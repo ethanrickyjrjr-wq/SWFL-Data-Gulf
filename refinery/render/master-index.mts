@@ -25,6 +25,16 @@ export function renderMasterIndex(out: PackOutput): string {
   const citationTable = renderCitationTable(citations);
   const savedFacts = renderSavedFacts(facts);
 
+  // Optional SUB-BRAIN POINTERS section — only a master index sets this.
+  const subBrainPointers =
+    pack.subBrainPointers && pack.subBrainPointers.length > 0
+      ? [
+          "--- SUB-BRAIN POINTERS ---",
+          pack.subBrainPointers.map((p) => `- ${p}`).join("\n"),
+          "",
+        ]
+      : [];
+
   const referenceBlock = [
     "```reference",
     "CONTEXT TYPE: user_saved_reference",
@@ -39,6 +49,7 @@ export function renderMasterIndex(out: PackOutput): string {
     "--- SAVED FACTS ---",
     savedFacts,
     "",
+    ...subBrainPointers,
     "--- ACTIVE PROJECTS ---",
     `- ${pack.activeProject}`,
     "",

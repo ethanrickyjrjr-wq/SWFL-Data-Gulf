@@ -23,7 +23,9 @@ export async function synthesisStage(
   pack: PackDefinition,
   allFragments: RawFragment[],
 ): Promise<SynthesisResult> {
-  const agentFacts = await runSynthesisAgent(triaged, pack);
+  const agentFacts = pack.skipSynthesisAgent
+    ? []
+    : await runSynthesisAgent(triaged, pack);
 
   const byId = new Map(triaged.map((f) => [f.fragment_id, f]));
   const today = isoDate();

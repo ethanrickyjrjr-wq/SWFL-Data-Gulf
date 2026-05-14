@@ -9,6 +9,11 @@ import {
   corridorSource,
   type CorridorNormalized,
 } from "../sources/cre-source.mts";
+import {
+  franchiseIndexSource,
+  creIndexSource,
+  type MasterNormalized,
+} from "../sources/master-source.mts";
 
 /**
  * Pack registry. The Refinery engine is pack-agnostic — a pack is just this
@@ -351,9 +356,102 @@ const creSwfl: PackDefinition = {
   },
 };
 
+// --- Master Index pack (master) -----------------------------------------
+
+/**
+ * Deterministic corpus facts for the master index. Reads the two sub-pack
+ * fragments (each carrying a published pack's verbatim corpus facts) and emits:
+ * one honest shared-scope fact, then each sub-pack's f001-f005 lifted verbatim.
+ * No LLM, no synthesis, no cross-vertical inference — pure aggregation of what
+ * is already verified and shipped.
+ */
+function masterCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
+  const subPacks = allFragments
+    .map((f) => ({ frag: f, n: f.normalized as MasterNormalized }))
+    .filter((x) => x.n?.kind === "sub-pack");
+  if (subPacks.length === 0) return [];
+
+  const byBrain = new Map(subPacks.map((x) => [x.n.brain_id, x]));
+  const franchise = byBrain.get("franchise-outcomes");
+  const cre = byBrain.get("cre-swfl");
+
+  const facts: SynthesisFact[] = [];
+
+  // 1. honest shared-scope fact — same market, explicitly NO record-level join
+  if (franchise && cre) {
+    facts.push({
+      topic: "shared_market_scope",
+      fact: "Both verticals in the SWFL Intelligence Lake cover the same Lee & Collier County, Florida market",
+      value:
+        "The Franchise Outcomes pack and the CRE Corridors pack are both scoped to Lee and Collier " +
+        "counties in Southwest Florida. They share that geographic market but have no record-level " +
+        "join: franchise outcomes are brand-level SBA loan data with no corridor geography, and " +
+        "corridor profiles carry no franchise-loan data. Cross-vertical questions are answered by " +
+        "fetching both sub-brains separately, not by inferring a link between an individual franchise " +
+        "and an individual corridor.",
+      source_fragment_ids: [franchise.frag.fragment_id, cre.frag.fragment_id],
+    });
+  }
+
+  // 2. each sub-pack's deterministic corpus facts, lifted verbatim, in
+  //    sources order (franchise = s01, cre = s02)
+  for (const sp of [franchise, cre]) {
+    if (!sp) continue;
+    for (const cf of sp.n.corpus_facts) {
+      facts.push({
+        topic: `${sp.n.brain_id} :: ${cf.topic}`,
+        fact: cf.fact,
+        value: cf.value,
+        source_fragment_ids: [sp.frag.fragment_id],
+      });
+    }
+  }
+
+  return facts;
+}
+
+const master: PackDefinition = {
+  id: "master",
+  brain_id: "master",
+  scope:
+    "SWFL Intelligence Lake — master index across the verified Franchise Outcomes and CRE Corridors packs (Lee & Collier counties, FL)",
+  ttl_seconds: 604800, // refreshes on the same cadence as its sub-packs
+  sources: [franchiseIndexSource, creIndexSource],
+  // Every sub-pack fragment belongs — positive fit so it survives triage,
+  // which lets the corpus facts resolve their s01/s02 citation via byId.
+  fitScore: () => 8,
+  // A 2-source index has no noise to filter — both fragments always survive.
+  compositeCutoff: 0,
+  // Pure deterministic pack — no synthesis agent. Every fact is the verbatim,
+  // already-verified output of a sub-pack; there is nothing to synthesize and
+  // no place for an LLM to re-derive or distort it.
+  skipSynthesisAgent: true,
+  corpusSummary: masterCorpusSummary,
+  subBrainPointers: [
+    "Franchise Outcomes — SBA 7(a)/504 franchise loan outcomes, Lee & Collier counties, FL: https://brain-platform-amber.vercel.app/api/b/franchise-outcomes",
+    "CRE Corridors — verified Southwest Florida commercial real estate corridor profiles: https://brain-platform-amber.vercel.app/api/b/cre-swfl",
+  ],
+  preferences: [
+    "The user maintains the SWFL Intelligence Lake — verified business intelligence for Lee and Collier County, Florida.",
+    "The user treats this master index as a directory: the corpus summaries give the headline figures, and the sub-brain pointers are fetched for record-level detail.",
+    "The user expects cross-vertical questions to be answered by consulting both sub-brains, never by inferring links between an individual franchise and an individual corridor.",
+  ],
+  activeProject:
+    "swfl-intelligence-lake: master index aggregating the verified Franchise Outcomes and CRE Corridors packs.",
+  prompts: {
+    triageContext:
+      "These fragments are sub-pack indexes aggregated into a master index — each represents one verified vertical pack. They are all high-relevance reference indexes.",
+    // Unused — `skipSynthesisAgent` means the synthesis agent never runs for
+    // this pack. Kept as an honest description of why.
+    synthesisContext:
+      "This pack runs no synthesis agent (skipSynthesisAgent). Every fact is the verbatim, already-verified output of a sub-pack, emitted deterministically by corpusSummary.",
+  },
+};
+
 export const PACKS: Record<string, PackDefinition> = {
   [franchiseOutcomes.id]: franchiseOutcomes,
   [creSwfl.id]: creSwfl,
+  [master.id]: master,
 };
 
 export function getPack(id: string): PackDefinition {

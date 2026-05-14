@@ -54,6 +54,19 @@ export interface PackDefinition {
    * prepends them as the pack's header facts. Returns [] if not applicable.
    */
   corpusSummary?: (allFragments: RawFragment[]) => SynthesisFact[];
+  /**
+   * Optional SUB-BRAIN POINTERS — pointer lines to other packs this one
+   * indexes (the spec-v1.1 section for a master index). Renders as an extra
+   * section inside the reference block; omitted entirely when not set, so
+   * single-vertical packs are unaffected.
+   */
+  subBrainPointers?: string[];
+  /**
+   * When true, Stage 3 skips the synthesis agent entirely — every fact comes
+   * from `corpusSummary`. For a pure deterministic pack (e.g. the master
+   * index) this is a guarantee, not a prompt the agent might ignore.
+   */
+  skipSynthesisAgent?: boolean;
   /** descriptive "HOW THE USER LIKES TO WORK" lines (third-person, never imperative) */
   preferences: string[];
   /** one-line "ACTIVE PROJECTS" description */

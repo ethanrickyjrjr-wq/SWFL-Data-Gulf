@@ -123,3 +123,52 @@ Run: `node refinery/cli.mts cre-swfl` — `brains/cre-swfl.md` at v2.
 
 Both packs are seaworthy. Phase 1 is complete — the Refinery engine is proven
 pack-agnostic, and both vertical packs are deployed and verified in Claude.
+
+---
+
+# Master Index — `master`
+
+The "brain of brains" — a Refinery-produced pack that aggregates the two
+verified vertical packs into one fetchable index. Proves the engine handles a
+pure-aggregation pack: zero live sources, zero LLM synthesis.
+
+## Build notes
+
+- **master-source.mts** parses the committed `brains/franchise-outcomes.md` +
+  `brains/cre-swfl.md` and lifts each pack's deterministic f001-f005 corpus
+  facts verbatim. No external APIs, no credentials — it indexes only what is
+  already verified and shipped. The committed brain files _are_ the fixture.
+- **A1/B2 air-gap held:** the updated `/build` task's STEP 2 (wire the PowerPad
+  component inside `premise-engine`) was refused — premise-engine is a separate
+  repo (CLAUDE.md rule #1). The canonical ingest snippet lives in
+  `docs/memory-ingest-prompt.md` as the producer/consumer bridge instead.
+- **Memory prompt is pointer-not-payload:** per Anthropic's published memory
+  guidance (detailed data belongs in reference docs, not memory), the snippet
+  has Claude remember the _index + scope + URL_, not the corpus.
+- **Two corrections mid-build:** (1) the synthesis agent ignored a "return
+  empty facts" prompt and produced 9 duplicate facts — fixed deterministically
+  with a new `skipSynthesisAgent` pack flag (the master pack runs no synthesis
+  agent at all); (2) `subBrainPointers` added as an optional `PackDefinition`
+  field + renderer section, implementing the spec-v1.1 SUB-BRAIN POINTERS
+  section (omitted for single-vertical packs).
+
+## Tier 1 — engine, offline ✅ PASSED (2026-05-14)
+
+- [x] `tsc -p refinery/tsconfig.json --noEmit` clean
+- [x] `node refinery/cli.mts master --dry-run` — Stages 1-4 + `spec-validator` +
+      `facts-only-lint` all pass against the committed brain files; nothing written
+
+## Tier 2 — live run ✅ PASSED (2026-05-14, v2)
+
+- [x] `node refinery/cli.mts master` → `brains/master.md` written, **11 facts**
+- [x] Eyeball: f001 = honest shared-scope fact, explicitly states there is **no
+      record-level join** (no fabricated cross-vertical links); f002-f006 =
+      franchise f001-f005 verbatim → cite s01; f007-f011 = cre f001-f005 verbatim →
+      cite s02. Citation table points at both sub-pack Brain URLs; SUB-BRAIN
+      POINTERS section renders both. Zero agent facts.
+
+## Tier 3 — deployed + Claude ⏳ PENDING
+
+- [x] Committed + pushed; deploy ships `brains/master.md`
+- [ ] `curl .../api/b/master` returns it as `text/plain` — not yet confirmed
+- [ ] Claude fetch + use check against the master index
