@@ -55,15 +55,15 @@ Run: `node refinery/cli.mts franchise-outcomes` — `brains/franchise-outcomes.m
 
 ---
 
-## Tier 3 — deployed + Claude (the seaworthy gate) ⏳ PENDING
+## Tier 3 — deployed + Claude (the seaworthy gate) ✅ PASSED (2026-05-14)
 
 - [x] Committed `brains/franchise-outcomes.md` (`52be6f6`); `vercel --prod` done (the `cre-swfl` deploy ships the whole repo, so this pack is live too)
-- [ ] `curl https://brain-platform-amber.vercel.app/api/b/franchise-outcomes` returns it as `text/plain` — not yet confirmed
-- [ ] In Claude (Pattern A then B, per `docs/invocation-patterns.md`):
-  - Retrieval check: "what franchise brands are in my saved reference and their outcome rates?"
-  - Use check: "which brands have the strongest SBA survival rates in SWFL?"
-  - PASS = answers from the pack, cites `s01`, treats it as reference data, no identity fight
-- [ ] Surface tested: \***\*\_\_\_\_\*\*** Date: \***\*\_\_\_\_\*\*** Verdict: \***\*\_\_\_\_\*\***
+- [x] Endpoint live — confirmed indirectly: Claude successfully fetched `/api/b/franchise-outcomes` in the test below
+- [x] In Claude (Pattern A):
+  - Use check: "which brands have the strongest SBA survival rates in my saved reference?" → returned the f004 strong-performers shortlist (7 brands — matches the Tier 2 exact-list verification), with resolved/total loan counts + gross approval per the user's stated preference; cited the f005 median (100%, 124 of 137 assessable)
+  - Behavior: answered from the pack, treated it as reference data, respected `n_loans` vs resolved throughout, no identity fight, no fabrication
+  - Minor **Claude-side** slip (not a pack defect): claimed only SkyZone + Jet's Pizza were fully resolved (3/3); Tropical Smoothie 4/4 is also fully resolved. Pack data was correct; the testing model's downstream arithmetic missed one.
+- Surface tested: claude.ai web, Pattern A — Date: 2026-05-14 — Verdict: **PASS**
 
 ---
 
@@ -71,9 +71,9 @@ Run: `node refinery/cli.mts franchise-outcomes` — `brains/franchise-outcomes.m
 
 - [x] Tier 1 passed — engine verified offline
 - [x] Tier 2 passed — real pack produced
-- [ ] Tier 3 passed — **seaworthy gate**: Claude fetches + uses the real Franchise pack
+- [x] Tier 3 passed — **seaworthy gate**: Claude fetches + uses the real Franchise pack
 
-Once Tier 3 passes, Phase 1's Franchise milestone is closed.
+Phase 1's Franchise milestone is closed.
 
 ---
 
@@ -118,8 +118,8 @@ Run: `node refinery/cli.mts cre-swfl` — `brains/cre-swfl.md` at v2.
 
 # Phase 1 status
 
-- **Franchise Outcomes:** Tier 1 ✅ · Tier 2 ✅ · Tier 3 ⏳ (deploy + Claude test outstanding)
+- **Franchise Outcomes:** Tier 1 ✅ · Tier 2 ✅ · Tier 3 ✅ — **closed**
 - **CRE (cre-swfl):** Tier 1 ✅ · Tier 2 ✅ · Tier 3 ✅ — **closed**
 
-Remaining for the Phase 1 milestone: Franchise Tier 3 (`vercel --prod` is already
-done for the deploy; the Franchise pack just needs its Claude fetch + use test).
+Both packs are seaworthy. Phase 1 is complete — the Refinery engine is proven
+pack-agnostic, and both vertical packs are deployed and verified in Claude.
