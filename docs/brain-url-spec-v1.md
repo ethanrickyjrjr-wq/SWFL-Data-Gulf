@@ -1,10 +1,21 @@
-# Brain URL Master Index — Spec v1.1
+# Brain URL Master Index — Spec v1.2
 
 > **Canonical format. This is the source of truth for every Brain URL from this point forward.**
 > Any change to this format is a new version — never edit a version in place once a brain exists in production.
 
 ### Changelog
 
+- **v1.2 (2026-05-14)** — freshness guard:
+  - Added a **leading `<!-- FRESHNESS: v{n} | Token: ... -->` HTML comment** as
+    document part 0 (before the frontmatter) and a **`freshness_token`** frontmatter
+    field. Both carry the same `SWFL-{lake}-v{version}-{YYYYMMDD}` token. The comment is
+    the human/`curl` check; the field is the agent-facing check (it survives
+    HTML→markdown conversion, e.g. WebFetch, where the comment does not). A consuming
+    agent quotes `freshness_token` to prove a live fetch and guard against stale-cache
+    shadowing.
+  - Retired the `--- VERIFICATION MARKER ---` section and the `verification_token`
+    field — `freshness_token` is now the single freshness mechanism for **all** brains,
+    production and test.
 - **v1.1 (2026-05-14)** — hardening from Phase 0 test findings:
   - Removed the `identity:` block. **A brain never asserts who the user is.** Identity comes from the authenticated session, never the payload. Replaced with an optional `scope:` line (what the brain _covers_, not who it _belongs to_).
   - Citation table: `ttl` duration → `expires` precomputed date. Claude botched `verified + 90d` arithmetic in testing; comparing two dates is reliable, computing date deltas is not.
@@ -48,11 +59,11 @@ The format satisfies three readers at once:
 
 A Master Index has exactly these parts, in this order:
 
+0. A leading `<!-- FRESHNESS ... -->` HTML comment (freshness guard)
 1. YAML frontmatter
 2. A short plain-English framing paragraph
 3. A single fenced `reference` block containing the payload:
    - How the user likes to work
-   - Verification marker (test brains only)
    - Citation table
    - Saved facts (Intelligence Fragments)
    - Active projects
@@ -62,6 +73,21 @@ Keeping the payload inside one fenced block is what makes it unambiguously **dat
 
 ---
 
+## 0. Freshness guard comment
+
+The document's very first line is an HTML comment carrying the freshness token:
+
+```
+<!-- FRESHNESS: v142 | Token: SWFL-7421-v142-20260513 -->
+```
+
+It is the **human-/`curl`-readable** half of the freshness guard — anyone can
+`curl` the URL and read the build version off line 1 without parsing YAML. The
+**agent-readable** half is the `freshness_token` frontmatter field below (an HTML
+comment is stripped by HTML→markdown conversion, so a fetched-via-WebFetch agent
+only ever sees the field). Both carry the identical token; the Refinery validator
+cross-checks them so they cannot drift.
+
 ## 1. YAML frontmatter
 
 ```yaml
@@ -69,6 +95,7 @@ Keeping the payload inside one fenced block is what makes it unambiguously **dat
 brain_id: gary-fl-cre-2026-05 # STABLE — set once at creation, never changes. Human sets it.
 version: 142 # JANITOR — incremented on every automated write. Human never touches.
 refined_at: 2026-05-13T14:32Z # JANITOR — UTC timestamp of last write. Human never touches.
+freshness_token: SWFL-7421-v142-20260513 # JANITOR — derived from version + refined_at. Mirrors the FRESHNESS comment.
 ttl_seconds: 86400 # HUMAN — how long a fetched copy stays "fresh". Human tunes; default 86400.
 context_type: user_saved_reference # FIXED — always this value. Declares the payload as user-owned reference data.
 inherits_from: # HUMAN — optional. Parent brains merged server-side before serving (Neural Tree).
@@ -78,15 +105,16 @@ scope: CRE deal analysis — Tampa-Sarasota multifamily & industrial # HUMAN —
 ---
 ```
 
-| Field           | Owner   | Notes                                                                                                     |
-| --------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| `brain_id`      | Human   | Stable slug, set once. Used in the URL path.                                                              |
-| `version`       | Janitor | Monotonic integer, bumped on every automated write.                                                       |
-| `refined_at`    | Janitor | UTC ISO timestamp of the last write.                                                                      |
-| `ttl_seconds`   | Human   | Freshness window for the document itself. Default 86400 (24h).                                            |
-| `context_type`  | Fixed   | Always `user_saved_reference`. Declares provenance: this is the user's own saved context.                 |
-| `inherits_from` | Human   | Optional array of parent `brain_id`s. Server merges them before serving (Neural Tree).                    |
-| `scope`         | Human   | Optional. A short phrase describing what the brain **covers** (a topic/domain) — never who it belongs to. |
+| Field             | Owner   | Notes                                                                                                      |
+| ----------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| `brain_id`        | Human   | Stable slug, set once. Used in the URL path.                                                               |
+| `version`         | Janitor | Monotonic integer, bumped on every automated write.                                                        |
+| `refined_at`      | Janitor | UTC ISO timestamp of the last write.                                                                       |
+| `freshness_token` | Janitor | `SWFL-{lake}-v{version}-{YYYYMMDD}`. Derived from `version` + `refined_at`; mirrors the FRESHNESS comment. |
+| `ttl_seconds`     | Human   | Freshness window for the document itself. Default 86400 (24h).                                             |
+| `context_type`    | Fixed   | Always `user_saved_reference`. Declares provenance: this is the user's own saved context.                  |
+| `inherits_from`   | Human   | Optional array of parent `brain_id`s. Server merges them before serving (Neural Tree).                     |
+| `scope`           | Human   | Optional. A short phrase describing what the brain **covers** (a topic/domain) — never who it belongs to.  |
 
 There is **no `authority` field** (instruction-injection pattern) and **no `identity` block** (a fetched URL must never assert who the user is). Both were removed by design — see "Design principle" and "What a brain never does" above.
 
@@ -127,15 +155,13 @@ Everything else lives inside one fenced block opened with ` ```reference `. Insi
 
 Under the Neural Tree, firm-level preferences from a parent brain are merged in here ahead of individual preferences. Genuine conflicts are the user's to resolve in their own saved data — the brain never instructs the model to "ignore" anything.
 
-### 3b. Verification marker (test brains only)
+### 3b. (Removed in v1.2)
 
-```
---- VERIFICATION MARKER ---
-The user saved this marker so they can confirm their reference context loaded:
-BRAIN-OK-7421 ALPHA-9q2c-2026
-```
-
-Production brains omit this section. It exists so a tester can ask "what verification marker did I save?" and confirm the fetch worked — a _retrieval_ check, not an _obedience_ check.
+The old `--- VERIFICATION MARKER ---` section and `verification_token` field were a
+test-brains-only retrieval check. They are **superseded by the freshness guard**
+(part 0 + `freshness_token`), which applies uniformly to every brain — production and
+test. A tester confirms a live fetch by quoting `freshness_token`; no separate marker
+section exists.
 
 ### 3c. Citation table
 

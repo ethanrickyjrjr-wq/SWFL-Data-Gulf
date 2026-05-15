@@ -1,12 +1,12 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-ALPHA -->
+<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260514 -->
 ---
 brain_id: test-alpha
 version: 3
 refined_at: 2026-05-14T04:00Z
+freshness_token: SWFL-7421-v3-20260514
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Phase 0 fetch-mechanism test fixture — sample CRE market data, no real identity
-freshness_token: SWFL-7421-ALPHA
 ---
 
 # User-Saved Reference Context
@@ -21,7 +21,7 @@ part and flag it.
 CONTEXT TYPE: user_saved_reference
 SCOPE: Phase 0 fetch-mechanism test fixture (sample CRE market data — not a real profile)
 
---- SAVED PREFERENCES ---
+--- HOW THE USER LIKES TO WORK ---
 - Saved preference: CRE shorthand is fine where relevant (NNN, T-12, T-3, cap rate, IRR, COC, DSCR).
 - Saved preference: market figures are most useful with their source and verification date attached.
 

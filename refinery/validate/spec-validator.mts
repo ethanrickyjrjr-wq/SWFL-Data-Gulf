@@ -1,8 +1,10 @@
 /**
- * Asserts a rendered Master Index conforms to brain-url-spec-v1.md (v1.1).
+ * Asserts a rendered Master Index conforms to brain-url-spec-v1.md (v1.2).
  * Pure function, no I/O. Stage 4 runs this before writing to brains/ —
  * if it fails, the run aborts and the existing pack is left intact.
  */
+
+import { freshnessToken, parseFreshnessComment } from "../lib/freshness.mts";
 
 export interface ValidationResult {
   ok: boolean;
@@ -13,10 +15,10 @@ const REQUIRED_FRONTMATTER = [
   "brain_id",
   "version",
   "refined_at",
+  "freshness_token",
   "ttl_seconds",
   "context_type",
   "scope",
-  "freshness_token",
 ];
 const FORBIDDEN_FRONTMATTER = ["authority", "identity"];
 const REQUIRED_SECTIONS = [
@@ -29,8 +31,8 @@ const REQUIRED_SECTIONS = [
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function parseFrontmatter(md: string): Record<string, string> | null {
-  // Loosen to tolerate leading HTML comments
-  const m = md.trimStart().match(/^---\n([\s\S]*?)\n---\n/);
+  // Tolerate one leading `<!-- FRESHNESS ... -->` HTML comment before the `---`.
+  const m = md.match(/^(?:<!--[\s\S]*?-->\s*)?---\n([\s\S]*?)\n---\n/);
   if (!m) return null;
   const fm: Record<string, string> = {};
   for (const line of m[1].split("\n")) {
@@ -65,11 +67,6 @@ function extractSection(refBlock: string, header: string): string | null {
 export function validateSpec(md: string): ValidationResult {
   const errors: string[] = [];
 
-  // --- freshness comment check ---
-  if (!md.trimStart().startsWith('<!-- FRESHNESS:')) {
-    errors.push("Missing leading FRESHNESS HTML comment.");
-  }
-
   // --- frontmatter ---
   const fm = parseFrontmatter(md);
   if (!fm) {
@@ -90,13 +87,43 @@ export function validateSpec(md: string): ValidationResult {
         `context_type must be "user_saved_reference", got "${fm.context_type}".`,
       );
     }
-    
-    // Cross-check token with comment
-    const commentMatch = md.match(/<!-- FRESHNESS: v(\d+) \| Token: (.*?) -->/);
-    if (commentMatch) {
-      const commentToken = commentMatch[2];
-      if (fm.freshness_token !== commentToken) {
-        errors.push(`Freshness token mismatch: frontmatter has "${fm.freshness_token}" but comment has "${commentToken}".`);
+  }
+
+  // --- freshness guard ---
+  // The doc must start with a `<!-- FRESHNESS ... -->` comment, and the
+  // comment + the `freshness_token` field must agree with each other and
+  // with `version` / `refined_at`. This keeps the two copies of the token
+  // (comment + frontmatter) from silently drifting apart.
+  if (fm) {
+    const firstLine = md.split("\n", 1)[0];
+    const comment = parseFreshnessComment(firstLine);
+    if (!comment) {
+      errors.push(
+        "Document must start with a `<!-- FRESHNESS: v{n} | Token: ... -->` comment.",
+      );
+    } else {
+      const version = Number(fm.version);
+      if (!Number.isInteger(version)) {
+        errors.push(`Frontmatter version "${fm.version}" is not an integer.`);
+      } else {
+        if (comment.version !== version) {
+          errors.push(
+            `FRESHNESS comment version v${comment.version} does not match frontmatter version ${version}.`,
+          );
+        }
+        if (fm.freshness_token && comment.token !== fm.freshness_token) {
+          errors.push(
+            `FRESHNESS comment token "${comment.token}" does not match frontmatter freshness_token "${fm.freshness_token}".`,
+          );
+        }
+        if (fm.freshness_token && fm.refined_at) {
+          const expected = freshnessToken(version, fm.refined_at);
+          if (fm.freshness_token !== expected) {
+            errors.push(
+              `freshness_token "${fm.freshness_token}" does not match version/refined_at — expected "${expected}".`,
+            );
+          }
+        }
       }
     }
   }

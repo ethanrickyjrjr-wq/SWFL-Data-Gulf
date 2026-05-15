@@ -2,7 +2,7 @@ import type { PackOutput } from "../types/pack.mts";
 import { renderFrontmatter } from "./frontmatter.mts";
 import { renderCitationTable } from "./citation-table.mts";
 import { renderSavedFacts } from "./saved-facts.mts";
-import { buildFreshnessToken, buildFreshnessComment } from "../lib/freshness.mts";
+import { freshnessComment, freshnessToken } from "../lib/freshness.mts";
 
 /**
  * Fixed framing paragraph (spec section 2). Identical for every pack —
@@ -20,10 +20,7 @@ and treat the rest as reference only.`;
 
 /** Render a complete spec-v1.1 Master Index markdown document. */
 export function renderMasterIndex(out: PackOutput): string {
-  const { pack, citations, facts, recentNote, version, refined_at } = out;
-  
-  const freshnessToken = buildFreshnessToken(version, refined_at);
-  const freshnessComment = buildFreshnessComment(version, freshnessToken);
+  const { pack, citations, facts, recentNote } = out;
 
   const preferences = pack.preferences.map((p) => `- ${p}`).join("\n");
   const citationTable = renderCitationTable(citations);
@@ -63,7 +60,7 @@ export function renderMasterIndex(out: PackOutput): string {
   ].join("\n");
 
   return [
-    freshnessComment,
+    freshnessComment(out.version, freshnessToken(out.version, out.refined_at)),
     renderFrontmatter(out),
     "",
     FRAMING_PARAGRAPH,

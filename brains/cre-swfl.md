@@ -3,10 +3,10 @@
 brain_id: cre-swfl
 version: 2
 refined_at: 2026-05-14T11:44:04Z
+freshness_token: SWFL-7421-v2-20260514
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL commercial real estate corridors — verified corridor intelligence (profiles, character, active flags)
-freshness_token: SWFL-7421-v2-20260514
 ---
 
 # User-Saved Reference Context
@@ -70,3 +70,4 @@ s01 | SWFL CRE corridor profiles — Supabase corridor_profiles (verified, non-d
 
 --- RECENT NOTES ---
 - 2026-05-14: pack refined by the Refinery — 30 fact(s) from 1 source(s).
+```
