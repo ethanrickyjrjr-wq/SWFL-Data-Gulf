@@ -1,5 +1,31 @@
 import type { RawFragment } from "./fragment.mts";
 import type { SynthesizedEvent, SynthesisFact } from "./event.mts";
+import type { BrainOutput } from "./brain-output.mts";
+
+/**
+ * BrainDomain — the controlled vocabulary for `PackDefinition.domain`.
+ * Mirrored by a SQL CHECK constraint on `brain_registry.domain`. Adding a new
+ * domain requires a one-line edit here AND in the SQL — the friction is the
+ * feature: it prevents the registry from fragmenting into "real-estate" /
+ * "real_estate" / "realestate" within a week.
+ */
+export type BrainDomain =
+  | "real-estate"
+  | "finance"
+  | "environmental"
+  | "demographics"
+  | "logistics"
+  | "hospitality"
+  | "macro";
+
+/**
+ * Source authority tier — drives the deterministic confidence formula.
+ * 1 = primary (federal/SEC/NOAA etc.)
+ * 2 = verified editorial / already-shipped brain output
+ * 3 = secondary aggregator / industry report
+ * 4 = inferred / weakly attested
+ */
+export type TrustTier = 1 | 2 | 3 | 4;
 
 /** A row in the spec-v1.1 CITATION TABLE. */
 export interface CitationRow {
@@ -20,6 +46,13 @@ export interface CitationRow {
 export interface SourceConnector {
   /** stable id, also used as RawFragment.source_id; Stage 4 maps it to a citation id */
   source_id: string;
+  /**
+   * Authority tier for the deterministic confidence formula. Stage 4 averages
+   * `trust_tier_score` across `pack.sources` (1→1.0, 2→0.8, 3→0.6, 4→0.4) and
+   * multiplies by the TTL freshness ratio. Set once per connector — never per
+   * fragment. See `BrainOutput.confidence` docs for the full formula.
+   */
+  trust_tier: TrustTier;
   /** fetch raw fragments (live or fixture, decided internally from env) */
   fetch(): Promise<RawFragment[]>;
   /** citation metadata for this source; Stage 4 assigns the `id` (s01, s02, ...) */
@@ -34,14 +67,25 @@ export interface SourceConnector {
  * Two packs share the whole engine; they differ only in this object.
  */
 export interface PackDefinition {
-  /** CLI arg, e.g. "franchise-outcomes" */
+  /** CLI arg, e.g. "franchise-outcomes" — also the URL-safe slug */
   id: string;
   /** frontmatter brain_id (also the brains/{slug}.md filename) */
   brain_id: string;
+  /**
+   * Vertical of intelligence — controls freshness-token scoping (per-domain
+   * LAKE_ID) and registry filtering. See `BrainDomain` for the closed set.
+   */
+  domain: BrainDomain;
   /** frontmatter scope — what the pack COVERS, never who it belongs to */
   scope: string;
   ttl_seconds: number;
   sources: SourceConnector[];
+  /**
+   * Ids of upstream brains this pack consumes via BrainInputSource. The DAG
+   * resolver uses this to compute build order. Empty array = no upstream
+   * dependencies. Replaces the deprecated `subBrainPointers` mechanism.
+   */
+  input_brains: string[];
   /** deterministic pack-fit score for a fragment (reinterpreted routing_score) */
   fitScore: (fragment: RawFragment) => number;
   /** optional composite-cutoff override; falls back to COMPOSITE_CUTOFF */
@@ -55,10 +99,9 @@ export interface PackDefinition {
    */
   corpusSummary?: (allFragments: RawFragment[]) => SynthesisFact[];
   /**
-   * Optional SUB-BRAIN POINTERS — pointer lines to other packs this one
-   * indexes (the spec-v1.1 section for a master index). Renders as an extra
-   * section inside the reference block; omitted entirely when not set, so
-   * single-vertical packs are unaffected.
+   * DEPRECATED — superseded by `input_brains` + the brain_registry. The
+   * renderer still emits this section until BrainInputSource is wired in and
+   * all existing consumers migrate. New packs should NOT set this.
    */
   subBrainPointers?: string[];
   /**
@@ -67,6 +110,18 @@ export interface PackDefinition {
    * index) this is a guarantee, not a prompt the agent might ignore.
    */
   skipSynthesisAgent?: boolean;
+  /**
+   * Optional producer of the BrainOutput narrative fields. Receives the
+   * fully-resolved PackOutput (citations finalized, facts f-id-assigned) and
+   * returns the conclusion + key_metrics + caveats that go into the `---
+   * OUTPUT ---` block. If unset, Stage 4 falls back to: conclusion = top
+   * composite fact's value, key_metrics = facts tagged `topic: "metric:*"`,
+   * caveats = []. Keeps the "deterministic where possible" invariant — no
+   * global synthesis-agent prompt expansion.
+   */
+  outputProducer?: (
+    out: PackOutput,
+  ) => Pick<BrainOutput, "conclusion" | "key_metrics" | "caveats">;
   /** descriptive "HOW THE USER LIKES TO WORK" lines (third-person, never imperative) */
   preferences: string[];
   /** one-line "ACTIVE PROJECTS" description */

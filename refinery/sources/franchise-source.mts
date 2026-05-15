@@ -174,6 +174,7 @@ export const franchiseSource: SourceConnector & {
 } = {
   id: "franchise-outcomes",
   source_id: SOURCE_ID,
+  trust_tier: 1, // SBA = federal agency, primary source
   fetch,
   normalize,
   citationMeta,

@@ -194,9 +194,11 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 const franchiseOutcomes: PackDefinition = {
   id: "franchise-outcomes",
   brain_id: "franchise-outcomes",
+  domain: "real-estate",
   scope: "SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL",
   ttl_seconds: 604800, // franchise outcome data is slow-moving
   sources: [franchiseSource],
+  input_brains: [],
   fitScore: franchiseFitScore,
   corpusSummary: franchiseCorpusSummary,
   preferences: [
@@ -352,10 +354,12 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 const creSwfl: PackDefinition = {
   id: "cre-swfl",
   brain_id: "cre-swfl",
+  domain: "real-estate",
   scope:
     "SWFL commercial real estate corridors — verified corridor intelligence (profiles, character, active flags)",
   ttl_seconds: 604800, // corridor intelligence is editorial, slow-moving
   sources: [corridorSource],
+  input_brains: [],
   fitScore: creFitScore,
   corpusSummary: creCorpusSummary,
   preferences: [
@@ -449,10 +453,17 @@ function masterCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 const master: PackDefinition = {
   id: "master",
   brain_id: "master",
+  // Both current sub-packs are real-estate; revisit when macro-swfl / non-RE
+  // brains join the lake and the index spans multiple domains.
+  domain: "real-estate",
   scope:
     "SWFL Intelligence Lake — master index across the verified Franchise Outcomes and CRE Corridors packs (Lee & Collier counties, FL)",
   ttl_seconds: 604800, // refreshes on the same cadence as its sub-packs
   sources: [franchiseIndexSource, creIndexSource],
+  // The two sub-packs are read via makeIndexSource (already-published .md
+  // files), not yet via the generic BrainInputSource — but they ARE upstream
+  // brains and belong in input_brains so the DAG resolver builds them first.
+  input_brains: ["franchise-outcomes", "cre-swfl"],
   // Every sub-pack fragment belongs — positive fit so it survives triage,
   // which lets the corpus facts resolve their s01/s02 citation via byId.
   fitScore: () => 8,

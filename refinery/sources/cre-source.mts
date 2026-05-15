@@ -151,6 +151,7 @@ async function fetchCorridorRows(): Promise<Record<string, unknown>[]> {
 
 export const corridorSource: SourceConnector = {
   source_id: CORRIDOR_SOURCE_ID,
+  trust_tier: 2, // verified editorial intelligence (curated corridor profiles)
   async fetch(): Promise<RawFragment[]> {
     const rows = await fetchCorridorRows();
     const fetched_at = isoTimestamp();

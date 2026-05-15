@@ -25,6 +25,7 @@ const REQUIRED_SECTIONS = [
   "--- HOW THE USER LIKES TO WORK ---",
   "--- CITATION TABLE ---",
   "--- SAVED FACTS ---",
+  "--- OUTPUT ---",
   "--- ACTIVE PROJECTS ---",
   "--- RECENT NOTES ---",
 ];
@@ -181,6 +182,117 @@ export function validateSpec(md: string): ValidationResult {
           errors.push(
             `CITATION row "${id}": expires "${expires}" must be an ISO date or "never".`,
           );
+        }
+      }
+    }
+  }
+
+  // --- output block (BrainOutput JSON) ---
+  const outputSection = extractSection(ref, "--- OUTPUT ---");
+  if (outputSection !== null) {
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(outputSection);
+    } catch (e) {
+      errors.push(`--- OUTPUT --- is not valid JSON: ${(e as Error).message}`);
+    }
+    if (parsed !== null) {
+      if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        errors.push("--- OUTPUT --- must be a JSON object.");
+      } else {
+        const o = parsed as Record<string, unknown>;
+        for (const field of ["brain_id", "refined_at", "conclusion"]) {
+          if (
+            typeof o[field] !== "string" ||
+            (o[field] as string).length === 0
+          ) {
+            errors.push(
+              `--- OUTPUT --- missing/empty required string field: ${field}`,
+            );
+          }
+        }
+        if (typeof o.version !== "number" || !Number.isInteger(o.version)) {
+          errors.push("--- OUTPUT --- field version must be an integer.");
+        }
+        if (
+          typeof o.confidence !== "number" ||
+          o.confidence < 0 ||
+          o.confidence > 1
+        ) {
+          errors.push(
+            "--- OUTPUT --- field confidence must be a number in [0, 1].",
+          );
+        }
+        if (!Array.isArray(o.key_metrics)) {
+          errors.push("--- OUTPUT --- field key_metrics must be an array.");
+        } else {
+          (o.key_metrics as unknown[]).forEach((km, i) => {
+            const m = km as Record<string, unknown>;
+            if (typeof m?.metric !== "string") {
+              errors.push(
+                `--- OUTPUT --- key_metrics[${i}].metric must be a string.`,
+              );
+            }
+            if (typeof m?.value !== "number") {
+              errors.push(
+                `--- OUTPUT --- key_metrics[${i}].value must be a number.`,
+              );
+            }
+            if (
+              m?.direction !== "rising" &&
+              m?.direction !== "falling" &&
+              m?.direction !== "stable"
+            ) {
+              errors.push(
+                `--- OUTPUT --- key_metrics[${i}].direction must be "rising"|"falling"|"stable".`,
+              );
+            }
+            if (typeof m?.label !== "string") {
+              errors.push(
+                `--- OUTPUT --- key_metrics[${i}].label must be a string.`,
+              );
+            }
+          });
+        }
+        if (!Array.isArray(o.caveats)) {
+          errors.push("--- OUTPUT --- field caveats must be an array.");
+        } else {
+          (o.caveats as unknown[]).forEach((c, i) => {
+            if (typeof c !== "string") {
+              errors.push(`--- OUTPUT --- caveats[${i}] must be a string.`);
+            }
+          });
+        }
+        // Cross-check against frontmatter — drift between the two copies of
+        // brain_id / version / refined_at would corrupt the chain.
+        if (fm) {
+          if (
+            typeof o.brain_id === "string" &&
+            fm.brain_id &&
+            o.brain_id !== fm.brain_id
+          ) {
+            errors.push(
+              `--- OUTPUT --- brain_id "${o.brain_id}" does not match frontmatter "${fm.brain_id}".`,
+            );
+          }
+          if (
+            typeof o.version === "number" &&
+            fm.version &&
+            String(o.version) !== fm.version
+          ) {
+            errors.push(
+              `--- OUTPUT --- version ${o.version} does not match frontmatter ${fm.version}.`,
+            );
+          }
+          if (
+            typeof o.refined_at === "string" &&
+            fm.refined_at &&
+            o.refined_at !== fm.refined_at
+          ) {
+            errors.push(
+              `--- OUTPUT --- refined_at "${o.refined_at}" does not match frontmatter "${fm.refined_at}".`,
+            );
+          }
         }
       }
     }

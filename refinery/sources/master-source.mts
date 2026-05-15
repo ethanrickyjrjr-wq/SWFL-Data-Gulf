@@ -98,6 +98,7 @@ function makeIndexSource(cfg: SubPackConfig): SourceConnector {
   const url = `${VERCEL_BASE}/${cfg.brain_id}`;
   return {
     source_id: cfg.source_id,
+    trust_tier: 2, // derived from an already-verified, shipped pack
     async fetch(): Promise<RawFragment[]> {
       const filePath = path.join(BRAINS_DIR, `${cfg.brain_id}.md`);
       let md: string;

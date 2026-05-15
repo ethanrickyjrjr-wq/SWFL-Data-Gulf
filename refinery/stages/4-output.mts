@@ -5,6 +5,7 @@ import type {
   PackOutput,
   CitationRow,
 } from "../types/pack.mts";
+import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
 import type { SynthesizedEvent } from "../types/event.mts";
 import { citationId, factId } from "../lib/ids.mts";
 import { isoDate, isoTimestamp } from "../lib/dates.mts";
@@ -13,6 +14,7 @@ import { renderMasterIndex } from "../render/master-index.mts";
 import { validateSpec } from "../validate/spec-validator.mts";
 import { lintFactsOnly } from "../validate/facts-only-lint.mts";
 import { lintInferenceBait } from "../validate/inference-bait-lint.mts";
+import { computeConfidence } from "../lib/confidence.mts";
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 
@@ -38,10 +40,38 @@ async function readPriorVersion(brainId: string): Promise<number> {
 }
 
 /**
+ * Default outputProducer used when a pack does not provide its own. Extracts
+ * the conclusion from the top-composite fact (facts are composite-sorted by the
+ * caller, so facts[0] is the headline) and surfaces any facts a pack tagged
+ * `topic: "metric:*"` as key_metrics with placeholder direction. No caveats —
+ * pack authors opt in to those explicitly via outputProducer.
+ *
+ * This intentionally stays minimal: rich narrative outputs are pack-author
+ * code, not engine guesswork.
+ */
+function defaultOutputProducer(
+  out: PackOutput,
+): Pick<BrainOutput, "conclusion" | "key_metrics" | "caveats"> {
+  const conclusion = out.facts[0]?.value ?? "(no facts produced this run)";
+  const key_metrics: BrainOutputMetric[] = out.facts
+    .filter((f) => typeof f.topic === "string" && f.topic.startsWith("metric:"))
+    .map((f) => ({
+      metric: f.topic.replace(/^metric:/, ""),
+      // SynthesizedEvent.value is a string narrative; a pack that wants typed
+      // metric values must provide its own outputProducer. Default falls back
+      // to 0 + stable direction so the JSON shape stays valid.
+      value: 0,
+      direction: "stable",
+      label: f.fact,
+    }));
+  return { conclusion, key_metrics, caveats: [] };
+}
+
+/**
  * Stage 4 — Output. Deterministic, no LLM. Builds the citation table, finalizes
- * fact ids + src mapping, renders the spec-v1.1 Master Index, validates it, and
- * writes it. If validation fails the run aborts and the existing pack is left
- * intact.
+ * fact ids + src mapping, computes the BrainOutput (confidence + narrative
+ * fields), renders the spec-v1.1 Master Index, validates it, and writes it.
+ * If validation fails the run aborts and the existing pack is left intact.
  */
 export async function outputStage(
   events: SynthesizedEvent[],
@@ -74,7 +104,7 @@ export async function outputStage(
       src: srcToCitation.get(e.src) ?? defaultCitation,
     }));
 
-  const output: PackOutput = {
+  const packOutput: PackOutput = {
     pack,
     version,
     refined_at,
@@ -83,7 +113,26 @@ export async function outputStage(
     recentNote: `${verifiedDate}: pack refined by the Refinery — ${facts.length} fact(s) from ${citations.length} source(s).`,
   };
 
-  const markdown = renderMasterIndex(output);
+  // Build BrainOutput — deterministic confidence + narrative fields from
+  // outputProducer (or the default minimal lift).
+  const producer = pack.outputProducer ?? defaultOutputProducer;
+  const distilled = producer(packOutput);
+  const confidence = computeConfidence({
+    sources: pack.sources,
+    refined_at,
+    ttl_seconds: pack.ttl_seconds,
+  });
+  const brainOutput: BrainOutput = {
+    brain_id: pack.brain_id,
+    version,
+    refined_at,
+    conclusion: distilled.conclusion,
+    confidence,
+    key_metrics: distilled.key_metrics,
+    caveats: distilled.caveats,
+  };
+
+  const markdown = renderMasterIndex(packOutput, brainOutput);
 
   // validate before writing — a failure aborts the run, leaving the old pack intact
   const spec = validateSpec(markdown);
@@ -108,6 +157,7 @@ export async function outputStage(
     version,
     citations,
     factCount: facts.length,
+    confidence,
   });
 
   const brainPath = path.join(BRAINS_DIR, `${pack.brain_id}.md`);
