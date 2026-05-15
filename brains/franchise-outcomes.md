@@ -1,3 +1,4 @@
+<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260514 -->
 ---
 brain_id: franchise-outcomes
 version: 5
@@ -5,6 +6,7 @@ refined_at: 2026-05-14T19:21:06Z
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL
+freshness_token: SWFL-7421-v5-20260514
 ---
 
 # User-Saved Reference Context
@@ -78,4 +80,3 @@ s01 | SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL (sba_l
 
 --- RECENT NOTES ---
 - 2026-05-14: pack refined by the Refinery — 40 fact(s) from 1 source(s).
-```

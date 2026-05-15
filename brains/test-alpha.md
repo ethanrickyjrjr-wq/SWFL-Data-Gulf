@@ -1,11 +1,12 @@
+<!-- FRESHNESS: v3 | Token: SWFL-7421-ALPHA -->
 ---
 brain_id: test-alpha
 version: 3
 refined_at: 2026-05-14T04:00Z
 ttl_seconds: 86400
 context_type: user_saved_reference
-verification_token: ALPHA-9q2c-2026
 scope: Phase 0 fetch-mechanism test fixture — sample CRE market data, no real identity
+freshness_token: SWFL-7421-ALPHA
 ---
 
 # User-Saved Reference Context
