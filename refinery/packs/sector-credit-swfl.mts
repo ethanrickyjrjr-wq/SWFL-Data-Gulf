@@ -3,6 +3,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
 import type {
   BrainOutput,
+  BrainOutputDirection,
   BrainOutputMetric,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
@@ -382,20 +383,88 @@ function sectorCreditOutputProducer(
     ...sectorMetrics,
   ];
 
+  const vote = voteSectorCreditDirection(rankable, sortedRisk, sortedSafe);
+
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
-    caveats,
-    // v1 placeholders — direction voting + override cascade happen in master
-    // Week 2. This brain reads as "neutral" until a synthesizer weighs the
-    // sector mix; per-sector direction is carried in key_metrics.
-    direction: "neutral",
-    magnitude: 0.5,
+    caveats: [...caveats, ...vote.caveats],
+    direction: vote.direction,
+    magnitude: vote.magnitude,
     drivers: [],
     overrides: [],
     contradicts: [],
     exogenous_signals: [],
   };
+}
+
+/**
+ * Sector-credit direction = a deterministic read on aggregate SWFL SBA risk:
+ *  - worst rankable sector charge-off > CHARGEOFF_BEARISH_THRESHOLD (30%) →
+ *    bearish; magnitude scales (worst − 30) / 70 (so 100% charge-off → 1.0).
+ *  - worst ≤ CHARGEOFF_BULLISH_CEILING (15%) AND best survival ≥
+ *    SURVIVAL_BULLISH_FLOOR (95%) → bullish; magnitude scales with how clean
+ *    the picture is.
+ *  - otherwise neutral.
+ *
+ * "Rankable" sectors only (≥5 resolved loans) — thin samples don't vote.
+ */
+const CHARGEOFF_BEARISH_THRESHOLD = 30;
+const CHARGEOFF_BULLISH_CEILING = 15;
+const SURVIVAL_BULLISH_FLOOR = 95;
+
+function voteSectorCreditDirection(
+  rankable: SectorAggregate[],
+  sortedRisk: SectorAggregate[],
+  sortedSafe: SectorAggregate[],
+): {
+  direction: BrainOutputDirection;
+  magnitude: number;
+  caveats: string[];
+} {
+  if (rankable.length === 0) {
+    return {
+      direction: "neutral",
+      magnitude: 0,
+      caveats: [
+        `No sector carries the ${RANKING_MIN_RESOLVED}+ resolved-loan minimum needed to read a credit-risk direction.`,
+      ],
+    };
+  }
+  const worst = sortedRisk[0];
+  const safest = sortedSafe[0];
+  const bestSurvival = 100 - safest.rate_resolved;
+
+  if (worst.rate_resolved > CHARGEOFF_BEARISH_THRESHOLD) {
+    const span = 100 - CHARGEOFF_BEARISH_THRESHOLD;
+    const magnitude = Math.max(
+      0,
+      Math.min(1, (worst.rate_resolved - CHARGEOFF_BEARISH_THRESHOLD) / span),
+    );
+    return {
+      direction: "bearish",
+      magnitude,
+      caveats: [
+        `Worst-sector charge-off ${pct(worst.rate_resolved)}% (${worst.label}, NAICS ${worst.naics_2digit}) above ${CHARGEOFF_BEARISH_THRESHOLD}% bearish threshold — sector-level credit risk is elevated.`,
+      ],
+    };
+  }
+  if (
+    worst.rate_resolved <= CHARGEOFF_BULLISH_CEILING &&
+    bestSurvival >= SURVIVAL_BULLISH_FLOOR
+  ) {
+    // Magnitude grows with how clean the picture is: worst near 0 + best at 100% → ~1.0
+    const magnitude = Math.max(
+      0,
+      Math.min(
+        1,
+        (CHARGEOFF_BULLISH_CEILING - worst.rate_resolved) /
+          CHARGEOFF_BULLISH_CEILING,
+      ),
+    );
+    return { direction: "bullish", magnitude, caveats: [] };
+  }
+  return { direction: "neutral", magnitude: 0.5, caveats: [] };
 }
 
 export const sectorCreditSwfl: PackDefinition = {

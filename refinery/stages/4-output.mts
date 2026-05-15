@@ -9,6 +9,7 @@ import type {
   BrainOutput,
   BrainOutputMetric,
   BrainOutputProducerResult,
+  BrainOutputRelevance,
   BrainTrustTier,
 } from "../types/brain-output.mts";
 import type { SynthesizedEvent } from "../types/event.mts";
@@ -177,11 +178,19 @@ export async function outputStage(
   });
   // Engine-owned v3 fields. Producer-owned fields (direction, magnitude,
   // drivers, overrides, contradicts, exogenous_signals + conclusion /
-  // key_metrics / caveats) come from `distilled`. Master synthesis (Week 2)
-  // computes real `upstream_count` (passing relevance floor) and weighted-avg
-  // `relevance.half_life_hours`; v1 uses placeholders.
-  const trust_tier = computeTrustTier(pack);
-  const upstream_count = pack.input_brains.length;
+  // key_metrics / caveats) come from `distilled`. The master synthesizer
+  // additionally returns its own `upstream_count` (passing relevance floor),
+  // `trust_tier` (worst-wins among passing), and `relevance` (weighted-avg
+  // decay) — Stage 4 prefers the producer's value when present, otherwise
+  // falls back to the engine default below.
+  const trust_tier: BrainTrustTier =
+    distilled.trust_tier ?? computeTrustTier(pack);
+  const upstream_count = distilled.upstream_count ?? pack.input_brains.length;
+  const relevance: BrainOutputRelevance = distilled.relevance ?? {
+    decay_curve: "weeks",
+    half_life_hours: 720,
+    computed_at: refined_at,
+  };
   const brainOutput: BrainOutput = {
     brain_id: pack.brain_id,
     version,
@@ -197,11 +206,7 @@ export async function outputStage(
     confidence,
     trust_tier,
     upstream_count,
-    relevance: {
-      decay_curve: "weeks",
-      half_life_hours: 720,
-      computed_at: refined_at,
-    },
+    relevance,
     exogenous_signals: distilled.exogenous_signals ?? [],
   };
 

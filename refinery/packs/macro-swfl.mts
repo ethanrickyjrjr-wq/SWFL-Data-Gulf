@@ -2,7 +2,7 @@ import type { PackDefinition, PackOutput } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
 import type {
-  BrainOutput,
+  BrainOutputDirection,
   BrainOutputMetric,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
@@ -10,10 +10,6 @@ import {
   macroSwflSource,
   type MacroSwflNormalized,
 } from "../sources/macro-swfl-source.mts";
-import {
-  makeBrainInputSource,
-  type BrainInputNormalized,
-} from "../sources/brain-input-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -23,14 +19,15 @@ import { env } from "../config/env.mts";
  * indicators an SWFL real-estate / franchise operator actually reads when
  * pricing capital, sizing absorption, and judging the timing window.
  *
- * Upstream brain: `master` (the SWFL Intelligence Lake index). macro-swfl
- * reads master's OUTPUT block via BrainInputSource so the macro snapshot is
- * paired with the same-market context master already curates.
+ * Leaf brain (no upstream brains). macro-swfl used to read master's OUTPUT
+ * block for context, but Week 2 inverted that: master is now the deterministic
+ * synthesizer that aggregates ACROSS the leaves (including macro-swfl), so a
+ * back-pointer here would create a DAG cycle. Operators who want the
+ * cross-vertical picture read master.md downstream.
  *
  * Pure deterministic pack — no synthesis agent. Every fact is computed in
- * code from typed fragments, and the BrainOutput is assembled by a
- * dedicated outputProducer. Confidence inherits the worst of (self,
- * upstream) per the propagation rule in lib/confidence.mts.
+ * code from typed fragments, and the BrainOutput is assembled by a dedicated
+ * outputProducer.
  */
 
 // ---------------------------------------------------------------------
@@ -40,7 +37,6 @@ import { env } from "../config/env.mts";
 // scope only; safe within a single pipeline run.
 // ---------------------------------------------------------------------
 let lastIndicators: MacroSwflNormalized[] = [];
-let lastMasterOutput: BrainOutput | null = null;
 
 /** Stable mapping from FRED series_id → BrainOutput metric slug + label. */
 const METRIC_MAP: Record<string, { metric: string; label: string }> = {
@@ -62,16 +58,6 @@ function indicatorsFrom(fragments: RawFragment[]): MacroSwflNormalized[] {
     .filter((n) => n?.kind === "macro-indicator");
 }
 
-function masterOutputFrom(fragments: RawFragment[]): BrainOutput | null {
-  for (const f of fragments) {
-    const n = f.normalized as unknown as BrainInputNormalized;
-    if (n?.kind === "brain-input" && n.upstream_id === "master") {
-      return n.output;
-    }
-  }
-  return null;
-}
-
 /** Format a number for display — 1dp for percentages, integer-clean otherwise. */
 const fmt = (n: number): string =>
   Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
@@ -83,11 +69,9 @@ const fmt = (n: number): string =>
  */
 function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const indicators = indicatorsFrom(allFragments);
-  const master = masterOutputFrom(allFragments);
 
   // Stash for outputProducer (typed values cannot survive in SynthesisFact.value)
   lastIndicators = indicators;
-  lastMasterOutput = master;
 
   if (indicators.length === 0) return [];
 
@@ -123,19 +107,6 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     });
   }
 
-  // Last — routing fact pointing at master upstream (only when present).
-  if (master) {
-    facts.push({
-      topic: "master :: upstream_routing",
-      fact: "SWFL Intelligence Lake context — fetch master for record-level detail",
-      value:
-        `The SWFL Intelligence Lake master index (confidence ${master.confidence.toFixed(2)} ` +
-        `at ${master.refined_at}) covers verified franchise outcomes and CRE corridor profiles ` +
-        `for the same Lee–Collier market. Record-level detail is read from master, not inferred here.`,
-      source_fragment_ids: [],
-    });
-  }
-
   return facts;
 }
 
@@ -147,7 +118,6 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
  */
 function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const indicators = lastIndicators;
-  const master = lastMasterOutput;
 
   const key_metrics: BrainOutputMetric[] = indicators
     .map((i) => {
@@ -184,17 +154,11 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     );
     conclusionParts.push(
       `The funding-cost and labor-supply picture is the operator's primary lens; ` +
-        `record-level franchise and corridor detail lives in the master index.`,
-    );
-  }
-  if (master) {
-    conclusionParts.push(
-      `Upstream master confidence is ${master.confidence.toFixed(2)} ` +
-        `(as of ${master.refined_at.slice(0, 10)}).`,
+        `cross-vertical synthesis (franchise + CRE + sector-credit) lives downstream in master.`,
     );
   }
 
-  const caveats: string[] =
+  const sourceCaveats: string[] =
     env.source === "fixture"
       ? [
           "Macro indicators in this build are synthetic fixture data (FRED-shaped) — unset REFINERY_SOURCE or set it to `live` for the live FRED API.",
@@ -203,21 +167,80 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
           "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
         ];
 
+  // Per-indicator vote: rising rates / inflation / unemployment are all
+  // bearish for an SWFL operator (funding cost up, Fed less likely to cut,
+  // labor demand softening). Falling is the inverse. Stable is neutral.
+  const macroVote = voteMacroDirection(indicators);
+
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
-    caveats,
-    // v1 placeholders — direction/magnitude voting happens in master Week 2.
-    // The macro snapshot itself is a point-in-time read; per-indicator
-    // direction is in key_metrics, brain-level direction is "neutral" until
-    // a synthesizer interprets the indicator mix.
-    direction: "neutral",
-    magnitude: 0.5,
+    caveats: [...sourceCaveats, ...macroVote.caveats],
+    direction: macroVote.direction,
+    magnitude: macroVote.magnitude,
     drivers: [],
     overrides: [],
     contradicts: [],
     exogenous_signals: [],
   };
+}
+
+type IndicatorVote = "bullish" | "bearish" | "neutral";
+
+/**
+ * Per-indicator vote. SOFR, CPI YoY, and FLUR all read "rising = bearish"
+ * for an SWFL operator: funding cost up, Fed less likely to cut, labor
+ * market softening. Falling is the inverse. Stable / unknown is neutral.
+ * FLLFPR is omitted on purpose — labor force participation's directional
+ * interpretation is too context-dependent to vote on.
+ */
+function voteMacroIndicator(i: MacroSwflNormalized): IndicatorVote {
+  if (i.direction === "stable") return "neutral";
+  const bearish_on_rising =
+    i.series_id === "SOFR" ||
+    i.series_id === "CPIAUCSL_YOY" ||
+    i.series_id === "FLUR";
+  if (!bearish_on_rising) return "neutral";
+  return i.direction === "rising" ? "bearish" : "bullish";
+}
+
+/**
+ * Brain-level direction. Counts per-indicator votes:
+ *  - any bullish AND any bearish → "mixed" (operator cannot read one direction).
+ *  - otherwise winning side adopts; magnitude = winning_count / total.
+ *  - all-neutral → "neutral" with magnitude = neutral_count / total (so an
+ *    all-stable read is loudly neutral, not silently absent).
+ */
+function voteMacroDirection(indicators: MacroSwflNormalized[]): {
+  direction: BrainOutputDirection;
+  magnitude: number;
+  caveats: string[];
+} {
+  const votes = indicators
+    .filter((i) => i.series_id !== "FLLFPR")
+    .map(voteMacroIndicator);
+  const total = votes.length;
+  if (total === 0) return { direction: "neutral", magnitude: 0, caveats: [] };
+  const bullish = votes.filter((v) => v === "bullish").length;
+  const bearish = votes.filter((v) => v === "bearish").length;
+  const neutral = votes.filter((v) => v === "neutral").length;
+
+  if (bullish > 0 && bearish > 0) {
+    return {
+      direction: "mixed",
+      magnitude: 0.5,
+      caveats: [
+        `Macro indicators split: ${bullish} bullish, ${bearish} bearish, ${neutral} neutral — operator cannot read one direction from this set.`,
+      ],
+    };
+  }
+  if (bullish > bearish) {
+    return { direction: "bullish", magnitude: bullish / total, caveats: [] };
+  }
+  if (bearish > bullish) {
+    return { direction: "bearish", magnitude: bearish / total, caveats: [] };
+  }
+  return { direction: "neutral", magnitude: neutral / total, caveats: [] };
 }
 
 export const macroSwfl: PackDefinition = {
@@ -227,10 +250,10 @@ export const macroSwfl: PackDefinition = {
   scope:
     "Macro context for Southwest Florida operators — FRED rates, Florida labor, and US inflation, paired with the SWFL Intelligence Lake index.",
   ttl_seconds: 86400, // 1 day — macro indicators refresh fast
-  sources: [macroSwflSource, makeBrainInputSource("master")],
-  input_brains: ["master"],
-  // Every fragment belongs — both the FRED indicators and the master brain-input.
-  // Composite cutoff = 0 so the 2-source DAG output survives triage uncontested.
+  sources: [macroSwflSource],
+  input_brains: [],
+  // Every FRED fragment belongs. Composite cutoff = 0 so the DAG output
+  // survives triage uncontested.
   fitScore: (): number => 8,
   compositeCutoff: 0,
   // Pure deterministic — every fact is computed in macroSwflCorpusSummary.
@@ -246,7 +269,7 @@ export const macroSwfl: PackDefinition = {
     "macro-swfl: standing macro snapshot for SWFL operators — funding rates, Florida labor, US inflation.",
   prompts: {
     triageContext:
-      "These fragments are FRED macro indicators and a master-index OUTPUT pointer. They are all decision-relevant by construction; the pack is pure deterministic aggregation.",
+      "These fragments are FRED macro indicators. They are all decision-relevant by construction; the pack is pure deterministic aggregation.",
     synthesisContext:
       "This pack runs no synthesis agent (skipSynthesisAgent). Every fact is produced deterministically by macroSwflCorpusSummary and the BrainOutput is built by macroSwflOutputProducer.",
   },

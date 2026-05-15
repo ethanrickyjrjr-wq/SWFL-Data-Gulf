@@ -110,9 +110,16 @@ export interface BrainOutput {
 
 /**
  * The narrative + qualitative fields a per-pack outputProducer is responsible
- * for emitting. Engine fields (brain_id, version, refined_at, confidence,
- * trust_tier, upstream_count, relevance) are computed deterministically by
- * Stage 4 and overlaid afterwards.
+ * for emitting. Engine fields (brain_id, version, refined_at, confidence) are
+ * always computed by Stage 4 and overlaid afterwards.
+ *
+ * `upstream_count`, `trust_tier`, and `relevance` are optionally producer-
+ * supplied: master synthesis computes them per spec §2 steps 1 + 7 (passing-
+ * floor count, worst-tier-wins, weighted-average decay). Stage 4 prefers the
+ * producer value when present and falls back to its own deterministic default
+ * (`pack.input_brains.length`, worst direct-source tier, fixed 720h relevance)
+ * otherwise. Producers without their own synthesis logic — i.e. every brain
+ * that is not the master — leave these undefined.
  */
 export type BrainOutputProducerResult = Pick<
   BrainOutput,
@@ -125,4 +132,5 @@ export type BrainOutputProducerResult = Pick<
   | "overrides"
   | "contradicts"
   | "exogenous_signals"
->;
+> &
+  Partial<Pick<BrainOutput, "upstream_count" | "trust_tier" | "relevance">>;

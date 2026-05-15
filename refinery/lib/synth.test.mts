@@ -1,0 +1,401 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import {
+  applyOverrideCascade,
+  applyRelevanceFloor,
+  composeConclusion,
+  computeRelevanceFactor,
+  detectContradictions,
+  emptySynthesisResult,
+  propagateDecay,
+  rollupKeyMetrics,
+  voteDirection,
+} from "./synth.mts";
+import type {
+  BrainOutput,
+  BrainOutputDirection,
+  BrainOutputMetric,
+  BrainTrustTier,
+} from "../types/brain-output.mts";
+import type { ExogenousSignal } from "../types/exogenous-signal.mts";
+import type { OverrideRule } from "../constitution/types.mts";
+
+const NOW = new Date("2026-05-15T20:00:00Z");
+
+function brain(
+  brain_id: string,
+  direction: BrainOutputDirection,
+  magnitude: number,
+  confidence: number,
+  opts: {
+    half_life_hours?: number;
+    computed_at?: string;
+    trust_tier?: BrainTrustTier;
+    key_metrics?: BrainOutputMetric[];
+  } = {},
+): BrainOutput {
+  return {
+    brain_id,
+    version: 1,
+    refined_at: opts.computed_at ?? NOW.toISOString(),
+    direction,
+    magnitude,
+    drivers: [],
+    overrides: [],
+    conclusion: `${brain_id} reads ${direction}`,
+    key_metrics: opts.key_metrics ?? [],
+    caveats: [],
+    contradicts: [],
+    confidence,
+    trust_tier: opts.trust_tier ?? 2,
+    upstream_count: 0,
+    relevance: {
+      decay_curve: "weeks",
+      half_life_hours: opts.half_life_hours ?? 720,
+      computed_at: opts.computed_at ?? NOW.toISOString(),
+    },
+    exogenous_signals: [],
+  };
+}
+
+// ---- computeRelevanceFactor ------------------------------------------------
+
+test("computeRelevanceFactor: brand-new returns 1.0", () => {
+  const b = brain("x", "bullish", 0.5, 0.8, { computed_at: NOW.toISOString() });
+  assert.equal(computeRelevanceFactor(b, NOW), 1);
+});
+
+test("computeRelevanceFactor: one half-life old returns 0.5", () => {
+  const computed_at = new Date(NOW.getTime() - 24 * 3600 * 1000).toISOString();
+  const b = brain("x", "bullish", 0.5, 0.8, {
+    half_life_hours: 24,
+    computed_at,
+  });
+  assert.ok(Math.abs(computeRelevanceFactor(b, NOW) - 0.5) < 1e-9);
+});
+
+test("computeRelevanceFactor: very stale → near 0 (spec test 11)", () => {
+  // 30 days old, half-life 168h → factor ≈ 2^-4.28 ≈ 0.05
+  const computed_at = new Date(
+    NOW.getTime() - 30 * 24 * 3600 * 1000,
+  ).toISOString();
+  const b = brain("x", "bullish", 0.5, 0.8, {
+    half_life_hours: 168,
+    computed_at,
+  });
+  const f = computeRelevanceFactor(b, NOW);
+  assert.ok(f > 0 && f < 0.06, `expected tiny positive, got ${f}`);
+});
+
+// ---- applyRelevanceFloor ---------------------------------------------------
+
+test("applyRelevanceFloor: separates passing/excluded and emits caveats", () => {
+  const fresh = brain("fresh", "bullish", 0.7, 0.8, {
+    computed_at: NOW.toISOString(),
+  });
+  const stale = brain("stale", "bearish", 0.5, 0.7, {
+    half_life_hours: 168,
+    computed_at: new Date(NOW.getTime() - 30 * 24 * 3600 * 1000).toISOString(),
+  });
+  const { passing, excluded, caveats } = applyRelevanceFloor(
+    [fresh, stale],
+    0.1,
+    NOW,
+  );
+  assert.equal(passing.length, 1);
+  assert.equal(passing[0].upstream.brain_id, "fresh");
+  assert.equal(excluded.length, 1);
+  assert.equal(excluded[0].upstream.brain_id, "stale");
+  assert.equal(caveats.length, 1);
+  assert.match(caveats[0], /stale.*below floor 0\.1/);
+});
+
+// ---- voteDirection ---------------------------------------------------------
+
+test("voteDirection: unanimous bullish → bullish, high magnitude (spec test 6)", () => {
+  const ups = [
+    brain("a", "bullish", 0.8, 0.9),
+    brain("b", "bullish", 0.85, 0.9),
+    brain("c", "bullish", 0.8, 0.85),
+  ];
+  const vote = voteDirection(ups.map((u) => ({ upstream: u, factor: 1 })));
+  assert.equal(vote.direction, "bullish");
+  assert.ok(vote.magnitude > 0.75);
+  assert.deepEqual(vote.drivers.sort(), ["a", "b", "c"]);
+});
+
+test("voteDirection: balanced bullish/bearish → mixed (spec test 7)", () => {
+  const ups = [
+    brain("a", "bullish", 0.7, 0.7),
+    brain("b", "bearish", 0.7, 0.7),
+  ];
+  const vote = voteDirection(ups.map((u) => ({ upstream: u, factor: 1 })));
+  assert.equal(vote.direction, "mixed");
+  assert.ok(vote.agreement_ratio < 0.6);
+});
+
+test("voteDirection: mixed upstream splits weight 50/50 (spec test 15)", () => {
+  // Heavy mixed upstream dilutes the lighter bearish reading below 0.60.
+  // bearish weight: 0.4 * 0.5 = 0.2; mixed split: 0.5 * (1.0 * 1.0) = 0.5 each
+  // → bearish total 0.7, bullish 0.5, ratio 0.583 < 0.6 → mixed.
+  const ups = [brain("a", "bearish", 0.4, 0.5), brain("b", "mixed", 1.0, 1.0)];
+  const vote = voteDirection(ups.map((u) => ({ upstream: u, factor: 1 })));
+  assert.equal(vote.direction, "mixed");
+  // Confirm the split happened: bullish weight purely from mixed = 0.5
+  assert.ok(Math.abs(vote.weights.bullish - 0.5) < 1e-9);
+});
+
+test("voteDirection: empty passing → neutral, magnitude 0", () => {
+  const vote = voteDirection([]);
+  assert.equal(vote.direction, "neutral");
+  assert.equal(vote.magnitude, 0);
+  assert.deepEqual(vote.drivers, []);
+});
+
+// ---- applyOverrideCascade --------------------------------------------------
+
+const FLOOD_RULE: OverrideRule = {
+  priority: 90,
+  override_id: "flood-veto",
+  effect: "force_bearish",
+  condition: (upstreams) =>
+    upstreams.some((u) =>
+      u.key_metrics.some((m) => m.metric === "flood_risk_pct" && m.value > 15),
+    ),
+};
+
+const SIGNAL_RULE: OverrideRule = {
+  priority: 100,
+  override_id: "exogenous-critical-confirmed",
+  effect: "force_signal_direction",
+  condition: (_u, signals) =>
+    signals.some(
+      (s) =>
+        s.severity === "critical" &&
+        s.classification === "confirmed" &&
+        s.confidence > 0.85,
+    ),
+};
+
+test("applyOverrideCascade: flood veto forces bearish, mag floor 0.85 (spec test 9)", () => {
+  const u = brain("a", "bullish", 0.5, 0.9, {
+    key_metrics: [
+      {
+        metric: "flood_risk_pct",
+        value: 25,
+        direction: "rising",
+        label: "Flood risk",
+      },
+    ],
+  });
+  const passing = [{ upstream: u, factor: 1 }];
+  const vote = voteDirection(passing);
+  const result = applyOverrideCascade(vote, passing, [], [FLOOD_RULE]);
+  assert.equal(result.direction, "bearish");
+  assert.ok(result.magnitude >= 0.85);
+  assert.deepEqual(result.overrides, ["flood-veto"]);
+  assert.equal(result.caveats.length, 1);
+  assert.match(result.caveats[0], /flood-veto/);
+});
+
+test("applyOverrideCascade: priority — bullish signal beats flood (spec test 10)", () => {
+  const u = brain("a", "bullish", 0.5, 0.9, {
+    key_metrics: [
+      {
+        metric: "flood_risk_pct",
+        value: 25,
+        direction: "rising",
+        label: "Flood",
+      },
+    ],
+  });
+  const passing = [{ upstream: u, factor: 1 }];
+  const vote = voteDirection(passing);
+  const signals: ExogenousSignal[] = [
+    {
+      signal_type: "weather",
+      entity: "Storm X",
+      direction: "bullish",
+      severity: "critical",
+      confidence: 0.95,
+      classification: "confirmed",
+      decay_curve: "hours",
+      source: "NOAA",
+      observed_at: NOW.toISOString(),
+    },
+  ];
+  const result = applyOverrideCascade(vote, passing, signals, [
+    SIGNAL_RULE,
+    FLOOD_RULE,
+  ]);
+  assert.equal(result.direction, "bullish");
+  assert.deepEqual(result.overrides, ["exogenous-critical-confirmed"]);
+});
+
+// ---- detectContradictions --------------------------------------------------
+
+test("detectContradictions: high-conf opposite → contradiction (spec test 7)", () => {
+  const a = brain("a", "bullish", 0.7, 0.7);
+  const b = brain("b", "bearish", 0.7, 0.7);
+  const out = detectContradictions(
+    [a, b].map((u) => ({ upstream: u, factor: 1 })),
+  );
+  assert.deepEqual(out, ["a (bullish) vs b (bearish)"]);
+});
+
+test("detectContradictions: low-confidence pair → no contradiction", () => {
+  const a = brain("a", "bullish", 0.7, 0.4);
+  const b = brain("b", "bearish", 0.7, 0.7);
+  const out = detectContradictions(
+    [a, b].map((u) => ({ upstream: u, factor: 1 })),
+  );
+  assert.equal(out.length, 0);
+});
+
+test("detectContradictions: neutral and mixed pairs skipped", () => {
+  const a = brain("a", "neutral", 0.7, 0.9);
+  const b = brain("b", "bearish", 0.7, 0.9);
+  const c = brain("c", "mixed", 0.7, 0.9);
+  const d = brain("d", "bullish", 0.7, 0.9);
+  const out = detectContradictions(
+    [a, b, c, d].map((u) => ({ upstream: u, factor: 1 })),
+  );
+  assert.deepEqual(out, ["b (bearish) vs d (bullish)"]);
+});
+
+// ---- composeConclusion -----------------------------------------------------
+
+test("composeConclusion: full template + plural", () => {
+  const c = composeConclusion({
+    direction: "bullish",
+    magnitude: 0.8,
+    drivers: ["a", "b"],
+    overrides: [],
+    contradicts: [],
+    confidence: 0.72,
+    trust_tier: 2,
+    upstream_count: 2,
+  });
+  assert.match(c, /Read is bullish \(high magnitude\)/);
+  assert.match(c, /Driven by: a, b/);
+  assert.match(c, /0\.72/);
+  assert.match(c, /T2/);
+  assert.match(c, /2 upstream brains/);
+});
+
+test("composeConclusion: singular and low magnitude", () => {
+  const c = composeConclusion({
+    direction: "neutral",
+    magnitude: 0.3,
+    drivers: ["a"],
+    overrides: [],
+    contradicts: [],
+    confidence: 0.6,
+    trust_tier: 1,
+    upstream_count: 1,
+  });
+  assert.match(c, /low magnitude/);
+  assert.match(c, /1 upstream brain\./);
+});
+
+test("composeConclusion: overrides + contradicts surfaced", () => {
+  const c = composeConclusion({
+    direction: "bearish",
+    magnitude: 0.85,
+    drivers: ["a"],
+    overrides: ["flood-veto"],
+    contradicts: ["a (bullish) vs b (bearish)"],
+    confidence: 0.5,
+    trust_tier: 3,
+    upstream_count: 2,
+  });
+  assert.match(c, /Overrides: flood-veto/);
+  assert.match(c, /Note conflicts: a \(bullish\) vs b \(bearish\)/);
+});
+
+// ---- rollupKeyMetrics ------------------------------------------------------
+
+test("rollupKeyMetrics: top 2 per upstream, capped at 8", () => {
+  const mk = (n: number): BrainOutputMetric[] =>
+    Array.from({ length: n }, (_, i) => ({
+      metric: `m${i}`,
+      value: i,
+      direction: "rising" as const,
+      label: `M${i}`,
+    }));
+  const ups = [
+    brain("a", "bullish", 0.5, 0.8, { key_metrics: mk(3) }),
+    brain("b", "bullish", 0.5, 0.8, { key_metrics: mk(2) }),
+  ];
+  const passing = ups.map((u) => ({ upstream: u, factor: 1 }));
+  const out = rollupKeyMetrics(passing);
+  assert.equal(out.length, 4);
+  assert.deepEqual(
+    out.map((m) => m.metric),
+    ["m0", "m1", "m0", "m1"],
+  );
+});
+
+test("rollupKeyMetrics: caps at 8 across many upstreams", () => {
+  const mk: BrainOutputMetric[] = [
+    { metric: "x", value: 1, direction: "rising", label: "X" },
+    { metric: "y", value: 2, direction: "rising", label: "Y" },
+  ];
+  const ups = Array.from({ length: 6 }, (_, i) =>
+    brain(`u${i}`, "bullish", 0.5, 0.8, { key_metrics: mk }),
+  );
+  const out = rollupKeyMetrics(ups.map((u) => ({ upstream: u, factor: 1 })));
+  assert.equal(out.length, 8);
+});
+
+// ---- propagateDecay --------------------------------------------------------
+
+test("propagateDecay: equal weights → arithmetic mean half-life", () => {
+  const ups = [
+    brain("a", "bullish", 1.0, 1.0, { half_life_hours: 100 }),
+    brain("b", "bearish", 1.0, 1.0, { half_life_hours: 200 }),
+  ];
+  const r = propagateDecay(
+    ups.map((u) => ({ upstream: u, factor: 1 })),
+    NOW,
+  );
+  assert.ok(Math.abs(r.half_life_hours - 150) < 1e-6);
+  assert.equal(r.decay_curve, "days");
+});
+
+test("propagateDecay: weighted half-life (heavier upstream dominates)", () => {
+  const heavy = brain("a", "bullish", 1.0, 1.0, { half_life_hours: 1000 });
+  const light = brain("b", "bullish", 0.1, 0.1, { half_life_hours: 100 });
+  const r = propagateDecay(
+    [heavy, light].map((u) => ({ upstream: u, factor: 1 })),
+    NOW,
+  );
+  // weights: 1.0 vs 0.01 → near-pure heavy → ~1000
+  assert.ok(
+    r.half_life_hours > 950,
+    `expected near 1000, got ${r.half_life_hours}`,
+  );
+  assert.equal(r.decay_curve, "weeks");
+});
+
+test("propagateDecay: empty passing → 24h hours-decay", () => {
+  const r = propagateDecay([], NOW);
+  assert.equal(r.half_life_hours, 24);
+  assert.equal(r.decay_curve, "hours");
+});
+
+// ---- emptySynthesisResult --------------------------------------------------
+
+test("emptySynthesisResult: neutral, mag 0, count 0, tier 4 (spec test 12)", () => {
+  const r = emptySynthesisResult(4, 0.1, NOW);
+  assert.equal(r.direction, "neutral");
+  assert.equal(r.magnitude, 0);
+  assert.equal(r.upstream_count, 0);
+  assert.equal(r.trust_tier, 4);
+  assert.match(r.conclusion, /Insufficient current data/);
+  assert.match(r.conclusion, /4 upstream brains below relevance floor 0\.1/);
+  assert.deepEqual(r.caveats, [
+    "All upstream brains below relevance threshold",
+  ]);
+  assert.deepEqual(r.exogenous_signals, []);
+});

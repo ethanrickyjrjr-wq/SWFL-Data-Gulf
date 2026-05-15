@@ -20,10 +20,12 @@ import type { PackDefinition } from "../types/pack.mts";
 // scaffold:imports
 import { sectorCreditSwfl } from "./sector-credit-swfl.mts";
 import { macroSwfl } from "./macro-swfl.mts";
+import { master } from "./master.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   // scaffold:entries
   [sectorCreditSwfl.id]: sectorCreditSwfl,
   [macroSwfl.id]: macroSwfl,
+  [master.id]: master,
 };
