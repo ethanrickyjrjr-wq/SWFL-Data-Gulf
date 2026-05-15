@@ -1,8 +1,8 @@
 {
   "__meta": {
     "_synthetic": true,
-    "_note": "SYNTHETIC fixture — NOT real corridor data. Column names match the live corridor_profiles table (confirmed via schema dump 2026-05-14) so the Tier-1 smoke test validates the real schema. cre-source.mts normalizeCorridor() is the single point of schema knowledge.",
-    "_shape": "One row per SWFL CRE corridor. The live fetch filters deleted_at IS NULL AND verification_status = 'verified' — fixture rows all reflect that state. There is NO county column; county is derived from city in normalize(). active_flags is the de-facto 'hidden truths' layer."
+    "_note": "SYNTHETIC fixture — NOT real corridor data. Column names match the live corridor_profiles table (schema dump 2026-05-14, plus the cap_rate / vacancy_rate columns added by 20260515_corridor_metrics_migration.sql). cre-source.mts normalizeCorridor() is the single point of schema knowledge.",
+    "_shape": "One row per SWFL CRE corridor. The live fetch filters deleted_at IS NULL AND verification_status = 'verified' — fixture rows all reflect that state. There is NO county column; county is derived from city in normalize(). active_flags is the de-facto 'hidden truths' layer. cap_rate_pct / vacancy_rate_pct are nullable — corridors without metrics are excluded from the cre-swfl direction vote and surfaced as caveats."
   },
   "rows": [
     {
@@ -29,7 +29,13 @@
       ],
       "source_url": "https://example.notion.so/immokalee-rd",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 5.8,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 4.2,
+      "vacancy_rate_direction": "falling",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     },
     {
       "corridor_name": "US-41 / Cleveland Ave Fort Myers",
@@ -49,7 +55,13 @@
       ],
       "source_url": "https://example.notion.so/us41-cleveland",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": null,
+      "cap_rate_direction": null,
+      "vacancy_rate_pct": null,
+      "vacancy_rate_direction": null,
+      "metrics_period": null,
+      "metrics_verified_date": null
     },
     {
       "corridor_name": "Gulf Coast Town Center / Alico Rd",
@@ -75,7 +87,13 @@
       ],
       "source_url": "https://example.notion.so/gulf-coast-town-center",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 7.5,
+      "cap_rate_direction": "stable",
+      "vacancy_rate_pct": 12,
+      "vacancy_rate_direction": "falling",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     },
     {
       "corridor_name": "Cape Coral Pkwy E",
@@ -95,7 +113,13 @@
       ],
       "source_url": "https://example.notion.so/cape-coral-pkwy",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 6.2,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 5,
+      "vacancy_rate_direction": "falling",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     },
     {
       "corridor_name": "Estero Blvd / Fort Myers Beach",
@@ -121,7 +145,13 @@
       ],
       "source_url": "https://example.notion.so/estero-blvd",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 8.5,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 18,
+      "vacancy_rate_direction": "falling",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     },
     {
       "corridor_name": "US-41 Bonita Springs",
@@ -141,7 +171,13 @@
       ],
       "source_url": "https://example.notion.so/us41-bonita",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 7,
+      "cap_rate_direction": "stable",
+      "vacancy_rate_pct": 8,
+      "vacancy_rate_direction": "stable",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     },
     {
       "corridor_name": "Pine Ridge Rd Naples",
@@ -161,7 +197,13 @@
       ],
       "source_url": "https://example.notion.so/pine-ridge-rd",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 6.5,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 6,
+      "vacancy_rate_direction": "stable",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     },
     {
       "corridor_name": "Alico Rd Industrial Flex",
@@ -174,7 +216,13 @@
       "active_flags": [],
       "source_url": "https://example.notion.so/alico-industrial",
       "verification_status": "verified",
-      "deleted_at": null
+      "deleted_at": null,
+      "cap_rate_pct": 6,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 3,
+      "vacancy_rate_direction": "falling",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
     }
   ]
 }

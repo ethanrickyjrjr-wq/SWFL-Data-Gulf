@@ -53,6 +53,9 @@ export interface CorridorFlag {
   resolution: string | null;
 }
 
+/** Cap-rate / vacancy direction — matches BrainOutputMetric.direction exactly. */
+export type CorridorMetricDirection = "rising" | "falling" | "stable";
+
 /** Normalized corridor-profile fragment. */
 export interface CorridorNormalized {
   kind: "corridor";
@@ -67,6 +70,17 @@ export interface CorridorNormalized {
   tenant_mix: string | null;
   flags: CorridorFlag[];
   source_url: string | null;
+  /** Cap rate %, 0-30 (DB CHECK enforces). Null = not yet sourced. */
+  cap_rate_pct: number | null;
+  /** Editorial direction set when the value is entered. Null = no read. */
+  cap_rate_direction: CorridorMetricDirection | null;
+  /** Vacancy rate %, 0-100. Null = not yet sourced. */
+  vacancy_rate_pct: number | null;
+  vacancy_rate_direction: CorridorMetricDirection | null;
+  /** e.g. "2026-Q1" — the period the metrics describe. */
+  metrics_period: string | null;
+  /** ISO date the metrics were last sourced. */
+  metrics_verified_date: string | null;
 }
 
 function str(v: unknown): string | null {
@@ -78,6 +92,12 @@ function num(v: unknown): number | null {
   if (v == null) return null;
   const n = typeof v === "string" ? parseFloat(v) : Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+function metricDirection(v: unknown): CorridorMetricDirection | null {
+  const s = str(v);
+  if (s === "rising" || s === "falling" || s === "stable") return s;
+  return null;
 }
 
 function normalizeFlags(raw: unknown): CorridorFlag[] {
@@ -112,6 +132,12 @@ export function normalizeCorridor(
     tenant_mix: str(row.tenant_mix),
     flags: normalizeFlags(row.active_flags),
     source_url: str(row.source_url),
+    cap_rate_pct: num(row.cap_rate_pct),
+    cap_rate_direction: metricDirection(row.cap_rate_direction),
+    vacancy_rate_pct: num(row.vacancy_rate_pct),
+    vacancy_rate_direction: metricDirection(row.vacancy_rate_direction),
+    metrics_period: str(row.metrics_period),
+    metrics_verified_date: str(row.metrics_verified_date),
   };
 }
 
