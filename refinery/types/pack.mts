@@ -1,6 +1,14 @@
 import type { RawFragment } from "./fragment.mts";
 import type { SynthesizedEvent, SynthesisFact } from "./event.mts";
-import type { BrainOutput } from "./brain-output.mts";
+import type { BrainOutputProducerResult } from "./brain-output.mts";
+
+/**
+ * Synthesis strategy for a pack. v1 ships everything as `"deterministic"`;
+ * the `"llm-assisted"` slot is reserved for Month 4+ when narrative-quality
+ * brains may opt into a guarded LLM step (confidence stays deterministic
+ * regardless — locked decision #4).
+ */
+export type SynthesisStrategy = "deterministic" | "llm-assisted";
 
 /**
  * BrainDomain — the controlled vocabulary for `PackDefinition.domain`.
@@ -119,17 +127,28 @@ export interface PackDefinition {
    */
   skipTriageAgent?: boolean;
   /**
-   * Optional producer of the BrainOutput narrative fields. Receives the
-   * fully-resolved PackOutput (citations finalized, facts f-id-assigned) and
-   * returns the conclusion + key_metrics + caveats that go into the `---
-   * OUTPUT ---` block. If unset, Stage 4 falls back to: conclusion = top
-   * composite fact's value, key_metrics = facts tagged `topic: "metric:*"`,
-   * caveats = []. Keeps the "deterministic where possible" invariant — no
-   * global synthesis-agent prompt expansion.
+   * Optional producer of the BrainOutput narrative + qualitative fields.
+   * Receives the fully-resolved PackOutput (citations finalized, facts
+   * f-id-assigned) and returns the producer-owned slice of BrainOutput:
+   *   conclusion, key_metrics, caveats, direction, magnitude, drivers,
+   *   overrides, contradicts, exogenous_signals.
+   * Engine-owned fields (brain_id, version, refined_at, confidence,
+   * trust_tier, upstream_count, relevance) are computed deterministically
+   * by Stage 4 and overlaid afterwards.
+   * If unset, Stage 4 falls back to a default producer that emits a
+   * minimum-viable v3 shape (neutral direction, 0.5 magnitude, empty
+   * arrays, conclusion from top composite fact, metrics from `topic:metric:*`).
+   * Keeps the "deterministic where possible" invariant — no global
+   * synthesis-agent prompt expansion.
    */
-  outputProducer?: (
-    out: PackOutput,
-  ) => Pick<BrainOutput, "conclusion" | "key_metrics" | "caveats">;
+  outputProducer?: (out: PackOutput) => BrainOutputProducerResult;
+  /**
+   * Marks the synthesis approach for this pack. v1 default is `"deterministic"`
+   * — pure code, no LLM in the output path. `"llm-assisted"` is reserved for
+   * Month 4+ narrative-only enhancements; numeric confidence stays
+   * deterministic regardless (locked decision #4).
+   */
+  synthesisStrategy?: SynthesisStrategy;
   /** descriptive "HOW THE USER LIKES TO WORK" lines (third-person, never imperative) */
   preferences: string[];
   /** one-line "ACTIVE PROJECTS" description */

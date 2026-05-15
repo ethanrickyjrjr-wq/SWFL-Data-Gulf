@@ -30,6 +30,11 @@ const REQUIRED_SECTIONS = [
   "--- RECENT NOTES ---",
 ];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_TIMESTAMP =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+const BRAIN_DIRECTIONS = new Set(["bullish", "bearish", "neutral", "mixed"]);
+const DECAY_CURVES = new Set(["hours", "days", "weeks", "months", "permanent"]);
+const TRUST_TIERS = new Set([1, 2, 3, 4]);
 
 function parseFrontmatter(md: string): Record<string, string> | null {
   // Tolerate one leading `<!-- FRESHNESS ... -->` HTML comment before the `---`.
@@ -263,6 +268,87 @@ export function validateSpec(md: string): ValidationResult {
             }
           });
         }
+
+        // --- v3 fields (spec docs/v3-synthesis-spec.md §1) ---
+        if (!BRAIN_DIRECTIONS.has(o.direction as string)) {
+          errors.push(
+            `--- OUTPUT --- field direction must be one of "bullish"|"bearish"|"neutral"|"mixed", got ${JSON.stringify(o.direction)}.`,
+          );
+        }
+        if (
+          typeof o.magnitude !== "number" ||
+          o.magnitude < 0 ||
+          o.magnitude > 1
+        ) {
+          errors.push(
+            "--- OUTPUT --- field magnitude must be a number in [0, 1].",
+          );
+        }
+        for (const field of ["drivers", "overrides", "contradicts"] as const) {
+          if (!Array.isArray(o[field])) {
+            errors.push(`--- OUTPUT --- field ${field} must be an array.`);
+          } else {
+            (o[field] as unknown[]).forEach((v, i) => {
+              if (typeof v !== "string") {
+                errors.push(`--- OUTPUT --- ${field}[${i}] must be a string.`);
+              }
+            });
+          }
+        }
+        if (
+          typeof o.trust_tier !== "number" ||
+          !TRUST_TIERS.has(o.trust_tier as number)
+        ) {
+          errors.push("--- OUTPUT --- field trust_tier must be 1, 2, 3, or 4.");
+        }
+        if (
+          typeof o.upstream_count !== "number" ||
+          !Number.isInteger(o.upstream_count) ||
+          o.upstream_count < 0
+        ) {
+          errors.push(
+            "--- OUTPUT --- field upstream_count must be a non-negative integer.",
+          );
+        }
+        const rel = o.relevance as Record<string, unknown> | undefined;
+        if (!rel || typeof rel !== "object" || Array.isArray(rel)) {
+          errors.push(
+            "--- OUTPUT --- field relevance must be an object with decay_curve, half_life_hours, computed_at.",
+          );
+        } else {
+          if (!DECAY_CURVES.has(rel.decay_curve as string)) {
+            errors.push(
+              `--- OUTPUT --- relevance.decay_curve must be "hours"|"days"|"weeks"|"months"|"permanent", got ${JSON.stringify(rel.decay_curve)}.`,
+            );
+          }
+          if (
+            typeof rel.half_life_hours !== "number" ||
+            rel.half_life_hours < 0 ||
+            !Number.isFinite(rel.half_life_hours)
+          ) {
+            errors.push(
+              "--- OUTPUT --- relevance.half_life_hours must be a non-negative finite number.",
+            );
+          }
+          if (
+            typeof rel.computed_at !== "string" ||
+            !ISO_TIMESTAMP.test(rel.computed_at)
+          ) {
+            errors.push(
+              `--- OUTPUT --- relevance.computed_at must be an ISO 8601 timestamp, got ${JSON.stringify(rel.computed_at)}.`,
+            );
+          }
+        }
+        if (o.exogenous_signals !== undefined) {
+          if (!Array.isArray(o.exogenous_signals)) {
+            errors.push(
+              "--- OUTPUT --- field exogenous_signals must be an array when present.",
+            );
+          }
+          // Per-element shape validation is deferred until Week 6-8 when the
+          // Context Signal Brain starts emitting them. v1: only `[]` ever ships.
+        }
+
         // Cross-check against frontmatter — drift between the two copies of
         // brain_id / version / refined_at would corrupt the chain.
         if (fm) {

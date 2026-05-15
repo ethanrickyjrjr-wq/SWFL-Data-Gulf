@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260515 -->
+<!-- FRESHNESS: v9 | Token: SWFL-7421-v9-20260515 -->
 ---
 brain_id: master
-version: 8
-refined_at: 2026-05-15T08:45:27Z
-freshness_token: SWFL-7421-v8-20260515
+version: 9
+refined_at: 2026-05-15T20:19:30Z
+freshness_token: SWFL-7421-v9-20260515
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master index across the verified Franchise Outcomes and CRE Corridors packs (Lee & Collier counties, FL)
@@ -50,12 +50,25 @@ s02 | cre-swfl pack — https://brain-platform-amber.vercel.app/api/b/cre-swfl  
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 8,
-  "refined_at": "2026-05-15T08:45:27Z",
+  "version": 9,
+  "refined_at": "2026-05-15T20:19:30Z",
+  "direction": "neutral",
+  "magnitude": 0.5,
+  "drivers": [],
+  "overrides": [],
   "conclusion": "The Franchise Outcomes pack and the CRE Corridors pack are both scoped to Lee and Collier counties in Southwest Florida. They share that geographic market but have no record-level join: franchise outcomes are brand-level SBA loan data with no corridor geography, and corridor profiles carry no franchise-loan data. Cross-vertical questions are answered by fetching both sub-brains separately, not by inferring a link between an individual franchise and an individual corridor.",
-  "confidence": 0.72,
   "key_metrics": [],
-  "caveats": []
+  "caveats": [],
+  "contradicts": [],
+  "confidence": 0.72,
+  "trust_tier": 2,
+  "upstream_count": 2,
+  "relevance": {
+    "decay_curve": "weeks",
+    "half_life_hours": 720,
+    "computed_at": "2026-05-15T20:19:30Z"
+  },
+  "exogenous_signals": []
 }
 
 --- SUB-BRAIN POINTERS ---

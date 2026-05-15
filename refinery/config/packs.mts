@@ -1,6 +1,10 @@
-import type { PackDefinition } from "../types/pack.mts";
+import type { PackDefinition, PackOutput } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
+import type {
+  BrainOutputMetric,
+  BrainOutputProducerResult,
+} from "../types/brain-output.mts";
 import {
   franchiseSource,
   type FranchiseNormalized,
@@ -59,6 +63,23 @@ const pct = (n: number): string => String(Math.round(n * 10) / 10);
 const CHARGEOFF_LIST_SEP =
   " Full per-brand list (each brand's resolved-loan survival rate): ";
 
+// ---------------------------------------------------------------------
+// Franchise aggregate state — populated by franchiseCorpusSummary, read by
+// franchiseOutputProducer. Per-pipeline-run scope only; safe within one build.
+// `overall_survival_rate` is the master plan's MANDATORY Week 1 metric —
+// system-wide survival across resolved loans, weighted by loan count
+// (not a mean of per-brand rates).
+// ---------------------------------------------------------------------
+interface FranchiseAggregate {
+  assessableBrands: number;
+  totalResolved: number;
+  totalPaidInFull: number;
+  totalChargedOff: number;
+  overallSurvivalRate: number;
+}
+ 
+let lastFranchiseAggregate: FranchiseAggregate | null = null;
+
 /**
  * One charge-off brand, formatted with a SINGLE denominator (resolved loans).
  * The rate sits outside the parenthesis and the parenthesis carries only the
@@ -97,6 +118,24 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
         b.n_charged_off - a.n_charged_off,
     );
   const totalChargedOff = chargeoff.reduce((s, n) => s + n.n_charged_off, 0);
+
+  // System-wide resolved-loan aggregates — weighted by loan count, not a mean
+  // of per-brand rates. (`metric:overall_survival_rate` — MANDATORY Week 1.)
+  const totalPaidInFull = assessable.reduce((s, n) => s + n.n_paid_in_full, 0);
+  const totalSystemChargedOff = assessable.reduce(
+    (s, n) => s + n.n_charged_off,
+    0,
+  );
+  const totalResolved = totalPaidInFull + totalSystemChargedOff;
+  const overallSurvivalRate =
+    totalResolved === 0 ? 0 : (totalPaidInFull / totalResolved) * 100;
+  lastFranchiseAggregate = {
+    assessableBrands: assessable.length,
+    totalResolved,
+    totalPaidInFull,
+    totalChargedOff: totalSystemChargedOff,
+    overallSurvivalRate,
+  };
 
   // total approved capital
   const capitalAssessable = assessable.reduce(
@@ -188,7 +227,53 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     });
   }
 
+  // Tagged metric fact — surfaces in SAVED FACTS and is rolled up by master.
+  // The numeric value lives in BrainOutput.key_metrics via franchiseOutputProducer.
+  if (totalResolved > 0) {
+    facts.push({
+      topic: "metric:overall_survival_rate",
+      fact: "Overall SBA franchise loan survival rate across the SWFL assessable corpus",
+      value:
+        `${totalPaidInFull} of ${totalResolved} resolved SBA franchise loans across ` +
+        `${assessable.length} assessable brands were paid in full — an overall survival rate of ` +
+        `${(Math.round(overallSurvivalRate * 10) / 10).toString()}% weighted by loan count.`,
+      source_fragment_ids: [],
+    });
+  }
+
   return facts;
+}
+
+/**
+ * Build BrainOutput's narrative + qualitative slice for franchise-outcomes.
+ * Reads the system-aggregate state stashed by franchiseCorpusSummary so the
+ * key_metrics carry a real numeric value (the default producer would emit 0
+ * because it only sees the fact's string `value`). v1 placeholders for the
+ * direction-voting fields — master synthesizes those Week 2.
+ */
+function franchiseOutputProducer(out: PackOutput): BrainOutputProducerResult {
+  const agg = lastFranchiseAggregate;
+  const conclusion = out.facts[0]?.value ?? "(no facts produced this run)";
+  const key_metrics: BrainOutputMetric[] = [];
+  if (agg && agg.totalResolved > 0) {
+    key_metrics.push({
+      metric: "overall_survival_rate",
+      value: Math.round(agg.overallSurvivalRate * 10) / 10,
+      direction: "stable",
+      label: `SBA franchise overall survival rate (${agg.totalResolved} resolved loans, ${agg.assessableBrands} brands)`,
+    });
+  }
+  return {
+    conclusion,
+    key_metrics,
+    caveats: [],
+    direction: "neutral",
+    magnitude: 0.5,
+    drivers: [],
+    overrides: [],
+    contradicts: [],
+    exogenous_signals: [],
+  };
 }
 
 const franchiseOutcomes: PackDefinition = {
@@ -201,6 +286,7 @@ const franchiseOutcomes: PackDefinition = {
   input_brains: [],
   fitScore: franchiseFitScore,
   corpusSummary: franchiseCorpusSummary,
+  outputProducer: franchiseOutputProducer,
   preferences: [
     "The user reviews SBA 7(a)/504 franchise loan outcomes across Lee and Collier counties, Florida.",
     "The user reads survival and charge-off figures as resolved-loan ratios; rates drawn from small samples are directional, not definitive.",

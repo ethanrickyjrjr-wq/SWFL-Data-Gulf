@@ -1,7 +1,11 @@
 import type { PackDefinition, PackOutput } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
-import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
+import type {
+  BrainOutput,
+  BrainOutputMetric,
+  BrainOutputProducerResult,
+} from "../types/brain-output.mts";
 import {
   sectorCreditSwflSource,
   type SectorCreditNormalized,
@@ -282,7 +286,7 @@ function sectorCreditCorpusSummary(
 
 function sectorCreditOutputProducer(
   _out: PackOutput,
-): Pick<BrainOutput, "conclusion" | "key_metrics" | "caveats"> {
+): BrainOutputProducerResult {
   const sectors = lastSectors;
   const macro = lastMacroOutput;
   const franchise = lastFranchiseOutput;
@@ -295,10 +299,34 @@ function sectorCreditOutputProducer(
     (a, b) => b.rate_resolved - a.rate_resolved,
   );
 
-  // Key metrics: one per ranked sector, charge-off rate as the value, direction
-  // is the directional flag a future YoY comparison would set; for now mark
+  // Headline metrics for master roll-up — best/worst named NAICS (MANDATORY
+  // Week 1, redistributed from franchise-outcomes since NAICS data lives here).
+  // `best_naics_survival` = highest survival rate among rankable sectors;
+  // `worst_naics_chargeoff` = highest charge-off rate among rankable sectors.
+  const headlineMetrics: BrainOutputMetric[] = [];
+  if (sortedSafe.length > 0) {
+    const best = sortedSafe[0];
+    headlineMetrics.push({
+      metric: "best_naics_survival",
+      value: Math.round((100 - best.rate_resolved) * 10) / 10,
+      direction: "stable",
+      label: `${best.label} (NAICS ${best.naics_2digit}) — best SWFL SBA survival rate`,
+    });
+  }
+  if (sortedRisk.length > 0) {
+    const worst = sortedRisk[0];
+    headlineMetrics.push({
+      metric: "worst_naics_chargeoff",
+      value: Math.round(worst.rate_resolved * 10) / 10,
+      direction: "stable",
+      label: `${worst.label} (NAICS ${worst.naics_2digit}) — worst SWFL SBA charge-off rate`,
+    });
+  }
+
+  // Per-sector metrics: charge-off rate as the value, direction is the
+  // directional flag a future YoY comparison would set; for now mark
   // "stable" since this is a point-in-time snapshot.
-  const key_metrics: BrainOutputMetric[] = rankable
+  const sectorMetrics: BrainOutputMetric[] = rankable
     .sort((a, b) => a.rate_resolved - b.rate_resolved)
     .map(
       (s): BrainOutputMetric => ({
@@ -347,10 +375,26 @@ function sectorCreditOutputProducer(
     `Sectors with fewer than ${RANKING_MIN_RESOLVED} resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.`,
   ];
 
+  // Headline best/worst NAICS metrics lead so master rolls them up first
+  // (master caps key_metrics at 8 per upstream's top-1-2 slice per spec §2 step 6).
+  const key_metrics: BrainOutputMetric[] = [
+    ...headlineMetrics,
+    ...sectorMetrics,
+  ];
+
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
     caveats,
+    // v1 placeholders — direction voting + override cascade happen in master
+    // Week 2. This brain reads as "neutral" until a synthesizer weighs the
+    // sector mix; per-sector direction is carried in key_metrics.
+    direction: "neutral",
+    magnitude: 0.5,
+    drivers: [],
+    overrides: [],
+    contradicts: [],
+    exogenous_signals: [],
   };
 }
 

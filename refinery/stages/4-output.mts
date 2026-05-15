@@ -5,7 +5,12 @@ import type {
   PackOutput,
   CitationRow,
 } from "../types/pack.mts";
-import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
+import type {
+  BrainOutput,
+  BrainOutputMetric,
+  BrainOutputProducerResult,
+  BrainTrustTier,
+} from "../types/brain-output.mts";
 import type { SynthesizedEvent } from "../types/event.mts";
 import { citationId, factId } from "../lib/ids.mts";
 import { isoDate, isoTimestamp } from "../lib/dates.mts";
@@ -44,15 +49,15 @@ async function readPriorVersion(brainId: string): Promise<number> {
  * Default outputProducer used when a pack does not provide its own. Extracts
  * the conclusion from the top-composite fact (facts are composite-sorted by the
  * caller, so facts[0] is the headline) and surfaces any facts a pack tagged
- * `topic: "metric:*"` as key_metrics with placeholder direction. No caveats —
- * pack authors opt in to those explicitly via outputProducer.
+ * `topic: "metric:*"` as key_metrics with placeholder direction. v1
+ * placeholders for the qualitative fields: direction "neutral", magnitude 0.5,
+ * empty driver / override / contradicts / exogenous_signals arrays.
  *
  * This intentionally stays minimal: rich narrative outputs are pack-author
- * code, not engine guesswork.
+ * code, not engine guesswork. Packs that want a real direction / magnitude
+ * read inject their own outputProducer.
  */
-function defaultOutputProducer(
-  out: PackOutput,
-): Pick<BrainOutput, "conclusion" | "key_metrics" | "caveats"> {
+function defaultOutputProducer(out: PackOutput): BrainOutputProducerResult {
   const conclusion = out.facts[0]?.value ?? "(no facts produced this run)";
   const key_metrics: BrainOutputMetric[] = out.facts
     .filter((f) => typeof f.topic === "string" && f.topic.startsWith("metric:"))
@@ -65,7 +70,35 @@ function defaultOutputProducer(
       direction: "stable",
       label: f.fact,
     }));
-  return { conclusion, key_metrics, caveats: [] };
+  return {
+    conclusion,
+    key_metrics,
+    caveats: [],
+    direction: "neutral",
+    magnitude: 0.5,
+    drivers: [],
+    overrides: [],
+    contradicts: [],
+    exogenous_signals: [],
+  };
+}
+
+/**
+ * Engine-computed trust_tier — worst (highest number) wins per spec §2 step 7.
+ * v1 takes the max across `pack.sources[].trust_tier` for direct sources (not
+ * brain-input wrappers). Pure index brains with no direct sources fall back to
+ * tier 4 (a no-current-pack situation; defensive default).
+ */
+function computeTrustTier(pack: PackDefinition): BrainTrustTier {
+  const directSources = pack.sources.filter(
+    (s) => !s.source_id.startsWith("brain-input:"),
+  );
+  if (directSources.length === 0) return 4;
+  const max = directSources.reduce(
+    (acc, s) => (s.trust_tier > acc ? s.trust_tier : acc),
+    1 as BrainTrustTier,
+  );
+  return max;
 }
 
 /**
@@ -142,14 +175,34 @@ export async function outputStage(
     ttl_seconds: pack.ttl_seconds,
     upstream_confidences,
   });
+  // Engine-owned v3 fields. Producer-owned fields (direction, magnitude,
+  // drivers, overrides, contradicts, exogenous_signals + conclusion /
+  // key_metrics / caveats) come from `distilled`. Master synthesis (Week 2)
+  // computes real `upstream_count` (passing relevance floor) and weighted-avg
+  // `relevance.half_life_hours`; v1 uses placeholders.
+  const trust_tier = computeTrustTier(pack);
+  const upstream_count = pack.input_brains.length;
   const brainOutput: BrainOutput = {
     brain_id: pack.brain_id,
     version,
     refined_at,
+    direction: distilled.direction,
+    magnitude: distilled.magnitude,
+    drivers: distilled.drivers,
+    overrides: distilled.overrides,
     conclusion: distilled.conclusion,
-    confidence,
     key_metrics: distilled.key_metrics,
     caveats: distilled.caveats,
+    contradicts: distilled.contradicts,
+    confidence,
+    trust_tier,
+    upstream_count,
+    relevance: {
+      decay_curve: "weeks",
+      half_life_hours: 720,
+      computed_at: refined_at,
+    },
+    exogenous_signals: distilled.exogenous_signals ?? [],
   };
 
   const markdown = renderMasterIndex(packOutput, brainOutput);

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260515 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260515 -->
 ---
 brain_id: sector-credit-swfl
-version: 1
-refined_at: 2026-05-15T08:48:08Z
-freshness_token: SWFL-7421-v1-20260515
+version: 2
+refined_at: 2026-05-15T20:19:35Z
+freshness_token: SWFL-7421-v2-20260515
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SBA 7(a)/504 sector credit risk — resolved-loan charge-off rates by 2-digit NAICS sector across Lee & Collier counties, FL, paired with named-brand outcomes and current macro funding backdrop.
@@ -51,18 +51,33 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
   {"id":"f014","topic":"metric:sector_71_chargeoff_rate","fact":"Arts, Entertainment & Recreation (NAICS 71) resolved charge-off rate","value":"Arts, Entertainment & Recreation — 0% resolved-loan charge-off rate (0 charged off out of 7 resolved loans; 63 total loans approved including still-active; $41.3M gross approved capital).","src":"s01","date":"2026-05-15"},
   {"id":"f015","topic":"metric:sector_52_chargeoff_rate","fact":"Finance & Insurance (NAICS 52) resolved charge-off rate","value":"Finance & Insurance — 0% resolved-loan charge-off rate (0 charged off out of 14 resolved loans; 49 total loans approved including still-active; $37.0M gross approved capital).","src":"s01","date":"2026-05-15"},
   {"id":"f016","topic":"metric:sector_48_chargeoff_rate","fact":"Transportation & Warehousing (NAICS 48) resolved charge-off rate","value":"Transportation & Warehousing — 57.1% resolved-loan charge-off rate (4 charged off out of 7 resolved loans; 59 total loans approved including still-active; $19.4M gross approved capital).","src":"s01","date":"2026-05-15"},
-  {"id":"f017","topic":"franchise-outcomes :: upstream_routing","fact":"Per-brand SBA survival rates from the franchise-outcomes brain","value":"The franchise-outcomes brain (confidence 1.00 at 2026-05-15T08:42:08Z) carries named per-brand resolved-loan survival rates for every franchise in this lake. Cross-validate any sector-level claim against the named brand outcomes — a sector that looks safe in aggregate can hide a single dominant brand with a charge-off run.","src":"s01","date":"2026-05-15"},
-  {"id":"f018","topic":"macro-swfl :: upstream_routing","fact":"Current macro funding-cost backdrop from the macro-swfl brain","value":"The macro-swfl brain (confidence 0.72 at 2026-05-15T08:45:32Z) reports the SWFL macro backdrop: SOFR 3.6% (stable), CPI YoY 3.8% (rising), FL unemployment 4.7% (rising). These rates set the funding-cost lens — a high-charge-off sector at a falling SOFR is a different bet from the same sector at a rising SOFR.","src":"s01","date":"2026-05-15"}
+  {"id":"f017","topic":"franchise-outcomes :: upstream_routing","fact":"Per-brand SBA survival rates from the franchise-outcomes brain","value":"The franchise-outcomes brain (confidence 1.00 at 2026-05-15T20:16:24Z) carries named per-brand resolved-loan survival rates for every franchise in this lake. Cross-validate any sector-level claim against the named brand outcomes — a sector that looks safe in aggregate can hide a single dominant brand with a charge-off run.","src":"s01","date":"2026-05-15"},
+  {"id":"f018","topic":"macro-swfl :: upstream_routing","fact":"Current macro funding-cost backdrop from the macro-swfl brain","value":"The macro-swfl brain (confidence 0.72 at 2026-05-15T20:19:35Z) reports the SWFL macro backdrop: SOFR 3.6% (stable), CPI YoY 3.8% (rising), FL unemployment 4.7% (rising). These rates set the funding-cost lens — a high-charge-off sector at a falling SOFR is a different bet from the same sector at a rising SOFR.","src":"s01","date":"2026-05-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "sector-credit-swfl",
-  "version": 1,
-  "refined_at": "2026-05-15T08:48:08Z",
+  "version": 2,
+  "refined_at": "2026-05-15T20:19:35Z",
+  "direction": "neutral",
+  "magnitude": 0.5,
+  "drivers": [],
+  "overrides": [],
   "conclusion": "For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Real Estate, Rental & Leasing (0%), Arts, Entertainment & Recreation (0%), Finance & Insurance (0%). The three highest-risk sectors are: Transportation & Warehousing (57.1%), Retail Trade (44.4%), Other Services (Personal & Repair) (21.2%) — meaningful sample size in each case. Read these rates against the current SOFR of 3.6% (stable) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.",
-  "confidence": 0.86,
   "key_metrics": [
+    {
+      "metric": "best_naics_survival",
+      "value": 100,
+      "direction": "stable",
+      "label": "Real Estate, Rental & Leasing (NAICS 53) — best SWFL SBA survival rate"
+    },
+    {
+      "metric": "worst_naics_chargeoff",
+      "value": 57.1,
+      "direction": "stable",
+      "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate"
+    },
     {
       "metric": "sector_53_chargeoff_rate",
       "value": 0,
@@ -145,7 +160,17 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
   "caveats": [
     "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
     "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable."
-  ]
+  ],
+  "contradicts": [],
+  "confidence": 0.86,
+  "trust_tier": 1,
+  "upstream_count": 2,
+  "relevance": {
+    "decay_curve": "weeks",
+    "half_life_hours": 720,
+    "computed_at": "2026-05-15T20:19:35Z"
+  },
+  "exogenous_signals": []
 }
 
 --- ACTIVE PROJECTS ---

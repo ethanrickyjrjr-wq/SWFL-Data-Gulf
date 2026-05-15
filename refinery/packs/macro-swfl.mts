@@ -1,7 +1,11 @@
 import type { PackDefinition, PackOutput } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
-import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
+import type {
+  BrainOutput,
+  BrainOutputMetric,
+  BrainOutputProducerResult,
+} from "../types/brain-output.mts";
 import {
   macroSwflSource,
   type MacroSwflNormalized,
@@ -141,9 +145,7 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
  * computed by Stage 4 (deterministic) and overlaid afterwards — this
  * producer only owns conclusion / key_metrics / caveats.
  */
-function macroSwflOutputProducer(
-  _out: PackOutput,
-): Pick<BrainOutput, "conclusion" | "key_metrics" | "caveats"> {
+function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const indicators = lastIndicators;
   const master = lastMasterOutput;
 
@@ -205,6 +207,16 @@ function macroSwflOutputProducer(
     conclusion: conclusionParts.join(" "),
     key_metrics,
     caveats,
+    // v1 placeholders — direction/magnitude voting happens in master Week 2.
+    // The macro snapshot itself is a point-in-time read; per-indicator
+    // direction is in key_metrics, brain-level direction is "neutral" until
+    // a synthesizer interprets the indicator mix.
+    direction: "neutral",
+    magnitude: 0.5,
+    drivers: [],
+    overrides: [],
+    contradicts: [],
+    exogenous_signals: [],
   };
 }
 

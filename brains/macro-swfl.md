@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260515 -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260515 -->
 ---
 brain_id: macro-swfl
-version: 5
-refined_at: 2026-05-15T08:45:32Z
-freshness_token: SWFL-7421-v5-20260515
+version: 6
+refined_at: 2026-05-15T20:19:35Z
+freshness_token: SWFL-7421-v6-20260515
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Macro context for Southwest Florida operators — FRED rates, Florida labor, and US inflation, paired with the SWFL Intelligence Lake index.
@@ -34,25 +34,28 @@ s02 | master brain — https://brain-platform-amber.vercel.app/api/b/master     
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"macro_snapshot","fact":"Current macro context for SWFL operators — funding rates, labor, inflation","value":"Macro snapshot (synthetic fixture; replace with live FRED pull before publishing): Secured Overnight Financing Rate is 3.6% (stable) as of 2026-05-13; Florida Unemployment Rate is 4.7% (rising) as of 2026-03-01; US CPI (All Items) Year-over-Year is 3.8% (rising) as of 2026-04-01; Florida Labor Force Participation Rate is 57.7% (stable) as of 2026-03-01. These four series anchor the funding-cost and labor-supply backdrop a Lee–Collier operator reads alongside the SWFL Intelligence Lake.","src":"s01","date":"2026-05-15"},
-  {"id":"f002","topic":"metric:sofr_rate","fact":"SOFR (Secured Overnight Financing Rate)","value":"SOFR (Secured Overnight Financing Rate) is 3.6% (period 2026-05-13, direction stable). SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.","src":"s01","date":"2026-05-15"},
+  {"id":"f001","topic":"macro_snapshot","fact":"Current macro context for SWFL operators — funding rates, labor, inflation","value":"Macro snapshot (synthetic fixture; replace with live FRED pull before publishing): Secured Overnight Financing Rate is 3.6% (stable) as of 2026-05-14; Florida Unemployment Rate is 4.7% (rising) as of 2026-03-01; US CPI (All Items) Year-over-Year is 3.8% (rising) as of 2026-04-01; Florida Labor Force Participation Rate is 57.7% (stable) as of 2026-03-01. These four series anchor the funding-cost and labor-supply backdrop a Lee–Collier operator reads alongside the SWFL Intelligence Lake.","src":"s01","date":"2026-05-15"},
+  {"id":"f002","topic":"metric:sofr_rate","fact":"SOFR (Secured Overnight Financing Rate)","value":"SOFR (Secured Overnight Financing Rate) is 3.6% (period 2026-05-14, direction stable). SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.","src":"s01","date":"2026-05-15"},
   {"id":"f003","topic":"metric:fl_unemployment","fact":"Florida unemployment rate","value":"Florida unemployment rate is 4.7% (period 2026-03-01, direction rising). Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low.","src":"s01","date":"2026-05-15"},
   {"id":"f004","topic":"metric:cpi_yoy","fact":"US CPI YoY","value":"US CPI YoY is 3.8% (period 2026-04-01, direction rising). Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026.","src":"s01","date":"2026-05-15"},
   {"id":"f005","topic":"metric:fl_labor_participation","fact":"Florida labor force participation","value":"Florida labor force participation is 57.7% (period 2026-03-01, direction stable). FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement.","src":"s01","date":"2026-05-15"},
-  {"id":"f006","topic":"master :: upstream_routing","fact":"SWFL Intelligence Lake context — fetch master for record-level detail","value":"The SWFL Intelligence Lake master index (confidence 0.72 at 2026-05-15T08:45:27Z) covers verified franchise outcomes and CRE corridor profiles for the same Lee–Collier market. Record-level detail is read from master, not inferred here.","src":"s01","date":"2026-05-15"}
+  {"id":"f006","topic":"master :: upstream_routing","fact":"SWFL Intelligence Lake context — fetch master for record-level detail","value":"The SWFL Intelligence Lake master index (confidence 0.72 at 2026-05-15T20:19:30Z) covers verified franchise outcomes and CRE corridor profiles for the same Lee–Collier market. Record-level detail is read from master, not inferred here.","src":"s01","date":"2026-05-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 5,
-  "refined_at": "2026-05-15T08:45:32Z",
+  "version": 6,
+  "refined_at": "2026-05-15T20:19:35Z",
+  "direction": "neutral",
+  "magnitude": 0.5,
+  "drivers": [],
+  "overrides": [],
   "conclusion": "As of the latest reported periods, the SWFL macro backdrop reads: SOFR at 3.6% and stable, Florida unemployment at 4.7% (rising), headline CPI at 3.8% YoY and rising. The funding-cost and labor-supply picture is the operator's primary lens; record-level franchise and corridor detail lives in the master index. Upstream master confidence is 0.72 (as of 2026-05-15).",
-  "confidence": 0.72,
   "key_metrics": [
     {
       "metric": "sofr_rate",
-      "value": 3.59,
+      "value": 3.56,
       "direction": "stable",
       "label": "SOFR (Secured Overnight Financing Rate)"
     },
@@ -77,7 +80,17 @@ s02 | master brain — https://brain-platform-amber.vercel.app/api/b/master     
   ],
   "caveats": [
     "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final."
-  ]
+  ],
+  "contradicts": [],
+  "confidence": 0.72,
+  "trust_tier": 1,
+  "upstream_count": 1,
+  "relevance": {
+    "decay_curve": "weeks",
+    "half_life_hours": 720,
+    "computed_at": "2026-05-15T20:19:35Z"
+  },
+  "exogenous_signals": []
 }
 
 --- ACTIVE PROJECTS ---
