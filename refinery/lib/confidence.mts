@@ -33,6 +33,17 @@ function tierScore(tier: TrustTier): number {
 }
 
 /**
+ * Public converter from TrustTier (1-4) to the numeric weight used in
+ * confidence + attribution math. Mirrors the static map above and is the
+ * fallback the engine uses until `source_connectors.trust_tier_score`
+ * (Supabase) lands — at which point this map becomes the seed default and
+ * the live score comes from the SourceConnector itself.
+ */
+export function tierToScore(tier: TrustTier): number {
+  return TIER_SCORE[tier];
+}
+
+/**
  * Days between two ISO timestamps. Positive = `to` is after `from`.
  * Fractional. Returns 0 on invalid input — caller treats as fully stale.
  */
@@ -99,4 +110,63 @@ export function computeConfidence(args: {
 
   // round to 2 dp — confidence is published, not used in further arithmetic
   return Math.round(value * 100) / 100;
+}
+
+// ---------------------------------------------------------------------------
+// Backprop-inspired attribution
+// ---------------------------------------------------------------------------
+
+/** A source with the trust_tier_score the attribution engine needs. */
+export interface WeightedSource {
+  source_id: string;
+  /** 0-1, mirrors `source_connectors.trust_tier_score` in Supabase. */
+  trust_tier_score: number;
+}
+
+/** One row in the attribution result, ordered by `error_contribution` desc. */
+export interface AttributionEntry {
+  source_id: string;
+  trust_tier_score: number;
+  /** outputConfidence / trust_tier_score — higher = more "blame" for the weak read. */
+  error_contribution: number;
+}
+
+/** Trust-tier-score floor used to keep attribution finite when score collapses to 0. */
+const TIER_SCORE_FLOOR = 0.01;
+
+/**
+ * Backprop-inspired error attribution.
+ *
+ * Given a brain's final `outputConfidence` and the weighted sources that fed
+ * it, distribute "blame" for the weak read across sources using:
+ *
+ *     error_contribution = outputConfidence / trust_tier_score
+ *
+ * Intuition: at a fixed published confidence, the WEAKER a source's trust
+ * tier, the more it had to "stretch" to land on that number — i.e. the more
+ * responsible it is for the run not being more confident. A tier-1 source
+ * (score 1.0) contributes ratio = confidence; a tier-4 source (score 0.4)
+ * contributes 2.5× as much; a score-0 source is clamped to TIER_SCORE_FLOOR
+ * (0.01) so the ratio stays finite and renderable in a caveat string.
+ *
+ * Result is sorted error_contribution DESCENDING — `result[0]` is the
+ * weakest contributor, the one Stage 4 names in the auto-caveat.
+ *
+ * Pure function. No I/O. Mirrors the contract the Adaptive Trust Tiers SGD
+ * job (Tier 4 #27) will eventually read from `outcomes.attribution`.
+ */
+export function attributeError(
+  outputConfidence: number,
+  sources: WeightedSource[],
+): AttributionEntry[] {
+  return sources
+    .map((s) => {
+      const score = Math.max(TIER_SCORE_FLOOR, s.trust_tier_score);
+      return {
+        source_id: s.source_id,
+        trust_tier_score: s.trust_tier_score,
+        error_contribution: outputConfidence / score,
+      };
+    })
+    .sort((a, b) => b.error_contribution - a.error_contribution);
 }

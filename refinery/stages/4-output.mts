@@ -20,10 +20,36 @@ import { renderMasterIndex } from "../render/master-index.mts";
 import { validateSpec } from "../validate/spec-validator.mts";
 import { lintFactsOnly } from "../validate/facts-only-lint.mts";
 import { lintInferenceBait } from "../validate/inference-bait-lint.mts";
-import { computeConfidence } from "../lib/confidence.mts";
+import {
+  computeConfidence,
+  attributeError,
+  tierToScore,
+  type WeightedSource,
+} from "../lib/confidence.mts";
 import { readBrainOutput } from "../lib/brain-output-reader.mts";
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
+
+/**
+ * Confidence threshold below which Stage 4 runs the attribution engine and
+ * appends a weakest-contributor caveat. Per arsenal-master-stack Pillar 1
+ * §4: "If the final confidence of a brain output is < 0.6, trigger the
+ * attribution engine and append a caveat."
+ */
+const ATTRIBUTION_CAVEAT_THRESHOLD = 0.6;
+
+/**
+ * Format the weakest-contributor caveat string. Exposed for testing.
+ * Format mirrors arsenal-master-stack Pillar 1 §4 verbatim:
+ *   "Weakest contributor: source '{id}' (trust {score}, contribution {ratio})."
+ */
+export function formatWeakestContributorCaveat(
+  weakest: import("../lib/confidence.mts").AttributionEntry,
+): string {
+  const score = weakest.trust_tier_score.toFixed(2);
+  const ratio = weakest.error_contribution.toFixed(2);
+  return `Weakest contributor: source '${weakest.source_id}' (trust ${score}, contribution ${ratio}).`;
+}
 
 export interface OutputResult {
   brainPath: string;
@@ -191,6 +217,27 @@ export async function outputStage(
     half_life_hours: 720,
     computed_at: refined_at,
   };
+  // Backprop-inspired attribution: when confidence falls below the threshold,
+  // run attributeError over the direct sources and append a caveat naming the
+  // weakest contributor. brain-input wrappers are excluded — their share of
+  // the error already lives in the upstream brain's own attribution chain.
+  const caveats = [...distilled.caveats];
+  if (confidence < ATTRIBUTION_CAVEAT_THRESHOLD) {
+    const directSources = pack.sources.filter(
+      (s) => !s.source_id.startsWith("brain-input:"),
+    );
+    if (directSources.length > 0) {
+      const weighted: WeightedSource[] = directSources.map((s) => ({
+        source_id: s.source_id,
+        trust_tier_score: tierToScore(s.trust_tier),
+      }));
+      const attribution = attributeError(confidence, weighted);
+      if (attribution.length > 0) {
+        caveats.push(formatWeakestContributorCaveat(attribution[0]));
+      }
+    }
+  }
+
   const brainOutput: BrainOutput = {
     brain_id: pack.brain_id,
     version,
@@ -201,7 +248,7 @@ export async function outputStage(
     overrides: distilled.overrides,
     conclusion: distilled.conclusion,
     key_metrics: distilled.key_metrics,
-    caveats: distilled.caveats,
+    caveats,
     contradicts: distilled.contradicts,
     confidence,
     trust_tier,

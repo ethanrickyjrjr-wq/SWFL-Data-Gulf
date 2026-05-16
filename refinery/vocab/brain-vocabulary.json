@@ -1,0 +1,632 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "created_at": "2026-05-16",
+    "description": "SWFL Intelligence Lake — canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
+    "next_review": "2026-08-15",
+    "audit_doc": "docs/vocab-audit.md"
+  },
+
+  "concepts": {
+    "sba_overall_survival_rate": {
+      "id": "sba_overall_survival_rate",
+      "prefLabel": "SBA Franchise Survival Rate (Corpus)",
+      "altLabels": ["overall survival rate", "franchise survival rate"],
+      "raw_slugs": ["overall_survival_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "source_brains": ["franchise-outcomes", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Resolved-loan denominator only: n_paid_in_full / (n_paid_in_full + n_chargeoffs). Never computed over total loans."
+    },
+
+    "sba_best_sector_survival": {
+      "id": "sba_best_sector_survival",
+      "prefLabel": "Best-Sector SBA Survival Rate",
+      "altLabels": ["best NAICS survival"],
+      "raw_slugs": ["best_naics_survival"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "source_brains": ["sector-credit-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Corpus-level derived aggregate. Identifies the top-ranked 2-digit NAICS sector by survival rate for the reporting period."
+    },
+
+    "sba_worst_sector_chargeoff": {
+      "id": "sba_worst_sector_chargeoff",
+      "prefLabel": "Worst-Sector SBA Charge-off Rate",
+      "altLabels": ["worst NAICS charge-off"],
+      "raw_slugs": ["worst_naics_chargeoff"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "source_brains": ["sector-credit-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Corpus-level derived aggregate. Above 30% triggers bearish threshold per sector-credit-swfl caveat logic."
+    },
+
+    "sba_chargeoff_rate_sector_23": {
+      "id": "sba_chargeoff_rate_sector_23",
+      "prefLabel": "Construction (NAICS 23) — SBA Charge-off Rate",
+      "altLabels": ["Construction charge-off rate"],
+      "raw_slugs": ["sector_23_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 23,
+      "naics_title": "Construction",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_42": {
+      "id": "sba_chargeoff_rate_sector_42",
+      "prefLabel": "Wholesale Trade (NAICS 42) — SBA Charge-off Rate",
+      "altLabels": ["Wholesale Trade charge-off rate"],
+      "raw_slugs": ["sector_42_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 42,
+      "naics_title": "Wholesale Trade",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_44": {
+      "id": "sba_chargeoff_rate_sector_44",
+      "prefLabel": "Retail Trade — Motor Vehicle & General Merchandise (NAICS 44) — SBA Charge-off Rate",
+      "altLabels": [
+        "Retail Trade 44 charge-off rate",
+        "NAICS 44 charge-off rate"
+      ],
+      "raw_slugs": ["sector_44_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 44,
+      "naics_title": "Retail Trade — Motor Vehicle Dealers, Electronics, Building Materials, Food & Beverage Stores",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "DISTINCT from sba_chargeoff_rate_sector_45. NAICS 44 covers motor vehicle dealers, electronics, building materials, and food/beverage stores. Both 44 and 45 are officially titled 'Retail Trade' by the SBA — use naics_code to disambiguate, never the label alone."
+    },
+
+    "sba_chargeoff_rate_sector_45": {
+      "id": "sba_chargeoff_rate_sector_45",
+      "prefLabel": "Retail Trade — Clothing, Sporting Goods & Non-store (NAICS 45) — SBA Charge-off Rate",
+      "altLabels": [
+        "Retail Trade 45 charge-off rate",
+        "NAICS 45 charge-off rate"
+      ],
+      "raw_slugs": ["sector_45_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 45,
+      "naics_title": "Retail Trade — Clothing, Sporting Goods, Hobby, Book, General Merchandise, Non-store Retailers",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "DISTINCT from sba_chargeoff_rate_sector_44. NAICS 45 covers clothing stores, sporting goods, hobby shops, general merchandise, and non-store retailers. Both 44 and 45 are officially titled 'Retail Trade' by the SBA — use naics_code to disambiguate, never the label alone."
+    },
+
+    "sba_chargeoff_rate_sector_48": {
+      "id": "sba_chargeoff_rate_sector_48",
+      "prefLabel": "Transportation & Warehousing (NAICS 48) — SBA Charge-off Rate",
+      "altLabels": [
+        "Transportation charge-off rate",
+        "Transport & Warehousing charge-off rate"
+      ],
+      "raw_slugs": ["sector_48_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 48,
+      "naics_title": "Transportation and Warehousing",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_52": {
+      "id": "sba_chargeoff_rate_sector_52",
+      "prefLabel": "Finance & Insurance (NAICS 52) — SBA Charge-off Rate",
+      "altLabels": ["Finance & Insurance charge-off rate"],
+      "raw_slugs": ["sector_52_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 52,
+      "naics_title": "Finance and Insurance",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_53": {
+      "id": "sba_chargeoff_rate_sector_53",
+      "prefLabel": "Real Estate, Rental & Leasing (NAICS 53) — SBA Charge-off Rate",
+      "altLabels": ["Real Estate charge-off rate"],
+      "raw_slugs": ["sector_53_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance", "real-estate"],
+      "naics_code": 53,
+      "naics_title": "Real Estate and Rental and Leasing",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_54": {
+      "id": "sba_chargeoff_rate_sector_54",
+      "prefLabel": "Professional, Scientific & Technical Services (NAICS 54) — SBA Charge-off Rate",
+      "altLabels": ["Professional Services charge-off rate"],
+      "raw_slugs": ["sector_54_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 54,
+      "naics_title": "Professional, Scientific, and Technical Services",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_56": {
+      "id": "sba_chargeoff_rate_sector_56",
+      "prefLabel": "Administrative & Support Services (NAICS 56) — SBA Charge-off Rate",
+      "altLabels": ["Admin & Support charge-off rate"],
+      "raw_slugs": ["sector_56_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 56,
+      "naics_title": "Administrative and Support and Waste Management and Remediation Services",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_62": {
+      "id": "sba_chargeoff_rate_sector_62",
+      "prefLabel": "Health Care & Social Assistance (NAICS 62) — SBA Charge-off Rate",
+      "altLabels": ["Health Care charge-off rate"],
+      "raw_slugs": ["sector_62_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 62,
+      "naics_title": "Health Care and Social Assistance",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_71": {
+      "id": "sba_chargeoff_rate_sector_71",
+      "prefLabel": "Arts, Entertainment & Recreation (NAICS 71) — SBA Charge-off Rate",
+      "altLabels": ["Arts & Entertainment charge-off rate"],
+      "raw_slugs": ["sector_71_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance", "hospitality"],
+      "naics_code": 71,
+      "naics_title": "Arts, Entertainment, and Recreation",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_72": {
+      "id": "sba_chargeoff_rate_sector_72",
+      "prefLabel": "Accommodation & Food Services (NAICS 72) — SBA Charge-off Rate",
+      "altLabels": [
+        "Food Service charge-off rate",
+        "Accommodation charge-off rate"
+      ],
+      "raw_slugs": ["sector_72_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance", "hospitality"],
+      "naics_code": 72,
+      "naics_title": "Accommodation and Food Services",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_chargeoff_rate_sector_81": {
+      "id": "sba_chargeoff_rate_sector_81",
+      "prefLabel": "Other Services — Personal & Repair (NAICS 81) — SBA Charge-off Rate",
+      "altLabels": [
+        "Other Services charge-off rate",
+        "Personal & Repair charge-off rate"
+      ],
+      "raw_slugs": ["sector_81_chargeoff_rate"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "naics_code": 81,
+      "naics_title": "Other Services (except Public Administration)",
+      "source_brains": ["sector-credit-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "sba_naics_distress_baseline": {
+      "id": "sba_naics_distress_baseline",
+      "prefLabel": "NAICS Sector Distress Baseline",
+      "altLabels": ["NAICS distress baseline"],
+      "raw_slugs": ["naics_distress_baseline"],
+      "category": "credit-risk",
+      "domain": ["finance"],
+      "source_brains": [],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "stub",
+      "scope_note": "Pre-registered for the naics-distress-veto override rule in refinery/constitution/real-estate.mts. Fires false until sector-credit-swfl exposes a baseline metric. Pair with sba_chargeoff_rate_sector_{naics} for the comparison."
+    },
+
+    "cre_cap_rate": {
+      "id": "cre_cap_rate",
+      "prefLabel": "Cap Rate (per corridor)",
+      "altLabels": ["capitalization rate", "cap rate"],
+      "raw_slugs": ["cap_rate"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 20],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Point-in-time corridor-level cap rate. Trajectory (falling/stable/rising) signals landlord vs tenant market direction."
+    },
+
+    "cre_cap_rate_median": {
+      "id": "cre_cap_rate_median",
+      "prefLabel": "Median Cap Rate (corpus)",
+      "altLabels": ["median cap rate", "corpus cap rate median"],
+      "raw_slugs": ["cap_rate_median"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 20],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Median across all corridors with reported metrics in the current period. A falling median is the primary bullish signal in the cre-swfl pack."
+    },
+
+    "cre_vacancy_rate": {
+      "id": "cre_vacancy_rate",
+      "prefLabel": "Vacancy Rate (per corridor)",
+      "altLabels": ["vacancy rate"],
+      "raw_slugs": ["vacancy_rate"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "cre_vacancy_rate_median": {
+      "id": "cre_vacancy_rate_median",
+      "prefLabel": "Median Vacancy Rate (corpus)",
+      "altLabels": ["median vacancy rate", "corpus vacancy median"],
+      "raw_slugs": ["vacancy_rate_median"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active"
+    },
+
+    "cre_seasonal_index": {
+      "id": "cre_seasonal_index",
+      "prefLabel": "Seasonal Index",
+      "altLabels": ["seasonality index", "seasonal score"],
+      "raw_slugs": ["seasonal_index"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl"],
+      "value_type": "index",
+      "unit": "0–1 scale",
+      "value_range": [0, 1],
+      "direction_concept": null,
+      "status": "active",
+      "scope_note": "0 = no seasonality, 1 = extreme seasonality. Corridor-level only; not aggregated to corpus median."
+    },
+
+    "cre_corridor_evolution": {
+      "id": "cre_corridor_evolution",
+      "prefLabel": "Corridor Evolution Stage",
+      "altLabels": ["evolution", "corridor direction", "evolution direction"],
+      "raw_slugs": ["evolution"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl"],
+      "value_type": "enum",
+      "unit": null,
+      "allowed_values": ["growing", "stable", "repositioning", "declining"],
+      "ordered_collection": "cre_corridor_evolution_stages",
+      "direction_concept": null,
+      "status": "active",
+      "scope_note": "Qualitative lifecycle stage of a corridor. Ordered by operator-friendliness descending; see cre_corridor_evolution_stages in ordered_collections."
+    },
+
+    "macro_sofr_rate": {
+      "id": "macro_sofr_rate",
+      "prefLabel": "SOFR (Secured Overnight Financing Rate)",
+      "altLabels": ["SOFR rate", "sofr"],
+      "raw_slugs": ["sofr_rate"],
+      "category": "macro",
+      "domain": ["macro", "finance"],
+      "fred_series": "SOFR",
+      "source_brains": ["macro-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 20],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Floor for floating-rate CRE debt. Rising SOFR triggers rising-rates-dominance override in refinery/constitution/finance.mts when magnitude > 0.6."
+    },
+
+    "macro_fl_unemployment": {
+      "id": "macro_fl_unemployment",
+      "prefLabel": "Florida Unemployment Rate",
+      "altLabels": ["FL unemployment", "Florida unemployment"],
+      "raw_slugs": ["fl_unemployment"],
+      "category": "macro",
+      "domain": ["macro", "demographics"],
+      "fred_series": "LBSSA12",
+      "source_brains": ["macro-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 25],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Primary labor-tightness read for SWFL operators. Tourism and construction absorb new entrants when this stays low."
+    },
+
+    "macro_cpi_yoy": {
+      "id": "macro_cpi_yoy",
+      "prefLabel": "US CPI Year-over-Year",
+      "altLabels": ["CPI YoY", "US inflation", "headline CPI"],
+      "raw_slugs": ["cpi_yoy"],
+      "category": "macro",
+      "domain": ["macro"],
+      "fred_series": "CPIAUCSL",
+      "source_brains": ["macro-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [-5, 25],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Fed's 2% target is the reference anchor. Shelter remains the sticky component through 2026."
+    },
+
+    "macro_fl_labor_participation": {
+      "id": "macro_fl_labor_participation",
+      "prefLabel": "Florida Labor Force Participation Rate",
+      "altLabels": ["FL LFPR", "Florida labor participation"],
+      "raw_slugs": ["fl_labor_participation"],
+      "category": "macro",
+      "domain": ["macro", "demographics"],
+      "fred_series": "FLUR",
+      "source_brains": ["macro-swfl"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [40, 80],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Climbs against retirement-state demographic gravity. A positive signal on Florida's working-age engagement."
+    },
+
+    "qual_sentiment_direction": {
+      "id": "qual_sentiment_direction",
+      "prefLabel": "Market Sentiment Direction",
+      "altLabels": ["brain direction", "synthesis direction"],
+      "raw_slugs": ["direction"],
+      "raw_field_path": "BrainOutput.direction",
+      "category": "qualitative",
+      "domain": ["all"],
+      "source_brains": ["all"],
+      "value_type": "enum",
+      "unit": null,
+      "allowed_values": ["bullish", "bearish", "neutral", "mixed"],
+      "direction_concept": null,
+      "disambiguates": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Brain-level qualitative read. Output of synthesis stage. NEVER conflated with qual_metric_trajectory. Answers: where should an operator lean?"
+    },
+
+    "qual_metric_trajectory": {
+      "id": "qual_metric_trajectory",
+      "prefLabel": "Metric Trajectory",
+      "altLabels": ["metric direction", "series direction"],
+      "raw_slugs": ["direction"],
+      "raw_field_path": "BrainOutputMetric.direction",
+      "category": "qualitative",
+      "domain": ["all"],
+      "source_brains": ["all"],
+      "value_type": "enum",
+      "unit": null,
+      "allowed_values": ["rising", "falling", "stable"],
+      "direction_concept": null,
+      "disambiguates": "qual_sentiment_direction",
+      "status": "active",
+      "scope_note": "Single-series time-series direction at the metric level. NEVER conflated with qual_sentiment_direction. Answers: which way is this number moving?"
+    },
+
+    "qual_magnitude": {
+      "id": "qual_magnitude",
+      "prefLabel": "Synthesis Magnitude",
+      "altLabels": ["magnitude", "signal strength"],
+      "raw_slugs": ["magnitude"],
+      "raw_field_path": "BrainOutput.magnitude",
+      "category": "qualitative",
+      "domain": ["all"],
+      "source_brains": ["all"],
+      "value_type": "index",
+      "unit": "0–1 scale",
+      "value_range": [0, 1],
+      "direction_concept": null,
+      "status": "active",
+      "scope_note": "Strength of the brain's direction read. 0 = no signal, 1 = maximum conviction. Computed deterministically from the upstream vote distribution."
+    },
+
+    "qual_confidence": {
+      "id": "qual_confidence",
+      "prefLabel": "Deterministic Confidence Score",
+      "altLabels": ["confidence", "brain confidence"],
+      "raw_slugs": ["confidence"],
+      "raw_field_path": "BrainOutput.confidence",
+      "category": "qualitative",
+      "domain": ["all"],
+      "source_brains": ["all"],
+      "value_type": "index",
+      "unit": "0–1 scale",
+      "value_range": [0, 1],
+      "direction_concept": null,
+      "status": "active",
+      "scope_note": "avg(trust_tier_score) × freshness_ratio. Deterministic — never produced by an LLM. Formula: refinery/lib/confidence.mts."
+    },
+
+    "qual_trust_tier": {
+      "id": "qual_trust_tier",
+      "prefLabel": "Source Trust Tier",
+      "altLabels": ["trust tier", "source tier"],
+      "raw_slugs": ["trust_tier"],
+      "raw_field_path": "BrainOutput.trust_tier",
+      "category": "qualitative",
+      "domain": ["all"],
+      "source_brains": ["all"],
+      "value_type": "integer",
+      "unit": null,
+      "allowed_values": [1, 2, 3, 4],
+      "direction_concept": null,
+      "status": "active",
+      "scope_note": "1=primary (federal/SEC/NOAA), 2=verified editorial/brain output, 3=secondary aggregator, 4=inferred. Worst (highest number) wins across upstreams. Defined in refinery/types/pack.mts."
+    },
+
+    "env_flood_risk_pct": {
+      "id": "env_flood_risk_pct",
+      "prefLabel": "Flood Risk Percentage",
+      "altLabels": ["flood risk", "flood_risk_pct"],
+      "raw_slugs": ["flood_risk_pct"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": [],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "stub",
+      "scope_note": "Pre-registered for the flood-veto override rule in refinery/constitution/real-estate.mts (priority 90). Activates automatically the day an environmental brain produces this metric above the 15% threshold. No source brain exists yet."
+    }
+  },
+
+  "ordered_collections": {
+    "cre_corridor_evolution_stages": {
+      "id": "cre_corridor_evolution_stages",
+      "prefLabel": "Corridor Evolution Stage — Ordered by Operator Friendliness",
+      "type": "skos:OrderedCollection",
+      "ordering_criterion": "operator-friendliness descending",
+      "ordered_members": ["growing", "stable", "repositioning", "declining"],
+      "member_notes": {
+        "growing": "Falling cap rate and/or vacancy, active development flags. Best landlord position.",
+        "stable": "Cap rate and vacancy flat. Healthy equilibrium; limited upside.",
+        "repositioning": "Tenant mix or use changing. Cap rate / vacancy may diverge. Watch flags closely.",
+        "declining": "Rising cap rate and/or vacancy, outmigration signals. Tenant-market territory."
+      }
+    }
+  },
+
+  "slug_index": {
+    "overall_survival_rate": "sba_overall_survival_rate",
+    "best_naics_survival": "sba_best_sector_survival",
+    "worst_naics_chargeoff": "sba_worst_sector_chargeoff",
+    "sector_23_chargeoff_rate": "sba_chargeoff_rate_sector_23",
+    "sector_42_chargeoff_rate": "sba_chargeoff_rate_sector_42",
+    "sector_44_chargeoff_rate": "sba_chargeoff_rate_sector_44",
+    "sector_45_chargeoff_rate": "sba_chargeoff_rate_sector_45",
+    "sector_48_chargeoff_rate": "sba_chargeoff_rate_sector_48",
+    "sector_52_chargeoff_rate": "sba_chargeoff_rate_sector_52",
+    "sector_53_chargeoff_rate": "sba_chargeoff_rate_sector_53",
+    "sector_54_chargeoff_rate": "sba_chargeoff_rate_sector_54",
+    "sector_56_chargeoff_rate": "sba_chargeoff_rate_sector_56",
+    "sector_62_chargeoff_rate": "sba_chargeoff_rate_sector_62",
+    "sector_71_chargeoff_rate": "sba_chargeoff_rate_sector_71",
+    "sector_72_chargeoff_rate": "sba_chargeoff_rate_sector_72",
+    "sector_81_chargeoff_rate": "sba_chargeoff_rate_sector_81",
+    "naics_distress_baseline": "sba_naics_distress_baseline",
+    "cap_rate": "cre_cap_rate",
+    "cap_rate_median": "cre_cap_rate_median",
+    "vacancy_rate": "cre_vacancy_rate",
+    "vacancy_rate_median": "cre_vacancy_rate_median",
+    "seasonal_index": "cre_seasonal_index",
+    "evolution": "cre_corridor_evolution",
+    "sofr_rate": "macro_sofr_rate",
+    "fl_unemployment": "macro_fl_unemployment",
+    "cpi_yoy": "macro_cpi_yoy",
+    "fl_labor_participation": "macro_fl_labor_participation",
+    "magnitude": "qual_magnitude",
+    "confidence": "qual_confidence",
+    "trust_tier": "qual_trust_tier",
+    "flood_risk_pct": "env_flood_risk_pct",
+    "_direction_ambiguous": {
+      "_note": "The raw slug 'direction' is overloaded. Resolve by field path: BrainOutput.direction → qual_sentiment_direction; BrainOutputMetric.direction → qual_metric_trajectory. Never resolve by value alone."
+    }
+  }
+}

@@ -73,6 +73,42 @@ export function walkConsumers(
     .sort();
 }
 
+/**
+ * Forward walk — every ancestor of `brainId` in the input_brains DAG. The
+ * adjoint of `walkConsumers`: where consumers asks "who reads me?", upstream
+ * asks "who fed me, transitively?". Used by the attribution engine to
+ * enumerate the full provenance closure of a low-confidence brain output.
+ *
+ * Semantics mirror walkConsumers:
+ *   - Tolerant of missing pack ids (unknown root or unknown upstream → skipped).
+ *   - Result is alphabetically sorted, deduplicated, and excludes `brainId`
+ *     itself.
+ *   - Cycle-safe via a visited set (we never re-enter a node, so a back-edge
+ *     in the registry does not loop). resolveBuildOrder is still the place
+ *     that THROWS on cycles; walkUpstream is read-only telemetry and stays
+ *     soft so it works even on a partially-broken registry.
+ */
+export function walkUpstream(
+  brainId: string,
+  PACKS: Record<string, PackDefinition>,
+): string[] {
+  const visited = new Set<string>();
+
+  function visit(id: string): void {
+    const pack = PACKS[id];
+    if (!pack) return; // unknown id — skip (matches walkConsumers tolerance)
+    for (const upstreamId of pack.input_brains) {
+      if (visited.has(upstreamId)) continue;
+      visited.add(upstreamId);
+      visit(upstreamId);
+    }
+  }
+
+  visit(brainId);
+  visited.delete(brainId); // defensive — a cycle could re-add self
+  return Array.from(visited).sort();
+}
+
 /** Frontmatter scalar reader — matches the parser in master-source / spec-validator. */
 function frontmatterValue(md: string, key: string): string | null {
   const fm = md.match(/^(?:<!--[\s\S]*?-->\s*)?---\n([\s\S]*?)\n---\n/);
