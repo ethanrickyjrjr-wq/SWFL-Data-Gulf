@@ -15,6 +15,17 @@ Search: `%%APP%%` → Replace: `[real name]`
 
 ---
 
+## Developer Setup — Serena MCP
+
+Serena gives Claude Code symbol-level semantic code intelligence (40+ languages, including TypeScript). Wired at project scope via `.mcp.json` + `.claude/settings.json` hooks. The `serena-agent` binary is a user-level install.
+
+- **One-time install:** `uv tool install -p 3.13 serena-agent@latest --prerelease=allow` then run `serena init`.
+- **Optional max-adherence session launch:** `claude --system-prompt="$(serena prompts print-cc-system-prompt-override)"`
+- **Why the override exists:** Serena's docs flag Opus 4.7 as biased toward built-in Grep/Read; the hooks partially compensate, but the override is the strongest fix.
+- **Verification:** `/mcp` should list `serena` connected; a symbolic call (e.g., "find the normalizeStage function") should fire a Serena tool.
+
+---
+
 ## Brain Factory Architecture (v1.1)
 
 **Spec of record:** [Notion — 🏭 Brain Factory Blueprint v1.1](https://www.notion.so/36135f3b7faf813db9b8dfc16ee7da0b) (page id `36135f3b-7faf-813d-b9b8-dfc16ee7da0b`). The Notion page is authoritative for spec changes; this section is a working summary so the agent can execute without round-tripping.

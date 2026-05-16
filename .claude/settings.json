@@ -3,6 +3,37 @@
     "superpowers@claude-plugins-official": true
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks activate --client=claude-code"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks remind --client=claude-code"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__serena__*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks auto-approve --client=claude-code"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -10,6 +41,17 @@
           {
             "type": "command",
             "command": "node .claude/hooks/refinery-tsc.mjs"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks cleanup --client=claude-code"
           }
         ]
       }
