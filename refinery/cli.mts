@@ -64,9 +64,7 @@ async function runPipeline(
     `[stage 2] triage: ${triaged.length} kept · ${droppedByFit} dropped (pack-fit) · ${droppedByCutoff} dropped (cutoff)`,
   );
 
-  const { normalized, orphans } = await normalizeStage(triaged, pack, {
-    strict: false,
-  });
+  const { normalized, orphans } = await normalizeStage(triaged, pack);
   const tagCount = normalized.reduce((n, f) => n + f.concept_tags.length, 0);
   console.log(
     `[stage 2.5] normalize: ${normalized.length} fragment(s) · ${tagCount} concept tag(s) · ${orphans.length} orphan(s)`,
