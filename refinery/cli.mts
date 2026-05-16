@@ -14,6 +14,7 @@ interface CliArgs {
   dryRun: boolean;
   force: boolean;
   listConsumers: boolean;
+  strict: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -21,33 +22,46 @@ function parseArgs(argv: string[]): CliArgs {
   const dryRun = args.includes("--dry-run");
   const force = args.includes("--force");
   const listConsumers = args.includes("--list-consumers");
+  // Stage 2.5 strict-mode is ON by default (orphan slugs abort the run, see
+  // refinery/stages/2.5-normalize.mts:347). --no-strict downgrades to a log so
+  // a contributor mid-migration on a new brain can finish the round-trip
+  // before backfilling refinery/vocab/brain-vocabulary.json. This flag is the
+  // escape hatch, not the recommended path.
+  const strict = !args.includes("--no-strict");
   const packId = args.find((a) => !a.startsWith("--"));
   if (!packId) {
     throw new Error(
-      "Usage: node refinery/cli.mts <pack-id> [--dry-run] [--force] [--list-consumers]\n" +
+      "Usage: node refinery/cli.mts <pack-id> [--dry-run] [--force] [--list-consumers] [--no-strict]\n" +
         "  e.g. node refinery/cli.mts master\n" +
         "       node refinery/cli.mts master --force      # rebuild upstreams even if fresh\n" +
         "       node refinery/cli.mts master --dry-run    # validate without writing\n" +
+        "       node refinery/cli.mts master --no-strict  # log Stage 2.5 orphans instead of aborting\n" +
         "       node refinery/cli.mts franchise-outcomes --list-consumers",
     );
   }
-  return { packId, dryRun, force, listConsumers };
+  return { packId, dryRun, force, listConsumers, strict };
 }
 
 /** Run the full 4-stage pipeline for a single pack. */
 async function runPipeline(
   pack: PackDefinition,
-  opts: { dryRun: boolean },
+  opts: { dryRun: boolean; strict: boolean },
 ): Promise<void> {
   console.log(
     `[refinery] pack=${pack.id} source=${env.source} agents=${
       agentsAreMocked() ? "MOCK" : "live"
-    }${opts.dryRun ? " (dry-run)" : ""}`,
+    }${opts.dryRun ? " (dry-run)" : ""}${opts.strict ? "" : " (no-strict)"}`,
   );
   if (agentsAreMocked()) {
     console.warn(
       "[refinery] WARNING: ANTHROPIC_API_KEY not set — agents run in deterministic mock mode. " +
         "Output is shape-valid and spec-valid, but not real intelligence.",
+    );
+  }
+  if (!opts.strict) {
+    console.warn(
+      "[refinery] WARNING: Stage 2.5 strict-mode OFF — orphan slugs will be logged but will NOT abort the run. " +
+        "Use this only during a vocab-bridge migration; default is strict.",
     );
   }
 
@@ -64,7 +78,9 @@ async function runPipeline(
     `[stage 2] triage: ${triaged.length} kept · ${droppedByFit} dropped (pack-fit) · ${droppedByCutoff} dropped (cutoff)`,
   );
 
-  const { normalized, orphans } = await normalizeStage(triaged, pack);
+  const { normalized, orphans } = await normalizeStage(triaged, pack, {
+    strict: opts.strict,
+  });
   const tagCount = normalized.reduce((n, f) => n + f.concept_tags.length, 0);
   console.log(
     `[stage 2.5] normalize: ${normalized.length} fragment(s) · ${tagCount} concept tag(s) · ${orphans.length} orphan(s)`,
@@ -95,7 +111,9 @@ async function runPipeline(
 }
 
 async function main(): Promise<void> {
-  const { packId, dryRun, force, listConsumers } = parseArgs(process.argv);
+  const { packId, dryRun, force, listConsumers, strict } = parseArgs(
+    process.argv,
+  );
 
   // --list-consumers: pure registry query, no build
   if (listConsumers) {
@@ -149,7 +167,7 @@ async function main(): Promise<void> {
       }
     }
 
-    await runPipeline(pack, { dryRun });
+    await runPipeline(pack, { dryRun, strict });
   }
 }
 
