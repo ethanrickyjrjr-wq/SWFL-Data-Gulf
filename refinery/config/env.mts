@@ -14,8 +14,12 @@ export type RefinerySource = "live" | "fixture";
 
 export interface RefineryEnv {
   source: RefinerySource;
+  /** Brains Supabase — primary database, owns all live data. */
   supabaseUrl: string | undefined;
   supabaseKey: string | undefined;
+  /** Premise Engine Supabase — kept during transition; remove when migration is complete. */
+  premiseSupabaseUrl: string | undefined;
+  premiseSupabaseKey: string | undefined;
   sanityProjectId: string;
   sanityDataset: string;
   sanityReadToken: string | undefined;
@@ -29,8 +33,10 @@ function readEnv(): RefineryEnv {
     process.env.REFINERY_SOURCE === "fixture" ? "fixture" : "live";
   return {
     source,
-    supabaseUrl: process.env.SUPABASE_URL,
-    supabaseKey: process.env.SUPABASE_READONLY_KEY,
+    supabaseUrl: process.env.BRAINS_SUPABASE_URL,
+    supabaseKey: process.env.BRAINS_SUPABASE_SERVICE_KEY,
+    premiseSupabaseUrl: process.env.PREMISE_SUPABASE_URL,
+    premiseSupabaseKey: process.env.PREMISE_SUPABASE_READONLY_KEY,
     // Intelligence Lake = lpyl3q9w (all corridorProfile + promptRule docs live
     // there). go8u2esq was the original plan's assumed A1 project but is an
     // empty shell — 0 docs of any type under published/previewDrafts/drafts
