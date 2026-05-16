@@ -64,9 +64,22 @@ async function runPipeline(
     `[stage 2] triage: ${triaged.length} kept · ${droppedByFit} dropped (pack-fit) · ${droppedByCutoff} dropped (cutoff)`,
   );
 
-  // Stage 2.5: Normalization Bridge (The SKOS Ledger Gate)
-  const { normalized } = await normalizeStage(triaged, pack);
-  console.log(`[stage 2.5] normalize: ${normalized.length} fragments mapped to SKOS concepts`);
+  const { normalized, orphans } = await normalizeStage(triaged, pack, {
+    strict: false,
+  });
+  const tagCount = normalized.reduce((n, f) => n + f.concept_tags.length, 0);
+  console.log(
+    `[stage 2.5] normalize: ${normalized.length} fragment(s) · ${tagCount} concept tag(s) · ${orphans.length} orphan(s)`,
+  );
+  if (orphans.length > 0) {
+    const sample = orphans.slice(0, 5);
+    for (const o of sample) {
+      console.log(`  orphan: ${o.fragment_id} :: ${o.path} :: "${o.raw_slug}"`);
+    }
+    if (orphans.length > sample.length) {
+      console.log(`  ... and ${orphans.length - sample.length} more`);
+    }
+  }
 
   const { events } = await synthesisStage(normalized, pack, fragments);
   console.log(`[stage 3] synthesis: ${events.length} fact(s)`);
@@ -121,7 +134,7 @@ async function main(): Promise<void> {
               `Run \`npm run refinery ${id}\` first, or pass --force to build it now.`,
           );
         }
-        console.log("upstream ${id}: missing — building (--force)");
+        console.log(`[refinery] upstream ${id}: missing — building (--force)`);
       } else if (status.kind === "stale") {
         console.log(
           `[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`,
