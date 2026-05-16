@@ -50,3 +50,6 @@ next-env.d.ts
 
 # session-scoped build-context intake (gated by .claude/hooks/check-build-context.mjs)
 .claude/build-context.md
+
+# Serena MCP project memories (local, re-onboarded per-environment)
+.serena/
