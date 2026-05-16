@@ -19,10 +19,47 @@ Search: `%%APP%%` → Replace: `[real name]`
 
 Serena gives Claude Code symbol-level semantic code intelligence (40+ languages, including TypeScript). Wired at project scope via `.mcp.json` + `.claude/settings.json` hooks. The `serena-agent` binary is a user-level install.
 
-- **One-time install:** `uv tool install -p 3.13 serena-agent@latest --prerelease=allow` then run `serena init`.
-- **Optional max-adherence session launch:** `claude --system-prompt="$(serena prompts print-cc-system-prompt-override)"`
-- **Why the override exists:** Serena's docs flag Opus 4.7 as biased toward built-in Grep/Read; the hooks partially compensate, but the override is the strongest fix.
-- **Verification:** `/mcp` should list `serena` connected; a symbolic call (e.g., "find the normalizeStage function") should fire a Serena tool.
+### Setup sequence (one-time, in order)
+
+1. `uv tool install -p 3.13 serena-agent@latest --prerelease=allow`
+2. `serena init`
+3. Restart Claude Code so `.mcp.json` is picked up and the SessionStart hooks fire.
+
+The hooks in `.claude/settings.json` will not work until both `serena-agent` and `serena-hooks` are on `PATH`. Running steps 1 and 2 puts them there.
+
+### Optional max-adherence session launch
+
+`claude --system-prompt="$(serena prompts print-cc-system-prompt-override)"`
+
+Serena's docs flag Opus 4.7 as biased toward built-in Grep/Read; the hooks partially compensate, but the system-prompt override is the strongest fix. Use it when you need maximum semantic-tool adherence (large refactors, symbol-heavy work).
+
+### Verification protocol
+
+After a fresh restart, run these in order. Any failure means the wiring is broken — stop and fix before doing real work.
+
+1. `/mcp` — `serena` must appear and be **connected**. If not, `.mcp.json` was not picked up.
+2. `serena context list` (in a separate shell) — confirms the `claude-code` context is active for this project.
+3. Symbolic search smoke test: ask "find the `normalizeStage` function" or "show me the `attributeError` symbol." A Serena MCP tool (e.g. `mcp__serena__find_symbol`) must fire — not built-in Grep/Read.
+
+### Risks (intentional fail-fast design)
+
+- **Missing `serena-agent` on PATH:** the SessionStart `serena-hooks activate` command will error loudly and block normal session bootstrap. This is intentional — silent fallback to Grep/Read would defeat the point of wiring Serena in the first place. Fix: run the install command above.
+- **`.mcp.json` only loads on Claude Code start.** Edits to it during a session have no effect until restart.
+- **`--project "."` is path-relative.** Launching Claude Code from outside the repo root will point Serena at the wrong directory. Always start CC from `brain-platform/`.
+
+---
+
+## Developer Setup — Build-Context Gate
+
+Every session must start with a fresh `.claude/build-context.md` describing the intake for that session (goal, scope boundary, success test, files in play). The SessionStart hook `.claude/hooks/check-build-context.mjs` enforces this.
+
+- **What it checks:** `.claude/build-context.md` exists AND was modified within the last **4 hours**.
+- **What happens on failure:** the hook prints a loud banner to stdout (so Claude sees it as session context) and exits non-zero. Treat the failure as a hard stop — populate or refresh the file before doing work.
+- **What happens on pass:** the hook prints a one-line OK with the file's age.
+- **Why 4 hours:** short enough that stale intake from yesterday's session can't masquerade as today's plan; long enough to survive a coffee break.
+- **Why "rewrite, don't touch":** the freshness check is mtime-based, but the _point_ is current intent. Touching the file to silence the hook is technically allowed and operationally a lie.
+
+`.claude/build-context.md` is intentionally not committed — it's session-scoped, not project-scoped.
 
 ---
 

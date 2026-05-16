@@ -47,3 +47,6 @@ next-env.d.ts
 
 # firecrawl tool cache
 .firecrawl/
+
+# session-scoped build-context intake (gated by .claude/hooks/check-build-context.mjs)
+.claude/build-context.md

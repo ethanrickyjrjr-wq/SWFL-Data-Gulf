@@ -9,6 +9,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node .claude/hooks/check-build-context.mjs"
+          },
+          {
+            "type": "command",
             "command": "serena-hooks activate --client=claude-code"
           }
         ]
