@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260515 -->
+<!-- FRESHNESS: v9 | Token: SWFL-7421-v9-20260516 -->
 ---
 brain_id: macro-swfl
-version: 8
-refined_at: 2026-05-15T22:20:11Z
-freshness_token: SWFL-7421-v8-20260515
+version: 9
+refined_at: 2026-05-16T23:02:31Z
+freshness_token: SWFL-7421-v9-20260516
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Macro context for Southwest Florida operators — FRED rates, Florida labor, and US inflation, paired with the SWFL Intelligence Lake index.
@@ -29,22 +29,22 @@ SCOPE: Macro context for Southwest Florida operators — FRED rates, Florida lab
 
 --- CITATION TABLE ---
 id  | source                                                                             | verified   | expires
-s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY, LBSSA12) | 2026-05-15 | 2026-05-16
+s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY, LBSSA12) | 2026-05-16 | 2026-05-17
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"macro_snapshot","fact":"Current macro context for SWFL operators — funding rates, labor, inflation","value":"Macro snapshot (synthetic fixture; replace with live FRED pull before publishing): Secured Overnight Financing Rate is 3.6% (stable) as of 2026-05-14; Florida Unemployment Rate is 4.7% (rising) as of 2026-03-01; US CPI (All Items) Year-over-Year is 3.8% (rising) as of 2026-04-01; Florida Labor Force Participation Rate is 57.7% (stable) as of 2026-03-01. These four series anchor the funding-cost and labor-supply backdrop a Lee–Collier operator reads alongside the SWFL Intelligence Lake.","src":"s01","date":"2026-05-15"},
-  {"id":"f002","topic":"metric:sofr_rate","fact":"SOFR (Secured Overnight Financing Rate)","value":"SOFR (Secured Overnight Financing Rate) is 3.6% (period 2026-05-14, direction stable). SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.","src":"s01","date":"2026-05-15"},
-  {"id":"f003","topic":"metric:fl_unemployment","fact":"Florida unemployment rate","value":"Florida unemployment rate is 4.7% (period 2026-03-01, direction rising). Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low.","src":"s01","date":"2026-05-15"},
-  {"id":"f004","topic":"metric:cpi_yoy","fact":"US CPI YoY","value":"US CPI YoY is 3.8% (period 2026-04-01, direction rising). Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026.","src":"s01","date":"2026-05-15"},
-  {"id":"f005","topic":"metric:fl_labor_participation","fact":"Florida labor force participation","value":"Florida labor force participation is 57.7% (period 2026-03-01, direction stable). FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement.","src":"s01","date":"2026-05-15"}
+  {"id":"f001","topic":"macro_snapshot","fact":"Current macro context for SWFL operators — funding rates, labor, inflation","value":"Macro snapshot (synthetic fixture; replace with live FRED pull before publishing): Secured Overnight Financing Rate is 3.6% (stable) as of 2026-05-14; Florida Unemployment Rate is 4.7% (rising) as of 2026-03-01; US CPI (All Items) Year-over-Year is 3.8% (rising) as of 2026-04-01; Florida Labor Force Participation Rate is 57.7% (stable) as of 2026-03-01. These four series anchor the funding-cost and labor-supply backdrop a Lee–Collier operator reads alongside the SWFL Intelligence Lake.","src":"s01","date":"2026-05-16"},
+  {"id":"f002","topic":"metric:sofr_rate","fact":"SOFR (Secured Overnight Financing Rate)","value":"SOFR (Secured Overnight Financing Rate) is 3.6% (period 2026-05-14, direction stable). SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.","src":"s01","date":"2026-05-16"},
+  {"id":"f003","topic":"metric:fl_unemployment","fact":"Florida unemployment rate","value":"Florida unemployment rate is 4.7% (period 2026-03-01, direction rising). Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low.","src":"s01","date":"2026-05-16"},
+  {"id":"f004","topic":"metric:cpi_yoy","fact":"US CPI YoY","value":"US CPI YoY is 3.8% (period 2026-04-01, direction rising). Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026.","src":"s01","date":"2026-05-16"},
+  {"id":"f005","topic":"metric:fl_labor_participation","fact":"Florida labor force participation","value":"Florida labor force participation is 57.7% (period 2026-03-01, direction stable). FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement.","src":"s01","date":"2026-05-16"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 8,
-  "refined_at": "2026-05-15T22:20:11Z",
+  "version": 9,
+  "refined_at": "2026-05-16T23:02:31Z",
   "direction": "bearish",
   "magnitude": 0.6666666666666666,
   "drivers": [],
@@ -86,7 +86,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-15T22:20:11Z"
+    "computed_at": "2026-05-16T23:02:31Z"
   },
   "exogenous_signals": []
 }
@@ -95,5 +95,5 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
 - macro-swfl: standing macro snapshot for SWFL operators — funding rates, Florida labor, US inflation.
 
 --- RECENT NOTES ---
-- 2026-05-15: pack refined by the Refinery — 5 fact(s) from 1 source(s).
+- 2026-05-16: pack refined by the Refinery — 5 fact(s) from 1 source(s).
 ```

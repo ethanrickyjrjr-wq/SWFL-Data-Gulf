@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260516 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260516 -->
 ---
 brain_id: tourism-tdt
-version: 1
-refined_at: 2026-05-16T21:49:37Z
-freshness_token: SWFL-7421-v1-20260516
+version: 2
+refined_at: 2026-05-16T23:02:14Z
+freshness_token: SWFL-7421-v2-20260516
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: Lee County hospitality pulse — monthly Tourist Development Tax (TDT) collections from the Florida Department of Revenue, with seasonal, year-over-year, and post-Hurricane-Ian recovery context for accommodation / food-service operators.
@@ -44,8 +44,8 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
 --- OUTPUT ---
 {
   "brain_id": "tourism-tdt",
-  "version": 1,
-  "refined_at": "2026-05-16T21:49:37Z",
+  "version": 2,
+  "refined_at": "2026-05-16T23:02:14Z",
   "direction": "bullish",
   "magnitude": 0.55,
   "drivers": [],
@@ -93,7 +93,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-16T21:49:37Z"
+    "computed_at": "2026-05-16T23:02:14Z"
   },
   "exogenous_signals": []
 }
