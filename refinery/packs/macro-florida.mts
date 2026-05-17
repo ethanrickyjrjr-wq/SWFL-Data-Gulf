@@ -16,6 +16,10 @@ import {
   makeBrainInputSource,
   type BrainInputNormalized,
 } from "../sources/brain-input-source.mts";
+import {
+  macroFloridaCbpSource,
+  type MacroFloridaCbpNormalized,
+} from "../sources/macro-florida-cbp-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -41,6 +45,10 @@ import { env } from "../config/env.mts";
 let lastIndicators: MacroFloridaNormalized[] = [];
 let lastFetchedAt: string | null = null;
 let lastMacroUsOutput: BrainOutput | null = null;
+
+let lastCbpSectors: MacroFloridaCbpNormalized[] = [];
+
+let lastCbpFetchedAt: string | null = null;
 
 function buildFredSource(
   indicator: MacroFloridaNormalized,
@@ -69,6 +77,38 @@ const METRIC_MAP: Record<string, { metric: string; label: string }> = {
   },
 };
 
+const CBP_NAICS_METRICS: Array<{
+  naics: string;
+  metric: string;
+  label: string;
+}> = [
+  {
+    naics: "44-45",
+    metric: "fl_estab_count_retail",
+    label: "Florida retail establishments",
+  },
+  {
+    naics: "72",
+    metric: "fl_estab_count_food_service",
+    label: "Florida food service & accommodation establishments",
+  },
+  {
+    naics: "23",
+    metric: "fl_estab_count_construction",
+    label: "Florida construction establishments",
+  },
+  {
+    naics: "62",
+    metric: "fl_estab_count_healthcare",
+    label: "Florida healthcare establishments",
+  },
+  {
+    naics: "54",
+    metric: "fl_estab_count_professional",
+    label: "Florida professional services establishments",
+  },
+];
+
 function indicatorsFrom(fragments: RawFragment[]): MacroFloridaNormalized[] {
   return fragments
     .map((f) => f.normalized as unknown as MacroFloridaNormalized)
@@ -86,6 +126,14 @@ function brainInputFrom(
     }
   }
   return null;
+}
+
+function cbpFragmentsFrom(
+  fragments: RawFragment[],
+): MacroFloridaCbpNormalized[] {
+  return fragments
+    .map((f) => f.normalized as unknown as MacroFloridaCbpNormalized)
+    .filter((n) => n?.kind === "fl-cbp-aggregate");
 }
 
 const fmt = (n: number): string =>
@@ -136,6 +184,47 @@ function macroFloridaCorpusSummary(
     });
   }
 
+  const cbpSectors = cbpFragmentsFrom(allFragments);
+  lastCbpSectors = cbpSectors;
+  lastCbpFetchedAt =
+    allFragments.find(
+      (f) =>
+        (f.normalized as unknown as MacroFloridaCbpNormalized)?.kind ===
+        "fl-cbp-aggregate",
+    )?.fetched_at ?? null;
+
+  if (cbpSectors.length > 0) {
+    const year = cbpSectors[0].year;
+    const top3 = cbpSectors
+      .slice(0, 3)
+      .map(
+        (s) =>
+          `${s.naics_label} (${s.fl_establishments.toLocaleString()} estab.)`,
+      )
+      .join(", ");
+    facts.push({
+      topic: "fl_cbp_sector_snapshot",
+      fact: "Florida business sector counts from Census CBP",
+      value:
+        `Florida CBP ${year}: top sectors by establishment count — ${top3}. ` +
+        `Source: Census Bureau County Business Patterns, all FL counties aggregated.`,
+      source_fragment_ids: [],
+    });
+    for (const s of cbpSectors) {
+      const m = CBP_NAICS_METRICS.find((x) => x.naics === s.naics_code);
+      if (!m) continue;
+      facts.push({
+        topic: `metric:${m.metric}`,
+        fact: m.label,
+        value:
+          `${m.label}: ${s.fl_establishments.toLocaleString()} establishments, ` +
+          `${s.fl_employment.toLocaleString()} employees, ` +
+          `$${(s.fl_annual_payroll / 1_000_000).toFixed(1)}B annual payroll (${s.year}).`,
+        source_fragment_ids: [],
+      });
+    }
+  }
+
   return facts;
 }
 
@@ -160,6 +249,27 @@ function macroFloridaOutputProducer(
       };
     })
     .filter((m): m is BrainOutputMetric => m !== null);
+
+  const cbpFetchedAt =
+    lastCbpFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  for (const s of lastCbpSectors) {
+    const m = CBP_NAICS_METRICS.find((x) => x.naics === s.naics_code);
+    if (!m) continue;
+    key_metrics.push({
+      metric: m.metric,
+      value: s.fl_establishments,
+      direction: "stable",
+      label: m.label,
+      source: {
+        url: `https://api.census.gov/data/${s.year}/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12`,
+        fetched_at: cbpFetchedAt,
+        tier: 1,
+        citation:
+          `${m.label}: ${s.fl_establishments.toLocaleString()} FL establishments in ${s.year} ` +
+          `(Census CBP, NAICS ${s.naics_code}, all FL counties aggregated).`,
+      },
+    });
+  }
 
   const conclusionParts: string[] = [];
   if (indicators.length > 0) {
@@ -197,6 +307,11 @@ function macroFloridaOutputProducer(
         ]
       : [
           "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
+          ...(lastCbpSectors.length > 0
+            ? [
+                "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions.",
+              ]
+            : []),
         ];
 
   const vote = voteMacroDirection(indicators);
@@ -262,9 +377,14 @@ export const macroFlorida: PackDefinition = {
   brain_id: "macro-florida",
   domain: "macro",
   scope:
-    "Florida state-level macro context — labor market (FLUR, FL LFPR). Mid-tier of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl). Future branches: CBP, IRS SOI.",
+    "Florida state-level macro context — labor market (FLUR, FL LFPR) and business sector counts (Census CBP). " +
+    "Mid-tier of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl). Future branches: IRS SOI.",
   ttl_seconds: 86400,
-  sources: [macroFloridaSource, makeBrainInputSource("macro-us")],
+  sources: [
+    macroFloridaSource,
+    macroFloridaCbpSource,
+    makeBrainInputSource("macro-us"),
+  ],
   input_brains: [{ id: "macro-us", edge_type: "input" }],
   fitScore: (): number => 8,
   compositeCutoff: 0,
