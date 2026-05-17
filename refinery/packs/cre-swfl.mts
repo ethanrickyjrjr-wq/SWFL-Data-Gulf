@@ -44,7 +44,7 @@ let lastCorridorFetchedAt: string | null = null;
  * own source without leaving the OUTPUT block.
  */
 function buildCreAggregateSource(
-  field: "cap_rate_pct" | "vacancy_rate_pct",
+  field: "cap_rate_pct" | "vacancy_rate_pct" | "absorption_sqft" | "asking_rent_psf",
   contributing: CorridorNormalized[],
   fetched_at: string,
 ): BrainOutputMetricSource {
@@ -220,12 +220,18 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     });
   }
 
-  // Cap-rate / vacancy-rate aggregates — tagged with `metric:` prefix so they
+  // Four CRE aggregates — tagged with `metric:` prefix so they
   // surface in SAVED FACTS alongside the producer's BrainOutput.key_metrics.
   const withCap = corridors.filter((c) => c.cap_rate_pct != null);
   const withVac = corridors.filter((c) => c.vacancy_rate_pct != null);
+  const withAbs = corridors.filter((c) => c.absorption_sqft != null);
+  const withRent = corridors.filter((c) => c.asking_rent_psf != null);
+
   const capMedian = medianOf(withCap.map((c) => c.cap_rate_pct as number));
   const vacMedian = medianOf(withVac.map((c) => c.vacancy_rate_pct as number));
+  const absMedian = medianOf(withAbs.map((c) => c.absorption_sqft as number));
+  const rentMedian = medianOf(withRent.map((c) => c.asking_rent_psf as number));
+
   if (capMedian != null) {
     facts.push({
       topic: "metric:cap_rate_median",
@@ -242,12 +248,28 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
       source_fragment_ids: [],
     });
   }
+  if (absMedian != null) {
+    facts.push({
+      topic: "metric:absorption_sqft_median",
+      fact: "Median net absorption across SWFL CRE corridors with reported metrics",
+      value: `Median net absorption is ${Math.round(absMedian).toLocaleString()} sqft across ${withAbs.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      source_fragment_ids: [],
+    });
+  }
+  if (rentMedian != null) {
+    facts.push({
+      topic: "metric:asking_rent_psf_median",
+      fact: "Median asking rent (PSF) across SWFL CRE corridors with reported metrics",
+      value: `Median asking rent is $${round2(rentMedian)}/sqft across ${withRent.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      source_fragment_ids: [],
+    });
+  }
 
   return facts;
 }
 
 /**
- * Per-corridor direction read from the (cap_rate, vacancy) signal pair:
+ * Per-corridor direction read from the signal suite:
  *   - any "falling" AND any "rising"           → "mixed" corridor (no clear read)
  *   - any "falling", no "rising"               → "bullish" (rates compressing
  *                                                 or space tightening — landlord
@@ -260,11 +282,18 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 type CorridorVote = "bullish" | "bearish" | "mixed" | "neutral" | "no-data";
 
 function voteCorridor(c: CorridorNormalized): CorridorVote {
-  const cap = c.cap_rate_direction;
-  const vac = c.vacancy_rate_direction;
-  if (cap == null && vac == null) return "no-data";
-  const hasFalling = cap === "falling" || vac === "falling";
-  const hasRising = cap === "rising" || vac === "rising";
+  const signals = [
+    c.cap_rate_direction,
+    c.vacancy_rate_direction,
+    c.absorption_sqft_direction,
+    c.asking_rent_psf_direction
+  ].filter(s => s != null);
+
+  if (signals.length === 0) return "no-data";
+  
+  const hasFalling = signals.includes("falling");
+  const hasRising = signals.includes("rising");
+  
   if (hasFalling && hasRising) return "mixed";
   if (hasFalling) return "bullish";
   if (hasRising) return "bearish";
@@ -288,7 +317,7 @@ function voteCreDirection(corridors: CorridorNormalized[]): {
   const caveats: string[] = [];
   if (noData > 0) {
     caveats.push(
-      `${noData} of ${corridors.length} corridors have no cap_rate / vacancy_rate metrics — direction is read from the ${withData.length} corridors with data.`,
+      `${noData} of ${corridors.length} corridors have no metrics — direction is read from the ${withData.length} corridors with data.`,
     );
   }
   if (withData.length === 0) {
@@ -322,14 +351,19 @@ function voteCreDirection(corridors: CorridorNormalized[]): {
 /**
  * CRE producer — emits cap_rate_median + vacancy_rate_median as headline
  * key_metrics and votes a deterministic direction from the per-corridor
- * cap_rate_direction / vacancy_rate_direction signals.
+ * signals.
  */
 function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
   const corridors = lastCorridors;
   const withCap = corridors.filter((c) => c.cap_rate_pct != null);
   const withVac = corridors.filter((c) => c.vacancy_rate_pct != null);
+  const withAbs = corridors.filter((c) => c.absorption_sqft != null);
+  const withRent = corridors.filter((c) => c.asking_rent_psf != null);
+
   const capMedian = medianOf(withCap.map((c) => c.cap_rate_pct as number));
   const vacMedian = medianOf(withVac.map((c) => c.vacancy_rate_pct as number));
+  const absMedian = medianOf(withAbs.map((c) => c.absorption_sqft as number));
+  const rentMedian = medianOf(withRent.map((c) => c.asking_rent_psf as number));
 
   // P2 provenance — single-query fetched_at shared across all corridors in
   // this run. If the closure capture missed (zero fragments), fall back to a
@@ -356,6 +390,24 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
       source: buildCreAggregateSource("vacancy_rate_pct", withVac, fetched_at),
     });
   }
+  if (absMedian != null) {
+    key_metrics.push({
+      metric: "absorption_sqft_median",
+      value: Math.round(absMedian),
+      direction: modalDirection(withAbs.map((c) => c.absorption_sqft_direction)),
+      label: `Median SWFL CRE net absorption (${withAbs.length} of ${corridors.length} corridors)`,
+      source: buildCreAggregateSource("absorption_sqft", withAbs, fetched_at),
+    });
+  }
+  if (rentMedian != null) {
+    key_metrics.push({
+      metric: "asking_rent_psf_median",
+      value: Math.round(rentMedian * 100) / 100,
+      direction: modalDirection(withRent.map((c) => c.asking_rent_psf_direction)),
+      label: `Median SWFL CRE asking rent PSF (${withRent.length} of ${corridors.length} corridors)`,
+      source: buildCreAggregateSource("asking_rent_psf", withRent, fetched_at),
+    });
+  }
 
   const vote = voteCreDirection(corridors);
 
@@ -371,16 +423,16 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
     );
   } else {
     conclusionParts.push(
-      "Cap-rate and vacancy metrics are not yet populated for enough corridors to anchor a median read.",
+      "Core metrics are not yet populated for enough corridors to anchor a median read.",
     );
   }
   if (vote.direction === "bullish") {
     conclusionParts.push(
-      "Cap rates and vacancy are predominantly compressing — landlord-market read.",
+      "Rates are predominantly compressing and space tightening — landlord-market read.",
     );
   } else if (vote.direction === "bearish") {
     conclusionParts.push(
-      "Cap rates and vacancy are predominantly expanding — yield distress read.",
+      "Rates are predominantly expanding and space emptying — yield distress read.",
     );
   } else if (vote.direction === "mixed") {
     conclusionParts.push(
