@@ -16,6 +16,7 @@
 
 import type { BrainOutput } from "../types/brain-output.mts";
 import type { ExogenousSignal } from "../types/exogenous-signal.mts";
+import { resolveConceptSlugs } from "../vocab/loader.mts";
 import type { Constitution, OverrideRule } from "./types.mts";
 
 /**
@@ -47,20 +48,20 @@ const exogenousCriticalConfirmed: OverrideRule = {
  * brain answers questions across both counties — a Marco Island question
  * deserves the same veto as a FMB question.
  *
- * NOTE on raw slugs vs SKOS concepts: this condition matches the raw
- * `metric` field env-swfl emits on its BrainOutput.key_metrics. Stage 2.5
- * SKOS normalization runs on the master's own corpus fragments, NOT on
- * upstream BrainOutput payloads — so the override cascade sees the
- * literal slug, not the concept. Tightly coupling the constitution to
- * one brain's slug naming is the known trade-off; SKOS-aware constitution
- * lookup (slug_index resolution at check time) is the cleaner long-term
- * shape and lands with the DAG edge-types work (P5).
+ * SKOS-aware (P5.5): the rule declares the SKOS concept IDs it cares about,
+ * then `resolveConceptSlugs` reads `refinery/vocab/brain-vocabulary.json` at
+ * module init and inverts each concept's `raw_slugs` into the literal slug
+ * set the synthesizer matches against on `BrainOutputMetric.metric`. Adding
+ * a third-county VE concept is a one-line change here; an upstream rename of
+ * a slug surfaces at module-init time instead of silently breaking the rule.
+ * The 5% threshold itself is a property of the rule, not the concept.
  */
 const FLOOD_VETO_VE_THRESHOLD = 0.05;
-const FLOOD_VETO_METRICS = new Set([
-  "lee_county_ve_zone_pct_area_weighted",
-  "collier_county_ve_zone_pct_area_weighted",
-]);
+const FLOOD_VETO_CONCEPTS = [
+  "env_lee_ve_zone_coverage_pct",
+  "env_collier_ve_zone_coverage_pct",
+] as const;
+const FLOOD_VETO_METRICS = resolveConceptSlugs(FLOOD_VETO_CONCEPTS);
 const floodVeto: OverrideRule = {
   priority: 90,
   override_id: "flood-veto",
