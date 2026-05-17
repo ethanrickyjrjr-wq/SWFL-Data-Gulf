@@ -70,6 +70,14 @@ export interface TourismTdtNormalized {
    * FY2023 for Florida's October-start fiscal year).
    */
   post_ian: boolean;
+  /**
+   * Canonical receipt URL for the underlying source — the live Brains Supabase
+   * PostgREST query the source connector ran (or a `fixture://` URI in fixture
+   * mode). Uniform across rows since the source fetches the full table; the
+   * pack's outputProducer uses this as the per-metric BrainOutputMetricSource.url
+   * so a disputant can reproduce the fetch.
+   */
+  source_url: string;
 }
 
 // ---------------------------------------------------------------------
@@ -155,6 +163,14 @@ function isPostIan(fiscalYear: number | null, periodYyyymm: string): boolean {
   return false;
 }
 
+/** Receipt URL the source connector queries (or fixture sentinel). */
+function tdtReceiptUrl(): string {
+  if (env.source === "live" && env.supabaseUrl) {
+    return `${env.supabaseUrl}/rest/v1/${TABLE}?select=id,county,period,collections_usd`;
+  }
+  return `fixture://refinery/__fixtures__/tourism-tdt.sample.json`;
+}
+
 export function normalizeTdtRow(
   row: Record<string, unknown>,
 ): TourismTdtNormalized {
@@ -168,6 +184,7 @@ export function normalizeTdtRow(
     fiscal_year,
     gross_collections_usd: numericOrMoney(row.collections_usd),
     post_ian: isPostIan(fiscal_year, period_yyyymm),
+    source_url: tdtReceiptUrl(),
   };
 }
 

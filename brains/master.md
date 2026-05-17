@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v26 | Token: SWFL-7421-v26-20260517 -->
+<!-- FRESHNESS: v27 | Token: SWFL-7421-v27-20260517 -->
 ---
 brain_id: master
-version: 26
-refined_at: 2026-05-17T03:08:28Z
-freshness_token: SWFL-7421-v26-20260517
+version: 27
+refined_at: 2026-05-17T03:10:38Z
+freshness_token: SWFL-7421-v27-20260517
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -49,8 +49,8 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 26,
-  "refined_at": "2026-05-17T03:08:28Z",
+  "version": 27,
+  "refined_at": "2026-05-17T03:10:38Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -112,7 +112,13 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "metric": "latest_monthly_collections_usd",
       "value": 9028029.34,
       "direction": "rising",
-      "label": "Latest monthly TDT collections (Lee County, 2026-04, shoulder season)"
+      "label": "Latest monthly TDT collections (Lee County, 2026-04, shoulder season)",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
+        "fetched_at": "2026-05-17T03:10:35Z",
+        "tier": 1,
+        "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest reported month 2026-04 = $9028029.34 (FY 2026, post_ian=true)."
+      }
     },
     {
       "metric": "swfl_sfha_pct_area_weighted",
@@ -127,6 +133,18 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       }
     },
     {
+      "metric": "yoy_delta_pct",
+      "value": 18.2,
+      "direction": "rising",
+      "label": "Year-over-year delta vs same month prior year",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
+        "fetched_at": "2026-05-17T03:10:35Z",
+        "tier": 1,
+        "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — comparing 2026-04 ($9028029.34) against same-month prior-year row 2025-04 ($7638043.46)."
+      }
+    },
+    {
       "metric": "worst_naics_chargeoff",
       "value": 57.1,
       "direction": "stable",
@@ -136,18 +154,6 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
         "fetched_at": "2026-05-17T03:08:25Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
-      }
-    },
-    {
-      "metric": "fl_unemployment",
-      "value": 4.7,
-      "direction": "rising",
-      "label": "Florida unemployment rate",
-      "source": {
-        "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-17T03:01:49Z",
-        "tier": 1,
-        "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.7 percent for period 2026-03-01, rising vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
       }
     }
   ],
@@ -168,7 +174,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-17T03:08:28.000Z"
+    "computed_at": "2026-05-17T03:10:38.000Z"
   },
   "exogenous_signals": []
 }

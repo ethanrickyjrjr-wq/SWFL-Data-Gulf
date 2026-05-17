@@ -4,6 +4,7 @@ import type { SynthesisFact } from "../types/event.mts";
 import type {
   BrainOutputDirection,
   BrainOutputMetric,
+  BrainOutputMetricSource,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
 import {
@@ -37,6 +38,8 @@ import { env } from "../config/env.mts";
 // for the producer to consume within a single pipeline run.
 // ---------------------------------------------------------------------
 let lastSnapshot: TdtSnapshot | null = null;
+
+let lastFetchedAt: string | null = null;
 
 interface TdtSnapshot {
   /** All rows that came back, filtered to those with a parseable period + value. */
@@ -243,6 +246,14 @@ function tourismTdtCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const rows = tdtRowsFrom(allFragments);
   const snapshot = buildSnapshot(rows);
   lastSnapshot = snapshot;
+  // Capture from the first matching TDT fragment so the producer can stamp
+  // each metric with the exact fetch timestamp the source recorded.
+  const sourceFragment = allFragments.find(
+    (f) =>
+      (f.normalized as unknown as TourismTdtNormalized)?.kind ===
+      "tdt-collection",
+  );
+  lastFetchedAt = sourceFragment?.fetched_at ?? null;
 
   if (!snapshot.latest) return [];
 
@@ -346,6 +357,78 @@ function tourismTdtCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 // Stage 4 — BrainOutput producer.
 // ---------------------------------------------------------------------
 
+/**
+ * Build the per-metric receipt for a TDT-derived metric. URL is uniform (the
+ * source connector queries the full fl_dor_tdt_collections table), but the
+ * citation is metric-specific: it names which rows from the fetched set
+ * contributed to the derived value so a disputant can pull the same rows
+ * from Supabase and reproduce the calculation.
+ */
+function buildTdtSource(
+  metricKind:
+    | "latest"
+    | "yoy"
+    | "trailing_12mo"
+    | "post_ian_recovery"
+    | "seasonal_position",
+  snapshot: TdtSnapshot,
+  fetched_at: string,
+  source_url: string,
+): BrainOutputMetricSource {
+  const latest = snapshot.latest;
+  const priorYear = snapshot.priorYear;
+  const trailing = snapshot.rows.slice(-12);
+  const trailingSpan =
+    trailing.length === 0
+      ? "no trailing rows"
+      : trailing.length === 1
+        ? trailing[0].period_yyyymm
+        : `${trailing[0].period_yyyymm} → ${trailing[trailing.length - 1].period_yyyymm} (${trailing.length} months)`;
+  const sameMonthCount = latest
+    ? snapshot.rows.filter(
+        (r) => monthOf(r.period_yyyymm) === monthOf(latest.period_yyyymm),
+      ).length
+    : 0;
+  const base =
+    "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections " +
+    `(Lee County, ${snapshot.rows.length} monthly rows fetched: ${snapshot.rows[0]?.period_yyyymm ?? "?"} → ${snapshot.rows[snapshot.rows.length - 1]?.period_yyyymm ?? "?"}); ` +
+    "state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328)";
+  let detail = "";
+  switch (metricKind) {
+    case "latest":
+      detail = latest
+        ? ` — latest reported month ${latest.period_yyyymm} = $${(latest.gross_collections_usd ?? 0).toFixed(2)} (FY ${latest.fiscal_year ?? "?"}, post_ian=${latest.post_ian})`
+        : "";
+      break;
+    case "yoy":
+      detail =
+        latest && priorYear
+          ? ` — comparing ${latest.period_yyyymm} ($${(latest.gross_collections_usd ?? 0).toFixed(2)}) against same-month prior-year row ${priorYear.period_yyyymm} ($${(priorYear.gross_collections_usd ?? 0).toFixed(2)})`
+          : "";
+      break;
+    case "trailing_12mo":
+      detail = ` — sum of trailing 12-month window: ${trailingSpan}`;
+      break;
+    case "post_ian_recovery":
+      detail =
+        snapshot.preIanBaseline12moUsd !== null
+          ? ` — trailing 12-month total (${trailingSpan}) divided by best pre-Ian 12-month window ($${snapshot.preIanBaseline12moUsd.toFixed(2)}; Ian landfall 2022-09-28 → FY2023+ treated as post-Ian)`
+          : "";
+      break;
+    case "seasonal_position":
+      detail = latest
+        ? ` — latest month ${latest.period_yyyymm} ($${(latest.gross_collections_usd ?? 0).toFixed(2)}) vs same-calendar-month mean across ${sameMonthCount} observed years`
+        : "";
+      break;
+  }
+  return {
+    url: source_url,
+    fetched_at,
+    tier: 1,
+    citation: `${base}${detail}.`,
+  };
+}
+
 function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const snapshot = lastSnapshot;
   if (!snapshot || !snapshot.latest) {
@@ -369,6 +452,9 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const latestUsd = latest.gross_collections_usd ?? 0;
   const vote = voteTdtDirection(snapshot);
   const season = seasonLabel(monthOf(latest.period_yyyymm));
+  const fetched_at =
+    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const source_url = latest.source_url;
 
   const key_metrics: BrainOutputMetric[] = [];
 
@@ -384,6 +470,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             ? "falling"
             : "stable",
     label: `Latest monthly TDT collections (Lee County, ${latest.period_yyyymm}, ${season} season)`,
+    source: buildTdtSource("latest", snapshot, fetched_at, source_url),
   });
 
   if (vote.yoyPct !== null) {
@@ -393,6 +480,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       direction:
         vote.yoyPct > 0 ? "rising" : vote.yoyPct < 0 ? "falling" : "stable",
       label: "Year-over-year delta vs same month prior year",
+      source: buildTdtSource("yoy", snapshot, fetched_at, source_url),
     });
   }
 
@@ -402,6 +490,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: snapshot.trailing12moUsd,
       direction: "stable", // sum, not a rate-of-change
       label: "Trailing 12-month TDT collections total",
+      source: buildTdtSource("trailing_12mo", snapshot, fetched_at, source_url),
     });
   }
 
@@ -417,6 +506,12 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             : "stable",
       label:
         "Post-Hurricane-Ian recovery ratio (trailing 12mo ÷ best pre-Ian 12mo)",
+      source: buildTdtSource(
+        "post_ian_recovery",
+        snapshot,
+        fetched_at,
+        source_url,
+      ),
     });
   }
 
@@ -432,6 +527,12 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             ? "falling"
             : "stable",
       label: "Seasonal position vs same-month historical mean",
+      source: buildTdtSource(
+        "seasonal_position",
+        snapshot,
+        fetched_at,
+        source_url,
+      ),
     });
   }
 
