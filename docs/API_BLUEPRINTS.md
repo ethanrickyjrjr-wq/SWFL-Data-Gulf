@@ -2,6 +2,9 @@
 
 **Note on Brains Supabase context:** All source fields and staging tables below target the Brains Supabase instance — not the legacy DB.
 
+**Architectural Rule — Ingest Broad, Filter Local:**
+The `dlt` pipelines described below MUST ingest data broadly (e.g., all of Florida or national context) into the A1 Data Lake. Do not prematurely truncate the raw ingest to just Lee/Collier counties at the pipeline level. SWFL-specific filtering (e.g., `county_fips = 12071` or `dms_dest = 129`) is handled downstream by the Master Brain when spinning up Atomic Brains. The examples below show the SWFL logic for downstream use, not for upstream truncation.
+
 ## Target 1 — Data USA API (Tesseract Cubes)
 
 ### Critical Corrections
@@ -11,19 +14,16 @@
 ### Cube 1: county_business_patterns (Business Density)
 *   **Base URL:** `https://api.datausa.io/tesseract/`
 *   **Auth:** None. No API key.
-*   **Rate Limits:** No documented limits.
-*   **Exact SWFL Query (Lee + Collier, all industries, 2022):**
-    `GET https://api.datausa.io/tesseract/data.jsonrecords?cube=county_business_patterns&drilldowns=County&measures=Employees,Annual+Payroll,Number+of+Establishments&Year=2022&County=05000US12071,05000US12021`
-    *(Lee County FIPS = 05000US12071 | Collier County FIPS = 05000US12021)*
+*   **Ingest Target:** Pull all FL counties. Drop the `&County=` filter in the raw ingest, or use `&State=04000US12` if supported.
+*   **Downstream SWFL Filter:** `05000US12071` (Lee) | `05000US12021` (Collier)
 *   **NAICS Drilldown:** Append `&drilldowns=County,NAICS` to get industry breakdown.
 
 ### Substitute for pums_migration: IRS SOI County-to-County Migration
 *   **Source:** `https://www.irs.gov/statistics/soi-tax-stats-county-to-county-migration-data-files`
 *   **Type:** Bulk CSV download via ZIP (dlt must use `requests` + `csv.DictReader`)
 *   **Auth:** None.
-*   **SWFL Filter Logic:**
-    *   Inflows TO Lee: `row["y2_statefips"] == "12" and row["y2_countyfips"] == "071"`
-    *   Inflows TO Collier: `row["y2_statefips"] == "12" and row["y2_countyfips"] == "021"`
+*   **Ingest Target:** Ingest all inflows/outflows involving `statefips == "12"` (Florida).
+*   **Downstream SWFL Filter:** `y2_countyfips` in `["071", "021"]`
 
 ## Target 2 — Federal Register API (/public-inspection)
 *   **Base URL:** `https://www.federalregister.gov/api/v1/`
@@ -31,7 +31,6 @@
 *   **Rate Limits:** ~100 req/min is safe.
 *   **Infrastructure Grants Query:**
     `GET https://www.federalregister.gov/api/v1/documents.json?per_page=100&conditions[term]=infrastructure+grant&conditions[type][]=Notice&conditions[publication_date][gte]=2025-01-01`
-    *(Add `&conditions[agencies][]=army-corps-of-engineers` for tighter SWFL relevance)*
 *   **AI Consortia Export Rules Query:**
     `GET https://www.federalregister.gov/api/v1/documents.json?per_page=50&conditions[term]=AI+export+rules&conditions[publication_date][gte]=2025-01-01`
 
@@ -46,13 +45,8 @@
 *   **Verdict:** No REST API. Bulk CSV/ZIP download only (`https://faf.ornl.gov/faf5/`).
 *   **FAF Zone for SWFL:** **Zone 129** (Remainder of Florida). *(Note: 124 is Tampa, 129 is Lee/Collier)*
 *   **SCTG Targets:** 12 (Gravel/crushed stone), 32 (Base metals/rebar), 31 (Nonmetallic mineral products), 33 (Articles of base metal).
-*   **Data Structure Notes:**
-    *   `trade_type`: 1=Domestic, 2=Import, 3=Export.
-    *   Columns are year-suffixed (e.g., `tons_2017`, `tons_2022`, `value_2022`, `current_value_2022`).
-    *   Foreign origin/dest use `fr_orig` / `fr_dest` (e.g., 807 = Eastern Asia).
-*   **Filter Logic for dlt (Inbound SWFL construction materials):**
-    `row["dms_dest"] == "129" and int(row["sctg2"]) in [12, 31, 32, 33] and row["trade_type"] == "1"`
-    *(For steel/rebar imports from Eastern Asia, use `fr_orig`=807 with `trade_type`=2)*
+*   **Ingest Target:** Ingest all domestic flows where `dms_dest` OR `dms_orig` starts with `12` (All FL zones: 121, 122, 123, 124, 129).
+*   **Downstream SWFL Filter:** `dms_dest = 129` and `trade_type = 1`
 
 ## Semantic Ledger Mapping Proposal (`brain-vocabulary.json`)
 
