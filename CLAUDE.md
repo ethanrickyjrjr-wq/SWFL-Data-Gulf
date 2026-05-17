@@ -98,6 +98,18 @@ Every brain is a self-contained black box: 4–10 branches of data go in, **one 
 7. **Spec-validator gates writes.** Every render runs through `spec-validator`, `facts-only-lint`, and `inference-bait-lint` before the `.md` is written. Failure aborts the run; the previous brain file is left intact.
 8. **Freshness token quoted on first response.** The consumption contract requires Claude to quote the freshness token verbatim on first use of a brain.
 
+### Data Tier Policy (locked 2026-05-17)
+
+Five rules that govern every new state/national dataset ingest. Lives in full at `docs/API_BLUEPRINTS.md`; summary here:
+
+1. **Three-tier storage.** Tier 1 = Supabase Storage (cheap cold layer, ~$0.021/GB/mo) for geometry + speculative tabular Parquet. Tier 2 = Postgres `data_lake.*` (~$0.125/GB/mo) — ONLY when a consuming brain ships the same sprint. Tier 3 = promoted brain-validated baselines in non-`data_lake` Postgres schemas.
+2. **Brain-first ingest gate.** No bulk ingest hits Tier 2 without its consuming brain's `PackDefinition` in the same PR. No direct Refinery SQL against `data_lake.*`.
+3. **Macro denominator chain canonical.** `macro-us` (national) → `macro-florida` (state) → `macro-swfl` (regional deltas). Every gap-\* brain declares `macro-florida` as upstream. Gap math in code, never LLM.
+4. **logistics-swfl owns FAF5; macro-\* stays economic/environmental.** Domain isolation per the `BrainDomain` union.
+5. **FAF5 cold-storage provenance.** ORNL is the archive. `data_lake.faf_flows` is a working cache with `_ingest_metadata` rows for traceability — no Postgres bill for archival.
+
+Cost rationale: a 50 GB speculative dump costs ~$1.05/mo in Tier 1 vs ~$6.25/mo in Tier 2 — multiplied across CBP, ACS, FEMA, FDOT historical the gap compounds fast.
+
 ### Build order (when adding a brain or shipping the factory)
 
 | #   | Files                                                                                                                                             | Atomic group |
