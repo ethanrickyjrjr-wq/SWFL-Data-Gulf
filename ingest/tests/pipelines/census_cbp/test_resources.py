@@ -11,6 +11,8 @@ FAKE_RESPONSE = [
 
 def _mock_get():
     m = MagicMock()
+    m.status_code = 200
+    m.text = "["
     m.json.return_value = FAKE_RESPONSE
     m.raise_for_status = MagicMock()
     return m

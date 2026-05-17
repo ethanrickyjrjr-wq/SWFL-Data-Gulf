@@ -1,7 +1,7 @@
 from datetime import date
 
-from ingest.lib.arcgis_paginator import paginate_arcgis
-from ingest.lib.storage_uploader import upload_geojson_gz, write_tier1_pointer
+from lib.arcgis_paginator import paginate_arcgis
+from lib.storage_uploader import upload_geojson_gz, write_tier1_pointer
 from .constants import LEEPA_PARCELS_URL, TABULAR_BUCKET
 
 
