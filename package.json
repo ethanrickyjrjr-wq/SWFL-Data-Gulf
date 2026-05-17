@@ -12,7 +12,8 @@
     "refinery:franchise": "bun refinery/cli.mts franchise-outcomes",
     "refinery:cre": "bun refinery/cli.mts cre-swfl",
     "refinery:typecheck": "tsc -p refinery/tsconfig.json --noEmit",
-    "ledger": "bun refinery/tools/semantic-ledger.mts"
+    "ledger": "bun refinery/tools/semantic-ledger.mts",
+    "roles": "bun refinery/tools/render-roles.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.69.0",
