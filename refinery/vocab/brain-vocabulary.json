@@ -777,6 +777,38 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Latest month's TDT collections ÷ mean collections for that same calendar month across all observed years. >1.0 = above-trend for the season; <1.0 = below-trend. Operators read this to separate true-bearish from in-trough-but-on-pace."
+    },
+
+    "logistics_inbound_freight_tons_swfl": {
+      "id": "logistics_inbound_freight_tons_swfl",
+      "prefLabel": "SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year)",
+      "altLabels": ["inbound freight tons", "SWFL freight tons inbound"],
+      "raw_slugs": ["inbound_freight_tons_swfl"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["logistics-swfl", "master"],
+      "value_type": "count",
+      "unit": "thousand tons",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "FAF5 sum of inbound domestic flows where dms_dest=129 (Remainder of Florida, the SWFL zone) and trade_type=1, reported in thousand-tons for the latest historical FAF5 year. Imports and exports are NOT included in this aggregate — see logistics_inbound_freight_value_swfl_musd for the dollar denominator."
+    },
+
+    "logistics_inbound_freight_value_swfl_musd": {
+      "id": "logistics_inbound_freight_value_swfl_musd",
+      "prefLabel": "SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year)",
+      "altLabels": ["inbound freight value", "SWFL freight value inbound"],
+      "raw_slugs": ["inbound_freight_value_swfl_musd"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["logistics-swfl", "master"],
+      "value_type": "count",
+      "unit": "millions USD",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "FAF5 sum of inbound domestic flow value, in millions of USD, for the same scope as logistics_inbound_freight_tons_swfl. Imports and exports excluded."
     }
   },
 
@@ -840,6 +872,8 @@
     "trailing_12mo_collections_usd": "hosp_tdt_trailing_12mo_collections",
     "post_ian_recovery_ratio": "hosp_tdt_post_ian_recovery_ratio",
     "seasonal_position_vs_history": "hosp_tdt_seasonal_position",
+    "inbound_freight_tons_swfl": "logistics_inbound_freight_tons_swfl",
+    "inbound_freight_value_swfl_musd": "logistics_inbound_freight_value_swfl_musd",
     "_direction_ambiguous": {
       "_note": "The raw slug 'direction' is overloaded. Resolve by field path: BrainOutput.direction → qual_sentiment_direction; BrainOutputMetric.direction → qual_metric_trajectory. Never resolve by value alone."
     }

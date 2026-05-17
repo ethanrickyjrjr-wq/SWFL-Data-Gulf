@@ -24,6 +24,7 @@ import { sectorCreditSwfl } from "./sector-credit-swfl.mts";
 import { macroUs } from "./macro-us.mts";
 import { macroFlorida } from "./macro-florida.mts";
 import { macroSwfl } from "./macro-swfl.mts";
+import { logisticsSwfl } from "./logistics-swfl.mts";
 import { master } from "./master.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
@@ -35,5 +36,6 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [macroUs.id]: macroUs,
   [macroFlorida.id]: macroFlorida,
   [macroSwfl.id]: macroSwfl,
+  [logisticsSwfl.id]: logisticsSwfl,
   [master.id]: master,
 };

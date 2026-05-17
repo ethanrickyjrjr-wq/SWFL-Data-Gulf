@@ -22,6 +22,7 @@ import { loadVocabularySync } from "../vocab/loader.mts";
 import { PACKS } from "../config/packs.mts";
 import { financeConstitution } from "../constitution/finance.mts";
 import { hospitalityConstitution } from "../constitution/hospitality.mts";
+import { logisticsConstitution } from "../constitution/logistics.mts";
 import { macroConstitution } from "../constitution/macro.mts";
 import { realEstateConstitution } from "../constitution/real-estate.mts";
 import type { Constitution } from "../constitution/types.mts";
@@ -458,6 +459,7 @@ function main(): void {
     financeConstitution,
     hospitalityConstitution,
     macroConstitution,
+    logisticsConstitution,
   ];
 
   const md = [

@@ -141,24 +141,46 @@ These are the seed constitutional rules. Section 7 plans the move from inline Ty
 
 ### 5.1 Live Brains
 
-| Brain                | Domain      | Sources                                     | Input brains                       |
-| -------------------- | ----------- | ------------------------------------------- | ---------------------------------- |
-| `franchise-outcomes` | real-estate | SBA franchise outcomes (275 brands)         | —                                  |
-| `cre-swfl`           | real-estate | `corridor_profiles` (25 corridors, 8 types) | —                                  |
-| `master`             | real-estate | Index of franchise-outcomes + cre-swfl      | `franchise-outcomes`, `cre-swfl`   |
-| `macro-swfl`         | finance     | Live FRED: SOFR, FLUR, CPI YoY, FL LFPR     | `master`                           |
-| `sector-credit-swfl` | finance     | SBA loans by NAICS × county (893 rows)      | `franchise-outcomes`, `macro-swfl` |
+Updated 2026-05-17 post-macro-restructure + logistics-swfl ship.
+
+| Brain                | Domain        | Sources                                                 | Input brains                                                |
+| -------------------- | ------------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| `franchise-outcomes` | real-estate   | SBA franchise outcomes (275 brands)                     | —                                                           |
+| `cre-swfl`           | real-estate   | `corridor_profiles` (25 corridors, 8 types)             | —                                                           |
+| `env-swfl`           | environmental | FEMA NFHL (per-county SFHA area-share, 6 SWFL counties) | —                                                           |
+| `tourism-tdt`        | hospitality   | Lee County Tourist Development Tax (FL DOR)             | —                                                           |
+| `macro-us`           | macro         | Live FRED: SOFR, US CPI YoY                             | —                                                           |
+| `macro-florida`      | macro         | Live FRED: FLUR, FL LFPR (+ planned: CBP, SOI rollups)  | `macro-us`                                                  |
+| `macro-swfl`         | macro         | _restructured to delta brain — no own sources_          | `macro-florida`                                             |
+| `sector-credit-swfl` | finance       | SBA loans by NAICS × county (893 rows)                  | `franchise-outcomes`, `macro-us`, `macro-florida`           |
+| `logistics-swfl`     | logistics     | FAF5 freight flows (inbound domestic to zone 129)       | —                                                           |
+| `master`             | real-estate   | Cross-vertical synthesizer over every leaf above        | every other brain (`env-swfl` via `veto`; rest via `input`) |
+
+**In flight / planned (designed, not yet shipped):**
+
+| Brain      | Domain       | Purpose                                                                                                           |
+| ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `gap-swfl` | demographics | SWFL vs FL deltas using IRS SOI county migration + macro-florida baseline. Will declare `macro-florida` upstream. |
+
+**`macro-swfl` restructure note:** the 2026-05-17 split moved national series (SOFR, CPI YoY) to a new `macro-us` brain and FL state series (FLUR, FL LFPR) to a new `macro-florida` brain. `macro-swfl` now consumes macro-florida and emits no own metrics — it is a chain-position placeholder until county-level BLS LAUS (Lee + Collier) is ingested. Downstream consumers needing macro context today should declare `macro-us` or `macro-florida` as direct upstreams (sector-credit-swfl already does).
 
 ### 5.2 DAG
 
 ```
-franchise-outcomes ─┐
-                    ├─→ master ─→ macro-swfl ─→ sector-credit-swfl
-cre-swfl ──────────┘                              ↑
-        (also feeds sector-credit-swfl directly ──┘)
+                       franchise-outcomes ─┐
+                                           ├─→ master
+                       cre-swfl ───────────┤
+                       env-swfl ──(veto)───┤
+                       tourism-tdt ────────┤
+                                           │
+   macro-us ─→ macro-florida ─→ macro-swfl ┤
+                  ↓                        │
+                  └─→ sector-credit-swfl ──┤
+   (sector-credit-swfl also reads macro-us directly)
+   logistics-swfl ──────────────────────────┘
 ```
 
-Longest chain: `franchise-outcomes → master → macro-swfl → sector-credit-swfl` (4 hops).
+Longest chain: `macro-us → macro-florida → macro-swfl → master` (4 hops). Sector-credit-swfl takes `macro-us` + `macro-florida` as direct upstreams (the `macro-swfl` edge was dropped in the restructure since macro-swfl emits no unique metrics yet — will be re-added when county-level data lands).
 
 ### 5.3 What Works
 
@@ -267,10 +289,11 @@ These are the moves that turn correlation into causation and turn manual runs in
 6. **Multi-agent inference.** Each brain runs as its own Claude agent in parallel; the master agent consumes their OUTPUT blocks. Same DAG, but at inference time instead of batch. Faster, fresher, more responsive to ad-hoc questions.
 7. **Fine-tuned Littlebird.** The outcomes table (seeded in NOW step 6.1.4) becomes training data. The Constitution stops being a prompt and starts being weights. The anti-inference-bait rules stop being a regex and start being learned behavior.
 8. **Additional brain domains** activated as data comes online:
-   - `environmental` — flood, storm, climate, sea-level.
-   - `demographics` — Census, migration, income trends.
-   - `logistics` — corridors as flow networks (traffic, freight, accessibility).
-   - `hospitality` — hotel ADR, STR pricing, occupancy beyond TDT.
+   - `environmental` — flood, storm, climate, sea-level. _(live: env-swfl)_
+   - `demographics` — Census, migration, income trends. _(planned: gap-swfl, IRS SOI)_
+   - `logistics` — corridors as flow networks (traffic, freight, accessibility). _(live: logistics-swfl on FAF5; planned v2: FDOT traffic counts)_
+   - `hospitality` — hotel ADR, STR pricing, occupancy beyond TDT. _(live: tourism-tdt)_
+9. **Regional brain proliferation reusing the macro chain.** The three-tier macro denominator chain (macro-us → macro-florida → macro-swfl, shipped 2026-05-17) is built for reuse. Future `macro-tampa` and `macro-jax` brains consume both `macro-us` and `macro-florida` as upstreams — zero duplication of national or state series, just the regional-specific layer. A future `macro-georgia` brain would consume `macro-us` only. The same pattern extends to gap brains: any `gap-*` brain declares `macro-florida` as its denominator upstream and computes deltas in code (never LLM). This is the architectural payoff of the restructure — every new regional or gap brain is one file + one DAG edge, not a fresh re-ingest of national context.
 
 ---
 

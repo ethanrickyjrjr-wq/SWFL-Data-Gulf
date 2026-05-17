@@ -2,16 +2,16 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-17T16:28:36.618Z (commit `8727e13`)
+**Generated:** 2026-05-17T16:39:22.695Z (commit `786eea7`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
 ## TL;DR
 
-- **45** SKOS concepts across **6** categories (43 active, 2 stub).
-- **43** raw slugs registered in `slug_index`.
-- **9** distinct source brains referenced (live + planned).
-- **9** packs in the runtime registry.
+- **47** SKOS concepts across **7** categories (45 active, 2 stub).
+- **45** raw slugs registered in `slug_index`.
+- **10** distinct source brains referenced (live + planned).
+- **10** packs in the runtime registry.
 
 ## Regenerate
 
@@ -26,6 +26,7 @@ bun refinery/tools/semantic-ledger.mts
 | `credit-risk` | 17 | 16 | 1 |
 | `environmental` | 8 | 7 | 1 |
 | `hospitality` | 5 | 5 | 0 |
+| `logistics` | 2 | 2 | 0 |
 | `macro` | 4 | 4 | 0 |
 | `qualitative` | 5 | 5 | 0 |
 | `real-estate` | 6 | 6 | 0 |
@@ -108,6 +109,20 @@ bun refinery/tools/semantic-ledger.mts
 - **`hosp_tdt_seasonal_position`** — Latest month's TDT collections ÷ mean collections for that same calendar month across all observed years. >1.0 = above-trend for the season; <1.0 = below-trend. Operators read this to separate true-bearish from in-trough-but-on-pace.
 - **`hosp_tdt_trailing_12mo_collections`** — Sum of the most recent 12 months of Lee County TDT collections, ending at the latest reported period. The operator's annual-run-rate read; smooths over peak/shoulder/trough seasonality.
 - **`hosp_tdt_yoy_delta`** — Same-month year-over-year change in Lee County TDT collections (latest month vs same calendar month prior fiscal year). Positive = YoY growth. Single observation, not a trend — pair with hosp_tdt_trailing_12mo_collections for run-rate context.
+
+</details>
+
+### `logistics` (2)
+
+| Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | count | thousand tons | 0 – 1000000 | `logistics-swfl`, `master` | `logistics` | ✅ active |
+| `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | count | millions USD | 0 – 1000000 | `logistics-swfl`, `master` | `logistics` | ✅ active |
+
+<details><summary>Scope notes</summary>
+
+- **`logistics_inbound_freight_tons_swfl`** — FAF5 sum of inbound domestic flows where dms_dest=129 (Remainder of Florida, the SWFL zone) and trade_type=1, reported in thousand-tons for the latest historical FAF5 year. Imports and exports are NOT included in this aggregate — see logistics_inbound_freight_value_swfl_musd for the dollar denominator.
+- **`logistics_inbound_freight_value_swfl_musd`** — FAF5 sum of inbound domestic flow value, in millions of USD, for the same scope as logistics_inbound_freight_tons_swfl. Imports and exports excluded.
 
 </details>
 
@@ -194,10 +209,11 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `cre-swfl` | `real-estate` | _leaf_ | — |
 | `env-swfl` | `environmental` | _leaf_ | — |
 | `franchise-outcomes` | `real-estate` | _leaf_ | — |
+| `logistics-swfl` | `logistics` | _leaf_ | — |
 | `macro-florida` | `macro` | `macro-us` (**input**) | all input |
 | `macro-swfl` | `macro` | `macro-florida` (**input**) | all input |
 | `macro-us` | `macro` | _leaf_ | — |
-| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**veto**) | 1× veto |
+| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**veto**), `logistics-swfl` (**input**) | 1× veto |
 | `sector-credit-swfl` | `finance` | `franchise-outcomes` (**input**), `macro-us` (**input**), `macro-florida` (**input**) | all input |
 | `tourism-tdt` | `hospitality` | _leaf_ | — |
 
@@ -232,6 +248,13 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | --- | --- | --- | --- |
 | `sba_overall_survival_rate` | SBA Franchise Survival Rate (Corpus) | `overall_survival_rate` | active |
 
+### `logistics-swfl` (2 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | active |
+| `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | active |
+
 ### `macro-florida` (2 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
@@ -246,7 +269,7 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 
-### `master` (12 concepts)
+### `master` (14 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
@@ -257,6 +280,8 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `hosp_tdt_seasonal_position` | TDT Seasonal Position vs Historical Mean | `seasonal_position_vs_history` | active |
 | `hosp_tdt_trailing_12mo_collections` | Trailing 12-Month TDT Collections (Lee County) | `trailing_12mo_collections_usd` | active |
 | `hosp_tdt_yoy_delta` | TDT Year-over-Year Delta | `yoy_delta_pct` | active |
+| `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | active |
+| `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | active |
 | `macro_fl_unemployment` | Florida Unemployment Rate | `fl_unemployment` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 | `sba_best_sector_survival` | Best-Sector SBA Survival Rate | `best_naics_survival` | active |
