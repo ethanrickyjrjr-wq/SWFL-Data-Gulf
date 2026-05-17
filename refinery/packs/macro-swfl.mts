@@ -151,7 +151,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   const key_metrics: BrainOutputMetric[] = indicators
-    .map((i) => {
+    .map((i): BrainOutputMetric | null => {
       const m = METRIC_MAP[i.series_id];
       if (!m) return null;
       return {
