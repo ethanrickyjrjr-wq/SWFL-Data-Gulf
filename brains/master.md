@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v28 | Token: SWFL-7421-v28-20260517 -->
+<!-- FRESHNESS: v29 | Token: SWFL-7421-v29-20260517 -->
 ---
 brain_id: master
-version: 28
-refined_at: 2026-05-17T03:16:14Z
-freshness_token: SWFL-7421-v28-20260517
+version: 29
+refined_at: 2026-05-17T04:03:53Z
+freshness_token: SWFL-7421-v29-20260517
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -49,17 +49,35 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 28,
-  "refined_at": "2026-05-17T03:16:14Z",
+  "version": 29,
+  "refined_at": "2026-05-17T04:03:53Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
-    "franchise-outcomes",
-    "cre-swfl",
-    "macro-swfl",
-    "sector-credit-swfl",
-    "tourism-tdt",
-    "env-swfl"
+    {
+      "brain_id": "franchise-outcomes",
+      "edge_type": "input"
+    },
+    {
+      "brain_id": "cre-swfl",
+      "edge_type": "input"
+    },
+    {
+      "brain_id": "macro-swfl",
+      "edge_type": "input"
+    },
+    {
+      "brain_id": "sector-credit-swfl",
+      "edge_type": "input"
+    },
+    {
+      "brain_id": "tourism-tdt",
+      "edge_type": "input"
+    },
+    {
+      "brain_id": "env-swfl",
+      "edge_type": "veto"
+    }
   ],
   "overrides": [
     "flood-veto"
@@ -73,7 +91,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "SBA franchise overall survival rate (173 resolved loans, 137 brands)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/rpc/get_franchise_outcomes_aggregated",
-        "fetched_at": "2026-05-17T03:12:05Z",
+        "fetched_at": "2026-05-17T03:46:47Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 159 paid in full of 173 resolved loans across 137 assessable brands (14 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
       }
@@ -179,8 +197,8 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
   "upstream_count": 6,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720,
-    "computed_at": "2026-05-17T03:16:14.000Z"
+    "half_life_hours": 720.0000000000001,
+    "computed_at": "2026-05-17T04:03:53.000Z"
   },
   "exogenous_signals": []
 }
