@@ -57,3 +57,8 @@ next-env.d.ts
 # dlt secrets and pipeline state (never commit credentials)
 .dlt/secrets.toml
 .dlt/.pipeline/
+
+# Python bytecode
+__pycache__/
+*.pyc
+.pytest_cache/
