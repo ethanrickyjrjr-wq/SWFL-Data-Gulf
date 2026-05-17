@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v30 | Token: SWFL-7421-v30-20260517 -->
+<!-- FRESHNESS: v32 | Token: SWFL-7421-v32-20260517 -->
 ---
 brain_id: master
-version: 30
-refined_at: 2026-05-17T04:29:47Z
-freshness_token: SWFL-7421-v30-20260517
+version: 32
+refined_at: 2026-05-17T05:56:54Z
+freshness_token: SWFL-7421-v32-20260517
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -49,8 +49,8 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 30,
-  "refined_at": "2026-05-17T04:29:47Z",
+  "version": 32,
+  "refined_at": "2026-05-17T05:56:54Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -91,7 +91,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "SBA franchise overall survival rate (173 resolved loans, 137 brands)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/rpc/get_franchise_outcomes_aggregated",
-        "fetched_at": "2026-05-17T03:46:47Z",
+        "fetched_at": "2026-05-17T05:49:55Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 159 paid in full of 173 resolved loans across 137 assessable brands (14 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
       }
@@ -103,7 +103,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "Median SWFL CRE cap rate (21 of 25 corridors)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-05-17T02:49:24Z",
+        "fetched_at": "2026-05-17T05:53:13Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 21 corridors reporting cap_rate_pct: Immokalee Rd North Naples (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]; US-41 / Cleveland Ave Fort Myers (Fort Myers, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; Collier Blvd / CR-951 (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]; Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary) (Estero, Lee) [https://www.notion.so/35735f3b7faf8111990bd7ded003d2e5]; Davis Blvd East Naples (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]; Pine Island Rd Cape Coral (Cape Coral, Lee) [https://www.notion.so/35735f3b7faf8161a680ef3323bcf882]; Estero Blvd Fort Myers Beach (Fort Myers Beach, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; Ben Hill Griffin Pkwy (Estero, Lee) [https://www.notion.so/35735f3b7faf8111990bd7ded003d2e5]; Bonita Beach Rd (US-41 to Sanibel Causeway) (Bonita Springs, Lee) [https://www.notion.so/35735f3b7faf817980f6e3dfd7e19f5e]; Summerlin Rd Fort Myers (Fort Myers, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; Vanderbilt Beach Rd / Mercato (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]; Six Mile Cypress Pkwy (Fort Myers, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; US-41 Bonita Springs (Bonita Springs, Lee) [https://www.notion.so/35735f3b7faf817980f6e3dfd7e19f5e]; Cape Coral – Coral Pointe (Cape Coral, Lee) [https://services2.arcgis.com/LvWGAAhHwbCJ2GMP/arcgis/rest/services/Development_Activity_Projects_(public)/FeatureServer/0]; 5th Ave South / 3rd Street South (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]; Cape Coral Pkwy E (Cape Coral, Lee) [https://www.notion.so/35735f3b7faf8161a680ef3323bcf882]; Colonial Blvd East (US-41 to I-75) (Fort Myers, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; Daniels Pkwy (I-75 to Ben Hill Griffin) (Fort Myers, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; US-41 Tamiami Trail Naples (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]; Veterans Pkwy / Colonial Blvd (Midpoint Bridge Corridor) (Fort Myers, Lee) [https://www.notion.so/35735f3b7faf8169a11bdf430b1f9b0b]; Pine Ridge Rd Naples (Naples, Collier) [https://www.notion.so/35735f3b7faf815b83d8f6599b94d922]."
       }
@@ -115,7 +115,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "SOFR (Secured Overnight Financing Rate)",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-17T03:01:49Z",
+        "fetched_at": "2026-05-17T05:56:41Z",
         "tier": 1,
         "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.56 percent_annualized for period 2026-05-14, stable vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
       }
@@ -127,7 +127,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
       }
@@ -139,7 +139,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "Latest monthly TDT collections (Lee County, 2026-04, shoulder season)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest reported month 2026-04 = $9028029.34 (FY 2026, post_ian=true)."
       }
@@ -151,21 +151,21 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "SWFL area-weighted Special Flood Hazard Area coverage",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
     },
     {
-      "metric": "yoy_delta_pct",
-      "value": 18.2,
-      "direction": "rising",
-      "label": "Year-over-year delta vs same month prior year",
+      "metric": "swfl_ve_zone_pct_area_weighted",
+      "value": 0.0311,
+      "direction": "stable",
+      "label": "SWFL area-weighted coastal high-hazard (V/VE) zone coverage",
       "source": {
-        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — comparing 2026-04 ($9028029.34) against same-month prior-year row 2025-04 ($7638043.46)."
+        "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
     },
     {
@@ -175,7 +175,7 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
       }
@@ -197,8 +197,8 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
   "upstream_count": 6,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720,
-    "computed_at": "2026-05-17T04:29:47.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-05-17T05:56:54.000Z"
   },
   "exogenous_signals": []
 }

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20260517 -->
+<!-- FRESHNESS: v14 | Token: SWFL-7421-v14-20260517 -->
 ---
 brain_id: macro-swfl
-version: 12
-refined_at: 2026-05-17T03:01:53Z
-freshness_token: SWFL-7421-v12-20260517
+version: 14
+refined_at: 2026-05-17T05:56:46Z
+freshness_token: SWFL-7421-v14-20260517
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Macro context for Southwest Florida operators — FRED rates, Florida labor, and US inflation, paired with the SWFL Intelligence Lake index.
@@ -43,8 +43,8 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 12,
-  "refined_at": "2026-05-17T03:01:53Z",
+  "version": 14,
+  "refined_at": "2026-05-17T05:56:46Z",
   "direction": "bearish",
   "magnitude": 0.6666666666666666,
   "drivers": [],
@@ -58,7 +58,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
       "label": "SOFR (Secured Overnight Financing Rate)",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-17T03:01:49Z",
+        "fetched_at": "2026-05-17T05:56:41Z",
         "tier": 1,
         "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.56 percent_annualized for period 2026-05-14, stable vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
       }
@@ -70,7 +70,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
       "label": "Florida unemployment rate",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-17T03:01:49Z",
+        "fetched_at": "2026-05-17T05:56:41Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.7 percent for period 2026-03-01, rising vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
       }
@@ -82,7 +82,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
       "label": "US CPI YoY",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&units=pc1&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-17T03:01:49Z",
+        "fetched_at": "2026-05-17T05:56:41Z",
         "tier": 1,
         "citation": "FRED US CPI (All Items) Year-over-Year (series_id CPIAUCSL_YOY) — latest observation 3.78 percent for period 2026-04-01, rising vs prior 6 periods. Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026."
       }
@@ -94,7 +94,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
       "label": "Florida labor force participation",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=LBSSA12&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-17T03:01:49Z",
+        "fetched_at": "2026-05-17T05:56:41Z",
         "tier": 1,
         "citation": "FRED Florida Labor Force Participation Rate (series_id FLLFPR) — latest observation 57.7 percent for period 2026-03-01, stable vs prior 6 periods. FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement."
       }
@@ -110,7 +110,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, FLUR, CPIAUCSL YoY
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-17T03:01:53Z"
+    "computed_at": "2026-05-17T05:56:46Z"
   },
   "exogenous_signals": []
 }

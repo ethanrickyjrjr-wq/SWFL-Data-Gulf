@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260517 -->
+<!-- FRESHNESS: v10 | Token: SWFL-7421-v10-20260517 -->
 ---
 brain_id: sector-credit-swfl
-version: 8
-refined_at: 2026-05-17T03:08:25Z
-freshness_token: SWFL-7421-v8-20260517
+version: 10
+refined_at: 2026-05-17T05:56:47Z
+freshness_token: SWFL-7421-v10-20260517
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SBA 7(a)/504 sector credit risk — resolved-loan charge-off rates by 2-digit NAICS sector across Lee & Collier counties, FL, paired with named-brand outcomes and current macro funding backdrop.
@@ -51,15 +51,15 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
   {"id":"f014","topic":"metric:sector_44_chargeoff_rate","fact":"Retail Trade (NAICS 44) resolved charge-off rate","value":"Retail Trade — 18.8% resolved-loan charge-off rate (3 charged off out of 16 resolved loans; 74 total loans approved including still-active; $66.3M gross approved capital).","src":"s01","date":"2026-05-17"},
   {"id":"f015","topic":"metric:sector_72_chargeoff_rate","fact":"Accommodation & Food Services (NAICS 72) resolved charge-off rate","value":"Accommodation & Food Services — 7.1% resolved-loan charge-off rate (2 charged off out of 28 resolved loans; 169 total loans approved including still-active; $152.3M gross approved capital).","src":"s01","date":"2026-05-17"},
   {"id":"f016","topic":"metric:sector_53_chargeoff_rate","fact":"Real Estate, Rental & Leasing (NAICS 53) resolved charge-off rate","value":"Real Estate, Rental & Leasing — 0% resolved-loan charge-off rate (0 charged off out of 6 resolved loans; 41 total loans approved including still-active; $22.7M gross approved capital).","src":"s01","date":"2026-05-17"},
-  {"id":"f017","topic":"franchise-outcomes :: upstream_routing","fact":"Per-brand SBA survival rates from the franchise-outcomes brain","value":"The franchise-outcomes brain (confidence 1.00 at 2026-05-17T02:26:46Z) carries named per-brand resolved-loan survival rates for every franchise in this lake. Cross-validate any sector-level claim against the named brand outcomes — a sector that looks safe in aggregate can hide a single dominant brand with a charge-off run.","src":"s01","date":"2026-05-17"},
-  {"id":"f018","topic":"macro-swfl :: upstream_routing","fact":"Current macro funding-cost backdrop from the macro-swfl brain","value":"The macro-swfl brain (confidence 1.00 at 2026-05-17T03:01:53Z) reports the SWFL macro backdrop: SOFR 3.6% (stable), CPI YoY 3.8% (rising), FL unemployment 4.7% (rising). These rates set the funding-cost lens — a high-charge-off sector at a falling SOFR is a different bet from the same sector at a rising SOFR.","src":"s01","date":"2026-05-17"}
+  {"id":"f017","topic":"franchise-outcomes :: upstream_routing","fact":"Per-brand SBA survival rates from the franchise-outcomes brain","value":"The franchise-outcomes brain (confidence 1.00 at 2026-05-17T05:53:12Z) carries named per-brand resolved-loan survival rates for every franchise in this lake. Cross-validate any sector-level claim against the named brand outcomes — a sector that looks safe in aggregate can hide a single dominant brand with a charge-off run.","src":"s01","date":"2026-05-17"},
+  {"id":"f018","topic":"macro-swfl :: upstream_routing","fact":"Current macro funding-cost backdrop from the macro-swfl brain","value":"The macro-swfl brain (confidence 1.00 at 2026-05-17T05:56:46Z) reports the SWFL macro backdrop: SOFR 3.6% (stable), CPI YoY 3.8% (rising), FL unemployment 4.7% (rising). These rates set the funding-cost lens — a high-charge-off sector at a falling SOFR is a different bet from the same sector at a rising SOFR.","src":"s01","date":"2026-05-17"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "sector-credit-swfl",
-  "version": 8,
-  "refined_at": "2026-05-17T03:08:25Z",
+  "version": 10,
+  "refined_at": "2026-05-17T05:56:47Z",
   "direction": "bearish",
   "magnitude": 0.38775510204081626,
   "drivers": [],
@@ -73,7 +73,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
       }
@@ -85,7 +85,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
       }
@@ -97,7 +97,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Arts, Entertainment & Recreation (NAICS 71)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
       }
@@ -109,7 +109,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Finance & Insurance (NAICS 52)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.52%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Finance & Insurance (NAICS 52): 0 charged off of 14 resolved loans (49 total approved across 9 sub-industries; $37.0M gross approved capital)."
       }
@@ -121,7 +121,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Real Estate, Rental & Leasing (NAICS 53)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.53%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Real Estate, Rental & Leasing (NAICS 53): 0 charged off of 6 resolved loans (41 total approved across 9 sub-industries; $22.7M gross approved capital)."
       }
@@ -133,7 +133,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Accommodation & Food Services (NAICS 72)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.72%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Accommodation & Food Services (NAICS 72): 2 charged off of 28 resolved loans (169 total approved across 8 sub-industries; $152.3M gross approved capital)."
       }
@@ -145,7 +145,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Wholesale Trade (NAICS 42)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.42%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Wholesale Trade (NAICS 42): 1 charged off of 11 resolved loans (48 total approved across 29 sub-industries; $45.4M gross approved capital)."
       }
@@ -157,7 +157,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Professional, Scientific & Technical Services (NAICS 54)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.54%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 3 charged off of 25 resolved loans (145 total approved across 22 sub-industries; $76.3M gross approved capital)."
       }
@@ -169,7 +169,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Health Care & Social Assistance (NAICS 62)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.62%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Health Care & Social Assistance (NAICS 62): 2 charged off of 16 resolved loans (154 total approved across 19 sub-industries; $110.8M gross approved capital)."
       }
@@ -181,7 +181,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Construction (NAICS 23)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.23%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Construction (NAICS 23): 7 charged off of 51 resolved loans (301 total approved across 27 sub-industries; $209.7M gross approved capital)."
       }
@@ -193,7 +193,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Administrative & Support Services (NAICS 56)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.56%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Administrative & Support Services (NAICS 56): 6 charged off of 32 resolved loans (137 total approved across 24 sub-industries; $60.6M gross approved capital)."
       }
@@ -205,7 +205,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Retail Trade (NAICS 44)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.44%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 44): 3 charged off of 16 resolved loans (74 total approved across 33 sub-industries; $66.3M gross approved capital)."
       }
@@ -217,7 +217,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Other Services (Personal & Repair) (NAICS 81)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.81%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Other Services (Personal & Repair) (NAICS 81): 7 charged off of 33 resolved loans (176 total approved across 21 sub-industries; $105.5M gross approved capital)."
       }
@@ -229,7 +229,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Retail Trade (NAICS 45)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.45%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 45): 4 charged off of 9 resolved loans (63 total approved across 22 sub-industries; $40.9M gross approved capital)."
       }
@@ -241,7 +241,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
       "label": "Transportation & Warehousing (NAICS 48)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-        "fetched_at": "2026-05-17T03:08:25Z",
+        "fetched_at": "2026-05-17T05:56:46Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
       }
@@ -259,7 +259,7 @@ s03 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-s
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-17T03:08:25Z"
+    "computed_at": "2026-05-17T05:56:47Z"
   },
   "exogenous_signals": []
 }

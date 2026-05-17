@@ -23,6 +23,7 @@
 import type { BrainDomain } from "../types/pack.mts";
 import type { Constitution } from "./types.mts";
 import { financeConstitution } from "./finance.mts";
+import { hospitalityConstitution } from "./hospitality.mts";
 import { realEstateConstitution } from "./real-estate.mts";
 
 /**
@@ -33,6 +34,7 @@ import { realEstateConstitution } from "./real-estate.mts";
 const REGISTRY: Partial<Record<BrainDomain, Constitution>> = {
   "real-estate": realEstateConstitution,
   finance: financeConstitution,
+  hospitality: hospitalityConstitution,
 };
 
 /**

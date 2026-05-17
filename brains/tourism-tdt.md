@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260517 -->
+<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260517 -->
 ---
 brain_id: tourism-tdt
-version: 5
-refined_at: 2026-05-17T03:10:35Z
-freshness_token: SWFL-7421-v5-20260517
+version: 7
+refined_at: 2026-05-17T05:56:47Z
+freshness_token: SWFL-7421-v7-20260517
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: Lee County hospitality pulse — monthly Tourist Development Tax (TDT) collections from the Florida Department of Revenue, with seasonal, year-over-year, and post-Hurricane-Ian recovery context for accommodation / food-service operators.
@@ -44,8 +44,8 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
 --- OUTPUT ---
 {
   "brain_id": "tourism-tdt",
-  "version": 5,
-  "refined_at": "2026-05-17T03:10:35Z",
+  "version": 7,
+  "refined_at": "2026-05-17T05:56:47Z",
   "direction": "bullish",
   "magnitude": 0.55,
   "drivers": [],
@@ -59,7 +59,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "label": "Latest monthly TDT collections (Lee County, 2026-04, shoulder season)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest reported month 2026-04 = $9028029.34 (FY 2026, post_ian=true)."
       }
@@ -71,7 +71,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "label": "Year-over-year delta vs same month prior year",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — comparing 2026-04 ($9028029.34) against same-month prior-year row 2025-04 ($7638043.46)."
       }
@@ -83,7 +83,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "label": "Trailing 12-month TDT collections total",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — sum of trailing 12-month window: 2025-05 → 2026-04 (12 months)."
       }
@@ -95,7 +95,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "label": "Post-Hurricane-Ian recovery ratio (trailing 12mo ÷ best pre-Ian 12mo)",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — trailing 12-month total (2025-05 → 2026-04 (12 months)) divided by best pre-Ian 12-month window ($67734797.04; Ian landfall 2022-09-28 → FY2023+ treated as post-Ian)."
       }
@@ -107,7 +107,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "label": "Seasonal position vs same-month historical mean",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd",
-        "fetched_at": "2026-05-17T03:10:35Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly rows fetched: 2012-10 → 2026-04); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest month 2026-04 ($9028029.34) vs same-calendar-month mean across 14 observed years."
       }
@@ -123,7 +123,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-17T03:10:35Z"
+    "computed_at": "2026-05-17T05:56:47Z"
   },
   "exogenous_signals": []
 }

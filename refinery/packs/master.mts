@@ -43,11 +43,13 @@ import { computeConfidence } from "../lib/confidence.mts";
  * Relevance floor: 0.10 (constitution default).
  */
 
-// Master loads only the constitutions that have rule files today. tourism-tdt
-// (hospitality) flows through vote/cascade/rollup with the default treatment;
-// adding `refinery/constitution/hospitality.mts` then bumping this array is a
-// clean follow-up that doesn't block the §6.4 acceptance test.
-const MASTER_DOMAINS: BrainDomain[] = ["real-estate", "finance"];
+// Master loads all four domain constitutions. Order matters only as a
+// readability hint — loadConstitution() unions domains and re-sorts the
+// override cascade by priority (descending) regardless of input order. The
+// effective cascade after merge: exogenous-critical-confirmed (100) →
+// flood-veto (90) → naics-distress-veto (80) → rising-rates-dominance (70)
+// → hospitality-recovery-collapse (65) → hospitality-yoy-collapse (60).
+const MASTER_DOMAINS: BrainDomain[] = ["real-estate", "finance", "hospitality"];
 
 // Per-pipeline-run state — populated by corpusSummary, consumed by producer.
 // Same pattern as macro-swfl: typed upstream OUTPUTs cannot survive in

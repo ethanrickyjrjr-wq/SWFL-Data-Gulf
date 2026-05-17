@@ -2,7 +2,7 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-17T04:32:41.230Z (commit `d4e710f`)
+**Generated:** 2026-05-17T08:36:42.601Z (commit `78fdc6a`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
@@ -298,8 +298,10 @@ Higher priority wins. Effect `force_signal_direction` tracks the originating sig
 | 90 | `flood-veto` | `force_bearish` | `real-estate` |
 | 80 | `naics-distress-veto` | `force_bearish` | `real-estate` |
 | 70 | `rising-rates-dominance` | `force_bearish` | `finance` |
+| 65 | `hospitality-recovery-collapse` | `force_bearish` | `hospitality` |
+| 60 | `hospitality-yoy-collapse` | `force_bearish` | `hospitality` |
 
-_Source: `refinery/constitution/{real-estate,finance}.mts` — see those files for the predicate code and threshold values._
+_Source: `refinery/constitution/{real-estate,finance,hospitality}.mts` — see those files for the predicate code and threshold values._
 
 ## Trust tiers (confidence weights)
 

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260517 -->
+<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260517 -->
 ---
 brain_id: env-swfl
-version: 2
-refined_at: 2026-05-17T02:30:05Z
-freshness_token: SWFL-7421-v2-20260517
+version: 4
+refined_at: 2026-05-17T05:56:54Z
+freshness_token: SWFL-7421-v4-20260517
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Southwest Florida flood-hazard exposure — area-weighted aggregates of FEMA National Flood Hazard Layer (NFHL) Flood Hazard Zones across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota), with coastal V/VE high-hazard breakouts for barrier-island / flood-veto consumers.
@@ -45,8 +45,8 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
 --- OUTPUT ---
 {
   "brain_id": "env-swfl",
-  "version": 2,
-  "refined_at": "2026-05-17T02:30:05Z",
+  "version": 4,
+  "refined_at": "2026-05-17T05:56:54Z",
   "direction": "bearish",
   "magnitude": 0.8,
   "drivers": [],
@@ -60,7 +60,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "SWFL area-weighted Special Flood Hazard Area coverage",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -72,7 +72,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "SWFL area-weighted coastal high-hazard (V/VE) zone coverage",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -84,7 +84,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "SWFL count of distinct coastal high-hazard (V/VE) polygons",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -96,7 +96,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "Lee County area-weighted SFHA coverage (Fort Myers Beach context)",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
       }
@@ -108,7 +108,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "Lee County area-weighted coastal high-hazard (V/VE) coverage",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
       }
@@ -120,7 +120,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "Collier County area-weighted SFHA coverage (Naples / Marco Island context)",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
       }
@@ -132,7 +132,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
       "label": "Collier County area-weighted coastal high-hazard (V/VE) coverage",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-05-17T02:29:58Z",
+        "fetched_at": "2026-05-17T05:56:47Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
       }
@@ -150,7 +150,7 @@ s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWF
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-17T02:30:05Z"
+    "computed_at": "2026-05-17T05:56:54Z"
   },
   "exogenous_signals": []
 }

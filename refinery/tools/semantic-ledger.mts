@@ -21,6 +21,7 @@ import path from "node:path";
 import { loadVocabularySync } from "../vocab/loader.mts";
 import { PACKS } from "../config/packs.mts";
 import { financeConstitution } from "../constitution/finance.mts";
+import { hospitalityConstitution } from "../constitution/hospitality.mts";
 import { realEstateConstitution } from "../constitution/real-estate.mts";
 import type { Constitution } from "../constitution/types.mts";
 import type { VocabConcept } from "../stages/2.5-normalize.mts";
@@ -322,7 +323,7 @@ function buildOverrides(constitutions: Constitution[]): string {
   }
   out.push("");
   out.push(
-    "_Source: `refinery/constitution/{real-estate,finance}.mts` — see those files for the predicate code and threshold values._",
+    "_Source: `refinery/constitution/{real-estate,finance,hospitality}.mts` — see those files for the predicate code and threshold values._",
   );
   out.push("");
   return out.join("\n");
@@ -454,6 +455,7 @@ function main(): void {
   const constitutions: Constitution[] = [
     realEstateConstitution,
     financeConstitution,
+    hospitalityConstitution,
   ];
 
   const md = [
