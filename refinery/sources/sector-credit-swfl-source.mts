@@ -76,6 +76,14 @@ export interface SectorCreditNormalized {
   total_approved: number;
   /** Charge-offs / (charge-offs + paid-in-full). null when nothing resolved yet. */
   chargeoff_rate_resolved: number | null;
+  /**
+   * FY lower bound the source actually queried (sinceFy). Stamped here so the
+   * pack's outputProducer can reconstruct the exact PostgREST query URL the
+   * source ran, without re-computing the lookback formula and drifting from
+   * the actual fetch. Fixture mode stamps the oldest approval_fy seen in the
+   * fixture so the receipt URL still accurately bounds the data.
+   */
+  since_fy: number;
 }
 
 function toNum(v: unknown): number {
@@ -90,6 +98,7 @@ function isSwflCounty(s: string): s is SwflCounty {
 
 function normalize(
   row: Record<string, unknown>,
+  since_fy: number,
 ): SectorCreditNormalized | null {
   const countyRawUpper = String(row.project_county ?? "")
     .trim()
@@ -114,6 +123,7 @@ function normalize(
     total_approved: toNum(row.total_approved),
     chargeoff_rate_resolved:
       resolved === 0 ? null : (n_chargeoffs / resolved) * 100,
+    since_fy,
   };
 }
 
@@ -128,8 +138,22 @@ async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   return rows as Record<string, unknown>[];
 }
 
-async function fetchRows(): Promise<Record<string, unknown>[]> {
-  if (env.source === "fixture") return loadFixtureRows();
+interface FetchResult {
+  rows: Record<string, unknown>[];
+  since_fy: number;
+}
+
+async function fetchRows(): Promise<FetchResult> {
+  if (env.source === "fixture") {
+    const rows = await loadFixtureRows();
+    // Stamp the oldest approval_fy in the fixture so the receipt URL still
+    // accurately bounds the fixture data.
+    const fys = rows
+      .map((r) => Number(r.approval_fy))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const since_fy = fys.length > 0 ? Math.min(...fys) : 0;
+    return { rows, since_fy };
+  }
 
   // Live: query the MV directly. Recent 6 fiscal years keeps the corpus to
   // the post-COVID window where loan-status data is mature enough to compute
@@ -153,18 +177,18 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
         "If the MV is empty, run REFRESH MATERIALIZED VIEW sba_loans_by_naics_county;",
     );
   }
-  return rows;
+  return { rows, since_fy: sinceFy };
 }
 
 export const sectorCreditSwflSource: SourceConnector = {
   source_id: SOURCE_ID,
   trust_tier: 1, // SBA federal — primary source
   async fetch(): Promise<RawFragment[]> {
-    const rows = await fetchRows();
+    const { rows, since_fy } = await fetchRows();
     const fetched_at = isoTimestamp();
     return rows
       .map((row): RawFragment<SectorCreditNormalized> | null => {
-        const normalized = normalize(row);
+        const normalized = normalize(row, since_fy);
         if (!normalized) return null;
         return {
           fragment_id: fragmentId(

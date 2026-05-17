@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v25 | Token: SWFL-7421-v25-20260517 -->
+<!-- FRESHNESS: v26 | Token: SWFL-7421-v26-20260517 -->
 ---
 brain_id: master
-version: 25
-refined_at: 2026-05-17T03:01:56Z
-freshness_token: SWFL-7421-v25-20260517
+version: 26
+refined_at: 2026-05-17T03:08:28Z
+freshness_token: SWFL-7421-v26-20260517
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -49,8 +49,8 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 25,
-  "refined_at": "2026-05-17T03:01:56Z",
+  "version": 26,
+  "refined_at": "2026-05-17T03:08:28Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -100,7 +100,13 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       "metric": "best_naics_survival",
       "value": 100,
       "direction": "stable",
-      "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate"
+      "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
+        "fetched_at": "2026-05-17T03:08:25Z",
+        "tier": 1,
+        "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
+      }
     },
     {
       "metric": "latest_monthly_collections_usd",
@@ -121,6 +127,18 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
       }
     },
     {
+      "metric": "worst_naics_chargeoff",
+      "value": 57.1,
+      "direction": "stable",
+      "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
+        "fetched_at": "2026-05-17T03:08:25Z",
+        "tier": 1,
+        "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
+      }
+    },
+    {
       "metric": "fl_unemployment",
       "value": 4.7,
       "direction": "rising",
@@ -130,18 +148,6 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
         "fetched_at": "2026-05-17T03:01:49Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.7 percent for period 2026-03-01, rising vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
-      }
-    },
-    {
-      "metric": "swfl_ve_zone_pct_area_weighted",
-      "value": 0.0311,
-      "direction": "stable",
-      "label": "SWFL area-weighted coastal high-hazard (V/VE) zone coverage",
-      "source": {
-        "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-05-17T02:29:58Z",
-        "tier": 1,
-        "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
     }
   ],
@@ -161,8 +167,8 @@ s06 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl 
   "upstream_count": 6,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-05-17T03:01:56.000Z"
+    "half_life_hours": 720,
+    "computed_at": "2026-05-17T03:08:28.000Z"
   },
   "exogenous_signals": []
 }

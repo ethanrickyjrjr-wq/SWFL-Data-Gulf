@@ -5,6 +5,7 @@ import type {
   BrainOutput,
   BrainOutputDirection,
   BrainOutputMetric,
+  BrainOutputMetricSource,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
 import {
@@ -15,6 +16,7 @@ import {
   makeBrainInputSource,
   type BrainInputNormalized,
 } from "../sources/brain-input-source.mts";
+import { env } from "../config/env.mts";
 
 /**
  * sector-credit-swfl — "What sectors should I lend into in SWFL right now?"
@@ -53,6 +55,51 @@ interface SectorAggregate {
 let lastSectors: SectorAggregate[] = [];
 let lastFranchiseOutput: BrainOutput | null = null;
 let lastMacroOutput: BrainOutput | null = null;
+
+let lastFetchedAt: string | null = null;
+
+let lastSinceFy: number | null = null;
+
+/**
+ * Build the per-metric receipt for a sector-credit metric. URL is the live
+ * Brains Supabase PostgREST query the source ran (county + FY filter +
+ * optional naics_code prefix when narrowing to a single 2-digit sector).
+ * Citation names the contributing sector, resolved-loan denominator, FY
+ * span, and underlying federal source so the receipt is self-contained.
+ */
+function buildSectorSource(
+  scope:
+    | { kind: "swfl_all" }
+    | { kind: "sector"; naics_2digit: string; label: string },
+  sector: SectorAggregate | null,
+  fetched_at: string,
+  since_fy: number,
+): BrainOutputMetricSource {
+  const fyClause = `&approval_fy=gte.${since_fy}`;
+  const countyClause = "&project_county=in.(LEE,COLLIER)";
+  const naicsClause =
+    scope.kind === "sector" ? `&naics_code=like.${scope.naics_2digit}%25` : "";
+  const url =
+    env.source === "live" && env.supabaseUrl
+      ? `${env.supabaseUrl}/rest/v1/sba_loans_by_naics_county?select=*${countyClause}${fyClause}${naicsClause}`
+      : `fixture://refinery/__fixtures__/sector-credit-swfl.sample.json${
+          scope.kind === "sector" ? `#naics_2digit=${scope.naics_2digit}` : ""
+        }`;
+  const fySpan = `FY ${since_fy}+`;
+  const sectorDetail =
+    sector !== null
+      ? ` — ${sector.label} (NAICS ${sector.naics_2digit}): ${sector.n_chargeoffs} charged off of ${sector.resolved} resolved loans (${sector.n_loans_total} total approved across ${sector.sample_brands} sub-industries; $${(sector.total_approved / 1_000_000).toFixed(1)}M gross approved capital)`
+      : "";
+  const citation =
+    `SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV ` +
+    `(Lee + Collier counties, ${fySpan}); federal source: Small Business Administration loan-status reporting${sectorDetail}.`;
+  return {
+    url,
+    fetched_at,
+    tier: 1,
+    citation,
+  };
+}
 
 /** 2-digit NAICS → human-readable major sector label. */
 const NAICS_2DIGIT_LABEL: Record<string, string> = {
@@ -167,6 +214,17 @@ function sectorCreditCorpusSummary(
   lastSectors = aggregateBySector(rows);
   lastFranchiseOutput = franchise;
   lastMacroOutput = macro;
+
+  // Capture fetched_at + since_fy from the first sector-credit row so the
+  // outputProducer can rebuild the exact PostgREST query URL the source ran.
+  const firstRow = rows[0];
+  const sectorFragment = allFragments.find(
+    (f) =>
+      (f.normalized as unknown as SectorCreditNormalized)?.kind ===
+      "sector-credit-row",
+  );
+  lastFetchedAt = sectorFragment?.fetched_at ?? null;
+  lastSinceFy = firstRow?.since_fy ?? null;
 
   if (rows.length === 0) return [];
 
@@ -291,6 +349,9 @@ function sectorCreditOutputProducer(
   const sectors = lastSectors;
   const macro = lastMacroOutput;
   const franchise = lastFranchiseOutput;
+  const fetched_at =
+    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const since_fy = lastSinceFy ?? new Date().getUTCFullYear() - 6;
 
   const rankable = sectors.filter((s) => s.resolved >= RANKING_MIN_RESOLVED);
   const sortedSafe = [...rankable].sort(
@@ -312,6 +373,12 @@ function sectorCreditOutputProducer(
       value: Math.round((100 - best.rate_resolved) * 10) / 10,
       direction: "stable",
       label: `${best.label} (NAICS ${best.naics_2digit}) — best SWFL SBA survival rate`,
+      source: buildSectorSource(
+        { kind: "sector", naics_2digit: best.naics_2digit, label: best.label },
+        best,
+        fetched_at,
+        since_fy,
+      ),
     });
   }
   if (sortedRisk.length > 0) {
@@ -321,6 +388,16 @@ function sectorCreditOutputProducer(
       value: Math.round(worst.rate_resolved * 10) / 10,
       direction: "stable",
       label: `${worst.label} (NAICS ${worst.naics_2digit}) — worst SWFL SBA charge-off rate`,
+      source: buildSectorSource(
+        {
+          kind: "sector",
+          naics_2digit: worst.naics_2digit,
+          label: worst.label,
+        },
+        worst,
+        fetched_at,
+        since_fy,
+      ),
     });
   }
 
@@ -335,6 +412,12 @@ function sectorCreditOutputProducer(
         value: Math.round(s.rate_resolved * 10) / 10,
         direction: "stable",
         label: `${s.label} (NAICS ${s.naics_2digit})`,
+        source: buildSectorSource(
+          { kind: "sector", naics_2digit: s.naics_2digit, label: s.label },
+          s,
+          fetched_at,
+          since_fy,
+        ),
       }),
     );
 
