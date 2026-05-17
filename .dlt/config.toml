@@ -1,0 +1,3 @@
+[pipeline]
+pipeline_name = "faf5"
+dataset_name = "data_lake"

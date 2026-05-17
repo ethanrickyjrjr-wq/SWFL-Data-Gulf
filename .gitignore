@@ -53,3 +53,7 @@ next-env.d.ts
 
 # Serena MCP project memories (local, re-onboarded per-environment)
 .serena/
+
+# dlt secrets and pipeline state (never commit credentials)
+.dlt/secrets.toml
+.dlt/.pipeline/
