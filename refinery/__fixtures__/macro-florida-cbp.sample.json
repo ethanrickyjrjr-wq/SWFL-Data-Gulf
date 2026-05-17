@@ -1,0 +1,89 @@
+{
+  "__meta": {
+    "source": "Census Bureau CBP (synthetic fixture — not for production analysis)",
+    "verified": "2026-05-17",
+    "note": "Florida state-level CBP aggregates (all counties summed). 10 representative NAICS sectors."
+  },
+  "sectors": [
+    {
+      "naics_code": "44-45",
+      "naics_label": "Retail Trade",
+      "fl_establishments": 52000,
+      "fl_employment": 580000,
+      "fl_annual_payroll": 13000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "72",
+      "naics_label": "Accommodation and Food Services",
+      "fl_establishments": 40000,
+      "fl_employment": 650000,
+      "fl_annual_payroll": 11000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "23",
+      "naics_label": "Construction",
+      "fl_establishments": 38000,
+      "fl_employment": 310000,
+      "fl_annual_payroll": 16000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "62",
+      "naics_label": "Health Care and Social Assistance",
+      "fl_establishments": 35000,
+      "fl_employment": 550000,
+      "fl_annual_payroll": 26000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "54",
+      "naics_label": "Professional, Scientific, and Technical Services",
+      "fl_establishments": 48000,
+      "fl_employment": 360000,
+      "fl_annual_payroll": 27000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "52",
+      "naics_label": "Finance and Insurance",
+      "fl_establishments": 22000,
+      "fl_employment": 210000,
+      "fl_annual_payroll": 19000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "56",
+      "naics_label": "Administrative and Support and Waste Management",
+      "fl_establishments": 20000,
+      "fl_employment": 380000,
+      "fl_annual_payroll": 10000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "53",
+      "naics_label": "Real Estate and Rental and Leasing",
+      "fl_establishments": 30000,
+      "fl_employment": 100000,
+      "fl_annual_payroll": 5000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "31-33",
+      "naics_label": "Manufacturing",
+      "fl_establishments": 14000,
+      "fl_employment": 280000,
+      "fl_annual_payroll": 16000000,
+      "year": 2022
+    },
+    {
+      "naics_code": "42",
+      "naics_label": "Wholesale Trade",
+      "fl_establishments": 16000,
+      "fl_employment": 190000,
+      "fl_annual_payroll": 13000000,
+      "year": 2022
+    }
+  ]
+}
