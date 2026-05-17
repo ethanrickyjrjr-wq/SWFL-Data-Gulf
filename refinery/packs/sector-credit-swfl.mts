@@ -562,7 +562,10 @@ export const sectorCreditSwfl: PackDefinition = {
     makeBrainInputSource("franchise-outcomes"),
     makeBrainInputSource("macro-swfl"),
   ],
-  input_brains: ["franchise-outcomes", "macro-swfl"],
+  input_brains: [
+    { id: "franchise-outcomes", edge_type: "input" },
+    { id: "macro-swfl", edge_type: "input" },
+  ],
   // Every SBA row matters; rows with no resolved loans still belong (the sector
   // may have resolved data elsewhere). Brain-input fragments bypass via the
   // generic always-keep score.

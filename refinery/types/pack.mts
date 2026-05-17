@@ -35,6 +35,45 @@ export type BrainDomain =
  */
 export type TrustTier = 1 | 2 | 3 | 4;
 
+/**
+ * BrainEdgeType — how an upstream brain relates to its downstream consumer.
+ *
+ *   "input":      consumed as data. The default; covers ~every leaf → master edge today.
+ *   "constraint": bounds the downstream's conclusion space (e.g. caps magnitude,
+ *                 forbids a direction) without flipping it outright.
+ *   "veto":       can flip the downstream's direction unilaterally. env-swfl → master
+ *                 carries this today via flood-veto in the real-estate constitution.
+ *   "modifier":   adjusts magnitude or confidence but never direction.
+ *
+ * Surfaced inline in `BrainOutput.drivers` so a disputant can ask
+ *   "did env-swfl *veto* this conclusion or just *influence* it?"
+ * and the answer is in the receipt, not the code.
+ */
+export type BrainEdgeType = "input" | "constraint" | "veto" | "modifier";
+
+/**
+ * A typed DAG edge from a downstream pack to one of its upstream brains.
+ * Replaces the bare-string `input_brains: string[]` shape.
+ */
+export interface BrainEdge {
+  /** Upstream brain id — must exist as a key in PACKS at build time. */
+  id: string;
+  /** Edge semantic. See `BrainEdgeType` for the meaning of each value. */
+  edge_type: BrainEdgeType;
+}
+
+/**
+ * Convenience constructor for `BrainEdge`. Defaults `edge_type` to `"input"` so
+ * the common case stays terse:
+ *   input_brains: [edge("franchise-outcomes"), edge("env-swfl", "veto")]
+ */
+export function edge(
+  id: string,
+  edge_type: BrainEdgeType = "input",
+): BrainEdge {
+  return { id, edge_type };
+}
+
 /** A row in the spec-v1.1 CITATION TABLE. */
 export interface CitationRow {
   /** s01, s02, ... */
@@ -89,11 +128,13 @@ export interface PackDefinition {
   ttl_seconds: number;
   sources: SourceConnector[];
   /**
-   * Ids of upstream brains this pack consumes via BrainInputSource. The DAG
-   * resolver uses this to compute build order. Empty array = no upstream
-   * dependencies. Replaces the deprecated `subBrainPointers` mechanism.
+   * Typed DAG edges to upstream brains this pack consumes via BrainInputSource.
+   * The DAG resolver reads `.id` for build order; the renderer surfaces
+   * `.edge_type` inline in OUTPUT.drivers so consumers see edge semantics in
+   * the receipt. Empty array = leaf brain. Replaces the deprecated
+   * `subBrainPointers` mechanism.
    */
-  input_brains: string[];
+  input_brains: BrainEdge[];
   /** deterministic pack-fit score for a fragment (reinterpreted routing_score) */
   fitScore: (fragment: RawFragment) => number;
   /** optional composite-cutoff override; falls back to COMPOSITE_CUTOFF */

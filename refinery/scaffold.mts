@@ -179,10 +179,15 @@ function renderPackTemplate(args: ScaffoldArgs): string {
   const inputBrainSources = inputBrains
     .map((u) => `    makeBrainInputSource(${JSON.stringify(u)}),`)
     .join("\n");
+  // Scaffold defaults every edge to `edge_type: "input"` — the safe default.
+  // Authors lift specific edges to "veto" / "constraint" / "modifier" by hand
+  // after scaffolding, once the semantic relationship is decided.
   const inputBrainsArrayLiteral =
     inputBrains.length === 0
       ? "[]"
-      : `[${inputBrains.map((u) => JSON.stringify(u)).join(", ")}]`;
+      : `[${inputBrains
+          .map((u) => `{ id: ${JSON.stringify(u)}, edge_type: "input" }`)
+          .join(", ")}]`;
 
   return `import type { PackDefinition } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";

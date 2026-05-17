@@ -186,13 +186,18 @@ export const master: PackDefinition = {
     makeBrainInputSource("tourism-tdt"),
     makeBrainInputSource("env-swfl"),
   ],
+  // Typed edges (P5): every leaf feeds master as `input` data EXCEPT env-swfl,
+  // which is wired as a `veto` — flood-veto in the real-estate constitution can
+  // flip master's direction unilaterally when Lee/Collier V-zone coverage
+  // crosses threshold. Surfaces inline in OUTPUT.drivers so a disputant can see
+  // env's role in the receipt rather than digging through constitution code.
   input_brains: [
-    "franchise-outcomes",
-    "cre-swfl",
-    "macro-swfl",
-    "sector-credit-swfl",
-    "tourism-tdt",
-    "env-swfl",
+    { id: "franchise-outcomes", edge_type: "input" },
+    { id: "cre-swfl", edge_type: "input" },
+    { id: "macro-swfl", edge_type: "input" },
+    { id: "sector-credit-swfl", edge_type: "input" },
+    { id: "tourism-tdt", edge_type: "input" },
+    { id: "env-swfl", edge_type: "veto" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.

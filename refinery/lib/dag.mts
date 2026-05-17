@@ -46,8 +46,8 @@ export function resolveBuildOrder(
       );
     }
     inStack.add(id);
-    for (const upstreamId of pack.input_brains) {
-      dfs(upstreamId, [...trail, id]);
+    for (const upstream of pack.input_brains) {
+      dfs(upstream.id, [...trail, id]);
     }
     inStack.delete(id);
     visited.add(id);
@@ -68,7 +68,7 @@ export function walkConsumers(
   PACKS: Record<string, PackDefinition>,
 ): string[] {
   return Object.values(PACKS)
-    .filter((p) => p.input_brains.includes(brainId))
+    .filter((p) => p.input_brains.some((e) => e.id === brainId))
     .map((p) => p.id)
     .sort();
 }
@@ -97,10 +97,10 @@ export function walkUpstream(
   function visit(id: string): void {
     const pack = PACKS[id];
     if (!pack) return; // unknown id — skip (matches walkConsumers tolerance)
-    for (const upstreamId of pack.input_brains) {
-      if (visited.has(upstreamId)) continue;
-      visited.add(upstreamId);
-      visit(upstreamId);
+    for (const upstream of pack.input_brains) {
+      if (visited.has(upstream.id)) continue;
+      visited.add(upstream.id);
+      visit(upstream.id);
     }
   }
 

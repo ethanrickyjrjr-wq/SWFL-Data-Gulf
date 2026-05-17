@@ -186,11 +186,11 @@ export async function outputStage(
   // error — by this point the DAG walker has already certified the upstream
   // exists; if the read fails here, the lake is in an inconsistent state.
   const upstream_confidences: number[] = [];
-  for (const upstreamId of pack.input_brains) {
-    const read = await readBrainOutput(upstreamId);
+  for (const upstream of pack.input_brains) {
+    const read = await readBrainOutput(upstream.id);
     if (read.kind === "missing") {
       throw new Error(
-        `Stage 4: cannot harvest upstream confidence for "${upstreamId}" — ${read.reason}. ` +
+        `Stage 4: cannot harvest upstream confidence for "${upstream.id}" — ${read.reason}. ` +
           `DAG resolver should have caught this; the lake may be in an inconsistent state.`,
       );
     }

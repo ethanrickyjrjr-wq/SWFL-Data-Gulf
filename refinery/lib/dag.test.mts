@@ -7,6 +7,12 @@ import type { PackDefinition } from "../types/pack.mts";
 // Test fixtures — minimal PackDefinitions, only `id` + `input_brains` are read
 // ---------------------------------------------------------------------------
 
+/**
+ * Test fixture factory. Accepts upstream ids as plain strings for ergonomics —
+ * every test edge is wrapped as an "input" edge. Tests that need to exercise
+ * `veto` / `constraint` / `modifier` semantics should construct the edge
+ * objects directly rather than going through this helper.
+ */
 function mkPack(id: string, input_brains: string[]): PackDefinition {
   return {
     id,
@@ -15,7 +21,10 @@ function mkPack(id: string, input_brains: string[]): PackDefinition {
     scope: "test",
     ttl_seconds: 86_400,
     sources: [],
-    input_brains,
+    input_brains: input_brains.map((upstreamId) => ({
+      id: upstreamId,
+      edge_type: "input",
+    })),
     fitScore: () => 1,
     preferences: [],
     activeProject: "test",
