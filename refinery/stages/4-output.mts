@@ -28,6 +28,7 @@ import {
   type WeightedSource,
 } from "../lib/confidence.mts";
 import { readBrainOutput } from "../lib/brain-output-reader.mts";
+import { PACKS } from "../config/packs.mts";
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 
@@ -294,7 +295,9 @@ export async function outputStage(
   // validate before writing — a failure aborts the run, leaving the old pack intact
   const spec = validateSpec(markdown);
   const lint = lintFactsOnly(markdown);
-  const bait = lintInferenceBait(markdown);
+  // Pass the live brain-id set so the causal-chain-across-brains rule fires.
+  // Object.keys(PACKS) is the authoritative registry at runtime.
+  const bait = lintInferenceBait(markdown, Object.keys(PACKS));
   if (!spec.ok || !lint.ok || !bait.ok) {
     const errs = [
       ...spec.errors.map((e) => `  spec: ${e}`),
