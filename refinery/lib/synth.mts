@@ -302,21 +302,69 @@ export function composeConclusion(args: {
 }
 
 /**
- * Step 6 — Key-metrics rollup. Each upstream contributes its top 1-2 metrics
- * (`key_metrics[0..1]`). Capped at 8 total; v1 tiebreak rule when >8 candidates
- * is drop-by-DAG-topo-order (first-come). `passing` arrives in DAG order, so a
- * straight slice is exactly that rule.
+ * Step 6 — Key-metrics rollup. Reserve-then-fill, ordering-independent.
+ *
+ * Pass 1 (reserve): one metric per passing upstream, in DAG order. Every
+ * upstream that produced any metric at all gets a seat at the table —
+ * guaranteeing a T1 brain cannot lose its representation to a T2 brain that
+ * simply ran earlier in the DAG.
+ *
+ * Pass 2 (fill): remaining slots up to the cap are filled from each upstream's
+ * second metric (preserving the original "top 2 per upstream" producer
+ * contract). Candidates are ranked by upstream `trust_tier` ascending (T1
+ * before T2), then by `confidence × relevance_factor` descending, with DAG
+ * order as a final tiebreak. This is the V2 fix the spec flagged.
+ *
+ * Overflow case (reserved.length > cap): trim the reservation by the same
+ * ranking rule. Past 8 upstreams the math-honest outcome is "best-tier brains
+ * keep their seat," not "whoever ran first."
  */
 export function rollupKeyMetrics(
   passing: PassingUpstream[],
+  cap = 8,
 ): BrainOutputMetric[] {
-  const out: BrainOutputMetric[] = [];
-  for (const { upstream } of passing) {
-    for (const m of upstream.key_metrics.slice(0, 2)) {
-      out.push(m);
+  type Indexed = {
+    metric: BrainOutputMetric;
+    tier: BrainTrustTier;
+    weight: number;
+    order: number;
+  };
+
+  const rank = (a: Indexed, b: Indexed): number =>
+    a.tier - b.tier || b.weight - a.weight || a.order - b.order;
+
+  const reserved: Indexed[] = [];
+  const secondaries: Indexed[] = [];
+  passing.forEach(({ upstream, factor }, i) => {
+    const weight = upstream.confidence * factor;
+    if (upstream.key_metrics.length > 0) {
+      reserved.push({
+        metric: upstream.key_metrics[0],
+        tier: upstream.trust_tier,
+        weight,
+        order: i,
+      });
     }
+    if (upstream.key_metrics.length > 1) {
+      secondaries.push({
+        metric: upstream.key_metrics[1],
+        tier: upstream.trust_tier,
+        weight,
+        order: i,
+      });
+    }
+  });
+
+  if (reserved.length >= cap) {
+    return [...reserved]
+      .sort(rank)
+      .slice(0, cap)
+      .map((c) => c.metric);
   }
-  return out.slice(0, 8);
+
+  const remaining = cap - reserved.length;
+  const fill = [...secondaries].sort(rank).slice(0, remaining);
+  return [...reserved.map((c) => c.metric), ...fill.map((c) => c.metric)];
 }
 
 /**

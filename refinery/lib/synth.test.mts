@@ -315,25 +315,105 @@ test("composeConclusion: overrides + contradicts surfaced", () => {
 
 // ---- rollupKeyMetrics ------------------------------------------------------
 
-test("rollupKeyMetrics: top 2 per upstream, capped at 8", () => {
-  const mk = (n: number): BrainOutputMetric[] =>
+test("rollupKeyMetrics: reserve-then-fill — every upstream gets a seat first", () => {
+  const mk = (prefix: string, n: number): BrainOutputMetric[] =>
     Array.from({ length: n }, (_, i) => ({
-      metric: `m${i}`,
+      metric: `${prefix}_m${i}`,
       value: i,
       direction: "rising" as const,
-      label: `M${i}`,
+      label: `${prefix} M${i}`,
     }));
   const ups = [
-    brain("a", "bullish", 0.5, 0.8, { key_metrics: mk(3) }),
-    brain("b", "bullish", 0.5, 0.8, { key_metrics: mk(2) }),
+    brain("a", "bullish", 0.5, 0.8, { key_metrics: mk("a", 3) }),
+    brain("b", "bullish", 0.5, 0.8, { key_metrics: mk("b", 2) }),
   ];
   const passing = ups.map((u) => ({ upstream: u, factor: 1 }));
   const out = rollupKeyMetrics(passing);
   assert.equal(out.length, 4);
+  // Reserve pass first (a_m0, b_m0), then fill pass (a_m1, b_m1) — ordering
+  // is "all seats reserved, then all fills," not "all of a, then all of b."
   assert.deepEqual(
     out.map((m) => m.metric),
-    ["m0", "m1", "m0", "m1"],
+    ["a_m0", "b_m0", "a_m1", "b_m1"],
   );
+});
+
+test("rollupKeyMetrics: T1 upstream at the end of the DAG keeps its seat", () => {
+  // Regression for Session 8 env-swfl bug: under the old DAG-order cap, a T1
+  // brain placed 6th in input_brains lost its slot to T2 brains that ran
+  // earlier. Reserve-then-fill must guarantee its inclusion.
+  const mk = (slug: string): BrainOutputMetric[] => [
+    { metric: slug, value: 1, direction: "rising", label: slug },
+  ];
+  const ups = [
+    brain("franchise", "bullish", 0.5, 0.8, {
+      trust_tier: 1,
+      key_metrics: mk("survival"),
+    }),
+    brain("cre", "bullish", 0.5, 0.8, {
+      trust_tier: 2,
+      key_metrics: [
+        { metric: "cap_rate", value: 6, direction: "falling", label: "cap" },
+        { metric: "vacancy", value: 5, direction: "falling", label: "vac" },
+      ],
+    }),
+    brain("macro", "bearish", 0.5, 0.8, {
+      trust_tier: 1,
+      key_metrics: [
+        { metric: "sofr", value: 3.6, direction: "stable", label: "sofr" },
+        { metric: "fl_unemp", value: 4.7, direction: "rising", label: "unemp" },
+      ],
+    }),
+    brain("sector", "bearish", 0.5, 0.8, {
+      trust_tier: 1,
+      key_metrics: [
+        { metric: "best_naics", value: 100, direction: "stable", label: "b" },
+        { metric: "worst_naics", value: 57, direction: "stable", label: "w" },
+      ],
+    }),
+    brain("tourism", "bullish", 0.5, 0.8, {
+      trust_tier: 1,
+      key_metrics: mk("tdt"),
+    }),
+    brain("env", "bearish", 0.5, 0.8, {
+      trust_tier: 1,
+      key_metrics: mk("lee_ve_zone"),
+    }),
+  ];
+  const out = rollupKeyMetrics(ups.map((u) => ({ upstream: u, factor: 1 })));
+  const slugs = out.map((m) => m.metric);
+  assert.ok(
+    slugs.includes("lee_ve_zone"),
+    `expected env-swfl's metric to survive reserve-then-fill, got ${JSON.stringify(slugs)}`,
+  );
+  // Under the OLD DAG-order cap this would have been impossible: 1+2+2+2+1=8
+  // would have filled the cap before env's index ticked.
+});
+
+test("rollupKeyMetrics: reserve overflow ranks by tier then weight then order", () => {
+  // 10 upstreams, all contribute 1 metric. Reserve length (10) > cap (8).
+  // T1 brains must keep their seats over T2 brains regardless of DAG order.
+  const mk = (slug: string): BrainOutputMetric[] => [
+    { metric: slug, value: 1, direction: "rising", label: slug },
+  ];
+  const ups = [
+    brain("t2_a", "bullish", 0.5, 0.5, { trust_tier: 2, key_metrics: mk("a") }),
+    brain("t2_b", "bullish", 0.5, 0.5, { trust_tier: 2, key_metrics: mk("b") }),
+    brain("t2_c", "bullish", 0.5, 0.5, { trust_tier: 2, key_metrics: mk("c") }),
+    brain("t1_d", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("d") }),
+    brain("t1_e", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("e") }),
+    brain("t1_f", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("f") }),
+    brain("t1_g", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("g") }),
+    brain("t1_h", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("h") }),
+    brain("t1_i", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("i") }),
+    brain("t1_j", "bullish", 0.5, 0.9, { trust_tier: 1, key_metrics: mk("j") }),
+  ];
+  const out = rollupKeyMetrics(ups.map((u) => ({ upstream: u, factor: 1 })));
+  const slugs = out.map((m) => m.metric).sort();
+  assert.equal(out.length, 8);
+  // All 7 T1 brains must be present; only one T2 brain (the highest-confidence,
+  // earliest-order one — but all T2s are tied, so DAG order wins → "a").
+  assert.deepEqual(slugs, ["a", "d", "e", "f", "g", "h", "i", "j"]);
 });
 
 test("rollupKeyMetrics: caps at 8 across many upstreams", () => {

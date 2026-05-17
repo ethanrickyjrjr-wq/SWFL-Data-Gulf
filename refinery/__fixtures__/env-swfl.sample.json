@@ -1,0 +1,21 @@
+{
+  "_comment": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR) area-weighted aggregate, verified live 2026-05-16. v1 fixture covers Lee County only — live mode (REFINERY_SOURCE=live) hits FEMA for all 6 SWFL counties. The area_total values are in square decimal degrees (WGS84, EPSG:4326), not projected meters; only ratios are meaningful.",
+  "fetched_at": "2026-05-16T23:00:00Z",
+  "counties": [
+    {
+      "fips": "12071",
+      "name": "Lee",
+      "bbox": [-82.3, 26.3, -81.6, 26.9],
+      "features": [
+        { "FLD_ZONE": "X", "polygon_count": 13280, "area_total": 0.18203 },
+        { "FLD_ZONE": "AE", "polygon_count": 2410, "area_total": 0.09075 },
+        { "FLD_ZONE": "AH", "polygon_count": 612, "area_total": 0.04652 },
+        { "FLD_ZONE": "A", "polygon_count": 396, "area_total": 0.00809 },
+        { "FLD_ZONE": "VE", "polygon_count": 271, "area_total": 0.0228 },
+        { "FLD_ZONE": "AO", "polygon_count": 11, "area_total": 0.00002 },
+        { "FLD_ZONE": "D", "polygon_count": 8, "area_total": 0.03229 },
+        { "FLD_ZONE": "OPEN WATER", "polygon_count": 2, "area_total": 0.06062 }
+      ]
+    }
+  ]
+}

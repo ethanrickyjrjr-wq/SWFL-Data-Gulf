@@ -195,7 +195,7 @@ Where:
 
 For each upstream above floor: take its top 1–2 metrics (by `b.key_metrics[0..1]`). Master's `key_metrics` is the concatenation, capped at 8 total. If franchise-outcomes contributes zero metrics, the mandatory backfill fixes that bug at the source.
 
-**V1 tiebreak rule (acceptable limitation):** when >8 candidates, drop by DAG topo order (first-come). V2 fix: order by `upstream.confidence × upstream.relevance_factor` descending.
+**Tiebreak rule (reserve-then-fill, shipped Session 8):** the rollup is ordering-independent. Pass 1 reserves one seat per passing upstream so every brain that produced any metric is represented (a T1 brain at the end of `input_brains` cannot lose its slot to T2 brains that ran earlier). Pass 2 fills remaining slots from each upstream's second metric, ranked by `upstream.trust_tier` ascending, then `upstream.confidence × upstream.relevance_factor` descending, with DAG order as the final tiebreak. If reservation alone overflows (passing.length > 8), the reservation is trimmed by the same ranking rule rather than DAG order.
 
 ### Step 7 — Trust tier + decay propagation
 

@@ -573,7 +573,128 @@
       "value_range": [0, 100],
       "direction_concept": "qual_metric_trajectory",
       "status": "stub",
-      "scope_note": "Pre-registered for the flood-veto override rule in refinery/constitution/real-estate.mts (priority 90). Activates automatically the day an environmental brain produces this metric above the 15% threshold. No source brain exists yet."
+      "scope_note": "Pre-registered for the flood-veto override rule in refinery/constitution/real-estate.mts (priority 90). NOT emitted by env-swfl directly — env-swfl emits scope-specific concepts (env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct). Constitution should be updated in a follow-up to point the flood-veto trigger at the V/VE coverage concepts; this stub remains as the legacy hook."
+    },
+
+    "env_swfl_sfha_coverage_pct": {
+      "id": "env_swfl_sfha_coverage_pct",
+      "prefLabel": "SWFL Area-Weighted SFHA Coverage",
+      "altLabels": ["SWFL SFHA %", "Southwest Florida SFHA coverage"],
+      "raw_slugs": ["swfl_sfha_pct_area_weighted"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "ratio",
+      "unit": "ratio (0–1)",
+      "value_range": [0, 1],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Area-weighted share of mapped SWFL footprint (6 counties) classified as a FEMA Special Flood Hazard Area per 44 CFR §59.1. Computed in env-swfl via sum(Shape__Area) over SFHA-classified zones ÷ sum(Shape__Area) over all returned zones. Areas are square decimal degrees (WGS84); only the RATIO is meaningful — absolute areas never propagate."
+    },
+
+    "env_swfl_ve_zone_coverage_pct": {
+      "id": "env_swfl_ve_zone_coverage_pct",
+      "prefLabel": "SWFL Area-Weighted Coastal V/VE Coverage",
+      "altLabels": [
+        "SWFL V/VE %",
+        "Southwest Florida coastal high-hazard coverage"
+      ],
+      "raw_slugs": ["swfl_ve_zone_pct_area_weighted"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "ratio",
+      "unit": "ratio (0–1)",
+      "value_range": [0, 1],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Area-weighted share of mapped SWFL footprint classified as FEMA coastal high-hazard (V, VE, V1–V30, V99). This is the barrier-island / flood-veto-eligible subset of SFHA; pair with env_swfl_sfha_coverage_pct for full structural-flood context."
+    },
+
+    "env_swfl_ve_zone_polygon_count": {
+      "id": "env_swfl_ve_zone_polygon_count",
+      "prefLabel": "SWFL Coastal V/VE Polygon Count",
+      "altLabels": ["SWFL VE polygons", "Southwest Florida V/VE polygon count"],
+      "raw_slugs": ["swfl_ve_zone_polygon_count"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "integer",
+      "unit": "polygons",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of distinct FEMA V/VE-classified polygons across the SWFL 6-county footprint. A polygon count, not an area; structural read on coastal-high-hazard fragmentation. Pair with env_swfl_ve_zone_coverage_pct for relative scale."
+    },
+
+    "env_lee_sfha_coverage_pct": {
+      "id": "env_lee_sfha_coverage_pct",
+      "prefLabel": "Lee County Area-Weighted SFHA Coverage",
+      "altLabels": ["Lee SFHA %", "Lee County SFHA coverage"],
+      "raw_slugs": ["lee_county_sfha_pct_area_weighted"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "fips_code": "12071",
+      "source_brains": ["env-swfl"],
+      "value_type": "ratio",
+      "unit": "ratio (0–1)",
+      "value_range": [0, 1],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Lee County (FIPS 12071) area-weighted SFHA coverage — the Fort Myers / Fort Myers Beach / Sanibel / Captiva footprint. The §6.4 FMB lease question keys on this and env_lee_ve_zone_coverage_pct."
+    },
+
+    "env_lee_ve_zone_coverage_pct": {
+      "id": "env_lee_ve_zone_coverage_pct",
+      "prefLabel": "Lee County Area-Weighted Coastal V/VE Coverage",
+      "altLabels": ["Lee V/VE %", "Lee County coastal high-hazard coverage"],
+      "raw_slugs": ["lee_county_ve_zone_pct_area_weighted"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "fips_code": "12071",
+      "source_brains": ["env-swfl"],
+      "value_type": "ratio",
+      "unit": "ratio (0–1)",
+      "value_range": [0, 1],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Lee County (FIPS 12071) area-weighted V/VE coastal high-hazard coverage. This is the flood-veto-eligible subset for Lee. Above-baseline values are the primary signal that barrier-island coordinates in Lee should be paired with property-level lookups before any lease/acquisition decision."
+    },
+
+    "env_collier_sfha_coverage_pct": {
+      "id": "env_collier_sfha_coverage_pct",
+      "prefLabel": "Collier County Area-Weighted SFHA Coverage",
+      "altLabels": ["Collier SFHA %", "Collier County SFHA coverage"],
+      "raw_slugs": ["collier_county_sfha_pct_area_weighted"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "fips_code": "12021",
+      "source_brains": ["env-swfl"],
+      "value_type": "ratio",
+      "unit": "ratio (0–1)",
+      "value_range": [0, 1],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Collier County (FIPS 12021) area-weighted SFHA coverage — the Naples / Marco Island / Everglades-fringe footprint. Pair with env_collier_ve_zone_coverage_pct for coastal-vs-inland structural read."
+    },
+
+    "env_collier_ve_zone_coverage_pct": {
+      "id": "env_collier_ve_zone_coverage_pct",
+      "prefLabel": "Collier County Area-Weighted Coastal V/VE Coverage",
+      "altLabels": [
+        "Collier V/VE %",
+        "Collier County coastal high-hazard coverage"
+      ],
+      "raw_slugs": ["collier_county_ve_zone_pct_area_weighted"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "fips_code": "12021",
+      "source_brains": ["env-swfl"],
+      "value_type": "ratio",
+      "unit": "ratio (0–1)",
+      "value_range": [0, 1],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Collier County (FIPS 12021) area-weighted V/VE coastal high-hazard coverage. Flood-veto-eligible subset for Collier — keyed by the same barrier-island logic as Lee but with Naples/Marco Island as the operator-visible context."
     },
 
     "hosp_tdt_latest_monthly_collections": {
@@ -707,6 +828,13 @@
     "confidence": "qual_confidence",
     "trust_tier": "qual_trust_tier",
     "flood_risk_pct": "env_flood_risk_pct",
+    "swfl_sfha_pct_area_weighted": "env_swfl_sfha_coverage_pct",
+    "swfl_ve_zone_pct_area_weighted": "env_swfl_ve_zone_coverage_pct",
+    "swfl_ve_zone_polygon_count": "env_swfl_ve_zone_polygon_count",
+    "lee_county_sfha_pct_area_weighted": "env_lee_sfha_coverage_pct",
+    "lee_county_ve_zone_pct_area_weighted": "env_lee_ve_zone_coverage_pct",
+    "collier_county_sfha_pct_area_weighted": "env_collier_sfha_coverage_pct",
+    "collier_county_ve_zone_pct_area_weighted": "env_collier_ve_zone_coverage_pct",
     "latest_monthly_collections_usd": "hosp_tdt_latest_monthly_collections",
     "yoy_delta_pct": "hosp_tdt_yoy_delta",
     "trailing_12mo_collections_usd": "hosp_tdt_trailing_12mo_collections",

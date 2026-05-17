@@ -184,6 +184,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("macro-swfl"),
     makeBrainInputSource("sector-credit-swfl"),
     makeBrainInputSource("tourism-tdt"),
+    makeBrainInputSource("env-swfl"),
   ],
   input_brains: [
     "franchise-outcomes",
@@ -191,6 +192,7 @@ export const master: PackDefinition = {
     "macro-swfl",
     "sector-credit-swfl",
     "tourism-tdt",
+    "env-swfl",
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.

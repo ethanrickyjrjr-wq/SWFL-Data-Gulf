@@ -26,6 +26,28 @@ export type DecayCurve = "hours" | "days" | "weeks" | "months" | "permanent";
 
 export type BrainTrustTier = 1 | 2 | 3 | 4;
 
+/**
+ * Per-metric provenance — the "receipt" that lets a disputant trace a single
+ * value back to its source. Optional in v1: env-swfl is the first brain to ship
+ * with it populated (P2 forward, Session 8); other packs retrofit as they're
+ * touched. When present, the spec-validator enforces shape; when absent, the
+ * metric is treated as legacy and only validated for the base fields.
+ *
+ * `citation` is the human-readable label that would appear in a footnote — it
+ * does NOT need to match a CITATION TABLE row id (those are pack-level), but
+ * should let a reader reproduce the lookup against the cited source.
+ */
+export interface BrainOutputMetricSource {
+  /** Direct URL the value was fetched from (or as close as the source permits). */
+  url: string;
+  /** ISO 8601 timestamp of the fetch that produced this specific value. */
+  fetched_at: string;
+  /** Authority tier of the source — same scale as BrainTrustTier. */
+  tier: BrainTrustTier;
+  /** Human-readable citation, e.g. "FEMA NFHL Flood Hazard Zones, DFIRM_ID 12021C". */
+  citation: string;
+}
+
 export interface BrainOutputMetric {
   /** machine-readable slug, e.g. "sofr_30d" */
   metric: string;
@@ -34,6 +56,12 @@ export interface BrainOutputMetric {
   direction: "rising" | "falling" | "stable";
   /** human-readable label, e.g. "30-Day SOFR Rate" */
   label: string;
+  /**
+   * Optional per-metric provenance — the disputable receipt for THIS value.
+   * v1: env-swfl populates this on every metric; other packs leave it absent
+   * until they retrofit. When present, shape is validated by spec-validator.
+   */
+  source?: BrainOutputMetricSource;
 }
 
 export interface BrainOutputRelevance {

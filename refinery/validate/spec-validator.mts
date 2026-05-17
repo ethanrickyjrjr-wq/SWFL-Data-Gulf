@@ -257,6 +257,43 @@ export function validateSpec(md: string): ValidationResult {
                 `--- OUTPUT --- key_metrics[${i}].label must be a string.`,
               );
             }
+            // Optional per-metric provenance (P2). Absent is fine for legacy
+            // packs; when present, every sub-field is required and well-typed.
+            if (m?.source !== undefined) {
+              const s = m.source as Record<string, unknown>;
+              if (typeof s !== "object" || s === null || Array.isArray(s)) {
+                errors.push(
+                  `--- OUTPUT --- key_metrics[${i}].source must be an object when present.`,
+                );
+              } else {
+                if (typeof s.url !== "string" || s.url.length === 0) {
+                  errors.push(
+                    `--- OUTPUT --- key_metrics[${i}].source.url must be a non-empty string.`,
+                  );
+                }
+                if (
+                  typeof s.fetched_at !== "string" ||
+                  !ISO_TIMESTAMP.test(s.fetched_at)
+                ) {
+                  errors.push(
+                    `--- OUTPUT --- key_metrics[${i}].source.fetched_at must be an ISO 8601 timestamp.`,
+                  );
+                }
+                if (
+                  typeof s.tier !== "number" ||
+                  !TRUST_TIERS.has(s.tier as number)
+                ) {
+                  errors.push(
+                    `--- OUTPUT --- key_metrics[${i}].source.tier must be 1, 2, 3, or 4.`,
+                  );
+                }
+                if (typeof s.citation !== "string" || s.citation.length === 0) {
+                  errors.push(
+                    `--- OUTPUT --- key_metrics[${i}].source.citation must be a non-empty string.`,
+                  );
+                }
+              }
+            }
           });
         }
         if (!Array.isArray(o.caveats)) {
