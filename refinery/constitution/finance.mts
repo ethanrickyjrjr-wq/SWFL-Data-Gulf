@@ -7,7 +7,7 @@
  * Override cascade (priority-ordered, highest first):
  *  - 70 → rising-rates-dominance
  *
- * Defensive: if macro-swfl is absent or its sofr_rate metric is missing,
+ * Defensive: if macro-us is absent or its sofr_rate metric is missing,
  * the condition fires false rather than throwing.
  */
 
@@ -15,9 +15,11 @@ import type { BrainOutput } from "../types/brain-output.mts";
 import type { Constitution, OverrideRule } from "./types.mts";
 
 /**
- * priority 70 — when macro-swfl reports a rising SOFR with magnitude above
+ * priority 70 — when macro-us reports a rising SOFR with magnitude above
  * 0.6, rates dominance forces bearish on finance synthesis regardless of
- * the rest of the upstream vote.
+ * the rest of the upstream vote. Retargeted from macro-swfl to macro-us
+ * during the 2026-05-17 macro restructure: SOFR is a national rate, so the
+ * rule belongs against the national brain, not the regional one.
  */
 const risingRatesDominance: OverrideRule = {
   priority: 70,
@@ -26,7 +28,7 @@ const risingRatesDominance: OverrideRule = {
   condition: (upstreams: BrainOutput[]): boolean =>
     upstreams.some(
       (u) =>
-        u.brain_id === "macro-swfl" &&
+        u.brain_id === "macro-us" &&
         u.magnitude > 0.6 &&
         u.key_metrics.some(
           (m) => m.metric === "sofr_rate" && m.direction === "rising",

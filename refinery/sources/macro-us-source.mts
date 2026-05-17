@@ -1,0 +1,236 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import type { RawFragment } from "../types/fragment.mts";
+import type { SourceConnector, CitationRow } from "../types/pack.mts";
+import { env } from "../config/env.mts";
+import { fragmentId } from "../lib/ids.mts";
+import { isoTimestamp, expiresDate } from "../lib/dates.mts";
+
+/**
+ * macro-us source connector — national FRED series (SOFR + US CPI YoY).
+ * The national half of the three-tier macro denominator chain
+ * (macro-us → macro-florida → macro-swfl). State-level Florida series live
+ * in macro-florida-source.mts; this connector strictly owns national data.
+ *
+ * Trust tier: 1 (FRED is a primary federal source).
+ *
+ * Live mode hits `https://api.stlouisfed.org/fred/series/observations` once
+ * per series. Fixture mode (REFINERY_SOURCE=fixture) reads the committed
+ * sample. Normalized fragments are keyed by `series_id` ∈ { SOFR,
+ * CPIAUCSL_YOY } so the pack's METRIC_MAP stays stable across source modes.
+ */
+
+const SOURCE_ID = "fred_macro_us";
+
+const FIXTURE_PATH = path.join(
+  process.cwd(),
+  "refinery",
+  "__fixtures__",
+  "macro-us.sample.json",
+);
+
+/** Normalized national-macro indicator — what Stage 2 / Stage 3 see. */
+export interface MacroUsNormalized {
+  kind: "macro-indicator";
+  /** Stable id used by the pack's METRIC_MAP — see FRED_SERIES below */
+  series_id: string;
+  label: string;
+  value: number;
+  unit: string;
+  period: string;
+  direction: "rising" | "falling" | "stable";
+  context: string;
+  /**
+   * Canonical receipt URL for the underlying source. In live mode this is the
+   * FRED observations endpoint for the queried fred_id (api_key stripped so
+   * the URL is shareable). In fixture mode this is a `fixture://` URI pinned
+   * to the file + series_id.
+   */
+  source_url: string;
+}
+
+interface FredSpec {
+  /** key under which this series surfaces to the pack */
+  key: "SOFR" | "CPIAUCSL_YOY";
+  /** FRED series id we actually hit */
+  fred_id: string;
+  /** FRED transformation: "lin" = level, "pc1" = year-over-year % */
+  units: "lin" | "pc1";
+  label: string;
+  unit: string;
+  /** Editorial note appended to the normalized context */
+  context: string;
+}
+
+const FRED_SERIES: FredSpec[] = [
+  {
+    key: "SOFR",
+    fred_id: "SOFR",
+    units: "lin",
+    label: "Secured Overnight Financing Rate",
+    unit: "percent_annualized",
+    context:
+      "SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.",
+  },
+  {
+    key: "CPIAUCSL_YOY",
+    fred_id: "CPIAUCSL",
+    units: "pc1",
+    label: "US CPI (All Items) Year-over-Year",
+    unit: "percent",
+    context:
+      "Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026.",
+  },
+];
+
+interface FredObservation {
+  date: string;
+  value: string;
+}
+
+interface FredResponse {
+  observations?: FredObservation[];
+}
+
+const FRED_BASE = "https://api.stlouisfed.org/fred/series/observations";
+
+async function fetchFredSeries(spec: FredSpec): Promise<FredObservation[]> {
+  const key = env.fredApiKey;
+  if (!key) {
+    throw new Error(
+      "macro-us-source: FRED_API_KEY not set. Add it to .env.local or run with REFINERY_SOURCE=fixture.",
+    );
+  }
+  const url =
+    `${FRED_BASE}?series_id=${spec.fred_id}` +
+    `&units=${spec.units}` +
+    `&api_key=${key}` +
+    `&file_type=json` +
+    `&sort_order=desc` +
+    `&limit=24`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(
+      `macro-us-source: FRED ${spec.fred_id} returned HTTP ${res.status} — check key validity and series id.`,
+    );
+  }
+  const data = (await res.json()) as FredResponse;
+  const obs = (data.observations ?? []).filter((o) => o.value !== ".");
+  if (obs.length === 0) {
+    throw new Error(
+      `macro-us-source: FRED ${spec.fred_id} returned no usable observations.`,
+    );
+  }
+  return obs;
+}
+
+function computeDirection(
+  observations: FredObservation[],
+): MacroUsNormalized["direction"] {
+  if (observations.length < 2) return "stable";
+  const latest = parseFloat(observations[0].value);
+  const compareIdx = Math.min(observations.length - 1, 6);
+  const prior = parseFloat(observations[compareIdx].value);
+  if (!Number.isFinite(latest) || !Number.isFinite(prior) || prior === 0) {
+    return "stable";
+  }
+  const relChange = (latest - prior) / Math.abs(prior);
+  if (relChange > 0.02) return "rising";
+  if (relChange < -0.02) return "falling";
+  return "stable";
+}
+
+function fredReceiptUrl(spec: FredSpec): string {
+  return (
+    `${FRED_BASE}?series_id=${spec.fred_id}` +
+    `&units=${spec.units}` +
+    `&file_type=json` +
+    `&sort_order=desc` +
+    `&limit=24`
+  );
+}
+
+async function liveFred(): Promise<MacroUsNormalized[]> {
+  return Promise.all(
+    FRED_SERIES.map(async (spec): Promise<MacroUsNormalized> => {
+      const obs = await fetchFredSeries(spec);
+      const latest = obs[0];
+      return {
+        kind: "macro-indicator",
+        series_id: spec.key,
+        label: spec.label,
+        value: parseFloat(latest.value),
+        unit: spec.unit,
+        period: latest.date,
+        direction: computeDirection(obs),
+        context: spec.context,
+        source_url: fredReceiptUrl(spec),
+      };
+    }),
+  );
+}
+
+function isDirection(s: unknown): s is MacroUsNormalized["direction"] {
+  return s === "rising" || s === "falling" || s === "stable";
+}
+
+function normalizeFixtureRow(row: Record<string, unknown>): MacroUsNormalized {
+  const direction = isDirection(row.direction) ? row.direction : "stable";
+  const series_id = String(row.series_id ?? "");
+  const spec = FRED_SERIES.find((s) => s.key === series_id);
+  const source_url = spec
+    ? fredReceiptUrl(spec)
+    : `fixture://refinery/__fixtures__/macro-us.sample.json#${series_id}`;
+  return {
+    kind: "macro-indicator",
+    series_id,
+    label: String(row.label ?? ""),
+    value: Number(row.value),
+    unit: String(row.unit ?? ""),
+    period: String(row.period ?? ""),
+    direction,
+    context: String(row.context ?? ""),
+    source_url,
+  };
+}
+
+async function loadFixtureRows(): Promise<MacroUsNormalized[]> {
+  const raw = await readFile(FIXTURE_PATH, "utf-8");
+  const data = JSON.parse(raw) as
+    | { rows?: unknown[]; data?: unknown[] }
+    | unknown[];
+  const rows: unknown[] = Array.isArray(data)
+    ? data
+    : (data.rows ?? data.data ?? []);
+  return (rows as Record<string, unknown>[]).map(normalizeFixtureRow);
+}
+
+export const macroUsSource: SourceConnector = {
+  source_id: SOURCE_ID,
+  trust_tier: 1,
+  async fetch(): Promise<RawFragment[]> {
+    const indicators =
+      env.source === "fixture" ? await loadFixtureRows() : await liveFred();
+    const fetched_at = isoTimestamp();
+    return indicators.map(
+      (normalized): RawFragment<MacroUsNormalized> => ({
+        fragment_id: fragmentId(SOURCE_ID, normalized.series_id),
+        source_id: SOURCE_ID,
+        source_trust_tier: 1,
+        fetched_at,
+        raw: { series_id: normalized.series_id, period: normalized.period },
+        normalized,
+      }),
+    );
+  },
+  citationMeta(verifiedDate, ttlSeconds): Omit<CitationRow, "id"> {
+    return {
+      source:
+        env.source === "fixture"
+          ? "FRED — Federal Reserve Economic Data (fixture; SOFR, CPIAUCSL YoY)"
+          : "FRED — Federal Reserve Economic Data (live API; SOFR, CPIAUCSL YoY)",
+      verified: verifiedDate,
+      expires: expiresDate(verifiedDate, ttlSeconds),
+    };
+  },
+};

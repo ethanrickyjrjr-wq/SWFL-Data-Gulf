@@ -28,28 +28,42 @@ import { computeConfidence } from "../lib/confidence.mts";
 /**
  * master — SWFL Intelligence Lake synthesizer.
  *
- * Reads the v3 OUTPUT blocks of all five live upstream brains
- * (franchise-outcomes, cre-swfl, macro-swfl, sector-credit-swfl, tourism-tdt)
- * via BrainInputSource, then runs spec §2 steps 0-8 in pure code to produce a
+ * Reads the v3 OUTPUT blocks of the live upstream brains via
+ * BrainInputSource, then runs spec §2 steps 0-8 in pure code to produce a
  * single synthesized read: direction, magnitude, drivers, overrides,
  * contradictions, key metrics, propagated decay.
+ *
+ * Upstream brains (post-2026-05-17 macro restructure):
+ *   franchise-outcomes, cre-swfl, sector-credit-swfl, tourism-tdt, env-swfl,
+ *   macro-us, macro-florida, macro-swfl. macro-swfl is a delta brain that
+ *   emits no metrics today but is kept on the upstream list so the chain
+ *   position stays declared; the rising-rates-dominance override fires off
+ *   macro-us where SOFR actually lives.
  *
  * No LLM in the output path — synthesisStrategy: "deterministic". The
  * synthesis lives entirely in `masterSynthesizerOutputProducer`; corpusSummary
  * lifts a per-upstream snapshot fact so SAVED FACTS surfaces what was
  * synthesized over.
  *
- * Constitution: real-estate + finance (covers all four upstream domains).
- * Relevance floor: 0.10 (constitution default).
+ * Constitution: real-estate + finance + hospitality + macro (covers every
+ * upstream's domain). Relevance floor: 0.10 (constitution default).
  */
 
-// Master loads all four domain constitutions. Order matters only as a
-// readability hint — loadConstitution() unions domains and re-sorts the
-// override cascade by priority (descending) regardless of input order. The
-// effective cascade after merge: exogenous-critical-confirmed (100) →
-// flood-veto (90) → naics-distress-veto (80) → rising-rates-dominance (70)
-// → hospitality-recovery-collapse (65) → hospitality-yoy-collapse (60).
-const MASTER_DOMAINS: BrainDomain[] = ["real-estate", "finance", "hospitality"];
+// Master loads every domain constitution that contributes an upstream.
+// Order matters only as a readability hint — loadConstitution() unions
+// domains and re-sorts the override cascade by priority (descending)
+// regardless of input order. The effective cascade after merge:
+// exogenous-critical-confirmed (100) → flood-veto (90) →
+// naics-distress-veto (80) → rising-rates-dominance (70) →
+// hospitality-recovery-collapse (65) → hospitality-yoy-collapse (60).
+// macro constitution is empty today — included so future cross-tier macro
+// back-stops land in the cascade automatically.
+const MASTER_DOMAINS: BrainDomain[] = [
+  "real-estate",
+  "finance",
+  "hospitality",
+  "macro",
+];
 
 // Per-pipeline-run state — populated by corpusSummary, consumed by producer.
 // Same pattern as macro-swfl: typed upstream OUTPUTs cannot survive in
@@ -183,6 +197,8 @@ export const master: PackDefinition = {
   sources: [
     makeBrainInputSource("franchise-outcomes"),
     makeBrainInputSource("cre-swfl"),
+    makeBrainInputSource("macro-us"),
+    makeBrainInputSource("macro-florida"),
     makeBrainInputSource("macro-swfl"),
     makeBrainInputSource("sector-credit-swfl"),
     makeBrainInputSource("tourism-tdt"),
@@ -193,9 +209,15 @@ export const master: PackDefinition = {
   // flip master's direction unilaterally when Lee/Collier V-zone coverage
   // crosses threshold. Surfaces inline in OUTPUT.drivers so a disputant can see
   // env's role in the receipt rather than digging through constitution code.
+  // The macro chain (macro-us → macro-florida → macro-swfl) is enumerated
+  // explicitly so the rising-rates-dominance override (registered in the
+  // finance constitution but reading off macro-us SOFR after the 2026-05-17
+  // restructure) sees the upstream it needs.
   input_brains: [
     { id: "franchise-outcomes", edge_type: "input" },
     { id: "cre-swfl", edge_type: "input" },
+    { id: "macro-us", edge_type: "input" },
+    { id: "macro-florida", edge_type: "input" },
     { id: "macro-swfl", edge_type: "input" },
     { id: "sector-credit-swfl", edge_type: "input" },
     { id: "tourism-tdt", edge_type: "input" },

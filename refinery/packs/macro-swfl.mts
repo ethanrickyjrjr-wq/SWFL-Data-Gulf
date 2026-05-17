@@ -2,214 +2,126 @@ import type { PackDefinition, PackOutput } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
 import type {
-  BrainOutputDirection,
-  BrainOutputMetric,
-  BrainOutputMetricSource,
+  BrainOutput,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
 import {
-  macroSwflSource,
-  type MacroSwflNormalized,
-} from "../sources/macro-swfl-source.mts";
-import { env } from "../config/env.mts";
+  makeBrainInputSource,
+  type BrainInputNormalized,
+} from "../sources/brain-input-source.mts";
 
 /**
- * macro-swfl — financial macro snapshot for SWFL operators.
+ * macro-swfl — regional macro context for the Southwest Florida market.
  *
- * Branches: four FRED series (SOFR, FLUR, CPI YoY, FLLFPR) — the macro
- * indicators an SWFL real-estate / franchise operator actually reads when
- * pricing capital, sizing absorption, and judging the timing window.
+ * Leaf tier of the three-tier macro denominator chain:
+ *   macro-us → macro-florida → macro-swfl.
  *
- * Leaf brain (no upstream brains). macro-swfl used to read master's OUTPUT
- * block for context, but Week 2 inverted that: master is now the deterministic
- * synthesizer that aggregates ACROSS the leaves (including macro-swfl), so a
- * back-pointer here would create a DAG cycle. Operators who want the
- * cross-vertical picture read master.md downstream.
+ * Post-restructure (2026-05-17), macro-swfl is a PURE DELTA BRAIN. It has no
+ * own sources — its only upstream is macro-florida, consumed via
+ * BrainInputSource. SWFL-specific actuals will land later (county-level BLS
+ * LAUS for Lee + Collier, payroll counts, etc.); until then this brain
+ * intentionally emits no key_metrics and surfaces a clear caveat that the FL
+ * state baseline is the best available proxy.
  *
- * Pure deterministic pack — no synthesis agent. Every fact is computed in
- * code from typed fragments, and the BrainOutput is assembled by a dedicated
- * outputProducer.
+ * Why this exists right now:
+ *  - Reserves the brain id so the DAG slot is fixed (future county data
+ *    drops in atomically without renaming consumers).
+ *  - Carries macro-florida's freshness + confidence forward through the chain
+ *    so any future regional brain that consumes macro-swfl gets accurate
+ *    decay even before SWFL-specific data lands.
+ *  - Documents the "no SWFL-specific data yet" state honestly inside the
+ *    consumption-contract receipt rather than leaving it as missing data.
+ *
+ * Pure deterministic — no synthesis agent.
  */
 
-// ---------------------------------------------------------------------
-// Closure state — populated by corpusSummary, read by outputProducer.
-// SynthesizedEvent.value is a string, so we keep the typed indicators here
-// to recover them when building BrainOutput.key_metrics. Per-pack-build
-// scope only; safe within a single pipeline run.
-// ---------------------------------------------------------------------
-let lastIndicators: MacroSwflNormalized[] = [];
+let lastMacroFloridaOutput: BrainOutput | null = null;
 
-let lastFetchedAt: string | null = null;
-
-/**
- * Build the per-metric receipt for a FRED indicator. URL is the canonical FRED
- * series query (api_key stripped, reproducible by anyone with a key); citation
- * names the FRED series with its latest value/period/direction so the receipt
- * is self-contained inside the OUTPUT block.
- */
-function buildFredSource(
-  indicator: MacroSwflNormalized,
-  fetched_at: string,
-): BrainOutputMetricSource {
-  const valueStr = Number.isInteger(indicator.value)
-    ? String(indicator.value)
-    : (Math.round(indicator.value * 100) / 100).toString();
-  return {
-    url: indicator.source_url,
-    fetched_at,
-    tier: 1,
-    citation:
-      `FRED ${indicator.label} (series_id ${indicator.series_id}) — ` +
-      `latest observation ${valueStr}${indicator.unit ? " " + indicator.unit : ""} ` +
-      `for period ${indicator.period}, ${indicator.direction} vs prior 6 periods. ` +
-      `${indicator.context}`,
-  };
+function brainInputFrom(
+  fragments: RawFragment[],
+  upstreamId: string,
+): BrainOutput | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as BrainInputNormalized;
+    if (n?.kind === "brain-input" && n.upstream_id === upstreamId) {
+      return n.output;
+    }
+  }
+  return null;
 }
 
-/** Stable mapping from FRED series_id → BrainOutput metric slug + label. */
-const METRIC_MAP: Record<string, { metric: string; label: string }> = {
-  SOFR: {
-    metric: "sofr_rate",
-    label: "SOFR (Secured Overnight Financing Rate)",
-  },
-  FLUR: { metric: "fl_unemployment", label: "Florida unemployment rate" },
-  CPIAUCSL_YOY: { metric: "cpi_yoy", label: "US CPI YoY" },
-  FLLFPR: {
-    metric: "fl_labor_participation",
-    label: "Florida labor force participation",
-  },
-};
-
-function indicatorsFrom(fragments: RawFragment[]): MacroSwflNormalized[] {
-  return fragments
-    .map((f) => f.normalized as unknown as MacroSwflNormalized)
-    .filter((n) => n?.kind === "macro-indicator");
-}
-
-/** Format a number for display — 1dp for percentages, integer-clean otherwise. */
 const fmt = (n: number): string =>
   Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
 
-/**
- * Deterministic corpus facts. The pack is a pure-aggregation brain — no
- * synthesis agent runs (`skipSynthesisAgent: true`). Stage 3 prepends these
- * verbatim with composite forced to max, in this order.
- */
 function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
-  const indicators = indicatorsFrom(allFragments);
+  const macroFl = brainInputFrom(allFragments, "macro-florida");
+  lastMacroFloridaOutput = macroFl;
 
-  // Stash for outputProducer (typed values cannot survive in SynthesisFact.value)
-  lastIndicators = indicators;
-  lastFetchedAt = allFragments[0]?.fetched_at ?? null;
-
-  if (indicators.length === 0) return [];
+  if (!macroFl) return [];
 
   const facts: SynthesisFact[] = [];
 
-  // f001 — overview snapshot, one paragraph
-  const snapshot = indicators
-    .map(
-      (i) =>
-        `${i.label} is ${fmt(i.value)}% (${i.direction}) as of ${i.period}`,
-    )
+  const flMetricsLine = macroFl.key_metrics
+    .map((m) => `${m.label} ${fmt(m.value)}% (${m.direction})`)
     .join("; ");
   facts.push({
-    topic: "macro_snapshot",
-    fact: "Current macro context for SWFL operators — funding rates, labor, inflation",
+    topic: "macro_swfl_baseline",
+    fact: "SWFL regional macro context — Florida state baseline used as proxy",
     value:
-      `Macro snapshot (synthetic fixture; replace with live FRED pull before publishing): ` +
-      `${snapshot}. These four series anchor the funding-cost and labor-supply ` +
-      `backdrop a Lee–Collier operator reads alongside the SWFL Intelligence Lake.`,
+      `macro-swfl currently has no SWFL-specific sources of its own — county-level BLS LAUS ` +
+      `for Lee + Collier and other regional indicators are planned but not yet ingested. ` +
+      `The Florida state baseline (macro-florida, confidence ${macroFl.confidence.toFixed(2)}) ` +
+      `is the best available proxy: ${flMetricsLine}.`,
     source_fragment_ids: [],
   });
-
-  // f002+ — one per-indicator fact, tagged with metric: prefix so the renderer
-  // / metric-extraction convention can route them into BrainOutput.key_metrics.
-  for (const i of indicators) {
-    const m = METRIC_MAP[i.series_id];
-    if (!m) continue;
-    facts.push({
-      topic: `metric:${m.metric}`,
-      fact: m.label,
-      value: `${m.label} is ${fmt(i.value)}% (period ${i.period}, direction ${i.direction}). ${i.context}`,
-      source_fragment_ids: [],
-    });
-  }
 
   return facts;
 }
 
-/**
- * Build BrainOutput from typed state + the resolved PackOutput. Runs in
- * Stage 4 after facts are sorted + f-ids are assigned. Confidence is
- * computed by Stage 4 (deterministic) and overlaid afterwards — this
- * producer only owns conclusion / key_metrics / caveats.
- */
 function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
-  const indicators = lastIndicators;
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const macroFl = lastMacroFloridaOutput;
 
-  const key_metrics: BrainOutputMetric[] = indicators
-    .map((i): BrainOutputMetric | null => {
-      const m = METRIC_MAP[i.series_id];
-      if (!m) return null;
-      return {
-        metric: m.metric,
-        value: i.value,
-        direction: i.direction,
-        label: m.label,
-        source: buildFredSource(i, fetched_at),
-      };
-    })
-    .filter((m): m is BrainOutputMetric => m !== null);
-
-  const conclusionParts: string[] = [];
-  if (indicators.length > 0) {
-    const sofr = indicators.find((i) => i.series_id === "SOFR");
-    const flur = indicators.find((i) => i.series_id === "FLUR");
-    const cpi = indicators.find((i) => i.series_id === "CPIAUCSL_YOY");
-    const tone: string[] = [];
-    if (sofr) {
-      tone.push(`SOFR at ${fmt(sofr.value)}% and ${sofr.direction}`);
-    }
-    if (flur) {
-      tone.push(
-        `Florida unemployment at ${fmt(flur.value)}% (${flur.direction})`,
-      );
-    }
-    if (cpi) {
-      tone.push(`headline CPI at ${fmt(cpi.value)}% YoY and ${cpi.direction}`);
-    }
-    conclusionParts.push(
-      `As of the latest reported periods, the SWFL macro backdrop reads: ${tone.join(", ")}.`,
-    );
-    conclusionParts.push(
-      `The funding-cost and labor-supply picture is the operator's primary lens; ` +
-        `cross-vertical synthesis (franchise + CRE + sector-credit) lives downstream in master.`,
-    );
+  if (!macroFl) {
+    return {
+      conclusion:
+        "macro-swfl could not resolve its upstream macro-florida brain — no SWFL macro context available.",
+      key_metrics: [],
+      caveats: [
+        "Upstream macro-florida brain was unavailable. Run `npm run refinery macro-florida` first.",
+      ],
+      direction: "neutral",
+      magnitude: 0,
+      drivers: [],
+      overrides: [],
+      contradicts: [],
+      exogenous_signals: [],
+    };
   }
 
-  const sourceCaveats: string[] =
-    env.source === "fixture"
-      ? [
-          "Macro indicators in this build are synthetic fixture data (FRED-shaped) — unset REFINERY_SOURCE or set it to `live` for the live FRED API.",
-        ]
-      : [
-          "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
-        ];
+  const flSummary = macroFl.key_metrics
+    .map((m) => `${m.label} ${fmt(m.value)}% (${m.direction})`)
+    .join(", ");
 
-  // Per-indicator vote: rising rates / inflation / unemployment are all
-  // bearish for an SWFL operator (funding cost up, Fed less likely to cut,
-  // labor demand softening). Falling is the inverse. Stable is neutral.
-  const macroVote = voteMacroDirection(indicators);
+  const conclusion =
+    `macro-swfl is a regional delta brain. It currently emits no SWFL-specific metrics — ` +
+    `county-level BLS LAUS (Lee + Collier) and other hyperlocal series are the planned sources ` +
+    `and have not yet been ingested. The Florida state baseline reads: ${flSummary} ` +
+    `(via macro-florida, confidence ${macroFl.confidence.toFixed(2)}). ` +
+    `Downstream consumers needing macro context today should declare macro-florida or macro-us as direct upstreams ` +
+    `rather than routing through macro-swfl, until SWFL-specific data lands.`;
 
   return {
-    conclusion: conclusionParts.join(" "),
-    key_metrics,
-    caveats: [...sourceCaveats, ...macroVote.caveats],
-    direction: macroVote.direction,
-    magnitude: macroVote.magnitude,
+    conclusion,
+    // Empty by design — see the brain header docstring. macro-swfl's value
+    // today is in the chain position + freshness propagation, not in unique
+    // metrics. When county-level LAUS lands, real SWFL metrics replace this.
+    key_metrics: [],
+    caveats: [
+      "macro-swfl emits no SWFL-specific metrics today — the brain is a chain-position placeholder until county-level BLS LAUS for Lee + Collier is ingested. Downstream brains should declare macro-florida or macro-us as direct upstreams for macro context in the interim.",
+    ],
+    // Pass through the FL state direction as the best available regional read.
+    direction: macroFl.direction,
+    magnitude: macroFl.magnitude,
     drivers: [],
     overrides: [],
     contradicts: [],
@@ -217,92 +129,31 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   };
 }
 
-type IndicatorVote = "bullish" | "bearish" | "neutral";
-
-/**
- * Per-indicator vote. SOFR, CPI YoY, and FLUR all read "rising = bearish"
- * for an SWFL operator: funding cost up, Fed less likely to cut, labor
- * market softening. Falling is the inverse. Stable / unknown is neutral.
- * FLLFPR is omitted on purpose — labor force participation's directional
- * interpretation is too context-dependent to vote on.
- */
-function voteMacroIndicator(i: MacroSwflNormalized): IndicatorVote {
-  if (i.direction === "stable") return "neutral";
-  const bearish_on_rising =
-    i.series_id === "SOFR" ||
-    i.series_id === "CPIAUCSL_YOY" ||
-    i.series_id === "FLUR";
-  if (!bearish_on_rising) return "neutral";
-  return i.direction === "rising" ? "bearish" : "bullish";
-}
-
-/**
- * Brain-level direction. Counts per-indicator votes:
- *  - any bullish AND any bearish → "mixed" (operator cannot read one direction).
- *  - otherwise winning side adopts; magnitude = winning_count / total.
- *  - all-neutral → "neutral" with magnitude = neutral_count / total (so an
- *    all-stable read is loudly neutral, not silently absent).
- */
-function voteMacroDirection(indicators: MacroSwflNormalized[]): {
-  direction: BrainOutputDirection;
-  magnitude: number;
-  caveats: string[];
-} {
-  const votes = indicators
-    .filter((i) => i.series_id !== "FLLFPR")
-    .map(voteMacroIndicator);
-  const total = votes.length;
-  if (total === 0) return { direction: "neutral", magnitude: 0, caveats: [] };
-  const bullish = votes.filter((v) => v === "bullish").length;
-  const bearish = votes.filter((v) => v === "bearish").length;
-  const neutral = votes.filter((v) => v === "neutral").length;
-
-  if (bullish > 0 && bearish > 0) {
-    return {
-      direction: "mixed",
-      magnitude: 0.5,
-      caveats: [
-        `Macro indicators split: ${bullish} bullish, ${bearish} bearish, ${neutral} neutral — operator cannot read one direction from this set.`,
-      ],
-    };
-  }
-  if (bullish > bearish) {
-    return { direction: "bullish", magnitude: bullish / total, caveats: [] };
-  }
-  if (bearish > bullish) {
-    return { direction: "bearish", magnitude: bearish / total, caveats: [] };
-  }
-  return { direction: "neutral", magnitude: neutral / total, caveats: [] };
-}
-
 export const macroSwfl: PackDefinition = {
   id: "macro-swfl",
   brain_id: "macro-swfl",
-  domain: "finance",
+  domain: "macro",
   scope:
-    "Macro context for Southwest Florida operators — FRED rates, Florida labor, and US inflation, paired with the SWFL Intelligence Lake index.",
-  ttl_seconds: 86400, // 1 day — macro indicators refresh fast
-  sources: [macroSwflSource],
-  input_brains: [],
-  // Every FRED fragment belongs. Composite cutoff = 0 so the DAG output
-  // survives triage uncontested.
+    "Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Currently a pure delta brain pending county-level BLS LAUS ingest.",
+  ttl_seconds: 86400,
+  sources: [makeBrainInputSource("macro-florida")],
+  input_brains: [{ id: "macro-florida", edge_type: "input" }],
   fitScore: (): number => 8,
   compositeCutoff: 0,
-  // Pure deterministic — every fact is computed in macroSwflCorpusSummary.
   skipSynthesisAgent: true,
   corpusSummary: macroSwflCorpusSummary,
   outputProducer: macroSwflOutputProducer,
   preferences: [
-    "The user is an SWFL operator who reads macro indicators to time capital decisions and judge labor-market tightness.",
-    "The user treats funding-rate direction and Florida unemployment as the two highest-signal series for Lee–Collier pricing decisions.",
-    "The user pairs the macro snapshot with the SWFL Intelligence Lake master index and never infers record-level franchise or corridor detail from macro alone.",
+    "The user is an SWFL operator who reads regional macro context against the FL state baseline.",
+    "The user treats county-level BLS LAUS for Lee + Collier as the planned-but-not-yet-ingested source for true SWFL macro metrics.",
+    "The user knows macro-swfl is intentionally a chain-position placeholder until county-level data lands and routes around it (consuming macro-florida or macro-us directly) when macro metrics are needed today.",
   ],
   activeProject:
-    "macro-swfl: standing macro snapshot for SWFL operators — funding rates, Florida labor, US inflation.",
+    "macro-swfl: chain-position placeholder for SWFL regional macro until county-level BLS LAUS lands.",
   prompts: {
     triageContext:
-      "These fragments are FRED macro indicators. They are all decision-relevant by construction; the pack is pure deterministic aggregation.",
+      "These fragments are upstream brain OUTPUTs (macro-florida). The pack is pure deterministic aggregation with no synthesis agent.",
     synthesisContext:
-      "This pack runs no synthesis agent (skipSynthesisAgent). Every fact is produced deterministically by macroSwflCorpusSummary and the BrainOutput is built by macroSwflOutputProducer.",
+      "This pack runs no synthesis agent (skipSynthesisAgent). The BrainOutput is built by macroSwflOutputProducer as a thin pass-through that emits no own metrics until county-level data lands.",
   },
 };

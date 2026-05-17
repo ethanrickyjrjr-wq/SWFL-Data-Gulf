@@ -28,8 +28,15 @@ import { env } from "../config/env.mts";
  * Input brains:
  *   • franchise-outcomes — named survival rates by brand (cross-validation
  *     of the sector aggregates with brand-level signal)
- *   • macro-swfl — current funding-cost backdrop (SOFR direction, CPI YoY,
- *     Florida labor) so the sector recommendation reads against the macro tape
+ *   • macro-us — national funding-cost backdrop (SOFR direction, CPI YoY)
+ *   • macro-florida — Florida state-level labor (FLUR)
+ *
+ * The macro-swfl edge was dropped in the 2026-05-17 restructure: macro-swfl
+ * is now a pure delta brain that emits no metrics until county-level BLS
+ * LAUS lands. Consuming macro-us + macro-florida directly is the honest
+ * shape — sofr_rate / cpi_yoy live on the national brain, fl_unemployment
+ * on the state brain, and the conclusion-line confidence cites the weaker
+ * of the two upstreams.
  *
  * Pure deterministic — every fact is computed in code from typed fragments.
  * `chargeoff_rate_resolved` (charge-offs / resolved loans) is the consistent
@@ -54,7 +61,10 @@ interface SectorAggregate {
 }
 let lastSectors: SectorAggregate[] = [];
 let lastFranchiseOutput: BrainOutput | null = null;
-let lastMacroOutput: BrainOutput | null = null;
+ 
+let lastMacroUsOutput: BrainOutput | null = null;
+ 
+let lastMacroFloridaOutput: BrainOutput | null = null;
 
 let lastFetchedAt: string | null = null;
 
@@ -208,12 +218,14 @@ function sectorCreditCorpusSummary(
 ): SynthesisFact[] {
   const rows = rowsFrom(allFragments);
   const franchise = brainInputFrom(allFragments, "franchise-outcomes");
-  const macro = brainInputFrom(allFragments, "macro-swfl");
+  const macroUs = brainInputFrom(allFragments, "macro-us");
+  const macroFl = brainInputFrom(allFragments, "macro-florida");
 
   // Stash typed state for outputProducer
   lastSectors = aggregateBySector(rows);
   lastFranchiseOutput = franchise;
-  lastMacroOutput = macro;
+  lastMacroUsOutput = macroUs;
+  lastMacroFloridaOutput = macroFl;
 
   // Capture fetched_at + since_fy from the first sector-credit row so the
   // outputProducer can rebuild the exact PostgREST query URL the source ran.
@@ -315,10 +327,10 @@ function sectorCreditCorpusSummary(
     });
   }
 
-  if (macro) {
-    const sofr = macro.key_metrics.find((m) => m.metric === "sofr_rate");
-    const cpi = macro.key_metrics.find((m) => m.metric === "cpi_yoy");
-    const flUnemp = macro.key_metrics.find(
+  if (macroUs || macroFl) {
+    const sofr = macroUs?.key_metrics.find((m) => m.metric === "sofr_rate");
+    const cpi = macroUs?.key_metrics.find((m) => m.metric === "cpi_yoy");
+    const flUnemp = macroFl?.key_metrics.find(
       (m) => m.metric === "fl_unemployment",
     );
     const macroLine = [
@@ -330,11 +342,15 @@ function sectorCreditCorpusSummary(
     ]
       .filter(Boolean)
       .join(", ");
+    const minConfidence = Math.min(
+      macroUs?.confidence ?? 1,
+      macroFl?.confidence ?? 1,
+    );
     facts.push({
-      topic: "macro-swfl :: upstream_routing",
-      fact: "Current macro funding-cost backdrop from the macro-swfl brain",
+      topic: "macro-chain :: upstream_routing",
+      fact: "Current macro funding-cost backdrop from the macro-us + macro-florida brains",
       value:
-        `The macro-swfl brain (confidence ${macro.confidence.toFixed(2)} at ${macro.refined_at}) reports the SWFL macro backdrop: ${macroLine}. ` +
+        `The macro chain (macro-us + macro-florida, weaker upstream confidence ${minConfidence.toFixed(2)}) reports the macro backdrop: ${macroLine}. ` +
         `These rates set the funding-cost lens — a high-charge-off sector at a falling SOFR is a different bet from the same sector at a rising SOFR.`,
       source_fragment_ids: [],
     });
@@ -347,7 +363,8 @@ function sectorCreditOutputProducer(
   _out: PackOutput,
 ): BrainOutputProducerResult {
   const sectors = lastSectors;
-  const macro = lastMacroOutput;
+  const macroUs = lastMacroUsOutput;
+  const macroFl = lastMacroFloridaOutput;
   const franchise = lastFranchiseOutput;
   const fetched_at =
     lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -440,8 +457,8 @@ function sectorCreditOutputProducer(
       `The three highest-risk sectors are: ${risk3} — meaningful sample size in each case.`,
     );
   }
-  if (macro) {
-    const sofr = macro.key_metrics.find((m) => m.metric === "sofr_rate");
+  if (macroUs) {
+    const sofr = macroUs.key_metrics.find((m) => m.metric === "sofr_rate");
     if (sofr) {
       conclusionParts.push(
         `Read these rates against the current SOFR of ${pct(sofr.value)}% (${sofr.direction}) — funding-cost direction sets the appetite for charge-off risk.`,
@@ -560,11 +577,13 @@ export const sectorCreditSwfl: PackDefinition = {
   sources: [
     sectorCreditSwflSource,
     makeBrainInputSource("franchise-outcomes"),
-    makeBrainInputSource("macro-swfl"),
+    makeBrainInputSource("macro-us"),
+    makeBrainInputSource("macro-florida"),
   ],
   input_brains: [
     { id: "franchise-outcomes", edge_type: "input" },
-    { id: "macro-swfl", edge_type: "input" },
+    { id: "macro-us", edge_type: "input" },
+    { id: "macro-florida", edge_type: "input" },
   ],
   // Every SBA row matters; rows with no resolved loans still belong (the sector
   // may have resolved data elsewhere). Brain-input fragments bypass via the

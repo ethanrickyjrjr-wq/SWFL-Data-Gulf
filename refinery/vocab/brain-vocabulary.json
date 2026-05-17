@@ -413,13 +413,13 @@
       "category": "macro",
       "domain": ["macro", "finance"],
       "fred_series": "SOFR",
-      "source_brains": ["macro-swfl", "master"],
+      "source_brains": ["macro-us", "master"],
       "value_type": "percentage",
       "unit": "%",
       "value_range": [0, 20],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Floor for floating-rate CRE debt. Rising SOFR triggers rising-rates-dominance override in refinery/constitution/finance.mts when magnitude > 0.6."
+      "scope_note": "Floor for floating-rate CRE debt. Rising SOFR triggers rising-rates-dominance override in refinery/constitution/finance.mts (retargeted from macro-swfl to macro-us in the 2026-05-17 macro restructure) when magnitude > 0.6."
     },
 
     "macro_fl_unemployment": {
@@ -430,7 +430,7 @@
       "category": "macro",
       "domain": ["macro", "demographics"],
       "fred_series": "LBSSA12",
-      "source_brains": ["macro-swfl", "master"],
+      "source_brains": ["macro-florida", "master"],
       "value_type": "percentage",
       "unit": "%",
       "value_range": [0, 25],
@@ -447,7 +447,7 @@
       "category": "macro",
       "domain": ["macro"],
       "fred_series": "CPIAUCSL",
-      "source_brains": ["macro-swfl"],
+      "source_brains": ["macro-us"],
       "value_type": "percentage",
       "unit": "%",
       "value_range": [-5, 25],
@@ -464,7 +464,7 @@
       "category": "macro",
       "domain": ["macro", "demographics"],
       "fred_series": "FLUR",
-      "source_brains": ["macro-swfl"],
+      "source_brains": ["macro-florida"],
       "value_type": "percentage",
       "unit": "%",
       "value_range": [40, 80],

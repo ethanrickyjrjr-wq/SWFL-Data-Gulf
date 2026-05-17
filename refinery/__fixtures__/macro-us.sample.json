@@ -1,0 +1,27 @@
+{
+  "__meta": {
+    "source": "FRED — Federal Reserve Economic Data (synthetic fixture for refinery testing; not for production analysis)",
+    "verified": "2026-05-15",
+    "note": "National macro indicators (SOFR + US CPI YoY). Series ids align with real FRED series so the live swap is one-line. State-level (FL) indicators live in macro-florida.sample.json."
+  },
+  "rows": [
+    {
+      "series_id": "SOFR",
+      "label": "Secured Overnight Financing Rate",
+      "value": 4.31,
+      "unit": "percent_annualized",
+      "period": "2026-05-14",
+      "direction": "falling",
+      "context": "SOFR has eased ~100bp from its 2025 peak as the Fed has begun cutting; floating-rate CRE debt is repricing lower."
+    },
+    {
+      "series_id": "CPIAUCSL_YOY",
+      "label": "US CPI (All Items) Year-over-Year",
+      "value": 2.6,
+      "unit": "percent",
+      "period": "2026-04",
+      "direction": "falling",
+      "context": "Headline CPI has cooled toward the 2% target; shelter is the remaining sticky component."
+    }
+  ]
+}

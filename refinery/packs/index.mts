@@ -21,6 +21,8 @@ import type { PackDefinition } from "../types/pack.mts";
 import { envSwfl } from "./env-swfl.mts";
 import { tourismTdt } from "./tourism-tdt.mts";
 import { sectorCreditSwfl } from "./sector-credit-swfl.mts";
+import { macroUs } from "./macro-us.mts";
+import { macroFlorida } from "./macro-florida.mts";
 import { macroSwfl } from "./macro-swfl.mts";
 import { master } from "./master.mts";
 
@@ -30,6 +32,8 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [envSwfl.id]: envSwfl,
   [tourismTdt.id]: tourismTdt,
   [sectorCreditSwfl.id]: sectorCreditSwfl,
+  [macroUs.id]: macroUs,
+  [macroFlorida.id]: macroFlorida,
   [macroSwfl.id]: macroSwfl,
   [master.id]: master,
 };

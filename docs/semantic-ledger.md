@@ -2,7 +2,7 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-17T08:36:42.601Z (commit `78fdc6a`)
+**Generated:** 2026-05-17T16:28:36.618Z (commit `8727e13`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
@@ -10,8 +10,8 @@ _The data on the data — auto-generated read-only view of the SKOS vocabulary, 
 
 - **45** SKOS concepts across **6** categories (43 active, 2 stub).
 - **43** raw slugs registered in `slug_index`.
-- **8** distinct source brains referenced (live + planned).
-- **7** packs in the runtime registry.
+- **9** distinct source brains referenced (live + planned).
+- **9** packs in the runtime registry.
 
 ## Regenerate
 
@@ -115,17 +115,17 @@ bun refinery/tools/semantic-ledger.mts
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | percentage | % | -5 – 25 | `macro-swfl` | `macro` | ✅ active |
-| `macro_fl_labor_participation` | Florida Labor Force Participation Rate | `fl_labor_participation` | percentage | % | 40 – 80 | `macro-swfl` | `macro`, `demographics` | ✅ active |
-| `macro_fl_unemployment` | Florida Unemployment Rate | `fl_unemployment` | percentage | % | 0 – 25 | `macro-swfl`, `master` | `macro`, `demographics` | ✅ active |
-| `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | percentage | % | 0 – 20 | `macro-swfl`, `master` | `macro`, `finance` | ✅ active |
+| `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | percentage | % | -5 – 25 | `macro-us` | `macro` | ✅ active |
+| `macro_fl_labor_participation` | Florida Labor Force Participation Rate | `fl_labor_participation` | percentage | % | 40 – 80 | `macro-florida` | `macro`, `demographics` | ✅ active |
+| `macro_fl_unemployment` | Florida Unemployment Rate | `fl_unemployment` | percentage | % | 0 – 25 | `macro-florida`, `master` | `macro`, `demographics` | ✅ active |
+| `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | percentage | % | 0 – 20 | `macro-us`, `master` | `macro`, `finance` | ✅ active |
 
 <details><summary>Scope notes</summary>
 
 - **`macro_cpi_yoy`** — Fed's 2% target is the reference anchor. Shelter remains the sticky component through 2026.
 - **`macro_fl_labor_participation`** — Climbs against retirement-state demographic gravity. A positive signal on Florida's working-age engagement.
 - **`macro_fl_unemployment`** — Primary labor-tightness read for SWFL operators. Tourism and construction absorb new entrants when this stays low.
-- **`macro_sofr_rate`** — Floor for floating-rate CRE debt. Rising SOFR triggers rising-rates-dominance override in refinery/constitution/finance.mts when magnitude > 0.6.
+- **`macro_sofr_rate`** — Floor for floating-rate CRE debt. Rising SOFR triggers rising-rates-dominance override in refinery/constitution/finance.mts (retargeted from macro-swfl to macro-us in the 2026-05-17 macro restructure) when magnitude > 0.6.
 
 </details>
 
@@ -194,9 +194,11 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `cre-swfl` | `real-estate` | _leaf_ | — |
 | `env-swfl` | `environmental` | _leaf_ | — |
 | `franchise-outcomes` | `real-estate` | _leaf_ | — |
-| `macro-swfl` | `finance` | _leaf_ | — |
-| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**veto**) | 1× veto |
-| `sector-credit-swfl` | `finance` | `franchise-outcomes` (**input**), `macro-swfl` (**input**) | all input |
+| `macro-florida` | `macro` | `macro-us` (**input**) | all input |
+| `macro-swfl` | `macro` | `macro-florida` (**input**) | all input |
+| `macro-us` | `macro` | _leaf_ | — |
+| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**veto**) | 1× veto |
+| `sector-credit-swfl` | `finance` | `franchise-outcomes` (**input**), `macro-us` (**input**), `macro-florida` (**input**) | all input |
 | `tourism-tdt` | `hospitality` | _leaf_ | — |
 
 ## What each brain emits (SKOS concepts)
@@ -230,13 +232,18 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | --- | --- | --- | --- |
 | `sba_overall_survival_rate` | SBA Franchise Survival Rate (Corpus) | `overall_survival_rate` | active |
 
-### `macro-swfl` (4 concepts)
+### `macro-florida` (2 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `macro_fl_labor_participation` | Florida Labor Force Participation Rate | `fl_labor_participation` | active |
+| `macro_fl_unemployment` | Florida Unemployment Rate | `fl_unemployment` | active |
+
+### `macro-us` (2 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | active |
-| `macro_fl_labor_participation` | Florida Labor Force Participation Rate | `fl_labor_participation` | active |
-| `macro_fl_unemployment` | Florida Unemployment Rate | `fl_unemployment` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 
 ### `master` (12 concepts)
