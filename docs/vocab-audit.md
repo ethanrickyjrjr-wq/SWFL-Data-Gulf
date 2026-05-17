@@ -264,3 +264,23 @@ The "10K-to-2.5K" target applies to the full projected lake at scale (every futu
 2. **`cre_corridor_evolution`**: the raw values (`stable`, `growing`, `declining`, `repositioning`) are strings in the fact layer, not `BrainOutputMetric` slugs. Should they be a SKOS `OrderedCollection` ordered by "operator friendliness" (growing > stable > repositioning > declining)? Flag for Item #1.
 3. **`flood_risk_pct`**: referenced in `refinery/constitution/real-estate.mts` but not yet produced by any brain. Pre-register it in the vocab as a placeholder concept `env_flood_risk_pct` so the constitution rule can reference a stable ID.
 4. **`naics_distress_baseline`**: same situation — stubbed in `naics-distress-veto`. Pre-register as `sba_naics_distress_baseline`.
+
+---
+
+## Post-Ship Audit TODOs
+
+### 1. Verify `macro_fl_labor_participation` FRED series mapping (flagged 2026-05-17)
+
+The Category C table above maps `macro_fl_labor_participation` to FRED series `FLUR`. `FLUR` is widely understood as Florida's _unemployment_ rate ticker on FRED — not labor force participation. The companion entry `macro_fl_unemployment` is mapped to `LBSSA12`, which compounds the suspicion that the two FRED series IDs may be swapped (or that one is wrong outright).
+
+**Action required:**
+
+1. Pull both FRED tickers from `https://fred.stlouisfed.org/` and inspect canonical titles + values.
+   - `FLUR` → confirm whether it's "Florida Unemployment Rate" or "Florida Labor Force Participation Rate"
+   - `LBSSA12` → confirm same
+   - Find the FRED series ID for "Florida Labor Force Participation Rate" if neither of the above is correct
+2. Update `refinery/vocab/brain-vocabulary.json` — fix `macro_fl_labor_participation.fred_series` and/or `macro_fl_unemployment.fred_series`.
+3. If any ingested `data_lake.fred_*` rows are mis-categorized, regenerate them under the corrected concept ID.
+4. After resolution, archive the vault fragment `fl-labor-baselines-suspect-until-audit` (banked 2026-05-17, conf 0.50) — set `status = 'superseded'` and `superseded_by` to a new confirmed entry.
+
+**Why it matters:** every brain that consumes Florida labor as a denominator (the macro-swfl chain, anything downstream from `macro-florida`) inherits the bug. The vault fragment serves as the operator-side caveat until the technical fix lands.

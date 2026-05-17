@@ -62,3 +62,6 @@ next-env.d.ts
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# personal_vault backups — strategic insights, never commit
+.private/
