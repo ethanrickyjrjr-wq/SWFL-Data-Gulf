@@ -2,14 +2,14 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-18T13:39:42.736Z (commit `5318e52`)
+**Generated:** 2026-05-18T14:14:18.534Z (commit `eb9a3be`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
 ## TL;DR
 
-- **67** SKOS concepts across **7** categories (65 active, 2 stub).
-- **74** raw slugs registered in `slug_index`.
+- **71** SKOS concepts across **7** categories (69 active, 2 stub).
+- **82** raw slugs registered in `slug_index`.
 - **12** distinct source brains referenced (live + planned).
 - **12** packs in the runtime registry.
 
@@ -24,7 +24,7 @@ bun refinery/tools/semantic-ledger.mts
 | Category | Concepts | Active | Stub |
 | --- | ---: | ---: | ---: |
 | `credit-risk` | 17 | 16 | 1 |
-| `environmental` | 12 | 11 | 1 |
+| `environmental` | 16 | 15 | 1 |
 | `hospitality` | 5 | 5 | 0 |
 | `logistics` | 7 | 7 | 0 |
 | `macro` | 9 | 9 | 0 |
@@ -66,7 +66,7 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `environmental` (12)
+### `environmental` (16)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -77,8 +77,12 @@ bun refinery/tools/semantic-ledger.mts
 | `env_flood_losses_swfl_storm_year_count_since_2000` | SWFL Named-Storm-Year Count Since 2000 | `storm_year_count_swfl`, `swfl_storm_frequency` | count | count | 0 – 20 | `env-swfl`, `master` | `environmental`, `real-estate` | ✅ active |
 | `env_flood_losses_swfl_storm_year_total_usd` | SWFL Storm-Year NFIP Paid Claims (Cumulative) | `flood_losses_storm_total`, `swfl_storm_year_claims_usd` | currency | USD | 0 – 50000000000 | `env-swfl`, `master` | `environmental`, `real-estate` | ✅ active |
 | `env_flood_risk_pct` | Flood Risk Percentage | `flood_risk_pct` | percentage | % | 0 – 100 | _none_ | `environmental`, `real-estate` | ⚠️ stub |
+| `env_gw_highwater_exceedance_days` | Lee County Groundwater High-Water Exceedance Days (>2 ft NAVD88) | `swfl_gw_highwater_days_lee`, `lee_gw_exceedance_days_above_2ft` | count | days | 0 – 366 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_gw_level_lee_median_ft` | Lee County Groundwater Median Elevation (NAVD88) | `swfl_gw_lee_median_ft`, `lee_gw_median_navd88_ft` | elevation_ft | ft (NAVD88) | -50 – 50 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_lee_sfha_coverage_pct` | Lee County Area-Weighted SFHA Coverage | `lee_county_sfha_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_lee_ve_zone_coverage_pct` | Lee County Area-Weighted Coastal V/VE Coverage | `lee_county_ve_zone_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_rainfall_swfl_annual_in` | SWFL Annual Rainfall (Latest Complete Year) | `swfl_rainfall_annual_in`, `rainfall_swfl_latest_year_in` | depth_in | in | 0 – 120 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_sw_stage_caloosahatchee_ft` | Caloosahatchee River Stage (S-79 / Olga) | `swfl_sw_stage_caloosahatchee_ft`, `caloosahatchee_stage_latest_ft` | elevation_ft | ft (gage local zero) | -5 – 30 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_swfl_sfha_coverage_pct` | SWFL Area-Weighted SFHA Coverage | `swfl_sfha_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_swfl_ve_zone_coverage_pct` | SWFL Area-Weighted Coastal V/VE Coverage | `swfl_ve_zone_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_swfl_ve_zone_polygon_count` | SWFL Coastal V/VE Polygon Count | `swfl_ve_zone_polygon_count` | integer | polygons | _unbounded_ | `env-swfl` | `environmental`, `real-estate` | ✅ active |
@@ -92,8 +96,12 @@ bun refinery/tools/semantic-ledger.mts
 - **`env_flood_losses_swfl_storm_year_count_since_2000`** — Count of named SWFL-impacting hurricane years since 2000 with paid-claim totals > 10× baseline. Operationally = the SWFL_STORM_YEARS hardcoded list in refinery/sources/fema-nfip-source.mts filtered to year >= 2000, deduplicated by year — currently Charley 2004, Wilma 2005, Irma 2017, Ian 2022, and 2024 (Helene + Milton, same year) (n=5 distinct years). Reads as 'how often does SWFL get hammered by flood claims'; the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) are the union scope.
 - **`env_flood_losses_swfl_storm_year_total_usd`** — Sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across all 6 SWFL counties (FIPS 12071 Lee, 12021 Collier, 12015 Charlotte, 12043 Glades, 12051 Hendry, 12115 Sarasota) in the named SWFL-impacting storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024). Storm list hardcoded in refinery/sources/fema-nfip-source.mts with a LAST_REVIEWED date; update when a new named storm hits SWFL.
 - **`env_flood_risk_pct`** — Pre-registered for the flood-veto override rule in refinery/constitution/real-estate.mts (priority 90). NOT emitted by env-swfl directly — env-swfl emits scope-specific concepts (env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct). Constitution should be updated in a follow-up to point the flood-veto trigger at the V/VE coverage concepts; this stub remains as the legacy hook.
+- **`env_gw_highwater_exceedance_days`** — Count of days within the most recent 365-day window where AT LEAST ONE Lee County (FIPS 12071) USGS active dv well reported a groundwater elevation above 2.0 ft NAVD88 (parameter 62610). The 2 ft threshold is a regional rule-of-thumb for septic-system constraint and slab-on-grade construction risk in low-lying parcels (carried over from the abandoned SFWMD DBHYDRO doc). De-duped per day: multiple wells exceeding on the same day counts as one day. Days_covered surfaces honestly when the window has gaps.
+- **`env_gw_level_lee_median_ft`** — Median groundwater elevation across Lee County (FIPS 12071) USGS active dv wells reporting parameter 62610 (groundwater level above NAVD88), computed over the most recent 90 days of observations available in data_lake.usgs_daily. Higher values mean a higher water table — relevant to septic capacity, slab construction, and post-storm dewatering capacity in low-lying parcels.
 - **`env_lee_sfha_coverage_pct`** — Lee County (FIPS 12071) area-weighted SFHA coverage — the Fort Myers / Fort Myers Beach / Sanibel / Captiva footprint. The §6.4 FMB lease question keys on this and env_lee_ve_zone_coverage_pct.
 - **`env_lee_ve_zone_coverage_pct`** — Lee County (FIPS 12071) area-weighted V/VE coastal high-hazard coverage. This is the flood-veto-eligible subset for Lee. Above-baseline values are the primary signal that barrier-island coordinates in Lee should be paired with property-level lookups before any lease/acquisition decision.
+- **`env_rainfall_swfl_annual_in`** — Average annual precipitation total across USGS active dv rain gauges in Lee + Collier counties (FIPS 12071, 12021), parameter 00045 with statCd 00006 (sum). Per-station annual totals are computed for the most recent year with >= 10 monthly samples; the SWFL value is the AVERAGE (not sum) of station totals — averaging gives regional intensity, summing across stations is physically meaningless. Typical SWFL annual rainfall is 50-60 inches; >70 inches suggests an exceptionally wet year.
+- **`env_sw_stage_caloosahatchee_ft`** — Most recent daily-mean gage height across USGS active dv sites in the Caloosahatchee HUC (03090205%) reporting parameter 00065. Reference is gage local zero, NOT a vertical datum — useful for trend and threshold comparisons within the basin but NOT cross-site additive without datum conversion. Caloosahatchee at S-79 (site 02292900) is the canonical reference; multiple gages averaged via median when more than one reports on the same date.
 - **`env_swfl_sfha_coverage_pct`** — Area-weighted share of mapped SWFL footprint (6 counties) classified as a FEMA Special Flood Hazard Area per 44 CFR §59.1. Computed in env-swfl via sum(Shape__Area) over SFHA-classified zones ÷ sum(Shape__Area) over all returned zones. Areas are square decimal degrees (WGS84); only the RATIO is meaningful — absolute areas never propagate.
 - **`env_swfl_ve_zone_coverage_pct`** — Area-weighted share of mapped SWFL footprint classified as FEMA coastal high-hazard (V, VE, V1–V30, V99). This is the barrier-island / flood-veto-eligible subset of SFHA; pair with env_swfl_sfha_coverage_pct for full structural-flood context.
 - **`env_swfl_ve_zone_polygon_count`** — Count of distinct FEMA V/VE-classified polygons across the SWFL 6-county footprint. A polygon count, not an area; structural read on coastal-high-hazard fragmentation. Pair with env_swfl_ve_zone_coverage_pct for relative scale.
@@ -272,7 +280,7 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `cre_vacancy_rate` | Vacancy Rate (per corridor) | `vacancy_rate` | active |
 | `cre_vacancy_rate_median` | Median Vacancy Rate (corpus) | `vacancy_rate_median` | active |
 
-### `env-swfl` (11 concepts)
+### `env-swfl` (15 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
@@ -282,8 +290,12 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `env_flood_losses_swfl_post_ian_ratio` | SWFL Post-Ian Flood Recovery Ratio (Latest Year ÷ Baseline) | `post_ian_claims_ratio`, `swfl_flood_recovery_ratio` | active |
 | `env_flood_losses_swfl_storm_year_count_since_2000` | SWFL Named-Storm-Year Count Since 2000 | `storm_year_count_swfl`, `swfl_storm_frequency` | active |
 | `env_flood_losses_swfl_storm_year_total_usd` | SWFL Storm-Year NFIP Paid Claims (Cumulative) | `flood_losses_storm_total`, `swfl_storm_year_claims_usd` | active |
+| `env_gw_highwater_exceedance_days` | Lee County Groundwater High-Water Exceedance Days (>2 ft NAVD88) | `swfl_gw_highwater_days_lee`, `lee_gw_exceedance_days_above_2ft` | active |
+| `env_gw_level_lee_median_ft` | Lee County Groundwater Median Elevation (NAVD88) | `swfl_gw_lee_median_ft`, `lee_gw_median_navd88_ft` | active |
 | `env_lee_sfha_coverage_pct` | Lee County Area-Weighted SFHA Coverage | `lee_county_sfha_pct_area_weighted` | active |
 | `env_lee_ve_zone_coverage_pct` | Lee County Area-Weighted Coastal V/VE Coverage | `lee_county_ve_zone_pct_area_weighted` | active |
+| `env_rainfall_swfl_annual_in` | SWFL Annual Rainfall (Latest Complete Year) | `swfl_rainfall_annual_in`, `rainfall_swfl_latest_year_in` | active |
+| `env_sw_stage_caloosahatchee_ft` | Caloosahatchee River Stage (S-79 / Olga) | `swfl_sw_stage_caloosahatchee_ft`, `caloosahatchee_stage_latest_ft` | active |
 | `env_swfl_sfha_coverage_pct` | SWFL Area-Weighted SFHA Coverage | `swfl_sfha_pct_area_weighted` | active |
 | `env_swfl_ve_zone_coverage_pct` | SWFL Area-Weighted Coastal V/VE Coverage | `swfl_ve_zone_pct_area_weighted` | active |
 | `env_swfl_ve_zone_polygon_count` | SWFL Coastal V/VE Polygon Count | `swfl_ve_zone_polygon_count` | active |

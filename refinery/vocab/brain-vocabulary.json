@@ -776,6 +776,92 @@
       "scope_note": "Most recent complete year's sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) ÷ env_flood_losses_swfl_baseline_annual_usd. >2 = elevated activity (still in storm recovery); ~1 = back to baseline. Tracks the Ian/Helene/Milton recovery curve."
     },
 
+    "env_gw_level_lee_median_ft": {
+      "id": "env_gw_level_lee_median_ft",
+      "prefLabel": "Lee County Groundwater Median Elevation (NAVD88)",
+      "altLabels": [
+        "Lee GW median ft",
+        "Lee County groundwater median elevation",
+        "Lee water table median NAVD88"
+      ],
+      "raw_slugs": ["swfl_gw_lee_median_ft", "lee_gw_median_navd88_ft"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "elevation_ft",
+      "unit": "ft (NAVD88)",
+      "value_range": [-50, 50],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Median groundwater elevation across Lee County (FIPS 12071) USGS active dv wells reporting parameter 62610 (groundwater level above NAVD88), computed over the most recent 90 days of observations available in data_lake.usgs_daily. Higher values mean a higher water table — relevant to septic capacity, slab construction, and post-storm dewatering capacity in low-lying parcels."
+    },
+
+    "env_sw_stage_caloosahatchee_ft": {
+      "id": "env_sw_stage_caloosahatchee_ft",
+      "prefLabel": "Caloosahatchee River Stage (S-79 / Olga)",
+      "altLabels": [
+        "Caloosahatchee stage ft",
+        "S-79 gage height",
+        "Caloosahatchee basin surface stage"
+      ],
+      "raw_slugs": [
+        "swfl_sw_stage_caloosahatchee_ft",
+        "caloosahatchee_stage_latest_ft"
+      ],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "elevation_ft",
+      "unit": "ft (gage local zero)",
+      "value_range": [-5, 30],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Most recent daily-mean gage height across USGS active dv sites in the Caloosahatchee HUC (03090205%) reporting parameter 00065. Reference is gage local zero, NOT a vertical datum — useful for trend and threshold comparisons within the basin but NOT cross-site additive without datum conversion. Caloosahatchee at S-79 (site 02292900) is the canonical reference; multiple gages averaged via median when more than one reports on the same date."
+    },
+
+    "env_rainfall_swfl_annual_in": {
+      "id": "env_rainfall_swfl_annual_in",
+      "prefLabel": "SWFL Annual Rainfall (Latest Complete Year)",
+      "altLabels": [
+        "SWFL annual rainfall inches",
+        "Lee + Collier annual rainfall",
+        "SWFL precipitation annual sum"
+      ],
+      "raw_slugs": ["swfl_rainfall_annual_in", "rainfall_swfl_latest_year_in"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "depth_in",
+      "unit": "in",
+      "value_range": [0, 120],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Average annual precipitation total across USGS active dv rain gauges in Lee + Collier counties (FIPS 12071, 12021), parameter 00045 with statCd 00006 (sum). Per-station annual totals are computed for the most recent year with >= 10 monthly samples; the SWFL value is the AVERAGE (not sum) of station totals — averaging gives regional intensity, summing across stations is physically meaningless. Typical SWFL annual rainfall is 50-60 inches; >70 inches suggests an exceptionally wet year."
+    },
+
+    "env_gw_highwater_exceedance_days": {
+      "id": "env_gw_highwater_exceedance_days",
+      "prefLabel": "Lee County Groundwater High-Water Exceedance Days (>2 ft NAVD88)",
+      "altLabels": [
+        "Lee GW exceedance days",
+        "septic threshold exceedance Lee",
+        "Lee high-water days above 2ft NAVD88"
+      ],
+      "raw_slugs": [
+        "swfl_gw_highwater_days_lee",
+        "lee_gw_exceedance_days_above_2ft"
+      ],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["env-swfl"],
+      "value_type": "count",
+      "unit": "days",
+      "value_range": [0, 366],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of days within the most recent 365-day window where AT LEAST ONE Lee County (FIPS 12071) USGS active dv well reported a groundwater elevation above 2.0 ft NAVD88 (parameter 62610). The 2 ft threshold is a regional rule-of-thumb for septic-system constraint and slab-on-grade construction risk in low-lying parcels (carried over from the abandoned SFWMD DBHYDRO doc). De-duped per day: multiple wells exceeding on the same day counts as one day. Days_covered surfaces honestly when the window has gaps."
+    },
+
     "hosp_tdt_latest_monthly_collections": {
       "id": "hosp_tdt_latest_monthly_collections",
       "prefLabel": "Latest Monthly TDT Collections (Lee County)",
@@ -1220,6 +1306,14 @@
     "swfl_storm_frequency": "env_flood_losses_swfl_storm_year_count_since_2000",
     "post_ian_claims_ratio": "env_flood_losses_swfl_post_ian_ratio",
     "swfl_flood_recovery_ratio": "env_flood_losses_swfl_post_ian_ratio",
+    "swfl_gw_lee_median_ft": "env_gw_level_lee_median_ft",
+    "lee_gw_median_navd88_ft": "env_gw_level_lee_median_ft",
+    "swfl_sw_stage_caloosahatchee_ft": "env_sw_stage_caloosahatchee_ft",
+    "caloosahatchee_stage_latest_ft": "env_sw_stage_caloosahatchee_ft",
+    "swfl_rainfall_annual_in": "env_rainfall_swfl_annual_in",
+    "rainfall_swfl_latest_year_in": "env_rainfall_swfl_annual_in",
+    "swfl_gw_highwater_days_lee": "env_gw_highwater_exceedance_days",
+    "lee_gw_exceedance_days_above_2ft": "env_gw_highwater_exceedance_days",
     "latest_monthly_collections_usd": "hosp_tdt_latest_monthly_collections",
     "yoy_delta_pct": "hosp_tdt_yoy_delta",
     "trailing_12mo_collections_usd": "hosp_tdt_trailing_12mo_collections",
