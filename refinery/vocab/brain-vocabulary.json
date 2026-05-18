@@ -809,6 +809,86 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "FAF5 sum of inbound domestic flow value, in millions of USD, for the same scope as logistics_inbound_freight_tons_swfl. Imports and exports excluded."
+    },
+
+    "traffic_aadt_swfl_avg": {
+      "id": "traffic_aadt_swfl_avg",
+      "prefLabel": "SWFL Length-Weighted Average AADT (Latest FDOT Year)",
+      "altLabels": ["SWFL traffic volume", "SWFL average daily traffic"],
+      "raw_slugs": ["aadt_swfl_avg", "traffic_aadt_avg_swfl"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["traffic-swfl", "master"],
+      "value_type": "count",
+      "unit": "vehicles per day",
+      "value_range": [0, 500000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Sum(AADT × Shape_Length) ÷ Sum(Shape_Length) across all FDOT segments in Lee + Collier counties for the latest published year. Shape_Length is the auto-generated geometry length in the layer projection (SHAPE_LENG attribute is unused — may be stale after route realignments). 2-county scope matches env-swfl and the master.mts SWFL Intelligence Lake scope; the wider 6-county FDOT extract would let thousands of rural Glades/Hendry/Monroe segments dominate the corridor signal. Length-weighting prevents short freeway off-ramps from dominating an arithmetic mean over thousands of segments."
+    },
+
+    "traffic_aadt_swfl_yoy_pct": {
+      "id": "traffic_aadt_swfl_yoy_pct",
+      "prefLabel": "SWFL AADT Year-over-Year Change (Latest vs Prior FDOT Year)",
+      "altLabels": ["SWFL traffic YoY", "SWFL AADT growth"],
+      "raw_slugs": ["aadt_yoy_pct", "traffic_yoy_swfl"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["traffic-swfl", "master"],
+      "value_type": "percent_change",
+      "unit": "percent",
+      "value_range": [-50, 50],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Percent change in length-weighted AADT (Lee + Collier) between the latest and prior FDOT years, computed over the comparable-segment cohort (segments with non-null AADT in BOTH years matched on roadway + desc_frm + desc_to). Positive = vehicular demand rising; negative = falling. Sensitive to FDOT survey re-routing — see post-Ian caveat in brain OUTPUT."
+    },
+
+    "traffic_aadt_swfl_5yr_cagr_pct": {
+      "id": "traffic_aadt_swfl_5yr_cagr_pct",
+      "prefLabel": "SWFL AADT 5-Year CAGR (2021–2025)",
+      "altLabels": ["SWFL traffic 5yr trend"],
+      "raw_slugs": ["aadt_5yr_cagr", "traffic_cagr_swfl"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["traffic-swfl", "master"],
+      "value_type": "percent_change",
+      "unit": "percent CAGR",
+      "value_range": [-20, 20],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Compound annual growth rate of length-weighted SWFL AADT (Lee + Collier) from 2021 base to 2025 latest. Comparable-segment cohort. Smooths YoY volatility (especially the 2022 Ian disruption); reads the medium-term demand trajectory."
+    },
+
+    "traffic_truck_share_swfl_median_pct": {
+      "id": "traffic_truck_share_swfl_median_pct",
+      "prefLabel": "SWFL Median Truck Share (FDOT TFCTR, Latest Year)",
+      "altLabels": ["SWFL freight density", "SWFL truck percentage"],
+      "raw_slugs": ["truck_share_median", "freight_density_swfl"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["traffic-swfl", "master"],
+      "value_type": "percentage",
+      "unit": "percent",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Median value of TFCTR (truck factor) across Lee + Collier FDOT segments for the latest year. Identifies freight-dense corridors. Complements logistics_inbound_freight_tons_swfl (FAF5 zone-to-zone aggregate) — TFCTR says WHERE trucks physically move; FAF5 says WHAT TOTAL VOLUME they carry."
+    },
+
+    "traffic_post_ian_recovery_index": {
+      "id": "traffic_post_ian_recovery_index",
+      "prefLabel": "SWFL Coastal Counties Post-Ian Recovery Index (2025 ÷ 2022)",
+      "altLabels": ["post-storm recovery", "Ian recovery index"],
+      "raw_slugs": ["post_ian_recovery", "ian_recovery_index"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["traffic-swfl", "master"],
+      "value_type": "index",
+      "unit": "index (2022 = 100)",
+      "value_range": [0, 200],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Ratio of 2025 length-weighted AADT to 2022 (pre-storm) baseline across the three coastal SWFL counties most impacted by Hurricane Ian: Lee, Collier, Charlotte. >100 = volumes exceed pre-storm; <100 = below pre-storm. DELIBERATELY broader county set than the other traffic-swfl concepts (which are Lee + Collier) — the Ian index is about storm geography, not brain scope; Charlotte was in the eye-wall path and must be included for the storm signal to be honest. Glades, Hendry, Monroe excluded — Ian's path didn't materially hit them."
     }
   },
 
@@ -874,6 +954,16 @@
     "seasonal_position_vs_history": "hosp_tdt_seasonal_position",
     "inbound_freight_tons_swfl": "logistics_inbound_freight_tons_swfl",
     "inbound_freight_value_swfl_musd": "logistics_inbound_freight_value_swfl_musd",
+    "aadt_swfl_avg": "traffic_aadt_swfl_avg",
+    "traffic_aadt_avg_swfl": "traffic_aadt_swfl_avg",
+    "aadt_yoy_pct": "traffic_aadt_swfl_yoy_pct",
+    "traffic_yoy_swfl": "traffic_aadt_swfl_yoy_pct",
+    "aadt_5yr_cagr": "traffic_aadt_swfl_5yr_cagr_pct",
+    "traffic_cagr_swfl": "traffic_aadt_swfl_5yr_cagr_pct",
+    "truck_share_median": "traffic_truck_share_swfl_median_pct",
+    "freight_density_swfl": "traffic_truck_share_swfl_median_pct",
+    "post_ian_recovery": "traffic_post_ian_recovery_index",
+    "ian_recovery_index": "traffic_post_ian_recovery_index",
     "_direction_ambiguous": {
       "_note": "The raw slug 'direction' is overloaded. Resolve by field path: BrainOutput.direction → qual_sentiment_direction; BrainOutputMetric.direction → qual_metric_trajectory. Never resolve by value alone."
     }

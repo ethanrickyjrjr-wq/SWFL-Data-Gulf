@@ -68,7 +68,11 @@ async function fetchAll(
       .range(from, from + PAGE - 1);
     if (error)
       throw new Error(`Premise fetch ${table} failed: ${error.message}`);
-    const rows = (data ?? []) as Record<string, unknown>[];
+    // Supabase's `.select(string)` overload widens `data` to include
+    // GenericStringError[]; that union doesn't directly cast to
+    // Record<string, unknown>[]. We've already short-circuited on `error`
+    // above, so funnel through unknown to silence TS2352.
+    const rows = (data ?? []) as unknown as Record<string, unknown>[];
     all.push(...rows);
     if (rows.length < PAGE) break;
     from += PAGE;

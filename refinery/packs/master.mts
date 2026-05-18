@@ -205,6 +205,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("tourism-tdt"),
     makeBrainInputSource("env-swfl"),
     makeBrainInputSource("logistics-swfl"),
+    makeBrainInputSource("traffic-swfl"),
   ],
   // Typed edges (P5): every leaf feeds master as `input` data EXCEPT env-swfl,
   // which is wired as a `veto` — flood-veto in the real-estate constitution can
@@ -225,6 +226,7 @@ export const master: PackDefinition = {
     { id: "tourism-tdt", edge_type: "input" },
     { id: "env-swfl", edge_type: "veto" },
     { id: "logistics-swfl", edge_type: "input" },
+    { id: "traffic-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.
