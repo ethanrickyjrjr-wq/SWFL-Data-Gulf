@@ -43,10 +43,18 @@ test("propertiesLeeValue pack: deterministic (skipTriageAgent + skipSynthesisAge
   assert.equal(propertiesLeeValue.skipSynthesisAgent, true);
 });
 
-test("propertiesLeeValue pack: source connector wired", () => {
-  assert.equal(propertiesLeeValue.sources.length, 1);
-  assert.equal(propertiesLeeValue.sources[0].source_id, "leepa_value_lee");
-  assert.equal(propertiesLeeValue.sources[0].trust_tier, 2);
+test("propertiesLeeValue pack: source connectors wired (leepa + fhfa-hpi)", () => {
+  assert.equal(propertiesLeeValue.sources.length, 2);
+  const leepa = propertiesLeeValue.sources.find(
+    (s) => s.source_id === "leepa_value_lee",
+  );
+  assert.ok(leepa, "leepa_value_lee source must be wired");
+  assert.equal(leepa!.trust_tier, 2);
+  const fhfa = propertiesLeeValue.sources.find(
+    (s) => s.source_id === "fhfa_hpi",
+  );
+  assert.ok(fhfa, "fhfa_hpi source must be wired");
+  assert.equal(fhfa!.trust_tier, 1);
 });
 
 test("propertiesLeeValue pack: fixture round-trip produces expected metrics", async () => {
