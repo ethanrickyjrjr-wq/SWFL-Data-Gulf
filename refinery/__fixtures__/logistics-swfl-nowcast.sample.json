@@ -1,0 +1,475 @@
+{
+  "_meta": {
+    "description": "Synthetic FDOT freight-coded segment fixtures for logistics-swfl-nowcast. Four scenarios drive shock_state state-machine coverage: nominal (z within band), i75_closure_acute (3-day breach → anomaly), i75_closure_sustained_30d (structural_break), i75_closure_sustained_90d (baseline_validity_flag flips). The baseline_brain_output mocks the upstream logistics-swfl OUTPUT JSON so the brain-input source has something to consume in fixture mode.",
+    "scope": "Lee + Collier freight-coded segments (I-* and US-* roadways only). tfctr values mirror FHWA T-factor decimals (0.04–0.095), shape_length in meters.",
+    "active_scenario_env": "REFINERY_FIXTURE_SCENARIO (defaults to 'nominal')",
+    "notes": "tons_per_year per segment = AADT × tfctr × AVG_PAYLOAD_TONS_PER_TRUCK (16.0) × 365 × (shape_length_m / METERS_PER_MILE 1609.344). For scenario 'nominal' the segments sum to ~baseline (deviation_z ~ 0). For 'i75_closure_*' the I-75 segments' AADT is dropped sharply to push deviation_z below −3."
+  },
+  "baseline_brain_output": {
+    "brain_id": "logistics-swfl",
+    "version": 1,
+    "refined_at": "2026-05-17T12:00:00Z",
+    "direction": "neutral",
+    "magnitude": 0.5,
+    "drivers": [],
+    "overrides": [],
+    "conclusion": "Synthetic logistics-swfl baseline for nowcast fixture mode. inbound_freight_tons_swfl is in thousand tons/year — Stage 2 multiplies by 1000 to anchor the baseline_mu.",
+    "key_metrics": [
+      {
+        "metric": "inbound_freight_tons_swfl",
+        "value": 1539664,
+        "direction": "stable",
+        "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+        "variable_type": "extensive",
+        "units": "thousand tons/year",
+        "display_format": "count",
+        "source": {
+          "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
+          "fetched_at": "2026-05-17T12:00:00Z",
+          "tier": 1,
+          "citation": "Synthetic logistics-swfl baseline for nowcast fixture."
+        }
+      }
+    ],
+    "caveats": [],
+    "contradicts": [],
+    "confidence": 0.85,
+    "joint_integrity": 1,
+    "confidence_dispersion": 0,
+    "chain_depth": 0,
+    "trust_tier": 1,
+    "upstream_count": 0,
+    "relevance": {
+      "decay_curve": "months",
+      "half_life_hours": 8760,
+      "computed_at": "2026-05-17T12:00:00Z"
+    },
+    "exogenous_signals": []
+  },
+  "scenarios": {
+    "nominal": {
+      "_meta": {
+        "description": "Current freight flow closely tracks the 250,000-thousand-tons baseline; deviation_z within ±1, shock_state=normal, baseline_validity_flag=valid.",
+        "expected_shock_state": "normal",
+        "expected_baseline_validity_flag": "valid"
+      },
+      "segments": [
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 116",
+          "desc_to": "Exit 123",
+          "aadt": 95000,
+          "tfctr": 0.092,
+          "shape_length": 11500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 123",
+          "desc_to": "Exit 131",
+          "aadt": 88000,
+          "tfctr": 0.088,
+          "shape_length": 13000.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 131",
+          "desc_to": "Exit 136",
+          "aadt": 82000,
+          "tfctr": 0.085,
+          "shape_length": 8500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 8",
+          "desc_to": "MM 14",
+          "aadt": 36000,
+          "tfctr": 0.043,
+          "shape_length": 9700.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 14",
+          "desc_to": "MM 22",
+          "aadt": 32000,
+          "tfctr": 0.041,
+          "shape_length": 12800.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 101",
+          "desc_to": "Exit 107",
+          "aadt": 78000,
+          "tfctr": 0.087,
+          "shape_length": 9500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 107",
+          "desc_to": "Exit 111",
+          "aadt": 73000,
+          "tfctr": 0.084,
+          "shape_length": 6500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples N",
+          "desc_to": "Naples S",
+          "aadt": 31000,
+          "tfctr": 0.04,
+          "shape_length": 10200.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples S",
+          "desc_to": "Marco Island",
+          "aadt": 26000,
+          "tfctr": 0.04,
+          "shape_length": 14500.0
+        }
+      ],
+      "prior_shock_log": []
+    },
+    "i75_closure_acute": {
+      "_meta": {
+        "description": "I-75 segments' AADT dropped ~70% to simulate an active closure. The prior_shock_log carries 2 prior breach days with z<0; this run becomes the 3rd consecutive breach day, triggering shock_state=anomaly.",
+        "expected_shock_state": "anomaly",
+        "expected_baseline_validity_flag": "valid",
+        "expected_consecutive_breach_days": 3
+      },
+      "segments": [
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 116",
+          "desc_to": "Exit 123",
+          "aadt": 28000,
+          "tfctr": 0.092,
+          "shape_length": 11500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 123",
+          "desc_to": "Exit 131",
+          "aadt": 26000,
+          "tfctr": 0.088,
+          "shape_length": 13000.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 131",
+          "desc_to": "Exit 136",
+          "aadt": 24000,
+          "tfctr": 0.085,
+          "shape_length": 8500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 8",
+          "desc_to": "MM 14",
+          "aadt": 36000,
+          "tfctr": 0.043,
+          "shape_length": 9700.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 14",
+          "desc_to": "MM 22",
+          "aadt": 32000,
+          "tfctr": 0.041,
+          "shape_length": 12800.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 101",
+          "desc_to": "Exit 107",
+          "aadt": 22000,
+          "tfctr": 0.087,
+          "shape_length": 9500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 107",
+          "desc_to": "Exit 111",
+          "aadt": 21000,
+          "tfctr": 0.084,
+          "shape_length": 6500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples N",
+          "desc_to": "Naples S",
+          "aadt": 31000,
+          "tfctr": 0.04,
+          "shape_length": 10200.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples S",
+          "desc_to": "Marco Island",
+          "aadt": 26000,
+          "tfctr": 0.04,
+          "shape_length": 14500.0
+        }
+      ],
+      "prior_shock_log": [
+        {
+          "refined_at": "2026-05-15T12:00:00Z",
+          "deviation_z": -4.2,
+          "shock_state": "normal"
+        },
+        {
+          "refined_at": "2026-05-16T12:00:00Z",
+          "deviation_z": -4.1,
+          "shock_state": "normal"
+        }
+      ]
+    },
+    "i75_closure_sustained_30d": {
+      "_meta": {
+        "description": "Same flow as i75_closure_acute, but the prior_shock_log carries 29 consecutive breach days. This run becomes day 30 → shock_state=structural_break.",
+        "expected_shock_state": "structural_break",
+        "expected_baseline_validity_flag": "valid",
+        "expected_consecutive_breach_days": 30
+      },
+      "segments": [
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 116",
+          "desc_to": "Exit 123",
+          "aadt": 28000,
+          "tfctr": 0.092,
+          "shape_length": 11500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 123",
+          "desc_to": "Exit 131",
+          "aadt": 26000,
+          "tfctr": 0.088,
+          "shape_length": 13000.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 131",
+          "desc_to": "Exit 136",
+          "aadt": 24000,
+          "tfctr": 0.085,
+          "shape_length": 8500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 8",
+          "desc_to": "MM 14",
+          "aadt": 36000,
+          "tfctr": 0.043,
+          "shape_length": 9700.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 14",
+          "desc_to": "MM 22",
+          "aadt": 32000,
+          "tfctr": 0.041,
+          "shape_length": 12800.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 101",
+          "desc_to": "Exit 107",
+          "aadt": 22000,
+          "tfctr": 0.087,
+          "shape_length": 9500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 107",
+          "desc_to": "Exit 111",
+          "aadt": 21000,
+          "tfctr": 0.084,
+          "shape_length": 6500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples N",
+          "desc_to": "Naples S",
+          "aadt": 31000,
+          "tfctr": 0.04,
+          "shape_length": 10200.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples S",
+          "desc_to": "Marco Island",
+          "aadt": 26000,
+          "tfctr": 0.04,
+          "shape_length": 14500.0
+        }
+      ],
+      "prior_shock_log_generator": {
+        "kind": "consecutive_breaches",
+        "count": 29,
+        "z": -4.1,
+        "end_date": "2026-05-17T12:00:00Z"
+      }
+    },
+    "i75_closure_sustained_90d": {
+      "_meta": {
+        "description": "Same flow as the 30d scenario, but with 89 prior consecutive breach days. This run becomes day 90 → shock_state=structural_break AND baseline_validity_flag flips to stale-structural (sticky).",
+        "expected_shock_state": "structural_break",
+        "expected_baseline_validity_flag": "stale-structural",
+        "expected_consecutive_breach_days": 90
+      },
+      "segments": [
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 116",
+          "desc_to": "Exit 123",
+          "aadt": 28000,
+          "tfctr": 0.092,
+          "shape_length": 11500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 123",
+          "desc_to": "Exit 131",
+          "aadt": 26000,
+          "tfctr": 0.088,
+          "shape_length": 13000.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 131",
+          "desc_to": "Exit 136",
+          "aadt": 24000,
+          "tfctr": 0.085,
+          "shape_length": 8500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 8",
+          "desc_to": "MM 14",
+          "aadt": 36000,
+          "tfctr": 0.043,
+          "shape_length": 9700.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 14",
+          "desc_to": "MM 22",
+          "aadt": 32000,
+          "tfctr": 0.041,
+          "shape_length": 12800.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 101",
+          "desc_to": "Exit 107",
+          "aadt": 22000,
+          "tfctr": 0.087,
+          "shape_length": 9500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 107",
+          "desc_to": "Exit 111",
+          "aadt": 21000,
+          "tfctr": 0.084,
+          "shape_length": 6500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples N",
+          "desc_to": "Naples S",
+          "aadt": 31000,
+          "tfctr": 0.04,
+          "shape_length": 10200.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples S",
+          "desc_to": "Marco Island",
+          "aadt": 26000,
+          "tfctr": 0.04,
+          "shape_length": 14500.0
+        }
+      ],
+      "prior_shock_log_generator": {
+        "kind": "consecutive_breaches",
+        "count": 89,
+        "z": -4.1,
+        "end_date": "2026-05-17T12:00:00Z"
+      }
+    }
+  }
+}
