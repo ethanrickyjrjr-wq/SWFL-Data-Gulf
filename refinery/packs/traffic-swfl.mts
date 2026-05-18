@@ -327,6 +327,11 @@ function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.latestAvgAadt),
       direction: "stable",
       label: `SWFL length-weighted average AADT, year ${LATEST_FDOT_YEAR} (vehicles/day)`,
+      // AADT is a daily count averaged across corridor segments (an aggregate
+      // count, not a per-unit rate) — extensive.
+      variable_type: "extensive",
+      units: "vehicles/day",
+      display_format: "count",
       source: sourceMeta,
     },
   ];
@@ -337,6 +342,9 @@ function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.yoyPct * 10) / 10,
       direction: metricDirectionFromValue(agg.yoyPct, "rising"),
       label: `SWFL AADT YoY change ${PRIOR_YEAR}→${LATEST_FDOT_YEAR}, cohort-matched (%)`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: sourceMeta,
     });
   }
@@ -346,6 +354,9 @@ function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.cagrPct * 10) / 10,
       direction: metricDirectionFromValue(agg.cagrPct, "rising"),
       label: `SWFL AADT 5-year CAGR (${FIVE_YEAR_BASE} → ${LATEST_FDOT_YEAR}, %)`,
+      variable_type: "intensive",
+      units: "percent/year",
+      display_format: "percent",
       source: sourceMeta,
     });
   }
@@ -358,6 +369,10 @@ function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.medianTfctr * 1000) / 10,
       direction: "stable",
       label: `SWFL median truck factor (TFCTR × 100), year ${LATEST_FDOT_YEAR}`,
+      // Truck factor is a share (%) — intensive ratio.
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: sourceMeta,
     });
   }
@@ -367,6 +382,10 @@ function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.ianRecoveryIndex * 10) / 10,
       direction: agg.ianRecoveryIndex >= 100 ? "rising" : "falling",
       label: `Coastal SWFL (Lee + Collier + Charlotte) post-Ian recovery index, ${LATEST_FDOT_YEAR} ÷ ${IAN_BASELINE_YEAR} × 100`,
+      // Recovery index = ratio × 100 (so 100 = baseline). Intensive index.
+      variable_type: "intensive",
+      units: "index (2022=100)",
+      display_format: "ratio",
       source: sourceMeta,
     });
   }

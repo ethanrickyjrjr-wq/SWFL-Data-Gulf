@@ -247,6 +247,9 @@ function logisticsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.totalTons * 10) / 10,
       direction: "stable",
       label: `Total inbound domestic freight to SWFL, year ${LATEST_HISTORICAL_FAF_YEAR} (thousand tons)`,
+      variable_type: "extensive",
+      units: "thousand tons/year",
+      display_format: "count",
       source: flowSource,
     },
     {
@@ -254,6 +257,9 @@ function logisticsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.totalValueMusd * 10) / 10,
       direction: "stable",
       label: `Total inbound domestic freight value to SWFL, year ${LATEST_HISTORICAL_FAF_YEAR} (millions USD)`,
+      variable_type: "extensive",
+      units: "million USD/year",
+      display_format: "currency",
       source: flowSource,
     },
   ];

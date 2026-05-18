@@ -62,7 +62,7 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const facts: SynthesisFact[] = [];
 
   const flMetricsLine = macroFl.key_metrics
-    .map((m) => `${m.label} ${fmt(m.value)}% (${m.direction})`)
+    .map((m) => `${m.label} ${fmt(Number(m.value))}% (${m.direction})`)
     .join("; ");
   facts.push({
     topic: "macro_swfl_baseline",
@@ -99,7 +99,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
 
   const flSummary = macroFl.key_metrics
-    .map((m) => `${m.label} ${fmt(m.value)}% (${m.direction})`)
+    .map((m) => `${m.label} ${fmt(Number(m.value))}% (${m.direction})`)
     .join(", ");
 
   const conclusion =

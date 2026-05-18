@@ -31,7 +31,20 @@ function brainWithMetrics(metrics: BrainOutputMetric[]): BrainOutput {
 }
 
 function metric(slug: string, value: number): BrainOutputMetric {
-  return { metric: slug, value, direction: "rising", label: slug };
+  return {
+    metric: slug,
+    value,
+    direction: "rising",
+    label: slug,
+    variable_type: "intensive",
+    units: "percent",
+    source: {
+      url: `test://${slug}`,
+      fetched_at: NOW,
+      tier: 1,
+      citation: `test ${slug}`,
+    },
+  };
 }
 
 function rule(id: string): OverrideRule {

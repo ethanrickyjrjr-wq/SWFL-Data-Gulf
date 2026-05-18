@@ -470,6 +470,9 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             ? "falling"
             : "stable",
     label: `Latest monthly TDT collections (Lee County, ${latest.period_yyyymm}, ${season} season)`,
+    variable_type: "extensive",
+    units: "USD/month",
+    display_format: "currency",
     source: buildTdtSource("latest", snapshot, fetched_at, source_url),
   });
 
@@ -480,6 +483,9 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       direction:
         vote.yoyPct > 0 ? "rising" : vote.yoyPct < 0 ? "falling" : "stable",
       label: "Year-over-year delta vs same month prior year",
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: buildTdtSource("yoy", snapshot, fetched_at, source_url),
     });
   }
@@ -490,6 +496,9 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: snapshot.trailing12moUsd,
       direction: "stable", // sum, not a rate-of-change
       label: "Trailing 12-month TDT collections total",
+      variable_type: "extensive",
+      units: "USD",
+      display_format: "currency",
       source: buildTdtSource("trailing_12mo", snapshot, fetched_at, source_url),
     });
   }
@@ -506,6 +515,9 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             : "stable",
       label:
         "Post-Hurricane-Ian recovery ratio (trailing 12mo ÷ best pre-Ian 12mo)",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: buildTdtSource(
         "post_ian_recovery",
         snapshot,
@@ -527,6 +539,9 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             ? "falling"
             : "stable",
       label: "Seasonal position vs same-month historical mean",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: buildTdtSource(
         "seasonal_position",
         snapshot,

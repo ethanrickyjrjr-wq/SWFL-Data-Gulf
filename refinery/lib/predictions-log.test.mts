@@ -18,12 +18,33 @@ function makeOutput(overrides: Partial<BrainOutput> = {}): BrainOutput {
     overrides: [],
     conclusion: "Macro tightening + sector credit distress dominate the read.",
     key_metrics: [
-      { metric: "sofr_rate", value: 5.3, direction: "rising", label: "SOFR" },
+      {
+        metric: "sofr_rate",
+        value: 5.3,
+        direction: "rising",
+        label: "SOFR",
+        variable_type: "intensive",
+        units: "percent",
+        source: {
+          url: "test://sofr",
+          fetched_at: "2026-05-17T16:39:09.000Z",
+          tier: 1,
+          citation: "test SOFR",
+        },
+      },
       {
         metric: "fl_lfpr",
         value: 60.1,
         direction: "falling",
         label: "FL LFPR",
+        variable_type: "intensive",
+        units: "percent",
+        source: {
+          url: "test://fl_lfpr",
+          fetched_at: "2026-05-17T16:39:09.000Z",
+          tier: 1,
+          citation: "test FL LFPR",
+        },
       },
     ],
     caveats: ["Tourism reads bullish — see contradicts."],
@@ -67,6 +88,14 @@ test("buildPredictionRow caps top_key_metrics at 5 to keep JSONB lean", () => {
     value: i,
     direction: "stable" as const,
     label: `Metric ${i}`,
+    variable_type: "extensive" as const,
+    units: "count",
+    source: {
+      url: `test://m${i}`,
+      fetched_at: "2026-05-17T16:39:09.000Z",
+      tier: 1 as const,
+      citation: `test m${i}`,
+    },
   }));
   const row = buildPredictionRow(makeOutput({ key_metrics: many }));
   assert.equal(row.metadata.top_key_metrics.length, 5);

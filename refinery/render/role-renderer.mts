@@ -317,8 +317,10 @@ function formatValue(m: BrainOutputMetric): string {
   // Verbatim quote: never round. If the raw value reads naturally as a
   // percentage (0 < x < 1 and the slug hints at percentage / rate / ratio
   // / share), surface a percentage rendering ALONGSIDE the raw value
-  // rather than replacing it.
+  // rather than replacing it. Categorical metrics carry strings — render
+  // the string as-is.
   const v = m.value;
+  if (typeof v !== "number") return `${v}`;
   const slug = m.metric.toLowerCase();
   const looksPercent =
     v > 0 && v < 1 && /(pct|percent|rate|ratio|share|coverage)/.test(slug);

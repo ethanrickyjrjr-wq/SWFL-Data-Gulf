@@ -497,6 +497,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     value: Math.round(vote.swfl_sfha_pct * 10000) / 10000,
     direction: "stable", // structural exposure — not a time-series rate
     label: "SWFL area-weighted Special Flood Hazard Area coverage",
+    variable_type: "intensive",
+    units: "ratio",
+    display_format: "ratio",
     source: swflSource,
   });
 
@@ -505,6 +508,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     value: Math.round(vote.swfl_ve_pct * 10000) / 10000,
     direction: "stable",
     label: "SWFL area-weighted coastal high-hazard (V/VE) zone coverage",
+    variable_type: "intensive",
+    units: "ratio",
+    display_format: "ratio",
     source: swflSource,
   });
 
@@ -513,6 +519,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     value: snapshot.swfl_ve_polygon_count,
     direction: "stable",
     label: "SWFL count of distinct coastal high-hazard (V/VE) polygons",
+    variable_type: "extensive",
+    units: "polygons",
+    display_format: "count",
     source: swflSource,
   });
 
@@ -525,6 +534,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       direction: "stable",
       label:
         "Lee County area-weighted SFHA coverage (Fort Myers Beach context)",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: leeSource,
     });
     key_metrics.push({
@@ -532,6 +544,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(leeVePct * 10000) / 10000,
       direction: "stable",
       label: "Lee County area-weighted coastal high-hazard (V/VE) coverage",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: leeSource,
     });
   }
@@ -544,6 +559,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       direction: "stable",
       label:
         "Collier County area-weighted SFHA coverage (Naples / Marco Island context)",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: collierSource,
     });
     key_metrics.push({
@@ -551,6 +569,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: Math.round(collierVePct * 10000) / 10000,
       direction: "stable",
       label: "Collier County area-weighted coastal high-hazard (V/VE) coverage",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: collierSource,
     });
   }
@@ -566,6 +587,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: snapshot.nfip.storm_year_total_usd,
       direction: "stable",
       label: `SWFL cumulative NFIP paid claims (B+C+ICO) across named storm years (${SWFL_STORM_YEARS.map((s) => `${s.name} ${s.year}`).join(", ")})`,
+      variable_type: "extensive",
+      units: "USD",
+      display_format: "currency",
       source: nfipSource,
     });
     key_metrics.push({
@@ -574,6 +598,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       direction: "stable",
       label:
         "SWFL non-storm-year annual NFIP paid claims (median across all non-storm years in the archive)",
+      variable_type: "extensive",
+      units: "USD/year",
+      display_format: "currency",
       source: nfipSource,
     });
     key_metrics.push({
@@ -581,6 +608,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: snapshot.nfip.storm_year_count_since_2000,
       direction: "stable",
       label: "SWFL named-storm-year count since 2000",
+      variable_type: "extensive",
+      units: "years",
+      display_format: "count",
       source: nfipSource,
     });
     key_metrics.push({
@@ -588,6 +618,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       value: snapshot.nfip.post_ian_ratio,
       direction: "stable",
       label: `SWFL latest-year NFIP claims ÷ non-storm baseline (numerator = ${snapshot.nfip.latest_complete_year} SWFL total)`,
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
       source: nfipSource,
     });
   }
@@ -603,6 +636,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         value: h.gw_lee_median_ft,
         direction: "stable",
         label: `Lee County groundwater median elevation (NAVD88) over the most recent ${h.gw_lee_window.days_covered} days (${h.gw_lee_window.start}→${h.gw_lee_window.end})`,
+        variable_type: "intensive",
+        units: "ft NAVD88",
+        display_format: "raw",
         source: hydroSource(
           snapshot,
           "62610",
@@ -617,6 +653,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         value: h.sw_stage_caloosahatchee_ft,
         direction: "stable",
         label: `Caloosahatchee surface stage at gage local zero — latest reading (${h.sw_stage_window.end})`,
+        variable_type: "intensive",
+        units: "ft",
+        display_format: "raw",
         source: hydroSource(
           snapshot,
           "00065",
@@ -631,6 +670,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         value: h.rainfall_swfl_annual_in,
         direction: "stable",
         label: `SWFL average annual rainfall (latest complete year ${h.rainfall_year}, averaged across ${h.rainfall_window.site_nos.length} Lee+Collier rain gauges)`,
+        variable_type: "extensive",
+        units: "inches/year",
+        display_format: "raw",
         source: hydroSource(
           snapshot,
           "00045",
@@ -648,6 +690,9 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         value: h.gw_highwater_days,
         direction: "stable",
         label: `Lee County days with groundwater >2.0 ft NAVD88 (${h.gw_highwater_days} of ${h.gw_highwater_total_days_in_window} days with observations in the trailing 365-day window)`,
+        variable_type: "extensive",
+        units: "days",
+        display_format: "count",
         source: hydroSource(
           snapshot,
           "62610",

@@ -36,6 +36,15 @@ const BRAIN_DIRECTIONS = new Set(["bullish", "bearish", "neutral", "mixed"]);
 const DECAY_CURVES = new Set(["hours", "days", "weeks", "months", "permanent"]);
 const TRUST_TIERS = new Set([1, 2, 3, 4]);
 const BRAIN_EDGE_TYPES = new Set(["input", "constraint", "veto", "modifier"]);
+// Lane 1B (atomic type-lift) — locked enums for the metric contract.
+const VARIABLE_TYPES = new Set(["extensive", "intensive", "categorical"]);
+const DISPLAY_FORMATS = new Set([
+  "currency",
+  "percent",
+  "count",
+  "ratio",
+  "raw",
+]);
 
 function parseFrontmatter(md: string): Record<string, string> | null {
   // Tolerate one leading `<!-- FRESHNESS ... -->` HTML comment before the `---`.
@@ -270,10 +279,27 @@ export function validateSpec(md: string): ValidationResult {
                 `--- OUTPUT --- key_metrics[${i}].metric must be a string.`,
               );
             }
-            if (typeof m?.value !== "number") {
+            // Lane 1B — variable_type is required first because it gates the
+            // value-type check (categorical accepts strings; everything else
+            // must be numeric).
+            const vt = m?.variable_type;
+            if (typeof vt !== "string" || !VARIABLE_TYPES.has(vt)) {
               errors.push(
-                `--- OUTPUT --- key_metrics[${i}].value must be a number.`,
+                `--- OUTPUT --- key_metrics[${i}].variable_type must be "extensive"|"intensive"|"categorical", got ${JSON.stringify(vt)}.`,
               );
+            }
+            if (vt === "categorical") {
+              if (typeof m?.value !== "string") {
+                errors.push(
+                  `--- OUTPUT --- key_metrics[${i}].value must be a string when variable_type is "categorical".`,
+                );
+              }
+            } else {
+              if (typeof m?.value !== "number") {
+                errors.push(
+                  `--- OUTPUT --- key_metrics[${i}].value must be a number when variable_type is "${vt}".`,
+                );
+              }
             }
             if (
               m?.direction !== "rising" &&
@@ -289,13 +315,45 @@ export function validateSpec(md: string): ValidationResult {
                 `--- OUTPUT --- key_metrics[${i}].label must be a string.`,
               );
             }
-            // Optional per-metric provenance (P2). Absent is fine for legacy
-            // packs; when present, every sub-field is required and well-typed.
-            if (m?.source !== undefined) {
-              const s = m.source as Record<string, unknown>;
-              if (typeof s !== "object" || s === null || Array.isArray(s)) {
+            // Lane 1B — units required when variable_type is NOT categorical.
+            // Categorical metrics MUST omit units (avoids ambiguity).
+            if (vt === "categorical") {
+              if (m?.units !== undefined) {
                 errors.push(
-                  `--- OUTPUT --- key_metrics[${i}].source must be an object when present.`,
+                  `--- OUTPUT --- key_metrics[${i}].units must be omitted when variable_type is "categorical".`,
+                );
+              }
+            } else if (
+              typeof m?.units !== "string" ||
+              (m.units as string).length === 0
+            ) {
+              errors.push(
+                `--- OUTPUT --- key_metrics[${i}].units must be a non-empty string when variable_type is "${vt}".`,
+              );
+            }
+            // Lane 1B — display_format is optional but when present must be in
+            // the locked enum.
+            if (m?.display_format !== undefined) {
+              if (
+                typeof m.display_format !== "string" ||
+                !DISPLAY_FORMATS.has(m.display_format as string)
+              ) {
+                errors.push(
+                  `--- OUTPUT --- key_metrics[${i}].display_format must be one of "currency"|"percent"|"count"|"ratio"|"raw", got ${JSON.stringify(m.display_format)}.`,
+                );
+              }
+            }
+            // Lane 1B — source promoted from optional to REQUIRED on every
+            // metric. Atomic type-lift; all 12 packs backfilled in the same PR.
+            if (m?.source === undefined || m?.source === null) {
+              errors.push(
+                `--- OUTPUT --- key_metrics[${i}].source is required (Lane 1B).`,
+              );
+            } else {
+              const s = m.source as Record<string, unknown>;
+              if (typeof s !== "object" || Array.isArray(s)) {
+                errors.push(
+                  `--- OUTPUT --- key_metrics[${i}].source must be an object.`,
                 );
               } else {
                 if (typeof s.url !== "string" || s.url.length === 0) {
@@ -323,6 +381,19 @@ export function validateSpec(md: string): ValidationResult {
                   errors.push(
                     `--- OUTPUT --- key_metrics[${i}].source.citation must be a non-empty string.`,
                   );
+                }
+                // Lane 1B — citation_ref is optional; renderer cross-validates
+                // it resolves to a CITATION TABLE row id. Validator only
+                // checks the field's type.
+                if (s.citation_ref !== undefined) {
+                  if (
+                    typeof s.citation_ref !== "string" ||
+                    (s.citation_ref as string).length === 0
+                  ) {
+                    errors.push(
+                      `--- OUTPUT --- key_metrics[${i}].source.citation_ref must be a non-empty string when present.`,
+                    );
+                  }
                 }
               }
             }

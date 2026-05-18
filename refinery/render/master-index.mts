@@ -6,6 +6,27 @@ import { renderSavedFacts } from "./saved-facts.mts";
 import { freshnessComment, freshnessToken } from "../lib/freshness.mts";
 
 /**
+ * Lane 1B — renderer-side cross-validation: every metric whose
+ * `source.citation_ref` is set must resolve to a row id in the rendered
+ * CITATION TABLE. Drift here means a downstream consumer reading the OUTPUT
+ * block would chase a dangling reference, so we fail loud at render time
+ * rather than ship a broken .md. Returns the offending refs (empty when ok).
+ */
+function findUnresolvedCitationRefs(
+  brainOutput: BrainOutput,
+  citationIds: ReadonlySet<string>,
+): string[] {
+  const missing: string[] = [];
+  brainOutput.key_metrics.forEach((m, i) => {
+    const ref = m.source?.citation_ref;
+    if (typeof ref === "string" && ref.length > 0 && !citationIds.has(ref)) {
+      missing.push(`key_metrics[${i}].source.citation_ref = "${ref}"`);
+    }
+  });
+  return missing;
+}
+
+/**
  * Fixed framing paragraph (spec section 2). Identical for every pack —
  * it states provenance, it does not specialize per pack. Keeping it
  * constant keeps the spec-validator simple and the output predictable.
@@ -34,6 +55,23 @@ export function renderMasterIndex(
   brainOutput: BrainOutput,
 ): string {
   const { pack, citations, facts, recentNote } = out;
+
+  // Lane 1B: gate the render on citation_ref resolution. The id set the
+  // renderer compares against is the EXACT set of citation row ids about to
+  // be written into the CITATION TABLE — no risk of validator-vs-renderer
+  // drift. Throw the same shape Stage 4 already throws for spec-validator
+  // failures so callers handle uniformly.
+  const citationIds = new Set(citations.map((c) => c.id));
+  const unresolvedRefs = findUnresolvedCitationRefs(brainOutput, citationIds);
+  if (unresolvedRefs.length > 0) {
+    throw new Error(
+      `master-index renderer: unresolved source.citation_ref(s) — every ` +
+        `BrainOutputMetric.source.citation_ref (when present) must match a ` +
+        `row id in the brain's CITATION TABLE. Pack "${pack.id}" has:\n` +
+        unresolvedRefs.map((r) => `  - ${r}`).join("\n") +
+        `\nKnown citation ids: ${[...citationIds].join(", ") || "(none)"}`,
+    );
+  }
 
   const preferences = pack.preferences.map((p) => `- ${p}`).join("\n");
   const citationTable = renderCitationTable(citations);

@@ -44,14 +44,12 @@ export interface BrainDriver {
 
 /**
  * Per-metric provenance — the "receipt" that lets a disputant trace a single
- * value back to its source. Optional in v1: env-swfl is the first brain to ship
- * with it populated (P2 forward, Session 8); other packs retrofit as they're
- * touched. When present, the spec-validator enforces shape; when absent, the
- * metric is treated as legacy and only validated for the base fields.
+ * value back to its source. REQUIRED on every metric as of Lane 1B (atomic
+ * type-lift, all packs backfilled in the same PR).
  *
- * `citation` is the human-readable label that would appear in a footnote — it
- * does NOT need to match a CITATION TABLE row id (those are pack-level), but
- * should let a reader reproduce the lookup against the cited source.
+ * `citation` is the human-readable label that would appear in a footnote —
+ * it does NOT need to match a CITATION TABLE row id. `citation_ref` is the
+ * separate optional pointer to a row id (renderer cross-validates when set).
  */
 export interface BrainOutputMetricSource {
   /** Direct URL the value was fetched from (or as close as the source permits). */
@@ -62,22 +60,80 @@ export interface BrainOutputMetricSource {
   tier: BrainTrustTier;
   /** Human-readable citation, e.g. "FEMA NFHL Flood Hazard Zones, DFIRM_ID 12021C". */
   citation: string;
+  /**
+   * Optional opaque pointer to a CITATION TABLE row id (e.g. "s01"). When
+   * present, `master-index.mts` cross-validates that the id resolves to an
+   * actual citation row at render time and aborts the write if it doesn't.
+   * Leave undefined on packs that don't ship a CITATION-row convention yet.
+   */
+  citation_ref?: string;
 }
+
+/**
+ * Variable-type taxonomy for a metric. Locked in Lane 1B (cosmic-rolling-brook
+ * plan v2). Drives display defaults, gap-math validity, and future role-renderer
+ * formatting.
+ *
+ *   "extensive"   — counts, totals, sums (employee_count, parcel_count, tons_per_year, claim_count).
+ *   "intensive"   — rates, ratios, percentages, z-scores, yoy_change_pct
+ *                   (unemployment_rate, yoy_change_pct, sales_velocity_z, gap_pct).
+ *   "categorical" — enums, labels, dominant_X strings (dominant_land_use, shock_state).
+ *
+ * `units` is REQUIRED when variable_type !== "categorical"; spec-validator
+ * enforces this. Categorical metrics omit `units`.
+ */
+export type BrainOutputMetricVariableType =
+  | "extensive"
+  | "intensive"
+  | "categorical";
+
+/**
+ * Optional render hint for any downstream consumer (Plumbline UI, role
+ * renderer, downstream Claude session formatting tables). Costs nothing to
+ * populate at the pack and saves every consumer the format-from-value
+ * introspection cost. Locked enum — extend only with paired type test.
+ */
+export type BrainOutputMetricDisplayFormat =
+  | "currency"
+  | "percent"
+  | "count"
+  | "ratio"
+  | "raw";
 
 export interface BrainOutputMetric {
   /** machine-readable slug, e.g. "sofr_30d" */
   metric: string;
-  /** numeric value */
-  value: number;
+  /**
+   * Numeric value for extensive/intensive metrics; string for categorical
+   * metrics (label/enum). Spec-validator only enforces categorical may carry a
+   * string; extensive/intensive must be number.
+   */
+  value: number | string;
   direction: "rising" | "falling" | "stable";
   /** human-readable label, e.g. "30-Day SOFR Rate" */
   label: string;
   /**
-   * Optional per-metric provenance — the disputable receipt for THIS value.
-   * v1: env-swfl populates this on every metric; other packs leave it absent
-   * until they retrofit. When present, shape is validated by spec-validator.
+   * Lane 1B (atomic type-lift). Drives gap-math validity and downstream
+   * formatting. See `BrainOutputMetricVariableType` for the locked taxonomy.
    */
-  source?: BrainOutputMetricSource;
+  variable_type: BrainOutputMetricVariableType;
+  /**
+   * Free-form units string. REQUIRED when `variable_type !== "categorical"`.
+   * Examples: "tons/year", "USD", "ratio", "z-score", "count", "percent",
+   * "parcels", "basis points", "jobs", "vehicles/day". Omit on categorical.
+   */
+  units?: string;
+  /**
+   * Optional render hint. Sensible defaults: USD → "currency", percentages →
+   * "percent", counts/totals → "count", ratios/z-scores → "ratio", everything
+   * else → "raw" or omit.
+   */
+  display_format?: BrainOutputMetricDisplayFormat;
+  /**
+   * Per-metric provenance — the disputable receipt for THIS value. REQUIRED
+   * on every metric as of Lane 1B; spec-validator enforces shape.
+   */
+  source: BrainOutputMetricSource;
 }
 
 export interface BrainOutputRelevance {

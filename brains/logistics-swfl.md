@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260518 -->
+<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260518 -->
 ---
 brain_id: logistics-swfl
-version: 2
-refined_at: 2026-05-18T19:29:02Z
-freshness_token: SWFL-7421-v2-20260518
+version: 3
+refined_at: 2026-05-18T19:42:23Z
+freshness_token: SWFL-7421-v3-20260518
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Inbound domestic freight flows landing in the SWFL FAF zone (129, Remainder of Florida) for the latest historical FAF5 year — origin zones, commodity classes, total tonnage + value.
@@ -43,8 +43,8 @@ s01 | FAF5 freight flows (fixture; data_lake.faf_flows + zone/sctg lookups, dms_
 --- OUTPUT ---
 {
   "brain_id": "logistics-swfl",
-  "version": 2,
-  "refined_at": "2026-05-18T19:29:02Z",
+  "version": 3,
+  "refined_at": "2026-05-18T19:42:23Z",
   "direction": "neutral",
   "magnitude": 0.5,
   "drivers": [],
@@ -56,9 +56,12 @@ s01 | FAF5 freight flows (fixture; data_lake.faf_flows + zone/sctg lookups, dms_
       "value": 12853.1,
       "direction": "stable",
       "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+      "variable_type": "extensive",
+      "units": "thousand tons/year",
+      "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 1,
         "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
       }
@@ -68,9 +71,12 @@ s01 | FAF5 freight flows (fixture; data_lake.faf_flows + zone/sctg lookups, dms_
       "value": 11639.4,
       "direction": "stable",
       "label": "Total inbound domestic freight value to SWFL, year 2024 (millions USD)",
+      "variable_type": "extensive",
+      "units": "million USD/year",
+      "display_format": "currency",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 1,
         "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
       }
@@ -92,7 +98,7 @@ s01 | FAF5 freight flows (fixture; data_lake.faf_flows + zone/sctg lookups, dms_
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:29:02Z"
+    "computed_at": "2026-05-18T19:42:23Z"
   },
   "exogenous_signals": []
 }

@@ -22,6 +22,42 @@ import type { OverrideRule } from "../constitution/types.mts";
 
 const NOW = new Date("2026-05-15T20:00:00Z");
 
+/**
+ * Test-only metric factory — fills in Lane 1B's required fields (variable_type,
+ * units, source) with sensible defaults so call sites stay tight. Override any
+ * of the inputs at the call site.
+ */
+function metric(
+  m: {
+    metric: string;
+    value: number | string;
+    direction: "rising" | "falling" | "stable";
+    label: string;
+  },
+  opts: Partial<BrainOutputMetric> = {},
+): BrainOutputMetric {
+  const variable_type =
+    typeof m.value === "string"
+      ? "categorical"
+      : (opts.variable_type ?? "extensive");
+  return {
+    ...m,
+    variable_type,
+    ...(variable_type === "categorical"
+      ? {}
+      : { units: opts.units ?? "count" }),
+    source: opts.source ?? {
+      url: `test://${m.metric}`,
+      fetched_at: NOW.toISOString(),
+      tier: 1,
+      citation: `test metric ${m.metric}`,
+    },
+    ...(opts.display_format !== undefined
+      ? { display_format: opts.display_format }
+      : {}),
+  };
+}
+
 function brain(
   brain_id: string,
   direction: BrainOutputDirection,
@@ -163,7 +199,12 @@ const FLOOD_RULE: OverrideRule = {
   effect: "force_bearish",
   condition: (upstreams) =>
     upstreams.some((u) =>
-      u.key_metrics.some((m) => m.metric === "flood_risk_pct" && m.value > 15),
+      u.key_metrics.some(
+        (m) =>
+          m.metric === "flood_risk_pct" &&
+          typeof m.value === "number" &&
+          m.value > 15,
+      ),
     ),
 };
 
@@ -183,12 +224,12 @@ const SIGNAL_RULE: OverrideRule = {
 test("applyOverrideCascade: flood veto forces bearish, mag floor 0.85 (spec test 9)", () => {
   const u = brain("a", "bullish", 0.5, 0.9, {
     key_metrics: [
-      {
+      metric({
         metric: "flood_risk_pct",
         value: 25,
         direction: "rising",
         label: "Flood risk",
-      },
+      }),
     ],
   });
   const passing = [{ upstream: u, factor: 1 }];
@@ -204,12 +245,12 @@ test("applyOverrideCascade: flood veto forces bearish, mag floor 0.85 (spec test
 test("applyOverrideCascade: priority — bullish signal beats flood (spec test 10)", () => {
   const u = brain("a", "bullish", 0.5, 0.9, {
     key_metrics: [
-      {
+      metric({
         metric: "flood_risk_pct",
         value: 25,
         direction: "rising",
         label: "Flood",
-      },
+      }),
     ],
   });
   const passing = [{ upstream: u, factor: 1 }];
@@ -320,12 +361,14 @@ test("composeConclusion: overrides + contradicts surfaced", () => {
 
 test("rollupKeyMetrics: reserve-then-fill — every upstream gets a seat first", () => {
   const mk = (prefix: string, n: number): BrainOutputMetric[] =>
-    Array.from({ length: n }, (_, i) => ({
-      metric: `${prefix}_m${i}`,
-      value: i,
-      direction: "rising" as const,
-      label: `${prefix} M${i}`,
-    }));
+    Array.from({ length: n }, (_, i) =>
+      metric({
+        metric: `${prefix}_m${i}`,
+        value: i,
+        direction: "rising" as const,
+        label: `${prefix} M${i}`,
+      }),
+    );
   const ups = [
     brain("a", "bullish", 0.5, 0.8, { key_metrics: mk("a", 3) }),
     brain("b", "bullish", 0.5, 0.8, { key_metrics: mk("b", 2) }),
@@ -346,7 +389,7 @@ test("rollupKeyMetrics: T1 upstream at the end of the DAG keeps its seat", () =>
   // brain placed 6th in input_brains lost its slot to T2 brains that ran
   // earlier. Reserve-then-fill must guarantee its inclusion.
   const mk = (slug: string): BrainOutputMetric[] => [
-    { metric: slug, value: 1, direction: "rising", label: slug },
+    metric({ metric: slug, value: 1, direction: "rising", label: slug }),
   ];
   const ups = [
     brain("franchise", "bullish", 0.5, 0.8, {
@@ -356,22 +399,52 @@ test("rollupKeyMetrics: T1 upstream at the end of the DAG keeps its seat", () =>
     brain("cre", "bullish", 0.5, 0.8, {
       trust_tier: 2,
       key_metrics: [
-        { metric: "cap_rate", value: 6, direction: "falling", label: "cap" },
-        { metric: "vacancy", value: 5, direction: "falling", label: "vac" },
+        metric({
+          metric: "cap_rate",
+          value: 6,
+          direction: "falling",
+          label: "cap",
+        }),
+        metric({
+          metric: "vacancy",
+          value: 5,
+          direction: "falling",
+          label: "vac",
+        }),
       ],
     }),
     brain("macro", "bearish", 0.5, 0.8, {
       trust_tier: 1,
       key_metrics: [
-        { metric: "sofr", value: 3.6, direction: "stable", label: "sofr" },
-        { metric: "fl_unemp", value: 4.7, direction: "rising", label: "unemp" },
+        metric({
+          metric: "sofr",
+          value: 3.6,
+          direction: "stable",
+          label: "sofr",
+        }),
+        metric({
+          metric: "fl_unemp",
+          value: 4.7,
+          direction: "rising",
+          label: "unemp",
+        }),
       ],
     }),
     brain("sector", "bearish", 0.5, 0.8, {
       trust_tier: 1,
       key_metrics: [
-        { metric: "best_naics", value: 100, direction: "stable", label: "b" },
-        { metric: "worst_naics", value: 57, direction: "stable", label: "w" },
+        metric({
+          metric: "best_naics",
+          value: 100,
+          direction: "stable",
+          label: "b",
+        }),
+        metric({
+          metric: "worst_naics",
+          value: 57,
+          direction: "stable",
+          label: "w",
+        }),
       ],
     }),
     brain("tourism", "bullish", 0.5, 0.8, {
@@ -397,7 +470,7 @@ test("rollupKeyMetrics: reserve overflow ranks by tier then weight then order", 
   // 10 upstreams, all contribute 1 metric. Reserve length (10) > cap (8).
   // T1 brains must keep their seats over T2 brains regardless of DAG order.
   const mk = (slug: string): BrainOutputMetric[] => [
-    { metric: slug, value: 1, direction: "rising", label: slug },
+    metric({ metric: slug, value: 1, direction: "rising", label: slug }),
   ];
   const ups = [
     brain("t2_a", "bullish", 0.5, 0.5, { trust_tier: 2, key_metrics: mk("a") }),
@@ -421,8 +494,8 @@ test("rollupKeyMetrics: reserve overflow ranks by tier then weight then order", 
 
 test("rollupKeyMetrics: caps at 8 across many upstreams", () => {
   const mk: BrainOutputMetric[] = [
-    { metric: "x", value: 1, direction: "rising", label: "X" },
-    { metric: "y", value: 2, direction: "rising", label: "Y" },
+    metric({ metric: "x", value: 1, direction: "rising", label: "X" }),
+    metric({ metric: "y", value: 2, direction: "rising", label: "Y" }),
   ];
   const ups = Array.from({ length: 6 }, (_, i) =>
     brain(`u${i}`, "bullish", 0.5, 0.8, { key_metrics: mk }),

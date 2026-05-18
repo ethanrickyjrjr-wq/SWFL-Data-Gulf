@@ -245,6 +245,10 @@ function macroFloridaOutputProducer(
         value: i.value,
         direction: i.direction,
         label: m.label,
+        // FLUR + FLLFPR are both percentages (rate / labor-force participation).
+        variable_type: "intensive",
+        units: "percent",
+        display_format: "percent",
         source: buildFredSource(i, fetched_at),
       };
     })
@@ -260,6 +264,10 @@ function macroFloridaOutputProducer(
       value: s.fl_establishments,
       direction: "stable",
       label: m.label,
+      // Establishment counts — a total of FL establishments in a NAICS sector.
+      variable_type: "extensive",
+      units: "establishments",
+      display_format: "count",
       source: {
         url: `https://api.census.gov/data/${s.year}/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12`,
         fetched_at: cbpFetchedAt,
@@ -278,11 +286,11 @@ function macroFloridaOutputProducer(
     const tone: string[] = [];
     if (flur) {
       tone.push(
-        `Florida unemployment at ${fmt(flur.value)}% (${flur.direction})`,
+        `Florida unemployment at ${fmt(Number(flur.value))}% (${flur.direction})`,
       );
     }
     if (lfpr) {
-      tone.push(`labor force participation at ${fmt(lfpr.value)}%`);
+      tone.push(`labor force participation at ${fmt(Number(lfpr.value))}%`);
     }
     conclusionParts.push(
       `As of the latest reported periods, the Florida state-level labor market reads: ${tone.join(", ")}.`,
@@ -291,7 +299,7 @@ function macroFloridaOutputProducer(
       const sofr = macroUs.key_metrics.find((m) => m.metric === "sofr_rate");
       if (sofr) {
         conclusionParts.push(
-          `Read against the national backdrop (macro-us, confidence ${macroUs.confidence.toFixed(2)}): SOFR at ${fmt(sofr.value)}% (${sofr.direction}).`,
+          `Read against the national backdrop (macro-us, confidence ${macroUs.confidence.toFixed(2)}): SOFR at ${fmt(Number(sofr.value))}% (${sofr.direction}).`,
         );
       }
     }

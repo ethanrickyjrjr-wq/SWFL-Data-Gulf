@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260518 -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260518 -->
 ---
 brain_id: macro-florida
-version: 5
-refined_at: 2026-05-18T19:28:59Z
-freshness_token: SWFL-7421-v5-20260518
+version: 6
+refined_at: 2026-05-18T19:40:23Z
+freshness_token: SWFL-7421-v6-20260518
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Florida state-level macro context — labor market (FLUR, FL LFPR) and business sector counts (Census CBP). Mid-tier of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl). Future branches: IRS SOI.
@@ -49,8 +49,8 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
 --- OUTPUT ---
 {
   "brain_id": "macro-florida",
-  "version": 5,
-  "refined_at": "2026-05-18T19:28:59Z",
+  "version": 6,
+  "refined_at": "2026-05-18T19:40:23Z",
   "direction": "neutral",
   "magnitude": 1,
   "drivers": [],
@@ -62,9 +62,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 3.4,
       "direction": "stable",
       "label": "Florida unemployment rate",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 3.4 percent for period 2026-04, stable vs prior 6 periods. Florida labor market remains tight, ~80bp below the national rate; tourism and construction continue to absorb new entrants."
       }
@@ -74,9 +77,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 60.9,
       "direction": "rising",
       "label": "Florida labor force participation",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=LBSSA12&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "FRED Florida Labor Force Participation Rate (series_id FLLFPR) — latest observation 60.9 percent for period 2026-04, rising vs prior 6 periods. Florida LFPR has climbed ~80bp over 12 months — retirement-state demographics make this an unusually positive read."
       }
@@ -86,9 +92,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 52000,
       "direction": "stable",
       "label": "Florida retail establishments",
+      "variable_type": "extensive",
+      "units": "establishments",
+      "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "Florida retail establishments: 52,000 FL establishments in 2022 (Census CBP, NAICS 44-45, all FL counties aggregated)."
       }
@@ -98,9 +107,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 40000,
       "direction": "stable",
       "label": "Florida food service & accommodation establishments",
+      "variable_type": "extensive",
+      "units": "establishments",
+      "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "Florida food service & accommodation establishments: 40,000 FL establishments in 2022 (Census CBP, NAICS 72, all FL counties aggregated)."
       }
@@ -110,9 +122,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 38000,
       "direction": "stable",
       "label": "Florida construction establishments",
+      "variable_type": "extensive",
+      "units": "establishments",
+      "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "Florida construction establishments: 38,000 FL establishments in 2022 (Census CBP, NAICS 23, all FL counties aggregated)."
       }
@@ -122,9 +137,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 35000,
       "direction": "stable",
       "label": "Florida healthcare establishments",
+      "variable_type": "extensive",
+      "units": "establishments",
+      "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "Florida healthcare establishments: 35,000 FL establishments in 2022 (Census CBP, NAICS 62, all FL counties aggregated)."
       }
@@ -134,9 +152,12 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
       "value": 48000,
       "direction": "stable",
       "label": "Florida professional services establishments",
+      "variable_type": "extensive",
+      "units": "establishments",
+      "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "Florida professional services establishments: 48,000 FL establishments in 2022 (Census CBP, NAICS 54, all FL counties aggregated)."
       }
@@ -155,7 +176,7 @@ s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:28:59Z"
+    "computed_at": "2026-05-18T19:40:23Z"
   },
   "exogenous_signals": []
 }

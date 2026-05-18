@@ -70,7 +70,9 @@ const floodVeto: OverrideRule = {
     upstreams.some((u) =>
       u.key_metrics.some(
         (m) =>
-          FLOOD_VETO_METRICS.has(m.metric) && m.value > FLOOD_VETO_VE_THRESHOLD,
+          FLOOD_VETO_METRICS.has(m.metric) &&
+          typeof m.value === "number" &&
+          m.value > FLOOD_VETO_VE_THRESHOLD,
       ),
     ),
 };

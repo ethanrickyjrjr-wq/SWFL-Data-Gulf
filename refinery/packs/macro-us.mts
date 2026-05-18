@@ -121,6 +121,11 @@ function macroUsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         value: i.value,
         direction: i.direction,
         label: m.label,
+        // Both FRED series exposed here (SOFR + CPI YoY) are percentages — rates,
+        // not counts. intensive/percent across the board.
+        variable_type: "intensive",
+        units: "percent",
+        display_format: "percent",
         source: buildFredSource(i, fetched_at),
       };
     })

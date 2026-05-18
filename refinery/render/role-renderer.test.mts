@@ -7,8 +7,17 @@ function metric(
   partial: Partial<BrainOutputMetric> &
     Pick<BrainOutputMetric, "metric" | "value" | "label">,
 ): BrainOutputMetric {
+  // Pick a sensible default for variable_type: string values → categorical;
+  // numeric → extensive (callers override when they want intensive).
+  const variable_type: BrainOutputMetric["variable_type"] =
+    partial.variable_type ??
+    (typeof partial.value === "string" ? "categorical" : "extensive");
+  const unitsDefault =
+    variable_type === "categorical" ? undefined : (partial.units ?? "count");
   return {
     direction: "stable",
+    variable_type,
+    ...(unitsDefault !== undefined ? { units: unitsDefault } : {}),
     source: {
       url: "https://example.test/m/" + partial.metric,
       fetched_at: "2026-05-17T00:00:00Z",
@@ -310,20 +319,11 @@ describe("role-renderer — receipts and provenance", () => {
     assert.ok(md.includes("T1"));
   });
 
-  test("noted as missing when source absent", () => {
-    const out = fixture({
-      key_metrics: [
-        {
-          metric: "legacy_metric",
-          value: 42,
-          direction: "stable",
-          label: "Legacy",
-        },
-      ],
-    });
-    const md = renderForRole(out, { role: "operator" });
-    assert.ok(md.includes("no provenance — pre-P2 metric"));
-  });
+  // Removed in Lane 1B: `source` is now required on every BrainOutputMetric,
+  // so the "no provenance — pre-P2 metric" fallback path in
+  // `renderMetricBullet` is unreachable through the type system. The
+  // fallback string is left in render code as defense for hand-constructed
+  // bad inputs (e.g. JSON loaded at runtime) but no longer has a typed test.
 
   test("freshness footer surfaces version + half-life + decay", () => {
     const md = renderForRole(fixture(), { role: "operator" });

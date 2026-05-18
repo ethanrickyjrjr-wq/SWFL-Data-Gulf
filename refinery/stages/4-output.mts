@@ -119,6 +119,7 @@ async function readPriorVersion(brainId: string): Promise<number> {
  */
 function defaultOutputProducer(out: PackOutput): BrainOutputProducerResult {
   const conclusion = out.facts[0]?.value ?? "(no facts produced this run)";
+  const nowIso = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
   const key_metrics: BrainOutputMetric[] = out.facts
     .filter((f) => typeof f.topic === "string" && f.topic.startsWith("metric:"))
     .map((f) => ({
@@ -129,6 +130,17 @@ function defaultOutputProducer(out: PackOutput): BrainOutputProducerResult {
       value: 0,
       direction: "stable",
       label: f.fact,
+      // Lane 1B (metric contract). Default producer ships a placeholder source
+      // pointing back at the pack id — any pack that wants real provenance
+      // must supply its own outputProducer.
+      variable_type: "extensive",
+      units: "count",
+      source: {
+        url: `pack:${out.pack.id}`,
+        fetched_at: nowIso,
+        tier: out.pack.sources[0]?.trust_tier ?? 4,
+        citation: `Default-producer metric synthesized from fact "${f.fact}" (${out.pack.id}).`,
+      },
     }));
   return {
     conclusion,

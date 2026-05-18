@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260518 -->
+<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260518 -->
 ---
 brain_id: properties-lee-value
-version: 4
-refined_at: 2026-05-18T19:29:02Z
-freshness_token: SWFL-7421-v4-20260518
+version: 5
+refined_at: 2026-05-18T19:42:23Z
+freshness_token: SWFL-7421-v5-20260518
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Lee County (FL) parcel-value direction read — sales-velocity z-score (current year vs trailing 3yr) plus Save-Our-Homes gap median across homesteaded parcels, derived from the LeePA Property Appraiser snapshot.
@@ -46,8 +46,8 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
 --- OUTPUT ---
 {
   "brain_id": "properties-lee-value",
-  "version": 4,
-  "refined_at": "2026-05-18T19:29:02Z",
+  "version": 5,
+  "refined_at": "2026-05-18T19:42:23Z",
   "direction": "bullish",
   "magnitude": 1,
   "drivers": [],
@@ -59,9 +59,12 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "value": 180,
       "direction": "stable",
       "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
+      "variable_type": "intensive",
+      "units": "sales per 1,000 parcels",
+      "display_format": "ratio",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -71,9 +74,12 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "value": 4.95,
       "direction": "rising",
       "label": "Lee sales-velocity z-score, year 2025 vs trailing 3yr (2022-2024)",
+      "variable_type": "intensive",
+      "units": "z-score",
+      "display_format": "ratio",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -83,9 +89,12 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "value": 22.6,
       "direction": "stable",
       "label": "Lee Save-Our-Homes gap median (% of just value suppressed for taxation) across 39 homesteaded parcels",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -95,9 +104,12 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "value": 50,
       "direction": "stable",
       "label": "Lee County parcels in snapshot (data_lake.leepa_parcels)",
+      "variable_type": "extensive",
+      "units": "parcels",
+      "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -107,9 +119,12 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "value": -8.86,
       "direction": "falling",
       "label": "FHFA Cape Coral-Fort Myers MSA HPI YoY (2025-Q4) — Lee County price-level proxy",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 1,
         "citation": "FHFA House Price Index (fixture)"
       }
@@ -119,9 +134,12 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "value": -2.62,
       "direction": "falling",
       "label": "FHFA Florida state HPI YoY (2025-Q4) — statewide baseline",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 1,
         "citation": "FHFA House Price Index (fixture)"
       }
@@ -146,7 +164,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:29:02Z"
+    "computed_at": "2026-05-18T19:42:23Z"
   },
   "exogenous_signals": [
     "FHFA Cape Coral-Fort Myers MSA HPI YoY: -8.86% (2025-Q4). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly.",

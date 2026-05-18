@@ -291,6 +291,9 @@ function franchiseOutputProducer(out: PackOutput): BrainOutputProducerResult {
       value: Math.round(agg.overallSurvivalRate * 10) / 10,
       direction: "stable",
       label: `SBA franchise overall survival rate (${agg.totalResolved} resolved loans, ${agg.assessableBrands} brands)`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: buildFranchiseSource(agg, fetched_at),
     });
   }
@@ -679,6 +682,9 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
       value: Math.round(capMedian * 100) / 100,
       direction: modalDirection(withCap.map((c) => c.cap_rate_direction)),
       label: `Median SWFL CRE cap rate (${withCap.length} of ${corridors.length} corridors)`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: buildCreAggregateSource("cap_rate_pct", withCap, fetched_at),
     });
   }
@@ -688,6 +694,9 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
       value: Math.round(vacMedian * 100) / 100,
       direction: modalDirection(withVac.map((c) => c.vacancy_rate_direction)),
       label: `Median SWFL CRE vacancy rate (${withVac.length} of ${corridors.length} corridors)`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: buildCreAggregateSource("vacancy_rate_pct", withVac, fetched_at),
     });
   }

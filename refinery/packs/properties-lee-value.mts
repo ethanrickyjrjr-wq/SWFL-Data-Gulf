@@ -322,6 +322,10 @@ function propertyValueOutputProducer(
       value: Math.round(agg.velocityCurrentPer1k * 10) / 10,
       direction: "stable",
       label: `Lee sales velocity, year ${agg.currentYear} (qualified sales per 1,000 parcels)`,
+      // Velocity is a normalized per-1,000-parcels rate — intensive.
+      variable_type: "intensive",
+      units: "sales per 1,000 parcels",
+      display_format: "ratio",
       source: sourceMeta,
     });
   }
@@ -336,6 +340,9 @@ function propertyValueOutputProducer(
             ? "falling"
             : "stable",
       label: `Lee sales-velocity z-score, year ${agg.currentYear} vs trailing ${BASELINE_YEAR_COUNT}yr (${agg.baselineYears[0]}-${agg.baselineYears[agg.baselineYears.length - 1]})`,
+      variable_type: "intensive",
+      units: "z-score",
+      display_format: "ratio",
       source: sourceMeta,
     });
   }
@@ -345,6 +352,9 @@ function propertyValueOutputProducer(
       value: Math.round(agg.sohGapMedianPct * 10) / 10,
       direction: "stable",
       label: `Lee Save-Our-Homes gap median (% of just value suppressed for taxation) across ${agg.homesteadedParcels} homesteaded parcels`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: sourceMeta,
     });
   }
@@ -353,6 +363,9 @@ function propertyValueOutputProducer(
     value: agg.totalParcels,
     direction: "stable",
     label: "Lee County parcels in snapshot (data_lake.leepa_parcels)",
+    variable_type: "extensive",
+    units: "parcels",
+    display_format: "count",
     source: sourceMeta,
   });
 
@@ -374,6 +387,9 @@ function propertyValueOutputProducer(
             ? "rising"
             : "falling",
       label: `FHFA Cape Coral-Fort Myers MSA HPI YoY (${msa.latest_period}) — Lee County price-level proxy`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: {
         url: "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
         fetched_at,
@@ -394,6 +410,9 @@ function propertyValueOutputProducer(
             ? "rising"
             : "falling",
       label: `FHFA Florida state HPI YoY (${st.latest_period}) — statewide baseline`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: {
         url: "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
         fetched_at,

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v16 | Token: SWFL-7421-v16-20260518 -->
+<!-- FRESHNESS: v17 | Token: SWFL-7421-v17-20260518 -->
 ---
 brain_id: macro-swfl
-version: 16
-refined_at: 2026-05-18T19:29:02Z
-freshness_token: SWFL-7421-v16-20260518
+version: 17
+refined_at: 2026-05-18T19:40:25Z
+freshness_token: SWFL-7421-v17-20260518
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Currently a pure delta brain pending county-level BLS LAUS ingest.
@@ -39,8 +39,8 @@ s01 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 16,
-  "refined_at": "2026-05-18T19:29:02Z",
+  "version": 17,
+  "refined_at": "2026-05-18T19:40:25Z",
   "direction": "neutral",
   "magnitude": 1,
   "drivers": [],
@@ -60,7 +60,7 @@ s01 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:29:02Z"
+    "computed_at": "2026-05-18T19:40:25Z"
   },
   "exogenous_signals": []
 }

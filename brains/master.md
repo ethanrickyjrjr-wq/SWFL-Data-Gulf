@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v40 | Token: SWFL-7421-v40-20260518 -->
+<!-- FRESHNESS: v41 | Token: SWFL-7421-v41-20260518 -->
 ---
 brain_id: master
-version: 40
-refined_at: 2026-05-18T19:29:02Z
-freshness_token: SWFL-7421-v40-20260518
+version: 41
+refined_at: 2026-05-18T19:42:27Z
+freshness_token: SWFL-7421-v41-20260518
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -59,8 +59,8 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 40,
-  "refined_at": "2026-05-18T19:29:02Z",
+  "version": 41,
+  "refined_at": "2026-05-18T19:42:27Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -119,9 +119,12 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "value": 100,
       "direction": "stable",
       "label": "Professional, Scientific & Technical Services (NAICS 54) — best SWFL SBA survival rate",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=54",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 0 charged off of 24 resolved loans (29 total approved across 4 sub-industries; $13.3M gross approved capital)."
       }
@@ -131,11 +134,29 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "value": 1800000,
       "direction": "rising",
       "label": "Latest monthly TDT collections (Lee County, 2025-09, trough season)",
+      "variable_type": "extensive",
+      "units": "USD/month",
+      "display_format": "currency",
       "source": {
         "url": "fixture://refinery/__fixtures__/tourism-tdt.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows fetched: 2021-10 → 2025-09); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest reported month 2025-09 = $1800000.00 (FY 2025, post_ian=true)."
+      }
+    },
+    {
+      "metric": "inbound_freight_tons_swfl",
+      "value": 12853.1,
+      "direction": "stable",
+      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+      "variable_type": "extensive",
+      "units": "thousand tons/year",
+      "display_format": "count",
+      "source": {
+        "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
+        "fetched_at": "2026-05-18T19:42:23Z",
+        "tier": 1,
+        "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
       }
     },
     {
@@ -143,6 +164,9 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "value": 0.3795,
       "direction": "stable",
       "label": "SWFL area-weighted Special Flood Hazard Area coverage",
+      "variable_type": "intensive",
+      "units": "ratio",
+      "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
         "fetched_at": "2026-05-16T23:00:00Z",
@@ -151,15 +175,18 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       }
     },
     {
-      "metric": "inbound_freight_tons_swfl",
-      "value": 12853.1,
+      "metric": "overall_survival_rate",
+      "value": 78.1,
       "direction": "stable",
-      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+      "label": "SBA franchise overall survival rate (169 resolved loans, 14 brands)",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
-        "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "url": "fixture://refinery/__fixtures__/franchise-outcomes.sample.json",
+        "fetched_at": "2026-05-18T19:40:29Z",
         "tier": 1,
-        "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
+        "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 132 paid in full of 169 resolved loans across 14 assessable brands (37 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
       }
     },
     {
@@ -167,9 +194,12 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "value": 3.4,
       "direction": "stable",
       "label": "Florida unemployment rate",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:28:47Z",
+        "fetched_at": "2026-05-18T19:40:10Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 3.4 percent for period 2026-04, stable vs prior 6 periods. Florida labor market remains tight, ~80bp below the national rate; tourism and construction continue to absorb new entrants."
       }
@@ -179,23 +209,14 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "value": 4.31,
       "direction": "falling",
       "label": "SOFR (Secured Overnight Financing Rate)",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:28:45Z",
+        "fetched_at": "2026-05-18T19:39:58Z",
         "tier": 1,
         "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 4.31 percent_annualized for period 2026-05-14, falling vs prior 6 periods. SOFR has eased ~100bp from its 2025 peak as the Fed has begun cutting; floating-rate CRE debt is repricing lower."
-      }
-    },
-    {
-      "metric": "overall_survival_rate",
-      "value": 78.1,
-      "direction": "stable",
-      "label": "SBA franchise overall survival rate (169 resolved loans, 14 brands)",
-      "source": {
-        "url": "fixture://refinery/__fixtures__/franchise-outcomes.sample.json",
-        "fetched_at": "2026-05-18T19:27:07Z",
-        "tier": 1,
-        "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 132 paid in full of 169 resolved loans across 14 assessable brands (37 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
       }
     },
     {
@@ -203,9 +224,12 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "value": 180,
       "direction": "stable",
       "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
+      "variable_type": "intensive",
+      "units": "sales per 1,000 parcels",
+      "display_format": "ratio",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:29:02Z",
+        "fetched_at": "2026-05-18T19:42:23Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -235,7 +259,7 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:29:02.000Z"
+    "computed_at": "2026-05-18T19:42:27.000Z"
   },
   "exogenous_signals": []
 }

@@ -61,6 +61,7 @@ const hospitalityRecoveryCollapse: OverrideRule = {
       u.key_metrics.some(
         (m) =>
           RECOVERY_COLLAPSE_METRICS.has(m.metric) &&
+          typeof m.value === "number" &&
           m.value < HOSPITALITY_RECOVERY_FLOOR,
       ),
     ),
@@ -92,6 +93,7 @@ const hospitalityYoyCollapse: OverrideRule = {
       u.key_metrics.some(
         (m) =>
           YOY_COLLAPSE_METRICS.has(m.metric) &&
+          typeof m.value === "number" &&
           m.value < HOSPITALITY_YOY_COLLAPSE_PCT,
       ),
     ),

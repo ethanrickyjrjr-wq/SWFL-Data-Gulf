@@ -61,9 +61,9 @@ interface SectorAggregate {
 }
 let lastSectors: SectorAggregate[] = [];
 let lastFranchiseOutput: BrainOutput | null = null;
- 
+
 let lastMacroUsOutput: BrainOutput | null = null;
- 
+
 let lastMacroFloridaOutput: BrainOutput | null = null;
 
 let lastFetchedAt: string | null = null;
@@ -334,10 +334,10 @@ function sectorCreditCorpusSummary(
       (m) => m.metric === "fl_unemployment",
     );
     const macroLine = [
-      sofr ? `SOFR ${pct(sofr.value)}% (${sofr.direction})` : "",
-      cpi ? `CPI YoY ${pct(cpi.value)}% (${cpi.direction})` : "",
+      sofr ? `SOFR ${pct(Number(sofr.value))}% (${sofr.direction})` : "",
+      cpi ? `CPI YoY ${pct(Number(cpi.value))}% (${cpi.direction})` : "",
       flUnemp
-        ? `FL unemployment ${pct(flUnemp.value)}% (${flUnemp.direction})`
+        ? `FL unemployment ${pct(Number(flUnemp.value))}% (${flUnemp.direction})`
         : "",
     ]
       .filter(Boolean)
@@ -390,6 +390,9 @@ function sectorCreditOutputProducer(
       value: Math.round((100 - best.rate_resolved) * 10) / 10,
       direction: "stable",
       label: `${best.label} (NAICS ${best.naics_2digit}) — best SWFL SBA survival rate`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: buildSectorSource(
         { kind: "sector", naics_2digit: best.naics_2digit, label: best.label },
         best,
@@ -405,6 +408,9 @@ function sectorCreditOutputProducer(
       value: Math.round(worst.rate_resolved * 10) / 10,
       direction: "stable",
       label: `${worst.label} (NAICS ${worst.naics_2digit}) — worst SWFL SBA charge-off rate`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
       source: buildSectorSource(
         {
           kind: "sector",
@@ -429,6 +435,9 @@ function sectorCreditOutputProducer(
         value: Math.round(s.rate_resolved * 10) / 10,
         direction: "stable",
         label: `${s.label} (NAICS ${s.naics_2digit})`,
+        variable_type: "intensive",
+        units: "percent",
+        display_format: "percent",
         source: buildSectorSource(
           { kind: "sector", naics_2digit: s.naics_2digit, label: s.label },
           s,
@@ -461,7 +470,7 @@ function sectorCreditOutputProducer(
     const sofr = macroUs.key_metrics.find((m) => m.metric === "sofr_rate");
     if (sofr) {
       conclusionParts.push(
-        `Read these rates against the current SOFR of ${pct(sofr.value)}% (${sofr.direction}) — funding-cost direction sets the appetite for charge-off risk.`,
+        `Read these rates against the current SOFR of ${pct(Number(sofr.value))}% (${sofr.direction}) — funding-cost direction sets the appetite for charge-off risk.`,
       );
     }
   }
