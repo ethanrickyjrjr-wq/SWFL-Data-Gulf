@@ -11,6 +11,10 @@ import {
   type LeepaSummaryNormalized,
   type SalesVelocityYearNormalized,
 } from "../sources/leepa-value-source.mts";
+import {
+  fhfaHpiSource,
+  type HpiSwflSummary,
+} from "../sources/fhfa-hpi-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -63,6 +67,8 @@ interface PropertyValueAggregates {
 let lastAggregate: PropertyValueAggregates | null = null;
 let lastFetchedAt: string | null = null;
 
+let lastFhfaSummary: HpiSwflSummary | null = null;
+
 function salesByYearFrom(fragments: RawFragment[]): Map<number, number> {
   const out = new Map<number, number>();
   for (const f of fragments) {
@@ -77,6 +83,14 @@ function summaryFrom(fragments: RawFragment[]): LeepaSummaryNormalized | null {
   for (const f of fragments) {
     const n = f.normalized as unknown as LeepaSummaryNormalized;
     if (n?.kind === "leepa-summary") return n;
+  }
+  return null;
+}
+
+function fhfaSummaryFrom(fragments: RawFragment[]): HpiSwflSummary | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as HpiSwflSummary;
+    if (n?.kind === "hpi-swfl-summary") return n;
   }
   return null;
 }
@@ -186,6 +200,7 @@ function propertyValueCorpusSummary(
   const summary = summaryFrom(allFragments);
   lastAggregate = aggregate(salesByYear, summary);
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
+  lastFhfaSummary = fhfaSummaryFrom(allFragments);
 
   const agg = lastAggregate;
   if (agg.totalParcels === 0) return [];
@@ -241,6 +256,33 @@ function propertyValueCorpusSummary(
     value: `${agg.totalParcels} parcels in data_lake.leepa_parcels.`,
     source_fragment_ids: [],
   });
+
+  const fhfa = lastFhfaSummary;
+  if (fhfa?.cape_coral_msa) {
+    const msa = fhfa.cape_coral_msa;
+    facts.push({
+      topic: "metric:fhfa_cape_coral_msa_yoy",
+      fact: `FHFA Cape Coral-Fort Myers MSA HPI YoY (${msa.latest_period})`,
+      value:
+        `Index (NSA): ${msa.index_nsa ?? "n/a"}. ` +
+        `YoY: ${msa.yoy_change_pct != null ? `${msa.yoy_change_pct > 0 ? "+" : ""}${msa.yoy_change_pct}%` : "n/a"}. ` +
+        `QoQ: ${msa.qoq_change_pct != null ? `${msa.qoq_change_pct > 0 ? "+" : ""}${msa.qoq_change_pct}%` : "n/a"}. ` +
+        `Federal HPI benchmark for Lee County market price direction (purchase-only, traditional, quarterly).`,
+      source_fragment_ids: [],
+    });
+  }
+  if (fhfa?.fl_state) {
+    const st = fhfa.fl_state;
+    facts.push({
+      topic: "metric:fhfa_fl_state_yoy",
+      fact: `FHFA Florida state HPI YoY (${st.latest_period})`,
+      value:
+        `Index (NSA): ${st.index_nsa ?? "n/a"}. ` +
+        `YoY: ${st.yoy_change_pct != null ? `${st.yoy_change_pct > 0 ? "+" : ""}${st.yoy_change_pct}%` : "n/a"}. ` +
+        `Statewide baseline — Lee MSA delta vs state signals local over/underperformance.`,
+      source_fragment_ids: [],
+    });
+  }
 
   return facts;
 }
@@ -314,6 +356,53 @@ function propertyValueOutputProducer(
     source: sourceMeta,
   });
 
+  const fhfa = lastFhfaSummary;
+  const fhfaCitationBase =
+    env.source === "live"
+      ? "FHFA House Price Index via data_lake.fhfa_hpi (purchase-only, traditional, quarterly)"
+      : "FHFA House Price Index (fixture)";
+
+  if (fhfa?.cape_coral_msa) {
+    const msa = fhfa.cape_coral_msa;
+    key_metrics.push({
+      metric: "fhfa_cape_coral_msa_yoy_pct",
+      value: msa.yoy_change_pct ?? 0,
+      direction:
+        msa.yoy_change_pct == null
+          ? "stable"
+          : msa.yoy_change_pct > 0
+            ? "rising"
+            : "falling",
+      label: `FHFA Cape Coral-Fort Myers MSA HPI YoY (${msa.latest_period}) — Lee County price-level proxy`,
+      source: {
+        url: "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
+        fetched_at,
+        tier: 1,
+        citation: fhfaCitationBase,
+      },
+    });
+  }
+  if (fhfa?.fl_state) {
+    const st = fhfa.fl_state;
+    key_metrics.push({
+      metric: "fhfa_fl_state_yoy_pct",
+      value: st.yoy_change_pct ?? 0,
+      direction:
+        st.yoy_change_pct == null
+          ? "stable"
+          : st.yoy_change_pct > 0
+            ? "rising"
+            : "falling",
+      label: `FHFA Florida state HPI YoY (${st.latest_period}) — statewide baseline`,
+      source: {
+        url: "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
+        fetched_at,
+        tier: 1,
+        citation: fhfaCitationBase,
+      },
+    });
+  }
+
   const direction = directionFromZScore(agg.zScore);
   // Magnitude: |z| / 3, clamped to [0,1]. z=+3 ⇒ full magnitude.
   //   - When z is null (no current-year data), default to 0.3 so master still
@@ -338,9 +427,30 @@ function propertyValueOutputProducer(
       `Trailing baseline has zero variance (all ${BASELINE_YEAR_COUNT} years identical), so z-score is undefined; direction is neutral.`,
     );
   }
+  if (fhfa?.cape_coral_msa?.yoy_change_pct != null) {
+    const msa = fhfa.cape_coral_msa;
+    const sign = msa.yoy_change_pct > 0 ? "+" : "";
+    conclusionParts.push(
+      `FHFA Cape Coral-Fort Myers MSA HPI: ${sign}${msa.yoy_change_pct}% YoY (${msa.latest_period}), FL state ${fhfa.fl_state?.yoy_change_pct != null ? `${fhfa.fl_state.yoy_change_pct > 0 ? "+" : ""}${fhfa.fl_state.yoy_change_pct}%` : "n/a"} — federal price-index benchmark for the Lee market.`,
+    );
+  }
   if (agg.sohGapMedianPct != null) {
     conclusionParts.push(
       `Median Save-Our-Homes gap across ${agg.homesteadedParcels} homesteaded parcels: ${fmt1(agg.sohGapMedianPct)}% of just value suppressed for taxation.`,
+    );
+  }
+
+  const exogenous_signals: string[] = [];
+  if (fhfa?.cape_coral_msa?.yoy_change_pct != null) {
+    const msa = fhfa.cape_coral_msa;
+    exogenous_signals.push(
+      `FHFA Cape Coral-Fort Myers MSA HPI YoY: ${msa.yoy_change_pct > 0 ? "+" : ""}${msa.yoy_change_pct}% (${msa.latest_period}). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly.`,
+    );
+  }
+  if (fhfa?.fl_state?.yoy_change_pct != null) {
+    const st = fhfa.fl_state;
+    exogenous_signals.push(
+      `FHFA Florida state HPI YoY: ${st.yoy_change_pct > 0 ? "+" : ""}${st.yoy_change_pct}% (${st.latest_period}). Statewide baseline — Lee MSA delta vs state signals local over/underperformance.`,
     );
   }
 
@@ -348,7 +458,7 @@ function propertyValueOutputProducer(
     `Sales-velocity baseline is derived from each parcel's LATEST qualified sale, so re-sales attributed to recent years are subtracted from earlier-year buckets. Current-year z-score is therefore biased UPWARD; treat marginal bullish reads as suggestive rather than confirmatory.`,
     `Qualified-sale-only sample: inheritance, divorce, and non-arms-length transfers do not appear in the velocity counts. The signal measures market-mediated parcel turnover, not total ownership change.`,
     `Lee County only — Collier and Charlotte are NOT included. SWFL-wide reads must be assembled from sibling brains (not yet built).`,
-    `Single-snapshot brain: true year-over-year value appreciation is not computed in v1 (requires two snapshots to be honest). Returns as a sibling metric once the second snapshot lands (~30 days post-first-run).`,
+    `FHFA HPI metrics (Cape Coral MSA + FL state) use a repeat-sale methodology and are published quarterly with a ~2-month lag. They measure price-level change, not transaction volume — the LeePA z-score and the FHFA YoY are complementary, not interchangeable.`,
     `Save-Our-Homes gap median is restricted to parcels with cap_difference > 0 (actively benefiting from the SOH cap). Non-homestead and newly-homesteaded parcels are excluded from the median; total_parcels is the full snapshot row count for context.`,
     `Direction thresholds: bullish if z ≥ +${Z_BULL_THRESHOLD.toFixed(1)}σ; bearish if z ≤ ${Z_BEAR_THRESHOLD.toFixed(1)}σ; neutral otherwise. Standard deviation is population std over ${BASELINE_YEAR_COUNT} baseline years; if variance is zero (all baseline years identical) z is undefined and direction is neutral.`,
   ];
@@ -367,7 +477,7 @@ function propertyValueOutputProducer(
     drivers: [],
     overrides: [],
     contradicts: [],
-    exogenous_signals: [],
+    exogenous_signals,
   };
 }
 
@@ -378,7 +488,7 @@ export const propertiesLeeValue: PackDefinition = {
   scope:
     "Lee County (FL) parcel-value direction read — sales-velocity z-score (current year vs trailing 3yr) plus Save-Our-Homes gap median across homesteaded parcels, derived from the LeePA Property Appraiser snapshot.",
   ttl_seconds: 2592000, // 30 days — LeePA pulls are scheduled monthly
-  sources: [leepaValueSource],
+  sources: [leepaValueSource, fhfaHpiSource],
   input_brains: [],
   fitScore: (): number => 8,
   compositeCutoff: 0,

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260518 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260518 -->
 ---
 brain_id: properties-lee-value
-version: 1
-refined_at: 2026-05-18T01:43:45Z
-freshness_token: SWFL-7421-v1-20260518
+version: 2
+refined_at: 2026-05-18T04:48:32Z
+freshness_token: SWFL-7421-v2-20260518
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Lee County (FL) parcel-value direction read — sales-velocity z-score (current year vs trailing 3yr) plus Save-Our-Homes gap median across homesteaded parcels, derived from the LeePA Property Appraiser snapshot.
@@ -30,26 +30,29 @@ SCOPE: Lee County (FL) parcel-value direction read — sales-velocity z-score (c
 --- CITATION TABLE ---
 id  | source                                                                                                                                                             | verified   | expires
 s01 | LeePA parcel snapshot (fixture; data_lake.leepa_parcels joined from layers 9+10+12, Lee County) — fixture://refinery/__fixtures__/properties-lee-value.sample.json | 2026-05-18 | 2026-06-17
+s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)                                                                                                | 2026-05-18 | 2026-06-17
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Lee County parcel snapshot — value/use/sale fields joined on FOLIOID","value":"50 Lee County parcels in snapshot. 39 actively homesteaded (cap_difference > 0). Sales-velocity baseline derived from each parcel's LATEST qualified sale across the 3-year window 2022-2024, current year 2025.","src":"s01","date":"2026-05-18"},
-  {"id":"f002","topic":"metric:sales_velocity_per_1k","fact":"Lee sales velocity (year 2025)","value":"9 qualified sales in 2025 across 50 parcels → 180 sales per 1,000 parcels.","src":"s01","date":"2026-05-18"},
-  {"id":"f003","topic":"metric:sales_velocity_zscore","fact":"Lee sales-velocity z-score (current year vs trailing 3yr)","value":"Baseline counts 2022=3, 2023=5, 2024=5; mean 4.3, population std 0.9. Current 9. z = 4.9.","src":"s01","date":"2026-05-18"},
-  {"id":"f004","topic":"metric:soh_gap_median","fact":"Lee Save-Our-Homes gap median across homesteaded parcels","value":"Median (just−taxable)/just across 39 homesteaded parcels: 22.6%.","src":"s01","date":"2026-05-18"},
-  {"id":"f005","topic":"metric:total_parcels","fact":"Lee total parcel count in snapshot","value":"50 parcels in data_lake.leepa_parcels.","src":"s01","date":"2026-05-18"}
+  {"id":"f001","topic":"corpus_overview","fact":"Lee County parcel snapshot — value/use/sale fields joined on FOLIOID","value":"50 Lee County parcels in snapshot. 39 actively homesteaded (cap_difference > 0). Sales-velocity baseline derived from each parcel's LATEST qualified sale across the 3-year window 2022-2024, current year 2025.","src":"s02","date":"2026-05-18"},
+  {"id":"f002","topic":"metric:sales_velocity_per_1k","fact":"Lee sales velocity (year 2025)","value":"9 qualified sales in 2025 across 50 parcels → 180 sales per 1,000 parcels.","src":"s02","date":"2026-05-18"},
+  {"id":"f003","topic":"metric:sales_velocity_zscore","fact":"Lee sales-velocity z-score (current year vs trailing 3yr)","value":"Baseline counts 2022=3, 2023=5, 2024=5; mean 4.3, population std 0.9. Current 9. z = 4.9.","src":"s02","date":"2026-05-18"},
+  {"id":"f004","topic":"metric:soh_gap_median","fact":"Lee Save-Our-Homes gap median across homesteaded parcels","value":"Median (just−taxable)/just across 39 homesteaded parcels: 22.6%.","src":"s02","date":"2026-05-18"},
+  {"id":"f005","topic":"metric:total_parcels","fact":"Lee total parcel count in snapshot","value":"50 parcels in data_lake.leepa_parcels.","src":"s02","date":"2026-05-18"},
+  {"id":"f006","topic":"metric:fhfa_cape_coral_msa_yoy","fact":"FHFA Cape Coral-Fort Myers MSA HPI YoY (2025-Q4)","value":"Index (NSA): 413.75. YoY: -8.86%. QoQ: +0.43%. Federal HPI benchmark for Lee County market price direction (purchase-only, traditional, quarterly).","src":"s02","date":"2026-05-18"},
+  {"id":"f007","topic":"metric:fhfa_fl_state_yoy","fact":"FHFA Florida state HPI YoY (2025-Q4)","value":"Index (NSA): 542.21. YoY: -2.62%. Statewide baseline — Lee MSA delta vs state signals local over/underperformance.","src":"s02","date":"2026-05-18"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "properties-lee-value",
-  "version": 1,
-  "refined_at": "2026-05-18T01:43:45Z",
+  "version": 2,
+  "refined_at": "2026-05-18T04:48:32Z",
   "direction": "bullish",
   "magnitude": 1,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Lee County had 9 qualified parcel sales recorded for 2025 across 50 parcels (180 per 1,000). Trailing 3yr baseline (2022-2024) averaged 4.3 sales/yr; current year sits at z = 4.9 — bullish read on Lee parcel transaction velocity. Median Save-Our-Homes gap across 39 homesteaded parcels: 22.6% of just value suppressed for taxation.",
+  "conclusion": "Lee County had 9 qualified parcel sales recorded for 2025 across 50 parcels (180 per 1,000). Trailing 3yr baseline (2022-2024) averaged 4.3 sales/yr; current year sits at z = 4.9 — bullish read on Lee parcel transaction velocity. FHFA Cape Coral-Fort Myers MSA HPI: -8.86% YoY (2025-Q4), FL state -2.62% — federal price-index benchmark for the Lee market. Median Save-Our-Homes gap across 39 homesteaded parcels: 22.6% of just value suppressed for taxation.",
   "key_metrics": [
     {
       "metric": "sales_velocity_per_1k",
@@ -58,7 +61,7 @@ s01 | LeePA parcel snapshot (fixture; data_lake.leepa_parcels joined from layers
       "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T01:43:45Z",
+        "fetched_at": "2026-05-18T04:48:32Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -70,7 +73,7 @@ s01 | LeePA parcel snapshot (fixture; data_lake.leepa_parcels joined from layers
       "label": "Lee sales-velocity z-score, year 2025 vs trailing 3yr (2022-2024)",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T01:43:45Z",
+        "fetched_at": "2026-05-18T04:48:32Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -82,7 +85,7 @@ s01 | LeePA parcel snapshot (fixture; data_lake.leepa_parcels joined from layers
       "label": "Lee Save-Our-Homes gap median (% of just value suppressed for taxation) across 39 homesteaded parcels",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T01:43:45Z",
+        "fetched_at": "2026-05-18T04:48:32Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -94,9 +97,33 @@ s01 | LeePA parcel snapshot (fixture; data_lake.leepa_parcels joined from layers
       "label": "Lee County parcels in snapshot (data_lake.leepa_parcels)",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T01:43:45Z",
+        "fetched_at": "2026-05-18T04:48:32Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
+      }
+    },
+    {
+      "metric": "fhfa_cape_coral_msa_yoy_pct",
+      "value": -8.86,
+      "direction": "falling",
+      "label": "FHFA Cape Coral-Fort Myers MSA HPI YoY (2025-Q4) — Lee County price-level proxy",
+      "source": {
+        "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
+        "fetched_at": "2026-05-18T04:48:32Z",
+        "tier": 1,
+        "citation": "FHFA House Price Index (fixture)"
+      }
+    },
+    {
+      "metric": "fhfa_fl_state_yoy_pct",
+      "value": -2.62,
+      "direction": "falling",
+      "label": "FHFA Florida state HPI YoY (2025-Q4) — statewide baseline",
+      "source": {
+        "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
+        "fetched_at": "2026-05-18T04:48:32Z",
+        "tier": 1,
+        "citation": "FHFA House Price Index (fixture)"
       }
     }
   ],
@@ -105,25 +132,28 @@ s01 | LeePA parcel snapshot (fixture; data_lake.leepa_parcels joined from layers
     "Sales-velocity baseline is derived from each parcel's LATEST qualified sale, so re-sales attributed to recent years are subtracted from earlier-year buckets. Current-year z-score is therefore biased UPWARD; treat marginal bullish reads as suggestive rather than confirmatory.",
     "Qualified-sale-only sample: inheritance, divorce, and non-arms-length transfers do not appear in the velocity counts. The signal measures market-mediated parcel turnover, not total ownership change.",
     "Lee County only — Collier and Charlotte are NOT included. SWFL-wide reads must be assembled from sibling brains (not yet built).",
-    "Single-snapshot brain: true year-over-year value appreciation is not computed in v1 (requires two snapshots to be honest). Returns as a sibling metric once the second snapshot lands (~30 days post-first-run).",
+    "FHFA HPI metrics (Cape Coral MSA + FL state) use a repeat-sale methodology and are published quarterly with a ~2-month lag. They measure price-level change, not transaction volume — the LeePA z-score and the FHFA YoY are complementary, not interchangeable.",
     "Save-Our-Homes gap median is restricted to parcels with cap_difference > 0 (actively benefiting from the SOH cap). Non-homestead and newly-homesteaded parcels are excluded from the median; total_parcels is the full snapshot row count for context.",
     "Direction thresholds: bullish if z ≥ +1.0σ; bearish if z ≤ -1.0σ; neutral otherwise. Standard deviation is population std over 3 baseline years; if variance is zero (all baseline years identical) z is undefined and direction is neutral."
   ],
   "contradicts": [],
-  "confidence": 0.8,
+  "confidence": 0.9,
   "trust_tier": 2,
   "upstream_count": 0,
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T01:43:45Z"
+    "computed_at": "2026-05-18T04:48:32Z"
   },
-  "exogenous_signals": []
+  "exogenous_signals": [
+    "FHFA Cape Coral-Fort Myers MSA HPI YoY: -8.86% (2025-Q4). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly.",
+    "FHFA Florida state HPI YoY: -2.62% (2025-Q4). Statewide baseline — Lee MSA delta vs state signals local over/underperformance."
+  ]
 }
 
 --- ACTIVE PROJECTS ---
 - properties-lee-value: standing snapshot of Lee County parcel-value direction — sales-velocity z-score + SOH gap median, leaf brain feeding master.
 
 --- RECENT NOTES ---
-- 2026-05-18: pack refined by the Refinery — 5 fact(s) from 1 source(s).
+- 2026-05-18: pack refined by the Refinery — 7 fact(s) from 2 source(s).
 ```

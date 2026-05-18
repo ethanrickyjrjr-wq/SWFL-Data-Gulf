@@ -28,7 +28,7 @@
 
 CREATE OR REPLACE VIEW data_lake.fdot_aadt_swfl_yearly AS
 SELECT
-    year_,
+    yearx AS year_,
     county,
     roadway,
     desc_frm,
@@ -38,7 +38,7 @@ SELECT
     tfctr,
     shape_length
 FROM data_lake.fdot_aadt_fl
-WHERE county IN ('LEE', 'COLLIER')
+WHERE county IN ('Lee', 'Collier')
   AND aadt IS NOT NULL;
 
 GRANT SELECT ON data_lake.fdot_aadt_swfl_yearly TO service_role;

@@ -101,15 +101,25 @@ def _promote_nfip_to_tier2(rows: list[dict]) -> None:
 
 
 def _fetch_all_nfip_claims() -> list[dict]:
-    """Paginate OpenFEMA FimaNfipClaims until exhaustion."""
+    """Paginate OpenFEMA FimaNfipClaims until exhaustion. Retries 5xx on each page."""
+    import time
     rows, skip, page_size = [], 0, 1000
     while True:
-        resp = requests.get(
-            NFIP_CLAIMS_URL,
-            params={"$skip": skip, "$top": page_size, "$format": "json"},
-            timeout=120,
-        )
-        resp.raise_for_status()
+        for attempt in range(4):
+            try:
+                resp = requests.get(
+                    NFIP_CLAIMS_URL,
+                    params={"$skip": skip, "$top": page_size, "$format": "json"},
+                    timeout=120,
+                )
+                resp.raise_for_status()
+                break
+            except requests.HTTPError as e:
+                if attempt == 3 or (resp is not None and resp.status_code < 500):
+                    raise
+                wait = 30 * (attempt + 1)
+                print(f"  FEMA API {resp.status_code} at skip={skip}, retry {attempt+1}/3 in {wait}s...")
+                time.sleep(wait)
         data = resp.json()
         batch = data.get("value") or data.get("FimaNfipClaims", [])
         if not batch:

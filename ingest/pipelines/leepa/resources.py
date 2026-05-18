@@ -47,9 +47,12 @@ _TIER2_LEEPA_COLUMNS: dict = {
 
 
 def _coerce_float(v):
-    if v in (None, ""):
+    if v in (None, "", "N/A", "n/a", "NA"):
         return None
-    return float(v)
+    try:
+        return float(v)
+    except (ValueError, TypeError):
+        return None
 
 
 def _coerce_esri_date(v):
