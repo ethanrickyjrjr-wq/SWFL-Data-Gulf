@@ -33,8 +33,10 @@ import {
   type WeightedSource,
 } from "../lib/confidence.mts";
 import { readBrainOutput } from "../lib/brain-output-reader.mts";
+import { brainStatus } from "../lib/dag.mts";
 import { logPrediction } from "../lib/predictions-log.mts";
 import { PACKS } from "../config/packs.mts";
+import type { BrainEdge } from "../types/pack.mts";
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 
@@ -89,6 +91,100 @@ export interface OutputResult {
   markdown: string;
   version: number;
   brainOutput: BrainOutput;
+}
+
+// ---------------------------------------------------------------------------
+// Lane 2E — stale-upstream cascade (CLAUDE.md non-negotiable #5)
+// ---------------------------------------------------------------------------
+
+/** Shape returned by `harvestUpstreams`. Exposed for testing. */
+export interface UpstreamHarvest {
+  /** Upstream confidence + trust_tier contributions for Lane 1A's weighted mean. */
+  upstreams: UpstreamConfidence[];
+  /**
+   * Verbatim staleness caveats (one per stale upstream, in input_brains order).
+   * Empty when every upstream is fresh. Format is locked to non-negotiable #5:
+   *   "Upstream brain '{id}' was stale at build time (expired YYYY-MM-DD)."
+   */
+  stalenessCaveats: string[];
+  /**
+   * `min(stale_upstream_confidences)` — the floor a self-confidence cap applies
+   * at. `Infinity` when no upstream is stale (sentinel: `applyStalenessCap`
+   * treats Infinity as "no cap to apply").
+   */
+  minStaleUpstreamConfidence: number;
+}
+
+/**
+ * Harvest upstream confidence + trust_tier AND surface staleness. Exported so
+ * the cap mechanism can be unit-tested in isolation from the rest of Stage 4.
+ *
+ * For each `input_brains` edge, reads the rendered .md output AND the freshness
+ * status in parallel. A missing upstream is a hard error (preserves the
+ * pre-2E behavior — the DAG walker already certified it exists; getting here
+ * means the lake is inconsistent). A STALE upstream produces a per-upstream
+ * caveat and contributes its confidence to the `min` floor for the cap; its
+ * confidence + trust_tier still flow into Lane 1A's weighted mean (we cap the
+ * headline, we don't drop the contribution).
+ *
+ * Pure-ish: filesystem I/O only via the existing `readBrainOutput()` and
+ * `brainStatus()` helpers. No side effects.
+ */
+export async function harvestUpstreams(
+  input_brains: readonly BrainEdge[],
+): Promise<UpstreamHarvest> {
+  const upstreams: UpstreamConfidence[] = [];
+  const stalenessCaveats: string[] = [];
+  let minStaleUpstreamConfidence = Infinity;
+
+  for (const upstream of input_brains) {
+    const [read, status] = await Promise.all([
+      readBrainOutput(upstream.id),
+      brainStatus(upstream.id),
+    ]);
+    if (read.kind === "missing") {
+      throw new Error(
+        `Stage 4: cannot harvest upstream confidence for "${upstream.id}" — ${read.reason}. ` +
+          `DAG resolver should have caught this; the lake may be in an inconsistent state.`,
+      );
+    }
+    if (status.kind === "stale") {
+      stalenessCaveats.push(
+        `Upstream brain '${upstream.id}' was stale at build time (expired ${status.expires_at}).`,
+      );
+      minStaleUpstreamConfidence = Math.min(
+        minStaleUpstreamConfidence,
+        read.output.confidence,
+      );
+    }
+    upstreams.push({
+      brain_id: upstream.id,
+      confidence: read.output.confidence,
+      trust_tier: read.output.trust_tier,
+    });
+  }
+
+  return { upstreams, stalenessCaveats, minStaleUpstreamConfidence };
+}
+
+/**
+ * Cap a brain's headline confidence at the min stale-upstream confidence. The
+ * cap is UNIDIRECTIONAL — it only DROPS self (it never lifts). When no
+ * upstream is stale (`stalenessCaveats.length === 0`, equivalently
+ * `minStaleUpstreamConfidence === Infinity`), the input flows through
+ * unchanged. Exposed for testing.
+ *
+ * Tradeoff documented in the Lane 2E blueprint: a fresh upstream at 0.20 does
+ * NOT cap a downstream at 0.85 — the cap is the *stale* floor, not the
+ * global floor. This preserves Lane 1A's headline math for fresh chains.
+ */
+export function applyStalenessCap(
+  baseConfidence: number,
+  minStaleUpstreamConfidence: number,
+  stalenessCaveats: readonly string[],
+): number {
+  if (stalenessCaveats.length === 0) return baseConfidence;
+  return Math.min(baseConfidence, minStaleUpstreamConfidence);
 }
 
 /** Read the prior version from an existing brain file (0 if none). */
@@ -231,21 +327,14 @@ export async function outputStage(
   // is a hard error — by this point the DAG walker has already certified the
   // upstream exists; if the read fails here, the lake is in an inconsistent
   // state.
-  const upstreams: UpstreamConfidence[] = [];
-  for (const upstream of pack.input_brains) {
-    const read = await readBrainOutput(upstream.id);
-    if (read.kind === "missing") {
-      throw new Error(
-        `Stage 4: cannot harvest upstream confidence for "${upstream.id}" — ${read.reason}. ` +
-          `DAG resolver should have caught this; the lake may be in an inconsistent state.`,
-      );
-    }
-    upstreams.push({
-      brain_id: upstream.id,
-      confidence: read.output.confidence,
-      trust_tier: read.output.trust_tier,
-    });
-  }
+  //
+  // Lane 2E (CLAUDE.md non-negotiable #5): `harvestUpstreams` also surfaces
+  // staleness — `stalenessCaveats` carry the per-upstream "expired YYYY-MM-DD"
+  // strings to append to BrainOutput.caveats below, and
+  // `minStaleUpstreamConfidence` is the floor we cap self.confidence at after
+  // Lane 1A's weighted mean.
+  const { upstreams, stalenessCaveats, minStaleUpstreamConfidence } =
+    await harvestUpstreams(pack.input_brains);
   const upstream_confidences = upstreams.map((u) => u.confidence);
 
   // Lane 1A: headline confidence is now a trust-tier-weighted mean across
@@ -253,12 +342,23 @@ export async function outputStage(
   // The legacy multiplicative cap (`self × avg(upstream_conf)`) survives as
   // `joint_integrity` below — a diagnostic for "what would the cap have been
   // under the old math?" without recomputing.
-  const confidence = trustTierWeightedConfidence({
+  //
+  // Lane 2E applies a SECOND cap on top: when any upstream was stale at build
+  // time, self.confidence is capped at min(stale_upstream_confidences). The
+  // cap is unidirectional (only drops, never lifts) and fresh upstreams DO NOT
+  // contribute to the floor — that's the design point that keeps Lane 1A's
+  // headline intact for fresh chains.
+  const laneOneAConfidence = trustTierWeightedConfidence({
     sources: pack.sources,
     refined_at,
     ttl_seconds: pack.ttl_seconds,
     upstreams,
   });
+  const confidence = applyStalenessCap(
+    laneOneAConfidence,
+    minStaleUpstreamConfidence,
+    stalenessCaveats,
+  );
   const joint_integrity = jointIntegrity(upstream_confidences);
   const confidence_dispersion = confidenceDispersion(upstream_confidences);
   const chain_depth = chainDepth(pack.id, PACKS);
@@ -297,6 +397,13 @@ export async function outputStage(
       }
     }
   }
+
+  // Lane 2E: append per-upstream staleness caveats (one per stale upstream,
+  // in input_brains order). Appended LAST so the producer's own caveats and
+  // the weakest-contributor caveat stay at the top of the list — staleness is
+  // the DAG-integrity footnote, not the headline. Empty array (every upstream
+  // fresh) → no-op.
+  caveats.push(...stalenessCaveats);
 
   // P5 Group B — lift producer's flat string[] drivers to typed BrainDriver[]
   // using the pack's typed input_brains for edge_type lookup. Unknown driver

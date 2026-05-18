@@ -131,7 +131,7 @@ export type BrainStatus =
  * walk to decide whether an upstream needs rebuilding before the target.
  *
  *   missing → hard error path (user must build it first, or `--force` triggers a build)
- *   stale   → warn + rebuild (or auto-append staleness caveat if not rebuilt)
+ *   stale   → warn + rebuild; staleness caveat is auto-appended via Stage 4 when not rebuilt
  *   fresh   → skip rebuild (cached output is valid)
  */
 export async function brainStatus(brainId: string): Promise<BrainStatus> {
