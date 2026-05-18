@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v38 | Token: SWFL-7421-v38-20260518 -->
+<!-- FRESHNESS: v39 | Token: SWFL-7421-v39-20260518 -->
 ---
 brain_id: master
-version: 38
-refined_at: 2026-05-18T01:54:48Z
-freshness_token: SWFL-7421-v38-20260518
+version: 39
+refined_at: 2026-05-18T08:51:31Z
+freshness_token: SWFL-7421-v39-20260518
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -53,14 +53,14 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.60, confidence 1.00)","value":"env-swfl as of 2026-05-18: direction bearish, magnitude 0.60, confidence 1.00, trust tier T1, 9 key metric(s). Southwest Florida flood-hazard exposure across 1 county: 37.95% of mapped area sits in a FEMA Special Flood Hazard Area, with 5.15% in coastal V/VE high-hazard zones. Lee County specifically — the Fort Myers / Fort Myers Beach footprint — carries 37.95% SFHA and 5.15% coastal high-hazard exposure (271 VE polygons). Realized loss — NFIP paid claims across the 6 SWFL counties total $4M in the 5 named storm years since 2000 vs a non-storm baseline of $56k/year (median); 2025 ran 1.56× the baseline. Downstream consumers should treat barrier-island and coastal-V/VE coordinates as flood-veto territory until paired with a property-level lookup.","src":"s01","date":"2026-05-18"},
   {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-05-17: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 12853.1K tons of inbound domestic freight worth $11639.4M across 7 origin zones and 7 commodity classes. Top origin zones by tonnage: Tampa-St. Petersburg (4411.1K tons), Orlando (2768.6K tons), Miami (2221K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Gravel and crushed stone (4704.3K tons), Other prepared foodstuffs (2747K tons), Gasoline and aviation fuel (2305.4K tons).","src":"s01","date":"2026-05-18"},
   {"id":"f010","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (bullish, magnitude 0.42, confidence 0.80)","value":"traffic-swfl as of 2026-05-18: direction bullish, magnitude 0.42, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 62803.5 vehicles/day across 4 FDOT segments. Cohort-matched YoY 2024→2025: 4.2% over 4 segments — bullish read on corridor demand. 5-year CAGR 2021→2025: 2.6% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 117.6 — above pre-storm baseline.","src":"s01","date":"2026-05-18"},
-  {"id":"f011","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (bullish, magnitude 1.00, confidence 0.80)","value":"properties-lee-value as of 2026-05-18: direction bullish, magnitude 1.00, confidence 0.80, trust tier T2, 4 key metric(s). Lee County had 9 qualified parcel sales recorded for 2025 across 50 parcels (180 per 1,000). Trailing 3yr baseline (2022-2024) averaged 4.3 sales/yr; current year sits at z = 4.9 — bullish read on Lee parcel transaction velocity. Median Save-Our-Homes gap across 39 homesteaded parcels: 22.6% of just value suppressed for taxation.","src":"s01","date":"2026-05-18"}
+  {"id":"f011","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (bullish, magnitude 0.50, confidence 0.90)","value":"properties-lee-value as of 2026-05-18: direction bullish, magnitude 0.50, confidence 0.90, trust tier T2, 5 key metric(s). Lee County had 8314 qualified parcel sales recorded for 2025 across 548803 parcels (15.1 per 1,000). Trailing 3yr baseline (2022-2024) averaged 7414 sales/yr; current year sits at z = 1.5 — bullish read on Lee parcel transaction velocity. FHFA Cape Coral-Fort Myers MSA HPI: -8.86% YoY (2025-Q4), FL state -2.62% — federal price-index benchmark for the Lee market.","src":"s01","date":"2026-05-18"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 38,
-  "refined_at": "2026-05-18T01:54:48Z",
+  "version": 39,
+  "refined_at": "2026-05-18T08:51:31Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -200,14 +200,14 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
     },
     {
       "metric": "sales_velocity_per_1k",
-      "value": 180,
+      "value": 15.1,
       "direction": "stable",
       "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
       "source": {
-        "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T01:43:45Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
+        "fetched_at": "2026-05-18T08:50:28Z",
         "tier": 2,
-        "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
+        "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548803 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
     }
   ],
@@ -236,8 +236,8 @@ s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   "upstream_count": 11,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720,
-    "computed_at": "2026-05-18T01:54:48.000Z"
+    "half_life_hours": 720.0000000000001,
+    "computed_at": "2026-05-18T08:51:31.000Z"
   },
   "exogenous_signals": []
 }

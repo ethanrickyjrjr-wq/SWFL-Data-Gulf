@@ -1034,6 +1034,38 @@
       "scope_note": "Row count of data_lake.leepa_parcels (Lee County Property Appraiser parcel snapshot, layers 9+10+12 joined on FOLIOID). Single source of truth for the velocity denominator."
     },
 
+    "fhfa_cape_coral_msa_yoy_pct": {
+      "id": "fhfa_cape_coral_msa_yoy_pct",
+      "prefLabel": "Cape Coral-Fort Myers MSA HPI Year-over-Year Change (FHFA)",
+      "altLabels": ["Cape Coral MSA HPI YoY", "Lee County HPI YoY proxy"],
+      "raw_slugs": ["fhfa_cape_coral_msa_yoy_pct"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-lee-value", "master"],
+      "value_type": "percent_change",
+      "unit": "percent",
+      "value_range": [-30, 30],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the Cape Coral-Fort Myers FL MSA — the Lee County price-level proxy. Computed from data_lake.fhfa_hpi: (latest_quarter_index - same_quarter_prior_year_index) / same_quarter_prior_year_index × 100. Negative = falling prices; positive = rising. Exogenous signal in properties-lee-value; contrasted against LeePA sales-velocity z-score."
+    },
+
+    "fhfa_fl_state_yoy_pct": {
+      "id": "fhfa_fl_state_yoy_pct",
+      "prefLabel": "Florida Statewide HPI Year-over-Year Change (FHFA)",
+      "altLabels": ["FL HPI YoY", "Florida house price YoY"],
+      "raw_slugs": ["fhfa_fl_state_yoy_pct"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-lee-value", "master"],
+      "value_type": "percent_change",
+      "unit": "percent",
+      "value_range": [-30, 30],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the state of Florida (place_id='FL'). Computed from data_lake.fhfa_hpi. State baseline for comparison against Cape Coral MSA divergence. Negative = statewide prices falling; positive = rising."
+    },
+
     "macro_fl_estab_count_retail": {
       "id": "macro_fl_estab_count_retail",
       "prefLabel": "Florida Retail Establishments (NAICS 44-45, Census CBP)",
@@ -1209,6 +1241,8 @@
     "sales_velocity_zscore": "properties_lee_sales_velocity_zscore",
     "soh_gap_median_pct": "properties_lee_soh_gap_median_pct",
     "total_parcels": "properties_lee_total_parcels",
+    "fhfa_cape_coral_msa_yoy_pct": "fhfa_cape_coral_msa_yoy_pct",
+    "fhfa_fl_state_yoy_pct": "fhfa_fl_state_yoy_pct",
     "fl_estab_count_retail": "macro_fl_estab_count_retail",
     "fl_estab_count_food_service": "macro_fl_estab_count_food_service",
     "fl_estab_count_construction": "macro_fl_estab_count_construction",

@@ -3,6 +3,7 @@ import gzip
 import io
 import json
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -36,19 +37,25 @@ def upload_geojson_gz(bucket: str, object_path: str, features: list[dict]) -> st
 
 def _upload_bytes(bucket: str, object_path: str, data: bytes, content_type: str) -> None:
     url = f"{os.environ['BRAINS_SUPABASE_URL']}/storage/v1/object/{bucket}/{object_path}"
-    resp = requests.post(
-        url,
-        headers={
-            "Authorization": f"Bearer {os.environ['BRAINS_SUPABASE_SERVICE_KEY']}",
-            "Content-Type": content_type,
-            "x-upsert": "true",
-        },
-        data=data,
-        timeout=120,
-    )
-    if not resp.ok:
-        raise RuntimeError(f"Storage upload failed {resp.status_code}: {resp.text}")
-    resp.raise_for_status()
+    headers = {
+        "Authorization": f"Bearer {os.environ['BRAINS_SUPABASE_SERVICE_KEY']}",
+        "Content-Type": content_type,
+        "x-upsert": "true",
+    }
+    for attempt in range(3):
+        try:
+            resp = requests.post(url, headers=headers, data=data, timeout=180)
+            if resp.ok:
+                return
+            if resp.status_code >= 500 and attempt < 2:
+                time.sleep(30 * (attempt + 1))
+                continue
+            raise RuntimeError(f"Storage upload failed {resp.status_code}: {resp.text}")
+        except requests.Timeout:
+            if attempt < 2:
+                time.sleep(30 * (attempt + 1))
+                continue
+            raise
 
 
 def write_tier1_pointer(
