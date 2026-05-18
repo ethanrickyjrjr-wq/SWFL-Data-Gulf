@@ -48,21 +48,21 @@ The ontology is what brains reason about. Entities are nouns. Relationships are 
 
 ### 3.1 Entities
 
-| Entity           | Status       | Source of truth (today or planned)               |
-| ---------------- | ------------ | ------------------------------------------------ |
-| Corridor         | **Live**     | Supabase `corridor_profiles` (25 verified)       |
-| Brand            | **Live**     | SBA franchise outcomes (275 brands)              |
-| NAICS_Code       | **Live**     | SBA loans aggregated view by 2-digit NAICS       |
-| Macro_Indicator  | **Live**     | FRED series (SOFR, FLUR, CPI YoY, FL LFPR)       |
-| Anchor           | Partial      | Mentioned in corridor narratives, no table yet   |
-| Property/Parcel  | Aspirational | PostGIS polygons, county parcel records          |
-| Demographic_Zone | Aspirational | Census B25038 block groups                       |
-| Permit           | Aspirational | Accela Lee County, similar feeds elsewhere       |
-| FEMA_Zone        | Aspirational | FEMA NFHL flood polygons                         |
-| TDT_Period       | Aspirational | Already ingested in premise-engine, awaits brain |
-| Hurricane_Event  | Aspirational | NOAA HURDAT2, plus our Ian impact tagging        |
-| Listing/Lease    | Aspirational | Eventually a CoStar/LoopNet shadow source        |
-| Prediction       | Aspirational | Our own outcomes table (predictions vs. actuals) |
+| Entity           | Status                    | Source of truth (today or planned)                                                                                                                                                    |
+| ---------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Corridor         | **Live**                  | Supabase `corridor_profiles` (25 verified)                                                                                                                                            |
+| Brand            | **Live**                  | SBA franchise outcomes (275 brands)                                                                                                                                                   |
+| NAICS_Code       | **Live**                  | SBA loans aggregated view by 2-digit NAICS                                                                                                                                            |
+| Macro_Indicator  | **Live**                  | FRED series (SOFR, FLUR, CPI YoY, FL LFPR)                                                                                                                                            |
+| Anchor           | Partial                   | Mentioned in corridor narratives, no table yet                                                                                                                                        |
+| Property/Parcel  | **Live (Lee value-axis)** | `data_lake.leepa_parcels` (joined layers 9+10+12, Lee only, no geometry). Consumed by `properties-lee-value`. Supply/corridors/flood + Collier + PostGIS geometry still aspirational. |
+| Demographic_Zone | Aspirational              | Census B25038 block groups                                                                                                                                                            |
+| Permit           | Aspirational              | Accela Lee County, similar feeds elsewhere                                                                                                                                            |
+| FEMA_Zone        | Aspirational              | FEMA NFHL flood polygons                                                                                                                                                              |
+| TDT_Period       | Aspirational              | Already ingested in premise-engine, awaits brain                                                                                                                                      |
+| Hurricane_Event  | Aspirational              | NOAA HURDAT2, plus our Ian impact tagging                                                                                                                                             |
+| Listing/Lease    | Aspirational              | Eventually a CoStar/LoopNet shadow source                                                                                                                                             |
+| Prediction       | Aspirational              | Our own outcomes table (predictions vs. actuals)                                                                                                                                      |
 
 ### 3.2 Relationships
 

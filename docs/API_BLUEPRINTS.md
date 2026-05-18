@@ -47,6 +47,18 @@ Is there a brain shipping THIS sprint that reads this data?
 - **Quarterly Tier 1 inventory audit:** review `data_lake._tier1_inventory`. >12 months old + no consumer brain on the roadmap → delete the bucket object, leave the pointer row with `deleted_at` timestamp (audit trail stays, bytes don't).
 - **FAF5 time-boxed exception:** FAF5 is in Tier 2 without a brain. Allowed because `logistics-swfl` ships this sprint. If the brain doesn't ship, FAF5 demotes to Tier 1.
 
+### Multi-layer Tier 2 promotion — LeePA canonical example
+
+LeePA exposes 24 layers on its ArcGIS MapServer; `properties-lee-value` reads three of them (9 use codes, 10 last qualified sale, 12 just value). The Tier 2 table `data_lake.leepa_parcels` is the **joined** result of those three layers on `FOLIOID`. Pattern:
+
+1. **Per-layer Tier 1 archive.** Each layer pulled via `paginate_arcgis_tabular()` (the `f=json&returnGeometry=false` sibling of `paginate_arcgis`), uploaded as `leepa/{layer}/{date}.csv.gz` with its own `_tier1_inventory` pointer. Three layers → three pointer rows. Provenance per layer is preserved even though Tier 2 holds the joined product.
+2. **Fail-fast canonical-count gate.** Before promotion, `arcgis_count(LEEPA_JUST_VALUE_URL)` queries the layer's `returnCountOnly=true` endpoint. If paginated rows are < 90% of the canonical count, abort — pagination dropped pages and Tier 2 would be silently truncated.
+3. **In-memory left-join on the value-layer spine.** Use-codes and last-sale are joined onto every just-value row. Missing matches yield NULL columns (left-join semantics), not row drops.
+4. **Single `_promote_to_tier2` step.** Same shape as the FDOT/FEMA inline promoters: `@dlt.resource(table_name="leepa_parcels", write_disposition="replace", columns=_TIER2_LEEPA_COLUMNS)` then `load_info.raise_on_failed_jobs()`. No separate file, no separate npm script.
+5. **Server-side aggregation views.** For 400k-row tables, the source connector reads pre-aggregated views (`data_lake.leepa_parcels_sales_yearly`, `data_lake.leepa_parcels_summary`) rather than pulling raw rows over PostgREST. Aggregation lives in `docs/sql/leepa_parcels_grant.sql` alongside the GRANTs.
+
+Sibling LeePA brains (`-supply`, `-corridors`, `-flood`) land additively against `data_lake.leepa_parcels` without re-ingesting layers. Spatial brains (`-flood`) will need a parallel promoter that retains SHAPE geometry — that's the only deviation from this pattern.
+
 **Architectural Rule — Ingest Broad, Filter Local:**
 The `dlt` pipelines described below MUST ingest data broadly (e.g., all of Florida or national context) into the A1 Data Lake. Do not prematurely truncate the raw ingest to just Lee/Collier counties at the pipeline level. SWFL-specific filtering (e.g., `county_fips = 12071` or `dms_dest = 129`) is handled downstream by the Master Brain when spinning up Atomic Brains. The examples below show the SWFL logic for downstream use, not for upstream truncation.
 

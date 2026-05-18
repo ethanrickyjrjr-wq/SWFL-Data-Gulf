@@ -18,6 +18,7 @@ import type { PackDefinition } from "../types/pack.mts";
 
 // SCAFFOLD INSERTS IMPORTS BELOW THIS LINE — do not move or remove this marker
 // scaffold:imports
+import { propertiesLeeValue } from "./properties-lee-value.mts";
 import { trafficSwfl } from "./traffic-swfl.mts";
 import { envSwfl } from "./env-swfl.mts";
 import { tourismTdt } from "./tourism-tdt.mts";
@@ -31,6 +32,7 @@ import { master } from "./master.mts";
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   // scaffold:entries
+  [propertiesLeeValue.id]: propertiesLeeValue,
   [trafficSwfl.id]: trafficSwfl,
   [envSwfl.id]: envSwfl,
   [tourismTdt.id]: tourismTdt,

@@ -968,6 +968,160 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Ratio of 2025 length-weighted AADT to 2022 (pre-storm) baseline across the three coastal SWFL counties most impacted by Hurricane Ian: Lee, Collier, Charlotte. >100 = volumes exceed pre-storm; <100 = below pre-storm. DELIBERATELY broader county set than the other traffic-swfl concepts (which are Lee + Collier) — the Ian index is about storm geography, not brain scope; Charlotte was in the eye-wall path and must be included for the storm signal to be honest. Glades, Hendry, Monroe excluded — Ian's path didn't materially hit them."
+    },
+
+    "properties_lee_sales_velocity_per_1k": {
+      "id": "properties_lee_sales_velocity_per_1k",
+      "prefLabel": "Lee County Qualified Sales Velocity (Per 1,000 Parcels, Current Year)",
+      "altLabels": ["Lee parcel turnover", "Lee sales velocity"],
+      "raw_slugs": ["sales_velocity_per_1k"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-lee-value", "master"],
+      "value_type": "rate",
+      "unit": "qualified sales per 1,000 parcels",
+      "value_range": [0, 200],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of LeePA-recorded qualified sales for the most recent COMPLETE calendar year (year-1 relative to today), divided by total parcels × 1000. Qualified sales exclude inheritance, divorce, and non-arms-length transfers."
+    },
+
+    "properties_lee_sales_velocity_zscore": {
+      "id": "properties_lee_sales_velocity_zscore",
+      "prefLabel": "Lee County Sales-Velocity Z-Score (Current Year vs Trailing 3yr Baseline)",
+      "altLabels": ["Lee velocity z", "Lee sales z-score"],
+      "raw_slugs": ["sales_velocity_zscore"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-lee-value", "master"],
+      "value_type": "zscore",
+      "unit": "standard deviations",
+      "value_range": [-10, 10],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Direction signal for properties-lee-value. Bullish if z ≥ +1.0, bearish if z ≤ −1.0. Baseline derived from each parcel's LATEST qualified sale, so re-sales overwrite earlier-year buckets — current-year z is biased UPWARD; treat marginal bullish reads as suggestive, not confirmatory."
+    },
+
+    "properties_lee_soh_gap_median_pct": {
+      "id": "properties_lee_soh_gap_median_pct",
+      "prefLabel": "Lee County Save-Our-Homes Gap Median (% Just Value Suppressed)",
+      "altLabels": ["Lee SOH gap", "Lee homestead gap"],
+      "raw_slugs": ["soh_gap_median_pct"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-lee-value", "master"],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [0, 80],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Median (just_value − taxable_value) / just_value × 100 across parcels where cap_difference > 0 (actively benefiting from the Save-Our-Homes cap). Reads as a level metric describing how much of the tax base is locked behind the homestead cap. High = long-tenured ownership; low = recent turnover or non-homestead."
+    },
+
+    "properties_lee_total_parcels": {
+      "id": "properties_lee_total_parcels",
+      "prefLabel": "Lee County Total Parcels (Snapshot Row Count)",
+      "altLabels": ["Lee parcel count"],
+      "raw_slugs": ["total_parcels"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-lee-value", "master"],
+      "value_type": "count",
+      "unit": "parcels",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Row count of data_lake.leepa_parcels (Lee County Property Appraiser parcel snapshot, layers 9+10+12 joined on FOLIOID). Single source of truth for the velocity denominator."
+    },
+
+    "macro_fl_estab_count_retail": {
+      "id": "macro_fl_estab_count_retail",
+      "prefLabel": "Florida Retail Establishments (NAICS 44-45, Census CBP)",
+      "altLabels": ["FL retail estab count"],
+      "raw_slugs": ["fl_estab_count_retail"],
+      "category": "macro",
+      "domain": ["macro"],
+      "naics_code": 44,
+      "naics_title": "Retail Trade",
+      "source_brains": ["macro-florida", "master"],
+      "value_type": "count",
+      "unit": "establishments",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 44-45 (Retail Trade). Level metric — direction read via macro-us SOFR via the rising-rates-dominance override, not via the establishment count itself."
+    },
+
+    "macro_fl_estab_count_food_service": {
+      "id": "macro_fl_estab_count_food_service",
+      "prefLabel": "Florida Food Service & Accommodation Establishments (NAICS 72, Census CBP)",
+      "altLabels": ["FL food service estab count"],
+      "raw_slugs": ["fl_estab_count_food_service"],
+      "category": "macro",
+      "domain": ["macro"],
+      "naics_code": 72,
+      "naics_title": "Accommodation and Food Services",
+      "source_brains": ["macro-florida", "master"],
+      "value_type": "count",
+      "unit": "establishments",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 72 (Accommodation and Food Services). Level metric — direction comes from sibling brains."
+    },
+
+    "macro_fl_estab_count_construction": {
+      "id": "macro_fl_estab_count_construction",
+      "prefLabel": "Florida Construction Establishments (NAICS 23, Census CBP)",
+      "altLabels": ["FL construction estab count"],
+      "raw_slugs": ["fl_estab_count_construction"],
+      "category": "macro",
+      "domain": ["macro"],
+      "naics_code": 23,
+      "naics_title": "Construction",
+      "source_brains": ["macro-florida", "master"],
+      "value_type": "count",
+      "unit": "establishments",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 23 (Construction). Level metric — direction comes from sibling brains (notably sector-credit-swfl charge-off rate for construction)."
+    },
+
+    "macro_fl_estab_count_healthcare": {
+      "id": "macro_fl_estab_count_healthcare",
+      "prefLabel": "Florida Healthcare Establishments (NAICS 62, Census CBP)",
+      "altLabels": ["FL healthcare estab count"],
+      "raw_slugs": ["fl_estab_count_healthcare"],
+      "category": "macro",
+      "domain": ["macro"],
+      "naics_code": 62,
+      "naics_title": "Health Care and Social Assistance",
+      "source_brains": ["macro-florida", "master"],
+      "value_type": "count",
+      "unit": "establishments",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 62 (Health Care and Social Assistance). Level metric — direction comes from sibling brains."
+    },
+
+    "macro_fl_estab_count_professional": {
+      "id": "macro_fl_estab_count_professional",
+      "prefLabel": "Florida Professional Services Establishments (NAICS 54, Census CBP)",
+      "altLabels": ["FL professional services estab count"],
+      "raw_slugs": ["fl_estab_count_professional"],
+      "category": "macro",
+      "domain": ["macro"],
+      "naics_code": 54,
+      "naics_title": "Professional, Scientific, and Technical Services",
+      "source_brains": ["macro-florida", "master"],
+      "value_type": "count",
+      "unit": "establishments",
+      "value_range": [0, 1000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 54 (Professional, Scientific, and Technical Services). Level metric — direction comes from sibling brains."
     }
   },
 
@@ -1051,6 +1205,15 @@
     "freight_density_swfl": "traffic_truck_share_swfl_median_pct",
     "post_ian_recovery": "traffic_post_ian_recovery_index",
     "ian_recovery_index": "traffic_post_ian_recovery_index",
+    "sales_velocity_per_1k": "properties_lee_sales_velocity_per_1k",
+    "sales_velocity_zscore": "properties_lee_sales_velocity_zscore",
+    "soh_gap_median_pct": "properties_lee_soh_gap_median_pct",
+    "total_parcels": "properties_lee_total_parcels",
+    "fl_estab_count_retail": "macro_fl_estab_count_retail",
+    "fl_estab_count_food_service": "macro_fl_estab_count_food_service",
+    "fl_estab_count_construction": "macro_fl_estab_count_construction",
+    "fl_estab_count_healthcare": "macro_fl_estab_count_healthcare",
+    "fl_estab_count_professional": "macro_fl_estab_count_professional",
     "_direction_ambiguous": {
       "_note": "The raw slug 'direction' is overloaded. Resolve by field path: BrainOutput.direction → qual_sentiment_direction; BrainOutputMetric.direction → qual_metric_trajectory. Never resolve by value alone."
     }

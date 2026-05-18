@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v36 | Token: SWFL-7421-v36-20260518 -->
+<!-- FRESHNESS: v38 | Token: SWFL-7421-v38-20260518 -->
 ---
 brain_id: master
-version: 36
-refined_at: 2026-05-18T01:27:12Z
-freshness_token: SWFL-7421-v36-20260518
+version: 38
+refined_at: 2026-05-18T01:54:48Z
+freshness_token: SWFL-7421-v38-20260518
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -28,17 +28,18 @@ SCOPE: SWFL Intelligence Lake — master synthesizer over the verified Franchise
 - The user expects the synthesizer to surface contradictions between upstream brains rather than paper over them.
 
 --- CITATION TABLE ---
-id  | source                                                                                      | verified   | expires
-s01 | franchise-outcomes brain — https://brain-platform-amber.vercel.app/api/b/franchise-outcomes | 2026-05-17 | 2026-05-24
-s02 | cre-swfl brain — https://brain-platform-amber.vercel.app/api/b/cre-swfl                     | 2026-05-17 | 2026-05-24
-s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us                     | 2026-05-17 | 2026-05-24
-s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macro-florida           | 2026-05-17 | 2026-05-24
-s05 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-swfl                 | 2026-05-17 | 2026-05-24
-s06 | sector-credit-swfl brain — https://brain-platform-amber.vercel.app/api/b/sector-credit-swfl | 2026-05-17 | 2026-05-24
-s07 | tourism-tdt brain — https://brain-platform-amber.vercel.app/api/b/tourism-tdt               | 2026-05-17 | 2026-05-24
-s08 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl                     | 2026-05-18 | 2026-05-25
-s09 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/logistics-swfl         | 2026-05-17 | 2026-05-24
-s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traffic-swfl             | 2026-05-18 | 2026-05-25
+id  | source                                                                                          | verified   | expires
+s01 | franchise-outcomes brain — https://brain-platform-amber.vercel.app/api/b/franchise-outcomes     | 2026-05-17 | 2026-05-24
+s02 | cre-swfl brain — https://brain-platform-amber.vercel.app/api/b/cre-swfl                         | 2026-05-17 | 2026-05-24
+s03 | macro-us brain — https://brain-platform-amber.vercel.app/api/b/macro-us                         | 2026-05-17 | 2026-05-24
+s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macro-florida               | 2026-05-17 | 2026-05-24
+s05 | macro-swfl brain — https://brain-platform-amber.vercel.app/api/b/macro-swfl                     | 2026-05-17 | 2026-05-24
+s06 | sector-credit-swfl brain — https://brain-platform-amber.vercel.app/api/b/sector-credit-swfl     | 2026-05-17 | 2026-05-24
+s07 | tourism-tdt brain — https://brain-platform-amber.vercel.app/api/b/tourism-tdt                   | 2026-05-17 | 2026-05-24
+s08 | env-swfl brain — https://brain-platform-amber.vercel.app/api/b/env-swfl                         | 2026-05-18 | 2026-05-25
+s09 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/logistics-swfl             | 2026-05-17 | 2026-05-24
+s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traffic-swfl                 | 2026-05-18 | 2026-05-25
+s11 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api/b/properties-lee-value | 2026-05-18 | 2026-05-25
 
 --- SAVED FACTS ---
 [
@@ -51,14 +52,15 @@ s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traff
   {"id":"f007","topic":"upstream :: tourism-tdt","fact":"Upstream snapshot — tourism-tdt (bullish, magnitude 0.55, confidence 1.00)","value":"tourism-tdt as of 2026-05-17: direction bullish, magnitude 0.55, confidence 1.00, trust tier T1, 5 key metric(s). Lee County TDT collections for 2026-04 (shoulder season): $9.03M. Year-over-year +18.2% against the prior fiscal year. Trailing 12 months stand at 79% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this seasonal pulse; the cross-vertical read lives downstream in master.","src":"s01","date":"2026-05-18"},
   {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.60, confidence 1.00)","value":"env-swfl as of 2026-05-18: direction bearish, magnitude 0.60, confidence 1.00, trust tier T1, 9 key metric(s). Southwest Florida flood-hazard exposure across 1 county: 37.95% of mapped area sits in a FEMA Special Flood Hazard Area, with 5.15% in coastal V/VE high-hazard zones. Lee County specifically — the Fort Myers / Fort Myers Beach footprint — carries 37.95% SFHA and 5.15% coastal high-hazard exposure (271 VE polygons). Realized loss — NFIP paid claims across the 6 SWFL counties total $4M in the 5 named storm years since 2000 vs a non-storm baseline of $56k/year (median); 2025 ran 1.56× the baseline. Downstream consumers should treat barrier-island and coastal-V/VE coordinates as flood-veto territory until paired with a property-level lookup.","src":"s01","date":"2026-05-18"},
   {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-05-17: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 12853.1K tons of inbound domestic freight worth $11639.4M across 7 origin zones and 7 commodity classes. Top origin zones by tonnage: Tampa-St. Petersburg (4411.1K tons), Orlando (2768.6K tons), Miami (2221K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Gravel and crushed stone (4704.3K tons), Other prepared foodstuffs (2747K tons), Gasoline and aviation fuel (2305.4K tons).","src":"s01","date":"2026-05-18"},
-  {"id":"f010","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (bullish, magnitude 0.42, confidence 0.80)","value":"traffic-swfl as of 2026-05-18: direction bullish, magnitude 0.42, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 62803.5 vehicles/day across 4 FDOT segments. Cohort-matched YoY 2024→2025: 4.2% over 4 segments — bullish read on corridor demand. 5-year CAGR 2021→2025: 2.6% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 117.6 — above pre-storm baseline.","src":"s01","date":"2026-05-18"}
+  {"id":"f010","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (bullish, magnitude 0.42, confidence 0.80)","value":"traffic-swfl as of 2026-05-18: direction bullish, magnitude 0.42, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 62803.5 vehicles/day across 4 FDOT segments. Cohort-matched YoY 2024→2025: 4.2% over 4 segments — bullish read on corridor demand. 5-year CAGR 2021→2025: 2.6% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 117.6 — above pre-storm baseline.","src":"s01","date":"2026-05-18"},
+  {"id":"f011","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (bullish, magnitude 1.00, confidence 0.80)","value":"properties-lee-value as of 2026-05-18: direction bullish, magnitude 1.00, confidence 0.80, trust tier T2, 4 key metric(s). Lee County had 9 qualified parcel sales recorded for 2025 across 50 parcels (180 per 1,000). Trailing 3yr baseline (2022-2024) averaged 4.3 sales/yr; current year sits at z = 4.9 — bullish read on Lee parcel transaction velocity. Median Save-Our-Homes gap across 39 homesteaded parcels: 22.6% of just value suppressed for taxation.","src":"s01","date":"2026-05-18"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 36,
-  "refined_at": "2026-05-18T01:27:12Z",
+  "version": 38,
+  "refined_at": "2026-05-18T01:54:48Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -101,12 +103,16 @@ s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traff
     {
       "brain_id": "traffic-swfl",
       "edge_type": "input"
+    },
+    {
+      "brain_id": "properties-lee-value",
+      "edge_type": "input"
     }
   ],
   "overrides": [
     "flood-veto"
   ],
-  "conclusion": "Read is bearish (high magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, traffic-swfl. Overrides: flood-veto. Note conflicts: cre-swfl (bullish) vs macro-florida (bearish). Combined confidence 0.96, trust tier T4, based on 10 upstream brains.",
+  "conclusion": "Read is bearish (high magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, traffic-swfl, properties-lee-value. Overrides: flood-veto. Note conflicts: cre-swfl (bullish) vs macro-florida (bearish). Combined confidence 0.95, trust tier T4, based on 11 upstream brains.",
   "key_metrics": [
     {
       "metric": "swfl_sfha_pct_area_weighted",
@@ -193,15 +199,15 @@ s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traff
       }
     },
     {
-      "metric": "aadt_swfl_avg",
-      "value": 62804,
+      "metric": "sales_velocity_per_1k",
+      "value": 180,
       "direction": "stable",
-      "label": "SWFL length-weighted average AADT, year 2025 (vehicles/day)",
+      "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
       "source": {
-        "url": "fixture://refinery/__fixtures__/traffic-swfl.sample.json",
-        "fetched_at": "2026-05-18T00:31:42Z",
+        "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
+        "fetched_at": "2026-05-18T01:43:45Z",
         "tier": 2,
-        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 4 latest-year segments contributing to the length-weighted corridor average."
+        "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
     }
   ],
@@ -217,18 +223,21 @@ s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traff
     "macro-us (bullish) vs env-swfl (bearish)",
     "macro-florida (bearish) vs tourism-tdt (bullish)",
     "macro-florida (bearish) vs traffic-swfl (bullish)",
+    "macro-florida (bearish) vs properties-lee-value (bullish)",
     "sector-credit-swfl (bearish) vs tourism-tdt (bullish)",
     "sector-credit-swfl (bearish) vs traffic-swfl (bullish)",
+    "sector-credit-swfl (bearish) vs properties-lee-value (bullish)",
     "tourism-tdt (bullish) vs env-swfl (bearish)",
-    "env-swfl (bearish) vs traffic-swfl (bullish)"
+    "env-swfl (bearish) vs traffic-swfl (bullish)",
+    "env-swfl (bearish) vs properties-lee-value (bullish)"
   ],
-  "confidence": 0.96,
+  "confidence": 0.95,
   "trust_tier": 4,
-  "upstream_count": 10,
+  "upstream_count": 11,
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T01:27:12.000Z"
+    "computed_at": "2026-05-18T01:54:48.000Z"
   },
   "exogenous_signals": []
 }
@@ -237,5 +246,5 @@ s10 | traffic-swfl brain — https://brain-platform-amber.vercel.app/api/b/traff
 - swfl-intelligence-lake: master synthesizer over the verified SWFL upstream brains enumerated in input_brains.
 
 --- RECENT NOTES ---
-- 2026-05-18: pack refined by the Refinery — 10 fact(s) from 10 source(s).
+- 2026-05-18: pack refined by the Refinery — 11 fact(s) from 11 source(s).
 ```
