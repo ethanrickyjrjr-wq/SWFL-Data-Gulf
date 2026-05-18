@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260518 -->
+<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260518 -->
 ---
 brain_id: macro-us
-version: 3
-refined_at: 2026-05-18T19:40:01Z
-freshness_token: SWFL-7421-v3-20260518
+version: 5
+refined_at: 2026-05-18T20:28:24Z
+freshness_token: SWFL-7421-v5-20260518
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: National macro context — SOFR funding rate and US CPI YoY. Root of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl).
@@ -41,8 +41,8 @@ s01 | FRED — Federal Reserve Economic Data (fixture; SOFR, CPIAUCSL YoY) | 202
 --- OUTPUT ---
 {
   "brain_id": "macro-us",
-  "version": 3,
-  "refined_at": "2026-05-18T19:40:01Z",
+  "version": 5,
+  "refined_at": "2026-05-18T20:28:24Z",
   "direction": "bullish",
   "magnitude": 1,
   "drivers": [],
@@ -59,7 +59,7 @@ s01 | FRED — Federal Reserve Economic Data (fixture; SOFR, CPIAUCSL YoY) | 202
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:39:58Z",
+        "fetched_at": "2026-05-18T20:28:22Z",
         "tier": 1,
         "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 4.31 percent_annualized for period 2026-05-14, falling vs prior 6 periods. SOFR has eased ~100bp from its 2025 peak as the Fed has begun cutting; floating-rate CRE debt is repricing lower."
       }
@@ -74,7 +74,7 @@ s01 | FRED — Federal Reserve Economic Data (fixture; SOFR, CPIAUCSL YoY) | 202
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&units=pc1&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:39:58Z",
+        "fetched_at": "2026-05-18T20:28:22Z",
         "tier": 1,
         "citation": "FRED US CPI (All Items) Year-over-Year (series_id CPIAUCSL_YOY) — latest observation 2.6 percent for period 2026-04, falling vs prior 6 periods. Headline CPI has cooled toward the 2% target; shelter is the remaining sticky component."
       }
@@ -93,7 +93,7 @@ s01 | FRED — Federal Reserve Economic Data (fixture; SOFR, CPIAUCSL YoY) | 202
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:40:01Z"
+    "computed_at": "2026-05-18T20:28:24Z"
   },
   "exogenous_signals": []
 }

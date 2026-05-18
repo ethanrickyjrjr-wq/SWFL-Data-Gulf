@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v42 | Token: SWFL-7421-v42-20260518 -->
+<!-- FRESHNESS: v43 | Token: SWFL-7421-v43-20260518 -->
 ---
 brain_id: master
-version: 42
-refined_at: 2026-05-18T20:21:47Z
-freshness_token: SWFL-7421-v42-20260518
+version: 43
+refined_at: 2026-05-18T20:28:39Z
+freshness_token: SWFL-7421-v43-20260518
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -61,8 +61,8 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 42,
-  "refined_at": "2026-05-18T20:21:47Z",
+  "version": 43,
+  "refined_at": "2026-05-18T20:28:39Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -121,21 +121,6 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   "conclusion": "Read is bearish (high magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value. Overrides: flood-veto. Note conflicts: cre-swfl (bullish) vs sector-credit-swfl (bearish). Combined confidence 0.95, trust tier T4, based on 12 upstream brains.",
   "key_metrics": [
     {
-      "metric": "inbound_freight_tons_swfl",
-      "value": 12853.1,
-      "direction": "stable",
-      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
-      "variable_type": "extensive",
-      "units": "thousand tons/year",
-      "display_format": "count",
-      "source": {
-        "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
-        "tier": 1,
-        "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
-      }
-    },
-    {
       "metric": "best_naics_survival",
       "value": 100,
       "direction": "stable",
@@ -145,7 +130,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=54",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 0 charged off of 24 resolved loans (29 total approved across 4 sub-industries; $13.3M gross approved capital)."
       }
@@ -160,7 +145,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "currency",
       "source": {
         "url": "fixture://refinery/__fixtures__/tourism-tdt.sample.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows fetched: 2021-10 → 2025-09); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest reported month 2025-09 = $1800000.00 (FY 2025, post_ian=true)."
       }
@@ -181,18 +166,18 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       }
     },
     {
-      "metric": "overall_survival_rate",
-      "value": 78.1,
+      "metric": "inbound_freight_tons_swfl",
+      "value": 12853.1,
       "direction": "stable",
-      "label": "SBA franchise overall survival rate (169 resolved loans, 14 brands)",
-      "variable_type": "intensive",
-      "units": "percent",
-      "display_format": "percent",
+      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+      "variable_type": "extensive",
+      "units": "thousand tons/year",
+      "display_format": "count",
       "source": {
-        "url": "fixture://refinery/__fixtures__/franchise-outcomes.sample.json",
-        "fetched_at": "2026-05-18T19:40:29Z",
+        "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
-        "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 132 paid in full of 169 resolved loans across 14 assessable brands (37 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
+        "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
       }
     },
     {
@@ -205,7 +190,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:40:10Z",
+        "fetched_at": "2026-05-18T20:28:24Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 3.4 percent for period 2026-04, stable vs prior 6 periods. Florida labor market remains tight, ~80bp below the national rate; tourism and construction continue to absorb new entrants."
       }
@@ -220,9 +205,24 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T19:39:58Z",
+        "fetched_at": "2026-05-18T20:28:22Z",
         "tier": 1,
         "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 4.31 percent_annualized for period 2026-05-14, falling vs prior 6 periods. SOFR has eased ~100bp from its 2025 peak as the Fed has begun cutting; floating-rate CRE debt is repricing lower."
+      }
+    },
+    {
+      "metric": "overall_survival_rate",
+      "value": 78.1,
+      "direction": "stable",
+      "label": "SBA franchise overall survival rate (169 resolved loans, 14 brands)",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "fixture://refinery/__fixtures__/franchise-outcomes.sample.json",
+        "fetched_at": "2026-05-18T20:26:34Z",
+        "tier": 1,
+        "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 132 paid in full of 169 resolved loans across 14 assessable brands (37 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
       }
     },
     {
@@ -235,7 +235,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "count",
       "source": {
         "url": "https://brain-platform-amber.vercel.app/api/b/logistics-swfl",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-05-18) — anchors baseline_mu via inbound_freight_tons_swfl × 1000."
       }
@@ -267,7 +267,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T20:21:47.000Z"
+    "computed_at": "2026-05-18T20:28:39.000Z"
   },
   "exogenous_signals": []
 }

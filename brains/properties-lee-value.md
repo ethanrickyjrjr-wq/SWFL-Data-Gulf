@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260518 -->
+<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260518 -->
 ---
 brain_id: properties-lee-value
-version: 5
-refined_at: 2026-05-18T19:42:23Z
-freshness_token: SWFL-7421-v5-20260518
+version: 7
+refined_at: 2026-05-18T20:28:39Z
+freshness_token: SWFL-7421-v7-20260518
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Lee County (FL) parcel-value direction read — sales-velocity z-score (current year vs trailing 3yr) plus Save-Our-Homes gap median across homesteaded parcels, derived from the LeePA Property Appraiser snapshot.
@@ -46,8 +46,8 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
 --- OUTPUT ---
 {
   "brain_id": "properties-lee-value",
-  "version": 5,
-  "refined_at": "2026-05-18T19:42:23Z",
+  "version": 7,
+  "refined_at": "2026-05-18T20:28:39Z",
   "direction": "bullish",
   "magnitude": 1,
   "drivers": [],
@@ -64,7 +64,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "display_format": "ratio",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -79,7 +79,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "display_format": "ratio",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -94,7 +94,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -109,7 +109,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/properties-lee-value.sample.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 50 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
       }
@@ -124,7 +124,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "display_format": "percent",
       "source": {
         "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "FHFA House Price Index (fixture)"
       }
@@ -139,7 +139,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
       "display_format": "percent",
       "source": {
         "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
-        "fetched_at": "2026-05-18T19:42:23Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "FHFA House Price Index (fixture)"
       }
@@ -164,7 +164,7 @@ s02 | FHFA House Price Index (fixture; fhfa-hpi.sample.json master field)       
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T19:42:23Z"
+    "computed_at": "2026-05-18T20:28:39Z"
   },
   "exogenous_signals": [
     "FHFA Cape Coral-Fort Myers MSA HPI YoY: -8.86% (2025-Q4). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly.",

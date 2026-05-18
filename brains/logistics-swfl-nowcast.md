@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260518 -->
+<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260518 -->
 ---
 brain_id: logistics-swfl-nowcast
-version: 1
-refined_at: 2026-05-18T20:21:43Z
-freshness_token: SWFL-7421-v1-20260518
+version: 3
+refined_at: 2026-05-18T20:28:39Z
+freshness_token: SWFL-7421-v3-20260518
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Current-state freight-flow nowcast for SWFL — derives a daily freight-tons proxy from FDOT AADT × tfctr × payload, compares against logistics-swfl's FAF5 annual baseline, and classifies shock_state + baseline_validity_flag.
@@ -41,8 +41,8 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
 --- OUTPUT ---
 {
   "brain_id": "logistics-swfl-nowcast",
-  "version": 1,
-  "refined_at": "2026-05-18T20:21:43Z",
+  "version": 3,
+  "refined_at": "2026-05-18T20:28:39Z",
   "direction": "bullish",
   "magnitude": 1,
   "drivers": [
@@ -64,7 +64,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "count",
       "source": {
         "url": "https://brain-platform-amber.vercel.app/api/b/logistics-swfl",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-05-18) — anchors baseline_mu via inbound_freight_tons_swfl × 1000."
       }
@@ -79,7 +79,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -94,7 +94,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "ratio",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -109,7 +109,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -122,7 +122,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "variable_type": "categorical",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -135,7 +135,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "variable_type": "categorical",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -150,7 +150,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -165,7 +165,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 9 segments contributed to the annualized current-flow tonnage proxy."
       }
@@ -180,7 +180,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
       "display_format": "raw",
       "source": {
         "url": "https://www.fhwa.dot.gov/policyinformation/statistics/2023/vm1.cfm",
-        "fetched_at": "2026-05-18T20:21:43Z",
+        "fetched_at": "2026-05-18T20:28:39Z",
         "tier": 1,
         "citation": "FHWA Highway Statistics 2023, Table VM-1 — combination-truck average payload assumption (16.0 tons)."
       }
@@ -203,7 +203,7 @@ s02 | logistics-swfl brain — https://brain-platform-amber.vercel.app/api/b/log
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T20:21:43Z"
+    "computed_at": "2026-05-18T20:28:39Z"
   },
   "exogenous_signals": []
 }
