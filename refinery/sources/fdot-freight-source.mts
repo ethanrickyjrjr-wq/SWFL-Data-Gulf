@@ -81,16 +81,6 @@ export const AVG_PAYLOAD_TONS_PER_TRUCK = 16.0;
  * stays exported in case a future v2 brain wants ton-mile reads. */
 export const METERS_PER_MILE = 1609.344;
 
-/**
- * (Retired in Path B 2026-05-18.) Coefficient of variation that v1 applied to
- * the FAF5 baseline_mu to derive baseline_sigma. Kept exported so legacy tests
- * + downstream packs that still reference the constant keep compiling. Path B
- * derives baseline_sigma from FDOT's own rolling history (not from a fixed CoV
- * applied to FAF5), so this value no longer participates in the deviation math.
- * Leave the value at 0.10 for documentation purposes.
- */
-export const BASELINE_COEFFICIENT_OF_VARIATION = 0.1;
-
 /** Number of prior shock-log rows the connector pulls. The brain needs the
  * last ~90 for the rolling baseline (mean + stddev) AND the consecutive-day
  * breach counter — pull a tiny safety margin (120) so the rolling window has
