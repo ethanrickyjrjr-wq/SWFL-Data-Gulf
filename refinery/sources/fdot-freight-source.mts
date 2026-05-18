@@ -10,13 +10,13 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 /**
  * fdot-freight source connector — freight-coded subset of data_lake.fdot_aadt_fl
  * (interstates + US routes for Lee + Collier, latest year). The connector
- * pre-computes per-segment annualized freight tonnage using the locked AADT-→-tons
- * conversion (see `tonsFromAadt()`) so the consuming pack reads a small set of
- * normalized fragments rather than re-running the math.
+ * pre-computes a per-segment annualized FREIGHT ACTIVITY proxy using the
+ * locked AADT-→-activity conversion (see `activityFromAadt()`) so the consuming
+ * pack reads a small set of normalized fragments rather than re-running the math.
  *
  * Sibling of `fdot-source.mts`. That connector exists for the
  * `traffic-swfl` brain (corridor-demand reads). This connector exists for the
- * `logistics-swfl-nowcast` brain (freight-tonnage deviation reads). The two
+ * `logistics-swfl-nowcast` brain (freight-activity deviation reads). The two
  * share the underlying table but apply DIFFERENT filters and emit DIFFERENT
  * fragment shapes — keeping them separated avoids loading one brain's worth of
  * cohort math when the other brain runs.
@@ -25,15 +25,29 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  *
  * Filter (live): `roadway LIKE 'I-%' OR roadway LIKE 'US-%'` for counties Lee +
  * Collier, year_ = LATEST_FDOT_YEAR. Tier 2 has annual AADT only — the "daily"
- * cadence the nowcast brain uses is synthetic (`tons_per_year ÷ 365`). This
- * limitation is surfaced in the pack's caveats.
+ * cadence the nowcast brain uses is synthetic. This limitation is surfaced in
+ * the pack's caveats.
+ *
+ * UNITS DISCIPLINE (Path B refactor 2026-05-18, post-commit 297ad23):
+ * `activityFromAadt` deliberately omits the segment length factor. The v1
+ * design multiplied by `(shape_length_m / METERS_PER_MILE)` which turned the
+ * value into ton-MILES/year and made the deviation math comparable to the
+ * FAF5 baseline (tons/year) only by accident. Path B drops the miles factor:
+ * the connector emits TONS crossing each segment per year, summed over the
+ * corpus. This over-counts pass-through traffic (one truck traversing five
+ * segments contributes to five segment-counts) but at least keeps units in
+ * the tons family. The downstream brain compares THIS quantity against its
+ * own rolling history — not against FAF5 — so the over-count is constant
+ * across days and cancels in the z-score.
  *
  * Shock log: a SECOND live read pulls the last N rows of
  * `data_lake.fdot_freight_nowcast_shock_log` so the brain can compute its
- * consecutive-day breach counter. The shock-log read is wrapped in a tolerant
- * try/catch because the table is brand-new (Lane 2D ships its DDL alongside
- * this connector) — on first run before the table exists the connector returns
- * an empty log array and the brain treats this as a cold start.
+ * consecutive-day breach counter AND its rolling-mean / rolling-stddev baseline.
+ * The shock-log read is wrapped in a tolerant try/catch because the table is
+ * brand-new (Lane 2D ships its DDL alongside this connector) — on first run
+ * before the table exists the connector returns an empty log array and the
+ * brain treats this as a cold start (suppresses z, emits insufficient_history
+ * caveat).
  */
 
 const SOURCE_ID = "fdot_freight_swfl";
@@ -60,20 +74,26 @@ const BRAIN_COUNTIES = ["LEE", "COLLIER"] as const;
  */
 export const AVG_PAYLOAD_TONS_PER_TRUCK = 16.0;
 
-/** Convert meters to miles. shape_length on FDOT segments is in meters
- * (auto-generated from the layer geometry in the EPSG projection FDOT uses). */
-const METERS_PER_MILE = 1609.344;
+/** Convert meters to miles. Retained for reference; Path B no longer uses
+ * segment length in the activity math (see header comment), but the constant
+ * stays exported in case a future v2 brain wants ton-mile reads. */
+export const METERS_PER_MILE = 1609.344;
 
-/** Coefficient of variation applied to baseline_mu to derive baseline_sigma.
- * 0.10 default per FHWA FAF5 §3.2 freight-flow uncertainty bands — published
- * confidence intervals for FAF flow estimates run ~±10% at the zone-pair level
- * for inbound domestic. Exposed for tests + the brain's deviation math. */
+/**
+ * (Retired in Path B 2026-05-18.) Coefficient of variation that v1 applied to
+ * the FAF5 baseline_mu to derive baseline_sigma. Kept exported so legacy tests
+ * + downstream packs that still reference the constant keep compiling. Path B
+ * derives baseline_sigma from FDOT's own rolling history (not from a fixed CoV
+ * applied to FAF5), so this value no longer participates in the deviation math.
+ * Leave the value at 0.10 for documentation purposes.
+ */
 export const BASELINE_COEFFICIENT_OF_VARIATION = 0.1;
 
-/** Number of prior shock-log rows the connector pulls. The brain only needs
- * the last ~90 to compute the 90-day rolling consecutive-breach counter — pull
- * a tiny safety margin (100) so the math is robust to an extra reading or two. */
-const SHOCK_LOG_PULL_COUNT = 100;
+/** Number of prior shock-log rows the connector pulls. The brain needs the
+ * last ~90 for the rolling baseline (mean + stddev) AND the consecutive-day
+ * breach counter — pull a tiny safety margin (120) so the rolling window has
+ * room to grow without bumping the pull count again. */
+const SHOCK_LOG_PULL_COUNT = 120;
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
@@ -82,8 +102,8 @@ const FIXTURE_PATH = path.join(
   "logistics-swfl-nowcast.sample.json",
 );
 
-/** One freight-coded segment, with the per-segment annualized tonnage already
- * computed by the connector (so the pack is a thin reader). */
+/** One freight-coded segment, with the per-segment annualized activity proxy
+ * already computed by the connector (so the pack is a thin reader). */
 export interface FreightSegmentNormalized {
   kind: "fdot-freight-segment";
   county: string;
@@ -94,7 +114,14 @@ export interface FreightSegmentNormalized {
   aadt: number;
   tfctr: number;
   shape_length_m: number;
-  tons_per_year: number;
+  /**
+   * TONS per year crossing this segment — AADT × tfctr × payload × 365.
+   * Deliberately omits segment length (Path B refactor): the downstream brain
+   * compares the corpus sum against its own rolling history, not against FAF5,
+   * so unit-purity vs FAF5 is no longer the goal. See connector header for
+   * the full rationale on the unit discipline.
+   */
+  activity_tons_per_year: number;
 }
 
 /** One row of the shock log (mutable Tier 2 state, see DDL header). */
@@ -102,25 +129,39 @@ export interface ShockLogRow {
   kind: "fdot-freight-shock-log";
   refined_at: string;
   deviation_z: number | null;
-  shock_state: "normal" | "anomaly" | "structural_break";
+  shock_state:
+    | "normal"
+    | "anomaly"
+    | "structural_break"
+    | "insufficient_history";
   baseline_validity_flag?: "valid" | "stale-structural";
+  /**
+   * The CURRENT-RUN activity value (tons/year) the brain computed and logged
+   * on that day. Path B reads the last N rows of this column to build the
+   * rolling mean + rolling stddev that anchor the deviation z-score. NULL on
+   * cold-start rows (no current_activity to log because there wasn't enough
+   * history to compute a deviation in the first place — preserves append-only
+   * monotonicity without poisoning the rolling stats).
+   */
+  current_activity_tons_year: number | null;
 }
 
-/** Locked formula (TypeScript-typed, unit-tested). Pure function. */
-export function tonsFromAadt(opts: {
+/**
+ * Locked formula (TypeScript-typed, unit-tested). Pure function. Returns
+ * annualized TONS crossing a segment (`AADT × tfctr × payload × 365`).
+ *
+ * Path B refactor (2026-05-18): the v1 `tonsFromAadt` multiplied by segment
+ * length to produce ton-miles, which mismatched FAF5's tons/year baseline.
+ * Path B drops the miles factor and renames the function so the units are
+ * honest. Downstream comparison is FDOT-vs-FDOT-history, not FDOT-vs-FAF5.
+ */
+export function activityFromAadt(opts: {
   aadt: number;
   tfctr: number;
-  shape_length_m: number;
   payload?: number;
 }): number {
   const payload = opts.payload ?? AVG_PAYLOAD_TONS_PER_TRUCK;
-  return (
-    opts.aadt *
-    opts.tfctr *
-    payload *
-    365 *
-    (opts.shape_length_m / METERS_PER_MILE)
-  );
+  return opts.aadt * opts.tfctr * payload * 365;
 }
 
 /** Raw segment row from data_lake.fdot_aadt_fl (subset used by this connector). */
@@ -148,15 +189,40 @@ interface FixtureSegment {
 
 interface PriorShockLogEntry {
   refined_at: string;
-  deviation_z: number;
-  shock_state: "normal" | "anomaly" | "structural_break";
+  deviation_z: number | null;
+  shock_state:
+    | "normal"
+    | "anomaly"
+    | "structural_break"
+    | "insufficient_history";
   baseline_validity_flag?: "valid" | "stale-structural";
+  current_activity_tons_year?: number | null;
 }
 
 interface PriorShockLogGenerator {
   kind: "consecutive_breaches";
   count: number;
   z: number;
+  /** Optional — synthetic activity value to seed each generated row's
+   * `current_activity_tons_year`. Path B uses this to build a clean rolling
+   * baseline against which the current-run activity is compared. If unset,
+   * the generated rows leave current_activity_tons_year unset (rolling stats
+   * fall through to empty). */
+  current_activity_tons_year?: number;
+  end_date: string;
+}
+
+interface PriorShockLogHistoryGenerator {
+  /** Build N rows of synthetic in-band history so the rolling baseline has
+   * enough samples to clear the cold-start threshold. All rows are in-band
+   * (deviation_z in ±2, shock_state = "normal", flag = "valid"). The current
+   * activity values are drawn from a tight band around `base_activity` with
+   * spread `±spread_pct` percent — the brain computes mean ≈ base_activity
+   * and a small but non-zero stddev. */
+  kind: "in_band_history";
+  count: number;
+  base_activity: number;
+  spread_pct: number;
   end_date: string;
 }
 
@@ -164,6 +230,11 @@ interface FixtureScenario {
   segments: FixtureSegment[];
   prior_shock_log?: PriorShockLogEntry[];
   prior_shock_log_generator?: PriorShockLogGenerator;
+  /**
+   * Path B: synthetic in-band history that clears the cold-start threshold.
+   * Composes with `prior_shock_log_generator` — the history is prepended (older
+   * dates) so the consecutive-breach generator still anchors to the tail. */
+  prior_shock_log_history?: PriorShockLogHistoryGenerator;
 }
 
 interface FixtureShape {
@@ -183,39 +254,87 @@ function toNum(v: unknown): number | null {
 }
 
 /**
- * Build the synthetic prior-shock-log for a fixture scenario. Either reads the
- * `prior_shock_log` literal array, or expands the `prior_shock_log_generator`
- * into N consecutive breach rows ending at `end_date`. The 30d/90d scenarios
- * use the generator so fixture JSON stays readable.
+ * Build the synthetic prior-shock-log for a fixture scenario.
+ *
+ * Three composable shapes (each optional, can stack):
+ *   1. `prior_shock_log`            — literal array of explicit rows.
+ *   2. `prior_shock_log_history`    — N synthetic in-band rows around a
+ *                                     base activity value (clears cold-start).
+ *   3. `prior_shock_log_generator`  — N consecutive breach rows ending at
+ *                                     `end_date`.
+ *
+ * When multiple shapes are present the order is: history (oldest), then
+ * literal entries, then generator (newest). This is the natural order the
+ * brain's rolling-stats and breach-counter logic want to see.
  */
 function buildPriorShockLog(scenario: FixtureScenario): ShockLogRow[] {
+  const rows: ShockLogRow[] = [];
+
+  // 1. Synthetic in-band history (oldest segment of the log).
+  const history = scenario.prior_shock_log_history;
+  if (history) {
+    const endMs = Date.parse(history.end_date);
+    // History sits BEFORE the generator's window — push it back by
+    // (history.count + generator.count) days from end_date when generator is
+    // present, otherwise just history.count days.
+    const genCount = scenario.prior_shock_log_generator?.count ?? 0;
+    const totalOffsetDays = history.count + genCount;
+    for (let i = 0; i < history.count; i++) {
+      const offsetDays = totalOffsetDays - i;
+      const ts = new Date(endMs - offsetDays * 86_400_000).toISOString();
+      // Deterministic pseudo-random jitter in ±spread_pct around base_activity.
+      // Use a simple hash on i so values vary without needing crypto/random.
+      const jitter = (((i * 9301 + 49297) % 233280) / 233280 - 0.5) * 2; // [-1, 1)
+      const activity =
+        history.base_activity * (1 + (jitter * history.spread_pct) / 100);
+      rows.push({
+        kind: "fdot-freight-shock-log",
+        refined_at: ts,
+        deviation_z: jitter * 2, // in ±2, well inside |z|<=3
+        shock_state: "normal",
+        baseline_validity_flag: "valid",
+        current_activity_tons_year: activity,
+      });
+    }
+  }
+
+  // 2. Literal log entries.
   if (scenario.prior_shock_log && scenario.prior_shock_log.length > 0) {
-    return scenario.prior_shock_log.map(
-      (e): ShockLogRow => ({
+    for (const e of scenario.prior_shock_log) {
+      rows.push({
         kind: "fdot-freight-shock-log",
         refined_at: e.refined_at,
         deviation_z: e.deviation_z,
         shock_state: e.shock_state,
         baseline_validity_flag: e.baseline_validity_flag,
-      }),
-    );
+        current_activity_tons_year:
+          e.current_activity_tons_year === undefined
+            ? null
+            : e.current_activity_tons_year,
+      });
+    }
   }
+
+  // 3. Consecutive-breach generator (newest, immediately precedes the CURRENT run).
   const gen = scenario.prior_shock_log_generator;
-  if (!gen) return [];
-  const endMs = Date.parse(gen.end_date);
-  const rows: ShockLogRow[] = [];
-  // Generator builds `count` consecutive prior days ending one day before
-  // end_date — the brain's CURRENT run becomes the next day in the chain.
-  for (let i = 0; i < gen.count; i++) {
-    const ts = new Date(endMs - (gen.count - i) * 86_400_000).toISOString();
-    rows.push({
-      kind: "fdot-freight-shock-log",
-      refined_at: ts,
-      deviation_z: gen.z,
-      shock_state: "normal",
-      baseline_validity_flag: "valid",
-    });
+  if (gen) {
+    const endMs = Date.parse(gen.end_date);
+    for (let i = 0; i < gen.count; i++) {
+      const ts = new Date(endMs - (gen.count - i) * 86_400_000).toISOString();
+      rows.push({
+        kind: "fdot-freight-shock-log",
+        refined_at: ts,
+        deviation_z: gen.z,
+        shock_state: "anomaly",
+        baseline_validity_flag: "valid",
+        current_activity_tons_year: gen.current_activity_tons_year ?? null,
+      });
+    }
   }
+
+  // Final guarantee: rows are sorted oldest-first by refined_at so the brain's
+  // rolling-window read (last N) walks the correct end of the array.
+  rows.sort((a, b) => Date.parse(a.refined_at) - Date.parse(b.refined_at));
   return rows;
 }
 
@@ -285,7 +404,9 @@ async function fetchLiveShockLog(): Promise<ShockLogRow[]> {
     const sb = getSupabase().schema(SCHEMA);
     const resp = await sb
       .from(SHOCK_LOG_TABLE)
-      .select("refined_at,deviation_z,shock_state,baseline_validity_flag")
+      .select(
+        "refined_at,deviation_z,shock_state,baseline_validity_flag,current_activity_tons_year",
+      )
       .order("refined_at", { ascending: false })
       .limit(SHOCK_LOG_PULL_COUNT);
     if (resp.error) {
@@ -297,18 +418,29 @@ async function fetchLiveShockLog(): Promise<ShockLogRow[]> {
     const rows = (resp.data ?? []) as Array<{
       refined_at: string;
       deviation_z: number | null;
-      shock_state: "normal" | "anomaly" | "structural_break";
+      shock_state:
+        | "normal"
+        | "anomaly"
+        | "structural_break"
+        | "insufficient_history";
       baseline_validity_flag?: "valid" | "stale-structural";
+      current_activity_tons_year: number | null;
     }>;
-    return rows.map(
-      (r): ShockLogRow => ({
-        kind: "fdot-freight-shock-log",
-        refined_at: r.refined_at,
-        deviation_z: r.deviation_z,
-        shock_state: r.shock_state,
-        baseline_validity_flag: r.baseline_validity_flag,
-      }),
-    );
+    // Connector returns the log in OLDEST-FIRST order (matches the fixture
+    // builder's contract) — Supabase returned DESC for limit efficiency, so
+    // reverse before returning.
+    return rows
+      .map(
+        (r): ShockLogRow => ({
+          kind: "fdot-freight-shock-log",
+          refined_at: r.refined_at,
+          deviation_z: r.deviation_z,
+          shock_state: r.shock_state,
+          baseline_validity_flag: r.baseline_validity_flag,
+          current_activity_tons_year: r.current_activity_tons_year,
+        }),
+      )
+      .reverse();
   } catch (err) {
     console.warn(
       `[fdot-freight-source] shock-log read threw (${(err as Error).message}); treating as cold start.`,
@@ -354,12 +486,13 @@ export const fdotFreightSegmentsSource: SourceConnector = {
     for (const row of segmentRows) {
       const tfctr = toNum(row.tfctr);
       const shapeLen = toNum(row.shape_length);
-      if (tfctr == null || shapeLen == null || shapeLen <= 0) continue;
-      const tons = tonsFromAadt({
-        aadt: row.aadt,
-        tfctr,
-        shape_length_m: shapeLen,
-      });
+      // shape_length is no longer used by the activity formula (Path B), but
+      // the live SegmentRow still carries it for provenance — drop the
+      // shape-length validity gate so the connector doesn't silently drop
+      // segments with missing geometry. Keep the tfctr null-check (a missing
+      // truck-factor genuinely invalidates the activity computation).
+      if (tfctr == null) continue;
+      const activity = activityFromAadt({ aadt: row.aadt, tfctr });
       const normalized: FreightSegmentNormalized = {
         kind: "fdot-freight-segment",
         county: row.county,
@@ -369,8 +502,8 @@ export const fdotFreightSegmentsSource: SourceConnector = {
         desc_to: row.desc_to,
         aadt: row.aadt,
         tfctr,
-        shape_length_m: shapeLen,
-        tons_per_year: tons,
+        shape_length_m: shapeLen ?? 0,
+        activity_tons_per_year: activity,
       };
       fragments.push({
         fragment_id: fragmentId(
@@ -406,7 +539,7 @@ export const fdotFreightSegmentsSource: SourceConnector = {
     return {
       source:
         env.source === "fixture"
-          ? `FDOT freight-coded segments (fixture; ${SCHEMA}.${TABLE}, counties ${BRAIN_COUNTIES.join("+")}, year ${LATEST_FDOT_YEAR}, roadways I-* + US-* only) plus prior shock-log entries — ${liveUrl}`
+          ? `FDOT freight-coded segments (fixture; ${SCHEMA}.${TABLE}, counties ${BRAIN_COUNTIES.join("+")}, year ${LATEST_FDOT_YEAR}, roadways I-* + US-* only) plus prior shock-log activity history — ${liveUrl}`
           : `FDOT freight-coded segments via ${SCHEMA}.${TABLE} (dlt-ingested from FDOT FTO_PROD/MapServer/7; counties ${BRAIN_COUNTIES.join("+")}, year ${LATEST_FDOT_YEAR}, roadways I-* + US-* only) plus the last ${SHOCK_LOG_PULL_COUNT} rows of ${SCHEMA}.${SHOCK_LOG_TABLE} — ${liveUrl}`,
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),

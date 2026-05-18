@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v15 | Token: SWFL-7421-v15-20260518 -->
+<!-- FRESHNESS: v17 | Token: SWFL-7421-v17-20260518 -->
 ---
 brain_id: sector-credit-swfl
-version: 15
-refined_at: 2026-05-18T20:28:39Z
-freshness_token: SWFL-7421-v15-20260518
+version: 17
+refined_at: 2026-05-18T20:50:57Z
+freshness_token: SWFL-7421-v17-20260518
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SBA 7(a)/504 sector credit risk — resolved-loan charge-off rates by 2-digit NAICS sector across Lee & Collier counties, FL, paired with named-brand outcomes and current macro funding backdrop.
@@ -47,15 +47,15 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
   {"id":"f009","topic":"metric:sector_62_chargeoff_rate","fact":"Health Care & Social Assistance (NAICS 62) resolved charge-off rate","value":"Health Care & Social Assistance — 0% resolved-loan charge-off rate (0 charged off out of 16 resolved loans; 19 total loans approved including still-active; $12.1M gross approved capital).","src":"s01","date":"2026-05-18"},
   {"id":"f010","topic":"metric:sector_44_chargeoff_rate","fact":"Retail Trade (NAICS 44) resolved charge-off rate","value":"Retail Trade — 18.8% resolved-loan charge-off rate (3 charged off out of 16 resolved loans; 18 total loans approved including still-active; $7.6M gross approved capital).","src":"s01","date":"2026-05-18"},
   {"id":"f011","topic":"metric:sector_45_chargeoff_rate","fact":"Retail Trade (NAICS 45) resolved charge-off rate","value":"Retail Trade — 26.1% resolved-loan charge-off rate (6 charged off out of 23 resolved loans; 26 total loans approved including still-active; $6.9M gross approved capital).","src":"s01","date":"2026-05-18"},
-  {"id":"f012","topic":"franchise-outcomes :: upstream_routing","fact":"Per-brand SBA survival rates from the franchise-outcomes brain","value":"The franchise-outcomes brain (confidence 1.00 at 2026-05-18T20:27:22Z) carries named per-brand resolved-loan survival rates for every franchise in this lake. Cross-validate any sector-level claim against the named brand outcomes — a sector that looks safe in aggregate can hide a single dominant brand with a charge-off run.","src":"s01","date":"2026-05-18"},
+  {"id":"f012","topic":"franchise-outcomes :: upstream_routing","fact":"Per-brand SBA survival rates from the franchise-outcomes brain","value":"The franchise-outcomes brain (confidence 1.00 at 2026-05-18T20:49:46Z) carries named per-brand resolved-loan survival rates for every franchise in this lake. Cross-validate any sector-level claim against the named brand outcomes — a sector that looks safe in aggregate can hide a single dominant brand with a charge-off run.","src":"s01","date":"2026-05-18"},
   {"id":"f013","topic":"macro-chain :: upstream_routing","fact":"Current macro funding-cost backdrop from the macro-us + macro-florida brains","value":"The macro chain (macro-us + macro-florida, weaker upstream confidence 1.00) reports the macro backdrop: SOFR 4.3% (falling), CPI YoY 2.6% (falling), FL unemployment 3.4% (stable). These rates set the funding-cost lens — a high-charge-off sector at a falling SOFR is a different bet from the same sector at a rising SOFR.","src":"s01","date":"2026-05-18"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "sector-credit-swfl",
-  "version": 15,
-  "refined_at": "2026-05-18T20:28:39Z",
+  "version": 17,
+  "refined_at": "2026-05-18T20:50:57Z",
   "direction": "bearish",
   "magnitude": 0.047619047619047554,
   "drivers": [],
@@ -72,7 +72,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=54",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 0 charged off of 24 resolved loans (29 total approved across 4 sub-industries; $13.3M gross approved capital)."
       }
@@ -87,7 +87,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=71",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 5 charged off of 15 resolved loans (18 total approved across 1 sub-industries; $9.8M gross approved capital)."
       }
@@ -102,7 +102,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=54",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 0 charged off of 24 resolved loans (29 total approved across 4 sub-industries; $13.3M gross approved capital)."
       }
@@ -117,7 +117,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=62",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Health Care & Social Assistance (NAICS 62): 0 charged off of 16 resolved loans (19 total approved across 2 sub-industries; $12.1M gross approved capital)."
       }
@@ -132,7 +132,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=23",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Construction (NAICS 23): 2 charged off of 43 resolved loans (50 total approved across 3 sub-industries; $32.9M gross approved capital)."
       }
@@ -147,7 +147,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=44",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 44): 3 charged off of 16 resolved loans (18 total approved across 2 sub-industries; $7.6M gross approved capital)."
       }
@@ -162,7 +162,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=81",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Other Services (Personal & Repair) (NAICS 81): 8 charged off of 38 resolved loans (44 total approved across 3 sub-industries; $13.7M gross approved capital)."
       }
@@ -177,7 +177,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=72",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Accommodation & Food Services (NAICS 72): 16 charged off of 63 resolved loans (79 total approved across 3 sub-industries; $51.4M gross approved capital)."
       }
@@ -192,7 +192,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=45",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 45): 6 charged off of 23 resolved loans (26 total approved across 2 sub-industries; $6.9M gross approved capital)."
       }
@@ -207,7 +207,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=71",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 5 charged off of 15 resolved loans (18 total approved across 1 sub-industries; $9.8M gross approved capital)."
       }
@@ -228,7 +228,7 @@ s04 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T20:28:39Z"
+    "computed_at": "2026-05-18T20:50:57Z"
   },
   "exogenous_signals": []
 }

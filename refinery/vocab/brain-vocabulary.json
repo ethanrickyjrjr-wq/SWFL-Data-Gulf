@@ -976,11 +976,15 @@
       "scope_note": "FAF5 sum of inbound domestic flow value, in millions of USD, for the same scope as logistics_inbound_freight_tons_swfl. Imports and exports excluded."
     },
 
-    "logistics_nowcast_baseline_flow_tons_year": {
-      "id": "logistics_nowcast_baseline_flow_tons_year",
-      "prefLabel": "SWFL Freight Baseline (Tons/Year, FAF5-Derived)",
-      "altLabels": ["nowcast baseline freight tons"],
-      "raw_slugs": ["baseline_flow_tons_year"],
+    "logistics_nowcast_faf5_inbound_flow_tons_year": {
+      "id": "logistics_nowcast_faf5_inbound_flow_tons_year",
+      "prefLabel": "SWFL FAF5 Inbound Freight Flow (Tons/Year, CONTEXT)",
+      "altLabels": [
+        "FAF5 inbound freight context",
+        "nowcast FAF5 inbound flow",
+        "nowcast baseline freight tons"
+      ],
+      "raw_slugs": ["faf5_inbound_flow_tons_year", "baseline_flow_tons_year"],
       "category": "logistics",
       "domain": ["logistics"],
       "source_brains": ["logistics-swfl-nowcast", "master"],
@@ -989,14 +993,17 @@
       "value_range": [0, 10000000000],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Reference point for nowcast shock detection. Derived as logistics-swfl.inbound_freight_tons_swfl × 1000 (kilotons → tons). Updated whenever logistics-swfl publishes a new FAF5 baseline."
+      "scope_note": "FAF5 audited annual inbound freight FLOW to SWFL. Derived as logistics-swfl.inbound_freight_tons_swfl × 1000 (kilotons → tons). Under Path B (post-commit 297ad23) this is preserved as CONTEXT only — it does NOT anchor the deviation math (which is computed against FDOT's own rolling-history baseline). raw_slug 'baseline_flow_tons_year' retained for legacy back-compat."
     },
 
-    "logistics_nowcast_current_flow_tons_year": {
-      "id": "logistics_nowcast_current_flow_tons_year",
-      "prefLabel": "SWFL Freight Current State (Tons/Year, FDOT-AADT-Derived)",
-      "altLabels": ["nowcast current freight tons"],
-      "raw_slugs": ["current_flow_tons_year"],
+    "logistics_nowcast_current_activity_tons_year": {
+      "id": "logistics_nowcast_current_activity_tons_year",
+      "prefLabel": "SWFL Freight Current Activity (Tons/Year, FDOT Segment-Counts)",
+      "altLabels": [
+        "nowcast current freight activity",
+        "nowcast current freight tons"
+      ],
+      "raw_slugs": ["current_activity_tons_year", "current_flow_tons_year"],
       "category": "logistics",
       "domain": ["logistics"],
       "source_brains": ["logistics-swfl-nowcast", "master"],
@@ -1005,7 +1012,55 @@
       "value_range": [0, 10000000000],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Σ over freight-coded Lee+Collier segments of AADT × tfctr (FDOT per-segment truck-share) × AVG_PAYLOAD_TONS_PER_TRUCK (16.0, FHWA Highway Statistics 2023 Table VM-1) × segment_miles × 365."
+      "scope_note": "Path B (post-commit 297ad23): Σ over freight-coded Lee+Collier segments of AADT × tfctr (FDOT per-segment truck-share) × AVG_PAYLOAD_TONS_PER_TRUCK (16.0, FHWA Highway Statistics 2023 Table VM-1) × 365. Deliberately omits segment length — v1 multiplied by miles which mismatched FAF5's tons baseline by units AND by population (pass-through vs delivered). This metric is ACTIVITY (segment counts, over-counts pass-through) — do not compare directly to FAF5 flow. raw_slug 'current_flow_tons_year' retained for legacy back-compat."
+    },
+
+    "logistics_nowcast_rolling_mean_activity_tons_year": {
+      "id": "logistics_nowcast_rolling_mean_activity_tons_year",
+      "prefLabel": "SWFL Freight Rolling-Mean Baseline (Tons/Year, FDOT History)",
+      "altLabels": ["nowcast rolling-mean baseline", "Path B math baseline"],
+      "raw_slugs": ["rolling_mean_activity_tons_year"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["logistics-swfl-nowcast", "master"],
+      "value_type": "count",
+      "unit": "tons/year",
+      "value_range": [0, 10000000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Path B: rolling mean of the last ROLLING_WINDOW_DAYS (90) shock-log rows with non-null current_activity_tons_year. This IS the math anchor for the deviation z-score — replaces the v1 FAF5-derived baseline. Drifts slowly as new daily activity rolls in."
+    },
+
+    "logistics_nowcast_rolling_stddev_activity_tons_year": {
+      "id": "logistics_nowcast_rolling_stddev_activity_tons_year",
+      "prefLabel": "SWFL Freight Rolling-Stddev Baseline (Tons/Year, FDOT History)",
+      "altLabels": ["nowcast rolling-stddev", "Path B math sigma"],
+      "raw_slugs": ["rolling_stddev_activity_tons_year"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["logistics-swfl-nowcast", "master"],
+      "value_type": "count",
+      "unit": "tons/year",
+      "value_range": [0, 10000000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Path B: population stddev of the same 90-day rolling window used for rolling_mean_activity_tons_year. Denominator of the deviation z-score. Replaces the v1 fixed-CoV (baseline_mu × 0.10) computation."
+    },
+
+    "logistics_nowcast_history_days_observed": {
+      "id": "logistics_nowcast_history_days_observed",
+      "prefLabel": "SWFL Freight Rolling-History Days Observed",
+      "altLabels": ["nowcast cold-start gate", "rolling-history count"],
+      "raw_slugs": ["history_days_observed"],
+      "category": "logistics",
+      "domain": ["logistics"],
+      "source_brains": ["logistics-swfl-nowcast", "master"],
+      "value_type": "count",
+      "unit": "days",
+      "value_range": [0, 365],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Path B cold-start gate. Count of prior shock-log rows with non-null current_activity_tons_year inside the rolling window. Must be ≥ COLD_START_THRESHOLD_DAYS (90) before deviation_z is computed and emitted; otherwise shock_state = 'insufficient_history' and deviation_z/pct are suppressed from key_metrics."
     },
 
     "logistics_nowcast_deviation_z": {
@@ -1021,7 +1076,7 @@
       "value_range": [-10, 10],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "(current_flow_tons_year − baseline_mu) / baseline_sigma where baseline_sigma = baseline_mu × 0.10 (FHWA FAF5 §3.2 freight-flow uncertainty band). |z|>3 triggers shock_state escalation."
+      "scope_note": "Path B: (current_activity_tons_year − rolling_mean_activity_tons_year) / rolling_stddev_activity_tons_year, computed over the last ROLLING_WINDOW_DAYS (90) of shock-log history. Suppressed (omitted from key_metrics) on cold-start runs (history_days_observed < COLD_START_THRESHOLD_DAYS). |z|>3 triggers shock_state escalation."
     },
 
     "logistics_nowcast_deviation_pct": {
@@ -1037,7 +1092,7 @@
       "value_range": [-100, 1000],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "(current_flow_tons_year − baseline) / baseline × 100. Companion to logistics_nowcast_deviation_z; both move in lockstep but percent is operator-readable."
+      "scope_note": "Path B: (current_activity_tons_year − rolling_mean_activity_tons_year) / rolling_mean × 100. Companion to logistics_nowcast_deviation_z; both move in lockstep but percent is operator-readable. Suppressed on cold-start runs."
     },
 
     "logistics_nowcast_shock_state": {
@@ -1050,10 +1105,15 @@
       "source_brains": ["logistics-swfl-nowcast", "master"],
       "value_type": "enum",
       "unit": null,
-      "allowed_values": ["normal", "anomaly", "structural_break"],
+      "allowed_values": [
+        "normal",
+        "anomaly",
+        "structural_break",
+        "insufficient_history"
+      ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Deterministic state machine over consecutive-day |z|>3 counter: ≥3d → anomaly; ≥30d → structural_break (candidate); ≥90d also flips baseline_validity_flag. Computed in code, never LLM."
+      "scope_note": "Deterministic state machine over consecutive-day |z|>3 counter: ≥3d → anomaly; ≥30d → structural_break (candidate); ≥90d also flips baseline_validity_flag. Path B added 'insufficient_history' for the cold-start gate (history_days_observed < COLD_START_THRESHOLD_DAYS). Computed in code, never LLM."
     },
 
     "logistics_nowcast_baseline_validity_flag": {
@@ -1069,7 +1129,7 @@
       "allowed_values": ["valid", "stale-structural"],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Sticky flag. Flips to stale-structural after 90 consecutive days of |z|>3 — signals the FAF5 baseline is structurally divergent from observed flow and downstream consumers should request a baseline refresh."
+      "scope_note": "Sticky flag. Flips to stale-structural after 90 consecutive days of |z|>3 against the ROLLING FDOT history baseline (Path B) — signals the rolling-mean baseline has drifted enough that operator review of the rolling window itself is warranted. Cold-start runs never flip the flag."
     },
 
     "logistics_nowcast_consecutive_breach_days": {
@@ -1085,7 +1145,7 @@
       "value_range": [0, 3650],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Stateful counter sourced from data_lake.fdot_freight_nowcast_shock_log (append-only Tier 2 table). Counts consecutive days |z|>3 with the same sign; resets to 0 when |z|≤3 or sign flips."
+      "scope_note": "Stateful counter sourced from data_lake.fdot_freight_nowcast_shock_log (append-only Tier 2 table). Counts consecutive days |z|>3 with the same sign; resets to 0 when |z|≤3, sign flips, or the current run is cold-start (z suppressed)."
     },
 
     "logistics_nowcast_freight_segment_count": {
@@ -1465,8 +1525,13 @@
     "seasonal_position_vs_history": "hosp_tdt_seasonal_position",
     "inbound_freight_tons_swfl": "logistics_inbound_freight_tons_swfl",
     "inbound_freight_value_swfl_musd": "logistics_inbound_freight_value_swfl_musd",
-    "baseline_flow_tons_year": "logistics_nowcast_baseline_flow_tons_year",
-    "current_flow_tons_year": "logistics_nowcast_current_flow_tons_year",
+    "baseline_flow_tons_year": "logistics_nowcast_faf5_inbound_flow_tons_year",
+    "faf5_inbound_flow_tons_year": "logistics_nowcast_faf5_inbound_flow_tons_year",
+    "current_flow_tons_year": "logistics_nowcast_current_activity_tons_year",
+    "current_activity_tons_year": "logistics_nowcast_current_activity_tons_year",
+    "rolling_mean_activity_tons_year": "logistics_nowcast_rolling_mean_activity_tons_year",
+    "rolling_stddev_activity_tons_year": "logistics_nowcast_rolling_stddev_activity_tons_year",
+    "history_days_observed": "logistics_nowcast_history_days_observed",
     "deviation_z": "logistics_nowcast_deviation_z",
     "deviation_pct": "logistics_nowcast_deviation_pct",
     "shock_state": "logistics_nowcast_shock_state",

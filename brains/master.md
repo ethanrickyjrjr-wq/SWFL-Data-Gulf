@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v43 | Token: SWFL-7421-v43-20260518 -->
+<!-- FRESHNESS: v45 | Token: SWFL-7421-v45-20260518 -->
 ---
 brain_id: master
-version: 43
-refined_at: 2026-05-18T20:28:39Z
-freshness_token: SWFL-7421-v43-20260518
+version: 45
+refined_at: 2026-05-18T20:50:58Z
+freshness_token: SWFL-7421-v45-20260518
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -53,7 +53,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   {"id":"f007","topic":"upstream :: tourism-tdt","fact":"Upstream snapshot — tourism-tdt (bullish, magnitude 0.80, confidence 1.00)","value":"tourism-tdt as of 2026-05-18: direction bullish, magnitude 0.80, confidence 1.00, trust tier T1, 5 key metric(s). Lee County TDT collections for 2025-09 (trough season): $1.80M. Year-over-year +12.5% against the prior fiscal year. Trailing 12 months stand at 99% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this seasonal pulse; the cross-vertical read lives downstream in master.","src":"s01","date":"2026-05-18"},
   {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.60, confidence 1.00)","value":"env-swfl as of 2026-05-18: direction bearish, magnitude 0.60, confidence 1.00, trust tier T1, 13 key metric(s). Southwest Florida flood-hazard exposure across 1 county: 37.95% of mapped area sits in a FEMA Special Flood Hazard Area, with 5.15% in coastal V/VE high-hazard zones. Lee County specifically — the Fort Myers / Fort Myers Beach footprint — carries 37.95% SFHA and 5.15% coastal high-hazard exposure (271 VE polygons). Realized loss — NFIP paid claims across the 6 SWFL counties total $4M in the 5 named storm years since 2000 vs a non-storm baseline of $56k/year (median); 2025 ran 1.56× the baseline. Hydrology — Lee County groundwater is sitting at 2.25 ft NAVD88 (90-day median); SWFL rainfall averaged 53.7 in across the 2025 water year; Lee wells exceeded the 2.0 ft NAVD88 high-water threshold on 17 of 24 observation-days in the trailing year. Downstream consumers should treat barrier-island and coastal-V/VE coordinates as flood-veto territory until paired with a property-level lookup.","src":"s01","date":"2026-05-18"},
   {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-05-18: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 12853.1K tons of inbound domestic freight worth $11639.4M across 7 origin zones and 7 commodity classes. Top origin zones by tonnage: Tampa-St. Petersburg (4411.1K tons), Orlando (2768.6K tons), Miami (2221K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Gravel and crushed stone (4704.3K tons), Other prepared foodstuffs (2747K tons), Gasoline and aviation fuel (2305.4K tons).","src":"s01","date":"2026-05-18"},
-  {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (bullish, magnitude 1.00, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-05-18: direction bullish, magnitude 1.00, confidence 0.91, trust tier T2, 9 key metric(s). Current freight flow (annualized from 9 freight-coded FDOT segments) is 1,539,663,943 tons/year against a 12,853,100 tons/year FAF5-anchored baseline — deviation z = 1187.89 (11878.9%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 1.","src":"s01","date":"2026-05-18"},
+  {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (neutral, magnitude 0.00, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-05-18: direction neutral, magnitude 0.00, confidence 0.91, trust tier T2, 12 key metric(s). FAF5 audited annual inbound freight: 12,853,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 9 freight-coded FDOT segments) is 242,430,080 tons/year against a 242,477,266 tons/year rolling baseline (90-day window, σ = 2,179,960) — deviation z = -0.02 (0.0%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 0.","src":"s01","date":"2026-05-18"},
   {"id":"f011","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (bullish, magnitude 0.42, confidence 0.80)","value":"traffic-swfl as of 2026-05-18: direction bullish, magnitude 0.42, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 62803.5 vehicles/day across 4 FDOT segments. Cohort-matched YoY 2024→2025: 4.2% over 4 segments — bullish read on corridor demand. 5-year CAGR 2021→2025: 2.6% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 117.6 — above pre-storm baseline.","src":"s01","date":"2026-05-18"},
   {"id":"f012","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (bullish, magnitude 1.00, confidence 0.91)","value":"properties-lee-value as of 2026-05-18: direction bullish, magnitude 1.00, confidence 0.91, trust tier T2, 6 key metric(s). Lee County had 9 qualified parcel sales recorded for 2025 across 50 parcels (180 per 1,000). Trailing 3yr baseline (2022-2024) averaged 4.3 sales/yr; current year sits at z = 4.9 — bullish read on Lee parcel transaction velocity. FHFA Cape Coral-Fort Myers MSA HPI: -8.86% YoY (2025-Q4), FL state -2.62% — federal price-index benchmark for the Lee market. Median Save-Our-Homes gap across 39 homesteaded parcels: 22.6% of just value suppressed for taxation.","src":"s01","date":"2026-05-18"}
 ]
@@ -61,8 +61,8 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 43,
-  "refined_at": "2026-05-18T20:28:39Z",
+  "version": 45,
+  "refined_at": "2026-05-18T20:50:58Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -130,7 +130,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/sector-credit-swfl.sample.json#naics_2digit=54",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2024+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 0 charged off of 24 resolved loans (29 total approved across 4 sub-industries; $13.3M gross approved capital)."
       }
@@ -145,7 +145,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "currency",
       "source": {
         "url": "fixture://refinery/__fixtures__/tourism-tdt.sample.json",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows fetched: 2021-10 → 2025-09); state source: Florida Department of Revenue distribution rosters (Lee County Clerk Doc 328) — latest reported month 2025-09 = $1800000.00 (FY 2025, post_ian=true)."
       }
@@ -175,7 +175,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/logistics-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
         "citation": "FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — dms_dest=129 (Remainder of Florida) AND trade_type=1, year 2024. Aggregate: 12 origin × commodity flow rows summing to 12853.1K tons ($11639.4M) across 7 origin zones and 7 commodity classes."
       }
@@ -190,7 +190,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T20:28:24Z",
+        "fetched_at": "2026-05-18T20:50:43Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 3.4 percent for period 2026-04, stable vs prior 6 periods. Florida labor market remains tight, ~80bp below the national rate; tourism and construction continue to absorb new entrants."
       }
@@ -205,7 +205,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-05-18T20:28:22Z",
+        "fetched_at": "2026-05-18T20:50:40Z",
         "tier": 1,
         "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 4.31 percent_annualized for period 2026-05-14, falling vs prior 6 periods. SOFR has eased ~100bp from its 2025 peak as the Fed has begun cutting; floating-rate CRE debt is repricing lower."
       }
@@ -220,24 +220,24 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
       "display_format": "percent",
       "source": {
         "url": "fixture://refinery/__fixtures__/franchise-outcomes.sample.json",
-        "fetched_at": "2026-05-18T20:26:34Z",
+        "fetched_at": "2026-05-18T20:48:54Z",
         "tier": 1,
         "citation": "SBA 7(a)/504 franchise loan outcomes via Brains Supabase RPC get_franchise_outcomes_aggregated (Lee + Collier counties, FL); federal source: Small Business Administration loan-status reporting — 132 paid in full of 169 resolved loans across 14 assessable brands (37 charged off). Rate is loan-count-weighted, not a mean of per-brand rates."
       }
     },
     {
-      "metric": "baseline_flow_tons_year",
+      "metric": "faf5_inbound_flow_tons_year",
       "value": 12853100,
       "direction": "stable",
-      "label": "FAF5-anchored baseline freight tonnage (annualized, year 2025)",
+      "label": "FAF5 audited annual inbound freight FLOW to SWFL (CONTEXT — not the math anchor; the deviation z below is computed against FDOT's own rolling history)",
       "variable_type": "extensive",
       "units": "tons/year",
       "display_format": "count",
       "source": {
         "url": "https://brain-platform-amber.vercel.app/api/b/logistics-swfl",
-        "fetched_at": "2026-05-18T20:28:39Z",
+        "fetched_at": "2026-05-18T20:50:57Z",
         "tier": 1,
-        "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-05-18) — anchors baseline_mu via inbound_freight_tons_swfl × 1000."
+        "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-05-18) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
       }
     }
   ],
@@ -250,11 +250,9 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
     "macro-us (bullish) vs sector-credit-swfl (bearish)",
     "macro-us (bullish) vs env-swfl (bearish)",
     "sector-credit-swfl (bearish) vs tourism-tdt (bullish)",
-    "sector-credit-swfl (bearish) vs logistics-swfl-nowcast (bullish)",
     "sector-credit-swfl (bearish) vs traffic-swfl (bullish)",
     "sector-credit-swfl (bearish) vs properties-lee-value (bullish)",
     "tourism-tdt (bullish) vs env-swfl (bearish)",
-    "env-swfl (bearish) vs logistics-swfl-nowcast (bullish)",
     "env-swfl (bearish) vs traffic-swfl (bullish)",
     "env-swfl (bearish) vs properties-lee-value (bullish)"
   ],
@@ -267,7 +265,7 @@ s12 | properties-lee-value brain — https://brain-platform-amber.vercel.app/api
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T20:28:39.000Z"
+    "computed_at": "2026-05-18T20:50:58.000Z"
   },
   "exogenous_signals": []
 }

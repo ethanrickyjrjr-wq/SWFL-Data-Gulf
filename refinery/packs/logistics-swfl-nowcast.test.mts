@@ -11,13 +11,16 @@ const {
   nextConsecutiveBreachDays,
   classifyShockState,
   decideBaselineValidityFlag,
+  rollingActivityStats,
+  renderFaf5ContextSentences,
+  COLD_START_THRESHOLD_DAYS,
+  ROLLING_WINDOW_DAYS,
 } = await import("./logistics-swfl-nowcast.mts");
 
 const {
   fdotFreightSegmentsSource,
-  tonsFromAadt,
+  activityFromAadt,
   AVG_PAYLOAD_TONS_PER_TRUCK,
-  BASELINE_COEFFICIENT_OF_VARIATION,
 } = await import("../sources/fdot-freight-source.mts");
 
 import type { ShockLogRow } from "../sources/fdot-freight-source.mts";
@@ -26,38 +29,43 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { BrainEdge, PackDefinition } from "../types/pack.mts";
 
 // =========================================================================
-// 1. Pure formula unit test — tonsFromAadt is the locked AADT→tons math.
+// 1. Pure formula unit test — activityFromAadt is the locked AADT→activity math.
 // =========================================================================
 
-test("tonsFromAadt: locked formula matches the blueprint-pinned worked example", () => {
-  // AADT=24000, tfctr=0.043, shape_length_m=6300, payload=16
-  // tons = 24000 × 0.043 × 16 × 365 × (6300 / 1609.344)
-  // miles = 6300 / 1609.344 = 3.9145...
-  // = 24000 × 0.043 × 16 × 365 × 3.9145...
-  const result = tonsFromAadt({
+test("activityFromAadt: locked Path B formula (NO segment-length factor)", () => {
+  // AADT=24000, tfctr=0.043, payload=16
+  // activity = 24000 × 0.043 × 16 × 365
+  const result = activityFromAadt({
     aadt: 24000,
     tfctr: 0.043,
-    shape_length_m: 6300,
     payload: 16,
   });
-  const expected = 24000 * 0.043 * 16 * 365 * (6300 / 1609.344);
+  const expected = 24000 * 0.043 * 16 * 365;
   assert.equal(result, expected);
 });
 
-test("tonsFromAadt: default payload uses AVG_PAYLOAD_TONS_PER_TRUCK = 16.0", () => {
+test("activityFromAadt: default payload uses AVG_PAYLOAD_TONS_PER_TRUCK = 16.0", () => {
   assert.equal(AVG_PAYLOAD_TONS_PER_TRUCK, 16.0);
-  const explicit = tonsFromAadt({
+  const explicit = activityFromAadt({
     aadt: 10000,
     tfctr: 0.05,
-    shape_length_m: 5000,
     payload: 16,
   });
-  const implicit = tonsFromAadt({
+  const implicit = activityFromAadt({
     aadt: 10000,
     tfctr: 0.05,
-    shape_length_m: 5000,
   });
   assert.equal(explicit, implicit);
+});
+
+test("Path B: the activity formula has no length factor — single-segment activity does not depend on shape_length", () => {
+  // This is the regression-preventing test for the v1 bug. If a future
+  // refactor re-introduces the miles factor, this test fires.
+  const a = activityFromAadt({ aadt: 10000, tfctr: 0.05 });
+  const b = activityFromAadt({ aadt: 10000, tfctr: 0.05 });
+  assert.equal(a, b);
+  // Worked example: 10000 * 0.05 * 16 * 365 = 2,920,000 (NOT 2,920,000 × miles).
+  assert.equal(a, 2_920_000);
 });
 
 // =========================================================================
@@ -68,6 +76,7 @@ function shockEntry(
   refined_at: string,
   deviation_z: number,
   flag?: "valid" | "stale-structural",
+  activity?: number | null,
 ): ShockLogRow {
   return {
     kind: "fdot-freight-shock-log",
@@ -75,6 +84,7 @@ function shockEntry(
     deviation_z,
     shock_state: Math.abs(deviation_z) > 3 ? "anomaly" : "normal",
     baseline_validity_flag: flag,
+    current_activity_tons_year: activity ?? null,
   };
 }
 
@@ -84,6 +94,14 @@ test("nextConsecutiveBreachDays: |z|<=3 returns 0 regardless of history", () => 
     shockEntry("2026-05-16T12:00:00Z", -4.0),
   ];
   assert.equal(nextConsecutiveBreachDays(-2.5, history), 0);
+});
+
+test("nextConsecutiveBreachDays: null current z (cold start) returns 0", () => {
+  const history = [
+    shockEntry("2026-05-15T12:00:00Z", -4.0),
+    shockEntry("2026-05-16T12:00:00Z", -4.0),
+  ];
+  assert.equal(nextConsecutiveBreachDays(null, history), 0);
 });
 
 test("nextConsecutiveBreachDays: |z|>3 with empty history → 1", () => {
@@ -126,6 +144,12 @@ test("classifyShockState: thresholds at 3 and 30", () => {
   assert.equal(classifyShockState(90), "structural_break");
 });
 
+test("classifyShockState: coldStart=true returns insufficient_history regardless of counter", () => {
+  assert.equal(classifyShockState(0, true), "insufficient_history");
+  assert.equal(classifyShockState(5, true), "insufficient_history");
+  assert.equal(classifyShockState(90, true), "insufficient_history");
+});
+
 test("decideBaselineValidityFlag: < 90 consecutive days + no prior stale → valid", () => {
   assert.equal(decideBaselineValidityFlag(89, []), "valid");
 });
@@ -142,7 +166,71 @@ test("decideBaselineValidityFlag: prior stale-structural is sticky regardless of
 });
 
 // =========================================================================
-// 3. Pack-level metadata invariants.
+// 3. Path B rolling-stats helper.
+// =========================================================================
+
+test("rollingActivityStats: empty log returns observed=0, mean=0, stddev=0", () => {
+  const stats = rollingActivityStats([]);
+  assert.equal(stats.observed, 0);
+  assert.equal(stats.mean, 0);
+  assert.equal(stats.stddev, 0);
+});
+
+test("rollingActivityStats: skips null-activity rows when counting observed", () => {
+  const log: ShockLogRow[] = [
+    shockEntry("2026-04-01T00:00:00Z", -4.0, undefined, null),
+    shockEntry("2026-04-02T00:00:00Z", -4.0, undefined, null),
+    shockEntry("2026-04-03T00:00:00Z", 0.0, undefined, 100_000_000),
+  ];
+  const stats = rollingActivityStats(log);
+  assert.equal(stats.observed, 1);
+  assert.equal(stats.mean, 100_000_000);
+  assert.equal(stats.stddev, 0);
+});
+
+test("rollingActivityStats: 100 in-band days around 240M with ±1% spread yields mean ≈ 240M and stddev > 0", () => {
+  const base = 240_000_000;
+  const log: ShockLogRow[] = [];
+  for (let i = 0; i < 100; i++) {
+    // alternating +1%, -1% jitter
+    const activity = base * (1 + (i % 2 === 0 ? 0.01 : -0.01));
+    log.push({
+      kind: "fdot-freight-shock-log",
+      refined_at: new Date(2026, 0, 1 + i).toISOString(),
+      deviation_z: 0.5,
+      shock_state: "normal",
+      current_activity_tons_year: activity,
+    });
+  }
+  const stats = rollingActivityStats(log);
+  assert.equal(stats.observed, 90); // capped at ROLLING_WINDOW_DAYS
+  assert.ok(
+    Math.abs(stats.mean - base) < base * 0.005,
+    `expected mean near ${base}, got ${stats.mean}`,
+  );
+  assert.ok(stats.stddev > 0, `expected non-zero stddev, got ${stats.stddev}`);
+  // For ±1% alternating jitter, the population stddev is exactly 1% of base.
+  assert.ok(
+    Math.abs(stats.stddev - base * 0.01) < base * 0.001,
+    `expected stddev near ${base * 0.01}, got ${stats.stddev}`,
+  );
+});
+
+// =========================================================================
+// 4. FAF5 framing — two-sentence template.
+// =========================================================================
+
+test("renderFaf5ContextSentences: matches the locked two-sentence template verbatim", () => {
+  const out = renderFaf5ContextSentences(1_500_000_000, 2024);
+  // Both sentences. First: FAF5 number with CY label. Second: the disambiguation.
+  assert.equal(
+    out,
+    "FAF5 audited annual inbound freight: 1,500,000,000 tons (CY2024). This is a flow metric; the deviation below is an activity metric from FDOT segment counts.",
+  );
+});
+
+// =========================================================================
+// 5. Pack-level metadata invariants.
 // =========================================================================
 
 test("logisticsSwflNowcast pack: stable id, brain_id, domain, ttl", () => {
@@ -170,8 +258,34 @@ test("logisticsSwflNowcast pack: deterministic (skipTriageAgent + skipSynthesisA
   assert.equal(logisticsSwflNowcast.skipSynthesisAgent, true);
 });
 
+test("logisticsSwflNowcast pack: cold-start threshold is documented at 90 days", () => {
+  assert.equal(COLD_START_THRESHOLD_DAYS, 90);
+  assert.equal(ROLLING_WINDOW_DAYS, 90);
+});
+
+test("logisticsSwflNowcast pack source: contains the Path B semantic-shift comment on input_brains", async () => {
+  // Mechanical assertion that the explanatory comment is not lost in a
+  // future refactor. The string need only be CONTAINED — wording can evolve.
+  const src = await readFile(
+    path.join(process.cwd(), "refinery", "packs", "logistics-swfl-nowcast.mts"),
+    "utf-8",
+  );
+  assert.ok(
+    src.includes("no longer load-bearing for the math"),
+    "expected the Path B semantic-shift comment to appear near input_brains declaration",
+  );
+  assert.ok(
+    src.includes("Lane 2E"),
+    "expected reference to Lane 2E stale-upstream cascade in the comment",
+  );
+  assert.ok(
+    src.includes("stale-upstream cascade"),
+    "expected the phrase 'stale-upstream cascade' to appear in the comment",
+  );
+});
+
 // =========================================================================
-// 4. Scenario tests — drive the pack end-to-end against each fixture
+// 6. Scenario tests — drive the pack end-to-end against each fixture
 // scenario and verify shock_state / baseline_validity_flag.
 // =========================================================================
 
@@ -195,10 +309,9 @@ async function withSyntheticBaseline(body: () => Promise<void>): Promise<void> {
     conclusion: "Synthetic baseline for nowcast tests.",
     key_metrics: [
       {
-        // Calibrated so the fixture "nominal" scenario sums to ~baseline
-        // (z ~= 0). Fixture closure scenarios cut I-75 AADT to ~30% which
-        // drops the corpus to ~600M tons → z ~= -6.1 → breach triggers.
-        // See blueprint §4: baseline_mu = value × 1000.
+        // Path B: this value is CONTEXT only. It appears verbatim in the
+        // rendered conclusion via the two-sentence FAF5 framing, but does
+        // NOT anchor the math baseline (which comes from FDOT rolling history).
         metric: "inbound_freight_tons_swfl",
         value: 1539664,
         direction: "stable",
@@ -296,7 +409,51 @@ async function runScenario(
   }
 }
 
-test("scenario nominal → shock_state=normal, baseline_validity_flag=valid, no stale caveat", async () => {
+test("scenario cold_start → shock_state=insufficient_history, deviation_z suppressed (not in key_metrics), insufficient_history caveat present", async () => {
+  await withSyntheticBaseline(async () => {
+    const result = await runScenario("cold_start");
+    const shockMetric = result.key_metrics.find(
+      (m) => m.metric === "shock_state",
+    );
+    const flagMetric = result.key_metrics.find(
+      (m) => m.metric === "baseline_validity_flag",
+    );
+    const historyDaysMetric = result.key_metrics.find(
+      (m) => m.metric === "history_days_observed",
+    );
+    const deviationZMetric = result.key_metrics.find(
+      (m) => m.metric === "deviation_z",
+    );
+    const deviationPctMetric = result.key_metrics.find(
+      (m) => m.metric === "deviation_pct",
+    );
+    assert.ok(shockMetric, "shock_state metric must be present");
+    assert.equal(shockMetric!.value, "insufficient_history");
+    assert.equal(flagMetric!.value, "valid");
+    assert.equal(historyDaysMetric!.value, 30);
+    // SUPPRESSED — must not appear in key_metrics on a cold-start run.
+    assert.equal(
+      deviationZMetric,
+      undefined,
+      "deviation_z must be suppressed on cold start",
+    );
+    assert.equal(
+      deviationPctMetric,
+      undefined,
+      "deviation_pct must be suppressed on cold start",
+    );
+    // Verbatim caveat
+    assert.ok(
+      result.caveats.some((c) => c.includes("Insufficient history")),
+      `expected an insufficient-history caveat, got:\n${result.caveats.join("\n")}`,
+    );
+    // Magnitude collapses to 0 on cold start so downstream signals are dampened.
+    assert.equal(result.magnitude, 0);
+    assert.equal(result.direction, "neutral");
+  });
+});
+
+test("scenario nominal → shock_state=normal, baseline_validity_flag=valid, deviation_z within ±1, no stale caveat", async () => {
   await withSyntheticBaseline(async () => {
     const result = await runScenario("nominal");
     const shockMetric = result.key_metrics.find(
@@ -305,11 +462,18 @@ test("scenario nominal → shock_state=normal, baseline_validity_flag=valid, no 
     const flagMetric = result.key_metrics.find(
       (m) => m.metric === "baseline_validity_flag",
     );
+    const deviationZMetric = result.key_metrics.find(
+      (m) => m.metric === "deviation_z",
+    );
     assert.ok(shockMetric, "shock_state metric must be present");
     assert.ok(flagMetric, "baseline_validity_flag metric must be present");
     assert.equal(shockMetric!.value, "normal");
     assert.equal(flagMetric!.value, "valid");
-    // No verbatim stale-structural caveat should fire.
+    assert.ok(deviationZMetric, "deviation_z must be emitted on a warm run");
+    assert.ok(
+      Math.abs(Number(deviationZMetric!.value)) <= 3,
+      `expected |z| <= 3 for nominal, got ${deviationZMetric!.value}`,
+    );
     assert.ok(
       !result.caveats.some((c) => c.includes("stale-structural")),
       "nominal scenario must not emit a stale-structural caveat",
@@ -377,12 +541,94 @@ test("scenario i75_closure_sustained_90d → baseline_validity_flag flips to sta
   });
 });
 
-test("baseline_sigma = baseline_mu × 0.10 (FHWA FAF5 §3.2)", () => {
-  assert.equal(BASELINE_COEFFICIENT_OF_VARIATION, 0.1);
+// =========================================================================
+// 7. Metric-rename invariants — Path B renamed two and added three metrics.
+// =========================================================================
+
+test("scenario nominal → emits faf5_inbound_flow_tons_year (NOT baseline_flow_tons_year)", async () => {
+  await withSyntheticBaseline(async () => {
+    const result = await runScenario("nominal");
+    const faf5 = result.key_metrics.find(
+      (m) => m.metric === "faf5_inbound_flow_tons_year",
+    );
+    const legacy = result.key_metrics.find(
+      (m) => m.metric === "baseline_flow_tons_year",
+    );
+    assert.ok(
+      faf5,
+      "faf5_inbound_flow_tons_year (renamed) must appear in key_metrics",
+    );
+    assert.equal(
+      legacy,
+      undefined,
+      "legacy baseline_flow_tons_year must NOT appear post-Path-B",
+    );
+  });
+});
+
+test("scenario nominal → emits current_activity_tons_year (NOT current_flow_tons_year)", async () => {
+  await withSyntheticBaseline(async () => {
+    const result = await runScenario("nominal");
+    const activity = result.key_metrics.find(
+      (m) => m.metric === "current_activity_tons_year",
+    );
+    const legacy = result.key_metrics.find(
+      (m) => m.metric === "current_flow_tons_year",
+    );
+    assert.ok(
+      activity,
+      "current_activity_tons_year (renamed) must appear in key_metrics",
+    );
+    assert.equal(
+      legacy,
+      undefined,
+      "legacy current_flow_tons_year must NOT appear post-Path-B",
+    );
+  });
+});
+
+test("scenario nominal → emits the 3 new rolling-stats metrics", async () => {
+  await withSyntheticBaseline(async () => {
+    const result = await runScenario("nominal");
+    const mean = result.key_metrics.find(
+      (m) => m.metric === "rolling_mean_activity_tons_year",
+    );
+    const stddev = result.key_metrics.find(
+      (m) => m.metric === "rolling_stddev_activity_tons_year",
+    );
+    const history = result.key_metrics.find(
+      (m) => m.metric === "history_days_observed",
+    );
+    assert.ok(mean, "rolling_mean_activity_tons_year must be emitted");
+    assert.ok(stddev, "rolling_stddev_activity_tons_year must be emitted");
+    assert.ok(history, "history_days_observed must be emitted");
+    // The 90-day-window cap on rolling stats means a 100-day history clamps to 90.
+    assert.equal(history!.value, 90);
+    assert.ok(Number(stddev!.value) > 0);
+  });
+});
+
+test("scenario nominal → conclusion contains the verbatim two-sentence FAF5 framing", async () => {
+  await withSyntheticBaseline(async () => {
+    const result = await runScenario("nominal");
+    // The FAF5 value in the fixture is 1,539,664 thousand tons → 1,539,664,000 tons.
+    assert.ok(
+      result.conclusion.includes(
+        "FAF5 audited annual inbound freight: 1,539,664,000 tons (CY",
+      ),
+      `expected conclusion to contain the FAF5 framing first sentence, got:\n${result.conclusion}`,
+    );
+    assert.ok(
+      result.conclusion.includes(
+        "This is a flow metric; the deviation below is an activity metric from FDOT segment counts.",
+      ),
+      `expected conclusion to contain the FAF5 framing second sentence, got:\n${result.conclusion}`,
+    );
+  });
 });
 
 // =========================================================================
-// 5. Integration test — Lane 2E stale-upstream cascade end-to-end.
+// 8. Integration test — Lane 2E stale-upstream cascade end-to-end.
 // =========================================================================
 
 test("Lane 2E integration: stale logistics-swfl upstream triggers caveat + capped confidence in nowcast", async () => {

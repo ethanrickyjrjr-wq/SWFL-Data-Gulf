@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "description": "Synthetic FDOT freight-coded segment fixtures for logistics-swfl-nowcast. Four scenarios drive shock_state state-machine coverage: nominal (z within band), i75_closure_acute (3-day breach → anomaly), i75_closure_sustained_30d (structural_break), i75_closure_sustained_90d (baseline_validity_flag flips). The baseline_brain_output mocks the upstream logistics-swfl OUTPUT JSON so the brain-input source has something to consume in fixture mode.",
-    "scope": "Lee + Collier freight-coded segments (I-* and US-* roadways only). tfctr values mirror FHWA T-factor decimals (0.04–0.095), shape_length in meters.",
+    "description": "Synthetic FDOT freight-coded segment fixtures for logistics-swfl-nowcast (Path B — FDOT-vs-FDOT-history math). Scenarios: cold_start (history below the 90-day threshold), nominal (history clears the threshold; deviation z within band), i75_closure_acute (3-day breach → anomaly), i75_closure_sustained_30d (structural_break), i75_closure_sustained_90d (baseline_validity_flag flips). The baseline_brain_output mocks the upstream logistics-swfl OUTPUT JSON so the brain-input source has something to consume in fixture mode; under Path B that value is consumed as DISPLAY CONTEXT only.",
+    "scope": "Lee + Collier freight-coded segments (I-* and US-* roadways only). tfctr values mirror FHWA T-factor decimals (0.04–0.095), shape_length in meters (no longer used by the activity formula — kept for provenance).",
     "active_scenario_env": "REFINERY_FIXTURE_SCENARIO (defaults to 'nominal')",
-    "notes": "tons_per_year per segment = AADT × tfctr × AVG_PAYLOAD_TONS_PER_TRUCK (16.0) × 365 × (shape_length_m / METERS_PER_MILE 1609.344). For scenario 'nominal' the segments sum to ~baseline (deviation_z ~ 0). For 'i75_closure_*' the I-75 segments' AADT is dropped sharply to push deviation_z below −3."
+    "notes": "Path B per-segment math: activity_tons_per_year = AADT × tfctr × AVG_PAYLOAD_TONS_PER_TRUCK (16.0) × 365 (no segment-length factor). The 'nominal' scenario's nine segments sum to ≈ 242,430,080 tons/year. Closure scenarios drop I-75 AADT to ~30% which collapses the corpus to ≈ 91,816,480 tons/year (deep negative z against the rolling baseline). Scenarios with prior_shock_log_history seed an in-band rolling baseline around the nominal value. The 'cold_start' scenario deliberately ships only 30 history days to exercise the cold-start gate."
   },
   "baseline_brain_output": {
     "brain_id": "logistics-swfl",
@@ -13,7 +13,7 @@
     "magnitude": 0.5,
     "drivers": [],
     "overrides": [],
-    "conclusion": "Synthetic logistics-swfl baseline for nowcast fixture mode. inbound_freight_tons_swfl is in thousand tons/year — Stage 2 multiplies by 1000 to anchor the baseline_mu.",
+    "conclusion": "Synthetic logistics-swfl baseline for nowcast fixture mode. inbound_freight_tons_swfl is in thousand tons/year — Path B exposes the value as CONTEXT only (it no longer anchors the math baseline).",
     "key_metrics": [
       {
         "metric": "inbound_freight_tons_swfl",
@@ -27,7 +27,7 @@
           "url": "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json",
           "fetched_at": "2026-05-17T12:00:00Z",
           "tier": 1,
-          "citation": "Synthetic logistics-swfl baseline for nowcast fixture."
+          "citation": "Synthetic logistics-swfl baseline for nowcast fixture (Path B: CONTEXT only)."
         }
       }
     ],
@@ -46,10 +46,118 @@
     },
     "exogenous_signals": []
   },
+  "_shared_segments_nominal": "See scenarios.nominal.segments — same nine segments are reused (verbatim) by every non-closure scenario; closure scenarios swap the I-75 AADT values to ~30% of nominal.",
   "scenarios": {
+    "cold_start": {
+      "_meta": {
+        "description": "Only 30 prior shock-log rows (below the 90-day threshold). Brain emits shock_state=insufficient_history, suppresses deviation_z, and skips state-machine progression.",
+        "expected_shock_state": "insufficient_history",
+        "expected_history_days_observed": 30,
+        "expected_deviation_z": null
+      },
+      "segments": [
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 116",
+          "desc_to": "Exit 123",
+          "aadt": 95000,
+          "tfctr": 0.092,
+          "shape_length": 11500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 123",
+          "desc_to": "Exit 131",
+          "aadt": 88000,
+          "tfctr": 0.088,
+          "shape_length": 13000.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "I-75",
+          "desc_frm": "Exit 131",
+          "desc_to": "Exit 136",
+          "aadt": 82000,
+          "tfctr": 0.085,
+          "shape_length": 8500.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 8",
+          "desc_to": "MM 14",
+          "aadt": 36000,
+          "tfctr": 0.043,
+          "shape_length": 9700.0
+        },
+        {
+          "year_": 2025,
+          "county": "LEE",
+          "roadway": "US-41",
+          "desc_frm": "MM 14",
+          "desc_to": "MM 22",
+          "aadt": 32000,
+          "tfctr": 0.041,
+          "shape_length": 12800.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 101",
+          "desc_to": "Exit 107",
+          "aadt": 78000,
+          "tfctr": 0.087,
+          "shape_length": 9500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "I-75",
+          "desc_frm": "Exit 107",
+          "desc_to": "Exit 111",
+          "aadt": 73000,
+          "tfctr": 0.084,
+          "shape_length": 6500.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples N",
+          "desc_to": "Naples S",
+          "aadt": 31000,
+          "tfctr": 0.04,
+          "shape_length": 10200.0
+        },
+        {
+          "year_": 2025,
+          "county": "COLLIER",
+          "roadway": "US-41",
+          "desc_frm": "Naples S",
+          "desc_to": "Marco Island",
+          "aadt": 26000,
+          "tfctr": 0.04,
+          "shape_length": 14500.0
+        }
+      ],
+      "prior_shock_log_history": {
+        "kind": "in_band_history",
+        "count": 30,
+        "base_activity": 242430080,
+        "spread_pct": 1.5,
+        "end_date": "2026-05-17T12:00:00Z"
+      }
+    },
     "nominal": {
       "_meta": {
-        "description": "Current freight flow closely tracks the 250,000-thousand-tons baseline; deviation_z within ±1, shock_state=normal, baseline_validity_flag=valid.",
+        "description": "Same nine segments as the cold-start scenario. 100 prior in-band history days seed a rolling baseline of ~242M tons/year ± 1.5%. Current activity matches the baseline → z within ±1, shock_state=normal, baseline_validity_flag=valid.",
         "expected_shock_state": "normal",
         "expected_baseline_validity_flag": "valid"
       },
@@ -145,11 +253,17 @@
           "shape_length": 14500.0
         }
       ],
-      "prior_shock_log": []
+      "prior_shock_log_history": {
+        "kind": "in_band_history",
+        "count": 100,
+        "base_activity": 242430080,
+        "spread_pct": 1.5,
+        "end_date": "2026-05-17T12:00:00Z"
+      }
     },
     "i75_closure_acute": {
       "_meta": {
-        "description": "I-75 segments' AADT dropped ~70% to simulate an active closure. The prior_shock_log carries 2 prior breach days with z<0; this run becomes the 3rd consecutive breach day, triggering shock_state=anomaly.",
+        "description": "I-75 segments' AADT dropped ~70% to simulate an active closure. 100 in-band history days seed a 242M-tons rolling baseline; current activity collapses to ~92M tons (z << -3). prior_shock_log carries 2 prior breach days with z<0; this run becomes the 3rd consecutive breach day, triggering shock_state=anomaly.",
         "expected_shock_state": "anomaly",
         "expected_baseline_validity_flag": "valid",
         "expected_consecutive_breach_days": 3
@@ -246,22 +360,30 @@
           "shape_length": 14500.0
         }
       ],
+      "prior_shock_log_history": {
+        "kind": "in_band_history",
+        "count": 100,
+        "base_activity": 242430080,
+        "spread_pct": 1.5,
+        "end_date": "2026-05-15T12:00:00Z"
+      },
       "prior_shock_log": [
         {
+          "_note": "Activity intentionally omitted so it does not poison the rolling baseline drawn from the 100 in-band history days above. Only the z drives the consecutive-day counter walk.",
           "refined_at": "2026-05-15T12:00:00Z",
           "deviation_z": -4.2,
-          "shock_state": "normal"
+          "shock_state": "anomaly"
         },
         {
           "refined_at": "2026-05-16T12:00:00Z",
           "deviation_z": -4.1,
-          "shock_state": "normal"
+          "shock_state": "anomaly"
         }
       ]
     },
     "i75_closure_sustained_30d": {
       "_meta": {
-        "description": "Same flow as i75_closure_acute, but the prior_shock_log carries 29 consecutive breach days. This run becomes day 30 → shock_state=structural_break.",
+        "description": "Same flow as i75_closure_acute, but a 29-day consecutive-breach generator precedes the current run. 100 in-band history days seed the rolling baseline (generator rows omit activity so they don't poison the rolling stats). This run becomes day 30 → shock_state=structural_break.",
         "expected_shock_state": "structural_break",
         "expected_baseline_validity_flag": "valid",
         "expected_consecutive_breach_days": 30
@@ -358,7 +480,15 @@
           "shape_length": 14500.0
         }
       ],
+      "prior_shock_log_history": {
+        "kind": "in_band_history",
+        "count": 100,
+        "base_activity": 242430080,
+        "spread_pct": 1.5,
+        "end_date": "2026-04-18T12:00:00Z"
+      },
       "prior_shock_log_generator": {
+        "_note": "Generator rows DELIBERATELY omit current_activity_tons_year — the rolling baseline draws only from the in-band history above (so the rolling mean stays ~226M and the current 85M activity comes in as a deep negative z). Generator rows still log the breach z for the consecutive-day counter to walk.",
         "kind": "consecutive_breaches",
         "count": 29,
         "z": -4.1,
@@ -464,7 +594,15 @@
           "shape_length": 14500.0
         }
       ],
+      "prior_shock_log_history": {
+        "kind": "in_band_history",
+        "count": 100,
+        "base_activity": 242430080,
+        "spread_pct": 1.5,
+        "end_date": "2026-02-17T12:00:00Z"
+      },
       "prior_shock_log_generator": {
+        "_note": "Generator rows omit current_activity_tons_year (see 30d scenario note).",
         "kind": "consecutive_breaches",
         "count": 89,
         "z": -4.1,
