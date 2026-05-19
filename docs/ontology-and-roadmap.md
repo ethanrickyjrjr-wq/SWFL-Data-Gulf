@@ -3,7 +3,7 @@
 | Field            | Value                                                                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **Version**      | 1.0                                                                                                                      |
-| **Last updated** | 2026-05-15                                                                                                               |
+| **Last updated** | 2026-05-19 (§5.1/§5.2 moved to auto-generated `docs/roadmap-status.md`)                                                  |
 | **Next review**  | 2026-08-15 (quarterly)                                                                                                   |
 | **Owner**        | Ricky Cooper. Assistant edits with explicit ask.                                                                         |
 | **Scope**        | Brain Factory + everything that feeds or consumes it. If a roadmap item doesn't involve brains, it does not belong here. |
@@ -137,50 +137,9 @@ These are the seed constitutional rules. Section 7 plans the move from inline Ty
 
 ---
 
-## 5. Current State — Honest Snapshot (2026-05-15)
+## 5. Current State — Honest Snapshot
 
-### 5.1 Live Brains
-
-Updated 2026-05-17 post-macro-restructure + logistics-swfl ship.
-
-| Brain                | Domain        | Sources                                                 | Input brains                                                |
-| -------------------- | ------------- | ------------------------------------------------------- | ----------------------------------------------------------- |
-| `franchise-outcomes` | real-estate   | SBA franchise outcomes (275 brands)                     | —                                                           |
-| `cre-swfl`           | real-estate   | `corridor_profiles` (25 corridors, 8 types)             | —                                                           |
-| `env-swfl`           | environmental | FEMA NFHL (per-county SFHA area-share, 6 SWFL counties) | —                                                           |
-| `tourism-tdt`        | hospitality   | Lee County Tourist Development Tax (FL DOR)             | —                                                           |
-| `macro-us`           | macro         | Live FRED: SOFR, US CPI YoY                             | —                                                           |
-| `macro-florida`      | macro         | Live FRED: FLUR, FL LFPR (+ planned: CBP, SOI rollups)  | `macro-us`                                                  |
-| `macro-swfl`         | macro         | _restructured to delta brain — no own sources_          | `macro-florida`                                             |
-| `sector-credit-swfl` | finance       | SBA loans by NAICS × county (893 rows)                  | `franchise-outcomes`, `macro-us`, `macro-florida`           |
-| `logistics-swfl`     | logistics     | FAF5 freight flows (inbound domestic to zone 129)       | —                                                           |
-| `master`             | real-estate   | Cross-vertical synthesizer over every leaf above        | every other brain (`env-swfl` via `veto`; rest via `input`) |
-
-**In flight / planned (designed, not yet shipped):**
-
-| Brain      | Domain       | Purpose                                                                                                           |
-| ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `gap-swfl` | demographics | SWFL vs FL deltas using IRS SOI county migration + macro-florida baseline. Will declare `macro-florida` upstream. |
-
-**`macro-swfl` restructure note:** the 2026-05-17 split moved national series (SOFR, CPI YoY) to a new `macro-us` brain and FL state series (FLUR, FL LFPR) to a new `macro-florida` brain. `macro-swfl` now consumes macro-florida and emits no own metrics — it is a chain-position placeholder until county-level BLS LAUS (Lee + Collier) is ingested. Downstream consumers needing macro context today should declare `macro-us` or `macro-florida` as direct upstreams (sector-credit-swfl already does).
-
-### 5.2 DAG
-
-```
-                       franchise-outcomes ─┐
-                                           ├─→ master
-                       cre-swfl ───────────┤
-                       env-swfl ──(veto)───┤
-                       tourism-tdt ────────┤
-                                           │
-   macro-us ─→ macro-florida ─→ macro-swfl ┤
-                  ↓                        │
-                  └─→ sector-credit-swfl ──┤
-   (sector-credit-swfl also reads macro-us directly)
-   logistics-swfl ──────────────────────────┘
-```
-
-Longest chain: `macro-us → macro-florida → macro-swfl → master` (4 hops). Sector-credit-swfl takes `macro-us` + `macro-florida` as direct upstreams (the `macro-swfl` edge was dropped in the restructure since macro-swfl emits no unique metrics yet — will be re-added when county-level data lands).
+> **§5.1 (live brains) and §5.2 (DAG) moved to an auto-generated sidecar.** See `docs/roadmap-status.md`, regenerated via `npm run roadmap:sync` after any commit that touches `refinery/packs/`, `refinery/sources/`, `refinery/types/`, `refinery/constitution/`, `refinery/lib/confidence`, `refinery/lib/dag`, `refinery/render/`, or `refinery/validate/`. That file also lists trigger-shaped commits since the last touch of this doc — read it first to see what's currently un-reflected here. The qualitative §5.3–§5.6 sub-sections below remain hand-edited.
 
 ### 5.3 What Works
 
@@ -366,6 +325,7 @@ So the next reader (Ricky or future Claude) can verify everything against code:
 ## Changelog
 
 - **2026-05-15 — v1.0.** Initial roadmap. Five brains live. Multiplicative confidence in production. Master is an index, not yet a synthesizer. Tourism-TDT, derived metrics, constitution, Yager-DST, causal layer, scheduled runs all on the roadmap. First wire-up: promote master from index to synthesizer.
+- **2026-05-19 — v1.2.** Split prescriptive from descriptive. §5.1 brain table and §5.2 DAG removed from this doc; replaced by the auto-generated sidecar `docs/roadmap-status.md` (regenerated via `npm run roadmap:sync` — generator at `refinery/tools/roadmap-sync.mts`, mirrors the `npm run ledger` pattern). The §10 trigger list now has a code-level enforcement path: any commit touching packs/sources/types/constitution/confidence/dag/render/validate surfaces in `roadmap-status.md` until the prescriptive sections here are updated to reflect it. Quarterly review cadence still applies to §6–§9 (forward strategy); §5 descriptive layer is now machine-current on every regenerate.
 - **2026-05-15 — v1.1.** Arsenal audit against 13 OSS tools (full findings in `C:\Users\ethan\.claude\plans\piped-seeking-backus.md`). Posture: **Math-Honest, Security-First, Vendor-First.** Three roadmap concretizations:
   - **§7.2 — Constitution → decision gate.** Week 8–10 evaluates GoRules Zen JDM alongside plain YAML; tipping point at ≥ 20 rules across domains. Pre-flight: verify Rust N-API binary on Vercel.
   - **§7.4 / §4.2 — Yager-DST → write ourselves.** ~30 LOC from textbook Yager 1987 in `refinery/lib/confidence-yager.mts`. ERTool rejected (empty repo).

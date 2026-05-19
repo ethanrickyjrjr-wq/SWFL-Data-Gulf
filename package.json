@@ -13,6 +13,7 @@
     "refinery:cre": "bun refinery/cli.mts cre-swfl",
     "refinery:typecheck": "tsc -p refinery/tsconfig.json --noEmit",
     "ledger": "bun refinery/tools/semantic-ledger.mts",
+    "roadmap:sync": "bun refinery/tools/roadmap-sync.mts",
     "roles": "bun refinery/tools/render-roles.mts",
     "triage": "bun refinery/tools/orphan-triage.mts",
     "pgvector:verify": "bun refinery/tools/verify-pgvector.mts",
