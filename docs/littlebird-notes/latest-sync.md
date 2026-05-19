@@ -1,6 +1,6 @@
 # Ground-Truth Sync
 
-> Generated: 2026-05-19 17:56:03 UTC
+> Generated: 2026-05-19 18:04:19 UTC
 > Source: `npm run roadmap:sync`
 > **LB: read this file, not chat memory, for current repo state.**
 
@@ -9,6 +9,7 @@
 ## Last 15 Commits
 
 ```
+93db15c feat(roadmap-sync): fold LittleBird ground-truth sync into roadmap:sync
 e751eb7 feat(notes): notes:sync script — reality-dump for LittleBird
 98babd2 feat(brains): live renders — properties-lee-value v10 + master v46
 9ee892e fix(leepa): factory fn to avoid dlt dataclass mutable-default error
@@ -23,17 +24,18 @@ fce5517 fix(tier1-inventory): fresh pipeline per write + non-fatal pointer + nul
 4579edb feat(refinery/sources): makeDuckDBSource cross-tier connector + 6-concept hurricane vocab
 25e6561 feat(ingest/hurdat2): NOAA NHC HURDAT2 Florida-filter pipeline → Tier 1 Parquet
 86a3e3d feat(refinery/env): SUPABASE_PG_* surface + requirePgEnv() for cross-tier DuckDB
-d60813c test(usgs/duckdb): integration tests for pipeline.run() with mocked HTTP
 ```
 
 ## Working Tree Status
 
 ```
-M docs/roadmap-status.md
+M .env.example
+ M docs/roadmap-status.md
+ M package-lock.json
  M package.json
  M refinery/tools/roadmap-sync.mts
- D scripts/sync-notes.mts
 ?? .claude/scheduled_tasks.lock
+?? docs/superpowers/plans/2026-05-19-usgs-postgres-to-parquet-migration.md
 ?? ingest/leepa_ingest.log
 ?? ingest/leepa_ingest_err.log
 ```

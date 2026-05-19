@@ -2,7 +2,7 @@
 
 _The descriptive layer. Live brains, sources, edges, and commits since the last `ontology-and-roadmap.md` touch. Hand-edit `docs/ontology-and-roadmap.md` §6–§9 for forward strategy; this file is regenerated from code._
 
-**Generated:** 2026-05-19T17:56:03.617Z (commit `e751eb7`)
+**Generated:** 2026-05-19T18:04:19.277Z (commit `93db15c`)
 **Last roadmap doc touch:** `c6bf675` · 2026-05-19T01:49:45-04:00 · docs(roadmap): cross-tier SQL deferral marker + Tool Placement lock
 
 ## Regenerate
@@ -16,7 +16,7 @@ npm run roadmap:sync
 - **15** brains in the runtime registry.
 - **35** source connectors across **2** distinct trust tiers (T1, T2).
 - **6** distinct domains: `environmental`, `finance`, `hospitality`, `logistics`, `macro`, `real-estate`.
-- **20** commits since the last roadmap-doc touch — **3** are trigger-shaped (touched packs/sources/types/constitution/confidence/dag/render/validate).
+- **21** commits since the last roadmap-doc touch — **3** are trigger-shaped (touched packs/sources/types/constitution/confidence/dag/render/validate).
 
 ## Live Brains
 
@@ -192,6 +192,7 @@ _The `BrainDomain` union (`real-estate | finance | environmental | demographics 
 
 | SHA | Date | Subject |
 | --- | --- | --- |
+| `93db15c` | 2026-05-19 | feat(roadmap-sync): fold LittleBird ground-truth sync into roadmap:sync |
 | `e751eb7` | 2026-05-19 | feat(notes): notes:sync script — reality-dump for LittleBird |
 | `98babd2` | 2026-05-19 | feat(brains): live renders — properties-lee-value v10 + master v46 |
 | `9ee892e` | 2026-05-19 | fix(leepa): factory fn to avoid dlt dataclass mutable-default error |

@@ -19,8 +19,12 @@ import { execSync } from "node:child_process";
 import { writeFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { homedir } from "node:os";
+import { config } from "dotenv";
+import { Client as NotionClient } from "@notionhq/client";
 import { PACKS } from "../config/packs.mts";
 import type { TrustTier } from "../types/pack.mts";
+
+config({ path: path.join(process.cwd(), ".env.local") });
 
 const OUTPUT_PATH = path.join(process.cwd(), "docs", "roadmap-status.md");
 const LITTLEBIRD_SYNC_PATH = path.join(
@@ -437,6 +441,77 @@ function main(): void {
   const lbSync = buildLittlebirdSync();
   writeFileSync(LITTLEBIRD_SYNC_PATH, lbSync, "utf-8");
   console.log(`[roadmap-sync] wrote ${LITTLEBIRD_SYNC_PATH}`);
+
+  pushToNotion(lbSync).catch((err) => {
+    console.warn(`[roadmap-sync] Notion push skipped: ${err.message}`);
+  });
+}
+
+async function pushToNotion(markdown: string): Promise<void> {
+  const apiKey = process.env.NOTION_API_KEY;
+  const pageId = process.env.NOTION_LITTLEBIRD_PAGE_ID;
+
+  if (!apiKey || !pageId) {
+    console.log(
+      "[roadmap-sync] NOTION_API_KEY or NOTION_LITTLEBIRD_PAGE_ID not set — skipping Notion push",
+    );
+    return;
+  }
+
+  const notion = new NotionClient({ auth: apiKey });
+
+  // Wipe existing blocks
+  const existing = await notion.blocks.children.list({ block_id: pageId });
+  await Promise.all(
+    existing.results.map((b) => notion.blocks.delete({ block_id: b.id })),
+  );
+
+  // Split markdown into lines and convert to Notion paragraph blocks
+  // Cap at 100 blocks (Notion API limit per append call)
+  const lines = markdown.split("\n");
+  const blocks: Parameters<
+    typeof notion.blocks.children.append
+  >[0]["children"] = [];
+
+  for (const line of lines) {
+    if (blocks.length >= 99) break;
+    if (line.startsWith("# ")) {
+      blocks.push({
+        type: "heading_1",
+        heading_1: {
+          rich_text: [{ type: "text", text: { content: line.slice(2) } }],
+        },
+      });
+    } else if (line.startsWith("## ")) {
+      blocks.push({
+        type: "heading_2",
+        heading_2: {
+          rich_text: [{ type: "text", text: { content: line.slice(3) } }],
+        },
+      });
+    } else if (line.startsWith("### ")) {
+      blocks.push({
+        type: "heading_3",
+        heading_3: {
+          rich_text: [{ type: "text", text: { content: line.slice(4) } }],
+        },
+      });
+    } else {
+      blocks.push({
+        type: "paragraph",
+        paragraph: {
+          rich_text: line.trim()
+            ? [{ type: "text", text: { content: line } }]
+            : [],
+        },
+      });
+    }
+  }
+
+  await notion.blocks.children.append({ block_id: pageId, children: blocks });
+  console.log(
+    `[roadmap-sync] pushed ${blocks.length} blocks to Notion page ${pageId}`,
+  );
 }
 
 main();
