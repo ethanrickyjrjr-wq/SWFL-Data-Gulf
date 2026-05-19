@@ -4,10 +4,9 @@ import io
 import json
 import os
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 
-import dlt
+import psycopg2
 import requests
 from dotenv import load_dotenv
 
@@ -71,38 +70,41 @@ def _upload_bytes(bucket: str, object_path: str, data: bytes, content_type: str)
 
 
 def write_tier1_pointer(
-    pipeline,
+    pipeline,  # unused — kept for call-site API compat
     table_name: str,
     bucket: str,
     object_path: str,
     row_count: int,
     source_url: str,
+    pack_id: str | None = None,
+    vintage: str | None = None,
 ) -> None:
-    import secrets
+    """Insert/update a row in data_lake._tier1_inventory via psycopg2.
 
-    # Create a fresh pipeline per call so stale pending packages from a previous
-    # failed write don't block subsequent writes in the same script run.
-    fresh = dlt.pipeline(
-        pipeline_name=f"_t1ptr_{secrets.token_hex(4)}",
-        destination="postgres",
-        dataset_name="data_lake",
+    dlt cannot write to this table — its hand-crafted schema (id/bucket/path/vintage/
+    byte_size/pack_id) conflicts with dlt's required NOT NULL meta-columns. Direct
+    psycopg2 insert keeps the schema contract clean.
+    """
+    from datetime import date
+
+    if vintage is None:
+        vintage = date.today().isoformat()
+
+    db_url = os.environ["DESTINATION__POSTGRES__CREDENTIALS"]
+    row_id = f"{bucket}/{object_path}"
+
+    conn = psycopg2.connect(db_url, connect_timeout=30)
+    conn.autocommit = True
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO data_lake._tier1_inventory
+            (id, bucket, path, vintage, byte_size, pack_id, source_url, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, now(), now())
+        ON CONFLICT (id) DO UPDATE SET
+            byte_size = EXCLUDED.byte_size,
+            updated_at = now()
+        """,
+        (row_id, bucket, object_path, vintage, row_count, pack_id, source_url),
     )
-
-    @dlt.resource(
-        table_name="_tier1_inventory",
-        write_disposition="merge",
-        primary_key=["table_name", "object_path"],
-        columns={"deleted_at": {"data_type": "timestamp"}},
-    )
-    def _row():
-        yield {
-            "table_name": table_name,
-            "bucket": bucket,
-            "object_path": object_path,
-            "row_count": row_count,
-            "source_url": source_url,
-            "ingested_at": datetime.now(timezone.utc).isoformat(),
-            "deleted_at": None,
-        }
-
-    fresh.run(_row())
+    conn.close()
