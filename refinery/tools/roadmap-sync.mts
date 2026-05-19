@@ -19,12 +19,9 @@ import { execSync } from "node:child_process";
 import { writeFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { homedir } from "node:os";
-import { config } from "dotenv";
 import { Client as NotionClient } from "@notionhq/client";
 import { PACKS } from "../config/packs.mts";
 import type { TrustTier } from "../types/pack.mts";
-
-config({ path: path.join(process.cwd(), ".env.local") });
 
 const OUTPUT_PATH = path.join(process.cwd(), "docs", "roadmap-status.md");
 const LITTLEBIRD_SYNC_PATH = path.join(

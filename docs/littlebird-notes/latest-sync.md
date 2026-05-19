@@ -1,6 +1,6 @@
 # Ground-Truth Sync
 
-> Generated: 2026-05-19 18:04:19 UTC
+> Generated: 2026-05-19 18:18:18 UTC
 > Source: `npm run roadmap:sync`
 > **LB: read this file, not chat memory, for current repo state.**
 
@@ -9,6 +9,7 @@
 ## Last 15 Commits
 
 ```
+016de4b feat(roadmap-sync): push latest-sync.md to Notion on every run
 93db15c feat(roadmap-sync): fold LittleBird ground-truth sync into roadmap:sync
 e751eb7 feat(notes): notes:sync script — reality-dump for LittleBird
 98babd2 feat(brains): live renders — properties-lee-value v10 + master v46
@@ -23,16 +24,14 @@ fce5517 fix(tier1-inventory): fresh pipeline per write + non-fatal pointer + nul
 23f27b9 feat(refinery/packs): hurricane-tracks-fl — first cross-tier brain (HURDAT2 × NFIP)
 4579edb feat(refinery/sources): makeDuckDBSource cross-tier connector + 6-concept hurricane vocab
 25e6561 feat(ingest/hurdat2): NOAA NHC HURDAT2 Florida-filter pipeline → Tier 1 Parquet
-86a3e3d feat(refinery/env): SUPABASE_PG_* surface + requirePgEnv() for cross-tier DuckDB
 ```
 
 ## Working Tree Status
 
 ```
-M .env.example
+M docs/littlebird-notes/latest-sync.md
  M docs/roadmap-status.md
- M package-lock.json
- M package.json
+ M refinery/sources/usgs-water-source.mts
  M refinery/tools/roadmap-sync.mts
 ?? .claude/scheduled_tasks.lock
 ?? docs/superpowers/plans/2026-05-19-usgs-postgres-to-parquet-migration.md
