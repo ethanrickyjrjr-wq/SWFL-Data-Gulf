@@ -96,26 +96,36 @@ def _join_leepa(use_rows: list[dict], value_rows: list[dict], sale_rows: list[di
     return joined
 
 
-def _promote_leepa_to_tier2(rows: list[dict]) -> None:
-    """Write the joined LeePA parcel rows to data_lake.leepa_parcels (replace disposition)."""
-    @dlt.resource(
-        table_name="leepa_parcels",
-        write_disposition="replace",
-        columns=_TIER2_LEEPA_COLUMNS,
-    )
-    def leepa_rows():
-        for row in rows:
-            yield row
+def _promote_leepa_to_tier2(rows: list[dict], chunk_size: int = 5_000) -> None:
+    """Write joined LeePA parcel rows to data_lake.leepa_parcels in chunked merge batches.
 
-    tier2_pipeline = dlt.pipeline(
-        pipeline_name="leepa_parcels_tier2",
-        destination="postgres",
-        dataset_name="data_lake",
-    )
-    load_info = tier2_pipeline.run(leepa_rows())
-    # Mirror fdot + fema: without this, dlt swallows per-job failures into LoadInfo and the
-    # process exits 0 with a half-empty table — Tier 1 succeeded, Tier 2 silently broke.
-    load_info.raise_on_failed_jobs()
+    replace disposition on 200k rows blows the Supabase pooler (same issue as FAF5).
+    merge + 5k chunks keeps each dlt run well under the connection timeout.
+    """
+    import secrets as _secrets
+
+    total = len(rows)
+    n_chunks = (total + chunk_size - 1) // chunk_size
+    for i in range(0, total, chunk_size):
+        chunk = rows[i : i + chunk_size]
+
+        @dlt.resource(
+            table_name="leepa_parcels",
+            write_disposition="merge",
+            primary_key="folioid",
+            columns=_TIER2_LEEPA_COLUMNS,
+        )
+        def leepa_rows(_c=chunk):
+            yield from _c
+
+        pipeline = dlt.pipeline(
+            pipeline_name=f"leepa_t2_{_secrets.token_hex(4)}",
+            destination="postgres",
+            dataset_name="data_lake",
+        )
+        load_info = pipeline.run(leepa_rows())
+        load_info.raise_on_failed_jobs()
+        print(f"  leepa_parcels chunk {i // chunk_size + 1}/{n_chunks} ({len(chunk)} rows)")
 
 
 def ingest_leepa_parcels_value(tier1_pipeline) -> None:
