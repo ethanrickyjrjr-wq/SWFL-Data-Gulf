@@ -16,9 +16,16 @@
  *      paste-into-Project-Custom-Instructions block, cache-bust convention,
  *      `freshness_token`-quote-on-first-response rule, and the reference to
  *      the `master-index.mts` framing paragraph (prompt-injection defense).
- *   5. Carries the §1.5 anti-confabulation rule's literal NEVER-fill string —
- *      the rule that converts the "(none) slot invites invention" weakness
- *      into a single explicit prohibition.
+ *   5. Carries the §1.5 anti-confabulation rule's literal NEVER-fill string,
+ *      in its v2.1-scoped form (quote-only zones named explicitly). The
+ *      v2.1 analyst amendment narrowed the prohibition so §Speculation is
+ *      no longer caught by it, but the underlying NEVER-fill discipline
+ *      remains bulletproof for the four quote-only sections.
+ *   6. Carries the v2.1 analyst-amendment literals: the LICENSED ANALYTICAL
+ *      ZONE charter for §Speculation, the SHOW YOUR WORK rule, the
+ *      `[INFERENCE]` tag requirement, and the false-silence symmetric
+ *      violation. Without these, §Speculation reverts to its v2.0 default
+ *      of refusal-by-omission.
  *
  * Failure here means the consumption contract drifted from its blueprint
  * locks. Fix the doc, not the test, unless the blueprint itself changed.
@@ -60,9 +67,24 @@ const SECTION_HEADERS = [
  * §1.5 anti-confabulation literal. The phrasing is locked because the rule
  * is mechanically simple, prompt-side-enforceable, and converts the rigid-
  * section design's headline weakness into a single explicit prohibition.
+ * v2.1 scoped this to QUOTE-ONLY zones; §Speculation is governed instead by
+ * the SHOW YOUR WORK rule (see ANALYST_AMENDMENT_LITERALS below).
  */
 const ANTI_CONFABULATION_LITERAL =
-  "NEVER fill a `(none)` section with inferred";
+  "NEVER fill a `(none)` section in a QUOTE-ONLY zone";
+
+/**
+ * v2.1 analyst-amendment literals. Each MUST appear in the doc — together
+ * they unlock §Speculation as a real analytical zone without weakening
+ * the audited-section discipline. Drop any one and the asymmetry that
+ * forced "play-dead in §Speculation" returns.
+ */
+const ANALYST_AMENDMENT_LITERALS = [
+  "LICENSED ANALYTICAL ZONE",
+  "SHOW YOUR WORK IN §SPECULATION",
+  "[INFERENCE]",
+  "false silence",
+] as const;
 
 test("contract anchors the smoothing-token source of truth (Coupling 3)", () => {
   assert.ok(
@@ -165,13 +187,29 @@ test("contract preserves v1.2 paste-block rule: READ RATES AS WRITTEN (Coupling 
   );
 });
 
-test("contract preserves v1.2 cache-bust convention (bumped to v=3)", () => {
-  // Per blueprint §9: v2 ship REQUIRES bumping ?v=2 → ?v=3 to force a refresh
-  // in every existing Project. The old v=2 must be gone from active URLs.
+test("contract preserves v1.2 cache-bust convention (bumped to v=4 by v2.1 amendment)", () => {
+  // Per blueprint §9: each contract ship REQUIRES bumping the cache-bust
+  // query string to force a refresh in every existing Project. v2.0 went
+  // from ?v=2 → ?v=3; the v2.1 analyst amendment goes ?v=3 → ?v=4. The
+  // OLD ?v=3 must be gone from active fetch URLs (it may still appear in
+  // historical-trail prose — that's fine; we only guard active URLs).
   assert.ok(
-    CONTRACT.includes("?v=3"),
-    `consumption-contract.md must carry the bumped ?v=3 cache-bust marker ` +
-      `(blueprint §9: v2 ship forces refresh in existing Projects).`,
+    CONTRACT.includes("?v=4"),
+    `consumption-contract.md must carry the bumped ?v=4 cache-bust marker ` +
+      `(v2.1 amendment forces refresh in existing Projects).`,
+  );
+  // Active fetch URLs (those that follow the master endpoint host) must
+  // use ?v=4. We grep for the full URL with old ?v=3 — any hit is a
+  // stale URL the v2.1 cache-bust was supposed to flush.
+  const staleUrls = CONTRACT.match(
+    /brain-platform-amber\.vercel\.app\/api\/b\/master\?v=3/g,
+  );
+  assert.equal(
+    staleUrls,
+    null,
+    `consumption-contract.md must not carry any ?v=3 master URLs in active ` +
+      `paste-block or fetch sections — v2.1 amendment requires all active ` +
+      `URLs at ?v=4. Stale URLs found: ${staleUrls?.join(", ")}`,
   );
 });
 
@@ -200,14 +238,36 @@ test("contract preserves freshness_token-quote-on-first-response rule (Coupling 
   );
 });
 
-test("contract carries §1.5 anti-confabulation rule literal", () => {
+test("contract carries §1.5 anti-confabulation rule literal (v2.1-scoped form)", () => {
   assert.ok(
     CONTRACT.includes(ANTI_CONFABULATION_LITERAL),
     `consumption-contract.md must carry the §1.5 anti-confabulation rule ` +
       `literal string:\n  "${ANTI_CONFABULATION_LITERAL}"\n` +
       `This rule converts the "(none) slot invites invention" weakness into a ` +
-      `single explicit prohibition; without it the rigid-section design's ` +
-      `headline failure mode goes un-addressed.`,
+      `single explicit prohibition (scoped to QUOTE-ONLY zones by v2.1); ` +
+      `without it the rigid-section design's headline failure mode goes ` +
+      `un-addressed.`,
+  );
+});
+
+test("contract carries v2.1 analyst-amendment literals (§Speculation unlock)", () => {
+  // Each literal MUST appear at least once. Together they convert §Speculation
+  // from a refusal-zone to a licensed analytical zone with audit discipline.
+  // Drop any one and the v2.0 "play-dead" failure mode returns.
+  const missing: string[] = [];
+  for (const literal of ANALYST_AMENDMENT_LITERALS) {
+    if (!CONTRACT.includes(literal)) {
+      missing.push(literal);
+    }
+  }
+  assert.deepEqual(
+    missing,
+    [],
+    `consumption-contract.md must carry every v2.1 analyst-amendment literal:` +
+      `\n  ${ANALYST_AMENDMENT_LITERALS.join("\n  ")}\n` +
+      `Missing: ${missing.join(", ")}. ` +
+      `Without these, §Speculation reverts to refusal-by-omission and the ` +
+      `analytical-zone unlock is silently undone.`,
   );
 });
 

@@ -144,3 +144,57 @@ A new contributor runs `npx tsx refinery/scaffold.mts --id=foo --domain=finance 
 - Engine state snapshot: `docs/engine_state_may15.md`
 - CT prior review (pre-lock): `docs/factory-review.md`
 - **Ontology + roadmap (living doc, quarterly review, next: 2026-08-15):** `docs/ontology-and-roadmap.md`
+
+SWFL Intelligence Lake — data protocol (v2.1, always follow):
+
+1. FETCH FRESH. Before answering any franchise or CRE question, fetch
+   https://brain-platform-amber.vercel.app/api/b/master?v=4 in THIS conversation.
+   Never answer from memory, project knowledge, earlier messages, or a cached
+   copy — only from a fetch made in this conversation.
+2. PROVE IT'S LIVE. The payload frontmatter carries a `freshness_token`
+   (format SWFL-7421-v{n}-{YYYYMMDD}). Quote it verbatim in your first
+   response. If you cannot fetch, say so — never answer from stale context.
+3. ROUTE, DON'T GUESS. The master index is a directory. When it gives a
+   count but points to a sub-brain for the names/detail, fetch that sub-brain
+   (franchise-outcomes, cre-swfl) before answering. Do not infer the detail.
+4. READ RATES AS WRITTEN. Survival rates are stated explicitly and are always
+   over RESOLVED loans. Never recompute a rate from loan counts; never treat a
+   "total loans" number as a denominator.
+5. RIGID SECTIONS. Every response — even small-talk and one-liners — MUST
+   emit exactly the six section headers below in this order, as level-3
+   Markdown headings. The slot is the contract:
+   `### §Receipts` → `### §Hard Edges` → `### §Live-Sources` →
+   `### §Speculation` → `### §User-Supplied Data` → `### §Handoff`.
+6. SECTION OWNERSHIP. Each section has a different evidentiary bar; mixing
+   the bars is the violation, not the analysis itself.
+   - §Receipts / §Hard Edges / §Live-Sources / §User-Supplied Data are
+     QUOTE-ONLY zones. Render `(none)` when there is no quotable source.
+     NEVER fill a `(none)` section in a quote-only zone with inferred,
+     paraphrased, or projected content. Confabulating an audited claim
+     here is the headline contract violation.
+   - §Speculation is the LICENSED ANALYTICAL ZONE. Projections, scenario
+     analysis, pattern-matching across §Receipts, base-rate priors, and
+     analogies are EXPECTED here whenever the user asks an analytical,
+     hypothetical, comparative, or forward-looking question. Rendering
+     `(none)` in §Speculation when the user has asked for judgement is
+     the opposite failure mode — false silence under protocol cover —
+     and is just as costly a violation as confabulation in a quote-only
+     slot.
+   - §Handoff is the two-beat script; §Speculation owns the projection
+     content. Cross-reference, don't in-line.
+7. SHOW YOUR WORK IN §SPECULATION. Every projection in §Speculation MUST:
+   (a) cite by name the §Receipts items it builds on,
+   (b) name the inferential move (e.g. "linear extrapolation",
+   "analogy from sector X", "base-rate prior", "scenario: if Y then Z"),
+   (c) carry an inline `[INFERENCE]` tag so the user sees the leap,
+   (d) state at least one condition that would falsify or invert the call.
+   A bare assertion under the §Speculation header that omits any of (a)–(d)
+   is confabulation under section cover and is a violation.
+8. NO SMOOTHING. The ban on `numeric_softening` and
+   `prose_confidence_translation` (source:
+   `refinery/lib/smoothing-tokens.mts`) applies to every section INCLUDING
+   §Speculation. Inference is licensed; hand-wavy English about
+   deterministic numbers is not. Quantify projections numerically. Rule 4
+   binds §Receipts and §Live-Sources absolutely; in §Speculation you MAY
+   model HYPOTHETICAL rates as long as the move is tagged `[INFERENCE]`
+   AND the audited rate is quoted in §Receipts for contrast.
