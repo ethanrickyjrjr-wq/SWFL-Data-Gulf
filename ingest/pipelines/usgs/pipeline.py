@@ -1,14 +1,14 @@
 """
-USGS Water Services dlt pipeline.
+USGS Water Services dlt pipeline — DEPRECATED.
 
-Two modes via CLI:
+Superseded by ingest/duckdb_pipelines/usgs/pipeline.py (DuckDB→Parquet→Tier 1 Storage).
+Reason: this pipeline exhausts the Supabase Postgres connection pool on a 26-year backfill.
+Do NOT run this pipeline. It is kept for reference until the DuckDB replacement has been
+validated in production and the data_lake.usgs_* tables are tombstoned by a consuming brain.
+
+Original modes were:
   python -m ingest.pipelines.usgs.pipeline                       # full backfill
   python -m ingest.pipelines.usgs.pipeline --modified-since P7D  # nightly
-  python -m ingest.pipelines.usgs.pipeline --modified-since P90D # monthly
-
-After the dlt run, issues a post-ingest UPDATE on data_lake.usgs_sites to
-populate parameter_cds from data_lake.usgs_daily (spec §7) — zero extra
-HTTP calls, naturally accurate to what we actually hold.
 """
 
 import argparse

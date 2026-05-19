@@ -1,6 +1,9 @@
 [normalize.data_writer]
-file_max_items    = 5000
-buffer_max_items  = 5000
+file_max_items    = 500
+buffer_max_items  = 500
+
+[load]
+workers = 1
 
 [pipeline.faf5]
 pipeline_name = "faf5"
@@ -14,6 +17,6 @@ dataset_name  = "data_lake"
 pipeline_name = "tier1_inventory"
 dataset_name  = "data_lake"
 
-[pipeline.usgs]
-pipeline_name = "usgs"
-dataset_name  = "data_lake"
+# [pipeline.usgs]  -- DEPRECATED: replaced by ingest/duckdb_pipelines/usgs/pipeline.py
+# pipeline_name = "usgs"
+# dataset_name  = "data_lake"
