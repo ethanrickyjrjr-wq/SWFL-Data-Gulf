@@ -110,6 +110,8 @@ Five rules that govern every new state/national dataset ingest. Lives in full at
 
 Cost rationale: a 50 GB speculative dump costs ~$1.05/mo in Tier 1 vs ~$6.25/mo in Tier 2 — multiplied across CBP, ACS, FEMA, FDOT historical the gap compounds fast.
 
+Tool placement matrix (dlt vs DuckDB lanes, anti-patterns, cross-tier deferral) is in `docs/API_BLUEPRINTS.md` (Data Tier Policy → Tool Placement).
+
 ### Build order (when adding a brain or shipping the factory)
 
 | #   | Files                                                                                                                                             | Atomic group |

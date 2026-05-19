@@ -63,6 +63,44 @@ Sibling LeePA brains (`-supply`, `-corridors`, `-flood`) land additively against
 **Architectural Rule — Ingest Broad, Filter Local:**
 The `dlt` pipelines described below MUST ingest data broadly (e.g., all of Florida or national context) into the A1 Data Lake. Do not prematurely truncate the raw ingest to just Lee/Collier counties at the pipeline level. SWFL-specific filtering (e.g., `county_fips = 12071` or `dms_dest = 129`) is handled downstream by the Master Brain when spinning up Atomic Brains. The examples below show the SWFL logic for downstream use, not for upstream truncation.
 
+### Tool Placement (added 2026-05-19)
+
+Locks which ingest/query tool serves which workload. dlt and DuckDB are **complementary, not competitive** — they live in parallel lanes that meet at the brain. First proof: `storm-history-swfl` v1 shipped end-to-end through the Tier 1 DuckDB lane while every Tier 2 pipeline keeps using dlt unchanged.
+
+| Workload                                                                           | Tool                            | Destination                            | Code path                                                   |
+| ---------------------------------------------------------------------------------- | ------------------------------- | -------------------------------------- | ----------------------------------------------------------- |
+| Hot, brain-critical, structured ingest with column pinning + dedup                 | `dlt[postgres]`                 | Tier 2 Postgres `data_lake.*`          | `ingest/pipelines/<id>/{pipeline,resources}.py`             |
+| Cold/speculative, bulk ingest with one-statement transform (CSV→Parquet at ingest) | `duckdb` Python + httpfs        | Tier 1 Parquet `s3://lake-tier1/<...>` | `ingest/duckdb_pipelines/<id>/pipeline.py`                  |
+| Pack reads Tier 1 Parquet                                                          | `@duckdb/node-api` + httpfs     | in-process refinery                    | per-pack source connector (e.g. `storm-history-source.mts`) |
+| Pack reads Tier 2 Postgres                                                         | `@supabase/supabase-js` (REST)  | in-process refinery                    | existing per-source connectors (no change)                  |
+| Pack reads Tier 1 **and** Tier 2 in one analytical SQL (joins, multi-source CTEs)  | `@duckdb/node-api` + `postgres` | in-process refinery                    | **deferred** — see "Cross-Tier SQL" below                   |
+
+**What "dlt math" actually is in this repo.** dlt is a **typed Postgres loader**, not an ETL engine. It uses `write_disposition` (replace/merge), column hints (`columns={...}`), and primary-key dedup. It does **not** use `dlt.sources.incremental`, schema contracts, merge_keys beyond primary key, or schema evolution. All transformations (joins, coercions, date parsing, normalizations) happen in Python `yield` generators inside `resources.py` files **before** dlt sees the data. This means migrating a dlt pipeline to the DuckDB lane is a "swap the typed sink" operation, not a "rewrite the math" one — the math lives in the generators and is portable. Future contributors should not assume dlt has rich ETL semantics it isn't actually using here.
+
+**Anti-patterns (do not do these):**
+
+- **Do NOT add a 9th dlt pipeline if the data is speculative/bulk/cold.** Use the DuckDB Tier 1 lane (`ingest/duckdb_pipelines/<id>/`). Tier 2 Postgres is ~6× the cost of Tier 1 Storage and the brain-first ingest gate (Rule §2) blocks Tier 2 without a consuming brain.
+- **Do NOT bypass dlt to write directly to `data_lake.*` from a pack.** Tier 2 is dlt's territory. The narrow exception (refinery's own append-only diagnostic tables — e.g. `data_lake.fdot_freight_nowcast_shock_log`) is documented in Rule §2 and requires a PR-level callout.
+- **Do NOT use a future cross-tier source to do `SELECT count(*) FROM pg.data_lake.X`.** DuckDB's `postgres` extension does NOT push aggregates or joins down to Postgres — you would pull the whole table over the wire. Materialize counts/aggregates in a Postgres VIEW (the LeePA pattern), or use the REST-based source for that read.
+- **Do NOT pre-build a cross-tier source connector with no consuming brain.** Connector + consumer ship in the same PR (Rule §2 logic applied to refinery code). See "Cross-Tier SQL" below for the trigger condition.
+
+### Cross-Tier SQL (DuckDBSource with pgAttachments) — deferred
+
+The mechanism that would let a single pack run analytical SQL joining `read_parquet('s3://lake-tier1/...')` with `pg.data_lake.<table>` in one in-process query (via DuckDB's `postgres` extension) is **architecturally proven** — the runtime smoke test at `scripts/duckdb_postgres_smoke_test.mts` exercises `INSTALL postgres → CREATE SECRET → ATTACH → SELECT` end-to-end against Supabase. The generic `makeDuckDBSource` connector is **deferred** until a shipping brain requires the join.
+
+**First candidate brains** (whichever ships first builds the connector in the same PR):
+
+- `demographics-swfl` — ACS 5-year tabulations as Tier 1 Parquet joined against `data_lake.macro-*` denominators (county-level gap math).
+- `hurricane-tracks-fl` — NHC HURDAT2 historical tracks as Tier 1 Parquet joined against `data_lake._tier1_inventory` or `data_lake.leepa_parcels` (spatial impact tagging).
+
+**Why deferred.** Building a connector before its first consumer violates the spirit of Rule §2 (brain-first gate, applied to refinery code). For brain-platform's typical data volumes (hundreds of aggregated rows per brain), two parallel `await` calls (`Promise.all([restSource.fetch(), parquetSource.fetch()])` + a TS Map lookup) is simpler and faster than unifying through DuckDB. A unified source adds a new credential surface (direct Postgres password vs current REST tokens), a connection-budget failure mode (`pg_connection_limit` must be clamped to 4), and performance cliffs (no aggregate pushdown). All of that is justified only when a pack truly needs cross-tier SQL — not before.
+
+**Triggers that unblock build:**
+
+1. A roadmap brain names cross-tier SQL as its core mechanism.
+2. The build PR includes both the brain and the new `refinery/sources/duckdb-source.mts` connector, with `pg_connection_limit=4`, `CREATE SECRET` (never inline `ATTACH` with password), a Postgres-side aggregation VIEW for any large scans, and an integration test that asserts query duration under a stated budget.
+3. A `.env.example` entry is added for `SUPABASE_PG_HOST / PORT / USER / PASSWORD` at that time — direct-Postgres credentials are a new attack surface and shouldn't appear in `.env.example` until they're actually used.
+
 ## Target 1 — Data USA API (Tesseract Cubes)
 
 ### Critical Corrections
