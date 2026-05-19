@@ -909,6 +909,103 @@
       "scope_note": "Hyphen-joined year range covered by this build's NOAA Storm Events corpus (e.g. '1996-2025'). Bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py when NCEI publishes the next yearly file, then re-run the ingest."
     },
 
+    "env_hurricane_landfalls_swfl_30yr": {
+      "id": "env_hurricane_landfalls_swfl_30yr",
+      "prefLabel": "SWFL Hurricane Landfalls (Trailing 30-Year Window)",
+      "altLabels": ["SWFL landfall count", "30yr landfalls SWFL"],
+      "raw_slugs": ["hurricane_landfalls_30yr"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["hurricane-tracks-fl"],
+      "value_type": "count",
+      "unit": "storms",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Distinct named storms in NOAA HURDAT2 that made landfall inside any SWFL county polygon (LEE+COLLIER+CHARLOTTE+HENDRY+GLADES+SARASOTA, FIPS 12015/12021/12043/12051/12071/12115) during the trailing 30-year window. Landfall is determined by HURDAT2's record_id='L' marker, not by passing near a county; counts each storm at most once per county-year."
+    },
+
+    "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl": {
+      "id": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
+      "prefLabel": "SWFL Cat-3+ Hurricane Passes Within 50mi (30-Year Window)",
+      "altLabels": ["Cat3+ passes SWFL", "major hurricane brushes SWFL"],
+      "raw_slugs": ["hurricane_cat3plus_passes_within_50mi_30yr"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["hurricane-tracks-fl"],
+      "value_type": "count",
+      "unit": "storms",
+      "value_range": [0, 100],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Distinct named storms in NOAA HURDAT2 whose lifetime max windspeed reached Saffir-Simpson Cat 3+ (>= 111 kt) AND that passed within 50 statute miles of any SWFL county centroid during the trailing 30-year window. Distance computed haversine from HURDAT2 obs lat/lon to hardcoded county centroids; threshold of 50mi captures eye-wall + significant tropical-storm-force wind impact band."
+    },
+
+    "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl": {
+      "id": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
+      "prefLabel": "SWFL Average NFIP Paid per Landfall Storm (USD)",
+      "altLabels": [
+        "NFIP per-landfall avg SWFL",
+        "avg NFIP claims per SWFL hurricane"
+      ],
+      "raw_slugs": ["hurricane_nfip_paid_per_landfall_storm_avg_usd"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate", "finance"],
+      "source_brains": ["hurricane-tracks-fl"],
+      "value_type": "currency_usd",
+      "unit": "USD",
+      "value_range": [0, 10000000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Mean of (SUM(amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim)) across all SWFL counties × storm_year combinations where a HURDAT2 landfall occurred in the storm_year. Joins HURDAT2 landfall records to OpenFEMA NFIP claims via county_fips + year_of_loss. Cross-tier metric: HURDAT2 lives in Tier 1 Storage Parquet, NFIP in Tier 2 Postgres; the brain pre-joins both in DuckDB SQL."
+    },
+
+    "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl": {
+      "id": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
+      "prefLabel": "SWFL Worst Storm-County-Year NFIP Paid (USD)",
+      "altLabels": ["worst NFIP storm-county-year SWFL"],
+      "raw_slugs": ["hurricane_worst_storm_county_year_nfip_paid_usd"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate", "finance"],
+      "source_brains": ["hurricane-tracks-fl"],
+      "value_type": "currency_usd",
+      "unit": "USD",
+      "value_range": [0, 100000000000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Maximum NFIP paid (building+contents+ICO) across all (county, storm_year) combinations where a HURDAT2 landfall occurred in the SWFL footprint. Highlights the single worst county-year hit on record in the joined corpus; pairs with env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl for distribution context (mean vs max). Hurricane Ian × Lee 2022 typically wins this in modern vintages."
+    },
+
+    "env_hurricane_most_recent_landfall_swfl": {
+      "id": "env_hurricane_most_recent_landfall_swfl",
+      "prefLabel": "SWFL Most Recent Hurricane Landfall (Storm + Date)",
+      "altLabels": ["last hurricane landfall SWFL", "most recent landfall"],
+      "raw_slugs": ["hurricane_most_recent_landfall_date"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["hurricane-tracks-fl"],
+      "value_type": "string",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Storm name + ISO landfall date (e.g. 'IAN 2022-09-28') of the most recent HURDAT2-recorded landfall (record_id='L') inside the SWFL county footprint. Surfaces recency of the last named-storm impact for recovery-stage framing. Encoded as a single string for the categorical metric slot; the underlying date is parseable from the trailing 'YYYY-MM-DD'."
+    },
+
+    "env_hurricane_closest_pass_5yr_min_mi_swfl": {
+      "id": "env_hurricane_closest_pass_5yr_min_mi_swfl",
+      "prefLabel": "SWFL Closest Hurricane Pass (Trailing 5-Year Window, miles)",
+      "altLabels": ["closest pass 5yr SWFL", "min track distance SWFL"],
+      "raw_slugs": ["hurricane_closest_pass_5yr_min_mi"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["hurricane-tracks-fl"],
+      "value_type": "distance_mi",
+      "unit": "statute miles",
+      "value_range": [0, 1000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Minimum haversine distance (statute miles) from any HURDAT2 observation point to any SWFL county centroid, across all named storms in the trailing 5-year window. Lower = closer = bigger near-term impact. A 'direct hit' is ~0-10mi; eye-wall passes are 10-30mi; significant outer-band impact is 30-100mi."
+    },
+
     "env_gw_level_lee_median_ft": {
       "id": "env_gw_level_lee_median_ft",
       "prefLabel": "Lee County Groundwater Median Elevation (NAVD88)",
@@ -1651,6 +1748,12 @@
     "storm_last_billion_dollar_event_type": "env_storm_last_billion_dollar_event_type_swfl",
     "storm_counties_covered": "env_storm_counties_covered_swfl",
     "storm_ingest_vintage": "env_storm_ingest_vintage_swfl",
+    "hurricane_landfalls_30yr": "env_hurricane_landfalls_swfl_30yr",
+    "hurricane_cat3plus_passes_within_50mi_30yr": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
+    "hurricane_nfip_paid_per_landfall_storm_avg_usd": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
+    "hurricane_worst_storm_county_year_nfip_paid_usd": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
+    "hurricane_most_recent_landfall_date": "env_hurricane_most_recent_landfall_swfl",
+    "hurricane_closest_pass_5yr_min_mi": "env_hurricane_closest_pass_5yr_min_mi_swfl",
     "swfl_gw_lee_median_ft": "env_gw_level_lee_median_ft",
     "lee_gw_median_navd88_ft": "env_gw_level_lee_median_ft",
     "swfl_sw_stage_caloosahatchee_ft": "env_sw_stage_caloosahatchee_ft",
