@@ -215,12 +215,16 @@ function buildFdotSource(
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)`
       : "fixture://refinery/__fixtures__/traffic-swfl.sample.json";
+  const provenance =
+    env.source === "live"
+      ? "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7)"
+      : "FDOT AADT segments (fixture; refinery/__fixtures__/traffic-swfl.sample.json)";
   return {
     url,
     fetched_at,
     tier: 2,
     citation:
-      `FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — ` +
+      `${provenance} — ` +
       `counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years ${FIVE_YEAR_BASE}-${LATEST_FDOT_YEAR}, non-null AADT only. ` +
       `Aggregate: ${segmentCount} latest-year segments contributing to the length-weighted corridor average.`,
   };

@@ -181,15 +181,20 @@ function buildLeepaSource(
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code`
       : "fixture://refinery/__fixtures__/properties-lee-value.sample.json";
+  const provenance =
+    env.source === "live"
+      ? `LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from ` +
+        `gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). ` +
+        `Snapshot row count: ${totalParcels} parcels. Pre-aggregated through ` +
+        `data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary.`
+      : `LeePA parcel snapshot (fixture; refinery/__fixtures__/properties-lee-value.sample.json), ` +
+        `layers 9+10+12 joined on FOLIOID; Lee County. ` +
+        `Snapshot row count: ${totalParcels} parcels (fixture).`;
   return {
     url,
     fetched_at,
     tier: 2,
-    citation:
-      `LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from ` +
-      `gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). ` +
-      `Snapshot row count: ${totalParcels} parcels. Pre-aggregated through ` +
-      `data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary.`,
+    citation: provenance,
   };
 }
 
@@ -253,7 +258,10 @@ function propertyValueCorpusSummary(
   facts.push({
     topic: "metric:total_parcels",
     fact: "Lee total parcel count in snapshot",
-    value: `${agg.totalParcels} parcels in data_lake.leepa_parcels.`,
+    value:
+      env.source === "live"
+        ? `${agg.totalParcels} parcels in data_lake.leepa_parcels.`
+        : `${agg.totalParcels} parcels in fixture refinery/__fixtures__/properties-lee-value.sample.json.`,
     source_fragment_ids: [],
   });
 
@@ -362,7 +370,10 @@ function propertyValueOutputProducer(
     metric: "total_parcels",
     value: agg.totalParcels,
     direction: "stable",
-    label: "Lee County parcels in snapshot (data_lake.leepa_parcels)",
+    label:
+      env.source === "live"
+        ? "Lee County parcels in snapshot (data_lake.leepa_parcels)"
+        : "Lee County parcels in snapshot (fixture; refinery/__fixtures__/properties-lee-value.sample.json)",
     variable_type: "extensive",
     units: "parcels",
     display_format: "count",

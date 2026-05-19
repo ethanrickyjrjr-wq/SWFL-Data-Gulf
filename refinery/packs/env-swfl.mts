@@ -320,11 +320,15 @@ function hydroSource(
   siteNos: string[],
 ): BrainOutputMetricSource {
   const sites = siteNos.length > 0 ? siteNos.join(",") : "no sites";
+  const provenance =
+    env.source === "live"
+      ? "USGS Water Services daily values via data_lake.usgs_daily"
+      : "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json)";
   return {
     url: `${USGS_WATER_BASE_URL}/dv/?stateCd=FL&parameterCd=${parameterCd}&siteStatus=active&format=json`,
     fetched_at: snapshot.hydro_fetched_at ?? snapshot.earliest_fetched_at,
     tier: 1,
-    citation: `USGS Water Services daily values via data_lake.usgs_daily, parameterCd ${parameterCd}, ${windowDesc}, sites: ${sites}.`,
+    citation: `${provenance}, parameterCd ${parameterCd}, ${windowDesc}, sites: ${sites}.`,
   };
 }
 
@@ -339,11 +343,15 @@ function nfipAggregateSource(snapshot: EnvSnapshot): BrainOutputMetricSource {
       citation: "OpenFEMA FimaNfipClaims — no aggregate fragment available.",
     };
   }
+  const provenance =
+    env.source === "live"
+      ? "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims"
+      : "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json)";
   return {
     url: FEMA_NFIP_TABLE_URL,
     fetched_at: snapshot.nfip_fetched_at ?? snapshot.earliest_fetched_at,
     tier: 1,
-    citation: `OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS ${nfip.county_codes.join("+")}), storm-list reviewed ${nfip.storm_year_list_reviewed_at}.`,
+    citation: `${provenance}, FL state, 6 SWFL counties (FIPS ${nfip.county_codes.join("+")}), storm-list reviewed ${nfip.storm_year_list_reviewed_at}.`,
   };
 }
 

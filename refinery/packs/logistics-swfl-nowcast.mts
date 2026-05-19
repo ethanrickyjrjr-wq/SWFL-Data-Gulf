@@ -325,12 +325,16 @@ function buildFdotSource(
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.${LATEST_FDOT_YEAR}`
       : "fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json";
+  const provenance =
+    env.source === "live"
+      ? `FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year ${LATEST_FDOT_YEAR})`
+      : `FDOT AADT freight-coded segments (fixture; refinery/__fixtures__/logistics-swfl-nowcast.sample.json)`;
   return {
     url,
     fetched_at,
     tier: 2,
     citation:
-      `FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year ${LATEST_FDOT_YEAR}) — ` +
+      `${provenance} — ` +
       `${segmentCount} segments contributed to the annualized current-activity tonnage proxy.`,
   };
 }

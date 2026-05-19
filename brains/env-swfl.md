@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v13 | Token: SWFL-7421-v13-20260518 -->
+<!-- FRESHNESS: v14 | Token: SWFL-7421-v14-20260519 -->
 ---
 brain_id: env-swfl
-version: 13
-refined_at: 2026-05-18T20:50:57Z
-freshness_token: SWFL-7421-v13-20260518
+version: 14
+refined_at: 2026-05-19T19:24:38Z
+freshness_token: SWFL-7421-v14-20260519
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed hydrology (USGS groundwater + Caloosahatchee surface stage + SWFL rainfall) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-veto consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = USGS daily-value pulls for parameters 72019/62610/00065/00045, filtered SWFL via county_cd + HUC.
@@ -29,21 +29,21 @@ SCOPE: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                    | verified   | expires
-s01 | FEMA NFHL — Flood Hazard Zones (Layer 28, fixture; SWFL 6-county aggregate)                                                                                                                                               | 2026-05-18 | 2026-06-17
-s02 | OpenFEMA FimaNfipClaims (fixture; data_lake.fema_nfip_claims, FL state, 6 SWFL counties 12071+12021+12015+12043+12051+12115, storm-list reviewed 2026-05-17) — fixture://refinery/__fixtures__/fema-nfip-swfl.sample.json | 2026-05-18 | 2026-06-17
-s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 parameterCds + 4 SWFL sites)                                                                                                                       | 2026-05-18 | 2026-06-17
+s01 | FEMA NFHL — Flood Hazard Zones (Layer 28, fixture; SWFL 6-county aggregate)                                                                                                                                               | 2026-05-19 | 2026-06-18
+s02 | OpenFEMA FimaNfipClaims (fixture; data_lake.fema_nfip_claims, FL state, 6 SWFL counties 12071+12021+12015+12043+12051+12115, storm-list reviewed 2026-05-17) — fixture://refinery/__fixtures__/fema-nfip-swfl.sample.json | 2026-05-19 | 2026-06-18
+s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 parameterCds + 4 SWFL sites)                                                                                                                       | 2026-05-19 | 2026-06-18
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"env_snapshot","fact":"SWFL flood-hazard exposure — area-weighted across 1 county","value":"Southwest Florida flood-hazard exposure across 1 county: 37.95% of mapped area falls in a FEMA Special Flood Hazard Area, with 5.15% in coastal high-hazard (V/VE) zones (271 distinct VE polygons).","src":"s01","date":"2026-05-18"},
-  {"id":"f002","topic":"env_county:12071","fact":"Lee County (FIPS 12071) flood-hazard exposure","value":"Lee County area-weighted SFHA coverage: 37.95%; coastal V/VE zones: 5.15% (271 VE polygons).","src":"s01","date":"2026-05-18"}
+  {"id":"f001","topic":"env_snapshot","fact":"SWFL flood-hazard exposure — area-weighted across 1 county","value":"Southwest Florida flood-hazard exposure across 1 county: 37.95% of mapped area falls in a FEMA Special Flood Hazard Area, with 5.15% in coastal high-hazard (V/VE) zones (271 distinct VE polygons).","src":"s01","date":"2026-05-19"},
+  {"id":"f002","topic":"env_county:12071","fact":"Lee County (FIPS 12071) flood-hazard exposure","value":"Lee County area-weighted SFHA coverage: 37.95%; coastal V/VE zones: 5.15% (271 VE polygons).","src":"s01","date":"2026-05-19"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "env-swfl",
-  "version": 13,
-  "refined_at": "2026-05-18T20:50:57Z",
+  "version": 14,
+  "refined_at": "2026-05-19T19:24:38Z",
   "direction": "bearish",
   "magnitude": 0.6,
   "drivers": [],
@@ -135,9 +135,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
+        "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
     },
     {
@@ -150,9 +150,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
+        "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
     },
     {
@@ -165,9 +165,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "count",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
+        "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
     },
     {
@@ -180,9 +180,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
+        "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
     },
     {
@@ -195,9 +195,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=62610&siteStatus=active&format=json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "USGS Water Services daily values via data_lake.usgs_daily, parameterCd 62610, last 90 days (2026-02-11→2026-05-12), sites: 265056081502300."
+        "citation": "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json), parameterCd 62610, last 90 days (2026-02-11→2026-05-12), sites: 265056081502300."
       }
     },
     {
@@ -210,9 +210,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&siteStatus=active&format=json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "USGS Water Services daily values via data_lake.usgs_daily, parameterCd 00065, latest dv read on 2026-05-15, HUC 03090205 (Caloosahatchee), sites: 02292900."
+        "citation": "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json), parameterCd 00065, latest dv read on 2026-05-15, HUC 03090205 (Caloosahatchee), sites: 02292900."
       }
     },
     {
@@ -225,9 +225,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00045&siteStatus=active&format=json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "USGS Water Services daily values via data_lake.usgs_daily, parameterCd 00045, 2025 per-station annual sum, averaged across Lee+Collier rain gauges, sites: 261000081480000,262916081530000."
+        "citation": "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json), parameterCd 00045, 2025 per-station annual sum, averaged across Lee+Collier rain gauges, sites: 261000081480000,262916081530000."
       }
     },
     {
@@ -240,9 +240,9 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "count",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=62610&siteStatus=active&format=json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "fetched_at": "2026-05-19T19:24:38Z",
         "tier": 1,
-        "citation": "USGS Water Services daily values via data_lake.usgs_daily, parameterCd 62610, trailing 365-day window (2025-05-12→2026-05-12), 24 observation-days, threshold >2.0 ft NAVD88, sites: 265056081502300."
+        "citation": "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json), parameterCd 62610, trailing 365-day window (2025-05-12→2026-05-12), 24 observation-days, threshold >2.0 ft NAVD88, sites: 265056081502300."
       }
     }
   ],
@@ -266,7 +266,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T20:50:57Z"
+    "computed_at": "2026-05-19T19:24:38Z"
   },
   "exogenous_signals": []
 }
@@ -275,5 +275,5 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
 - env-swfl: standing flood-hazard exposure read for SWFL — area-weighted FEMA NFHL aggregates with coastal V/VE breakouts; first brain shipped with per-metric P2 provenance.
 
 --- RECENT NOTES ---
-- 2026-05-18: pack refined by the Refinery — 2 fact(s) from 3 source(s).
+- 2026-05-19: pack refined by the Refinery — 2 fact(s) from 3 source(s).
 ```
