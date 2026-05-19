@@ -2,7 +2,7 @@
 
 # NOAA NCEI Storm Events Database -- modern-schema range only (1996+).
 # Pre-1996 records use an incompatible column layout; see spec Open Q3.
-NOAA_BASE_URL = "https://www.ncei.noaa.gov/data/storm-events/csvfiles/"
+NOAA_BASE_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 YEAR_RANGE_START = 1996
 YEAR_RANGE_END = 2025  # bump annually as NCEI publishes new yearly files
 NOAA_URL_GLOB = (

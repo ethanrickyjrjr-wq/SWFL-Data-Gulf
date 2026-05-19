@@ -11,15 +11,19 @@ import re
 from pathlib import Path
 
 import duckdb
+import requests
 
 from ingest.duckdb_pipelines.storm_history_swfl.constants import (
     BUCKET,
+    NOAA_BASE_URL,
     NOAA_URL_GLOB,
     PACK_ID,
     PARQUET_PATH,
     PARQUET_TARGET,
     SWFL_COUNTIES_CZ,
     VINTAGE,
+    YEAR_RANGE_END,
+    YEAR_RANGE_START,
 )
 from ingest.lib.tier1_inventory import upsert_inventory_row
 
@@ -42,6 +46,28 @@ def parse_damage_string(raw: str | None) -> float | None:
     return float(m.group(1)) * _MULT[m.group(2).upper()]
 
 
+_NCEI_FILE_RE = re.compile(r"StormEvents_details-ftp_v1\.0_d(\d{4})_c(\d+)\.csv\.gz")
+
+
+def _list_noaa_urls(start_year: int, end_year: int) -> list[str]:
+    """Enumerate NOAA NCEI 'details' file URLs from the index page.
+
+    HTTP doesn't support glob expansion, so we scrape NCEI's Apache directory
+    listing and pick the latest compile-date file per year in [start, end].
+    """
+    resp = requests.get(NOAA_BASE_URL, timeout=60)
+    resp.raise_for_status()
+    by_year: dict[int, tuple[int, str]] = {}
+    for m in _NCEI_FILE_RE.finditer(resp.text):
+        year = int(m.group(1))
+        compile_date = int(m.group(2))
+        full_name = m.group(0)
+        if start_year <= year <= end_year:
+            if year not in by_year or compile_date > by_year[year][0]:
+                by_year[year] = (compile_date, full_name)
+    return sorted(f"{NOAA_BASE_URL}{name}" for _, (_, name) in by_year.items())
+
+
 def _load_env() -> None:
     """Load .env.local for SUPABASE_S3_* credentials."""
     env_path = Path(__file__).parent.parent.parent.parent / ".env.local"
@@ -59,9 +85,14 @@ def run() -> None:
     endpoint = os.environ["SUPABASE_S3_ENDPOINT"].replace("https://", "").replace("http://", "")
 
     print(f"storm-history-swfl: starting ingest")
-    print(f"  source: {NOAA_URL_GLOB}")
+    print(f"  source: NCEI index at {NOAA_BASE_URL}")
     print(f"  target: {PARQUET_TARGET}")
     print(f"  counties: {SWFL_COUNTIES_CZ}")
+
+    urls = _list_noaa_urls(YEAR_RANGE_START, YEAR_RANGE_END)
+    print(f"  files: {len(urls)} (years {YEAR_RANGE_START}-{YEAR_RANGE_END})")
+    if not urls:
+        raise RuntimeError(f"No NOAA files found in {YEAR_RANGE_START}-{YEAR_RANGE_END} range")
 
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs;")
@@ -75,11 +106,12 @@ def run() -> None:
     """)
 
     counties_sql_list = ", ".join(f"'{c}'" for c in SWFL_COUNTIES_CZ)
+    urls_sql_list = ", ".join(f"'{u}'" for u in urls)
     con.execute(f"""
         COPY (
             SELECT *
             FROM read_csv_auto(
-                '{NOAA_URL_GLOB}',
+                [{urls_sql_list}],
                 union_by_name=true,
                 ignore_errors=true,
                 null_padding=true
