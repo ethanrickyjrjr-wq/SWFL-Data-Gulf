@@ -776,6 +776,139 @@
       "scope_note": "Most recent complete year's sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) ÷ env_flood_losses_swfl_baseline_annual_usd. >2 = elevated activity (still in storm recovery); ~1 = back to baseline. Tracks the Ian/Helene/Milton recovery curve."
     },
 
+    "env_storm_property_damage_events_10yr_swfl": {
+      "id": "env_storm_property_damage_events_10yr_swfl",
+      "prefLabel": "SWFL Property-Damage Events (10-Year Window)",
+      "altLabels": ["SWFL property-damage event count", "10yr damage events"],
+      "raw_slugs": ["storm_property_damage_events_10yr"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "count",
+      "unit": "events",
+      "value_range": [0, 10000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE in the trailing 10-year window with a parseable, non-zero damage_property value. Source: s3://lake-tier1/environmental/storm_events_swfl.parquet via DuckDB httpfs; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py. Excludes rows with unparseable damage strings (counted separately, not summed)."
+    },
+
+    "env_storm_extreme_wind_events_10yr_swfl": {
+      "id": "env_storm_extreme_wind_events_10yr_swfl",
+      "prefLabel": "SWFL Hurricane-Force Wind Events (10-Year Window)",
+      "altLabels": ["SWFL extreme-wind events", "hurricane-force wind count"],
+      "raw_slugs": ["storm_extreme_wind_events_10yr"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "count",
+      "unit": "events",
+      "value_range": [0, 1000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE in the trailing 10-year window with MAGNITUDE >= 74 kt (hurricane-force wind threshold). Drives storm-history-swfl's bearish/neutral direction read: >= 3 events in the window flips the brain bearish."
+    },
+
+    "env_storm_major_storm_count_30yr_swfl": {
+      "id": "env_storm_major_storm_count_30yr_swfl",
+      "prefLabel": "SWFL Major Storm Count (Full Vintage)",
+      "altLabels": ["SWFL major storms 30yr", "major storm count"],
+      "raw_slugs": ["storm_major_storm_count_30yr"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "count",
+      "unit": "events",
+      "value_range": [0, 10000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025) where damage_property >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}. Backward-looking risk-history aggregate — pair with env-swfl (modeled exposure) for forward-looking decisions."
+    },
+
+    "env_storm_total_storm_count_30yr_swfl": {
+      "id": "env_storm_total_storm_count_30yr_swfl",
+      "prefLabel": "SWFL Total Storm Event Count (Full Vintage)",
+      "altLabels": ["SWFL total storms", "NOAA event count SWFL"],
+      "raw_slugs": ["storm_total_storm_count_30yr"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "count",
+      "unit": "events",
+      "value_range": [0, 100000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of ALL NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025). Denominator-style total — provides context for the major-storm and 10-year-window ratios but is not itself a risk-magnitude indicator."
+    },
+
+    "env_storm_last_billion_dollar_event_date_swfl": {
+      "id": "env_storm_last_billion_dollar_event_date_swfl",
+      "prefLabel": "Most Recent SWFL Billion-Dollar Storm Event Date",
+      "altLabels": [
+        "last $1B event date",
+        "most recent billion-dollar storm SWFL"
+      ],
+      "raw_slugs": ["storm_last_billion_dollar_event_date"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "date",
+      "unit": "ISO 8601 date (YYYY-MM-DD)",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "ISO 8601 date of the most recent NOAA Storm Event across the SWFL footprint (LEE+COLLIER+CHARLOTTE) with damage_property >= $1B. Null when no billion-dollar event exists in the corpus window (e.g. fixture mode). Surfaces the recency of catastrophic-loss events for storm-recovery framing."
+    },
+
+    "env_storm_last_billion_dollar_event_type_swfl": {
+      "id": "env_storm_last_billion_dollar_event_type_swfl",
+      "prefLabel": "Most Recent SWFL Billion-Dollar Storm Event Type",
+      "altLabels": ["last $1B event type"],
+      "raw_slugs": ["storm_last_billion_dollar_event_type"],
+      "category": "environmental",
+      "domain": ["environmental", "real-estate"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "string",
+      "allowed_values": [
+        "Hurricane",
+        "Hurricane (Typhoon)",
+        "Tornado",
+        "Flash Flood",
+        "Storm Surge/Tide",
+        "Tropical Storm",
+        "Thunderstorm Wind"
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "NOAA EVENT_TYPE string of the most recent billion-dollar storm in the SWFL corpus. Pairs with env_storm_last_billion_dollar_event_date_swfl. Examples observed in the 1996-2025 vintage: Hurricane (Charley 2004, Ian 2022), Tornado, Flash Flood, Storm Surge/Tide."
+    },
+
+    "env_storm_counties_covered_swfl": {
+      "id": "env_storm_counties_covered_swfl",
+      "prefLabel": "SWFL Counties Present in Storm History Corpus",
+      "altLabels": ["counties covered storm-history"],
+      "raw_slugs": ["storm_counties_covered"],
+      "category": "environmental",
+      "domain": ["environmental"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "string",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Plus-joined alphabetical list of counties present in the storm-history corpus, e.g. 'CHARLOTTE+COLLIER+LEE'. Provides scope provenance — if a county is missing, downstream consumers know NOT to trust the SWFL-wide rollup for that county."
+    },
+
+    "env_storm_ingest_vintage_swfl": {
+      "id": "env_storm_ingest_vintage_swfl",
+      "prefLabel": "SWFL Storm-History Ingest Vintage Range",
+      "altLabels": ["storm history vintage", "NOAA SWFL vintage"],
+      "raw_slugs": ["storm_ingest_vintage"],
+      "category": "environmental",
+      "domain": ["environmental"],
+      "source_brains": ["storm-history-swfl"],
+      "value_type": "string",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Hyphen-joined year range covered by this build's NOAA Storm Events corpus (e.g. '1996-2025'). Bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py when NCEI publishes the next yearly file, then re-run the ingest."
+    },
+
     "env_gw_level_lee_median_ft": {
       "id": "env_gw_level_lee_median_ft",
       "prefLabel": "Lee County Groundwater Median Elevation (NAVD88)",
@@ -1510,6 +1643,14 @@
     "swfl_storm_frequency": "env_flood_losses_swfl_storm_year_count_since_2000",
     "post_ian_claims_ratio": "env_flood_losses_swfl_post_ian_ratio",
     "swfl_flood_recovery_ratio": "env_flood_losses_swfl_post_ian_ratio",
+    "storm_property_damage_events_10yr": "env_storm_property_damage_events_10yr_swfl",
+    "storm_extreme_wind_events_10yr": "env_storm_extreme_wind_events_10yr_swfl",
+    "storm_major_storm_count_30yr": "env_storm_major_storm_count_30yr_swfl",
+    "storm_total_storm_count_30yr": "env_storm_total_storm_count_30yr_swfl",
+    "storm_last_billion_dollar_event_date": "env_storm_last_billion_dollar_event_date_swfl",
+    "storm_last_billion_dollar_event_type": "env_storm_last_billion_dollar_event_type_swfl",
+    "storm_counties_covered": "env_storm_counties_covered_swfl",
+    "storm_ingest_vintage": "env_storm_ingest_vintage_swfl",
     "swfl_gw_lee_median_ft": "env_gw_level_lee_median_ft",
     "lee_gw_median_navd88_ft": "env_gw_level_lee_median_ft",
     "swfl_sw_stage_caloosahatchee_ft": "env_sw_stage_caloosahatchee_ft",

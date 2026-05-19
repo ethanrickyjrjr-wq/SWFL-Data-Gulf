@@ -2,16 +2,16 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-18T14:14:18.534Z (commit `eb9a3be`)
+**Generated:** 2026-05-19T05:00:57.797Z (commit `d2ab8ad`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
 ## TL;DR
 
-- **71** SKOS concepts across **7** categories (69 active, 2 stub).
-- **82** raw slugs registered in `slug_index`.
-- **12** distinct source brains referenced (live + planned).
-- **12** packs in the runtime registry.
+- **91** SKOS concepts across **7** categories (89 active, 2 stub).
+- **104** raw slugs registered in `slug_index`.
+- **14** distinct source brains referenced (live + planned).
+- **14** packs in the runtime registry.
 
 ## Regenerate
 
@@ -24,9 +24,9 @@ bun refinery/tools/semantic-ledger.mts
 | Category | Concepts | Active | Stub |
 | --- | ---: | ---: | ---: |
 | `credit-risk` | 17 | 16 | 1 |
-| `environmental` | 16 | 15 | 1 |
+| `environmental` | 24 | 23 | 1 |
 | `hospitality` | 5 | 5 | 0 |
-| `logistics` | 7 | 7 | 0 |
+| `logistics` | 19 | 19 | 0 |
 | `macro` | 9 | 9 | 0 |
 | `qualitative` | 5 | 5 | 0 |
 | `real-estate` | 12 | 12 | 0 |
@@ -66,7 +66,7 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `environmental` (16)
+### `environmental` (24)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -82,6 +82,14 @@ bun refinery/tools/semantic-ledger.mts
 | `env_lee_sfha_coverage_pct` | Lee County Area-Weighted SFHA Coverage | `lee_county_sfha_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_lee_ve_zone_coverage_pct` | Lee County Area-Weighted Coastal V/VE Coverage | `lee_county_ve_zone_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_rainfall_swfl_annual_in` | SWFL Annual Rainfall (Latest Complete Year) | `swfl_rainfall_annual_in`, `rainfall_swfl_latest_year_in` | depth_in | in | 0 – 120 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_storm_counties_covered_swfl` | SWFL Counties Present in Storm History Corpus | `storm_counties_covered` | string | — | _unbounded_ | `storm-history-swfl` | `environmental` | ✅ active |
+| `env_storm_extreme_wind_events_10yr_swfl` | SWFL Hurricane-Force Wind Events (10-Year Window) | `storm_extreme_wind_events_10yr` | count | events | 0 – 1000 | `storm-history-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_storm_ingest_vintage_swfl` | SWFL Storm-History Ingest Vintage Range | `storm_ingest_vintage` | string | — | _unbounded_ | `storm-history-swfl` | `environmental` | ✅ active |
+| `env_storm_last_billion_dollar_event_date_swfl` | Most Recent SWFL Billion-Dollar Storm Event Date | `storm_last_billion_dollar_event_date` | date | ISO 8601 date (YYYY-MM-DD) | _unbounded_ | `storm-history-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_storm_last_billion_dollar_event_type_swfl` | Most Recent SWFL Billion-Dollar Storm Event Type | `storm_last_billion_dollar_event_type` | string | — | `Hurricane` / `Hurricane (Typhoon)` / `Tornado` / `Flash Flood` / `Storm Surge/Tide` / `Tropical Storm` / `Thunderstorm Wind` | `storm-history-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_storm_major_storm_count_30yr_swfl` | SWFL Major Storm Count (Full Vintage) | `storm_major_storm_count_30yr` | count | events | 0 – 10000 | `storm-history-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_storm_property_damage_events_10yr_swfl` | SWFL Property-Damage Events (10-Year Window) | `storm_property_damage_events_10yr` | count | events | 0 – 10000 | `storm-history-swfl` | `environmental`, `real-estate` | ✅ active |
+| `env_storm_total_storm_count_30yr_swfl` | SWFL Total Storm Event Count (Full Vintage) | `storm_total_storm_count_30yr` | count | events | 0 – 100000 | `storm-history-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_sw_stage_caloosahatchee_ft` | Caloosahatchee River Stage (S-79 / Olga) | `swfl_sw_stage_caloosahatchee_ft`, `caloosahatchee_stage_latest_ft` | elevation_ft | ft (gage local zero) | -5 – 30 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_swfl_sfha_coverage_pct` | SWFL Area-Weighted SFHA Coverage | `swfl_sfha_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
 | `env_swfl_ve_zone_coverage_pct` | SWFL Area-Weighted Coastal V/VE Coverage | `swfl_ve_zone_pct_area_weighted` | ratio | ratio (0–1) | 0 – 1 | `env-swfl` | `environmental`, `real-estate` | ✅ active |
@@ -101,6 +109,14 @@ bun refinery/tools/semantic-ledger.mts
 - **`env_lee_sfha_coverage_pct`** — Lee County (FIPS 12071) area-weighted SFHA coverage — the Fort Myers / Fort Myers Beach / Sanibel / Captiva footprint. The §6.4 FMB lease question keys on this and env_lee_ve_zone_coverage_pct.
 - **`env_lee_ve_zone_coverage_pct`** — Lee County (FIPS 12071) area-weighted V/VE coastal high-hazard coverage. This is the flood-veto-eligible subset for Lee. Above-baseline values are the primary signal that barrier-island coordinates in Lee should be paired with property-level lookups before any lease/acquisition decision.
 - **`env_rainfall_swfl_annual_in`** — Average annual precipitation total across USGS active dv rain gauges in Lee + Collier counties (FIPS 12071, 12021), parameter 00045 with statCd 00006 (sum). Per-station annual totals are computed for the most recent year with >= 10 monthly samples; the SWFL value is the AVERAGE (not sum) of station totals — averaging gives regional intensity, summing across stations is physically meaningless. Typical SWFL annual rainfall is 50-60 inches; >70 inches suggests an exceptionally wet year.
+- **`env_storm_counties_covered_swfl`** — Plus-joined alphabetical list of counties present in the storm-history corpus, e.g. 'CHARLOTTE+COLLIER+LEE'. Provides scope provenance — if a county is missing, downstream consumers know NOT to trust the SWFL-wide rollup for that county.
+- **`env_storm_extreme_wind_events_10yr_swfl`** — Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE in the trailing 10-year window with MAGNITUDE >= 74 kt (hurricane-force wind threshold). Drives storm-history-swfl's bearish/neutral direction read: >= 3 events in the window flips the brain bearish.
+- **`env_storm_ingest_vintage_swfl`** — Hyphen-joined year range covered by this build's NOAA Storm Events corpus (e.g. '1996-2025'). Bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py when NCEI publishes the next yearly file, then re-run the ingest.
+- **`env_storm_last_billion_dollar_event_date_swfl`** — ISO 8601 date of the most recent NOAA Storm Event across the SWFL footprint (LEE+COLLIER+CHARLOTTE) with damage_property >= $1B. Null when no billion-dollar event exists in the corpus window (e.g. fixture mode). Surfaces the recency of catastrophic-loss events for storm-recovery framing.
+- **`env_storm_last_billion_dollar_event_type_swfl`** — NOAA EVENT_TYPE string of the most recent billion-dollar storm in the SWFL corpus. Pairs with env_storm_last_billion_dollar_event_date_swfl. Examples observed in the 1996-2025 vintage: Hurricane (Charley 2004, Ian 2022), Tornado, Flash Flood, Storm Surge/Tide.
+- **`env_storm_major_storm_count_30yr_swfl`** — Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025) where damage_property >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}. Backward-looking risk-history aggregate — pair with env-swfl (modeled exposure) for forward-looking decisions.
+- **`env_storm_property_damage_events_10yr_swfl`** — Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE in the trailing 10-year window with a parseable, non-zero damage_property value. Source: s3://lake-tier1/environmental/storm_events_swfl.parquet via DuckDB httpfs; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py. Excludes rows with unparseable damage strings (counted separately, not summed).
+- **`env_storm_total_storm_count_30yr_swfl`** — Count of ALL NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025). Denominator-style total — provides context for the major-storm and 10-year-window ratios but is not itself a risk-magnitude indicator.
 - **`env_sw_stage_caloosahatchee_ft`** — Most recent daily-mean gage height across USGS active dv sites in the Caloosahatchee HUC (03090205%) reporting parameter 00065. Reference is gage local zero, NOT a vertical datum — useful for trend and threshold comparisons within the basin but NOT cross-site additive without datum conversion. Caloosahatchee at S-79 (site 02292900) is the canonical reference; multiple gages averaged via median when more than one reports on the same date.
 - **`env_swfl_sfha_coverage_pct`** — Area-weighted share of mapped SWFL footprint (6 counties) classified as a FEMA Special Flood Hazard Area per 44 CFR §59.1. Computed in env-swfl via sum(Shape__Area) over SFHA-classified zones ÷ sum(Shape__Area) over all returned zones. Areas are square decimal degrees (WGS84); only the RATIO is meaningful — absolute areas never propagate.
 - **`env_swfl_ve_zone_coverage_pct`** — Area-weighted share of mapped SWFL footprint classified as FEMA coastal high-hazard (V, VE, V1–V30, V99). This is the barrier-island / flood-veto-eligible subset of SFHA; pair with env_swfl_sfha_coverage_pct for full structural-flood context.
@@ -128,12 +144,24 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `logistics` (7)
+### `logistics` (19)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | count | thousand tons | 0 – 1000000 | `logistics-swfl`, `master` | `logistics` | ✅ active |
 | `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | count | millions USD | 0 – 1000000 | `logistics-swfl`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_avg_payload_tons_per_truck` | Average Payload Per Truck (FHWA Constant) | `avg_payload_tons_per_truck` | ratio | tons/truck | 0 – 100 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_baseline_validity_flag` | SWFL Freight Baseline Validity Flag | `baseline_validity_flag` | enum | — | `valid` / `stale-structural` | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_consecutive_breach_days` | SWFL Freight Consecutive Breach Days | `consecutive_breach_days` | count | days | 0 – 3650 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_current_activity_tons_year` | SWFL Freight Current Activity (Tons/Year, FDOT Segment-Counts) | `current_activity_tons_year`, `current_flow_tons_year` | count | tons/year | 0 – 10000000000 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_deviation_pct` | SWFL Freight Deviation (Percent vs Baseline) | `deviation_pct` | percentage | % | -100 – 1000 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_deviation_z` | SWFL Freight Deviation Z-Score | `deviation_z` | ratio | z-score | -10 – 10 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_faf5_inbound_flow_tons_year` | SWFL FAF5 Inbound Freight Flow (Tons/Year, CONTEXT) | `faf5_inbound_flow_tons_year`, `baseline_flow_tons_year` | count | tons/year | 0 – 10000000000 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_freight_segment_count` | SWFL Freight Segment Count (FDOT, Latest Year) | `freight_segment_count` | count | segments | 0 – 100000 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_history_days_observed` | SWFL Freight Rolling-History Days Observed | `history_days_observed` | count | days | 0 – 365 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_rolling_mean_activity_tons_year` | SWFL Freight Rolling-Mean Baseline (Tons/Year, FDOT History) | `rolling_mean_activity_tons_year` | count | tons/year | 0 – 10000000000 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_rolling_stddev_activity_tons_year` | SWFL Freight Rolling-Stddev Baseline (Tons/Year, FDOT History) | `rolling_stddev_activity_tons_year` | count | tons/year | 0 – 10000000000 | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
+| `logistics_nowcast_shock_state` | SWFL Freight Shock State | `shock_state` | enum | — | `normal` / `anomaly` / `structural_break` / `insufficient_history` | `logistics-swfl-nowcast`, `master` | `logistics` | ✅ active |
 | `traffic_aadt_swfl_5yr_cagr_pct` | SWFL AADT 5-Year CAGR (2021–2025) | `aadt_5yr_cagr`, `traffic_cagr_swfl` | percent_change | percent CAGR | -20 – 20 | `traffic-swfl`, `master` | `logistics` | ✅ active |
 | `traffic_aadt_swfl_avg` | SWFL Length-Weighted Average AADT (Latest FDOT Year) | `aadt_swfl_avg`, `traffic_aadt_avg_swfl` | count | vehicles per day | 0 – 500000 | `traffic-swfl`, `master` | `logistics` | ✅ active |
 | `traffic_aadt_swfl_yoy_pct` | SWFL AADT Year-over-Year Change (Latest vs Prior FDOT Year) | `aadt_yoy_pct`, `traffic_yoy_swfl` | percent_change | percent | -50 – 50 | `traffic-swfl`, `master` | `logistics` | ✅ active |
@@ -144,6 +172,18 @@ bun refinery/tools/semantic-ledger.mts
 
 - **`logistics_inbound_freight_tons_swfl`** — FAF5 sum of inbound domestic flows where dms_dest=129 (Remainder of Florida, the SWFL zone) and trade_type=1, reported in thousand-tons for the latest historical FAF5 year. Imports and exports are NOT included in this aggregate — see logistics_inbound_freight_value_swfl_musd for the dollar denominator.
 - **`logistics_inbound_freight_value_swfl_musd`** — FAF5 sum of inbound domestic flow value, in millions of USD, for the same scope as logistics_inbound_freight_tons_swfl. Imports and exports excluded.
+- **`logistics_nowcast_avg_payload_tons_per_truck`** — Locked constant 16.0 per FHWA Highway Statistics 2023 Table VM-1 (combination-truck average net loaded payload). Single national-average — SWFL commodity mix may skew heavier; SCTG-weighted upgrade reserved for v2.
+- **`logistics_nowcast_baseline_validity_flag`** — Sticky flag. Flips to stale-structural after 90 consecutive days of |z|>3 against the ROLLING FDOT history baseline (Path B) — signals the rolling-mean baseline has drifted enough that operator review of the rolling window itself is warranted. Cold-start runs never flip the flag.
+- **`logistics_nowcast_consecutive_breach_days`** — Stateful counter sourced from data_lake.fdot_freight_nowcast_shock_log (append-only Tier 2 table). Counts consecutive days |z|>3 with the same sign; resets to 0 when |z|≤3, sign flips, or the current run is cold-start (z suppressed).
+- **`logistics_nowcast_current_activity_tons_year`** — Path B (post-commit 297ad23): Σ over freight-coded Lee+Collier segments of AADT × tfctr (FDOT per-segment truck-share) × AVG_PAYLOAD_TONS_PER_TRUCK (16.0, FHWA Highway Statistics 2023 Table VM-1) × 365. Deliberately omits segment length — v1 multiplied by miles which mismatched FAF5's tons baseline by units AND by population (pass-through vs delivered). This metric is ACTIVITY (segment counts, over-counts pass-through) — do not compare directly to FAF5 flow. raw_slug 'current_flow_tons_year' retained for legacy back-compat.
+- **`logistics_nowcast_deviation_pct`** — Path B: (current_activity_tons_year − rolling_mean_activity_tons_year) / rolling_mean × 100. Companion to logistics_nowcast_deviation_z; both move in lockstep but percent is operator-readable. Suppressed on cold-start runs.
+- **`logistics_nowcast_deviation_z`** — Path B: (current_activity_tons_year − rolling_mean_activity_tons_year) / rolling_stddev_activity_tons_year, computed over the last ROLLING_WINDOW_DAYS (90) of shock-log history. Suppressed (omitted from key_metrics) on cold-start runs (history_days_observed < COLD_START_THRESHOLD_DAYS). |z|>3 triggers shock_state escalation.
+- **`logistics_nowcast_faf5_inbound_flow_tons_year`** — FAF5 audited annual inbound freight FLOW to SWFL. Derived as logistics-swfl.inbound_freight_tons_swfl × 1000 (kilotons → tons). Under Path B (post-commit 297ad23) this is preserved as CONTEXT only — it does NOT anchor the deviation math (which is computed against FDOT's own rolling-history baseline). raw_slug 'baseline_flow_tons_year' retained for legacy back-compat.
+- **`logistics_nowcast_freight_segment_count`** — Number of freight-coded FDOT segments (roadway LIKE 'I-%' OR 'US-%') in Lee+Collier counties contributing to the current-flow aggregate. Sanity check — a sudden drop signals data-pull failure, not a real freight shock.
+- **`logistics_nowcast_history_days_observed`** — Path B cold-start gate. Count of prior shock-log rows with non-null current_activity_tons_year inside the rolling window. Must be ≥ COLD_START_THRESHOLD_DAYS (90) before deviation_z is computed and emitted; otherwise shock_state = 'insufficient_history' and deviation_z/pct are suppressed from key_metrics.
+- **`logistics_nowcast_rolling_mean_activity_tons_year`** — Path B: rolling mean of the last ROLLING_WINDOW_DAYS (90) shock-log rows with non-null current_activity_tons_year. This IS the math anchor for the deviation z-score — replaces the v1 FAF5-derived baseline. Drifts slowly as new daily activity rolls in.
+- **`logistics_nowcast_rolling_stddev_activity_tons_year`** — Path B: population stddev of the same 90-day rolling window used for rolling_mean_activity_tons_year. Denominator of the deviation z-score. Replaces the v1 fixed-CoV (baseline_mu × 0.10) computation.
+- **`logistics_nowcast_shock_state`** — Deterministic state machine over consecutive-day |z|>3 counter: ≥3d → anomaly; ≥30d → structural_break (candidate); ≥90d also flips baseline_validity_flag. Path B added 'insufficient_history' for the cold-start gate (history_days_observed < COLD_START_THRESHOLD_DAYS). Computed in code, never LLM.
 - **`traffic_aadt_swfl_5yr_cagr_pct`** — Compound annual growth rate of length-weighted SWFL AADT (Lee + Collier) from 2021 base to 2025 latest. Comparable-segment cohort. Smooths YoY volatility (especially the 2022 Ian disruption); reads the medium-term demand trajectory.
 - **`traffic_aadt_swfl_avg`** — Sum(AADT × Shape_Length) ÷ Sum(Shape_Length) across all FDOT segments in Lee + Collier counties for the latest published year. Shape_Length is the auto-generated geometry length in the layer projection (SHAPE_LENG attribute is unused — may be stale after route realignments). 2-county scope matches env-swfl and the master.mts SWFL Intelligence Lake scope; the wider 6-county FDOT extract would let thousands of rural Glades/Hendry/Monroe segments dominate the corridor signal. Length-weighting prevents short freeway off-ramps from dominating an arithmetic mean over thousands of segments.
 - **`traffic_aadt_swfl_yoy_pct`** — Percent change in length-weighted AADT (Lee + Collier) between the latest and prior FDOT years, computed over the comparable-segment cohort (segments with non-null AADT in BOTH years matched on roadway + desc_frm + desc_to). Positive = vehicular demand rising; negative = falling. Sensitive to FDOT survey re-routing — see post-Ian caveat in brain OUTPUT.
@@ -258,12 +298,14 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `env-swfl` | `environmental` | _leaf_ | — |
 | `franchise-outcomes` | `real-estate` | _leaf_ | — |
 | `logistics-swfl` | `logistics` | _leaf_ | — |
+| `logistics-swfl-nowcast` | `logistics` | `logistics-swfl` (**input**) | all input |
 | `macro-florida` | `macro` | `macro-us` (**input**) | all input |
 | `macro-swfl` | `macro` | `macro-florida` (**input**) | all input |
 | `macro-us` | `macro` | _leaf_ | — |
-| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**veto**), `logistics-swfl` (**input**), `traffic-swfl` (**input**), `properties-lee-value` (**input**) | 1× veto |
+| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**veto**), `logistics-swfl` (**input**), `logistics-swfl-nowcast` (**input**), `traffic-swfl` (**input**), `properties-lee-value` (**input**) | 1× veto |
 | `properties-lee-value` | `real-estate` | _leaf_ | — |
 | `sector-credit-swfl` | `finance` | `franchise-outcomes` (**input**), `macro-us` (**input**), `macro-florida` (**input**) | all input |
+| `storm-history-swfl` | `environmental` | _leaf_ | — |
 | `tourism-tdt` | `hospitality` | _leaf_ | — |
 | `traffic-swfl` | `logistics` | _leaf_ | — |
 
@@ -313,6 +355,23 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | active |
 | `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | active |
 
+### `logistics-swfl-nowcast` (12 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `logistics_nowcast_avg_payload_tons_per_truck` | Average Payload Per Truck (FHWA Constant) | `avg_payload_tons_per_truck` | active |
+| `logistics_nowcast_baseline_validity_flag` | SWFL Freight Baseline Validity Flag | `baseline_validity_flag` | active |
+| `logistics_nowcast_consecutive_breach_days` | SWFL Freight Consecutive Breach Days | `consecutive_breach_days` | active |
+| `logistics_nowcast_current_activity_tons_year` | SWFL Freight Current Activity (Tons/Year, FDOT Segment-Counts) | `current_activity_tons_year`, `current_flow_tons_year` | active |
+| `logistics_nowcast_deviation_pct` | SWFL Freight Deviation (Percent vs Baseline) | `deviation_pct` | active |
+| `logistics_nowcast_deviation_z` | SWFL Freight Deviation Z-Score | `deviation_z` | active |
+| `logistics_nowcast_faf5_inbound_flow_tons_year` | SWFL FAF5 Inbound Freight Flow (Tons/Year, CONTEXT) | `faf5_inbound_flow_tons_year`, `baseline_flow_tons_year` | active |
+| `logistics_nowcast_freight_segment_count` | SWFL Freight Segment Count (FDOT, Latest Year) | `freight_segment_count` | active |
+| `logistics_nowcast_history_days_observed` | SWFL Freight Rolling-History Days Observed | `history_days_observed` | active |
+| `logistics_nowcast_rolling_mean_activity_tons_year` | SWFL Freight Rolling-Mean Baseline (Tons/Year, FDOT History) | `rolling_mean_activity_tons_year` | active |
+| `logistics_nowcast_rolling_stddev_activity_tons_year` | SWFL Freight Rolling-Stddev Baseline (Tons/Year, FDOT History) | `rolling_stddev_activity_tons_year` | active |
+| `logistics_nowcast_shock_state` | SWFL Freight Shock State | `shock_state` | active |
+
 ### `macro-florida` (7 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
@@ -332,7 +391,7 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 
-### `master` (34 concepts)
+### `master` (46 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
@@ -351,6 +410,18 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `hosp_tdt_yoy_delta` | TDT Year-over-Year Delta | `yoy_delta_pct` | active |
 | `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | active |
 | `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | active |
+| `logistics_nowcast_avg_payload_tons_per_truck` | Average Payload Per Truck (FHWA Constant) | `avg_payload_tons_per_truck` | active |
+| `logistics_nowcast_baseline_validity_flag` | SWFL Freight Baseline Validity Flag | `baseline_validity_flag` | active |
+| `logistics_nowcast_consecutive_breach_days` | SWFL Freight Consecutive Breach Days | `consecutive_breach_days` | active |
+| `logistics_nowcast_current_activity_tons_year` | SWFL Freight Current Activity (Tons/Year, FDOT Segment-Counts) | `current_activity_tons_year`, `current_flow_tons_year` | active |
+| `logistics_nowcast_deviation_pct` | SWFL Freight Deviation (Percent vs Baseline) | `deviation_pct` | active |
+| `logistics_nowcast_deviation_z` | SWFL Freight Deviation Z-Score | `deviation_z` | active |
+| `logistics_nowcast_faf5_inbound_flow_tons_year` | SWFL FAF5 Inbound Freight Flow (Tons/Year, CONTEXT) | `faf5_inbound_flow_tons_year`, `baseline_flow_tons_year` | active |
+| `logistics_nowcast_freight_segment_count` | SWFL Freight Segment Count (FDOT, Latest Year) | `freight_segment_count` | active |
+| `logistics_nowcast_history_days_observed` | SWFL Freight Rolling-History Days Observed | `history_days_observed` | active |
+| `logistics_nowcast_rolling_mean_activity_tons_year` | SWFL Freight Rolling-Mean Baseline (Tons/Year, FDOT History) | `rolling_mean_activity_tons_year` | active |
+| `logistics_nowcast_rolling_stddev_activity_tons_year` | SWFL Freight Rolling-Stddev Baseline (Tons/Year, FDOT History) | `rolling_stddev_activity_tons_year` | active |
+| `logistics_nowcast_shock_state` | SWFL Freight Shock State | `shock_state` | active |
 | `macro_fl_estab_count_construction` | Florida Construction Establishments (NAICS 23, Census CBP) | `fl_estab_count_construction` | active |
 | `macro_fl_estab_count_food_service` | Florida Food Service & Accommodation Establishments (NAICS 72, Census CBP) | `fl_estab_count_food_service` | active |
 | `macro_fl_estab_count_healthcare` | Florida Healthcare Establishments (NAICS 62, Census CBP) | `fl_estab_count_healthcare` | active |
@@ -401,6 +472,19 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `sba_chargeoff_rate_sector_72` | Accommodation & Food Services (NAICS 72) — SBA Charge-off Rate | `sector_72_chargeoff_rate` | active |
 | `sba_chargeoff_rate_sector_81` | Other Services — Personal & Repair (NAICS 81) — SBA Charge-off Rate | `sector_81_chargeoff_rate` | active |
 | `sba_worst_sector_chargeoff` | Worst-Sector SBA Charge-off Rate | `worst_naics_chargeoff` | active |
+
+### `storm-history-swfl` (8 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `env_storm_counties_covered_swfl` | SWFL Counties Present in Storm History Corpus | `storm_counties_covered` | active |
+| `env_storm_extreme_wind_events_10yr_swfl` | SWFL Hurricane-Force Wind Events (10-Year Window) | `storm_extreme_wind_events_10yr` | active |
+| `env_storm_ingest_vintage_swfl` | SWFL Storm-History Ingest Vintage Range | `storm_ingest_vintage` | active |
+| `env_storm_last_billion_dollar_event_date_swfl` | Most Recent SWFL Billion-Dollar Storm Event Date | `storm_last_billion_dollar_event_date` | active |
+| `env_storm_last_billion_dollar_event_type_swfl` | Most Recent SWFL Billion-Dollar Storm Event Type | `storm_last_billion_dollar_event_type` | active |
+| `env_storm_major_storm_count_30yr_swfl` | SWFL Major Storm Count (Full Vintage) | `storm_major_storm_count_30yr` | active |
+| `env_storm_property_damage_events_10yr_swfl` | SWFL Property-Damage Events (10-Year Window) | `storm_property_damage_events_10yr` | active |
+| `env_storm_total_storm_count_30yr_swfl` | SWFL Total Storm Event Count (Full Vintage) | `storm_total_storm_count_30yr` | active |
 
 ### `tourism-tdt` (5 concepts)
 
