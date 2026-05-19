@@ -115,7 +115,7 @@ def _fetch_all_nfip_claims() -> list[dict]:
                     NFIP_CLAIMS_URL,
                     params={"$skip": skip, "$top": page_size, "$format": "json",
                             "$filter": "state eq 'FL'"},
-                    timeout=120,
+                    timeout=240,
                 )
                 resp.raise_for_status()
                 break
@@ -125,7 +125,7 @@ def _fetch_all_nfip_claims() -> list[dict]:
                 wait = min(30 * 2 ** attempt, 300)
                 print(f"  FEMA API {resp.status_code} at skip={skip}, retry {attempt+1}/5 in {wait}s...")
                 time.sleep(wait)
-            except requests.ConnectionError:
+            except (requests.ConnectionError, requests.Timeout):
                 if attempt == 5:
                     raise
                 wait = min(30 * 2 ** attempt, 300)
@@ -161,9 +161,17 @@ def ingest_nfip_claims(pipeline) -> None:
         return
 
     # Tier 1 (cold archive): full raw CSV.gz + pointer row in data_lake._tier1_inventory.
+    # Non-fatal: Tier 1 failures (S3 or dlt _tier1_inventory schema issues) must not
+    # block Tier 2, which is the consumer-facing table env-swfl actually reads.
     object_path = f"fema/nfip_claims/{today}.csv.gz"
-    upload_csv_gz(TABULAR_BUCKET, object_path, rows, list(rows[0].keys()))
-    write_tier1_pointer(pipeline, "fema_nfip_claims", TABULAR_BUCKET, object_path, len(rows), NFIP_CLAIMS_URL)
+    try:
+        upload_csv_gz(TABULAR_BUCKET, object_path, rows, list(rows[0].keys()))
+        write_tier1_pointer(pipeline, "fema_nfip_claims", TABULAR_BUCKET, object_path, len(rows), NFIP_CLAIMS_URL)
+        print(f"  Tier 1 pointer written: {len(rows):,} rows → {object_path}")
+    except Exception as exc:
+        print(f"  WARNING: Tier 1 write failed (non-fatal) — {exc}")
 
     # Tier 2 (hot consumer cache for env-swfl brain): normalized 15-column table in data_lake.fema_nfip_claims.
+    print(f"  Promoting {len(rows):,} rows to Tier 2 (data_lake.fema_nfip_claims)...")
     _promote_nfip_to_tier2(rows)
+    print(f"  Tier 2 load complete.")

@@ -14,6 +14,18 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 
+def upload_parquet(bucket: str, object_path: str, rows: list[dict]) -> int:
+    """Convert rows to Parquet (pyarrow) and upload. Returns byte size."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    table = pa.Table.from_pylist(rows)
+    buf = io.BytesIO()
+    pq.write_table(table, buf)
+    data = buf.getvalue()
+    _upload_bytes(bucket, object_path, data, "application/vnd.apache.parquet")
+    return len(data)
+
+
 def upload_csv_gz(bucket: str, object_path: str, rows: list[dict], fieldnames: list[str]) -> str:
     csv_buf = io.StringIO()
     writer = csv.DictWriter(csv_buf, fieldnames=fieldnames, extrasaction="ignore")

@@ -1,0 +1,5 @@
+-- FAF5 tables migrated to Cold Lane (lake-tier1 S3 Parquet).
+-- Run in Supabase SQL editor after faf5_to_parquet.py upload completes.
+DROP TABLE IF EXISTS data_lake.faf_flows CASCADE;
+DROP TABLE IF EXISTS data_lake.faf_zone_lookup CASCADE;
+DROP TABLE IF EXISTS data_lake.faf_sctg_lookup CASCADE;

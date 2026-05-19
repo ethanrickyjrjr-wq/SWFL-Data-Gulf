@@ -8,6 +8,7 @@ import type {
 } from "../types/brain-output.mts";
 import {
   faf5Source,
+  FAF5_ORNL_URL,
   LATEST_HISTORICAL_FAF_YEAR,
   type FafFlowNormalized,
 } from "../sources/faf5-source.mts";
@@ -127,16 +128,15 @@ function buildFlowSource(
   fetched_at: string,
 ): BrainOutputMetricSource {
   const url =
-    env.source === "live" && env.supabaseUrl
-      ? `${env.supabaseUrl}/rest/v1/faf_flows?select=dms_orig,dms_dest,sctg2,trade_type,tons_${LATEST_HISTORICAL_FAF_YEAR},value_${LATEST_HISTORICAL_FAF_YEAR}&dms_dest=eq.129&trade_type=eq.1`
+    env.source === "live"
+      ? `${FAF5_ORNL_URL}`
       : "fixture://refinery/__fixtures__/logistics-swfl.sample.json";
   return {
     url,
     fetched_at,
     tier: 1,
     citation:
-      `FAF5 inbound domestic freight flows (data_lake.faf_flows, dlt-ingested from ORNL FAF5.7.1) — ` +
-      `dms_dest=129 (Remainder of Florida) AND trade_type=1, year ${LATEST_HISTORICAL_FAF_YEAR}. ` +
+      `FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year ${LATEST_HISTORICAL_FAF_YEAR}). ` +
       `Aggregate: ${agg.flowCount} origin × commodity flow rows summing to ${fmtTonsK(agg.totalTons)} ` +
       `(${fmtMusd(agg.totalValueMusd)}) across ${agg.byOrigin.length} origin zones and ${agg.byCommodity.length} commodity classes.`,
   };
