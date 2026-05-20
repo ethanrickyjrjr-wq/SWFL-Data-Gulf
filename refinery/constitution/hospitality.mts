@@ -13,11 +13,14 @@
  * macro veto and pre-dates any single-vertical signal. Above the un-keyed
  * default treatment that tourism-tdt currently receives.
  *
- * SKOS-aware (mirrors real-estate.mts flood-veto pattern): rules declare the
- * SKOS concept IDs they care about; `resolveConceptSlugs` reads the vocab at
- * module init and inverts each concept's `raw_slugs` into the literal slug
- * set the synthesizer matches against on `BrainOutputMetric.metric`. A typo
- * in a concept ID fails loud at startup instead of silently never firing.
+ * SKOS-aware: rules declare the SKOS concept IDs they care about, and
+ * `resolveConceptSlugs` reads the vocab at module init and inverts each
+ * concept's `raw_slugs` into the literal slug set the synthesizer matches
+ * against on `BrainOutputMetric.metric`. A typo in a concept ID fails loud
+ * at startup instead of silently never firing. (Note: real-estate's
+ * flood-barrier-mode-1 rule deliberately bypasses SKOS in favor of regex on
+ * per-ZIP primitives — `swfl_zip_{ZIP}_*` is a templated slug family rather
+ * than a SKOS concept, and the predicate joins barrier+AAL by ZIP.)
  *
  * Scope: these rules back-stop master's cross-vertical synthesis. They do
  * NOT duplicate tourism-tdt's own thresholds (which already vote bearish at

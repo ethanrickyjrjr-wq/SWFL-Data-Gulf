@@ -6,7 +6,7 @@
  *
  * Override cascade (priority-ordered, highest first):
  *  - 100 → exogenous-critical-confirmed
- *  - 90  → flood-veto (live as of Session 8 — keyed on env-swfl Lee/Collier V/VE)
+ *  - 90  → flood-barrier-mode-1 (Group C — per-ZIP barrier+AAL pair-join, add_caveat)
  *  - 80  → naics-distress-veto (stubbed — wires up Week 3+)
  *
  * Defensive-by-design: rules whose data sources do not yet exist in the
@@ -16,7 +16,7 @@
 
 import type { BrainOutput } from "../types/brain-output.mts";
 import type { ExogenousSignal } from "../types/exogenous-signal.mts";
-import { resolveConceptSlugs } from "../vocab/loader.mts";
+import { FLOOD_VETO_AAL_THRESHOLD_USD } from "../lib/swfl-geo.mts";
 import type { Constitution, OverrideRule } from "./types.mts";
 
 /**
@@ -38,43 +38,77 @@ const exogenousCriticalConfirmed: OverrideRule = {
 };
 
 /**
- * priority 90 — flood-veto. Fires bearish when any upstream reports Lee or
- * Collier coastal V/VE coverage above 5% of mapped area. The 5% threshold
- * is calibrated to fire against Lee County's measured 5.75% V/VE exposure
- * (272 VE polygons across the Fort Myers Beach barrier-island footprint),
- * which is the §6.4 acceptance scenario the rule has to honor.
+ * priority 90 — flood-barrier-mode-1.
  *
- * Both Lee and Collier triggers are checked because the SWFL real-estate
- * brain answers questions across both counties — a Marco Island question
- * deserves the same veto as a FMB question.
+ * Fires `add_caveat` (NOT force_bearish) when an upstream emits at least one
+ * SWFL ZIP whose env-swfl reading meets the Mode 1 predicate:
+ *     barrier_island_score === 1.0  AND  flood_aal_usd_per_insured_property >= 800
  *
- * SKOS-aware (P5.5): the rule declares the SKOS concept IDs it cares about,
- * then `resolveConceptSlugs` reads `refinery/vocab/brain-vocabulary.json` at
- * module init and inverts each concept's `raw_slugs` into the literal slug
- * set the synthesizer matches against on `BrainOutputMetric.metric`. Adding
- * a third-county VE concept is a one-line change here; an upstream rename of
- * a slug surfaces at module-init time instead of silently breaking the rule.
- * The 5% threshold itself is a property of the rule, not the concept.
+ * Both conditions MUST hold for the SAME ZIP. The pair-join is necessary
+ * because metro-aggregate signals (Lee County area-weighted V/VE coverage)
+ * mask the barrier-island concentration where the catastrophic AAL lives —
+ * that masking artifact is exactly what Group B's restructure was built to
+ * fix. Per-ZIP is policy; metro is data.
+ *
+ * Effect choice: `add_caveat` rather than `force_bearish`. The deterministic
+ * +50-70 bps cap-rate adjustment env-swfl already emits in its key_metrics
+ * IS the proportional signal. The constitution surfaces "flood risk
+ * material at the per-ZIP barrier-island unit" as a caveat; master's
+ * direction synthesis weighs env-swfl's own bearish read alongside other
+ * upstreams as a modifier, not a kill-switch.
+ *
+ * Threshold value FLOOD_VETO_AAL_THRESHOLD_USD is imported from swfl-geo so
+ * the producer-side Mode 1 boundary and the constitution-side override fire
+ * on the identical $800 cliff. Single source of truth. Constitutions cannot
+ * import from packs/* — that drags config/env.mts into the first test file's
+ * load chain and freezes env.source to "live" before any test sets fixture
+ * mode (bisected 2026-05-20). swfl-geo is zero-import-deps by design.
+ *
+ * §6.4 acceptance scenario: ZIP 33931 (Fort Myers Beach, barrier=1.0,
+ * measured AAL ≥ $800) fires the rule with higher fidelity than the prior
+ * metro-VE rule ever did.
  */
-const FLOOD_VETO_VE_THRESHOLD = 0.05;
-const FLOOD_VETO_CONCEPTS = [
-  "env_lee_ve_zone_coverage_pct",
-  "env_collier_ve_zone_coverage_pct",
-] as const;
-const FLOOD_VETO_METRICS = resolveConceptSlugs(FLOOD_VETO_CONCEPTS);
-const floodVeto: OverrideRule = {
+const AAL_PATTERN = /^swfl_zip_(\d{5})_flood_aal_usd_per_insured_property$/;
+const BARRIER_PATTERN = /^swfl_zip_(\d{5})_barrier_island_score$/;
+
+const floodBarrierMode1: OverrideRule = {
   priority: 90,
-  override_id: "flood-veto",
-  effect: "force_bearish",
-  condition: (upstreams: BrainOutput[]): boolean =>
-    upstreams.some((u) =>
-      u.key_metrics.some(
-        (m) =>
-          FLOOD_VETO_METRICS.has(m.metric) &&
-          typeof m.value === "number" &&
-          m.value > FLOOD_VETO_VE_THRESHOLD,
-      ),
-    ),
+  override_id: "flood-barrier-mode-1",
+  effect: "add_caveat",
+  condition: (upstreams: BrainOutput[]): boolean => {
+    for (const upstream of upstreams) {
+      const zipMap = new Map<string, { aal?: number; barrier?: number }>();
+      for (const m of upstream.key_metrics) {
+        // Type-narrow at extraction (mirrors the pattern that lived in the
+        // prior flood rule's condition). Non-numeric values never reach the
+        // predicate, so the `(e.aal ?? 0)` fallback below only has to handle
+        // genuine "metric not emitted" cases, not "metric emitted with junk".
+        if (typeof m.value !== "number") continue;
+        const aalMatch = AAL_PATTERN.exec(m.metric);
+        if (aalMatch) {
+          const entry = zipMap.get(aalMatch[1]) ?? {};
+          entry.aal = m.value;
+          zipMap.set(aalMatch[1], entry);
+          continue;
+        }
+        const barMatch = BARRIER_PATTERN.exec(m.metric);
+        if (barMatch) {
+          const entry = zipMap.get(barMatch[1]) ?? {};
+          entry.barrier = m.value;
+          zipMap.set(barMatch[1], entry);
+        }
+      }
+      // Symmetric partial-data shapes both evaluate false:
+      //   AAL emitted, barrier missing  → undefined === 1.0 is false
+      //   barrier emitted, AAL missing  → (undefined ?? 0) >= 800 is false
+      const hit = [...zipMap.values()].some(
+        (e) =>
+          e.barrier === 1.0 && (e.aal ?? 0) >= FLOOD_VETO_AAL_THRESHOLD_USD,
+      );
+      if (hit) return true;
+    }
+    return false;
+  },
 };
 
 /**
@@ -97,7 +131,11 @@ export const realEstateConstitution: Constitution = {
   domains: ["real-estate"],
   relevance_floor: 0.1,
   absoluteConstraints: [],
-  overrideCascade: [exogenousCriticalConfirmed, floodVeto, naicsDistressVeto],
+  overrideCascade: [
+    exogenousCriticalConfirmed,
+    floodBarrierMode1,
+    naicsDistressVeto,
+  ],
   domainHierarchy: [],
   caveatGenerators: [],
 };

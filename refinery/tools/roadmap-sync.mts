@@ -21,7 +21,9 @@ import path from "node:path";
 import { homedir } from "node:os";
 import { Client as NotionClient } from "@notionhq/client";
 import { PACKS } from "../config/packs.mts";
+import fs from "fs";
 import type { TrustTier } from "../types/pack.mts";
+
 
 const OUTPUT_PATH = path.join(process.cwd(), "docs", "roadmap-status.md");
 const LITTLEBIRD_SYNC_PATH = path.join(
@@ -366,7 +368,7 @@ function buildLittlebirdSync(): string {
   const sessions = lsNewestFirst(path.join(process.cwd(), "docs", "sessions"));
   const handoffs = lsNewestFirst(path.join(process.cwd(), "docs", "handoffs"));
   const ingestScripts = Object.entries(
-    JSON.parse(execSync("cat package.json", { encoding: "utf-8" }))
+  JSON.parse(fs.readFileSync("package.json", "utf-8"))
       .scripts as Record<string, string>,
   )
     .filter(([k]) => k.startsWith("ingest:"))

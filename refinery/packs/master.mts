@@ -17,6 +17,7 @@ import {
   applyOverrideCascade,
   applyRelevanceFloor,
   composeConclusion,
+  dedupeCaveats,
   detectContradictions,
   emptySynthesisResult,
   propagateDecay,
@@ -53,7 +54,7 @@ import { computeConfidence } from "../lib/confidence.mts";
 // Order matters only as a readability hint — loadConstitution() unions
 // domains and re-sorts the override cascade by priority (descending)
 // regardless of input order. The effective cascade after merge:
-// exogenous-critical-confirmed (100) → flood-veto (90) →
+// exogenous-critical-confirmed (100) → flood-barrier-mode-1 (90) →
 // naics-distress-veto (80) → rising-rates-dominance (70) →
 // hospitality-recovery-collapse (65) → hospitality-yoy-collapse (60).
 // macro constitution is empty today — included so future cross-tier macro
@@ -167,10 +168,23 @@ function masterSynthesizerOutputProducer(
     upstream_count,
   });
 
+  // Lift caveats from passing upstreams so master's OUTPUT carries the
+  // material qualifications upstream brains attached to their reads (e.g.
+  // env-swfl's per-ZIP Mode 1 detail, franchise-outcomes' data-staleness
+  // notes). Excluded upstreams' caveats are intentionally dropped — they're
+  // below the relevance floor and the floor caveats already speak for them.
+  // dedupeCaveats handles overlap when master's override-cascade caveat and
+  // an upstream caveat happen to template identically.
+  const upstreamCaveats = passing.flatMap((p) => p.upstream.caveats);
+
   return {
     conclusion,
     key_metrics,
-    caveats: [...floorCaveats, ...cascade.caveats],
+    caveats: dedupeCaveats([
+      ...floorCaveats,
+      ...cascade.caveats,
+      ...upstreamCaveats,
+    ]),
     direction: cascade.direction,
     magnitude: cascade.magnitude,
     drivers: vote.drivers,
@@ -209,11 +223,16 @@ export const master: PackDefinition = {
     makeBrainInputSource("traffic-swfl"),
     makeBrainInputSource("properties-lee-value"),
   ],
-  // Typed edges (P5): every leaf feeds master as `input` data EXCEPT env-swfl,
-  // which is wired as a `veto` — flood-veto in the real-estate constitution can
-  // flip master's direction unilaterally when Lee/Collier V-zone coverage
-  // crosses threshold. Surfaces inline in OUTPUT.drivers so a disputant can see
-  // env's role in the receipt rather than digging through constitution code.
+  // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
+  // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
+  // emit per-ZIP barrier+AAL primitives plus a deterministic +50-70 bps cap-rate
+  // adjustment in its own key_metrics; Group C surfaces that as a proportional
+  // signal master weighs alongside other upstreams rather than as a unilateral
+  // metro-level veto. The real-estate constitution's flood-barrier-mode-1 rule
+  // (priority 90, effect `add_caveat`) tags master's OUTPUT when any upstream
+  // emits a Mode 1 ZIP (barrier_island_score === 1.0 AND aal ≥ $800), but the
+  // direction synthesis stays driven by the full upstream vote — env-swfl's own
+  // bearish read counts as one weighted voice, not a kill-switch.
   // The macro chain (macro-us → macro-florida → macro-swfl) is enumerated
   // explicitly so the rising-rates-dominance override (registered in the
   // finance constitution but reading off macro-us SOFR after the 2026-05-17
@@ -226,7 +245,7 @@ export const master: PackDefinition = {
     { id: "macro-swfl", edge_type: "input" },
     { id: "sector-credit-swfl", edge_type: "input" },
     { id: "tourism-tdt", edge_type: "input" },
-    { id: "env-swfl", edge_type: "veto" },
+    { id: "env-swfl", edge_type: "modifier" },
     { id: "logistics-swfl", edge_type: "input" },
     { id: "logistics-swfl-nowcast", edge_type: "input" },
     { id: "traffic-swfl", edge_type: "input" },

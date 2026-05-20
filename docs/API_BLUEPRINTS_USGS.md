@@ -192,7 +192,7 @@ Things to reuse from `API_BLUEPRINTS_DBHYDRO.md` (now-dead source) so the brain 
 
 ## 10. Known Gap (Carried, Not Solved)
 
-**No USGS equivalent to SFWMD's engineered structure release rates (S77/S79/S80).** USGS `00060` discharge at gaged sites near those structures is a partial proxy but not the same signal. If `env-swfl`'s flood-veto logic depends on engineered releases (DBHYDRO had S79 stage at 10.0 ft NAVD88 hardcoded as a flood threshold), this must be surfaced in the brain's `caveats` field, not silently substituted. **The pipeline's job is faithful ingest; the brain's job is to admit what the data doesn't say.**
+**No USGS equivalent to SFWMD's engineered structure release rates (S77/S79/S80).** USGS `00060` discharge at gaged sites near those structures is a partial proxy but not the same signal. If `env-swfl`'s flood-barrier-mode-1 logic depends on engineered releases (DBHYDRO had S79 stage at 10.0 ft NAVD88 hardcoded as a flood threshold), this must be surfaced in the brain's `caveats` field, not silently substituted. **The pipeline's job is faithful ingest; the brain's job is to admit what the data doesn't say.**
 
 **Defer-list:**
 

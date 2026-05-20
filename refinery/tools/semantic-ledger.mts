@@ -313,7 +313,7 @@ function buildOverrides(constitutions: Constitution[]): string {
   const out: string[] = [
     "## Constitution overrides (cascade)",
     "",
-    "Higher priority wins. Effect `force_signal_direction` tracks the originating signal's direction; `force_bearish` / `force_bullish` pin the read; `add_caveat` only appends a caveat. SKOS-aware rules (e.g. `flood-veto`) declare trigger concepts by SKOS ID and resolve to raw slugs at module-init via `refinery/vocab/loader.mts`.",
+    "Higher priority wins. Effect `force_signal_direction` tracks the originating signal's direction; `force_bearish` / `force_bullish` pin the read; `add_caveat` only appends a caveat. SKOS-aware rules (e.g. `hospitality-yoy-collapse`) declare trigger concepts by SKOS ID, resolve them to a raw-slug set at module-init via `resolveConceptSlugs` from `refinery/vocab/loader.mts`, and match `m.metric` against that set inside the predicate.",
     "",
     "| Priority | Override ID | Effect | Domains |",
     "| ---: | --- | --- | --- |",

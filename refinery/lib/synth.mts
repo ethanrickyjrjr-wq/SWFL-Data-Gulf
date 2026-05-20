@@ -408,6 +408,29 @@ function quantizeDecay(hours: number): DecayCurve {
 }
 
 /**
+ * Utility — deduplicate caveat strings, preserving first-occurrence order.
+ *
+ * Master's producer lifts upstream caveats AND emits its own (relevance-floor
+ * exclusions, override-cascade firings). Two paths can independently surface
+ * identical strings: e.g. an upstream's own template happens to match a
+ * master-side template, or two upstreams template the same caveat. OUTPUT
+ * receipts should show each distinct caveat once.
+ *
+ * Exact-string equality. No case- or whitespace-folding — caveats are
+ * templated and deterministic; any divergence is intentional, not noise.
+ */
+export function dedupeCaveats(caveats: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const c of caveats) {
+    if (seen.has(c)) continue;
+    seen.add(c);
+    out.push(c);
+  }
+  return out;
+}
+
+/**
  * Step 8 — Empty-synthesis result. Master NEVER hallucinates from nothing.
  * Returns the full BrainOutputProducerResult slice that the master producer
  * can return directly.

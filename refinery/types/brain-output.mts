@@ -163,7 +163,7 @@ export interface BrainOutput {
    * `BrainDriver` for the shape rationale.
    */
   drivers: BrainDriver[];
-  /** override_ids that fired during synthesis (e.g. "flood-veto") */
+  /** override_ids that fired during synthesis (e.g. "flood-barrier-mode-1") */
   overrides: string[];
 
   /**

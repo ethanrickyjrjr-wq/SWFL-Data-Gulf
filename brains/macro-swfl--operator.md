@@ -4,22 +4,19 @@ _Flat technical read of the brain output in DAG order, suitable for engine opera
 
 ## TL;DR
 
-**BEARISH** (magnitude 0.67)
+**NEUTRAL** (magnitude 1.00)
 
 ## ⚠️ Caveats (read first)
 
-- FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.
+- macro-swfl emits no SWFL-specific metrics today — the brain is a chain-position placeholder until county-level BLS LAUS for Lee + Collier is ingested. Downstream brains should declare macro-florida or macro-us as direct upstreams for macro context in the interim.
 
 ## Conclusion
 
-As of the latest reported periods, the SWFL macro backdrop reads: SOFR at 3.6% and stable, Florida unemployment at 4.7% (rising), headline CPI at 3.8% YoY and rising. The funding-cost and labor-supply picture is the operator's primary lens; cross-vertical synthesis (franchise + CRE + sector-credit) lives downstream in master.
+macro-swfl is a regional delta brain. It currently emits no SWFL-specific metrics — county-level BLS LAUS (Lee + Collier) and other hyperlocal series are the planned sources and have not yet been ingested. The Florida state baseline reads: Florida unemployment rate 3.4% (stable), Florida labor force participation 60.9% (rising), Florida retail establishments 52000% (stable), Florida food service & accommodation establishments 40000% (stable), Florida construction establishments 38000% (stable), Florida healthcare establishments 35000% (stable), Florida professional services establishments 48000% (stable) (via macro-florida, confidence 1.00). Downstream consumers needing macro context today should declare macro-florida or macro-us as direct upstreams rather than routing through macro-swfl, until SWFL-specific data lands.
 
 ## Key Findings
 
-- **SOFR (Secured Overnight Financing Rate)** — 3.56 → _(source: [FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.56 percent_annualized for period 2026-05-…](https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24), T1, fetched 2026-05-17T03:01:49Z)_
-- **Florida unemployment rate** — 4.7 ↑ _(source: [FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.7 percent for period 2026-03-01, rising vs prior…](https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24), T1, fetched 2026-05-17T03:01:49Z)_
-- **US CPI YoY** — 3.77925 ↑ _(source: [FRED US CPI (All Items) Year-over-Year (series_id CPIAUCSL_YOY) — latest observation 3.78 percent for period 2026-04-01…](https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&units=pc1&file_type=json&sort_order=desc&limit=24), T1, fetched 2026-05-17T03:01:49Z)_
-- **Florida labor force participation** — 57.7 → _(source: [FRED Florida Labor Force Participation Rate (series_id FLLFPR) — latest observation 57.7 percent for period 2026-03-01,…](https://api.stlouisfed.org/fred/series/observations?series_id=LBSSA12&units=lin&file_type=json&sort_order=desc&limit=24), T1, fetched 2026-05-17T03:01:49Z)_
+_No key metrics emitted by this brain._
 
 ## Drivers
 
@@ -28,9 +25,9 @@ _No upstream drivers (primary brain)._
 ## Confidence
 
 - **1.00** (deterministic: trust tier × freshness × upstream propagation)
-- Worst trust tier in chain: T1
-- Upstream brains that passed the relevance floor: 0
+- Worst trust tier in chain: T4
+- Upstream brains that passed the relevance floor: 1
 
 ---
 
-_Brain: `macro-swfl` v12 · refined 2026-05-17T03:01:53Z · relevance half-life 720h · decay `weeks`_
+_Brain: `macro-swfl` v22 · refined 2026-05-20T07:33:37Z · relevance half-life 720h · decay `weeks`_

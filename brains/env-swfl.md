@@ -1,12 +1,12 @@
-<!-- FRESHNESS: v16 | Token: SWFL-7421-v16-20260520 -->
+<!-- FRESHNESS: v17 | Token: SWFL-7421-v17-20260520 -->
 ---
 brain_id: env-swfl
-version: 16
-refined_at: 2026-05-20T00:59:03Z
-freshness_token: SWFL-7421-v16-20260520
+version: 17
+refined_at: 2026-05-20T07:33:11Z
+freshness_token: SWFL-7421-v17-20260520
 ttl_seconds: 2592000
 context_type: user_saved_reference
-scope: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-veto consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.
+scope: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-barrier-mode-1 consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.
 ---
 
 # User-Saved Reference Context
@@ -20,11 +20,11 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-veto consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.
+SCOPE: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-barrier-mode-1 consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.
 
 --- HOW THE USER LIKES TO WORK ---
 - The user is an SWFL operator who treats FEMA flood-zone designations as the authoritative read on structural flood exposure — never weaker secondary aggregators.
-- The user expects coastal V/VE zone presence to be surfaced separately from general SFHA coverage because the barrier-island flood-veto rule keys on V/VE specifically.
+- The user expects coastal V/VE zone presence to be surfaced separately from general SFHA coverage because barrier-island ZIPs concentrate both V/VE exposure and the per-ZIP AAL that flood-barrier-mode-1 keys on.
 - The user expects per-metric provenance on every value: a disputant should be able to trace any SFHA percentage back to the exact FEMA NFHL query that produced it.
 
 --- CITATION TABLE ---
@@ -42,8 +42,8 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
 --- OUTPUT ---
 {
   "brain_id": "env-swfl",
-  "version": 16,
-  "refined_at": "2026-05-20T00:59:03Z",
+  "version": 17,
+  "refined_at": "2026-05-20T07:33:11Z",
   "direction": "bearish",
   "magnitude": 0.8,
   "drivers": [],
@@ -135,7 +135,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -150,7 +150,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -165,7 +165,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "count",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -180,7 +180,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -195,7 +195,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&siteStatus=active&format=json",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json), parameterCd 00065, latest dv read on 2026-05-15, HUC 03090205 (Caloosahatchee), sites: 02292900."
       }
@@ -210,7 +210,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2025, 51 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
@@ -225,7 +225,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2025, 51 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
@@ -240,7 +240,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33931 → barrier."
       }
@@ -255,7 +255,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
@@ -270,7 +270,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 849.52 USD/yr; median building value = 400000 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2025, 51 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
@@ -285,7 +285,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2025, 1 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
@@ -300,7 +300,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2025, 1 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
@@ -315,7 +315,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33957 → barrier."
       }
@@ -330,7 +330,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
@@ -345,7 +345,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 13.69 USD/yr; median building value = 720000 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2025, 1 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
@@ -360,7 +360,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34145 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 2 claims in window, 2020 ACS population estimate 18,000 × 0.3 NSI proxy (v1)."
       }
@@ -375,7 +375,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34145 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 2 claims in window, 2020 ACS population estimate 18,000 × 0.3 NSI proxy (v1)."
       }
@@ -390,7 +390,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34145 → barrier."
       }
@@ -405,7 +405,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
@@ -420,7 +420,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 8.31 USD/yr; median building value = 545000 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34145 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 2 claims in window, 2020 ACS population estimate 18,000 × 0.3 NSI proxy (v1)."
       }
@@ -435,7 +435,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34103 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 3 claims in window, 2020 ACS population estimate 19,000 × 0.3 NSI proxy (v1)."
       }
@@ -450,7 +450,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34103 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 3 claims in window, 2020 ACS population estimate 19,000 × 0.3 NSI proxy (v1)."
       }
@@ -465,7 +465,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34103 → inland."
       }
@@ -480,7 +480,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0) midpoint; range no flood cap-rate adjustment. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
@@ -495,7 +495,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 8.2 USD/yr; median building value = 510000 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34103 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 3 claims in window, 2020 ACS population estimate 19,000 × 0.3 NSI proxy (v1)."
       }
@@ -510,7 +510,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 3 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       }
@@ -525,7 +525,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 3 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       }
@@ -540,7 +540,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34102 → coastal-mainland."
       }
@@ -555,7 +555,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0.5) midpoint; range +20-35 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
@@ -570,7 +570,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 7.5 USD/yr; median building value = 450000 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2025, 3 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       }
@@ -585,7 +585,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33950 (Charlotte County, FIPS 12015), AAL window = last 10 years ending 2025, 4 claims in window, 2020 ACS population estimate 18,000 × 0.3 NSI proxy (v1)."
       }
@@ -600,7 +600,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33950 (Charlotte County, FIPS 12015), AAL window = last 10 years ending 2025, 4 claims in window, 2020 ACS population estimate 18,000 × 0.3 NSI proxy (v1)."
       }
@@ -615,7 +615,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33950 → inland."
       }
@@ -630,7 +630,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0) midpoint; range no flood cap-rate adjustment. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
@@ -645,7 +645,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-05-20T00:59:03Z",
+        "fetched_at": "2026-05-20T07:33:11Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 7.23 USD/yr; median building value = 297500 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims (fixture; refinery/__fixtures__/fema-nfip-swfl.sample.json), ZIP 33950 (Charlotte County, FIPS 12015), AAL window = last 10 years ending 2025, 4 claims in window, 2020 ACS population estimate 18,000 × 0.3 NSI proxy (v1)."
       }
@@ -672,7 +672,7 @@ s03 | USGS Water Services (fixture; usgs-water.sample.json, 57 rows across 4 par
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-20T00:59:03Z"
+    "computed_at": "2026-05-20T07:33:11Z"
   },
   "exogenous_signals": []
 }

@@ -4,7 +4,7 @@
  * Why this exists: env-swfl's pre-2026-05-19 flood logic applied one SWFL-wide
  * threshold to a metro that contains both Fort Myers Beach (Ian 14-16 ft surge,
  * ~90% structural destruction) AND downtown Fort Myers (Ian 2-4 ft surge, structures
- * intact). The flood-veto fired on every Lee County refine because Lee's aggregate
+ * intact). The prior `flood-veto` override fired on every Lee County refine because Lee's aggregate
  * VE coverage is 5.75% — but that 5.75% lives almost entirely on 6.5 sq mi of
  * barrier-island ZIP 33931. Cape Coral, Fort Myers downtown, and inland Naples
  * share none of that risk and shouldn't share the veto.
@@ -179,7 +179,7 @@ export const SWFL_COUNTY_FIPS = new Set([
 
 /**
  * Lookup the barrier classification for a ZIP. Unknown ZIPs default to "inland"
- * with score 0.0 — the conservative choice that does NOT trigger the flood-veto.
+ * with score 0.0 — the conservative choice that does NOT trigger the flood-barrier-mode-1 override.
  * The data-driven validator (`validateClassification`) catches stale-table cases
  * where an unknown ZIP is in fact high-risk.
  */
@@ -227,6 +227,20 @@ export function capRateBpsRangeFor(barrierScore: BarrierScore): string {
   if (barrierScore === 0.5) return "+20-35 bps";
   return "no flood cap-rate adjustment";
 }
+
+/**
+ * Per-insured-property AAL threshold (USD/yr) above which a barrier-island
+ * ZIP triggers flood-barrier-mode-1. Calibrated from Wharton/Kousky NFIP-
+ * claims-based ranges (barrier-island avg claim ~$134k ÷ ~10-yr return ÷
+ * ~30% NFIP-coverage proxy). The env-swfl pack's producer-side Mode 1
+ * boundary and the real-estate constitution's flood-barrier-mode-1 override
+ * both import this constant so they fire on the identical $800 cliff —
+ * single source of truth lives in swfl-geo (alongside barrierClassFor and
+ * capRateBpsFor) because it's a SWFL flood-policy primitive, not pack-
+ * internal state. Revisit after the first full live refine — open question
+ * §1 in docs/superpowers/plans/2026-05-19-env-swfl-flood-restructure.md.
+ */
+export const FLOOD_VETO_AAL_THRESHOLD_USD = 800;
 
 /**
  * Build-time stale-table sentinel. Given the per-ZIP AAL values computed for

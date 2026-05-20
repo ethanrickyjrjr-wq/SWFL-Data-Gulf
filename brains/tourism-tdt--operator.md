@@ -4,23 +4,24 @@ _Flat technical read of the brain output in DAG order, suitable for engine opera
 
 ## TL;DR
 
-**BULLISH** (magnitude 0.55)
+**BULLISH** (magnitude 0.80)
 
 ## ⚠️ Caveats (read first)
 
-- Florida DOR distribution rosters may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.
+- TDT collections in this build are SYNTHETIC fixture data — unset REFINERY_SOURCE or set it to `live` to read the real fl_dor_tdt_collections table.
+- Latest month is a trough-season reading (trough). Operators should not extrapolate the single-month figure to an annual run rate — weight against trailing_12mo_collections_usd instead.
 
 ## Conclusion
 
-Lee County TDT collections for 2026-04 (shoulder season): $9.03M. Year-over-year +18.2% against the prior fiscal year. Trailing 12 months stand at 79% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this seasonal pulse; the cross-vertical read lives downstream in master.
+Lee County TDT collections for 2025-09 (trough season): $1.80M. Year-over-year +12.5% against the prior fiscal year. Trailing 12 months stand at 99% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this seasonal pulse; the cross-vertical read lives downstream in master.
 
 ## Key Findings
 
-- **Latest monthly TDT collections (Lee County, 2026-04, shoulder season)** — 9028029.34 ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly row…](https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd), T1, fetched 2026-05-17T03:10:35Z)_
-- **Year-over-year delta vs same month prior year** — 18.2 ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly row…](https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd), T1, fetched 2026-05-17T03:10:35Z)_
-- **Trailing 12-month TDT collections total** — 53331298.019999996 → _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly row…](https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd), T1, fetched 2026-05-17T03:10:35Z)_
-- **Post-Hurricane-Ian recovery ratio (trailing 12mo ÷ best pre-Ian 12mo)** — 0.79 (79.00%) ↓ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly row…](https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd), T1, fetched 2026-05-17T03:10:35Z)_
-- **Seasonal position vs same-month historical mean** — 1.23 ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 103 monthly row…](https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fl_dor_tdt_collections?select=id,county,period,collections_usd), T1, fetched 2026-05-17T03:10:35Z)_
+- **Latest monthly TDT collections (Lee County, 2025-09, trough season)** — 1800000 ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows…](fixture://refinery/__fixtures__/tourism-tdt.sample.json), T1, fetched 2026-05-18T20:50:57Z)_
+- **Year-over-year delta vs same month prior year** — 12.5 ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows…](fixture://refinery/__fixtures__/tourism-tdt.sample.json), T1, fetched 2026-05-18T20:50:57Z)_
+- **Trailing 12-month TDT collections total** — 53150000 → _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows…](fixture://refinery/__fixtures__/tourism-tdt.sample.json), T1, fetched 2026-05-18T20:50:57Z)_
+- **Post-Hurricane-Ian recovery ratio (trailing 12mo ÷ best pre-Ian 12mo)** — 0.99 (99.00%) ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows…](fixture://refinery/__fixtures__/tourism-tdt.sample.json), T1, fetched 2026-05-18T20:50:57Z)_
+- **Seasonal position vs same-month historical mean** — 1.11 ↑ _(source: [Florida DOR Tourist Development Tax collections via Brains Supabase fl_dor_tdt_collections (Lee County, 48 monthly rows…](fixture://refinery/__fixtures__/tourism-tdt.sample.json), T1, fetched 2026-05-18T20:50:57Z)_
 
 ## Drivers
 
@@ -34,4 +35,4 @@ _No upstream drivers (primary brain)._
 
 ---
 
-_Brain: `tourism-tdt` v5 · refined 2026-05-17T03:10:35Z · relevance half-life 720h · decay `weeks`_
+_Brain: `tourism-tdt` v13 · refined 2026-05-18T20:50:57Z · relevance half-life 720h · decay `weeks`_

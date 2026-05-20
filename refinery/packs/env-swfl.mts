@@ -29,6 +29,7 @@ import {
   barrierClassFor,
   capRateBpsFor,
   capRateBpsRangeFor,
+  FLOOD_VETO_AAL_THRESHOLD_USD,
 } from "../lib/swfl-geo.mts";
 import { env } from "../config/env.mts";
 
@@ -42,9 +43,8 @@ import { env } from "../config/env.mts";
  * fetch shape and docs/env-swfl-spike-findings.md for the verified endpoint
  * contract.
  *
- * Leaf brain (no upstream brains). env-swfl becomes the FIRST upstream a
- * future flood-veto override consults — declared via `input_brains: ["env-swfl"]`
- * with `edge_type: "veto"` once typed DAG edges land (Session 8 P5).
+ * Leaf brain (no upstream brains). Declared from master via
+ * `{ id: "env-swfl", edge_type: "modifier" }` — see `refinery/packs/master.mts`.
  *
  * Pure deterministic pack — every key_metric is computed in code from typed
  * fragments. No synthesis agent, no triage agent.
@@ -272,23 +272,12 @@ interface EnvVote {
 const STORM_SHADOW_YEARS = 3;
 
 /**
- * Per-insured-property AAL threshold (USD/yr) above which a barrier-island
- * ZIP triggers the flood-veto mode. Calibrated from Wharton/Kousky NFIP-
- * claims-based ranges (barrier-island avg claim ~$134k ÷ ~10-yr return ÷
- * ~30% NFIP-coverage proxy). Group C's constitution rule (PR-to-follow)
- * imports this same value so the producer-side mode and the constitution-
- * side override fire on the identical boundary. Revisit after the first
- * full live refine — open question §1 in the restructure plan.
- */
-export const FLOOD_VETO_AAL_THRESHOLD_USD = 800;
-
-/**
  * Four-state mode selection consumed by both `voteEnvDirection` (for
  * direction/magnitude) and `envSwflOutputProducer` (for conclusion template).
  * Centralising the mode keeps the two surfaces aligned by construction.
  *
  *   "barrier-veto"     — any ZIP with barrier_score 1.0 AND aal ≥ $800/yr.
- *                        Headline mode; binding flood-veto signal.
+ *                        Headline mode; binding flood-barrier-mode-1 signal.
  *   "coastal-mainland" — no barrier-veto fire AND ≥1 ZIP with score ≥ 0.5.
  *                        Includes barrier ZIPs whose AAL is below threshold.
  *   "inland"           — only ZIPs at barrier_score 0.0.
@@ -586,7 +575,7 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   if (!snapshot || snapshot.counties.length === 0) {
     return {
       conclusion:
-        "env-swfl: no usable FEMA NFHL aggregates in this build window — pack rendered with no metrics. Flood-veto cannot fire from this brain until live data is restored.",
+        "env-swfl: no usable FEMA NFHL aggregates in this build window — pack rendered with no metrics. Flood-barrier-mode-1 cannot fire from this brain until live data is restored.",
       key_metrics: [],
       caveats: [
         "Zero FEMA NFHL zone aggregates survived fetch + normalization. Check REFINERY_SOURCE, network reachability to hazards.fema.gov, and the fixture file before treating this output as a real read.",
@@ -1094,7 +1083,7 @@ export const envSwfl: PackDefinition = {
   brain_id: "env-swfl",
   domain: "environmental",
   scope:
-    "Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-veto consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.",
+    "Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-barrier-mode-1 consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.",
   ttl_seconds: 2592000, // 30 days — FEMA NFHL revisions arrive via LOMRs at multi-month cadence
   sources: [envSwflSource, femaNfipSource, usgsWaterSource],
   input_brains: [],
@@ -1110,7 +1099,7 @@ export const envSwfl: PackDefinition = {
   synthesisStrategy: "deterministic",
   preferences: [
     "The user is an SWFL operator who treats FEMA flood-zone designations as the authoritative read on structural flood exposure — never weaker secondary aggregators.",
-    "The user expects coastal V/VE zone presence to be surfaced separately from general SFHA coverage because the barrier-island flood-veto rule keys on V/VE specifically.",
+    "The user expects coastal V/VE zone presence to be surfaced separately from general SFHA coverage because barrier-island ZIPs concentrate both V/VE exposure and the per-ZIP AAL that flood-barrier-mode-1 keys on.",
     "The user expects per-metric provenance on every value: a disputant should be able to trace any SFHA percentage back to the exact FEMA NFHL query that produced it.",
   ],
   activeProject:

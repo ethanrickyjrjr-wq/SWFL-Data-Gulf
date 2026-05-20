@@ -91,7 +91,7 @@ const ROLE_PURPOSE: Record<RoleId, string> = {
   operator:
     "Flat technical read of the brain output in DAG order, suitable for engine operators and producers.",
   "cre-broker":
-    "Market-direction read framed for commercial real estate decisions, with flood-veto and rate signals foregrounded.",
+    "Market-direction read framed for commercial real estate decisions, with flood-barrier-mode-1 and rate signals foregrounded.",
   "franchise-consultant":
     "Outcomes-first read framed for franchise opportunity assessment, with survival and sector-credit signals foregrounded.",
   cpa: "Audit-grade read with full per-metric provenance tabulated by trust tier — every value traceable to its source URL.",

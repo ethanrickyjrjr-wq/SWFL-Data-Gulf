@@ -41,8 +41,7 @@ export type TrustTier = 1 | 2 | 3 | 4;
  *   "input":      consumed as data. The default; covers ~every leaf → master edge today.
  *   "constraint": bounds the downstream's conclusion space (e.g. caps magnitude,
  *                 forbids a direction) without flipping it outright.
- *   "veto":       can flip the downstream's direction unilaterally. env-swfl → master
- *                 carries this today via flood-veto in the real-estate constitution.
+ *   "veto":       can flip the downstream's direction unilaterally.
  *   "modifier":   adjusts magnitude or confidence but never direction.
  *
  * Surfaced inline in `BrainOutput.drivers` so a disputant can ask

@@ -39,7 +39,7 @@ function fixture(overrides: Partial<BrainOutput> = {}): BrainOutput {
       { brain_id: "cre-swfl", edge_type: "input" },
       { brain_id: "env-swfl", edge_type: "veto" },
     ],
-    overrides: ["flood-veto"],
+    overrides: ["flood-barrier-mode-1"],
     conclusion:
       "Concrete narrative produced by the synthesis producer. Numbers cited here are 43.24% SFHA and 5.75% V/VE Lee.",
     key_metrics: [
@@ -70,7 +70,7 @@ function fixture(overrides: Partial<BrainOutput> = {}): BrainOutput {
         label: "Sector credit charge-off",
       }),
     ],
-    caveats: ['Override "flood-veto" forced bearish (priority 90)'],
+    caveats: ['Override "flood-barrier-mode-1" fired (priority 90)'],
     contradicts: ["cre-swfl (bullish) vs env-swfl (bearish)"],
     confidence: 0.97,
     joint_integrity: 0.85,

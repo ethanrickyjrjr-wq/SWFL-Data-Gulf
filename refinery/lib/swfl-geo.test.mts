@@ -28,7 +28,7 @@ describe("swfl-geo barrier-island classification", () => {
     expect(out.score).toBe(0.0);
   });
 
-  it("defaults unknown ZIPs to inland 0.0 (conservative — does not trigger flood-veto)", () => {
+  it("defaults unknown ZIPs to inland 0.0 (conservative — does not trigger flood-barrier-mode-1 override)", () => {
     const out = barrierClassFor("99999");
     expect(out.classification).toBe("inland");
     expect(out.score).toBe(0.0);

@@ -21,7 +21,7 @@ test("loadVocabularySync: caches across calls (same object reference)", () => {
   assert.equal(a, b);
 });
 
-test("resolveConceptSlugs: inverts slug_index for the flood-veto pair", () => {
+test("resolveConceptSlugs: inverts slug_index for the Lee/Collier VE-coverage pair", () => {
   const slugs = resolveConceptSlugs([
     "env_lee_ve_zone_coverage_pct",
     "env_collier_ve_zone_coverage_pct",

@@ -78,7 +78,7 @@ const SFHA_ZONES = new Set([
   "V30",
 ]);
 
-/** Coastal high-hazard zones — the FMB / barrier-island flood-veto trigger. */
+/** Coastal high-hazard SFHA subset — V-family FEMA flood zones (wave action per 44 CFR §59.1). Flags each fragment's is_ve_zone, which aggregates into swfl_ve_area_sq_deg. */
 const VE_ZONES = new Set([
   "V",
   "VE",

@@ -573,7 +573,7 @@
       "value_range": [0, 100],
       "direction_concept": "qual_metric_trajectory",
       "status": "stub",
-      "scope_note": "Pre-registered for the flood-veto override rule in refinery/constitution/real-estate.mts (priority 90). NOT emitted by env-swfl directly — env-swfl emits scope-specific concepts (env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct). Constitution should be updated in a follow-up to point the flood-veto trigger at the V/VE coverage concepts; this stub remains as the legacy hook."
+      "scope_note": "Generic flood-risk percentage at unspecified spatial granularity. Currently a stub — no source brain emits it, and the SWFL flood-coverage signal is carried instead by the scope-specific concepts env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct (and their V/VE-zone siblings)."
     },
 
     "env_swfl_sfha_coverage_pct": {
@@ -608,7 +608,7 @@
       "value_range": [0, 1],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Area-weighted share of mapped SWFL footprint classified as FEMA coastal high-hazard (V, VE, V1–V30, V99). This is the barrier-island / flood-veto-eligible subset of SFHA; pair with env_swfl_sfha_coverage_pct for full structural-flood context."
+      "scope_note": "Area-weighted share of mapped SWFL footprint (6 counties) classified as FEMA coastal high-hazard (V, VE, V1–V30, V99). Coastal-high-hazard zones are the V-prefixed subset of SFHA, distinguished from A-prefixed riverine/sheet-flow SFHA by wave-action exposure. Pair with env_swfl_sfha_coverage_pct for full structural-flood context."
     },
 
     "env_swfl_ve_zone_polygon_count": {
@@ -657,7 +657,7 @@
       "value_range": [0, 1],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Lee County (FIPS 12071) area-weighted V/VE coastal high-hazard coverage. This is the flood-veto-eligible subset for Lee. Above-baseline values are the primary signal that barrier-island coordinates in Lee should be paired with property-level lookups before any lease/acquisition decision."
+      "scope_note": "Lee County (FIPS 12071) area-weighted share of mapped footprint classified as FEMA coastal high-hazard (V, VE, V1–V30, V99). Pair with env_lee_sfha_coverage_pct for full structural-flood context. Lee County's coastal high-hazard exposure concentrates in the barrier-island ZIPs (33931 Fort Myers Beach, 33957 Sanibel, 33924 Captiva); county-aggregate values average across that concentration."
     },
 
     "env_collier_sfha_coverage_pct": {
@@ -694,7 +694,7 @@
       "value_range": [0, 1],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Collier County (FIPS 12021) area-weighted V/VE coastal high-hazard coverage. Flood-veto-eligible subset for Collier — keyed by the same barrier-island logic as Lee but with Naples/Marco Island as the operator-visible context."
+      "scope_note": "Collier County (FIPS 12021) area-weighted V/VE coastal high-hazard coverage. Companion to env_lee_ve_zone_coverage_pct under identical FEMA NFHL area-weighted methodology; Naples and Marco Island concentrate this county's V/VE polygons."
     },
 
     "env_flood_losses_swfl_storm_year_total_usd": {
@@ -837,7 +837,7 @@
       "value_range": [0, 1],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Three-state SWFL geographic classification from the static table in refinery/lib/swfl-geo.mts: 1.0 = barrier island (Fort Myers Beach 33931, Sanibel 33957, Captiva 33924, Marco Island 34145, Boca Grande 33921); 0.5 = coastal-mainland (Bonita Beach 34134, Naples coastal 34102, Cape Coral SW 33914, Fort Myers downtown 33901); 0.0 = inland (Cape Coral E 33990, North Naples 34109, East Naples 34112, plus all SWFL ZIPs not in the table — conservative default). The flood-veto constitution rule in real-estate.mts fires only when this score is 1.0 AND aal_usd_per_insured_property ≥ FLOOD_VETO_AAL_THRESHOLD_USD ($800/yr). Validator validateClassification(zipAALs) warns at build time if a high-AAL ZIP is not in the table — stale-table sentinel. Emitted with slug template swfl_zip_{ZIP}_barrier_island_score."
+      "scope_note": "Three-state SWFL geographic classification from the static table in refinery/lib/swfl-geo.mts: 1.0 = barrier island (Fort Myers Beach 33931, Sanibel 33957, Captiva 33924, Marco Island 34145, Boca Grande 33921); 0.5 = coastal-mainland (Bonita Beach 34134, Naples coastal 34102, Cape Coral SW 33914, Fort Myers downtown 33901); 0.0 = inland (Cape Coral E 33990, North Naples 34109, East Naples 34112, plus all SWFL ZIPs not in the table — conservative default). The flood-barrier-mode-1 constitution rule in real-estate.mts fires only when this score is 1.0 AND aal_usd_per_insured_property ≥ FLOOD_VETO_AAL_THRESHOLD_USD ($800/yr). Validator validateClassification(zipAALs) warns at build time if a high-AAL ZIP is not in the table — stale-table sentinel. Emitted with slug template swfl_zip_{ZIP}_barrier_island_score."
     },
 
     "env_storm_property_damage_events_10yr_swfl": {
