@@ -108,7 +108,7 @@ export function capRateBpsRangeFor(barrier_score: 0.0 | 0.5 | 1.0): string;
 
 ```ts
 // Replaces the priority-90 ANY-VE-pct >5% trigger.
-const FLOOD_VETO_AAL_THRESHOLD_USD = 800; // per insured property per year
+const FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD = 800; // per insured property per year
 const ZIP_AAL_PATTERN = /^swfl_zip_(\d{5})_flood_aal_usd_per_insured_property$/;
 const ZIP_BARRIER_PATTERN = /^swfl_zip_(\d{5})_barrier_island_score$/;
 
@@ -130,7 +130,7 @@ const floodVeto: OverrideRule = {
       }
       for (const [zip, aal] of aalByZip) {
         if (
-          aal >= FLOOD_VETO_AAL_THRESHOLD_USD &&
+          aal >= FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD &&
           (barrierByZip.get(zip) ?? 0) >= 1.0
         )
           return true;
@@ -301,7 +301,7 @@ Bumps automatically: env-swfl version → `vN+1` because `outputProducer` shape 
 
 ## Open questions for review
 
-1. **Threshold calibration.** `FLOOD_VETO_AAL_THRESHOLD_USD = 800`. Is this the right cut? It's calibrated from Wharton/Kousky NFIP-claims-based ranges (barrier-island avg claim ~$134k ÷ ~10-yr return ÷ ~30% policy denominator). Worth pressure-testing against the actual 89k-row SWFL claim data before locking.
+1. **Threshold calibration.** `FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD = 800`. Is this the right cut? It's calibrated from Wharton/Kousky NFIP-claims-based ranges (barrier-island avg claim ~$134k ÷ ~10-yr return ÷ ~30% policy denominator). Worth pressure-testing against the actual 89k-row SWFL claim data before locking.
 2. **Should NRI ingest be in Group B or v2?** Including it makes the per-ZIP AAL a "claims OR NRI-tract-EAL" hybrid (more defensible). Deferring keeps the v1 PR small and reviewable.
 3. **Top-6 ZIP cap.** Worth confirming spec-validator's metric-count ceiling before locking N=6. If the limit is higher, we can surface more.
 4. **`flood-is-one-rule-not-the-headline` posture.** This plan keeps flood-veto in the cascade — it's one rule among many priority-90 overrides, not removed. Confirm that matches the intended brand posture.
