@@ -71,6 +71,9 @@ next-env.d.ts
 # Claude Code per-machine permission overrides (settings.json stays shared)
 .claude/settings.local.json
 
+# Claude Code internal scheduler lockfile — runtime-only, per-machine
+.claude/scheduled_tasks.lock
+
 # Python bytecode
 __pycache__/
 *.pyc
