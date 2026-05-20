@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { lintSmoothing } from "./smoothing-lint.mts";
 import { SMOOTHING_TOKENS } from "../lib/smoothing-tokens.mts";

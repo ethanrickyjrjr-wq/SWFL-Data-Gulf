@@ -13,7 +13,7 @@
  * fixture-mode refinery runs in CI. Validator only checks the field's TYPE.
  */
 
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { validateSpec } from "../../validate/spec-validator.mts";
 

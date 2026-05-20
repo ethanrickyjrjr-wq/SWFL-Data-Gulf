@@ -13,7 +13,7 @@
  * which is the atomic-type-lift rule. Fix all three before re-greening.
  */
 
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import type {
   BrainOutputMetric,

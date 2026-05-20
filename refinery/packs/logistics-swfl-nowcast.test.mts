@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile, rm, readFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -979,15 +979,29 @@ test("writeShockLogRow: fixture mode is a no-op (returns kind=skipped, reason=fi
 });
 
 test("writeShockLogRow: skipped when supabase env is missing in live mode", async () => {
-  const out = makeNowcastBrainOutput();
-  const result = await writeShockLogRow({
-    packId: "logistics-swfl-nowcast",
-    brainOutput: out,
-    supabaseUrl: undefined,
-    supabaseKey: undefined,
-    sourceMode: "live",
-  });
-  assert.deepEqual(result, { kind: "skipped", reason: "no-supabase-env" });
+  // Force env.supabaseUrl/Key to undefined so the `?? env.x` fallback inside
+  // writeShockLogRow doesn't pick up creds loaded from a local .env.local. CI
+  // has no .env.local so this is a no-op there; locally it's the only way to
+  // exercise the "no-supabase-env" branch when developers have real creds.
+  const { env } = await import("../config/env.mts");
+  const savedUrl = env.supabaseUrl;
+  const savedKey = env.supabaseKey;
+  env.supabaseUrl = undefined;
+  env.supabaseKey = undefined;
+  try {
+    const out = makeNowcastBrainOutput();
+    const result = await writeShockLogRow({
+      packId: "logistics-swfl-nowcast",
+      brainOutput: out,
+      supabaseUrl: undefined,
+      supabaseKey: undefined,
+      sourceMode: "live",
+    });
+    assert.deepEqual(result, { kind: "skipped", reason: "no-supabase-env" });
+  } finally {
+    env.supabaseUrl = savedUrl;
+    env.supabaseKey = savedKey;
+  }
 });
 
 test("writeShockLogRow: live mode invokes the injected client with the right table + row shape", async () => {

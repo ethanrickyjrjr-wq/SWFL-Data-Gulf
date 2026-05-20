@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { walkUpstream, walkConsumers } from "./dag.mts";
 import type { PackDefinition } from "../types/pack.mts";

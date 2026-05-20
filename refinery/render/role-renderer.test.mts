@@ -1,4 +1,4 @@
-import { describe, test } from "node:test";
+import { describe, test } from "bun:test";
 import assert from "node:assert/strict";
 import { renderAllRoles, renderForRole } from "./role-renderer.mts";
 import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";

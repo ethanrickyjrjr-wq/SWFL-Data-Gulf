@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 
 // Force fixture mode BEFORE importing — env.mts reads process.env at module init.

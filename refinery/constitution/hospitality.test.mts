@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
 import type { OverrideRule } from "./types.mts";

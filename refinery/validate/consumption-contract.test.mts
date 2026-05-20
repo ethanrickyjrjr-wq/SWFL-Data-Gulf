@@ -31,7 +31,7 @@
  * locks. Fix the doc, not the test, unless the blueprint itself changed.
  */
 
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";

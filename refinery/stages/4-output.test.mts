@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { formatWeakestContributorCaveat } from "./4-output.mts";
 import type { AttributionEntry } from "../lib/confidence.mts";
