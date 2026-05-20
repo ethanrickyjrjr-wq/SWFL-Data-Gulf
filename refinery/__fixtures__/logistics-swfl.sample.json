@@ -1,128 +1,110 @@
-{
-  "__meta": {
-    "source": "FAF5 (Freight Analysis Framework v5) — synthetic fixture for refinery testing; values approximate real ORNL FAF5.7.1 magnitudes for FL zone 129 (Remainder of Florida) inbound domestic flows. Replace with live data_lake.faf_flows query in live mode.",
-    "verified": "2026-05-17",
-    "note": "Filtered to dms_dest=129 AND trade_type=1 (inbound domestic to SWFL). Each row is one origin-zone × commodity combination for the latest historical FAF5 year (2024). tons_2024 in thousand tons; value_2024 in millions USD."
+[
+  {
+    "dms_orig": 121,
+    "dms_dest": 129,
+    "sctg2": 7,
+    "trade_type": 1,
+    "tons_2024": 1240.3,
+    "value_2024": 3812.5,
+    "year": 2024
   },
-  "flows": [
-    {
-      "dms_orig": 121,
-      "dms_dest": 129,
-      "sctg2": 7,
-      "trade_type": 1,
-      "tons_2024": 1240.3,
-      "value_2024": 3812.5
-    },
-    {
-      "dms_orig": 121,
-      "dms_dest": 129,
-      "sctg2": 12,
-      "trade_type": 1,
-      "tons_2024": 980.7,
-      "value_2024": 64.2
-    },
-    {
-      "dms_orig": 123,
-      "dms_dest": 129,
-      "sctg2": 12,
-      "trade_type": 1,
-      "tons_2024": 2156.4,
-      "value_2024": 142.8
-    },
-    {
-      "dms_orig": 123,
-      "dms_dest": 129,
-      "sctg2": 31,
-      "trade_type": 1,
-      "tons_2024": 1842.1,
-      "value_2024": 487.3
-    },
-    {
-      "dms_orig": 123,
-      "dms_dest": 129,
-      "sctg2": 32,
-      "trade_type": 1,
-      "tons_2024": 412.6,
-      "value_2024": 391.5
-    },
-    {
-      "dms_orig": 124,
-      "dms_dest": 129,
-      "sctg2": 7,
-      "trade_type": 1,
-      "tons_2024": 875.2,
-      "value_2024": 2641.0
-    },
-    {
-      "dms_orig": 124,
-      "dms_dest": 129,
-      "sctg2": 17,
-      "trade_type": 1,
-      "tons_2024": 1893.4,
-      "value_2024": 1142.7
-    },
-    {
-      "dms_orig": 41,
-      "dms_dest": 129,
-      "sctg2": 33,
-      "trade_type": 1,
-      "tons_2024": 318.9,
-      "value_2024": 412.6
-    },
-    {
-      "dms_orig": 49,
-      "dms_dest": 129,
-      "sctg2": 12,
-      "trade_type": 1,
-      "tons_2024": 1567.2,
-      "value_2024": 103.1
-    },
-    {
-      "dms_orig": 49,
-      "dms_dest": 129,
-      "sctg2": 26,
-      "trade_type": 1,
-      "tons_2024": 522.8,
-      "value_2024": 287.4
-    },
-    {
-      "dms_orig": 51,
-      "dms_dest": 129,
-      "sctg2": 17,
-      "trade_type": 1,
-      "tons_2024": 412.0,
-      "value_2024": 248.6
-    },
-    {
-      "dms_orig": 122,
-      "dms_dest": 129,
-      "sctg2": 7,
-      "trade_type": 1,
-      "tons_2024": 631.5,
-      "value_2024": 1905.7
-    }
-  ],
-  "zone_lookup": [
-    { "zone_id": 41, "zone_name": "Atlanta", "state_abbr": "GA" },
-    {
-      "zone_id": 49,
-      "zone_name": "Remainder of Southeast",
-      "state_abbr": "AL/GA/MS/SC/TN"
-    },
-    { "zone_id": 51, "zone_name": "Dallas", "state_abbr": "TX" },
-    { "zone_id": 121, "zone_name": "Miami", "state_abbr": "FL" },
-    { "zone_id": 122, "zone_name": "Jacksonville", "state_abbr": "FL" },
-    { "zone_id": 123, "zone_name": "Tampa-St. Petersburg", "state_abbr": "FL" },
-    { "zone_id": 124, "zone_name": "Orlando", "state_abbr": "FL" },
-    { "zone_id": 129, "zone_name": "Remainder of Florida", "state_abbr": "FL" }
-  ],
-  "sctg_lookup": [
-    { "sctg_code": 7, "commodity_name": "Other prepared foodstuffs" },
-    { "sctg_code": 12, "commodity_name": "Gravel and crushed stone" },
-    { "sctg_code": 17, "commodity_name": "Gasoline and aviation fuel" },
-    { "sctg_code": 26, "commodity_name": "Wood products" },
-    { "sctg_code": 31, "commodity_name": "Nonmetallic mineral products" },
-    { "sctg_code": 32, "commodity_name": "Base metals" },
-    { "sctg_code": 33, "commodity_name": "Articles of base metal" }
-  ]
-}
+  {
+    "dms_orig": 121,
+    "dms_dest": 129,
+    "sctg2": 12,
+    "trade_type": 1,
+    "tons_2024": 980.7,
+    "value_2024": 64.2,
+    "year": 2024
+  },
+  {
+    "dms_orig": 123,
+    "dms_dest": 129,
+    "sctg2": 12,
+    "trade_type": 1,
+    "tons_2024": 2156.4,
+    "value_2024": 142.8,
+    "year": 2024
+  },
+  {
+    "dms_orig": 123,
+    "dms_dest": 129,
+    "sctg2": 31,
+    "trade_type": 1,
+    "tons_2024": 1842.1,
+    "value_2024": 487.3,
+    "year": 2024
+  },
+  {
+    "dms_orig": 123,
+    "dms_dest": 129,
+    "sctg2": 32,
+    "trade_type": 1,
+    "tons_2024": 412.6,
+    "value_2024": 391.5,
+    "year": 2024
+  },
+  {
+    "dms_orig": 124,
+    "dms_dest": 129,
+    "sctg2": 7,
+    "trade_type": 1,
+    "tons_2024": 875.2,
+    "value_2024": 2641,
+    "year": 2024
+  },
+  {
+    "dms_orig": 124,
+    "dms_dest": 129,
+    "sctg2": 17,
+    "trade_type": 1,
+    "tons_2024": 1893.4,
+    "value_2024": 1142.7,
+    "year": 2024
+  },
+  {
+    "dms_orig": 41,
+    "dms_dest": 129,
+    "sctg2": 33,
+    "trade_type": 1,
+    "tons_2024": 318.9,
+    "value_2024": 412.6,
+    "year": 2024
+  },
+  {
+    "dms_orig": 49,
+    "dms_dest": 129,
+    "sctg2": 12,
+    "trade_type": 1,
+    "tons_2024": 1567.2,
+    "value_2024": 103.1,
+    "year": 2024
+  },
+  {
+    "dms_orig": 49,
+    "dms_dest": 129,
+    "sctg2": 26,
+    "trade_type": 1,
+    "tons_2024": 522.8,
+    "value_2024": 287.4,
+    "year": 2024
+  },
+  {
+    "dms_orig": 51,
+    "dms_dest": 129,
+    "sctg2": 17,
+    "trade_type": 1,
+    "tons_2024": 412,
+    "value_2024": 248.6,
+    "year": 2024
+  },
+  {
+    "dms_orig": 122,
+    "dms_dest": 129,
+    "sctg2": 7,
+    "trade_type": 1,
+    "tons_2024": 631.5,
+    "value_2024": 1905.7,
+    "year": 2024
+  }
+]
