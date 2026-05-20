@@ -39,6 +39,24 @@ _YEAR_COLS: list[str] = (
     + [f"tmiles_{y}" for y in FAF5_YEARS]
 )
 
+HISTORICAL_YEARS: list[int] = [2020, 2021, 2022, 2023, 2024]
+
+
+def _melt_to_year(rows: list[dict], year: int) -> list[dict]:
+    """Thin per-year rows — generic column names (no year suffix)."""
+    return [
+        {
+            "dms_orig":   r["dms_orig"],
+            "dms_dest":   r["dms_dest"],
+            "sctg2":      r["sctg2"],
+            "trade_type": r["trade_type"],
+            "tons":       r[f"tons_{year}"],
+            "value_musd": r[f"value_{year}"],
+            "tmiles":     r[f"tmiles_{year}"],
+        }
+        for r in rows
+    ]
+
 
 def _fetch_zip_bytes(url: str) -> bytes:
     result = subprocess.run(
@@ -103,6 +121,52 @@ def main() -> None:
         except Exception as exc:
             print(f"  [{table_name}] WARNING: _tier1_inventory write failed (non-fatal) -- {exc}")
         s3_urls.append(f"s3://{BUCKET}/{object_path}")
+
+    print("\n=== Year-partitioned backfill (2020-2024) ===")
+    for year in HISTORICAL_YEARS:
+        year_rows = _melt_to_year(flows_rows, year)
+        object_path = f"faf5/year={year}/faf_flows.parquet"
+        print(f"\n  [year={year}] {len(year_rows):,} rows -> {BUCKET}/{object_path}")
+        byte_size = upload_parquet(BUCKET, object_path, year_rows)
+        print(f"  [year={year}] uploaded {byte_size:,} bytes")
+        try:
+            write_tier1_pointer(
+                None,
+                f"faf_flows_year_{year}",
+                BUCKET,
+                object_path,
+                len(year_rows),
+                FAF5_DOWNLOAD_URL,
+                pack_id="logistics-swfl",
+                vintage=str(year),
+            )
+            print(f"  [year={year}] _tier1_inventory pointer written")
+        except Exception as exc:
+            print(f"  [year={year}] WARNING: _tier1_inventory write failed (non-fatal) -- {exc}")
+        s3_urls.append(f"s3://{BUCKET}/{object_path}")
+
+    print("\n=== DuckDB row-count verification (local Parquet scan) ===")
+    import duckdb as _ddb
+    import tempfile
+    import pyarrow as _pa
+    import pyarrow.parquet as _pq
+    _conn = _ddb.connect()
+    for year in HISTORICAL_YEARS:
+        year_rows_v = _melt_to_year(flows_rows, year)
+        with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as _tmp:
+            _pq.write_table(_pa.Table.from_pylist(year_rows_v), _tmp.name)
+            _total = _conn.execute(
+                f"SELECT COUNT(*) FROM read_parquet('{_tmp.name}')"
+            ).fetchone()[0]
+            _swfl = _conn.execute(
+                f"SELECT COUNT(*) FROM read_parquet('{_tmp.name}') "
+                f"WHERE dms_dest = 129 AND trade_type = 1 AND tons > 0"
+            ).fetchone()[0]
+        print(
+            f"  year={year}: {_total:,} total FL-zone rows "
+            f"| {_swfl:,} SWFL inbound (dms_dest=129 trade_type=1 tons>0)"
+        )
+    _conn.close()
 
     print("\n=== FAF5 Cold Lane upload complete ===\n")
     print("1. Set FAF5_VINTAGE in refinery/sources/faf5-source.mts:")
