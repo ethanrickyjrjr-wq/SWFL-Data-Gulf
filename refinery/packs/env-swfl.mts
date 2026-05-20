@@ -29,7 +29,7 @@ import {
   barrierClassFor,
   capRateBpsFor,
   capRateBpsRangeFor,
-  FLOOD_VETO_AAL_THRESHOLD_USD,
+  FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD,
 } from "../lib/swfl-geo.mts";
 import { env } from "../config/env.mts";
 
@@ -292,7 +292,7 @@ export type EnvMode =
 
 export function selectEnvMode(
   snapshot: EnvSnapshot,
-  threshold: number = FLOOD_VETO_AAL_THRESHOLD_USD,
+  threshold: number = FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD,
 ): EnvMode {
   const zips = snapshot.zipAggregates;
   if (!zips || zips.length === 0) return "no-data";
@@ -1062,7 +1062,7 @@ function modeConclusion(
     const insPct = computeInsurancePctNoi(topCoastal);
     return (
       `SWFL coastal-mainland ZIPs cluster at $${Math.round(med).toLocaleString()}/yr per insured property over the ${AAL_WINDOW_YEARS}-year window, ` +
-      `with no ZIP crossing the $${FLOOD_VETO_AAL_THRESHOLD_USD}/yr barrier-island band. ` +
+      `with no ZIP crossing the $${FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD}/yr barrier-island band. ` +
       `CRE translation: +20-35 bps cap-rate adjustment for coastal-mainland flood exposure; imputed flood insurance runs ${(insPct * 100).toFixed(1)}% of NOI at an 8% cap. ` +
       `Flood exposure here is a real but bounded line item, not a structural veto.`
     );
@@ -1073,7 +1073,7 @@ function modeConclusion(
   const insPct = computeInsurancePctNoi(topInland);
   return (
     `SWFL inland ZIPs in this snapshot show $${Math.round(topInland.aal_usd_per_insured_property).toLocaleString()}/yr or less per insured property over the ${AAL_WINDOW_YEARS}-year window — ` +
-    `below the $${FLOOD_VETO_AAL_THRESHOLD_USD}/yr threshold where flood becomes a binding underwriting factor. ` +
+    `below the $${FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD}/yr threshold where flood becomes a binding underwriting factor. ` +
     `CRE translation: no flood cap-rate adjustment indicated; imputed flood insurance runs ${(insPct * 100).toFixed(1)}% of NOI.`
   );
 }

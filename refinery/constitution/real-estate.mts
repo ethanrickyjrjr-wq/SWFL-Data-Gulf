@@ -16,7 +16,7 @@
 
 import type { BrainOutput } from "../types/brain-output.mts";
 import type { ExogenousSignal } from "../types/exogenous-signal.mts";
-import { FLOOD_VETO_AAL_THRESHOLD_USD } from "../lib/swfl-geo.mts";
+import { FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD } from "../lib/swfl-geo.mts";
 import type { Constitution, OverrideRule } from "./types.mts";
 
 /**
@@ -57,7 +57,7 @@ const exogenousCriticalConfirmed: OverrideRule = {
  * direction synthesis weighs env-swfl's own bearish read alongside other
  * upstreams as a modifier, not a kill-switch.
  *
- * Threshold value FLOOD_VETO_AAL_THRESHOLD_USD is imported from swfl-geo so
+ * Threshold value FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD is imported from swfl-geo so
  * the producer-side Mode 1 boundary and the constitution-side override fire
  * on the identical $800 cliff. Single source of truth. Constitutions cannot
  * import from packs/* — that drags config/env.mts into the first test file's
@@ -103,7 +103,8 @@ const floodBarrierMode1: OverrideRule = {
       //   barrier emitted, AAL missing  → (undefined ?? 0) >= 800 is false
       const hit = [...zipMap.values()].some(
         (e) =>
-          e.barrier === 1.0 && (e.aal ?? 0) >= FLOOD_VETO_AAL_THRESHOLD_USD,
+          e.barrier === 1.0 &&
+          (e.aal ?? 0) >= FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD,
       );
       if (hit) return true;
     }

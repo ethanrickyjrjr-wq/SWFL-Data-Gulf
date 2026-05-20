@@ -240,7 +240,7 @@ export function capRateBpsRangeFor(barrierScore: BarrierScore): string {
  * internal state. Revisit after the first full live refine — open question
  * §1 in docs/superpowers/plans/2026-05-19-env-swfl-flood-restructure.md.
  */
-export const FLOOD_VETO_AAL_THRESHOLD_USD = 800;
+export const FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD = 800;
 
 /**
  * Build-time stale-table sentinel. Given the per-ZIP AAL values computed for
