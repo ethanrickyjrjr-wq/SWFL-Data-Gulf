@@ -1,0 +1,78 @@
+﻿diff --git a/refinery/vocab/brain-vocabulary.json b/refinery/vocab/brain-vocabulary.json
+index a80ef88..65ebdd0 100644
+--- a/refinery/vocab/brain-vocabulary.json
++++ b/refinery/vocab/brain-vocabulary.json
+@@ -372,6 +372,62 @@
+       "status": "active"
+     },
+ 
++    "cre_absorption_sqft": {
++      "id": "cre_absorption_sqft",
++      "prefLabel": "Net Absorption (per corridor)",
++      "altLabels": ["absorption", "net absorption"],
++      "raw_slugs": ["absorption_sqft"],
++      "category": "real-estate",
++      "domain": ["real-estate"],
++      "source_brains": ["cre-swfl"],
++      "value_type": "integer",
++      "unit": "sqft",
++      "direction_concept": "qual_metric_trajectory",
++      "status": "active"
++    },
++
++    "cre_absorption_sqft_median": {
++      "id": "cre_absorption_sqft_median",
++      "prefLabel": "Median Net Absorption (corpus)",
++      "altLabels": ["median absorption", "corpus absorption median"],
++      "raw_slugs": ["absorption_sqft_median"],
++      "category": "real-estate",
++      "domain": ["real-estate"],
++      "source_brains": ["cre-swfl", "master"],
++      "value_type": "integer",
++      "unit": "sqft",
++      "direction_concept": "qual_metric_trajectory",
++      "status": "active"
++    },
++
++    "cre_asking_rent_psf": {
++      "id": "cre_asking_rent_psf",
++      "prefLabel": "Asking Rent PSF (per corridor)",
++      "altLabels": ["asking rent", "rent psf"],
++      "raw_slugs": ["asking_rent_psf"],
++      "category": "real-estate",
++      "domain": ["real-estate"],
++      "source_brains": ["cre-swfl"],
++      "value_type": "currency",
++      "unit": "USD",
++      "direction_concept": "qual_metric_trajectory",
++      "status": "active"
++    },
++
++    "cre_asking_rent_psf_median": {
++      "id": "cre_asking_rent_psf_median",
++      "prefLabel": "Median Asking Rent PSF (corpus)",
++      "altLabels": ["median asking rent", "corpus rent median"],
++      "raw_slugs": ["asking_rent_psf_median"],
++      "category": "real-estate",
++      "domain": ["real-estate"],
++      "source_brains": ["cre-swfl", "master"],
++      "value_type": "currency",
++      "unit": "USD",
++      "direction_concept": "qual_metric_trajectory",
++      "status": "active"
++    },
++
+     "cre_seasonal_index": {
+       "id": "cre_seasonal_index",
+       "prefLabel": "Seasonal Index",
+@@ -818,6 +874,10 @@
+     "cap_rate_median": "cre_cap_rate_median",
+     "vacancy_rate": "cre_vacancy_rate",
+     "vacancy_rate_median": "cre_vacancy_rate_median",
++    "absorption_sqft": "cre_absorption_sqft",
++    "absorption_sqft_median": "cre_absorption_sqft_median",
++    "asking_rent_psf": "cre_asking_rent_psf",
++    "asking_rent_psf_median": "cre_asking_rent_psf_median",
+     "seasonal_index": "cre_seasonal_index",
+     "evolution": "cre_corridor_evolution",
+     "sofr_rate": "macro_sofr_rate",

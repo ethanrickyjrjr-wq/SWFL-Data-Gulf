@@ -1,0 +1,260 @@
+﻿{
+  "__meta": {
+    "_synthetic": true,
+    "_note": "SYNTHETIC fixture — NOT real corridor data. Column names match the live corridor_profiles table (schema dump 2026-05-14, plus the cap_rate / vacancy_rate columns added by 20260515_corridor_metrics_migration.sql). cre-source.mts normalizeCorridor() is the single point of schema knowledge.",
+    "_shape": "One row per SWFL CRE corridor. The live fetch filters deleted_at IS NULL AND verification_status = 'verified' — fixture rows all reflect that state. There is NO county column; county is derived from city in normalize(). active_flags is the de-facto 'hidden truths' layer. cap_rate_pct / vacancy_rate_pct are nullable — corridors without metrics are excluded from the cre-swfl direction vote and surfaced as caveats."
+  },
+  "rows": [
+    {
+      "corridor_name": "Immokalee Rd North Naples",
+      "city": "Naples",
+      "corridor_type": "highway-strip-mall",
+      "seasonal_index": 0.3,
+      "character": "The 'Suburban 5th Avenue' — true commercial gravity center of north Collier, anchored by daytime medical-tech employment rather than seasonal tourism.",
+      "evolution_direction": "stable",
+      "tenant_mix": "Arthrex HQ campus, Seed to Table grocery, national QSR pads, medical office",
+      "active_flags": [
+        {
+          "flag": "Arthrex Effect — non-seasonal daytime economy, year-round captive workforce",
+          "type": "status_update",
+          "status": "active",
+          "resolution": "structural"
+        },
+        {
+          "flag": "Founders Square mixed-use delivering 2026",
+          "type": "new_project",
+          "status": "active",
+          "resolution": null
+        }
+      ],
+      "source_url": "https://example.notion.so/immokalee-rd",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 5.8,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 4.2,
+      "vacancy_rate_direction": "falling",
+      "absorption_sqft": 120500,
+      "absorption_sqft_direction": "rising",
+      "asking_rent_psf": 42.50,
+      "asking_rent_psf_direction": "rising",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    },
+    {
+      "corridor_name": "US-41 / Cleveland Ave Fort Myers",
+      "city": "Fort Myers",
+      "corridor_type": "mixed-use-downtown",
+      "seasonal_index": 0.15,
+      "character": "Legacy commercial spine in structural decline. Auto-row dealerships thinning, retail vacancy climbing north of Colonial.",
+      "evolution_direction": "declining",
+      "tenant_mix": "Auto dealerships (declining), Edison Mall (struggling), discount retail",
+      "active_flags": [
+        {
+          "flag": "Edison Mall medical-office outmigration",
+          "type": "status_update",
+          "status": "active",
+          "resolution": "monitoring"
+        }
+      ],
+      "source_url": "https://example.notion.so/us41-cleveland",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": null,
+      "cap_rate_direction": null,
+      "vacancy_rate_pct": null,
+      "vacancy_rate_direction": null,
+      "absorption_sqft": null,
+      "absorption_sqft_direction": null,
+      "asking_rent_psf": null,
+      "asking_rent_psf_direction": null,
+      "metrics_period": null,
+      "metrics_verified_date": null
+    },
+    {
+      "corridor_name": "Gulf Coast Town Center / Alico Rd",
+      "city": "Estero",
+      "corridor_type": "anchor-dependent",
+      "seasonal_index": 0.45,
+      "character": "Big-box power center whose health tracks a handful of anchor leases. Anchor turnover is the dominant risk variable.",
+      "evolution_direction": "repositioning",
+      "tenant_mix": "Costco, Bass Pro, Belk, mid-box junior anchors",
+      "active_flags": [
+        {
+          "flag": "Junior anchor box backfill underway",
+          "type": "new_project",
+          "status": "active",
+          "resolution": null
+        },
+        {
+          "flag": "Alico Rd widening to six lanes",
+          "type": "infrastructure",
+          "status": "active",
+          "resolution": "structural"
+        }
+      ],
+      "source_url": "https://example.notion.so/gulf-coast-town-center",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 7.5,
+      "cap_rate_direction": "stable",
+      "vacancy_rate_pct": 12,
+      "vacancy_rate_direction": "falling",
+      "absorption_sqft": 45000,
+      "absorption_sqft_direction": "rising",
+      "asking_rent_psf": 28.00,
+      "asking_rent_psf_direction": "stable",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    },
+    {
+      "corridor_name": "Cape Coral Pkwy E",
+      "city": "Cape Coral",
+      "corridor_type": "suburban-residential",
+      "seasonal_index": 0.25,
+      "character": "Neighborhood-serving retail spine for a fast-growing residential base. Demand is rooftop-driven, not destination-driven.",
+      "evolution_direction": "growing",
+      "tenant_mix": "Publix-anchored centers, local services, QSR",
+      "active_flags": [
+        {
+          "flag": "Bimini Basin mixed-use district entitlement",
+          "type": "regulatory",
+          "status": "active",
+          "resolution": null
+        }
+      ],
+      "source_url": "https://example.notion.so/cape-coral-pkwy",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 6.2,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 5,
+      "vacancy_rate_direction": "falling",
+      "absorption_sqft": 32000,
+      "absorption_sqft_direction": "rising",
+      "asking_rent_psf": 32.50,
+      "asking_rent_psf_direction": "rising",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    },
+    {
+      "corridor_name": "Estero Blvd / Fort Myers Beach",
+      "city": "Fort Myers Beach",
+      "corridor_type": "beachfront-tourism",
+      "seasonal_index": 0.88,
+      "character": "Barrier-island tourism corridor mid-rebuild after Hurricane Ian. Extreme seasonality — winter-quarter revenue carries the year.",
+      "evolution_direction": "repositioning",
+      "tenant_mix": "Beachfront F&B, resort retail, tourist services",
+      "active_flags": [
+        {
+          "flag": "Margaritaville Resort reopening anchoring the rebuild",
+          "type": "new_project",
+          "status": "active",
+          "resolution": "structural"
+        },
+        {
+          "flag": "Estero Blvd streetscape reconstruction",
+          "type": "construction",
+          "status": "active",
+          "resolution": null
+        }
+      ],
+      "source_url": "https://example.notion.so/estero-blvd",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 8.5,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 18,
+      "vacancy_rate_direction": "falling",
+      "absorption_sqft": -5000,
+      "absorption_sqft_direction": "stable",
+      "asking_rent_psf": 45.00,
+      "asking_rent_psf_direction": "rising",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    },
+    {
+      "corridor_name": "US-41 Bonita Springs",
+      "city": "Bonita Springs",
+      "corridor_type": "highway-strip-mall",
+      "seasonal_index": 0.4,
+      "character": null,
+      "evolution_direction": "stable",
+      "tenant_mix": "Strip retail, national QSR, big-box junior anchors",
+      "active_flags": [
+        {
+          "flag": "Old 41 downtown revitalization district",
+          "type": "regulatory",
+          "status": "active",
+          "resolution": null
+        }
+      ],
+      "source_url": "https://example.notion.so/us41-bonita",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 7,
+      "cap_rate_direction": "stable",
+      "vacancy_rate_pct": 8,
+      "vacancy_rate_direction": "stable",
+      "absorption_sqft": 12000,
+      "absorption_sqft_direction": "stable",
+      "asking_rent_psf": 26.50,
+      "asking_rent_psf_direction": "stable",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    },
+    {
+      "corridor_name": "Pine Ridge Rd Naples",
+      "city": "Naples",
+      "corridor_type": "medical-anchored",
+      "seasonal_index": 0.35,
+      "character": "Medical-office and health-services corridor with a stable, age-driven demand base less exposed to tourist seasonality.",
+      "evolution_direction": "stable",
+      "tenant_mix": "Physician groups, outpatient surgical, pharmacy, supporting retail",
+      "active_flags": [
+        {
+          "flag": "NCH outpatient campus expansion",
+          "type": "new_project",
+          "status": "active",
+          "resolution": "structural"
+        }
+      ],
+      "source_url": "https://example.notion.so/pine-ridge-rd",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 6.5,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 6,
+      "vacancy_rate_direction": "stable",
+      "absorption_sqft": 28000,
+      "absorption_sqft_direction": "rising",
+      "asking_rent_psf": 38.00,
+      "asking_rent_psf_direction": "rising",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    },
+    {
+      "corridor_name": "Alico Rd Industrial Flex",
+      "city": "Fort Myers",
+      "corridor_type": "industrial-flex",
+      "seasonal_index": 0.1,
+      "character": "Logistics and light-industrial flex corridor riding regional distribution growth. Effectively zero seasonality.",
+      "evolution_direction": "growing",
+      "tenant_mix": "Distribution, contractor flex, last-mile logistics",
+      "active_flags": [],
+      "source_url": "https://example.notion.so/alico-industrial",
+      "verification_status": "verified",
+      "deleted_at": null,
+      "cap_rate_pct": 6,
+      "cap_rate_direction": "falling",
+      "vacancy_rate_pct": 3,
+      "vacancy_rate_direction": "falling",
+      "absorption_sqft": 185000,
+      "absorption_sqft_direction": "rising",
+      "asking_rent_psf": 16.50,
+      "asking_rent_psf_direction": "rising",
+      "metrics_period": "2026-Q1",
+      "metrics_verified_date": "2026-05-15"
+    }
+  ]
+}

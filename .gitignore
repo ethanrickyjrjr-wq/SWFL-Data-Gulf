@@ -75,3 +75,11 @@ __pycache__/
 
 # personal_vault backups — strategic insights, never commit
 .private/
+
+# LittleBird review-drop directory — ephemeral artifacts from prior Sonnet
+# sessions. Anything worth keeping gets promoted to docs/superpowers/plans/
+# with a README; the rest stays out of the tree.
+.tmp_lb_review/
+
+# Ingest runtime logs (LeePA + future ingest pipelines)
+ingest/*.log
