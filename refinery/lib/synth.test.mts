@@ -68,6 +68,7 @@ function brain(
     computed_at?: string;
     trust_tier?: BrainTrustTier;
     key_metrics?: BrainOutputMetric[];
+    caveats?: string[];
   } = {},
 ): BrainOutput {
   return {
@@ -80,7 +81,7 @@ function brain(
     overrides: [],
     conclusion: `${brain_id} reads ${direction}`,
     key_metrics: opts.key_metrics ?? [],
-    caveats: [],
+    caveats: opts.caveats ?? [],
     contradicts: [],
     confidence,
     joint_integrity: 1,
@@ -147,6 +148,40 @@ test("applyRelevanceFloor: separates passing/excluded and emits caveats", () => 
   assert.equal(excluded[0].upstream.brain_id, "stale");
   assert.equal(caveats.length, 1);
   assert.match(caveats[0], /stale.*below floor 0\.1/);
+});
+
+test("applyRelevanceFloor: excluded brain's upstream caveats do not appear — floor caveat does", () => {
+  // Codifies the intentional policy in master.mts lines 175-176:
+  // "Excluded upstreams' caveats are intentionally dropped — they're below
+  //  the relevance floor and the floor caveats already speak for them."
+  //
+  // Fixture: env-swfl is 30 days old with half_life_hours=168 →
+  //   factor ≈ 2^(-30*24/168) ≈ 0.05, which is below the 0.1 floor.
+  //   This is what makes it excluded — not merely that it carries caveats.
+  const PER_ZIP_CAVEAT =
+    "Flood barrier risk at ZIP 33931: barrier=1.0, AAL=$1200/yr";
+  const envSwfl = brain("env-swfl", "bearish", 0.7, 0.8, {
+    half_life_hours: 168,
+    computed_at: new Date(NOW.getTime() - 30 * 24 * 3600 * 1000).toISOString(),
+    caveats: [PER_ZIP_CAVEAT],
+  });
+  const {
+    passing,
+    excluded,
+    caveats: floorCaveats,
+  } = applyRelevanceFloor([envSwfl], 0.1, NOW);
+  // Confirm env-swfl is actually excluded by staleness, not just fixture-set.
+  assert.equal(excluded.length, 1);
+  assert.equal(passing.length, 0);
+  // (a) Floor exclusion caveat fires.
+  assert.equal(floorCaveats.length, 1);
+  assert.match(floorCaveats[0], /env-swfl.*below floor/);
+  // (b) Per-ZIP caveats do NOT flow through. The master producer collects
+  //     upstream caveats via `passing.flatMap(p => p.upstream.caveats)`;
+  //     with passing empty, that yields [] and the per-ZIP detail is gone.
+  const upstreamCaveats = passing.flatMap((p) => p.upstream.caveats);
+  assert.equal(upstreamCaveats.length, 0);
+  assert.ok(!floorCaveats.some((c) => c.includes("33931")));
 });
 
 // ---- voteDirection ---------------------------------------------------------

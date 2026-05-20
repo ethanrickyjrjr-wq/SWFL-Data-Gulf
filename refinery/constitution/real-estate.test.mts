@@ -131,6 +131,15 @@ test("flood-barrier-mode-1: Mode 3 inland — barrier=0.0, AAL=$50 → does NOT 
   assert.equal(r.condition([u], []), false);
 });
 
+test("flood-barrier-mode-1: Mode 3 Naples 34112 — barrier=0, AAL=0 → does NOT fire", () => {
+  // Specific regression pin for Naples/North Naples. 34112 is inland by
+  // classification — barrier_island_score=0.0 at any AAL leaves Mode 1
+  // predicate false. Mirrors the "drift watch" convention on the Mode 2 test.
+  const r = rule("flood-barrier-mode-1");
+  const u = brainWithMetrics([barrier("34112", 0.0), aal("34112", 0)]);
+  assert.equal(r.condition([u], []), false);
+});
+
 test("flood-barrier-mode-1: no barrier metric emitted — AAL alone → does NOT fire (cleanly silent)", () => {
   // If env-swfl's barrier source goes dark for a ZIP, the rule stays
   // silent at the metric level; relevance_floor handles brain-level
