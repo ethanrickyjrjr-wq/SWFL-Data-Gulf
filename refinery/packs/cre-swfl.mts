@@ -44,7 +44,11 @@ let lastCorridorFetchedAt: string | null = null;
  * own source without leaving the OUTPUT block.
  */
 function buildCreAggregateSource(
-  field: "cap_rate_pct" | "vacancy_rate_pct",
+  field:
+    | "cap_rate_pct"
+    | "vacancy_rate_pct"
+    | "absorption_sqft"
+    | "asking_rent_psf",
   contributing: CorridorNormalized[],
   fetched_at: string,
 ): BrainOutputMetricSource {
@@ -81,10 +85,35 @@ function medianOf(xs: number[]): number | null {
     : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-/** Most-common direction across a slice of corridors (modal direction). */
-function modalDirection(
+/**
+ * Direction summary across a slice of corridor direction reads. Returns the
+ * modal direction PLUS a status that distinguishes three cases the call site
+ * MUST surface differently in caveats — the earlier `modalDirection` helper
+ * collapsed all three to "stable" and fabricated a label where no signal
+ * existed.
+ *
+ *   - "modal":   one bucket strictly wins. Direction is real.
+ *   - "tied":    two or more buckets tie for the lead. Direction defaults to
+ *                "stable" as the schema-required label; caveats MUST disclose
+ *                the split — "stable" here is a tiebreak, not a consensus.
+ *   - "no-data": every input was null. Direction defaults to "stable" as the
+ *                schema-required label; caveats MUST disclose that no
+ *                directional signal was reported.
+ *
+ * Schema constraint: `BrainOutputMetric.direction` is the closed enum
+ * "rising" | "falling" | "stable" — there is no null option. The call site
+ * is responsible for converting `status !== "modal"` into a caveat so the
+ * fallback label cannot masquerade as a measured trend.
+ */
+type DirectionSummary = {
+  direction: CorridorMetricDirection;
+  status: "modal" | "tied" | "no-data";
+  counts: Record<CorridorMetricDirection, number>;
+};
+
+function summarizeDirection(
   values: (CorridorMetricDirection | null)[],
-): CorridorMetricDirection {
+): DirectionSummary {
   const counts: Record<CorridorMetricDirection, number> = {
     rising: 0,
     falling: 0,
@@ -93,14 +122,20 @@ function modalDirection(
   for (const v of values) {
     if (v != null) counts[v] += 1;
   }
-  // Tiebreak: stable > falling > rising (descriptive over directional when tied).
+  const total = counts.rising + counts.falling + counts.stable;
+  if (total === 0) {
+    return { direction: "stable", status: "no-data", counts };
+  }
   if (counts.falling > counts.rising && counts.falling > counts.stable) {
-    return "falling";
+    return { direction: "falling", status: "modal", counts };
   }
   if (counts.rising > counts.falling && counts.rising > counts.stable) {
-    return "rising";
+    return { direction: "rising", status: "modal", counts };
   }
-  return "stable";
+  if (counts.stable > counts.rising && counts.stable > counts.falling) {
+    return { direction: "stable", status: "modal", counts };
+  }
+  return { direction: "stable", status: "tied", counts };
 }
 
 /** Sorted "label (count)" breakdown of a string-keyed tally, count-descending. */
@@ -220,12 +255,16 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     });
   }
 
-  // Cap-rate / vacancy-rate aggregates — tagged with `metric:` prefix so they
-  // surface in SAVED FACTS alongside the producer's BrainOutput.key_metrics.
+  // Four CRE corpus medians — tagged with `metric:` prefix so they surface in
+  // SAVED FACTS alongside the producer's BrainOutput.key_metrics.
   const withCap = corridors.filter((c) => c.cap_rate_pct != null);
   const withVac = corridors.filter((c) => c.vacancy_rate_pct != null);
+  const withAbs = corridors.filter((c) => c.absorption_sqft != null);
+  const withRent = corridors.filter((c) => c.asking_rent_psf != null);
   const capMedian = medianOf(withCap.map((c) => c.cap_rate_pct as number));
   const vacMedian = medianOf(withVac.map((c) => c.vacancy_rate_pct as number));
+  const absMedian = medianOf(withAbs.map((c) => c.absorption_sqft as number));
+  const rentMedian = medianOf(withRent.map((c) => c.asking_rent_psf as number));
   if (capMedian != null) {
     facts.push({
       topic: "metric:cap_rate_median",
@@ -242,33 +281,90 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
       source_fragment_ids: [],
     });
   }
+  if (absMedian != null) {
+    facts.push({
+      topic: "metric:absorption_sqft_median",
+      fact: "Median net absorption across SWFL CRE corridors with reported metrics",
+      value: `Median net absorption is ${Math.round(absMedian).toLocaleString()} sqft across ${withAbs.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      source_fragment_ids: [],
+    });
+  }
+  if (rentMedian != null) {
+    facts.push({
+      topic: "metric:asking_rent_psf_median",
+      fact: "Median asking rent (PSF, NNN) across SWFL CRE corridors with reported metrics",
+      value: `Median asking rent is $${round2(rentMedian)}/sqft across ${withRent.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      source_fragment_ids: [],
+    });
+  }
 
   return facts;
 }
 
 /**
- * Per-corridor direction read from the (cap_rate, vacancy) signal pair:
- *   - any "falling" AND any "rising"           → "mixed" corridor (no clear read)
- *   - any "falling", no "rising"               → "bullish" (rates compressing
- *                                                 or space tightening — landlord
- *                                                 market)
- *   - any "rising", no "falling"               → "bearish" (yields widening or
- *                                                 vacancy climbing — distress)
- *   - both stable, or one stable + null        → "neutral"
- *   - both null                                → "no-data"
+ * Per-metric polarity. Each CRE metric's "rising" means something different —
+ * we normalize to a polarity-corrected bullish / bearish / neutral side BEFORE
+ * pooling.
+ *
+ *   cap_rate           : falling = bullish (yields compressing)
+ *   vacancy_rate       : falling = bullish (space tightening)
+ *   absorption_sqft    : rising  = bullish (leasing velocity up)
+ *   asking_rent_psf    : rising  = bullish (pricing power)
+ *
+ * The non-monotone case the handoff flagged (rent ↑ + vacancy ↑ = distress)
+ * surfaces correctly as `mixed` here because rent ↑ normalizes to bullish
+ * while vacancy ↑ normalizes to bearish — the per-corridor join then sees
+ * both sides and emits `mixed`, exactly the distress read.
+ */
+type CreMetric =
+  | "cap_rate"
+  | "vacancy_rate"
+  | "absorption_sqft"
+  | "asking_rent_psf";
+
+type VoteSide = "bullish" | "bearish" | "neutral";
+
+const BULLISH_WHEN: Record<CreMetric, "rising" | "falling"> = {
+  cap_rate: "falling",
+  vacancy_rate: "falling",
+  absorption_sqft: "rising",
+  asking_rent_psf: "rising",
+};
+
+function metricVote(
+  metric: CreMetric,
+  dir: CorridorMetricDirection | null,
+): VoteSide | null {
+  if (dir == null) return null;
+  if (dir === "stable") return "neutral";
+  return dir === BULLISH_WHEN[metric] ? "bullish" : "bearish";
+}
+
+/**
+ * Per-corridor direction read from the polarity-normalized signal suite:
+ *   - any "bullish" AND any "bearish"  → "mixed" corridor (split read)
+ *   - any "bullish", no "bearish"      → "bullish" (landlord market)
+ *   - any "bearish", no "bullish"      → "bearish" (distress)
+ *   - all neutral (stable values only) → "neutral"
+ *   - all signals null                 → "no-data"
  */
 type CorridorVote = "bullish" | "bearish" | "mixed" | "neutral" | "no-data";
 
 function voteCorridor(c: CorridorNormalized): CorridorVote {
-  const cap = c.cap_rate_direction;
-  const vac = c.vacancy_rate_direction;
-  if (cap == null && vac == null) return "no-data";
-  const hasFalling = cap === "falling" || vac === "falling";
-  const hasRising = cap === "rising" || vac === "rising";
-  if (hasFalling && hasRising) return "mixed";
-  if (hasFalling) return "bullish";
-  if (hasRising) return "bearish";
-  return "neutral"; // any combination of stable + null with no directional signal
+  const sides = [
+    metricVote("cap_rate", c.cap_rate_direction),
+    metricVote("vacancy_rate", c.vacancy_rate_direction),
+    metricVote("absorption_sqft", c.absorption_sqft_direction),
+    metricVote("asking_rent_psf", c.asking_rent_psf_direction),
+  ].filter((s): s is VoteSide => s != null);
+
+  if (sides.length === 0) return "no-data";
+  const hasBullish = sides.includes("bullish");
+  const hasBearish = sides.includes("bearish");
+  if (hasBullish && hasBearish) return "mixed";
+  if (hasBullish) return "bullish";
+  if (hasBearish) return "bearish";
+  return "neutral";
 }
 
 /**
@@ -288,7 +384,7 @@ function voteCreDirection(corridors: CorridorNormalized[]): {
   const caveats: string[] = [];
   if (noData > 0) {
     caveats.push(
-      `${noData} of ${corridors.length} corridors have no cap_rate / vacancy_rate metrics — direction is read from the ${withData.length} corridors with data.`,
+      `${noData} of ${corridors.length} corridors have no reported metrics — direction is read from the ${withData.length} corridors with data.`,
     );
   }
   if (withData.length === 0) {
@@ -311,8 +407,21 @@ function voteCreDirection(corridors: CorridorNormalized[]): {
     return { direction: "bearish", magnitude: bearishRatio, caveats };
   }
   // Any directional or mixed signal but no majority → mixed at brain level.
+  //
+  // Magnitude is the leading directional share among corridors with signal —
+  // `max(bullishRatio, bearishRatio)` — bounded to [0, 0.60) here by
+  // construction (≥ 0.60 would have triggered the bullish/bearish branch
+  // above). The edge case where bullish=bearish=0 and only per-corridor
+  // `mixed` reads exist yields magnitude 0, which is the honest read: neither
+  // side dominates. This is the deterministic strength-of-read, NOT a
+  // confidence (which is computed separately in lib/confidence.mts from
+  // trust tiers + freshness). Source: this file, voteCreDirection.
   if (bullish > 0 || bearish > 0 || mixed > 0) {
-    return { direction: "mixed", magnitude: 0.5, caveats };
+    return {
+      direction: "mixed",
+      magnitude: Math.max(bullishRatio, bearishRatio),
+      caveats,
+    };
   }
   // All neutral (everything stable) — emit neutral with magnitude scaled by
   // how unanimous "stable" was (loudly neutral when every corridor is stable).
@@ -320,16 +429,35 @@ function voteCreDirection(corridors: CorridorNormalized[]): {
 }
 
 /**
- * CRE producer — emits cap_rate_median + vacancy_rate_median as headline
- * key_metrics and votes a deterministic direction from the per-corridor
- * cap_rate_direction / vacancy_rate_direction signals.
+ * CRE producer — emits cap_rate_median + vacancy_rate_median +
+ * absorption_sqft_median + asking_rent_psf_median as headline key_metrics and
+ * votes a deterministic direction from the polarity-normalized per-corridor
+ * signal suite (see metricVote / voteCorridor).
  */
 function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
   const corridors = lastCorridors;
   const withCap = corridors.filter((c) => c.cap_rate_pct != null);
   const withVac = corridors.filter((c) => c.vacancy_rate_pct != null);
+  const withAbs = corridors.filter((c) => c.absorption_sqft != null);
+  const withRent = corridors.filter((c) => c.asking_rent_psf != null);
   const capMedian = medianOf(withCap.map((c) => c.cap_rate_pct as number));
   const vacMedian = medianOf(withVac.map((c) => c.vacancy_rate_pct as number));
+  const absMedian = medianOf(withAbs.map((c) => c.absorption_sqft as number));
+  const rentMedian = medianOf(withRent.map((c) => c.asking_rent_psf as number));
+
+  // Direction summaries computed once per metric — the `status` field drives
+  // per-metric caveats below so a "stable" fallback label can't masquerade as
+  // a measured trend.
+  const capDir = summarizeDirection(withCap.map((c) => c.cap_rate_direction));
+  const vacDir = summarizeDirection(
+    withVac.map((c) => c.vacancy_rate_direction),
+  );
+  const absDir = summarizeDirection(
+    withAbs.map((c) => c.absorption_sqft_direction),
+  );
+  const rentDir = summarizeDirection(
+    withRent.map((c) => c.asking_rent_psf_direction),
+  );
 
   // P2 provenance — single-query fetched_at shared across all corridors in
   // this run. If the closure capture missed (zero fragments), fall back to a
@@ -342,7 +470,7 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "cap_rate_median",
       value: Math.round(capMedian * 100) / 100,
-      direction: modalDirection(withCap.map((c) => c.cap_rate_direction)),
+      direction: capDir.direction,
       label: `Median SWFL CRE cap rate (${withCap.length} of ${corridors.length} corridors)`,
       variable_type: "intensive",
       units: "percent",
@@ -354,7 +482,7 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "vacancy_rate_median",
       value: Math.round(vacMedian * 100) / 100,
-      direction: modalDirection(withVac.map((c) => c.vacancy_rate_direction)),
+      direction: vacDir.direction,
       label: `Median SWFL CRE vacancy rate (${withVac.length} of ${corridors.length} corridors)`,
       variable_type: "intensive",
       units: "percent",
@@ -362,35 +490,103 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
       source: buildCreAggregateSource("vacancy_rate_pct", withVac, fetched_at),
     });
   }
+  if (absMedian != null) {
+    key_metrics.push({
+      metric: "absorption_sqft_median",
+      value: Math.round(absMedian),
+      direction: absDir.direction,
+      label: `Median SWFL CRE net absorption (${withAbs.length} of ${corridors.length} corridors)`,
+      variable_type: "extensive",
+      units: "sqft",
+      display_format: "count",
+      source: buildCreAggregateSource("absorption_sqft", withAbs, fetched_at),
+    });
+  }
+  if (rentMedian != null) {
+    key_metrics.push({
+      metric: "asking_rent_psf_median",
+      value: Math.round(rentMedian * 100) / 100,
+      direction: rentDir.direction,
+      label: `Median SWFL CRE asking rent PSF NNN (${withRent.length} of ${corridors.length} corridors)`,
+      variable_type: "intensive",
+      units: "USD/sqft",
+      display_format: "currency",
+      source: buildCreAggregateSource("asking_rent_psf", withRent, fetched_at),
+    });
+  }
 
   const vote = voteCreDirection(corridors);
 
+  // Per-metric direction-confidence caveats. Only emitted for metrics that
+  // ship a value (n > 0); a metric with no value also has no row in
+  // key_metrics, so its direction can't mislead anyone.
+  const directionGuards = [
+    ["cap_rate_median", capDir, withCap.length] as const,
+    ["vacancy_rate_median", vacDir, withVac.length] as const,
+    ["absorption_sqft_median", absDir, withAbs.length] as const,
+    ["asking_rent_psf_median", rentDir, withRent.length] as const,
+  ];
+  for (const [name, sum, n] of directionGuards) {
+    if (n === 0) continue;
+    if (sum.status === "no-data") {
+      vote.caveats.push(
+        `${name}: ${n} corridor${n === 1 ? "" : "s"} report a value but none reports a direction — the "stable" label on this metric is a schema-required fallback, not a measured trend.`,
+      );
+    } else if (sum.status === "tied") {
+      vote.caveats.push(
+        `${name}: directional reads are tied (rising ${sum.counts.rising}, falling ${sum.counts.falling}, stable ${sum.counts.stable}) — no modal winner; "stable" is the tiebreak label, not a consensus signal.`,
+      );
+    }
+  }
+
+  // Conclusion: each metric stands on its own — no AND-gating between
+  // cap/vac and abs/rent pairs. A populated absorption read must not be
+  // silently dropped because asking_rent is null (or vice versa).
   const conclusionParts: string[] = [];
   if (corridors.length > 0) {
     conclusionParts.push(
       `The SWFL CRE pack covers ${corridors.length} verified corridors across Lee and Collier counties.`,
     );
   }
-  if (capMedian != null && vacMedian != null) {
-    conclusionParts.push(
-      `Median cap rate sits at ${round2(capMedian)}% (${modalDirection(withCap.map((c) => c.cap_rate_direction))}); median vacancy at ${round2(vacMedian)}% (${modalDirection(withVac.map((c) => c.vacancy_rate_direction))}).`,
+  const metricLines: string[] = [];
+  if (capMedian != null) {
+    metricLines.push(
+      `median cap rate ${round2(capMedian)}% (${capDir.direction})`,
     );
+  }
+  if (vacMedian != null) {
+    metricLines.push(
+      `median vacancy ${round2(vacMedian)}% (${vacDir.direction})`,
+    );
+  }
+  if (absMedian != null) {
+    metricLines.push(
+      `median net absorption ${Math.round(absMedian).toLocaleString()} sqft (${absDir.direction})`,
+    );
+  }
+  if (rentMedian != null) {
+    metricLines.push(
+      `median asking rent $${round2(rentMedian)}/sqft NNN (${rentDir.direction})`,
+    );
+  }
+  if (metricLines.length > 0) {
+    conclusionParts.push(`Quantified reads: ${metricLines.join("; ")}.`);
   } else {
     conclusionParts.push(
-      "Cap-rate and vacancy metrics are not yet populated for enough corridors to anchor a median read.",
+      "Cap-rate, vacancy, absorption, and asking-rent metrics are not yet populated for enough corridors to anchor a median read.",
     );
   }
   if (vote.direction === "bullish") {
     conclusionParts.push(
-      "Cap rates and vacancy are predominantly compressing — landlord-market read.",
+      "Polarity-normalized corridor signals lean predominantly landlord-market — rates compressing, space tightening, leasing velocity up, or pricing power present.",
     );
   } else if (vote.direction === "bearish") {
     conclusionParts.push(
-      "Cap rates and vacancy are predominantly expanding — yield distress read.",
+      "Polarity-normalized corridor signals lean predominantly distressed — yields widening, space emptying, absorption falling, or rents giving back.",
     );
   } else if (vote.direction === "mixed") {
     conclusionParts.push(
-      "Corridor reads split between compressing and expanding — no consensus direction at the SWFL CRE level.",
+      "Corridor signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power).",
     );
   }
 

@@ -2,8 +2,8 @@
 
 _Auto-generated read-only report — raw slugs that Stage 2.5 normalize observed but could not map to a SKOS concept, ranked against candidate concepts via the active similarity engine._
 
-**Generated:** 2026-05-21T22:08:20.712Z (commit `b4f380b`)
-**Vocab schema:** 1.0.0 (concepts: 102)
+**Generated:** 2026-05-21T23:24:52.624Z (commit `05b7d29`)
+**Vocab schema:** 1.0.0 (concepts: 106)
 **Ranker engine:** `string-similarity`
 
 ---
@@ -31,7 +31,7 @@ Each row lists one unique orphan slug, the pack(s) and path(s) it was observed a
 | --- | --- | --- | --- |
 | 1 | `cre_vacancy_rate_median` | 0.072 | Median Vacancy Rate (corpus) |
 | 2 | `cre_vacancy_rate` | 0.066 | Vacancy Rate (per corridor) |
-| 3 | `qual_metric_trajectory` | 0.059 | Metric Trajectory |
+| 3 | `cre_asking_rent_psf_median` | 0.063 | Median Asking Rent PSF NNN (corpus) |
 
 ### `totally_fake_slug`
 

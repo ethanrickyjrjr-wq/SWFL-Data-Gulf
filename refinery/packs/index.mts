@@ -8,9 +8,9 @@ import type { PackDefinition } from "../types/pack.mts";
  * the new pack file AND appends to this index — atomic on success, manual
  * cleanup on partial failure.
  *
- * The three v1 packs (`franchise-outcomes`, `cre-swfl`, `master`) currently
- * live in `refinery/config/packs.mts` and are merged into the unified `PACKS`
- * record there. New packs go HERE.
+ * The two v1 packs (`franchise-outcomes`, `master`) currently live in
+ * `refinery/config/packs.mts` and are merged into the unified `PACKS` record
+ * there. New packs go HERE.
  *
  * Discovery is sync (one static import per pack) — no glob, no async startup
  * cost. The scaffold edits this file deterministically.
