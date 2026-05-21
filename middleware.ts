@@ -7,8 +7,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on every path EXCEPT static assets and image optimization output.
-    // This matcher mirrors the canonical Supabase Next.js SSR pattern.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Run on every path EXCEPT static assets, image optimization output, and
+    // the public brain-read API. /api/b/* is stateless and must stay reachable
+    // without any auth-client env vars present.
+    "/((?!api/b/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
