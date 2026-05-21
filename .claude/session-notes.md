@@ -157,3 +157,50 @@ Conversations don't sync between them. This file is the workaround — key conte
 committed to the repo so it survives and is accessible anywhere via git pull.
 
 Next step: lobby Anthropic to fix this. It should just work.
+
+---
+
+## Common Commands
+
+### Session Notes
+```bash
+# Pull latest notes to any computer
+git pull && cat .claude/session-notes.md
+
+# Manually save and push notes (if hook didn't fire)
+git add .claude/session-notes.md && git commit -m "notes update" && git push
+```
+
+### Git Basics
+```bash
+# Check current branch and status
+git status
+git branch --show-current
+
+# Switch to brain-platform working branch
+git fetch origin
+git checkout claude/brains-claude-instructions-W2iFP
+
+# Stage, commit, push
+git add [file]
+git commit -m "your message"
+git push -u origin [branch-name]
+```
+
+### Start Claude Code in Terminal
+```bash
+cd brain-platform
+claude
+```
+
+### Tell Any Session to Save Notes
+Before closing any session, say:
+> "Add the key points from this conversation to .claude/session-notes.md and push."
+
+### Shell Aliases (add to ~/.zshrc or ~/.bashrc)
+```bash
+alias notes="git pull && cat .claude/session-notes.md"
+alias save-notes="git add .claude/session-notes.md && git commit -m 'notes update' && git push"
+alias bp="cd brain-platform && claude"
+```
+After adding: `source ~/.zshrc`
