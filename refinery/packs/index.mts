@@ -21,6 +21,7 @@ import type { PackDefinition } from "../types/pack.mts";
 import { hurricaneTracksFl } from "./hurricane-tracks-fl.mts";
 import { propertiesLeeValue } from "./properties-lee-value.mts";
 import { trafficSwfl } from "./traffic-swfl.mts";
+import { creSwfl } from "./cre-swfl.mts";
 import { envSwfl } from "./env-swfl.mts";
 import { tourismTdt } from "./tourism-tdt.mts";
 import { sectorCreditSwfl } from "./sector-credit-swfl.mts";
@@ -38,6 +39,7 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [hurricaneTracksFl.id]: hurricaneTracksFl,
   [propertiesLeeValue.id]: propertiesLeeValue,
   [trafficSwfl.id]: trafficSwfl,
+  [creSwfl.id]: creSwfl,
   [envSwfl.id]: envSwfl,
   [tourismTdt.id]: tourismTdt,
   [sectorCreditSwfl.id]: sectorCreditSwfl,
