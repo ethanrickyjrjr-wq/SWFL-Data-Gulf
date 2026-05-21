@@ -2,14 +2,14 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-21T22:08:20.014Z (commit `b4f380b`)
+**Generated:** 2026-05-21T23:24:52.174Z (commit `05b7d29`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
 ## TL;DR
 
-- **102** SKOS concepts across **7** categories (100 active, 2 stub).
-- **111** raw slugs registered in `slug_index`.
+- **106** SKOS concepts across **7** categories (104 active, 2 stub).
+- **115** raw slugs registered in `slug_index`.
 - **15** distinct source brains referenced (live + planned).
 - **15** packs in the runtime registry.
 
@@ -29,7 +29,7 @@ bun refinery/tools/semantic-ledger.mts
 | `logistics` | 19 | 19 | 0 |
 | `macro` | 9 | 9 | 0 |
 | `qualitative` | 5 | 5 | 0 |
-| `real-estate` | 12 | 12 | 0 |
+| `real-estate` | 16 | 16 | 0 |
 
 ## Concepts by Category
 
@@ -262,10 +262,14 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `real-estate` (12)
+### `real-estate` (16)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `cre_absorption_sqft` | Net Absorption (per corridor) | `absorption_sqft` | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_absorption_sqft_median` | Median Net Absorption (corpus) | `absorption_sqft_median` | integer | sqft | _unbounded_ | `cre-swfl`, `master` | `real-estate` | ✅ active |
+| `cre_asking_rent_psf` | Asking Rent PSF NNN (per corridor) | `asking_rent_psf` | currency | USD/sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_asking_rent_psf_median` | Median Asking Rent PSF NNN (corpus) | `asking_rent_psf_median` | currency | USD/sqft | _unbounded_ | `cre-swfl`, `master` | `real-estate` | ✅ active |
 | `cre_cap_rate` | Cap Rate (per corridor) | `cap_rate` | percentage | % | 0 – 20 | `cre-swfl` | `real-estate` | ✅ active |
 | `cre_cap_rate_median` | Median Cap Rate (corpus) | `cap_rate_median` | percentage | % | 0 – 20 | `cre-swfl`, `master` | `real-estate` | ✅ active |
 | `cre_corridor_evolution` | Corridor Evolution Stage | `evolution` | enum | — | `growing` / `stable` / `repositioning` / `declining` | `cre-swfl` | `real-estate` | ✅ active |
@@ -281,6 +285,8 @@ bun refinery/tools/semantic-ledger.mts
 
 <details><summary>Scope notes</summary>
 
+- **`cre_absorption_sqft`** — Net absorption in square feet over the metrics_period. Negative values are valid (give-back). Bullish polarity: rising = stronger leasing velocity.
+- **`cre_asking_rent_psf`** — Average asking rent, NNN, per square foot. Bullish polarity: rising = pricing power — BUT rising rent + rising vacancy = distress (asking-price stickiness, not real pricing power). Polarity is enforced per metric in the cre-swfl voteCorridor.
 - **`cre_cap_rate`** — Point-in-time corridor-level cap rate. Trajectory (falling/stable/rising) signals landlord vs tenant market direction.
 - **`cre_cap_rate_median`** — Median across all corridors with reported metrics in the current period. A falling median is the primary bullish signal in the cre-swfl pack.
 - **`cre_corridor_evolution`** — Qualitative lifecycle stage of a corridor. Ordered by operator-friendliness descending; see cre_corridor_evolution_stages in ordered_collections.
@@ -334,10 +340,14 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 
 ## What each brain emits (SKOS concepts)
 
-### `cre-swfl` (6 concepts)
+### `cre-swfl` (10 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
+| `cre_absorption_sqft` | Net Absorption (per corridor) | `absorption_sqft` | active |
+| `cre_absorption_sqft_median` | Median Net Absorption (corpus) | `absorption_sqft_median` | active |
+| `cre_asking_rent_psf` | Asking Rent PSF NNN (per corridor) | `asking_rent_psf` | active |
+| `cre_asking_rent_psf_median` | Median Asking Rent PSF NNN (corpus) | `asking_rent_psf_median` | active |
 | `cre_cap_rate` | Cap Rate (per corridor) | `cap_rate` | active |
 | `cre_cap_rate_median` | Median Cap Rate (corpus) | `cap_rate_median` | active |
 | `cre_corridor_evolution` | Corridor Evolution Stage | `evolution` | active |
@@ -430,10 +440,12 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 
-### `master` (51 concepts)
+### `master` (53 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
+| `cre_absorption_sqft_median` | Median Net Absorption (corpus) | `absorption_sqft_median` | active |
+| `cre_asking_rent_psf_median` | Median Asking Rent PSF NNN (corpus) | `asking_rent_psf_median` | active |
 | `cre_cap_rate_median` | Median Cap Rate (corpus) | `cap_rate_median` | active |
 | `cre_vacancy_rate_median` | Median Vacancy Rate (corpus) | `vacancy_rate_median` | active |
 | `env_flood_losses_swfl_baseline_annual_usd` | SWFL Non-Storm-Year Annual NFIP Paid Claims (Median) | `flood_losses_baseline`, `swfl_nonstorm_claims_baseline` | active |
