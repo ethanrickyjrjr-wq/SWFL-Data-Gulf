@@ -2,8 +2,8 @@
 
 _Auto-generated read-only report — raw slugs that Stage 2.5 normalize observed but could not map to a SKOS concept, ranked against candidate concepts via the active similarity engine._
 
-**Generated:** 2026-05-21T23:24:52.624Z (commit `05b7d29`)
-**Vocab schema:** 1.0.0 (concepts: 106)
+**Generated:** 2026-05-22T07:42:32.652Z (commit `891a4c3`)
+**Vocab schema:** 1.0.0 (concepts: 111)
 **Ranker engine:** `string-similarity`
 
 ---
@@ -42,8 +42,8 @@ Each row lists one unique orphan slug, the pack(s) and path(s) it was observed a
 | Rank | Candidate concept | Score | prefLabel |
 | --- | --- | --- | --- |
 | 1 | `cre_vacancy_rate` | 0.075 | Vacancy Rate (per corridor) |
-| 2 | `sba_chargeoff_rate_sector_42` | 0.057 | Wholesale Trade (NAICS 42) — SBA Charge-off Rate |
-| 3 | `sba_chargeoff_rate_sector_23` | 0.056 | Construction (NAICS 23) — SBA Charge-off Rate |
+| 2 | `sba_chargeoff_rate_sector_42` | 0.056 | Wholesale Trade (NAICS 42) â€” SBA Charge-off Rate |
+| 3 | `sba_chargeoff_rate_sector_23` | 0.054 | Construction (NAICS 23) â€” SBA Charge-off Rate |
 
 ---
 
