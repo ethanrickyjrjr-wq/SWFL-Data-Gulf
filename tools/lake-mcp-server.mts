@@ -149,15 +149,16 @@ async function startup(): Promise<void> {
     }
   }
 
-  registeredViews = inventoryRows
-    .filter(() => finalViews.length > 0)
-    .map((row) => ({
-      name: deriveViewName(row.path),
-      s3_url: `s3://${row.bucket}/${row.path}`,
-      pack_id: row.pack_id,
-      vintage: row.vintage,
-      byte_size: row.byte_size,
-    }));
+  registeredViews =
+    finalViews.length > 0
+      ? inventoryRows.map((row) => ({
+          name: deriveViewName(row.path),
+          s3_url: `s3://${row.bucket}/${row.path}`,
+          pack_id: row.pack_id,
+          vintage: row.vintage,
+          byte_size: row.byte_size,
+        }))
+      : [];
 
   // Step 3 — Build the main DuckDB connection using composeQuery
   const statements = composeQuery({
