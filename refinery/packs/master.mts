@@ -222,6 +222,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("logistics-swfl-nowcast"),
     makeBrainInputSource("traffic-swfl"),
     makeBrainInputSource("properties-lee-value"),
+    makeBrainInputSource("permits-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
   // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
