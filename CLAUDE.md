@@ -7,7 +7,6 @@
 - Stack: Next.js, Sanity CMS, Supabase Auth, Vercel
 - This project is SEPARATE from premise-engine. Never mix them.
 - All brand references use %%APP%% until name is decided
-- Dashboard only — no maps, no 3D, no heavy viz libs
 
 ## Find + Replace When Name Is Ready
 
