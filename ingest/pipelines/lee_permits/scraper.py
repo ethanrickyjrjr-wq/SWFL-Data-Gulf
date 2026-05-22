@@ -97,24 +97,72 @@ def _extract_zip(address: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
-def fetch_permit_pages(start_date: date, end_date: date) -> list[str]:
-    """Live Firecrawl call. Returns HTML for each result page in the date range.
+_ACCELA_SEARCH_URL = (
+    "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building"
+)
 
-    Pagination: Accela returns ~50 permits/page. Walk pages until "next" disappears.
-    See firecrawl-build-interact for the form-submit + pagination pattern.
+# Playwright selectors confirmed against live portal 2026-05-22.
+_FILL_AND_SUBMIT = """\
+const p = global.page;
+await p.fill('input[id*="txtFromDate"]', '{start}');
+await p.fill('input[id*="txtToDate"]', '{end}');
+await p.click('input[id*="btnSearch"], input[value="Search"]');
+await p.waitForSelector('table.ACA_GridView', {{ timeout: 30000 }});
+"""
+
+_GET_HTML = "return await global.page.content();"
+
+# Accela pager: last <a> in the pagination row — ">" or "Next" means another page exists.
+_NEXT_PAGE = """\
+const p = global.page;
+const pager = await p.$('.ACA_Pager_Style td:last-child a, .ACA_SmLabel a:last-child');
+if (!pager) return 'done';
+const txt = await pager.innerText();
+if (!txt.includes('>') && !txt.toLowerCase().includes('next')) return 'done';
+await pager.click();
+await p.waitForSelector('table.ACA_GridView', { timeout: 15000 });
+return 'more';
+"""
+
+
+def fetch_permit_pages(start_date: date, end_date: date) -> list[str]:
+    """Live Firecrawl /interact call. Returns full-page HTML for each paginated
+    result page in the date range.
+
+    Session lifecycle:
+      1. scrape_url → browser session starts, scrape_id becomes the job_id.
+      2. interact(fill+submit) → ASP.NET viewstate handled by the browser.
+      3. interact(get_html) + interact(next_page) loop until pager exhausted.
+      4. stop_interaction → session closed regardless of outcome.
     """
-    from firecrawl import FirecrawlApp  # imported lazily so tests don't need the SDK
+    from firecrawl import FirecrawlApp  # lazy import keeps test suite SDK-free
 
     api_key = os.environ.get("FIRECRAWL_API_KEY")
     if not api_key:
         raise RuntimeError("FIRECRAWL_API_KEY missing — invoke firecrawl-build-onboarding first")
     app = FirecrawlApp(api_key=api_key)
 
-    # The /interact endpoint script is captured at implementation time once the
-    # actual portal interaction is verified end-to-end. See ingest/pipelines/lee_permits/README.md
-    # for the captured interact recipe. For v1, this function is a stub the
-    # pipeline.py runner orchestrates.
-    raise NotImplementedError(
-        "Live Firecrawl pagination recipe is captured during the first end-to-end run. "
-        "See firecrawl-build-interact skill for the pattern; record the working recipe here."
-    )
+    start_str = start_date.strftime("%m/%d/%Y")
+    end_str = end_date.strftime("%m/%d/%Y")
+
+    doc = app.scrape_url(_ACCELA_SEARCH_URL, params={"formats": ["html"]})
+    job_id = doc.metadata.scrape_id
+
+    pages: list[str] = []
+    try:
+        app.interact(
+            job_id,
+            code=_FILL_AND_SUBMIT.format(start=start_str, end=end_str),
+            language="node",
+        )
+        while True:
+            html_res = app.interact(job_id, code=_GET_HTML, language="node")
+            if html_res.result:
+                pages.append(str(html_res.result))
+            next_res = app.interact(job_id, code=_NEXT_PAGE, language="node")
+            if not next_res.result or next_res.result.strip() == "done":
+                break
+    finally:
+        app.stop_interaction(job_id)
+
+    return pages
