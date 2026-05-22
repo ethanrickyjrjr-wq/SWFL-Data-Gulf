@@ -14,19 +14,35 @@ open while building.
 
 ## File index
 
-| File                          | What it covers                                                          |
-| ----------------------------- | ----------------------------------------------------------------------- |
-| `00-START-HERE.md`            | Soul of the product, three contexts, load order                         |
-| `01-product-brief.md`         | Product brief + canonical mock data shape                               |
-| `02-motion-rules.md`          | Three-context motion model, vetoes, the toggle, default timings         |
-| `03-surface-recipes.md`       | Beat-by-beat sequence per surface + empty/loading/error states          |
-| `04-context-decision-tree.md` | Content × user state → motion pattern lookup table                      |
-| `05-color-and-type.md`        | Gulf palette + typography system as concrete tokens                     |
-| `06-voice-and-microcopy.md`   | How the product talks: number formatting, trend language, copy rules    |
-| `QUICK-REFERENCE.md`          | One-page cheat sheet — palette, type scale, motion budgets              |
-| `prompts/`                    | Ready-to-use prompts for Claude Design, one per surface                 |
-| `animejs-v4-examples/`        | 24 standalone working Anime.js v4 example apps (primary code reference) |
-| `animejs-docs/`               | v4 API reference docs                                                   |
+| File                          | What it covers                                                             |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `00-START-HERE.md`            | Soul of the product, three contexts, load order                            |
+| `01-product-brief.md`         | Product brief + canonical mock data shape                                  |
+| `02-motion-rules.md`          | Three-context motion model, vetoes, the toggle, default timings            |
+| `03-surface-recipes.md`       | Beat-by-beat sequence per surface + empty/loading/error states             |
+| `04-context-decision-tree.md` | Content × user state → motion pattern lookup table                         |
+| `05-color-and-type.md`        | Gulf palette + typography system as concrete tokens                        |
+| `06-voice-and-microcopy.md`   | How the product talks: number formatting, trend language, copy rules       |
+| `QUICK-REFERENCE.md`          | One-page cheat sheet — palette, type scale, motion budgets                 |
+| `NOTES-FOR-CLAUDE-DESIGN.md`  | Short + long brand-summary blocks to paste into Claude Design's notes slot |
+| `prompts/`                    | Ready-to-use prompts for Claude Design, one per surface                    |
+| `assets/fonts/`               | Inter (4 weights) + JetBrains Mono (2 weights) `.woff2` files              |
+| `assets/inspiration/`         | 4 reference screenshots — meteo, Pudding, Linear, nodal — with taste guide |
+| `assets/figma-leads.md`       | Honest survey of free Figma resources (and why none of them fit)           |
+| `animejs-v4-examples/`        | 24 standalone working Anime.js v4 example apps (primary code reference)    |
+| `animejs-docs/`               | v4 API reference docs                                                      |
+
+## Filling Claude Design's input slots
+
+Claude Design has four input channels. Recommended usage:
+
+| Slot                           | What to put there                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
+| **Frontend-focused subfolder** | Attach `app/_design/` via GitHub. This is the foundation.                           |
+| **Fonts**                      | Attach the six `.woff2` files from `assets/fonts/`. Forces exact font use.          |
+| **Logos & assets**             | Attach the four screenshots from `assets/inspiration/`. Multimodal taste reference. |
+| **Notes textarea**             | Paste the short version from `NOTES-FOR-CLAUDE-DESIGN.md`. Gestalt context.         |
+| **`.fig` slot**                | Leave empty. See `assets/figma-leads.md` for why.                                   |
 
 ## When to update what
 
