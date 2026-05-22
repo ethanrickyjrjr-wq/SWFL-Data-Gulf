@@ -65,6 +65,12 @@ export interface PgAttachment {
    * connector wants to attach to two distinct PG instances.
    */
   secret_name?: string;
+  /**
+   * When true, appends READ_ONLY to the ATTACH clause. Pass true in the MCP
+   * server to prevent any accidental write back to data_lake.*.
+   * Default false — existing pack connectors are unaffected.
+   */
+  readOnly?: boolean;
 }
 
 export interface MakeDuckDBSourceOptions<TRow> {
@@ -109,7 +115,7 @@ export interface MakeDuckDBSourceOptions<TRow> {
 }
 
 /** SQL string-escape — single quotes only (DuckDB SET / CREATE SECRET syntax). */
-function sqlEscape(s: string): string {
+export function sqlEscape(s: string): string {
   return s.replace(/'/g, "''");
 }
 
@@ -188,7 +194,7 @@ export function composeQuery<TRow>(opts: {
         ].join("\n"),
       );
       statements.push(
-        `ATTACH '' AS ${att.alias} (TYPE POSTGRES, SECRET ${secretName});`,
+        `ATTACH '' AS ${att.alias} (TYPE POSTGRES, SECRET ${secretName}${att.readOnly ? ", READ_ONLY" : ""});`,
       );
     }
   }

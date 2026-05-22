@@ -142,6 +142,28 @@ test("composeQuery: single-quote escaping in s3 + pg creds", () => {
   assert.ok(stmts.some((s) => /y''z\.parquet/.test(s)));
 });
 
+test("composeQuery: ATTACH includes READ_ONLY when readOnly: true", () => {
+  const stmts = composeQuery({
+    source_id: "ro_test",
+    pgAttachments: [{ alias: "pg", readOnly: true }],
+    query: "SELECT 1",
+    pg: PG,
+  });
+  const attachStmt = stmts.find((s) => /ATTACH/.test(s))!;
+  assert.match(attachStmt, /READ_ONLY/);
+});
+
+test("composeQuery: ATTACH omits READ_ONLY when readOnly is false or omitted", () => {
+  const stmts = composeQuery({
+    source_id: "rw_test",
+    pgAttachments: [{ alias: "pg" }],
+    query: "SELECT 1",
+    pg: PG,
+  });
+  const attachStmt = stmts.find((s) => /ATTACH/.test(s))!;
+  assert.doesNotMatch(attachStmt, /READ_ONLY/);
+});
+
 test("makeDuckDBSource: fixture mode reads fixturePath and applies rowShape + normalize", async () => {
   // Use the bundled hurricane fixture as a smoke check of the fixture branch.
   const { fileURLToPath } = await import("node:url");
