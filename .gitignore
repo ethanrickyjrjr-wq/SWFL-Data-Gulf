@@ -89,3 +89,6 @@ __pycache__/
 
 # Ingest runtime logs (LeePA + future ingest pipelines)
 ingest/*.log
+
+# Scratch / throwaway scripts — never commit
+refinery/__scratch__/

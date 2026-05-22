@@ -23,7 +23,6 @@
 
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
 import { loadVocabularySync } from "../vocab/loader.mts";
 import {
   rankCandidates,
@@ -61,14 +60,6 @@ interface DedupedOrphan {
   observations: OrphanObservation[];
   packs: Set<string>;
   paths: Set<string>;
-}
-
-function gitShortSha(): string {
-  try {
-    return execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
-  } catch {
-    return "unknown";
-  }
 }
 
 function loadAllOrphans(): {
@@ -149,7 +140,6 @@ function renderReport(
   engineId: string,
 ): string {
   const now = new Date().toISOString();
-  const sha = gitShortSha();
   const vocab = loadVocabularySync();
 
   const lines: string[] = [];
@@ -159,7 +149,7 @@ function renderReport(
     "_Auto-generated read-only report — raw slugs that Stage 2.5 normalize observed but could not map to a SKOS concept, ranked against candidate concepts via the active similarity engine._",
   );
   lines.push("");
-  lines.push(`**Generated:** ${now} (commit \`${sha}\`)`);
+  lines.push(`**Generated:** ${now}`);
   lines.push(
     `**Vocab schema:** ${vocab.meta.schema_version} (concepts: ${Object.keys(vocab.concepts).length})`,
   );
