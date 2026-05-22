@@ -306,6 +306,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Only start when invoked directly (not when imported by tests).
 if (import.meta.main) {
+  process.on("exit", () => {
+    mainConn?.closeSync();
+  });
   startup()
     .then(() => {
       const transport = new StdioServerTransport();

@@ -53,7 +53,7 @@ This is the database-engine-level write guard. The MCP server passes `readOnly: 
 ### `list_views`
 
 - **Input:** none
-- **Behavior:** Returns the in-memory inventory array: `name`, `description`, `s3_url`, `row_count` for each registered Parquet view. Also lists the `pg` alias for Postgres.
+- **Behavior:** Returns the in-memory inventory array: `name`, `s3_url`, `pack_id`, `vintage`, `byte_size` for each registered Parquet view. Also lists the `pg` alias for Postgres.
 - **Error:** none (pure in-memory read).
 
 ### `describe_view`
