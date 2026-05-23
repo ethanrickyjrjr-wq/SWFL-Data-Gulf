@@ -1,0 +1,38 @@
+/* SWFL Data Gulf — Color tokens */
+/* Copy these into your project or reference directly */
+
+:root {
+  /* Surfaces */
+  --gulf-midnight: #0a1419;   /* Primary background */
+  --gulf-deep:     #0f1d24;   /* Section bg above midnight */
+  --gulf-slate:    #152832;   /* Card / surface */
+  --gulf-slate-hi: #1c3340;   /* Elevated surface (hover, expanded) */
+  --gulf-haze:     #22414f;   /* Dividers, table borders */
+
+  /* Accents */
+  --gulf-teal:     #3dc9c0;   /* Primary accent, CTAs, brand */
+  --gulf-teal-dim: #2a8c85;   /* Source links, secondary CTAs */
+  --mangrove:      #5bc97a;   /* Bullish signals */
+  --mangrove-dim:  #3d8a52;   /* Bullish on muted backgrounds */
+  --sunset-coral:  #e08158;   /* Bearish signals */
+  --coral-dim:     #a45a3d;   /* Bearish on muted backgrounds */
+  --neutral-gold:  #d4b370;   /* Mixed / neutral / stale data */
+
+  /* Text */
+  --text-primary:   #f0ede6;  /* Warm off-white — never pure #fff */
+  --text-secondary: #b8b4a8;  /* Body copy on cards, table cells */
+  --text-tertiary:  #807e76;  /* Captions, freshness token, footnotes */
+  --text-on-accent: #0a1419;  /* Text on --gulf-teal backgrounds */
+}
+
+/* Direction state — set instantly, never animated */
+[data-direction="bullish"] { color: var(--mangrove);       }
+[data-direction="bearish"] { color: var(--sunset-coral);   }
+[data-direction="mixed"]   { color: var(--neutral-gold);   }
+[data-direction="neutral"] { color: var(--text-secondary); }
+
+/* Tabular numbers on all metric values */
+.metric-value,
+td.numeric {
+  font-variant-numeric: tabular-nums;
+}
