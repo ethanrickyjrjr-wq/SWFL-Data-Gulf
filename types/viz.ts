@@ -22,6 +22,14 @@ export interface ZHVIMonth {
   naples: number | null;
 }
 
+// Non-nullable version of ZHVIMonth used for chart rendering (nulls filtered before passing in).
+export interface ZHVITrendEntry {
+  month: string; // "YYYY-MM"
+  cape_coral: number;
+  fort_myers: number;
+  naples: number;
+}
+
 export interface ZORIEntry {
   zip: string;
   city: string;

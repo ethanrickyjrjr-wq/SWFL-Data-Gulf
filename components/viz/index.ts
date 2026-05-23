@@ -3,6 +3,8 @@
 
 export { CorridorRentChart } from "./CorridorRentChart";
 export { ZHVIAreaChart } from "./ZHVIAreaChart";
+export { CorridorMarketScatter } from "./CorridorMarketScatter";
+export { RadialConfidenceGauge } from "./RadialConfidenceGauge";
 
 // Placeholders — implement in subsequent deliveries:
 // export { PermitHeatmap } from "./PermitHeatmap";
