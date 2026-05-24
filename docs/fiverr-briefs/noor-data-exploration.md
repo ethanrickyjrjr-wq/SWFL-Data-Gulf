@@ -1,4 +1,4 @@
-# Data Exploration & Visualization Brief — Nora
+# Data Exploration & Visualization Brief — Noor
 
 **From:** Ricky / Brain Platform
 **Scope:** Exploratory data review + chart prototyping

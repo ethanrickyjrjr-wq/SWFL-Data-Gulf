@@ -1,6 +1,6 @@
-# Nora — Contact & Portfolio
+# Noor — Contact & Portfolio
 
-**Companion file to:** `nora-data-exploration.md` (the brief)
+**Companion file to:** `noor-data-exploration.md` (the brief)
 **Date received:** 2026-05-24
 
 ## Links
