@@ -6,6 +6,7 @@ import stats from "@/fixtures/stats.json";
 import type {
   CorridorEntry,
   ZHVIMonth,
+  ZHVITrendEntry,
   BrainOutput,
   VizStats,
 } from "@/types/viz";
@@ -13,7 +14,10 @@ import type {
 // Static fixture data — swap these imports for live fetch() calls
 // when the Fiverr components are wired to the real API.
 const corridorData = corridors as CorridorEntry[];
-const zhviData = zhviTrend as ZHVIMonth[];
+const zhviData = (zhviTrend as ZHVIMonth[]).filter(
+  (row): row is ZHVITrendEntry =>
+    row.cape_coral !== null && row.fort_myers !== null && row.naples !== null
+);
 const brainData = brainOutput as BrainOutput;
 const statsData = stats as VizStats;
 
