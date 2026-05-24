@@ -57,6 +57,23 @@ function brainInputFrom(
   return null;
 }
 
+const METRIC_SOURCE_FIELD = {
+  cap_rate_pct:     "cap_rate_source_url",
+  vacancy_rate_pct: "vacancy_rate_source_url",
+  absorption_sqft:  "absorption_sqft_source_url",
+  asking_rent_psf:  "asking_rent_psf_source_url",
+} as const satisfies Record<
+  "cap_rate_pct" | "vacancy_rate_pct" | "absorption_sqft" | "asking_rent_psf",
+  keyof CorridorNormalized
+>;
+
+function resolveMetricSource(
+  c: CorridorNormalized,
+  field: keyof typeof METRIC_SOURCE_FIELD,
+): string | null {
+  return (c[METRIC_SOURCE_FIELD[field]] as string | null) ?? c.source_url;
+}
+
 /**
  * Build a BrainOutputMetricSource for a cre-swfl aggregate metric.
  *
@@ -85,7 +102,8 @@ function buildCreAggregateSource(
       : "fixture://refinery/__fixtures__/corridor-profiles.sample.json";
   const named = contributing
     .map((c) => {
-      const tail = c.source_url ? ` [${c.source_url}]` : "";
+      const resolved = resolveMetricSource(c, field);
+      const tail = resolved ? ` [${resolved}]` : "";
       return `${c.name} (${c.city}, ${c.county})${tail}`;
     })
     .join("; ");

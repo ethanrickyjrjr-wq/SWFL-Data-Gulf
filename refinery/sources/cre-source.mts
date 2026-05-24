@@ -70,6 +70,11 @@ export interface CorridorNormalized {
   tenant_mix: string | null;
   flags: CorridorFlag[];
   source_url: string | null;
+  /** Per-metric source overrides. Fallback: metric_source_url ?? source_url ?? null. */
+  cap_rate_source_url: string | null;
+  vacancy_rate_source_url: string | null;
+  absorption_sqft_source_url: string | null;
+  asking_rent_psf_source_url: string | null;
   /** Cap rate %, 0-30 (DB CHECK enforces). Null = not yet sourced. */
   cap_rate_pct: number | null;
   /** Editorial direction set when the value is entered. Null = no read. */
@@ -138,6 +143,10 @@ export function normalizeCorridor(
     tenant_mix: str(row.tenant_mix),
     flags: normalizeFlags(row.active_flags),
     source_url: str(row.source_url),
+    cap_rate_source_url: str(row.cap_rate_source_url),
+    vacancy_rate_source_url: str(row.vacancy_rate_source_url),
+    absorption_sqft_source_url: str(row.absorption_sqft_source_url),
+    asking_rent_psf_source_url: str(row.asking_rent_psf_source_url),
     cap_rate_pct: num(row.cap_rate_pct),
     cap_rate_direction: metricDirection(row.cap_rate_direction),
     vacancy_rate_pct: num(row.vacancy_rate_pct),
