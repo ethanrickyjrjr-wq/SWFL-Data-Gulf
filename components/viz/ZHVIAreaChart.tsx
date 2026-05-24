@@ -264,7 +264,7 @@ export function ZHVIAreaChart({
                     <div className="bg-slate-900 border border-slate-800 p-3 shadow-2xl rounded-lg text-xs space-y-1.5 font-mono">
                       <p className="text-slate-400 font-semibold mb-1 flex items-center gap-1">
                         <Calendar className="h-3 w-3 text-sky-400" />
-                        <span>{formatXAxis(label)}</span>
+                        <span>{formatXAxis(String(label ?? ""))}</span>
                       </p>
                       <div className="h-px bg-slate-800" />
                       {payload.map((item: any, i) => (
