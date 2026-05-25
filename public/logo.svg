@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="40" fill="#0A1419"/>
   <!-- Wave 1 (top) -->
   <path d="M 30 62 C 55 48, 75 48, 100 62 C 125 76, 145 76, 170 62"
         fill="none" stroke="#3DC9C0" stroke-width="14" stroke-linecap="round"/>
