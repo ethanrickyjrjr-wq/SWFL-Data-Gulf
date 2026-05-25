@@ -32,6 +32,7 @@ import {
   FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD,
 } from "../lib/swfl-geo.mts";
 import { env } from "../config/env.mts";
+import { medianOf } from "../lib/stats.mts";
 
 /**
  * env-swfl — Southwest Florida flood-hazard exposure derived directly from
@@ -980,16 +981,6 @@ function computeInsurancePctNoi(z: NfipZipAggregate): number {
   return num / denom;
 }
 
-/** Median of a number array, returns 0 on empty. */
-function medianOf(values: number[]): number {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1] + sorted[mid]) / 2
-    : sorted[mid];
-}
-
 const FEMA_NFIP_TABLE_URL_FOR_ZIP =
   "https://www.fema.gov/api/open/v2/FimaNfipClaims";
 
@@ -1037,9 +1028,9 @@ function modeConclusion(
         z.county_code === topBarrier.county_code &&
         barrierClassFor(z.zip).score < 1.0,
     );
-    const mainlandMedian = medianOf(
-      mainlandSameCounty.map((z) => z.aal_usd_per_insured_property),
-    );
+    const mainlandMedian =
+      medianOf(mainlandSameCounty.map((z) => z.aal_usd_per_insured_property)) ??
+      0;
     const mainlandClause =
       mainlandSameCounty.length > 0
         ? `, vs the ${topBarrier.county_name}-mainland median of $${Math.round(mainlandMedian).toLocaleString()}/yr per insured property`
@@ -1058,7 +1049,8 @@ function modeConclusion(
     const topCoastal = [...coastalish].sort(
       (a, b) => b.aal_usd_per_insured_property - a.aal_usd_per_insured_property,
     )[0];
-    const med = medianOf(coastalish.map((z) => z.aal_usd_per_insured_property));
+    const med =
+      medianOf(coastalish.map((z) => z.aal_usd_per_insured_property)) ?? 0;
     const insPct = computeInsurancePctNoi(topCoastal);
     return (
       `SWFL coastal-mainland ZIPs cluster at $${Math.round(med).toLocaleString()}/yr per insured property over the ${AAL_WINDOW_YEARS}-year window, ` +

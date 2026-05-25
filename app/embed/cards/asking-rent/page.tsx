@@ -7,6 +7,7 @@ import {
   type HBarTier,
 } from "@/components/charts/HBarChart";
 import type { CorridorEntry } from "@/types/viz";
+import { medianOf } from "@/lib/stats";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -37,15 +38,6 @@ async function loadCorridors(): Promise<CorridorEntry[]> {
   return JSON.parse(raw) as CorridorEntry[];
 }
 
-function medianOf(values: number[]): number {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1] + sorted[mid]) / 2
-    : sorted[mid];
-}
-
 function tierFor(value: number, median: number): HBarTier {
   if (value >= median * BULLISH_MULTIPLIER) return "bullish";
   if (value <= median * BEARISH_MULTIPLIER) return "bearish";
@@ -64,7 +56,7 @@ export default async function AskingRentCardPage() {
 
   const total = ranked.length;
   const marketValues = ranked.map((c) => c.nnn_asking_rent_per_sqft);
-  const marketMedian = medianOf(marketValues);
+  const marketMedian = medianOf(marketValues) ?? 0;
   const marketRange = {
     min: marketValues[marketValues.length - 1],
     max: marketValues[0],
