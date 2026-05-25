@@ -1,33 +1,51 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
+  registerAppTool,
+  registerAppResource,
+  RESOURCE_MIME_TYPE,
+} from "@modelcontextprotocol/ext-apps/server";
+import {
   fetchBrain,
-  resolveOrigin,
   BrainNotFoundError,
   BrainBadTierError,
 } from "@/lib/fetch-brain";
 import { buildInventoryMarkdown, buildReportIdSet } from "./inventory";
 
 /**
- * MCP server callback. Registers the single `swfl_fetch` tool against the
- * server instance `mcp-handler` constructs for each request. Pure registration
- * — the tool handler does the actual fetch + render via `lib/fetch-brain.ts`.
+ * MCP server callback. Registers `swfl_fetch` as an MCP App tool (the in-chat
+ * widget surface, per the MCP Apps spec live 2026-01-26) plus a text fallback
+ * for clients that don't render apps.
  *
- * Response shape per the v1 plan (`docs/superpowers/plans/2026-05-22-brains-mcp-server-v1/README.md`):
+ * Response shape:
  *
- *   - Two content blocks: a text block (consumed by all clients) and a
- *     `resource` block carrying the structured MCP App payload (Claude
- *     renders as an inline widget; other clients ignore silently).
+ *   - Single text content block — speaker output (conclusion + key-metrics
+ *     table + caveats + report link + freshness token). Universal across every
+ *     MCP client (Claude Desktop, Cursor, Windsurf, ChatGPT).
  *   - `_meta.freshness_token` on every response — verbatim from BrainOutput.
- *   - Tool handler returns `{ content, isError: true }` on failure; NEVER throws.
+ *   - Tool registration links to the chart widget via `_meta.ui.resourceUri`.
+ *     App-capable clients (Claude) render the HTML from `registerAppResource`
+ *     inline in the conversation; non-app clients see the text block only.
  *
- * MIME type `application/vnd.anthropic.mcp-app+json` is the v1 design intent
- * for MCP Apps — verify against current Anthropic MCP Apps documentation
- * before locking long-term.
+ * The chart widget HTML is Saimum's "Chat-Charts-Standalone.html" — a fully
+ * self-contained bundle (gzip+base64 assets unpacked client-side into blob
+ * URLs). It is registered as an `text/html;profile=mcp-app` resource at
+ * `ui://swfl-fetch/chat-charts.html`.
  */
 
 const VALID_REPORT_IDS = buildReportIdSet();
 const INVENTORY_MD = buildInventoryMarkdown();
+
+const CHART_RESOURCE_URI = "ui://swfl-fetch/chat-charts.html";
+
+// Read the chart bundle once at module load. `outputFileTracingIncludes` in
+// next.config.ts ensures Vercel ships this file with the `/api/mcp` function.
+const CHART_HTML = readFileSync(
+  join(process.cwd(), "docs/fiverr-briefs/assets/Chat-Charts-Standalone.html"),
+  "utf-8",
+);
 
 const TOOL_DESCRIPTION = `swfl_fetch — read the Southwest Florida data lake.
 
@@ -46,63 +64,60 @@ ${INVENTORY_MD}
 Full structured view. Every response includes a link of the form https://www.swfldatagulf.com/r/{report_id} — point the user there for charts, the full metrics table, or to share the report.`;
 
 export function buildMcpServer(server: McpServer): void {
-  server.tool(
-    "swfl_fetch",
-    TOOL_DESCRIPTION,
+  registerAppResource(
+    server,
+    "SWFL Chat Charts",
+    CHART_RESOURCE_URI,
     {
-      report_id: z
-        .string()
-        .refine((id) => VALID_REPORT_IDS.has(id), {
-          message: `report_id must be one of: ${[...VALID_REPORT_IDS].join(", ")}`,
-        })
-        .optional()
-        .describe(
-          "Report to fetch. Omit for the master synthesis (recommended for first-call routing).",
-        ),
-      tier: z
-        .union([z.literal(1), z.literal(2), z.literal(3)])
-        .optional()
-        .describe(
-          "Output detail. 1 = conversational, 2 = structured (default), 3 = audit. Use 3 only when the user explicitly asks to verify or trace sources.",
-        ),
+      description:
+        "Inline chart widget for swfl_fetch responses. Renders headline metrics, corridor scatter, and rent breakdowns from the report payload.",
+    },
+    async () => ({
+      contents: [
+        {
+          uri: CHART_RESOURCE_URI,
+          mimeType: RESOURCE_MIME_TYPE,
+          text: CHART_HTML,
+        },
+      ],
+    }),
+  );
+
+  registerAppTool(
+    server,
+    "swfl_fetch",
+    {
+      description: TOOL_DESCRIPTION,
+      inputSchema: {
+        report_id: z
+          .string()
+          .refine((id) => VALID_REPORT_IDS.has(id), {
+            message: `report_id must be one of: ${[...VALID_REPORT_IDS].join(", ")}`,
+          })
+          .optional()
+          .describe(
+            "Report to fetch. Omit for the master synthesis (recommended for first-call routing).",
+          ),
+        tier: z
+          .union([z.literal(1), z.literal(2), z.literal(3)])
+          .optional()
+          .describe(
+            "Output detail. 1 = conversational, 2 = structured (default), 3 = audit. Use 3 only when the user explicitly asks to verify or trace sources.",
+          ),
+      },
+      _meta: {
+        ui: { resourceUri: CHART_RESOURCE_URI },
+      },
     },
     async ({ report_id, tier }) => {
       const slug = report_id ?? "master";
       const t: 1 | 2 | 3 = tier ?? 2;
 
       try {
-        const { text, freshness_token, output } = await fetchBrain(slug, {
-          tier: t,
-        });
-        const origin = resolveOrigin();
-        const report_url = `${origin}/r/${slug}`;
-
-        const mcpAppPayload = {
-          report_id: slug,
-          tier: t,
-          freshness_token,
-          conclusion: output.conclusion,
-          key_metrics: output.key_metrics.map((m) => ({
-            label: m.label,
-            value: typeof m.value === "string" ? m.value : String(m.value),
-            source_url: m.source.url,
-          })),
-          caveats: output.caveats,
-          report_url,
-        };
+        const { text, freshness_token } = await fetchBrain(slug, { tier: t });
 
         return {
-          content: [
-            { type: "text" as const, text },
-            {
-              type: "resource" as const,
-              resource: {
-                uri: `swfl://report/${slug}`,
-                mimeType: "application/vnd.anthropic.mcp-app+json",
-                text: JSON.stringify(mcpAppPayload),
-              },
-            },
-          ],
+          content: [{ type: "text" as const, text }],
           _meta: { freshness_token },
         };
       } catch (err) {

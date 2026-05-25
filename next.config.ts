@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/api/mcp": ["./docs/fiverr-briefs/assets/Chat-Charts-Standalone.html"],
+  },
   async headers() {
     return [
       {

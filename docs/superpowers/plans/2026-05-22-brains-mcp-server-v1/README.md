@@ -99,59 +99,32 @@ return {
 
 ### MCP App response format
 
-`swfl_fetch` returns **two content blocks** on every response: a text block (consumed by all clients) and a structured data block (rendered as an MCP App widget in Claude). Non-Claude clients ignore the second block silently — no conditional branching in server code; always emit both.
+**AMENDED 2026-05-25 — wire format corrected to match published MCP Apps spec (live 2026-01-26). Widget SHIPS in v1; the original "structured JSON resource block" was wrong but the in-chat chart surface is real.**
 
-**Data contract for `server.ts` (lock this shape before building):**
+**What was wrong in the original draft:** a second `resource` content block with `mimeType: "application/vnd.anthropic.mcp-app+json"` carrying a JSON payload. That MIME type and that inline-JSON shape do not exist in the spec. Pushing them would be silently ignored by lenient clients and break strict ones.
 
-```ts
-// Text block — all clients
-{ type: "text", text }
+**What the spec actually requires** (verified via `apps.extensions.modelcontextprotocol.io/api/documents/Quickstart.html` and the typed surface of `@modelcontextprotocol/ext-apps/server`):
 
-// MCP App block — Claude renders this as an inline widget; other clients ignore it
-{
-  type: "resource",
-  resource: {
-    uri: `swfl://report/${report_id}`,
-    mimeType: "application/vnd.anthropic.mcp-app+json",
-    text: JSON.stringify({
-      report_id:       string,          // e.g. "master"
-      tier:            1 | 2 | 3,
-      freshness_token: string,          // verbatim from BrainOutput
-      conclusion:      string,          // BrainOutput.conclusion
-      key_metrics:     Array<{
-        label:      string;
-        value:      string;
-        source_url: string;
-      }>,
-      caveats:         string[],
-      report_url:      string,          // CANONICAL_ORIGIN + "/r/" + report_id
-    }),
-  },
-}
-```
+- Widget is an **HTML bundle** served as a separate MCP resource.
+- Register via `registerAppResource(server, name, uri, config, readCallback)` with `mimeType: RESOURCE_MIME_TYPE` (= `"text/html;profile=mcp-app"`).
+- Tool is registered via `registerAppTool(server, name, { ..., _meta: { ui: { resourceUri } } }, handler)` — the `_meta.ui.resourceUri` is the link from tool response → widget.
+- App-capable clients (Claude Desktop) render the HTML inline in the conversation; text-only clients fall back to the tool's text content block.
+- The widget can call back into the server with `app.callServerTool({ name, arguments })` from inside the iframe.
 
-**Full response shape:**
+**v1 response shape (text block stays universal; widget link is metadata):**
 
 ```ts
 return {
-  content: [
-    { type: "text", text },
-    {
-      type: "resource",
-      resource: {
-        uri: `swfl://report/${report_id}`,
-        mimeType: "application/vnd.anthropic.mcp-app+json",
-        text: JSON.stringify(mcpAppPayload),
-      },
-    },
-  ],
+  content: [{ type: "text", text }],
   _meta: { freshness_token },
 };
 ```
 
-**Why lock this now:** Retrofitting the structured block after launch means a breaking change to any Claude session that parsed the first response shape. `server.ts` must emit both blocks from day one.
+Speaker output (conclusion + key-metrics table + caveats + report link + freshness token) is in the text block — universal across every client. The chart widget is wired at registration time, not per-response.
 
-**Verify before building:** Confirm the `mimeType` value against current Anthropic MCP Apps documentation — `application/vnd.anthropic.mcp-app+json` is the design intent; the published spec is authoritative.
+**Widget asset:** Saimum's `docs/fiverr-briefs/assets/Chat-Charts-Standalone.html` — a self-contained bundle (gzip+base64 assets unpacked client-side into blob URLs). Read once at module load in `app/api/mcp/server.ts`; `next.config.ts` `outputFileTracingIncludes` ensures Vercel ships the file with the `/api/mcp` function.
+
+**Install:** `bun add mcp-handler zod @modelcontextprotocol/ext-apps` + `bun add -d @modelcontextprotocol/inspector`.
 
 ### Tool description (first draft, ~340 words)
 
