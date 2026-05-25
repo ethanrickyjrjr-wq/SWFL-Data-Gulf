@@ -5,6 +5,7 @@ import {
   speak,
   type SpeakerTier,
 } from "../refinery/render/speaker.mts";
+import type { BrainOutput } from "../refinery/types/brain-output.mts";
 
 /**
  * Shared brain-fetch pipeline used by `/api/b/[slug]` and (Step 2) the MCP
@@ -42,7 +43,7 @@ export class BrainBadTierError extends Error {
  *
  * `VERCEL_URL` is a hostname only (no protocol), per Vercel's docs.
  */
-function resolveOrigin(explicit?: string): string {
+export function resolveOrigin(explicit?: string): string {
   if (explicit) return explicit;
   if (process.env.BRAIN_PLATFORM_URL) return process.env.BRAIN_PLATFORM_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -62,6 +63,13 @@ export interface FetchBrainOptions {
 export interface FetchBrainResult {
   text: string;
   freshness_token: string;
+  /**
+   * Structured BrainOutput parsed from the `--- OUTPUT ---` block. The MCP
+   * route needs this to build the App resource block (conclusion, key_metrics,
+   * caveats). HTTP `/api/b` ignores it. Always present — `parseBrainMarkdown`
+   * throws if the OUTPUT block is missing.
+   */
+  output: BrainOutput;
 }
 
 export function parseTier(raw: unknown): SpeakerTier {
@@ -92,7 +100,11 @@ export async function fetchBrain(
     origin: resolveOrigin(opts.origin),
   });
 
-  return { text, freshness_token: brain.freshness_token };
+  return {
+    text,
+    freshness_token: brain.freshness_token,
+    output: brain.output,
+  };
 }
 
 /**
