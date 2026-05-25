@@ -1,0 +1,53 @@
+name: LeePA parcels annual
+
+on:
+  schedule:
+    # 13:00 UTC = 9 AM ET on March 1st.
+    # LeePA publishes the prior year's certified roll in early Q1; March 1 is
+    # conservative enough to ensure the data is available.
+    - cron: "0 13 1 3 *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run leepa pipeline
+        env:
+          BRAINS_SUPABASE_URL: ${{ secrets.BRAINS_SUPABASE_URL }}
+          BRAINS_SUPABASE_SERVICE_KEY: ${{ secrets.BRAINS_SUPABASE_SERVICE_KEY }}
+          SUPABASE_PG_HOST: ${{ secrets.SUPABASE_PG_HOST }}
+          SUPABASE_PG_PORT: ${{ secrets.SUPABASE_PG_PORT }}
+          SUPABASE_PG_DB: ${{ secrets.SUPABASE_PG_DB }}
+          SUPABASE_PG_USER: ${{ secrets.SUPABASE_PG_USER }}
+          SUPABASE_PG_PASSWORD: ${{ secrets.SUPABASE_PG_PASSWORD }}
+        run: python -m ingest.pipelines.leepa.pipeline
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set — skipping Slack alert."
+            exit 0
+          fi
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -sS -X POST -H "Content-Type: application/json" \
+            -d "{\"text\": \":rotating_light: *leepa-parcels-annual* failed.\\n• Run: ${RUN_URL}\"}" \
+            "$SLACK_WEBHOOK_URL"

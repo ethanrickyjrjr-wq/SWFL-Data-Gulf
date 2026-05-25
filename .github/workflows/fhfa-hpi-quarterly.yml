@@ -1,0 +1,52 @@
+name: FHFA HPI quarterly
+
+on:
+  schedule:
+    # 13:00 UTC = 9 AM ET on the 8th of Jan / Apr / Jul / Oct.
+    # FHFA typically releases ~8 weeks after quarter-end; 8th gives buffer.
+    - cron: "0 13 8 1,4,7,10 *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run fhfa pipeline
+        env:
+          BRAINS_SUPABASE_URL: ${{ secrets.BRAINS_SUPABASE_URL }}
+          BRAINS_SUPABASE_SERVICE_KEY: ${{ secrets.BRAINS_SUPABASE_SERVICE_KEY }}
+          SUPABASE_PG_HOST: ${{ secrets.SUPABASE_PG_HOST }}
+          SUPABASE_PG_PORT: ${{ secrets.SUPABASE_PG_PORT }}
+          SUPABASE_PG_DB: ${{ secrets.SUPABASE_PG_DB }}
+          SUPABASE_PG_USER: ${{ secrets.SUPABASE_PG_USER }}
+          SUPABASE_PG_PASSWORD: ${{ secrets.SUPABASE_PG_PASSWORD }}
+        run: python -m ingest.pipelines.fhfa.pipeline
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set — skipping Slack alert."
+            exit 0
+          fi
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -sS -X POST -H "Content-Type: application/json" \
+            -d "{\"text\": \":rotating_light: *fhfa-hpi-quarterly* failed.\\n• Run: ${RUN_URL}\"}" \
+            "$SLACK_WEBHOOK_URL"
