@@ -10,7 +10,7 @@ The wedge: hand a tester a URL (or eventually a click), and their Claude can ans
 
 ## Locked decisions
 
-- **Transport:** Remote Streamable HTTP at `https://brain-platform-amber.vercel.app/api/mcp`. Same Next.js app as `/api/b/[slug]`. No new project.
+- **Transport:** Remote Streamable HTTP at `https://www.swfldatagulf.com/api/mcp`. Same Next.js app as `/api/b/[slug]`. No new project.
 - **Tool shape:** One tool — `swfl_fetch(report_id?, tier?)`. Defaults: `report_id="master"`, `tier=2`. Master-first routing flow encoded in the tool description (matches today's CLAUDE.md protocol).
 - **Auth:** Open, mirrors `/api/b`. Middleware hook stubbed so adding bearer-token gating later is a single-function edit.
 - **Voice:** Plain language, "SWFL data lake" framing. No internal jargon in user-visible copy or tool description.
@@ -33,7 +33,7 @@ The wedge: hand a tester a URL (or eventually a click), and their Claude can ans
   const CANONICAL_ORIGIN =
     process.env.BRAIN_PLATFORM_URL ??
     `https://${process.env.VERCEL_URL}` ??
-    "https://brain-platform-amber.vercel.app";
+    "https://www.swfldatagulf.com";
   ```
 
   Thread into the `speak()` call. **Correctness fix: report links are `null` without this.**
@@ -169,7 +169,7 @@ return {
 >
 > **Available reports.** `<inventory injected from BRAIN_CATALOG at boot>`
 >
-> **Full structured view.** Every response includes a link of the form `https://brain-platform-amber.vercel.app/r/{report_id}` — point the user there for charts, the full metrics table, or to share the report.
+> **Full structured view.** Every response includes a link of the form `https://www.swfldatagulf.com/r/{report_id}` — point the user there for charts, the full metrics table, or to share the report.
 
 ### Landing page (`/connect`)
 
@@ -180,7 +180,7 @@ Install instructions are presented as **four client tabs** (accordions on mobile
 Primary CTA — copy-paste one-liner:
 
 ```
-claude mcp add --transport http swfl https://brain-platform-amber.vercel.app/api/mcp
+claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp
 ```
 
 Helper text: "Run this in your terminal where Claude Code is installed."
@@ -195,7 +195,7 @@ Steps: Open Claude Desktop → Settings → Developer → Edit Config. Add to `m
 {
   "mcpServers": {
     "swfl": {
-      "url": "https://brain-platform-amber.vercel.app/api/mcp",
+      "url": "https://www.swfldatagulf.com/api/mcp",
       "transport": "http"
     }
   }
@@ -218,7 +218,7 @@ Steps: Cursor Settings → Features → MCP → Add server. Or paste directly in
 {
   "mcpServers": {
     "swfl": {
-      "url": "https://brain-platform-amber.vercel.app/api/mcp",
+      "url": "https://www.swfldatagulf.com/api/mcp",
       "transport": "http"
     }
   }
@@ -238,7 +238,7 @@ Steps: Windsurf Settings → Cascade → MCP Servers → Add. Or paste directly 
 {
   "mcpServers": {
     "swfl": {
-      "url": "https://brain-platform-amber.vercel.app/api/mcp",
+      "url": "https://www.swfldatagulf.com/api/mcp",
       "transport": "http"
     }
   }
@@ -247,7 +247,7 @@ Steps: Windsurf Settings → Cascade → MCP Servers → Add. Or paste directly 
 
 Reload Windsurf after saving.
 
-**Note — ChatGPT Desktop:** Supports remote MCP via Settings → Connected Apps → Add MCP server. URL: `https://brain-platform-amber.vercel.app/api/mcp`. Exact UI path is subject to OpenAI updates — verify before publishing instructions.
+**Note — ChatGPT Desktop:** Supports remote MCP via Settings → Connected Apps → Add MCP server. URL: `https://www.swfldatagulf.com/api/mcp`. Exact UI path is subject to OpenAI updates — verify before publishing instructions.
 
 #### Below the install — three short sections
 
@@ -310,7 +310,7 @@ Tool name derived from `${AREA_SLUG}_fetch`. Tool description auto-fills county 
 4. **Claude Code locally.** `claude mcp add --transport http swfl-local http://localhost:3000/api/mcp`. In a fresh session, ask "what does the SWFL data lake say about housing right now?" — confirm the tool fires and the response carries source URLs.
 5. **Vercel preview deploy.** Push branch. Hit preview URL's `/api/mcp` with Inspector again. Confirm `Access-Control-Allow-Origin: *` and `force-dynamic` are present.
 6. **Waitlist smoke test.** Submit the form against the preview deploy. Confirm the row lands in `public.waitlist` with the expected `interests` array. Resubmit the same email — expect a clean "already on the list" UI, not a 500.
-7. **Production.** Final Inspector run against `brain-platform-amber.vercel.app/api/mcp` before pointing testers at `/connect`.
+7. **Production.** Final Inspector run against `www.swfldatagulf.com/api/mcp` before pointing testers at `/connect`.
 
 ## Costs
 
@@ -363,7 +363,7 @@ _This brief is for Claude.ai (web or desktop) artifact/UI prototyping. Not a spe
 Large, centered monospace code block with a "Copy" button on the right:
 
 ```
-claude mcp add --transport http swfl https://brain-platform-amber.vercel.app/api/mcp
+claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp
 ```
 
 Small helper text: "Run this in your terminal where Claude Code is installed."
@@ -378,7 +378,7 @@ Tertiary: "Add to Claude" deep-link button — hidden until Ricky verifies the `
    {
      "mcpServers": {
        "swfl": {
-         "url": "https://brain-platform-amber.vercel.app/api/mcp",
+         "url": "https://www.swfldatagulf.com/api/mcp",
          "transport": "http"
        }
      }
@@ -401,7 +401,7 @@ Config file paths:
    {
      "mcpServers": {
        "swfl": {
-         "url": "https://brain-platform-amber.vercel.app/api/mcp",
+         "url": "https://www.swfldatagulf.com/api/mcp",
          "transport": "http"
        }
      }
@@ -419,7 +419,7 @@ Config file paths:
    {
      "mcpServers": {
        "swfl": {
-         "url": "https://brain-platform-amber.vercel.app/api/mcp",
+         "url": "https://www.swfldatagulf.com/api/mcp",
          "transport": "http"
        }
      }
@@ -427,7 +427,7 @@ Config file paths:
    ```
 3. Reload Windsurf.
 
-**Note — ChatGPT Desktop:** Supports remote MCP via Settings → Connected Apps → Add MCP server. URL: `https://brain-platform-amber.vercel.app/api/mcp`. Exact UI path subject to OpenAI updates — verify before publishing instructions.
+**Note — ChatGPT Desktop:** Supports remote MCP via Settings → Connected Apps → Add MCP server. URL: `https://www.swfldatagulf.com/api/mcp`. Exact UI path subject to OpenAI updates — verify before publishing instructions.
 
 ---
 

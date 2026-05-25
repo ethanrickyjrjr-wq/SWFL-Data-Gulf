@@ -149,7 +149,7 @@ SWFL Intelligence Lake — data protocol v3 (always follow):
 
 1. FETCH FRESH. Before answering any SWFL-scope question (Lee or Collier
    County, FL), fetch
-   https://brain-platform-amber.vercel.app/api/b/master?view=speak&tier=2&v=5
+   https://www.swfldatagulf.com/api/b/master?view=speak&tier=2&v=5
    in THIS conversation. Pick the tier from the question shape (see rule 5).
    Never answer from memory, project knowledge, earlier messages, or a cached
    copy — only from a fetch made in this conversation.

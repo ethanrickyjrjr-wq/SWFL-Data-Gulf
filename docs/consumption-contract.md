@@ -37,7 +37,7 @@ SWFL Intelligence Lake — data protocol v3 (always follow):
 
 1. FETCH FRESH. Before answering any SWFL-scope question (Lee or Collier
    County, FL), fetch
-   https://brain-platform-amber.vercel.app/api/b/master?view=speak&tier=2&v=5
+   https://www.swfldatagulf.com/api/b/master?view=speak&tier=2&v=5
    in THIS conversation. Pick the tier from the question shape (see rule 5).
    Never answer from memory, project knowledge, earlier messages, or a cached
    copy — only from a fetch made in this conversation.
@@ -128,7 +128,7 @@ Never use lake data from memory, project files, or prior messages. At the start 
 conversation, fetch the speaker view of the Master Index:
 
 ```
-https://brain-platform-amber.vercel.app/api/b/master?view=speak&tier=2&v=5
+https://www.swfldatagulf.com/api/b/master?view=speak&tier=2&v=5
 ```
 
 (The `?v=5` query string is a Claude-Projects cache-bust — Vercel's route ignores
@@ -167,9 +167,9 @@ If the Master Index gives aggregate stats but points to a sub-brain for names/na
 fetch the sub-brain URL immediately. Do not guess. Same speaker-view query string
 applies — pick the tier that matches the sub-question.
 
-- Franchise Outcomes: `https://brain-platform-amber.vercel.app/api/b/franchise-outcomes?view=speak&tier=2`
-- CRE SWFL Corridors: `https://brain-platform-amber.vercel.app/api/b/cre-swfl?view=speak&tier=2`
-- Lee Properties: `https://brain-platform-amber.vercel.app/api/b/properties-lee-value?view=speak&tier=2`
+- Franchise Outcomes: `https://www.swfldatagulf.com/api/b/franchise-outcomes?view=speak&tier=2`
+- CRE SWFL Corridors: `https://www.swfldatagulf.com/api/b/cre-swfl?view=speak&tier=2`
+- Lee Properties: `https://www.swfldatagulf.com/api/b/properties-lee-value?view=speak&tier=2`
 
 ### 4. Zero-inference hardening
 

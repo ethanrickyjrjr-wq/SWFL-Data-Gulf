@@ -75,7 +75,7 @@ Build exactly to Surface E's nine beats. Summary:
 **Install command block** (the centerpiece)
 
 ```
-claude mcp add --transport http swfl https://brain-platform-amber.vercel.app/api/mcp
+claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp
 ```
 
 - Mono type (JetBrains Mono or IBM Plex Mono), weight 500.
@@ -95,7 +95,7 @@ crossfade.
   sub-section with a JSON config snippet.
 - **ChatGPT** — Numbered steps:
   1. Settings → 2. Developer Mode → 3. Connectors →
-  2. paste this URL: `https://brain-platform-amber.vercel.app/api/mcp`
+  2. paste this URL: `https://www.swfldatagulf.com/api/mcp`
 - **Cursor** — Single "Install in Cursor" button (deep-link
   placeholder `cursor://mcp/install?url=...`).
 - **Windsurf** — Single "Install in Windsurf" button (deep-link

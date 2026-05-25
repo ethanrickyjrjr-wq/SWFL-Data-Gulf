@@ -19,7 +19,7 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  * (s01, s02, ...) in `pack.sources` order.
  */
 
-const VERCEL_BASE = "https://brain-platform-amber.vercel.app/api/b";
+const VERCEL_BASE = "https://www.swfldatagulf.com/api/b";
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 
 /** A SAVED FACTS entry as it appears in a rendered brain file. */

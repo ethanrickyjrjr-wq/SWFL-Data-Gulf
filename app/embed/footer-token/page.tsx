@@ -12,7 +12,7 @@ type MasterPayload = {
 async function fetchMaster(): Promise<MasterPayload | null> {
   try {
     const res = await fetch(
-      "https://brain-platform-amber.vercel.app/api/b/master?view=speak&tier=2",
+      "https://www.swfldatagulf.com/api/b/master?view=speak&tier=2",
       { next: { revalidate: 300 } },
     );
     if (!res.ok) return null;
@@ -82,7 +82,7 @@ export default async function EmbedFooterTokenPage() {
             </span>
           </div>
           <a
-            href="https://brain-platform-amber.vercel.app/r/master"
+            href="https://www.swfldatagulf.com/r/master"
             style={{
               fontSize: 13,
               color: "#3DC9C0",

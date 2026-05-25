@@ -344,7 +344,7 @@ function buildBrainInputSource(
   fetched_at: string,
 ): BrainOutputMetricSource {
   return {
-    url: `https://brain-platform-amber.vercel.app/api/b/${BASELINE_UPSTREAM_ID}`,
+    url: `https://www.swfldatagulf.com/api/b/${BASELINE_UPSTREAM_ID}`,
     fetched_at,
     tier: upstream.trust_tier,
     citation:

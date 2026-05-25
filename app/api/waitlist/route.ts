@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_INTERESTS = 10;
@@ -38,6 +41,16 @@ export async function POST(request: Request) {
   if (error && error.code !== "23505") {
     // 23505 = unique_violation — treat duplicate as success
     return NextResponse.json({ error: "insert_failed" }, { status: 500 });
+  }
+
+  // Only send confirmation on first signup, not duplicates
+  if (!error) {
+    await resend.emails.send({
+      from: "SWFL Data Gulf <hello@swfldatagulf.com>",
+      to: email,
+      subject: "You're on the list",
+      text: `Hey — you're in.\n\nWe'll reach out when SWFL Data Gulf is ready. No spam, no fluff.\n\n— The SWFL Data Gulf team`,
+    });
   }
 
   return NextResponse.json({ ok: true });

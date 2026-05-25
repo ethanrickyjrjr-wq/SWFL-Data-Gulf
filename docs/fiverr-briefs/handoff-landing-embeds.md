@@ -94,7 +94,7 @@ Dark background, single column, cinematic pacing. A terminal-style animation sho
 ```
 User: What's the franchise survival rate in Fort Myers?
 
-Claude fetching → brain-platform-amber.vercel.app/api/b/master
+Claude fetching → www.swfldatagulf.com/api/b/master
 freshness_token: SWFL-7421-v8-20260523 ✓
 
 Claude: Based on 847 resolved SBA loans in Lee County,
@@ -397,11 +397,11 @@ Freshness: SWFL-7421-v8-20260523
 
 ### Production URLs (verified 2026-05-24)
 
-- Master brain report page: `https://brain-platform-amber.vercel.app/r/master`
-- Chart reference (Gulf-palette example): `https://brain-platform-amber.vercel.app/embed/charts`
-- Freshness card reference: `https://brain-platform-amber.vercel.app/embed/footer-token`
-- Waitlist endpoint: `POST https://brain-platform-amber.vercel.app/api/waitlist`
-- Brain API base (text-speak format): `https://brain-platform-amber.vercel.app/api/b/{brain-id}?view=speak&tier={1|2|3}`
+- Master brain report page: `https://www.swfldatagulf.com/r/master`
+- Chart reference (Gulf-palette example): `https://www.swfldatagulf.com/embed/charts`
+- Freshness card reference: `https://www.swfldatagulf.com/embed/footer-token`
+- Waitlist endpoint: `POST https://www.swfldatagulf.com/api/waitlist`
+- Brain API base (text-speak format): `https://www.swfldatagulf.com/api/b/{brain-id}?view=speak&tier={1|2|3}`
 - **JSON output endpoint:** _coming — see §12 item 1_
 
 ### Brain IDs the script references (all live)
@@ -415,21 +415,21 @@ CSP is already configured — `/embed/*` routes allow iframing from any domain. 
 ```html
 <!-- Scene 3 — Charts (two charts side-by-side, stacks under 960px) -->
 <iframe
-  src="https://brain-platform-amber.vercel.app/embed/charts"
+  src="https://www.swfldatagulf.com/embed/charts"
   style="border:0;width:100%;height:720px;background:#0A1419"
   loading="lazy"
 ></iframe>
 
 <!-- Scene 7 — Freshness token card -->
 <iframe
-  src="https://brain-platform-amber.vercel.app/embed/footer-token"
+  src="https://www.swfldatagulf.com/embed/footer-token"
   style="border:0;width:100%;height:180px;background:#0A1419"
   loading="lazy"
 ></iframe>
 
 <!-- Scene 7 — Waitlist form -->
 <iframe
-  src="https://brain-platform-amber.vercel.app/embed/waitlist"
+  src="https://www.swfldatagulf.com/embed/waitlist"
   style="border:0;width:100%;height:120px;background:#0A1419"
   loading="lazy"
 ></iframe>

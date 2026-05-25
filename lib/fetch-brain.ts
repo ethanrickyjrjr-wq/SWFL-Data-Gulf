@@ -46,7 +46,7 @@ function resolveOrigin(explicit?: string): string {
   if (explicit) return explicit;
   if (process.env.BRAIN_PLATFORM_URL) return process.env.BRAIN_PLATFORM_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "https://brain-platform-amber.vercel.app";
+  return "https://www.swfldatagulf.com";
 }
 
 export interface FetchBrainOptions {

@@ -26,7 +26,7 @@ import { readBrainOutput } from "../lib/brain-output-reader.mts";
  * migrate once the OUTPUT block has been in place across one TTL cycle.
  */
 
-const VERCEL_BASE = "https://brain-platform-amber.vercel.app/api/b";
+const VERCEL_BASE = "https://www.swfldatagulf.com/api/b";
 
 /** Normalized brain-input fragment — one upstream's OUTPUT contributes one of these. */
 export interface BrainInputNormalized {
