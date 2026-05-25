@@ -95,6 +95,7 @@ const BANNED_PROSE: Array<[RegExp, string]> = [
  * Throws on malformed input — callers decide how to surface to the user.
  */
 export function parseBrainMarkdown(md: string): ParsedBrain {
+  md = md.replace(/\r\n/g, "\n");
   const frontmatter = extractFrontmatter(md);
   const outputJson = extractDelimitedSection(md, "OUTPUT");
   if (!outputJson) {
