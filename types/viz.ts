@@ -6,14 +6,29 @@ export interface CorridorEntry {
   id: string;
   name: string;
   submarket: string;
-  nnn_asking_rent_per_sqft: number;
-  vacancy_pct: number;
+  // Per-metric fields are nullable: the fixture is regenerated from
+  // Supabase `corridor_profiles` (see refinery/tools/regen-corridor-fixture.mts),
+  // and only the columns owned by that table are guaranteed populated.
+  // permit_zscore/saturation_index require permits-swfl pack output;
+  // lat/lng require a centroid table. Both are TODO joins — consumers
+  // must null-filter before rendering on those fields.
+  nnn_asking_rent_per_sqft: number | null;
+  vacancy_pct: number | null;
   absorption_sqft: number | null;
-  permit_zscore: number;
-  saturation_index: number;
-  lat: number;
-  lng: number;
+  permit_zscore: number | null;
+  saturation_index: number | null;
+  lat: number | null;
+  lng: number | null;
 }
+
+/**
+ * CorridorEntry with all per-metric fields non-null. Use this as the type after
+ * a filter that drops rows missing any of the optional fields, so downstream
+ * code can dereference `.toFixed()` without re-checking for null.
+ */
+export type CleanCorridorEntry = {
+  [K in keyof CorridorEntry]: NonNullable<CorridorEntry[K]>;
+};
 
 export interface ZHVIMonth {
   month: string; // "YYYY-MM"

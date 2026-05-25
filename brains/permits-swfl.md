@@ -1,5 +1,7 @@
 <!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260522 -->
----
+
+## <!-- TODO: rebuild needed — v4 written with 0 facts (transient Accela fetch failure 2026-05-24); restored to v3. TTL expired; run `npm run refinery permits-swfl` for a clean v4. -->
+
 brain_id: permits-swfl
 version: 3
 refined_at: 2026-05-22T10:39:12Z
@@ -7,6 +9,7 @@ freshness_token: SWFL-7421-v3-20260522
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Lee County building-permit issuance flow - corridor-level z-scores, saturation index, and trend reads against a trailing 13-window (28d each) historical baseline.
+
 ---
 
 # User-Saved Reference Context

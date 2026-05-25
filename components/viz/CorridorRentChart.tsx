@@ -4,8 +4,15 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import * as echarts from "echarts";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { MapPin, TrendingUp, Info, Activity, AlertCircle, Sparkles } from "lucide-react";
-import type { CorridorEntry } from "@/types/viz";
+import {
+  MapPin,
+  TrendingUp,
+  Info,
+  Activity,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
+import type { CleanCorridorEntry, CorridorEntry } from "@/types/viz";
 
 export type { CorridorEntry };
 
@@ -21,7 +28,11 @@ export interface CorridorRentChartProps {
 }
 
 // Utility to parse and interpolate colors between cool teal (#2A8C85) and warm amber (#D4B370)
-function interpolateColor(color1: string, color2: string, factor: number): string {
+function interpolateColor(
+  color1: string,
+  color2: string,
+  factor: number,
+): string {
   const parseHex = (hex: string) => {
     const val = parseInt(hex.replace("#", ""), 16);
     return {
@@ -51,9 +62,23 @@ export function CorridorRentChart({
   const chartInstance = useRef<echarts.ECharts | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // 1. Sort data by NNN asking rent descending
-  const sortedData = useMemo(() => {
-    return [...data].sort((a, b) => b.nnn_asking_rent_per_sqft - a.nnn_asking_rent_per_sqft);
+  // 1. Sort data by NNN asking rent descending.
+  // Side-panel readouts dereference permit_zscore/saturation_index/lat/lng,
+  // so drop rows missing any of them rather than crash on selection. Rent +
+  // vacancy are the chart's primary axes — null-filter those too.
+  const sortedData = useMemo<CleanCorridorEntry[]>(() => {
+    return [...data]
+      .filter(
+        (c): c is CleanCorridorEntry =>
+          c.nnn_asking_rent_per_sqft != null &&
+          c.vacancy_pct != null &&
+          c.permit_zscore != null &&
+          c.saturation_index != null &&
+          c.absorption_sqft != null &&
+          c.lat != null &&
+          c.lng != null,
+      )
+      .sort((a, b) => b.nnn_asking_rent_per_sqft - a.nnn_asking_rent_per_sqft);
   }, [data]);
 
   // Find currently selected corridor details
@@ -83,7 +108,10 @@ export function CorridorRentChart({
     const highColor = "#D4B370"; // Warm sand/amber
     const barColors = sortedData.map((_, index) => {
       // Map highest rent (index 0) to factor 1, lowest to 0
-      const factor = sortedData.length > 1 ? (sortedData.length - 1 - index) / (sortedData.length - 1) : 1;
+      const factor =
+        sortedData.length > 1
+          ? (sortedData.length - 1 - index) / (sortedData.length - 1)
+          : 1;
       return interpolateColor(lowColor, highColor, factor);
     });
 
@@ -195,7 +223,9 @@ export function CorridorRentChart({
     const targets = sortedData.map((_, i) => ({ val: 0, index: i }));
 
     // Detect user styling / accessibility preferences
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     // Set scrollTrigger
     const trigger = ScrollTrigger.create({
@@ -260,7 +290,9 @@ export function CorridorRentChart({
               fontSize: isMobile ? 10 : 12,
               formatter: (value: string) => {
                 const maxLen = isMobile ? 12 : 20;
-                return value.length > maxLen ? `${value.slice(0, maxLen - 2)}...` : value;
+                return value.length > maxLen
+                  ? `${value.slice(0, maxLen - 2)}...`
+                  : value;
               },
             },
           },
@@ -284,7 +316,9 @@ export function CorridorRentChart({
   // Standard loading skeleton
   if (loading) {
     return (
-      <div className={`p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col gap-4 animate-pulse ${className}`}>
+      <div
+        className={`p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col gap-4 animate-pulse ${className}`}
+      >
         <div className="h-6 w-48 bg-slate-800 rounded"></div>
         <div className="h-4 w-72 bg-slate-800 rounded"></div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
@@ -298,10 +332,17 @@ export function CorridorRentChart({
   // Handle empty state beautifully
   if (sortedData.length === 0) {
     return (
-      <div className={`p-12 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center gap-3 ${className}`}>
+      <div
+        className={`p-12 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center gap-3 ${className}`}
+      >
         <AlertCircle className="h-10 w-10 text-slate-500" />
-        <h3 className="text-slate-200 font-medium text-lg">No Corridor Data Available</h3>
-        <p className="text-slate-400 text-sm max-w-sm">Please supply a populated roster of Corridor entries to render this visualization.</p>
+        <h3 className="text-slate-200 font-medium text-lg">
+          No Corridor Data Available
+        </h3>
+        <p className="text-slate-400 text-sm max-w-sm">
+          Please supply a populated roster of Corridor entries to render this
+          visualization.
+        </p>
       </div>
     );
   }
@@ -322,7 +363,8 @@ export function CorridorRentChart({
           Corridor Asking Rents (NNN)
         </h2>
         <p className="text-sm text-slate-400 mt-0.5">
-          Southwest Florida’s primary commercial highways ranked from high to low. Hover columns for detail or click to analyze.
+          Southwest Florida’s primary commercial highways ranked from high to
+          low. Hover columns for detail or click to analyze.
         </p>
       </div>
 
@@ -341,7 +383,10 @@ export function CorridorRentChart({
           />
           <div className="text-[10px] text-slate-500 font-mono mt-1 flex items-start gap-1.5 px-1 bg-slate-900/30 py-1.5 rounded">
             <Info className="h-3 w-3 flex-shrink-0 text-slate-400 mt-0.5" />
-            <span>Interactive bounds: Graph is fully responsive. Bar heights represent asking NNN rate.</span>
+            <span>
+              Interactive bounds: Graph is fully responsive. Bar heights
+              represent asking NNN rate.
+            </span>
           </div>
         </div>
 
@@ -349,7 +394,10 @@ export function CorridorRentChart({
         <div className="flex flex-col gap-4">
           <div className="bg-slate-950/40 p-5 rounded-xl border border-slate-800/50 flex flex-col justify-between h-full">
             {selectedCorridor ? (
-              <div className="space-y-5" id={`disclosure-card-${selectedCorridor.id}`}>
+              <div
+                className="space-y-5"
+                id={`disclosure-card-${selectedCorridor.id}`}
+              >
                 {/* Header submarket badge */}
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono tracking-widest text-[#2A8C85] bg-[#2A8C85]/10 px-2.5 py-1 rounded-full uppercase border border-[#2A8C85]/20">
@@ -364,7 +412,8 @@ export function CorridorRentChart({
                     {selectedCorridor.name}
                   </h3>
                   <p className="text-xs text-slate-400 font-mono mt-1">
-                    Latitude: {selectedCorridor.lat.toFixed(4)} • Longitude: {selectedCorridor.lng.toFixed(4)}
+                    Latitude: {selectedCorridor.lat.toFixed(4)} • Longitude:{" "}
+                    {selectedCorridor.lng.toFixed(4)}
                   </p>
                 </div>
 
@@ -373,20 +422,28 @@ export function CorridorRentChart({
                 {/* KPI Metrics */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-slate-900/40 p-3 rounded-lg border border-slate-800/30">
-                    <p className="text-xs text-slate-400 font-mono">Ask NNN Rent</p>
+                    <p className="text-xs text-slate-400 font-mono">
+                      Ask NNN Rent
+                    </p>
                     <p className="text-lg font-bold text-[rgb(212,179,112)] mt-0.5">
                       ${selectedCorridor.nnn_asking_rent_per_sqft.toFixed(2)}
-                      <span className="text-xs font-normal text-slate-400">/sqft</span>
+                      <span className="text-xs font-normal text-slate-400">
+                        /sqft
+                      </span>
                     </p>
                   </div>
                   <div className="bg-slate-900/40 p-3 rounded-lg border border-slate-800/30">
-                    <p className="text-xs text-slate-400 font-mono">Vacancy Index</p>
+                    <p className="text-xs text-slate-400 font-mono">
+                      Vacancy Index
+                    </p>
                     <p className="text-lg font-bold text-teal-400 mt-0.5">
                       {selectedCorridor.vacancy_pct}%
                     </p>
                   </div>
                   <div className="bg-slate-900/40 p-3 rounded-lg border border-slate-800/30">
-                    <p className="text-xs text-slate-400 font-mono">Net Absorption</p>
+                    <p className="text-xs text-slate-400 font-mono">
+                      Net Absorption
+                    </p>
                     <p className="text-sm font-bold text-slate-200 mt-1">
                       {selectedCorridor.absorption_sqft !== null
                         ? `${selectedCorridor.absorption_sqft.toLocaleString()} sqft`
@@ -394,7 +451,9 @@ export function CorridorRentChart({
                     </p>
                   </div>
                   <div className="bg-slate-900/40 p-3 rounded-lg border border-slate-800/30">
-                    <p className="text-xs text-slate-400 font-mono">Saturation Level</p>
+                    <p className="text-xs text-slate-400 font-mono">
+                      Saturation Level
+                    </p>
                     <p className="text-sm font-bold text-amber-500 mt-1">
                       {(selectedCorridor.saturation_index * 100).toFixed(0)}%
                     </p>
@@ -407,10 +466,12 @@ export function CorridorRentChart({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-400 flex items-center gap-1.5 font-mono">
-                      <Activity className="h-3.5 w-3.5 text-blue-400" /> Permit Z-Score
+                      <Activity className="h-3.5 w-3.5 text-blue-400" /> Permit
+                      Z-Score
                     </span>
                     <span className="font-mono font-semibold text-blue-400">
-                      {selectedCorridor.permit_zscore > 0 ? "+" : ""}{selectedCorridor.permit_zscore.toFixed(2)}
+                      {selectedCorridor.permit_zscore > 0 ? "+" : ""}
+                      {selectedCorridor.permit_zscore.toFixed(2)}
                     </span>
                   </div>
                   {/* Visual scale */}
@@ -423,7 +484,8 @@ export function CorridorRentChart({
                     />
                   </div>
                   <p className="text-[10px] text-slate-500">
-                    Z-Score measures building permit volumes normalized relative to the regional baseline standard mean.
+                    Z-Score measures building permit volumes normalized relative
+                    to the regional baseline standard mean.
                   </p>
                 </div>
               </div>
