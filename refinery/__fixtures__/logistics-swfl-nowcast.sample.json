@@ -57,8 +57,8 @@
       },
       "segments": [
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 116",
           "desc_to": "Exit 123",
@@ -67,8 +67,8 @@
           "shape_length": 11500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 123",
           "desc_to": "Exit 131",
@@ -77,8 +77,8 @@
           "shape_length": 13000.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 131",
           "desc_to": "Exit 136",
@@ -87,8 +87,8 @@
           "shape_length": 8500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 8",
           "desc_to": "MM 14",
@@ -97,8 +97,8 @@
           "shape_length": 9700.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 14",
           "desc_to": "MM 22",
@@ -107,8 +107,8 @@
           "shape_length": 12800.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 101",
           "desc_to": "Exit 107",
@@ -117,8 +117,8 @@
           "shape_length": 9500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 107",
           "desc_to": "Exit 111",
@@ -127,8 +127,8 @@
           "shape_length": 6500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples N",
           "desc_to": "Naples S",
@@ -137,8 +137,8 @@
           "shape_length": 10200.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples S",
           "desc_to": "Marco Island",
@@ -163,8 +163,8 @@
       },
       "segments": [
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 116",
           "desc_to": "Exit 123",
@@ -173,8 +173,8 @@
           "shape_length": 11500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 123",
           "desc_to": "Exit 131",
@@ -183,8 +183,8 @@
           "shape_length": 13000.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 131",
           "desc_to": "Exit 136",
@@ -193,8 +193,8 @@
           "shape_length": 8500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 8",
           "desc_to": "MM 14",
@@ -203,8 +203,8 @@
           "shape_length": 9700.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 14",
           "desc_to": "MM 22",
@@ -213,8 +213,8 @@
           "shape_length": 12800.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 101",
           "desc_to": "Exit 107",
@@ -223,8 +223,8 @@
           "shape_length": 9500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 107",
           "desc_to": "Exit 111",
@@ -233,8 +233,8 @@
           "shape_length": 6500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples N",
           "desc_to": "Naples S",
@@ -243,8 +243,8 @@
           "shape_length": 10200.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples S",
           "desc_to": "Marco Island",
@@ -270,8 +270,8 @@
       },
       "segments": [
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 116",
           "desc_to": "Exit 123",
@@ -280,8 +280,8 @@
           "shape_length": 11500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 123",
           "desc_to": "Exit 131",
@@ -290,8 +290,8 @@
           "shape_length": 13000.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 131",
           "desc_to": "Exit 136",
@@ -300,8 +300,8 @@
           "shape_length": 8500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 8",
           "desc_to": "MM 14",
@@ -310,8 +310,8 @@
           "shape_length": 9700.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 14",
           "desc_to": "MM 22",
@@ -320,8 +320,8 @@
           "shape_length": 12800.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 101",
           "desc_to": "Exit 107",
@@ -330,8 +330,8 @@
           "shape_length": 9500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 107",
           "desc_to": "Exit 111",
@@ -340,8 +340,8 @@
           "shape_length": 6500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples N",
           "desc_to": "Naples S",
@@ -350,8 +350,8 @@
           "shape_length": 10200.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples S",
           "desc_to": "Marco Island",
@@ -390,8 +390,8 @@
       },
       "segments": [
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 116",
           "desc_to": "Exit 123",
@@ -400,8 +400,8 @@
           "shape_length": 11500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 123",
           "desc_to": "Exit 131",
@@ -410,8 +410,8 @@
           "shape_length": 13000.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 131",
           "desc_to": "Exit 136",
@@ -420,8 +420,8 @@
           "shape_length": 8500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 8",
           "desc_to": "MM 14",
@@ -430,8 +430,8 @@
           "shape_length": 9700.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 14",
           "desc_to": "MM 22",
@@ -440,8 +440,8 @@
           "shape_length": 12800.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 101",
           "desc_to": "Exit 107",
@@ -450,8 +450,8 @@
           "shape_length": 9500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 107",
           "desc_to": "Exit 111",
@@ -460,8 +460,8 @@
           "shape_length": 6500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples N",
           "desc_to": "Naples S",
@@ -470,8 +470,8 @@
           "shape_length": 10200.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples S",
           "desc_to": "Marco Island",
@@ -504,8 +504,8 @@
       },
       "segments": [
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 116",
           "desc_to": "Exit 123",
@@ -514,8 +514,8 @@
           "shape_length": 11500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 123",
           "desc_to": "Exit 131",
@@ -524,8 +524,8 @@
           "shape_length": 13000.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "I-75",
           "desc_frm": "Exit 131",
           "desc_to": "Exit 136",
@@ -534,8 +534,8 @@
           "shape_length": 8500.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 8",
           "desc_to": "MM 14",
@@ -544,8 +544,8 @@
           "shape_length": 9700.0
         },
         {
-          "year_": 2025,
-          "county": "LEE",
+          "yearx": 2025,
+          "county": "Lee",
           "roadway": "US-41",
           "desc_frm": "MM 14",
           "desc_to": "MM 22",
@@ -554,8 +554,8 @@
           "shape_length": 12800.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 101",
           "desc_to": "Exit 107",
@@ -564,8 +564,8 @@
           "shape_length": 9500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "I-75",
           "desc_frm": "Exit 107",
           "desc_to": "Exit 111",
@@ -574,8 +574,8 @@
           "shape_length": 6500.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples N",
           "desc_to": "Naples S",
@@ -584,8 +584,8 @@
           "shape_length": 10200.0
         },
         {
-          "year_": 2025,
-          "county": "COLLIER",
+          "yearx": 2025,
+          "county": "Collier",
           "roadway": "US-41",
           "desc_frm": "Naples S",
           "desc_to": "Marco Island",

@@ -5,7 +5,7 @@
   },
   "segments": [
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12001000",
       "desc_frm": "US-41 @ MM 0.0",
       "desc_to": "US-41 @ MM 1.2",
@@ -16,7 +16,7 @@
       "yearx": 2021
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12001000",
       "desc_frm": "US-41 @ MM 0.0",
       "desc_to": "US-41 @ MM 1.2",
@@ -27,7 +27,7 @@
       "yearx": 2022
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12001000",
       "desc_frm": "US-41 @ MM 0.0",
       "desc_to": "US-41 @ MM 1.2",
@@ -38,7 +38,7 @@
       "yearx": 2023
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12001000",
       "desc_frm": "US-41 @ MM 0.0",
       "desc_to": "US-41 @ MM 1.2",
@@ -49,7 +49,7 @@
       "yearx": 2024
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12001000",
       "desc_frm": "US-41 @ MM 0.0",
       "desc_to": "US-41 @ MM 1.2",
@@ -60,7 +60,7 @@
       "yearx": 2025
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12012000",
       "desc_frm": "I-75 @ Exit 131",
       "desc_to": "I-75 @ Exit 136",
@@ -71,7 +71,7 @@
       "yearx": 2021
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12012000",
       "desc_frm": "I-75 @ Exit 131",
       "desc_to": "I-75 @ Exit 136",
@@ -82,7 +82,7 @@
       "yearx": 2022
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12012000",
       "desc_frm": "I-75 @ Exit 131",
       "desc_to": "I-75 @ Exit 136",
@@ -93,7 +93,7 @@
       "yearx": 2023
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12012000",
       "desc_frm": "I-75 @ Exit 131",
       "desc_to": "I-75 @ Exit 136",
@@ -104,7 +104,7 @@
       "yearx": 2024
     },
     {
-      "county": "LEE",
+      "county": "Lee",
       "roadway": "12012000",
       "desc_frm": "I-75 @ Exit 131",
       "desc_to": "I-75 @ Exit 136",
@@ -115,7 +115,7 @@
       "yearx": 2025
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03004000",
       "desc_frm": "US-41 @ MM 30",
       "desc_to": "US-41 @ MM 32",
@@ -126,7 +126,7 @@
       "yearx": 2021
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03004000",
       "desc_frm": "US-41 @ MM 30",
       "desc_to": "US-41 @ MM 32",
@@ -137,7 +137,7 @@
       "yearx": 2022
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03004000",
       "desc_frm": "US-41 @ MM 30",
       "desc_to": "US-41 @ MM 32",
@@ -148,7 +148,7 @@
       "yearx": 2023
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03004000",
       "desc_frm": "US-41 @ MM 30",
       "desc_to": "US-41 @ MM 32",
@@ -159,7 +159,7 @@
       "yearx": 2024
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03004000",
       "desc_frm": "US-41 @ MM 30",
       "desc_to": "US-41 @ MM 32",
@@ -170,7 +170,7 @@
       "yearx": 2025
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03015000",
       "desc_frm": "I-75 @ Exit 101",
       "desc_to": "I-75 @ Exit 105",
@@ -181,7 +181,7 @@
       "yearx": 2021
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03015000",
       "desc_frm": "I-75 @ Exit 101",
       "desc_to": "I-75 @ Exit 105",
@@ -192,7 +192,7 @@
       "yearx": 2022
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03015000",
       "desc_frm": "I-75 @ Exit 101",
       "desc_to": "I-75 @ Exit 105",
@@ -203,7 +203,7 @@
       "yearx": 2023
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03015000",
       "desc_frm": "I-75 @ Exit 101",
       "desc_to": "I-75 @ Exit 105",
@@ -214,7 +214,7 @@
       "yearx": 2024
     },
     {
-      "county": "COLLIER",
+      "county": "Collier",
       "roadway": "03015000",
       "desc_frm": "I-75 @ Exit 101",
       "desc_to": "I-75 @ Exit 105",
@@ -225,7 +225,7 @@
       "yearx": 2025
     },
     {
-      "county": "CHARLOTTE",
+      "county": "Charlotte",
       "roadway": "01007000",
       "desc_frm": "US-41 @ MM 18",
       "desc_to": "US-41 @ MM 20",
@@ -236,7 +236,7 @@
       "yearx": 2022
     },
     {
-      "county": "CHARLOTTE",
+      "county": "Charlotte",
       "roadway": "01007000",
       "desc_frm": "US-41 @ MM 18",
       "desc_to": "US-41 @ MM 20",
@@ -247,7 +247,7 @@
       "yearx": 2025
     },
     {
-      "county": "CHARLOTTE",
+      "county": "Charlotte",
       "roadway": "01018000",
       "desc_frm": "I-75 @ Exit 170",
       "desc_to": "I-75 @ Exit 175",
@@ -258,7 +258,7 @@
       "yearx": 2022
     },
     {
-      "county": "CHARLOTTE",
+      "county": "Charlotte",
       "roadway": "01018000",
       "desc_frm": "I-75 @ Exit 170",
       "desc_to": "I-75 @ Exit 175",

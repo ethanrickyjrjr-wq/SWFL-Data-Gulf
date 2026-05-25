@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v22 | Token: SWFL-7421-v22-20260520 -->
+<!-- FRESHNESS: v23 | Token: SWFL-7421-v23-20260525 -->
 ---
 brain_id: macro-swfl
-version: 22
-refined_at: 2026-05-20T07:33:37Z
-freshness_token: SWFL-7421-v22-20260520
+version: 23
+refined_at: 2026-05-25T06:33:01Z
+freshness_token: SWFL-7421-v23-20260525
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Currently a pure delta brain pending county-level BLS LAUS ingest.
@@ -28,24 +28,24 @@ SCOPE: Regional macro context for Southwest Florida — leaf tier of the three-t
 - The user knows macro-swfl is intentionally a chain-position placeholder until county-level data lands and routes around it (consuming macro-florida or macro-us directly) when macro metrics are needed today.
 
 --- CITATION TABLE ---
-id  | source                                                                            | verified   | expires
-s01 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macro-florida | 2026-05-20 | 2026-05-21
+id  | source                                                                 | verified   | expires
+s01 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida | 2026-05-25 | 2026-05-26
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"macro_swfl_baseline","fact":"SWFL regional macro context — Florida state baseline used as proxy","value":"macro-swfl currently has no SWFL-specific sources of its own — county-level BLS LAUS for Lee + Collier and other regional indicators are planned but not yet ingested. The Florida state baseline (macro-florida, confidence 1.00) is the best available proxy: Florida unemployment rate 3.4% (stable); Florida labor force participation 60.9% (rising); Florida retail establishments 52000% (stable); Florida food service & accommodation establishments 40000% (stable); Florida construction establishments 38000% (stable); Florida healthcare establishments 35000% (stable); Florida professional services establishments 48000% (stable).","src":"s01","date":"2026-05-20"}
+  {"id":"f001","topic":"macro_swfl_baseline","fact":"SWFL regional macro context — Florida state baseline used as proxy","value":"macro-swfl currently has no SWFL-specific sources of its own — county-level BLS LAUS for Lee + Collier and other regional indicators are planned but not yet ingested. The Florida state baseline (macro-florida, confidence 1.00) is the best available proxy: Florida unemployment rate 4.7% (rising); Florida labor force participation 57.7% (stable); Florida professional services establishments 2026% (stable); Florida retail establishments 1669% (stable).","src":"s01","date":"2026-05-25"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 22,
-  "refined_at": "2026-05-20T07:33:37Z",
-  "direction": "neutral",
-  "magnitude": 1,
+  "version": 23,
+  "refined_at": "2026-05-25T06:33:01Z",
+  "direction": "bearish",
+  "magnitude": 0.5,
   "drivers": [],
   "overrides": [],
-  "conclusion": "macro-swfl is a regional delta brain. It currently emits no SWFL-specific metrics — county-level BLS LAUS (Lee + Collier) and other hyperlocal series are the planned sources and have not yet been ingested. The Florida state baseline reads: Florida unemployment rate 3.4% (stable), Florida labor force participation 60.9% (rising), Florida retail establishments 52000% (stable), Florida food service & accommodation establishments 40000% (stable), Florida construction establishments 38000% (stable), Florida healthcare establishments 35000% (stable), Florida professional services establishments 48000% (stable) (via macro-florida, confidence 1.00). Downstream consumers needing macro context today should declare macro-florida or macro-us as direct upstreams rather than routing through macro-swfl, until SWFL-specific data lands.",
+  "conclusion": "macro-swfl is a regional delta brain. It currently emits no SWFL-specific metrics — county-level BLS LAUS (Lee + Collier) and other hyperlocal series are the planned sources and have not yet been ingested. The Florida state baseline reads: Florida unemployment rate 4.7% (rising), Florida labor force participation 57.7% (stable), Florida professional services establishments 2026% (stable), Florida retail establishments 1669% (stable) (via macro-florida, confidence 1.00). Downstream consumers needing macro context today should declare macro-florida or macro-us as direct upstreams rather than routing through macro-swfl, until SWFL-specific data lands.",
   "key_metrics": [],
   "caveats": [
     "macro-swfl emits no SWFL-specific metrics today — the brain is a chain-position placeholder until county-level BLS LAUS for Lee + Collier is ingested. Downstream brains should declare macro-florida or macro-us as direct upstreams for macro context in the interim."
@@ -60,7 +60,7 @@ s01 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-20T07:33:37Z"
+    "computed_at": "2026-05-25T06:33:01Z"
   },
   "exogenous_signals": []
 }
@@ -69,5 +69,5 @@ s01 | macro-florida brain — https://brain-platform-amber.vercel.app/api/b/macr
 - macro-swfl: chain-position placeholder for SWFL regional macro until county-level BLS LAUS lands.
 
 --- RECENT NOTES ---
-- 2026-05-20: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-05-25: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

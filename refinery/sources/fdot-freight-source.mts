@@ -62,7 +62,7 @@ export const LATEST_FDOT_YEAR = 2025;
 
 /** Brain scope: Lee + Collier. The nowcast does NOT include Charlotte (that's
  * traffic-swfl's storm exception, not a freight-flow scope decision). */
-const BRAIN_COUNTIES = ["LEE", "COLLIER"] as const;
+const BRAIN_COUNTIES = ["Lee", "Collier"] as const;
 
 /**
  * Average payload per truck (tons). FHWA Highway Statistics 2023, Table VM-1
@@ -158,7 +158,7 @@ export function activityFromAadt(opts: {
 
 /** Raw segment row from data_lake.fdot_aadt_fl (subset used by this connector). */
 interface SegmentRow {
-  year_: number;
+  yearx: number;
   county: string;
   roadway: string;
   desc_frm: string;
@@ -169,7 +169,7 @@ interface SegmentRow {
 }
 
 interface FixtureSegment {
-  year_: number;
+  yearx: number;
   county: string;
   roadway: string;
   desc_frm: string;
@@ -233,10 +233,16 @@ interface FixtureShape {
   scenarios: Record<string, FixtureScenario>;
 }
 
-function isFreightRoadway(roadway: string): boolean {
-  // Freight-coded segments are the interstates + US routes. State + county
-  // roads carry local traffic that's mostly NOT in the FAF5 baseline scope.
-  return /^I-/.test(roadway) || /^US-/.test(roadway);
+/** Minimum truck factor (%) to qualify as a freight-relevant segment.
+ * The roadway column in data_lake.fdot_aadt_fl is a numeric FDOT site ID,
+ * not a route name, so we use tfctr (percent trucks) as the freight indicator
+ * rather than string-matching route names. 5% matches FHWA's threshold for
+ * "significant truck traffic" and yields ~600 qualifying segments for Lee+Collier.
+ */
+const FREIGHT_TFCTR_MIN = 5;
+
+function isFreightSegment(tfctr: number | null): boolean {
+  return tfctr != null && tfctr >= FREIGHT_TFCTR_MIN;
 }
 
 function toNum(v: unknown): number | null {
@@ -356,26 +362,20 @@ async function loadFixture(): Promise<{
 export function assertSegmentsNonEmpty(segments: SegmentRow[]): void {
   if (segments.length > 0) return;
   throw new Error(
-    `fdot-freight-source: ${SCHEMA}.${TABLE} returned 0 freight-coded rows for counties=${BRAIN_COUNTIES.join(",")} year=${LATEST_FDOT_YEAR}. ` +
-      "Confirm the dlt pipeline ran (python -m ingest.pipelines.fdot.pipeline) and that docs/sql/fdot_aadt_fl_grant.sql was applied (service_role needs SELECT on data_lake.fdot_aadt_fl). " +
-      "Also check that freight-coded roadways (I-* / US-*) are actually present in the table — county roads alone won't pass the connector filter.",
+    `fdot-freight-source: ${SCHEMA}.${TABLE} returned 0 rows for counties=${BRAIN_COUNTIES.join(",")} year=${LATEST_FDOT_YEAR} tfctr>=${FREIGHT_TFCTR_MIN}. ` +
+      "Confirm the dlt pipeline ran (python -m ingest.pipelines.fdot.pipeline) and that docs/sql/fdot_aadt_fl_grant.sql was applied.",
   );
 }
 
 async function fetchLiveSegments(): Promise<SegmentRow[]> {
   const sb = getSupabase().schema(SCHEMA);
-  // Pre-filter by counties + year; freight-roadway filter applied in TS
-  // because Postgres' LIKE on a bigint-shaped roadway column would need a cast
-  // (`roadway::text LIKE 'I-%'`) that supabase-js doesn't expose ergonomically.
-  // The set is small (<1k segments per county) so the TS filter is cheap.
   const resp = await sb
     .from(TABLE)
-    .select(
-      "year_:year,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length",
-    )
+    .select("yearx,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length")
     .in("county", [...BRAIN_COUNTIES])
-    .eq("year", LATEST_FDOT_YEAR)
+    .eq("yearx", LATEST_FDOT_YEAR)
     .not("aadt", "is", null)
+    .gte("tfctr", FREIGHT_TFCTR_MIN)
     .limit(10000);
   if (resp.error) {
     throw new Error(
@@ -383,11 +383,8 @@ async function fetchLiveSegments(): Promise<SegmentRow[]> {
     );
   }
   const rows = (resp.data ?? []) as SegmentRow[];
-  const freight = rows.filter(
-    (r) => typeof r.roadway === "string" && isFreightRoadway(r.roadway),
-  );
-  assertSegmentsNonEmpty(freight);
-  return freight;
+  assertSegmentsNonEmpty(rows);
+  return rows;
 }
 
 async function fetchLiveShockLog(): Promise<ShockLogRow[]> {
@@ -456,10 +453,10 @@ export const fdotFreightSegmentsSource: SourceConnector = {
     if (env.source === "fixture") {
       const { scenario } = await loadFixture();
       segmentRows = scenario.segments
-        .filter((s) => isFreightRoadway(s.roadway))
+        .filter((s) => isFreightSegment(s.tfctr))
         .map(
           (s): SegmentRow => ({
-            year_: s.year_,
+            yearx: s.yearx,
             county: s.county,
             roadway: s.roadway,
             desc_frm: s.desc_frm,
@@ -490,7 +487,7 @@ export const fdotFreightSegmentsSource: SourceConnector = {
       const normalized: FreightSegmentNormalized = {
         kind: "fdot-freight-segment",
         county: row.county,
-        year: row.year_,
+        year: row.yearx,
         roadway: row.roadway,
         desc_frm: row.desc_frm,
         desc_to: row.desc_to,
@@ -502,7 +499,7 @@ export const fdotFreightSegmentsSource: SourceConnector = {
       fragments.push({
         fragment_id: fragmentId(
           SOURCE_ID,
-          `${row.county.toLowerCase()}-${row.roadway}-${row.desc_frm}-${row.desc_to}-${row.year_}`,
+          `${row.county.toLowerCase()}-${row.roadway}-${row.desc_frm}-${row.desc_to}-${row.yearx}`,
         ),
         source_id: SOURCE_ID,
         source_trust_tier: 2,
@@ -528,7 +525,7 @@ export const fdotFreightSegmentsSource: SourceConnector = {
   citationMeta(verifiedDate, ttlSeconds): Omit<CitationRow, "id"> {
     const liveUrl =
       env.source === "live" && env.supabaseUrl
-        ? `${env.supabaseUrl}/rest/v1/${TABLE}?select=year_:year,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(${BRAIN_COUNTIES.join(",")})&year=eq.${LATEST_FDOT_YEAR}`
+        ? `${env.supabaseUrl}/rest/v1/${TABLE}?select=yearx,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(${BRAIN_COUNTIES.join(",")})&yearx=eq.${LATEST_FDOT_YEAR}`
         : `fixture://refinery/__fixtures__/logistics-swfl-nowcast.sample.json`;
     return {
       source:

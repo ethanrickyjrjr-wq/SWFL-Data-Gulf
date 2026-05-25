@@ -50,7 +50,7 @@ test("cohort YoY fragment matches the latest two years for Lee + Collier", async
   const n = cohort!.normalized as Record<string, unknown>;
   assert.equal(n["curr_year"], LATEST_FDOT_YEAR);
   assert.equal(n["prev_year"], LATEST_FDOT_YEAR - 1);
-  assert.deepEqual(n["counties"], ["LEE", "COLLIER"]);
+  assert.deepEqual(n["counties"], ["Lee", "Collier"]);
   assert.ok((n["cohort_size"] as number) > 0);
   assert.equal(typeof n["yoy_pct"], "number");
 });
@@ -71,9 +71,9 @@ test("fixture is non-degenerate: covers both Lee + Collier + Charlotte in latest
         (f.normalized as { year: number }).year === LATEST_FDOT_YEAR,
     )
     .map((f) => (f.normalized as { county: string }).county);
-  assert.ok(latest.includes("LEE"));
-  assert.ok(latest.includes("COLLIER"));
-  assert.ok(latest.includes("CHARLOTTE"));
+  assert.ok(latest.includes("Lee"));
+  assert.ok(latest.includes("Collier"));
+  assert.ok(latest.includes("Charlotte"));
 });
 
 test("citationMeta returns a fdot_aadt_fl-cited source", () => {

@@ -1,15 +1,12 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260522 -->
-
-## <!-- TODO: rebuild needed — Accela returning 0 rows on 2026-05-24 AND 2026-05-25 (no longer transient). v3 preserved (TTL expired). Sidecar emit code is now in place: PackDefinition.sidecarProducer wired to permits-swfl, fixtures/corridor-permits.json contract live, empty-array skip verified (no zero-byte fixture overwrites when snap is null). Unblock requires fixing the Accela ingest; then a single `npm run refinery permits-swfl` will produce both the v4 brain and the corridor-permits sidecar atomically. -->
-
+<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260525 -->
+---
 brain_id: permits-swfl
-version: 3
-refined_at: 2026-05-22T10:39:12Z
-freshness_token: SWFL-7421-v3-20260522
+version: 4
+refined_at: 2026-05-25T06:11:33Z
+freshness_token: SWFL-7421-v4-20260525
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Lee County building-permit issuance flow - corridor-level z-scores, saturation index, and trend reads against a trailing 13-window (28d each) historical baseline.
-
 ---
 
 # User-Saved Reference Context
@@ -31,210 +28,25 @@ SCOPE: Lee County building-permit issuance flow - corridor-level z-scores, satur
 - When saturation_index is high, the user wants the contrarian read surfaced first - not the directional read.
 
 --- CITATION TABLE ---
-id  | source                                       | verified   | expires
-s01 | Lee County Accela building permits (fixture) | 2026-05-22 | 2026-05-23
+id  | source                                                                                                                                                                                                      | verified   | expires
+s01 | Lee County Accela Citizen Access — building permit records (data_lake.lee_building_permits), scraped daily via Firecrawl. Portal: https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building. | 2026-05-25 | 2026-05-26
 
 --- SAVED FACTS ---
-[
-  {"id":"f001","topic":"corpus_overview","fact":"Lee County building-permits corpus","value":"20 permits in trailing 294d window across 5 (corridor x bucket) cells. County-weighted z = 1.26, saturation index = 0.00.","src":"s01","date":"2026-05-22"}
-]
+[]
 
 --- OUTPUT ---
 {
   "brain_id": "permits-swfl",
-  "version": 3,
-  "refined_at": "2026-05-22T10:39:12Z",
+  "version": 4,
+  "refined_at": "2026-05-25T06:11:33Z",
   "direction": "neutral",
-  "magnitude": 0.42076088116055765,
+  "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Lee County permit flow reads neutral (county-weighted z = 1.26, 0% of corridors saturated at z >= +2 in commercial buckets). Highest commercial-alteration heat: none. Coolest: none.",
-  "key_metrics": [
-    {
-      "metric": "permits_lee_county_weighted_avg_corridor_z",
-      "value": 1.262,
-      "direction": "rising",
-      "label": "Lee County permits - corridor-weighted z-score, current 90d vs trailing-365d (rate-normalized)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_saturation_index",
-      "value": 0,
-      "direction": "falling",
-      "label": "Lee County permits - share of corridors with z >= +2 in commercial buckets (saturation / contrarian signal)",
-      "variable_type": "intensive",
-      "units": "share",
-      "display_format": "percent",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_corridor_us-41-fort-myers_commercial_alteration_z",
-      "value": 1.725,
-      "direction": "rising",
-      "label": "Lee permits - US-41 / Fort Myers, commercial_alteration - 90d vs trailing-365d z (n_current=5)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_corridor_daniels-pkwy_commercial_new_z",
-      "value": 0.929,
-      "direction": "rising",
-      "label": "Lee permits - Daniels Parkway, commercial_new - 90d vs trailing-365d z (n_current=2)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_corridor_us-41-fort-myers_residential_z",
-      "value": 0.879,
-      "direction": "rising",
-      "label": "Lee permits - US-41 / Fort Myers, residential - 90d vs trailing-365d z (n_current=1)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_corridor_us-41-fort-myers_demolition_z",
-      "value": 0,
-      "direction": "stable",
-      "label": "Lee permits - US-41 / Fort Myers, demolition - 90d vs trailing-365d z (n_current=1)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_corridor_daniels-pkwy_other_z",
-      "value": 0,
-      "direction": "stable",
-      "label": "Lee permits - Daniels Parkway, other - 90d vs trailing-365d z (n_current=1)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_zip_33903_commercial_alteration_z",
-      "value": 1.725,
-      "direction": "rising",
-      "label": "Lee permits - ZIP 33903, commercial_alteration - 90d vs trailing-365d z (n_current=5)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_zip_33912_commercial_new_z",
-      "value": 0.929,
-      "direction": "rising",
-      "label": "Lee permits - ZIP 33912, commercial_new - 90d vs trailing-365d z (n_current=2)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_zip_33903_residential_z",
-      "value": 0.879,
-      "direction": "rising",
-      "label": "Lee permits - ZIP 33903, residential - 90d vs trailing-365d z (n_current=1)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_zip_33903_demolition_z",
-      "value": 0,
-      "direction": "stable",
-      "label": "Lee permits - ZIP 33903, demolition - 90d vs trailing-365d z (n_current=1)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    },
-    {
-      "metric": "permits_lee_zip_33912_other_z",
-      "value": 0,
-      "direction": "stable",
-      "label": "Lee permits - ZIP 33912, other - 90d vs trailing-365d z (n_current=1)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://accela.leegov.com/CitizenAccess/Cap/CapHome.aspx?module=Building",
-        "fetched_at": "2026-05-22T10:39:12.649Z",
-        "tier": 1,
-        "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
-      }
-    }
-  ],
+  "conclusion": "permits-swfl could not load any Lee County Accela permit rows this build.",
+  "key_metrics": [],
   "caveats": [
-    "Accela backfill window is 294d (< 365d) - historical baseline is incomplete; z-scores are indicative, not robust.",
-    "5 of 5 (corridor x bucket) cells have n < 10 in the current 90d window — z-scores on those cells are computed against small samples.",
-    "100% of corridors have no cell with n >= 10 in the current window - county direction reads as neutral by construction."
+    "Zero rows from Accela ingest. Verify Firecrawl job completed + data_lake.lee_building_permits has recent rows."
   ],
   "contradicts": [],
   "confidence": 1,
@@ -246,7 +58,7 @@ s01 | Lee County Accela building permits (fixture) | 2026-05-22 | 2026-05-23
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-22T10:39:12Z"
+    "computed_at": "2026-05-25T06:11:33Z"
   },
   "exogenous_signals": []
 }
@@ -255,5 +67,5 @@ s01 | Lee County Accela building permits (fixture) | 2026-05-22 | 2026-05-23
 - permits-swfl: track Lee County commercial permit velocity as a leading CRE demand signal.
 
 --- RECENT NOTES ---
-- 2026-05-22: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-05-25: pack refined by the Refinery — 0 fact(s) from 1 source(s).
 ```

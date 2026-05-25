@@ -42,8 +42,8 @@ const WINDOW_YEARS = 5;
 const EARLIEST_YEAR = LATEST_FDOT_YEAR - (WINDOW_YEARS - 1);
 const IAN_BASELINE_YEAR = 2022;
 
-const BRAIN_COUNTIES = ["LEE", "COLLIER"] as const;
-const IAN_COUNTIES = ["LEE", "COLLIER", "CHARLOTTE"] as const;
+const BRAIN_COUNTIES = ["Lee", "Collier"] as const;
+const IAN_COUNTIES = ["Lee", "Collier", "Charlotte"] as const;
 const ALL_COUNTIES = [
   ...new Set([...BRAIN_COUNTIES, ...IAN_COUNTIES]),
 ] as const;
