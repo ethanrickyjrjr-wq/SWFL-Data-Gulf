@@ -56,7 +56,7 @@ export default async function ReportPage({ params }: PageProps) {
   const out = brain.output;
 
   return (
-    <div className="min-h-dvh bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+    <div className="min-h-dvh bg-white font-sans text-zinc-900">
       <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
         <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
           <p className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -268,7 +268,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function RawFallback({ slug, content }: { slug: string; content: string }) {
   return (
-    <div className="min-h-dvh bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+    <div className="min-h-dvh bg-white font-sans text-zinc-900">
       <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
         <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
           <p className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
