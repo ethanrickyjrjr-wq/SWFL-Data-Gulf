@@ -59,31 +59,43 @@ export default function ConnectPage() {
         }}
       >
         {/* Hero */}
-        <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <section
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            textAlign: "center",
+            alignItems: "center",
+          }}
+        >
           <h1
             style={{
-              fontSize: "clamp(2rem, 6vw, 3rem)",
+              fontSize: "clamp(2.5rem, 7vw, 5.25rem)",
               fontWeight: 600,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.15,
+              letterSpacing: "-0.035em",
+              lineHeight: 1.04,
               margin: 0,
               color: "#F0EDE6",
+              textWrap: "balance" as const,
             }}
           >
-            Connect your AI to the SWFL Data Lake
+            Real <span style={{ color: "#3DC9C0" }}>data</span> Brought Together
+            <br />
+            With Your <span style={{ color: "#3DC9C0" }}>AI</span>.
           </h1>
           <p
             style={{
-              fontSize: 17,
+              fontSize: "clamp(1rem, 1.4vw, 1.1875rem)",
               color: "#B8CDD8",
-              lineHeight: 1.6,
+              lineHeight: 1.55,
               margin: 0,
-              maxWidth: 580,
+              maxWidth: "56ch",
+              textWrap: "balance" as const,
             }}
           >
-            Analyst-grade Southwest Florida data — housing, commercial real
-            estate, permits, traffic, macro. Every number sourced to a federal
-            or state dataset. Read-only.
+            Lee + Collier corridor data, environmental risk, freight nowcast,
+            SBA franchise outcomes — every number cited, every source linked,
+            delivered straight into Claude.
           </p>
         </section>
 
