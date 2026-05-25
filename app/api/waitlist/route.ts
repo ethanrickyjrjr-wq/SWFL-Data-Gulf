@@ -2,11 +2,25 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_INTERESTS = 10;
 const MAX_INTEREST_LEN = 64;
+
+/**
+ * Lazy Resend client — instantiated on first request, not at module load.
+ *
+ * Why: Resend's constructor throws `MissingAPIKeyError` when invoked with an
+ * undefined API key. Next.js evaluates route modules at build time to
+ * collect page data, and Vercel's build environment does not expose runtime
+ * env vars to that pass — so a module-scope `new Resend(...)` crashes the
+ * build even though RESEND_API_KEY is correctly set for the running app.
+ * Defer the construction and the build stays green.
+ */
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (_resend == null) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
 
 function sanitizeInterests(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -47,7 +61,7 @@ export async function POST(request: Request) {
 
   // Only send confirmation on first signup, not duplicates
   if (!alreadySubscribed) {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: "SWFL Data Gulf <hello@swfldatagulf.com>",
       to: email,
       subject: "You're on the list",
