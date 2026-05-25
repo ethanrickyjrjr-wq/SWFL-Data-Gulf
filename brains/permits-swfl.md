@@ -1,6 +1,6 @@
 <!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260522 -->
 
-## <!-- TODO: rebuild needed — v4 written with 0 facts (transient Accela fetch failure 2026-05-24); restored to v3. TTL expired; run `npm run refinery permits-swfl` for a clean v4. -->
+## <!-- TODO: rebuild needed — Accela returning 0 rows on 2026-05-24 AND 2026-05-25 (no longer transient). v3 preserved (TTL expired). Sidecar emit code is now in place: PackDefinition.sidecarProducer wired to permits-swfl, fixtures/corridor-permits.json contract live, empty-array skip verified (no zero-byte fixture overwrites when snap is null). Unblock requires fixing the Accela ingest; then a single `npm run refinery permits-swfl` will produce both the v4 brain and the corridor-permits sidecar atomically. -->
 
 brain_id: permits-swfl
 version: 3

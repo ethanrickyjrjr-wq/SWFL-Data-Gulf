@@ -149,3 +149,58 @@ describe("permitsOutputProducer (via pack)", () => {
     expect(result.caveats.length).toBeLessThanOrEqual(4);
   });
 });
+
+describe("permitsSidecarProducer (via pack)", () => {
+  beforeAll(() => {
+    process.env.REFINERY_SOURCE = "fixture";
+  });
+  afterAll(() => {
+    delete process.env.REFINERY_SOURCE;
+  });
+
+  it("emits per-corridor headline_z weighted by n_current across non-other buckets", async () => {
+    const { permits } = loadFixtures();
+    const fragments = permits.map((r) => ({
+      fragment_id: `lee_building_permits::${r.permit_id}`,
+      source_id: "lee_building_permits",
+      source_trust_tier: 1 as const,
+      fetched_at: new Date().toISOString(),
+      raw: {
+        permit_id: r.permit_id,
+        issued_date: r.issued_date,
+        bucket: r.bucket,
+      },
+      normalized: r,
+    }));
+    permitsSwfl.corpusSummary!(fragments);
+
+    const sidecars = await permitsSwfl.sidecarProducer!({} as never, fragments);
+    expect(sidecars).toHaveLength(1);
+    expect(sidecars[0].name).toBe("corridor-permits");
+
+    const rows = sidecars[0].data as Array<{
+      corridor_id: string;
+      headline_z: number;
+      n_current: number;
+      last_refined_at: string;
+    }>;
+    expect(Array.isArray(rows)).toBe(true);
+    for (const row of rows) {
+      expect(typeof row.corridor_id).toBe("string");
+      expect(Number.isFinite(row.headline_z)).toBe(true);
+      expect(row.n_current).toBeGreaterThanOrEqual(10);
+      expect(row.last_refined_at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    }
+    // alphabetical, no duplicates
+    const ids = rows.map((r) => r.corridor_id);
+    expect([...ids].sort()).toEqual(ids);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("returns empty array when no snapshot is available (Accela 0-fact run)", async () => {
+    // Drive corpusSummary with no fragments — resets lastSnapshot to null.
+    permitsSwfl.corpusSummary!([]);
+    const sidecars = await permitsSwfl.sidecarProducer!({} as never, []);
+    expect(sidecars).toEqual([]);
+  });
+});

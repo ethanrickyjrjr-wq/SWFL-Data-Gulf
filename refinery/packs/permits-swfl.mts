@@ -526,6 +526,64 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   };
 }
 
+/**
+ * Stage 4 sidecar: publish per-corridor permit z-scores as a named JSON
+ * artifact (`fixtures/corridor-permits.json`). This is the thin-pipe
+ * contract for downstream consumers — render-time code in
+ * `app/embed/charts/page.tsx` reads this file via the alias table in
+ * `refinery/lib/corridor-aliases.mts`, never reaches into the pack's
+ * in-memory `corridor_cells`.
+ *
+ * Per-corridor `headline_z` formula: weighted average of all non-`"other"`
+ * bucket cells with `n_current >= LOW_N_THRESHOLD`, weighted by `n_current`.
+ * Mirrors the `county_weighted_z` formula scoped to one corridor + a
+ * sample-size gate. Corridors with zero qualifying cells are omitted from
+ * the output entirely — null is rendered downstream as "no permits
+ * coverage" (rare for Lee, expected for Collier).
+ *
+ * Empty return signals SKIP to Stage 4 — used when the in-memory snapshot
+ * is null (Accela 0-fact run); spec-validator already aborts the brain
+ * `.md` write at the same point, so this is belt-and-suspenders to avoid
+ * a zero-byte sidecar overwrite.
+ */
+async function permitsSidecarProducer(
+  _output: PackOutput,
+  _rawFragments: ReadonlyArray<RawFragment>,
+): Promise<Array<{ name: string; data: unknown }>> {
+  const snap = lastSnapshot;
+  const fetched_at = lastFetchedAt ?? new Date().toISOString();
+  if (!snap || snap.corridor_cells.length === 0) {
+    return [];
+  }
+
+  const byCorridor = new Map<
+    string,
+    { weightedSum: number; weightSum: number }
+  >();
+  for (const cell of snap.corridor_cells) {
+    if (cell.bucket === "other") continue;
+    if (cell.n_current < LOW_N_THRESHOLD) continue;
+    const acc = byCorridor.get(cell.corridor_id) ?? {
+      weightedSum: 0,
+      weightSum: 0,
+    };
+    acc.weightedSum += cell.z * cell.n_current;
+    acc.weightSum += cell.n_current;
+    byCorridor.set(cell.corridor_id, acc);
+  }
+
+  const rows = Array.from(byCorridor.entries())
+    .map(([corridor_id, { weightedSum, weightSum }]) => ({
+      corridor_id,
+      headline_z: Number((weightedSum / weightSum).toFixed(3)),
+      n_current: weightSum,
+      last_refined_at: fetched_at,
+    }))
+    .sort((a, b) => a.corridor_id.localeCompare(b.corridor_id));
+
+  return [{ name: "corridor-permits", data: rows }];
+}
+
 export const permitsSwfl: PackDefinition = {
   id: BRAIN_ID,
   brain_id: BRAIN_ID,
@@ -540,6 +598,7 @@ export const permitsSwfl: PackDefinition = {
   skipSynthesisAgent: true,
   corpusSummary: permitsCorpusSummary,
   outputProducer: permitsOutputProducer,
+  sidecarProducer: permitsSidecarProducer,
   preferences: [
     "The user reads permit flow as a leading indicator of tenant demand and capital commitment in commercial corridors.",
     "Rate-normalized z-scores are the headline signal; raw counts are secondary context.",
