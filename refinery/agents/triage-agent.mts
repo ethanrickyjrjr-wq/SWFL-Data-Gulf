@@ -82,19 +82,13 @@ function mockTriage(
   return out;
 }
 
-/**
- * Stage 2 triage. One batched Haiku call classifies every fragment via a
- * forced tool call. Pack-agnostic: it only sees `normalized` blocks plus the
- * pack's triage context.
- */
-export async function triage(
+const TRIAGE_BATCH_SIZE = 50;
+
+async function triageBatch(
   fragments: RawFragment[],
   pack: PackDefinition,
+  client: ReturnType<typeof getAnthropic>,
 ): Promise<Map<string, TriageClassification>> {
-  if (fragments.length === 0) return new Map();
-  if (agentsAreMocked()) return mockTriage(fragments);
-
-  const client = getAnthropic();
   const batch = fragments.map((f) => ({
     fragment_id: f.fragment_id,
     data: f.normalized,
@@ -132,6 +126,11 @@ export async function triage(
     throw new Error("Triage agent: response contained no tool_use block");
   }
   const parsed = toolUse.input as TriageToolInput;
+  if (!parsed.classifications || !Array.isArray(parsed.classifications)) {
+    throw new Error(
+      `Triage agent: tool input missing classifications array (got ${JSON.stringify(parsed)})`,
+    );
+  }
 
   const out = new Map<string, TriageClassification>();
   for (const c of parsed.classifications) {
@@ -141,6 +140,33 @@ export async function triage(
       subtopic_key: c.subtopic_key,
       decision_relevance_reason: c.decision_relevance_reason,
     });
+  }
+  return out;
+}
+
+/**
+ * Stage 2 triage. Fragments are chunked into batches of TRIAGE_BATCH_SIZE
+ * so large packs (e.g. Census CBP with 700+ fragments) don't overflow the
+ * model's output token budget. Pack-agnostic: it only sees `normalized`
+ * blocks plus the pack's triage context.
+ */
+export async function triage(
+  fragments: RawFragment[],
+  pack: PackDefinition,
+): Promise<Map<string, TriageClassification>> {
+  if (fragments.length === 0) return new Map();
+  if (agentsAreMocked()) return mockTriage(fragments);
+
+  const client = getAnthropic();
+  const chunks: RawFragment[][] = [];
+  for (let i = 0; i < fragments.length; i += TRIAGE_BATCH_SIZE) {
+    chunks.push(fragments.slice(i, i + TRIAGE_BATCH_SIZE));
+  }
+
+  const out = new Map<string, TriageClassification>();
+  for (const chunk of chunks) {
+    const result = await triageBatch(chunk, pack, client);
+    for (const [k, v] of result) out.set(k, v);
   }
   return out;
 }
