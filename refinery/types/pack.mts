@@ -183,6 +183,32 @@ export interface PackDefinition {
    */
   outputProducer?: (out: PackOutput) => BrainOutputProducerResult;
   /**
+   * Optional Stage 4 sidecar emit. Runs AFTER the brain `.md` is written and
+   * BEFORE the optional Supabase upsert. Returns a flat list of named JSON
+   * payloads; Stage 4 routes each `{ name, data }` to `fixtures/{name}.json`
+   * via `writeJsonAtomic` (deterministic stringify + tmpfile rename).
+   *
+   * Receives `rawFragments` (Stage 1's collected output) because some sidecars
+   * — like permits-swfl's per-corridor cells — need upstream data that the
+   * engine-finalized `PackOutput.facts` does not carry. The producer is
+   * expected to re-derive deterministically from those fragments (e.g.
+   * re-run a pure `buildSnapshot`).
+   *
+   * Returning an empty array (or a `{ name, data: [] }` entry) is a signal to
+   * SKIP the write — used to avoid zero-byte overwrites when an upstream
+   * fetch flaked (e.g. Accela returning 0 permits). spec-validator already
+   * gates the brain `.md` write on 0 facts, so getting here implies the
+   * brain itself was valid.
+   *
+   * Thin-pipe rule applies on the consumer side: downstream readers consume
+   * the published sidecar artifact, never reach into the pack's in-memory
+   * snapshot.
+   */
+  sidecarProducer?: (
+    output: PackOutput,
+    rawFragments: ReadonlyArray<RawFragment>,
+  ) => Promise<Array<{ name: string; data: unknown }>>;
+  /**
    * Marks the synthesis approach for this pack. v1 default is `"deterministic"`
    * — pure code, no LLM in the output path. `"llm-assisted"` is reserved for
    * Month 4+ narrative-only enhancements; numeric confidence stays

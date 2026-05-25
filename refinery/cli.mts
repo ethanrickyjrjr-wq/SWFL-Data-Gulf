@@ -101,7 +101,9 @@ async function runPipeline(
   const { events } = await synthesisStage(normalized, pack, fragments);
   console.log(`[stage 3] synthesis: ${events.length} fact(s)`);
 
-  const result = await outputStage(events, pack, { dryRun: opts.dryRun });
+  const result = await outputStage(events, pack, fragments, {
+    dryRun: opts.dryRun,
+  });
   if (result.written) {
     console.log(
       `[stage 4] output: wrote ${result.brainPath} (version ${result.version})`,

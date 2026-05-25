@@ -38,6 +38,10 @@ import { logPrediction } from "../lib/predictions-log.mts";
 import { writeShockLogRow } from "../sources/fdot-freight-source.mts";
 import { PACKS } from "../config/packs.mts";
 import type { BrainEdge } from "../types/pack.mts";
+import type { RawFragment } from "../types/fragment.mts";
+import { writeJsonAtomic } from "../lib/write-json-atomic.mts";
+
+const FIXTURES_DIR = path.join(process.cwd(), "fixtures");
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 
@@ -279,6 +283,7 @@ function computeTrustTier(pack: PackDefinition): BrainTrustTier {
 export async function outputStage(
   events: SynthesizedEvent[],
   pack: PackDefinition,
+  rawFragments: ReadonlyArray<RawFragment>,
   opts: { dryRun: boolean },
 ): Promise<OutputResult> {
   const version = (await readPriorVersion(pack.brain_id)) + 1;
@@ -479,6 +484,28 @@ export async function outputStage(
   }
   await mkdir(BRAINS_DIR, { recursive: true });
   await writeFile(brainPath, markdown, "utf-8");
+
+  // Sidecar emit. Optional per-pack hook that publishes named JSON artifacts
+  // alongside the brain `.md` — e.g. permits-swfl's per-corridor cells, which
+  // PackOutput.facts deliberately doesn't carry. Empty `data` entries are
+  // skipped so an upstream fetch flake (Accela returning 0 permits) never
+  // zero-byte-overwrites a previously-good fixture. A sidecar producer that
+  // throws aborts the run BEFORE telemetry inserts — the brain `.md` is
+  // already on disk, but no partial sidecar lands.
+  if (pack.sidecarProducer) {
+    const sidecars = await pack.sidecarProducer(packOutput, rawFragments);
+    for (const entry of sidecars) {
+      if (!entry || !entry.name) continue;
+      if (Array.isArray(entry.data) && entry.data.length === 0) continue;
+      const sidecarPath = path.join(FIXTURES_DIR, `${entry.name}.json`);
+      await writeJsonAtomic(sidecarPath, entry.data);
+      console.log(
+        `[stage 4] sidecar: wrote ${sidecarPath} (${
+          Array.isArray(entry.data) ? `${entry.data.length} rows` : "object"
+        })`,
+      );
+    }
+  }
 
   // Roadmap §6.1.4 — log master refines to predictions table (silent no-op
   // for non-master packs or when Supabase env is unset). Insert failures are

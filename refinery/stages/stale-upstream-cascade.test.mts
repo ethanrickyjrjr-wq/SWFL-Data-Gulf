@@ -500,7 +500,9 @@ test("staleness cascade: outputStage end-to-end emits caveat + capped confidence
         id: downstreamId,
         input_brains: edges(stalePackId),
       });
-      const result = await outputStage([], downstreamPack, { dryRun: true });
+      const result = await outputStage([], downstreamPack, [], {
+        dryRun: true,
+      });
       // Caveat present, verbatim format from non-negotiable #5.
       const expectedCaveat = `Upstream brain '${stalePackId}' was stale at build time (expired ${expectedExpiry}).`;
       assert.ok(

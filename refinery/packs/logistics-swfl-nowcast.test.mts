@@ -753,7 +753,7 @@ test("Lane 2E integration: stale logistics-swfl upstream triggers caveat + cappe
       }),
     };
 
-    const result = await outputStage([], downstreamPack, { dryRun: true });
+    const result = await outputStage([], downstreamPack, [], { dryRun: true });
     const expectedCaveat = `Upstream brain '${staleId}' was stale at build time (expired ${expectedExpiry}).`;
     assert.ok(
       result.brainOutput.caveats.includes(expectedCaveat),
