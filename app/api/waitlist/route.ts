@@ -43,8 +43,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "insert_failed" }, { status: 500 });
   }
 
+  const alreadySubscribed = !!error; // error is only set here for 23505
+
   // Only send confirmation on first signup, not duplicates
-  if (!error) {
+  if (!alreadySubscribed) {
     await resend.emails.send({
       from: "SWFL Data Gulf <hello@swfldatagulf.com>",
       to: email,
@@ -53,5 +55,8 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    ...(alreadySubscribed && { already_subscribed: true }),
+  });
 }

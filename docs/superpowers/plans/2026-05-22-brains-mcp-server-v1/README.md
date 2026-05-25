@@ -2,6 +2,26 @@
 
 _Planned 2026-05-22. Source-of-truth durable copy of the plan-mode draft at `~/.claude/plans/let-s-plan-this-out-declarative-conway.md`._
 
+## Status (2026-05-25)
+
+| Step | Item                                                      | Status                    |
+| ---- | --------------------------------------------------------- | ------------------------- |
+| 1    | `lib/fetch-brain.ts` shared pipeline                      | ✅ shipped `1385c58`      |
+| 1    | `/api/waitlist` + Resend confirmation email               | ✅ shipped `1385c58`      |
+| 1    | `docs/sql/20260522_waitlist.sql` DDL                      | ✅ shipped `1385c58`      |
+| 2    | `app/api/mcp/route.ts` (GET health + POST handler)        | ✅ shipped `db3b83f`      |
+| 2    | `app/api/mcp/server.ts` (`swfl_fetch` tool)               | ✅ shipped `db3b83f`      |
+| 2    | `app/api/mcp/inventory.ts` + `refinery/packs/catalog.mts` | ✅ shipped `db3b83f`      |
+| 2    | `app/api/mcp/auth.ts` (open stub)                         | ✅ shipped `db3b83f`      |
+| 2    | MCP Apps chart widget (`@modelcontextprotocol/ext-apps`)  | ✅ shipped `ac45e62`      |
+| 2    | `.npmrc` `legacy-peer-deps` (Vercel npm peer dep fix)     | ✅ shipped `f81c462`      |
+| 2    | All URLs migrated to `www.swfldatagulf.com`               | ✅ shipped `1385c58`      |
+| 2    | `BRAIN_PLATFORM_URL` set in Vercel env vars               | ✅ done (Vercel UI)       |
+| 3    | `/connect` landing page (3 components)                    | ✅ shipped                |
+| —    | `/privacy` page                                           | ✅ shipped (pre-existing) |
+| —    | Vercel WAF rule: 5 req/min on `POST /api/waitlist`        | ⬜ Vercel UI — set it     |
+| —    | Anthropic Connectors directory submission                 | ⬜ submit when ready      |
+
 ## Context
 
 Today, the only way for someone's Claude to consume the data lake is to paste a multi-paragraph protocol block into their CLAUDE.md by hand. That protocol drifts the moment we change anything, and every new tester is a manual onboarding. Ontology doc §6.7 calls for an MCP server that replaces the copy-paste protocol with a tool the user's Claude can call directly. v1 ships **fetch only** — read access to the SWFL data lake through one tool. Write-back (/vault) is explicitly deferred; it needs multi-tenancy (`user_id` column + RLS) the current `personal_vault` schema is not set up for.
