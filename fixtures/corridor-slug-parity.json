@@ -1,0 +1,88 @@
+{
+  "_doc": "Slug parity fixture for the corridor character generator. Source of truth for the slug() helper that lives independently in TypeScript (refinery/tools/synthesize-corridor-character.mts) and Python (ingest/pipelines/corridor_grounded/pipeline.py). Both implementations are tested against this list; divergence on any entry trips a test in both languages. Real-world inputs are pulled verbatim from docs/audits/2026-05-26-corridor-character-snapshot.md (the 26 verified corridor_profiles rows as of 2026-05-26). Edge-case inputs cover patterns the production data could plausibly grow into (ampersand-joined names, apostrophes, multi-hyphen drift, leading/trailing whitespace).",
+  "cases": [
+    {
+      "input": "5th Ave South / 3rd Street South",
+      "expected": "5th-ave-south-3rd-street-south"
+    },
+    { "input": "Collier Blvd / CR-951", "expected": "collier-blvd-cr-951" },
+    { "input": "Davis Blvd East Naples", "expected": "davis-blvd-east-naples" },
+    {
+      "input": "Immokalee Rd North Naples",
+      "expected": "immokalee-rd-north-naples"
+    },
+    {
+      "input": "Naples Airport-Pulling (North)",
+      "expected": "naples-airport-pulling-north"
+    },
+    {
+      "input": "Naples Airport-Pulling (South)",
+      "expected": "naples-airport-pulling-south"
+    },
+    { "input": "Pine Ridge Rd Naples", "expected": "pine-ridge-rd-naples" },
+    {
+      "input": "US-41 Tamiami Trail Naples",
+      "expected": "us-41-tamiami-trail-naples"
+    },
+    {
+      "input": "Vanderbilt Beach Rd / Mercato",
+      "expected": "vanderbilt-beach-rd-mercato"
+    },
+    { "input": "Waterside Shops", "expected": "waterside-shops" },
+    {
+      "input": "Bonita Beach Rd (US-41 to Sanibel Causeway)",
+      "expected": "bonita-beach-rd-us-41-to-sanibel-causeway"
+    },
+    { "input": "US-41 Bonita Springs", "expected": "us-41-bonita-springs" },
+    {
+      "input": "Cape Coral – Coral Pointe",
+      "expected": "cape-coral-coral-pointe"
+    },
+    { "input": "Cape Coral Pkwy E", "expected": "cape-coral-pkwy-e" },
+    {
+      "input": "Pine Island Rd Cape Coral",
+      "expected": "pine-island-rd-cape-coral"
+    },
+    { "input": "Ben Hill Griffin Pkwy", "expected": "ben-hill-griffin-pkwy" },
+    { "input": "Coconut Point Mall", "expected": "coconut-point-mall" },
+    {
+      "input": "Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)",
+      "expected": "three-oaks-pkwy-coconut-rd-estero-bonita-boundary"
+    },
+    {
+      "input": "Colonial Blvd East (US-41 to I-75)",
+      "expected": "colonial-blvd-east-us-41-to-i-75"
+    },
+    {
+      "input": "Daniels Pkwy (I-75 to Ben Hill Griffin)",
+      "expected": "daniels-pkwy-i-75-to-ben-hill-griffin"
+    },
+    { "input": "Gulf Coast Town Center", "expected": "gulf-coast-town-center" },
+    { "input": "Six Mile Cypress Pkwy", "expected": "six-mile-cypress-pkwy" },
+    {
+      "input": "Summerlin Rd Fort Myers",
+      "expected": "summerlin-rd-fort-myers"
+    },
+    {
+      "input": "US-41 / Cleveland Ave Fort Myers",
+      "expected": "us-41-cleveland-ave-fort-myers"
+    },
+    {
+      "input": "Veterans Pkwy / Colonial Blvd (Midpoint Bridge Corridor)",
+      "expected": "veterans-pkwy-colonial-blvd-midpoint-bridge-corridor"
+    },
+    {
+      "input": "Estero Blvd Fort Myers Beach",
+      "expected": "estero-blvd-fort-myers-beach"
+    },
+    {
+      "input": "   Leading and trailing whitespace   ",
+      "expected": "leading-and-trailing-whitespace"
+    },
+    { "input": "Multi---hyphens", "expected": "multi-hyphens" },
+    { "input": "Smith & Wesson Ave", "expected": "smith-wesson-ave" },
+    { "input": "O'Brien's Pub Rd", "expected": "o-brien-s-pub-rd" },
+    { "input": "123 Numbers Only", "expected": "123-numbers-only" },
+    { "input": "ALL CAPS BLVD", "expected": "all-caps-blvd" }
+  ]
+}

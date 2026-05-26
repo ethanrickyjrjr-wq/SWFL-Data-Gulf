@@ -420,7 +420,16 @@ Flags:
 
 ANTHROPIC_API_KEY must be set in .env.local.`;
 
-function slug(corridorName: string): string {
+/**
+ * Slugify a corridor name into a filesystem-safe path component. Must stay
+ * byte-identical with the Python `slug()` in
+ * `ingest/pipelines/corridor_grounded/pipeline.py` — divergence breaks the
+ * `resolveGroundedPath()` lookup. Both implementations are pinned by
+ * `fixtures/corridor-slug-parity.json` and verified in both language test
+ * suites; if you change the rule here, update the Python copy + regenerate
+ * the fixture's `expected` values.
+ */
+export function slug(corridorName: string): string {
   return corridorName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")

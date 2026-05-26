@@ -91,6 +91,16 @@ BUCKET = "lake-tier1"
 
 
 def slug(corridor_name: str) -> str:
+    """Slugify a corridor name into a filesystem-safe path component.
+
+    Must stay byte-identical with the TypeScript `slug()` in
+    `refinery/tools/synthesize-corridor-character.mts` — divergence breaks
+    Stage C's `resolveGroundedPath()` lookup against this pipeline's NDJSON
+    output. Both implementations are pinned by
+    `fixtures/corridor-slug-parity.json` and verified in both language test
+    suites; if you change the rule here, update the TS copy + regenerate
+    the fixture's `expected` values.
+    """
     return re.sub(r"[^a-z0-9]+", "-", corridor_name.lower()).strip("-")
 
 
@@ -219,6 +229,13 @@ def main(argv: list[str] | None = None) -> int:
 
     now = datetime.now(timezone.utc)
     run_at = now.isoformat()
+    # URL-safe compact form for the Storage object-key path component.
+    # `:` and `+` from isoformat (run-2026-05-26T14:30:00+00:00.ndjson) are
+    # not safe in path segments — Supabase Storage URL-encodes the `+` to
+    # `%2B`, which breaks any tool that reads the path back literally. The
+    # full ISO timestamp is still preserved inside the NDJSON payload's
+    # `run_at` field, so audit trails are unaffected.
+    run_key = now.strftime("%Y%m%dT%H%M%SZ")
     yyyy = f"{now.year:04d}"
     mm = f"{now.month:02d}"
 
@@ -245,7 +262,7 @@ def main(argv: list[str] | None = None) -> int:
             )
 
         corridor_slug = slug(name)
-        path = f"corridor_grounded/{corridor_slug}/year={yyyy}/month={mm}/run-{run_at}.ndjson"
+        path = f"corridor_grounded/{corridor_slug}/year={yyyy}/month={mm}/run-{run_key}.ndjson"
         body = to_ndjson([record])
 
         if args.dry_run:
@@ -275,10 +292,13 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  - {e!r}")
         if len(errors) == len(corridors):
             raise RuntimeError("corridor_grounded: all corridors failed — investigate.")
-        print("corridor_grounded: partial run complete (some corridors failed).")
-    else:
-        print(f"corridor_grounded: {len(corridors)} corridor(s) complete.")
+        # Non-zero exit on ANY failure — keeps GHA red so a partial run
+        # doesn't quietly leave gaps in the Tier-1 capture and graduate to
+        # cadence-registry "active" status with bad coverage.
+        print("corridor_grounded: partial run complete (some corridors failed). Exiting non-zero.")
+        return 1
 
+    print(f"corridor_grounded: {len(corridors)} corridor(s) complete.")
     return 0
 
 

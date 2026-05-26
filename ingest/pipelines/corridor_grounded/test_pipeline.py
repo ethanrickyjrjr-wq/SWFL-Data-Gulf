@@ -152,3 +152,66 @@ def test_to_ndjson_unicode_preserved():
     records = [{"text": "SWFL — Southwest Florida ©"}]
     out = to_ndjson(records).decode("utf-8")
     assert json.loads(out.strip())["text"] == records[0]["text"]
+
+
+# ── storage key URL-safety ───────────────────────────────────────────────────
+
+
+# ── slug parity (Python ↔ TS) ────────────────────────────────────────────────
+
+
+def test_slug_parity_python_side():
+    """Load fixtures/corridor-slug-parity.json and verify Python slug()
+    matches every expected value. The TS slug() in
+    refinery/tools/synthesize-corridor-character.mts is verified against the
+    same fixture in refinery/tools/corridor-slug-parity.test.mts. If either
+    suite trips, the two implementations have drifted and Stage C's
+    grounded-NDJSON lookup will silently miss for any corridor whose slug
+    diverges.
+    """
+    from pathlib import Path
+
+    # Walk from this test file's location up to repo root then into fixtures/.
+    fixture_path = (
+        Path(__file__).resolve().parents[3] / "fixtures" / "corridor-slug-parity.json"
+    )
+    with fixture_path.open("r", encoding="utf-8") as f:
+        fixture = json.load(f)
+
+    assert isinstance(fixture.get("cases"), list)
+    assert len(fixture["cases"]) >= 26, (
+        f"expected at least 26 cases (one per verified corridor); "
+        f"got {len(fixture['cases'])}"
+    )
+
+    mismatches = []
+    for c in fixture["cases"]:
+        actual = slug(c["input"])
+        if actual != c["expected"]:
+            mismatches.append((c["input"], c["expected"], actual))
+
+    assert not mismatches, (
+        "Python slug() diverged from the fixture. If you changed the rule, "
+        "update the TS copy in refinery/tools/synthesize-corridor-character.mts "
+        "AND regenerate the fixture's 'expected' values.\n"
+        + "\n".join(
+            f"  input={inp!r} expected={exp!r} actual={act!r}"
+            for inp, exp, act in mismatches
+        )
+    )
+
+
+def test_storage_key_run_component_is_url_safe():
+    """The `run-XXX.ndjson` path component must contain no `:` or `+` —
+    Supabase Storage URL-encodes `+` to `%2B` in the object key, which breaks
+    any tool that reads the path back literally. We use strftime
+    `%Y%m%dT%H%M%SZ` for the key and keep full ISO in the NDJSON payload.
+    """
+    from datetime import datetime, timezone
+
+    now = datetime(2026, 5, 26, 14, 30, 0, tzinfo=timezone.utc)
+    run_key = now.strftime("%Y%m%dT%H%M%SZ")
+    path = f"corridor_grounded/pine-ridge-rd-naples/year=2026/month=05/run-{run_key}.ndjson"
+    assert ":" not in path
+    assert "+" not in path
+    assert run_key == "20260526T143000Z"
