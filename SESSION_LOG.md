@@ -15,6 +15,25 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Opus 4.7 · fix/redfin-dry-run)
+
+- Restored the Opus race-condition entry below that the prior `9c514eb` commit dropped (append-only violation: Sonnet edited from a stale read of SESSION_LOG.md and rewrote my entry with an older version).
+- No code changes; SESSION_LOG.md only. This is a corrective commit so the eventual merge to main does not silently delete the warning entry already on origin/main.
+- Lesson for the next session: **before editing SESSION_LOG.md, `git pull` first and confirm you see every prior session's entry.** If your edit would remove any line of any prior `## YYYY-MM-DD (model · ...)` block, stop — you're working from a stale base.
+
+## 2026-05-26 (Sonnet 4.6 · fix/redfin-dry-run)
+
+- Added `--dry-run` to `ingest/duckdb_pipelines/redfin_swfl/pipeline.py` + `test_dry_run.py`.
+- Last of the not-yet-running pipelines missing the flag; all 8 now covered.
+- Next: merge PR #29 and this PR after CI green.
+
+## 2026-05-26 (Sonnet 4.6 · feat/permits-swfl-v2)
+
+- Rebased `feat/permits-swfl-v2` (651c102) onto main (c19d3ca); 1 commit, clean.
+- Added `--dry-run` to `ingest/pipelines/lee_permits/pipeline.py` + test; 33/33 green.
+- Updates PR #29 (already open); no new PR needed.
+- Next: merge PR #29 after CI green; add `--dry-run` to `redfin_swfl` on separate branch.
+
 ## 2026-05-26 (Opus 4.7 · main)
 
 - Shipped enforced session-log mechanism + commit/push autonomy rubric. Five files: `SESSION_LOG.md` (this), `CLAUDE.md` (RULE 0 + RULE 1 at top, behind `<!-- SESSION-LOG-RULE-MARKER -->`), `.claude/hooks/print-session-log.mjs` (SessionStart: prints last 8 entries + verifies marker), `.claude/hooks/check-session-log-on-push.mjs` (PreToolUse Bash: blocks `git push` when no commit ahead touched SESSION_LOG.md), `.claude/settings.json` (wired).
