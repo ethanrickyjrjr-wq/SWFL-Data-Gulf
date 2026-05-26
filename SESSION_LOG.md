@@ -15,6 +15,14 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Sonnet 4.6 · feat/corridor-character-generator-step-2) — Step 2 B1: corridor_grounded pipeline
+
+- New `ingest/pipelines/corridor_grounded/pipeline.py`: one Anthropic `web_search_20250305` call per corridor (`--corridor NAME` / `--all`); captures full `model_dump()` response + flattened `citations[]` as NDJSON to `lake-tier1/corridor_grounded/{slug}/year=YYYY/month=MM/run-{iso}.ndjson`. `--dry-run` writes to `/tmp/{slug}-{date}.ndjson` for smoke acceptance. Tool-version guard: emits WARNING when `cited_text_count == 0` (the `20260209` regression signal).
+- 12 unit tests green: `slug`, `_extract_citations` (dedup + null), `build_record` shape/zero-citations/full-response, `to_ndjson` NDJSON + unicode.
+- `ingest/cadence_registry.yaml`: `corridor_grounded` entry under `not_yet_running` with `lake-tier1/corridor_grounded/` prefix key.
+- Next: A1 (fact pack builder, TS) and A2 (SQL migration DDL) being built in parallel on this branch. B1 is the Python ingest half; C1+C2 (synthesizer + lint) depend on A1 + B1 contracts being stable.
+- Plan: `docs/superpowers/plans/2026-05-26-corridor-character-generator/README.md`
+
 ## 2026-05-26 (Opus 4.7 · fix/firecrawl-agent-client) — firecrawl /v2/agent polling fix + spider fallback layer
 
 - Root cause: `ingest/lib/firecrawl_client.py:agent()` was a single sync POST that returned the job-ID payload, never polled `GET /v2/agent/<id>`. Three pipelines (corridor_narratives, marketbeat_swfl, county_planning_swfl) were silently failing with "zero rows" because the extractor was reading `data.result.rows` on `{success, id}` — finds nothing → empty. Vendor-first verified `firecrawl-py>=4.28.0` already implements correct polling via `Firecrawl().agent()`.
