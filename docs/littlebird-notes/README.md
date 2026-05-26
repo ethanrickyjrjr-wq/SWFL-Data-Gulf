@@ -24,5 +24,6 @@ If a note in here proves durable after 2–3 sessions, promote it to a CT memory
 
 Append newest-first.
 
+- [2026-05-26](2026-05-26.md) — Brains MCP v1 LIVE in prod (Lane D verified, `86435b8`); freshness-first chain closed (PRs #19–#26: secrets normalize, dry-run plumbing, Node 24 bump, pipeline-freshness standard, 9 cron backfills, 3 Tier-1 macro pipelines, daily probe); `/connect` content moved to `/` homepage (#27); MCP basePath fix (#28); waitlist canonical+legacy env-name fallback (`f738ed4`, #30); firecrawl outside-eyes audit script committed (`54eab65`). permits-swfl v2 (PR #29) still open.
 - [2026-05-25](2026-05-25.md) — MarketBeat Flow 3 shipped (PR #18, `f815c58`); `--target-only` CLI flag added; singleton-reset backlog closed; SKOS `raw_slug_patterns` is the next follow-up.
 - [2026-05-18](2026-05-18.md) — seed session: memory rewrite, notes directory established.
