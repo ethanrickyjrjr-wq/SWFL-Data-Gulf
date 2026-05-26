@@ -92,6 +92,38 @@ function wrapForRefenceLinter(block: string): string {
 }
 
 const CITATION_REF_RE = /\[(internal|web)-\d+\]/i;
+const ANCHOR_RE = /\[(internal|web)-\d+\]/gi;
+
+/**
+ * Cross-check every [internal-N] / [web-N] anchor in `block` against the
+ * citations payload. Dangling anchors (no matching row) are returned as
+ * errors. Pure — no IO, no shared state. Used by BOTH facts-block and
+ * speculative-block lint paths because either block can produce a dangling
+ * ref and either would break the renderer downstream.
+ */
+function findDanglingAnchorErrors(
+  blockName: "facts_block" | "speculative_block",
+  block: string,
+  citations: CharacterCitations,
+): string[] {
+  const errors: string[] = [];
+  const internalRefs = new Set(
+    citations.internal.map((c) => c.ref.toLowerCase()),
+  );
+  const webRefs = new Set(citations.web.map((c) => c.ref.toLowerCase()));
+  for (const m of block.matchAll(ANCHOR_RE)) {
+    const anchor = m[0].toLowerCase();
+    const kind = anchor.startsWith("[internal") ? "internal" : "web";
+    const set = kind === "internal" ? internalRefs : webRefs;
+    const bareRef = anchor.slice(1, -1);
+    if (!set.has(bareRef)) {
+      errors.push(
+        `${blockName} cites "${anchor}" but no matching ${kind} citation row was supplied.`,
+      );
+    }
+  }
+  return errors;
+}
 
 export function lintCorridorCharacterOutput(
   output: CorridorCharacterOutput,
@@ -143,26 +175,14 @@ export function lintCorridorCharacterOutput(
       );
     }
 
-    // Resolve every [internal-N] / [web-N] anchor to a citation row.
-    const internalRefs = new Set(
-      output.citations.internal.map((c) => c.ref.toLowerCase()),
+    // 4. Dangling-anchor cross-check (facts block).
+    factsErrors.push(
+      ...findDanglingAnchorErrors(
+        "facts_block",
+        output.facts_block,
+        output.citations,
+      ),
     );
-    const webRefs = new Set(
-      output.citations.web.map((c) => c.ref.toLowerCase()),
-    );
-    const anchorRe = /\[(internal|web)-\d+\]/gi;
-    for (const m of output.facts_block.matchAll(anchorRe)) {
-      const anchor = m[0].toLowerCase();
-      const kind = anchor.startsWith("[internal") ? "internal" : "web";
-      const set = kind === "internal" ? internalRefs : webRefs;
-      // Compare against the bare ref string ("internal-3", "web-2").
-      const bareRef = anchor.slice(1, -1);
-      if (!set.has(bareRef)) {
-        factsErrors.push(
-          `facts_block cites "${anchor}" but no matching ${kind} citation row was supplied.`,
-        );
-      }
-    }
   }
 
   // ── Speculative block ──────────────────────────────────────────────────
@@ -171,6 +191,21 @@ export function lintCorridorCharacterOutput(
   } else {
     const sp = lintSpeculativeBlock(output.speculative_block, factPack);
     if (!sp.ok) speculativeErrors.push(...sp.errors);
+
+    // Dangling-anchor cross-check (speculative block). The plan's REJECT
+    // contract requires this: a model can emit [web-99] in the speculative
+    // block, hedge it properly, and otherwise pass — but the renderer would
+    // break trying to resolve a citation that was never supplied. Same
+    // helper as facts block; presence of a marker is NOT required here
+    // (the speculative block can be pure inference with [inference] tags),
+    // but any web/internal anchor that DOES appear must resolve.
+    speculativeErrors.push(
+      ...findDanglingAnchorErrors(
+        "speculative_block",
+        output.speculative_block,
+        output.citations,
+      ),
+    );
   }
 
   // ── Chart block ────────────────────────────────────────────────────────

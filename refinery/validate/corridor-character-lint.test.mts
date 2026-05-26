@@ -159,3 +159,45 @@ test("orchestrator: empty facts_block rejected with clear message", () => {
   assert.equal(r.ok, false);
   assert.match(r.errors.facts.join(" "), /non-empty string/);
 });
+
+test("orchestrator: dangling [web-N] anchor in speculative_block rejected", () => {
+  // The plan's REJECT contract: a model emits [web-99] in the speculative
+  // block, the citations payload only carries web-1, the renderer would
+  // break trying to resolve web-99. Lint must catch it before DB write.
+  const bad = happyOutput();
+  bad.speculative_block =
+    "Trends could be tracking toward expansion [web-99]. " +
+    SPECULATIVE_DISCLAIMER;
+  const r = lintCorridorCharacterOutput(bad, factPack);
+  assert.equal(r.ok, false);
+  assert.ok(
+    r.errors.speculative.some((e) =>
+      /speculative_block cites "\[web-99\]"/.test(e),
+    ),
+    `expected a dangling-anchor error in speculative errors, got: ${JSON.stringify(r.errors.speculative)}`,
+  );
+});
+
+test("orchestrator: dangling [internal-N] anchor in speculative_block rejected", () => {
+  const bad = happyOutput();
+  bad.speculative_block =
+    "Continuing the drift first flagged in Q3 [internal-42]. " +
+    SPECULATIVE_DISCLAIMER;
+  const r = lintCorridorCharacterOutput(bad, factPack);
+  assert.equal(r.ok, false);
+  assert.ok(
+    r.errors.speculative.some((e) =>
+      /speculative_block cites "\[internal-42\]"/.test(e),
+    ),
+  );
+});
+
+test("orchestrator: speculative_block with resolved anchors passes", () => {
+  // web-1 IS in the citations payload — should not trip the dangling check.
+  const good = happyOutput();
+  good.speculative_block =
+    "The most recent reading [web-1] suggests trends could be tracking toward expansion. " +
+    SPECULATIVE_DISCLAIMER;
+  const r = lintCorridorCharacterOutput(good, factPack);
+  assert.equal(r.ok, true, `expected ok=true, got errors: ${r.flat_errors}`);
+});
