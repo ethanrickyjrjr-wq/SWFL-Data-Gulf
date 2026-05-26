@@ -40,6 +40,7 @@ import type {
 } from "../sources/cre-source.mts";
 import type { MarketbeatSwflNormalized } from "../sources/marketbeat-swfl-source.mts";
 import type { LausSwflSummary } from "../sources/bls-laus-source.mts";
+import { subtractMonthsUtc, subtractYearsUtc } from "../lib/dates.mts";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -598,10 +599,11 @@ function buildZoriRentIndex(input: BuildFactPackInput): MetricFact {
     ? latestRows.reduce((s, r) => s + r.rent_index, 0) / latestRows.length
     : null;
 
-  // Prior-year same month rollup.
+  // Prior-year same month rollup. Use subtractYearsUtc to snap Feb 29 in a
+  // leap year onto Feb 28 of the prior year — JS's setUTCFullYear() rolls
+  // forward to Mar 1 instead, silently missing the ZORI 2023-02-28 row.
   const latestDate = new Date(latestPeriod);
-  const priorDate = new Date(latestDate);
-  priorDate.setUTCFullYear(priorDate.getUTCFullYear() - 1);
+  const priorDate = subtractYearsUtc(latestDate, 1);
   const priorIso = priorDate.toISOString().slice(0, 10);
   const priorRows = sorted.filter((r) => r.period_end === priorIso);
   const priorMean = priorRows.length
@@ -717,10 +719,11 @@ function buildPermitsTrailing6Mo(input: BuildFactPackInput): MetricFact {
   );
   const latestIso = sorted[sorted.length - 1].issued_date;
   const latestDate = new Date(latestIso);
-  const sixMoAgo = new Date(latestDate);
-  sixMoAgo.setUTCMonth(sixMoAgo.getUTCMonth() - 6);
-  const twelveMoAgo = new Date(latestDate);
-  twelveMoAgo.setUTCMonth(twelveMoAgo.getUTCMonth() - 12);
+  // subtractMonthsUtc snaps month-end overflow (Aug 31 - 6mo → Feb 28, not
+  // Mar 3 as setUTCMonth would produce). Boundary stability matters for
+  // window inclusion.
+  const sixMoAgo = subtractMonthsUtc(latestDate, 6);
+  const twelveMoAgo = subtractMonthsUtc(latestDate, 12);
 
   const trailing6mo = sorted.filter(
     (r) => new Date(r.issued_date) > sixMoAgo,

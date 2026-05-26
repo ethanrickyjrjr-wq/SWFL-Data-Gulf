@@ -178,6 +178,35 @@ test("zori_rent_index: empty zori_rows fires gap_reason", () => {
   assert.equal(z.important_math[0].value, null);
 });
 
+test("zori_rent_index: Feb 29 leap-year latest period looks up Feb 28 prior year (not Mar 1)", () => {
+  // Regression: setUTCFullYear(year-1) on a Feb-29 source date rolls forward
+  // to Mar 1 in the non-leap target year. subtractYearsUtc snaps to Feb 28,
+  // letting the prior-year lookup hit the canonical month-end ZORI row.
+  const input = makeNaplesFullDataInput({
+    zori_rows: [
+      // Latest leap-year period.
+      { zip_code: "34109", period_end: "2024-02-29", rent_index: 2100 },
+      { zip_code: "34110", period_end: "2024-02-29", rent_index: 2120 },
+      // Prior-year ZORI: 2023 has no Feb 29 — the canonical row is
+      // 2023-02-28. Pre-fix, the lookup ran against "2023-03-01" and
+      // missed; YoY came back null.
+      { zip_code: "34109", period_end: "2023-02-28", rent_index: 2000 },
+      { zip_code: "34110", period_end: "2023-02-28", rent_index: 2020 },
+    ],
+  });
+  const pack = buildCorridorFactPack(input);
+  const z = pack.metrics.zori_rent_index;
+  assert.equal(z.current.vintage, "2024-02-29");
+  // Latest mean = 2110 ; prior mean = 2010 ; YoY = (2110-2010)/2010*100 = 4.975... → 4.98.
+  assert.equal(z.current.value, 2110);
+  const yoy = z.important_math[0];
+  assert.equal(yoy.value, 4.98);
+  assert.equal(yoy.direction, "rising");
+  // The math's computation string must reference 2023-02-28 (the snapped
+  // prior date), not the JS-overflow 2023-03-01.
+  assert.match(yoy.computation, /2023-02-28/);
+});
+
 // ── permits_trailing_6mo ─────────────────────────────────────────────────────
 
 test("permits_trailing_6mo: Collier corridor fires Lee-only gap_reason", () => {
@@ -208,6 +237,54 @@ test("permits_trailing_6mo: Lee corridor with zero permits fires gap_reason", ()
   const p = pack.metrics.permits_trailing_6mo;
   assert.equal(p.current.value, null);
   assert.match(p.current.gap_reason!, /Zero permits joined/);
+});
+
+test("permits_trailing_6mo: month-end latestIso (Aug 31) does not drift the 6mo boundary by 3 days", () => {
+  // Regression: setUTCMonth(-6) on Aug 31 yields Mar 3, pushing a Mar 1
+  // permit out of the prior-6mo window and a Feb 28 permit into the
+  // trailing-6mo window. subtractMonthsUtc snaps to Feb 28, restoring
+  // stable boundaries.
+  const input = makeLeePermitsInput({
+    lee_permits: [
+      // Latest permit anchors latestIso at 2026-08-31.
+      { permit_id: "ANCHOR", issued_date: "2026-08-31", bucket: "commercial" },
+      // 2026-03-01: 1 day INTO the prior-6mo window (sixMoAgo = 2026-02-28).
+      // The naive Mar-3 boundary would put it on the wrong side.
+      { permit_id: "MAR01", issued_date: "2026-03-01", bucket: "commercial" },
+      // 2026-02-28: exactly ON the prior-6mo window boundary, must count
+      // as prior-6mo (sixMoAgo is exclusive in the trailing filter:
+      // `d > sixMoAgo` means d=2026-02-28 falls to prior, not trailing).
+      { permit_id: "FEB28", issued_date: "2026-02-28", bucket: "commercial" },
+      // Trailing-6mo padding.
+      { permit_id: "JUN15", issued_date: "2026-06-15", bucket: "commercial" },
+      { permit_id: "JUL15", issued_date: "2026-07-15", bucket: "commercial" },
+      // Prior-6mo padding (twelveMoAgo = 2025-08-31, exclusive at sixMoAgo).
+      { permit_id: "OCT15", issued_date: "2025-10-15", bucket: "commercial" },
+      { permit_id: "NOV15", issued_date: "2025-11-15", bucket: "commercial" },
+    ],
+  });
+  const pack = buildCorridorFactPack(input);
+  const p = pack.metrics.permits_trailing_6mo;
+  // Trailing-6mo (strict-greater-than 2026-02-28): Mar 01 + Jun 15 +
+  // Jul 15 + Aug 31 = 4.
+  // Prior-6mo (>2025-08-31 and <=2026-02-28): Oct 15 + Nov 15 +
+  // Feb 28 = 3.
+  // Delta = +1.
+  //
+  // Pre-fix the picture inverted: setUTCMonth(-6) on Aug 31 returns
+  // Mar 03, so Mar 01 fell into prior (count 4) and trailing dropped
+  // to 3 (delta -1). The flip from -1 to +1 across the fix is the
+  // entire point — a 3-day boundary drift inverts the signal at the
+  // corridor scale.
+  assert.equal(p.current.value, 4);
+  assert.equal(p.important_math[0].value, 1);
+  // sixMoAgo input vintage must be the snapped Feb 28, not the JS-overflow
+  // Mar 03.
+  assert.equal(
+    p.important_math[0].inputs[1].vintage,
+    "2026-02-28",
+    "sixMoAgo vintage must snap to last-day-of-Feb, not roll forward to Mar",
+  );
 });
 
 // ── nfip_claim_frequency ─────────────────────────────────────────────────────
