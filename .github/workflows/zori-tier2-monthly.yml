@@ -1,0 +1,46 @@
+name: ZORI SWFL Tier 2 load monthly
+
+on:
+  schedule:
+    # 0 13 21 * * — 13:00 UTC = 9:00 AM ET on the 21st of each month.
+    # Stage 2 of 2: reads the Tier 1 Parquet written by zori-tier1-monthly (day 20) and merges
+    # into data_lake.zori_swfl. Scheduled 1 day after Tier 1 fetch to ensure Parquet is ready.
+    # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
+    - cron: "0 13 21 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run ZORI Tier 2 load pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.zori_swfl.pipeline --dry-run
+          else
+            python -m ingest.pipelines.zori_swfl.pipeline
+          fi

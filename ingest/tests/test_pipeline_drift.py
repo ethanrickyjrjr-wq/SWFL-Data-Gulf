@@ -21,19 +21,8 @@ PIPELINES_DIR = REPO_ROOT / "ingest" / "pipelines"
 DUCKDB_DIR = REPO_ROOT / "ingest" / "duckdb_pipelines"
 WORKFLOWS_DIR = REPO_ROOT / ".github" / "workflows"
 
-# Pipelines without a workflow yet — covered in plan PR 3.
-ALLOW_LIST = {
-    "ingest/pipelines/bls_qcew",           # covered in plan PR 3
-    "ingest/pipelines/faf5",               # covered in plan PR 3
-    "ingest/pipelines/lee_permits",        # covered in plan PR 3
-    "ingest/pipelines/usgs",               # to be DELETED in plan PR 3 (superseded by duckdb lane)
-    "ingest/pipelines/zori_swfl",          # covered in plan PR 3 (2-stage: pipelines/ feeds duckdb_pipelines/)
-    "ingest/duckdb_pipelines/usgs",        # covered in plan PR 3
-    "ingest/duckdb_pipelines/zori_swfl",   # covered in plan PR 3 (2-stage)
-    "ingest/duckdb_pipelines/hurdat2_fl",  # covered in plan PR 3
-    "ingest/duckdb_pipelines/redfin_swfl", # covered in plan PR 3
-    "ingest/duckdb_pipelines/storm_history_swfl",  # covered in plan PR 3
-}
+# All pipelines now have workflows — allow-list emptied in PR 3.
+ALLOW_LIST: set[str] = set()
 
 # Pipeline dirs that are scaffolding/internal only (no workflow needed).
 _SKIP_NAMES = {"__pycache__", "__init__.py"}
