@@ -6,3 +6,4 @@ duckdb>=1.1
 pandas>=2.0.0
 pyarrow>=14.0
 firecrawl-py>=4.28.0
+psycopg[binary]>=3.2
