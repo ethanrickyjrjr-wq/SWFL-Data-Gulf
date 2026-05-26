@@ -15,6 +15,12 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Sonnet 4.6 · main) — PR #40 merged into main
+
+- Squash-merged PR #40 (`feat/corridor-character-generator-step-2`) → main at `8c4a737`; branch deleted from remote.
+- Lands: `build-corridor-fact-pack.mts`, `synthesize-corridor-character.mts`, corridor-character lints, `corridor_grounded` pipeline, `extract_client.py`/`spider_client.py`, dates lib, slug-parity fixture + tests (738 pass).
+- Next: Step 4 — Stage A driver (`--preview` against all 26 corridors) + operator 5-corridor spot-check. Fresh session required.
+
 ## 2026-05-26 (Opus 4.7 · feat/corridor-character-generator-step-2) — Step 3 audit follow-up: 3 commits closing 7 audit items
 
 Outside-eyes audit on Step 2 surfaced 8 findings; this push lands fixes for #2 through #8. Item #1 (spider_client extraction_schema wrapper regression on commit `0028522`) is a merge-ordering concern, not a step-2 issue: B1's grounded pipeline uses Anthropic `web_search` and never reaches firecrawl→spider, so the fix correctly lives on `fix/firecrawl-agent-client` and propagates here on rebase after that PR lands.
