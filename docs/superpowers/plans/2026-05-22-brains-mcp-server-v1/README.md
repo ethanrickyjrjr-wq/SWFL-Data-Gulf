@@ -2,29 +2,48 @@
 
 _Planned 2026-05-22. Source-of-truth durable copy of the plan-mode draft at `~/.claude/plans/let-s-plan-this-out-declarative-conway.md`._
 
-## Status (2026-05-26 — LIVE IN PROD)
+## Status (2026-05-26 — FULLY LIVE IN PROD ✅)
 
-Prod verified 2026-05-26: `POST https://www.swfldatagulf.com/api/mcp` returns proper SSE-framed JSON-RPC; `tools/list` returns `swfl_fetch` with 16 reports; `tools/call swfl_fetch {}` returns the real tier-2 master payload with freshness token `SWFL-7421-v53-20260525`. First successful prod MCP call landed via `09cf72a`.
+End-to-end verified in prod 2026-05-26 02:30 ET:
 
-| Step | Item                                                             | Status                    |
-| ---- | ---------------------------------------------------------------- | ------------------------- |
-| 1    | `lib/fetch-brain.ts` shared pipeline                             | ✅ shipped `1385c58`      |
-| 1    | `/api/waitlist` + Resend confirmation email                      | ✅ shipped `1385c58`      |
-| 1    | `docs/sql/20260522_waitlist.sql` DDL                             | ✅ shipped `1385c58`      |
-| 2    | `app/api/mcp/route.ts` (GET health + POST handler)               | ✅ shipped `db3b83f`      |
-| 2    | `app/api/mcp/server.ts` (`swfl_fetch` tool)                      | ✅ shipped `db3b83f`      |
-| 2    | `app/api/mcp/inventory.ts` + `refinery/packs/catalog.mts`        | ✅ shipped `db3b83f`      |
-| 2    | `app/api/mcp/auth.ts` (open stub)                                | ✅ shipped `db3b83f`      |
-| 2    | MCP Apps chart widget (`@modelcontextprotocol/ext-apps`)         | ✅ shipped `ac45e62`      |
-| 2    | `.npmrc` `legacy-peer-deps` (Vercel npm peer dep fix)            | ✅ shipped `f81c462`      |
-| 2    | All URLs migrated to `www.swfldatagulf.com`                      | ✅ shipped `1385c58`      |
-| 2    | `BRAIN_PLATFORM_URL` set in Vercel env vars                      | ✅ done (Vercel UI)       |
-| 2    | **`basePath: "/api"` on `createMcpHandler` — POST live in prod** | ✅ shipped `09cf72a`      |
-| 3    | `/connect` → `/` (landing moved to root, `/connect` 308s)        | ✅ shipped `8eff67a`      |
-| 3    | `/connect` landing page (3 components)                           | ✅ shipped                |
-| —    | `/privacy` page                                                  | ✅ shipped (pre-existing) |
-| —    | Anthropic Connectors directory submission                        | ✅ submitted 2026-05-26   |
-| —    | Vercel WAF rule: 5 req/min on `POST /api/waitlist`               | ⬜ Vercel UI — set it     |
+- `GET /api/mcp` → 200 health JSON, 16 reports inventoried
+- `POST /api/mcp` (`tools/list`) → returns `swfl_fetch` over SSE-framed JSON-RPC
+- `POST /api/mcp` (`tools/call swfl_fetch {}`) → real tier-2 master payload with freshness token `SWFL-7421-v53-20260525`, 14 upstream brains, combined confidence 0.94
+- `POST /api/waitlist` → 200 `{"ok":true}`, row inserted, Resend confirmation email fires
+- WAF rate limit on `POST /api/waitlist` → 6th rapid POST returns HTTP 429 with Vercel rate-limit envelope
+- `/connect` → 308 → `/` (landing at root)
+- `/privacy` → 200
+- Anthropic Connectors directory submission → submitted
+
+**Install command for any tester:**
+
+```
+claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp
+```
+
+| Step | Item                                                                 | Status                        |
+| ---- | -------------------------------------------------------------------- | ----------------------------- |
+| 1    | `lib/fetch-brain.ts` shared pipeline                                 | ✅ shipped `1385c58`          |
+| 1    | `/api/waitlist` + Resend confirmation email                          | ✅ shipped `1385c58`          |
+| 1    | `docs/sql/20260522_waitlist.sql` DDL                                 | ✅ shipped `1385c58`          |
+| 2    | `app/api/mcp/route.ts` (GET health + POST handler)                   | ✅ shipped `db3b83f`          |
+| 2    | `app/api/mcp/server.ts` (`swfl_fetch` tool)                          | ✅ shipped `db3b83f`          |
+| 2    | `app/api/mcp/inventory.ts` + `refinery/packs/catalog.mts`            | ✅ shipped `db3b83f`          |
+| 2    | `app/api/mcp/auth.ts` (open stub)                                    | ✅ shipped `db3b83f`          |
+| 2    | MCP Apps chart widget (`@modelcontextprotocol/ext-apps`)             | ✅ shipped `ac45e62`          |
+| 2    | `.npmrc` `legacy-peer-deps` (Vercel npm peer dep fix)                | ✅ shipped `f81c462`          |
+| 2    | All URLs migrated to `www.swfldatagulf.com`                          | ✅ shipped `1385c58`          |
+| 2    | `BRAIN_PLATFORM_URL` set in Vercel env vars                          | ✅ done (Vercel UI)           |
+| 2    | **`basePath: "/api"` on `createMcpHandler` — POST live in prod**     | ✅ shipped `09cf72a` (PR #28) |
+| 3    | `/connect` → `/` (landing moved to root, `/connect` 308s)            | ✅ shipped `8eff67a` (PR #27) |
+| 3    | `/connect` landing page (3 components)                               | ✅ shipped                    |
+| —    | `/privacy` page                                                      | ✅ shipped (pre-existing)     |
+| —    | Anthropic Connectors directory submission                            | ✅ submitted 2026-05-26       |
+| —    | **`SUPABASE_URL`+`SUPABASE_SERVICE_KEY` on Vercel — waitlist live**  | ✅ done (Vercel UI)           |
+| —    | **`createServiceRoleClient()` reads canonical SUPABASE\_ env names** | ✅ shipped `f738ed4`          |
+| —    | **`createServiceRoleClient()` legacy `BRAINS_SUPABASE_*` fallback**  | ✅ shipped `c3b9d0a` (PR #30) |
+| —    | **Vercel WAF rule: 5 req/min on `POST /api/waitlist`**               | ✅ verified live (429 fires)  |
+| —    | `app/terms/page.tsx` next/link lint fix (unblocked CI for `09cf72a`) | ✅ shipped (PR #28)           |
 
 ## Context
 
