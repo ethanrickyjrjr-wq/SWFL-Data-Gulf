@@ -194,10 +194,6 @@ not_yet_running:
     inventory_key_type: exact
     note: "Pipeline exists; no successful GHA run yet."
 
-  - name: corridor_narratives
-    lane: tier-1
-    note: "n8n/Railway half of firecrawl pipeline pending; no inventory writes yet."
-
   - name: marketbeat_swfl
     lane: tier-1
     note: "n8n/Railway half of firecrawl pipeline pending; no inventory writes yet."

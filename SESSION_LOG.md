@@ -15,6 +15,13 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Opus 4.7 · chore/kill-corridor-narratives-pipeline) — delete dead broker-scrape pipeline
+
+- `corridor_narratives` is superseded by the v2 corridor-character-generator (`ingest/pipelines/corridor_grounded/`, B1 shipped on `feat/corridor-character-generator-step-2`). All 4 source broker URLs (creconsultants, lsicompanies, ipcswfl, svnswfl) are 404 or 525-blocked; pipeline has never produced a row. v2 uses Anthropic `web_search_20260209` for grounded citations — different directory, different schema, no dependency on the deleted pipeline or its `_pending` quarantine column.
+- Deleted: `ingest/pipelines/corridor_narratives/` (pipeline.py, test_pipeline.py, **init**.py) + `.github/workflows/corridor-narratives-quarterly.yml` + `docs/sql/20260525_corridor_broker_narrative_pending.sql` (v1 quarantine column; v2's migration at `20260526_corridor_character_generator.sql` adds `character_facts`/`_chart`/`_speculative`/`_citations`/`_generated_at`/`_fact_pack_vintage` — no consumer for `_pending`).
+- Bookkeeping: removed corridor_narratives row from `ingest/cadence_registry.yaml not_yet_running:`; dropped corridor_narratives from `FIRECRAWL_API_KEY` consumer list in `ingest/.env.example`; updated cron-clash comment in `bls-laus-monthly.yml`.
+- Sibling PR (#39, `fix/firecrawl-agent-client`) keeps the firecrawl + spider extraction wrapper as durable infra — that has general value for future firecrawl-backed pipelines. This PR is the housekeeping that should have been a separate diff from the start.
+
 ## 2026-05-26 (Opus 4.7 · fix/firecrawl-agent-client) — extract timeout + GHA wall-clock tuning
 
 - Corridor + county dry-runs hit GHA's 15m/20m wall-clock without ever reaching a vendor traceback — firecrawl SDK was still polling at the kill. Marketbeat (3 URLs) finished in 9m and surfaced both vendor errors cleanly; corridor (4 URLs) couldn't make the same window. Confirms firecrawl agent polling time scales roughly per-URL.
