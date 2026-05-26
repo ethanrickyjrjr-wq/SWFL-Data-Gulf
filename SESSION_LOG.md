@@ -15,6 +15,12 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Sonnet 4.6 · chore/kill-corridor-narratives-pipeline) — SWFL CRE intel probe script + GHA workflow
+
+- New `scripts/swfl_cre_intel_probe.py`: two-vendor extract() probe across 3 URL tiers (CW MarketBeat PDFs, Colliers SWFL HTML, academic/editorial). Confirmed-live URLs sourced from live search (CW industrial + office Q1 2026, Colliers retail Q3 2025 + office/industrial Q1 2026, FGCU RERI Q1 2026); retail CW PDF URL pattern-guessed. Dead-URL table in docstring matches brief exactly. `_bootstrap()` loads `.env.local` so script runs directly.
+- New `.github/workflows/swfl-cre-intel-probe.yml`: manual `workflow_dispatch` with optional `tier` input, uploads `cre-intel-results.json` as artifact (14d retention). Uses existing `FIRECRAWL_API_KEY` + `SPIDER_API_KEY` repo secrets — no local `.env.local` needed.
+- Next: `gh workflow run swfl-cre-intel-probe.yml` → inspect artifact → update BROKER_SOURCES in corridor_narratives + any surviving marketbeat URL list with confirmed working URLs.
+
 ## 2026-05-26 (Opus 4.7 · chore/kill-corridor-narratives-pipeline) — also kill marketbeat_swfl + county_planning_swfl
 
 - Live dry-runs against the fixed wrapper (PR #39 latest) confirmed the same pattern as corridor: spider successfully scrapes the pages but the LLM extracts only null-field rows because the actual data (rents, vacancy, absorption) isn't on the broker landing pages — it lives in linked PDFs that change URL every quarter or behind CoStar/LoopNet paywalls. County planning hub pages have the same shape problem.
