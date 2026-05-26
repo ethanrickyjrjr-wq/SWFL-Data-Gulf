@@ -108,7 +108,7 @@ function resolveMetricSource(
  * Build a BrainOutputMetricSource for a cre-swfl aggregate metric.
  *
  * The URL is the reproducible PostgREST query against Brains Supabase
- * (`{BRAINS_SUPABASE_URL}/rest/v1/corridor_profiles?...`), filtered to the
+ * (`{SUPABASE_URL}/rest/v1/corridor_profiles?...`), filtered to the
  * same rows that fed the median — verified, non-deleted, and non-null for the
  * specific metric column. In fixture mode the URL collapses to the fixture
  * file path so the receipt still points at the actual data origin.

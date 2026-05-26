@@ -115,9 +115,17 @@ test("logPrediction skips non-master packs (no-op)", async () => {
 });
 
 test("logPrediction skips when supabase env is missing", async () => {
-  // Save and clear env so process.env fallback finds nothing.
-  const prevUrl = process.env.BRAINS_SUPABASE_URL;
-  const prevKey = process.env.BRAINS_SUPABASE_SERVICE_KEY;
+  // Save and clear env so process.env fallback finds nothing. Both the
+  // canonical bare names and the legacy BRAINS_-prefixed names are cleared
+  // because logPrediction reads both (canonical first, legacy as fallback).
+  const prev = {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_SERVICE_KEY,
+    legacyUrl: process.env.BRAINS_SUPABASE_URL,
+    legacyKey: process.env.BRAINS_SUPABASE_SERVICE_KEY,
+  };
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_KEY;
   delete process.env.BRAINS_SUPABASE_URL;
   delete process.env.BRAINS_SUPABASE_SERVICE_KEY;
   try {
@@ -127,8 +135,11 @@ test("logPrediction skips when supabase env is missing", async () => {
     });
     assert.deepEqual(result, { kind: "skipped", reason: "no-supabase-env" });
   } finally {
-    if (prevUrl) process.env.BRAINS_SUPABASE_URL = prevUrl;
-    if (prevKey) process.env.BRAINS_SUPABASE_SERVICE_KEY = prevKey;
+    if (prev.url) process.env.SUPABASE_URL = prev.url;
+    if (prev.key) process.env.SUPABASE_SERVICE_KEY = prev.key;
+    if (prev.legacyUrl) process.env.BRAINS_SUPABASE_URL = prev.legacyUrl;
+    if (prev.legacyKey)
+      process.env.BRAINS_SUPABASE_SERVICE_KEY = prev.legacyKey;
   }
 });
 

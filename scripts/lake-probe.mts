@@ -5,8 +5,9 @@ for (const l of lines) {
   const m = l.match(/^([A-Z0-9_]+)=(.*)$/);
   if (m) process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, "");
 }
-const url = process.env.BRAINS_SUPABASE_URL!;
-const key = process.env.BRAINS_SUPABASE_SERVICE_KEY!;
+const url = (process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL)!;
+const key = (process.env.SUPABASE_SERVICE_KEY ??
+  process.env.BRAINS_SUPABASE_SERVICE_KEY)!;
 if (!url || !key) {
   console.error("missing creds");
   process.exit(1);

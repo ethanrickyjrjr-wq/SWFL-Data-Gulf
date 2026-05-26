@@ -123,7 +123,7 @@ Report the two file paths the script prints. That's it.
 ## Failure surface
 
 - `--schema must be one of …` → tell Ricky to add `personal_vault` to Project Settings → API → Exposed schemas in the Supabase dashboard. One-time setup.
-- `missing required env var(s): supabaseUrl, supabaseKey` → tell Ricky to populate `BRAINS_SUPABASE_URL` and `BRAINS_SUPABASE_SERVICE_KEY` in `.env.local`.
+- `missing required env var(s): supabaseUrl, supabaseKey` → tell Ricky to populate `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` in `.env.local` (legacy `BRAINS_SUPABASE_*` also accepted).
 - `unknown SKOS concept` → show the script's "did you mean" suggestions verbatim and let Ricky pick or correct.
 
 ---

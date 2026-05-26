@@ -9,9 +9,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * code that ships to the browser; the key would leak.
  *
  * Env vars: `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` (the canonical normalized
- * names per PR #19; see `.env.example` lines 9-10). The refinery still reads
- * the legacy `BRAINS_SUPABASE_*` pair in `refinery/config/env.mts:76-77` —
- * separate concern, separate cleanup PR.
+ * names per PR #19; see `.env.example` lines 9-10). Legacy `BRAINS_SUPABASE_*`
+ * is accepted as a fallback so deploys carrying the old keys keep working —
+ * `refinery/config/env.mts` follows the same read-canonical-fallback-legacy
+ * pattern.
  *
  * Throws at call time (not module load) when env is missing so dev/build
  * environments without the key still boot.

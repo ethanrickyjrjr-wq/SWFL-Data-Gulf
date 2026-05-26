@@ -73,8 +73,13 @@ type EnvSnapshot = Omit<RefineryEnv, "source">;
 
 function readEnvSnapshot(): EnvSnapshot {
   return {
-    supabaseUrl: process.env.BRAINS_SUPABASE_URL,
-    supabaseKey: process.env.BRAINS_SUPABASE_SERVICE_KEY,
+    // Canonical bare names per the 2026-05-25 normalization (see .env.example
+    // lines 9-10). Fall back to legacy BRAINS_-prefixed names so any deploy
+    // env still carrying the old keys keeps working.
+    supabaseUrl: process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL,
+    supabaseKey:
+      process.env.SUPABASE_SERVICE_KEY ??
+      process.env.BRAINS_SUPABASE_SERVICE_KEY,
     // Intelligence Lake = lpyl3q9w (all corridorProfile + promptRule docs live
     // there). go8u2esq was the original plan's assumed A1 project but is an
     // empty shell — 0 docs of any type under published/previewDrafts/drafts

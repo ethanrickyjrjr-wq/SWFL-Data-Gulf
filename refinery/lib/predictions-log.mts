@@ -94,8 +94,14 @@ export async function logPrediction(
   if (opts.packId !== MASTER_PACK_ID) {
     return { kind: "skipped", reason: "not-master" };
   }
-  const url = opts.supabaseUrl ?? process.env.BRAINS_SUPABASE_URL;
-  const key = opts.supabaseKey ?? process.env.BRAINS_SUPABASE_SERVICE_KEY;
+  const url =
+    opts.supabaseUrl ??
+    process.env.SUPABASE_URL ??
+    process.env.BRAINS_SUPABASE_URL;
+  const key =
+    opts.supabaseKey ??
+    process.env.SUPABASE_SERVICE_KEY ??
+    process.env.BRAINS_SUPABASE_SERVICE_KEY;
   if (!url || !key) {
     return { kind: "skipped", reason: "no-supabase-env" };
   }

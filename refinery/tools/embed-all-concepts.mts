@@ -14,7 +14,8 @@
  *
  * Requires:
  *   - VOYAGE_KEY in .env.local
- *   - BRAINS_SUPABASE_URL + BRAINS_SUPABASE_SERVICE_KEY in .env.local
+ *   - SUPABASE_URL + SUPABASE_SERVICE_KEY in .env.local
+ *     (legacy BRAINS_SUPABASE_URL / BRAINS_SUPABASE_SERVICE_KEY also accepted)
  *   - docs/sql/20260517_vocab_concept_embeddings.sql already applied
  *     (run `npm run pgvector:verify` to confirm)
  */
