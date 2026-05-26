@@ -1,0 +1,46 @@
+name: BLS QCEW quarterly
+
+on:
+  schedule:
+    # 0 13 9 2,5,8,11 * — 13:00 UTC = 9:00 AM ET on the 9th of Feb/May/Aug/Nov.
+    # BLS QCEW lags ~5 months; quarterly release ~day 6-7 of Feb/May/Aug/Nov. Day 9 = 2-day buffer.
+    # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
+    - cron: "0 13 9 2,5,8,11 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run BLS QCEW pipeline
+        env:
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.bls_qcew.pipeline --dry-run
+          else
+            python -m ingest.pipelines.bls_qcew.pipeline
+          fi

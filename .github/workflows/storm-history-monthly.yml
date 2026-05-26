@@ -1,0 +1,46 @@
+name: SWFL storm history Tier 1 monthly
+
+on:
+  schedule:
+    # 0 14 10 * * — 14:00 UTC = 10:00 AM ET on the 10th of each month.
+    # NOAA storm-events update cadence. Scheduled 1 hour after usgs-monthly (13:00 UTC)
+    # to avoid resource contention on the same day.
+    # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
+    - cron: "0 14 10 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip Storage upload"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run storm history pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.duckdb_pipelines.storm_history_swfl.pipeline --dry-run
+          else
+            python -m ingest.duckdb_pipelines.storm_history_swfl.pipeline
+          fi

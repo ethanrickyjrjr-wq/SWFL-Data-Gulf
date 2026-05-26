@@ -1,0 +1,49 @@
+name: Lee County permits weekly
+
+on:
+  schedule:
+    # 0 11 * * 1 — 11:00 UTC = 7:00 AM ET every Monday.
+    # Rolling weekly window: captures Mon→Mon permit activity.
+    # v1 (first-page only) + weekly cron is strictly better than v1 + manual; v2 pagination supersedes when ready.
+    # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
+    - cron: "0 11 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run Lee permits pipeline
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          START=$(date -u -d "7 days ago" +%Y-%m-%d)
+          END=$(date -u +%Y-%m-%d)
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.lee_permits.pipeline --start "$START" --end "$END" --dry-run
+          else
+            python -m ingest.pipelines.lee_permits.pipeline --start "$START" --end "$END"
+          fi

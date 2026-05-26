@@ -12,12 +12,41 @@ first (writes the Parquet) and then this script (merges to Postgres).
 from __future__ import annotations
 
 import argparse
+import os
 import sys
+from datetime import date, timedelta
 from typing import Optional
 
 import dlt
 
 from .resources import zori_swfl_resource
+
+ZORI_PARQUET_ID = "lake-tier1/market/zori_swfl.parquet"
+
+
+def _ensure_tier1_fresh() -> None:
+    """Refuse to load if the upstream Tier 1 Parquet didn't refresh today."""
+    import psycopg  # lazy import — not needed on dry-run or test paths
+
+    dsn = os.environ.get("DESTINATION__POSTGRES__CREDENTIALS")
+    if not dsn:
+        sys.exit("DESTINATION__POSTGRES__CREDENTIALS not set; cannot verify Tier 1 freshness.")
+    with psycopg.connect(dsn) as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT vintage FROM data_lake._tier1_inventory WHERE id = %s",
+            (ZORI_PARQUET_ID,),
+        )
+        row = cur.fetchone()
+    if row is None:
+        sys.exit(
+            f"Tier 1 fetch did not succeed: no _tier1_inventory row for {ZORI_PARQUET_ID}."
+        )
+    vintage = row[0]
+    if vintage < date.today() - timedelta(days=1):
+        sys.exit(
+            f"Tier 1 fetch did not succeed today: vintage={vintage} is older than yesterday. "
+            f"Run `gh workflow run zori-tier1-monthly.yml -f dry_run=false` first."
+        )
 
 
 def run_pipeline(parquet_path: Optional[str] = None) -> None:
@@ -43,8 +72,21 @@ def main() -> None:
         default=None,
         help="Override the Parquet source (default: s3 production path).",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate Tier 1 Parquet is readable; skip dlt write and freshness check.",
+    )
     args = parser.parse_args()
+    if not args.dry_run:
+        _ensure_tier1_fresh()
     try:
+        if args.dry_run:
+            rows = list(zori_swfl_resource(parquet_path=args.parquet_path))
+            print(f"zori_swfl dry-run: {len(rows)} rows")
+            if rows:
+                print(f"first row: {rows[0]}")
+            return
         run_pipeline(parquet_path=args.parquet_path)
     except KeyboardInterrupt:
         print("interrupted", file=sys.stderr)

@@ -1,0 +1,45 @@
+name: FAF5 Tier 2 annual
+
+on:
+  schedule:
+    # 0 13 15 3 * — 13:00 UTC = 9:00 AM ET on March 15.
+    # ORNL publishes FAF5 updates annually in Q1; day 15 provides a ~2-week buffer after typical release.
+    # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
+    - cron: "0 13 15 3 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run FAF5 pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.faf5.pipeline --dry-run
+          else
+            python -m ingest.pipelines.faf5.pipeline
+          fi
