@@ -15,13 +15,25 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Sonnet 4.6 · fix/redfin-dry-run)
+
+- Added `--dry-run` to `ingest/duckdb_pipelines/redfin_swfl/pipeline.py` + `test_dry_run.py`.
+- Last of the not-yet-running pipelines missing the flag; all 8 now covered.
+- Next: merge PR #29 and this PR after CI green.
+
+## 2026-05-26 (Sonnet 4.6 · feat/permits-swfl-v2)
+
+- Rebased `feat/permits-swfl-v2` (651c102) onto main (c19d3ca); 1 commit, clean.
+- Added `--dry-run` to `ingest/pipelines/lee_permits/pipeline.py` + test; 33/33 green.
+- Updates PR #29 (already open); no new PR needed.
+- Next: merge PR #29 after CI green; add `--dry-run` to `redfin_swfl` on separate branch.
+
 ## 2026-05-26 (Opus 4.7 · main)
 
-- Shipped enforced session-log mechanism + commit/push autonomy rubric. Five files: `SESSION_LOG.md` (this), `CLAUDE.md` (RULE 0 + RULE 1 at top, behind `<!-- SESSION-LOG-RULE-MARKER -->`), `.claude/hooks/print-session-log.mjs` (SessionStart: prints last 8 entries + verifies marker), `.claude/hooks/check-session-log-on-push.mjs` (PreToolUse Bash: blocks `git push` when no commit ahead touched SESSION_LOG.md), `.claude/settings.json` (wired).
-- RULE 1 authorizes Claude to commit + push small/policy/tooling changes without asking, and lists what still requires a diff review (brain pack math, ingest→data_lake, schema migrations, multi-file refactors, anything affecting live `/api/b/*` or MCP).
-- Race condition discovered mid-build: a parallel Sonnet 4.6 session sharing this working tree picked up my untracked `SESSION_LOG.md`, committed it onto `feat/permits-swfl-v2`, and switched HEAD under me. Sonnet's own entry will arrive on `main` when PR #29 merges — expect a 30-second conflict on this file, resolve by keeping both entry blocks. **Operator action needed: use `git worktree add` for parallel Claude sessions, not the same working tree.**
-- Memory: `project_session-log-mechanism.md` + high-visibility pointer at top of MEMORY.md.
-- Pushing this commit now under RULE 1 authority.
+- Installed enforced session-log mechanism: `SESSION_LOG.md` (this file), SessionStart hook prints last entries + verifies CLAUDE.md rule marker, PreToolUse hook blocks `git push` when no entry was added since upstream.
+- Files: `.claude/hooks/print-session-log.mjs`, `.claude/hooks/check-session-log-on-push.mjs`, `.claude/settings.json`, `CLAUDE.md` (top-of-file rule with `<!-- SESSION-LOG-RULE-MARKER -->`).
+- Open in working tree: `M ingest/pipelines/lee_permits/pipeline.py` (uncommitted, not from this work).
+- Next: confirm hooks fire after restart; first real push will exercise the gate.
 
 ## 2026-05-25 (prior session · main)
 
