@@ -15,6 +15,14 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Opus 4.7 · chore/kill-corridor-narratives-pipeline) — also kill marketbeat_swfl + county_planning_swfl
+
+- Live dry-runs against the fixed wrapper (PR #39 latest) confirmed the same pattern as corridor: spider successfully scrapes the pages but the LLM extracts only null-field rows because the actual data (rents, vacancy, absorption) isn't on the broker landing pages — it lives in linked PDFs that change URL every quarter or behind CoStar/LoopNet paywalls. County planning hub pages have the same shape problem.
+- Marketbeat: cushmanwakefield + lsicompanies returned 1 row each via spider, both with every field null → pipeline correctly raised `ValidationError`. cpswfl returned 0 rows. The wrapper does its job; the data source is the wrong shape. County: cancelled after 3-minute window per operator directive.
+- Deleted: `ingest/pipelines/marketbeat_swfl/` + `ingest/pipelines/county_planning_swfl/` + `.github/workflows/marketbeat-quarterly.yml` + `.github/workflows/county-planning-monthly.yml`. Stripped `not_yet_running:` rows from `cadence_registry.yaml`; dropped both names from the `FIRECRAWL_API_KEY` comment in `.env.example`; removed the cron-clash comment in `bls-laus-monthly.yml`.
+- **Preserved** (downstream consumers, untouched): `refinery/sources/marketbeat-swfl-source.mts`, `refinery/packs/cre-swfl.mts`, `refinery/lib/marketbeat-submarket-aliases.mts`, `refinery/__fixtures__/marketbeat-swfl.sample.json`, `docs/sql/20260525_marketbeat_swfl.sql`, `app/r/source/_tables.ts` provenance row. The `data_lake.marketbeat_swfl` table stays empty; cre-swfl already handles the empty case gracefully. Future data backfill from a real source (CoStar / direct broker feeds / outreach response) writes to the same table; brain pack picks it up automatically.
+- PR #41 retitled + body updated to cover all 3 pipeline kills. Sibling PR #39 (wrapper + spider fallback as durable infra) keeps its scope unchanged.
+
 ## 2026-05-26 (Opus 4.7 · chore/kill-corridor-narratives-pipeline) — delete dead broker-scrape pipeline
 
 - `corridor_narratives` is superseded by the v2 corridor-character-generator (`ingest/pipelines/corridor_grounded/`, B1 shipped on `feat/corridor-character-generator-step-2`). All 4 source broker URLs (creconsultants, lsicompanies, ipcswfl, svnswfl) are 404 or 525-blocked; pipeline has never produced a row. v2 uses Anthropic `web_search_20260209` for grounded citations — different directory, different schema, no dependency on the deleted pipeline or its `_pending` quarantine column.

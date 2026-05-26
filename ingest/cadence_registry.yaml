@@ -176,12 +176,6 @@ not_yet_running:
     inventory_key_type: prefix
     note: "PR #24 shipped pipeline; GHA cron has not yet fired."
 
-  - name: county_planning_swfl
-    lane: tier-1
-    inventory_id: lake-tier1/county-planning/
-    inventory_key_type: prefix
-    note: "Pipeline exists; no successful GHA run with live Firecrawl output yet."
-
   - name: news_swfl
     lane: tier-1
     inventory_id: lake-tier1/news/
@@ -193,7 +187,3 @@ not_yet_running:
     inventory_id: lake-tier1/market/redfin_swfl.parquet
     inventory_key_type: exact
     note: "Pipeline exists; no successful GHA run yet."
-
-  - name: marketbeat_swfl
-    lane: tier-1
-    note: "n8n/Railway half of firecrawl pipeline pending; no inventory writes yet."
