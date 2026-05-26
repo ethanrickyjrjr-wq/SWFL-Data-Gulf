@@ -50,7 +50,7 @@ Answers stay clean. Disclosure is one click away. Same model Claude uses.
 ## Non-negotiable rules (these are the floor)
 
 1. **Two-block lint discipline.** Facts block passes `spec-validator`, `facts-only-lint`, `inference-bait-lint`, and the `numeric_softening` token ban (same gates brain output passes today). Speculative block passes `spec-validator` only, AND requires the inline disclaimer be present, AND must NOT cite inferred numbers as facts (when inferring a value, use hedging language explicitly — that's the whole point of the block being separate).
-2. **Provenance per facts-block claim.** Every claim in the facts block traces to (a) a row in `data_lake.*` / `corridor_profiles.*` with a `*_source_url`, or (b) a web citation URL from Anthropic's `web_search_20260209` `citations[]` array. Untraceable claims do not enter the facts block — they may enter the speculative block, properly disclaimed.
+2. **Provenance per facts-block claim.** Every claim in the facts block traces to (a) a row in `data_lake.*` / `corridor_profiles.*` with a `*_source_url`, or (b) a web citation URL from Anthropic's `web_search_20250305` `citations[]` array. Untraceable claims do not enter the facts block — they may enter the speculative block, properly disclaimed.
 3. **Math is deterministic for what matters.** Stage A computes the indicators we know are decision-relevant: YoY deltas on cap rate / vacancy / asking rent, permit-volume trailing-6mo direction, BLS LAUS county trend direction, ZORI YoY rent change, NFIP claim frequency direction where multi-year data exists. Output is structured numbers in the fact pack; facts block restates them verbatim with units. We do NOT pre-compute every conceivable comparison — consumer-Claude still does the live arithmetic on raw values when the user asks something we didn't anticipate. We DO compute the indicators that are obvious top-of-corridor signals so they're ready for the facts block without round-tripping through the model.
 4. **Continuity — new expert reads old expert.** Each generator run reads the prior run's `character_facts` and `character_speculative` for the same corridor as additional context. Enables honest "since last quarter, vacancy moved from 4.2% to 6.1% [internal-3]" framing in the facts block, and "this continues the drift first flagged in Q3 2025 [prior-self]" framing in the speculative block. Old expert's mistakes don't propagate — each run re-derives from the fact pack and grounded web; prior text is context, not source of truth.
 5. **Freshness token mandatory.** Every generator run writes `character_fact_pack_vintage` (the date of the OLDEST data source used). Format: `OLDEST-{YYYY-MM}` e.g. `OLDEST-2026-04` if the oldest input is April 2026 BLS LAUS. Surfaced on the sources chart page. Consumer-Claude quotes it per the existing SWFL consumption contract rule 2.
@@ -69,18 +69,16 @@ The blanket ban on `numeric_softening` and `prose_confidence_translation` is pre
 
 Done in commits `20692fc` + `ae4061e`. `docs/audits/2026-05-26-corridor-character-snapshot.md` is the frozen pre-generator baseline (26 corridors, 10 Collier / 16 Lee). `refinery/tools/pull-corridor-character-snapshot.mts` is re-runnable.
 
-### Step 1 — Anthropic `web_search_20260209` verification + wire-up [LOCKED, ~30 min]
+### Step 1 — Anthropic `web_search_20250305` verification + wire-up [SHIPPED 2026-05-26]
 
-**Vendor pick is settled**: Anthropic's `web_search_20260209` tool. Decision rationale captured in `docs/vendor-notes/grounded-search-research-2026-05-26.md`. Anthropic is the only Tier-1 vendor that returns **per-claim citations with `cited_text` spans** AND raw publisher URLs (Gemini's `groundingChunks[].web.uri` is a Vertex redirect). The per-claim contract is what Step 3's lint stack needs.
+**Tool version corrected**: Anthropic's `web_search_20250305` (stable), NOT `web_search_20260209` (latest). The A/B in `docs/vendor-notes/anthropic-web-search-wire-up.md` showed that `20260209`'s "dynamic filtering" feature routes results through code execution and emits text from Python variables, which **returns zero `cited_text` spans** — same prompt, same model, same `allowed_domains` produced 9 cited spans on `20250305` and 0 on `20260209`. The per-claim citation contract is what Step 3's lint stack needs, so the stable tool version is the only viable pick. Anthropic remains the vendor choice; raw publisher URLs (no Vertex-style redirect) and verbatim `cited_text` spans confirmed.
 
-30-minute confirmation, not a comparison:
+Deliverables (shipped 2026-05-26 by Opus 4.7 in this commit):
 
-1. **Vendor-first check** — fetch current Anthropic web_search docs in-session. Verify tool name + version, model availability on Opus 4.7 + Sonnet 4.6, exact citation field path (`citations: [{url, title, cited_text, encrypted_index}]`), `allowed_domains` / `blocked_domains` syntax, rate limits.
-2. **Env confirmation** — `ANTHROPIC_API_KEY` already wired in `.env.local`; no new key.
-3. **Smoke test** — one Pine Ridge Rd Naples query. Eyeball whether `cited_text` spans are coherent and URLs are primary sources.
-4. **Document seed `allowed_domains`** — known SWFL brokers (`cushmanwakefield.com`, `lsicompanies.com`, `creconsultants.com`, `ipcnaples.com`, `cbre.com`, `colliers.com`), county portals (`leegov.com`, `colliercountyfl.gov`, `leepa.org`, `collierappraiser.com`), news sites (`news-press.com`, `naplesnews.com`, `gulfshorebusiness.com`), federal/state data (`fred.stlouisfed.org`, `bls.gov`, `census.gov`, `fema.gov`, `fdot.gov`). Grow from real corridor questions, not imagination.
-
-Deliverable: `docs/vendor-notes/grounded-search-research-2026-05-26.md` (already shipped during propagation) + `docs/vendor-notes/anthropic-web-search-wire-up.md` (verified API contract, seed allowlist, smoke-test response slice).
+- `docs/vendor-notes/anthropic-web-search-wire-up.md` — verified API contract, A/B finding, seed allowlist (with `news-press.com` and `naplesnews.com` removed — they block Anthropic's crawler), full Q1+Q2 smoke-test answers, token-economics budget, parallel-eligible next-steps split.
+- `docs/vendor-notes/anthropic-web-search-smoke-output.json` + `anthropic-web-search-compare-output.json` — raw API responses for re-inspection.
+- `scripts/smoke/anthropic_web_search_smoke.py` + `anthropic_web_search_compare.py` — re-runnable smoke + A/B.
+- `docs/vendor-notes/grounded-search-research-2026-05-26.md` (shipped earlier in propagation) — 7-vendor comparison the pick rested on; carries a 2026-05-26 correction note at the top now.
 
 ### Step 2 — One-corridor generator end-to-end [GATED on Step 1]
 
@@ -97,7 +95,7 @@ Build for **Pine Ridge Rd Naples only** (clean, medical-office, low confounders)
 
 **Stage B — Grounded web call + Tier-1 capture** (`ingest/pipelines/corridor_grounded/pipeline.py`, Python, matches `news_swfl` pattern):
 
-- One Anthropic `web_search_20260209` call per corridor with the seed `allowed_domains` list.
+- One Anthropic `web_search_20250305` call per corridor with the seed `allowed_domains` list (see `docs/vendor-notes/anthropic-web-search-wire-up.md`; do NOT use `web_search_20260209` — dynamic filtering kills per-claim citations).
 - Capture the full response + all `citations[]` entries to `lake-tier1` bucket as NDJSON via existing `storage_uploader.py` + `tier1_inventory.py`.
 - Re-runnable without re-spending credits.
 

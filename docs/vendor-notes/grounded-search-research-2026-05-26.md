@@ -4,6 +4,16 @@ Background research for the corridor character generator (`docs/superpowers/plan
 
 ---
 
+## 2026-05-26 wire-up correction (read first)
+
+**This doc's headline recommendation names `web_search_20260209`. The wire-up smoke test that evening corrected this to `web_search_20250305`.** Anthropic remains the vendor pick. The newer tool's "dynamic filtering" feature, which the research agent framed as an advantage, routes search results through code execution and emits text from Python variables — which **kills per-claim `citations[]` entirely**. Same prompt, same model, same `allowed_domains` returned 9 cited spans on `20250305` and 0 on `20260209`. Per-claim citations are the contract the v2 plan's facts-block lint depends on, so the stable tool version (`20250305`) is the only viable pick.
+
+The rest of this research doc — the seven-vendor landscape, the Tavily-as-secondary fallback, the comparison of citation contracts across Gemini / Perplexity / Brave / OpenAI / etc. — remains correct and useful. Only the tool-version choice within Anthropic flips.
+
+See `docs/vendor-notes/anthropic-web-search-wire-up.md` for the full A/B + raw API responses + corrected seed allowlist (with `news-press.com` and `naplesnews.com` removed — they block Anthropic's crawler).
+
+---
+
 ## Headline recommendation
 
 **Anthropic's `web_search_20260209` tool is the strongest pick** for the SWFL corridor-character pipeline. It is the only vendor in the field that returns **per-claim citations** (`citations: [{ url, title, cited_text, encrypted_index }]` attached to specific text blocks, not just a flat URL list at the bottom), which is exactly the contract a "every line traces to a source" guardrail needs. It is GA on Opus 4.7 and Sonnet 4.6, supports `allowed_domains` / `blocked_domains` for steering toward primary sources (county portals, broker reports, NAR/FAR), and ships with the same Anthropic SDK Brains already uses — no second auth surface. Reservations: searches are LLM-decided (Claude picks query and frequency, capped by `max_uses`), not deterministic; and the underlying index provider/freshness window is not stated in docs. If we need explicit "give me primary-source URLs for this exact query string and let me do my own synthesis," **Tavily** is the right secondary tool — it returns a clean structured `results[]` array with `score` and `raw_content`, which is closer to a search primitive than a grounded-LLM response.

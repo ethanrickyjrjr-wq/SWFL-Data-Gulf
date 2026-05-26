@@ -15,6 +15,15 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Opus 4.7 · main) — corridor character generator Step 1 SHIPPED + tool-version correction
+
+- Step 1 (Anthropic web_search verification + smoke against Pine Ridge Rd Naples) done. Vendor-first WebFetch confirmed contract; ran two questions through `web_search_20260209` then an A/B with `web_search_20250305` on Q1 after observing zero `cited_text` spans in the dynamic-filtering variant. Same prompt, same model, same `allowed_domains`: `20260209` returned 0 cited spans (Claude pipes content through code-execution and emits text from Python variables); `20250305` returned 9 verbatim cited spans with raw publisher URLs. **Corrected tool-version pick from `20260209` → `20250305`** in the v2 plan, the research doc (correction note at top), and memory. Anthropic-as-vendor unchanged.
+- Other findings: `news-press.com` and `naplesnews.com` block Anthropic's crawler — API rejects allowlist with 400. Pine Ridge–specific NNN rents are not on the open web (paywalled in LoopNet/CoStar) — facts block will have to surface this as `{value: null, gap_reason: ...}` and let the speculative block do the inference work. Token budget for the full generator is ~$30/yr at `20250305`.
+- Files: `docs/vendor-notes/anthropic-web-search-wire-up.md` (Step 1 deliverable — full Q&A, A/B table, blocked-publisher list, verified seed allowlist, parallel-eligible Step-2 task split for Opus + Sonnet), `docs/vendor-notes/anthropic-web-search-smoke-output.json` + `anthropic-web-search-compare-output.json` (raw API responses), `scripts/smoke/anthropic_web_search_smoke.py` + `anthropic_web_search_compare.py` (re-runnable). Plan + research doc + memory + this log carry the correction. `pip install anthropic` added a setup dep — flag for ingest pipeline `requirements.txt` work in Step 2 B1.
+- Next: Step 2 (Pine Ridge end-to-end generator) — A1 Stage A fact pack builder + A2 SQL migration can run in parallel on Opus; B1 Stage B Python pipeline runs against the verified `20250305` contract on Sonnet; C1+C2 synthesis + lint stack are Opus-sequential after A+B contracts firm. Worktree pattern recommended. Plan path: `docs/superpowers/plans/2026-05-26-corridor-character-generator/README.md`. Wire-up doc: `docs/vendor-notes/anthropic-web-search-wire-up.md`.
+
+---
+
 ## 2026-05-26 (Opus 4.7 · main) — corridor character generator v2 plan propagation
 
 - Locked v2 plan for replacing `corridor_profiles.character` (24–26 May-era Claude-drafted strings) with a two-block generator output: facts block (strict, sourced, lint-tight) + speculative block (AI unleashed with inline "Speculative — double-check" disclaimer). Optional chart block when comparison is useful. Sources chart page at the bottom of every answer carries citations + freshness token + legal/disclaimer (NOT in the answer body).
