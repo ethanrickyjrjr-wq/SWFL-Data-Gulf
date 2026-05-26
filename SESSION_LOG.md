@@ -24,6 +24,14 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-26 (Sonnet 4.6 · main) — CCPM installed + corridor character generator epic wired to GitHub
+
+- Installed CCPM (agentskills.io PM skill) into `.claude/skills/ccpm/` — gives any session a live `standup.sh` + GitHub Issues source of truth instead of relying on SESSION_LOG alone. Motivated by 4-5 parallel sessions with no shared state.
+- Created corridor character generator epic in CCPM: `.claude/prds/corridor-character-generator.md` + `.claude/epics/corridor-character-generator/` with 5 task files (34.md–38.md). Synced to GitHub: epic #33, tasks #34–#38 (`ethanrickyjrjr-wq/brain-platform`).
+- Step 1 (vendor verification) was already DONE by a prior Opus session — discovered from untracked `docs/vendor-notes/anthropic-web-search-wire-up.md`. Critical finding: **use `web_search_20250305`, NOT `web_search_20260209`** (dynamic filtering kills citations — 0 `cited_text` spans). Posted finding on GitHub epic #33 and closed issue #34.
+- Step 2 parallel decomposition from wire-up doc posted to GitHub: Batch A (fact pack builder + SQL migration, parallel) → Batch B (corridor_grounded pipeline, `web_search_20250305`) → Batch C (synthesizer + lint stack).
+- Next: any session picking up Step 2 should read `docs/vendor-notes/anthropic-web-search-wire-up.md` first, then `gh issue view 35` for acceptance criteria. Branch: `feat/corridor-character-generator-step-2`.
+
 ## 2026-05-26 (Opus 4.7 · main) — corridor character generator v2 plan propagation
 
 - Locked v2 plan for replacing `corridor_profiles.character` (24–26 May-era Claude-drafted strings) with a two-block generator output: facts block (strict, sourced, lint-tight) + speculative block (AI unleashed with inline "Speculative — double-check" disclaimer). Optional chart block when comparison is useful. Sources chart page at the bottom of every answer carries citations + freshness token + legal/disclaimer (NOT in the answer body).
