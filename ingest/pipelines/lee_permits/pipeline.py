@@ -74,12 +74,30 @@ def run_pipeline(start_date: date, end_date: date) -> None:
     pipeline.run(permits_resource(rows=rows))
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--start", type=lambda s: date.fromisoformat(s), required=True)
     p.add_argument("--end", type=lambda s: date.fromisoformat(s), required=True)
-    args = p.parse_args()
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Fetch and parse only; skip detail enrichment and dlt write.",
+    )
+    args = p.parse_args(argv)
+
+    if args.dry_run:
+        issued_fallback = args.end.isoformat()
+        pages = fetch_permit_pages(args.start, args.end)
+        rows: list = []
+        for html in pages:
+            rows.extend(parse_accela_result_page(html, issued_date_fallback=issued_fallback))
+        print(f"lee_permits dry-run: {len(rows)} rows (detail enrichment skipped)")
+        if rows:
+            print("first row:", rows[0])
+        return 0
+
     run_pipeline(args.start, args.end)
+    return 0
 
 
 if __name__ == "__main__":
