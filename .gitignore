@@ -110,3 +110,6 @@ docs/design-reference/
 # that are committed as diff/restore baselines. If a future audit-style file
 # carries interactive checkboxes or per-row notes, gitignore that specific
 # pattern case-by-case rather than the whole directory.
+
+# In-progress / uncertain plan docs — ignored until promoted or deleted
+docs/superpowers/plans/2026-05-26-corridor-broker-narrative-promotion/
