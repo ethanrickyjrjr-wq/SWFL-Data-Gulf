@@ -15,6 +15,13 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — docs: data intelligence catalog + API source mining
+
+- Creates `docs/data-intel.md` — master data catalog (11 domains, 55+ dataset rows) with status badges (LIVE/COLD/PARTIAL/PIPELINE EXISTS/SCRAPED/SOURCE KNOWN/GAP), table locations, brain consumers, and notes.
+- Mined 4 API sources this session: NeighborhoodScout (scraped), USF library guide, public-apis/public-apis GitHub README (1881 lines), marcelscruz/public-apis JSON (1586 entries). Net additions: RentCast, Realie, OpenAQ, GDELT, QWI, ZBP, SOMA, RHFS, Community Resilience Estimates, AQICN, Open-Meteo, NWS, CDC, Medicare, OpenCorporates, Yelp, Adzuna, Socrata, EIA, USDA NASS, SEC EDGAR, OpenSky, and more.
+- Priority table lists 14 actionable free sources; GDELT + RentCast + ZBP are highest ROI.
+- Next: Step 4 corridor character still queued; Collier permits pipeline DDL + first live run pending.
+
 ## 2026-05-27 (Sonnet 4.6 · main) — feat(ingest): Collier County building permits pipeline
 
 - Ships `ingest/pipelines/collier_permits/` (fetcher + normalizer + geocoder + dlt pipeline + 35 tests, 35/35 pass). Dry-run confirmed: 5030 rows from April 2026 XLSX.
