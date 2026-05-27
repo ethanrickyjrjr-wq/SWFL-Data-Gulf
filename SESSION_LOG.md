@@ -15,6 +15,15 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — fix(housing-swfl): live Parquet quirks fully resolved, master v54
+
+- `refinery/sources/housing-source.mts`: three live-Parquet discoveries fixed: (1) `REGION_TYPE = 'zip code'` (not 'zip'); (2) `PERIOD_DURATION = 90` (not 1) — filter removed; (3) all numeric columns are VARCHAR strings (read_csv_auto infers VARCHAR when 'NA' mixes with decimals) — added `toNum()` helper replacing raw `Number()` casts; (4) `zip_code` stores `'Zip Code: XXXXX'` prefix — stripped in rowShape.
+- `refinery/packs/housing-swfl.mts`: key_metrics now use conditional push (omit when null) instead of `"n/a"` string fallback — validator requires `typeof number` for extensive/intensive metrics. months_of_supply correctly absent (Redfin stores 'NA' for all SWFL ZIPs in this vintage).
+- `refinery/vocab/brain-vocabulary.json`: 6 new concepts (5 housing-swfl metrics + `laus_lee_unemployment_rate_yoy_delta`). Total: 135.
+- `brains/cre-swfl.md`: force-rebuilt (v44) to evict stale MarketBeat metrics (17 orphan slugs from PR #18 — pipeline was deleted in PR #41 but cached output persisted). marketbeat_swfl=0, 0 orphans.
+- `brains/master.md`: v54 — 15 upstreams including housing-swfl, 343 concept tags, 0 orphans. DONE.
+- Next: PR #43 merge (Step 4.5 type-conditional voice) — still needs 3-step verification.
+
 ## 2026-05-27 (Opus 4.7 · main) — fix(synthesis-agent): Stage 3 null guard + universal smoothing-token scrub
 
 - `refinery/agents/synthesis-agent.mts`: (1) null guard after `parsed = toolUse.input` — when Anthropic returns `{}` or drops the `facts` key, log raw input and return `[]` instead of crashing Stage 3 with `for (const fact of agentFacts)` over undefined. (2) Universal smoothing-language ban added to `SYSTEM_INSTRUCTIONS` — was only a per-pack suggestion in cre-swfl's synthesisContext. (3) Scrubbing pass strips surviving smoothing tokens from `fact.fact`/`fact.value` via shared `SMOOTHING_TOKENS` (imported from `refinery/lib/smoothing-tokens.mts` to stay drift-locked with the Stage 4 lint). Stage 4 `smoothing-lint.mts` abort remains as final safety net.
