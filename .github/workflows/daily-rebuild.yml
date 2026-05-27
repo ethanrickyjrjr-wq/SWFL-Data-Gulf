@@ -38,6 +38,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
           PACK="${{ github.event.inputs.pack_id || 'master' }}"
           FORCE_FLAG="${{ github.event.inputs.force == 'true' && '--force' || '' }}"
