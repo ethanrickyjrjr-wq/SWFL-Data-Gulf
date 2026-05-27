@@ -17,8 +17,8 @@
   },
   {
     "absorption_sqft": 18000,
-    "id": "bonita-beach-rd-us-41-to-sanibel-causeway",
-    "name": "Bonita Beach Rd (US-41 to Sanibel Causeway)",
+    "id": "bonita-beach-rd-bonita-beach",
+    "name": "Bonita Beach Rd / Bonita Beach",
     "nnn_asking_rent_per_sqft": 27.51,
     "submarket": "Bonita Springs",
     "vacancy_pct": 2.3
@@ -65,8 +65,8 @@
   },
   {
     "absorption_sqft": 4200,
-    "id": "daniels-pkwy-i-75-to-ben-hill-griffin",
-    "name": "Daniels Pkwy (I-75 to Ben Hill Griffin)",
+    "id": "daniels-pkwy",
+    "name": "Daniels Pkwy",
     "nnn_asking_rent_per_sqft": 23.27,
     "submarket": "Fort Myers",
     "vacancy_pct": 3.2

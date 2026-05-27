@@ -122,16 +122,59 @@ export interface CorridorNormalized {
   character_broker_narrative: CorridorBrokerNarrative | null;
   /**
    * Derived per-corridor narrative the pack's synthesisContext instructs the
-   * LLM to quote verbatim. Resolves the three cases:
+   * LLM to quote verbatim. Resolves four cases:
    *   - both `character` and a broker positioning string present → character
    *     verbatim, then "\n\nBroker positioning ({Qn YYYY}): {positioning}".
    *   - only broker positioning present → just the broker prefix line.
    *   - only `character` present → character verbatim (no change to today).
    *   - neither → null.
-   * The hand-authored `character` column is never overwritten — the broker
-   * narrative is layered on top.
+   * When `character_facts` is non-null (Step 4 generator output), it
+   * PREFERS that over the legacy `character` head, and appends
+   * `character_speculative` (when non-null) as a clearly separated second
+   * section. The hand-authored `character` column is never overwritten —
+   * the broker narrative is layered on top, the structured generator
+   * fields are layered on top of that, and `character` itself stays as
+   * cold restore safety per the plan's one-quarterly-cycle retention rule.
    */
   character_render: string | null;
+  /**
+   * Step 4 structured generator output — fact-pack-anchored prose that
+   * preferred over the legacy `character` column when non-null. Carries
+   * inline [internal-N] / [web-N] citations. Lint-gated upstream (facts-
+   * only, smoothing-token ban, citation presence) so this surface is the
+   * trusted, sourced version of the corridor's character.
+   */
+  character_facts: string | null;
+  /**
+   * Step 4 structured generator output — thought-provoking inference
+   * around fact-pack gaps. Carries the verbatim disclaimer
+   * "Speculative — based partly on inferred data. Double-check." inline
+   * and is rendered as a labeled second section below the facts head.
+   * Lint-gated (speculative-block-lint: required disclaimer + hedging
+   * around inferred quantities + [web-N] sentence-scope exemption).
+   */
+  character_speculative: string | null;
+  /**
+   * Step 4 structured generator output — optional `{title, columns, rows}`
+   * JSONB. When non-null, every numeric cell value traces to the fact
+   * pack (chart-provenance lint enforces this). Renderer formats as a
+   * markdown table or visualization downstream.
+   */
+  character_chart: unknown;
+  /**
+   * Step 4 structured generator output — `{internal: [{ref, source_url}],
+   * web: [{ref, url, title, cited_text}]}` JSONB. Drives the sources
+   * panel / link rendering at the bottom of the answer.
+   */
+  character_citations: unknown;
+  /** ISO timestamp the structured generator output was produced. Null until first generator run. */
+  character_generated_at: string | null;
+  /**
+   * "OLDEST-YYYY-MM" — date of the oldest data anchor in the fact pack
+   * that produced this character output. Quoted verbatim by consumer-
+   * Claude per SWFL Protocol rule 2. Null until first generator run.
+   */
+  character_fact_pack_vintage: string | null;
 }
 
 function str(v: unknown): string | null {
@@ -237,19 +280,54 @@ export function formatQuarterForDisplay(quarter: string): string {
  * The hand-authored `character` is NEVER mutated — broker narrative is
  * appended after it, not in place of it.
  */
+/**
+ * Compose the corridor's renderable character prose from up to four
+ * sources, in this priority:
+ *
+ *   1. `factsBlock` (preferred head when non-null — Step 4 generator output)
+ *   2. `character` (cold fallback when factsBlock is null — legacy hand-authored)
+ *   3. `narrative` broker positioning (appended within the head as the
+ *      existing "Broker positioning (Qn YYYY): …" overlay)
+ *   4. `speculativeBlock` (appended as a labeled second section; carries
+ *      its own inline disclaimer per the speculative-block-lint contract)
+ *
+ * Backward-compat: `factsBlock` and `speculativeBlock` are optional with
+ * default null. Pre-Step-4 callers (`composeCharacterRender(character,
+ * narrative)`) get the legacy two-input behavior unchanged.
+ *
+ * The legacy `character` TEXT column is NEVER mutated — when factsBlock is
+ * present, character is ignored on output but stays in DB as cold restore
+ * safety per the plan's one-quarterly-cycle retention rule.
+ */
 export function composeCharacterRender(
   character: string | null,
   narrative: CorridorBrokerNarrative | null,
+  factsBlock: string | null = null,
+  speculativeBlock: string | null = null,
 ): string | null {
   const brokerLine =
     narrative != null && narrative.market_positioning != null
       ? `Broker positioning (${formatQuarterForDisplay(narrative.quarter)}): ${narrative.market_positioning}`
       : null;
-  if (character != null && brokerLine != null) {
-    return `${character}\n\n${brokerLine}`;
+
+  // Prefer the structured facts block (Step 4 generator output) when
+  // available. The legacy `character` column is cold fallback only.
+  const factsHead = factsBlock ?? character;
+
+  const parts: string[] = [];
+  if (factsHead != null && brokerLine != null) {
+    parts.push(`${factsHead}\n\n${brokerLine}`);
+  } else if (factsHead != null) {
+    parts.push(factsHead);
+  } else if (brokerLine != null) {
+    parts.push(brokerLine);
   }
-  if (brokerLine != null) return brokerLine;
-  return character;
+
+  if (speculativeBlock != null) {
+    parts.push(speculativeBlock);
+  }
+
+  return parts.length > 0 ? parts.join("\n\n") : null;
 }
 
 /**
@@ -351,9 +429,17 @@ export function normalizeCorridor(
     metrics_period: str(row.metrics_period),
     metrics_verified_date: str(row.metrics_verified_date),
     character_broker_narrative,
+    character_facts: str(row.character_facts),
+    character_speculative: str(row.character_speculative),
+    character_chart: row.character_chart ?? null,
+    character_citations: row.character_citations ?? null,
+    character_generated_at: str(row.character_generated_at),
+    character_fact_pack_vintage: str(row.character_fact_pack_vintage),
     character_render: composeCharacterRender(
       character,
       character_broker_narrative,
+      str(row.character_facts),
+      str(row.character_speculative),
     ),
   };
 }

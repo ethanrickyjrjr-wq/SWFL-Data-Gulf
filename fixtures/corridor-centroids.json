@@ -7,8 +7,8 @@
     "submarket": "Estero"
   },
   {
-    "corridor_id": "bonita-beach-rd-us-41-to-sanibel-causeway",
-    "corridor_label": "Bonita Beach Rd (US-41 to Sanibel Causeway)",
+    "corridor_id": "bonita-beach-rd-bonita-beach",
+    "corridor_label": "Bonita Beach Rd / Bonita Beach",
     "center_lat": 26.34,
     "center_lon": -81.81,
     "submarket": "Bonita Springs"
@@ -42,8 +42,8 @@
     "submarket": "Fort Myers"
   },
   {
-    "corridor_id": "daniels-pkwy-i-75-to-ben-hill-griffin",
-    "corridor_label": "Daniels Pkwy (I-75 to Ben Hill Griffin)",
+    "corridor_id": "daniels-pkwy",
+    "corridor_label": "Daniels Pkwy",
     "center_lat": 26.56,
     "center_lon": -81.78,
     "submarket": "Fort Myers"

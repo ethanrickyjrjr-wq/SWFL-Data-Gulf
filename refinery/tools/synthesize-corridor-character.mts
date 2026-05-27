@@ -79,12 +79,25 @@ export interface SynthesizeInput {
    * `getAnthropic()`.
    */
   client?: Pick<Anthropic, "messages">;
+  /**
+   * Preview-only: when true, lint failures return the rejected output in
+   * `result.lint.ok=false` instead of throwing. The driver writes both
+   * accepted and rejected preview JSONs so the operator can scan offline
+   * and judge whether the prompt + lint pair are converging.
+   *
+   * Default false — DB-write path stays aligned with Step 3 acceptance
+   * ("malformed runs abort, DB stays untouched"). Only the preview driver
+   * sets this true.
+   */
+  acceptLintFailure?: boolean;
 }
 
 export interface SynthesizeResult {
   output: CorridorCharacterOutput;
-  /** The lint result the orchestrator returned. `ok: true` is guaranteed; a
-   *  failing lint raises before this return. */
+  /** The lint result the orchestrator returned. `ok: true` is guaranteed
+   *  when `acceptLintFailure` is false (default — failing lint throws).
+   *  When `acceptLintFailure` is true, lint failures are returned to the
+   *  caller as `lint.ok=false` with `lint.flat_errors` populated. */
   lint: CorridorCharacterLintResult;
   /** Token + finish telemetry, mirrored from the underlying SDK response. */
   usage: {
@@ -144,19 +157,72 @@ Hard contract:
 [FACTS BLOCK]
 - 3–5 sentences. Use values from FACT_PACK verbatim with their units (e.g. "5.2%", "$32.50/sqft NNN", "12,000 sqft").
 - Every claim cites inline as [internal-N] (data row in the fact pack) or [web-N] (citation from GROUNDED_WEB).
-- No softening words, no rounding, no inference, no second-person ("you" / "your" / imperatives).
+- No softening words, no rounding, no inference, no second-person ("you" / "your" / imperatives). The facts-block lint REJECTS softening qualifiers — this includes "approximately", "roughly", "about", "around", "nearly", "almost", "or so". These are banned even when the underlying web source uses them.
+- WEB-CITED NUMBERS: strip softening qualifiers when transposing a number from a cited_text span. The citation tag IS the disclosure of the source's wording; the facts block restates the bare numeric value.
+    ❌ "Pine Ridge has approximately 91,000 sqft of medical office [web-2]"
+    ✅ "Pine Ridge has 91,000 sqft of medical office [web-2]"
+    ❌ "Coconut Point Mall draws roughly 260 stores [web-3]"
+    ✅ "Coconut Point Mall draws 260 stores [web-3]"
+  If the underlying source's number is genuinely a range or estimate (e.g. "between 80,000 and 100,000 sqft") and you cannot pick a single value to restate verbatim, do NOT put the number in the facts block — push the qualified claim to the speculative block where hedging is allowed.
 - If a value is null with a gap_reason in the fact pack, OMIT IT FROM THIS BLOCK — gaps live in the speculative block.
 - At least one [internal-N] and at least one [web-N] citation should appear.
 
 [CHART BLOCK]
-- Emit a {title, columns, rows} object ONLY when a comparison is genuinely useful (e.g. corridor vacancy vs. submarket peer, asking-rent vs. county median, YoY metric trio).
-- Use only fact-pack values. Do NOT invent comparisons.
-- When no comparison is useful, return null.
+- Emit a {title, columns, rows} object ONLY when a comparison is genuinely useful and every numeric cell value is present in FACT_PACK.
+- HARD RULE — provenance: a regex-based lint REJECTS this block if ANY numeric cell is not in FACT_PACK (within ±5% tolerance). String cells (labels, units) are exempt; null cells are exempt. Numbers are not.
+- Web-cited peer values (national averages, peer-metro vacancies like "Tampa 21%", "Miami 15.4%", "national shopping-center 5.9%") DO NOT belong here. Those go in the speculative block where hedging is allowed. The chart is for apples-to-apples values the system can vouch for.
+- Acceptable chart shapes:
+    ✅ Single-corridor YoY trio: vacancy, asking rent, absorption for this corridor (all values in FACT_PACK)
+    ✅ Current snapshot vs. prior-year snapshot for this corridor (when both are in FACT_PACK)
+    ✅ Single column of corridor metrics restating values verbatim
+- Unacceptable shapes:
+    ❌ Corridor vs. peer metros (Tampa / Orlando / Miami) — peer values not in FACT_PACK
+    ❌ Corridor vs. national average — national value not in FACT_PACK
+    ❌ Corridor vs. submarket peer — peer corridor's values not in this fact pack
+- When no chart shape works with FACT_PACK values only, RETURN null. A missing chart is better than a chart that fails provenance.
 
 [SPECULATIVE BLOCK]
 - 2–4 sentences. Reads FACT_PACK gaps + GROUNDED_WEB context. Produces thought-provoking inference: where the next-quarter signal might be heading; what the gap_reason implies; what the operator should dig into next.
-- HEDGING IS REQUIRED on any number not in the fact pack. Use phrases like "most likely hovering near", "tracking toward", "approximately", "likely". Mark pure inference with [inference].
-- Use [web-N] for claims drawn from grounded sources.
+
+- PURPOSE — make hedged predictions, do NOT decline to predict. The block exists to give the operator something they can push back on. "Without a quarterly time series, direction cannot be confirmed" is a FAILURE MODE — it gives the operator nothing. Instead, USE the directional anchors available (unemployment trend, absorption signal, web-cited tenant activity, supply pipeline) to make a hedged estimate. Examples:
+    ❌ "Without a verified quarterly cap rate series, we cannot confirm YoY direction." — refuses to engage; defeats the purpose
+    ✅ "Without a verified quarterly cap rate series, direction is most likely tracking toward 25–50 bps of expansion [inference] given the 1.2 pp uptick in Collier unemployment [internal-5] and slowing absorption signals — confirmation requires the next quarterly snapshot."
+    ❌ "Net absorption direction is unknown."
+    ✅ "Net absorption is likely tracking flat-to-negative [inference] given the supply pipeline (2.8M sqft approved at Daniels–Treeline [web-26]) outrunning current 4,200 sqft quarterly take-up [internal-3]."
+  When data is missing, REACH for the directional signal and DISCLOSE the inference. Hedging plus [inference] makes the guess legitimate; declining to guess is a content failure.
+
+- HARD RULE — quantitative values: a regex-based lint REJECTS this block if ANY number appears that is (a) not present in FACT_PACK and (b) not immediately wrapped in a hedge phrase or [inference] tag. This is non-negotiable. The lint cannot be appeased after the fact. You have THREE legal options for any inferred quantity (sqft, rent, %, $, count, ratio):
+
+    OPTION 1 — wrap in a hedge phrase BEFORE the number:
+      ACCEPT: "vacancy is most likely tracking toward 6%"
+      ACCEPT: "rent could be near $32/sqft"
+      ACCEPT: "absorption may be approximately 12,000 sqft"
+      ACCEPT: "permit volume probably hovering near 25 per quarter"
+      Approved hedge phrases (use one verbatim before the number, ≤60 chars away):
+        "most likely", "tracking toward", "likely", "likely hovering", "near",
+        "approximately", "could be", "may be", "might be", "appears to be",
+        "would put", "would suggest", "probably"
+
+    OPTION 2 — attach an [inference] tag IMMEDIATELY after the number:
+      ACCEPT: "rent could push past $35/sqft [inference]"
+      ACCEPT: "12,000 sqft [inference] of give-back over the cycle"
+
+    OPTION 3 — OMIT the number entirely. Prose without specific projected numbers is ALWAYS preferable to unhedged numbers. If you cannot find a way to satisfy options 1 or 2, REWRITE the sentence to make the same point without the number ("vacancy is drifting upward" instead of "vacancy is likely 6.1%").
+
+  REJECT examples that the lint will catch:
+    REJECT: "vacancy could approach 6%" — "approach" is not on the hedge list
+    REJECT: "rent has hit $32/sqft" — declarative, no hedge, not in fact pack
+    REJECT: "next quarter should clear 12,000 sqft" — "should clear" is not a hedge
+  When in doubt, prefer option 3.
+
+- YEARS — 4-digit ints in 1900-2099 ("by 2026", "the 2024-2025 stretch", "since 2023") are temporal anchors and DO NOT need hedging. This is the only number-shape the lint exempts.
+
+- HIGHWAY DESIGNATORS — always use the full prefixed form: "I-75", "U.S. 41", "SR-82", "CR-951", "US-41". The lint exempts those. NEVER use SWFL colloquialisms that strip the prefix ("west of 75", "the 41 corridor", "off-75") — the bare digits will trip the lint as inferred quantities. Write "west of I-75", not "west-of-75".
+
+- FACT-PACK NUMBERS — values that appear in FACT_PACK can be restated verbatim WITHOUT hedging (they are anchored, not inferred). e.g. if FACT_PACK has vacancy_rate.current.value = 5.2, you can write "vacancy is 5.2% [internal-1]" with no hedge.
+
+- Use [web-N] for claims drawn from grounded sources. The GROUNDED_WEB cited_text spans are your raw material; attribute every claim drawn from them.
+
 - The block MUST END WITH THIS EXACT STRING (verbatim, no quotes around it): ${SPECULATIVE_DISCLAIMER}
 
 [CITATIONS]
@@ -290,7 +356,24 @@ function parseToolUse(
       "synthesize-corridor-character: model response contained no tool_use block — model may have refused or hit max_tokens before emitting the tool call.",
     );
   }
-  return toolUse.input as SynthesisToolInput;
+  const raw = toolUse.input as Partial<SynthesisToolInput> | undefined;
+  // Defensive shape coercion — TOOL_SCHEMA marks every field required, but
+  // tool_use validation occasionally returns partial payloads when the model
+  // hits max_tokens mid-emit. Coerce missing pieces to legal-but-empty values
+  // so the lint layer (rather than this parser) decides whether the output
+  // is acceptable. Missing citations.internal/web are the most common gap.
+  return {
+    facts_block: typeof raw?.facts_block === "string" ? raw.facts_block : "",
+    chart_block: raw?.chart_block ?? null,
+    speculative_block:
+      typeof raw?.speculative_block === "string" ? raw.speculative_block : "",
+    citations: {
+      internal: Array.isArray(raw?.citations?.internal)
+        ? raw.citations.internal
+        : [],
+      web: Array.isArray(raw?.citations?.web) ? raw.citations.web : [],
+    },
+  };
 }
 
 // ── Public entry point ──────────────────────────────────────────────────────
@@ -348,7 +431,7 @@ export async function synthesizeCorridorCharacter(
   };
 
   const lint = lintCorridorCharacterOutput(output, input.factPack);
-  if (!lint.ok) {
+  if (!lint.ok && !input.acceptLintFailure) {
     const reasons = lint.flat_errors.join("\n  - ");
     throw new Error(
       `synthesize-corridor-character: lint REJECTED model output for "${input.factPack.corridor_name}". DB write blocked. Errors:\n  - ${reasons}`,

@@ -53,6 +53,12 @@ function makeCorridor(
     metrics_verified_date: "2026-03-15",
     character_broker_narrative: null,
     character_render: null,
+    character_facts: null,
+    character_speculative: null,
+    character_chart: null,
+    character_citations: null,
+    character_generated_at: null,
+    character_fact_pack_vintage: null,
     ...patch,
   };
 }
