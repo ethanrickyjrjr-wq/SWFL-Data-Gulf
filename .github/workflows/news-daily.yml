@@ -33,6 +33,9 @@ jobs:
       - name: Run news_swfl pipeline
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          # Spider is the fallback vendor for plain scrape per pipeline-freshness §6.
+          # If the secret is unset, scrape_with_fallback() runs firecrawl-only and logs a warning.
+          SPIDER_API_KEY: ${{ secrets.SPIDER_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}

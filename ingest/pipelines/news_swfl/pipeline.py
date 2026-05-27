@@ -1,13 +1,16 @@
 """SWFL news daily ingest -> Tier 1 cold storage (GitHub Actions cron).
 
-Calls Firecrawl /v2/scrape per source landing page, dedupes by URL, writes the
-batch as one NDJSON file under `lake-tier1/news/year=YYYY/month=MM/day=DD/`
-in Supabase Storage. No Postgres table -- Tier 1 stays cold until a consuming
+Calls `extract_client.scrape_with_fallback()` per source landing page
+(firecrawl /v2/scrape primary → spider /scrape fallback, per the rule in
+`docs/standards/pipeline-freshness.md` §6), dedupes by URL, writes the batch
+as one NDJSON file under `lake-tier1/news/year=YYYY/month=MM/day=DD/` in
+Supabase Storage. No Postgres table -- Tier 1 stays cold until a consuming
 brain ships (per the data tier policy). Per-run audit row in
 `data_lake._tier1_inventory` with pack_id = NULL.
 
-Env: FIRECRAWL_API_KEY + SUPABASE_URL + SUPABASE_SERVICE_KEY +
-DESTINATION__POSTGRES__CREDENTIALS (for the inventory upsert).
+Env: FIRECRAWL_API_KEY (primary scrape vendor) + SPIDER_API_KEY (fallback;
+optional — if unset, fallback is skipped with a warning) + SUPABASE_URL +
+SUPABASE_SERVICE_KEY + DESTINATION__POSTGRES__CREDENTIALS (for the inventory upsert).
 
 CLI:
   python -m ingest.pipelines.news_swfl.pipeline
@@ -22,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlparse
 
-from ingest.lib.firecrawl_client import scrape
+from ingest.lib.extract_client import scrape_with_fallback
 from ingest.lib.storage_uploader import _upload_bytes  # type: ignore[attr-defined]
 from ingest.lib.tier1_inventory import upsert_inventory_row
 
@@ -49,14 +52,21 @@ def collect_articles(sources: list[str]) -> list[dict[str, Any]]:
     for url in sources:
         print(f"news_swfl: scraping {url}...")
         try:
-            response = scrape(url, only_main_content=True)
+            response = scrape_with_fallback(url, only_main_content=True)
         except Exception as exc:
             # Single-source failure shouldn't kill the whole batch. Surface it.
             print(f"  -> ERROR scraping {url}: {exc!r}")
             continue
-        data = response.get("data", response)
+        data = response["data"]
         markdown = data.get("markdown", "")
-        metadata = data.get("metadata", {})
+        metadata = data.get("metadata", {}) or {}
+        # Surface which vendor served this URL — useful when spider fallback fires.
+        for entry in response.get("_provenance", []):
+            if entry.get("ok"):
+                vendor = entry.get("vendor")
+                kb = entry.get("bytes", 0) / 1024.0
+                print(f"  -> vendor={vendor} bytes={entry.get('bytes', 0)} ({kb:.1f} KB)")
+                break
         source_url = metadata.get("sourceURL") or metadata.get("url") or url
         if source_url in seen:
             continue

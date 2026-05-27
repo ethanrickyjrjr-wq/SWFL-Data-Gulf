@@ -161,7 +161,12 @@ Tool placement matrix (dlt vs DuckDB lanes, anti-patterns, cross-tier deferral) 
 
 ### Pipeline Freshness (every Tier 1/2 ingest)
 
-Every ingest pipeline must ship its GHA cron wrapper + `--dry-run` support in the same PR as the pipeline code. See `docs/standards/pipeline-freshness.md` for the four rules, secrets reference, cron-slot table, and GHA vs n8n delineation. Use `python -m ingest.scaffold` to generate the boilerplate.
+Every ingest pipeline must ship its GHA cron wrapper + `--dry-run` support in the same PR as the pipeline code. See `docs/standards/pipeline-freshness.md` for the six rules, secrets reference, cron-slot table, GHA vs n8n delineation, and the **Firecrawl primary, Spider fallback** vendor rule (§6). Use `python -m ingest.scaffold` to generate the boilerplate.
+
+**Two cron-picking non-negotiables** (full rules in §3):
+
+1. **Vendor cadence is verified, not remembered.** Before picking a cron day, fetch the publisher's release calendar (BLS at `bls.gov/schedule/`, Census at `census.gov/programs-surveys/<survey>/news-updates`, FRED at `fred.stlouisfed.org/release-calendar`). Encode the publisher's release pattern in the workflow YAML comment alongside the timezone conversion.
+2. **HTML scraping uses the vendor wrapper.** Plain `firecrawl.scrape()` calls must go through `extract_client.scrape_with_fallback()`. Agent-mode calls go through `extract_client.extract()`. Only `scrape_with_actions()` (Accela-style click-through) stays direct — spider has no analogue. See §6 for the table.
 
 ### Build order (when adding a brain or shipping the factory)
 

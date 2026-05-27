@@ -156,6 +156,82 @@ def ai_scrape(
     return response if isinstance(response, list) else []
 
 
+def scrape(
+    url: str,
+    *,
+    return_format: str = "markdown",
+    proxy_enabled: bool = True,
+    request: str = "smart",
+    stealth: bool = True,
+    timeout_ms: Optional[int] = None,
+) -> dict[str, Any]:
+    """Run spider.cloud /scrape against a single URL — plain markdown/raw fetch.
+
+    This is the fallback target for plain `firecrawl_client.scrape()`. It is
+    NOT a replacement for /ai/scrape (which is LLM-extraction); use ai_scrape()
+    for that.
+
+    Vendor contract (spider.cloud/openapi.yaml, RequestParams shape):
+        POST https://api.spider.cloud/scrape
+        Body (subset we use):
+            url             : str   (required)
+            return_format   : str   ("markdown" | "raw" | "text" | "html2text" | ...)
+            proxy_enabled   : bool  (1.5x cost; needed for blocked pages)
+            request         : str   ("http" | "chrome" | "smart" — default "smart")
+            stealth         : bool  (fingerprint detection bypass)
+            request_timeout : int   (ms — passed through when set)
+
+    Response shape (verified via WebFetch against spider.cloud openapi):
+        {"result": "<formatted page content as string>"}
+
+    We normalize this into a firecrawl-/v2/scrape-compatible shape so
+    `extract_client.scrape_with_fallback()` callers can read
+    `response["data"]["markdown"]` regardless of which vendor served the URL:
+
+        {"data": {"markdown": "<page>", "metadata": {}}}
+
+    Metadata is intentionally empty — spider's /scrape does not surface
+    title / publishedTime fields the way firecrawl /v2/scrape does. Callers
+    that depend on metadata should treat absence as "spider served this URL"
+    and accept the degraded experience (better than zero rows).
+    """
+    body: dict[str, Any] = {
+        "url": url,
+        "return_format": return_format,
+        "proxy_enabled": proxy_enabled,
+        "request": request,
+        "stealth": stealth,
+    }
+    if timeout_ms is not None:
+        body["request_timeout"] = timeout_ms
+
+    response = _post("/scrape", body)
+    # Spider /scrape returns {"result": "..."} per the openapi spec. Be
+    # defensive: a 2xx with an unexpected shape gets normalized to empty
+    # markdown so callers see the "vendor returned no rows" path, not a
+    # KeyError.
+    markdown = ""
+    if isinstance(response, dict):
+        result = response.get("result")
+        if isinstance(result, str):
+            markdown = result
+        # Some spider responses (when return_format is a list) wrap content
+        # by format key. Tolerate that too.
+        elif isinstance(result, dict):
+            for key in (return_format, "markdown", "text", "raw"):
+                value = result.get(key)
+                if isinstance(value, str):
+                    markdown = value
+                    break
+    return {
+        "data": {
+            "markdown": markdown,
+            "metadata": {},
+        },
+        "_raw": response,
+    }
+
+
 def extract_rows(
     response: Any,
     *,
