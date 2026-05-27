@@ -43,7 +43,7 @@ export const MARKETBEAT_SUBMARKET_MAP: Record<
   ],
   "Fort Myers": [
     "Colonial Blvd East (US-41 to I-75)",
-    "Daniels Pkwy (I-75 to Ben Hill Griffin)",
+    "Daniels Pkwy",
     "Gulf Coast Town Center",
     "Six Mile Cypress Pkwy",
     "Summerlin Rd Fort Myers",
@@ -55,10 +55,7 @@ export const MARKETBEAT_SUBMARKET_MAP: Record<
     "Cape Coral Pkwy E",
     "Pine Island Rd Cape Coral",
   ],
-  "Bonita Springs": [
-    "Bonita Beach Rd (US-41 to Sanibel Causeway)",
-    "US-41 Bonita Springs",
-  ],
+  "Bonita Springs": ["Bonita Beach Rd / Bonita Beach", "US-41 Bonita Springs"],
   Estero: [
     "Ben Hill Griffin Pkwy",
     "Coconut Point Mall",

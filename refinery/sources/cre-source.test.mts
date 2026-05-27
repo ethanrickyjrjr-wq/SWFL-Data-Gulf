@@ -48,6 +48,12 @@ function mkCorridor(name: string): CorridorNormalized {
     metrics_verified_date: null,
     character_broker_narrative: null,
     character_render: null,
+    character_facts: null,
+    character_speculative: null,
+    character_chart: null,
+    character_citations: null,
+    character_generated_at: null,
+    character_fact_pack_vintage: null,
   };
 }
 
@@ -183,6 +189,67 @@ test("case 3: only character present → character verbatim (no broker append)",
 
 test("case 4: neither present → null", () => {
   assert.equal(composeCharacterRender(null, null), null);
+});
+
+test("case 5 (Step 4): factsBlock present preempts legacy character as the head", () => {
+  // Structured generator output takes priority over the legacy hand-authored
+  // character. The legacy `character` column stays in DB as cold restore
+  // safety but is NOT rendered when factsBlock is present.
+  const out = composeCharacterRender(
+    "Legacy hand-authored prose (cold fallback only).",
+    null,
+    "New facts block from generator.",
+    null,
+  );
+  assert.equal(out, "New facts block from generator.");
+});
+
+test("case 6 (Step 4): factsBlock + speculativeBlock concatenated with separator", () => {
+  // Speculative block appends as a labeled second section. Its inline
+  // disclaimer is already in the prose per the speculative-block-lint
+  // contract — no extra header needed here.
+  const out = composeCharacterRender(
+    null,
+    null,
+    "Facts head.",
+    "Speculative tail. Speculative — based partly on inferred data. Double-check.",
+  );
+  assert.equal(
+    out,
+    "Facts head.\n\nSpeculative tail. Speculative — based partly on inferred data. Double-check.",
+  );
+});
+
+test("case 7 (Step 4): factsBlock + brokerLine + speculativeBlock all stack correctly", () => {
+  // Three-layer compose: facts head + broker overlay within the head,
+  // then speculative block as separate section below.
+  const out = composeCharacterRender(
+    "Legacy fallback — ignored.",
+    {
+      quarter: "2026-Q3",
+      market_positioning: "Brokers see momentum.",
+      dominant_tenant_types: null,
+      development_pipeline_notes: null,
+    },
+    "New facts head.",
+    "Speculative section here. Speculative — based partly on inferred data. Double-check.",
+  );
+  assert.equal(
+    out,
+    "New facts head.\n\nBroker positioning (Q3 2026): Brokers see momentum.\n\nSpeculative section here. Speculative — based partly on inferred data. Double-check.",
+  );
+});
+
+test("case 8 (Step 4): factsBlock null falls back to legacy character (cold-fallback path)", () => {
+  // When character_facts is null (no generator run yet), the renderer falls
+  // back to legacy character. Pre-Step-4 corridors keep working.
+  const out = composeCharacterRender(
+    "Legacy still load-bearing.",
+    null,
+    null, // factsBlock null
+    null,
+  );
+  assert.equal(out, "Legacy still load-bearing.");
 });
 
 test("composeCharacterRender: broker narrative with null market_positioning is treated as no broker signal", () => {

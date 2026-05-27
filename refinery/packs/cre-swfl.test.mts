@@ -184,6 +184,12 @@ function makeCorridorFragment(name: string, city: string): RawFragment {
     metrics_verified_date: null,
     character_broker_narrative: null,
     character_render: null,
+    character_facts: null,
+    character_speculative: null,
+    character_chart: null,
+    character_citations: null,
+    character_generated_at: null,
+    character_fact_pack_vintage: null,
   };
   return {
     fragment_id: `corridor_profiles:${name}`,

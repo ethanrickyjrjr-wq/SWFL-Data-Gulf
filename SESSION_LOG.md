@@ -15,6 +15,36 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Opus 4.7 · feat/corridor-character-generator-step-4) — Step 4 SHIPPED: 25/26 corridors on new structured character output
+
+Step 4 of the corridor-character generator landed in DB. 25 corridors carry `character_facts` / `character_speculative` / `character_chart` / `character_citations` from the Anthropic-grounded synthesizer; 1 (Veterans Pkwy / Colonial Blvd) stays on legacy `character` cold fallback — model dropped citations object on 2 deterministic retries (only corridor with negative absorption; deeper investigation deferred to Phase 1 voices, where the same-fix-path applies). Legacy `character` preserved on all 26 per plan retention rule.
+
+Key surgery:
+
+- `refinery/tools/run-corridor-character-preview.mts` (new) — Stage A driver: hydrates fact pack from Supabase (corridor_profiles + marketbeat_swfl + bls_laus) + downloads grounded NDJSON from lake-tier1 + invokes synthesizer + dumps preview JSONs (lint pass → `{slug}.json`, lint fail → `{slug}.rejected.json`). CLI `--corridor` / `--corridors` / `--grounded-dir` / `--output-dir`.
+- `refinery/tools/write-corridor-character-to-db.mts` (new) — DB writer: reads `*.json` previews (skips `.rejected.json`), UPSERTs 6 character\_\* columns on corridor_profiles. Idempotent. CLI `--dry-run` for sanity. Split from preview tool so operator can write to DB without re-firing $0.35/corridor Anthropic calls.
+- `refinery/sources/cre-source.mts` — `composeCharacterRender` flipped: prefers `character_facts` over legacy `character` (cold fallback only when facts is null); appends `character_speculative` as labeled second section; broker overlay still stacks inside facts head. 4 new structured fields on `CorridorNormalized` (character_facts/speculative/chart/citations + generated_at + fact_pack_vintage). Backwards-compat: 2-arg calls still work (4 new test cases for structured-output paths).
+- `refinery/sources/bls-laus-source.mts` — exported `buildLausSwflSummary` + `DbRow` + `FL_FIPS`/`LEE_FIPS`/`COLLIER_FIPS` constants so the new driver consumes the source-of-truth summary builder instead of duplicating its logic. Surgical (additive `export` keywords); not a behavioral change.
+- `refinery/validate/speculative-block-lint.mts` — three new principled exemptions: year [1900-2099] bare 4-digit ints, SWFL highway designators (US/I/SR/CR + digits), `[web-N]` upgraded from ±60-char window to sentence-scope (citation = sourced ≠ inferred). 7 new test cases including the U.S. 41 sentence-splitter edge littlebird called out.
+- `refinery/validate/chart-block-lint.mts` — provenance enforcement: every numeric cell must trace to fact pack (±5% tolerance, mirrors anchors check). String cells (labels, units) and null cells bypass. 4 new test cases.
+- `refinery/tools/synthesize-corridor-character.mts` — prompt iterations: facts-block softening-token strip on web cites + ❌/✅ examples; chart-block fact-pack-only with shape guidance; speculative-block predictions-not-declines with example pairs; highway-designator full-prefix-only. Defensive parseToolUse for partial tool_use payloads (coerce missing fields to legal-but-empty, let lint decide). New `acceptLintFailure` flag for preview-mode callers.
+- `ingest/pipelines/corridor_grounded/pipeline.py` — env loading (.env.local + .dlt/secrets.toml fallback for DESTINATION\_\_POSTGRES\_\_CREDENTIALS), required `name: "web_search"` field on tool definition (verified against live Anthropic docs 2026-05-27 — 400 invalid_request_error without it), `ORDER BY city` not non-existent `county` column. Regression test pins the no-filter SQL shape.
+- Schema migration applied via Supabase Studio (ALTER TABLE corridor_profiles ADD 6 character\_\* columns IF NOT EXISTS).
+- Corridor renames in DB + 3 fixtures + alias map: `Bonita Beach Rd (US-41 to Sanibel Causeway)` → `Bonita Beach Rd / Bonita Beach` (Sanibel pull-in confirmed dropped: 0 mentions in new output, was 4+ in stale); `Daniels Pkwy (I-75 to Ben Hill Griffin)` → `Daniels Pkwy`.
+
+Tests: bun lint suite 24 → 34 (+10), cre-source 23 → 27 (+4), corridor_grounded pipeline 14 → 15 (+1 regression). All green. Typecheck clean for changed files.
+
+Cost: ~$22 total (Stage B grounded ×26 ≈ $9; Stage C synthesis 2 full passes + iteration ≈ $13).
+
+Next:
+
+- Veterans Pkwy iteration — Phase 1 follow-up; deterministic citations-object drop is the diagnostic.
+- Live `/api/b/cre-swfl?view=speak&tier=2` smoke after deploy + daily-rebuild fires.
+- Operator-deferred ("outside tweaks later"): I-75 Naples coverage gap (new corridor or routing layer), freshness UX wave logo + sources page, citation footnote rendering (Step 5), Vacancy-date-transparency framing, 11 data-gap-priority items.
+
+Plan: `docs/superpowers/plans/2026-05-26-corridor-character-generator/README.md`
+Audit trail: `docs/superpowers/plans/2026-05-26-corridor-character-generator/audits/step4-{fact-packs,spot-checks,review-clean}.md`
+
 ## 2026-05-26 (Sonnet 4.6 · main) — PR #40 merged into main
 
 - Squash-merged PR #40 (`feat/corridor-character-generator-step-2`) → main at `8c4a737`; branch deleted from remote.

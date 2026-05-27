@@ -30,8 +30,8 @@
     },
     { "input": "Waterside Shops", "expected": "waterside-shops" },
     {
-      "input": "Bonita Beach Rd (US-41 to Sanibel Causeway)",
-      "expected": "bonita-beach-rd-us-41-to-sanibel-causeway"
+      "input": "Bonita Beach Rd / Bonita Beach",
+      "expected": "bonita-beach-rd-bonita-beach"
     },
     { "input": "US-41 Bonita Springs", "expected": "us-41-bonita-springs" },
     {
@@ -53,10 +53,7 @@
       "input": "Colonial Blvd East (US-41 to I-75)",
       "expected": "colonial-blvd-east-us-41-to-i-75"
     },
-    {
-      "input": "Daniels Pkwy (I-75 to Ben Hill Griffin)",
-      "expected": "daniels-pkwy-i-75-to-ben-hill-griffin"
-    },
+    { "input": "Daniels Pkwy", "expected": "daniels-pkwy" },
     { "input": "Gulf Coast Town Center", "expected": "gulf-coast-town-center" },
     { "input": "Six Mile Cypress Pkwy", "expected": "six-mile-cypress-pkwy" },
     {

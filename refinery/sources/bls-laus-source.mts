@@ -28,9 +28,9 @@ const SCHEMA = "data_lake";
 const TABLE = "bls_laus";
 const API_BASE = "https://api.bls.gov/publicAPI/v2/timeseries/data/";
 
-const FL_FIPS = "12000";
-const LEE_FIPS = "12071";
-const COLLIER_FIPS = "12021";
+export const FL_FIPS = "12000";
+export const LEE_FIPS = "12071";
+export const COLLIER_FIPS = "12021";
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
@@ -41,7 +41,7 @@ const FIXTURE_PATH = path.join(
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-interface DbRow {
+export interface DbRow {
   series_id: string;
   area_fips: string;
   measure_code: string;
@@ -133,7 +133,7 @@ function buildCountyMetrics(
   };
 }
 
-function buildLausSwflSummary(rows: DbRow[]): LausSwflSummary {
+export function buildLausSwflSummary(rows: DbRow[]): LausSwflSummary {
   const leeRows = rows.filter((r) => r.area_fips === LEE_FIPS);
   const rateRows = leeRows.filter((r) => r.measure_code === "03");
   const ref = latestPeriod(rateRows);
