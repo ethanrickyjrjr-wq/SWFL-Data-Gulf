@@ -15,6 +15,14 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Opus 4.7 · feat/step-4-5-type-conditional-voice) — PR #43 cleanup: rebase + bun.lock fix
+
+- Rebased `feat/step-4-5-type-conditional-voice` onto current main, dropped the Collier permits double-commit (`c03ec4b`) that main already has as `ccb79b9`. Branch now: `/data-intel page` → Step 4.5 synthesizer + chart audit → log entry.
+- Regenerated `bun.lock` to include react-markdown + remark-gfm + @tailwindcss/typography (the /data-intel commit updated `package.json` and `package-lock.json` but missed `bun.lock`; CI uses bun → `bun install --frozen-lockfile` was failing).
+- Deleted dead `feat/corridor-character-generator-step-2` branch + worktree at `C:/Users/ethan/dev/brain-platform-corridor-step-2` (Step 2 work already squash-merged via PR #42).
+- Fixed PR #43 title + description to describe Step 4.5 (was auto-PR boilerplate referencing Collier permits).
+- Next: merge PR #43 after CI green.
+
 ## 2026-05-27 (Opus 4.7 · main) — wire GHA failures into cron-rebuild-failures.md (auto-capture + auto-resolve)
 
 - `.github/workflows/log-cron-incident.yml`: new `workflow_run` listener watching 22 cron workflows (allowlist by `name:`). Two jobs: `record_failure` on `conclusion==failure` + `maybe_auto_resolve` on `conclusion==success && event==schedule`. `ref: main` checkout to avoid detached-HEAD; `concurrency` group per workflow name to serialize fail+resolve race.
