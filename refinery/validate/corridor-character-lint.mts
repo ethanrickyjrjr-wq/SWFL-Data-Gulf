@@ -34,6 +34,7 @@
 import { lintFactsOnly } from "./facts-only-lint.mts";
 import { lintSmoothing } from "./smoothing-lint.mts";
 import {
+  collectFactPackNumbers,
   lintSpeculativeBlock,
   SPECULATIVE_DISCLAIMER,
 } from "./speculative-block-lint.mts";
@@ -209,7 +210,12 @@ export function lintCorridorCharacterOutput(
   }
 
   // ── Chart block ────────────────────────────────────────────────────────
-  const ch = lintChartBlock(output.chart_block);
+  // Pass the fact-pack number set so the provenance layer can reject
+  // numeric cell values that aren't anchored. Mirrors the anchors check
+  // used by speculative-block-lint — keeps the chart and speculative
+  // numbers in sync (same tolerance, same source of truth).
+  const factPackNumbers = collectFactPackNumbers(factPack);
+  const ch = lintChartBlock(output.chart_block, factPackNumbers);
   if (!ch.ok) chartErrors.push(...ch.errors);
 
   const flat = [

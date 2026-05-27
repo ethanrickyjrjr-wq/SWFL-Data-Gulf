@@ -1,17 +1,31 @@
 /**
  * Chart-block lint — Step 3 of the corridor-character generator plan.
  *
- * STRUCTURAL validation only. The `chart_block` of a corridor-character
- * synthesis output is either:
- *   - `null` (no chart was useful for this corridor — fine), or
- *   - `{ title: string, columns: string[], rows: cell[][] }` where every
- *     `rows[i].length === columns.length` and every cell is a string,
- *     number, or null.
+ * Two layers of validation:
  *
- * No semantic gating: this lint does NOT decide whether a chart is the right
- * shape of comparison, whether the values match the fact pack, etc. Those
- * judgments belong upstream in the prompt / human review. The point here is
- * to reject malformed JSON that would crash the consumer renderer.
+ *   1. STRUCTURAL — the `chart_block` of a corridor-character synthesis
+ *      output is either `null` (no chart was useful — fine) or
+ *      `{ title: string, columns: string[], rows: cell[][] }` where every
+ *      `rows[i].length === columns.length` and every cell is a string,
+ *      number, or null.
+ *
+ *   2. PROVENANCE — every numeric cell value must be present in the fact
+ *      pack (within tolerance, same as speculative-block-lint's anchors
+ *      check). The chart-block prompt says "use only fact-pack values" —
+ *      this lint enforces it. Web-cited peer numbers (Tampa office
+ *      vacancy, national shopping-center averages, etc.) belong in the
+ *      speculative block where hedging is allowed; the chart is for
+ *      apples-to-apples comparisons against values the system can vouch
+ *      for. Without this gate, the model leaks web context into the
+ *      chart and the operator can't trust the table at a glance.
+ *
+ * String cells (labels like corridor names, units, etc.) are exempt —
+ * they're not quantitative claims. Null cells are exempt — they're
+ * explicit "no data" markers.
+ *
+ * Provenance check is opt-in: callers that haven't built a fact pack
+ * (e.g. structural-only tests) pass `factPackNumbers: null` and only the
+ * structural layer runs.
  */
 
 export type ChartCell = string | number | null;
@@ -32,7 +46,29 @@ function isCell(v: unknown): v is ChartCell {
   return v === null || typeof v === "string" || typeof v === "number";
 }
 
-export function lintChartBlock(block: unknown): ChartLintResult {
+/** Is `value` within tolerance of any number in the anchor set?
+ *  Mirrors speculative-block-lint.isAnchored — keep the two tolerances
+ *  aligned so the chart and speculative blocks accept the same numbers. */
+function isAnchored(
+  value: number,
+  anchors: ReadonlySet<number>,
+  tolerance = 0.05,
+): boolean {
+  for (const a of anchors) {
+    if (a === 0) {
+      if (Math.abs(value) <= tolerance) return true;
+    } else if (Math.abs((value - a) / a) <= tolerance) {
+      return true;
+    }
+    if (Math.abs(value - a) <= tolerance) return true;
+  }
+  return false;
+}
+
+export function lintChartBlock(
+  block: unknown,
+  factPackNumbers: ReadonlySet<number> | null = null,
+): ChartLintResult {
   const errors: string[] = [];
 
   // null is a legal value — the prompt is allowed to emit no chart.
@@ -82,6 +118,16 @@ export function lintChartBlock(block: unknown): ChartLintResult {
           errors.push(
             `chart_block.rows[${ri}][${ci}] must be string|number|null, got ${typeof cell}.`,
           );
+          return;
+        }
+        // Provenance check — numeric cells must trace to the fact pack.
+        // Strings (labels, units, "—") and nulls bypass.
+        if (factPackNumbers !== null && typeof cell === "number") {
+          if (!isAnchored(cell, factPackNumbers)) {
+            errors.push(
+              `chart-provenance: chart_block.rows[${ri}][${ci}] = ${cell} is not in the fact pack. Web-cited peer values belong in the speculative block, not the chart. (See "use only fact-pack values" in the chart-block prompt fragment.)`,
+            );
+          }
         }
       });
     });

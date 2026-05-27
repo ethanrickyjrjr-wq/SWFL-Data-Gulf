@@ -116,6 +116,16 @@ interface NumberMatch {
 const NUMBER_RE =
   /(?<![\w[])\$?-?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?|(?<![\w[])\$?-?\d+(?:\.\d+)?%?/g;
 
+/**
+ * SWFL road-vocabulary prefixes that turn a trailing integer into a route
+ * identifier rather than a quantity. Mirrors the year exemption's logic:
+ * identifiers, not predictions. Scope is intentionally tight to highway
+ * shapes that show up in SWFL corridor prose (U.S. 41, I-75, SR-82,
+ * CR-951, US-41). Anything outside this list still goes through the full
+ * quantity pipeline.
+ */
+const HIGHWAY_PREFIX_RE = /(?:^|[^\w])(?:U\.S\.\s|US-|US\s|I-|SR[ -]|CR[ -])$/;
+
 function findNumbers(text: string): NumberMatch[] {
   const out: NumberMatch[] = [];
   for (const m of text.matchAll(NUMBER_RE)) {
@@ -125,9 +135,22 @@ function findNumbers(text: string): NumberMatch[] {
     const startIdx = m.index ?? 0;
     const pre = text.slice(Math.max(0, startIdx - 12), startIdx);
     if (/\[(internal|web|inference)-?$/.test(pre)) continue;
+    // Highway-designator exemption: "U.S. 41", "I-75", "SR-82", "CR-951",
+    // "US-41" — these are identifiers, not quantities. Same category-error
+    // surgical fix shape as the year exemption.
+    if (HIGHWAY_PREFIX_RE.test(pre)) continue;
+    // Year exemption: a bare 4-digit integer in the calendar range
+    // [1900-2099] is a temporal anchor, not an inferred prediction. The
+    // speculative block legitimately references years ("the 2024-2025
+    // stretch", "by Q2 2026"); requiring hedging tokens around them was
+    // a category error in the original lint. Stays linted: anything with a
+    // `%`, `$`, `.`, or `,` qualifier ("25%", "$2025", "2,025", "2025.5")
+    // — those are quantities, not years.
+    const isBareFourDigit = /^\d{4}$/.test(raw);
     const cleaned = raw.replace(/[$,%]/g, "");
     const n = Number(cleaned);
     if (!Number.isFinite(n)) continue;
+    if (isBareFourDigit && n >= 1900 && n <= 2099) continue;
     out.push({ value: n, raw, index: startIdx, end: startIdx + raw.length });
   }
   return out;
@@ -151,23 +174,90 @@ function isAnchored(
 }
 
 /**
- * Within a fixed window around `match.index`, does the text contain any
- * hedging token (smoothing-list or speculative-only) OR an `[inference]`
- * citation marker? If yes, the inferred number is properly hedged.
+ * Compute the [start, end) offsets of the sentence containing `index`.
+ * Sentences are separated by [.!?]+ + whitespace + capital letter.
+ *
+ * The `(?=[A-Z])` lookahead is doing the load-bearing work: it prevents
+ * splits on "U.S. 41" / "U.S. and the state highway..." / "5.2% asking"
+ * because the char following the punctuation+space is a digit / lowercase
+ * letter / etc. — not a capital. False-positive splits on
+ * "Mr. Smith" / "U.S. Government" / "the St. Johns River" do happen but
+ * are the SAFE failure direction (a [web-N] in the "real" sentence may
+ * not be visible to the over-split fragment containing the number →
+ * exemption fails → number gets flagged → operator iterates). The unsafe
+ * direction (under-splitting, a [web-N] wrongly extending coverage to a
+ * number in a different sentence) doesn't happen here.
+ */
+function sentenceBoundsAt(
+  text: string,
+  index: number,
+): { start: number; end: number } {
+  const boundaryRe = /[.!?]+\s+(?=[A-Z])/g;
+  let lastBoundaryEnd = 0;
+  for (const m of text.matchAll(boundaryRe)) {
+    const matchEnd = (m.index ?? 0) + m[0].length;
+    if (matchEnd > index) {
+      return { start: lastBoundaryEnd, end: m.index ?? text.length };
+    }
+    lastBoundaryEnd = matchEnd;
+  }
+  return { start: lastBoundaryEnd, end: text.length };
+}
+
+/**
+ * Does the speculative-block text satisfy the hedging requirement for
+ * the number at `match`?
+ *
+ * Three exemption paths, in increasing scope:
+ *
+ *   1. Phrase-level (±60-char window): a hedging token from the
+ *      smoothing-list or SPECULATIVE_ONLY_HEDGES list within ±60 chars
+ *      of the number ("most likely near 6.1%", "tracking toward 35,000").
+ *      Phrase-level proximity is the right scope for hedging tokens —
+ *      they're modifying-the-number signals, not block-level attribution.
+ *
+ *   2. Sentence-scoped — `[inference]` marker anywhere in the same
+ *      sentence as the number. Operator-blessed explicit hedge: "this
+ *      claim is model-inferred, no source."
+ *
+ *   3. Sentence-scoped — `[web-N]` (N = digits) anywhere in the same
+ *      sentence as the number. Source-attribution marker. A web citation
+ *      IS the disclosure; the hedging requirement was designed to gate
+ *      INFERRED predictions, not quoted facts. Sentence-scope (not the
+ *      ±60-char window) is the principled boundary because the model is
+ *      citing a sentence, not a phrase — e.g. "365-unit redevelopment
+ *      proposal for the former cinema pad faces a politically uncertain
+ *      path after the Estero Planning, Zoning & Design Board's criticism
+ *      [web-19][web-21]" — the [web-N] cluster clearly covers the whole
+ *      claim including the 365.
+ *
+ * Internal-fact-pack citations (`[internal-N]`) get a separate path —
+ * those numbers ARE in the fact pack and are already caught by
+ * `isAnchored`, so we don't exempt them here (defense in depth: if a
+ * model wrote "[internal-X]" referring to a value that isn't actually
+ * in the pack, the lint still flags it).
  */
 function hasNearbyHedge(text: string, match: NumberMatch): boolean {
+  // Phrase-level: hedging tokens within ±60 chars of the number.
   const WINDOW = 60;
   const start = Math.max(0, match.index - WINDOW);
   const end = Math.min(text.length, match.end + WINDOW);
   const window = text.slice(start, end).toLowerCase();
-  // `[inference]` marker is the operator-blessed explicit hedge.
-  if (window.includes("[inference]")) return true;
   for (const { token } of HEDGING_TOKENS) {
     if (window.includes(token.toLowerCase())) return true;
   }
   for (const phrase of SPECULATIVE_ONLY_HEDGES) {
     if (window.includes(phrase)) return true;
   }
+  // Sentence-scope: [inference] and [web-N] are sentence-level
+  // attribution markers, not phrase-level hedges, so they get the
+  // wider scope.
+  const sentence = (() => {
+    const b = sentenceBoundsAt(text, match.index);
+    return text.slice(b.start, b.end);
+  })();
+  if (sentence.toLowerCase().includes("[inference]")) return true;
+  if (/\[web-\d+\]/.test(sentence)) return true;
   return false;
 }
 
