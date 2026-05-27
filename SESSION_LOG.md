@@ -15,11 +15,12 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
-## 2026-05-27 (Sonnet 4.6 · main) — fire dormant pipelines + redfin workflow fix
+## 2026-05-27 (Sonnet 4.6 · main) — fire dormant pipelines + CI/rebuild fixes
 
-- Fixed `redfin-monthly.yml`: actions/checkout@v6 + setup-python@v6 → @v4/@v5 (nonexistent versions that would have failed immediately).
-- Next: workflow_dispatch census-vip, redfin, bls-ppi, fred-g17 to get data flowing; collier_permits off the table (handled elsewhere).
-- PR #43 still open; broker narrative plan untracked at `docs/superpowers/plans/2026-05-26-corridor-broker-narrative-promotion/`.
+- `workflow_dispatch` fired on 4 dormant pipelines: census-vip ✅, bls-ppi ✅, fred-g17 ✅, redfin (in progress). Fixed `redfin-monthly.yml` actions versions (@v6 → @v4/v5) before firing.
+- Fixed daily-rebuild: added `FRED_API_KEY` to env in `daily-rebuild.yml` (was missing — caused macro-us failure daily since the pipeline shipped).
+- Fixed CI: `CORRIDOR_ALIASES` had stale slugs for Bonita Beach + Daniels Pkwy renames from Step 4; updated `refinery/lib/corridor-aliases.mts` to `bonita-beach-rd-bonita-beach` + `daniels-pkwy`. All 7 alias tests pass.
+- Next: verify redfin completes; move census-vip/bls-ppi/fred-g17 from `not_yet_running:` → `pipelines:` in `cadence_registry.yaml` after first rows confirmed; PR #43 verification still pending.
 
 ## 2026-05-27 (Sonnet 4.6 · cleanup) — branch merges + Step 4.5 on PR #43
 
