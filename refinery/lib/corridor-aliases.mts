@@ -30,14 +30,12 @@ export const CORRIDOR_ALIASES: Record<
 > = {
   // Lee — identity map to centroids.
   "ben-hill-griffin-pkwy": "ben-hill-griffin-pkwy",
-  "bonita-beach-rd-us-41-to-sanibel-causeway":
-    "bonita-beach-rd-us-41-to-sanibel-causeway",
+  "bonita-beach-rd-bonita-beach": "bonita-beach-rd-bonita-beach",
   "cape-coral-coral-pointe": "cape-coral-coral-pointe",
   "cape-coral-pkwy-e": "cape-coral-pkwy-e",
   "coconut-point-mall": "coconut-point-mall",
   "colonial-blvd-east-us-41-to-i-75": "colonial-blvd-east-us-41-to-i-75",
-  "daniels-pkwy-i-75-to-ben-hill-griffin":
-    "daniels-pkwy-i-75-to-ben-hill-griffin",
+  "daniels-pkwy": "daniels-pkwy",
   "estero-blvd-fort-myers-beach": "estero-blvd-fort-myers-beach",
   "gulf-coast-town-center": "gulf-coast-town-center",
   "pine-island-rd-cape-coral": "pine-island-rd-cape-coral",
