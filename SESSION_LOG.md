@@ -15,6 +15,10 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — update cron-rebuild-failures ledger with WAF incident
+
+- `docs/cron-rebuild-failures.md`: added `collier-permits-monthly` WAF incident row (RESOLVED). Updated Pre-flight First-Fire Pending note — WAF fix wired, monitor June 5th run.
+
 ## 2026-05-27 (Sonnet 4.6 · main) — fix collier_permits WAF + wire FIRECRAWL_API_KEY to GHA
 
 - `ingest/pipelines/collier_permits/fetcher.py`: replaced `_make_session()` + plain requests with `scrape_with_actions(proxy="stealth")` via `ingest.lib.firecrawl_client` for listing-page discovery; XLSX binary download stays as direct `requests.get` with browser headers.
