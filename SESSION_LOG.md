@@ -15,6 +15,13 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — docs: industry character system — 7 audience voices
+
+- Creates `docs/superpowers/plans/2026-05-26-industry-characters/` with README + 7 voice spec files (01-main-street through 07-local-pulse).
+- README covers DB schema, 5-tier routing cascade, keyword→voice table, Phase 0 shared infra (0A–0H), build order, and verification rubric. Each voice file covers audience, data sources, fact-pack shape, web query template, system preamble, and speculative framing notes.
+- Next: Phase 0 blocked on Step 4 5/5 operator sign-off; Collier permits DDL + live run still pending.
+- Plan: `docs/superpowers/plans/2026-05-26-industry-characters/README.md`
+
 ## 2026-05-27 (Sonnet 4.6 · main) — docs: data intelligence catalog + API source mining
 
 - Creates `docs/data-intel.md` — master data catalog (11 domains, 55+ dataset rows) with status badges (LIVE/COLD/PARTIAL/PIPELINE EXISTS/SCRAPED/SOURCE KNOWN/GAP), table locations, brain consumers, and notes.
