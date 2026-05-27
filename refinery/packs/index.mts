@@ -34,6 +34,7 @@ import { logisticsSwfl } from "./logistics-swfl.mts";
 import { logisticsSwflNowcast } from "./logistics-swfl-nowcast.mts";
 import { stormHistorySwfl } from "./storm-history-swfl.mts";
 import { master } from "./master.mts";
+import { housingSwfl } from "./housing-swfl.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
@@ -54,4 +55,5 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [logisticsSwflNowcast.id]: logisticsSwflNowcast,
   [stormHistorySwfl.id]: stormHistorySwfl,
   [master.id]: master,
+  [housingSwfl.id]: housingSwfl,
 };

@@ -15,6 +15,16 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — feat: housing-swfl brain (Redfin Tier 1 Parquet → master)
+
+- `refinery/sources/housing-source.mts`: new DuckDB source reading `s3://lake-tier1/market/redfin_swfl.parquet` via `makeDuckDBSource` with `parquetViews`. SQL filters `PROPERTY_TYPE='All Residential' AND PERIOD_DURATION=1`, uses `QUALIFY ROW_NUMBER()=1` to get latest period per ZIP. All 21 columns aliased lowercase. `HousingZipRow` interface exported.
+- `refinery/packs/housing-swfl.mts`: leaf pack (skip triage + synthesis, input_brains=[]). 6 key_metrics: median sale price, DOM, months of supply, sale-to-list ratio, sold above list, off-market-in-2-weeks. Vote-based `classifyDirection()` uses DOM/inventory/sale-to-list/MOS for bullish/bearish/neutral/mixed. Fixture run: 6 ZIPs → clean `--- OUTPUT ---` block.
+- `refinery/__fixtures__/housing-swfl.sample.json`: 6 SWFL ZIP rows (Fort Myers, Naples, Punta Gorda, North Port, Cape Coral).
+- `refinery/packs/index.mts` + `refinery/packs/master.mts`: housingSwfl registered; master `sources` + `input_brains` wired with `edge_type: "input"`.
+- `ingest/duckdb_pipelines/redfin_swfl/constants.py`: `PACK_ID` set to `"housing-swfl"`, comments updated.
+- Next: run live build once Parquet S3 access confirmed (`npm run refinery housing-swfl`), then `npm run refinery master`.
+- Plan: `C:\Users\ethan\.claude\plans\lets-get-this-redfin-graceful-avalanche.md`
+
 ## 2026-05-27 (Opus 4.7 · main) — wire Naples (Collier) permits into permits-swfl brain
 
 - `refinery/sources/permits-source.mts`: exports new `PermitBucket` + `NormalizedPermitRow`; Lee `fetch()` now maps DB rows → unified shape (`permit_uid="lee:"+permit_id`, `county="lee"`). Existing `LeePermitRow` interface kept for the raw DB shape.

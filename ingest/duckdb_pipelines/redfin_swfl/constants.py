@@ -5,7 +5,7 @@ Grain: ZIP × month × property_type
 Filter: Lee County (Cape Coral MSA) + Collier County (Naples MSA)
 Output: s3://lake-tier1/market/redfin_swfl.parquet
 
-No consuming brain yet — PACK_ID is None until redfin-swfl pack ships.
+Consuming brain: housing-swfl (refinery/packs/housing-swfl.mts).
 """
 
 # ── Source ───────────────────────────────────────────────────────────────────
@@ -21,8 +21,8 @@ BUCKET = "lake-tier1"
 PARQUET_PATH = "market/redfin_swfl.parquet"
 PARQUET_TARGET = f"s3://{BUCKET}/{PARQUET_PATH}"
 
-# Set to "redfin-swfl" when the consuming brain PR ships.
-PACK_ID: str | None = None
+# consuming brain shipped as "housing-swfl" (not "redfin-swfl")
+PACK_ID = "housing-swfl"
 
 # ── Geographic filter ─────────────────────────────────────────────────────────
 
