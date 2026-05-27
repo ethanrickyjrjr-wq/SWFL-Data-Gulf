@@ -26,6 +26,13 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 - Next: first real failure (likely `faf5-annual` next cron, or the `freshness-probe-daily` if a source has gone stale) is the live test. Watch issue #44 + ledger commits.
 - Plan: `C:\Users\ethan\.claude\plans\just-set-up-cron-rebuild-failures-md-luminous-yeti.md`
 
+## 2026-05-27 (Sonnet 4.6 · feat/step-4-5-type-conditional-voice) — feat: Step 4.5 type-conditional voice + chart audit
+
+- `refinery/tools/synthesize-corridor-character.mts`: renames `SYSTEM_INSTRUCTIONS` → `SYSTEM_INSTRUCTIONS_BASE`, adds `TYPE_VOICE_BLOCKS` (6 corridor types: beachfront-tourism, highway-strip-mall, medical-anchored, anchor-dependent, industrial-flex, mixed-use-downtown), adds `buildSystemInstructions(corridorType)`. Each type block tells the synthesizer which signals to lead with, what speculative angle to take, and closes with a Broker Take instruction.
+- `refinery/tools/verify-corridor-chart-blocks.mts`: new read-only audit tool — pulls 25 in-DB `character_chart` blocks, rebuilds fact packs from the same DB data, runs `lintChartBlock` against each. Exit 1 if any chart fails ±5% provenance (Step 4.5 parity check).
+- Next: operator runs `bun refinery/tools/verify-corridor-chart-blocks.mts` to see which in-DB rows fail chart provenance → regenerate those under hardened lint. Then run `--preview` on the 5 spot-check corridors with type-conditional voice to validate framing fires.
+- Plan: `C:\Users\ethan\.claude\plans\thoughts-a-plan-for-cheeky-cascade.md`
+
 ## 2026-05-27 (Sonnet 4.6 · main) — feat: /data-intel page
 
 - Adds `app/data-intel/page.tsx` — static server component rendering `docs/data-intel.md` via `react-markdown` + `remark-gfm` + `@tailwindcss/typography`. Wired `@plugin` in `globals.css`, added file tracing in `next.config.ts`. Build clean, prerendered static.
