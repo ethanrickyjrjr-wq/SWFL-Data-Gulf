@@ -35,7 +35,7 @@
     "ingest:zori-swfl": "npm run ingest:zori-swfl:tier1 && npm run ingest:zori-swfl:tier2"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.69.0",
+    "@anthropic-ai/sdk": "^0.99.0",
     "@duckdb/node-api": "^1.5.2-r.2",
     "@modelcontextprotocol/ext-apps": "^1.7.2",
     "@modelcontextprotocol/sdk": "^1.29.0",

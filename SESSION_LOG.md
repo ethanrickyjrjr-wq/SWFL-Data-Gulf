@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-27 (Sonnet 4.6 · claude/swfl-data-gulf-voices-fvlR8) — chore: bump @anthropic-ai/sdk ^0.69.0 → ^0.99.0
+
+- `bun add @anthropic-ai/sdk` installed the module that was missing in the remote env (synthesizer tests were failing with "Cannot find module"). Package bumped from 0.69 to 0.99; bun.lock updated accordingly.
+- 12/12 synthesize-corridor-character tests pass after bump. No functional changes.
+
 ## 2026-05-27 (Opus 4.7 · fix/spider-extraction-schema-http400) — fix: spider /ai/scrape HTTP 400 (cherry-pick from local fix/firecrawl-agent-client)
 
 - Cherry-picked commit `539d8e7` (2026-05-26 19:08, Ricky Cooper) onto a fresh branch off main. Live consumer of `ingest/lib/spider_client.ai_scrape()` is `scripts/swfl_cre_intel_probe.py` via `extract_client.extract()` (Firecrawl→Spider fallback for URL discovery) — the spider fallback path was silently broken by `extraction_schema` rejection (HTTP 400, empty body) until this fix.
