@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-27 (Sonnet 4.6 · main) — feat: link /terms and /support in footer + add support page
+
+- `app/page.tsx`: footer now shows Privacy · Terms · Support links (was Privacy-only).
+- `app/support/` — new `/support` page (email contact, what to include, data corrections, legal links).
+- Next: broker narrative promotion tool (`refinery/tools/promote-broker-narratives.mts`).
+
 ## 2026-05-27 (Opus 4.7 · feat/firecrawl-spider-fallback-and-cron-fixes) — feat: firecrawl→spider plain-scrape wrapper + cron-cadence audit + rule lock
 
 - **Rule locked: "Firecrawl primary, Spider fallback" for HTML scraping.** Added §6 to `docs/standards/pipeline-freshness.md` + pointer in `CLAUDE.md`. Three-mode split: plain `firecrawl.scrape()` → wrap via `extract_client.scrape_with_fallback()`; `firecrawl.agent()` → already wrapped via `extract_client.extract()`; `firecrawl.scrape_with_actions()` → stays direct (spider has no analogue). Audit confirmed only `news_swfl/pipeline.py` was calling plain `scrape()` direct — migrated.

@@ -214,17 +214,41 @@ export default function ConnectPage() {
         >
           swfldatagulf.com
         </span>
-        <a
-          href="/privacy"
-          style={{
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-            fontSize: 12,
-            color: "#22414F",
-            textDecoration: "none",
-          }}
-        >
-          Privacy
-        </a>
+        <div style={{ display: "flex", gap: 20 }}>
+          <a
+            href="/privacy"
+            style={{
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              fontSize: 12,
+              color: "#22414F",
+              textDecoration: "none",
+            }}
+          >
+            Privacy
+          </a>
+          <a
+            href="/terms"
+            style={{
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              fontSize: 12,
+              color: "#22414F",
+              textDecoration: "none",
+            }}
+          >
+            Terms
+          </a>
+          <a
+            href="/support"
+            style={{
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              fontSize: 12,
+              color: "#22414F",
+              textDecoration: "none",
+            }}
+          >
+            Support
+          </a>
+        </div>
       </footer>
     </main>
   );
