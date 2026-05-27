@@ -16,8 +16,9 @@ import { expiresDate } from "../lib/dates.mts";
 // AVG_SALE_TO_LIST is a ratio (0.997 = 99.7% of list, 1.012 = 1.2% above).
 // SOLD_ABOVE_LIST and OFF_MARKET_IN_TWO_WEEKS are fractions 0–1.
 //
-// PERIOD_DURATION = 1 for all monthly rows (integer in the Parquet; if the
-// pipeline ever produces a VARCHAR column, change the WHERE clause to = '1').
+// REGION_TYPE stores 'zip code' (two words) — not 'zip'.
+// PERIOD_DURATION = 90 (BIGINT) for all rows in this Parquet — Redfin's
+// ZIP tracker uses rolling 90-day windows labeled by end month.
 
 export interface HousingZipRow {
   zip_code: string;
@@ -44,6 +45,14 @@ export interface HousingZipRow {
 }
 
 const SOURCE_ID = "redfin_swfl";
+
+// Redfin Parquet stores missing numerics as the string "NA" (not SQL NULL).
+// read_csv_auto infers columns as VARCHAR when "NA" appears alongside decimals.
+function toNum(v: unknown): number | null {
+  if (v == null || v === "NA") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
 
 export const housingSource: SourceConnector = makeDuckDBSource<HousingZipRow>({
   source_id: SOURCE_ID,
@@ -78,52 +87,34 @@ export const housingSource: SourceConnector = makeDuckDBSource<HousingZipRow>({
       INVENTORY_YOY               AS inventory_yoy,
       AVG_SALE_TO_LIST_YOY        AS avg_sale_to_list_yoy
     FROM redfin_swfl
-    WHERE REGION_TYPE     = 'zip'
-      AND PROPERTY_TYPE   = 'All Residential'
-      AND PERIOD_DURATION = 1
+    WHERE REGION_TYPE   = 'zip code'
+      AND PROPERTY_TYPE = 'All Residential'
     QUALIFY ROW_NUMBER() OVER (PARTITION BY zip_code ORDER BY PERIOD_BEGIN DESC) = 1
     ORDER BY zip_code
   `,
   rowShape: (raw) => ({
-    zip_code: String(raw.zip_code ?? ""),
+    // Strip Redfin's "Zip Code: XXXXX" label down to just the 5-digit ZIP.
+    zip_code: String(raw.zip_code ?? "").replace(/^Zip Code:\s*/i, ""),
     period_begin: String(raw.period_begin ?? ""),
     period_end: String(raw.period_end ?? ""),
     parent_metro_region: String(raw.parent_metro_region ?? ""),
-    median_sale_price:
-      raw.median_sale_price != null ? Number(raw.median_sale_price) : null,
-    median_list_price:
-      raw.median_list_price != null ? Number(raw.median_list_price) : null,
-    median_ppsf: raw.median_ppsf != null ? Number(raw.median_ppsf) : null,
-    median_dom: raw.median_dom != null ? Number(raw.median_dom) : null,
-    avg_sale_to_list:
-      raw.avg_sale_to_list != null ? Number(raw.avg_sale_to_list) : null,
-    sold_above_list:
-      raw.sold_above_list != null ? Number(raw.sold_above_list) : null,
-    price_drops: raw.price_drops != null ? Number(raw.price_drops) : null,
-    off_market_in_two_weeks:
-      raw.off_market_in_two_weeks != null
-        ? Number(raw.off_market_in_two_weeks)
-        : null,
-    homes_sold: raw.homes_sold != null ? Number(raw.homes_sold) : null,
-    inventory: raw.inventory != null ? Number(raw.inventory) : null,
-    months_of_supply:
-      raw.months_of_supply != null ? Number(raw.months_of_supply) : null,
-    pending_sales: raw.pending_sales != null ? Number(raw.pending_sales) : null,
-    median_sale_price_yoy:
-      raw.median_sale_price_yoy != null
-        ? Number(raw.median_sale_price_yoy)
-        : null,
-    median_sale_price_mom:
-      raw.median_sale_price_mom != null
-        ? Number(raw.median_sale_price_mom)
-        : null,
-    median_dom_yoy:
-      raw.median_dom_yoy != null ? Number(raw.median_dom_yoy) : null,
-    inventory_yoy: raw.inventory_yoy != null ? Number(raw.inventory_yoy) : null,
-    avg_sale_to_list_yoy:
-      raw.avg_sale_to_list_yoy != null
-        ? Number(raw.avg_sale_to_list_yoy)
-        : null,
+    median_sale_price: toNum(raw.median_sale_price),
+    median_list_price: toNum(raw.median_list_price),
+    median_ppsf: toNum(raw.median_ppsf),
+    median_dom: toNum(raw.median_dom),
+    avg_sale_to_list: toNum(raw.avg_sale_to_list),
+    sold_above_list: toNum(raw.sold_above_list),
+    price_drops: toNum(raw.price_drops),
+    off_market_in_two_weeks: toNum(raw.off_market_in_two_weeks),
+    homes_sold: toNum(raw.homes_sold),
+    inventory: toNum(raw.inventory),
+    months_of_supply: toNum(raw.months_of_supply),
+    pending_sales: toNum(raw.pending_sales),
+    median_sale_price_yoy: toNum(raw.median_sale_price_yoy),
+    median_sale_price_mom: toNum(raw.median_sale_price_mom),
+    median_dom_yoy: toNum(raw.median_dom_yoy),
+    inventory_yoy: toNum(raw.inventory_yoy),
+    avg_sale_to_list_yoy: toNum(raw.avg_sale_to_list_yoy),
   }),
   normalize: (rows, { fetched_at }): RawFragment[] =>
     rows.map((r) => ({

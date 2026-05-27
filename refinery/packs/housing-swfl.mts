@@ -299,92 +299,82 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   });
 
   // 2. Median days on market
-  key_metrics.push({
-    metric: "housing_median_dom_swfl",
-    value:
-      snap.median_dom !== null ? Number(snap.median_dom.toFixed(0)) : "n/a",
-    direction: domTrendDirection(snap.median_dom_yoy),
-    label: `SWFL regional median days on market — falling = faster sales${snap.median_dom_yoy !== null ? ` (YoY: ${(snap.median_dom_yoy * 100).toFixed(1)}%)` : ""}`,
-    variable_type: "extensive",
-    units: "days",
-    display_format: "count",
-    source,
-  });
+  if (snap.median_dom !== null) {
+    key_metrics.push({
+      metric: "housing_median_dom_swfl",
+      value: Number(snap.median_dom.toFixed(0)),
+      direction: domTrendDirection(snap.median_dom_yoy),
+      label: `SWFL regional median days on market — falling = faster sales${snap.median_dom_yoy !== null ? ` (YoY: ${(snap.median_dom_yoy * 100).toFixed(1)}%)` : ""}`,
+      variable_type: "extensive",
+      units: "days",
+      display_format: "count",
+      source,
+    });
+  }
 
   // 3. Months of supply
-  const supplyDir: "rising" | "falling" | "stable" =
-    snap.months_of_supply !== null
-      ? snap.months_of_supply < 3
+  if (snap.months_of_supply !== null) {
+    const supplyDir: "rising" | "falling" | "stable" =
+      snap.months_of_supply < 3
         ? "falling"
         : snap.months_of_supply > 6
           ? "rising"
-          : "stable"
-      : "stable";
-  key_metrics.push({
-    metric: "housing_months_of_supply_swfl",
-    value:
-      snap.months_of_supply !== null
-        ? Number(snap.months_of_supply.toFixed(1))
-        : "n/a",
-    direction: supplyDir,
-    label:
-      "SWFL regional median months of supply (< 3 = seller's market, > 6 = buyer's market)",
-    variable_type: "intensive",
-    units: "months",
-    display_format: "raw",
-    source,
-  });
+          : "stable";
+    key_metrics.push({
+      metric: "housing_months_of_supply_swfl",
+      value: Number(snap.months_of_supply.toFixed(1)),
+      direction: supplyDir,
+      label:
+        "SWFL regional median months of supply (< 3 = seller's market, > 6 = buyer's market)",
+      variable_type: "intensive",
+      units: "months",
+      display_format: "raw",
+      source,
+    });
+  }
 
   // 4. Sale-to-list ratio
-  key_metrics.push({
-    metric: "housing_avg_sale_to_list_swfl",
-    value:
-      snap.avg_sale_to_list !== null
-        ? Number((snap.avg_sale_to_list * 100).toFixed(1))
-        : "n/a",
-    direction:
-      snap.avg_sale_to_list !== null
-        ? snap.avg_sale_to_list >= 1.0
-          ? "rising"
-          : "falling"
-        : "stable",
-    label:
-      "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
-    variable_type: "intensive",
-    units: "percent",
-    display_format: "percent",
-    source,
-  });
+  if (snap.avg_sale_to_list !== null) {
+    key_metrics.push({
+      metric: "housing_avg_sale_to_list_swfl",
+      value: Number((snap.avg_sale_to_list * 100).toFixed(1)),
+      direction: snap.avg_sale_to_list >= 1.0 ? "rising" : "falling",
+      label:
+        "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
+      source,
+    });
+  }
 
   // 5. Sold above list
-  key_metrics.push({
-    metric: "housing_sold_above_list_pct_swfl",
-    value:
-      snap.sold_above_list !== null
-        ? Number((snap.sold_above_list * 100).toFixed(1))
-        : "n/a",
-    direction: "stable",
-    label: "SWFL regional median % of homes sold above list price",
-    variable_type: "intensive",
-    units: "percent",
-    display_format: "percent",
-    source,
-  });
+  if (snap.sold_above_list !== null) {
+    key_metrics.push({
+      metric: "housing_sold_above_list_pct_swfl",
+      value: Number((snap.sold_above_list * 100).toFixed(1)),
+      direction: "stable",
+      label: "SWFL regional median % of homes sold above list price",
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
+      source,
+    });
+  }
 
   // 6. Off-market in 2 weeks
-  key_metrics.push({
-    metric: "housing_off_market_in_two_weeks_pct_swfl",
-    value:
-      snap.off_market_in_two_weeks !== null
-        ? Number((snap.off_market_in_two_weeks * 100).toFixed(1))
-        : "n/a",
-    direction: "stable",
-    label: "SWFL regional median % of homes going off-market within 2 weeks",
-    variable_type: "intensive",
-    units: "percent",
-    display_format: "percent",
-    source,
-  });
+  if (snap.off_market_in_two_weeks !== null) {
+    key_metrics.push({
+      metric: "housing_off_market_in_two_weeks_pct_swfl",
+      value: Number((snap.off_market_in_two_weeks * 100).toFixed(1)),
+      direction: "stable",
+      label: "SWFL regional median % of homes going off-market within 2 weeks",
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
+      source,
+    });
+  }
 
   // ── Caveats ──
   const caveats = [...verdict.caveats];

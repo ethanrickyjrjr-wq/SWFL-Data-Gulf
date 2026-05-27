@@ -2,15 +2,15 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-05-24T00:50:54.693Z (commit `3f834fe`)
+**Generated:** 2026-05-27T13:03:26.404Z (commit `d2496a4`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
 ## TL;DR
 
-- **120** SKOS concepts across **7** categories (118 active, 2 stub).
-- **129** raw slugs registered in `slug_index`.
-- **17** distinct source brains referenced (live + planned).
+- **123** SKOS concepts across **7** categories (121 active, 2 stub).
+- **135** raw slugs registered in `slug_index`.
+- **18** distinct source brains referenced (live + planned).
 - **17** packs in the runtime registry.
 
 ## Regenerate
@@ -27,7 +27,7 @@ bun refinery/tools/semantic-ledger.mts
 | `environmental` | 35 | 34 | 1 |
 | `hospitality` | 5 | 5 | 0 |
 | `logistics` | 19 | 19 | 0 |
-| `macro` | 9 | 9 | 0 |
+| `macro` | 12 | 12 | 0 |
 | `qualitative` | 5 | 5 | 0 |
 | `real-estate` | 30 | 30 | 0 |
 
@@ -214,10 +214,13 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `macro` (9)
+### `macro` (12)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `laus_collier_unemployment_rate` | Collier County Unemployment Rate | `laus_collier_unemployment_rate`, `collier_unemployment_rate` | ratio | % | _unbounded_ | `macro-swfl`, `master` | `macro` | ✅ active |
+| `laus_fl_unemployment_rate` | Florida LAUS Unemployment Rate | `laus_fl_unemployment_rate`, `fl_laus_unemployment_rate` | ratio | % | _unbounded_ | `macro-swfl`, `master` | `macro` | ✅ active |
+| `laus_lee_unemployment_rate` | Lee County Unemployment Rate | `laus_lee_unemployment_rate`, `lee_unemployment_rate` | ratio | % | _unbounded_ | `macro-swfl`, `master` | `macro` | ✅ active |
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | percentage | % | -5 – 25 | `macro-us` | `macro` | ✅ active |
 | `macro_fl_estab_count_construction` | Florida Construction Establishments (NAICS 23, Census CBP) | `fl_estab_count_construction` | count | establishments | 0 – 1000000 | `macro-florida`, `master` | `macro` | ✅ active |
 | `macro_fl_estab_count_food_service` | Florida Food Service & Accommodation Establishments (NAICS 72, Census CBP) | `fl_estab_count_food_service` | count | establishments | 0 – 1000000 | `macro-florida`, `master` | `macro` | ✅ active |
@@ -230,6 +233,9 @@ bun refinery/tools/semantic-ledger.mts
 
 <details><summary>Scope notes</summary>
 
+- **`laus_collier_unemployment_rate`** — BLS LAUS monthly unemployment rate for Collier County, FL (not seasonally adjusted). Secondary SWFL county reference.
+- **`laus_fl_unemployment_rate`** — BLS LAUS monthly unemployment rate for Florida state (not seasonally adjusted). Distinct from FRED FLUR (same economic concept, different estimation methodology). Used as the denominator for SWFL county gap math.
+- **`laus_lee_unemployment_rate`** — BLS LAUS monthly unemployment rate for Lee County, FL (not seasonally adjusted). Primary SWFL county labor market reference. Denominator for gap math against FL state LAUS baseline.
 - **`macro_cpi_yoy`** — Fed's 2% target is the reference anchor. Shelter remains the sticky component through 2026.
 - **`macro_fl_estab_count_construction`** — Statewide Census County Business Patterns establishment count for NAICS 23 (Construction). Level metric — direction comes from sibling brains (notably sector-credit-swfl charge-off rate for construction).
 - **`macro_fl_estab_count_food_service`** — Statewide Census County Business Patterns establishment count for NAICS 72 (Accommodation and Food Services). Level metric — direction comes from sibling brains.
@@ -465,6 +471,14 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `macro_fl_labor_participation` | Florida Labor Force Participation Rate | `fl_labor_participation` | active |
 | `macro_fl_unemployment` | Florida Unemployment Rate | `fl_unemployment` | active |
 
+### `macro-swfl` (3 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `laus_collier_unemployment_rate` | Collier County Unemployment Rate | `laus_collier_unemployment_rate`, `collier_unemployment_rate` | active |
+| `laus_fl_unemployment_rate` | Florida LAUS Unemployment Rate | `laus_fl_unemployment_rate`, `fl_laus_unemployment_rate` | active |
+| `laus_lee_unemployment_rate` | Lee County Unemployment Rate | `laus_lee_unemployment_rate`, `lee_unemployment_rate` | active |
+
 ### `macro-us` (2 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
@@ -472,7 +486,7 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 
-### `master` (57 concepts)
+### `master` (60 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
@@ -496,6 +510,9 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `hosp_tdt_seasonal_position` | TDT Seasonal Position vs Historical Mean | `seasonal_position_vs_history` | active |
 | `hosp_tdt_trailing_12mo_collections` | Trailing 12-Month TDT Collections (Lee County) | `trailing_12mo_collections_usd` | active |
 | `hosp_tdt_yoy_delta` | TDT Year-over-Year Delta | `yoy_delta_pct` | active |
+| `laus_collier_unemployment_rate` | Collier County Unemployment Rate | `laus_collier_unemployment_rate`, `collier_unemployment_rate` | active |
+| `laus_fl_unemployment_rate` | Florida LAUS Unemployment Rate | `laus_fl_unemployment_rate`, `fl_laus_unemployment_rate` | active |
+| `laus_lee_unemployment_rate` | Lee County Unemployment Rate | `laus_lee_unemployment_rate`, `lee_unemployment_rate` | active |
 | `logistics_inbound_freight_tons_swfl` | SWFL Inbound Domestic Freight (Thousand Tons, Latest FAF5 Year) | `inbound_freight_tons_swfl` | active |
 | `logistics_inbound_freight_value_swfl_musd` | SWFL Inbound Domestic Freight Value (Millions USD, Latest FAF5 Year) | `inbound_freight_value_swfl_musd` | active |
 | `logistics_nowcast_avg_payload_tons_per_truck` | Average Payload Per Truck (FHWA Constant) | `avg_payload_tons_per_truck` | active |
