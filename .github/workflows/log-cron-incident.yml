@@ -1,0 +1,102 @@
+name: Log cron incident
+
+# Listens for completion of all production cron workflows. On `failure`, appends
+# a row to `docs/cron-rebuild-failures.md` and comments on the sticky issue
+# (`vars.CRON_INCIDENT_ISSUE_NUMBER`). On `success` of a scheduled run, flips
+# the most-recent OPEN row for that workflow to `RESOLVED (auto)`.
+#
+# Kill switches (repo Settings -> Variables):
+#   CRON_INCIDENT_LOGGER_ENABLED          = "false"  -> disable everything
+#   CRON_INCIDENT_AUTO_RESOLVE_ENABLED    = "false"  -> keep capture, drop auto-resolve
+#
+# Plan: C:\Users\ethan\.claude\plans\just-set-up-cron-rebuild-failures-md-luminous-yeti.md
+
+on:
+  workflow_run:
+    workflows:
+      - "BLS LAUS monthly"
+      - "BLS QCEW quarterly"
+      - "Census CBP annual"
+      - "Collier County permits monthly"
+      - "Daily Brain Rebuild"
+      - "FAF5 Tier 2 annual"
+      - "FDOT AADT annual"
+      - "FEMA NFIP quarterly"
+      - "FHFA HPI quarterly"
+      - "HURDAT2 FL annual"
+      - "Lee County permits weekly"
+      - "LeePA parcels annual"
+      - "Pipeline freshness probe (daily)"
+      - "Redfin SWFL Tier 1 monthly"
+      - "SWFL news daily (Tier 1 cold storage)"
+      - "SWFL storm history Tier 1 monthly"
+      - "USGS SWFL Tier 1 monthly"
+      - "ZORI SWFL Tier 1 fetch monthly"
+      - "ZORI SWFL Tier 2 load monthly"
+      - "bls-ppi monthly"
+      - "census-vip monthly"
+      - "fred-g17 monthly"
+    types: [completed]
+
+permissions:
+  contents: write # commit ledger edits
+  issues: write # comment on sticky issue
+  actions: read # gh run view --log-failed
+
+concurrency:
+  # Serialize per-workflow so a fail+resolve pair (or two rapid failures) can't race the ledger.
+  group: log-cron-incident-${{ github.event.workflow_run.name }}
+  cancel-in-progress: false
+
+jobs:
+  record_failure:
+    if: >
+      vars.CRON_INCIDENT_LOGGER_ENABLED != 'false' &&
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main (writable)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Record failure
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CRON_INCIDENT_ISSUE_NUMBER: ${{ vars.CRON_INCIDENT_ISSUE_NUMBER }}
+        run: node .github/scripts/log-cron-incident.mjs --mode=record-failure
+
+  maybe_auto_resolve:
+    if: >
+      vars.CRON_INCIDENT_LOGGER_ENABLED != 'false' &&
+      vars.CRON_INCIDENT_AUTO_RESOLVE_ENABLED != 'false' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main (writable)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Maybe auto-resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CRON_INCIDENT_ISSUE_NUMBER: ${{ vars.CRON_INCIDENT_ISSUE_NUMBER }}
+        run: node .github/scripts/log-cron-incident.mjs --mode=maybe-resolve

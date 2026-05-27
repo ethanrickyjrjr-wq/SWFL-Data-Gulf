@@ -15,6 +15,17 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Opus 4.7 · main) — wire GHA failures into cron-rebuild-failures.md (auto-capture + auto-resolve)
+
+- `.github/workflows/log-cron-incident.yml`: new `workflow_run` listener watching 22 cron workflows (allowlist by `name:`). Two jobs: `record_failure` on `conclusion==failure` + `maybe_auto_resolve` on `conclusion==success && event==schedule`. `ref: main` checkout to avoid detached-HEAD; `concurrency` group per workflow name to serialize fail+resolve race.
+- `.github/scripts/log-cron-incident.mjs` (~190 LOC): sentinel-anchored row insertion (`<!-- INCIDENT_TABLE_START -->` / `END`); kebab-name derived from `run.path`; symptom regex extraction; layered push-retry (fetch → reset → re-read → re-apply → re-commit); issue-comment via `gh issue comment -F`.
+- `docs/cron-rebuild-failures.md`: sentinels + intro paragraph + `RESOLVED (auto)` Status key. Already on main via op-side commit.
+- Sticky issue #44 (`Cron incident feed (do not close)`) opened; repo variables set: `CRON_INCIDENT_ISSUE_NUMBER=44`, `CRON_INCIDENT_LOGGER_ENABLED=true`, `CRON_INCIDENT_AUTO_RESOLVE_ENABLED=true`.
+- Dry-run verified both modes: failure-mode row layout matches existing entries; resolve-mode correctly identifies `faf5-annual` OPEN row (the only one in the ledger).
+- Kill switches: flip either variable to `false` from repo Settings → Variables. No code change needed to disable.
+- Next: first real failure (likely `faf5-annual` next cron, or the `freshness-probe-daily` if a source has gone stale) is the live test. Watch issue #44 + ledger commits.
+- Plan: `C:\Users\ethan\.claude\plans\just-set-up-cron-rebuild-failures-md-luminous-yeti.md`
+
 ## 2026-05-27 (Sonnet 4.6 · main) — update cron-rebuild-failures ledger with WAF incident
 
 - `docs/cron-rebuild-failures.md`: added `collier-permits-monthly` WAF incident row (RESOLVED). Updated Pre-flight First-Fire Pending note — WAF fix wired, monitor June 5th run.
