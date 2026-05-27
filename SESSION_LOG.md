@@ -15,6 +15,20 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — feat(ingest): Collier County building permits pipeline
+
+- Ships `ingest/pipelines/collier_permits/` (fetcher + normalizer + geocoder + dlt pipeline + 35 tests, 35/35 pass). Dry-run confirmed: 5030 rows from April 2026 XLSX.
+- Key design: listing-page parser (URLs not predictable), Census batch geocoder (free, no key), haversine corridor assignment via `fixtures/collier-corridor-centroids.json` (10 Naples corridors). Issued-only; Applied series requires compound PK.
+- Also ships: `docs/sql/20260527_collier_building_permits.sql`, `.github/workflows/collier-permits-monthly.yml`, `openpyxl` added to requirements, `collier_permits` added to `cadence_registry.yaml` `not_yet_running:`.
+- Next: run DDL in Supabase, trigger first live run (`workflow_dispatch`), verify rows + move cadence entry to `pipelines:`. Brain UNION (permits-swfl consuming both tables) is a follow-up PR.
+
+## 2026-05-27 (Opus 4.7 · main) — PR #42 merged → main at `99b062e`
+
+- Squash-free merge (`gh pr merge --merge`) preserved all 4 atomic commits on main so C4 (`df486ab`) stays independently revertable if the live `/api/b/cre-swfl?view=speak&tier=2` smoke flags anything unexpected.
+- Branch deleted from remote. Local main synced at `99b062e`.
+- Test plan now waiting on Vercel deploy + daily-rebuild fire to regenerate cre-swfl brain markdown picking up the new `character_render` from 25/26 corridors.
+- Phase 1 follow-up tracked: Veterans Pkwy citations-drop diagnostic (will resolve naturally when industry voices run — absorption-vs-name signal in builders-edge / main-street voices).
+
 ## 2026-05-27 (Opus 4.7 · feat/corridor-character-generator-step-4) — Step 4 SHIPPED: 25/26 corridors on new structured character output
 
 Step 4 of the corridor-character generator landed in DB. 25 corridors carry `character_facts` / `character_speculative` / `character_chart` / `character_citations` from the Anthropic-grounded synthesizer; 1 (Veterans Pkwy / Colonial Blvd) stays on legacy `character` cold fallback — model dropped citations object on 2 deterministic retries (only corridor with negative absorption; deeper investigation deferred to Phase 1 voices, where the same-fix-path applies). Legacy `character` preserved on all 26 per plan retention rule.

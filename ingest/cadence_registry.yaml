@@ -207,3 +207,10 @@ not_yet_running:
     inventory_id: lake-tier1/corridor_grounded/
     inventory_key_type: prefix
     note: "Pipeline exists (Step 2 B1); no GHA run yet — quarterly cadence, triggered after operator sign-off on Pine Ridge output."
+
+  - name: collier_permits
+    lane: tier-2
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    dlt_schema_name: collier_permits
+    note: "Pipeline shipped 2026-05-27; GHA cron not yet fired. Move to pipelines: after first successful run and verify schema_name in _dlt_loads."

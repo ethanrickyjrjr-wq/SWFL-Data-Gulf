@@ -1,0 +1,49 @@
+name: Collier County permits monthly
+
+on:
+  schedule:
+    # 8:00 AM ET on the 5th of each month — picks up previous month's published XLSX.
+    # Staggered from lee-permits-weekly (Monday) to avoid simultaneous Supabase load.
+    - cron: "0 12 5 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "YYYY-MM to ingest (default: previous calendar month)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Dry run — download and parse only; skip geocode + dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run Collier permits pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.month }}" ]; then
+            ARGS="--month ${{ github.event.inputs.month }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python -m ingest.pipelines.collier_permits.pipeline $ARGS
