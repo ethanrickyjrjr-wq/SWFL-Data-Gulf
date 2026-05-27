@@ -15,6 +15,11 @@ If a hook blocks your push, that's the system working. Fix the entry, then push.
 
 ---
 
+## 2026-05-27 (Sonnet 4.6 · main) — add cron-rebuild-failures ledger
+
+- Created `docs/cron-rebuild-failures.md`: operational incident ledger for GHA workflows + daily rebuild. 13 historical incidents logged. Fixed 3 OPEN/BLOCKED rows that were already RESOLVED by PR #41 (deleted broker pipelines). Completed Pre-flight section with `faf5-annual` DDL gap + `collier-permits-monthly` first-fire pending row.
+- Next: log `collier-permits-monthly` WAF failure to the ledger once the workaround is in.
+
 ## 2026-05-27 (Opus 4.7 · main) — promote collier_permits to active cadence
 
 - Moved `collier_permits` from `not_yet_running:` → `pipelines:` (tier-2) in `ingest/cadence_registry.yaml`. April 2026 XLSX loaded last night by operator (table already populated; today's GHA dispatch failed because Collier WAF turned on between last night's load and morning).
