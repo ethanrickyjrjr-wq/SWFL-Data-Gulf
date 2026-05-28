@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-27 (Opus 4.7 · main) — fix: cover URL → Vercel CDN (GitHub raw 404s on private repo)
+
+- Operator reported missing wave cover. Root cause: cover URL pointed at `raw.githubusercontent.com` which 404s for private repos (and brain-platform IS private). Vercel-hosted URL `https://www.swfldatagulf.com/swfl-data-gulf-icon-512.png` returns 200.
+- Swapped `LOGO_URL` in `scripts/notion-sync.mjs` to the Vercel path. Re-ran the sync (41 stale blocks archived, 4 child pages recreated with the working cover).
+- **Lesson recorded:** for private repos, do not use `raw.githubusercontent.com` URLs for cover images or any other public-fetch surface. Vercel's `public/` serve is the right public CDN.
+
 ## 2026-05-27 (Opus 4.7 · main) — Notion v2 visual upgrade: dashboard hub + cover image + bookmarks + toggles
 
 - **`public/swfl-data-gulf-icon-512.png`** — 512×512 wave PNG rendered from `Downloads/generate-icon.html`. 149KB. Used as Notion cover (served via GitHub raw URL for instant CDN, no Vercel deploy wait).

@@ -34,10 +34,9 @@ const H = {
 const SITE = "https://www.swfldatagulf.com";
 const REPO = "https://github.com/ethanrickyjrjr-wq/brain-platform";
 // Notion needs a renderable image URL (PNG/JPEG/WEBP). The 512×512 wave PNG
-// lives in public/ (served by Vercel at /swfl-data-gulf-icon-512.png) and is
-// also available via GitHub raw — using raw for instant CDN, no deploy wait.
-const LOGO_URL =
-  "https://raw.githubusercontent.com/ethanrickyjrjr-wq/brain-platform/main/public/swfl-data-gulf-icon-512.png";
+// lives in public/ and is served by Vercel at the SITE-rooted path below.
+// (GitHub raw 404s because the repo is private — Vercel is the public CDN.)
+const LOGO_URL = `${SITE}/swfl-data-gulf-icon-512.png`;
 const COVER_URL = LOGO_URL;
 const FRESHNESS = "SWFL-7421-v53-20260525";
 const TODAY = new Date().toISOString().slice(0, 10);
