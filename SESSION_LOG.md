@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-28 (Sonnet 4.6 · claude/roadmap-ideas-file-ps3Xc) — new: littlebird session notes from live MCP testing
+
+- Created `docs/littlebird-notes/2026-05-28.md` with full live-testing findings: what worked (corridor voices, SBA data, source attribution), what broke (broker submarket join all 26 corridors → blended mush, FDOT corridor match, tourism source unknown), and priority stack.
+- Priority order confirmed: US-41 alias fix → broker data decision → FDOT corridor match → tourism audit → 2 pipelines/day → master synthesizer → 26 voices → landing page → ads.
+- Next session: start with US-41/Tamiami alias canonicalization (quick win), then investigate tourism data source.
+
 ## 2026-05-28 (Sonnet 4.6 · claude/roadmap-ideas-file-ps3Xc) — new: vision & priorities ideas file
 
 - Created `_AUDIT_AND_ROADMAP/vision-and-priorities-2026-05-28.md` capturing operator's product vision: "The Proof Is In The Data" slogan, side-by-side landing page comparison, corridor-triggered ad model, and top priorities (2 pipelines/day, master synthesizer, broker data, 26 corridor voices).
