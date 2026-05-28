@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-28 (Sonnet 4.6 · claude/roadmap-ideas-file-ps3Xc) — new: vision & priorities ideas file
+
+- Created `_AUDIT_AND_ROADMAP/vision-and-priorities-2026-05-28.md` capturing operator's product vision: "The Proof Is In The Data" slogan, side-by-side landing page comparison, corridor-triggered ad model, and top priorities (2 pipelines/day, master synthesizer, broker data, 26 corridor voices).
+- File includes honest pushback on ToS risk for live API comparison, MLS licensing, and pipeline quality gates.
+- Next: operator reviews file in morning; pick up highest-priority items from the top of that file each session.
+
 ## 2026-05-27 (Opus 4.7 · main) — fix: cover URL → Vercel CDN (GitHub raw 404s on private repo)
 
 - Operator reported missing wave cover. Root cause: cover URL pointed at `raw.githubusercontent.com` which 404s for private repos (and brain-platform IS private). Vercel-hosted URL `https://www.swfldatagulf.com/swfl-data-gulf-icon-512.png` returns 200.
