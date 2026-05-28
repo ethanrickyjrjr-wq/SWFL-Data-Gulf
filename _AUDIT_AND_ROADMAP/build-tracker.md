@@ -5,9 +5,9 @@
 
 ## Tracker status (update as sections complete)
 
-- 🟡 **Section 1 — Stamp the goal** — in progress
-- 🔴 **Section 2 — Build /ops ledger** — not started
-- 🔴 **Section 3 — Plan the real work** — blocked until ledger is live
+- 🟢 **Section 1 — Stamp the goal** — DONE (shipped `2c1a355`): `docs/THE-GOAL.md` + lean rules-of-engagement in CLAUDE.md + contract.
+- 🟡 **Section 2 — Build /ops ledger** — code DONE + `next build` verified (shipped `9180955`). **Operator deploy pending:** create Vercel project (Root Directory = `ops`) + set env vars, then deploy. See `ops/README.md` + `ops-build-spec.md`.
+- 🔴 **Section 3 — Plan the real work** — blocked until /ops is live. Opens by reading the /ops build-queue page.
 
 ---
 

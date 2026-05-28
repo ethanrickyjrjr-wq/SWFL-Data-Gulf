@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-28 (Opus 4.8 · main) — docs: build-tracker status → S1 done, S2 code-done/deploy-pending
+
+- `_AUDIT_AND_ROADMAP/build-tracker.md` status block updated to match reality (the anti-drift point): Section 1 🟢 shipped; Section 2 🟡 code done + build-verified, operator Vercel deploy pending; Section 3 🔴 blocked until /ops is live.
+
 ## 2026-05-28 (Opus 4.8 · main) — feat(ops): scaffold standalone /ops live ledger (Section 2 of sectioned build)
 
 - **`ops/`** — new self-contained Next.js 15 / React 19 app, a SEPARATE Vercel project (Root Directory = `ops`). Private dashboard whose status is **derived from real signals, never hand-typed.** `next build` passes clean (6 routes: `/`, `/c/[category]`, `/queue`, `/api/ledger`, middleware).
