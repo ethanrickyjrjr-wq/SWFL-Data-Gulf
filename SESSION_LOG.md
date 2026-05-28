@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-28 (Sonnet 4.6 · claude/swfl-mcp-http-transport-u3uG7) — feat: add SWFL HTTP MCP server to .mcp.json
+
+- Added `swfl` HTTP transport entry to `.mcp.json` (type: http, url: https://www.swfldatagulf.com/api/mcp). Removed stray entry that `claude mcp add` had dropped into `/root/.claude.json`.
+- `/api/mcp` endpoint is live (returns 403 auth-gated, not 404). The 404 seen in screenshot was a typo URL `/api/mpi`.
+
 ## 2026-05-27 (Opus 4.7 · main) — fix: cover URL → Vercel CDN (GitHub raw 404s on private repo)
 
 - Operator reported missing wave cover. Root cause: cover URL pointed at `raw.githubusercontent.com` which 404s for private repos (and brain-platform IS private). Vercel-hosted URL `https://www.swfldatagulf.com/swfl-data-gulf-icon-512.png` returns 200.
