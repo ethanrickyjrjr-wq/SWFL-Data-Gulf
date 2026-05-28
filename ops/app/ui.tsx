@@ -1,36 +1,8 @@
 import Link from "next/link";
 import type { Category, LedgerItem } from "../lib/ledger";
-import { computeRead } from "../lib/read";
-import type { QueueItem } from "../lib/ledger";
 
 export function Pill({ status }: { status: LedgerItem["status"] }) {
   return <span className={`pill ${status}`}>{status}</span>;
-}
-
-/** The fixed read: last 2 greens · next 3–6 reds · any yellows. */
-export function ReadBar({
-  items,
-  queue,
-}: {
-  items: LedgerItem[];
-  queue?: QueueItem[];
-}) {
-  const r = computeRead(items, queue ?? []);
-  const names = (xs: LedgerItem[]) =>
-    xs.length ? xs.map((i) => i.label).join(", ") : "—";
-  return (
-    <div className="read">
-      <span>
-        <b>Last 2 done:</b> {names(r.greens)}
-      </span>
-      <span>
-        <b>Next up:</b> {names(r.reds)}
-      </span>
-      <span>
-        <b>Building:</b> {names(r.yellows)}
-      </span>
-    </div>
-  );
 }
 
 export function CategoryTable({ cat }: { cat: Category }) {
@@ -76,20 +48,20 @@ export function CategoryTable({ cat }: { cat: Category }) {
   );
 }
 
-export function CategorySection({
-  cat,
-  queue,
-}: {
-  cat: Category;
-  queue?: QueueItem[];
-}) {
+export function CategorySection({ cat }: { cat: Category }) {
+  const t = tally(cat.items);
   return (
     <section className="category">
       <div className="category-header">
         <span className="cat-dot" style={{ background: cat.dot }} />
         {cat.title}
+        <span className="cat-tally">
+          <span style={{ color: "var(--green)" }}>{t.green}✓</span>
+          <span style={{ color: "var(--yellow)" }}>{t.yellow}~</span>
+          <span style={{ color: "var(--red)" }}>{t.red}✗</span>
+          <span className="note">· {cat.items.length} total</span>
+        </span>
       </div>
-      <ReadBar items={cat.items} queue={queue} />
       <CategoryTable cat={cat} />
     </section>
   );

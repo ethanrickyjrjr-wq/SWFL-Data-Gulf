@@ -25,7 +25,7 @@ export default async function CategoryPage({
         live signals
       </p>
       <div style={{ marginTop: 16 }}>
-        <CategorySection cat={cat} queue={ledger.queue} />
+        <CategorySection cat={cat} />
       </div>
       <footer>
         SWFL Data Gulf · /ops · {cat.title}. Status is derived, never

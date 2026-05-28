@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-28 (Opus 4.8 · main) — fix(ops): show ALL on dashboard + logo flair
+
+- **Show everything:** home page now renders EVERY category with its FULL table (all rows), not a card summary. Removed the truncated "last 2 greens / 3–6 reds" `ReadBar` from the dashboard entirely — that digest was the narrow "what's next" idea, not the dashboard view. Per-category header now shows a count (`N✓ M~ K✗ · total`) above the full table.
+- **Logo flair:** `ops/public/logo.png` + `ops/app/icon.png` (favicon) from swfl-data-gulf-icon-512.png; teal-glow logo header on home via `next/image`.
+- Fixed `/c/[category]` caller (dropped removed `queue` prop); `next build` passes clean (7 routes).
+- **View locally:** `cd ops && npm run dev` → http://localhost:3000 (runs without secrets; rows show unavailable + degraded banner until env set).
+
 ## 2026-05-28 (Opus 4.8 · main) — docs: build-tracker status → S1 done, S2 code-done/deploy-pending
 
 - `_AUDIT_AND_ROADMAP/build-tracker.md` status block updated to match reality (the anti-drift point): Section 1 🟢 shipped; Section 2 🟡 code done + build-verified, operator Vercel deploy pending; Section 3 🔴 blocked until /ops is live.

@@ -66,6 +66,44 @@ h1 {
   margin-top: 2px;
 }
 
+/* logo header */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.logo {
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 0 24px rgba(45, 212, 191, 0.12);
+}
+
+/* category jump nav */
+.catnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  padding: 10px 0 22px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+/* per-category count (proves nothing is truncated — full table below) */
+.cat-tally {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 /* status pills */
 .pill {
   display: inline-block;
