@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-27 (Opus 4.7 · main) — Notion build: Big Bird's Brain → Latest Sync hub + 4 detail pages
+
+- **Built into the correct Notion workspace** (Big Bird's Brain, integration key passed via env var; MCP `claude_ai_Notion` connects to a different workspace and could not see this one).
+- **Tore down Latest Sync** (90 stale blocks archived, page renamed to `🦅 Latest Sync — Big Bird's Brain (2026-05-27)`) and rebuilt as a hub with current state + links.
+- **Created 4 child pages** under Latest Sync: Project Audit (`36e8729a6459816db946e9a80fc6adc6`), Roadmap (`36e8729a645981c2b5ceff473add289e`), Premise Data Replacement Plan (`36e8729a64598117acbdd20bc230df31`), Data Sources Inventory (`36e8729a6459816db3cde24397e0bf7c`).
+- **Brand reference baked into the hub:** logo bg `#080E11`, accent teal `#3DC9C0` / `#3ECFB2`, bearish amber `#E8A84C`, IBM Plex Sans + Mono. Logo system: three stacked sine waves at 1.0/0.65/0.3 opacity with glow (generator: `Downloads/generate-icon.html`). Notion's fixed palette mapping: teal → `blue_background`, amber → `orange_background`.
+- **Build script kept at** `__scratch__/notion-bb-build.mjs` (gitignored). Re-runnable with `NOTION_KEY=... node __scratch__/notion-bb-build.mjs`. Wipes Latest Sync children + rebuilds all 5 pages idempotently.
+- **One leftover from earlier in this session:** the misplaced "🦅 Big Bird's Brain" page I created in the _other_ SWFL Data Gulf Notion workspace (page id `36e35f3b-7faf-81b5-aac0-e84d21beccd1`) under the wrong parent. MCP `claude_ai_Notion` doesn't expose an archive op; can be deleted from the Notion UI when convenient.
+- **Next:** when the master synthesizer (§6.1) work starts, the hub + audit + roadmap pages can be refreshed via the script. The Data Sources Inventory should evolve as NEED-status items get built into brains.
+
 ## 2026-05-27 (Opus 4.7 · main) — audit + roadmap + CLAUDE.md refactor + premise-data chart + memory drift sync
 
 - **`_AUDIT_AND_ROADMAP/` folder created at repo root** (underscore prefix → VS Code sort priority). Contains: `audit-2026-05-27.md`, `roadmap-2026-05-27.md`, `premise-data-replacement.md`, `notion-export/` (paste-ready copies for LittleBird's Notion: audit + roadmap + premise chart).
