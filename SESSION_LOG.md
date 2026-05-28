@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-27 (Opus 4.7 · main) — automation layer: notion-sync GHA + project-state-sync subagent + single-doc build guide
+
+- **`scripts/notion-sync.mjs`** — promoted from `__scratch__/notion-bb-build.mjs` to tracked `scripts/`. Parameterized via `NOTION_KEY` + `NOTION_LATEST_SYNC_PAGE` env vars. Idempotent: wipes + rebuilds 5 pages every run.
+- **`.github/workflows/notion-sync-weekly.yml`** — cron `0 13 * * 1` (Monday 09:00 ET) + `workflow_dispatch` with `dry_run` input. Requires one new repo secret: `NOTION_KEY`.
+- **`.claude/agents/project-state-sync.md`** — third subagent (read-only drift detector). Compares git log + SESSION_LOG + MEMORY.md + plan READMEs + ontology doc + CLAUDE.md against repo reality. Cannot Edit/Write. Mirrors `v3-spec-guard` shape.
+- **`docs/BRAIN_PLATFORM_AUTOMATION_GUIDE.md`** — single-document build guide modeled on `PREMISE_N8N_BUILD_GUIDE.md`. Covers ingest crons (20 active), daily-rebuild, notion-sync-weekly, subagents (3 total). Prerequisites, secret list, build order, cost ledger, failure recovery, what's NOT built, replaceability, open decisions, file map, quick reference IDs. Notes brain-platform pivoted off n8n at PR #17.
+- **One key needed** for the new workflow: `NOTION_KEY` = the Big Bird's Brain integration token.
+- **Next:** operator adds `NOTION_KEY` repo secret; next Monday's cron fires automatically. Master synthesizer (§6.1) is the highest-leverage next code item.
+
 ## 2026-05-27 (Opus 4.7 · main) — follow-up: track \_AUDIT_AND_ROADMAP/data-sources-inventory.html
 
 - One-file follow-up commit `2d92c88` adding `_AUDIT_AND_ROADMAP/data-sources-inventory.html` (1,142 lines) — the brand-styled HTML cross-walk of premise vs. brain-platform data sources. Companion to `premise-data-replacement.md` and the Notion mirror. Should have shipped with the prior `5ce39db` commit; was left untracked. Pre-push hook didn't block (prior push's SESSION_LOG entry covered the ahead-of-upstream window), but RULE 0 says every push gets an entry — this is that entry.

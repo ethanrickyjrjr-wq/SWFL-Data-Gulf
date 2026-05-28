@@ -1,0 +1,70 @@
+name: notion-sync-weekly
+
+# Pushes Big Bird's Brain → Latest Sync hub + 4 detail pages.
+# Tears down stale content and rebuilds. Idempotent.
+#
+# Cadence: every Monday 13:00 UTC = 09:00 ET (Monday morning briefing window).
+# Manual run: workflow_dispatch.
+#
+# Required repo secrets:
+#   NOTION_KEY                — Big Bird's Brain integration token (ntn_...)
+#   NOTION_LATEST_SYNC_PAGE   — optional, defaults to 3658729a64598193a737f845f9747bb1
+#
+# Script: scripts/notion-sync.mjs (zero-state, single fetch loop).
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "If 'true', don't write — just log what would happen."
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notion-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Notion sync
+        env:
+          NOTION_KEY: ${{ secrets.NOTION_KEY }}
+          NOTION_LATEST_SYNC_PAGE: ${{ secrets.NOTION_LATEST_SYNC_PAGE }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          if [ -z "$NOTION_KEY" ]; then
+            echo "::error::NOTION_KEY repo secret not set. Add it under Settings → Secrets → Actions."
+            exit 1
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Dry run — would invoke scripts/notion-sync.mjs"
+            node -e "console.log('script readable:', require('node:fs').statSync('scripts/notion-sync.mjs').size, 'bytes')"
+            exit 0
+          fi
+          node scripts/notion-sync.mjs
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## notion-sync-weekly"
+            echo "- Ran at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "- Status: ${{ job.status }}"
+            echo "- Page: https://www.notion.so/3658729a64598193a737f845f9747bb1"
+          } >> $GITHUB_STEP_SUMMARY
