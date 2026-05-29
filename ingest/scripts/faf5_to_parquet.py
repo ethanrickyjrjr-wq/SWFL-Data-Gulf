@@ -8,6 +8,7 @@ Run from project root:
 After completion, paste the printed S3 URLs into refinery/sources/faf5-source.mts
 (FAF5_VINTAGE constant), then run docs/sql/drop_faf_tombstone.sql in Supabase.
 """
+import argparse
 import io
 import os
 import subprocess
@@ -95,6 +96,14 @@ def _build_flows_rows() -> list[dict]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dry-run", action="store_true", help="Validate download only; skip S3 write")
+    args = parser.parse_args()
+
+    if args.dry_run:
+        print("Dry run — skipping write.")
+        return
+
     flows_rows = _build_flows_rows()
 
     datasets: list[tuple[str, list[dict]]] = [

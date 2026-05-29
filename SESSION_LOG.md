@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — fix(faf5-annual): wire workflow to Cold Lane script + add --dry-run stub
+
+- `faf5-annual.yml`: step was calling `ingest.pipelines.faf5.pipeline` (the abandoned dlt→Postgres route) — now calls `ingest.scripts.faf5_to_parquet` (Cold Lane). Added the three `SUPABASE_S3_*` env vars the upload script needs.
+- `ingest/scripts/faf5_to_parquet.py`: added `argparse` + `--dry-run` flag so `workflow_dispatch` dry_run input works without crashing.
+- Root cause of the SCTG lookup red light: wrong script + `--dry-run` passed to a module with no CLI — would have crashed before touching S3.
+- **Next:** verify secrets `SUPABASE_S3_ENDPOINT / SUPABASE_S3_ACCESS_KEY_ID / SUPABASE_S3_SECRET_ACCESS_KEY` are set in repo settings, then trigger a dry-run dispatch to confirm the workflow goes green.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — fix(ops): lock project link + guard ops/ in CLAUDE.md
 
 - Committed `ops/.vercel/project.json` (projectId + orgId, no secrets) so `vercel --prod` always targets `swfldatagulf-ops` and can never drift to a new project again.
