@@ -198,7 +198,8 @@ pipelines:
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
-    dlt_schema_name: fl_dor_sales_tax
+    freshness_table: public.fl_dor_sales_tax
+    # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # First run: 2026-05-29 backfill (cy0203–cy2425). 40,140 rows. Lee + Collier.
     # Cron: 15th of month 11:00 UTC via fl-dor-sales-tax-monthly.yml.
 

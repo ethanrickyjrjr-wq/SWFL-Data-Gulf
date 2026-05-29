@@ -273,16 +273,17 @@ def download_form10(start: int, end: int, timeout: int = 180) -> bytes:
 UPSERT_SQL = f"""
 INSERT INTO {TABLE}
   (county, county_code, kind_code, business_type, period,
-   taxable_sales_usd, source_url, retrieved_at)
+   taxable_sales_usd, source_url, retrieved_at, inserted_at)
 VALUES
   (%(county)s, %(county_code)s, %(kind_code)s, %(business_type)s, %(period)s,
-   %(taxable_sales_usd)s, %(source_url)s, %(retrieved_at)s)
+   %(taxable_sales_usd)s, %(source_url)s, %(retrieved_at)s, NOW())
 ON CONFLICT (county, kind_code, period) DO UPDATE SET
   taxable_sales_usd = EXCLUDED.taxable_sales_usd,
   business_type     = EXCLUDED.business_type,
   county_code       = EXCLUDED.county_code,
   source_url        = EXCLUDED.source_url,
-  retrieved_at      = EXCLUDED.retrieved_at
+  retrieved_at      = EXCLUDED.retrieved_at,
+  inserted_at       = NOW()
 """
 
 

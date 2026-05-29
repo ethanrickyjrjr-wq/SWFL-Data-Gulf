@@ -2,8 +2,8 @@
  * Supabase signal adapter. Read-only, server-side only (service key never
  * reaches the client). Degrades gracefully when env is unset.
  *
- * Reads data_lake._dlt_loads to get the latest successful load per schema —
- * the tier-2 pipeline freshness signal.
+ * latestDltLoads — reads data_lake._dlt_loads for dlt-pipeline freshness.
+ * directTableFreshness — reads MAX(inserted_at) on non-dlt tables directly.
  */
 import { createClient } from "@supabase/supabase-js";
 
@@ -25,7 +25,6 @@ export async function latestDltLoads(): Promise<{
       auth: { persistSession: false, autoRefreshToken: false },
       db: { schema: "data_lake" },
     });
-    // _dlt_loads: one row per load; status 0 = success.
     const { data, error } = await sb
       .from("_dlt_loads")
       .select("schema_name, inserted_at, status")
@@ -49,6 +48,47 @@ export async function latestDltLoads(): Promise<{
         last_loaded,
       })),
     };
+  } catch {
+    return { available: false, loads: [] };
+  }
+}
+
+export interface DirectLoad {
+  table_name: string; // "schema.table" or "table" (defaults to public)
+  last_inserted: string; // ISO timestamp from MAX(inserted_at)
+}
+
+/**
+ * For non-dlt pipelines that write directly via psycopg.
+ * Queries MAX(inserted_at) on each specified table.
+ * tableSpecs format: "public.fl_dor_sales_tax" or "fl_dor_sales_tax".
+ */
+export async function directTableFreshness(tableSpecs: string[]): Promise<{
+  available: boolean;
+  loads: DirectLoad[];
+}> {
+  if (!URL || !KEY || tableSpecs.length === 0)
+    return { available: false, loads: [] };
+  try {
+    const results: DirectLoad[] = [];
+    for (const spec of tableSpecs) {
+      const [schema, table] = spec.includes(".")
+        ? spec.split(".", 2)
+        : ["public", spec];
+      const sb = createClient(URL, KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        db: { schema },
+      });
+      const { data } = await sb
+        .from(table)
+        .select("inserted_at")
+        .order("inserted_at", { ascending: false })
+        .limit(1);
+      if (data?.[0]?.inserted_at) {
+        results.push({ table_name: spec, last_inserted: data[0].inserted_at });
+      }
+    }
+    return { available: true, loads: results };
   } catch {
     return { available: false, loads: [] };
   }

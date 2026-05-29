@@ -2,15 +2,14 @@
  * The ledger — the derived-status brain.
  *
  * Combines real signals (GitHub workflow runs, raw repo files, Supabase
- * _dlt_loads) into categorized items with a GREEN / YELLOW / RED status.
+ * _dlt_loads, direct table freshness) into categorized GREEN / YELLOW / RED items.
  *
- * DERIVED (never hand-typed): existence + done-or-not (green vs red).
- * HUMAN INPUT (the one editable file): build-queue.md sets which items are
- *   YELLOW (being built) and the priority order of REDs. See ops-build-spec.md.
+ * DERIVED (never hand-typed): existence + done-or-not.
+ * HUMAN INPUT: build-queue.md sets YELLOW items and RED priority order.
  */
 import { parse as parseYaml } from "yaml";
 import { latestWorkflowRuns, rawText, listDir, githubMeta } from "./github";
-import { latestDltLoads, supabaseMeta } from "./supabase";
+import { latestDltLoads, directTableFreshness, supabaseMeta } from "./supabase";
 
 export type Status = "green" | "yellow" | "red";
 
@@ -18,8 +17,8 @@ export interface LedgerItem {
   id: string;
   label: string;
   status: Status;
-  cols: Record<string, string>; // table cells (varies by category)
-  updatedAt: string | null; // ISO, for "last greens" ordering
+  cols: Record<string, string>;
+  updatedAt: string | null;
   link?: string;
   note?: string;
 }
@@ -34,7 +33,7 @@ export interface Category {
 
 export interface QueueItem {
   label: string;
-  status: Status; // [x]=green [~]=yellow [ ]=red
+  status: Status;
   order: number;
 }
 
@@ -52,7 +51,6 @@ const DOT = {
   services: "#10b981",
 };
 
-/** Parse build-queue.md checklist. `- [x]` green, `- [~]` yellow, `- [ ]` red. */
 function parseQueue(md: string | null): QueueItem[] {
   if (!md) return [];
   const out: QueueItem[] = [];
@@ -68,9 +66,6 @@ function parseQueue(md: string | null): QueueItem[] {
   return out;
 }
 
-/** Apply the human queue overlay: flip a derived item to YELLOW when the queue
- *  marks a matching label as being built. Matching = queue label contains the
- *  item id or label (case-insensitive). */
 function applyQueueOverlay(items: LedgerItem[], queue: QueueItem[]): void {
   const building = queue.filter((q) => q.status === "yellow");
   for (const item of items) {
@@ -91,70 +86,94 @@ function ageDays(iso: string): number {
   return (Date.now() - new Date(iso).getTime()) / 86_400_000;
 }
 
-// ── Pipelines / cron (cadence_registry + workflow runs + dlt loads) ──────────
+// ── Pipelines / cron ──────────────────────────────────────────────────────────
 interface RegistryEntry {
   name: string;
   lane?: string;
   cadence_days?: number;
   tolerance_multiplier?: number;
   dlt_schema_name?: string;
+  freshness_table?: string; // non-dlt: check MAX(inserted_at) on this table
 }
 
 async function buildPipelines(): Promise<Category> {
+  // Fetch registry + dlt loads in parallel; then resolve direct-table specs.
   const [registryRaw, dlt] = await Promise.all([
     rawText("ingest/cadence_registry.yaml"),
     latestDltLoads(),
   ]);
-  const loadBySchema = new Map(
-    dlt.loads.map((l) => [l.schema_name, l.last_loaded]),
-  );
 
-  const items: LedgerItem[] = [];
+  let reg: {
+    pipelines?: RegistryEntry[];
+    not_yet_running?: RegistryEntry[];
+  } = {};
   if (registryRaw) {
-    let reg: {
-      pipelines?: RegistryEntry[];
-      not_yet_running?: RegistryEntry[];
-    } = {};
     try {
       reg = parseYaml(registryRaw) ?? {};
     } catch {
       reg = {};
     }
-    for (const e of reg.pipelines ?? []) {
-      const schema = e.dlt_schema_name ?? e.name;
-      const loaded = loadBySchema.get(schema) ?? null;
-      const cadence = e.cadence_days ?? 30;
-      const tol = e.tolerance_multiplier ?? 2.0;
-      let status: Status = "red";
-      if (loaded && ageDays(loaded) <= cadence * tol) status = "green";
-      else if (loaded)
-        status = "red"; // stale
-      else if (e.lane !== "tier-2") status = "green"; // tier-1 freshness not in dlt; assume ok if registered
-      items.push({
-        id: e.name,
-        label: e.name,
-        status,
-        updatedAt: loaded,
-        cols: {
-          Lane: e.lane ?? "—",
-          Cadence: `${cadence}d`,
-          "Last load": loaded ? loaded.slice(0, 10) : "—",
-        },
-        note: dlt.available
-          ? undefined
-          : "Supabase signal unavailable — load freshness unknown",
-      });
-    }
-    for (const e of reg.not_yet_running ?? []) {
-      items.push({
-        id: e.name,
-        label: e.name,
-        status: "red",
-        updatedAt: null,
-        cols: { Lane: e.lane ?? "—", Cadence: "—", "Last load": "never run" },
-      });
-    }
   }
+
+  const freshnessTables = (reg.pipelines ?? [])
+    .filter((e) => e.freshness_table)
+    .map((e) => e.freshness_table!);
+
+  const direct = await directTableFreshness(freshnessTables);
+
+  const loadBySchema = new Map(
+    dlt.loads.map((l) => [l.schema_name, l.last_loaded]),
+  );
+  const loadByTable = new Map(
+    direct.loads.map((l) => [l.table_name, l.last_inserted]),
+  );
+
+  const items: LedgerItem[] = [];
+
+  for (const e of reg.pipelines ?? []) {
+    const cadence = e.cadence_days ?? 30;
+    const tol = e.tolerance_multiplier ?? 2.0;
+
+    // Prefer freshness_table signal; fall back to dlt_loads.
+    const loaded = e.freshness_table
+      ? (loadByTable.get(e.freshness_table) ?? null)
+      : (loadBySchema.get(e.dlt_schema_name ?? e.name) ?? null);
+
+    let status: Status = "red";
+    if (loaded && ageDays(loaded) <= cadence * tol) status = "green";
+    else if (loaded)
+      status = "red"; // stale
+    else if (e.lane !== "tier-2") status = "green"; // tier-1: no dlt, assume ok
+
+    const signalMissing =
+      !e.freshness_table && !dlt.available
+        ? "Supabase signal unavailable — load freshness unknown"
+        : undefined;
+
+    items.push({
+      id: e.name,
+      label: e.name,
+      status,
+      updatedAt: loaded,
+      cols: {
+        Lane: e.lane ?? "—",
+        Cadence: `${cadence}d`,
+        "Last load": loaded ? loaded.slice(0, 10) : "—",
+      },
+      note: signalMissing,
+    });
+  }
+
+  for (const e of reg.not_yet_running ?? []) {
+    items.push({
+      id: e.name,
+      label: e.name,
+      status: "red",
+      updatedAt: null,
+      cols: { Lane: e.lane ?? "—", Cadence: "—", "Last load": "never run" },
+    });
+  }
+
   return {
     key: "pipelines",
     title: "Pipelines & Cron",
@@ -164,7 +183,7 @@ async function buildPipelines(): Promise<Category> {
   };
 }
 
-// ── Workflows (GHA) ──────────────────────────────────────────────────────────
+// ── Workflows (GHA) ───────────────────────────────────────────────────────────
 async function buildWorkflows(): Promise<Category> {
   const { runs } = await latestWorkflowRuns();
   const items: LedgerItem[] = runs
@@ -194,7 +213,7 @@ async function buildWorkflows(): Promise<Category> {
   };
 }
 
-// ── Brains ───────────────────────────────────────────────────────────────────
+// ── Brains ────────────────────────────────────────────────────────────────────
 async function buildBrains(): Promise<Category> {
   const files = (await listDir("brains")).filter(
     (f) => f.endsWith(".md") && !f.includes("--") && f !== "test-alpha.md",

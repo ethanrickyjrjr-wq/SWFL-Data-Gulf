@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — feat(ops): UI overhaul + freshness fix + Fast Read page
+
+- **Freshness fix (Option B):** `fl_dor_sales_tax` was stuck RED because the pipeline uses psycopg directly (no dlt → no `_dlt_loads` entries). Added `inserted_at` column (migration `docs/sql/20260529_fl_dor_sales_tax_add_inserted_at.sql`), `inserted_at = NOW()` in pipeline upsert, `freshness_table: public.fl_dor_sales_tax` in registry, `directTableFreshness()` in `ops/lib/supabase.ts`, and updated `ops/lib/ledger.ts` to use it. After SQL migration runs, fl_dor_sales_tax will flip GREEN.
+- **UI overhaul:** Full `globals.css` redesign — animated topbar glow, pulsing green pills, blinking yellow, `fadeSlideUp` section entrances, staggered delays. Per-category SVG donut charts (pure SSR) in section headers. Big stat numbers in topbar. Progress bars + colour-coded recap cards at the bottom of every section. Daily Tracker (auto-hides when empty) showing today's wins / in-flight / tomorrow's goals. Clickable nav pills with counts.
+- **Fast Read page (`/read`):** New route — structured Claude-optimised summary with big health numbers, per-category breakdown (live/building/offline chips with dates), signals status, and build-queue next actions. Links to `/api/ledger` raw JSON. 8 routes, clean build.
+- **Next:** Run SQL migration in Supabase → `vercel --prod` → fl_dor_sales_tax flips GREEN.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — chore: kill Industry Characters plan + Role Renderer
 
 - Deleted `docs/superpowers/plans/2026-05-26-industry-characters/` (8 files)
