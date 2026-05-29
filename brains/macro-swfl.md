@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v26 | Token: SWFL-7421-v26-20260527 -->
+<!-- FRESHNESS: v27 | Token: SWFL-7421-v27-20260529 -->
 ---
 brain_id: macro-swfl
-version: 26
-refined_at: 2026-05-27T16:11:42Z
-freshness_token: SWFL-7421-v26-20260527
+version: 27
+refined_at: 2026-05-29T09:58:11Z
+freshness_token: SWFL-7421-v27-20260529
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Own sources: BLS LAUS monthly unemployment for Lee County + Collier County. Upstream: macro-florida for FL state baseline and confidence propagation.
@@ -30,21 +30,21 @@ SCOPE: Regional macro context for Southwest Florida — leaf tier of the three-t
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                            | verified   | expires
-s01 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                                                                                                                                                            | 2026-05-27 | 2026-05-28
-s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (https://api.bls.gov/publicAPI/v2/timeseries/data/; series prefixes LAUST12, LAUCN12071, LAUCN12021; measures 03/04/05/06; monthly, not seasonally adjusted) | 2026-05-27 | 2026-05-28
+s01 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                                                                                                                                                            | 2026-05-29 | 2026-05-30
+s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (https://api.bls.gov/publicAPI/v2/timeseries/data/; series prefixes LAUST12, LAUCN12071, LAUCN12021; measures 03/04/05/06; monthly, not seasonally adjusted) | 2026-05-29 | 2026-05-30
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"laus_lee_vs_fl","fact":"Lee County unemployment rate vs FL state baseline","value":"Lee County 4.9% vs FL state baseline 4.4% (gap: +0.5pp, 2026-M03, preliminary)","src":"s02","date":"2026-05-27"},
-  {"id":"f002","topic":"laus_collier_vs_fl","fact":"Collier County unemployment rate vs FL state baseline","value":"Collier County 4.5% vs FL state baseline 4.4% (gap: +0.1pp, 2026-M03, preliminary)","src":"s02","date":"2026-05-27"},
-  {"id":"f003","topic":"laus_fl_benchmark","fact":"FL LAUS state rate (denominator benchmark for gap math)","value":"FL state LAUS 4.4% (2026-M03) — macro-florida confidence 1.00","src":"s02","date":"2026-05-27"}
+  {"id":"f001","topic":"laus_lee_vs_fl","fact":"Lee County unemployment rate vs FL state baseline","value":"Lee County 4.9% vs FL state baseline 4.4% (gap: +0.5pp, 2026-M03, preliminary)","src":"s02","date":"2026-05-29"},
+  {"id":"f002","topic":"laus_collier_vs_fl","fact":"Collier County unemployment rate vs FL state baseline","value":"Collier County 4.5% vs FL state baseline 4.4% (gap: +0.1pp, 2026-M03, preliminary)","src":"s02","date":"2026-05-29"},
+  {"id":"f003","topic":"laus_fl_benchmark","fact":"FL LAUS state rate (denominator benchmark for gap math)","value":"FL state LAUS 4.4% (2026-M03) — macro-florida confidence 1.00","src":"s02","date":"2026-05-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 26,
-  "refined_at": "2026-05-27T16:11:42Z",
+  "version": 27,
+  "refined_at": "2026-05-29T09:58:11Z",
   "direction": "bearish",
   "magnitude": 1,
   "drivers": [],
@@ -61,7 +61,7 @@ s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (http
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-05-27T16:11:42Z",
+        "fetched_at": "2026-05-29T09:58:11Z",
         "tier": 1,
         "citation": "BLS LAUS series LAUCN120710000000003, 2026-M03 = 4.9%"
       }
@@ -76,7 +76,7 @@ s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (http
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-05-27T16:11:42Z",
+        "fetched_at": "2026-05-29T09:58:11Z",
         "tier": 1,
         "citation": "BLS LAUS series LAUCN120210000000003, 2026-M03 = 4.5%"
       }
@@ -91,7 +91,7 @@ s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (http
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-05-27T16:11:42Z",
+        "fetched_at": "2026-05-29T09:58:11Z",
         "tier": 1,
         "citation": "BLS LAUS series LAUST120000000000003, 2026-M03 = 4.4%"
       }
@@ -106,7 +106,7 @@ s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (http
       "display_format": "raw",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-05-27T16:11:42Z",
+        "fetched_at": "2026-05-29T09:58:11Z",
         "tier": 1,
         "citation": "BLS LAUS LAUCN120710000000003, YoY delta (prior-year 2026-M03 → 2026-M03) = +1.3pp"
       }
@@ -125,7 +125,7 @@ s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (http
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-27T16:11:42Z"
+    "computed_at": "2026-05-29T09:58:11Z"
   },
   "exogenous_signals": []
 }
@@ -134,5 +134,5 @@ s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (http
 - macro-swfl: BLS LAUS county unemployment data live for Lee + Collier counties.
 
 --- RECENT NOTES ---
-- 2026-05-27: pack refined by the Refinery — 3 fact(s) from 2 source(s).
+- 2026-05-29: pack refined by the Refinery — 3 fact(s) from 2 source(s).
 ```

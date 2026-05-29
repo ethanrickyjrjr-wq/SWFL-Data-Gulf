@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — diag: May 29 daily rebuild failure root-caused + process note
+
+- **Root cause:** GHA daily rebuild at 08:59Z ran against commit `5e7963e` — 4 TDT county metric slugs (`lee_latest_monthly_collections_usd`, `lee_trailing_12mo_collections_usd`, `collier_latest_monthly_collections_usd`, `collier_trailing_12mo_collections_usd`) were referenced in master's `key_metrics` but their vocab entries hadn't landed yet (they shipped in `6cf27d8` at 12:40Z, hours after the failing run). Fix was already in place; no code change needed.
+- **Process rule logged:** `[[ship-contract-together]]` — new metric slugs must ship in the same commit as the pack that uses them. Pre-push orphan-linter hook added to backlog.
+- **Brain refreshes:** macro-florida v15, macro-swfl, macro-us, permits-swfl freshness bumps from today's local rebuild.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — fix(ops/targets): clean targets page matching real design system
 
 - Fixed `ops/app/targets/page.tsx`: removed inline `<style>` block, changed `Link` import to `../ui`, no inline styles.
