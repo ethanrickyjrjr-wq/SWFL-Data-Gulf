@@ -590,3 +590,113 @@ test("emptySynthesisResult: neutral, mag 0, count 0, tier 4 (spec test 12)", () 
   ]);
   assert.deepEqual(r.exogenous_signals, []);
 });
+
+// ---- composeConditionalThesis (dossier authoring) --------------------------
+
+import {
+  composeConditionalThesis,
+  composeGrainBoundary,
+  predictedWindow,
+} from "./synth.mts";
+
+test("composeConditionalThesis: bullish dominant domain → table row + citable basis_refs", () => {
+  const passing = [
+    { upstream: brain("tourism-tdt", "bullish", 0.8, 0.9), factor: 1 },
+  ];
+  const vote = voteDirection(passing);
+  const claims = composeConditionalThesis({ passing, vote, trust_tier: 2 });
+  assert.equal(claims.length, 1);
+  assert.equal(claims[0].then_direction, "bullish");
+  assert.match(claims[0].condition, /tourist-tax collections/);
+  assert.ok(claims[0].falsifier.length > 0);
+  // basis_refs must include the dominant brain_id (resolves against drivers).
+  assert.ok(claims[0].basis_refs.includes("tourism-tdt"));
+});
+
+test("composeConditionalThesis: mixed vote → split claim naming both sides", () => {
+  const passing = [
+    { upstream: brain("cre-swfl", "bullish", 0.7, 0.7), factor: 1 },
+    { upstream: brain("sector-credit-swfl", "bearish", 0.7, 0.7), factor: 1 },
+  ];
+  const vote = voteDirection(passing);
+  assert.equal(vote.direction, "mixed");
+  const claims = composeConditionalThesis({ passing, vote, trust_tier: 2 });
+  assert.equal(claims.length, 1);
+  assert.equal(claims[0].then_direction, "mixed");
+  assert.match(claims[0].condition, /split/);
+  assert.ok(claims[0].basis_refs.includes("cre-swfl"));
+  assert.ok(claims[0].basis_refs.includes("sector-credit-swfl"));
+});
+
+test("composeConditionalThesis: neutral vote → holding-pattern claim", () => {
+  const passing = [
+    { upstream: brain("macro-us", "neutral", 0.5, 0.8), factor: 1 },
+  ];
+  const vote = voteDirection(passing);
+  assert.equal(vote.direction, "neutral");
+  const claims = composeConditionalThesis({ passing, vote, trust_tier: 2 });
+  assert.equal(claims[0].then_direction, "neutral");
+  assert.match(claims[0].condition, /without a decisive move/);
+});
+
+test("composeConditionalThesis: empty passing → no claims", () => {
+  const claims = composeConditionalThesis({
+    passing: [],
+    vote: voteDirection([]),
+    trust_tier: 4,
+  });
+  assert.deepEqual(claims, []);
+});
+
+// ---- composeGrainBoundary --------------------------------------------------
+
+test("composeGrainBoundary: well-formed grain + non-empty boundary + excluded note", () => {
+  const passing = [
+    { upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 3,
+    relevanceFloor: 0.1,
+  });
+  assert.equal(gb.finest_grain, "county-month");
+  assert.ok(gb.not_available.length > 0);
+  // originalCount(3) - passing(1) = 2 excluded → that line appears.
+  assert.ok(
+    gb.not_available.some((s) => /2 upstream read\(s\) fell below/.test(s)),
+  );
+  // finest_grain must satisfy the grain-guard <unit>-<period> format.
+  assert.match(gb.finest_grain, /^[a-z]+-[a-z]+$/);
+});
+
+// ---- predictedWindow -------------------------------------------------------
+
+test("predictedWindow: neutral vote → undefined", () => {
+  const passing = [
+    { upstream: brain("macro-us", "neutral", 0.5, 0.8), factor: 1 },
+  ];
+  assert.equal(
+    predictedWindow({ passing, vote: voteDirection(passing) }),
+    undefined,
+  );
+});
+
+test("predictedWindow: nowcast present → freight-shock horizon", () => {
+  const passing = [
+    {
+      upstream: brain("logistics-swfl-nowcast", "bullish", 0.8, 0.9),
+      factor: 1,
+    },
+    { upstream: brain("tourism-tdt", "bullish", 0.8, 0.9), factor: 1 },
+  ];
+  const w = predictedWindow({ passing, vote: voteDirection(passing) });
+  assert.match(String(w), /freight-shock/);
+});
+
+test("predictedWindow: directional, no nowcast → quarters horizon", () => {
+  const passing = [
+    { upstream: brain("cre-swfl", "bullish", 0.8, 0.9), factor: 1 },
+  ];
+  const w = predictedWindow({ passing, vote: voteDirection(passing) });
+  assert.match(String(w), /quarters/);
+});

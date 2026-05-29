@@ -22,6 +22,7 @@ import { validateSpec } from "../validate/spec-validator.mts";
 import { lintFactsOnly } from "../validate/facts-only-lint.mts";
 import { lintInferenceBait } from "../validate/inference-bait-lint.mts";
 import { lintSmoothing } from "../validate/smoothing-lint.mts";
+import { lintGrainGuard } from "../validate/grain-guard-lint.mts";
 import {
   attributeError,
   chainDepth,
@@ -452,7 +453,11 @@ export async function outputStage(
   // in `refinery/lib/smoothing-tokens.mts` (also consumed by the consumption
   // contract — Coupling 3 in the v2 roll-out plan).
   const smoothing = lintSmoothing(markdown);
-  if (!spec.ok || !lint.ok || !bait.ok || !smoothing.ok) {
+  // Grain-guard runs on the structured output (not the markdown): master's
+  // grain_boundary must name absences, not predictions, and finest_grain must
+  // be well-formed. No-op when grain_boundary is absent (every leaf brain).
+  const grainGuard = lintGrainGuard(brainOutput);
+  if (!spec.ok || !lint.ok || !bait.ok || !smoothing.ok || !grainGuard.ok) {
     const errs = [
       ...spec.errors.map((e) => `  spec: ${e}`),
       ...lint.violations.map(
@@ -464,6 +469,10 @@ export async function outputStage(
       ...smoothing.violations.map(
         (v) =>
           `  smoothing [line ${v.line}, ${v.group}/"${v.token}"]: ${v.text}`,
+      ),
+      ...grainGuard.violations.map(
+        (v) =>
+          `  grain-guard [${v.field}${v.index !== undefined ? `[${v.index}]` : ""}]: ${v.reason} — "${v.text}"`,
       ),
     ].join("\n");
     throw new Error(
