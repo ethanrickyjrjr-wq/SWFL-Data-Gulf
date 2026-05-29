@@ -185,7 +185,6 @@ Assumes 20 ingest pipelines firing at their declared cadence, 1 daily rebuild/da
 - **Premise's 4 n8n agents** (Discovery Call Prep, Sanity↔Postgres Sync, Post-Call Follow-up, Daily Briefing). Those are premise-engine surfaces, not brain-platform. Brain-platform has its own equivalent layer (GHA crons + daily-rebuild + notion-sync + subagents).
 - **Master synthesizer (§6.1)** — highest-leverage NOW item. Until shipped, `master` is an index, not a synthesizer. See `_AUDIT_AND_ROADMAP/roadmap-2026-05-27.md` for the work breakdown.
 - **Self-ingest of `tourism-tdt` source data** — brain LIVE but reads premise's Supabase. See `_AUDIT_AND_ROADMAP/premise-data-replacement.md`.
-- **Industry-characters Phase 0** — gate met by corridor-character Step 4 ship; 8-file shared infra PR untouched. See `docs/superpowers/plans/2026-05-26-industry-characters/`.
 - **Constitution YAML (§7.2)** — currently inline TypeScript in master's outputProducer (which doesn't exist yet). Land after §6.1.
 - **Yager-DST confidence upgrade (§7.4)** — ~30 LOC from textbook Yager 1987. Ship behind `synthesisStrategy: "llm-assisted"` A/B toggle.
 - **Outcomes loop** — predictions table will be seeded in §6.1.4; the grading cron is LONG-TERM work.

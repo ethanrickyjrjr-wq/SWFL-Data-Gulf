@@ -71,8 +71,7 @@ export interface BrainOutputMetricSource {
 
 /**
  * Variable-type taxonomy for a metric. Locked in Lane 1B (cosmic-rolling-brook
- * plan v2). Drives display defaults, gap-math validity, and future role-renderer
- * formatting.
+ * plan v2). Drives display defaults, gap-math validity, and future formatting.
  *
  *   "extensive"   — counts, totals, sums (employee_count, parcel_count, tons_per_year, claim_count).
  *   "intensive"   — rates, ratios, percentages, z-scores, yoy_change_pct

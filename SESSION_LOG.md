@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — chore: kill Industry Characters plan + Role Renderer
+
+- Deleted `docs/superpowers/plans/2026-05-26-industry-characters/` (8 files)
+- Deleted `refinery/render/role-renderer.mts` + `role-renderer.test.mts`
+- Deleted `refinery/tools/render-roles.mts` + `render-roles.test.mts` (test imported deleted function); removed `"roles"` npm script from `package.json`
+- Updated `docs/ontology-and-roadmap.md`: removed closed §5.4 speaker-layer gap bullet, added v1.7 changelog
+- Updated `docs/BRAIN_PLATFORM_AUTOMATION_GUIDE.md`: removed dead industry-characters Phase 0 bullet
+- Fixed stale comments in `speaker.mts`, `brain-output.mts`, `real-estate.test.mts`; `next build` passes clean
+
+**Decision:** Voice system = 26 corridor voices (shipped). Industry Characters (7 voices, 5-tier cascade) killed — never started. Role Renderer killed — CLI-only, never hit API.
+**What's next:** Roadmap work continues. Master synthesizer (§6.1) is highest priority.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — feat(fl-dor-sales-tax): backfill complete + registry activated
 
 - **Backfill:** 40,140 rows in `data_lake.fl_dor_sales_tax` — cy0203–cy2425, Lee + Collier (cy0203 thin at 348 rows; all later pairs ~3,500–3,720).

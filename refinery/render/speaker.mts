@@ -2,8 +2,8 @@
  * Speaker layer — Stage 6.
  *
  * Pure function. Parses a brain `.md` artifact and renders the conversational
- * reply appropriate for the requested tier (1/2/3). Runs AFTER Stage 5
- * role-rendering; strips the renderer artifacts that don't belong in front of
+ * reply appropriate for the requested tier (1/2/3). Runs AFTER Stage 4
+ * output rendering; strips artifacts that don't belong in front of
  * a human reader.
  *
  * Tier contract:
@@ -28,7 +28,7 @@
  *   - No "siblings haven't shipped" / "sub-brain pointers" — protocol noise,
  *     stripped.
  *
- * Math-honest invariants (inherited from role-renderer):
+ * Math-honest invariants:
  *
  *   - Numbers verbatim from `key_metrics[i].value`. Display formatting allowed;
  *     semantic compression is not.

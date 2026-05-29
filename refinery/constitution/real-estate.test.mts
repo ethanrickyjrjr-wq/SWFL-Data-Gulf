@@ -179,7 +179,7 @@ test("flood-barrier-mode-1: unrelated metric never triggers the rule", () => {
 
 test("flood-barrier-mode-1: legacy metro V/VE concept does NOT trigger (per-ZIP is policy, metro is data)", () => {
   // Group B's architectural decision: lee_county_ve_zone_pct_area_weighted
-  // remains a data signal emitted by env-swfl for ledger/role-renderer
+  // remains a data signal emitted by env-swfl for ledger
   // continuity, but it stops being a policy trigger. Lock that with a
   // regression test against accidental re-introduction of metro-as-policy.
   const r = rule("flood-barrier-mode-1");

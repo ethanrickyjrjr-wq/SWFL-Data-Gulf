@@ -15,7 +15,6 @@
     "fixtures:corridors": "bun refinery/tools/regen-corridor-fixture.mts",
     "ledger": "bun refinery/tools/semantic-ledger.mts",
     "roadmap:sync": "bun refinery/tools/roadmap-sync.mts",
-    "roles": "bun refinery/tools/render-roles.mts",
     "triage": "bun refinery/tools/orphan-triage.mts",
     "snapshot:corridor-character": "bun refinery/tools/pull-corridor-character-snapshot.mts",
     "pgvector:verify": "bun refinery/tools/verify-pgvector.mts",
