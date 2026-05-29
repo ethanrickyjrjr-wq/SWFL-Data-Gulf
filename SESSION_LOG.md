@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — fix(ops): restore ops/ after retire commit broke site
+
+- Reverted ebaca42 (Opus retire-ops), restored ui.tsx + read/page.tsx to bd8afd2. Force-rebuilding /read to flush stale CDN 404.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — feat(ops): date visibility on red/yellow items
 
 - **Main table (`ops/app/ui.tsx`):** date cols ("Last load", "Last run", "Refined at") now show "Xd ago" for non-green rows. Fixed "Refined at" missing from `mono note` styling.
