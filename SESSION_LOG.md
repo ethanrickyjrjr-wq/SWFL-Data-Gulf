@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — fix(corridors): 26→25 merge + US-41 token scrub [BREAKING]
+
+- **Breaking change:** 26 corridors reduced to 25. Airport-Pulling North/South merged into `airport-pulling-naples` (centroid midpoint lat 26.19, lon -81.776; blended rent $45.88/sqft, vacancy 2.55%). Six renames: `tamiami-naples`, `cleveland-ave-fort-myers`, `bonita-trail`, `colonial-east`, `midpoint-bridge-corridor`.
+- **Files touched:** `fixtures/corridor-{centroids,rents,permits,slug-parity}.json`, `refinery/lib/corridor-aliases.mts` + test, `refinery/lib/marketbeat-submarket-aliases.mts` + test, `refinery/__fixtures__/corridor-profiles.sample.json`, `refinery/sources/cre-source.test.mts`, `refinery/packs/cre-swfl.test.mts`, `ingest/pipelines/collier_permits/test_pipeline.py`, `ingest/pipelines/corridor_grounded/test_pipeline.py`, `docs/sql/20260529_corridor_rename_25.sql`. 754 TS tests + 50 Python tests pass. Master rebuilt → v56.
+- **Tier 1 cold storage:** old slugs (`us-41-*`, `naples-airport-pulling-*`) in `lake-tier1/corridor_grounded/` are stale/dead. New runs write to new slug paths.
+- **Next:** Run `docs/sql/20260529_corridor_rename_25.sql` in prod Supabase → `vercel --prod`.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — feat: FGCU RERI pipeline + ops /targets page
 
 - **FGCU RERI pipeline (`ingest/pipelines/fgcu_reri_indicators/`):** Scrapes FGCU Regional Economic Research Institute homepage via Firecrawl, parses 8 SWFL monthly indicators (airport activity, tourist tax, taxable sales, unemployment, building permits, home sales, home prices per-county, active listings) into `public.fgcu_reri_indicators`. Handles multi-county home price sentences (Lee / Collier / Charlotte per-row). 10 rows verified correct on dry-run parse.
