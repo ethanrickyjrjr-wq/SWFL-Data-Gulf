@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — feat: merge dossier engine — master.md v59 live with conditional thesis + grain boundary
+
+- **Merged** `feat/master-dossier-engine` into main (tag `pre-merge-dossier-engine` = `6cf27d8`). 18 files, 1755 insertions.
+- **Ship-blocker fixes (this session):** `basisRefsFor` intersect-or-drop against `vote.drivers` + rolled `key_metrics` (dead metric-ref on cap overflow); neutral-vote dominant now from neutral-direction pool only (dead brain*id ref); Stage 4 passthrough for `conditional_claims`/`grain_boundary`/`prediction_window` (fields were computed but never copied to `brainOutput`); 4 missing `hosp_tdt*\*\_county` vocab concepts + slug aliases.
+- **master.md v59:** bearish, 15 upstreams, 1 conditional claim (macro:bearish thesis), `grain_boundary.finest_grain=county-month`, `prediction_window` set. `basis_refs` verified: `macro-swfl` in drivers, `laus_lee_unemployment_rate` in key_metrics.
+- **Next:** dominant-seat fix on new branch (rollupKeyMetrics cap-overflow ranking — T1 brain at high DAG index can still lose its seat to a T2 that runs earlier when reserved.length > cap).
+
 ## 2026-05-29 (Opus 4.8 · feat/master-dossier-engine) — feat: master dossier engine (conditional thesis + grain boundary + contract-in-payload)
 
 - **Branch, not main.** All work on `feat/master-dossier-engine` (operator's choice). Needs diff-review before merge/push: changes the `--- OUTPUT ---` shape + the live `/api/b` + MCP surface (Rule 1).
