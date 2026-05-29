@@ -11,19 +11,9 @@
       "input": "Immokalee Rd North Naples",
       "expected": "immokalee-rd-north-naples"
     },
-    {
-      "input": "Naples Airport-Pulling (North)",
-      "expected": "naples-airport-pulling-north"
-    },
-    {
-      "input": "Naples Airport-Pulling (South)",
-      "expected": "naples-airport-pulling-south"
-    },
+    { "input": "Airport-Pulling Naples", "expected": "airport-pulling-naples" },
     { "input": "Pine Ridge Rd Naples", "expected": "pine-ridge-rd-naples" },
-    {
-      "input": "US-41 Tamiami Trail Naples",
-      "expected": "us-41-tamiami-trail-naples"
-    },
+    { "input": "Tamiami Naples", "expected": "tamiami-naples" },
     {
       "input": "Vanderbilt Beach Rd / Mercato",
       "expected": "vanderbilt-beach-rd-mercato"
@@ -33,7 +23,7 @@
       "input": "Bonita Beach Rd / Bonita Beach",
       "expected": "bonita-beach-rd-bonita-beach"
     },
-    { "input": "US-41 Bonita Springs", "expected": "us-41-bonita-springs" },
+    { "input": "Bonita Trail", "expected": "bonita-trail" },
     {
       "input": "Cape Coral – Coral Pointe",
       "expected": "cape-coral-coral-pointe"
@@ -49,10 +39,7 @@
       "input": "Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)",
       "expected": "three-oaks-pkwy-coconut-rd-estero-bonita-boundary"
     },
-    {
-      "input": "Colonial Blvd East (US-41 to I-75)",
-      "expected": "colonial-blvd-east-us-41-to-i-75"
-    },
+    { "input": "Colonial East", "expected": "colonial-east" },
     { "input": "Daniels Pkwy", "expected": "daniels-pkwy" },
     { "input": "Gulf Coast Town Center", "expected": "gulf-coast-town-center" },
     { "input": "Six Mile Cypress Pkwy", "expected": "six-mile-cypress-pkwy" },
@@ -61,12 +48,12 @@
       "expected": "summerlin-rd-fort-myers"
     },
     {
-      "input": "US-41 / Cleveland Ave Fort Myers",
-      "expected": "us-41-cleveland-ave-fort-myers"
+      "input": "Cleveland Ave Fort Myers",
+      "expected": "cleveland-ave-fort-myers"
     },
     {
-      "input": "Veterans Pkwy / Colonial Blvd (Midpoint Bridge Corridor)",
-      "expected": "veterans-pkwy-colonial-blvd-midpoint-bridge-corridor"
+      "input": "Midpoint Bridge Corridor",
+      "expected": "midpoint-bridge-corridor"
     },
     {
       "input": "Estero Blvd Fort Myers Beach",

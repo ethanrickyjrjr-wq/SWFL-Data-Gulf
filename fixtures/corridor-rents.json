@@ -8,6 +8,14 @@
     "vacancy_pct": 1.8
   },
   {
+    "absorption_sqft": null,
+    "id": "airport-pulling-naples",
+    "name": "Airport-Pulling Naples",
+    "nnn_asking_rent_per_sqft": 45.88,
+    "submarket": "Naples",
+    "vacancy_pct": 2.55
+  },
+  {
     "absorption_sqft": 4200,
     "id": "ben-hill-griffin-pkwy",
     "name": "Ben Hill Griffin Pkwy",
@@ -19,6 +27,14 @@
     "absorption_sqft": 18000,
     "id": "bonita-beach-rd-bonita-beach",
     "name": "Bonita Beach Rd / Bonita Beach",
+    "nnn_asking_rent_per_sqft": 27.51,
+    "submarket": "Bonita Springs",
+    "vacancy_pct": 2.3
+  },
+  {
+    "absorption_sqft": 12500,
+    "id": "bonita-trail",
+    "name": "Bonita Trail",
     "nnn_asking_rent_per_sqft": 27.51,
     "submarket": "Bonita Springs",
     "vacancy_pct": 2.3
@@ -40,6 +56,14 @@
     "vacancy_pct": 2.5
   },
   {
+    "absorption_sqft": -8679,
+    "id": "cleveland-ave-fort-myers",
+    "name": "Cleveland Ave Fort Myers",
+    "nnn_asking_rent_per_sqft": 16.04,
+    "submarket": "Fort Myers",
+    "vacancy_pct": 2.9
+  },
+  {
     "absorption_sqft": null,
     "id": "coconut-point-mall",
     "name": "Coconut Point Mall",
@@ -57,8 +81,8 @@
   },
   {
     "absorption_sqft": 5500,
-    "id": "colonial-blvd-east-us-41-to-i-75",
-    "name": "Colonial Blvd East (US-41 to I-75)",
+    "id": "colonial-east",
+    "name": "Colonial East",
     "nnn_asking_rent_per_sqft": 23.27,
     "submarket": "Fort Myers",
     "vacancy_pct": 3.2
@@ -104,20 +128,12 @@
     "vacancy_pct": 3.3
   },
   {
-    "absorption_sqft": null,
-    "id": "naples-airport-pulling-north",
-    "name": "Naples Airport-Pulling (North)",
-    "nnn_asking_rent_per_sqft": 30.91,
-    "submarket": "Naples",
-    "vacancy_pct": 3.3
-  },
-  {
-    "absorption_sqft": null,
-    "id": "naples-airport-pulling-south",
-    "name": "Naples Airport-Pulling (South)",
-    "nnn_asking_rent_per_sqft": 60.84,
-    "submarket": "Naples",
-    "vacancy_pct": 1.8
+    "absorption_sqft": -5500,
+    "id": "midpoint-bridge-corridor",
+    "name": "Midpoint Bridge Corridor",
+    "nnn_asking_rent_per_sqft": 23.27,
+    "submarket": "Fort Myers",
+    "vacancy_pct": 3.2
   },
   {
     "absorption_sqft": 6200,
@@ -152,6 +168,14 @@
     "vacancy_pct": 7.2
   },
   {
+    "absorption_sqft": 6200,
+    "id": "tamiami-naples",
+    "name": "Tamiami Naples",
+    "nnn_asking_rent_per_sqft": 60.84,
+    "submarket": "Naples",
+    "vacancy_pct": 1.8
+  },
+  {
     "absorption_sqft": 7500,
     "id": "three-oaks-pkwy-coconut-rd-estero-bonita-boundary",
     "name": "Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)",
@@ -160,44 +184,12 @@
     "vacancy_pct": 5
   },
   {
-    "absorption_sqft": 12500,
-    "id": "us-41-bonita-springs",
-    "name": "US-41 Bonita Springs",
-    "nnn_asking_rent_per_sqft": 27.51,
-    "submarket": "Bonita Springs",
-    "vacancy_pct": 2.3
-  },
-  {
-    "absorption_sqft": -8679,
-    "id": "us-41-cleveland-ave-fort-myers",
-    "name": "US-41 / Cleveland Ave Fort Myers",
-    "nnn_asking_rent_per_sqft": 16.04,
-    "submarket": "Fort Myers",
-    "vacancy_pct": 2.9
-  },
-  {
-    "absorption_sqft": 6200,
-    "id": "us-41-tamiami-trail-naples",
-    "name": "US-41 Tamiami Trail Naples",
-    "nnn_asking_rent_per_sqft": 60.84,
-    "submarket": "Naples",
-    "vacancy_pct": 1.8
-  },
-  {
     "absorption_sqft": 8500,
     "id": "vanderbilt-beach-rd-mercato",
     "name": "Vanderbilt Beach Rd / Mercato",
     "nnn_asking_rent_per_sqft": 30.91,
     "submarket": "Naples",
     "vacancy_pct": 3.3
-  },
-  {
-    "absorption_sqft": -5500,
-    "id": "veterans-pkwy-colonial-blvd-midpoint-bridge-corridor",
-    "name": "Veterans Pkwy / Colonial Blvd (Midpoint Bridge Corridor)",
-    "nnn_asking_rent_per_sqft": 23.27,
-    "submarket": "Fort Myers",
-    "vacancy_pct": 3.2
   },
   {
     "absorption_sqft": null,
