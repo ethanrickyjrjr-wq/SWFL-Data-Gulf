@@ -199,18 +199,36 @@ export function CategoryTable({ cat }: { cat: Category }) {
                 )}
                 {it.note && <div className="row-note">{it.note}</div>}
               </td>
-              {dataCols.map((c) => (
-                <td
-                  key={c}
-                  className={
-                    c === "Last load" || c === "Last run" || c === "Result"
-                      ? "mono note"
-                      : "note"
-                  }
-                >
-                  {it.cols[c] ?? "—"}
-                </td>
-              ))}
+              {dataCols.map((c) => {
+                const isDateCol =
+                  c === "Last load" || c === "Last run" || c === "Refined at";
+                const val = it.cols[c] ?? "—";
+                const age =
+                  isDateCol && it.status !== "green" && val !== "—"
+                    ? daysAgo(val)
+                    : null;
+                return (
+                  <td
+                    key={c}
+                    className={
+                      isDateCol || c === "Result" ? "mono note" : "note"
+                    }
+                  >
+                    {val}
+                    {age !== null && (
+                      <span
+                        style={{
+                          marginLeft: 5,
+                          opacity: 0.65,
+                          fontSize: "0.82em",
+                        }}
+                      >
+                        {age}d ago
+                      </span>
+                    )}
+                  </td>
+                );
+              })}
               <td>
                 <Pill status={it.status} />
               </td>
@@ -365,6 +383,12 @@ export function DailyTracker({ categories }: { categories: Category[] }) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+function daysAgo(dateStr: string): number | null {
+  const d = Date.parse(dateStr);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d) / 86_400_000);
+}
+
 export function tally(items: LedgerItem[]) {
   return {
     green: items.filter((i) => i.status === "green").length,
