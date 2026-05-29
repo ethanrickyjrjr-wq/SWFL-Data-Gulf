@@ -1,7 +1,7 @@
 import { buildLedger } from "../../lib/ledger";
 import { DonutChart, Link, tally } from "../ui";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function ReadPage() {
   const ledger = await buildLedger();
@@ -246,4 +246,3 @@ export default async function ReadPage() {
     </main>
   );
 }
-
