@@ -27,9 +27,8 @@ CREATE TABLE IF NOT EXISTS fl_dor_sales_tax (
 );
 
 -- Required before first upsert (ON CONFLICT (county, kind_code, period)).
-ALTER TABLE fl_dor_sales_tax
-    ADD CONSTRAINT fl_dor_sales_tax_county_kind_period_unique
-    UNIQUE (county, kind_code, period);
+CREATE UNIQUE INDEX IF NOT EXISTS fl_dor_sales_tax_county_kind_period_unique
+    ON fl_dor_sales_tax (county, kind_code, period);
 
 -- Index for brain queries: county + period range scans.
 CREATE INDEX IF NOT EXISTS idx_fl_dor_sales_tax_county_period

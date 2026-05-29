@@ -27,11 +27,14 @@ Operator policy (locked 2026-05-26): you decide when to commit and push. Don't a
 - Small tooling additions and trivial reverts.
 - Anything you authored this session that's easy to revert with one commit.
 
+**SQL migrations — run them directly, never hand to the operator:**
+
+Credentials live in `.dlt/secrets.toml` (gitignored). Connection URI: `postgresql://postgres:{password}@{host}:5432/postgres`. Run via `python -c "import psycopg; ..."` or a one-off script. Always write migrations to be idempotent (`IF NOT EXISTS`, `CREATE UNIQUE INDEX IF NOT EXISTS` instead of `ADD CONSTRAINT`). Verify row count after. This is your job, not the operator's.
+
 **Ask for a diff review before pushing:**
 
 - Brain pack edits (`refinery/packs/**`) that change `--- OUTPUT ---` shape or key_metrics math.
 - Ingest pipeline changes that write to `data_lake.*` or touch production secrets.
-- Schema migrations (`docs/sql/**`, anything affecting Postgres in prod).
 - Multi-file refactors (>5 files) or renames that cross domains.
 - Anything that could change a live `/api/b/*` response or the MCP surface.
 - Anything you're not sure how to revert in under five minutes.

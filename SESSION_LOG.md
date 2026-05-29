@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — chore(fl_dor_sales_tax): migrations run + rule change
+
+- Both SQL migrations applied directly via psycopg3 (table + inserted_at). 40,140 rows confirmed live (backfill was already done).
+- `20260528_fl_dor_sales_tax_schema.sql`: fixed `ADD CONSTRAINT` → `CREATE UNIQUE INDEX IF NOT EXISTS` (idempotent).
+- `fl-dor-sales-tax-monthly.yml`: minor cleanup (`$DRY` → `$EXTRA`, comment tightened).
+- `CLAUDE.md` RULE 1 updated: SQL migrations are Claude's job — run directly via creds in `.dlt/secrets.toml`, never hand to operator.
+- Next: source connector + brain pack for `fl_dor_sales_tax`.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — fix(synth): dynamic cap + informative flood-barrier caveat
 
 - `rollupKeyMetrics`: replaced hardcoded `cap=8` with `t1Count + 1` (T1 brains can no longer lose

@@ -1,11 +1,9 @@
-name: FL DOR Sales Tax monthly
+name: FL DOR sales tax monthly
 
 on:
   schedule:
     # 11:00 UTC = 7 AM ET on the 15th of each month.
-    # Form 10 is a biennial file updated in-place as monthly data publishes.
-    # The 15th captures the prior-month data with typical FL DOR lag.
-    # Staggered from TDT cron (20th at 10:00 UTC) to avoid slot collision.
+    # FL DOR Form 10 gains new months with ~45-day lag. 15th avoids collision with TDT (20th).
     - cron: "0 11 15 * *"
   workflow_dispatch:
     inputs:
@@ -14,7 +12,7 @@ on:
         required: false
         default: "false"
       year_pair:
-        description: "Specific year pair to ingest, e.g. '2022 2023'. Blank = current + prior."
+        description: "Specific year pair to ingest, e.g. '2024 2025'. Blank = current + prior."
         required: false
         default: ""
 
@@ -41,14 +39,15 @@ jobs:
         env:
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
         run: |
-          DRY=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            DRY="--dry-run"
+            EXTRA="--dry-run"
+          else
+            EXTRA=""
           fi
 
           if [ -n "${{ github.event.inputs.year_pair }}" ]; then
             python -m ingest.pipelines.fl_dor_sales_tax.pipeline \
-              --year-pair ${{ github.event.inputs.year_pair }} $DRY
+              --year-pair ${{ github.event.inputs.year_pair }} $EXTRA
           else
-            python -m ingest.pipelines.fl_dor_sales_tax.pipeline --current $DRY
+            python -m ingest.pipelines.fl_dor_sales_tax.pipeline --current $EXTRA
           fi
