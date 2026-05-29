@@ -352,7 +352,7 @@ test("groupCorridorsBySubmarket: happy path — intersects mapped corridors with
     "Pine Ridge Rd Naples",
   ]);
   // Full alias denominator captured at join time.
-  assert.equal(naples.mappedCorridorNames.length, 10);
+  assert.equal(naples.mappedCorridorNames.length, 9);
   const cape = matched.get("Cape Coral") as JoinedSubmarketGroup;
   assert.ok(cape);
   assert.deepEqual(

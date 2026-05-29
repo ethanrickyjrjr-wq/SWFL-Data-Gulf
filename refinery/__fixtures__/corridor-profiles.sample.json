@@ -46,7 +46,7 @@
       "asking_rent_psf_source_url": null
     },
     {
-      "corridor_name": "US-41 / Cleveland Ave Fort Myers",
+      "corridor_name": "Cleveland Ave Fort Myers",
       "city": "Fort Myers",
       "corridor_type": "mixed-use-downtown",
       "seasonal_index": 0.15,
@@ -194,7 +194,7 @@
       "asking_rent_psf_source_url": null
     },
     {
-      "corridor_name": "US-41 Bonita Springs",
+      "corridor_name": "Bonita Trail",
       "city": "Bonita Springs",
       "corridor_type": "highway-strip-mall",
       "seasonal_index": 0.4,

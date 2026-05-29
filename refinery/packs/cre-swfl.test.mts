@@ -287,8 +287,8 @@ test("marketbeat: citation enumerates matched corridors with 'matched X of Y map
   const result = creSwfl.outputProducer!(minimalPackOutput());
 
   // Fixture intersection with MARKETBEAT_SUBMARKET_MAP:
-  //   Naples — 2 of 10 matched (Immokalee Rd North Naples, Pine Ridge Rd Naples)
-  //   Fort Myers — 1 of 7 matched (US-41 / Cleveland Ave Fort Myers)
+  //   Naples — 2 of 9 matched (Immokalee Rd North Naples, Pine Ridge Rd Naples)
+  //   Fort Myers — 1 of 7 matched (Cleveland Ave Fort Myers)
   //   Cape Coral — 1 of 3 matched (Cape Coral Pkwy E)
   const vacNaples = result.key_metrics.find(
     (m) => m.metric === "vacancy_rate_marketbeat_naples",
@@ -296,8 +296,8 @@ test("marketbeat: citation enumerates matched corridors with 'matched X of Y map
   assert.ok(vacNaples);
   const naplesCite = vacNaples!.source.citation;
   assert.ok(
-    /matched 2 of 10 mapped/.test(naplesCite),
-    `Naples citation missing 'matched 2 of 10 mapped': ${naplesCite}`,
+    /matched 2 of 9 mapped/.test(naplesCite),
+    `Naples citation missing 'matched 2 of 9 mapped': ${naplesCite}`,
   );
   assert.ok(naplesCite.includes("Immokalee Rd North Naples"));
   assert.ok(naplesCite.includes("Pine Ridge Rd Naples"));
@@ -347,11 +347,11 @@ test("marketbeat: zero-matched-corridors caveat fires when submarket reports a v
   assert.ok(vacNaples, "expected Naples vacancy metric to still ship");
   assert.equal(vacNaples!.value, 4.8);
 
-  // Zero-matched caveat fires with `0 of its 10 mapped` wording.
+  // Zero-matched caveat fires with `0 of its 9 mapped` wording.
   const caveatHit = result.caveats.find(
     (c) =>
       c.includes("Naples") &&
-      c.includes("0 of its 10 mapped") &&
+      c.includes("0 of its 9 mapped") &&
       c.includes("verified corpus this run"),
   );
   assert.ok(
