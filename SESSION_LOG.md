@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — fix(ops): lock project link + guard ops/ in CLAUDE.md
+
+- Committed `ops/.vercel/project.json` (projectId + orgId, no secrets) so `vercel --prod` always targets `swfldatagulf-ops` and can never drift to a new project again.
+- Added CLAUDE.md rule: any change to `ops/` requires explicit operator instruction — deleting or retiring it takes the live dashboard offline.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — fix(ops): restore ops/ after retire commit broke site
 
 - Reverted ebaca42 (Opus retire-ops), restored ui.tsx + read/page.tsx to bd8afd2. Force-rebuilding /read to flush stale CDN 404.

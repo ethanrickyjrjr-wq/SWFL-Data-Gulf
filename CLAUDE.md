@@ -35,6 +35,7 @@ Operator policy (locked 2026-05-26): you decide when to commit and push. Don't a
 - Multi-file refactors (>5 files) or renames that cross domains.
 - Anything that could change a live `/api/b/*` response or the MCP surface.
 - Anything you're not sure how to revert in under five minutes.
+- **Any change to `ops/`** — it is a live Vercel production deployment (`swfldatagulf-ops.vercel.app`). Deleting, moving, or retiring `ops/` without explicit operator instruction takes the dashboard offline. Never do this autonomously.
 
 **Always (no exceptions):**
 
