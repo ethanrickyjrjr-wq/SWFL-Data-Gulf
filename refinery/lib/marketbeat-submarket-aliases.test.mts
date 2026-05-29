@@ -98,7 +98,7 @@ test("Fort Myers Beach maps to 1 corridor", () => {
 
 test("submarketFor returns correct submarket for a known corridor", () => {
   assert.equal(submarketFor("Pine Ridge Rd Naples"), "Naples");
-  assert.equal(submarketFor("US-41 / Cleveland Ave Fort Myers"), "Fort Myers");
+  assert.equal(submarketFor("Cleveland Ave Fort Myers"), "Fort Myers");
   assert.equal(submarketFor("Cape Coral Pkwy E"), "Cape Coral");
 });
 

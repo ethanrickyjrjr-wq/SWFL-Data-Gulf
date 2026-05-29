@@ -57,8 +57,8 @@ describe("corridor-aliases coverage", () => {
   });
 
   it("aliasFor returns string for a known Lee corridor", () => {
-    expect(aliasFor("us-41-cleveland-ave-fort-myers")).toBe(
-      "us-41-cleveland-ave-fort-myers",
+    expect(aliasFor("cleveland-ave-fort-myers")).toBe(
+      "cleveland-ave-fort-myers",
     );
   });
 
