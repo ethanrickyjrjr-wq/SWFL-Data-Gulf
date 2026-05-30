@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 · main) — fix: land the actual v62 rebuild artifacts + FDOT truck-share 740% bug (diff-review catch)
+
+- **Lands the artifacts the prior push MISSED.** The entry below shipped the role-view deletion + a v62 SESSION_LOG note, but a `git commit -- <paths> -m` arg-order error meant the 5 rebuilt base brains never committed (origin got the log + deletions only). They land here: `env-swfl` v18, `logistics-swfl` v14, `logistics-swfl-nowcast` v12, `traffic-swfl` v9, `master` v62 (`SWFL-7421-v62-20260530`). All fixture-clean.
+- **Subagent diff-review caught a real bug**: live FDOT `tfctr` is published as a PERCENT (T-factor, range 0–92; FDOT Project Traffic Forecasting Handbook + FGDL AADT metadata), but `traffic-swfl` treated it as a fraction and did `× 100` → `truck_share_median` = **739.6%** (impossible). Fixed at the ingestion boundary: `refinery/sources/fdot-source.mts` `fetchLive()` now divides live `tfctr` by 100 to match the fixture + the whole pack's fraction convention. truck_share now **7.4%**; rebuilt `traffic-swfl` → v9. Does NOT feed master (master pulls AADT/YoY, not truck share) → master v62 unaffected, re-verified clean.
+- **Scope note / latent smell**: `refinery/sources/fdot-freight-source.mts` (the nowcast's source) independently treats `tfctr` as a PERCENT (`FREIGHT_TFCTR_MIN=5`) and z-scores it (the 100× cancels by design). The two FDOT source files now carry divergent in-memory `tfctr` units — correct today, worth a future unify. The nowcast shock-log (`data_lake.fdot_freight_nowcast_shock_log`) is read-only at build time + in insufficient_history mode → unaffected.
+- **Verify**: `bun test` 801 pass / 0 fail; fixture-sentinel scan of all 5 base brains = 0.
+- Push triggers a Vercel redeploy → live master read goes clean. Next: PR2 build-time fixture-sentinel gate + PR3 speaker caveat hygiene (v62 clean on main).
+
 ## 2026-05-30 (Opus 4.8 · main) — fix(brains): clear fixture-mode leak from live master — rebuild env/logistics/traffic + master LIVE (v62)
 
 - **Root cause**: live `/api/b/master` + MCP `swfl_fetch` (v61) served fixture-mode text to users — "Fixture mode: only Lee County… set REFINERY_SOURCE=live", "FAF5/FDOT synthetic fixture data", file paths, constants, commit hashes. Site was UP (HTTP 200); the DATA was wrong. Master lifts committed upstream OUTPUT blocks and does NOT re-render them; `env-swfl` v17, `logistics-swfl` v13, `traffic-swfl` v7 were last rendered in fixture mode 10 days ago, and the daily cron rebuilt master (v61) from those stale artifacts.
