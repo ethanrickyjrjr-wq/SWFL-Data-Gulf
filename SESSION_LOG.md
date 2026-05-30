@@ -835,3 +835,8 @@ Test deltas: bun suite **687 → 738 pass** (+51 new tests across `dates.test.mt
 ## 2026-05-25 (prior session · main)
 
 - Seed entry — see git log for c19d3ca (GHA unblock + brand scrub), 86435b8 (Lane D fully live), c3b9d0a (waitlist env-name fallback #30).
+
+## 2026-05-30 (Sonnet 4.6 · main) — docs: write LittleBird note for 2026-05-30 (148 commits since last note)
+
+- `docs/littlebird-notes/2026-05-30.md` written — covers 2026-05-27 through 2026-05-30: fixture-leak closed (v62 + gate + speaker hygiene), FDOT truck-share fix (739.6%→7.4%), corridor character generator done (PRs #40–#43), ops/ standalone, fgcu-reri brain, Goal 9 flywheel, speaker corridor→area + NNN lock, LeePA sale-price landmine.
+- `docs/littlebird-notes/README.md` index updated.

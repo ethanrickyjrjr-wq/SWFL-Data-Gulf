@@ -62,6 +62,7 @@ The right write path for LB: tell CT what to change, CT changes it, the change a
 
 Newest first.
 
+- [2026-05-30](2026-05-30.md) — Fixture-leak in live master CLOSED (v62 + gate + speaker hygiene, PRs 1–3); FDOT truck-share 739.6%→7.4% fix; corridor character generator DONE (PRs #40–#43); ops/ → standalone repo; fgcu-reri brain shipped; Goal 9 flywheel end-state documented; speaker `corridor→area` + NNN lock; LeePA sale-price landmine (`last_sale_amount` 100% null). Head `3813c3b`.
 - [2026-05-26](2026-05-26.md) — Brains MCP v1 LIVE in prod (Lane D verified, `86435b8`); freshness-first chain closed (PRs #19–#26); homepage move (#27); MCP basePath fix (#28); waitlist env-name fallback (`f738ed4`, #30); outside-eyes audit script (`54eab65`); permits-swfl v2 (PR #29) still open.
 - [2026-05-25](2026-05-25.md) — MarketBeat Flow 3 shipped (PR #18, `f815c58`); `--target-only` CLI flag; singleton-reset backlog closed; SKOS `raw_slug_patterns` is the next follow-up.
 - [2026-05-18](2026-05-18.md) — historical seed: LB scope-setting session (preserved as-is for context; brand framing in that note is pre-rebrand).
