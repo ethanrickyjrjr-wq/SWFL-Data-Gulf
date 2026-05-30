@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — Firecrawl primary + Anthropic auto-fallback (default) + city-constraint distill fix
+
+- **`--source-provider auto` is now the default** (`b6e1ad2`): Firecrawl `/v2/search` primary → **Anthropic web_search fallback** fires only when Firecrawl errors OR returns 0 citations (operator's resilience ask — a city never goes dark; Anthropic's ~$0.45 only on failure). Explicit `firecrawl`/`anthropic` still force one. (No Spider tier: `spider_client` has no search endpoint, only scrape — confirmed.)
+- **City-constraint distill fix** (shared, both providers): the distill prompt now extracts only facts whose primary subject is the queried city, skipping other named SWFL cities. Fixes the cross-city leak.
+- **Verified live (Naples, auto):** Firecrawl ran (36 credits), 13 facts — all Naples/Collier (Costco #2, 375 13th Ave resale, Oakes Farms $6.2M suit, I-75 diverging diamond, NCH). The Fort Myers facts that leaked before are gone. 22 city_pulse unit tests pass (incl. 3 fallback-dispatch tests).
+- **Net steady-state cost: ~$10/mo Anthropic (distill) + ~7.5k Firecrawl credits/mo** (of 100k), with Anthropic web_search as the paid-for-itself safety net. PR #57 is now the cheapest + most resilient + most accurate version. **Still NOT merged — operator's call.**
+
 ## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — Firecrawl capture provider (side-by-side) — validated, saves ~$85/mo
 
 - **Operator flagged the cost:** capture used Anthropic `web_search` (~$95/mo in tokens), NOT the 100k/mo Firecrawl credits they already pay for. Added a **side-by-side Firecrawl provider** (`firecrawl_client.search()` → `/v2/search` with `tbs=qdr:m` + inline markdown; `capture_firecrawl()` produces the same record shape so distill/table/pack/master are unchanged; `--source-provider {anthropic,firecrawl}` flag, **anthropic still the default** — Firecrawl is opt-in, no rebuild needed if it flops).
