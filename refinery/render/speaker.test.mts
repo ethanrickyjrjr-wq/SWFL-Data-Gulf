@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
+  deCorridor,
   parseBrainMarkdown,
   sanitizeProse,
   speak,
@@ -158,6 +159,34 @@ describe("sanitizeProse", () => {
     // Citation table rows say "env-swfl brain — https://...". Don't mangle.
     const out = sanitizeProse("env-swfl brain — https://example.com");
     assert.ok(out.includes("env-swfl brain"));
+  });
+
+  test("swaps corridor → area in user-facing prose", () => {
+    const out = sanitizeProse(
+      "Median across 12 of 25 corridors; one corridor leads.",
+    );
+    assert.ok(!/corridor/i.test(out));
+    assert.ok(out.includes("12 of 25 areas"));
+    assert.ok(out.includes("one area leads"));
+  });
+});
+
+describe("deCorridor", () => {
+  test("swaps singular and plural", () => {
+    assert.equal(deCorridor("one corridor"), "one area");
+    assert.equal(deCorridor("five corridors"), "five areas");
+  });
+
+  test("preserves leading capitalization", () => {
+    assert.equal(deCorridor("Corridor signals split."), "Area signals split.");
+    assert.equal(deCorridor("Corridors by type."), "Areas by type.");
+  });
+
+  test("leaves the corridor_type field token intact (no word boundary)", () => {
+    assert.equal(
+      deCorridor("the corridor_type field"),
+      "the corridor_type field",
+    );
   });
 });
 

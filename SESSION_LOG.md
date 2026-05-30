@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 1M · main) — feat(speaker): PR 2 language scrub — corridor→area, NNN=triple-net, speak-in-places
+
+- **Speaker chokepoint swap (`refinery/render/speaker.mts`):** new `deCorridor()` — case-preserving `corridor(s)→area(s)`, word-boundary leaves the `corridor_type` data field intact (`_` is a word char → no `\b` match; trailing `s` blocks the singular pattern from biting `corridors`). Wired into `sanitizeProse`, and now also applied to metric-table labels + the tier-2 scope header (both rendered raw before). Hard-coded leak fixed: `traffic-swfl` label `"SWFL corridor traffic"` → `"SWFL road traffic"`. Tier-3 audit keeps internal "corridor" (same pattern as bifurcate→split). Raw `cre-swfl.mts` internals deliberately NOT churned — chokepoint covers tiers 1/2, rewriting them would churn snapshots + `corridor_type` refs for zero user-visible gain.
+- **NNN lock:** `rules-of-engagement.mts` rule 5 parenthetical (`NNN = triple-net rent, never a place name`) + `cre-swfl.mts` synthesisContext hard line ("never expand to North Naples"). This is the misread that started PR 2.
+- **Rules block (`rules-of-engagement.mts` + verbatim mirror in `docs/consumption-contract.md`):** rule 3 rewritten from "Do NOT offer drill-downs" → "name what's missing plainly — you may offer to pull it, never invent it" (reconciles the contradiction with the passive-invite pattern; anti-fabrication intent preserved). New rule 6 "SPEAK IN PLACES" — metro/area altitude, zoom only when the user names a spot. Block now 232/250 tokens (was 193).
+- **Verify:** `bun test` 801 pass / 0 fail (6 new speaker tests incl. corridor_type guard). Drift test confirms the two rules blocks stay byte-mirrored.
+- Next: PR 3 candidate — if the raw `cre-swfl.md` artifact should also read "area" (operator's call; bigger snapshot churn).
+
 ## 2026-05-30 (Sonnet 4.6 · main) — chore: clear working tree — diagrams, orphan triage, build-queue, premise-data-replacement deletion
 
 - `_diagrams/`: added 3 Mermaid diagrams + `contract-flow.md` (tier system / consumption-contract flow, operator-authored).

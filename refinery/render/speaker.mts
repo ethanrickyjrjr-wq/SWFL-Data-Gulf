@@ -25,6 +25,9 @@
  *   - No internal pack ids in prose. `env-swfl`, `properties-lee-value`, etc.
  *     are translated to human labels via PACK_ID_LABELS.
  *   - No "bifurcate" — style ban. Tokenized swap to "split".
+ *   - No "corridor" in front of a human. Users speak in places, not road IDs;
+ *     "corridor(s)" is swapped to "area(s)" in tier 1/2 prose, metric labels,
+ *     and the scope header. Tier 3 (audit) keeps it — the receipt is internal.
  *   - No "siblings haven't shipped" / "sub-brain pointers" — protocol noise,
  *     stripped.
  *
@@ -76,7 +79,7 @@ const PACK_ID_LABELS: Record<string, string> = {
   "tourism-tdt": "Lee County tourism (TDT)",
   "logistics-swfl": "SWFL freight (FAF5)",
   "logistics-swfl-nowcast": "SWFL freight nowcast",
-  "traffic-swfl": "SWFL corridor traffic (FDOT)",
+  "traffic-swfl": "SWFL road traffic (FDOT)",
   "storm-history-swfl": "SWFL storm history",
 };
 
@@ -168,11 +171,26 @@ export function stripSectionMarker(text: string): string {
 }
 
 /**
+ * Case-preserving swap of "corridor"/"corridors" → "area"/"areas". The word is
+ * an internal road-ID frame; a human reader hears places. Capitalization of the
+ * source token is preserved so a sentence-initial "Corridor" stays "Area".
+ */
+export function deCorridor(text: string): string {
+  const cased = (orig: string, repl: string) =>
+    orig[0] === orig[0].toUpperCase()
+      ? repl[0].toUpperCase() + repl.slice(1)
+      : repl;
+  return text
+    .replace(/\bcorridors\b/gi, (m) => cased(m, "areas"))
+    .replace(/\bcorridor\b/gi, (m) => cased(m, "area"));
+}
+
+/**
  * Tier 1 / 2 prose sanitization: pack-id → label swap, banned-phrase strip,
- * `§` strip, whitespace normalization.
+ * corridor → area swap, `§` strip, whitespace normalization.
  */
 export function sanitizeProse(text: string): string {
-  let out = stripSectionMarker(text);
+  let out = deCorridor(stripSectionMarker(text));
   for (const [pat, replacement] of BANNED_PROSE) {
     out = out.replace(pat, replacement);
   }
@@ -210,7 +228,7 @@ function renderTier1(brain: ParsedBrain, reportLink: string | null): string {
 function renderTier2(brain: ParsedBrain, reportLink: string | null): string {
   const out = brain.output;
   const blocks: string[] = [];
-  blocks.push(`**${humanScope(brain.scope)}**`);
+  blocks.push(`**${sanitizeProse(humanScope(brain.scope))}**`);
   blocks.push(sanitizeProse(out.conclusion));
   if (out.conditional_claims && out.conditional_claims.length > 0) {
     const c = out.conditional_claims[0];
@@ -273,7 +291,10 @@ function humanScope(scope: string): string {
 function renderMetricsTable(metrics: BrainOutputMetric[]): string {
   const rows = metrics
     .slice(0, 6)
-    .map((m) => `| ${m.label} | ${formatValue(m)} | ${m.direction} |`)
+    .map(
+      (m) =>
+        `| ${sanitizeProse(m.label)} | ${formatValue(m)} | ${m.direction} |`,
+    )
     .join("\n");
   return `| Metric | Value | Direction |\n| --- | --- | --- |\n${rows}`;
 }
