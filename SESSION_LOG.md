@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 · main) — chore: reconcile diverged main + commit operator WIP; land fixture-leak fix plan
+
+- **Reconciled diverged `main`**: origin had 3 commits I lacked (incl. `a08fa09` daily rebuild 2026-05-30), local had 2 (Census ACS spec, goals/goal9 migration). Rebased local onto `origin/main` — linear history, no force-push.
+- **Committed working-tree WIP** (operator's, at operator's explicit instruction — sole session running): `fix(leepa)` currency-strip + ESRI year-month date normalize in `ingest/pipelines/leepa/resources.py`; `docs` Goal 9 (compounding flywheel) end-state in `THE-GOAL.md` + roadmap ladder 0-8 → 0-9; event-study backfill spec; spent `_run_pending_sqls.py` migration runner (reads creds from gitignored secrets — no embedded secret).
+- **Plan into repo**: `docs/superpowers/plans/2026-05-30-fixture-leak-fix/README.md` — the v61 fixture-leak fix (PR1 live rebuild of stale env/logistics/traffic upstreams + master; PR2 build-time fixture-sentinel gate + logistics emptiness assert; PR3 speaker caveat hygiene).
+- **Network this session**: GitHub + Supabase DB pooler reachable; only the Vercel app host (`swfldatagulf.com:443`) blocked. PR1 rebuild + push are runnable from here.
+- Next: execute PR1 (clean master v61) — first inspect `brains/master.md` from today's daily rebuild for the fixture leak.
+
 ## 2026-05-30 (Sonnet 4.6 · main) — chore(db): run 2 operator-gated SQL migrations + commit goal9 flywheel SQL
 
 - `20260529_goals_table.sql`: run — creates `public.goals` table + seeds Goals 0–8 (`ON CONFLICT DO NOTHING`). Source of truth for the /ops/goals ladder.
