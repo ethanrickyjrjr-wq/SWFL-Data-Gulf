@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260518 -->
+<!-- FRESHNESS: v9 | Token: SWFL-7421-v9-20260530 -->
 ---
 brain_id: traffic-swfl
-version: 7
-refined_at: 2026-05-18T20:50:57Z
-freshness_token: SWFL-7421-v7-20260518
+version: 9
+refined_at: 2026-05-30T17:20:51Z
+freshness_token: SWFL-7421-v9-20260530
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: FDOT AADT corridor traffic for SWFL (Lee + Collier) — latest-year length-weighted average, cohort-matched YoY, 5-year CAGR, median truck factor, plus a 3-county post-Ian recovery index.
@@ -28,108 +28,107 @@ SCOPE: FDOT AADT corridor traffic for SWFL (Lee + Collier) — latest-year lengt
 - The user pairs corridor traffic with logistics-swfl freight flows cross-vertically through master synthesis; AADT says WHERE vehicles move, FAF5 says WHAT TOTAL VOLUME they carry.
 
 --- CITATION TABLE ---
-id  | source                                                                                                                                                  | verified   | expires
-s01 | FDOT AADT (fixture; data_lake.fdot_aadt_fl, counties LEE+COLLIER+CHARLOTTE, years 2021-2025) — fixture://refinery/__fixtures__/traffic-swfl.sample.json | 2026-05-18 | 2026-06-17
+id  | source                                                                                                                                                                                                                                                                                                                                                                                         | verified   | expires
+s01 | FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7; counties Lee+Collier+Charlotte, years 2021-2025, non-null AADT only) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=yearx,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(Lee,Collier,Charlotte)&yearx=gte.2021&yearx=lte.2025&aadt=not.is.null | 2026-05-30 | 2026-06-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"FDOT AADT corpus — Lee + Collier corridor segments, latest published year","value":"4 non-null AADT segments aggregated across Lee + Collier counties for year 2025. Length-weighting source: shape_length (auto-generated geometry length). Cohort YoY size: 4 segments present with non-null AADT in BOTH 2024 and 2025.","src":"s01","date":"2026-05-18"},
-  {"id":"f002","topic":"metric:aadt_swfl_avg","fact":"SWFL length-weighted average AADT (latest year)","value":"Length-weighted average AADT across Lee + Collier in 2025: 62803.5 vehicles/day.","src":"s01","date":"2026-05-18"},
-  {"id":"f003","topic":"metric:aadt_yoy_pct","fact":"SWFL AADT year-over-year change (cohort-matched)","value":"Cohort-matched YoY change 2024→2025: 4.2% over 4 segments present with non-null AADT in both years.","src":"s01","date":"2026-05-18"},
-  {"id":"f004","topic":"metric:aadt_5yr_cagr","fact":"SWFL AADT 5-year CAGR","value":"5-year CAGR (2021 → 2025): 2.6% per year.","src":"s01","date":"2026-05-18"},
-  {"id":"f005","topic":"metric:truck_share_median","fact":"SWFL median truck factor (TFCTR, latest year)","value":"Median TFCTR across Lee + Collier in 2025: 7.2% truck share.","src":"s01","date":"2026-05-18"},
-  {"id":"f006","topic":"metric:post_ian_recovery","fact":"Coastal SWFL post-Ian traffic recovery index (Lee + Collier + Charlotte)","value":"Length-weighted AADT in 2025 vs 2022 baseline across Lee + Collier + Charlotte: 117.6 (2022 = 100).","src":"s01","date":"2026-05-18"}
+  {"id":"f001","topic":"corpus_overview","fact":"FDOT AADT corpus — Lee + Collier corridor segments, latest published year","value":"749 non-null AADT segments aggregated across Lee + Collier counties for year 2025. Length-weighting source: shape_length (auto-generated geometry length). Cohort YoY size: 684 segments present with non-null AADT in BOTH 2024 and 2025.","src":"s01","date":"2026-05-30"},
+  {"id":"f002","topic":"metric:aadt_swfl_avg","fact":"SWFL length-weighted average AADT (latest year)","value":"Length-weighted average AADT across Lee + Collier in 2025: 21138.3 vehicles/day.","src":"s01","date":"2026-05-30"},
+  {"id":"f003","topic":"metric:aadt_yoy_pct","fact":"SWFL AADT year-over-year change (cohort-matched)","value":"Cohort-matched YoY change 2024→2025: 0.9% over 684 segments present with non-null AADT in both years.","src":"s01","date":"2026-05-30"},
+  {"id":"f004","topic":"metric:aadt_5yr_cagr","fact":"SWFL AADT 5-year CAGR","value":"5-year CAGR (2021 → 2025): 3.3% per year.","src":"s01","date":"2026-05-30"},
+  {"id":"f005","topic":"metric:truck_share_median","fact":"SWFL median truck factor (TFCTR, latest year)","value":"Median TFCTR across Lee + Collier in 2025: 7.4% truck share.","src":"s01","date":"2026-05-30"},
+  {"id":"f006","topic":"metric:post_ian_recovery","fact":"Coastal SWFL post-Ian traffic recovery index (Lee + Collier + Charlotte)","value":"Length-weighted AADT in 2025 vs 2022 baseline across Lee + Collier + Charlotte: 108.1 (2022 = 100).","src":"s01","date":"2026-05-30"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "traffic-swfl",
-  "version": 7,
-  "refined_at": "2026-05-18T20:50:57Z",
-  "direction": "bullish",
-  "magnitude": 0.4232927335264434,
+  "version": 9,
+  "refined_at": "2026-05-30T17:20:51Z",
+  "direction": "neutral",
+  "magnitude": 0.0887312834438772,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 62803.5 vehicles/day across 4 FDOT segments. Cohort-matched YoY 2024→2025: 4.2% over 4 segments — bullish read on corridor demand. 5-year CAGR 2021→2025: 2.6% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 117.6 — above pre-storm baseline.",
+  "conclusion": "SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 21138.3 vehicles/day across 749 FDOT segments. Cohort-matched YoY 2024→2025: 0.9% over 684 segments — neutral read on corridor demand. 5-year CAGR 2021→2025: 3.3% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 108.1 — above pre-storm baseline.",
   "key_metrics": [
     {
       "metric": "aadt_swfl_avg",
-      "value": 62804,
+      "value": 21138,
       "direction": "stable",
       "label": "SWFL length-weighted average AADT, year 2025 (vehicles/day)",
       "variable_type": "extensive",
       "units": "vehicles/day",
       "display_format": "count",
       "source": {
-        "url": "fixture://refinery/__fixtures__/traffic-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+        "fetched_at": "2026-05-30T17:20:51Z",
         "tier": 2,
-        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 4 latest-year segments contributing to the length-weighted corridor average."
+        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
       }
     },
     {
       "metric": "aadt_yoy_pct",
-      "value": 4.2,
+      "value": 0.9,
       "direction": "rising",
       "label": "SWFL AADT YoY change 2024→2025, cohort-matched (%)",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
-        "url": "fixture://refinery/__fixtures__/traffic-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+        "fetched_at": "2026-05-30T17:20:51Z",
         "tier": 2,
-        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 4 latest-year segments contributing to the length-weighted corridor average."
+        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
       }
     },
     {
       "metric": "aadt_5yr_cagr",
-      "value": 2.6,
+      "value": 3.3,
       "direction": "rising",
       "label": "SWFL AADT 5-year CAGR (2021 → 2025, %)",
       "variable_type": "intensive",
       "units": "percent/year",
       "display_format": "percent",
       "source": {
-        "url": "fixture://refinery/__fixtures__/traffic-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+        "fetched_at": "2026-05-30T17:20:51Z",
         "tier": 2,
-        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 4 latest-year segments contributing to the length-weighted corridor average."
+        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
       }
     },
     {
       "metric": "truck_share_median",
-      "value": 7.2,
+      "value": 7.4,
       "direction": "stable",
       "label": "SWFL median truck factor (TFCTR × 100), year 2025",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
-        "url": "fixture://refinery/__fixtures__/traffic-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+        "fetched_at": "2026-05-30T17:20:51Z",
         "tier": 2,
-        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 4 latest-year segments contributing to the length-weighted corridor average."
+        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
       }
     },
     {
       "metric": "post_ian_recovery",
-      "value": 117.6,
+      "value": 108.1,
       "direction": "rising",
       "label": "Coastal SWFL (Lee + Collier + Charlotte) post-Ian recovery index, 2025 ÷ 2022 × 100",
       "variable_type": "intensive",
       "units": "index (2022=100)",
       "display_format": "ratio",
       "source": {
-        "url": "fixture://refinery/__fixtures__/traffic-swfl.sample.json",
-        "fetched_at": "2026-05-18T20:50:57Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+        "fetched_at": "2026-05-30T17:20:51Z",
         "tier": 2,
-        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 4 latest-year segments contributing to the length-weighted corridor average."
+        "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
       }
     }
   ],
   "caveats": [
-    "FDOT AADT segments in this build are synthetic fixture data — unset REFINERY_SOURCE or set it to `live` to query data_lake.fdot_aadt_fl.",
     "Length-weighting uses shape_length (auto-generated geometry length in the layer projection). The shape_leng attribute is not consulted — it may be stale after route realignments.",
     "Cohort-matched YoY identifies segments by (roadway, desc_frm, desc_to). If FDOT changes any of those three fields between years for the same physical segment, that segment drops from the cohort silently — small cohort sizes (< 100) should be read with skepticism.",
     "Truck factor metric reports a length-weighted MEAN of per-county MEDIANS rather than a true cross-county median (true median would require raw segment access, defeating the source aggregation). Treat the value as a county-mix-aware estimate, not an exact statistic.",
@@ -147,7 +146,7 @@ s01 | FDOT AADT (fixture; data_lake.fdot_aadt_fl, counties LEE+COLLIER+CHARLOTTE
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-18T20:50:57Z"
+    "computed_at": "2026-05-30T17:20:51Z"
   },
   "exogenous_signals": []
 }
@@ -156,5 +155,5 @@ s01 | FDOT AADT (fixture; data_lake.fdot_aadt_fl, counties LEE+COLLIER+CHARLOTTE
 - traffic-swfl: standing snapshot of SWFL corridor AADT — length-weighted average, YoY, CAGR, truck factor, plus post-Ian recovery index for storm-zone framing.
 
 --- RECENT NOTES ---
-- 2026-05-18: pack refined by the Refinery — 6 fact(s) from 1 source(s).
+- 2026-05-30: pack refined by the Refinery — 6 fact(s) from 1 source(s).
 ```
