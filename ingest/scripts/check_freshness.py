@@ -118,19 +118,30 @@ def check_tier1_entry(conn, entry: dict) -> dict:
 
 
 def check_tier2_entry(conn, entry: dict) -> dict:
-    """Query _dlt_loads by schema_name and return a status dict."""
+    """Query tier-2 freshness — via _dlt_loads (dlt pipelines) or directTableFreshness (non-dlt)."""
+    from psycopg import sql as pgsql
+
     name = entry["name"]
-    schema_name = entry["dlt_schema_name"]
     cadence = int(entry["cadence_days"])
     tolerance = float(entry["tolerance_multiplier"])
     threshold = int(cadence * tolerance)
 
     with conn.cursor() as cur:
-        cur.execute(
-            "SELECT MAX(inserted_at) FROM data_lake._dlt_loads"
-            " WHERE schema_name = %s AND status = 0",
-            (schema_name,),
-        )
+        if "freshness_table" in entry:
+            # Non-dlt pipeline: query MAX(inserted_at) on the named table directly.
+            schema, table = entry["freshness_table"].split(".", 1)
+            cur.execute(
+                pgsql.SQL("SELECT MAX(inserted_at) FROM {}.{}").format(
+                    pgsql.Identifier(schema), pgsql.Identifier(table)
+                )
+            )
+        else:
+            schema_name = entry["dlt_schema_name"]
+            cur.execute(
+                "SELECT MAX(inserted_at) FROM data_lake._dlt_loads"
+                " WHERE schema_name = %s AND status = 0",
+                (schema_name,),
+            )
         row = cur.fetchone()
 
     if row is None or row[0] is None:

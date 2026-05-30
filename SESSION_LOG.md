@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Sonnet 4.6 · main) — fix(freshness-probe): handle freshness_table entries in check_freshness.py
+
+- `ingest/scripts/check_freshness.py`: `check_tier2_entry` now branches on `freshness_table` vs `dlt_schema_name`. Non-dlt entries (fl_dor_tdt, fl_dor_sales_tax, fgcu_reri_indicators) query `MAX(inserted_at)` on their named table directly using `psycopg.sql.Identifier` for safe quoting. DLT entries unchanged.
+- Root cause: replacing `dlt_schema_name` with `freshness_table` in cadence_registry.yaml (TDT fix, earlier today) broke the probe — it threw `KeyError: 'dlt_schema_name'` at line 123.
+- Next: daily rebuild orphan error (4 TDT vocab slugs) should self-resolve on next scheduled run — vocab landed in `6cf27d8`. PRs #50 + #51 open, awaiting operator action.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — fix(tdt): wire freshness signal → ops green
 
 - `docs/sql/20260529_tdt_inserted_at.sql`: idempotent rename `retrieved_at → inserted_at` on `public.fl_dor_tdt_collections` (applied; 666 rows, latest 2026-05-28).
