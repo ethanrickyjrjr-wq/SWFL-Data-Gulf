@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 1M · main) — note: master outputProducer is LIVE (kill the stale "§6.1 NOT STARTED" flag)
+
+- **No code change.** Correcting a stale external/LittleBird note that had **§6.1 master outputProducer = NOT STARTED**. Verified in code: `refinery/packs/master.mts:105` `masterSynthesizerOutputProducer` is fully implemented — pure-code deterministic synthesis (`skipSynthesisAgent`, **no LLM in the synthesis path**), implementing `docs/v3-synthesis-spec.md` §2 steps 0–8: relevance floor → direction vote → override cascade → contradictions → conclusion template → key-metrics rollup (cap `t1Count+1`) → trust_tier worst-wins + decay → `computeConfidence`, plus dossier layer (`composeConditionalThesis` / `composeGrainBoundary` / `predictedWindow`).
+- **Live evidence:** `/api/b/master` token `SWFL-7421-v60-20260530`, bearish / magnitude high / confidence 0.91 / 15 upstreams — comes straight from this producer, not a stray LLM essay.
+- **Repo doc is already correct:** `docs/ontology-and-roadmap.md:207` reads "### 6.1 (Goal 3 — SHIPPED)". Nothing to fix in-tree — the stale flag lives only in external notes. Read done-ness off /ops + code, never a markdown flag.
+- **Pitch implication (logged to memory):** the no-invention guarantee is **structural** — the MCP/`/api/b/*` payload controls what the model is handed; it can't fabricate what it was never given. "The system prevents it" ≫ "the AI won't." The deterministic producer is the proof.
+
 ## 2026-05-30 (Opus 4.8 1M · main) — feat(speaker): PR 2 language scrub — corridor→area, NNN=triple-net, speak-in-places
 
 - **Speaker chokepoint swap (`refinery/render/speaker.mts`):** new `deCorridor()` — case-preserving `corridor(s)→area(s)`, word-boundary leaves the `corridor_type` data field intact (`_` is a word char → no `\b` match; trailing `s` blocks the singular pattern from biting `corridors`). Wired into `sanitizeProse`, and now also applied to metric-table labels + the tier-2 scope header (both rendered raw before). Hard-coded leak fixed: `traffic-swfl` label `"SWFL corridor traffic"` → `"SWFL road traffic"`. Tier-3 audit keeps internal "corridor" (same pattern as bifurcate→split). Raw `cre-swfl.mts` internals deliberately NOT churned — chokepoint covers tiers 1/2, rewriting them would churn snapshots + `corridor_type` refs for zero user-visible gain.
