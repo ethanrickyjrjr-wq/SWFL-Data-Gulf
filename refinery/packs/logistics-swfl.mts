@@ -222,6 +222,19 @@ function logisticsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!agg || agg.flowCount === 0) {
+    // Live build with zero FAF5 flows is a real ingestion failure, not a valid
+    // "no freight" read — a live build against empty data produces no fixture
+    // sentinel, so the Stage-4 gate sails right past it. Fail loud here (the
+    // way fdot-source's assertSegmentsNonEmpty does) so an empty live run can
+    // never silently ship a hollow brain as "live". The graceful-degrade path
+    // below is reserved for fixture mode.
+    if (env.source === "live") {
+      throw new Error(
+        "logistics-swfl: live build resolved 0 FAF5 inbound flow rows for zone 129. " +
+          "Confirm the FAF5 Parquet exists in lake-tier1 S3 (re-run ingest/scripts/faf5_to_parquet.py) " +
+          "and that DuckDB S3 credentials are configured. Refusing to ship a hollow 'live' brain.",
+      );
+    }
     return {
       conclusion:
         "logistics-swfl could not resolve any FAF5 inbound flow rows for zone 129 — no freight context available this build.",

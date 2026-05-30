@@ -23,6 +23,8 @@ import { lintFactsOnly } from "../validate/facts-only-lint.mts";
 import { lintInferenceBait } from "../validate/inference-bait-lint.mts";
 import { lintSmoothing } from "../validate/smoothing-lint.mts";
 import { lintGrainGuard } from "../validate/grain-guard-lint.mts";
+import { hasFixtureSentinel } from "../lib/fixture-sentinels.mts";
+import { env } from "../config/env.mts";
 import {
   attributeError,
   chainDepth,
@@ -462,8 +464,26 @@ export async function outputStage(
   // grain_boundary must name absences, not predictions, and finest_grain must
   // be well-formed. No-op when grain_boundary is absent (every leaf brain).
   const grainGuard = lintGrainGuard(brainOutput);
-  if (!spec.ok || !lint.ok || !bait.ok || !smoothing.ok || !grainGuard.ok) {
+  // A LIVE build must never ship a fixture-mode sentinel lifted from a stale
+  // upstream (the master v60/v61 leak). Scans the rendered markdown; never
+  // fires in fixture mode (sentinels are expected there) nor on a clean live
+  // build. Self-correcting — master can't be produced until its upstreams are
+  // re-rendered live. Single-sourced patterns: refinery/lib/fixture-sentinels.
+  const fixtureLeak = env.source === "live" && hasFixtureSentinel(markdown);
+  if (
+    !spec.ok ||
+    !lint.ok ||
+    !bait.ok ||
+    !smoothing.ok ||
+    !grainGuard.ok ||
+    fixtureLeak
+  ) {
     const errs = [
+      ...(fixtureLeak
+        ? [
+            `  fixture-leak: live build of ${pack.brain_id} contains a fixture sentinel — an upstream is stale. Re-render it live first (bun refinery/cli.mts <upstream>).`,
+          ]
+        : []),
       ...spec.errors.map((e) => `  spec: ${e}`),
       ...lint.violations.map(
         (v) => `  facts-only [line ${v.line}, ${v.pattern}]: ${v.text}`,
