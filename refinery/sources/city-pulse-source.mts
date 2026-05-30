@@ -15,8 +15,11 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  *
  * Live mode: getSupabase().schema("data_lake").from("city_pulse"), filtered to
  * expires_at > now(). Fixture mode (env.source === "fixture"): loads the JSON
- * fixture at refinery/__fixtures__/city-pulse.sample.json. Throws on 0 live
- * rows so a hollow brain never ships.
+ * fixture at refinery/__fixtures__/city-pulse.sample.json. Returns [] on 0
+ * live rows (table is legitimately empty on bootstrap and between cron runs);
+ * the pack's empty-guard emits a neutral "no current signals" brain, which
+ * prevents a hollow brain without crashing the master rebuild cascade. A real
+ * DB failure still throws.
  *
  * THIS IS THE ONLY FILE THAT KNOWS THE data_lake.city_pulse SCHEMA.
  * Columns read (verified against 2026-05-30 migration):
@@ -128,9 +131,11 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
 
   const rows = (data ?? []) as Record<string, unknown>[];
   if (rows.length === 0) {
-    throw new Error(
-      `city-pulse-source: ${SCHEMA}.${TABLE} returned 0 non-expired rows.`,
-    );
+    // Table is legitimately empty on bootstrap (day 1) and between cron runs.
+    // The pack's empty-guard emits a neutral "no current signals" brain —
+    // returning [] here lets that guard do its job without crashing the master
+    // rebuild cascade. A real DB failure is caught above and still throws.
+    return [];
   }
   return rows;
 }

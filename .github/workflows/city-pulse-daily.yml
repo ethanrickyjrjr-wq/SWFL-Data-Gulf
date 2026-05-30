@@ -3,7 +3,7 @@ name: City pulse daily
 on:
   schedule:
     # 09:00 UTC = 5 AM ET daily.
-    # Slot confirmed free: daily-rebuild uses 0 6 * * *, news-daily uses 0 11 * * *,
+    # Slot confirmed free: daily-rebuild uses 0 6 * * *,
     # freshness-probe uses 0 14 * * *. 0 9 * * * has no collision.
     - cron: "0 9 * * *"
   workflow_dispatch:
