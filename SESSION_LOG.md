@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 · main) — design: city-pulse + flywheel spec (brainstorm w/ operator)
+
+- **Doc-only.** New `docs/superpowers/specs/2026-05-30-city-pulse-flywheel-design.md`. Adds a fast current-events layer the batch narrative stack lacks: **daily city pulse** at city grain (≈7 cities: Lehigh Acres, Cape Coral, Fort Myers, Naples, Estero, Bonita Springs, Fort Myers Beach), distilled into a TTL'd `data_lake.city_pulse` table (the flywheel — stable facts fall off the daily pull-list, search volume self-shrinks), consumed by a new deterministic **`city-pulse-swfl` reporter brain** wired as a `master` `input_brains` edge.
+- **Decisions locked:** dedicated reporter brain (NOT bolted onto cre-swfl — wrong coupling); hybrid storage (Tier-1 cold raw NDJSON + Tier-2 distilled table) per data-tier policy; **single PR ships pack + migration together** (brain-first gate); query-time relevance is the **already-live Tier-3 carry contract** (zero new infra). Forked from `corridor_grounded`.
+- **⚠️ Vendor catch (corrected my own + littlebird's earlier advice):** must use `web_search_20250305`, NOT `20260209` — the newer tool's dynamic filtering suppresses per-claim `citations[]` (repo A/B 2026-05-26: 9 vs 0 spans), which would break the `[web-N]` no-hallucination gate. Also: naplesnews/news-press block Anthropic's crawler — source via gulfshorebusiness + Business Observer + county/gov.
+- **Next:** operator reviews spec (3 open decisions: naming `city-pulse` vs `news-swfl`, retire dead `news_swfl` scraper?, Batch API on cron?) → then `writing-plans`. Nothing built yet.
+
 ## 2026-05-30 (Opus 4.8 · main) — docs: close the fixture-leak fix plan (SHIPPED banner) so it isn't re-executed
 
 - **Doc-only.** `docs/superpowers/plans/2026-05-30-fixture-leak-fix/README.md` now leads with a **STATUS — SHIPPED** banner: PR1 (master v62 live, fixture-free), the FDOT truck-share 740% diff-review catch, PR2 (gate), PR3 (speaker hygiene, live) — all on `main`. Records the deviations (FAF5 is S3 Parquet not a Postgres table; role-views deleted not re-rendered; cre-swfl LLM-rebuild follow-up). Prevents a future session from mistaking the plan for open work ([[pre-build-state-check]]).
