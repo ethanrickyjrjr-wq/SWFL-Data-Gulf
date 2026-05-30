@@ -32,6 +32,7 @@ from typing import Any
 
 import anthropic
 from dotenv import load_dotenv
+from ingest.lib import firecrawl_client
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
@@ -149,6 +150,61 @@ def run_city_search(city: str, run_at: str) -> dict[str, Any]:
     return build_record(city, query, response.model_dump(), run_at)
 
 
+_FIRECRAWL_CITATION_MAX_CHARS = 1500
+
+
+def capture_firecrawl(city: str, run_at: str) -> dict[str, Any]:
+    """Capture city pulse signals via Firecrawl /v2/search (side-by-side with Anthropic path).
+
+    Returns a record with the same keys as build_record() so distill_capture()
+    works unchanged. Token fields are None (Firecrawl has no token concept).
+    """
+    query = (
+        f"{city} Florida business news openings closings construction "
+        "real estate development"
+    )
+    response = firecrawl_client.search(
+        query,
+        limit=10,
+        sources=[{"type": "web"}, {"type": "news"}],
+        tbs="qdr:m",
+        location=f"{city}, Florida, United States",
+        scrape_markdown=True,
+    )
+
+    data = response.get("data") or {}
+    web_results = data.get("web") or []
+    news_results = data.get("news") or []
+    all_results = web_results + news_results
+
+    citations: list[dict[str, Any]] = []
+    for result in all_results:
+        url = result.get("url") or (result.get("metadata") or {}).get("sourceURL")
+        if not url:
+            continue
+        title = result.get("title") or ""
+        raw_text = result.get("markdown") or result.get("description") or ""
+        cited_text = raw_text[:_FIRECRAWL_CITATION_MAX_CHARS] if raw_text else ""
+        if not cited_text:
+            continue
+        citations.append({"url": url, "title": title, "cited_text": cited_text})
+
+    return {
+        "city": city,
+        "city_slug": slug(city),
+        "query": query,
+        "model": "firecrawl/v2/search",
+        "tool_version": "firecrawl-search",
+        "run_at": run_at,
+        "input_tokens": None,
+        "output_tokens": None,
+        "response": response,
+        "citations": citations,
+        "cited_text_count": len(citations),
+        "credits_used": response.get("creditsUsed"),
+    }
+
+
 def to_ndjson(records: list[dict[str, Any]]) -> bytes:
     return ("\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n").encode("utf-8")
 
@@ -162,6 +218,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--city", metavar="NAME", help="Run a single city by exact name.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Run search + distill; print rows, skip Tier-1 upload and DB write.")
+    parser.add_argument(
+        "--source-provider",
+        choices=["anthropic", "firecrawl"],
+        default="anthropic",
+        help="Capture provider: 'anthropic' (default, web_search_20250305) or 'firecrawl' (/v2/search).",
+    )
     args = parser.parse_args(argv)
 
     cities = [args.city] if args.city else CITIES
@@ -176,18 +238,25 @@ def main(argv: list[str] | None = None) -> int:
     errors: list[str] = []
     total_new = 0
     for city in cities:
-        print(f"city_pulse: querying '{city}'...")
+        print(f"city_pulse: querying '{city}' via {args.source_provider}...")
         try:
-            record = run_city_search(city, run_at)
+            if args.source_provider == "firecrawl":
+                record = capture_firecrawl(city, run_at)
+            else:
+                record = run_city_search(city, run_at)
         except Exception as exc:
             print(f"  -> ERROR (search): {exc!r}")
             errors.append(city)
             continue
 
         cited = record["cited_text_count"]
-        print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
+        if args.source_provider == "firecrawl":
+            print(f"  -> {cited} cited_text spans | credits_used={record.get('credits_used')}")
+        else:
+            print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
         if cited == 0:
-            print(f"  -> WARNING: zero cited_text spans — verify SEARCH_TOOL_VERSION is '{SEARCH_TOOL_VERSION}'")
+            if args.source_provider == "anthropic":
+                print(f"  -> WARNING: zero cited_text spans — verify SEARCH_TOOL_VERSION is '{SEARCH_TOOL_VERSION}'")
 
         path = tier1_path(city, run_key, yyyy, mm)
         body = to_ndjson([record])
