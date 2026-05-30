@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · claude/cron-annual-to-monthly-yfb1J) — cron: annual → monthly on three GHA workflows
+
+- Changed cron schedule in `census-cbp-annual.yml`, `leepa-parcels-annual.yml`, and `fdot-aadt-annual.yml` from single annual-date triggers to `0 10 15 * *` (15th of every month, 10:00 UTC). Data cadence unchanged (annual-release); monthly retries prevent a year-long gap from a single GHA failure. Pipelines are idempotent. `cadence_registry.yaml` untouched.
+- Next: open PR for review.
+
 ## 2026-05-30 (Opus 4.8 · main) — plan: add Tier-2 prune (Task 6B) + supersession-vs-TTL note (operator Q)
 
 - **Doc-only.** Operator asked about the flywheel's cleanup mechanism. Added to the plan a deterministic **Task 6B prune** (`DELETE FROM data_lake.city_pulse WHERE expires_at < now()`, wired into pipeline `main()` — skipped on `--dry-run`) so the Tier-2 table doesn't grow unbounded; safe because Tier-1 cold keeps the permanent raw audit. Answers "delete old info, keep it fresh and clean."
