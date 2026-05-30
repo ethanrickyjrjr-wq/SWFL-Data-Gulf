@@ -37,11 +37,10 @@ const TOPIC_PRIORITY = [
 /** Cap on how many signals we surface as key_metrics (plan spec). */
 const MAX_SIGNALS = 8;
 
-// Stable strings used in both corpusSummary and catalog.mts — keep in sync.
-export const CITY_PULSE_SCOPE =
+const CITY_PULSE_SCOPE =
   "SWFL (Lee + Collier) daily current-events pulse — dated business openings/closings, transactions, construction, and disaster signals for 7 cities, each cited to a primary source.";
 
-export const CITY_PULSE_TTL = 86400; // 1 day — daily pulse
+const CITY_PULSE_TTL = 86400; // 1 day — daily pulse
 
 // ---------------------------------------------------------------------
 // Closure state — populated by corpusSummary, read by outputProducer.
@@ -62,7 +61,13 @@ let lastSnapshot: CityPulseSnapshot | null = null;
 function pulseRowsFrom(fragments: RawFragment[]): CityPulseNormalized[] {
   return fragments
     .map((f) => f.normalized as unknown as CityPulseNormalized)
-    .filter((n) => n && n.kind === "city-pulse" && n.fact.length > 0);
+    .filter(
+      (n) =>
+        n &&
+        n.kind === "city-pulse" &&
+        n.fact.length > 0 &&
+        n.source_url.length > 0,
+    );
 }
 
 function sortSignals(rows: CityPulseNormalized[]): CityPulseNormalized[] {

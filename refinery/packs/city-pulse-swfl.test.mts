@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 process.env["REFINERY_SOURCE"] = "fixture";
 
 const { cityPulseSwfl } = await import("./city-pulse-swfl.mts");
+const { cityPulseSource } = await import("../sources/city-pulse-source.mts");
 
 import type { RawFragment } from "../types/fragment.mts";
 
@@ -74,4 +75,54 @@ test("city-pulse-swfl: empty data yields a valid neutral output, no throw", () =
   assert.equal(out.key_metrics.length, 0);
   assert.equal(out.direction, "neutral");
   assert.ok(out.caveats.length >= 1, "expected at least 1 caveat");
+});
+
+// ── Test 4 (M1): cited_text-null → citation falls back to url shape ───────────
+
+test("city-pulse-swfl: cited_text null falls back to url-based citation", () => {
+  const fragNoText = frag({
+    cited_text: null,
+    source_title: null,
+    source_url: "https://example.com/fallback",
+  });
+  cityPulseSwfl.corpusSummary!([fragNoText]);
+  const out = cityPulseSwfl.outputProducer!({} as never);
+
+  assert.ok(out.key_metrics.length >= 1, "expected at least 1 key_metric");
+  for (const m of out.key_metrics) {
+    assert.ok(
+      typeof m.source?.citation === "string" && m.source.citation.length > 0,
+      "citation must be a non-empty string even when cited_text is null",
+    );
+    // url-fallback shape must contain the source_url
+    assert.ok(
+      m.source.citation.includes("https://example.com/fallback"),
+      `citation should contain source_url; got: ${m.source.citation}`,
+    );
+  }
+});
+
+// ── Test 5 (M2): fixture source round-trip ─────────────────────────────────────
+
+test("city-pulse-swfl: fixture source round-trip — ≥1 metric, all with non-empty url", async () => {
+  const allFragments = await cityPulseSource.fetch();
+  assert.ok(
+    allFragments.length >= 1,
+    "fixture must return at least 1 fragment",
+  );
+
+  cityPulseSwfl.corpusSummary!(allFragments);
+  const out = cityPulseSwfl.outputProducer!({} as never);
+
+  assert.ok(
+    out.key_metrics.length >= 1,
+    "expected at least 1 key_metric from fixture",
+  );
+
+  for (const m of out.key_metrics) {
+    assert.ok(
+      typeof m.source?.url === "string" && m.source.url.length > 0,
+      `every key_metric must have a non-empty source.url; metric "${m.metric}" failed`,
+    );
+  }
 });
