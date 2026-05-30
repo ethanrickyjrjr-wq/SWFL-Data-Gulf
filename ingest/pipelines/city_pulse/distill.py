@@ -1,11 +1,18 @@
 """SWFL city pulse — distill step.
 
 Reads a Tier-1 capture record (one city), makes ONE cheap Anthropic call (no
-web search — forced tool_use structured output) that turns the captured prose +
+web search — forced tool_use structured output) that turns the captured
 citations[] into discrete, citation-backed facts. Each fact is classified into a
-volatility `topic` (which sets its TTL), backed by one of the supplied citation
-URLs, and given a dedup_key. Facts with no backing citation are DROPPED — that is
-the no-unbacked-claim guarantee, enforced before the row exists.
+volatility `topic` (which sets its TTL), backed by a citation span by 1-based
+INDEX (cite field), and given a dedup_key.
+
+Distill contract: the model is shown a NUMBERED list of citation spans
+(title + cited_text + url) — not the raw response blob — and each extracted fact
+references its backing span by index number (cite: 1, 2, …). Facts whose cite
+index is out of range, whose topic is invalid, or whose resolved citation has no
+URL are DROPPED — that is the no-unbacked-claim guarantee, enforced before the
+row exists. This approach fixes the 0-facts bug (the raw 278k-char response blob
+drowned the model) and cuts distill input tokens ~20x.
 
 Writes to data_lake.city_pulse via psycopg with ON CONFLICT (dedup_key) DO NOTHING.
 """
@@ -62,9 +69,9 @@ EXTRACT_TOOL = {
                         "topic": {"type": "string", "enum": sorted(VALID_TOPICS),
                                   "description": "Volatility class. breaking=disaster/sudden closure/major layoff; transactions=sales/big leases/land buys; development=construction/permits/approvals; business=openings/closings/expansions/hiring; structural=ownership/long-run posture."},
                         "fact": {"type": "string", "description": "One concrete claim, numbers and dates verbatim."},
-                        "source_url": {"type": "string", "description": "MUST be one of the URLs from the provided citations — the source that backs this fact."},
+                        "cite": {"type": "integer", "description": "The number of the citation span (from the numbered list) that backs this fact."},
                     },
-                    "required": ["topic", "fact", "source_url"],
+                    "required": ["topic", "fact", "cite"],
                 },
             }
         },
@@ -75,27 +82,34 @@ EXTRACT_TOOL = {
 
 def rows_from_extraction(capture: dict[str, Any], extraction: dict[str, Any]) -> list[dict[str, Any]]:
     """Turn the model's extraction into city_pulse rows, dropping any fact whose
-    source_url is not in the capture's citations or whose topic is invalid.
-    citation lookup carries title + cited_text onto the row."""
-    by_url = {c.get("url"): c for c in capture.get("citations", []) if c.get("url")}
+    cite index is out of range, whose topic is invalid, or whose resolved citation
+    has no URL. Index-based lookup carries title + cited_text onto the row."""
+    citations = capture.get("citations", [])
     captured_at = datetime.fromisoformat(capture["run_at"].replace("Z", "+00:00"))
     rows: list[dict[str, Any]] = []
     for f in extraction.get("facts", []):
         topic = f.get("topic")
         fact = (f.get("fact") or "").strip()
-        url = f.get("source_url")
         if topic not in VALID_TOPICS or not fact:
             continue
-        cite = by_url.get(url)
-        if cite is None:  # uncited -> dropped (the guarantee)
-            continue
+        # cite is a 1-based index into citations; coerce and range-check
+        try:
+            cite_idx = int(f["cite"])
+        except (KeyError, TypeError, ValueError):
+            continue  # missing or non-integer cite -> dropped (the guarantee)
+        if not (1 <= cite_idx <= len(citations)):
+            continue  # out of range -> dropped
+        c = citations[cite_idx - 1]
+        url = c.get("url")
+        if not url:
+            continue  # no URL on resolved citation -> dropped
         rows.append({
             "city": capture["city"],
             "topic": topic,
             "fact": fact,
             "source_url": url,
-            "source_title": cite.get("title"),
-            "cited_text": cite.get("cited_text"),
+            "source_title": c.get("title"),
+            "cited_text": c.get("cited_text"),
             "captured_at": captured_at,
             "expires_at": expires_at_for(topic, captured_at),
             "dedup_key": dedup_key(capture["city"], topic, fact),
@@ -105,19 +119,38 @@ def rows_from_extraction(capture: dict[str, Any], extraction: dict[str, Any]) ->
 
 
 def distill_capture(capture: dict[str, Any]) -> list[dict[str, Any]]:
-    """One forced-tool-use call: extract facts from the capture's response text +
-    citations, then post-process into rows. No web search here."""
+    """One forced-tool-use call: extract facts from the capture's citation spans,
+    then post-process into rows. No web search here.
+
+    The model receives a NUMBERED list of citation spans (not the raw response
+    blob) and returns each fact with a cite integer referencing its backing span
+    by 1-based index. This avoids the 0-facts bug caused by feeding the model a
+    ~278k-char encrypted_content blob and cuts input tokens ~20x."""
     if not capture.get("citations"):
         return []  # nothing citable -> nothing to distill
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    response_text = json.dumps(capture["response"].get("content", []), ensure_ascii=False)
-    citations_block = json.dumps(capture["citations"], ensure_ascii=False)
+    city = capture["city"]
+    citations = capture["citations"]
+    # Build a numbered list of citation spans for the prompt
+    span_lines = []
+    for i, c in enumerate(citations, start=1):
+        title = c.get("title") or ""
+        cited_text = c.get("cited_text") or ""
+        url = c.get("url") or ""
+        span_lines.append(f'[{i}] {title} — "{cited_text}" ({url})')
+    numbered_spans = "\n".join(span_lines)
+    n = len(citations)
     prompt = (
-        f"City: {capture['city']}.\n\n"
-        f"Captured web_search response content:\n{response_text}\n\n"
-        f"Available citations (you MUST set each fact's source_url to one of these URLs):\n{citations_block}\n\n"
-        "Extract every concrete, dated current-events fact. Numbers and company "
-        "names verbatim. Skip vague or undated statements. Call record_city_facts."
+        f"Here are {n} cited spans from a web search about {city}, Florida "
+        f"(Southwest Florida), covering recent current events:\n\n"
+        f"{numbered_spans}\n\n"
+        "Extract every concrete, DATED current-events fact from these spans — "
+        "business openings/closings, transactions/sales/leases, "
+        "construction/permits/approvals, layoffs/hiring, storm/disaster impacts. "
+        "Keep numbers, dollar amounts, company names, and dates verbatim. "
+        "Skip vague or undated statements. "
+        "For each fact set `cite` to the [number] of the span it came from and "
+        "classify `topic`. Call record_city_facts."
     )
     msg = client.messages.create(
         model=MODEL,

@@ -48,8 +48,9 @@ def _capture():
 
 
 def test_rows_from_extraction_keeps_cited_facts_and_assigns_ttl():
+    # cite: 1 → citations[0] → url/cited_text resolved from index
     extraction = {"facts": [
-        {"topic": "transactions", "fact": "Amazon bought $60M of land in Naples", "source_url": "https://gulfshorebusiness.com/a"},
+        {"topic": "transactions", "fact": "Amazon bought $60M of land in Naples", "cite": 1},
     ]}
     rows = rows_from_extraction(_capture(), extraction)
     assert len(rows) == 1
@@ -62,17 +63,36 @@ def test_rows_from_extraction_keeps_cited_facts_and_assigns_ttl():
 
 
 def test_rows_from_extraction_drops_uncited_facts():
+    # cite: 99 is out of range (only 1 citation) -> dropped (the guarantee)
     extraction = {"facts": [
-        {"topic": "transactions", "fact": "Unbacked rumor", "source_url": "https://made-up.com/x"},
+        {"topic": "transactions", "fact": "Unbacked rumor", "cite": 99},
     ]}
     assert rows_from_extraction(_capture(), extraction) == []
 
 
 def test_rows_from_extraction_drops_invalid_topic():
     extraction = {"facts": [
-        {"topic": "gossip", "fact": "x", "source_url": "https://gulfshorebusiness.com/a"},
+        {"topic": "gossip", "fact": "x", "cite": 1},
     ]}
     assert rows_from_extraction(_capture(), extraction) == []
+
+
+def test_rows_from_extraction_drops_missing_or_nonnumeric_cite():
+    # cite missing -> dropped
+    extraction_missing = {"facts": [
+        {"topic": "transactions", "fact": "Amazon bought $60M of land in Naples"},
+    ]}
+    assert rows_from_extraction(_capture(), extraction_missing) == []
+    # cite is a string that can't be coerced to int -> dropped
+    extraction_string = {"facts": [
+        {"topic": "transactions", "fact": "Amazon bought $60M of land in Naples", "cite": "web-1"},
+    ]}
+    assert rows_from_extraction(_capture(), extraction_string) == []
+    # cite is None -> dropped
+    extraction_none = {"facts": [
+        {"topic": "transactions", "fact": "Amazon bought $60M of land in Naples", "cite": None},
+    ]}
+    assert rows_from_extraction(_capture(), extraction_none) == []
 
 
 from ingest.pipelines.city_pulse.distill import _insert_sql
