@@ -68,3 +68,81 @@ ALLOWED_DOMAINS = [
 
 def slug(city: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-")
+
+
+QUERY_TEMPLATE = (
+    "Provide a current-events briefing for {city}, Florida (Southwest Florida, "
+    "Lee or Collier County) covering the LAST 60 DAYS. Surface concrete, dated "
+    "developments in these areas:\n"
+    "- New business openings, closings, expansions, or major hiring/layoffs.\n"
+    "- Commercial building sales, large lease signings, or land acquisitions.\n"
+    "- Construction starts, planning-board approvals, or permit milestones.\n"
+    "- Storm, flood, or disaster impacts to the local economy.\n\n"
+    "Quote specific figures, company names, dollar amounts, and dates. Cite each "
+    "claim to its primary source (local news, county records, company releases)."
+)
+
+USER_LOCATION = {
+    "type": "approximate",
+    "city": "Fort Myers",
+    "region": "Florida",
+    "country": "US",
+    "timezone": "America/New_York",
+}
+
+
+def _extract_citations(content: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Flatten all non-null citations from model_dump() content blocks, deduped."""
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for block in content:
+        for c in block.get("citations") or []:
+            key = f"{c.get('url')}|{c.get('cited_text', '')[:60]}"
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({
+                "url": c.get("url"),
+                "title": c.get("title"),
+                "cited_text": c.get("cited_text"),
+                "type": c.get("type"),
+            })
+    return out
+
+
+def build_record(city: str, query: str, response_dump: dict[str, Any], run_at: str) -> dict[str, Any]:
+    content = response_dump.get("content", [])
+    citations = _extract_citations(content)
+    usage = response_dump.get("usage", {}) or {}
+    return {
+        "city": city,
+        "city_slug": slug(city),
+        "query": query,
+        "model": MODEL,
+        "tool_version": SEARCH_TOOL_VERSION,
+        "run_at": run_at,
+        "input_tokens": usage.get("input_tokens"),
+        "output_tokens": usage.get("output_tokens"),
+        "stop_reason": response_dump.get("stop_reason"),
+        "response": response_dump,
+        "citations": citations,
+        "cited_text_count": len(citations),
+    }
+
+
+def run_city_search(city: str, run_at: str) -> dict[str, Any]:
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    query = QUERY_TEMPLATE.format(city=city)
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=4096,
+        tools=[{
+            "type": SEARCH_TOOL_VERSION,
+            "name": "web_search",
+            "max_uses": 8,
+            "allowed_domains": ALLOWED_DOMAINS,
+            "user_location": USER_LOCATION,
+        }],
+        messages=[{"role": "user", "content": query}],
+    )
+    return build_record(city, query, response.model_dump(), run_at)
