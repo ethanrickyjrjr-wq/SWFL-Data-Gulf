@@ -101,7 +101,7 @@ GRANT SELECT ON data_lake.city_pulse TO service_role;          -- brain-platform
 
 ## 7. TTL volatility classes (the flywheel made real)
 
-TTL keyed by `topic`. The daily job only issues a search for a `(city, topic)` whose freshest row is **expired** — stable facts fall out of the daily pull-list, so **search volume self-shrinks as the lake fills.** Starting classes (tunable):
+TTL keyed by `topic`. TTL governs two things: what the reader surfaces (only non-expired rows) and, ultimately, what the daily job re-pulls. Starting classes (tunable):
 
 | `topic`        | Examples                                      | TTL     |
 | -------------- | --------------------------------------------- | ------- |
@@ -111,11 +111,13 @@ TTL keyed by `topic`. The daily job only issues a search for a `(city, topic)` w
 | `business`     | openings/closings, expansions, hiring         | 14 days |
 | `structural`   | anchor ownership, long-run market posture     | 90 days |
 
-Dedup: a new pull whose `dedup_key` already exists and is **not** expired is a no-op (skip the search entirely next cycle); a materially-changed fact writes a new row and sets the prior row's `superseded_by`.
+**v1 flywheel = dedup-on-write + TTL-filtered reads.** A distilled fact whose `dedup_key` already exists is a no-op on write (`ON CONFLICT (dedup_key) DO NOTHING`); a materially-changed fact has a different `dedup_key` and writes a new row. The pack reads only `expires_at > now()`. In v1 the daily job still runs one broad search per city (7/day) — the broad query covers all topics, so it cannot skip per-topic. **v2 (with the weekly corridor trigger): topic-scoped queries enable true search-volume-shrink** — skip the search for a `(city, topic)` whose freshest row is still fresh. `superseded_by` is reserved for the v2 supersede-linking; v1 leaves it null. Cost is ~$0.9–1.5/day either way (§11) — the v1 win is a clean, deduped, TTL-bounded lake, not a smaller search bill.
 
 ## 8. Reporter pack — `city-pulse-swfl`
 
-Deterministic reporter (mirrors `traffic-swfl` / `macro-swfl`): `skipTriageAgent: true`, `skipSynthesisAgent: true`, `corpusSummary` + `outputProducer`, `synthesisStrategy: "deterministic"`. Reads non-expired `data_lake.city_pulse` rows → `BrainOutput` of **city-grain current facts**, each carrying a `[web-N]` stamp resolved from `source_url`/`title`/`cited_text`. It is a **Tier-1 Reporter** per THE-GOAL: cited current facts, **no opinions** — speculation stays with master. The existing `[web-N]` + dangling-anchor write-blocking citation gate (`refinery/validate/corridor-character-lint.mts` family) governs its render, unchanged.
+Deterministic reporter (mirrors `traffic-swfl` / `macro-swfl`): `skipTriageAgent: true`, `skipSynthesisAgent: true`, `corpusSummary` + `outputProducer`, `synthesisStrategy: "deterministic"`. Reads non-expired `data_lake.city_pulse` rows → standard `BrainOutput` of **city-grain current facts**. It is a **Tier-1 Reporter** per THE-GOAL: cited current facts, **no opinions** — speculation stays with master.
+
+**Provenance / no-unbacked-claim guarantee (corrected):** this is a _standard pack_, so its provenance is the per-metric **`key_metrics[].source` receipt** (`BrainOutputMetricSource`: `url`, `fetched_at`, `tier`, `citation` carrying the `cited_text`) — enforced by `spec-validator`, with the standard `facts-only-lint` / `inference-bait-lint` / `smoothing-lint` render stack (Brain Factory rule 7). The inline `[web-N]` + dangling-anchor lint (`corridor-character-lint.mts` family) belongs to the _free-form corridor-character surface only_ and does **not** apply here. The structural guarantee is delivered earlier and harder: **the distill step (§5a) drops any fact lacking a backing citation before the row exists**, and every surfaced signal becomes a `key_metric` whose `source.url` is that backing citation — so the render can never carry a claim without a source.
 
 Master edge: add `{ id: "city-pulse-swfl", edge_type: "input" }` to `master.mts` `input_brains[]`.
 

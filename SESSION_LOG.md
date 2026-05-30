@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 · main) — plan: city-pulse-swfl implementation plan + spec decision-lock/corrections
+
+- **Doc-only.** New `docs/superpowers/plans/2026-05-30-city-pulse-swfl.md` — 16 TDD tasks (migration → capture pipeline → distill → source connector → pack → registry → master edge → GHA cron → cadence registry → delete dead `news_swfl` → verify). Real code per step (modeled on `tourism-tdt` pack/source, `corridor_grounded` pipeline, `fl-dor-tdt-monthly.yml` cron). One PR, brain-first (pack + `data_lake.city_pulse` migration together).
+- **Spec locked + corrected** (`...specs/2026-05-30-city-pulse-flywheel-design.md`): §14 decisions locked (naming `city-pulse-swfl`; delete dead `news_swfl`; defer Batch API to v2). Two corrections caught while planning: (1) provenance is the standard `key_metrics[].source` receipt + spec-validator/facts-only/smoothing stack — NOT the corridor-character `[web-N]` lint (wrong surface); the distill step dropping uncited facts is the real guarantee. (2) v1 flywheel = dedup-on-write + TTL-filtered reads; search-volume-shrink is v2 (needs topic-scoped queries) — v1 still runs 7 searches/day.
+- **Verified in-session:** web search $10/1k + Sonnet 4.6 $3/$15 (live pricing); `web_search_20250305` REQUIRED (20260209 dynamic filtering suppresses citations — repo A/B); `data_lake` is PostgREST-exposed via `getSupabase().schema("data_lake")` (bls-laus precedent); naplesnews/news-press block Anthropic's crawler.
+- **Next:** operator picks execution mode (subagent-driven vs inline) → implement on branch `feat/city-pulse-swfl`. Nothing built yet.
+
 ## 2026-05-30 (Opus 4.8 · main) — design: city-pulse + flywheel spec (brainstorm w/ operator)
 
 - **Doc-only.** New `docs/superpowers/specs/2026-05-30-city-pulse-flywheel-design.md`. Adds a fast current-events layer the batch narrative stack lacks: **daily city pulse** at city grain (≈7 cities: Lehigh Acres, Cape Coral, Fort Myers, Naples, Estero, Bonita Springs, Fort Myers Beach), distilled into a TTL'd `data_lake.city_pulse` table (the flywheel — stable facts fall off the daily pull-list, search volume self-shrinks), consumed by a new deterministic **`city-pulse-swfl` reporter brain** wired as a `master` `input_brains` edge.
