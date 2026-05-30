@@ -6,6 +6,7 @@ import {
   deCorridor,
   parseBrainMarkdown,
   sanitizeProse,
+  scrubCaveatTechnical,
   speak,
   stripSectionMarker,
   type ParsedBrain,
@@ -95,6 +96,93 @@ function parsedFixture(overrides: Partial<BrainOutput> = {}): ParsedBrain {
     raw_md: "<raw markdown not used in this test>",
   };
 }
+
+describe("scrubCaveatTechnical (PR3-B)", () => {
+  test("spares domain acronyms, plain numbers, and dates", () => {
+    for (const safe of [
+      "SOFR fell below 3.6%",
+      "NFIP claims are policyholder-only",
+      "FEMA NFHL is queried live",
+      "NAICS 48 charge-off 57.1%",
+      "AAL $850 per insured property",
+      "Year scope is 2024",
+      "token SWFL-7421-v62-20260530",
+      "WGS84 / EPSG:4326 square degrees",
+      // all-letter hex word + a pure-digit year — neither is a commit hash
+      "the wall was defaced in 2004",
+    ]) {
+      assert.equal(scrubCaveatTechnical(safe), safe);
+    }
+  });
+
+  test("redacts internal identifiers, file paths, and commit hashes", () => {
+    assert.equal(
+      scrubCaveatTechnical("the DFIRM_ID is authoritative"),
+      "the [config] is authoritative",
+    );
+    assert.match(
+      scrubCaveatTechnical("set REFINERY_SOURCE=live"),
+      /\[config\]=live/,
+    );
+    assert.match(
+      scrubCaveatTechnical("ignore chargeoff_pct here"),
+      /\[config\]/,
+    );
+    assert.match(
+      scrubCaveatTechnical("absent from MARKETBEAT_SUBMARKET_MAP this run"),
+      /\[config\]/,
+    );
+    assert.match(
+      scrubCaveatTechnical("bump it in refinery/sources/faf5-source.mts when"),
+      /\[internal\]/,
+    );
+    assert.match(
+      scrubCaveatTechnical("documented in docs/env-swfl-spike-findings.md and"),
+      /\[internal\]/,
+    );
+    assert.match(
+      scrubCaveatTechnical("Path B (post-commit 297ad23)"),
+      /\[ref\]/,
+    );
+  });
+});
+
+describe("sanitizeProse path preservation (PR3-A)", () => {
+  test("leaves a compound doc path containing a pack id intact", () => {
+    const out = sanitizeProse("see docs/env-swfl-spike-findings.md for detail");
+    assert.match(out, /docs\/env-swfl-spike-findings\.md/);
+    // the env-swfl pack id must NOT be expanded to its label inside the path
+    assert.doesNotMatch(out, /environmental read-spike/);
+  });
+
+  test("still scrubs a bare sentence-final pack id", () => {
+    const out = sanitizeProse("the read came from env-swfl.");
+    assert.doesNotMatch(out, /\benv-swfl\b/);
+  });
+});
+
+describe("speak tier-2 caveats — cap + fixture backstop (PR3-C / PR2-B)", () => {
+  test("caps at 8 caveats with a non-silent tail", () => {
+    const caveats = Array.from(
+      { length: 11 },
+      (_, i) => `Caveat number ${i + 1} stands on its own.`,
+    );
+    const reply = speak(parsedFixture({ caveats }), { tier: 2 });
+    const bullets = reply.split("\n").filter((l) => l.startsWith("- "));
+    assert.equal(bullets.length, 9); // 8 shown + 1 tail
+    assert.match(reply, /…and 3 more in the full audit\./);
+  });
+
+  test("strips a fixture sentinel and prepends one honest line", () => {
+    const caveats = [
+      "Fixture mode: only Lee County is populated. Switch to REFINERY_SOURCE=live.",
+      "FRED can revise recent observations.",
+    ];
+    const reply = speak(parsedFixture({ caveats }), { tier: 2 });
+    assert.doesNotMatch(reply, /Fixture mode:/i);
+    assert.match(reply, /cached sample data at build time/);
+  });
+});
 
 describe("parseBrainMarkdown", () => {
   test("parses the real master.md fixture", async () => {

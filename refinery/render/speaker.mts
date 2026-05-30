@@ -41,6 +41,7 @@
  */
 
 import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
+import { hasFixtureSentinel } from "../lib/fixture-sentinels.mts";
 
 export type SpeakerTier = 1 | 2 | 3;
 
@@ -196,13 +197,60 @@ export function sanitizeProse(text: string): string {
   }
   for (const [id, label] of Object.entries(PACK_ID_LABELS)) {
     const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const re = new RegExp(`\\b${escaped}\\b(?!\\s+brain)`, "g");
+    // Negative lookahead spares paths / compound filenames — a following hyphen
+    // or word char (e.g. "env-swfl-spike-findings.md") is NOT a bare pack id, so
+    // it's left intact — while a sentence-final "env-swfl." still scrubs. Fixes
+    // the mangled "docs/the SWFL flood + environmental read-spike-findings.md".
+    const re = new RegExp(`\\b${escaped}\\b(?![-\\w]|\\s+brain)`, "g");
     out = out.replace(re, label);
   }
   return out
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\s+([.,;:])/g, "$1")
     .trim();
+}
+
+/**
+ * Max caveats rendered in a tier-2 reply. The full set stays in the tier-3
+ * audit and in the BrainOutput (every downstream's input) — only the
+ * human-facing chat reply is capped, with an explicit, non-silent "…and N more"
+ * tail (CLAUDE.md: no silent caps — log what was dropped).
+ */
+const MAX_DISPLAY_CAVEATS = 8;
+
+/**
+ * Scrub internal technical tokens that `sanitizeProse` doesn't cover but that
+ * leak through `caveats` — the only ungated prose channel (the facts-only and
+ * smoothing linters guard the reference fence, not the OUTPUT caveats). Applied
+ * to caveat lines ONLY. Conservative by construction: it must NEVER eat a
+ * domain acronym (SOFR, NFIP, FEMA, FDOT, NAICS, AAL, WGS84) or a plain
+ * number/date — those carry no underscore, no slash-path, and no lowercase-hex
+ * run of 7+, so each rule is shaped to pass them through untouched.
+ */
+export function scrubCaveatTechnical(text: string): string {
+  return (
+    text
+      // Source-code + doc file paths: refinery/… and any slash-path ending in a
+      // code/doc extension (docs/…-spike-findings.md, refinery/sources/x.mts).
+      .replace(/\brefinery\/\S+/g, "[internal]")
+      .replace(
+        /\b[\w.-]+(?:\/[\w.-]+)+\.(?:mts|ts|tsx|md|sql|json)\b/g,
+        "[internal]",
+      )
+      // Commit hashes: a lowercase-hex run of 7–40 that contains BOTH a letter
+      // (a–f) and a digit. Requiring both spares a pure-digit date (20260530),
+      // an uppercase acronym (no /i flag), AND a lowercase all-letter English
+      // word like "defaced"/"deedface" — real short commit hashes are mixed
+      // alphanumeric, so this loses nothing while removing the false positives.
+      .replace(
+        /\b(?=[0-9a-f]{7,40}\b)(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,40}\b/g,
+        "[ref]",
+      )
+      // Internal identifiers: a word with an internal underscore flanked by
+      // alphanumerics (DFIRM_ID, REFINERY_SOURCE, chargeoff_pct,
+      // MARKETBEAT_SUBMARKET_MAP). Acronyms have no underscore → untouched.
+      .replace(/\b\w*[a-z0-9]_[a-z0-9]\w*\b/gi, "[config]")
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -241,10 +289,24 @@ function renderTier2(brain: ParsedBrain, reportLink: string | null): string {
     blocks.push(renderMetricsTable(out.key_metrics));
   }
   if (out.caveats.length > 0) {
-    blocks.push(
-      "**Caveats**\n" +
-        out.caveats.map((c) => `- ${sanitizeProse(c)}`).join("\n"),
+    // Backstop: the Stage-4 gate blocks a live artifact from ever carrying a
+    // fixture sentinel, but if a bad artifact still slips through, strip the
+    // raw sentinel caveats and replace them with one honest line.
+    let caveats = out.caveats;
+    if (caveats.some((c) => hasFixtureSentinel(c))) {
+      caveats = [
+        "One or more underlying datasets were running on cached sample data at build time.",
+        ...caveats.filter((c) => !hasFixtureSentinel(c)),
+      ];
+    }
+    const shown = caveats.slice(0, MAX_DISPLAY_CAVEATS);
+    const lines = shown.map(
+      (c) => `- ${scrubCaveatTechnical(sanitizeProse(c))}`,
     );
+    const extra = caveats.length - shown.length;
+    // No silent caps — name what was dropped (CLAUDE.md). Full set in tier 3.
+    if (extra > 0) lines.push(`- …and ${extra} more in the full audit.`);
+    blocks.push("**Caveats**\n" + lines.join("\n"));
   }
   if (out.grain_boundary && out.grain_boundary.not_available.length > 0) {
     blocks.push(

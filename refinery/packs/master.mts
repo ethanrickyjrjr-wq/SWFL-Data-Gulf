@@ -199,9 +199,14 @@ function masterSynthesizerOutputProducer(
   return {
     conclusion,
     key_metrics,
+    // Order by user-relevance — the speaker caps the tier-1/2 display at
+    // MAX_DISPLAY_CAVEATS, so the most material lines must lead: cascade
+    // caveats explain the forced direction call, floor caveats name excluded
+    // upstreams, then the lifted upstream qualifications. No truncation here —
+    // out.caveats stays the full tier-3 audit receipt + every downstream input.
     caveats: dedupeCaveats([
-      ...floorCaveats,
       ...cascade.caveats,
+      ...floorCaveats,
       ...upstreamCaveats,
     ]),
     direction: cascade.direction,

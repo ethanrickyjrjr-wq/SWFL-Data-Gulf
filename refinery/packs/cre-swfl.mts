@@ -920,8 +920,15 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
     const names = lastJoinedBySubmarket.unmatched.map((c) =>
       displayNameFor(c.name),
     );
+    // Build diagnostic, NOT a user caveat. The constant name + the per-area
+    // list are internal noise that leaked into the live tier-2 payload as a
+    // 25-item dump. Log the detail for the build; surface one plain line about
+    // the coverage gap (no count, no constant, no list).
+    console.warn(
+      `[cre-swfl] ${names.length} area(s) did not join to a MarketBeat submarket this run: ${names.join(", ")}`,
+    );
     vote.caveats.push(
-      `${lastJoinedBySubmarket.unmatched.length} corridor${lastJoinedBySubmarket.unmatched.length === 1 ? "" : "s"} did not join to a MarketBeat submarket this run (either absent from MARKETBEAT_SUBMARKET_MAP or the resolved submarket has no broker-survey row): ${names.join(", ")}.`,
+      "Broker-survey (MarketBeat) coverage is incomplete for some areas this build — those areas are not reflected in the survey-backed rent and vacancy metrics.",
     );
   }
 
