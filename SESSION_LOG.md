@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · claude/swfl-inc-pipeline-k3IJx) — feat: econ-dev-swfl Tier-2 pipeline + pack
+
+- **New pipeline** `ingest/pipelines/swfl_inc/pipeline.py`: weekly Firecrawl scrape of `swflinc.com/news/` (primary) + Spider fallback; parses markdown with regex for title/date/investment_usd/jobs/county/category; writes raw NDJSON to `lake-tier1/econ/swfl_inc/year=YYYY/.../run-{ts}.ndjson` + inventory row; upserts to `public.swfl_inc_announcements`.
+- **Migration** `docs/sql/20260530_swfl_inc_announcements_create.sql`: `public.swfl_inc_announcements` (id, title, announced_date, county, category, investment_usd, jobs, summary, source_url, scraped_at, inserted_at) + 3 indexes. Run in Supabase SQL editor before first dispatch.
+- **Pack** `refinery/packs/econ-dev-swfl.mts` + **source** `refinery/sources/swfl-inc-source.mts`: `domain=macro`, TTL 7d, 4 key metrics (announcements_90d, prior_90d, investment_usd_90d, jobs_90d), direction vote from 90d vs prior-90d count momentum. Registered in `index.mts` + wired into `master` as `input_brains` edge.
+- **GHA cron** `.github/workflows/swfl-inc-weekly.yml`: Monday 08:00 UTC. **Cadence registry** entry added (tier-2, 7 days, tolerance 3.0×). Fixture at `refinery/__fixtures__/econ-dev-swfl.sample.json`.
+- **Next:** run migration in Supabase SQL editor → `workflow_dispatch --dry-run` to verify scrape → first live dispatch.
+
 ## 2026-05-30 (Opus 4.8 · main) — plan: add Tier-2 prune (Task 6B) + supersession-vs-TTL note (operator Q)
 
 - **Doc-only.** Operator asked about the flywheel's cleanup mechanism. Added to the plan a deterministic **Task 6B prune** (`DELETE FROM data_lake.city_pulse WHERE expires_at < now()`, wired into pipeline `main()` — skipped on `--dry-run`) so the Tier-2 table doesn't grow unbounded; safe because Tier-1 cold keeps the permanent raw audit. Answers "delete old info, keep it fresh and clean."
