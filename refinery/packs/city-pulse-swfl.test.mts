@@ -42,8 +42,8 @@ test("city-pulse-swfl: deterministic flags", () => {
 // ── Test 2: each surfaced signal carries a source receipt with its url ────────
 
 test("city-pulse-swfl: each surfaced signal carries a source receipt with its url", () => {
-  cityPulseSwfl.corpusSummary([frag()]);
-  const out = cityPulseSwfl.outputProducer({} as never);
+  cityPulseSwfl.corpusSummary!([frag()]);
+  const out = cityPulseSwfl.outputProducer!({} as never);
 
   assert.ok(out.key_metrics.length >= 1, "expected at least 1 key_metric");
 
@@ -68,8 +68,8 @@ test("city-pulse-swfl: each surfaced signal carries a source receipt with its ur
 // ── Test 3: empty data → valid neutral output, no throw ───────────────────────
 
 test("city-pulse-swfl: empty data yields a valid neutral output, no throw", () => {
-  cityPulseSwfl.corpusSummary([]);
-  const out = cityPulseSwfl.outputProducer({} as never);
+  cityPulseSwfl.corpusSummary!([]);
+  const out = cityPulseSwfl.outputProducer!({} as never);
 
   assert.equal(out.key_metrics.length, 0);
   assert.equal(out.direction, "neutral");
