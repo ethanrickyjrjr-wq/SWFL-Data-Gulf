@@ -37,6 +37,7 @@ load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import upsert_inventory_row  # noqa: E402
+from ingest.pipelines.city_pulse.distill import distill_capture, write_rows, prune_expired  # noqa: E402
 
 CITIES = [
     "Lehigh Acres", "Cape Coral", "Fort Myers", "Naples",
@@ -148,9 +149,6 @@ def run_city_search(city: str, run_at: str) -> dict[str, Any]:
     return build_record(city, query, response.model_dump(), run_at)
 
 
-from ingest.pipelines.city_pulse.distill import distill_capture, write_rows, prune_expired  # noqa: E402
-
-
 def to_ndjson(records: list[dict[str, Any]]) -> bytes:
     return ("\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n").encode("utf-8")
 
@@ -208,13 +206,23 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  -> --dry-run: would upload {len(body)} bytes to {BUCKET}/{path} and write {len(rows)} rows")
             continue
 
-        _upload_bytes(BUCKET, path, body, "application/x-ndjson")
-        upsert_inventory_row(bucket=BUCKET, path=path, vintage=f"{yyyy}-{mm}",
-                             byte_size=len(body), pack_id="city-pulse-swfl", source_url=None)
-        new = write_rows(rows)
+        try:
+            _upload_bytes(BUCKET, path, body, "application/x-ndjson")
+            upsert_inventory_row(bucket=BUCKET, path=path, vintage=f"{yyyy}-{mm}",
+                                 byte_size=len(body), pack_id="city-pulse-swfl", source_url=None)
+            new = write_rows(rows)
+        except Exception as exc:
+            # Tier-1 may have been written; Tier-2 can be re-distilled from it.
+            print(f"  -> ERROR (persist): {exc!r} — Tier-1 raw may exist; re-distill from it.")
+            errors.append(city)
+            continue
         total_new += new
         print(f"  -> uploaded Tier-1 + wrote {new} new rows (deduped {len(rows) - new})")
 
+        # Sequence is capture -> distill -> upsert -> prune. Prune runs ONCE here,
+        # AFTER the full per-city loop, in this single process — never concurrent
+        # with an upsert. Doubly safe: prune deletes only expires_at < now(), and a
+        # just-refreshed row is fresh (expires_at > now()), so it is never pruned.
     if not args.dry_run:
         pruned = prune_expired()
         print(f"city_pulse: pruned {pruned} expired Tier-2 rows (raw audit retained in Tier-1).")

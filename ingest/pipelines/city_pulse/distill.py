@@ -149,7 +149,9 @@ def _insert_sql() -> str:
 
 
 def write_rows(rows: list[dict[str, Any]]) -> int:
-    """Upsert rows; returns number of NEW rows inserted (dedup skips count as 0)."""
+    """Upsert rows; returns number of NEW rows inserted (dedup skips count as 0).
+    On any error the whole batch is rolled back and the exception re-raised — the
+    caller treats the city as failed rather than trusting a partial count."""
     if not rows:
         return 0
     conn = _get_connection()
@@ -160,6 +162,9 @@ def write_rows(rows: list[dict[str, Any]]) -> int:
                 cur.execute(_insert_sql(), row)
                 inserted += cur.rowcount  # 0 on conflict, 1 on insert
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
     return inserted
