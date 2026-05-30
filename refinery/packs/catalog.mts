@@ -148,4 +148,11 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     scope: "Southwest Florida — FGCU RERI monthly regional economic indicators",
     ttl_seconds: 86400 * 30,
   },
+  {
+    id: "rsw-airport",
+    domain: "hospitality",
+    scope:
+      "Southwest Florida airport passenger demand — RSW (Southwest Florida International, Fort Myers/Cape Coral) and PGD (Punta Gorda) monthly enplanements from Lee County Port Authority",
+    ttl_seconds: 86400 * 30,
+  },
 ];

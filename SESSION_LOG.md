@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · feat/rsw-airport-monthly) — RSW/PGD monthly enplanement pipeline + pack
+
+- **New pipeline** `ingest/pipelines/rsw_airport_monthly/pipeline.py` — scrapes `flylcpa.com/about/statistics` via `scrape_with_fallback()` (Firecrawl primary, Spider fallback), parses markdown tables for RSW + PGD monthly enplanements, upserts to `public.rsw_airport_monthly`. `--dry-run` mandatory before first live write.
+- **New pack** `refinery/packs/rsw-airport.mts` (domain: hospitality, fitScore: 0.8) + source `refinery/sources/rsw-airport-source.mts` + 6-test suite `rsw-airport.test.mts`. Added to `catalog.mts` and `index.mts`.
+- **Migration** `docs/sql/20260530_rsw_airport_monthly_create.sql` — needs manual run in Supabase SQL editor (DB credentials not available in this cloud session). **GHA cron** `.github/workflows/rsw-airport-monthly.yml` (8th of month, 15:00 UTC). **Cadence registry** entry added; moves to `pipelines:` after first successful run.
+- **Next:** run SQL migration in Supabase, then `workflow_dispatch` with `dry_run=true` to verify parser against live LCPA page; update `parse_stats()` if page structure differs from expected markdown-table format.
+
 ## 2026-05-30 (Opus 4.8 · main) — plan: add Tier-2 prune (Task 6B) + supersession-vs-TTL note (operator Q)
 
 - **Doc-only.** Operator asked about the flywheel's cleanup mechanism. Added to the plan a deterministic **Task 6B prune** (`DELETE FROM data_lake.city_pulse WHERE expires_at < now()`, wired into pipeline `main()` — skipped on `--dry-run`) so the Tier-2 table doesn't grow unbounded; safe because Tier-1 cold keeps the permanent raw audit. Answers "delete old info, keep it fresh and clean."
