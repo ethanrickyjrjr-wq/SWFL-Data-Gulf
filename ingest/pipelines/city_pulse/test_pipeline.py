@@ -38,3 +38,17 @@ def test_build_record_shape():
     assert rec["tool_version"] == "web_search_20250305"
     assert rec["cited_text_count"] == 1
     assert rec["response"] == dump
+
+
+from ingest.pipelines.city_pulse.pipeline import to_ndjson, tier1_path
+
+
+def test_to_ndjson_round_trips():
+    import json
+    body = to_ndjson([{"city": "Naples", "a": 1}])
+    assert json.loads(body.decode("utf-8").strip()) == {"city": "Naples", "a": 1}
+
+
+def test_tier1_path_is_date_partitioned_and_slugged():
+    p = tier1_path("Fort Myers Beach", "20260530T091500Z", "2026", "05")
+    assert p == "city_pulse/fort-myers-beach/year=2026/month=05/run-20260530T091500Z.ndjson"

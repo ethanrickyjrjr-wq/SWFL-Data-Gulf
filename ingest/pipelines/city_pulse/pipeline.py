@@ -146,3 +146,87 @@ def run_city_search(city: str, run_at: str) -> dict[str, Any]:
         messages=[{"role": "user", "content": query}],
     )
     return build_record(city, query, response.model_dump(), run_at)
+
+
+from ingest.pipelines.city_pulse.distill import distill_capture, write_rows, prune_expired  # noqa: E402
+
+
+def to_ndjson(records: list[dict[str, Any]]) -> bytes:
+    return ("\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n").encode("utf-8")
+
+
+def tier1_path(city: str, run_key: str, yyyy: str, mm: str) -> str:
+    return f"city_pulse/{slug(city)}/year={yyyy}/month={mm}/run-{run_key}.ndjson"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--city", metavar="NAME", help="Run a single city by exact name.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Run search + distill; print rows, skip Tier-1 upload and DB write.")
+    args = parser.parse_args(argv)
+
+    cities = [args.city] if args.city else CITIES
+    if args.city and args.city not in CITIES:
+        parser.error(f"--city must be one of {CITIES}")
+
+    now = datetime.now(timezone.utc)
+    run_at = now.isoformat()
+    run_key = now.strftime("%Y%m%dT%H%M%SZ")
+    yyyy, mm = f"{now.year:04d}", f"{now.month:02d}"
+
+    errors: list[str] = []
+    total_new = 0
+    for city in cities:
+        print(f"city_pulse: querying '{city}'...")
+        try:
+            record = run_city_search(city, run_at)
+        except Exception as exc:
+            print(f"  -> ERROR (search): {exc!r}")
+            errors.append(city)
+            continue
+
+        cited = record["cited_text_count"]
+        print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
+        if cited == 0:
+            print(f"  -> WARNING: zero cited_text spans — verify SEARCH_TOOL_VERSION is '{SEARCH_TOOL_VERSION}'")
+
+        path = tier1_path(city, run_key, yyyy, mm)
+        body = to_ndjson([record])
+
+        try:
+            rows = distill_capture(record)
+        except Exception as exc:
+            print(f"  -> ERROR (distill): {exc!r}")
+            errors.append(city)
+            continue
+        print(f"  -> distilled {len(rows)} citation-backed facts")
+
+        if args.dry_run:
+            for r in rows:
+                print(f"     [{r['topic']}] {r['fact']}  <{r['source_url']}>")
+            print(f"  -> --dry-run: would upload {len(body)} bytes to {BUCKET}/{path} and write {len(rows)} rows")
+            continue
+
+        _upload_bytes(BUCKET, path, body, "application/x-ndjson")
+        upsert_inventory_row(bucket=BUCKET, path=path, vintage=f"{yyyy}-{mm}",
+                             byte_size=len(body), pack_id="city-pulse-swfl", source_url=None)
+        new = write_rows(rows)
+        total_new += new
+        print(f"  -> uploaded Tier-1 + wrote {new} new rows (deduped {len(rows) - new})")
+
+    if not args.dry_run:
+        pruned = prune_expired()
+        print(f"city_pulse: pruned {pruned} expired Tier-2 rows (raw audit retained in Tier-1).")
+
+    print(f"city_pulse: complete. {total_new} new rows across {len(cities)} cities.")
+    if errors:
+        print(f"city_pulse: {len(errors)} city(ies) errored: {errors}")
+        if len(errors) == len(cities):
+            raise RuntimeError("city_pulse: all cities failed — investigate.")
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
