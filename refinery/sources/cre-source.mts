@@ -10,6 +10,7 @@ import {
   corridorsForSubmarket,
   submarketFor,
 } from "../lib/marketbeat-submarket-aliases.mts";
+import { displayNameFor } from "../lib/corridor-display.mts";
 import type { MarketbeatSwflNormalized } from "./marketbeat-swfl-source.mts";
 
 /**
@@ -82,7 +83,15 @@ export type CorridorMetricDirection = "rising" | "falling" | "stable";
 /** Normalized corridor-profile fragment. */
 export interface CorridorNormalized {
   kind: "corridor";
+  /** Canonical DB `corridor_name` — the join key. NEVER user-facing. */
   name: string;
+  /**
+   * Plain user-facing place name ("Vanderbilt", "North Naples"), derived from
+   * `name` via `displayNameFor`. Populated by `normalizeCorridor`; optional so
+   * pre-existing test literals keep typechecking. User-facing emit sites call
+   * `displayNameFor(c.name)` directly so they are correct even when unset.
+   */
+  display_name?: string;
   city: string;
   county: "Lee" | "Collier" | "Unknown";
   corridor_type: string;
@@ -405,6 +414,7 @@ export function normalizeCorridor(
   return {
     kind: "corridor",
     name: str(row.corridor_name) ?? "",
+    display_name: displayNameFor(str(row.corridor_name) ?? ""),
     city,
     county: cityToCounty(city),
     corridor_type: str(row.corridor_type) ?? "unknown",

@@ -7,6 +7,7 @@ import {
   BrainBadTierError,
 } from "@/lib/fetch-brain";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
+import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 
 // Node runtime, not Edge: Edge isolates have no filesystem access, and Phase 0
 // is a fetch-reliability test, not a latency test. Move to Edge in v2.
@@ -48,6 +49,7 @@ export async function GET(
             text,
             freshness_token,
             rules: RULES_OF_ENGAGEMENT,
+            geography: GEOGRAPHY_GAZETTEER,
             dossier: buildDossier(output, freshness_token),
           },
           { status: 200, headers: COMMON_HEADERS },

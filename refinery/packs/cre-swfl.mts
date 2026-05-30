@@ -19,6 +19,7 @@ import {
   type MarketbeatSwflNormalized,
 } from "../sources/marketbeat-swfl-source.mts";
 import { submarketSlug } from "../lib/marketbeat-submarket-aliases.mts";
+import { displayNameFor } from "../lib/corridor-display.mts";
 import {
   makeBrainInputSource,
   type BrainInputNormalized,
@@ -134,7 +135,7 @@ function buildCreAggregateSource(
     .map((c) => {
       const resolved = resolveMetricSource(c, field);
       const tail = resolved ? ` [${resolved}]` : "";
-      return `${c.name} (${c.city}, ${c.county})${tail}`;
+      return `${displayNameFor(c.name)} (${c.city}, ${c.county})${tail}`;
     })
     .join("; ");
   return {
@@ -204,10 +205,12 @@ function buildMarketbeatSubmarketSource(
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/marketbeat_swfl?select=*&verified=eq.true&submarket=eq.${encodedSubmarket}&${field}=not.is.null`
       : "fixture://refinery/__fixtures__/marketbeat-swfl.sample.json";
-  const matchedNames = group.corridors.map((c) => c.name).join(", ");
+  const matchedNames = group.corridors
+    .map((c) => displayNameFor(c.name))
+    .join(", ");
   const matchedDisclosure =
     group.corridors.length > 0
-      ? `covers corridors ${matchedNames} (matched ${group.corridors.length} of ${group.mappedCorridorNames.length} mapped in MARKETBEAT_SUBMARKET_MAP)`
+      ? `covers ${matchedNames} (matched ${group.corridors.length} of ${group.mappedCorridorNames.length} mapped in MARKETBEAT_SUBMARKET_MAP)`
       : `covers 0 of ${group.mappedCorridorNames.length} mapped corridors in the verified corpus this run`;
   const tail = group.row.source_url ? ` [${group.row.source_url}]` : "";
   return {
@@ -914,7 +917,9 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
   // run. Calling these out so a reader knows which corridors were excluded
   // from the per-submarket fan-out, and why.
   if (lastJoinedBySubmarket.unmatched.length > 0) {
-    const names = lastJoinedBySubmarket.unmatched.map((c) => c.name);
+    const names = lastJoinedBySubmarket.unmatched.map((c) =>
+      displayNameFor(c.name),
+    );
     vote.caveats.push(
       `${lastJoinedBySubmarket.unmatched.length} corridor${lastJoinedBySubmarket.unmatched.length === 1 ? "" : "s"} did not join to a MarketBeat submarket this run (either absent from MARKETBEAT_SUBMARKET_MAP or the resolved submarket has no broker-survey row): ${names.join(", ")}.`,
     );

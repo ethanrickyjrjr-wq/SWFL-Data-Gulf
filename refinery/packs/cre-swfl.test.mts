@@ -299,8 +299,9 @@ test("marketbeat: citation enumerates matched corridors with 'matched X of Y map
     /matched 2 of 9 mapped/.test(naplesCite),
     `Naples citation missing 'matched 2 of 9 mapped': ${naplesCite}`,
   );
-  assert.ok(naplesCite.includes("Immokalee Rd North Naples"));
-  assert.ok(naplesCite.includes("Pine Ridge Rd Naples"));
+  // Citations now emit plain user-facing display names, not road-suffix labels.
+  assert.ok(naplesCite.includes("North Naples (Immokalee Rd)"));
+  assert.ok(naplesCite.includes("Pine Ridge"));
 
   const vacFm = result.key_metrics.find(
     (m) => m.metric === "vacancy_rate_marketbeat_fort_myers",

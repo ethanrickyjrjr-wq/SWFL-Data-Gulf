@@ -14,6 +14,7 @@ import {
   BrainBadTierError,
 } from "@/lib/fetch-brain";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
+import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { buildInventoryMarkdown, buildReportIdSet } from "./inventory";
 
 /**
@@ -137,6 +138,10 @@ export function buildMcpServer(server: McpServer): void {
             // inference / stop at grain) and can answer follow-ups from the
             // loaded bundle without re-fetching.
             rules: RULES_OF_ENGAGEMENT,
+            // The areas we cover + a "map any real place to its pocket, never
+            // reject" instruction, so a Tier-3 Claude resolves colloquial place
+            // names ("Bonita Bay") itself instead of saying "not in our system".
+            geography: GEOGRAPHY_GAZETTEER,
             dossier: buildDossier(output, freshness_token),
           },
         };

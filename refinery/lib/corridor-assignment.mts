@@ -13,6 +13,14 @@
 export interface CorridorCentroid {
   corridor_id: string;
   corridor_label: string;
+  /**
+   * Plain, area-style user-facing name (e.g. "Vanderbilt", "North Naples"),
+   * distinct from the over-specific internal `corridor_label`
+   * ("Vanderbilt Beach Rd / Mercato"). ASCII-only. Optional so pre-existing
+   * test fixtures + literal constructor sites keep typechecking; the live
+   * fixture (`fixtures/corridor-centroids.json`) sets it on every row.
+   */
+  display_name?: string;
   center_lat: number;
   center_lon: number;
   submarket?: string;

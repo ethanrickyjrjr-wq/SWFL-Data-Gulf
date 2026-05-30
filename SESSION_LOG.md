@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-29 (Opus 4.8 · main) — feat(geo): de-corridor display names + place→pocket resolver + payload gazetteer (PR 1)
+
+- **Internal `corridor_id` slugs NOT renamed** (a rename = 14 files + a mandatory SQL migration + slug-parity churn; we paid that 3 days ago). This is three ADDITIVE layers on frozen IDs.
+- **Layer 1 — display names:** `fixtures/corridor-centroids.json` gains a `display_name` per corridor (ASCII-only; "Vanderbilt Beach Rd / Mercato" → "Vanderbilt", "Immokalee Rd – North Naples" → "North Naples (Immokalee Rd)"). New `refinery/lib/corridor-display.mts` (`displayNameFor` collapses slug/label/DB-name punctuation drift to one key). Emitted in `cre-swfl.mts` citations/caveats + `permits-swfl.mts` metric labels (internal `c.name` joins untouched).
+- **Layer 2 — pockets:** new `refinery/lib/pockets.mts` groups the 25 corridors into 8 pockets (N/E/Downtown Naples, Bonita Springs, Estero, Fort Myers, Cape Coral, Fort Myers Beach). `pine-ridge-rd-naples` + `airport-pulling-naples` placed in North Naples (Pine Ridge-line judgment calls). Guards: every corridor in exactly one pocket + county-consistency.
+- **Layer 3 — resolver + gazetteer:** new `refinery/lib/place-resolver.mts` (`resolvePlace`: exact→pocket→alias→fuzzy; "Bonita Bay"→Bonita Springs, "Tampa"=only honest rejection). `refinery/lib/geography-gazetteer.mts` ships in `_meta.geography` on BOTH `/api/b/[slug]` + MCP `server.ts`, with a "map any real SWFL place to its pocket, never say 'not in our system'" note. `embedder.mts` now exports `levenshteinSimilarity`.
+- **Brains regenerated** (display names render live, 0 leaked road-suffix labels): `permits-swfl.md` v10, `cre-swfl.md` v45, `master.md` v60.
+- **Verified:** 39 new tests; full suite 791 pass / 1 fail (`fgcu-reri` catalog skeleton — pre-existing, unrelated). `tsc` + `next build` clean.
+- **PR 2 TRIGGER ACTIVE — do not amnesia this:** `display_name` is LIVE and the resolver is VALIDATED → the **language scrub is the immediate next PR**. It must (1) purge the word "corridor" from every user-facing string (speaker + cre-swfl `synthesisContext` + rules-of-engagement), (2) encode **NNN = triple-net lease, ALWAYS — never a place name, never expanded to "North Naples"**, (3) set default answer altitude = metro/pocket. Plan: `C:\Users\ethan\.claude\plans\plan-all-of-this-synchronous-stearns.md`.
+
 ## 2026-05-29 (Sonnet 4.6 · main) — feat(mcp): add swfl HTTP transport to .mcp.json
 
 - `.mcp.json`: added `swfl` HTTP transport entry pointing at `https://www.swfldatagulf.com/api/mcp`. Applied directly to main — PR #50 had merge conflicts after main moved. PR #51 (stale vision doc) closed without merge.

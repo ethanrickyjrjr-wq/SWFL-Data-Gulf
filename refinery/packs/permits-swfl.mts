@@ -23,6 +23,7 @@ import {
   assignCorridor,
   type CorridorCentroid,
 } from "../lib/corridor-assignment.mts";
+import { displayNameFor } from "../lib/corridor-display.mts";
 import {
   generateCurrentWindow,
   generateHistoricalWindows,
@@ -795,7 +796,7 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: `${prefix}_corridor_${cell.corridor_id}_${cell.bucket}_z`,
       value: Number(cell.z.toFixed(3)),
       direction: cell.z > 0.5 ? "rising" : cell.z < -0.5 ? "falling" : "stable",
-      label: `${cell.county === "lee" ? "Lee" : "Collier"} permits - ${cell.corridor_label}, ${cell.bucket} - 90d vs trailing-365d z (n_current=${cell.n_current})`,
+      label: `${cell.county === "lee" ? "Lee" : "Collier"} permits - ${displayNameFor(cell.corridor_id)}, ${cell.bucket} - 90d vs trailing-365d z (n_current=${cell.n_current})`,
       variable_type: "intensive",
       units: "z-score",
       display_format: "ratio",
