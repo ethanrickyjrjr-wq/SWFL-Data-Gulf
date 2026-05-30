@@ -248,6 +248,17 @@ async function fetchLive(): Promise<FixtureShape> {
       );
     }
     const rows = (resp.data ?? []) as SegmentRow[];
+    // FDOT publishes TFCTR (the "T-factor") as a PERCENTAGE of AADT that is
+    // trucks — range 0–~92, not a 0–1 fraction (FDOT Project Traffic
+    // Forecasting Handbook; FGDL AADT metadata). The refinery convention,
+    // however, treats tfctr as a FRACTION: the fixture stores it that way and
+    // downstream math relies on it (traffic-swfl truck_share does tfctr × 100,
+    // logistics-swfl-nowcast freight activity does aadt × tfctr × payload).
+    // Normalize the live percentage to a fraction at the ingestion boundary so
+    // the live and fixture paths agree and the consumers stay correct.
+    for (const r of rows) {
+      if (r.tfctr != null) r.tfctr = Number(r.tfctr) / 100;
+    }
     segments.push(...rows);
     if (rows.length < PAGE_SIZE) {
       assertSegmentsNonEmpty(segments);
