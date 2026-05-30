@@ -7,6 +7,10 @@
     "lake": {
       "command": "bun",
       "args": ["tools/lake-mcp-server.mts"]
+    },
+    "swfl": {
+      "type": "http",
+      "url": "https://www.swfldatagulf.com/api/mcp"
     }
   }
 }
