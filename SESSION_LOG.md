@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · claude/fldeo-job-postings-rIjgS) — fix: cadence registry placement + magic-number citation
+
+- **Bug fix**: moved `fl_deo_job_postings_tier1` + `fl_deo_job_postings` from `pipelines:` into `not_yet_running:` — they were in the actively-probed section despite never having run, which would have triggered immediate false-stale alerts.
+- **Citation**: added `SOURCED.md#labor-demand-swfl-wow-threshold` entry documenting the ±3% WoW direction threshold as an empirical engineering estimate (no published Lightcast county-level noise floor exists). Added calibration instruction for first 8 live weeks. Replaced uncited inline comment with `# see SOURCED.md#...` pointer.
+
 ## 2026-05-30 (Sonnet 4.6 · claude/fldeo-job-postings-rIjgS) — feat: fl_deo_job_postings pipeline + labor-demand-swfl pack
 
 - **New pipeline** `ingest/pipelines/fl_deo_job_postings/` — weekly scrape of CareerSource FL / DEO OSPA for Lee + Collier job posting counts by NAICS supersector. Uses `extract_client.extract()` (Firecrawl primary, Spider fallback). Writes NDJSON to `lake-tier1/labor/fl_deo_job_postings/{YYYY}-W{WW}.ndjson` (Tier-1) and dlt-merges into `data_lake.fl_deo_job_postings` (Tier-2). `--dry-run` supported.

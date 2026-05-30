@@ -22,8 +22,7 @@ const CITATION_URL =
  *
  * Emits posting counts and WoW delta by NAICS supersector for SWFL.
  * Direction logic: rising total postings = bullish (more labor demand →
- * healthier hiring environment). Threshold: ±3% WoW to exceed week-to-week
- * noise in online job posting analytics (Lightcast methodology).
+ * healthier hiring environment). Threshold: ±3% WoW — see SOURCED.md#labor-demand-swfl-wow-threshold.
  *
  * Tier-1 Reporter — no upstream brains. Pure deterministic aggregation.
  */
@@ -35,7 +34,7 @@ let lastFetchedAt: string | null = null;
 
 // ── Direction helpers ─────────────────────────────────────────────────────────
 
-// ±3% WoW threshold: exceeds typical Lightcast weekly revision noise.
+// ±3% WoW threshold — see SOURCED.md#labor-demand-swfl-wow-threshold
 function wowDirection(
   pct: number | null,
 ): "rising" | "falling" | "stable" {
