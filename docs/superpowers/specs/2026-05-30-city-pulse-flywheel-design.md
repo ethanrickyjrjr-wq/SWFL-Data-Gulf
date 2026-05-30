@@ -134,6 +134,7 @@ Master edge: add `{ id: "city-pulse-swfl", edge_type: "input" }` to `master.mts`
 5. `refinery/packs/city-pulse-swfl.mts` + registry entry + tests
 6. `master.mts` `input_brains` edge
 7. Distill step that reads Tier-1 raw → writes Tier-2 distilled+TTL'd rows
+8. **Delete** `ingest/pipelines/news_swfl/` + its `cadence_registry.yaml` `not_yet_running` entry (dead, superseded — §14.2)
 
 Pipeline-freshness standard (`docs/standards/pipeline-freshness.md`) satisfied: GHA cron + `--dry-run` + cadence-registry entry all in the same PR.
 
@@ -143,10 +144,11 @@ Web search **$10 / 1,000 searches = $0.01/search** (results count as input token
 
 ## 12. Out of scope (future phases, designed-for but not built)
 
-- **Weekly/bi-weekly corridor trigger** — a _second trigger on the same `city_pulse` table_ at corridor grain, not a separate pipeline. Build when the daily city layer proves insufficient for corridor-specific questions.
+- **Weekly/bi-weekly corridor trigger** — a _second trigger on the same `city_pulse` table_ at corridor grain, not a separate pipeline. Build when the daily city layer proves insufficient for corridor-specific questions. **This is the point to add the Batch API 50%-token lever** (deferred from v1, §14.3): once call volume grows, async submit/poll orchestration earns its keep.
 - **Conversation follow-up → flywheel write-back** — capturing a live fact surfaced on a follow-up turn back into `city_pulse` so the _next_ user's master is smarter. This is the lake-level compounding; it requires a live/query write path we are deliberately deferring. The schema (dedup + supersede) is built to receive it.
 - **Lehigh corridor** — separate corridor add.
-- **Retiring the dead source-based `news_swfl` scraper** — superseded by this city-based pipeline; never ran. Cleanup, optional, can ride this PR or a follow-up.
+
+(The dead source-based `news_swfl` scraper is **removed in this PR**, not deferred — see §14.2.)
 
 ## 13. Testing
 
@@ -155,12 +157,8 @@ Web search **$10 / 1,000 searches = $0.01/search** (results count as input token
 - Pack: deterministic `corpusSummary`/`outputProducer` snapshot; **citation gate must reject a fabricated `[web-N]`** (dangling-anchor test) — proves the guarantee holds on the new surface.
 - Master: rebuild with the new edge present and absent; assert graceful degrade when `city_pulse` is empty (no hollow brain).
 
-## 14. Open decisions for operator review
+## 14. Resolved decisions (operator-locked 2026-05-30)
 
-1. **Naming.** Spec uses `city-pulse-swfl` (pack), `data_lake.city_pulse` (table), `ingest/pipelines/city_pulse/`, `lake-tier1/city_pulse/`. littlebird/earlier discussion used `news-swfl`. Pick one family; spec is internally consistent on `city_pulse`.
-2. **Retire `news_swfl` now or later?** It never ran and is superseded. Delete in this PR (clean) or leave dormant.
-3. **Batch API on the daily cron?** 50% off tokens; a daily pull is non-urgent enough. Optional optimization, can defer.
-
-```
-
-```
+1. **Naming → `city-pulse-swfl` family.** Pack `city-pulse-swfl`, table `data_lake.city_pulse`, pipeline `ingest/pipelines/city_pulse/`, cold prefix `lake-tier1/city_pulse/`. Clearer than `news-swfl` and avoids collision with the dead scraper being removed (#2).
+2. **Retire `news_swfl` → delete in this PR.** The source-based scraper never ran and is superseded by this city-based pipeline. Remove `ingest/pipelines/news_swfl/` and its `cadence_registry.yaml` `not_yet_running` entry as part of the build PR. Clean cut.
+3. **Batch API → deferred (synchronous v1).** Savings (~50% of the token portion only; search fees don't discount) are noise at 7 calls/day and don't justify async submit/poll orchestration in v1. Revisit when the weekly corridor trigger grows call volume; documented in §12 as the lever to pull then.
