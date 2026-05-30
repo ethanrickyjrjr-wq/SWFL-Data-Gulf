@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · main) — chore(db): run 2 operator-gated SQL migrations + commit goal9 flywheel SQL
+
+- `20260529_goals_table.sql`: run — creates `public.goals` table + seeds Goals 0–8 (`ON CONFLICT DO NOTHING`). Source of truth for the /ops/goals ladder.
+- `20260530_goal9_flywheel.sql`: run — inserts Goal 9 (the compounding flywheel) into `public.goals`. Was untracked; now committed.
+- Both migrations idempotent; safe to re-run.
+
 ## 2026-05-30 (Opus 4.8 1M · main) — docs(rules): note the 250-token budget on RULES_OF_ENGAGEMENT (PR 2 follow-up)
 
 - **Comment-only.** `refinery/lib/rules-of-engagement.mts`: added a TOKEN BUDGET docblock — the block is hard-capped at 250 tokens by `rules-of-engagement.test.mts`; as of rule 6 it sits at **~232 (≈18 to spare, room for ~1 more terse rule)**. Whoever adds rule 7 must trim an existing rule first, and must mirror any change into `docs/consumption-contract.md` (CI `toContain` drift test).
