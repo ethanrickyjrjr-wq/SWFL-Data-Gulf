@@ -50,7 +50,7 @@ def _coerce_float(v):
     if v in (None, "", "N/A", "n/a", "NA"):
         return None
     try:
-        return float(v)
+        return float(str(v).replace("$", "").replace(",", ""))
     except (ValueError, TypeError):
         return None
 
@@ -61,8 +61,14 @@ def _coerce_esri_date(v):
         return None
     if isinstance(v, (int, float)):
         return datetime.fromtimestamp(int(v) / 1000.0, tz=timezone.utc).date().isoformat()
-    s = str(v)
-    return s.split("T")[0] if "T" in s else s[:10]
+    s = str(v).strip()
+    if "T" in s:
+        s = s.split("T")[0]
+    # normalize ESRI year-month strings like "2024-4" -> "2024-04-01"
+    parts = s.split("-")
+    if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+        return f"{int(parts[0]):04d}-{int(parts[1]):02d}-01"
+    return s[:10] if len(s) >= 10 else None
 
 
 def _join_leepa(use_rows: list[dict], value_rows: list[dict], sale_rows: list[dict]) -> list[dict]:
