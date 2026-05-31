@@ -12,7 +12,6 @@
     "refinery:franchise": "bun refinery/cli.mts franchise-outcomes",
     "refinery:cre": "bun refinery/cli.mts cre-swfl",
     "refinery:typecheck": "tsc -p refinery/tsconfig.json --noEmit",
-    "gen:coverage": "bun scripts/gen-coverage-registry.mts",
     "fixtures:corridors": "bun refinery/tools/regen-corridor-fixture.mts",
     "ledger": "bun refinery/tools/semantic-ledger.mts",
     "roadmap:sync": "bun refinery/tools/roadmap-sync.mts",
@@ -68,7 +67,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "yaml": "^2.9.0"
+    "typescript": "^5"
   }
 }
