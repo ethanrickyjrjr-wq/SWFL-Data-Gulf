@@ -175,7 +175,18 @@ def _parse_fibrs_sheet(ws: Any, year: int) -> list[Row]:
 
     # Accumulate: county → slug → total count
     county_totals: dict[str, dict[str, int]] = {c: {s: 0 for s in FIBRS_OFFENSE_GROUPS} for c in COUNTIES}
-    county_population: dict[str, int | None] = {c: None for c in COUNTIES}
+    # Coverage-matched denominator: SUM the populations of every reporting agency in
+    # the county. (The original bug took the FIRST agency's population as the whole-
+    # county denominator — e.g. Lee landed on Fort Myers city, 91,544 — while the
+    # numerator was the all-agency county sum. Guaranteed garbage.) 0-pop agencies
+    # (state RAs, campus/airport PDs) are non-jurisdictional and excluded by `if pop_val`.
+    # Summing keeps numerator and denominator over the SAME footprint even as the
+    # agency roster changes year to year. NOTE: this footprint is incomplete during
+    # the NIBRS transition, so the per-1k LEVEL still understates the true county rate
+    # vs. the FDLE UCR baseline — see the source-unfitness issue. county_agencies is
+    # tracked for the coverage caveat / dry-run visibility only.
+    county_population: dict[str, int] = {c: 0 for c in COUNTIES}
+    county_agencies: dict[str, int] = {c: 0 for c in COUNTIES}
 
     # Data rows start at index 3 (after 3 header rows)
     for data_row in all_rows[3:]:
@@ -190,11 +201,14 @@ def _parse_fibrs_sheet(ws: Any, year: int) -> list[Row]:
         if matched is None:
             continue
 
-        # Population: take the first non-None value seen for this county
-        if county_population[matched] is None and len(data_row) > POP_COL:
+        # Coverage-matched: sum every reporting agency's population (skip 0-pop
+        # non-jurisdictional agencies). This is the denominator the summed crimes
+        # actually belong to.
+        if len(data_row) > POP_COL:
             pop_val = _to_int(data_row[POP_COL])
             if pop_val:
-                county_population[matched] = pop_val
+                county_population[matched] += pop_val
+                county_agencies[matched] += 1
 
         # Sum 12 monthly columns for each offense group
         for slug, start_cols in group_cols.items():
@@ -219,7 +233,9 @@ def _parse_fibrs_sheet(ws: Any, year: int) -> list[Row]:
         arson = totals["arson"] or None
         parts = [x for x in [burglary, larceny_theft, motor_vehicle_theft, arson] if x is not None]
         total_property_crimes = sum(parts) if parts else None
-        population = county_population[county]
+        # Covered population = sum of reporting agencies' populations (0 → None so the
+        # rate is left null rather than dividing by zero).
+        population = county_population[county] or None
         property_crime_per_1k: float | None = None
         if population and total_property_crimes:
             property_crime_per_1k = round(total_property_crimes / population * 1000, 2)
@@ -234,6 +250,10 @@ def _parse_fibrs_sheet(ws: Any, year: int) -> list[Row]:
             "total_property_crimes": total_property_crimes,
             "population": population,
             "property_crime_per_1k": property_crime_per_1k,
+            # Diagnostic only — count of reporting agencies whose pop summed into the
+            # coverage-matched denominator. Lands in the Tier-1 NDJSON / dry-run; the
+            # named-param Tier-2 upsert ignores keys it doesn't reference.
+            "reporting_agencies": county_agencies[county],
             "source_url": FIBRS_URL,
             "retrieved_at": now_iso,
         })
@@ -257,6 +277,17 @@ def parse_fibrs(content: bytes, years: list[int]) -> dict[int, list[Row]]:
         except ValueError:
             continue
         if sheet_year not in years:
+            continue
+        # Never ingest the current calendar year or beyond. FDLE carries forward a
+        # stub sheet (e.g. a 2026 sheet identical to 2025) and the in-progress year
+        # is always partial — a partial annual sum would read as a crime cliff.
+        current_cal_year = datetime.now(timezone.utc).year
+        if sheet_year >= current_cal_year:
+            print(
+                f"  SKIP FIBRS {sheet_year}: current/future calendar year "
+                "(carried-forward stub or in-progress year — not a completed release).",
+                file=sys.stderr,
+            )
             continue
         ws = wb[sheet_name]
         rows = _parse_fibrs_sheet(ws, sheet_year)

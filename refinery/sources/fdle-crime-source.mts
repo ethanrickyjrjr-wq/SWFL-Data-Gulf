@@ -27,7 +27,8 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
  *   property_crime_per_1k NUMERIC(8,2) -- total_property_crimes / population * 1000
  *   source_url            TEXT
  *
- * Window: last 3 years — enough for 2 YoY comparisons.
+ * Window: last ~5 data years (by data_year) — enough comparable-coverage years to find a
+ *   clean YoY pair after coverage-shift suppression in the pack.
  *
  * Trust tier: 1 (FDLE is a Florida state law enforcement agency — primary source).
  */
@@ -65,8 +66,7 @@ function str(v: unknown): string {
 
 function toNum(v: unknown): number | null {
   if (v == null) return null;
-  const n =
-    typeof v === "string" ? parseFloat(v.replace(/,/g, "")) : Number(v);
+  const n = typeof v === "string" ? parseFloat(v.replace(/,/g, "")) : Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
@@ -80,8 +80,7 @@ function normalize(row: Record<string, unknown>): FdleCrimeNormalized | null {
   const county = str(row.county);
   if (!county) return null;
   const period_raw = str(row.period);
-  const data_year =
-    toYear(period_raw) || (toNum(row.data_year) as number) || 0;
+  const data_year = toYear(period_raw) || (toNum(row.data_year) as number) || 0;
   if (!data_year) return null;
   return {
     kind: "fdle-crime",
@@ -112,16 +111,18 @@ async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
 
 async function fetchRows(): Promise<Record<string, unknown>[]> {
   if (env.source === "fixture") return loadFixtureRows();
-  const cutoff = new Date();
-  cutoff.setFullYear(cutoff.getFullYear() - 3);
-  const cutoffDate = cutoff.toISOString().slice(0, 10);
+  // Window: last ~5 data years, keyed off the integer `data_year` column. The previous
+  // `period >= now − 3y` cutoff was month-precise against Jan-1-dated rows, so it silently
+  // dropped a whole year (e.g. May-2026 − 3y = May-2023, which excludes 2023-01-01) and left
+  // only two FIBRS years visible — not enough to find a clean, comparable-coverage YoY pair.
+  const minDataYear = new Date().getUTCFullYear() - 5;
   const { data, error } = await getSupabase()
     .from(TABLE)
     .select(
       "county, period, data_year, burglary, larceny_theft, motor_vehicle_theft, " +
         "arson, total_property_crimes, population, property_crime_per_1k, source_url",
     )
-    .gte("period", cutoffDate)
+    .gte("data_year", minDataYear)
     .order("period", { ascending: false });
   if (error) {
     throw new Error(

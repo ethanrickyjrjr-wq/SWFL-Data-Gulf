@@ -1,11 +1,19 @@
 name: FDLE crime quarterly
 
 on:
-  schedule:
-    # 12:00 UTC on the 1st of Jan, Apr, Jul, Oct.
-    # FDLE publishes prior-year UCR with ~6–9 month lag; Q2 (Apr) and Q3 (Jul)
-    # runs capture the fresh annual release. Q1/Q4 runs pick up any corrections.
-    - cron: "0 12 1 1,4,7,10 *"
+  # PAUSED 2026-05-30 — safety-swfl is source-blocked. The FIBRS parser is fixed
+  # (coverage-matched denominator), but FIBRS county aggregates undercount the true
+  # county rate ~2-3x vs. the FDLE UCR baseline because agency participation is
+  # incomplete during the NIBRS transition. Auto-running this cron would populate
+  # public.fdle_crime_swfl with understated data and silently un-dormant the brain into
+  # master. Re-enable (uncomment the schedule below) only once the source is replaced —
+  # see the FBI Crime Data Explorer follow-up issue. workflow_dispatch stays available
+  # for manual verification runs.
+  # schedule:
+  #   # 12:00 UTC on the 1st of Jan, Apr, Jul, Oct.
+  #   # FDLE publishes prior-year UCR with ~6–9 month lag; Q2 (Apr) and Q3 (Jul)
+  #   # runs capture the fresh annual release. Q1/Q4 runs pick up any corrections.
+  #   - cron: "0 12 1 1,4,7,10 *"
   workflow_dispatch:
     inputs:
       dry_run:

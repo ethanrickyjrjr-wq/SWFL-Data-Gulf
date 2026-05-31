@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Opus 4.8 · main) — fix(fdle): coverage-matched parser; safety-swfl kept DORMANT (source-blocked); issue #59 [LOCAL COMMIT, NOT PUSHED]
+
+- **Context:** asked to activate safety-swfl. Operator ran the dry-run and caught a landmine; running the live FIBRS file confirmed it + deeper problems. **Activation is source-blocked, not parser-blocked** — shipped the fix + handoff, brain stays dormant.
+- **Parser fix** `ingest/pipelines/fdle_crime_swfl/pipeline.py`: `_parse_fibrs_sheet` now SUMS all reporting agencies' populations (coverage-matched denominator) instead of taking the first (the bug used one city — Lee landed on Fort Myers 91,544 / Cape Coral 220,236; numerator was the all-agency sum). Skips any sheet year ≥ current calendar year (kills the 2026 carried-forward stub). Verified live: Lee 2021 denom 91,544 → 574,582.
+- **Pack** `refinery/packs/safety-swfl.mts`: covered-population >10% YoY shift → suppress direction to neutral + roster-shift caveat (Cape Coral enters/exits Lee's roster yearly); standing coverage caveat; ±3% / /15 / 10% extracted to named constants, all cited in `SOURCED.md`. **Source window** `fdle-crime-source.mts` widened 3y→~5y (by data_year). 822/822 tests pass.
+- **Kept dormant:** quarterly cron PAUSED (`fdle-crime-quarterly.yml`), `public.fdle_crime_swfl` left EMPTY (no backfill). `brains/safety-swfl.md` + `brains/econ-dev-swfl.md` built NEUTRAL from empty tables. Cadence entry moved to `not_yet_running:` (already landed in 071781d).
+- **Why dormant:** even bug-fixed, coverage-matched FIBRS undercounts the true county rate ~2.3× vs the UCR-2020 baseline (Lee 4.64 vs 10.82/1k) — incomplete NIBRS-transition agency participation. **Issue [#59](https://github.com/ethanrickyjrjr-wq/brain-platform/issues/59)** filed: recommend FBI Crime Data Explorer as the real source (own session, vendor-doc verify first).
+- **Master cleanup NOT done — reversed on new facts:** labor-demand-swfl is now LIVE (BLS OEWS, 220 rows, d05b501/0793dec), not the dead fl_deo source. Removing its master edge would drop live data, so I REVERTED that edit (master.mts untouched). Nightly is red because labor-demand's new BLS-OEWS metric slugs are ORPHANS in the vocab → master stage 2.5 aborts. **Left red intentionally — operator owns labor-demand vocab, will register slugs in a new session.** Did NOT touch brain-vocabulary.json / master / labor-demand.
+- **Git:** committed LOCALLY only (FDLE files + this entry). NOT pushed — parallel session committing to main in this tree (local behind origin 5); operator pushes when that settles.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — fix(registry): bls_oews notes + ops page surfaces cadence + follow-up
 
 - Updated `ingest/cadence_registry.yaml` `not_yet_running` notes for `bls_oews_swfl` + `bls_oews_swfl_tier1`: now state backfill done (220 rows), GHA target date (15 May 2027), and CURRENT_OEWS_YEAR update trigger (~Apr 2027 oesm26ma.zip release).

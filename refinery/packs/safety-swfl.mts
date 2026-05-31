@@ -66,27 +66,61 @@ function rowFor(
   );
 }
 
-function yoyPct(
-  current: number | null,
-  prior: number | null,
-): number | null {
+function yoyPct(current: number | null, prior: number | null): number | null {
   if (current == null || prior == null || prior === 0) return null;
   return Number((((current - prior) / prior) * 100).toFixed(1));
 }
 
+// ── Tuning constants (all cited in SOURCED.md) ─────────────────────────────────
+
+/**
+ * Direction threshold: |YoY rate Δ| ≥ this percent flips bullish/bearish; below it,
+ * neutral. Engineering estimate — see SOURCED.md#safety-swfl-direction-threshold.
+ */
+const DIRECTION_THRESHOLD_PCT = 3;
+
+/**
+ * Magnitude normalizer: magnitude = min(1, |YoY %| / this). A 15% YoY swing saturates
+ * to full magnitude. Engineering estimate — see SOURCED.md#safety-swfl-magnitude-divisor.
+ */
+const MAGNITUDE_YOY_DIVISOR = 15;
+
+/**
+ * Coverage-shift suppression line. `population` here is the COVERED population — the
+ * sum of the populations of the agencies that reported to FIBRS that year, which is
+ * the per-1k denominator. Organic county growth is ~1–3%/yr, so a YoY move larger than
+ * this percent can only mean an agency entered or left the roster (Cape Coral, ~25% of
+ * Lee, does exactly this). When that happens the YoY rate compares two different
+ * geographies, so we force the direction to neutral and caveat it rather than report a
+ * fabricated trend. See SOURCED.md#safety-swfl-coverage-shift-threshold.
+ */
+const COVERAGE_SHIFT_SUPPRESS_PCT = 10;
+
 /** Property crime is INVERSE: a falling rate signals an improving investment environment. */
 function crimeDirection(yoyPct: number | null): BrainOutputDirection {
   if (yoyPct == null) return "neutral";
-  if (yoyPct <= -3) return "bullish";
-  if (yoyPct >= 3) return "bearish";
+  if (yoyPct <= -DIRECTION_THRESHOLD_PCT) return "bullish";
+  if (yoyPct >= DIRECTION_THRESHOLD_PCT) return "bearish";
   return "neutral";
 }
 
 function rateTrend(yoyPct: number | null): "falling" | "rising" | "stable" {
   if (yoyPct == null) return "stable";
-  if (yoyPct <= -3) return "falling";
-  if (yoyPct >= 3) return "rising";
+  if (yoyPct <= -DIRECTION_THRESHOLD_PCT) return "falling";
+  if (yoyPct >= DIRECTION_THRESHOLD_PCT) return "rising";
   return "stable";
+}
+
+/**
+ * |YoY %| change in covered population. null when either year is missing or zero.
+ * Used to detect a FIBRS agency-roster shift that would make the YoY rate misleading.
+ */
+function coverageShiftPct(
+  current: number | null,
+  prior: number | null,
+): number | null {
+  if (current == null || prior == null || prior === 0) return null;
+  return Math.abs(((current - prior) / prior) * 100);
 }
 
 function makeSource(
@@ -212,8 +246,27 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         : null;
   }
 
-  const direction = crimeDirection(swflYoy);
-  const magnitude = Math.min(1, Math.abs(swflYoy ?? 0) / 15);
+  // ── Coverage-shift guard ───────────────────────────────────────────────────
+  // `population` is the COVERED population (sum of reporting-agency populations).
+  // A >COVERAGE_SHIFT_SUPPRESS_PCT YoY move means the FIBRS roster changed (an agency
+  // entered or left), so the YoY rate compares two different geographies — suppress
+  // the affected county's trend to neutral rather than report a fabricated direction.
+  const leeCovShift = coverageShiftPct(leePop, leePriorPop);
+  const collierCovShift = coverageShiftPct(collierPop, collierPriorPop);
+  const leeRosterShift =
+    leeCovShift != null && leeCovShift > COVERAGE_SHIFT_SUPPRESS_PCT;
+  const collierRosterShift =
+    collierCovShift != null && collierCovShift > COVERAGE_SHIFT_SUPPRESS_PCT;
+  const swflRosterShift = leeRosterShift || collierRosterShift;
+
+  const leeTrend = leeRosterShift ? "stable" : rateTrend(leeYoy);
+  const collierTrend = collierRosterShift ? "stable" : rateTrend(collierYoy);
+  const swflTrend = swflRosterShift ? "stable" : rateTrend(swflYoy);
+
+  const direction = swflRosterShift ? "neutral" : crimeDirection(swflYoy);
+  const magnitude = swflRosterShift
+    ? 0
+    : Math.min(1, Math.abs(swflYoy ?? 0) / MAGNITUDE_YOY_DIVISOR);
 
   const archiveUrl =
     "https://www.fdle.state.fl.us/FSAC/Crime-Data/UCR-Data-Archive.aspx";
@@ -239,7 +292,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "safety_property_crime_per_1k_lee",
       value: leeRate,
-      direction: rateTrend(leeYoy),
+      direction: leeTrend,
       label: `Lee County property crime rate — ${yr} UCR, Part I offenses per 1,000 residents`,
       variable_type: "intensive",
       units: "per 1,000 population",
@@ -252,7 +305,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "safety_property_crime_per_1k_collier",
       value: collierRate,
-      direction: rateTrend(collierYoy),
+      direction: collierTrend,
       label: `Collier County property crime rate — ${yr} UCR, Part I offenses per 1,000 residents`,
       variable_type: "intensive",
       units: "per 1,000 population",
@@ -265,7 +318,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "safety_property_crime_per_1k_swfl",
       value: swflRate,
-      direction: rateTrend(swflYoy),
+      direction: swflTrend,
       label: `SWFL (Lee + Collier) population-weighted property crime rate — ${yr} UCR, Part I offenses per 1,000 residents`,
       variable_type: "intensive",
       units: "per 1,000 population",
@@ -278,7 +331,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "safety_property_crime_yoy_pct_swfl",
       value: swflYoy,
-      direction: rateTrend(swflYoy),
+      direction: swflTrend,
       label: `SWFL property crime rate YoY — ${priorYr} to ${yr}, percent change`,
       variable_type: "intensive",
       units: "percent",
@@ -291,7 +344,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "safety_property_crime_yoy_pct_lee",
       value: leeYoy,
-      direction: rateTrend(leeYoy),
+      direction: leeTrend,
       label: `Lee County property crime rate YoY — ${priorYr} to ${yr}, percent change`,
       variable_type: "intensive",
       units: "percent",
@@ -304,7 +357,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "safety_property_crime_yoy_pct_collier",
       value: collierYoy,
-      direction: rateTrend(collierYoy),
+      direction: collierTrend,
       label: `Collier County property crime rate YoY — ${priorYr} to ${yr}, percent change`,
       variable_type: "intensive",
       units: "percent",
@@ -383,6 +436,32 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   if (swflYoy == null) {
     caveats.push(
       `Prior-year (${priorYr}) data not in table — YoY comparison unavailable.`,
+    );
+  }
+
+  // Coverage caveat — the per-1k denominator is the COVERED population (sum of the
+  // agencies that reported to FIBRS that year), not the full county. FIBRS agency
+  // participation is incomplete during Florida's NIBRS transition, so this understates
+  // the true county property-crime rate versus the FDLE UCR baseline.
+  caveats.push(
+    "Rate is per 1,000 residents covered by the agencies that reported to FIBRS that year " +
+      "(the denominator is the sum of reporting agencies' populations), not the full county; " +
+      "incomplete agency participation during the NIBRS transition understates the level " +
+      "relative to the FDLE UCR baseline.",
+  );
+
+  if (leeRosterShift) {
+    caveats.push(
+      `Lee's FIBRS reporting footprint changed >${COVERAGE_SHIFT_SUPPRESS_PCT}% from ${priorYr} to ${yr} ` +
+        `(covered population ${leePriorPop?.toLocaleString()} → ${leePop?.toLocaleString()}); an agency entered ` +
+        `or left the roster, so the Lee year-over-year direction is suppressed (reported as neutral).`,
+    );
+  }
+  if (collierRosterShift) {
+    caveats.push(
+      `Collier's FIBRS reporting footprint changed >${COVERAGE_SHIFT_SUPPRESS_PCT}% from ${priorYr} to ${yr} ` +
+        `(covered population ${collierPriorPop?.toLocaleString()} → ${collierPop?.toLocaleString()}); the Collier ` +
+        `year-over-year direction is suppressed (reported as neutral).`,
     );
   }
 

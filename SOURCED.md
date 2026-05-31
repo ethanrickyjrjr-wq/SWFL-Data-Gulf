@@ -51,3 +51,54 @@ classification here, not a "cited" one.
 - Rationale: Dedicated SWFL regional macro leaf. Always relevant to SWFL macro queries.
   Not a universal macro brain (no national/state coverage) — capped below 1.0 to allow
   broader-scope brains to rank above it when the query is national or Florida-wide.
+
+---
+
+## safety-swfl-direction-threshold
+
+**crimeDirection / rateTrend threshold: ±3% YoY (`DIRECTION_THRESHOLD_PCT`)**
+
+A property-crime-rate YoY change of magnitude ≥ 3% flips the brain bullish (falling crime) or
+bearish (rising crime); smaller moves read as neutral. Engineering estimate, not a published
+figure:
+
+1. **No published county-level UCR/FIBRS noise floor.** FDLE does not publish a year-over-year
+   revision band for county Part I property-crime rates, so there is no authoritative threshold to
+   cite (contrast BLS LAUS ±0.2pp, which is published).
+2. **Population denominator drift.** The covered-population denominator moves ~1–3%/yr with organic
+   growth even when the agency roster is stable, so a sub-3% rate change is within denominator noise.
+3. **Calibration knob.** If the first live FBI-CDE-sourced years show the brain flipping on noise,
+   tighten toward 5%; if it sits neutral through real moves, loosen toward 2%. Update point:
+   `crimeDirection()` / `rateTrend()` in `refinery/packs/safety-swfl.mts`.
+
+## safety-swfl-magnitude-divisor
+
+**magnitude = min(1, |YoY %| / 15) (`MAGNITUDE_YOY_DIVISOR`)**
+
+Normalizes the YoY rate change into the 0–1 magnitude scale; a 15% YoY swing saturates to full
+magnitude. Engineering estimate: a 15% single-year move in a county property-crime rate is a
+genuinely large shift (multiples of the ±3% direction threshold), so it anchors the top of the
+scale. Not a published figure; same calibration discipline as the direction threshold.
+
+## safety-swfl-coverage-shift-threshold
+
+**Coverage-shift suppression: ±10% covered-population YoY (`COVERAGE_SHIFT_SUPPRESS_PCT`)**
+
+FIBRS reports per-agency; the per-1k denominator is the sum of the populations of the agencies that
+reported that year (the "covered population"). When that covered population moves more than 10% YoY,
+the brain suppresses the direction to neutral and caveats it. Engineering estimate:
+
+1. **Organic county population growth is ~1–3%/yr** (Census PEP, Lee/Collier). A covered-population
+   move >10% cannot be organic — it means an agency entered or left the FIBRS roster.
+2. **The roster genuinely swings.** Cape Coral PD (~25% of Lee County's population) reports to FIBRS
+   in 2024 but is absent in 2021/2025. Including/excluding it shifts Lee's covered population
+   ~25–40% — far above 10% — while a like-for-like comparison would not.
+3. **Why suppress rather than adjust.** When the footprint changes, the numerator (crimes) and the
+   geography both change, so the YoY rate is not a like-for-like comparison and cannot be rescued by
+   normalizing the denominator alone. Neutral + caveat is the honest output. Update point: the
+   coverage-shift guard in `safetyOutputProducer`.
+
+**Note:** this guard makes the data internally honest; it does NOT fix the FIBRS undercount versus
+the FDLE UCR baseline (incomplete NIBRS-transition participation). That is a source-fitness problem
+tracked separately — `safety-swfl` stays dormant until a complete county source (FBI CDE) replaces
+FIBRS aggregation.
