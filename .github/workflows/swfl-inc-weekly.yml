@@ -1,0 +1,46 @@
+name: SWFL Inc. economic dev weekly
+
+on:
+  schedule:
+    # 08:00 UTC Monday — clear of existing monthly cron slots (5th, 15th, 20th).
+    # SWFL Inc. publishes new project announcements throughout the week.
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — parse and print rows without writing to DB or storage"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run swfl_inc pipeline
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          SPIDER_API_KEY: ${{ secrets.SPIDER_API_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.swfl_inc.pipeline --dry-run
+          else
+            python -m ingest.pipelines.swfl_inc.pipeline
+          fi

@@ -234,6 +234,17 @@ pipelines:
     # Cron: 5th of month 14:00 UTC via fgcu-reri-monthly.yml.
     # First run: 2026-05-29 (manual dispatch after SQL migration).
 
+  - name: swfl_inc
+    lane: tier-2
+    cadence_days: 7
+    tolerance_multiplier: 3.0
+    freshness_table: public.swfl_inc_announcements
+    # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
+    # Source: SWFL Inc. (swflinc.com/news/), Lee County Economic Development Organization.
+    # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
+    # Cron: Monday 08:00 UTC via swfl-inc-weekly.yml.
+    # First run: pending (migration + first GHA dispatch).
+
   - name: rsw_airport_monthly
     lane: tier-2
     cadence_days: 30

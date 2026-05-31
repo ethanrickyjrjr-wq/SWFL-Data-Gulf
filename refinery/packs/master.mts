@@ -252,6 +252,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("permits-swfl"),
     makeBrainInputSource("rentals-swfl"),
     makeBrainInputSource("housing-swfl"),
+    makeBrainInputSource("econ-dev-swfl"),
     makeBrainInputSource("city-pulse-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
@@ -284,6 +285,7 @@ export const master: PackDefinition = {
     { id: "permits-swfl", edge_type: "input" },
     { id: "rentals-swfl", edge_type: "input" },
     { id: "housing-swfl", edge_type: "input" },
+    { id: "econ-dev-swfl", edge_type: "input" },
     { id: "city-pulse-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
