@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Sonnet 4.6 · main) — chore: commit stale session artifacts + tree clean
+
+- Committed 3 files left dirty by prior sessions: hook comment update (d6290dd companion), `news_swfl` removed from build queue, `city-pulse-swfl.md` v2 rebuild artifact. Tree is now clean.
+- `scripts/patch-vocab-oews.py` deleted (one-time vocab patch, already applied).
+
 ## 2026-05-31 (Sonnet 4.6 · main) — fix(vocab): register 10 OEWS slugs → unblocks master/nightly
 
 - Registered 10 `oews_{lee,collier}_*` concepts in `refinery/vocab/brain-vocabulary.json` + wired all 10 raw slugs into `slug_index`. Stage 2.5 was aborting master on every labor-demand-swfl metric slug (unregistered after BLS OEWS rewire in prior session).
