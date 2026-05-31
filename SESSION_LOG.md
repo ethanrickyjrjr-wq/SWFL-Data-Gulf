@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · main) — feat: Skunkworks ⚗️ page on swfldatagulf-ops
+
+- **New page `/skunkworks`** — tracks intentionally-parked pipeline/brain ideas. `ops_ideas` table created + seeded with `news_swfl` (crime/alert pipeline parked pending a consuming brain; city_pulse intentionally NOT the home for this content).
+- **Full CRUD UI**: Approve button (Supabase status → `approved`, card moves to Approved section), Scrap flow (funny first-confirm → GitHub code-search ref check → second confirm → hard delete), collapsible Add Idea form (slug auto-derived from title, 409 on duplicate).
+- **Files**: `lib/ideas.ts`, `app/api/ideas/route.ts`, `app/api/ideas/[slug]/route.ts`, `app/api/ideas/[slug]/refs/route.ts`, `app/skunkworks/{page,ideas-client,idea-card,add-idea-form}.tsx`, catnav pill + CSS in `app/globals.css`. Build clean (`next build` ✓).
+- **Next**: push swfldatagulf-ops, Vercel auto-deploys. Page is live at `https://swfldatagulf-ops.vercel.app/skunkworks`.
+
 ## 2026-05-30 (Opus 4.8 · main) — spec + seed: deferred-commitment ledger (`/checks`) on swfldatagulf-ops
 
 - **What this is:** a `/checks` page that surfaces mid-build _verbal commitments_ (the promises that die in session logs), distinct from the signal-derived `/ops` ledger. Spec: `docs/superpowers/specs/2026-05-30-deferred-commitment-ledger-design.md`. Build assigned to CT (in daylight) — **start at §2**.
