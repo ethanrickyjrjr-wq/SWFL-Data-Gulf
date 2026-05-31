@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Opus 4.8 · branch) — fix(econ-dev-swfl): rewire dead /news/ 404 → /blog/ feeds + classified momentum (PR #53 activation)
+
+- **Root cause**: PR #53's `swfl_inc` pipeline hardcoded `https://www.swflinc.com/news/`, which 404s (verified via WebFetch + Spider stealth Chrome — site's own ASP.NET "Page Not Found"). Parser also split on H2/H3 + "Month DD, YYYY"; live `/blog/` pages render `[Title](url)` links + `Date posted MM/DD/YYYY`. Every row got `announced_date=null` → dropped at 3 layers (ingest `_parse_date`, source `.gte`, brain filter). 822 tests passed against a synthetic fixture that didn't match live shape (the env-swfl phantom-data pattern).
+- **Migration**: applied `docs/sql/20260530_swfl_inc_announcements_create.sql` to prod (table was absent; `to_regclass` was NULL). Now exists, `service_role` SELECT granted, 0 rows.
+- **Pipeline** (`ingest/pipelines/swfl_inc/pipeline.py`): `SWFL_INC_FEEDS` = `/blog/{business-development,chamber-news,policy}` (all verified 200); `fetch_feeds()` per-feed; `parse_announcements()` rewritten to anchor on `Date posted MM/DD/YYYY` (non-zero-padded) + read title from first non-category, non-CTA `/blog/` link; `dedup_rows()` cross-feed by id in `run()`. Article URL = per-row `source_url`.
+- **Pack** (`refinery/packs/econ-dev-swfl.mts`): momentum now counts **classified** rows only — `isQualifying` = {relocation, expansion, grant, infrastructure}; partnership/workforce/null excluded. New caveat "N of M … matched qualifying categories". All dead `/news/` strings → `/blog/` (pack lines 60/164/289/344, source citationMeta, cadence comment, migration comments).
+- **Fixtures regenerated from live shape** (the landmine): `ingest/pipelines/swfl_inc/__fixtures__/blog_*.md` (real Spider captures) + `refinery/__fixtures__/econ-dev-swfl.sample.json` rebuilt (mixed categories incl. partnership + null, mostly-null $/jobs, mixed counties).
+- **Tests**: new `test_pipeline.py` (5 pytest, incl. cross-feed dedup) + `econ-dev-swfl.test.mts` (6 bun, incl. classified-count exclusion). Baseline was 820/2 (catalog labor-demand + rsw-airport — concurrent main edits, now green); full suite **828 pass / 0 fail**.
+- **Pagination check**: page-1 oldest item per feed is 2021–2023, far past the 90-day cutoff → page-1-only is correct for v1 (documented in SOURCED.md#econ-dev-swfl-qualifying-categories).
+- **NOT pushed — pending operator**: (1) diff review of pack key_metrics-math change (Rule 1); (2) live ingest approach (manual seed vs GHA dispatch — no FIRECRAWL_API_KEY locally). Cadence stays "First run: pending". **Landmine**: cron fires Mon 08:00 UTC; merge before then or the old scraper seeds garbage rows.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — fix(labor-demand-swfl): rewire dead OSPA URLs to BLS OEWS + full backfill 2021-2025
 
 - **Root cause**: `fl_deo_job_postings` pipeline targeted two dead URLs — OSPA app retired, CareerSource LMI page gone. FREIDA (FL state LMI portal) also retired; replaced by Florida Insight (interactive, same scraping problem). BLS flat files are the authoritative source the state portals re-presented.
