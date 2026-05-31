@@ -1,13 +1,15 @@
-name: SWFL news daily (Tier 1 cold storage)
+name: RSW Airport monthly
 
 on:
   schedule:
-    # 11:00 UTC = 7 AM ET daily.
-    - cron: "0 11 * * *"
+    # 15:00 UTC = 11 AM ET on the 8th of each month.
+    # LCPA publishes monthly aviation activity in the first week of the following month.
+    # Avoids collision with fgcu-reri (5th 14:00) and fl-dor-tdt (20th).
+    - cron: "0 15 8 * *"
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run — scrape and build NDJSON but skip Storage + inventory writes"
+        description: "Dry run — fetch and parse rows without writing to DB"
         required: false
         default: "false"
 
@@ -17,7 +19,7 @@ permissions:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -30,18 +32,14 @@ jobs:
       - name: Install ingest dependencies
         run: pip install -r ingest/requirements.txt
 
-      - name: Run news_swfl pipeline
+      - name: Run rsw_airport_monthly pipeline
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-          # Spider is the fallback vendor for plain scrape per pipeline-freshness §6.
-          # If the secret is unset, scrape_with_fallback() runs firecrawl-only and logs a warning.
           SPIDER_API_KEY: ${{ secrets.SPIDER_API_KEY }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
         run: |
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            python -m ingest.pipelines.news_swfl.pipeline --dry-run
+            python -m ingest.pipelines.rsw_airport_monthly.pipeline --dry-run
           else
-            python -m ingest.pipelines.news_swfl.pipeline
+            python -m ingest.pipelines.rsw_airport_monthly.pipeline
           fi

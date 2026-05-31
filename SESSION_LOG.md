@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · merge-queue) — merge: econ-dev-swfl (#53) synced with main + catalog fix
+
+- Resolved additive conflicts with main (rsw-airport + city-pulse-swfl merged since branch cut). All packs kept.
+- Fixed missing `econ-dev-swfl` entry in `catalog.mts` (caught by catalog test). 822/822 pass.
+- PR #53 ready to merge.
+
 ## 2026-05-30 (Sonnet 4.6 · claude/swfl-inc-pipeline-k3IJx) — feat: econ-dev-swfl Tier-2 pipeline + pack
 
 - **New pipeline** `ingest/pipelines/swfl_inc/pipeline.py`: weekly Firecrawl scrape of `swflinc.com/news/` (primary) + Spider fallback; parses markdown with regex for title/date/investment_usd/jobs/county/category; writes raw NDJSON to `lake-tier1/econ/swfl_inc/year=YYYY/.../run-{ts}.ndjson` + inventory row; upserts to `public.swfl_inc_announcements`.
@@ -9,6 +15,65 @@
 - **Pack** `refinery/packs/econ-dev-swfl.mts` + **source** `refinery/sources/swfl-inc-source.mts`: `domain=macro`, TTL 7d, 4 key metrics (announcements_90d, prior_90d, investment_usd_90d, jobs_90d), direction vote from 90d vs prior-90d count momentum. Registered in `index.mts` + wired into `master` as `input_brains` edge.
 - **GHA cron** `.github/workflows/swfl-inc-weekly.yml`: Monday 08:00 UTC. **Cadence registry** entry added (tier-2, 7 days, tolerance 3.0×). Fixture at `refinery/__fixtures__/econ-dev-swfl.sample.json`.
 - **Next:** run migration in Supabase SQL editor → `workflow_dispatch --dry-run` to verify scrape → first live dispatch.
+
+## 2026-05-30 (Sonnet 4.6 · feat/rsw-airport-monthly) — RSW/PGD monthly enplanement pipeline + pack
+
+- **New pipeline** `ingest/pipelines/rsw_airport_monthly/pipeline.py` — scrapes `flylcpa.com/about/statistics` via `scrape_with_fallback()` (Firecrawl primary, Spider fallback), parses markdown tables for RSW + PGD monthly enplanements, upserts to `public.rsw_airport_monthly`. `--dry-run` mandatory before first live write.
+- **New pack** `refinery/packs/rsw-airport.mts` (domain: hospitality, fitScore: 0.8) + source `refinery/sources/rsw-airport-source.mts` + 6-test suite `rsw-airport.test.mts`. Added to `catalog.mts` and `index.mts`.
+- **Migration** `docs/sql/20260530_rsw_airport_monthly_create.sql` — needs manual run in Supabase SQL editor (DB credentials not available in this cloud session). **GHA cron** `.github/workflows/rsw-airport-monthly.yml` (8th of month, 15:00 UTC). **Cadence registry** entry added; moves to `pipelines:` after first successful run.
+- **Next:** run SQL migration in Supabase, then `workflow_dispatch` with `dry_run=true` to verify parser against live LCPA page; update `parse_stats()` if page structure differs from expected markdown-table format.
+
+Append-Only Cross-Session Memory
+
+**Read this on session start. Append to it before every `git push`.**
+
+## 2026-05-30 (Sonnet 4.6 · claude/cron-annual-to-monthly-yfb1J) — cron: annual → monthly on three GHA workflows
+
+- Changed cron schedule in `census-cbp-annual.yml`, `leepa-parcels-annual.yml`, and `fdot-aadt-annual.yml` from single annual-date triggers to `0 10 15 * *` (15th of every month, 10:00 UTC). Data cadence unchanged (annual-release); monthly retries prevent a year-long gap from a single GHA failure. Pipelines are idempotent. `cadence_registry.yaml` untouched.
+- Next: open PR for review.
+
+## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — dedup fix: key on (city, source_url), not fact text — pre-merge live test caught near-dupe accumulation
+
+- **Operator-requested pre-merge live write+dedup test caught a real bug:** `dedup_key` was `sha256(city|topic|normalized_fact_text)`, but the distill LLM rewords the same event run-to-run → a real Naples re-run wrote **12 of 14 facts as "new"** (only 2 word-identical ones deduped). `ON CONFLICT` worked mechanically; the key was too brittle. The cron would have accumulated reworded near-dupes daily until TTL.
+- **Fix:** `dedup_key` now `sha256(city | normalize_url(source_url))` — the article URL is stable run-to-run, immune to rewording AND topic-reclassification. One signal per source article per city; a 2nd fact from the same article dedups at write time. **Re-verified live: re-run now dedups 12 of 13** (the 1 "new" was a genuinely new article from search drift). Flywheel dedup is now real.
+- 22 city_pulse unit tests pass (dedup test rewritten for the url contract). Committed on `feat/city-pulse-swfl`.
+- **Cleanup pending (operator):** ~38 Naples test rows in `data_lake.city_pulse` from the 4 test runs need a `DELETE` — the repo's destructive-SQL safety hook (correctly) blocks me from running it; handed the exact command to the operator. Tier-1 audit blobs + `_tier1_inventory` rows left as harmless cold audit.
+- **Note:** local working tree had been left on `main` (someone's `3ed44bc` leepa fix); switched back to `feat/city-pulse-swfl` to continue, will restore to `main` after. All city-pulse work is safe on the branch + PR #57.
+
+## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — Firecrawl primary + Anthropic auto-fallback (default) + city-constraint distill fix
+
+- **`--source-provider auto` is now the default** (`b6e1ad2`): Firecrawl `/v2/search` primary → **Anthropic web_search fallback** fires only when Firecrawl errors OR returns 0 citations (operator's resilience ask — a city never goes dark; Anthropic's ~$0.45 only on failure). Explicit `firecrawl`/`anthropic` still force one. (No Spider tier: `spider_client` has no search endpoint, only scrape — confirmed.)
+- **City-constraint distill fix** (shared, both providers): the distill prompt now extracts only facts whose primary subject is the queried city, skipping other named SWFL cities. Fixes the cross-city leak.
+- **Verified live (Naples, auto):** Firecrawl ran (36 credits), 13 facts — all Naples/Collier (Costco #2, 375 13th Ave resale, Oakes Farms $6.2M suit, I-75 diverging diamond, NCH). The Fort Myers facts that leaked before are gone. 22 city_pulse unit tests pass (incl. 3 fallback-dispatch tests).
+- **Net steady-state cost: ~$10/mo Anthropic (distill) + ~7.5k Firecrawl credits/mo** (of 100k), with Anthropic web_search as the paid-for-itself safety net. PR #57 is now the cheapest + most resilient + most accurate version. **Still NOT merged — operator's call.**
+
+## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — Firecrawl capture provider (side-by-side) — validated, saves ~$85/mo
+
+- **Operator flagged the cost:** capture used Anthropic `web_search` (~$95/mo in tokens), NOT the 100k/mo Firecrawl credits they already pay for. Added a **side-by-side Firecrawl provider** (`firecrawl_client.search()` → `/v2/search` with `tbs=qdr:m` + inline markdown; `capture_firecrawl()` produces the same record shape so distill/table/pack/master are unchanged; `--source-provider {anthropic,firecrawl}` flag, **anthropic still the default** — Firecrawl is opt-in, no rebuild needed if it flops).
+- **Validated live (Naples):** 18 real dated cited facts for **36 credits** (Costco #2, $112M affordable housing, 375 13th Ave resale, I-75 diverging diamond, Oakes Farms $6.2M suit). **Reaches naplesnews.com + news-press.com — both block Anthropic's crawler** → strictly better coverage. Clean per-article attribution. Excluded social/UGC domains; limit 15. Cost: ~7.5k credits/mo + ~$10/mo Anthropic (distill only) vs $95/mo → **~$85/mo saved.**
+- **Known follow-up before making Firecrawl the default:** regional SWFL sources leak cross-city facts (a Naples query surfaced Fort Myers facts, all tagged city=Naples). One-line distill-prompt fix ("extract facts specifically about {city}") — affects BOTH providers. Not yet applied.
+- 19 city_pulse unit tests pass. Pushed to PR #57. Decision pending: make Firecrawl the default (+ the city-constraint fix)?
+
+## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — FIX via pre-merge live smoke: distill produced 0 facts → now 40 real cited facts
+
+- **Operator-requested live Naples dry-run before merge caught a feature-breaking bug:** capture was great (47-50 real cited SWFL spans) but distill produced **0 facts** — the brain would've stayed permanently empty. Two fixes, both diagnosed live (not guessed):
+  - `15959ff` — distill was fed `json.dumps(response.content)` (~278k chars, encrypted-blob bloat). Rewrote to feed ONLY numbered citation spans (`cited_text`+title+url) and cite **by index** (`cite: N` → code maps to the citation), per the corridor-character pattern. Robust to URL reproduction + cuts distill input ~20x.
+  - `dca…` (this commit) — **ROOT cause: `max_tokens=2048` truncated the forced tool-input JSON mid-array** (`stop_reason=max_tokens`) → partial JSON parsed to 0 facts. Bumped to **8192**. Verified: Naples dry-run now distills **40 real dated cited facts** (Ekos Creekside $63M groundbreak, 8-story hotel board approval, Costco on Collier Blvd, Hoffmann Fifth Ave, Silver Oaks $30M sale, permit-fraud fine). web_search pulls genuine local press (Gulfshore Business, Business Observer, county records).
+- **Known v2 refinements:** (1) occasional `cite`→source mismatch — fact is real + grounded but the model sometimes picks the wrong span number for attribution; validate cite↔fact in v2. (2) **Cost higher than spec estimate:** capture pulls ~95-137k input tokens/city (web_search pulls page content) → ~$0.45/city → ~$95/mo naive at 7 cities; `max_uses=8` is tunable down. Distill is now cheap.
+- 16 city_pulse unit tests pass. Pushed to branch (PR #57). **Still NOT merged** — awaiting operator review.
+
+## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — BUILD: city-pulse-swfl daily current-events reporter (subagent-driven; pushed for review, NOT merged)
+
+- **Branch `feat/city-pulse-swfl`, 21 commits, 815 tests pass / 0 fail.** Built the whole feature subagent-driven (TDD per task; 2 design reviews + a whole-branch opus review, all findings fixed): Python ingest (`ingest/pipelines/city_pulse/` — capture via `web_search_20250305` → Tier-1 NDJSON → LLM distill w/ citation-drop → `data_lake.city_pulse` upsert w/ dedup → prune expired), TS source connector + `city-pulse-swfl` reporter pack (every signal carries a `key_metrics[].source` receipt = structural guarantee), registry + catalog + master `input_brains` edge, daily GHA cron (`0 9 * * *`), cadence entry, and **deleted the dead `news_swfl` scraper**.
+- **3 integration blockers found by review + fixed:** (1) master only DECLARED the edge — added the missing `makeBrainInputSource("city-pulse-swfl")` to master `sources[]` (verified: master ingest now shows `brain-input:city-pulse-swfl`, master fixture build = 0 orphans, v63); (A) **vocab orphan** — registered `city_pulse_signal` concept w/ 5 topic-scoped `raw_slug_patterns` (`signal_<topic>_*`) in `brain-vocabulary.json` + regenerated `semantic-ledger.md` ([[ship-contract-together]]); (B) **bootstrap brain** — source now returns `[]` on 0 live rows (graceful, was throw) so the empty-guard emits a neutral brain.
+- **Migration APPLIED to live DB** (Rule 1): `data_lake.city_pulse` created (idempotent), 0 rows, `service_role` SELECT granted. **Neutral bootstrap `brains/city-pulse-swfl.md` committed** (empty table → no-signals placeholder, no fake data) so the no-`--force` daily-rebuild won't crash on a missing upstream.
+- **NOT on main.** Pushed for operator diff review (pack + data_lake changes = Rule 1 gate). **Pending:** operator review → merge; first real live smoke (`python -m ingest.pipelines.city_pulse.pipeline --city "Naples" --dry-run` then real run) once merged; the daily-rebuild cron regenerates `master.md` to include city-pulse (left to the cron, not hand-built). Follow-up: stale `news_swfl` prose refs (notion-sync.mjs, .env.example, pipeline-freshness.md) — non-blocking. Spec/plan: `docs/superpowers/{specs,plans}/2026-05-30-city-pulse-*`.
+
+## 2026-05-30 (Sonnet 4.6 · main) — fix(leepa): last_sale_amount + DoS date parsing
+
+- **Root cause:** ESRI Layer 10 returns `Amount` as a currency string (`"$245,000.00"`), not a float. `_coerce_float` passed it raw to `float()` → `ValueError` → `None` for every row. Similarly `DoS` came back as year-month strings (`"2024-4"`); `s[:10]` truncated to `"2024-4"` (not a valid ISO date), so only epoch-ms rows landed as valid dates.
+- **Fix:** `ingest/pipelines/leepa/resources.py` — strip `$`/`,` in `_coerce_float` before cast; normalize year-month DoS strings to `YYYY-MM-01` in `_coerce_esri_date`. Both fixes in one 548k merge pass.
+- **Verified:** 528,130 parcels now have `last_sale_amount` (was 0); 528,133 with `last_sale_date`; avg $529k; date range 1900-01-01 → 2026-05-01. Unblocks any LeePA-dependent brain waiting on sale price data.>>>>>>> origin/main>>>>>>> origin/main
 
 ## 2026-05-30 (Opus 4.8 · main) — plan: add Tier-2 prune (Task 6B) + supersession-vs-TTL note (operator Q)
 
