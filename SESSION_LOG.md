@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Sonnet 4.6 · main) — feat(hooks): session kickoff block + delete bad /checks rows
+
+- **Kickoff block**: every SessionStart now prints `KICKOFF — date · brain-platform · main` with last ship (SESSION_LOG), open /checks rows (live Supabase REST), and top build-queue item. Logic in `scripts/session-kickoff.mjs`; thin hook in `.claude/hooks/print-kickoff.mjs`; registered as second SessionStart hook in `.claude/settings.json`. Credential patterns live outside `.claude/hooks/` to avoid the auto-mode classifier.
+- **Deleted 3 wrongly-placed /checks rows**: `bls_oews_first_gha`, `bls_oews_promote_cadence`, `bls_oews_year_update` — CT had used /checks as a todo list for maintenance reminders and GHA health checks. Those belong on the ops page (machine signals) or nowhere. `public.checks` is back to 6 rows: only the original project commitments.
+- **Rule clarified**: /checks = deferred project-level verbal commitments only. Pipeline health / cron / GHA status → main ops page. Never double-up.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — fix(labor-demand-swfl): rewire dead OSPA URLs to BLS OEWS + full backfill 2021-2025
 
 - **Root cause**: `fl_deo_job_postings` pipeline targeted two dead URLs — OSPA app retired, CareerSource LMI page gone. FREIDA (FL state LMI portal) also retired; replaced by Florida Insight (interactive, same scraping problem). BLS flat files are the authoritative source the state portals re-presented.
