@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260530 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260531 -->
 ---
 brain_id: city-pulse-swfl
-version: 1
-refined_at: 2026-05-30T22:26:35Z
-freshness_token: SWFL-7421-v1-20260530
+version: 2
+refined_at: 2026-05-31T01:55:51Z
+freshness_token: SWFL-7421-v2-20260531
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) daily current-events pulse — dated business openings/closings, transactions, construction, and disaster signals for 7 cities, each cited to a primary source.
@@ -29,7 +29,7 @@ SCOPE: SWFL (Lee + Collier) daily current-events pulse — dated business openin
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                       | verified   | expires
-s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-05-30 | 2026-05-31
+s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-05-31 | 2026-06-01
 
 --- SAVED FACTS ---
 []
@@ -37,8 +37,8 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 --- OUTPUT ---
 {
   "brain_id": "city-pulse-swfl",
-  "version": 1,
-  "refined_at": "2026-05-30T22:26:35Z",
+  "version": 2,
+  "refined_at": "2026-05-31T01:55:51Z",
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
@@ -58,7 +58,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-30T22:26:35Z"
+    "computed_at": "2026-05-31T01:55:51Z"
   },
   "exogenous_signals": []
 }
@@ -67,5 +67,5 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 - city-pulse-swfl: daily SWFL city-grain current-events reporter over data_lake.city_pulse (TTL'd, citation-backed).
 
 --- RECENT NOTES ---
-- 2026-05-30: pack refined by the Refinery — 0 fact(s) from 1 source(s).
+- 2026-05-31: pack refined by the Refinery — 0 fact(s) from 1 source(s).
 ```

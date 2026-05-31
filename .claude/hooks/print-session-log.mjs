@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// SessionStart hook: prints the most recent SESSION_LOG.md entries so every
-// new Claude session sees what the previous one actually did. Also verifies
-// that the locked rule marker is still present in CLAUDE.md — if someone
-// (or a Claude) deletes the rule, this hook screams.
+// SessionStart hook — prints recent SESSION_LOG entries, verifies the locked
+// CLAUDE.md rule marker, then appends a ready-to-paste KICKOFF BLOCK so every
+// new session opens with live context (last ship · open checks · build queue).
 
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";

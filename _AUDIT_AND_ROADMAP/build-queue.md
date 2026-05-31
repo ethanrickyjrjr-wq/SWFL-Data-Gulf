@@ -13,4 +13,3 @@
 - [X ] fl_dor_sales_tax — run schema migration + first backfill, move registry to active
 - [X ] Section 3 — plan master synthesizer flesh, starting from /ops state
 - [x] Fix US-41 / Tamiami Trail corridor naming collision
-- [ ] news_swfl — first successful live Firecrawl run + consuming brain
