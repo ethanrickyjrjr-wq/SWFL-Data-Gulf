@@ -60,6 +60,28 @@ export interface VocabConcept {
   /** "BrainOutput.direction" / "BrainOutputMetric.direction" / ... — used by Stage 2.5 to resolve overloads */
   raw_field_path?: string;
   ordered_collection?: string;
+  /**
+   * Optional per-slug grading config for the prediction grading loop (Goal 9).
+   * Most slugs OMIT this and inherit: window_days from the concept's category,
+   * epsilon/epsilon_mode/grade_basis from its value_type (see
+   * refinery/vocab/loader.mts resolveGradeConfig). `direction_polarity` is the
+   * ONE field that is never inherited — a slug without it is ungradeable by the
+   * deterministic grader (within one category, opposite-polarity metrics coexist
+   * e.g. survival-rate vs charge-off, so a category default would grade one
+   * backwards).
+   */
+  grade?: {
+    /** Which slug movement reads as bullish. NEVER inherited; required to be gradeable. */
+    direction_polarity: "higher_is_bullish" | "lower_is_bullish" | "none";
+    /** Override the category window default (days until a prediction is grade-ready). */
+    window_days?: number;
+    /** Override the value_type epsilon (deadband magnitude). */
+    epsilon?: number;
+    /** Override the value_type epsilon mode. */
+    epsilon_mode?: "absolute" | "relative";
+    /** Override the value_type grade basis. */
+    grade_basis?: "delta" | "sign";
+  };
 }
 
 export interface Vocabulary {

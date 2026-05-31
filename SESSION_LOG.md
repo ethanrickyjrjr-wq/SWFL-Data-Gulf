@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Opus 4.8 · main) — feat(grading-loop): Phase 1 schema + capture mechanism (1b/1c/1e)
+
+Goal 9 prediction grading loop, Phase 1. Schema migration RUN; grade-config mechanism + metric snapshot hook built & verified. **1d (capture) and Phase 2 (grader) NOT started — operator picks up 1d tomorrow on terminal.** Plan: `C:\Users\ethan\.claude\plans\can-you-plan-out-federated-fairy.md`.
+
+- **Migration RUN in DB** (operator-authorized "RUN ANY SQLs", after lifting the Studio-only gate): `docs/sql/20260531_grading_loop.sql` (NEW) — `public.metric_observations` + gradeable cols on `predictions` (conditional_claims, gradeable_slug, baseline_value, predicted_direction, window_end_date, grade_status, grade_method) and `outcomes` (predicted/observed_direction, baseline/observed_value, direction_correct, error, source_url, graded_at, grade_method, grade_config) + indexes incl. partial-unique `outcomes_machine_uidx`. Verified live (23 stmts committed).
+- **1b** `refinery/stages/2.5-normalize.mts` — optional `grade` block on `VocabConcept`. `refinery/vocab/loader.mts` — `resolveGradeConfig(slug)` + `CATEGORY_WINDOW_DAYS` + `VALUE_TYPE_BUCKET`. Two-axis fallback: window←category, epsilon/basis←value_type, **polarity←slug-only, never inherited** (credit-risk holds opposite-polarity survival vs charge-off).
+- **1e** `refinery/vocab/brain-vocabulary.json` — 16 operator-approved `direction_polarity` blocks (3 LAUS lower; sba survival higher / charge-off lower; ZORI index+yoy higher; 6 TDT collections + Ian-recovery higher; properties velocity-z higher). All resolve `gradeable:true`.
+- **1c** `refinery/lib/metric-observations-log.mts` (NEW) + wired into `refinery/stages/4-output.mts` (fires EVERY brain, not just master). Snapshots numeric key_metrics → metric_observations; `observed_at`=refined_at vintage; idempotent upsert on (slug,brain_id,observed_at); silent no-op without Supabase env.
+- Verified: 4 touched files typecheck-clean (the ~99 `refinery:typecheck` errors are ALL pre-existing baseline — bun:test resolution + GenericStringError/null-strictness in untouched files, none reference grade-loop symbols). `resolveGradeConfig` + `buildMetricObservationRows` runtime-verified.
+- **NEXT:** 1d = `deriveGradeFields` in `refinery/lib/predictions-log.mts` (stop dropping conditional_claims; resolve gradeable_slug/baseline/window/grade_status at capture). Then end-to-end live rebuild (leaf→metric_observations + dedup; master→predictions gradeable fields). Then Phase 2 grader. **Committed + pushed after operator diff review; 1d picked up next on terminal.**
+- Aside: pre-existing `synth.mts:487` TS2345 (cosmetic `string|undefined` narrowing in the mixed-direction basis_refs filter; runtime-safe via `Boolean(x) &&` short-circuit). One-line fix proposed as a STANDALONE commit, not bundled into the grade-loop diff.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — chore(cadence-registry): document 3 excluded tables
 
 - `ingest/cadence_registry.yaml`: added `# excluded` block for `dbhydro_stations` (defunct SFWMD API), `usgs_sites` (legacy dlt, scheduled DROP), `fdot_freight_nowcast_shock_log` (brain write-back, not ingest). 17/20 probe coverage is correct and complete.

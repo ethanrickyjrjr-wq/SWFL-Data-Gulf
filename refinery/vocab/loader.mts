@@ -18,7 +18,7 @@
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { Vocabulary } from "../stages/2.5-normalize.mts";
+import type { Vocabulary, VocabConcept } from "../stages/2.5-normalize.mts";
 
 const VOCAB_PATH = path.join(
   process.cwd(),
@@ -68,4 +68,221 @@ export function resolveConceptSlugs(
     );
   }
   return slugs;
+}
+
+// ---------------------------------------------------------------------------
+// Grade-config resolver — prediction grading loop (Goal 9, Phase 1)
+//
+// Per-slug grading config lives on each concept's optional `grade` block in
+// brain-vocabulary.json. Most slugs carry NO block and inherit via two axes:
+//   • window_days        ← CATEGORY_WINDOW_DAYS[concept.category]   (source cadence)
+//   • epsilon/mode/basis ← VALUE_TYPE_BUCKET[concept.value_type]    (metric scale)
+//   • direction_polarity ← NOTHING. Polarity is slug-only, never inherited:
+//     within one category, survival-rate (higher = bullish) and charge-off
+//     (higher = bearish) have opposite polarity, so a category default would
+//     silently grade one backwards. A slug with no declared polarity is
+//     ungradeable by the deterministic grader.
+//
+// Precedence: explicit slug block > category/value_type default > ungradeable.
+// Never throws — returns gradeable:false with a `reason` for any non-gradeable slug.
+// ---------------------------------------------------------------------------
+
+export type DirectionPolarity =
+  | "higher_is_bullish"
+  | "lower_is_bullish"
+  | "none";
+export type GradeBasis = "delta" | "sign";
+export type EpsilonMode = "absolute" | "relative";
+
+/**
+ * window_days default by vocab category, grounded in source publish cadence
+ * (ingest/cadence_registry.yaml). `qualitative` is intentionally absent —
+ * qualitative concepts are non-gradeable by construction.
+ */
+const CATEGORY_WINDOW_DAYS: Record<string, number> = {
+  macro: 90, // LAUS/FRED monthly + "two consecutive prints" falsifier
+  hospitality: 120, // TDT monthly, ~2-mo lag, "two consecutive months"
+  "economic-activity": 120, // FGCU RERI / FL DOR sales-tax monthly, ~2-mo lag
+  "demand-signal": 90, // SWFL Inc / permit intensity weekly–monthly → ~1 quarter
+  "credit-risk": 180, // SBA/QCEW quarterly → 2 quarters
+  "real-estate": 180, // ZORI/FHFA indices quarterly & laggy; permits override down
+  environmental: 180, // NFIP quarterly + structural AAL
+  labor: 395, // BLS OEWS annual (~Apr) → next vintage, off the release boundary
+  logistics: 365, // FAF5 annual
+};
+
+interface ValueTypeBucket {
+  grade_basis: GradeBasis;
+  epsilon_mode: EpsilonMode;
+  epsilon: number;
+}
+
+/**
+ * epsilon + grade_basis default by value_type. value_types absent here
+ * (enum/string/categorical/date/score) are non-numeric → ungradeable.
+ *   • Rate (percent-scale): absolute deadband in the native unit (0.05 = 5bp on a rate stored as 4.0).
+ *   • Bounded other-scale (bps/percentile): absolute, own native defaults.
+ *   • Unbounded level: relative (fraction of baseline) — ±5 permits means nothing without scale.
+ *   • Change/z-score: grade the SIGN of the value, absolute deadband (relative explodes near 0).
+ */
+const VALUE_TYPE_BUCKET: Record<string, ValueTypeBucket> = {
+  percentage: { grade_basis: "delta", epsilon_mode: "absolute", epsilon: 0.05 },
+  ratio: { grade_basis: "delta", epsilon_mode: "absolute", epsilon: 0.05 },
+  rate: { grade_basis: "delta", epsilon_mode: "absolute", epsilon: 0.05 },
+  bps: { grade_basis: "delta", epsilon_mode: "absolute", epsilon: 5 },
+  percentile: { grade_basis: "delta", epsilon_mode: "absolute", epsilon: 2 },
+  count: { grade_basis: "delta", epsilon_mode: "relative", epsilon: 0.05 },
+  integer: { grade_basis: "delta", epsilon_mode: "relative", epsilon: 0.05 },
+  currency: { grade_basis: "delta", epsilon_mode: "relative", epsilon: 0.05 },
+  currency_usd: {
+    grade_basis: "delta",
+    epsilon_mode: "relative",
+    epsilon: 0.05,
+  },
+  index: { grade_basis: "delta", epsilon_mode: "relative", epsilon: 0.05 },
+  days: { grade_basis: "delta", epsilon_mode: "relative", epsilon: 0.05 },
+  distance_mi: {
+    grade_basis: "delta",
+    epsilon_mode: "relative",
+    epsilon: 0.05,
+  },
+  elevation_ft: {
+    grade_basis: "delta",
+    epsilon_mode: "relative",
+    epsilon: 0.05,
+  },
+  depth_in: { grade_basis: "delta", epsilon_mode: "relative", epsilon: 0.05 },
+  percent_change: {
+    grade_basis: "sign",
+    epsilon_mode: "absolute",
+    epsilon: 0.5,
+  },
+  percentage_point_change: {
+    grade_basis: "sign",
+    epsilon_mode: "absolute",
+    epsilon: 0.5,
+  },
+  zscore: { grade_basis: "sign", epsilon_mode: "absolute", epsilon: 0.1 },
+  z_score: { grade_basis: "sign", epsilon_mode: "absolute", epsilon: 0.1 },
+};
+
+export interface ResolvedGradeConfig {
+  slug: string;
+  concept_id: string | null;
+  gradeable: boolean;
+  window_days: number | null;
+  epsilon: number | null;
+  epsilon_mode: EpsilonMode | null;
+  grade_basis: GradeBasis | null;
+  direction_polarity: DirectionPolarity;
+  /** Provenance of each resolved value — snapshotted into outcomes.grade_config for audit. */
+  source: {
+    window: "slug" | "category" | null;
+    epsilon: "slug" | "value_type" | null;
+    polarity: "slug" | null;
+  };
+  /** Present only when gradeable=false: which gate failed. */
+  reason?: string;
+}
+
+/** Resolve a raw slug OR a canonical concept id to its concept. */
+function conceptForSlug(vocab: Vocabulary, slug: string): VocabConcept | null {
+  const mapped = vocab.slug_index[slug];
+  if (typeof mapped === "string") return vocab.concepts[mapped] ?? null;
+  return vocab.concepts[slug] ?? null; // slug may already be a canonical concept id
+}
+
+function ungradeable(
+  slug: string,
+  concept_id: string | null,
+  reason: string,
+): ResolvedGradeConfig {
+  return {
+    slug,
+    concept_id,
+    gradeable: false,
+    window_days: null,
+    epsilon: null,
+    epsilon_mode: null,
+    grade_basis: null,
+    direction_polarity: "none",
+    source: { window: null, epsilon: null, polarity: null },
+    reason,
+  };
+}
+
+/**
+ * Resolve the deterministic grading rule for a metric slug via the two-axis
+ * fallback. Read by capture (predictions-log deriveGradeFields) and by the
+ * grader. NEVER throws — an unknown / polarity-less / non-numeric / qualitative
+ * slug returns `gradeable:false` with a `reason`, so the corpus self-cleans.
+ */
+export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
+  const vocab = loadVocabularySync();
+  const concept = conceptForSlug(vocab, slug);
+  if (!concept) {
+    return ungradeable(
+      slug,
+      null,
+      `slug "${slug}" is not registered in the vocabulary`,
+    );
+  }
+
+  const g = concept.grade;
+
+  // Polarity — slug-only, never inherited.
+  const direction_polarity: DirectionPolarity = g?.direction_polarity ?? "none";
+
+  // Window — slug override, else category default.
+  const window_days =
+    g?.window_days ?? CATEGORY_WINDOW_DAYS[concept.category] ?? null;
+  const windowSource: "slug" | "category" | null =
+    g?.window_days != null ? "slug" : window_days != null ? "category" : null;
+
+  // Epsilon / basis — slug override, else value_type bucket.
+  const bucket = concept.value_type
+    ? VALUE_TYPE_BUCKET[concept.value_type]
+    : undefined;
+  const epsilon = g?.epsilon ?? bucket?.epsilon ?? null;
+  const epsilon_mode = g?.epsilon_mode ?? bucket?.epsilon_mode ?? null;
+  const grade_basis = g?.grade_basis ?? bucket?.grade_basis ?? null;
+  const epsilonSource: "slug" | "value_type" | null =
+    g?.epsilon != null ? "slug" : bucket != null ? "value_type" : null;
+
+  const base: ResolvedGradeConfig = {
+    slug,
+    concept_id: concept.id,
+    gradeable: false,
+    window_days,
+    epsilon,
+    epsilon_mode,
+    grade_basis,
+    direction_polarity,
+    source: {
+      window: windowSource,
+      epsilon: epsilonSource,
+      polarity: g?.direction_polarity ? "slug" : null,
+    },
+  };
+
+  if (direction_polarity === "none") {
+    return {
+      ...base,
+      reason: "no direction_polarity declared (slug-only, never inherited)",
+    };
+  }
+  if (window_days == null) {
+    return {
+      ...base,
+      reason: `category "${concept.category}" has no window default (non-gradeable)`,
+    };
+  }
+  if (epsilon == null || grade_basis == null) {
+    return {
+      ...base,
+      reason: `value_type "${concept.value_type ?? "—"}" is non-numeric (no epsilon/basis)`,
+    };
+  }
+
+  return { ...base, gradeable: true };
 }

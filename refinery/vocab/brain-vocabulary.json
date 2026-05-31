@@ -10,6 +10,7 @@
   "concepts": {
     "sba_overall_survival_rate": {
       "id": "sba_overall_survival_rate",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "SBA Franchise Survival Rate (Corpus)",
       "altLabels": [
         "overall survival rate",
@@ -38,6 +39,7 @@
     },
     "sba_best_sector_survival": {
       "id": "sba_best_sector_survival",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Best-Sector SBA Survival Rate",
       "altLabels": [
         "best NAICS survival"
@@ -65,6 +67,7 @@
     },
     "sba_worst_sector_chargeoff": {
       "id": "sba_worst_sector_chargeoff",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Worst-Sector SBA Charge-off Rate",
       "altLabels": [
         "worst NAICS charge-off"
@@ -2004,6 +2007,7 @@
     },
     "hosp_tdt_latest_monthly_collections": {
       "id": "hosp_tdt_latest_monthly_collections",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Latest Monthly TDT Collections (Lee County)",
       "altLabels": [
         "latest monthly TDT",
@@ -2056,6 +2060,7 @@
     },
     "hosp_tdt_trailing_12mo_collections": {
       "id": "hosp_tdt_trailing_12mo_collections",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Trailing 12-Month TDT Collections (Lee County)",
       "altLabels": [
         "TTM TDT",
@@ -2081,6 +2086,7 @@
     },
     "hosp_tdt_post_ian_recovery_ratio": {
       "id": "hosp_tdt_post_ian_recovery_ratio",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Post-Hurricane-Ian Recovery Ratio",
       "altLabels": [
         "Ian recovery",
@@ -2139,6 +2145,7 @@
     },
     "hosp_tdt_lee_latest_monthly_collections": {
       "id": "hosp_tdt_lee_latest_monthly_collections",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "TDT Latest Monthly Collections \u00e2\u20ac\u201d Lee County",
       "altLabels": [
         "Lee TDT collections latest month"
@@ -2162,6 +2169,7 @@
     },
     "hosp_tdt_lee_trailing_12mo_collections": {
       "id": "hosp_tdt_lee_trailing_12mo_collections",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "TDT Trailing 12-Month Collections \u00e2\u20ac\u201d Lee County",
       "altLabels": [
         "Lee TDT trailing 12-month"
@@ -2185,6 +2193,7 @@
     },
     "hosp_tdt_collier_latest_monthly_collections": {
       "id": "hosp_tdt_collier_latest_monthly_collections",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "TDT Latest Monthly Collections \u00e2\u20ac\u201d Collier County",
       "altLabels": [
         "Collier TDT collections latest month"
@@ -2208,6 +2217,7 @@
     },
     "hosp_tdt_collier_trailing_12mo_collections": {
       "id": "hosp_tdt_collier_trailing_12mo_collections",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "TDT Trailing 12-Month Collections \u00e2\u20ac\u201d Collier County",
       "altLabels": [
         "Collier TDT trailing 12-month"
@@ -2795,6 +2805,7 @@
     },
     "properties_lee_sales_velocity_zscore": {
       "id": "properties_lee_sales_velocity_zscore",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Lee County Sales-Velocity Z-Score (Current Year vs Trailing 3yr Baseline)",
       "altLabels": [
         "Lee velocity z",
@@ -3345,6 +3356,7 @@
     },
     "rental_rent_index_zori": {
       "id": "rental_rent_index_zori",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Zillow Observed Rent Index (ZORI) \u00e2\u20ac\u201d ZIP-Level Monthly Rent",
       "altLabels": [
         "ZORI rent index",
@@ -3377,6 +3389,7 @@
     },
     "rental_rent_yoy_pct": {
       "id": "rental_rent_yoy_pct",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "ZORI Rent YoY % \u00e2\u20ac\u201d ZIP Level",
       "altLabels": [
         "rent year-over-year",
@@ -3540,6 +3553,7 @@
     },
     "laus_lee_unemployment_rate": {
       "id": "laus_lee_unemployment_rate",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Lee County Unemployment Rate",
       "altLabels": [
         "Lee unemployment rate",
@@ -3566,6 +3580,7 @@
     },
     "laus_collier_unemployment_rate": {
       "id": "laus_collier_unemployment_rate",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Collier County Unemployment Rate",
       "altLabels": [
         "Collier unemployment rate",
@@ -3592,6 +3607,7 @@
     },
     "laus_fl_unemployment_rate": {
       "id": "laus_fl_unemployment_rate",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Florida LAUS Unemployment Rate",
       "altLabels": [
         "FL LAUS rate",

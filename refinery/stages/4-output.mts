@@ -38,6 +38,7 @@ import {
 import { readBrainOutput } from "../lib/brain-output-reader.mts";
 import { brainStatus } from "../lib/dag.mts";
 import { logPrediction } from "../lib/predictions-log.mts";
+import { logMetricObservations } from "../lib/metric-observations-log.mts";
 import { writeShockLogRow } from "../sources/fdot-freight-source.mts";
 import { PACKS } from "../config/packs.mts";
 import type { BrainEdge } from "../types/pack.mts";
@@ -553,6 +554,18 @@ export async function outputStage(
     console.warn(
       `Stage 4: predictions insert failed for "${pack.id}" — ${logResult.message}. ` +
         `Brain file was written; only the telemetry row is missing.`,
+    );
+  }
+
+  // Goal 9 Phase 1 (1c) — snapshot this brain's numeric key_metrics to
+  // metric_observations, the grader's window-end value source. Fires for EVERY
+  // pack, not just master. Silent no-op without Supabase env; insert failures
+  // are warnings — a successful .md write must not be aborted by telemetry.
+  const metricObsResult = await logMetricObservations({ brainOutput });
+  if (metricObsResult.kind === "error") {
+    console.warn(
+      `Stage 4: metric_observations insert failed for "${pack.id}" — ${metricObsResult.message}. ` +
+        `Brain file was written; only the metric snapshot is missing.`,
     );
   }
 
