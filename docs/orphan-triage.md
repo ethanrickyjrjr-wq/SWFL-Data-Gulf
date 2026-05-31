@@ -2,15 +2,15 @@
 
 _Auto-generated read-only report — raw slugs that Stage 2.5 normalize observed but could not map to a SKOS concept, ranked against candidate concepts via the active similarity engine._
 
-**Generated:** 2026-05-30T01:28:14.951Z
-**Vocab schema:** 1.0.0 (concepts: 152)
+**Generated:** 2026-05-31T05:03:21.857Z
+**Vocab schema:** 1.0.0 (concepts: 169)
 **Ranker engine:** `string-similarity`
 
 ---
 
 ## TL;DR
 
-- Stage 2.5 artifacts scanned: **12**
+- Stage 2.5 artifacts scanned: **18**
 - Total orphan observations: **2**
 - Unique raw_slugs that are orphaned: **2**
 - Packs producing orphans: **2** (`bad-pack` (1), `mixed` (1))
@@ -30,8 +30,8 @@ Each row lists one unique orphan slug, the pack(s) and path(s) it was observed a
 | Rank | Candidate concept | Score | prefLabel |
 | --- | --- | --- | --- |
 | 1 | `cre_vacancy_rate_median` | 0.072 | Median Vacancy Rate (corpus) |
-| 2 | `cre_vacancy_rate` | 0.066 | Vacancy Rate (per corridor) |
-| 3 | `cre_asking_rent_psf_median` | 0.063 | Median Asking Rent PSF NNN (corpus) |
+| 2 | `enplanements` | 0.066 | Monthly Enplanements |
+| 3 | `cre_vacancy_rate` | 0.066 | Vacancy Rate (per corridor) |
 
 ### `totally_fake_slug`
 
@@ -42,8 +42,8 @@ Each row lists one unique orphan slug, the pack(s) and path(s) it was observed a
 | Rank | Candidate concept | Score | prefLabel |
 | --- | --- | --- | --- |
 | 1 | `cre_vacancy_rate` | 0.075 | Vacancy Rate (per corridor) |
-| 2 | `sba_chargeoff_rate_sector_42` | 0.057 | Wholesale Trade (NAICS 42) — SBA Charge-off Rate |
-| 3 | `sba_chargeoff_rate_sector_23` | 0.056 | Construction (NAICS 23) — SBA Charge-off Rate |
+| 2 | `sba_chargeoff_rate_sector_42` | 0.056 | Wholesale Trade (NAICS 42) â€” SBA Charge-off Rate |
+| 3 | `sba_chargeoff_rate_sector_23` | 0.054 | Construction (NAICS 23) â€” SBA Charge-off Rate |
 
 ---
 
