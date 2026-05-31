@@ -2,6 +2,22 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-30 (Sonnet 4.6 · merge-queue) — fix(fdle): rewire to FIBRS (2021–2026) + UCR hardcoded URLs (2010–2020)
+
+- Old `/FSAC/docs/UCR/.../countybytype{year}.xlsx` pattern 404s for all years. FDLE restructured site.
+- New: FIBRS file (`/cjab/fibrs`, 2021–2026, confirmed 200 + 1.8MB) + 11 hardcoded content-asset UCR county property crime URLs for 2010–2020 (all verified live 2026-05-30).
+- `parse_fibrs()` aggregates monthly county+agency rows to annual county totals; UCR path unchanged. 822/822 pass.
+
+## 2026-05-30 (Sonnet 4.6 · claude/fdle-quarterly-setup-Iik0V) — feat: FDLE quarterly crime pipeline + safety-swfl pack
+
+- **New pipeline**: `ingest/pipelines/fdle_crime_swfl/` (constants.py, pipeline.py) — fetches FDLE UCR county offense Excel for Lee + Collier; Tier-1 NDJSON → `lake-tier1/crime/{year}/fdle_crime_swfl.ndjson`; Tier-2 upsert → `public.fdle_crime_swfl`. CLI: `--backfill`, `--current`, `--year YYYY`, `--dry-run`.
+- **New pack**: `refinery/packs/safety-swfl.mts` + source `refinery/sources/fdle-crime-source.mts` + fixture `refinery/__fixtures__/safety-swfl.sample.json`. Key metric: `property_crime_per_1k` by county (population-weighted SWFL combined). Direction: bullish if YoY Δ ≤ −3%, bearish if ≥ +3%.
+- **Wired to master**: `safety-swfl` added to `master.mts` sources + `input_brains` (edge_type: "input"). Registered in `refinery/packs/index.mts`.
+- **GHA cron**: `.github/workflows/fdle-crime-quarterly.yml` — 12:00 UTC on 1 Jan/Apr/Jul/Oct.
+- **Cadence registry**: `fdle_crime_swfl` entry added (tier-2, cadence_days: 90, freshness_table: public.fdle_crime_swfl).
+- **SQL migration**: `docs/sql/20260530_fdle_crime_swfl_migration.sql` — run in Supabase before first pipeline execution.
+- **Next**: run migration in Supabase Studio, then `--backfill` to seed historical data; verify FDLE URL pattern against live archive page.
+
 ## 2026-05-30 (Sonnet 4.6 · claude/fldeo-job-postings-rIjgS) — fix: cadence registry placement + magic-number citation
 
 - **Bug fix**: moved `fl_deo_job_postings_tier1` + `fl_deo_job_postings` from `pipelines:` into `not_yet_running:` — they were in the actively-probed section despite never having run, which would have triggered immediate false-stale alerts.
@@ -14,6 +30,7 @@
 - **Pack** `refinery/packs/labor-demand-swfl.mts` + source `refinery/sources/fl-deo-job-postings-source.mts` — deterministic Tier-1 Reporter; emits Lee + Collier total postings, WoW delta, top NAICS sector per county. Wired as `input` edge into `master.mts`.
 - **Updated**: `ingest/cadence_registry.yaml` (2 entries: tier-1 prefix + tier-2 dlt), `refinery/packs/index.mts` (registered), `ingest/lib/storage_uploader.py` (`upload_ndjson` added). Fixture at `refinery/__fixtures__/fl-deo-job-postings.sample.json`.
 - **Next**: run `workflow_dispatch --dry-run` to verify CareerSource FL scrape returns rows; move cadence entries from `not_yet_running` once first GHA run succeeds.
+
 ## 2026-05-30 (Sonnet 4.6 · merge-queue) — merge: econ-dev-swfl (#53) synced with main + catalog fix
 
 - Resolved additive conflicts with main (rsw-airport + city-pulse-swfl merged since branch cut). All packs kept.
@@ -43,6 +60,7 @@ Append-Only Cross-Session Memory
 
 - Changed cron schedule in `census-cbp-annual.yml`, `leepa-parcels-annual.yml`, and `fdot-aadt-annual.yml` from single annual-date triggers to `0 10 15 * *` (15th of every month, 10:00 UTC). Data cadence unchanged (annual-release); monthly retries prevent a year-long gap from a single GHA failure. Pipelines are idempotent. `cadence_registry.yaml` untouched.
 - Next: open PR for review.
+
 ## 2026-05-30 (Opus 4.8 · feat/city-pulse-swfl) — dedup fix: key on (city, source_url), not fact text — pre-merge live test caught near-dupe accumulation
 
 - **Operator-requested pre-merge live write+dedup test caught a real bug:** `dedup_key` was `sha256(city|topic|normalized_fact_text)`, but the distill LLM rewords the same event run-to-run → a real Naples re-run wrote **12 of 14 facts as "new"** (only 2 word-identical ones deduped). `ON CONFLICT` worked mechanically; the key was too brittle. The cron would have accumulated reworded near-dupes daily until TTL.
@@ -85,8 +103,9 @@ Append-Only Cross-Session Memory
 - **Root cause:** ESRI Layer 10 returns `Amount` as a currency string (`"$245,000.00"`), not a float. `_coerce_float` passed it raw to `float()` → `ValueError` → `None` for every row. Similarly `DoS` came back as year-month strings (`"2024-4"`); `s[:10]` truncated to `"2024-4"` (not a valid ISO date), so only epoch-ms rows landed as valid dates.
 - **Fix:** `ingest/pipelines/leepa/resources.py` — strip `$`/`,` in `_coerce_float` before cast; normalize year-month DoS strings to `YYYY-MM-01` in `_coerce_esri_date`. Both fixes in one 548k merge pass.
 - **Verified:** 528,130 parcels now have `last_sale_amount` (was 0); 528,133 with `last_sale_date`; avg $529k; date range 1900-01-01 → 2026-05-01. Unblocks any LeePA-dependent brain waiting on sale price data.
-- **Verified:** 528,130 parcels now have `last_sale_amount` (was 0); 528,133 with `last_sale_date`; avg $529k; date range 1900-01-01 → 2026-05-01. Unblocks any LeePA-dependent brain waiting on sale price data.>>>>>>> origin/main>>>>>>> origin/main
->>>>>>> origin/main
+- **Verified:** 528,130 parcels now have `last_sale_amount` (was 0); 528,133 with `last_sale_date`; avg $529k; date range 1900-01-01 → 2026-05-01. Unblocks any LeePA-dependent brain waiting on sale price data.>>>>>>> origin/main>>>>>>> origin/main>>>>>>> origin/main
+  > > > > > > > origin/main
+
 ## 2026-05-30 (Opus 4.8 · main) — plan: add Tier-2 prune (Task 6B) + supersession-vs-TTL note (operator Q)
 
 - **Doc-only.** Operator asked about the flywheel's cleanup mechanism. Added to the plan a deterministic **Task 6B prune** (`DELETE FROM data_lake.city_pulse WHERE expires_at < now()`, wired into pipeline `main()` — skipped on `--dry-run`) so the Tier-2 table doesn't grow unbounded; safe because Tier-1 cold keeps the permanent raw audit. Answers "delete old info, keep it fresh and clean."
