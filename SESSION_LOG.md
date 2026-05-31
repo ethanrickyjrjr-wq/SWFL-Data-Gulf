@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Sonnet 4.6 · main) — chore(cadence-registry): document 3 excluded tables
+
+- `ingest/cadence_registry.yaml`: added `# excluded` block for `dbhydro_stations` (defunct SFWMD API), `usgs_sites` (legacy dlt, scheduled DROP), `fdot_freight_nowcast_shock_log` (brain write-back, not ingest). 17/20 probe coverage is correct and complete.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — feat(volume-guard): shared coercion + guards + probe LOW_VOLUME + cadence floors
 
 - `ingest/lib/coercion.py` NEW — shared `coerce_float/int/date/suppressed`; leepa `_coerce_float`/`_coerce_esri_date` re-exported as backward-compat aliases.

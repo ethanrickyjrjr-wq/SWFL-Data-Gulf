@@ -327,3 +327,26 @@ not_yet_running:
     # Source: BLS OEWS (https://www.bls.gov/oes/tables.htm). Annual cadence — BLS releases
     # May estimates ~April of the following year. GHA cron: 14:00 UTC 15 May.
     # Consuming brain: labor-demand-swfl.
+
+# ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
+# These tables have rows in Postgres but no active ingest pipeline. Adding them
+# would create false-FRESH signal or meaningless LOW_VOLUME noise. Investigated
+# 2026-05-31; decisions are final until a new ingest pipeline is explicitly built.
+#
+# data_lake.dbhydro_stations (12,937 rows)
+#   DEFUNCT SOURCE. SFWMD DBHYDRO API was decommissioned (OAuth wall on new REST).
+#   Rows are a legacy artifact. No pipeline writes to this table. See
+#   docs/API_BLUEPRINTS_DBHYDRO.md for the abandoned source history.
+#
+# data_lake.usgs_sites (900 rows)
+#   LEGACY DLT TABLE, SCHEDULED FOR DROP. The active USGS workflow
+#   (usgs-monthly.yml) writes Parquet to Tier-1 only. These rows are from a
+#   deprecated dlt pipeline. docs/superpowers/plans/2026-05-19-usgs-postgres-to-
+#   parquet-migration.md schedules DROP once env-swfl migrates to Parquet.
+#   Do not add a floor — the table will be gone before it matters.
+#
+# data_lake.fdot_freight_nowcast_shock_log (14 rows, growing)
+#   BRAIN WRITE-BACK, NOT INGEST. refinery/sources/fdot-freight-source.mts
+#   inserts via Supabase client during stage-4 brain execution. Same category
+#   as public.predictions — wrong layer for an ingest guard. The refinery pack
+#   owns the integrity of its own write-back tables.
