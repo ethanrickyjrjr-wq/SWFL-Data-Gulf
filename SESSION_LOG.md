@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Opus 4.8 · main) — feat(grading-loop): deriveGradeFields capture (Goal 9, 1d)
+
+The last Phase-1 flywheel-capture edge. `logPrediction` previously dropped `output.conditional_claims` entirely; now master refines pin the gradeable structure into the 7 columns the live `20260531_grading_loop` migration added. Single-file change + tests; `logPrediction`/Stage-4 wire site unchanged. Diff-reviewed by operator, push approved.
+
+- `refinery/lib/predictions-log.mts` — new pure `deriveGradeFields(output)` + `GradeFields`; `PredictionRow extends GradeFields`; `buildPredictionRow` spreads it. **First numeric driver decides, no substitution** (`break` on first numeric basis_ref) — grading a secondary driver would corrupt the calibration signal. `predicted_direction` from the claim's `then_direction` (bullish/bearish else null→ungradeable). `addDaysUTC` for `window_end_date` (UTC `setUTCDate`, not local — avoids a DST off-by-one that diverges dev-box vs UTC runner). Calls `resolveGradeConfig` (its first call site).
+- `refinery/lib/predictions-log.test.mts` — 8 new tests (gradeable path, neutral→ungradeable, no-claims, brain_id-only ref, real producer shape `[brain_id, slug]`→slug wins, forward-guard no-jump, UTC regression asserting `2026-11-13`, wiring check) + `expectedKeys` drift-guard updated with all 7 keys.
+- Verified: 13/13 tests green; whole-project typecheck clean (source 0 errors, non-test baseline 14 unchanged); live insert+ROLLBACK proved both gradeable and all-null ungradeable rows insert (0 rows persisted). Ran `NOTIFY pgrst, 'reload schema'` to clear the PostgREST column cache pre-cron (avoids a transient PGRST204 on the first real insert — graceful `kind:"error"` anyway, not a crash).
+- NEXT: Phase 2 deterministic grader (`refinery/grade/grade-predictions.mts` + GHA cron). Carry-forward: `predictions` has no unique constraint → Phase-2 calibration query must dedup by `(gradeable_slug, baseline_value, window_end_date)`; `grade_method='operator'` is overloaded (unconfigured-slug vs no-direction) — distinguish via `gradeable_slug`/`predicted_direction` presence, not grade_method alone.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — feat(volume-guard): wire fema + fhfa pre-promote guards; close flywheel_volume_guard check
 
 Final step of the volume guard plan. Infrastructure already shipped (5bedd50); this wires the two highest-risk pipelines and attests.

@@ -2,10 +2,15 @@ import { test } from "bun:test";
 import assert from "node:assert/strict";
 import {
   buildPredictionRow,
+  deriveGradeFields,
   logPrediction,
   type PredictionRow,
 } from "./predictions-log.mts";
-import type { BrainOutput } from "../types/brain-output.mts";
+import type {
+  BrainOutput,
+  BrainOutputMetric,
+  ConditionalClaim,
+} from "../types/brain-output.mts";
 
 function makeOutput(overrides: Partial<BrainOutput> = {}): BrainOutput {
   return {
@@ -62,6 +67,38 @@ function makeOutput(overrides: Partial<BrainOutput> = {}): BrainOutput {
     },
     exogenous_signals: [],
     ...overrides,
+  };
+}
+
+/** Minimal key_metric. Numeric value → intensive+units; string → categorical. */
+function metric(slug: string, value: number | string): BrainOutputMetric {
+  return {
+    metric: slug,
+    value,
+    direction: "stable",
+    label: slug,
+    variable_type: typeof value === "number" ? "intensive" : "categorical",
+    ...(typeof value === "number" ? { units: "ratio" } : {}),
+    source: {
+      url: `test://${slug}`,
+      fetched_at: "2026-05-17T16:39:09.000Z",
+      tier: 1,
+      citation: `test ${slug}`,
+    },
+  };
+}
+
+/** Minimal master conditional claim. */
+function claim(
+  then_direction: ConditionalClaim["then_direction"],
+  basis_refs: string[],
+): ConditionalClaim {
+  return {
+    condition: "test condition",
+    then_direction,
+    basis: "test basis",
+    basis_refs,
+    falsifier: "test falsifier",
   };
 }
 
@@ -154,8 +191,125 @@ test("PredictionRow shape stays explicit (compile-time + runtime check)", () => 
     "confidence",
     "prediction_window",
     "metadata",
+    // Goal 9 Phase 1d — derived grade fields, persisted to the new columns.
+    "conditional_claims",
+    "gradeable_slug",
+    "baseline_value",
+    "predicted_direction",
+    "window_end_date",
+    "grade_status",
+    "grade_method",
   ];
   for (const k of expectedKeys) {
     assert.ok(k in row, `row missing key ${k}`);
   }
+});
+
+// --- Goal 9 Phase 1d: deriveGradeFields ------------------------------------
+
+test("deriveGradeFields: gradeable master call → machine-gradeable, pinned baseline", () => {
+  const out = makeOutput({
+    refined_at: "2026-05-17T12:00:00.000Z",
+    conditional_claims: [
+      claim("bullish", ["franchise-outcomes", "sba_overall_survival_rate"]),
+    ],
+    key_metrics: [metric("sba_overall_survival_rate", 0.82)],
+  });
+  const g = deriveGradeFields(out);
+  assert.equal(g.gradeable_slug, "sba_overall_survival_rate");
+  assert.equal(g.baseline_value, 0.82);
+  assert.equal(g.predicted_direction, "bullish");
+  assert.equal(g.grade_status, "gradeable");
+  assert.equal(g.grade_method, "machine");
+  assert.equal(g.window_end_date, "2026-11-13"); // refined_at + 180d (credit-risk)
+  assert.deepEqual(g.conditional_claims, out.conditional_claims);
+});
+
+test("deriveGradeFields: neutral then_direction → ungradeable/operator, null window", () => {
+  const out = makeOutput({
+    conditional_claims: [claim("neutral", ["sba_overall_survival_rate"])],
+    key_metrics: [metric("sba_overall_survival_rate", 0.82)],
+  });
+  const g = deriveGradeFields(out);
+  assert.equal(g.predicted_direction, null);
+  assert.equal(g.gradeable_slug, "sba_overall_survival_rate"); // anchor still recorded
+  assert.equal(g.window_end_date, null);
+  assert.equal(g.grade_status, "ungradeable");
+  assert.equal(g.grade_method, "operator");
+});
+
+test("deriveGradeFields: no conditional_claims → ungradeable, empty claims, null slug", () => {
+  const g = deriveGradeFields(makeOutput({ conditional_claims: undefined }));
+  assert.deepEqual(g.conditional_claims, []);
+  assert.equal(g.gradeable_slug, null);
+  assert.equal(g.baseline_value, null);
+  assert.equal(g.predicted_direction, null);
+  assert.equal(g.window_end_date, null);
+  assert.equal(g.grade_status, "ungradeable");
+  assert.equal(g.grade_method, "operator");
+});
+
+test("deriveGradeFields: basis_ref is a brain_id only (absent from key_metrics) → null slug", () => {
+  const out = makeOutput({
+    conditional_claims: [claim("bullish", ["macro-us"])],
+    key_metrics: [metric("sba_overall_survival_rate", 0.82)],
+  });
+  const g = deriveGradeFields(out);
+  assert.equal(g.gradeable_slug, null);
+  assert.equal(g.grade_status, "ungradeable");
+});
+
+test("deriveGradeFields: real producer shape [brain_id, metric] → metric wins, brain_id skipped", () => {
+  // basisRefsFor (synth.mts:433-435) emits [brain_id, key_metrics[0].metric],
+  // brain_id first. This proves the brain_id-skip on master's actual output shape.
+  const out = makeOutput({
+    conditional_claims: [
+      claim("bullish", ["macro-us", "sba_overall_survival_rate"]),
+    ],
+    key_metrics: [metric("sba_overall_survival_rate", 0.82)],
+  });
+  const g = deriveGradeFields(out);
+  assert.equal(g.gradeable_slug, "sba_overall_survival_rate");
+  assert.equal(g.grade_status, "gradeable");
+});
+
+test("deriveGradeFields: FORWARD-GUARD — first numeric driver decides, no jump to gradeable secondary", () => {
+  // The current producer emits AT MOST ONE numeric metric ref, so this two-numeric
+  // case cannot occur live today — it guards a future multi-claim/corridor producer.
+  // sofr_rate is registered-but-ungradeable (no polarity); sba_overall_survival_rate is gradeable.
+  const out = makeOutput({
+    conditional_claims: [
+      claim("bullish", ["sofr_rate", "sba_overall_survival_rate"]),
+    ],
+    key_metrics: [
+      metric("sofr_rate", 5.3),
+      metric("sba_overall_survival_rate", 0.82),
+    ],
+  });
+  const g = deriveGradeFields(out);
+  assert.equal(g.gradeable_slug, "sofr_rate"); // first numeric ref, NOT the gradeable second
+  assert.equal(g.baseline_value, 5.3);
+  assert.equal(g.grade_status, "ungradeable"); // no polarity on sofr_rate → no jump
+});
+
+test("deriveGradeFields: window_end_date uses UTC date math (no local/DST off-by-one)", () => {
+  // 23:30Z + 180d (credit-risk). A local setDate() helper yields 2026-11-14 in a
+  // non-UTC tz (e.g. America/New_York); correct UTC math yields 2026-11-13.
+  const out = makeOutput({
+    refined_at: "2026-05-17T23:30:00Z",
+    conditional_claims: [claim("bullish", ["sba_overall_survival_rate"])],
+    key_metrics: [metric("sba_overall_survival_rate", 0.82)],
+  });
+  assert.equal(deriveGradeFields(out).window_end_date, "2026-11-13");
+});
+
+test("buildPredictionRow embeds derived grade fields (wiring check)", () => {
+  const row = buildPredictionRow(
+    makeOutput({
+      conditional_claims: [claim("bullish", ["sba_overall_survival_rate"])],
+      key_metrics: [metric("sba_overall_survival_rate", 0.82)],
+    }),
+  );
+  assert.equal(row.gradeable_slug, "sba_overall_survival_rate");
+  assert.equal(row.grade_status, "gradeable");
 });
