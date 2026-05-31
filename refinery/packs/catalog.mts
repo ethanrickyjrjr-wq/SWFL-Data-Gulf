@@ -155,4 +155,11 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "Southwest Florida airport passenger demand — RSW (Southwest Florida International, Fort Myers/Cape Coral) and PGD (Punta Gorda) monthly enplanements from Lee County Port Authority",
     ttl_seconds: 86400 * 30,
   },
+  {
+    id: "city-pulse-swfl",
+    domain: "macro",
+    scope:
+      "SWFL (Lee + Collier) daily current-events pulse — dated business openings/closings, transactions, construction, and disaster signals for 7 cities, each cited to a primary source.",
+    ttl_seconds: 86400,
+  },
 ];
