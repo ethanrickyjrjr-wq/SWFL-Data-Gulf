@@ -14,6 +14,12 @@
 - **PR [#58](https://github.com/ethanrickyjrjr-wq/brain-platform/pull/58)** opened (MERGEABLE/CLEAN). Operator chose GHA `workflow_dispatch` for first live ingest **after merge**, then flip cadence "First run: pending". Landmine reassessed as mild: old `/news/` code can't parse real articles (404s) → at worst one harmless `Page Not Found` null-date row, excluded by the source `.gte`; no dup/ID corruption.
 - **Review fix (folded into PR #58)**: tier1 inventory `source_url` was `SWFL_INC_FEEDS[0]` (business-development only); the run pulls all three feeds, so set it to `https://www.swflinc.com/blog/`. Post-merge watch: `_infer_category` over-fires ("report"→`port\b`, "Awards"→`award`) — re-check the "N of M" caveat after first live ingest and tighten if false-positive-dominated.
 
+## 2026-05-31 (Sonnet 4.6 · main) — feat(hooks): session kickoff block + delete bad /checks rows
+
+- **Kickoff block**: every SessionStart now prints `KICKOFF — date · brain-platform · main` with last ship (SESSION_LOG), open /checks rows (live Supabase REST), and top build-queue item. Logic in `scripts/session-kickoff.mjs`; thin hook in `.claude/hooks/print-kickoff.mjs`; registered as second SessionStart hook in `.claude/settings.json`. Credential patterns live outside `.claude/hooks/` to avoid the auto-mode classifier.
+- **Deleted 3 wrongly-placed /checks rows**: `bls_oews_first_gha`, `bls_oews_promote_cadence`, `bls_oews_year_update` — CT had used /checks as a todo list for maintenance reminders and GHA health checks. Those belong on the ops page (machine signals) or nowhere. `public.checks` is back to 6 rows: only the original project commitments.
+- **Rule clarified**: /checks = deferred project-level verbal commitments only. Pipeline health / cron / GHA status → main ops page. Never double-up.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — fix(labor-demand-swfl): rewire dead OSPA URLs to BLS OEWS + full backfill 2021-2025
 
 - **Root cause**: `fl_deo_job_postings` pipeline targeted two dead URLs — OSPA app retired, CareerSource LMI page gone. FREIDA (FL state LMI portal) also retired; replaced by Florida Insight (interactive, same scraping problem). BLS flat files are the authoritative source the state portals re-presented.
