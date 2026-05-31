@@ -10,6 +10,7 @@ import {
   type ReriNormalized,
 } from "../sources/fgcu-reri-source.mts";
 import type { RawFragment } from "../types/fragment.mts";
+import type { SynthesisFact } from "../types/event.mts";
 
 const SOURCE_ID = "fgcu_reri_indicators";
 
@@ -58,10 +59,10 @@ function sign(n: number): string {
 }
 
 function metricDirection(
-  adjusted: number | null,
-): "bullish" | "bearish" | "neutral" {
-  if (adjusted == null) return "neutral";
-  return adjusted > 0 ? "bullish" : adjusted < 0 ? "bearish" : "neutral";
+  value: number | null,
+): "rising" | "falling" | "stable" {
+  if (value == null) return "stable";
+  return value > 0 ? "rising" : value < 0 ? "falling" : "stable";
 }
 
 function makeSource(
@@ -122,13 +123,15 @@ function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     row: ReriNormalized | null,
   ) => {
     if (!row || row.pct_change == null) return;
-    const adj = polarityAdjusted(row.indicator, row.pct_change);
     const unit = row.pct_change_unit === "percentage points" ? "pp" : "%";
     key_metrics.push({
       metric: slug,
       label,
       value: row.pct_change,
-      direction: metricDirection(adj),
+      // Per-metric direction tracks the value's own movement (rising/falling/
+      // stable). Economic polarity (e.g. rising unemployment = bearish) is
+      // applied only in the brain-level `direction` tally further down.
+      direction: metricDirection(row.pct_change),
       variable_type: "intensive",
       units: unit,
       display_format: "raw",
@@ -256,8 +259,14 @@ function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     overrides: [],
     contradicts: [],
     exogenous_signals: [],
-    grain_boundary:
-      "Monthly SWFL regional economic snapshot; 8 indicators for Lee + Collier + Charlotte counties; ~2-month data lag.",
+    grain_boundary: {
+      not_available: [
+        "Sub-county grain — indicators are county/region-attributed only (no ZIP, corridor, parcel, or per-business detail)",
+        "Indicators beyond the 8 published RERI series (airport activity, tourist tax, taxable sales, unemployment, single-family permits, single-family home sales, single-family home prices, active listings)",
+        "Months more recent than the latest report — FGCU RERI publishes ~4th of each month for a ~2-month-prior reference period, so the current and prior month are not yet available",
+      ],
+      finest_grain: "county-month",
+    },
   };
 }
 
@@ -279,7 +288,7 @@ export const fgcuReri: PackDefinition = {
   skipSynthesisAgent: true,
   skipTriageAgent: true,
 
-  corpusSummary: (allFragments: RawFragment[]) => {
+  corpusSummary: (allFragments: RawFragment[]): SynthesisFact[] => {
     const rows = allFragments
       .filter((f) => f.source_id === SOURCE_ID)
       .map((f) => f.normalized as ReriNormalized)
@@ -289,8 +298,42 @@ export const fgcuReri: PackDefinition = {
       ? (allFragments.find((f) => f.source_id === SOURCE_ID)?.fetched_at ??
         null)
       : null;
-    return rows.map((r) => ({ kind: "reri-row" as const, ...r }));
+    // skipSynthesisAgent: these facts ARE the brain's SAVED FACTS. Each RERI
+    // row becomes one SynthesisFact; the raw row fields (indicator, county, …)
+    // ride along as harmless extras for deterministic downstream readers.
+    return allFragments
+      .filter((f) => f.source_id === SOURCE_ID && f.normalized != null)
+      .map((f) => {
+        const r = f.normalized as ReriNormalized;
+        const unit = r.pct_change_unit === "percentage points" ? "pp" : "%";
+        const value =
+          r.pct_change == null
+            ? "n/a"
+            : `${sign(r.pct_change)}${fmt(r.pct_change)}${unit}`;
+        return {
+          ...r,
+          topic: `reri:${r.indicator}:${r.county}`,
+          fact: `FGCU RERI ${r.indicator.replace(/_/g, " ")} (${r.county}) YoY, ${r.report_month}`,
+          value,
+          source_fragment_ids: [f.fragment_id],
+          period: r.report_month,
+        };
+      });
   },
 
   outputProducer: fgcuReriOutputProducer,
+
+  preferences: [
+    "The user reads FGCU RERI as the authoritative monthly pulse on the SWFL regional economy — airport activity, tourism, taxable sales, jobs, and housing in one cited snapshot.",
+    "The user expects every indicator to be a dated, cited year-over-year change — never an opinion or a forecast.",
+    "The user expects master to weigh these regional indicators against the structural reads from the other brains.",
+  ],
+  activeProject:
+    "fgcu-reri: monthly SWFL regional economic indicators (8 series across Lee + Collier + Charlotte) from FGCU's Regional Economic Research Institute, ~2-month data lag.",
+  prompts: {
+    triageContext:
+      "These fragments are recent fgcu_reri_indicators rows — one dated, cited YoY change per indicator/county. Decision-relevant by construction; the pack is pure deterministic selection (skipTriageAgent).",
+    synthesisContext:
+      "This pack runs no synthesis agent (skipSynthesisAgent). Facts come from the deterministic corpusSummary and the BrainOutput is built by fgcuReriOutputProducer. Every metric carries a source receipt.",
+  },
 };

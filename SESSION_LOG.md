@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Opus 4.8 · main) — fix(fgcu-reri): resolve type debt + fulfill PackDefinition contract
+
+Cleared the 4 pre-existing `refinery:typecheck` errors in `refinery/packs/fgcu-reri.mts` that the previous entry left as debt (the cast attempt that regressed). Non-test typecheck count 18 → 14; a before/after scoped-`git stash` diff confirms **0 new errors introduced** (test or non-test); `bun test fgcu-reri.test.mts` = 5 pass / 0 fail.
+
+- **L131** — `metricDirection` returned `bullish/bearish/neutral` (brain-level vocab) on a metric field typed `rising/falling/stable`. Rewrote helper → `rising/falling/stable` and fed it `row.pct_change` (raw value) not `adj`, matching housing-swfl/traffic-swfl. Per-metric direction now tracks the value's own movement; economic polarity still lives only in the brain-level `direction` tally. Removed the dead `adj` local.
+- **L259** — `grain_boundary` prose string → valid `GrainBoundary { not_available[], finest_grain: "county-month" }` (mirrors econ-dev-swfl). Stays truthy → test line 91 passes.
+- **L282/292** — `corpusSummary` returned `{kind:"reri-row",...r}[]` ≠ `SynthesisFact[]`. Now returns real SynthesisFacts while spreading `...r` so row fields (`.indicator`) survive for Test 2; dropped the duplicate explicit `kind`. `lastRows`/`lastFetchedAt` side-effects unchanged.
+- **PackDefinition contract** — fixing the above unmasked a latent TS2739: the pack was always missing required `preferences`/`activeProject`/`prompts` (TS suppresses the missing-property check on a literal while one of its present properties errors). **This is the "line 273 shape break" the prior model botched** — it tried to cast/reshape instead of adding the fields. Added the 3 fields (additive, nothing removed), authored to match city-pulse-swfl. OUTPUT-affecting pack edit, operator diff-reviewed before push.
+
+Behavior note for next session: per-metric `direction` for inverse indicators (unemployment) now shows the rate's actual movement, consistent with its displayed value. No follow-up open.
+
 ## 2026-05-31 (Opus 4.8 · main) — fix(typecheck): clear 4 strictness errors in 3 source files
 
 Standalone commit for the synth.mts fix flagged in the grading-loop entry below, plus 3 more strictness errors. Behavior-neutral except one OUTPUT-field fix. Non-test `refinery:typecheck` error count 22 → 18.
