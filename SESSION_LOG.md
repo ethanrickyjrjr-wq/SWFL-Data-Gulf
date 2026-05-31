@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Sonnet 4.6 · main) — fix(fred-rate-limit): retry-with-backoff + sequential series fetches in both FRED source connectors
+
+- `refinery/sources/macro-us-source.mts` + `macro-florida-source.mts`: added `sleep` helper, retry loop (3 attempts, 2 s / 4 s exponential) on HTTP 429 in `fetchFredSeries`, switched `liveFred` from `Promise.all` to sequential with 1.5 s inter-series gap. No other files touched.
+
 ## 2026-05-31 (Opus 4.8 · main) — revert(data-coverage): WRONG REPO — /data-coverage belongs in the OPS dashboard, not the public site
 
 Reverted `a416d58` in full. The /data-coverage page is an internal ops/diagnostic tool; it was mistakenly built on the **public product site** (`brain-platform` → swfldatagulf.com). It belongs in the standalone **`swfldatagulf-ops`** repo (swfldatagulf-ops.vercel.app), alongside the health banner / /goals / /checks. This revert removes the route, the generator, the `yaml` devDep, and the tsconfig/package.json edits from brain-platform so nothing ships to the real site.

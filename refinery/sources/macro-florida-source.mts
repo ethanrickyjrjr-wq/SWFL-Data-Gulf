@@ -84,6 +84,10 @@ interface FredResponse {
 
 const FRED_BASE = "https://api.stlouisfed.org/fred/series/observations";
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function fetchFredSeries(spec: FredSpec): Promise<FredObservation[]> {
   const key = env.fredApiKey;
   if (!key) {
@@ -98,20 +102,29 @@ async function fetchFredSeries(spec: FredSpec): Promise<FredObservation[]> {
     `&file_type=json` +
     `&sort_order=desc` +
     `&limit=24`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(
-      `macro-florida-source: FRED ${spec.fred_id} returned HTTP ${res.status} — check key validity and series id.`,
-    );
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const res = await fetch(url);
+    if (res.status === 429 && attempt < 3) {
+      await sleep(2000 * 2 ** (attempt - 1)); // 2 s, then 4 s
+      continue;
+    }
+    if (!res.ok) {
+      throw new Error(
+        `macro-florida-source: FRED ${spec.fred_id} returned HTTP ${res.status} — check key validity and series id.`,
+      );
+    }
+    const data = (await res.json()) as FredResponse;
+    const obs = (data.observations ?? []).filter((o) => o.value !== ".");
+    if (obs.length === 0) {
+      throw new Error(
+        `macro-florida-source: FRED ${spec.fred_id} returned no usable observations.`,
+      );
+    }
+    return obs;
   }
-  const data = (await res.json()) as FredResponse;
-  const obs = (data.observations ?? []).filter((o) => o.value !== ".");
-  if (obs.length === 0) {
-    throw new Error(
-      `macro-florida-source: FRED ${spec.fred_id} returned no usable observations.`,
-    );
-  }
-  return obs;
+  throw new Error(
+    `macro-florida-source: FRED ${spec.fred_id} exhausted 3 attempts on HTTP 429.`,
+  );
 }
 
 function computeDirection(
@@ -141,23 +154,25 @@ function fredReceiptUrl(spec: FredSpec): string {
 }
 
 async function liveFred(): Promise<MacroFloridaNormalized[]> {
-  return Promise.all(
-    FRED_SERIES.map(async (spec): Promise<MacroFloridaNormalized> => {
-      const obs = await fetchFredSeries(spec);
-      const latest = obs[0];
-      return {
-        kind: "macro-indicator",
-        series_id: spec.key,
-        label: spec.label,
-        value: parseFloat(latest.value),
-        unit: spec.unit,
-        period: latest.date,
-        direction: computeDirection(obs),
-        context: spec.context,
-        source_url: fredReceiptUrl(spec),
-      };
-    }),
-  );
+  const results: MacroFloridaNormalized[] = [];
+  for (let i = 0; i < FRED_SERIES.length; i++) {
+    if (i > 0) await sleep(1500);
+    const spec = FRED_SERIES[i];
+    const obs = await fetchFredSeries(spec);
+    const latest = obs[0];
+    results.push({
+      kind: "macro-indicator",
+      series_id: spec.key,
+      label: spec.label,
+      value: parseFloat(latest.value),
+      unit: spec.unit,
+      period: latest.date,
+      direction: computeDirection(obs),
+      context: spec.context,
+      source_url: fredReceiptUrl(spec),
+    });
+  }
+  return results;
 }
 
 function isDirection(s: unknown): s is MacroFloridaNormalized["direction"] {
