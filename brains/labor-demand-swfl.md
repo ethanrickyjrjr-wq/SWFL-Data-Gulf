@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260531 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260531 -->
 ---
 brain_id: labor-demand-swfl
-version: 1
-refined_at: 2026-05-31T02:41:45Z
-freshness_token: SWFL-7421-v1-20260531
+version: 2
+refined_at: 2026-05-31T02:46:47Z
+freshness_token: SWFL-7421-v2-20260531
 ttl_seconds: 7776000
 context_type: user_saved_reference
 scope: Southwest Florida workforce composition and wage benchmarks — BLS OEWS major occupation groups for Cape Coral-Fort Myers MSA (Lee Co.) and Naples-Marco Island MSA (Collier Co.). Annual May survey data.
@@ -39,8 +39,8 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
 --- OUTPUT ---
 {
   "brain_id": "labor-demand-swfl",
-  "version": 1,
-  "refined_at": "2026-05-31T02:41:45Z",
+  "version": 2,
+  "refined_at": "2026-05-31T02:46:47Z",
   "direction": "bullish",
   "magnitude": 0.7799999999999999,
   "drivers": [],
@@ -57,7 +57,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Office and Administrative Support Occupations: 37,050 workers"
       }
@@ -72,7 +72,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "raw",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) Construction & Extraction — 2.17× national avg"
       }
@@ -87,7 +87,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Healthcare Practitioners + Support: 35,380 workers"
       }
@@ -102,7 +102,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "currency",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) Construction & Extraction — median $23.35/hr"
       }
@@ -117,7 +117,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "percent",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) total employment YoY: +1.5%"
       }
@@ -132,7 +132,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) — Food Preparation and Serving Related Occupations: 25,250 workers"
       }
@@ -147,7 +147,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "raw",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) Construction & Extraction — 1.88× national avg"
       }
@@ -162,7 +162,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) — Healthcare Practitioners + Support: 15,630 workers"
       }
@@ -177,7 +177,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "currency",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) Construction & Extraction — median $24.37/hr"
       }
@@ -192,14 +192,15 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "percent",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T02:41:45Z",
+        "fetched_at": "2026-05-31T02:46:47Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) total employment YoY: +1.6%"
       }
     }
   ],
   "caveats": [
-    "BLS OEWS data is annual (May survey); released ~April of the following year. Counts are employment estimates, not job openings."
+    "BLS OEWS data is annual (May survey); released ~April of the following year. Counts are employment estimates, not job openings.",
+    "Some wage and employment cells are suppressed by BLS to protect employer confidentiality when sample size is insufficient (marked * in source). Suppressed values are stored as null and excluded from all aggregates — never zeroed."
   ],
   "contradicts": [],
   "confidence": 1,
@@ -211,13 +212,12 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-31T02:41:45Z"
+    "computed_at": "2026-05-31T02:46:47Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
     "not_available": [
       "Job openings / vacancy counts — BLS OEWS tracks employment levels, not open positions",
-      "Wage data suppressed by BLS below sample threshold (marked * in source)",
       "Sub-MSA county breakdowns — Lee and Collier reported as MSAs only (no ZIP or city grain)",
       "Industry-by-occupation cross-tabs — major group totals are cross-industry only"
     ],

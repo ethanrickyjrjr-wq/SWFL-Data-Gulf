@@ -120,8 +120,11 @@ function buildMsaSnapshot(
   const healthcarePract = msaRows.find((r) => r.occ_code === "29-0000");
   const healthcareSupp = msaRows.find((r) => r.occ_code === "31-0000");
 
+  // Propagate null if either leg is BLS-suppressed — never zero a suppressed cell.
   const hcEmp =
-    (healthcarePract?.tot_emp ?? 0) + (healthcareSupp?.tot_emp ?? 0) || null;
+    healthcarePract?.tot_emp != null && healthcareSupp?.tot_emp != null
+      ? healthcarePract.tot_emp + healthcareSupp.tot_emp
+      : (healthcarePract?.tot_emp ?? healthcareSupp?.tot_emp ?? null);
 
   return {
     area_code: areaCode,

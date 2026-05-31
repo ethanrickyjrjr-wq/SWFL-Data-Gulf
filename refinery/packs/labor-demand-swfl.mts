@@ -269,6 +269,7 @@ function laborDemandOutputProducer(
     key_metrics,
     caveats: [
       "BLS OEWS data is annual (May survey); released ~April of the following year. Counts are employment estimates, not job openings.",
+      "Some wage and employment cells are suppressed by BLS to protect employer confidentiality when sample size is insufficient (marked * in source). Suppressed values are stored as null and excluded from all aggregates — never zeroed.",
       cape_coral_employment_yoy_pct == null
         ? "Only one survey year loaded — YoY delta will appear after a second annual run (--backfill or next May cron)."
         : null,
@@ -282,7 +283,6 @@ function laborDemandOutputProducer(
     grain_boundary: {
       not_available: [
         "Job openings / vacancy counts — BLS OEWS tracks employment levels, not open positions",
-        "Wage data suppressed by BLS below sample threshold (marked * in source)",
         "Sub-MSA county breakdowns — Lee and Collier reported as MSAs only (no ZIP or city grain)",
         "Industry-by-occupation cross-tabs — major group totals are cross-industry only",
       ],
