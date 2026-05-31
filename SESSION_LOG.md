@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Sonnet 4.6 · main) — feat(volume-guard): wire fema + fhfa pre-promote guards; close flywheel_volume_guard check
+
+Final step of the volume guard plan. Infrastructure already shipped (5bedd50); this wires the two highest-risk pipelines and attests.
+
+- `ingest/pipelines/fema/resources.py` — `assert_min_rows(len(rows), 403_542, "fema_nfip_claims")` at top of `_promote_nfip_to_tier2`, before the replace-disposition dlt write (448k-row quarterly table).
+- `ingest/pipelines/fhfa/resources.py` — refactored to FEMA pattern: extracted `_fetch_hpi_rows()`, rewrote `fhfa_hpi_resource()` as `yield from` (dry-run compat), added `_promote_hpi_to_tier2()` with `assert_min_rows(len(rows), 119_903, "fhfa_hpi")` (133k-row monthly table).
+- `ingest/pipelines/fhfa/pipeline.py` — `run()` → `_promote_hpi_to_tier2(_fetch_hpi_rows())`; `import dlt` dropped; dry-run unchanged.
+- `docs/sql/20260531_checks_resolve_volume_guard.sql` — NEW; UPDATE run + verified: `flywheel_volume_guard` state='done', resolved_at=2026-05-31T22:36Z.
+- Verified: 80/81 lib tests pass (1 pre-existing arcgis_paginator failure, unrelated); env-swfl rebuild → EXIT 0 v19.
+- NEXT: coercion refactor (bls*laus, fema, fhfa local `\_coerce*\*`→ import) is follow-up.`flywheel_writeback` check (due Jun 6) is next.
+
 ## 2026-05-31 (Opus 4.8 · main) — fix(fgcu-reri): resolve type debt + fulfill PackDefinition contract
 
 Cleared the 4 pre-existing `refinery:typecheck` errors in `refinery/packs/fgcu-reri.mts` that the previous entry left as debt (the cast attempt that regressed). Non-test typecheck count 18 → 14; a before/after scoped-`git stash` diff confirms **0 new errors introduced** (test or non-test); `bun test fgcu-reri.test.mts` = 5 pass / 0 fail.

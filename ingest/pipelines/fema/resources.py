@@ -5,6 +5,7 @@ import requests
 
 from ingest.lib.arcgis_paginator import paginate_arcgis
 from ingest.lib.geo_utils import FL_BBOX
+from ingest.lib.guards import assert_min_rows
 from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz, write_tier1_pointer
 from .constants import GEOMETRY_BUCKET, NFIP_CLAIMS_URL, TABULAR_BUCKET
 
@@ -80,6 +81,7 @@ def _normalize_nfip(raw: dict) -> dict:
 
 def _promote_nfip_to_tier2(rows: list[dict]) -> None:
     """Write the normalized NFIP claims rows to data_lake.fema_nfip_claims (replace disposition)."""
+    assert_min_rows(len(rows), 403_542, label="fema_nfip_claims")
     @dlt.resource(
         table_name="fema_nfip_claims",
         write_disposition="replace",

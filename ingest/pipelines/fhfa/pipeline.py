@@ -1,20 +1,12 @@
 import argparse
 import sys
 
-import dlt
-
-from .resources import fhfa_hpi_resource
+from .resources import fhfa_hpi_resource, _fetch_hpi_rows, _promote_hpi_to_tier2
 
 
 def run():
-    pipeline = dlt.pipeline(
-        pipeline_name="fhfa_hpi",
-        destination="postgres",
-        dataset_name="data_lake",
-    )
     print("Ingesting FHFA HPI master (~133k records)...")
-    load_info = pipeline.run(fhfa_hpi_resource())
-    load_info.raise_on_failed_jobs()
+    _promote_hpi_to_tier2(_fetch_hpi_rows())
     print("FHFA HPI pipeline complete.")
 
 
