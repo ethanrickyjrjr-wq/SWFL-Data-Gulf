@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Opus 4.8 · main) — feat(data-coverage): /data-coverage page — what's in the lake vs what's missing, with a copy-paste chase list
+
+New internal diagnostic route `/data-coverage` (force-dynamic, service-role, light theme, no nav link). Per-source coverage (years 2020–now) + an in-depth health view that REUSES the freshness probe's exact semantics — does not reinvent them. Registry is the source of truth (test-time-only boundary); a generated snapshot + drift test keep them in lock-step. Plan: `~/.claude/plans/nifty-nibbling-balloon.md` (operator-approved after 4 audit rounds). Does NOT touch `predictions-log.mts` / predictions / outcomes — read-only over the ingest lake.
+
+- `scripts/gen-coverage-registry.mts` (+ `npm run gen:coverage`) bakes `ingest/cadence_registry.yaml` → committed `app/data-coverage/_registry.generated.ts` (29 entries). Table resolution mirrors the probe's `check_volume_entry` order EXACTLY (`count_table`→`freshness_table`→`data_lake.{dlt_schema_name}`). YAML is parsed ONLY at gen/test time — the page imports the typed snapshot, never parses YAML at runtime.
+- `app/data-coverage/_coverage.ts` — 28-row display supplement (label, brain_id, date_col + date_kind, brain_is_live), keyed by registry name; date_col verified vs `information_schema`. The 3 tier-1 cold feeds (`fred_g17`/`bls_ppi`/`census_vip`) have no consuming brain (brain_id null). Only `safety-swfl` is dormant.
+- `app/data-coverage/health.ts` (pure, 24 unit tests) — probe-identical freshness (`threshold=int(cadence×tolerance)`, STALE if `age>threshold`) + a documented page-only `EMPTY` status. Severity ranks Tier A only (active pipeline that's broken/stale/short/recent-gap); Tier C = parked/blocked (never competes for top, e.g. bls_oews parked, FDLE blocked); Tier D = healthy. `buildWorkOrder` → GRAB/FIX/FIND/ROUTE markdown surfaced via the lone client island (copy button).
+- Fixed from the draft plan: `.schema("data_lake")` — the draft's unqualified `.from()` would have errored on every `data_lake` table; verified live (zori 5185, leepa 548798, bls_oews 220 @2021–2025, fema 448381). Dead `marketbeat` pipeline dropped to the orphan footnote. Drift test enforces all 26 active pipelines have a supplement entry; `not_yet_running` exempt.
+- Verified: 24/24 bun tests; whole-app `tsc -p tsconfig.json --noEmit` clean; live DB query shapes confirmed (both `_dlt_loads` and `_tier1_inventory` freshness paths); `next build` OK (`/data-coverage` = ƒ dynamic). Added `yaml` devDep; tsconfig now excludes `**/*.test.mts` from `next build` so `bun:test` imports don't break the build. Did NOT stage `brains/env-swfl.md` (not mine).
+- NEXT (deferred, in plan): GROUP-BY internal-hole detection; probe persists a `freshness_status` table → page reads it (kills in-page re-derivation); recent-gap tuning (new flow pipelines like `lee_permits` honestly show "missing 2025" but it isn't backfillable); tier-1 year-coverage; `?format=json` for ops/MCP.
+
 ## 2026-05-31 (Opus 4.8 · main) — feat(grading-loop): deriveGradeFields capture (Goal 9, 1d)
 
 The last Phase-1 flywheel-capture edge. `logPrediction` previously dropped `output.conditional_claims` entirely; now master refines pin the gradeable structure into the 7 columns the live `20260531_grading_loop` migration added. Single-file change + tests; `logPrediction`/Stage-4 wire site unchanged. Diff-reviewed by operator, push approved.
