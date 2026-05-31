@@ -757,7 +757,7 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     const h = snapshot.hydro;
     key_metrics.push({
       metric: METRIC_HYDRO_SW_STAGE_CALOOSA,
-      value: h.sw_stage_caloosahatchee_ft,
+      value: h.sw_stage_caloosahatchee_ft!,
       direction: "stable",
       label: `Caloosahatchee surface stage at gage local zero — latest reading (${h.sw_stage_window.end})`,
       variable_type: "intensive",
@@ -883,7 +883,7 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     if (snapshot.hydro && snapshot.hydro.sw_stage_caloosahatchee_ft !== null) {
       const h = snapshot.hydro;
       conclusionParts.push(
-        `Hydrology — Caloosahatchee surface stage at gage local zero was ${h.sw_stage_caloosahatchee_ft.toFixed(2)} ft on its latest read (${h.sw_stage_window.end}).`,
+        `Hydrology — Caloosahatchee surface stage at gage local zero was ${h.sw_stage_caloosahatchee_ft!.toFixed(2)} ft on its latest read (${h.sw_stage_window.end}).`,
       );
     }
   } else {

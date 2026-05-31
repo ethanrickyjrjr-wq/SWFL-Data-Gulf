@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Opus 4.8 · main) — fix(typecheck): clear 4 strictness errors in 3 source files
+
+Standalone commit for the synth.mts fix flagged in the grading-loop entry below, plus 3 more strictness errors. Behavior-neutral except one OUTPUT-field fix. Non-test `refinery:typecheck` error count 22 → 18.
+
+- `refinery/lib/synth.mts` — filter type-guard `Boolean(x)` → `typeof x === "string"` (clears TS2345; the `allowedBrainIds.has(x)` gate already excluded `""`, so no behavior change).
+- `refinery/packs/env-swfl.mts` (L760, L886) — `!` non-null assertions on `h.sw_stage_caloosahatchee_ft`, both already inside the `!== null` guard above them (clears TS2322 + TS18047; behavior-neutral).
+- `refinery/packs/econ-dev-swfl.mts` (L341) — `grain_boundary` was a prose **string** assigned to a field typed `GrainBoundary` (object). Replaced with the valid `{ not_available[], finest_grain }` shape matching labor-demand-swfl/rsw-airport (clears TS2322). **Changes the value of that one OUTPUT field** — flagged to operator, who authorized the push.
+- `refinery/packs/fgcu-reri.mts` — **NOT touched.** Its 4 original errors (131/259/282/292) stay as pre-existing debt (a prior cast attempt introduced a real regression; reverted).
+
+Verified: `synth/env-swfl/econ-dev-swfl` suites = 76 pass / 0 fail; my 3 files report zero typecheck errors. Remaining 18 non-test errors are untouched pre-existing debt.
+
 ## 2026-05-31 (Opus 4.8 · main) — feat(grading-loop): Phase 1 schema + capture mechanism (1b/1c/1e)
 
 Goal 9 prediction grading loop, Phase 1. Schema migration RUN; grade-config mechanism + metric snapshot hook built & verified. **1d (capture) and Phase 2 (grader) NOT started — operator picks up 1d tomorrow on terminal.** Plan: `C:\Users\ethan\.claude\plans\can-you-plan-out-federated-fairy.md`.

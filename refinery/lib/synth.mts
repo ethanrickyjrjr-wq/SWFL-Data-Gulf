@@ -484,7 +484,7 @@ export function composeConditionalThesis(args: {
     const bull = sorted.find((p) => p.upstream.direction === "bullish");
     const bear = sorted.find((p) => p.upstream.direction === "bearish");
     const refs = [bull?.upstream.brain_id, bear?.upstream.brain_id].filter(
-      (x): x is string => Boolean(x) && allowedBrainIds.has(x),
+      (x): x is string => typeof x === "string" && allowedBrainIds.has(x),
     );
     return [
       {

@@ -338,8 +338,14 @@ function econDevSwflOutputProducer(
     overrides: [],
     contradicts: [],
     exogenous_signals: [],
-    grain_boundary:
-      "Weekly SWFL economic development pulse; announcement-level grain; Lee County primary coverage (Collier via partnerships); investment/job figures are disclosed-at-announcement only.",
+    grain_boundary: {
+      not_available: [
+        "Systematic Collier and Charlotte coverage — the feed is the Lee County EDO (SWFL Inc.); other counties appear only when announced via partnerships",
+        "Investment and job figures beyond what is disclosed at announcement — no audited or updated totals",
+        "Sub-county grain — announcements are county-attributed only (no ZIP, corridor, or parcel detail)",
+      ],
+      finest_grain: "project-announcement",
+    },
   };
 }
 
