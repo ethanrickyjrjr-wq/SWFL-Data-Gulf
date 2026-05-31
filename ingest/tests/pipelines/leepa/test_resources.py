@@ -231,7 +231,7 @@ class TestPromoteLeepaToTier2:
         "last_sale_instrument": "WD", "last_sale_book_page": "5012/3456",
     }]
 
-    def test_pipeline_named_leepa_parcels_tier2(self):
+    def test_pipeline_named_leepa_t2(self):
         from ingest.pipelines.leepa.resources import _promote_leepa_to_tier2
         mock_pipeline_instance = MagicMock()
         with patch("ingest.pipelines.leepa.resources.dlt") as mock_dlt:
@@ -239,11 +239,11 @@ class TestPromoteLeepaToTier2:
             mock_dlt.resource = lambda **kwargs: (lambda fn: fn)
             _promote_leepa_to_tier2(self.JOINED)
         call_kwargs = mock_dlt.pipeline.call_args.kwargs
-        assert call_kwargs["pipeline_name"] == "leepa_parcels_tier2"
+        assert call_kwargs["pipeline_name"].startswith("leepa_t2_")
         assert call_kwargs["destination"] == "postgres"
         assert call_kwargs["dataset_name"] == "data_lake"
 
-    def test_table_named_leepa_parcels_with_replace(self):
+    def test_table_named_leepa_parcels_with_merge(self):
         from ingest.pipelines.leepa.resources import _promote_leepa_to_tier2
         captured = {}
         def capture_resource(**kwargs):
@@ -254,7 +254,7 @@ class TestPromoteLeepaToTier2:
             mock_dlt.resource = capture_resource
             _promote_leepa_to_tier2(self.JOINED)
         assert captured["table_name"] == "leepa_parcels"
-        assert captured["write_disposition"] == "replace"
+        assert captured["write_disposition"] == "merge"
         assert "columns" in captured
         assert len(captured["columns"]) == 15
         assert captured["columns"]["folioid"].get("primary_key") is True

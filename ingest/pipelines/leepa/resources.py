@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date
 
 import dlt
 
@@ -7,6 +7,8 @@ from ingest.lib.arcgis_paginator import (
     paginate_arcgis,
     paginate_arcgis_tabular,
 )
+from ingest.lib.coercion import coerce_date as _coerce_esri_date, coerce_float as _coerce_float
+from ingest.lib.guards import assert_vs_canonical
 from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz, write_tier1_pointer
 from .constants import (
     LEEPA_JUST_VALUE_URL,
@@ -45,30 +47,6 @@ _TIER2_LEEPA_COLUMNS: dict = {
     "last_sale_book_page":  {"data_type": "text",   "nullable": True},
 }
 
-
-def _coerce_float(v):
-    if v in (None, "", "N/A", "n/a", "NA"):
-        return None
-    try:
-        return float(str(v).replace("$", "").replace(",", ""))
-    except (ValueError, TypeError):
-        return None
-
-
-def _coerce_esri_date(v):
-    """Esri f=json date fields land as epoch milliseconds (int) or an ISO string."""
-    if v in (None, ""):
-        return None
-    if isinstance(v, (int, float)):
-        return datetime.fromtimestamp(int(v) / 1000.0, tz=timezone.utc).date().isoformat()
-    s = str(v).strip()
-    if "T" in s:
-        s = s.split("T")[0]
-    # normalize ESRI year-month strings like "2024-4" -> "2024-04-01"
-    parts = s.split("-")
-    if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
-        return f"{int(parts[0]):04d}-{int(parts[1]):02d}-01"
-    return s[:10] if len(s) >= 10 else None
 
 
 def _join_leepa(use_rows: list[dict], value_rows: list[dict], sale_rows: list[dict]) -> list[dict]:
@@ -167,15 +145,8 @@ def ingest_leepa_parcels_value(tier1_pipeline) -> None:
             tier1_pipeline, f"leepa_{name}", TABULAR_BUCKET, object_path, len(rows), url,
         )
 
-    # Fail-fast: layer 12 (just_value) is the canonical parcel set. If pagination dropped
-    # >10% of rows, the join would be silently incomplete — abort before promotion so the
-    # Tier 2 table never sees a stealth-truncated snapshot.
     canonical = arcgis_count(LEEPA_JUST_VALUE_URL)
-    if canonical > 0 and len(pulled["just_value"]) < int(canonical * 0.9):
-        raise RuntimeError(
-            f"leepa just_value pagination returned {len(pulled['just_value'])} rows "
-            f"vs canonical {canonical} (<90%) — aborting Tier 2 promotion to avoid silent data loss.",
-        )
+    assert_vs_canonical(len(pulled["just_value"]), canonical, label="leepa just_value")
 
     joined = _join_leepa(pulled["use_codes"], pulled["just_value"], pulled["last_sale"])
     if not joined:

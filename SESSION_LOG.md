@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-05-31 (Sonnet 4.6 · main) — feat(volume-guard): shared coercion + guards + probe LOW_VOLUME + cadence floors
+
+- `ingest/lib/coercion.py` NEW — shared `coerce_float/int/date/suppressed`; leepa `_coerce_float`/`_coerce_esri_date` re-exported as backward-compat aliases.
+- `ingest/lib/guards.py` NEW — `VolumeGuardError(RuntimeError)` + `assert_vs_canonical/assert_min_rows/assert_vs_baseline` (bootstrap-safe: prior==0 → BASELINE_UNAVAILABLE warning, no raise).
+- `ingest/pipelines/leepa/resources.py` — refactored to import from coercion/guards; inline guard replaced with `assert_vs_canonical`. Regression anchor: 77/77 tests pass.
+- `ingest/scripts/check_freshness.py` — added `check_volume_entry` + LOW_VOLUME status in summary table; schema fix via `count_table`/`freshness_table` fallback (public.\* entries were hardcoded to data_lake before).
+- `ingest/cadence_registry.yaml` — seeded `expected_rows_min` for all 20 active Tier-2 pipelines (confirmed live row counts 2026-05-31); added `count_table` for 7 dlt entries where schema_name != table name.
+- `docs/standards/pipeline-freshness.md` — rule (e) added: every new pipeline ships an `expected_rows_min` + optional guard wire.
+- 2 pre-existing stale leepa test expectations fixed (pipeline_name pattern, write_disposition merge vs replace).
+- Next: resolve check `flywheel_volume_guard` in public.checks; wire `assert_min_rows` into city_pulse after week-1 baseline.
+
 ## 2026-05-31 (Sonnet 4.6 · main) — fix(city-pulse): missing anthropic pkg + FIRECRAWL_API_KEY in workflow; fix(ops-ledger): tier-1 Last load dates
 
 - `ingest/requirements.txt`: added `anthropic>=0.49.0` — module-level `import anthropic` was crashing city-pulse-daily before any code ran.

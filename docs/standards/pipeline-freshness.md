@@ -22,6 +22,11 @@ Every completed run must produce a traceable record. dlt covers Tier 2. Tier 1 p
 **(d) `--dry-run` support.**
 Every `pipeline.py` entry point accepts `--dry-run`. Dry-run fetches data and validates row count/shape, then exits 0 without writing to Postgres or Storage. A pytest in `ingest/tests/pipelines/<name>/test_dry_run.py` asserts `dlt.pipeline` is not called.
 
+**(e) Volume floor registered.**
+Every new pipeline adds an `expected_rows_min` entry to `cadence_registry.yaml`. The daily freshness probe uses this to emit `LOW_VOLUME` (icon ⚠️, exit 0) in the GHA step summary alongside `FRESH`/`STALE`/`MISSING`. For nascent pipelines with no stable baseline yet, set `expected_rows_min: 1`.
+
+Tier-2 dlt entries where the `dlt_schema_name` differs from the actual Postgres table name must also set `count_table: schema.table` (fully-qualified). Tier-1 entries skip the SQL count check; `expected_rows_min` is recorded for when the pipeline graduates to Tier 2. See `ingest/lib/guards.py` for the `assert_min_rows` / `assert_vs_canonical` guard functions to wire into the pipeline itself (pre-promote, not just probe).
+
 ---
 
 ## 2. Secrets Reference

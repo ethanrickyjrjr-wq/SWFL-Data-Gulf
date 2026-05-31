@@ -18,6 +18,13 @@
 #   Tier-2 entries also require:
 #     dlt_schema_name:   the schema_name value in data_lake._dlt_loads
 #
+#   Volume guard fields (optional, any lane):
+#     expected_rows_min: N   # floor row count; probe emits LOW_VOLUME (not STALE) when below
+#     count_table: schema.table  # required for tier-2 dlt entries where dlt_schema_name
+#                                # differs from the actual Postgres table name.
+#                                # Falls back to freshness_table for non-dlt entries.
+#                                # Tier-1 entries: volume check is skipped (no SQL table).
+#
 # Naming note: dlt_schema_name is the schema_name column in _dlt_loads, NOT the
 # pipeline_name argument in pipeline.py (they sometimes differ — see verified values below).
 
@@ -123,6 +130,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     dlt_schema_name: bls_laus
+    expected_rows_min: 295 # 90% of 328 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-25 ✓
 
   - name: bls_qcew
@@ -130,6 +138,7 @@ pipelines:
     cadence_days: 90
     tolerance_multiplier: 1.5
     dlt_schema_name: bls_qcew
+    expected_rows_min: 28 # 90% of 32 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
 
   - name: census_cbp
@@ -137,6 +146,8 @@ pipelines:
     cadence_days: 365
     tolerance_multiplier: 1.5
     dlt_schema_name: census_cbp
+    expected_rows_min: 230006 # 90% of 255,563 confirmed 2026-05-31
+    count_table: data_lake.census_cbp_fl # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-20 ✓
 
   - name: usgs_tier2
@@ -144,6 +155,8 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     dlt_schema_name: usgs
+    expected_rows_min: 544 # 90% of 605 confirmed 2026-05-31
+    count_table: data_lake.usgs_daily # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-19 ✓
     # Separate from usgs tier-1-duckdb entry above; this tracks the Postgres load.
 
@@ -152,6 +165,8 @@ pipelines:
     cadence_days: 90
     tolerance_multiplier: 2.0
     dlt_schema_name: fema_nfip_tier2
+    expected_rows_min: 403542 # 90% of 448,381 confirmed 2026-05-31
+    count_table: data_lake.fema_nfip_claims # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-19 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name in _dlt_loads is fema_nfip_tier2.
 
@@ -160,6 +175,8 @@ pipelines:
     cadence_days: 365
     tolerance_multiplier: 1.5
     dlt_schema_name: leepa_parcels_tier2
+    expected_rows_min: 493918 # 90% of 548,798 confirmed 2026-05-31
+    count_table: data_lake.leepa_parcels # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name is leepa_parcels_tier2.
 
@@ -168,6 +185,7 @@ pipelines:
     cadence_days: 90
     tolerance_multiplier: 2.0
     dlt_schema_name: fhfa_hpi
+    expected_rows_min: 119903 # 90% of 133,226 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="fhfa_hpi" in pipeline.py matches _dlt_loads schema_name.
 
@@ -176,6 +194,8 @@ pipelines:
     cadence_days: 365
     tolerance_multiplier: 1.5
     dlt_schema_name: fdot_aadt_tier2
+    expected_rows_min: 93295 # 90% of 103,662 confirmed 2026-05-31
+    count_table: data_lake.fdot_aadt_fl # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name is fdot_aadt_tier2.
 
@@ -184,6 +204,8 @@ pipelines:
     cadence_days: 7
     tolerance_multiplier: 3.0
     dlt_schema_name: lee_permits
+    expected_rows_min: 1 # nascent v1 first-page-only — floor at 1
+    count_table: data_lake.lee_building_permits # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-25 ✓
 
   - name: collier_permits
@@ -191,6 +213,8 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     dlt_schema_name: collier_permits
+    expected_rows_min: 4477 # 90% of 4,975 confirmed 2026-05-31
+    count_table: data_lake.collier_building_permits # dlt schema_name != table name
     # Verified: April 2026 XLSX loaded 2026-05-27 (operator-confirmed, pre-WAF window).
 
   - name: fl_dor_tdt
@@ -198,6 +222,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.5
     freshness_table: public.fl_dor_tdt_collections
+    expected_rows_min: 599 # 90% of 666 confirmed 2026-05-31
     # First run: 2026-05-28 backfill (FY1999-FY2026). Lee: 334 rows Jul 1998-Apr 2026.
     # Collier: 332 rows Jul 1998-Feb 2026 (~2 month lag vs Lee).
     # Cron: 20th of month 10:00 UTC via fl-dor-tdt-monthly.yml.
@@ -209,6 +234,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     freshness_table: public.fl_dor_sales_tax
+    expected_rows_min: 36126 # 90% of 40,140 confirmed 2026-05-31
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # First run: 2026-05-29 backfill (cy0203–cy2425). 40,140 rows. Lee + Collier.
     # Cron: 15th of month 11:00 UTC via fl-dor-sales-tax-monthly.yml.
@@ -218,6 +244,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     dlt_schema_name: zori_swfl
+    expected_rows_min: 4666 # 90% of 5,185 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-24 ✓
     # Separate from zori_swfl_duckdb; this is the Postgres promotion pipeline.
 
@@ -226,6 +253,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     freshness_table: public.fgcu_reri_indicators
+    expected_rows_min: 1 # nascent — floor at 1
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # Source: FGCU RERI homepage (https://www.fgcu.edu/cob/reri/). Scrapes via Firecrawl.
     # 8 SWFL economic indicators per month: airport activity, tourist tax, taxable sales,
@@ -239,6 +267,7 @@ pipelines:
     cadence_days: 7
     tolerance_multiplier: 3.0
     freshness_table: public.swfl_inc_announcements
+    expected_rows_min: 28 # 90% of 32 confirmed 2026-05-31
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # Source: SWFL Inc. (swflinc.com/blog/ category feeds), Lee County Economic Development Organization.
     # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
@@ -250,6 +279,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     freshness_table: public.rsw_airport_monthly
+    expected_rows_min: 464 # 90% of 516 confirmed 2026-05-31
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # Source: LCPA statistics page (https://www.flylcpa.com/about/statistics). Scrapes via Firecrawl.
     # Airports: RSW (Southwest Florida International) + PGD (Punta Gorda).
@@ -278,6 +308,8 @@ not_yet_running:
     inventory_id: lake-tier1/labor/bls_oews_swfl/
     inventory_key_type: prefix
     note: "Backfilled 220 rows (2021-2025). Next: verify GHA cron 15 May 2027, then move both bls_oews entries to pipelines:. Update CURRENT_OEWS_YEAR in constants.py when oesm26ma.zip ships (~Apr 2027)."
+    # expected_rows_min pre-seeded for when this graduates to pipelines: (tier-1, probe only)
+    expected_rows_min: 198 # 90% of 220 confirmed 2026-05-31
     # NDJSON archive path: lake-tier1/labor/bls_oews_swfl/{YYYY}.ndjson (one per survey year)
     # Source: BLS OEWS metro area zip — https://www.bls.gov/oes/special-requests/oesm{YY}ma.zip
     # MSAs: 15980 (Cape Coral-Fort Myers / Lee) + 34940 (Naples-Marco Island / Collier)
@@ -287,6 +319,7 @@ not_yet_running:
     cadence_days: 365
     tolerance_multiplier: 1.5
     dlt_schema_name: bls_oews_swfl
+    expected_rows_min: 198 # 90% of 220 confirmed 2026-05-31; pre-seeded for graduation
     note: "Backfilled 220 rows (2021-2025). First GHA cron: 15 May 2027 — after green, move both bls_oews entries to pipelines: and update CURRENT_OEWS_YEAR=2026 in constants.py."
     # First run: pending SQL migration + manual dispatch with --backfill.
     # After run, verify via:

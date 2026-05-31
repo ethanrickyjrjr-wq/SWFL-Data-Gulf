@@ -1,9 +1,8 @@
-"""Daily freshness probe — alerts when any registered pipeline is stale.
+"""Daily freshness probe — alerts when any registered pipeline is stale or low-volume.
 
 Reads ingest/cadence_registry.yaml; queries _tier1_inventory.updated_at for
 tier-1/tier-1-duckdb entries and _dlt_loads.inserted_at for tier-2 entries;
-writes a markdown table to $GITHUB_STEP_SUMMARY listing any pipeline whose
-age > cadence_days * tolerance_multiplier.
+also checks landed row count vs expected_rows_min (when set) and flags LOW_VOLUME.
 
 Always exits 0 (probe is observability, not gating).
 """
@@ -117,6 +116,51 @@ def check_tier1_entry(conn, entry: dict) -> dict:
     }
 
 
+def check_volume_entry(conn, entry: dict) -> dict | None:
+    """Check landed row count vs expected_rows_min.
+
+    Returns a volume result dict or None if the check doesn't apply.
+    Skips tier-1 entries (no SQL table to count). Always exits 0 — LOW_VOLUME
+    surfaces in the summary but never gates the pipeline.
+
+    count_table resolution order:
+      1. entry["count_table"]  — explicit fully-qualified name (required for dlt entries
+                                 where schema_name != table name)
+      2. entry["freshness_table"] — already fully-qualified; used for public.* non-dlt tables
+      3. data_lake.<dlt_schema_name> — fallback for dlt entries where names do match
+    """
+    from psycopg import sql as pgsql
+
+    min_rows = entry.get("expected_rows_min")
+    if min_rows is None:
+        return None
+
+    lane = entry.get("lane", "")
+    if lane in ("tier-1", "tier-1-duckdb"):
+        return None
+
+    count_table = (
+        entry.get("count_table")
+        or entry.get("freshness_table")
+        or (f"data_lake.{entry['dlt_schema_name']}" if "dlt_schema_name" in entry else None)
+    )
+    if not count_table:
+        return None
+
+    schema, table = count_table.split(".", 1)
+    with conn.cursor() as cur:
+        cur.execute(
+            pgsql.SQL("SELECT count(*) FROM {}.{}").format(
+                pgsql.Identifier(schema), pgsql.Identifier(table)
+            )
+        )
+        row = cur.fetchone()
+
+    landed = row[0] if row else 0
+    status = "LOW_VOLUME" if landed < min_rows else "OK"
+    return {"landed": landed, "min_rows": min_rows, "status": status, "table": count_table}
+
+
 def check_tier2_entry(conn, entry: dict) -> dict:
     """Query tier-2 freshness — via _dlt_loads (dlt pipelines) or directTableFreshness (non-dlt)."""
     from psycopg import sql as pgsql
@@ -177,36 +221,54 @@ def run_probe(conn, registry: dict) -> list[dict]:
     for entry in registry.get("pipelines", []):
         lane = entry.get("lane", "")
         if lane in ("tier-1", "tier-1-duckdb"):
-            results.append(check_tier1_entry(conn, entry))
+            r = check_tier1_entry(conn, entry)
         elif lane == "tier-2":
-            results.append(check_tier2_entry(conn, entry))
+            r = check_tier2_entry(conn, entry)
+        else:
+            continue
+        vol = check_volume_entry(conn, entry)
+        r["volume_status"] = vol["status"] if vol else None
+        r["volume_landed"] = vol["landed"] if vol else None
+        r["volume_min"] = vol["min_rows"] if vol else None
+        results.append(r)
     return results
 
 
 # ── output formatting ─────────────────────────────────────────────────────────
 
 _STATUS_ICON = {"FRESH": "✅", "STALE": "⚠️", "MISSING": "❌"}
+_VOL_ICON = {"OK": "✅", "LOW_VOLUME": "⚠️"}
 
 
 def format_summary(results: list[dict], run_date: date | None = None) -> str:
     today = run_date or date.today()
     header = f"## Pipeline Freshness Probe — {today}\n\n"
 
-    stale_or_missing = [r for r in results if r["status"] != "FRESH"]
-    if not stale_or_missing:
-        return header + "✅ All pipelines fresh.\n"
+    alerting = [
+        r for r in results
+        if r["status"] != "FRESH" or r.get("volume_status") == "LOW_VOLUME"
+    ]
+    if not alerting:
+        return header + "✅ All pipelines fresh and volume healthy.\n"
 
     lines = [
-        "| Pipeline | Lane | Last Run | Age (days) | Cadence | Threshold | Status |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Pipeline | Lane | Last Run | Age (days) | Cadence | Threshold | Status | Volume |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
-    for r in results:
+    for r in alerting:
         icon = _STATUS_ICON.get(r["status"], r["status"])
         last_run = str(r["last_run"]) if r["last_run"] is not None else "—"
         age = str(r["age_days"]) if r["age_days"] is not None else "—"
+        vol_status = r.get("volume_status")
+        if vol_status == "LOW_VOLUME":
+            vol_str = f"⚠️ {r['volume_landed']:,} / {r['volume_min']:,}"
+        elif vol_status == "OK":
+            vol_str = "✅"
+        else:
+            vol_str = "—"
         lines.append(
             f"| {r['name']} | {r['lane']} | {last_run} | {age}"
-            f" | {r['cadence_days']}d | {r['threshold_days']}d | {icon} {r['status']} |"
+            f" | {r['cadence_days']}d | {r['threshold_days']}d | {icon} {r['status']} | {vol_str} |"
         )
     return header + "\n".join(lines) + "\n"
 
