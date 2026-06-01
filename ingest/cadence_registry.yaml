@@ -386,6 +386,23 @@ not_yet_running:
     # Two rows for the same respondent is normal; ORDER BY response_deadline DESC for active version.
     # First run: pending (SQL migration must run first, then manual dispatch).
 
+  - name: dbpr_sirs_submissions
+    lane: tier-2
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    freshness_table: data_lake.dbpr_sirs_submissions
+    expected_rows_min: 50 # floor at 50; Lee+Collier July 2025+ alone is 77+
+    # Non-dlt pipeline — freshness checked via MAX(scraped_at) on the table directly.
+    # Source: DBPR SIRS Reporting Database — two Qlik Sense apps:
+    #   pre-July 2025 (appid 14f1ed21) and July 2025+ (appid d217126f).
+    # Coverage: Lee + Collier counties (statewide scrape, Python county_normalized filter).
+    # Qlik hypercube limit: statewide set exceeds render threshold on both apps.
+    #   result_truncated=true on all rows is expected — counts are floor estimates.
+    # Cron: first Monday of month 07:00 UTC via dbpr-sirs-monthly.yml.
+    # Consuming brain: condo-sirs-swfl (ships in same PR as this pipeline).
+    # Positive signal only — presence = confirmed SIRS filing; absence has no meaning.
+    # First run: COMPLETE 2026-06-01 — 239 rows (LEE=83, COLLIER=159).
+
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
 # These tables have rows in Postgres but no active ingest pipeline. Adding them
 # would create false-FRESH signal or meaningless LOW_VOLUME noise. Investigated

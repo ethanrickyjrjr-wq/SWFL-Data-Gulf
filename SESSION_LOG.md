@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Sonnet 4.6 · feat/dbpr-sirs-submissions) — feat(condo-sirs-swfl): DBPR SIRS pipeline + brain LIVE — 239 SWFL associations confirmed
+
+Full stack shipped: `ingest/pipelines/dbpr_sirs/pipeline.py` (Firecrawl REST client, not CLI subprocess), `refinery/sources/dbpr-sirs-source.mts`, `refinery/packs/condo-sirs-swfl.mts` (outputProducer: neutral direction, magnitude=count/280, 5 metrics, 3 mandatory caveats), `refinery/packs/condo-sirs-swfl.test.mts` (10/10 pass), `refinery/__fixtures__/dbpr-sirs.sample.json`, `.github/workflows/dbpr-sirs-monthly.yml`, cadence registry entry. Live ingest: 239 rows (LEE=80, COLLIER=159; pre-July=9, July+=230); idempotent on re-run. Brain built live: version 1, magnitude 0.854, SWFL-7421-v1-20260601. 5 vocab slugs added (concepts 175→180). Column verification: `county_normalized` + `result_truncated` confirmed in DDL before coding. Brain-first gate satisfied.
+
 ## 2026-06-01 (Sonnet 4.6 · main) — rule: bun.lock regeneration added to CLAUDE.md
 
 Added explicit rule to RULE 1: any package.json change requires `bun install` + `git add bun.lock` in the same commit. Previous sessions burned by this repeatedly.

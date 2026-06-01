@@ -1,0 +1,11 @@
+{
+  "summary": {
+    "kind": "dbpr-sirs-summary",
+    "sirs_confirmed_swfl": 239,
+    "sirs_lee_count": 80,
+    "sirs_collier_count": 159,
+    "sirs_july2025_plus_count": 230,
+    "result_truncated_any": true,
+    "latest_scraped_at": "2026-06-01T07:06:53Z"
+  }
+}
