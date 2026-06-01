@@ -2,6 +2,8 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Sonnet 4.6 · main) — fix(ci): unregister news-swfl pack stub — removes catalog mismatch that broke CI
+
 ## 2026-06-01 (Sonnet 4.6 · main) — chore(cadence): mark fdle_crime_swfl + bls_oews × 2 as parked: true — ops page shows yellow instead of red for blocked/waiting pipelines
 
 ## 2026-06-01 (Sonnet 4.6 · main) — feat(dbpr): DBPR press releases pipeline + news-swfl brain stub — 151 rows backfilled 2016-2026
