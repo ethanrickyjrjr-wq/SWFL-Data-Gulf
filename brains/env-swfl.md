@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v21 | Token: SWFL-7421-v21-20260601 -->
+<!-- FRESHNESS: v22 | Token: SWFL-7421-v22-20260601 -->
 ---
 brain_id: env-swfl
-version: 21
-refined_at: 2026-06-01T20:00:00Z
-freshness_token: SWFL-7421-v21-20260601
+version: 22
+refined_at: 2026-06-01T20:49:31Z
+freshness_token: SWFL-7421-v22-20260601
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), and observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-barrier-mode-1 consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = single USGS surface-stage metric for HUC 03090205 (Caloosahatchee) — groundwater, rainfall, and high-water-day signals were stripped 2026-05-19 pending re-source via SFWMD DBHYDRO.
@@ -47,13 +47,13 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
 --- OUTPUT ---
 {
   "brain_id": "env-swfl",
-  "version": 21,
-  "refined_at": "2026-06-01T20:00:00Z",
+  "version": 22,
+  "refined_at": "2026-06-01T20:49:31Z",
   "direction": "bearish",
-  "magnitude": 0.6,
+  "magnitude": 0.8,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL coastal-mainland ZIPs cluster at $155/yr per insured property over the 10-year window, with no ZIP crossing the $800/yr barrier-island band. CRE translation: +20-35 bps cap-rate adjustment for coastal-mainland flood exposure; imputed flood insurance runs 2.0% of NOI at an 8% cap. Flood exposure here is a real but bounded line item, not a structural veto.",
+  "conclusion": "Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $31,624/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $10,510/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 247.2% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.",
   "key_metrics": [
     {
       "metric": "swfl_sfha_pct_area_weighted",
@@ -65,7 +65,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -80,7 +80,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -95,7 +95,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "count",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -110,7 +110,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
       }
@@ -125,7 +125,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
       }
@@ -140,7 +140,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
       }
@@ -155,14 +155,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
       }
     },
     {
       "metric": "swfl_storm_year_claims_usd",
-      "value": 63364563.12,
+      "value": 6090279753.89,
       "direction": "stable",
       "label": "SWFL cumulative NFIP paid claims (B+C+ICO) across named storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024)",
       "variable_type": "extensive",
@@ -170,14 +170,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
     },
     {
       "metric": "swfl_nonstorm_claims_baseline",
-      "value": 4752.38,
+      "value": 409015.86,
       "direction": "stable",
       "label": "SWFL non-storm-year annual NFIP paid claims (median across all non-storm years in the archive)",
       "variable_type": "extensive",
@@ -185,7 +185,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -200,7 +200,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "count",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -215,7 +215,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 6 SWFL counties (FIPS 12071+12021+12015+12043+12051+12115), storm-list reviewed 2026-05-17."
       }
@@ -230,89 +230,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&siteStatus=active&format=json",
-        "fetched_at": "2026-06-01T20:00:00Z",
+        "fetched_at": "2026-06-01T20:49:31Z",
         "tier": 1,
         "citation": "USGS Water Services daily values via data_lake.usgs_daily, parameterCd 00065, latest dv read on 2026-05-17, HUC 03090205 (Caloosahatchee), sites: 02292010,02292490,02292740,02292780,02292900,02293230,02293262."
       }
     },
     {
-      "metric": "swfl_zip_33931_flood_aal_usd_per_insured_property",
-      "value": 264.32,
-      "direction": "stable",
-      "label": "33931 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
-      "variable_type": "intensive",
-      "units": "USD/year",
-      "display_format": "currency",
-      "source": {
-        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 33 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
-      }
-    },
-    {
-      "metric": "swfl_zip_33931_flood_aal_pct_swfl_rank",
-      "value": 100,
-      "direction": "stable",
-      "label": "33931 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
-      "variable_type": "intensive",
-      "units": "percentile",
-      "display_format": "raw",
-      "source": {
-        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 33 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
-      }
-    },
-    {
-      "metric": "swfl_zip_33931_barrier_island_score",
-      "value": 1,
-      "direction": "stable",
-      "label": "33931 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
-      "variable_type": "intensive",
-      "units": "score",
-      "display_format": "raw",
-      "source": {
-        "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33931 → barrier."
-      }
-    },
-    {
-      "metric": "swfl_zip_33931_flood_cap_rate_adj_bps",
-      "value": 60,
-      "direction": "stable",
-      "label": "33931 flood cap-rate adjustment (+50-70 bps)",
-      "variable_type": "intensive",
-      "units": "bps",
-      "display_format": "raw",
-      "source": {
-        "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
-      }
-    },
-    {
-      "metric": "swfl_zip_33931_insurance_pct_typical_noi",
-      "value": 0.020449847121300272,
-      "direction": "stable",
-      "label": "33931 imputed flood insurance as fraction of NOI (8% cap on median building value)",
-      "variable_type": "intensive",
-      "units": "ratio",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 264.32 USD/yr; median building value = 323132 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 33 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
-      }
-    },
-    {
       "metric": "swfl_zip_33957_flood_aal_usd_per_insured_property",
-      "value": 180.31,
+      "value": 31624.37,
       "direction": "stable",
       "label": "33957 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
       "variable_type": "intensive",
@@ -320,14 +245,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 48 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5500 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
       "metric": "swfl_zip_33957_flood_aal_pct_swfl_rank",
-      "value": 98.63,
+      "value": 100,
       "direction": "stable",
       "label": "33957 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
       "variable_type": "intensive",
@@ -335,9 +260,9 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 48 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5500 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
@@ -350,7 +275,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33957 → barrier."
       }
@@ -365,14 +290,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
     },
     {
       "metric": "swfl_zip_33957_insurance_pct_typical_noi",
-      "value": 0.01864386099875094,
+      "value": 2.4716116557666092,
       "direction": "stable",
       "label": "33957 imputed flood insurance as fraction of NOI (8% cap on median building value)",
       "variable_type": "intensive",
@@ -380,89 +305,164 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 180.31 USD/yr; median building value = 241782 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 48 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
+        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 31624.37 USD/yr; median building value = 319876 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5500 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
-      "metric": "swfl_zip_33924_flood_aal_usd_per_insured_property",
-      "value": 130.04,
+      "metric": "swfl_zip_33931_flood_aal_usd_per_insured_property",
+      "value": 30074.61,
       "direction": "stable",
-      "label": "33924 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+      "label": "33931 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
       "variable_type": "intensive",
       "units": "USD/year",
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 15 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 3975 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
-      "metric": "swfl_zip_33924_flood_aal_pct_swfl_rank",
-      "value": 97.26,
+      "metric": "swfl_zip_33931_flood_aal_pct_swfl_rank",
+      "value": 99.13,
       "direction": "stable",
-      "label": "33924 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+      "label": "33931 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
       "variable_type": "intensive",
       "units": "percentile",
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 15 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 3975 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
-      "metric": "swfl_zip_33924_barrier_island_score",
+      "metric": "swfl_zip_33931_barrier_island_score",
       "value": 1,
       "direction": "stable",
-      "label": "33924 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+      "label": "33931 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
       "variable_type": "intensive",
       "units": "score",
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33924 → barrier."
+        "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33931 → barrier."
       }
     },
     {
-      "metric": "swfl_zip_33924_flood_cap_rate_adj_bps",
+      "metric": "swfl_zip_33931_flood_cap_rate_adj_bps",
       "value": 60,
       "direction": "stable",
-      "label": "33924 flood cap-rate adjustment (+50-70 bps)",
+      "label": "33931 flood cap-rate adjustment (+50-70 bps)",
       "variable_type": "intensive",
       "units": "bps",
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
     },
     {
-      "metric": "swfl_zip_33924_insurance_pct_typical_noi",
-      "value": 0.010153568428055206,
+      "metric": "swfl_zip_33931_insurance_pct_typical_noi",
+      "value": 2.740108603551482,
       "direction": "stable",
-      "label": "33924 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+      "label": "33931 imputed flood insurance as fraction of NOI (8% cap on median building value)",
       "variable_type": "intensive",
       "units": "ratio",
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 130.04 USD/yr; median building value = 320183 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 15 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 30074.61 USD/yr; median building value = 274392.5 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 3975 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
+      }
+    },
+    {
+      "metric": "swfl_zip_33921_flood_aal_usd_per_insured_property",
+      "value": 16600.23,
+      "direction": "stable",
+      "label": "33921 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+      "variable_type": "intensive",
+      "units": "USD/year",
+      "display_format": "currency",
+      "source": {
+        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 879 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+      }
+    },
+    {
+      "metric": "swfl_zip_33921_flood_aal_pct_swfl_rank",
+      "value": 98.26,
+      "direction": "stable",
+      "label": "33921 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+      "variable_type": "intensive",
+      "units": "percentile",
+      "display_format": "raw",
+      "source": {
+        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 879 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+      }
+    },
+    {
+      "metric": "swfl_zip_33921_barrier_island_score",
+      "value": 1,
+      "direction": "stable",
+      "label": "33921 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+      "variable_type": "intensive",
+      "units": "score",
+      "display_format": "raw",
+      "source": {
+        "url": "internal://refinery/lib/swfl-geo.mts",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33921 → barrier."
+      }
+    },
+    {
+      "metric": "swfl_zip_33921_flood_cap_rate_adj_bps",
+      "value": 60,
+      "direction": "stable",
+      "label": "33921 flood cap-rate adjustment (+50-70 bps)",
+      "variable_type": "intensive",
+      "units": "bps",
+      "display_format": "raw",
+      "source": {
+        "url": "internal://refinery/lib/swfl-geo.mts",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+      }
+    },
+    {
+      "metric": "swfl_zip_33921_insurance_pct_typical_noi",
+      "value": 0.9558952583645435,
+      "direction": "stable",
+      "label": "33921 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+      "variable_type": "intensive",
+      "units": "ratio",
+      "display_format": "ratio",
+      "source": {
+        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 16600.23 USD/yr; median building value = 434154 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 879 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
       "metric": "swfl_zip_33908_flood_aal_usd_per_insured_property",
-      "value": 121.4,
+      "value": 10510.33,
       "direction": "stable",
       "label": "33908 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
       "variable_type": "intensive",
@@ -470,14 +470,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 95 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 7771 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
       "metric": "swfl_zip_33908_flood_aal_pct_swfl_rank",
-      "value": 95.89,
+      "value": 97.39,
       "direction": "stable",
       "label": "33908 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
       "variable_type": "intensive",
@@ -485,9 +485,9 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 95 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 7771 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
@@ -500,7 +500,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33908 → inland."
       }
@@ -515,14 +515,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0) midpoint; range no flood cap-rate adjustment. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
     },
     {
       "metric": "swfl_zip_33908_insurance_pct_typical_noi",
-      "value": 0.01153637092758504,
+      "value": 0.8990534145849086,
       "direction": "stable",
       "label": "33908 imputed flood insurance as fraction of NOI (8% cap on median building value)",
       "variable_type": "intensive",
@@ -530,14 +530,89 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 121.4 USD/yr; median building value = 263081 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 95 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
+        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 10510.33 USD/yr; median building value = 292261 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 7771 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
+      }
+    },
+    {
+      "metric": "swfl_zip_33924_flood_aal_usd_per_insured_property",
+      "value": 9703.69,
+      "direction": "stable",
+      "label": "33924 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+      "variable_type": "intensive",
+      "units": "USD/year",
+      "display_format": "currency",
+      "source": {
+        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 968 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+      }
+    },
+    {
+      "metric": "swfl_zip_33924_flood_aal_pct_swfl_rank",
+      "value": 96.52,
+      "direction": "stable",
+      "label": "33924 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+      "variable_type": "intensive",
+      "units": "percentile",
+      "display_format": "raw",
+      "source": {
+        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 968 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
+      }
+    },
+    {
+      "metric": "swfl_zip_33924_barrier_island_score",
+      "value": 1,
+      "direction": "stable",
+      "label": "33924 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+      "variable_type": "intensive",
+      "units": "score",
+      "display_format": "raw",
+      "source": {
+        "url": "internal://refinery/lib/swfl-geo.mts",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33924 → barrier."
+      }
+    },
+    {
+      "metric": "swfl_zip_33924_flood_cap_rate_adj_bps",
+      "value": 60,
+      "direction": "stable",
+      "label": "33924 flood cap-rate adjustment (+50-70 bps)",
+      "variable_type": "intensive",
+      "units": "bps",
+      "display_format": "raw",
+      "source": {
+        "url": "internal://refinery/lib/swfl-geo.mts",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+      }
+    },
+    {
+      "metric": "swfl_zip_33924_insurance_pct_typical_noi",
+      "value": 0.806766445957226,
+      "direction": "stable",
+      "label": "33924 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+      "variable_type": "intensive",
+      "units": "ratio",
+      "display_format": "ratio",
+      "source": {
+        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        "fetched_at": "2026-06-01T20:49:24Z",
+        "tier": 1,
+        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 9703.69 USD/yr; median building value = 300697 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 968 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
       "metric": "swfl_zip_34102_flood_aal_usd_per_insured_property",
-      "value": 74.44,
+      "value": 6359.46,
       "direction": "stable",
       "label": "34102 (Collier County) per-insured-property NFIP AAL — 10-year window ending 2026",
       "variable_type": "intensive",
@@ -545,14 +620,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 32 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2769 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
       "metric": "swfl_zip_34102_flood_aal_pct_swfl_rank",
-      "value": 94.52,
+      "value": 95.65,
       "direction": "stable",
       "label": "34102 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
       "variable_type": "intensive",
@@ -560,9 +635,9 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 32 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
+        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2769 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       }
     },
     {
@@ -575,7 +650,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34102 → coastal-mainland."
       }
@@ -590,14 +665,14 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0.5) midpoint; range +20-35 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       }
     },
     {
       "metric": "swfl_zip_34102_insurance_pct_typical_noi",
-      "value": 0.0027308051252854064,
+      "value": 0.23206184754431444,
       "direction": "stable",
       "label": "34102 imputed flood insurance as fraction of NOI (8% cap on median building value)",
       "variable_type": "intensive",
@@ -605,84 +680,9 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
+        "fetched_at": "2026-06-01T20:49:24Z",
         "tier": 1,
-        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 74.44 USD/yr; median building value = 681484 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 32 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
-      }
-    },
-    {
-      "metric": "swfl_zip_34103_flood_aal_usd_per_insured_property",
-      "value": 58.75,
-      "direction": "stable",
-      "label": "34103 (Collier County) per-insured-property NFIP AAL — 10-year window ending 2026",
-      "variable_type": "intensive",
-      "units": "USD/year",
-      "display_format": "currency",
-      "source": {
-        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34103 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 21 claims in window, 2020 ACS population estimate 19,000 × 0.3 NSI proxy (v1)."
-      }
-    },
-    {
-      "metric": "swfl_zip_34103_flood_aal_pct_swfl_rank",
-      "value": 93.15,
-      "direction": "stable",
-      "label": "34103 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
-      "variable_type": "intensive",
-      "units": "percentile",
-      "display_format": "raw",
-      "source": {
-        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34103 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 21 claims in window, 2020 ACS population estimate 19,000 × 0.3 NSI proxy (v1)."
-      }
-    },
-    {
-      "metric": "swfl_zip_34103_barrier_island_score",
-      "value": 0,
-      "direction": "stable",
-      "label": "34103 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
-      "variable_type": "intensive",
-      "units": "score",
-      "display_format": "raw",
-      "source": {
-        "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34103 → inland."
-      }
-    },
-    {
-      "metric": "swfl_zip_34103_flood_cap_rate_adj_bps",
-      "value": 0,
-      "direction": "stable",
-      "label": "34103 flood cap-rate adjustment (no flood cap-rate adjustment)",
-      "variable_type": "intensive",
-      "units": "bps",
-      "display_format": "raw",
-      "source": {
-        "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "swfl-geo capRateBpsFor(0) midpoint; range no flood cap-rate adjustment. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
-      }
-    },
-    {
-      "metric": "swfl_zip_34103_insurance_pct_typical_noi",
-      "value": 0.00200163810655597,
-      "direction": "stable",
-      "label": "34103 imputed flood insurance as fraction of NOI (8% cap on median building value)",
-      "variable_type": "intensive",
-      "units": "ratio",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-06-01T19:59:53Z",
-        "tier": 1,
-        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 58.75 USD/yr; median building value = 733774 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34103 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 21 claims in window, 2020 ACS population estimate 19,000 × 0.3 NSI proxy (v1)."
+        "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = 6359.46 USD/yr; median building value = 685104 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2769 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       }
     }
   ],
@@ -706,7 +706,7 @@ s03 | USGS Water Services daily values via data_lake.usgs_daily + data_lake.usgs
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-01T20:00:00Z"
+    "computed_at": "2026-06-01T20:49:31Z"
   },
   "exogenous_signals": []
 }

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v64 | Token: SWFL-7421-v64-20260601 -->
+<!-- FRESHNESS: v65 | Token: SWFL-7421-v65-20260601 -->
 ---
 brain_id: master
-version: 64
-refined_at: 2026-06-01T20:31:04Z
-freshness_token: SWFL-7421-v64-20260601
+version: 65
+refined_at: 2026-06-01T20:52:35Z
+freshness_token: SWFL-7421-v65-20260601
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -59,7 +59,7 @@ s20 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl          
   {"id":"f005","topic":"upstream :: macro-swfl","fact":"Upstream snapshot — macro-swfl (bearish, magnitude 1.00, confidence 1.00)","value":"macro-swfl as of 2026-06-01: direction bearish, magnitude 1.00, confidence 1.00, trust tier T1, 4 key metric(s). SWFL labor market, 2026-M03 (preliminary): Lee County at 4.9%, +1.3pp YoY; Collier County at 4.5%, +1.2pp YoY; FL state LAUS 4.4% (benchmark). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.","src":"s01","date":"2026-06-01"},
   {"id":"f006","topic":"upstream :: sector-credit-swfl","fact":"Upstream snapshot — sector-credit-swfl (bearish, magnitude 0.39, confidence 1.00)","value":"sector-credit-swfl as of 2026-05-27: direction bearish, magnitude 0.39, confidence 1.00, trust tier T1, 15 key metric(s). For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0%), Finance & Insurance (0%), Real Estate, Rental & Leasing (0%). The three highest-risk sectors are: Transportation & Warehousing (57.1%), Retail Trade (44.4%), Other Services (Personal & Repair) (21.2%) — meaningful sample size in each case. Read these rates against the current SOFR of 3.6% (rising) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.","src":"s01","date":"2026-06-01"},
   {"id":"f007","topic":"upstream :: tourism-tdt","fact":"Upstream snapshot — tourism-tdt (neutral, magnitude 0.40, confidence 1.00)","value":"tourism-tdt as of 2026-05-28: direction neutral, magnitude 0.40, confidence 1.00, trust tier T1, 8 key metric(s). SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.","src":"s01","date":"2026-06-01"},
-  {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.60, confidence 1.00)","value":"env-swfl as of 2026-06-01: direction bearish, magnitude 0.60, confidence 1.00, trust tier T1, 42 key metric(s). SWFL coastal-mainland ZIPs cluster at $155/yr per insured property over the 10-year window, with no ZIP crossing the $800/yr barrier-island band. CRE translation: +20-35 bps cap-rate adjustment for coastal-mainland flood exposure; imputed flood insurance runs 2.0% of NOI at an 8% cap. Flood exposure here is a real but bounded line item, not a structural veto.","src":"s01","date":"2026-06-01"},
+  {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.80, confidence 1.00)","value":"env-swfl as of 2026-06-01: direction bearish, magnitude 0.80, confidence 1.00, trust tier T1, 42 key metric(s). Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $31,624/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $10,510/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 247.2% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.","src":"s01","date":"2026-06-01"},
   {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-05-30: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 1226969.1K tons of inbound domestic freight worth $614894.8M across 12 origin zones and 40 commodity classes. Top origin zones by tonnage: Remainder of Florida (835272.9K tons), Jacksonville (125669.1K tons), Orlando (96882.9K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Natural sands (206809.8K tons), Gravel and crushed stone (155970.1K tons), Natural gas and other fuels (153589.7K tons).","src":"s01","date":"2026-06-01"},
   {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (neutral, magnitude 0.00, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-06-01: direction neutral, magnitude 0.00, confidence 0.91, trust tier T2, 10 key metric(s). FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year. Shock-state: insufficient_history. Only 14/90 required days of rolling-baseline history are available — deviation z is suppressed until the history matures.","src":"s01","date":"2026-06-01"},
   {"id":"f011","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (neutral, magnitude 0.09, confidence 0.80)","value":"traffic-swfl as of 2026-05-30: direction neutral, magnitude 0.09, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 21138.3 vehicles/day across 749 FDOT segments. Cohort-matched YoY 2024→2025: 0.9% over 684 segments — neutral read on corridor demand. 5-year CAGR 2021→2025: 3.3% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 108.1 — above pre-storm baseline.","src":"s01","date":"2026-06-01"},
@@ -77,8 +77,8 @@ s20 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl          
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 64,
-  "refined_at": "2026-06-01T20:31:04Z",
+  "version": 65,
+  "refined_at": "2026-06-01T20:52:35Z",
   "direction": "bearish",
   "magnitude": 0.85,
   "drivers": [
@@ -120,9 +120,10 @@ s20 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl          
     }
   ],
   "overrides": [
+    "flood-barrier-mode-1",
     "rising-rates-dominance"
   ],
-  "conclusion": "Read is bearish (high magnitude). Driven by: cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, env-swfl, rentals-swfl, housing-swfl, news-swfl. Overrides: rising-rates-dominance. Note conflicts: macro-us (bearish) vs properties-lee-value (bullish). Combined confidence 0.90, trust tier T3, based on 20 upstream brains.",
+  "conclusion": "Read is bearish (high magnitude). Driven by: cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, env-swfl, rentals-swfl, housing-swfl, news-swfl. Overrides: flood-barrier-mode-1, rising-rates-dominance. Note conflicts: macro-us (bearish) vs properties-lee-value (bullish). Combined confidence 0.90, trust tier T3, based on 20 upstream brains.",
   "key_metrics": [
     {
       "metric": "swfl_sfha_pct_area_weighted",
@@ -134,7 +135,7 @@ s20 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl          
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-06-01T19:59:41Z",
+        "fetched_at": "2026-06-01T20:48:30Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
       }
@@ -306,6 +307,7 @@ s20 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl          
     }
   ],
   "caveats": [
+    "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $31,624/insured property",
     "Override \"rising-rates-dominance\" forced bearish (priority 70)",
     "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
     "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions.",
@@ -384,7 +386,7 @@ s20 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl          
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-01T20:31:04.000Z"
+    "computed_at": "2026-06-01T20:52:35.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [

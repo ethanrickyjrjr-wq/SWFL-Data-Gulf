@@ -2,6 +2,19 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — fix(fema): paginate fetchLive — uncovered + fixed a 1.2%-SAMPLE truncation; env-swfl v22 + master v65 rebuilt on full claim set
+
+Started as the §8 follow-up (paginate `fema-nfip-source.mts` `fetchLive()` so env-swfl rebuilds on GHA). **It uncovered a correctness bug far bigger than the GHA-reliability one:** the old single `.select(...).limit(500000)` was **silently truncated to 1,000 rows by PostgREST's `db-max-rows` cap**. Proven by direct probe — SWFL exact `count(head)` = **86,574** (ZIP 33931 = **7,398**, matches the §1 banked figure), old unbounded query returned **1,000**, new `.range()` pagination returns **86,574 rows / 86,574 distinct ids / 0 dupes**. So every prior env-swfl (v18 live, v20, v21) computed its per-ZIP + per-county-year + SWFL-rollup FEMA aggregates on **~1.2% of the claims**.
+
+**Impact on the FMB number I shipped an hour ago:** ZIP 33931 flood AAL was **$264/yr (truncated) → $30,074/yr (full data)**; pct-rank 100→99.13; insurance 2.04%→2.74% of NOI. barrier_island_score (1.0) and cap_rate_adj_bps (+60) unchanged (geometry-derived, not claims-derived). The $30k figure reconciles: 7,398 Ian-era claims over a ~1,650 insured-property proxy ÷ 10yr ≈ $30k. (Magnitude is still v1-proxy-denominator rough per env-swfl's own caveat; the **rank** is the robust signal — and now it's computed on complete data.)
+
+**Two commits (clean rollback: FMB restore was already safe in main @ `b3e0e34`):**
+
+- `fix(fema-nfip-source)`: `fetchLive()` pages with `.range(from,to)` ordered by unique `id`, 1000/page, stops on a short page. Both reliability (small responses don't socket-reset on the GH runner) and correctness (no `db-max-rows` truncation).
+- `fix(brains)`: env-swfl **v22** + master **v65** rebuilt LOCALLY (live; GHA egress still suspect) on the full 86,574-row set. master v65 still fires `grain_boundary.routes` (per-ZIP flood) + no false MarketBeat caveat; freshness advances past v64.
+
+**FOLLOW-UP (class bug, flagged):** any other source doing an unbounded `.limit(>1000)` on a >1000-row table is silently truncated the same way. Audit all `refinery/sources/*.mts` for unbounded selects on large `data_lake.*` tables (candidates: anything reading raw rows, not pre-aggregated). The `db-max-rows` cap is the real teeth here, independent of the GH-runner egress issue.
+
 ## 2026-06-01 (Opus 4.8 · main) — docs(backlog): bank the §7 GHA-rebuild traps so the next session doesn't execute the stale rule into a wall
 
 GHA runner egress degraded June 1 — built cre-swfl and master locally after confirming local Anthropic egress clean (probe HTTP 200). `--force` also unsafe without S3 creds in GHA. Both now documented in the **post-§7 hardening backlog** (`docs/superpowers/plans/2026-06-01-post-fmb-restore-backlog.md` → new "GHA rebuild mechanics" section), alongside the `fema-nfip-source.fetchLive()` pagination fix. The plan's "rebuild whole DAG via GHA with --force" wording is stale; non-force per-`pack_id` dispatch (or local build when egress is confirmed) is the working path.
