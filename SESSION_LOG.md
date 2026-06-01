@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Sonnet 4.6 · main) — feat(news-swfl): public notices source + 9 enforcement metrics + master modifier edge
+
+Both DBPR dry runs confirmed clean. Added `inserted_at` column to `public.dbpr_press_releases` (151 rows backfilled). Created `refinery/sources/dbpr-public-notices-source.mts` (SourceB, hard-parsed). Expanded `news-swfl.mts` from 3 to 9 metrics: SourceA momentum (3) + SourceB confirmed enforcement (4: construction/ABT/Lee/Collier) + SourceA sector announces (2). Declared polarities locked: construction rising = bullish, ABT rising = bearish, notice metrics direction="stable" (no prior-window history yet). Wired `news-swfl` to master as `modifier` edge. 9 new vocab slugs. 896/0 tests. Fixture build clean. GHA `--enrich-only` dispatch input added. Next: wait for first live weekly run to validate notice metrics against real data; revisit `direction` on notice metrics once 6+ months of data accumulates.
+
 ## 2026-06-01 (Sonnet 4.6 · main) — tooling(safe-push): parallel-Claude push coordination via fetch+rebase+retry
 
 Added `scripts/safe-push.mjs` — replaces raw `git push` for all sessions. Fetches origin, rebases your commits on top of whoever pushed first, shows exactly which files are going, pushes. Auto-retries 3× on race-loss. CLAUDE.md RULE 1 updated: safe-push is now required. No branches, no worktrees, no merge scripts.
