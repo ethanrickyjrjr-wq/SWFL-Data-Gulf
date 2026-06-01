@@ -55,4 +55,4 @@ SWFL_TERMS = (
 
 # Anthropic model for enrichment step
 ENRICH_MODEL = "claude-sonnet-4-6"
-ENRICH_BATCH_SIZE = 10  # rows per run (keeps latency predictable on weekly cron)
+ENRICH_BATCH_SIZE = 200  # catchup — restore to 10 after backlog clears
