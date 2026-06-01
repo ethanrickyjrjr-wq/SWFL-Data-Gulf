@@ -1,0 +1,52 @@
+[
+  {
+    "source_url": "https://www2.myfloridalicense.com/florida-dbpr-takes-action-against-unlicensed-contractors-in-lee-and-monroe-counties/",
+    "title": "Florida DBPR Takes Action Against Unlicensed Contractors in Lee and Monroe Counties",
+    "published_date": "2025-02-24",
+    "summary": "DBPR executed undercover operations in Lee and Monroe counties targeting unlicensed contractors, resulting in 9 felony charges in Lee County and 8 citations in Monroe County.",
+    "topics": ["enforcement", "construction", "public_safety"],
+    "affected_industries": ["construction"],
+    "geographic_mentions": ["Lee County", "Monroe County", "Fort Myers"],
+    "is_swfl_relevant": true,
+    "scraped_at": "2026-06-01T09:00:00Z"
+  },
+  {
+    "source_url": "https://www2.myfloridalicense.com/florida-dbpr-opens-entry-period-for-2025-quota-beverage-license-drawing/",
+    "title": "Florida DBPR Opens Entry Period for 2025 Quota Beverage License Drawing",
+    "published_date": "2025-08-18",
+    "summary": "DBPR opened the 2025 quota beverage license drawing period; 52 new licenses are available across 26 Florida counties including Lee, Collier, Charlotte, Sarasota, and Hendry.",
+    "topics": ["ABT", "licensing"],
+    "affected_industries": ["hospitality"],
+    "geographic_mentions": [
+      "Lee County",
+      "Collier County",
+      "Charlotte County",
+      "Sarasota County",
+      "Hendry County"
+    ],
+    "is_swfl_relevant": true,
+    "scraped_at": "2026-06-01T09:00:00Z"
+  },
+  {
+    "source_url": "https://www2.myfloridalicense.com/statewide-support-of-enforcement-legislation-to-strengthen-accountability-and-protect-floridians/",
+    "title": "Statewide Support of Enforcement Legislation to Strengthen Accountability and Protect Floridians",
+    "published_date": "2026-01-29",
+    "summary": "DBPR is supporting HB 1341/SB 1394 to expand ABT enforcement authority, combat nitrous oxide abuse, and strengthen protections for minors across DBPR-regulated industries.",
+    "topics": ["legislation", "enforcement", "ABT", "public_safety"],
+    "affected_industries": ["hospitality", "construction"],
+    "geographic_mentions": ["Fort Myers"],
+    "is_swfl_relevant": true,
+    "scraped_at": "2026-06-01T09:00:00Z"
+  },
+  {
+    "source_url": "https://www2.myfloridalicense.com/florida-dbpr-provides-resources-ahead-of-2025-hurricane-season/",
+    "title": "Florida DBPR Provides Resources to Protect Florida Businesses and Consumers Ahead of 2025 Hurricane Season",
+    "published_date": "2025-05-16",
+    "summary": "DBPR provided consumer resources for the 2025 Atlantic Hurricane Season, including license verification tools and the Disaster Contractors Network to combat unlicensed activity after storms.",
+    "topics": ["public_safety", "construction", "enforcement"],
+    "affected_industries": ["construction"],
+    "geographic_mentions": [],
+    "is_swfl_relevant": false,
+    "scraped_at": "2026-06-01T09:00:00Z"
+  }
+]

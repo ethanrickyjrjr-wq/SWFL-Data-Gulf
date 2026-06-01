@@ -1,0 +1,55 @@
+name: DBPR Press Releases weekly
+
+on:
+  schedule:
+    # 09:00 UTC Monday — clear of swfl-inc-weekly (08:00 UTC Monday).
+    # DBPR publishes a handful of press releases per month; pages 1-2 covers any week.
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Backfill all 30 pages (one-time historical run)"
+        required: false
+        default: "false"
+      dry_run:
+        description: "Dry run — parse and print rows without writing to DB or storage"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run dbpr_press_releases pipeline
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          SPIDER_API_KEY: ${{ secrets.SPIDER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            FLAGS="--dry-run"
+          else
+            FLAGS=""
+          fi
+          if [ "${{ github.event.inputs.backfill }}" = "true" ]; then
+            FLAGS="$FLAGS --backfill"
+          fi
+          python -m ingest.pipelines.dbpr_press_releases.pipeline $FLAGS
