@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — fix(lockfile): regenerate bun.lock after the @sanity/client removal — unblocks CI install
+
+A `daily-rebuild` (pack=master, run 26734667788) fast-failed in 10s at **Install dependencies**: `lockfile had changes, but lockfile is frozen`. Root cause: `e6258d0 chore(sanity): remove dead @sanity/client` edited `package.json` without regenerating `bun.lock`, so the frozen CI install rejected the drift — aborting the rebuild BEFORE FRED or any brain. Ran `bun install`; diff is sanity-only (31 deletions: `@sanity/client` + `@sanity/eventsource` + `eventsource`, "Removed: 1"). This was the FIRST blocker masking everything downstream. Re-triggering the master rebuild to test the next layer (FRED retry/stagger + the citation-exemption brain renders).
+
 ## 2026-06-01 (Opus 4.8 · main) — fix(lint): exempt verbatim citations from facts-only + smoothing lints — unblocks BOTH pulse reporters
 
 Live-rendering corridor-pulse-swfl surfaced a **pre-existing, systemic** Stage-4 failure: the daily `city-pulse-swfl` ALSO fails validation when its rows quote `approximately $X` (smoothing-lint) or scraped second-person marketing (facts-only-lint, e.g. a Zillow "build your dream home" citation). The linters had no quote exemption — they policed verbatim source text as if it were the brain's own claim. city-pulse survived only because it had a prior good `.md`; **corridor-pulse-swfl is new with no fallback**, so via the cre-swfl edge it would have hard-broken cre-swfl→master once FRED clears. Operator decision: Option 1 (exempt quoted citations).
