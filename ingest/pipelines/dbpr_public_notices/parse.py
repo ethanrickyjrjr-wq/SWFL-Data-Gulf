@@ -8,6 +8,7 @@ SWFL_COUNTIES = {'lee', 'collier', 'charlotte', 'sarasota', 'manatee', 'hendry',
 BOARD_INDUSTRY_MAP = [
     ('REAL ESTATE',              'real_estate'),
     ('CONSTRUCTION INDUSTRY',    'construction'),
+    ('CONSTRUCTION CONTRACTING', 'construction'),  # unlicensed notices use this form in IN RE
     ('ELECTRICAL CONTRACTORS',   'electrical'),
     ('COSMETOLOGY',              'cosmetology'),
     ('PHARMACY',                 'pharmacy'),
@@ -19,6 +20,7 @@ BOARD_INDUSTRY_MAP = [
     ('NURSING',                  'nursing'),
     ('VETERINARY',               'veterinary'),
     ('GENERAL CONTRACTORS',      'construction'),
+    ('GENERAL CONTRACTING',      'construction'),
 ]
 
 

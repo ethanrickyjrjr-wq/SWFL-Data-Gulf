@@ -177,6 +177,38 @@ class TestManateeTwoCaseNumbers:
         assert self.result['response_deadline'] == date(2026, 6, 1)
 
 
+# Real Collier PDF structure: generic DBPR header, no board-specific line
+COLLIER_REAL_PDF = """
+## COLLIER COUNTY
+
+## NOTICE OF ACTION
+
+BEFORE THE DEPARTMENT OF BUSINESS AND PROFESSIONAL REGULATION
+
+IN RE: The practice of UNLICENSED Construction Contracting
+
+Jhandy Garcia 170 20th Ave NE Naples, FL 34120
+
+## CASE NO.: 2025090885
+
+If no contact has been made by you concerning the above by June 15, 2026, a final order will be issued.
+"""
+
+
+class TestCollierRealPdfStructure:
+    def setup_method(self):
+        self.result = parse_pdf_markdown(COLLIER_REAL_PDF, 'https://example.com/collier-real.pdf', 'Jhandy Garcia')
+
+    def test_industry_from_in_re_fallback(self):
+        assert self.result['industry'] == 'construction'
+
+    def test_violation_type(self):
+        assert self.result['violation_type'] == 'unlicensed_activity'
+
+    def test_response_deadline(self):
+        assert self.result['response_deadline'] == date(2026, 6, 15)
+
+
 # ---------------------------------------------------------------------------
 # Tests: parse_index_markdown
 # ---------------------------------------------------------------------------
