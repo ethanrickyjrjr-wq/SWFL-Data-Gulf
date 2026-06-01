@@ -5,6 +5,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
@@ -46,34 +47,18 @@ async function fetchFromSupabase(): Promise<ZoriZipRow[]> {
   sinceDate.setUTCMonth(sinceDate.getUTCMonth() - monthsBack);
   const sinceIso = sinceDate.toISOString().slice(0, 10);
 
-  // Supabase enforces a server-side max_rows cap (default 1000) that
-  // `.limit(N)` cannot exceed. Trailing 24mo × ~100 SWFL ZIPs is ~2,400 rows,
-  // so paginate via `.range()`. Keeps the source self-sufficient — no
-  // project-level config dependency.
-  const PAGE_SIZE = 1000;
-  const all: ZoriZipRow[] = [];
-  for (let offset = 0; ; offset += PAGE_SIZE) {
-    const { data, error } = await getSupabase()
-      .schema("data_lake")
-      .from("zori_swfl")
-      .select("zip_code, period_end, rent_index, metro, county_name, city")
-      .gte("period_end", sinceIso)
-      .order("zip_code", { ascending: true })
-      .order("period_end", { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-    if (error) {
-      throw new Error(`zori-source: Supabase fetch failed — ${error.message}`);
-    }
-    const page = (data ?? []) as ZoriZipRow[];
-    all.push(...page);
-    if (page.length < PAGE_SIZE) break;
-    if (offset > 100_000) {
-      throw new Error(
-        `zori-source: pagination exceeded 100k rows — investigate before raising the ceiling`,
-      );
-    }
-  }
-  return all;
+  // PostgREST caps any single response at db-max-rows=1000, which `.limit(N)`
+  // cannot exceed. Trailing 24mo × ~100 SWFL ZIPs is ~2,400 rows, so page by the
+  // unique (zip_code, period_end) — the dlt primary key.
+  return selectAllPaged<ZoriZipRow>(
+    () =>
+      getSupabase()
+        .schema("data_lake")
+        .from("zori_swfl")
+        .select("zip_code, period_end, rent_index, metro, county_name, city")
+        .gte("period_end", sinceIso) as unknown as PagedQuery<ZoriZipRow>,
+    ["zip_code", "period_end"],
+  );
 }
 
 async function fetchFromFixture(): Promise<ZoriZipRow[]> {

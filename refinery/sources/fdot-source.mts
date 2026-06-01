@@ -4,6 +4,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
@@ -213,62 +214,36 @@ export function assertSegmentsNonEmpty(segments: SegmentRow[]): void {
   );
 }
 
-/**
- * PostgREST enforces a project-level `db.max_rows` cap (default 1000 on
- * Supabase). A single `.limit(100000)` silently truncates to that cap and
- * the truncated slice happens to skew to the lowest objectid rows, so
- * later years (and the Lee+Collier cohort-yoy join) silently drop out.
- * Page explicitly with `.range()` instead.
- */
-const PAGE_SIZE = 1000;
-/** Hard ceiling on pagination iterations. ~4,600 rows in current scope; 200 pages = 200K row safety margin. */
-const MAX_PAGES = 200;
-
 async function fetchLive(): Promise<FixtureShape> {
   const sb = getSupabase().schema(SCHEMA);
-  const segments: SegmentRow[] = [];
-  let from = 0;
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const to = from + PAGE_SIZE - 1;
-    const resp = await sb
-      .from(TABLE)
-      .select(
-        "yearx,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length",
-      )
-      .in("county", [...ALL_COUNTIES])
-      .gte("yearx", Math.min(EARLIEST_YEAR, IAN_BASELINE_YEAR))
-      .lte("yearx", LATEST_FDOT_YEAR)
-      .not("aadt", "is", null)
-      // Stable ordering — PostgREST without ORDER BY can repeat or skip rows across pages.
-      .order("objectid", { ascending: true })
-      .range(from, to);
-    if (resp.error) {
-      throw new Error(
-        `fdot-source: ${SCHEMA}.${TABLE} query failed — ${resp.error.message}`,
-      );
-    }
-    const rows = (resp.data ?? []) as SegmentRow[];
-    // FDOT publishes TFCTR (the "T-factor") as a PERCENTAGE of AADT that is
-    // trucks — range 0–~92, not a 0–1 fraction (FDOT Project Traffic
-    // Forecasting Handbook; FGDL AADT metadata). The refinery convention,
-    // however, treats tfctr as a FRACTION: the fixture stores it that way and
-    // downstream math relies on it (traffic-swfl truck_share does tfctr × 100,
-    // logistics-swfl-nowcast freight activity does aadt × tfctr × payload).
-    // Normalize the live percentage to a fraction at the ingestion boundary so
-    // the live and fixture paths agree and the consumers stay correct.
-    for (const r of rows) {
-      if (r.tfctr != null) r.tfctr = Number(r.tfctr) / 100;
-    }
-    segments.push(...rows);
-    if (rows.length < PAGE_SIZE) {
-      assertSegmentsNonEmpty(segments);
-      return { segments };
-    }
-    from += PAGE_SIZE;
-  }
-  throw new Error(
-    `fdot-source: ${SCHEMA}.${TABLE} pagination exceeded MAX_PAGES=${MAX_PAGES} (${MAX_PAGES * PAGE_SIZE} rows) — raise MAX_PAGES or narrow the query.`,
+  // PostgREST silently caps any single response at db-max-rows=1000; a
+  // `.limit(100000)` truncates to the lowest-objectid 1000 rows, dropping later
+  // years and the Lee+Collier cohort-yoy join. Page by the unique `objectid`.
+  const segments = await selectAllPaged<SegmentRow>(
+    () =>
+      sb
+        .from(TABLE)
+        .select(
+          "yearx,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length",
+        )
+        .in("county", [...ALL_COUNTIES])
+        .gte("yearx", Math.min(EARLIEST_YEAR, IAN_BASELINE_YEAR))
+        .lte("yearx", LATEST_FDOT_YEAR)
+        .not("aadt", "is", null) as unknown as PagedQuery<SegmentRow>,
+    "objectid",
   );
+  // FDOT publishes TFCTR (the "T-factor") as a PERCENTAGE of AADT that is
+  // trucks — range 0–~92, not a 0–1 fraction (FDOT Project Traffic Forecasting
+  // Handbook; FGDL AADT metadata). The refinery convention treats tfctr as a
+  // FRACTION: the fixture stores it that way and downstream math relies on it
+  // (traffic-swfl truck_share does tfctr × 100, logistics-swfl-nowcast freight
+  // activity does aadt × tfctr × payload). Normalize the live percentage to a
+  // fraction at the ingestion boundary so live and fixture paths agree.
+  for (const r of segments) {
+    if (r.tfctr != null) r.tfctr = Number(r.tfctr) / 100;
+  }
+  assertSegmentsNonEmpty(segments);
+  return { segments };
 }
 
 export const fdotSource: SourceConnector = {

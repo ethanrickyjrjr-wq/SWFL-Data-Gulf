@@ -4,6 +4,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
@@ -530,42 +531,24 @@ export function assertClaimsNonEmpty(rows: ClaimRow[]): void {
   );
 }
 
-/**
- * Page size for the live claims fetch. A single unbounded `.limit(500000)` over
- * the ~89k-row SWFL claim set ships one large response body that the GitHub
- * Actions runner network resets ("socket connection was closed unexpectedly" —
- * see SESSION_LOG 2026-06-01), even though it succeeds from a local network.
- * Paging keeps every response small and reliable.
- */
-const FEMA_PAGE_SIZE = 1000;
-
 const FEMA_CLAIM_COLUMNS =
   "id,year_of_loss,date_of_loss,state,county_code,reported_city,reported_zipcode,flood_zone,occupancy_type,number_of_floors_insured,amount_paid_on_building_claim,amount_paid_on_contents_claim,amount_paid_on_ico_claim,building_property_value,building_damage_amount";
 
 async function fetchLive(): Promise<FixtureShape> {
   const sb = getSupabase().schema(SCHEMA);
-  const claims: ClaimRow[] = [];
-  // Page with `.range()` ordered by the unique `id` so the window is stable
-  // (no overlapped/skipped rows between pages) and the full archive is
-  // assembled deterministically. Stop on the first short page.
-  for (let from = 0; ; from += FEMA_PAGE_SIZE) {
-    const to = from + FEMA_PAGE_SIZE - 1;
-    const resp = await sb
-      .from(TABLE)
-      .select(FEMA_CLAIM_COLUMNS)
-      .eq("state", "FL")
-      .in("county_code", SWFL_FIPS)
-      .order("id", { ascending: true })
-      .range(from, to);
-    if (resp.error) {
-      throw new Error(
-        `fema-nfip-source: ${SCHEMA}.${TABLE} query failed (rows ${from}–${to}) — ${resp.error.message}`,
-      );
-    }
-    const page = (resp.data ?? []) as ClaimRow[];
-    claims.push(...page);
-    if (page.length < FEMA_PAGE_SIZE) break;
-  }
+  // Page via selectAllPaged ordered by the unique `id`: PostgREST silently caps
+  // any single response at db-max-rows=1000, so the full SWFL archive (~86.6k
+  // claims) only assembles by paging. Small per-page bodies also avoid the GHA
+  // runner's large-response socket reset (SESSION_LOG 2026-06-01).
+  const claims = await selectAllPaged<ClaimRow>(
+    () =>
+      sb
+        .from(TABLE)
+        .select(FEMA_CLAIM_COLUMNS)
+        .eq("state", "FL")
+        .in("county_code", SWFL_FIPS) as unknown as PagedQuery<ClaimRow>,
+    "id",
+  );
   assertClaimsNonEmpty(claims);
   return { claims };
 }
