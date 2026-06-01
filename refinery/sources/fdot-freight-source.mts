@@ -6,6 +6,7 @@ import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import type { BrainOutput } from "../types/brain-output.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
@@ -369,20 +370,21 @@ export function assertSegmentsNonEmpty(segments: SegmentRow[]): void {
 
 async function fetchLiveSegments(): Promise<SegmentRow[]> {
   const sb = getSupabase().schema(SCHEMA);
-  const resp = await sb
-    .from(TABLE)
-    .select("yearx,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length")
-    .in("county", [...BRAIN_COUNTIES])
-    .eq("yearx", LATEST_FDOT_YEAR)
-    .not("aadt", "is", null)
-    .gte("tfctr", FREIGHT_TFCTR_MIN)
-    .limit(10000);
-  if (resp.error) {
-    throw new Error(
-      `fdot-freight-source: ${SCHEMA}.${TABLE} query failed — ${resp.error.message}`,
-    );
-  }
-  const rows = (resp.data ?? []) as SegmentRow[];
+  // PostgREST silently caps any single response at db-max-rows=1000 — the old
+  // `.limit(10000)` could never actually return >1000 rows. The freight-coded
+  // Lee+Collier subset for one year is ~615 rows today, but page by the unique
+  // objectid so a heavier freight year can never silently truncate.
+  const rows = await selectAllPaged<SegmentRow>(
+    () =>
+      sb
+        .from(TABLE)
+        .select("yearx,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length")
+        .in("county", [...BRAIN_COUNTIES])
+        .eq("yearx", LATEST_FDOT_YEAR)
+        .not("aadt", "is", null)
+        .gte("tfctr", FREIGHT_TFCTR_MIN) as unknown as PagedQuery<SegmentRow>,
+    "objectid",
+  );
   assertSegmentsNonEmpty(rows);
   return rows;
 }

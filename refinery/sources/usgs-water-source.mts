@@ -4,6 +4,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
@@ -383,16 +384,18 @@ const SITE_COLS =
 async function fetchLive(): Promise<{ daily: DailyRow[]; sites: SiteRow[] }> {
   const sb = getSupabase().schema(SCHEMA);
 
-  const sitesResp = await sb
-    .from(SITES_TABLE)
-    .select(SITE_COLS)
-    .eq("state_cd", "12");
-  if (sitesResp.error) {
-    throw new Error(
-      `usgs-water-source: sites query failed — ${sitesResp.error.message}`,
-    );
-  }
-  const allFlSites = (sitesResp.data ?? []) as SiteRow[];
+  // PostgREST silently caps any single response at db-max-rows=1000. The FL
+  // sites table is ~900 rows (close to the cap), so page by the unique site_no —
+  // a sampled sites read would drop SWFL sites before the isSwflSite filter
+  // runs, cascading into the daily read.
+  const allFlSites = await selectAllPaged<SiteRow>(
+    () =>
+      sb
+        .from(SITES_TABLE)
+        .select(SITE_COLS)
+        .eq("state_cd", "12") as unknown as PagedQuery<SiteRow>,
+    "site_no",
+  );
   const swflSites = allFlSites.filter(isSwflSite);
 
   if (swflSites.length === 0) {
@@ -400,18 +403,22 @@ async function fetchLive(): Promise<{ daily: DailyRow[]; sites: SiteRow[] }> {
   }
 
   const swflSiteNos = swflSites.map((s) => s.site_no);
-  const dailyResp = await sb
-    .from(DAILY_TABLE)
-    .select(DAILY_COLS)
-    .in("site_no", swflSiteNos)
-    .order("obs_date", { ascending: false });
-  if (dailyResp.error) {
-    throw new Error(
-      `usgs-water-source: daily query failed — ${dailyResp.error.message}`,
-    );
-  }
+  // Page the daily values by the unique _dlt_id. The old single read ordered
+  // obs_date desc and would silently keep only the newest 1000 readings; sort
+  // desc in TS after assembling the full set to preserve the prior contract.
+  const daily = await selectAllPaged<DailyRow>(
+    () =>
+      sb
+        .from(DAILY_TABLE)
+        .select(DAILY_COLS)
+        .in("site_no", swflSiteNos) as unknown as PagedQuery<DailyRow>,
+    "_dlt_id",
+  );
+  daily.sort((a, b) =>
+    a.obs_date < b.obs_date ? 1 : a.obs_date > b.obs_date ? -1 : 0,
+  );
   return {
-    daily: (dailyResp.data ?? []) as DailyRow[],
+    daily,
     sites: swflSites,
   };
 }

@@ -5,6 +5,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
@@ -82,18 +83,21 @@ async function fetchFromSupabase(): Promise<LeePermitRow[]> {
   const sinceIso = new Date(Date.now() - 448 * 86400_000)
     .toISOString()
     .slice(0, 10);
-  const { data, error } = await getSupabase()
-    .schema("data_lake")
-    .from("lee_building_permits")
-    .select(
-      "permit_id, issued_date, permit_type_raw, permit_description_raw, bucket, address, zip_code, lat, lon, declared_value_usd, status",
-    )
-    .gte("issued_date", sinceIso)
-    .order("issued_date", { ascending: true });
-  if (error) {
-    throw new Error(`permits-source: Supabase fetch failed — ${error.message}`);
-  }
-  return (data ?? []) as LeePermitRow[];
+  // PostgREST silently caps any single response at db-max-rows=1000. The Lee
+  // permit set is small today (~28 rows) but the planned v2 pagination ingest
+  // will balloon it past 1000; page by the unique permit_id now so it can never
+  // silently truncate (issued_date has ties that would break a page seam).
+  return selectAllPaged<LeePermitRow>(
+    () =>
+      getSupabase()
+        .schema("data_lake")
+        .from("lee_building_permits")
+        .select(
+          "permit_id, issued_date, permit_type_raw, permit_description_raw, bucket, address, zip_code, lat, lon, declared_value_usd, status",
+        )
+        .gte("issued_date", sinceIso) as unknown as PagedQuery<LeePermitRow>,
+    "permit_id",
+  );
 }
 
 async function fetchFromFixture(): Promise<LeePermitRow[]> {
