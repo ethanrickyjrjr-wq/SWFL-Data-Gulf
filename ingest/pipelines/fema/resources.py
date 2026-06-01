@@ -5,7 +5,7 @@ import requests
 
 from ingest.lib.arcgis_paginator import paginate_arcgis
 from ingest.lib.geo_utils import FL_BBOX
-from ingest.lib.guards import assert_min_rows
+from ingest.lib.guards import assert_min_rows, assert_vs_canonical, VolumeGuardError
 from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz, write_tier1_pointer
 from .constants import GEOMETRY_BUCKET, NFIP_CLAIMS_URL, TABULAR_BUCKET
 
@@ -67,7 +67,7 @@ def _normalize_nfip(raw: dict) -> dict:
         "state":                             raw.get("state"),
         "county_code":                       raw.get("countyCode"),
         "reported_city":                     raw.get("reportedCity"),
-        "reported_zipcode":                  raw.get("reportedZipcode"),
+        "reported_zipcode":                  raw.get("reportedZipCode"),
         "flood_zone":                        raw.get("floodZone"),
         "occupancy_type":                    _coerce_int(raw.get("occupancyType")),
         "number_of_floors_insured":          _coerce_int(raw.get("numberOfFloorsInsured")),
@@ -79,17 +79,64 @@ def _normalize_nfip(raw: dict) -> dict:
     }
 
 
+def _current_tier2_count() -> int | None:
+    """Live row count of data_lake.fema_nfip_claims, for a dynamic volume floor.
+    Vendor-First: derive the guard from reality, not a hardcoded number that drifts
+    below the true count and lets a partial pull silently wipe rows. Returns None when
+    the DB is unavailable (first run / no creds) so the guard no-ops, not false-fails."""
+    import os
+    try:
+        import psycopg
+    except ImportError:
+        return None
+    uri = os.environ.get("DESTINATION__POSTGRES__CREDENTIALS")
+    if not uri:
+        try:
+            import re
+            secrets = os.path.join(os.path.dirname(__file__), "..", "..", "..", ".dlt", "secrets.toml")
+            txt = open(secrets, encoding="utf-8").read()
+
+            def _v(k: str) -> str | None:
+                m = re.search(r"^\s*" + k + r'\s*=\s*"?([^"\r\n]+?)"?\s*$', txt, re.M)
+                return m.group(1) if m else None
+
+            uri = f"postgresql://{_v('username')}:{_v('password')}@{_v('host')}:{_v('port')}/{_v('database')}"
+        except Exception:
+            return None
+    try:
+        with psycopg.connect(uri, connect_timeout=15) as conn:
+            with conn.cursor() as cur:
+                cur.execute("select count(*) from data_lake.fema_nfip_claims")
+                return cur.fetchone()[0]
+    except Exception:
+        return None
+
+
 def _promote_nfip_to_tier2(rows: list[dict]) -> None:
-    """Write the normalized NFIP claims rows to data_lake.fema_nfip_claims (replace disposition)."""
-    assert_min_rows(len(rows), 403_542, label="fema_nfip_claims")
+    """Write the normalized NFIP claims rows to data_lake.fema_nfip_claims (replace disposition).
+    Volume floors (enough rows?) live in ingest_nfip_claims; here we guard data SHAPE."""
+    # Normalize once so the OUTPUT column can be guarded BEFORE the destructive replace.
+    normalized = [_normalize_nfip(r) for r in rows]
+
+    # Tripwire (class fix): a silent vendor field-name break nulls a whole column while the
+    # row count looks fine — exactly how reportedZipCode -> reportedZipcode stayed hidden for
+    # weeks. Guard the pinned zip column pre-replace so a broken mapping can't wipe good data.
+    nonnull_zip = sum(1 for r in normalized if (r.get("reported_zipcode") or "").strip())
+    zip_rate = nonnull_zip / len(normalized) if normalized else 0.0
+    print(f"  reported_zipcode non-null rate: {zip_rate:.1%} ({nonnull_zip:,}/{len(normalized):,})")
+    if zip_rate < 0.5:
+        raise VolumeGuardError(
+            f"[volume-guard] fema_nfip_claims: reported_zipcode non-null {zip_rate:.1%} < 50% floor "
+            f"— likely a vendor field-name break (verify the reportedZipCode mapping). Refusing to replace."
+        )
+
     @dlt.resource(
         table_name="fema_nfip_claims",
         write_disposition="replace",
         columns=_TIER2_NFIP_COLUMNS,
     )
     def fema_nfip_rows():
-        for row in rows:
-            yield _normalize_nfip(row)
+        yield from normalized
 
     tier2_pipeline = dlt.pipeline(
         pipeline_name="fema_nfip_tier2",
@@ -161,6 +208,14 @@ def ingest_nfip_claims(pipeline) -> None:
     rows = _fetch_all_nfip_claims()
     if not rows:
         return
+
+    # Volume floor (Vendor-First): a partial pull (e.g. API 503 mid-page) must NOT replace a
+    # full table. assert_min_rows is the absolute backstop; assert_vs_canonical compares against
+    # the live row count so the floor tracks reality instead of a stale hardcoded constant.
+    assert_min_rows(len(rows), 403_542, label="fema_nfip_claims")
+    prior = _current_tier2_count()
+    if prior:
+        assert_vs_canonical(len(rows), prior, floor=0.95, label="fema_nfip_claims")
 
     # Tier 1 (cold archive): full raw CSV.gz + pointer row in data_lake._tier1_inventory.
     # Non-fatal: Tier 1 failures (S3 or dlt _tier1_inventory schema issues) must not

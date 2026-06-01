@@ -11,7 +11,7 @@ FAKE_NFIP_RAW = {
     "state": "FL",
     "countyCode": "12071",
     "reportedCity": "FORT MYERS",
-    "reportedZipcode": "33901",
+    "reportedZipCode": "33901",
     "floodZone": "AE",
     "occupancyType": 1,
     "numberOfFloorsInsured": 1,
@@ -61,6 +61,8 @@ class TestIngestNfipClaims:
     def test_uploads_csv_gz_to_tabular_cold(self):
         from ingest.pipelines.fema.resources import ingest_nfip_claims
         with patch("ingest.pipelines.fema.resources._fetch_all_nfip_claims", return_value=[FAKE_CLAIM]), \
+             patch("ingest.pipelines.fema.resources.assert_min_rows"), \
+             patch("ingest.pipelines.fema.resources._current_tier2_count", return_value=None), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz") as mock_upload, \
              patch("ingest.pipelines.fema.resources.write_tier1_pointer"), \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2"):
@@ -81,6 +83,8 @@ class TestIngestNfipClaims:
     def test_tier2_promotion_fires_after_tier1(self):
         from ingest.pipelines.fema.resources import ingest_nfip_claims
         with patch("ingest.pipelines.fema.resources._fetch_all_nfip_claims", return_value=[FAKE_CLAIM]), \
+             patch("ingest.pipelines.fema.resources.assert_min_rows"), \
+             patch("ingest.pipelines.fema.resources._current_tier2_count", return_value=None), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz"), \
              patch("ingest.pipelines.fema.resources.write_tier1_pointer"), \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2") as mock_tier2:
@@ -92,6 +96,8 @@ class TestIngestNfipClaims:
     def test_tier1_uses_fema_nfip_claims_table_name(self):
         from ingest.pipelines.fema.resources import ingest_nfip_claims
         with patch("ingest.pipelines.fema.resources._fetch_all_nfip_claims", return_value=[FAKE_CLAIM]), \
+             patch("ingest.pipelines.fema.resources.assert_min_rows"), \
+             patch("ingest.pipelines.fema.resources._current_tier2_count", return_value=None), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz"), \
              patch("ingest.pipelines.fema.resources.write_tier1_pointer") as mock_ptr, \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2"):
@@ -235,3 +241,17 @@ class TestTier2PromotionNfip:
         assert captured_kwargs["write_disposition"] == "replace"
         assert "columns" in captured_kwargs
         assert len(captured_kwargs["columns"]) == 15
+
+    def test_null_zip_rate_guard_aborts_before_replace(self):
+        """Tripwire: if the zip column comes back all-null (a silent vendor field-name
+        break — exactly how reportedZipCode->reportedZipcode hid), abort BEFORE the
+        destructive replace rather than wipe the table with zip-less data."""
+        from ingest.pipelines.fema.resources import _promote_nfip_to_tier2
+        from ingest.lib.guards import VolumeGuardError
+        rows = [{**FAKE_NFIP_RAW, "reportedZipCode": None} for _ in range(10)]
+        try:
+            _promote_nfip_to_tier2(rows)
+        except VolumeGuardError as e:
+            assert "reported_zipcode" in str(e)
+        else:
+            raise AssertionError("expected the NULL-zip-rate guard to abort the promote")
