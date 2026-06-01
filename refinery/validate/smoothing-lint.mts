@@ -20,6 +20,7 @@ import {
   SMOOTHING_TOKENS,
   type SmoothingTokenGroup,
 } from "../lib/smoothing-tokens.mts";
+import { isQuotedSourceLine } from "./facts-only-lint.mts";
 
 export interface SmoothingViolation {
   /** 1-based line number within the reference block */
@@ -69,6 +70,30 @@ const PATTERNS: CompiledPattern[] = Object.entries(SMOOTHING_TOKENS).flatMap(
     })),
 );
 
+/**
+ * Only "approximately"/"roughly" can faithfully qualify a reported figure
+ * ("approximately $6.2 million") — the source itself reported it as approximate
+ * and the number stays visible. The other numeric_softening tokens describe the
+ * brain's own number-derivation ("smoothed", "interpolated", "estimated from",
+ * "on the order of", "in the range of", "ballpark") and ALWAYS smell of smoothing,
+ * so they are never figure-exempt.
+ */
+const FIGURE_QUALIFIER_TOKENS = new Set(["approximately", "roughly"]);
+
+/**
+ * True when the text immediately AFTER a matched token is a numeric quantity
+ * ("$6.2 million", "55 acres", "~5%"). That keeps the number visible — the
+ * opposite of the failure mode this lint targets (re-encoding a known-exact
+ * number, or softening a non-numeric claim like "approximately rising").
+ */
+function qualifiesAFigure(line: string, afterTokenIdx: number): boolean {
+  const rest = line.slice(afterTokenIdx).replace(/^[\s:=]+/, "");
+  return (
+    /^[~$(]?\s*\$?\s*[\d]/.test(rest) ||
+    /^(one|two|three|four|five|six|seven|eight|nine|ten)\b/i.test(rest)
+  );
+}
+
 export function lintSmoothing(md: string): SmoothingLintResult {
   const m = md.match(/```reference\n([\s\S]*?)\n```/);
   // A missing reference block is the spec-validator's problem, not ours.
@@ -76,9 +101,27 @@ export function lintSmoothing(md: string): SmoothingLintResult {
 
   const violations: SmoothingViolation[] = [];
   m[1].split("\n").forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (isQuotedSourceLine(trimmed)) return; // pass-through: verbatim quoted source
     for (const { group, token, re } of PATTERNS) {
-      if (re.test(line)) {
-        violations.push({ line: idx + 1, text: line.trim(), token, group });
+      // Global scan so a number-qualified occurrence early in the line doesn't
+      // mask a genuine softening occurrence later.
+      const g = new RegExp(re.source, "gi");
+      let hit: RegExpExecArray | null;
+      let flagged = false;
+      while ((hit = g.exec(line)) !== null) {
+        if (
+          group === "numeric_softening" &&
+          FIGURE_QUALIFIER_TOKENS.has(token) &&
+          qualifiesAFigure(line, g.lastIndex)
+        ) {
+          continue; // faithful figure qualifier — not the softening this lint bans
+        }
+        flagged = true;
+        break;
+      }
+      if (flagged) {
+        violations.push({ line: idx + 1, text: trimmed, token, group });
       }
     }
   });

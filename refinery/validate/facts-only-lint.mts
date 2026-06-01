@@ -40,6 +40,18 @@ const PATTERNS: { name: string; re: RegExp }[] = [
   },
 ];
 
+/**
+ * Verbatim quoted-source field lines (citation receipts) are exempt from the
+ * synthesized-claim checks: a source listing that says "your dream home" or a
+ * news article quoted verbatim is faithful reporting, not an instruction the
+ * brain injected. The checks police the brain's OWN claim text (fact/value/
+ * conclusion), never the quoted span it cites. Matches the JSON render where
+ * citation text always lands on its own `"citation": "…"` line.
+ */
+export function isQuotedSourceLine(trimmed: string): boolean {
+  return /^"(citation|cited_text|quoted_text|quote)"\s*:/.test(trimmed);
+}
+
 export function lintFactsOnly(md: string): LintResult {
   const m = md.match(/```reference\n([\s\S]*?)\n```/);
   // A missing reference block is the spec-validator's problem, not ours.
@@ -48,6 +60,7 @@ export function lintFactsOnly(md: string): LintResult {
   const violations: LintViolation[] = [];
   m[1].split("\n").forEach((line, idx) => {
     const trimmed = line.trim();
+    if (isQuotedSourceLine(trimmed)) return; // pass-through: verbatim quoted source
     for (const { name, re } of PATTERNS) {
       if (re.test(trimmed)) {
         violations.push({ line: idx + 1, text: trimmed, pattern: name });

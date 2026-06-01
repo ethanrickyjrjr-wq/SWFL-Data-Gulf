@@ -41,10 +41,12 @@ test("a missing reference fence is not the linter's problem", () => {
   });
 });
 
-test("flags numeric_softening token: approximately", () => {
+test("flags numeric_softening token: approximately (softening a non-figure)", () => {
+  // "approximately" softening a non-numeric claim is the failure mode — it is
+  // only figure-exempt when it immediately qualifies a number.
   const md = wrap(
     JSON.stringify({
-      conclusion: "Permits fell approximately 12% YoY in Lee County.",
+      conclusion: "Direction is approximately flat across the basin.",
     }),
   );
   const r = lintSmoothing(md);
@@ -53,6 +55,57 @@ test("flags numeric_softening token: approximately", () => {
   assert.equal(r.violations[0].group, "numeric_softening");
   assert.equal(r.violations[0].token, "approximately");
   assert.match(r.violations[0].text, /approximately/i);
+});
+
+test("does NOT flag approximately/roughly that faithfully qualify a figure", () => {
+  // A reporter quoting a source's approximate figure keeps the number visible —
+  // that's faithful reporting, not the re-encode-the-number failure mode.
+  for (const claim of [
+    "The site traded for approximately $55 million ($23 psf).",
+    "Oakes allegedly took approximately $6.2 million from the firm.",
+    "The parcel spans roughly 55 acres along Metro Parkway.",
+  ]) {
+    const md = wrap(JSON.stringify({ conclusion: claim }));
+    assert.deepEqual(
+      lintSmoothing(md),
+      { ok: true, violations: [] },
+      `figure-qualified claim should pass: ${claim}`,
+    );
+  }
+});
+
+test("still flags approximately softening a direction word, even near figures", () => {
+  const md = wrap(
+    JSON.stringify({
+      conclusion: "Momentum is approximately rising this quarter.",
+    }),
+  );
+  const r = lintSmoothing(md);
+  assert.equal(r.ok, false);
+  assert.equal(r.violations[0].token, "approximately");
+});
+
+test("verbatim citation/cited_text fields are exempt (quoted source)", () => {
+  // A pulse reporter's citation quotes the source verbatim; a source that says
+  // "approximately $6.2 million" or "roughly half" is faithful, not the brain
+  // softening its own number. Pass-through, mirroring facts-only-lint.
+  const md = wrap(
+    JSON.stringify(
+      {
+        key_metrics: [
+          {
+            metric: "signal_transactions_1",
+            value: "Costco site traded.",
+            citation:
+              'PRNewswire: "the property traded at approximately $23 psf for roughly half the block"',
+          },
+        ],
+      },
+      null,
+      2,
+    ),
+  );
+  assert.deepEqual(lintSmoothing(md), { ok: true, violations: [] });
 });
 
 test("flags numeric_softening multi-word token: on the order of", () => {
@@ -126,7 +179,7 @@ test("flags prose_confidence_translation token: the model suggests", () => {
 test("match is case-insensitive", () => {
   const md = wrap(
     JSON.stringify({
-      conclusion: "Permits fell APPROXIMATELY 12% YoY.",
+      conclusion: "Direction is APPROXIMATELY flat YoY.",
     }),
   );
   const r = lintSmoothing(md);
@@ -138,7 +191,7 @@ test("reports every distinct violation across lines", () => {
   const md = wrap(
     JSON.stringify(
       {
-        conclusion: "Permits fell roughly 12% YoY.",
+        conclusion: "Permits fell roughly in line with last year.",
         caveats: ["We are fairly confident the trend will persist."],
       },
       null,
@@ -157,7 +210,7 @@ test("violation line numbers are 1-based within the reference fence", () => {
     JSON.stringify(
       {
         conclusion: "OK.",
-        caveats: ["roughly 4%"],
+        caveats: ["roughly flat"],
       },
       null,
       2,
