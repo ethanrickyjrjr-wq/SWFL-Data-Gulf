@@ -4,6 +4,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 import { buildSourceCitationUrl } from "../lib/citation-url.mts";
@@ -90,7 +91,9 @@ function normalize(row: Record<string, unknown>): SalesTaxNormalized | null {
 async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   const raw = await readFile(FIXTURE_PATH, "utf-8");
   const data = JSON.parse(raw) as { rows?: unknown[] } | unknown[];
-  const rows: unknown[] = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
+  const rows: unknown[] = Array.isArray(data)
+    ? data
+    : ((data as { rows?: unknown[] }).rows ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -99,20 +102,23 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - 26);
   const cutoffDate = cutoff.toISOString().slice(0, 10);
-  const { data, error } = await getSupabase()
-    .from(TABLE)
-    .select(
-      "county, kind_code, business_type, period, taxable_sales_usd, source_url",
-    )
-    .in("county", ["Lee", "Collier"])
-    .gte("period", cutoffDate)
-    .not("taxable_sales_usd", "is", null);
-  if (error) {
-    throw new Error(
-      `fl-dor-sales-tax-source: ${TABLE} query failed — ${error.message}`,
-    );
-  }
-  return (data ?? []) as Record<string, unknown>[];
+  // PostgREST caps any single response at db-max-rows=1000; Lee+Collier × 26mo ×
+  // business type is ~3.3k rows. Page by the unique composite (county,
+  // kind_code, period) — the table's ON CONFLICT key (no surrogate id exists).
+  return selectAllPaged<Record<string, unknown>>(
+    () =>
+      getSupabase()
+        .from(TABLE)
+        .select(
+          "county, kind_code, business_type, period, taxable_sales_usd, source_url",
+        )
+        .in("county", ["Lee", "Collier"])
+        .gte("period", cutoffDate)
+        .not("taxable_sales_usd", "is", null) as unknown as PagedQuery<
+        Record<string, unknown>
+      >,
+    ["county", "kind_code", "period"],
+  );
 }
 
 export const flDorSalesTaxSource: SourceConnector = {
