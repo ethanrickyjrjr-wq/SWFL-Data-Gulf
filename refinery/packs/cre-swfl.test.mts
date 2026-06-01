@@ -409,3 +409,56 @@ test("marketbeat: singleton reset — running corpusSummary twice does not let a
     `expected zero marketbeat keys in run2 (post-reset), got: ${leakedKeys.map((m) => m.metric).join(", ")}`,
   );
 });
+
+// --- MarketBeat coverage caveat: only fires on a REAL partial gap ----------
+// The broker (MarketBeat) feed is frequently absent (deleted upstream) — its
+// normal, expected state. When mbRows === [] every corridor lands in
+// `unmatched`, which used to emit a "coverage is incomplete" caveat. That is
+// the false "Fort Myers Beach did not join" signal: there is no broker survey
+// at all, so there is nothing for it to be incomplete *about*.
+
+test("marketbeat: empty MarketBeat feed (deleted) → no incomplete-coverage caveat", () => {
+  // Corridors present, zero MarketBeat fragments — the normal post-delete
+  // state. Every corridor is `unmatched` (no submarket rows to join against),
+  // but a missing survey is not an incomplete survey.
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"),
+    makeCorridorFragment("Cape Coral Pkwy E", "Cape Coral"),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const coverageCaveat = result.caveats.find((c) =>
+    c.includes("Broker-survey (MarketBeat) coverage is incomplete"),
+  );
+  assert.ok(
+    !coverageCaveat,
+    `expected NO MarketBeat coverage caveat when the feed is empty, got caveats:\n${result.caveats.join("\n")}`,
+  );
+});
+
+test("marketbeat: non-empty feed with an unmatched corridor → incomplete-coverage caveat fires", () => {
+  // A Naples broker row IS present (mbRows.length > 0). One corridor maps to
+  // Naples (matched); one has no alias entry (unmatched). That is a real
+  // partial gap — the coverage caveat must still fire.
+  const naplesMb: MarketbeatSwflNormalized = {
+    kind: "marketbeat-swfl",
+    submarket: "Naples",
+    quarter: "2026-Q3",
+    vacancy_rate: 4.8,
+    asking_rent_nnn: 41.5,
+    absorption_sqft: 32000,
+    source_url: "https://example.invalid/naples",
+  };
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"), // maps to Naples
+    makeCorridorFragment("Nonexistent Corridor", "Naples"), // no alias → unmatched
+    makeMbFragment(naplesMb),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const coverageCaveat = result.caveats.find((c) =>
+    c.includes("Broker-survey (MarketBeat) coverage is incomplete"),
+  );
+  assert.ok(
+    coverageCaveat,
+    `expected the coverage caveat to fire on a real partial gap, got caveats:\n${result.caveats.join("\n")}`,
+  );
+});

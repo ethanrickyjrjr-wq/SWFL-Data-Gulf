@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — fix(cre-swfl): kill the false "Fort Myers Beach did not join" MarketBeat caveat
+
+§2 of the FMB-restore plan. When the MarketBeat broker feed is deleted (mbRows === [], the normal state), `groupCorridorsBySubmarket` buckets EVERY corridor into `unmatched`, which fired a false "Broker-survey (MarketBeat) coverage is incomplete" caveat — the "Fort Myers Beach did not join" signal — even though no survey ran at all. Guarded the unmatched-coverage caveat (`cre-swfl.mts` ~975) and the `zeroMatchedCaveatGroups` loop (~961) on `mbRows.length > 0`: a missing survey is not an incomplete one; only disclose a partial gap when a survey actually ran. TDD: added 2 tests to `cre-swfl.test.mts` (empty feed → no caveat [was RED]; non-empty + unmatched corridor → caveat still fires). `bun test refinery/packs/cre-swfl.test.mts` → 10/0; full `bun test refinery/` → 887/0, no regressions. Touched only `cre-swfl.mts` + `cre-swfl.test.mts` (constructed MB fixtures inline per the existing zero-matched test pattern — the shared `marketbeat-swfl.sample.json` is pinned by sibling "exactly 9 keys" tests and the "miss" case is corridor-driven, out of scope). Changes `--- OUTPUT ---` caveats; takes effect in prod at the §7 gated DAG rebuild. Next on critical path: §1 (FEMA) proven → §7 rebuild.
+
 ## 2026-06-01 (Opus 4.8 · main) — docs(backlog): add ops false-green health-check fix
 
 Operator flagged: ops dashboard showed brain + fema GREEN while master was Stage-4-frozen and FEMA's zip column was 100% null. Added a backlog item — ops health checks test liveness (run succeeded / rows > 0 / API 200), not correctness (latest _scheduled_ rebuild green, freshness token advancing, no fixture sentinel, column non-null rate). Post-restore fix lives in `swfldatagulf-ops`. [skip ci]

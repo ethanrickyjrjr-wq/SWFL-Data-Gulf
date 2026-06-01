@@ -958,16 +958,27 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
   // alias-mapped corridors are in the verified corpus this run. The metric ships
   // (the broker survey stands on its own) but the citation can't tie it to
   // specific corridors — disclose loudly per affected submarket.
-  for (const group of zeroMatchedCaveatGroups) {
-    vote.caveats.push(
-      `MarketBeat ${group.submarket} submarket reports a value but 0 of its ${group.mappedCorridorNames.length} mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.`,
-    );
+  // Gate on a live broker feed: when mbRows === [] (the feed was deleted — the
+  // normal state) there are no submarket rows, so `matched` and therefore
+  // zeroMatchedCaveatGroups are empty. The explicit guard documents that intent
+  // and keeps a deleted-feed run from ever emitting a survey-coverage caveat.
+  if (mbRows.length > 0) {
+    for (const group of zeroMatchedCaveatGroups) {
+      vote.caveats.push(
+        `MarketBeat ${group.submarket} submarket reports a value but 0 of its ${group.mappedCorridorNames.length} mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.`,
+      );
+    }
   }
   // Unmatched corridors — verified corpus rows whose submarket either isn't in
   // the alias table, or resolves to a submarket with no MarketBeat row this
   // run. Calling these out so a reader knows which corridors were excluded
   // from the per-submarket fan-out, and why.
-  if (lastJoinedBySubmarket.unmatched.length > 0) {
+  // Gate on mbRows.length > 0: when the broker feed is absent (deleted — the
+  // normal state) groupCorridorsBySubmarket buckets EVERY corridor into
+  // `unmatched`, which used to fire a false "coverage is incomplete" caveat —
+  // the "Fort Myers Beach did not join" bug. A missing survey is not an
+  // incomplete one; only disclose a partial gap when a survey actually ran.
+  if (mbRows.length > 0 && lastJoinedBySubmarket.unmatched.length > 0) {
     const names = lastJoinedBySubmarket.unmatched.map((c) =>
       displayNameFor(c.name),
     );
