@@ -25,6 +25,14 @@ The thing the operator actually asked for. Today `/api/b/[slug]` takes a brain s
 - Fixtures derive field names from a **shared schema constant** (the FEMA `reportedZipCode` typo survived because the fixture mirrored it; `dbpr-sirs.sample.json` self-masks the same way).
 - Post-ingest **NULL-rate alarm** on pinned columns; **orphan/dead-edge lint**.
 
+## GHA rebuild mechanics — learned executing §7 (2026-06-01). READ before running any rebuild.
+
+Three traps hit while clearing the §7 gate. The plan's "rebuild the entire DAG via the Daily Brain Rebuild GHA, use --force" wording is **stale** — faithfully executing it walks into a wall:
+
+- **NEVER `--force` the daily-rebuild GHA.** `--force` rebuilds _fresh_ leaves too, including Tier-1/Parquet **S3** brains (`storm-history-swfl`, and ZORI/Redfin-backed `rentals-swfl`/`housing-swfl`). `daily-rebuild.yml` carries no `SUPABASE_S3_ENDPOINT/ACCESS_KEY_ID/SECRET_ACCESS_KEY` → the run dies (`storm-history-source: missing required env var(s)`). The nightly cron works _because it's non-force_ (skips fresh leaves, reads their OUTPUT via thin pipe). To refresh specific packs, dispatch them one at a time as `pack_id` (the target always rebuilds regardless of freshness) — or add the S3 creds to the workflow first if a true full-`--force` is ever needed.
+- **GHA runner egress was degraded 2026-06-01** — env-swfl's FEMA fetch socket-reset and cre-swfl's stage-3 hung 13 min then `Connection error.` (Anthropic). **Local egress was clean** (probe to `api.anthropic.com` → **HTTP 200**; local Supabase/FEMA fetch fine), so cre-swfl + master were built **locally** with `source=live agents=live` and committed. The plan's "use GHA not local" rule exists _only_ for LLM egress; when GHA is the broken side and local egress is confirmed, a local build is the valid fallback for deterministic _and_ LLM brains (same code + same pinned model = functionally identical output). Always confirm local egress with a cheap probe before relying on it.
+- **`fema-nfip-source.mts` `fetchLive()` is GHA-fragile** — one unbounded `.select(...).limit(500000)` over the ~89k-row SWFL claim set; the runner network resets the large response. **Fix: paginate with `.range()`.** Until then env-swfl can only be rebuilt locally, and the **nightly cron will fail on env-swfl once it goes stale (~2026-06-29)** — a forced/stale env-swfl aborts the whole master rebuild. File before late June.
+
 ## Ops dashboard shows FALSE-GREEN (operator-flagged 2026-06-01)
 
 The ops health banner showed **brain** and **fema** green while master was frozen (Stage-4 fixture abort) and FEMA's zip column was 100% null. Root cause: the checks test **liveness/existence, not correctness**:

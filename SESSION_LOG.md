@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — docs(backlog): bank the §7 GHA-rebuild traps so the next session doesn't execute the stale rule into a wall
+
+GHA runner egress degraded June 1 — built cre-swfl and master locally after confirming local Anthropic egress clean (probe HTTP 200). `--force` also unsafe without S3 creds in GHA. Both now documented in the **post-§7 hardening backlog** (`docs/superpowers/plans/2026-06-01-post-fmb-restore-backlog.md` → new "GHA rebuild mechanics" section), alongside the `fema-nfip-source.fetchLive()` pagination fix. The plan's "rebuild whole DAG via GHA with --force" wording is stale; non-force per-`pack_id` dispatch (or local build when egress is confirmed) is the working path.
+
 ## 2026-06-01 (Opus 4.8 · main) — ✅ §7 GATE CLEARED — FMB restore LIVE in prod; all 4 acceptance criteria pass on the MCP path
 
 Pushed `0ce0f32` → Vercel auto-deployed (master live token flipped v63→**v64**). **Live-verified all four §7 criteria:**
