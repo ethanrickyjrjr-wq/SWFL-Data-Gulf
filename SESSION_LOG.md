@@ -2,6 +2,19 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — ✅ §7 GATE CLEARED — FMB restore LIVE in prod; all 4 acceptance criteria pass on the MCP path
+
+Pushed `0ce0f32` → Vercel auto-deployed (master live token flipped v63→**v64**). **Live-verified all four §7 criteria:**
+
+1. **§1 data:** `…/api/b/env-swfl?…format=json` → **5 `swfl_zip_33931_*`** metrics live (v21). ✓
+2. **§3-grain route + §2 caveat:** `…/api/b/master?…format=json` → freshness **v64** (>v63) · `grain_boundary.routes = ["Flood risk is tracked per ZIP — want it for a specific ZIP or address?"]` · false **"…did not join…Fort Myers Beach" MarketBeat caveat ABSENT**. ✓
+3. **§3-grain/§6 UX:** master speaker tier-2 renders the flood offer under **"You can also ask:"**, a separate block from "What this can't tell you" (which is the legit businesses/finer-geography denial, no flood). ✓
+4. **FMB via MCP:** `swfl_fetch` (master v64) surfaces the per-ZIP flood offer with NO FMB false-denial; routing to env-swfl returns a **real FMB read** — ZIP 33931 AAL **$264.32/yr** per insured property (100th pct SWFL), barrier-island score **1.0** (flood-barrier-mode-1 hit), **+60 bps** cap-rate, **2.04%** of NOI, cited to `fema.gov/.../FimaNfipClaims`. Not "we don't carry it." ✓
+
+**How it shipped (honest record):** GHA `--force` died on storm-history-swfl S3 creds (never `--force` the daily-rebuild GHA — it rebuilds Tier-1/S3 leaves it can't auth); GHA env-swfl + cre-swfl runs then failed on degraded **runner egress** (FEMA socket reset; Anthropic conn hang). Local egress was fully working (Anthropic 200, FEMA fetch ok), so env-swfl v21 / cre-swfl v46 / master v64 were built LOCALLY with `source=live agents=live` — functionally identical to a GHA build (same code, same pinned model; deterministic math + LLM narrative). Three commits: `dae8569` (env-swfl v21), `0ce0f32` (cre-swfl v46 + master v64).
+
+**OPEN FOLLOW-UP (§8 hardening — real landmine):** `refinery/sources/fema-nfip-source.mts` `fetchLive()` uses an unbounded `.select(...).limit(500000)` over the ~89k-row SWFL claim set that the GH-runner network resets. **The nightly cron will fail rebuilding env-swfl once it goes stale (~2026-06-29)** — and a forced/stale env-swfl would abort the whole master rebuild. Fix = paginate with `.range()`. Until fixed, env-swfl must be rebuilt locally. Not a §7 blocker (master reads env-swfl OUTPUT via thin pipe, never re-fetches FEMA), but file it before late June.
+
 ## 2026-06-01 (Opus 4.8 · main) — §7 GATE: cre-swfl v46 + master v64 built LOCALLY (GHA egress down) — all 3 acceptance axes pass on disk; pushing → Vercel deploy → live-verify
 
 GHA runner egress is degraded right now: env-swfl FEMA fetch socket-reset, **and** cre-swfl GHA run `26778768926` hung 13min in stage-3 then `Connection error.` (Anthropic egress). **Local egress is fully working** — probed Anthropic API → HTTP 200; local FEMA fetch succeeds. So built the two LLM brains locally with `source=live agents=live` (the plan's "use GHA" rule exists only for LLM egress, which is confirmed working locally; GHA is the broken side). Deterministic + LLM-narrative output is functionally identical to a GHA build (same code, same pinned model).
