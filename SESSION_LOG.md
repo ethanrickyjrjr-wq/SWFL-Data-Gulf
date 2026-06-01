@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — docs: post-FMB-restore backlog (the "after the plan" list)
+
+Added `docs/superpowers/plans/2026-06-01-post-fmb-restore-backlog.md` — everything staged for after the restore: §9 place→data router + connector un-crush (the real "everywhere"), §4 ranker / condo-SIRS / rsw-airport / TDT / output-presentation hardening, class-level regression guards (fixture-sentinel pre-check, schema-derived fixture field names, NULL-rate alarm), dormant-data fixes (safety-swfl FIBRS→FBI CDE #59, news-swfl announcements 0 rows), the two un-run audits, and the scope ceiling. Operator output directive also captured to memory (no system/noun — answer → sources → token). [skip ci]
+
 ## 2026-06-01 (Opus 4.8 · main) — fix(news-swfl): re-render live — clear fixture sentinel blocking every master rebuild
 
 §0 of the FMB-restore plan. `brains/news-swfl.md` had been committed from a fixture build (CITATION TABLE `(fixture; …)` + a `"this build uses SYNTHETIC fixture data"` caveat). news-swfl is a master `modifier` edge, so master lifted that OUTPUT via thin pipe and the **Stage-4 fixture-leak gate aborted every master rebuild** (failing CI run 26750877564, 11:01 UTC) — freezing prod on stale master v63. Re-rendered news-swfl **live** (`bun refinery/cli.mts news-swfl`, source=live, 9 fragments = 3 press releases + 6 public notices) → v2, sentinel gone. Verified: no `(fixture` token in any `brains/*.md`; master now rebuilds clean (local `bun refinery/cli.mts master` → v64, Stage 4 EXIT=0; restored committed v63 — the real master rebuild is §7 after the cre-swfl/FEMA fixes). Only `news-swfl.md` committed here. Next: §1 (FEMA per-ZIP `reportedZipCode` typo) + the rest of the critical path. Plan: `~/.claude/plans/look-into-all-of-scalable-engelbart.md`.
