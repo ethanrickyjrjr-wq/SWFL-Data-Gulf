@@ -596,7 +596,34 @@ export function composeGrainBoundary(args: {
     );
   }
 
-  return { not_available, finest_grain: "county-month" };
+  // Routes — sanctioned finer-grain offers. master's default grain is
+  // county-month, but some upstreams publish finer (per-ZIP, per-association).
+  // Surface those as plain user offers so a downstream Claude can route to the
+  // grain we actually hold instead of opening with a flat "we don't carry it."
+  //
+  // GATE ON CONTRIBUTION, NOT WIRING. Each rule fires only when its upstream
+  // emitted the finer-grain metric THIS run — a present-but-empty upstream
+  // (env-swfl before §1's per-ZIP FEMA data lands; a brain that returned 0 rows
+  // for the geography) must never light a false offer. Same failure mode as the
+  // cre-swfl MarketBeat coverage caveat that fired on an empty feed.
+  const byId = new Map(passing.map((p) => [p.upstream.brain_id, p.upstream]));
+  const routes: string[] = [];
+  const envSwfl = byId.get("env-swfl");
+  if (envSwfl && envSwfl.key_metrics.some((m) => /^swfl_zip_/.test(m.metric))) {
+    routes.push(
+      "Flood risk is tracked per ZIP — want it for a specific ZIP or address?",
+    );
+  }
+  // TODO(§3 + §9): add a condo-association route once condo-sirs-swfl is wired
+  // to master AND holds per-association grain. Today its connector is
+  // count-only-by-county (dbpr-sirs-source.mts), so offering "filings for that
+  // building?" would be the inverse FMB bug — offering a grain we don't hold.
+
+  return {
+    not_available,
+    finest_grain: "county-month",
+    ...(routes.length > 0 ? { routes } : {}),
+  };
 }
 
 /**

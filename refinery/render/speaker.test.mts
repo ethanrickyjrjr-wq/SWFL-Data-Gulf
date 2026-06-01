@@ -350,3 +350,73 @@ describe("speak — tier 3", () => {
     assert.ok(out.includes("properties-lee-value"));
   });
 });
+
+describe("speak — tier 2 grain_boundary.routes", () => {
+  const FLOOD_OFFER =
+    "Flood risk is tracked per ZIP — want it for a specific ZIP or address?";
+
+  test("routes render under 'You can also ask:', never under 'What this can't tell you'", () => {
+    const md = speak(
+      parsedFixture({
+        grain_boundary: {
+          not_available: ["County-level only for most series this run."],
+          finest_grain: "county-month",
+          routes: [FLOOD_OFFER],
+        },
+      }),
+      { tier: 2 },
+    );
+    assert.match(md, /You can also ask:/);
+    assert.ok(md.includes(FLOOD_OFFER), "offer text should be rendered");
+
+    // The offer must live in the offer block, NOT inside the denial block —
+    // rendering an offer under "What this can't tell you" is the contradiction
+    // this whole field exists to avoid.
+    const blocks = md.split("\n\n");
+    const denialBlock = blocks.find((b) =>
+      b.includes("What this can't tell you"),
+    );
+    assert.ok(
+      !denialBlock || !denialBlock.includes(FLOOD_OFFER),
+      "offer must not appear under the can't-tell-you header",
+    );
+    const askBlock = blocks.find((b) => b.includes("You can also ask"));
+    assert.ok(
+      askBlock && askBlock.includes(FLOOD_OFFER),
+      "offer must appear under the ask header",
+    );
+  });
+
+  test("no routes → no 'You can also ask:' block", () => {
+    const md = speak(
+      parsedFixture({
+        grain_boundary: {
+          not_available: ["County-level only."],
+          finest_grain: "county-month",
+        },
+      }),
+      { tier: 2 },
+    );
+    assert.ok(!md.includes("You can also ask:"));
+  });
+
+  test("grain_boundary.routes survive the OUTPUT JSON round-trip (block is JSON.stringify→JSON.parse)", () => {
+    const out = outputFixture({
+      grain_boundary: {
+        not_available: ["County-level only for most series."],
+        finest_grain: "county-month",
+        routes: [FLOOD_OFFER],
+      },
+    });
+    const frontmatter = [
+      "brain_id: master",
+      "version: 1",
+      "freshness_token: SWFL-7421-v1-20260520",
+      "scope: SWFL Intelligence Lake — fixture",
+      "refined_at: 2026-05-20T00:00:00Z",
+    ].join("\n");
+    const md = `---\n${frontmatter}\n---\n\n--- OUTPUT ---\n${JSON.stringify(out, null, 2)}\n--- END ---\n`;
+    const parsed = parseBrainMarkdown(md);
+    assert.deepEqual(parsed.output.grain_boundary?.routes, [FLOOD_OFFER]);
+  });
+});

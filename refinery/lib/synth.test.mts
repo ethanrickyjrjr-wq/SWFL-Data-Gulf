@@ -794,6 +794,79 @@ test("composeGrainBoundary: well-formed grain + non-empty boundary + excluded no
   assert.match(gb.finest_grain, /^[a-z]+-[a-z]+$/);
 });
 
+test("composeGrainBoundary: env-swfl contributing per-ZIP metrics this run → flood route offered", () => {
+  // env-swfl is a master upstream; when it actually emits swfl_zip_* metrics
+  // this run (i.e. §1 FEMA per-ZIP data is live), master holds a finer grain
+  // than county for flood — surface it as a plain user offer.
+  const passing = [
+    {
+      upstream: brain("env-swfl", "bearish", 0.6, 0.8, {
+        key_metrics: [
+          metric({
+            metric: "swfl_zip_33931_flood_aal_usd_per_insured_property",
+            value: 850,
+            direction: "stable",
+            label: "33931 flood AAL per insured property",
+          }),
+        ],
+      }),
+      factor: 1,
+    },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 1,
+    relevanceFloor: 0.1,
+  });
+  assert.ok(gb.routes && gb.routes.length > 0, "expected a route offer");
+  assert.ok(
+    gb.routes!.some((r) => /flood/i.test(r) && /zip/i.test(r)),
+    `expected a per-ZIP flood offer, got: ${JSON.stringify(gb.routes)}`,
+  );
+});
+
+test("composeGrainBoundary: env-swfl wired but NO per-ZIP metrics this run → no flood route (gate on data, not wiring)", () => {
+  // Same bug class as the §2 MarketBeat caveat: a present-but-empty upstream
+  // must not light an offer. env-swfl with only metro-level metrics holds no
+  // finer grain this run.
+  const passing = [
+    {
+      upstream: brain("env-swfl", "bearish", 0.6, 0.8, {
+        key_metrics: [
+          metric({
+            metric: "swfl_metro_flood_aal_usd",
+            value: 700,
+            direction: "stable",
+            label: "metro flood AAL",
+          }),
+        ],
+      }),
+      factor: 1,
+    },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 1,
+    relevanceFloor: 0.1,
+  });
+  assert.ok(
+    !gb.routes || gb.routes.length === 0,
+    `expected no routes when env-swfl emits no per-ZIP metrics, got: ${JSON.stringify(gb.routes)}`,
+  );
+});
+
+test("composeGrainBoundary: no env-swfl upstream → no routes", () => {
+  const passing = [
+    { upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 1,
+    relevanceFloor: 0.1,
+  });
+  assert.ok(!gb.routes || gb.routes.length === 0);
+});
+
 // ---- predictedWindow -------------------------------------------------------
 
 test("predictedWindow: neutral vote → undefined", () => {

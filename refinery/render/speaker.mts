@@ -317,6 +317,18 @@ function renderTier2(brain: ParsedBrain, reportLink: string | null): string {
           .join(" "),
     );
   }
+  // Finer-grain offers ride in their OWN block — never folded into the
+  // can't-tell-you line above. These are grains we DO hold this run, surfaced
+  // as plain user invitations (no internal ids, per the output-presentation
+  // rule). Absent on every brain that holds no finer grain.
+  if (out.grain_boundary?.routes && out.grain_boundary.routes.length > 0) {
+    blocks.push(
+      "**You can also ask:**\n" +
+        out.grain_boundary.routes
+          .map((s) => `- ${sanitizeProse(s)}`)
+          .join("\n"),
+    );
+  }
   if (reportLink) blocks.push(`Full audit → ${reportLink}`);
   blocks.push(`_Freshness:_ \`${brain.freshness_token}\``);
   return blocks.join("\n\n");

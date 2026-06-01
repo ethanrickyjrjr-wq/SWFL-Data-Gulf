@@ -590,6 +590,17 @@ export function validateSpec(md: string): ValidationResult {
                 "--- OUTPUT --- grain_boundary.finest_grain must be a non-empty string.",
               );
             }
+            if (
+              gb.routes !== undefined &&
+              (!Array.isArray(gb.routes) ||
+                (gb.routes as unknown[]).some(
+                  (s) => typeof s !== "string" || s === "",
+                ))
+            ) {
+              errors.push(
+                "--- OUTPUT --- grain_boundary.routes must be an array of non-empty strings when present.",
+              );
+            }
           }
         }
         if (

@@ -191,9 +191,21 @@ export interface GrainBoundary {
   /**
    * Finest grain the payload supports, e.g. "county-month". The consumer must
    * not offer a finer drill-down (a named business, a ZIP, a quarter) than
-   * this. Format: "<unit>-<period>".
+   * this — EXCEPT for the sanctioned exceptions enumerated in `routes`.
+   * Format: "<unit>-<period>".
    */
   finest_grain: string;
+  /**
+   * Plain-English, user-facing offers for a FINER grain the lake actually
+   * holds this run — the sanctioned exceptions to `finest_grain`. Each entry
+   * is gated on the relevant upstream having CONTRIBUTED that finer grain in
+   * the current build (not merely being wired), so a present-but-empty
+   * upstream never produces a false offer. Never carries internal pack ids.
+   * Optional/absent on every leaf brain and on master when no upstream holds a
+   * finer grain. Distinct from `not_available` (true gaps) and `caveats`
+   * (limitations on what we DO have).
+   */
+  routes?: string[];
 }
 
 export interface BrainOutput {
