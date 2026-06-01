@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Sonnet 4.6 · main) — chore(dbpr-sirs): probe + DDL for SIRS submissions table — pipeline plan written, table live
+
+Full structure probe of DBPR's two SIRS Qlik apps confirmed: data in DOM (not canvas), no ID column in July 2025+ schema, no status column (presence = complete), URL county pre-filter non-functional. DDL applied: `data_lake.dbpr_sirs_submissions` (14 cols, 4 indexes) with nullable `dbpr_id` (pre-July only), `row_hash` dedup key, `result_truncated` flag. Statewide visible rows: pre-July ~1,208 (LEE=3, COLLIER=6), July 2025+ ~1,774 (LEE=90, COLLIER=181). Both apps hit Qlik hypercube limit mid-load — extraction approach: 15s wait + Python county filter. Brain-first gate applies — pipeline + `condo-sirs-swfl` pack must ship together. Full implementation plan: `docs/superpowers/plans/2026-06-01-dbpr-sirs-submissions/README.md`. SQL on disk: `docs/sql/20260601_dbpr_sirs_submissions.sql`.
+
 ## 2026-06-01 (Sonnet 4.6 · main) — fix(fl-dbpr-licenses): replace stream=True + TextIOWrapper with resp.content decode — closes GHA dry-run crash
 
 `_stream_csv` in resources.py used `requests.get(stream=True)` + `io.TextIOWrapper(resp.raw)`. GHA run 26737829191 showed `ValueError: I/O operation on closed file` because urllib3's raw socket closed before the lazy `list(reader)` could consume it. Fix: read the full response with `resp.content.decode("utf-8-sig")` and wrap in `io.StringIO`. DBPR bulk CSVs are 5-50 MB — safe to hold in memory.
