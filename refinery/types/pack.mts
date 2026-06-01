@@ -24,7 +24,8 @@ export type BrainDomain =
   | "demographics"
   | "logistics"
   | "hospitality"
-  | "macro";
+  | "macro"
+  | "regulatory";
 
 /**
  * Source authority tier — drives the deterministic confidence formula.

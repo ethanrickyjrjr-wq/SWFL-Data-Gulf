@@ -133,9 +133,12 @@ def parse_july_plus_rows(markdown: str) -> list[dict]:
 
 
 def get_db_conn():
+    # GHA passes the URI directly; local dev falls back to .dlt/secrets.toml
+    uri = os.environ.get('DESTINATION__POSTGRES__CREDENTIALS')
+    if uri:
+        return psycopg.connect(uri)
     secrets_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', '.dlt', 'secrets.toml')
-    # Parse only the postgres credentials block manually (secrets.toml has a non-TOML line at end)
-    creds = {}
+    creds: dict[str, str] = {}
     in_block = False
     with open(secrets_path, 'r') as f:
         for line in f:
