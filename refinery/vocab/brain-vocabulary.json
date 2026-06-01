@@ -2,15 +2,17 @@
   "meta": {
     "schema_version": "1.0.0",
     "created_at": "2026-05-16",
-    "description": "SWFL Intelligence Lake \u00e2\u20ac\u201d canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
+    "description": "SWFL Intelligence Lake â€” canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
     "next_review": "2026-08-15",
     "audit_doc": "docs/vocab-audit.md",
-    "concept_count": 169
+    "concept_count": 175
   },
   "concepts": {
     "sba_overall_survival_rate": {
       "id": "sba_overall_survival_rate",
-      "grade": { "direction_polarity": "higher_is_bullish" },
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SBA Franchise Survival Rate (Corpus)",
       "altLabels": [
         "overall survival rate",
@@ -39,7 +41,9 @@
     },
     "sba_best_sector_survival": {
       "id": "sba_best_sector_survival",
-      "grade": { "direction_polarity": "higher_is_bullish" },
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Best-Sector SBA Survival Rate",
       "altLabels": [
         "best NAICS survival"
@@ -67,7 +71,9 @@
     },
     "sba_worst_sector_chargeoff": {
       "id": "sba_worst_sector_chargeoff",
-      "grade": { "direction_polarity": "lower_is_bullish" },
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Worst-Sector SBA Charge-off Rate",
       "altLabels": [
         "worst NAICS charge-off"
@@ -95,7 +101,7 @@
     },
     "sba_chargeoff_rate_sector_23": {
       "id": "sba_chargeoff_rate_sector_23",
-      "prefLabel": "Construction (NAICS 23) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Construction (NAICS 23) â€” SBA Charge-off Rate",
       "altLabels": [
         "Construction charge-off rate"
       ],
@@ -122,7 +128,7 @@
     },
     "sba_chargeoff_rate_sector_42": {
       "id": "sba_chargeoff_rate_sector_42",
-      "prefLabel": "Wholesale Trade (NAICS 42) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Wholesale Trade (NAICS 42) â€” SBA Charge-off Rate",
       "altLabels": [
         "Wholesale Trade charge-off rate"
       ],
@@ -149,7 +155,7 @@
     },
     "sba_chargeoff_rate_sector_44": {
       "id": "sba_chargeoff_rate_sector_44",
-      "prefLabel": "Retail Trade \u00e2\u20ac\u201d Motor Vehicle & General Merchandise (NAICS 44) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Retail Trade â€” Motor Vehicle & General Merchandise (NAICS 44) â€” SBA Charge-off Rate",
       "altLabels": [
         "Retail Trade 44 charge-off rate",
         "NAICS 44 charge-off rate"
@@ -162,7 +168,7 @@
         "finance"
       ],
       "naics_code": 44,
-      "naics_title": "Retail Trade \u00e2\u20ac\u201d Motor Vehicle Dealers, Electronics, Building Materials, Food & Beverage Stores",
+      "naics_title": "Retail Trade â€” Motor Vehicle Dealers, Electronics, Building Materials, Food & Beverage Stores",
       "source_brains": [
         "sector-credit-swfl"
       ],
@@ -174,11 +180,11 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "DISTINCT from sba_chargeoff_rate_sector_45. NAICS 44 covers motor vehicle dealers, electronics, building materials, and food/beverage stores. Both 44 and 45 are officially titled 'Retail Trade' by the SBA \u00e2\u20ac\u201d use naics_code to disambiguate, never the label alone."
+      "scope_note": "DISTINCT from sba_chargeoff_rate_sector_45. NAICS 44 covers motor vehicle dealers, electronics, building materials, and food/beverage stores. Both 44 and 45 are officially titled 'Retail Trade' by the SBA â€” use naics_code to disambiguate, never the label alone."
     },
     "sba_chargeoff_rate_sector_45": {
       "id": "sba_chargeoff_rate_sector_45",
-      "prefLabel": "Retail Trade \u00e2\u20ac\u201d Clothing, Sporting Goods & Non-store (NAICS 45) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Retail Trade â€” Clothing, Sporting Goods & Non-store (NAICS 45) â€” SBA Charge-off Rate",
       "altLabels": [
         "Retail Trade 45 charge-off rate",
         "NAICS 45 charge-off rate"
@@ -191,7 +197,7 @@
         "finance"
       ],
       "naics_code": 45,
-      "naics_title": "Retail Trade \u00e2\u20ac\u201d Clothing, Sporting Goods, Hobby, Book, General Merchandise, Non-store Retailers",
+      "naics_title": "Retail Trade â€” Clothing, Sporting Goods, Hobby, Book, General Merchandise, Non-store Retailers",
       "source_brains": [
         "sector-credit-swfl"
       ],
@@ -203,11 +209,11 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "DISTINCT from sba_chargeoff_rate_sector_44. NAICS 45 covers clothing stores, sporting goods, hobby shops, general merchandise, and non-store retailers. Both 44 and 45 are officially titled 'Retail Trade' by the SBA \u00e2\u20ac\u201d use naics_code to disambiguate, never the label alone."
+      "scope_note": "DISTINCT from sba_chargeoff_rate_sector_44. NAICS 45 covers clothing stores, sporting goods, hobby shops, general merchandise, and non-store retailers. Both 44 and 45 are officially titled 'Retail Trade' by the SBA â€” use naics_code to disambiguate, never the label alone."
     },
     "sba_chargeoff_rate_sector_48": {
       "id": "sba_chargeoff_rate_sector_48",
-      "prefLabel": "Transportation & Warehousing (NAICS 48) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Transportation & Warehousing (NAICS 48) â€” SBA Charge-off Rate",
       "altLabels": [
         "Transportation charge-off rate",
         "Transport & Warehousing charge-off rate"
@@ -235,7 +241,7 @@
     },
     "sba_chargeoff_rate_sector_52": {
       "id": "sba_chargeoff_rate_sector_52",
-      "prefLabel": "Finance & Insurance (NAICS 52) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Finance & Insurance (NAICS 52) â€” SBA Charge-off Rate",
       "altLabels": [
         "Finance & Insurance charge-off rate"
       ],
@@ -262,7 +268,7 @@
     },
     "sba_chargeoff_rate_sector_53": {
       "id": "sba_chargeoff_rate_sector_53",
-      "prefLabel": "Real Estate, Rental & Leasing (NAICS 53) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Real Estate, Rental & Leasing (NAICS 53) â€” SBA Charge-off Rate",
       "altLabels": [
         "Real Estate charge-off rate"
       ],
@@ -290,7 +296,7 @@
     },
     "sba_chargeoff_rate_sector_54": {
       "id": "sba_chargeoff_rate_sector_54",
-      "prefLabel": "Professional, Scientific & Technical Services (NAICS 54) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Professional, Scientific & Technical Services (NAICS 54) â€” SBA Charge-off Rate",
       "altLabels": [
         "Professional Services charge-off rate"
       ],
@@ -317,7 +323,7 @@
     },
     "sba_chargeoff_rate_sector_56": {
       "id": "sba_chargeoff_rate_sector_56",
-      "prefLabel": "Administrative & Support Services (NAICS 56) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Administrative & Support Services (NAICS 56) â€” SBA Charge-off Rate",
       "altLabels": [
         "Admin & Support charge-off rate"
       ],
@@ -344,7 +350,7 @@
     },
     "sba_chargeoff_rate_sector_62": {
       "id": "sba_chargeoff_rate_sector_62",
-      "prefLabel": "Health Care & Social Assistance (NAICS 62) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Health Care & Social Assistance (NAICS 62) â€” SBA Charge-off Rate",
       "altLabels": [
         "Health Care charge-off rate"
       ],
@@ -371,7 +377,7 @@
     },
     "sba_chargeoff_rate_sector_71": {
       "id": "sba_chargeoff_rate_sector_71",
-      "prefLabel": "Arts, Entertainment & Recreation (NAICS 71) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Arts, Entertainment & Recreation (NAICS 71) â€” SBA Charge-off Rate",
       "altLabels": [
         "Arts & Entertainment charge-off rate"
       ],
@@ -399,7 +405,7 @@
     },
     "sba_chargeoff_rate_sector_72": {
       "id": "sba_chargeoff_rate_sector_72",
-      "prefLabel": "Accommodation & Food Services (NAICS 72) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Accommodation & Food Services (NAICS 72) â€” SBA Charge-off Rate",
       "altLabels": [
         "Food Service charge-off rate",
         "Accommodation charge-off rate"
@@ -428,7 +434,7 @@
     },
     "sba_chargeoff_rate_sector_81": {
       "id": "sba_chargeoff_rate_sector_81",
-      "prefLabel": "Other Services \u00e2\u20ac\u201d Personal & Repair (NAICS 81) \u00e2\u20ac\u201d SBA Charge-off Rate",
+      "prefLabel": "Other Services â€” Personal & Repair (NAICS 81) â€” SBA Charge-off Rate",
       "altLabels": [
         "Other Services charge-off rate",
         "Personal & Repair charge-off rate"
@@ -652,7 +658,7 @@
       "unit": "USD/sqft",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Average asking rent, NNN, per square foot. Bullish polarity: rising = pricing power \u00e2\u20ac\u201d BUT rising rent + rising vacancy = distress (asking-price stickiness, not real pricing power). Polarity is enforced per metric in the cre-swfl voteCorridor."
+      "scope_note": "Average asking rent, NNN, per square foot. Bullish polarity: rising = pricing power â€” BUT rising rent + rising vacancy = distress (asking-price stickiness, not real pricing power). Polarity is enforced per metric in the cre-swfl voteCorridor."
     },
     "cre_asking_rent_psf_median": {
       "id": "cre_asking_rent_psf_median",
@@ -695,7 +701,7 @@
         "cre-swfl"
       ],
       "value_type": "index",
-      "unit": "0\u00e2\u20ac\u201c1 scale",
+      "unit": "0â€“1 scale",
       "value_range": [
         0,
         1
@@ -933,7 +939,7 @@
         "all"
       ],
       "value_type": "index",
-      "unit": "0\u00e2\u20ac\u201c1 scale",
+      "unit": "0â€“1 scale",
       "value_range": [
         0,
         1
@@ -961,14 +967,14 @@
         "all"
       ],
       "value_type": "index",
-      "unit": "0\u00e2\u20ac\u201c1 scale",
+      "unit": "0â€“1 scale",
       "value_range": [
         0,
         1
       ],
       "direction_concept": null,
       "status": "active",
-      "scope_note": "avg(trust_tier_score) \u00c3\u2014 freshness_ratio. Deterministic \u00e2\u20ac\u201d never produced by an LLM. Formula: refinery/lib/confidence.mts."
+      "scope_note": "avg(trust_tier_score) Ã— freshness_ratio. Deterministic â€” never produced by an LLM. Formula: refinery/lib/confidence.mts."
     },
     "qual_trust_tier": {
       "id": "qual_trust_tier",
@@ -1024,7 +1030,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "stub",
-      "scope_note": "Generic flood-risk percentage at unspecified spatial granularity. Currently a stub \u00e2\u20ac\u201d no source brain emits it, and the SWFL flood-coverage signal is carried instead by the scope-specific concepts env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct (and their V/VE-zone siblings)."
+      "scope_note": "Generic flood-risk percentage at unspecified spatial granularity. Currently a stub â€” no source brain emits it, and the SWFL flood-coverage signal is carried instead by the scope-specific concepts env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct (and their V/VE-zone siblings)."
     },
     "env_swfl_sfha_coverage_pct": {
       "id": "env_swfl_sfha_coverage_pct",
@@ -1045,14 +1051,14 @@
         "env-swfl"
       ],
       "value_type": "ratio",
-      "unit": "ratio (0\u00e2\u20ac\u201c1)",
+      "unit": "ratio (0â€“1)",
       "value_range": [
         0,
         1
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Area-weighted share of mapped SWFL footprint (6 counties) classified as a FEMA Special Flood Hazard Area per 44 CFR \u00c2\u00a759.1. Computed in env-swfl via sum(Shape__Area) over SFHA-classified zones \u00c3\u00b7 sum(Shape__Area) over all returned zones. Areas are square decimal degrees (WGS84); only the RATIO is meaningful \u00e2\u20ac\u201d absolute areas never propagate."
+      "scope_note": "Area-weighted share of mapped SWFL footprint (6 counties) classified as a FEMA Special Flood Hazard Area per 44 CFR Â§59.1. Computed in env-swfl via sum(Shape__Area) over SFHA-classified zones Ã· sum(Shape__Area) over all returned zones. Areas are square decimal degrees (WGS84); only the RATIO is meaningful â€” absolute areas never propagate."
     },
     "env_swfl_ve_zone_coverage_pct": {
       "id": "env_swfl_ve_zone_coverage_pct",
@@ -1073,14 +1079,14 @@
         "env-swfl"
       ],
       "value_type": "ratio",
-      "unit": "ratio (0\u00e2\u20ac\u201c1)",
+      "unit": "ratio (0â€“1)",
       "value_range": [
         0,
         1
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Area-weighted share of mapped SWFL footprint (6 counties) classified as FEMA coastal high-hazard (V, VE, V1\u00e2\u20ac\u201cV30, V99). Coastal-high-hazard zones are the V-prefixed subset of SFHA, distinguished from A-prefixed riverine/sheet-flow SFHA by wave-action exposure. Pair with env_swfl_sfha_coverage_pct for full structural-flood context."
+      "scope_note": "Area-weighted share of mapped SWFL footprint (6 counties) classified as FEMA coastal high-hazard (V, VE, V1â€“V30, V99). Coastal-high-hazard zones are the V-prefixed subset of SFHA, distinguished from A-prefixed riverine/sheet-flow SFHA by wave-action exposure. Pair with env_swfl_sfha_coverage_pct for full structural-flood context."
     },
     "env_swfl_ve_zone_polygon_count": {
       "id": "env_swfl_ve_zone_polygon_count",
@@ -1126,14 +1132,14 @@
         "env-swfl"
       ],
       "value_type": "ratio",
-      "unit": "ratio (0\u00e2\u20ac\u201c1)",
+      "unit": "ratio (0â€“1)",
       "value_range": [
         0,
         1
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Lee County (FIPS 12071) area-weighted SFHA coverage \u00e2\u20ac\u201d the Fort Myers / Fort Myers Beach / Sanibel / Captiva footprint. The \u00c2\u00a76.4 FMB lease question keys on this and env_lee_ve_zone_coverage_pct."
+      "scope_note": "Lee County (FIPS 12071) area-weighted SFHA coverage â€” the Fort Myers / Fort Myers Beach / Sanibel / Captiva footprint. The Â§6.4 FMB lease question keys on this and env_lee_ve_zone_coverage_pct."
     },
     "env_lee_ve_zone_coverage_pct": {
       "id": "env_lee_ve_zone_coverage_pct",
@@ -1155,14 +1161,14 @@
         "env-swfl"
       ],
       "value_type": "ratio",
-      "unit": "ratio (0\u00e2\u20ac\u201c1)",
+      "unit": "ratio (0â€“1)",
       "value_range": [
         0,
         1
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Lee County (FIPS 12071) area-weighted share of mapped footprint classified as FEMA coastal high-hazard (V, VE, V1\u00e2\u20ac\u201cV30, V99). Pair with env_lee_sfha_coverage_pct for full structural-flood context. Lee County's coastal high-hazard exposure concentrates in the barrier-island ZIPs (33931 Fort Myers Beach, 33957 Sanibel, 33924 Captiva); county-aggregate values average across that concentration."
+      "scope_note": "Lee County (FIPS 12071) area-weighted share of mapped footprint classified as FEMA coastal high-hazard (V, VE, V1â€“V30, V99). Pair with env_lee_sfha_coverage_pct for full structural-flood context. Lee County's coastal high-hazard exposure concentrates in the barrier-island ZIPs (33931 Fort Myers Beach, 33957 Sanibel, 33924 Captiva); county-aggregate values average across that concentration."
     },
     "env_collier_sfha_coverage_pct": {
       "id": "env_collier_sfha_coverage_pct",
@@ -1184,14 +1190,14 @@
         "env-swfl"
       ],
       "value_type": "ratio",
-      "unit": "ratio (0\u00e2\u20ac\u201c1)",
+      "unit": "ratio (0â€“1)",
       "value_range": [
         0,
         1
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Collier County (FIPS 12021) area-weighted SFHA coverage \u00e2\u20ac\u201d the Naples / Marco Island / Everglades-fringe footprint. Pair with env_collier_ve_zone_coverage_pct for coastal-vs-inland structural read."
+      "scope_note": "Collier County (FIPS 12021) area-weighted SFHA coverage â€” the Naples / Marco Island / Everglades-fringe footprint. Pair with env_collier_ve_zone_coverage_pct for coastal-vs-inland structural read."
     },
     "env_collier_ve_zone_coverage_pct": {
       "id": "env_collier_ve_zone_coverage_pct",
@@ -1213,7 +1219,7 @@
         "env-swfl"
       ],
       "value_type": "ratio",
-      "unit": "ratio (0\u00e2\u20ac\u201c1)",
+      "unit": "ratio (0â€“1)",
       "value_range": [
         0,
         1
@@ -1282,7 +1288,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Median annual total of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115), restricted to non-storm years only (the full 1978-onward archive MINUS the SWFL_STORM_YEARS list in refinery/sources/fema-nfip-source.mts). The 'boring-times floor' for SWFL flood losses \u00e2\u20ac\u201d the denominator for env_flood_losses_swfl_post_ian_ratio."
+      "scope_note": "Median annual total of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115), restricted to non-storm years only (the full 1978-onward archive MINUS the SWFL_STORM_YEARS list in refinery/sources/fema-nfip-source.mts). The 'boring-times floor' for SWFL flood losses â€” the denominator for env_flood_losses_swfl_post_ian_ratio."
     },
     "env_flood_losses_swfl_storm_year_count_since_2000": {
       "id": "env_flood_losses_swfl_storm_year_count_since_2000",
@@ -1312,11 +1318,11 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of named SWFL-impacting hurricane years since 2000 with paid-claim totals > 10\u00c3\u2014 baseline. Operationally = the SWFL_STORM_YEARS hardcoded list in refinery/sources/fema-nfip-source.mts filtered to year >= 2000, deduplicated by year \u00e2\u20ac\u201d currently Charley 2004, Wilma 2005, Irma 2017, Ian 2022, and 2024 (Helene + Milton, same year) (n=5 distinct years). Reads as 'how often does SWFL get hammered by flood claims'; the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) are the union scope."
+      "scope_note": "Count of named SWFL-impacting hurricane years since 2000 with paid-claim totals > 10Ã— baseline. Operationally = the SWFL_STORM_YEARS hardcoded list in refinery/sources/fema-nfip-source.mts filtered to year >= 2000, deduplicated by year â€” currently Charley 2004, Wilma 2005, Irma 2017, Ian 2022, and 2024 (Helene + Milton, same year) (n=5 distinct years). Reads as 'how often does SWFL get hammered by flood claims'; the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) are the union scope."
     },
     "env_flood_losses_swfl_post_ian_ratio": {
       "id": "env_flood_losses_swfl_post_ian_ratio",
-      "prefLabel": "SWFL Post-Ian Flood Recovery Ratio (Latest Year \u00c3\u00b7 Baseline)",
+      "prefLabel": "SWFL Post-Ian Flood Recovery Ratio (Latest Year Ã· Baseline)",
       "altLabels": [
         "post-Ian claims ratio",
         "SWFL flood recovery ratio",
@@ -1344,7 +1350,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Most recent complete year's sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) \u00c3\u00b7 env_flood_losses_swfl_baseline_annual_usd. >2 = elevated activity (still in storm recovery); ~1 = back to baseline. Tracks the Ian/Helene/Milton recovery curve."
+      "scope_note": "Most recent complete year's sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) Ã· env_flood_losses_swfl_baseline_annual_usd. >2 = elevated activity (still in storm recovery); ~1 = back to baseline. Tracks the Ian/Helene/Milton recovery curve."
     },
     "env_zip_flood_aal_usd_per_insured_property": {
       "id": "env_zip_flood_aal_usd_per_insured_property",
@@ -1377,7 +1383,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Per-SWFL-ZIP average annual flood loss: sum(amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim over last AAL_WINDOW_YEARS=10 years where reported_zipcode=Z) \u00c3\u00b7 10 \u00c3\u00b7 insured_denominator(Z), where v1 insured_denominator(Z) = ZIP_POPULATION_2020[Z] \u00c3\u2014 INSURED_PENETRATION_FACTOR (0.30 NSI proxy). Emitted by env-swfl as one metric per top-6 highest-AAL ZIP with the slug template swfl_zip_{ZIP}_flood_aal_usd_per_insured_property; the ZIP-templated slugs bypass SKOS resolveConceptSlugs at constitution-trigger time and are matched via regex (see refinery/constitution/real-estate.mts) \u00e2\u20ac\u201d this SKOS concept exists for documentation, semantic-ledger surfacing, and downstream brain reference. v2 replaces the population \u00c3\u2014 0.30 proxy with the live OpenFEMA NFIP Policies insured-property count."
+      "scope_note": "Per-SWFL-ZIP average annual flood loss: sum(amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim over last AAL_WINDOW_YEARS=10 years where reported_zipcode=Z) Ã· 10 Ã· insured_denominator(Z), where v1 insured_denominator(Z) = ZIP_POPULATION_2020[Z] Ã— INSURED_PENETRATION_FACTOR (0.30 NSI proxy). Emitted by env-swfl as one metric per top-6 highest-AAL ZIP with the slug template swfl_zip_{ZIP}_flood_aal_usd_per_insured_property; the ZIP-templated slugs bypass SKOS resolveConceptSlugs at constitution-trigger time and are matched via regex (see refinery/constitution/real-estate.mts) â€” this SKOS concept exists for documentation, semantic-ledger surfacing, and downstream brain reference. v2 replaces the population Ã— 0.30 proxy with the live OpenFEMA NFIP Policies insured-property count."
     },
     "env_zip_flood_aal_pct_swfl_rank": {
       "id": "env_zip_flood_aal_pct_swfl_rank",
@@ -1410,7 +1416,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Linear-method percentile rank of a ZIP's per-insured-property AAL across all SWFL ZIPs with \u00e2\u2030\u00a51 claim in the AAL_WINDOW_YEARS=10 window. 100 = highest-AAL ZIP, 0 = lowest. Computed across the FULL SWFL ZIP distribution (not just the top-6) so the value is comparable across runs even though only top-6 fragments are emitted. Emitted with slug template swfl_zip_{ZIP}_flood_aal_pct_swfl_rank; ZIP-templated slugs bypass SKOS at runtime per refinery/constitution/real-estate.mts."
+      "scope_note": "Linear-method percentile rank of a ZIP's per-insured-property AAL across all SWFL ZIPs with â‰¥1 claim in the AAL_WINDOW_YEARS=10 window. 100 = highest-AAL ZIP, 0 = lowest. Computed across the FULL SWFL ZIP distribution (not just the top-6) so the value is comparable across runs even though only top-6 fragments are emitted. Emitted with slug template swfl_zip_{ZIP}_flood_aal_pct_swfl_rank; ZIP-templated slugs bypass SKOS at runtime per refinery/constitution/real-estate.mts."
     },
     "env_zip_barrier_island_score": {
       "id": "env_zip_barrier_island_score",
@@ -1443,7 +1449,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Three-state SWFL geographic classification from the static table in refinery/lib/swfl-geo.mts: 1.0 = barrier island (Fort Myers Beach 33931, Sanibel 33957, Captiva 33924, Marco Island 34145, Boca Grande 33921); 0.5 = coastal-mainland (Bonita Beach 34134, Naples coastal 34102, Cape Coral SW 33914, Fort Myers downtown 33901); 0.0 = inland (Cape Coral E 33990, North Naples 34109, East Naples 34112, plus all SWFL ZIPs not in the table \u00e2\u20ac\u201d conservative default). The flood-barrier-mode-1 constitution rule in real-estate.mts fires only when this score is 1.0 AND aal_usd_per_insured_property \u00e2\u2030\u00a5 FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD ($800/yr). Validator validateClassification(zipAALs) warns at build time if a high-AAL ZIP is not in the table \u00e2\u20ac\u201d stale-table sentinel. Emitted with slug template swfl_zip_{ZIP}_barrier_island_score."
+      "scope_note": "Three-state SWFL geographic classification from the static table in refinery/lib/swfl-geo.mts: 1.0 = barrier island (Fort Myers Beach 33931, Sanibel 33957, Captiva 33924, Marco Island 34145, Boca Grande 33921); 0.5 = coastal-mainland (Bonita Beach 34134, Naples coastal 34102, Cape Coral SW 33914, Fort Myers downtown 33901); 0.0 = inland (Cape Coral E 33990, North Naples 34109, East Naples 34112, plus all SWFL ZIPs not in the table â€” conservative default). The flood-barrier-mode-1 constitution rule in real-estate.mts fires only when this score is 1.0 AND aal_usd_per_insured_property â‰¥ FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD ($800/yr). Validator validateClassification(zipAALs) warns at build time if a high-AAL ZIP is not in the table â€” stale-table sentinel. Emitted with slug template swfl_zip_{ZIP}_barrier_island_score."
     },
     "env_zip_flood_cap_rate_adj_bps": {
       "id": "env_zip_flood_cap_rate_adj_bps",
@@ -1476,7 +1482,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Per-SWFL-ZIP cap-rate adjustment in basis points, derived from the barrier-island score via swfl-geo capRateBpsFor(): 1.0 \u00e2\u2020\u2019 barrier-island midpoint, 0.5 \u00e2\u2020\u2019 coastal-mainland midpoint, 0.0 \u00e2\u2020\u2019 inland (zero or minimal). Calibrated against ULI/LaSalle 2024 guidance of +25-50 bps for elevated physical risk, stratified by exposure intensity. Emitted by env-swfl as one metric per top-6 highest-AAL ZIP with the slug template swfl_zip_{ZIP}_flood_cap_rate_adj_bps. Source: internal://refinery/lib/swfl-geo.mts."
+      "scope_note": "Per-SWFL-ZIP cap-rate adjustment in basis points, derived from the barrier-island score via swfl-geo capRateBpsFor(): 1.0 â†’ barrier-island midpoint, 0.5 â†’ coastal-mainland midpoint, 0.0 â†’ inland (zero or minimal). Calibrated against ULI/LaSalle 2024 guidance of +25-50 bps for elevated physical risk, stratified by exposure intensity. Emitted by env-swfl as one metric per top-6 highest-AAL ZIP with the slug template swfl_zip_{ZIP}_flood_cap_rate_adj_bps. Source: internal://refinery/lib/swfl-geo.mts."
     },
     "env_zip_insurance_pct_typical_noi": {
       "id": "env_zip_insurance_pct_typical_noi",
@@ -1509,7 +1515,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Per-SWFL-ZIP imputed flood insurance load as a fraction of typical NOI: (AAL \u00c3\u2014 2) \u00c3\u00b7 (median_building_property_value \u00c3\u2014 0.08), where AAL is the per-insured-property NFIP loss (env_zip_flood_aal_usd_per_insured_property), median_building_property_value is the FEMA-reported median, and the 8% cap-rate assumption converts building value to a typical NOI proxy. Emitted by env-swfl as one metric per top-6 highest-AAL ZIP with the slug template swfl_zip_{ZIP}_insurance_pct_typical_noi."
+      "scope_note": "Per-SWFL-ZIP imputed flood insurance load as a fraction of typical NOI: (AAL Ã— 2) Ã· (median_building_property_value Ã— 0.08), where AAL is the per-insured-property NFIP loss (env_zip_flood_aal_usd_per_insured_property), median_building_property_value is the FEMA-reported median, and the 8% cap-rate assumption converts building value to a typical NOI proxy. Emitted by env-swfl as one metric per top-6 highest-AAL ZIP with the slug template swfl_zip_{ZIP}_insurance_pct_typical_noi."
     },
     "env_storm_property_damage_events_10yr_swfl": {
       "id": "env_storm_property_damage_events_10yr_swfl",
@@ -1593,7 +1599,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025) where damage_property >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}. Backward-looking risk-history aggregate \u00e2\u20ac\u201d pair with env-swfl (modeled exposure) for forward-looking decisions."
+      "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025) where damage_property >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}. Backward-looking risk-history aggregate â€” pair with env-swfl (modeled exposure) for forward-looking decisions."
     },
     "env_storm_total_storm_count_30yr_swfl": {
       "id": "env_storm_total_storm_count_30yr_swfl",
@@ -1621,7 +1627,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of ALL NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025). Denominator-style total \u00e2\u20ac\u201d provides context for the major-storm and 10-year-window ratios but is not itself a risk-magnitude indicator."
+      "scope_note": "Count of ALL NOAA Storm Events across LEE+COLLIER+CHARLOTTE over the FULL modern-schema vintage (1996-2025). Denominator-style total â€” provides context for the major-storm and 10-year-window ratios but is not itself a risk-magnitude indicator."
     },
     "env_storm_last_billion_dollar_event_date_swfl": {
       "id": "env_storm_last_billion_dollar_event_date_swfl",
@@ -1697,7 +1703,7 @@
       "value_type": "string",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Plus-joined alphabetical list of counties present in the storm-history corpus, e.g. 'CHARLOTTE+COLLIER+LEE'. Provides scope provenance \u00e2\u20ac\u201d if a county is missing, downstream consumers know NOT to trust the SWFL-wide rollup for that county."
+      "scope_note": "Plus-joined alphabetical list of counties present in the storm-history corpus, e.g. 'CHARLOTTE+COLLIER+LEE'. Provides scope provenance â€” if a county is missing, downstream consumers know NOT to trust the SWFL-wide rollup for that county."
     },
     "env_storm_ingest_vintage_swfl": {
       "id": "env_storm_ingest_vintage_swfl",
@@ -1804,7 +1810,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Mean of (SUM(amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim)) across all SWFL counties \u00c3\u2014 storm_year combinations where a HURDAT2 landfall occurred in the storm_year. Joins HURDAT2 landfall records to OpenFEMA NFIP claims via county_fips + year_of_loss. Cross-tier metric: HURDAT2 lives in Tier 1 Storage Parquet, NFIP in Tier 2 Postgres; the brain pre-joins both in DuckDB SQL."
+      "scope_note": "Mean of (SUM(amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim)) across all SWFL counties Ã— storm_year combinations where a HURDAT2 landfall occurred in the storm_year. Joins HURDAT2 landfall records to OpenFEMA NFIP claims via county_fips + year_of_loss. Cross-tier metric: HURDAT2 lives in Tier 1 Storage Parquet, NFIP in Tier 2 Postgres; the brain pre-joins both in DuckDB SQL."
     },
     "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl": {
       "id": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
@@ -1832,7 +1838,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Maximum NFIP paid (building+contents+ICO) across all (county, storm_year) combinations where a HURDAT2 landfall occurred in the SWFL footprint. Highlights the single worst county-year hit on record in the joined corpus; pairs with env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl for distribution context (mean vs max). Hurricane Ian \u00c3\u2014 Lee 2022 typically wins this in modern vintages."
+      "scope_note": "Maximum NFIP paid (building+contents+ICO) across all (county, storm_year) combinations where a HURDAT2 landfall occurred in the SWFL footprint. Highlights the single worst county-year hit on record in the joined corpus; pairs with env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl for distribution context (mean vs max). Hurricane Ian Ã— Lee 2022 typically wins this in modern vintages."
     },
     "env_hurricane_most_recent_landfall_swfl": {
       "id": "env_hurricane_most_recent_landfall_swfl",
@@ -1913,7 +1919,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Median groundwater elevation across Lee County (FIPS 12071) USGS active dv wells reporting parameter 62610 (groundwater level above NAVD88), computed over the most recent 90 days of observations available in data_lake.usgs_daily. Higher values mean a higher water table \u00e2\u20ac\u201d relevant to septic capacity, slab construction, and post-storm dewatering capacity in low-lying parcels."
+      "scope_note": "Median groundwater elevation across Lee County (FIPS 12071) USGS active dv wells reporting parameter 62610 (groundwater level above NAVD88), computed over the most recent 90 days of observations available in data_lake.usgs_daily. Higher values mean a higher water table â€” relevant to septic capacity, slab construction, and post-storm dewatering capacity in low-lying parcels."
     },
     "env_sw_stage_caloosahatchee_ft": {
       "id": "env_sw_stage_caloosahatchee_ft",
@@ -1943,7 +1949,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Most recent daily-mean gage height across USGS active dv sites in the Caloosahatchee HUC (03090205%) reporting parameter 00065. Reference is gage local zero, NOT a vertical datum \u00e2\u20ac\u201d useful for trend and threshold comparisons within the basin but NOT cross-site additive without datum conversion. Caloosahatchee at S-79 (site 02292900) is the canonical reference; multiple gages averaged via median when more than one reports on the same date."
+      "scope_note": "Most recent daily-mean gage height across USGS active dv sites in the Caloosahatchee HUC (03090205%) reporting parameter 00065. Reference is gage local zero, NOT a vertical datum â€” useful for trend and threshold comparisons within the basin but NOT cross-site additive without datum conversion. Caloosahatchee at S-79 (site 02292900) is the canonical reference; multiple gages averaged via median when more than one reports on the same date."
     },
     "env_rainfall_swfl_annual_in": {
       "id": "env_rainfall_swfl_annual_in",
@@ -1973,7 +1979,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Average annual precipitation total across USGS active dv rain gauges in Lee + Collier counties (FIPS 12071, 12021), parameter 00045 with statCd 00006 (sum). Per-station annual totals are computed for the most recent year with >= 10 monthly samples; the SWFL value is the AVERAGE (not sum) of station totals \u00e2\u20ac\u201d averaging gives regional intensity, summing across stations is physically meaningless. Typical SWFL annual rainfall is 50-60 inches; >70 inches suggests an exceptionally wet year."
+      "scope_note": "Average annual precipitation total across USGS active dv rain gauges in Lee + Collier counties (FIPS 12071, 12021), parameter 00045 with statCd 00006 (sum). Per-station annual totals are computed for the most recent year with >= 10 monthly samples; the SWFL value is the AVERAGE (not sum) of station totals â€” averaging gives regional intensity, summing across stations is physically meaningless. Typical SWFL annual rainfall is 50-60 inches; >70 inches suggests an exceptionally wet year."
     },
     "env_gw_highwater_exceedance_days": {
       "id": "env_gw_highwater_exceedance_days",
@@ -2007,7 +2013,9 @@
     },
     "hosp_tdt_latest_monthly_collections": {
       "id": "hosp_tdt_latest_monthly_collections",
-      "grade": { "direction_polarity": "higher_is_bullish" },
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Latest Monthly TDT Collections (Lee County)",
       "altLabels": [
         "latest monthly TDT",
@@ -2028,7 +2036,7 @@
       "unit": "USD",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Most recent reported month of Lee County Tourist Development Tax collections from the Florida DOR. Period grain is one calendar month; single-month reads should NEVER be extrapolated to an annual run rate \u00e2\u20ac\u201d pair with hosp_tdt_trailing_12mo_collections."
+      "scope_note": "Most recent reported month of Lee County Tourist Development Tax collections from the Florida DOR. Period grain is one calendar month; single-month reads should NEVER be extrapolated to an annual run rate â€” pair with hosp_tdt_trailing_12mo_collections."
     },
     "hosp_tdt_yoy_delta": {
       "id": "hosp_tdt_yoy_delta",
@@ -2056,11 +2064,13 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Same-month year-over-year change in Lee County TDT collections (latest month vs same calendar month prior fiscal year). Positive = YoY growth. Single observation, not a trend \u00e2\u20ac\u201d pair with hosp_tdt_trailing_12mo_collections for run-rate context."
+      "scope_note": "Same-month year-over-year change in Lee County TDT collections (latest month vs same calendar month prior fiscal year). Positive = YoY growth. Single observation, not a trend â€” pair with hosp_tdt_trailing_12mo_collections for run-rate context."
     },
     "hosp_tdt_trailing_12mo_collections": {
       "id": "hosp_tdt_trailing_12mo_collections",
-      "grade": { "direction_polarity": "higher_is_bullish" },
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Trailing 12-Month TDT Collections (Lee County)",
       "altLabels": [
         "TTM TDT",
@@ -2086,7 +2096,9 @@
     },
     "hosp_tdt_post_ian_recovery_ratio": {
       "id": "hosp_tdt_post_ian_recovery_ratio",
-      "grade": { "direction_polarity": "higher_is_bullish" },
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Post-Hurricane-Ian Recovery Ratio",
       "altLabels": [
         "Ian recovery",
@@ -2141,12 +2153,14 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Latest month's TDT collections \u00c3\u00b7 mean collections for that same calendar month across all observed years. >1.0 = above-trend for the season; <1.0 = below-trend. Operators read this to separate true-bearish from in-trough-but-on-pace."
+      "scope_note": "Latest month's TDT collections Ã· mean collections for that same calendar month across all observed years. >1.0 = above-trend for the season; <1.0 = below-trend. Operators read this to separate true-bearish from in-trough-but-on-pace."
     },
     "hosp_tdt_lee_latest_monthly_collections": {
       "id": "hosp_tdt_lee_latest_monthly_collections",
-      "grade": { "direction_polarity": "higher_is_bullish" },
-      "prefLabel": "TDT Latest Monthly Collections \u00e2\u20ac\u201d Lee County",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "TDT Latest Monthly Collections â€” Lee County",
       "altLabels": [
         "Lee TDT collections latest month"
       ],
@@ -2169,8 +2183,10 @@
     },
     "hosp_tdt_lee_trailing_12mo_collections": {
       "id": "hosp_tdt_lee_trailing_12mo_collections",
-      "grade": { "direction_polarity": "higher_is_bullish" },
-      "prefLabel": "TDT Trailing 12-Month Collections \u00e2\u20ac\u201d Lee County",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "TDT Trailing 12-Month Collections â€” Lee County",
       "altLabels": [
         "Lee TDT trailing 12-month"
       ],
@@ -2193,8 +2209,10 @@
     },
     "hosp_tdt_collier_latest_monthly_collections": {
       "id": "hosp_tdt_collier_latest_monthly_collections",
-      "grade": { "direction_polarity": "higher_is_bullish" },
-      "prefLabel": "TDT Latest Monthly Collections \u00e2\u20ac\u201d Collier County",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "TDT Latest Monthly Collections â€” Collier County",
       "altLabels": [
         "Collier TDT collections latest month"
       ],
@@ -2217,8 +2235,10 @@
     },
     "hosp_tdt_collier_trailing_12mo_collections": {
       "id": "hosp_tdt_collier_trailing_12mo_collections",
-      "grade": { "direction_polarity": "higher_is_bullish" },
-      "prefLabel": "TDT Trailing 12-Month Collections \u00e2\u20ac\u201d Collier County",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "TDT Trailing 12-Month Collections â€” Collier County",
       "altLabels": [
         "Collier TDT trailing 12-month"
       ],
@@ -2265,7 +2285,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "FAF5 sum of inbound domestic flows where dms_dest=129 (Remainder of Florida, the SWFL zone) and trade_type=1, reported in thousand-tons for the latest historical FAF5 year. Imports and exports are NOT included in this aggregate \u00e2\u20ac\u201d see logistics_inbound_freight_value_swfl_musd for the dollar denominator."
+      "scope_note": "FAF5 sum of inbound domestic flows where dms_dest=129 (Remainder of Florida, the SWFL zone) and trade_type=1, reported in thousand-tons for the latest historical FAF5 year. Imports and exports are NOT included in this aggregate â€” see logistics_inbound_freight_value_swfl_musd for the dollar denominator."
     },
     "logistics_inbound_freight_value_swfl_musd": {
       "id": "logistics_inbound_freight_value_swfl_musd",
@@ -2323,7 +2343,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "FAF5 audited annual inbound freight FLOW to SWFL. Derived as logistics-swfl.inbound_freight_tons_swfl \u00c3\u2014 1000 (kilotons \u00e2\u2020\u2019 tons). Under Path B (post-commit 297ad23) this is preserved as CONTEXT only \u00e2\u20ac\u201d it does NOT anchor the deviation math (which is computed against FDOT's own rolling-history baseline). raw_slug 'baseline_flow_tons_year' retained for legacy back-compat."
+      "scope_note": "FAF5 audited annual inbound freight FLOW to SWFL. Derived as logistics-swfl.inbound_freight_tons_swfl Ã— 1000 (kilotons â†’ tons). Under Path B (post-commit 297ad23) this is preserved as CONTEXT only â€” it does NOT anchor the deviation math (which is computed against FDOT's own rolling-history baseline). raw_slug 'baseline_flow_tons_year' retained for legacy back-compat."
     },
     "logistics_nowcast_current_activity_tons_year": {
       "id": "logistics_nowcast_current_activity_tons_year",
@@ -2352,7 +2372,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Path B (post-commit 297ad23): \u00ce\u00a3 over freight-coded Lee+Collier segments of AADT \u00c3\u2014 tfctr (FDOT per-segment truck-share) \u00c3\u2014 AVG_PAYLOAD_TONS_PER_TRUCK (16.0, FHWA Highway Statistics 2023 Table VM-1) \u00c3\u2014 365. Deliberately omits segment length \u00e2\u20ac\u201d v1 multiplied by miles which mismatched FAF5's tons baseline by units AND by population (pass-through vs delivered). This metric is ACTIVITY (segment counts, over-counts pass-through) \u00e2\u20ac\u201d do not compare directly to FAF5 flow. raw_slug 'current_flow_tons_year' retained for legacy back-compat."
+      "scope_note": "Path B (post-commit 297ad23): Î£ over freight-coded Lee+Collier segments of AADT Ã— tfctr (FDOT per-segment truck-share) Ã— AVG_PAYLOAD_TONS_PER_TRUCK (16.0, FHWA Highway Statistics 2023 Table VM-1) Ã— 365. Deliberately omits segment length â€” v1 multiplied by miles which mismatched FAF5's tons baseline by units AND by population (pass-through vs delivered). This metric is ACTIVITY (segment counts, over-counts pass-through) â€” do not compare directly to FAF5 flow. raw_slug 'current_flow_tons_year' retained for legacy back-compat."
     },
     "logistics_nowcast_rolling_mean_activity_tons_year": {
       "id": "logistics_nowcast_rolling_mean_activity_tons_year",
@@ -2380,7 +2400,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Path B: rolling mean of the last ROLLING_WINDOW_DAYS (90) shock-log rows with non-null current_activity_tons_year. This IS the math anchor for the deviation z-score \u00e2\u20ac\u201d replaces the v1 FAF5-derived baseline. Drifts slowly as new daily activity rolls in."
+      "scope_note": "Path B: rolling mean of the last ROLLING_WINDOW_DAYS (90) shock-log rows with non-null current_activity_tons_year. This IS the math anchor for the deviation z-score â€” replaces the v1 FAF5-derived baseline. Drifts slowly as new daily activity rolls in."
     },
     "logistics_nowcast_rolling_stddev_activity_tons_year": {
       "id": "logistics_nowcast_rolling_stddev_activity_tons_year",
@@ -2408,7 +2428,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Path B: population stddev of the same 90-day rolling window used for rolling_mean_activity_tons_year. Denominator of the deviation z-score. Replaces the v1 fixed-CoV (baseline_mu \u00c3\u2014 0.10) computation."
+      "scope_note": "Path B: population stddev of the same 90-day rolling window used for rolling_mean_activity_tons_year. Denominator of the deviation z-score. Replaces the v1 fixed-CoV (baseline_mu Ã— 0.10) computation."
     },
     "logistics_nowcast_history_days_observed": {
       "id": "logistics_nowcast_history_days_observed",
@@ -2436,7 +2456,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Path B cold-start gate. Count of prior shock-log rows with non-null current_activity_tons_year inside the rolling window. Must be \u00e2\u2030\u00a5 COLD_START_THRESHOLD_DAYS (90) before deviation_z is computed and emitted; otherwise shock_state = 'insufficient_history' and deviation_z/pct are suppressed from key_metrics."
+      "scope_note": "Path B cold-start gate. Count of prior shock-log rows with non-null current_activity_tons_year inside the rolling window. Must be â‰¥ COLD_START_THRESHOLD_DAYS (90) before deviation_z is computed and emitted; otherwise shock_state = 'insufficient_history' and deviation_z/pct are suppressed from key_metrics."
     },
     "logistics_nowcast_deviation_z": {
       "id": "logistics_nowcast_deviation_z",
@@ -2464,7 +2484,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Path B: (current_activity_tons_year \u00e2\u02c6\u2019 rolling_mean_activity_tons_year) / rolling_stddev_activity_tons_year, computed over the last ROLLING_WINDOW_DAYS (90) of shock-log history. Suppressed (omitted from key_metrics) on cold-start runs (history_days_observed < COLD_START_THRESHOLD_DAYS). |z|>3 triggers shock_state escalation."
+      "scope_note": "Path B: (current_activity_tons_year âˆ’ rolling_mean_activity_tons_year) / rolling_stddev_activity_tons_year, computed over the last ROLLING_WINDOW_DAYS (90) of shock-log history. Suppressed (omitted from key_metrics) on cold-start runs (history_days_observed < COLD_START_THRESHOLD_DAYS). |z|>3 triggers shock_state escalation."
     },
     "logistics_nowcast_deviation_pct": {
       "id": "logistics_nowcast_deviation_pct",
@@ -2491,7 +2511,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Path B: (current_activity_tons_year \u00e2\u02c6\u2019 rolling_mean_activity_tons_year) / rolling_mean \u00c3\u2014 100. Companion to logistics_nowcast_deviation_z; both move in lockstep but percent is operator-readable. Suppressed on cold-start runs."
+      "scope_note": "Path B: (current_activity_tons_year âˆ’ rolling_mean_activity_tons_year) / rolling_mean Ã— 100. Companion to logistics_nowcast_deviation_z; both move in lockstep but percent is operator-readable. Suppressed on cold-start runs."
     },
     "logistics_nowcast_shock_state": {
       "id": "logistics_nowcast_shock_state",
@@ -2520,7 +2540,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Deterministic state machine over consecutive-day |z|>3 counter: \u00e2\u2030\u00a53d \u00e2\u2020\u2019 anomaly; \u00e2\u2030\u00a530d \u00e2\u2020\u2019 structural_break (candidate); \u00e2\u2030\u00a590d also flips baseline_validity_flag. Path B added 'insufficient_history' for the cold-start gate (history_days_observed < COLD_START_THRESHOLD_DAYS). Computed in code, never LLM."
+      "scope_note": "Deterministic state machine over consecutive-day |z|>3 counter: â‰¥3d â†’ anomaly; â‰¥30d â†’ structural_break (candidate); â‰¥90d also flips baseline_validity_flag. Path B added 'insufficient_history' for the cold-start gate (history_days_observed < COLD_START_THRESHOLD_DAYS). Computed in code, never LLM."
     },
     "logistics_nowcast_baseline_validity_flag": {
       "id": "logistics_nowcast_baseline_validity_flag",
@@ -2547,7 +2567,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Sticky flag. Flips to stale-structural after 90 consecutive days of |z|>3 against the ROLLING FDOT history baseline (Path B) \u00e2\u20ac\u201d signals the rolling-mean baseline has drifted enough that operator review of the rolling window itself is warranted. Cold-start runs never flip the flag."
+      "scope_note": "Sticky flag. Flips to stale-structural after 90 consecutive days of |z|>3 against the ROLLING FDOT history baseline (Path B) â€” signals the rolling-mean baseline has drifted enough that operator review of the rolling window itself is warranted. Cold-start runs never flip the flag."
     },
     "logistics_nowcast_consecutive_breach_days": {
       "id": "logistics_nowcast_consecutive_breach_days",
@@ -2575,7 +2595,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Stateful counter sourced from data_lake.fdot_freight_nowcast_shock_log (append-only Tier 2 table). Counts consecutive days |z|>3 with the same sign; resets to 0 when |z|\u00e2\u2030\u00a43, sign flips, or the current run is cold-start (z suppressed)."
+      "scope_note": "Stateful counter sourced from data_lake.fdot_freight_nowcast_shock_log (append-only Tier 2 table). Counts consecutive days |z|>3 with the same sign; resets to 0 when |z|â‰¤3, sign flips, or the current run is cold-start (z suppressed)."
     },
     "logistics_nowcast_freight_segment_count": {
       "id": "logistics_nowcast_freight_segment_count",
@@ -2602,7 +2622,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Number of freight-coded FDOT segments (roadway LIKE 'I-%' OR 'US-%') in Lee+Collier counties contributing to the current-flow aggregate. Sanity check \u00e2\u20ac\u201d a sudden drop signals data-pull failure, not a real freight shock."
+      "scope_note": "Number of freight-coded FDOT segments (roadway LIKE 'I-%' OR 'US-%') in Lee+Collier counties contributing to the current-flow aggregate. Sanity check â€” a sudden drop signals data-pull failure, not a real freight shock."
     },
     "logistics_nowcast_avg_payload_tons_per_truck": {
       "id": "logistics_nowcast_avg_payload_tons_per_truck",
@@ -2629,7 +2649,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Locked constant 16.0 per FHWA Highway Statistics 2023 Table VM-1 (combination-truck average net loaded payload). Single national-average \u00e2\u20ac\u201d SWFL commodity mix may skew heavier; SCTG-weighted upgrade reserved for v2."
+      "scope_note": "Locked constant 16.0 per FHWA Highway Statistics 2023 Table VM-1 (combination-truck average net loaded payload). Single national-average â€” SWFL commodity mix may skew heavier; SCTG-weighted upgrade reserved for v2."
     },
     "traffic_aadt_swfl_avg": {
       "id": "traffic_aadt_swfl_avg",
@@ -2658,7 +2678,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Sum(AADT \u00c3\u2014 Shape_Length) \u00c3\u00b7 Sum(Shape_Length) across all FDOT segments in Lee + Collier counties for the latest published year. Shape_Length is the auto-generated geometry length in the layer projection (SHAPE_LENG attribute is unused \u00e2\u20ac\u201d may be stale after route realignments). 2-county scope matches env-swfl and the master.mts SWFL Intelligence Lake scope; the wider 6-county FDOT extract would let thousands of rural Glades/Hendry/Monroe segments dominate the corridor signal. Length-weighting prevents short freeway off-ramps from dominating an arithmetic mean over thousands of segments."
+      "scope_note": "Sum(AADT Ã— Shape_Length) Ã· Sum(Shape_Length) across all FDOT segments in Lee + Collier counties for the latest published year. Shape_Length is the auto-generated geometry length in the layer projection (SHAPE_LENG attribute is unused â€” may be stale after route realignments). 2-county scope matches env-swfl and the master.mts SWFL Intelligence Lake scope; the wider 6-county FDOT extract would let thousands of rural Glades/Hendry/Monroe segments dominate the corridor signal. Length-weighting prevents short freeway off-ramps from dominating an arithmetic mean over thousands of segments."
     },
     "traffic_aadt_swfl_yoy_pct": {
       "id": "traffic_aadt_swfl_yoy_pct",
@@ -2687,11 +2707,11 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Percent change in length-weighted AADT (Lee + Collier) between the latest and prior FDOT years, computed over the comparable-segment cohort (segments with non-null AADT in BOTH years matched on roadway + desc_frm + desc_to). Positive = vehicular demand rising; negative = falling. Sensitive to FDOT survey re-routing \u00e2\u20ac\u201d see post-Ian caveat in brain OUTPUT."
+      "scope_note": "Percent change in length-weighted AADT (Lee + Collier) between the latest and prior FDOT years, computed over the comparable-segment cohort (segments with non-null AADT in BOTH years matched on roadway + desc_frm + desc_to). Positive = vehicular demand rising; negative = falling. Sensitive to FDOT survey re-routing â€” see post-Ian caveat in brain OUTPUT."
     },
     "traffic_aadt_swfl_5yr_cagr_pct": {
       "id": "traffic_aadt_swfl_5yr_cagr_pct",
-      "prefLabel": "SWFL AADT 5-Year CAGR (2021\u00e2\u20ac\u201c2025)",
+      "prefLabel": "SWFL AADT 5-Year CAGR (2021â€“2025)",
       "altLabels": [
         "SWFL traffic 5yr trend"
       ],
@@ -2744,11 +2764,11 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Median value of TFCTR (truck factor) across Lee + Collier FDOT segments for the latest year. Identifies freight-dense corridors. Complements logistics_inbound_freight_tons_swfl (FAF5 zone-to-zone aggregate) \u00e2\u20ac\u201d TFCTR says WHERE trucks physically move; FAF5 says WHAT TOTAL VOLUME they carry."
+      "scope_note": "Median value of TFCTR (truck factor) across Lee + Collier FDOT segments for the latest year. Identifies freight-dense corridors. Complements logistics_inbound_freight_tons_swfl (FAF5 zone-to-zone aggregate) â€” TFCTR says WHERE trucks physically move; FAF5 says WHAT TOTAL VOLUME they carry."
     },
     "traffic_post_ian_recovery_index": {
       "id": "traffic_post_ian_recovery_index",
-      "prefLabel": "SWFL Coastal Counties Post-Ian Recovery Index (2025 \u00c3\u00b7 2022)",
+      "prefLabel": "SWFL Coastal Counties Post-Ian Recovery Index (2025 Ã· 2022)",
       "altLabels": [
         "post-storm recovery",
         "Ian recovery index"
@@ -2773,7 +2793,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Ratio of 2025 length-weighted AADT to 2022 (pre-storm) baseline across the three coastal SWFL counties most impacted by Hurricane Ian: Lee, Collier, Charlotte. >100 = volumes exceed pre-storm; <100 = below pre-storm. DELIBERATELY broader county set than the other traffic-swfl concepts (which are Lee + Collier) \u00e2\u20ac\u201d the Ian index is about storm geography, not brain scope; Charlotte was in the eye-wall path and must be included for the storm signal to be honest. Glades, Hendry, Monroe excluded \u00e2\u20ac\u201d Ian's path didn't materially hit them."
+      "scope_note": "Ratio of 2025 length-weighted AADT to 2022 (pre-storm) baseline across the three coastal SWFL counties most impacted by Hurricane Ian: Lee, Collier, Charlotte. >100 = volumes exceed pre-storm; <100 = below pre-storm. DELIBERATELY broader county set than the other traffic-swfl concepts (which are Lee + Collier) â€” the Ian index is about storm geography, not brain scope; Charlotte was in the eye-wall path and must be included for the storm signal to be honest. Glades, Hendry, Monroe excluded â€” Ian's path didn't materially hit them."
     },
     "properties_lee_sales_velocity_per_1k": {
       "id": "properties_lee_sales_velocity_per_1k",
@@ -2801,11 +2821,13 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of LeePA-recorded qualified sales for the most recent COMPLETE calendar year (year-1 relative to today), divided by total parcels \u00c3\u2014 1000. Qualified sales exclude inheritance, divorce, and non-arms-length transfers."
+      "scope_note": "Count of LeePA-recorded qualified sales for the most recent COMPLETE calendar year (year-1 relative to today), divided by total parcels Ã— 1000. Qualified sales exclude inheritance, divorce, and non-arms-length transfers."
     },
     "properties_lee_sales_velocity_zscore": {
       "id": "properties_lee_sales_velocity_zscore",
-      "grade": { "direction_polarity": "higher_is_bullish" },
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Sales-Velocity Z-Score (Current Year vs Trailing 3yr Baseline)",
       "altLabels": [
         "Lee velocity z",
@@ -2830,7 +2852,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Direction signal for properties-lee-value. Bullish if z \u00e2\u2030\u00a5 +1.0, bearish if z \u00e2\u2030\u00a4 \u00e2\u02c6\u20191.0. Baseline derived from each parcel's LATEST qualified sale, so re-sales overwrite earlier-year buckets \u00e2\u20ac\u201d current-year z is biased UPWARD; treat marginal bullish reads as suggestive, not confirmatory."
+      "scope_note": "Direction signal for properties-lee-value. Bullish if z â‰¥ +1.0, bearish if z â‰¤ âˆ’1.0. Baseline derived from each parcel's LATEST qualified sale, so re-sales overwrite earlier-year buckets â€” current-year z is biased UPWARD; treat marginal bullish reads as suggestive, not confirmatory."
     },
     "properties_lee_soh_gap_median_pct": {
       "id": "properties_lee_soh_gap_median_pct",
@@ -2858,7 +2880,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Median (just_value \u00e2\u02c6\u2019 taxable_value) / just_value \u00c3\u2014 100 across parcels where cap_difference > 0 (actively benefiting from the Save-Our-Homes cap). Reads as a level metric describing how much of the tax base is locked behind the homestead cap. High = long-tenured ownership; low = recent turnover or non-homestead."
+      "scope_note": "Median (just_value âˆ’ taxable_value) / just_value Ã— 100 across parcels where cap_difference > 0 (actively benefiting from the Save-Our-Homes cap). Reads as a level metric describing how much of the tax base is locked behind the homestead cap. High = long-tenured ownership; low = recent turnover or non-homestead."
     },
     "properties_lee_total_parcels": {
       "id": "properties_lee_total_parcels",
@@ -2913,7 +2935,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the Cape Coral-Fort Myers FL MSA \u00e2\u20ac\u201d the Lee County price-level proxy. Computed from data_lake.fhfa_hpi: (latest_quarter_index - same_quarter_prior_year_index) / same_quarter_prior_year_index \u00c3\u2014 100. Negative = falling prices; positive = rising. Exogenous signal in properties-lee-value; contrasted against LeePA sales-velocity z-score."
+      "scope_note": "Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the Cape Coral-Fort Myers FL MSA â€” the Lee County price-level proxy. Computed from data_lake.fhfa_hpi: (latest_quarter_index - same_quarter_prior_year_index) / same_quarter_prior_year_index Ã— 100. Negative = falling prices; positive = rising. Exogenous signal in properties-lee-value; contrasted against LeePA sales-velocity z-score."
     },
     "fhfa_fl_state_yoy_pct": {
       "id": "fhfa_fl_state_yoy_pct",
@@ -2970,7 +2992,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 44-45 (Retail Trade). Level metric \u00e2\u20ac\u201d direction read via macro-us SOFR via the rising-rates-dominance override, not via the establishment count itself."
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 44-45 (Retail Trade). Level metric â€” direction read via macro-us SOFR via the rising-rates-dominance override, not via the establishment count itself."
     },
     "macro_fl_estab_count_food_service": {
       "id": "macro_fl_estab_count_food_service",
@@ -2999,7 +3021,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 72 (Accommodation and Food Services). Level metric \u00e2\u20ac\u201d direction comes from sibling brains."
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 72 (Accommodation and Food Services). Level metric â€” direction comes from sibling brains."
     },
     "macro_fl_estab_count_construction": {
       "id": "macro_fl_estab_count_construction",
@@ -3028,7 +3050,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 23 (Construction). Level metric \u00e2\u20ac\u201d direction comes from sibling brains (notably sector-credit-swfl charge-off rate for construction)."
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 23 (Construction). Level metric â€” direction comes from sibling brains (notably sector-credit-swfl charge-off rate for construction)."
     },
     "macro_fl_estab_count_healthcare": {
       "id": "macro_fl_estab_count_healthcare",
@@ -3057,7 +3079,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 62 (Health Care and Social Assistance). Level metric \u00e2\u20ac\u201d direction comes from sibling brains."
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 62 (Health Care and Social Assistance). Level metric â€” direction comes from sibling brains."
     },
     "macro_fl_estab_count_professional": {
       "id": "macro_fl_estab_count_professional",
@@ -3086,7 +3108,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 54 (Professional, Scientific, and Technical Services). Level metric \u00e2\u20ac\u201d direction comes from sibling brains."
+      "scope_note": "Statewide Census County Business Patterns establishment count for NAICS 54 (Professional, Scientific, and Technical Services). Level metric â€” direction comes from sibling brains."
     },
     "permits_lee_county_weighted_avg_corridor_z": {
       "id": "permits_lee_county_weighted_avg_corridor_z",
@@ -3356,8 +3378,10 @@
     },
     "rental_rent_index_zori": {
       "id": "rental_rent_index_zori",
-      "grade": { "direction_polarity": "higher_is_bullish" },
-      "prefLabel": "Zillow Observed Rent Index (ZORI) \u00e2\u20ac\u201d ZIP-Level Monthly Rent",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Zillow Observed Rent Index (ZORI) â€” ZIP-Level Monthly Rent",
       "altLabels": [
         "ZORI rent index",
         "ZIP rent index",
@@ -3385,12 +3409,14 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Zillow Observed Rent Index \u00e2\u20ac\u201d seasonally-adjusted monthly composite methodology approximating typical monthly rent (SFR + Condo + Multifamily) for a given ZIP and month. Emitted by rentals-swfl as one metric per top-N ZIP using the slug template rental_rent_index_zori_zip_{ZIP}; the templated slugs resolve through refinery/vocab/patterns.mts."
+      "scope_note": "Zillow Observed Rent Index â€” seasonally-adjusted monthly composite methodology approximating typical monthly rent (SFR + Condo + Multifamily) for a given ZIP and month. Emitted by rentals-swfl as one metric per top-N ZIP using the slug template rental_rent_index_zori_zip_{ZIP}; the templated slugs resolve through refinery/vocab/patterns.mts."
     },
     "rental_rent_yoy_pct": {
       "id": "rental_rent_yoy_pct",
-      "grade": { "direction_polarity": "higher_is_bullish" },
-      "prefLabel": "ZORI Rent YoY % \u00e2\u20ac\u201d ZIP Level",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "ZORI Rent YoY % â€” ZIP Level",
       "altLabels": [
         "rent year-over-year",
         "ZIP rent YoY %"
@@ -3421,7 +3447,7 @@
     },
     "rental_rent_mom_pct": {
       "id": "rental_rent_mom_pct",
-      "prefLabel": "ZORI Rent MoM % \u00e2\u20ac\u201d ZIP Level",
+      "prefLabel": "ZORI Rent MoM % â€” ZIP Level",
       "altLabels": [
         "rent month-over-month",
         "ZIP rent MoM %"
@@ -3451,7 +3477,7 @@
     },
     "rental_rent_index_zori_regional_median": {
       "id": "rental_rent_index_zori_regional_median",
-      "prefLabel": "ZORI Rent Index \u00e2\u20ac\u201d SWFL Regional Median",
+      "prefLabel": "ZORI Rent Index â€” SWFL Regional Median",
       "altLabels": [
         "SWFL median rent (ZORI)"
       ],
@@ -3478,7 +3504,7 @@
     },
     "rental_rent_yoy_pct_regional_median": {
       "id": "rental_rent_yoy_pct_regional_median",
-      "prefLabel": "ZORI Rent YoY % \u00e2\u20ac\u201d SWFL Regional Median",
+      "prefLabel": "ZORI Rent YoY % â€” SWFL Regional Median",
       "altLabels": [
         "SWFL median rent YoY (ZORI)"
       ],
@@ -3501,7 +3527,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Median YoY % across SWFL ZIPs \u00e2\u20ac\u201d the headline signal that drives rentals-swfl direction polarity per the locked band table (bearish < 0; neutral [0,2); bullish [2,6]; bullish with caveat (6,10]; neutral with caveat > 10)."
+      "scope_note": "Median YoY % across SWFL ZIPs â€” the headline signal that drives rentals-swfl direction polarity per the locked band table (bearish < 0; neutral [0,2); bullish [2,6]; bullish with caveat (6,10]; neutral with caveat > 10)."
     },
     "rental_rent_yoy_pct_top_heating_zips": {
       "id": "rental_rent_yoy_pct_top_heating_zips",
@@ -3522,7 +3548,7 @@
       "value_type": "string",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Comma-joined list of the top-N (default 3) SWFL ZIPs by rental_rent_yoy_pct at the latest period_end. Categorical metric \u00e2\u20ac\u201d value is a label string, not a number."
+      "scope_note": "Comma-joined list of the top-N (default 3) SWFL ZIPs by rental_rent_yoy_pct at the latest period_end. Categorical metric â€” value is a label string, not a number."
     },
     "rentals_swfl_zips_covered": {
       "id": "rentals_swfl_zips_covered",
@@ -3549,11 +3575,13 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of distinct SWFL ZIPs present in the rentals-swfl corpus for the current build. Sentinel for corpus thinness \u00e2\u20ac\u201d a low count fires a 'regional median is thin' caveat."
+      "scope_note": "Count of distinct SWFL ZIPs present in the rentals-swfl corpus for the current build. Sentinel for corpus thinness â€” a low count fires a 'regional median is thin' caveat."
     },
     "laus_lee_unemployment_rate": {
       "id": "laus_lee_unemployment_rate",
-      "grade": { "direction_polarity": "lower_is_bullish" },
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Lee County Unemployment Rate",
       "altLabels": [
         "Lee unemployment rate",
@@ -3580,7 +3608,9 @@
     },
     "laus_collier_unemployment_rate": {
       "id": "laus_collier_unemployment_rate",
-      "grade": { "direction_polarity": "lower_is_bullish" },
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Collier County Unemployment Rate",
       "altLabels": [
         "Collier unemployment rate",
@@ -3607,7 +3637,9 @@
     },
     "laus_fl_unemployment_rate": {
       "id": "laus_fl_unemployment_rate",
-      "grade": { "direction_polarity": "lower_is_bullish" },
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Florida LAUS Unemployment Rate",
       "altLabels": [
         "FL LAUS rate",
@@ -3730,7 +3762,7 @@
       "unit": "%",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Redfin ZIP-level median sale price \u00c3\u00b7 list price across SWFL MSAs, expressed as percent. >100% = homes selling above ask on average."
+      "scope_note": "Redfin ZIP-level median sale price Ã· list price across SWFL MSAs, expressed as percent. >100% = homes selling above ask on average."
     },
     "housing_sold_above_list_pct_swfl": {
       "id": "housing_sold_above_list_pct_swfl",
@@ -3924,7 +3956,7 @@
     },
     "fgcu_reri_unemployment_rate_pct_change": {
       "id": "fgcu_reri_unemployment_rate_pct_change",
-      "prefLabel": "FGCU RERI Unemployment Rate YoY \u00ce\u201d",
+      "prefLabel": "FGCU RERI Unemployment Rate YoY Î”",
       "altLabels": [
         "RERI unemployment change",
         "SWFL unemployment YoY delta"
@@ -4234,7 +4266,7 @@
       "unit": "passengers",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Monthly enplaned passengers at PGD (Charlotte County Airport, Punta Gorda). Data absent \u00e2\u20ac\u201d PGD is not an LCPA airport; slot reserved for future data source."
+      "scope_note": "Monthly enplaned passengers at PGD (Charlotte County Airport, Punta Gorda). Data absent â€” PGD is not an LCPA airport; slot reserved for future data source."
     },
     "pgd_yoy_pct_change": {
       "id": "pgd_yoy_pct_change",
@@ -4257,7 +4289,7 @@
       "unit": "%",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Year-over-year percentage change in PGD monthly enplanements. Currently absent \u00e2\u20ac\u201d PGD is not an LCPA airport."
+      "scope_note": "Year-over-year percentage change in PGD monthly enplanements. Currently absent â€” PGD is not an LCPA airport."
     },
     "oews_lee_top_occupation_employment": {
       "id": "oews_lee_top_occupation_employment",
@@ -4281,7 +4313,7 @@
       "unit": "workers",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "BLS OEWS May survey \u2014 total employment in the largest SOC major occupation group for the Cape Coral-Fort Myers MSA (Lee County). Annual; released ~April of the following year."
+      "scope_note": "BLS OEWS May survey — total employment in the largest SOC major occupation group for the Cape Coral-Fort Myers MSA (Lee County). Annual; released ~April of the following year."
     },
     "oews_lee_construction_loc_quotient": {
       "id": "oews_lee_construction_loc_quotient",
@@ -4329,7 +4361,7 @@
       "unit": "workers",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "BLS OEWS combined employment for Healthcare Practitioners & Technical (SOC 29) and Healthcare Support (SOC 31) in the Cape Coral-Fort Myers MSA. BLS suppression (*) treated as null \u2014 never zeroed."
+      "scope_note": "BLS OEWS combined employment for Healthcare Practitioners & Technical (SOC 29) and Healthcare Support (SOC 31) in the Cape Coral-Fort Myers MSA. BLS suppression (*) treated as null — never zeroed."
     },
     "oews_lee_construction_median_hourly_wage": {
       "id": "oews_lee_construction_median_hourly_wage",
@@ -4377,7 +4409,7 @@
       "unit": "%",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Year-over-year percentage change in total BLS OEWS employment across all SOC major groups for the Cape Coral-Fort Myers MSA. Null on first load \u2014 requires two annual survey years in data_lake.bls_oews_swfl."
+      "scope_note": "Year-over-year percentage change in total BLS OEWS employment across all SOC major groups for the Cape Coral-Fort Myers MSA. Null on first load — requires two annual survey years in data_lake.bls_oews_swfl."
     },
     "oews_collier_top_occupation_employment": {
       "id": "oews_collier_top_occupation_employment",
@@ -4401,7 +4433,7 @@
       "unit": "workers",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "BLS OEWS May survey \u2014 total employment in the largest SOC major occupation group for the Naples-Marco Island MSA (Collier County). Annual; released ~April of the following year."
+      "scope_note": "BLS OEWS May survey — total employment in the largest SOC major occupation group for the Naples-Marco Island MSA (Collier County). Annual; released ~April of the following year."
     },
     "oews_collier_construction_loc_quotient": {
       "id": "oews_collier_construction_loc_quotient",
@@ -4449,7 +4481,7 @@
       "unit": "workers",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "BLS OEWS combined employment for Healthcare Practitioners & Technical (SOC 29) and Healthcare Support (SOC 31) in the Naples-Marco Island MSA. BLS suppression (*) treated as null \u2014 never zeroed."
+      "scope_note": "BLS OEWS combined employment for Healthcare Practitioners & Technical (SOC 29) and Healthcare Support (SOC 31) in the Naples-Marco Island MSA. BLS suppression (*) treated as null — never zeroed."
     },
     "oews_collier_construction_median_hourly_wage": {
       "id": "oews_collier_construction_median_hourly_wage",
@@ -4497,13 +4529,199 @@
       "unit": "%",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Year-over-year percentage change in total BLS OEWS employment across all SOC major groups for the Naples-Marco Island MSA. Null on first load \u2014 requires two annual survey years in data_lake.bls_oews_swfl."
+      "scope_note": "Year-over-year percentage change in total BLS OEWS employment across all SOC major groups for the Naples-Marco Island MSA. Null on first load — requires two annual survey years in data_lake.bls_oews_swfl."
+    },
+    "licenses_active_lee": {
+      "id": "licenses_active_lee",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "FL DBPR Active Contractor Licenses — Lee County",
+      "altLabels": [
+        "Lee contractor licenses active",
+        "Lee active licenses"
+      ],
+      "raw_slugs": [
+        "licenses_active_lee"
+      ],
+      "category": "labor",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "licenses-swfl"
+      ],
+      "value_type": "count",
+      "unit": "licenses",
+      "value_range": [
+        0,
+        50000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of FL DBPR Construction Board (06) + Electrical Board (08) licenses with primary_status=C + secondary_status=A in Lee County (county_code=46). Monthly bulk extract snapshot; does not represent project-level activity."
+    },
+    "licenses_active_collier": {
+      "id": "licenses_active_collier",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "FL DBPR Active Contractor Licenses — Collier County",
+      "altLabels": [
+        "Collier contractor licenses active",
+        "Naples active licenses"
+      ],
+      "raw_slugs": [
+        "licenses_active_collier"
+      ],
+      "category": "labor",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "licenses-swfl"
+      ],
+      "value_type": "count",
+      "unit": "licenses",
+      "value_range": [
+        0,
+        50000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of FL DBPR Construction Board (06) + Electrical Board (08) licenses with primary_status=C + secondary_status=A in Collier County (county_code=21). Monthly bulk extract snapshot; does not represent project-level activity."
+    },
+    "licenses_new_12m_swfl": {
+      "id": "licenses_new_12m_swfl",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "FL DBPR New Contractor Licenses — SWFL (Trailing 12 Months)",
+      "altLabels": [
+        "SWFL new licenses 12mo",
+        "new contractor licenses SWFL"
+      ],
+      "raw_slugs": [
+        "licenses_new_12m_swfl"
+      ],
+      "category": "labor",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "licenses-swfl"
+      ],
+      "value_type": "count",
+      "unit": "licenses",
+      "value_range": [
+        0,
+        5000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of active FL DBPR (boards 06+08) licenses in Lee+Collier with original_licensure_date within the trailing 12 months. Leading indicator of new entrants to the contractor workforce. Near-zero signals stale data, not market stagnation — verify pipeline freshness first."
+    },
+    "licenses_lapse_rate_swfl": {
+      "id": "licenses_lapse_rate_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
+      "prefLabel": "FL DBPR Contractor License Lapse Rate — SWFL",
+      "altLabels": [
+        "SWFL contractor lapse rate",
+        "license attrition rate SWFL"
+      ],
+      "raw_slugs": [
+        "licenses_lapse_rate_swfl"
+      ],
+      "category": "labor",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "licenses-swfl"
+      ],
+      "value_type": "percentage",
+      "unit": "ratio",
+      "value_range": [
+        0,
+        1
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Lapsed (primary_status != C) / all rows for FL DBPR boards 06+08 in Lee+Collier. Bearish threshold >0.10 (>10%); bullish threshold <0.05 (<5%). No historical baseline on first run — direction defaults to neutral until second snapshot enables trend comparison. DBPR annual report baseline ~8-9% statewide. [CITATION_NEEDED — verify figure against live DBPR annual report]"
+    },
+    "licenses_cbc_share_swfl": {
+      "id": "licenses_cbc_share_swfl",
+      "grade": {
+        "direction_polarity": "neutral"
+      },
+      "prefLabel": "FL DBPR CBC Share of Active Licenses — SWFL",
+      "altLabels": [
+        "SWFL CBC license share",
+        "certified building contractor share"
+      ],
+      "raw_slugs": [
+        "licenses_cbc_share_swfl"
+      ],
+      "category": "labor",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "licenses-swfl"
+      ],
+      "value_type": "percentage",
+      "unit": "ratio",
+      "value_range": [
+        0,
+        1
+      ],
+      "direction_concept": null,
+      "status": "active",
+      "scope_note": "FL DBPR Construction Board (board_code=06, occupation_code=CBC) active licenses as share of all active licenses (boards 06+08) in Lee+Collier. Tracks balance between general contractors and specialists. Directionality is context-dependent: no universal bullish/bearish polarity assigned."
+    },
+    "licenses_applicants_swfl": {
+      "id": "licenses_applicants_swfl",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "FL DBPR Contractor License Applicants — SWFL",
+      "altLabels": [
+        "SWFL contractor applicants pipeline",
+        "applicants in licensing pipeline SWFL"
+      ],
+      "raw_slugs": [
+        "licenses_applicants_swfl"
+      ],
+      "category": "labor",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "licenses-swfl"
+      ],
+      "value_type": "count",
+      "unit": "applicants",
+      "value_range": [
+        0,
+        10000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of FL DBPR applicant rows for Lee+Collier counties from the CONSTRUCTIONAPPLICANT_1.csv bulk extract. Represents people in the licensing pipeline — a leading indicator of future active-license growth. Table is full-replace monthly (no primary key)."
     }
   },
   "ordered_collections": {
     "cre_corridor_evolution_stages": {
       "id": "cre_corridor_evolution_stages",
-      "prefLabel": "Corridor Evolution Stage \u00e2\u20ac\u201d Ordered by Operator Friendliness",
+      "prefLabel": "Corridor Evolution Stage â€” Ordered by Operator Friendliness",
       "type": "skos:OrderedCollection",
       "ordering_criterion": "operator-friendliness descending",
       "ordered_members": [
@@ -4641,7 +4859,7 @@
     "fl_estab_count_healthcare": "macro_fl_estab_count_healthcare",
     "fl_estab_count_professional": "macro_fl_estab_count_professional",
     "_direction_ambiguous": {
-      "_note": "The raw slug 'direction' is overloaded. Resolve by field path: BrainOutput.direction \u00e2\u2020\u2019 qual_sentiment_direction; BrainOutputMetric.direction \u00e2\u2020\u2019 qual_metric_trajectory. Never resolve by value alone."
+      "_note": "The raw slug 'direction' is overloaded. Resolve by field path: BrainOutput.direction â†’ qual_sentiment_direction; BrainOutputMetric.direction â†’ qual_metric_trajectory. Never resolve by value alone."
     },
     "permits_lee_county_weighted_avg_corridor_z": "permits_lee_county_weighted_avg_corridor_z",
     "permits_lee_saturation_index": "permits_lee_saturation_index",

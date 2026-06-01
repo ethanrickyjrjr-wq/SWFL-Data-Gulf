@@ -1,0 +1,43 @@
+name: FL DBPR contractor licenses monthly
+
+on:
+  schedule:
+    # 10:00 UTC on the 5th of each month.
+    # DBPR bulk extracts are updated monthly; the 5th gives several days for
+    # the prior-month data to stabilize after the 1st-of-month refresh.
+    - cron: "0 10 5 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — download and parse without writing to DB"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run fl_dbpr_licenses pipeline
+        env:
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.fl_dbpr_licenses.pipeline --dry-run
+          else
+            python -m ingest.pipelines.fl_dbpr_licenses.pipeline
+          fi

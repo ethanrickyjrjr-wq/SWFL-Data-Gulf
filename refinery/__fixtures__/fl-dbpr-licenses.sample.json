@@ -1,0 +1,123 @@
+{
+  "__meta": {
+    "source": "Synthetic fixture mirroring fl_dbpr_licenses + fl_dbpr_applicants schema",
+    "verified": "2026-06-01",
+    "note": "Covers all test branches: active Lee, active Collier, CBC, lapsed, new-12m, applicants."
+  },
+  "licenses": [
+    {
+      "license_number": "CBC1234567",
+      "board_number": "06",
+      "occupation_code": "CBC",
+      "licensee_name": "SMITH CONSTRUCTION LLC",
+      "dba_name": null,
+      "county_code": "46",
+      "county": "Lee",
+      "primary_status": "C",
+      "secondary_status": "A",
+      "original_licensure_date": "2015-03-12",
+      "effective_date": "2024-09-01",
+      "expiration_date": "2027-08-31",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    },
+    {
+      "license_number": "CGC9876543",
+      "board_number": "06",
+      "occupation_code": "CGC",
+      "licensee_name": "GULF COAST BUILDERS INC",
+      "dba_name": "Gulf Coast Builders",
+      "county_code": "46",
+      "county": "Lee",
+      "primary_status": "C",
+      "secondary_status": "A",
+      "original_licensure_date": "2026-02-15",
+      "effective_date": "2026-02-15",
+      "expiration_date": "2028-08-31",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    },
+    {
+      "license_number": "EC1357924",
+      "board_number": "08",
+      "occupation_code": "EC",
+      "licensee_name": "NAPLES ELECTRIC INC",
+      "dba_name": "Naples Electric",
+      "county_code": "21",
+      "county": "Collier",
+      "primary_status": "C",
+      "secondary_status": "A",
+      "original_licensure_date": "2018-07-01",
+      "effective_date": "2024-09-01",
+      "expiration_date": "2026-08-31",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    },
+    {
+      "license_number": "CRC2468135",
+      "board_number": "06",
+      "occupation_code": "CRC",
+      "licensee_name": "COLLIER ROOFING LLC",
+      "dba_name": null,
+      "county_code": "21",
+      "county": "Collier",
+      "primary_status": "C",
+      "secondary_status": "A",
+      "original_licensure_date": "2025-11-20",
+      "effective_date": "2025-11-20",
+      "expiration_date": "2027-08-31",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    },
+    {
+      "license_number": "CBC0000001",
+      "board_number": "06",
+      "occupation_code": "CBC",
+      "licensee_name": "OLD CONTRACTOR INC",
+      "dba_name": null,
+      "county_code": "46",
+      "county": "Lee",
+      "primary_status": "X",
+      "secondary_status": "I",
+      "original_licensure_date": "2010-01-01",
+      "effective_date": "2020-09-01",
+      "expiration_date": "2022-08-31",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    },
+    {
+      "license_number": "EC9999999",
+      "board_number": "08",
+      "occupation_code": "EC",
+      "licensee_name": "INACTIVE ELECTRIC CO",
+      "dba_name": null,
+      "county_code": "21",
+      "county": "Collier",
+      "primary_status": "S",
+      "secondary_status": "I",
+      "original_licensure_date": "2012-06-15",
+      "effective_date": "2022-09-01",
+      "expiration_date": "2024-08-31",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    }
+  ],
+  "applicants": [
+    {
+      "occupation_code": "CBC",
+      "first_name": "JANE",
+      "last_name": "DOE",
+      "city": "FORT MYERS, FL 33901",
+      "state": null,
+      "zip": null,
+      "phone": "239-555-0100",
+      "county_code": "46",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    },
+    {
+      "occupation_code": "EC",
+      "first_name": "CARLOS",
+      "last_name": "RIVERA",
+      "city": "NAPLES, FL 34102",
+      "state": null,
+      "zip": null,
+      "phone": "239-555-0200",
+      "county_code": "21",
+      "_ingested_at": "2026-06-01T10:00:00Z"
+    }
+  ]
+}
