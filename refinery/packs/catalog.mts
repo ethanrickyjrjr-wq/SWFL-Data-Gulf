@@ -192,4 +192,25 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "Southwest Florida workforce composition and wage benchmarks — BLS OEWS major occupation groups for Cape Coral-Fort Myers MSA (Lee Co.) and Naples-Marco Island MSA (Collier Co.). Annual May survey data.",
     ttl_seconds: 90 * 24 * 60 * 60,
   },
+  {
+    id: "news-swfl",
+    domain: "macro",
+    scope:
+      "SWFL regulatory and industry news — DBPR press releases enriched with summary, topics, and SWFL relevance flag. Weekly scrape.",
+    ttl_seconds: 604800,
+  },
+  {
+    id: "licenses-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL contractor licensing health — FL DBPR Construction Board (06) + Electrical Board (08) license counts, lapse rate, and applicant pipeline for Lee + Collier counties.",
+    ttl_seconds: 30 * 24 * 60 * 60,
+  },
+  {
+    id: "condo-sirs-swfl",
+    domain: "regulatory",
+    scope:
+      "SWFL condominium and cooperative associations that have confirmed Structural Integrity Reserve Study (SIRS) submission to DBPR. Lee + Collier counties. Monthly scrape. Positive signal only — presence = confirmed filing; absence has no meaning without a baseline registry of all SWFL 3-story+ condominiums.",
+    ttl_seconds: 30 * 24 * 60 * 60,
+  },
 ];
