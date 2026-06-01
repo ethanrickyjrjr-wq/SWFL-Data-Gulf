@@ -2,6 +2,24 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — DONE: PostgREST pagination audit — selectAllPaged helper + 3 truncation fixes + 3 defensive; 2 brains rebuilt, macro chain → nightly
+
+Executed the handoff audit (plan: `docs/superpowers/plans/2026-06-01-postgrest-pagination-audit.md`). Probed every `refinery/sources/*.mts` raw-row read against live `count(head)`. Proven boundary: an out-of-bounds `.range()` returns **empty-200 (not 416)** on this project, so a short-page break terminates cleanly.
+
+**New shared helper** `refinery/lib/paginate.mts` (`selectAllPaged`, 7 tests) — pages `.range()` ordered by a unique col until a short page; treats PGRST103/416 as clean EOF (defensive). Migrated the 3 existing inline paginators (fdot-source, zori-source, fema-nfip-source) onto it — zero-delta, live re-check: fema **86,574** / fdot 4,596 / zori 1,937 (assembled==count(head)==distinct, 0 dupes). `1e11bf1`.
+
+**3 truncation fixes** (were computing on a ≤1,000-row sample), each live-verified assembled==count(head)==distinct, 0 dupes:
+
+- `collier-permits` 1,000→**4,975** (order `permit_number`) → permits-swfl **v12** (corpus 1,011→5,003; per-corridor z denominators corrected — Vanderbilt 11→102, etc.). `ef6c584`
+- `fl-dor-sales-tax` 1,000→**3,255** (composite `(county,kind_code,period)`) → sector-credit-swfl **v19** (now surfaces SWFL taxable-sales: 2025-12 $5,403.0M, ttm $70,759.4M, YoY −13.6%). `1657187`
+- `macro-florida-cbp` 1,000→**43,606** (order `_dlt_id`) — biggest, ~2.3% sample. `8c4c61a`
+
+**3 defensive migrations** (under the cap today, latent traps; zero-delta, no rebuild): fdot-freight (had a fake `.limit(10000)`, 615), permits/lee (28; planned v2 ingest will balloon it), usgs sites/daily (900/19, frozen deprecated pipeline). `1fd071a`
+
+**DEFERRED → nightly GHA:** `macro-florida` runs an LLM triage agent (no `skipTriageAgent`) — hangs locally without LLM egress (7-min, killed). Its cbp fix (and downstream macro-swfl + master) propagates on the next nightly Daily Brain Rebuild once `macro-florida.md` expires (2026-06-02). **Never `--force`** (S3 leaves). master NOT rebuilt locally (would mix fresh leaves + still-sampled macro, superseded <24h). **VERIFY after the 2026-06-02 nightly:** macro-florida sector aggregates reflect the full 43,606 rows; master re-syncs.
+
+Audit-confirmed SAFE (no action): leepa-value (pre-agg views + `.single()`), fl-dbpr-licenses/dbpr-sirs (count/head only — no rows), bls-\* (per-FIPS), fhfa-hpi (MSA 280 / State 140), sba (893), tourism-tdt (666), and all small lookup tables. Typecheck: no new errors (real count 44→30, removed casts). `bun test` 911 pass. Memory [[postgrest-db-max-rows-truncation]] updated open→resolved.
+
 ## 2026-06-01 (Opus 4.8 · main) — HANDOFF: PostgREST pagination audit (class bug) — fresh Claude, start here
 
 The `fema-nfip-source` fix exposed a **class bug**: PostgREST silently caps every response at `db-max-rows` = **1,000 rows**, so any `refinery/sources/*.mts` `.select()` against a >1,000-row table **without `.range()` pagination** is computing on a silent sample (no error). env-swfl ran on 1.2% of FEMA claims this way (FMB AAL $264→$30,074). **Full handoff + audit plan: `docs/superpowers/plans/2026-06-01-postgrest-pagination-audit.md`.**
