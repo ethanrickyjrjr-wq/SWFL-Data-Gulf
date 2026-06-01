@@ -118,6 +118,17 @@ pipelines:
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
 
+  - name: city_pulse_corridors
+    lane: tier-1
+    cadence_days: 7
+    tolerance_multiplier: 3.0
+    inventory_id: lake-tier1/city_pulse_corridors/
+    inventory_key_type: prefix
+    # Weekly corridor-grain current-events capture for the SWFL CRE corridors;
+    # synchronous distill into data_lake.city_pulse_corridors (Tier-2), read by the
+    # corridor-pulse-swfl brain (brain-input edge into cre-swfl). Cron 0 10 * * 0.
+    # First run: <fill on first successful GHA run>.
+
   # ── Tier-2 dlt (Postgres data_lake.* via _dlt_loads) ─────────────────────
   # Verified: SELECT schema_name, MAX(inserted_at) FROM data_lake._dlt_loads
   #           WHERE schema_name = '<dlt_schema_name>' AND status = 0 GROUP BY 1

@@ -1,0 +1,56 @@
+name: Corridor pulse weekly
+
+on:
+  schedule:
+    # 10:00 UTC Sunday = 6 AM ET — after the Saturday-night news cycle.
+    # Slot confirmed free: daily-rebuild 0 6 * * *, city-pulse-daily 0 9 * * *,
+    # freshness-probe 0 14 * * *. 0 10 * * 0 has no collision.
+    - cron: "0 10 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — search + distill, print rows, no upload/DB write"
+        required: false
+        default: "false"
+      corridor:
+        description: "Single corridor by exact corridor_name (blank = all verified corridors)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    # 25 corridors are captured + distilled sequentially (one synchronous forced-tool
+    # call each), so this is longer than the daily 7-city job. Latency is irrelevant
+    # on a weekly cadence; 45m is headroom, not expected runtime.
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run city_pulse_corridors pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          EXTRA=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then EXTRA="--dry-run"; fi
+          if [ -n "${{ github.event.inputs.corridor }}" ]; then
+            python -m ingest.pipelines.city_pulse_corridors.pipeline --corridor "${{ github.event.inputs.corridor }}" $EXTRA
+          else
+            python -m ingest.pipelines.city_pulse_corridors.pipeline $EXTRA
+          fi

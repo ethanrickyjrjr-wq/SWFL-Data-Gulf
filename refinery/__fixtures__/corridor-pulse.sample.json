@@ -1,0 +1,45 @@
+[
+  {
+    "id": 1,
+    "corridor": "Immokalee Rd North Naples",
+    "topic": "transactions",
+    "fact": "A 38,000 sqft retail strip on Immokalee Rd traded for $14.2M to a Naples-based investor",
+    "source_url": "https://gulfshorebusiness.com/immokalee-rd-retail-sale",
+    "source_title": "Immokalee Rd retail center sells",
+    "cited_text": "the 38,000-square-foot center sold for $14.2 million",
+    "captured_at": "2026-05-29T10:00:00Z",
+    "expires_at": "2099-01-01T00:00:00Z",
+    "dedup_key": "fixture-immokalee-transactions-retail",
+    "story_key": "immokalee-rd-retail-trade",
+    "run_at": "2026-05-29T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "corridor": "Cleveland Ave Fort Myers",
+    "topic": "development",
+    "fact": "County approved a 95,000 sqft mixed-use redevelopment on Cleveland Ave",
+    "source_url": "https://leegov.com/cleveland-ave-approval",
+    "source_title": "Cleveland Ave redevelopment cleared",
+    "cited_text": "the 95,000-square-foot redevelopment cleared the board 4-1",
+    "captured_at": "2026-05-29T10:00:00Z",
+    "expires_at": "2099-01-01T00:00:00Z",
+    "dedup_key": "fixture-cleveland-development-mixeduse",
+    "story_key": "cleveland-ave-mixed-use",
+    "run_at": "2026-05-29T10:00:00Z"
+  },
+  {
+    "id": 3,
+    "corridor": "Immokalee Rd North Naples",
+    "topic": "transactions",
+    "fact": "Immokalee Rd retail strip reportedly under contract (earlier version of the story)",
+    "source_url": "https://gulfshorebusiness.com/immokalee-rd-retail-rumor",
+    "source_title": "Immokalee Rd center under contract",
+    "cited_text": "sources say the center is under contract for about $14 million",
+    "captured_at": "2026-05-20T10:00:00Z",
+    "expires_at": "2099-01-01T00:00:00Z",
+    "dedup_key": "fixture-immokalee-transactions-retail-rumor",
+    "story_key": "immokalee-rd-retail-trade",
+    "superseded_by": 1,
+    "run_at": "2026-05-20T10:00:00Z"
+  }
+]

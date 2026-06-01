@@ -179,6 +179,13 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     ttl_seconds: 86400,
   },
   {
+    id: "corridor-pulse-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL (Lee + Collier) weekly corridor current-events pulse — dated commercial-real-estate transactions, construction, leasing, and openings/closings on the CRE corridors, each cited to a primary source.",
+    ttl_seconds: 604800,
+  },
+  {
     id: "labor-demand-swfl",
     domain: "macro",
     scope:

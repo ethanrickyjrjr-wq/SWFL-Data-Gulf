@@ -493,6 +493,34 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     });
   }
 
+  // --- corridor-pulse-swfl thin-pipe context (Build #2, Option 4) ---
+  // Surface recent corridor current-events facts from corridor-pulse-swfl's distilled
+  // OUTPUT (never the raw data_lake.city_pulse_corridors rows — thin-pipe rule) so the
+  // synthesis narrative can weave in what just happened on the corridors. Qualitative
+  // context ONLY: this adds NO key_metric and does not touch the corridor-median
+  // direction math. corridor-pulse-swfl is NOT a direct master input; it reaches master
+  // solely through cre-swfl's enriched read (respects "stop at the grain").
+  const corridorPulseOutput = brainInputFrom(
+    allFragments,
+    "corridor-pulse-swfl",
+  );
+  if (corridorPulseOutput != null) {
+    const signals = corridorPulseOutput.key_metrics.filter((m) =>
+      m.metric.startsWith("signal_"),
+    );
+    for (const s of signals.slice(0, 6)) {
+      facts.push({
+        topic: "corridor-pulse:recent",
+        fact:
+          typeof s.label === "string" && s.label.length > 0
+            ? s.label
+            : s.metric,
+        value: `${String(s.value)} (source: ${s.source?.url ?? "brain://corridor-pulse-swfl"})`,
+        source_fragment_ids: [],
+      });
+    }
+  }
+
   return facts;
 }
 
@@ -1078,8 +1106,12 @@ export const creSwfl: PackDefinition = {
     corridorSource,
     marketbeatSwflSource,
     makeBrainInputSource("permits-swfl"),
+    makeBrainInputSource("corridor-pulse-swfl"),
   ],
-  input_brains: [{ id: "permits-swfl", edge_type: "input" }],
+  input_brains: [
+    { id: "permits-swfl", edge_type: "input" },
+    { id: "corridor-pulse-swfl", edge_type: "input" },
+  ],
   fitScore: creFitScore,
   corpusSummary: creCorpusSummary,
   outputProducer: creSwflOutputProducer,
