@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — fix(news-swfl): re-render live — clear fixture sentinel blocking every master rebuild
+
+§0 of the FMB-restore plan. `brains/news-swfl.md` had been committed from a fixture build (CITATION TABLE `(fixture; …)` + a `"this build uses SYNTHETIC fixture data"` caveat). news-swfl is a master `modifier` edge, so master lifted that OUTPUT via thin pipe and the **Stage-4 fixture-leak gate aborted every master rebuild** (failing CI run 26750877564, 11:01 UTC) — freezing prod on stale master v63. Re-rendered news-swfl **live** (`bun refinery/cli.mts news-swfl`, source=live, 9 fragments = 3 press releases + 6 public notices) → v2, sentinel gone. Verified: no `(fixture` token in any `brains/*.md`; master now rebuilds clean (local `bun refinery/cli.mts master` → v64, Stage 4 EXIT=0; restored committed v63 — the real master rebuild is §7 after the cre-swfl/FEMA fixes). Only `news-swfl.md` committed here. Next: §1 (FEMA per-ZIP `reportedZipCode` typo) + the rest of the critical path. Plan: `~/.claude/plans/look-into-all-of-scalable-engelbart.md`.
+
 ## 2026-06-01 (Sonnet 4.6 · main) — fix(ci+sirs): add "regulatory" BrainDomain + fix SIRS pipeline DB creds in GHA
 
 CI was red: `catalog.mts:211` used `domain: "regulatory"` not in `BrainDomain` union. Added `"regulatory"` to `refinery/types/pack.mts` and ran `ALTER TABLE brain_registry DROP/ADD CONSTRAINT` to match (migration: `docs/sql/20260601_brain_registry_regulatory_domain.sql`). DBPR SIRS pipeline was failing with `FileNotFoundError: .dlt/secrets.toml` — rewired `get_db_conn()` to read `DESTINATION__POSTGRES__CREDENTIALS` env var first (local falls back to secrets.toml). Added that secret to `.github/workflows/dbpr-sirs-monthly.yml`. Both fixes independent; Daily Brain Rebuild should go green on next run.
