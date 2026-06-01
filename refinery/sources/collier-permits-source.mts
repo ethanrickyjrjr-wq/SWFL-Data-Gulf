@@ -5,6 +5,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
+import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 import {
@@ -82,20 +83,21 @@ async function fetchFromSupabase(): Promise<CollierDbRow[]> {
   const sinceIso = new Date(Date.now() - 448 * 86400_000)
     .toISOString()
     .slice(0, 10);
-  const { data, error } = await getSupabase()
-    .schema("data_lake")
-    .from("collier_building_permits")
-    .select(
-      "permit_number, declared_value, permit_type_desc, permit_status, site_address, date_issued, lat, lon, bucket, building_type, permit_class, const_type",
-    )
-    .gte("date_issued", sinceIso)
-    .order("date_issued", { ascending: true });
-  if (error) {
-    throw new Error(
-      `collier-permits-source: Supabase fetch failed — ${error.message}`,
-    );
-  }
-  return (data ?? []) as CollierDbRow[];
+  // PostgREST silently caps any single response at db-max-rows=1000; Collier's
+  // 448-day window is ~5k permits, so page by the UNIQUE permit_number. Ordering
+  // by date_issued would lose/duplicate rows at a page seam (many permits share
+  // an issue date).
+  return selectAllPaged<CollierDbRow>(
+    () =>
+      getSupabase()
+        .schema("data_lake")
+        .from("collier_building_permits")
+        .select(
+          "permit_number, declared_value, permit_type_desc, permit_status, site_address, date_issued, lat, lon, bucket, building_type, permit_class, const_type",
+        )
+        .gte("date_issued", sinceIso) as unknown as PagedQuery<CollierDbRow>,
+    "permit_number",
+  );
 }
 
 async function fetchFromFixture(): Promise<CollierDbRow[]> {
