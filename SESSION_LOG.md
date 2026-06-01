@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Sonnet 4.6 · main) — feat(ingest): DBPR public notices weekly pipeline — 6 SWFL rows dry-run verified, table created, GHA wired
+
+Scrapes https://www2.myfloridalicense.com/public-notices/ weekly (Monday 10:00 UTC). Parses PDF metadata (county, case_number, all_case_numbers, violation_type, industry, response_deadline) with regex; Claude summary via Sonnet. Upserts public.dbpr_public_notices (pdf_url unique key). Amendment pattern handled: two rows same respondent = normal, ORDER BY response_deadline DESC. 20/20 parse tests pass. Dry-run: 6 rows (Collier 1, Sarasota 2, Manatee 3) all acceptance criteria met. DB migration run. Live run needs manual trigger: python \_live_run.py (or GHA dispatch). No consuming brain — regulatory-swfl deferred.
+
 ## 2026-06-01 (Sonnet 4.6 · main) — feat(licenses-swfl): brain LIVE — 9,623 active SWFL contractors, lapse 0.5% → bullish
 
 12,379 rows in data_lake.fl_dbpr_licenses (6,342 Lee active, 3,281 Collier active). Bugs fixed: (1) DBPR CSVs comma-delimited not pipe-delimited; (2) CONSTRUCTIONAPPLICANT_1.csv returns HTML — applicants_swfl=0 with caveat. Brain direction: bullish. PostgREST needed manual GRANT: GRANT SELECT ON ALL TABLES IN SCHEMA data_lake TO service_role + NOTIFY pgrst. Add to future dlt runbook: dlt does not auto-grant PostgREST roles on table creation.
