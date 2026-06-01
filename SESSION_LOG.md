@@ -2,6 +2,23 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — bank: §7 GATE readiness checklist (run this once §1 lands)
+
+Banking the §7 acceptance gate so it survives a context reset — it lived only in chat. **State:** §0 (news-swfl sentinel) cleared; §2 (cre-swfl false MarketBeat caveat, `07279f4`) + §3-grain (`GrainBoundary.routes[]`, `b948700`) merged on main; full `bun test refinery/` = 893/0. **Two de-risk checks this session, both green:** (1) env-swfl is wired as a REAL master source (`master.mts:247` `makeBrainInputSource` + `:283` modifier edge) → it lands in `passing`, so the new per-ZIP flood route WILL fire once env-swfl emits `swfl_zip_*` and clears the relevance floor (no longer a guess); (2) zero fixture sentinels in any committed `brains/*.md` → the full-DAG rebuild won't re-abort at Stage 4 like news-swfl did.
+
+**WAITING ON:** §1 (Claude A) — FEMA `reportedZipCode` fix + re-ingest + prove env-swfl emits `swfl_zip_*`.
+
+**§7 — THE GATE (run after §1 is proven):**
+
+1. Rebuild the WHOLE DAG — prefer the **Daily Brain Rebuild GHA** (has the LLM egress the synthesis stages need; a local master build can hang at stage 3 `exit 124` without egress). Do NOT hand-pick leaves (a missed stale leaf re-aborts master).
+2. **LIVE verify** (not local — passing-locally-while-prod-stale is the original FMB failure):
+   - `…/api/b/env-swfl?format=json` → `swfl_zip_33931_*` metrics present (proves §1).
+   - `…/api/b/master?format=json` → freshness past v63 · `grain_boundary.routes` contains the per-ZIP flood offer (proves §3-grain) · NO 25-item MarketBeat coverage caveat (proves §2).
+   - `…/api/b/master?view=speak&tier=2` → a "You can also ask:" block carries the flood offer, and it is NOT under "What this can't tell you".
+   - Re-ask **Fort Myers Beach** through the MCP path the operator uses → real flood read, not "we don't carry it."
+
+Owner: whoever runs the gate (this session can take it). Plan: `~/.claude/plans/look-into-all-of-scalable-engelbart.md` §7 (mirror copy banked there too).
+
 ## 2026-06-01 (Opus 4.8 · main) — feat(grain): add GrainBoundary.routes[] — master can surface finer grain it actually holds
 
 §3-grain, the FULL fix (Option 1, operator-locked: "fix it right"). `composeGrainBoundary` returned `{not_available, finest_grain}` with no slot for a route/offer, and `finest_grain:"county-month"` is a single validator-pinned string the consumer treats as a hard floor — so scrubbing the false denial alone would still suppress per-ZIP flood. Added an optional `routes?: string[]` carrier to `GrainBoundary` (`brain-output.mts`) — plain user-facing offers for a finer grain the lake holds _this run_, the sanctioned exceptions to `finest_grain`. `composeGrainBoundary` (`synth.mts`) builds routes from a brain*id rule table **gated on the upstream CONTRIBUTING the finer-grain metric this run, not on being wired** (env-swfl fires the per-ZIP flood offer only when it emits `swfl_zip*\*` key_metrics — empty today, auto-lights when §1's FEMA per-ZIP data lands). Same gating discipline as the §2 MarketBeat-caveat fix; LittleBird flagged it. Speaker (`speaker.mts`) renders routes in their OWN block under **"You can also ask:"** — never folded into the "What this can't tell you" denial block (§6: plain offers, no internal ids). spec-validator validates `routes`is a non-empty-string array when present. Round-trip is free: the`--- OUTPUT ---`block is whole-object`JSON.stringify`→`JSON.parse` (`master-index.mts:49`/`speaker.mts:110`), so the nested optional field rides through. Optional field → no pack backfill (Brain Factory rule 3 trivially satisfied). **Deliberately NOT added: a condo-sirs route** — count-only-by-county, not wired to master; offering "filings for that building?" would be the inverse FMB bug. Left a `TODO(§3+§9)`. TDD: 3 composeGrainBoundary tests (contributes→offer; wired-but-empty→none; absent→none) + 3 speaker tests (renders under ask-header not denial-header; no-routes→no-block; OUTPUT JSON round-trip). `bun test refinery/` → 893/0; typecheck clean on touched files (101 total = baseline test-file noise, see memory). Takes effect in prod at the §7 gated DAG rebuild. Files: brain-output.mts, synth.mts, speaker.mts, spec-validator.mts + 2 test files.
