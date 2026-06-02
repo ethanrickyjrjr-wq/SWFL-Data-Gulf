@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Sonnet 4.6 · main) — fix: wire SUPABASE*S3*\* secrets into daily-rebuild workflow
+
+Root-caused 5 OPEN cron incidents from 2026-06-01. Primary fix: `SUPABASE_S3_ENDPOINT`, `SUPABASE_S3_ACCESS_KEY_ID`, `SUPABASE_S3_SECRET_ACCESS_KEY` added to `daily-rebuild.yml` env block — secrets existed in GitHub repo settings (used by 7 other workflows) but were never wired to the rebuild job. FEMA pagination fix (`f772f72`) already on main. Next: manually dispatch rebuild to confirm clean run; OPEN incident rows auto-resolve on next clean scheduled cron.
+
 ## 2026-06-02 (Sonnet 4.6 · main) — Brain Resilience System Phase 2+3+5 shipped
 
 Phase 2+3+5 of `docs/superpowers/plans/2026-06-02-brain-resilience-phase-2/README.md`. 9 commits, 920 tests green (5 new speaker tests, 13 new resilient-build tests — 0 changed assertions).
