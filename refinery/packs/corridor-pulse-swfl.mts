@@ -165,7 +165,7 @@ function corridorPulseOutputProducer(
       caveats: [
         env.source === "fixture"
           ? "Corridor pulse is reading FIXTURE data — check the fixture file at refinery/__fixtures__/corridor-pulse.sample.json."
-          : "No non-expired city_pulse_corridors rows. Either the weekly pulse has not run, all signals have aged past their TTL, or no tracked corridor made news this window.",
+          : "No live corridor current-events signals in this build window — either the weekly pulse has not run yet, all signals have aged past their TTL, or no tracked corridor made news this window.",
       ],
       direction: "neutral",
       magnitude: 0,
@@ -217,7 +217,7 @@ function corridorPulseOutputProducer(
   const caveats: string[] = [];
   if (snapshot.signals.length > MAX_SIGNALS) {
     caveats.push(
-      `${snapshot.signals.length - MAX_SIGNALS} additional live signals not surfaced here (cap ${MAX_SIGNALS}); the full set is in data_lake.city_pulse_corridors.`,
+      `${snapshot.signals.length - MAX_SIGNALS} additional live signals are tracked but not surfaced here (cap ${MAX_SIGNALS}).`,
     );
   }
   caveats.push(

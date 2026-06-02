@@ -252,6 +252,35 @@ type DuckDBConn = Awaited<
 let mainConn: DuckDBConn | null = null;
 let registeredViews: ViewMeta[] = [];
 
+/** Resolves when startup() finishes. Tool handlers await this so the server can
+ *  accept the MCP handshake immediately while view registration runs in the
+ *  background; the first query simply waits for the background work to land. */
+
+let startupPromise: Promise<void> | null = null;
+async function awaitReady(): Promise<void> {
+  if (startupPromise) await startupPromise;
+}
+
+/** Loads httpfs and applies S3 credentials to a connection. Mirrors
+ *  composeQuery's S3 block (refinery/sources/duckdb-source.mts). Each connection
+ *  that reads a Tier-1 s3:// view needs its own copy of these session settings. */
+async function configureS3(
+  conn: DuckDBConn,
+  s3: { endpoint: string; accessKey: string; secretKey: string },
+): Promise<void> {
+  await conn.run("INSTALL httpfs; LOAD httpfs;");
+  await conn.run(
+    [
+      `SET s3_endpoint='${sqlEscape(s3.endpoint)}';`,
+      `SET s3_access_key_id='${sqlEscape(s3.accessKey)}';`,
+      `SET s3_secret_access_key='${sqlEscape(s3.secretKey)}';`,
+      "SET s3_region='us-east-1';",
+      "SET s3_url_style='path';",
+      "SET s3_use_ssl=true;",
+    ].join("\n"),
+  );
+}
+
 async function startup(): Promise<void> {
   const pg = requirePgEnv();
 
@@ -311,23 +340,28 @@ async function startup(): Promise<void> {
   }
 
   if (s3) {
-    // Mirrors composeQuery's S3 block (refinery/sources/duckdb-source.mts).
-    await conn.run("INSTALL httpfs; LOAD httpfs;");
-    await conn.run(
-      [
-        `SET s3_endpoint='${sqlEscape(s3.endpoint)}';`,
-        `SET s3_access_key_id='${sqlEscape(s3.accessKey)}';`,
-        `SET s3_secret_access_key='${sqlEscape(s3.secretKey)}';`,
-        "SET s3_region='us-east-1';",
-        "SET s3_url_style='path';",
-        "SET s3_use_ssl=true;",
-      ].join("\n"),
-    );
+    await configureS3(conn, s3);
   }
+
+  // mainConn must be live before we await the (slow) view registration so that
+  // the MCP handshake — which the caller has already accepted — can serve
+  // pg.data_lake.* queries the instant Step 4 finishes, even while Tier-1 views
+  // are still being built in the background.
+  mainConn = conn;
 
   // Step 5 — Register each dataset view in its own try/catch. A view that fails
   // (corrupt file, transient S3 error, drifting schema) is logged and skipped;
   // the server still comes up with every view that did register.
+  //
+  // This is the slow part of startup: each CREATE VIEW forces DuckDB to sniff
+  // the backing S3 object(s) to bind a schema (csv_auto ~5s/file; a 26-file
+  // ndjson union_by_name read ~30s), summing to ~90s. It stays serial on
+  // purpose — DuckDB's node binding executes run() calls on a single scheduler,
+  // so fanning these across multiple connections measured *slower*, not faster.
+  // The connect-first ordering in the boot block (not parallelism) is what
+  // keeps this off the handshake's critical path: the transport is already
+  // connected, so this whole loop runs in the background and only the first
+  // tool call waits on it.
   const registered: ViewMeta[] = [];
   if (s3) {
     for (const g of groups) {
@@ -362,10 +396,9 @@ async function startup(): Promise<void> {
     }
   }
   registeredViews = registered;
-  mainConn = conn;
 
   console.error(
-    `[lake-mcp] Ready — ${registered.length} Tier-1 view(s) over ${viewableRows} file(s); ` +
+    `[lake-mcp] Ready — ${registeredViews.length} Tier-1 view(s) over ${viewableRows} file(s); ` +
       `${skippedCount} row(s) skipped (geojson/other — query via pg.data_lake.*); ` +
       `Postgres READ_ONLY (pg.data_lake.*)`,
   );
@@ -482,6 +515,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
+  // Block until startup() has finished registering views. The handshake was
+  // accepted early (transport connects before startup completes); the first
+  // tool call is where we actually wait for the lake to be ready.
+  await awaitReady();
   try {
     if (name === "list_views") {
       return {
@@ -515,13 +552,16 @@ if (import.meta.main) {
   process.on("exit", () => {
     mainConn?.closeSync();
   });
-  startup()
-    .then(() => {
-      const transport = new StdioServerTransport();
-      return server.connect(transport);
-    })
-    .catch((err) => {
-      console.error("[lake-mcp] Fatal startup error:", err);
-      process.exit(1);
-    });
+  // Connect the transport FIRST so the MCP handshake (initialize + list_tools)
+  // is answered immediately, then build the lake in the background. Previously
+  // startup() ran to completion before connect(), so its ~90s of S3 schema
+  // sniffing blocked the handshake and the client timed out → "failed to
+  // connect". Tool handlers await awaitReady(), so the first query waits for
+  // the background startup; the connection itself never stalls.
+  startupPromise = startup().catch((err) => {
+    console.error("[lake-mcp] Fatal startup error:", err);
+    process.exit(1);
+  });
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
 }

@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Sonnet 4.6 · main) — Bundle A+B: FMB rename + caveat leak fix + corridor routing + rebuild gate
+
+**Bundle A (leak fix):** `corridor-pulse-swfl.mts` empty-guard caveat reworded — no table name, no `[config]` artifact in tier-2 output. `speaker.mts` `scrubCaveatTechnical` gets an explicit `data_lake.*`/`public.*` schema-qualified redaction rule as a durable backstop; pinned by new test in `speaker.test.mts`.
+
+**Bundle B (routing):** `cre-swfl.mts` appends `corridor_pulse_signals_live` count after its medians (index ≥ 2). `synth.mts` `composeGrainBoundary` gates a new corridor current-events route on that count > 0 — reads the full `passing[]` array (not `rollupKeyMetrics`'s `[0]/[1]` slice), so the count gates the offer but never reaches master's dossier. Route text is distinct from the flood/ZIP route. Buried-index test in `synth.test.mts` proves both halves simultaneously. All 944 tests pass.
+
+**FMB rename:** `corridor-pulse-source.mts` `normalizeRow` maps "Estero Blvd Fort Myers Beach" → "Fort Myers Beach" via `displayNameFor` on every read. Exact-key lookup (no substring); inland Estero and mainland Fort Myers corridors stay distinct. Three trap-case tests in new `corridor-pulse-source.test.mts`.
+
+**Rebuild gate:** `ingest/scripts/rebuild_due.py` wired into `.github/workflows/daily-rebuild.yml`. Gate compares oldest `refined_at` across `brains/*.md` vs newest source ingest timestamp from the cadence registry. Exit 0 = rebuild needed; exit 10 = skip. Fail-open. `force=true` input bypasses the gate. Saves ~20 min of nightly LLM triage when sources haven't published new data.
+
 ## 2026-06-02 (Sonnet 4.6 · main) — QCEW→macro-swfl wire + env-swfl hydro phantom audit
 
 **macro-swfl** (`refinery/packs/macro-swfl.mts`): wired `blsQcewSource` into the pack. Adds `qcewFrom` fragment extractor + 6 private-sector wage/employment metrics (qcew_lee/collier_private_avg_wkly_wage, \_yoy_pct, \_employment). Degrades gracefully when QCEW data absent with logged caveat.

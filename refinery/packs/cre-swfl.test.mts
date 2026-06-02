@@ -139,6 +139,108 @@ test("cre-swfl × permits-swfl: no permits upstream → no permits metrics in ou
   assert.ok(!zMetric, "expected no z signal when permits absent");
 });
 
+// --- corridor-pulse contribution count (B1) ---------------------------
+
+function makeCorridorPulseFragment(signalCount: number): RawFragment {
+  const key_metrics: BrainOutputMetric[] = Array.from(
+    { length: signalCount },
+    (_, i) => ({
+      metric: `signal_breaking_${i + 1}`,
+      value: "Fort Myers Beach — a beachfront retail building changed hands",
+      direction: "stable" as const,
+      label: "Fort Myers Beach — breaking",
+      variable_type: "categorical" as const,
+      source: {
+        url: `https://gulfshorebusiness.com/s${i + 1}`,
+        fetched_at: NOW,
+        tier: 2 as const,
+        citation: `corridor-pulse signal ${i + 1}`,
+      },
+    }),
+  );
+  const output: BrainOutput = {
+    brain_id: "corridor-pulse-swfl",
+    version: 1,
+    refined_at: NOW,
+    direction: "neutral",
+    magnitude: 0,
+    drivers: [],
+    overrides: [],
+    conclusion: "test fixture — corridor-pulse-swfl OUTPUT",
+    key_metrics,
+    caveats: [],
+    contradicts: [],
+    confidence: 0.7,
+    joint_integrity: 1,
+    confidence_dispersion: 0,
+    chain_depth: 0,
+    trust_tier: 2,
+    upstream_count: 0,
+    relevance: { decay_curve: "weeks", half_life_hours: 168, computed_at: NOW },
+    exogenous_signals: [],
+  };
+  const norm: BrainInputNormalized = {
+    kind: "brain-input",
+    upstream_id: "corridor-pulse-swfl",
+    output,
+  };
+  return {
+    fragment_id: "brain-input:corridor-pulse-swfl:test",
+    source_id: "brain-input:corridor-pulse-swfl",
+    source_trust_tier: 2,
+    fetched_at: NOW,
+    raw: {},
+    normalized: norm as unknown as Record<string, unknown>,
+  };
+}
+
+// cre only builds a corpus when it has verified corridors (creCorpusSummary
+// early-returns on zero corridors), so every case carries a corridor fragment —
+// cre's normal state. The corridor-pulse fragment is the contribution under test.
+test("cre-swfl × corridor-pulse: N live signals → corridor_pulse_signals_live = N", () => {
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"),
+    makeCorridorPulseFragment(7),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const m = result.key_metrics.find(
+    (k) => k.metric === "corridor_pulse_signals_live",
+  );
+  assert.ok(m, "expected a corridor_pulse_signals_live metric");
+  assert.equal(m!.value, 7);
+  assert.ok(
+    typeof m!.source === "object" && m!.source.url.length > 0,
+    "count metric must carry a well-formed source receipt",
+  );
+});
+
+test("cre-swfl × corridor-pulse: corridors present but no corridor-pulse upstream → no count metric (gate on contribution, not wiring)", () => {
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  assert.ok(
+    !result.key_metrics.some((k) => k.metric === "corridor_pulse_signals_live"),
+    "no corridor count metric when corridor-pulse is absent",
+  );
+});
+
+test("cre-swfl × corridor-pulse: singleton reset — a second run without corridor-pulse clears the prior count", () => {
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"),
+    makeCorridorPulseFragment(5),
+  ]);
+  creSwfl.outputProducer!(minimalPackOutput());
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"),
+  ]);
+  const run2 = creSwfl.outputProducer!(minimalPackOutput());
+  assert.ok(
+    !run2.key_metrics.some((k) => k.metric === "corridor_pulse_signals_live"),
+    "a prior-run corridor count must not bleed into a run without corridor-pulse",
+  );
+});
+
 // --- MarketBeat per-submarket fan-out ---------------------------------
 
 function makeMbFragment(

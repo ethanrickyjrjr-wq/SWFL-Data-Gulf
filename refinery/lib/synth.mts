@@ -614,6 +614,24 @@ export function composeGrainBoundary(args: {
       "Flood risk is tracked per ZIP — want it for a specific ZIP or address?",
     );
   }
+  // Corridor current-events route. Gated on cre's deterministic
+  // `corridor_pulse_signals_live` count (>0), NOT on cre being present —
+  // corridor-pulse is TTL-bounded and can empty while cre still votes; an
+  // unconditional offer is the inverse-FMB false-offer bug. Text is kept
+  // DISTINCT from the flood route above so a downstream Claude routes to the
+  // right brain (CRE current events vs per-ZIP flood) instead of free-styling —
+  // the failure that surfaced a sector charge-off on a Fort Myers Beach query.
+  const cre = byId.get("cre-swfl");
+  if (
+    cre &&
+    cre.key_metrics.some(
+      (m) => m.metric === "corridor_pulse_signals_live" && Number(m.value) > 0,
+    )
+  ) {
+    routes.push(
+      "Recent commercial real-estate current events — leasing, sales, openings and closings — are tracked per area; want the latest for a specific area?",
+    );
+  }
   // TODO(§3 + §9): add a condo-association route once condo-sirs-swfl is wired
   // to master AND holds per-association grain. Today its connector is
   // count-only-by-county (dbpr-sirs-source.mts), so offering "filings for that

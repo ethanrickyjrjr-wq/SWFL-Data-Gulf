@@ -145,6 +145,23 @@ describe("scrubCaveatTechnical (PR3-B)", () => {
       /\[ref\]/,
     );
   });
+
+  test("redacts schema-qualified DB identifiers as one unit", () => {
+    // The exact leak this rule shipped for: a raw table name in a caveat.
+    const leak = "the full set is in data_lake.city_pulse_corridors.";
+    assert.match(scrubCaveatTechnical(leak), /\[internal\]\./);
+    assert.doesNotMatch(
+      scrubCaveatTechnical(leak),
+      /data_lake|city_pulse_corridors/,
+    );
+    // The no-underscore table-name case the [config] rule alone would miss —
+    // "permits" has no internal underscore, so only the schema-qualified rule
+    // catches it.
+    assert.doesNotMatch(
+      scrubCaveatTechnical("see public.permits for the rows"),
+      /\bpermits\b/,
+    );
+  });
 });
 
 describe("sanitizeProse path preservation (PR3-A)", () => {

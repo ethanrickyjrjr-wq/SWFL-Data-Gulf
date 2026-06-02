@@ -241,6 +241,15 @@ function formatDegradedToken(entry: { label: string; date: string }): string {
 export function scrubCaveatTechnical(text: string): string {
   return (
     text
+      // Schema-qualified DB identifiers (data_lake.city_pulse_corridors,
+      // public.corridor_profiles) — redact the whole schema.table as ONE unit.
+      // The [config] rule below only catches a table name that happens to
+      // contain an underscore; a name like `data_lake.permits` would leak the
+      // table half straight through. Named schemas only, so it never eats prose.
+      .replace(
+        /\b(?:data_lake|public|information_schema)\.[a-z_][a-z0-9_]*\b/gi,
+        "[internal]",
+      )
       // Source-code + doc file paths: refinery/… and any slash-path ending in a
       // code/doc extension (docs/…-spike-findings.md, refinery/sources/x.mts).
       .replace(/\brefinery\/\S+/g, "[internal]")

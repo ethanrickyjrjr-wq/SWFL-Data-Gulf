@@ -6,6 +6,7 @@ import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
+import { displayNameFor } from "../lib/corridor-display.mts";
 
 /**
  * corridor-pulse source connector — reads non-expired rows from
@@ -51,7 +52,12 @@ const FIXTURE_PATH = path.join(
 /** Normalized corridor-pulse row — what Stage 2 / Stage 3 see. */
 export interface CorridorPulseNormalized {
   kind: "corridor-pulse";
-  /** corridor_profiles.corridor_name (e.g. "Immokalee Rd North Naples"). */
+  /**
+   * User-facing place name (e.g. "North Naples", "Fort Myers Beach"), mapped
+   * from the DB join-key `corridor_name` via `displayNameFor` at normalize time.
+   * The over-specific road-ID label ("Estero Blvd Fort Myers Beach") never
+   * reaches a human — same canonical display authority cre-swfl renders through.
+   */
   corridor: string;
   /** Volatility class: breaking | transactions | development | business | structural */
   topic: string;
@@ -91,7 +97,11 @@ export function normalizeRow(
 ): CorridorPulseNormalized {
   return {
     kind: "corridor-pulse",
-    corridor: str(row.corridor) || "Unknown",
+    // Map the DB join-key corridor_name → plain place name. displayNameFor keys
+    // on the FULL collapsed name (never a substring), so inland "…estero-bonita-
+    // boundary" and "Cleveland Ave Fort Myers" can never fold into Fort Myers
+    // Beach. Durable across weekly re-ingest — runs on every brain read.
+    corridor: displayNameFor(str(row.corridor) || "Unknown"),
     topic: str(row.topic) || "structural",
     fact: str(row.fact),
     source_url: str(row.source_url),

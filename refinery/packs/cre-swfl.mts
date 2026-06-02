@@ -56,6 +56,21 @@ let lastCorridorFetchedAt: string | null = null;
 let lastPermitsSwflOutput: BrainOutput | null = null;
 
 /**
+ * Stashed corridor-pulse contribution signal — populated by creCorpusSummary,
+ * consumed by creSwflOutputProducer to emit ONE deterministic count key_metric
+ * (`corridor_pulse_signals_live`). master gates its "ask about a specific area"
+ * grain-boundary route on this count > 0 — gate on REAL contribution, not on
+ * cre being wired: corridor-pulse is TTL-bounded and can empty while cre still
+ * votes. The representative source receipt rides along so the count metric is a
+ * well-formed citation. Thin-pipe intact — this is cre's distilled OUTPUT, never
+ * corridor-pulse internals.
+ */
+
+let lastCorridorPulseSignalCount = 0;
+
+let lastCorridorPulseSource: BrainOutputMetric["source"] | null = null;
+
+/**
  * Stashed MarketBeat rows — populated by creCorpusSummary, consumed by
  * outputProducer. Each entry is one submarket at its latest verified quarter
  * (the source already applied the verified-filter + latest-per-submarket pick).
@@ -341,6 +356,8 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastMarketbeatRows = [];
   lastMarketbeatFetchedAt = null;
   lastJoinedBySubmarket = { matched: new Map(), unmatched: [] };
+  lastCorridorPulseSignalCount = 0;
+  lastCorridorPulseSource = null;
 
   // Stash permits-swfl upstream OUTPUT for outputProducer (thin-pipe: read only
   // the distilled OUTPUT block, never the raw permit rows).
@@ -531,6 +548,11 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     const signals = corridorPulseOutput.key_metrics.filter((m) =>
       m.metric.startsWith("signal_"),
     );
+    // Contribution signal for master's grain-boundary route gate (B1). Stash the
+    // FULL live count (pre-narrative-cap) + a representative source receipt for
+    // creSwflOutputProducer to emit as one deterministic count key_metric.
+    lastCorridorPulseSignalCount = signals.length;
+    lastCorridorPulseSource = signals[0]?.source ?? null;
     for (const s of signals.slice(0, CORRIDOR_PULSE_NARRATIVE_CAP)) {
       facts.push({
         topic: "corridor-pulse:recent",
@@ -893,6 +915,30 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
       });
       emittedSubmarketSlugs.absorption_sqft.push(metricName);
     }
+  }
+
+  // --- corridor-pulse contribution signal (B1) -------------------------------
+  // ONE deterministic count key_metric so master can gate its "ask about a
+  // specific area" grain-boundary route on REAL contribution (count > 0), not on
+  // cre merely being wired — corridor-pulse is TTL-bounded and can empty while
+  // cre still votes (an unconditional route is the inverse-FMB false-offer bug).
+  // Placed after cre's median + MarketBeat blocks. Load-bearing invariant:
+  // rollupKeyMetrics only ever lifts each upstream's key_metrics[0]/[1] into
+  // master's dossier, and those slots are cre's cap/vacancy medians — so this
+  // count never displaces them there. composeGrainBoundary, by contrast, reads
+  // the FULL array and still sees it. Thin-pipe intact: cre's distilled OUTPUT,
+  // never corridor-pulse internals.
+  if (lastCorridorPulseSignalCount > 0 && lastCorridorPulseSource != null) {
+    key_metrics.push({
+      metric: "corridor_pulse_signals_live",
+      value: lastCorridorPulseSignalCount,
+      direction: "stable",
+      label: `Live corridor current-events signals informing this read (${lastCorridorPulseSignalCount})`,
+      variable_type: "extensive",
+      units: "count",
+      display_format: "count",
+      source: lastCorridorPulseSource,
+    });
   }
 
   const vote = voteCreDirection(corridors);

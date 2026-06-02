@@ -867,6 +867,184 @@ test("composeGrainBoundary: no env-swfl upstream → no routes", () => {
   assert.ok(!gb.routes || gb.routes.length === 0);
 });
 
+test("composeGrainBoundary: cre contributing corridor_pulse_signals_live → corridor route, distinct from flood", () => {
+  // cre forwards a deterministic count of live corridor current-events signals;
+  // master offers an area current-events route so a downstream Claude routes to
+  // the corridor brain instead of free-styling (the FMB charge-off failure).
+  const passing = [
+    {
+      upstream: brain("cre-swfl", "bullish", 0.5, 0.8, {
+        key_metrics: [
+          metric({
+            metric: "corridor_pulse_signals_live",
+            value: 7,
+            direction: "stable",
+            label:
+              "Live corridor current-events signals informing this read (7)",
+          }),
+        ],
+      }),
+      factor: 1,
+    },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 1,
+    relevanceFloor: 0.1,
+  });
+  const corridorRoute = gb.routes?.find(
+    (r) => /current events/i.test(r) && /area/i.test(r),
+  );
+  assert.ok(
+    corridorRoute,
+    `expected a corridor current-events offer, got: ${JSON.stringify(gb.routes)}`,
+  );
+  // Mandatory disambiguation: it must NOT read like the per-ZIP flood route.
+  assert.doesNotMatch(corridorRoute!, /flood|zip/i);
+});
+
+test("composeGrainBoundary: cre wired but corridor_pulse_signals_live=0 → no corridor route (gate on contribution)", () => {
+  // corridor-pulse is TTL-bounded; a 0 count means it emptied this run. cre still
+  // votes, but the area route must stay dark — the inverse-FMB false-offer guard.
+  const passing = [
+    {
+      upstream: brain("cre-swfl", "bullish", 0.5, 0.8, {
+        key_metrics: [
+          metric({
+            metric: "corridor_pulse_signals_live",
+            value: 0,
+            direction: "stable",
+            label:
+              "Live corridor current-events signals informing this read (0)",
+          }),
+          metric({
+            metric: "cap_rate_median",
+            value: 6.1,
+            direction: "stable",
+            label: "Median SWFL CRE cap rate",
+          }),
+        ],
+      }),
+      factor: 1,
+    },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 1,
+    relevanceFloor: 0.1,
+  });
+  assert.ok(
+    !gb.routes || !gb.routes.some((r) => /current events/i.test(r)),
+    `expected no corridor route when the count is 0, got: ${JSON.stringify(gb.routes)}`,
+  );
+});
+
+test("composeGrainBoundary: env per-ZIP + cre corridor signals → both routes, clearly distinct", () => {
+  const passing = [
+    {
+      upstream: brain("env-swfl", "bearish", 0.6, 0.8, {
+        key_metrics: [
+          metric({
+            metric: "swfl_zip_33931_aal",
+            value: 1200,
+            direction: "rising",
+            label: "ZIP 33931 average annual flood loss",
+          }),
+        ],
+      }),
+      factor: 1,
+    },
+    {
+      upstream: brain("cre-swfl", "bullish", 0.5, 0.8, {
+        key_metrics: [
+          metric({
+            metric: "corridor_pulse_signals_live",
+            value: 4,
+            direction: "stable",
+            label:
+              "Live corridor current-events signals informing this read (4)",
+          }),
+        ],
+      }),
+      factor: 1,
+    },
+  ];
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 2,
+    relevanceFloor: 0.1,
+  });
+  assert.equal(
+    gb.routes?.length,
+    2,
+    `expected both routes, got: ${JSON.stringify(gb.routes)}`,
+  );
+  const flood = gb.routes!.find((r) => /flood/i.test(r));
+  const corridor = gb.routes!.find((r) => /current events/i.test(r));
+  assert.ok(
+    flood && corridor,
+    "expected one flood route and one corridor route",
+  );
+  assert.notEqual(flood, corridor);
+});
+
+test("cre→master hop: corridor count buried at index 2 is SEEN by the route gate but NOT lifted into master's dossier", () => {
+  // Coherence proof for the two-claims-in-tension concern. cre appends
+  // corridor_pulse_signals_live AFTER its medians, so it lives at index >= 2.
+  // master.mts feeds the SAME `passing` (full upstream BrainOutputs, from
+  // lastUpstreams = …map(n => n.output)) to BOTH:
+  //   • composeGrainBoundary (master.mts:183) — reads the FULL key_metrics array,
+  //   • rollupKeyMetrics      (master.mts:143) — lifts only key_metrics[0]/[1].
+  // So the gate must fire from index 2 AND the count must stay out of the dossier.
+  const cre = brain("cre-swfl", "bullish", 0.5, 0.8, {
+    trust_tier: 1,
+    key_metrics: [
+      metric({
+        metric: "cap_rate_median",
+        value: 6.1,
+        direction: "stable",
+        label: "Median SWFL CRE cap rate",
+      }),
+      metric({
+        metric: "vacancy_rate_median",
+        value: 7.4,
+        direction: "stable",
+        label: "Median SWFL CRE vacancy rate",
+      }),
+      metric({
+        metric: "corridor_pulse_signals_live",
+        value: 9,
+        direction: "stable",
+        label: "Live corridor current-events signals informing this read (9)",
+      }),
+    ],
+  });
+  const passing = [{ upstream: cre, factor: 1 }];
+
+  // (a) The gate reads the full array → route fires even with the count at [2].
+  const gb = composeGrainBoundary({
+    passing,
+    originalCount: 1,
+    relevanceFloor: 0.1,
+  });
+  assert.ok(
+    gb.routes?.some((r) => /current events/i.test(r)),
+    `expected the corridor route to fire from a count at index 2, got: ${JSON.stringify(gb.routes)}`,
+  );
+
+  // (b) The dossier rollup lifts only [0]/[1] → the count never reaches master.
+  const rolled = rollupKeyMetrics(passing);
+  assert.ok(
+    !rolled.some((m) => m.metric === "corridor_pulse_signals_live"),
+    `corridor count must not reach master's dossier, got: ${rolled.map((m) => m.metric).join(", ")}`,
+  );
+  // Guard against a vacuous pass: rollup did lift a real median.
+  assert.ok(
+    rolled.some((m) => m.metric === "cap_rate_median"),
+    "expected cap_rate_median in the rollup (sanity)",
+  );
+});
+
 // ---- predictedWindow -------------------------------------------------------
 
 test("predictedWindow: neutral vote → undefined", () => {
