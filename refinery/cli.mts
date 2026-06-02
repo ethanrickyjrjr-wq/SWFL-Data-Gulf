@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import { getPack, PACKS } from "./config/packs.mts";
 import type { PackDefinition } from "./types/pack.mts";
 import { env } from "./config/env.mts";
@@ -384,8 +386,32 @@ async function main(): Promise<void> {
         }
       }
     }
-    // Task 4 will add report emission + process.exit here
-    void masterDecision; // prevent unused-variable lint until Task 4
+    // Determine exit code:
+    // 0 — all built/skipped-fresh, no degraded or missing
+    // 2 — degraded-but-complete (≥1 degraded/missing, master published/skipped)
+    // 1 — master HELD or run crashed
+    const hasDegradedOrMissing = outcomes.some(
+      (o) => o.status === "degraded" || o.status === "missing",
+    );
+    const masterHeld = masterDecision === "held";
+    const exitCode: 0 | 1 | 2 = masterHeld ? 1 : hasDegradedOrMissing ? 2 : 0;
+
+    const report: BuildReport = {
+      target: packId,
+      timestamps: { started: startedAt, finished: new Date().toISOString() },
+      source: env.source,
+      outcomes,
+      exitCode,
+      masterDecision,
+    };
+
+    const reportPath = path.join(process.cwd(), "brains", "_build-report.json");
+    if (!dryRun) {
+      await writeFile(reportPath, JSON.stringify(report, null, 2), "utf-8");
+      console.log(`[cli] build report → ${reportPath} (exit ${exitCode})`);
+    }
+
+    if (exitCode !== 0) process.exit(exitCode);
   }
 
   if (report) {
