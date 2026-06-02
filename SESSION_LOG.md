@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-01 (Opus 4.8 · main) — Brain Resilience System plan: code-verified audit + committed (`206ff6e`)
+
+Audited `docs/superpowers/plans/2026-06-01-brain-resilience-system/README.md` against live source (4 verification agents). ~30 line-number/behavior claims confirmed exact; the plan already carried the 8 agreed corrections (MULT=1 + 14-day ceiling, master-carries-the-token Phase 5, registry-invariant label gate, `dataIntegrity` slot, critical-set snapshot, missing-vs-not-yet-online split, transient-only retry, dropped rename). Found + fixed 2 real issues it still had:
+
+- **decision #2 said "60-day window"** — stale MULT=2 number, contradicted Phase 3; corrected to 30 (MULT is 1; ceiling caps to 14).
+- **`degraded_inputs` round-trip missing** — field added to the type but nothing required serializing it into the `--- OUTPUT ---` block + reconstructing in `parseBrainMarkdown`. Speaker renders from the re-parsed `master.md`, so as written the token would silently never appear. Added requirement + verification guard 9. Also documented that never-built-vs-re-darkened detection relies on last-good being sacred.
+
+**Headline calibration bug caught:** env-swfl TTL is 30d (`env-swfl.mts:1079`), not the 7d the author assumed (conflated with cre-swfl) — the FMB "constant calibrated against the wrong reference value" lesson repeating. The plan doc was **untracked** (root cause of cross-session working-tree thrash) — now committed. **Next:** implementation not started; Phase 1 (atomic type-lifts) is the entry point; SOURCED.md needs the 3 eligibility constants + real TTL table before Phase 3 ships.
+
 ## 2026-06-01 (Opus 4.8 · main) — VERIFY QUEUED + follow-on filed (sequel to the audit below)
 
 **VERIFY after the 2026-06-02 nightly Daily Brain Rebuild:** open the rebuilt macro-florida brain and check the `--- SOURCES ---` block — the `census_cbp_fl` / macro-florida-cbp assembled row count should read **~43,606**, not **1,000**. If it still reads 1,000, the nightly didn't pick up the `8c4c61a` cbp pagination fix (macro-florida.md may not have expired, or the rebuild was skipped/--force-blocked) — investigate before trusting macro-florida / macro-swfl / master sector aggregates.
