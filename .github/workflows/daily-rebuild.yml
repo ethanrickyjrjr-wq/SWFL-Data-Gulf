@@ -57,7 +57,19 @@ jobs:
             echo "No brain files changed — all fresh, nothing to commit."
           else
             git commit -m "chore(brains): daily rebuild $(date -u '+%Y-%m-%d')"
-            git push
+            for attempt in 1 2 3; do
+              git fetch origin
+              git rebase origin/main
+              if git push; then
+                echo "Push succeeded on attempt $attempt."
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "Push failed after 3 attempts — giving up."
+                exit 1
+              fi
+              echo "Push rejected — another commit landed first; retrying (attempt $attempt/3)..."
+            done
           fi
 
       - name: Notify on failure
