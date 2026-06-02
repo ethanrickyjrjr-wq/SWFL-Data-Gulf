@@ -1,7 +1,11 @@
 // refinery/lib/master-gate.test.mts
 import { test } from "bun:test";
 import assert from "node:assert/strict";
-import { evaluateMasterGate, type MasterGateInput } from "./master-gate.mts";
+import {
+  evaluateMasterGate,
+  computeDegradedCriticalIds,
+  type MasterGateInput,
+} from "./master-gate.mts";
 
 /** Build a PUBLISH-by-default gate input; override per test to trip a rule. */
 function gateInput(overrides: Partial<MasterGateInput> = {}): MasterGateInput {
@@ -94,4 +98,61 @@ test("PUBLISH: non-critical hole", () => {
     }),
   );
   assert.equal(decision, "PUBLISH");
+});
+
+// ── computeDegradedCriticalIds — the gate's Rule-4 numerator construction ──
+// (issue #6) One test per filter clause. The INCLUDE case is first and load-bearing:
+// without it, a `return new Set()` stub would pass every exclusion case below.
+const sorted = (s: ReadonlySet<string>) => [...s].sort();
+
+test("numerator INCLUDE: critical+degraded, no holes/never-built → non-empty", () => {
+  const result = computeDegradedCriticalIds({
+    allDegraded: new Set(["A", "B"]),
+    criticalUpstreamIds: new Set(["A", "B"]),
+    holes: new Set<string>(),
+    neverBuilt: new Set<string>(),
+  });
+  assert.deepEqual(sorted(result), ["A", "B"]);
+});
+
+test("numerator EXCLUDE never-built (issue #6 fix)", () => {
+  const result = computeDegradedCriticalIds({
+    allDegraded: new Set(["A"]),
+    criticalUpstreamIds: new Set(["A"]),
+    holes: new Set<string>(),
+    neverBuilt: new Set(["A"]),
+  });
+  assert.deepEqual(sorted(result), []);
+});
+
+test("numerator LEAK reproduced without the never-built guard (regression)", () => {
+  // Same inputs as the fix case but neverBuilt empty — proves the exclusion is what
+  // keeps A out, not some other clause.
+  const result = computeDegradedCriticalIds({
+    allDegraded: new Set(["A"]),
+    criticalUpstreamIds: new Set(["A"]),
+    holes: new Set<string>(),
+    neverBuilt: new Set<string>(),
+  });
+  assert.deepEqual(sorted(result), ["A"]);
+});
+
+test("numerator EXCLUDE holes and never-built together", () => {
+  const result = computeDegradedCriticalIds({
+    allDegraded: new Set(["A", "B"]),
+    criticalUpstreamIds: new Set(["A", "B"]),
+    holes: new Set(["A"]),
+    neverBuilt: new Set(["B"]),
+  });
+  assert.deepEqual(sorted(result), []);
+});
+
+test("numerator EXCLUDE non-critical degraded", () => {
+  const result = computeDegradedCriticalIds({
+    allDegraded: new Set(["C"]),
+    criticalUpstreamIds: new Set(["A"]),
+    holes: new Set<string>(),
+    neverBuilt: new Set<string>(),
+  });
+  assert.deepEqual(sorted(result), []);
 });

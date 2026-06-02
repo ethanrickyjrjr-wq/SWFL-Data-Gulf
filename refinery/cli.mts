@@ -85,6 +85,9 @@ async function runPipeline(
     degradedUpstreamIds?: ReadonlySet<string>;
     /** Phase 4 — re-darkened critical holes; outputStage's master gate reads this. */
     criticalHoleIds?: ReadonlySet<string>;
+    /** Phase 6 (issue #6) — never-built upstreams; outputStage subtracts these from the
+     *  gate's degraded-fraction numerator. */
+    neverBuiltIds?: ReadonlySet<string>;
   },
 ): Promise<OutputResult> {
   console.log(
@@ -142,6 +145,7 @@ async function runPipeline(
     dryRun: opts.dryRun,
     degradedUpstreamIds: opts.degradedUpstreamIds,
     criticalHoleIds: opts.criticalHoleIds,
+    neverBuiltIds: opts.neverBuiltIds,
   });
   if (result.written) {
     console.log(
@@ -204,6 +208,12 @@ async function main(): Promise<void> {
   // via `criticalUpstreamIds.has(id)`. Never-built `missing` outcomes (no
   // lastGoodRefinedAt) are "not-yet-online" and intentionally excluded.
   const criticalHoleIds = new Set<string>();
+  // Phase 6 (issue #6) — never-built upstreams (`missing` with NO lastGoodRefinedAt).
+  // They stay in `degradedIds` for the harvest soft-skip, but are subtracted from the
+  // master gate's degraded-fraction numerator (computeDegradedCriticalIds). Without this,
+  // a new critical brain failing its first build would force a spurious HOLD once
+  // MASTER_MAX_DEGRADED_FRACTION drops below 1.0 (Phase 7).
+  const neverBuiltIds = new Set<string>();
   const startedAt = new Date().toISOString();
 
   // In resilient mode, master is handled separately after all upstreams so
@@ -343,6 +353,14 @@ async function main(): Promise<void> {
       // Re-darkened: had a last-good, eligibility expired. The gate's HOLD trigger.
       criticalHoleIds.add(id);
     }
+    if (
+      outcome.status === "missing" &&
+      outcome.lastGoodRefinedAt === undefined
+    ) {
+      // Never-built ("not-yet-online"): soft-skipped via degradedIds (above), but kept
+      // OUT of the gate's degraded-fraction numerator. See computeDegradedCriticalIds.
+      neverBuiltIds.add(id);
+    }
     outcomes.push(outcome);
     if (outcome.written) {
       entries.push({
@@ -392,6 +410,8 @@ async function main(): Promise<void> {
               // Phase 4 — closed over from the outer scope; no opts/type change
               // in resilient-build.mts. The gate inside outputStage reads this.
               criticalHoleIds,
+              // Phase 6 (issue #6) — closed over; subtracted from the gate numerator.
+              neverBuiltIds,
             }),
         );
         outcomes.push(masterOutcome);

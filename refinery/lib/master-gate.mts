@@ -79,3 +79,34 @@ export function evaluateMasterGate(input: MasterGateInput): GateDecision {
 
   return "PUBLISH";
 }
+
+/**
+ * Build the gate's Rule-4 numerator: critical ∧ degraded ∧ not-a-hole ∧ not-never-built.
+ * Pure — used by Stage 4's `outputStage` to feed `MasterGateInput.degradedCriticalIds`.
+ *
+ * - Holes (re-darkened critical upstreams) are excluded because they already trip Rule 1.
+ * - Never-built ("not-yet-online") ids are excluded per issue #6: a `missing` critical
+ *   upstream that has NEVER built must not inflate the degraded fraction (it would force a
+ *   spurious HOLD the night `maxDegradedFraction` first drops below 1.0). Such ids are still
+ *   soft-skipped in `harvestUpstreams` via the separate `degradedIds` set — only the
+ *   numerator excludes them.
+ *
+ * Never-built ids deliberately REMAIN in the denominator (`criticalUpstreamIds`): keeping
+ * them there can only shrink the fraction, which is the safe direction (never a spurious
+ * HOLD). This matches the SESSION_LOG 2026-06-02 carry-forward prescription.
+ */
+export function computeDegradedCriticalIds(input: {
+  allDegraded: ReadonlySet<string>;
+  criticalUpstreamIds: ReadonlySet<string>;
+  holes: ReadonlySet<string>;
+  neverBuilt: ReadonlySet<string>;
+}): Set<string> {
+  return new Set(
+    [...input.allDegraded].filter(
+      (id) =>
+        input.criticalUpstreamIds.has(id) &&
+        !input.holes.has(id) &&
+        !input.neverBuilt.has(id),
+    ),
+  );
+}

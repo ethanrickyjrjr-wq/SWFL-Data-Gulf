@@ -38,6 +38,7 @@ import {
 import { readBrainOutput } from "../lib/brain-output-reader.mts";
 import {
   evaluateMasterGate,
+  computeDegradedCriticalIds,
   type MasterGateInput,
 } from "../lib/master-gate.mts";
 import { brainStatus } from "../lib/dag.mts";
@@ -340,6 +341,9 @@ export async function outputStage(
     degradedUpstreamIds?: ReadonlySet<string>;
     /** Phase 4 — re-darkened critical holes; the master gate (below) reads this. */
     criticalHoleIds?: ReadonlySet<string>;
+    /** Phase 6 (issue #6) — never-built ("not-yet-online") upstreams: soft-skipped via
+     *  degradedUpstreamIds, but excluded from the gate's degraded-fraction numerator. */
+    neverBuiltIds?: ReadonlySet<string>;
   },
 ): Promise<OutputResult> {
   const version = (await readPriorVersion(pack.brain_id)) + 1;
@@ -605,11 +609,14 @@ export async function outputStage(
     );
     const allDegraded = opts.degradedUpstreamIds ?? new Set<string>();
     const holes = opts.criticalHoleIds ?? new Set<string>();
-    const degradedCriticalIds = new Set(
-      [...allDegraded].filter(
-        (id) => criticalUpstreamIds.has(id) && !holes.has(id),
-      ),
-    );
+    // issue #6: never-built upstreams are soft-skipped (still in allDegraded) but must not
+    // inflate the degraded-fraction numerator. See computeDegradedCriticalIds.
+    const degradedCriticalIds = computeDegradedCriticalIds({
+      allDegraded,
+      criticalUpstreamIds,
+      holes,
+      neverBuilt: opts.neverBuiltIds ?? new Set<string>(),
+    });
     const gateInput: MasterGateInput = {
       rendered: brainOutput,
       priorMasterExists: priorRead.kind === "ok",
