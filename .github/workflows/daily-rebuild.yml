@@ -15,6 +15,13 @@ on:
         required: false
         default: "false"
 
+# Serialize rebuilds so overlapping runs (a manual dispatch landing while a
+# scheduled run is mid-build, or several dispatches stacked up) can't race each
+# other's push. The in-flight run finishes; the next queues behind it.
+concurrency:
+  group: daily-brain-rebuild
+  cancel-in-progress: false
+
 jobs:
   rebuild:
     runs-on: ubuntu-latest

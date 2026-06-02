@@ -245,7 +245,7 @@ test("logisticsSwflNowcast pack: stable id, brain_id, domain, ttl", () => {
   assert.equal(logisticsSwflNowcast.id, "logistics-swfl-nowcast");
   assert.equal(logisticsSwflNowcast.brain_id, "logistics-swfl-nowcast");
   assert.equal(logisticsSwflNowcast.domain, "logistics");
-  assert.equal(logisticsSwflNowcast.ttl_seconds, 86400);
+  assert.equal(logisticsSwflNowcast.ttl_seconds, 2592000);
 });
 
 test("logisticsSwflNowcast pack: thin-pipe upstream is logistics-swfl", () => {

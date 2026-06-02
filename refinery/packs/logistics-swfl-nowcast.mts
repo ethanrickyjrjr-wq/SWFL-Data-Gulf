@@ -724,7 +724,7 @@ export const logisticsSwflNowcast: PackDefinition = {
   domain: "logistics",
   scope:
     "Current-state freight-activity nowcast for SWFL — derives a daily activity proxy from FDOT AADT × tfctr × payload, compares against the brain's OWN rolling history (Path B), and classifies shock_state + baseline_validity_flag. FAF5 inbound-flow is preserved as audited CONTEXT.",
-  ttl_seconds: 86400, // 24h — FDOT refreshes nightly in production
+  ttl_seconds: 2592000, // 30 days — FDOT AADT is annual (sibling traffic-swfl=30d); a daily rebuild restamped an identical proxy AND flooded the row-based rolling baseline with zero-variance duplicates, degrading the shock detector. Comment was wrong: FDOT does not refresh nightly.
   sources: [
     fdotFreightSegmentsSource,
     makeBrainInputSource(BASELINE_UPSTREAM_ID),

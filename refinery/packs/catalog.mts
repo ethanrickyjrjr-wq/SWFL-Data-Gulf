@@ -126,7 +126,7 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     domain: "logistics",
     scope:
       "Current-state freight-activity nowcast for SWFL — derives a daily activity proxy from FDOT AADT × tfctr × payload, compares against the brain's OWN rolling history (Path B), and classifies shock_state + baseline_validity_flag. FAF5 inbound-flow is preserved as audited CONTEXT.",
-    ttl_seconds: 86400,
+    ttl_seconds: 2592000,
   },
   {
     id: "storm-history-swfl",
