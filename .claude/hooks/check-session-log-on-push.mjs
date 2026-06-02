@@ -81,7 +81,13 @@ process.stdin.on("end", () => {
 function isGitPush(cmd) {
   // Strip leading whitespace, handle `&& git push`, `;git push`, `git  push`.
   // Match the token boundary so we don't trip on `git push-something-else`.
-  return /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd);
+  // ALSO match `node scripts/safe-push.mjs` — the mandated push path runs
+  // `git push` in a child process the Bash PreToolUse hook can't intercept, so
+  // matching the wrapper command is the only way this log-gate fires on it.
+  return (
+    /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) ||
+    /safe-push(\.mjs)?\b/.test(cmd)
+  );
 }
 
 function sh(c) {

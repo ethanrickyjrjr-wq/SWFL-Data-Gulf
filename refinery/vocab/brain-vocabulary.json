@@ -3211,6 +3211,17 @@
     }
   },
   "slug_index": {
+    "licenses_active_lee": "licenses_active_lee",
+    "licenses_active_collier": "licenses_active_collier",
+    "licenses_new_12m_swfl": "licenses_new_12m_swfl",
+    "licenses_lapse_rate_swfl": "licenses_lapse_rate_swfl",
+    "licenses_cbc_share_swfl": "licenses_cbc_share_swfl",
+    "licenses_applicants_swfl": "licenses_applicants_swfl",
+    "sirs_confirmed_swfl": "sirs_confirmed_swfl",
+    "sirs_lee_count": "sirs_lee_count",
+    "sirs_collier_count": "sirs_collier_count",
+    "sirs_july2025_plus_count": "sirs_july2025_plus_count",
+    "sirs_result_truncated": "sirs_result_truncated",
     "swfl_taxable_sales_latest_usd": "fl_dor_taxable_sales_latest_usd",
     "swfl_taxable_sales_yoy_pct": "fl_dor_taxable_sales_yoy_pct",
     "swfl_taxable_sales_trailing_12mo_usd": "fl_dor_taxable_sales_trailing_12mo_usd",

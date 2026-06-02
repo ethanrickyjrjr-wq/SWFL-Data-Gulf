@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Opus 4.8 · main) — Close the two real gaps: session-log safe-push bypass + slug_index staleness
+
+**Why:** operator pushback — fix the two findings from the prior entry instead of parking them.
+
+1. **session-log hook safe-push bypass (FIXED).** `check-session-log-on-push.mjs` `isGitPush()` now also matches `safe-push` (same as `check-prepush-gate.mjs`). The whole point of SESSION_LOG enforcement is that it fires on every push; safe-push runs `git push` in a child process the Bash hook can't see, so a CT on the mandated path could skip logging silently. Closed.
+2. **slug_index staleness (FIXED).** 11 leaf slugs (condo-sirs-swfl ×5, licenses-swfl ×6) existed as concept `raw_slugs` but were missing from the materialized `slug_index` the resolver actually reads — "harmless today" was the condo-sirs phantom-data smell. Added 11 identity entries to `refinery/vocab/brain-vocabulary.json` `slug_index` (210→221). `bun refinery/tools/check-vocab-coverage.mts --all` now clean across all 26 brains. 37/37 normalize+alias+contract tests pass.
+
+**Firecrawl research on CLAUDE.md best practices (official `code.claude.com/docs/en/best-practices` + community):** validated the whole direction — (a) "bloated CLAUDE.md → Claude ignores instructions" (length is itself a failure cause), (b) "hooks are deterministic, CLAUDE.md is advisory" (the pre-push gate is the textbook move), (c) "for each line ask: would removing this cause a mistake?", (d) **"workflows only relevant _sometimes_ → use a skill, not CLAUDE.md."** Finding (d) → the data-protocol v3 block ("fires only on an in-scope SWFL question") is conditional domain knowledge and is the prime candidate to move into an on-demand skill. Surfaced to operator for decision (not done unilaterally — touches live SWFL fetch-trigger behavior + operator is mid-edit on contract surfaces). Brain Factory 8 rules have NO single canonical home (confirmed) → stay inline.
+
 ## 2026-06-02 (Opus 4.8 · main) — Lean CLAUDE.md + pre-push failure gate (enforces the 3 recurring breakers)
 
 **Why:** asked to parse CLAUDE.md leaner + diagnose "so many failures." Diagnosis (from `docs/cron-rebuild-failures.md` + log + commits): most OPEN rows are an _instrumentation artifact_ — auto-resolve only fires on `event==schedule`, so the already-fixed lockfile incident (`e6258d0`→`bd06ff0`) left 3 scary OPEN rows. Under the noise, 3 genuinely recurring, pre-push-preventable classes: bun.lock drift (1×→3 cascades), vocab/corridor-alias desync (3× in 2wk: 2026-05-29/06-02/05-27), secret-not-in-workflow-`env:` (3×). Rest are transient flakes.
