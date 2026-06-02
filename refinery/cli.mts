@@ -1,5 +1,3 @@
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
 import { getPack, PACKS } from "./config/packs.mts";
 import type { PackDefinition } from "./types/pack.mts";
 import { env } from "./config/env.mts";
@@ -273,7 +271,14 @@ async function main(): Promise<void> {
         console.log(
           `[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`,
         );
-        outcomes.push({ packId: id, status: "skipped-fresh", written: false });
+        // Record actual status so computeMasterDecision sees missing upstreams correctly.
+        // target-only skipped upstreams never have a last-good read, so they are
+        // "not-yet-online" from the HOLD gate's perspective (no lastGoodRefinedAt).
+        outcomes.push({
+          packId: id,
+          status: status.kind === "missing" ? "missing" : "skipped-fresh",
+          written: false,
+        });
         continue;
       }
       if (status.kind === "fresh" && !force) {
@@ -282,6 +287,19 @@ async function main(): Promise<void> {
         );
         outcomes.push({ packId: id, status: "skipped-fresh", written: false });
         continue;
+      }
+      if (status.kind === "missing") {
+        console.log(
+          `[refinery] upstream ${id}: missing — building (resilient)`,
+        );
+      } else if (status.kind === "stale") {
+        console.log(
+          `[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`,
+        );
+      } else if (force) {
+        console.log(
+          `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — rebuilding (--force)`,
+        );
       }
     } else {
       // target pack in resilient mode: if it's not master (handled below),
