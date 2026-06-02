@@ -396,7 +396,7 @@ export const macroFlorida: PackDefinition = {
   scope:
     "Florida state-level macro context — labor market (FLUR, FL LFPR) and business sector counts (Census CBP). " +
     "Mid-tier of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl). Future branches: IRS SOI.",
-  ttl_seconds: 86400,
+  ttl_seconds: 2592000, // 30 days — FLUR/FL LFPR are monthly, Census CBP annual (cadence_registry bls_laus=30)
   sources: [
     macroFloridaSource,
     macroFloridaCbpSource,

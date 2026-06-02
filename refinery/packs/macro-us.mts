@@ -219,7 +219,7 @@ export const macroUs: PackDefinition = {
   domain: "macro",
   scope:
     "National macro context — SOFR funding rate and US CPI YoY. Root of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl).",
-  ttl_seconds: 86400, // 1 day — macro indicators refresh fast
+  ttl_seconds: 2592000, // 30 days — FRED macro series publish monthly; SOFR ticks daily but the denominator direction read does not (cadence_registry fred_g17=30)
   sources: [macroUsSource],
   input_brains: [],
   fitScore: (): number => 8,

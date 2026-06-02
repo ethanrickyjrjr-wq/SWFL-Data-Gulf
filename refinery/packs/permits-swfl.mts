@@ -1012,7 +1012,7 @@ export const permitsSwfl: PackDefinition = {
   domain: "real-estate",
   scope:
     "SWFL building-permit issuance flow (Lee + Collier) - corridor-level z-scores, saturation index, per-county splits, and trend reads against a trailing 13-window (28d each) historical baseline.",
-  ttl_seconds: 86400,
+  ttl_seconds: 604800, // 7 days — Lee permits ingest weekly (cadence_registry lee_permits=7), Collier monthly
   sources: [permitsSource, collierPermitsSource],
   input_brains: [{ id: "storm-history-swfl", edge_type: "modifier" }],
   fitScore: () => 10,

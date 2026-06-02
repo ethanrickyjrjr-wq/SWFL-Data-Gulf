@@ -366,7 +366,7 @@ export const macroSwfl: PackDefinition = {
   domain: "macro",
   scope:
     "Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Own sources: BLS LAUS monthly unemployment for Lee County + Collier County. Upstream: macro-florida for FL state baseline and confidence propagation.",
-  ttl_seconds: 86400,
+  ttl_seconds: 2592000, // 30 days — BLS LAUS county unemployment is monthly (cadence_registry bls_laus=30)
   sources: [makeBrainInputSource("macro-florida"), blsLausSource],
   input_brains: [{ id: "macro-florida", edge_type: "input" }],
   fitScore: (): number => 8,

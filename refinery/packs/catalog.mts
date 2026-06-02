@@ -35,7 +35,7 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     domain: "real-estate",
     scope:
       "SWFL building-permit issuance flow (Lee + Collier) - corridor-level z-scores, saturation index, per-county splits, and trend reads against a trailing 13-window (28d each) historical baseline.",
-    ttl_seconds: 86400,
+    ttl_seconds: 604800,
   },
   {
     id: "housing-swfl",
@@ -98,21 +98,21 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     domain: "macro",
     scope:
       "National macro context — SOFR funding rate and US CPI YoY. Root of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl).",
-    ttl_seconds: 86400,
+    ttl_seconds: 2592000,
   },
   {
     id: "macro-florida",
     domain: "macro",
     scope:
       "Florida state-level macro context — labor market (FLUR, FL LFPR) and business sector counts (Census CBP). Mid-tier of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl). Future branches: IRS SOI.",
-    ttl_seconds: 86400,
+    ttl_seconds: 2592000,
   },
   {
     id: "macro-swfl",
     domain: "macro",
     scope:
       "Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Own sources: BLS LAUS monthly unemployment for Lee County + Collier County. Upstream: macro-florida for FL state baseline and confidence propagation.",
-    ttl_seconds: 86400,
+    ttl_seconds: 2592000,
   },
   {
     id: "logistics-swfl",
