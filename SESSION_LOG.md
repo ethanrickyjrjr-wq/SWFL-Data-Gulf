@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Sonnet 4.6 · main) — /d/[...slug] doc viewer route
+
+Added `app/d/[...slug]/page.tsx` — serves any `docs/` markdown file as a rendered HTML page using react-markdown + remark-gfm. Sandboxed to DOCS_DIR (no path traversal). Example: `/d/superpowers/plans/2026-05-26-corridor-character-generator/audits/step4-spot-checks`.
+
 ## 2026-06-02 (Opus 4.8 · main) — THE BIBLE (data/build standards) + wiring-gap audit
 
 Operator directive: stop rebuilding, wire up what exists, and lock the rules so we stop relitigating. **Created `docs/standards/data-and-build-bible.md`** — the canonical reference: 3 tiers, file-format readers (parquet→`read_parquet`, csv→`read_csv_auto(union_by_name)`, ndjson→`read_json_auto(union_by_name,ignore_errors,maximum_object_size=104857600)`, geojson→pg not a view), lake-MCP view rules (partitioned→1 view/top-folder, flat→per-file, try/catch resilience, jsonSafe BigInt), `_tier1_inventory` contract, and the end-to-end data→brain wiring checklist. Wired it EVERYWHERE: top of CLAUDE.md reference index + bold pointer, `docs/API_BLUEPRINTS.md` header, `docs/standards/pipeline-freshness.md` header. Precedence: it wins over older docs on format/tier conflicts.
