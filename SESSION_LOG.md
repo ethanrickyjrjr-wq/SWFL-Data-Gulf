@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Opus 4.8 · main) — data-protocol v3 stays inline, compressed in place (denied the skill move)
+
+**Decision (operator):** do NOT move data-protocol v3 to a skill. Rationale: it's the platform's data-access contract, not an occasional workflow — on a SWFL platform effectively every session is in-scope, so Anthropic's "sometimes-relevant → skill" guidance is misapplied here. A skill's load-step is a _silent_ failure vector (no rules, no freshness token, no tier guard, no warning) — strictly worse than ~12 always-loaded lines. Brain Factory 8 also stays inline (no canonical home). Instead: compressed both-relevant prose in place — same substance, every fact/URL/path/example and the no-smoothing carve-out preserved, numbered coordinates intact. Bought tokens (char density), not line count (each rule is one markdown line). Drift tests 13/13, marker intact. Reference table left as-is (no true duplicates; `THE-CONTRACT.md` row kept — operator's active surface, not dead).
+
 ## 2026-06-02 (Opus 4.8 · main) — Close the two real gaps: session-log safe-push bypass + slug_index staleness
 
 **Why:** operator pushback — fix the two findings from the prior entry instead of parking them.
