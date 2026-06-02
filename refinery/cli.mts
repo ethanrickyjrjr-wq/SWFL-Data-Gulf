@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import { getPack, PACKS } from "./config/packs.mts";
 import type { PackDefinition } from "./types/pack.mts";
 import { env } from "./config/env.mts";
@@ -8,6 +10,12 @@ import { normalizeStage } from "./stages/2.5-normalize.mts";
 import { synthesisStage } from "./stages/3-synthesis.mts";
 import { outputStage, type OutputResult } from "./stages/4-output.mts";
 import { resolveBuildOrder, walkConsumers, brainStatus } from "./lib/dag.mts";
+import {
+  buildOne,
+  computeMasterDecision,
+  type BrainBuildOutcome,
+  type BuildReport,
+} from "./lib/resilient-build.mts";
 
 interface CliArgs {
   packId: string;
@@ -17,6 +25,7 @@ interface CliArgs {
   listConsumers: boolean;
   strict: boolean;
   report: boolean;
+  resilient: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -35,16 +44,18 @@ function parseArgs(argv: string[]): CliArgs {
   // escape hatch, not the recommended path.
   const strict = !args.includes("--no-strict");
   const report = args.includes("--report");
+  const resilient = args.includes("--resilient");
   const packId = args.find((a) => !a.startsWith("--"));
   if (!packId) {
     throw new Error(
-      "Usage: node refinery/cli.mts <pack-id> [--dry-run] [--force] [--target-only] [--list-consumers] [--no-strict] [--report]\n" +
+      "Usage: node refinery/cli.mts <pack-id> [--dry-run] [--force] [--target-only] [--list-consumers] [--no-strict] [--report] [--resilient]\n" +
         "  e.g. node refinery/cli.mts master\n" +
         "       node refinery/cli.mts master --force        # rebuild upstreams even if fresh\n" +
         "       node refinery/cli.mts master --target-only  # rebuild only this pack; never touch upstreams\n" +
         "       node refinery/cli.mts master --dry-run      # validate without writing\n" +
         "       node refinery/cli.mts master --no-strict    # log Stage 2.5 orphans instead of aborting\n" +
         "       node refinery/cli.mts master --report       # append a section to docs/HANDOFF.md\n" +
+        "       node refinery/cli.mts master --resilient    # outcome-collection walk with HOLD gate\n" +
         "       node refinery/cli.mts franchise-outcomes --list-consumers",
     );
   }
@@ -53,13 +64,26 @@ function parseArgs(argv: string[]): CliArgs {
       "[refinery] --force and --target-only are mutually exclusive (one rebuilds upstreams, the other refuses to).",
     );
   }
-  return { packId, dryRun, force, targetOnly, listConsumers, strict, report };
+  return {
+    packId,
+    dryRun,
+    force,
+    targetOnly,
+    listConsumers,
+    strict,
+    report,
+    resilient,
+  };
 }
 
 /** Run the full 4-stage pipeline for a single pack. */
 async function runPipeline(
   pack: PackDefinition,
-  opts: { dryRun: boolean; strict: boolean },
+  opts: {
+    dryRun: boolean;
+    strict: boolean;
+    degradedUpstreamIds?: ReadonlySet<string>;
+  },
 ): Promise<OutputResult> {
   console.log(
     `[refinery] pack=${pack.id} source=${env.source} agents=${
@@ -114,6 +138,7 @@ async function runPipeline(
 
   const result = await outputStage(events, pack, fragments, {
     dryRun: opts.dryRun,
+    degradedUpstreamIds: opts.degradedUpstreamIds,
   });
   if (result.written) {
     console.log(
@@ -128,8 +153,16 @@ async function runPipeline(
 }
 
 async function main(): Promise<void> {
-  const { packId, dryRun, force, targetOnly, listConsumers, strict, report } =
-    parseArgs(process.argv);
+  const {
+    packId,
+    dryRun,
+    force,
+    targetOnly,
+    listConsumers,
+    strict,
+    report,
+    resilient,
+  } = parseArgs(process.argv);
 
   // --list-consumers: pure registry query, no build
   if (listConsumers) {
@@ -160,17 +193,77 @@ async function main(): Promise<void> {
     brainOutput: OutputResult["brainOutput"];
   }> = [];
 
-  for (const id of order) {
+  const outcomes: BrainBuildOutcome[] = [];
+  const degradedIds = new Set<string>();
+  const startedAt = new Date().toISOString();
+
+  // In resilient mode, master is handled separately after all upstreams so
+  // computeMasterDecision can inspect the full outcome set before master runs.
+  for (const id of resilient ? order.filter((id) => id !== "master") : order) {
     const pack = getPack(id);
     const isTarget = id === packId;
 
+    if (!resilient) {
+      // ── non-resilient path (unchanged) ────────────────────────────────
+      if (!isTarget) {
+        const status = await brainStatus(id);
+        if (targetOnly) {
+          // --target-only never touches upstream artifacts. If the upstream
+          // brain.md is missing this run will still fail at ingest time when
+          // the brain-input source can't load it — that's the honest signal,
+          // not a silent fixture-mode regen of an unrelated brain.
+          const statusBlurb =
+            status.kind === "missing"
+              ? "missing"
+              : status.kind === "stale"
+                ? `stale (expired ${status.expires_at})`
+                : `fresh (expires ${status.expires_at})`;
+          console.log(
+            `[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`,
+          );
+          continue;
+        }
+        if (status.kind === "missing") {
+          if (!force) {
+            throw new Error(
+              `[refinery] upstream "${id}" is missing (brains/${id}.md not found). ` +
+                `Run \`npm run refinery ${id}\` first, or pass --force to build it now.`,
+            );
+          }
+          console.log(
+            `[refinery] upstream ${id}: missing — building (--force)`,
+          );
+        } else if (status.kind === "stale") {
+          console.log(
+            `[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`,
+          );
+        } else if (force) {
+          console.log(
+            `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — rebuilding (--force)`,
+          );
+        } else {
+          console.log(
+            `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`,
+          );
+          continue;
+        }
+      }
+
+      const result = await runPipeline(pack, { dryRun, strict });
+      entries.push({
+        packId: id,
+        written: result.written,
+        brainPath: result.brainPath,
+        brainOutput: result.brainOutput,
+      });
+      continue;
+      // ── end non-resilient path ─────────────────────────────────────────
+    }
+
+    // ── resilient path ─────────────────────────────────────────────────
     if (!isTarget) {
       const status = await brainStatus(id);
       if (targetOnly) {
-        // --target-only never touches upstream artifacts. If the upstream
-        // brain.md is missing this run will still fail at ingest time when
-        // the brain-input source can't load it — that's the honest signal,
-        // not a silent fixture-mode regen of an unrelated brain.
         const statusBlurb =
           status.kind === "missing"
             ? "missing"
@@ -180,39 +273,101 @@ async function main(): Promise<void> {
         console.log(
           `[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`,
         );
+        outcomes.push({ packId: id, status: "skipped-fresh", written: false });
         continue;
       }
-      if (status.kind === "missing") {
-        if (!force) {
-          throw new Error(
-            `[refinery] upstream "${id}" is missing (brains/${id}.md not found). ` +
-              `Run \`npm run refinery ${id}\` first, or pass --force to build it now.`,
-          );
-        }
-        console.log(`[refinery] upstream ${id}: missing — building (--force)`);
-      } else if (status.kind === "stale") {
-        console.log(
-          `[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`,
-        );
-      } else if (force) {
-        console.log(
-          `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — rebuilding (--force)`,
-        );
-      } else {
+      if (status.kind === "fresh" && !force) {
         console.log(
           `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`,
         );
+        outcomes.push({ packId: id, status: "skipped-fresh", written: false });
+        continue;
+      }
+    } else {
+      // target pack in resilient mode: if it's not master (handled below),
+      // run it through buildOne as well
+      const status = await brainStatus(id);
+      if (status.kind === "fresh" && !force) {
+        outcomes.push({ packId: id, status: "skipped-fresh", written: false });
         continue;
       }
     }
 
-    const result = await runPipeline(pack, { dryRun, strict });
-    entries.push({
-      packId: id,
-      written: result.written,
-      brainPath: result.brainPath,
-      brainOutput: result.brainOutput,
-    });
+    const outcome = await buildOne(
+      pack,
+      { dryRun, degradedUpstreamIds: degradedIds },
+      (p, o) =>
+        runPipeline(p, {
+          dryRun: o.dryRun,
+          strict,
+          degradedUpstreamIds: o.degradedUpstreamIds,
+        }),
+    );
+
+    if (outcome.status === "degraded" || outcome.status === "missing") {
+      degradedIds.add(id);
+    }
+    outcomes.push(outcome);
+    if (outcome.written) {
+      entries.push({
+        packId: id,
+        written: outcome.written,
+        brainPath: `brains/${id}.md`,
+        brainOutput: outcome.brainOutput,
+      });
+    }
+  }
+
+  if (resilient && order.includes("master")) {
+    const masterPack = getPack("master");
+    const masterStatus = await brainStatus("master");
+    let masterDecision: BuildReport["masterDecision"];
+
+    if (masterStatus.kind === "fresh" && !force) {
+      masterDecision = "skipped-fresh";
+      outcomes.push({
+        packId: "master",
+        status: "skipped-fresh",
+        written: false,
+      });
+    } else {
+      const decision = computeMasterDecision(masterPack, outcomes);
+      if (decision === "held") {
+        masterDecision = "held";
+        console.warn(
+          "[cli] HOLD: one or more critical upstreams have an expired last-good. Master not rebuilt.",
+        );
+        outcomes.push({
+          packId: "master",
+          status: "missing",
+          reason: "HOLD: critical upstream eligibility expired",
+          written: false,
+        });
+      } else {
+        masterDecision = "published";
+        const masterOutcome = await buildOne(
+          masterPack,
+          { dryRun, degradedUpstreamIds: degradedIds },
+          (p, o) =>
+            runPipeline(p, {
+              dryRun: o.dryRun,
+              strict,
+              degradedUpstreamIds: o.degradedUpstreamIds,
+            }),
+        );
+        outcomes.push(masterOutcome);
+        if (masterOutcome.written) {
+          entries.push({
+            packId: "master",
+            written: masterOutcome.written,
+            brainPath: `brains/master.md`,
+            brainOutput: masterOutcome.brainOutput,
+          });
+        }
+      }
+    }
+    // Task 4 will add report emission + process.exit here
+    void masterDecision; // prevent unused-variable lint until Task 4
   }
 
   if (report) {
