@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Sonnet 4.6 · main) — Brain Resilience System Phase 2+3+5 shipped
+
+Phase 2+3+5 of `docs/superpowers/plans/2026-06-02-brain-resilience-phase-2/README.md`. 9 commits, 920 tests green (5 new speaker tests, 13 new resilient-build tests — 0 changed assertions).
+
+- **`refinery/lib/resilient-build.mts`** (new): `BrainBuildOutcome`, `BuildReport`, `isTransientError`, `isEligibleLastGood`, `classifyFailure`, `computeMasterDecision`, `buildOne` (retry on transient errors only; `socket hang up`/`ECONNRESET`/`ETIMEDOUT`/`fetch failed`)
+- **`refinery/lib/resilient-build.test.mts`** (new): 13 unit tests (guards 2–5: retry, classification, HOLD/no-HOLD)
+- **`refinery/cli.mts`**: `--resilient` flag; outcome-collection walk; `degradedIds` threading; HOLD gate via `computeMasterDecision`; `brains/_build-report.json` emission; exit codes 0 (clean) / 2 (degraded-but-complete) / 1 (HOLD or crash)
+- **`refinery/stages/4-output.mts`**: `harvestUpstreams(degradedIds)` — soft-skip for missing degraded upstreams, degradation caveats, `degradedUpstreamDates`, populates `BrainOutput.degraded_inputs` for critical degraded upstreams only
+- **`refinery/render/speaker.mts`**: `formatDegradedToken` helper; `_(Label · Date)_` tokens in tier-1 and tier-2 output after conclusion
+- **Plan patched**: 5 audit bugs fixed in README before implementation (renderTier1 string-concat approach, missing-upstream soft-skip guard, renderTier2 anchor, unused imports, integration test gap)
+- **Next**: Phase 4 (`master-gate.mts` circuit breaker) + Phase 6 (ops dashboard) + Phase 7 (GHA `--resilient` default + `continue-on-error`)
+
 ## 2026-06-02 (Sonnet 4.6 · main) — Brain Resilience System Phase 1: behavior-neutral type-lifts shipped
 
 Phase 1 of `docs/superpowers/plans/2026-06-01-brain-resilience-system/README.md`. Single atomic commit, 902 tests green (0 changed assertions).
