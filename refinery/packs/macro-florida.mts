@@ -195,7 +195,15 @@ function macroFloridaCorpusSummary(
 
   if (cbpSectors.length > 0) {
     const year = cbpSectors[0].year;
+    // The live CBP source aggregates EVERY naics_code present, including the
+    // "00" total-all-sectors line and multi-digit subsectors (e.g. "541" under
+    // "54"). Restrict the headline to the sectors this brain tracks, and sort by
+    // establishment count so "top sectors by establishment count" is true even in
+    // fixture mode (loadFixture does not pre-sort). .filter()/.sort() build a new
+    // array — cbpSectors and lastCbpSectors stay untouched for the loop below.
     const top3 = cbpSectors
+      .filter((s) => CBP_NAICS_METRICS.some((m) => m.naics === s.naics_code))
+      .sort((a, b) => b.fl_establishments - a.fl_establishments)
       .slice(0, 3)
       .map(
         (s) =>
