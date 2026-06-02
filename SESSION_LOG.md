@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Opus 4.8 · main) — Compress the lean Rules-of-Engagement block 346→206t + lock all 3 mirrors
+
+**Why:** lean RoE block (rides in every `_meta.rules` / `?format=json` payload) had grown to 346/350t — near its own cap. Compressed to verb-keyed form (CITE/[INFERENCE]/GRAIN/MASTER ONLY/CLEAN/PLACES/SCOPE). Synthesis-prompt change, not an API schema change — `_meta.rules` field shape unchanged, no consumer contract breaks.
+
+**What:** `refinery/lib/rules-of-engagement.mts` constant rewritten (206t, cap dropped 350→210). Kept two phrases in full for reliability (operator call): rule 1 "in this payload", rule 5 "NNN = triple-net rent, never a place name". Dropped redundant "like a store's hours" from rule 7 (Arby's example already covers it) to fit under cap. Mirrors synced verbatim: `docs/consumption-contract.md`, `THE-CONTRACT.md` (+budget line 346/350→206/210; was untracked, now added), `CLAUDE.md` (was a STALE 5-rule block whose rule 3 carried the retired "Do NOT offer drill-downs" framing — the exact killed behavior). **Drift test now locks all 3 mirrors** (was consumption-contract.md only — that gap is why CLAUDE.md rotted); added "Arby's" regression anchor + SCOPE literal. Tests: 5/5 RoE, 973/973 full suite.
+
 ## 2026-06-02 (Opus 4.8 · main) — data-protocol v3 stays inline, compressed in place (denied the skill move)
 
 **Decision (operator):** do NOT move data-protocol v3 to a skill. Rationale: it's the platform's data-access contract, not an occasional workflow — on a SWFL platform effectively every session is in-scope, so Anthropic's "sometimes-relevant → skill" guidance is misapplied here. A skill's load-step is a _silent_ failure vector (no rules, no freshness token, no tier guard, no warning) — strictly worse than ~12 always-loaded lines. Brain Factory 8 also stays inline (no canonical home). Instead: compressed both-relevant prose in place — same substance, every fact/URL/path/example and the no-smoothing carve-out preserved, numbered coordinates intact. Bought tokens (char density), not line count (each rule is one markdown line). Drift tests 13/13, marker intact. Reference table left as-is (no true duplicates; `THE-CONTRACT.md` row kept — operator's active surface, not dead).
