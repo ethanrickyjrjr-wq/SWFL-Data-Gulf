@@ -116,6 +116,10 @@ export interface UpstreamHarvest {
    *   "Upstream brain '{id}' was stale at build time (expired YYYY-MM-DD)."
    */
   stalenessCaveats: string[];
+  /** Caveat per degraded upstream (failed rebuild, using last-good). */
+  degradationCaveats: string[];
+  /** ISO YYYY-MM-DD of last-good read per degraded upstream id. */
+  degradedUpstreamDates: Map<string, string>;
   /**
    * `min(stale_upstream_confidences)` — the floor a self-confidence cap applies
    * at. `Infinity` when no upstream is stale (sentinel: `applyStalenessCap`
@@ -147,16 +151,27 @@ export interface UpstreamHarvest {
  */
 export async function harvestUpstreams(
   input_brains: readonly BrainEdge[],
+  degradedIds: ReadonlySet<string> = new Set(),
 ): Promise<UpstreamHarvest> {
   const upstreams: UpstreamConfidence[] = [];
   const stalenessCaveats: string[] = [];
-  let minStaleUpstreamConfidence = Infinity;
+  const degradationCaveats: string[] = [];
+  const degradedUpstreamDates = new Map<string, string>();
+  let minCappedUpstreamConfidence = Infinity;
 
   for (const upstream of input_brains) {
     const [read, status] = await Promise.all([
       readBrainOutput(upstream.id),
       brainStatus(upstream.id),
     ]);
+    if (read.kind === "missing" && degradedIds.has(upstream.id)) {
+      // Soft-skip: no last-good file on disk; computeMasterDecision already held
+      // master if this was critical. Non-critical: add a hole caveat, skip contribution.
+      degradationCaveats.push(
+        `Upstream brain '${upstream.id}' was unavailable at build time (no last-good read).`,
+      );
+      continue;
+    }
     if (read.kind === "missing") {
       throw new Error(
         `Stage 4: cannot harvest upstream confidence for "${upstream.id}" — ${read.reason}. ` +
@@ -167,8 +182,20 @@ export async function harvestUpstreams(
       stalenessCaveats.push(
         `Upstream brain '${upstream.id}' was stale at build time (expired ${status.expires_at}).`,
       );
-      minStaleUpstreamConfidence = Math.min(
-        minStaleUpstreamConfidence,
+      minCappedUpstreamConfidence = Math.min(
+        minCappedUpstreamConfidence,
+        read.output.confidence,
+      );
+    }
+    if (degradedIds.has(upstream.id) && read.kind === "ok") {
+      const today = new Date().toISOString().slice(0, 10);
+      const lastDate = read.output.refined_at.slice(0, 10);
+      degradationCaveats.push(
+        `Upstream brain '${upstream.id}' failed to rebuild on ${today}; using last good read from ${lastDate} (v${read.output.version}).`,
+      );
+      degradedUpstreamDates.set(upstream.id, lastDate);
+      minCappedUpstreamConfidence = Math.min(
+        minCappedUpstreamConfidence,
         read.output.confidence,
       );
     }
@@ -182,8 +209,12 @@ export async function harvestUpstreams(
   return {
     upstreams,
     stalenessCaveats,
-    minStaleUpstreamConfidence,
-    degradedUpstreamIds: new Set(),
+    degradationCaveats,
+    degradedUpstreamDates,
+    minStaleUpstreamConfidence: minCappedUpstreamConfidence,
+    degradedUpstreamIds: new Set(
+      [...degradedIds].filter((id) => input_brains.some((e) => e.id === id)),
+    ),
   };
 }
 
@@ -358,8 +389,16 @@ export async function outputStage(
   // strings to append to BrainOutput.caveats below, and
   // `minStaleUpstreamConfidence` is the floor we cap self.confidence at after
   // Lane 1A's weighted mean.
-  const { upstreams, stalenessCaveats, minStaleUpstreamConfidence } =
-    await harvestUpstreams(pack.input_brains);
+  const {
+    upstreams,
+    stalenessCaveats,
+    degradationCaveats,
+    degradedUpstreamDates,
+    minStaleUpstreamConfidence,
+  } = await harvestUpstreams(
+    pack.input_brains,
+    opts.degradedUpstreamIds ?? new Set(),
+  );
   const upstream_confidences = upstreams.map((u) => u.confidence);
 
   // Lane 1A: headline confidence is now a trust-tier-weighted mean across
@@ -429,6 +468,7 @@ export async function outputStage(
   // the DAG-integrity footnote, not the headline. Empty array (every upstream
   // fresh) → no-op.
   caveats.push(...stalenessCaveats);
+  caveats.push(...degradationCaveats);
 
   // P5 Group B — lift producer's flat string[] drivers to typed BrainDriver[]
   // using the pack's typed input_brains for edge_type lookup. Unknown driver
@@ -461,9 +501,20 @@ export async function outputStage(
     conditional_claims: distilled.conditional_claims,
     grain_boundary: distilled.grain_boundary,
     prediction_window: distilled.prediction_window,
-    // Phase 2 populates this from degradedUpstreamIds + pack.public_label lookups.
-    // undefined here → omitted by JSON.stringify → no OUTPUT change for existing brains.
-    degraded_inputs: undefined,
+    degraded_inputs:
+      degradationCaveats.length > 0
+        ? [...(opts.degradedUpstreamIds ?? new Set())]
+            .filter((id) =>
+              pack.input_brains.some((e) => e.id === id && e.critical),
+            )
+            .map((id) => ({
+              label: PACKS[id]?.public_label ?? "a regional input",
+              date:
+                degradedUpstreamDates.get(id) ??
+                new Date().toISOString().slice(0, 10),
+            }))
+            .filter((entry) => entry !== undefined)
+        : undefined,
   };
 
   const markdown = renderMasterIndex(packOutput, brainOutput);
