@@ -1604,3 +1604,8 @@ Test deltas: bun suite **687 → 738 pass** (+51 new tests across `dates.test.mt
 
 - `app/r/cre-swfl/[corridor]/page.tsx`: replaced two `<a href="/r/cre-swfl">` with `<Link href="/r/cre-swfl">` (next/link) + added `import Link from "next/link"`. Was causing 4 ESLint errors (`@next/next/no-html-link-for-pages`) → CI exit 1.
 - Next: confirm CI green on next push.
+
+## 2026-06-03 (Sonnet 4.6 · main) — Surface cleanup state capture
+
+- Updated `docs/superpowers/plans/2026-06-02-surface-cleanup-handoff.md`: marked Decision 1 closed (92ca539 refactor track), marked drill-down page shipped (a0b9846 + d58f546), added HOLD on parent-page link wiring (needs diff review before touching).
+- Struck "one-liner" framing — parent-page wiring requires explicit operator approval.
