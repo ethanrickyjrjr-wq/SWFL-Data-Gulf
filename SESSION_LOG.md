@@ -2,6 +2,21 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Sonnet 4.6 · main) — Charts build & wire: Phase 0–4 complete
+
+**What shipped:** Full charts pipeline from contract → adapter → renderer → embed surface → live data → router. 9 files changed (4 new, 5 modified).
+
+- **Phase 0** — `ChartBlock` extended with `chart_type?: "bar"|"area"|"scatter"|"table"` + `TOOL_SCHEMA` column convention documented (`columns[0]=label, columns[1]=primary metric`)
+- **Phase 1** — `refinery/lib/chart-adapter.mts` (NEW): `adaptToHBar`, `adaptToTable`, `adaptToArea`/`adaptToScatter` stubs, `pickRenderer`, `tierFor`, multiplier constants. `asking-rent/page.tsx` updated to import from here.
+- **Phase 2a** — `components/charts/ChartBlockView.tsx` (NEW): `"use client"` dispatcher → HBarChart (bar), table fallback (area/scatter stubs, table, unknown)
+- **Phase 2b** — `refinery/render/corridor-character.mts` (NEW): `composeCorridorCharacterRender` — validates `character_chart: unknown` via `lintChartBlock`, casts only on `ok===true`, degrades silently to `chart: null`
+- **Phase 2c** — `app/embed/charts/page.tsx`: added live Supabase `corridor_profiles` read (try/catch → silent degrade), mounts `<ChartBlockView>` for corridors with non-null `character_chart`. Changed `force-static` → `revalidate: 3600`.
+- **Phase 2d** — `lib/fetch-brain.ts`: `Dossier` interface gets `chart?: ChartBlock` (forward-proofs Track C MCP widget)
+- **Phase 3** — `app/embed/cards/asking-rent/page.tsx`: live Supabase swap (`asking_rent_psf` from `corridor_profiles`), fixture fallback on error, `force-static` → `revalidate: 3600`
+- **Phase 4** — `lib/route-chart.ts` (NEW): `routeChart(question): ChartIntent | null` — keyword heuristics + `resolvePlace()` for per-corridor vitals; `import.meta.main` guard fixed to project idiom
+
+**What's next:** Deferred items from plan — MCP widget rebuild (Track C: postMessage listener on `_meta.dossier`), flood chart (ZIP AAL bar), `/r/cre-swfl/[corridor]` sub-route after surface-cleanup DECISION 1 closes.
+
 ## 2026-06-02 (Opus 4.8 · main) — Compress the lean Rules-of-Engagement block 346→206t + lock all 3 mirrors
 
 **Why:** lean RoE block (rides in every `_meta.rules` / `?format=json` payload) had grown to 346/350t — near its own cap. Compressed to verb-keyed form (CITE/[INFERENCE]/GRAIN/MASTER ONLY/CLEAN/PLACES/SCOPE). Synthesis-prompt change, not an API schema change — `_meta.rules` field shape unchanged, no consumer contract breaks.

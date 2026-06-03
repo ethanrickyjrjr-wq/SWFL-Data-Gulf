@@ -317,6 +317,12 @@ const TOOL_SCHEMA = {
                 },
               },
             },
+            chart_type: {
+              type: "string",
+              enum: ["bar", "area", "scatter", "table"],
+              description:
+                "Renderer hint. columns[0] = label string (e.g. corridor name), columns[1] = primary numeric metric (e.g. asking rent $/sqft). Absent/unknown → table fallback.",
+            },
           },
           required: ["title", "columns", "rows"],
         },

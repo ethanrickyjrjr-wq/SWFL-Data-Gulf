@@ -1,21 +1,20 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import {
-  HBarChart,
-  type HBarCorridor,
-  type HBarTier,
-} from "@/components/charts/HBarChart";
+import { HBarChart, type HBarCorridor } from "@/components/charts/HBarChart";
 import type { CorridorEntry } from "@/types/viz";
 import { medianOf } from "@/lib/stats";
+import {
+  BULLISH_MULTIPLIER,
+  BEARISH_MULTIPLIER,
+  tierFor,
+} from "@/refinery/lib/chart-adapter.mts";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
-export const dynamic = "force-static";
 export const revalidate = 3600;
 
 const TOP_N = 5;
 const BOTTOM_N = 2;
-const BULLISH_MULTIPLIER = 1.2;
-const BEARISH_MULTIPLIER = 0.7;
 const DETAIL_HREF = "/r/cre-swfl";
 
 const plexSans = IBM_Plex_Sans({
@@ -33,15 +32,32 @@ const plexMono = IBM_Plex_Mono({
 });
 
 async function loadCorridors(): Promise<CorridorEntry[]> {
-  const file = path.join(process.cwd(), "fixtures", "corridor-rents.json");
-  const raw = await fs.readFile(file, "utf-8");
-  return JSON.parse(raw) as CorridorEntry[];
-}
-
-function tierFor(value: number, median: number): HBarTier {
-  if (value >= median * BULLISH_MULTIPLIER) return "bullish";
-  if (value <= median * BEARISH_MULTIPLIER) return "bearish";
-  return "neutral";
+  try {
+    const supabase = createServiceRoleClient();
+    const { data, error } = await supabase
+      .from("corridor_profiles")
+      .select(
+        "corridor_name, asking_rent_psf, vacancy_rate_pct, absorption_sqft, city",
+      )
+      .not("asking_rent_psf", "is", null)
+      .is("deleted_at", null)
+      .eq("verification_status", "verified");
+    if (error || !data || data.length === 0) throw new Error("supabase empty");
+    return data.map((row) => ({
+      // corridor_name is the canonical slug/join key; use as both id and name
+      id: row.corridor_name as string,
+      name: row.corridor_name as string,
+      submarket: (row.city as string | null) ?? "Unknown",
+      nnn_asking_rent_per_sqft: row.asking_rent_psf as number,
+      vacancy_pct: (row.vacancy_rate_pct as number | null) ?? null,
+      absorption_sqft: (row.absorption_sqft as number | null) ?? null,
+    }));
+  } catch {
+    // fixture fallback — used when Supabase is unreachable or returns no rows
+    const file = path.join(process.cwd(), "fixtures", "corridor-rents.json");
+    const raw = await fs.readFile(file, "utf-8");
+    return JSON.parse(raw) as CorridorEntry[];
+  }
 }
 
 export default async function AskingRentCardPage() {

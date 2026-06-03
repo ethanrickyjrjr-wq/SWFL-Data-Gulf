@@ -6,6 +6,7 @@ import {
   type SpeakerTier,
 } from "../refinery/render/speaker.mts";
 import type { BrainOutput } from "../refinery/types/brain-output.mts";
+import type { ChartBlock } from "../refinery/validate/chart-block-lint.mts";
 
 /**
  * Shared brain-fetch pipeline used by `/api/b/[slug]` and (Step 2) the MCP
@@ -152,6 +153,8 @@ export interface Dossier {
   contradicts: string[];
   caveats: string[];
   prediction_window?: string;
+  /** Forward-proofs Track C MCP widget — embed charts go through corridor composer, not buildDossier. */
+  chart?: ChartBlock;
 }
 
 /** Assemble the dossier from a parsed BrainOutput + its freshness token. */

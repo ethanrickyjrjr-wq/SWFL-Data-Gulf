@@ -14,8 +14,11 @@ import type {
   ZHVIMonth,
   ZHVITrendEntry,
 } from "@/types/viz";
+import { composeCorridorCharacterRender } from "@/refinery/render/corridor-character.mts";
+import { ChartBlockView } from "@/components/charts/ChartBlockView";
+import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
-export const dynamic = "force-static";
 export const revalidate = 3600;
 
 async function loadFixture<T>(name: string): Promise<T> {
@@ -74,6 +77,35 @@ function joinCorridors(
 }
 
 export default async function EmbedChartsPage() {
+  const corridorCharts: Array<{ name: string; chart: ChartBlock }> = [];
+  try {
+    const supabase = createServiceRoleClient();
+    const { data } = await supabase
+      .from("corridor_profiles")
+      .select(
+        "corridor_name, character_chart, character_facts, character_speculative",
+      )
+      .is("deleted_at", null);
+
+    if (data) {
+      for (const row of data) {
+        const rendered = composeCorridorCharacterRender({
+          characterFacts: row.character_facts as string | null,
+          characterSpeculative: row.character_speculative as string | null,
+          characterChart: row.character_chart,
+        });
+        if (rendered.chart) {
+          corridorCharts.push({
+            name: row.corridor_name as string,
+            chart: rendered.chart,
+          });
+        }
+      }
+    }
+  } catch {
+    // degrade silently — page still renders without chart data
+  }
+
   const [zhviRaw, rents, permits, centroids] = await Promise.all([
     loadFixture<ZHVIMonth[]>("zhvi-trend.json"),
     loadFixture<CorridorEntry[]>("corridor-rents.json"),
@@ -210,6 +242,38 @@ export default async function EmbedChartsPage() {
           </header>
           <CorridorMarketScatter data={joined} loading={false} />
         </section>
+
+        {corridorCharts.length > 0 && (
+          <section
+            style={{
+              background: "#152832",
+              border: "1px solid #22414F",
+              borderRadius: 12,
+              padding: 24,
+              gridColumn: "1 / -1",
+            }}
+          >
+            <header style={{ marginBottom: 16 }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: "#F0EDE6",
+                }}
+              >
+                Corridor character charts
+              </h2>
+            </header>
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              {corridorCharts.map(({ name, chart }) => (
+                <div key={name}>
+                  <ChartBlockView block={chart} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

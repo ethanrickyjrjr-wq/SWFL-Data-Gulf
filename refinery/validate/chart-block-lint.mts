@@ -34,6 +34,7 @@ export interface ChartBlock {
   title: string;
   columns: string[];
   rows: ChartCell[][];
+  chart_type?: "bar" | "area" | "scatter" | "table";
 }
 
 export interface ChartLintResult {
