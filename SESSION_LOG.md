@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — Close out city_pulse story_key (no code — reconcile only): stop re-scoping shipped work
+
+**Why:** `city_pulse_story_key` was sitting OPEN (due Jun 14) but the whole Build #1 already shipped in one commit `a5c0db1` (2026-05-31). The check was a false-open — the next CHECK kept re-litigating settled work. Verified before closing, not assumed: distill.py (`slugify_story_key`/`live_story_keys`/`reconcile_supersession`/`_reconcile_sql`/`_INSERT_COLUMNS`), pipeline.py end-of-run reconcile→prune, source `.is("superseded_by", null)` + fixture mirror, 3-row superseded fixture — all present. **Migration is applied** (city-pulse-daily cron: 3 missing-column crashes 05-31 16:02–16:42, then GREEN 16:46 = migration landed; green 06-01/06-02 → `story_key` rows writing in prod). `bun test refinery/packs/city-pulse-swfl.test.mts` 6/6 incl. superseded-row-hidden.
+
+- **Closed `city_pulse_story_key`** (`scripts/check.mjs close`) — this is the ops/LittleBird update (both render from `public.checks`). Honest basis: shipped + green-cron + green-tests; a forced cross-run story collapse was NOT manufactured (deterministic logic is test-proven, mechanism is live).
+- **`docs/superpowers/plans/2026-05-31-city-pulse-story-key/README.md`** — status flipped READY-TO-BUILD → SHIPPED & CLOSED (RULE 2: flip the marker in the same commit). "Do NOT re-scope this."
+- **Build #2 (corridor weekly)** also already shipped (`corridor-pulse-weekly.yml` + `ingest/pipelines/city_pulse_corridors/`, cron green 06-01); no `city_pulse_weekly_corridor` check is open.
+- **Open checks now: 2** — `surface_parent_links` (ON HOLD, needs your diff review), `env_hydro_metrics_source` (no live hydro source — DBHYDRO API dead).
+
 ## 2026-06-03 (Opus 4.8 · main) — Phase 7 runner-kill sentinel: kill the last false-green path (closes `phase7_runner_kill_sentinel`)
 
 **Why:** `continue-on-error: true` on the resilient rebuild step (load-bearing — lets a captured bun exit 1/2 reach the commit/gate steps) also downgrades a runner OOM / `timeout-minutes` kill from red to a warning. The process dies before `echo exit_code=$?` runs, so `exit_code` is empty, every gate keyed on `!= ''` silently no-ops, and the job concludes GREEN on a dead step. A Stage-3 Anthropic synthesis hang tripping `timeout-minutes` lands exactly here.

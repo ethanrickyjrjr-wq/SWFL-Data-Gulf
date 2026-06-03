@@ -1,7 +1,7 @@
 # Build #1 — city_pulse `story_key` content-aware supersession
 
-**Status:** READY TO BUILD (audited against live code 2026-05-31)
-**Check:** `city_pulse_story_key` (`public.checks`, due 2026-06-15 UTC) — resolves `docs/sql/20260530_checks.sql:36`
+**Status:** ✅ SHIPPED & CLOSED 2026-06-03. Code landed in one commit `a5c0db1` (2026-05-31); migration applied (city-pulse-daily cron went green 05-31 16:46 after 3 missing-column crashes, green since). bun pack test 6/6. Check `city_pulse_story_key` closed on shipped+green-cron+green-tests — a forced end-to-end story collapse was not manufactured (supersession fires only on a cross-run continuation); the deterministic logic is test-proven and the mechanism is live in prod. Do NOT re-scope this.
+**Check:** `city_pulse_story_key` (`public.checks`) — CLOSED 2026-06-03. Build #2 (corridor weekly) also shipped, cron green 06-01.
 **Precedes / hands the contract to:** Build #2 — weekly corridor trigger (`city_pulse_weekly_corridor`, same due date)
 
 This supersedes the original pasted plan. Every line ref below was verified against the
