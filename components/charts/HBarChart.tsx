@@ -29,10 +29,26 @@ export type HBarChartProps = {
   detailLabel?: string;
   /** Override tier fill colors. Defaults to platform teal/amber. */
   tierColors?: HBarTierColors;
-  /** Format the numeric value for display. Defaults to $X.XX */
+  /**
+   * Format the numeric value for display. Defaults to $X.XX.
+   * NOTE: a function prop can only be passed from another Client Component.
+   * Server Components (e.g. the /embed/charts page) must use `valueFormat`
+   * instead — a function cannot cross the RSC→client boundary at prerender.
+   */
   formatValue?: (v: number) => string;
+  /**
+   * Serializable formatter selector for Server-Component callers.
+   * "currency" → $X.XX (default), "aal" → $X,XXX/yr. Ignored when
+   * `formatValue` is supplied.
+   */
+  valueFormat?: "currency" | "aal";
   /** Label shown in tooltip for the primary metric row. Defaults to "Asking Rent". */
   tooltipMetricLabel?: string;
+};
+
+const VALUE_FORMATTERS: Record<"currency" | "aal", (v: number) => string> = {
+  currency: (v) => `$${v.toFixed(2)}`,
+  aal: (v) => `$${Math.round(v).toLocaleString("en-US")}/yr`,
 };
 
 type TooltipState = {
@@ -57,9 +73,10 @@ export function HBarChart({
   detailLabel,
   tierColors,
   formatValue,
+  valueFormat = "currency",
   tooltipMetricLabel = "Asking Rent",
 }: HBarChartProps) {
-  const fmt = formatValue ?? ((v: number) => `$${v.toFixed(2)}`);
+  const fmt = formatValue ?? VALUE_FORMATTERS[valueFormat];
   const scopeRef = useRef<HTMLDivElement>(null);
   const fillRefs = useRef<(HTMLDivElement | null)[]>([]);
   const valueRefs = useRef<(HTMLDivElement | null)[]>([]);

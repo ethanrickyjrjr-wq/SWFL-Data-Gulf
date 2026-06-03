@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — fix(charts): Vercel deploy red since charts-chore — RSC→client function-prop serialization
+
+**GitHub Actions was green the whole time (`rebuild` ✅, `build` ✅) — the red ❌ on every commit since `chore(catch-up): ship in-progress charts work` was the _Vercel_ check, not CI. `next build` prerenders; the GH `build` check (refinery/typecheck) does not — so the break hid from CI.**
+
+- **Root cause:** `app/embed/charts/page.tsx` renders `<HBarChart {...floodChartProps} />` (a `"use client"` component) from a Server Component. `adaptFloodZipsToHBar` (`refinery/lib/chart-adapter.mts`) put `formatValue: fmtAal` — a **function** — in those props. Functions can't cross the RSC→client boundary, so `next build` died: _"Functions cannot be passed directly to Client Components… Export encountered an error on /embed/charts/page."_ Reproduced locally with `npx next build` (exit 1).
+- **Fix (serializable discriminator, backward-compatible):** added `valueFormat?: "currency" | "aal"` to `HBarChartProps` + a `VALUE_FORMATTERS` map inside `HBarChart.tsx`; component resolves `formatValue ?? VALUE_FORMATTERS[valueFormat]`. `adaptFloodZipsToHBar` now sets `valueFormat: "aal"` (both return paths) instead of the function; removed the now-unused `fmtAal`. `formatValue` stays for legitimate client-side callers (documented that Server Components must use `valueFormat`).
+- **Verified:** `npx next build` exit 0 — `/embed/charts` prerenders as static content. Files: `components/charts/HBarChart.tsx`, `refinery/lib/chart-adapter.mts`.
+- **Phase 7 acceptance (prior entry) — GREEN:** dispatch run 26869794278 succeeded end-to-end; autostash fix held; `_build-report.json` on origin.
+
 ## 2026-06-03 (Opus 4.8 · main) — Phase 7 acceptance run surfaced a latent rebase bug — fixed (autostash) + runner-kill sentinel
 
 **Dispatched the first live `--resilient` run (26868740782). Phase 7 logic worked perfectly; the run failed on a PRE-EXISTING commit-step bug it exposed.**

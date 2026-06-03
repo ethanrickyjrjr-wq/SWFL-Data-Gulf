@@ -122,11 +122,6 @@ const FLOOD_COLORS = {
   bearish: "#E08158", // --sunset-coral (high risk)
 };
 
-/** Format AAL as $X,XXX/yr */
-function fmtAal(v: number): string {
-  return `$${Math.round(v).toLocaleString("en-US")}/yr`;
-}
-
 /**
  * Builds HBarChartProps from a sorted list of NfipZipAggregate rows.
  * Tiers are inverted: high AAL → bearish (#E08158), low → bullish (#5BC97A).
@@ -140,7 +135,7 @@ export function adaptFloodZipsToHBar(zips: NfipZipAggregate[]): HBarChartProps {
       median: 0,
       range: { min: 0, max: 0 },
       tierColors: FLOOD_COLORS,
-      formatValue: fmtAal,
+      valueFormat: "aal",
       tooltipMetricLabel: "Flood AAL",
     };
   }
@@ -180,7 +175,7 @@ export function adaptFloodZipsToHBar(zips: NfipZipAggregate[]): HBarChartProps {
     median,
     range,
     tierColors: FLOOD_COLORS,
-    formatValue: fmtAal,
+    valueFormat: "aal",
     tooltipMetricLabel: "Flood AAL",
     ...(separatorAfter !== undefined && {
       separatorAfter,
