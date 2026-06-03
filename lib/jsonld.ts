@@ -61,7 +61,7 @@ export function brainJsonLd(display: DisplayBrain, slug: string): object[] {
       .map((m) =>
         question(
           `What is ${m.label} in Southwest Florida?`,
-          `${m.value} (${m.direction}). Source: ${m.sourceLabel}. As of ${display.freshnessToken}.`,
+          `${m.value} (${m.direction}). Source: ${m.sourceLabel}${m.sourceUrl ? ` (${m.sourceUrl})` : ""}. As of ${display.freshnessToken}.`,
         ),
       ),
   ].slice(0, 8);
@@ -84,6 +84,11 @@ export function corridorJsonLd(
   // computes the safe label via `displayNameFor`; require it as an arg so this
   // helper can never leak the raw slug into public JSON-LD.
   const displayN = displayName;
+
+  // Per-metric provenance: each metric carries its own `*_source_url`, falling
+  // back to the corridor-wide `source_url`. Embed it into the answer text only
+  // when one actually exists (most corridors are pre-sourcing → no suffix).
+  const sourceSuffix = (url: string | null) => (url ? ` Source: ${url}.` : "");
 
   const place = {
     "@context": "https://schema.org",
@@ -112,7 +117,7 @@ export function corridorJsonLd(
     faqEntries.push(
       question(
         `What is the cap rate on ${displayN} in Southwest Florida?`,
-        `${corridor.cap_rate_pct}%${corridor.cap_rate_direction ? ` (${corridor.cap_rate_direction})` : ""}. As of ${freshnessToken}.`,
+        `${corridor.cap_rate_pct}%${corridor.cap_rate_direction ? ` (${corridor.cap_rate_direction})` : ""}. As of ${freshnessToken}.${sourceSuffix(corridor.cap_rate_source_url ?? corridor.source_url)}`,
       ),
     );
   }
@@ -121,7 +126,7 @@ export function corridorJsonLd(
     faqEntries.push(
       question(
         `What is the vacancy rate on ${displayN} in Southwest Florida?`,
-        `${corridor.vacancy_rate_pct}%${corridor.vacancy_rate_direction ? ` (${corridor.vacancy_rate_direction})` : ""}. As of ${freshnessToken}.`,
+        `${corridor.vacancy_rate_pct}%${corridor.vacancy_rate_direction ? ` (${corridor.vacancy_rate_direction})` : ""}. As of ${freshnessToken}.${sourceSuffix(corridor.vacancy_rate_source_url ?? corridor.source_url)}`,
       ),
     );
   }
@@ -130,7 +135,7 @@ export function corridorJsonLd(
     faqEntries.push(
       question(
         `What is the asking rent per square foot on ${displayN}?`,
-        `$${corridor.asking_rent_psf} PSF (triple-net)${corridor.asking_rent_psf_direction ? ` (${corridor.asking_rent_psf_direction})` : ""}. As of ${freshnessToken}.`,
+        `$${corridor.asking_rent_psf} PSF (triple-net)${corridor.asking_rent_psf_direction ? ` (${corridor.asking_rent_psf_direction})` : ""}. As of ${freshnessToken}.${sourceSuffix(corridor.asking_rent_psf_source_url ?? corridor.source_url)}`,
       ),
     );
   }
@@ -139,7 +144,7 @@ export function corridorJsonLd(
     faqEntries.push(
       question(
         `What is the net absorption on ${displayN}?`,
-        `${corridor.absorption_sqft.toLocaleString()} sqft${corridor.absorption_sqft_direction ? ` (${corridor.absorption_sqft_direction})` : ""}. As of ${freshnessToken}.`,
+        `${corridor.absorption_sqft.toLocaleString()} sqft${corridor.absorption_sqft_direction ? ` (${corridor.absorption_sqft_direction})` : ""}. As of ${freshnessToken}.${sourceSuffix(corridor.absorption_sqft_source_url ?? corridor.source_url)}`,
       ),
     );
   }

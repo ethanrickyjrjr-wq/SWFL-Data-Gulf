@@ -109,6 +109,42 @@ test("brainJsonLd: empty conclusion drops the intro Q, no empty acceptedAnswer",
   assert.ok(!(entries[0].name as string).toLowerCase().includes("outlook"));
 });
 
+test("brainJsonLd: FAQ metric answer embeds sourceUrl when present", () => {
+  const [, faq] = brainJsonLd(minBrain, "env-swfl");
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<
+    string,
+    unknown
+  >[];
+  const aalQ = entries.find((e) =>
+    (e.name as string).includes("AAL per policy"),
+  );
+  assert.ok(aalQ, "expected an AAL metric FAQ entry");
+  assert.ok(
+    ((aalQ!.acceptedAnswer as Record<string, unknown>).text as string).includes(
+      "https://www.fema.gov/nfip",
+    ),
+    "metric answer should embed the source url",
+  );
+});
+
+test("brainJsonLd: FAQ metric answer is url-free when sourceUrl is empty", () => {
+  const noUrl = {
+    ...minBrain,
+    metrics: [{ ...minBrain.metrics[0], sourceUrl: "" }],
+  };
+  const [, faq] = brainJsonLd(noUrl, "env-swfl");
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<
+    string,
+    unknown
+  >[];
+  const aalQ = entries.find((e) =>
+    (e.name as string).includes("AAL per policy"),
+  );
+  const text = (aalQ!.acceptedAnswer as Record<string, unknown>).text as string;
+  assert.ok(!text.includes("http"), "no url when sourceUrl is empty");
+  assert.ok(!text.includes("()"), "no dangling empty parens");
+});
+
 const minCorridor: CorridorNormalized = {
   kind: "corridor",
   name: "airport-pulling",
@@ -212,4 +248,64 @@ test("corridorJsonLd: pre-sourcing corridor emits Place only, no empty FAQPage",
   const ld = corridorJsonLd(bare, TOKEN, "Airport-Pulling");
   assert.equal(ld.length, 1);
   assert.equal((ld[0] as Record<string, unknown>)["@type"], "Place");
+});
+
+function capRateText(c: CorridorNormalized): string {
+  const [, faq] = corridorJsonLd(c, TOKEN, "Airport-Pulling");
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<
+    string,
+    unknown
+  >[];
+  const capQ = entries.find((e) =>
+    (e.name as string).toLowerCase().includes("cap rate"),
+  );
+  return (capQ!.acceptedAnswer as Record<string, unknown>).text as string;
+}
+
+test("corridorJsonLd: metric answer embeds per-metric source url", () => {
+  const text = capRateText({
+    ...minCorridor,
+    cap_rate_source_url: "https://costar.example/cap",
+  });
+  assert.ok(text.includes("https://costar.example/cap"));
+});
+
+test("corridorJsonLd: metric source url falls back to corridor.source_url", () => {
+  const text = capRateText({
+    ...minCorridor,
+    cap_rate_source_url: null,
+    source_url: "https://costar.example/fallback",
+  });
+  assert.ok(text.includes("https://costar.example/fallback"));
+});
+
+test("corridorJsonLd: metric answer is url-free when no source url at all", () => {
+  // minCorridor has every *_source_url and source_url null
+  assert.ok(!capRateText(minCorridor).includes("http"));
+});
+
+test("corridorJsonLd: each metric uses its own per-metric source url", () => {
+  const c: CorridorNormalized = {
+    ...minCorridor,
+    cap_rate_source_url: "https://costar.example/cap",
+    vacancy_rate_source_url: "https://costar.example/vac",
+  };
+  const [, faq] = corridorJsonLd(c, TOKEN, "Airport-Pulling");
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<
+    string,
+    unknown
+  >[];
+  const capQ = entries.find((e) =>
+    (e.name as string).toLowerCase().includes("cap rate"),
+  );
+  const vacQ = entries.find((e) =>
+    (e.name as string).toLowerCase().includes("vacancy"),
+  );
+  const capText = (capQ!.acceptedAnswer as Record<string, unknown>)
+    .text as string;
+  const vacText = (vacQ!.acceptedAnswer as Record<string, unknown>)
+    .text as string;
+  assert.ok(capText.includes("https://costar.example/cap"));
+  assert.ok(!capText.includes("https://costar.example/vac"));
+  assert.ok(vacText.includes("https://costar.example/vac"));
 });

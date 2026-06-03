@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — feat(aeo): embed per-metric source_url into FAQ acceptedAnswer.text (brainJsonLd + corridorJsonLd)
+
+**Follow-up to 28c7dc9 (did NOT amend it). Closes check `aeo_faq_source_urls`.** AEO JSON-LD FAQ answers now carry their provenance URL inline so an LLM/crawler reading the FAQPage has the source on the answer itself, not just the Dataset block.
+
+- **brainJsonLd:** each metric FAQ answer appends ` ({sourceUrl})` after `Source: {label}` when `m.sourceUrl` is truthy (same guard the Dataset's `variableMeasured` already uses). Empty `sourceUrl` → no parens, text unchanged.
+- **corridorJsonLd:** new local `sourceSuffix(url)` helper appends ` Source: {url}.` per metric. Lookup is **per-metric with fallback** — `cap_rate_source_url ?? source_url` (same for vacancy / asking_rent_psf / absorption), per the `CorridorNormalized` "metric_source_url ?? source_url ?? null" contract. All-null → no suffix (most corridors are pre-sourcing). Character Q left URL-free (qualitative).
+- **Tests (+6, TDD red→green):** brain embed-when-present + url-free-when-empty; corridor per-metric embed, fallback-to-source_url, url-free-when-none, per-metric independence (cap≠vacancy URL). Full suite **1016 pass / 0 fail**, eslint clean on both files.
+- Staged **ONLY** `lib/jsonld.ts` + `lib/jsonld.test.ts` (+ this log). Left untouched (NOT mine / in-flight): `app/r/[slug]/page.tsx`, `app/r/cre-swfl/[corridor]/page.tsx`, `refinery/lib/synth.mts`(+test) [that's `housing_master_zip_route` work — housing per-ZIP route in `composeGrainBoundary`], `.gitignore`, `corridors.ts`, the Firecrawl JSONs.
+- **STILL OPEN (`aeo_rich_results_validate`):** Google Rich Results Test on /r/housing-swfl + /r/cre-swfl/airport-pulling — blocked, not by this: the FAQ JSON-LD won't be live until the unstaged page injections deploy. Low urgency, explicitly not a push gate.
+
 ## 2026-06-03 (Opus 4.8 · main) — fix(housing): per-ZIP detail + zip-drill so a specific ZIP (Gateway/33913) is answerable, not refused
 
 **Operator report: MCP answer for "Gateway housing" leaked "tier-2 summary" jargon, refused the number, pivoted to Naples luxury. Root cause: housing-swfl emitted only regional medians + top-3 priciest/fastest ZIPs; every ordinary ZIP (incl. 33913 = $500k) was dropped before the payload existed, and there was no ZIP read path.**
