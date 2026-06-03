@@ -97,6 +97,11 @@ async function fetchFromSupabase(): Promise<LeePermitRow[]> {
         )
         .gte("issued_date", sinceIso) as unknown as PagedQuery<LeePermitRow>,
     "permit_id",
+    // Row-floor guard (issue #61): a pure total-collapse tripwire, NOT a volume
+    // assertion. The set is tiny (28 rows, probed live 2026-06-03) and the
+    // gte(issued_date) window is rolling, so a quiet period can legitimately
+    // return very few rows — only 0 (a grant/pipeline failure) is a real fault.
+    { minRows: 1 },
   );
 }
 

@@ -76,6 +76,11 @@ async function fetchLive(): Promise<CbpRow[]> {
         .eq("fips_state", "12")
         .eq("year", maxYear) as unknown as PagedQuery<Record<string, unknown>>,
     "_dlt_id",
+    // Row-floor guard (issue #61): FL had 43,606 CBP rows for the latest year
+    // (year=2022, probed live 2026-06-03). 30k sits above the 1000 db-max-rows
+    // cap and well below real volume — catches a pagination regression that would
+    // otherwise silently truncate the by-naics aggregate to a ~2% sample.
+    { minRows: 30_000 },
   );
 
   // Step 3: aggregate by naics_code in TS (sum across all FL counties)

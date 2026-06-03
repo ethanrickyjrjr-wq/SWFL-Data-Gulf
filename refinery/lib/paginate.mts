@@ -19,6 +19,12 @@
  * of pageSize. A PGRST103 / 416 error (some PostgREST configs answer an
  * out-of-bounds range that way) is also treated as clean end-of-data, not an
  * error — defensive against config drift.
+ *
+ * Pass `opts.minRows` to assert a row-floor on the assembled total (issue #61):
+ * if the full fetch yields fewer rows than expected — a silent db-max-rows=1000
+ * truncation or a pagination regression — it throws rather than letting a
+ * partial-sample aggregate build GREEN. Opt-in per call site; verify the live
+ * count and set the floor below it (above 1000 where the table exceeds the cap).
  */
 
 /** Minimal structural view of the supabase-js query builder this helper drives. */
@@ -41,7 +47,11 @@ const RANGE_NOT_SATISFIABLE = "PGRST103";
 export async function selectAllPaged<T>(
   buildQuery: () => PagedQuery<T>,
   orderCols: string | readonly string[],
-  opts?: { pageSize?: number; maxRows?: number },
+  // `minRows` — issue #61 row-floor. SELECTALLPAGED HAS NO ENV AWARENESS: the
+  // floor fires on any call that reaches it, so offline-safety is the CONNECTOR's
+  // job. Only ever pass `minRows` from a live-gated path (a source's fetchLive /
+  // else-branch); never from fixture code, or it will trip on the fixture set.
+  opts?: { pageSize?: number; maxRows?: number; minRows?: number },
 ): Promise<T[]> {
   const pageSize = opts?.pageSize ?? DEFAULT_PAGE_SIZE;
   const maxRows = opts?.maxRows ?? DEFAULT_MAX_ROWS;
@@ -74,6 +84,20 @@ export async function selectAllPaged<T>(
     const page = res.data ?? [];
     rows.push(...page);
     if (page.length < pageSize) break;
+  }
+
+  // Row-floor guard (issue #61). The raw assembled count is the ONLY layer where
+  // a silent db-max-rows=1000 truncation is detectable: a caller that aggregates
+  // downstream (e.g. census_cbp_fl folds ~43.6k raw rows into a few hundred NAICS
+  // sectors) would still clear a fragment-count floor while its sums were wrong.
+  // So the floor lives here, on `rows`, before any aggregation. Asserts only when
+  // the caller opts in; selectAllPaged never runs in fixture mode (live path only).
+  if (opts?.minRows !== undefined && rows.length < opts.minRows) {
+    throw new Error(
+      `selectAllPaged: fetched ${rows.length} rows, expected ≥${opts.minRows}. ` +
+        `Likely a silent db-max-rows=1000 truncation or a pagination regression — ` +
+        `aborting before a partial-sample aggregate can build GREEN. (issue #61)`,
+    );
   }
   return rows;
 }

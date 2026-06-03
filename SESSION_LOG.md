@@ -2,6 +2,20 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — issue #61 row-floor guard: raw-row floor in `selectAllPaged` (closes `row_floor_guard`)
+
+**Why:** PostgREST silently caps any un-paged response at `db-max-rows=1000`, so a source over a >1000-row table could aggregate a 1000-row sample and ship GREEN (the bug that once read FMB AAL as $264/yr vs $30,074/yr). Adds an opt-in floor that turns a silent truncation / pagination regression into a loud abort.
+
+- **`refinery/lib/paginate.mts`** — `selectAllPaged` gains optional `opts.minRows`; after the paging loop it throws if the **assembled raw total** is below the floor. Asserting on raw rows (not post-aggregation fragments) is the load-bearing choice — see boundary #1.
+- **Floors set from live counts probed 2026-06-03** (not memory), each with an inline comment: `census_cbp_fl` 43,606 → `30_000`; `fema_nfip_claims` 86,574 → `50_000`; `lee_building_permits` 28 → `1` (rolling window → collapse tripwire only).
+- **`refinery/lib/paginate.test.mts`** — +4 cases (floor unmet throws `/issue #61/`, floor met passes, unset no-op, page-seam total). 11/11 pass. Typecheck: no new errors in edited files. Fixture rebuild guard-inert (master orphan failure is pre-existing — confirmed by stash+repro).
+- **First design corrected (Littlebird review):** original plan put a `minLiveRows` field on `SourceConnector` + a Stage-1 check on `sourceFragments.length` — that checks the WRONG number for `census_cbp_fl`, which folds ~43.6k raw rows into a few hundred NAICS sectors before emitting; a sub-1000 fragment floor can't detect a truncation-to-1000. Floor moved to the raw-fetch layer where truncation actually bites.
+
+**Two known boundaries (intentional, not regressions):**
+
+1. **Only `selectAllPaged` callers can be floor-guarded now.** The guard is a paginator param, not a connector field — so a future source that does a single un-paged query (the exact "forgot to paginate" time-bomb #61 names) still can't get a floor until it's routed through `selectAllPaged` first. Fine for today's 3 sources; a real boundary for the next one.
+2. **Inertness is connector-enforced, not guard-enforced.** `selectAllPaged` has no `REFINERY_SOURCE` awareness; the floor fires on any call that reaches it. Offline-safety lives in each connector's `env.source === "fixture" ? loadFixture() : fetchLive()` dispatch — `minRows` is only ever passed from the live branch. A comment on the param now says so. If a future caller passes `minRows` from fixture code, it'll trip on the fixture set.
+
 ## 2026-06-03 (Opus 4.8 · main) — check.mjs: add `update` primitive + kill the silent-no-op false-green
 
 **Why:** tonight's wire_orphan_data re-scope needed to revise an existing check's `--detail`, but `open` early-returned `console.log("already exists…")` + **exit 0** on any existing key — a no-op masquerading as success (the exact false-green class the RULE 2 hardening exists to kill). There was no update path at all.

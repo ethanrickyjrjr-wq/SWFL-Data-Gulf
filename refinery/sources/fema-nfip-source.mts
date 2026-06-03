@@ -548,6 +548,11 @@ async function fetchLive(): Promise<FixtureShape> {
         .eq("state", "FL")
         .in("county_code", SWFL_FIPS) as unknown as PagedQuery<ClaimRow>,
     "id",
+    // Row-floor guard (issue #61): the SWFL archive held 86,574 claims (probed
+    // live 2026-06-03). 50k is above the 1000 db-max-rows cap and below real
+    // volume — catches the exact truncation that once read FMB AAL as $264/yr
+    // instead of $30,074/yr. Complements assertClaimsNonEmpty (the 0-row guard).
+    { minRows: 50_000 },
   );
   assertClaimsNonEmpty(claims);
   return { claims };

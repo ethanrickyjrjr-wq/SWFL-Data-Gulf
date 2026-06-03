@@ -156,3 +156,38 @@ test("exceeding maxRows throws instead of looping forever", async () => {
     /maxRows/,
   );
 });
+
+// Row-floor guard (issue #61): turn a silent db-max-rows truncation / pagination
+// regression into a loud abort. The floor is asserted on the assembled total.
+
+test("minRows: throws when the assembled total is below the floor", async () => {
+  await assert.rejects(
+    () =>
+      selectAllPaged(fakeTable(range(3)), "id", { minRows: 5, pageSize: 2 }),
+    /fetched 3 rows, expected ≥5.*issue #61/s,
+  );
+});
+
+test("minRows: passes and returns all rows when the floor is met", async () => {
+  const out = await selectAllPaged(fakeTable(range(5)), "id", {
+    minRows: 5,
+    pageSize: 2,
+  });
+  assert.equal(out.length, 5);
+});
+
+test("minRows: unset never throws (back-compat for existing callers)", async () => {
+  const out = await selectAllPaged(fakeTable(range(1)), "id", { pageSize: 2 });
+  assert.deepEqual(out, [{ id: 0 }]);
+});
+
+test("minRows: counts the assembled total across page seams, not one page", async () => {
+  // 1500 rows assembled over pages of 1000. A single un-paged response would
+  // have stopped at 1000 and tripped a 1200 floor; this proves the guard sees
+  // the full set, so a healthy multi-page fetch clears the floor.
+  const out = await selectAllPaged(fakeTable(range(1500)), "id", {
+    pageSize: 1000,
+    minRows: 1200,
+  });
+  assert.equal(out.length, 1500);
+});
