@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — RULE 2: the session loop (Check → Submit → Update) — fix "nobody knows where we are"
+
+**Why:** completed surface-cleanup work looked unfinished because it lived in a hand-edited handoff doc with `⬜/✅` markers that nothing flips when code ships. The repo had CHECK (kickoff) + SUBMIT (session-log hook) but **no UPDATE beat** — the durable `checks` ledger never moved, so the next CHECK was a lie.
+
+- **`scripts/check.mjs` (NEW)** — the UPDATE one-liner over the `checks` ledger (Supabase `public.checks`, the Deferred-Commitment Ledger): `list` / `open <project> <check_key> "<label>"` / `close <check_key> [note] [--drop]`. Reads creds from `.dlt/secrets.toml` (line-by-line TOML parse; never prints them). Idempotent on `check_key`. Schema honored: `state IN (open,done,dropped)`, `resolution IN (auto,manual,both)`. Round-trip verified (open→list→close→drop).
+- **`CLAUDE.md`** — new **RULE 2 — THE SESSION LOOP** after RULE 1; reconciled the "Status — NOT here" block to name the `checks` ledger + `build-queue.md` + /ops dashboard as the three durable trackers. Rule: plan/handoff docs are briefs, not status boards — verify markers against git; flip them in the same commit as the code. Locked SESSION-LOG marker intact; RoE drift test 8/8 green (edits are outside the RoE block).
+- **Backfilled 3 real open checks** so kickoff stops under-reporting (now shows 4 open): `surface_parent_links` (ON HOLD, needs diff review), `row_floor_guard` (issue #61), `wire_orphan_data` (dbhydro + qcew).
+- **Closed the stale handoff doc** (`2026-06-02-surface-cleanup-handoff.md`) with a verified CLOSED banner: Decisions 1–4 already resolved in code (`92ca539`, `cre-swfl.mts:1213`, `display-leak.test.mts` 3/3 green); remaining work migrated to the ledger.
+- **Next / still open (in the ledger, not here):** FMB end-to-end retest + 25-vs-26 corridor count are unrun (not leaks, not blockers); the 3 backfilled checks. Flagged separately: `MEMORY.md` is over its 24.4 KB cap and only partially loads.
+- Did **not** touch the operator's in-progress charts files / firecrawl JSONs / staged spec deletion — staged only my 4 files.
+
 ## 2026-06-03 (Sonnet 4.6 · main) — freshness probe: graceful connection failure + parked flags
 
 - `check_freshness.py`: catch DB connection errors in `main()` → exit 0 with warning in step summary (probe is non-gating observability). Added `connect_timeout=15` to fail in 15s instead of hanging 2min.

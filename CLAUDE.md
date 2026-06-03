@@ -43,6 +43,21 @@ The point: every new Claude on any machine should clone this repo, read `SESSION
 
 ---
 
+# RULE 2 — THE SESSION LOOP (Check → Submit → Update)
+
+**Every session runs the same three beats. No branches, no special cases. The reason "nobody knew where we are" was a missing third beat — work shipped but the durable tracker never moved, so the next CHECK was a lie.**
+
+1. **CHECK** — the SessionStart kickoff prints it for you: last ship (`SESSION_LOG.md`), open `checks` (the Deferred-Commitment Ledger — Supabase `public.checks`, spec `docs/superpowers/specs/2026-05-30-deferred-commitment-ledger-design.md`), and the build queue (`_AUDIT_AND_ROADMAP/build-queue.md`). That is the state. Trust it over memory; verify any surprise against `git`/code before acting.
+2. **SUBMIT** — ship the work: commit + a top-of-file `SESSION_LOG.md` entry + `node scripts/safe-push.mjs`. (Hook-enforced; don't fight it.)
+3. **UPDATE** — in the _same_ push, reconcile the ledger so the next CHECK is true:
+   - finished something → `node scripts/check.mjs close <check_key> [note]` (`--drop` to abandon)
+   - found / left something open → `node scripts/check.mjs open <project> <check_key> "<label>" [--detail "…"] [--due YYYY-MM-DD]`
+   - `node scripts/check.mjs list` to see what's open. Open obligations live in the `checks` table — **never** as `⬜/✅` markers in a plan doc.
+
+**Plan/handoff docs under `docs/superpowers/plans/**`are briefs, not status boards.** Their`⬜/✅ DECISION`markers rot the instant code ships without flipping them — that drift is what makes a finished job look unfinished and burns the next session re-litigating settled work. So: never trust a plan-doc marker as done/not-done — verify against`git` + the file first; and if a plan doc carries a marker, flip or delete it in the _same commit_ as the code. Shipping the fix and leaving the tracker stale IS the bug this rule kills.
+
+---
+
 # brain-platform — SWFL Data Gulf
 
 Live at `https://www.swfldatagulf.com`. MCP at `/api/mcp` (`claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp`). Stack: Next.js + Supabase + Vercel + DuckDB + Python ingest. **Separate from premise-engine — never mix them.**
@@ -72,7 +87,13 @@ Full reference: `docs/consumption-contract.md`. The contract that travels with e
 
 # Status + what's next — NOT here
 
-Current state, what's shipped, and what's-next live in the **/ops live ledger** (`https://swfldatagulf-ops.vercel.app`), derived from real signals — never in this file (prose drifts; the ledger can't). **Do not record build status in CLAUDE.md.** Plan the next move from /ops, confirming done-ness against GitHub. Roadmap detail: `docs/ontology-and-roadmap.md`.
+Current state, what's shipped, and what's-next live in the **durable trackers**, never in this file (prose drifts; a ledger can't). **Do not record build status in CLAUDE.md** or in a plan/handoff doc. The trackers, all surfaced at session start (RULE 2 CHECK):
+
+- **Open obligations** → the `checks` ledger (Supabase `public.checks`), reconciled with `scripts/check.mjs` (RULE 2 UPDATE).
+- **Build queue** → `_AUDIT_AND_ROADMAP/build-queue.md`.
+- **Live signals** (pipelines, GHA, brains) → the **/ops dashboard** (`https://swfldatagulf-ops.vercel.app`), derived from GitHub + Supabase.
+
+Plan the next move from those, confirming done-ness against `git`. Roadmap detail: `docs/ontology-and-roadmap.md`.
 
 The strategic **Goal 0–8 ladder** lives in a Supabase `goals` table, rendered at `/ops/goals` — the operator edits it in Studio; never seed/overwrite from a session (the seed is insert-only). **The carry contract is Goal 2 and it is live:** a downstream Claude reasons over master's dossier + the lean rules block above (rides in every MCP `_meta` / `/api/b?format=json` payload) and answers follow-ups without re-fetching. That carry contract is the spine — everything 3→8 stands on it.
 

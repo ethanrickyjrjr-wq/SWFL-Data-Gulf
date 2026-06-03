@@ -147,3 +147,28 @@ surface.)_
 - Re-run the FMB question and paste the actual output.
 - Run the corridor count and paste the number.
 - Tests + typecheck green; `SESSION_LOG.md` entry; safe-push.
+
+---
+
+## ✅ CLOSED — 2026-06-03 (Opus 4.8) — DO NOT re-open from this doc
+
+This handoff is **superseded by the `checks` ledger** (RULE 2). It was the exact failure
+RULE 2 now fixes: a hand-edited status board whose `⬜/✅` markers rotted as code shipped past
+it. Verified against current code this session:
+
+- **Decisions 1 & 2** — resolved in code: `/r/[slug]` + chat both route through one
+  display-normalizer with a build-failing leak guard (`refinery/render/display-leak.test.mts`,
+  **3/3 green this session**; commit `92ca539`). Corridor drill-down page shipped.
+- **Decision 3** — moot: its premise ("speaker still emits '20 upstream brains'") is false in
+  current code (grep-clean; tier/master/slug all scrubbed at `speaker.mts:293` + guarded).
+- **Section 3 / Decision 4** — the verbatim-softening already shipped (`cre-swfl.mts:1213`:
+  "let it dissolve into a richer picture … do NOT paste it through verbatim"). The block-label
+  cosmetic choice, if still wanted, is a fresh design task, not a leak.
+- **Remaining open work migrated to `checks`** (run `node scripts/check.mjs list`):
+  `surface_parent_links` (parent-page link wiring, ON HOLD — needs diff review),
+  `row_floor_guard` (issue #61), `wire_orphan_data` (dbhydro + qcew).
+- **Section 4 verifications** (FMB end-to-end retest; the 25-vs-26 corridor count) are **still
+  unrun** — they are not leaks and not blockers; do them when the surface work resumes, against
+  live data, not from this doc.
+
+Status from here lives in the ledger, not in this file.
