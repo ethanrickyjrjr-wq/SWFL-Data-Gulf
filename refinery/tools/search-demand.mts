@@ -82,7 +82,20 @@ export interface BucketConfig {
 
 // ── Pure helpers ───────────────────────────────────────────────────────────────
 
-/** One row per keyword: freshest captured_month, then highest-volume location. */
+/**
+ * One row per keyword, ranked: freshest captured_month, then a SWFL-metro
+ * reading over a statewide one, then highest volume.
+ *
+ * Metro-preference is the load-bearing semantic of a SWFL demand feed. A term
+ * like "homes for sale" reads ~5,400/mo statewide (dominated by Miami/Orlando)
+ * but ~480/mo locked to Cape Coral–Fort Myers — only the MSA-locked number
+ * speaks to our corridors and should drive build/sharpen calls. Picking the
+ * highest number regardless of geo is top-of-funnel drift; we fall back to
+ * state: only when no metro: reading exists for the keyword.
+ */
+const metroScore = (r: DemandRow): number =>
+  r.location.startsWith("metro:") ? 1 : 0;
+
 export function dedupeToBestPerKeyword(rows: DemandRow[]): DemandRow[] {
   const best = new Map<string, DemandRow>();
   for (const r of rows) {
@@ -91,11 +104,21 @@ export function dedupeToBestPerKeyword(rows: DemandRow[]): DemandRow[] {
       best.set(r.keyword, r);
       continue;
     }
-    const newer = r.captured_month > cur.captured_month;
-    const sameMonth = r.captured_month === cur.captured_month;
+    if (r.captured_month > cur.captured_month) {
+      best.set(r.keyword, r);
+      continue;
+    }
+    if (r.captured_month < cur.captured_month) continue;
+    // same captured_month → prefer metro over state, then higher volume
+    const moreLocal = metroScore(r) - metroScore(cur);
+    if (moreLocal > 0) {
+      best.set(r.keyword, r);
+      continue;
+    }
+    if (moreLocal < 0) continue;
     const higher =
       (r.avg_monthly_searches ?? 0) > (cur.avg_monthly_searches ?? 0);
-    if (newer || (sameMonth && higher)) best.set(r.keyword, r);
+    if (higher) best.set(r.keyword, r);
   }
   return [...best.values()];
 }

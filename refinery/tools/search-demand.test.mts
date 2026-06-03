@@ -92,7 +92,7 @@ describe("bucketize", () => {
 });
 
 describe("dedupeToBestPerKeyword", () => {
-  test("keeps the freshest month, then the highest-volume location", () => {
+  test("keeps the freshest month, then prefers a SWFL metro over statewide", () => {
     const rows = [
       row({
         keyword: "x",
@@ -114,7 +114,50 @@ describe("dedupeToBestPerKeyword", () => {
     ];
     const out = dedupeToBestPerKeyword(rows);
     expect(out).toHaveLength(1);
-    expect(out[0].avg_monthly_searches).toBe(320);
+    // metro reading wins over the higher statewide number — geographic truth
+    expect(out[0].location).toBe("metro:naples-marco-island");
+    expect(out[0].avg_monthly_searches).toBe(280);
+  });
+
+  test("falls back to statewide when no metro reading exists", () => {
+    const rows = [
+      row({
+        keyword: "y",
+        captured_month: "2026-05-01",
+        avg_monthly_searches: 90,
+        location: "state:fl",
+      }),
+      row({
+        keyword: "y",
+        captured_month: "2026-05-01",
+        avg_monthly_searches: 70,
+        location: "state:fl",
+      }),
+    ];
+    const out = dedupeToBestPerKeyword(rows);
+    expect(out).toHaveLength(1);
+    expect(out[0].location).toBe("state:fl");
+    expect(out[0].avg_monthly_searches).toBe(90); // higher of the two statewide
+  });
+
+  test("prefers metro over state even when statewide is fresher? no — month wins first", () => {
+    const rows = [
+      row({
+        keyword: "z",
+        captured_month: "2026-04-01",
+        avg_monthly_searches: 100,
+        location: "metro:cape-coral-fort-myers",
+      }),
+      row({
+        keyword: "z",
+        captured_month: "2026-05-01",
+        avg_monthly_searches: 999,
+        location: "state:fl",
+      }),
+    ];
+    const out = dedupeToBestPerKeyword(rows);
+    expect(out).toHaveLength(1);
+    // freshest month is the first gate; the older metro row loses
     expect(out[0].location).toBe("state:fl");
   });
 });

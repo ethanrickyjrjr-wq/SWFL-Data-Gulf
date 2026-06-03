@@ -13,6 +13,7 @@ accidental pickup. Its swap-gate (see the class docstring) must clear first.
 from __future__ import annotations
 
 import abc
+import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -23,6 +24,15 @@ from .constants import (
     LANGUAGE_CODE,
     MAX_KEYWORDS_PER_TASK,
 )
+
+# Transient failures worth a bounded retry. 40104 ("verify your account")
+# FLAPPED across DataForSEO's nodes during the post-signup verification window
+# (Fort Myers returned 200 while Florida 40104 on the same second); >= 50000 is
+# their internal-error range. Everything else — bad location (40400), bad field
+# (40501), insufficient funds — is a PERSISTENT defect: raise immediately so the
+# weekly/monthly cron goes LOUD instead of silently retrying into a timeout.
+_RETRYABLE_BODY_CODES = frozenset({40104})
+_RETRYABLE_HTTP_STATUS = frozenset({429, 500, 502, 503, 504})
 
 # Provider-agnostic normalized row. The pipeline maps this dict -> DB columns.
 # Keys: keyword, source, location, captured_month (date|None), avg_monthly_searches
@@ -140,9 +150,19 @@ class DataForSEOKeywordVolumeProvider(KeywordVolumeProvider):
 
     name = "dataforseo"
 
-    def __init__(self, login: str, password: str, *, timeout: int = 120) -> None:
+    def __init__(
+        self,
+        login: str,
+        password: str,
+        *,
+        timeout: int = 120,
+        max_retries: int = 3,
+        backoff_seconds: float = 2.0,
+    ) -> None:
         self._auth = (login, password)
         self._timeout = timeout
+        self._max_retries = max_retries
+        self._backoff = backoff_seconds
 
     def fetch(
         self, keywords: list[str], location_label: str, location_query: str | int
@@ -158,20 +178,7 @@ class DataForSEOKeywordVolumeProvider(KeywordVolumeProvider):
                 task["location_code"] = location_query
             else:
                 task["location_name"] = location_query
-            # DataForSEO request body is an ARRAY of task objects.
-            resp = requests.post(
-                DATAFORSEO_SEARCH_VOLUME_URL,
-                auth=self._auth,
-                json=[task],
-                timeout=self._timeout,
-            )
-            resp.raise_for_status()
-            body = resp.json()
-            status = body.get("status_code")
-            if status != 20000:  # DataForSEO success code
-                raise RuntimeError(
-                    f"DataForSEO error {status}: {body.get('status_message')}"
-                )
+            body = self._post_task(task)
             rows.extend(
                 parse_search_volume_response(
                     body,
@@ -182,6 +189,54 @@ class DataForSEOKeywordVolumeProvider(KeywordVolumeProvider):
                 )
             )
         return rows
+
+    def _post_task(self, task: dict[str, Any]) -> dict[str, Any]:
+        """POST one task (DataForSEO body is an ARRAY of task objects) with a
+        bounded retry on TRANSIENT failures only — network errors, HTTP
+        429/5xx, the 40104 verification-propagation flap, and the >= 50000
+        internal-error range. Persistent defects raise immediately (loud).
+        Returns the validated (status_code 20000) response body.
+        """
+        last_detail = ""
+        for attempt in range(self._max_retries + 1):
+            can_retry = attempt < self._max_retries
+            try:
+                resp = requests.post(
+                    DATAFORSEO_SEARCH_VOLUME_URL,
+                    auth=self._auth,
+                    json=[task],
+                    timeout=self._timeout,
+                )
+            except requests.exceptions.RequestException as exc:
+                last_detail = f"network: {exc}"
+                if can_retry:
+                    time.sleep(self._backoff * (2**attempt))
+                    continue
+                raise
+            if resp.status_code in _RETRYABLE_HTTP_STATUS and can_retry:
+                last_detail = f"http {resp.status_code}"
+                time.sleep(self._backoff * (2**attempt))
+                continue
+            resp.raise_for_status()
+            body = resp.json()
+            status = body.get("status_code")
+            if status == 20000:  # DataForSEO success code
+                return body
+            transient = status in _RETRYABLE_BODY_CODES or (
+                isinstance(status, int) and status >= 50000
+            )
+            if transient and can_retry:
+                last_detail = f"body {status}: {body.get('status_message')}"
+                time.sleep(self._backoff * (2**attempt))
+                continue
+            raise RuntimeError(
+                f"DataForSEO error {status}: {body.get('status_message')}"
+            )
+        # Exhausted retries on a transient condition that never raised on its own.
+        raise RuntimeError(
+            f"DataForSEO unavailable after {self._max_retries + 1} attempts "
+            f"({last_detail})"
+        )
 
 
 class GoogleAdsKeywordVolumeProvider(KeywordVolumeProvider):

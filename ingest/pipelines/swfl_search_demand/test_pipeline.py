@@ -1,11 +1,28 @@
 """Unit tests for swfl_search_demand — pure logic, no network, no DB."""
 from __future__ import annotations
 
-from ingest.pipelines.swfl_search_demand import pipeline, seeds
+import pytest
+
+from ingest.pipelines.swfl_search_demand import pipeline, providers, seeds
 from ingest.pipelines.swfl_search_demand.providers import (
+    DataForSEOKeywordVolumeProvider,
     normalize_result_row,
     parse_search_volume_response,
 )
+
+
+class _FakeResp:
+    """Minimal stand-in for a requests.Response (no network)."""
+
+    def __init__(self, body: dict, status_code: int = 200) -> None:
+        self._body = body
+        self.status_code = status_code
+
+    def raise_for_status(self) -> None:  # 200 → no-op
+        pass
+
+    def json(self) -> dict:
+        return self._body
 
 # A trimmed but shape-accurate DataForSEO search_volume response.
 FIXTURE_BODY = {
@@ -113,6 +130,48 @@ def test_upsert_sql_has_all_columns():
     ):
         assert f"%({col})s" in pipeline.UPSERT_SQL
     assert "public.swfl_search_demand" in pipeline.UPSERT_SQL
+
+
+def test_dataforseo_retries_transient_40104_then_succeeds(monkeypatch):
+    """The 40104 verification-propagation flap is retried, not fatal."""
+    calls = {"n": 0}
+
+    def fake_post(url, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _FakeResp({"status_code": 40104, "status_message": "verify your account"})
+        return _FakeResp(
+            {
+                "status_code": 20000,
+                "tasks": [
+                    {"result": [{"keyword": "x", "search_volume": 10, "monthly_searches": []}]}
+                ],
+            }
+        )
+
+    monkeypatch.setattr(providers.requests, "post", fake_post)
+    monkeypatch.setattr(providers.time, "sleep", lambda *_: None)  # no real backoff
+    p = DataForSEOKeywordVolumeProvider("login", "pw", max_retries=2, backoff_seconds=0)
+    rows = p.fetch(["x"], "state:fl", "Florida,United States")
+    assert calls["n"] == 2  # retried once, then succeeded
+    assert rows[0]["keyword"] == "x"
+
+
+def test_dataforseo_raises_immediately_on_persistent_error(monkeypatch):
+    """A persistent defect (bad location) is NOT retried into a timeout — it
+    raises loud on the first response."""
+    calls = {"n": 0}
+
+    def fake_post(url, **kwargs):
+        calls["n"] += 1
+        return _FakeResp({"status_code": 40400, "status_message": "location not found"})
+
+    monkeypatch.setattr(providers.requests, "post", fake_post)
+    monkeypatch.setattr(providers.time, "sleep", lambda *_: None)
+    p = DataForSEOKeywordVolumeProvider("login", "pw", max_retries=2, backoff_seconds=0)
+    with pytest.raises(RuntimeError, match="40400"):
+        p.fetch(["x"], "state:fl", "Florida,United States")
+    assert calls["n"] == 1  # no retry on a persistent error
 
 
 def test_build_seeds_dedups_lowercases_and_caps():

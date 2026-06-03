@@ -1,11 +1,14 @@
-name: SWFL search demand weekly
+name: SWFL search demand monthly
 
 on:
   schedule:
-    # 16:00 UTC Tuesday — verified-clear slot: nothing else runs at hour >= 16
-    # (busy window is Mon 06:00–13:00; latest existing job is 15:00). Keyword
-    # volume is monthly data, so weekly is plenty; the digest reads on-demand.
-    - cron: "0 16 * * 2"
+    # 16:00 UTC on the 2nd of each month — verified-clear slot: nothing else runs
+    # at hour >= 16 (busy window is Mon 06:00–13:00, latest existing job 15:00),
+    # and day 2 is clear of the monthly 5th/15th/20th crons. MONTHLY, not weekly:
+    # DataForSEO volume IS monthly data and the API bills per task, so a weekly
+    # pull would re-fetch identical numbers and burn ~4x the cost. The digest
+    # reads the table on-demand, so freshness within the month is fine.
+    - cron: "0 16 2 * *"
   workflow_dispatch:
     inputs:
       dry_run:

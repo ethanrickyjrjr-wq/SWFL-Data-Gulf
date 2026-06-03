@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — feat(demand): metro-preference dedupe + provider retry + cadence/cron operationalized (v1 demand spine DONE)
+
+**Follow-up to `eea7850` (the 15-file SWFL search-demand pipeline already landed last session). This push is the post-backfill correctness + operationalization pass. Live backfill = 825 rows in `public.swfl_search_demand` (3 SWFL locations × ~275 seeds).**
+
+- **Metro-preference dedupe (the load-bearing semantic).** `dedupeToBestPerKeyword` (`refinery/tools/search-demand.mts`) now ranks freshest-month → **metro: over state:** → volume, falling back to statewide only when no metro reading exists. Was picking highest-volume regardless of geo, so `state:fl` (Miami/Orlando-dominated) inflated over the MSA-locked SWFL number — top-of-funnel drift. Concretely: "cape coral homes for sale" reads 480/mo metro vs 5,400 statewide; "lehigh acres homes for sale" 320/mo metro vs 3,600 statewide. The digest is now MSA-truthful.
+- **Lehigh re-read (honest correction).** The statewide 3,600/mo that looked like a "Lehigh corridor NEEDED" Build flag is 320/mo metro-locked and maps to housing-swfl + properties-lee-value → it's **Sharpen, not Build**. No above-floor SWFL term currently lacks a brain (Build bucket empty) — partly real coverage, partly that seeds were derived from our own brain topics (v2: seed topics OUTSIDE current coverage to surface true gaps).
+- **Provider retry resilience.** `DataForSEOKeywordVolumeProvider._post_task` does bounded exponential-backoff retry on TRANSIENT only — network errors, HTTP 429/5xx, the 40104 verification-propagation flap (which bit us during signup), and ≥50000. Persistent defects (40400 bad location, insufficient funds) raise immediately/loud. 2 new tests (retry-then-succeed, raise-on-persistent).
+- **Operationalized.** `cadence_registry.yaml`: unparked, `expected_rows_min: 742` (~90% of 825). Cron flipped **weekly→monthly** (`swfl-search-demand-monthly.yml`, `0 16 2 * *`): volume is monthly data + DataForSEO bills per task, so weekly burned ~4× for identical numbers — and with ~$0.47 of credit left, weekly would have died red in ~2 runs. Closed check `swfl_demand_backfill` (prod evidence: live rows).
+- **Gates:** bun `search-demand.test.mts` 12/12; pytest `swfl_search_demand/` 12/12; both YAML parse; cadence entry validated (unparked, floor 742, monthly). Staged ONLY my 6 files + this log — NOT `.gitignore`.
+
 ## 2026-06-03 (Opus 4.8 · main) — fix(resilient): KILL the silent-master-freeze class — deterministic failures go loud (exit 1), + independent freshness watchdog + TTL-aware gate
 
 **Operator-directed ("FIGURE THIS OUT AND KILL"). Root cause of the 2026-06-03 frozen-master-while-green incident: since Phase 7 flipped `--resilient` to default, a DETERMINISTIC error in master's own pipeline (orphan-concept/spec/type) was caught by `buildOne`→`classifyFailure`→`degraded`→exit 2→GREEN, freezing `master.md` with no notify. The resilient executor only modeled UPSTREAM failure; it had no concept of "master's own build threw a real defect." Fixed in depth (Option 1 + any-brain paging, operator-approved). Twice adversarially verified.**
