@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — chore(gitignore): guard against firecrawl path-flatten dumps + ship pending `scripts/reddit.mjs` ignore
+
+- Deleted two junk root-level Firecrawl search dumps (`Usersethandevbrain-platform.firecrawl*.json`, May 31) — a path-flatten bug wrote `.firecrawl/fiverr-*.json` as a literal root filename, escaping the existing `.firecrawl/` ignore.
+- Added guard `Users*firecrawl*.json` (verified via `git check-ignore`: catches both dumps, leaves package.json / brain-vocabulary.json untracked). Also lands the operator's pending `scripts/reddit.mjs` ignore line so `.gitignore` stops showing as a dirty working-tree change.
+- `.gitignore`-only change; no code touched.
+
 ## 2026-06-03 (Opus 4.8 · main) — feat(aeo): wire the JSON-LD helpers into the report + corridor pages + a corridor index (lands the `0d119ec` consumers)
 
 **Until now the `28c7dc9`/`0d119ec` JSON-LD helpers were unused — this injects them into the actual pages so the structured data ships. Operator-directed push. A concurrent session had already committed+pushed the housing per-ZIP master route (`ed75586`) + vocab orphan fix (`5625997`) and explicitly disclaimed these page files, so this picks up ONLY the AEO page wiring.**
