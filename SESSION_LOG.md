@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — catch-up: ship operator's in-progress charts work + untrack closing-disclosure spec
+
+- **Charts workstream (operator's in-progress)** committed: `app/embed/charts/page.tsx`, `components/charts/HBarChart.tsx`, `lib/route-chart.ts`, `refinery/lib/chart-adapter.mts` (+220/−23). Continuation of the 2026-06-02 charts Phase 0–4 work.
+- **`.gitignore` + untrack** `docs/superpowers/specs/2026-06-02-closing-disclosure-janitor-evidence-chain.md` — operator marked it "not for repo" in `.gitignore`; `git rm --cached` (kept on disk, removed from tracking) to honor that intent.
+- **Left out of git (flagged):** two `Usersethandevbrain-platform.firecrawl*.json` files in repo root — mangled-path Firecrawl search dumps (Fiverr research), not repo content. On disk, untracked.
+
 ## 2026-06-03 (Opus 4.8 · main) — RULE 2: the session loop (Check → Submit → Update) — fix "nobody knows where we are"
 
 **Why:** completed surface-cleanup work looked unfinished because it lived in a hand-edited handoff doc with `⬜/✅` markers that nothing flips when code ships. The repo had CHECK (kickoff) + SUBMIT (session-log hook) but **no UPDATE beat** — the durable `checks` ledger never moved, so the next CHECK was a lie.

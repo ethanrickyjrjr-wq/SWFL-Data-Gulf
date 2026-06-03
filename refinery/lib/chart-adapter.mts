@@ -12,6 +12,8 @@ import type {
   HBarChartProps,
   HBarTier,
 } from "../../components/charts/HBarChart";
+import type { NfipZipAggregate } from "../sources/fema-nfip-source.mts";
+import { barrierClassFor } from "./swfl-geo.mts";
 import { medianOf } from "../../lib/stats";
 
 // ---------------------------------------------------------------------------
@@ -107,6 +109,84 @@ export function pickRenderer(
     return block.chart_type;
   }
   return "table";
+}
+
+// ---------------------------------------------------------------------------
+// adaptFloodZipsToHBar
+// ---------------------------------------------------------------------------
+
+/** Flood colors from the design system — inverted: high AAL = bearish. */
+const FLOOD_COLORS = {
+  bullish: "#5BC97A", // --mangrove (low risk)
+  neutral: "rgba(91, 201, 122, 0.55)",
+  bearish: "#E08158", // --sunset-coral (high risk)
+};
+
+/** Format AAL as $X,XXX/yr */
+function fmtAal(v: number): string {
+  return `$${Math.round(v).toLocaleString("en-US")}/yr`;
+}
+
+/**
+ * Builds HBarChartProps from a sorted list of NfipZipAggregate rows.
+ * Tiers are inverted: high AAL → bearish (#E08158), low → bullish (#5BC97A).
+ * Adds a separator between barrier-island and non-barrier ZIPs when mixed.
+ */
+export function adaptFloodZipsToHBar(zips: NfipZipAggregate[]): HBarChartProps {
+  if (zips.length === 0) {
+    return {
+      title: "Flood loss by ZIP",
+      corridors: [],
+      median: 0,
+      range: { min: 0, max: 0 },
+      tierColors: FLOOD_COLORS,
+      formatValue: fmtAal,
+      tooltipMetricLabel: "Flood AAL",
+    };
+  }
+
+  // Sort descending by AAL — highest risk first.
+  const sorted = [...zips].sort(
+    (a, b) => b.aal_usd_per_insured_property - a.aal_usd_per_insured_property,
+  );
+
+  const values = sorted.map((z) => z.aal_usd_per_insured_property);
+  const median = medianOf(values) ?? 0;
+  const range = { min: Math.min(...values), max: Math.max(...values) };
+
+  // Inverted tier thresholds: high AAL relative to median is bearish.
+  const corridors: HBarCorridor[] = sorted.map((z) => {
+    const v = z.aal_usd_per_insured_property;
+    let tier: HBarTier;
+    if (v >= median * BULLISH_MULTIPLIER) tier = "bearish";
+    else if (v <= median * BEARISH_MULTIPLIER) tier = "bullish";
+    else tier = "neutral";
+    const county = z.county_name.replace(/ County$/i, "");
+    return { name: `${z.zip} · ${county}`, value: v, tier };
+  });
+
+  // Separator after the last barrier-island ZIP (score 1.0) if the list is mixed.
+  const lastBarrierIdx = sorted.reduce<number>((acc, z, i) => {
+    return barrierClassFor(z.zip).score === 1.0 ? i : acc;
+  }, -1);
+  const hasNonBarrier = sorted.some((z) => barrierClassFor(z.zip).score < 1.0);
+  const separatorAfter =
+    lastBarrierIdx >= 0 && hasNonBarrier ? lastBarrierIdx + 1 : undefined;
+
+  return {
+    title: "Flood loss by ZIP",
+    eyebrow: "NFIP · 10-yr window · per insured property",
+    corridors,
+    median,
+    range,
+    tierColors: FLOOD_COLORS,
+    formatValue: fmtAal,
+    tooltipMetricLabel: "Flood AAL",
+    ...(separatorAfter !== undefined && {
+      separatorAfter,
+      separatorLabel: "Coastal / Inland",
+    }),
+  };
 }
 
 // ---------------------------------------------------------------------------

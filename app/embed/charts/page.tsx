@@ -18,8 +18,54 @@ import { composeCorridorCharacterRender } from "@/refinery/render/corridor-chara
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { parseBrainMarkdown } from "@/refinery/render/speaker.mts";
+import type { NfipZipAggregate } from "@/refinery/sources/fema-nfip-source.mts";
+import { adaptFloodZipsToHBar } from "@/refinery/lib/chart-adapter.mts";
+import { HBarChart } from "@/components/charts/HBarChart";
 
 export const revalidate = 3600;
+
+const ZIP_AAL_METRIC = /^swfl_zip_(\d{5})_flood_aal_usd_per_insured_property$/;
+
+async function loadFloodZips(): Promise<NfipZipAggregate[]> {
+  try {
+    const raw = await fs.readFile(
+      path.join(process.cwd(), "brains", "env-swfl.md"),
+      "utf-8",
+    );
+    const brain = parseBrainMarkdown(raw);
+    // Index county label from the metric label, e.g. "33957 (Lee County) per-insured..."
+    const countyByZip = new Map<string, string>();
+    const aalByZip = new Map<string, number>();
+    for (const m of brain.output.key_metrics) {
+      const aalMatch = ZIP_AAL_METRIC.exec(m.metric);
+      if (aalMatch) {
+        const zip = aalMatch[1];
+        aalByZip.set(zip, m.value as number);
+        // Extract county name from label: "33957 (Lee County) per-insured..."
+        const countyMatch = /\(([^)]+)\)/.exec(m.label ?? "");
+        if (countyMatch) countyByZip.set(zip, countyMatch[1]);
+      }
+    }
+    return Array.from(aalByZip.entries()).map(([zip, aal]) => ({
+      kind: "nfip-zip-aggregate" as const,
+      zip,
+      county_code: "",
+      county_name: countyByZip.get(zip) ?? "",
+      aal_usd_per_insured_property: aal,
+      aal_pct_swfl_rank: 0,
+      median_building_property_value_usd: 0,
+      claim_count_in_window: 0,
+      window_years: 10,
+      window_end_year: 0,
+      insured_denominator: 0,
+      insured_denominator_basis: "",
+      paid_total_in_window_usd: 0,
+    }));
+  } catch {
+    return [];
+  }
+}
 
 async function loadFixture<T>(name: string): Promise<T> {
   const file = path.join(process.cwd(), "fixtures", name);
@@ -106,12 +152,15 @@ export default async function EmbedChartsPage() {
     // degrade silently — page still renders without chart data
   }
 
-  const [zhviRaw, rents, permits, centroids] = await Promise.all([
+  const [zhviRaw, rents, permits, centroids, floodZips] = await Promise.all([
     loadFixture<ZHVIMonth[]>("zhvi-trend.json"),
     loadFixture<CorridorEntry[]>("corridor-rents.json"),
     loadFixtureOptional<CorridorPermitsEntry[]>("corridor-permits.json"),
     loadFixture<CorridorCentroidEntry[]>("corridor-centroids.json"),
+    loadFloodZips(),
   ]);
+  const floodChartProps =
+    floodZips.length > 0 ? adaptFloodZipsToHBar(floodZips) : null;
 
   const zhvi: ZHVITrendEntry[] = zhviRaw.filter(
     (m): m is ZHVITrendEntry =>
@@ -242,6 +291,41 @@ export default async function EmbedChartsPage() {
           </header>
           <CorridorMarketScatter data={joined} loading={false} />
         </section>
+
+        {floodChartProps && (
+          <section
+            style={{
+              background: "#152832",
+              border: "1px solid #22414F",
+              borderRadius: 12,
+              padding: 24,
+            }}
+          >
+            <header style={{ marginBottom: 16 }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: "#F0EDE6",
+                }}
+              >
+                Flood loss by ZIP
+              </h2>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  fontSize: 13,
+                  color: "#807E76",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                NFIP · 10-yr AAL per insured property · SWFL top ZIPs
+              </p>
+            </header>
+            <HBarChart {...floodChartProps} />
+          </section>
+        )}
 
         {corridorCharts.length > 0 && (
           <section

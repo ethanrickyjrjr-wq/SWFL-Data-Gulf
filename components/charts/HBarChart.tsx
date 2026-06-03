@@ -11,6 +11,12 @@ export type HBarCorridor = {
   tier: HBarTier;
 };
 
+export type HBarTierColors = {
+  bullish?: string;
+  neutral?: string;
+  bearish?: string;
+};
+
 export type HBarChartProps = {
   title: string;
   corridors: HBarCorridor[];
@@ -21,6 +27,12 @@ export type HBarChartProps = {
   separatorLabel?: string;
   detailHref?: string;
   detailLabel?: string;
+  /** Override tier fill colors. Defaults to platform teal/amber. */
+  tierColors?: HBarTierColors;
+  /** Format the numeric value for display. Defaults to $X.XX */
+  formatValue?: (v: number) => string;
+  /** Label shown in tooltip for the primary metric row. Defaults to "Asking Rent". */
+  tooltipMetricLabel?: string;
 };
 
 type TooltipState = {
@@ -43,7 +55,11 @@ export function HBarChart({
   separatorLabel,
   detailHref,
   detailLabel,
+  tierColors,
+  formatValue,
+  tooltipMetricLabel = "Asking Rent",
 }: HBarChartProps) {
+  const fmt = formatValue ?? ((v: number) => `$${v.toFixed(2)}`);
   const scopeRef = useRef<HTMLDivElement>(null);
   const fillRefs = useRef<(HTMLDivElement | null)[]>([]);
   const valueRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -83,7 +99,7 @@ export function HBarChart({
           ease: "power2.out",
           delay: i * ANIM_STAGGER,
           onUpdate: () => {
-            valEl.textContent = `$${proxy.v.toFixed(2)}`;
+            valEl.textContent = fmt(proxy.v);
           },
         });
       });
@@ -117,8 +133,20 @@ export function HBarChart({
   const tipDiff = tipCorr ? tipCorr.value - median : 0;
   const tipSign = tipDiff >= 0 ? "+" : "−";
 
+  const cssVars = {
+    "--color-bullish": tierColors?.bullish ?? "#3ecfb2",
+    "--color-bullish-glow": tierColors?.bullish
+      ? `${tierColors.bullish}72`
+      : "rgba(62, 207, 178, 0.45)",
+    "--color-neutral": tierColors?.neutral ?? "rgba(62, 207, 178, 0.55)",
+    "--color-bearish": tierColors?.bearish ?? "#e8a84c",
+    "--color-bearish-glow": tierColors?.bearish
+      ? `${tierColors.bearish}72`
+      : "rgba(232, 168, 76, 0.45)",
+  } as React.CSSProperties;
+
   return (
-    <div ref={scopeRef} className="hbarchart-root">
+    <div ref={scopeRef} className="hbarchart-root" style={cssVars}>
       <div className="hbarchart-card">
         <div className="hbarchart-eyebrow">
           {eyebrow ?? `${corridors.length} corridors`}
@@ -173,8 +201,8 @@ export function HBarChart({
         </div>
         <div className="hbarchart-footer">
           <span>
-            Median ${median.toFixed(2)} &nbsp;·&nbsp; range $
-            {range.min.toFixed(2)}–${range.max.toFixed(2)}
+            Median {fmt(median)} &nbsp;·&nbsp; range {fmt(range.min)}–
+            {fmt(range.max)}
           </span>
           {detailHref && detailLabel && (
             <a className="hbarchart-detail-link" href={detailHref}>
@@ -191,8 +219,8 @@ export function HBarChart({
         >
           <div className="hbarchart-tooltip-name">{tipCorr.name}</div>
           <div className="hbarchart-tooltip-row">
-            <span>Asking Rent</span>
-            <span>${tipCorr.value.toFixed(2)}/sqft</span>
+            <span>{tooltipMetricLabel}</span>
+            <span>{fmt(tipCorr.value)}</span>
           </div>
           <div className="hbarchart-tooltip-row">
             <span>Tier</span>
@@ -203,7 +231,8 @@ export function HBarChart({
           <div className="hbarchart-tooltip-row">
             <span>vs Median</span>
             <span>
-              {tipSign}${Math.abs(tipDiff).toFixed(2)}
+              {tipSign}
+              {fmt(Math.abs(tipDiff))}
             </span>
           </div>
         </div>
@@ -211,10 +240,6 @@ export function HBarChart({
 
       <style jsx>{`
         .hbarchart-root {
-          --teal: #3ecfb2;
-          --teal-glow: rgba(62, 207, 178, 0.45);
-          --amber: #e8a84c;
-          --amber-glow: rgba(232, 168, 76, 0.45);
           --muted-txt: rgba(255, 255, 255, 0.38);
           --label-txt: rgba(255, 255, 255, 0.88);
           --value-txt: rgba(255, 255, 255, 0.95);
@@ -306,18 +331,18 @@ export function HBarChart({
         }
 
         .hbarchart-fill-bullish {
-          background: var(--teal);
-          box-shadow: 0 0 10px var(--teal-glow);
+          background: var(--color-bullish);
+          box-shadow: 0 0 10px var(--color-bullish-glow);
         }
 
         .hbarchart-fill-neutral {
-          background: rgba(62, 207, 178, 0.55);
+          background: var(--color-neutral);
           box-shadow: none;
         }
 
         .hbarchart-fill-bearish {
-          background: var(--amber);
-          box-shadow: 0 0 10px var(--amber-glow);
+          background: var(--color-bearish);
+          box-shadow: 0 0 10px var(--color-bearish-glow);
         }
 
         .hbarchart-value {

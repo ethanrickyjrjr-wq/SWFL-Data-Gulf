@@ -22,7 +22,8 @@ export type ChartIntent =
   | { chart_type: "bar"; scope: "asking-rent" }
   | { chart_type: "bar"; scope: "vacancy" }
   | { chart_type: "area"; scope: "zhvi" }
-  | { chart_type: "bar"; scope: "vitals"; corridor_slug: string };
+  | { chart_type: "bar"; scope: "vitals"; corridor_slug: string }
+  | { chart_type: "bar"; scope: "flood-aal" };
 
 /**
  * Route a plain-English question to a chart intent.
@@ -52,17 +53,22 @@ export function routeChart(question: string): ChartIntent | null {
 
   const q = question.toLowerCase();
 
-  // 1. Market rents
+  // 1. Flood / AAL
+  if (q.includes("flood") || q.includes("aal") || q.includes("nfip")) {
+    return { chart_type: "bar", scope: "flood-aal" };
+  }
+
+  // 2. Market rents
   if (q.includes("rent") || q.includes("asking rent")) {
     return { chart_type: "bar", scope: "asking-rent" };
   }
 
-  // 2. Vacancy
+  // 3. Vacancy
   if (q.includes("vacanc")) {
     return { chart_type: "bar", scope: "vacancy" };
   }
 
-  // 3. Home values / ZHVI
+  // 4. Home values / ZHVI
   if (
     q.includes("zhvi") ||
     q.includes("home value") ||
@@ -72,7 +78,7 @@ export function routeChart(question: string): ChartIntent | null {
     return { chart_type: "area", scope: "zhvi" };
   }
 
-  // 4. Per-corridor vitals
+  // 5. Per-corridor vitals
   // Match "how is/are/‛s" OR "vital"
   const hasHowPattern =
     q.includes("how") &&
@@ -90,7 +96,7 @@ export function routeChart(question: string): ChartIntent | null {
     }
   }
 
-  // 5. No match
+  // 6. No match
   return null;
 }
 
