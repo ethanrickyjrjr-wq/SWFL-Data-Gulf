@@ -18,6 +18,10 @@
 #   Tier-2 entries also require:
 #     dlt_schema_name:   the schema_name value in data_lake._dlt_loads
 #
+#   Non-dlt tier-2 entries may optionally set:
+#     freshness_column:  the timestamp column to query MAX() on (default: inserted_at).
+#                        Set when the table uses a different column, e.g. scraped_at or last_seen_at.
+#
 #   Volume guard fields (optional, any lane):
 #     expected_rows_min: N   # floor row count; probe emits LOW_VOLUME (not STALE) when below
 #     count_table: schema.table  # required for tier-2 dlt entries where dlt_schema_name
@@ -283,7 +287,7 @@ pipelines:
     # Source: SWFL Inc. (swflinc.com/blog/ category feeds), Lee County Economic Development Organization.
     # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
     # Cron: Monday 08:00 UTC via swfl-inc-weekly.yml.
-    # First run: pending (migration + first GHA dispatch).
+    # First run: 2026-06-01 (GHA success confirmed).
 
   - name: dbpr_press_releases
     lane: tier-2
@@ -312,6 +316,24 @@ pipelines:
     # Primary metric: enplanements (monthly passengers boarding). YoY % back-filled.
     # Cron: 8th of month 15:00 UTC via rsw-airport-monthly.yml.
     # First run: pending SQL migration (docs/sql/20260530_rsw_airport_monthly_create.sql) + manual dispatch.
+
+  - name: dbpr_sirs_submissions
+    lane: tier-2
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    freshness_table: data_lake.dbpr_sirs_submissions
+    freshness_column: scraped_at # table has scraped_at + created_at, no inserted_at
+    expected_rows_min: 50 # floor at 50; Lee+Collier July 2025+ alone is 77+
+    # Non-dlt pipeline — freshness checked via MAX(scraped_at) on the table directly.
+    # Source: DBPR SIRS Reporting Database — two Qlik Sense apps:
+    #   pre-July 2025 (appid 14f1ed21) and July 2025+ (appid d217126f).
+    # Coverage: Lee + Collier counties (statewide scrape, Python county_normalized filter).
+    # Qlik hypercube limit: statewide set exceeds render threshold on both apps.
+    #   result_truncated=true on all rows is expected — counts are floor estimates.
+    # Cron: first Monday of month 07:00 UTC via dbpr-sirs-monthly.yml.
+    # Consuming brain: condo-sirs-swfl.
+    # Positive signal only — presence = confirmed SIRS filing; absence has no meaning.
+    # First cron run: 2026-06-02 (success). 239 rows (LEE=83, COLLIER=159) backfill.
 
 # ── Pipelines that have never run — excluded from active probe ────────────────
 # These have no rows in _tier1_inventory or _dlt_loads as of 2026-05-26.
@@ -376,6 +398,7 @@ not_yet_running:
     cadence_days: 7
     tolerance_multiplier: 3.0
     freshness_table: public.dbpr_public_notices
+    freshness_column: last_seen_at # table uses last_seen_at (updated each scrape), not inserted_at
     expected_rows_min: 1 # floor at 1; 0 = real alert (some counties empty weekly but Sarasota isn't)
     # Non-dlt pipeline — freshness checked via MAX(last_seen_at) on the table directly.
     # Source: FL DBPR public notices index (www2.myfloridalicense.com/public-notices/).
@@ -385,23 +408,6 @@ not_yet_running:
     # Amendment pattern: DBPR publishes corrections as new URLs alongside old ones.
     # Two rows for the same respondent is normal; ORDER BY response_deadline DESC for active version.
     # First run: pending (SQL migration must run first, then manual dispatch).
-
-  - name: dbpr_sirs_submissions
-    lane: tier-2
-    cadence_days: 30
-    tolerance_multiplier: 2.0
-    freshness_table: data_lake.dbpr_sirs_submissions
-    expected_rows_min: 50 # floor at 50; Lee+Collier July 2025+ alone is 77+
-    # Non-dlt pipeline — freshness checked via MAX(scraped_at) on the table directly.
-    # Source: DBPR SIRS Reporting Database — two Qlik Sense apps:
-    #   pre-July 2025 (appid 14f1ed21) and July 2025+ (appid d217126f).
-    # Coverage: Lee + Collier counties (statewide scrape, Python county_normalized filter).
-    # Qlik hypercube limit: statewide set exceeds render threshold on both apps.
-    #   result_truncated=true on all rows is expected — counts are floor estimates.
-    # Cron: first Monday of month 07:00 UTC via dbpr-sirs-monthly.yml.
-    # Consuming brain: condo-sirs-swfl (ships in same PR as this pipeline).
-    # Positive signal only — presence = confirmed SIRS filing; absence has no meaning.
-    # First run: COMPLETE 2026-06-01 — 239 rows (LEE=83, COLLIER=159).
 
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
 # These tables have rows in Postgres but no active ingest pipeline. Adding them

@@ -172,11 +172,16 @@ def check_tier2_entry(conn, entry: dict) -> dict:
 
     with conn.cursor() as cur:
         if "freshness_table" in entry:
-            # Non-dlt pipeline: query MAX(inserted_at) on the named table directly.
+            # Non-dlt pipeline: query MAX(<freshness_column>) on the named table directly.
+            # freshness_column defaults to inserted_at; override in registry for tables that
+            # use a different timestamp (e.g. scraped_at, last_seen_at).
+            freshness_col = entry.get("freshness_column", "inserted_at")
             schema, table = entry["freshness_table"].split(".", 1)
             cur.execute(
-                pgsql.SQL("SELECT MAX(inserted_at) FROM {}.{}").format(
-                    pgsql.Identifier(schema), pgsql.Identifier(table)
+                pgsql.SQL("SELECT MAX({}) FROM {}.{}").format(
+                    pgsql.Identifier(freshness_col),
+                    pgsql.Identifier(schema),
+                    pgsql.Identifier(table),
                 )
             )
         else:

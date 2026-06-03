@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-02 (Sonnet 4.6 · main) — Diagnose + fix two failing GHA workflows
+
+- **notion-sync-weekly**: deleted `NOTION_LATEST_SYNC_PAGE` repo secret — GHA was masking the UUID value as `***` and passing it literally to the Notion API, causing a 400 validation error. Script falls through to hardcoded default `3658729a64598193a737f845f9747bb1`.
+- **freshness-probe-daily**: 2026-06-02 failure was transient DB `ConnectionTimeout`; probe is now correct. Added `freshness_column` support to `check_tier2_entry` (defaults to `inserted_at`; override for tables using `scraped_at`/`last_seen_at`). Promoted `dbpr_sirs_submissions` from `not_yet_running:` to `pipelines:` (first cron ran 2026-06-02). Fixed stale `swfl_inc` "First run: pending" comment. Added `freshness_column` to `dbpr_public_notices` for clean graduation. Dry-run confirmed all pipelines fresh.
+- Next: trigger notion-sync-weekly manual run to verify the secret fix.
+
 ## 2026-06-02 (Opus 4.8 · main) — Closing-disclosure janitor: evidence-chain + de-identified term-row SPEC filed
 
 **What shipped:** `docs/superpowers/specs/2026-06-02-closing-disclosure-janitor-evidence-chain.md` (doc only, no code). Captures the design after the 9-doc byte-for-byte run.
