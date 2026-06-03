@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Sonnet 4.6 · main) — Add /r/cre-swfl/[corridor] corridor detail page
+
+- **New route:** `app/r/cre-swfl/[corridor]/page.tsx` — corridor-level drill-down, gated on surface-cleanup Decision 1 (speaker-layer refactor already shipped in `92ca539`).
+- Fetches `corridor_profiles` from Supabase (service-role, all verified rows), matches URL slug via `corridorKey()`, normalizes with existing `normalizeCorridor()`.
+- Displays: display_name header + city/county/type chips + metrics table (cap rate, vacancy, absorption, asking rent with direction + source links) + active intel flags with type badges + area context prose (citation markers stripped) + web citations panel + freshness token from `brains/cre-swfl.md`.
+- TypeScript clean; display-leak guard (3 tests) still green.
+- Next: wire corridor links from `/r/cre-swfl` parent page → individual corridor URLs.
+
 ## 2026-06-02 (Sonnet 4.6 · main) — Diagnose + fix two failing GHA workflows
 
 - **notion-sync-weekly**: deleted `NOTION_LATEST_SYNC_PAGE` repo secret — GHA was masking the UUID value as `***` and passing it literally to the Notion API, causing a 400 validation error. Script falls through to hardcoded default `3658729a64598193a737f845f9747bb1`.
