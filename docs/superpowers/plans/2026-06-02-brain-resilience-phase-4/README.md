@@ -1,14 +1,14 @@
 # Brain Resilience — Phase 4: Circuit Breaker
 
-> **Status:** Ready to implement. Audited 2026-06-02 — three bugs found and corrected (see Audit Corrections below).
+> **Status:** Phase 4 SHIPPED (verified 2026-06-03 — `refinery/lib/master-gate.mts` matches this spec, `evaluateMasterGate` is wired in `refinery/stages/4-output.mts`, `master-gate.test.mts` exists). Phase 7 DONE (see What's Next). **Only Phase 6 (ops-dashboard health, in the `swfldatagulf-ops` repo) remains.** Spec below retained as the build record.
 >
-> Phases 1 (type-lifts), 2 (resilient walk + buildOne), 3 (harvestUpstreams degradation wiring), and 5 (speaker token rendering) are all shipped — 920 tests green, 9 commits on main as of 2026-06-02.
+> Phases 1 (type-lifts), 2 (resilient walk + buildOne), 3 (harvestUpstreams degradation wiring), 4 (circuit breaker), 5 (speaker token rendering), and 7 (GHA default flip) are all shipped.
 
 ---
 
 ## Context
 
-What remains: Phase 4 (circuit breaker), Phase 6 (ops dashboard health), Phase 7 (GHA default flip).
+What remains: Phase 6 (ops dashboard health) — in the `swfldatagulf-ops` repo. (Phase 4 circuit breaker and Phase 7 GHA default flip both shipped — see Status above.)
 
 Phase 4 goal: Add a pure `evaluateMasterGate()` function (`refinery/lib/master-gate.mts`) called inside `outputStage` before `writeFile` when `brain_id === "master"`. The gate refuses to overwrite a good `master.md` when critical upstreams have gone dark (expired eligibility, not merely never-built). Two knobs default to OFF so the gate is hole-or-hollow only until explicitly tuned.
 

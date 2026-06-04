@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-03 (Opus 4.8 · main) — file row-tier plan + Opus HANDOFF; rule-sort verified; flywheel two-engine reframe; A8 flip; ledger reconcile
+
+**Architecture-session output filed. No production code changed — docs + ledger only.**
+
+- **Plan filed:** `docs/superpowers/plans/2026-06-03-row-tier/{README.md,HANDOFF.md}`. README adds a rule-disposition table (8 candidate rules sorted lock-now vs stays-in-plan), the two-engine flywheel reframe, and the C2 scope carve-out. HANDOFF = runnable Opus directions (Step 0 lock-now batch → Track A sweep / Track B backward-engine).
+- **3 lock-now items verified in-session:** (1) R8 path-guard hook slot is REAL — `.claude/settings.json` already wires `PreToolUse` and the `Edit|Write` matcher (so the cross-project hard-stop can be a registered hook, not a CLAUDE.md sentence); (2) R6 is a real GAP — `buildSourceCitationUrl` (`refinery/lib/citation-url.mts`) only swaps page-origin via `NEXT_PUBLIC_SITE_URL`, never branches on build-mode → a fixture build can emit a live-looking `/r/source/[table]` citation (phantom provenance); (3) A8 — `master-gate.mts` SHIPPED + wired in `4-output.mts` + tested. Flipped the Phase-4 README header from "Ready to implement" → "Phase 4 shipped; only Phase 6 (ops repo) remains."
+- **Flywheel reframe (operator):** moat is thin **forward-only**; the **backward engine** (retrodict past events we hold before+after for — permits/FDOT/Fed/Ian Sept-2022) is the fast path to a non-empty moat, gated on point-in-time honesty (R4 `vintage_policy` becomes moat-load-bearing). Unifies with the row-tier sweep: one `resolveGradeConfig` pass → row/brain partition + moat-fuel backlog + backtestable-slug inventory.
+- **Ledger:** opened `row_tier_build`, `row_tier_t1_transitive_invalidation` + `row_tier_t2_tenancy_seam` (deferred tripwires), `marketbeat_swfl_orphan`, `freeze_watchdog_parse_error_hardening`. NOTE: `flywheel_volume_guard` already existed as `done` — B1's "orphan" premise was wrong; left as-is, flagged to verify the `done` is real (plan doc says READY).
+- **NOT done (next):** Step 0 lock-now CODE — R8 hook + R4 assertion in `check-vocab-coverage.mts` + R6 guard + CLAUDE.md C1/C2 — handed to the Opus track. R1/R2/R3 stay as plan acceptance criteria, NOT CLAUDE.md (avoids the rotting-marker drift Phase 0 cleaned).
+
 ## 2026-06-03 (Opus 4.8 · main) — verify: TDT 4-slug "orphan" scare is STALE (already fixed 6cf27d8) — NO code change
 
 **Operator relayed an alert to register 4 per-county TDT collection slugs (`lee_/collier_ {latest_monthly,trailing_12mo}_collections_usd`) before tonight's nightly, fearing today's `deriveExitCode` would red on them. Verified FALSE ALARM — no code change, nothing to register.**
