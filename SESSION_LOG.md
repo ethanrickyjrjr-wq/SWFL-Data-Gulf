@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Sonnet 4.6 · main) — Stale branch audit + cleanup
+
+**Audited 4 local branches hanging off main; confirmed all work already cherry-picked into main; deleted all 4.**
+
+- `feat/dbpr-public-notices` (1 commit — stream fix `afad76e`) → in main + followed by `5d1d36e`; deleted.
+- `feat/dbpr-sirs-submissions` (2 commits — docs/cron-rebuild triage `fc3a4b0`) → in main; deleted.
+- `fix/firecrawl-agent-client` (1 commit — spider /ai/scrape rewrite `7620196`) → in main via PR #48; deleted.
+- `feat/master-dossier-engine` → 0 commits ahead of main; deleted.
+- **Next:** GSC P0 due today (see check `gsc_property_day0` + `indexing_verify`).
+
 ## 2026-06-04 (Opus 4.8 · main) — Revenue-first re-sequence LANDED + indexing shipped + LeePA "null" scare KILLED
 
 **Consolidated the operator's parallel GTM-review WIP, corrected one false premise in the blessed spec, shipped the indexing foundation, reconciled the ledger. The re-sequence supersedes the row-tier-next build order; architecture unchanged.**
