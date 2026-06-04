@@ -35,7 +35,7 @@ The only genuinely mechanizable lock-now items. These are CODE/POLICY, not prose
 
 ## Track A — Full classifier sweep / audit (the row-tier on-ramp) 🔴
 
-This is plan phase **P2**. **Pre-sweep dependency (do first):** `vintage_policy` is not in `cadence_registry` yet (it's one of R4's +3 fields). Populate it via a **per-source revision audit** — classify each pipeline _immutable-record_ (recorded sale / paid claim / issued permit = its own point-in-time truth, clean even under `overwrite`) vs _revised-aggregate_ (LAUS/OEWS/ACS = needs retained vintages), each verified against the vendor's actual revision calendar (Vendor-First). Without this, column 3 below is empty.
+This is plan phase **P2**. **Pre-sweep dependency — ✅ DONE 2026-06-04.** `vintage_policy` audit complete: `docs/littlebird-notes/2026-06-04.md`. Key findings: **11 clean gradeable slugs** (3 SBA loan outcomes + 7 TDT hospitality + 1 LeePA sales velocity z-score — all immutable individual-record sources). 5 dirty (3 BLS LAUS revised-aggregate + 2 Zillow ZORI revised-aggregate). 5 licenses slugs gradeable-in-theory but pipeline not yet running. Gate verdict: **somewhere between** (~11 = modest boost, not moat-fuel). The `laus_lee_unemployment_rate` forward-flywheel slug is in the dirty bucket — needs `append_asof` before Track B can use it. Full table + LAUS note in the doc above.
 
 Then run `resolveGradeConfig` across the whole lake → per slug, a three-column ledger:
 
@@ -63,6 +63,6 @@ The backtest. **Gated entirely on point-in-time honesty** (README § two engines
 
 ## Recommended sequence
 
-**Step 0 (R8 hook + R4 assertion + C1/C2; R6 already shipped) → populate `vintage_policy` (pre-sweep dependency) → Track A's sweep → read the clean-corpus count → decide how far to push Track B.** Not either/or at the foundation; the sweep is the shared spine, and the `vintage_policy` audit is the gate that sizes Track B's prize before you commit to it.
+**Step 0 (R8 hook + R4 assertion + C1/C2; R6 already shipped) → ~~populate `vintage_policy` (pre-sweep dependency)~~ ✅ DONE → Track A's sweep → read the clean-corpus count → decide how far to push Track B.** Not either/or at the foundation; the sweep is the shared spine. Vintage policy audit landed 2026-06-04: 11 clean slugs, LAUS dirty. Next: Step 0 code (R8 hook + R4 assertion + C1/C2) and then the full Track A `resolveGradeConfig` sweep.
 
 **Token discipline:** Step 0 items 1–2 + the Track B harness are Sonnet to a written spec. Opus reserved for: C1 wording, the row/brain schema semantics, the look-ahead-bias + event-catalog design, and the adversarial refutation pass. That keeps Opus at ~20–25% of spend.

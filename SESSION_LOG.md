@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Sonnet 4.6 · main) — vintage_policy audit: 11 clean gradeable slugs, LAUS dirty, pre-sweep dependency closed
+
+**Read-only audit. One new file. No code changes.**
+
+- **`docs/littlebird-notes/2026-06-04.md`:** vintage policy revision audit. Enumerated all 22 slugs with `grade.direction_polarity` blocks in `brain-vocabulary.json`. 11 are backtest-clean (3 SBA loan outcomes, 7 TDT hospitality, 1 LeePA sales velocity z-score — all sourced from immutable individual-record tables). 5 dirty (3 BLS LAUS revised-aggregate, 2 Zillow ZORI revised-aggregate). 5 licenses slugs gradeable-in-theory but pipeline not yet running. 4 news/DBPR slugs have polarity but fail `window_days` (regulatory category absent from `CATEGORY_WINDOW_DAYS`). Gate verdict: **somewhere between** (~11 clean = modest boost, not moat-fuel ~>30).
+- **LAUS explicit call:** `laus_lee_unemployment_rate` — DIRTY for backtest. BLS annual benchmark revisions restate historical values; the current table holds the revised rate, not the as-of-then preliminary. This is also the current forward-flywheel slug. Needs `append_asof` (store `(series_id, period_date, value, pulled_at)`) before any backtest using it is trustworthy.
+- **HANDOFF.md updated:** pre-sweep dependency (`vintage_policy` audit) flipped ✅ DONE; recommended sequence updated with the 11-slug count and next step (Step 0 code: R8 hook + R4 assertion + C1/C2).
+- **Next:** Step 0 lock-now (R8 hook + R4 assertion + C1/C2), then Track A full `resolveGradeConfig` sweep.
+
 ## 2026-06-04 (Opus 4.8 · main) — R6 phantom-citation FIX (live-bug class) + plan/HANDOFF sequencing (vintage_policy pre-sweep + mechanical survivorship gate)
 
 **One code fix + doc sequencing. R6 graduated from "verify" to a shipped bug fix.**
