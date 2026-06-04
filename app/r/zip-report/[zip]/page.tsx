@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { parseBrainMarkdown } from "../../../../refinery/render/speaker.mts";
 import {
   resolveGradeConfig,
@@ -116,7 +117,13 @@ export default async function ZipReportPage({ params }: PageProps) {
         {/* Header */}
         <header className="border-b border-zinc-200 pb-6">
           <div className="flex items-center gap-2 text-zinc-500">
-            <WaveMark />
+            <Image
+              src="/logo.png"
+              alt="SWFL Data Gulf"
+              width={16}
+              height={16}
+              className="h-4 w-4"
+            />
             <p className="text-xs uppercase tracking-wider">SWFL Data Gulf</p>
           </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -227,7 +234,13 @@ export default async function ZipReportPage({ params }: PageProps) {
         {/* Footer */}
         <footer className="mt-10 border-t border-zinc-200 pt-6 text-xs text-zinc-500">
           <div className="flex items-center gap-2">
-            <WaveMark />
+            <Image
+              src="/logo.png"
+              alt="SWFL Data Gulf"
+              width={16}
+              height={16}
+              className="h-4 w-4"
+            />
             <span>
               SWFL Data Gulf ·{" "}
               <code className="text-xs">{housing.freshness_token}</code>
@@ -255,24 +268,6 @@ export default async function ZipReportPage({ params }: PageProps) {
 }
 
 // ── Helper components ──────────────────────────────────────────────────────
-
-function WaveMark() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 28 18"
-      className="h-4 w-6 text-sky-500"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    >
-      <path d="M1 5c3.5-4 7-4 10.5 0S18.5 9 22 5s4.5-1 5 0" />
-      <path d="M1 10c3.5-4 7-4 10.5 0S18.5 14 22 10s4.5-1 5 0" />
-      <path d="M1 15c3.5-4 7-4 10.5 0S18.5 19 22 15s4.5-1 5 0" />
-    </svg>
-  );
-}
 
 function Meta({ label, value }: { label: string; value: React.ReactNode }) {
   return (

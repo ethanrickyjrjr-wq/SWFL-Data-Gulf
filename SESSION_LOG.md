@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Sonnet 4.6 · main) — logo: WaveMark replaced with public/logo.png
+
+**Replaced inline WaveMark SVG in `/r/zip-report/[zip]/page.tsx` with `<Image src="/logo.png">` (16×16, matching ops topbar asset). `public/logo.png` pulled from swfldatagulf-ops repo (149KB). WaveMark function removed. tsc clean.**
+
 ## 2026-06-04 (Sonnet 4.6 · main) — vocab: housing badge slugs registered
 
 **Added `median_sale_price_yoy_pct` (`higher_is_bullish`) and `median_dom_yoy_days` (`lower_is_bullish`) to `brain-vocabulary.json`. Both were absent; ZIP report page badges were rendering zinc/neutral. Now 198 concepts, 224 slug_index entries. Enum-scan test + vocab-coverage pass.**
