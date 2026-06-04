@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Opus 4.8 · main) — R6 phantom-citation FIX (live-bug class) + plan/HANDOFF sequencing (vintage_policy pre-sweep + mechanical survivorship gate)
+
+**One code fix + doc sequencing. R6 graduated from "verify" to a shipped bug fix.**
+
+- **R6 FIXED (`refinery/lib/citation-url.mts` + test):** `buildSourceCitationUrl` now branches on `env.source` — a fixture build returns a `synthetic fixture` sentinel string instead of a live `/r/source/[table]` URL, so the existing Stage-4 fixture-sentinel gate hard-fails any live build that lifts a fixture artifact. Why it mattered: the exact leak shipped to prod 2026-05-30 (the fixture-leak incident); the caveat-string sentinel only caught it by co-incidence — the citation builder had zero provenance-awareness. **Live mode byte-identical**; `citation-url.test.mts` +1 (9 pass) + 111 source tests green; no pack test references `/r/source/`.
+- **Plan/HANDOFF sequencing (operator corrections):** (1) `vintage_policy` is not in `cadence_registry` yet → populating it (a per-source revision audit) is a **PRE-sweep dependency**, not a parallel track; the sweep's backtestable-inventory payoff is empty without it. (2) **"overwrite ≠ dirty"** — immutable records (sales/claims/permits) are clean by nature; only revised aggregates (LAUS/OEWS/ACS) need vintages. Corollary: `laus_lee_unemployment_rate` (the one forward-flywheel slug) is among the _dirtiest_ for backtest. (3) The clean-corpus **count is the size-the-prize go/no-go** on Track B (~8 = modest boost, ~80 = moat-builder). (4) Survivorship is now a **mechanical two-phase gate** (committed content-hashed event manifest, hash stamped into each graded outcome), not a discipline note.
+- **A8:** already flipped clean in `d5d2952` (no flag). **R6 dropped from HANDOFF Step 0** (shipped) → lock-now batch is now R8 hook + R4 assertion + CLAUDE.md C1/C2.
+- **Next:** Step 0 lock-now (R8 hook + R4 assertion + C1/C2), then populate `vintage_policy` before any classifier sweep.
+
 ## 2026-06-03 (Opus 4.8 · main) — file row-tier plan + Opus HANDOFF; rule-sort verified; flywheel two-engine reframe; A8 flip; ledger reconcile
 
 **Architecture-session output filed. No production code changed — docs + ledger only.**

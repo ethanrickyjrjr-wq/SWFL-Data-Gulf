@@ -1,14 +1,19 @@
 import { test, beforeEach, afterEach } from "bun:test";
 import assert from "node:assert/strict";
 import { buildSourceCitationUrl } from "./citation-url.mts";
+import { hasFixtureSentinel } from "./fixture-sentinels.mts";
 
 const ORIGINAL_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL;
 
 beforeEach(() => {
   delete process.env.NEXT_PUBLIC_SITE_URL;
+  // Every assertion below (except the explicit fixture-mode test) expects the
+  // live default; ensure no prior test left REFINERY_SOURCE=fixture set.
+  delete process.env.REFINERY_SOURCE;
 });
 
 afterEach(() => {
+  delete process.env.REFINERY_SOURCE;
   if (ORIGINAL_ORIGIN === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
   else process.env.NEXT_PUBLIC_SITE_URL = ORIGINAL_ORIGIN;
 });
@@ -106,4 +111,25 @@ test("buildSourceCitationUrl emits parameters in stable order: label, source, br
   const query = url.split("?")[1] ?? "";
   const keys = query.split("&").map((kv) => kv.split("=")[0]);
   assert.deepEqual(keys, ["label", "source", "brain", "date_col", "doc"]);
+});
+
+test("buildSourceCitationUrl emits a fixture sentinel and no live /r/source URL in fixture mode", () => {
+  // Phantom-provenance guard (R6): a fixture-built brain must never carry a
+  // citation that claims live /r/source provenance. The sentinel string lets
+  // the Stage-4 fixture-sentinel gate catch it if such an artifact is lifted
+  // by a live build. env.source re-reads process.env on every access.
+  process.env.REFINERY_SOURCE = "fixture";
+  const url = buildSourceCitationUrl("fl_dor_tdt_collections", {
+    label: "Florida DOR TDT collections",
+    source: "Florida DOR",
+    brain: "tourism-tdt",
+  });
+  assert.ok(
+    hasFixtureSentinel(url),
+    `fixture build must carry a fixture sentinel so the Stage-4 gate catches it; got ${url}`,
+  );
+  assert.ok(
+    !url.includes("/r/source/"),
+    `fixture build must not claim live /r/source provenance; got ${url}`,
+  );
 });

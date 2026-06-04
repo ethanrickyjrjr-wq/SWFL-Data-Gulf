@@ -22,8 +22,8 @@ The only genuinely mechanizable lock-now items. These are CODE/POLICY, not prose
 2. **R4 polarity assertion** _(Sonnet)_
    - Add to `refinery/tools/check-vocab-coverage.mts`: assert **no gradeable slug inherits `direction_polarity`** (every gradeable slug declares it explicitly). Already the runtime behavior (`resolveGradeConfig` → ungradeable if none) — this pins it so a future multi-metric vote can't regress to a category default. cre-swfl polarity-flip is the why.
 
-3. **R6 citation-provenance guard** _(Sonnet — this is a BUILD, verified gap)_
-   - `refinery/lib/citation-url.mts` `buildSourceCitationUrl` swaps page-origin via `NEXT_PUBLIC_SITE_URL` but never branches on build-mode. Thread the build-mode (`REFINERY_SOURCE` / the refinery's `env.source`) into citation emission: a **non-live** build must not emit a live-provenance `/r/source/[table]` citation (omit the live URL or stamp the vintage). Add a test in `refinery/lib/citation-url.test.mts` pinning "fixture build → no live citation."
+3. **R6 citation-provenance guard — ✅ SHIPPED 2026-06-03 (not a remaining task).**
+   - `buildSourceCitationUrl` now branches on `env.source`: a fixture build returns a `synthetic fixture` sentinel string instead of a live `/r/source/[table]` URL, so the existing Stage-4 fixture-sentinel gate hard-fails any live build that lifts it. Test pinned in `refinery/lib/citation-url.test.mts` (9 citation + 111 source tests green; live mode byte-identical). Left here only as the record of what the lock-now batch contained.
 
 4. **CLAUDE.md policy C1 + C2** _(Opus authors the wording)_ — land in the **same commit** as the R8 hook.
    - **C1 (working agreement):** architecture-level claims get a code audit **always**; an adversarial web-refutation pass **only** when the claim imports an outside best-practice (new storage tier / new mandatory gate / any "X is the spine / the one primitive"). Eloquence is not evidence.
@@ -35,11 +35,13 @@ The only genuinely mechanizable lock-now items. These are CODE/POLICY, not prose
 
 ## Track A — Full classifier sweep / audit (the row-tier on-ramp) 🔴
 
-This is plan phase **P2**. Run `resolveGradeConfig` across the whole lake and produce, per slug, a three-column ledger:
+This is plan phase **P2**. **Pre-sweep dependency (do first):** `vintage_policy` is not in `cadence_registry` yet (it's one of R4's +3 fields). Populate it via a **per-source revision audit** — classify each pipeline _immutable-record_ (recorded sale / paid claim / issued permit = its own point-in-time truth, clean even under `overwrite`) vs _revised-aggregate_ (LAUS/OEWS/ACS = needs retained vintages), each verified against the vendor's actual revision calendar (Vendor-First). Without this, column 3 below is empty.
 
-1. **row vs brain** — `gradeable === false` → row-tier candidate; `true` → brain.
-2. **moat-fuel backlog** — slugs ungradeable **only** for a missing `direction_polarity` (everything else qualifies). These are the cheapest predictions to make gradeable.
-3. **backtestable inventory** — read each slug's `vintage_policy` from `cadence_registry` (see Track B gate 1): `append_asof` / revision-stable source → backtestable; `overwrite` → contaminated, not backtestable until vintages are recovered.
+Then run `resolveGradeConfig` across the whole lake → per slug, a three-column ledger:
+
+1. **row vs brain** — `gradeable === false` → row-tier candidate; `true` → brain. _(from `resolveGradeConfig` alone — no vintage dependency.)_
+2. **moat-fuel backlog** — slugs ungradeable **only** for a missing `direction_polarity`. The cheapest predictions to make gradeable. _(also vintage-independent.)_
+3. **backtestable inventory** — from the `vintage_policy` audit above: immutable-record / vintaged → backtestable; revised-aggregate without retained vintages → contaminated. **The count here is the go/no-go on Track B** (≈8 clean = modest boost; ≈80 = moat-builder).
 
 Then author the row-tier spec (schema with **no free-text column** — numeric/enum/identifier only; materialize as a precomputed artifact served through the `lib/fetch-brain.ts` disk choke point, not a live-DB read). **A second Opus agent adversarially refutes the spec before it's blessed** (C1). Then P3–P6 per `README.md`.
 
@@ -51,9 +53,9 @@ Model split: the sweep itself is mechanical (⚪/🔵); the row/brain semantics,
 
 The backtest. **Gated entirely on point-in-time honesty** (README § two engines). Steps:
 
-1. **Inventory backtestable slugs** — overlaps Track A column 3. A slug is backtestable iff its as-of-then value is recoverable (revision-stable source archive, or retained vintages). Where pipelines `overwrite`, the vintage is gone — flag those as "recover vintages first" or skip. **This is the make-or-break gate; do it honestly or the whole track is fool's gold.**
+1. **Inventory backtestable slugs = Track A's `vintage_policy` audit** (don't duplicate it). A slug is backtestable iff its as-of-then value is recoverable: immutable records (sales/claims/permits) are clean by nature; revised aggregates are clean only with retained vintages. **The clean-corpus count is the make-or-break, size-the-prize gate — get it before building anything else, or the whole track is fool's gold.**
 2. **Deterministic retrodiction harness** _(Sonnet to spec; Opus designs the look-ahead guard)_ — no LLM. For each backtestable slug × each past period: reconstruct (as-of-then baseline + window + the slug's polarity rule) → the direction the system _would_ have predicted → grade against the known later outcome via the existing `grade_prediction()` machinery. Seeds `grade_accuracy_by_slug` with real N today.
-3. **Pre-register the event catalog** _(Opus designs; the selection bias is the trap)_ — every past store opening (permits), interchange (FDOT), rate hike (Fed), Hurricane Ian (Sept 2022). Register the **full** catalog before grading; grade ALL of it, duds included.
+3. **Pre-register the event catalog — a mechanical two-phase gate, not a discipline note** _(Opus designs)_. Phase 1: enumerate the full event list from source data (store openings from permits, interchanges from FDOT, rate hikes from the Fed, Hurricane Ian Sept-2022) → write a **committed, content-hashed manifest**, never reading outcomes. Phase 2: outcome lookup + grading refuses to run unless pointed at a frozen manifest, and **stamps the manifest hash into every graded outcome** so "registered before looked-up" is provable. Grade ALL of it, duds included.
 4. **Report** real N + direction-hit rate, with the contamination caveats stated (which slugs are clean-vintaged vs revised-only).
 5. **Defer** the rich version (re-run the master pack against a point-in-time lake snapshot to backtest its _conditional_ calls, not just the deterministic signal) until the deterministic version proves the machinery.
 
@@ -61,6 +63,6 @@ The backtest. **Gated entirely on point-in-time honesty** (README § two engines
 
 ## Recommended sequence
 
-**Step 0 → Track A's sweep (it produces Track B's input inventory for free) → decide how far to push Track B.** They are not either/or at the foundation; the sweep is the shared spine.
+**Step 0 (R8 hook + R4 assertion + C1/C2; R6 already shipped) → populate `vintage_policy` (pre-sweep dependency) → Track A's sweep → read the clean-corpus count → decide how far to push Track B.** Not either/or at the foundation; the sweep is the shared spine, and the `vintage_policy` audit is the gate that sizes Track B's prize before you commit to it.
 
-**Token discipline:** Step 0 items 1–3 + Track B harness are Sonnet to a written spec. Opus reserved for: C1 wording, the row/brain schema semantics, the look-ahead-bias + event-catalog design, and the adversarial refutation pass. That keeps Opus at ~20–25% of spend.
+**Token discipline:** Step 0 items 1–2 + the Track B harness are Sonnet to a written spec. Opus reserved for: C1 wording, the row/brain schema semantics, the look-ahead-bias + event-catalog design, and the adversarial refutation pass. That keeps Opus at ~20–25% of spend.

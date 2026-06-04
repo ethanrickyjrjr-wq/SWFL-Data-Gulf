@@ -14,6 +14,8 @@
  * the page against `localhost:3000`, set `NEXT_PUBLIC_SITE_URL=http://localhost:3000`
  * before regenerating the brain.
  */
+import { env } from "../config/env.mts";
+
 export interface SourceCitationParams {
   /** Human-readable label rendered in the page header (e.g. "Florida DOR TDT collections"). */
   label: string;
@@ -39,10 +41,26 @@ function resolveOrigin(): string {
   return raw.endsWith("/") ? raw.slice(0, -1) : raw;
 }
 
+/**
+ * Fixture-mode citation. A brain rendered against synthetic fixtures must NOT
+ * emit a citation that claims live `/r/source/{table}` provenance — that is the
+ * "phantom data" failure: a confident citation to a source that never served
+ * the number. The returned string carries the `synthetic fixture` sentinel
+ * (`refinery/lib/fixture-sentinels.mts`) on purpose — if a fixture-built
+ * artifact is ever lifted by a LIVE master build, the Stage-4 fixture-sentinel
+ * gate hard-fails the write. Defense-in-depth through the gate that already
+ * exists, not a parallel one. Live mode is byte-for-byte unchanged.
+ */
+function fixtureCitation(table: string): string {
+  return `synthetic fixture data — no live citation (table: ${table})`;
+}
+
 export function buildSourceCitationUrl(
   table: string,
   params: SourceCitationParams,
 ): string {
+  // Phantom-provenance guard: never emit a live citation from a fixture build.
+  if (env.source === "fixture") return fixtureCitation(table);
   const origin = resolveOrigin();
   const qs = new URLSearchParams();
   qs.append("label", params.label);
