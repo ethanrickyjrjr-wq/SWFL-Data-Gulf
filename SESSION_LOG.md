@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Sonnet 4.6 · main) — paid_path_wtp: bearer gate + ZIP report page
+
+**Re-sequence move #2 shipped: MCP bearer gate live, ZIP-level housing+flood-risk report page at `/r/zip-report/[zip]`.**
+
+- `app/api/mcp/auth.ts` — no-op stub → bearer gate; `MCP_BEARER_TOKEN` unset = open (v1 compat); set = require `Authorization: Bearer <token>`; CORS headers on 401; 4 Bun tests in `auth.test.ts`.
+- `app/r/zip-report/[zip]/page.tsx` — new server component; housing-swfl required (404 on miss), env-swfl optional (flood section hidden if unavailable); badge polarity from `resolveGradeConfig` (vocab single source of truth, three states); delta=0 suppresses badge; CTA mailto `support@swfldatagulf.com` at $39/$79/mo.
+- `.env.example` — appended `MCP_BEARER_TOKEN=` block.
+- Note: `median_sale_price_yoy_pct` and `median_dom_yoy_days` not yet registered in vocab → badges render zinc/neutral until vocab entries added.
+- Demo target: `/r/zip-report/33931` (FMB — highest NFIP AAL in SWFL). Next: vocab entries for the two badge slugs; set `MCP_BEARER_TOKEN` in Vercel env when ready to gate.
+
 ## 2026-06-04 (Opus 4.8 · claude/opus-review-diff-TNTpe) — Grade-config sweep §1a+§1b LANDED (was spec-only)
 
 **The row-tier sweep-spec §1a/§1b code never existed in-tree — only the design did. Implemented both in `refinery/vocab/loader.mts` to spec, with the Opus diff-review HARD/SOFT flags built in from the start.**
