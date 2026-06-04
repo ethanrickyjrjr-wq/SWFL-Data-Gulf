@@ -10,7 +10,7 @@
 - `feat/dbpr-sirs-submissions` (2 commits — docs/cron-rebuild triage `fc3a4b0`) → in main; deleted.
 - `fix/firecrawl-agent-client` (1 commit — spider /ai/scrape rewrite `7620196`) → in main via PR #48; deleted.
 - `feat/master-dossier-engine` → 0 commits ahead of main; deleted.
-- **Next:** GSC P0 due today (see check `gsc_property_day0` + `indexing_verify`).
+- **GSC checks CLOSED:** `sitemap.xml` live — Success / 54 pages. `robots.txt` was submitted to GSC as a sitemap in error; remove it from GSC → Sitemaps (three-dot → Remove). Not a sitemap, not a code bug.
 
 ## 2026-06-04 (Opus 4.8 · main) — Revenue-first re-sequence LANDED + indexing shipped + LeePA "null" scare KILLED
 
