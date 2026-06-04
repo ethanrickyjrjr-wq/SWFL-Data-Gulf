@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Opus 4.8 · main) — Row-tier P2 sweep-spec + Track B HOLD + ALFRED LAUS verified (19yr) [doc/ledger only]
+
+**Track A sweep design locked across two LB review rounds; Track B held on the decision-function gap; LAUS dirty→backtestable confirmed via ALFRED. No code shipped this push — `gateVector` + the polarity-gate tighten are deferred to the sub-agent per the spec.**
+
+- **`docs/superpowers/plans/2026-06-03-row-tier/sweep-spec.md` (new):** the P2 classifier-sweep contract. Two `loader.mts` code-writes — (1a) tighten the polarity gate `=== "none"` → **enum-membership** so an out-of-enum polarity is `ungradeable` at the runtime source (live-inert blast radius: only `licenses_cbc_share_swfl` "neutral" flips, pipeline not running); (1b) a pure no-short-circuit `gateVector`. Bucketing = a **total disjoint 24-combo truth table** (unregistered ▸ invalid-polarity ▸ non-numeric→row ▸ gradeable ▸ moat-fuel ▸ needs-window) — kills the first-failing-gate double-count. Drift pin `gateVector all-green ⇔ resolveGradeConfig.gradeable`, green from the 1a commit. Invalid-polarity = fix-or-remove via Opus directional audit, **never** string-normalize. Output = regenerable JSON + `checks`, never a markdown board.
+- **`HANDOFF.md`:** Track A → sweep-spec reference + locked contract + C1 web-refutation debt (run before P4). Track B → ⛔ **HELD** behind `flywheel_backtest_decision_function`; LAUS reframed dirty→ALFRED-recoverable; ZORI append_asof-only; revision claim tagged `[INFERENCE]` with a falsifier. Sequence updated.
+- **ALFRED verification (live FRED/ALFRED API this session):** Lee = `FLLEEC7URN`, Collier = `FLCOLL0URN`, 231 vintages each, earliest 2007-06-07, ~19yr point-in-time. Revision real (Jun-2022 Lee 2.9%→3.3%, Collier 2.8%→3.4%). Connector + `FRED_API_KEY` already exist; only the `realtime_start` params are missing.
+- **Ledger:** opened `flywheel_backtest_decision_function` (Track B gate) + `laus_alfred_pit_reingest` (verified moat-fuel work item).
+- **Next:** build the sweep (`loader.mts` 1a/1b → sweep tool); settle the Track B decision function before scoping the harness.
+
 ## 2026-06-04 (Opus 4.8 · main) — Step 0 lock-now SHIPPED: R8 path-guard hook + R4 polarity pin + CLAUDE.md RULE 3 (C1/C2)
 
 **Executed HANDOFF Step 0 — the mechanizable lock-now batch — as one commit. R6 shipped previously; the `vintage_policy` audit already landed (the Sonnet entry below — 11 clean slugs, LAUS dirty).**

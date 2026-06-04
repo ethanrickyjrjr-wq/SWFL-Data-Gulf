@@ -33,34 +33,44 @@ Three things were verified in-session 2026-06-03 (don't re-verify, but know the 
 
 ## Track A — Full classifier sweep / audit (the row-tier on-ramp) 🔴
 
-This is plan phase **P2**. **Pre-sweep dependency — ✅ DONE 2026-06-04.** `vintage_policy` audit complete: `docs/littlebird-notes/2026-06-04.md`. Key findings: **11 clean gradeable slugs** (3 SBA loan outcomes + 7 TDT hospitality + 1 LeePA sales velocity z-score — all immutable individual-record sources). 5 dirty (3 BLS LAUS revised-aggregate + 2 Zillow ZORI revised-aggregate). 5 licenses slugs gradeable-in-theory but pipeline not yet running. Gate verdict: **somewhere between** (~11 = modest boost, not moat-fuel). The `laus_lee_unemployment_rate` forward-flywheel slug is in the dirty bucket — needs `append_asof` before Track B can use it. Full table + LAUS note in the doc above.
+This is plan phase **P2**. **Pre-sweep dependency — ✅ DONE 2026-06-04.** `vintage_policy` audit complete: `docs/littlebird-notes/2026-06-04.md` (11 clean gradeable slugs; LAUS + ZORI dirty; licenses gradeable-in-theory but pipeline not running).
 
-Then run `resolveGradeConfig` across the whole lake → per slug, a three-column ledger:
+**Sweep design — ✅ SPEC WRITTEN 2026-06-04: `sweep-spec.md` (this folder).** The locked contract, hardened across two LB review rounds and grounded against `loader.mts` / `predictions-log.mts`:
 
-1. **row vs brain** — `gradeable === false` → row-tier candidate; `true` → brain. _(from `resolveGradeConfig` alone — no vintage dependency.)_
-2. **moat-fuel backlog** — slugs ungradeable **only** for a missing `direction_polarity`. The cheapest predictions to make gradeable. _(also vintage-independent.)_
-3. **backtestable inventory** — from the `vintage_policy` audit above: immutable-record / vintaged → backtestable; revised-aggregate without retained vintages → contaminated. **The count here is the go/no-go on Track B** (≈8 clean = modest boost; ≈80 = moat-builder).
+- **Two code-writes in `loader.mts` (one commit, Opus diff-review):** (1a) tighten the polarity gate from `=== "none"` to **enum-membership** so an out-of-enum polarity (`"neutral"`, `"higher_is_bearish"`) is `ungradeable` at the runtime source, not just flagged in the sweep — blast radius is live-inert today (licenses pipeline not running); (1b) add a pure no-short-circuit `gateVector(slug)` returning the independent gates `{registered, polarity_state, window_ok, numeric_ok}`.
+- **Bucketing is a total, disjoint 24-combo truth table** (precedence: unregistered ▸ invalid-polarity ▸ non-numeric→row ▸ gradeable ▸ moat-fuel ▸ needs-window). No slug in two buckets — kills the first-failing-gate double-count by construction.
+- **Drift pin** `gateVector all-green ⇔ resolveGradeConfig.gradeable`, green from the 1a commit.
+- **Invalid-polarity = fix-or-remove via per-slug Opus directional audit, NEVER string-normalize** (the cre-swfl inversion lesson).
+- **Output is a regenerable JSON artifact + `checks` rows, never a markdown checkbox board.** Row-vs-brain (R1) stays an Opus semantic call; the sweep emits candidates only.
 
-Then author the row-tier spec (schema with **no free-text column** — numeric/enum/identifier only; materialize as a precomputed artifact served through the `lib/fetch-brain.ts` disk choke point, not a live-DB read). **A second Opus agent adversarially refutes the spec before it's blessed** (C1). Then P3–P6 per `README.md`.
+One pass → the three-column ledger: (1) row vs brain, (2) moat-fuel backlog, (3) backtestable inventory (gradeable ∩ vintage-clean). Then author the row-tier schema (**no free-text column**; precomputed artifact through the `lib/fetch-brain.ts` disk choke point) → **a second Opus agent adversarially refutes it before it's blessed (C1)** → P3–P6 per `README.md`.
 
-Model split: the sweep itself is mechanical (⚪/🔵); the row/brain semantics, schema design, and adversarial refutation are 🔴.
+**C1 debt — run before P4:** the "governed gold / row tier" is an imported best-practice (the Databricks medallion) → C1 owes an adversarial **web-refutation** pass (Phase-0 was a code audit only). Name the row tier's consumer first (per R1, rows = slugs master never calls on → consumer = product querying facts directly), and tie it to the 2026-06-03 rejection of the mandatory Source-Contract spine (too-early-governance grounds) so we don't rebuild it.
+
+Model split: the sweep tool is mechanical (⚪/🔵); 1a/1b + row/brain semantics + schema + refutation are 🔴.
 
 ---
 
-## Track B — Flywheel backward-engine (fastest path to a non-empty moat) 🔴
+## Track B — Flywheel backward-engine 🔴 — ⛔ HELD (settle the decision function first)
 
-The backtest. **Gated entirely on point-in-time honesty** (README § two engines). Steps:
+**HOLD (2026-06-04):** do NOT scope the retrodiction harness or the manifest/look-ahead scaffolding until the decision function + skill baseline are settled — `checks` key `flywheel_backtest_decision_function`. Building immaculate point-in-time hygiene around an undefined predictor is scaffolding around a void.
 
-1. **Inventory backtestable slugs = Track A's `vintage_policy` audit** (don't duplicate it). A slug is backtestable iff its as-of-then value is recoverable: immutable records (sales/claims/permits) are clean by nature; revised aggregates are clean only with retained vintages. **The clean-corpus count is the make-or-break, size-the-prize gate — get it before building anything else, or the whole track is fool's gold.**
-2. **Deterministic retrodiction harness** _(Sonnet to spec; Opus designs the look-ahead guard)_ — no LLM. For each backtestable slug × each past period: reconstruct (as-of-then baseline + window + the slug's polarity rule) → the direction the system _would_ have predicted → grade against the known later outcome via the existing `grade_prediction()` machinery. Seeds `grade_accuracy_by_slug` with real N today.
-3. **Pre-register the event catalog — a mechanical two-phase gate, not a discipline note** _(Opus designs)_. Phase 1: enumerate the full event list from source data (store openings from permits, interchanges from FDOT, rate hikes from the Fed, Hurricane Ian Sept-2022) → write a **committed, content-hashed manifest**, never reading outcomes. Phase 2: outcome lookup + grading refuses to run unless pointed at a frozen manifest, and **stamps the manifest hash into every graded outcome** so "registered before looked-up" is provable. Grade ALL of it, duds included.
-4. **Report** real N + direction-hit rate, with the contamination caveats stated (which slugs are clean-vintaged vs revised-only).
-5. **Defer** the rich version (re-run the master pack against a point-in-time lake snapshot to backtest its _conditional_ calls, not just the deterministic signal) until the deterministic version proves the machinery.
+The unresolved crux: the forward engine grades master's authored `claim.then_direction` (`predictions-log.mts:99-101`); **polarity is the grading orientation, not a predictor.** The backward harness has no master, so "the direction the system would have predicted" must be defined explicitly:
+
+1. **Decision function (deterministic, no LLM):** replay = recomputed z-score / MoM sign **as-of-then**, never a model call. This needs as-of-then INPUTS — a bounded partial de-defer of step 5 (date-filtered queries over immutable records, not a full master re-run).
+2. **Skill baseline:** report **lift over a persistence null**, never raw accuracy (a directional rule on a trending series — e.g. `hosp_tdt_post_ian_recovery_ratio` — scores ~100% by autocorrelation).
+3. **Independence caption (reporting contract):** effective **N ≈ 5 families, not 11** (7 TDT slugs are one `fl_dor_tdt_collections` series; 3 SBA = one outcome family). Caption family-N wherever N is reported.
+
+**Backtestable corpus (post-ALFRED):** clean/recoverable = SBA-outcomes · TDT-collections · LeePA-deeds (immutable, date-filter) **+ Lee/Collier LAUS** — the latter **verified recoverable from ALFRED 2026-06-04**: `FLLEEC7URN` / `FLCOLL0URN`, 231 vintages, ~19yr point-in-time deep, `realtime_start` returns as-of-then values; connector + key already exist (`refinery/sources/macro-florida-source.mts`). Re-ingest tracked as `checks` key `laus_alfred_pit_reingest`. **ZORI stays dirty** — Zillow republishes its back-series and ships no vintage archive → `append_asof`-forward only, past gone. The rule: re-ingesting the _same_ source re-imports the contamination; the only moves are a **vintage-preserving source** (LAUS→ALFRED) or **append_asof-forward** (ZORI).
+
+[INFERENCE] "directional grades rarely flip on revision" (base: benchmark revisions are typically sub-100bps) — **falsifier:** once ALFRED LAUS vintages are ingested, measure as-of-then vs revised direction; if >~10% of periods flip sign, false. Not enshrined as a constant.
+
+**Deferred (the rich version):** re-run the master pack against a point-in-time lake snapshot to backtest its _conditional_ calls, not just the deterministic signal — only after the deterministic version proves the machinery.
 
 ---
 
 ## Recommended sequence
 
-**Step 0 (R8 hook + R4 assertion + C1/C2; R6 already shipped) → ~~populate `vintage_policy` (pre-sweep dependency)~~ ✅ DONE → Track A's sweep → read the clean-corpus count → decide how far to push Track B.** Not either/or at the foundation; the sweep is the shared spine. Vintage policy audit landed 2026-06-04: 11 clean slugs, LAUS dirty. Next: Step 0 code (R8 hook + R4 assertion + C1/C2) and then the full Track A `resolveGradeConfig` sweep.
+**Step 0 ✅ → vintage audit ✅ → Track A sweep (spec ✅ `sweep-spec.md`; build next: `loader.mts` 1a/1b → sweep tool → 3-col ledger) → C1 web-refutation before P4 → row-tier schema (P4).** Track B is **HELD** behind `flywheel_backtest_decision_function`; the sweep's column 3 (backtestable inventory) is the only Track-B input it produces. ALFRED LAUS re-ingest (`laus_alfred_pit_reingest`) is verified moat fuel that runs once the decision function is settled.
 
-**Token discipline:** Step 0 items 1–2 + the Track B harness are Sonnet to a written spec. Opus reserved for: C1 wording, the row/brain schema semantics, the look-ahead-bias + event-catalog design, and the adversarial refutation pass. That keeps Opus at ~20–25% of spend.
+**Token discipline:** the sweep tool + `gateVector` (1b) are Sonnet to this spec; 1a (behavior change), the row/brain semantics, the decision-function + look-ahead design, and the C1 refutation are Opus. Keeps Opus at ~20–25% of spend.
