@@ -11,6 +11,8 @@
  * Built deterministically from `POCKETS` + display names — no hand-maintained
  * second copy to drift.
  */
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { POCKETS, POCKET_COUNTY, allPockets, type Pocket } from "./pockets.mts";
 import { displayNameFor } from "./corridor-display.mts";
 
@@ -21,10 +23,92 @@ export interface GazetteerPocket {
   places: string[];
 }
 
+/** One sourced place-name -> primary-ZIP entry. */
+export interface PlaceZipEntry {
+  place: string;
+  aliases: string[];
+  /** Primary (core / most-recognized) ZIP for the place. */
+  zip: string;
+  /** Other ZIPs the place spans (empty for single-ZIP places). */
+  alt_zips: string[];
+  county: "lee" | "collier";
+  usps_preferred_city: string;
+  /** Provenance — USPS / Census; never LLM knowledge. */
+  source: string;
+  needs_verification: boolean;
+  note: string;
+}
+
+/**
+ * Sourced place-name -> ZIP crosswalk. UNLIKE `pockets` (area names only),
+ * this resolves a named place to a citable primary ZIP. Each entry carries
+ * its `source`. Built from `fixtures/swfl-place-zip-crosswalk.json`.
+ */
+export interface PlaceZipCrosswalk {
+  crosswalk_vintage: string;
+  note: string;
+  default_source: string;
+  verified_date: string;
+  entries: PlaceZipEntry[];
+}
+
 export interface GeographyGazetteer {
   note: string;
   metros: { lee: string; collier: string };
   pockets: GazetteerPocket[];
+  /**
+   * Sourced place-name -> primary-ZIP crosswalk. This is the deterministic,
+   * citable ZIP resolver — quote each entry's `source` when answering.
+   */
+  place_zip_crosswalk: PlaceZipCrosswalk;
+}
+
+const FIXTURES_DIR = path.resolve(import.meta.dirname, "..", "..", "fixtures");
+
+interface RawCrosswalk extends PlaceZipCrosswalk {
+  verification_method?: string;
+}
+
+const RAW_CROSSWALK: RawCrosswalk = JSON.parse(
+  readFileSync(
+    path.join(FIXTURES_DIR, "swfl-place-zip-crosswalk.json"),
+    "utf-8",
+  ),
+);
+
+export const PLACE_ZIP_CROSSWALK: PlaceZipCrosswalk = {
+  crosswalk_vintage: RAW_CROSSWALK.crosswalk_vintage,
+  note: RAW_CROSSWALK.note,
+  default_source: RAW_CROSSWALK.default_source,
+  verified_date: RAW_CROSSWALK.verified_date,
+  entries: RAW_CROSSWALK.entries,
+};
+
+/** Lowercase, fold dashes/underscores to spaces, collapse whitespace. */
+function normalizePlace(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[_\-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// place name + every alias -> entry (normalized keys).
+const ENTRY_BY_NORM = new Map<string, PlaceZipEntry>();
+for (const entry of PLACE_ZIP_CROSSWALK.entries) {
+  ENTRY_BY_NORM.set(normalizePlace(entry.place), entry);
+  for (const alias of entry.aliases)
+    ENTRY_BY_NORM.set(normalizePlace(alias), entry);
+}
+
+/**
+ * Resolve a place name to its sourced crosswalk entry (exact match on the
+ * place name or any alias, after normalization). Returns `undefined` when the
+ * place isn't in the crosswalk — the caller then falls back to the consuming
+ * AI's own SWFL geography, never an invented ZIP.
+ */
+export function resolvePlaceZip(input: string): PlaceZipEntry | undefined {
+  return ENTRY_BY_NORM.get(normalizePlace(input ?? ""));
 }
 
 const NOTE =
@@ -46,4 +130,5 @@ export const GEOGRAPHY_GAZETTEER: GeographyGazetteer = {
     county: POCKET_COUNTY[pocket],
     places: POCKETS[pocket].map((id) => displayNameFor(id)),
   })),
+  place_zip_crosswalk: PLACE_ZIP_CROSSWALK,
 };

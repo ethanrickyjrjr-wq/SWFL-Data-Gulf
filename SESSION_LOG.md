@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Opus 4.8 · claude/swfl-place-zip-crosswalk-i5hPC) — sourced place→ZIP crosswalk (committed, NOT pushed — diff for Ricky)
+
+**Built the sourced SWFL place-name → primary-ZIP crosswalk that `8a48bfd` de-claimed. Per task: committed to the feature branch, NOT pushed — awaiting Ricky's diff review.**
+
+- `fixtures/swfl-place-zip-crosswalk.json` (new): 11 named places (Gateway 33913 … Immokalee 34142), each with `zip`/`alt_zips`/`county`/`usps_preferred_city`/`source`/`needs_verification`/`note`. `crosswalk_vintage: "2024"` (Census ZCTA geometry) + `verified_date: 2026-06-04`. Every place→ZIP verified against USPS ZIP Code Lookup (tools.usps.com) via web search — no LLM knowledge as source of record; all `needs_verification:false`. (census.gov direct fetch blocked by session network allowlist.)
+- `refinery/lib/geography-gazetteer.mts`: reads fixture; adds `PlaceZipCrosswalk`/`PlaceZipEntry` types, `place_zip_crosswalk` field on `GEOGRAPHY_GAZETTEER` (rides in both `/api/b/*` + MCP `_meta.geography` automatically — zero master.mts changes), and `resolvePlaceZip()` helper (exact/alias match, returns undefined not an invented ZIP).
+- `docs/consumption-contract.md`: ZIP-resolution step 1 updated — gazetteer `pockets` stay area-names-only; `place_zip_crosswalk` is now the sourced resolver (resolves the 8a48bfd contract contradiction).
+- Tests: `geography-gazetteer.test.mts` +4 (Gateway→33913, FMB→33931, alias, provenance guard). 8/8 pass. tsc clean except pre-existing `@types/node` env noise (same errors `place-resolver.mts` already throws).
+- **Flags for review:** (1) changes live `/api/b/*` + MCP payload shape; (2) reverses the 8a48bfd de-claim line — alternative is a separate top-level payload key instead of nesting under `geography`; (3) `alt_zips` are illustrative, only the primary ZIP is USPS-audited.
+
 ## 2026-06-04 (Sonnet 4.6 · main) — fix CI: lint suppression + vocab reformat revert
 
 **`187c890`** `fix(lint)`: add eslint-disable-next-line on two `/api/b/*` hrefs in zip-report footer — `@next/next/no-html-link-for-pages` false-positive because `app/api/b/[slug]/route.ts` matches the pattern; dynamic template literals in `[slug]/page.tsx` escape the check.
