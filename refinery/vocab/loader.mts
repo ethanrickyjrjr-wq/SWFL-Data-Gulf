@@ -95,6 +95,35 @@ export type GradeBasis = "delta" | "sign";
 export type EpsilonMode = "absolute" | "relative";
 
 /**
+ * The two polarity tokens that make a slug directionally gradeable.
+ * Anything else — absent, "none", or an out-of-enum token like "neutral" /
+ * "higher_is_bearish" — is NOT a valid directional grade.
+ */
+const VALID_DIRECTIONAL_POLARITIES: ReadonlySet<string> = new Set([
+  "higher_is_bullish",
+  "lower_is_bullish",
+]);
+
+/**
+ * Three-state classification of a raw `direction_polarity` token. The JSON
+ * field is typed to the enum but is not runtime-validated, so a fat-fingered or
+ * un-normalized token reaches here as a garbage string — this lattice separates
+ * the author's intent so the grader and the sweep agree:
+ *   • valid_directional ⇔ token ∈ {higher_is_bullish, lower_is_bullish}
+ *   • none              ⇔ token absent or === "none" (author declined to grade)
+ *   • invalid           ⇔ token present but ∉ enum ("neutral", "higher_is_bearish")
+ *                          = intent-to-grade with an un-gradeable token → needs a human.
+ */
+export type PolarityState = "valid_directional" | "none" | "invalid";
+
+export function classifyPolarity(
+  raw: string | null | undefined,
+): PolarityState {
+  if (raw == null || raw === "none") return "none";
+  return VALID_DIRECTIONAL_POLARITIES.has(raw) ? "valid_directional" : "invalid";
+}
+
+/**
  * window_days default by vocab category, grounded in source publish cadence
  * (ingest/cadence_registry.yaml). `qualitative` is intentionally absent —
  * qualitative concepts are non-gradeable by construction.
@@ -230,8 +259,17 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
 
   const g = concept.grade;
 
-  // Polarity — slug-only, never inherited.
-  const direction_polarity: DirectionPolarity = g?.direction_polarity ?? "none";
+  // Polarity — slug-only, never inherited. Read raw (the JSON field is typed to
+  // the enum but not runtime-validated) and classify against the enum, so an
+  // out-of-enum token is rejected here at the runtime grading source, not just
+  // flagged downstream.
+  const rawPolarity: string | null =
+    (g?.direction_polarity as string | undefined) ?? null;
+  const polarityState = classifyPolarity(rawPolarity);
+  const direction_polarity: DirectionPolarity =
+    polarityState === "valid_directional"
+      ? (rawPolarity as DirectionPolarity)
+      : "none";
 
   // Window — slug override, else category default.
   const window_days =
@@ -261,14 +299,20 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
     source: {
       window: windowSource,
       epsilon: epsilonSource,
-      polarity: g?.direction_polarity ? "slug" : null,
+      polarity: polarityState === "valid_directional" ? "slug" : null,
     },
   };
 
-  if (direction_polarity === "none") {
+  if (polarityState === "none") {
     return {
       ...base,
       reason: "no direction_polarity declared (slug-only, never inherited)",
+    };
+  }
+  if (polarityState === "invalid") {
+    return {
+      ...base,
+      reason: `invalid direction_polarity "${rawPolarity}" (not in {higher_is_bullish, lower_is_bullish})`,
     };
   }
   if (window_days == null) {
@@ -285,4 +329,81 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
   }
 
   return { ...base, gradeable: true };
+}
+
+// ---------------------------------------------------------------------------
+// gateVector — non-short-circuiting gate read for the grade-config sweep.
+//
+// resolveGradeConfig returns the FIRST failing gate as its `reason`, which is
+// correct for the grader but wrong for bucketing: a slug failing two gates
+// reports only one, so reason-string branching double-counts. gateVector
+// evaluates each gate INDEPENDENTLY (no early return), so the sweep can route
+// every slug into exactly one bucket from the full gate state. Pure read; same
+// CATEGORY_WINDOW_DAYS / VALUE_TYPE_BUCKET / conceptForSlug as resolveGradeConfig.
+//
+// Drift pin (sweep §3): for every slug,
+//   registered && polarity_state === "valid_directional" && window_ok && numeric_ok
+//     ⇔  resolveGradeConfig(slug).gradeable
+// ---------------------------------------------------------------------------
+
+export interface GateVector {
+  slug: string;
+  concept_id: string | null;
+  /** conceptForSlug(vocab, slug) !== null */
+  registered: boolean;
+  /** classifyPolarity(raw_polarity) — the three-state lattice. */
+  polarity_state: PolarityState;
+  /** (g.window_days ?? CATEGORY_WINDOW_DAYS[category]) != null */
+  window_ok: boolean;
+  /** epsilon != null && grade_basis != null (slug override or value_type bucket) */
+  numeric_ok: boolean;
+  // raw values carried for the ledger / per-slug audit:
+  raw_polarity: string | null;
+  category: string | null;
+  value_type: string | null;
+  window_days: number | null;
+}
+
+export function gateVector(slug: string): GateVector {
+  const vocab = loadVocabularySync();
+  const concept = conceptForSlug(vocab, slug);
+  if (!concept) {
+    // Unregistered: polarity/window/numeric are uncomputable without a concept.
+    return {
+      slug,
+      concept_id: null,
+      registered: false,
+      polarity_state: "none",
+      window_ok: false,
+      numeric_ok: false,
+      raw_polarity: null,
+      category: null,
+      value_type: null,
+      window_days: null,
+    };
+  }
+
+  const g = concept.grade;
+  const rawPolarity: string | null =
+    (g?.direction_polarity as string | undefined) ?? null;
+  const window_days =
+    g?.window_days ?? CATEGORY_WINDOW_DAYS[concept.category] ?? null;
+  const bucket = concept.value_type
+    ? VALUE_TYPE_BUCKET[concept.value_type]
+    : undefined;
+  const epsilon = g?.epsilon ?? bucket?.epsilon ?? null;
+  const grade_basis = g?.grade_basis ?? bucket?.grade_basis ?? null;
+
+  return {
+    slug,
+    concept_id: concept.id,
+    registered: true,
+    polarity_state: classifyPolarity(rawPolarity),
+    window_ok: window_days != null,
+    numeric_ok: epsilon != null && grade_basis != null,
+    raw_polarity: rawPolarity,
+    category: concept.category ?? null,
+    value_type: concept.value_type ?? null,
+    window_days,
+  };
 }

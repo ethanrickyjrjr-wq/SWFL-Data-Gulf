@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-04 (Opus 4.8 · claude/session-log-update-YF3Gl) — Grade-config SWEEP built (re-sequence move #3) — 1a polarity-tighten + 1b gateVector + sweep tool
+
+**Move #2 (paid path / WTP) is being built in parallel by the operator session; took the next non-colliding move = the row-tier sweep (move #3 / Track A P2), fully specified in `sweep-spec.md`. Grading-layer change → operator diff-review before merge to main. On the feature branch only.**
+
+- **1a — polarity gate tightened to enum-membership (`refinery/vocab/loader.mts`).** Was `direction_polarity === "none"`, which let an OUT-OF-ENUM token (`"neutral"`, `"higher_is_bearish"`) pass as "declared" and reach `gradeable:true` with a garbage polarity. Now `classifyPolarity(raw)` → 3-state lattice (`valid_directional`/`none`/`invalid`); invalid → ungradeable with reason `invalid direction_polarity "<raw>" (not in {...})`. Closes the hole at the runtime grading source (`deriveGradeFields` reads it). **Blast radius live-inert today** (the only flips are the 3 named slugs, all already non-gradeable for other reasons / pipelines not running).
+- **1b — `gateVector(slug)` added (`loader.mts`, exported).** Pure non-short-circuiting gate read `{registered, polarity_state, window_ok, numeric_ok}` + raw carry — independent gates so the sweep buckets from the full gate state, not the first-failing reason string.
+- **§3 drift pin GREEN** in `grade-config-polarity.test.mts` (+5 cases): `gateVector all-green ⇔ resolveGradeConfig.gradeable` over every concept; classifyPolarity lattice; the `neutral` slug now ungradeable. `bun test refinery/vocab/` → 18 pass.
+- **Sweep tool `refinery/tools/grade-config-sweep.mts`** → regenerable `sweep-output.json` (196 slugs, total/disjoint 24-combo truth table, strict precedence). First-run tallies: **gradeable 21 · backtest_clean 11** (= the vintage audit's clean count, EXACT) · **moat-fuel 141** (cheapest unlock) · **row-candidate 17** (R1 candidates) · **invalid-polarity 3** · needs-window 14 · **unregistered 0** (expected empty ✓).
+- **3 invalid-polarity slugs owe a directional-audit `checks` row** (Opus per-slug, FIX-OR-REMOVE, NEVER string-normalize — the cre-swfl inversion lesson): `dbpr_notices_abt_90d` + `dbpr_releases_abt_90d` (`higher_is_bearish`), `licenses_cbc_share_swfl` (`neutral`). **Could not open them — `.dlt/secrets.toml` absent in this container** (Supabase unreachable). The sweep tool reprints them on every run; flagged here for the next session/operator to `check.mjs open`.
+- **NOT done (deferred, Opus-semantic — sweep emits candidates only):** R1 row-vs-brain confirm (17 candidates), COND 1/2 directional audit (3 slugs), C1 web-refutation before P4. Plan-doc markers flipped in this commit (sweep-spec status + HANDOFF Track A).
+- **Next:** operator diff-review of the loader change → merge; then the Opus semantic pass (R1 + COND 1/2 + C1) OR continue the re-sequence (move #4 corridor-factor, was operator WIP / unwired). Move #2 paid path stays the parallel session's.
+
 ## 2026-06-04 (Opus 4.8 · main) — Revenue-first re-sequence LANDED + indexing shipped + LeePA "null" scare KILLED
 
 **Consolidated the operator's parallel GTM-review WIP, corrected one false premise in the blessed spec, shipped the indexing foundation, reconciled the ledger. The re-sequence supersedes the row-tier-next build order; architecture unchanged.**

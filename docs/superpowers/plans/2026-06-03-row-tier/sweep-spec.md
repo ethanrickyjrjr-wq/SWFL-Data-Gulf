@@ -1,6 +1,6 @@
 # Grade-Config Sweep — spec (plan phase P2, Track A on-ramp)
 
-**Filed:** 2026-06-04 · **Status:** design — greenlit; mechanical pass sub-agent-scopable once §1 lands · **Parent:** `README.md` (P2) + `HANDOFF.md` (Track A)
+**Filed:** 2026-06-04 · **Status:** BUILT 2026-06-04 — 1a + 1b + sweep tool shipped; output at `sweep-output.json`. Remaining is the Opus semantic pass (R1 row/brain confirmation · COND 1/2 directional audit · C1 refutation), none of which the sweep decides. · **Parent:** `README.md` (P2) + `HANDOFF.md` (Track A)
 **Origin:** LB plan-review (2026-06-04, two rounds), grounded against `refinery/vocab/loader.mts` + `refinery/lib/predictions-log.mts`.
 
 > Design doc, not a status board. The sweep's _output_ is a regenerable data artifact (§5), never a hand-maintained markdown checkbox board (RULE 2 — the rotting-status-board failure). Adjudications land in the `checks` ledger.
