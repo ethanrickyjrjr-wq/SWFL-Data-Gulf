@@ -26,6 +26,13 @@
 - `feat/firecrawl-spider-fallback-and-cron-fixes` (4 ahead, 354 behind): **awaiting operator review** — spider fallback wrapper, bls-laus cron day fix, pipeline-freshness §6. Diff shown in session.
 - **corridor-factor.mts** (untracked): **NEVER committed to any branch** — exists only as `refinery/lib/derived/` untracked files. Not wired. `corridor_factor_wire` check is the gate.
 - Dropped: `session-update-review-Qs7Pk` (superseded auth.ts), `roadmap-ideas-file-ps3Xc` (old docs), `swfl-mcp-http-transport-u3uG7` (already in main via PR #50).
+## 2026-06-05 (Opus 4.8 · claude/env-swfl-hydrology-stubs-e4PY7) — env-swfl hydrology stubs: disposition report (report only, no pack/vocab changes)
+
+**Resolve-or-retire research for the 3 env-swfl hydrology slugs with vocab entries but no live source. Report persisted to `docs/superpowers/plans/2026-06-05-env-swfl-hydrology-stubs.md` for a follow-up session to execute.**
+
+- **Rainfall `env_rainfall_swfl_annual_in` → BUILD (viable).** NOAA GHCN-D via AWS Open Data S3 (`noaa-ghcn-pds`, no token) is reachable + current (inventory 2026-06-03). Verified anchor stations: `USW00012835` Fort Myers Page Field (1892–2026, 2024=80.5in/100% days), `USW00012894` RSW, `USW00012897` Naples Muni, `USC00086078` Naples COOP. Pull `csv/by_year/{YYYY}.csv` (current to Jan-2026) NOT `by_station` (lags — airport WBAN stuck 2025-02-06). inches = VALUE/254; avg of station totals (not sum). Connector spec + gates in the doc.
+- **Groundwater `env_gw_level_lee_median_ft` + `env_gw_highwater_exceedance_days` → RETIRE.** DBHYDRO confirmed catalog-only (`DBHYDRO_Wells` FeatureServer = well metadata, time-series behind DBHydro Insights, Browser retired 2025); USGS thin/out-of-bounds (not re-chased). One UNVERIFIED non-USGS lead flagged: Lee County NR Monitor Well Data (leegov.com, NAVD88) — host off web-session allowlist, couldn't verify machine-readability. Retire unless an open-network session confirms it.
+- **No code/vocab/pack changes; nothing on `main`.** Next: execute the doc on a machine with open network (probe the Lee County lead, build the rainfall connector, retire the two gw slugs).
 
 ## 2026-06-04 (Sonnet 4.6 · main) — fix CI: lint suppression + vocab reformat revert
 
