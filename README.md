@@ -83,31 +83,6 @@ Three tiers:
 
 ---
 
-## Local development
-
-```bash
-bun install
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-Copy `.env.example` to `.env.local` and fill in your Supabase credentials.
-
-To run the refinery (rebuild brains locally):
-
-```bash
-npm run refinery -- master --force
-```
-
-Tests:
-
-```bash
-bun test
-```
-
----
-
 ## Data coverage
 
 Lee County + Collier County, Florida. Grain: county → corridor → ZIP. Named towns and beaches (Fort Myers Beach, Bonita Springs, Naples, Cape Coral, Estero, Marco Island, etc.) resolve to their ZIP.
