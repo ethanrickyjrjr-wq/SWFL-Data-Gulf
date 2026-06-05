@@ -17,7 +17,7 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { loadVocabulary } from "../stages/2.5-normalize.mts";
-import { resolveGradeConfig } from "./loader.mts";
+import { classifyPolarity, resolveGradeConfig } from "./loader.mts";
 
 test("R4: every gradeable slug declares its own polarity — none inherited", async () => {
   const vocab = await loadVocabulary();
@@ -55,7 +55,11 @@ test("1a: out-of-enum polarity is rejected, raw token in reason (licenses_cbc_sh
   // — present, but ∉ {higher_is_bullish, lower_is_bullish}.
   const cfg = resolveGradeConfig("licenses_cbc_share_swfl");
 
-  assert.equal(cfg.gradeable, false, "out-of-enum polarity must be ungradeable");
+  assert.equal(
+    cfg.gradeable,
+    false,
+    "out-of-enum polarity must be ungradeable",
+  );
   assert.equal(
     cfg.direction_polarity,
     "none",
@@ -102,4 +106,18 @@ test("1a: no out-of-enum polarity reaches gradeable:true (full-vocab scan)", asy
     0,
     `gradeable slugs with non-valid polarity reached gradeable:true:\n  ${leaks.join("\n  ")}`,
   );
+});
+
+// ---------------------------------------------------------------------------
+// classifyPolarity three-state lattice
+// ---------------------------------------------------------------------------
+
+test("classifyPolarity: three-state lattice over the raw token", () => {
+  assert.equal(classifyPolarity("higher_is_bullish"), "valid_directional");
+  assert.equal(classifyPolarity("lower_is_bullish"), "valid_directional");
+  assert.equal(classifyPolarity("none"), "none");
+  assert.equal(classifyPolarity(null), "none");
+  assert.equal(classifyPolarity(undefined), "none");
+  assert.equal(classifyPolarity("neutral"), "invalid");
+  assert.equal(classifyPolarity("higher_is_bearish"), "invalid");
 });

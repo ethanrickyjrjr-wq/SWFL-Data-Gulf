@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · main) — branch cleanup: classifyPolarity exported + all stale branches deleted
+
+**classifyPolarity exported from loader.mts** (was duplicate inline logic in two places; now shared). New test: classifyPolarity three-state lattice (4/4 pass). Dropped conflicting branch test that disagreed with the existing SOFT-FLAG spec on `source.polarity` for invalid tokens.
+
+**All remote branches deleted** — 15 branches dropped (all work accounted for in main or intentionally abandoned).
+
 ## 2026-06-05 (Sonnet 4.6 · main) — fix: geography-gazetteer import.meta.dirname → JSON import
 
 **`refinery/lib/geography-gazetteer.mts`**: replaced `readFileSync` + `import.meta.dirname` with `import crosswalkJson from "../../fixtures/swfl-place-zip-crosswalk.json"`. `import.meta.dirname` is `undefined` in Turbopack SSR bundles (Next.js), causing the `/api/b/[slug]` page data collection to fail with `ERR_INVALID_ARG_TYPE (paths[0] undefined)` at module evaluation. JSON import works in both Bun (refinery) and Next.js (SSR bundle). Tests still 8/8.

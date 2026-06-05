@@ -325,6 +325,14 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
 
 export type PolarityState = "valid_directional" | "none" | "invalid";
 
+/** Three-state classification of a raw direction_polarity token. */
+export function classifyPolarity(
+  raw: string | null | undefined,
+): PolarityState {
+  if (raw == null || raw === "none") return "none";
+  return VALID_DIRECTION_POLARITY.has(raw) ? "valid_directional" : "invalid";
+}
+
 export interface GateVector {
   slug: string;
   concept_id: string | null;
