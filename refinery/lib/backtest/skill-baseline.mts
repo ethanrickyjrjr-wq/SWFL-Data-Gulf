@@ -12,6 +12,15 @@
  * so `lift` is an honest delta. A neutral observation is excluded as a TARGET but
  * is retained in the series as the PRIOR for the next call.
  *
+ * SOURCE (cited per the no-uncited-constants / magic-number rule — the cutoff is a
+ * methodology choice, not a free parameter): the persistence-null lift baseline is
+ * locked in docs/superpowers/plans/2026-06-03-row-tier/HANDOFF.md, item 2 —
+ * "report lift over a persistence null, never raw accuracy" (a directional rule on
+ * a trending series, e.g. hosp_tdt_post_ian_recovery_ratio, scores ~100% by
+ * autocorrelation). The non-first / non-neutral cutoff operationalizes that
+ * decision (persistence requires a prior; a neutral observed is an inconclusive
+ * directional target) and is gated by check flywheel_backtest_decision_function.
+ *
  * Provenance is NOT silent: every scored call carries source_tag, the scored
  * denominator is broken out in n_calls_by_tag, and a clean lake_tier1-only
  * accuracy ships alongside the blended system_accuracy. If the two diverge, the
