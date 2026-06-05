@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · main) — feat(cre-swfl): sector filter + brain rebuild + MHS session notes + paid-path plan
+
+`refinery/packs/cre-swfl.mts`: Added `&sector=eq.retail` to both `buildMarketbeatAggregateSource` and `buildMarketbeatSubmarketSource` citation URLs — locks the pack to retail-only rows now that all 3 sectors (retail/industrial/office) share one table. `brains/cre-swfl.md`: Rebuilt v47 (2026-06-05). `docs/sql/20260605_marketbeat_swfl_mhs_extension.sql`: Migration doc updated with final O5 resolution (4-part UNIQUE confirmed live, DROP DEFAULT documented). `docs/littlebird-notes/2026-06-05.md`: Full MHS extraction architecture decisions (3 recipes, dual-signal negative, 16-row validation, write-gate status). `docs/superpowers/plans/2026-06-04-paid-path-wtp.md`: Bearer-gate + ZIP-report page plan (Group A + B, TDD-ready). Open: period-stamp item C, DROP DEFAULT DDL, cre_swfl_per_sector_surfacing check.
+
 ## 2026-06-05 (Opus 4.8 · main) — feat(aliases): Charlotte County registered (FIPS 12015, county-level)
 
 `marketbeat-submarket-aliases.mts`: `Charlotte County: []` added to `MARKETBEAT_SUBMARKET_MAP` (empty corridors — county-level grain); `SUBMARKET_METADATA` record introduced with `{ fips: "12015", geographic_type: "county" }` for Charlotte County; header note added that permit jurisdictions must NOT be added here (separate crosswalk required). 16/16 alias tests + vocab-coverage OK.
