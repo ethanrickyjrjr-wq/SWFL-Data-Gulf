@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Opus 4.8 · main) — feat(aliases): Charlotte County registered (FIPS 12015, county-level)
+
+`marketbeat-submarket-aliases.mts`: `Charlotte County: []` added to `MARKETBEAT_SUBMARKET_MAP` (empty corridors — county-level grain); `SUBMARKET_METADATA` record introduced with `{ fips: "12015", geographic_type: "county" }` for Charlotte County; header note added that permit jurisdictions must NOT be added here (separate crosswalk required). 16/16 alias tests + vocab-coverage OK.
+
 ## 2026-06-05 (Opus 4.8 · main) — feat(mhs): 4-part ID reconcile + per-field gating + permits scaffold
 
 `refinery/sources/marketbeat-swfl-source.mts`: `MarketbeatRow` + `MarketbeatSwflNormalized` updated with `source_name`, `geographic_type`, `verified_vacancy/rents/absorption`; `.eq("verified", true)` removed (MHS rows are always `verified=false`); per-source inclusion rule in `selectLatestVerifiedPerSubmarket` (C&W: legacy `verified` gate; MHS: any per-field flag); collision-winner tiebreak (MHS wins same quarter); per-field normalization nulls dark MHS fields; `idKey` fallback 4-part. `refinery/__fixtures__/marketbeat-swfl.sample.json`: all rows updated with `source_name`/`sector`/4-part `id`; Bonita Springs collision case added (MHS Q1 wins over C&W Q1; `absorption_sqft` nulled at normalization because `verified_absorption=false`). 19/19 tests green. `docs/sql/20260605_mhs_permits_swfl.sql` + parked `mhs_permits_swfl` cadence entry — ODD scaffold for Recipe 2 (separate from Accela feed, jurisdiction crosswalk pending). Next: confirm `prior_12mo_ending` inference (item C) + Charlotte County slug decision (item B) before any CRE write.

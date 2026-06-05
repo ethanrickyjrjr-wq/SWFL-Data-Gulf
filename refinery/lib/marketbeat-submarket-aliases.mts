@@ -2,8 +2,9 @@
  * MarketBeat submarket → corridor_profiles.corridor_name[] fan-out table.
  *
  * Scope: maps the free-text `submarket` field from `data_lake.marketbeat_swfl`
- * (as populated by the n8n Firecrawl ingest flow) to one or more corridor names
- * as they appear in `corridor_profiles.corridor_name` and `fixtures/corridor-rents.json`.
+ * (as populated by the n8n Firecrawl ingest flow / MHS geometry extractor) to
+ * one or more corridor names as they appear in `corridor_profiles.corridor_name`
+ * and `fixtures/corridor-rents.json`.
  *
  * This is intentionally a SEPARATE file from `corridor-aliases.mts`.
  * corridor-aliases.mts maps CRE slugs → centroid IDs for the permits join.
@@ -11,19 +12,50 @@
  * Flow-3 per-corridor enrichment join in cre-source.mts. Different domains,
  * different key types, different join target.
  *
+ * NOTE ON PERMIT JURISDICTIONS: permit jurisdiction strings
+ * ("Unincorporated Lee County", "City of Sanibel", etc.) do NOT align 1:1 with
+ * MarketBeat submarkets and must NOT be added here. They belong in a separate
+ * jurisdiction crosswalk file (planned as Recipe 2 Step 2).
+ *
  * Coverage notes:
  *   - "Naples", "Fort Myers", "Cape Coral", "Bonita Springs" appear in current
- *     MarketBeat fixture data.
+ *     MarketBeat / MHS fixture data.
  *   - "Estero" and "Fort Myers Beach" appear in CRE corridor data but have no
  *     corresponding MarketBeat submarket in the current broker report cadence.
  *     They are included here so the mapping is exhaustive; they will silently
  *     produce zero MarketBeat rows until coverage is added.
+ *   - "Charlotte County" is a COUNTY-LEVEL entry (FIPS 12015, geographic_type:
+ *     'county'). It has no corridor profile mappings; its corridor array is
+ *     intentionally empty. Metadata lives in SUBMARKET_METADATA below.
  *
  * Source of truth for corridor names: `fixtures/corridor-rents.json` (26 rows).
  */
 
 export type MarketbeatSubmarket = string;
 export type CorridorProfileName = string;
+
+/**
+ * Optional per-submarket metadata. Populated for entries where the standard
+ * submarket → corridor join doesn't apply, e.g. county-level rows that MHS
+ * tags `geographic_type: 'county'` rather than `'submarket'`.
+ */
+export interface SubmarketMeta {
+  /** FIPS code for the county this entry represents (county entries only). */
+  fips?: string;
+  geographic_type: "submarket" | "county";
+}
+
+/**
+ * Metadata for registered submarkets that carry non-default attributes.
+ * Entries here are a superset of `MARKETBEAT_SUBMARKET_MAP` — every entry
+ * in this record MUST also appear as a key in the map below.
+ */
+export const SUBMARKET_METADATA: Partial<
+  Record<MarketbeatSubmarket, SubmarketMeta>
+> = {
+  /** Charlotte County (FIPS 12015) — county-level grain, no corridor profiles. */
+  "Charlotte County": { fips: "12015", geographic_type: "county" },
+};
 
 export const MARKETBEAT_SUBMARKET_MAP: Record<
   MarketbeatSubmarket,
@@ -61,6 +93,13 @@ export const MARKETBEAT_SUBMARKET_MAP: Record<
     "Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)",
   ],
   "Fort Myers Beach": ["Estero Blvd Fort Myers Beach"],
+  /**
+   * Charlotte County — county-level grain (FIPS 12015, geographic_type: 'county').
+   * No corridor profile mappings (county rows don't resolve to a single CRE corridor).
+   * Per-submarket MarketBeat key_metrics will still emit for this entry; the
+   * zero-matched-corridors caveat fires (expected — see buildMarketbeatSubmarketSource).
+   */
+  "Charlotte County": [],
 };
 
 /**
