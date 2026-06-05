@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · claude/env-swfl-hydrology-stubs-e4PY7) — feat(env-swfl): GHCN-D rainfall connector + GW slug retirement — hydrology cleanup PR
+
+**TASK A — GHCN-D rainfall (BUILD):** `refinery/sources/noaa-ghcn-rainfall-source.mts` (new connector, `GhcnRainfallAggregate` fragment, 4 anchor stations), `ingest/pipelines/noaa_ghcn_rainfall/` (Python DLT pipeline, merge+primary_key, `--dry-run`), `.github/workflows/noaa-ghcn-rainfall-monthly.yml` (cron 5th of month), `ingest/cadence_registry.yaml` (+tier-2 entry). **TASK C — GW slugs (RETIRE):** `refinery/sources/usgs-water-source.mts` stripped to Caloosahatchee surface-stage only; `env_gw_level_lee_median_ft` + `env_gw_highwater_exceedance_days` concepts + slug_index entries removed from vocab. **env-swfl pack** wired to GHCN source, dead GW caveat replaced, 35/35 tests pass. **Vocab JSON repair:** 6 Unicode smart-quote structural delimiters introduced by prior Edit tool replaced with ASCII `"`. Checks closed: `env_hydro_metrics_source`, `gw_highwater_threshold_source`. PR #66 merged → main.
+
+## 2026-06-05 (Sonnet 4.6 · claude/env-swfl-hydrology-stubs-e4PY7) — feat(cre-swfl): corridor_factor wired — Move #4
+
+**`refinery/lib/derived/corridor-factor.mts`** (new file, previously untracked): status header updated DRAFT → WIRED; band-threshold inline source comment added. **`refinery/packs/cre-swfl.mts`**: `computeCorridorFactor` imported + wired in `creSwflOutputProducer` — emits `corridor_factor` key_metric (median of per-corridor 0–100 composite; `bandFor` routes through `DEFAULT_CORRIDOR_FACTOR_CONFIG.bands` so conclusion prose stays in sync if operator tunes thresholds); caveat + conclusion line added. **`refinery/vocab/brain-vocabulary.json`**: `cre_corridor_factor` concept (`higher_is_bullish`, `index 0-100`, scope_note) + slug_index entry. **`refinery/packs/cre-swfl.test.mts`**: 2 new tests (metric present with CRE metrics / absent with null metrics). 45/45 pass. Opus diff-review cleared both blockers before push.
+
+## 2026-06-05 (Sonnet 4.6 · claude/env-swfl-hydrology-stubs-e4PY7) — recon: Lee County NR WellMonitor endpoint spec
+
+**GW retirement STAYED** — TASK B gate fired: Lee County NR WellMonitor confirmed machine-readable NAVD88 daily water levels via anonymous POST, no CSRF. Full connector spec appended to `docs/superpowers/plans/2026-06-05-env-swfl-hydrology-stubs.md` (§4). Key findings: POST `https://naturalresources.leegov.com/Home/WellMonitor` returns HTML with data embedded as JS array; 177–182 wells, daily back to 1995; **Lee County ONLY** (zero Collier wells confirmed). Build blocked on `gw_highwater_threshold_source` check: ">2 ft NAVD88" exceedance threshold is unsourced — must cite FDEP/SFWMD/Lee NR standard before connector PR. Rainfall (TASK A) and GW retirement (TASK C) deferred to next session per plan.
+
 ## 2026-06-05 (Sonnet 4.6 · main) — docs: README rewrite + logo assets
 
 **`README.md`**: replaced Next.js boilerplate with actual project description — what it is, MCP install command, live brain table, three-tier architecture diagram, tech stack, local dev steps, data coverage. Logo+name lockup displayed at top via `public/logo-name.png`.
@@ -26,6 +38,14 @@
 - `feat/firecrawl-spider-fallback-and-cron-fixes` (4 ahead, 354 behind): **awaiting operator review** — spider fallback wrapper, bls-laus cron day fix, pipeline-freshness §6. Diff shown in session.
 - **corridor-factor.mts** (untracked): **NEVER committed to any branch** — exists only as `refinery/lib/derived/` untracked files. Not wired. `corridor_factor_wire` check is the gate.
 - Dropped: `session-update-review-Qs7Pk` (superseded auth.ts), `roadmap-ideas-file-ps3Xc` (old docs), `swfl-mcp-http-transport-u3uG7` (already in main via PR #50).
+
+## 2026-06-05 (Opus 4.8 · claude/env-swfl-hydrology-stubs-e4PY7) — env-swfl hydrology stubs: disposition report (report only, no pack/vocab changes)
+
+**Resolve-or-retire research for the 3 env-swfl hydrology slugs with vocab entries but no live source. Report persisted to `docs/superpowers/plans/2026-06-05-env-swfl-hydrology-stubs.md` for a follow-up session to execute.**
+
+- **Rainfall `env_rainfall_swfl_annual_in` → BUILD (viable).** NOAA GHCN-D via AWS Open Data S3 (`noaa-ghcn-pds`, no token) is reachable + current (inventory 2026-06-03). Verified anchor stations: `USW00012835` Fort Myers Page Field (1892–2026, 2024=80.5in/100% days), `USW00012894` RSW, `USW00012897` Naples Muni, `USC00086078` Naples COOP. Pull `csv/by_year/{YYYY}.csv` (current to Jan-2026) NOT `by_station` (lags — airport WBAN stuck 2025-02-06). inches = VALUE/254; avg of station totals (not sum). Connector spec + gates in the doc.
+- **Groundwater `env_gw_level_lee_median_ft` + `env_gw_highwater_exceedance_days` → RETIRE.** DBHYDRO confirmed catalog-only (`DBHYDRO_Wells` FeatureServer = well metadata, time-series behind DBHydro Insights, Browser retired 2025); USGS thin/out-of-bounds (not re-chased). One UNVERIFIED non-USGS lead flagged: Lee County NR Monitor Well Data (leegov.com, NAVD88) — host off web-session allowlist, couldn't verify machine-readability. Retire unless an open-network session confirms it.
+- **No code/vocab/pack changes; nothing on `main`.** Next: execute the doc on a machine with open network (probe the Lee County lead, build the rainfall connector, retire the two gw slugs).
 
 ## 2026-06-04 (Sonnet 4.6 · main) — fix CI: lint suppression + vocab reformat revert
 
