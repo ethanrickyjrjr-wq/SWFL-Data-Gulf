@@ -9,8 +9,9 @@ SERIES_AREA_MAP = {
 SOURCE_URL = "https://api.stlouisfed.org/fred/series/observations"
 BUCKET = "lake-tier1"
 
-# FRED sentinel for "all vintages from the beginning of time"
+# FRED sentinels for "all vintages" — start = earliest available; end = current vintage
 REALTIME_START_ALL = "1776-07-04"
+REALTIME_END_ALL = "9999-12-31"
 
 # Both series start ~2007; "2000-01-01" captures everything without FRED's default truncation.
 OBSERVATION_START = "2000-01-01"

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ingest.pipelines.fred_laus_alfred.constants import SERIES_AREA_MAP
+from ingest.pipelines.fred_laus_alfred.constants import REALTIME_END_ALL, SERIES_AREA_MAP
 from ingest.pipelines.fred_laus_alfred.resources import fetch_alfred_laus
 
 
@@ -113,6 +113,10 @@ class TestFetchAlfredLaus:
             assert "realtime_start" in params, "realtime_start missing from API call"
             assert "realtime_end" in params, "realtime_end missing from API call"
             assert params["realtime_start"] == "1776-07-04"
+            assert params["realtime_end"] == REALTIME_END_ALL, (
+                f"realtime_end must be {REALTIME_END_ALL!r} (FRED sentinel), got {params['realtime_end']!r}. "
+                "Passing today's date causes a 400 when FRED's clock lags UTC by a day."
+            )
 
 
 class TestSeriesAreaMapInvariants:
