@@ -149,12 +149,23 @@ def check_volume_entry(conn, entry: dict) -> dict | None:
         return None
 
     schema, table = count_table.split(".", 1)
+    # source_name: scope the row count to one source when the table is shared (see
+    # check_tier2_entry) so expected_rows_min is a per-source floor, not a blended one.
+    source_name = entry.get("source_name")
     with conn.cursor() as cur:
-        cur.execute(
-            pgsql.SQL("SELECT count(*) FROM {}.{}").format(
-                pgsql.Identifier(schema), pgsql.Identifier(table)
+        if source_name:
+            cur.execute(
+                pgsql.SQL("SELECT count(*) FROM {}.{} WHERE source_name = %s").format(
+                    pgsql.Identifier(schema), pgsql.Identifier(table)
+                ),
+                (source_name,),
             )
-        )
+        else:
+            cur.execute(
+                pgsql.SQL("SELECT count(*) FROM {}.{}").format(
+                    pgsql.Identifier(schema), pgsql.Identifier(table)
+                )
+            )
         row = cur.fetchone()
 
     landed = row[0] if row else 0
@@ -178,13 +189,28 @@ def check_tier2_entry(conn, entry: dict) -> dict:
             # use a different timestamp (e.g. scraped_at, last_seen_at).
             freshness_col = entry.get("freshness_column", "inserted_at")
             schema, table = entry["freshness_table"].split(".", 1)
-            cur.execute(
-                pgsql.SQL("SELECT MAX({}) FROM {}.{}").format(
-                    pgsql.Identifier(freshness_col),
-                    pgsql.Identifier(schema),
-                    pgsql.Identifier(table),
+            # source_name: when two un-auto-ingestable sources share one table (e.g.
+            # marketbeat_swfl holds cw_marketbeat quarterly + mhs_databook annual), scope
+            # freshness to THIS source so a recent write by the co-tenant can't mask this
+            # one's staleness (the "one cadence per table breaks silently" trap).
+            source_name = entry.get("source_name")
+            if source_name:
+                cur.execute(
+                    pgsql.SQL("SELECT MAX({}) FROM {}.{} WHERE source_name = %s").format(
+                        pgsql.Identifier(freshness_col),
+                        pgsql.Identifier(schema),
+                        pgsql.Identifier(table),
+                    ),
+                    (source_name,),
                 )
-            )
+            else:
+                cur.execute(
+                    pgsql.SQL("SELECT MAX({}) FROM {}.{}").format(
+                        pgsql.Identifier(freshness_col),
+                        pgsql.Identifier(schema),
+                        pgsql.Identifier(table),
+                    )
+                )
         else:
             schema_name = entry["dlt_schema_name"]
             cur.execute(

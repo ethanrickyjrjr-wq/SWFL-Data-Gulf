@@ -102,6 +102,30 @@ def test_tier2_fresh_not_stale():
     assert result["age_days"] == 0
 
 
+# ── test 3b: source-aware tier-2 freshness (two sources share one table) ───────
+
+
+def test_tier2_source_name_scopes_freshness_query():
+    """When source_name is set, the freshness query must filter WHERE source_name=%s
+    so a co-tenant source's recent write can't mask this source's staleness
+    (marketbeat_swfl holds cw_marketbeat quarterly + mhs_databook annual)."""
+    conn = _tier2_conn(datetime.now(tz=timezone.utc))
+    entry = {
+        "name": "mhs_databook",
+        "lane": "tier-2",
+        "cadence_days": 365,
+        "tolerance_multiplier": 1.5,
+        "freshness_table": "data_lake.marketbeat_swfl",
+        "freshness_column": "_ingested_at",
+        "source_name": "mhs_databook",
+    }
+    result = check_tier2_entry(conn, entry)
+    assert result["status"] == "FRESH"
+    cur = conn.cursor.return_value.__enter__.return_value
+    # The freshness query must carry source_name as a bound param.
+    assert cur.execute.call_args.args[1] == ("mhs_databook",)
+
+
 # ── test 4: missing tier-1 ────────────────────────────────────────────────────
 
 
