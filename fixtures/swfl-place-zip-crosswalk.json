@@ -1,0 +1,130 @@
+{
+  "crosswalk_vintage": "2024",
+  "note": "SWFL place-name -> primary USPS ZIP crosswalk for deterministic, citable place resolution (Lee + Collier counties only). Geographic ZIP/ZCTA boundaries follow the U.S. Census 2024 TIGER/Line ZCTA vintage; each place-name -> ZIP association and USPS preferred mail city was verified against the USPS ZIP Code Lookup (tools.usps.com). A place may span several ZIPs; `zip` is the primary (core/most-recognized) code and `alt_zips` lists the others. This is a SOURCED crosswalk: every entry carries a `source`. Do not invent ZIPs not present here.",
+  "default_source": "USPS ZIP Code Lookup (tools.usps.com); ZCTA geometry: U.S. Census TIGER/Line 2024 ZCTA Gazetteer",
+  "verified_date": "2026-06-04",
+  "verification_method": "USPS ZIP Code Lookup (tools.usps.com) cross-referenced with USPS-derived ZIP directories; ZCTA boundaries per Census 2024 TIGER/Line. No LLM knowledge used as the source of record.",
+  "entries": [
+    {
+      "place": "Gateway",
+      "aliases": [],
+      "zip": "33913",
+      "alt_zips": [],
+      "county": "lee",
+      "usps_preferred_city": "Fort Myers",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Gateway CDP, Lee County. ZCTA 33913 also covers western Lehigh Acres / Miromar Lakes; USPS preferred mail city for 33913 is Fort Myers."
+    },
+    {
+      "place": "Lehigh Acres",
+      "aliases": ["lehigh"],
+      "zip": "33936",
+      "alt_zips": ["33971", "33972", "33973", "33974", "33976"],
+      "county": "lee",
+      "usps_preferred_city": "Lehigh Acres",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Lehigh Acres CDP spans multiple ZIPs; 33936 is the primary/original code. 33971 and 33972 cover the western/southern sections."
+    },
+    {
+      "place": "Fort Myers",
+      "aliases": ["ft myers", "ft. myers"],
+      "zip": "33901",
+      "alt_zips": ["33902", "33905", "33907", "33908", "33912", "33913", "33916", "33919"],
+      "county": "lee",
+      "usps_preferred_city": "Fort Myers",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "City of Fort Myers spans many ZIPs; 33901 is the central/downtown core and the primary reference."
+    },
+    {
+      "place": "Cape Coral",
+      "aliases": ["cape"],
+      "zip": "33904",
+      "alt_zips": ["33909", "33914", "33990", "33991", "33993"],
+      "county": "lee",
+      "usps_preferred_city": "Cape Coral",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Cape Coral spans several ZIPs; 33904 (SE Cape, oldest section, Cape Coral South P.O.) is the primary reference."
+    },
+    {
+      "place": "Naples",
+      "aliases": ["downtown naples", "old naples"],
+      "zip": "34102",
+      "alt_zips": ["34103", "34104", "34105", "34108", "34109", "34110", "34112", "34113", "34114", "34116", "34119", "34120"],
+      "county": "collier",
+      "usps_preferred_city": "Naples",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "City of Naples, Collier County. 34102 is the downtown/Old Naples core (5th Ave S, Gulf Shore Blvd S) and the primary reference."
+    },
+    {
+      "place": "Estero",
+      "aliases": [],
+      "zip": "33928",
+      "alt_zips": ["33967", "34134", "34135"],
+      "county": "lee",
+      "usps_preferred_city": "Estero",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Village of Estero, Lee County. 33928 is the primary Estero code."
+    },
+    {
+      "place": "Bonita Springs",
+      "aliases": ["bonita"],
+      "zip": "34135",
+      "alt_zips": ["34133", "34134"],
+      "county": "lee",
+      "usps_preferred_city": "Bonita Springs",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Bonita Springs, Lee County (Cape Coral-Fort Myers MSA). 34135 is the primary inland code; 34134 covers the coastal/Bonita Beach side."
+    },
+    {
+      "place": "Fort Myers Beach",
+      "aliases": ["fmb"],
+      "zip": "33931",
+      "alt_zips": [],
+      "county": "lee",
+      "usps_preferred_city": "Fort Myers Beach",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Town of Fort Myers Beach (Estero Island), Lee County. 33931 is the dedicated code."
+    },
+    {
+      "place": "Sanibel",
+      "aliases": ["sanibel island"],
+      "zip": "33957",
+      "alt_zips": [],
+      "county": "lee",
+      "usps_preferred_city": "Sanibel",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "City of Sanibel (Sanibel Island), Lee County. 33957 is the dedicated code."
+    },
+    {
+      "place": "Marco Island",
+      "aliases": ["marco"],
+      "zip": "34145",
+      "alt_zips": [],
+      "county": "collier",
+      "usps_preferred_city": "Marco Island",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "City of Marco Island, Collier County. 34145 is the dedicated code."
+    },
+    {
+      "place": "Immokalee",
+      "aliases": [],
+      "zip": "34142",
+      "alt_zips": [],
+      "county": "collier",
+      "usps_preferred_city": "Immokalee",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": false,
+      "note": "Immokalee CDP, Collier County. 34142 is the dedicated code."
+    }
+  ]
+}

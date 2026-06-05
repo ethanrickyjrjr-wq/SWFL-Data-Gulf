@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · main) — branch audit: place-zip crosswalk + grade-config sweep tool landed
+
+**Branch audit — 3 useful branches found, 2 clean picks landed:**
+
+- `swfl-place-zip-crosswalk-i5hPC` (1 ahead, 0 behind): cherry-picked `e5a5ec6` — `fixtures/swfl-place-zip-crosswalk.json` + `refinery/lib/geography-gazetteer.mts` + tests + consumption-contract update. Closes open check `name_zip_crosswalk`.
+- `session-log-update-YF3Gl` (1 ahead, 14 behind): extracted sweep tool only (loader.mts refactor skipped — conflicts with `4c7eca0` already in main). `refinery/tools/grade-config-sweep.mts` + `sweep-output.json` regenerated against current vocab (198 slugs; §3 pin green).
+- `feat/firecrawl-spider-fallback-and-cron-fixes` (4 ahead, 354 behind): **awaiting operator review** — spider fallback wrapper, bls-laus cron day fix, pipeline-freshness §6. Diff shown in session.
+- **corridor-factor.mts** (untracked): **NEVER committed to any branch** — exists only as `refinery/lib/derived/` untracked files. Not wired. `corridor_factor_wire` check is the gate.
+- Dropped: `session-update-review-Qs7Pk` (superseded auth.ts), `roadmap-ideas-file-ps3Xc` (old docs), `swfl-mcp-http-transport-u3uG7` (already in main via PR #50).
+
 ## 2026-06-04 (Sonnet 4.6 · main) — fix CI: lint suppression + vocab reformat revert
 
 **`187c890`** `fix(lint)`: add eslint-disable-next-line on two `/api/b/*` hrefs in zip-report footer — `@next/next/no-html-link-for-pages` false-positive because `app/api/b/[slug]/route.ts` matches the pattern; dynamic template literals in `[slug]/page.tsx` escape the check.

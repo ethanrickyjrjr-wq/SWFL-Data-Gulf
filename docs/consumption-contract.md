@@ -26,7 +26,7 @@ Some reports carry bulk per-row data at a **finer grain than the headline metric
 When a user asks about a specific ZIP, town, or area:
 
 0. For a **housing** question about a specific ZIP/town, fetch `report_id=housing-swfl` — the per-ZIP table rides on that report's dossier, not the master one.
-1. Map the place to its ZIP from general knowledge. (The `geography` gazetteer in the payload carries area/corridor names, **not** a ZIP crosswalk — do not claim it resolves ZIPs.)
+1. Map the place to its ZIP using `geography.place_zip_crosswalk` in the payload — a **sourced** place-name → primary-ZIP table (USPS ZIP Code Lookup; ZCTA geometry per Census TIGER/Line). Match on `place` or any `aliases` entry; quote that entry's `source`. If the place isn't in the crosswalk, fall back to general knowledge of SWFL geography. (The gazetteer's `pockets` list still carries area/corridor names only — it is **not** a ZIP resolver; the `place_zip_crosswalk` is.)
 2. Find that ZIP's row by its `key` in the matching detail table.
 3. Quote its real numbers with the table's `source`. **Do not** substitute the regional median, and **do not** tell the user it "wasn't broken out" or that you "can't source it directly" — those phrases are banned because they leak the payload's internal shape. If the row's `low_sample` is `true`, say the figure rests on a handful of sales (indicative, not a stable median). Only if the place genuinely has no row do you say what you do hold and offer that grain.
 
