@@ -475,6 +475,19 @@ not_yet_running:
     # Recipes (source-aware window logic): docs/superpowers/plans/2026-06-05-mhs-odd-graduation-handoff.md.
     # Extraction spec: docs/littlebird-notes/2026-06-05.md.
 
+  - name: mhs_permits_swfl
+    parked: true
+    lane: tier-2
+    cadence_days: 365 # MHS annual data book; "ISSUED PERMITS 2025" = full CY 2025
+    tolerance_multiplier: 1.5
+    freshness_table: data_lake.mhs_permits_swfl
+    freshness_column: _ingested_at
+    source_name: mhs_databook
+    expected_rows_min: 1
+    note: "DORMANT — ODD scaffold for Recipe 2 (MHS 2026 Data Book permits). Grain: individual permit rows by raw jurisdiction string (NOT submarket slugs — separate crosswalk required). Period: full calendar year 2025 confirmed from PDF. Schema: issued_date / asset_class / project_address / project_name / permit_value_usd / building_sf. Table DDL: docs/sql/20260605_mhs_permits_swfl.sql. DO NOT blend into permits-swfl (Accela feed) until jurisdiction crosswalk + consumer brain update land — separate table prevents double-counting. Graduation = (1) build jurisdiction crosswalk, (2) wire consuming brain, (3) move to pipelines:."
+    # Table DDL: docs/sql/20260605_mhs_permits_swfl.sql
+    # Schema spec: docs/littlebird-notes/2026-06-05.md (item D — jurisdiction crosswalk).
+
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
 # These tables have rows in Postgres but no active ingest pipeline. Adding them
 # would create false-FRESH signal or meaningless LOW_VOLUME noise. Investigated

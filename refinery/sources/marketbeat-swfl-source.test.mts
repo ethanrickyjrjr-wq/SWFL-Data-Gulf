@@ -14,9 +14,10 @@ test("selectLatestVerifiedPerSubmarket: empty input returns empty output", () =>
   assert.deepEqual(selectLatestVerifiedPerSubmarket([]), []);
 });
 
-test("selectLatestVerifiedPerSubmarket: all-unverified input returns empty output", () => {
+test("selectLatestVerifiedPerSubmarket: all-unverified cw_marketbeat rows return empty output", () => {
   const rows = [
     {
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2026-Q3",
       vacancy_rate: 5,
@@ -26,6 +27,7 @@ test("selectLatestVerifiedPerSubmarket: all-unverified input returns empty outpu
       verified: false,
     },
     {
+      source_name: "cw_marketbeat",
       submarket: "Fort Myers",
       quarter: "2026-Q3",
       vacancy_rate: 6,
@@ -38,9 +40,10 @@ test("selectLatestVerifiedPerSubmarket: all-unverified input returns empty outpu
   assert.deepEqual(selectLatestVerifiedPerSubmarket(rows), []);
 });
 
-test("selectLatestVerifiedPerSubmarket: single verified quarter survives", () => {
+test("selectLatestVerifiedPerSubmarket: single verified cw_marketbeat quarter survives", () => {
   const rows = [
     {
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2026-Q3",
       vacancy_rate: 5,
@@ -59,6 +62,7 @@ test("selectLatestVerifiedPerSubmarket: single verified quarter survives", () =>
 test("selectLatestVerifiedPerSubmarket: multi-quarter, latest verified wins", () => {
   const rows = [
     {
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2026-Q1",
       vacancy_rate: 5.5,
@@ -68,6 +72,7 @@ test("selectLatestVerifiedPerSubmarket: multi-quarter, latest verified wins", ()
       verified: true,
     },
     {
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2026-Q3",
       vacancy_rate: 4.8,
@@ -89,6 +94,7 @@ test("selectLatestVerifiedPerSubmarket: unverified latest does NOT outrank verif
   // are filtered out BEFORE the latest-quarter pick.
   const rows = [
     {
+      source_name: "cw_marketbeat",
       submarket: "Cape Coral",
       quarter: "2026-Q1",
       vacancy_rate: 7.0,
@@ -98,6 +104,7 @@ test("selectLatestVerifiedPerSubmarket: unverified latest does NOT outrank verif
       verified: true,
     },
     {
+      source_name: "cw_marketbeat",
       submarket: "Cape Coral",
       quarter: "2026-Q2",
       vacancy_rate: 6.8,
@@ -115,6 +122,7 @@ test("selectLatestVerifiedPerSubmarket: unverified latest does NOT outrank verif
 test("selectLatestVerifiedPerSubmarket: stable submarket alpha order in output", () => {
   const rows = [
     {
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2026-Q3",
       vacancy_rate: 5,
@@ -124,6 +132,7 @@ test("selectLatestVerifiedPerSubmarket: stable submarket alpha order in output",
       verified: true,
     },
     {
+      source_name: "cw_marketbeat",
       submarket: "Bonita Springs",
       quarter: "2026-Q3",
       vacancy_rate: 6,
@@ -133,6 +142,7 @@ test("selectLatestVerifiedPerSubmarket: stable submarket alpha order in output",
       verified: true,
     },
     {
+      source_name: "cw_marketbeat",
       submarket: "Fort Myers",
       quarter: "2026-Q3",
       vacancy_rate: 8,
@@ -149,14 +159,97 @@ test("selectLatestVerifiedPerSubmarket: stable submarket alpha order in output",
   );
 });
 
+test("selectLatestVerifiedPerSubmarket: mhs_databook wins same-quarter collision over cw_marketbeat", () => {
+  // Collision-winner rule (20260605 migration): on identical (sector, submarket,
+  // quarter), mhs_databook replaces cw_marketbeat.
+  const rows = [
+    {
+      source_name: "cw_marketbeat",
+      sector: "retail",
+      submarket: "Bonita Springs",
+      quarter: "2026-Q1",
+      vacancy_rate: 5.8,
+      asking_rent_nnn: 32.5,
+      absorption_sqft: 9000,
+      source_url: "https://example.com/cw",
+      verified: true,
+    },
+    {
+      source_name: "mhs_databook",
+      sector: "retail",
+      submarket: "Bonita Springs",
+      quarter: "2026-Q1",
+      vacancy_rate: 6.2,
+      asking_rent_nnn: 34.0,
+      absorption_sqft: 11000,
+      source_url: "https://example.com/mhs",
+      verified: false,
+      verified_vacancy: true,
+      verified_rents: true,
+      verified_absorption: false,
+    },
+  ];
+  const out = selectLatestVerifiedPerSubmarket(rows);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].source_name, "mhs_databook");
+  assert.equal(out[0].vacancy_rate, 6.2);
+});
+
+test("selectLatestVerifiedPerSubmarket: mhs_databook with no per-field flags is excluded", () => {
+  // An MHS row where all per-field flags are false must NOT enter the output —
+  // it would carry only null metrics after normalization, which is useless.
+  const rows = [
+    {
+      source_name: "mhs_databook",
+      sector: "retail",
+      submarket: "Naples",
+      quarter: "2026-Q1",
+      vacancy_rate: 5.0,
+      asking_rent_nnn: 38.0,
+      absorption_sqft: 20000,
+      source_url: null,
+      verified: false,
+      verified_vacancy: false,
+      verified_rents: false,
+      verified_absorption: false,
+    },
+  ];
+  assert.deepEqual(selectLatestVerifiedPerSubmarket(rows), []);
+});
+
+test("selectLatestVerifiedPerSubmarket: mhs_databook with only verified_vacancy is included", () => {
+  const rows = [
+    {
+      source_name: "mhs_databook",
+      sector: "retail",
+      submarket: "Naples",
+      quarter: "2026-Q1",
+      vacancy_rate: 5.0,
+      asking_rent_nnn: 38.0,
+      absorption_sqft: 20000,
+      source_url: null,
+      verified: false,
+      verified_vacancy: true,
+      verified_rents: false,
+      verified_absorption: false,
+    },
+  ];
+  const out = selectLatestVerifiedPerSubmarket(rows);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].source_name, "mhs_databook");
+});
+
 // --- marketbeatSwflSource (fixture mode) -------------------------------
 
 test("fixture mode returns fragments after verified-filter + latest-per-submarket", async () => {
   const fragments = await marketbeatSwflSource.fetch();
-  // Fixture has 4 verified submarkets total: Naples (Q1+Q3 both verified),
-  // Fort Myers (Q3), Cape Coral (Q1 verified, Q2 unverified → Q1 wins).
-  // Bonita Springs is all-unverified → dropped. Total = 3 fragments.
-  assert.equal(fragments.length, 3);
+  // Fixture verified winners:
+  //   Naples     — cw_marketbeat Q3 (latest-wins over Q1)
+  //   Fort Myers — cw_marketbeat Q3
+  //   Cape Coral — cw_marketbeat Q1 (Q2 unverified → dropped)
+  //   Bonita Springs — mhs_databook Q1 (collision winner over cw_marketbeat Q1;
+  //                    Q3 cw_marketbeat unverified → dropped)
+  assert.equal(fragments.length, 4);
 });
 
 test("every fragment has kind = marketbeat-swfl with the typed field set", async () => {
@@ -167,6 +260,7 @@ test("every fragment has kind = marketbeat-swfl with the typed field set", async
     assert.equal(typeof n["submarket"], "string");
     assert.equal(typeof n["quarter"], "string");
     assert.match(n["quarter"] as string, /^\d{4}-Q[1-4]$/);
+    assert.equal(typeof n["source_name"], "string");
     // Nullable numerics — must be either null or number; never undefined / NaN.
     for (const field of [
       "vacancy_rate",
@@ -205,13 +299,22 @@ test("Cape Coral fragment carries the Q1 row because Q2 is unverified", async ()
   assert.equal(n["quarter"], "2026-Q1");
 });
 
-test("Bonita Springs is dropped entirely — all rows unverified", async () => {
+test("Bonita Springs fragment is mhs_databook Q1 — collision winner over cw_marketbeat", async () => {
+  // The fixture has C&W Q1 (verified=true) and MHS Q1 (verified=false,
+  // verified_vacancy=true). Same quarter → mhs_databook wins.
   const fragments = await marketbeatSwflSource.fetch();
   const bonita = fragments.find(
     (f) =>
       (f.normalized as { submarket: string }).submarket === "Bonita Springs",
   );
-  assert.equal(bonita, undefined);
+  assert.ok(bonita, "Bonita Springs fragment must be present");
+  const n = bonita!.normalized as Record<string, unknown>;
+  assert.equal(n["source_name"], "mhs_databook");
+  assert.equal(n["quarter"], "2026-Q1");
+  assert.equal(n["vacancy_rate"], 6.2);
+  assert.equal(n["asking_rent_nnn"], 34.0);
+  // absorption is DARK (verified_absorption=false) → nulled at normalization
+  assert.equal(n["absorption_sqft"], null);
 });
 
 test("quarter field round-trips into the typed row (no string mangling)", async () => {
@@ -219,7 +322,7 @@ test("quarter field round-trips into the typed row (no string mangling)", async 
   const quarters = new Set(
     fragments.map((f) => (f.normalized as { quarter: string }).quarter),
   );
-  // Naples + Fort Myers are 2026-Q3; Cape Coral is 2026-Q1.
+  // Naples + Fort Myers are 2026-Q3; Cape Coral + Bonita Springs are 2026-Q1.
   assert.ok(quarters.has("2026-Q3"));
   assert.ok(quarters.has("2026-Q1"));
 });
@@ -241,22 +344,30 @@ test("fragment trust tier + source_id are constant across all fragments", async 
   }
 });
 
-test("fragment_ids are unique and deterministic from the row's natural key", async () => {
+test("fragment_ids are unique and derive from the 4-part row id", async () => {
   const { fragmentId } = await import("../lib/ids.mts");
   const fragments = await marketbeatSwflSource.fetch();
   const ids = fragments.map((f) => f.fragment_id);
-  assert.equal(new Set(ids).size, ids.length);
-  // Verify the natural-key shape: fragmentId("marketbeat_swfl", `${submarket}_${quarter}`)
-  // when row.id is absent. The fixture supplies `id` directly, so we reproduce
-  // from that — same result either way.
+  assert.equal(new Set(ids).size, ids.length, "fragment_ids must be unique");
+  // The fixture supplies 4-part ids (source_name_sector_submarket_quarter) for
+  // all rows; idKey resolves to row.id directly (the fallback is never reached
+  // for fixture rows that supply id explicitly).
   for (const f of fragments) {
-    const n = f.normalized as { submarket: string; quarter: string };
-    const naturalKey = `${n.submarket}_${n.quarter}`;
-    const expected = fragmentId("marketbeat_swfl", naturalKey);
+    const raw = f.raw as {
+      id?: string;
+      source_name: string;
+      sector?: string;
+      submarket: string;
+      quarter: string;
+    };
+    const idKey =
+      raw.id ??
+      `${raw.source_name}_${raw.sector ?? "retail"}_${raw.submarket}_${raw.quarter}`;
+    const expected = fragmentId("marketbeat_swfl", idKey);
     assert.equal(
       f.fragment_id,
       expected,
-      `fragment_id for ${n.submarket}/${n.quarter} must derive from natural key`,
+      `fragment_id for ${raw.submarket}/${raw.quarter} must derive from 4-part key`,
     );
   }
 });
