@@ -74,7 +74,7 @@ The five seams (mirror the shipped `marketbeat_swfl` / `mhs_databook` pattern):
 - [ ] **(Sonnet)** Writer stamps `source_name='mhs_databook'`, `report_label`, `prior_12mo_ending` (+ `_source`), per-field `verified_*`. Idempotent merge.
 - [ ] **(Sonnet build + Opus diff-review — RULE 1)** Wire MHS into `cre-swfl.mts`: **(submarket, period) dedup preferring `mhs_databook`** (the named rule) + move to per-field verification. Changes median math → Opus review mandatory.
 - [ ] **(Sonnet)** Charlotte FIPS-only slug (decision #2) in the submarket→canonical map; tests.
-- [x] **O5 RESOLVED — retain-both.** DDL widened: `UNIQUE (submarket, quarter, source_name)`; `id = source_name||'_'||submarket||'_'||quarter`. **n8n C&W writer must be updated to the new id format before the first write** (otherwise a same-(submarket,quarter) C&W row will PK-collide with any future MHS row).
+- [x] **O5 RESOLVED — retain-both.** DDL widens live constraint `marketbeat_swfl_sector_submarket_quarter_key` → `UNIQUE (source_name, sector, submarket, quarter)`; `id = source_name||'_'||sector||'_'||submarket||'_'||quarter` (e.g. `mhs_databook_retail_bonita-springs_2026-Q1`). **n8n C&W writer must be updated to the new 4-part id format before the first write** (PK collision otherwise).
 
 ### Recipe 2 — Permits → `permits-swfl` (own PR)
 
@@ -112,4 +112,4 @@ The five seams (mirror the shipped `marketbeat_swfl` / `mhs_databook` pattern):
 - **O4 — Extraction lives in the PDF env.** `drop/mhs-market-trends-2026.pdf` + `_build_geometry.py` are NOT on `main`. Geometry runs where the PDF lives; the repo-side ODD scaffold ships here ahead of the drop.
 
 > **O2 (was: source-precedence) — RESOLVED:** MHS wins. Folded into the named collision rule above.
-> **O5 (was: row-retention) — RESOLVED:** retain-both. `UNIQUE (submarket, quarter, source_name)` shipped in DDL. See §3 Recipe 1 note for n8n writer update requirement.
+> **O5 (was: row-retention) — RESOLVED:** retain-both. `UNIQUE (source_name, sector, submarket, quarter)` shipped in DDL (drops live `marketbeat_swfl_sector_submarket_quarter_key`). See §3 Recipe 1 note for n8n writer id-format update requirement.

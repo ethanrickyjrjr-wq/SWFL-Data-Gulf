@@ -48,15 +48,15 @@ ALTER TABLE data_lake.marketbeat_swfl
 ALTER TABLE data_lake.marketbeat_swfl
   ADD COLUMN IF NOT EXISTS source_name TEXT NOT NULL DEFAULT 'cw_marketbeat';
 
--- ── O5 RESOLVED: retain-both — widen UNIQUE to (submarket, quarter, source_name) ────────────
+-- ── O5 RESOLVED: retain-both — widen UNIQUE to (source_name, sector, submarket, quarter) ──────
 -- Decision (operator 2026-06-05): retain both source rows so the C&W↔MHS discrepancy stays
 -- queryable (Data Provenance + Discrepancy Reporting rule). Read-time dedup in cre-swfl
--- applies the collision-winner rule (mhs_databook wins on identical (submarket, quarter)).
+-- applies the collision-winner rule (mhs_databook wins on identical (sector, submarket, quarter)).
 --
--- id format change (also applies to the n8n C&W writer — update it before the first write):
---   OLD: id = submarket || '_' || quarter
---   NEW: id = source_name || '_' || submarket || '_' || quarter
---   e.g. 'cw_marketbeat_bonita-springs_2026-Q1' / 'mhs_databook_bonita-springs_2026-Q1'
+-- id format (also applies to the n8n C&W writer — update it before the first write):
+--   id = source_name || '_' || sector || '_' || submarket || '_' || quarter
+--   e.g. 'mhs_databook_retail_bonita-springs_2026-Q1'
+--       'cw_marketbeat_retail_bonita-springs_2026-Q1'
 --
 -- PERIOD-SEMANTICS NOTE (MHS rows only):
 --   MHS does not publish a quarter label — it publishes a rolling "Prior 12 Months" window.
@@ -68,12 +68,14 @@ ALTER TABLE data_lake.marketbeat_swfl
 --   the key shifts to '2026-Q2'. The DROP/ADD below is idempotent; re-running after the confirmed
 --   date only requires updating the writer's period stamp — no structural migration needed.
 
+-- Drop the correct live constraint name (sector-aware 3-part, already live)
 ALTER TABLE data_lake.marketbeat_swfl
-  DROP CONSTRAINT IF EXISTS marketbeat_swfl_submarket_quarter_key;
+  DROP CONSTRAINT IF EXISTS marketbeat_swfl_sector_submarket_quarter_key;
 
+-- Correct 4-part retain-both key
 ALTER TABLE data_lake.marketbeat_swfl
-  ADD CONSTRAINT IF NOT EXISTS marketbeat_swfl_submarket_quarter_source_key
-  UNIQUE (submarket, quarter, source_name);
+  ADD CONSTRAINT IF NOT EXISTS marketbeat_swfl_source_sector_submarket_quarter_key
+  UNIQUE (source_name, sector, submarket, quarter);
 
 -- ── Per-field verification (supersedes the all-or-nothing `verified` gate) ─────
 ALTER TABLE data_lake.marketbeat_swfl

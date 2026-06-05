@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · main) — fix(ddl): O5 CORRECTED — 4-part UNIQUE (source_name, sector, submarket, quarter) + period-semantics note
+
+**CORRECTS prior entry below.** Live constraint was already 3-part `(sector, submarket, quarter)` — prior entry dropped the wrong constraint name and used a 3-part key missing `sector`. Correct: `DROP CONSTRAINT IF EXISTS marketbeat_swfl_sector_submarket_quarter_key` → `ADD CONSTRAINT marketbeat_swfl_source_sector_submarket_quarter_key UNIQUE (source_name, sector, submarket, quarter)`. `id` format → `source_name||'_'||sector||'_'||submarket||'_'||quarter` (e.g. `mhs_databook_retail_bonita-springs_2026-Q1`). Period-semantics note retained (MHS `quarter` derived from `prior_12mo_ending`; tentative until LB item C confirmed). Handoff O5 bullet + resolved note corrected to 4-part key.
+
 ## 2026-06-05 (Sonnet 4.6 · main) — fix(ddl): O5 resolved — retain-both UNIQUE widening + period-semantics note
 
 **O5 closed (operator decision: retain-both).** `docs/sql/20260605_marketbeat_swfl_mhs_extension.sql` — dropped `UNIQUE (submarket, quarter)`, added `UNIQUE (submarket, quarter, source_name)`; `id` format → `source_name||'_'||submarket||'_'||quarter`. **Period-semantics note embedded in DDL:** MHS `quarter` is derived as `to_char(prior_12mo_ending, 'YYYY-"Q"Q')` — tentatively `'2026-Q1'` until LB item C (exact period-end) is confirmed from MHS website; structural migration not needed if it shifts, only the writer's stamp. **n8n C&W writer must also be updated to the new id format** before the first write (PK collision otherwise). Handoff doc updated: O5 → RESOLVED, O3 carries the period-semantics open item.
