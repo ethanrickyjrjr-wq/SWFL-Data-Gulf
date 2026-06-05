@@ -2,6 +2,58 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Opus 4.8 · main) — feat(demo): Hurricane Ian retrodiction — illustrative N≈1 (COMMITTED, NOT pushed — RULE 1 diff-review)
+
+**Standalone pre-registered demo exercising the shipped deterministic decision fn on ONE event.** New `refinery/tools/ian-retrodiction-demo.mts` (hardcoded one-off — NOT a harness/event-manifest/vintage-resolver; tripwire) + writeup `docs/superpowers/plans/2026-06-05-ian-retrodiction-demo.md`. Reads LIVE: ALFRED LAUS initial vintages from the **pinned** snapshot `s3://lake-tier1/macro/fred_laus_alfred/2026-06.parquet` (DuckDB+S3) + LeePA sale-velocity `data_lake.leepa_parcels_sales_yearly` (price-free, sale COUNTS only — `grep last_sale_amount` = 0 hits). Calls `computeBacktestCall` + `computeSkillScore` + `resolveGradeConfig` (unmodified); replicates the `properties-lee-value` z-formula inline (±1.0, pinned anchor years — no `new Date()`). Deterministic: re-run byte-identical. `bun test refinery/lib/backtest/` = 29/29. **Honest result: pre-Ian call BEARISH (pre-existing summer labor rise, NOT an Ian forecast); both velocity windows NEUTRAL at ±1.0 → no scored hit/miss. N≈1 illustrative — does NOT lift the Track-B HOLD. TDT outcome = Phase 2.** Ledger close held pending operator diff-review/push: `node scripts/check.mjs close ian_retrodiction_demo "..."`.
+
+Receipts (verbatim script output):
+
+```
+================================================================
+  HURRICANE IAN RETRODICTION DEMO — receipts
+  Standalone · pre-registered · ILLUSTRATIVE (N≈1, not skill proof)
+================================================================
+
+SLUG: laus_lee_unemployment_rate_initial_vintage
+RESOLVED GRADE-CONFIG: gradeable=true basis=delta polarity=lower_is_bullish epsilon=0.05 epsilon_mode=absolute window_days=90
+
+AS-OF (decision date = Ian landfall 2022-09-28):
+  freshest initial vintage published ≤ landfall → obs 2022-08-01 = 2.7% (first published 2022-09-28)
+PRIORS (selected in-script; the window rule lives here, not in computeBacktestCall):
+  90-day  (obs ≤ as-of−90d)  → obs 2022-05-01 = 2.4%   [the registered prediction]
+  MoM     (as-of−1 month)    → obs 2022-07-01 = 2.8%   [robustness]
+  YoY     (as-of−12 months)  → obs 2021-08-01 = 4.6%   [robustness, seasonality-neutral]
+
+PRE-IAN CALL (computeBacktestCall, delta basis, lower_is_bullish):
+  90-day  2.7 vs 2.4  (diff 0.3)  →  BEARISH   [registered prediction]
+  MoM     2.7 vs 2.8  (diff -0.1)  →  BULLISH   [robustness]
+  YoY     2.7 vs 4.6  (diff -1.9)  →  BULLISH   [robustness]
+  → Convention-sensitivity (90-day vs MoM vs YoY flips the sign) is the non-seasonally-adjusted caveat made visible.
+  → The BEARISH 90-day read reflects a PRE-EXISTING summer rise in unemployment, NOT an Ian forecast.
+
+REALIZED OUTCOME — LeePA sale-velocity (price-free; ±1.0 z-thresholds, NOT the 0.05 LAUS epsilon):
+  immediate (post-Ian): year 2023 count=35329 vs baseline 2020,2021,2022 (mean 36972.3, popStd 6379.9) → z=-0.2576 → NEUTRAL   | raw YoY -7.2%
+  recovery: year 2024 count=37219 vs baseline 2021,2022,2023 (mean 39193.7, popStd 3696.7) → z=-0.5342 → NEUTRAL   | raw YoY +5.3%
+
+computeSkillScore (WIRING SMOKE-TEST ONLY):
+  {"system_accuracy":0,"lake_tier1_accuracy":0,"persistence_accuracy":0,"lift":0,"n_calls":0,"n_families":1,"n_correct":0,"n_persistence_correct":0,"n_calls_by_tag":{}}
+  DEGENERACY NOTE: both calls share one slug AND one as_of_date, so the persistence-null logic
+  excludes the first call and drops neutral-observed targets — n_calls collapses to 0. The aggregate
+  metrics (system_accuracy, persistence_accuracy, lift) are NOT meaningful at N=1 same-slug/same-date.
+  The per-window table below is the real deliverable.
+
+PER-WINDOW RESULT (prediction = BEARISH):
+  window                  | observed  | z       | verdict
+  ------------------------|-----------|---------|----------------------
+  immediate (post-Ian)    | neutral   | -0.2576 | NO-DIRECTIONAL-OUTCOME
+  recovery                | neutral   | -0.5342 | NO-DIRECTIONAL-OUTCOME
+
+NET: pre-Ian call BEARISH (pre-existing labor trend, not Ian-prediction); both velocity windows
+NEUTRAL at ±1.0 → no scored hit/miss. Mechanism runs end-to-end on live point-in-time data. N≈1 —
+illustrative, not proof; does NOT lift the Track-B HOLD. TDT outcome = Phase 2 (pending self-ingest).
+================================================================
+```
+
 ## 2026-06-05 (Sonnet 4.6 · main) — fix(ddl): migration syntax fix + applied to live DB
 
 **`ADD CONSTRAINT IF NOT EXISTS` is not valid PostgreSQL syntax** (only columns support that form) — replaced with plain `ADD CONSTRAINT` (idempotent via the preceding `DROP CONSTRAINT IF EXISTS`). Migration re-run successfully against live DB. Verified: `marketbeat_swfl_source_sector_submarket_quarter_key` UNIQUE live, old 3-part constraint gone, `source_name` column present with default `'cw_marketbeat'`, all 13 new columns confirmed. Note: `sector` is nullable on the live table — PostgreSQL treats NULLs as distinct in UNIQUE constraints (MHS rows will always have a sector, so not a blocker).
