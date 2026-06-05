@@ -1,0 +1,48 @@
+name: FRED ALFRED LAUS monthly
+
+on:
+  schedule:
+    # 14:00 UTC = 10 AM ET on the 27th of each month.
+    # BLS LAUS data releases ~3rd-4th week of M+1; bls-laus pipeline fires day 25.
+    # FRED/ALFRED picks up the new BLS vintage within 1-2 days of BLS publication.
+    # Day 27 = 2-day buffer after bls-laus; clear of occupied monthly slots
+    # (day 25 = bls_laus, day 17 = fred_g17 — see docs/standards/pipeline-freshness.md §3).
+    - cron: "0 14 27 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip Storage upload"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run fred_laus_alfred pipeline
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.fred_laus_alfred.pipeline --dry-run
+          else
+            python -m ingest.pipelines.fred_laus_alfred.pipeline
+          fi
