@@ -29,7 +29,7 @@ Competitive urgency (disruption radar): ATTOM national MCP (Jan 2026) and Cotali
 
 | #   | Move                                                                                                                                                                                                                 | Owner              | Gate                                                                                     |
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------- |
-| 0   | Renew GSC domain verification — **confirm the date in Search Console first**, then execute                                                                                                                           | operator, today    | irreversible; expires 2026-06-05                                                         |
+| 0   | ~~Renew GSC domain verification~~ **✅ RESOLVED 2026-06-05 — phantom; was already verified days ago (Cloudflare DNS TXT + sitemap Success 06-04). No action was ever needed.**                                       | operator, today    | done — never open                                                                        |
 | 1   | `app/sitemap.ts` + `app/robots.ts` (+ force-dynamic recommendation) — justified as **crawlability, NOT JSON-LD theory**                                                                                              | agent (running)    | diff review before push                                                                  |
 | 2   | **Willingness-to-pay test = the keystone:** one-function bearer gate in `auth.ts` + a $39–79 page on the _existing_ housing-swfl ZIP-drill + env-swfl flood AAL → one LCAR/NABOR demo                                | next               | operator go (money/auth surface)                                                         |
 | 3   | **Sweep stays IN scope:** 1a polarity-gate tighten (live-correctness) + column 3 (Track-B input). Only the row-tier _schema/P4_ defers behind a NAMED consumer                                                       | ready              | 1a: diff before merge; per-metric polarity audit                                         |
@@ -76,6 +76,11 @@ The 7 future-proofing moves are an idea bank, ledgered as backlog, **not** commi
 
 ---
 
-## GSC — P0, operator-only
+## GSC — ✅ RESOLVED (phantom; reconciled 2026-06-05)
 
-GSC domain verification expires **2026-06-05**. Operator confirms the date in Search Console and executes. Highest-leverage hour on the board; outside every agent's scope.
+This was **never an open task** — it was already done days ago, and the "expires 2026-06-05 / highest-leverage hour" framing was simply wrong. Retracted. Evidence, live-verified 2026-06-05:
+
+- `swfldatagulf.com` is a GSC **Domain property** verified by the Cloudflare DNS TXT record `google-site-verification=OlE2yH0lorP2gDes2tzW7aqQfSYiRB4XdKQAN5wyIZE` (confirmed live via `Resolve-DnsName`).
+- `https://www.swfldatagulf.com/sitemap.xml` submitted **Success / 54 pages on 2026-06-04** — impossible against an unverified property.
+
+GSC DNS verification does **not** expire on a calendar date; it lasts as long as that TXT record exists in Cloudflare. The only maintenance rule: don't delete that record. No operator action was required then or now. _(A redundant `https://www.swfldatagulf.com/` URL-prefix property was added during 06-05 confusion and auto-verified off the domain ownership — harmless; remove via GSC → Settings → Remove property if you want it gone.)_
