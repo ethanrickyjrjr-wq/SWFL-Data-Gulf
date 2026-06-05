@@ -74,7 +74,7 @@ ALTER TABLE data_lake.marketbeat_swfl
 
 -- Correct 4-part retain-both key
 ALTER TABLE data_lake.marketbeat_swfl
-  ADD CONSTRAINT IF NOT EXISTS marketbeat_swfl_source_sector_submarket_quarter_key
+  ADD CONSTRAINT marketbeat_swfl_source_sector_submarket_quarter_key
   UNIQUE (source_name, sector, submarket, quarter);
 
 -- ── Per-field verification (supersedes the all-or-nothing `verified` gate) ─────

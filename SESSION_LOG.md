@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · main) — fix(ddl): migration syntax fix + applied to live DB
+
+**`ADD CONSTRAINT IF NOT EXISTS` is not valid PostgreSQL syntax** (only columns support that form) — replaced with plain `ADD CONSTRAINT` (idempotent via the preceding `DROP CONSTRAINT IF EXISTS`). Migration re-run successfully against live DB. Verified: `marketbeat_swfl_source_sector_submarket_quarter_key` UNIQUE live, old 3-part constraint gone, `source_name` column present with default `'cw_marketbeat'`, all 13 new columns confirmed. Note: `sector` is nullable on the live table — PostgreSQL treats NULLs as distinct in UNIQUE constraints (MHS rows will always have a sector, so not a blocker).
+
 ## 2026-06-05 (Sonnet 4.6 · main) — fix(ddl): O5 CORRECTED — 4-part UNIQUE (source_name, sector, submarket, quarter) + period-semantics note
 
 **CORRECTS prior entry below.** Live constraint was already 3-part `(sector, submarket, quarter)` — prior entry dropped the wrong constraint name and used a 3-part key missing `sector`. Correct: `DROP CONSTRAINT IF EXISTS marketbeat_swfl_sector_submarket_quarter_key` → `ADD CONSTRAINT marketbeat_swfl_source_sector_submarket_quarter_key UNIQUE (source_name, sector, submarket, quarter)`. `id` format → `source_name||'_'||sector||'_'||submarket||'_'||quarter` (e.g. `mhs_databook_retail_bonita-springs_2026-Q1`). Period-semantics note retained (MHS `quarter` derived from `prior_12mo_ending`; tentative until LB item C confirmed). Handoff O5 bullet + resolved note corrected to 4-part key.
