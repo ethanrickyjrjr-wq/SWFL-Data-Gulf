@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Sonnet 4.6 · claude/env-swfl-hydrology-stubs-e4PY7) — feat(cre-swfl): corridor_factor wired — Move #4
+
+**`refinery/lib/derived/corridor-factor.mts`** (new file, previously untracked): status header updated DRAFT → WIRED; band-threshold inline source comment added. **`refinery/packs/cre-swfl.mts`**: `computeCorridorFactor` imported + wired in `creSwflOutputProducer` — emits `corridor_factor` key_metric (median of per-corridor 0–100 composite; `bandFor` routes through `DEFAULT_CORRIDOR_FACTOR_CONFIG.bands` so conclusion prose stays in sync if operator tunes thresholds); caveat + conclusion line added. **`refinery/vocab/brain-vocabulary.json`**: `cre_corridor_factor` concept (`higher_is_bullish`, `index 0-100`, scope_note) + slug_index entry. **`refinery/packs/cre-swfl.test.mts`**: 2 new tests (metric present with CRE metrics / absent with null metrics). 45/45 pass. Opus diff-review cleared both blockers before push.
+
 ## 2026-06-05 (Sonnet 4.6 · claude/env-swfl-hydrology-stubs-e4PY7) — recon: Lee County NR WellMonitor endpoint spec
 
 **GW retirement STAYED** — TASK B gate fired: Lee County NR WellMonitor confirmed machine-readable NAVD88 daily water levels via anonymous POST, no CSRF. Full connector spec appended to `docs/superpowers/plans/2026-06-05-env-swfl-hydrology-stubs.md` (§4). Key findings: POST `https://naturalresources.leegov.com/Home/WellMonitor` returns HTML with data embedded as JS array; 177–182 wells, daily back to 1995; **Lee County ONLY** (zero Collier wells confirmed). Build blocked on `gw_highwater_threshold_source` check: ">2 ft NAVD88" exceedance threshold is unsourced — must cite FDEP/SFWMD/Lee NR standard before connector PR. Rainfall (TASK A) and GW retirement (TASK C) deferred to next session per plan.
@@ -30,6 +34,7 @@
 - `feat/firecrawl-spider-fallback-and-cron-fixes` (4 ahead, 354 behind): **awaiting operator review** — spider fallback wrapper, bls-laus cron day fix, pipeline-freshness §6. Diff shown in session.
 - **corridor-factor.mts** (untracked): **NEVER committed to any branch** — exists only as `refinery/lib/derived/` untracked files. Not wired. `corridor_factor_wire` check is the gate.
 - Dropped: `session-update-review-Qs7Pk` (superseded auth.ts), `roadmap-ideas-file-ps3Xc` (old docs), `swfl-mcp-http-transport-u3uG7` (already in main via PR #50).
+
 ## 2026-06-05 (Opus 4.8 · claude/env-swfl-hydrology-stubs-e4PY7) — env-swfl hydrology stubs: disposition report (report only, no pack/vocab changes)
 
 **Resolve-or-retire research for the 3 env-swfl hydrology slugs with vocab entries but no live source. Report persisted to `docs/superpowers/plans/2026-06-05-env-swfl-hydrology-stubs.md` for a follow-up session to execute.**
