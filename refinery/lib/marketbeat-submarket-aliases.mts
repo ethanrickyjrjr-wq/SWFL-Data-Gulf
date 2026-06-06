@@ -28,7 +28,7 @@
  *     'county'). It has no corridor profile mappings; its corridor array is
  *     intentionally empty. Metadata lives in SUBMARKET_METADATA below.
  *
- * Source of truth for corridor names: `fixtures/corridor-rents.json` (26 rows).
+ * Source of truth for corridor names: `fixtures/corridor-rents.json` (27 rows).
  */
 
 export type MarketbeatSubmarket = string;
@@ -99,7 +99,7 @@ export const MARKETBEAT_SUBMARKET_MAP: Record<
    * 23-26). Registered so submarketFor() resolves it and no "unmatched
    * corridor" caveat fires; it will silently produce zero MarketBeat rows.
    */
-  "Lehigh Acres": ["Lee Blvd Lehigh Acres"],
+  "Lehigh Acres": ["Lee Blvd Lehigh Acres", "Joel Blvd Lehigh Acres"],
   /**
    * Charlotte County — county-level grain (FIPS 12015, geographic_type: 'county').
    * No corridor profile mappings (county rows don't resolve to a single CRE corridor).

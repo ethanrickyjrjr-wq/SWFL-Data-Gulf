@@ -18,6 +18,15 @@
     "county": "lee"
   },
   {
+    "corridor_id": "joel-blvd-lehigh-acres",
+    "corridor_label": "Joel Blvd Lehigh Acres",
+    "display_name": "Joel Blvd",
+    "center_lat": 26.63,
+    "center_lon": -81.598,
+    "submarket": "Lehigh Acres",
+    "county": "lee"
+  },
+  {
     "corridor_id": "bonita-beach-rd-bonita-beach",
     "corridor_label": "Bonita Beach Rd / Bonita Beach",
     "display_name": "Bonita Beach",

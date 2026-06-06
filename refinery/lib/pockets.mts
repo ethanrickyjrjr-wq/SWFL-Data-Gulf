@@ -49,7 +49,7 @@ export const POCKETS: Record<Pocket, string[]> = {
   ],
   "Bonita Springs": ["bonita-beach-rd-bonita-beach", "bonita-trail"],
   "Fort Myers Beach": ["estero-blvd-fort-myers-beach"],
-  "Lehigh Acres": ["lee-blvd-lehigh-acres"],
+  "Lehigh Acres": ["lee-blvd-lehigh-acres", "joel-blvd-lehigh-acres"],
   "Downtown Naples": ["5th-ave-south-3rd-street-south"],
   "North Naples": [
     "vanderbilt-beach-rd-mercato",

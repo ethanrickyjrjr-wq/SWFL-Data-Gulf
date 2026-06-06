@@ -39,8 +39,8 @@ const fixture = JSON.parse(readFileSync(fixturePath, "utf-8")) as SlugFixture;
 
 test("slug parity (TS): fixture loads with cases", () => {
   assert.ok(
-    Array.isArray(fixture.cases) && fixture.cases.length >= 26,
-    `expected at least 26 cases (one per verified corridor); got ${fixture.cases?.length}`,
+    Array.isArray(fixture.cases) && fixture.cases.length >= 27,
+    `expected at least 27 cases (one per verified corridor); got ${fixture.cases?.length}`,
   );
 });
 

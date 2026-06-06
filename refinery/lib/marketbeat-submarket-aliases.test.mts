@@ -60,12 +60,12 @@ test("no name in MARKETBEAT_SUBMARKET_MAP is absent from corridor-rents.json", a
 
 // --- total coverage ---
 
-test("MARKETBEAT_SUBMARKET_MAP covers all 26 corridors", () => {
+test("MARKETBEAT_SUBMARKET_MAP covers all 27 corridors", () => {
   const total = Object.values(MARKETBEAT_SUBMARKET_MAP).reduce(
     (sum, arr) => sum + arr.length,
     0,
   );
-  assert.equal(total, 26);
+  assert.equal(total, 27);
 });
 
 // --- submarket counts ---

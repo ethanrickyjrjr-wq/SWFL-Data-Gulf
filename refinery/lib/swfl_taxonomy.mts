@@ -16,7 +16,7 @@
  */
 import { CORRIDOR_ALIASES } from "./corridor-aliases.mts";
 
-/** The 25 live corridor slugs (Lee + Collier). For the Phase-2 page-join. */
+/** The 27 live corridor slugs (Lee + Collier). For the Phase-2 page-join. */
 export const CORRIDOR_SLUGS: string[] = Object.keys(CORRIDOR_ALIASES);
 
 /** SWFL town/place tokens a searcher would type, lowercased. */

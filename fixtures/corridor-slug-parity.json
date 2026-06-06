@@ -64,6 +64,10 @@
       "expected": "lee-blvd-lehigh-acres"
     },
     {
+      "input": "Joel Blvd Lehigh Acres",
+      "expected": "joel-blvd-lehigh-acres"
+    },
+    {
       "input": "   Leading and trailing whitespace   ",
       "expected": "leading-and-trailing-whitespace"
     },

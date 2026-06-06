@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — feat(cre): Joel Blvd — Lehigh's 2nd corridor (completes lehigh_acres_corridor)
+
+- **Joel Blvd Lehigh Acres added** as the second Lehigh corridor (east-side N-S secondary spine; anchor Jack's Market @510 Joel Blvd, Mapbox-verified rooftop −81.5975/26.6198, Lee County). Centroid `26.63, −81.598` (true midpoint of the commercial stretch). Metrics NULL — same no-broker-coverage state as Lee Blvd; no regional cap_rate inherited (RULE 3 / no-invention).
+- 13 files, mirroring the Lee Blvd surfaces: 4 fixtures (`corridor-centroids`/`-rents`/`-slug-parity`/`corridor-profiles.sample`), identity slug in `corridor-aliases.mts`, `marketbeat-submarket-aliases.mts` Lehigh array, `pockets.mts` POCKETS, 4 count tests bumped 26→27. **Fixed 3 stale count comments the plan missed:** `cre-source.mts` (now `18 Lee / 9 Collier / 27`), `corridor-aliases.mts` header (`27 / 18 Lee`), `swfl_taxonomy.mts` (`27 live slugs`).
+- Live `corridor_profiles` insert (idempotent `WHERE NOT EXISTS`) → **27 verified corridors**; Lehigh Acres now Lee Blvd + Joel Blvd. Verified: `bun test refinery/` 1160 pass / 0 fail; `check-vocab-coverage` OK; alias 4-way consistency green.
+- Ledger: closed `lehigh_acres_corridor` (both corridors live). Lehigh data-parity roadmap → `docs/lehigh-acres-data-parity.md` (next steps to bring Lehigh to Fort Myers / Naples coverage).
+
 ## 2026-06-06 (Opus 4.8 · main) — correction(record): honest-record fixes to the Lehigh corridor entry + cre-source comment
 
 - **Two claims in the d640b08 entry below were wrong — correcting on top, not editing (RULE 0).** Verified this session against live `corridor_profiles` + code.
