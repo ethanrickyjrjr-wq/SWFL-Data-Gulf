@@ -118,6 +118,7 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
         Record<string, unknown>
       >,
     ["county", "kind_code", "period"],
+    { minRows: 2_000 }, // ~3.3k rows (Lee+Collier × 26mo × business types); floor above 1000 cap (issue #61)
   );
 }
 

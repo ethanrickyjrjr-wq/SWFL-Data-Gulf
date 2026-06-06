@@ -97,6 +97,7 @@ async function fetchFromSupabase(): Promise<CollierDbRow[]> {
         )
         .gte("date_issued", sinceIso) as unknown as PagedQuery<CollierDbRow>,
     "permit_number",
+    { minRows: 3_000 }, // ~5k rows in 448-day window; floor above 1000 cap (issue #61)
   );
 }
 

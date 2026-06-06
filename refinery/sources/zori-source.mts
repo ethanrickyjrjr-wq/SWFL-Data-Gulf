@@ -58,6 +58,7 @@ async function fetchFromSupabase(): Promise<ZoriZipRow[]> {
         .select("zip_code, period_end, rent_index, metro, county_name, city")
         .gte("period_end", sinceIso) as unknown as PagedQuery<ZoriZipRow>,
     ["zip_code", "period_end"],
+    { minRows: 1_500 }, // ~2.4k rows (24mo × ~100 SWFL ZIPs); floor above 1000 cap (issue #61)
   );
 }
 

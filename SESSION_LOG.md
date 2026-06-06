@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(row-floor-guard): wire minRows floors on 3 unguarded >1k-row selectAllPaged callers
+
+- `collier-permits-source.mts`: minRows: 3_000 (~5k rows in 448-day window)
+- `fl-dor-sales-tax-source.mts`: minRows: 2_000 (~3.3k rows Lee+Collier × 26mo × business types)
+- `zori-source.mts`: minRows: 1_500 (~2.4k rows 24mo × ~100 SWFL ZIPs)
+- All above 1000 PostgREST cap; 1158 tests pass. Closes check `row_floor_guard` pending nightly GHA confirm.
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(properties-collier-value): Collier real-estate brain LIVE (Redfin, free data)
 
 - New leaf brain `properties-collier-value` — Collier County market direction, peer to `properties-lee-value`, feeding master. Source: Redfin Data Center county market tracker (FREE public gzipped TSV; NO scraping, NO paid calls).
