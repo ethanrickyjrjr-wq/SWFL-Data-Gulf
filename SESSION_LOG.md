@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+
+
+## 2026-06-06 (Sonnet 4.6 · main) — fix(ci): commit missing _components to resolve TS2307 + unblock CI
+
+- `app/r/_components/` (report-shell, metrics-table, color-legend) committed — operator had refactored `app/r/[slug]/page.tsx` to import from this dir but left it untracked; CI was getting TS2307 after the <a>→<Link> fix landed the refactored page.
+- CI should be green on this push: lint errors (2x <a>→<Link>) fixed + TS2307 unblocked.
+
+## 2026-06-06 (Sonnet 4.6 · main) — feat(ui): commit operator components required by slug page refactor
+
+- `app/r/_components/`: report-shell.tsx, metrics-table.tsx, color-legend.tsx — operator's extracted components that `app/r/[slug]/page.tsx` now imports. Were untracked; committing alongside the refactored page to resolve TS2307 type errors in CI.
+
 ## 2026-06-06 (Opus 4.8 · main) — docs(trackers): reconcile all surfaces after #59 ship (same-page sweep)
 
 - Tracker reconciliation after the safety-swfl/#59 ship (commit aba0fc3) so every surface agrees:
