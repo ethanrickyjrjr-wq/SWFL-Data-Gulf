@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — correction(record): honest-record fixes to the Lehigh corridor entry + cre-source comment
+
+- **Two claims in the d640b08 entry below were wrong — correcting on top, not editing (RULE 0).** Verified this session against live `corridor_profiles` + code.
+  - "metrics NULL = news-signal corridor **like Cleveland Ave**" was **wrong**. Cleveland Ave carries full metrics; live query shows Lee Blvd Lehigh Acres is the **only** metrics-NULL corridor of 26 (`count(*) WHERE cap_rate_pct IS NULL AND deleted_at IS NULL` = 1). It's an outlier, not a peer of the metric'd corridors. No regional cap_rate may be inherited onto it: fixture spread is 5.8–8.5, so stamping one = an invented number (RULE 3 / no-invention). It stays NULL → ODD graduation only.
+  - "open→auto-close lifecycle **proven** this session" was **unearned**. No `corridor_gap_*` row ever reached prod — the gap detector ran dry-run/local only. The writer is sound but was not proven end-to-end in prod.
+- **Pre-existing comment bug fixed (no behavior change):** `cre-source.mts` CITY_TO_COUNTY header read `15 Lee / 9 Collier across the 24 corridors` — double-stale (live corpus is 26: Naples 9 = Collier, 17 Lee). Corrected to `17 Lee / 9 Collier across the 26 corridors`.
+- Opened ledger check `lehigh_cre_metrics` (cre-swfl, due 2026-09-30): manual ODD drop for Lehigh CRE metrics, no broker coverage. Docs/ledger only — zero code-behavior change.
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(ui): unify all four /r/ reads on shared components + teal/blue source-color rule
 
 - `app/r/_components/` (report-shell, metrics-table, color-legend) + all four `/r/` reads (`[slug]`, `cre-swfl/[corridor]`, `zip-report/[zip]`, `source/[table]`) now render off ONE shared component set — identical shell/header/footer/table chrome; only the data differs.

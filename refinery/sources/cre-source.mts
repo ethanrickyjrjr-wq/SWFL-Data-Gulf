@@ -37,7 +37,7 @@ const CORRIDOR_FIXTURE = path.join(
 /**
  * City -> county map for SWFL. `corridor_profiles` has `city` but no `county`
  * column; county is derived here. Confirmed mapping: Naples = Collier, every
- * other city in the corpus = Lee (15 Lee / 9 Collier across the 24 corridors).
+ * other city in the corpus = Lee (17 Lee / 9 Collier across the 26 corridors).
  */
 const CITY_TO_COUNTY: Record<string, "Lee" | "Collier"> = {
   Naples: "Collier",
