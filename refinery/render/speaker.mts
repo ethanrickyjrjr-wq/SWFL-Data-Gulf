@@ -236,6 +236,33 @@ export function sanitizeProse(text: string): string {
 }
 
 /**
+ * Post-process a master conclusion for user-facing display:
+ * - Strip "Combined confidence … upstream brains." (shown in badges)
+ * - Strip "Overrides: …." (internal cascade key, not a user concept)
+ * - Trim "Driven by:" list to top 5 items + "and N more" tail
+ */
+function cleanConclusionText(text: string): string {
+  let out = text
+    .replace(
+      /\s*Combined confidence\s[\d.]+,\s*trust tier\s*T\d+,\s*based on\s*\d+\s*upstream brain[s]?\.\s*/g,
+      " ",
+    )
+    .replace(/\s*Overrides:[^.]+\.\s*/g, " ");
+
+  out = out.replace(/Driven by:\s*([^.]+)\./g, (_m, list) => {
+    const items = list.split(/,\s*/);
+    if (items.length <= 5) return `Driven by: ${list}.`;
+    const top = items.slice(0, 5).join(", ");
+    return `Driven by: ${top}, and ${items.length - 5} more.`;
+  });
+
+  return out
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([.,;:])/g, "$1")
+    .trim();
+}
+
+/**
  * Max caveats rendered in a tier-2 reply. The full set stays in the tier-3
  * audit and in the BrainOutput (every downstream's input) — only the
  * human-facing chat reply is capped, with an explicit, non-silent "…and N more"
@@ -579,7 +606,7 @@ export function toDisplayBrain(brain: ParsedBrain): DisplayBrain {
     direction: out.direction,
     magnitudePct: Math.round(out.magnitude * 100),
     confidencePct: Math.round(out.confidence * 100),
-    conclusion: sanitizeProse(out.conclusion),
+    conclusion: cleanConclusionText(sanitizeProse(out.conclusion)),
     metrics: (out.key_metrics ?? []).map((m) => ({
       label: sanitizeProse(m.label),
       value: formatValue(m),

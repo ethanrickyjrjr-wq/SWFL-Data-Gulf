@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(speaker): clean master conclusion — strip metadata + trim driver list
+
+- `refinery/render/speaker.mts`: added `cleanConclusionText()` — strips "Combined confidence … upstream brains." (shown in badges), strips "Overrides: …." (internal key), trims "Driven by:" to top 5 + "and N more". Applied in `toDisplayBrain`. 34 tests pass.
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(mcp): real MCP App widget — logo + chart + five-part card
 
 - The logo/chart cannot render in claude.ai's TEXT reply (verified: inline images/UI aren't supported there). The ONLY surface that can is the MCP App "interactive tool" — a sandboxed iframe card below the message. claude.ai supports it (web/desktop/mobile, all plans, incl. remote connectors): Anthropic `blog/interactive-tools-in-claude` + `docs/connectors/building/mcp-apps`. Our registered widget was a dead canned shell ("decorative until rebuilt").
