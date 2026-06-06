@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — feat(ui): unify all four /r/ reads on shared components + teal/blue source-color rule
+
+- `app/r/_components/` (report-shell, metrics-table, color-legend) + all four `/r/` reads (`[slug]`, `cre-swfl/[corridor]`, `zip-report/[zip]`, `source/[table]`) now render off ONE shared component set — identical shell/header/footer/table chrome; only the data differs.
+- Color rule (operator-locked): metric VALUE wears its DIRECTION color (mangrove rising / coral falling / gold mixed / gray stable / teal when no trend). SOURCE links default **TEAL** = ingested-lake data (FRED, permits, Census, FDOT, NFIP, CRE); **BLUE** (`web` flag on `SourceLink`) reserved for City Pulse / LLM current-data only. Page-foot legend: `Sources — SWFL Data Gulf (teal) · Websites (blue)`.
+- Verified tsc + eslint clean on every /r/ file. Connector/chat (`app/api/mcp`) untouched; no "web-n" string anywhere in answers.
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(cre/ops): Lehigh Acres corridor LIVE + corridors get real /ops coverage
 
 - **Part A — Lehigh Acres corridor added (closes the only city_pulse city with 0 corridors).** Inserted verified `Lee Blvd Lehigh Acres` row into `corridor_profiles` (idempotent, direct; metrics NULL = news-signal corridor like Cleveland Ave; Walmart Supercenter @2523 Lee Blvd mapbox/dataplor-verified, character cited to Wikipedia). Code: `cre-source.mts` CITY_TO_COUNTY += Lehigh→Lee, `marketbeat-submarket-aliases.mts` map, `corridor-aliases.mts` identity slug, `pockets.mts` new "Lehigh Acres" pocket (union+POCKETS+POCKET_COUNTY), 3 fixtures (rents/centroids/slug-parity), `corridor-profiles.sample.json`. **Audit caught the inherited plan was wrong**: it claimed "no test hardcodes the count / 1158 pass" — actually **4 tests** hardcoded 25 (pockets, swfl_taxonomy, marketbeat, +parity case) and it **omitted pockets.mts** entirely. All fixed; centroid corrected to 26.61,-81.67 (plan's -81.62 was wrong). Full suite green **1211 pass, 0 fail**.

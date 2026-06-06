@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { parseBrainMarkdown } from "../../../../refinery/render/speaker.mts";
@@ -15,6 +14,16 @@ import {
 } from "../../../../refinery/sources/cre-source.mts";
 import { fetchVerifiedCorridorRows } from "../corridors";
 import { corridorJsonLd } from "../../../../lib/jsonld.ts";
+import {
+  ReportShell,
+  ReportHeader,
+  ReportFooter,
+  SectionTitle,
+  Meta,
+  Chip,
+} from "../../_components/report-shell";
+import { MetricsTable, type MetricRow } from "../../_components/metrics-table";
+import { ColorLegend } from "../../_components/color-legend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,192 +88,101 @@ export default async function CorridorPage({ params }: PageProps) {
   const ld = corridorJsonLd(c, freshnessToken, displayN);
 
   return (
-    <div className="min-h-dvh bg-navy-dark font-sans text-white">
-      <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
-        {/* Back nav */}
-        <nav className="mb-6">
-          <Link
-            href="/r/cre-swfl"
-            className="text-xs text-gray-400 transition-colors hover:text-white"
-          >
-            ← Commercial Real Estate
-          </Link>
-        </nav>
+    <ReportShell>
+      <nav className="mb-6">
+        <Link
+          href="/r/cre-swfl"
+          className="text-xs text-gray-400 transition-colors hover:text-white"
+        >
+          ← Commercial Real Estate
+        </Link>
+      </nav>
 
-        {/* Header */}
-        <header className="border-b border-white/10 pb-6">
-          <div className="flex items-center gap-2 text-gray-400">
-            <Image
-              src="/logo.png"
-              alt="SWFL Data Gulf"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded-lg"
+      <ReportHeader title={displayN}>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Chip>{c.city}</Chip>
+          <Chip>{c.county} County</Chip>
+          {c.corridor_type && <Chip>{formatType(c.corridor_type)}</Chip>}
+        </div>
+        <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+          {c.metrics_period && <Meta label="Period" value={c.metrics_period} />}
+          {freshnessToken && (
+            <Meta
+              label="Freshness"
+              value={
+                <code className="text-xs text-[#00d4aa]">{freshnessToken}</code>
+              }
             />
-            <p className="text-xs uppercase tracking-wider">SWFL Data Gulf</p>
-          </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            {displayN}
-          </h1>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Chip>{c.city}</Chip>
-            <Chip>{c.county} County</Chip>
-            {c.corridor_type && <Chip>{formatType(c.corridor_type)}</Chip>}
-          </div>
-          <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-            {c.metrics_period && (
-              <Meta label="Period" value={c.metrics_period} />
-            )}
-            {freshnessToken && (
-              <Meta
-                label="Freshness"
-                value={
-                  <code className="text-xs text-[#00d4aa]">
-                    {freshnessToken}
-                  </code>
-                }
-              />
-            )}
-            {c.metrics_verified_date && (
-              <Meta
-                label="Verified"
-                value={c.metrics_verified_date.slice(0, 10)}
-              />
-            )}
-          </dl>
-        </header>
+          )}
+          {c.metrics_verified_date && (
+            <Meta
+              label="Verified"
+              value={c.metrics_verified_date.slice(0, 10)}
+            />
+          )}
+        </dl>
+      </ReportHeader>
 
-        {/* Key metrics */}
-        {metrics.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold tracking-tight text-white">
-              Key metrics
-            </h2>
-            <div className="mt-4 overflow-x-auto rounded-xl glass-card-modern border border-white/10">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-white/[0.04] text-xs uppercase tracking-wider text-gray-400">
-                  <tr>
-                    <th className="px-4 py-3">Metric</th>
-                    <th className="px-4 py-3 text-right">Value</th>
-                    <th className="px-4 py-3">Trend</th>
-                    <th className="px-4 py-3">Source</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.06]">
-                  {metrics.map((m, i) => (
-                    <tr key={i}>
-                      <td className="px-4 py-3 font-medium text-white">
-                        {m.label}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-gray-200">
-                        {m.value}
-                      </td>
-                      <td className="px-4 py-3">
-                        <DirectionBadge direction={m.direction} />
-                      </td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
-                        {m.sourceUrl ? (
-                          <a
-                            href={m.sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
-                          >
-                            Source
-                          </a>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
+      {metrics.length > 0 && (
+        <section className="mt-10">
+          <SectionTitle>Key metrics</SectionTitle>
+          <MetricsTable metrics={metrics} trendLabel="Trend" />
+        </section>
+      )}
 
-        {/* Active intel */}
-        {c.flags.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold tracking-tight text-white">
-              Active intel
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {c.flags.map((f, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <FlagTypeBadge type={f.type} />
-                  <span className="text-sm text-gray-200">
-                    {f.flag}
-                    {f.status && (
-                      <span className="ml-1 text-xs text-gray-500">
-                        ({f.status})
-                      </span>
-                    )}
-                  </span>
-                </li>
+      {c.flags.length > 0 && (
+        <section className="mt-10">
+          <SectionTitle>Active intel</SectionTitle>
+          <ul className="mt-4 space-y-3">
+            {c.flags.map((f, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <FlagTypeBadge type={f.type} />
+                <span className="text-sm text-gray-200">
+                  {f.flag}
+                  {f.status && (
+                    <span className="ml-1 text-xs text-gray-500">
+                      ({f.status})
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {c.character_render && (
+        <section className="mt-10">
+          <SectionTitle>Area context</SectionTitle>
+          <div className="mt-4 space-y-4 text-sm leading-7 text-gray-300">
+            {stripCitations(c.character_render)
+              .split(/\n\n+/)
+              .filter((p) => p.trim().length > 0)
+              .map((para, i) => (
+                <p key={i}>{para.trim()}</p>
               ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Area context */}
-        {c.character_render && (
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold tracking-tight text-white">
-              Area context
-            </h2>
-            <div className="mt-4 space-y-4 text-sm leading-7 text-gray-300">
-              {stripCitations(c.character_render)
-                .split(/\n\n+/)
-                .filter((p) => p.trim().length > 0)
-                .map((para, i) => (
-                  <p key={i}>{para.trim()}</p>
-                ))}
-            </div>
-          </section>
-        )}
-
-        {/* Web citations */}
-        <WebCitations citations={c.character_citations} />
-
-        {/* Footer */}
-        <footer className="mt-12 border-t border-white/10 pt-6 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt=""
-              width={16}
-              height={16}
-              className="h-4 w-4 rounded"
-            />
-            <span>
-              SWFL Data Gulf Intelligence
-              {freshnessToken && (
-                <>
-                  {" · "}
-                  <code className="text-xs text-[#00d4aa]">
-                    {freshnessToken}
-                  </code>
-                </>
-              )}
-            </span>
           </div>
-          <p className="mt-2">
-            <Link
-              href="/r/cre-swfl"
-              className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
-            >
-              All SWFL commercial areas
-            </Link>
-          </p>
-        </footer>
-      </main>
+        </section>
+      )}
+
+      <WebCitations citations={c.character_citations} />
+
+      {metrics.length > 0 && <ColorLegend />}
+
+      <ReportFooter freshnessToken={freshnessToken || undefined}>
+        <Link
+          href="/r/cre-swfl"
+          className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
+        >
+          All SWFL commercial areas
+        </Link>
+      </ReportFooter>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
       />
-    </div>
+    </ReportShell>
   );
 }
 
@@ -278,13 +196,6 @@ function formatType(t: string): string {
 
 function stripCitations(text: string): string {
   return text.replace(/\[(?:internal|web)-\d+\]/g, "");
-}
-
-interface MetricRow {
-  label: string;
-  value: string;
-  direction: string | null;
-  sourceUrl: string | null;
 }
 
 function buildMetricRows(c: CorridorNormalized): MetricRow[] {
@@ -345,44 +256,6 @@ function parseWebCitations(raw: unknown): WebCitation[] {
       title: typeof w.title === "string" ? w.title : undefined,
     }))
     .filter((w) => w.url);
-}
-
-// ---------------------------------------------------------------------------
-// Components
-// ---------------------------------------------------------------------------
-
-function Meta({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="text-xs uppercase tracking-wider text-gray-400">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm text-white">{value}</dd>
-    </div>
-  );
-}
-
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-xs text-gray-300">
-      {children}
-    </span>
-  );
-}
-
-const DIRECTION_CONFIG: Record<string, { label: string; className: string }> = {
-  rising: { label: "↑ Rising", className: "text-[#5bc97a]" },
-  falling: { label: "↓ Falling", className: "text-[#e08158]" },
-  stable: { label: "→ Stable", className: "text-gray-400" },
-};
-
-function DirectionBadge({ direction }: { direction: string | null }) {
-  if (!direction) return <span className="text-gray-600">—</span>;
-  const cfg = DIRECTION_CONFIG[direction];
-  if (!cfg) return <span className="text-gray-400">{direction}</span>;
-  return (
-    <span className={`text-xs font-medium ${cfg.className}`}>{cfg.label}</span>
-  );
 }
 
 const FLAG_TYPE_CONFIG: Record<string, { label: string; className: string }> = {

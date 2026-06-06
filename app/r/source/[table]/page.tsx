@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { z } from "zod";
 import {
   isPublishedSourceTable,
@@ -6,6 +5,12 @@ import {
   type SourceTableEntry,
 } from "../_tables";
 import { createServiceRoleClient } from "../../../../utils/supabase/service-role";
+import {
+  ReportShell,
+  ReportHeader,
+  ReportFooter,
+  Meta,
+} from "../../_components/report-shell";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -198,179 +203,130 @@ function Shell({
   statusMessage,
 }: ShellProps) {
   return (
-    <div className="min-h-dvh bg-navy-dark font-sans text-white">
-      <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
-        <header className="border-b border-white/10 pb-6">
-          <div className="flex items-center gap-2 text-gray-400">
-            <Image
-              src="/logo.png"
-              alt="SWFL Data Gulf"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded-lg"
-            />
-            <p className="text-xs uppercase tracking-wider">SWFL Data Gulf</p>
-          </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            {label}
-          </h1>
-          <p className="mt-3 font-mono text-sm text-gray-400">{table}</p>
-        </header>
+    <ReportShell>
+      <ReportHeader title={label}>
+        <p className="mt-3 font-mono text-sm text-gray-400">{table}</p>
+      </ReportHeader>
 
-        <section className="mt-8">
-          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <Meta label="Source" value={sourceName ?? "—"} />
-            <Meta
-              label="Brain"
-              value={
-                brain ? (
-                  <a
-                    href={`/r/${brain}`}
-                    className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
-                  >
-                    {brain}
-                  </a>
-                ) : (
-                  "—"
-                )
-              }
-            />
-            <Meta
-              label="Rows"
-              value={rowCount === null ? "—" : rowCount.toLocaleString("en-US")}
-            />
-            <Meta
-              label="Date range"
-              value={
-                dateRange
-                  ? `${dateRange.min} → ${dateRange.max}`
-                  : dateColEffective === null
-                    ? "no date column detected"
-                    : "—"
-              }
-            />
-          </dl>
-          {docHref && (
-            <p className="mt-4 text-sm">
-              <a
-                href={docHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
-              >
-                Source documentation ↗
-              </a>
-            </p>
-          )}
-          {dateColEffective && (
-            <p className="mt-3 text-xs text-gray-500">
-              Sample ordered by{" "}
-              <code className="font-mono text-gray-300">
-                {dateColEffective}
-              </code>{" "}
-              desc.
-            </p>
-          )}
-        </section>
-
-        {statusMessage && (
-          <section className="mt-8">
-            <div className="glass-card-modern rounded-xl border border-white/10 px-4 py-3 text-sm text-gray-300">
-              {statusMessage}
-            </div>
-          </section>
+      <section className="mt-8">
+        <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+          <Meta label="Source" value={sourceName ?? "—"} />
+          <Meta
+            label="Brain"
+            value={
+              brain ? (
+                <a
+                  href={`/r/${brain}`}
+                  className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
+                >
+                  {brain}
+                </a>
+              ) : (
+                "—"
+              )
+            }
+          />
+          <Meta
+            label="Rows"
+            value={rowCount === null ? "—" : rowCount.toLocaleString("en-US")}
+          />
+          <Meta
+            label="Date range"
+            value={
+              dateRange
+                ? `${dateRange.min} → ${dateRange.max}`
+                : dateColEffective === null
+                  ? "no date column detected"
+                  : "—"
+            }
+          />
+        </dl>
+        {docHref && (
+          <p className="mt-4 text-sm">
+            <a
+              href={docHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
+            >
+              Source documentation ↗
+            </a>
+          </p>
         )}
+        {dateColEffective && (
+          <p className="mt-3 text-xs text-gray-500">
+            Sample ordered by{" "}
+            <code className="font-mono text-gray-300">{dateColEffective}</code>{" "}
+            desc.
+          </p>
+        )}
+      </section>
 
-        {rows.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold tracking-tight text-white">
-              Sample rows ({rows.length})
-            </h2>
-            <div className="mt-4 overflow-x-auto rounded-xl glass-card-modern border border-white/10">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-white/[0.04] text-xs uppercase tracking-wider text-gray-400">
-                  <tr>
+      {statusMessage && (
+        <section className="mt-8">
+          <div className="glass-card-modern rounded-xl border border-white/10 px-4 py-3 text-sm text-gray-300">
+            {statusMessage}
+          </div>
+        </section>
+      )}
+
+      {rows.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight text-white">
+            Sample rows ({rows.length})
+          </h2>
+          <div className="mt-4 overflow-x-auto rounded-xl glass-card-modern border border-white/10">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-white/[0.04] text-xs uppercase tracking-wider text-gray-400">
+                <tr>
+                  {columns.map((c) => (
+                    <th
+                      key={c}
+                      className="px-4 py-3 font-mono text-[11px] tracking-wide"
+                    >
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.06]">
+                {rows.map((row, i) => (
+                  <tr key={i}>
                     {columns.map((c) => (
-                      <th
+                      <td
                         key={c}
-                        className="px-4 py-3 font-mono text-[11px] tracking-wide"
+                        className="px-4 py-3 align-top font-mono text-xs text-gray-300 max-w-[220px] break-all"
                       >
-                        {c}
-                      </th>
+                        {displayCell(row[c])}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.06]">
-                  {rows.map((row, i) => (
-                    <tr key={i}>
-                      {columns.map((c) => (
-                        <td
-                          key={c}
-                          className="px-4 py-3 align-top font-mono text-xs text-gray-300 max-w-[220px] break-all"
-                        >
-                          {displayCell(row[c])}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
-        <footer className="mt-12 border-t border-white/10 pt-6 text-xs text-gray-500">
-          <p>
-            Provenance page for tables consumed by Brains. Rows served via a
-            server-only Supabase service-role client; no credentials reach the
-            browser.
-          </p>
-        </footer>
-      </main>
-    </div>
+      <ReportFooter note="Provenance page for tables consumed by Brains. Rows served via a server-only Supabase service-role client; no credentials reach the browser." />
+    </ReportShell>
   );
 }
 
 function NotPublishedPanel({ table }: { table: string }) {
   return (
-    <div className="min-h-dvh bg-navy-dark font-sans text-white">
-      <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
-        <header className="border-b border-white/10 pb-6">
-          <div className="flex items-center gap-2 text-gray-400">
-            <Image
-              src="/logo.png"
-              alt="SWFL Data Gulf"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded-lg"
-            />
-            <p className="text-xs uppercase tracking-wider">SWFL Data Gulf</p>
-          </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Not a published source
-          </h1>
-          <p className="mt-3 font-mono text-sm text-gray-400">{table}</p>
-        </header>
-        <section className="mt-8">
-          <p className="text-base leading-7 text-gray-300">
-            This table is not exposed via the public provenance route. If you
-            arrived here from a citation link, the brain that emitted it may
-            need to be regenerated against the current allowlist.
-          </p>
-        </section>
-      </main>
-    </div>
-  );
-}
-
-function Meta({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="text-xs uppercase tracking-wider text-gray-400">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm text-white">{value}</dd>
-    </div>
+    <ReportShell>
+      <ReportHeader title="Not a published source">
+        <p className="mt-3 font-mono text-sm text-gray-400">{table}</p>
+      </ReportHeader>
+      <section className="mt-8">
+        <p className="text-base leading-7 text-gray-300">
+          This table is not exposed via the public provenance route. If you
+          arrived here from a citation link, the brain that emitted it may need
+          to be regenerated against the current allowlist.
+        </p>
+      </section>
+    </ReportShell>
   );
 }
 
