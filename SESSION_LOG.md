@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+
+## 2026-06-06 (Sonnet 4.6 · main) — docs(brains): nightly built properties-collier-value + Lehigh Acres corridor gap logged
+
+- `brains/properties-collier-value.md` built by nightly rebuild (v1, token SWFL-7421-v1-20260606) — Collier county real-estate brain is now LIVE in master: Redfin county tracker (782 rows) + FDOR cadastral (290,973 parcels, SOH gap 36.47%). Wired into master as upstream since last push; nightly populated the brain file.
+- Opened check `lehigh_acres_corridor`: Lehigh Acres (~120k residents) is the only city in city_pulse with zero corridors in corridor_profiles — no CRE chain, no corridor-pulse. Fix = add Lee Blvd + Joel Blvd rows to corridor_profiles; Sunday corridor-pulse-weekly.yml auto-picks up.
+- City-pulse fix confirmed working: 7 new rows landed after 60d→7d window narrowing (was 0 for days).
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(safety-swfl): FBI CDE replaces unfit FIBRS → issue #59 RESOLVED, brain LIVE
 
 - **safety-swfl un-dormanted and LIVE in master.** Vendor-First-verified the FBI Crime Data Explorer API (`api.usa.gov/crime/fbi/cde`, key in `FBI_CDE_API_KEY` secret) and confirmed it fixes the #59 undercount: CDE exposes `participated_population`, so the coverage-matched Lee rate is **10.12/1k 2023 (matches the 10.82 UCR baseline)** vs FIBRS's broken 4.64. Backfilled 2022–2024 → `public.fdle_crime_swfl` (6 rows). 2021 excluded (Cape Coral PD didn't report — COVID-era transition gap; covered pop 586k→815k).
