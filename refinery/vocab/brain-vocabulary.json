@@ -5,7 +5,7 @@
     "description": "SWFL Intelligence Lake â€” canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
     "next_review": "2026-08-15",
     "audit_doc": "docs/vocab-audit.md",
-    "concept_count": 203
+    "concept_count": 204
   },
   "concepts": {
     "sba_overall_survival_rate": {
@@ -496,6 +496,25 @@
       "direction_concept": null,
       "status": "active",
       "scope_note": "Composite 0–100 index ranking SWFL CRE corridors on four metrics (cap rate, vacancy, absorption, asking rent) via within-cohort percentile-rank with equal weights. 67–100 = strong, 34–66 = neutral, 0–33 = soft. Corridor-health/landlord lens by default; buyer/yield lens available via config. Higher is bullish. Weights and band thresholds are empirical placeholders pending §8.2 backtest (2022–2024 corridor outcomes)."
+    },
+    "cre_corridor_pulse_signals": {
+      "id": "cre_corridor_pulse_signals",
+      "prefLabel": "Live Corridor-Pulse Signals",
+      "altLabels": [
+        "corridor pulse signals",
+        "live corridor signals",
+        "corridor current-events signals"
+      ],
+      "raw_slugs": ["corridor_pulse_signals_live"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl"],
+      "value_type": "count",
+      "unit": "signals",
+      "value_range": [0, 1000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of live corridor-pulse current-events signals (TTL-bounded news/lease/closure items) informing the cre-swfl read this period. Emitted only when count > 0; master gates its 'ask about a specific area' grain-boundary route on this contribution count, not on cre merely being wired. No inherent direction polarity — a signal can be bullish (new lease/opening) or bearish (closure/termination), so the concept is intentionally ungradeable."
     },
     "cre_corridor_evolution": {
       "id": "cre_corridor_evolution",
@@ -3464,6 +3483,7 @@
     "seasonal_index": "cre_seasonal_index",
     "evolution": "cre_corridor_evolution",
     "corridor_factor": "cre_corridor_factor",
+    "corridor_pulse_signals_live": "cre_corridor_pulse_signals",
     "sofr_rate": "macro_sofr_rate",
     "fl_unemployment": "macro_fl_unemployment",
     "cpi_yoy": "macro_cpi_yoy",
