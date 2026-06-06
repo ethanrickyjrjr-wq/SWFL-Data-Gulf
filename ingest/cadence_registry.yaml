@@ -323,7 +323,7 @@ pipelines:
     # Airports: RSW (Southwest Florida International) + PGD (Punta Gorda).
     # Primary metric: enplanements (monthly passengers boarding). YoY % back-filled.
     # Cron: 8th of month 15:00 UTC via rsw-airport-monthly.yml.
-    # First run: pending SQL migration (docs/sql/20260530_rsw_airport_monthly_create.sql) + manual dispatch.
+    # First run: 2026-05-31 — migration applied, 516 rows loaded, brain v2 built.
 
   - name: dbpr_sirs_submissions
     lane: tier-2

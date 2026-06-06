@@ -95,7 +95,10 @@ export const noaaGhcnRainfallSource: SourceConnector = {
     const { data, error } = await sb
       .from(TABLE)
       .select("station_id,station_name,county,year,annual_in,day_count");
-    if (error) throw error;
+    if (error)
+      throw new Error(
+        `noaa-ghcn-rainfall-source: ${error.message} (code ${error.code})`,
+      );
     const rows = (data ?? []) as GhcnRow[];
     const aggregate = computeAggregate(rows);
     return [

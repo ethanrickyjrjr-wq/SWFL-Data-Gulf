@@ -257,6 +257,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("labor-demand-swfl"),
     makeBrainInputSource("econ-dev-swfl"),
     makeBrainInputSource("city-pulse-swfl"),
+    makeBrainInputSource("rsw-airport"),
     makeBrainInputSource("news-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`

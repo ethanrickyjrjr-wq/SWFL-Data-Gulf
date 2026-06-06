@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(master): wire rsw-airport into master sources + GRANT noaa_ghcn_rainfall + master v69
+
+- `refinery/packs/master.mts`: added `makeBrainInputSource('rsw-airport')` to sources[] — was declared in input_brains since 2026-05-31 but never wired, contributing 0 fragments. Now 21 fragments in master.
+- `ingest/cadence_registry.yaml`: updated stale "pending SQL migration" comment on rsw_airport_monthly entry (migration ran 2026-05-31).
+- `refinery/sources/noaa-ghcn-rainfall-source.mts`: applied `GRANT SELECT ON data_lake.noaa_ghcn_rainfall TO service_role` (was blocking env-swfl rebuild with unserializable Supabase error object); fixed `throw error` → `throw new Error(error.message)`.
+- `brains/master.md` rebuilt to v69 (21 fragments, 0 orphans). Side-effect: full upstream chain rebuilt during --force run before target-only (franchise-outcomes v30, cre-swfl v49, macro-us v16, macro-florida v20, macro-swfl v32, sector-credit-swfl v21, tourism-tdt v23, permits-swfl v15, corridor-pulse-swfl v3, storm-history-swfl v8).
+- Closed check: `rsw_airport_phantom_edge`.
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(robots): AI-crawler moat policy + fix broken `/r/[slug]` build-breaker
 
 `app/robots.ts`: replaced "allow all" with a verified moat policy — blocks ~30 AI training + answer-engine crawlers, keeps search (Google/Bing/Apple) + social + live per-user fetches ("Balanced" posture, operator-chosen). Every token verified against the vendor's LIVE crawler docs 2026-06-06 via a 12-agent fan-out (caught gaps the draft missed: `ClaudeBot`, `OAI-SearchBot`, `Claude-SearchBot`, `cohere-training-data-crawler`, `Webzio-Extended`, `ImagesiftBot`, `meta-webindexer`, …). Kept `Disallow: /api/` for `*`. **Also fixed a build-breaker the prior `60814eb` commit stranded on main**: `app/r/[slug]/page.tsx` imported `fetchVerifiedCorridorRows` via a wrong relative path and `toCorridorLinks` from a non-existent `lib/corridor-links.ts` — consolidated to `../cre-swfl/corridors` (where both live). `next build` was failing → no deploy could ship; project typecheck now 3 → 0.
