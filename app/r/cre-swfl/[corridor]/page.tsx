@@ -371,8 +371,8 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 const DIRECTION_CONFIG: Record<string, { label: string; className: string }> = {
-  rising: { label: "↑ Rising", className: "text-emerald-400" },
-  falling: { label: "↓ Falling", className: "text-rose-400" },
+  rising: { label: "↑ Rising", className: "text-[#5bc97a]" },
+  falling: { label: "↓ Falling", className: "text-[#e08158]" },
   stable: { label: "→ Stable", className: "text-gray-400" },
 };
 
@@ -396,11 +396,11 @@ const FLAG_TYPE_CONFIG: Record<string, { label: string; className: string }> = {
   },
   construction: {
     label: "Construction",
-    className: "bg-amber-900/40 text-amber-300",
+    className: "bg-[#d4b370]/10 text-[#d4b370]",
   },
   regulatory: {
     label: "Regulatory",
-    className: "bg-rose-900/40 text-rose-300",
+    className: "bg-[#e08158]/10 text-[#e08158]",
   },
   status_update: {
     label: "Status",

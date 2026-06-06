@@ -52,9 +52,9 @@ export async function generateMetadata({
 }
 
 const DIRECTION_BADGE: Record<BrainOutputDirection, string> = {
-  bullish: "bg-emerald-900/40 text-emerald-400 border border-emerald-700/30",
-  bearish: "bg-rose-900/40 text-rose-400 border border-rose-700/30",
-  mixed: "bg-amber-900/40 text-amber-400 border border-amber-700/30",
+  bullish: "bg-[#5bc97a]/10 text-[#5bc97a] border border-[#5bc97a]/25",
+  bearish: "bg-[#e08158]/10 text-[#e08158] border border-[#e08158]/25",
+  mixed: "bg-[#d4b370]/10 text-[#d4b370] border border-[#d4b370]/25",
   neutral: "bg-white/[0.06] text-gray-400 border border-white/10",
 };
 

@@ -280,9 +280,9 @@ function Meta({ label, value }: { label: string; value: React.ReactNode }) {
 function badgeColor(polarity: DirectionPolarity, isUp: boolean): string {
   if (polarity === "none") return "text-gray-400";
   if (polarity === "higher_is_bullish") {
-    return isUp ? "text-emerald-400" : "text-rose-400";
+    return isUp ? "text-[#5bc97a]" : "text-[#e08158]";
   }
-  return isUp ? "text-rose-400" : "text-emerald-400";
+  return isUp ? "text-[#e08158]" : "text-[#5bc97a]";
 }
 
 function DataRow({

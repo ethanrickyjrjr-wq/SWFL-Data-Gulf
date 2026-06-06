@@ -2,6 +2,24 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(lee-permits): correct pager selector + backfill 90d → permits-swfl v16
+
+- `ingest/pipelines/lee_permits/scraper.py`: Root cause of Lee z-score=0 was NOT session-state loss (plan hypothesis). Real bug: `_PAGER_NEXT_SELECTOR = "a.aca_simple_text"` clicked "< Prev" on pages 2+ (first aca_simple_text link), bouncing 1↔2 forever. Fixed to `td.aca_pagination_PrevNext:last-child > a` (structure-based, confirmed against live pager HTML). Also `_PAGER_NEXT_WAIT_MS` 5000→4000 to stay under Firecrawl's 60s total-wait cap (page 11 was failing at 63s). `.dlt/secrets.toml`: fixed malformed TOML (unquoted DATAFORSEO values, gitignored).
+- Backfill: `--start 2026-03-07 --end 2026-06-06` → 111 rows in `data_lake.lee_building_permits` (was 28 garbage rows from broken v1). `permits-swfl` rebuilt to v16 (5086 fragments, Lee 111 + Collier 4975, 0 orphans).
+- Note: Lee z-score remains 0.00 — data-availability issue (only 15 days of actual issued-date history). Historical backfill across prior quarters needed to establish a baseline; separate task.
+
+## 2026-06-06 (Sonnet 4.6 · main) — fix(ui): align direction badge colors to gulf design system tokens
+
+- `app/r/[slug]/page.tsx`: replaced Tailwind emerald/rose/amber badge classes with gulf tokens (`#5bc97a` bullish, `#e08158` bearish, `#d4b370` mixed).
+- `app/r/cre-swfl/[corridor]/page.tsx`: same for rising/falling text and construction/regulatory flag badges.
+- `app/r/zip-report/[zip]/page.tsx`: same for polarity badge colors.
+- Eliminates the amber/brown "Mixed" badge that read as red against the dark background.
+
+## 2026-06-06 (Sonnet 4.6 · main) — fix(speaker): fill missing PACK_ID_LABELS + PACK_DISPLAY_NAMES for 9 brain slugs
+
+- `refinery/render/speaker.mts`: added `permits-swfl`, `rentals-swfl`, `housing-swfl`, `safety-swfl`, `labor-demand-swfl`, `econ-dev-swfl`, `city-pulse-swfl`, `rsw-airport`, `news-swfl` to both `PACK_ID_LABELS` (prose) and `PACK_DISPLAY_NAMES` (title). Raw slugs were leaking into master `/r/` conclusion paragraph verbatim.
+- 34 speaker tests pass.
+
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(ui): consistent logo across all /r/ report pages
 
 - `app/r/[slug]/page.tsx`, `app/r/cre-swfl/[corridor]/page.tsx`: replaced custom `WaveMark` SVG with `logo.png` (28×28 header, 16×16 footer); deleted dead WaveMark functions.

@@ -29,13 +29,14 @@ for the Accela portal and the SDK lacks the proxy flag in its CLI surface.
 Pagination: repeated /v2/scrape calls — each call for page K re-submits the
 search form then clicks the "Next >" pager link K-1 times before scraping.
 pagecount is read from the table's pagecount="N" attribute on page 1.
+Wait budget: Firecrawl caps total wait actions at 60 s. Base actions consume
+~13 s; each next-click adds _PAGER_NEXT_WAIT_MS. At 4 000 ms/click the cap
+hits at page 15 (13 + 14×4 = 69 s). Monthly cron handles ≤4 pages; a 90-day
+backfill needs 11 pages (53 s total). Longer ranges require date-range chunking.
 
 Per-permit detail: after pagination, (permit_id, cap_detail_url) tuples are
 parallel-scraped via /v2/scrape with stealth proxy to extract issued_date,
 declared_value_usd, and permit_type_raw. Stealth assumed until proven otherwise.
-
-TODO: if pagination loses session state between re-submits (open unknown — not
-tested by probe), fall back to a /interact Python REPL session for pages 2..N.
 """
 from __future__ import annotations
 
@@ -275,11 +276,16 @@ _ACCELA_SEARCH_URL = (
     "?module=Permitting&TabName=Permitting"
 )
 
-# Pager "Next >" link in the Accela GridView (fixture-confirmed 2026-05-26)
-_PAGER_NEXT_SELECTOR = "a.aca_simple_text"
+# "Next >" pager link. Pager row structure (confirmed live 2026-06-06):
+#   [ACA_Hide] [td.aca_pagination_PrevNext: < Prev] [td: 1][td: 2]...[td: ...]
+#   [td.aca_pagination_PrevNext: Next >]
+# "Next >" is always the last td in the row AND the last td.aca_pagination_PrevNext.
+# href is always empty so text is not selectable via attribute; positional works.
+_PAGER_NEXT_SELECTOR = "td.aca_pagination_PrevNext:last-child > a"
 
-# Wait after clicking "Next >" before scraping (ms)
-_PAGER_NEXT_WAIT_MS = 5000
+# Wait after clicking "Next >" before scraping (ms).
+# Keep (13_000 + (page_count-1) * _PAGER_NEXT_WAIT_MS) < 60_000 — Firecrawl cap.
+_PAGER_NEXT_WAIT_MS = 4000
 
 
 def _base_search_actions(start_str: str, end_str: str) -> list[dict]:

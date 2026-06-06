@@ -86,6 +86,15 @@ const PACK_ID_LABELS: Record<string, string> = {
   "logistics-swfl-nowcast": "SWFL freight nowcast",
   "traffic-swfl": "SWFL road traffic (FDOT)",
   "storm-history-swfl": "SWFL storm history",
+  "permits-swfl": "SWFL building permits",
+  "rentals-swfl": "SWFL rental market",
+  "housing-swfl": "SWFL housing market",
+  "safety-swfl": "SWFL public safety",
+  "labor-demand-swfl": "SWFL labor demand",
+  "econ-dev-swfl": "SWFL economic development",
+  "city-pulse-swfl": "SWFL city pulse",
+  "rsw-airport": "RSW airport activity",
+  "news-swfl": "SWFL news signals",
 };
 
 const BANNED_PROSE: Array<[RegExp, string]> = [
@@ -477,6 +486,14 @@ const PACK_DISPLAY_NAMES: Record<string, string> = {
   "traffic-swfl": "Southwest Florida — Road Traffic",
   "storm-history-swfl": "Southwest Florida — Storm History",
   "labor-demand-swfl": "Southwest Florida — Labor Demand",
+  "permits-swfl": "Southwest Florida — Building Permits",
+  "rentals-swfl": "Southwest Florida — Rental Market",
+  "housing-swfl": "Southwest Florida — Housing Market",
+  "safety-swfl": "Southwest Florida — Public Safety",
+  "econ-dev-swfl": "Southwest Florida — Economic Development",
+  "city-pulse-swfl": "Southwest Florida — City Pulse",
+  "rsw-airport": "RSW Airport Activity",
+  "news-swfl": "Southwest Florida — News Signals",
 };
 
 /** Kebab id → Title Case, e.g. "new-brain-swfl" → "New Brain Swfl". */
