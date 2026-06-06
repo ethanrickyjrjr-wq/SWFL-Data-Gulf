@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — fix(connector): City Pulse links + clean conclusion + grounded-speculation contract + our-logo icon
+
+- `app/api/mcp/server.ts`: City Pulse + news facts now surface as **highlighted Markdown links** ("From the web") — `loadWebFacts` (was hardcoded `web_facts: []`, so the 64 live sourced signals were thrown away). RESPONSE_CONTRACT rewritten with a razor line: part 2 (numbers) cites/invents nothing; part 3 "THE READ AHEAD" reaches — patterns/behaviors, City Pulse, conversation, past examples, may project numbers DERIVED from real ones, ends on strategic IF/THEN + what-to-watch + early flip signal. Widget view drops fake speculation, carries web_facts. MAX_WEB_FACTS 6→8.
+- `refinery/render/speaker.mts`: `isGroundedConditional` (exported) filters the circular "if the split resolves → mixed" tie-breaker everywhere (speaker/widget/dossier); `cleanConclusionText` now applied in tier-1/2 connector text (strips Driven-by/Overrides/trust-tier/confidence; keeps "Note conflicts:"); `[config]` caveat wall filtered via `isDisplayableCaveat`; brand "SWFL Intelligence Lake"→"SWFL Data Gulf"; relabel "If/then"→"What would move this"; shows first GROUNDED claim, not `[0]`.
+- `app/api/mcp/route.ts`: `serverInfo` declares OUR logo — inline `data:` SVG (can't fail to fetch) + hosted PNG; name "SWFL Data Gulf". Icon shape verified vs live MCP 2025-11-25 schema (cast through mcp-handler's narrow serverInfo type; SDK Implementation carries `icons`).
+- `lib/fetch-brain.ts`: dossier drops non-grounded conditional_claims.
+- Verified: 44 tests pass, `tsc` clean. **Serve-time only — NO master rebuild** (live on deploy). Plan doc marked RESOLVED.
+- NEXT (open check `connector_output_live_verify`): re-add the connector in claude.ai + run a question — confirm links / clean conclusion / read-ahead / icon. Card iframe + connector-icon rendering are claude.ai-side; the text answer is the reliable surface and is fixed.
+
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(permits-swfl): county-level Lee z-score fallback + historical backfill
 
 - Root cause of Lee z=0: (1) Lee permits have null lat/lon → corridor assignment returns null → corridor_cells for Lee is empty → `weightedZForCounty("lee")` always 0. (2) Accela portal returns ~110 currently-active permits for any date range; all have issued_dates in Feb-Mar 2026, so 12/13 historical windows are always empty → stdev=0.

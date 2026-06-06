@@ -4,6 +4,7 @@ import {
   parseBrainMarkdown,
   speak,
   toDisplayBrain,
+  isGroundedConditional,
   type SpeakerTier,
   type DisplayBrain,
 } from "../refinery/render/speaker.mts";
@@ -195,7 +196,12 @@ export function buildDossier(
     drivers: output.drivers,
     key_metrics: output.key_metrics,
     detail_tables: output.detail_tables,
-    conditional_claims: output.conditional_claims ?? [],
+    // Drop the deterministic circular tie-breaker so no downstream client (one
+    // that DOES forward _meta) ever sees "if the upstream split resolves → mixed"
+    // as a real forecast. Only grounded, about-the-world claims survive.
+    conditional_claims: (output.conditional_claims ?? []).filter(
+      isGroundedConditional,
+    ),
     grain_boundary: output.grain_boundary,
     contradicts: output.contradicts,
     caveats: output.caveats,

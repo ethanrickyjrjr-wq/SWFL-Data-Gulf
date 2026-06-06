@@ -102,6 +102,8 @@ const BANNED_PROSE: Array<[RegExp, string]> = [
   [/\bbifurcate(s|d|ing)?\b/gi, "split"],
   [/siblings?\s+haven'?t\s+shipped\.?/gi, ""],
   [/sub-brain\s+pointers?:?/gi, ""],
+  // Brand: the lake's internal name never reaches a reader — it is SWFL Data Gulf.
+  [/\bSWFL Intelligence Lake\b/gi, "SWFL Data Gulf"],
 ];
 
 // ---------------------------------------------------------------------------
@@ -250,17 +252,34 @@ function cleanConclusionText(text: string): string {
     )
     .replace(/\s*Overrides:[^.]+\.\s*/g, " ");
 
-  out = out.replace(/Driven by:\s*([^.]+)\./g, (_m, list) => {
-    const items = list.split(/,\s*/);
-    if (items.length <= 5) return `Driven by: ${list}.`;
-    const top = items.slice(0, 5).join(", ");
-    return `Driven by: ${top}, and ${items.length - 5} more.`;
-  });
+  // Strip the "Driven by: …" upstream roll-call entirely — process noise to a
+  // reader. Drivers still surface as badges on the report page, not in prose.
+  // The useful "Note conflicts: …" tension is left intact (it fuels the read).
+  out = out.replace(/\s*Driven by:[^.]*\.\s*/g, " ");
 
   return out
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\s+([.,;:])/g, "$1")
     .trim();
+}
+
+/**
+ * A conditional claim is "grounded" only when it speaks about the world
+ * (rates, prices, tourism, flood) rather than the synthesizer's own vote math.
+ * The deterministic master fallback emits a circular tie-breaker — "if the
+ * upstream split resolves → mixed; falsifier: one side clears 60% on the next
+ * refine" — which is process-noise, not a forecast. This filter suppresses
+ * those everywhere a human (or a downstream Claude) reads the output, so the
+ * one ungrounded claim never masquerades as a real prediction. Shared by the
+ * speaker, the MCP widget, and the dossier — filtered in exactly one place.
+ */
+export function isGroundedConditional(c: {
+  condition: string;
+  falsifier: string;
+}): boolean {
+  const internal =
+    /\b(upstream|refines?|refined|agreement threshold|weights?\s+clear|breaks?\s+the\s+tie|the\s+tie|synthesis|the\s+vote|vote\s+weight)\b/i;
+  return !internal.test(c.condition) && !internal.test(c.falsifier);
 }
 
 /**
@@ -347,7 +366,9 @@ export function speak(brain: ParsedBrain, opts: SpeakOptions): string {
 
 function renderTier1(brain: ParsedBrain, reportLink: string | null): string {
   const headline = oneLineHeadline(brain.output);
-  const conclusion = sanitizeProse(brain.output.conclusion);
+  const conclusion = cleanConclusionText(
+    sanitizeProse(brain.output.conclusion),
+  );
   const degradedToken =
     brain.output.degraded_inputs && brain.output.degraded_inputs.length > 0
       ? "\n\n" + brain.output.degraded_inputs.map(formatDegradedToken).join(" ")
@@ -360,16 +381,20 @@ function renderTier2(brain: ParsedBrain, reportLink: string | null): string {
   const out = brain.output;
   const blocks: string[] = [];
   blocks.push(`**${sanitizeProse(humanScope(brain.scope))}**`);
-  blocks.push(sanitizeProse(out.conclusion));
+  blocks.push(cleanConclusionText(sanitizeProse(out.conclusion)));
   if (out.degraded_inputs && out.degraded_inputs.length > 0) {
     const tokens = out.degraded_inputs.map(formatDegradedToken).join(" ");
     blocks.push(tokens);
   }
-  if (out.conditional_claims && out.conditional_claims.length > 0) {
-    const c = out.conditional_claims[0];
+  // Show the FIRST grounded conditional — not just [0]. If the primary claim is
+  // the deterministic circular tie-breaker ("if the upstream split resolves →
+  // mixed"), a later world-facing claim should still surface. One only, so the
+  // initial answer stays tight (operator: "don't ramble").
+  const groundedClaim = out.conditional_claims?.find(isGroundedConditional);
+  if (groundedClaim) {
     blocks.push(
-      `**If/then:** If ${sanitizeProse(c.condition)}, then expect ${c.then_direction}. ` +
-        `_Falsifier:_ ${sanitizeProse(c.falsifier)}.`,
+      `**What would move this:** If ${sanitizeProse(groundedClaim.condition)}, expect ${groundedClaim.then_direction}. ` +
+        `_What would flip it:_ ${sanitizeProse(groundedClaim.falsifier)}.`,
     );
   }
   if (out.key_metrics.length > 0) {
@@ -386,14 +411,20 @@ function renderTier2(brain: ParsedBrain, reportLink: string | null): string {
         ...caveats.filter((c) => !hasFixtureSentinel(c)),
       ];
     }
-    const shown = caveats.slice(0, MAX_DISPLAY_CAVEATS);
-    const lines = shown.map(
-      (c) => `- ${scrubCaveatTechnical(sanitizeProse(c))}`,
-    );
-    const extra = caveats.length - shown.length;
-    // No silent caps — name what was dropped (CLAUDE.md). Full set in tier 3.
-    if (extra > 0) lines.push(`- …and ${extra} more in the full audit.`);
-    blocks.push("**Caveats**\n" + lines.join("\n"));
+    // Scrub + drop machine-internal QA noise ([config] dumps, D-mapped-area and
+    // verified-corpus notes) — the SAME filter the web report page uses, so the
+    // connector text no longer shows the "[config], [config], …" wall.
+    const cleaned = caveats
+      .map((c) => scrubCaveatTechnical(sanitizeProse(c)))
+      .filter(isDisplayableCaveat);
+    if (cleaned.length > 0) {
+      const shown = cleaned.slice(0, MAX_DISPLAY_CAVEATS);
+      const lines = shown.map((c) => `- ${c}`);
+      const extra = cleaned.length - shown.length;
+      // No silent caps — name what was dropped (CLAUDE.md). Full set in tier 3.
+      if (extra > 0) lines.push(`- …and ${extra} more in the full audit.`);
+      blocks.push("**Caveats**\n" + lines.join("\n"));
+    }
   }
   if (out.grain_boundary && out.grain_boundary.not_available.length > 0) {
     blocks.push(
