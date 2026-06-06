@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(speaker): filter QA caveats + translate flood-barrier key
+
+- `refinery/render/speaker.mts`: added `isDisplayableCaveat()` — drops D-mapped-areas corpus notices, verified-corpus-this-run notices, and any caveat still containing [config] after scrubbing. These were flooding the "Worth knowing" section with 8 lines of cre-swfl QA noise.
+- Added `flood-barrier-mode-1` → "flood barrier" to PACK_ID_LABELS so the barrier caveat reads clean.
+- 34 tests pass.
+
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(speaker): clean master conclusion — strip metadata + trim driver list
 
 - `refinery/render/speaker.mts`: added `cleanConclusionText()` — strips "Combined confidence … upstream brains." (shown in badges), strips "Overrides: …." (internal key), trims "Driven by:" to top 5 + "and N more". Applied in `toDisplayBrain`. 34 tests pass.

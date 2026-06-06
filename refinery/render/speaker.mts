@@ -95,6 +95,7 @@ const PACK_ID_LABELS: Record<string, string> = {
   "city-pulse-swfl": "SWFL city pulse",
   "rsw-airport": "RSW airport activity",
   "news-swfl": "SWFL news signals",
+  "flood-barrier-mode-1": "flood barrier",
 };
 
 const BANNED_PROSE: Array<[RegExp, string]> = [
@@ -593,11 +594,22 @@ export interface DisplayBrain {
  * type level. Degrades gracefully on missing/empty fields (new brains, no
  * metrics, no caveats) — never throws.
  */
+/** Drop technical QA caveats that are noise on a user-facing page. */
+function isDisplayableCaveat(scrubbed: string): boolean {
+  // Sub-market corpus QA notes (cre-swfl corridor mapping quality)
+  if (/D-mapped areas/i.test(scrubbed)) return false;
+  if (/verified corpus this run/i.test(scrubbed)) return false;
+  // Anything that still contains a [config] token after scrubbing is
+  // machine-internal — suppress it from the summary view.
+  if (scrubbed.includes("[config]")) return false;
+  return true;
+}
+
 export function toDisplayBrain(brain: ParsedBrain): DisplayBrain {
   const out = brain.output;
-  const cleanCaveats = (out.caveats ?? []).map((c) =>
-    scrubCaveatTechnical(sanitizeProse(c)),
-  );
+  const cleanCaveats = (out.caveats ?? [])
+    .map((c) => scrubCaveatTechnical(sanitizeProse(c)))
+    .filter(isDisplayableCaveat);
   return {
     title: displayName(brain.brain_id),
     scope: sanitizeProse(humanScope(brain.scope)),
