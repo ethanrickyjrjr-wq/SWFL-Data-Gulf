@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — feat(collier-parcels): LIVE — 290,973 parcels, SOH gap 36.47% (corrects "deferred")
+
+- Operator approved the ingest. `data_lake.collier_parcels` LIVE: **290,973 unique parcels** (FDOR cadastral returns 364,827 features but merges to unique PARCEL_ID — multi-part rows carry identical values), 107,030 homesteaded, **Save-Our-Homes gap median 36.47%**. Grant + `collier_parcels_summary` view applied. `properties-collier-value` now emits `collier_soh_gap_median_pct` + `collier_total_parcels` live — full parcel + SOH parity with the Lee brain.
+- Two real bugs found + fixed during ingest: (1) resultOffset paging caps at exactly 100k on this ArcGIS Online host (volume guard caught the under-fetch) → switched to **OBJECTID keyset paging** → full 364,827 fetched. (2) random-per-chunk dlt `pipeline_name` left `_dlt_loads.schema_name` unmatchable by the freshness probe → **stable name "collier_parcels"** so /ops resolves `MAX(inserted_at)` (verified green). cadence `expected_rows_min` corrected 328000→261000 (90% of unique count). NOTE: bug (2) also affects `leepa` (random `leepa_t2_*` names) — not fixed there this pass.
+- master NOT rebuilt (nightly upstream-aware trigger picks it up; avoids LLM egress).
+
 ## 2026-06-06 (Opus 4.8 · main) — fix(connector): City Pulse links + clean conclusion + grounded-speculation contract + our-logo icon
 
 - `app/api/mcp/server.ts`: City Pulse + news facts now surface as **highlighted Markdown links** ("From the web") — `loadWebFacts` (was hardcoded `web_facts: []`, so the 64 live sourced signals were thrown away). RESPONSE_CONTRACT rewritten with a razor line: part 2 (numbers) cites/invents nothing; part 3 "THE READ AHEAD" reaches — patterns/behaviors, City Pulse, conversation, past examples, may project numbers DERIVED from real ones, ends on strategic IF/THEN + what-to-watch + early flip signal. Widget view drops fake speculation, carries web_facts. MAX_WEB_FACTS 6→8.

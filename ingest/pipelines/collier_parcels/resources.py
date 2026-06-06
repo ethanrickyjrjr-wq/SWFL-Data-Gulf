@@ -82,21 +82,26 @@ def _make_resource(chunk: list[dict]):
 
 
 def _promote_to_tier2(rows: list[dict], chunk_size: int = 5_000) -> None:
-    """Chunked merge into data_lake.collier_parcels (364k rows — replace blows the
-    Supabase pooler; merge + 5k chunks stays under the connection timeout)."""
-    import secrets as _secrets
+    """Chunked merge into data_lake.collier_parcels (replace blows the Supabase
+    pooler; merge + 5k chunks stays under the connection timeout).
 
+    ONE pipeline with a STABLE name ("collier_parcels") reused across chunks, so
+    _dlt_loads.schema_name == the cadence `dlt_schema_name` and the freshness probe
+    resolves MAX(inserted_at) correctly. (The random-per-chunk pipeline name the
+    leepa loader uses leaves the probe unable to match its schema_name — avoided
+    here. Each .run() is still its own load/connection, so the pooler-timeout
+    protection the chunking gives is preserved.)"""
     import dlt
 
+    pipeline = dlt.pipeline(
+        pipeline_name="collier_parcels",
+        destination="postgres",
+        dataset_name="data_lake",
+    )
     total = len(rows)
     n_chunks = (total + chunk_size - 1) // chunk_size
     for i in range(0, total, chunk_size):
         chunk = rows[i : i + chunk_size]
-        pipeline = dlt.pipeline(
-            pipeline_name=f"collier_parcels_t2_{_secrets.token_hex(4)}",
-            destination="postgres",
-            dataset_name="data_lake",
-        )
         load_info = pipeline.run(_make_resource(chunk)())
         load_info.raise_on_failed_jobs()
         print(f"  collier_parcels chunk {i // chunk_size + 1}/{n_chunks} ({len(chunk)} rows)")
