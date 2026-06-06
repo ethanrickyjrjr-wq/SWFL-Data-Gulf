@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Opus 4.8 · main) — fix(vocab): register corridor_pulse_signals_live → unblocks master rebuild (keystone)
+
+**Full brain→master→surface pipeline audit (5-slice workflow + adversarial verify). One real blocker, fixed.** cre-swfl emits `corridor_pulse_signals_live` (`cre-swfl.mts:1117`, gated on live corridor-pulse signals >0 — now firing, 8 live signals) but the slug was never registered in `refinery/vocab/brain-vocabulary.json`. master ingests it as a stage-2.5 claim and aborted LOUD (exit 1) — freezing master at v68 while cre-swfl moved to v47. Same conditional-metric-orphan class as 06-03. FIX (`0a80aef`): added `cre_corridor_pulse_signals` count concept + `slug_index` entry + `concept_count` 203→204. Verified: `vocab-coverage --all` clean (26 brains), `master --dry-run --target-only` passes with **0 orphans (would write v69)**, 18 vocab/alias tests pass.
+
+**Next (operator-chosen):** master is now buildable but the CLI gate (`cli.mts:381`) skips it as TTL-fresh until 06-10 with no upstream-aware trigger — data won't reach master until then. Fixing the rebuild-trigger (TDD) so master self-heals on the nightly when any upstream is newer. Also queued: typecheck `source_name` fixture drift + corridor-pulse citation chrome-leak cleanup. **Audit refuted concerns:** live surface in sync (master v68=local, cre v47=local), deploy works, MCP healthy, tests 1130/0, not mock-mode. Per-sector dark data (industrial/office) = intentional, untouched.
+
 ## 2026-06-05 (Opus 4.8 · main) — fix(mhs): sector-column + raw_slugs blockers; places resolver; Naples/FM area rollups; NO reingest
 
 **DO NOT truncate+reload marketbeat_swfl.** The prior handoff's "truncate + reload with clean slugs" is UNNECESSARY: `cre-swfl.mts` canonicalizes display/slug/citation at READ time (`resolvePlace`) while the DB query keys on the RAW `submarket` — stored raw labels (`The Islands`, `sfm-san-carlos`, `Outlying Collier County`) never reach a customer. The 48 live rows are correct steady-state. Verified by code-read + independent adversarial workflow (12 agents). **Reload buys nothing; don't redo this.**
