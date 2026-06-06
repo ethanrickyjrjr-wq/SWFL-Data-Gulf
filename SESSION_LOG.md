@@ -2,7 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — docs(trackers): reconcile all surfaces after #59 ship (same-page sweep)
 
+- Tracker reconciliation after the safety-swfl/#59 ship (commit aba0fc3) so every surface agrees:
+  - `_AUDIT_AND_ROADMAP/build-queue.md`: added safety-swfl FBI CDE done line (/ops reads this within 5 min).
+  - `checks` ledger: opened `fdle_cde_cron_2025` (confirm first quarterly cron run green + 2025 data lands).
+  - Auto-memory: `project_fdle-fibrs-population-bug.md` DORMANT→LIVE; MEMORY.md status + FDLE + row-floor lines updated.
+  - GH issues all reconciled: #61 closed, #59 closed, #44 open-by-design.
+- /ops dashboard auto-derives the rest (fdle_crime_swfl now in `pipelines:`, safety-swfl brain health) from cadence_registry + GitHub + Supabase — no manual ops-repo edit. Roadmap doc has no safety-swfl mention to update.
 
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(lint): <a>→<Link> in slug + corridor pages — CI green
 
