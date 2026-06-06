@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-05 (Opus 4.8 · main) — feat(refinery): upstream-aware master rebuild trigger + cre-swfl citation sanitize + typecheck drift
+
+**Second batch of the pipeline audit (operator-approved). 3 things, all verified green (full suite 1137/0, typecheck residue cleared, master --resilient dry-run clean).**
+
+1. **Upstream-aware master rebuild trigger** (`6fc90bd`): master was skipped as TTL-fresh in resilient/nightly mode even when a leaf rebuilt more recently — so updates never reached master until master's own 7-day TTL lapsed (the other half of "data reaches master"). Added pure `masterIsStaleVsUpstreams(masterRefinedAt, upstreamRefinedAts)` (4 TDD tests) + wired into the cli resilient master gate (`cli.mts`): fresh-but-behind any upstream ⇒ re-synthesize. Verified: `master --resilient --target-only --dry-run` logs the trigger and builds v69. **NOTE:** self-heals the NIGHTLY going forward; to make master current RIGHT NOW still needs a one-time `master --force` (LLM egress).
+2. **Citation sanitize** (`848ee8f`): `corridor_pulse_signals_live` adopted the first corridor-pulse signal's source receipt verbatim — raw scraped page markdown (nav/share chrome, full URLs) leaking into the user payload (CLEAN-rule). Added pure `sanitizeScrapedCitation` (3 TDD tests) + applied at the adoption point. Takes effect on the next cre-swfl rebuild.
+3. **Typecheck drift** (`848ee8f`): added required `source_name='cw_marketbeat'` to 10 marketbeat fixtures that drifted after `d4ab5d1`; 134→124 error TS lines (remaining 124 = pre-existing bun:test/vitest module noise).
+
+**Ledger UPDATE:** opened `master_expires_vs_cadence_policy` (slow-cadence brains read perpetually-expired in master) + `rsw_airport_phantom_edge` (input_brains edge with no source). **Untouched by design:** per-sector dark data (industrial/office). **Audit refuted:** live surface in sync (deploy works), MCP healthy, tests 1130→1137.
+
 ## 2026-06-05 (Opus 4.8 · main) — fix(vocab): register corridor_pulse_signals_live → unblocks master rebuild (keystone)
 
 **Full brain→master→surface pipeline audit (5-slice workflow + adversarial verify). One real blocker, fixed.** cre-swfl emits `corridor_pulse_signals_live` (`cre-swfl.mts:1117`, gated on live corridor-pulse signals >0 — now firing, 8 live signals) but the slug was never registered in `refinery/vocab/brain-vocabulary.json`. master ingests it as a stage-2.5 claim and aborted LOUD (exit 1) — freezing master at v68 while cre-swfl moved to v47. Same conditional-metric-orphan class as 06-03. FIX (`0a80aef`): added `cre_corridor_pulse_signals` count concept + `slug_index` entry + `concept_count` 203→204. Verified: `vocab-coverage --all` clean (26 brains), `master --dry-run --target-only` passes with **0 orphans (would write v69)**, 18 vocab/alias tests pass.
