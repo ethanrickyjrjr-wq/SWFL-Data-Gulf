@@ -22,6 +22,7 @@ import { rentalsSwfl } from "./rentals-swfl.mts";
 import { permitsSwfl } from "./permits-swfl.mts";
 import { hurricaneTracksFl } from "./hurricane-tracks-fl.mts";
 import { propertiesLeeValue } from "./properties-lee-value.mts";
+import { propertiesCollierValue } from "./properties-collier-value.mts";
 import { trafficSwfl } from "./traffic-swfl.mts";
 import { creSwfl } from "./cre-swfl.mts";
 import { envSwfl } from "./env-swfl.mts";
@@ -53,6 +54,7 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [permitsSwfl.id]: permitsSwfl,
   [hurricaneTracksFl.id]: hurricaneTracksFl,
   [propertiesLeeValue.id]: propertiesLeeValue,
+  [propertiesCollierValue.id]: propertiesCollierValue,
   [trafficSwfl.id]: trafficSwfl,
   [creSwfl.id]: creSwfl,
   [envSwfl.id]: envSwfl,

@@ -5,7 +5,7 @@
     "description": "SWFL Intelligence Lake â€” canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
     "next_review": "2026-08-15",
     "audit_doc": "docs/vocab-audit.md",
-    "concept_count": 204
+    "concept_count": 208
   },
   "concepts": {
     "sba_overall_survival_rate": {
@@ -1756,6 +1756,69 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Row count of data_lake.leepa_parcels (Lee County Property Appraiser parcel snapshot, layers 9+10+12 joined on FOLIOID). Single source of truth for the velocity denominator."
+    },
+    "properties_collier_homes_sold_zscore": {
+      "id": "properties_collier_homes_sold_zscore",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Collier County Homes-Sold Z-Score (Current Year vs Trailing 3yr Baseline)",
+      "altLabels": ["Collier velocity z", "Collier homes-sold z-score"],
+      "raw_slugs": ["collier_homes_sold_zscore"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-collier-value", "master"],
+      "value_type": "zscore",
+      "unit": "standard deviations",
+      "value_range": [-10, 10],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Direction signal for properties-collier-value. Bullish if z >= +1.0, bearish if z <= -1.0. Derived from Redfin Data Center 'All Residential' monthly HOMES_SOLD summed to calendar years, current complete year (year-1) vs trailing 3yr mean. Market-grain (Redfin closed sales), NOT parcel-grain — not directly comparable to the Lee qualified-sale velocity; compare direction, not raw counts."
+    },
+    "properties_collier_homes_sold_per_year": {
+      "id": "properties_collier_homes_sold_per_year",
+      "prefLabel": "Collier County Residential Homes Sold (Current Year, Redfin)",
+      "altLabels": ["Collier homes sold", "Collier closings"],
+      "raw_slugs": ["collier_homes_sold_per_year"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-collier-value", "master"],
+      "value_type": "count",
+      "unit": "home sales",
+      "value_range": [0, 100000],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of Redfin-recorded 'All Residential' closed sales in Collier County for the most recent COMPLETE calendar year (year-1 relative to today), summed from monthly HOMES_SOLD. Recent years are revised upward as late-recorded sales land; treat the latest year as a soft floor."
+    },
+    "properties_collier_median_sale_price_yoy": {
+      "id": "properties_collier_median_sale_price_yoy",
+      "prefLabel": "Collier County Median Sale Price Year-over-Year (Redfin)",
+      "altLabels": ["Collier median price YoY", "Collier price YoY"],
+      "raw_slugs": ["collier_median_sale_price_yoy"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-collier-value", "master"],
+      "value_type": "percent_change",
+      "unit": "percent",
+      "value_range": [-30, 30],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in Redfin median sale price ('All Residential') for Collier County at the latest published period. Positive = rising prices; negative = falling. Level/price metric, complementary to the homes-sold velocity direction signal."
+    },
+    "properties_collier_months_of_supply": {
+      "id": "properties_collier_months_of_supply",
+      "prefLabel": "Collier County Months of Supply (Redfin)",
+      "altLabels": ["Collier months of supply", "Collier MOS"],
+      "raw_slugs": ["collier_months_of_supply"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-collier-value", "master"],
+      "value_type": "rate",
+      "unit": "months",
+      "value_range": [0, 36],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Redfin months-of-supply for Collier County ('All Residential') at the latest published period: inventory divided by the monthly sales pace. Lower = tighter, seller-favorable; higher = more buyer leverage. Level metric, no direction contribution."
     },
     "fhfa_cape_coral_msa_yoy_pct": {
       "id": "fhfa_cape_coral_msa_yoy_pct",
@@ -3565,6 +3628,10 @@
     "sales_velocity_zscore": "properties_lee_sales_velocity_zscore",
     "soh_gap_median_pct": "properties_lee_soh_gap_median_pct",
     "total_parcels": "properties_lee_total_parcels",
+    "collier_homes_sold_zscore": "properties_collier_homes_sold_zscore",
+    "collier_homes_sold_per_year": "properties_collier_homes_sold_per_year",
+    "collier_median_sale_price_yoy": "properties_collier_median_sale_price_yoy",
+    "collier_months_of_supply": "properties_collier_months_of_supply",
     "fhfa_cape_coral_msa_yoy_pct": "fhfa_cape_coral_msa_yoy_pct",
     "fhfa_fl_state_yoy_pct": "fhfa_fl_state_yoy_pct",
     "fl_estab_count_retail": "macro_fl_estab_count_retail",

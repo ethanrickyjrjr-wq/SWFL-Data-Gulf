@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — feat(properties-collier-value): Collier real-estate brain LIVE (Redfin, free data)
+
+- New leaf brain `properties-collier-value` — Collier County market direction, peer to `properties-lee-value`, feeding master. Source: Redfin Data Center county market tracker (FREE public gzipped TSV; NO scraping, NO paid calls).
+- `ingest/pipelines/redfin_collier/` streams the national county tracker, filters to "Collier County, FL", merges → `data_lake.redfin_collier_market` (**782 rows live, grant applied, 157 All-Residential 2013–2026**). `refinery/sources/collier-market-source.mts` + `refinery/packs/properties-collier-value.mts` sum monthly HOMES_SOLD → yearly velocity z-score (reuses Lee's exact math) + median price YoY + months of supply.
+- Wired: vocab (4 `collier_*` concepts, count 204→208), master input edge, index + catalog registry, cadence entry (`redfin_collier`, 31d), GHA `redfin-collier-monthly.yml` (cron 18th + workflow_dispatch). Verified: dry-run 782; pytest 3/3; pack bun 14/14; **full refinery 1158/0**; vocab-coverage --all 26 OK; typecheck clean (new code).
+- LIMITATION vs Lee: market-grain only — **NO parcel detail, NO Save-Our-Homes gap** (Redfin has no assessed/taxable value). NEXT (in progress): parcel + SOH parity via FDOR Statewide Cadastral ArcGIS (CO_NO=21, verified live: 364,827 Collier parcels w/ JV/JV_HMSTD/AV_HMSTD/SALE_YR1/QUAL_CD1) → `data_lake.collier_parcels`.
+- master NOT rebuilt (avoids LLM egress; upstream-aware nightly trigger will pick it up). Overlap noted: `housing-swfl` already pulls Redfin SWFL ZIP-level; this brain adds the county-level direction vote (Lee↔Collier symmetry the O1 goal asked for).
+
 ## 2026-06-06 (Sonnet 4.6 · main) — feat(paywall): gate sources section across all /r/ report pages
 
 - `app/r/[slug]/page.tsx`: replaced "Full detail — every source and note" `<details>` + "Raw data" footer link with `SourcesGate` — shows blurred skeleton + lock badge + "Get access" CTA → `/#waitlist`.

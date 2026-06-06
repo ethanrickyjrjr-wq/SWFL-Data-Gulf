@@ -59,6 +59,13 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     ttl_seconds: 2592000,
   },
   {
+    id: "properties-collier-value",
+    domain: "real-estate",
+    scope:
+      "Collier County (FL) real-estate market direction read — homes-sold velocity z-score (current year vs trailing 3yr) plus median sale price YoY and months of supply, from the Redfin Data Center county market tracker.",
+    ttl_seconds: 2592000,
+  },
+  {
     id: "traffic-swfl",
     domain: "logistics",
     scope:
