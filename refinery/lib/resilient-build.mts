@@ -146,6 +146,23 @@ export function computeMasterDecision(
   return "published";
 }
 
+/** Pure: is master TTL-fresh-but-behind its inputs? True iff any upstream brain
+ *  was refined STRICTLY AFTER master's last synthesis — master is carrying a
+ *  stale snapshot of a leaf that has since moved (e.g. cre-swfl rebuilt to v47
+ *  on 06-05 while master sat at v68/06-03). The CLI uses this to override a
+ *  "skipped-fresh" master decision so the nightly re-synthesizes the moment a
+ *  leaf updates, instead of waiting out master's own 7-day TTL. Equal timestamps
+ *  are NOT stale (a same-run rebuild already yields a current master). An
+ *  unparseable upstream timestamp is ignored (NaN comparison is false) so junk
+ *  never forces a spurious rebuild. Exported for direct unit testing. */
+export function masterIsStaleVsUpstreams(
+  masterRefinedAt: string,
+  upstreamRefinedAts: readonly string[],
+): boolean {
+  const masterMs = Date.parse(masterRefinedAt);
+  return upstreamRefinedAts.some((ts) => Date.parse(ts) > masterMs);
+}
+
 /**
  * Pure: derive the process exit code from the full outcome set + master decision.
  *

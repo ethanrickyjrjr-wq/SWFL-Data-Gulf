@@ -9,6 +9,7 @@ import {
   isEligibleLastGood,
   classifyFailure,
   computeMasterDecision,
+  masterIsStaleVsUpstreams,
   buildOne,
   deriveExitCode,
   type BrainBuildOutcome,
@@ -417,4 +418,41 @@ test("deriveExitCode: deterministic dominates a mixed transient+deterministic se
     oc({ packId: "master" }),
   ];
   assert.equal(deriveExitCode(outcomes, "published", { dryRun: false }), 1);
+});
+
+// ── masterIsStaleVsUpstreams ─────────────────────────────────────────────────
+// The upstream-aware rebuild trigger: master is TTL-fresh by its own clock, but
+// an upstream brain.md was rebuilt MORE RECENTLY than master's last synthesis,
+// so master is carrying a stale snapshot and must rebuild. Without this, the CLI
+// gate skips master as "fresh" until its own 7-day TTL lapses, even though
+// cre-swfl (or any leaf) already moved — the "data doesn't reach master" gap.
+
+test("masterIsStaleVsUpstreams: an upstream refined AFTER master → stale (true)", () => {
+  // Real scenario: master v68 built 2026-06-03; cre-swfl v47 rebuilt 2026-06-05.
+  const masterRefinedAt = "2026-06-03T15:57:48Z";
+  const upstreams = [
+    "2026-06-01T00:00:00Z",
+    "2026-06-05T12:56:19Z", // cre-swfl v47 — newer than master
+    "2026-05-28T00:00:00Z",
+  ];
+  assert.equal(masterIsStaleVsUpstreams(masterRefinedAt, upstreams), true);
+});
+
+test("masterIsStaleVsUpstreams: all upstreams refined before master → fresh (false)", () => {
+  const masterRefinedAt = "2026-06-05T12:00:00Z";
+  const upstreams = [
+    "2026-06-01T00:00:00Z",
+    "2026-06-03T15:57:48Z",
+    "2026-05-28T00:00:00Z",
+  ];
+  assert.equal(masterIsStaleVsUpstreams(masterRefinedAt, upstreams), false);
+});
+
+test("masterIsStaleVsUpstreams: an upstream refined at the SAME instant → not stale (false; strictly-newer only)", () => {
+  const ts = "2026-06-05T12:00:00Z";
+  assert.equal(masterIsStaleVsUpstreams(ts, [ts]), false);
+});
+
+test("masterIsStaleVsUpstreams: no upstreams → fresh (false)", () => {
+  assert.equal(masterIsStaleVsUpstreams("2026-06-05T12:00:00Z", []), false);
 });

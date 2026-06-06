@@ -13,6 +13,7 @@ import { resolveBuildOrder, walkConsumers, brainStatus } from "./lib/dag.mts";
 import {
   buildOne,
   computeMasterDecision,
+  masterIsStaleVsUpstreams,
   deriveExitCode,
   type BrainBuildOutcome,
   type BuildReport,
@@ -378,7 +379,25 @@ async function main(): Promise<void> {
     const masterStatus = await brainStatus("master");
     let masterDecision: BuildReport["masterDecision"];
 
-    if (masterStatus.kind === "fresh" && !force) {
+    // Upstream-aware freshness trigger: master can be within its own 7-day TTL
+    // yet still carry a STALE snapshot of a leaf that rebuilt more recently
+    // (e.g. cre-swfl v47 on 06-05 while master sat at v68/06-03). Gather every
+    // upstream's CURRENT refined_at — post-rebuild for anything rebuilt this run,
+    // existing for anything skipped-fresh — and force a master re-synthesis if
+    // any is newer than master's last synthesis, instead of waiting out master's
+    // own TTL. This is the "data doesn't reach master" gap: without it, a leaf
+    // that updated between master TTL cycles never propagates until 06-10.
+    const upstreamRefinedAts: string[] = [];
+    for (const upstreamId of order) {
+      if (upstreamId === "master") continue;
+      const s = await brainStatus(upstreamId);
+      if (s.kind !== "missing") upstreamRefinedAts.push(s.refined_at);
+    }
+    const masterStaleVsUpstreams =
+      masterStatus.kind !== "missing" &&
+      masterIsStaleVsUpstreams(masterStatus.refined_at, upstreamRefinedAts);
+
+    if (masterStatus.kind === "fresh" && !force && !masterStaleVsUpstreams) {
       masterDecision = "skipped-fresh";
       outcomes.push({
         packId: "master",
@@ -386,6 +405,11 @@ async function main(): Promise<void> {
         written: false,
       });
     } else {
+      if (masterStaleVsUpstreams && masterStatus.kind === "fresh" && !force) {
+        console.log(
+          "[cli] master is TTL-fresh but an upstream rebuilt more recently — re-synthesizing (upstream-aware trigger).",
+        );
+      }
       const decision = computeMasterDecision(masterPack, outcomes);
       if (decision === "held") {
         masterDecision = "held";
