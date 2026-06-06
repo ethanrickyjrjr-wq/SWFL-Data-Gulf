@@ -50,9 +50,9 @@
   "scenarios": {
     "cold_start": {
       "_meta": {
-        "description": "Only 30 prior shock-log rows (below the 90-day threshold). Brain emits shock_state=insufficient_history, suppresses deviation_z, and skips state-machine progression.",
+        "description": "Only 3 prior shock-log rows (below the 6-build threshold). Brain emits shock_state=insufficient_history, suppresses deviation_z, and skips state-machine progression.",
         "expected_shock_state": "insufficient_history",
-        "expected_history_days_observed": 30,
+        "expected_history_days_observed": 3,
         "expected_deviation_z": null
       },
       "segments": [
@@ -149,7 +149,7 @@
       ],
       "prior_shock_log_history": {
         "kind": "in_band_history",
-        "count": 30,
+        "count": 3,
         "base_activity": 21241248000,
         "spread_pct": 1.5,
         "end_date": "2026-05-17T12:00:00Z"

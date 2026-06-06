@@ -99,14 +99,14 @@ const STALE_STRUCTURAL_CONSECUTIVE_DAYS = 90;
  * deviation_z = null (suppressed), and a verbatim caveat. The state machine
  * does not progress on cold-start days.
  */
-export const COLD_START_THRESHOLD_DAYS = 90;
+export const COLD_START_THRESHOLD_DAYS = 6;
 
 /** Rolling-window size for the mean/stddev computation. Set equal to the
  * cold-start threshold by design — once the brain has enough history to
  * leave cold start, every subsequent day's math uses the same 90-day window.
  * If a longer window is desired later, bump SHOCK_LOG_PULL_COUNT in the
  * connector to match. */
-export const ROLLING_WINDOW_DAYS = 90;
+export const ROLLING_WINDOW_DAYS = 24;
 
 export type ShockState =
   | "normal"

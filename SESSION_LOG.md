@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(logistics-swfl-nowcast): recalibrate cold-start threshold for 30d TTL cadence
+
+- `refinery/packs/logistics-swfl-nowcast.mts`: `COLD_START_THRESHOLD_DAYS` 90→6, `ROLLING_WINDOW_DAYS` 90→24. Brain had 18 shock-log rows but needed 90 to clear cold-start — with a 30-day TTL the log grows 1 row/rebuild, not 1/day, so the original threshold was ~6 years away. Recalibrated to match actual cadence (6 builds ≈ 6 months, 24 builds ≈ 2 years rolling window). Brain will exit "history immature" on next rebuild.
+- `refinery/packs/logistics-swfl-nowcast.test.mts` + `refinery/__fixtures__/logistics-swfl-nowcast.sample.json`: updated all hardcoded 90→6/24 references; cold_start fixture count 30→3; 95-run integration test rewritten to N=10 (threshold crosses at run 7); deviation_z spike test totalRuns 92→8. 45/45 pass.
 
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(city-pulse): narrow search window 60d→7d to break dedup-fatigue
 
@@ -2303,4 +2307,3 @@ Test deltas: bun suite **687 → 738 pass** (+51 new tests across `dates.test.mt
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(city-pulse): narrow search window 60d→7d to break dedup-fatigue
 
 - `ingest/pipelines/city_pulse/pipeline.py`: Firecrawl `tbs="qdr:m"` → `tbs="qdr:w"` (last week); Anthropic fallback query "LAST 60 DAYS" → "LAST 7 DAYS". Pipeline was running green daily but writing 0 new rows because both search paths returned the same article URLs that were already deduped in the DB. Narrowing to 7 days forces fresher results the dedup hasn't seen. corridor-pulse is healthy (cron Sundays, next run June 8).
-

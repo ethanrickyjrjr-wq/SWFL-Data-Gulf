@@ -211,7 +211,7 @@ test("rollingActivityStats: 100 in-band days around 240M with ±1% spread yields
     });
   }
   const stats = rollingActivityStats(log);
-  assert.equal(stats.observed, 90); // capped at ROLLING_WINDOW_DAYS
+  assert.equal(stats.observed, 24); // capped at ROLLING_WINDOW_DAYS
   assert.ok(
     Math.abs(stats.mean - base) < base * 0.005,
     `expected mean near ${base}, got ${stats.mean}`,
@@ -266,9 +266,9 @@ test("logisticsSwflNowcast pack: deterministic (skipTriageAgent + skipSynthesisA
   assert.equal(logisticsSwflNowcast.skipSynthesisAgent, true);
 });
 
-test("logisticsSwflNowcast pack: cold-start threshold is documented at 90 days", () => {
-  assert.equal(COLD_START_THRESHOLD_DAYS, 90);
-  assert.equal(ROLLING_WINDOW_DAYS, 90);
+test("logisticsSwflNowcast pack: cold-start threshold is 6 builds, rolling window is 24 builds", () => {
+  assert.equal(COLD_START_THRESHOLD_DAYS, 6);
+  assert.equal(ROLLING_WINDOW_DAYS, 24);
 });
 
 test("logisticsSwflNowcast pack source: contains the Path B semantic-shift comment on input_brains", async () => {
@@ -438,7 +438,7 @@ test("scenario cold_start → shock_state=insufficient_history, deviation_z supp
     assert.ok(shockMetric, "shock_state metric must be present");
     assert.equal(shockMetric!.value, "insufficient_history");
     assert.equal(flagMetric!.value, "valid");
-    assert.equal(historyDaysMetric!.value, 30);
+    assert.equal(historyDaysMetric!.value, 3);
     // SUPPRESSED — must not appear in key_metrics on a cold-start run.
     assert.equal(
       deviationZMetric,
@@ -610,8 +610,8 @@ test("scenario nominal → emits the 3 new rolling-stats metrics", async () => {
     assert.ok(mean, "rolling_mean_activity_tons_year must be emitted");
     assert.ok(stddev, "rolling_stddev_activity_tons_year must be emitted");
     assert.ok(history, "history_days_observed must be emitted");
-    // The 90-day-window cap on rolling stats means a 100-day history clamps to 90.
-    assert.equal(history!.value, 90);
+    // The 24-build-window cap on rolling stats means a 100-build history clamps to 24.
+    assert.equal(history!.value, 24);
     assert.ok(Number(stddev!.value) > 0);
   });
 });
@@ -1291,10 +1291,10 @@ function simulateWriterAppend(
   return row;
 }
 
-test("Lane 2D.1 end-to-end: 95-run loop — accumulator grows by 1 each run, shock_state transitions at cold-start threshold (run 90)", async () => {
-  // 95 > COLD_START_THRESHOLD_DAYS (90) gives headroom. We pick a base date
+test("Lane 2D.1 end-to-end: 10-run loop — accumulator grows by 1 each run, shock_state transitions at cold-start threshold (run 7)", async () => {
+  // 10 > COLD_START_THRESHOLD_DAYS (6) gives headroom. We pick a base date
   // and advance one day per run so refined_at is monotonic.
-  const N = 95;
+  const N = 10;
   const baseMs = Date.parse("2026-01-01T00:00:00.000Z");
   const accumulator: ShockLogRow[] = [];
   const segments = buildTwoInBandSegments();
@@ -1390,40 +1390,36 @@ test("Lane 2D.1 end-to-end: 95-run loop — accumulator grows by 1 each run, sho
     "run 1 sees 0 prior rows (the accumulator is empty when it runs)",
   );
 
-  // ---- Assertion 3: run 89 → still insufficient_history (history_days_observed = 88) ----
-  // At run 89, the accumulator has 88 prior rows (rows 1..88). All 88 are
-  // logged with current_activity_tons_year set on the cold-start runs because
-  // the producer emits the current_activity metric REGARDLESS of cold-start
-  // (only deviation_z + deviation_pct are suppressed). So 88 days < 90 →
-  // still insufficient_history.
-  const run89 = snapshotByRun.get(89)!;
+  // ---- Assertion 3: run 5 → still insufficient_history (history_days_observed = 4) ----
+  // At run 5, the accumulator has 4 prior rows. 4 < 6 → still insufficient_history.
+  const run5 = snapshotByRun.get(5)!;
   assert.equal(
-    metricValue(run89, "shock_state"),
+    metricValue(run5, "shock_state"),
     "insufficient_history",
-    "run 89 must still be insufficient_history (88 history days < 90 threshold)",
+    "run 5 must still be insufficient_history (4 history rows < 6 threshold)",
   );
-  assert.equal(metricValue(run89, "history_days_observed"), 88);
+  assert.equal(metricValue(run5, "history_days_observed"), 4);
   assert.equal(
-    hasMetric(run89, "deviation_z"),
+    hasMetric(run5, "deviation_z"),
     false,
-    "run 89 must still NOT emit deviation_z",
+    "run 5 must still NOT emit deviation_z",
   );
 
-  // ---- Assertion 4: run 90 → still insufficient_history (history_days_observed = 89, ONE short) ----
-  const run90 = snapshotByRun.get(90)!;
+  // ---- Assertion 4: run 6 → still insufficient_history (history_days_observed = 5, ONE short) ----
+  const run6 = snapshotByRun.get(6)!;
   assert.equal(
-    metricValue(run90, "history_days_observed"),
-    89,
-    "run 90 sees 89 prior rows (off-by-one: 1..89)",
+    metricValue(run6, "history_days_observed"),
+    5,
+    "run 6 sees 5 prior rows (off-by-one: 1..5)",
   );
   assert.equal(
-    metricValue(run90, "shock_state"),
+    metricValue(run6, "shock_state"),
     "insufficient_history",
-    "run 90 must still be insufficient_history (89 < 90)",
+    "run 6 must still be insufficient_history (5 < 6)",
   );
 
-  // ---- Assertion 5: run 91 → COLD-START THRESHOLD CROSSED ----
-  // At run 91, the accumulator has 90 prior rows, history_days_observed === 90,
+  // ---- Assertion 5: run 7 → COLD-START THRESHOLD CROSSED ----
+  // At run 7, the accumulator has 6 prior rows, history_days_observed === 6,
   // cold-start gate releases and shock_state transitions off
   // "insufficient_history". This is the transition the integration test
   // exists to prove.
@@ -1436,40 +1432,34 @@ test("Lane 2D.1 end-to-end: 95-run loop — accumulator grows by 1 each run, sho
   // denominator is 0. The second integration test below ("deviation_z is a
   // finite NUMBER...") injects a per-run perturbation to force stddev > 0
   // and asserts the real-z path explicitly.
-  const run91 = snapshotByRun.get(91)!;
+  const run7 = snapshotByRun.get(7)!;
   assert.equal(
-    metricValue(run91, "history_days_observed"),
-    90,
-    "run 91 sees exactly 90 prior rows → cold-start threshold met",
+    metricValue(run7, "history_days_observed"),
+    6,
+    "run 7 sees exactly 6 prior rows → cold-start threshold met",
   );
   assert.notEqual(
-    metricValue(run91, "shock_state"),
+    metricValue(run7, "shock_state"),
     "insufficient_history",
-    "run 91 must transition off insufficient_history once 90-day threshold is met",
+    "run 7 must transition off insufficient_history once 6-build threshold is met",
   );
 
-  // ---- Assertion 6: run 95 → not insufficient_history; deviation_z handled per stddev guard ----
-  // 95 runs in, the rolling window has been saturated for 5 runs. shock_state
-  // is some real classification (normal/anomaly/etc.) — the integration test
-  // proves the gate is open. deviation_z's number-vs-null behavior depends
-  // on the rolling stddev, exercised explicitly in the next test.
-  const run95 = snapshotByRun.get(95)!;
+  // ---- Assertion 6: run 10 → not insufficient_history; deviation_z handled per stddev guard ----
+  const run10 = snapshotByRun.get(10)!;
   assert.notEqual(
-    metricValue(run95, "shock_state"),
+    metricValue(run10, "shock_state"),
     "insufficient_history",
-    "run 95 must stay off insufficient_history (history is fully saturated)",
+    "run 10 must stay off insufficient_history (history is fully saturated)",
   );
-  // The accumulator row for run 95 was lifted via buildShockLogRow. Verify
-  // the row that the WRITER would have INSERTed carries the same shock_state.
-  const writerRow95 = accumulator[94];
+  const writerRow10 = accumulator[9];
   assert.notEqual(
-    writerRow95.shock_state,
+    writerRow10.shock_state,
     "insufficient_history",
-    "writer's row for run 95 must mirror the producer's non-cold shock_state",
+    "writer's row for run 10 must mirror the producer's non-cold shock_state",
   );
   assert.equal(
-    writerRow95.refined_at,
-    snapshotByRun.get(95)!.refined_at,
+    writerRow10.refined_at,
+    snapshotByRun.get(10)!.refined_at,
     "writer's row refined_at must match the BrainOutput refined_at",
   );
 });
@@ -1495,10 +1485,9 @@ test("Lane 2D.1 end-to-end: deviation_z is a finite NUMBER (not null) when curre
     }),
   );
 
-  // 90 baseline runs to fill the rolling window with the in-band activity,
-  // then ONE more run with a small in-band perturbation (so stddev > 0),
-  // then the spike run. So 92 total. Reads cleaner than burning 95 runs.
-  const totalRuns = 92;
+  // 6 baseline runs to clear the cold-start gate, then ONE perturbation
+  // (so stddev > 0), then the spike run. 8 total.
+  const totalRuns = 8;
 
   for (let runIdx = 0; runIdx < totalRuns; runIdx++) {
     const runIso = new Date(baseMs + runIdx * 86_400_000).toISOString();
