@@ -352,6 +352,41 @@ def test_dry_run_skips_dlt(capsys):
     assert "rows" in captured.out
 
 
+# ── publish-lag fallback ──────────────────────────────────────────────────────
+
+def test_fallback_when_month_not_published(capsys):
+    """Pipeline exits 0 and pulls latest when the requested month isn't on the listing page."""
+    from .fetcher import MonthlyReport
+    from .pipeline import main
+
+    # Simulate: only the prior month is available (not the requested one).
+    prev_year, prev_month = (2026, 5)
+    fake_report = MonthlyReport(year=prev_year, month=prev_month, label="May 2026", url="http://x/fake.xlsx")
+
+    fake_xlsx = _build_minimal_xlsx()
+
+    with (
+        patch(
+            "ingest.pipelines.collier_permits.pipeline.download_month",
+            side_effect=ValueError("No issued XLSX found for 2026-06"),
+        ),
+        patch(
+            "ingest.pipelines.collier_permits.pipeline.discover_issued_reports",
+            return_value=[fake_report],
+        ),
+        patch(
+            "ingest.pipelines.collier_permits.pipeline.download_latest_issued",
+            return_value=(fake_xlsx, "fake.xlsx"),
+        ),
+    ):
+        exit_code = main(["--month", "2026-06", "--dry-run"])
+
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "not yet published" in captured.out
+    assert "falling back" in captured.out
+
+
 # ── previous month helper ─────────────────────────────────────────────────────
 
 def test_previous_month_never_returns_current():

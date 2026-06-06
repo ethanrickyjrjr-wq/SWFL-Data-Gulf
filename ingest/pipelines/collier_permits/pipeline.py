@@ -13,9 +13,13 @@ from typing import Iterable
 import dlt
 import pandas as pd
 
-from .fetcher import discover_issued_reports, download_month
+from .fetcher import discover_issued_reports, download_latest_issued, download_month
 from .geocoder import assign_corridor, geocode_batch, load_collier_centroids
 from .normalizer import normalize_df
+
+# Collier publishes the prior month's XLSX mid-month; tolerate up to this many
+# days of lag before treating a missing month as an actual error.
+_PUBLISH_LAG_TOLERANCE_DAYS = 60
 
 
 @dlt.resource(
@@ -33,6 +37,29 @@ def permits_resource(rows: Iterable[dict] | None = None):
         yield row
 
 
+def _fallback_latest(year: int, month: int) -> tuple[bytes, str] | None:
+    """Return the latest published XLSX when the requested month isn't out yet.
+
+    Returns None (caller should re-raise) if the gap is too large to be a
+    normal publish lag — something is actually wrong.
+    """
+    reports = discover_issued_reports()
+    if not reports:
+        return None
+    latest = reports[0]
+    requested_first = date(year, month, 1)
+    latest_first = date(latest.year, latest.month, 1)
+    lag_days = (requested_first - latest_first).days
+    if 0 < lag_days <= _PUBLISH_LAG_TOLERANCE_DAYS:
+        print(
+            f"collier_permits: {year}-{month:02d} not yet published; "
+            f"falling back to latest available ({latest.year}-{latest.month:02d}). "
+            "This is normal before mid-month publish."
+        )
+        return download_latest_issued()
+    return None
+
+
 def _previous_month() -> tuple[int, int]:
     today = date.today()
     first_of_this = today.replace(day=1)
@@ -41,7 +68,13 @@ def _previous_month() -> tuple[int, int]:
 
 
 def run_pipeline(year: int, month: int) -> None:
-    xlsx_bytes, filename = download_month(year, month)
+    try:
+        xlsx_bytes, filename = download_month(year, month)
+    except ValueError:
+        result = _fallback_latest(year, month)
+        if result is None:
+            raise
+        xlsx_bytes, filename = result
     df = pd.read_excel(io.BytesIO(xlsx_bytes), engine="openpyxl", header=1)
     rows = normalize_df(df, source_file=filename)
 
@@ -92,7 +125,13 @@ def main(argv: list[str] | None = None) -> int:
         year, month = _previous_month()
 
     if args.dry_run:
-        xlsx_bytes, filename = download_month(year, month)
+        try:
+            xlsx_bytes, filename = download_month(year, month)
+        except ValueError:
+            result = _fallback_latest(year, month)
+            if result is None:
+                raise
+            xlsx_bytes, filename = result
         df = pd.read_excel(io.BytesIO(xlsx_bytes), engine="openpyxl", header=1)
         rows = normalize_df(df, source_file=filename)
         print(f"collier_permits dry-run: {len(rows)} rows from {filename} (geocode + dlt skipped)")

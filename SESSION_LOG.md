@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — fix(collier-permits): graceful publish-lag fallback + cron shift to 15th
+
+`ingest/pipelines/collier_permits/pipeline.py`: added `_fallback_latest()` + try/except around both `download_month()` call sites — when the requested month isn't published yet, falls back to latest available XLSX (idempotent merge on `permit_number`). `.github/workflows/collier-permits-monthly.yml`: shifted cron from 5th → 15th (Vendor-First confirmed: May 2026 still absent on June 6). `test_pipeline.py`: added `test_fallback_when_month_not_published` (36 tests total, 33 pass locally — 3 pre-existing dlt secrets failures unchanged).
+Next: no follow-up needed; close any open check for this cron-red issue if one exists.
+
 ## 2026-06-06 (Sonnet 4.6 · main) — feat(ui): Fiverr landing page integration + /r/ page dark-theme restyle
 
 Two separate changes shipped together:

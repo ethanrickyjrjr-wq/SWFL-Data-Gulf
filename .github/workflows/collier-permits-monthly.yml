@@ -2,9 +2,10 @@ name: Collier County permits monthly
 
 on:
   schedule:
-    # 8:00 AM ET on the 5th of each month — picks up previous month's published XLSX.
-    # Staggered from lee-permits-weekly (Monday) to avoid simultaneous Supabase load.
-    - cron: "0 12 5 * *"
+    # 8:00 AM ET on the 15th of each month — Collier publishes prior-month XLSXs
+    # mid-month (confirmed June 6 2026: May still absent). Pipeline falls back to
+    # latest-available if the exact month isn't posted yet (belt-and-suspenders).
+    - cron: "0 12 15 * *"
   workflow_dispatch:
     inputs:
       month:
