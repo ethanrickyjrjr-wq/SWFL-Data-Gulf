@@ -174,6 +174,7 @@ async function verifyOneCorridor(
           .sort((a, b) => a.quarter.localeCompare(b.quarter))
           .map((r) => ({
             kind: "marketbeat-swfl" as const,
+            source_name: "cw_marketbeat",
             submarket: r.submarket,
             quarter: r.quarter,
             vacancy_rate: r.vacancy_rate,

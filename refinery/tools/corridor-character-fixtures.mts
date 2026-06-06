@@ -73,6 +73,7 @@ export function makeNaplesFullDataInput(
   const marketbeatRows: MarketbeatSwflNormalized[] = [
     {
       kind: "marketbeat-swfl",
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2025-Q1",
       vacancy_rate: 4.8,
@@ -82,6 +83,7 @@ export function makeNaplesFullDataInput(
     },
     {
       kind: "marketbeat-swfl",
+      source_name: "cw_marketbeat",
       submarket: "Naples",
       quarter: "2026-Q1",
       vacancy_rate: 6.1,
@@ -196,6 +198,7 @@ export function makeLeePermitsInput(
     marketbeat_submarket_rows: [
       {
         kind: "marketbeat-swfl",
+        source_name: "cw_marketbeat",
         submarket: "Fort Myers",
         quarter: "2026-Q1",
         vacancy_rate: 6.5,

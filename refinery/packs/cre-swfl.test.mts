@@ -8,7 +8,7 @@ import type { CorridorNormalized } from "../sources/cre-source.mts";
 
 process.env["REFINERY_SOURCE"] = "fixture";
 
-const { creSwfl, computeMarketbeatParentRollups } =
+const { creSwfl, computeMarketbeatParentRollups, sanitizeScrapedCitation } =
   await import("./cre-swfl.mts");
 const { corridorSource } = await import("../sources/cre-source.mts");
 const { marketbeatSwflSource } =
@@ -434,6 +434,7 @@ test("marketbeat: zero-matched-corridors caveat fires when submarket reports a v
   const lonely = makeCorridorFragment("Cape Coral Pkwy E", "Cape Coral");
   const naplesMb: MarketbeatSwflNormalized = {
     kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
     submarket: "Naples",
     quarter: "2026-Q3",
     vacancy_rate: 4.8,
@@ -469,6 +470,7 @@ test("marketbeat: singleton reset — running corpusSummary twice does not let a
   // mbRows with corridors that match each.
   const naples: MarketbeatSwflNormalized = {
     kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
     submarket: "Naples",
     quarter: "2026-Q3",
     vacancy_rate: 4.8,
@@ -478,6 +480,7 @@ test("marketbeat: singleton reset — running corpusSummary twice does not let a
   };
   const fm: MarketbeatSwflNormalized = {
     kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
     submarket: "Fort Myers",
     quarter: "2026-Q3",
     vacancy_rate: 8.2,
@@ -648,6 +651,7 @@ test("marketbeat: non-empty feed with an unmatched corridor → incomplete-cover
   // partial gap — the coverage caveat must still fire.
   const naplesMb: MarketbeatSwflNormalized = {
     kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
     submarket: "Naples",
     quarter: "2026-Q3",
     vacancy_rate: 4.8,
@@ -762,4 +766,43 @@ test("rollup: an unresolved submarket is skipped, never invents a parent", () =>
     mbRow("Gotham", 6.0, null, null),
   ]);
   assert.equal(rollups.length, 0);
+});
+
+// ── sanitizeScrapedCitation ──────────────────────────────────────────────────
+// corridor-pulse signal source receipts arrive as RAW scraped page markdown
+// (nav links, share buttons, full encoded URLs). Adopting one verbatim as the
+// corridor_pulse_signals_live citation leaks that chrome into the user payload
+// (violates the CLEAN rule of engagement). The sanitizer strips markdown-link
+// chrome (keeping the visible text), collapses whitespace, and bounds length.
+
+test("sanitizeScrapedCitation: strips markdown-link chrome but keeps the visible text", () => {
+  const dirty =
+    'Old Naples lease terminated: "[Skip to main content](https://x.example/article#main) [Facebook](https://x.example/share?u=long-encoded-url)"';
+  const clean = sanitizeScrapedCitation(dirty);
+  assert.ok(!clean.includes("]("), `markdown link syntax leaked: ${clean}`);
+  assert.ok(
+    !clean.includes("https://x.example/share"),
+    `raw share URL leaked: ${clean}`,
+  );
+  assert.ok(clean.includes("Skip to main content"), "kept the link text");
+  assert.ok(clean.includes("Old Naples lease terminated"), "kept the headline");
+});
+
+test("sanitizeScrapedCitation: collapses newlines and runs of whitespace", () => {
+  assert.equal(
+    sanitizeScrapedCitation("line one\n\n  line two\t\tline three"),
+    "line one line two line three",
+  );
+});
+
+test("sanitizeScrapedCitation: bounds length with an ellipsis; short clean text passes through unchanged", () => {
+  const short =
+    "Restaurant lease terminated in Old Naples (Gulfshore Business).";
+  assert.equal(sanitizeScrapedCitation(short), short);
+  const clean = sanitizeScrapedCitation("x".repeat(500));
+  assert.ok(
+    clean.length <= 221,
+    `expected bounded length, got ${clean.length}`,
+  );
+  assert.ok(clean.endsWith("…"), "expected an ellipsis on truncation");
 });

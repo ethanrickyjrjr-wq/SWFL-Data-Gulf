@@ -311,6 +311,25 @@ export interface MarketbeatParentRollup {
   }[];
 }
 
+/** Strip scraped-page chrome from a citation adopted from an upstream source
+ *  receipt. corridor-pulse signal sources carry RAW page markdown (nav/share
+ *  links, full encoded URLs); adopting one verbatim leaks that into the
+ *  user-facing payload (violates the CLEAN rule of engagement). Removes
+ *  markdown-link syntax (keeping the visible label), collapses whitespace, and
+ *  bounds length. Pure; exported for unit testing. */
+export const MAX_ADOPTED_CITATION_LEN = 220;
+export function sanitizeScrapedCitation(raw: string): string {
+  const stripped = raw
+    // [text](url) → text  — drop the URL + brackets, keep the visible label
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // collapse every run of whitespace (newlines/tabs/repeats) to one space
+    .replace(/\s+/g, " ")
+    .trim();
+  return stripped.length <= MAX_ADOPTED_CITATION_LEN
+    ? stripped
+    : stripped.slice(0, MAX_ADOPTED_CITATION_LEN) + "…";
+}
+
 /**
  * Roll MarketBeat submarket rows up to their parent PLACE and emit a median per
  * field for any parent that aggregates ≥2 distinct child submarkets — so the
@@ -689,7 +708,17 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     // FULL live count (pre-narrative-cap) + a representative source receipt for
     // creSwflOutputProducer to emit as one deterministic count key_metric.
     lastCorridorPulseSignalCount = signals.length;
-    lastCorridorPulseSource = signals[0]?.source ?? null;
+    // Adopt the first signal's source receipt as the count metric's citation,
+    // but SANITIZE it first — corridor-pulse receipts are raw scraped page
+    // markdown and would otherwise leak nav/share chrome into the user payload.
+    const repPulseSource = signals[0]?.source ?? null;
+    lastCorridorPulseSource =
+      repPulseSource != null
+        ? {
+            ...repPulseSource,
+            citation: sanitizeScrapedCitation(repPulseSource.citation ?? ""),
+          }
+        : null;
     for (const s of signals.slice(0, CORRIDOR_PULSE_NARRATIVE_CAP)) {
       facts.push({
         topic: "corridor-pulse:recent",

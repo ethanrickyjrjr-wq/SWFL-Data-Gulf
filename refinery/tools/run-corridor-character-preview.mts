@@ -353,6 +353,7 @@ async function runOneCorridor(
           .sort((a, b) => a.quarter.localeCompare(b.quarter))
           .map((r) => ({
             kind: "marketbeat-swfl",
+            source_name: "cw_marketbeat",
             submarket: r.submarket,
             quarter: r.quarter,
             vacancy_rate: r.vacancy_rate,

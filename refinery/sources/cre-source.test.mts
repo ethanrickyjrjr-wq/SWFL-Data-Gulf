@@ -60,6 +60,7 @@ function mkCorridor(name: string): CorridorNormalized {
 function mkMbRow(submarket: string): MarketbeatSwflNormalized {
   return {
     kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
     submarket,
     quarter: "2026-Q3",
     vacancy_rate: 5.0,
