@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — feat(robots): AI-crawler moat policy + fix broken `/r/[slug]` build-breaker
+
+`app/robots.ts`: replaced "allow all" with a verified moat policy — blocks ~30 AI training + answer-engine crawlers, keeps search (Google/Bing/Apple) + social + live per-user fetches ("Balanced" posture, operator-chosen). Every token verified against the vendor's LIVE crawler docs 2026-06-06 via a 12-agent fan-out (caught gaps the draft missed: `ClaudeBot`, `OAI-SearchBot`, `Claude-SearchBot`, `cohere-training-data-crawler`, `Webzio-Extended`, `ImagesiftBot`, `meta-webindexer`, …). Kept `Disallow: /api/` for `*`. **Also fixed a build-breaker the prior `60814eb` commit stranded on main**: `app/r/[slug]/page.tsx` imported `fetchVerifiedCorridorRows` via a wrong relative path and `toCorridorLinks` from a non-existent `lib/corridor-links.ts` — consolidated to `../cre-swfl/corridors` (where both live). `next build` was failing → no deploy could ship; project typecheck now 3 → 0.
+Next: robots.txt is advisory + doesn't touch the OPEN `/api/b/*` JSON (no auth/rate-limit) — recommended Vercel Firewall rate-limit (~60 rpm/IP) on `/api/b/*` + `/api/mcp` as the real lever; tracked as a follow-up check. NOT auth-gating (breaks the open-MCP GTM).
+
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(collier-permits): graceful publish-lag fallback + cron shift to 15th
 
 `ingest/pipelines/collier_permits/pipeline.py`: added `_fallback_latest()` + try/except around both `download_month()` call sites — when the requested month isn't published yet, falls back to latest available XLSX (idempotent merge on `permit_number`). `.github/workflows/collier-permits-monthly.yml`: shifted cron from 5th → 15th (Vendor-First confirmed: May 2026 still absent on June 6). `test_pipeline.py`: added `test_fallback_when_month_not_published` (36 tests total, 33 pass locally — 3 pre-existing dlt secrets failures unchanged).
