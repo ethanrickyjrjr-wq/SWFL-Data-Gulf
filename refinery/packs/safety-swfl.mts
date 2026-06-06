@@ -13,12 +13,15 @@ import {
 } from "../sources/fdle-crime-source.mts";
 
 /**
- * safety-swfl — SWFL (Lee + Collier) property crime rate from FDLE UCR.
+ * safety-swfl — SWFL (Lee + Collier) property crime rate, FBI CDE NIBRS.
  *
  * Source: public.fdle_crime_swfl (ingest/pipelines/fdle_crime_swfl, quarterly cron).
- * Data: UCR Part I property offenses — burglary, larceny-theft, motor vehicle
- *   theft, arson — per 1,000 residents. Annual grain; FDLE publishes with
- *   ~6–9 month lag. Quarterly ingest cadence picks up each new annual release.
+ *   2022+ comes from the FBI Crime Data Explorer (NIBRS; FL agencies → FDLE → FBI),
+ *   which exposes participated_population so the county rate is coverage-matched and
+ *   lands at the UCR baseline (Lee ~10/1k) — it replaces the unfit FIBRS county
+ *   aggregation that undercounted ~2.3x (issue #59).
+ * Data: UCR property crime — burglary, larceny-theft, motor vehicle theft — per 1,000
+ *   residents. Annual grain; ~6–9 month publication lag. Quarterly ingest cadence.
  *
  * Tier-1 Reporter: no opinions, cited facts only.
  *
@@ -87,12 +90,12 @@ const MAGNITUDE_YOY_DIVISOR = 15;
 
 /**
  * Coverage-shift suppression line. `population` here is the COVERED population — the
- * sum of the populations of the agencies that reported to FIBRS that year, which is
- * the per-1k denominator. Organic county growth is ~1–3%/yr, so a YoY move larger than
- * this percent can only mean an agency entered or left the roster (Cape Coral, ~25% of
- * Lee, does exactly this). When that happens the YoY rate compares two different
- * geographies, so we force the direction to neutral and caveat it rather than report a
- * fabricated trend. See SOURCED.md#safety-swfl-coverage-shift-threshold.
+ * sum of the participated populations of the agencies that reported NIBRS (via CDE)
+ * that year, which is the per-1k denominator. Organic county growth is ~1–3%/yr, so a
+ * YoY move larger than this percent can only mean an agency entered or left the roster
+ * (Cape Coral PD, ~25% of Lee, was absent in 2021 and entered in 2022). When that
+ * happens the YoY rate compares two different geographies, so we force the direction to
+ * neutral and caveat it. See SOURCED.md#safety-swfl-coverage-shift-threshold.
  */
 const COVERAGE_SHIFT_SUPPRESS_PCT = 10;
 
@@ -129,12 +132,10 @@ function makeSource(
   year: number,
 ): BrainOutputMetricSource {
   return {
-    url:
-      sourceUrl ||
-      "https://www.fdle.state.fl.us/FSAC/Crime-Data/UCR-Data-Archive.aspx",
+    url: sourceUrl || "https://cde.ucr.cjis.gov/",
     fetched_at: fetchedAt,
     tier: 1,
-    citation: `FDLE Uniform Crime Report — UCR Part I property offenses by county, ${year} annual data. Source: Florida Department of Law Enforcement, FSAC.`,
+    citation: `FBI Crime Data Explorer (NIBRS) — property crime by county, ${year} annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate.`,
   };
 }
 
@@ -268,8 +269,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     ? 0
     : Math.min(1, Math.abs(swflYoy ?? 0) / MAGNITUDE_YOY_DIVISOR);
 
-  const archiveUrl =
-    "https://www.fdle.state.fl.us/FSAC/Crime-Data/UCR-Data-Archive.aspx";
+  const archiveUrl = "https://cde.ucr.cjis.gov/";
   const leeSource = makeSource(
     fetched_at,
     leeNow?.source_url || archiveUrl,
@@ -421,7 +421,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
 
   const caveats: string[] = [
-    `FDLE UCR data is annual (${yr}) with ~6–9 month publication lag; quarterly incident granularity is not available at county level.`,
+    `Property crime data is annual (${yr}) with ~6–9 month publication lag; quarterly incident granularity is not available at county level.`,
   ];
 
   const missing = (["Lee", "Collier"] as const).filter(
@@ -429,7 +429,7 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   );
   if (missing.length > 0) {
     caveats.push(
-      `${missing.join(", ")} County data absent for ${yr}; FDLE may not yet have published ${yr} UCR.`,
+      `${missing.join(", ")} County data absent for ${yr}; the FBI may not yet have published ${yr} NIBRS data.`,
     );
   }
 
@@ -440,26 +440,27 @@ function safetyOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
 
   // Coverage caveat — the per-1k denominator is the COVERED population (sum of the
-  // agencies that reported to FIBRS that year), not the full county. FIBRS agency
-  // participation is incomplete during Florida's NIBRS transition, so this understates
-  // the true county property-crime rate versus the FDLE UCR baseline.
+  // participated populations of the agencies that reported NIBRS via CDE that year).
+  // From 2022 the big-three Lee agencies (Sheriff, Cape Coral, Fort Myers) all report,
+  // so Lee covers ~the full county and the rate sits at the UCR baseline; in Collier,
+  // Naples PD does not report, so its ~20k residents are outside the denominator.
   caveats.push(
-    "Rate is per 1,000 residents covered by the agencies that reported to FIBRS that year " +
-      "(the denominator is the sum of reporting agencies' populations), not the full county; " +
-      "incomplete agency participation during the NIBRS transition understates the level " +
-      "relative to the FDLE UCR baseline.",
+    "Rate is per 1,000 residents covered by the agencies reporting NIBRS to the FBI that " +
+      "year (the denominator is the sum of those agencies' participated populations). Lee " +
+      "coverage is near-complete from 2022; in Collier, Naples PD does not report, so the " +
+      "Collier rate reflects the Sheriff + Marco Island footprint.",
   );
 
   if (leeRosterShift) {
     caveats.push(
-      `Lee's FIBRS reporting footprint changed >${COVERAGE_SHIFT_SUPPRESS_PCT}% from ${priorYr} to ${yr} ` +
+      `Lee's NIBRS reporting footprint changed >${COVERAGE_SHIFT_SUPPRESS_PCT}% from ${priorYr} to ${yr} ` +
         `(covered population ${leePriorPop?.toLocaleString()} → ${leePop?.toLocaleString()}); an agency entered ` +
         `or left the roster, so the Lee year-over-year direction is suppressed (reported as neutral).`,
     );
   }
   if (collierRosterShift) {
     caveats.push(
-      `Collier's FIBRS reporting footprint changed >${COVERAGE_SHIFT_SUPPRESS_PCT}% from ${priorYr} to ${yr} ` +
+      `Collier's NIBRS reporting footprint changed >${COVERAGE_SHIFT_SUPPRESS_PCT}% from ${priorYr} to ${yr} ` +
         `(covered population ${collierPriorPop?.toLocaleString()} → ${collierPop?.toLocaleString()}); the Collier ` +
         `year-over-year direction is suppressed (reported as neutral).`,
     );
@@ -487,9 +488,10 @@ export const safetySwfl: PackDefinition = {
   public_label: "Public Safety",
   domain: "real-estate",
   scope:
-    "SWFL (Lee + Collier) property crime rate from FDLE UCR — Part I property offenses " +
-    "(burglary, larceny-theft, motor vehicle theft, arson) per 1,000 residents. " +
-    "Annual grain, quarterly ingest cadence; data lags ~6–9 months.",
+    "SWFL (Lee + Collier) property crime rate from FBI Crime Data Explorer NIBRS — " +
+    "property offenses (burglary, larceny-theft, motor vehicle theft) per 1,000 residents, " +
+    "coverage-matched to reporting agencies. Annual grain, quarterly ingest cadence; " +
+    "data lags ~6–9 months.",
   ttl_seconds: 7_776_000, // 90 days — matches quarterly source cadence
   sources: [fdleCrimeSource],
   input_brains: [],

@@ -110,6 +110,27 @@ UCR_CITATION_URL = "https://www.fdle.state.fl.us/cjab/ucr/annual-reports/ucr-off
 
 EARLIEST_YEAR = min(UCR_COUNTY_URLS)  # 2010
 
+# ── FBI Crime Data Explorer (CDE) — current-year county rate (issue #59) ──────
+# Replaces unfit FIBRS county aggregation. CDE exposes participated_population so the
+# county rate is coverage-matched and lands at the UCR baseline. Verified live
+# 2026-06-06. Auth: api.data.gov key via env FBI_CDE_API_KEY.
+CDE_BASE = "https://api.usa.gov/crime/fbi/cde"
+CDE_CITATION_URL = "https://cde.ucr.cjis.gov/"
+# First year FL NIBRS participation is complete enough for a coverage-matched county
+# rate. 2021 is excluded empirically: Cape Coral PD (~25% of Lee County's population)
+# did not report in 2021, so the Lee 2021 rate collapses to 2.39/1k over a 586k covered
+# pop vs. 10.0/1k over 815k once Cape Coral enters in 2022 — a transition artifact, not
+# a real drop. From 2022 the big-three Lee agencies (Sheriff + Cape Coral + Fort Myers)
+# all report and the covered pop tracks the full county. Years < this self-skip (thin
+# coverage) or come from the FDLE UCR Excel archive (2010–2020).
+CDE_FIRST_YEAR = 2022
+# County name (as configured here) -> the upper-case key CDE groups agencies under
+# in /agency/byStateAbbr/FL.
+COUNTY_CDE_KEY: dict[str, str] = {
+    "Lee": "LEE",
+    "Collier": "COLLIER",
+}
+
 # ── Shared ────────────────────────────────────────────────────────────────────
 TABLE = "fdle_crime_swfl"
 TIER1_BUCKET = "lake-tier1"

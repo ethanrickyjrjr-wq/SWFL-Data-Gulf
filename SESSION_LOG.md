@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — feat(safety-swfl): FBI CDE replaces unfit FIBRS → issue #59 RESOLVED, brain LIVE
+
+- **safety-swfl un-dormanted and LIVE in master.** Vendor-First-verified the FBI Crime Data Explorer API (`api.usa.gov/crime/fbi/cde`, key in `FBI_CDE_API_KEY` secret) and confirmed it fixes the #59 undercount: CDE exposes `participated_population`, so the coverage-matched Lee rate is **10.12/1k 2023 (matches the 10.82 UCR baseline)** vs FIBRS's broken 4.64. Backfilled 2022–2024 → `public.fdle_crime_swfl` (6 rows). 2021 excluded (Cape Coral PD didn't report — COVID-era transition gap; covered pop 586k→815k).
+- **New acquisition path** `ingest/pipelines/fdle_crime_swfl/cde.py` (aggregates FL agency NIBRS property-crime by county, denominator = Σ participated_population); `run()` routes 2022+ → CDE, 2010–2020 → existing UCR Excel, FIBRS dropped. Source connector + pack + catalog + fixture rewired FDLE/FIBRS→FBI CDE wording; coverage caveat corrected (no longer "understates baseline"). Cadence moved parked→`pipelines:`; GHA quarterly cron re-enabled with the key.
+- **safety-swfl brain v2 LIVE:** direction **bullish**, "SWFL property crime 8.3/1k (2024), -9.7% YoY. Lee 9.1, Collier 6.7." Registered 8 `safety_property_crime_*` vocab concepts + slug_index (were orphans while dormant). master rebuilt **v71** (--target-only, pure-code synth, no LLM egress) — 0 orphans, incorporates safety. Refinery suite green for my changes (the 1 failing `logistics-swfl-nowcast` test belongs to the concurrent Sonnet session's WIP, not committed by me).
+- All 3 GH issues now resolved: **#61 closed** (fdot floor), **#59 shipped** (this), **#44** stays open by design (cron feed).
+
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(logistics-swfl-nowcast): recalibrate cold-start threshold for 30d TTL cadence
 
 - `refinery/packs/logistics-swfl-nowcast.mts`: `COLD_START_THRESHOLD_DAYS` 90→6, `ROLLING_WINDOW_DAYS` 90→24. Brain had 18 shock-log rows but needed 90 to clear cold-start — with a 30-day TTL the log grows 1 row/rebuild, not 1/day, so the original threshold was ~6 years away. Recalibrated to match actual cadence (6 builds ≈ 6 months, 24 builds ≈ 2 years rolling window). Brain will exit "history immature" on next rebuild.

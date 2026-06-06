@@ -280,6 +280,19 @@ pipelines:
     # First run: 2026-05-29 backfill (cy0203–cy2425). 40,140 rows. Lee + Collier.
     # Cron: 15th of month 11:00 UTC via fl-dor-sales-tax-monthly.yml.
 
+  - name: fdle_crime_swfl
+    lane: tier-2
+    cadence_days: 90
+    tolerance_multiplier: 2.0
+    freshness_table: public.fdle_crime_swfl
+    expected_rows_min: 4 # 6 rows expected (2022–2024 × Lee+Collier); floor allows one absent county-year
+    # ACTIVATED 2026-06-06 (issue #59): source replaced FIBRS (unfit, ~2.3x undercount) with the
+    # FBI Crime Data Explorer NIBRS API — coverage-matched county rate (Lee ~10/1k vs the 10.82
+    # UCR baseline). Backfilled 2022–2024 (2021 excluded — Cape Coral PD did not report).
+    # Non-dlt pipeline — freshness via MAX(inserted_at). Pack: refinery/packs/safety-swfl.mts.
+    # Pipeline: ingest/pipelines/fdle_crime_swfl/ (cde.py). Needs FBI_CDE_API_KEY (api.data.gov).
+    # Cron: quarterly 1st of Jan/Apr/Jul/Oct 12:00 UTC via fdle-crime-quarterly.yml.
+
   - name: zori_swfl_tier2
     lane: tier-2
     cadence_days: 30
@@ -379,16 +392,6 @@ pipelines:
 # Add to pipelines: above when the GHA cron has run at least once successfully.
 
 not_yet_running:
-  - name: fdle_crime_swfl
-    parked: true
-    lane: tier-2
-    cadence_days: 90
-    tolerance_multiplier: 2.0
-    freshness_table: public.fdle_crime_swfl
-    note: "BLOCKED 2026-05-30 — source unfit. FIBRS parser fixed (coverage-matched denominator) + quarterly cron paused, but FIBRS county aggregates undercount the true county rate ~2-3x vs the FDLE UCR baseline (incomplete NIBRS-transition agency participation). public.fdle_crime_swfl left empty; safety-swfl dormant. Re-home to pipelines: only after a complete county source (FBI Crime Data Explorer) replaces FIBRS — see issue #59."
-    # Non-dlt pipeline — freshness via MAX(inserted_at). Pack: refinery/packs/safety-swfl.mts.
-    # Pipeline: ingest/pipelines/fdle_crime_swfl/. Tier 1: lake-tier1/crime/{year}/fdle_crime_swfl.ndjson.
-
   - name: bls_oews_swfl_tier1
     parked: true
     lane: tier-1

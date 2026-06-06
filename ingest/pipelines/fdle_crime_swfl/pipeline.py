@@ -45,7 +45,10 @@ import requests
 
 from ingest.lib.tier1_inventory import upsert_inventory_row
 
+from .cde import fetch_cde_rows
 from .constants import (
+    CDE_CITATION_URL,
+    CDE_FIRST_YEAR,
     COL_ALIASES,
     COUNTIES,
     EARLIEST_YEAR,
@@ -438,30 +441,42 @@ def upsert_rows(rows: list[Row], conn_str: str) -> int:
 
 
 def run(years: list[int], dry_run: bool, conn_str: str | None) -> None:
-    fibrs_years = sorted(y for y in years if y >= FIBRS_FIRST_YEAR)
-    ucr_years = sorted(y for y in years if y < FIBRS_FIRST_YEAR and y in UCR_COUNTY_URLS)
-    skipped = [y for y in years if y < FIBRS_FIRST_YEAR and y not in UCR_COUNTY_URLS]
+    cde_years = sorted(y for y in years if y >= CDE_FIRST_YEAR)
+    ucr_years = sorted(y for y in years if y < CDE_FIRST_YEAR and y in UCR_COUNTY_URLS)
+    skipped = [y for y in years if y < CDE_FIRST_YEAR and y not in UCR_COUNTY_URLS]
     if skipped:
         print(f"  SKIP years with no UCR URL: {skipped}", file=sys.stderr)
 
     all_year_rows: dict[int, list[Row]] = {}
 
-    # ── FIBRS batch download (one file covers all 2021+ years) ──────────────
-    if fibrs_years:
-        print(f"fdle_crime_swfl: downloading FIBRS file for years {fibrs_years}...")
-        try:
-            fibrs_content = _download(FIBRS_URL, "FIBRS offense data")
-            fibrs_results = parse_fibrs(fibrs_content, fibrs_years)
-            for year, rows in fibrs_results.items():
-                all_year_rows[year] = rows
-                print(f"  FIBRS {year}: {len(rows)} county rows parsed ({[r['county'] for r in rows]}).")
-            missing = [y for y in fibrs_years if y not in fibrs_results]
-            if missing:
-                print(f"  FIBRS: no sheet found for years {missing} — FDLE may not have published yet.", file=sys.stderr)
-        except FileNotFoundError as exc:
-            print(f"  SKIP FIBRS: {exc}", file=sys.stderr)
-        except Exception as exc:
-            print(f"  SKIP FIBRS: {exc}", file=sys.stderr)
+    # ── FBI CDE current-year county rate (2021+, replaces unfit FIBRS — issue #59) ──
+    if cde_years:
+        api_key = os.environ.get("FBI_CDE_API_KEY")
+        if not api_key:
+            print(
+                "  SKIP CDE: FBI_CDE_API_KEY not set (api.data.gov key). "
+                f"Years {cde_years} not ingested.",
+                file=sys.stderr,
+            )
+        else:
+            print(f"fdle_crime_swfl: fetching FBI CDE for years {cde_years}...")
+            try:
+                cde_results = fetch_cde_rows(cde_years, api_key)
+                for year, rows in cde_results.items():
+                    all_year_rows[year] = rows
+                    print(
+                        f"  CDE {year}: {len(rows)} county rows "
+                        f"({[r['county'] for r in rows]})."
+                    )
+                missing = [y for y in cde_years if y not in cde_results]
+                if missing:
+                    print(
+                        f"  CDE: no reporting agencies for years {missing} — "
+                        "FL coverage too thin or year not yet complete.",
+                        file=sys.stderr,
+                    )
+            except Exception as exc:
+                print(f"  SKIP CDE: {exc}", file=sys.stderr)
 
     # ── UCR per-year downloads (2010–2020) ───────────────────────────────────
     for year in ucr_years:
@@ -481,8 +496,8 @@ def run(years: list[int], dry_run: bool, conn_str: str | None) -> None:
     total = 0
     for year in sorted(all_year_rows):
         rows = all_year_rows[year]
-        source_url = rows[0]["source_url"] if rows else FIBRS_URL
-        citation_url = FIBRS_CITATION_URL if year >= FIBRS_FIRST_YEAR else UCR_CITATION_URL
+        source_url = rows[0]["source_url"] if rows else CDE_CITATION_URL
+        citation_url = CDE_CITATION_URL if year >= CDE_FIRST_YEAR else UCR_CITATION_URL
 
         if dry_run:
             for r in rows:

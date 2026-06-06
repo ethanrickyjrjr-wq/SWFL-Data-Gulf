@@ -9,7 +9,13 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 import { buildSourceCitationUrl } from "../lib/citation-url.mts";
 
 /**
- * fdle-crime source — FDLE UCR property crime counts for Lee + Collier counties.
+ * fdle-crime source — property crime counts for Lee + Collier counties.
+ *
+ * Source (2022+): FBI Crime Data Explorer (CDE) NIBRS. Florida agencies report to
+ * FDLE, which submits to the FBI UCR/NIBRS program; CDE is the API access layer that
+ * also exposes participated_population, yielding a coverage-matched county rate at the
+ * authoritative UCR baseline (replaces the unfit FIBRS county aggregation — issue #59).
+ * Historical years (2010–2020) come from the FDLE UCR Excel archive.
  *
  * Table: public.fdle_crime_swfl (self-ingested via ingest/pipelines/fdle_crime_swfl,
  * GHA cron quarterly via fdle-crime-quarterly.yml).
@@ -30,7 +36,7 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
  * Window: last ~5 data years (by data_year) — enough comparable-coverage years to find a
  *   clean YoY pair after coverage-shift suppression in the pack.
  *
- * Trust tier: 1 (FDLE is a Florida state law enforcement agency — primary source).
+ * Trust tier: 1 (FBI UCR/NIBRS via CDE; FDLE-submitted — primary source).
  */
 
 const SOURCE_ID = "fdle_crime_swfl";
@@ -94,9 +100,7 @@ function normalize(row: Record<string, unknown>): FdleCrimeNormalized | null {
     total_property_crimes: toNum(row.total_property_crimes),
     population: toNum(row.population),
     property_crime_per_1k: toNum(row.property_crime_per_1k),
-    source_url:
-      str(row.source_url) ||
-      "https://www.fdle.state.fl.us/FSAC/Crime-Data/UCR-Data-Archive.aspx",
+    source_url: str(row.source_url) || "https://cde.ucr.cjis.gov/",
   };
 }
 
@@ -142,8 +146,9 @@ export const fdleCrimeSource: SourceConnector = {
       env.source === "fixture"
         ? `fixture://refinery/__fixtures__/safety-swfl.sample.json`
         : buildSourceCitationUrl(TABLE, {
-            label: "FDLE UCR Property Crime — Lee + Collier Counties",
-            source: "FDLE FSAC",
+            label:
+              "FBI Crime Data Explorer (NIBRS) — Lee + Collier Property Crime",
+            source: "FBI CDE / FDLE",
             brain: "safety-swfl",
             date_col: "period",
           });
@@ -170,9 +175,10 @@ export const fdleCrimeSource: SourceConnector = {
     return {
       source:
         env.source === "fixture"
-          ? "FDLE UCR Property Crime — Lee + Collier Counties (fixture; fdle_crime_swfl)"
-          : "FDLE Uniform Crime Report — Property Crime by County (Supabase fdle_crime_swfl: " +
-            "Lee + Collier; annual UCR data; quarterly ingest cadence; ~6–9 month publication lag)",
+          ? "FBI Crime Data Explorer (NIBRS) — Lee + Collier Counties (fixture; fdle_crime_swfl)"
+          : "FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property Crime by " +
+            "County (Supabase fdle_crime_swfl: Lee + Collier; annual data; coverage-matched " +
+            "county rate; quarterly ingest cadence)",
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

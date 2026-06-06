@@ -1,19 +1,14 @@
 name: FDLE crime quarterly
 
 on:
-  # PAUSED 2026-05-30 — safety-swfl is source-blocked. The FIBRS parser is fixed
-  # (coverage-matched denominator), but FIBRS county aggregates undercount the true
-  # county rate ~2-3x vs. the FDLE UCR baseline because agency participation is
-  # incomplete during the NIBRS transition. Auto-running this cron would populate
-  # public.fdle_crime_swfl with understated data and silently un-dormant the brain into
-  # master. Re-enable (uncomment the schedule below) only once the source is replaced —
-  # see the FBI Crime Data Explorer follow-up issue. workflow_dispatch stays available
-  # for manual verification runs.
-  # schedule:
-  #   # 12:00 UTC on the 1st of Jan, Apr, Jul, Oct.
-  #   # FDLE publishes prior-year UCR with ~6–9 month lag; Q2 (Apr) and Q3 (Jul)
-  #   # runs capture the fresh annual release. Q1/Q4 runs pick up any corrections.
-  #   - cron: "0 12 1 1,4,7,10 *"
+  # REACTIVATED 2026-06-06 (issue #59) — source replaced the unfit FIBRS county
+  # aggregation with the FBI Crime Data Explorer NIBRS API (coverage-matched county
+  # rate at the UCR baseline). Needs the FBI_CDE_API_KEY secret (api.data.gov).
+  schedule:
+    # 12:00 UTC on the 1st of Jan, Apr, Jul, Oct.
+    # The FBI publishes prior-year NIBRS with a lag; Q2 (Apr) and Q3 (Jul) runs capture
+    # the fresh annual release. Q1/Q4 runs pick up any corrections.
+    - cron: "0 12 1 1,4,7,10 *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -49,6 +44,7 @@ jobs:
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          FBI_CDE_API_KEY: ${{ secrets.FBI_CDE_API_KEY }}
         run: |
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             EXTRA="--dry-run"

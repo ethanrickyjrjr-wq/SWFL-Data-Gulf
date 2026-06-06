@@ -1,12 +1,12 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260531 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260606 -->
 ---
 brain_id: safety-swfl
-version: 1
-refined_at: 2026-05-31T03:19:55Z
-freshness_token: SWFL-7421-v1-20260531
+version: 2
+refined_at: 2026-06-06T19:07:17Z
+freshness_token: SWFL-7421-v2-20260606
 ttl_seconds: 7776000
 context_type: user_saved_reference
-scope: SWFL (Lee + Collier) property crime rate from FDLE UCR — Part I property offenses (burglary, larceny-theft, motor vehicle theft, arson) per 1,000 residents. Annual grain, quarterly ingest cadence; data lags ~6–9 months.
+scope: SWFL (Lee + Collier) property crime rate from FBI Crime Data Explorer NIBRS — property offenses (burglary, larceny-theft, motor vehicle theft) per 1,000 residents, coverage-matched to reporting agencies. Annual grain, quarterly ingest cadence; data lags ~6–9 months.
 ---
 
 # User-Saved Reference Context
@@ -20,7 +20,7 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: SWFL (Lee + Collier) property crime rate from FDLE UCR — Part I property offenses (burglary, larceny-theft, motor vehicle theft, arson) per 1,000 residents. Annual grain, quarterly ingest cadence; data lags ~6–9 months.
+SCOPE: SWFL (Lee + Collier) property crime rate from FBI Crime Data Explorer NIBRS — property offenses (burglary, larceny-theft, motor vehicle theft) per 1,000 residents, coverage-matched to reporting agencies. Annual grain, quarterly ingest cadence; data lags ~6–9 months.
 
 --- HOW THE USER LIKES TO WORK ---
 - Property crime rate is an underwriting input: rising crime is a headwind for occupancy and rent growth in commercial corridors.
@@ -28,25 +28,149 @@ SCOPE: SWFL (Lee + Collier) property crime rate from FDLE UCR — Part I propert
 - UCR data is annual; do not cross-compare to sub-county or monthly figures from other sources without normalizing the grain.
 
 --- CITATION TABLE ---
-id  | source                                                                                                                                                                | verified   | expires
-s01 | FDLE Uniform Crime Report — Property Crime by County (Supabase fdle_crime_swfl: Lee + Collier; annual UCR data; quarterly ingest cadence; ~6–9 month publication lag) | 2026-05-31 | 2026-08-29
+id  | source                                                                                                                                                                                                 | verified   | expires
+s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property Crime by County (Supabase fdle_crime_swfl: Lee + Collier; annual data; coverage-matched county rate; quarterly ingest cadence) | 2026-06-06 | 2026-09-04
 
 --- SAVED FACTS ---
-[]
+[
+  {"id":"f001","topic":"corpus_overview","fact":"FDLE UCR property crime corpus (Lee + Collier)","value":"6 county-year rows, latest year 2024.","src":"s01","date":"2026-06-06"}
+]
 
 --- OUTPUT ---
 {
   "brain_id": "safety-swfl",
-  "version": 1,
-  "refined_at": "2026-05-31T03:19:55Z",
-  "direction": "neutral",
-  "magnitude": 0,
+  "version": 2,
+  "refined_at": "2026-06-06T19:07:17Z",
+  "direction": "bullish",
+  "magnitude": 0.6466666666666666,
   "drivers": [],
   "overrides": [],
-  "conclusion": "safety-swfl: no FDLE UCR rows available this build. Verify fdle_crime_swfl table has been populated via the fdle_crime_swfl ingest pipeline.",
-  "key_metrics": [],
+  "conclusion": "SWFL property crime: 8.3 Part I offenses per 1,000 residents (2024 UCR), -9.7% YoY. Lee (9.1/1k) runs 2.4 points above Collier (6.7/1k).",
+  "key_metrics": [
+    {
+      "metric": "safety_property_crime_per_1k_lee",
+      "value": 9.06,
+      "direction": "falling",
+      "label": "Lee County property crime rate — 2024 UCR, Part I offenses per 1,000 residents",
+      "variable_type": "intensive",
+      "units": "per 1,000 population",
+      "display_format": "raw",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_property_crime_per_1k_collier",
+      "value": 6.67,
+      "direction": "falling",
+      "label": "Collier County property crime rate — 2024 UCR, Part I offenses per 1,000 residents",
+      "variable_type": "intensive",
+      "units": "per 1,000 population",
+      "display_format": "raw",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_property_crime_per_1k_swfl",
+      "value": 8.3,
+      "direction": "falling",
+      "label": "SWFL (Lee + Collier) population-weighted property crime rate — 2024 UCR, Part I offenses per 1,000 residents",
+      "variable_type": "intensive",
+      "units": "per 1,000 population",
+      "display_format": "raw",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_property_crime_yoy_pct_swfl",
+      "value": -9.7,
+      "direction": "falling",
+      "label": "SWFL property crime rate YoY — 2023 to 2024, percent change",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_property_crime_yoy_pct_lee",
+      "value": -11.1,
+      "direction": "falling",
+      "label": "Lee County property crime rate YoY — 2023 to 2024, percent change",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_property_crime_yoy_pct_collier",
+      "value": -5.1,
+      "direction": "falling",
+      "label": "Collier County property crime rate YoY — 2023 to 2024, percent change",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_total_property_crimes_lee",
+      "value": 7859,
+      "direction": "stable",
+      "label": "Lee County total Part I property crime incidents — 2024 UCR",
+      "variable_type": "extensive",
+      "units": "incidents",
+      "display_format": "count",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    },
+    {
+      "metric": "safety_total_property_crimes_collier",
+      "value": 2677,
+      "direction": "stable",
+      "label": "Collier County total Part I property crime incidents — 2024 UCR",
+      "variable_type": "extensive",
+      "units": "incidents",
+      "display_format": "count",
+      "source": {
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "tier": 1,
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
+      }
+    }
+  ],
   "caveats": [
-    "Zero rows from fdle_crime_swfl. Run: python -m ingest.pipelines.fdle_crime_swfl.pipeline --current"
+    "Property crime data is annual (2024) with ~6–9 month publication lag; quarterly incident granularity is not available at county level.",
+    "Rate is per 1,000 residents covered by the agencies reporting NIBRS to the FBI that year (the denominator is the sum of those agencies' participated populations). Lee coverage is near-complete from 2022; in Collier, Naples PD does not report, so the Collier rate reflects the Sheriff + Marco Island footprint."
   ],
   "contradicts": [],
   "confidence": 1,
@@ -58,7 +182,7 @@ s01 | FDLE Uniform Crime Report — Property Crime by County (Supabase fdle_crim
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-31T03:19:55Z"
+    "computed_at": "2026-06-06T19:07:17Z"
   },
   "exogenous_signals": []
 }
@@ -67,5 +191,5 @@ s01 | FDLE Uniform Crime Report — Property Crime by County (Supabase fdle_crim
 - safety-swfl: FDLE UCR property crime baseline for Lee + Collier as a real-estate underwriting input.
 
 --- RECENT NOTES ---
-- 2026-05-31: pack refined by the Refinery — 0 fact(s) from 1 source(s).
+- 2026-06-06: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

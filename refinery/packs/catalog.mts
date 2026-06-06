@@ -159,9 +159,10 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     id: "safety-swfl",
     domain: "real-estate",
     scope:
-      "SWFL (Lee + Collier) property crime rate from FDLE UCR — Part I property offenses " +
-      "(burglary, larceny-theft, motor vehicle theft, arson) per 1,000 residents. " +
-      "Annual grain, quarterly ingest cadence; data lags ~6–9 months.",
+      "SWFL (Lee + Collier) property crime rate from FBI Crime Data Explorer NIBRS — " +
+      "property offenses (burglary, larceny-theft, motor vehicle theft) per 1,000 residents, " +
+      "coverage-matched to reporting agencies. Annual grain, quarterly ingest cadence; " +
+      "data lags ~6–9 months.",
     ttl_seconds: 7_776_000,
   },
   {

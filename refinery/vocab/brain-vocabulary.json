@@ -3516,6 +3516,121 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Number of distinct BLS-issued vintages for a given Collier County observation_date. Parallel to laus_lee_unemployment_vintage_count. Source: ALFRED Tier-1 Parquet FLCOLL0URN."
+    },
+    "safety_property_crime_per_1k_lee": {
+      "id": "safety_property_crime_per_1k_lee",
+      "prefLabel": "Lee County Property Crime Rate",
+      "altLabels": ["Lee property crime per 1k", "Lee crime rate"],
+      "raw_slugs": ["safety_property_crime_per_1k_lee"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "rate",
+      "unit": "per 1,000 population",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Lee County property crime offenses per 1,000 residents, FBI Crime Data Explorer NIBRS, coverage-matched to reporting agencies. Annual; a falling rate is bullish for the investment environment."
+    },
+    "safety_property_crime_per_1k_collier": {
+      "id": "safety_property_crime_per_1k_collier",
+      "prefLabel": "Collier County Property Crime Rate",
+      "altLabels": ["Collier property crime per 1k", "Collier crime rate"],
+      "raw_slugs": ["safety_property_crime_per_1k_collier"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "rate",
+      "unit": "per 1,000 population",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Collier County property crime offenses per 1,000 residents, FBI Crime Data Explorer NIBRS (Sheriff + Marco Island footprint; Naples PD does not report). Annual."
+    },
+    "safety_property_crime_per_1k_swfl": {
+      "id": "safety_property_crime_per_1k_swfl",
+      "prefLabel": "SWFL Property Crime Rate",
+      "altLabels": ["SWFL property crime per 1k", "SWFL crime rate"],
+      "raw_slugs": ["safety_property_crime_per_1k_swfl"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "rate",
+      "unit": "per 1,000 population",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Population-weighted Lee + Collier property crime offenses per 1,000 residents, FBI Crime Data Explorer NIBRS. Annual; a falling rate is bullish."
+    },
+    "safety_property_crime_yoy_pct_swfl": {
+      "id": "safety_property_crime_yoy_pct_swfl",
+      "prefLabel": "SWFL Property Crime Rate YoY",
+      "altLabels": ["SWFL crime rate change", "SWFL property crime YoY"],
+      "raw_slugs": ["safety_property_crime_yoy_pct_swfl"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "percent_change",
+      "unit": "%",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in the SWFL population-weighted property crime rate. Negative is bullish (falling crime)."
+    },
+    "safety_property_crime_yoy_pct_lee": {
+      "id": "safety_property_crime_yoy_pct_lee",
+      "prefLabel": "Lee County Property Crime Rate YoY",
+      "altLabels": ["Lee crime rate change", "Lee property crime YoY"],
+      "raw_slugs": ["safety_property_crime_yoy_pct_lee"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "percent_change",
+      "unit": "%",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in the Lee County property crime rate. Suppressed to neutral when the NIBRS reporting footprint shifts >10%."
+    },
+    "safety_property_crime_yoy_pct_collier": {
+      "id": "safety_property_crime_yoy_pct_collier",
+      "prefLabel": "Collier County Property Crime Rate YoY",
+      "altLabels": ["Collier crime rate change", "Collier property crime YoY"],
+      "raw_slugs": ["safety_property_crime_yoy_pct_collier"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "percent_change",
+      "unit": "%",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in the Collier County property crime rate. Suppressed to neutral when the NIBRS reporting footprint shifts >10%."
+    },
+    "safety_total_property_crimes_lee": {
+      "id": "safety_total_property_crimes_lee",
+      "prefLabel": "Lee County Total Property Crime Incidents",
+      "altLabels": ["Lee property crime count", "Lee total property offenses"],
+      "raw_slugs": ["safety_total_property_crimes_lee"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "count",
+      "unit": "incidents",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Total property crime incidents reported in Lee County, FBI Crime Data Explorer NIBRS, latest year. Raw count behind the per-1k rate."
+    },
+    "safety_total_property_crimes_collier": {
+      "id": "safety_total_property_crimes_collier",
+      "prefLabel": "Collier County Total Property Crime Incidents",
+      "altLabels": [
+        "Collier property crime count",
+        "Collier total property offenses"
+      ],
+      "raw_slugs": ["safety_total_property_crimes_collier"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["safety-swfl", "master"],
+      "value_type": "count",
+      "unit": "incidents",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Total property crime incidents reported in Collier County, FBI Crime Data Explorer NIBRS, latest year. Raw count behind the per-1k rate."
     }
   },
   "ordered_collections": {
@@ -3532,8 +3647,17 @@
         "declining": "Rising cap rate and/or vacancy, outmigration signals. Tenant-market territory."
       }
     }
+
   },
   "slug_index": {
+    "safety_property_crime_per_1k_lee": "safety_property_crime_per_1k_lee",
+    "safety_property_crime_per_1k_collier": "safety_property_crime_per_1k_collier",
+    "safety_property_crime_per_1k_swfl": "safety_property_crime_per_1k_swfl",
+    "safety_property_crime_yoy_pct_swfl": "safety_property_crime_yoy_pct_swfl",
+    "safety_property_crime_yoy_pct_lee": "safety_property_crime_yoy_pct_lee",
+    "safety_property_crime_yoy_pct_collier": "safety_property_crime_yoy_pct_collier",
+    "safety_total_property_crimes_lee": "safety_total_property_crimes_lee",
+    "safety_total_property_crimes_collier": "safety_total_property_crimes_collier",
     "licenses_active_lee": "licenses_active_lee",
     "licenses_active_collier": "licenses_active_collier",
     "licenses_new_12m_swfl": "licenses_new_12m_swfl",
