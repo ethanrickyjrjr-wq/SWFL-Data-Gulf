@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Sonnet 4.6 · main) — chore(ui): replace favicon.ico with SWFL Data Gulf brand icon
+
+- `app/favicon.ico` replaced with `swfl-data-gulf-favicon.ico` (25 KB → 59 KB). Deployed with `vercel --force --prod` to bust the build cache and serve the new icon immediately.
+
 ## 2026-06-06 (Opus 4.8 · main) — feat(cre): Joel Blvd — Lehigh's 2nd corridor (completes lehigh_acres_corridor)
 
 - **Joel Blvd Lehigh Acres added** as the second Lehigh corridor (east-side N-S secondary spine; anchor Jack's Market @510 Joel Blvd, Mapbox-verified rooftop −81.5975/26.6198, Lee County). Centroid `26.63, −81.598` (true midpoint of the commercial stretch). Metrics NULL — same no-broker-coverage state as Lee Blvd; no regional cap_rate inherited (RULE 3 / no-invention).
