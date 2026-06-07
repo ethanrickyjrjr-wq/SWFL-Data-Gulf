@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · claude/highlighter-reach-r0-r1-r4) — feat(highlighter): R0+R1+R4 reach engine BUILT (PR) — server core done, UI mounted, meter live
+
+- **Executed the reach plan** (`docs/superpowers/plans/2026-06-07-highlighter-reach-r0-r1-r4.md`) via subagent-driven TDD on a feature branch. 12 commits, **39/39 tests green, app tsc clean**, no new deps. Opening a PR (not direct-to-main) per RULE 1 — new public route + meter + live-page mount.
+- **Server engine (all tested + reviewed):** `lib/highlighter/grounding.ts` (multi-dossier system prompt; inlines `detail_tables` → cross-area compare in-context = R0) · `reach.ts` (`resolveReachTargets` — deterministic, allowlist-bounded; regression test locks the guard) · `fetch-reach.ts` (tolerant cross-report fetch = R1) · `app/api/converse/route.ts` (SSE, `claude-haiku-4-5`, grounded; **SDK v0.69.0 has NO `.textStream`** → dual-path `extractText` adapter iterating `content_block_delta`→`text_delta`, prod path pinned by a separate test) · `meter.ts` + `docs/sql/20260607_usage_events.sql` (**migration APPLIED to prod**, reuses `createServiceRoleClient`, counting only, enforcement OFF) · `handoff.ts` (R4 "Open in your Claude").
+- **UI:** tested pure helpers (`sse.ts`, `position.ts`, `suggestions.ts`) + `use-highlight` hook, `HighlightPopup`/`FactChip`/`FirstTouchHint`, mounted as a defensive sibling on `app/r/[slug]/page.tsx` (can't blank the page); MCP discovery line added.
+- **Final-review C1 fixed:** converse gates the PRIMARY report on brain-exists (404 if missing), NOT MCP-catalog membership — so `franchise-outcomes` (live brain, page, not in `BRAIN_CATALOG`) no longer 400s. Reach stays catalog-bound. No MCP-surface change.
+- **Deferred (ledger checks opened):** (1) Stage-4 suggestions carried IN the dossier — needs atomic type-lift on `BrainOutputMetric` (function `suggestionsForMetric` shipped; client copy in `lib/highlighter/suggestions.ts`); (2) `FactChip`→`MetricsTable` wiring (selection-only for now); (3) live-app verification of popup positioning/selection/SSE/mobile. Pricing+enforcement still deferred (existing checks).
+
 ## 2026-06-07 (Opus 4.8 · main) — docs(vision): one-file "Build Anything With Real Data" master that unifies all four layers
 
 - **New master doc** `docs/superpowers/specs/2026-06-07-build-anything-with-real-data-MASTER.md` — the single north-star picture that ties the four build-ready docs into one user journey: point → ask → reach (R0/R1/R4) → chart (A/B/C) → save (`/c/`) → compose (`/board/`) → export (PDF). Carries the end-to-end flow diagram, the consolidated real-vs-greenfield table, the full cross-layer build order, the trust guarantee, and the meter posture. It is a MAP that links to each detailed spec/plan, not a replacement for them.
