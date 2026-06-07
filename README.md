@@ -34,32 +34,75 @@ Then ask: _"What's the flood-adjusted investment picture for ZIP 33931?"_ and it
 
 ## What's live
 
-| Brain                  | What it covers                                                |
-| ---------------------- | ------------------------------------------------------------- |
-| `master`               | Synthesizer — one grounded direction call over the whole lake |
-| `macro-swfl`           | FRED rates, BLS unemployment (LAUS), labor participation      |
-| `housing-swfl`         | Median sale prices, DOM, YoY deltas (LEEPA)                   |
-| `env-swfl`             | FEMA flood zones, NFIP AAL, storm surge exposure              |
-| `cre-swfl`             | Commercial corridor pulse — 25 verified corridors             |
-| `sector-credit-swfl`   | SBA franchise outcomes, NAICS charge-off rates                |
-| `labor-demand-swfl`    | BLS OEWS occupational demand + wages                          |
-| `properties-lee-value` | Parcel-level Lee County values, SOH gap analysis              |
-| `traffic-swfl`         | FDOT annual average daily traffic by road segment             |
-| `tourism-tdt`          | Tourist Development Tax receipts                              |
-| `notices-swfl`         | DBPR public business notices                                  |
+Two counties, dozens of pipelines, one synthesizer. Each leaf brain below emits a single cited output block; `master` reads all of them and makes the call.
+
+**Economy & labor**
+
+| Brain                | What it covers                                                           |
+| -------------------- | ------------------------------------------------------------------------ |
+| `macro-us`           | US backdrop — FRED policy rates, Treasuries, the Fed read                |
+| `macro-florida`      | Florida-level macro context                                              |
+| `macro-swfl`         | SWFL unemployment (BLS LAUS), labor-force participation, local rate read |
+| `labor-demand-swfl`  | BLS OEWS occupational demand + wages                                     |
+| `econ-dev-swfl`      | Economic-development announcements — jobs + investment, trailing 90 days |
+| `sector-credit-swfl` | SBA loan outcomes and NAICS charge-off rates by sector                   |
+| `franchise-outcomes` | SBA franchise survival + charge-off by brand                             |
+
+**Real estate & development**
+
+| Brain                      | What it covers                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `housing-swfl`             | Median sale prices, days-on-market, YoY deltas, inventory by ZIP                        |
+| `properties-lee-value`     | Parcel-level Lee County values, Save-Our-Homes gap, sales velocity (LeePA)              |
+| `properties-collier-value` | Parcel-level Collier County values                                                      |
+| `rentals-swfl`             | Observed rents by ZIP (Zillow ZORI)                                                     |
+| `permits-swfl`             | Lee + Collier building permits, geocoded to corridors                                   |
+| `cre-swfl`                 | Commercial corridor pulse — 27 verified corridors (vacancy, rent, absorption, cap rate) |
+| `corridor-pulse-swfl`      | Weekly corridor signal pulse — development + transaction activity                       |
+| `condo-sirs-swfl`          | DBPR condo structural-reserve (SIRS) signals                                            |
+
+**Risk & environment**
+
+| Brain                | What it covers                                                   |
+| -------------------- | ---------------------------------------------------------------- |
+| `env-swfl`           | FEMA flood zones, NFIP average annual loss, storm-surge exposure |
+| `storm-history-swfl` | NOAA storm-event history                                         |
+| `safety-swfl`        | Crime rates from FBI CDE / NIBRS, coverage-matched               |
+
+**Infrastructure & activity**
+
+| Brain                                       | What it covers                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `traffic-swfl`                              | FDOT annual average daily traffic by road segment                                           |
+| `logistics-swfl` + `logistics-swfl-nowcast` | Freight flows (FAF5) + a near-term logistics nowcast                                        |
+| `rsw-airport`                               | RSW (Southwest Florida International) passenger traffic                                     |
+| `tourism-tdt`                               | Tourist Development Tax receipts                                                            |
+| `licenses-swfl`                             | FL DBPR business + contractor licenses                                                      |
+| `city-pulse-swfl`                           | Daily city/region pulse — 49+ live signals, top surfaced                                    |
+| `news-swfl`                                 | SWFL business-news signal feed                                                              |
+| `master`                                    | **Synthesizer** — one grounded, conditional, falsifiable direction call over the whole lake |
+
+---
+
+## Point at a fact — ask it or chart it
+
+A report should be something you can interrogate, not just read. Two surfaces on the `/r/` report pages turn the numbers into a conversation:
+
+- **Charts at a glance _(live)_.** Every report auto-renders one chart computed deterministically in code from the brain's own audited numbers — the most comparable series it holds (median price across ZIPs, vacancy across corridors, and so on). No LLM draws it: the bars come straight from the locked key-metrics and detail tables, capped and human-labeled. The same chart block rides the dossier, so any downstream AI can reference or redraw it.
+- **The Highlighter _(rolling out)_.** Point at a specific fact — select it on desktop, tap a chip on mobile — and a popup, grounded **only** in that report's dossier plus the rules-of-engagement block, lets you ask about it or chart it. The answer comes _to_ the fact instead of sending you elsewhere. The engine runs server-side on our own key (`/api/converse`, Claude Haiku 4.5), so every answer is grounded, cite-or-decline, and metered. It can reach past one report: compare any SWFL ZIP already in the dossier, pull a sibling brain or `master`, or hand the whole dossier to your own Claude over MCP. The popup ships behind a flag while it finishes browser-hardening.
 
 ---
 
 ## Architecture
 
 ```
-Sources (FRED, BLS, FEMA, LEEPA, FDOT, SBA…)
-    ↓  Python ingest pipelines
+Sources (FRED, BLS, FEMA, LeePA, FDOT, SBA, NOAA, DBPR…)
+    ↓  Python + dlt ingest pipelines
 data_lake.*  (Supabase Postgres + Parquet on Storage)
-    ↓  Refinery (Bun + TypeScript)
-Brains  →  master synthesizer
-    ↓  MCP / REST
-Your AI
+    ↓  Refinery (Bun + TypeScript) — deterministic math, gated synthesis
+Leaf brains  →  master synthesizer  →  predictions ledger → graded outcomes
+    ↓  MCP / REST  (dossier + rules-of-engagement)
+Your AI   ·   /r/ report pages (charts + the Highlighter)
 ```
 
 Three tiers:
@@ -83,6 +126,21 @@ Because the rules travel _with_ the data, the model is bound by them at answer t
 One constant defines it — `refinery/lib/rules-of-engagement.mts` — imported by both the MCP server and the JSON route and mirrored to `THE-CONTRACT.md`, with a CI drift test keeping the copies in lockstep.
 
 **Where this is heading.** Grounding keeps a single answer honest; memory is how the system carries judgment across answers. Today a personal vault banks strategic insights, recallable by term and tag. Next it grows into durable working memory — past deals, the issues they surfaced, and how they resolved — so the assistant builds consistent working habits and recognizes when a new situation rhymes with an old one.
+
+---
+
+## The flywheel — graded, falsifiable calls
+
+A direction call is only worth something if it can be scored. So every time `master` runs, it writes its prediction to a `predictions` table — the call, its confidence, the date it should be checked, and the exact number that would prove it wrong. As each window closes and the real number lands, a deterministic grader (zero LLM, idempotent, wired to run downstream of the daily rebuild) banks a verdict in `outcomes`.
+
+That turns "78% confident" from decoration into something measurable: over time the system accrues a real, scored track record — plus a calibration curve that tests whether "high confidence" actually means "more often right." To get a read **today** instead of waiting years, a backtest bootstrap replays point-in-time-honest history — vintaged unemployment, immutable property sales, never look-ahead-revised series like rents — to grade hundreds of as-of calls and tune signal weighting against the scorecard.
+
+Two lines stay bright:
+
+- **Replays are tuning fuel, not the headline.** Backtest grades are kept physically separate and stamped "retrodicted"; the public track record only ever comes from **live** calls resolving.
+- **Never a lonely percentage.** Every score travels with its sample size — `68% (N=31)`, not `68%`.
+
+The moat isn't a smarter model — it's a falsifiable record that compounds with time and territory.
 
 ---
 
