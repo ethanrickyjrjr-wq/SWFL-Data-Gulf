@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Sonnet 4.6 · claude/lehigh-permit-geocode) — research(cre): Lehigh Acres CRE broker coverage sourcing — Task A complete
+
+- **`docs/superpowers/specs/2026-06-06-lehigh-cre-data-findings.md`:** Full broker coverage audit for Lee Blvd / Joel Blvd / Lehigh Acres submarket. Searched C&W MarketBeat, Colliers, LSI Companies, Mayhugh, LoopNet, Crexi, Lee & Associates, Ian Black, CBRE, Marcus & Millichap, LeePA implied cap rate.
+- **Verdict:** Industrial + office partially covered by C&W MarketBeat (named submarket: 3.4% vacancy, $13.22–$14.86/SF rent). Retail, cap rate, NNN rent, and Joel Blvd corridor-level metrics have zero broker coverage → narrative-only in `lehigh-cre` pack.
+- **Next:** Build `lehigh-cre` pack using C&W industrial/office data; retail goes county-proxy + caveat; cap rate stays narrative with Chipotle NNN single data point.
+
 ## 2026-06-07 (Sonnet 4.6 · claude/lehigh-permit-geocode) — feat(permits): Lee permit geocoding — Census batch geocoder ported from Collier
 
 - **New `ingest/pipelines/lee_permits/geocoder.py`:** Census batch geocoder + corridor assignment, ported from `collier_permits/geocoder.py`. Lee-specific address splitter handles "STREET, CITY, FL ZIP" format (Collier uses "STREET, City"). 11 tests green.
