@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — chore(branches): merged PR #70 + cleaned all 3 feature branches → only `main` remains
+
+- **Branch hygiene at operator request** ("why 3 branches? handle it properly"). Audited each vs `origin/main`: `claude/lehigh-permit-geocode` (PR #67) and `claude/highlighter-ux-followups` (PR #69, incl. teal styling) were **100% merged** (zero two-dot delta) → deleted from remote. `claude/flywheel-plan` was open **PR #70** (docs-only — flywheel bootstrap plan + Glass spec), `CLEAN`/mergeable → **squash-merged** (`c662e3d`) and branch auto-deleted.
+- **Confirmed the "flywheel + highlighter are on main" claim:** highlighter is fully on main (#68 engine + #69 UX); the flywheel **engine** is on main (`predictions-log.mts` / `backtest/decision-fn.mts` / `grade/grade-predictions.mts` / `grade-predictions.yml`) — only the next-phase **bootstrap plan docs** were unmerged (now landed via #70).
+- **Reconciled local `main`:** rebased the 2 unpushed commits — charts Tier A (`9202091`) + the README refresh — onto the updated `origin/main`; resolved 2 append-only `SESSION_LOG` conflicts (kept every entry). Pushing both now. End state: GitHub shows only `main`.
+
 ## 2026-06-07 (Opus 4.8 · claude/flywheel-plan) — docs(glass): observability + continuous-improvement spec → joins PR #98
 
 - **Added "The Glass"** (`docs/superpowers/specs/2026-06-07-the-glass-observability-and-improvement-loop-design.md`) to the flywheel PR — the human-facing window onto the grading engine the flywheel feeds. 4 panes: ① data-flow lineage (macro→micro), ② the calls + basis + falsifier + what-it's-graded-against-next, ③ skill-vs-naive + calibration over time (the "are we getting better" graph), ④ an auto-updating `data_targets` table (system flags data to go acquire when low-N / not-beating-naive / stale / excluded-but-wanted).
@@ -30,6 +36,7 @@
 - **Verified:** `bun test lib/highlighter` **44/44** (10 new: converse + dock-geom); `eslint` + `tsc` clean on changed files — fixed a `react-hooks/set-state-in-effect` error (the PR #68 CI-breaker class) via lazy `useState` init, and a FAB positioning bug (`.btn-gradient{position:relative}` overrode `fixed` → wrapped FAB in a positioned div). Browser harness `hl-verify/driver-ux.mjs` (desktop 1280×800 + mobile 375×720, live flag-on server) **26/26**, incl. two live grounded answers (HTTP 200), dock drag/resize/persist, mobile selectionchange + sheet. Screenshots in `hl-verify/shots-ux/`.
 - **Isolation:** a parallel session is mid-build on the charts layer in the shared tree (`components/charts/*`, `refinery/*`, `app/r/[slug]/page.tsx`). This work touched NONE of those (all new UI mounts inside `HighlighterLayer`), staged only highlighter-owned files, and pushed a **branch, not `main`**. Did NOT use `safe-push` (it would `git stash` the parallel WIP).
 - **Next:** operator reviews the PR — confirm the 4 flagged defaults (esp. #3 color + #6 dock layout), then flip `HIGHLIGHTER_UI=1` in prod + close `highlighter_ui_live_verify`. Did NOT flip the prod flag or merge.
+
 ## 2026-06-07 (Opus 4.8 · main) — docs(readme): refresh GitHub boilerplate — full live brain roster + Highlighter / charts / flywheel
 
 - **What:** Updated `README.md` (the repo front page) to match the real shipped surface. No code/behavior change — doc only.
