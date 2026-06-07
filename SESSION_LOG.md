@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — docs(glass): audited + corrected The Glass build decomposition (6 waved sections)
+
+- **What:** New `docs/superpowers/specs/2026-06-07-the-glass-build-decomposition.md` — audited the inherited Glass plan against live code + the live DB (`predictions`/`outcomes`), corrected into 6 waved sections. Doc-only.
+- **Key corrections:** §2 backtest = critical path; §6 added (raise live gradeable-call yield, honesty-gated — never manufacture a bet); Pane-2 `fetchOpenCalls` must filter `grade_status IN ('gradeable','ungradeable')` (DB: 40 master preds, only 11 carry claims, 29 legacy `pending` husks, `outcomes`=0); pinned the `backtest_grades` contract; ops fixes (reader idiom `{available,<entity>}`, `ProgressBar` not exported, nullable `freshnessToken`); Pane-3 views grant `service_role` not `anon`. Confirmed the 4 design docs are on `main` via PR #70 (`c662e3d`).
+- **Next:** operator review → writing-plans for §1 (built from the `swfldatagulf-ops` session, no brain-platform path-guard in the way). Wave 1 = §1 ‖ §2 ‖ §6.
+
 ## 2026-06-07 (Sonnet 4.6 · main) — feat(charts): direction colors + ZIP/city two-line labels on all /r/ hbar charts
 
 - **Color system aligned:** default bar fills changed from teal to direction colors — bullish `#5bc97a` (mangrove green), bearish `#e08158` (sunset coral), neutral `rgba(184,180,168,0.45)` (grey). Label text (ZIP) and value numbers switched to teal `#3ecfb2`; city sub-label uses muted teal `rgba(62,207,178,0.62)`.
