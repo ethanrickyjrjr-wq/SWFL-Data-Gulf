@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — RULE: smoke vocab slugs before pushing (close the leaf/conditional-orphan hole that held the rebuild)
+
+- **Root of the hole:** the pre-push gate (`.claude/hooks/check-prepush-gate.mjs`) ran `check-vocab-coverage` with the **bare master-only default**, which never inspects leaf-brain slugs — so econ-dev-swfl's unregistered metrics walked right past it and HELD the 2026-06-07 rebuild. Fixed in **4 homes**:
+  1. **Hook** — switched the gate to `check-vocab-coverage.mts --all` (all brains, real Stage-2.5 resolver), **plus** a new conditional-orphan guard: scans touched `refinery/packs/*.mts` source for double-quoted `metric:` literals not in `slug_index` (catches slugs emitted behind an `if` that no rendered `.md` shows yet). Both fail-closed (exit 2); guard fails-open on internal error so a bug never wedges pushes.
+  2. **CLAUDE.md** RULE 1 breaker #2 — rewritten: `--all` mandatory; every emittable slug (incl. conditional) must be registered AND documented (concept `prefLabel`+`scope_note` + `slug_index` entry) in the SAME commit.
+  3. **`docs/standards/data-and-build-bible.md`** §5 step 4 — same discipline in the wire-a-new-dataset checklist.
+  4. **`docs/cron-rebuild-failures.md`** Recurring Patterns — new "Leaf / conditional metric slug" failure class.
+- **Verified:** hook syntax OK; `--all` exits 0 on current tree; **integration test** — scratch pack with a fake slug → hook BLOCKED with exit 2, then scratch dropped; literal-guard would have caught all 4 econ-dev slugs (incl. the 2 conditional ones `--all` can't see) pre-fix.
+
 ## 2026-06-07 (Opus 4.8 · main) — fix(highlighter): popup browser-verified + 2 real bugs fixed + light theme + number-snap; 2 handoffs written (charts + UX follow-ups)
 
 - **Browser-verified the popup end-to-end** (Playwright, desktop 1280×800 + mobile 320×700, live dev server `HIGHLIGHTER_UI=1`): coachmark → text-select → suggestions → composer → **live `/api/converse` grounded answer (HTTP 200; cite-or-decline fired live)** → Esc/outside-close. 16/16 checks, screenshots in `hl-verify/shots/`. This is the browser half of `highlighter_ui_live_verify` — done LOCALLY; **prod flag-flip still pending → check stays open**.

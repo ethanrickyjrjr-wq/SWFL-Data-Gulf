@@ -96,14 +96,43 @@ process.stdin.on("end", () => {
           truncate(alias.out),
       );
     }
-    const vocab = run("bun refinery/tools/check-vocab-coverage.mts");
+    // --all, NOT the bare (master-only) default. The bare check only inspects
+    // master.md's own key_metrics, so a slug emitted by a LEAF brain that orphans
+    // master's normalize at stage 2.5 sails right through it — that exact hole
+    // held the 2026-06-07 rebuild (econ-dev-swfl emitted econ_dev_announcements_90d
+    // / _prior_90d, never registered). --all walks every brains/*.md through the
+    // real Stage-2.5 resolver and exits 1 on the first orphan.
+    const vocab = run("bun refinery/tools/check-vocab-coverage.mts --all");
     if (vocab.ran && vocab.code !== 0) {
       block(
-        "VOCAB/ALIAS — master emits a slug not registered in the vocabulary",
-        `pack "master" claims a metric slug that does not resolve in\n` +
+        "VOCAB/ALIAS — a brain emits a metric slug not registered in the vocabulary",
+        `A brain claims a metric slug that does not resolve in\n` +
           `refinery/vocab/brain-vocabulary.json — the orphan-concept error that\n` +
-          `aborts the nightly rebuild.\n\n` +
+          `aborts the nightly rebuild the moment master re-synthesizes.\n\n` +
+          `Fix: add a documented concept (prefLabel + scope_note) AND a slug_index\n` +
+          `identity entry for each slug below, in THIS commit, then retry.\n\n` +
           truncate(vocab.out),
+      );
+    }
+    // Conditional-slug guard: --all only sees slugs present in a RENDERED .md.
+    // A slug emitted behind an `if` (e.g. econ_dev_investment_usd_90d, only when a
+    // disclosure exists) is absent from the .md until data makes it computable —
+    // then it orphans master with no warning. So read the touched pack SOURCE and
+    // require every statically-emitted (double-quoted) metric literal to already be
+    // registered in slug_index. Templated slugs use backticks → skipped (they
+    // resolve via raw_slug_patterns, not slug_index).
+    const unregistered = unregisteredLiteralSlugs(changed);
+    if (unregistered.length > 0) {
+      block(
+        "VOCAB/ALIAS — a pack emits a metric slug literal not registered (conditional-orphan guard)",
+        `These metric slugs are written as literals in pack source but are NOT in\n` +
+          `refinery/vocab/brain-vocabulary.json slug_index. Even if a slug is emitted\n` +
+          `only conditionally (behind an \`if\`), it MUST be registered now — otherwise\n` +
+          `it orphans master the first day its data makes it computable.\n\n` +
+          unregistered.map((u) => `  - ${u.slug}   (${u.file})`).join("\n") +
+          `\n\nFix: add a documented concept + slug_index identity entry for each, in\n` +
+          `THIS commit, then retry. (If a slug is genuinely templated, emit it via a\n` +
+          `backtick template and register a raw_slug_patterns glob instead.)`,
       );
     }
   }
@@ -208,4 +237,57 @@ function depsChanged(base) {
     }
   }
   return false;
+}
+
+// Scan touched pack source for statically-emitted (double-quoted) metric slug
+// literals and return any not present in the committed vocab's slug_index. The
+// conditional-slug companion to `--all`: `--all` only sees slugs in a rendered
+// .md, so a slug emitted behind an `if` is invisible until its data lands and
+// orphans master with no warning. Reading the source catches it at push time.
+// Both sides read HEAD so a slug registered in the SAME commit counts as covered.
+// Fails OPEN (returns []) on any internal error — a broken guard must never wedge
+// every push (mirrors the hook-wide fail-open design).
+function unregisteredLiteralSlugs(changed) {
+  try {
+    const packs = changed.filter(
+      (f) =>
+        f.startsWith("refinery/packs/") &&
+        f.endsWith(".mts") &&
+        !f.endsWith(".test.mts"),
+    );
+    if (packs.length === 0) return [];
+    let vocabRaw;
+    try {
+      vocabRaw = sh("git show HEAD:refinery/vocab/brain-vocabulary.json");
+    } catch {
+      return []; // can't read vocab at HEAD — fail open
+    }
+    const slugIndex = JSON.parse(vocabRaw)?.slug_index ?? {};
+    const registered = new Set(Object.keys(slugIndex));
+    const found = [];
+    const seen = new Set();
+    for (const file of packs) {
+      let src;
+      try {
+        src = sh(`git show HEAD:${file}`);
+      } catch {
+        continue; // file gone at HEAD (rename/delete) — skip
+      }
+      // `metric: "slug"` — double-quoted literal only. Backtick templates
+      // (per-ZIP / per-corridor emissions) are intentionally skipped; they
+      // resolve via raw_slug_patterns, not slug_index.
+      const re = /\bmetric:\s*"([a-z0-9_]+)"/g;
+      let m;
+      while ((m = re.exec(src)) !== null) {
+        const slug = m[1];
+        const key = `${file}::${slug}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        if (!registered.has(slug)) found.push({ slug, file });
+      }
+    }
+    return found;
+  } catch {
+    return []; // never wedge a push on a guard bug
+  }
 }

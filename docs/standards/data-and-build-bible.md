@@ -114,8 +114,17 @@ Do these in order. Steps that must share a single commit are marked **[same PR]*
    in code; LLMs only do qualitative prose.** `rowShape` coerces DuckDB types.
 4. **Pack** — `refinery/packs/<x>.mts`, registered in `refinery/packs/index.mts`
    (use `refinery/scaffold.mts` — it writes both atomically). The pack **imports
-   the source**. Vocabulary slugs land in the **[same PR]** (the orphan linter
-   aborts the GHA rebuild in any gap — "ship the contract together").
+   the source**. **Every metric slug the pack can emit — including conditional
+   ones behind an `if` — lands in `refinery/vocab/brain-vocabulary.json` in the
+   **[same PR]**, both as a documented concept (`prefLabel` + `scope_note`) and a
+   `slug_index` identity entry** ("ship the contract together"). A leaf-emitted
+   orphan aborts the GHA rebuild the moment master re-synthesizes; a _conditional_
+   slug stays invisible until its data lands, then orphans master with zero
+   warning — register it the day you write it. **Smoke before pushing:**
+   `bun refinery/tools/check-vocab-coverage.mts --all` (NOT the bare master-only
+   default — that misses leaf orphans). The pre-push hook enforces both `--all`
+   and a source scan for unregistered `metric:` literals; full rule in `CLAUDE.md`
+   RULE 1 breaker #2.
 5. **Cadence** — add to `ingest/cadence_registry.yaml`. Set the pack's
    `ttl_seconds` to the **source's real cadence**, never 1 day unless the source
    is genuinely daily (monthly source on a 1d TTL = nightly re-render of
