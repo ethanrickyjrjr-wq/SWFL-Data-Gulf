@@ -37,7 +37,7 @@
 
 ### 1. Cushman & Wakefield MarketBeat
 
-**Finding: Lehigh Acres IS a named submarket — for industrial and office only.**
+**Finding: Lehigh Acres IS a named submarket — industrial, office, retail, and medical office.**
 
 C&W publishes Southwest Florida MarketBeat reports quarterly under the "Americas Alliance" franchise operated locally by Commercial Property Southwest Florida (cpswfl.com). Lehigh Acres appears as a distinct named row in the submarket statistics table for both the industrial and office reports. These are publicly accessible PDF documents.
 
@@ -56,26 +56,44 @@ C&W publishes Southwest Florida MarketBeat reports quarterly under the "Americas
 
 Historical industrial data confirmed: Q4 2024 (vacancy 5.6%, rent WD $9.79), Q1 2025 (vacancy 6.0%, rent WD $10.62), Q3 2025 (vacancy 2.5%), Q1 2026 (vacancy 3.4%).
 
-**Office Q4 2025 — Lehigh Acres submarket row (verified from PDF):**
+**Office Q1 2026 — Lehigh Acres submarket row (verified from PDF):**
 
 - Inventory: 182,043 SF
 - Overall Vacancy Rate: **1.1%** (extremely tight)
-- Net Absorption: -2,006 SF
+- Net Absorption: 0 SF (Q1 2026 current quarter)
 - Avg Asking Rent: `---` (suppressed — market too thin to publish)
-- Leasing Activity: `---` (suppressed)
 
 The office submarket (182K SF total) is too small for a statistically published rent figure — C&W marks it `---`.
 
-**Retail:** A C&W Southwest Florida Retail MarketBeat exists (Q4 2024 referenced on cpswfl.com), but the scraped data did not confirm a Lehigh Acres submarket row in the retail report. Given that the office market only has 182K SF and the retail market in Lehigh Acres is primarily strip/general retail scattered along Lee Blvd, it is unlikely that a retail row exists with published metrics.
+**Retail Q4 2025 — Lehigh Acres submarket row (verified from PDF):**
 
-**Cap rate:** Not published in any C&W MarketBeat for any SWFL submarket. MarketBeat tracks vacancy/absorption/rent, not investment yields.
+- Inventory: 1,799,903 SF
+- Sublet Vacant: 0 SF
+- Direct Vacant: 4,275 SF
+- Vacancy Rate: **0.2%** (tightest in all of Lee County)
+- Current Qtr Net Absorption: +6,397 SF
+- YTD Net Absorption: +24,493 SF
+- Under Construction: 0 SF
+- Avg NNN Asking Rent: **$35.08/SF**
+
+C&W narrative: "Tight supply and limited new development in submarkets like Lehigh Acres, Marco Island, Lely, and Naples, each with sub-2% vacancy, present notable opportunities for future retail expansion." Lee County retail cap rates averaged 6.7% per the Q4 2025 report (county-wide figure, not Lehigh Acres-specific).
+
+**Medical Office Q1 2026 — "Lehigh" submarket row (verified from PDF):**
+
+- Inventory: 367,473 SF
+- Net Absorption: +4,378 SF (current qtr)
+- YTD Leasing Activity: 7,103 SF
+- Avg Asking Rent: **$31.32/SF**
+- Vacancy/direct vacant: suppressed (`---` — market too thin to publish rate)
+
+**Cap rate:** Not published in any C&W MarketBeat for any SWFL submarket. MarketBeat tracks vacancy/absorption/rent, not investment yields. Lee County retail aggregate was 6.7% per Q4 2025 retail report.
 
 **Sources:**
 
 - Industrial Q1 2026: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2026/q1/us-reports/industrial/fortmyers_naples_americas_alliance_marketbeat_industrial_q12026.pdf
-- Office Q4 2025: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2025/q4/us-reports/office/fort-myers_naples_americas_alliance_marketbeat_office_q42025.pdf
-- Industrial Q1 2025: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2025/q1/us-reports/industrial/fortmyers_naples_americas_alliance_marketbeat_industrial_q12025.pdf
-- Industrial Q4 2024: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2024/q4/us-reports/inustrial/fortmyers_naples_americas_alliance_marketbeat_industrial_q42024.pdf
+- Office Q1 2026: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2026/q1/us-reports/office/fort-myers_naples_americas_alliance_marketbeat_office_q12026.pdf
+- Retail Q4 2025: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2025/q4/us-reports/retail/fortmyersnaples_americas_marketbeat_retail_q42025.pdf
+- Medical Office Q1 2026: https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdfs/2026/q1/us-reports/medical/fort-myers_naples_americas_alliance_marketbeat_medicaloffice_q12026.pdf
 - MarketBeat hub: https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeats/fort-myers-naples-marketbeats
 
 ---
