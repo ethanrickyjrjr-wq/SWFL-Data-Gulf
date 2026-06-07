@@ -38,6 +38,44 @@ function selectionIsSuppressed(sel: Selection): boolean {
 }
 
 /**
+ * Widen a selection range outward to cover a whole numeric figure when it lands
+ * inside one. Dragging across part of "$525,000" (or "$30,074/yr", "-9.7%",
+ * "+60bps") snaps to the entire token. Returns a widened Range, or null when
+ * the selection isn't inside a single-text-node number (e.g. a place name), so
+ * the caller leaves the selection alone.
+ */
+function expandRangeToNumber(range: Range): Range | null {
+  const node = range.startContainer;
+  // Only the common case: a selection that lives inside one text node.
+  if (node.nodeType !== Node.TEXT_NODE || range.endContainer !== node)
+    return null;
+  const text = node.textContent ?? "";
+  let start = range.startOffset;
+  let end = range.endOffset;
+  const NUM = /[0-9.,$%+\-/]/; // currency, percent, ratio, sign, decimals
+  // Grow left/right over number characters...
+  while (start > 0 && NUM.test(text[start - 1])) start--;
+  while (end < text.length && NUM.test(text[end])) end++;
+  // ...then a short trailing unit run (k / m / b / bps / yr / sf / mo).
+  for (let u = 0; u < 4 && end < text.length && /[a-zA-Z]/.test(text[end]); u++)
+    end++;
+  // Drop a trailing sentence period / dangling comma.
+  while (end > start && /[.,]/.test(text[end - 1])) end--;
+  const widened = text.slice(start, end);
+  // Bail unless we captured a digit AND actually grew the original selection.
+  if (!/\d/.test(widened)) return null;
+  if (start === range.startOffset && end === range.endOffset) return null;
+  try {
+    const r = document.createRange();
+    r.setStart(node, start);
+    r.setEnd(node, end);
+    return r;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Desktop text-selection → fact snapshot. On `mouseup`/`keyup` we wait 10ms for
  * the selection to settle, then snapshot the selected text, its bounding rect,
  * and a coarse fact type. Selections inside form fields, contenteditable, or
@@ -55,22 +93,37 @@ export function useHighlight() {
     function snapshot() {
       const sel = typeof window !== "undefined" ? window.getSelection() : null;
       if (!sel || sel.isCollapsed || selectionIsSuppressed(sel)) {
-        // Don't clobber an open popup the user is interacting with: only clear
-        // when there is genuinely no selection.
-        if (!sel || sel.isCollapsed) setFact(null);
+        // Clear the popup ONLY on a real collapse in page content. When focus
+        // moves into our popup/composer (suppressed), the page selection
+        // collapses too — but the user is typing a question, NOT dismissing it.
+        // Clearing here is the "popup vanishes mid-compose" bug. Outside-click
+        // and Esc still close it via the popup's own handlers.
+        if ((!sel || sel.isCollapsed) && !(sel && selectionIsSuppressed(sel))) {
+          setFact(null);
+        }
         return;
+      }
+      let range: Range;
+      try {
+        range = sel.getRangeAt(0);
+      } catch {
+        return;
+      }
+      // Snap a partial number selection out to the whole figure: dragging
+      // across "525" in "$525,000" (or "30,074/yr", "-9.7%", "+60bps") grabs
+      // the entire token. Only ever widens; leaves place names untouched.
+      const widened = expandRangeToNumber(range);
+      if (widened) {
+        sel.removeAllRanges();
+        sel.addRange(widened);
+        range = widened;
       }
       const text = sel.toString().trim();
       if (!text) {
         setFact(null);
         return;
       }
-      let rect: DOMRect;
-      try {
-        rect = sel.getRangeAt(0).getBoundingClientRect();
-      } catch {
-        return;
-      }
+      const rect = range.getBoundingClientRect();
       if (rect.width === 0 && rect.height === 0) return;
       setFact({ text, rect, factType: classifyFact(text) });
     }

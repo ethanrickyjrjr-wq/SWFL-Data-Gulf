@@ -163,7 +163,7 @@ export function HighlightPopup({
       ref={ref}
       role="dialog"
       aria-label="Ask about this figure"
-      className="glass-card-modern fixed z-[60] w-[min(92vw,340px)] rounded-xl border border-white/10 p-4 text-sm shadow-2xl shadow-black/40"
+      className="fixed z-[60] max-h-[85vh] w-[min(92vw,340px)] overflow-y-auto rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-900 shadow-2xl shadow-black/50"
       style={{
         top: pos?.top ?? -9999,
         left: pos?.left ?? -9999,
@@ -171,14 +171,17 @@ export function HighlightPopup({
       }}
     >
       <div className="mb-2 flex items-start justify-between gap-3">
-        <p className="min-w-0 break-words font-mono text-[#00d4aa]">
+        <p
+          title={fact.text}
+          className="line-clamp-3 min-w-0 break-words font-mono font-semibold text-[#0b6b5a]"
+        >
           {fact.text}
         </p>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="-mr-1 -mt-1 shrink-0 rounded p-1 text-gray-500 transition-colors hover:text-gray-200"
+          className="-mr-1 -mt-1 shrink-0 rounded p-1 text-gray-400 transition-colors hover:text-gray-700"
         >
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
             <path d="M4.3 3.3 8 7l3.7-3.7 1 1L9 8l3.7 3.7-1 1L8 9l-3.7 3.7-1-1L7 8 3.3 4.3z" />
@@ -188,7 +191,7 @@ export function HighlightPopup({
 
       {stage === "suggestions" && (
         <div>
-          <p className="mb-2 text-xs uppercase tracking-wider text-gray-400">
+          <p className="mb-2 text-xs uppercase tracking-wider text-gray-500">
             Ask about this
           </p>
           <ul className="flex flex-col gap-1.5">
@@ -197,7 +200,7 @@ export function HighlightPopup({
                 <button
                   type="button"
                   onClick={() => ask(s)}
-                  className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-left text-gray-200 transition-colors hover:border-[#00d4aa]/50 hover:text-[#00d4aa]"
+                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left text-gray-800 transition-colors hover:border-[#0b6b5a]/60 hover:bg-[#0b6b5a]/5 hover:text-[#0b6b5a]"
                 >
                   {s}
                 </button>
@@ -207,7 +210,7 @@ export function HighlightPopup({
           <button
             type="button"
             onClick={() => setStage("ask")}
-            className="mt-2 text-xs text-gray-400 underline underline-offset-2 hover:text-[#00d4aa]"
+            className="mt-2 text-xs text-gray-500 underline underline-offset-2 hover:text-[#0b6b5a]"
           >
             Ask your own question →
           </button>
@@ -227,13 +230,13 @@ export function HighlightPopup({
             onChange={(e) => setQuestion(e.target.value)}
             rows={3}
             placeholder="Ask anything about this figure…"
-            className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-gray-100 placeholder:text-gray-600 focus:border-[#00d4aa]/50 focus:outline-none"
+            className="w-full resize-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-[#0b6b5a]/60 focus:outline-none"
           />
           <div className="mt-2 flex items-center justify-between">
             <button
               type="button"
               onClick={() => setStage("suggestions")}
-              className="text-xs text-gray-400 hover:text-gray-200"
+              className="text-xs text-gray-500 hover:text-gray-800"
             >
               ← Back
             </button>
@@ -250,14 +253,14 @@ export function HighlightPopup({
 
       {stage === "answer" && (
         <div>
-          <div className="max-h-[40vh] overflow-y-auto whitespace-pre-wrap leading-6 text-gray-200">
+          <div className="max-h-[40vh] overflow-y-auto whitespace-pre-wrap leading-6 text-gray-800">
             {error ? (
-              <span className="text-[#e08158]">{error}</span>
+              <span className="text-red-600">{error}</span>
             ) : (
               <>
                 {answer}
                 {streaming && (
-                  <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-[#00d4aa]/70 align-middle" />
+                  <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-[#0b6b5a]/80 align-middle" />
                 )}
               </>
             )}
@@ -275,7 +278,7 @@ export function HighlightPopup({
                 setAnswer("");
                 setReach([]);
               }}
-              className="mt-3 text-xs text-gray-400 underline underline-offset-2 hover:text-[#00d4aa]"
+              className="mt-3 text-xs text-gray-500 underline underline-offset-2 hover:text-[#0b6b5a]"
             >
               Ask another →
             </button>
@@ -283,19 +286,19 @@ export function HighlightPopup({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-gray-200 pt-3">
         <button
           type="button"
           disabled
           title="Charting is coming soon"
-          className="cursor-not-allowed rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-500"
+          className="cursor-not-allowed rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-400"
         >
           Chart this · soon
         </button>
         <button
           type="button"
           onClick={copyHandoff}
-          className="text-xs text-[#60a5fa] underline decoration-[#60a5fa]/40 underline-offset-2 transition-colors hover:decoration-[#60a5fa]"
+          className="text-xs text-blue-600 underline decoration-blue-600/40 underline-offset-2 transition-colors hover:decoration-blue-600"
         >
           {copied ? "Copied ✓" : "Copy prompt for Claude ↗"}
         </button>
