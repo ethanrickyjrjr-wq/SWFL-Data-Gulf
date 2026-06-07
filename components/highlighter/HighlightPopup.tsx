@@ -77,16 +77,18 @@ export function HighlightPopup({
   // A chip click or a typed question both land here → switch to the answer
   // view and stream a grounded reply. The SSE/accumulation logic lives in the
   // shared useConverse hook (also used by the Ask-AI dock).
+  const factWithContext = fact.context ? `${fact.context}: ${fact.text}` : fact.text;
+
   function submit(q: string) {
     const trimmed = q.trim();
     if (!trimmed) return;
     setStage("answer");
-    void ask({ reportId, fact: fact.text, question: trimmed });
+    void ask({ reportId, fact: factWithContext, question: trimmed });
   }
 
   const handoff = buildClaudeHandoff({
     report_id: reportId,
-    fact: fact.text,
+    fact: factWithContext,
     conclusion: conclusion ?? "",
     freshness_token: freshnessToken ?? "",
   });
@@ -115,12 +117,17 @@ export function HighlightPopup({
       }}
     >
       <div className="mb-2 flex items-start justify-between gap-3">
-        <p
-          title={fact.text}
-          className="line-clamp-3 min-w-0 break-words font-mono font-semibold text-[#0b6b5a]"
-        >
-          {fact.text}
-        </p>
+        <div className="min-w-0">
+          {fact.context && (
+            <p className="mb-0.5 line-clamp-2 break-words text-xs text-gray-500">{fact.context}</p>
+          )}
+          <p
+            title={factWithContext}
+            className="line-clamp-2 break-words font-mono font-semibold text-[#0b6b5a]"
+          >
+            {fact.text}
+          </p>
+        </div>
         <button
           type="button"
           onClick={onClose}
@@ -137,9 +144,7 @@ export function HighlightPopup({
         <div>
           {suggestions.length > 0 && (
             <>
-              <p className="mb-2 text-xs uppercase tracking-wider text-gray-500">
-                Ask about this
-              </p>
+              <p className="mb-2 text-xs uppercase tracking-wider text-gray-500">Ask about this</p>
               <ul className="mb-3 flex flex-col gap-1.5">
                 {suggestions.map((s, i) => (
                   <li key={i}>
@@ -196,9 +201,7 @@ export function HighlightPopup({
             )}
           </div>
           {reach.length > 0 && (
-            <p className="mt-3 text-xs text-gray-500">
-              Also pulled: {reach.join(", ")}
-            </p>
+            <p className="mt-3 text-xs text-gray-500">Also pulled: {reach.join(", ")}</p>
           )}
           {!streaming && !error && (
             <button

@@ -8,6 +8,8 @@ export interface SelectedFact {
   text: string;
   rect: DOMRect;
   factType: FactType;
+  /** Row-level label from the nearest <tr> first cell, or nearest heading. */
+  context?: string;
 }
 
 /** Classify a selection: a number/currency/percent reads as a "metric", else
@@ -22,17 +24,13 @@ export function classifyFact(text: string): FactType {
   return "place";
 }
 
-const SUPPRESS_CLOSEST =
-  "input, textarea, [contenteditable], #highlighter-popup, #ask-ai-dock";
+const SUPPRESS_CLOSEST = "input, textarea, [contenteditable], #highlighter-popup, #ask-ai-dock";
 
 function selectionIsSuppressed(sel: Selection): boolean {
   if (sel.rangeCount === 0) return true;
   const node = sel.anchorNode;
   if (!node) return true;
-  const el =
-    node.nodeType === Node.ELEMENT_NODE
-      ? (node as Element)
-      : node.parentElement;
+  const el = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement;
   if (!el) return true;
   return el.closest(SUPPRESS_CLOSEST) !== null;
 }
@@ -47,8 +45,7 @@ function selectionIsSuppressed(sel: Selection): boolean {
 function expandRangeToNumber(range: Range): Range | null {
   const node = range.startContainer;
   // Only the common case: a selection that lives inside one text node.
-  if (node.nodeType !== Node.TEXT_NODE || range.endContainer !== node)
-    return null;
+  if (node.nodeType !== Node.TEXT_NODE || range.endContainer !== node) return null;
   const text = node.textContent ?? "";
   let start = range.startOffset;
   let end = range.endOffset;
@@ -57,8 +54,7 @@ function expandRangeToNumber(range: Range): Range | null {
   while (start > 0 && NUM.test(text[start - 1])) start--;
   while (end < text.length && NUM.test(text[end])) end++;
   // ...then a short trailing unit run (k / m / b / bps / yr / sf / mo).
-  for (let u = 0; u < 4 && end < text.length && /[a-zA-Z]/.test(text[end]); u++)
-    end++;
+  for (let u = 0; u < 4 && end < text.length && /[a-zA-Z]/.test(text[end]); u++) end++;
   // Drop a trailing sentence period / dangling comma.
   while (end > start && /[.,]/.test(text[end - 1])) end--;
   const widened = text.slice(start, end);
@@ -73,6 +69,41 @@ function expandRangeToNumber(range: Range): Range | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Walk up from the selection anchor to extract the metric label that owns the
+ * selected value. Strategy: nearest <tr> → first <td>/<th> text (covers the key-
+ * metrics table). Fallback: the nearest preceding sibling heading within any
+ * ancestor, for prose sections. Returns undefined when no label is found.
+ */
+function extractRowContext(node: Node): string | undefined {
+  const el: Element | null =
+    node.nodeType === Node.ELEMENT_NODE ? (node as Element) : (node as Text).parentElement;
+  if (!el) return undefined;
+
+  // Table row: the first cell is the metric label.
+  const row = el.closest("tr");
+  if (row) {
+    const firstCell = row.querySelector("td, th");
+    const label = firstCell?.textContent?.trim();
+    if (label) return label;
+  }
+
+  // Prose fallback: nearest preceding heading among ancestors.
+  let cursor: Element | null = el;
+  while (cursor) {
+    let sib: Element | null = cursor.previousElementSibling;
+    while (sib) {
+      if (/^h[1-6]$/i.test(sib.tagName)) {
+        const h = sib.textContent?.trim();
+        if (h) return h;
+      }
+      sib = sib.previousElementSibling;
+    }
+    cursor = cursor.parentElement;
+  }
+  return undefined;
 }
 
 /**
@@ -125,7 +156,8 @@ export function useHighlight() {
       }
       const rect = range.getBoundingClientRect();
       if (rect.width === 0 && rect.height === 0) return;
-      setFact({ text, rect, factType: classifyFact(text) });
+      const context = extractRowContext(range.startContainer);
+      setFact({ text, rect, factType: classifyFact(text), context });
     }
 
     function onSettle() {
