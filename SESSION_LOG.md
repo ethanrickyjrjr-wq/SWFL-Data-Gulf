@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Sonnet 4.6 · main) — verify(rentals): ZORI / rentals-swfl Lehigh coverage confirmed — nothing to build
+
+- **All 6 Lehigh ZIPs** (33936, 33971–33974, 33976) present in `data_lake.zori_swfl` (5,185 rows, 94 ZIPs, Jan 2015 → Apr 2026, last ingested 2026-05-24).
+- **`rentals-swfl` pack is fully wired:** source connector, pack definition, `index.mts` registration, and `brains/rentals-swfl.md` all exist. `zori_swfl_tier2` cadence entry live. No HUD FMR scaffold needed.
+- **Plan doc updated:** `docs/superpowers/plans/2026-06-06-lehigh-parity-sprint.md` — added `[VERIFIED 2026-06-07]` note to Verified current state so the next session doesn't re-research this.
+
 ## 2026-06-07 (Sonnet 4.6 · claude/lehigh-permit-geocode) — research(cre): Lehigh Acres CRE broker coverage sourcing — Task A complete
 
 - **`docs/superpowers/specs/2026-06-06-lehigh-cre-data-findings.md`:** Full broker coverage audit for Lee Blvd / Joel Blvd / Lehigh Acres submarket. Searched C&W MarketBeat, Colliers, LSI Companies, Mayhugh, LoopNet, Crexi, Lee & Associates, Ian Black, CBRE, Marcus & Millichap, LeePA implied cap rate.

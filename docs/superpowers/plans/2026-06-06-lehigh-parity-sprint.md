@@ -65,6 +65,12 @@ Roadmap: `docs/lehigh-acres-data-parity.md`.
   won't 404); flood from `brains/env-swfl.md` `key_metrics`
   `swfl_zip_{zip}_flood_aal_usd_per_insured_property` + `swfl_zip_{zip}_flood_aal_pct_swfl_rank`.
   Missing flood → section hides gracefully via conditional render (NOT a 404/throw).
+- **[VERIFIED 2026-06-07] ZORI / rentals-swfl is fully wired — nothing to build.** All 6
+  Lehigh ZIPs (33936, 33971–33974, 33976) appear in `data_lake.zori_swfl` (5,185 rows, 94 ZIPs,
+  Jan 2015 → Apr 2026, last ingested 2026-05-24). The `rentals-swfl` pack is built, registered in
+  `refinery/packs/index.mts`, `brains/rentals-swfl.md` exists, and the `zori_swfl_tier2` cadence
+  entry is live (30-day). HUD FMR scaffold is NOT needed. Rebuild with
+  `npm run refinery -- rentals-swfl` whenever a fresh output is needed.
 
 ## ⚠️ Two discrepancies — both real (resolve honestly)
 
