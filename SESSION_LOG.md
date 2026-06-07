@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Sonnet 4.6 · main) — chore: prettier + lint-staged pre-commit hook; gitignore .superpowers/
+
+- Added `.prettierrc` (100-char, double quotes, trailing commas — matches existing style) + `.prettierignore` (excludes ingest/, markdown, design refs, bun.lock).
+- Installed `prettier` + `lint-staged`; wired `lint-staged` in `package.json` + `.git/hooks/pre-commit`. Formatter now runs only on staged files at commit, not mid-work.
+- Removed broken global Claude `PostToolUse` hook (`~/.claude/settings.json`) that was running `prettier --write` + `eslint --fix || true` on every edit (silent failures, no config = defaults).
+- Added `.superpowers/` to `.gitignore` (auto-generated plugin runtime data, not repo artifacts).
+
 ## 2026-06-07 (Opus 4.8 · main) — docs(glass): add Dispatch section (model/repo/concurrency) + clarify /glass home
 
 - **What:** Updated `docs/superpowers/specs/2026-06-07-the-glass-build-decomposition.md` — added a **Dispatch** table (per section: Sonnet vs Opus, what to send, when it can start, what's safe vs forbidden to run concurrently) + the "one working tree, one agent" rule → honest max parallelism is 2 streams (ops `§1/§3/§5` ‖ brain-platform `§2/§4/§6`). Clarified DECISION 1: `/glass` is a NEW page in the ops dashboard alongside `/littlebird`/`/checks`/`/goals`/`/targets`, not inside littlebird. Doc-only.

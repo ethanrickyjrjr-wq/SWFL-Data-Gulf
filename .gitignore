@@ -126,3 +126,6 @@ docs/superpowers/plans/2026-05-26-corridor-broker-narrative-promotion/
 docs/superpowers/specs/2026-06-02-closing-disclosure-janitor-evidence-chain.md
 *janitor*
 scripts/reddit.mjs
+
+# Superpowers plugin runtime data — ephemeral, auto-generated per session
+.superpowers/

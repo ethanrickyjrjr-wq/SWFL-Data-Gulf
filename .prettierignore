@@ -1,0 +1,11 @@
+.next/
+out/
+build/
+node_modules/
+bun.lock
+app/_design/
+docs/design-reference/
+ops/
+ingest/
+**/*.py
+**/*.md
