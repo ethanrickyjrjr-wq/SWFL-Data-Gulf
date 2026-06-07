@@ -10,6 +10,71 @@ audits — every claim here was read in-session, not remembered.
 
 ---
 
+## ⛳ SHIPPED STATE + OPEN ERRORS TO FIX — handoff for the next Opus (2026-06-07)
+
+**Layers 1 + 2 (Highlighter + Reach R0/R1/R4) are BUILT and MERGED to `main`** via PR #68 (squash `82e33fd`,
+"feat(highlighter): in-page reach engine — R0 cross-area + R1 cross-report + R4 Claude handoff"). The server
+engine deployed to prod. Tests: **1254/1254 pass, tsc clean, eslint clean.**
+
+### What is live right now
+
+| Piece                                                      | State                              | Notes                                                                                                                                                                                                                          |
+| ---------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/converse` SSE engine (R0 + R1 + R4)                  | ✅ **live on prod**, live-verified | grounded on `claude-haiku-4-5`; R0 cites every-ZIP `detail_tables`, R1 fetches 0–3 other reports server-side (allowlist-bounded), R4 builds the "Open in your Claude" handoff                                                  |
+| `usage_events` meter                                       | ✅ **live**, counting only         | migration applied to prod; enforcement OFF; writes 1 row per successful answer                                                                                                                                                 |
+| Primary-report gating                                      | ✅ fixed (C1)                      | gates on brain-exists (404 if missing), NOT MCP-catalog membership — `franchise-outcomes` (live brain, not in `BRAIN_CATALOG`) works; reach stays catalog-bound                                                                |
+| **Popup UI** (`HighlighterLayer`, chips, popup, coachmark) | 🟡 **shipped but DARK**            | mounted behind flag `HIGHLIGHTER_UI` (default **OFF**) in `app/r/[slug]/page.tsx`. Code is on prod; renders for nobody until the flag flips. `lib/highlighter/flag.ts` → `highlighterUiEnabled()` (ON only for `"1"`/`"true"`) |
+
+### Verify findings (from the live `/api/converse` runtime pass — these are real, carry them forward)
+
+- ⚠️ **The GUI popup itself was NOT driven** — no browser automation could reach it. The _server stream_ it
+  consumes was verified end-to-end (the part headless tests mocked). **Still unverified: popup positioning,
+  selection UX, mobile chips, coachmark.** This is the open `highlighter_ui_live_verify` check; it needs a real
+  browser pass. (Cloud browser tools can't hit localhost; prod has the popup flag-gated OFF — see "how to verify"
+  below.)
+- ✅ **The real SDK v0.69.0 streaming path works against the live Anthropic API.** The `extractText`
+  event-iteration branch (`content_block_delta` → `text_delta`) — which CI only exercises via a mock — streamed
+  text cleanly across many frames. This was the single biggest unknown; **confirmed live.**
+- ✅ **Decline-without-a-ZIP fired under real conditions** — given the whole dossier and no ZIP named, the model
+  refused to fabricate a single-ZIP number and offered the grain instead. The structural guarantee works live.
+- 🔧 **Next 16.2.6 deprecation** logged at dev-server start: _"the 'middleware' file convention is deprecated,
+  use 'proxy'"_ — **pre-existing, unrelated to this branch**, but worth a ticket before the next Next major.
+
+### A breaker this merge caught (so the next Opus doesn't get bitten)
+
+- **CI runs `eslint` and treats `@typescript-eslint/no-explicit-any` as an ERROR, not a warning.** `bun test` +
+  `tsc` were green locally but the PR's `build` check went RED on lint (7 `as any` in two test files). Fixed in
+  the same PR. **Lesson: run `npx eslint` (or `bun run lint`) locally before pushing — green tests + green tsc do
+  NOT mean green CI.** (Also: a gitignored local-only dir `awesome-claude-code-toolkit/` throws 43
+  `no-require-imports` errors locally but is absent from CI's checkout — `--ignore-pattern` it when sanity-checking.)
+
+### ❌ Open errors / work to fix (priority order for the next Opus)
+
+1. **Browser-verify the popup, then turn it on.** This is the only thing between "engine live" and "users can
+   click it." How to verify, two clean options:
+   - **Preview-deploy path (recommended):** set `HIGHLIGHTER_UI=1` for a Vercel _Preview_ environment, push a
+     throwaway branch, open the preview `/r/<slug>` URL, drive it (desktop text-select → popup → Ask → Answer;
+     mobile chip tap; coachmark first-touch; popup positioning near viewport edges). Cloud browser tooling
+     (Spider) CAN reach a public preview URL.
+     - When it passes: flip `HIGHLIGHTER_UI=1` in the **Production** Vercel env + redeploy → popup goes live. Then
+       close `highlighter_ui_live_verify`.
+   - **Local Playwright path:** `bun add -d playwright` (⚠️ touches the lockfile — `git add bun.lock` per the
+     pre-push gate), `HIGHLIGHTER_UI=1 bun run dev`, drive `localhost`. Heavier; only if preview is unavailable.
+2. **`highlighter_suggestions_dossier_wiring`** (open check) — carry the Stage-4 precomputed suggestions IN the
+   dossier so the popup shows them with zero round-trip. Blocked on the **atomic type-lift** of `BrainOutputMetric`
+   (CLAUDE.md non-negotiable #3: the type change + backfill of all packs ship in ONE commit). The pure function
+   `suggestionsForMetric(m, slug)` already exists in `refinery/stages/4-output.mts`; the client copy lives in
+   `lib/highlighter/suggestions.ts`. Only the dossier-carry is unwired.
+3. **`highlighter_factchip_metrics_wiring`** (open check) — wire `FactChip` → `MetricsTable` so a highlighted
+   metric scrolls/links to its table row. Selection-only today.
+4. **Next `middleware` → `proxy` rename** — file/fix the deprecation above before the next Next major.
+
+> **Do NOT re-litigate the merged engine** — R0/R1/R4 + meter are live-verified and tested. The remaining work is
+> the UI surface (items 1–3) and housekeeping (item 4). Pricing + the charge path (`highlighter_pricing_matrix`,
+> `paid_path_wtp`) stay deliberately deferred.
+
+---
+
 ## The promise
 
 > **A user reads a SWFL report, points at any fact, and in seconds turns it into an answer, a chart, a

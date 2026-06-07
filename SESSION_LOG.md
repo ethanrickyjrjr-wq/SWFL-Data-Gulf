@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — PR #68 MERGED (engine live, UI dark) + master-doc handoff for next Opus
+
+- **Merged PR #68** (squash `82e33fd`): Highlighter Layers 1+2 (R0/R1/R4 reach engine + `usage_events` meter) are **live on prod**. The popup UI is shipped but **dark** behind flag `HIGHLIGHTER_UI` (default OFF, `lib/highlighter/flag.ts`) — nothing unverified faces visitors. CI went green after fixing 7 `no-explicit-any` lint errors (CI treats them as errors; bun test + tsc didn't catch it).
+- **Handoff written:** `docs/superpowers/specs/2026-06-07-build-anything-with-real-data-MASTER.md` now opens with a **"SHIPPED STATE + OPEN ERRORS TO FIX"** section — live-vs-dark table, the 4 live-verify findings (popup-GUI unverified ⚠️, SDK streaming confirmed ✅, decline-guarantee confirmed ✅, Next `middleware`→`proxy` deprecation 🔧), the CI-lint breaker, and a priority error list for the next Opus.
+- **Next (for new Opus):** (1) browser-verify the popup via a Vercel **preview** with `HIGHLIGHTER_UI=1` (cloud browser tools can reach a public preview; localhost is unreachable) → then flip the flag in prod + close `highlighter_ui_live_verify`; (2) `highlighter_suggestions_dossier_wiring` (needs atomic type-lift on `BrainOutputMetric`); (3) `highlighter_factchip_metrics_wiring`; (4) Next middleware→proxy rename.
+
 ## 2026-06-07 (Opus 4.8 · claude/highlighter-reach-r0-r1-r4) — fix(highlighter): green the CI lint gate before merging PR #68
 
 - PR #68's `build` check was RED on **eslint** (`no-explicit-any` is an error in CI, not a warning) — bun test + tsc were green locally but never caught it. 7 errors, all `as any` in two branch test files (`lib/highlighter/grounding.test.ts`, `refinery/stages/4-output.suggestions.test.mts`). Fixed by completing the one incomplete metric fixture and dropping the gratuitous casts. No production code change.
