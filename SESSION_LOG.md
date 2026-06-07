@@ -2,6 +2,25 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Sonnet 4.6 · main) — verify(rentals): ZORI / rentals-swfl Lehigh coverage confirmed — nothing to build
+
+- **All 6 Lehigh ZIPs** (33936, 33971–33974, 33976) present in `data_lake.zori_swfl` (5,185 rows, 94 ZIPs, Jan 2015 → Apr 2026, last ingested 2026-05-24).
+- **`rentals-swfl` pack is fully wired:** source connector, pack definition, `index.mts` registration, and `brains/rentals-swfl.md` all exist. `zori_swfl_tier2` cadence entry live. No HUD FMR scaffold needed.
+- **Plan doc updated:** `docs/superpowers/plans/2026-06-06-lehigh-parity-sprint.md` — added `[VERIFIED 2026-06-07]` note to Verified current state so the next session doesn't re-research this.
+
+## 2026-06-07 (Sonnet 4.6 · claude/lehigh-permit-geocode) — research(cre): Lehigh Acres CRE broker coverage sourcing — Task A complete
+
+- **`docs/superpowers/specs/2026-06-06-lehigh-cre-data-findings.md`:** Full broker coverage audit for Lee Blvd / Joel Blvd / Lehigh Acres submarket. Searched C&W MarketBeat, Colliers, LSI Companies, Mayhugh, LoopNet, Crexi, Lee & Associates, Ian Black, CBRE, Marcus & Millichap, LeePA implied cap rate.
+- **Verdict:** Industrial + office partially covered by C&W MarketBeat (named submarket: 3.4% vacancy, $13.22–$14.86/SF rent). Retail, cap rate, NNN rent, and Joel Blvd corridor-level metrics have zero broker coverage → narrative-only in `lehigh-cre` pack.
+- **Next:** Build `lehigh-cre` pack using C&W industrial/office data; retail goes county-proxy + caveat; cap rate stays narrative with Chipotle NNN single data point.
+
+## 2026-06-07 (Sonnet 4.6 · claude/lehigh-permit-geocode) — feat(permits): Lee permit geocoding — Census batch geocoder ported from Collier
+
+- **New `ingest/pipelines/lee_permits/geocoder.py`:** Census batch geocoder + corridor assignment, ported from `collier_permits/geocoder.py`. Lee-specific address splitter handles "STREET, CITY, FL ZIP" format (Collier uses "STREET, City"). 11 tests green.
+- **`lee_permits/pipeline.py`:** wired geocode step into `run_pipeline()` (after detail enrichment, before dlt write); added `corridor` field to `permits_resource` yield.
+- **`scripts/backfill_lee_permit_geocodes.py`:** one-time backfill for 119 existing null rows. Ran live — 84/119 geocoded, 8 corridor IDs assigned (3 `joel-blvd-lehigh-acres`, 1 `lee-blvd-lehigh-acres`, 2 `summerlin-rd`, 2 `six-mile-cypress`); 35 Census no-matches remain null (incomplete/ambiguous addresses). `ALTER TABLE ... ADD COLUMN IF NOT EXISTS corridor TEXT` applied.
+- **`lehigh_permit_geocode` check:** closing — corridor z-scores for Lee Blvd + Joel Blvd now have data. 29 Lehigh ZIPs are geocoded and assigned.
+
 ## 2026-06-07 (Opus 4.8 · main) — feat(mcp): chat-answer hygiene — card title + fan-out tighten + `##` headers (B deferred)
 
 - **`app/api/mcp/server.ts` only — three of the four "Chat Answer Hygiene" changes; B (move the `⟦HOW TO ANSWER⟧` box out of content) deliberately SKIPPED.**
