@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — docs(specs): full Highlighter + charts + boards/PDF spec set (3) for Opus handoff
+
+- **Three buildable-cold design specs** under `docs/superpowers/specs/`, grounded by a 7-agent code audit (`charts-boards-spec-audit`) — every file:line read in-session, not remembered:
+  - `2026-06-07-highlighter-in-page-ask-chart-design.md` (authored last session, never committed — now landed): in-page "point at a fact → ask or chart it" layer on `/r/`; metered server-side engine (`/api/converse`, `claude-haiku-4-5`), enforcement OFF.
+  - `2026-06-07-chart-generation-three-tier-design.md`: Tier A deterministic at-a-glance (build-time, $0) → B intent-routed (wires the MISSING `routeChart`→`ChartBlock` glue — `routeChart` is a classifier with NO consumer today) → C NL LLM chart (metered). Fills the dead `Dossier.chart` slot.
+  - `2026-06-07-boards-pdf-composed-export-design.md`: `/c/[id]` saved chart → `/board/[id]` (first-ever `auth.uid()` RLS policy in the repo) → PDF via `window.print()` (no new dep). Delivers the already-marketed "sourced PDF/doc" promise.
+- **Audit corrections folded in:** no brain→chart producer exists anywhere; `HBarChart` is fixed-px (not responsive); there is NO money path (`$39/$79` = copy + `mailto`, no Stripe); magic-link auth exists but is unenforced (zero `auth.uid()` policies repo-wide); `usage_events`/`saved_charts`/`boards` all greenfield.
+- **Next (dependency order):** Highlighter P1 → Charts A → Charts B + Highlighter "Chart this" → `/c/` → `/board/` → PDF. Pricing numbers deferred (`checks: highlighter_pricing_matrix`).
+
 ## 2026-06-07 (Sonnet 4.6 · main) — verify(rentals): ZORI / rentals-swfl Lehigh coverage confirmed — nothing to build
 
 - **All 6 Lehigh ZIPs** (33936, 33971–33974, 33976) present in `data_lake.zori_swfl` (5,185 rows, 94 ZIPs, Jan 2015 → Apr 2026, last ingested 2026-05-24).
