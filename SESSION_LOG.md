@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — docs(vision): one-file "Build Anything With Real Data" master that unifies all four layers
+
+- **New master doc** `docs/superpowers/specs/2026-06-07-build-anything-with-real-data-MASTER.md` — the single north-star picture that ties the four build-ready docs into one user journey: point → ask → reach (R0/R1/R4) → chart (A/B/C) → save (`/c/`) → compose (`/board/`) → export (PDF). Carries the end-to-end flow diagram, the consolidated real-vs-greenfield table, the full cross-layer build order, the trust guarantee, and the meter posture. It is a MAP that links to each detailed spec/plan, not a replacement for them.
+- No code/behavior change — pure synthesis of the three 06-07 specs + the reach plan.
+
 ## 2026-06-07 (Opus 4.8 · main) — design(highlighter): Reach Expansion (R0+R1+R4) decided + R0/R1/R4 implementation plan
 
 - **Spec extended** — `docs/superpowers/specs/2026-06-07-highlighter-in-page-ask-chart-design.md` gains a "Reach Expansion" section (grounded by a live `mcp__lake` probe + DAG/cadence audit, not memory): the R0→R4 ladder for letting the in-page Highlighter reach BEYOND one report. **Decision locked:** R0 (in-dossier cross-area) + R1 (cross-report fetch) + R4 (Open-in-your-Claude handoff) `[COMMITTED]`; R2 (runtime bounded lake read — time-series/ad-hoc columns) `[NEXT SPEC]`; R3 (free-form LLM SQL) `[REJECTED]` on the public surface.
