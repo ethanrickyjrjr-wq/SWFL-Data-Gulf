@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Sonnet 4.6 · claude/lehigh-permit-geocode) — feat(permits): Lee permit geocoding — Census batch geocoder ported from Collier
+
+- **New `ingest/pipelines/lee_permits/geocoder.py`:** Census batch geocoder + corridor assignment, ported from `collier_permits/geocoder.py`. Lee-specific address splitter handles "STREET, CITY, FL ZIP" format (Collier uses "STREET, City"). 11 tests green.
+- **`lee_permits/pipeline.py`:** wired geocode step into `run_pipeline()` (after detail enrichment, before dlt write); added `corridor` field to `permits_resource` yield.
+- **`scripts/backfill_lee_permit_geocodes.py`:** one-time backfill for 119 existing null rows. Ran live — 84/119 geocoded, 8 corridor IDs assigned (3 `joel-blvd-lehigh-acres`, 1 `lee-blvd-lehigh-acres`, 2 `summerlin-rd`, 2 `six-mile-cypress`); 35 Census no-matches remain null (incomplete/ambiguous addresses). `ALTER TABLE ... ADD COLUMN IF NOT EXISTS corridor TEXT` applied.
+- **`lehigh_permit_geocode` check:** closing — corridor z-scores for Lee Blvd + Joel Blvd now have data. 29 Lehigh ZIPs are geocoded and assigned.
+
 ## 2026-06-07 (Opus 4.8 · main) — feat(mcp): chat-answer hygiene — card title + fan-out tighten + `##` headers (B deferred)
 
 - **`app/api/mcp/server.ts` only — three of the four "Chat Answer Hygiene" changes; B (move the `⟦HOW TO ANSWER⟧` box out of content) deliberately SKIPPED.**

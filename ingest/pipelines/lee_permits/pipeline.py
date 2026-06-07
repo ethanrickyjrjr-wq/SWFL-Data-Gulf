@@ -10,6 +10,7 @@ import argparse
 import dlt
 
 from .buckets import classify_permit_type
+from .geocoder import assign_corridor, geocode_batch, load_lee_centroids
 from .scraper import enrich_rows_with_details, fetch_permit_pages, parse_accela_result_page
 
 
@@ -44,6 +45,7 @@ def permits_resource(rows: Optional[Iterable[dict]] = None):
             "zip_code": r.get("zip_code"),
             "lat": r.get("lat"),
             "lon": r.get("lon"),
+            "corridor": r.get("corridor"),
             "declared_value_usd": r.get("declared_value_usd"),
             "status": r.get("status"),
             "_ingest_metadata": {
@@ -65,6 +67,17 @@ def run_pipeline(start_date: date, end_date: date) -> None:
 
     permit_rows = enrich_rows_with_details(permit_rows)
     rows = [r.__dict__ for r in permit_rows]
+
+    addresses = [r["address"] for r in rows if r.get("address")]
+    geo = geocode_batch(addresses)
+    centroids = load_lee_centroids()
+    for r in rows:
+        addr = r.get("address") or ""
+        lat_lon = geo.get(addr) if addr else None
+        lat, lon = lat_lon if lat_lon else (None, None)
+        r["lat"] = lat
+        r["lon"] = lon
+        r["corridor"] = assign_corridor(lat, lon, centroids)
 
     pipeline = dlt.pipeline(
         pipeline_name="lee_permits",
