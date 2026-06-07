@@ -31,25 +31,27 @@ const GAZETTEER_STR = JSON.stringify(GEOGRAPHY_GAZETTEER, null, 2);
  * future SDK versions may expose .textStream directly; check for it first.
  */
 async function* extractText(
-  ai: AsyncIterable<{
-    type?: string;
-    delta?: { type?: string; text?: string };
-  }> & {
-    textStream?: AsyncIterable<string>;
-  },
+  ai: AsyncIterable<unknown> & { textStream?: AsyncIterable<string> },
 ): AsyncIterable<string> {
   if (ai.textStream) {
     yield* ai.textStream;
     return;
   }
-  // Real SDK path: iterate MessageStreamEvent, pull content_block_delta text
+  // Real SDK path: iterate MessageStreamEvent, pull content_block_delta text.
+  // The SDK's MessageStreamEvent union doesn't structurally narrow here, so we
+  // assert the delta shape we care about (verified against @anthropic-ai/sdk
+  // v0.69.0: content_block_delta → delta.type "text_delta" → delta.text).
   for await (const event of ai) {
+    const e = event as {
+      type?: string;
+      delta?: { type?: string; text?: string };
+    };
     if (
-      event.type === "content_block_delta" &&
-      event.delta?.type === "text_delta" &&
-      typeof event.delta.text === "string"
+      e.type === "content_block_delta" &&
+      e.delta?.type === "text_delta" &&
+      typeof e.delta.text === "string"
     ) {
-      yield event.delta.text;
+      yield e.delta.text;
     }
   }
 }
