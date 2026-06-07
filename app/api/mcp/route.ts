@@ -66,9 +66,15 @@ const handler = createMcpHandler(
         // load"). If a client ignores connector icons entirely, it still shows
         // the server name "SWFL Data Gulf" as text.
         { src: ICON_DATA_URI, mimeType: "image/svg+xml", sizes: ["any"] },
-        // Higher-res raster of the full logo for clients that prefer a sized PNG.
+        // Higher-res raster of the brand logo (public/logo.png, 512x512) for
+        // clients that prefer a sized PNG. NOTE: claude.ai does not yet render
+        // serverInfo icons at all — it shows a generic globe regardless of this
+        // field (open enhancement: anthropics/claude-ai-mcp#152). So this only
+        // takes effect in clients that already honor `serverInfo.icons`; it's
+        // forward-looking for claude.ai. The embedded data: SVG above is the
+        // primary (can't fail to fetch); this raster is the fallback.
         {
-          src: "https://www.swfldatagulf.com/swfl-data-gulf-icon-512.png",
+          src: "https://www.swfldatagulf.com/logo.png",
           mimeType: "image/png",
           sizes: ["512x512"],
         },

@@ -1,61 +1,50 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import {
-  registerAppTool,
-  registerAppResource,
-  RESOURCE_MIME_TYPE,
-} from "@modelcontextprotocol/ext-apps/server";
 import {
   fetchBrain,
   fetchDetailRow,
   buildDossier,
-  resolveOrigin,
   BrainNotFoundError,
   BrainBadTierError,
 } from "@/lib/fetch-brain";
-import type { DisplayBrain } from "@/refinery/render/speaker.mts";
-import { isGroundedConditional } from "@/refinery/render/speaker.mts";
-import type { BrainOutput } from "@/refinery/types/brain-output.mts";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { buildInventoryMarkdown, buildReportIdSet } from "./inventory";
 
 /**
- * MCP server callback. Registers `swfl_fetch` as an MCP App tool (the in-chat
- * widget surface, per the MCP Apps spec live 2026-01-26) plus a text fallback
- * for clients that don't render apps.
+ * MCP server callback. Registers `swfl_fetch` as a plain text tool.
  *
- * Response shape:
+ * Response shape: one text content block — the speaker output (bottom line +
+ * cited numbers + read-ahead + report link + freshness token), prefixed with
+ * RESPONSE_CONTRACT. Universal across every MCP client (Claude, Cursor, etc.).
  *
- *   - Single text content block — speaker output (conclusion + key-metrics
- *     table + caveats + report link + freshness token). Universal across every
- *     MCP client (Claude Desktop, Cursor, Windsurf, ChatGPT).
- *   - `_meta.freshness_token` on every response — verbatim from BrainOutput.
- *   - Tool registration links to the chart widget via `_meta.ui.resourceUri`.
- *     App-capable clients (Claude) render the HTML from `registerAppResource`
- *     inline in the conversation; non-app clients see the text block only.
+ * `_meta` carries the freshness token + rules-of-engagement + geography + the
+ * structured dossier so a downstream Claude can answer follow-ups without
+ * re-fetching. (`_meta` is dropped by some hosts — e.g. claude.ai — which is
+ * why the binding reply rules ALSO ride in the text via RESPONSE_CONTRACT.)
  *
- * The widget HTML is our own MCP App View (`mcp-widget/src/widget.ts`, bundled
- * self-contained by `mcp-widget/build.mts` — the ext-apps SDK + render code
- * inlined into one <script>, no external load, for the sandbox CSP). It reads
- * the tool result's `structuredContent` (a WidgetView) and renders the logo +
- * the five parts (Answer · Data · Speculation · Link · Freshness). Registered as
- * a `text/html;profile=mcp-app` resource at `ui://swfl-fetch/chat-charts.html`.
+ * NO in-chat MCP App widget — intentional, and not for lack of trying. The View
+ * is built and parked at `mcp-widget/` (bundled self-contained to
+ * docs/fiverr-briefs/assets/Chat-Charts-Standalone.html). The wiring was verified
+ * spec-correct against @modelcontextprotocol/ext-apps@1.7.2 + the MCP Apps spec
+ * (2026-01-26): `_meta.ui.resourceUri`, RESOURCE_MIME_TYPE "text/html;profile=
+ * mcp-app", `structuredContent` over `ui/notifications/tool-result`, inline script
+ * allowed by the default sandbox CSP (`script-src 'self' 'unsafe-inline'`). It
+ * STILL renders as a blank, never-painted iframe in claude.ai web + desktop — an
+ * OPEN, unfixed *host* bug, worst over remote HTTP (our transport on Vercel):
+ *   anthropics/claude-ai-mcp#61 + #165 — the host fetches the resource but leaves
+ *   the container `visibility:hidden`; no `ui/initialize` handshake ever reaches
+ *   the server. Confirmed host-side by the ext-apps maintainer across many
+ *   spec-compliant servers; works fine in Goose / MCP Inspector / native stdio.
+ * Re-attaching the widget here = one blank card on every call = "blank parts on
+ * the screen for no reason", so the tool stays text-only. The branded charts live
+ * on the linked /r/{report_id} page (renders fine in a real browser). Re-enable in
+ * ONE commit (registerAppTool + registerAppResource + structuredContent, restore
+ * the next.config.ts outputFileTracingIncludes line) the day #61/#165 close.
  */
 
 const VALID_REPORT_IDS = buildReportIdSet();
 const INVENTORY_MD = buildInventoryMarkdown();
-
-const CHART_RESOURCE_URI = "ui://swfl-fetch/chat-charts.html";
-
-// Read the chart bundle once at module load. `outputFileTracingIncludes` in
-// next.config.ts ensures Vercel ships this file with the `/api/mcp` function.
-const CHART_HTML = readFileSync(
-  join(process.cwd(), "docs/fiverr-briefs/assets/Chat-Charts-Standalone.html"),
-  "utf-8",
-);
 
 const TOOL_DESCRIPTION = `swfl_fetch — read the Southwest Florida data lake.
 
@@ -113,77 +102,6 @@ HARD RULES: never write "master", a report id, or internal/process wording ("dri
 ⟦END RULES — the data follows⟧
 
 `;
-
-/**
- * WidgetView — the structured payload the MCP App View (mcp-widget/src/widget.ts)
- * renders into the inline card. Rides in the tool result's `structuredContent`,
- * which the host forwards to the iframe via `ui/notifications/tool-result`.
- *
- * Built ONLY from the scrub-guaranteed `DisplayBrain` projection, so the card
- * can never show an internal token. `provenance: "ours"` => our computed data,
- * marked with the logo; `"web"` => City-Pulse/LLM facts, shown as highlighted
- * source links. (Master key_metrics are all our own computed reads → "ours".)
- */
-interface WidgetView {
-  title: string;
-  freshness_token: string;
-  answer: string;
-  metrics: Array<{
-    label: string;
-    value: string;
-    direction: "rising" | "falling" | "stable";
-    provenance: "ours" | "web";
-    source_url?: string;
-    source_name?: string;
-  }>;
-  speculation?: {
-    condition: string;
-    then: string;
-    falsifier: string;
-  } | null;
-  report_url?: string;
-  web_facts?: Array<{ text: string; source_url: string; source_name?: string }>;
-}
-
-function buildWidgetView(
-  display: DisplayBrain,
-  output: BrainOutput,
-  reportUrl: string,
-  webFacts: WebFact[],
-): WidgetView {
-  // First GROUNDED conditional (not just [0]) — if the primary is the filtered
-  // circular tie-breaker, a later world-facing claim still surfaces. Only a
-  // world-facing claim is ever shown as "what would move this".
-  const grounded =
-    output.conditional_claims?.find(isGroundedConditional) ?? null;
-  const dir = (d: string): "rising" | "falling" | "stable" =>
-    d === "rising" || d === "falling" ? d : "stable";
-
-  return {
-    title: display.title,
-    freshness_token: display.freshnessToken,
-    answer: display.conclusion,
-    // Our own computed lake reads → marked "ours" (logo). Outside-source
-    // current-event facts ride in web_facts as highlighted links instead.
-    metrics: display.metrics.slice(0, 8).map((m) => ({
-      label: m.label,
-      value: m.value,
-      direction: dir(m.direction),
-      provenance: "ours" as const,
-      source_url: m.sourceUrl,
-      source_name: m.sourceLabel,
-    })),
-    speculation: grounded
-      ? {
-          condition: grounded.condition,
-          then: `expect ${grounded.then_direction}`,
-          falsifier: grounded.falsifier,
-        }
-      : null,
-    report_url: reportUrl,
-    web_facts: webFacts,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Outside-source facts → highlighted links
@@ -277,27 +195,7 @@ function injectBeforeFooter(text: string, block: string): string {
 }
 
 export function buildMcpServer(server: McpServer): void {
-  registerAppResource(
-    server,
-    "SWFL Chat Charts",
-    CHART_RESOURCE_URI,
-    {
-      description:
-        "Inline chart widget for swfl_fetch responses. Renders headline metrics, corridor scatter, and rent breakdowns from the report payload.",
-    },
-    async () => ({
-      contents: [
-        {
-          uri: CHART_RESOURCE_URI,
-          mimeType: RESOURCE_MIME_TYPE,
-          text: CHART_HTML,
-        },
-      ],
-    }),
-  );
-
-  registerAppTool(
-    server,
+  server.registerTool(
     "swfl_fetch",
     {
       description: TOOL_DESCRIPTION,
@@ -325,9 +223,6 @@ export function buildMcpServer(server: McpServer): void {
           ),
       },
       annotations: { readOnlyHint: true },
-      _meta: {
-        ui: { resourceUri: CHART_RESOURCE_URI },
-      },
     },
     async ({ report_id, tier, zip }) => {
       // ZIP drill (Fix B): return the specific row in the TEXT block so the
@@ -364,12 +259,9 @@ export function buildMcpServer(server: McpServer): void {
       const t: 1 | 2 | 3 = tier ?? 2;
 
       try {
-        const [{ text, freshness_token, output, display }, webFacts] =
-          await Promise.all([
-            fetchBrain(slug, { tier: t }),
-            loadWebFacts(slug),
-          ]);
-        const reportUrl = `${resolveOrigin().replace(/\/$/, "")}/r/${slug}`;
+        const [{ text, freshness_token, output }, webFacts] = await Promise.all(
+          [fetchBrain(slug, { tier: t }), loadWebFacts(slug)],
+        );
         // Outside-source items ride in the TEXT (claude.ai drops _meta) as a
         // highlighted-link block, placed before the link + freshness footer.
         const bodyText = injectBeforeFooter(
@@ -381,16 +273,6 @@ export function buildMcpServer(server: McpServer): void {
           content: [
             { type: "text" as const, text: RESPONSE_CONTRACT + bodyText },
           ],
-          // Feeds the inline MCP App card (mcp-widget) — logo + numbers + web
-          // links. Host forwards it to the View via ui/notifications/tool-result.
-          // Cast: structuredContent is a protocol-level Record<string, unknown>;
-          // the typed WidgetView has no implicit index signature.
-          structuredContent: buildWidgetView(
-            display,
-            output,
-            reportUrl,
-            webFacts,
-          ) as unknown as Record<string, unknown>,
           _meta: {
             freshness_token,
             // The rules-of-engagement block + structured dossier travel with

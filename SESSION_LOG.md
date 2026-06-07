@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-06 (Opus 4.8 · main) — fix(mcp): swfl_fetch text-only — MCP App widget blocked by OPEN host bug (claude-ai-mcp#61/#165)
+
+- **Root cause DIAGNOSED, not assumed.** The in-chat MCP App widget shows as a blank, never-painted iframe in claude.ai due to an OPEN _host-side_ bug — `anthropics/claude-ai-mcp#61` + `#165` (host fetches the `ui://` resource but leaves the container `visibility:hidden`; no `ui/initialize` handshake reaches the server; worst over remote HTTP = our Vercel transport). Maintainer-confirmed host-side across many spec-compliant servers; renders fine in Goose / MCP Inspector / native stdio. Verified OUR wiring was already spec-correct vs `ext-apps@1.7.2` + MCP Apps spec 2026-01-26 (`_meta.ui.resourceUri`, MIME `text/html;profile=mcp-app`, `structuredContent` over `ui/notifications/tool-result`, default CSP `script-src 'self' 'unsafe-inline'` allows our inline script) — restoring it only reproduces the blank card.
+- **Fix (operator: "charts only when needed, no blank parts on screen for no reason"):** `swfl_fetch` → text-only (`server.registerTool`; dropped `registerAppTool`/`registerAppResource`/`structuredContent`/`_meta.ui` + the bundle read). KEPT the `_meta` carry contract (freshness/rules/geography/dossier) + the "From the web" text block. `next.config.ts` drops the widget-bundle `outputFileTracingIncludes` line. `route.ts` connector icon raster → `logo.png` (512²) + cites `#152` (claude.ai ignores `serverInfo.icons` today → globe regardless; forward-looking). Widget parked at `mcp-widget/` + new `mcp-widget/PARKED.md` (one-commit re-enable when #61/#165 close).
+- Verified: `bunx tsc --noEmit` **0 errors**; `bun test app/api/mcp` **4 pass / 0 fail**. (Favicon `efef992` already on main — kept.)
+- Ledger: opened `mcp_widget_host_bug_blocked` (re-enable widget when claude-ai-mcp#61/#165 close).
+
 ## 2026-06-06 (Opus 4.8 · main) — audit: Lehigh-parity sprint plan corrected + roadmap/memory reconciled
 
 - **Audited the inherited Lehigh→FM/Naples parity sprint plan against live code + DB + git (do-not-assume pass).** Verdict: ~80% sound; one task was dead weight and several premises were false.

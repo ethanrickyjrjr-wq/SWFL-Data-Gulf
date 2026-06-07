@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    "/api/mcp": ["./docs/fiverr-briefs/assets/Chat-Charts-Standalone.html"],
+    // NOTE: the /api/mcp chart-widget bundle is intentionally NOT shipped — the
+    // tool is text-only (see app/api/mcp/server.ts; MCP App widget blocked by the
+    // open host bug claude-ai-mcp#61/#165). Restore the line shipping
+    // "./docs/fiverr-briefs/assets/Chat-Charts-Standalone.html" when re-enabling.
     "/data-intel": ["./docs/data-intel.md"],
   },
   async redirects() {
