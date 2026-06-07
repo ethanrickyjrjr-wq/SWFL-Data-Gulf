@@ -14,7 +14,7 @@ const TOPIC_TO_SLUG: Array<{ keywords: RegExp; slug: string }> = [
     slug: "cre-swfl",
   },
   {
-    keywords: /\b(permit|construction|build(ing|s)?\b|new homes?)\b/i,
+    keywords: /\b(permit|construction|build(?:ing|s)?|new homes?)\b/i,
     slug: "permits-swfl",
   },
   {

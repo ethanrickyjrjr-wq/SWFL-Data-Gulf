@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test";
 import { resolveReachTargets } from "./reach";
+import { buildReportIdSet } from "@/app/api/mcp/inventory";
 
 test("flood question on a housing page reaches env-swfl", () => {
   const t = resolveReachTargets(
@@ -44,4 +45,23 @@ test("a plain same-vertical compare needs no reach (R0 covers it)", () => {
     "housing-swfl",
   );
   expect(t).toEqual([]);
+});
+
+test("output is always a subset of the catalog allowlist", () => {
+  const allowed = buildReportIdSet();
+  const questions = [
+    "flood and commercial and permits and rent and jobs and tourism",
+    "overall outlook for the whole market",
+    "office cap rates and insurance",
+    "",
+  ];
+  for (const q of questions) {
+    for (const slug of resolveReachTargets(q, "housing-swfl")) {
+      expect(allowed.has(slug)).toBe(true);
+    }
+  }
+});
+
+test("falsy question returns no targets", () => {
+  expect(resolveReachTargets("", "housing-swfl")).toEqual([]);
 });

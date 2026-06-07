@@ -1,4 +1,5 @@
 import type { Dossier } from "../fetch-brain";
+import type { BrainOutputMetric } from "../../refinery/types/brain-output.mts";
 
 export interface GroundingBlock {
   /** Human label the model uses to attribute a number ("Naples housing", "Naples flood (env-swfl)"). */
@@ -34,7 +35,7 @@ function renderDetailTables(d: Dossier): string {
 function renderKeyMetrics(d: Dossier): string {
   return d.key_metrics
     .map(
-      (m: any) =>
+      (m: BrainOutputMetric) =>
         `  - ${m.metric}: ${m.value}${m.source?.citation ? ` [${m.source.citation}]` : ""}`,
     )
     .join("\n");
@@ -58,6 +59,14 @@ function renderBlock(b: GroundingBlock): string {
   return parts.join("\n");
 }
 
+/**
+ * Build the model's system prompt from N grounded dossier blocks.
+ *
+ * TRUST ASSUMPTION: every block is server-authored, pre-validated brain output —
+ * NEVER user-authored text. Dossier strings are interpolated raw (no delimiter
+ * escaping) on that basis. Do NOT pipe user input through a GroundingBlock, or
+ * the cite-or-decline guarantee breaks (prompt-injection surface).
+ */
 export function buildGroundingContext(input: GroundingInput): string {
   const primary = input.blocks[0];
   const token = primary?.dossier.freshness_token ?? "";
