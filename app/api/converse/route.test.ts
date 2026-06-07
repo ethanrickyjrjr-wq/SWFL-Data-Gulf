@@ -38,7 +38,7 @@ test("streams grounded text for a known report", async () => {
   expect(body).toContain("$1.85M");
 });
 
-test("400 on unknown report_id", async () => {
+test("404 on a slug with no brain file (not 400 — viewing-gated, not catalog-gated)", async () => {
   const req = new Request("https://x/api/converse", {
     method: "POST",
     body: JSON.stringify({
@@ -46,6 +46,15 @@ test("400 on unknown report_id", async () => {
       fact: "x",
       question: "y",
     }),
+  });
+  const res = await POST(req);
+  expect(res.status).toBe(404);
+});
+
+test("400 on a missing report_id", async () => {
+  const req = new Request("https://x/api/converse", {
+    method: "POST",
+    body: JSON.stringify({ question: "y" }),
   });
   const res = await POST(req);
   expect(res.status).toBe(400);

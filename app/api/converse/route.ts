@@ -6,7 +6,6 @@ import {
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
-import { buildReportIdSet } from "@/app/api/mcp/inventory";
 import {
   buildGroundingContext,
   type GroundingBlock,
@@ -18,7 +17,6 @@ import { recordUse } from "@/lib/highlighter/meter";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ALLOWED = buildReportIdSet();
 const MAX_TOKENS = 700;
 
 // GEOGRAPHY_GAZETTEER is an object; buildGroundingContext expects a string.
@@ -64,8 +62,12 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "bad json" }, { status: 400 });
   }
   const { report_id, fact, question } = body;
-  if (!report_id || !ALLOWED.has(report_id)) {
-    return Response.json({ error: "unknown report_id" }, { status: 400 });
+  // Gate the PRIMARY report on "the brain exists" (fetchBrain → 404 below), NOT
+  // on MCP-catalog membership: if a user can view /r/<slug>, they can ask about
+  // it, even if that brain isn't in BRAIN_CATALOG (e.g. franchise-outcomes).
+  // Reach targets (R1) stay catalog-bound inside resolveReachTargets.
+  if (!report_id || typeof report_id !== "string") {
+    return Response.json({ error: "report_id required" }, { status: 400 });
   }
   if (!question || typeof question !== "string") {
     return Response.json({ error: "question required" }, { status: 400 });
