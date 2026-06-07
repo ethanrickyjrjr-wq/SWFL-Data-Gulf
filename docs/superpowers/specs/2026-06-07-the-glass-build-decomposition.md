@@ -22,6 +22,32 @@
 
 ---
 
+## Dispatch — who builds what, when, and what runs at the same time
+
+**What you send each agent:** this doc + the section number + "the companion design docs are on `main`, read them first." Send `§6` as a **brainstorm** (it has an unresolved architectural fork). For the Opus _plan-first_ sections, ask for a `writing-plans` implementation plan before any code.
+
+| §   | Section                     | Repo               | Model                            | First step                                        | Can start                          | Same-time OK | NEVER same-time (same repo) |
+| --- | --------------------------- | ------------------ | -------------------------------- | ------------------------------------------------- | ---------------------------------- | ------------ | --------------------------- |
+| 1   | Glass shell + Pane 2        | `swfldatagulf-ops` | **Sonnet**                       | build (brief is execution-ready)                  | **now**                            | §2, §6       | §3, §5                      |
+| 2   | Backtest engine (CRIT path) | `brain-platform`   | **Opus**                         | plan → build (point-in-time correctness)          | **now**                            | §1           | §4, §6                      |
+| 6   | Lift live gradeable yield   | `brain-platform`   | **Opus**                         | **brainstorm** the "leaves log predictions?" fork | **now** (aligns to §2 Phase-0 cfg) | §1           | §2, §4                      |
+| 3   | Pane 3 Scoreboard           | `swfldatagulf-ops` | **Sonnet** (Opus vets the SQL)   | plan → build                                      | after §2 wrote ≥100 rows           | §4           | §1, §5                      |
+| 4   | data_targets generator      | `brain-platform`   | **Opus** plan / **Sonnet** build | plan → build                                      | after §2 corpus + live grade views | §3, §5       | §2, §6                      |
+| 5   | Pane 4 + Pane 1             | `swfldatagulf-ops` | **Sonnet**                       | build Pane 4 / resolve DECISION 3 (Pane 1)        | Pane 4 after §4; Pane 1 in Wave 2  | §4           | §1, §3                      |
+
+**The rule that bounds parallelism — one working tree, one agent.** Two build agents editing the _same repo's working tree_ at once collide in git. The repos split cleanly: **`swfldatagulf-ops`** → §1/§3/§5; **`brain-platform`** → §2/§4/§6. So **honest max parallelism = two streams (one per repo)** unless each section gets its own branch/worktree:
+
+- **Wave 1 (now):**
+  - **Stream A — `swfldatagulf-ops`:** §1 (Sonnet).
+  - **Stream B — `brain-platform`:** §2 **then** §6 (Opus, sequential in one tree) — or §2 ‖ §6 on **separate branches** for true concurrency. §2 Phase 0 locks the grade-config §6 aligns to, so if sequential, §2 first.
+- **Wave 2 (after §2 wrote ≥100 `backtest_grades` rows):**
+  - **Stream A — `swfldatagulf-ops`:** §3 **then** §5 (Sonnet).
+  - **Stream B — `brain-platform`:** §4 (Opus plan / Sonnet build).
+
+**Why these models:** Sonnet for the well-scoped execution surfaces (§1/§3/§5 — clear briefs, mirror existing patterns, no novel design). Opus for the correctness/design-critical ones: §2 (a look-ahead leak turns the whole corpus to fiction), §6 (novel synthesis change with an honesty trap + an open architectural fork), §4 (threshold/ranking design). For "Opus plan / Sonnet build," the plan pins every decision so the build is mechanical.
+
+---
+
 ## The load-bearing truth (every planner inherits this)
 
 **The Glass RENDERS grades; it does not MAKE them.** Pane 2 (The Calls) is live today off `predictions`/`outcomes`. Pane 3 (Scoreboard) and Pane 4 (Shopping List) depend on **new brain-platform code** — the `§2` backtest corpus and the `§4` `data_targets` generator. That dependency is the whole reason for the wave ordering.
@@ -200,7 +226,7 @@ Plan two read surfaces (new SQL, **`GRANT … TO service_role`**, not `anon`) + 
 
 ## Decisions already locked (do not re-litigate)
 
-- **DECISION 1** — The Glass lives in `swfldatagulf-ops` next to `/littlebird` (same Supabase project).
+- **DECISION 1** — The Glass is a **new `/glass` page in the `swfldatagulf-ops` dashboard** — the internal control room that already serves `/littlebird` (master health + checks + reds + session-log), `/checks`, `/goals`, `/targets`, `/coverage`, `/queue`. Its own catnav pill **alongside** those, **not** inside `/littlebird`. Same Supabase project `jtkdowmrjaxfvwmemxso`, so the grade tables are reachable. (A future _public, live-only_ scoreboard is a separate customer-facing surface on the public `brain-platform` site — not this internal page.)
 - **DECISION 2** — Pane 3 Y-axis = both raw hit-rate AND skill-above-naive (`lift`), toggle.
 - **DECISION 3** — Pane 1 depth deferred to `§5`'s planner (leans lean-strip).
 - **DECISION 4** — thresholds as in `§4`.

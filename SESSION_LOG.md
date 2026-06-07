@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · main) — docs(glass): add Dispatch section (model/repo/concurrency) + clarify /glass home
+
+- **What:** Updated `docs/superpowers/specs/2026-06-07-the-glass-build-decomposition.md` — added a **Dispatch** table (per section: Sonnet vs Opus, what to send, when it can start, what's safe vs forbidden to run concurrently) + the "one working tree, one agent" rule → honest max parallelism is 2 streams (ops `§1/§3/§5` ‖ brain-platform `§2/§4/§6`). Clarified DECISION 1: `/glass` is a NEW page in the ops dashboard alongside `/littlebird`/`/checks`/`/goals`/`/targets`, not inside littlebird. Doc-only.
+- **Next:** dispatch Wave 1 — §1 (Sonnet, ops) ‖ §2→§6 (Opus, brain-platform); §3/§4/§5 after §2's corpus.
+
 ## 2026-06-07 (Opus 4.8 · main) — docs(glass): audited + corrected The Glass build decomposition (6 waved sections)
 
 - **What:** New `docs/superpowers/specs/2026-06-07-the-glass-build-decomposition.md` — audited the inherited Glass plan against live code + the live DB (`predictions`/`outcomes`), corrected into 6 waved sections. Doc-only.
