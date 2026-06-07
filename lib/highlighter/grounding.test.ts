@@ -17,13 +17,17 @@ function fakeDossier(token: string, withZips = false): Dossier {
       {
         metric: "median_price",
         value: "$525,000",
+        direction: "falling",
+        label: "Median price",
+        variable_type: "extensive",
+        units: "USD",
         source: {
           url: "https://x",
           fetched_at: "2026-06-01",
           tier: 2,
           citation: "Redfin",
         },
-      } as any,
+      },
     ],
     detail_tables: withZips
       ? [
@@ -36,7 +40,7 @@ function fakeDossier(token: string, withZips = false): Dossier {
                 id: "median",
                 label: "Median",
                 display_format: "currency",
-              } as any,
+              },
             ],
             rows: [
               { key: "34102", label: "Naples", cells: { median: 1850000 } },
@@ -47,7 +51,7 @@ function fakeDossier(token: string, withZips = false): Dossier {
               fetched_at: "2026-06-01",
               tier: 2,
               citation: "Redfin",
-            } as any,
+            },
           },
         ]
       : [],

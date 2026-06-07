@@ -3,7 +3,7 @@ import { suggestionsForMetric } from "./4-output.mts";
 
 test("a numeric metric gets 2-3 suggestions incl. one cross-area compare", () => {
   const s = suggestionsForMetric(
-    { metric: "median_price", value: "$525,000" } as any,
+    { metric: "median_price", value: "$525,000" },
     "housing-swfl",
   );
   expect(s.length).toBeGreaterThanOrEqual(2);
@@ -12,7 +12,7 @@ test("a numeric metric gets 2-3 suggestions incl. one cross-area compare", () =>
 
 test("non-housing slug returns exactly 2 suggestions", () => {
   const s = suggestionsForMetric(
-    { metric: "vacancy_rate", value: "8.2%" } as any,
+    { metric: "vacancy_rate", value: "8.2%" },
     "cre-swfl",
   );
   expect(s.length).toBe(2);
@@ -21,7 +21,7 @@ test("non-housing slug returns exactly 2 suggestions", () => {
 
 test("housing-swfl slug returns exactly 3 suggestions", () => {
   const s = suggestionsForMetric(
-    { metric: "median_price", value: 525000 } as any,
+    { metric: "median_price", value: 525000 },
     "housing-swfl",
   );
   expect(s.length).toBe(3);
@@ -30,7 +30,7 @@ test("housing-swfl slug returns exactly 3 suggestions", () => {
 
 test("underscores in metric name are replaced with spaces in suggestions", () => {
   const s = suggestionsForMetric(
-    { metric: "months_of_supply", value: 3.2 } as any,
+    { metric: "months_of_supply", value: 3.2 },
     "housing-swfl",
   );
   expect(s[0]).toContain("months of supply");
