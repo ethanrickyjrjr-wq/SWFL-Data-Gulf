@@ -8,10 +8,7 @@ import type {
 } from "../types/brain-output.mts";
 import type { ExogenousSignal } from "../types/exogenous-signal.mts";
 import type { BrainDomain } from "../types/pack.mts";
-import {
-  makeBrainInputSource,
-  type BrainInputNormalized,
-} from "../sources/brain-input-source.mts";
+import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brain-input-source.mts";
 import { loadConstitution } from "../constitution/index.mts";
 import {
   applyOverrideCascade,
@@ -28,6 +25,7 @@ import {
   voteDirection,
 } from "../lib/synth.mts";
 import { computeConfidence } from "../lib/confidence.mts";
+import { resolveGradeConfig } from "../vocab/loader.mts";
 
 /**
  * master — SWFL Intelligence Lake synthesizer.
@@ -102,9 +100,7 @@ function masterCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
  * Master synthesizer producer — spec §2 steps 0-8 wired together. Pure
  * function over the closure state above. No I/O.
  */
-function masterSynthesizerOutputProducer(
-  out: PackOutput,
-): BrainOutputProducerResult {
+function masterSynthesizerOutputProducer(out: PackOutput): BrainOutputProducerResult {
   const now = new Date(out.refined_at);
   const constitution = loadConstitution(MASTER_DOMAINS);
 
@@ -120,31 +116,20 @@ function masterSynthesizerOutputProducer(
   );
 
   if (passing.length === 0) {
-    const empty = emptySynthesisResult(
-      lastUpstreams.length,
-      constitution.relevance_floor,
-      now,
-    );
+    const empty = emptySynthesisResult(lastUpstreams.length, constitution.relevance_floor, now);
     return { ...empty, caveats: [...empty.caveats, ...floorCaveats] };
   }
 
   // Step 2 — direction voting (with mixed-direction split).
   const vote = voteDirection(passing);
   // Step 3 — override cascade.
-  const cascade = applyOverrideCascade(
-    vote,
-    passing,
-    lastSignals,
-    constitution.overrideCascade,
-  );
+  const cascade = applyOverrideCascade(vote, passing, lastSignals, constitution.overrideCascade);
   // Step 4 — contradictions among passing upstreams.
   const contradicts = detectContradictions(passing);
   // Step 6 — key-metrics rollup (top 1-2 per upstream, capped at 8).
   const key_metrics = rollupKeyMetrics(passing);
   // Step 7 — trust_tier worst-wins (highest tier number) + weighted-avg decay.
-  const trust_tier = Math.max(
-    ...passing.map((p) => p.upstream.trust_tier),
-  ) as BrainTrustTier;
+  const trust_tier = Math.max(...passing.map((p) => p.upstream.trust_tier)) as BrainTrustTier;
   const relevance = propagateDecay(passing, now);
   const upstream_count = passing.length;
 
@@ -179,6 +164,10 @@ function masterSynthesizerOutputProducer(
     vote,
     trust_tier,
     finalKeyMetrics: key_metrics,
+    // Anchor directional claims on a GRADEABLE driver slug so the deterministic
+    // grader can score the live call (yield-leak fix). Resolver injected to keep
+    // synth.mts free of vocab I/O.
+    gradeConfigFor: resolveGradeConfig,
   });
   const grain_boundary = composeGrainBoundary({
     passing,
@@ -204,11 +193,7 @@ function masterSynthesizerOutputProducer(
     // caveats explain the forced direction call, floor caveats name excluded
     // upstreams, then the lifted upstream qualifications. No truncation here —
     // out.caveats stays the full tier-3 audit receipt + every downstream input.
-    caveats: dedupeCaveats([
-      ...cascade.caveats,
-      ...floorCaveats,
-      ...upstreamCaveats,
-    ]),
+    caveats: dedupeCaveats([...cascade.caveats, ...floorCaveats, ...upstreamCaveats]),
     direction: cascade.direction,
     magnitude: cascade.magnitude,
     drivers: vote.drivers,

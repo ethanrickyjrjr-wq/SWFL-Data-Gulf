@@ -21,6 +21,16 @@ import type {
 } from "../types/brain-output.mts";
 import type { ExogenousSignal } from "../types/exogenous-signal.mts";
 import type { OverrideRule } from "../constitution/types.mts";
+import type { ResolvedGradeConfig } from "../vocab/loader.mts";
+import { computeDirection } from "../grade/grade-predictions.mts";
+
+/**
+ * Injected grade-config resolver. composeConditionalThesis stays pure (no vocab
+ * I/O) by taking this from its caller (the master producer passes the live
+ * resolveGradeConfig). Absent ⇒ the gradeable-anchor selection is skipped and the
+ * prior key_metrics[0] behavior stands — so nothing regresses when it is omitted.
+ */
+export type GradeConfigResolver = (slug: string) => ResolvedGradeConfig;
 
 const MS_PER_HOUR = 3_600_000;
 
@@ -144,8 +154,7 @@ export function voteDirection(passing: PassingUpstream[]): DirectionVote {
     const avgMag =
       winners.length === 0
         ? 0
-        : winners.reduce((s, { upstream }) => s + upstream.magnitude, 0) /
-          winners.length;
+        : winners.reduce((s, { upstream }) => s + upstream.magnitude, 0) / winners.length;
     return {
       direction: winningKey,
       magnitude: agreement_ratio * avgMag,
@@ -207,24 +216,17 @@ export function applyOverrideCascade(
       direction = "bearish";
       magnitude = Math.max(magnitude, 0.85);
       overrides.push(rule.override_id);
-      caveats.push(
-        `Override "${rule.override_id}" forced bearish (priority ${rule.priority})`,
-      );
+      caveats.push(`Override "${rule.override_id}" forced bearish (priority ${rule.priority})`);
       directionForced = true;
     } else if (rule.effect === "force_bullish") {
       direction = "bullish";
       magnitude = Math.max(magnitude, 0.85);
       overrides.push(rule.override_id);
-      caveats.push(
-        `Override "${rule.override_id}" forced bullish (priority ${rule.priority})`,
-      );
+      caveats.push(`Override "${rule.override_id}" forced bullish (priority ${rule.priority})`);
       directionForced = true;
     } else if (rule.effect === "force_signal_direction") {
       const sig = signals.find(
-        (s) =>
-          s.severity === "critical" &&
-          s.classification === "confirmed" &&
-          s.confidence > 0.85,
+        (s) => s.severity === "critical" && s.classification === "confirmed" && s.confidence > 0.85,
       );
       if (sig && sig.direction !== "neutral") {
         direction = sig.direction;
@@ -257,9 +259,7 @@ export function detectContradictions(passing: PassingUpstream[]): string[] {
       if (a.direction === "neutral" || b.direction === "neutral") continue;
       if (a.direction === "mixed" || b.direction === "mixed") continue;
       if (a.confidence <= 0.5 || b.confidence <= 0.5) continue;
-      out.push(
-        `${a.brain_id} (${a.direction}) vs ${b.brain_id} (${b.direction})`,
-      );
+      out.push(`${a.brain_id} (${a.direction}) vs ${b.brain_id} (${b.direction})`);
     }
   }
   return out;
@@ -292,8 +292,7 @@ export function composeConclusion(args: {
     neutral: "Read is neutral",
     mixed: "Read is mixed",
   }[direction];
-  const magDesc =
-    magnitude >= 0.75 ? "high" : magnitude >= 0.4 ? "moderate" : "low";
+  const magDesc = magnitude >= 0.75 ? "high" : magnitude >= 0.4 ? "moderate" : "low";
   const parts: string[] = [`${dirClause} (${magDesc} magnitude).`];
   if (drivers.length > 0) parts.push(`Driven by: ${drivers.join(", ")}.`);
   if (overrides.length > 0) parts.push(`Overrides: ${overrides.join(", ")}.`);
@@ -359,29 +358,23 @@ const THESIS_TABLE: Record<string, { condition: string; falsifier: string }> = {
   },
   "macro:bullish": {
     condition: "the rate path eases and the macro read stays bullish",
-    falsifier:
-      "the macro direction flips bearish on the next FRED or BLS print",
+    falsifier: "the macro direction flips bearish on the next FRED or BLS print",
   },
   "tourism:bullish": {
     condition: "tourist-tax collections keep rising year over year",
-    falsifier:
-      "collections decline month over month for two consecutive months",
+    falsifier: "collections decline month over month for two consecutive months",
   },
   "tourism:bearish": {
     condition: "tourist-tax collections keep falling year over year",
     falsifier: "collections rise month over month for two consecutive months",
   },
   "credit:bearish": {
-    condition:
-      "small-business charge-offs stay above the sector-distress threshold",
-    falsifier:
-      "the flagged sector's charge-off rate falls back under threshold",
+    condition: "small-business charge-offs stay above the sector-distress threshold",
+    falsifier: "the flagged sector's charge-off rate falls back under threshold",
   },
   "credit:bullish": {
-    condition:
-      "small-business charge-offs stay below the sector-distress threshold",
-    falsifier:
-      "a flagged sector's charge-off rate crosses the distress threshold",
+    condition: "small-business charge-offs stay below the sector-distress threshold",
+    falsifier: "a flagged sector's charge-off rate crosses the distress threshold",
   },
   "cre:bullish": {
     condition: "corridor asking rents hold and net absorption stays positive",
@@ -416,6 +409,64 @@ function dominantOf(pool: PassingUpstream[]): PassingUpstream {
 }
 
 /**
+ * Choose the metric slug to cite as a directional claim's gradeable anchor
+ * (yield-leak fix, "approach B"). deriveGradeFields grades the FIRST numeric
+ * basis_ref and — by design — does NOT skip to a later gradeable one, so a claim
+ * is gradeable only if its first cited metric is itself gradeable. We therefore
+ * prefer the dominant upstream's first GRADEABLE key_metric (in the payload) over a
+ * blind key_metrics[0] that may carry no grade block.
+ *
+ * HONESTY: for a sign-basis slug whose own value direction CONTRADICTS the claim
+ * direction we skip it — never anchor a bullish claim on a bearish-signed driver, a
+ * structural mis-grade that would poison the calibration signal the flywheel banks.
+ * This changes WHICH already-emitted driver is cited as checkable; it never changes
+ * the claim's direction (no manufactured bet). Falls back to the prior
+ * key_metrics[0] behavior when nothing gradeable/aligned exists ⇒ no regression for
+ * a genuinely non-gradeable read.
+ */
+function pickAnchorMetric(
+  keyMetrics: BrainOutputMetric[],
+  allowedMetrics: Set<string>,
+  claimDirection: BrainOutputDirection,
+  gradeConfigFor?: GradeConfigResolver,
+): string | undefined {
+  // No resolver injected ⇒ exact prior behavior (the dominant's top metric).
+  if (!gradeConfigFor) {
+    const top = keyMetrics[0]?.metric;
+    return top && allowedMetrics.has(top) ? top : undefined;
+  }
+
+  const numeric = keyMetrics.filter(
+    (m) => allowedMetrics.has(m.metric) && typeof m.value === "number" && Number.isFinite(m.value),
+  );
+
+  // A sign-basis gradeable slug whose OWN value direction opposes the claim would
+  // grade the claim backwards — never anchor on it (the calibration poison).
+  const contradicts = (m: BrainOutputMetric, cfg: ResolvedGradeConfig): boolean =>
+    cfg.gradeable &&
+    (claimDirection === "bullish" || claimDirection === "bearish") &&
+    cfg.grade_basis === "sign" &&
+    (() => {
+      const implied = computeDirection(m.value as number, 0, cfg);
+      return implied !== "neutral" && implied !== claimDirection;
+    })();
+
+  // 1. The checkable anchor: first gradeable, non-contradicting driver (author order).
+  for (const m of numeric) {
+    const cfg = gradeConfigFor(m.metric);
+    if (cfg.gradeable && !contradicts(m, cfg)) return m.metric;
+  }
+  // 2. Else a NON-gradeable numeric driver — the row is honestly ungradeable, never
+  //    mis-graded (this is what keeps a contradicting gradeable slug from sneaking
+  //    in as the first numeric ref that deriveGradeFields would then score wrong).
+  for (const m of numeric) {
+    if (!gradeConfigFor(m.metric).gradeable) return m.metric;
+  }
+  // 3. Only contradicting gradeable slugs exist — cite brain_id alone ⇒ ungradeable.
+  return undefined;
+}
+
+/**
  * basis_refs for a dominant driver — intersect-or-drop against the two
  * allowlists so the emitted slugs are guaranteed to resolve in the payload:
  *   • brain_id  must be in allowedBrainIds  (= Set(vote.drivers))
@@ -428,11 +479,18 @@ function basisRefsFor(
   p: PassingUpstream,
   allowedBrainIds: Set<string>,
   allowedMetrics: Set<string>,
+  claimDirection: BrainOutputDirection,
+  gradeConfigFor?: GradeConfigResolver,
 ): string[] {
   const refs: string[] = [];
   if (allowedBrainIds.has(p.upstream.brain_id)) refs.push(p.upstream.brain_id);
-  const topMetric = p.upstream.key_metrics[0]?.metric;
-  if (topMetric && allowedMetrics.has(topMetric)) refs.push(topMetric);
+  const anchor = pickAnchorMetric(
+    p.upstream.key_metrics,
+    allowedMetrics,
+    claimDirection,
+    gradeConfigFor,
+  );
+  if (anchor) refs.push(anchor);
   return refs;
 }
 
@@ -456,8 +514,11 @@ export function composeConditionalThesis(args: {
   vote: DirectionVote;
   trust_tier: BrainTrustTier;
   finalKeyMetrics: BrainOutputMetric[];
+  /** Live grade-config resolver; when present, directional/neutral claims anchor on
+   *  a GRADEABLE driver slug so the deterministic grader can score them (yield fix). */
+  gradeConfigFor?: GradeConfigResolver;
 }): ConditionalClaim[] {
-  const { passing, vote, finalKeyMetrics } = args;
+  const { passing, vote, finalKeyMetrics, gradeConfigFor } = args;
   if (passing.length === 0) return [];
 
   // Allowlists for basis_refs intersection.
@@ -467,9 +528,7 @@ export function composeConditionalThesis(args: {
   // Internal dispersion gate — population std-dev of passing confidences.
   const confs = passing.map((p) => p.upstream.confidence);
   const mean = confs.reduce((s, c) => s + c, 0) / confs.length;
-  const dispersion = Math.sqrt(
-    confs.reduce((s, c) => s + (c - mean) ** 2, 0) / confs.length,
-  );
+  const dispersion = Math.sqrt(confs.reduce((s, c) => s + (c - mean) ** 2, 0) / confs.length);
   const wideSplit = dispersion >= 0.15;
 
   // Mixed read → one split conditional naming the contested pair.
@@ -500,8 +559,7 @@ export function composeConditionalThesis(args: {
                 .map((p) => p.upstream.brain_id)
                 .filter((id) => allowedBrainIds.has(id))
                 .slice(0, 2),
-        falsifier:
-          "one side's weight clears 60% of the total on the next refine, breaking the tie",
+        falsifier: "one side's weight clears 60% of the total on the next refine, breaking the tie",
       },
     ];
   }
@@ -511,21 +569,22 @@ export function composeConditionalThesis(args: {
   // won the vote and therefore appear in vote.drivers) — not from all passing.
   // This guarantees the brain_id ref resolves against OUTPUT.drivers.
   if (vote.direction === "neutral") {
-    const neutralPassing = passing.filter(
-      (p) => p.upstream.direction === "neutral",
-    );
-    const dominant = dominantOf(
-      neutralPassing.length > 0 ? neutralPassing : passing,
-    );
+    const neutralPassing = passing.filter((p) => p.upstream.direction === "neutral");
+    const dominant = dominantOf(neutralPassing.length > 0 ? neutralPassing : passing);
     return [
       {
         condition:
           "the current cross-sector signals hold without a decisive move in either direction",
         then_direction: "neutral",
         basis: `no upstream read dominates; the strongest is ${dominant.upstream.brain_id}`,
-        basis_refs: basisRefsFor(dominant, allowedBrainIds, allowedMetrics),
-        falsifier:
-          "any major upstream posts a decisive directional move on its next refine",
+        basis_refs: basisRefsFor(
+          dominant,
+          allowedBrainIds,
+          allowedMetrics,
+          "neutral",
+          gradeConfigFor,
+        ),
+        falsifier: "any major upstream posts a decisive directional move on its next refine",
       },
     ];
   }
@@ -533,8 +592,7 @@ export function composeConditionalThesis(args: {
   // Directional read (bullish | bearish) → table lookup on dominant domain.
   const direction = vote.direction;
   const aligned = passing.filter(
-    (p) =>
-      p.upstream.direction === direction || p.upstream.direction === "mixed",
+    (p) => p.upstream.direction === direction || p.upstream.direction === "mixed",
   );
   const dominant = dominantOf(aligned.length > 0 ? aligned : passing);
   const domain = BRAIN_DOMAIN[dominant.upstream.brain_id] ?? "macro";
@@ -551,7 +609,13 @@ export function composeConditionalThesis(args: {
       condition,
       then_direction: direction,
       basis: `driven by the ${direction} read from ${dominant.upstream.brain_id}`,
-      basis_refs: basisRefsFor(dominant, allowedBrainIds, allowedMetrics),
+      basis_refs: basisRefsFor(
+        dominant,
+        allowedBrainIds,
+        allowedMetrics,
+        direction,
+        gradeConfigFor,
+      ),
       falsifier: row.falsifier,
     },
   ];
@@ -570,9 +634,7 @@ export function composeGrainBoundary(args: {
   relevanceFloor: number;
 }): GrainBoundary {
   const { passing, originalCount } = args;
-  const present = new Set(
-    passing.map((p) => BRAIN_DOMAIN[p.upstream.brain_id] ?? "macro"),
-  );
+  const present = new Set(passing.map((p) => BRAIN_DOMAIN[p.upstream.brain_id] ?? "macro"));
 
   const not_available: string[] = [
     "Outcomes for a specific named business or street address — the lake holds sector- and corridor-level aggregates, not individual firms.",
@@ -610,9 +672,7 @@ export function composeGrainBoundary(args: {
   const routes: string[] = [];
   const envSwfl = byId.get("env-swfl");
   if (envSwfl && envSwfl.key_metrics.some((m) => /^swfl_zip_/.test(m.metric))) {
-    routes.push(
-      "Flood risk is tracked per ZIP — want it for a specific ZIP or address?",
-    );
+    routes.push("Flood risk is tracked per ZIP — want it for a specific ZIP or address?");
   }
   // Corridor current-events route. Gated on cre's deterministic
   // `corridor_pulse_signals_live` count (>0), NOT on cre being present —
@@ -624,9 +684,7 @@ export function composeGrainBoundary(args: {
   const cre = byId.get("cre-swfl");
   if (
     cre &&
-    cre.key_metrics.some(
-      (m) => m.metric === "corridor_pulse_signals_live" && Number(m.value) > 0,
-    )
+    cre.key_metrics.some((m) => m.metric === "corridor_pulse_signals_live" && Number(m.value) > 0)
   ) {
     routes.push(
       "Recent commercial real-estate current events — leasing, sales, openings and closings — are tracked per area; want the latest for a specific area?",
@@ -641,10 +699,7 @@ export function composeGrainBoundary(args: {
   // kept DISTINCT from the flood ("flood risk") and corridor ("current events")
   // offers so a downstream Claude routes to the housing report, not the wrong one.
   const housing = byId.get("housing-swfl");
-  if (
-    housing &&
-    housing.detail_tables?.some((t) => t.grain === "zip" && t.rows.length > 0)
-  ) {
+  if (housing && housing.detail_tables?.some((t) => t.grain === "zip" && t.rows.length > 0)) {
     routes.push(
       "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?",
     );
@@ -698,9 +753,7 @@ export function predictedWindow(args: {
  * math-honest outcome is "best-tier brains keep their seat," not "whoever
  * ran first."
  */
-export function rollupKeyMetrics(
-  passing: PassingUpstream[],
-): BrainOutputMetric[] {
+export function rollupKeyMetrics(passing: PassingUpstream[]): BrainOutputMetric[] {
   const t1Count = passing.filter((p) => p.upstream.trust_tier === 1).length;
   const cap = t1Count + 1;
   type Indexed = {
@@ -752,10 +805,7 @@ export function rollupKeyMetrics(
  * passing upstreams (weight = magnitude × confidence × relevance_factor — same
  * formula as direction voting). `decay_curve` quantized per spec thresholds.
  */
-export function propagateDecay(
-  passing: PassingUpstream[],
-  now: Date,
-): BrainOutputRelevance {
+export function propagateDecay(passing: PassingUpstream[], now: Date): BrainOutputRelevance {
   const computed_at = now.toISOString();
   if (passing.length === 0) {
     return { decay_curve: "hours", half_life_hours: 24, computed_at };
@@ -770,8 +820,7 @@ export function propagateDecay(
   const half_life_hours =
     totalWeight > 0
       ? weightedHL / totalWeight
-      : passing.reduce((s, p) => s + p.upstream.relevance.half_life_hours, 0) /
-        passing.length;
+      : passing.reduce((s, p) => s + p.upstream.relevance.half_life_hours, 0) / passing.length;
   return {
     decay_curve: quantizeDecay(half_life_hours),
     half_life_hours,

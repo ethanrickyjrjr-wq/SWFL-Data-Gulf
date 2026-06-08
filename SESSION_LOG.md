@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — feat(glass): §2 flywheel backtest engine + §6-B gradeable-yield fix
+
+- **§2 (SHIPPED):** `public.backtest_grades` migration (`docs/sql/20260607_backtest_grades.sql`, applied to live DB, `service_role`-only, idempotent natural key, `grade_method` pinned `'retrodicted'`) + pure PIT/grade core `refinery/lib/backtest/grid.mts` (15 tests) + harness `refinery/tools/flywheel-backtest.mts` (DuckDB over ALFRED LAUS vintages → quarterly non-overlapping as-of grid → skill+calibration → idempotent upsert). **144 retrodicted grades written** (Lee 71, Collier 73). First read: **lift −6.5pp** (system 42.0% vs persistence 48.6%) — does NOT beat naive, the plan's anticipated honest headline. Caught + fixed a look-ahead artifact (monthly grid's persistence baseline peeked 60d past as-of → −28pp; quarterly step ≥ window fixes it). LeePA velocity / permits excluded-with-reason (logged, not dropped).
+- **§6-B (SHIPPED):** `composeConditionalThesis` now anchors directional/neutral claims on the dominant's first **gradeable, non-contradicting** driver slug (injected resolver, `synth.mts` stays pure) so `deriveGradeFields` can score live directional master calls. Skips sign-basis drivers whose sign opposes the claim (no backward grade). Never changes a claim's direction (no manufactured bet); `mixed` stays ungradeable (honest). `refinery/lib/synth.mts` + `refinery/packs/master.mts`; 49 synth tests green (zero regression), integration-tested through `deriveGradeFields`.
+- **§6-A (DESIGNED, not built):** per-slug leaf prediction logging (the ~22× multiplier) planned in `docs/superpowers/specs/2026-06-07-smart-grading-system-design.md` — sign-basis self-directional slugs + non-overlap cadence guard + lift-not-accuracy + `prediction_kind` discriminator. Awaiting operator review before build (touches the live predictions write path).
+- **Gates:** typecheck clean (touched files), corridor-aliases 7/7, `check-vocab-coverage --all` OK (no new slugs emitted). Checks: `flywheel_backtest_grades_corpus` + `flywheel_calibration_read` CLOSED; `glass_section6_leaf_yield` OPEN; `row_tier_build_remaining` Track-B HOLD lifted.
+- **Next:** operator reviews the spec → build §6-A (A1–A5). Did NOT touch `app/api/converse/route.ts` or `.claude/hooks/check-project-path.mjs` (other sessions' work). NOT pushed — awaiting OK.
+
 ## 2026-06-07 (Sonnet 4.6 · main) — chore: prettier + lint-staged pre-commit hook; gitignore .superpowers/
 
 - Added `.prettierrc` (100-char, double quotes, trailing commas — matches existing style) + `.prettierignore` (excludes ingest/, markdown, design refs, bun.lock).
