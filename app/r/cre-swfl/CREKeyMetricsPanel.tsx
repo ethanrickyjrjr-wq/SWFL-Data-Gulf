@@ -10,6 +10,8 @@ export interface SerializedMetric {
   label: string;
   value: string;
   direction: string | null;
+  sourceUrl?: string | null;
+  sourceLabel?: string | null;
 }
 
 type TabKey = "vacancy" | "absorption" | "rent";
@@ -19,6 +21,8 @@ interface ParsedMBMetric {
   metricType: TabKey;
   value: string;
   direction: string | null;
+  sourceUrl?: string | null;
+  sourceLabel?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -45,6 +49,26 @@ function DirectionBadge({ direction }: { direction: string | null }) {
   const cfg = DIRECTION_CONFIG[direction];
   if (!cfg) return <span className="text-[#b8b4a8] text-xs">{direction}</span>;
   return <span className={`text-xs font-medium ${cfg.className}`}>{cfg.label}</span>;
+}
+
+function SourceLink({ url, label }: { url?: string | null; label?: string | null }) {
+  if (!url) return null;
+  const isInternal =
+    url.includes("supabase.co") || url.startsWith("/") || url.includes("swfldatagulf.com");
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`text-[10px] font-medium underline-offset-2 hover:underline ${
+        isInternal
+          ? "text-[#00d4aa]/70 hover:text-[#00d4aa]"
+          : "text-blue-400/70 hover:text-blue-400"
+      }`}
+    >
+      {label || "Source"}
+    </a>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -131,6 +155,11 @@ function CoreStatCard({ metric }: { metric: SerializedMetric }) {
           <DirectionBadge direction={metric.direction} />
         </div>
       )}
+      {metric.sourceUrl && (
+        <div className="mt-1">
+          <SourceLink url={metric.sourceUrl} label={metric.sourceLabel || "Source"} />
+        </div>
+      )}
     </div>
   );
 }
@@ -139,16 +168,23 @@ function CityRow({
   city,
   value,
   direction,
+  sourceUrl,
+  sourceLabel,
 }: {
   city: string;
   value: string;
   direction: string | null;
+  sourceUrl?: string | null;
+  sourceLabel?: string | null;
 }) {
   const colorCls = directionClass(direction);
   return (
     <div className="flex items-center justify-between px-4 py-3 text-sm border-b border-white/[0.06] last:border-b-0">
-      <span className="text-gray-300 font-medium">{city}</span>
-      <div className="flex items-center gap-3 text-right">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-gray-300 font-medium">{city}</span>
+        {sourceUrl && <SourceLink url={sourceUrl} label={sourceLabel || "Source"} />}
+      </div>
+      <div className="flex items-center gap-3 text-right shrink-0 ml-4">
         <span className={`font-mono text-sm tabular-nums ${colorCls}`}>{value}</span>
         <DirectionBadge direction={direction} />
       </div>
@@ -174,7 +210,13 @@ export function CREKeyMetricsPanel({ coreMetrics, mbMetrics }: CREKeyMetricsPane
   for (const m of mbMetrics) {
     const p = parseMarketBeatLabel(m.label);
     if (!p) continue;
-    parsed.push({ ...p, value: m.value, direction: m.direction });
+    parsed.push({
+      ...p,
+      value: m.value,
+      direction: m.direction,
+      sourceUrl: m.sourceUrl,
+      sourceLabel: m.sourceLabel,
+    });
   }
 
   const allCities = Array.from(new Set(parsed.map((p) => p.city))).sort((a, b) =>
@@ -284,6 +326,8 @@ export function CREKeyMetricsPanel({ coreMetrics, mbMetrics }: CREKeyMetricsPane
                   city={row.city}
                   value={row.value}
                   direction={row.direction}
+                  sourceUrl={row.sourceUrl}
+                  sourceLabel={row.sourceLabel}
                 />
               ))
             )}

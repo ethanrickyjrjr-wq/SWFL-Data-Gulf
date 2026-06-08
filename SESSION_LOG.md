@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — fix(cre-swfl): restore source links in CREKeyMetricsPanel
+
+- CREKeyMetricsPanel.tsx: added sourceUrl/sourceLabel to SerializedMetric + ParsedMBMetric; SourceLink renders teal (internal) or blue (external) below city name and on CoreStatCard
+- page.tsx: serializedMetrics passes m.sourceUrl and m.sourceLabel through
+
 ## 2026-06-08 (Sonnet 4.6 · main) — fix(highlighter): snap cross-row table selections to one row
 
 - `lib/highlighter/use-highlight.ts`: added `snapCrossRowSelection` — detects when a drag spans two `<tr>` rows in a table (e.g. user drags from `$22.29 → Stable` in Bonita Springs row into `Cape Coral $22.6 →` in the next row). Snaps to the dominant row: if start-row text is >1.5× end-row text → snap to start row; otherwise snap to end row (drag destination = intent). Wired into `snapshot()` after the number/word-boundary snaps, before the worthiness check.

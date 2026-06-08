@@ -120,6 +120,8 @@ export default async function ReportPage({ params }: PageProps) {
     label: m.label,
     value: typeof m.value === "string" ? m.value : String(m.value),
     direction: m.direction,
+    sourceUrl: m.sourceUrl ?? null,
+    sourceLabel: m.sourceLabel ?? null,
   }));
   const coreMetrics =
     slug === "cre-swfl" ? serializedMetrics.filter((m) => !isCityMB(m.label)) : serializedMetrics;
