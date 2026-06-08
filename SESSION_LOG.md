@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · main) — MERGE: source-links-methodology → main (12 commits; /r/method + methodology registry + city-pulse 13-city)
+
+- Operator decree "just do the merge, the same way." Integrated `origin/claude/source-links-methodology` (12 commits ahead, 27 behind) into `main` via local `--no-ff` merge, `union` driver on `SESSION_LOG.md` (local `.git/info/attributes`, uncommitted). Brings: public `/r/method/[metric]` formula+provenance pages, `refinery/lib/methodology-registry.mts` (curated allowlist + `methodHrefForSlug`), the method-badge "ƒ" affordance on documented metric rows, `scrub-host` citation scrub, city-pulse 13-city expansion, `auto-pr.yml` deleted, 2 design/plan docs.
+- **2 semantic conflicts resolved KEEP-BOTH** (both files were also rewritten by the 9-PR highlighter batch already on main): (1) `app/r/_components/metrics-table.tsx` — HEAD's `MetricValueCell`/FactChip (value-column mobile tap target) and the branch's `MethodBadge` (label-column ƒ link) are complementary; kept both helpers + wired both into the row. (2) `refinery/render/speaker.mts` — HEAD's `suggestions` field and the branch's `methodHref` field both kept on `DisplayMetric` and in `toDisplayBrain`'s metric map. `app/r/[slug]/page.tsx` + `SESSION_LOG.md` auto-merged clean.
+- **Combined-state gate (all green):** web `tsc` **0 errors** (metrics-table / page.tsx / method pages — the SelectedFact-class risk surface); `refinery:typecheck` **133 = 131 baseline + 2 benign `bun:test` TS2307** from the 2 new test files (`speaker.mts` itself 0 err); full `bun test` **1338/0**; `check-vocab-coverage --all` OK (27 brains, every emitted metric resolves).
+- Branch `claude/source-links-methodology` left on origin (operator deletes / PR auto-closes on merge-to-main). Untracked `corridor-build-standard.md` + `make_pdfs.py` left untouched (operator/WIP, not in the branch). Highlighter `ANTHROPIC_API_KEY` prod-env is operator-fixed (separate from this merge); `/api/converse` 500 clears once that deploy carries the key.
+
 ## 2026-06-08 (Opus 4.8 · main) — applied #78 data_requests migration to prod
 
 - Ran `scripts/apply_data_requests_migration.py` (idempotent `docs/sql/20260608_data_requests.sql`) against prod. **Verified: anon SELECT=False (no default-privilege leak), service_role INSERT=True, row count=0.** `/api/converse` (deployed via #78 merge) now has its logging table — the Highlighter ask-loop won't 500. Feature still needs end-to-end live-verify (`highlighter_ui_live_verify` / `highlighter_chat_data_loop` stay open — table existing ≠ loop proven; awaiting a real logged ask).
@@ -93,6 +100,30 @@
 ## 2026-06-08 (Sonnet 4.6 · chore/reconcile-resilience-marker) — chore: flip rotted resilience marker in mhs-odd-graduation-handoff.md
 
 - Flipped `[ ]` → `[x]` for `freeze_watchdog_parse_error_hardening` in `docs/superpowers/plans/2026-06-05-mhs-odd-graduation-handoff.md`; work already shipped f9ae300 (2026-06-06), ledger check already closed by orchestrator 2026-06-08.
+## 2026-06-08 (Sonnet 4.6 · main) — city_pulse expanded to all 13 cities
+
+- Added 6 cities to `ingest/pipelines/city_pulse/pipeline.py` CITIES list: Sanibel, North Fort Myers, Marco Island, East Naples, North Naples, Golden Gate.
+- Seeded initial data for all 6 via pipeline run: 19 total new rows (Sanibel 3, NFM 2, Marco 5, ENaples 3, NNaples 5, GGate 1).
+- Updated `swfldatagulf-ops/lib/city-matrix.ts`: flipped `city_pulse` to `"live"` for all 6, removed stale "not in list" need entries, bumped `MATRIX_AUDITED` to 2026-06-08.
+
+## 2026-06-08 (Sonnet 4.6 · main) — kill auto-pr workflow
+
+- Deleted `.github/workflows/auto-pr.yml` — was auto-opening PRs on every branch push.
+
+## 2026-06-08 (Opus 4.8 · claude/source-links-methodology) — holistic review APPROVE + formatting heads-up
+
+- **Holistic cross-task review: APPROVE** (independent reviewer over all 8 impl files + 8 invariants). No Critical/Important. 3 Minor, all cosmetic/docs: (a) `marketbeat_swfl` is on the source allowlist but has no method-registry entry yet — known gap, not a bug; (b) the design spec's illustrative example named a per-ZIP `flood_aal_33931` pattern, but the impl ships a per-county TDT pattern — the generalized invariant ("a pattern family resolves") is satisfied + tested, example drift only; (c) the not-found panel echoes the raw slug (React-escaped → XSS-safe, cosmetic). 12/12 tests pass.
+- **FORMATTING HEADS-UP — read before you panic at the diff.** `refinery/render/speaker.mts` (+72) and `app/r/[slug]/page.tsx` (+47) show big diffs that are **pure prettier reformatting, not logic.** Cause: the active `.git/hooks/pre-commit` runs `npx lint-staged` → `prettier --write` on every staged file (config in `package.json`, not added by me). Those two files predated the prettier standard, so the first touch rewraps the whole file. The real logic change is **4 lines** (the `methodHref` wiring). See logic-only: **`git diff -w origin/main..HEAD`**. Unavoidable without `--no-verify` (banned by RULE 1). One-time cost; both files are now standard-conformant, so future edits to them diff clean.
+- **Tracker:** opened check `methodology_registry_expand` (extend the `ƒ` explainer beyond tourism-tdt). Next: push + open PR → `main`.
+
+## 2026-06-08 (Opus 4.8 · claude/source-links-methodology) — feat(method): public methodology surface + citation hygiene
+
+- **Registry + gate** (`refinery/lib/methodology-registry.mts`, `00c18be`): curated metric-slug → `{measures, formula, denominator, sourceTable, brain}` (mirrors `SOURCE_PROVENANCE_TABLES`); `resolveMethod` + `methodHrefForSlug` (allowlist gate, literals-before-patterns). Seeded with tourism-tdt SWFL + per-county slugs. FORMULA ONLY — no retrodicted skill (Glass guardrail 3). `cap_rate_median` left unregistered = the display-leak canary.
+- **Leak-gated wiring** (`refinery/render/speaker.mts`, `c0b5112`): `DisplayMetric.methodHref` set in `toDisplayBrain` via the gate — raw slug NEVER enters the display type (only the vetted `/r/method/<slug>` URL, same shape as `sourceUrl`); `display-leak.test.mts` extended (canary stays unregistered → no leak).
+- **Route + UI**: `app/r/method/[metric]/page.tsx` (`56f60e1`, formula + provenance, mirrors `/r/source`, no DB); teal `ƒ` affordance on documented metric rows (`8f317d1`) + `aria-label` (`5ffe287`).
+- **Hygiene** (`57e6530`): `scrubCaveatTechnical` maps "Brains Supabase" → "SWFL Data Gulf" (full citation / tier-3 / MCP); pass-through battery guards SOFR/NFIP/FEMA/etc.
+- **Verified:** 12/12 tests (registry + leak-guard + scrub) pass; `npm run build` clean (route registers `ƒ /r/method/[metric]`, full app typecheck). Each unit reviewed (spec + code-quality). Prettier reformatted `speaker.mts` on first touch (logic byte-identical).
+- **Next:** open PR → `main`. Spec `docs/superpowers/specs/2026-06-08-source-links-methodology-design.md`, plan `docs/superpowers/plans/2026-06-08-source-links-methodology.md`. No pack/vocab/lockfile/secret triggers. No `checks` row maps to this. Minor follow-ups (a11y already done; a few test-expressiveness niceties) noted but non-blocking.
 
 ## 2026-06-08 (Opus 4.8 · claude/glass-section4-data-targets) — feat(glass): §4 data_targets + §3 view vet + anon-leak fix (Wave 2, Stream B)
 

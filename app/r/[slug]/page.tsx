@@ -143,6 +143,7 @@ export default async function ReportPage({ params }: PageProps) {
               direction: m.direction,
               sourceUrl: m.sourceUrl,
               sourceLabel: m.sourceLabel,
+              methodHref: m.methodHref,
             }))}
           />
         </section>

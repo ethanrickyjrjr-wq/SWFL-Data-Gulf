@@ -47,6 +47,7 @@ import type {
 } from "../types/brain-output.mts";
 import { hasFixtureSentinel } from "../lib/fixture-sentinels.mts";
 import { computeMetricChart } from "../lib/chart-from-metrics.mts";
+import { methodHrefForSlug } from "../lib/methodology-registry.mts";
 import type { ChartBlock, ChartCell } from "../validate/chart-block-lint.mts";
 
 export type SpeakerTier = 1 | 2 | 3;
@@ -300,6 +301,10 @@ function formatDegradedToken(entry: { label: string; date: string }): string {
 export function scrubCaveatTechnical(text: string): string {
   return (
     text
+      // Internal data-host phrase: "Brains Supabase" names our storage vendor,
+      // not a customer-facing source. Map it to the public lake name. Maximally
+      // specific (two literal words) so it can never eat domain prose.
+      .replace(/\bBrains\s+Supabase\b/gi, "SWFL Data Gulf")
       // Schema-qualified DB identifiers (data_lake.city_pulse_corridors,
       // public.corridor_profiles) — redact the whole schema.table as ONE unit.
       // The [config] rule below only catches a table name that happens to
@@ -573,6 +578,13 @@ export interface DisplayMetric {
    * opted out — the client keeps its `suggestionsForMetric` fallback then.
    */
   suggestions: string[];
+  /**
+   * Public `/r/method/<slug>` URL when this metric's slug is documented in the
+   * methodology registry, else absent. The raw slug NEVER enters this type — only
+   * a finished, allowlist-vetted URL (same shape as `sourceUrl`), so the
+   * display-leak invariant holds.
+   */
+  methodHref?: string;
 }
 
 /**
@@ -668,6 +680,7 @@ export function toDisplayBrain(brain: ParsedBrain): DisplayBrain {
       // Highlighter Reach — carry the dossier's precomputed suggestions, each
       // sanitized like every other display string. Absent on pre-lift brains.
       suggestions: (m.suggestions ?? []).map((s) => sanitizeProse(s)),
+      methodHref: methodHrefForSlug(m.metric),
     })),
     summaryCaveats: cleanCaveats.slice(0, MAX_DISPLAY_CAVEATS),
     detailCaveats: cleanCaveats.slice(MAX_DISPLAY_CAVEATS),

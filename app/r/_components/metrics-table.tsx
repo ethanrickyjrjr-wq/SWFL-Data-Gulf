@@ -50,6 +50,8 @@ export interface MetricRow {
   sourceUrl?: string | null;
   /** Link text (defaults to "Source"). */
   sourceLabel?: ReactNode;
+  /** Public `/r/method/<slug>` URL when this metric has a documented method. */
+  methodHref?: string | null;
 }
 
 /** Trend pill — same color the value wears. Unknown values fall back to the
@@ -134,6 +136,23 @@ function MetricValueCell({
   return <span className={`font-mono ${colorCls}`}>{value}</span>;
 }
 
+/** A tiny "how computed" affordance next to a metric label — links to the
+ *  metric's /r/method page. Teal, because the methodology page is our own
+ *  surface. Absent when the metric has no documented method (most rows today). */
+function MethodBadge({ href }: { href?: string | null }) {
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      title="How this is computed"
+      aria-label="How this metric is computed"
+      className="ml-1.5 align-super text-[10px] font-semibold text-[#00d4aa] no-underline hover:underline"
+    >
+      ƒ
+    </a>
+  );
+}
+
 /** Metric · Value · Trend · Source table. The value cell inherits the row's
  *  direction color; the source link colors itself by origin. */
 export function MetricsTable({
@@ -158,7 +177,10 @@ export function MetricsTable({
         <tbody className="divide-y divide-white/[0.06]">
           {metrics.map((m, i) => (
             <tr key={i}>
-              <td className="px-4 py-3 align-top font-medium text-white">{m.label}</td>
+              <td className="px-4 py-3 align-top font-medium text-white">
+                {m.label}
+                <MethodBadge href={m.methodHref} />
+              </td>
               <td className="px-4 py-3 text-right align-top">
                 <MetricValueCell value={m.value} direction={m.direction} label={m.label} />
               </td>
