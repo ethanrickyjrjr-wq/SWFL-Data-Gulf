@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · claude/source-links-methodology) — holistic review APPROVE + formatting heads-up
+
+- **Holistic cross-task review: APPROVE** (independent reviewer over all 8 impl files + 8 invariants). No Critical/Important. 3 Minor, all cosmetic/docs: (a) `marketbeat_swfl` is on the source allowlist but has no method-registry entry yet — known gap, not a bug; (b) the design spec's illustrative example named a per-ZIP `flood_aal_33931` pattern, but the impl ships a per-county TDT pattern — the generalized invariant ("a pattern family resolves") is satisfied + tested, example drift only; (c) the not-found panel echoes the raw slug (React-escaped → XSS-safe, cosmetic). 12/12 tests pass.
+- **FORMATTING HEADS-UP — read before you panic at the diff.** `refinery/render/speaker.mts` (+72) and `app/r/[slug]/page.tsx` (+47) show big diffs that are **pure prettier reformatting, not logic.** Cause: the active `.git/hooks/pre-commit` runs `npx lint-staged` → `prettier --write` on every staged file (config in `package.json`, not added by me). Those two files predated the prettier standard, so the first touch rewraps the whole file. The real logic change is **4 lines** (the `methodHref` wiring). See logic-only: **`git diff -w origin/main..HEAD`**. Unavoidable without `--no-verify` (banned by RULE 1). One-time cost; both files are now standard-conformant, so future edits to them diff clean.
+- **Tracker:** opened check `methodology_registry_expand` (extend the `ƒ` explainer beyond tourism-tdt). Next: push + open PR → `main`.
+
 ## 2026-06-08 (Opus 4.8 · claude/source-links-methodology) — feat(method): public methodology surface + citation hygiene
 
 - **Registry + gate** (`refinery/lib/methodology-registry.mts`, `00c18be`): curated metric-slug → `{measures, formula, denominator, sourceTable, brain}` (mirrors `SOURCE_PROVENANCE_TABLES`); `resolveMethod` + `methodHrefForSlug` (allowlist gate, literals-before-patterns). Seeded with tourism-tdt SWFL + per-county slugs. FORMULA ONLY — no retrodicted skill (Glass guardrail 3). `cap_rate_median` left unregistered = the display-leak canary.
