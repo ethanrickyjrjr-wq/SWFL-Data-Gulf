@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · main) — BOARD SWEEP: deleted 2 merged branches + added no-branch-create guard hook
+
+- Operator decree: "close out the 2 open branches, get all commits off the board, and never auto-open/start branches." Both remote branches were **fully merged** (0 commits ahead of `main`): `claude/glass-flywheel-backtest` (PR #71 MERGED) and `claude/source-links-methodology` (PR #74, merged locally as `a243fa2`). Deleted both via `gh api -X DELETE git/refs/heads/...`. Remote is now **`main`-only**. Deleted the 3 matching merged local branches; **preserved `backup/operator-corridor-38c7760`** (has 2 unique commits NOT in main — operator's).
+- **New guard:** `.claude/hooks/check-no-branch-create.mjs` (wired into PreToolUse Bash). Blocks agent-initiated `git checkout -b/-B`, `git switch -c/-C/--create`, bare `git branch <name>`, and `gh pr create/new` (exit 2). Allows list/delete/rename/checkout-existing + all non-branch ops. Escape hatch: prefix `ALLOW_BRANCH_CREATE=1`. 17/17 unit cases pass. Memory: `feedback_no-auto-branch-creation`.
+- **Root-cause note:** in-repo automation creates ZERO branches — `auto-pr.yml` already deleted (`00e528a`), no Claude GHA runner, no hook spawns branches. The `claude/*` branches come from **cloud/web launch mode** (per-task branch at launch) — a launch-time choice the Bash hook can't reach. To stop it there: run locally (this CLI honors RULE 1) or change the launch config.
+
 ## 2026-06-08 (Opus 4.8 · main) — MERGE: source-links-methodology → main (12 commits; /r/method + methodology registry + city-pulse 13-city)
 
 - Operator decree "just do the merge, the same way." Integrated `origin/claude/source-links-methodology` (12 commits ahead, 27 behind) into `main` via local `--no-ff` merge, `union` driver on `SESSION_LOG.md` (local `.git/info/attributes`, uncommitted). Brings: public `/r/method/[metric]` formula+provenance pages, `refinery/lib/methodology-registry.mts` (curated allowlist + `methodHrefForSlug`), the method-badge "ƒ" affordance on documented metric rows, `scrub-host` citation scrub, city-pulse 13-city expansion, `auto-pr.yml` deleted, 2 design/plan docs.
