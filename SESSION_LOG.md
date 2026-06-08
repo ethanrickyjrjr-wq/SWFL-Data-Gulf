@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — /r/ page cleanup: teal section titles, teal corridor pills, CRE MarketBeat panel, highlighter tab-click fix
+
+- `app/r/_components/report-shell.tsx`: `SectionTitle` → `text-[#00d4aa]` (all /r/ pages now have teal section headings — Explore corridors, Key metrics, Worth knowing)
+- `app/r/[slug]/page.tsx`: corridor pills always teal-outlined (`border-[#00d4aa]/40 bg-[#00d4aa]/[0.04]`, hover to full teal); county headers show item count; added `CREKeyMetricsPanel` import + server-side metric split (core vs MarketBeat); cre-swfl slug renders the new panel, all other brains keep the existing MetricsTable
+- `app/r/cre-swfl/CREKeyMetricsPanel.tsx` (NEW): client component with Corridor Summary stat grid + MarketBeat by City panel (3 tabs: Vacancy Rate / Net Absorption / Asking Rent; city filter pills; A–Z city rows); `parseMarketBeatLabel` strips area/sector/SWFL aggregates; `shortenCRELabel` maps verbose pack labels to compact names
+- `lib/highlighter/use-highlight.ts`: `onMouseUp` now accepts `MouseEvent`; if target is `button` or `[role="tab"]` it clears the selection and returns — popup no longer fires on tab clicks
+
 ## 2026-06-08 (Sonnet 4.6 · main) — fix FirstTouchHint pill: left-anchor, size parity, visible X, auto-dismiss
 
 - `components/highlighter/FirstTouchHint.tsx`: moved from centered `bottom-4` to `left-4 bottom-4` — constrained `max-w-[185px]` on mobile (sm: expands to `max-w-xs`) so it never overlaps the bottom-right FAB; `py-3` to match FAB height; X now has `rounded-full bg-gray-200 p-1.5 text-gray-600` (gray circle, clearly tappable); sparkle updated to `#00d4aa`; added `used?: boolean` prop — auto-dismisses (marks seen cookie) the first time the user activates a highlight

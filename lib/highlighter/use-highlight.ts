@@ -230,8 +230,13 @@ export function useHighlight() {
     function onMouseDown() {
       mouseIsDown = true;
     }
-    function onMouseUp() {
+    function onMouseUp(e: MouseEvent) {
       mouseIsDown = false;
+      const target = e.target as Element | null;
+      if (target?.closest('button, [role="tab"]')) {
+        window.getSelection()?.removeAllRanges();
+        return;
+      }
       if (timer) clearTimeout(timer);
       timer = setTimeout(snapshot, 10);
     }

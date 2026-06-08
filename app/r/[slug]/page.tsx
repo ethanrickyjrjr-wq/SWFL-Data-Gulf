@@ -25,6 +25,7 @@ import { ReportChart } from "../../../components/charts/ReportChart";
 import { HighlighterLayer } from "../../../components/highlighter/HighlighterLayer";
 import { HighlighterProvider } from "../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
+import { CREKeyMetricsPanel } from "../cre-swfl/CREKeyMetricsPanel";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -97,6 +98,19 @@ export default async function ReportPage({ params }: PageProps) {
   const hasDetail = display.detailCaveats.length > 0 || display.metrics.length > 0;
   const ld = brainJsonLd(display, slug);
 
+  // Split metrics for the CRE-specific panel (server-safe: plain strings only)
+  const serializedMetrics = display.metrics.map((m) => ({
+    label: m.label,
+    value: typeof m.value === "string" ? m.value : String(m.value),
+    direction: m.direction,
+  }));
+  const coreMetrics =
+    slug === "cre-swfl"
+      ? serializedMetrics.filter((m) => !m.label.startsWith("MarketBeat"))
+      : serializedMetrics;
+  const mbMetrics =
+    slug === "cre-swfl" ? serializedMetrics.filter((m) => m.label.startsWith("MarketBeat")) : [];
+
   const highlighterEnabled = highlighterUiEnabled();
 
   const pageContent = (
@@ -133,21 +147,28 @@ export default async function ReportPage({ params }: PageProps) {
 
       {slug === "cre-swfl" && <CorridorIndex />}
 
-      {display.metrics.length > 0 && (
-        <section className="mt-10">
-          <SectionTitle>Key metrics</SectionTitle>
-          <MetricsTable
-            metrics={display.metrics.map((m) => ({
-              label: m.label,
-              value: m.value,
-              direction: m.direction,
-              sourceUrl: m.sourceUrl,
-              sourceLabel: m.sourceLabel,
-              methodHref: m.methodHref,
-            }))}
-          />
-        </section>
-      )}
+      {slug === "cre-swfl"
+        ? (coreMetrics.length > 0 || mbMetrics.length > 0) && (
+            <section className="mt-10">
+              <SectionTitle>Key metrics</SectionTitle>
+              <CREKeyMetricsPanel coreMetrics={coreMetrics} mbMetrics={mbMetrics} />
+            </section>
+          )
+        : display.metrics.length > 0 && (
+            <section className="mt-10">
+              <SectionTitle>Key metrics</SectionTitle>
+              <MetricsTable
+                metrics={display.metrics.map((m) => ({
+                  label: m.label,
+                  value: m.value,
+                  direction: m.direction,
+                  sourceUrl: m.sourceUrl,
+                  sourceLabel: m.sourceLabel,
+                  methodHref: m.methodHref,
+                }))}
+              />
+            </section>
+          )}
 
       {display.summaryCaveats.length > 0 && (
         <section className="mt-10">
@@ -213,21 +234,23 @@ async function CorridorIndex() {
     <section className="mt-10">
       <SectionTitle>Explore corridors</SectionTitle>
       <p className="mt-1 text-sm text-gray-400">
-        {links.length} verified corridors — open one for its metrics, active intel, and area
-        context.
+        {links.length} verified corridors · tap any for metrics, active intel, and area context.
       </p>
-      <div className="mt-4 space-y-5">
+      <div className="mt-4 space-y-6">
         {[...byCounty.entries()].map(([county, items]) => (
           <div key={county}>
-            <h3 className="text-xs uppercase tracking-wider text-gray-400">
+            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
               {county === "Unknown" ? "Other SWFL" : `${county} County`}
+              <span className="font-normal normal-case tracking-normal text-gray-600">
+                ({items.length})
+              </span>
             </h3>
             <ul className="mt-2 flex flex-wrap gap-2">
               {items.map((l) => (
                 <li key={l.slug}>
                   <Link
                     href={`/r/cre-swfl/${l.slug}`}
-                    className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-gray-300 transition-colors hover:border-[#00d4aa]/50 hover:text-[#00d4aa]"
+                    className="inline-flex items-center rounded-full border border-[#00d4aa]/40 bg-[#00d4aa]/[0.04] px-3 py-1 text-sm text-gray-300 transition-colors hover:border-[#00d4aa] hover:bg-[#00d4aa]/[0.08] hover:text-[#00d4aa]"
                   >
                     {l.name}
                   </Link>

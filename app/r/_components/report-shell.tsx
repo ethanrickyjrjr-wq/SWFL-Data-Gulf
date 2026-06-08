@@ -34,13 +34,7 @@ export function ReportShell({
 
 /** Logo eyebrow + brand + title, with the standard bottom rule. Page-specific
  *  subtitle/chips/meta go in `children`. */
-export function ReportHeader({
-  title,
-  children,
-}: {
-  title: ReactNode;
-  children?: ReactNode;
-}) {
+export function ReportHeader({ title, children }: { title: ReactNode; children?: ReactNode }) {
   return (
     <header className="border-b border-white/10 pb-6">
       <div className="flex items-center gap-2 text-gray-400">
@@ -53,9 +47,7 @@ export function ReportHeader({
         />
         <p className="text-xs uppercase tracking-wider">SWFL Data Gulf</p>
       </div>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-        {title}
-      </h1>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{title}</h1>
       {children}
     </header>
   );
@@ -75,13 +67,7 @@ export function ReportFooter({
   return (
     <footer className="mt-12 border-t border-white/10 pt-6 text-sm text-gray-500">
       <div className="flex items-center gap-2">
-        <Image
-          src="/logo.png"
-          alt=""
-          width={16}
-          height={16}
-          className="h-4 w-4 rounded"
-        />
+        <Image src="/logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded" />
         <span>
           SWFL Data Gulf
           {freshnessToken && (
@@ -100,19 +86,13 @@ export function ReportFooter({
 
 /** One section heading style for every report. */
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="text-xl font-semibold tracking-tight text-white">
-      {children}
-    </h2>
-  );
+  return <h2 className="text-xl font-semibold tracking-tight text-[#00d4aa]">{children}</h2>;
 }
 
 export function Meta({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wider text-gray-400">
-        {label}
-      </dt>
+      <dt className="text-xs uppercase tracking-wider text-gray-400">{label}</dt>
       <dd className="mt-1 text-sm text-white">{value}</dd>
     </div>
   );
