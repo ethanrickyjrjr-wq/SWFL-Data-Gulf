@@ -250,6 +250,23 @@ function cleanSubmarket(submarket: string): { display: string; slug: string } {
   return { display: submarket, slug: submarketSlug(submarket) };
 }
 
+/**
+ * Customer-facing publisher label for a marketbeat_swfl row, keyed on its
+ * `source_name`. The marketbeat_swfl table UNIONS two publishers
+ * ('cw_marketbeat' | 'mhs_databook' — NOT NULL, see
+ * refinery/sources/marketbeat-swfl-source.mts:22), so a single-row citation
+ * must name the real one. MHS rows were shipping under a generic "MarketBeat"
+ * prefix (e.g. the Marco Island submarket, sourced from mhsappraisal.com) —
+ * that is the provenance mislabel this fixes.
+ *
+ * Minimal by design: only `mhs_databook` is relabelled. `cw_marketbeat` stays
+ * "MarketBeat" because that feed spans Cushman & Wakefield / LSI / CPSWFL and
+ * the per-row `source_url` already carries the exact provenance.
+ */
+function publisherLabel(sourceName: string): string {
+  return sourceName === "mhs_databook" ? "MHS Databook" : "MarketBeat";
+}
+
 function buildMarketbeatSubmarketSource(
   field: "vacancy_rate" | "asking_rent_nnn" | "absorption_sqft",
   group: JoinedSubmarketGroup,
@@ -277,7 +294,7 @@ function buildMarketbeatSubmarketSource(
     url,
     fetched_at,
     tier: 2,
-    citation: `MarketBeat ${display}${sectorLabel} ${group.row.quarter} — ${field} across the ${display} submarket; ${matchedDisclosure}${tail}.`,
+    citation: `${publisherLabel(group.row.source_name)} ${display}${sectorLabel} ${group.row.quarter} — ${field} across the ${display} submarket; ${matchedDisclosure}${tail}.`,
   };
 }
 
@@ -1362,7 +1379,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   if (mbRows.length > 0) {
     for (const group of zeroMatchedCaveatGroups) {
       vote.caveats.push(
-        `MarketBeat ${cleanSubmarket(group.submarket).display} submarket reports a value but 0 of its ${group.mappedCorridorNames.length} mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.`,
+        `${publisherLabel(group.row.source_name)} ${cleanSubmarket(group.submarket).display} submarket reports a value but 0 of its ${group.mappedCorridorNames.length} mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.`,
       );
     }
   }
