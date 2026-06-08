@@ -1,10 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import type {
-  PackDefinition,
-  PackOutput,
-  CitationRow,
-} from "../types/pack.mts";
+import type { PackDefinition, PackOutput, CitationRow } from "../types/pack.mts";
 import type {
   BrainDriver,
   BrainOutput,
@@ -42,7 +38,7 @@ import {
   type MasterGateInput,
 } from "../lib/master-gate.mts";
 import { brainStatus } from "../lib/dag.mts";
-import { logPrediction } from "../lib/predictions-log.mts";
+import { logPrediction, logSlugPredictions } from "../lib/predictions-log.mts";
 import { logMetricObservations } from "../lib/metric-observations-log.mts";
 import { writeShockLogRow } from "../sources/fdot-freight-source.mts";
 import { PACKS } from "../config/packs.mts";
@@ -73,12 +69,8 @@ export function suggestionsForMetric(
   slug: string,
 ): string[] {
   const label = m.metric.replace(/_/g, " ");
-  const out = [
-    `What's driving ${label}?`,
-    `How does ${label} here compare to other SWFL areas?`,
-  ];
-  if (slug === "housing-swfl")
-    out.push(`How does flood risk affect ${label} in this ZIP?`);
+  const out = [`What's driving ${label}?`, `How does ${label} here compare to other SWFL areas?`];
+  if (slug === "housing-swfl") out.push(`How does flood risk affect ${label} in this ZIP?`);
   return out.slice(0, 3);
 }
 
@@ -89,15 +81,11 @@ export function suggestionsForMetric(
  * names an id NOT declared as an upstream edge throws here, surfacing the
  * mistake before the rendered file is written.
  */
-function liftDrivers(
-  pack: PackDefinition,
-  driverIds: readonly string[],
-): BrainDriver[] {
+function liftDrivers(pack: PackDefinition, driverIds: readonly string[]): BrainDriver[] {
   return driverIds.map((id) => {
     const edge = pack.input_brains.find((e) => e.id === id);
     if (!edge) {
-      const declared =
-        pack.input_brains.map((e) => e.id).join(", ") || "(none)";
+      const declared = pack.input_brains.map((e) => e.id).join(", ") || "(none)";
       throw new Error(
         `Stage 4: producer for "${pack.id}" named driver "${id}" that is not declared in input_brains. Declared upstreams: ${declared}.`,
       );
@@ -215,10 +203,7 @@ export async function harvestUpstreams(
       stalenessCaveats.push(
         `Upstream brain '${upstream.id}' was stale at build time (expired ${status.expires_at}).`,
       );
-      minCappedUpstreamConfidence = Math.min(
-        minCappedUpstreamConfidence,
-        read.output.confidence,
-      );
+      minCappedUpstreamConfidence = Math.min(minCappedUpstreamConfidence, read.output.confidence);
     }
     if (degradedIds.has(upstream.id) && read.kind === "ok") {
       const today = new Date().toISOString().slice(0, 10);
@@ -227,10 +212,7 @@ export async function harvestUpstreams(
         `Upstream brain '${upstream.id}' failed to rebuild on ${today}; using last good read from ${lastDate} (v${read.output.version}).`,
       );
       degradedUpstreamDates.set(upstream.id, lastDate);
-      minCappedUpstreamConfidence = Math.min(
-        minCappedUpstreamConfidence,
-        read.output.confidence,
-      );
+      minCappedUpstreamConfidence = Math.min(minCappedUpstreamConfidence, read.output.confidence);
     }
     upstreams.push({
       brain_id: upstream.id,
@@ -274,10 +256,7 @@ export function applyStalenessCap(
 /** Read the prior version from an existing brain file (0 if none). */
 async function readPriorVersion(brainId: string): Promise<number> {
   try {
-    const content = await readFile(
-      path.join(BRAINS_DIR, `${brainId}.md`),
-      "utf-8",
-    );
+    const content = await readFile(path.join(BRAINS_DIR, `${brainId}.md`), "utf-8");
     const m = content.match(/^version:\s*(\d+)/m);
     return m ? parseInt(m[1], 10) : 0;
   } catch {
@@ -342,9 +321,7 @@ function defaultOutputProducer(out: PackOutput): BrainOutputProducerResult {
  * tier 4 (a no-current-pack situation; defensive default).
  */
 function computeTrustTier(pack: PackDefinition): BrainTrustTier {
-  const directSources = pack.sources.filter(
-    (s) => !s.source_id.startsWith("brain-input:"),
-  );
+  const directSources = pack.sources.filter((s) => !s.source_id.startsWith("brain-input:"));
   if (directSources.length === 0) return 4;
   const max = directSources.reduce(
     (acc, s) => (s.trust_tier > acc ? s.trust_tier : acc),
@@ -433,10 +410,7 @@ export async function outputStage(
     degradationCaveats,
     degradedUpstreamDates,
     minStaleUpstreamConfidence,
-  } = await harvestUpstreams(
-    pack.input_brains,
-    opts.degradedUpstreamIds ?? new Set(),
-  );
+  } = await harvestUpstreams(pack.input_brains, opts.degradedUpstreamIds ?? new Set());
   const upstream_confidences = upstreams.map((u) => u.confidence);
 
   // Lane 1A: headline confidence is now a trust-tier-weighted mean across
@@ -471,8 +445,7 @@ export async function outputStage(
   // `trust_tier` (worst-wins among passing), and `relevance` (weighted-avg
   // decay) — Stage 4 prefers the producer's value when present, otherwise
   // falls back to the engine default below.
-  const trust_tier: BrainTrustTier =
-    distilled.trust_tier ?? computeTrustTier(pack);
+  const trust_tier: BrainTrustTier = distilled.trust_tier ?? computeTrustTier(pack);
   const upstream_count = distilled.upstream_count ?? pack.input_brains.length;
   const relevance: BrainOutputRelevance = distilled.relevance ?? {
     decay_curve: "weeks",
@@ -485,9 +458,7 @@ export async function outputStage(
   // the error already lives in the upstream brain's own attribution chain.
   const caveats = [...distilled.caveats];
   if (confidence < ATTRIBUTION_CAVEAT_THRESHOLD) {
-    const directSources = pack.sources.filter(
-      (s) => !s.source_id.startsWith("brain-input:"),
-    );
+    const directSources = pack.sources.filter((s) => !s.source_id.startsWith("brain-input:"));
     if (directSources.length > 0) {
       const weighted: WeightedSource[] = directSources.map((s) => ({
         source_id: s.source_id,
@@ -546,14 +517,10 @@ export async function outputStage(
     degraded_inputs:
       degradationCaveats.length > 0
         ? [...(opts.degradedUpstreamIds ?? new Set())]
-            .filter((id) =>
-              pack.input_brains.some((e) => e.id === id && e.critical),
-            )
+            .filter((id) => pack.input_brains.some((e) => e.id === id && e.critical))
             .map((id) => ({
               label: PACKS[id]?.public_label ?? "a regional input",
-              date:
-                degradedUpstreamDates.get(id) ??
-                new Date().toISOString().slice(0, 10),
+              date: degradedUpstreamDates.get(id) ?? new Date().toISOString().slice(0, 10),
             }))
             .filter((entry) => entry !== undefined)
         : undefined,
@@ -582,14 +549,7 @@ export async function outputStage(
   // build. Self-correcting — master can't be produced until its upstreams are
   // re-rendered live. Single-sourced patterns: refinery/lib/fixture-sentinels.
   const fixtureLeak = env.source === "live" && hasFixtureSentinel(markdown);
-  if (
-    !spec.ok ||
-    !lint.ok ||
-    !bait.ok ||
-    !smoothing.ok ||
-    !grainGuard.ok ||
-    fixtureLeak
-  ) {
+  if (!spec.ok || !lint.ok || !bait.ok || !smoothing.ok || !grainGuard.ok || fixtureLeak) {
     const errs = [
       ...(fixtureLeak
         ? [
@@ -597,15 +557,10 @@ export async function outputStage(
           ]
         : []),
       ...spec.errors.map((e) => `  spec: ${e}`),
-      ...lint.violations.map(
-        (v) => `  facts-only [line ${v.line}, ${v.pattern}]: ${v.text}`,
-      ),
-      ...bait.violations.map(
-        (v) => `  inference-bait [line ${v.line}, ${v.pattern}]: ${v.text}`,
-      ),
+      ...lint.violations.map((v) => `  facts-only [line ${v.line}, ${v.pattern}]: ${v.text}`),
+      ...bait.violations.map((v) => `  inference-bait [line ${v.line}, ${v.pattern}]: ${v.text}`),
       ...smoothing.violations.map(
-        (v) =>
-          `  smoothing [line ${v.line}, ${v.group}/"${v.token}"]: ${v.text}`,
+        (v) => `  smoothing [line ${v.line}, ${v.group}/"${v.token}"]: ${v.text}`,
       ),
       ...grainGuard.violations.map(
         (v) =>
@@ -652,9 +607,7 @@ export async function outputStage(
     const gateInput: MasterGateInput = {
       rendered: brainOutput,
       priorMasterExists: priorRead.kind === "ok",
-      criticalHoleIds: new Set(
-        [...holes].filter((id) => criticalUpstreamIds.has(id)),
-      ),
+      criticalHoleIds: new Set([...holes].filter((id) => criticalUpstreamIds.has(id))),
       criticalUpstreamIds,
       degradedCriticalIds,
     };
@@ -722,6 +675,19 @@ export async function outputStage(
     console.warn(
       `Stage 4: metric_observations insert failed for "${pack.id}" — ${metricObsResult.message}. ` +
         `Brain file was written; only the metric snapshot is missing.`,
+    );
+  }
+
+  // §6-A — log this brain's per-slug directional sub-calls (kind='slug'),
+  // cadence-guarded so a slug is re-logged only after its window closes. Fires for
+  // EVERY pack (the master-only guard stays on the synthesis row above). Self-
+  // directional sign-basis gradeable slugs only; never manufactures a bet. Silent
+  // no-op without Supabase env / no qualifying slug; errors are warnings.
+  const slugLogResult = await logSlugPredictions({ brainOutput });
+  if (slugLogResult.kind === "error") {
+    console.warn(
+      `Stage 4: slug predictions insert failed for "${pack.id}" — ${slugLogResult.message}. ` +
+        `Brain file was written; only the per-slug telemetry rows are missing.`,
     );
   }
 

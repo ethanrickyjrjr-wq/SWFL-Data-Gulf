@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — feat(glass): §6-A per-slug leaf prediction logging (the gradeable-yield multiplier)
+
+- **A1 (schema):** `predictions.prediction_kind` (`'synthesis'`|`'slug'`, default `'synthesis'`, CHECK) + `(brain_id, gradeable_slug, window_end_date)` index — applied to live DB (`docs/sql/20260607_predictions_kind.sql`, idempotent, all 40 existing rows defaulted `synthesis`).
+- **A2 (pure):** `deriveSlugPredictions(brainOutput)` + `filterByCadence` in `predictions-log.mts` — one directional sub-call per **self-directional sign-basis gradeable** key_metric (z-scores/deltas; `computeDirection(value,0,cfg)`). Skips non-numeric / non-gradeable / delta-basis / neutral. No borrowed direction, no manufactured bet. 5 new tests.
+- **A3 (write):** `logSlugPredictions` — cadence-guarded (skips a slug while its window is still open → the §2 non-overlap discipline applied live, kills autocorrelation inflation), wired into Stage 4 for **every** pack (master-only guard stays on the synthesis row). **Runtime-verified:** live smoke inserted a `kind='slug'` row (`grade_status='gradeable'`, window +180d), confirmed, cleaned up. The existing grader drains these on window close.
+- **A4/A5 deferred to §3/§4** (calibration read over outcomes+backtest_grades; `data_targets` falsifiability-gap) — not duplicated. Spec updated: `docs/superpowers/specs/2026-06-07-smart-grading-system-design.md`.
+- **Gates:** typecheck clean (touched files), 111 tests green, `check-vocab-coverage --all` OK (no new slugs), predictions table clean (40 synthesis, 0 smoke). Did NOT touch other sessions' files.
+
 ## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — feat(glass): §2 flywheel backtest engine + §6-B gradeable-yield fix
 
 - **§2 (SHIPPED):** `public.backtest_grades` migration (`docs/sql/20260607_backtest_grades.sql`, applied to live DB, `service_role`-only, idempotent natural key, `grade_method` pinned `'retrodicted'`) + pure PIT/grade core `refinery/lib/backtest/grid.mts` (15 tests) + harness `refinery/tools/flywheel-backtest.mts` (DuckDB over ALFRED LAUS vintages → quarterly non-overlapping as-of grid → skill+calibration → idempotent upsert). **144 retrodicted grades written** (Lee 71, Collier 73). First read: **lift −6.5pp** (system 42.0% vs persistence 48.6%) — does NOT beat naive, the plan's anticipated honest headline. Caught + fixed a look-ahead artifact (monthly grid's persistence baseline peeked 60d past as-of → −28pp; quarterly step ≥ window fixes it). LeePA velocity / permits excluded-with-reason (logged, not dropped).

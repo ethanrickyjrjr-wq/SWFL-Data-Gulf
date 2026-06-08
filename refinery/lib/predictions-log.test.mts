@@ -3,14 +3,12 @@ import assert from "node:assert/strict";
 import {
   buildPredictionRow,
   deriveGradeFields,
+  deriveSlugPredictions,
+  filterByCadence,
   logPrediction,
   type PredictionRow,
 } from "./predictions-log.mts";
-import type {
-  BrainOutput,
-  BrainOutputMetric,
-  ConditionalClaim,
-} from "../types/brain-output.mts";
+import type { BrainOutput, BrainOutputMetric, ConditionalClaim } from "../types/brain-output.mts";
 
 function makeOutput(overrides: Partial<BrainOutput> = {}): BrainOutput {
   return {
@@ -112,9 +110,7 @@ test("buildPredictionRow maps BrainOutput → row with metadata bag", () => {
   assert.equal(row.metadata.trust_tier, 2);
   assert.equal(row.metadata.upstream_count, 5);
   assert.equal(row.metadata.relevance_half_life_hours, 720);
-  assert.deepEqual(row.metadata.contradicts, [
-    "macro-us (bearish) vs tourism-tdt (bullish)",
-  ]);
+  assert.deepEqual(row.metadata.contradicts, ["macro-us (bearish) vs tourism-tdt (bullish)"]);
   assert.equal(row.metadata.top_key_metrics.length, 2);
   assert.equal(row.metadata.version, 7);
 });
@@ -175,8 +171,7 @@ test("logPrediction skips when supabase env is missing", async () => {
     if (prev.url) process.env.SUPABASE_URL = prev.url;
     if (prev.key) process.env.SUPABASE_SERVICE_KEY = prev.key;
     if (prev.legacyUrl) process.env.BRAINS_SUPABASE_URL = prev.legacyUrl;
-    if (prev.legacyKey)
-      process.env.BRAINS_SUPABASE_SERVICE_KEY = prev.legacyKey;
+    if (prev.legacyKey) process.env.BRAINS_SUPABASE_SERVICE_KEY = prev.legacyKey;
   }
 });
 
@@ -210,9 +205,7 @@ test("PredictionRow shape stays explicit (compile-time + runtime check)", () => 
 test("deriveGradeFields: gradeable master call → machine-gradeable, pinned baseline", () => {
   const out = makeOutput({
     refined_at: "2026-05-17T12:00:00.000Z",
-    conditional_claims: [
-      claim("bullish", ["franchise-outcomes", "sba_overall_survival_rate"]),
-    ],
+    conditional_claims: [claim("bullish", ["franchise-outcomes", "sba_overall_survival_rate"])],
     key_metrics: [metric("sba_overall_survival_rate", 0.82)],
   });
   const g = deriveGradeFields(out);
@@ -263,9 +256,7 @@ test("deriveGradeFields: real producer shape [brain_id, metric] → metric wins,
   // basisRefsFor (synth.mts:433-435) emits [brain_id, key_metrics[0].metric],
   // brain_id first. This proves the brain_id-skip on master's actual output shape.
   const out = makeOutput({
-    conditional_claims: [
-      claim("bullish", ["macro-us", "sba_overall_survival_rate"]),
-    ],
+    conditional_claims: [claim("bullish", ["macro-us", "sba_overall_survival_rate"])],
     key_metrics: [metric("sba_overall_survival_rate", 0.82)],
   });
   const g = deriveGradeFields(out);
@@ -278,13 +269,8 @@ test("deriveGradeFields: FORWARD-GUARD — first numeric driver decides, no jump
   // case cannot occur live today — it guards a future multi-claim/corridor producer.
   // sofr_rate is registered-but-ungradeable (no polarity); sba_overall_survival_rate is gradeable.
   const out = makeOutput({
-    conditional_claims: [
-      claim("bullish", ["sofr_rate", "sba_overall_survival_rate"]),
-    ],
-    key_metrics: [
-      metric("sofr_rate", 5.3),
-      metric("sba_overall_survival_rate", 0.82),
-    ],
+    conditional_claims: [claim("bullish", ["sofr_rate", "sba_overall_survival_rate"])],
+    key_metrics: [metric("sofr_rate", 5.3), metric("sba_overall_survival_rate", 0.82)],
   });
   const g = deriveGradeFields(out);
   assert.equal(g.gradeable_slug, "sofr_rate"); // first numeric ref, NOT the gradeable second
@@ -312,4 +298,59 @@ test("buildPredictionRow embeds derived grade fields (wiring check)", () => {
   );
   assert.equal(row.gradeable_slug, "sba_overall_survival_rate");
   assert.equal(row.grade_status, "gradeable");
+});
+
+// --- §6-A: deriveSlugPredictions + filterByCadence (per-slug leaf logging) ---
+
+test("deriveSlugPredictions: sign-basis gradeable slug → one slug sub-call (kind='slug')", () => {
+  const out = makeOutput({
+    brain_id: "properties-lee-value",
+    refined_at: "2026-05-17T00:00:00.000Z",
+    direction: "bullish",
+    key_metrics: [metric("properties_lee_sales_velocity_zscore", 1.4)],
+  });
+  const rows = deriveSlugPredictions(out);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].prediction_kind, "slug");
+  assert.equal(rows[0].gradeable_slug, "properties_lee_sales_velocity_zscore");
+  assert.equal(rows[0].predicted_direction, "bullish"); // +z, higher_is_bullish
+  assert.equal(rows[0].baseline_value, 1.4);
+  assert.equal(rows[0].grade_status, "gradeable");
+  assert.equal(rows[0].window_end_date, "2026-11-13"); // refined + 180d (real-estate) UTC
+  assert.equal(rows[0].conditional_claims[0].basis_refs[0], "properties_lee_sales_velocity_zscore");
+});
+
+test("deriveSlugPredictions: neutral value inside the deadband → no bet, skipped", () => {
+  const out = makeOutput({
+    brain_id: "properties-lee-value",
+    key_metrics: [metric("properties_lee_sales_velocity_zscore", 0.05)], // < ε 0.1
+  });
+  assert.deepEqual(deriveSlugPredictions(out), []);
+});
+
+test("deriveSlugPredictions: delta-basis gradeable slug skipped (not self-directional)", () => {
+  const out = makeOutput({
+    brain_id: "macro-swfl",
+    key_metrics: [metric("laus_lee_unemployment_rate_initial_vintage", 4.2)], // ratio → delta basis
+  });
+  assert.deepEqual(deriveSlugPredictions(out), []);
+});
+
+test("deriveSlugPredictions: unregistered / non-gradeable slug skipped", () => {
+  const out = makeOutput({ key_metrics: [metric("totally_unregistered_slug_zzz", 3)] });
+  assert.deepEqual(deriveSlugPredictions(out), []);
+});
+
+test("filterByCadence: drops a slug that already has an open prediction; keeps fresh ones", () => {
+  const out = makeOutput({
+    brain_id: "properties-lee-value",
+    direction: "bullish",
+    key_metrics: [metric("properties_lee_sales_velocity_zscore", 1.4)],
+  });
+  const derived = deriveSlugPredictions(out);
+  assert.equal(
+    filterByCadence(derived, new Set(["properties_lee_sales_velocity_zscore"])).length,
+    0,
+  );
+  assert.equal(filterByCadence(derived, new Set<string>()).length, 1);
 });

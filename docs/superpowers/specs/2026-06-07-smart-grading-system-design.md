@@ -1,7 +1,7 @@
 # Smart grading system — backtest corpus + live gradeable yield
 
 **Date:** 2026-06-07
-**Status:** §2 SHIPPED · §6-B SHIPPED · §6-A DESIGNED (this doc is the plan to review before building A)
+**Status:** §2 SHIPPED · §6-B SHIPPED · §6-A A1–A3 SHIPPED + runtime-verified (A4/A5 = §3/§4 integration)
 **Scope:** The Glass §2 (flywheel backtest) + §6 (lift live gradeable-call yield). Companion to
 `2026-06-07-the-glass-build-decomposition.md` and the flywheel-bootstrap plan.
 
@@ -93,7 +93,14 @@ absent ⇒ exact prior behavior (zero regression — 49 synth tests green). File
 on the next **directional** master refine. Integration-tested end-to-end (`composeConditionalThesis`
 → `deriveGradeFields` with the live resolver → `grade_status='gradeable'`).
 
-### §6-A — Per-slug leaf prediction logging (DESIGNED — build next, operator review first)
+### §6-A — Per-slug leaf prediction logging (A1–A3 SHIPPED + runtime-verified)
+
+> **Build status (2026-06-07):** A1 (schema), A2 (pure deriver + cadence filter), A3 (cadence-guarded
+> write wired into Stage 4 for every pack) are **shipped and runtime-verified** (a live smoke inserted
+> a `kind='slug'` row, the existing grader picks it up on window close, then cleaned up). The live
+> yield materializes on the next nightly refine. **A4** (calibration read consuming both `outcomes` +
+> `backtest_grades`) and **A5** (`data_targets` falsifiability-gap trigger) are deliberately left as
+> The Glass **§3 / §4** integration work, not duplicated here.
 
 **The multiplier.** Master's top-line is one synthesized call and is *often* `mixed` by construction.
 But each of the ~22 leaf brains holds clean directional reads on numeric slugs. Grading those —
