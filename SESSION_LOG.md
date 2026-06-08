@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · chore/reconcile-resilience-marker) — chore: flip rotted resilience marker in mhs-odd-graduation-handoff.md
+
+- Flipped `[ ]` → `[x]` for `freeze_watchdog_parse_error_hardening` in `docs/superpowers/plans/2026-06-05-mhs-odd-graduation-handoff.md`; work already shipped f9ae300 (2026-06-06), ledger check already closed by orchestrator 2026-06-08.
+
 ## 2026-06-08 (Opus 4.8 · claude/glass-section4-data-targets) — feat(glass): §4 data_targets + §3 view vet + anon-leak fix (Wave 2, Stream B)
 
 - **§4 (this branch):** `docs/sql/20260608_data_targets.sql` — `data_targets` table + `backtest_skill_by_slug` view (per-slug `lift` via `LAG`, mirrors `computeSkillScore`); `ingest/scripts/generate_data_targets.py` (Python, reuses `check_freshness`; 5 gap kinds: stale/low_skill/low_n/excluded_wanted/falsifiability_gap; upsert + auto-drop; `--dry-run`); tests 7/7; `.github/workflows/data-targets-daily.yml`. **Applied to live DB; first write = 7 targets** (4 excluded_wanted, 1 low_skill = Collier LAUS −15.7pp, 1 falsifiability_gap = master 45% ungradeable, 1 stale). Plan: `docs/superpowers/plans/2026-06-08-glass-section4-data-targets.md`.
