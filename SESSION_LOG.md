@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · claude/source-links-methodology) — feat(method): public methodology surface + citation hygiene
+
+- **Registry + gate** (`refinery/lib/methodology-registry.mts`, `00c18be`): curated metric-slug → `{measures, formula, denominator, sourceTable, brain}` (mirrors `SOURCE_PROVENANCE_TABLES`); `resolveMethod` + `methodHrefForSlug` (allowlist gate, literals-before-patterns). Seeded with tourism-tdt SWFL + per-county slugs. FORMULA ONLY — no retrodicted skill (Glass guardrail 3). `cap_rate_median` left unregistered = the display-leak canary.
+- **Leak-gated wiring** (`refinery/render/speaker.mts`, `c0b5112`): `DisplayMetric.methodHref` set in `toDisplayBrain` via the gate — raw slug NEVER enters the display type (only the vetted `/r/method/<slug>` URL, same shape as `sourceUrl`); `display-leak.test.mts` extended (canary stays unregistered → no leak).
+- **Route + UI**: `app/r/method/[metric]/page.tsx` (`56f60e1`, formula + provenance, mirrors `/r/source`, no DB); teal `ƒ` affordance on documented metric rows (`8f317d1`) + `aria-label` (`5ffe287`).
+- **Hygiene** (`57e6530`): `scrubCaveatTechnical` maps "Brains Supabase" → "SWFL Data Gulf" (full citation / tier-3 / MCP); pass-through battery guards SOFR/NFIP/FEMA/etc.
+- **Verified:** 12/12 tests (registry + leak-guard + scrub) pass; `npm run build` clean (route registers `ƒ /r/method/[metric]`, full app typecheck). Each unit reviewed (spec + code-quality). Prettier reformatted `speaker.mts` on first touch (logic byte-identical).
+- **Next:** open PR → `main`. Spec `docs/superpowers/specs/2026-06-08-source-links-methodology-design.md`, plan `docs/superpowers/plans/2026-06-08-source-links-methodology.md`. No pack/vocab/lockfile/secret triggers. No `checks` row maps to this. Minor follow-ups (a11y already done; a few test-expressiveness niceties) noted but non-blocking.
+
 ## 2026-06-08 (Opus 4.8 · claude/glass-section4-data-targets) — feat(glass): §4 data_targets + §3 view vet + anon-leak fix (Wave 2, Stream B)
 
 - **§4 (this branch):** `docs/sql/20260608_data_targets.sql` — `data_targets` table + `backtest_skill_by_slug` view (per-slug `lift` via `LAG`, mirrors `computeSkillScore`); `ingest/scripts/generate_data_targets.py` (Python, reuses `check_freshness`; 5 gap kinds: stale/low_skill/low_n/excluded_wanted/falsifiability_gap; upsert + auto-drop; `--dry-run`); tests 7/7; `.github/workflows/data-targets-daily.yml`. **Applied to live DB; first write = 7 targets** (4 excluded_wanted, 1 low_skill = Collier LAUS −15.7pp, 1 falsifiability_gap = master 45% ungradeable, 1 stale). Plan: `docs/superpowers/plans/2026-06-08-glass-section4-data-targets.md`.
