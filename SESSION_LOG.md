@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · main) — feat(ops): leveled self-healing for cron failures (classifier + L0 retry + L2 diagnose; L1 deferred)
+
+- Audit-driven redesign of the draft "auto-fix" pipeline. Verified against code: `ModuleNotFoundError` appears **once** in ~32 incidents (the draft's L1 target is the rarest failure); recurring breakers are TRANSIENT/MISSING_SECRET/DATA_EMPTY/SCHEMA_DRIFT. So: built classifier + L0 retry + L2 diagnose; **L1 auto-branch dep-fix DEFERRED** (designed in spec, build on a 2nd MISSING_DEP). Spec: `docs/superpowers/specs/2026-06-08-leveled-cron-self-healing-design.md`.
+- NEW `.github/scripts/classify-cron-failure.mjs` — pure `classify(logTail)→{klass,signal,suggestedAction}` (LOCKFILE/ACTION_VERSION/MISSING_DEP/MISSING_SECRET/SCHEMA_DRIFT/DATA_EMPTY/TRANSIENT/UNKNOWN) + `isLocalModule`/`isFreshnessProbe`/`shouldRetry`/`needsLlm`. 22/22 unit tests pass (`classify-cron-failure.test.mjs`). `pypi-import-map.json` = import→PyPI allowlist.
+- NEW `.github/scripts/lib/cron-run.mjs` — `deriveWorkflowName`+`fetchLogTail` extracted from the logger (no behaviour change), shared by logger + healer.
+- NEW `.github/workflows/heal-cron-failure.yml` + `heal-cron-failure.mjs` — triage→{retry,diagnose} over the watched set **minus Daily Brain Rebuild**. L0 retry guarded `run_attempt===1` (no flail loop) + excludes freshness-probe. L2 resolves pipeline source from the workflow `run:` cmd, calls Haiku (`claude-haiku-4-5`), comments on the incident issue. Kill switches: `CRON_HEAL_ENABLED`/`_RETRY_ENABLED`/`_DIAGNOSE_ENABLED`.
+- MODIFIED `log-cron-incident.mjs` — fills ledger Root Cause with `CLASS — signal` + class in issue title + Suggested action in body (race-free; logger owns the issue).
+- **Operator action to enable L2 LLM path:** `gh secret set ANTHROPIC_API_KEY` (degrades to deterministic-only without it). Briefly reverted (236e780) then restored per operator.
+
 ## 2026-06-08 (Opus 4.8 · main) — never-dead-end Task 1: registry gains equation + have/need components (CRE)
 
 - `refinery/lib/methodology-registry.mts`: `MethodologyEntry` gains `equation?` + `components?` (`{name, role:"have"|"need", heldFrom?, candidateSource?}`). The `components` list is the **anti-invention allowlist** — an answer may name ONLY these parts, never guess drivers. Added 3 corridor-median literals (`asking_rent_psf_median`, `vacancy_rate_median`, `absorption_sqft_median`) + a per-submarket **pattern** (`(vacancy_rate|asking_rent_nnn|absorption_sqft)_marketbeat_<submarket>`, e.g. `asking_rent_nnn_marketbeat_marco_island`). Pattern EXCLUDES `_swfl`/`_area` aggregates (medians-of-submarkets — they fall to the converse floor in Task 3, not mislabelled). `cap_rate_median` stays UNregistered (display-leak canary).
