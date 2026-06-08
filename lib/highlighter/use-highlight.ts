@@ -98,6 +98,54 @@ function isWorthySelection(text: string): boolean {
 }
 
 /**
+ * When a drag crosses <tr> row boundaries in a table, snap the selection to a
+ * single row. Whichever row contributes more text wins; if both are within 1.5×
+ * of each other the end row wins (user's drag destination = intent). Returns
+ * null when the range is already within one row (no snap needed).
+ */
+function snapCrossRowSelection(range: Range): Range | null {
+  const startEl =
+    range.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (range.startContainer as Element)
+      : (range.startContainer as Text).parentElement;
+  const endEl =
+    range.endContainer.nodeType === Node.ELEMENT_NODE
+      ? (range.endContainer as Element)
+      : (range.endContainer as Text).parentElement;
+
+  const startRow = startEl?.closest("tr");
+  const endRow = endEl?.closest("tr");
+  if (!startRow || !endRow || startRow === endRow) return null;
+
+  try {
+    // Measure text from each row within the current range.
+    const r1 = document.createRange();
+    r1.setStart(range.startContainer, range.startOffset);
+    r1.setEndAfter(startRow);
+    const startLen = r1.toString().trim().length;
+
+    const r2 = document.createRange();
+    r2.setStartBefore(endRow);
+    r2.setEnd(range.endContainer, range.endOffset);
+    const endLen = r2.toString().trim().length;
+
+    const snapped = document.createRange();
+    if (startLen > endLen * 1.5) {
+      // Start row clearly dominates — keep start row portion only.
+      snapped.setStart(range.startContainer, range.startOffset);
+      snapped.setEndAfter(startRow);
+    } else {
+      // End row dominates or both are comparable — snap to end row.
+      snapped.setStartBefore(endRow);
+      snapped.setEnd(range.endContainer, range.endOffset);
+    }
+    return snapped;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Widen a selection range outward to cover a whole numeric figure when it lands
  * inside one. Dragging across part of "$525,000" (or "$30,074/yr", "-9.7%",
  * "+60bps") snaps to the entire token. Returns a widened Range, or null when
@@ -225,6 +273,14 @@ export function useHighlight() {
           range = startSnapped;
         }
       }
+      // Snap cross-row table selections to a single row.
+      const rowSnapped = snapCrossRowSelection(range);
+      if (rowSnapped) {
+        sel.removeAllRanges();
+        sel.addRange(rowSnapped);
+        range = rowSnapped;
+      }
+
       const text = sel.toString().trim();
       // Reject garbage selections — clear visually so user knows it
       // didn't register rather than surfacing a broken popup.
