@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · claude/glass-flywheel-backtest) — chore: PR #71 merge-prep; `.claude/hooks` ALLOWED_SIBLINGS fix
+
+- **Hook fix:** `check-project-path.mjs` — added `ALLOWED_SIBLINGS` allowlist + guard so `swfldatagulf-ops` sibling is permitted without triggering the cross-project block.
+- **PR #71 status:** all checks green (build + Vercel). Merging glass §1–§2 + §6-A/§6-B + highlighter UX overhaul to `main`.
+
 ## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — fix(highlighter): FactChip `mode` typecheck; HOLD grading on branch until confirmed good
 
 - **Build fix:** `components/highlighter/FactChip.tsx` — the highlighter commit made `SelectedFact.mode` required but left this existing consumer without it → `tsc --noEmit` failed → PR #71 build + Vercel red. Added `mode: "fact"` (a chip is always a single fact, never a >25-word section). `tsc` clean (exit 0); 82 backtest/predictions/synth tests pass.

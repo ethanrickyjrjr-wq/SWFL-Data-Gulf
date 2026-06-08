@@ -25,6 +25,9 @@ const REPO_ROOT = path.resolve(HERE, "..", ".."); // <repo>
 const DEV_ROOT = path.dirname(REPO_ROOT); // the dev workspace (parent of repo)
 const WIN = process.platform === "win32";
 
+// Sibling repos explicitly permitted from this session (operator-approved).
+const ALLOWED_SIBLINGS = [path.join(DEV_ROOT, "swfldatagulf-ops")];
+
 let raw = "";
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (c) => (raw += c));
@@ -46,7 +49,10 @@ process.stdin.on("end", () => {
   }
 
   if (isUnder(abs, REPO_ROOT)) process.exit(0); // this repo — always allowed
-  if (isUnder(abs, DEV_ROOT) || hasSegment(abs, "premise-engine")) block(abs);
+  if (isUnder(abs, DEV_ROOT) || hasSegment(abs, "premise-engine")) {
+    if (ALLOWED_SIBLINGS.some((allowed) => isUnder(abs, allowed))) process.exit(0);
+    block(abs);
+  }
   process.exit(0); // outside the dev workspace (memory, temp, …) — allowed
 });
 
