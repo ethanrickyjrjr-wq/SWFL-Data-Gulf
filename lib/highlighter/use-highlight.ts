@@ -27,6 +27,7 @@ export function classifyFact(text: string): FactType {
 }
 
 const SUPPRESS_CLOSEST = "input, textarea, [contenteditable], #highlighter-popup, #ask-ai-dock";
+const MAX_WORDS = 40;
 
 function selectionIsSuppressed(sel: Selection): boolean {
   if (sel.rangeCount === 0) return true;
@@ -35,6 +36,28 @@ function selectionIsSuppressed(sel: Selection): boolean {
   const el = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement;
   if (!el) return true;
   return el.closest(SUPPRESS_CLOSEST) !== null;
+}
+
+/**
+ * Snap the start of a selection backward to the nearest word boundary when the
+ * drag began mid-word. Only applies within a single text node and only ever
+ * extends — never shortens. Returns null when already at a boundary.
+ */
+function expandRangeToWordStart(range: Range): Range | null {
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+  const text = node.textContent ?? "";
+  let start = range.startOffset;
+  if (start === 0 || !/\w/.test(text[start - 1])) return null;
+  while (start > 0 && /\w/.test(text[start - 1])) start--;
+  try {
+    const r = document.createRange();
+    r.setStart(node, start);
+    r.setEnd(range.endContainer, range.endOffset);
+    return r;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -159,6 +182,7 @@ export function useHighlight() {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let lastSuppressedText: string | null = null;
 
     function snapshot() {
       const sel = typeof window !== "undefined" ? window.getSelection() : null;
@@ -193,21 +217,16 @@ export function useHighlight() {
           sel.addRange(wordSnapped);
           range = wordSnapped;
         }
+        // Snap start to word boundary (partial-word drag from the left edge).
+        const startSnapped = expandRangeToWordStart(range);
+        if (startSnapped) {
+          sel.removeAllRanges();
+          sel.addRange(startSnapped);
+          range = startSnapped;
+        }
       }
       const text = sel.toString().trim();
-      // Reject if the selection starts mid-word (char before start is
-      // alphanumeric) — catches "ude). Note" style drag artifacts.
-      const startNode = range.startContainer;
-      if (
-        startNode.nodeType === Node.TEXT_NODE &&
-        range.startOffset > 0 &&
-        /\w/.test((startNode.textContent ?? "")[range.startOffset - 1])
-      ) {
-        sel.removeAllRanges();
-        setFact(null);
-        return;
-      }
-      // Reject other garbage selections — clear visually so user knows it
+      // Reject garbage selections — clear visually so user knows it
       // didn't register rather than surfacing a broken popup.
       if (!text || !isWorthySelection(text)) {
         sel.removeAllRanges();
@@ -218,13 +237,28 @@ export function useHighlight() {
       if (rect.width === 0 && rect.height === 0) return;
       const context = extractRowContext(range.startContainer);
       const wordCount = text.split(/\s+/).filter(Boolean).length;
+      // Suppress popup on accidental large sweeps. Second identical selection
+      // is treated as intentional and passes through.
+      if (wordCount > MAX_WORDS) {
+        if (lastSuppressedText === text) {
+          lastSuppressedText = null;
+        } else {
+          lastSuppressedText = text;
+          sel.removeAllRanges();
+          setFact(null);
+          return;
+        }
+      } else {
+        lastSuppressedText = null;
+      }
       const mode: "fact" | "section" = wordCount > 25 ? "section" : "fact";
       setFact({ text, rect, factType: classifyFact(text), context, mode });
     }
 
-    // Track mouse-button state so selectionchange (touch path) never fires
-    // a snapshot mid-drag — the popup must only appear after mouseup.
+    // Track mouse-button and touch state so selectionchange never fires a
+    // snapshot mid-drag — the popup must only appear after the gesture ends.
     let mouseIsDown = false;
+    let touchIsActive = false;
     let selTimer: ReturnType<typeof setTimeout> | null = null;
 
     function onMouseDown() {
@@ -241,20 +275,31 @@ export function useHighlight() {
       timer = setTimeout(snapshot, 10);
     }
     function onKeyUp() {
+      // Debounce at 200ms so shift+arrow sequences don't fire on every keystroke.
       if (timer) clearTimeout(timer);
-      timer = setTimeout(snapshot, 10);
+      timer = setTimeout(snapshot, 200);
+    }
+    function onTouchStart() {
+      touchIsActive = true;
+    }
+    function onTouchEnd() {
+      touchIsActive = false;
+      // Fire snapshot 600ms after the finger lifts to let handles settle.
+      if (selTimer) clearTimeout(selTimer);
+      selTimer = setTimeout(snapshot, 600);
     }
     function onSelectionChange() {
-      // Touch double-tap / long-press fires `selectionchange` but not
-      // `mouseup`; skip entirely while the mouse button is held (desktop drag).
-      if (mouseIsDown) return;
+      // Skip mid-drag on desktop (mouseIsDown) and during touch gestures.
+      if (mouseIsDown || touchIsActive) return;
       if (selTimer) clearTimeout(selTimer);
-      selTimer = setTimeout(snapshot, 300);
+      selTimer = setTimeout(snapshot, 600);
     }
 
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener("keyup", onKeyUp);
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd);
     document.addEventListener("selectionchange", onSelectionChange);
     return () => {
       if (timer) clearTimeout(timer);
@@ -262,6 +307,8 @@ export function useHighlight() {
       document.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("selectionchange", onSelectionChange);
     };
   }, []);

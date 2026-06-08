@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — fix(highlighter): 3 selection UX regressions in use-highlight.ts
+
+- `lib/highlighter/use-highlight.ts`: (1) MAX_WORDS=40 cap — accidental large sweeps suppress the popup on first select; second identical selection passes through as intentional. (2) keyup debounced 10ms→200ms so shift+arrow sequences don't fire on each keystroke; added touchstart/touchend tracking so selectionchange is suppressed during touch drags; selectionchange debounce 300ms→600ms. (3) Added `expandRangeToWordStart` (mirrors existing `expandRangeToWordEnd`); replaced the mid-word start REJECTION with a start-snap so partial-word drags from the left produce full words instead of silently clearing.
+
 ## 2026-06-08 (Sonnet 4.6 · main) — /r/ page cleanup: teal section titles, teal corridor pills, CRE MarketBeat panel, highlighter tab-click fix
 
 - `app/r/_components/report-shell.tsx`: `SectionTitle` → `text-[#00d4aa]` (all /r/ pages now have teal section headings — Explore corridors, Key metrics, Worth knowing)
