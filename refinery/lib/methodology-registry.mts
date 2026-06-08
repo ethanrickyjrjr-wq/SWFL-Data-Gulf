@@ -33,6 +33,24 @@ export interface MethodologyEntry {
   brain?: string;
   /** Optional external methodology doc/PDF. */
   doc?: string;
+  /** Explicit derivation of the quantity a user means when they "break this down".
+   *  Plain language, no exact constants, e.g.
+   *  "all-in occupancy cost = base rent + property taxes + insurance + CAM". */
+  equation?: string;
+  /** The parts of `equation`. role:"have" = we hold an input for it; role:"need" =
+   *  we don't (yet). This list is the ONLY set of components an answer may name —
+   *  the structural anti-invention allowlist for the never-dead-end doctrine
+   *  (docs/superpowers/plans/2026-06-08-never-dead-end-doctrine.md). A published
+   *  figure stays HELD: `need` parts belong to a broader derived quantity (e.g. a
+   *  tenant's all-in occupancy cost), never imply the published number is partial. */
+  components?: {
+    name: string;
+    role: "have" | "need";
+    /** Slug/source we hold it from, when role==="have". */
+    heldFrom?: string;
+    /** Where to get it, when role==="need". */
+    candidateSource?: string;
+  }[];
 }
 
 /** Literal slug -> entry. Add the headline metrics you want explained. */
@@ -76,6 +94,68 @@ export const METHODOLOGY_LITERALS: Record<string, MethodologyEntry> = {
     sourceTable: "fl_dor_tdt_collections",
     brain: "tourism-tdt",
   },
+
+  // --- CRE corridor medians (cre-swfl). The published figure is HELD; the
+  // `need` components belong to a tenant's broader all-in occupancy cost. ---
+  asking_rent_psf_median: {
+    label: "Median asking rent (NNN)",
+    measures:
+      "The median quoted triple-net asking rent across SWFL CRE corridors reporting this period. This published figure is the base asking rate — held, not estimated.",
+    formula: "Median of each corridor's quoted NNN asking rent for the period.",
+    denominator: "per sqft (PSF), across reporting corridors",
+    brain: "cre-swfl",
+    equation: "all-in occupancy cost = base (NNN asking rent) + property taxes + insurance + CAM",
+    components: [
+      { name: "Base (NNN asking rent)", role: "have", heldFrom: "asking_rent_psf_median" },
+      {
+        name: "Property taxes",
+        role: "need",
+        candidateSource: "county property appraiser / broker comps",
+      },
+      { name: "Insurance", role: "need", candidateSource: "broker comps / carrier quotes" },
+      {
+        name: "CAM (common-area maintenance)",
+        role: "need",
+        candidateSource: "landlord CAM reconciliation / broker comps",
+      },
+    ],
+  },
+  vacancy_rate_median: {
+    label: "Median vacancy rate",
+    measures:
+      "The median vacancy rate across SWFL CRE corridors reporting this period. The published rate is held; the underlying GLA counts are not.",
+    formula: "Median of each corridor's reported vacancy rate for the period.",
+    denominator: "percent, across reporting corridors",
+    brain: "cre-swfl",
+    equation: "vacancy rate = vacant GLA ÷ total GLA",
+    components: [
+      { name: "Reported vacancy rate", role: "have", heldFrom: "vacancy_rate_median" },
+      { name: "Vacant GLA", role: "need", candidateSource: "broker survey detail / CoStar" },
+      { name: "Total GLA", role: "need", candidateSource: "broker survey detail / CoStar" },
+    ],
+  },
+  absorption_sqft_median: {
+    label: "Median net absorption",
+    measures:
+      "The median net absorption across SWFL CRE corridors reporting this period. The published flow is held; the period-end GLA snapshots are not.",
+    formula: "Median of each corridor's reported net absorption for the period.",
+    denominator: "sqft, across reporting corridors",
+    brain: "cre-swfl",
+    equation: "net absorption = occupied GLA (period end) − occupied GLA (period start)",
+    components: [
+      { name: "Reported net absorption", role: "have", heldFrom: "absorption_sqft_median" },
+      {
+        name: "Occupied GLA (period start)",
+        role: "need",
+        candidateSource: "broker survey detail / CoStar",
+      },
+      {
+        name: "Occupied GLA (period end)",
+        role: "need",
+        candidateSource: "broker survey detail / CoStar",
+      },
+    ],
+  },
 };
 
 /**
@@ -100,6 +180,78 @@ export const METHODOLOGY_PATTERNS: Array<{
         denominator: `${county} County`,
         sourceTable: "fl_dor_tdt_collections",
         brain: "tourism-tdt",
+      };
+    },
+  },
+  {
+    // Per-submarket broker metrics from cre-swfl, e.g.
+    // `asking_rent_nnn_marketbeat_marco_island`. One pattern covers the whole
+    // submarket family. EXCLUDES the `_swfl` SWFL-wide median and `_area`
+    // parent rollups — those are medians-of-submarkets, not a single submarket,
+    // so they fall through to the converse floor rather than be mislabelled.
+    test: /^(vacancy_rate|asking_rent_nnn|absorption_sqft)_marketbeat_(?!swfl$)(?!.*_area$)[a-z0-9_]+$/,
+    build: (slug) => {
+      const m = slug.match(/^(vacancy_rate|asking_rent_nnn|absorption_sqft)_marketbeat_(.+)$/)!;
+      const field = m[1];
+      const place = m[2].replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      if (field === "asking_rent_nnn") {
+        return {
+          label: `${place} asking rent (NNN)`,
+          measures: `The quoted triple-net asking rent reported for the ${place} submarket. This published figure is the base asking rate — held, not estimated.`,
+          formula: `Quoted NNN asking rent for the ${place} submarket from the latest verified broker report.`,
+          denominator: "per sqft (PSF)",
+          brain: "cre-swfl",
+          equation:
+            "all-in occupancy cost = base (NNN asking rent) + property taxes + insurance + CAM",
+          components: [
+            { name: "Base (NNN asking rent)", role: "have", heldFrom: slug },
+            {
+              name: "Property taxes",
+              role: "need",
+              candidateSource: "county property appraiser / broker comps",
+            },
+            { name: "Insurance", role: "need", candidateSource: "broker comps / carrier quotes" },
+            {
+              name: "CAM (common-area maintenance)",
+              role: "need",
+              candidateSource: "landlord CAM reconciliation / broker comps",
+            },
+          ],
+        };
+      }
+      const isVac = field === "vacancy_rate";
+      return {
+        label: `${place} ${isVac ? "vacancy rate" : "net absorption"}`,
+        measures: `The ${isVac ? "vacancy rate" : "net absorption"} reported for the ${place} submarket. The published ${isVac ? "rate" : "flow"} is held; the underlying GLA detail is not.`,
+        formula: `${isVac ? "Reported vacancy rate" : "Reported net absorption"} for the ${place} submarket from the latest verified broker report.`,
+        denominator: isVac ? "percent" : "sqft",
+        brain: "cre-swfl",
+        equation: isVac
+          ? "vacancy rate = vacant GLA ÷ total GLA"
+          : "net absorption = occupied GLA (period end) − occupied GLA (period start)",
+        components: isVac
+          ? [
+              { name: "Reported vacancy rate", role: "have", heldFrom: slug },
+              {
+                name: "Vacant GLA",
+                role: "need",
+                candidateSource: "broker survey detail / CoStar",
+              },
+              { name: "Total GLA", role: "need", candidateSource: "broker survey detail / CoStar" },
+            ]
+          : [
+              { name: "Reported net absorption", role: "have", heldFrom: slug },
+              {
+                name: "Occupied GLA (period start)",
+                role: "need",
+                candidateSource: "broker survey detail / CoStar",
+              },
+              {
+                name: "Occupied GLA (period end)",
+                role: "need",
+                candidateSource: "broker survey detail / CoStar",
+              },
+            ],
       };
     },
   },
