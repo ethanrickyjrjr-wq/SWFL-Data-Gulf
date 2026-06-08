@@ -77,6 +77,9 @@ awesome-claude-code-toolkit/
 .claude/notes/
 .claude/handoffs/
 
+# transient worktrees scaffolded by parallel-agent dispatch — never tracked
+.claude/worktrees/
+
 # Claude Code per-machine permission overrides (settings.json stays shared)
 .claude/settings.local.json
 
@@ -129,3 +132,6 @@ scripts/reddit.mjs
 
 # Superpowers plugin runtime data — ephemeral, auto-generated per session
 .superpowers/
+
+# Personal strategy / trading notes — never commit (personal, not platform code)
+/_private/
