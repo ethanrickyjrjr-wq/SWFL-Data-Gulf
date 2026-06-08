@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Sonnet 4.6 · main) — feat(highlighter): UX overhaul + branding + HIGHLIGHTER_UI flipped ON in prod
+
+- **Selection engine** (`use-highlight.ts`): mousedown guard (no mid-drag popup), word-boundary snap, `isWorthySelection` filter (rejects fragments/mid-word starts/short noise), section mode (>25 words → generic exploration chips, not raw blob).
+- **Context enrichment**: `extractRowContext()` walks DOM to nearest `<tr>` first cell → "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate: 100.00%" instead of bare "100.00%".
+- **AI response quality** (`/api/converse`): FORMAT system prompt — no markdown, no internal terms (master/brain/grain/payload), speak like a local market analyst.
+- **Summarize flow** (dock): "Summarize for my AI →" → 3-chip options (highlights / full recap / custom focus) → AI writes a clean summary with /r/ link embedded → "Copy this summary" button.
+- **Branding**: `public/logo-transparent.svg` created; dock header → wave logo + "SWFL Data Gulf" in `#00d4aa`; FAB → inline SVG `currentColor` waves; both popup + dock containers → gunmetal `#2c3539` bg + `#00d4aa` teal border + black font.
+- **Flag**: `HIGHLIGHTER_UI=1` set in Vercel production (was OFF since #68/#69 merged). Browser verify still open.
+- **Handoff doc**: `docs/superpowers/plans/2026-06-07-highlighter-ux-session-handoff.md` — next-session context including data-gap handling (Option B deferred), chat logging / "ask for more data" button, and visual polish notes.
+
 ## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — feat(glass): §6-A per-slug leaf prediction logging (the gradeable-yield multiplier)
 
 - **A1 (schema):** `predictions.prediction_kind` (`'synthesis'`|`'slug'`, default `'synthesis'`, CHECK) + `(brain_id, gradeable_slug, window_end_date)` index — applied to live DB (`docs/sql/20260607_predictions_kind.sql`, idempotent, all 40 existing rows defaulted `synthesis`).

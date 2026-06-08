@@ -1,15 +1,8 @@
-import {
-  fetchBrain,
-  buildDossier,
-  BrainNotFoundError,
-} from "@/lib/fetch-brain";
+import { fetchBrain, buildDossier, BrainNotFoundError } from "@/lib/fetch-brain";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
-import {
-  buildGroundingContext,
-  type GroundingBlock,
-} from "@/lib/highlighter/grounding";
+import { buildGroundingContext, type GroundingBlock } from "@/lib/highlighter/grounding";
 import { resolveReachTargets } from "@/lib/highlighter/reach";
 import { fetchReachBlocks } from "@/lib/highlighter/fetch-reach";
 import { recordUse } from "@/lib/highlighter/meter";
@@ -95,11 +88,13 @@ export async function POST(request: Request): Promise<Response> {
   const reachSlugs = resolveReachTargets(question, report_id);
   const reachBlocks = await fetchReachBlocks(reachSlugs, { origin });
 
-  const system = buildGroundingContext({
-    rules: RULES_OF_ENGAGEMENT,
-    gazetteer: GAZETTEER_STR,
-    blocks: [primary, ...reachBlocks],
-  });
+  const system =
+    buildGroundingContext({
+      rules: RULES_OF_ENGAGEMENT,
+      gazetteer: GAZETTEER_STR,
+      blocks: [primary, ...reachBlocks],
+    }) +
+    "\n\nFORMAT: Plain text only — no markdown, no **, no ##, no bullet dashes, no backticks. Clean prose sentences. Speak naturally and helpfully, like a smart friend who knows the SWFL market well. Use the data you have to give a real, useful answer. Never use internal terms like 'master', 'brain', 'grounded data', 'payload', or 'grain'.";
 
   const userMsg = fact ? `About this fact: "${fact}". ${question}` : question;
   const client = getAnthropic();
@@ -115,21 +110,15 @@ export async function POST(request: Request): Promise<Response> {
           messages: [{ role: "user", content: userMsg }],
         });
         for await (const text of extractText(ai)) {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ text })}\n\n`),
-          );
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
         }
         await recordUse(request, { report_id, reach: reachSlugs });
         controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ done: true, reach: reachSlugs })}\n\n`,
-          ),
+          encoder.encode(`data: ${JSON.stringify({ done: true, reach: reachSlugs })}\n\n`),
         );
       } catch (e) {
         controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ error: (e as Error).message })}\n\n`,
-          ),
+          encoder.encode(`data: ${JSON.stringify({ error: (e as Error).message })}\n\n`),
         );
       } finally {
         controller.close();

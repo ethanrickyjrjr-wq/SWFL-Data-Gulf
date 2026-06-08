@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { buildClaudeHandoff } from "@/lib/highlighter/handoff";
+import Image from "next/image";
 import { useConverse } from "@/lib/highlighter/use-converse";
 import {
   applyDockDrag,
@@ -13,23 +13,17 @@ import {
 
 const GEOM_KEY = "swfl_ai_dock_geom";
 
-// Report-level seed prompts. Each /api/converse call is independently grounded
-// in the report dossier (no server-side history), so these are single-shot
-// starters, not a threaded conversation.
 const PROMPTS = [
-  "What's the bottom line?",
-  "What's driving this?",
-  "How does this compare across SWFL?",
-  "What should I watch next?",
+  "What's the bottom line on this market?",
+  "Compare this to other SWFL areas",
+  "Walk me through the key trends",
+  "What should I be watching or worried about?",
 ];
 
 type Viewport = { width: number; height: number };
 
 function isNarrow(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(max-width: 639px)").matches
-  );
+  return typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
 }
 
 function restoreGeom(): DockGeom {
@@ -60,9 +54,13 @@ export function AskAiDock({
   // setState-in-effect cascade (react-hooks/set-state-in-effect).
   const [isMobile, setIsMobile] = useState(isNarrow);
   const [geom, setGeom] = useState<DockGeom>(restoreGeom);
-  const [stage, setStage] = useState<"compose" | "answer">("compose");
+  const [stage, setStage] = useState<"compose" | "summarize" | "answer">("compose");
+  const [isSummaryAnswer, setIsSummaryAnswer] = useState(false);
   const [question, setQuestion] = useState("");
+  const [customFocus, setCustomFocus] = useState("");
   const [copied, setCopied] = useState(false);
+  const [history, setHistory] = useState<Array<{ q: string; a: string }>>([]);
+  const [activeQuestion, setActiveQuestion] = useState("");
   const { ask, answer, reach, error, streaming, reset } = useConverse();
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -135,30 +133,75 @@ export function AskAiDock({
   function submit(q: string) {
     const trimmed = q.trim();
     if (!trimmed) return;
+    setActiveQuestion(trimmed);
+    setIsSummaryAnswer(false);
     setStage("answer");
-    void ask({ reportId, question: trimmed }); // report-level: no fact
+    void ask({ reportId, question: trimmed });
   }
 
-  const handoff = buildClaudeHandoff({
-    report_id: reportId,
-    fact: "",
-    conclusion: conclusion ?? "",
-    freshness_token: freshnessToken ?? "",
-  });
+  function archiveAndReset() {
+    if (activeQuestion && answer) {
+      setHistory((h) => [...h, { q: activeQuestion, a: answer }]);
+    }
+    setActiveQuestion("");
+    setIsSummaryAnswer(false);
+    setStage("compose");
+    setQuestion("");
+    reset();
+  }
 
-  function copyHandoff() {
-    void navigator.clipboard?.writeText(handoff).then(
+  function buildHistoryContext(): string {
+    if (history.length === 0) return "";
+    return (
+      "\n\nContext from our conversation:\n" +
+      history.map((h) => `Q: ${h.q}\nA: ${h.a}`).join("\n\n")
+    );
+  }
+
+  function submitSummary(prompt: string) {
+    setActiveQuestion("summary");
+    setIsSummaryAnswer(true);
+    setStage("answer");
+    void ask({ reportId, question: prompt });
+  }
+
+  function triggerSummary(type: "full" | "highlights" | "custom") {
+    const reportUrl = typeof window !== "undefined" ? window.location.href : "";
+    const urlNote = reportUrl ? ` End with this link on its own line: ${reportUrl}` : "";
+    const conclusionNote = conclusion ? ` The report's overall thesis is: "${conclusion}".` : "";
+    const freshNote = freshnessToken ? ` Data freshness: ${freshnessToken}.` : "";
+    const ctx = buildHistoryContext();
+
+    if (type === "full") {
+      submitSummary(
+        `Summarize the most important findings from this report in 4-6 sentences — key metrics, what they signal, and the bottom line.${conclusionNote}${freshNote} Write it so someone can paste it into any AI and get useful follow-up answers.${urlNote}${ctx}`,
+      );
+    } else if (type === "highlights") {
+      submitSummary(
+        `In 2-3 sentences, what is the single most important thing to know from this report right now?${conclusionNote} Be direct and specific — include the actual numbers.${urlNote}${ctx}`,
+      );
+    } else {
+      const focus = customFocus.trim();
+      if (!focus) return;
+      submitSummary(
+        `The user is focused on: "${focus}". Summarize only the findings from this report most relevant to that. 3-5 sentences, include key numbers, end with the bottom line.${urlNote}${ctx}`,
+      );
+    }
+  }
+
+  function copySummary() {
+    void navigator.clipboard?.writeText(answer).then(
       () => {
         setCopied(true);
-        setTimeout(() => setCopied(false), 1800);
+        setTimeout(() => setCopied(false), 2500);
       },
-      () => setCopied(false),
+      () => {},
     );
   }
 
   const containerClass = isMobile
     ? "fixed inset-x-0 bottom-0 top-16 z-[58] flex flex-col rounded-t-2xl border border-gray-200 bg-white text-sm text-gray-900 shadow-2xl shadow-black/50"
-    : "fixed z-[58] flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-sm text-gray-900 shadow-2xl shadow-black/50";
+    : "fixed z-[58] flex flex-col overflow-hidden rounded-xl border border-[#00d4aa] bg-[#2c3539] text-sm text-gray-900 shadow-2xl shadow-black/50";
 
   const containerStyle: React.CSSProperties | undefined = isMobile
     ? undefined
@@ -180,28 +223,27 @@ export function AskAiDock({
       {/* Header / drag handle */}
       <div
         onPointerDown={(e) => startPointer(e, applyDockDrag)}
-        className={`flex items-center justify-between gap-2 border-b border-gray-200 px-4 py-2.5 ${
+        className={`flex items-center justify-between gap-2 border-b border-[#00d4aa]/30 px-4 py-2.5 ${
           isMobile ? "" : "cursor-move select-none"
         }`}
         style={isMobile ? undefined : { touchAction: "none" }}
       >
-        <div className="flex items-center gap-2 font-semibold text-[#0b6b5a]">
-          <svg
-            className="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="currentColor"
+        <div className="flex items-center gap-2">
+          <Image
+            src="/logo-transparent.svg"
+            alt=""
             aria-hidden="true"
-          >
-            <path d="M12 2l1.7 4.8L18.5 8.5l-4.8 1.7L12 15l-1.7-4.8L5.5 8.5l4.8-1.7z" />
-          </svg>
-          Ask AI
-          <span className="font-normal text-gray-400">· this report</span>
+            width={20}
+            height={20}
+            className="shrink-0"
+          />
+          <span className="font-semibold text-[#00d4aa]">SWFL Data Gulf</span>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="-mr-1 shrink-0 rounded p-1 text-gray-400 transition-colors hover:text-gray-700"
+          className="-mr-1 shrink-0 rounded p-1 text-gray-500 transition-colors hover:text-white"
         >
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
             <path d="M4.3 3.3 8 7l3.7-3.7 1 1L9 8l3.7 3.7-1 1L8 9l-3.7 3.7-1-1L7 8 3.3 4.3z" />
@@ -211,11 +253,11 @@ export function AskAiDock({
 
       {/* Body */}
       <div ref={bodyRef} className="flex-1 overflow-y-auto px-4 py-3">
-        {stage === "compose" ? (
+        {stage === "compose" && (
           <div>
             <p className="mb-3 text-gray-600">
-              Ask anything about this report — answers are grounded in our data
-              and cite their source, or say what we don&apos;t hold.
+              Ask comparative questions, dig into specific metrics, or explore trends across SWFL —
+              all answers pull from verified local data.
             </p>
             <ul className="flex flex-col gap-1.5">
               {PROMPTS.map((p, i) => (
@@ -223,16 +265,80 @@ export function AskAiDock({
                   <button
                     type="button"
                     onClick={() => submit(p)}
-                    className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-800 transition-colors hover:bg-[#00d4aa]/15 hover:text-[#0b6b5a]"
+                    className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-900 transition-colors hover:bg-[#00d4aa]/20 hover:text-[#00d4aa]"
                   >
                     {p}
                   </button>
                 </li>
               ))}
             </ul>
+            <button
+              type="button"
+              onClick={() => setStage("summarize")}
+              className="mt-4 text-xs text-gray-400 underline underline-offset-2 hover:text-[#0b6b5a]"
+            >
+              Summarize for my AI →
+            </button>
           </div>
-        ) : (
-          <div className="whitespace-pre-wrap leading-6 text-gray-800">
+        )}
+
+        {stage === "summarize" && (
+          <div>
+            <p className="mb-3 text-gray-600">What should the summary cover?</p>
+            <ul className="flex flex-col gap-1.5">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => triggerSummary("highlights")}
+                  className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-900 transition-colors hover:bg-[#00d4aa]/20 hover:text-[#00d4aa]"
+                >
+                  Just the highlights — 2-3 sentences
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => triggerSummary("full")}
+                  className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-900 transition-colors hover:bg-[#00d4aa]/20 hover:text-[#00d4aa]"
+                >
+                  Full session recap — key metrics + bottom line
+                </button>
+              </li>
+              <li>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customFocus}
+                    onChange={(e) => setCustomFocus(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && customFocus.trim()) triggerSummary("custom");
+                    }}
+                    placeholder="Tell me what you care about most…"
+                    className="min-w-0 flex-1 rounded-lg border border-[#00d4aa] bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00d4aa]/40"
+                  />
+                  <button
+                    type="button"
+                    disabled={!customFocus.trim()}
+                    onClick={() => triggerSummary("custom")}
+                    className="btn-gradient shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-navy-dark disabled:opacity-40"
+                  >
+                    Go
+                  </button>
+                </div>
+              </li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => setStage("compose")}
+              className="mt-3 text-xs text-gray-400 underline underline-offset-2 hover:text-[#0b6b5a]"
+            >
+              ← Back
+            </button>
+          </div>
+        )}
+
+        {stage === "answer" && (
+          <div className="whitespace-pre-wrap leading-6">
             {error ? (
               <span className="text-red-600">{error}</span>
             ) : (
@@ -244,18 +350,21 @@ export function AskAiDock({
               </>
             )}
             {reach.length > 0 && (
-              <p className="mt-3 text-xs text-gray-500">
-                Also pulled: {reach.join(", ")}
-              </p>
+              <p className="mt-3 text-xs text-gray-500">Also pulled: {reach.join(", ")}</p>
             )}
-            {!streaming && !error && (
+            {!streaming && !error && isSummaryAnswer && (
               <button
                 type="button"
-                onClick={() => {
-                  setStage("compose");
-                  setQuestion("");
-                  reset();
-                }}
+                onClick={copySummary}
+                className="mt-3 block rounded-lg border border-[#00d4aa] bg-[#00d4aa]/10 px-4 py-2 text-xs font-semibold text-[#0b6b5a] transition-colors hover:bg-[#00d4aa]/20"
+              >
+                {copied ? "Copied ✓" : "Copy this summary"}
+              </button>
+            )}
+            {!streaming && !error && !isSummaryAnswer && (
+              <button
+                type="button"
+                onClick={archiveAndReset}
                 className="mt-3 block text-xs text-gray-500 underline underline-offset-2 hover:text-[#0b6b5a]"
               >
                 Ask another →
@@ -271,7 +380,7 @@ export function AskAiDock({
           e.preventDefault();
           submit(question);
         }}
-        className="border-t border-gray-200 p-3"
+        className="border-t border-[#00d4aa]/30 p-3"
       >
         <div className="flex items-end gap-2">
           <textarea
@@ -295,13 +404,14 @@ export function AskAiDock({
             Ask
           </button>
         </div>
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex justify-start">
           <button
             type="button"
-            onClick={copyHandoff}
-            className="text-xs text-blue-600 underline decoration-blue-600/40 underline-offset-2 transition-colors hover:decoration-blue-600"
+            disabled
+            title="Upload your own documents to compare — coming soon"
+            className="cursor-not-allowed text-xs text-gray-400 underline underline-offset-2"
           >
-            {copied ? "Copied ✓" : "Copy prompt for Claude ↗"}
+            Upload your data · soon
           </button>
         </div>
       </form>
@@ -318,16 +428,8 @@ export function AskAiDock({
           className="absolute left-0 top-0 flex h-4 w-4 cursor-nwse-resize items-center justify-center"
           style={{ touchAction: "none" }}
         >
-          <svg
-            className="h-2.5 w-2.5 text-gray-400"
-            viewBox="0 0 10 10"
-            fill="none"
-          >
-            <path
-              d="M9 1 1 9M9 5 5 9"
-              stroke="currentColor"
-              strokeWidth="1.2"
-            />
+          <svg className="h-2.5 w-2.5 text-gray-400" viewBox="0 0 10 10" fill="none">
+            <path d="M9 1 1 9M9 5 5 9" stroke="currentColor" strokeWidth="1.2" />
           </svg>
         </div>
       )}

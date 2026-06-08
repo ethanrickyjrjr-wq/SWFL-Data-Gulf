@@ -10,6 +10,8 @@ export interface SelectedFact {
   factType: FactType;
   /** Row-level label from the nearest <tr> first cell, or nearest heading. */
   context?: string;
+  /** "fact" = specific metric/phrase; "section" = large selection (>25 words). */
+  mode: "fact" | "section";
 }
 
 /** Classify a selection: a number/currency/percent reads as a "metric", else
@@ -33,6 +35,43 @@ function selectionIsSuppressed(sel: Selection): boolean {
   const el = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement;
   if (!el) return true;
   return el.closest(SUPPRESS_CLOSEST) !== null;
+}
+
+/**
+ * Snap the end of a selection forward to the nearest word boundary when the
+ * drag released mid-word. Only applies within a single text node and only ever
+ * extends — never shortens. Returns null when already at a boundary.
+ */
+function expandRangeToWordEnd(range: Range): Range | null {
+  const node = range.endContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+  const text = node.textContent ?? "";
+  let end = range.endOffset;
+  if (end >= text.length || !/\w/.test(text[end])) return null;
+  while (end < text.length && /\w/.test(text[end])) end++;
+  try {
+    const r = document.createRange();
+    r.setStart(range.startContainer, range.startOffset);
+    r.setEnd(node, end);
+    return r;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Return false for selections that aren't worth surfacing as a popup:
+ * too short, unclosed-paren fragments ("national macro (be"), or purely
+ * punctuation/whitespace. Caller should clear the DOM selection on false.
+ */
+function isWorthySelection(text: string): boolean {
+  if (text.length < 4) return false;
+  if (!/[a-zA-Z0-9]/.test(text)) return false;
+  // Unclosed parenthesis = mid-drag fragment
+  const opens = (text.match(/\(/g) ?? []).length;
+  const closes = (text.match(/\)/g) ?? []).length;
+  if (opens > closes) return false;
+  return true;
 }
 
 /**
@@ -140,49 +179,84 @@ export function useHighlight() {
       } catch {
         return;
       }
-      // Snap a partial number selection out to the whole figure: dragging
-      // across "525" in "$525,000" (or "30,074/yr", "-9.7%", "+60bps") grabs
-      // the entire token. Only ever widens; leaves place names untouched.
+      // Snap a number selection to the whole figure, then try word-boundary
+      // snap for text. Only one of these will ever apply to a given selection.
       const widened = expandRangeToNumber(range);
       if (widened) {
         sel.removeAllRanges();
         sel.addRange(widened);
         range = widened;
+      } else {
+        const wordSnapped = expandRangeToWordEnd(range);
+        if (wordSnapped) {
+          sel.removeAllRanges();
+          sel.addRange(wordSnapped);
+          range = wordSnapped;
+        }
       }
       const text = sel.toString().trim();
-      if (!text) {
+      // Reject if the selection starts mid-word (char before start is
+      // alphanumeric) — catches "ude). Note" style drag artifacts.
+      const startNode = range.startContainer;
+      if (
+        startNode.nodeType === Node.TEXT_NODE &&
+        range.startOffset > 0 &&
+        /\w/.test((startNode.textContent ?? "")[range.startOffset - 1])
+      ) {
+        sel.removeAllRanges();
+        setFact(null);
+        return;
+      }
+      // Reject other garbage selections — clear visually so user knows it
+      // didn't register rather than surfacing a broken popup.
+      if (!text || !isWorthySelection(text)) {
+        sel.removeAllRanges();
         setFact(null);
         return;
       }
       const rect = range.getBoundingClientRect();
       if (rect.width === 0 && rect.height === 0) return;
       const context = extractRowContext(range.startContainer);
-      setFact({ text, rect, factType: classifyFact(text), context });
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      const mode: "fact" | "section" = wordCount > 25 ? "section" : "fact";
+      setFact({ text, rect, factType: classifyFact(text), context, mode });
     }
 
-    function onSettle() {
+    // Track mouse-button state so selectionchange (touch path) never fires
+    // a snapshot mid-drag — the popup must only appear after mouseup.
+    let mouseIsDown = false;
+    let selTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function onMouseDown() {
+      mouseIsDown = true;
+    }
+    function onMouseUp() {
+      mouseIsDown = false;
       if (timer) clearTimeout(timer);
       timer = setTimeout(snapshot, 10);
     }
-
-    let selTimer: ReturnType<typeof setTimeout> | null = null;
+    function onKeyUp() {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(snapshot, 10);
+    }
     function onSelectionChange() {
-      // Touch double-tap / long-press fires `selectionchange` but not always
-      // `mouseup`/`keyup`; debounce so we snapshot once the selection settles.
-      // snapshot() reuses the same suppression + number-snap + don't-clear-while-
-      // composing logic as the desktop path.
+      // Touch double-tap / long-press fires `selectionchange` but not
+      // `mouseup`; skip entirely while the mouse button is held (desktop drag).
+      if (mouseIsDown) return;
       if (selTimer) clearTimeout(selTimer);
       selTimer = setTimeout(snapshot, 300);
     }
 
-    document.addEventListener("mouseup", onSettle);
-    document.addEventListener("keyup", onSettle);
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("keyup", onKeyUp);
     document.addEventListener("selectionchange", onSelectionChange);
     return () => {
       if (timer) clearTimeout(timer);
       if (selTimer) clearTimeout(selTimer);
-      document.removeEventListener("mouseup", onSettle);
-      document.removeEventListener("keyup", onSettle);
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("keyup", onKeyUp);
       document.removeEventListener("selectionchange", onSelectionChange);
     };
   }, []);
