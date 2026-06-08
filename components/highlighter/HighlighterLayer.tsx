@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  useHighlight,
-  type SelectedFact,
-} from "@/lib/highlighter/use-highlight";
+import { useHighlight, type SelectedFact } from "@/lib/highlighter/use-highlight";
 import { suggestionsForMetric } from "@/lib/highlighter/suggestions";
 import { HighlightPopup } from "./HighlightPopup";
 import { FirstTouchHint } from "./FirstTouchHint";
@@ -24,11 +21,7 @@ interface LayerProps {
  * text selection (and FactChip taps, via the same `onActivate` shape) and shows
  * the popup anchored to the selection.
  */
-export function HighlighterLayer({
-  reportId,
-  conclusion,
-  freshnessToken,
-}: LayerProps) {
+export function HighlighterLayer({ reportId, conclusion, freshnessToken }: LayerProps) {
   const { fact: selectedFact, clear } = useHighlight();
   // A chip tap can override the text-selection fact; track it separately and
   // prefer it when present.
@@ -51,10 +44,11 @@ export function HighlighterLayer({
         <HighlightPopup
           reportId={reportId}
           fact={fact}
-          suggestions={suggestionsForMetric(
-            { metric: fact.text, value: fact.text },
-            reportId,
-          )}
+          suggestions={
+            fact.mode === "section"
+              ? []
+              : suggestionsForMetric({ metric: fact.text, value: fact.text }, reportId)
+          }
           conclusion={conclusion}
           freshnessToken={freshnessToken}
           onClose={close}
@@ -62,11 +56,7 @@ export function HighlighterLayer({
       )}
       <FirstTouchHint />
       <DiscoveryTicker />
-      <AskAi
-        reportId={reportId}
-        conclusion={conclusion}
-        freshnessToken={freshnessToken}
-      />
+      <AskAi reportId={reportId} conclusion={conclusion} freshnessToken={freshnessToken} />
     </>
   );
 }

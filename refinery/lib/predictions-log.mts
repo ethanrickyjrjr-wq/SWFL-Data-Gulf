@@ -13,6 +13,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { resolveGradeConfig } from "../vocab/loader.mts";
+import { computeDirection } from "../grade/grade-predictions.mts";
 import type { BrainOutput, ConditionalClaim } from "../types/brain-output.mts";
 
 /** Pack id that triggers the log. Master is the only synthesizer today. */
@@ -97,8 +98,7 @@ export function deriveGradeFields(output: BrainOutput): GradeFields {
   const claim = conditional_claims[0];
 
   const dir = claim?.then_direction;
-  const predicted_direction =
-    dir === "bullish" || dir === "bearish" ? dir : null;
+  const predicted_direction = dir === "bullish" || dir === "bearish" ? dir : null;
 
   // slug -> numeric value, numeric key_metrics only (categorical/non-finite
   // dropped) — mirrors buildMetricObservationRows' coercion guard.
@@ -122,9 +122,7 @@ export function deriveGradeFields(output: BrainOutput): GradeFields {
   }
 
   const cfg = gradeable_slug ? resolveGradeConfig(gradeable_slug) : null;
-  const isGradeable = Boolean(
-    cfg?.gradeable && gradeable_slug && predicted_direction,
-  );
+  const isGradeable = Boolean(cfg?.gradeable && gradeable_slug && predicted_direction);
   let window_end_date: string | null = null;
   if (isGradeable && cfg && cfg.window_days != null) {
     window_end_date = addDaysUTC(output.refined_at, cfg.window_days);
@@ -156,10 +154,7 @@ export function buildPredictionRow(brainOutput: BrainOutput): PredictionRow {
       upstream_count: brainOutput.upstream_count,
       contradicts: brainOutput.contradicts,
       relevance_half_life_hours: brainOutput.relevance.half_life_hours,
-      top_key_metrics: brainOutput.key_metrics.slice(
-        0,
-        MAX_METRICS_IN_METADATA,
-      ),
+      top_key_metrics: brainOutput.key_metrics.slice(0, MAX_METRICS_IN_METADATA),
       version: brainOutput.version,
     },
     ...deriveGradeFields(brainOutput),
@@ -185,20 +180,13 @@ export interface LogPredictionOpts {
  * .md should not be retroactively aborted by a telemetry insert failure. The
  * caller decides whether to log/ignore/escalate.
  */
-export async function logPrediction(
-  opts: LogPredictionOpts,
-): Promise<LogResult> {
+export async function logPrediction(opts: LogPredictionOpts): Promise<LogResult> {
   if (opts.packId !== MASTER_PACK_ID) {
     return { kind: "skipped", reason: "not-master" };
   }
-  const url =
-    opts.supabaseUrl ??
-    process.env.SUPABASE_URL ??
-    process.env.BRAINS_SUPABASE_URL;
+  const url = opts.supabaseUrl ?? process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL;
   const key =
-    opts.supabaseKey ??
-    process.env.SUPABASE_SERVICE_KEY ??
-    process.env.BRAINS_SUPABASE_SERVICE_KEY;
+    opts.supabaseKey ?? process.env.SUPABASE_SERVICE_KEY ?? process.env.BRAINS_SUPABASE_SERVICE_KEY;
   if (!url || !key) {
     return { kind: "skipped", reason: "no-supabase-env" };
   }
@@ -211,4 +199,161 @@ export async function logPrediction(
     return { kind: "error", message: error.message };
   }
   return { kind: "inserted", row };
+}
+
+// ---------------------------------------------------------------------------
+// §6-A — per-slug leaf prediction logging (the gradeable-yield multiplier).
+//
+// Master's synthesized top-line is one call and is often `mixed` (ungradeable by
+// construction). But every brain holds clean directional reads on its numeric
+// slugs. Logging those — attributed to the brain, kind='slug' — multiplies the
+// honest gradeable corpus and aligns the LIVE universe with §2's retrodicted one.
+//
+// HONESTY (mirrors grid.buildGradedCall): SELF-DIRECTIONAL slugs only — sign-basis
+// gradeable slugs (z-scores, YoY deltas, percent-changes) where the value's own
+// sign × polarity IS the read (computeDirection(value, 0, cfg)). No borrowing a
+// brain's overall direction → no invented attribution. Neutral (inside ε) → no bet,
+// skipped. Delta-basis LEVEL slugs are skipped (they need a prior we don't hold at
+// capture; their directional sibling slug carries the gradeable read).
+//
+// NON-OVERLAP CADENCE (the §2 lesson, live): a slug is re-logged only once its open
+// window has closed — never nightly — so a persistent z-score can't grade "hit" by
+// autocorrelation and inflate skill. The guard is filterByCadence + the
+// (brain_id, gradeable_slug, window_end_date) index.
+// ---------------------------------------------------------------------------
+
+/** A per-slug directional sub-call row (predictions.prediction_kind='slug'). */
+export interface SlugPredictionRow {
+  brain_id: string;
+  refined_at: string;
+  conclusion: string;
+  confidence: number;
+  prediction_window: string | null;
+  conditional_claims: ConditionalClaim[];
+  gradeable_slug: string;
+  baseline_value: number;
+  predicted_direction: "bullish" | "bearish";
+  window_end_date: string;
+  grade_status: "gradeable";
+  grade_method: "machine";
+  prediction_kind: "slug";
+  metadata: {
+    slug: string;
+    value: number;
+    brain_direction: BrainOutput["direction"];
+    version: number;
+  };
+}
+
+/**
+ * Derive the per-slug directional sub-calls for one brain's output. Pure, no I/O,
+ * no LLM. One row per sign-basis gradeable key_metric whose value reads directional;
+ * everything else (non-numeric, non-gradeable, delta-basis, neutral) is dropped.
+ */
+export function deriveSlugPredictions(output: BrainOutput): SlugPredictionRow[] {
+  const rows: SlugPredictionRow[] = [];
+  for (const m of output.key_metrics) {
+    if (typeof m.value !== "number" || !Number.isFinite(m.value)) continue;
+    const cfg = resolveGradeConfig(m.metric);
+    if (!cfg.gradeable || cfg.grade_basis !== "sign" || cfg.window_days == null) {
+      continue; // self-directional sign-basis slugs only
+    }
+    const dir = computeDirection(m.value, 0, cfg);
+    if (dir !== "bullish" && dir !== "bearish") continue; // neutral → no bet
+    rows.push({
+      brain_id: output.brain_id,
+      refined_at: output.refined_at,
+      conclusion: `${output.brain_id}: ${m.metric} reads ${dir}`,
+      confidence: output.confidence,
+      prediction_window: null,
+      conditional_claims: [
+        {
+          condition: `${m.metric} holds its current sign`,
+          then_direction: dir,
+          basis: `self-directional sign-basis read of ${m.metric} = ${m.value}`,
+          basis_refs: [m.metric],
+          falsifier: `${m.metric} crosses zero (sign flip) by window close`,
+        },
+      ],
+      gradeable_slug: m.metric,
+      baseline_value: m.value,
+      predicted_direction: dir,
+      window_end_date: addDaysUTC(output.refined_at, cfg.window_days),
+      grade_status: "gradeable",
+      grade_method: "machine",
+      prediction_kind: "slug",
+      metadata: {
+        slug: m.metric,
+        value: m.value,
+        brain_direction: output.direction,
+        version: output.version,
+      },
+    });
+  }
+  return rows;
+}
+
+/**
+ * Non-overlap cadence guard: drop any derived row whose slug already has an OPEN
+ * prediction (window not yet closed). Pure — the caller supplies the open-slug set.
+ */
+export function filterByCadence(
+  derived: SlugPredictionRow[],
+  openSlugs: Set<string>,
+): SlugPredictionRow[] {
+  return derived.filter((r) => !openSlugs.has(r.gradeable_slug));
+}
+
+export type SlugLogResult =
+  | { kind: "skipped"; reason: "no-supabase-env" | "no-slug-calls" | "all-open" }
+  | { kind: "inserted"; count: number }
+  | { kind: "error"; message: string };
+
+export interface LogSlugPredictionsOpts {
+  brainOutput: BrainOutput;
+  supabaseUrl?: string;
+  supabaseKey?: string;
+  /** Override "now" for deterministic tests (YYYY-MM-DD compared to window_end_date). */
+  today?: string;
+}
+
+/**
+ * Insert this brain's per-slug sub-calls, cadence-guarded. Reads the brain's open
+ * slug predictions first and inserts only those whose window has lapsed. Errors are
+ * returned, not thrown — a telemetry insert must not abort a refine that wrote its
+ * .md (same contract as logPrediction).
+ */
+export async function logSlugPredictions(opts: LogSlugPredictionsOpts): Promise<SlugLogResult> {
+  const url = opts.supabaseUrl ?? process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL;
+  const key =
+    opts.supabaseKey ?? process.env.SUPABASE_SERVICE_KEY ?? process.env.BRAINS_SUPABASE_SERVICE_KEY;
+  if (!url || !key) return { kind: "skipped", reason: "no-supabase-env" };
+
+  const derived = deriveSlugPredictions(opts.brainOutput);
+  if (derived.length === 0) return { kind: "skipped", reason: "no-slug-calls" };
+
+  const sb = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const today = opts.today ?? new Date().toISOString().slice(0, 10);
+
+  // Open slug predictions for THIS brain whose window hasn't closed → skip those slugs.
+  const { data, error: readErr } = await sb
+    .from("predictions")
+    .select("gradeable_slug")
+    .eq("brain_id", opts.brainOutput.brain_id)
+    .eq("prediction_kind", "slug")
+    .in("grade_status", ["gradeable", "pending_data"])
+    .gt("window_end_date", today);
+  if (readErr) return { kind: "error", message: readErr.message };
+
+  const openSlugs = new Set(
+    (data ?? []).map((r) => (r as { gradeable_slug: string }).gradeable_slug),
+  );
+  const toInsert = filterByCadence(derived, openSlugs);
+  if (toInsert.length === 0) return { kind: "skipped", reason: "all-open" };
+
+  const { error } = await sb.from("predictions").insert(toInsert);
+  if (error) return { kind: "error", message: error.message };
+  return { kind: "inserted", count: toInsert.length };
 }

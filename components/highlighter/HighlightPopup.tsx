@@ -77,7 +77,21 @@ export function HighlightPopup({
   // A chip click or a typed question both land here → switch to the answer
   // view and stream a grounded reply. The SSE/accumulation logic lives in the
   // shared useConverse hook (also used by the Ask-AI dock).
-  const factWithContext = fact.context ? `${fact.context}: ${fact.text}` : fact.text;
+  const isSection = fact.mode === "section";
+  const sectionLabel = fact.context ?? "this section";
+  // Section mode: send the heading as context, not a 200-word blob.
+  const factWithContext = isSection
+    ? sectionLabel
+    : fact.context
+      ? `${fact.context}: ${fact.text}`
+      : fact.text;
+
+  const SECTION_CHIPS = [
+    "Give me a plain-English summary of this",
+    "What's the most important thing happening here?",
+    "What should I be watching or concerned about?",
+    "Break this down further",
+  ];
 
   function submit(q: string) {
     const trimmed = q.trim();
@@ -109,7 +123,7 @@ export function HighlightPopup({
       ref={ref}
       role="dialog"
       aria-label="Ask about this figure"
-      className="fixed z-[60] max-h-[85vh] w-[min(92vw,340px)] overflow-y-auto rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-900 shadow-2xl shadow-black/50"
+      className="fixed z-[60] max-h-[85vh] w-[min(92vw,340px)] overflow-y-auto rounded-xl border border-[#00d4aa] bg-[#2c3539] p-4 text-sm text-gray-900 shadow-2xl shadow-black/50"
       style={{
         top: pos?.top ?? -9999,
         left: pos?.left ?? -9999,
@@ -118,21 +132,34 @@ export function HighlightPopup({
     >
       <div className="mb-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          {fact.context && (
-            <p className="mb-0.5 line-clamp-2 break-words text-xs text-gray-500">{fact.context}</p>
+          {isSection ? (
+            <>
+              <p className="mb-0.5 text-xs text-gray-500">Large selection</p>
+              <p className="line-clamp-2 break-words font-semibold text-[#0b6b5a]">
+                {sectionLabel}
+              </p>
+            </>
+          ) : (
+            <>
+              {fact.context && (
+                <p className="mb-0.5 line-clamp-2 break-words text-xs text-gray-500">
+                  {fact.context}
+                </p>
+              )}
+              <p
+                title={factWithContext}
+                className="line-clamp-2 break-words font-mono font-semibold text-[#0b6b5a]"
+              >
+                {fact.text}
+              </p>
+            </>
           )}
-          <p
-            title={factWithContext}
-            className="line-clamp-2 break-words font-mono font-semibold text-[#0b6b5a]"
-          >
-            {fact.text}
-          </p>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="-mr-1 -mt-1 shrink-0 rounded p-1 text-gray-400 transition-colors hover:text-gray-700"
+          className="-mr-1 -mt-1 shrink-0 rounded p-1 text-gray-500 transition-colors hover:text-white"
         >
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
             <path d="M4.3 3.3 8 7l3.7-3.7 1 1L9 8l3.7 3.7-1 1L8 9l-3.7 3.7-1-1L7 8 3.3 4.3z" />
@@ -142,16 +169,18 @@ export function HighlightPopup({
 
       {stage === "compose" && (
         <div>
-          {suggestions.length > 0 && (
+          {(isSection ? SECTION_CHIPS : suggestions).length > 0 && (
             <>
-              <p className="mb-2 text-xs uppercase tracking-wider text-gray-500">Ask about this</p>
+              <p className="mb-2 text-xs uppercase tracking-wider text-gray-500">
+                {isSection ? "Explore this" : "Ask about this"}
+              </p>
               <ul className="mb-3 flex flex-col gap-1.5">
-                {suggestions.map((s, i) => (
+                {(isSection ? SECTION_CHIPS : suggestions).map((s, i) => (
                   <li key={i}>
                     <button
                       type="button"
                       onClick={() => submit(s)}
-                      className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-800 transition-colors hover:bg-[#00d4aa]/15 hover:text-[#0b6b5a]"
+                      className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-900 transition-colors hover:bg-[#00d4aa]/20 hover:text-[#00d4aa]"
                     >
                       {s}
                     </button>
@@ -188,7 +217,7 @@ export function HighlightPopup({
 
       {stage === "answer" && (
         <div>
-          <div className="max-h-[40vh] overflow-y-auto whitespace-pre-wrap leading-6 text-gray-800">
+          <div className="max-h-[40vh] overflow-y-auto whitespace-pre-wrap leading-6">
             {error ? (
               <span className="text-red-600">{error}</span>
             ) : (
@@ -219,7 +248,7 @@ export function HighlightPopup({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-2 border-t border-gray-200 pt-3">
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#00d4aa]/30 pt-3">
         <button
           type="button"
           disabled

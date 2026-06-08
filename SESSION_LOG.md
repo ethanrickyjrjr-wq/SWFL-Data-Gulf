@@ -2,6 +2,37 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — fix(highlighter): FactChip `mode` typecheck; HOLD grading on branch until confirmed good
+
+- **Build fix:** `components/highlighter/FactChip.tsx` — the highlighter commit made `SelectedFact.mode` required but left this existing consumer without it → `tsc --noEmit` failed → PR #71 build + Vercel red. Added `mode: "fact"` (a chip is always a single fact, never a >25-word section). `tsc` clean (exit 0); 82 backtest/predictions/synth tests pass.
+- **CALL (after reviewing §2 `grid.mts` + §6-A `predictions-log.mts` — both honest + tested):** grading stays on `claude/glass-flywheel-backtest` until confirmed good — NOT cherry-picked/merged to `main`. Gate: green build + `20260607_backtest_grades.sql` & `20260607_predictions_kind.sql` applied + one nightly LOGS AND GRADES a leaf slug-prediction (live-yield proven) + A4/A5 done. `main` = prod + nightly; the branch is reversible.
+
+## 2026-06-07 (Sonnet 4.6 · main) — feat(highlighter): UX overhaul + branding + HIGHLIGHTER_UI flipped ON in prod
+
+- **Selection engine** (`use-highlight.ts`): mousedown guard (no mid-drag popup), word-boundary snap, `isWorthySelection` filter (rejects fragments/mid-word starts/short noise), section mode (>25 words → generic exploration chips, not raw blob).
+- **Context enrichment**: `extractRowContext()` walks DOM to nearest `<tr>` first cell → "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate: 100.00%" instead of bare "100.00%".
+- **AI response quality** (`/api/converse`): FORMAT system prompt — no markdown, no internal terms (master/brain/grain/payload), speak like a local market analyst.
+- **Summarize flow** (dock): "Summarize for my AI →" → 3-chip options (highlights / full recap / custom focus) → AI writes a clean summary with /r/ link embedded → "Copy this summary" button.
+- **Branding**: `public/logo-transparent.svg` created; dock header → wave logo + "SWFL Data Gulf" in `#00d4aa`; FAB → inline SVG `currentColor` waves; both popup + dock containers → gunmetal `#2c3539` bg + `#00d4aa` teal border + black font.
+- **Flag**: `HIGHLIGHTER_UI=1` set in Vercel production (was OFF since #68/#69 merged). Browser verify still open.
+- **Handoff doc**: `docs/superpowers/plans/2026-06-07-highlighter-ux-session-handoff.md` — next-session context including data-gap handling (Option B deferred), chat logging / "ask for more data" button, and visual polish notes.
+
+## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — feat(glass): §6-A per-slug leaf prediction logging (the gradeable-yield multiplier)
+
+- **A1 (schema):** `predictions.prediction_kind` (`'synthesis'`|`'slug'`, default `'synthesis'`, CHECK) + `(brain_id, gradeable_slug, window_end_date)` index — applied to live DB (`docs/sql/20260607_predictions_kind.sql`, idempotent, all 40 existing rows defaulted `synthesis`).
+- **A2 (pure):** `deriveSlugPredictions(brainOutput)` + `filterByCadence` in `predictions-log.mts` — one directional sub-call per **self-directional sign-basis gradeable** key_metric (z-scores/deltas; `computeDirection(value,0,cfg)`). Skips non-numeric / non-gradeable / delta-basis / neutral. No borrowed direction, no manufactured bet. 5 new tests.
+- **A3 (write):** `logSlugPredictions` — cadence-guarded (skips a slug while its window is still open → the §2 non-overlap discipline applied live, kills autocorrelation inflation), wired into Stage 4 for **every** pack (master-only guard stays on the synthesis row). **Runtime-verified:** live smoke inserted a `kind='slug'` row (`grade_status='gradeable'`, window +180d), confirmed, cleaned up. The existing grader drains these on window close.
+- **A4/A5 deferred to §3/§4** (calibration read over outcomes+backtest_grades; `data_targets` falsifiability-gap) — not duplicated. Spec updated: `docs/superpowers/specs/2026-06-07-smart-grading-system-design.md`.
+- **Gates:** typecheck clean (touched files), 111 tests green, `check-vocab-coverage --all` OK (no new slugs), predictions table clean (40 synthesis, 0 smoke). Did NOT touch other sessions' files.
+
+## 2026-06-07 (Opus 4.8 · claude/glass-flywheel-backtest) — feat(glass): §2 flywheel backtest engine + §6-B gradeable-yield fix
+
+- **§2 (SHIPPED):** `public.backtest_grades` migration (`docs/sql/20260607_backtest_grades.sql`, applied to live DB, `service_role`-only, idempotent natural key, `grade_method` pinned `'retrodicted'`) + pure PIT/grade core `refinery/lib/backtest/grid.mts` (15 tests) + harness `refinery/tools/flywheel-backtest.mts` (DuckDB over ALFRED LAUS vintages → quarterly non-overlapping as-of grid → skill+calibration → idempotent upsert). **144 retrodicted grades written** (Lee 71, Collier 73). First read: **lift −6.5pp** (system 42.0% vs persistence 48.6%) — does NOT beat naive, the plan's anticipated honest headline. Caught + fixed a look-ahead artifact (monthly grid's persistence baseline peeked 60d past as-of → −28pp; quarterly step ≥ window fixes it). LeePA velocity / permits excluded-with-reason (logged, not dropped).
+- **§6-B (SHIPPED):** `composeConditionalThesis` now anchors directional/neutral claims on the dominant's first **gradeable, non-contradicting** driver slug (injected resolver, `synth.mts` stays pure) so `deriveGradeFields` can score live directional master calls. Skips sign-basis drivers whose sign opposes the claim (no backward grade). Never changes a claim's direction (no manufactured bet); `mixed` stays ungradeable (honest). `refinery/lib/synth.mts` + `refinery/packs/master.mts`; 49 synth tests green (zero regression), integration-tested through `deriveGradeFields`.
+- **§6-A (DESIGNED, not built):** per-slug leaf prediction logging (the ~22× multiplier) planned in `docs/superpowers/specs/2026-06-07-smart-grading-system-design.md` — sign-basis self-directional slugs + non-overlap cadence guard + lift-not-accuracy + `prediction_kind` discriminator. Awaiting operator review before build (touches the live predictions write path).
+- **Gates:** typecheck clean (touched files), corridor-aliases 7/7, `check-vocab-coverage --all` OK (no new slugs emitted). Checks: `flywheel_backtest_grades_corpus` + `flywheel_calibration_read` CLOSED; `glass_section6_leaf_yield` OPEN; `row_tier_build_remaining` Track-B HOLD lifted.
+- **Next:** operator reviews the spec → build §6-A (A1–A5). Did NOT touch `app/api/converse/route.ts` or `.claude/hooks/check-project-path.mjs` (other sessions' work). NOT pushed — awaiting OK.
+
 ## 2026-06-07 (Sonnet 4.6 · main) — chore: prettier + lint-staged pre-commit hook; gitignore .superpowers/
 
 - Added `.prettierrc` (100-char, double quotes, trailing commas — matches existing style) + `.prettierignore` (excludes ingest/, markdown, design refs, bun.lock).

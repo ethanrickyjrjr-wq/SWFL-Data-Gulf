@@ -38,24 +38,18 @@ function metric(
   opts: Partial<BrainOutputMetric> = {},
 ): BrainOutputMetric {
   const variable_type =
-    typeof m.value === "string"
-      ? "categorical"
-      : (opts.variable_type ?? "extensive");
+    typeof m.value === "string" ? "categorical" : (opts.variable_type ?? "extensive");
   return {
     ...m,
     variable_type,
-    ...(variable_type === "categorical"
-      ? {}
-      : { units: opts.units ?? "count" }),
+    ...(variable_type === "categorical" ? {} : { units: opts.units ?? "count" }),
     source: opts.source ?? {
       url: `test://${m.metric}`,
       fetched_at: NOW.toISOString(),
       tier: 1,
       citation: `test metric ${m.metric}`,
     },
-    ...(opts.display_format !== undefined
-      ? { display_format: opts.display_format }
-      : {}),
+    ...(opts.display_format !== undefined ? { display_format: opts.display_format } : {}),
   };
 }
 
@@ -119,9 +113,7 @@ test("computeRelevanceFactor: one half-life old returns 0.5", () => {
 
 test("computeRelevanceFactor: very stale → near 0 (spec test 11)", () => {
   // 30 days old, half-life 168h → factor ≈ 2^-4.28 ≈ 0.05
-  const computed_at = new Date(
-    NOW.getTime() - 30 * 24 * 3600 * 1000,
-  ).toISOString();
+  const computed_at = new Date(NOW.getTime() - 30 * 24 * 3600 * 1000).toISOString();
   const b = brain("x", "bullish", 0.5, 0.8, {
     half_life_hours: 168,
     computed_at,
@@ -140,11 +132,7 @@ test("applyRelevanceFloor: separates passing/excluded and emits caveats", () => 
     half_life_hours: 168,
     computed_at: new Date(NOW.getTime() - 30 * 24 * 3600 * 1000).toISOString(),
   });
-  const { passing, excluded, caveats } = applyRelevanceFloor(
-    [fresh, stale],
-    0.1,
-    NOW,
-  );
+  const { passing, excluded, caveats } = applyRelevanceFloor([fresh, stale], 0.1, NOW);
   assert.equal(passing.length, 1);
   assert.equal(passing[0].upstream.brain_id, "fresh");
   assert.equal(excluded.length, 1);
@@ -161,18 +149,13 @@ test("applyRelevanceFloor: excluded brain's upstream caveats do not appear — f
   // Fixture: env-swfl is 30 days old with half_life_hours=168 →
   //   factor ≈ 2^(-30*24/168) ≈ 0.05, which is below the 0.1 floor.
   //   This is what makes it excluded — not merely that it carries caveats.
-  const PER_ZIP_CAVEAT =
-    "Flood barrier risk at ZIP 33931: barrier=1.0, AAL=$1200/yr";
+  const PER_ZIP_CAVEAT = "Flood barrier risk at ZIP 33931: barrier=1.0, AAL=$1200/yr";
   const envSwfl = brain("env-swfl", "bearish", 0.7, 0.8, {
     half_life_hours: 168,
     computed_at: new Date(NOW.getTime() - 30 * 24 * 3600 * 1000).toISOString(),
     caveats: [PER_ZIP_CAVEAT],
   });
-  const {
-    passing,
-    excluded,
-    caveats: floorCaveats,
-  } = applyRelevanceFloor([envSwfl], 0.1, NOW);
+  const { passing, excluded, caveats: floorCaveats } = applyRelevanceFloor([envSwfl], 0.1, NOW);
   // Confirm env-swfl is actually excluded by staleness, not just fixture-set.
   assert.equal(excluded.length, 1);
   assert.equal(passing.length, 0);
@@ -202,10 +185,7 @@ test("voteDirection: unanimous bullish → bullish, high magnitude (spec test 6)
 });
 
 test("voteDirection: balanced bullish/bearish → mixed (spec test 7)", () => {
-  const ups = [
-    brain("a", "bullish", 0.7, 0.7),
-    brain("b", "bearish", 0.7, 0.7),
-  ];
+  const ups = [brain("a", "bullish", 0.7, 0.7), brain("b", "bearish", 0.7, 0.7)];
   const vote = voteDirection(ups.map((u) => ({ upstream: u, factor: 1 })));
   assert.equal(vote.direction, "mixed");
   assert.ok(vote.agreement_ratio < 0.6);
@@ -238,10 +218,7 @@ const FLOOD_RULE: OverrideRule = {
   condition: (upstreams) =>
     upstreams.some((u) =>
       u.key_metrics.some(
-        (m) =>
-          m.metric === "flood_risk_pct" &&
-          typeof m.value === "number" &&
-          m.value > 15,
+        (m) => m.metric === "flood_risk_pct" && typeof m.value === "number" && m.value > 15,
       ),
     ),
 };
@@ -252,10 +229,7 @@ const SIGNAL_RULE: OverrideRule = {
   effect: "force_signal_direction",
   condition: (_u, signals) =>
     signals.some(
-      (s) =>
-        s.severity === "critical" &&
-        s.classification === "confirmed" &&
-        s.confidence > 0.85,
+      (s) => s.severity === "critical" && s.classification === "confirmed" && s.confidence > 0.85,
     ),
 };
 
@@ -306,10 +280,7 @@ test("applyOverrideCascade: priority — bullish signal beats flood (spec test 1
       observed_at: NOW.toISOString(),
     },
   ];
-  const result = applyOverrideCascade(vote, passing, signals, [
-    SIGNAL_RULE,
-    FLOOD_RULE,
-  ]);
+  const result = applyOverrideCascade(vote, passing, signals, [SIGNAL_RULE, FLOOD_RULE]);
   assert.equal(result.direction, "bullish");
   assert.deepEqual(result.overrides, ["exogenous-critical-confirmed"]);
 });
@@ -319,18 +290,14 @@ test("applyOverrideCascade: priority — bullish signal beats flood (spec test 1
 test("detectContradictions: high-conf opposite → contradiction (spec test 7)", () => {
   const a = brain("a", "bullish", 0.7, 0.7);
   const b = brain("b", "bearish", 0.7, 0.7);
-  const out = detectContradictions(
-    [a, b].map((u) => ({ upstream: u, factor: 1 })),
-  );
+  const out = detectContradictions([a, b].map((u) => ({ upstream: u, factor: 1 })));
   assert.deepEqual(out, ["a (bullish) vs b (bearish)"]);
 });
 
 test("detectContradictions: low-confidence pair → no contradiction", () => {
   const a = brain("a", "bullish", 0.7, 0.4);
   const b = brain("b", "bearish", 0.7, 0.7);
-  const out = detectContradictions(
-    [a, b].map((u) => ({ upstream: u, factor: 1 })),
-  );
+  const out = detectContradictions([a, b].map((u) => ({ upstream: u, factor: 1 })));
   assert.equal(out.length, 0);
 });
 
@@ -339,9 +306,7 @@ test("detectContradictions: neutral and mixed pairs skipped", () => {
   const b = brain("b", "bearish", 0.7, 0.9);
   const c = brain("c", "mixed", 0.7, 0.9);
   const d = brain("d", "bullish", 0.7, 0.9);
-  const out = detectContradictions(
-    [a, b, c, d].map((u) => ({ upstream: u, factor: 1 })),
-  );
+  const out = detectContradictions([a, b, c, d].map((u) => ({ upstream: u, factor: 1 })));
   assert.deepEqual(out, ["b (bearish) vs d (bullish)"]);
 });
 
@@ -583,10 +548,7 @@ test("propagateDecay: weighted half-life (heavier upstream dominates)", () => {
     NOW,
   );
   // weights: 1.0 vs 0.01 → near-pure heavy → ~1000
-  assert.ok(
-    r.half_life_hours > 950,
-    `expected near 1000, got ${r.half_life_hours}`,
-  );
+  assert.ok(r.half_life_hours > 950, `expected near 1000, got ${r.half_life_hours}`);
   assert.equal(r.decay_curve, "weeks");
 });
 
@@ -606,19 +568,13 @@ test("emptySynthesisResult: neutral, mag 0, count 0, tier 4 (spec test 12)", () 
   assert.equal(r.trust_tier, 4);
   assert.match(r.conclusion, /Insufficient current data/);
   assert.match(r.conclusion, /4 upstream brains below relevance floor 0\.1/);
-  assert.deepEqual(r.caveats, [
-    "All upstream brains below relevance threshold",
-  ]);
+  assert.deepEqual(r.caveats, ["All upstream brains below relevance threshold"]);
   assert.deepEqual(r.exogenous_signals, []);
 });
 
 // ---- composeConditionalThesis (dossier authoring) --------------------------
 
-import {
-  composeConditionalThesis,
-  composeGrainBoundary,
-  predictedWindow,
-} from "./synth.mts";
+import { composeConditionalThesis, composeGrainBoundary, predictedWindow } from "./synth.mts";
 
 test("composeConditionalThesis: bullish dominant domain → table row + citable basis_refs", () => {
   const tdt = metric({
@@ -673,9 +629,7 @@ test("composeConditionalThesis: mixed vote → split claim naming both sides", (
 });
 
 test("composeConditionalThesis: neutral vote → holding-pattern claim", () => {
-  const passing = [
-    { upstream: brain("macro-us", "neutral", 0.5, 0.8), factor: 1 },
-  ];
+  const passing = [{ upstream: brain("macro-us", "neutral", 0.5, 0.8), factor: 1 }];
   const vote = voteDirection(passing);
   assert.equal(vote.direction, "neutral");
   const claims = composeConditionalThesis({
@@ -696,6 +650,136 @@ test("composeConditionalThesis: empty passing → no claims", () => {
     finalKeyMetrics: [],
   });
   assert.deepEqual(claims, []);
+});
+
+// ---- composeConditionalThesis: gradeable-anchor selection (yield-leak fix B) ----
+
+import { resolveGradeConfig } from "../vocab/loader.mts";
+import type { ResolvedGradeConfig } from "../vocab/loader.mts";
+import { deriveGradeFields } from "./predictions-log.mts";
+
+/** Stub grade-config resolver: only the named slugs are gradeable, with the given block. */
+function gcStub(
+  map: Record<string, Partial<ResolvedGradeConfig> & { gradeable: true }>,
+): (slug: string) => ResolvedGradeConfig {
+  return (slug) => {
+    const base: ResolvedGradeConfig = {
+      slug,
+      concept_id: slug,
+      gradeable: false,
+      window_days: null,
+      epsilon: null,
+      epsilon_mode: null,
+      grade_basis: null,
+      direction_polarity: "none",
+      source: { window: null, epsilon: null, polarity: null },
+    };
+    return map[slug] ? { ...base, ...map[slug] } : base;
+  };
+}
+
+test("composeConditionalThesis: directional read anchors on the first GRADEABLE driver, not key_metrics[0]", () => {
+  const m0 = metric({
+    metric: "cre_categorical_index",
+    value: 5,
+    direction: "rising",
+    label: "idx",
+  });
+  const m1 = metric({ metric: "velocity_z", value: 1.4, direction: "rising", label: "vz" });
+  const passing = [
+    {
+      upstream: brain("properties-lee-value", "bullish", 0.8, 0.9, { key_metrics: [m0, m1] }),
+      factor: 1,
+    },
+  ];
+  const claims = composeConditionalThesis({
+    passing,
+    vote: voteDirection(passing),
+    trust_tier: 2,
+    finalKeyMetrics: [m0, m1], // both survive the rollup for this test
+    gradeConfigFor: gcStub({
+      velocity_z: {
+        gradeable: true,
+        grade_basis: "sign",
+        epsilon: 0.1,
+        epsilon_mode: "absolute",
+        direction_polarity: "higher_is_bullish",
+        window_days: 180,
+      },
+    }),
+  });
+  assert.equal(claims[0].then_direction, "bullish");
+  assert.ok(claims[0].basis_refs.includes("velocity_z")); // the gradeable, checkable anchor
+  assert.ok(!claims[0].basis_refs.includes("cre_categorical_index")); // the non-gradeable top metric is NOT cited
+});
+
+test("composeConditionalThesis: a sign-basis driver CONTRADICTING the claim is skipped → non-gradeable fallback", () => {
+  // Bullish claim, but the only gradeable slug is a NEGATIVE higher-is-bullish z (bearish-signed).
+  const mNeg = metric({ metric: "velocity_z", value: -1.4, direction: "falling", label: "vz" });
+  const mPlain = metric({
+    metric: "cre_categorical_index",
+    value: 5,
+    direction: "rising",
+    label: "idx",
+  });
+  const passing = [
+    {
+      upstream: brain("properties-lee-value", "bullish", 0.8, 0.9, { key_metrics: [mNeg, mPlain] }),
+      factor: 1,
+    },
+  ];
+  const claims = composeConditionalThesis({
+    passing,
+    vote: voteDirection(passing),
+    trust_tier: 2,
+    finalKeyMetrics: [mNeg, mPlain],
+    gradeConfigFor: gcStub({
+      velocity_z: {
+        gradeable: true,
+        grade_basis: "sign",
+        epsilon: 0.1,
+        epsilon_mode: "absolute",
+        direction_polarity: "higher_is_bullish",
+        window_days: 180,
+      },
+    }),
+  });
+  // The contradicting gradeable slug must NOT be the cited anchor (would mis-grade);
+  // it falls back to the non-gradeable numeric driver so the row is honestly ungradeable.
+  assert.ok(!claims[0].basis_refs.includes("velocity_z"));
+  assert.ok(claims[0].basis_refs.includes("cre_categorical_index"));
+});
+
+test("composeConditionalThesis → deriveGradeFields: real resolver makes a directional master call GRADEABLE", () => {
+  // properties_lee_sales_velocity_zscore is a real gradeable slug (sign, higher_is_bullish).
+  const vz = metric({
+    metric: "properties_lee_sales_velocity_zscore",
+    value: 1.4,
+    direction: "rising",
+    label: "vz",
+  });
+  const passing = [
+    {
+      upstream: brain("properties-lee-value", "bullish", 0.8, 0.9, { key_metrics: [vz] }),
+      factor: 1,
+    },
+  ];
+  const claims = composeConditionalThesis({
+    passing,
+    vote: voteDirection(passing),
+    trust_tier: 2,
+    finalKeyMetrics: [vz],
+    gradeConfigFor: resolveGradeConfig,
+  });
+  // Feed the produced claims + the same numeric metric back through the LIVE capture path.
+  const output = {
+    ...brain("master", "bullish", 0.8, 0.9, { key_metrics: [vz] }),
+    conditional_claims: claims,
+  };
+  const g = deriveGradeFields(output);
+  assert.equal(g.grade_status, "gradeable");
+  assert.equal(g.gradeable_slug, "properties_lee_sales_velocity_zscore");
+  assert.equal(g.predicted_direction, "bullish");
 });
 
 test("composeConditionalThesis: dominant metric squeezed by cap — basis_refs drops dead metric ref", () => {
@@ -779,9 +863,7 @@ test("composeConditionalThesis: neutral vote — brain_id in basis_refs resolves
 // ---- composeGrainBoundary --------------------------------------------------
 
 test("composeGrainBoundary: well-formed grain + non-empty boundary + excluded note", () => {
-  const passing = [
-    { upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 },
-  ];
+  const passing = [{ upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 }];
   const gb = composeGrainBoundary({
     passing,
     originalCount: 3,
@@ -790,9 +872,7 @@ test("composeGrainBoundary: well-formed grain + non-empty boundary + excluded no
   assert.equal(gb.finest_grain, "county-month");
   assert.ok(gb.not_available.length > 0);
   // originalCount(3) - passing(1) = 2 excluded → that line appears.
-  assert.ok(
-    gb.not_available.some((s) => /2 upstream read\(s\) fell below/.test(s)),
-  );
+  assert.ok(gb.not_available.some((s) => /2 upstream read\(s\) fell below/.test(s)));
   // finest_grain must satisfy the grain-guard <unit>-<period> format.
   assert.match(gb.finest_grain, /^[a-z]+-[a-z]+$/);
 });
@@ -859,9 +939,7 @@ test("composeGrainBoundary: env-swfl wired but NO per-ZIP metrics this run → n
 });
 
 test("composeGrainBoundary: no env-swfl upstream → no routes", () => {
-  const passing = [
-    { upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 },
-  ];
+  const passing = [{ upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 }];
   const gb = composeGrainBoundary({
     passing,
     originalCount: 1,
@@ -882,8 +960,7 @@ test("composeGrainBoundary: cre contributing corridor_pulse_signals_live → cor
             metric: "corridor_pulse_signals_live",
             value: 7,
             direction: "stable",
-            label:
-              "Live corridor current-events signals informing this read (7)",
+            label: "Live corridor current-events signals informing this read (7)",
           }),
         ],
       }),
@@ -895,9 +972,7 @@ test("composeGrainBoundary: cre contributing corridor_pulse_signals_live → cor
     originalCount: 1,
     relevanceFloor: 0.1,
   });
-  const corridorRoute = gb.routes?.find(
-    (r) => /current events/i.test(r) && /area/i.test(r),
-  );
+  const corridorRoute = gb.routes?.find((r) => /current events/i.test(r) && /area/i.test(r));
   assert.ok(
     corridorRoute,
     `expected a corridor current-events offer, got: ${JSON.stringify(gb.routes)}`,
@@ -917,8 +992,7 @@ test("composeGrainBoundary: cre wired but corridor_pulse_signals_live=0 → no c
             metric: "corridor_pulse_signals_live",
             value: 0,
             direction: "stable",
-            label:
-              "Live corridor current-events signals informing this read (0)",
+            label: "Live corridor current-events signals informing this read (0)",
           }),
           metric({
             metric: "cap_rate_median",
@@ -964,8 +1038,7 @@ test("composeGrainBoundary: env per-ZIP + cre corridor signals → both routes, 
             metric: "corridor_pulse_signals_live",
             value: 4,
             direction: "stable",
-            label:
-              "Live corridor current-events signals informing this read (4)",
+            label: "Live corridor current-events signals informing this read (4)",
           }),
         ],
       }),
@@ -977,17 +1050,10 @@ test("composeGrainBoundary: env per-ZIP + cre corridor signals → both routes, 
     originalCount: 2,
     relevanceFloor: 0.1,
   });
-  assert.equal(
-    gb.routes?.length,
-    2,
-    `expected both routes, got: ${JSON.stringify(gb.routes)}`,
-  );
+  assert.equal(gb.routes?.length, 2, `expected both routes, got: ${JSON.stringify(gb.routes)}`);
   const flood = gb.routes!.find((r) => /flood/i.test(r));
   const corridor = gb.routes!.find((r) => /current events/i.test(r));
-  assert.ok(
-    flood && corridor,
-    "expected one flood route and one corridor route",
-  );
+  assert.ok(flood && corridor, "expected one flood route and one corridor route");
   assert.notEqual(flood, corridor);
 });
 
@@ -1096,13 +1162,8 @@ test("composeGrainBoundary: housing-swfl contributing a per-ZIP detail table thi
     originalCount: 1,
     relevanceFloor: 0.1,
   });
-  const housingRoute = gb.routes?.find(
-    (r) => /housing/i.test(r) && /zip/i.test(r),
-  );
-  assert.ok(
-    housingRoute,
-    `expected a per-ZIP housing offer, got: ${JSON.stringify(gb.routes)}`,
-  );
+  const housingRoute = gb.routes?.find((r) => /housing/i.test(r) && /zip/i.test(r));
+  assert.ok(housingRoute, `expected a per-ZIP housing offer, got: ${JSON.stringify(gb.routes)}`);
   // Mandatory disambiguation: must not read like the flood or corridor route.
   assert.doesNotMatch(housingRoute!, /flood|current events/i);
 });
@@ -1131,9 +1192,7 @@ test("composeGrainBoundary: housing-swfl wired but its per-ZIP table is empty �
 });
 
 test("composeGrainBoundary: no housing-swfl upstream → no housing route", () => {
-  const passing = [
-    { upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 },
-  ];
+  const passing = [{ upstream: brain("macro-us", "bullish", 0.5, 0.8), factor: 1 }];
   const gb = composeGrainBoundary({
     passing,
     originalCount: 1,
@@ -1164,8 +1223,7 @@ test("composeGrainBoundary: env per-ZIP + cre corridor + housing per-ZIP → thr
             metric: "corridor_pulse_signals_live",
             value: 4,
             direction: "stable",
-            label:
-              "Live corridor current-events signals informing this read (4)",
+            label: "Live corridor current-events signals informing this read (4)",
           }),
         ],
       }),
@@ -1201,13 +1259,8 @@ test("composeGrainBoundary: env per-ZIP + cre corridor + housing per-ZIP → thr
 // ---- predictedWindow -------------------------------------------------------
 
 test("predictedWindow: neutral vote → undefined", () => {
-  const passing = [
-    { upstream: brain("macro-us", "neutral", 0.5, 0.8), factor: 1 },
-  ];
-  assert.equal(
-    predictedWindow({ passing, vote: voteDirection(passing) }),
-    undefined,
-  );
+  const passing = [{ upstream: brain("macro-us", "neutral", 0.5, 0.8), factor: 1 }];
+  assert.equal(predictedWindow({ passing, vote: voteDirection(passing) }), undefined);
 });
 
 test("predictedWindow: nowcast present → freight-shock horizon", () => {
@@ -1223,9 +1276,7 @@ test("predictedWindow: nowcast present → freight-shock horizon", () => {
 });
 
 test("predictedWindow: directional, no nowcast → quarters horizon", () => {
-  const passing = [
-    { upstream: brain("cre-swfl", "bullish", 0.8, 0.9), factor: 1 },
-  ];
+  const passing = [{ upstream: brain("cre-swfl", "bullish", 0.8, 0.9), factor: 1 }];
   const w = predictedWindow({ passing, vote: voteDirection(passing) });
   assert.match(String(w), /quarters/);
 });
