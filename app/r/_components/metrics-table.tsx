@@ -45,6 +45,8 @@ export interface MetricRow {
   sourceUrl?: string | null;
   /** Link text (defaults to "Source"). */
   sourceLabel?: ReactNode;
+  /** Public `/r/method/<slug>` URL when this metric has a documented method. */
+  methodHref?: string | null;
 }
 
 /** Trend pill — same color the value wears. Unknown values fall back to the
@@ -53,9 +55,7 @@ export function DirectionBadge({ direction }: { direction: string | null }) {
   if (!direction) return <span className="text-[#807e76]">—</span>;
   const cfg = DIRECTION_CONFIG[direction];
   if (!cfg) return <span className="text-[#b8b4a8]">{direction}</span>;
-  return (
-    <span className={`text-xs font-medium ${cfg.className}`}>{cfg.label}</span>
-  );
+  return <span className={`text-xs font-medium ${cfg.className}`}>{cfg.label}</span>;
 }
 
 /** One source-link style, colored by where the data comes FROM:
@@ -88,6 +88,22 @@ export function SourceLink({
   );
 }
 
+/** A tiny "how computed" affordance next to a metric label — links to the
+ *  metric's /r/method page. Teal, because the methodology page is our own
+ *  surface. Absent when the metric has no documented method (most rows today). */
+function MethodBadge({ href }: { href?: string | null }) {
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      title="How this is computed"
+      className="ml-1.5 align-super text-[10px] font-semibold text-[#00d4aa] no-underline hover:underline"
+    >
+      ƒ
+    </a>
+  );
+}
+
 /** Metric · Value · Trend · Source table. The value cell inherits the row's
  *  direction color; the source link colors itself by origin. */
 export function MetricsTable({
@@ -114,6 +130,7 @@ export function MetricsTable({
             <tr key={i}>
               <td className="px-4 py-3 align-top font-medium text-white">
                 {m.label}
+                <MethodBadge href={m.methodHref} />
               </td>
               <td
                 className={`px-4 py-3 text-right align-top font-mono ${directionClassName(m.direction)}`}
@@ -124,10 +141,7 @@ export function MetricsTable({
                 <DirectionBadge direction={m.direction} />
               </td>
               <td className="px-4 py-3 align-top text-xs text-gray-500">
-                <SourceLink
-                  url={m.sourceUrl}
-                  label={m.sourceLabel ?? "Source"}
-                />
+                <SourceLink url={m.sourceUrl} label={m.sourceLabel ?? "Source"} />
               </td>
             </tr>
           ))}
