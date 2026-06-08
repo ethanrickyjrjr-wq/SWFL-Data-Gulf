@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — kill auto-pr workflow
+
+- Deleted `.github/workflows/auto-pr.yml` — was auto-opening PRs on every branch push.
+
 ## 2026-06-08 (Opus 4.8 · claude/source-links-methodology) — holistic review APPROVE + formatting heads-up
 
 - **Holistic cross-task review: APPROVE** (independent reviewer over all 8 impl files + 8 invariants). No Critical/Important. 3 Minor, all cosmetic/docs: (a) `marketbeat_swfl` is on the source allowlist but has no method-registry entry yet — known gap, not a bug; (b) the design spec's illustrative example named a per-ZIP `flood_aal_33931` pattern, but the impl ships a per-county TDT pattern — the generalized invariant ("a pattern family resolves") is satisfied + tested, example drift only; (c) the not-found panel echoes the raw slug (React-escaped → XSS-safe, cosmetic). 12/12 tests pass.
