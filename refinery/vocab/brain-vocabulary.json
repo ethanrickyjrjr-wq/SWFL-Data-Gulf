@@ -2743,6 +2743,7 @@
     },
     "fgcu_reri_active_listings_pct_change": {
       "id": "fgcu_reri_active_listings_pct_change",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "FGCU RERI Active Listings YoY",
       "altLabels": [
         "RERI active listings change",
