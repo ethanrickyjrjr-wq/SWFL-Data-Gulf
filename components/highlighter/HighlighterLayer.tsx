@@ -1,6 +1,6 @@
 "use client";
 
-import { useHighlight } from "@/lib/highlighter/use-highlight";
+import { useHighlight, type SelectedFact } from "@/lib/highlighter/use-highlight";
 import { useHighlighterContext } from "@/lib/highlighter/context";
 import { suggestionsForMetric } from "@/lib/highlighter/suggestions";
 import { HighlightPopup } from "./HighlightPopup";

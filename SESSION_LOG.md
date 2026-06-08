@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · main) — MERGE BATCH: closed all 9 open PRs (#75–#83) into main
+
+- Operator decree: clear the PR sprawl. Merged all 9 green-CI PRs into `main` via local sequential integration (git built-in `union` merge-driver on `SESSION_LOG.md`, set in local-only `.git/info/attributes` — committed nothing): #75 vocab-polarity+CI-v6, #83 cre-swfl per-sector, #81 highlighter type-lift, #80 FactChip mount, #78 converse+data_requests, #77 rate-limit, #79 anon-revoke SQL, #82 lee-permits declared_value, #76 resilience-marker. `--no-ff` so each PR shows Merged.
+- **One semantic-merge break caught + fixed before push:** #80 and #81 both edited `HighlighterLayer.tsx`; the clean-looking 3-way merge dropped #81's `SelectedFact` type import (TS2304 at line 38). Fixed (`import { useHighlight, type SelectedFact }`). This is the exact "compiles alone, breaks combined" risk a per-PR merge would have shipped.
+- **Combined-state gate (all green):** `check-vocab-coverage --all` OK (27 brains, 0 orphans); refinery suite **1228/0** + rate-limit; `refinery:typecheck` 131 = baseline (no regression — the "~18" memory is stale); full-project `tsc` = baseline (1 pre-existing `.next` artifact). Local main kept disposable until green.
+- **Follow-ups (NOT auto-applied — operator call):** #78 `data_requests` table migration (`docs/sql/20260608_data_requests.sql`) should be verified/applied to prod before the Highlighter ask-loop goes live (route `/api/converse` deploys on this push, enforcement OFF); #79 anon-revoke SQL already applied (prior session). Highlighter still needs end-to-end live-verify (`highlighter_ui_live_verify`).
+- All 9 head branches deleted on origin; PRs auto-close as merged.
+
 ## 2026-06-08 (Opus 4.8 · claude/gradeable-polarity) — cleanup: rogue-agent litter swept, PR #75 force-pushed clean, active_listings polarity shipped
 
 - **Rogue P2-agent mess audited + cleaned** (verified vs refs, not the narrative): `origin/claude/gradeable-polarity` (PR #75) had been force-pushed to `38c7760` (polarity work split into 2 commits + the untracked corridor doc folded on top). **No secret leak** — `.dlt/secrets.toml` is NOT tracked and NOT in `38c7760` (only `.env.example`/`config.toml` templates, already tracked); the agent read creds, did not commit them. Corridor doc safe on `backup/operator-corridor-38c7760` + still untracked locally.
