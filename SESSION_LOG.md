@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — fix FirstTouchHint pill: left-anchor, size parity, visible X, auto-dismiss
+
+- `components/highlighter/FirstTouchHint.tsx`: moved from centered `bottom-4` to `left-4 bottom-4` — constrained `max-w-[185px]` on mobile (sm: expands to `max-w-xs`) so it never overlaps the bottom-right FAB; `py-3` to match FAB height; X now has `rounded-full bg-gray-200 p-1.5 text-gray-600` (gray circle, clearly tappable); sparkle updated to `#00d4aa`; added `used?: boolean` prop — auto-dismisses (marks seen cookie) the first time the user activates a highlight
+- `components/highlighter/HighlighterLayer.tsx`: passes `used={!!fact}` to `FirstTouchHint` — triggers auto-dismiss on first highlight use
+- Applies to ALL `/r/` pages (shared HighlighterLayer mount point)
+
 ## 2026-06-08 (Sonnet 4.6 · main) — auto-add incident issues to Ops Incidents project (#3)
 
 - `log-cron-incident.mjs`: after opening a `cron-failure` issue, calls `gh project item-add 3` to land it on the board immediately — no label-rule needed

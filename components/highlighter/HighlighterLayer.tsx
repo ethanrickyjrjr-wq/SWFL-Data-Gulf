@@ -98,7 +98,7 @@ export function HighlighterLayer({
           onClose={close}
         />
       )}
-      <FirstTouchHint />
+      <FirstTouchHint used={!!fact} />
       <DiscoveryTicker />
       <AskAi reportId={reportId} conclusion={conclusion} freshnessToken={freshnessToken} />
     </>
