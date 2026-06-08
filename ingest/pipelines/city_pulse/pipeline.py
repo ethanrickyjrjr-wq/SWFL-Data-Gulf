@@ -45,6 +45,8 @@ from ingest.pipelines.city_pulse.distill import (  # noqa: E402
 CITIES = [
     "Lehigh Acres", "Cape Coral", "Fort Myers", "Naples",
     "Estero", "Bonita Springs", "Fort Myers Beach",
+    "Sanibel", "North Fort Myers", "Marco Island",
+    "East Naples", "North Naples", "Golden Gate",
 ]
 
 MODEL = "claude-sonnet-4-6"

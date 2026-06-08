@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — city_pulse expanded to all 13 cities
+
+- Added 6 cities to `ingest/pipelines/city_pulse/pipeline.py` CITIES list: Sanibel, North Fort Myers, Marco Island, East Naples, North Naples, Golden Gate.
+- Seeded initial data for all 6 via pipeline run: 19 total new rows (Sanibel 3, NFM 2, Marco 5, ENaples 3, NNaples 5, GGate 1).
+- Updated `swfldatagulf-ops/lib/city-matrix.ts`: flipped `city_pulse` to `"live"` for all 6, removed stale "not in list" need entries, bumped `MATRIX_AUDITED` to 2026-06-08.
+
 ## 2026-06-08 (Sonnet 4.6 · main) — kill auto-pr workflow
 
 - Deleted `.github/workflows/auto-pr.yml` — was auto-opening PRs on every branch push.
