@@ -26,6 +26,7 @@ import { HighlighterLayer } from "../../../components/highlighter/HighlighterLay
 import { HighlighterProvider } from "../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
 import { CREKeyMetricsPanel } from "../cre-swfl/CREKeyMetricsPanel";
+import { CRECorridorClient } from "../cre-swfl/CRECorridorClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -98,18 +99,31 @@ export default async function ReportPage({ params }: PageProps) {
   const hasDetail = display.detailCaveats.length > 0 || display.metrics.length > 0;
   const ld = brainJsonLd(display, slug);
 
-  // Split metrics for the CRE-specific panel (server-safe: plain strings only)
+  // Split metrics for the CRE-specific panel (server-safe: plain strings only).
+  // isCityMB: true only for per-city MarketBeat rows (not SWFL/area/sector aggregates).
+  // SWFL-wide and area rollup MarketBeat metrics stay in coreMetrics so they
+  // appear in the stat grid rather than silently vanishing.
+  function isCityMB(label: string): boolean {
+    if (!label.startsWith("MarketBeat ")) return false;
+    const l = label.toLowerCase();
+    if (l.includes("swfl") || l.includes(" area ")) return false;
+    if (
+      l.includes("industrial") ||
+      l.includes("office") ||
+      l.includes("retail") ||
+      l.includes("flex")
+    )
+      return false;
+    return l.includes("vacancy rate") || l.includes("net absorption") || l.includes("asking rent");
+  }
   const serializedMetrics = display.metrics.map((m) => ({
     label: m.label,
     value: typeof m.value === "string" ? m.value : String(m.value),
     direction: m.direction,
   }));
   const coreMetrics =
-    slug === "cre-swfl"
-      ? serializedMetrics.filter((m) => !m.label.startsWith("MarketBeat"))
-      : serializedMetrics;
-  const mbMetrics =
-    slug === "cre-swfl" ? serializedMetrics.filter((m) => m.label.startsWith("MarketBeat")) : [];
+    slug === "cre-swfl" ? serializedMetrics.filter((m) => !isCityMB(m.label)) : serializedMetrics;
+  const mbMetrics = slug === "cre-swfl" ? serializedMetrics.filter((m) => isCityMB(m.label)) : [];
 
   const highlighterEnabled = highlighterUiEnabled();
 
@@ -143,7 +157,32 @@ export default async function ReportPage({ params }: PageProps) {
           from the data this report holds (detail-table cross-section if it has
           one, else its headline metrics). The Highlighter's on-demand "Chart
           this" can later swap this for the user's actual question. */}
-      {display.chart && <ReportChart block={display.chart} />}
+      {display.chart && (
+        <ReportChart
+          block={
+            slug === "cre-swfl"
+              ? {
+                  ...display.chart,
+                  columns: display.chart.columns.map((col) => {
+                    // Strip "MarketBeat " prefix and "(YYYY-Qn)" date qualifier
+                    // so chart axis labels read "Fort Myers Vacancy" not
+                    // "MarketBeat Fort Myers vacancy rate (2026-Q1)".
+                    let c = col
+                      .replace(/^MarketBeat\s+/i, "")
+                      .replace(/\s*\([^)]*\)\s*$/, "")
+                      .trim();
+                    c = c
+                      .replace(/\bvacancy rate\b/gi, "Vacancy")
+                      .replace(/\bnet absorption\b/gi, "Absorption")
+                      .replace(/\basking rent\s*NNN?\b/gi, "Asking Rent")
+                      .replace(/\bvacancy\b/gi, "Vacancy");
+                    return c;
+                  }),
+                }
+              : display.chart
+          }
+        />
+      )}
 
       {slug === "cre-swfl" && <CorridorIndex />}
 
@@ -223,43 +262,35 @@ async function CorridorIndex() {
   const links = toCorridorLinks(await fetchVerifiedCorridorRows());
   if (links.length === 0) return null;
 
-  const byCounty = new Map<string, typeof links>();
+  // Group county → city → corridors for the accordion client component
+  const countyMap = new Map<string, Map<string, typeof links>>();
   for (const l of links) {
-    const arr = byCounty.get(l.county) ?? [];
-    arr.push(l);
-    byCounty.set(l.county, arr);
+    if (!countyMap.has(l.county)) countyMap.set(l.county, new Map());
+    const cityMap = countyMap.get(l.county)!;
+    const cityKey = l.city || "Other";
+    if (!cityMap.has(cityKey)) cityMap.set(cityKey, []);
+    cityMap.get(cityKey)!.push(l);
   }
+
+  const groups = [...countyMap.entries()].map(([county, cityMap]) => ({
+    county,
+    cities: [...cityMap.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([city, corridors]) => ({
+        city,
+        corridors: corridors
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(({ slug, name }) => ({ slug, name })),
+      })),
+  }));
 
   return (
     <section className="mt-10">
       <SectionTitle>Explore corridors</SectionTitle>
       <p className="mt-1 text-sm text-gray-400">
-        {links.length} verified corridors · tap any for metrics, active intel, and area context.
+        {links.length} verified corridors · select a city, then drill into any corridor.
       </p>
-      <div className="mt-4 space-y-6">
-        {[...byCounty.entries()].map(([county, items]) => (
-          <div key={county}>
-            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-              {county === "Unknown" ? "Other SWFL" : `${county} County`}
-              <span className="font-normal normal-case tracking-normal text-gray-600">
-                ({items.length})
-              </span>
-            </h3>
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {items.map((l) => (
-                <li key={l.slug}>
-                  <Link
-                    href={`/r/cre-swfl/${l.slug}`}
-                    className="inline-flex items-center rounded-full border border-[#00d4aa]/40 bg-[#00d4aa]/[0.04] px-3 py-1 text-sm text-gray-300 transition-colors hover:border-[#00d4aa] hover:bg-[#00d4aa]/[0.08] hover:text-[#00d4aa]"
-                  >
-                    {l.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
+      <CRECorridorClient groups={groups} />
     </section>
   );
 }

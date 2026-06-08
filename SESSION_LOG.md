@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — feat(cre-swfl): city accordion, metric panel, chart label cleanup
+
+- `app/r/cre-swfl/CRECorridorClient.tsx` (NEW): client accordion — county header → city expand/collapse buttons (teal border, chevron) → corridor pills drill-down; teal outline always visible, not just on hover
+- `app/r/cre-swfl/CREKeyMetricsPanel.tsx`: updated `shortenCRELabel` to tag MarketBeat variants with `(MB)` to disambiguate from corridor medians with the same label
+- `app/r/[slug]/page.tsx`: (1) `isCityMB` predicate routes only true per-city MarketBeat rows to mbMetrics — SWFL/area/sector aggregates stay in coreMetrics so they never silently vanish; (2) chart label post-processor for cre-swfl strips "MarketBeat " prefix + "(YYYY-Qn)" date qualifier and maps verbose metric names to short forms (Vacancy, Absorption, Asking Rent) so chart axes are readable; (3) `CorridorIndex` passes data to `CRECorridorClient` for city-first accordion UX
+
 ## 2026-06-08 (Sonnet 4.6 · main) — fix(highlighter): 3 selection UX regressions in use-highlight.ts
 
 - `lib/highlighter/use-highlight.ts`: (1) MAX_WORDS=40 cap — accidental large sweeps suppress the popup on first select; second identical selection passes through as intentional. (2) keyup debounced 10ms→200ms so shift+arrow sequences don't fire on each keystroke; added touchstart/touchend tracking so selectionchange is suppressed during touch drags; selectionchange debounce 300ms→600ms. (3) Added `expandRangeToWordStart` (mirrors existing `expandRangeToWordEnd`); replaced the mid-word start REJECTION with a start-snap so partial-word drags from the left produce full words instead of silently clearing.

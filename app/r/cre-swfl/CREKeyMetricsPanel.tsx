@@ -53,11 +53,13 @@ function DirectionBadge({ direction }: { direction: string | null }) {
 
 export function shortenCRELabel(label: string): string {
   const l = label.toLowerCase();
+  const isMB = label.startsWith("MarketBeat");
+  const tag = isMB ? " (MB)" : "";
   if (l.includes("cap rate") || l.includes("cap_rate")) return "Cap Rate";
-  if (l.includes("vacancy")) return "Vacancy Rate";
-  if (l.includes("absorption")) return "Net Absorption";
+  if (l.includes("vacancy")) return `Vacancy Rate${tag}`;
+  if (l.includes("absorption")) return `Net Absorption${tag}`;
   if (l.includes("asking rent") || (l.includes("rent") && !l.includes("absorption")))
-    return "Asking Rent";
+    return `Asking Rent NNN${tag}`;
   if (l.includes("factor")) return "Composite Factor";
   if (l.includes("pulse") || l.includes("signal")) return "Pulse Signals";
   if (l.includes("saturation")) return "Permit Saturation";
