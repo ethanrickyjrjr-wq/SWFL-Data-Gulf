@@ -43,11 +43,10 @@ if (!run) {
 // Canonical ledger key: kebab-case filename (matches existing hand-typed convention).
 // Human-readable name (run.name) is kept for issue-comment display.
 const workflowPath = run.path || ""; // e.g. ".github/workflows/faf5-annual.yml"
-const workflowName = (
-  workflowPath.split("/").pop() ||
-  run.name ||
-  "unknown"
-).replace(/\.ya?ml$/, "");
+const workflowName = (workflowPath.split("/").pop() || run.name || "unknown").replace(
+  /\.ya?ml$/,
+  "",
+);
 const workflowDisplayName = run.name || workflowName;
 const runId = run.id;
 const runUrl = run.html_url;
@@ -77,14 +76,15 @@ function recordFailure() {
   if (dryRun) {
     log("DRY-RUN: would insert row:\n" + row);
     if (issueNumber) log(`DRY-RUN: would comment on issue #${issueNumber}`);
-    log(`DRY-RUN: would open discrete issue titled "${INCIDENT_TAG} ${workflowDisplayName} — ${today}"`);
+    log(
+      `DRY-RUN: would open discrete issue titled "${INCIDENT_TAG} ${workflowDisplayName} — ${today}"`,
+    );
     return;
   }
 
   insertRow(row);
-  gitCommitAndPush(
-    `docs(cron-failures): log ${workflowName} failure [skip ci]`,
-    () => insertRow(row),
+  gitCommitAndPush(`docs(cron-failures): log ${workflowName} failure [skip ci]`, () =>
+    insertRow(row),
   );
   if (issueNumber) postComment(buildFailureBody(logTail));
   openIncidentIssue(logTail);
@@ -92,31 +92,25 @@ function recordFailure() {
 
 function maybeResolve() {
   if (conclusion !== "success") return log(`skip: conclusion is ${conclusion}`);
-  if (triggerEvent !== "schedule")
-    return log(`skip: trigger is ${triggerEvent}, not schedule`);
+  if (triggerEvent !== "schedule") return log(`skip: trigger is ${triggerEvent}, not schedule`);
 
   const before = readFileSync(LEDGER_PATH, "utf8");
   const after = flipMostRecentOpenRow(before, workflowName);
   if (!after) return log(`no OPEN row for ${workflowName}; nothing to resolve`);
 
   if (dryRun) {
-    log(
-      `DRY-RUN: would flip OPEN → RESOLVED (auto) for most-recent ${workflowName} row`,
-    );
+    log(`DRY-RUN: would flip OPEN → RESOLVED (auto) for most-recent ${workflowName} row`);
     if (issueNumber) log(`DRY-RUN: would comment ✅ on issue #${issueNumber}`);
     log(`DRY-RUN: would close open incident issue tagged ${INCIDENT_TAG}`);
     return;
   }
 
   writeFileSync(LEDGER_PATH, after, "utf8");
-  gitCommitAndPush(
-    `docs(cron-failures): auto-resolve ${workflowName} [skip ci]`,
-    () => {
-      const fresh = readFileSync(LEDGER_PATH, "utf8");
-      const reflipped = flipMostRecentOpenRow(fresh, workflowName);
-      if (reflipped) writeFileSync(LEDGER_PATH, reflipped, "utf8");
-    },
-  );
+  gitCommitAndPush(`docs(cron-failures): auto-resolve ${workflowName} [skip ci]`, () => {
+    const fresh = readFileSync(LEDGER_PATH, "utf8");
+    const reflipped = flipMostRecentOpenRow(fresh, workflowName);
+    if (reflipped) writeFileSync(LEDGER_PATH, reflipped, "utf8");
+  });
   if (issueNumber)
     postComment(
       `✅ **${workflowName}** auto-resolved — ${today}\n\nNext scheduled run succeeded: ${runUrl}`,
@@ -162,8 +156,7 @@ function insertRow(row) {
   if (startIdx < 0) throw new Error(`Sentinel ${START} not found in ledger`);
   const after = text.slice(startIdx);
   const sep = after.match(/^\| -+ \|.*$/m);
-  if (!sep)
-    throw new Error("Header separator row not found after START sentinel");
+  if (!sep) throw new Error("Header separator row not found after START sentinel");
   const insertAt = startIdx + sep.index + sep[0].length;
   const updated = text.slice(0, insertAt) + "\n" + row + text.slice(insertAt);
   writeFileSync(LEDGER_PATH, updated, "utf8");
@@ -175,9 +168,7 @@ function flipMostRecentOpenRow(ledger, name) {
   if (s < 0 || e < 0 || e < s) return null;
   const block = ledger.slice(s, e);
   const lines = block.split("\n");
-  const nameRx = new RegExp(
-    `\\\`${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\\``,
-  );
+  const nameRx = new RegExp(`\\\`${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\\``);
   // Status column is delimited by pipes with single-space padding: ` | OPEN | `.
   // Newest-first order: first match from the top wins.
   for (let i = 0; i < lines.length; i++) {
@@ -277,11 +268,26 @@ function openIncidentIssue(logTail) {
       `gh issue create --title "${title.replace(/"/g, '\\"')}" --label "cron-failure" --body-file "${tmp}"`,
       { encoding: "utf8", env: process.env },
     );
-    log(`opened incident issue: ${out.trim()}`);
+    const issueUrl = out.trim();
+    log(`opened incident issue: ${issueUrl}`);
+    // Add directly to the Ops Incidents project (project 3, owner ethanrickyjrjr-wq)
+    try {
+      const repo = process.env.GITHUB_REPOSITORY || "";
+      const owner = repo.split("/")[0] || "ethanrickyjrjr-wq";
+      execSync(`gh project item-add 3 --owner ${owner} --url "${issueUrl}"`, {
+        encoding: "utf8",
+        env: process.env,
+      });
+      log(`added to Ops Incidents project`);
+    } catch (e) {
+      log(`could not add to project: ${e.message}`);
+    }
   } catch (e) {
     log(`could not open incident issue: ${e.message}`);
   } finally {
-    try { unlinkSync(tmp); } catch {}
+    try {
+      unlinkSync(tmp);
+    } catch {}
   }
 }
 

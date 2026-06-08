@@ -43,8 +43,9 @@ on:
 
 permissions:
   contents: write # commit ledger edits
-  issues: write # comment on sticky issue
+  issues: write # open/close/comment on incident issues
   actions: read # gh run view --log-failed
+  repository-projects: write # gh project item-add
 
 concurrency:
   # Serialize per-workflow so a fail+resolve pair (or two rapid failures) can't race the ledger.

@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — auto-add incident issues to Ops Incidents project (#3)
+
+- `log-cron-incident.mjs`: after opening a `cron-failure` issue, calls `gh project item-add 3` to land it on the board immediately — no label-rule needed
+- `log-cron-incident.yml`: added `repository-projects: write` permission so GHA token can write to project
+- Ops Incidents project #3 created + linked to brain-platform repo
+
 ## 2026-06-08 (Sonnet 4.6 · main) — wire discrete GH issues + cron-failure label for Projects
 
 - `.github/scripts/log-cron-incident.mjs`: on failure now opens a discrete `cron-failure`-labeled issue (title embeds `[cron-failure:workflow-name]` tag for reliable close-search); on auto-resolve closes the matching open issue so GH Projects auto-moves it to Done
