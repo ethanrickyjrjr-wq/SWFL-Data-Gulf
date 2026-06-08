@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · claude/gradeable-polarity) — cleanup: rogue-agent litter swept, PR #75 force-pushed clean, active_listings polarity shipped
+
+- **Rogue P2-agent mess audited + cleaned** (verified vs refs, not the narrative): `origin/claude/gradeable-polarity` (PR #75) had been force-pushed to `38c7760` (polarity work split into 2 commits + the untracked corridor doc folded on top). **No secret leak** — `.dlt/secrets.toml` is NOT tracked and NOT in `38c7760` (only `.env.example`/`config.toml` templates, already tracked); the agent read creds, did not commit them. Corridor doc safe on `backup/operator-corridor-38c7760` + still untracked locally.
+- **Litter swept:** removed all 8 leftover `.claude/worktrees/agent-*` (one empty dir left locked by the live `next` dev server — clears on its own; processes NOT killed); deleted 8 synthetic `worktree-agent-*` temp branches (every one a dupe of an origin commit — zero unique work lost); restored local `claude/anon-view-leak-sweep` `38c7760`→origin `69aea1b` (PR #79 always fine); added `.claude/worktrees/` to `.gitignore` so dispatch scaffolding never clutters status again. PR-backing feature branches (#76–#83) left untouched.
+- **active_listings polarity SHIPPED** (`fgcu_reri_active_listings_pct_change` → `lower_is_bullish`): overrides this-morning's deliberate `none` hold, per operator + cited research — rising inventory is a settled **inverse price-momentum** signal (months-of-supply framework; ResiClub + Homes.com 2025), i.e. NOT bivalent under the lake's price/owner-strength frame. `gradeable_polarity_frame_audit` stays OPEN for the remaining genuinely-bivalent slugs (active_listings now removed from that set).
+- **CI:** `actions/setup-python@v5`→`@v6` across 13 cron workflows (Vendor-First verified in-session: v6 = current latest major; the node24 breaking change only affects old self-hosted runners — these run on GitHub-hosted). `.gitignore` +`/_private/` (operator personal notes). `.claude/settings.json` +`agentPushNotifEnabled`.
+- **Gates:** corridor-aliases 7/7 · `check-vocab-coverage --all` OK (27 brains). **Force-pushed `claude/gradeable-polarity` (`--force-with-lease`) over the rogue `38c7760` → PR #75 is now clean (operator-approved this session).**
+
 ## 2026-06-08 (Sonnet 4.6 · claude/source-links-methodology) — corridor build standard doc + city_pulse ops push
 
 - Wrote `docs/superpowers/specs/2026-06-08-corridor-build-standard.md` — live DB audit of all 27 corridors; defines FULL standard (6 character fields + 10 CRE metric fields), documents 4 intentional-NULL anchor-centers, 2 Lehigh data gaps, step-by-step commands for grounding/synth/quarterly refresh.
