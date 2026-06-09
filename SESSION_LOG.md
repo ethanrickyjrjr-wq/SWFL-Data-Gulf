@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — converse: no preamble, Bottom Line first
+
+- `lib/highlighter/grounding.ts`: added one instruction to the system prompt forcing `## Bottom Line` as the first line of every converse response — no setup prose before it.
+
 ## 2026-06-08 (Sonnet 4.6 · main) — never-dead-end Task 6: Open-in-your-Claude link
 
 - `components/highlighter/HighlightPopup.tsx` footer: added "Open in your Claude ↗" anchor (`claude.ai/new?q=<encoded handoff>`, `target="_blank"`) alongside the existing copy button; both kept. Check `highlighter_open_in_claude` closed.
