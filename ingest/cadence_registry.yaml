@@ -531,7 +531,7 @@ pipelines:
     source_name: mhs_databook
     first_expected_by: 2027-03-13
     expected_rows_min: 1
-    note: "DORMANT — ODD scaffold Recipe 2 (MHS 2026 Data Book permits). DO NOT blend into permits-swfl until jurisdiction crosswalk + consumer brain land. Graduation = (1) crosswalk, (2) wire brain, (3) remove probe_mode: odd_window."
+    note: "281 commercial permits loaded (2025, 12 SWFL jurisdictions). Top: Unincorporated Lee Co. 93 | Cape Coral 57 | Bonita Springs 46 | Fort Myers 45 | Naples 38. Annual (MHS Data Book ~Mar). DORMANT — needs jurisdiction→submarket crosswalk + consumer brain before wiring into permits-swfl. Next drop: Mar 2027."
     # Table DDL: docs/sql/20260605_mhs_permits_swfl.sql
     # Schema spec: docs/littlebird-notes/2026-06-05.md (item D — jurisdiction crosswalk).
 
@@ -547,7 +547,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: crexi
     expected_rows_min: 1
-    note: "Wave 1 CRE. Crexi active listings — Estero + FMB. Weekly Firecrawl. Graduation = remove probe_mode: odd_window after first green run. check_key=cre_broker_estero_fmb."
+    note: "Active CRE lease listings — Estero (33928) + Fort Myers Beach (33931). Fills MarketBeat coverage gap for these submarkets. Weekly Firecrawl agent scrape → active_listings_cre table. NOT YET ACTIVATED — table exists, pipeline needs first green GHA run to graduate."
     # SQL migration: docs/sql/20260609_active_listings_cre.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/crexi_listings/pipeline.py.
 
@@ -560,7 +560,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: lee_associates
     expected_rows_min: 1
-    note: "Wave 2 CRE. Lee & Associates SWFL — ACTIVE. 20 rows loaded 2026-06-09 (4 sectors x 5 quarters, Q1-2026 thru Q1-2025). PDF URL pattern VERIFIED. GHA: ingest-lee-associates-swfl.yml (quarterly, 20th of Feb/May/Aug/Nov). Graduation = remove probe_mode: odd_window after first GHA green."
+    note: "Fort Myers quarterly: Q1-2026 Office 6.05% vac / $27.74 NNN; Retail 3.60% / $23.07 NNN; Industrial 9.01% / $12.20 NNN; Multifamily 17.2% vac / $1,689/unit. 20 rows loaded (Q1-2025–Q1-2026). GHA quarterly (20th of Feb/May/Aug/Nov). Graduate after first GHA green."
     # Pipeline: ingest/pipelines/lee_associates_swfl/pipeline.py + extract.py.
 
   - name: premier_commercial_swfl
@@ -572,7 +572,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: premier_commercial
     expected_rows_min: 1
-    note: "Wave 2 CRE. Premier Commercial SWFL — NO MARKET REPORTS PUBLISHED. Brokerage-only landing page (premcomm.com); vacancy/rent/absorption data NOT available. Stub pipeline exits 1. Do not attempt PDF extraction until a report URL is identified."
+    note: "NO MARKET REPORTS. premcomm.com is brokerage-only (listings + contact, no survey data). Verified 2026-06-09. No vacancy/rent/absorption data available. Stub exits 1. Dead end unless a specific PDF report URL surfaces."
 
   - name: svn_florida_swfl
     lane: tier-2
@@ -583,7 +583,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: svn_florida
     expected_rows_min: 1
-    note: "Wave 2 CRE. SVN Florida SWFL — TRANSACTION NEWS ONLY. svncp.com publishes deal-by-deal press releases, not structured market reports. No vacancy/rent/absorption tables available. Stub pipeline exits 1. If individual deal rows are useful, wire to a separate table (not marketbeat_swfl)."
+    note: "TRANSACTION NEWS ONLY. svncp.com publishes individual deal press releases (sale price, buyer/seller, SF) — not vacancy/rent/absorption surveys. Rich SWFL investment sales coverage but no structured report tables. Stub exits 1. If deal-level data is valuable, wire to a separate table."
 
   - name: estero_edc
     lane: tier-2
@@ -594,7 +594,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: estero_edc
     expected_rows_min: 1
-    note: "Wave 3 CRE. Village of Estero EDC context. No GHA trigger yet."
+    note: "Active Estero development (2025-2026): Corkscrew Rd Widening Phase 2 (~$27M, end-2026); mini-warehouse 75,910 SF; High 5 Entertainment 40,000 SF; Aldi (11906 Newbridge Ct); Home2 Suites; Walmart expansion. 6 rows live. estero-fl.gov returns 526 — seed-based upsert. GHA: monthly (ingest-local-cre-context.yml)."
     # SQL: docs/sql/20260609_local_cre_context.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/estero_edc/.
 
@@ -607,7 +607,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: fmb_planning
     expected_rows_min: 1
-    note: "Wave 3 CRE. Fort Myers Beach recovery progress — fmbgov.com + leegov.com/recovery. No GHA trigger yet."
+    note: "$1.107B CDBG-DR funding (largest single-municipality award in SWFL post-Ian). Pier contract $11.7M awarded Apr 8, 2026. Beach renourishment 41,655 CY (mid-May 2026). Bay Oaks Park complete ~Aug 2025. Times Square: plans→permits. Big Carlos Pass Bridge underway. 8 rows live. GHA: monthly (ingest-local-cre-context.yml)."
     # SQL: docs/sql/20260609_local_cre_context.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/fmb_recovery/.
 
