@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Sonnet 4.6 · main) — never-dead-end Task 5: span-aware action-only chips
+
+- **Task 5 (`suggestionsForSpan`).** `lib/highlighter/suggestions.ts`: new `suggestionsForSpan({ entry, value, place })` — action chips only (Break down / Compare / Find <missing part>), never definitional; imports `MethodologyEntry` from registry. `components/highlighter/HighlightPopup.tsx`: calls `resolveMethod(fact.slug)` client-side; when an entry resolves, overrides the precomputed `suggestions` prop with span-aware chips; falls back to prop when no slug/entry. `lib/highlighter/suggestions.test.ts`: two new tests (value span → "Break down…" / no "What is…"; need-component → "Find Marco Island's…"). Gates: highlighter suite 49/0; `tsc --noEmit` clean; refinery typecheck baseline-only (no new errors).
+- **Task 6 (deferred).** `claude.ai/new?q=` param unverifiable in-session (auth wall 403; support article 404) — per plan's Vendor-First fallback, copy-only stays as-is. Check `highlighter_open_in_claude` opened.
+
 ## 2026-06-08 (Opus 4.8 · main) — never-dead-end Tasks 3+4: converse floor + authored-method injection + deterministic gap-log
 
 - **Task 3 (live `/api/converse` behavior change).** `lib/highlighter/grounding.ts`: `GroundingInput.method?` + `renderMethod()`; preamble rewritten from cite-or-**DECLINE** → the never-dead-end floor (two shapes only: DERIVE or OFFER-TO-FIND; a published figure is HELD never partial; **NEVER invent/guess components** — with a method block the model may name ONLY its listed components, citation retained). An injected entry renders a `=== METHOD ===` block (equation + We HOLD / We do NOT hold). `route.ts`: reads `slug`, `resolveMethod(slug)`, passes `method` into grounding.

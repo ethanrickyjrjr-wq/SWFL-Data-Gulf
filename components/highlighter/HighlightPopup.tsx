@@ -5,6 +5,8 @@ import { popupPosition, type Position } from "@/lib/highlighter/position";
 import { buildClaudeHandoff } from "@/lib/highlighter/handoff";
 import { useConverse } from "@/lib/highlighter/use-converse";
 import type { SelectedFact } from "@/lib/highlighter/use-highlight";
+import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
+import { suggestionsForSpan } from "@/lib/highlighter/suggestions";
 
 type Stage = "compose" | "answer";
 
@@ -85,6 +87,15 @@ export function HighlightPopup({
     : fact.context
       ? `${fact.context}: ${fact.text}`
       : fact.text;
+
+  const entry = fact.slug ? resolveMethod(fact.slug) : null;
+  const displaySuggestions = entry
+    ? suggestionsForSpan({
+        entry,
+        value: fact.text,
+        place: fact.factType === "place" ? fact.text : undefined,
+      })
+    : suggestions;
 
   const SECTION_CHIPS = [
     "Give me a plain-English summary of this",
@@ -169,13 +180,13 @@ export function HighlightPopup({
 
       {stage === "compose" && (
         <div>
-          {(isSection ? SECTION_CHIPS : suggestions).length > 0 && (
+          {(isSection ? SECTION_CHIPS : displaySuggestions).length > 0 && (
             <>
               <p className="mb-2 text-xs uppercase tracking-wider text-gray-500">
                 {isSection ? "Explore this" : "Ask about this"}
               </p>
               <ul className="mb-3 flex flex-col gap-1.5">
-                {(isSection ? SECTION_CHIPS : suggestions).map((s, i) => (
+                {(isSection ? SECTION_CHIPS : displaySuggestions).map((s, i) => (
                   <li key={i}>
                     <button
                       type="button"
