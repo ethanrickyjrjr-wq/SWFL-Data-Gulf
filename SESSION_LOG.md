@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — cre: cre-swfl v53 re-run + check cre_broker_estero_fmb detail updated
+
+- `brains/cre-swfl.md` bumped v52→v53 (timestamp-only re-run, no content change).
+- `checks` ledger: `cre_broker_estero_fmb` detail updated — Wave 1 live, Wave 2 URLs verified, next blocker = sample PDFs + table parsers.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — cre: Wave 2 broker URLs verified (Lee & Associates, Premier Commercial, SVN)
 
 - `ingest/pipelines/lee_associates_swfl/extract.py`: `VERIFIED_URL` set to `https://www.lee-associates.com/research/`; `parse_lee_table()` still NotImplementedError (no sample PDF yet).
