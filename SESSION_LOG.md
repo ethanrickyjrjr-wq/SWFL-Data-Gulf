@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — feat: ODD-window freshness probe (±10d cadence window)
+
+- `ingest/scripts/check_freshness.py`: new `check_odd_window_entry()` + `_fetch_max_freshness()` helper; 5 statuses: UNINITIALIZED / WAITING / WINDOW_OPEN / OVERDUE / FRESH; silent statuses silent by default. `run_probe` dispatches on `probe_mode: odd_window`.
+- `ingest/cadence_registry.yaml`: 7 remaining `not_yet_running:` entries moved to `pipelines:` with `probe_mode: odd_window` — `mhs_permits_swfl` (first_expected_by 2027-03-13) + 6 Group E CRE entries (UNINITIALIZED until first data). `not_yet_running: []` (empty). Glass Flow: 50 probed / 0 parked.
+- `ingest/tests/scripts/test_check_freshness.py`: 5 new tests covering all ODD-window status paths; 11/11 green.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — chore: graduate 4 pipelines from not_yet_running to pipelines
 
 - `ingest/cadence_registry.yaml`: graduated `bls_oews_swfl_tier1` + `bls_oews_swfl` (backfill ran 2026-05-31, 220 rows; cron annual May 2027), `fl_dbpr_licenses` (first run 2026-06-01, 9,623 Lee+Collier licenses; consumer: licenses-swfl), `dbpr_public_notices` (first run 2026-06-01, 6 notices; stale "no consuming brain" comment replaced with "Consuming brain: news-swfl"). Glass Flow now shows 43 live / 7 parked.

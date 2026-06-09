@@ -9,6 +9,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from ingest.scripts.check_freshness import (
+    check_odd_window_entry,
     check_tier1_entry,
     check_tier2_entry,
     load_registry,
@@ -157,3 +158,82 @@ def test_registry_loads_and_iterates():
     first = registry["pipelines"][0]
     for key in ("name", "lane", "cadence_days", "tolerance_multiplier"):
         assert key in first, f"pipeline entry missing required key: {key}"
+
+
+# ── ODD-window probe tests ────────────────────────────────────────────────────
+
+
+def _odd_conn(freshness_val):
+    """Mock connection returning (freshness_val,) or None from a freshness query."""
+    row = (freshness_val,) if freshness_val is not None else None
+    cur = MagicMock()
+    cur.fetchone.return_value = row
+    conn = MagicMock()
+    conn.cursor.return_value.__enter__ = MagicMock(return_value=cur)
+    conn.cursor.return_value.__exit__ = MagicMock(return_value=False)
+    return conn
+
+
+_ODD_BASE = {
+    "name": "test_odd",
+    "lane": "tier-2",
+    "probe_mode": "odd_window",
+    "cadence_days": 90,
+    "tolerance_multiplier": 2.0,
+    "freshness_table": "data_lake.marketbeat_swfl",
+    "freshness_column": "_ingested_at",
+    "source_name": "test_source",
+}
+
+
+def test_odd_window_uninitialized_when_no_data_and_no_expected():
+    """No DB data + no first_expected_by → UNINITIALIZED (silent — not yet scoped)."""
+    conn = _odd_conn(None)
+    result = check_odd_window_entry(conn, _ODD_BASE)
+    assert result["status"] == "UNINITIALIZED"
+    assert result["last_run"] is None
+    assert result["expected_date"] is None
+
+
+def test_odd_window_waiting_when_expected_is_far_future():
+    """No DB data, first_expected_by 60 days away → WAITING (silent — too early to watch)."""
+    today = date(2026, 6, 9)
+    entry = {**_ODD_BASE, "first_expected_by": str(today + timedelta(days=60))}
+    conn = _odd_conn(None)
+    result = check_odd_window_entry(conn, entry, _today=today)
+    assert result["status"] == "WAITING"
+
+
+def test_odd_window_open_when_today_inside_window():
+    """No DB data, first_expected_by 5 days away → today inside ±10-day window → WINDOW_OPEN."""
+    today = date(2026, 6, 9)
+    entry = {**_ODD_BASE, "first_expected_by": str(today + timedelta(days=5))}
+    conn = _odd_conn(None)
+    result = check_odd_window_entry(conn, entry, _today=today)
+    assert result["status"] == "WINDOW_OPEN"
+
+
+def test_odd_window_overdue_when_window_passed_without_data():
+    """No DB data, first_expected_by 20 days ago → past window_end by 10 days → OVERDUE."""
+    today = date(2026, 6, 9)
+    entry = {**_ODD_BASE, "first_expected_by": str(today - timedelta(days=20))}
+    conn = _odd_conn(None)
+    result = check_odd_window_entry(conn, entry, _today=today)
+    assert result["status"] == "OVERDUE"
+
+
+def test_odd_window_fresh_when_recent_run_in_current_window():
+    """7-day cadence, last_run 4 days ago → expected in 3 days → window_start was 7 days ago
+    → last_run is within the current window → FRESH."""
+    today = date(2026, 6, 9)
+    last_run = today - timedelta(days=4)
+    entry = {
+        **_ODD_BASE,
+        "cadence_days": 7,
+        "freshness_table": "data_lake.active_listings_cre",
+        "source_name": "crexi",
+    }
+    conn = _odd_conn(last_run)
+    result = check_odd_window_entry(conn, entry, _today=today)
+    assert result["status"] == "FRESH"
+    assert result["last_run"] == last_run

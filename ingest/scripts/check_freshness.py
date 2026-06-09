@@ -5,6 +5,11 @@ tier-1/tier-1-duckdb entries and _dlt_loads.inserted_at (or MAX(freshness_column
 on the named table for non-dlt entries) for tier-2 entries; also checks landed row
 count vs expected_rows_min (when set) and flags LOW_VOLUME.
 
+ODD window mode (probe_mode: odd_window):
+  Manual-drop sources that arrive unpredictably. Instead of a tolerance threshold,
+  uses a ±10-day window around the expected date (last_run + cadence_days).
+  WAITING/UNINITIALIZED are silent. WINDOW_OPEN / OVERDUE surface as alerts.
+
 Also runs a structural-gap detector (check_structural_gaps / sync_gap_checks): any
 city we capture city_pulse news for with zero verified corridor_profiles rows is
 opened as a `corridor_gap_*` row in the public.checks ledger (auto-closed when the
@@ -17,7 +22,7 @@ import argparse
 import os
 import re
 import sys
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -74,6 +79,60 @@ def _to_date(val) -> date:
     if isinstance(val, date):
         return val
     raise ValueError(f"Cannot convert {type(val)} to date")
+
+
+def _fetch_max_freshness(conn, entry: dict) -> date | None:
+    """Return MAX(freshness_column) for this entry, or None if no rows / table missing.
+
+    Handles both dlt pipelines (_dlt_loads) and non-dlt tables (freshness_table).
+    Rolls back and returns None on any DB error (e.g. table not yet created for
+    ODD scaffolds whose DDL hasn't been applied yet).
+    """
+    from psycopg import sql as pgsql
+
+    try:
+        with conn.cursor() as cur:
+            if "freshness_table" in entry:
+                freshness_col = entry.get("freshness_column", "inserted_at")
+                schema, table = entry["freshness_table"].split(".", 1)
+                source_name = entry.get("source_name")
+                if source_name:
+                    cur.execute(
+                        pgsql.SQL("SELECT MAX({}) FROM {}.{} WHERE source_name = %s").format(
+                            pgsql.Identifier(freshness_col),
+                            pgsql.Identifier(schema),
+                            pgsql.Identifier(table),
+                        ),
+                        (source_name,),
+                    )
+                else:
+                    cur.execute(
+                        pgsql.SQL("SELECT MAX({}) FROM {}.{}").format(
+                            pgsql.Identifier(freshness_col),
+                            pgsql.Identifier(schema),
+                            pgsql.Identifier(table),
+                        )
+                    )
+            else:
+                schema_name = entry["dlt_schema_name"]
+                cur.execute(
+                    "SELECT MAX(inserted_at) FROM data_lake._dlt_loads"
+                    " WHERE schema_name = %s AND status = 0",
+                    (schema_name,),
+                )
+            row = cur.fetchone()
+    except Exception:
+        # Table may not exist yet (ODD scaffold DDL not applied), or other transient
+        # error. Rollback so the connection stays usable and return None.
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        return None
+
+    if row is None or row[0] is None:
+        return None
+    return _to_date(row[0])
 
 
 def check_tier1_entry(conn, entry: dict) -> dict:
@@ -157,24 +216,29 @@ def check_volume_entry(conn, entry: dict) -> dict | None:
         return None
 
     schema, table = count_table.split(".", 1)
-    # source_name: scope the row count to one source when the table is shared (see
-    # check_tier2_entry) so expected_rows_min is a per-source floor, not a blended one.
     source_name = entry.get("source_name")
-    with conn.cursor() as cur:
-        if source_name:
-            cur.execute(
-                pgsql.SQL("SELECT count(*) FROM {}.{} WHERE source_name = %s").format(
-                    pgsql.Identifier(schema), pgsql.Identifier(table)
-                ),
-                (source_name,),
-            )
-        else:
-            cur.execute(
-                pgsql.SQL("SELECT count(*) FROM {}.{}").format(
-                    pgsql.Identifier(schema), pgsql.Identifier(table)
+    try:
+        with conn.cursor() as cur:
+            if source_name:
+                cur.execute(
+                    pgsql.SQL("SELECT count(*) FROM {}.{} WHERE source_name = %s").format(
+                        pgsql.Identifier(schema), pgsql.Identifier(table)
+                    ),
+                    (source_name,),
                 )
-            )
-        row = cur.fetchone()
+            else:
+                cur.execute(
+                    pgsql.SQL("SELECT count(*) FROM {}.{}").format(
+                        pgsql.Identifier(schema), pgsql.Identifier(table)
+                    )
+                )
+            row = cur.fetchone()
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        return None
 
     landed = row[0] if row else 0
     status = "LOW_VOLUME" if landed < min_rows else "OK"
@@ -182,53 +246,15 @@ def check_volume_entry(conn, entry: dict) -> dict | None:
 
 
 def check_tier2_entry(conn, entry: dict) -> dict:
-    """Query tier-2 freshness — via _dlt_loads (dlt pipelines) or directTableFreshness (non-dlt)."""
-    from psycopg import sql as pgsql
-
+    """Query tier-2 freshness via _fetch_max_freshness and compare to threshold."""
     name = entry["name"]
     cadence = int(entry["cadence_days"])
     tolerance = float(entry["tolerance_multiplier"])
     threshold = int(cadence * tolerance)
 
-    with conn.cursor() as cur:
-        if "freshness_table" in entry:
-            # Non-dlt pipeline: query MAX(<freshness_column>) on the named table directly.
-            # freshness_column defaults to inserted_at; override in registry for tables that
-            # use a different timestamp (e.g. scraped_at, last_seen_at).
-            freshness_col = entry.get("freshness_column", "inserted_at")
-            schema, table = entry["freshness_table"].split(".", 1)
-            # source_name: when two un-auto-ingestable sources share one table (e.g.
-            # marketbeat_swfl holds cw_marketbeat quarterly + mhs_databook annual), scope
-            # freshness to THIS source so a recent write by the co-tenant can't mask this
-            # one's staleness (the "one cadence per table breaks silently" trap).
-            source_name = entry.get("source_name")
-            if source_name:
-                cur.execute(
-                    pgsql.SQL("SELECT MAX({}) FROM {}.{} WHERE source_name = %s").format(
-                        pgsql.Identifier(freshness_col),
-                        pgsql.Identifier(schema),
-                        pgsql.Identifier(table),
-                    ),
-                    (source_name,),
-                )
-            else:
-                cur.execute(
-                    pgsql.SQL("SELECT MAX({}) FROM {}.{}").format(
-                        pgsql.Identifier(freshness_col),
-                        pgsql.Identifier(schema),
-                        pgsql.Identifier(table),
-                    )
-                )
-        else:
-            schema_name = entry["dlt_schema_name"]
-            cur.execute(
-                "SELECT MAX(inserted_at) FROM data_lake._dlt_loads"
-                " WHERE schema_name = %s AND status = 0",
-                (schema_name,),
-            )
-        row = cur.fetchone()
+    last_run = _fetch_max_freshness(conn, entry)
 
-    if row is None or row[0] is None:
+    if last_run is None:
         return {
             "name": name,
             "lane": "tier-2",
@@ -239,7 +265,6 @@ def check_tier2_entry(conn, entry: dict) -> dict:
             "status": "MISSING",
         }
 
-    last_run = _to_date(row[0])
     age_days = (date.today() - last_run).days
     status = "STALE" if age_days > threshold else "FRESH"
     return {
@@ -249,6 +274,75 @@ def check_tier2_entry(conn, entry: dict) -> dict:
         "age_days": age_days,
         "cadence_days": cadence,
         "threshold_days": threshold,
+        "status": status,
+    }
+
+
+# ODD_WINDOW_HALF is the number of days before/after the expected drop to watch.
+ODD_WINDOW_HALF = 10
+
+
+def check_odd_window_entry(conn, entry: dict, _today: date | None = None) -> dict:
+    """Window-based probe for ODD (manual-drop) sources.
+
+    Expected date = last_run + cadence_days, or first_expected_by if no data.
+
+    Statuses:
+      UNINITIALIZED  no data and no first_expected_by  → silent
+      WAITING        today < expected - 10 days        → silent
+      WINDOW_OPEN    in the window, no new data yet    → shown (watching)
+      OVERDUE        today > expected + 10, no data    → alert
+      FRESH          new data arrived this cycle       → silent
+    """
+    name = entry["name"]
+    lane = entry.get("lane", "tier-2")
+    cadence = int(entry["cadence_days"])
+    today = _today or date.today()
+
+    last_run = _fetch_max_freshness(conn, entry)
+
+    # Determine expected date for the next drop
+    if last_run is not None:
+        expected = last_run + timedelta(days=cadence)
+    elif "first_expected_by" in entry:
+        raw = entry["first_expected_by"]
+        expected = raw if isinstance(raw, date) else date.fromisoformat(str(raw))
+    else:
+        return {
+            "name": name,
+            "lane": lane,
+            "last_run": None,
+            "age_days": None,
+            "cadence_days": cadence,
+            "threshold_days": ODD_WINDOW_HALF,
+            "expected_date": None,
+            "status": "UNINITIALIZED",
+        }
+
+    window_start = expected - timedelta(days=ODD_WINDOW_HALF)
+    window_end = expected + timedelta(days=ODD_WINDOW_HALF)
+
+    # "Fresh this cycle" = data arrived at or after the window start
+    has_current = last_run is not None and last_run >= window_start
+
+    if has_current:
+        status = "FRESH"
+    elif today < window_start:
+        status = "WAITING"
+    elif today <= window_end:
+        status = "WINDOW_OPEN"
+    else:
+        status = "OVERDUE"
+
+    age_days = (today - last_run).days if last_run else None
+    return {
+        "name": name,
+        "lane": lane,
+        "last_run": last_run,
+        "age_days": age_days,
+        "cadence_days": cadence,
+        "threshold_days": ODD_WINDOW_HALF,
+        "expected_date": expected,
         "status": status,
     }
 
@@ -359,12 +453,18 @@ def sync_gap_checks(conn, gap_cities: list[str]) -> dict:
 
 # ── probe runner ──────────────────────────────────────────────────────────────
 
+# Statuses that require no action and are excluded from the alert summary.
+_SILENT_STATUSES = {"FRESH", "WAITING", "UNINITIALIZED"}
+
 
 def run_probe(conn, registry: dict) -> list[dict]:
     results = []
     for entry in registry.get("pipelines", []):
         lane = entry.get("lane", "")
-        if lane in ("tier-1", "tier-1-duckdb"):
+        probe_mode = entry.get("probe_mode", "standard")
+        if probe_mode == "odd_window":
+            r = check_odd_window_entry(conn, entry)
+        elif lane in ("tier-1", "tier-1-duckdb"):
             r = check_tier1_entry(conn, entry)
         elif lane == "tier-2":
             r = check_tier2_entry(conn, entry)
@@ -380,7 +480,15 @@ def run_probe(conn, registry: dict) -> list[dict]:
 
 # ── output formatting ─────────────────────────────────────────────────────────
 
-_STATUS_ICON = {"FRESH": "✅", "STALE": "⚠️", "MISSING": "❌"}
+_STATUS_ICON = {
+    "FRESH": "✅",
+    "STALE": "⚠️",
+    "MISSING": "❌",
+    "WAITING": "⏳",
+    "UNINITIALIZED": "—",
+    "WINDOW_OPEN": "👀",
+    "OVERDUE": "🚨",
+}
 _VOL_ICON = {"OK": "✅", "LOW_VOLUME": "⚠️"}
 
 
@@ -390,19 +498,24 @@ def format_summary(results: list[dict], run_date: date | None = None) -> str:
 
     alerting = [
         r for r in results
-        if r["status"] != "FRESH" or r.get("volume_status") == "LOW_VOLUME"
+        if r["status"] not in _SILENT_STATUSES or r.get("volume_status") == "LOW_VOLUME"
     ]
     if not alerting:
         return header + "✅ All pipelines fresh and volume healthy.\n"
 
     lines = [
-        "| Pipeline | Lane | Last Run | Age (days) | Cadence | Threshold | Status | Volume |",
+        "| Pipeline | Lane | Last Run | Age (days) | Cadence | Expected / Threshold | Status | Volume |",
         "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for r in alerting:
         icon = _STATUS_ICON.get(r["status"], r["status"])
         last_run = str(r["last_run"]) if r["last_run"] is not None else "—"
         age = str(r["age_days"]) if r["age_days"] is not None else "—"
+        # ODD window entries show expected date; standard entries show threshold days.
+        if "expected_date" in r and r["expected_date"] is not None:
+            threshold_col = f"expect {r['expected_date']} ±{ODD_WINDOW_HALF}d"
+        else:
+            threshold_col = f"{r.get('threshold_days', '—')}d"
         vol_status = r.get("volume_status")
         if vol_status == "LOW_VOLUME":
             vol_str = f"⚠️ {r['volume_landed']:,} / {r['volume_min']:,}"
@@ -412,7 +525,7 @@ def format_summary(results: list[dict], run_date: date | None = None) -> str:
             vol_str = "—"
         lines.append(
             f"| {r['name']} | {r['lane']} | {last_run} | {age}"
-            f" | {r['cadence_days']}d | {r['threshold_days']}d | {icon} {r['status']} | {vol_str} |"
+            f" | {r['cadence_days']}d | {threshold_col} | {icon} {r['status']} | {vol_str} |"
         )
     return header + "\n".join(lines) + "\n"
 
