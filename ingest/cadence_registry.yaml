@@ -560,7 +560,8 @@ pipelines:
     freshness_column: _ingested_at
     source_name: lee_associates
     expected_rows_min: 1
-    note: "Wave 2 CRE. Lee & Associates SWFL office+retail PDFs. URL VERIFIED 2026-06-09: https://www.lee-associates.com/research/ — needs sample PDF + parse_lee_table() impl."
+    note: "Wave 2 CRE. Lee & Associates SWFL — ACTIVE. 20 rows loaded 2026-06-09 (4 sectors x 5 quarters, Q1-2026 thru Q1-2025). PDF URL pattern VERIFIED. GHA: ingest-lee-associates-swfl.yml (quarterly, 20th of Feb/May/Aug/Nov). Graduation = remove probe_mode: odd_window after first GHA green."
+    # Pipeline: ingest/pipelines/lee_associates_swfl/pipeline.py + extract.py.
 
   - name: premier_commercial_swfl
     lane: tier-2
@@ -571,7 +572,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: premier_commercial
     expected_rows_min: 1
-    note: "Wave 2 CRE. Premier Commercial SWFL retail+mixed-use PDFs. URL VERIFIED 2026-06-09: https://www.premcomm.com/ — needs sample PDF + extractor."
+    note: "Wave 2 CRE. Premier Commercial SWFL — NO MARKET REPORTS PUBLISHED. Brokerage-only landing page (premcomm.com); vacancy/rent/absorption data NOT available. Stub pipeline exits 1. Do not attempt PDF extraction until a report URL is identified."
 
   - name: svn_florida_swfl
     lane: tier-2
@@ -582,7 +583,7 @@ pipelines:
     freshness_column: _ingested_at
     source_name: svn_florida
     expected_rows_min: 1
-    note: "Wave 2 CRE. SVN Florida SWFL retail+investment sales PDFs. URL VERIFIED 2026-06-09: https://svncp.com/ — needs sample PDF + extractor."
+    note: "Wave 2 CRE. SVN Florida SWFL — TRANSACTION NEWS ONLY. svncp.com publishes deal-by-deal press releases, not structured market reports. No vacancy/rent/absorption tables available. Stub pipeline exits 1. If individual deal rows are useful, wire to a separate table (not marketbeat_swfl)."
 
   - name: estero_edc
     lane: tier-2

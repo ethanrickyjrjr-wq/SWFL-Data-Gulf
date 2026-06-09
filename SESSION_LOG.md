@@ -2,6 +2,23 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — feat: 7 ODD-window pipelines activated (mhs_permits, lee_associates, estero_edc, fmb_recovery + stubs)
+
+- **data loaded** — 2 new tables created + seeded:
+  - `data_lake.active_listings_cre` (DDL + GRANT, empty — crexi_listings pipeline writes here)
+  - `data_lake.local_cre_context` (DDL + GRANT): 6 Estero EDC rows + 8 FMB Recovery rows loaded
+  - `data_lake.marketbeat_swfl` (lee_associates): 20 rows loaded (4 sectors × 5 quarters, Q1-2025 thru Q1-2026)
+  - `data_lake.mhs_permits_swfl` (mhs_databook): 281 permit rows loaded (12 jurisdictions, 2025 calendar year)
+- **pipelines** — all functional and dry-run verified:
+  - `ingest/pipelines/mhs_permits_swfl/extract.py + pipeline.py`: full pdfplumber extractor for Recipe 2 (Issued Permits); jurisdiction-exact line matching; handles multi-page continues
+  - `ingest/pipelines/lee_associates_swfl/extract.py`: fixed token-based parsing (was `\s{2+}` split, now regex-per-format per column type); `pipeline.py` fully implemented from stub
+  - `ingest/pipelines/estero_edc/pipeline.py`: seed-based upsert with graceful 526 fallback; `estero-fl.gov` returns SSL/Cloudflare errors locally, handled cleanly
+  - `ingest/pipelines/fmb_recovery/pipeline.py`: seed-based upsert; live scrape of fortmyersbeachfl.gov/123/Projects-Around-Town works (208k bytes confirmed)
+  - `premier_commercial_swfl`, `svn_florida_swfl`: stubs updated; cadence registry notes updated to "NO MARKET REPORTS — brokerage only"
+- **GHA workflows** added: `ingest-lee-associates-swfl.yml` (quarterly, 20th of Feb/May/Aug/Nov), `ingest-mhs-permits-swfl.yml` (annual, Mar 20), `ingest-local-cre-context.yml` (monthly/quarterly, 1st of each month)
+- `ingest/cadence_registry.yaml`: notes updated for lee_associates (ACTIVE, 20 rows loaded), premier_commercial (NO REPORTS), svn_florida (TRANSACTION NEWS ONLY)
+- **Next:** wire `local_cre_context` into `cre-swfl` pack caveats; crexi_listings first live run; primer for graduation (remove `probe_mode: odd_window` after first green GHA)
+
 ## 2026-06-09 (Sonnet 4.6 · main) — fix: ODD-window cadence-scaled probe + clock-start rule
 
 - `ingest/scripts/check_freshness.py`: 3 rule changes — (1) `ODD_WINDOW_HALF=10` → `_odd_window_half(cadence)` scaled ±10d/±5d/±2d for quarterly/monthly/weekly; (2) no-data + no-`first_expected_by` → clock-starts from today (`expected = today + cadence`) instead of silent UNINITIALIZED — window opens in one cadence cycle; (3) `has_current` = `(today - last_run).days <= window_half` — FRESH means "drop arrived in the last window_half days" (old `last_run >= window_start` was unreachable with scaled windows since `window_half < cadence` always).

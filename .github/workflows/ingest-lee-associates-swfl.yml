@@ -1,0 +1,78 @@
+name: ingest-lee-associates-swfl
+
+on:
+  schedule:
+    # Quarterly: 20th of Feb/May/Aug/Nov — ~7 weeks after quarter close.
+    # Lee & Associates typically publishes 4-6 weeks post-quarter.
+    - cron: "0 10 20 2,5,8,11 *"
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Report year (e.g. 2026)"
+        required: true
+        default: "2026"
+      quarter:
+        description: "Report quarter (1-4)"
+        required: true
+        default: "1"
+      month:
+        description: "PDF upload month override (leave blank to auto)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Dry-run (extract only, no DB write)"
+        type: boolean
+        default: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install pdfplumber requests psycopg[binary]
+
+      - name: Resolve quarter from schedule
+        id: quarter
+        run: |
+          YEAR="${{ inputs.year }}"
+          QTR="${{ inputs.quarter }}"
+          if [ -z "$YEAR" ]; then
+            MONTH=$(date +%-m)
+            YEAR=$(date +%Y)
+            # Schedule fires month after publish: Feb=Q4prev, May=Q1, Aug=Q2, Nov=Q3
+            case $MONTH in
+              2)  QTR=4; YEAR=$((YEAR - 1)) ;;
+              5)  QTR=1 ;;
+              8)  QTR=2 ;;
+              11) QTR=3 ;;
+              *)  QTR=$(( (MONTH - 1) / 3 )) ;;
+            esac
+          fi
+          echo "year=$YEAR" >> "$GITHUB_OUTPUT"
+          echo "quarter=$QTR" >> "$GITHUB_OUTPUT"
+
+      - name: Run Lee & Associates pipeline
+        run: |
+          MONTH_FLAG=""
+          if [ -n "${{ inputs.month }}" ]; then
+            MONTH_FLAG="--month ${{ inputs.month }}"
+          fi
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          python -m ingest.pipelines.lee_associates_swfl.pipeline \
+            --year ${{ steps.quarter.outputs.year }} \
+            --quarter ${{ steps.quarter.outputs.quarter }} \
+            $MONTH_FLAG $DRY_FLAG

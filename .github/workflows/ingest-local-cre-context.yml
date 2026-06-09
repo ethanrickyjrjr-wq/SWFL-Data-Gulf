@@ -1,0 +1,54 @@
+name: ingest-local-cre-context
+
+on:
+  schedule:
+    # Monthly (estero_edc) + quarterly (fmb_recovery) — run both on the 1st.
+    # estero-fl.gov checks: monthly, 01:00 UTC on the 1st.
+    # fmb_recovery checks: quarterly (Jan/Apr/Jul/Oct 1st), same run covers both.
+    - cron: "0 1 1 * *"
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Which source to run (estero_edc | fmb_recovery | both)"
+        required: false
+        default: "both"
+      dry_run:
+        description: "Dry-run (print rows, no DB write)"
+        type: boolean
+        default: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install requests psycopg[binary]
+
+      - name: Run Estero EDC pipeline
+        if: ${{ inputs.source == 'estero_edc' || inputs.source == 'both' || inputs.source == '' }}
+        run: |
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          python -m ingest.pipelines.estero_edc.pipeline $DRY_FLAG
+
+      - name: Run FMB Recovery pipeline
+        if: ${{ inputs.source == 'fmb_recovery' || inputs.source == 'both' || inputs.source == '' }}
+        run: |
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          python -m ingest.pipelines.fmb_recovery.pipeline $DRY_FLAG

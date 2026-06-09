@@ -1,0 +1,52 @@
+name: ingest-mhs-permits-swfl
+
+on:
+  schedule:
+    # Annual: March 20 — MHS Data Book publishes ~mid-March each year.
+    - cron: "0 10 20 3 *"
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Override PDF URL (leave blank to use current default)"
+        required: false
+        default: ""
+      year:
+        description: "Calendar year of permit data in the PDF (default: 2025)"
+        required: false
+        default: "2025"
+      dry_run:
+        description: "Dry-run (extract only, no DB write)"
+        type: boolean
+        default: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install pdfplumber requests psycopg[binary]
+
+      - name: Run MHS permits pipeline
+        run: |
+          URL_FLAG=""
+          if [ -n "${{ inputs.url }}" ]; then
+            URL_FLAG="--url ${{ inputs.url }}"
+          fi
+          YEAR_FLAG="--year ${{ inputs.year || '2025' }}"
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          python -m ingest.pipelines.mhs_permits_swfl.pipeline \
+            $URL_FLAG $YEAR_FLAG $DRY_FLAG
