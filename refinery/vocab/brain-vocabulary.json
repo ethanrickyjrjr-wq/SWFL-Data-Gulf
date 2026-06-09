@@ -1928,6 +1928,22 @@
       "status": "active",
       "scope_note": "Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the state of Florida (place_id='FL'). Computed from data_lake.fhfa_hpi. State baseline for comparison against Cape Coral MSA divergence. Negative = statewide prices falling; positive = rising."
     },
+    "fhfa_naples_msa_yoy_pct": {
+      "id": "fhfa_naples_msa_yoy_pct",
+      "grade": { "direction_polarity": "higher_is_bullish" },
+      "prefLabel": "Naples-Marco Island MSA HPI Year-over-Year Change (FHFA)",
+      "altLabels": ["Naples MSA HPI YoY", "Collier County HPI YoY proxy"],
+      "raw_slugs": ["fhfa_naples_msa_yoy_pct"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["properties-collier-value", "master"],
+      "value_type": "percent_change",
+      "unit": "percent",
+      "value_range": [-30, 30],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the Naples-Marco Island FL MSA — the Collier County price-level proxy. Computed from data_lake.fhfa_hpi: (latest_quarter_index - same_quarter_prior_year_index) / same_quarter_prior_year_index × 100. Negative = falling prices; positive = rising. Exogenous signal in properties-collier-value; contrasted against Redfin homes-sold velocity z-score."
+    },
     "macro_fl_estab_count_retail": {
       "id": "macro_fl_estab_count_retail",
       "prefLabel": "Florida Retail Establishments (NAICS 44-45, Census CBP)",
@@ -3801,6 +3817,7 @@
     "collier_total_parcels": "properties_collier_total_parcels",
     "fhfa_cape_coral_msa_yoy_pct": "fhfa_cape_coral_msa_yoy_pct",
     "fhfa_fl_state_yoy_pct": "fhfa_fl_state_yoy_pct",
+    "fhfa_naples_msa_yoy_pct": "fhfa_naples_msa_yoy_pct",
     "fl_estab_count_retail": "macro_fl_estab_count_retail",
     "fl_estab_count_food_service": "macro_fl_estab_count_food_service",
     "fl_estab_count_construction": "macro_fl_estab_count_construction",
