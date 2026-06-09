@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — fix: marketbeat-pdf-ingest YAML invalid (workflow file issue)
+
+- `marketbeat-pdf-ingest.yml` had Python heredoc content starting at column 0 inside `run: |` blocks — YAML block scalars terminate at < their indentation level, so GitHub's parser rejected the file on every push, showing the raw filename instead of `name:`.
+- Fix: `Determine target quarter` step rewritten as pure bash; Python download logic extracted to `.github/scripts/download-colliers.py` + `.github/scripts/download-cw.py`; workflow calls those scripts with `python3 .github/scripts/download-*.py "$QUARTER"`.
+- **Next:** CI should be fully green on next push.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — fix: deptry pymupdf + mhs_databook graduation
 
 - `ingest/requirements.txt`: added `pymupdf>=1.23` (fitz import used by `marketbeat_pdf/extractor.py` + `lee_associates_swfl/extract.py` was missing entirely).
