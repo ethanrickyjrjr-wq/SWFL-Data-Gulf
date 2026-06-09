@@ -170,6 +170,65 @@ describe("toDisplayBrain chart (Tier A — compute-on-read)", () => {
   });
 });
 
+describe("formatValue percent — points vs share (Naples/Estero 0.4% bug)", () => {
+  // A percentage-point value renders verbatim — a legitimately small rate
+  // like 0.4% must NOT be multiplied to "40.00%". Regression for the
+  // Naples/Estero vacancy bug, where both submarkets sat at 0.4% and the old
+  // |v| ≤ 1 → ×100 heuristic rendered both as "40.00%".
+  function displayValueOf(m: BrainOutputMetric): string {
+    const d = toDisplayBrain(parsedFixture({ key_metrics: [m] }));
+    return d.metrics[0]!.value;
+  }
+
+  test("sub-1% percentage-point value renders as-is, not ×100", () => {
+    assert.equal(
+      displayValueOf(
+        metric({
+          metric: "vacancy_rate_marketbeat_naples",
+          value: 0.4,
+          label: "MarketBeat Naples vacancy rate",
+          variable_type: "intensive",
+          units: "percent",
+          display_format: "percent",
+        }),
+      ),
+      "0.40%",
+    );
+  });
+
+  test("a 0–1 share (units: share) is still scaled to a percent", () => {
+    assert.equal(
+      displayValueOf(
+        metric({
+          metric: "permits_lee_saturation_index",
+          value: 0.4,
+          label: "Lee County permit saturation",
+          variable_type: "intensive",
+          units: "share",
+          display_format: "percent",
+        }),
+      ),
+      "40.00%",
+    );
+  });
+
+  test("ordinary percentage-point values are unchanged", () => {
+    assert.equal(
+      displayValueOf(
+        metric({
+          metric: "cap_rate_median",
+          value: 6.7,
+          label: "Cap rate",
+          variable_type: "intensive",
+          units: "percent",
+          display_format: "percent",
+        }),
+      ),
+      "6.70%",
+    );
+  });
+});
+
 describe("scrubCaveatTechnical (PR3-B)", () => {
   test("spares domain acronyms, plain numbers, and dates", () => {
     for (const safe of [

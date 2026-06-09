@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Opus · claude/naples-estero-vacancy-kupm6b) — fix: percent formatter — 0.4% vacancy rendered as "40%"
+
+- `refinery/render/speaker.mts` `formatValue`: percent case no longer multiplies by 100 on the `|v| ≤ 1` magnitude guess. Now percentage-points by default; scales ×100 only when `units` is a 0–1 share (`share`/`ratio`/`fraction`/`proportion`, e.g. permit `saturation_index`). Discriminator verified across all 114 percent-format metrics in the lake (111 points / 3 share).
+- **Root cause**: Naples & Estero retail vacancy are both a genuine 0.4% (stored `value:0.4`, units `percent`); the old heuristic read 0.4 as a fraction → "40.00%". Same value = both cities wrong. Data was correct; bug was display-only, in the single chokepoint feeding `/r/`, chat speaker, and MCP.
+- `refinery/render/speaker.test.mts`: +3 regression tests (sub-1% point value, 0–1 share, ordinary point value). 46/46 green; typecheck clean. Live page corrects on next deploy (no rebuild needed — data unchanged).
+
 ## 2026-06-09 (Sonnet 4.6 · main) — fix: voteDirection neutral-abstains + mixed directional sub-calls
 
 - `refinery/lib/synth.mts`: `voteDirection` now excludes neutral weight from the agreement-ratio denominator (neutral upstreams abstain; only bullish vs bearish compete for the 60% threshold). Neutral brains' brain_ids are preserved in `drivers` so `composeConditionalThesis` can cite them.
