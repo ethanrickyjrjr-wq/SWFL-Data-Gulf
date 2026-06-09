@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Opus · `claude/cre-market-analysis-firecrawl-9ny137`) — docs: CRE supplementary-metrics handoff + firecrawl scouting
+
+- **handoff written** — `docs/superpowers/plans/2026-06-09-cre-supplementary-metrics-handoff.md`: goal (predictive CRE `/r/` read + charts over the operator's 4 metric families), what-we-have / what's-missing matrix, firecrawl scouting results, prioritized next steps. Doc-only, no code/data changed.
+- **key finding** — `marketbeat_swfl` already has DARK columns for the construction pipeline + sales volume (`under_construction`, `deliveries`, `inventory_sf`, `sales_volume`, `sale_price_psf`, `vol_growth`, `ytd_absorption_sqft`): present in schema (`20260605` + `20260609` migrations) but the source connector never reads them and the pack never emits them. Lighting them up needs NO migration — just connector + pack + vocab. Verified zero hits via grep over `marketbeat-swfl-source.mts` + `cre-swfl.mts`.
+- **missing entirely** (no column): pre-leased %, availability rate, effective rents, TI allowances, free-rent months. Family 3 (effective/TI/free-rent) are ODD candidates (not in free PDFs).
+- **firecrawl scouting** — could NOT run live: no `FIRECRAWL_API_KEY` / `.dlt/secrets.toml` in this clone; publisher sites 403 plain WebFetch (the reason the stealth-proxy path exists). Net-new targets named: **LSI Companies "Market Trends"** quarterly PDF (cap rate + sales volume + under-construction, SWFL-native) and **CBRE Cap Rate Survey** (semi-annual cap-rate anchor). C&W/Colliers/Lee already wired.
+- **charts** — Tier A engine already live (`computeMetricChart` → `/r/[slug]:162`); richer CRE charts are a DATA problem, not a render one.
+- **next** — light up dark columns (step 1 in handoff); verify population from a creds-bearing session; wire LSI pipeline.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — feat: 7 ODD-window pipelines activated (mhs_permits, lee_associates, estero_edc, fmb_recovery + stubs)
 
 - **data loaded** — 2 new tables created + seeded:
