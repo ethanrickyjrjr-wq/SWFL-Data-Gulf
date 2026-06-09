@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Opus 4.8 · main) — ops: force-bank first 11 §6-A slug predictions (live gradeable corpus 6→17)
+
+- Audited the "master always-mixed + no-grades" plan against code + live DB: the §2 backtest is already SHIPPED (144 retrodicted grades, lift −6.5pp) and §6-A/§6-B already SHIPPED. The real live-yield gap was timing — the 12 sign-slug leaf brains last refined 06-03/06-06, just before the §6-A wiring (`a4f5383`, 06-08) — so `logSlugPredictions` had banked 0 rows.
+- Forced `--target-only` rebuilds of `properties-lee-value`, `properties-collier-value`, `safety-swfl`, `rsw-airport`, `traffic-swfl` → Stage 4 banked **11 `kind='slug'` gradeable predictions** (windows 2026-09-07 → 2027-06-09). Live gradeable corpus 6→17. Cadence guard now holds them open (tonight's nightly won't double-log). No code/vocab/pack changes — brain `.md` refreshed with current data (e.g. properties-lee `sales_velocity_zscore` flipped +4.95→−0.93, banked bearish).
+- **FLAG (decision pending):** `da0a79d` (neutral-abstains) landed via a parallel session mid-audit. It conflicts with locked spec `docs/superpowers/specs/2026-06-07-smart-grading-system-design.md` §6 ("mixed stays ungradeable… approach C rejected — the hard honesty line") and honesty guardrail #1. My audit recommended AGAINST it (low-leverage vs §6-A; reopens a locked decision). Surfaced to operator — not reverting unilaterally.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — fix: voteDirection neutral-abstains + mixed directional sub-calls
 
 - `refinery/lib/synth.mts`: `voteDirection` now excludes neutral weight from the agreement-ratio denominator (neutral upstreams abstain; only bullish vs bearish compete for the 60% threshold). Neutral brains' brain_ids are preserved in `drivers` so `composeConditionalThesis` can cite them.

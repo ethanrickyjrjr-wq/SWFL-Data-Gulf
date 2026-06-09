@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260531 -->
+<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260609 -->
 ---
 brain_id: rsw-airport
-version: 2
-refined_at: 2026-05-31T02:31:22Z
-freshness_token: SWFL-7421-v2-20260531
+version: 3
+refined_at: 2026-06-09T13:41:17Z
+freshness_token: SWFL-7421-v3-20260609
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Southwest Florida airport passenger demand — RSW (Southwest Florida International, Fort Myers/Cape Coral) and PGD (Punta Gorda) monthly enplanements from Lee County Port Authority
@@ -29,18 +29,18 @@ SCOPE: Southwest Florida airport passenger demand — RSW (Southwest Florida Int
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                            | verified   | expires
-s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida International) + PGD (Punta Gorda) monthly enplanements (Supabase rsw_airport_monthly: airport_code, metric, value, yoy_pct_change, report_month; scrape cadence monthly via flylcpa.com/about/statistics) | 2026-05-31 | 2026-06-30
+s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida International) + PGD (Punta Gorda) monthly enplanements (Supabase rsw_airport_monthly: airport_code, metric, value, yoy_pct_change, report_month; scrape cadence monthly via flylcpa.com/about/statistics) | 2026-06-09 | 2026-07-09
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"rsw_airport_enplanements","fact":"RSW monthly enplanements — 13 rows loaded (2025-04 to 2026-04)","value":"Latest: April 2026 — 640,135 enplaned passengers (+1.7% YoY)","src":"s01","date":"2026-05-31"}
+  {"id":"f001","topic":"rsw_airport_enplanements","fact":"RSW monthly enplanements — 13 rows loaded (2025-04 to 2026-04)","value":"Latest: April 2026 — 640,135 enplaned passengers (+1.7% YoY)","src":"s01","date":"2026-06-09"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "rsw-airport",
-  "version": 2,
-  "refined_at": "2026-05-31T02:31:22Z",
+  "version": 3,
+  "refined_at": "2026-06-09T13:41:17Z",
   "direction": "bullish",
   "magnitude": 0.08499999999999999,
   "drivers": [],
@@ -57,10 +57,14 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf",
-        "fetched_at": "2026-05-31T02:31:22Z",
+        "fetched_at": "2026-06-09T13:41:17Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 640,135 enplanements"
-      }
+      },
+      "suggestions": [
+        "What's driving rsw monthly enplanements?",
+        "How does rsw monthly enplanements here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "rsw_yoy_pct_change",
@@ -72,10 +76,14 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "raw",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf",
-        "fetched_at": "2026-05-31T02:31:22Z",
+        "fetched_at": "2026-06-09T13:41:17Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 YoY +1.7%"
-      }
+      },
+      "suggestions": [
+        "What's driving rsw yoy pct change?",
+        "How does rsw yoy pct change here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "rsw_trailing_12mo_enplanements",
@@ -87,10 +95,14 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf",
-        "fetched_at": "2026-05-31T02:31:22Z",
+        "fetched_at": "2026-06-09T13:41:17Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW trailing 12-month sum ending 2026-04"
-      }
+      },
+      "suggestions": [
+        "What's driving rsw trailing 12mo enplanements?",
+        "How does rsw trailing 12mo enplanements here compare to other SWFL areas?"
+      ]
     }
   ],
   "caveats": [],
@@ -104,7 +116,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-31T02:31:22Z"
+    "computed_at": "2026-06-09T13:41:17Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -121,5 +133,5 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
 - rsw-airport: SWFL aviation demand pulse — monthly RSW enplanements from LCPA PDF, YoY change, and trailing 12-month total.
 
 --- RECENT NOTES ---
-- 2026-05-31: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-09: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

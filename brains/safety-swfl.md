@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260606 -->
+<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260609 -->
 ---
 brain_id: safety-swfl
-version: 2
-refined_at: 2026-06-06T19:07:17Z
-freshness_token: SWFL-7421-v2-20260606
+version: 3
+refined_at: 2026-06-09T13:41:16Z
+freshness_token: SWFL-7421-v3-20260609
 ttl_seconds: 7776000
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) property crime rate from FBI Crime Data Explorer NIBRS — property offenses (burglary, larceny-theft, motor vehicle theft) per 1,000 residents, coverage-matched to reporting agencies. Annual grain, quarterly ingest cadence; data lags ~6–9 months.
@@ -29,18 +29,18 @@ SCOPE: SWFL (Lee + Collier) property crime rate from FBI Crime Data Explorer NIB
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                 | verified   | expires
-s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property Crime by County (Supabase fdle_crime_swfl: Lee + Collier; annual data; coverage-matched county rate; quarterly ingest cadence) | 2026-06-06 | 2026-09-04
+s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property Crime by County (Supabase fdle_crime_swfl: Lee + Collier; annual data; coverage-matched county rate; quarterly ingest cadence) | 2026-06-09 | 2026-09-07
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"FDLE UCR property crime corpus (Lee + Collier)","value":"6 county-year rows, latest year 2024.","src":"s01","date":"2026-06-06"}
+  {"id":"f001","topic":"corpus_overview","fact":"FDLE UCR property crime corpus (Lee + Collier)","value":"6 county-year rows, latest year 2024.","src":"s01","date":"2026-06-09"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "safety-swfl",
-  "version": 2,
-  "refined_at": "2026-06-06T19:07:17Z",
+  "version": 3,
+  "refined_at": "2026-06-09T13:41:16Z",
   "direction": "bullish",
   "magnitude": 0.6466666666666666,
   "drivers": [],
@@ -57,10 +57,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "raw",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety property crime per 1k lee?",
+        "How does safety property crime per 1k lee here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_property_crime_per_1k_collier",
@@ -72,10 +76,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "raw",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety property crime per 1k collier?",
+        "How does safety property crime per 1k collier here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_property_crime_per_1k_swfl",
@@ -87,10 +95,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "raw",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety property crime per 1k swfl?",
+        "How does safety property crime per 1k swfl here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_property_crime_yoy_pct_swfl",
@@ -102,10 +114,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "percent",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety property crime yoy pct swfl?",
+        "How does safety property crime yoy pct swfl here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_property_crime_yoy_pct_lee",
@@ -117,10 +133,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "percent",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety property crime yoy pct lee?",
+        "How does safety property crime yoy pct lee here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_property_crime_yoy_pct_collier",
@@ -132,10 +152,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "percent",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety property crime yoy pct collier?",
+        "How does safety property crime yoy pct collier here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_total_property_crimes_lee",
@@ -147,10 +171,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "count",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety total property crimes lee?",
+        "How does safety total property crimes lee here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "safety_total_property_crimes_collier",
@@ -162,10 +190,14 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
       "display_format": "count",
       "source": {
         "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-06-06T19:07:17.668Z",
+        "fetched_at": "2026-06-09T13:41:16.906Z",
         "tier": 1,
         "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      }
+      },
+      "suggestions": [
+        "What's driving safety total property crimes collier?",
+        "How does safety total property crimes collier here compare to other SWFL areas?"
+      ]
     }
   ],
   "caveats": [
@@ -182,7 +214,7 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-06T19:07:17Z"
+    "computed_at": "2026-06-09T13:41:16Z"
   },
   "exogenous_signals": []
 }
@@ -191,5 +223,5 @@ s01 | FBI Crime Data Explorer (NIBRS, FL agencies; FDLE-submitted) — Property 
 - safety-swfl: FDLE UCR property crime baseline for Lee + Collier as a real-estate underwriting input.
 
 --- RECENT NOTES ---
-- 2026-06-06: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-09: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
