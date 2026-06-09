@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — fix: marketbeat workflow secret + red-brain audit
+
+- `marketbeat-pdf-ingest.yml`: `MARKETBEAT_DB_URL: ${{ secrets.DATABASE_URL }}` → `DESTINATION__POSTGRES__CREDENTIALS` (DATABASE_URL secret doesn't exist; was failing every run since GHA extract scripts landed).
+- Dispatched `rsw-airport-monthly.yml` manually — pdfplumber was committed at 19:54 UTC but cron ran at 15:00 UTC on Jun 8, causing the ModuleNotFoundError; next cron (Jul 8) will self-heal, dispatch confirms now.
+- Opened check `ops_dashboard_freshness_mismatch`: ops-dashboard `directTableFreshness()` hardcodes `inserted_at` but 6 pipelines use `scraped_at`/`last_seen_at`/`captured_at`/`_ingested_at` → show red despite fresh DB data. Fix: update `swfldatagulf-ops/lib/supabase.ts` + add 13 SUPPLEMENT entries to `coverage.ts`. Fix code written, pending ops-dashboard push.
+- 7 ODD-window pipelines (mhs_permits_swfl, crexi_listings, lee_associates_swfl, premier_commercial_swfl, svn_florida_swfl, estero_edc, fmb_recovery) show red because they lack SUPPLEMENT entries + the dashboard doesn't understand probe_mode:odd_window as parked. Will turn gray/parked once ops-dashboard fix lands.
+- **Next:** push ops-dashboard fix (swfldatagulf-ops/lib/supabase.ts + coverage.ts) then dispatch marketbeat-pdf-ingest workflow.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — chore: upgrade GHA actions to Node.js 24-compatible versions
 
 - 17 workflow files: `actions/checkout@v4` → `@v6`, `actions/setup-node@v4` → `@v5` (heal-cron-failure, log-cron-incident, notion-sync-weekly).

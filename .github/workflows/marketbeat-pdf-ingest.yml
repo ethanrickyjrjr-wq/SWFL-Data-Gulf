@@ -27,7 +27,7 @@ jobs:
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-      MARKETBEAT_DB_URL: ${{ secrets.DATABASE_URL }}
+      MARKETBEAT_DB_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
 
     steps:
       - uses: actions/checkout@v6
