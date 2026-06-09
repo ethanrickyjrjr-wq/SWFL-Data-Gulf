@@ -12,6 +12,7 @@ export function FactChip({
   value,
   factType,
   context,
+  slug,
   onActivate,
 }: {
   value: string;
@@ -20,6 +21,9 @@ export function FactChip({
    *  Populates SelectedFact.context so the popup can show
    *  "Unemployment Rate — 3.2%" instead of the bare figure. */
   context?: string;
+  /** Metric slug for this figure, when known — lets the converse server resolve
+   *  the authored methodology entry. Undefined for chips with no documented method. */
+  slug?: string;
   onActivate: (fact: SelectedFact) => void;
 }) {
   return (
@@ -32,6 +36,7 @@ export function FactChip({
           rect: e.currentTarget.getBoundingClientRect(),
           factType,
           context,
+          slug,
           mode: "fact",
         })
       }

@@ -10,6 +10,9 @@ export interface SelectedFact {
   factType: FactType;
   /** Row-level label from the nearest <tr> first cell, or nearest heading. */
   context?: string;
+  /** Metric slug when the selection is a known key_metric value (chip/row path).
+   *  Undefined for free text selections — those fall to the converse floor. */
+  slug?: string;
   /** "fact" = specific metric/phrase; "section" = large selection (>25 words). */
   mode: "fact" | "section";
 }

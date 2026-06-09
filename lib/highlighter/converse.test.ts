@@ -94,10 +94,7 @@ test("reports a status error when the response is not ok", async () => {
 
 test("reassembles a frame split across read chunks", async () => {
   const c = collector();
-  const body = streamOf([
-    `data: {"text":"Hel`,
-    `lo"}\n\ndata: {"done":true,"reach":[]}\n\n`,
-  ]);
+  const body = streamOf([`data: {"text":"Hel`, `lo"}\n\ndata: {"done":true,"reach":[]}\n\n`]);
   await streamConverse(
     { reportId: "env-swfl", question: "q" },
     c.handlers,
@@ -107,6 +104,39 @@ test("reassembles a frame split across read chunks", async () => {
   expect(c.state.done).toBe(true);
 });
 
+test("sends slug in the POST body when provided, omits it when not", async () => {
+  type ConverseBody = { report_id: string; fact?: string; slug?: string; question: string };
+  // Capture the request body the stub receives, return a minimal done frame.
+  function capturingFetch(sink: { body?: ConverseBody }): typeof fetch {
+    return (async (_url: string, init: RequestInit) => {
+      sink.body = JSON.parse(init.body as string) as ConverseBody;
+      return { ok: true, status: 200, body: streamOf([`data: {"done":true,"reach":[]}\n\n`]) };
+    }) as unknown as typeof fetch;
+  }
+
+  const withSlug: { body?: ConverseBody } = {};
+  await streamConverse(
+    {
+      reportId: "cre-swfl",
+      fact: "$27.51",
+      slug: "asking_rent_psf_median",
+      question: "break it down",
+    },
+    collector().handlers,
+    capturingFetch(withSlug),
+  );
+  expect(withSlug.body?.slug).toBe("asking_rent_psf_median");
+
+  const noSlug: { body?: ConverseBody } = {};
+  await streamConverse(
+    { reportId: "cre-swfl", fact: "$27.51", question: "break it down" },
+    collector().handlers,
+    capturingFetch(noSlug),
+  );
+  // JSON.stringify drops an undefined value — the key must be absent, not null.
+  expect("slug" in (noSlug.body ?? {})).toBe(false);
+});
+
 test("skips the request entirely when the question is blank", async () => {
   const c = collector();
   let called = false;
@@ -114,11 +144,7 @@ test("skips the request entirely when the question is blank", async () => {
     called = true;
     return { ok: true, status: 200, body: null };
   }) as unknown as typeof fetch;
-  await streamConverse(
-    { reportId: "env-swfl", question: "   " },
-    c.handlers,
-    spyFetch,
-  );
+  await streamConverse({ reportId: "env-swfl", question: "   " }, c.handlers, spyFetch);
   expect(called).toBe(false);
   expect(c.texts).toEqual([]);
   expect(c.errors).toEqual([]);

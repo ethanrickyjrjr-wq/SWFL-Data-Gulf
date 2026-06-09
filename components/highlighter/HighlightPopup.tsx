@@ -97,7 +97,7 @@ export function HighlightPopup({
     const trimmed = q.trim();
     if (!trimmed) return;
     setStage("answer");
-    void ask({ reportId, fact: factWithContext, question: trimmed });
+    void ask({ reportId, fact: factWithContext, slug: fact.slug, question: trimmed });
   }
 
   const handoff = buildClaudeHandoff({

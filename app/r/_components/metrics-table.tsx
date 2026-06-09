@@ -104,14 +104,25 @@ export function SourceLink({
  * Falls back to a plain <span> when the provider is absent (Highlighter flag
  * off) or when the value is already a ReactNode (not a string).
  */
+/** A metric's `methodHref` is `/r/method/<slug>`; recover the slug so the chip
+ *  can carry it to /api/converse. Returns undefined when there is no method link
+ *  (most rows), which correctly leaves the selection on the converse floor. */
+export function slugFromMethodHref(href?: string | null): string | undefined {
+  if (!href) return undefined;
+  const m = href.match(/\/r\/method\/([^/?#]+)/);
+  return m ? m[1] : undefined;
+}
+
 function MetricValueCell({
   value,
   direction,
   label,
+  methodHref,
 }: {
   value: ReactNode;
   direction: string | null;
   label: string;
+  methodHref?: string | null;
 }) {
   const ctx = useHighlighterContext();
   const colorCls = directionClassName(direction);
@@ -127,6 +138,7 @@ function MetricValueCell({
           value={value}
           factType={classifyFact(value)}
           context={label}
+          slug={slugFromMethodHref(methodHref)}
           onActivate={ctx.onActivate}
         />
       </span>
@@ -182,7 +194,12 @@ export function MetricsTable({
                 <MethodBadge href={m.methodHref} />
               </td>
               <td className="px-4 py-3 text-right align-top">
-                <MetricValueCell value={m.value} direction={m.direction} label={m.label} />
+                <MetricValueCell
+                  value={m.value}
+                  direction={m.direction}
+                  label={m.label}
+                  methodHref={m.methodHref}
+                />
               </td>
               <td className="px-4 py-3 align-top">
                 <DirectionBadge direction={m.direction} />

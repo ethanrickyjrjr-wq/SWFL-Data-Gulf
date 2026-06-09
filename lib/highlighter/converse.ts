@@ -12,6 +12,9 @@ export interface ConverseInput {
   reportId: string;
   /** Optional fact context (the selected figure). Omitted for report-level chat. */
   fact?: string;
+  /** Metric slug for the highlighted figure, when known (chip/row path). Lets the
+   *  server resolve the authored methodology entry. Undefined for free selections. */
+  slug?: string;
   question: string;
 }
 
@@ -52,6 +55,7 @@ export async function streamConverse(
       body: JSON.stringify({
         report_id: input.reportId,
         fact: input.fact,
+        slug: input.slug,
         question,
       }),
     });
