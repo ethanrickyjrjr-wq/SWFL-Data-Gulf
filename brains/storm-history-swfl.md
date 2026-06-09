@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v10 | Token: SWFL-7421-v10-20260606 -->
+<!-- FRESHNESS: v14 | Token: SWFL-7421-v14-20260609 -->
 ---
 brain_id: storm-history-swfl
-version: 10
-refined_at: 2026-06-06T10:38:13Z
-freshness_token: SWFL-7421-v10-20260606
+version: 14
+refined_at: 2026-06-09T06:39:27Z
+freshness_token: SWFL-7421-v14-20260609
 ttl_seconds: 31536000
 context_type: user_saved_reference
 scope: NOAA Storm Events history for Southwest Florida (LEE + COLLIER + CHARLOTTE), 1996-2025 modern-schema vintage. Surfaces SWFL-wide event counts (total / major / 10yr property-damage / 10yr extreme-wind) and the most recent billion-dollar event for risk-history framing. Pairs with env-swfl (modeled NFHL exposure) — exposure says WHERE flood risk lives, storm-history says WHAT has hit historically.
@@ -29,23 +29,23 @@ SCOPE: NOAA Storm Events history for Southwest Florida (LEE + COLLIER + CHARLOTT
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                                                                                                                      | verified   | expires
-s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] — ingested from https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/, SWFL counties (LEE+COLLIER+CHARLOTTE), 1996-2025 modern-schema vintage — s3://lake-tier1/environmental/storm_events_swfl.parquet (browse via https://supabase.com/dashboard/project/_/storage/buckets/lake-tier1?path=environmental/storm_events_swfl.parquet) | 2026-06-06 | 2027-06-06
+s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] — ingested from https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/, SWFL counties (LEE+COLLIER+CHARLOTTE), 1996-2025 modern-schema vintage — s3://lake-tier1/environmental/storm_events_swfl.parquet (browse via https://supabase.com/dashboard/project/_/storage/buckets/lake-tier1?path=environmental/storm_events_swfl.parquet) | 2026-06-09 | 2027-06-09
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"NOAA Storm Events corpus — SWFL footprint (LEE+COLLIER+CHARLOTTE), vintage 1996-2025","value":"Southwest Florida storm history across 3 counties — 1,178 total events from NOAA NCEI Storm Events Database (1996-2025 modern-schema vintage). 8 events have unparseable damage_property strings (excluded from damage metrics).","src":"s01","date":"2026-06-06"},
-  {"id":"f002","topic":"metric:property_damage_events_10yr","fact":"SWFL property-damage events in the trailing 10-year window","value":"76 events with parseable, non-zero property damage across LEE+COLLIER+CHARLOTTE in the trailing 10-year window.","src":"s01","date":"2026-06-06"},
-  {"id":"f003","topic":"metric:extreme_wind_events_10yr","fact":"SWFL hurricane-force-wind events (>= 74 kt) in the trailing 10-year window","value":"0 events with MAGNITUDE >= 74 kt across the SWFL footprint in the trailing 10-year window.","src":"s01","date":"2026-06-06"},
-  {"id":"f004","topic":"metric:major_storm_count_30yr","fact":"SWFL major-storm count (full 30-year vintage, damage >= $1M AND major event type)","value":"10 events qualify as major storms (damage >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}) across the full 1996-2025 vintage.","src":"s01","date":"2026-06-06"},
-  {"id":"f005","topic":"metric:total_storm_count_30yr","fact":"SWFL total storm event count (full 30-year vintage)","value":"1,178 total storm events across the SWFL footprint for 1996-2025.","src":"s01","date":"2026-06-06"},
-  {"id":"f006","topic":"metric:last_billion_dollar_event","fact":"Most recent SWFL billion-dollar storm event","value":"Last billion-dollar event in the SWFL footprint: Hurricane (Typhoon) on 2004-08-13.","src":"s01","date":"2026-06-06"}
+  {"id":"f001","topic":"corpus_overview","fact":"NOAA Storm Events corpus — SWFL footprint (LEE+COLLIER+CHARLOTTE), vintage 1996-2025","value":"Southwest Florida storm history across 3 counties — 1,178 total events from NOAA NCEI Storm Events Database (1996-2025 modern-schema vintage). 8 events have unparseable damage_property strings (excluded from damage metrics).","src":"s01","date":"2026-06-09"},
+  {"id":"f002","topic":"metric:property_damage_events_10yr","fact":"SWFL property-damage events in the trailing 10-year window","value":"76 events with parseable, non-zero property damage across LEE+COLLIER+CHARLOTTE in the trailing 10-year window.","src":"s01","date":"2026-06-09"},
+  {"id":"f003","topic":"metric:extreme_wind_events_10yr","fact":"SWFL hurricane-force-wind events (>= 74 kt) in the trailing 10-year window","value":"0 events with MAGNITUDE >= 74 kt across the SWFL footprint in the trailing 10-year window.","src":"s01","date":"2026-06-09"},
+  {"id":"f004","topic":"metric:major_storm_count_30yr","fact":"SWFL major-storm count (full 30-year vintage, damage >= $1M AND major event type)","value":"10 events qualify as major storms (damage >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}) across the full 1996-2025 vintage.","src":"s01","date":"2026-06-09"},
+  {"id":"f005","topic":"metric:total_storm_count_30yr","fact":"SWFL total storm event count (full 30-year vintage)","value":"1,178 total storm events across the SWFL footprint for 1996-2025.","src":"s01","date":"2026-06-09"},
+  {"id":"f006","topic":"metric:last_billion_dollar_event","fact":"Most recent SWFL billion-dollar storm event","value":"Last billion-dollar event in the SWFL footprint: Hurricane (Typhoon) on 2004-08-13.","src":"s01","date":"2026-06-09"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "storm-history-swfl",
-  "version": 10,
-  "refined_at": "2026-06-06T10:38:13Z",
+  "version": 14,
+  "refined_at": "2026-06-09T06:39:27Z",
   "direction": "neutral",
   "magnitude": 0.2,
   "drivers": [],
@@ -62,10 +62,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm property damage events 10yr?",
+        "How does storm property damage events 10yr here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_extreme_wind_events_10yr",
@@ -77,10 +81,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm extreme wind events 10yr?",
+        "How does storm extreme wind events 10yr here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_major_storm_count_30yr",
@@ -92,10 +100,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm major storm count 30yr?",
+        "How does storm major storm count 30yr here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_total_storm_count_30yr",
@@ -107,10 +119,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm total storm count 30yr?",
+        "How does storm total storm count 30yr here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_last_billion_dollar_event_date",
@@ -120,10 +136,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm last billion dollar event date?",
+        "How does storm last billion dollar event date here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_last_billion_dollar_event_type",
@@ -133,10 +153,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm last billion dollar event type?",
+        "How does storm last billion dollar event type here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_counties_covered",
@@ -146,10 +170,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm counties covered?",
+        "How does storm counties covered here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "storm_ingest_vintage",
@@ -159,10 +187,14 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-06-06T10:38:13Z",
+        "fetched_at": "2026-06-09T06:39:27Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      }
+      },
+      "suggestions": [
+        "What's driving storm ingest vintage?",
+        "How does storm ingest vintage here compare to other SWFL areas?"
+      ]
     }
   ],
   "caveats": [
@@ -181,7 +213,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-06T10:38:13Z"
+    "computed_at": "2026-06-09T06:39:27Z"
   },
   "exogenous_signals": []
 }
@@ -190,5 +222,5 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
 - storm-history-swfl: standing 30-year NOAA Storm Events read for the SWFL footprint — first brain to consume a Tier 1 Storage Parquet via DuckDB httpfs.
 
 --- RECENT NOTES ---
-- 2026-06-06: pack refined by the Refinery — 6 fact(s) from 1 source(s).
+- 2026-06-09: pack refined by the Refinery — 6 fact(s) from 1 source(s).
 ```

@@ -512,16 +512,17 @@ not_yet_running:
     # First run: 2026-06-03, 825 rows (manual live backfill, all 3 SWFL locations).
 
   - name: mhs_databook
-    parked: true
     lane: tier-2
-    cadence_days: 365 # MHS publishes ANNUALLY — 2026 Data Book pub 2026-03-13 (verified mhsappraisal.com 2026-06-05; 403 on auto-fetch → a true ODD source)
+    cadence_days: 365 # MHS publishes ANNUALLY — 2026 Data Book pub 2026-03-13 (verified mhsappraisal.com 2026-06-05; 403 on auto-fetch → true ODD source)
     tolerance_multiplier: 1.5
-    freshness_table: data_lake.marketbeat_swfl # SAME table as cw_marketbeat — scoped by source_name
+    freshness_table: data_lake.marketbeat_swfl
     freshness_column: _ingested_at
-    source_name: mhs_databook # probe filters WHERE source_name='mhs_databook' so a recent cw_marketbeat write can't mask MHS staleness
-    expected_rows_min: 1
-    note: "DORMANT — Operation Dumbo Drop. MHS (Maxwell Hendry Simmons) ANNUAL CRE Data Book, geometry-extracted from a manual PDF. Lands in data_lake.marketbeat_swfl tagged source_name='mhs_databook' (DDL: docs/sql/20260605_marketbeat_swfl_mhs_extension.sql). Non-overlapping prior_12mo windows (annual). COLLISION RULE: MHS wins over cw_marketbeat on identical (submarket, period). Period: prior_12mo_ending INFERRED + prior_12mo_ending_source falsifier; reject NULL on absorption rows. Graduation = move to pipelines: — the probe source_name filter is already shipped, so no other code change."
-    # Recipes (source-aware window logic): docs/superpowers/plans/2026-06-05-mhs-odd-graduation-handoff.md.
+    source_name: mhs_databook
+    expected_rows_min: 45 # 48 rows loaded 2026-06-09 (16 submarkets x 3 sectors: industrial/office/retail)
+    # ODD source — manual PDF drop only; probe alerts ~March 2027 when annual data goes stale.
+    # COLLISION RULE: mhs_databook wins over cw_marketbeat on identical (sector, submarket, period).
+    # First run: 2026-06-09, 48 rows (2026 MHS Data Book, sectors: industrial/office/retail).
+    # Recipes: docs/superpowers/plans/2026-06-05-mhs-odd-graduation-handoff.md.
     # Extraction spec: docs/littlebird-notes/2026-06-05.md.
 
   - name: mhs_permits_swfl

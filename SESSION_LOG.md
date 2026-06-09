@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — cre-swfl v52: MHS industrial + office + retail live; cadences graduated
+
+- MHS 2026 Data Book: 48 rows in `data_lake.marketbeat_swfl` (16 submarkets × 3 sectors), all verification flags = True. Passes per-field gate in `marketbeat-swfl-source.mts`.
+- `cre-swfl` rebuilt v51→v52: 108 new `_industrial` / `_office` key_metric slugs. Vocab coverage clean (27 brains, 0 orphans).
+- Check `cre_swfl_per_sector_surfacing` closed — industrial/office now fully surfaced.
+- `ingest/cadence_registry.yaml`: `mhs_databook` graduated `not_yet_running:` → `pipelines:` — probe active, will alert ~March 2027. `expected_rows_min: 45`.
+- **Open:** `mhs_period_end_item_c` — `prior_12mo_ending=2026-03-31` is INFERRED; verify on mhsappraisal.com when convenient.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — cre: Group E broker-alternative sources scaffolded (Estero + FMB gap)
 
 - SQL migrations applied: `data_lake.active_listings_cre` (Crexi listings) + `data_lake.local_cre_context` (govt/EDC narrative). Both tables empty at 0 rows, ready for first ingest.
