@@ -10,7 +10,7 @@ MATRIX = r"""/**
  * RULE: update this file whenever a cell changes. Bump MATRIX_AUDITED every
  * time. Stale cells are worse than no cells.
  *
- * Last audited: 2026-06-09 (city_pulse live for all 13 cities)
+ * Last audited: 2026-06-09 (ZORI verified — all 8 Lehigh + Golden Gate ZIPs live)
  */
 
 export const MATRIX_AUDITED = "2026-06-09";
@@ -142,14 +142,13 @@ export const CITIES: CityRow[] = [
     cols: {
       city_pulse:"live", permits:"live",    perm_geo:"live",
       corridors:"live",  corr_voice:"gap",  properties:"live",
-      cre_broker:"gap",  rentals:"partial", flood_aal:"na",
+      cre_broker:"gap",  rentals:"live",    flood_aal:"na",
       traffic:"live",    safety:"partial",  labor:"partial", fhfa_hpi:"partial",
     },
     needs: [
       "Geocoding DONE 2026-06-07: 29 Lehigh-ZIP permits now geocoded; Lee Blvd + Joel Blvd corridor IDs assigned where within 1.5mi.",
       "Corridor Voice: both corridors have NULL character_facts + character_speculative. Run corridor_grounded/pipeline.py → run-corridor-character-preview.mts → write-corridor-character-to-db.mts. Check open: lehigh_broker_narrative.",
       "CRE Broker: no MarketBeat/MHS coverage by design — Lehigh has minimal commercial inventory. MSA-level data only → narrative, never to corridor metric columns. Check open: lehigh_cre_metrics.",
-      "Rentals partial: ZORI has 94 SWFL ZIPs — verify all 6 Lehigh ZIPs included. Query: SELECT zip_code FROM data_lake.zori_zip_rents WHERE zip_code IN ('33936','33971','33972','33973','33974','33976') GROUP BY 1.",
       "Flood/AAL N/A: inland — correctly out of NFIP coastal AAL set. This is the right answer.",
     ],
   },
@@ -231,12 +230,11 @@ export const CITIES: CityRow[] = [
     cols: {
       city_pulse:"live", permits:"live",    perm_geo:"live",
       corridors:"na",    corr_voice:"na",   properties:"live",
-      cre_broker:"gap",  rentals:"partial", flood_aal:"na",
+      cre_broker:"gap",  rentals:"live",    flood_aal:"na",
       traffic:"live",    safety:"partial",  labor:"partial", fhfa_hpi:"gap",
     },
     needs: [
       "CRE Broker: no MarketBeat coverage. No corridors defined.",
-      "Rentals partial: ZORI coverage for 34116/34120 unverified — lower-listing-velocity inland CDP may not publish. Verify: SELECT zip_code FROM data_lake.zori_zip_rents WHERE zip_code IN ('34116','34120') GROUP BY 1.",
       "FHFA HPI: Naples-Marco Island MSA not in lake.",
     ],
   },
