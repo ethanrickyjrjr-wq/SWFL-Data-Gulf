@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — marketbeat: automated PDF extraction pipeline + GHA quarterly cron
+
+- `ingest/pipelines/marketbeat_pdf/`: new ODD pipeline — `extractor.py` (PyMuPDF text-based parser, multi-gen Colliers + C&W support, Anthropic vision fallback), `loader.py` (psycopg3 upsert to `data_lake.marketbeat_swfl`), `pipeline.py` (CLI entry point + drop-folder scan), `downloader.py` (auto-download from cpswfl.com + colliers.com, form-gated quarters fall back gracefully). 18 PDFs → 251 rows, 0 errors in dry-run.
+- `.github/workflows/marketbeat-pdf-ingest.yml`: quarterly cron (Jan/Apr/Jul/Oct 15th), tries auto-download, creates GH issue if manual drop needed.
+- `docs/sql/20260609_marketbeat_ytd_and_mf_os_rents.sql`: migration adding `ytd_absorption_sqft`, `asking_rent_mf`, `asking_rent_os` to `data_lake.marketbeat_swfl` — **operator must run before first live load**.
+- `ingest/cadence_registry.yaml`: `marketbeat_swfl` entry updated to ODD-READY; `colliers_industrial` entry added under `not_yet_running:`.
+- `.gitignore`: `ingest/drops/marketbeat_pdf/*.pdf` added; `ingest/drops/marketbeat_pdf/.gitkeep` created.
+- Bug fixed: older Colliers PDFs (Q4 2022) split "Cape Coral/N. Fort Myers" across two lines — `re.sub` normalization in extractor resolves.
+- **Next:** operator runs SQL migration, then first live load via `--from-downloads`; move cadence entries to `pipelines:` after graduation.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — marketbeat: Colliers submarket aliases + PDF collection
 
 - `refinery/lib/marketbeat-submarket-aliases.mts`: added 3 Colliers International submarket aliases — "Cape Coral/N. Fort Myers", "Lehigh", "Bonita/Estero" — all with empty corridor arrays (corridors already claimed by fine-grained C&W entries). Updated header comment documenting the 6 Colliers submarket names. 16/16 tests pass, vocab coverage clean.

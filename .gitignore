@@ -144,3 +144,7 @@ scripts/reddit.mjs
 
 # Personal strategy / trading notes — never commit (personal, not platform code)
 /_private/
+
+# MarketBeat / Colliers PDF drop folder — PDFs are large and proprietary
+# Only the .gitkeep sentinel is tracked; actual PDFs go in this folder locally
+ingest/drops/marketbeat_pdf/*.pdf

@@ -492,10 +492,24 @@ not_yet_running:
     freshness_column: _ingested_at # table has _ingested_at, NOT the default inserted_at (DDL line 20) — same override as dbpr_sirs_submissions
     source_name: cw_marketbeat # data_lake.marketbeat_swfl now holds 2 ODD sources; probe scopes freshness WHERE source_name (graduation)
     expected_rows_min: 1 # floor at 1 once a quarter lands (read on graduation)
-    note: "DORMANT — source confirmed (C&W / LSI quarterly CRE MarketBeat PDFs); Operation Dumbo Drop (manual ingest) is ready. Manual ingest available Q3 2026. Consumer cre-swfl already wired (reads marketbeatSwflSource, tolerates empty). Auto-scrape pipeline deleted PR #41 (landing pages held no data — numbers live in rotating-URL PDFs). When Dumbo Drop ships, MOVE this entry to pipelines: — no other code changes. check_key=marketbeat_swfl_orphan closed dormant-by-decision."
+    note: "ODD-READY — C&W MarketBeat Industrial PDFs. Pipeline: ingest/pipelines/marketbeat_pdf/pipeline.py. Drop folder: ingest/drops/marketbeat_pdf/ (gitignored *.pdf). GHA cron: .github/workflows/marketbeat-pdf-ingest.yml (quarterly, auto-download + manual-drop fallback via GH issue). 7 C&W PDFs in hand (Q1 2024–Q1 2026). SQL migration needed before first load: docs/sql/20260609_marketbeat_ytd_and_mf_os_rents.sql. Graduation = move to pipelines: after first load + DB migration. check_key=marketbeat_swfl_orphan closed dormant-by-decision."
     # Table DDL: docs/sql/20260525_marketbeat_swfl.sql.
+    # Extended DDL (new cols): docs/sql/20260609_marketbeat_ytd_and_mf_os_rents.sql.
     # Source connector: refinery/sources/marketbeat-swfl-source.mts (Supabase verified=true gate).
     # Submarket→corridor join: refinery/lib/marketbeat-submarket-aliases.mts.
+
+  - name: colliers_industrial
+    parked: true
+    lane: tier-2
+    cadence_days: 90 # Colliers publishes quarterly
+    tolerance_multiplier: 2.5
+    freshness_table: data_lake.marketbeat_swfl
+    freshness_column: _ingested_at
+    source_name: colliers_industrial
+    expected_rows_min: 1
+    note: "ODD-READY — Colliers International SWFL Industrial PDFs. Same pipeline + GHA as cw_marketbeat. 11 Colliers PDFs in hand (Q4 2022–Q4 2025, Q4 2024 form-gated). Provides 5-quarter time-series, Industrial + Flex breakdown, 6 broad submarkets (vs C&W's 16). Source tag source_name='colliers_industrial' keeps Colliers data isolated from cw_marketbeat rows. Graduation = move to pipelines: after first load."
+    # Pipeline: ingest/pipelines/marketbeat_pdf/pipeline.py (same as cw_marketbeat).
+    # Submarket aliases: refinery/lib/marketbeat-submarket-aliases.mts (Colliers aliases added 2026-06-09).
 
   - name: mhs_databook
     parked: true
