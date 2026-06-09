@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — Naples MSA FHFA HPI wired: fhfa_naples_msa_yoy_pct live
+
+- `refinery/__fixtures__/fhfa-hpi.sample.json`: added 5 Naples-Marco Island MSA rows (CBSA 34940, 2024-Q4→2025-Q4; YoY = +1.41% by design).
+- `refinery/sources/fhfa-hpi-source.mts`: `naples_msa` field added to `HpiSwflSummary`; `buildSwflSummary()` now calls `computeMsaSummary(rows, "Naples-Marco Island, FL")`.
+- `refinery/vocab/brain-vocabulary.json`: concept `fhfa_naples_msa_yoy_pct` + slug_index entry added.
+- `refinery/packs/properties-collier-value.mts`: `fhfaHpiSource` wired (3rd source); `fhfa_naples_msa_yoy_pct` emitted as key_metric. 14/14 tests pass, vocab coverage clean.
+- `scripts/write_ops_cities.py`: 5 Collier cities (naples, marco-island, east-naples, north-naples, golden-gate) flipped `fhfa_hpi:"gap"` → `"partial"`; script re-run (city matrix updated in ops repo).
+- **Next:** nightly rebuild will surface `fhfa_naples_msa_yoy_pct` in properties-collier-value output.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — city-matrix: ZORI ZIP coverage verified, Lehigh + Golden Gate rentals partial→live
 
 - Queried `data_lake.zori_swfl` (PostgREST): all 8 target ZIPs have data — Lehigh (33936/71/72/73/74/76: 17–52 rows each) + Golden Gate (34116/34120: 16–47 rows each). No gap exists.
