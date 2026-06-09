@@ -68,6 +68,10 @@ export interface SubmarketMeta {
 export const SUBMARKET_METADATA: Partial<Record<MarketbeatSubmarket, SubmarketMeta>> = {
   /** Charlotte County (FIPS 12015) — county-level grain, no corridor profiles. */
   "Charlotte County": { fips: "12015", geographic_type: "county" },
+  /** Lee County (FIPS 12071) — retail MarketBeat publishes county grain only. */
+  "Lee County": { fips: "12071", geographic_type: "county" },
+  /** Collier County (FIPS 12021) — retail MarketBeat publishes county grain only. */
+  "Collier County": { fips: "12021", geographic_type: "county" },
 };
 
 export const MARKETBEAT_SUBMARKET_MAP: Record<MarketbeatSubmarket, CorridorProfileName[]> = {
@@ -136,6 +140,12 @@ export const MARKETBEAT_SUBMARKET_MAP: Record<MarketbeatSubmarket, CorridorProfi
   "Outlying Collier County": [],
   /** 96K SF. Near-zero tracked inventory. */
   "Golden Gate": [],
+
+  // ── County-grain entries (retail MarketBeat publishes county totals only) ──
+  /** Lee County retail — 27.1M SF, 2.4% vacancy, $21.32/SF NNN (Q4 2024). */
+  "Lee County": [],
+  /** Collier County retail — 13.6M SF, 3.8% vacancy, $26.97/SF NNN (Q4 2024). */
+  "Collier County": [],
 };
 
 /**
