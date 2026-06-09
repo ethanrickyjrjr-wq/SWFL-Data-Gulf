@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — fix: deptry package_module_name_map + psycopg2 DEP001 suppress
+
+- `pyproject.toml`: added `[tool.deptry.package_module_name_map]` for 5 packages whose PyPI name differs from import name (`firecrawl-py`→`firecrawl`, `python-dotenv`→`dotenv`, `beautifulsoup4`→`bs4`, `python-dateutil`→`dateutil`, `pyyaml`→`yaml`); also added `DEP001 = ["psycopg2"]` alongside existing DEP003 suppress. Clears all 19 deptry findings from run 27183717030.
+- **Next:** deptry CI gate should be green on next `ingest/**` push.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — cre: Lee/Collier county-grain MarketBeat entries registered
 
 - `refinery/lib/marketbeat-submarket-aliases.mts`: added Lee County + Collier County as county-grain submarket entries (retail MarketBeat publishes county totals only; corridor map empty). Vocab coverage clean (27 brains, 0 orphans). `cre-swfl.md` rebuilt (v50).
