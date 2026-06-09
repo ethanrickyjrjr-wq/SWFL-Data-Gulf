@@ -55,6 +55,10 @@ process.stdin.on("end", () => {
     process.exit(0);
   }
   if (touched.trim().length > 0) {
+    // Reminder: ops board syncs from build-queue.md — keep it current.
+    process.stderr.write(
+      "ℹ️  ops board: https://swfldatagulf-ops.vercel.app/ (auto-syncs from build-queue.md within 5 min)\n",
+    );
     process.exit(0); // good — log was updated
   }
 
@@ -84,10 +88,7 @@ function isGitPush(cmd) {
   // ALSO match `node scripts/safe-push.mjs` — the mandated push path runs
   // `git push` in a child process the Bash PreToolUse hook can't intercept, so
   // matching the wrapper command is the only way this log-gate fires on it.
-  return (
-    /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) ||
-    /safe-push(\.mjs)?\b/.test(cmd)
-  );
+  return /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) || /safe-push(\.mjs)?\b/.test(cmd);
 }
 
 function sh(c) {

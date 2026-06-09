@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — ops: mark Highlighter Phase 1 done + ops-board sync rule
+
+- `_AUDIT_AND_ROADMAP/build-queue.md`: Highlighter Phase 1 `[ ]` → `[x]` (PRs #68+#69 merged, `HIGHLIGHTER_UI=1` live in prod per `docs/superpowers/plans/2026-06-07-highlighter-ux-session-handoff.md`).
+- `CLAUDE.md` RULE 1: new "Ops board sync" bullet — before every push, verify `build-queue.md` marks done items `[x]`; ops dashboard auto-syncs within 5 min.
+- `.claude/hooks/check-session-log-on-push.mjs`: prints ops dashboard URL reminder on every successful push.
+- **Open:** `highlighter_ui_live_verify` (live browser end-to-end), `highlighter_factchip_metrics_wiring`, `highlighter_suggestions_dossier_wiring` — Phase 1 code done; these are Phase 2 follow-ons.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — fix: marketbeat-pdf-ingest YAML invalid (workflow file issue)
 
 - `marketbeat-pdf-ingest.yml` had Python heredoc content starting at column 0 inside `run: |` blocks — YAML block scalars terminate at < their indentation level, so GitHub's parser rejected the file on every push, showing the raw filename instead of `name:`.

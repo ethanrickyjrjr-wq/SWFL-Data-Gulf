@@ -35,6 +35,7 @@ Incident detail + "Recurring Patterns" live in `docs/cron-rebuild-failures.md`.
 **Always (no exceptions):**
 
 - `SESSION_LOG.md` gets a new top-of-file entry on every push (RULE 0; the pre-push hook enforces it — don't fight it, write the entry).
+- **Ops board sync.** Before pushing, verify `_AUDIT_AND_ROADMAP/build-queue.md` marks every finished item `[x]` and every in-progress item `[~]`. The ops dashboard at **https://swfldatagulf-ops.vercel.app/** auto-syncs from this file within 5 min — a stale build-queue is a lying ops board. This is the same push; no separate "ops update" commit needed.
 - Use `node scripts/safe-push.mjs` instead of raw `git push`. It fetches, rebases your commits on top of anyone who landed first, shows you exactly what's going, then pushes (auto-retries up to 3×).
 - Stage only files you created or intentionally modified. Untracked files in your tree may be the operator's in-progress work.
 - Never use `--no-verify`, never skip hooks, never force-push to `main`.

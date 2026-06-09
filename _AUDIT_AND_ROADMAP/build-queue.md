@@ -14,7 +14,7 @@
 - [X ] Section 3 — plan master synthesizer flesh, starting from /ops state
 - [x] Fix US-41 / Tamiami Trail corridor naming collision
 - [x] safety-swfl — FBI Crime Data Explorer replaces unfit FIBRS (#59); brain LIVE (bullish, -9.7% YoY), `public.fdle_crime_swfl` backfilled 2022–2024, quarterly cron re-enabled, master v71
-- [ ] Highlighter Phase 1 — in-page ask layer (`docs/superpowers/specs/2026-06-07-highlighter-in-page-ask-chart-design.md`): fact detection + mobile chips, popup (3 states), `/api/converse` (haiku, metered, enforcement OFF), precomputed suggestions, discovery coachmark
+- [x] Highlighter Phase 1 — in-page ask layer (`docs/superpowers/specs/2026-06-07-highlighter-in-page-ask-chart-design.md`): fact detection + mobile chips, popup (3 states), `/api/converse` (haiku, metered, enforcement OFF), precomputed suggestions, discovery coachmark
 - [ ] Charts Tier A — deterministic at-a-glance chart from key_metrics/detail_tables (`docs/superpowers/specs/2026-06-07-chart-generation-three-tier-design.md`); wire the dead `Dossier.chart` slot + new `/r/` render child
 - [ ] Charts Tier B + Highlighter "Chart this" — build `buildChartForIntent` (routeChart has NO consumer today) + `HBarChart` responsive fix (shared sub-task)
 - [ ] `/c/[id]` saved chart → `/board/[id]` (first `auth.uid()` RLS policy) → PDF via `window.print()` (`docs/superpowers/specs/2026-06-07-boards-pdf-composed-export-design.md`)
