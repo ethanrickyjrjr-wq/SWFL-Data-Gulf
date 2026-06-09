@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Opus 4.8 · main) — cron self-healing: item 8 built (DATA_EMPTY URL rediscovery)
+
+- **Item 8 — Firecrawl v2 map rediscovery for DATA_EMPTY** (`heal-cron-failure.mjs` diagnose path + `heal-cron-failure.yml` diagnose env). On a 0-row failure (dead/moved source URL), L2 diagnose now maps the source's own domain via `POST /v2/map` (search-ranked by the workflow name) and appends up to 5 **candidate replacement URLs** to the incident issue. Advisory only — never re-points the source or writes code (guardrail intact). Runs in parallel with the Haiku narrative; degrades to null without FIRECRAWL_API_KEY.
+- Vendor-First: v2 map contract verified live (POST /v2/map, Bearer auth, body {url,search?,limit?,sitemap?}, resp {success, links:[{url,title?,description?}]}) + a live smoke against flylcpa.com → http 200 / 10 links, ranked …/reports-and-statistics first for "statistics".
+- Secrets confirmed in gh (`gh secret list -R`): FIRECRAWL_API_KEY + ANTHROPIC_API_KEY both already set → both L2 paths live; the old "gh secret set ANTHROPIC_API_KEY" TODO was already done.
+- Gates: node:test 25/25, eslint clean, node --check clean. Plan items 4 + 7 + 8 now ALL built. Plan: `docs/superpowers/plans/2026-06-09-cron-healing-followups-4-7-8.md`.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — corridor page: drop Supabase REST fallback from source links
 
 - `app/r/cre-swfl/[corridor]/page.tsx`: `buildMetricRows` no longer falls back to `c.source_url` for each metric. Per-metric fields (`cap_rate_source_url`, etc.) show when set (real broker/property URLs); otherwise renders `—`. Prevents raw Supabase REST API URLs from appearing as clickable "Source" links.
