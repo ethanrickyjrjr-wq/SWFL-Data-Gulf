@@ -15,6 +15,7 @@ import {
   collierParcelsSource,
   type CollierParcelsSummaryNormalized,
 } from "../sources/collier-parcels-source.mts";
+import { fhfaHpiSource, type HpiSwflSummary } from "../sources/fhfa-hpi-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -73,6 +74,8 @@ interface CollierMarketAggregates {
 let lastAggregate: CollierMarketAggregates | null = null;
 let lastFetchedAt: string | null = null;
 
+let lastFhfaSummary: HpiSwflSummary | null = null;
+
 function salesByYearFrom(fragments: RawFragment[]): Map<number, number> {
   const out = new Map<number, number>();
   for (const f of fragments) {
@@ -83,9 +86,7 @@ function salesByYearFrom(fragments: RawFragment[]): Map<number, number> {
   return out;
 }
 
-function summaryFrom(
-  fragments: RawFragment[],
-): CollierSummaryNormalized | null {
+function summaryFrom(fragments: RawFragment[]): CollierSummaryNormalized | null {
   for (const f of fragments) {
     const n = f.normalized as unknown as CollierSummaryNormalized;
     if (n?.kind === "collier-summary") return n;
@@ -93,9 +94,7 @@ function summaryFrom(
   return null;
 }
 
-function parcelsSummaryFrom(
-  fragments: RawFragment[],
-): CollierParcelsSummaryNormalized | null {
+function parcelsSummaryFrom(fragments: RawFragment[]): CollierParcelsSummaryNormalized | null {
   for (const f of fragments) {
     const n = f.normalized as unknown as CollierParcelsSummaryNormalized;
     if (n?.kind === "collier-parcels-summary") return n;
@@ -103,11 +102,18 @@ function parcelsSummaryFrom(
   return null;
 }
 
+function fhfaSummaryFrom(fragments: RawFragment[]): HpiSwflSummary | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as HpiSwflSummary;
+    if (n?.kind === "hpi-swfl-summary") return n;
+  }
+  return null;
+}
+
 function populationStd(values: number[]): number {
   if (values.length === 0) return 0;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const sq =
-    values.reduce((acc, v) => acc + (v - mean) ** 2, 0) / values.length;
+  const sq = values.reduce((acc, v) => acc + (v - mean) ** 2, 0) / values.length;
   return Math.sqrt(sq);
 }
 
@@ -132,8 +138,7 @@ function aggregate(
   const baselineMean =
     baselineSalesCounts.length === 0
       ? null
-      : baselineSalesCounts.reduce((a, b) => a + b, 0) /
-        baselineSalesCounts.length;
+      : baselineSalesCounts.reduce((a, b) => a + b, 0) / baselineSalesCounts.length;
   const baselineStd = populationStd(baselineSalesCounts);
   const zScore =
     currentSalesCount != null && baselineMean != null && baselineStd > 0
@@ -161,9 +166,7 @@ function aggregate(
 const fmt1 = (n: number): string =>
   Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
 
-export function directionFromZScore(
-  z: number | null,
-): "bullish" | "bearish" | "neutral" {
+export function directionFromZScore(z: number | null): "bullish" | "bearish" | "neutral" {
   if (z == null) return "neutral";
   if (z >= Z_BULL_THRESHOLD) return "bullish";
   if (z <= Z_BEAR_THRESHOLD) return "bearish";
@@ -191,6 +194,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const parcels = parcelsSummaryFrom(allFragments);
   lastAggregate = aggregate(salesByYear, summary, parcels);
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
+  lastFhfaSummary = fhfaSummaryFrom(allFragments);
 
   const agg = lastAggregate;
   if (agg.yearsObserved === 0 && agg.totalParcels === 0) return [];
@@ -265,13 +269,27 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     });
   }
 
+  const fhfa = lastFhfaSummary;
+  if (fhfa?.naples_msa) {
+    const msa = fhfa.naples_msa;
+    facts.push({
+      topic: "metric:fhfa_naples_msa_yoy",
+      fact: `FHFA Naples-Marco Island MSA HPI YoY (${msa.latest_period})`,
+      value:
+        `Index (NSA): ${msa.index_nsa ?? "n/a"}. ` +
+        `YoY: ${msa.yoy_change_pct != null ? `${msa.yoy_change_pct > 0 ? "+" : ""}${msa.yoy_change_pct}%` : "n/a"}. ` +
+        `QoQ: ${msa.qoq_change_pct != null ? `${msa.qoq_change_pct > 0 ? "+" : ""}${msa.qoq_change_pct}%` : "n/a"}. ` +
+        `Federal HPI benchmark for Collier County market price direction (purchase-only, traditional, quarterly).`,
+      source_fragment_ids: [],
+    });
+  }
+
   return facts;
 }
 
 function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const agg = lastAggregate;
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!agg || (agg.yearsObserved === 0 && agg.totalParcels === 0)) {
     return {
@@ -384,8 +402,7 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: "collier_total_parcels",
       value: agg.totalParcels,
       direction: "stable",
-      label:
-        "Collier County parcels in FDOR cadastral snapshot (data_lake.collier_parcels)",
+      label: "Collier County parcels in FDOR cadastral snapshot (data_lake.collier_parcels)",
       variable_type: "extensive",
       units: "parcels",
       display_format: "count",
@@ -393,9 +410,34 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     });
   }
 
+  const fhfa = lastFhfaSummary;
+  const fhfaCitationBase =
+    env.source === "live"
+      ? "FHFA House Price Index via data_lake.fhfa_hpi (purchase-only, traditional, quarterly)"
+      : "FHFA House Price Index (fixture)";
+
+  if (fhfa?.naples_msa) {
+    const msa = fhfa.naples_msa;
+    key_metrics.push({
+      metric: "fhfa_naples_msa_yoy_pct",
+      value: msa.yoy_change_pct ?? 0,
+      direction:
+        msa.yoy_change_pct == null ? "stable" : msa.yoy_change_pct > 0 ? "rising" : "falling",
+      label: `FHFA Naples-Marco Island MSA HPI YoY (${msa.latest_period}) — Collier County price-level proxy`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
+      source: {
+        url: "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
+        fetched_at,
+        tier: 1,
+        citation: fhfaCitationBase,
+      },
+    });
+  }
+
   const direction = directionFromZScore(agg.zScore);
-  const magnitude =
-    agg.zScore == null ? 0.3 : Math.min(1, Math.abs(agg.zScore) / 3);
+  const magnitude = agg.zScore == null ? 0.3 : Math.min(1, Math.abs(agg.zScore) / 3);
 
   const conclusionParts: string[] = [];
   conclusionParts.push(
@@ -460,7 +502,7 @@ export const propertiesCollierValue: PackDefinition = {
   scope:
     "Collier County (FL) real-estate read — homes-sold velocity z-score (current year vs trailing 3yr) + median sale price YoY + months of supply from the Redfin Data Center county tracker, plus parcel count + Save-Our-Homes gap median from the FDOR Statewide Cadastral (parcel-grain, CO_NO=21). County-grain peer to properties-lee-value.",
   ttl_seconds: 2592000, // 30 days — Redfin refreshes monthly
-  sources: [collierMarketSource, collierParcelsSource],
+  sources: [collierMarketSource, collierParcelsSource, fhfaHpiSource],
   input_brains: [],
   fitScore: (): number => 8,
   compositeCutoff: 0,
