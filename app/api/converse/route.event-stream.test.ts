@@ -38,6 +38,7 @@ mock.module("@/refinery/agents/anthropic.mts", () => ({
 
 mock.module("@/lib/highlighter/meter", () => ({
   recordUse: async () => 1,
+  recordAsk: async () => {},
   weeklyCount: async () => 0,
   capEnabled: () => false,
 }));

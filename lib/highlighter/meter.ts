@@ -51,8 +51,9 @@ export async function recordUse(
  * Runs fire-and-forget alongside the existing `recordUse()` meter — must never
  * throw (errors are swallowed so they don't break a streaming answer).
  *
- * `answered` should be false when the AI response signals it couldn't answer
- * from the payload (data-gap detection at the call site).
+ * `answered` is false when the resolved metric has `need` components — i.e. we
+ * offered to find a named gap. `needed_components` lists those parts so the Ops
+ * coverage page can show, per metric, exactly what we don't yet hold.
  */
 export async function recordAsk(meta: {
   report_id: string;
@@ -60,6 +61,7 @@ export async function recordAsk(meta: {
   question: string;
   reach: string[];
   answered: boolean;
+  needed_components?: string[];
 }): Promise<void> {
   try {
     const db = createServiceRoleClient();
@@ -69,6 +71,7 @@ export async function recordAsk(meta: {
       question: meta.question,
       reach: meta.reach,
       answered: meta.answered,
+      needed_components: meta.needed_components ?? [],
     });
   } catch {
     // metering must never break an answer

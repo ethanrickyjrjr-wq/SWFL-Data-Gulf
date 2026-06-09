@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-08 (Opus 4.8 · main) — never-dead-end Tasks 3+4: converse floor + authored-method injection + deterministic gap-log
+
+- **Task 3 (live `/api/converse` behavior change).** `lib/highlighter/grounding.ts`: `GroundingInput.method?` + `renderMethod()`; preamble rewritten from cite-or-**DECLINE** → the never-dead-end floor (two shapes only: DERIVE or OFFER-TO-FIND; a published figure is HELD never partial; **NEVER invent/guess components** — with a method block the model may name ONLY its listed components, citation retained). An injected entry renders a `=== METHOD ===` block (equation + We HOLD / We do NOT hold). `route.ts`: reads `slug`, `resolveMethod(slug)`, passes `method` into grounding.
+- **Task 4 (deterministic gap-log).** Replaced the answer-text `DATA_GAP_PHRASES` parser with a deterministic signal: `answered = neededComponents.length === 0` computed from the resolved method's `role:"need"` components; logs `needed_components` via `recordAsk`. `meter.ts` `recordAsk` carries `needed_components`. New idempotent migration `docs/sql/20260608_data_requests_components.sql` — **applied + verified live** (`needed_components text[] NOT NULL DEFAULT '{}'`; anon SELECT denied; text[] insert round-trips; rolled back, no probe row). `DATA_GAP_PHRASES` demoted to a route.test regression guard.
+- Gates: highlighter suite **47/0**; grounding+converse+route+route.event-stream+registry **28/0**; `tsc --noEmit` clean on all touched files; prettier+eslint pre-commit pass. Tasks 0–2 already on `main` (`b0f408e`).
+- **Next:** Task 5 (span-aware action-only chips) + Task 6 (Open-in-your-Claude link, Vendor-First verify the `claude.ai/new?q=` param first). Plan: `docs/superpowers/plans/2026-06-08-never-dead-end-doctrine.md`.
+
 ## 2026-06-08 (Sonnet 4.6 · main) — feat(highlighter): AI pill + text highlighter on all /r/ sub-pages
 
 - `app/r/cre-swfl/[corridor]/page.tsx`: added `HighlighterProvider` + `HighlighterLayer` (full highlighter + AI pill on every corridor explore page); uses corridor slug as `reportId`, character_render as `conclusion`.

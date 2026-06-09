@@ -6,6 +6,7 @@ import { buildGroundingContext, type GroundingBlock } from "@/lib/highlighter/gr
 import { resolveReachTargets } from "@/lib/highlighter/reach";
 import { fetchReachBlocks } from "@/lib/highlighter/fetch-reach";
 import { recordUse, recordAsk } from "@/lib/highlighter/meter";
+import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,13 +49,13 @@ async function* extractText(
 }
 
 export async function POST(request: Request): Promise<Response> {
-  let body: { report_id?: string; fact?: string; question?: string };
+  let body: { report_id?: string; fact?: string; slug?: string; question?: string };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: "bad json" }, { status: 400 });
   }
-  const { report_id, fact, question } = body;
+  const { report_id, fact, slug, question } = body;
   // Gate the PRIMARY report on "the brain exists" (fetchBrain → 404 below), NOT
   // on MCP-catalog membership: if a user can view /r/<slug>, they can ask about
   // it, even if that brain isn't in BRAIN_CATALOG (e.g. franchise-outcomes).
@@ -88,6 +89,17 @@ export async function POST(request: Request): Promise<Response> {
   const reachSlugs = resolveReachTargets(question, report_id);
   const reachBlocks = await fetchReachBlocks(reachSlugs, { origin });
 
+  // Authored method for the highlighted metric, when its slug resolved. Drives
+  // both the injected derivation (never-guess) and the deterministic gap-log.
+  const method = typeof slug === "string" ? resolveMethod(slug) : null;
+  const neededComponents = (method?.components ?? [])
+    .filter((c) => c.role === "need")
+    .map((c) => c.name);
+  // answered=false means "we offered to find a named gap" (a tracked data
+  // request), NOT "we failed to answer". A metric with `need` components is, by
+  // definition, a gap — deterministic, no answer-text parsing.
+  const answered = neededComponents.length === 0;
+
   const FORMAT_RULE =
     "CRITICAL: Respond in plain text ONLY. " +
     "NEVER use markdown — no asterisks (* or **), no # headers, no - bullet lists, no backticks (`), no > blockquotes. " +
@@ -99,30 +111,11 @@ export async function POST(request: Request): Promise<Response> {
       rules: RULES_OF_ENGAGEMENT,
       gazetteer: GAZETTEER_STR,
       blocks: [primary, ...reachBlocks],
+      method,
     }) +
     "\n\nSpeak like a knowledgeable friend. Give a real, useful answer from the data. No markdown. Never say 'master', 'brain', 'grounded data', 'payload', or 'grain'.";
 
   const userMsg = fact ? `About this fact: "${fact}". ${question}` : question;
-
-  // Phrases that indicate the AI could not answer from the payload.
-  // When any phrase appears in the final answer we mark the ask as answered=false
-  // so the data-gap affordance and the §4 data_targets loop can consume it.
-  const DATA_GAP_PHRASES = [
-    "don't have that data",
-    "don't have data",
-    "no data available",
-    "not in the payload",
-    "not available in",
-    "can't find that",
-    "cannot find that",
-    "i don't have information",
-    "i don't have specific",
-    "that information isn't",
-    "that data isn't",
-    "outside what i have",
-    "beyond what i have",
-    "not something i have",
-  ];
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -135,17 +128,21 @@ export async function POST(request: Request): Promise<Response> {
           system,
           messages: [{ role: "user", content: userMsg }],
         });
-        let fullAnswer = "";
         for await (const text of extractText(ai)) {
-          fullAnswer += text;
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
         }
-        // Detect data gap: any gap phrase in the accumulated answer → answered=false.
-        const lc = fullAnswer.toLowerCase();
-        const answered = !DATA_GAP_PHRASES.some((p) => lc.includes(p));
         // Log the ask alongside the existing meter — both fire-and-forget.
+        // `answered` + `needed_components` are computed deterministically from the
+        // resolved method (above), not parsed from the answer text.
         void recordUse(request, { report_id, reach: reachSlugs });
-        void recordAsk({ report_id, fact, question, reach: reachSlugs, answered });
+        void recordAsk({
+          report_id,
+          fact,
+          question,
+          reach: reachSlugs,
+          answered,
+          needed_components: neededComponents,
+        });
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({ done: true, reach: reachSlugs, answered })}\n\n`,
