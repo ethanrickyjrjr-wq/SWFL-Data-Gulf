@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — fix: ODD-window cadence-scaled probe + clock-start rule
+
+- `ingest/scripts/check_freshness.py`: 3 rule changes — (1) `ODD_WINDOW_HALF=10` → `_odd_window_half(cadence)` scaled ±10d/±5d/±2d for quarterly/monthly/weekly; (2) no-data + no-`first_expected_by` → clock-starts from today (`expected = today + cadence`) instead of silent UNINITIALIZED — window opens in one cadence cycle; (3) `has_current` = `(today - last_run).days <= window_half` — FRESH means "drop arrived in the last window_half days" (old `last_run >= window_start` was unreachable with scaled windows since `window_half < cadence` always).
+- `ingest/tests/scripts/test_check_freshness.py`: 2 tests updated to match new semantics; 11/11 green.
+- **Next:** ops dashboard deploys automatically; all 7 ODD-window entries will show as yellow briefcases.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — fix: percent formatter 0.4% rendered as "40%" (Naples/Estero vacancy)
 
 - `refinery/render/speaker.mts` `formatValue`: percent case no longer uses `|v| ≤ 1 → ×100` magnitude heuristic. Percentage-points by default; scales ×100 only when `units` is `"share"/"ratio"/"fraction"/"proportion"` (e.g. permit saturation_index). Grepped all 114 percent-format metrics — 111 are percentage-point stored, 3 are shares (all correctly tagged `units: "share"`).

@@ -278,26 +278,37 @@ def check_tier2_entry(conn, entry: dict) -> dict:
     }
 
 
-# ODD_WINDOW_HALF is the number of days before/after the expected drop to watch.
-ODD_WINDOW_HALF = 10
+def _odd_window_half(cadence_days: int) -> int:
+    """Alert window (days each side), scaled to how often the source drops.
+
+    ≥90d (quarterly/annual) → ±10 days   — PDFs arrive a week or two off schedule
+    ≥30d (monthly)          → ±5 days    — reports usually land within a week
+    <30d (weekly and under) → ±2 days    — near-real-time; ±2 is still generous
+    """
+    if cadence_days >= 90:
+        return 10
+    if cadence_days >= 30:
+        return 5
+    return 2
 
 
 def check_odd_window_entry(conn, entry: dict, _today: date | None = None) -> dict:
     """Window-based probe for ODD (manual-drop) sources.
 
-    Expected date = last_run + cadence_days, or first_expected_by if no data.
+    Expected date = last_run + cadence_days, or first_expected_by if no data,
+    or today + cadence_days if neither is known (clock starts at registry entry).
 
     Statuses:
-      UNINITIALIZED  no data and no first_expected_by  → silent
-      WAITING        today < expected - 10 days        → silent
-      WINDOW_OPEN    in the window, no new data yet    → shown (watching)
-      OVERDUE        today > expected + 10, no data    → alert
-      FRESH          new data arrived this cycle       → silent
+      WAITING     today < expected - window_half  → silent
+      WINDOW_OPEN in the window, no new data yet  → shown (watching)
+      OVERDUE     today > expected + window_half  → loud alert
+      FRESH       new data arrived this cycle     → silent
     """
     name = entry["name"]
     lane = entry.get("lane", "tier-2")
     cadence = int(entry["cadence_days"])
     today = _today or date.today()
+    window_half = _odd_window_half(cadence)
 
     last_run = _fetch_max_freshness(conn, entry)
 
@@ -308,22 +319,15 @@ def check_odd_window_entry(conn, entry: dict, _today: date | None = None) -> dic
         raw = entry["first_expected_by"]
         expected = raw if isinstance(raw, date) else date.fromisoformat(str(raw))
     else:
-        return {
-            "name": name,
-            "lane": lane,
-            "last_run": None,
-            "age_days": None,
-            "cadence_days": cadence,
-            "threshold_days": ODD_WINDOW_HALF,
-            "expected_date": None,
-            "status": "UNINITIALIZED",
-        }
+        # No prior data, no explicit date — start the clock from today so the
+        # window opens in one cadence cycle rather than sitting silent forever.
+        expected = today + timedelta(days=cadence)
 
-    window_start = expected - timedelta(days=ODD_WINDOW_HALF)
-    window_end = expected + timedelta(days=ODD_WINDOW_HALF)
+    window_start = expected - timedelta(days=window_half)
+    window_end = expected + timedelta(days=window_half)
 
-    # "Fresh this cycle" = data arrived at or after the window start
-    has_current = last_run is not None and last_run >= window_start
+    # "Fresh this cycle" = data arrived within the last window_half days
+    has_current = last_run is not None and (today - last_run).days <= window_half
 
     if has_current:
         status = "FRESH"
@@ -341,7 +345,7 @@ def check_odd_window_entry(conn, entry: dict, _today: date | None = None) -> dic
         "last_run": last_run,
         "age_days": age_days,
         "cadence_days": cadence,
-        "threshold_days": ODD_WINDOW_HALF,
+        "threshold_days": window_half,
         "expected_date": expected,
         "status": status,
     }
@@ -454,7 +458,7 @@ def sync_gap_checks(conn, gap_cities: list[str]) -> dict:
 # ── probe runner ──────────────────────────────────────────────────────────────
 
 # Statuses that require no action and are excluded from the alert summary.
-_SILENT_STATUSES = {"FRESH", "WAITING", "UNINITIALIZED"}
+_SILENT_STATUSES = {"FRESH", "WAITING"}
 
 
 def run_probe(conn, registry: dict) -> list[dict]:
@@ -511,9 +515,9 @@ def format_summary(results: list[dict], run_date: date | None = None) -> str:
         icon = _STATUS_ICON.get(r["status"], r["status"])
         last_run = str(r["last_run"]) if r["last_run"] is not None else "—"
         age = str(r["age_days"]) if r["age_days"] is not None else "—"
-        # ODD window entries show expected date; standard entries show threshold days.
+        # ODD window entries show expected date + ±window; standard show threshold.
         if "expected_date" in r and r["expected_date"] is not None:
-            threshold_col = f"expect {r['expected_date']} ±{ODD_WINDOW_HALF}d"
+            threshold_col = f"expect {r['expected_date']} ±{r.get('threshold_days', 10)}d"
         else:
             threshold_col = f"{r.get('threshold_days', '—')}d"
         vol_status = r.get("volume_status")

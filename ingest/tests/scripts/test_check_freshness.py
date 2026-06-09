@@ -186,13 +186,14 @@ _ODD_BASE = {
 }
 
 
-def test_odd_window_uninitialized_when_no_data_and_no_expected():
-    """No DB data + no first_expected_by → UNINITIALIZED (silent — not yet scoped)."""
+def test_odd_window_waiting_when_no_data_and_no_expected():
+    """No DB data + no first_expected_by → WAITING (clock starts from today, window opens in one cadence)."""
+    today = date(2026, 6, 9)
     conn = _odd_conn(None)
-    result = check_odd_window_entry(conn, _ODD_BASE)
-    assert result["status"] == "UNINITIALIZED"
+    result = check_odd_window_entry(conn, _ODD_BASE, _today=today)
+    assert result["status"] == "WAITING"
     assert result["last_run"] is None
-    assert result["expected_date"] is None
+    assert result["expected_date"] == today + timedelta(days=_ODD_BASE["cadence_days"])
 
 
 def test_odd_window_waiting_when_expected_is_far_future():
@@ -222,11 +223,10 @@ def test_odd_window_overdue_when_window_passed_without_data():
     assert result["status"] == "OVERDUE"
 
 
-def test_odd_window_fresh_when_recent_run_in_current_window():
-    """7-day cadence, last_run 4 days ago → expected in 3 days → window_start was 7 days ago
-    → last_run is within the current window → FRESH."""
+def test_odd_window_fresh_when_data_arrived_recently():
+    """7-day cadence (window_half=2), last_run 1 day ago → within window_half days → FRESH."""
     today = date(2026, 6, 9)
-    last_run = today - timedelta(days=4)
+    last_run = today - timedelta(days=1)
     entry = {
         **_ODD_BASE,
         "cadence_days": 7,
