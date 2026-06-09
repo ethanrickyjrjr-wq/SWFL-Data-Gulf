@@ -9,17 +9,16 @@ const { directionFromZScore, propertiesCollierValue } =
 // Direction rule table — identical thresholds to properties-lee-value
 // (bullish z >= +1.0, bearish z <= -1.0, neutral otherwise). Boundary cases
 // pin the exact cut-points so the band can't drift.
-const RULES: Array<[number | null, "bullish" | "bearish" | "neutral", string]> =
-  [
-    [3, "bullish", "clearly bullish"],
-    [1.0, "bullish", "boundary: exactly +1 sigma -> bullish (>=)"],
-    [0.99, "neutral", "just inside band -> neutral"],
-    [0, "neutral", "zero -> neutral"],
-    [-0.99, "neutral", "just inside band -> neutral (negative)"],
-    [-1.0, "bearish", "boundary: exactly -1 sigma -> bearish (<=)"],
-    [-3, "bearish", "clearly bearish"],
-    [null, "neutral", "null z -> neutral"],
-  ];
+const RULES: Array<[number | null, "bullish" | "bearish" | "neutral", string]> = [
+  [3, "bullish", "clearly bullish"],
+  [1.0, "bullish", "boundary: exactly +1 sigma -> bullish (>=)"],
+  [0.99, "neutral", "just inside band -> neutral"],
+  [0, "neutral", "zero -> neutral"],
+  [-0.99, "neutral", "just inside band -> neutral (negative)"],
+  [-1.0, "bearish", "boundary: exactly -1 sigma -> bearish (<=)"],
+  [-3, "bearish", "clearly bearish"],
+  [null, "neutral", "null z -> neutral"],
+];
 
 for (const [z, expected, label] of RULES) {
   test(`directionFromZScore: ${label} (z=${z})`, () => {
@@ -42,8 +41,8 @@ test("propertiesCollierValue pack: deterministic (skipTriageAgent + skipSynthesi
   assert.equal(propertiesCollierValue.skipSynthesisAgent, true);
 });
 
-test("propertiesCollierValue pack: Redfin + FDOR parcel sources wired (tier 2)", () => {
-  assert.equal(propertiesCollierValue.sources.length, 2);
+test("propertiesCollierValue pack: Redfin + FDOR parcel + FHFA sources wired", () => {
+  assert.equal(propertiesCollierValue.sources.length, 3);
   const redfin = propertiesCollierValue.sources.find(
     (s) => s.source_id === "redfin_collier_market",
   );
@@ -54,16 +53,19 @@ test("propertiesCollierValue pack: Redfin + FDOR parcel sources wired (tier 2)",
   );
   assert.ok(parcels, "collier_parcels_fdor source must be wired");
   assert.equal(parcels!.trust_tier, 2);
+  const fhfa = propertiesCollierValue.sources.find((s) => s.source_id === "fhfa_hpi");
+  assert.ok(fhfa, "fhfa_hpi source must be wired");
+  assert.equal(fhfa!.trust_tier, 1);
 });
 
 test("propertiesCollierValue pack: fixture round-trip produces expected metrics", async () => {
-  const { collierMarketSource } =
-    await import("../sources/collier-market-source.mts");
-  const { collierParcelsSource } =
-    await import("../sources/collier-parcels-source.mts");
+  const { collierMarketSource } = await import("../sources/collier-market-source.mts");
+  const { collierParcelsSource } = await import("../sources/collier-parcels-source.mts");
+  const { fhfaHpiSource } = await import("../sources/fhfa-hpi-source.mts");
   const allFragments = [
     ...(await collierMarketSource.fetch()),
     ...(await collierParcelsSource.fetch()),
+    ...(await fhfaHpiSource.fetch()),
   ];
 
   const yearKinds = allFragments.filter(
@@ -73,16 +75,11 @@ test("propertiesCollierValue pack: fixture round-trip produces expected metrics"
     (f) => (f.normalized as { kind: string }).kind === "collier-summary",
   );
   const parcelKinds = allFragments.filter(
-    (f) =>
-      (f.normalized as { kind: string }).kind === "collier-parcels-summary",
+    (f) => (f.normalized as { kind: string }).kind === "collier-parcels-summary",
   );
   assert.ok(yearKinds.length >= 4, "expected at least 4 year fragments");
   assert.equal(summaryKinds.length, 1, "expected exactly one summary fragment");
-  assert.equal(
-    parcelKinds.length,
-    1,
-    "expected exactly one parcels-summary fragment",
-  );
+  assert.equal(parcelKinds.length, 1, "expected exactly one parcels-summary fragment");
 
   propertiesCollierValue.corpusSummary!(allFragments);
   const result = propertiesCollierValue.outputProducer!({
@@ -92,17 +89,12 @@ test("propertiesCollierValue pack: fixture round-trip produces expected metrics"
     citations: [],
     facts: [],
     recentNote: "",
-  } as unknown as Parameters<
-    NonNullable<typeof propertiesCollierValue.outputProducer>
-  >[0]);
+  } as unknown as Parameters<NonNullable<typeof propertiesCollierValue.outputProducer>>[0]);
 
   // Fixture engineered so current-year (year-1) homes_sold sits well above the
   // trailing 3yr baseline -> bullish.
   assert.equal(result.direction, "bullish");
-  assert.ok(
-    result.magnitude > 0 && result.magnitude <= 1,
-    "magnitude must be in (0, 1]",
-  );
+  assert.ok(result.magnitude > 0 && result.magnitude <= 1, "magnitude must be in (0, 1]");
 
   const metricNames = result.key_metrics.map((m) => m.metric);
   assert.ok(metricNames.includes("collier_homes_sold_zscore"));
@@ -112,28 +104,29 @@ test("propertiesCollierValue pack: fixture round-trip produces expected metrics"
   // Parcel-grain parity metrics from the FDOR cadastral source.
   assert.ok(metricNames.includes("collier_soh_gap_median_pct"));
   assert.ok(metricNames.includes("collier_total_parcels"));
+  assert.ok(
+    metricNames.includes("fhfa_naples_msa_yoy_pct"),
+    "fhfa_naples_msa_yoy_pct metric must appear when FHFA fixture has Naples rows",
+  );
+
+  const naplesMsaMetric = result.key_metrics.find((m) => m.metric === "fhfa_naples_msa_yoy_pct");
+  assert.ok(naplesMsaMetric, "Naples MSA HPI metric must exist");
+  assert.equal(naplesMsaMetric!.value, 1.41, "Naples MSA YoY must be +1.41% from fixture");
+  assert.equal(naplesMsaMetric!.direction, "rising", "Naples MSA rising (positive YoY)");
+  assert.equal(naplesMsaMetric!.units, "percent");
+  assert.equal(naplesMsaMetric!.display_format, "percent");
 
   // Parcel fixture has 5 parcels (4 homesteaded); SOH gaps [20,30,3.33,28] -> median 24.
-  const totalParcels = result.key_metrics.find(
-    (m) => m.metric === "collier_total_parcels",
-  );
-  assert.equal(
-    totalParcels!.value,
-    5,
-    "total_parcels must count all fixture parcels",
-  );
-  const sohGap = result.key_metrics.find(
-    (m) => m.metric === "collier_soh_gap_median_pct",
-  );
+  const totalParcels = result.key_metrics.find((m) => m.metric === "collier_total_parcels");
+  assert.equal(totalParcels!.value, 5, "total_parcels must count all fixture parcels");
+  const sohGap = result.key_metrics.find((m) => m.metric === "collier_soh_gap_median_pct");
   assert.equal(sohGap!.value, 24, "SOH gap median over homesteaded parcels");
 
   // Property-type filter check: only "All Residential" rows count toward
   // velocity. The fixture plants a Condo/Co-op row with homes_sold=99999 in the
   // current year that MUST be excluded — so the current-year count is exactly
   // the All Residential figure (12000), not inflated.
-  const perYear = result.key_metrics.find(
-    (m) => m.metric === "collier_homes_sold_per_year",
-  );
+  const perYear = result.key_metrics.find((m) => m.metric === "collier_homes_sold_per_year");
   assert.equal(
     perYear!.value,
     12000,
@@ -166,9 +159,7 @@ test("propertiesCollierValue pack: empty-snapshot path -> neutral + zero-metrics
     citations: [],
     facts: [],
     recentNote: "",
-  } as unknown as Parameters<
-    NonNullable<typeof propertiesCollierValue.outputProducer>
-  >[0]);
+  } as unknown as Parameters<NonNullable<typeof propertiesCollierValue.outputProducer>>[0]);
 
   assert.equal(result.direction, "neutral");
   assert.equal(result.magnitude, 0);
