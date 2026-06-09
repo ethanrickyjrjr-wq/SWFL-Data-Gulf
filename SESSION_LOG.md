@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — highlighter: persistent chat panel redesign
+
+- **`components/highlighter/HighlightPopup.tsx`** — full redesign: two-stage compose/answer model replaced with persistent scrollable chat thread (`thread: ChatEntry[]` + live `activeQuestion`/`answer`); follow-ups archive prior Q&A and pass full history context to `/api/converse` so Claude can weave in correlated answers. Draggable on desktop (pointer-capture drag, position resets on new selection). Mobile bottom-sheet at `50dvh`. Scroll isolation via non-passive `wheel` listener (page never scrolls behind panel). No outside-click close — panel persists; Esc + X only. Copy-for-Claude becomes a 3-option dropdown (key facts / research prompt / this answer). Chips re-appear as "Follow up" when a new span is selected while panel is open.
+- **Next:** live-app verify (`highlighter_ui_live_verify` check still open).
+
 ## 2026-06-08 (Sonnet 4.6 · main) — converse: no preamble, Bottom Line first
 
 - `lib/highlighter/grounding.ts`: added one instruction to the system prompt forcing `## Bottom Line` as the first line of every converse response — no setup prose before it.
