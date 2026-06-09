@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Sonnet 4.6 · main) — Lehigh parity sprint: CRE metrics filled + smoke test passed
+
+- `corridor_profiles` — both Lehigh corridors filled with C&W MarketBeat Retail Q4 2025 data: vacancy 0.2% (tightest in Lee County), asking rent $35.08/sf NNN, net absorption +6,397 sf; per-metric `*_source_url` set to C&W PDF. Cap rate left NULL (no submarket data). `refinery/__fixtures__/corridor-profiles.sample.json` updated to match.
+- `cre-swfl.md` rebuilt (v50); `lehigh_cre_metrics` check closed.
+- Smoke test PASS: `/r/cre-swfl/lee-blvd-lehigh-acres` and `/r/cre-swfl/joel-blvd-lehigh-acres` show metrics + character narrative + C&W PDF source links (0 raw Supabase REST URLs); all 6 Lehigh ZIP pages (33936–33976) render housing data, flood AAL absent by design (inland CDP).
+- **Next:** Lehigh parity sprint fully closed. No open Lehigh checks.
+
 ## 2026-06-09 (Sonnet 4.6 · main) — Naples MSA FHFA HPI wired: fhfa_naples_msa_yoy_pct live
 
 - `refinery/__fixtures__/fhfa-hpi.sample.json`: added 5 Naples-Marco Island MSA rows (CBSA 34940, 2024-Q4→2025-Q4; YoY = +1.41% by design).
