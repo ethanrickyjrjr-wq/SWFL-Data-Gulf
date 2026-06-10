@@ -1,4 +1,6 @@
 import { fetchBrain, buildDossier, BrainNotFoundError } from "@/lib/fetch-brain";
+import { routeChart } from "@/lib/route-chart";
+import { buildChartForIntent } from "@/lib/build-chart-for-intent.mts";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
@@ -149,6 +151,20 @@ export async function POST(request: Request): Promise<Response> {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        // Best-effort chart frame — emitted before the text stream.
+        // Failure is silently swallowed; a chart never blocks the answer.
+        try {
+          const intent = routeChart(question);
+          if (intent) {
+            const chart = await buildChartForIntent(intent);
+            if (chart) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chart })}\n\n`));
+            }
+          }
+        } catch {
+          /* chart is best-effort */
+        }
+
         const client = getAnthropic();
         const ai = client.messages.stream({
           model: TRIAGE_MODEL, // claude-haiku-4-5
