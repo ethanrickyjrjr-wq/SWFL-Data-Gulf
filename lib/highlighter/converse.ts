@@ -78,6 +78,8 @@ export interface ConverseHandlers {
    * false = the AI signalled it couldn't answer from the payload (data gap).
    */
   onAnswered?: (answered: boolean) => void;
+  /** Called with the chart frame payload when the server emits one. */
+  onChart?: (chart: unknown) => void;
   /** Called with a human-readable message on any failure. Terminal. */
   onError: (message: string) => void;
   /** Called once when the stream completes cleanly. */
@@ -137,6 +139,9 @@ export async function streamConverse(
         if (ev.error) {
           handlers.onError(ev.error);
           return;
+        }
+        if (ev.chart !== undefined) {
+          handlers.onChart?.(ev.chart);
         }
         if (typeof ev.text === "string") {
           acc += ev.text;

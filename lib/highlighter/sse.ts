@@ -20,6 +20,8 @@ export interface SSEEvent {
   /** Server sets false when the answer signals a data gap (answered=false in data_requests). */
   answered?: boolean;
   error?: string;
+  /** Best-effort chart emitted before the text stream. See buildChartForIntent. */
+  chart?: unknown;
 }
 
 export interface ParsedSSE {

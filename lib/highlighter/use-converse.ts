@@ -16,9 +16,11 @@ export interface UseConverse {
    * null = stream still in progress (no done frame yet).
    */
   answered: boolean | null;
+  /** Best-effort chart payload emitted before the text stream. null until received. */
+  chart: unknown;
   error: string | null;
   streaming: boolean;
-  /** Clear answer/reach/answered/error back to the empty state. */
+  /** Clear answer/reach/answered/chart/error back to the empty state. */
   reset: () => void;
 }
 
@@ -33,6 +35,7 @@ export function useConverse(): UseConverse {
   const [reach, setReach] = useState<string[]>([]);
   const [followups, setFollowups] = useState<string[]>([]);
   const [answered, setAnswered] = useState<boolean | null>(null);
+  const [chart, setChart] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
 
@@ -41,6 +44,7 @@ export function useConverse(): UseConverse {
     setReach([]);
     setFollowups([]);
     setAnswered(null);
+    setChart(null);
     setError(null);
     setStreaming(false);
   }, []);
@@ -51,6 +55,7 @@ export function useConverse(): UseConverse {
     setReach([]);
     setFollowups([]);
     setAnswered(null);
+    setChart(null);
     setError(null);
     setStreaming(true);
     await streamConverse(input, {
@@ -58,10 +63,11 @@ export function useConverse(): UseConverse {
       onReach: setReach,
       onFollowups: setFollowups,
       onAnswered: setAnswered,
+      onChart: setChart,
       onError: (m) => setError(m),
     });
     setStreaming(false);
   }, []);
 
-  return { ask, answer, reach, followups, answered, error, streaming, reset };
+  return { ask, answer, reach, followups, answered, chart, error, streaming, reset };
 }

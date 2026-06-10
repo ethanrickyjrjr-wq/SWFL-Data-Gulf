@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { formatChartValue } from "@/refinery/lib/chart-adapter.mts";
 import type { ChartValueFormat } from "@/refinery/validate/chart-block-lint.mts";
@@ -49,6 +49,12 @@ export type HBarChartProps = {
   valueFormat?: ChartValueFormat;
   /** Label shown in tooltip for the primary metric row. Defaults to "Asking Rent". */
   tooltipMetricLabel?: string;
+  /**
+   * Compact density toggle for inline popup/dock rendering.
+   * When true, tightens font sizes and bar heights; fluid clamp() ranges are narrowed.
+   * Default false (full-size embed/page rendering).
+   */
+  compact?: boolean;
 };
 
 type TooltipState = {
@@ -75,8 +81,12 @@ export function HBarChart({
   formatValue,
   valueFormat = "currency",
   tooltipMetricLabel = "Asking Rent",
+  compact = false,
 }: HBarChartProps) {
-  const fmt = formatValue ?? ((v: number) => formatChartValue(valueFormat, v));
+  const fmt = useMemo(
+    () => formatValue ?? ((v: number) => formatChartValue(valueFormat, v)),
+    [formatValue, valueFormat],
+  );
   const scopeRef = useRef<HTMLDivElement>(null);
   const fillRefs = useRef<(HTMLDivElement | null)[]>([]);
   const valueRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -90,9 +100,7 @@ export function HBarChart({
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const fills = fillRefs.current.filter(
-        (el): el is HTMLDivElement => el !== null,
-      );
+      const fills = fillRefs.current.filter((el): el is HTMLDivElement => el !== null);
       const pcts = corridors.map((c) => (c.value / range.max) * 100);
 
       gsap.fromTo(
@@ -123,7 +131,7 @@ export function HBarChart({
     }, scopeRef);
 
     return () => ctx.revert();
-  }, [corridors, range.max]);
+  }, [corridors, range.max, fmt]);
 
   const handleEnter = (idx: number) => (e: React.MouseEvent) => {
     setHoveredIdx(idx);
@@ -136,9 +144,7 @@ export function HBarChart({
   };
 
   const handleMove = (e: React.MouseEvent) => {
-    setTooltip((prev) =>
-      prev.visible ? { ...prev, x: e.clientX + 14, y: e.clientY - 48 } : prev,
-    );
+    setTooltip((prev) => (prev.visible ? { ...prev, x: e.clientX + 14, y: e.clientY - 48 } : prev));
   };
 
   const handleLeave = () => {
@@ -163,11 +169,13 @@ export function HBarChart({
   } as React.CSSProperties;
 
   return (
-    <div ref={scopeRef} className="hbarchart-root" style={cssVars}>
+    <div
+      ref={scopeRef}
+      className={`hbarchart-root${compact ? " hbarchart-compact" : ""}`}
+      style={cssVars}
+    >
       <div className="hbarchart-card">
-        <div className="hbarchart-eyebrow">
-          {eyebrow ?? `${corridors.length} corridors`}
-        </div>
+        <div className="hbarchart-eyebrow">{eyebrow ?? `${corridors.length} corridors`}</div>
         <div className="hbarchart-title">{title}</div>
         <div
           className={`hbarchart-list${hoveredIdx !== null ? " has-hover" : ""}`}
@@ -177,9 +185,7 @@ export function HBarChart({
           {corridors.map((c, i) => {
             const pct = (c.value / range.max) * 100;
             const showSeparator =
-              typeof separatorAfter === "number" &&
-              separatorLabel &&
-              i + 1 === separatorAfter;
+              typeof separatorAfter === "number" && separatorLabel && i + 1 === separatorAfter;
             return (
               <Fragment key={c.name}>
                 <div
@@ -188,9 +194,7 @@ export function HBarChart({
                 >
                   <div className="hbarchart-label">
                     <span className="hbarchart-label-primary">{c.name}</span>
-                    {c.subLabel && (
-                      <span className="hbarchart-label-sub">{c.subLabel}</span>
-                    )}
+                    {c.subLabel && <span className="hbarchart-label-sub">{c.subLabel}</span>}
                   </div>
                   <div className="hbarchart-track">
                     <div
@@ -212,9 +216,7 @@ export function HBarChart({
                 </div>
                 {showSeparator && (
                   <div className="hbarchart-separator" aria-hidden="true">
-                    <span className="hbarchart-separator-label">
-                      {separatorLabel}
-                    </span>
+                    <span className="hbarchart-separator-label">{separatorLabel}</span>
                   </div>
                 )}
               </Fragment>
@@ -223,8 +225,7 @@ export function HBarChart({
         </div>
         <div className="hbarchart-footer">
           <span>
-            Median {fmt(median)} &nbsp;·&nbsp; range {fmt(range.min)}–
-            {fmt(range.max)}
+            Median {fmt(median)} &nbsp;·&nbsp; range {fmt(range.min)}–{fmt(range.max)}
           </span>
           {detailHref && detailLabel && (
             <a className="hbarchart-detail-link" href={detailHref}>
@@ -246,9 +247,7 @@ export function HBarChart({
           </div>
           <div className="hbarchart-tooltip-row">
             <span>Tier</span>
-            <span>
-              {tipCorr.tier.charAt(0).toUpperCase() + tipCorr.tier.slice(1)}
-            </span>
+            <span>{tipCorr.tier.charAt(0).toUpperCase() + tipCorr.tier.slice(1)}</span>
           </div>
           <div className="hbarchart-tooltip-row">
             <span>vs Median</span>
@@ -278,8 +277,7 @@ export function HBarChart({
           border-radius: 12px;
           /* Fluid padding so the card breathes on desktop but tightens on
              narrow phones; upper bounds equal the original 28/32/22. */
-          padding: clamp(16px, 5vw, 28px) clamp(16px, 6vw, 32px)
-            clamp(14px, 4vw, 22px);
+          padding: clamp(16px, 5vw, 28px) clamp(16px, 6vw, 32px) clamp(14px, 4vw, 22px);
           width: 100%;
           max-width: 620px;
           /* Was a hard 320px floor that clipped below it. Fluid now: the row
@@ -296,8 +294,7 @@ export function HBarChart({
 
         .hbarchart-eyebrow {
           font-family:
-            var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
-            SFMono-Regular, Menlo, monospace;
+            var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
           font-size: 11px;
           letter-spacing: 0.12em;
           color: var(--muted-txt);
@@ -351,8 +348,7 @@ export function HBarChart({
           text-overflow: ellipsis;
           letter-spacing: -0.01em;
           font-family:
-            var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
-            SFMono-Regular, Menlo, monospace;
+            var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
         }
 
         .hbarchart-label-sub {
@@ -400,8 +396,7 @@ export function HBarChart({
 
         .hbarchart-value {
           font-family:
-            var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
-            SFMono-Regular, Menlo, monospace;
+            var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
           font-size: 13.5px;
           font-weight: 700;
           color: var(--value-txt);
@@ -438,8 +433,7 @@ export function HBarChart({
         }
         .hbarchart-separator-label {
           font-family:
-            var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
-            SFMono-Regular, Menlo, monospace;
+            var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
           font-size: 10.5px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -479,8 +473,7 @@ export function HBarChart({
           display: flex;
           justify-content: space-between;
           font-family:
-            var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
-            SFMono-Regular, Menlo, monospace;
+            var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
           font-size: 11px;
           color: var(--muted-txt);
         }
@@ -493,8 +486,7 @@ export function HBarChart({
           padding-top: 14px;
           border-top: 1px dashed rgba(255, 255, 255, 0.1);
           font-family:
-            var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
-            SFMono-Regular, Menlo, monospace;
+            var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
           font-size: 11.5px;
           color: var(--meta-txt);
           letter-spacing: 0.02em;
@@ -512,6 +504,27 @@ export function HBarChart({
         }
         .hbarchart-detail-link:hover {
           opacity: 0.75;
+        }
+
+        .hbarchart-compact .hbarchart-card {
+          padding: 12px 14px 10px;
+          max-width: 100%;
+        }
+        .hbarchart-compact .hbarchart-title {
+          font-size: 14px;
+          margin-bottom: 12px;
+        }
+        .hbarchart-compact .hbarchart-list {
+          gap: 6px;
+        }
+        .hbarchart-compact .hbarchart-row {
+          grid-template-columns: clamp(60px, 22vw, 100px) minmax(0, 1fr) clamp(40px, 14vw, 58px);
+          gap: 6px;
+          padding: 3px 0;
+        }
+        .hbarchart-compact .hbarchart-footer {
+          font-size: 10px;
+          margin-top: 8px;
         }
       `}</style>
     </div>
