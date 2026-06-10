@@ -2,6 +2,19 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(S1): highlighter thread persistence + briefcase capture + cross-cell snap
+
+- **Projects S1 complete** (`docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/session-1-highlighter-thread-briefcase__OPUS/`), 6 commits `66ce9cc..295e0b0`.
+- `lib/project/items.ts` (new) — `ProjectItem` discriminated union + `projectItemSchema`/`projectItemsSchema` (zod v4). The shared spine S2/S4/S6/S9 import. +tests 4/4.
+- `lib/highlighter/context.tsx` — grew `HighlighterProvider` with per-`reportId` `thread` + `draftItems` (`localStorage` `swfl_project_draft_v1`, 50-cap) + `draftNearCap`. Pure reducers (`appendExchange`/`addItem`/`loadDraftFrom`…) exported + unit-tested 8/8. Lazy-init read, write-through in setter callbacks — **no setState-in-effect**.
+- `HighlightPopup.tsx` reads thread from provider (condensed reopen, tap-to-expand) + "File this figure/answer"; `AskAiDock.tsx` shares the same thread (null-safe local fallback). **Bug fixed:** renamed a shadowed local `ctx` (prior-context string) → `priorContext` so `archiveExchange` hits the provider, not a string.
+- `components/highlighter/Briefcase.tsx` (new) — count-badge tray (bottom-sheet/popover), remove/Open-project, "File this report"; mounted in `AskAi.tsx`; `#briefcase-tray` added to `SUPPRESS_CLOSEST`. Each file fires `/api/meter` `item_add`.
+- `metricSuggestions` provenance widened (value/sourceUrl/sourceLabel/freshnessToken) on `app/r/[slug]/page.tsx` AND `app/r/cre-swfl/[corridor]/page.tsx` `[AUDIT-FIX C-meta + EXTENDED]`.
+- `lib/highlighter/use-highlight.ts` — `snapCrossCellSelection` + pure `pickDominantCell` (1.5× dominance, balanced→suppress) wired after cross-row snap. +tests 7/7.
+- **Verify:** `bun test lib/highlighter lib/project` 86/86 green; `tsc --noEmit` 0 errors app-wide; eslint clean on all touched files.
+- **Deviation:** repo has no DOM test env (bun:test only) → plan's `renderHook`/jsdom tests re-cast as pure-function tests; React/DOM wrappers guarded by the set-state-in-effect lint + (deferred) manual browser smoke. Highlighter UI is flag-gated OFF in prod — smoke before flipping `highlighterUiEnabled`.
+- **Next (S2):** Charts Tier B `buildChartForIntent` + `ChartBlockView` wiring (fixture-backed, per LB-R1 override).
+
 ## 2026-06-10 (main) — fix(highlighter): double-tap gate + keep selection for copy
 
 - `lib/highlighter/use-highlight.ts` — replaced exact-text suppression (`lastSuppressedText === text`) with word-count + 10s window check (`DOUBLE_TAP_WINDOW_MS=10_000`, `DOUBLE_TAP_FUZZ=5`). First large sweep (>40 words): popup suppressed, DOM selection STAYS (user can copy). Second similar-sized selection within 10s: popup fires. `onKeyUp` now ignores Escape so popup doesn't re-open from the lingering selection after Esc.
