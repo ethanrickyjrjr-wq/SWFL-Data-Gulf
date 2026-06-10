@@ -9,10 +9,10 @@
 **`[LB-R4]` Authoritative numbers:** the `chart_block` jsonb stored here is the **frozen single source of truth** for a saved chart's numbers. `computeMetricChart` (`refinery/lib/chart-from-metrics.mts`) is the live `/r/` render and is NEVER the source for a saved/filed chart — once saved, the block is frozen and the `ProjectItem`'s `chart_id` always reads it back from `saved_charts`. The two paths cannot diverge because a filed chart is never recomputed.
 
 **Tasks (in order):**
-- [ ] `task-01-saved-charts-sql.md` — idempotent SQL + RLS public-select + service-role grant
-- [ ] `task-02-charts-save-route.md` — `POST /api/charts/save` (lint → 422 / insert → `{id}` + meter `chart_save`)
-- [ ] `task-03-c-id-page.md` — `app/c/[id]/page.tsx` renders `ChartBlockView` + provenance + token + "Add to project"
-- [ ] `task-04-wire-file-this-chart.md` — replace S2's `TODO(S3)` marker; save then `ctx.fileItem({kind:'chart'})`
+- [x] `task-01-saved-charts-sql.md` — idempotent SQL + RLS public-select + service-role grant
+- [x] `task-02-charts-save-route.md` — `POST /api/charts/save` (lint → 422 / insert → `{id}` + meter `chart_save`)
+- [x] `task-03-c-id-page.md` — `app/c/[id]/page.tsx` renders `ChartBlockView` + provenance + token + "Add to project"
+- [x] `task-04-wire-file-this-chart.md` — replace S2's `TODO(S3)` marker; save then `ctx.fileItem({kind:'chart'})`
 
 **Files:** new `docs/sql/20260611_saved_charts.sql` · `app/api/charts/save/route.ts` · `app/c/[id]/page.tsx` · `components/highlighter/HighlightPopup.tsx` (+dock) — replace the S2 TODO.
 

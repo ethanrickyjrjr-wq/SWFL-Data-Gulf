@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(S3): saved_charts + /c/[id] + File-this-chart wired
+
+- `docs/sql/20260611_saved_charts.sql` (new) — idempotent table + RLS public-select + service-role grant; applied + PostgREST schema reloaded.
+- `app/api/charts/save/route.ts` (new) — `POST /api/charts/save`; `lintChartBlock` gate (422 on structural fail); service-role insert; meters `chart_save`; returns `{id}` (8-char slug). 3/3 tests green.
+- `app/c/[id]/page.tsx` + `app/c/[id]/AddToProject.tsx` (new) — server component reads `saved_charts` by id (404 if missing); renders `ChartBlockView` + `freshness_token` caption + source link; client island writes directly to `swfl_project_draft_v1` localStorage.
+- `components/highlighter/HighlightPopup.tsx` + `AskAiDock.tsx` — S2 `TODO(S3)` replaced; "File this chart" enabled for `{block}` variant only; on success calls `ctx.fileItem({kind:"chart", chart_id, title})`; on failure shows "Save failed" inline.
+- S3 README all `[x]`. **Next (S4):** `/project/[id]` page + first `auth.uid()` RLS policy.
+
 ## 2026-06-10 (main) — spec: chart as-of anchoring rules
 
 - `docs/superpowers/specs/2026-06-10-chart-as-of-anchoring.md` (new) — full spec from operator design review: every builder returns `asOf`, bottom caption (monospace 11px, dimmed, NOT in title), uniform-vintage = one caption, mixed-vintage = tag series in legend + Option B (refuse co-plot if gap ≥ 1 quarter), build shows full detail, print collapses to cover stamp when uniform. `asOf` never stripped — template decides loudness.
