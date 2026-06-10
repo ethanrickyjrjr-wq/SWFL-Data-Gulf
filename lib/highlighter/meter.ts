@@ -54,6 +54,11 @@ export async function recordUse(
  * `answered` is false when the resolved metric has `need` components — i.e. we
  * offered to find a named gap. `needed_components` lists those parts so the Ops
  * coverage page can show, per metric, exactly what we don't yet hold.
+ *
+ * `selection_type` / `is_realtime` / `from_chip` tag the chip-click event: what was
+ * highlighted (date/token/place/metric/section), whether the click was a
+ * model-generated real-time follow-up (vs a static starter), and whether it came
+ * from a chip at all (vs the free-form textarea).
  */
 export async function recordAsk(meta: {
   report_id: string;
@@ -62,6 +67,9 @@ export async function recordAsk(meta: {
   reach: string[];
   answered: boolean;
   needed_components?: string[];
+  selection_type?: string | null;
+  is_realtime?: boolean;
+  from_chip?: boolean;
 }): Promise<void> {
   try {
     const db = createServiceRoleClient();
@@ -72,6 +80,9 @@ export async function recordAsk(meta: {
       reach: meta.reach,
       answered: meta.answered,
       needed_components: meta.needed_components ?? [],
+      selection_type: meta.selection_type ?? null,
+      is_realtime: meta.is_realtime ?? false,
+      from_chip: meta.from_chip ?? false,
     });
   } catch {
     // metering must never break an answer

@@ -5,6 +5,7 @@ import {
   suggestionsForSelection,
   isFreshnessToken,
   isLikelyDate,
+  deriveSelectionType,
 } from "./suggestions";
 import { resolveMethod } from "../../refinery/lib/methodology-registry.mts";
 
@@ -75,4 +76,24 @@ test("a date/year is detected and never gets a 'what's driving' chip", () => {
   const c = suggestionsForSelection("2026-06-09", "metric");
   expect(c.some((s) => /driving/i.test(s))).toBe(false);
   expect(c.some((s) => /current|updated/i.test(s))).toBe(true);
+});
+
+test("deriveSelectionType maps section/token/date/metric/place", () => {
+  // A large selection is a section regardless of its text classification.
+  expect(
+    deriveSelectionType({ text: "lots of words here", factType: "place", mode: "section" }),
+  ).toBe("section");
+  // The freshness token wins over classifyFact's "metric" (it has digits).
+  expect(
+    deriveSelectionType({ text: "SWFL-7421-v5-20260607", factType: "metric", mode: "fact" }),
+  ).toBe("token");
+  // A date wins over "metric" too.
+  expect(deriveSelectionType({ text: "2026-06-09", factType: "metric", mode: "fact" })).toBe(
+    "date",
+  );
+  // A plain figure stays metric; a place stays place.
+  expect(deriveSelectionType({ text: "6.2%", factType: "metric", mode: "fact" })).toBe("metric");
+  expect(deriveSelectionType({ text: "Fort Myers Beach", factType: "place", mode: "fact" })).toBe(
+    "place",
+  );
 });

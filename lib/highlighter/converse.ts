@@ -15,7 +15,54 @@ export interface ConverseInput {
   /** Metric slug for the highlighted figure, when known (chip/row path). Lets the
    *  server resolve the authored methodology entry. Undefined for free selections. */
   slug?: string;
+  /** Selection type (date/token/place/metric/section) so the server can tailor BOTH
+   *  the answer and the real-time follow-ups. Absent for the report-level dock —
+   *  its absence also gates off the follow-ups directive (no chips there). */
+  selectionType?: string;
+  /** True when this ask originated from a model-generated real-time follow-up chip
+   *  (vs a static starter chip). Analytics only. */
+  isRealtime?: boolean;
+  /** True when this ask came from a chip click (vs free-form textarea). Analytics only. */
+  fromChip?: boolean;
   question: string;
+}
+
+/** The structured tail marker the converse model appends after its answer:
+ *  `⟦FOLLOWUPS⟧ q1 | q2 | q3`. U+27E6 + "FOLLOWUPS" + U+27E7 = 11 JS chars. Exotic
+ *  + non-markdown so it never collides with answer prose. */
+const FOLLOWUPS_MARKER = "⟦FOLLOWUPS⟧";
+
+/**
+ * Split the accumulated answer into the visible prose and the follow-up chips.
+ * Pure + exported so the parsing is unit-tested directly (no stream needed).
+ *
+ * - Full marker present → `visible` is everything before it (trimEnd); `followups`
+ *   is the tail split on "|", trimmed, empties dropped, stray brackets stripped,
+ *   capped at 3.
+ * - No full marker → `followups` is empty and we trim any TRAILING PARTIAL of the
+ *   marker off `visible` so a half-streamed "…answer.\n\n⟦FOLL" never flashes.
+ */
+export function splitFollowupTail(acc: string): { visible: string; followups: string[] } {
+  const idx = acc.indexOf(FOLLOWUPS_MARKER);
+  if (idx !== -1) {
+    const visible = acc.slice(0, idx).trimEnd();
+    const followups = acc
+      .slice(idx + FOLLOWUPS_MARKER.length)
+      .split("|")
+      .map((q) => q.replace(/[⟦⟧]/g, "").trim())
+      .filter(Boolean)
+      .slice(0, 3);
+    return { visible, followups };
+  }
+  // No full marker yet — hide any trailing partial of it (check every prefix,
+  // longest first, so "⟦FOLLOWUPS" and "⟦F" are both caught). trimEnd drops the
+  // blank line the model puts before the marker so it never flashes mid-stream.
+  for (let len = FOLLOWUPS_MARKER.length - 1; len >= 1; len--) {
+    if (acc.endsWith(FOLLOWUPS_MARKER.slice(0, len))) {
+      return { visible: acc.slice(0, acc.length - len).trimEnd(), followups: [] };
+    }
+  }
+  return { visible: acc, followups: [] };
 }
 
 export interface ConverseHandlers {
@@ -23,6 +70,9 @@ export interface ConverseHandlers {
   onText: (accumulated: string) => void;
   /** Called once with the reach slugs the server pulled (on the done frame). */
   onReach?: (reach: string[]) => void;
+  /** Called once on the done frame with the model's real-time follow-up chips
+   *  (empty when the tail was missing/malformed — caller falls back to static). */
+  onFollowups?: (followups: string[]) => void;
   /**
    * Called once with the answered flag from the done frame.
    * false = the AI signalled it couldn't answer from the payload (data gap).
@@ -56,6 +106,9 @@ export async function streamConverse(
         report_id: input.reportId,
         fact: input.fact,
         slug: input.slug,
+        selection_type: input.selectionType,
+        is_realtime: input.isRealtime,
+        from_chip: input.fromChip,
         question,
       }),
     });
@@ -87,12 +140,15 @@ export async function streamConverse(
         }
         if (typeof ev.text === "string") {
           acc += ev.text;
-          handlers.onText(acc);
+          // Hide the follow-ups tail (and any half-streamed partial of it) from
+          // the displayed answer; it surfaces as chips on the done frame instead.
+          handlers.onText(splitFollowupTail(acc).visible);
         }
         if (ev.done) {
           if (Array.isArray(ev.reach)) handlers.onReach?.(ev.reach);
           // answered defaults to true when absent (older server / test stub).
           handlers.onAnswered?.(ev.answered !== false);
+          handlers.onFollowups?.(splitFollowupTail(acc).followups);
           handlers.onDone?.();
         }
       }

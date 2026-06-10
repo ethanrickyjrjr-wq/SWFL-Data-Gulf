@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Opus 4.8 · main) — feat(highlighter): Phase 2 — real-time follow-ups + selection-type awareness + mobile tap-targets + chip analytics
+
+- **Real-time follow-ups (Option 1, same-call tail):** converse model ends its answer with `⟦FOLLOWUPS⟧ q1 | q2 | q3`; new pure `splitFollowupTail()` (`lib/highlighter/converse.ts`) strips the 11-char marker (+ any half-streamed partial) from the displayed answer and surfaces the parts as "Follow up" chips via a new `onFollowups` handler → `useConverse().followups`. `HighlightPopup` renders `followups` after an answer, falls back to static chips when the tail is absent, and re-shows chips on the streaming→done transition (previous-value-ref effect — the only shape this lint config allows).
+- **Selection-type awareness:** `deriveSelectionType()` (`lib/highlighter/suggestions.ts`) → section/token/date/place/metric, passed to `/api/converse`. The FOLLOWUPS directive + a type hint in the user message are **gated on `selection_type`** so the report-level Ask-AI dock (no chips) spends zero extra tokens. `MAX_TOKENS` 700→760.
+- **Mobile "numbers won't pop" fix** (`app/r/_components/metrics-table.tsx`): `MetricValueCell` now chip-wraps `string | number` (a number-typed value was rendering as a non-tappable span — the live bug); `DataRow` (per-ZIP report) gains the same `FactChip` tap target.
+- **Chip analytics:** `recordAsk` (`lib/highlighter/meter.ts`) tags each ask with `selection_type`/`is_realtime`/`from_chip`; columns added to `public.data_requests` (idempotent ALTER, applied + PostgREST reloaded). No PostHog — reused the existing Supabase meter.
+- Verified: `bun test lib/highlighter/` 64✓ (added followup-tail split incl. split-across-chunks + `deriveSelectionType`), `tsc --noEmit` 0 errors, eslint 0 on all 9 touched files. **Next/blocked:** live runtime verify (model actually emits the tail, chips render, mobile tap) — `highlighter_realtime_prompts` check kept OPEN until that prod signal (per checks-are-prod-evidence rule).
+
 ## 2026-06-10 (Opus 4.8 · main) — feat(§B): Universal Location Search dispatcher — `resolveLocation`
 
 - New `refinery/lib/location-resolver.mts` (pure dispatch over existing resolvers, no new data, no geocoder) + 13-test acceptance (all green via `bun test`). Async so §E's geocoder drops into the `address` branch later without touching callers.

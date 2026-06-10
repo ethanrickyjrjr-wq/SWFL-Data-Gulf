@@ -45,39 +45,54 @@ dev). Fix is one code path → every `/r/` report's popup + the Ask-AI dock.
 
 ---
 
-## TOP NEXT BUILD — real-time follow-up prompts
+## SHIPPED — Phase 2: real-time follow-ups + selection-type awareness (2026-06-10)
 
-Operator has asked for this repeatedly. Today's chips are static heuristics
-(token / date / place / metric / section). What's wanted: **follow-up prompts
-generated in real time AFTER an answer**, tailored to the answer + what was
-highlighted — so the popup proposes the *next* useful question instead of
-re-showing the same starters. "Most will be the same, but real-time after a
-question is answered for sure."
+Built via **Option 1 (same-call structured tail)**. Live-runtime verification
+(model actually emits the tail, chips render, mobile tap) is the remaining gate —
+tracked by the open `highlighter_realtime_prompts` check, not a marker here.
 
-Design options:
+- **Same-call tail.** Converse model ends its answer with
+  `⟦FOLLOWUPS⟧ q1 | q2 | q3`. The client splits it off in
+  `splitFollowupTail()` (`lib/highlighter/converse.ts`, pure + unit-tested):
+  strips the 11-char marker (U+27E6 + `FOLLOWUPS` + U+27E7) **and any
+  half-streamed partial of it** so nothing leaks mid-stream, then hands the parts
+  to a new `onFollowups` handler → `useConverse().followups`. `HighlightPopup`
+  renders `followups` after an answer and **falls back to the static chips** when
+  the tail is missing/malformed. Zero extra latency/cost. Chips re-appear on the
+  streaming→done transition (previous-value-ref effect — the strict
+  `react-hooks` config bans both set-state-in-effect on reactive deps and
+  ref-reads during render; the prev-value-ref-in-effect shape is the one allowed).
+- **Selection-type awareness.** `deriveSelectionType()`
+  (`lib/highlighter/suggestions.ts`) maps a selection to
+  section/token/date/place/metric (reusing `isFreshnessToken`/`isLikelyDate`) and
+  is passed to `/api/converse`. The FOLLOWUPS directive **and** a type hint in the
+  user message are **gated on `selection_type`** — so the report-level Ask-AI
+  dock (renders no chips) spends no tokens on a tail that would only be stripped.
+  `MAX_TOKENS` 700→760 for the tail.
+- **Chip analytics (no PostHog — reused the meter).** `recordAsk`
+  (`lib/highlighter/meter.ts`) tags every ask with
+  `selection_type`/`is_realtime`/`from_chip`; columns added to
+  `public.data_requests` (idempotent ALTER, applied). `is_realtime` = the clicked
+  chip was a model follow-up vs a static starter; `from_chip` = chip vs free-text.
 
-1. **Same-call structured tail (recommended).** Instruct the converse model to
-   end its response with a strict delimiter then 2-3 follow-ups, e.g.
-   `\n\n⟦FOLLOWUPS⟧ q1 | q2 | q3`. The client (`lib/highlighter/converse.ts`)
-   splits the tail off the stream, hides it from the displayed answer, and
-   renders the parts as the "Follow up" chips. Zero extra latency/cost. Risk:
-   format reliability — parse defensively and fall back to the current static
-   chips when the tail is missing/malformed.
-2. **Second cheap call on `done`.** After the answer completes, fire a tiny
-   Haiku call ("given this Q&A + the highlighted fact, propose 3 follow-ups →
-   JSON"). Cleaner separation, slightly more latency/cost.
+Scope held to the shared `/api/converse` + popup. Per-report tuning of the other
+`/r/` brains (housing, env, macro, …) stays a separate session.
 
-Recommendation: option 1 first; it reuses the existing SSE stream and the
-"Follow up" chip slot that already renders after an answer in `HighlightPopup`.
+### Also shipped this pass — mobile "numbers won't pop"
 
-**Better highlight awareness (pairs with this):** pass the selection *type* to
-the model (date / token / place / metric / section), not just the text, so both
-the answer and the follow-ups are tailored. Today `factWithContext` carries the
-text + row/section label; add the `factType` (and an explicit "this is a
-section/chart summary" flag) so the model knows the shape of what was grabbed.
+Live bug: header Strength/Confidence popped (plain text → long-press selects) but
+table numbers didn't. Cause: `MetricValueCell` only chip-wrapped a value when it
+was a **string**, so a number-typed value rendered as a plain, non-tappable span;
+the per-ZIP `DataRow` wrapped no `FactChip` at all. Fixed both in
+`app/r/_components/metrics-table.tsx` (wrap `string | number`; `DataRow` gets the
+same tap target, row label as context).
 
-Scope: all `/r/` pages (shared `/api/converse` + popup). Per-report tuning of
-the other `/r/` brains (housing, env, macro, …) is a separate session.
+### Original design notes (kept for reference)
+
+The rejected alternative was a **second cheap call on `done`** (a tiny Haiku call
+proposing 3 follow-ups as JSON) — cleaner separation but extra latency/cost.
+Option 1 won because it reuses the existing SSE stream and the "Follow up" chip
+slot that already renders after an answer.
 
 ## Near-term UI backlog (do next, not yet built)
 

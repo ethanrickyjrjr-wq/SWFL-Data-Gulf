@@ -11,7 +11,7 @@ import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_TOKENS = 700;
+const MAX_TOKENS = 760; // +60 over the answer budget for the short follow-ups tail.
 
 // GEOGRAPHY_GAZETTEER is an object; buildGroundingContext expects a string.
 const GAZETTEER_STR = JSON.stringify(GEOGRAPHY_GAZETTEER, null, 2);
@@ -49,13 +49,21 @@ async function* extractText(
 }
 
 export async function POST(request: Request): Promise<Response> {
-  let body: { report_id?: string; fact?: string; slug?: string; question?: string };
+  let body: {
+    report_id?: string;
+    fact?: string;
+    slug?: string;
+    selection_type?: string;
+    is_realtime?: boolean;
+    from_chip?: boolean;
+    question?: string;
+  };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: "bad json" }, { status: 400 });
   }
-  const { report_id, fact, slug, question } = body;
+  const { report_id, fact, slug, selection_type, is_realtime, from_chip, question } = body;
   // Gate the PRIMARY report on "the brain exists" (fetchBrain → 404 below), NOT
   // on MCP-catalog membership: if a user can view /r/<slug>, they can ask about
   // it, even if that brain isn't in BRAIN_CATALOG (e.g. franchise-outcomes).
@@ -105,6 +113,21 @@ export async function POST(request: Request): Promise<Response> {
     "NEVER use markdown — no asterisks (* or **), no # headers, no - bullet lists, no backticks (`), no > blockquotes. " +
     "Plain prose sentences only. If you use any markdown symbol the answer will be unreadable to the user.\n\n";
 
+  // Real-time follow-ups: ask the model to append a strict, non-markdown tail the
+  // client splits off into "Follow up" chips. GATED on selection_type — the popup
+  // sends it; the report-level Ask-AI dock does not (it renders no chips), so the
+  // dock never spends tokens on a tail that would only be stripped.
+  const followupsDirective =
+    typeof selection_type === "string" && selection_type
+      ? "\n\nAFTER your answer, on its very own final line, output exactly this marker " +
+        "then 2-3 natural next questions separated by ' | ':\n" +
+        "⟦FOLLOWUPS⟧ first question | second question | third question\n" +
+        `Each must be a complete question (<= 12 words), grounded in the data you have, ` +
+        `tailored to your answer and to what the user highlighted (a ${selection_type}). ` +
+        "Do not number them. Write nothing after the last one. Keep them CLEAN — no internal " +
+        "ids/slugs, never the words 'master', 'brain', 'payload', or 'grain'."
+      : "";
+
   const system =
     FORMAT_RULE +
     buildGroundingContext({
@@ -113,9 +136,14 @@ export async function POST(request: Request): Promise<Response> {
       blocks: [primary, ...reachBlocks],
       method,
     }) +
-    "\n\nSpeak like a knowledgeable friend. Give a real, useful answer from the data. No markdown. Never say 'master', 'brain', 'grounded data', 'payload', or 'grain'.";
+    "\n\nSpeak like a knowledgeable friend. Give a real, useful answer from the data. No markdown. Never say 'master', 'brain', 'grounded data', 'payload', or 'grain'." +
+    followupsDirective;
 
-  const userMsg = fact ? `About this fact: "${fact}". ${question}` : question;
+  // Tell the model the SHAPE of what was grabbed so the answer (not just the
+  // follow-ups) is tailored — e.g. a date/token reads differently than a metric.
+  const typeHint =
+    typeof selection_type === "string" && selection_type ? ` (a ${selection_type})` : "";
+  const userMsg = fact ? `About this fact${typeHint}: "${fact}". ${question}` : question;
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -142,6 +170,9 @@ export async function POST(request: Request): Promise<Response> {
           reach: reachSlugs,
           answered,
           needed_components: neededComponents,
+          selection_type: selection_type ?? null,
+          is_realtime: is_realtime === true,
+          from_chip: from_chip === true,
         });
         controller.enqueue(
           encoder.encode(

@@ -127,7 +127,11 @@ function MetricValueCell({
   const ctx = useHighlighterContext();
   const colorCls = directionClassName(direction);
 
-  if (ctx && typeof value === "string") {
+  // Chip-wrap strings AND numbers — a number-typed value (e.g. a raw count) would
+  // otherwise render as a plain, non-tappable <span> and never pop on mobile.
+  // ReactNode values (e.g. a <code> token) stay on the plain span.
+  if (ctx && (typeof value === "string" || typeof value === "number")) {
+    const text = String(value);
     return (
       // Outer span carries font-mono + direction color; FactChip (a <button>)
       // sits inline and adds the dotted teal underline + tap-target padding.
@@ -135,8 +139,8 @@ function MetricValueCell({
       // to ≥44px on mobile to meet the WCAG 2.5.5 touch-target guidance.
       <span className={`font-mono ${colorCls}`}>
         <FactChip
-          value={value}
-          factType={classifyFact(value)}
+          value={text}
+          factType={classifyFact(text)}
           context={label}
           slug={slugFromMethodHref(methodHref)}
           onActivate={ctx.onActivate}
@@ -230,11 +234,28 @@ export function DataRow({
   badge?: ReactNode;
   valueClassName?: string;
 }) {
+  const ctx = useHighlighterContext();
+  // Mirror MetricValueCell: a string/number value gets a FactChip tap target so
+  // the per-ZIP numbers pop the popup on mobile (drag-select is hard on a phone).
+  // The row label rides as `context` ("Median sale price — $525,000"). ReactNode
+  // values (a <code> token) and the flag-off path keep the plain span.
+  const chippable = ctx && (typeof value === "string" || typeof value === "number");
   return (
     <div className="flex items-center justify-between px-4 py-3 text-sm">
       <dt className="text-gray-400">{label}</dt>
       <dd className="flex items-center gap-2 text-right font-mono">
-        <span className={valueClassName}>{value}</span>
+        {chippable ? (
+          <span className={valueClassName}>
+            <FactChip
+              value={String(value)}
+              factType={classifyFact(String(value))}
+              context={label}
+              onActivate={ctx.onActivate}
+            />
+          </span>
+        ) : (
+          <span className={valueClassName}>{value}</span>
+        )}
         {badge}
       </dd>
     </div>

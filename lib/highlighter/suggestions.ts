@@ -74,6 +74,24 @@ export function isLikelyDate(text: string): boolean {
   );
 }
 
+/** The 5-way selection type passed to the converse server so it can tailor both
+ *  the answer and the real-time follow-ups to WHAT was grabbed — not just the
+ *  text. `factType` is only metric/place; this layers section (large selection) +
+ *  token/date (which classifyFact() folds into "metric") back out, reusing the
+ *  existing detectors. Pure so it is bun-testable. */
+export type SelectionType = "section" | "token" | "date" | "place" | "metric";
+
+export function deriveSelectionType(fact: {
+  text: string;
+  factType: FactType;
+  mode: "fact" | "section";
+}): SelectionType {
+  if (fact.mode === "section") return "section";
+  if (isFreshnessToken(fact.text)) return "token";
+  if (isLikelyDate(fact.text)) return "date";
+  return fact.factType;
+}
+
 export function suggestionsForSelection(text: string, factType: FactType): string[] {
   if (isFreshnessToken(text)) {
     return ["What does this freshness stamp mean?", "How current is this data?"];

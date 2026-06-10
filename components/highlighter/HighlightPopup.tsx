@@ -6,7 +6,7 @@ import { buildClaudeHandoff } from "@/lib/highlighter/handoff";
 import { useConverse } from "@/lib/highlighter/use-converse";
 import type { SelectedFact } from "@/lib/highlighter/use-highlight";
 import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
-import { suggestionsForSpan } from "@/lib/highlighter/suggestions";
+import { suggestionsForSpan, deriveSelectionType } from "@/lib/highlighter/suggestions";
 
 interface ChatEntry {
   question: string;
@@ -47,7 +47,7 @@ export function HighlightPopup({
   const [thread, setThread] = useState<ChatEntry[]>([]);
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
   const [showChips, setShowChips] = useState(true);
-  const { ask, answer, reach, answered, error, streaming, reset } = useConverse();
+  const { ask, answer, reach, followups, answered, error, streaming, reset } = useConverse();
 
   // Mobile breakpoint subscription (initial value from lazy initializer above)
   useEffect(() => {
@@ -65,6 +65,18 @@ export function HighlightPopup({
       prevFactRef.current = fact;
     }
   }, [fact]);
+
+  // Re-show chips when an answer finishes, so the real-time follow-ups surface.
+  // submit() hides chips while composing; without this they'd never reappear
+  // within the same selection. Uses the previous-value-ref pattern (mirrors the
+  // fact-change effect above) so it only fires on the streaming→done transition,
+  // not on mount — and so it doesn't trip react-hooks/set-state-in-effect.
+  const prevCompletedRef = useRef(false);
+  useEffect(() => {
+    const completed = !streaming && Boolean(activeQuestion) && Boolean(answer) && !error;
+    if (completed && !prevCompletedRef.current) setShowChips(true);
+    prevCompletedRef.current = completed;
+  }, [streaming, activeQuestion, answer, error]);
 
   // Recalculate position when selection moves (desktop only); reset drag on new selection
   useLayoutEffect(() => {
@@ -149,7 +161,9 @@ export function HighlightPopup({
   const factWithContext = fact.context ? `${fact.context}: ${fact.text}` : fact.text;
 
   const entry = fact.slug ? resolveMethod(fact.slug) : null;
-  const chips = entry
+  // Static heuristic chips — the STARTER set (before any answer) and the fallback
+  // when the model didn't return real-time follow-ups.
+  const staticChips = entry
     ? suggestionsForSpan({
         entry,
         value: fact.text,
@@ -164,7 +178,13 @@ export function HighlightPopup({
         ]
       : suggestions;
 
-  function submit(q: string) {
+  // After an answer completes, prefer the model's real-time follow-ups (tailored
+  // to that answer); fall back to the static set if the tail was missing.
+  const hasCompletedAnswer = Boolean(activeQuestion && answer && !streaming && !error);
+  const realtimeChips = hasCompletedAnswer && followups.length > 0;
+  const chips = realtimeChips ? followups : staticChips;
+
+  function submit(q: string, opts?: { fromChip?: boolean; isRealtime?: boolean }) {
     const trimmed = q.trim();
     if (!trimmed) return;
     setQuestion("");
@@ -192,6 +212,9 @@ export function HighlightPopup({
       reportId,
       fact: factWithContext,
       slug: fact.slug,
+      selectionType: deriveSelectionType(fact),
+      fromChip: opts?.fromChip ?? false,
+      isRealtime: opts?.isRealtime ?? false,
       question: trimmed + ctx,
     });
   }
@@ -368,7 +391,7 @@ export function HighlightPopup({
                 <li key={i}>
                   <button
                     type="button"
-                    onClick={() => submit(s)}
+                    onClick={() => submit(s, { fromChip: true, isRealtime: realtimeChips })}
                     className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-xs text-gray-100 transition-colors hover:bg-[#00d4aa]/20 hover:text-[#00d4aa]"
                   >
                     {s}

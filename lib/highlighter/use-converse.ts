@@ -8,6 +8,9 @@ export interface UseConverse {
   ask: (input: ConverseInput) => Promise<void>;
   answer: string;
   reach: string[];
+  /** Model-generated real-time follow-up chips for the just-finished answer.
+   *  Empty when the tail was missing/malformed — the popup falls back to static. */
+  followups: string[];
   /**
    * true = grounded answer; false = data gap (AI signalled it couldn't answer).
    * null = stream still in progress (no done frame yet).
@@ -28,6 +31,7 @@ export interface UseConverse {
 export function useConverse(): UseConverse {
   const [answer, setAnswer] = useState("");
   const [reach, setReach] = useState<string[]>([]);
+  const [followups, setFollowups] = useState<string[]>([]);
   const [answered, setAnswered] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
@@ -35,6 +39,7 @@ export function useConverse(): UseConverse {
   const reset = useCallback(() => {
     setAnswer("");
     setReach([]);
+    setFollowups([]);
     setAnswered(null);
     setError(null);
     setStreaming(false);
@@ -44,17 +49,19 @@ export function useConverse(): UseConverse {
     if (!input.question.trim()) return;
     setAnswer("");
     setReach([]);
+    setFollowups([]);
     setAnswered(null);
     setError(null);
     setStreaming(true);
     await streamConverse(input, {
       onText: setAnswer,
       onReach: setReach,
+      onFollowups: setFollowups,
       onAnswered: setAnswered,
       onError: (m) => setError(m),
     });
     setStreaming(false);
   }, []);
 
-  return { ask, answer, reach, answered, error, streaming, reset };
+  return { ask, answer, reach, followups, answered, error, streaming, reset };
 }

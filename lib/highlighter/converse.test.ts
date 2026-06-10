@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { streamConverse, type ConverseHandlers } from "./converse";
+import { streamConverse, splitFollowupTail, type ConverseHandlers } from "./converse";
 
 // Build a ReadableStream<Uint8Array> from string chunks so a test controls the
 // exact SSE-frame boundaries the reader sees.
@@ -26,13 +26,16 @@ function fakeFetch(res: {
 function collector() {
   const texts: string[] = [];
   const errors: string[] = [];
-  const state: { reach?: string[]; done: boolean } = { done: false };
+  const state: { reach?: string[]; followups?: string[]; done: boolean } = { done: false };
   const handlers: ConverseHandlers = {
     onText: (acc) => {
       texts.push(acc);
     },
     onReach: (r) => {
       state.reach = r;
+    },
+    onFollowups: (f) => {
+      state.followups = f;
     },
     onError: (m) => {
       errors.push(m);
@@ -148,4 +151,76 @@ test("skips the request entirely when the question is blank", async () => {
   expect(called).toBe(false);
   expect(c.texts).toEqual([]);
   expect(c.errors).toEqual([]);
+});
+
+// ── Real-time follow-ups tail ────────────────────────────────────────────────
+
+test("sends selectionType/is_realtime/from_chip in the POST body", async () => {
+  type Body = { selection_type?: string; is_realtime?: boolean; from_chip?: boolean };
+  let captured: Body = {};
+  const capturingFetch = (async (_url: string, init: RequestInit) => {
+    captured = JSON.parse(init.body as string) as Body;
+    return { ok: true, status: 200, body: streamOf([`data: {"done":true,"reach":[]}\n\n`]) };
+  }) as unknown as typeof fetch;
+  await streamConverse(
+    {
+      reportId: "env-swfl",
+      question: "q",
+      selectionType: "metric",
+      isRealtime: true,
+      fromChip: true,
+    },
+    collector().handlers,
+    capturingFetch,
+  );
+  expect(captured.selection_type).toBe("metric");
+  expect(captured.is_realtime).toBe(true);
+  expect(captured.from_chip).toBe(true);
+});
+
+test("splits the ⟦FOLLOWUPS⟧ tail off the answer and reports it as chips", async () => {
+  const c = collector();
+  const body = streamOf([
+    `data: {"text":"Lee leads.\\n\\n"}\n\n`,
+    `data: {"text":"⟦FOLLOWUPS⟧ How does Collier compare? | What's driving it? | Is it seasonal?"}\n\n`,
+    `data: {"done":true,"reach":[]}\n\n`,
+  ]);
+  await streamConverse(
+    { reportId: "env-swfl", question: "q" },
+    c.handlers,
+    fakeFetch({ ok: true, status: 200, body }),
+  );
+  // The displayed answer never contains the marker or the questions.
+  expect(c.texts.every((t) => !t.includes("⟦FOLLOWUPS⟧"))).toBe(true);
+  expect(c.texts.at(-1)).toBe("Lee leads.");
+  expect(c.state.followups).toEqual([
+    "How does Collier compare?",
+    "What's driving it?",
+    "Is it seasonal?",
+  ]);
+});
+
+test("no marker → followups empty, full answer shown", async () => {
+  const c = collector();
+  const body = streamOf([
+    `data: {"text":"Just an answer, no tail."}\n\n`,
+    `data: {"done":true,"reach":[]}\n\n`,
+  ]);
+  await streamConverse(
+    { reportId: "env-swfl", question: "q" },
+    c.handlers,
+    fakeFetch({ ok: true, status: 200, body }),
+  );
+  expect(c.texts.at(-1)).toBe("Just an answer, no tail.");
+  expect(c.state.followups).toEqual([]);
+});
+
+test("splitFollowupTail hides a partial marker streamed across chunks (no leak)", () => {
+  // Simulate the accumulator growing one fragment at a time through the marker.
+  const fragments = ["Answer.", "Answer.\n\n⟦FOLL", "Answer.\n\n⟦FOLLOWUPS⟧ a | b"];
+  const visibles = fragments.map((acc) => splitFollowupTail(acc).visible);
+  // No intermediate visible state ever exposes a partial or full marker.
+  expect(visibles.every((v) => !v.includes("⟦"))).toBe(true);
+  expect(visibles).toEqual(["Answer.", "Answer.", "Answer."]);
+  expect(splitFollowupTail(fragments[2]).followups).toEqual(["a", "b"]);
 });
