@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — plan: Projects/Briefcase + Assembly Engine (audited, decomposed)
+
+- Added `docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/` — the operator's single-doc plan, audited against live code then decomposed into 10 independently-shippable sessions (folder per session, one file per task), each marked OPUS/SONNET. Single-file edition at `BUILD-PLAN.md` (167KB) for cold handoff.
+- Audit baked in 6 fact-fixes (`AUDIT.md` C1–C6): `next`-threading is in login-form not callback; rent/vacancy is a fixture not a `corridor_profiles` column; `ChartBlockView` exists; `ChartBlock` import is spec-locked to `chart-block-lint.mts`; HBarChart already responsive; MCP `auth.ts` is OPEN in prod (token unset), not enforced.
+- LittleBird review addendum R1–R7 evaluated (not blindly applied): agreed on 6, rejected the R5 "make /p non-public" tail (breaks the share-with-client rail). Written into session acceptance: live-source-only rent + defer vacancy (R1); EXACT (verbatim) narrative anchoring not the 5% chart tolerance (R2); grounded-conditional lint (R3); frozen `saved_charts` block = single source of truth (R4); ≥122-bit deliverable slug + `/p/*` rate-limit (R5); MCP bearer-enforced-first + write hard-bound to key's project (R6/R7). Freshness staleness-UI scoped down per operator (token stays; live-refresh = higher tier).
+- Doc-only; nothing built yet. Build-isolation: S4/S6/S8/S9 are SOLO; S0/S4/S6 serialize on `middleware.ts`.
+
 ## 2026-06-10 (main) — merge: land 3 orphaned cloud branches onto main
 
 - `claude/key-metrics-cleanup-ictv6x` → cherry-picked `446ff7f`: CRE /r/ UI — `CREMarketBeatChart` bars now sort by value descending; `CREMetricsExplorer` split into `CRESummaryBoxes` (inside Key metrics) + `CRECorridorBreakdown` (own section below); `buildCounties` try/catch for missing-creds graceful degrade.
