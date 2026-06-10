@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — chore: clear board before big build
+
+- Dropped 3 stale stashes (ops-retirement WIP + 2 old env-swfl sets); all verified not from last 3 sessions.
+- `.gitignore` updated: suppress `dev-stdout.txt`, `dev-stderr.txt`, path-flattened Windows temp SQL.
+- Next: Projects + Briefcase S2+ build queue.
+
 ## 2026-06-10 (main) — feat(S1): highlighter thread persistence + briefcase capture + cross-cell snap
 
 - **Projects S1 complete** (`docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/session-1-highlighter-thread-briefcase__OPUS/`), 6 commits `66ce9cc..295e0b0`.
