@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Sonnet 4.6 · main) — feat(J2): Collier permits site `zip_code` — backfill, pipeline, surface, vocab
+
+- **Migration + backfill:** `ALTER TABLE data_lake.collier_building_permits ADD COLUMN IF NOT EXISTS zip_code text` + index applied directly. Census batch geocoder re-run over 4,883 rows (site_address); 2,072 in-scope ZIPs written. MOAT assertion passed: 0 out-of-scope ZIPs (19 distinct all in-scope). Census ZIP extracted from matched_addr column 4 (confirmed live call: `"34120"` from `"3390 27TH AVE NE, NAPLES, FL, 34120"`).
+- **Pipeline wired (G2):** `geocoder.py::geocode_batch` returns `(lat, lon, zip_code)` 3-tuple; `pipeline.py` stamps `r["zip_code"]` with scope-gate via `_load_in_scope_zips()` — future runs populate the column automatically.
+- **Source connector:** `collier-permits-source.mts` — `zip_code` added to `CollierDbRow` + SELECT; `mapCollierRow` uses `row.zip_code ?? null` (drops the hardcoded `null` stub).
+- **Pack (§F crisp rows):** `permits-swfl.mts` — `ZipBucketCell` gains `county: "lee" | "collier"`; grouping key adds county (`zip::bucket::county`); metric slugs now `permits_${county}_zip_*_*_z` (covers Collier); `detail_tables` `permits_by_zip` (grain: zip) added — both Lee and Collier rows land there. Tests 10/10 ✓.
+- **Vocab:** `permits_collier_zip_z` concept + 5 `raw_slug_patterns` added; `vocab --all` clean (27 brains).
+- **Plan doc updates:** J2 card marked ✅ BUILT; `03-fanout.md` BRAIN_GEO table updated (drops "no zip_code" for Collier, per §F-2 fold-in + user note). Spot check: Naples 34102 has 7 permits in `permits_by_zip` detail rows.
+- **Next:** J3 (MHS graduation + site ZIP + brain) or §C fan-out (`assembleLocationDossier` + BRAIN_GEO).
+
 ## 2026-06-10 (Opus 4.8 · main) — feat(highlighter): Phase 2 — real-time follow-ups + selection-type awareness + mobile tap-targets + chip analytics
 
 - **Real-time follow-ups (Option 1, same-call tail):** converse model ends its answer with `⟦FOLLOWUPS⟧ q1 | q2 | q3`; new pure `splitFollowupTail()` (`lib/highlighter/converse.ts`) strips the 11-char marker (+ any half-streamed partial) from the displayed answer and surfaces the parts as "Follow up" chips via a new `onFollowups` handler → `useConverse().followups`. `HighlightPopup` renders `followups` after an answer, falls back to static chips when the tail is absent, and re-shows chips on the streaming→done transition (previous-value-ref effect — the only shape this lint config allows).

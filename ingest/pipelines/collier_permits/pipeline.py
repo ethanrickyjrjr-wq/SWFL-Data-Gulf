@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 from datetime import date, timedelta
+from pathlib import Path
 from typing import Iterable
 
 import dlt
@@ -16,6 +18,15 @@ import pandas as pd
 from .fetcher import discover_issued_reports, download_latest_issued, download_month
 from .geocoder import assign_corridor, geocode_batch, load_collier_centroids
 from .normalizer import normalize_df
+
+_SCOPE_FIXTURE = Path(__file__).resolve().parents[3] / "fixtures" / "swfl-zip-county.json"
+
+
+def _load_in_scope_zips() -> frozenset:
+    """Load the 6-county SWFL ZIP scope from the authoritative fixture."""
+    with open(_SCOPE_FIXTURE) as f:
+        data = json.load(f)
+    return frozenset(e["zip"] for e in data["entries"])
 
 # Collier publishes the prior month's XLSX mid-month; tolerate up to this many
 # days of lag before treating a missing month as an actual error.
@@ -81,14 +92,17 @@ def run_pipeline(year: int, month: int) -> None:
     addresses = [r["site_address"] for r in rows if r["site_address"]]
     geo = geocode_batch(addresses)
     centroids = load_collier_centroids()
+    in_scope_zips = _load_in_scope_zips()
 
     for r in rows:
         addr = r["site_address"]
-        lat_lon = geo.get(addr) if addr else None
-        lat, lon = lat_lon if lat_lon else (None, None)
+        geo_result = geo.get(addr) if addr else None
+        lat, lon, raw_zip = geo_result if geo_result else (None, None, None)
         r["lat"] = lat
         r["lon"] = lon
         r["corridor"] = assign_corridor(lat, lon, centroids)
+        # Scope-gate: only write zip_code if it's in the 6-county SWFL footprint (MOAT).
+        r["zip_code"] = raw_zip if (raw_zip and raw_zip in in_scope_zips) else None
         r["_ingest_metadata"] = {
             "source": "collier_county_official",
             "format": "xlsx",

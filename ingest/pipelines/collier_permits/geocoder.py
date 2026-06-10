@@ -67,17 +67,34 @@ def _split_site_address(site_address: str) -> tuple[str, str]:
     return site_address.strip(), "Naples"
 
 
+def _extract_zip_from_matched_addr(matched_addr: str) -> str | None:
+    """Extract the 5-digit ZIP from a Census matched_addr string.
+
+    Census returns matched_addr like "3390 27TH AVE NE, NAPLES, FL, 34120".
+    The ZIP is the last comma-separated segment.
+    """
+    parts = matched_addr.rsplit(",", 1)
+    if len(parts) < 2:
+        return None
+    candidate = parts[1].strip()
+    if len(candidate) == 5 and candidate.isdigit():
+        return candidate
+    return None
+
+
 def geocode_batch(
     addresses: list[str],
     session: requests.Session | None = None,
-) -> dict[str, tuple[float, float] | None]:
+) -> dict[str, tuple[float, float, str | None] | None]:
     """Geocode site addresses via Census batch API.
 
-    Returns {address: (lat, lon) | None}. Addresses that don't match return None.
+    Returns {address: (lat, lon, zip_code) | None}. Addresses that don't match
+    return None. zip_code is the 5-digit site ZIP extracted from matched_addr
+    (column 4 of the Census CSV response); None when not parseable.
     Deduplicates before sending; chunks at CENSUS_BATCH_SIZE.
     """
     unique = list(dict.fromkeys(a for a in addresses if a))
-    result: dict[str, tuple[float, float] | None] = {a: None for a in unique}
+    result: dict[str, tuple[float, float, str | None] | None] = {a: None for a in unique}
     if not unique:
         return result
 
@@ -109,12 +126,14 @@ def geocode_batch(
             continue
 
         # Response CSV: id, input_addr, match, match_type, matched_addr, lon_lat, tiger_id, side
+        # matched_addr (col 4): "3390 27TH AVE NE, NAPLES, FL, 34120" — ZIP is last segment.
         reader = csv.reader(io.StringIO(r.text))
         for row in reader:
             if len(row) < 6:
                 continue
             idx_str = row[0].strip()
             match_status = row[2].strip().lower()
+            matched_addr = row[4].strip() if len(row) > 4 else ""
             coords = row[5].strip() if len(row) > 5 else ""
 
             if match_status != "match" or not coords:
@@ -122,7 +141,8 @@ def geocode_batch(
             try:
                 lon_str, lat_str = coords.split(",")
                 lat, lon = float(lat_str.strip()), float(lon_str.strip())
-                result[chunk[int(idx_str)]] = (lat, lon)
+                zip_code = _extract_zip_from_matched_addr(matched_addr)
+                result[chunk[int(idx_str)]] = (lat, lon, zip_code)
             except (ValueError, IndexError):
                 continue
 

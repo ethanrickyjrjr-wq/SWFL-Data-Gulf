@@ -8,11 +8,7 @@ import { getSupabase } from "./supabase.mts";
 import { selectAllPaged, type PagedQuery } from "../lib/paginate.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
-import {
-  isPermitBucket,
-  type NormalizedPermitRow,
-  type PermitBucket,
-} from "./permits-source.mts";
+import { isPermitBucket, type NormalizedPermitRow, type PermitBucket } from "./permits-source.mts";
 
 const SOURCE_ID = "collier_building_permits";
 // Collier publishes the building-permit XLSX monthly. The pack-level TTL stays
@@ -55,6 +51,7 @@ interface CollierDbRow {
   date_issued: string | null;
   lat: number | null;
   lon: number | null;
+  zip_code: string | null;
   bucket: PermitBucket | null;
   building_type: string | null;
   permit_class: string | null;
@@ -80,9 +77,7 @@ export function getCollierDroppedRowCounts(): {
 async function fetchFromSupabase(): Promise<CollierDbRow[]> {
   // Same 448-day window as Lee — z-score baseline depends on the window math,
   // not the publication cadence. Collier will simply yield fewer rows.
-  const sinceIso = new Date(Date.now() - 448 * 86400_000)
-    .toISOString()
-    .slice(0, 10);
+  const sinceIso = new Date(Date.now() - 448 * 86400_000).toISOString().slice(0, 10);
   // PostgREST silently caps any single response at db-max-rows=1000; Collier's
   // 448-day window is ~5k permits, so page by the UNIQUE permit_number. Ordering
   // by date_issued would lose/duplicate rows at a page seam (many permits share
@@ -93,7 +88,7 @@ async function fetchFromSupabase(): Promise<CollierDbRow[]> {
         .schema("data_lake")
         .from("collier_building_permits")
         .select(
-          "permit_number, declared_value, permit_type_desc, permit_status, site_address, date_issued, lat, lon, bucket, building_type, permit_class, const_type",
+          "permit_number, declared_value, permit_type_desc, permit_status, site_address, date_issued, lat, lon, zip_code, bucket, building_type, permit_class, const_type",
         )
         .gte("date_issued", sinceIso) as unknown as PagedQuery<CollierDbRow>,
     "permit_number",
@@ -116,15 +111,14 @@ function mapCollierRow(row: CollierDbRow): NormalizedPermitRow | null {
     return null;
   }
   const descParts = [row.building_type, row.permit_class, row.const_type];
-  const permit_description_raw =
-    descParts.filter((s): s is string => Boolean(s)).join(" ") || null;
+  const permit_description_raw = descParts.filter((s): s is string => Boolean(s)).join(" ") || null;
   return {
     permit_uid: `collier:${row.permit_number}`,
     county: "collier",
     issued_date: row.date_issued,
     bucket: row.bucket,
     address: row.site_address,
-    zip_code: null, // Collier table has no zip_code column.
+    zip_code: row.zip_code ?? null,
     lat: row.lat,
     lon: row.lon,
     declared_value_usd: row.declared_value,
@@ -141,10 +135,7 @@ export const collierPermitsSource: SourceConnector = {
     droppedNullBucket = 0;
     droppedNullDate = 0;
     const fetched_at = isoTimestamp();
-    const rows =
-      env.source === "fixture"
-        ? await fetchFromFixture()
-        : await fetchFromSupabase();
+    const rows = env.source === "fixture" ? await fetchFromFixture() : await fetchFromSupabase();
 
     const fragments: RawFragment<NormalizedPermitRow>[] = [];
     for (const r of rows) {
@@ -165,10 +156,7 @@ export const collierPermitsSource: SourceConnector = {
     }
     return fragments;
   },
-  citationMeta(
-    verifiedDate: string,
-    ttlSeconds: number,
-  ): Omit<CitationRow, "id"> {
+  citationMeta(verifiedDate: string, ttlSeconds: number): Omit<CitationRow, "id"> {
     return {
       source:
         env.source === "fixture"
@@ -180,7 +168,4 @@ export const collierPermitsSource: SourceConnector = {
   },
 };
 
-export {
-  TTL_SECONDS as COLLIER_PERMITS_TTL_SECONDS,
-  PORTAL_URL as COLLIER_PORTAL_URL,
-};
+export { TTL_SECONDS as COLLIER_PERMITS_TTL_SECONDS, PORTAL_URL as COLLIER_PORTAL_URL };

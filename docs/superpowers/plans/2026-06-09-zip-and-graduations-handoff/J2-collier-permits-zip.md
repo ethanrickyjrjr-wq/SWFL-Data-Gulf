@@ -1,4 +1,4 @@
-# J2 — Collier permits site `zip_code`
+# J2 — Collier permits site `zip_code` ✅ BUILT 2026-06-10
 
 > **Preamble:** Read `SESSION_LOG.md` then `CLAUDE.md` (RULE 0). Obey the **3 GATES**
 > ([`README.md`](./README.md)). **Do not `git push` without operator confirmation.** Work on
@@ -61,3 +61,5 @@ assertion (zero out-of-6-county ZIPs). Don't let those two slide.
 - `bun test refinery/packs/permits-swfl.test.mts` green (update/extend fixtures as needed).
 - A spot ZIP (e.g. a Naples `34102` permit) appears in the `permits-swfl` zip detail rows.
 - Pipeline dry-run shows new rows carry `zip_code` going forward (G2 — not backfill-only).
+One thing worth doing when I dispatch §C: make the G2 throw message explicit ("BRAIN_GEO missing entry for catalog brain '<id>' — add it (see §C brief)") so when J3 lands, the failure self-documents
+  instead of being a cryptic throw.

@@ -19,10 +19,7 @@ import {
   collierPermitsSource,
   getCollierDroppedRowCounts,
 } from "../sources/collier-permits-source.mts";
-import {
-  assignCorridor,
-  type CorridorCentroid,
-} from "../lib/corridor-assignment.mts";
+import { assignCorridor, type CorridorCentroid } from "../lib/corridor-assignment.mts";
 import { displayNameFor } from "../lib/corridor-display.mts";
 import {
   generateCurrentWindow,
@@ -75,9 +72,7 @@ const CORRIDOR_COUNTY: Map<string, "lee" | "collier"> = new Map(
   // Defensive warning for any centroid missing the explicit county tag — we
   // default to "lee" for backwards compatibility, but the live fixture should
   // never trip this.
-  const missing = CORRIDOR_CENTROIDS.filter((c) => !c.county).map(
-    (c) => c.corridor_id,
-  );
+  const missing = CORRIDOR_CENTROIDS.filter((c) => !c.county).map((c) => c.corridor_id);
   if (missing.length > 0) {
     console.warn(
       `[permits-swfl] CorridorCentroid missing county field — defaulting to "lee" for: ${missing.join(", ")}`,
@@ -98,6 +93,7 @@ export interface CorridorBucketCell {
 
 export interface ZipBucketCell {
   zip_code: string;
+  county: "lee" | "collier";
   bucket: PermitBucket;
   z: number;
   n_current: number;
@@ -264,7 +260,7 @@ export function buildSnapshot(
       byCorridorBucket.set(k, arr);
     }
     if (p.zip_code) {
-      const k = `${p.zip_code}::${p.bucket}`;
+      const k = `${p.zip_code}::${p.bucket}::${p.county}`;
       const arr = byZipBucket.get(k) ?? [];
       arr.push(p);
       byZipBucket.set(k, arr);
@@ -299,7 +295,7 @@ export function buildSnapshot(
 
   const zip_cells: ZipBucketCell[] = [];
   for (const [key, group] of byZipBucket.entries()) {
-    const [zip_code, bucket] = key.split("::") as [string, PermitBucket];
+    const [zip_code, bucket, county] = key.split("::") as [string, PermitBucket, "lee" | "collier"];
     const n_current = countPermitsInWindow(group, currentWin);
     const current_rate = rateNormalize(n_current, currentWin);
     const historical_rates = historicalWins.map((w) =>
@@ -312,6 +308,7 @@ export function buildSnapshot(
     const z = computeZScore(current_rate, historical_rates);
     zip_cells.push({
       zip_code,
+      county,
       bucket,
       z,
       n_current,
@@ -333,24 +330,17 @@ export function buildSnapshot(
   const lee_weighted_z = hasLeeCorridorPermits
     ? weightedZForCounty(corridor_cells, "lee")
     : (() => {
-        const group = permits.filter(
-          (p) => p.county === "lee" && p.bucket !== "other",
-        );
+        const group = permits.filter((p) => p.county === "lee" && p.bucket !== "other");
         if (group.length === 0) return 0;
         const n = countPermitsInWindow(group, currentWin);
         const rate = rateNormalize(n, currentWin);
-        const hRates = historicalWins.map((w) =>
-          rateNormalize(countPermitsInWindow(group, w), w),
-        );
+        const hRates = historicalWins.map((w) => rateNormalize(countPermitsInWindow(group, w), w));
         return computeZScore(rate, hRates);
       })();
 
   const swfl_saturation_index = saturationForCounty(corridor_cells, "swfl");
   const lee_saturation_index = saturationForCounty(corridor_cells, "lee");
-  const collier_saturation_index = saturationForCounty(
-    corridor_cells,
-    "collier",
-  );
+  const collier_saturation_index = saturationForCounty(corridor_cells, "collier");
 
   const top_heating_lee_alt = rankCorridorIdsForScope(
     corridor_cells,
@@ -402,17 +392,11 @@ export function buildSnapshot(
   );
 
   const total_cell_count = corridor_cells.length;
-  const low_n_cell_count = corridor_cells.filter(
-    (c) => c.n_current < LOW_N_THRESHOLD,
-  ).length;
+  const low_n_cell_count = corridor_cells.filter((c) => c.n_current < LOW_N_THRESHOLD).length;
   const corridorsWithAnyDenseCell = new Set(
-    corridor_cells
-      .filter((c) => c.n_current >= LOW_N_THRESHOLD)
-      .map((c) => c.corridor_id),
+    corridor_cells.filter((c) => c.n_current >= LOW_N_THRESHOLD).map((c) => c.corridor_id),
   );
-  const corridorsWithDataAll = new Set(
-    corridor_cells.map((c) => c.corridor_id),
-  );
+  const corridorsWithDataAll = new Set(corridor_cells.map((c) => c.corridor_id));
   const thin_corridor_share =
     corridorsWithDataAll.size === 0
       ? 0
@@ -424,14 +408,10 @@ export function buildSnapshot(
     if (!Number.isNaN(t) && t < earliest) earliest = t;
   }
   const backfill_days =
-    earliest === Infinity
-      ? 0
-      : Math.floor((now.getTime() - earliest) / 86400_000);
+    earliest === Infinity ? 0 : Math.floor((now.getTime() - earliest) / 86400_000);
 
   const lee_row_count = permits.filter((p) => p.county === "lee").length;
-  const collier_row_count = permits.filter(
-    (p) => p.county === "collier",
-  ).length;
+  const collier_row_count = permits.filter((p) => p.county === "collier").length;
 
   return {
     corridor_cells,
@@ -522,13 +502,9 @@ function permitsCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   ];
 }
 
-function buildSourceMeta(
-  scope: "lee" | "collier" | "swfl",
-): BrainOutputMetricSource {
-  const leeFetched =
-    lastLeeFetchedAt ?? lastFetchedAt ?? new Date().toISOString();
-  const collierFetched =
-    lastCollierFetchedAt ?? lastFetchedAt ?? new Date().toISOString();
+function buildSourceMeta(scope: "lee" | "collier" | "swfl"): BrainOutputMetricSource {
+  const leeFetched = lastLeeFetchedAt ?? lastFetchedAt ?? new Date().toISOString();
+  const collierFetched = lastCollierFetchedAt ?? lastFetchedAt ?? new Date().toISOString();
   if (scope === "lee") {
     return {
       url: "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
@@ -558,8 +534,7 @@ function buildSourceMeta(
 }
 
 function classifyDirection(snap: PermitsSnapshot): BrainOutputDirection {
-  if (snap.thin_corridor_share > THIN_CORRIDOR_SHARE_THRESHOLD)
-    return "neutral";
+  if (snap.thin_corridor_share > THIN_CORRIDOR_SHARE_THRESHOLD) return "neutral";
 
   const headlinedCorridors = new Set(
     snap.corridor_cells
@@ -569,12 +544,10 @@ function classifyDirection(snap: PermitsSnapshot): BrainOutputDirection {
   if (headlinedCorridors.size === 0) return "neutral";
 
   const anyStrongPos = snap.corridor_cells.some(
-    (c) =>
-      (HEADLINE_BUCKETS as readonly string[]).includes(c.bucket) && c.z >= 1.0,
+    (c) => (HEADLINE_BUCKETS as readonly string[]).includes(c.bucket) && c.z >= 1.0,
   );
   const anyStrongNeg = snap.corridor_cells.some(
-    (c) =>
-      (HEADLINE_BUCKETS as readonly string[]).includes(c.bucket) && c.z <= -1.0,
+    (c) => (HEADLINE_BUCKETS as readonly string[]).includes(c.bucket) && c.z <= -1.0,
   );
   if (anyStrongPos && anyStrongNeg) return "mixed";
 
@@ -643,9 +616,7 @@ function buildConclusionProse(snap: PermitsSnapshot, now: Date): string {
     }
   }
 
-  parts.push(
-    `Highest commercial-alteration heat: ${heatList}. Coolest: ${coolList}.`,
-  );
+  parts.push(`Highest commercial-alteration heat: ${heatList}. Coolest: ${coolList}.`);
 
   if (snap.swfl_saturation_index >= 0.4) {
     parts.push(
@@ -708,11 +679,7 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "permits_swfl_county_weighted_avg_corridor_z",
     value: Number(snap.swfl_weighted_z.toFixed(3)),
     direction:
-      snap.swfl_weighted_z > 0.1
-        ? "rising"
-        : snap.swfl_weighted_z < -0.1
-          ? "falling"
-          : "stable",
+      snap.swfl_weighted_z > 0.1 ? "rising" : snap.swfl_weighted_z < -0.1 ? "falling" : "stable",
     label:
       "SWFL permits - corridor-weighted z-score across Lee + Collier, current 90d vs trailing-365d (rate-normalized)",
     variable_type: "intensive",
@@ -724,11 +691,7 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "permits_lee_county_weighted_avg_corridor_z",
     value: Number(snap.lee_weighted_z.toFixed(3)),
     direction:
-      snap.lee_weighted_z > 0.1
-        ? "rising"
-        : snap.lee_weighted_z < -0.1
-          ? "falling"
-          : "stable",
+      snap.lee_weighted_z > 0.1 ? "rising" : snap.lee_weighted_z < -0.1 ? "falling" : "stable",
     label:
       "Lee County permits - corridor-weighted z-score, current 90d vs trailing-365d (rate-normalized)",
     variable_type: "intensive",
@@ -825,17 +788,19 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     });
   }
 
-  // ZIP cells — Lee-only (Collier table has no zip_code column).
+  // ZIP cells — Lee and Collier (Collier zip_code added by J2).
   for (const cell of snap.zip_cells) {
+    const zipSource = cell.county === "lee" ? leeSource : collierSource;
+    const countyLabel = cell.county === "lee" ? "Lee" : "Collier";
     key_metrics.push({
-      metric: `permits_lee_zip_${cell.zip_code}_${cell.bucket}_z`,
+      metric: `permits_${cell.county}_zip_${cell.zip_code}_${cell.bucket}_z`,
       value: Number(cell.z.toFixed(3)),
       direction: cell.z > 0.5 ? "rising" : cell.z < -0.5 ? "falling" : "stable",
-      label: `Lee permits - ZIP ${cell.zip_code}, ${cell.bucket} - 90d vs trailing-365d z (n_current=${cell.n_current})`,
+      label: `${countyLabel} permits - ZIP ${cell.zip_code}, ${cell.bucket} - 90d vs trailing-365d z (n_current=${cell.n_current})`,
       variable_type: "intensive",
       units: "z-score",
       display_format: "ratio",
-      source: leeSource,
+      source: zipSource,
     });
   }
 
@@ -956,14 +921,28 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       }
     }
   }
-  if (
-    snap.collier_row_count > 0 &&
-    snap.collier_backfill_months < COLLIER_SHORT_BASELINE_MONTHS
-  ) {
+  if (snap.collier_row_count > 0 && snap.collier_backfill_months < COLLIER_SHORT_BASELINE_MONTHS) {
     caveats.push(
       `Collier z-scores are based on ${snap.collier_backfill_months} month${snap.collier_backfill_months === 1 ? "" : "s"} of data; signal stabilizes after 6+ months. Treat Collier values as directional only.`,
     );
   }
+
+  // ZIP-grain detail_table — one row per (zip, bucket) so downstream Claude can
+  // answer a specific-ZIP permit question without re-fetching. Both Lee and
+  // Collier ZIP rows land here (J2). key = zip_code (multiple rows per ZIP, one
+  // per bucket — consumer filters by key prefix or by bucket cell).
+  const zipDetailRows = snap.zip_cells.map((cell) => ({
+    key: cell.zip_code,
+    label: cell.zip_code,
+    cells: {
+      county: cell.county,
+      bucket: cell.bucket,
+      z: Number(cell.z.toFixed(3)),
+      n_current: cell.n_current,
+      current_rate: Number(cell.current_rate.toFixed(4)),
+      historical_mean_rate: Number(cell.historical_mean_rate.toFixed(4)),
+    } as Record<string, number | string | boolean | null>,
+  }));
 
   return {
     conclusion: buildConclusionProse(snap, now),
@@ -975,6 +954,43 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     overrides: [],
     contradicts: [],
     exogenous_signals: [],
+    detail_tables:
+      zipDetailRows.length > 0
+        ? [
+            {
+              id: "permits_by_zip",
+              title: "SWFL building permits by ZIP — 90d vs trailing-365d z-scores",
+              grain: "zip",
+              columns: [
+                { id: "county", label: "County" },
+                { id: "bucket", label: "Bucket" },
+                {
+                  id: "z",
+                  label: "Z-score",
+                  display_format: "ratio" as const,
+                  units: "z-score",
+                },
+                {
+                  id: "n_current",
+                  label: "Count (90d)",
+                  display_format: "count" as const,
+                },
+                {
+                  id: "current_rate",
+                  label: "Current rate (permits/day)",
+                  display_format: "ratio" as const,
+                },
+                {
+                  id: "historical_mean_rate",
+                  label: "Historical mean rate (permits/day)",
+                  display_format: "ratio" as const,
+                },
+              ],
+              rows: zipDetailRows,
+              source: swflSource,
+            },
+          ]
+        : undefined,
   };
 }
 
@@ -998,10 +1014,7 @@ async function permitsSidecarProducer(
     return [];
   }
 
-  const byCorridor = new Map<
-    string,
-    { weightedSum: number; weightSum: number }
-  >();
+  const byCorridor = new Map<string, { weightedSum: number; weightSum: number }>();
   for (const cell of snap.corridor_cells) {
     if (cell.bucket === "other") continue;
     if (cell.n_current < LOW_N_THRESHOLD) continue;

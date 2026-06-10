@@ -2184,6 +2184,26 @@
       "status": "active",
       "scope_note": "Per-(ZIP x bucket) rate-normalized z-score. Child slugs match permits_lee_zip_{zip5}_{bucket}_z."
     },
+    "permits_collier_zip_z": {
+      "id": "permits_collier_zip_z",
+      "prefLabel": "Collier permits per-ZIP z-score (parameterized)",
+      "raw_slugs": [],
+      "raw_slug_patterns": [
+        "permits_collier_zip_*_commercial_new_z",
+        "permits_collier_zip_*_commercial_alteration_z",
+        "permits_collier_zip_*_residential_z",
+        "permits_collier_zip_*_demolition_z",
+        "permits_collier_zip_*_other_z"
+      ],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["permits-swfl"],
+      "value_type": "ratio",
+      "unit": "z-score",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Per-(ZIP x bucket) rate-normalized z-score for Collier County permits. Child slugs match permits_collier_zip_{zip5}_{bucket}_z. Added by J2 (site zip_code column + backfill on collier_building_permits)."
+    },
     "permits_lee_top_heating_cooling": {
       "id": "permits_lee_top_heating_cooling",
       "prefLabel": "Lee permits top heating/cooling corridors (rank-ordered categorical)",

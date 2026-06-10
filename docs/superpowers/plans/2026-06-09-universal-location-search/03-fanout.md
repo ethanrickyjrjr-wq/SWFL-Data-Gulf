@@ -32,7 +32,7 @@ Each entry carries a one-line sourced comment in code (directive 2). `covers` us
 | brain | grains | covers | source |
 |---|---|---|---|
 | rentals-swfl | [zip, region] | Lee,Col | Zillow ZORI per-ZIP + SWFL median |
-| permits-swfl | [zip, corridor, county] | Lee,Col | Lee `zip_code`; Collier corridor-geocoded (**no zip_code**) |
+| permits-swfl | [zip, corridor, county] | Lee,Col | Lee `zip_code`; Collier `zip_code` (Census batch geocoded — J2) |
 | housing-swfl | [zip, region] | Lee,Col | Redfin `housing_by_zip` grain="zip" |
 | hurricane-tracks-fl | [county, region] | **6-county** | HURDAT2 × NFIP |
 | properties-lee-value | [county] | Lee | LeePA parcels → Lee |
@@ -119,3 +119,5 @@ can't flake on nightly data), PLUS one integration smoke:
 - **(vi)** a Charlotte ZIP gets **no** macro-swfl line (`covers` gate).
 - **Integration smoke:** every ZIP key in live `housing_by_zip` rows is `in_scope:true` (catches
   `swfl-zip-county.json` gaps forever).
+One thing worth doing when I dispatch §C: make the G2 throw message explicit ("BRAIN_GEO missing entry for catalog brain '<id>' — add it (see §C brief)") so when J3 lands, the failure self-documents
+  instead of being a cryptic throw.
