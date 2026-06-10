@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(S4): projects + FIRST auth.uid() RLS + first gated route — HELD FOR DIFF REVIEW
+
+- **Session 4 of Projects/Briefcase, tasks 01–05 built + committed locally (5 commits `f755a89..f5bc795`), NOT pushed.** Awaiting operator diff-review on `middleware.ts`/`login-form.tsx` (RULE 1 gate) + push confirmation. Task 06 (two-account prod live-verify) is the operator's — `projects_rls_live_verify` stays OPEN (prod evidence, not dev attestation).
+- `docs/sql/20260612_projects.sql` (new, APPLIED + `NOTIFY pgrst`) — **the repo's first `auth.uid()` RLS policy**: `projects(id,user_id,title,items jsonb,branding,mcp_key,created_at,updated_at)`, `projects_owner_all FOR ALL USING+WITH CHECK (auth.uid()=user_id)`, REVOKE anon / GRANT authenticated+service_role. Verified live: cmd `*`, both quals `(auth.uid() = user_id)`.
+- `app/api/projects/route.ts` (POST) + `app/api/projects/[id]/route.ts` (GET/PATCH/DELETE) + `app/api/projects/import/route.ts` — all **cookie client only** (RLS-enforced, zero service-role; self-checked); zod-validate items (422); 401 unauth; meter `project_create`. 13 route tests.
+- `app/project/page.tsx` (list) + `app/project/[id]/page.tsx` + `ProjectDetail.tsx` (client) — inline render per `ProjectItem` kind (chart joins `saved_charts`, metric/qa/report/source/note/table_slice/file), reorder/remove → PATCH, branding form, plain `as of {date}` line from `freshness_token` (`lib/project/as-of.ts`, no badge — operator scope-down), `// TODO(S5)`/`// TODO(S6)` buttons. `ImportDraftOnLogin` migrates `swfl_project_draft_v1` then clears.
+- `utils/supabase/middleware.ts` → `updateSession()` now returns `{response,user}` (awaits `getUser`, no code between createServerClient+getUser — Supabase SSR pattern verified in-session). `middleware.ts` gates **ONLY** `/project` prefix (`/project/draft` public) → `/login?next=`; copies refreshed cookies onto the redirect. `[AUDIT-FIX C1]`: `login-form.tsx` now threads `next` onto `emailRedirectTo`.
+- **Verify:** `bun test` 115/115 green (incl. 6 new middleware gate tests: public passthrough, /project redirect, draft public, authed passthrough, /api not gated); `tsc -p tsconfig.json` clean on all touched; eslint clean.
+- **Next:** operator reviews middleware/login-form diff → push → Task 06 two-account live RLS deny verify → close `projects_rls_live_verify`. Then S5 (print CSS) / S6 (assembly engine).
+
 ## 2026-06-10 (main) — fix: uniform as-of anchoring + SSE chart parse test
 
 - `ChartResult` union: all 3 branches now carry `asOf: string` (was missing on zhvi + scatter)
