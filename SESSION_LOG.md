@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Opus 4.8 · main) — log: opened `mcp_zip_fanout_live_verify` (deploy-watch for §D1 zips)
+
+- Opened check **`mcp_zip_fanout_live_verify`** [mcp] — after deploy, verify in claude.ai: `zip=33931` (multi-brain grain-labeled, true-ZIP + "covers 33931" rollups), `zip=33908` (corridor line at corridor-grain), `zip=90210` (honest "outside footprint"), and a pinned non-master `report_id` still returns the single-brain drill. Confirm tier-2 text stays capped (~11 lines, no balloon) + freshness token quoted. Pairs with `connector_output_live_verify`.
+
 ## 2026-06-10 (Opus 4.8 · main) — feat(§D1): MCP `swfl_fetch` zip fan-out — wired to `assembleLocationDossier`
 
 - **`app/api/mcp/server.ts`** — a `zip` with NO `report_id` (or `report_id="master"`) now `resolveLocation` + `assembleLocationDossier` + `renderLocationDossierText`, identical chain to `/api/z/[zip]` & `/api/where` (operator mandate: MCP reply must match those routes, not diverge). Origin = `resolveOrigin()` (no request URL in the tool callback). `_meta.dossier` = full `LocationDossier` (all lines + per-brain `freshness_tokens`), matching `/api/z?format=json`; a representative freshness token (first selected line, true-ZIP-first) surfaced for capable hosts.
