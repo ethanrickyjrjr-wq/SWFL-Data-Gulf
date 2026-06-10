@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(S0): metering foundations — signed sdg_cid cookie + action dimension
+
+- `middleware.ts` — now async; mints `sdg_cid=<uuid>.<hmac16>` (Web Crypto HMAC-SHA256) when absent; fail-safe to `"anon"` if `SDG_COOKIE_SECRET` unset. Added `SDG_COOKIE_SECRET` to `.env` (generate & add to Vercel before deploy).
+- `lib/highlighter/meter.ts` — `clientIdFrom` now parses + HMAC-verifies the signed cookie (node:crypto `timingSafeEqual`); `recordUse` gains `action` param (default `"ask"`); new `actionCount(clientId, action)`. `__clientIdFromForTest` exported for tests. 5/5 tests green.
+- `app/api/meter/route.ts` — thin `POST /api/meter` for client-side non-route action logging (`ask/chart_save/project_create/item_add/build/export_print/deliver_email/upload`); enforcement OFF.
+- `docs/sql/20260611_usage_events_action.sql` — `action text NOT NULL DEFAULT 'ask'` + index; **migration applied to prod**.
+- `docs/superpowers/specs/2026-06-07-boards-pdf-composed-export-design.md` — appended Amendments A1–A8 (rename boards→projects, item union, assembly engine, meter day-one, etc.).
+- `_AUDIT_AND_ROADMAP/build-queue.md` — Highlighter item → `[~]`; S3-S5 item updated to projects; S6–S9 assembly engine lines appended.
+- Checks opened: `cookie_mint_live_verify`, `projects_rls_live_verify`, `deliverable_anchor_lint`, `storage_rls_scope_verify`, `mcp_project_tools_live_verify`.
+- **Next (Task 05):** set `SDG_COOKIE_SECRET` in Vercel Production → redeploy → run live cookie verify → close `cookie_mint_live_verify`.
+
 ## 2026-06-10 (main) — docs(plan): kill freshness-gate on fixture charts (operator override LB-R1)
 
 - `2026-06-10-projects-briefcase-assembly/` — 8 files updated: LB-R1 marked OVERRIDDEN in `AUDIT.md` + `BUILD-PLAN.md`; `session-2` task-01 rewritten (wire fixture paths, no live-source hunt), task-02 adds scatter/vacancy tests + ChartBlockView area/scatter renderer fix; S2 README replaces `[LB-R1] Live-source-only` block with "fixture-first, as-of date is sufficient"; `shared/data-model.md` invariant drops `freshness_token MUST be REAL` prohibition; S6 task-05 "freshness footer" → "citation footer", no token in print.
