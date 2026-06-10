@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — fix(highlighter): double-tap gate + keep selection for copy
+
+- `lib/highlighter/use-highlight.ts` — replaced exact-text suppression (`lastSuppressedText === text`) with word-count + 10s window check (`DOUBLE_TAP_WINDOW_MS=10_000`, `DOUBLE_TAP_FUZZ=5`). First large sweep (>40 words): popup suppressed, DOM selection STAYS (user can copy). Second similar-sized selection within 10s: popup fires. `onKeyUp` now ignores Escape so popup doesn't re-open from the lingering selection after Esc.
+- `components/highlighter/HighlighterLayer.tsx` — removed `removeAllRanges()` from `close()`; highlight remains visible after dismissing the popup until user clicks away.
+
 ## 2026-06-10 (main) — feat(S0): metering foundations — signed sdg_cid cookie + action dimension
 
 - `middleware.ts` — now async; mints `sdg_cid=<uuid>.<hmac16>` (Web Crypto HMAC-SHA256) when absent; fail-safe to `"anon"` if `SDG_COOKIE_SECRET` unset. Added `SDG_COOKIE_SECRET` to `.env` (generate & add to Vercel before deploy).

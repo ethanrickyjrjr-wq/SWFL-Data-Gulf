@@ -13,6 +13,13 @@ import { AskAi } from "./AskAi";
 export interface MetricSuggestion {
   label: string;
   suggestions: string[];
+  /** Provenance carried so the popup's "File this figure" can build a `metric`
+   *  ProjectItem with its source + freshness pinned at save time. Optional so
+   *  pre-lift brains and prose selections still type-check. */
+  value?: string;
+  sourceUrl?: string;
+  sourceLabel?: string;
+  freshnessToken?: string;
 }
 
 interface LayerProps {
@@ -48,6 +55,21 @@ export function resolveSuggestions(fact: SelectedFact, carried: MetricSuggestion
 }
 
 /**
+ * Pick the full carried metric (value + provenance) for the selected fact by the
+ * same row-context label match as `resolveSuggestions`. Returns null for prose
+ * selections or values with no matching row label — the popup then falls back to
+ * the raw selection text + the page freshness token when filing a figure.
+ */
+export function resolveMetric(
+  fact: SelectedFact,
+  carried: MetricSuggestion[],
+): MetricSuggestion | null {
+  const ctx = fact.context?.trim().toLowerCase();
+  if (!ctx) return null;
+  return carried.find((m) => m.label.trim().toLowerCase() === ctx) ?? null;
+}
+
+/**
  * The single mount point for the Highlighter on a /r/ report page. It is a
  * SIBLING of the report content (never a wrapper), so if anything in here
  * throws, the report itself is already painted and unaffected. It listens for
@@ -75,8 +97,8 @@ export function HighlighterLayer({
   function close() {
     setChipFact?.(null);
     clear();
-    // Drop any lingering native selection so it can't immediately re-open.
-    if (typeof window !== "undefined") window.getSelection()?.removeAllRanges();
+    // Don't clear the DOM selection here — user may want to copy the highlighted text.
+    // The browser clears it naturally on the next click elsewhere.
   }
 
   // Always-on surfaces (coachmark, ambient ticker, Ask-AI dock) render as
@@ -91,6 +113,9 @@ export function HighlighterLayer({
           // fall back to the client generator for prose / unmatched selections.
           // (A "section" selection has its own chip set inside the popup.)
           suggestions={fact.mode === "section" ? [] : resolveSuggestions(fact, metricSuggestions)}
+          // The matched metric's value + provenance, so "File this figure" pins a
+          // sourced snapshot. Null for prose / unmatched selections.
+          fileableMetric={fact.mode === "section" ? null : resolveMetric(fact, metricSuggestions)}
           conclusion={conclusion}
           freshnessToken={freshnessToken}
           onClose={close}

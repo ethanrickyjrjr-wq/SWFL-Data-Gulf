@@ -31,6 +31,8 @@ export function classifyFact(text: string): FactType {
 
 const SUPPRESS_CLOSEST = "input, textarea, [contenteditable], #highlighter-popup, #ask-ai-dock";
 const MAX_WORDS = 40;
+const DOUBLE_TAP_WINDOW_MS = 10_000;
+const DOUBLE_TAP_FUZZ = 5;
 
 function selectionIsSuppressed(sel: Selection): boolean {
   if (sel.rangeCount === 0) return true;
@@ -233,7 +235,8 @@ export function useHighlight() {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
-    let lastSuppressedText: string | null = null;
+    let lastSuppressedWordCount: number | null = null;
+    let lastSuppressedAt: number | null = null;
 
     function snapshot() {
       const sel = typeof window !== "undefined" ? window.getSelection() : null;
@@ -296,19 +299,28 @@ export function useHighlight() {
       if (rect.width === 0 && rect.height === 0) return;
       const context = extractRowContext(range.startContainer);
       const wordCount = text.split(/\s+/).filter(Boolean).length;
-      // Suppress popup on accidental large sweeps. Second identical selection
-      // is treated as intentional and passes through.
+      // Suppress popup on accidental large sweeps. A second selection of
+      // similar size (±5 words) within 10 s is treated as intentional.
       if (wordCount > MAX_WORDS) {
-        if (lastSuppressedText === text) {
-          lastSuppressedText = null;
+        const now = Date.now();
+        const withinWindow =
+          lastSuppressedAt !== null && now - lastSuppressedAt <= DOUBLE_TAP_WINDOW_MS;
+        const similarSize =
+          lastSuppressedWordCount !== null &&
+          Math.abs(wordCount - lastSuppressedWordCount) <= DOUBLE_TAP_FUZZ;
+        if (withinWindow && similarSize) {
+          lastSuppressedWordCount = null;
+          lastSuppressedAt = null;
         } else {
-          lastSuppressedText = text;
-          sel.removeAllRanges();
+          lastSuppressedWordCount = wordCount;
+          lastSuppressedAt = now;
+          // Don't clear the DOM selection — user can still copy the text.
           setFact(null);
           return;
         }
       } else {
-        lastSuppressedText = null;
+        lastSuppressedWordCount = null;
+        lastSuppressedAt = null;
       }
       const mode: "fact" | "section" = wordCount > 25 ? "section" : "fact";
       setFact({ text, rect, factType: classifyFact(text), context, mode });
@@ -333,7 +345,10 @@ export function useHighlight() {
       if (timer) clearTimeout(timer);
       timer = setTimeout(snapshot, 10);
     }
-    function onKeyUp() {
+    function onKeyUp(e: KeyboardEvent) {
+      // Esc is handled by the popup itself — don't re-snapshot or the popup
+      // immediately re-opens from the still-visible DOM selection.
+      if (e.key === "Escape") return;
       // Debounce at 200ms so shift+arrow sequences don't fire on every keystroke.
       if (timer) clearTimeout(timer);
       timer = setTimeout(snapshot, 200);
