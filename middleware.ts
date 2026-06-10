@@ -14,8 +14,53 @@ function isRateLimited(pathname: string): boolean {
   return RATE_LIMITED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
 }
 
-export function middleware(request: NextRequest) {
+const SDG_CID_COOKIE = "sdg_cid";
+const SDG_CID_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+async function hmac16(value: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
+  const hex = Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hex.slice(0, 16);
+}
+
+/** Returns a fresh signed cid, or null if minting is impossible (no secret / crypto error). */
+async function mintCid(): Promise<string | null> {
+  const secret = process.env.SDG_COOKIE_SECRET;
+  if (!secret) return null;
+  try {
+    const randomId = crypto.randomUUID();
+    return `${randomId}.${await hmac16(randomId, secret)}`;
+  } catch {
+    return null;
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hasCid = Boolean(request.cookies.get(SDG_CID_COOKIE));
+  const freshCid = hasCid ? null : await mintCid();
+
+  const attachCid = (res: NextResponse) => {
+    if (freshCid) {
+      res.cookies.set(SDG_CID_COOKIE, freshCid, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: SDG_CID_MAX_AGE,
+      });
+    }
+    return res;
+  };
 
   // Public API: per-IP burst guard, NO Supabase client (keeps these routes
   // reachable without auth env vars and saves a function invocation per hit).
@@ -45,11 +90,12 @@ export function middleware(request: NextRequest) {
     pass.headers.set("X-RateLimit-Limit", String(result.limit));
     pass.headers.set("X-RateLimit-Remaining", String(result.remaining));
     pass.headers.set("X-RateLimit-Reset", String(Math.ceil(result.resetAt / 1000)));
-    return pass;
+    return attachCid(pass);
   }
 
   // Everything else keeps the existing Supabase auth-refresh behavior unchanged.
-  return createClient(request);
+  const res = await createClient(request);
+  return attachCid(res as NextResponse);
 }
 
 export const config = {
