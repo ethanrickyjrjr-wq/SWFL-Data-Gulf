@@ -2,6 +2,21 @@ import type { MethodologyEntry } from "../../refinery/lib/methodology-registry.m
 import type { FactType } from "./use-highlight";
 
 /**
+ * Returns a phrased chip that hits `routeChart` for a deliverable scope, or
+ * null when no scope resolves for this metric slug (avoids dead chips).
+ * Scopes flood-aal and vitals are intentionally excluded — buildChartForIntent
+ * returns null for both until their data paths are live.
+ */
+function chartChipForMetric(metricSlug: string): string | null {
+  const s = metricSlug.toLowerCase();
+  if (s.includes("rent") || s.includes("asking")) return "Chart asking rents across the corridors";
+  if (s.includes("vacanc")) return "Chart vacancy rates across corridors";
+  if (s.includes("zhvi") || s.includes("home_value") || s.includes("home_price"))
+    return "Chart home values over time";
+  return null;
+}
+
+/**
  * Client FALLBACK copy of `suggestionsForMetric` from
  * `refinery/stages/4-output.mts`.
  *
@@ -18,9 +33,11 @@ export function suggestionsForMetric(
   m: { metric: string; value: string | number },
   slug: string,
 ): string[] {
+  const chip = chartChipForMetric(m.metric);
   const label = m.metric.replace(/_/g, " ");
   const out = [`What's driving ${label}?`, `How does ${label} here compare to other SWFL areas?`];
   if (slug === "housing-swfl") out.push(`How does flood risk affect ${label} in this ZIP?`);
+  if (chip) out.unshift(chip);
   return out.slice(0, 3);
 }
 
@@ -100,7 +117,11 @@ export function suggestionsForSelection(text: string, factType: FactType): strin
     return ["How current is this data?", "How often is this updated?"];
   }
   if (factType === "place") {
-    return [`What's the read on ${text}?`, `How does ${text} compare?`];
+    return [
+      "Chart home values over time",
+      `What's the read on ${text}?`,
+      `How does ${text} compare?`,
+    ];
   }
   // A number with no metric label of its own — explain/compare the figure.
   return ["What does this number tell me?", "How does it compare across our areas?"];
