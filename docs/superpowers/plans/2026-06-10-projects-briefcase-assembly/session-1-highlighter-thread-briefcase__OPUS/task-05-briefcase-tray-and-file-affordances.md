@@ -2,6 +2,8 @@
 
 **Goal:** A briefcase icon with a count badge (next to the Ask-AI FAB) opens a tray listing the draft items (remove/reorder, "Open project" link). Each thread exchange gets "File this answer" (→`qa`); a resolved fact gets "File this figure" (→`metric`); the tray gets "File this report" (→`report`). Every file logs `item_add` via `/api/meter`.
 
+> **[AUDIT-FIX C-meta EXTENDED — 2026-06-10]** The `metricSuggestions` widen in Step 1 applies to `app/r/[slug]/page.tsx` (brain pages). **Corridor breakdown pages are broken by the same bug.** `app/r/cre-swfl/[corridor]/page.tsx` line 120 calls `<MetricsTable metrics={metrics} trendLabel="Trend" />` with no suggestion/provenance props, AND its `HighlighterLayer` call (line 171) passes no `metricSuggestions`. Result: popup opens with stripped fact (no slug → no methodology → no grounded chips → generic fallback only). Fix in the same Step 1 pass: map the corridor metric rows into the same `MetricSuggestion[]` shape (`label`, `value`, `sourceUrl?`, `sourceLabel?`, `freshnessToken`) and pass them to the corridor page's `HighlighterLayer` call. Same pattern, one extra file.
+
 **Files:**
 - Create: `components/highlighter/Briefcase.tsx`
 - Modify: `components/highlighter/AskAi.tsx` (mount the Briefcase next to the FAB), `HighlightPopup.tsx` (file affordances on exchanges), `lib/highlighter/use-highlight.ts` (add tray DOM id to `SUPPRESS_CLOSEST`)
