@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — plan: Presentation Deliverable Engine — build folder + flywheel locked
+
+- `docs/superpowers/plans/2026-06-10-presentation-deliverable-engine/` (new, 15 files) — decomposed build of the client-deliverable engine: hosted `/p/[id]` first, PDF = export of the SAME project (one engine), own `ChartSpec` registry extending `ChartBlock` (operator-LOCKED, NOT Vega-Lite), per-visual `asOf` on every frame (cover stamp only as additional summary, never a replacement). Master `README.md` + `DECISION-engine.md` + one copy-paste brief per phase, each tagged `__OPUS`/`__SONNET` with parallel/exclusive markers (Phase 1, 2a, 3 exclusive type-seam/critical-path; the 5 visual frames + Phase 4‖5 fan out).
+- **Flywheel locked:** "Listing PDF maker" = primary template use case — saved template (flood→comps→rent→cap-rate) + one ZIP/address → auto-bind from live brains → `/p/[id]` + PDF, one command. Phase 3 + Phase 5 together, no new engine. Phase 5 brief now requires a user-facing named-template "run" invocation.
+- Engine evidence pass: declarative chart spec (not LLM-generated code) is the validated pattern (VegaChat/Chat2Plot/LIDA/Highcharts-for-LLM) — recorded in `DECISION-engine.md`.
+- Doc-only; staged only the plan dir + this entry. Parallel auth session's work (`409e479`) left as committed.
+- **Next:** Phase 0 (verify `/r/` charts render) → Phase 1 (`asOf` keystone on `ChartBlock`).
+
 ## 2026-06-10 (main) — fix(auth): accept variable-length OTP (Supabase emits 8 digits here, not 6)
 
 - `app/login/login-form.tsx` — `maxLength` was hardcoded to 6, so the project's 8-digit email OTP got cut off at the input and the verify button (gated on `code.length >= 6`) could never see the full code. Raised `maxLength` to 10 (Supabase OTP range is 6–10, project-configurable), copy de-specified from "6-digit" to "sign-in code". `app/login/page.tsx` copy match.
