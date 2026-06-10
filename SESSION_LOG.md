@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-09 (Opus 4.8 · main) — docs: ZIP-columns + graduations handoff folder (audit of the Charts/Session-Map plan)
+
+- **New handoff hub:** `docs/superpowers/plans/2026-06-09-zip-and-graduations-handoff/` — README + PARALLEL-MAP + 6 self-contained job cards (J1–J6), each tagged with a model-routing flag.
+- **Audit verdict:** the original "Charts Tier A" build is ALREADY shipped (`557edf0`; recompute-on-the-fly, no ` ```chart ` in `.md`) → J4 is reconcile-only; cre-swfl Step-0 commit + estero/fmb caveats also already done (`765d688`, `cre-swfl.mts:1721`). Corrected two plan errors: packs read via Supabase PostgREST source connectors (NOT `mcp__lake`); MHS needs a real site `zip_code` too.
+- **ZIP work routed onto the existing `universal-location-search` §A–§G plan** under the operator's 3 GATES (site-location-only / derivable-now-or-park / brain-first; 6-county scope via `fixtures/swfl-zip-county.json`). Honest "all we can" = Collier permits (J2, from lat/lon) + MHS (J3, geocode address); parcels PARKED (J6, no site geo on the row); county/MSA tables excluded (MOAT).
+- **Model marks:** 🔴 Opus-only J1 (spine/moat) + Opus-recommended J3 (pack+vocab+cadence); 🟡 J2 Sonnet w/ Opus on Census field-path + scope-gate; 🟢 J4/J6 any; ⚪ J5 operator.
+- **Next:** claim J1 first (blocks J2/J3); J4/J5/J6 can start now. No code shipped yet — docs only.
+
 ## 2026-06-09 (Opus 4.8 · main) — feat(highlighter): /r/ AI answer-quality + chip relevance + off-screen shield
 
 - **Scope: ALL `/r/` pages** (shared `/api/converse` grounding + popup; flag `HIGHLIGHTER_UI`). Working doc: `docs/superpowers/plans/2026-06-09-highlighter-iteration.md`.
