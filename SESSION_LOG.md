@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — spec: chart as-of anchoring rules
+
+- `docs/superpowers/specs/2026-06-10-chart-as-of-anchoring.md` (new) — full spec from operator design review: every builder returns `asOf`, bottom caption (monospace 11px, dimmed, NOT in title), uniform-vintage = one caption, mixed-vintage = tag series in legend + Option B (refuse co-plot if gap ≥ 1 quarter), build shows full detail, print collapses to cover stamp when uniform. `asOf` never stripped — template decides loudness.
+- SSE parse test gap documented: no test exercises `data: {"chart":{...}}\n\n` frame ahead of prose stream; failure is swallowed but malformed frame is the gap. Add next time in `sse.test.ts` or `use-converse`.
+- Checks opened: `chart_asof_anchoring` + `generic_chart_capability`.
+- Not push-blocking; current charts work and data is honest — just not uniformly stamped.
+
 ## 2026-06-10 (main) — chore: push S2 + visuals kit planning
 
 - S2 push cleared by operator (diff-review gate satisfied); 8 local commits shipped to main.
