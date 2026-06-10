@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — S7 (delivery surfaces): revoke route + project deliverables list · PARTIAL (awaiting S6 /p/[id])
+
+- **S7 Task 02 (revoke) built:** new `app/api/deliverables/[id]/revoke/route.ts` — POST with `{ restore? }` body; ownership check via cookie client, service-role write; 401/403/404 guarded.
+- **Project detail wired:** `app/project/[id]/page.tsx` fetches `deliverables WHERE project_id=id`; `ProjectDetail.tsx` shows list with per-deliverable Revoke/Restore toggle (client-side fetch → optimistic status update).
+- **Pending (S7 Task 01 + revoke on /p/):** delivery buttons (Copy email / mailto / share) + 410-on-revoke on `app/p/[id]/page.tsx` — blocked until S6 ships that file.
+
 ## 2026-06-10 (main) — Presentation Deliverable Engine · PHASE 0 ✅ GREEN (chart render proven in a real browser)
 
 - **Phase 0 of `docs/superpowers/plans/2026-06-10-presentation-deliverable-engine/` PASSES.** This was the serial gate blocking all 6 phases: prove the server-rendered chart path actually paints in a browser before building a deliverable engine on it. No product code written (smoke test).

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
 import type { ProjectItem } from "@/lib/project/items";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
-import { ProjectDetail, type SavedChart } from "./ProjectDetail";
+import { ProjectDetail, type SavedChart, type DeliverableRow } from "./ProjectDetail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -60,6 +60,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     }
   }
 
+  // Deliverables for this project — table exists after S6 SQL migration; graceful empty on error.
+  const { data: deliverableRows } = await supabase
+    .from("deliverables")
+    .select("id, template, status, created_at")
+    .eq("project_id", id)
+    .order("created_at", { ascending: false });
+  const deliverables: DeliverableRow[] = (deliverableRows ?? []) as DeliverableRow[];
+
   return (
     <ProjectDetail
       id={project.id}
@@ -67,6 +75,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       branding={project.branding}
       items={items}
       charts={charts}
+      deliverables={deliverables}
     />
   );
 }

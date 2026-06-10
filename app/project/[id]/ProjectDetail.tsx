@@ -13,12 +13,20 @@ export interface SavedChart {
   freshness_token: string | null;
 }
 
+export interface DeliverableRow {
+  id: string;
+  template: string;
+  status: string;
+  created_at: string;
+}
+
 interface Props {
   id: string;
   title: string | null;
   branding: Record<string, string> | null;
   items: ProjectItem[];
   charts: Record<string, SavedChart>;
+  deliverables: DeliverableRow[];
 }
 
 const BRANDING_FIELDS: { key: string; label: string }[] = [
@@ -41,6 +49,7 @@ export function ProjectDetail({
   branding: initialBranding,
   items: initialItems,
   charts,
+  deliverables: initialDeliverables,
 }: Props) {
   const [items, setItems] = useState<ProjectItem[]>(initialItems);
   const [title, setTitle] = useState(initialTitle ?? "");
@@ -48,6 +57,7 @@ export function ProjectDetail({
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const [deliverables, setDeliverables] = useState<DeliverableRow[]>(initialDeliverables);
 
   function mutate(next: ProjectItem[]) {
     setItems(next);
@@ -83,6 +93,22 @@ export function ProjectDetail({
       setSavedMsg("Save failed");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function toggleRevoke(deliverableId: string, currentStatus: string) {
+    const restore = currentStatus === "revoked";
+    const res = await fetch(`/api/deliverables/${deliverableId}/revoke`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ restore }),
+    });
+    if (res.ok) {
+      setDeliverables((prev) =>
+        prev.map((d) =>
+          d.id === deliverableId ? { ...d, status: restore ? "ready" : "revoked" } : d,
+        ),
+      );
     }
   }
 
@@ -181,6 +207,44 @@ export function ProjectDetail({
           Save branding
         </button>
       </section>
+
+      {/* Shared deliverables — owner kill-switch (S7) */}
+      {deliverables.length > 0 && (
+        <section className="mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
+          <h2 className="text-sm font-semibold text-white">Shared Deliverables</h2>
+          <ul className="mt-3 flex flex-col gap-2">
+            {deliverables.map((d) => (
+              <li key={d.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/p/${d.id}`}
+                    className="text-sm text-[#00d4aa] underline underline-offset-2"
+                  >
+                    {d.template}
+                  </a>
+                  <span className="text-xs text-gray-500">
+                    {new Date(d.created_at).toLocaleDateString()}
+                  </span>
+                  {d.status === "revoked" && (
+                    <span className="text-xs font-medium text-red-400">revoked</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleRevoke(d.id, d.status)}
+                  className={
+                    d.status === "revoked"
+                      ? "text-xs text-[#00d4aa] underline underline-offset-2"
+                      : "text-xs text-red-400 underline underline-offset-2"
+                  }
+                >
+                  {d.status === "revoked" ? "Restore" : "Revoke"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Deliverable actions */}
       <div className="print-hide mt-6 flex gap-3">
