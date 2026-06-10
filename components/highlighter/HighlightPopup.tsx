@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { popupPosition, type Position } from "@/lib/highlighter/position";
 import { buildClaudeHandoff } from "@/lib/highlighter/handoff";
 import { useConverse } from "@/lib/highlighter/use-converse";
 import type { SelectedFact } from "@/lib/highlighter/use-highlight";
 import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 import { suggestionsForSpan, deriveSelectionType } from "@/lib/highlighter/suggestions";
-
-interface ChatEntry {
-  question: string;
-  answer: string;
-}
+import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
 
 interface PopupProps {
   reportId: string;
@@ -44,7 +40,11 @@ export function HighlightPopup({
   const [question, setQuestion] = useState("");
   const [showCopyMenu, setShowCopyMenu] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [thread, setThread] = useState<ChatEntry[]>([]);
+  // Thread now lives in the shared provider so it survives close/reopen and is
+  // shared with the Ask-AI dock. activeQuestion stays local (transient live state).
+  const ctx = useHighlighterContext();
+  const thread = useMemo(() => ctx?.thread(reportId) ?? [], [ctx, reportId]);
+  const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
   const [showChips, setShowChips] = useState(true);
   const { ask, answer, reach, followups, answered, error, streaming, reset } = useConverse();
@@ -201,9 +201,9 @@ export function HighlightPopup({
           allEntries.map((m) => `Q: ${m.question}\nA: ${m.answer}`).join("\n\n")
         : "";
 
-    // Archive current live exchange to the thread
+    // Archive current live exchange to the shared provider thread
     if (activeQuestion && answer) {
-      setThread((t) => [...t, { question: activeQuestion, answer }]);
+      ctx?.archiveExchange(reportId, { question: activeQuestion, answer });
     }
 
     setActiveQuestion(trimmed);
@@ -320,18 +320,38 @@ export function HighlightPopup({
 
       {/* Chat body — scrollable */}
       <div ref={bodyRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-2">
-        {/* Archived thread */}
-        {thread.map((entry, i) => (
-          <div key={i}>
-            <p className="mb-1 ml-6 rounded-lg bg-[#00d4aa]/10 px-2.5 py-1.5 text-right text-xs text-gray-300">
-              {entry.question}
-            </p>
-            <p className="whitespace-pre-wrap text-xs leading-5 text-gray-200">{entry.answer}</p>
-            {(i < thread.length - 1 || activeQuestion) && (
-              <div className="mt-3 border-t border-[#00d4aa]/10" />
-            )}
-          </div>
-        ))}
+        {/* Archived thread — condensed on reopen: question visible, answer behind a tap. */}
+        {thread.map((archived, i) => {
+          const isOpen = expanded.has(i);
+          return (
+            <div key={i}>
+              <button
+                type="button"
+                onClick={() =>
+                  setExpanded((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(i)) next.delete(i);
+                    else next.add(i);
+                    return next;
+                  })
+                }
+                aria-expanded={isOpen}
+                className="mb-1 ml-6 flex w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-lg bg-[#00d4aa]/10 px-2.5 py-1.5 text-xs text-gray-300 transition-colors hover:bg-[#00d4aa]/20"
+              >
+                <span className="text-[10px] text-gray-500">{isOpen ? "▾" : "▸"}</span>
+                <span className="min-w-0 flex-1 truncate text-left">{archived.question}</span>
+              </button>
+              {isOpen && archived.answer && (
+                <p className="whitespace-pre-wrap text-xs leading-5 text-gray-200">
+                  {archived.answer}
+                </p>
+              )}
+              {(i < thread.length - 1 || activeQuestion) && (
+                <div className="mt-3 border-t border-[#00d4aa]/10" />
+              )}
+            </div>
+          );
+        })}
 
         {/* Live / current exchange */}
         {activeQuestion && (
