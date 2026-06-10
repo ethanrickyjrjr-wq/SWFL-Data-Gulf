@@ -412,7 +412,25 @@ export function AskAiDock({
                               ? "Save failed"
                               : "File this chart"}
                         </button>
-                      ) : null}
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void fetch("/api/meter", {
+                              method: "POST",
+                              headers: { "content-type": "application/json" },
+                              body: JSON.stringify({
+                                action: "chart_save_gated",
+                                report_id: reportId,
+                              }),
+                            }).catch(() => {});
+                          }}
+                          className="text-[10px] text-gray-500 hover:text-gray-400"
+                          title="Saving this chart type is coming soon"
+                        >
+                          File this chart
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => setDismissedChart(chart)}
