@@ -54,7 +54,8 @@ Every job card repeats these. They are the acceptance bar — a card that violat
 | `lee_building_permits` | `zip_code` ✓ | Nothing to do |
 | `collier_building_permits` | `lat`/`lon` ✓ (+`site_address`); `owner_zip`/`contractor_zip` **excluded by G1** | **J2** — derive site zip, backfill, wire pipeline |
 | `mhs_permits_swfl` | `project_address` only | **J3** — geocode → zip (full graduation; brain is mandatory per G3) |
-| `leepa_parcels`, `collier_parcels` | none on the row | **J6 — PARK** (needs a situs/geometry source-layer pull first) |
+| `collier_parcels` | **`phy_zipcd` already on the row** (site ZIP, FDOR) | **J6a** — no column add; validate + surface per-ZIP in `properties-collier-value` |
+| `leepa_parcels` | none on the row | **J6b — PARK** (needs a situs/centroid source-layer pull first) |
 | `zori_swfl`, `redfin_*` | ZIP-keyed already | Nothing to do |
 | `bls_*`, `fl_dor_*`, `marketbeat_swfl`, `fgcu_reri`, `fdot_aadt_*`, `census_*`, `fred_*`, `city_pulse*` | county / MSA / corridor / submarket | **EXCLUDE (G1)** — a zip here is the MOAT violation |
 
@@ -68,7 +69,18 @@ planned-not-started, verified `@765d688`). It already specifies the 6-county sco
 fan-out invariants. **Do not reinvent it.** Our jobs map onto it:
 - **J1** = its **§A spine** + **§B dispatcher** (`01-spine.md`, `02-dispatcher.md`).
 - **J2 / J3** = its **§F** "crisp ZIP rows — permits detail_tables," governed by the 3 GATES.
-- **J6** = its **§G** parcel-exact (parked).
+- **J6** = its **§G** parcel-exact.
+
+### Cross-plan coordination (these are the SAME files — don't run both blind)
+
+| Touchpoint | Rule |
+|---|---|
+| **J1 ≡ §A + §B** | Same deliverables (`zip-resolver.mts`, `swfl-zip-county.json`, dispatcher). **One owner.** Never dispatch J1 *and* §A/§B as separate sessions — that's two Claudes creating the same file. |
+| **J2 ⊃ §F-2** (same file `permits-swfl.mts`) | §F-2 and §C `BRAIN_GEO` were written when "Collier permits have **no** `zip_code`." **J2 adds it**, which lifts §F-2's "Lee only" restriction. **Fold §F-2 into J2** (Lee + now-enabled Collier ZIP rows in one edit) and update §C's `BRAIN_GEO` comment for `permits-swfl`. Do **not** run §F-2 as a later separate job. |
+| **J3 → §C `BRAIN_GEO`** | J3 adds a **new** brain (`permits-commercial-swfl`). §C has a CI test: every catalog brain needs a `BRAIN_GEO` entry or it **throws**. Whoever builds §C must add it. |
+| **J6a ≡ §G's "Collier `phy_zipcd` now"** | Surface the existing column; not a new column. |
+| **§E geocoding ≠ J2/J3 geocoding** | §E is a **runtime Mapbox** address geocoder; J2/J3 use the **Census batch geocoder in ingest**. Different layer, different file — J2/J3 do **not** deliver §E. |
+| **No overlap:** §C (`lib/zip-dossier.ts`, only *adds* a `loadParsedBrain` export to `fetch-brain.ts`), §D surfaces, §F-1 rentals (`rentals-swfl.mts`) | Independent; all sit downstream of J1. |
 
 ---
 

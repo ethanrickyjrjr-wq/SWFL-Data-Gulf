@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Opus 4.8 · main) — docs: reconcile ZIP handoff with universal-location-search (J6 fix + cross-plan notes)
+
+- **J6 corrected:** earlier draft wrongly parked BOTH parcel tables. Verified `collier_parcels.phy_zipcd` exists (site ZIP, FDOR — `ingest/pipelines/collier_parcels/resources.py:35`). Split: **J6a** Collier = surface the existing `phy_zipcd` per-ZIP in `properties-collier-value` (no column add, scope-gated); **J6b** Lee `leepa_parcels` = genuinely parked (no situs/geo; needs a centroid source-layer pull).
+- **Cross-plan coordination added** (README + PARALLEL-MAP + J2): the handoff and `2026-06-09-universal-location-search/` share files — **J1 ≡ §A+§B** (one owner, never both); **J2 absorbs §F-2** and must update §C `BRAIN_GEO`'s stale "Collier — no zip_code" note; **J3 obliges §C** to add the new `permits-commercial-swfl` brain to `BRAIN_GEO` (CI throws otherwise); §C/§D/§E/§F-1 are independent/downstream. §E's runtime Mapbox geocoder ≠ J2/J3's Census ingest geocoder.
+- Docs only; no code shipped.
+
 ## 2026-06-09 (Opus 4.8 · main) — docs: ZIP-columns + graduations handoff folder (audit of the Charts/Session-Map plan)
 
 - **New handoff hub:** `docs/superpowers/plans/2026-06-09-zip-and-graduations-handoff/` — README + PARALLEL-MAP + 6 self-contained job cards (J1–J6), each tagged with a model-routing flag.

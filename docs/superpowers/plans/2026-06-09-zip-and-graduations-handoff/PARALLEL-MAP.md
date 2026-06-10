@@ -45,6 +45,16 @@ pushes second must `safe-push` (rebase), never force.
 - **J5** — operator-run GitHub Actions + the cadence edit above. No Claude code.
 
 ## Suggested wave order
-1. **Wave 0 (now, parallel):** J4, J5, J6 — none depend on anything.
+1. **Wave 0 (now, parallel):** J4, J5, **J6b** (Lee park doc) — none depend on anything.
 2. **Wave 1:** J1 (the spine) — the critical path.
-3. **Wave 2 (after J1 on `main`):** J2 ‖ J3 — two Claudes, coordinating the registry merges.
+3. **Wave 2 (after J1 on `main`):** J2 ‖ J3 ‖ **J6a** (Collier `phy_zipcd` surface) — coordinate the
+   registry merges; all three call `resolveZip().in_scope`.
+
+## Cross-plan serialization with `2026-06-09-universal-location-search/`
+These two plans share files — coordinate so two Claudes don't build the same thing:
+- **J1 ≡ §A+§B** — one owner; never launch both. (Pick this handoff's J1 *or* the other folder's
+  §A/§B, not both.)
+- **J2 absorbs §F-2** (`permits-swfl.mts` detail_tables) and must update §C's `BRAIN_GEO` note that
+  currently says "Collier — no zip_code." Don't schedule §F-2 separately after J2.
+- **J3 obliges §C** to add `permits-commercial-swfl` to `BRAIN_GEO` (CI throws otherwise).
+- **§C / §D / §E / §F-1** don't touch J1–J6 files — independent, downstream of J1.

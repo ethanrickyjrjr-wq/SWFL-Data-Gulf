@@ -49,6 +49,12 @@ assertion (zero out-of-6-county ZIPs). Don't let those two slide.
    ZIP). Numbers stay at their true grain — a permit's ZIP is the permit's own site, not a county
    figure (MOAT safe).
 
+> **Cross-plan — fold in §F-2.** This step IS `universal-location-search` **§F-2**, written when
+> "Collier permits have no `zip_code` → keep them branch-(c)." J2 lifts that. Do the Lee per-ZIP
+> detail_table (§F-2's original scope) **and** the now-enabled Collier ZIP rows in this one edit,
+> and update §C's `BRAIN_GEO` comment for `permits-swfl` (drop the "Collier — no zip_code" note).
+> Don't run §F-2 as a separate later job.
+
 ## Acceptance
 - Migration idempotent (re-run = no-op); row counts verified; **zero non-null `zip_code` outside
   the 6 counties** (the scope-gate assertion above passes).
