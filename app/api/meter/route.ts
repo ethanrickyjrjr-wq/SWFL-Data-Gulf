@@ -6,6 +6,7 @@ const ALLOWED = new Set([
   "chart_save",
   "project_create",
   "item_add",
+  "draft_import_failed",
   "build",
   "export_print",
   "deliver_email",

@@ -13,8 +13,20 @@ import { projectItemsSchema } from "@/lib/project/items";
  * Side-effect-only effect: reads localStorage + fetches + navigates. It sets NO
  * React state (this repo treats react-hooks/set-state-in-effect as a hard error),
  * and a ref one-shots it so React 18 StrictMode double-invoke can't double-import.
- * On any failure the draft is left intact (no data loss).
+ * On any failure the draft is left intact (no data loss) AND a
+ * `draft_import_failed` meter beacon fires (reason tagged in `reach`) so dropped
+ * drafts at login are VISIBLE in usage_events — never a silent swallow.
  */
+
+/** Fire-and-forget failure beacon so a dropped draft is observable, not silent. */
+function reportImportFailure(reason: string) {
+  void fetch("/api/meter", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ action: "draft_import_failed", report_id: "", reach: [reason] }),
+  }).catch(() => {});
+}
+
 export function ImportDraftOnLogin() {
   const router = useRouter();
   const ran = useRef(false);
@@ -41,12 +53,15 @@ export function ImportDraftOnLogin() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ items }),
         });
-        if (!res.ok) return; // leave the draft intact so nothing is lost
+        if (!res.ok) {
+          reportImportFailure("server_rejected"); // draft intact; visible in usage_events
+          return;
+        }
         const { id } = (await res.json()) as { id?: string };
         localStorage.removeItem(DRAFT_KEY);
         if (id) router.replace(`/project/${id}`);
       } catch {
-        // network/parse failure — draft stays, user can retry
+        reportImportFailure("network_error"); // draft stays, user can retry
       }
     })();
   }, [router]);
