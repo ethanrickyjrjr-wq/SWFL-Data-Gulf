@@ -16,10 +16,14 @@ export function LoginForm({ next }: { next: string }) {
     setErrorMessage(null);
 
     const supabase = createClient();
-    const emailRedirectTo = `${window.location.origin}/auth/callback`;
+    // [AUDIT-FIX C1] thread the received `next` onto the callback URL so the
+    // magic-link round-trip lands the user back on the page they were gated from.
+    // The callback route (app/auth/callback/route.ts) already forwards `next`.
+    const callback = new URL("/auth/callback", window.location.origin);
+    if (next && next !== "/") callback.searchParams.set("next", next);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo },
+      options: { emailRedirectTo: callback.toString() },
     });
 
     if (error) {
@@ -33,8 +37,8 @@ export function LoginForm({ next }: { next: string }) {
   if (status === "sent") {
     return (
       <div className="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 text-sm leading-6 text-emerald-900 dark:text-emerald-200">
-        Check <span className="font-medium">{email}</span> for a sign-in link.
-        You can close this tab.
+        Check <span className="font-medium">{email}</span> for a sign-in link. You can close this
+        tab.
       </div>
     );
   }
@@ -63,9 +67,7 @@ export function LoginForm({ next }: { next: string }) {
         {status === "sending" ? "Sending…" : "Send magic link"}
       </button>
       {status === "error" && errorMessage && (
-        <p className="text-sm leading-6 text-red-600 dark:text-red-400">
-          {errorMessage}
-        </p>
+        <p className="text-sm leading-6 text-red-600 dark:text-red-400">{errorMessage}</p>
       )}
     </form>
   );

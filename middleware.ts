@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/middleware";
+import { updateSession } from "@/utils/supabase/middleware";
 import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 
 // Public, unauthenticated data endpoints. These bypass the Supabase auth client
@@ -93,9 +93,26 @@ export async function middleware(request: NextRequest) {
     return attachCid(pass);
   }
 
-  // Everything else keeps the existing Supabase auth-refresh behavior unchanged.
-  const res = await createClient(request);
-  return attachCid(res as NextResponse);
+  // Everything else: refresh the Supabase session (and get the current user).
+  const { response, user } = await updateSession(request);
+
+  // Gate ONLY the /project prefix — every other path behaves exactly as before
+  // (the named lock-out risk). /project/draft stays public (anonymous briefcase).
+  const isProject = pathname === "/project" || pathname.startsWith("/project/");
+  const isPublicDraft = pathname === "/project/draft";
+  if (isProject && !isPublicDraft && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    url.searchParams.set("next", pathname);
+    const redirect = NextResponse.redirect(url);
+    // Per the Supabase SSR docs: when building a new response, copy the refreshed
+    // auth cookies over so the browser/server session doesn't desync.
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return attachCid(redirect);
+  }
+
+  return attachCid(response);
 }
 
 export const config = {
