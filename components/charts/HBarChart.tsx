@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { formatChartValue } from "@/refinery/lib/chart-adapter.mts";
 import type { ChartValueFormat } from "@/refinery/validate/chart-block-lint.mts";
@@ -132,6 +132,17 @@ export function HBarChart({
 
     return () => ctx.revert();
   }, [corridors, range.max, fmt]);
+
+  useEffect(() => {
+    const onBeforePrint = () => {
+      const pcts = corridors.map((c) => (c.value / range.max) * 100);
+      fillRefs.current.forEach((el, i) => {
+        if (el) gsap.set(el, { width: `${pcts[i]}%` });
+      });
+    };
+    window.addEventListener("beforeprint", onBeforePrint);
+    return () => window.removeEventListener("beforeprint", onBeforePrint);
+  }, [corridors, range.max]);
 
   const handleEnter = (idx: number) => (e: React.MouseEvent) => {
     setHoveredIdx(idx);
