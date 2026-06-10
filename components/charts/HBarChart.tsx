@@ -214,6 +214,7 @@ export function HBarChart({
                       }}
                       className={`hbarchart-fill hbarchart-fill-${c.tier}`}
                       data-pct={pct.toFixed(2)}
+                      style={{ "--bar-pct": `${pct.toFixed(2)}%` } as React.CSSProperties}
                     />
                   </div>
                   <div
@@ -536,6 +537,17 @@ export function HBarChart({
         .hbarchart-compact .hbarchart-footer {
           font-size: 10px;
           margin-top: 8px;
+        }
+
+        /* iOS Safari does not fire beforeprint reliably. Drive bar width from the
+           CSS var set at render so the final state is CSS-declarative and event-free.
+           The beforeprint gsap.set above remains as progressive enhancement on desktop. */
+        @media print {
+          .hbarchart-fill {
+            width: var(--bar-pct) !important;
+            transition: none !important;
+            animation: none !important;
+          }
         }
       `}</style>
     </div>
