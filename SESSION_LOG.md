@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — merge: land 3 orphaned cloud branches onto main
+
+- `claude/key-metrics-cleanup-ictv6x` → cherry-picked `446ff7f`: CRE /r/ UI — `CREMarketBeatChart` bars now sort by value descending; `CREMetricsExplorer` split into `CRESummaryBoxes` (inside Key metrics) + `CRECorridorBreakdown` (own section below); `buildCounties` try/catch for missing-creds graceful degrade.
+- `claude/cre-market-analysis-firecrawl-9ny137` → cherry-picked plan doc only (`docs/superpowers/plans/2026-06-09-cre-supplementary-metrics-handoff.md`): CRE supplementary-metrics handoff — what the lake holds vs 4 metric families (construction pipeline, market velocity, concessions, macro drivers), names net-new Firecrawl targets. SESSION_LOG entries from that branch skipped (stale).
+- `claude/naples-estero-vacancy-kupm6b` → percent formatter fix already on main (landed earlier); only prettier whitespace diffs remain — branch deleted, no code needed.
+- Deleted all 3 remote branches.
+
 ## 2026-06-10 (main) — verify(§E): live verifies PASS → §D CLOSED
 
 - Deployed `14822a7` + Vercel `MAPBOX_TOKEN` (operator). **URL-restricted Mapbox token works on Vercel via the explicit `Referer` header** — no unrestricted token needed.

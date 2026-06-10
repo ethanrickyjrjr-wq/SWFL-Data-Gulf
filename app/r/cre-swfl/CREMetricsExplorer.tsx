@@ -43,7 +43,9 @@ function StatBox({ box }: { box: MetricBox }) {
   return (
     <div className="flex flex-col gap-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
       <dt className="text-xs uppercase leading-tight tracking-wider text-gray-400">{box.label}</dt>
-      <dd className={`font-mono text-lg font-semibold tabular-nums ${directionClass(box.direction)}`}>
+      <dd
+        className={`font-mono text-lg font-semibold tabular-nums ${directionClass(box.direction)}`}
+      >
         {box.value}
       </dd>
       {box.direction && (
@@ -138,7 +140,14 @@ function CorridorRow({
             aria-label="Close corridor detail"
             className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <svg
+              className="h-3.5 w-3.5"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            >
               <path d="M3 3l8 8M11 3l-8 8" />
             </svg>
           </button>
@@ -194,7 +203,13 @@ function CityBriefcase({
       >
         <span className="flex items-center gap-2.5">
           {/* briefcase glyph — cities are filed like the corridor explorer */}
-          <svg className="h-4 w-4 shrink-0 opacity-80" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <svg
+            className="h-4 w-4 shrink-0 opacity-80"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+          >
             <rect x="2" y="5" width="12" height="8" rx="1.5" />
             <path d="M6 5V3.5A1.5 1.5 0 017.5 2h1A1.5 1.5 0 0110 3.5V5" />
           </svg>
@@ -237,9 +252,7 @@ function CityBriefcase({
                     key={c.slug}
                     corridor={c}
                     isOpen={openCorridor === c.slug}
-                    onToggle={() =>
-                      setOpenCorridor((prev) => (prev === c.slug ? null : c.slug))
-                    }
+                    onToggle={() => setOpenCorridor((prev) => (prev === c.slug ? null : c.slug))}
                   />
                 ))}
               </ul>
@@ -255,98 +268,79 @@ function CityBriefcase({
 // Main explorer
 // ---------------------------------------------------------------------------
 
-export interface CREMetricsExplorerProps {
-  /** Combined Lee + Collier SWFL boxes — visible on page load. */
-  summaryMetrics: MetricBox[];
-  /** Per-city MarketBeat datapoints for the expanded-city boxes. */
-  mbMetrics: MBCityMetric[];
-  /** County → City → Corridor hierarchy. */
-  counties: CountyNode[];
-}
-
-export function CREMetricsExplorer({
-  summaryMetrics,
-  mbMetrics,
-  counties,
-}: CREMetricsExplorerProps) {
-  const [showCities, setShowCities] = useState(false);
-  const [openCity, setOpenCity] = useState<string | null>(null);
-
-  const hasCities = counties.some((c) => c.cities.length > 0);
-
+/**
+ * CRESummaryBoxes — the combined Lee + Collier SWFL stat boxes that sit inside
+ * the "Key metrics" section, visible on page load (two rows).
+ */
+export function CRESummaryBoxes({ boxes }: { boxes: MetricBox[] }) {
+  if (boxes.length === 0) return null;
   return (
-    <div className="mt-6 space-y-6">
-      {/* Combined Lee + Collier boxes — two rows, on load. */}
-      {summaryMetrics.length > 0 && (
-        <section>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            Southwest Florida · Lee + Collier combined
-          </h3>
-          <StatGrid boxes={summaryMetrics} />
-        </section>
-      )}
-
-      {/* See-by-city drill-down toggle. */}
-      {hasCities && (
-        <div>
-          <button
-            onClick={() => setShowCities((v) => !v)}
-            aria-expanded={showCities}
-            className={[
-              "inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors",
-              showCities
-                ? "border-[#00d4aa] bg-[#00d4aa]/10 text-[#00d4aa]"
-                : "border-[#00d4aa]/40 bg-[#00d4aa]/[0.06] text-[#00d4aa] hover:bg-[#00d4aa]/10",
-            ].join(" ")}
-          >
-            <svg
-              className={`h-3.5 w-3.5 transition-transform ${showCities ? "rotate-180" : ""}`}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M4 6l4 4 4-4" />
-            </svg>
-            {showCities ? "Hide city breakdown" : "See by city"}
-          </button>
-
-          {showCities && (
-            <div className="mt-5 space-y-8">
-              {counties
-                .filter((c) => c.cities.length > 0)
-                .map(({ county, cities }) => (
-                  <div key={county}>
-                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      {county === "Unknown" ? "Other SWFL" : `${county} County`}
-                    </h4>
-                    <div className="space-y-2">
-                      {cities.map((cityNode) => {
-                        const key = `${county}::${cityNode.city}`;
-                        return (
-                          <CityBriefcase
-                            key={key}
-                            city={cityNode.city}
-                            corridors={cityNode.corridors}
-                            mbMetrics={mbMetrics}
-                            isOpen={openCity === key}
-                            onToggle={() =>
-                              setOpenCity((prev) => (prev === key ? null : key))
-                            }
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-      )}
+    <div className="mt-4">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        Southwest Florida · Lee + Collier combined
+      </h3>
+      <StatGrid boxes={boxes} />
     </div>
   );
 }
 
-export default CREMetricsExplorer;
+/**
+ * CRECorridorBreakdown — the per-corridor breakdown, its OWN section that lives
+ * BELOW "Key metrics". County → City briefcases (collapsed) → corridors (name
+ * big, type small) → click a corridor → its metric boxes inline with an X to
+ * close. The city briefcases are shown directly under the section heading so
+ * the corridor data is always findable (no extra gate).
+ */
+export function CRECorridorBreakdown({
+  mbMetrics,
+  counties,
+}: {
+  mbMetrics: MBCityMetric[];
+  counties: CountyNode[];
+}) {
+  const [openCity, setOpenCity] = useState<string | null>(null);
+
+  const populated = counties.filter((c) => c.cities.length > 0);
+  if (populated.length === 0) {
+    return (
+      <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-6 text-center text-sm text-gray-500">
+        Corridor breakdown is temporarily unavailable.
+      </p>
+    );
+  }
+
+  const totalCorridors = populated.reduce(
+    (sum, c) => sum + c.cities.reduce((s, city) => s + city.corridors.length, 0),
+    0,
+  );
+
+  return (
+    <div className="mt-4 space-y-8">
+      <p className="text-sm text-gray-400">
+        {totalCorridors} verified corridors · pick a city, then open any corridor for its numbers.
+      </p>
+      {populated.map(({ county, cities }) => (
+        <div key={county}>
+          <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {county === "Unknown" ? "Other SWFL" : `${county} County`}
+          </h4>
+          <div className="space-y-2">
+            {cities.map((cityNode) => {
+              const key = `${county}::${cityNode.city}`;
+              return (
+                <CityBriefcase
+                  key={key}
+                  city={cityNode.city}
+                  corridors={cityNode.corridors}
+                  mbMetrics={mbMetrics}
+                  isOpen={openCity === key}
+                  onToggle={() => setOpenCity((prev) => (prev === key ? null : key))}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -46,8 +46,8 @@ export function CREMarketBeatChart({ metrics }: { metrics: MBCityMetric[] }) {
   const [metricType, setMetricType] = useState<CREMetricType>("vacancy");
 
   const corridors: HBarCorridor[] = useMemo(() => {
-    const out: HBarCorridor[] = [];
-    const values: number[] = [];
+    // Pull each city's value for the active sector + metric…
+    const picked: { city: string; value: number }[] = [];
     for (const city of MARKET_BEAT_CITIES) {
       const hit = metrics.find(
         (m) =>
@@ -56,25 +56,17 @@ export function CREMarketBeatChart({ metrics }: { metrics: MBCityMetric[] }) {
           m.metricType === metricType &&
           m.valueNum !== null,
       );
-      if (hit && hit.valueNum !== null) values.push(hit.valueNum);
+      if (hit && hit.valueNum !== null) picked.push({ city, value: hit.valueNum });
     }
-    const median = medianOf(values) ?? 0;
-    for (const city of MARKET_BEAT_CITIES) {
-      const hit = metrics.find(
-        (m) =>
-          m.city === city &&
-          m.sector === sector &&
-          m.metricType === metricType &&
-          m.valueNum !== null,
-      );
-      if (!hit || hit.valueNum === null) continue;
-      out.push({
-        name: city,
-        value: hit.valueNum,
-        tier: tierFor(hit.valueNum, median),
-      });
-    }
-    return out;
+    // …then rank by the number (largest on top) so the order actually changes
+    // when you flip sector / metric — it is NOT a fixed city list.
+    picked.sort((a, b) => b.value - a.value);
+    const median = medianOf(picked.map((p) => p.value)) ?? 0;
+    return picked.map((p) => ({
+      name: p.city,
+      value: p.value,
+      tier: tierFor(p.value, median),
+    }));
   }, [metrics, sector, metricType]);
 
   const values = corridors.map((c) => c.value);

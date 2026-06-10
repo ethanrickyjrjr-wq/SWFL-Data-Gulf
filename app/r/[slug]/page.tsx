@@ -27,7 +27,7 @@ import { ReportChart } from "../../../components/charts/ReportChart";
 import { HighlighterLayer } from "../../../components/highlighter/HighlighterLayer";
 import { HighlighterProvider } from "../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
-import { CREMetricsExplorer } from "../cre-swfl/CREMetricsExplorer";
+import { CRESummaryBoxes, CRECorridorBreakdown } from "../cre-swfl/CREMetricsExplorer";
 import { CREMarketBeatChart } from "../cre-swfl/CREMarketBeatChart";
 import {
   parseMBCityLabel,
@@ -123,8 +123,7 @@ export default async function ReportPage({ params }: PageProps) {
       label: m.label,
       value: valueStr,
       direction: m.direction,
-      valueNum:
-        raw && typeof raw.value === "number" ? raw.value : parseDisplayNumeric(valueStr),
+      valueNum: raw && typeof raw.value === "number" ? raw.value : parseDisplayNumeric(valueStr),
     };
   });
 
@@ -195,34 +194,41 @@ export default async function ReportPage({ params }: PageProps) {
       {/* The at-a-glance chart. For cre-swfl this is the sector-clickable
           "Market Beat" chart (six city totals); every other report keeps the
           auto-computed chart derived from the data it holds. */}
-      {slug === "cre-swfl" ? (
-        mbCityMetrics.length > 0 && <CREMarketBeatChart metrics={mbCityMetrics} />
-      ) : (
-        display.chart && <ReportChart block={display.chart} />
-      )}
-
       {slug === "cre-swfl"
-        ? (summaryMetrics.length > 0 || mbCityMetrics.length > 0) && (
+        ? mbCityMetrics.length > 0 && <CREMarketBeatChart metrics={mbCityMetrics} />
+        : display.chart && <ReportChart block={display.chart} />}
+
+      {slug === "cre-swfl" ? (
+        <>
+          {summaryMetrics.length > 0 && (
             <section className="mt-10">
               <SectionTitle>Key metrics</SectionTitle>
-              <CRESection summaryMetrics={summaryMetrics} mbMetrics={mbCityMetrics} />
-            </section>
-          )
-        : display.metrics.length > 0 && (
-            <section className="mt-10">
-              <SectionTitle>Key metrics</SectionTitle>
-              <MetricsTable
-                metrics={display.metrics.map((m) => ({
-                  label: m.label,
-                  value: m.value,
-                  direction: m.direction,
-                  sourceUrl: m.sourceUrl,
-                  sourceLabel: m.sourceLabel,
-                  methodHref: m.methodHref,
-                }))}
-              />
+              <CRESummaryBoxes boxes={summaryMetrics} />
             </section>
           )}
+          {/* Per-corridor breakdown — its own section, BELOW Key metrics. */}
+          <section className="mt-12">
+            <SectionTitle>Corridor breakdown</SectionTitle>
+            <CRESection mbMetrics={mbCityMetrics} />
+          </section>
+        </>
+      ) : (
+        display.metrics.length > 0 && (
+          <section className="mt-10">
+            <SectionTitle>Key metrics</SectionTitle>
+            <MetricsTable
+              metrics={display.metrics.map((m) => ({
+                label: m.label,
+                value: m.value,
+                direction: m.direction,
+                sourceUrl: m.sourceUrl,
+                sourceLabel: m.sourceLabel,
+                methodHref: m.methodHref,
+              }))}
+            />
+          </section>
+        )
+      )}
 
       {display.summaryCaveats.length > 0 && (
         <section className="mt-10">
@@ -319,7 +325,14 @@ function corridorBoxes(c: ReturnType<typeof normalizeCorridor>): MetricBox[] {
 
 /** County → City → Corridor hierarchy, each corridor carrying its own boxes. */
 async function buildCounties(): Promise<CountyNode[]> {
-  const rows = await fetchVerifiedCorridorRows();
+  let rows: Record<string, unknown>[] = [];
+  try {
+    rows = await fetchVerifiedCorridorRows();
+  } catch {
+    // Missing Supabase creds (e.g. a preview deploy) must NOT crash the page —
+    // degrade to an empty breakdown instead.
+    return [];
+  }
   const countyMap = new Map<string, Map<string, CorridorNode[]>>();
   for (const r of rows) {
     const c = normalizeCorridor(r);
@@ -358,23 +371,11 @@ async function buildCounties(): Promise<CountyNode[]> {
     }));
 }
 
-/** Server wrapper: fetches the corridor hierarchy, then hands everything to the
- *  client drill-down explorer. */
-async function CRESection({
-  summaryMetrics,
-  mbMetrics,
-}: {
-  summaryMetrics: MetricBox[];
-  mbMetrics: MBCityMetric[];
-}) {
+/** Server wrapper: fetches the corridor hierarchy, then hands it to the client
+ *  drill-down breakdown. */
+async function CRESection({ mbMetrics }: { mbMetrics: MBCityMetric[] }) {
   const counties = await buildCounties();
-  return (
-    <CREMetricsExplorer
-      summaryMetrics={summaryMetrics}
-      mbMetrics={mbMetrics}
-      counties={counties}
-    />
-  );
+  return <CRECorridorBreakdown mbMetrics={mbMetrics} counties={counties} />;
 }
 
 function RawFallback({ slug, content }: { slug: string; content: string }) {
