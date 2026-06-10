@@ -75,7 +75,7 @@ or the critical-path engine). Everything marked PARALLEL above is safe to fan ou
 
 | # | Section | File | Builder | Depends on | Status |
 |---|---------|------|---------|-----------|--------|
-| 0 | Verify render | `phase-0-verify-render__OPUS.md` | Opus | — | ⬜ |
+| 0 | Verify render | `phase-0-verify-render__OPUS.md` | Opus | — | ✅ 2026-06-10 → `phase-0-VERDICT.md` |
 | 1 | Keystone as-of | `phase-1-keystone-asof__OPUS.md` | Opus | 0 | ⬜ |
 | 2a | ChartSpec scaffold | `phase-2a-chartspec-registry-scaffold__OPUS.md` | Opus | 1 | ⬜ |
 | 2b | Frame: franchise survival | `phase-2-visuals/frame-franchise-survival__SONNET.md` | Sonnet | 2a | ⬜ |
