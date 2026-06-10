@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(J6a): Collier parcels ZIP-grain detail_tables
+
+- `docs/sql/20260610_collier_parcels_zip_summary.sql` — new view `data_lake.collier_parcels_zip_summary` (group by `phy_zipcd`: parcel_count, homesteaded_count, median_jv, soh_gap_median_pct). Applied; 22 in-scope Collier ZIPs confirmed.
+- `refinery/sources/collier-parcels-source.mts` — added `CollierParcelsZipRowNormalized`, `fetchLiveZipRows()` (queries zip view, filters via `resolveZip().in_scope`). Main `fetch()` now emits both the county summary fragment and one fragment per in-scope ZIP.
+- `refinery/packs/properties-collier-value.mts` — `lastZipRows` captured in `corpusSummary`; `outputProducer` builds `detail_tables[0]` (`collier_parcels_by_zip`, grain:"zip") when zip rows present. `parcelSourceMeta` hoisted from `if` block.
+- Next: J6b (Lee leepa_parcels situs-geo is genuinely parked — no situs address on row); J5 (GHA manual triggers, OPERATOR).
+
 ## 2026-06-10 (main) — reconcile(J4): Charts Tier A tracker reconcile
 
 - Verified `557edf0` is complete as-built: `computeMetricChart` in `refinery/lib/chart-from-metrics.mts`, `DisplayBrain.chart` + `sanitizeChart` in `speaker.mts`, wired in `toDisplayBrain` + `buildDossier`, rendered via `<ReportChart>` on `/r/` pages.

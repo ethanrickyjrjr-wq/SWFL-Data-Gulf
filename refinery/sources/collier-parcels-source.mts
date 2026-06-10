@@ -6,6 +6,7 @@ import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
+import { resolveZip } from "../lib/zip-resolver.mts";
 
 /**
  * collier-parcels source connector — Collier County parcel snapshot from the
@@ -26,6 +27,7 @@ const SOURCE_ID = "collier_parcels_fdor";
 const SCHEMA = "data_lake";
 const PARCELS_TABLE = "collier_parcels";
 const SUMMARY_VIEW = "collier_parcels_summary";
+const ZIP_SUMMARY_VIEW = "collier_parcels_zip_summary";
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
@@ -48,6 +50,16 @@ export interface CollierParcelsSummaryNormalized {
   soh_gap_median_pct: number | null;
 }
 
+/** Per-ZIP parcel stats row (from collier_parcels_zip_summary view). */
+export interface CollierParcelsZipRowNormalized {
+  kind: "collier-parcels-zip-row";
+  zip: string;
+  parcel_count: number;
+  homesteaded_count: number;
+  median_jv: number | null;
+  soh_gap_median_pct: number | null;
+}
+
 interface FixtureShape {
   _meta?: Record<string, unknown>;
   parcels: ParcelRow[];
@@ -57,15 +69,11 @@ function median(values: number[]): number | null {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1] + sorted[mid]) / 2
-    : sorted[mid];
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
 /** Aggregate raw parcels into the shape the live summary view returns. Fixture only. */
-export function aggregateFromParcels(
-  parcels: ParcelRow[],
-): CollierParcelsSummaryNormalized {
+export function aggregateFromParcels(parcels: ParcelRow[]): CollierParcelsSummaryNormalized {
   const gaps: number[] = [];
   let homesteaded = 0;
   for (const p of parcels) {
@@ -90,7 +98,7 @@ async function loadFixture(): Promise<CollierParcelsSummaryNormalized> {
   return aggregateFromParcels(data.parcels);
 }
 
-async function fetchLive(): Promise<CollierParcelsSummaryNormalized> {
+async function fetchLiveSummary(): Promise<CollierParcelsSummaryNormalized> {
   const sb = getSupabase().schema(SCHEMA);
   const resp = await sb
     .from(SUMMARY_VIEW)
@@ -121,14 +129,54 @@ async function fetchLive(): Promise<CollierParcelsSummaryNormalized> {
   };
 }
 
+function coerceNumeric(v: number | string | null | undefined): number | null {
+  if (v == null) return null;
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  return Number.isNaN(n) ? null : n;
+}
+
+async function fetchLiveZipRows(): Promise<CollierParcelsZipRowNormalized[]> {
+  const sb = getSupabase().schema(SCHEMA);
+  const resp = await sb
+    .from(ZIP_SUMMARY_VIEW)
+    .select("phy_zipcd,parcel_count,homesteaded_count,median_jv,soh_gap_median_pct");
+  if (resp.error) {
+    // Non-fatal: zip-grain detail is additive; absence degrades gracefully.
+    console.warn(
+      `collier-parcels-source: ${ZIP_SUMMARY_VIEW} query failed (${resp.error.message}) — detail_tables will be empty. ` +
+        "Run docs/sql/20260610_collier_parcels_zip_summary.sql to create the view.",
+    );
+    return [];
+  }
+  const rows = (resp.data ?? []) as {
+    phy_zipcd: string;
+    parcel_count: number;
+    homesteaded_count: number;
+    median_jv: number | string | null;
+    soh_gap_median_pct: number | string | null;
+  }[];
+  return rows
+    .filter((r) => r.phy_zipcd && resolveZip(r.phy_zipcd).in_scope)
+    .map((r) => ({
+      kind: "collier-parcels-zip-row" as const,
+      zip: r.phy_zipcd,
+      parcel_count: r.parcel_count,
+      homesteaded_count: r.homesteaded_count,
+      median_jv: coerceNumeric(r.median_jv),
+      soh_gap_median_pct: coerceNumeric(r.soh_gap_median_pct),
+    }));
+}
+
 export const collierParcelsSource: SourceConnector = {
   source_id: SOURCE_ID,
   trust_tier: 2,
   async fetch(): Promise<RawFragment[]> {
-    const summary =
-      env.source === "fixture" ? await loadFixture() : await fetchLive();
     const fetched_at = isoTimestamp();
-    return [
+    const summary = env.source === "fixture" ? await loadFixture() : await fetchLiveSummary();
+    const zipRows: CollierParcelsZipRowNormalized[] =
+      env.source === "fixture" ? [] : await fetchLiveZipRows();
+
+    const fragments: RawFragment[] = [
       {
         fragment_id: fragmentId(SOURCE_ID, "parcels-summary"),
         source_id: SOURCE_ID,
@@ -141,6 +189,19 @@ export const collierParcelsSource: SourceConnector = {
         normalized: summary,
       },
     ];
+
+    for (const row of zipRows) {
+      fragments.push({
+        fragment_id: fragmentId(SOURCE_ID, `zip-${row.zip}`),
+        source_id: SOURCE_ID,
+        source_trust_tier: 2,
+        fetched_at,
+        raw: { zip: row.zip, parcel_count: row.parcel_count },
+        normalized: row,
+      });
+    }
+
+    return fragments;
   },
   citationMeta(verifiedDate, ttlSeconds): Omit<CitationRow, "id"> {
     const liveUrl =

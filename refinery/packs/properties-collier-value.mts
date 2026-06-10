@@ -5,6 +5,7 @@ import type {
   BrainOutputMetric,
   BrainOutputMetricSource,
   BrainOutputProducerResult,
+  BrainOutputDetailTable,
 } from "../types/brain-output.mts";
 import {
   collierMarketSource,
@@ -14,6 +15,7 @@ import {
 import {
   collierParcelsSource,
   type CollierParcelsSummaryNormalized,
+  type CollierParcelsZipRowNormalized,
 } from "../sources/collier-parcels-source.mts";
 import { fhfaHpiSource, type HpiSwflSummary } from "../sources/fhfa-hpi-source.mts";
 import { env } from "../config/env.mts";
@@ -73,6 +75,7 @@ interface CollierMarketAggregates {
 
 let lastAggregate: CollierMarketAggregates | null = null;
 let lastFetchedAt: string | null = null;
+let lastZipRows: CollierParcelsZipRowNormalized[] = [];
 
 let lastFhfaSummary: HpiSwflSummary | null = null;
 
@@ -100,6 +103,12 @@ function parcelsSummaryFrom(fragments: RawFragment[]): CollierParcelsSummaryNorm
     if (n?.kind === "collier-parcels-summary") return n;
   }
   return null;
+}
+
+function parcelsZipRowsFrom(fragments: RawFragment[]): CollierParcelsZipRowNormalized[] {
+  return fragments
+    .map((f) => f.normalized as unknown as CollierParcelsZipRowNormalized)
+    .filter((n) => n?.kind === "collier-parcels-zip-row");
 }
 
 function fhfaSummaryFrom(fragments: RawFragment[]): HpiSwflSummary | null {
@@ -194,6 +203,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const parcels = parcelsSummaryFrom(allFragments);
   lastAggregate = aggregate(salesByYear, summary, parcels);
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
+  lastZipRows = parcelsZipRowsFrom(allFragments);
   lastFhfaSummary = fhfaSummaryFrom(allFragments);
 
   const agg = lastAggregate;
@@ -373,19 +383,19 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
 
   // Parcel-grain metrics from the FDOR cadastral (separate source/provenance).
+  const parcelSourceMeta: BrainOutputMetricSource = {
+    url:
+      env.source === "live" && env.supabaseUrl
+        ? `${env.supabaseUrl}/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct`
+        : "fixture://refinery/__fixtures__/properties-collier-parcels.sample.json",
+    fetched_at,
+    tier: 2,
+    citation:
+      env.source === "live"
+        ? "FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (CO_NO=21; SOH gap = median (jv_hmstd - av_hmstd)/jv_hmstd over homesteaded parcels)."
+        : "FDOR Statewide Cadastral — Collier parcels (fixture; refinery/__fixtures__/properties-collier-parcels.sample.json).",
+  };
   if (agg.totalParcels > 0) {
-    const parcelSourceMeta: BrainOutputMetricSource = {
-      url:
-        env.source === "live" && env.supabaseUrl
-          ? `${env.supabaseUrl}/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct`
-          : "fixture://refinery/__fixtures__/properties-collier-parcels.sample.json",
-      fetched_at,
-      tier: 2,
-      citation:
-        env.source === "live"
-          ? "FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (CO_NO=21; SOH gap = median (jv_hmstd - av_hmstd)/jv_hmstd over homesteaded parcels)."
-          : "FDOR Statewide Cadastral — Collier parcels (fixture; refinery/__fixtures__/properties-collier-parcels.sample.json).",
-    };
     if (agg.sohGapMedianPct != null) {
       key_metrics.push({
         metric: "collier_soh_gap_median_pct",
@@ -436,6 +446,49 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     });
   }
 
+  const detail_tables: BrainOutputDetailTable[] = lastZipRows.length
+    ? [
+        {
+          id: "collier_parcels_by_zip",
+          title: "Collier County parcels by ZIP (FDOR cadastral snapshot)",
+          grain: "zip",
+          columns: [
+            { id: "parcel_count", label: "Parcels", display_format: "count", units: "count" },
+            {
+              id: "homesteaded_count",
+              label: "Homesteaded parcels",
+              display_format: "count",
+              units: "count",
+            },
+            {
+              id: "median_jv",
+              label: "Median just value",
+              display_format: "currency",
+              units: "USD",
+            },
+            {
+              id: "soh_gap_median_pct",
+              label: "Median SOH gap",
+              display_format: "percent",
+              units: "percent",
+            },
+          ],
+          rows: lastZipRows.map((r) => ({
+            key: r.zip,
+            label: r.zip,
+            cells: {
+              parcel_count: r.parcel_count,
+              homesteaded_count: r.homesteaded_count,
+              median_jv: r.median_jv,
+              soh_gap_median_pct: r.soh_gap_median_pct,
+            },
+          })),
+          source: parcelSourceMeta,
+          note: "One row per in-scope SWFL ZIP (6-county footprint). Values from FDOR Statewide Cadastral (CO_NO=21). Median just value is the parcel-level median market value; SOH gap is median (jv_hmstd − av_hmstd)/jv_hmstd across homesteaded parcels in that ZIP — NULLs for ZIPs with no homesteaded parcels.",
+        },
+      ]
+    : [];
+
   const direction = directionFromZScore(agg.zScore);
   const magnitude = agg.zScore == null ? 0.3 : Math.min(1, Math.abs(agg.zScore) / 3);
 
@@ -484,6 +537,7 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
+    detail_tables,
     caveats,
     direction,
     magnitude,
