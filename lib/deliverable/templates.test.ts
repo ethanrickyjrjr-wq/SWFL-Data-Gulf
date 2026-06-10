@@ -323,3 +323,38 @@ describe("buildRenderModel — sources slot", () => {
     expect(urls).toContain("https://swfldatagulf.com/r/macro-swfl");
   });
 });
+
+describe("buildRenderModel — filed qa + note are never dropped", () => {
+  const TEMPLATES = ["market-overview", "bov-lite", "client-email", "one-pager"] as const;
+
+  for (const template of TEMPLATES) {
+    test(`${template}: filed qa surfaces as a qa slot with its provenance`, () => {
+      const model = buildRenderModel(template, NARRATIVE, ITEMS, BRANDING);
+      const qaSlot = model.slots.find((s) => s.kind === "qa");
+      expect(qaSlot).toBeDefined();
+      if (!qaSlot || qaSlot.kind !== "qa") throw new Error("no qa slot");
+      expect(qaSlot.question).toBe("Is Lee County a good buy?");
+      expect(qaSlot.answer).toContain("Absorption is outpacing new supply");
+      // citation must survive into the deliverable
+      expect(qaSlot.freshness_token).toBe("SWFL-7421-v5-20260610");
+      expect(qaSlot.report_id).toBe("cre-swfl");
+    });
+
+    test(`${template}: filed note surfaces as a note slot`, () => {
+      const model = buildRenderModel(template, NARRATIVE, ITEMS, BRANDING);
+      const noteSlot = model.slots.find((s) => s.kind === "note");
+      expect(noteSlot).toBeDefined();
+      if (!noteSlot || noteSlot.kind !== "note") throw new Error("no note slot");
+      expect(noteSlot.text).toBe("Client focus: office sector only.");
+    });
+  }
+
+  test("qa/note slots land before the sources slot (when sources exist)", () => {
+    const model = buildRenderModel("market-overview", NARRATIVE, ITEMS, BRANDING);
+    const qaIdx = model.slots.findIndex((s) => s.kind === "qa");
+    const srcIdx = model.slots.findIndex((s) => s.kind === "sources");
+    expect(qaIdx).toBeGreaterThanOrEqual(0);
+    expect(srcIdx).toBeGreaterThanOrEqual(0);
+    expect(qaIdx).toBeLessThan(srcIdx);
+  });
+});

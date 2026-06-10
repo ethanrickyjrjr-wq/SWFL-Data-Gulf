@@ -139,6 +139,26 @@ export type InferenceNotesSlot = {
   notes: string[];
 };
 
+/** A filed Q&A — the user's question + the cited answer. Carries its own
+ *  provenance (the source brain + freshness_token) so it renders as a cited
+ *  callout. Never dropped: a filed answer must survive into the deliverable. */
+export type QaSlot = {
+  kind: "qa";
+  id: string;
+  question: string;
+  answer: string;
+  report_id: string;
+  fact?: string;
+  freshness_token?: string;
+};
+
+/** A filed free-text note — inline context the user added. */
+export type NoteSlot = {
+  kind: "note";
+  id: string;
+  text: string;
+};
+
 export type Slot =
   | ExecSummarySlot
   | SectionSlot
@@ -146,7 +166,9 @@ export type Slot =
   | StatSlot
   | SourcesSlot
   | BrandingSlot
-  | InferenceNotesSlot;
+  | InferenceNotesSlot
+  | QaSlot
+  | NoteSlot;
 
 // ---------------------------------------------------------------------------
 // RenderModel
@@ -244,6 +266,29 @@ function collectSources(items: SnapshotItem[]): SourcesSlot {
   return { kind: "sources", sources };
 }
 
+/** Filed Q&A + notes → slots, in input order. These have no other home in any
+ *  template, so without this they would be silently dropped from the
+ *  deliverable. Deterministic — preserves input order. */
+function collectFiledContext(items: SnapshotItem[]): (QaSlot | NoteSlot)[] {
+  const out: (QaSlot | NoteSlot)[] = [];
+  for (const item of items) {
+    if (item.kind === "qa") {
+      out.push({
+        kind: "qa",
+        id: item.id,
+        question: item.question,
+        answer: item.answer,
+        report_id: item.report_id,
+        fact: item.fact,
+        freshness_token: item.freshness_token,
+      });
+    } else if (item.kind === "note") {
+      out.push({ kind: "note", id: item.id, text: item.text });
+    }
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // buildRenderModel — the public API
 // ---------------------------------------------------------------------------
@@ -270,9 +315,10 @@ export function buildRenderModel(
   const sourcesSlot = collectSources(items);
   const inferenceNotes = narrative.inference_notes;
 
+  let model: RenderModel;
   switch (template) {
     case "market-overview":
-      return buildMarketOverview(
+      model = buildMarketOverview(
         narrative,
         items,
         exhibits,
@@ -281,10 +327,20 @@ export function buildRenderModel(
         inferenceNotes,
         branding,
       );
+      break;
     case "bov-lite":
-      return buildBovLite(narrative, items, exhibits, stats, sourcesSlot, inferenceNotes, branding);
+      model = buildBovLite(
+        narrative,
+        items,
+        exhibits,
+        stats,
+        sourcesSlot,
+        inferenceNotes,
+        branding,
+      );
+      break;
     case "client-email":
-      return buildClientEmail(
+      model = buildClientEmail(
         narrative,
         items,
         exhibits,
@@ -293,8 +349,9 @@ export function buildRenderModel(
         inferenceNotes,
         branding,
       );
+      break;
     case "one-pager":
-      return buildOnePager(
+      model = buildOnePager(
         narrative,
         items,
         exhibits,
@@ -303,7 +360,24 @@ export function buildRenderModel(
         inferenceNotes,
         branding,
       );
+      break;
+    default: {
+      const _exhaustive: never = template;
+      throw new Error(`unknown template: ${String(_exhaustive)}`);
+    }
   }
+
+  // Filed Q&A + notes have no home inside any template's own structure. Splice
+  // them in immediately before the sources list so nothing the user filed is
+  // silently dropped from the deliverable (deterministic — input order).
+  const filed = collectFiledContext(items);
+  if (filed.length > 0) {
+    const srcIdx = model.slots.findIndex((s) => s.kind === "sources");
+    const at = srcIdx === -1 ? model.slots.length : srcIdx;
+    model.slots.splice(at, 0, ...filed);
+  }
+
+  return model;
 }
 
 // ---------------------------------------------------------------------------
