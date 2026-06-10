@@ -928,21 +928,23 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
 
   // ZIP-grain detail_table — one row per (zip, bucket) so downstream Claude can
-  // answer a specific-ZIP permit question without re-fetching. Both Lee and
-  // Collier ZIP rows land here (J2). key = zip_code (multiple rows per ZIP, one
-  // per bucket — consumer filters by key prefix or by bucket cell).
-  const zipDetailRows = snap.zip_cells.map((cell) => ({
-    key: cell.zip_code,
-    label: cell.zip_code,
-    cells: {
-      county: cell.county,
-      bucket: cell.bucket,
-      z: Number(cell.z.toFixed(3)),
-      n_current: cell.n_current,
-      current_rate: Number(cell.current_rate.toFixed(4)),
-      historical_mean_rate: Number(cell.historical_mean_rate.toFixed(4)),
-    } as Record<string, number | string | boolean | null>,
-  }));
+  // answer a specific-ZIP permit question without re-fetching. Lee permits only —
+  // Collier permits have no populated zip_code column; Collier data appears at
+  // corridor/county grain in key_metrics above.
+  const zipDetailRows = snap.zip_cells
+    .filter((cell) => cell.county === "lee")
+    .map((cell) => ({
+      key: cell.zip_code,
+      label: cell.zip_code,
+      cells: {
+        county: cell.county,
+        bucket: cell.bucket,
+        z: Number(cell.z.toFixed(3)),
+        n_current: cell.n_current,
+        current_rate: Number(cell.current_rate.toFixed(4)),
+        historical_mean_rate: Number(cell.historical_mean_rate.toFixed(4)),
+      } as Record<string, number | string | boolean | null>,
+    }));
 
   return {
     conclusion: buildConclusionProse(snap, now),
@@ -959,10 +961,9 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         ? [
             {
               id: "permits_by_zip",
-              title: "SWFL building permits by ZIP — 90d vs trailing-365d z-scores",
+              title: "Lee building permits by ZIP — 90d vs trailing-365d z-scores",
               grain: "zip",
               columns: [
-                { id: "county", label: "County" },
                 { id: "bucket", label: "Bucket" },
                 {
                   id: "z",
@@ -987,7 +988,8 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
                 },
               ],
               rows: zipDetailRows,
-              source: swflSource,
+              source: leeSource,
+              note: "Lee permits only. Collier permits have no ZIP-level column — Collier data is reported at corridor/county grain in key_metrics.",
             },
           ]
         : undefined,

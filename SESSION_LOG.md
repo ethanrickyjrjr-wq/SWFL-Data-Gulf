@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(§F-2): permits-swfl detail_table Lee-only filter + note
+
+- `refinery/packs/permits-swfl.mts` — `permits_by_zip` detail table now filters `zip_cells` to `county === "lee"` only; title → "Lee building permits by ZIP…"; added `note` citing Lee-only coverage + Collier corridor/county fallback; source swapped to `leeSource`. Dropped `county` column (implicit from filter). `rentals_by_zip` was already complete — no change needed.
+- `bun refinery/tools/check-vocab-coverage.mts --all` → 0 orphans (28 brains). No new slugs added.
+
 ## 2026-06-10 (main) — feat(§E): address geocoder → §B dispatcher (NOT PUSHED — awaiting operator OK + Vercel token)
 
 - **`refinery/lib/geocode.mts`** (new, +`.test.mts` 8 tests) — `geocodeAddress(q)`: Mapbox v6 forward primary, Census single-line the only fallback. Returns `{lat,lon,zip,place,region,confidence,provider}`. Address-level hits read `context.postcode.name`; locality hits (no postcode, e.g. Pelican Bay) trigger a v6 **reverse** `types=postcode` fall-through. **Token is URL-restricted to `https://www.swfldatagulf.com/`** → every Mapbox call sends that `Referer` (server fetch has none → 403 without it). G4 field-path evidence: `docs/superpowers/plans/2026-06-09-universal-location-search/05-geocoding-G4-evidence.md` (recorded BEFORE code, per G4).
