@@ -514,16 +514,14 @@ pipelines:
     # monthly matches the source cadence (verified-clear slot, nothing runs at hour >= 16).
     # First run: 2026-06-03, 825 rows (manual live backfill, all 3 SWFL locations).
 
-  # ── ODD-window entries (probe_mode: odd_window) ──────────────────────────────
-  # Sources that cannot be auto-ingested on a reliable schedule. The probe is
-  # WAITING (silent) until 10 days before the expected drop, WINDOW_OPEN for the
-  # 20-day window, then OVERDUE (alerts) if nothing lands. UNINITIALIZED when no
-  # expected date is known yet. After first green run, remove probe_mode: odd_window
-  # and reassign to the standard lane.
-
+  # ── Graduated ODD source — MHS commercial permits (J3, 2026-06-10) ───────────
+  # Was probe_mode: odd_window until its jurisdiction→submarket crosswalk and
+  # consumer brain (permits-commercial-swfl) shipped. Now an active annual
+  # pipeline: the Mar drop runs ingest/pipelines/mhs_permits_swfl, which also
+  # stamps submarket_slug + scope-gated site zip_code (geocode.py, G2). Manual
+  # PDF drop remains zero-code — only --url/--year change each March.
   - name: mhs_permits_swfl
     lane: tier-2
-    probe_mode: odd_window
     cadence_days: 365
     tolerance_multiplier: 1.5
     freshness_table: data_lake.mhs_permits_swfl
@@ -531,9 +529,17 @@ pipelines:
     source_name: mhs_databook
     first_expected_by: 2027-03-13
     expected_rows_min: 1
-    note: "281 commercial permits loaded (2025, 12 SWFL jurisdictions). Top: Unincorporated Lee Co. 93 | Cape Coral 57 | Bonita Springs 46 | Fort Myers 45 | Naples 38. Annual (MHS Data Book ~Mar). DORMANT — needs jurisdiction→submarket crosswalk + consumer brain before wiring into permits-swfl. Next drop: Mar 2027."
+    note: "281 commercial permits (2025, 12 SWFL jurisdictions). GRADUATED 2026-06-10 (J3): jurisdiction→submarket crosswalk (data_lake.mhs_jurisdiction_xwalk) + consumer brain permits-commercial-swfl live; 184/281 rows carry an in-scope site zip_code. Annual (MHS Data Book ~Mar); next drop Mar 2027. Do NOT blend with permits-swfl (residential Accela)."
     # Table DDL: docs/sql/20260605_mhs_permits_swfl.sql
-    # Schema spec: docs/littlebird-notes/2026-06-05.md (item D — jurisdiction crosswalk).
+    # Consumer: refinery/packs/permits-commercial-swfl.mts. Pipeline stamps
+    # submarket + zip via ingest/pipelines/mhs_permits_swfl/geocode.py.
+
+  # ── ODD-window entries (probe_mode: odd_window) ──────────────────────────────
+  # Sources that cannot be auto-ingested on a reliable schedule. The probe is
+  # WAITING (silent) until 10 days before the expected drop, WINDOW_OPEN for the
+  # 20-day window, then OVERDUE (alerts) if nothing lands. UNINITIALIZED when no
+  # expected date is known yet. After first green run, remove probe_mode: odd_window
+  # and reassign to the standard lane.
 
   # ── Group E — CRE Broker Alternative Sources (2026-06-09) ────────────────────
   # Wave 1: Crexi active listings; Wave 2: local broker PDFs; Wave 3: EDC narrative.

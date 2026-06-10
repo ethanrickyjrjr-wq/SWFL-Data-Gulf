@@ -132,6 +132,14 @@ def main() -> None:
     action = "Would insert" if args.dry_run else "Inserted"
     print(f"{action} {inserted} new rows into data_lake.mhs_permits_swfl", file=sys.stderr)
 
+    # G2 — stamp submarket_slug (via jurisdiction xwalk) + scope-gated site
+    # zip_code so future annual drops populate both columns, not just the
+    # one-time J3 backfill. Idempotent; only fills rows that are missing them.
+    from ingest.pipelines.mhs_permits_swfl.geocode import stamp_submarket_and_zip
+
+    stamp = stamp_submarket_and_zip(db_url, dry_run=args.dry_run)
+    print(f"{'Would stamp' if args.dry_run else 'Stamped'} submarket/zip: {stamp}", file=sys.stderr)
+
     # Verify (skip on dry-run)
     if not args.dry_run:
         import psycopg

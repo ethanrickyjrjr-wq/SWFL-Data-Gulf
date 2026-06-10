@@ -221,4 +221,11 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "SWFL condominium and cooperative associations that have confirmed Structural Integrity Reserve Study (SIRS) submission to DBPR. Lee + Collier counties. Source: DBPR SIRS Reporting Database (two Qlik apps: pre-July 2025 and July 2025+ submissions). Monthly scrape. Positive signal only — presence = confirmed filing; absence has no meaning without a baseline registry of all SWFL 3-story+ condominiums.",
     ttl_seconds: 30 * 24 * 60 * 60,
   },
+  {
+    id: "permits-commercial-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL commercial building permits — annual issued-permit dataset from the Maxwell, Hendry & Simmons Data Book (calendar year 2025), aggregated by submarket and site ZIP into permit count, declared value, and building square footage for commercial-real-estate operators.",
+    ttl_seconds: 31536000,
+  },
 ];

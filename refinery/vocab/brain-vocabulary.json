@@ -3735,6 +3735,51 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Sum of disclosed jobs announced across SWFL Inc. announcements in the trailing 90 days. Conditionally emitted only when at least one announcement discloses a jobs figure; values reflect announcement-time intent, not audited hiring."
+    },
+    "commercial_permits_count": {
+      "id": "commercial_permits_count",
+      "grade": { "direction_polarity": "higher_is_bullish" },
+      "prefLabel": "SWFL Commercial Permits Issued",
+      "altLabels": ["commercial permit count", "commercial permits issued"],
+      "raw_slugs": ["commercial_permits_count"],
+      "category": "cre",
+      "domain": ["real-estate"],
+      "source_brains": ["permits-commercial-swfl"],
+      "value_type": "count",
+      "unit": "permits",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of issued commercial building permits across SWFL for the reporting calendar year, from the Maxwell, Hendry & Simmons annual Data Book (data_lake.mhs_permits_swfl, source_name='mhs_databook'). SWFL-wide total across all mapped submarkets. Distinct from residential Accela permits (permits-swfl) — never blend the two. Single-year snapshot; not a trend until a second annual book lands."
+    },
+    "commercial_permits_value_usd": {
+      "id": "commercial_permits_value_usd",
+      "grade": { "direction_polarity": "higher_is_bullish" },
+      "prefLabel": "SWFL Commercial Permit Value",
+      "altLabels": ["commercial permit value", "commercial construction value"],
+      "raw_slugs": ["commercial_permits_value_usd"],
+      "category": "cre",
+      "domain": ["real-estate"],
+      "source_brains": ["permits-commercial-swfl"],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Sum of declared permit value (USD) across SWFL issued commercial building permits for the reporting calendar year, from the MHS Data Book (data_lake.mhs_permits_swfl). Declared value is the applicant-stated construction value, not appraised or assessed value. SWFL-wide total across all mapped submarkets; distinct from residential Accela permits."
+    },
+    "commercial_permits_sf": {
+      "id": "commercial_permits_sf",
+      "grade": { "direction_polarity": "higher_is_bullish" },
+      "prefLabel": "SWFL Commercial Permit Building Area",
+      "altLabels": ["commercial permit square footage", "commercial building SF"],
+      "raw_slugs": ["commercial_permits_sf"],
+      "category": "cre",
+      "domain": ["real-estate"],
+      "source_brains": ["permits-commercial-swfl"],
+      "value_type": "count",
+      "unit": "sqft",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Sum of building square footage across SWFL issued commercial building permits for the reporting calendar year, from the MHS Data Book (data_lake.mhs_permits_swfl). SWFL-wide total across all mapped submarkets; rows with a missing building_sf contribute 0. Distinct from residential Accela permits."
     }
   },
   "ordered_collections": {
@@ -3815,6 +3860,9 @@
     }
   },
   "slug_index": {
+    "commercial_permits_count": "commercial_permits_count",
+    "commercial_permits_value_usd": "commercial_permits_value_usd",
+    "commercial_permits_sf": "commercial_permits_sf",
     "econ_dev_announcements_90d": "econ_dev_announcements_90d",
     "econ_dev_announcements_prior_90d": "econ_dev_announcements_prior_90d",
     "econ_dev_investment_usd_90d": "econ_dev_investment_usd_90d",

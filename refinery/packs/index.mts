@@ -46,6 +46,7 @@ import { corridorPulseSwfl } from "./corridor-pulse-swfl.mts";
 import { newsSwfl } from "./news-swfl.mts";
 import { licensesSwfl } from "./licenses-swfl.mts";
 import { condoSirsSwfl } from "./condo-sirs-swfl.mts";
+import { permitsCommercialSwfl } from "./permits-commercial-swfl.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
@@ -78,4 +79,5 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [newsSwfl.id]: newsSwfl,
   [licensesSwfl.id]: licensesSwfl,
   [condoSirsSwfl.id]: condoSirsSwfl,
+  [permitsCommercialSwfl.id]: permitsCommercialSwfl,
 };

@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(J3): MHS commercial-permits brain graduation + BRAIN_GEO unblock
+
+- **`permits-commercial-swfl` brain LIVE** — `refinery/sources/mhs-permits-source.mts` (reads `mhs_permits_swfl`: site `zip_code` scope-gated via `resolveZip().in_scope`, `submarket_slug` from the J3 jurisdiction crosswalk, county ∈ Lee|Collier|Charlotte), `refinery/packs/permits-commercial-swfl.mts` (+`.test.mts`) aggregating count/value/SF by submarket + per-ZIP detail table, `__fixtures__/permits-commercial-swfl.sample.json`, registered in `packs/index.mts` + `packs/catalog.mts`, metrics in `vocab/brain-vocabulary.json`, rendered `brains/permits-commercial-swfl.md`.
+- **Ingest:** `ingest/pipelines/mhs_permits_swfl/geocode.py` (new, G2 site-ZIP derivation) + `pipeline.py` wiring; `ingest/cadence_registry.yaml` graduated out of `odd_window` → active. DB (`mhs_jurisdiction_xwalk` + `submarket_slug`/`zip_code` columns) already applied, idempotent.
+- **BRAIN_GEO unblock (the gap D3 flagged):** `lib/zip-dossier.ts` — `"permits-commercial-swfl": { grains: ["zip","region"], covers: [LEE, COLLIER, CHARLOTTE] }`. `validateBrainGeo()` passes; D1/D2/D3 no longer 500 on boot. Fan-out verified: 3-county true-ZIP lines, Hendry skip, region fallback. Check `permits_commercial_brain_geo` CLOSED.
+- **Gates (verified this session before push):** vocab `--all` OK (28 brains) · dossier+corridor+surface 53/0 · operator-run catalog/critical/permits-swfl 43/0 + full suite 1273/0.
+
 ## 2026-06-10 (Opus 4.8 · main) — feat(§D3): web search box + generalized ZIP page — §D COMPLETE
 
 - **New `lib/location-surface.ts`** (pure, 19 tests `lib/location-surface.test.ts`) — the page decisions: `searchRoute` (ZIP→redirect / county·corridor·region→render / else→out-of-scope, never a 404), `zipReportHref` (clean URL unless did-you-mean), `didYouMeanBanner`, `identityForZip`/`identityForLocation`, `distinctChips` (human labels, NEVER "grain"), `barrierTagLabel` (G6 — null classification → no tag).

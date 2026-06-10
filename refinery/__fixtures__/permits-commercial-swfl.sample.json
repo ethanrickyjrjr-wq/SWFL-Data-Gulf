@@ -1,0 +1,77 @@
+{
+  "_comment": "Representative sample of data_lake.mhs_permits_swfl (MHS Data Book, CY2025) for REFINERY_SOURCE=fixture builds + pack tests. Real rows pulled 2026-06-10; covers 3 submarkets across 2 counties, varied asset classes, and both populated + NULL zip_code (honest unresolved-geocode case). verified=false mirrors production (manual PDF extraction pending spot-check). The Government row ($8.19M) is ~51% of the fixture total, which exercises the top-permit concentration caveat.",
+  "rows": [
+    {
+      "id": "mhs_databook_city_of_cape_coral_2025-01-02_a3fd454ec5c3",
+      "jurisdiction": "City of Cape Coral",
+      "submarket_slug": "cape-coral",
+      "calendar_year": 2025,
+      "asset_class": "Medical",
+      "project_name": "Cape Memorial Hospital",
+      "permit_value_usd": 600000.0,
+      "building_sf": 1278,
+      "zip_code": "33990",
+      "verified": false
+    },
+    {
+      "id": "mhs_databook_city_of_cape_coral_2025-01-23_df4404242664",
+      "jurisdiction": "City of Cape Coral",
+      "submarket_slug": "cape-coral",
+      "calendar_year": 2025,
+      "asset_class": "Government",
+      "project_name": "Master Pump Station 720",
+      "permit_value_usd": 8190000.0,
+      "building_sf": 2000,
+      "zip_code": "33909",
+      "verified": false
+    },
+    {
+      "id": "mhs_databook_city_of_naples_2025-01-08_1bfc29361432",
+      "jurisdiction": "City of Naples",
+      "submarket_slug": "naples",
+      "calendar_year": 2025,
+      "asset_class": "Special Purpose",
+      "project_name": "Seventh Day Adventists School",
+      "permit_value_usd": 300000.0,
+      "building_sf": 1728,
+      "zip_code": "34104",
+      "verified": false
+    },
+    {
+      "id": "mhs_databook_city_of_naples_2025-03-05_0ee221f5cc7b",
+      "jurisdiction": "City of Naples",
+      "submarket_slug": "naples",
+      "calendar_year": 2025,
+      "asset_class": "Special Purpose",
+      "project_name": "The Enclave",
+      "permit_value_usd": 100000.0,
+      "building_sf": null,
+      "zip_code": "34103",
+      "verified": false
+    },
+    {
+      "id": "mhs_databook_unincorporated_lee_county_2025-01-08_1d785d6fae5e",
+      "jurisdiction": "Unincorporated Lee County",
+      "submarket_slug": "lee-county-unincorp",
+      "calendar_year": 2025,
+      "asset_class": "Multi-Family",
+      "project_name": "Bonita Solis Grande - Pulte Homes",
+      "permit_value_usd": 892000.0,
+      "building_sf": 86536,
+      "zip_code": null,
+      "verified": false
+    },
+    {
+      "id": "mhs_databook_city_of_punta_gorda_2025-04-08_ad2cc52e1fd5",
+      "jurisdiction": "City of Punta Gorda",
+      "submarket_slug": "punta-gorda",
+      "calendar_year": 2025,
+      "asset_class": "Retail",
+      "project_name": "Punta Gorda Station",
+      "permit_value_usd": 5987972.0,
+      "building_sf": 16472,
+      "zip_code": null,
+      "verified": false
+    }
+  ]
+}

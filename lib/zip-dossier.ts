@@ -83,6 +83,11 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // permits' `zip_code` is MAILING-grade contractor (out-of-state ZIPs fenced at resolution). The
   // pack's `permits_by_zip` (grain="zip") detail table feeds branch (a) once the brain is rebuilt.
   "permits-swfl": { grains: ["zip", "corridor", "county"], covers: LEE_COLLIER },
+  // MHS Data Book commercial permits — per-ZIP `commercial_permits_by_zip` detail table
+  // (grain="zip", Census-geocoded site ZIP, scope-gated — J3) feeds branch (a); the headline
+  // metrics are SWFL-wide totals, so the (c) fallback is "region" (never a county/city figure).
+  // covers Lee+Collier+Charlotte (the 12 jurisdictions; verified live 2026-06-10).
+  "permits-commercial-swfl": { grains: ["zip", "region"], covers: [LEE, COLLIER, CHARLOTTE] },
   // Redfin `housing_by_zip` detail table, grain="zip" (site-grade, 4-county metro) + a SWFL regional read.
   "housing-swfl": { grains: ["zip", "region"], covers: METRO_4 },
   // NOAA HURDAT2 best-track × OpenFEMA NFIP across the 6-county footprint.
