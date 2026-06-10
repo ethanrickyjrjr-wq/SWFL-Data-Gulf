@@ -10,6 +10,7 @@ import {
   DOCK_DEFAULT,
   type DockGeom,
 } from "@/lib/highlighter/dock-geom";
+import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
 
 const GEOM_KEY = "swfl_ai_dock_geom";
 
@@ -59,7 +60,14 @@ export function AskAiDock({
   const [question, setQuestion] = useState("");
   const [customFocus, setCustomFocus] = useState("");
   const [copied, setCopied] = useState(false);
-  const [history, setHistory] = useState<Array<{ q: string; a: string }>>([]);
+  // Thread is shared with the popup via the provider so the dock and popup show
+  // one continuous conversation per report. When no provider is in the tree
+  // (dock mounted standalone), fall back to a local thread so it never crashes.
+  const ctx = useHighlighterContext();
+  const [localThread, setLocalThread] = useState<ChatEntry[]>([]);
+  const thread = ctx ? ctx.thread(reportId) : localThread;
+  const archive = (entry: ChatEntry) =>
+    ctx ? ctx.archiveExchange(reportId, entry) : setLocalThread((t) => [...t, entry]);
   const [activeQuestion, setActiveQuestion] = useState("");
   const { ask, answer, reach, error, streaming, reset } = useConverse();
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -141,7 +149,7 @@ export function AskAiDock({
 
   function archiveAndReset() {
     if (activeQuestion && answer) {
-      setHistory((h) => [...h, { q: activeQuestion, a: answer }]);
+      archive({ question: activeQuestion, answer });
     }
     setActiveQuestion("");
     setIsSummaryAnswer(false);
@@ -151,10 +159,10 @@ export function AskAiDock({
   }
 
   function buildHistoryContext(): string {
-    if (history.length === 0) return "";
+    if (thread.length === 0) return "";
     return (
       "\n\nContext from our conversation:\n" +
-      history.map((h) => `Q: ${h.q}\nA: ${h.a}`).join("\n\n")
+      thread.map((h) => `Q: ${h.question}\nA: ${h.answer}`).join("\n\n")
     );
   }
 
