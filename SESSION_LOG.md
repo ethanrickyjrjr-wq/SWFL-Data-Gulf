@@ -2,6 +2,20 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — Presentation Deliverable Engine · PHASE 0 ✅ GREEN (chart render proven in a real browser)
+
+- **Phase 0 of `docs/superpowers/plans/2026-06-10-presentation-deliverable-engine/` PASSES.** This was the serial gate blocking all 6 phases: prove the server-rendered chart path actually paints in a browser before building a deliverable engine on it. No product code written (smoke test).
+- Method: booted `bun dev` (Next 16.2.6 / Turbopack, Ready 266ms) → drove **headless system Edge** via `playwright-core` (`channel:"msedge"`, **no Chromium download, nothing added to `package.json`** — lockfile gate clean). Full-page screenshots + in-page DOM assertions + console-error capture. Harness lives outside the repo at `C:\Users\ethan\AppData\Local\Temp\phase0\`.
+- **All three render, zero console errors:** `/r/housing-swfl` (HBarChart "Median sale price by ZIP"), `/r/macro-swfl` (HBarChart unemployment/wages), `/r/cre-swfl` (interactive CREMarketBeatChart). **Tab interactivity proven**: Retail/Vacancy → Industrial/Net-Absorption re-binds + re-sorts the bars (2.3% → 53,186; Fort Myers −201,983 negative), DOM fingerprint changed, no errors.
+- **Trap recorded for later phases:** `HBarChart` is a CSS/div bar chart (gsap-animated `<div class="hbarchart-fill">` widths, NOT SVG) — "0 `<svg>` in the at-a-glance section" is CORRECT, not broken. Only `CREMarketBeatChart` (recharts) is SVG. Don't assert chart presence by counting SVG on housing/macro.
+- Evidence: 4 screenshots in `phase-0-evidence/`; full writeup `phase-0-VERDICT.md`; README status row 0 flipped ✅. **No broken chart → no new Phase 1 fix inserted; proceed to planned Phase 1 (keystone as-of).**
+- **NEXT:** Phase 1 (keystone as-of) — SERIAL/EXCLUSIVE, lifts the shared `ChartBlock` type. Plan: `phase-1-keystone-asof__OPUS.md`. Per plan contract: NO push — Ricky pushes.
+
+## 2026-06-10 (main) — fix(pdf): iOS-safe HBarChart print bars — CSS-var pattern locked
+
+- `components/charts/HBarChart.tsx`: each `.hbarchart-fill` div now carries `style={{ "--bar-pct": "${pct}%" }}` set declaratively at render. `@media print` in styled-jsx reads it: `width: var(--bar-pct) !important; transition: none !important; animation: none !important;` — fires from the browser entering print media, before any JS, and overrides any in-progress GSAP tween with `!important`. iOS Safari `beforeprint` is unreliable; this is event-independent.
+- **Pattern locked for future charts:** set the final animated value as a CSS custom property at render time; `@media print` reads the var. `beforeprint` gsap.set stays as desktop progressive enhancement only — never the load-bearing print mechanism. New charts inherit iOS-correct print behavior by following this pattern.
+
 ## 2026-06-10 (main) — S5 COMPLETE: print CSS + PDF via `window.print()` (S0–S5 build-queue item → [x])
 
 - `app/globals.css` — `@media print` block: `.print-hide` hides chrome, white bg, `break-inside: avoid` on li/chart, charts full-width, no URL-after-link.
