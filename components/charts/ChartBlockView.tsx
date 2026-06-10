@@ -1,36 +1,39 @@
 "use client";
 
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
-import {
-  pickRenderer,
-  adaptToHBar,
-  adaptToArea,
-  adaptToScatter,
-  adaptToTable,
-} from "@/refinery/lib/chart-adapter.mts";
+import { pickRenderer, adaptToHBar, adaptToTable } from "@/refinery/lib/chart-adapter.mts";
 import { HBarChart } from "@/components/charts/HBarChart";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ScatterChart,
+  Scatter,
+  ResponsiveContainer,
+} from "recharts";
 
 interface ChartBlockViewProps {
   block: ChartBlock;
+  compact?: boolean;
 }
 
-export function ChartBlockView({ block }: ChartBlockViewProps) {
+export function ChartBlockView({ block, compact = false }: ChartBlockViewProps) {
   const renderer = pickRenderer(block);
 
   if (renderer === "bar") {
     const props = adaptToHBar(block);
-    return <HBarChart {...props} />;
+    return <HBarChart {...props} compact={compact} />;
   }
 
-  // area and scatter: stubs return table data until matching chart_type producers land
   if (renderer === "area") {
-    const { title, columns, rows } = adaptToArea(block);
-    return renderTable(title, columns, rows);
+    return renderArea(block.title, block.columns, block.rows, compact);
   }
 
   if (renderer === "scatter") {
-    const { title, columns, rows } = adaptToScatter(block);
-    return renderTable(title, columns, rows);
+    return renderScatter(block.title, block.columns, block.rows, compact);
   }
 
   // table (default fallback)
@@ -38,11 +41,115 @@ export function ChartBlockView({ block }: ChartBlockViewProps) {
   return renderTable(title, columns, rows);
 }
 
-function renderTable(
+const AREA_COLORS = ["#00d4aa", "#f59e0b", "#a855f7", "#0ea5e9", "#ef4444"];
+
+function renderArea(
   title: string,
   columns: string[],
   rows: (string | number | null)[][],
+  compact: boolean,
 ) {
+  const xKey = columns[0] ?? "x";
+  const seriesKeys = columns.slice(1);
+  const chartData = rows.map((row) => {
+    const entry: Record<string, string | number | null> = {};
+    columns.forEach((col, i) => {
+      entry[col] = row[i] ?? null;
+    });
+    return entry;
+  });
+  const height = compact ? 160 : 240;
+  return (
+    <div
+      style={{
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+        fontSize: 13,
+        color: "#F0EDE6",
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>{title}</div>
+      <ResponsiveContainer width="100%" height={height}>
+        <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+          <XAxis
+            dataKey={xKey}
+            tick={{ fill: "#94a3b8", fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickLine={false} axisLine={false} />
+          <Tooltip
+            contentStyle={{ background: "#0d1527", border: "1px solid #1e293b", fontSize: 11 }}
+          />
+          {seriesKeys.map((k, i) => (
+            <Area
+              key={k}
+              type="monotone"
+              dataKey={k}
+              stroke={AREA_COLORS[i % AREA_COLORS.length]}
+              fill={`${AREA_COLORS[i % AREA_COLORS.length]}22`}
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={false}
+            />
+          ))}
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function renderScatter(
+  title: string,
+  columns: string[],
+  rows: (string | number | null)[][],
+  compact: boolean,
+) {
+  // col[0] = x-axis, col[1] = y-axis
+  const xKey = columns[0] ?? "x";
+  const yKey = columns[1] ?? "y";
+  const scatterData = rows
+    .filter((r) => typeof r[0] === "number" && typeof r[1] === "number")
+    .map((r) => ({ [xKey]: r[0], [yKey]: r[1] }));
+  const height = compact ? 160 : 240;
+  return (
+    <div
+      style={{
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+        fontSize: 13,
+        color: "#F0EDE6",
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>{title}</div>
+      <ResponsiveContainer width="100%" height={height}>
+        <ScatterChart margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+          <XAxis
+            dataKey={xKey}
+            name={xKey}
+            tick={{ fill: "#94a3b8", fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            dataKey={yKey}
+            name={yKey}
+            tick={{ fill: "#94a3b8", fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Tooltip
+            cursor={{ strokeDasharray: "3 3" }}
+            contentStyle={{ background: "#0d1527", border: "1px solid #1e293b", fontSize: 11 }}
+          />
+          <Scatter data={scatterData} fill="#00d4aa" />
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function renderTable(title: string, columns: string[], rows: (string | number | null)[][]) {
   return (
     <div
       style={{
