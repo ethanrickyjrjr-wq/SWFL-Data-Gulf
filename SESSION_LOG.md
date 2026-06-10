@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — verify(§E): live verifies PASS → §D CLOSED
+
+- Deployed `14822a7` + Vercel `MAPBOX_TOKEN` (operator). **URL-restricted Mapbox token works on Vercel via the explicit `Referer` header** — no unrestricted token needed.
+- **`mcp_zip_fanout_live_verify` CLOSED** — live `swfl_fetch zip=33950` → 12-line fan-out dossier; `_meta.dossier` populated + `coverage_caveats` propagates. `/api/where` address path live: 33908 / 34108 / 33950 / 34237.
+- **`connector_output_live_verify` CLOSED** — `/api/mcp` tools/call returns the `⟦HOW TO ANSWER⟧` RESPONSE_CONTRACT box + Markdown headers; Charlotte `_Coverage:_` note renders in connector text.
+- build-queue: §E marked `[x]` (live-verified). §D fully closed.
+
 ## 2026-06-10 (main) — fix(§E): METRO_4 scope-gate coverage + asymmetry caveat
 
 - Operator blocker on §E: acceptance cases didn't exercise the METRO_4 boundary. **`resolveZip().in_scope` is keyed to the 6-county fixture (`fixtures/swfl-zip-county.json` = SIX_COUNTY ⊃ METRO_4), NOT Lee/Collier core** — correct expansive boundary. Charlotte (13 ZIPs) + Sarasota (24) resolve `in_scope=true`.
