@@ -2,6 +2,20 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — feat(S2): Charts Tier B + in-chat chart render — COMPLETE
+
+- **Session 2 of Projects/Briefcase fully shipped** (`docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/session-2-charts-tierB-inchat__SONNET/`), 7 commits `7a20b8f..63d5468`.
+- `lib/build-chart-for-intent.mts` (new) — `ChartResult` union + 4 fixture-backed builders (asking-rent, vacancy, zhvi, corridor-scatter); flood-aal deferred (no detail_tables); lint-gated. 9 tests.
+- `ChartBlockView.tsx` — area/scatter branches rewritten from stub HTML-table to real Recharts `AreaChart`/`ScatterChart`; `compact?: boolean` prop propagated.
+- `app/api/converse/route.ts` — `routeChart → buildChartForIntent` called before LLM; emits SSE `data: {"chart":{...}}\n\n` frame best-effort; failure skips silently.
+- `lib/highlighter/{sse,converse,use-converse}.ts` — `chart?: unknown` in SSEEvent; `onChart?` handler; `chart` state slot in `useConverse` (reset on each ask).
+- `HBarChart.tsx` — `compact?: boolean` prop + `.hbarchart-compact` CSS overrides; `fmt` memoized (fixes `react-hooks/exhaustive-deps`).
+- `HighlightPopup.tsx` + `AskAiDock.tsx` — dismiss-keyed chart block above streamed prose; ChartBlockView/ZHVIAreaChart/CorridorMarketScatter by discriminated union; "File this chart" disabled with `TODO(S3)` marker.
+- `lib/highlighter/suggestions.ts` — `chartChipForMetric()` maps rent/vacancy/zhvi slugs → routed chips; place selection gets "Chart home values over time"; 5 routing-alignment tests (all chips feed routeChart → non-null).
+- **Build-queue item 2 → `[x]`; S2 README all `[x]`.**
+- **Diff-review gate applies** (`/api/converse` SSE response changed) — show operator the converse diff before pushing.
+- **Next (S3):** `/c/[id]` saved chart page + first `auth.uid()` RLS policy + `POST /api/charts/save` wiring.
+
 ## 2026-06-10 (main) — chore: clear board before big build
 
 - Dropped 3 stale stashes (ops-retirement WIP + 2 old env-swfl sets); all verified not from last 3 sessions.

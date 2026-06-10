@@ -11,11 +11,11 @@
 **`[LB-R4]` Single source of truth for chart NUMBERS:** two chart paths exist — `computeMetricChart` (`refinery/lib/chart-from-metrics.mts`, on-the-fly for `/r/` pages) and the persisted `chart_block` jsonb in `saved_charts` (S3). They MUST NOT diverge: `computeMetricChart` is the **live render only**; the moment a chart is *saved/filed*, its block is **frozen into `saved_charts`** and the `ProjectItem` references that frozen `chart_id` — a filed chart is never recomputed. Live = recompute; filed = frozen snapshot. State this in `buildChartForIntent`'s doc comment so a future dev doesn't wire a filed chart back through `computeMetricChart`.
 
 **Tasks (read in order):**
-- [ ] `task-01-locate-rent-vacancy-datapath.md` — **`[AUDIT-FIX C2]`** locate all fixture data paths (asking-rent, zhvi, corridor-scatter, vacancy, flood-aal) + confirm ChartBlockView stubs
-- [ ] `task-02-build-chart-for-intent.md` — `lib/build-chart-for-intent.mts` (all 4 fixture scopes + flood-aal), lint every block; wire area + scatter renderers in `ChartBlockView`
-- [ ] `task-03-converse-chart-frame.md` — `routeChart` before LLM + SSE `chart` frame
-- [ ] `task-04-client-onchart.md` — `onChart` in sse/converse/use-converse; render `ChartBlockView` compact; HBarChart `compact` prop
-- [ ] `task-05-chart-this-chip.md` — "Chart this" chip in `suggestions.ts`
+- [x] `task-01-locate-rent-vacancy-datapath.md` — **`[AUDIT-FIX C2]`** locate all fixture data paths (asking-rent, zhvi, corridor-scatter, vacancy, flood-aal) + confirm ChartBlockView stubs
+- [x] `task-02-build-chart-for-intent.md` — `lib/build-chart-for-intent.mts` (all 4 fixture scopes + flood-aal), lint every block; wire area + scatter renderers in `ChartBlockView`
+- [x] `task-03-converse-chart-frame.md` — `routeChart` before LLM + SSE `chart` frame
+- [x] `task-04-client-onchart.md` — `onChart` in sse/converse/use-converse; render `ChartBlockView` compact; HBarChart `compact` prop
+- [x] `task-05-chart-this-chip.md` — "Chart this" chip in `suggestions.ts`
 
 **Files:** new `lib/build-chart-for-intent.mts` · `lib/route-chart.ts` (read) · `app/api/converse/route.ts` · `lib/highlighter/{sse,converse,use-converse}.ts` · `components/highlighter/HighlightPopup.tsx` + `AskAiDock.tsx` · `components/charts/HBarChart.tsx` (add `compact`) · `lib/highlighter/suggestions.ts`
 
