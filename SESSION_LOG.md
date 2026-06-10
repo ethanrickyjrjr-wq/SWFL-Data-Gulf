@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — fix(J3): permits-commercial-swfl BRAIN_GEO grain → ["zip","corridor","county"]
+
+- `lib/zip-dossier.ts` — changed `permits-commercial-swfl` fallback grain from `["zip","region"]` to `["zip","corridor","county"]` (operator decision). Submarkets are jurisdictions that roll up to county, so a non-ZIP query now resolves at the brain's true grain instead of coarsening to region. `validateBrainGeo()` passes; dossier suite 27/0.
+
 ## 2026-06-10 (main) — feat(J3): MHS commercial-permits brain graduation + BRAIN_GEO unblock
 
 - **`permits-commercial-swfl` brain LIVE** — `refinery/sources/mhs-permits-source.mts` (reads `mhs_permits_swfl`: site `zip_code` scope-gated via `resolveZip().in_scope`, `submarket_slug` from the J3 jurisdiction crosswalk, county ∈ Lee|Collier|Charlotte), `refinery/packs/permits-commercial-swfl.mts` (+`.test.mts`) aggregating count/value/SF by submarket + per-ZIP detail table, `__fixtures__/permits-commercial-swfl.sample.json`, registered in `packs/index.mts` + `packs/catalog.mts`, metrics in `vocab/brain-vocabulary.json`, rendered `brains/permits-commercial-swfl.md`.
