@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Sonnet 4.6 · main) — feat(§D2): Universal Location Search endpoints — `/api/where` + `/api/z/[zip]`
+
+- **New `app/api/where/route.ts`** — `GET ?q=<anything>` → `resolveLocation` → `assembleLocationDossier` → plain text (default tier 2) or `?format=json` (`resolved_as` + `zip` + `lines` + `freshness_tokens`). Supports `?tier=1|2|3`. `runtime="nodejs"`, `dynamic="force-dynamic"`, CORS open.
+- **New `app/api/z/[zip]/route.ts`** — canonical ZIP permalink; validates `VALID_ZIP=/^\d{5}$/`, same tier/format params as `/where`. Cloned pattern from `/api/b/[slug]/route.ts`.
+- Both routes: 400 on bad input, 500 on unexpected throws. Typecheck 0 / no eslint errors. Completes **§D2**.
+- **Next:** §D1 (MCP `swfl_fetch` zip fan-out) + §D3 (web search box + identity card) — both depend on §C (on disk).
+
 ## 2026-06-10 (Opus 4.8 · main) — feat(§C): Universal Location Search fan-out — `assembleLocationDossier` (THE MOAT)
 
 - **New `lib/zip-dossier.ts`** — `BRAIN_GEO` (27-brain grain+county registry, G2), `assembleLocationDossier`, `selectDossierLines`, `renderLocationDossierText`, `validateBrainGeo`. Plus `loadParsedBrain` in `lib/fetch-brain.ts` (resilient parse-on-read: missing/malformed brain → null, never 500s the dossier). **27 tests green** (`lib/zip-dossier.test.ts`): acceptance (i)–(vi) + the MANDATORY pocket-only-corridor directive (gate on `loc.county`, never `corridor_id`; null never drops the pocket) + tier selection + a live housing integration smoke. Typecheck 0 / eslint 0. Completes **J3 ≡ §C**; unblocks §D (surfaces). NOT yet wired to a surface.
