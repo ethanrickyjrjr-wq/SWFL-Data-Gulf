@@ -19,9 +19,9 @@ import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 const GEOM_KEY = "swfl_ai_dock_geom";
 
 type LiveChart =
-  | { block: ChartBlock }
-  | { component: "zhvi"; data: ZHVITrendEntry[] }
-  | { component: "scatter"; data: JoinedCorridorRow[] };
+  | { block: ChartBlock; asOf: string }
+  | { component: "zhvi"; data: ZHVITrendEntry[]; asOf: string }
+  | { component: "scatter"; data: JoinedCorridorRow[]; asOf: string };
 
 const PROMPTS = [
   "What's the bottom line on this market?",
@@ -424,11 +424,11 @@ export function AskAiDock({
                     </div>
                   </div>
                   {"block" in lc ? (
-                    <ChartBlockView block={lc.block} compact />
+                    <ChartBlockView block={lc.block} compact asOf={lc.asOf} />
                   ) : lc.component === "zhvi" ? (
-                    <ZHVIAreaChart data={lc.data} loading={false} />
+                    <ZHVIAreaChart data={lc.data} loading={false} asOf={lc.asOf} />
                   ) : lc.component === "scatter" ? (
-                    <CorridorMarketScatter data={lc.data} loading={false} />
+                    <CorridorMarketScatter data={lc.data} loading={false} asOf={lc.asOf} />
                   ) : null}
                 </div>
               );

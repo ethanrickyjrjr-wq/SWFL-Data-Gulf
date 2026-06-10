@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — fix: uniform as-of anchoring + SSE chart parse test
+
+- `ChartResult` union: all 3 branches now carry `asOf: string` (was missing on zhvi + scatter)
+- `buildRentChart`/`buildVacancyChart`: date removed from title → `asOf: "Jun 2026"`; `buildZhviChart`: derives `asOf` from fixture's last month; `buildScatterChart`: `asOf: "Jun 2026"`
+- `ChartBlockView`: bottom caption `as of {asOf} · SWFL fixture sample` (monospace 11px, dimmed) below all renderers — not in title
+- `ZHVIAreaChart` + `CorridorMarketScatter`: accept + render `asOf?` bottom caption
+- `HighlightPopup` + `AskAiDock`: `LiveChart.asOf: string`; passed through to all 3 renderers
+- `route-chart.ts`: `corridor-scatter` scope added to `ChartIntent` (was dead code) + keyword route (scatter / position / corridor compare)
+- `sse.test.ts`: new test — leading `{"chart":{...}}` frame ahead of text → chart parses, accumulated text contains zero chart JSON
+- 15/15 tests pass, tsc clean on all touched files; check `chart_asof_anchoring` closeable when browser-verified
+
 ## 2026-06-10 (main) — feat(S3): saved_charts + /c/[id] + File-this-chart wired
 
 - `docs/sql/20260611_saved_charts.sql` (new) — idempotent table + RLS public-select + service-role grant; applied + PostgREST schema reloaded.

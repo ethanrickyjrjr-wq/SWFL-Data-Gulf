@@ -9,7 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { Calendar, HelpCircle, Eye, EyeOff, AreaChart as ChartIcon, Sparkles } from "lucide-react";
@@ -21,18 +20,15 @@ export interface ZHVIAreaChartProps {
   data: ZHVITrendEntry[];
   loading?: boolean;
   className?: string;
+  asOf?: string;
 }
 
 type TimeRangeOption = "6M" | "1Y" | "2Y" | "ALL";
 
-export function ZHVIAreaChart({
-  data,
-  loading = false,
-  className = "",
-}: ZHVIAreaChartProps) {
+export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: ZHVIAreaChartProps) {
   const [range, setRange] = useState<TimeRangeOption>("ALL");
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Custom interactive state to toggle specific city curves on/off in the graph
   const [visibleCities, setVisibleCities] = useState({
     cape_coral: true,
@@ -47,10 +43,10 @@ export function ZHVIAreaChart({
   // 1. Sort and slice chronological ranges in a stable, memoized array
   const sortedAndFilteredData = useMemo(() => {
     if (!data || data.length === 0) return [];
-    
+
     // Sort chronologically ascending
     const sorted = [...data].sort((a, b) => a.month.localeCompare(b.month));
-    
+
     switch (range) {
       case "6M":
         return sorted.slice(-6);
@@ -70,7 +66,7 @@ export function ZHVIAreaChart({
       const [year, month] = tickItem.split("-");
       const date = new Date(parseInt(year), parseInt(month) - 1, 1);
       return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
-    } catch (_) {
+    } catch {
       return tickItem;
     }
   };
@@ -86,7 +82,9 @@ export function ZHVIAreaChart({
   // Skeleton framework
   if (loading) {
     return (
-      <div className={`p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col gap-4 animate-pulse ${className}`}>
+      <div
+        className={`p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col gap-4 animate-pulse ${className}`}
+      >
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <div className="h-6 w-52 bg-slate-800 rounded"></div>
@@ -102,10 +100,15 @@ export function ZHVIAreaChart({
   // Beautiful empty states
   if (!data || data.length === 0) {
     return (
-      <div className={`p-12 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center gap-3 ${className}`}>
+      <div
+        className={`p-12 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center gap-3 ${className}`}
+      >
         <ChartIcon className="h-10 w-10 text-slate-500" />
         <h3 className="text-slate-200 font-medium text-lg">No Market Trends Loaded</h3>
-        <p className="text-slate-400 text-sm max-w-sm">Supply a historical sequence of Zillow Home Value Index records to graph home val valuations.</p>
+        <p className="text-slate-400 text-sm max-w-sm">
+          Supply a historical sequence of Zillow Home Value Index records to graph home val
+          valuations.
+        </p>
       </div>
     );
   }
@@ -167,7 +170,11 @@ export function ZHVIAreaChart({
               : "bg-transparent border-slate-800/30 text-slate-500 decoration-line-through"
           }`}
         >
-          {visibleCities.naples ? <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+          {visibleCities.naples ? (
+            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          ) : (
+            <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          )}
           <span>Naples (Gold Coast)</span>
         </button>
         <button
@@ -178,7 +185,11 @@ export function ZHVIAreaChart({
               : "bg-transparent border-slate-800/30 text-slate-500 decoration-line-through"
           }`}
         >
-          {visibleCities.cape_coral ? <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+          {visibleCities.cape_coral ? (
+            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          ) : (
+            <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          )}
           <span>Cape Coral (Waterways)</span>
         </button>
         <button
@@ -189,7 +200,11 @@ export function ZHVIAreaChart({
               : "bg-transparent border-slate-800/30 text-slate-500 decoration-line-through"
           }`}
         >
-          {visibleCities.fort_myers ? <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+          {visibleCities.fort_myers ? (
+            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          ) : (
+            <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          )}
           <span>Fort Myers</span>
         </button>
       </div>
@@ -230,11 +245,7 @@ export function ZHVIAreaChart({
             </defs>
 
             {/* Subtle dashboard lines */}
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#1e293b"
-              vertical={false}
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
 
             <XAxis
               dataKey="month"
@@ -269,8 +280,14 @@ export function ZHVIAreaChart({
                       <div className="h-px bg-slate-800" />
                       {payload.map((item: any, i) => (
                         <div key={i} className="flex items-center justify-between gap-6">
-                          <span style={{ color: item.stroke }} className="font-sans flex items-center gap-1.5">
-                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.stroke }} />
+                          <span
+                            style={{ color: item.stroke }}
+                            className="font-sans flex items-center gap-1.5"
+                          >
+                            <span
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: item.stroke }}
+                            />
                             {item.name}
                           </span>
                           <span className="font-bold text-white tracking-tight">
@@ -337,9 +354,15 @@ export function ZHVIAreaChart({
       <div className="flex items-start gap-2 mt-4 bg-slate-950/20 p-3 rounded-lg border border-slate-800/30 text-xs text-slate-400">
         <HelpCircle className="h-4 w-4 text-slate-500 mt-0.5 flex-shrink-0" />
         <span>
-          Curves are fully interactive. Toggle names above to isolate metros. Selection defaults: <strong>{range}</strong> duration.
+          Curves are fully interactive. Toggle names above to isolate metros. Selection defaults:{" "}
+          <strong>{range}</strong> duration.
         </span>
       </div>
+      {asOf && (
+        <p className="mt-2 font-mono text-[11px] tracking-wide" style={{ color: "#4a5a6a" }}>
+          as of {asOf} · SWFL fixture sample
+        </p>
+      )}
     </div>
   );
 }

@@ -14,9 +14,9 @@ import type {
 } from "@/types/viz";
 
 export type ChartResult =
-  | { block: ChartBlock }
-  | { component: "zhvi"; data: ZHVITrendEntry[] }
-  | { component: "scatter"; data: JoinedCorridorRow[] };
+  | { block: ChartBlock; asOf: string }
+  | { component: "zhvi"; data: ZHVITrendEntry[]; asOf: string }
+  | { component: "scatter"; data: JoinedCorridorRow[]; asOf: string };
 
 async function loadFixture<T>(name: string): Promise<T> {
   const file = path.join(process.cwd(), "fixtures", name);
@@ -58,7 +58,7 @@ export async function buildChartForIntent(intent: ChartIntent): Promise<ChartRes
   }
 }
 
-async function buildRentChart(): Promise<{ block: ChartBlock } | null> {
+async function buildRentChart(): Promise<{ block: ChartBlock; asOf: string } | null> {
   const rents = await loadFixture<CorridorEntry[]>("corridor-rents.json");
 
   const rows = rents
@@ -73,7 +73,7 @@ async function buildRentChart(): Promise<{ block: ChartBlock } | null> {
   if (rows.length < 3) return null;
 
   const block: ChartBlock = {
-    title: "SWFL Corridor NNN Asking Rents — Jun 2026",
+    title: "SWFL Corridor NNN Asking Rents",
     columns: ["Corridor", "NNN Asking Rent ($/sqft)"],
     rows,
     chart_type: "bar",
@@ -82,10 +82,10 @@ async function buildRentChart(): Promise<{ block: ChartBlock } | null> {
 
   const result = lintChartBlock(block);
   if (!result.ok) return null;
-  return { block };
+  return { block, asOf: "Jun 2026" };
 }
 
-async function buildVacancyChart(): Promise<{ block: ChartBlock } | null> {
+async function buildVacancyChart(): Promise<{ block: ChartBlock; asOf: string } | null> {
   const rents = await loadFixture<CorridorEntry[]>("corridor-rents.json");
 
   const rows = rents
@@ -97,7 +97,7 @@ async function buildVacancyChart(): Promise<{ block: ChartBlock } | null> {
   if (rows.length < 3) return null;
 
   const block: ChartBlock = {
-    title: "SWFL Corridor Vacancy Rates — Jun 2026",
+    title: "SWFL Corridor Vacancy Rates",
     columns: ["Corridor", "Vacancy (%)"],
     rows,
     chart_type: "bar",
@@ -106,10 +106,14 @@ async function buildVacancyChart(): Promise<{ block: ChartBlock } | null> {
 
   const result = lintChartBlock(block);
   if (!result.ok) return null;
-  return { block };
+  return { block, asOf: "Jun 2026" };
 }
 
-async function buildZhviChart(): Promise<{ component: "zhvi"; data: ZHVITrendEntry[] } | null> {
+async function buildZhviChart(): Promise<{
+  component: "zhvi";
+  data: ZHVITrendEntry[];
+  asOf: string;
+} | null> {
   const raw = await loadFixture<ZHVIMonth[]>("zhvi-trend.json");
 
   const data = raw.filter(
@@ -117,12 +121,19 @@ async function buildZhviChart(): Promise<{ component: "zhvi"; data: ZHVITrendEnt
   );
 
   if (data.length < 3) return null;
-  return { component: "zhvi", data };
+  const lastMonth = data.reduce((m, r) => (r.month > m ? r.month : m), data[0].month);
+  const [yr, mo] = lastMonth.split("-");
+  const asOf = new Date(parseInt(yr), parseInt(mo) - 1, 1).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+  return { component: "zhvi", data, asOf };
 }
 
 async function buildScatterChart(): Promise<{
   component: "scatter";
   data: JoinedCorridorRow[];
+  asOf: string;
 } | null> {
   const aliasMap = CORRIDOR_ALIASES as Record<string, string | null | undefined>;
 
@@ -160,5 +171,5 @@ async function buildScatterChart(): Promise<{
   );
   if (plottable.length < 3) return null;
 
-  return { component: "scatter", data: rows };
+  return { component: "scatter", data: rows, asOf: "Jun 2026" };
 }

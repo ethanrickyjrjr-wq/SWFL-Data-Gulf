@@ -18,27 +18,56 @@ import {
 interface ChartBlockViewProps {
   block: ChartBlock;
   compact?: boolean;
+  asOf?: string;
 }
 
-export function ChartBlockView({ block, compact = false }: ChartBlockViewProps) {
+const captionStyle: React.CSSProperties = {
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  fontSize: 11,
+  color: "#4a5a6a",
+  marginTop: 6,
+  letterSpacing: "0.02em",
+};
+
+export function ChartBlockView({ block, compact = false, asOf }: ChartBlockViewProps) {
   const renderer = pickRenderer(block);
 
   if (renderer === "bar") {
     const props = adaptToHBar(block);
-    return <HBarChart {...props} compact={compact} />;
+    return (
+      <>
+        <HBarChart {...props} compact={compact} />
+        {asOf && <p style={captionStyle}>as of {asOf} · SWFL fixture sample</p>}
+      </>
+    );
   }
 
   if (renderer === "area") {
-    return renderArea(block.title, block.columns, block.rows, compact);
+    return (
+      <>
+        {renderArea(block.title, block.columns, block.rows, compact)}
+        {asOf && <p style={captionStyle}>as of {asOf} · SWFL fixture sample</p>}
+      </>
+    );
   }
 
   if (renderer === "scatter") {
-    return renderScatter(block.title, block.columns, block.rows, compact);
+    return (
+      <>
+        {renderScatter(block.title, block.columns, block.rows, compact)}
+        {asOf && <p style={captionStyle}>as of {asOf} · SWFL fixture sample</p>}
+      </>
+    );
   }
 
   // table (default fallback)
   const { title, columns, rows } = adaptToTable(block);
-  return renderTable(title, columns, rows);
+  return (
+    <>
+      {renderTable(title, columns, rows)}
+      {asOf && <p style={captionStyle}>as of {asOf} · SWFL fixture sample</p>}
+    </>
+  );
 }
 
 const AREA_COLORS = ["#00d4aa", "#f59e0b", "#a855f7", "#0ea5e9", "#ef4444"];

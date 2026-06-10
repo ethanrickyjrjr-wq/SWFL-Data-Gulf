@@ -1,8 +1,5 @@
 import path from "node:path";
-import {
-  resolvePlace,
-  type PlaceResolution,
-} from "../refinery/lib/place-resolver.mts";
+import { resolvePlace } from "../refinery/lib/place-resolver.mts";
 
 /**
  * Intent to render a chart given a user question.
@@ -22,6 +19,7 @@ export type ChartIntent =
   | { chart_type: "bar"; scope: "asking-rent" }
   | { chart_type: "bar"; scope: "vacancy" }
   | { chart_type: "area"; scope: "zhvi" }
+  | { chart_type: "scatter"; scope: "corridor-scatter" }
   | { chart_type: "bar"; scope: "vitals"; corridor_slug: string }
   | { chart_type: "bar"; scope: "flood-aal" };
 
@@ -78,11 +76,19 @@ export function routeChart(question: string): ChartIntent | null {
     return { chart_type: "area", scope: "zhvi" };
   }
 
+  // 4b. Corridor positioning scatter (cap rate × vacancy)
+  if (
+    q.includes("scatter") ||
+    q.includes("position") ||
+    (q.includes("corridor") && (q.includes("compar") || q.includes("vs") || q.includes("map")))
+  ) {
+    return { chart_type: "scatter", scope: "corridor-scatter" };
+  }
+
   // 5. Per-corridor vitals
   // Match "how is/are/‛s" OR "vital"
   const hasHowPattern =
-    q.includes("how") &&
-    (q.includes(" is ") || q.includes(" are ") || q.includes("'s"));
+    q.includes("how") && (q.includes(" is ") || q.includes(" are ") || q.includes("'s"));
   const hasVitalKeyword = q.includes("vital");
 
   if (hasHowPattern || hasVitalKeyword) {
@@ -105,38 +111,23 @@ export function routeChart(question: string): ChartIntent | null {
  */
 // CLI-detect idiom matching refinery/tools (works under both `bun script.ts`
 // and `node script.ts`; `import.meta.main` is Bun-only and tsc rejects it).
-if (
-  process.argv[1] &&
-  import.meta.url.endsWith(path.basename(process.argv[1]))
-) {
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
   console.log("Testing routeChart...\n");
 
   // Test 1: asking-rent match
   const test1 = routeChart("what are rents doing");
-  const test1Pass =
-    test1?.chart_type === "bar" && test1?.scope === "asking-rent";
-  console.log(
-    `✓ Test 1 (rents): ${test1Pass ? "PASS" : "FAIL"}`,
-    JSON.stringify(test1),
-  );
+  const test1Pass = test1?.chart_type === "bar" && test1?.scope === "asking-rent";
+  console.log(`✓ Test 1 (rents): ${test1Pass ? "PASS" : "FAIL"}`, JSON.stringify(test1));
 
   // Test 2: place resolution (may or may not match depending on place-resolver state)
   const test2 = routeChart("how is Vanderbilt Beach looking");
-  const test2Pass =
-    test2 === null ||
-    (test2?.chart_type === "bar" && test2?.scope === "vitals");
-  console.log(
-    `✓ Test 2 (place): ${test2Pass ? "PASS" : "FAIL"}`,
-    JSON.stringify(test2),
-  );
+  const test2Pass = test2 === null || (test2?.chart_type === "bar" && test2?.scope === "vitals");
+  console.log(`✓ Test 2 (place): ${test2Pass ? "PASS" : "FAIL"}`, JSON.stringify(test2));
 
   // Test 3: no match
   const test3 = routeChart("what's the weather");
   const test3Pass = test3 === null;
-  console.log(
-    `✓ Test 3 (weather): ${test3Pass ? "PASS" : "FAIL"}`,
-    JSON.stringify(test3),
-  );
+  console.log(`✓ Test 3 (weather): ${test3Pass ? "PASS" : "FAIL"}`, JSON.stringify(test3));
 
   const allPass = test1Pass && test2Pass && test3Pass;
   console.log(`\n${allPass ? "All tests passed!" : "Some tests failed."}`);

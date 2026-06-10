@@ -15,9 +15,9 @@ import type { ZHVITrendEntry, JoinedCorridorRow } from "@/types/viz";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 
 type LiveChart =
-  | { block: ChartBlock }
-  | { component: "zhvi"; data: ZHVITrendEntry[] }
-  | { component: "scatter"; data: JoinedCorridorRow[] };
+  | { block: ChartBlock; asOf: string }
+  | { component: "zhvi"; data: ZHVITrendEntry[]; asOf: string }
+  | { component: "scatter"; data: JoinedCorridorRow[]; asOf: string };
 
 /** The matched metric's value + provenance, threaded in by HighlighterLayer so
  *  "File this figure" can pin a sourced snapshot. Structurally a subset of
@@ -522,11 +522,11 @@ export function HighlightPopup({
                     </div>
                   </div>
                   {"block" in lc ? (
-                    <ChartBlockView block={lc.block} compact />
+                    <ChartBlockView block={lc.block} compact asOf={lc.asOf} />
                   ) : lc.component === "zhvi" ? (
-                    <ZHVIAreaChart data={lc.data} loading={false} />
+                    <ZHVIAreaChart data={lc.data} loading={false} asOf={lc.asOf} />
                   ) : lc.component === "scatter" ? (
-                    <CorridorMarketScatter data={lc.data} loading={false} />
+                    <CorridorMarketScatter data={lc.data} loading={false} asOf={lc.asOf} />
                   ) : null}
                 </div>
               );

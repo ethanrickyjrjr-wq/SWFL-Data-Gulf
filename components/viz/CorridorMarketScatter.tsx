@@ -4,14 +4,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import * as echarts from "echarts";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-  Info,
-  AlertCircle,
-  Sparkles,
-  Sliders,
-  BarChart3,
-  Activity,
-} from "lucide-react";
+import { Info, AlertCircle, Sparkles, Sliders, BarChart3, Activity } from "lucide-react";
 import type { JoinedCorridorRow, CorridorPermitsEntry } from "@/types/viz";
 
 // Narrowed view for the scatter: rent + vacancy + permits all present. Centroid
@@ -42,12 +35,14 @@ export interface CorridorMarketScatterProps {
   data: JoinedCorridorRow[];
   loading?: boolean;
   className?: string;
+  asOf?: string;
 }
 
 export function CorridorMarketScatter({
   data,
   loading = false,
   className = "",
+  asOf,
 }: CorridorMarketScatterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<HTMLDivElement>(null);
@@ -62,9 +57,7 @@ export function CorridorMarketScatter({
   const cleanData = useMemo<ScatterRow[]>(() => {
     return data.filter(
       (c): c is ScatterRow =>
-        c.nnn_asking_rent_per_sqft != null &&
-        c.vacancy_pct != null &&
-        c.permits != null,
+        c.nnn_asking_rent_per_sqft != null && c.vacancy_pct != null && c.permits != null,
     );
   }, [data]);
 
@@ -230,9 +223,7 @@ export function CorridorMarketScatter({
     });
 
     const shadowValues = scatterDataset.map((d) => [...d]);
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Trigger stagger animations on view enter via GSAP ScrollTrigger
     const trigger = ScrollTrigger.create({
@@ -267,9 +258,7 @@ export function CorridorMarketScatter({
       onLeaveBack: () => {
         if (!prefersReducedMotion) {
           myChart.setOption({
-            series: [
-              { data: scatterDataset.map((d) => [d[0], d[1], 0, d[3], d[4]]) },
-            ],
+            series: [{ data: scatterDataset.map((d) => [d[0], d[1], 0, d[3], d[4]]) }],
           });
         }
       },
@@ -323,12 +312,9 @@ export function CorridorMarketScatter({
         className={`p-12 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center gap-3 ${className}`}
       >
         <AlertCircle className="h-10 w-10 text-slate-500" />
-        <h3 className="text-slate-200 font-medium text-lg">
-          No Scatter Plot Data Available
-        </h3>
+        <h3 className="text-slate-200 font-medium text-lg">No Scatter Plot Data Available</h3>
         <p className="text-slate-400 text-sm max-w-sm">
-          Provide a list of complete corridor items to render the bubble
-          analysis model.
+          Provide a list of complete corridor items to render the bubble analysis model.
         </p>
       </div>
     );
@@ -350,8 +336,8 @@ export function CorridorMarketScatter({
           Market Saturation & Appraisal Matrix
         </h2>
         <p className="text-sm text-slate-400 mt-0.5">
-          Plotting Vacancy (%) vs. NNN Asking Rent ($) to map saturated hubs and
-          active development zones.
+          Plotting Vacancy (%) vs. NNN Asking Rent ($) to map saturated hubs and active development
+          zones.
         </p>
       </div>
 
@@ -380,9 +366,8 @@ export function CorridorMarketScatter({
           <div className="text-[10px] text-slate-500 font-mono mt-2 flex items-start gap-1.5 px-1 bg-slate-900/30 py-2 rounded">
             <Info className="h-3 w-3 flex-shrink-0 text-slate-400 mt-0.5" />
             <span>
-              Interactive Guide: Bubbles scales mirror building permit volumes
-              (Z-Score). Bubble tone maps saturation level. Select circles to
-              inspect deeper market analytics.
+              Interactive Guide: Bubbles scales mirror building permit volumes (Z-Score). Bubble
+              tone maps saturation level. Select circles to inspect deeper market analytics.
             </span>
           </div>
         </div>
@@ -391,10 +376,7 @@ export function CorridorMarketScatter({
         <div className="flex flex-col gap-4">
           <div className="bg-slate-950/40 p-5 rounded-xl border border-slate-800/50 flex flex-col justify-between h-full">
             {selectedCorridor ? (
-              <div
-                className="space-y-4"
-                id={`scatter-detail-card-${selectedCorridor.id}`}
-              >
+              <div className="space-y-4" id={`scatter-detail-card-${selectedCorridor.id}`}>
                 {/* Visual Category indicators */}
                 <div className="flex items-center justify-between">
                   <div>
@@ -422,9 +404,7 @@ export function CorridorMarketScatter({
                 {/* Submarket quadrant metrics */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-400 font-mono">
-                      Quadrant classification
-                    </span>
+                    <span className="text-slate-400 font-mono">Quadrant classification</span>
                     <span
                       className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
                         selectedCorridor.vacancy_pct < 6 &&
@@ -447,34 +427,26 @@ export function CorridorMarketScatter({
                   {/* Quick-stats items */}
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/40">
-                      <p className="text-[10px] text-slate-400 font-mono">
-                        Asking NNN
-                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono">Asking NNN</p>
                       <p className="text-base font-bold text-teal-400 mt-0.5">
                         ${selectedCorridor.nnn_asking_rent_per_sqft.toFixed(2)}
                       </p>
                     </div>
                     <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/40">
-                      <p className="text-[10px] text-slate-400 font-mono">
-                        Vacancy
-                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono">Vacancy</p>
                       <p className="text-base font-bold text-sky-400 mt-0.5">
                         {selectedCorridor.vacancy_pct}%
                       </p>
                     </div>
                     <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/40">
-                      <p className="text-[10px] text-slate-400 font-mono">
-                        Permit Z-Score
-                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono">Permit Z-Score</p>
                       <p className="text-base font-bold text-blue-400 mt-0.5">
                         {selectedCorridor.permits.headline_z > 0 ? "+" : ""}
                         {selectedCorridor.permits.headline_z.toFixed(2)}
                       </p>
                     </div>
                     <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/40">
-                      <p className="text-[10px] text-slate-400 font-mono font-medium">
-                        Sample (n)
-                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono font-medium">Sample (n)</p>
                       <p className="text-base font-bold text-amber-500 mt-0.5">
                         {selectedCorridor.permits.n_current.toLocaleString()}
                       </p>
@@ -487,8 +459,7 @@ export function CorridorMarketScatter({
                 {/* Growth and absorption overview */}
                 <div className="space-y-2">
                   <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1 uppercase tracking-wider">
-                    <Activity className="h-3.5 w-3.5 text-orange-400" />{" "}
-                    Absorption Profile
+                    <Activity className="h-3.5 w-3.5 text-orange-400" /> Absorption Profile
                   </span>
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">
                     With an NNN rent of{" "}
@@ -497,18 +468,16 @@ export function CorridorMarketScatter({
                       /sqft
                     </strong>{" "}
                     and vacancy at{" "}
-                    <strong className="text-white">
-                      {selectedCorridor.vacancy_pct}%
-                    </strong>
-                    , {selectedCorridor.name} exhibits a net absorption value of{" "}
+                    <strong className="text-white">{selectedCorridor.vacancy_pct}%</strong>,{" "}
+                    {selectedCorridor.name} exhibits a net absorption value of{" "}
                     {selectedCorridor.absorption_sqft
                       ? `+${selectedCorridor.absorption_sqft.toLocaleString()} sqft`
                       : "N/A"}
                     .
                   </p>
                   <p className="text-[10px] text-slate-500 font-sans leading-normal">
-                    High Permit Z-Scores suggest incoming supply lines, while
-                    Saturation Indices near 100% flag mature lease environments.
+                    High Permit Z-Scores suggest incoming supply lines, while Saturation Indices
+                    near 100% flag mature lease environments.
                   </p>
                 </div>
               </div>
@@ -521,6 +490,11 @@ export function CorridorMarketScatter({
           </div>
         </div>
       </div>
+      {asOf && (
+        <p className="mt-2 font-mono text-[11px] tracking-wide" style={{ color: "#4a5a6a" }}>
+          as of {asOf} · SWFL fixture sample
+        </p>
+      )}
     </div>
   );
 }
