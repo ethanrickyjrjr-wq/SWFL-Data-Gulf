@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Opus 4.8 · main) — feat(§D1): MCP `swfl_fetch` zip fan-out — wired to `assembleLocationDossier`
+
+- **`app/api/mcp/server.ts`** — a `zip` with NO `report_id` (or `report_id="master"`) now `resolveLocation` + `assembleLocationDossier` + `renderLocationDossierText`, identical chain to `/api/z/[zip]` & `/api/where` (operator mandate: MCP reply must match those routes, not diverge). Origin = `resolveOrigin()` (no request URL in the tool callback). `_meta.dossier` = full `LocationDossier` (all lines + per-brain `freshness_tokens`), matching `/api/z?format=json`; a representative freshness token (first selected line, true-ZIP-first) surfaced for capable hosts.
+- **Back-compat preserved:** an explicit **non-master** `report_id` still hits the single-brain `fetchDetailRow` drill (lean `_meta`, no location dossier). Discriminator: `_meta.dossier` present ⇔ fan-out path.
+- **Tier:** default **2**, and capped — `selectDossierLines` keeps all true-ZIP lines + caps headline at 8. 33931 text = 11 lines/~5.7KB (NOT the 24-line `_meta.dossier`). `tier` param honored (1→4 lines, 3→all).
+- **Breaking-change check (conscious yes):** grepped all `swfl_fetch` sites — **no internal caller** hits the zip-only default path (highlighter `handoff.ts` emits a prompt with a PINNED `report_id`; notion-sync/widget are doc strings). External MCP clients get the new multi-brain shape (the intended upgrade).
+- **Docs updated** (spec-named): `zip` param describe + `TOOL_DESCRIPTION` SHORTCUT now say "returns every dataset covering that location at its true grain." New `app/api/mcp/server.test.ts` — 5 integration tests vs real `brains/*.md`, green. Root `tsc` 0 / eslint 0 / `zip-dossier`(31)+`auth` green. Completes **§D1**; §D3 remains.
+- **Next:** §D3 (search box + identity card + grain chips + did-you-mean). Live verify in claude.ai after deploy → `connector_output_live_verify` stays open.
+
 ## 2026-06-10 (Sonnet 4.6 · main) — feat(§D2): Universal Location Search endpoints — `/api/where` + `/api/z/[zip]`
 
 - **New `app/api/where/route.ts`** — `GET ?q=<anything>` → `resolveLocation` → `assembleLocationDossier` → plain text (default tier 2) or `?format=json` (`resolved_as` + `zip` + `lines` + `freshness_tokens`). Supports `?tier=1|2|3`. `runtime="nodejs"`, `dynamic="force-dynamic"`, CORS open.

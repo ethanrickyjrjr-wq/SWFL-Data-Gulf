@@ -4,9 +4,17 @@ import {
   fetchBrain,
   fetchDetailRow,
   buildDossier,
+  resolveOrigin,
   BrainNotFoundError,
   BrainBadTierError,
 } from "@/lib/fetch-brain";
+import { resolveLocation } from "@/refinery/lib/location-resolver.mts";
+import {
+  assembleLocationDossier,
+  renderLocationDossierText,
+  selectDossierLines,
+  type LocationDossier,
+} from "@/lib/zip-dossier";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { buildInventoryMarkdown, buildReportIdSet } from "./inventory";
@@ -71,7 +79,7 @@ STRICT OUTPUT RULES — follow these in every response, no exceptions:
 - NEVER surface internal routing logic ("macro-swfl emits no metrics", "punting to parent brain", "DAG resolver", etc.). If a report is empty, skip it silently.
 - NEVER explain which report you fetched unless the user asked. Just answer the question with the data.
 - NEVER narrate the SHAPE of the payload to the user. Phrases like "tier-2 summary", "wasn't broken out", "the summary didn't include it", "the dataset doesn't break that out", or "I can't source that directly" are FORBIDDEN — they leak your own tooling. Before you say anything about a figure being unavailable, look for it in the per-row detail table described next.
-- A specific ZIP, town, or named area IS answerable — it is not "too specific". Many reports carry a per-row detail table in the structured dossier (\`dossier.detail_tables\`). Housing, for example, carries EVERY SWFL ZIP's median sale price, year-over-year change, days on market, sale-to-list ratio, and months of supply — not just the priciest or fastest-moving ZIPs named in the headline. For a housing question about a specific ZIP/town/area, call swfl_fetch with report_id="housing-swfl" (the per-ZIP table rides on that report's dossier, NOT the master one), map the place to its ZIP from general knowledge (the geography list carries area names, not a ZIP crosswalk — do not claim it resolves ZIPs), FIND that row by its \`key\` in the detail table, and quote its real numbers with the source. Do NOT substitute the regional median when the specific row exists. If a row's \`low_sample\` is true (only a handful of sales that period), say the figure rests on a tiny sample and is indicative, not a stable median. Only if the place truly has no row do you say what you do hold and offer that grain. SHORTCUT: you may pass zip="33913" directly to swfl_fetch (report_id defaults to housing-swfl) and that ZIP's row comes back in the response text — no need to parse the table yourself.
+- A specific ZIP, town, or named area IS answerable — it is not "too specific". Many reports carry a per-row detail table in the structured dossier (\`dossier.detail_tables\`). Housing, for example, carries EVERY SWFL ZIP's median sale price, year-over-year change, days on market, sale-to-list ratio, and months of supply — not just the priciest or fastest-moving ZIPs named in the headline. For a housing question about a specific ZIP/town/area, call swfl_fetch with report_id="housing-swfl" (the per-ZIP table rides on that report's dossier, NOT the master one), map the place to its ZIP from general knowledge (the geography list carries area names, not a ZIP crosswalk — do not claim it resolves ZIPs), FIND that row by its \`key\` in the detail table, and quote its real numbers with the source. Do NOT substitute the regional median when the specific row exists. If a row's \`low_sample\` is true (only a handful of sales that period), say the figure rests on a tiny sample and is indicative, not a stable median. Only if the place truly has no row do you say what you do hold and offer that grain. SHORTCUT: you may pass zip="33913" directly to swfl_fetch with NO report_id — it returns every dataset covering that location at its true grain (a real per-ZIP figure where we hold one, otherwise the county/region read labeled as covering that ZIP), straight in the response text, so you answer a specific place without parsing the table yourself. Only pin report_id to a single report when you want that one report's row alone.
 - Caveats about data freshness belong at the END of a response, one line, not at the top.`;
 
 /**
@@ -130,9 +138,7 @@ const WEB_REPORTER_SLUGS = ["city-pulse-swfl", "news-swfl"] as const;
 const MAX_WEB_FACTS = 8;
 
 async function loadWebFacts(slug: string): Promise<WebFact[]> {
-  const sources: string[] = (WEB_REPORTER_SLUGS as readonly string[]).includes(
-    slug,
-  )
+  const sources: string[] = (WEB_REPORTER_SLUGS as readonly string[]).includes(slug)
     ? [slug]
     : slug === "master"
       ? [...WEB_REPORTER_SLUGS]
@@ -148,10 +154,7 @@ async function loadWebFacts(slug: string): Promise<WebFact[]> {
       for (const m of display.metrics) {
         if (!m.sourceUrl || seen.has(m.sourceUrl)) continue;
         seen.add(m.sourceUrl);
-        const text =
-          m.value.length > 160
-            ? m.value.slice(0, 159).trimEnd() + "…"
-            : m.value;
+        const text = m.value.length > 160 ? m.value.slice(0, 159).trimEnd() + "…" : m.value;
         facts.push({
           text,
           source_url: m.sourceUrl,
@@ -170,10 +173,7 @@ async function loadWebFacts(slug: string): Promise<WebFact[]> {
 function renderWebFactsBlock(facts: WebFact[]): string {
   if (!facts.length) return "";
   const lines = facts
-    .map(
-      (f) =>
-        `- [${f.text}](${f.source_url})${f.source_name ? ` — ${f.source_name}` : ""}`,
-    )
+    .map((f) => `- [${f.text}](${f.source_url})${f.source_name ? ` — ${f.source_name}` : ""}`)
     .join("\n");
   return `\n\n## From The Web-\n${lines}`;
 }
@@ -185,16 +185,28 @@ function renderWebFactsBlock(facts: WebFact[]): string {
  */
 function injectBeforeFooter(text: string, block: string): string {
   if (!block) return text;
-  const markers = [
-    "\n\nFull audit →",
-    "\n\nFull breakdown →",
-    "\n\n_Freshness:_",
-  ];
+  const markers = ["\n\nFull audit →", "\n\nFull breakdown →", "\n\n_Freshness:_"];
   for (const marker of markers) {
     const idx = text.indexOf(marker);
     if (idx !== -1) return text.slice(0, idx) + block + text.slice(idx);
   }
   return text + block;
+}
+
+/**
+ * One representative freshness token for the multi-brain location dossier's
+ * `_meta`. A fan-out has no single canonical token, so surface the token of the
+ * FIRST selected line — true-ZIP answers rank first (`selectDossierLines`), so
+ * this is the token for the read the user actually asked about. The full
+ * per-brain map still rides in `_meta.dossier.freshness_tokens`. Undefined when
+ * out-of-scope (no lines), so `_meta` simply omits it.
+ */
+function representativeFreshnessToken(dossier: LocationDossier): string | undefined {
+  for (const line of selectDossierLines(dossier.lines, 3)) {
+    const tok = dossier.freshness_tokens[line.brain_id];
+    if (tok) return tok;
+  }
+  return undefined;
 }
 
 export function buildMcpServer(server: McpServer): void {
@@ -227,35 +239,78 @@ export function buildMcpServer(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            "Optional 5-digit ZIP (e.g. \"33913\"). When set, returns THAT ZIP's row from the report's per-ZIP detail table directly in the response text — use for a specific place's housing numbers. report_id defaults to housing-swfl when a zip is given.",
+            'Optional 5-digit ZIP (e.g. "33913"). When set WITHOUT report_id (or with report_id="master"), returns every dataset covering that location at its true grain — a real per-ZIP number where we hold one, otherwise the county/region figure clearly labeled as covering that ZIP — directly in the response text. Pin report_id to a specific report to get only that report\'s per-ZIP detail row instead.',
           ),
       },
       annotations: { readOnlyHint: true, title: "SWFL Data Gulf" },
     },
     async ({ report_id, tier, zip }) => {
-      // ZIP drill (Fix B): return the specific row in the TEXT block so the
-      // answer survives clients that don't forward _meta.dossier, and without
-      // re-querying the lake (reads the detail_tables baked into the brain).
-      // Defaults to the housing report (the per-ZIP table holder).
+      // Location fan-out (§C / D1). A ZIP/location with NO pinned report (or
+      // report_id="master") returns EVERY dataset covering that location at its
+      // TRUE grain — a real per-ZIP number where we hold one, otherwise the
+      // county/region figure LABELED as covering that ZIP so an aggregate can
+      // never read as a ZIP-specific fact. Same resolver + dossier the
+      // GET /api/z/{zip} and /api/where routes use, so the MCP reply matches
+      // those endpoints. An explicit non-master report_id keeps today's
+      // single-brain detail-row drill below (back-compat — Fix B).
       if (zip && zip.trim()) {
-        const drillSlug =
-          !report_id || report_id === "master" ? "housing-swfl" : report_id;
+        const pinnedReport = report_id && report_id !== "master" ? report_id : null;
+
+        if (!pinnedReport) {
+          const t: 1 | 2 | 3 = tier ?? 2;
+          try {
+            const loc = await resolveLocation(zip.trim());
+            // No request URL in the tool callback — Vercel's internal hostname
+            // would leak — so use the env-derived canonical origin, as the
+            // detail-row drill already does via resolveOrigin().
+            const dossier = await assembleLocationDossier(loc, {
+              origin: resolveOrigin(),
+            });
+            const repToken = representativeFreshnessToken(dossier);
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: RESPONSE_CONTRACT + renderLocationDossierText(dossier, t),
+                },
+              ],
+              _meta: {
+                ...(repToken ? { freshness_token: repToken } : {}),
+                rules: RULES_OF_ENGAGEMENT,
+                geography: GEOGRAPHY_GAZETTEER,
+                // The full multi-brain location dossier (every covering read +
+                // per-brain freshness tokens) so a downstream Claude answers
+                // follow-ups about this place without re-fetching.
+                dossier,
+              },
+            };
+          } catch (err) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Unexpected error resolving location "${zip}": ${(err as Error).message}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+        }
+
+        // Back-compat: an explicit non-master report_id returns ONLY that
+        // report's per-ZIP detail row (the single-brain drill, Fix B) — the
+        // row rides in the TEXT block so it survives clients that drop _meta.
         try {
-          const { text, freshness_token } = await fetchDetailRow(
-            drillSlug,
-            zip,
-          );
+          const { text, freshness_token } = await fetchDetailRow(pinnedReport, zip);
           return {
-            content: [
-              { type: "text" as const, text: RESPONSE_CONTRACT + text },
-            ],
+            content: [{ type: "text" as const, text: RESPONSE_CONTRACT + text }],
             _meta: { freshness_token, rules: RULES_OF_ENGAGEMENT },
           };
         } catch (err) {
           const message =
             err instanceof BrainNotFoundError
-              ? `Report not found: "${drillSlug}". Valid ids: ${[...VALID_REPORT_IDS].join(", ")}.`
-              : `Unexpected error fetching "${drillSlug}" zip="${zip}": ${(err as Error).message}`;
+              ? `Report not found: "${pinnedReport}". Valid ids: ${[...VALID_REPORT_IDS].join(", ")}.`
+              : `Unexpected error fetching "${pinnedReport}" zip="${zip}": ${(err as Error).message}`;
           return {
             content: [{ type: "text" as const, text: message }],
             isError: true,
@@ -267,20 +322,16 @@ export function buildMcpServer(server: McpServer): void {
       const t: 1 | 2 | 3 = tier ?? 2;
 
       try {
-        const [{ text, freshness_token, output }, webFacts] = await Promise.all(
-          [fetchBrain(slug, { tier: t }), loadWebFacts(slug)],
-        );
+        const [{ text, freshness_token, output }, webFacts] = await Promise.all([
+          fetchBrain(slug, { tier: t }),
+          loadWebFacts(slug),
+        ]);
         // Outside-source items ride in the TEXT (claude.ai drops _meta) as a
         // highlighted-link block, placed before the link + freshness footer.
-        const bodyText = injectBeforeFooter(
-          text,
-          renderWebFactsBlock(webFacts),
-        );
+        const bodyText = injectBeforeFooter(text, renderWebFactsBlock(webFacts));
 
         return {
-          content: [
-            { type: "text" as const, text: RESPONSE_CONTRACT + bodyText },
-          ],
+          content: [{ type: "text" as const, text: RESPONSE_CONTRACT + bodyText }],
           _meta: {
             freshness_token,
             // The rules-of-engagement block + structured dossier travel with
