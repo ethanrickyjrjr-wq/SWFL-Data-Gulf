@@ -1,7 +1,11 @@
 # §B — Dispatcher: `resolveLocation(input)`
 
-**Phase 1 · ~1 day · depends on: §A (`resolveZip`, types) · status: not started**
+**Phase 1 · ~1 day · depends on: §A (`resolveZip`, types) · status: BUILT 2026-06-10**
 Read [`README.md`](./README.md) §0 first. §A must be merged before this is testable end-to-end.
+
+> **Shipped:** `refinery/lib/location-resolver.mts` + 13-test acceptance (all green via `bun test`).
+> One operator-style deviation: `corridor_id` is `string | null` (pocket-only matches) — see the
+> README §B build note. All acceptance cases below pass as written.
 
 ---
 

@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (Opus 4.8 · main) — feat(§B): Universal Location Search dispatcher — `resolveLocation`
+
+- New `refinery/lib/location-resolver.mts` (pure dispatch over existing resolvers, no new data, no geocoder) + 13-test acceptance (all green via `bun test`). Async so §E's geocoder drops into the `address` branch later without touching callers.
+- **Dispatch order (gazetteer FIRST):** `^\d{5}$`→zip · `resolvePlaceZip`→place(primary ZIP) · county-grain `places-swfl.resolvePlace`→county · `place-resolver.resolvePlace`→corridor/pocket · region terms→region · address-shaped→`address-unsupported` (pre-§E) else→`out-of-scope`. Gazetteer-before-corridor makes "Estero" resolve to its honest ZIP and rescues "Immokalee"→34142 with no geocode call.
+- **Deviation from 02-dispatcher.md:** `corridor_id` is `string | null` (pocket-only matches like "North Naples" have no single corridor). Noted in plan README §B build-note so §C handles the null and doesn't re-litigate. Plan status flipped to BUILT.
+- Completes **J1 ≡ §A+§B** (Phase 1). Next: §C fan-out (`assembleLocationDossier` + `BRAIN_GEO`, the moat) — depends on §A+§B, now both on disk.
+
 ## 2026-06-10 (Opus 4.8 · main) — feat(§A): Universal Location Search spine — `resolveZip` + sourced `swfl-zip-county.json`
 
 - New `refinery/lib/zip-resolver.mts` (pure, G1/G6) + 13-test acceptance (all green via `bun test`). New `fixtures/swfl-zip-county.json` (100 ZCTAs, 6-county) built by `scripts/build_swfl_zip_county.py` from the live Census ZCTA→county relationship file.

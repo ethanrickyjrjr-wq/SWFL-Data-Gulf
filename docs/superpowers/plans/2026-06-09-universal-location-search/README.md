@@ -118,6 +118,14 @@ to widen scope. Full rule + provenance: header of `scripts/build_swfl_zip_county
 fixture's `precedence_rule`/`discrepancies`/`excluded_examples`. The one population override
 (`33936`→Lee) is in `SOURCED.md#swfl-zip-county-pop-override`.
 
+### Build note — §B `corridor_id` is nullable (locked 2026-06-10, do not re-litigate)
+
+`02-dispatcher.md` types the corridor variant as `corridor_id: string`. **Implementation
+deviation:** the corridor resolver (`place-resolver.mts`) legitimately returns a **pocket-only**
+match (e.g. "North Naples") with no single corridor — there is no honest single ID — so the
+shipped `LocationInput` types it `corridor_id: string | null` (null ⇒ pocket grain; §C labels the
+line by `pocket`). §C consumers must handle the null. Everything else in §B matches the brief.
+
 ---
 
 ## Section map, dependencies, and Claude assignment
