@@ -138,7 +138,7 @@ Method: every "Verified ground truth" claim in the source plan was checked again
 
 ## Added features (`[ADDED]` — not in the source plan)
 
-1. **As-of date on every exhibit** (S6 task-05) — SCOPED DOWN per operator (2026-06-10). The `freshness_token` is pinned at save and **stays** (it IS the moat — `[LB-R1]` confirms every filed item must carry a real citation+token). What's overkill for v1 is elaborate staleness UI: **drop** the cadence-aware "may have updated" computation and per-item age badge. Just print the as-of date plainly as part of the citation line (it's already there). **Live-refresh-before-print is explicitly a HIGHER-TIER future feature** (operator: updating numbers everywhere + reconciling client-added content is hard) — deferred, not built. Never silently re-fetch in v1.
+1. **As-of date on exhibits** (S6 task-05) — per operator (2026-06-10): the as-of date stamp is the **only** honesty mechanism required. Every chart and filed item carries the date it was captured (from the fixture's own date field or, for live-brain items, the brain's `freshness_token`). A `freshness_token` is present only on items from live brains (`qa`, `metric`, `report`, `table_slice`); chart items carry as-of date via their `chart_block` data. Drop the cadence-aware "may have updated" computation and per-item age badge. In printed/shared deliverables, the date appears **only** as a plain citation line under each exhibit — no freshness badges, no token display, no staleness warnings. Live-refresh-before-print is a deferred higher-tier feature. Never silently re-fetch in v1.
 2. **Restyle without re-LLM** (S6 task-06). Content is already separate from template by design — expose a template-swap that re-renders the same narrative+items under a different template with **no new LLM call** (free, instant). Gamma/Perplexity-Labs "cheap restyle."
 3. **Deterministic jargon scrub on the deliverable** (S6 task-04). The build system prompt forbids `master/brain/payload/grain/dossier`; don't trust the LLM — add a post-generation deterministic check reusing the speaker-layer scrub patterns.
 4. **Deliverable revoke / unpublish** (S7 task-02). `/p/[id]` is public by unguessable slug; the `status` column already exists — add `status='revoked'` → `/p/[id]` returns 410. Owner-controlled kill switch for a shared link.
@@ -154,7 +154,7 @@ LittleBird's plan-review (notetaker — `feedback_littlebird-is-notetaker`) flag
 
 | # | Requirement | Enforced in | Verdict |
 |---|---|---|---|
-| **R1** | Never pin a `freshness_token` onto fixture data. Rent/vacancy chart needs a LIVE source or it defers. **Confirmed: `rentals-swfl`/ZORI (`refinery/sources/zori-source.mts`) IS live** → rent uses the brain, NOT `corridor-rents.json`. Vacancy has no clean live residential source → **DEFER vacancy.** | S2 task-01 (rewritten) + task-02 acceptance | accepted, sharpened with the live-source fact |
+| **R1** | ~~Never pin a `freshness_token` onto fixture data. Rent/vacancy chart needs a LIVE source or it defers.~~ **OVERRIDDEN BY OPERATOR (2026-06-10):** Fixture-backed charts are fully deliverable. An as-of date (from the fixture's own date field) is the **only required honesty mechanism** — no `freshness_token` required on chart items. All four Tier-B chart scopes ship from fixtures: asking-rent (`corridor-rents.json`), vacancy (`corridor-rents.json`), zhvi (ZHVI fixture), corridor-scatter (rents fixture). S2 task-01 is rewritten to locate fixture paths, not hunt for live sources. | S2 task-01 (rewritten) | **OVERRIDDEN** |
 | **R2** | Deliverable narrative lint anchors numbers by **EQUALITY**, not the 5%/0.05 chart-render tolerance. Keep 5% on chart rendering only. | S6 task-04 + README acceptance | accepted — this was a real bug in my plan |
 | **R3** | Add the `isGroundedConditional` / no-smoothing check (`refinery/render/speaker.mts`) to the narrative path — anchoring alone passes a number-free ungrounded forecast ("rents will keep climbing"). | S6 task-04 + README acceptance | accepted |
 | **R4** | State the single source of truth for chart NUMBERS: the **persisted `chart_block` jsonb in `saved_charts` is the frozen authority for a saved/filed chart**; `computeMetricChart` stays the live `/r/` on-the-fly render only. They cannot diverge because they serve different lifecycles (live recompute vs frozen snapshot). | S2 README + S3 README/task-02 | accepted |
@@ -219,7 +219,7 @@ The folder name carries the assignment (`__OPUS` / `__SONNET`). If you were disp
 
 Every session that touches projects depends on this exact shape. It is created once in **Session 1** (`lib/project/items.ts`), zod-validated, unit-tested, and never re-declared elsewhere — import it.
 
-**Invariant:** every item is a **snapshot pinned at save time**. The value, citation, and `freshness_token` are copied in at the moment of filing and are **never re-fetched**. A deliverable assembled weeks later shows exactly what the user saw when they filed it. The `freshness_token` MUST be a REAL token from a live source — **never pinned onto fixture-derived data** (`[LB-R1]`; this is why S2 sources rent from the live `rentals-swfl`/ZORI brain, not the `corridor-rents.json` fixture). v1 surfaces the as-of **date** plainly on the deliverable; live-refresh-before-print and cadence-aware staleness badges are a deferred higher-tier feature (operator, 2026-06-10), not built.
+**Invariant:** every item is a **snapshot pinned at save time**. The value, citation, and (where available) `freshness_token` are copied in at the moment of filing and are **never re-fetched**. A deliverable assembled weeks later shows exactly what the user saw when they filed it. **Fixture-backed items** (charts, metrics sourced from fixtures) carry an as-of date from the fixture's own date field — that is the only required honesty mechanism; no `freshness_token` is required. `freshness_token` is present on items from live brain sources (`qa`, `metric`, `report`, `table_slice` filed from `/r/` pages). v1 surfaces the as-of **date** plainly as a citation line under each exhibit; live-refresh-before-print and cadence-aware staleness badges are a deferred higher-tier feature (operator, 2026-06-10), not built.
 
 ```ts
 // lib/project/items.ts
@@ -1145,13 +1145,13 @@ git commit -m "feat(highlighter): cross-cell selection snapping + ambiguous-mix 
 
 **Architecture:** new `lib/build-chart-for-intent.mts` maps a `ChartIntent` → `{ block: ChartBlock }` | `{ component: "zhvi"; data }` | `null`. `/api/converse` calls `routeChart(question)` before the LLM and emits one SSE `chart` frame ahead of text; failure skips silently (a chart never blocks an answer). The LLM never touches chart numbers. Every block passes `lintChartBlock`.
 
-**`[LB-R1]` Live-source-only:** rent → the live `rentals-swfl`/ZORI brain (NOT the `corridor-rents.json` fixture — a fixture chart cannot honestly carry a `freshness_token`); vacancy → DEFERRED (no live residential source). See task-01.
+**Chart sources — fixture-first, as-of date is sufficient (operator decree 2026-06-10):** All Tier-B chart scopes ship from fixture data with an as-of date label — no live-brain precondition, no `freshness_token` required on chart items. Phase 2 ships: `CorridorRentChart` (bar, `corridor-rents.json`), `ZHVIAreaChart` (area, ZHVI fixture), `CorridorMarketScatter` (scatter, rents fixture), and `vacancy` (bar, rents fixture). Task 01 locates all fixture paths; Task 02 wires them **and** repairs ChartBlockView's area + scatter renderers (currently stub to HTML table). `flood-aal` stays on the live env-brain path (unchanged). See task-01.
 
 **`[LB-R4]` Single source of truth for chart NUMBERS:** two chart paths exist — `computeMetricChart` (`refinery/lib/chart-from-metrics.mts`, on-the-fly for `/r/` pages) and the persisted `chart_block` jsonb in `saved_charts` (S3). They MUST NOT diverge: `computeMetricChart` is the **live render only**; the moment a chart is *saved/filed*, its block is **frozen into `saved_charts`** and the `ProjectItem` references that frozen `chart_id` — a filed chart is never recomputed. Live = recompute; filed = frozen snapshot. State this in `buildChartForIntent`'s doc comment so a future dev doesn't wire a filed chart back through `computeMetricChart`.
 
 **Tasks (read in order):**
-- [ ] `task-01-locate-rent-vacancy-datapath.md` — **`[AUDIT-FIX C2]`** find the REAL rent/vacancy source (it's a fixture, not a `corridor_profiles` column)
-- [ ] `task-02-build-chart-for-intent.md` — `lib/build-chart-for-intent.mts`, lint every block
+- [ ] `task-01-locate-rent-vacancy-datapath.md` — **`[AUDIT-FIX C2]`** locate all fixture data paths (asking-rent, zhvi, corridor-scatter, vacancy, flood-aal) + confirm ChartBlockView stubs
+- [ ] `task-02-build-chart-for-intent.md` — `lib/build-chart-for-intent.mts` (all 4 fixture scopes + flood-aal), lint every block; wire area + scatter renderers in `ChartBlockView`
 - [ ] `task-03-converse-chart-frame.md` — `routeChart` before LLM + SSE `chart` frame
 - [ ] `task-04-client-onchart.md` — `onChart` in sse/converse/use-converse; render `ChartBlockView` compact; HBarChart `compact` prop
 - [ ] `task-05-chart-this-chip.md` — "Chart this" chip in `suggestions.ts`
@@ -1168,38 +1168,50 @@ git commit -m "feat(highlighter): cross-cell selection snapping + ambiguous-mix 
 
 ## ----- task-01-locate-rent-vacancy-datapath.md -----
 
-# Task 01 — `[AUDIT-FIX C2]` Locate the REAL rent/vacancy data path
+# Task 01 — Wire fixture data paths for all Tier-B charts
 
-**Why this task exists:** The source plan said `buildChartForIntent` should "read `corridor_profiles` exactly as `app/embed/charts/page.tsx:130` does." **That is wrong.** The audit found that query (`embed/charts/page.tsx:129-134`) selects `corridor_name, character_chart, character_facts, character_speculative` — NOT rent or vacancy. Asking-rent is loaded from a **`corridor-rents.json` fixture** (~embed lines 156-160). You must find the truth before coding Task 02, or you'll build against a column that doesn't exist.
+**Why this task changed:** The original task sent you on a hunt for "live" data paths and blocked on a prohibition on fixture data. That prohibition is **OVERRIDDEN by operator decree (2026-06-10)**: fixture-backed charts are fully deliverable. A chart carries an as-of date (captured from the fixture's own date field) — that is the only honesty mechanism required. No `freshness_token` required on charts, no live-brain precondition, no gating.
 
-**This is investigation, not code. Output a short findings note that Task 02 consumes.**
+**This is a read + findings note, no code yet. Output a short findings note that Task 02 consumes.**
 
-- [ ] **Step 1: Read `app/embed/charts/page.tsx` end-to-end.** Identify exactly where asking-rent values come from (the fixture path), what shape they're in, and what corridors/ZIPs they cover. Confirm whether vacancy is in the same fixture, a different one, or derived.
-
-```bash
-# find the fixture(s)
-ls fixtures/ | grep -i -E 'rent|vacan|corridor'
-```
-
-- [ ] **Step 2: `[LB-R1]` — the source MUST be live; a fixture cannot carry an honest `freshness_token`.** A filed chart becomes a `ProjectItem` and the whole moat depends on every filed item being pinned with a REAL citation + freshness token. A chart built from `corridor-rents.json` (a static file) **cannot** honestly carry a token — a freshness badge on fixture data still lies (this is the env-swfl phantom-data bug). **Decision is therefore forced, not a recommendation:**
-  - **Asking-rent → use the LIVE brain.** `refinery/sources/zori-source.mts` + `rentals-swfl`'s `rentals_by_zip` detail_table (ZORI, real ingested data — confirmed live, SESSION_LOG 2026-06-10 §F-1). Source via `fetchBrain("rentals-swfl")` and carry the brain's freshness token. **The `corridor-rents.json` fixture is FORBIDDEN as a fileable-chart source.** (The embed page may keep using it for its character display; the chart producer may not.)
-  - **NEVER** attach a `freshness_token` to fixture-derived data. Record this prohibition in the findings note as a hard rule.
-
-- [ ] **Step 3: Vacancy → DEFER (no clean live residential source).** Confirmed: vacancy only appears in CRE/marketbeat surfaces (`marketbeat_pdf` is ODD-parked, not reliably live) and broker scrapes — no clean live residential vacancy-by-ZIP source like ZORI. **Mark `vacancy` DEFERRED in `buildChartForIntent` (return `null`)** — same discipline as `vitals`. Do NOT source it from a fixture or a parked pipeline. If you discover a genuinely live vacancy source in-session, you may light it; otherwise it stays deferred. Note the decision.
+- [ ] **Step 1: Read `corridor-rents.json` end-to-end.**
 
 ```bash
-grep -rIl -E 'vacanc' refinery/packs/ refinery/sources/ | head   # confirm: CRE/marketbeat only
+cat fixtures/corridor-rents.json | head -80
 ```
 
-- [ ] **Step 4: Locate the flood-AAL source.** Plan says "from env brain detail table via `fetchBrain`." Confirm `fetchBrain` exists and the env brain exposes an AAL-by-ZIP detail_table; record the exact accessor.
+Record: corridors covered, rent field names, vacancy field names, and the `as_of` / date field that will label every chart built from this fixture.
 
-- [ ] **Step 5: Write the findings note** at `docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/session-2-charts-tierB-inchat__SONNET/FINDINGS-datapaths.md` listing, per scope (`asking-rent`, `vacancy`, `zhvi`, `flood-aal`, `vitals`): the real source, the accessor, and whether it's LIVE or DEFERRED. Task 02 codes directly against this.
+- [ ] **Step 2: Find the ZHVI fixture path.**
 
-- [ ] **Step 6: Commit the findings note.**
+```bash
+ls fixtures/ | grep -iE 'zhvi|home.value|hpi'
+grep -rIl 'ZHVIAreaChart\|zhvi' app/ components/ lib/ | head
+```
+
+Open the file that `ZHVIAreaChart` actually loads. Record: fixture path, series shape (date → value), and the as-of date field.
+
+- [ ] **Step 3: Find the corridor scatter fixture path.**
+
+```bash
+grep -rIl 'CorridorMarketScatter\|corridor.*scatter\|scatter.*corridor' app/ components/ | head
+```
+
+Open that file to find where it loads data. Record: fixture path and the x-axis, y-axis, label field names.
+
+- [ ] **Step 4: Confirm vacancy data is in the rents fixture.** Per operator: "data exists in the rents fixture, no chart draws it today." Verify the vacancy field name in `corridor-rents.json`.
+
+- [ ] **Step 5: Confirm ChartBlockView area + scatter renderers are stubs.** Per operator: "ChartBlockView's area and scatter renderers currently stub to an HTML table." Open `components/charts/ChartBlockView.tsx` and verify which chart types render a real chart vs. fall through to an HTML table. Task 02 wires the real renderers.
+
+- [ ] **Step 6: Locate the flood-AAL source.** Plan says "from env brain detail table via `fetchBrain`." Confirm `fetchBrain` exists and the env brain exposes an AAL-by-ZIP detail_table; record the exact accessor.
+
+- [ ] **Step 7: Write the findings note** at `docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/session-2-charts-tierB-inchat__SONNET/FINDINGS-datapaths.md` listing, per scope (`asking-rent`, `vacancy`, `zhvi`, `corridor-scatter`, `flood-aal`): fixture or live-brain source, exact path/accessor, as-of date field, and confirmed deliverable (no deferred scopes except `flood-aal` if its env brain accessor doesn't resolve).
+
+- [ ] **Step 8: Commit the findings note.**
 
 ```bash
 git add docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/session-2-charts-tierB-inchat__SONNET/FINDINGS-datapaths.md
-git commit -m "docs(charts): [AUDIT-FIX C2] real rent/vacancy/aal data-path findings"
+git commit -m "docs(charts): fixture data-path findings for all Tier-B chart scopes"
 ```
 
 
@@ -1229,6 +1241,14 @@ describe("buildChartForIntent", () => {
     const r = await buildChartForIntent({ chart_type: "area", scope: "zhvi" });
     expect(r && "component" in r ? r.component : null).toBe("zhvi");
   });
+  it("returns a scatter component marker", async () => {
+    const r = await buildChartForIntent({ chart_type: "scatter", scope: "corridor-scatter" });
+    expect(r && "component" in r ? r.component : null).toBe("scatter");
+  });
+  it("returns a bar block for vacancy", async () => {
+    const r = await buildChartForIntent({ chart_type: "bar", scope: "vacancy" });
+    expect(r && "block" in r ? r.block.chart_type : null).toBe("bar");
+  });
   it("returns null for deferred vitals", async () => {
     expect(await buildChartForIntent({ chart_type: "bar", scope: "vitals", corridor_slug: "x" })).toBeNull();
   });
@@ -1237,13 +1257,16 @@ describe("buildChartForIntent", () => {
 
 - [ ] **Step 2: Run — expect FAIL.**
 
-- [ ] **Step 3: Implement.** Signature: `export async function buildChartForIntent(intent: ChartIntent): Promise<{ block: ChartBlock } | { component: "zhvi"; data: unknown } | null>`. Per scope, using Task 01's findings:
-  - `asking-rent` → load the real source (fixture or `fetchBrain` per the recorded decision), shape ≤6 rows into a `ChartBlock` (bar), **pass it through `lintChartBlock`**; if lint fails return `null`.
-  - `flood-aal` → env brain AAL-by-ZIP detail_table → bar block → lint.
-  - `zhvi` → `{ component: "zhvi", data }` (the `ZHVIAreaChart` renderer handles it — `components/viz/ZHVIAreaChart.tsx` exists).
-  - `vacancy` → per Task 01: build if a real source exists, else `null`.
+- [ ] **Step 3: Implement.** Signature: `export async function buildChartForIntent(intent: ChartIntent): Promise<{ block: ChartBlock } | { component: "zhvi"; data: unknown } | { component: "scatter"; data: unknown } | null>`. Per scope, using Task 01's findings — **all four are fixture-sourced; as-of date comes from the fixture's own date field**:
+  - `asking-rent` → `corridor-rents.json` fixture → `CorridorRentChart`, shape ≤6 rows into a `ChartBlock` (bar), include `as_of_date` from fixture metadata, **pass through `lintChartBlock`**; if lint fails return `null`.
+  - `vacancy` → `corridor-rents.json` fixture vacancy field → bar `ChartBlock` with `as_of_date`, lint.
+  - `zhvi` → ZHVI fixture → `{ component: "zhvi", data }` (`ZHVIAreaChart` renderer handles it — `components/viz/ZHVIAreaChart.tsx` exists).
+  - `corridor-scatter` → rents fixture → `{ component: "scatter", data }` (`CorridorMarketScatter` renderer).
+  - `flood-aal` → env brain AAL-by-ZIP detail_table (live, per Task 01 findings) → bar block → lint.
   - `vitals` → `null` (deferred, A8).
   - Any error / <3 comparable points → `null`. **Never invent a number; lint is the gate.**
+
+  **Also in this step: wire ChartBlockView area + scatter renderers.** Per Task 01, `components/charts/ChartBlockView.tsx` currently stubs area and scatter chart types to an HTML table. Replace those stubs: area → `ZHVIAreaChart` (or a generic Recharts `AreaChart`); scatter → `CorridorMarketScatter`. Both chart types must actually draw after this task ships.
 
 - [ ] **Step 4: Run — expect PASS.** Then `npm run refinery:typecheck` adds no NEW errors for this file (baseline debt is accepted — `reference_refinery-typecheck-exits-nonzero`; run it alone, compare against baseline).
 
@@ -1862,7 +1885,7 @@ Reference the same `bars`/`pcts` the animation uses (read the existing gsap bloc
 - [ ] `task-02-templates-lib.md` — `market-overview`, `bov-lite`, `client-email`, `one-pager` (content/template separation)
 - [ ] `task-03-build-route-forced-tool.md` — the ONE forced-tool call; RULES_OF_ENGAGEMENT verbatim; numbered item snapshots only
 - [ ] `task-04-narrative-anchor-lint.md` — number-anchor lint (reuse `isAnchored`) + `[ADDED]` jargon scrub + regenerate-then-strip
-- [ ] `task-05-p-id-page.md` — `/p/[id]` render: provenance under every exhibit + `[INFERENCE]` notes + freshness footer + `[ADDED]` stale badge
+- [ ] `task-05-p-id-page.md` — `/p/[id]` render: provenance under every exhibit + `[INFERENCE]` notes + citation footer (as-of date only — no stale badge)
 - [ ] `task-06-restyle-without-rellm.md` — `[ADDED]` template swap re-renders same narrative, no new LLM call
 - [ ] `task-07-build-all-templates-verify.md` — build all 4 from a seeded project; poisoned-narrative test; close `deliverable_anchor_lint`
 
@@ -2028,11 +2051,11 @@ it("strips the offending sentence", () => {
 
 **Contract:** server component; loads `deliverables` by slug (public SELECT); 404 if missing; 410 if `status='revoked'` (S7). Renders from the **frozen `items_snapshot`**, never the live project.
 
-- [ ] **Step 1: Layout** — branding header (agent name/photo/license/brokerage from `branding`) → exec summary → sections (action title + intro + its exhibits) → **source line + as-of date under EVERY exhibit** (this is the differentiator CoStar lacks) → `[INFERENCE]` notes block in `#d4b370` → freshness footer → action strip (Print / Copy email / Share — all `.print-hide`).
+- [ ] **Step 1: Layout** — branding header (agent name/photo/license/brokerage from `branding`) → exec summary → sections (action title + intro + its exhibits) → **source line + as-of date under EVERY exhibit** (this is the differentiator CoStar lacks) → `[INFERENCE]` notes block in `#d4b370` → citation footer (source credit, no freshness badges) → action strip (Print / Copy email / Share — all `.print-hide`).
 
-- [ ] **Step 2: As-of date (SCOPED DOWN — operator 2026-06-10).** Each exhibit/item carries a `freshness_token` pinned at file time (this stays — it's the moat). Render the as-of **date plainly** as part of each exhibit's citation line. **Do NOT build** the cadence-aware "may have updated" computation or a per-item age badge — overkill for v1, because users build projects over days/weeks and a badge on every item is noise. **Live-refresh-before-print is a HIGHER-TIER future feature, NOT built here** (updating every number + reconciling client-added content is hard; deferred by operator decree). Never silently re-fetch in v1.
+- [ ] **Step 2: As-of date (operator 2026-06-10).** The as-of date is the **only** honesty mechanism required. For live-brain items (`qa`, `metric`, `report`, `table_slice`) it's parsed from their `freshness_token`; for chart items it comes from the `chart_block` data's own date field. Render the date plainly as part of each exhibit's citation line — a simple "As of [Month YYYY]" is sufficient. **Do NOT build** a cadence-aware "may have updated" badge, per-item age indicator, staleness warning, or token string display. **Live-refresh-before-print is a HIGHER-TIER future feature, NOT built here**. Never silently re-fetch in v1.
 
-- [ ] **Step 3: Provenance survives.** Confirm the citation + token elements use the `.citation`/`.source-line`/`.freshness-token` classes the S5 print CSS keeps visible — they must appear in the printed PDF.
+- [ ] **Step 3: Provenance survives in print.** Confirm the citation elements use `.citation`/`.source-line` classes that the S5 print CSS keeps visible — source credit and as-of date must appear in the printed PDF. No `.freshness-token` token string is printed.
 
 - [ ] **Step 4: `[LB-R5]` Rate-limit `/p/*`.** Add `/p/` to the middleware rate-limit prefixes (`middleware.ts` `RATE_LIMITED_PREFIXES` — currently `/api/b/`, `/api/mcp`, `/api/waitlist`) so the public, branding-bearing deliverable pages get the same per-IP burst guard against scraping/enumeration. Confirm the limiter fires on `/p/<slug>`.
 

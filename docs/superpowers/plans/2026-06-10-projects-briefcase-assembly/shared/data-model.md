@@ -2,7 +2,7 @@
 
 Every session that touches projects depends on this exact shape. It is created once in **Session 1** (`lib/project/items.ts`), zod-validated, unit-tested, and never re-declared elsewhere — import it.
 
-**Invariant:** every item is a **snapshot pinned at save time**. The value, citation, and `freshness_token` are copied in at the moment of filing and are **never re-fetched**. A deliverable assembled weeks later shows exactly what the user saw when they filed it. The `freshness_token` MUST be a REAL token from a live source — **never pinned onto fixture-derived data** (`[LB-R1]`; this is why S2 sources rent from the live `rentals-swfl`/ZORI brain, not the `corridor-rents.json` fixture). v1 surfaces the as-of **date** plainly on the deliverable; live-refresh-before-print and cadence-aware staleness badges are a deferred higher-tier feature (operator, 2026-06-10), not built.
+**Invariant:** every item is a **snapshot pinned at save time**. The value, citation, and (where available) `freshness_token` are copied in at the moment of filing and are **never re-fetched**. A deliverable assembled weeks later shows exactly what the user saw when they filed it. **Fixture-backed items** (charts, metrics sourced from fixtures) carry an as-of date from the fixture's own date field — that is the only required honesty mechanism; no `freshness_token` is required. `freshness_token` is present on items from live brain sources (`qa`, `metric`, `report`, `table_slice` filed from `/r/` pages). v1 surfaces the as-of **date** plainly as a citation line under each exhibit; live-refresh-before-print and cadence-aware staleness badges are a deferred higher-tier feature (operator, 2026-06-10), not built.
 
 ```ts
 // lib/project/items.ts

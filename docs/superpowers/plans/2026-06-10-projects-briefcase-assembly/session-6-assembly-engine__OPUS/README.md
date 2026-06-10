@@ -13,7 +13,7 @@
 - [ ] `task-02-templates-lib.md` — `market-overview`, `bov-lite`, `client-email`, `one-pager` (content/template separation)
 - [ ] `task-03-build-route-forced-tool.md` — the ONE forced-tool call; RULES_OF_ENGAGEMENT verbatim; numbered item snapshots only
 - [ ] `task-04-narrative-anchor-lint.md` — number-anchor lint (reuse `isAnchored`) + `[ADDED]` jargon scrub + regenerate-then-strip
-- [ ] `task-05-p-id-page.md` — `/p/[id]` render: provenance under every exhibit + `[INFERENCE]` notes + freshness footer + `[ADDED]` stale badge
+- [ ] `task-05-p-id-page.md` — `/p/[id]` render: provenance under every exhibit + `[INFERENCE]` notes + citation footer (as-of date only — no stale badge)
 - [ ] `task-06-restyle-without-rellm.md` — `[ADDED]` template swap re-renders same narrative, no new LLM call
 - [ ] `task-07-build-all-templates-verify.md` — build all 4 from a seeded project; poisoned-narrative test; close `deliverable_anchor_lint`
 

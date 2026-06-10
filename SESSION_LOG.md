@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — docs(plan): kill freshness-gate on fixture charts (operator override LB-R1)
+
+- `2026-06-10-projects-briefcase-assembly/` — 8 files updated: LB-R1 marked OVERRIDDEN in `AUDIT.md` + `BUILD-PLAN.md`; `session-2` task-01 rewritten (wire fixture paths, no live-source hunt), task-02 adds scatter/vacancy tests + ChartBlockView area/scatter renderer fix; S2 README replaces `[LB-R1] Live-source-only` block with "fixture-first, as-of date is sufficient"; `shared/data-model.md` invariant drops `freshness_token MUST be REAL` prohibition; S6 task-05 "freshness footer" → "citation footer", no token in print.
+- Operator decree: fixture-backed charts are fully deliverable; as-of date stamp is the only honesty mechanism; no freshness tokens or dates in printed/client deliverables.
+
 ## 2026-06-10 (main) — plan: Projects/Briefcase + Assembly Engine (audited, decomposed)
 
 - Added `docs/superpowers/plans/2026-06-10-projects-briefcase-assembly/` — the operator's single-doc plan, audited against live code then decomposed into 10 independently-shippable sessions (folder per session, one file per task), each marked OPUS/SONNET. Single-file edition at `BUILD-PLAN.md` (167KB) for cold handoff.
