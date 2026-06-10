@@ -13,6 +13,11 @@
 - `sse.test.ts`: new test — leading `{"chart":{...}}` frame ahead of text → chart parses, accumulated text contains zero chart JSON
 - 15/15 tests pass, tsc clean on all touched files; check `chart_asof_anchoring` closeable when browser-verified
 
+## 2026-06-10 (main) — fix(S3): demand-log gated chart variants + verification pass
+
+- `HighlightPopup.tsx` + `AskAiDock.tsx` — ZHVI/scatter "File this chart" was silently `null`; replaced with a clickable button that fires `POST /api/meter` `action:"chart_save_gated"` for demand logging. `{block}` save path unchanged.
+- Verified: (1) commit count = 5 (da0ea93…f441b38); (2) `freshness_token` is display-only stamp, no render gate; (3) `AddToProject` + `ctx.fileItem` use same key (`swfl_project_draft_v1`) + same `addItem` fn — coherent; (4) `asOf` added to all `LiveChart` branches by operator `9e5707c` — compatible with `fileChart` (`lc.block.title` still valid).
+
 ## 2026-06-10 (main) — feat(S3): saved_charts + /c/[id] + File-this-chart wired
 
 - `docs/sql/20260611_saved_charts.sql` (new) — idempotent table + RLS public-select + service-role grant; applied + PostgREST schema reloaded.
