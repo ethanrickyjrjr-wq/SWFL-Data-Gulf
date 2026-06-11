@@ -1,0 +1,57 @@
+# .github/workflows/daily-email-digest.yml
+name: Daily Email Digest
+
+on:
+  schedule:
+    # 10:00 UTC = 6:00 AM ET Mon–Fri.
+    # Clear of: daily-rebuild (0 6), city-pulse (0 9), freshness-probe (0 14).
+    - cron: "0 10 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — render + write preview log, do NOT send"
+        required: false
+        default: "false"
+
+concurrency:
+  group: daily-email-digest
+  cancel-in-progress: false
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write   # needed to commit the email log
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Send daily digest
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          # Set these as Actions Variables (not secrets — not sensitive)
+          DIGEST_SENDER_NAME: ${{ vars.DIGEST_SENDER_NAME }}
+          DIGEST_SENDER_ADDRESS: ${{ vars.DIGEST_SENDER_ADDRESS }}
+          DIGEST_SENDER_CONTACT: ${{ vars.DIGEST_SENDER_CONTACT }}
+        run: bun scripts/email/build-digest.mts
+
+      - name: Commit email log
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/email-marketing/email-logs/ || true
+          git diff --staged --quiet || git commit -m "log(email): digest $(date -u +%Y-%m-%d)"
+          git push || true
