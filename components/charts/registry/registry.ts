@@ -13,6 +13,9 @@ import type { ChartSpec, DataShape } from "./chart-spec";
 import { ChartBlockFrame } from "./frames/ChartBlockFrame";
 import { ZHVIAreaChartFrame } from "./frames/ZHVIAreaChartFrame";
 import { CorridorMarketScatterFrame } from "./frames/CorridorMarketScatterFrame";
+import { CompositionFrame } from "./frames/CompositionFrame";
+import { ZGaugeFrame } from "./frames/ZGaugeFrame";
+import { FranchiseSurvivalFrame } from "./frames/FranchiseSurvivalFrame";
 
 export interface FrameDef {
   /** Renders a `ChartSpec`. Every registry component takes exactly `{ spec }`. */
@@ -38,6 +41,21 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     component: CorridorMarketScatterFrame,
     accepts: ["relationship"],
     label: "Corridor Market Scatter",
+  },
+  composition: {
+    component: CompositionFrame,
+    accepts: ["composition"],
+    label: "Composition Bar",
+  },
+  "z-gauge": {
+    component: ZGaugeFrame,
+    accepts: ["single-vs-target"],
+    label: "Z-Gauge / Index",
+  },
+  "franchise-survival": {
+    component: FranchiseSurvivalFrame,
+    accepts: ["ranked-categories"],
+    label: "Franchise Survival (SBA)",
   },
 };
 
