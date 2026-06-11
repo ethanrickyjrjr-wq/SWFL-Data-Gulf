@@ -21,6 +21,13 @@
 - **ZIP report page** (`app/r/zip-report/[zip]/page.tsx`): removed DossierCards (the "Lee county-wide 10 times" problem — was loading 25+ brains per request just to discard them), removed static GrainChips (non-interactive pills), moved flood + housing sources into a single collapsible `<details>` section at the bottom. Page now follows the CRE corridor template: only true-ZIP data, clean layout.
 - **Highlighter** (`lib/highlighter/flag.ts`): flipped default from OFF to ON. `HIGHLIGHTER_UI` was only set in `.env.local`, not Vercel → dead on prod. Now active everywhere; set `HIGHLIGHTER_UI=0` to disable. Test file updated to match.
 - Next: SESSION_LOG entry on push; `MCPInstall.tsx` (M in git status pre-session) still unstaged — operator's work, not touched.
+## 2026-06-11 (main) — docs: email-marketing system spec + rules
+
+- **Email marketing folder created:** `docs/email-marketing/` — spec, rules, and log structure for the SWFL Data Gulf daily digest product.
+- **`EMAIL.md`** — 10-rule governing file (like CLAUDE.md for the email system): section order, prev-day log contract, cite-everything, no-invention, escalation flags, CAN-SPAM compliance, 6am ET send window.
+- **`README.md`** — full spec: data sources, ZIP cluster (33908+nearby), email section template, 5-phase plan (internal → subscriber → white-label), React Email + Resend stack notes, Firecrawl research findings (ROI $36/$1, 30%+ open rate achievable, charts-are-tables constraint), subject line formulas, Fiverr visual polish path, subscriber reply-to-preference feedback loop design.
+- **`email-logs/.gitkeep`** — daily JSON snapshot folder; each sent email logs key_metrics, signals surfaced, and subject line for prev-day dedup.
+- **Next:** Phase 1 implementation — `scripts/email/build-digest.mts` + `DigestEmail.tsx` + GHA cron.
 
 ## 2026-06-11 (main) — fixup(charts): Phase 1 gate-holes + Phase 2a plan hardened
 
