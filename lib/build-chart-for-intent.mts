@@ -134,9 +134,10 @@ async function buildZhviChart(): Promise<{
   if (data.length < 3) return null;
   const lastMonth = data.reduce((m, r) => (r.month > m ? r.month : m), data[0].month);
   const [yr, mo] = lastMonth.split("-");
-  const asOf = new Date(parseInt(yr), parseInt(mo) - 1, 1).toLocaleDateString("en-US", {
+  const asOf = new Date(Date.UTC(parseInt(yr), parseInt(mo) - 1, 1)).toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   });
   return { component: "zhvi", data, asOf };
 }

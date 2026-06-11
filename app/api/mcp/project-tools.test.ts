@@ -276,6 +276,7 @@ test("swfl_project_add: chart_block → lint → saves chart → files a {kind:'
       ["Q2", 1920],
     ],
     chart_type: "area",
+    asOf: "2026-06-30",
   };
   const res = await tools().swfl_project_add(
     { item: { kind: "chart_block", block, title: "Rent chart" } },

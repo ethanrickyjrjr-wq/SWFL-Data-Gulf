@@ -136,6 +136,7 @@ const chartBlockInput = z
     rows: z.array(z.array(z.union([z.string(), z.number(), z.null()]))),
     chart_type: z.enum(["bar", "area", "scatter", "table"]).optional(),
     value_format: z.unknown().optional(),
+    asOf: z.string().optional(),
   })
   .passthrough();
 
@@ -239,7 +240,7 @@ async function buildChartItem(
   input: Extract<AddItemInput, { kind: "chart_block" }>,
 ): Promise<{ item: ProjectItem } | { error: string }> {
   // Provenance/structure gate — same lint the web /api/charts/save path runs.
-  const lint = lintChartBlock(input.block);
+  const lint = lintChartBlock(input.block, null, { requireAsOf: true });
   if (!lint.ok) return { error: `Chart rejected: ${lint.errors.join("; ")}` };
   const chart_id = crypto.randomUUID().slice(0, 8);
   const { error } = await db.from("saved_charts").insert({

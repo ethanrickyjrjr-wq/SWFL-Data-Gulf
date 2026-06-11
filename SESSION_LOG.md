@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — fixup(charts): Phase 1 gate-holes + Phase 2a plan hardened
+
+- **Gate holes closed (pre-push corrections to 7d9360d):** `app/api/charts/save/route.ts` + `app/api/mcp/project-tools.ts` — both `lintChartBlock` calls now pass `{ requireAsOf: true }`. A chart block without `asOf` is now a hard error (422/isError) at both save surfaces; previously warned-and-passed. `chartBlockInput` Zod schema now documents `asOf` as optional (passthrough already let it through; declaration is for discoverability). `app/api/mcp/project-tools.test.ts` — happy-path block fixture updated to include `asOf: "2026-06-30"`.
+- **`buildZhviChart` UTC fix:** `lib/build-chart-for-intent.mts` — replaced local-time `Date` constructor with `Date.UTC` + `timeZone:"UTC"` so the month label can't drift one month back on non-UTC servers.
+- **`ChartBlockView` fallback label stripped:** `components/charts/ChartBlockView.tsx:56` — removed the hardcoded `· SWFL fixture sample` from the back-compat `asOfProp` fallback; pre-keystone saved charts in `ProjectDetail` were showing that label regardless of their actual source.
+- **Phase 2a plan hardened:** `phase-2a-chartspec-registry-scaffold__OPUS.md` — added `CONFIRMED CONSTRAINT` block: `ZHVIAreaChart`/`CorridorMarketScatter` accept raw data arrays, not `{spec:ChartSpec}`; plan now specifies thin wrapper components (`ZHVIAreaChartFrame`, `CorridorMarketScatterFrame`) as mandatory; removed misleading `asOf`/`source` re-declarations from `ChartSpec` stub (both already inherited from `ChartBlock`).
+- **tsc:** clean (0). **bun test:** 36 refinery/chart green + 19 MCP project-tools green.
+
 ## 2026-06-11 (main) — Fix print/PDF for /r/ report pages (HBarChart blank + values + tabs)
 
 - `components/charts/HBarChart.tsx` — expanded `@media print` in `<style jsx>`: white card bg, dark text colors, `print-color-adjust: exact` on fills/track so bar colors print; extended `beforeprint` handler to also snap value text (was stuck at "$0.00" since GSAP counter-animation was separate from bar width snap)

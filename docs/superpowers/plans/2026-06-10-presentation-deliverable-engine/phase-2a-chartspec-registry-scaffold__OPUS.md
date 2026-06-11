@@ -19,8 +19,8 @@ Phase 1 (uses the `asOf`/`source` fields now on `ChartBlock`).
      ```ts
      export interface ChartSpec extends ChartBlock {
        frameId: string;                 // which registry frame renders this
-       asOf: string;                    // required here (Phase 1 added it to ChartBlock)
-       source?: { citation: string; url?: string };
+       // asOf: string — inherited from ChartBlock (Phase 1); do NOT re-declare
+       // source?: {...} — inherited from ChartBlock (Phase 1); do NOT re-declare
        theme?: ChartTheme;              // primary/accent/logo — resolved at render (Phase 6 fills it)
        options?: Record<string, unknown>; // per-frame knobs (series keys, axis labels, etc.)
      }
@@ -33,6 +33,31 @@ Phase 1 (uses the `asOf`/`source` fields now on `ChartBlock`).
      ```
      Register the **already-built** frames first: the generic `ChartBlockView`/`HBarChart` bar+table,
      `ZHVIAreaChart` (area/time-series), `CorridorMarketScatter` (scatter/relationship — UI-Kit #01).
+
+   > **CONFIRMED CONSTRAINT — do NOT skip:** `ZHVIAreaChart` (`components/viz/ZHVIAreaChart.tsx`) and
+   > `CorridorMarketScatter` (`components/viz/CorridorMarketScatter.tsx`) accept **raw data arrays**
+   > (`ZHVITrendEntry[]` and `JoinedCorridorRow[]`), not `{ spec: ChartSpec }`. You cannot register them
+   > directly as `FrameDef` — TypeScript will error. You must write **thin wrapper components** first:
+   >
+   > ```ts
+   > // components/charts/registry/frames/ZHVIAreaChartFrame.tsx
+   > import { ZHVIAreaChart } from "@/components/viz/ZHVIAreaChart";
+   > import type { ChartSpec } from "../chart-spec";
+   > export function ZHVIAreaChartFrame({ spec }: { spec: ChartSpec }) {
+   >   const data = (spec.options?.data ?? []) as ZHVITrendEntry[];
+   >   return <ZHVIAreaChart data={data} asOf={spec.asOf} />;
+   > }
+   >
+   > // components/charts/registry/frames/CorridorMarketScatterFrame.tsx
+   > export function CorridorMarketScatterFrame({ spec }: { spec: ChartSpec }) {
+   >   const data = (spec.options?.data ?? []) as JoinedCorridorRow[];
+   >   return <CorridorMarketScatter data={data} asOf={spec.asOf} />;
+   > }
+   > ```
+   >
+   > Register **the wrapper** (not the underlying component) in `CHART_REGISTRY`. The wrapper is the
+   > adapter seam — the underlying component never knows about `ChartSpec`. Keep wrappers thin: extract
+   > `spec.options.data`, forward `spec.asOf`, nothing else.
    - **`FrameRenderer.tsx`** — given a `ChartSpec`, look up `CHART_REGISTRY[spec.frameId]` and render
      its component (with an error boundary, mirroring `ReportChart.tsx`). This is the single render
      entry the assembly engine (Phase 3) and `/p/[id]` use.

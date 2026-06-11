@@ -53,7 +53,7 @@ function captionFor(block: ChartBlock, asOfProp?: string): string | null {
     const cite = block.source?.citation;
     return `as of ${friendlyAsOf(block.asOf)}${cite ? ` · ${cite}` : ""}`;
   }
-  if (asOfProp) return `as of ${asOfProp} · SWFL fixture sample`;
+  if (asOfProp) return `as of ${asOfProp}`;
   return null;
 }
 

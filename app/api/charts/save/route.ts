@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body?.block) return NextResponse.json({ error: "no block" }, { status: 400 });
 
-  const lint = lintChartBlock(body.block);
+  const lint = lintChartBlock(body.block, null, { requireAsOf: true });
   if (!lint.ok) {
     return NextResponse.json({ error: "invalid chart", detail: lint.errors }, { status: 422 });
   }
