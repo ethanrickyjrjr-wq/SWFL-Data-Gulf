@@ -2,6 +2,20 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Presentation Deliverable Engine: Phase 2a ChartSpec registry scaffold COMPLETE + PUSHED
+
+- **Phase 2a — the type seam (TDD).** New `components/charts/registry/`:
+  - `chart-spec.ts` — `ChartSpec extends ChartBlock` (import `type ChartBlock` from `@/refinery/validate/chart-block-lint.mts`, per plan); adds `frameId: string`, `theme?: {primary?,accent?,logoUrl?}`, `options?: Record<string,unknown>`. `asOf`/`source` inherited from Phase 1 — NOT re-declared. `DataShape` union (time-series | ranked-categories | relationship | composition | single-vs-target | timeline).
+  - `registry.ts` — `CHART_REGISTRY: Record<string, FrameDef{component,accepts,label}>` + `getFrame(frameId)`. Registers the 3 ALREADY-BUILT frames: `bar-table` (generic `ChartBlockView`), `zhvi-area`, `corridor-scatter`.
+  - `frames/ChartBlockFrame.tsx` + `ZHVIAreaChartFrame.tsx` + `CorridorMarketScatterFrame.tsx` — thin wrappers. CONFIRMED real: `ZHVIAreaChart`/`CorridorMarketScatter` (`components/viz/`) take raw arrays (`ZHVITrendEntry[]`/`JoinedCorridorRow[]`) + `asOf?`, NOT `{spec}`; wrappers read `spec.options.data`, forward `spec.asOf`.
+  - `FrameRenderer.tsx` — single render entry; `getFrame` lookup behind a `ReportChart`-style error boundary; unknown `frameId` or render fault → renders nothing (never throws into a client deck).
+  - `registry.test.ts` — 5 pure tests (repo has NO DOM test env by design; "renders each frame" verified at the resolution level via `getFrame`).
+- **Additive only — `/r/` untouched.** Existing `ChartBlockView`/`ReportChart` dispatch left intact (plan: registry is additive; `/r/`→`FrameRenderer` migration is a later cleanup).
+- **2b–2f UNBLOCKED.** Exact shipped field names + add-a-frame recipe written into the plan's new §SHIPPED block (`phase-2a-...__OPUS.md`).
+- **Verify:** `tsc --noEmit` clean (0); `bun test components lib` → 778 pass / 0 fail (773 prior lib + 5 new). README row 2a + build-queue flipped.
+- **Recovery note (git):** this work was first committed locally as `feab8fc` on top of two local-only zip-report reverts; a parallel session then reset local `main` to `964dc4a` (wiping `feab8fc` from the branch — it survived as a dangling commit) and committed its own `b9c442b` "consolidate layout", while origin advanced to `a71ad0c` (a *different* zip-report approach). To avoid entangling the two diverged zip-report lines, Phase 2a was cherry-picked onto `a71ad0c` and FF-pushed alone (`git push origin HEAD:main`), NOT via safe-push. **Local `main` still carries the parallel session's `b9c442b` (diverged from origin) — that zip-report reconciliation is the operator's / that session's call; Phase 2a did not touch it.**
+- Next: Phase 2b–2f frame ports (PARALLEL, Sonnet) + 2g pickFramesForData; then Phase 3 assembly onto `FrameRenderer`.
+
 ## 2026-06-11 (main) — fix(zip-report): page cleanup + highlighter always-on
 
 - **ZIP report page** (`app/r/zip-report/[zip]/page.tsx`): removed DossierCards (the "Lee county-wide 10 times" problem — was loading 25+ brains per request just to discard them), removed static GrainChips (non-interactive pills), moved flood + housing sources into a single collapsible `<details>` section at the bottom. Page now follows the CRE corridor template: only true-ZIP data, clean layout.

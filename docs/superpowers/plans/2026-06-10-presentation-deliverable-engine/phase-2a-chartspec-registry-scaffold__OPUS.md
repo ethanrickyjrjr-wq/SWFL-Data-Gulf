@@ -1,5 +1,9 @@
 # Phase 2a — ChartSpec registry scaffold · OPUS · SERIAL, EXCLUSIVE (type seam)
 
+> **STATUS: ✅ SHIPPED + PUSHED 2026-06-11.** Files under `components/charts/registry/`. 2b–2f are now
+> UNBLOCKED. Exact shipped field names + the add-a-frame recipe are in the **§SHIPPED — hand-off to
+> 2b–2f** block at the bottom of this file.
+
 > **Contract (inherited):** own ChartSpec registry extending `ChartBlock` (not Vega-Lite); per-visual
 > as-of; NO `git push`. **This defines the `ChartSpec` type every Phase-2 frame imports — run EXCLUSIVE;
 > the 5 frame ports (2b–2f) start only AFTER this lands.**
@@ -76,3 +80,47 @@ shipped** so their `options`/`source` usage matches.
 
 ## Wrap
 - Commit locally. SESSION_LOG + build-queue. Update README status row 2a. **No push.**
+
+---
+
+## §SHIPPED — hand-off to 2b–2f (read this before porting a frame)
+
+**Files shipped (`components/charts/registry/`):**
+- `chart-spec.ts` — `ChartSpec`, `ChartTheme`, `DataShape`.
+- `registry.ts` — `CHART_REGISTRY`, `FrameDef`, `getFrame(frameId)`.
+- `FrameRenderer.tsx` — `<FrameRenderer spec={...} />` (error-boundary'd lookup + render).
+- `frames/ChartBlockFrame.tsx`, `frames/ZHVIAreaChartFrame.tsx`, `frames/CorridorMarketScatterFrame.tsx`.
+- `registry.test.ts` — 5 pure tests (no DOM by repo design).
+
+**`ChartSpec` exact shape** (superset of `ChartBlock` — import `type ChartBlock` from
+`@/refinery/validate/chart-block-lint.mts`):
+```ts
+interface ChartSpec extends ChartBlock {
+  frameId: string;                    // which registry frame renders this
+  theme?: { primary?: string; accent?: string; logoUrl?: string };
+  options?: Record<string, unknown>;  // per-frame knobs; raw-array data rides at options.data
+}
+// inherited from ChartBlock: title, columns, rows, chart_type?, value_format?,
+//   asOf (REQUIRED ISO YYYY-MM-DD), source? { citation; url? }
+type DataShape = "time-series" | "ranked-categories" | "relationship"
+               | "composition" | "single-vs-target" | "timeline";
+```
+
+**To add YOUR frame (one entry + one file, no surgery):**
+1. `components/charts/registry/frames/<YourFrame>.tsx` — a component typed
+   `({ spec }: { spec: ChartSpec }) => JSX`. If the underlying viz takes a raw data array
+   (the UI-Kit pattern), read it from `spec.options?.data` and forward `spec.asOf` — keep the
+   wrapper thin (this is the adapter seam; the viz never sees `ChartSpec`).
+2. In `registry.ts`, add ONE `CHART_REGISTRY` entry:
+   `"<frame-id>": { component: <YourFrame>, accepts: [<DataShape...>], label: "<human label>" }`.
+   `accepts` MUST be non-empty (Phase 2g `pickFramesForData` maps `DataShape → frames`).
+3. The registry test auto-covers your frame (it iterates `CHART_REGISTRY`); add a frame-specific
+   data-shaping test next to your file if you transform `options` into the viz's array.
+
+**Already registered (do NOT re-add):** `bar-table` (ranked-categories, generic `ChartBlockView`),
+`zhvi-area` (time-series), `corridor-scatter` (relationship). The 5 UI-Kit frames cover the
+remaining shapes: `composition`, `single-vs-target`, `timeline`.
+
+**Render contract:** the assembly engine (Phase 3) + `/p/[id]` render via `<FrameRenderer spec />`,
+NOT by importing your component directly. An unknown `frameId` or a render fault degrades to nothing —
+never throws into a client-facing deck.
