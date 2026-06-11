@@ -181,59 +181,7 @@ Missing a field = inability to compute valid deltas on the next run.
 
 ---
 
-## Rule 9 — CAN-SPAM + RFC 8058 COMPLIANCE (non-negotiable)
-
-### Email headers (set at send time via Resend API)
-
-```
-List-Unsubscribe: <https://swfldatagulf.com/unsubscribe?token={token}>, <mailto:unsubscribe@swfldatagulf.com?subject=unsubscribe>
-List-Unsubscribe-Post: List-Unsubscribe=One-Click
-```
-
-RFC 8058 / Gmail + Yahoo bulk-sender requirement (enforced Feb 2024). One-click unsubscribe
-must process within 2 business days. The unsubscribe token must be subscriber-scoped
-(not a shared secret). Both headers are required; the HTTPS endpoint takes precedence.
-
-### Footer content (CAN-SPAM §15 USC 7704)
-
-Required by law:
-- Physical postal address (real, USPS-deliverable; not a fiction placeholder, not a PO Box
-  unless the sender actually uses one as a registered business address)
-- Sender identification (must be non-deceptive; FROM name must match the entity that controls the list)
-- One-click unsubscribe link (in the body, in addition to the header)
-- "You received this because..." context line
-
-**IDENTITY DECISION REQUIRED — DO NOT SHIP WITH PLACEHOLDER:**
-```
-[PLACEHOLDER — REPLACE BEFORE FIRST LIVE SEND]
-Company: _________________________ (must be the actual controlling entity)
-Address: _________________________ (must be USPS-valid physical address or registered CMRA)
-Contact: _________________________ (real name or role)
-Email: hello@swfldatagulf.com
-
-Decision options:
-  A) "SWFL Data Gulf" + your actual registered business address (cleanest)
-  B) Register "Gulf Coast Intelligence Group, LLC" as a FL DBA → use its registered address
-  C) Send from your personal name + address (CAN-SPAM allows this for sole proprietors)
-Phone: omit unless you have a dialable number (CAN-SPAM does not require phone)
-[END PLACEHOLDER]
-```
-
-Footer template (fill in identity above):
-```
-{COMPANY_NAME}
-{PHYSICAL_ADDRESS}
-{CITY}, FL {ZIP}
-{CONTACT_NAME OR ROLE}  ·  hello@swfldatagulf.com
-
-Data sourced from SWFL Data Gulf (swfldatagulf.com).
-You received this because you subscribed at swfldatagulf.com.
-[Unsubscribe] [Privacy Policy] [View on Web]
-```
-
----
-
-## Rule 10 — SEND WINDOW
+## Rule 9 — SEND WINDOW
 
 Weekday sends: **6:00 AM ET** (GHA cron: `0 10 * * 1-5` UTC).
 No sends on weekends — Saturday/Sunday data gaps are covered in Monday's DELTA section.
@@ -241,7 +189,7 @@ Holiday skips: log `send_status: "skipped"`; next run reads this as a valid prio
 
 ---
 
-## Rule 11 — SUBJECT LINE
+## Rule 10 — SUBJECT LINE
 
 - **Derive from `top_story`** if a signal with `topic: "breaking"` or `topic: "transactions"` exists.
   Otherwise default to the primary ZIP metric movement (see formulas below).

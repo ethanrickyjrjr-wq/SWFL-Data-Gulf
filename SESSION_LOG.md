@@ -2,6 +2,8 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — EMAIL.md: drop Rule 9 (CAN-SPAM), renumber 10→9 / 11→10
+
 ## 2026-06-11 (main) — email digest Phase 1 plan + spec
 
 - Created `docs/email-marketing/` folder with `EMAIL.md` (11 rules + SOURCED THRESHOLDS) + `README.md` (full spec: business case, V1→V3 roadmap, 8-section layout, Phase 0–5 plan) + `email-logs/.gitkeep`.
