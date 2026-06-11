@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — S8 uploads COMPLETE (local) — images+PDF attach, per-user Storage RLS, signed-URL render
+
+- **Vendor-verified** Supabase Storage in-session (FINDINGS-storage.md): per-operation `storage.objects` policies, `TO authenticated`, `(storage.foldername(name))[1] = (select auth.uid()::text)`, `createSignedUrl(path,sec)`, `upload(path,file,{contentType,upsert})`.
+- **`docs/sql/20260614_project_uploads_bucket.sql`** APPLIED to prod: private `project-uploads` bucket (10 MiB, jpg/png/webp/pdf), 4 per-op RLS policies keyed to the owner uid path-prefix.
+- **`components/project/UploadDrop.tsx`** — browser upload via user JWT (RLS applies), client limits (10 MB / 10-per-project / MIME / HEIC-reject), files a `{kind:"file"}` item, meters `upload`. Mounted in `ProjectDetail.tsx`; file items render as `<figure>`/PDF-link via server signed URLs + "Provided by agent".
+- **`lib/project/signed-upload-url.ts`** — 1h signed URLs; owner session client on `/project/[id]`, service-role on `/p/[id]` (re-signs each render; raw private path never rendered). `/p/[id]` file exhibit render fixed (was pointing at the raw path) + `ExhibitSlot.signed_url`.
+- **`storage_rls_scope_verify` CLOSED** on a LIVE two-account test (`scripts/verify-storage-rls.mjs`, 8/8): owner-reads-own=200; B cross-read/sign/write=400, anon read=400 all DENIED; 1s signed URL 200→400 after expiry.
+- Tsc clean (0), 92 tests green, eslint clean. UI built LOCALLY — **awaiting operator review + push, then deploy.** (S7 also marked `[x]` in build-queue per operator: "7 is done".)
+
 ## 2026-06-10 (main) — S7 delivery surfaces COMPLETE — Copy email / mailto / share + revoke/restore
 
 - **Task 01:** `DeliveryButtons.tsx` on `/p/[id]` action strip — Copy email (full body), `mailto:` (short lead + link), `navigator.share` (OS sheet; clipboard fallback); each click meters `deliver_email`.
