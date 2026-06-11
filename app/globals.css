@@ -179,4 +179,27 @@ body {
   .recharts-cartesian-grid line { stroke: #d1d5db !important; }
   .recharts-text tspan { fill: #374151 !important; }
   .recharts-area path { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+  /* ── /p/[id] deliverable page — scoped print fixes ── */
+  /* Exhibit/stat/QA containers use dark glass backgrounds that are invisible on
+     white paper. Clear them and swap the border to a light gray. */
+  .deliverable-page .rounded-xl,
+  .deliverable-page .rounded-lg {
+    background: transparent !important;
+    border-color: #e5e7eb !important;
+  }
+
+  /* Inference-notes aside: keep the amber callout visible */
+  .deliverable-page aside { background: #fefce8 !important; border-color: #d97706 !important; color: #92400e !important; }
+
+  /* Per-visual asOf captions — must survive in print */
+  .deliverable-page .citation { color: #374151 !important; }
+  .deliverable-page figcaption { color: #374151 !important; }
+
+  /* Ensure each top-level slot starts on a new page only for section-level breaks */
+  .deliverable-page section { break-before: avoid; }
+  .deliverable-page figure { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Stat grid — remove dark card backgrounds */
+  .deliverable-page .grid > div { background: transparent !important; border-color: #e5e7eb !important; }
 }

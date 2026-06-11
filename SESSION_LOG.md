@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Presentation Engine Phase 4: PDF export vintage guard (LOCAL, not pushed)
+
+- **Phase 4 contract delivered:** `lib/deliverable/print-vintage.ts` — pure utility `vintageSet` / `isUniformVintage` / `assertUniformVintage` over `SnapshotItem[]` using `chart_spec.asOf` / `chart_block.asOf`. Guard prevents a cover-level asOf stamp from replacing per-visual captions when frames span multiple vintages (ZHVI, flood AAL, rents never share a date).
+- `lib/deliverable/print-vintage.test.ts` — 19 tests: mixed-vintage trips assert with vintage list in error; uniform-vintage passes (cover stamp explicitly allowed); empty/non-visual snapshots pass. 104/104 deliverable tests green, tsc 0.
+- Print CSS: scoped `.deliverable-page` block added to `globals.css` — clears dark glass backgrounds from exhibit/stat/QA containers, preserves `.citation` + `figcaption` asOf text on white paper, inference-notes amber callout kept legible; `<main>` in `/p/[id]` gains `deliverable-page` class.
+- README Phase 4 row ✅, build-queue Phase 4 ✅. **NOT pushed** — Ricky pushes. Next: Phase 5 (templates) or live browser round-trip.
+
 ## 2026-06-11 (main) — FIRST REAL EMAIL SENT: 33908 white-label digest → ethanrickyjrjr@gmail.com
 
 - Sent the standalone 33908 white-label client digest (real lake data, in-email HTML/CSS bar chart, agent brand slot) via Resend from `hello@swfldatagulf.com`. Resend accepted: id `c838152d-85ac-4f87-bed3-60189296284f`, `error: null`, 9774 bytes. Mirrored the verified `from` used by `app/api/waitlist/route.ts`.

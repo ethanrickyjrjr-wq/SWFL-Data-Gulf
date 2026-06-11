@@ -417,7 +417,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
+    <main className="deliverable-page mx-auto max-w-3xl px-4 py-10">
       {/* Action strip — hidden in print */}
       <div className="print-hide mb-6 flex flex-wrap items-center justify-between gap-3">
         <TemplateSwitcher id={id} current={data.template} />
