@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — ZIP report layout redesign + stat-annotation strip PUSHED
+
+- **`feat(zip-report)`** (`d6f5a11`): consolidated layout — grouped sections (ZIP-Level / City Area / County / SWFL), sources accordion (collapsed by default), no inline source citations, removed GrainChips/DossierCards.
+- **`fix(zip-report)`** (`015bc27`): strip trailing `(Label: value)` parentheticals from `claim_text` display via `stripStatAnnotation()`; display-layer only.
+- `housingSourceUrl`/`housingSourceCitation` variables present; tsc clean (0 errors).
+- Next: Phase 2b–2f frame ports + 2g pickFramesForData.
+
 ## 2026-06-11 (main) — Presentation Deliverable Engine: Phase 2e SeasonalRadialFrame LOCAL
 
 - **Data-availability confirmed:** `cre-swfl` emits `seasonal_index` (0→1) per `CorridorNormalized`; no rebuild needed (read built output only).
