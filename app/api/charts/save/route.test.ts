@@ -8,6 +8,7 @@ const validBlock = {
     ["2024-Q2", 1920],
   ],
   chart_type: "area",
+  asOf: "2026-06-10",
 };
 
 mock.module("@/utils/supabase/service-role", () => ({
