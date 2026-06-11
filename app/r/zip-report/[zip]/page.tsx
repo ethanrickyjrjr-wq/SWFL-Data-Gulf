@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
-import type { LocationInput } from "../../../../refinery/lib/location-resolver.mts";
 import { resolveGradeConfig, type DirectionPolarity } from "../../../../refinery/vocab/loader.mts";
 import { loadParsedBrain } from "../../../../lib/fetch-brain";
-import { assembleLocationDossier, selectDossierLines } from "../../../../lib/zip-dossier";
-import { identityForZip, distinctChips, didYouMeanBanner } from "../../../../lib/location-surface";
+import { identityForZip, didYouMeanBanner } from "../../../../lib/location-surface";
 import { ReportShell, ReportHeader, ReportFooter, Meta } from "../../_components/report-shell";
 import { HighlighterLayer } from "../../../../components/highlighter/HighlighterLayer";
 import { HighlighterProvider } from "../../../../lib/highlighter/context";
@@ -14,9 +12,7 @@ import { ColorLegend } from "../../_components/color-legend";
 import {
   LocationSearchBox,
   IdentityCard,
-  GrainChips,
   DidYouMeanBanner,
-  DossierCards,
   OutOfScopePanel,
 } from "../../_components/location-ui";
 
@@ -66,10 +62,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     );
   }
 
-  // The full fan-out — every dataset covering this ZIP, at the grain we hold it.
-  const loc: LocationInput = { kind: "zip", resolution: res };
-  const dossier = await assembleLocationDossier(loc);
-
   // The bespoke headline reads housing + flood structured, for the trend-badged
   // tables. Resilient: a missing brain hides its section, never 500s the page.
   const housing = await loadParsedBrain("housing-swfl");
@@ -77,6 +69,8 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const housingTable = housing?.output.detail_tables?.find((t) => t.id === "housing_by_zip");
   const housingRow = housingTable?.rows.find((r) => r.key === zip);
+  const housingSourceUrl = housingTable?.source.url ?? "";
+  const housingSourceCitation = housingTable?.source.citation ?? "";
 
   const price = housingRow?.cells["median_sale_price"] as number | undefined;
   const priceYoy = housingRow?.cells["median_sale_price_yoy_pct"] as number | null | undefined;
@@ -112,20 +106,11 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     ? (floodMetric as NonNullable<typeof floodMetric>).source.citation
     : "";
 
-  // Identity, chips, did-you-mean (G6 + human language live in location-surface).
   const identity = identityForZip(res);
-  const chips = distinctChips(dossier.lines);
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);
 
-  // County / metro / region rollups — every labeled "covers {zip}" read BELOW
-  // the true-ZIP headline. `!is_true_zip` already excludes the housing/flood
-  // lines shown bespoke above. (Future per-ZIP rentals/permits rows render via
-  // §F; until then the only true-ZIP reads are housing + flood, both headlined.)
-  const rollupLines = selectDossierLines(dossier.lines, 2).filter((l) => !l.is_true_zip);
-
   // Freshness token — quoted once, in the header.
-  const freshnessToken =
-    housing?.freshness_token ?? env?.freshness_token ?? Object.values(dossier.freshness_tokens)[0];
+  const freshnessToken = housing?.freshness_token ?? env?.freshness_token;
   const updatedAt = housing?.refined_at ?? env?.refined_at;
 
   const highlighterEnabled = highlighterUiEnabled();
@@ -150,7 +135,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       {/* Identity — confirm WHERE before any number. */}
       <IdentityCard identity={identity} />
       {didYouMean && <DidYouMeanBanner message={didYouMean} />}
-      <GrainChips chips={chips} />
 
       {/* True-ZIP headline: real estate + flood. */}
       {hasHousing && (
@@ -194,25 +178,47 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
               })} / yr per insured property`}
             />
             <DataRow label="SWFL percentile rank" value={`${rank}th`} />
-            <div className="flex items-start justify-between px-4 py-3 text-sm">
-              <dt className="text-gray-400">Source</dt>
-              <dd className="ml-4 text-right text-xs text-gray-400">
+          </dl>
+        </section>
+      )}
+
+      {/* Sources — collapsible, not scattered */}
+      {(hasHousing || hasFlood) && (
+        <details className="mt-8 rounded-xl glass-card-modern border border-white/10">
+          <summary className="flex cursor-pointer list-none select-none items-center justify-between px-4 py-3 text-sm">
+            <span className="font-medium text-gray-400">Sources</span>
+            <span className="text-xs text-gray-600">▾</span>
+          </summary>
+          <div className="space-y-2.5 border-t border-white/[0.06] px-4 pb-4 pt-3">
+            {hasHousing && housingSourceUrl && (
+              <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
+                <span className="shrink-0 text-gray-500">Housing market:</span>
+                <a
+                  href={housingSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
+                >
+                  {housingSourceCitation || "Source"}
+                </a>
+              </div>
+            )}
+            {hasFlood && floodSourceUrl && (
+              <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
+                <span className="shrink-0 text-gray-500">Flood risk:</span>
                 <a
                   href={floodSourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
                 >
-                  {floodSourceCitation}
+                  {floodSourceCitation || "Source"}
                 </a>
-              </dd>
-            </div>
-          </dl>
-        </section>
+              </div>
+            )}
+          </div>
+        </details>
       )}
-
-      {/* County / metro / region rollups — labeled, never read as a ZIP figure. */}
-      <DossierCards lines={rollupLines} />
 
       {/* CTA */}
       <div className="mt-10 rounded-xl glass-card-modern border border-white/10 px-6 py-6">
