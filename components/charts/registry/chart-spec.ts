@@ -29,8 +29,10 @@ export interface ChartTheme {
  * The coarse shape of the data a frame consumes — declared on each registry
  * entry's `accepts`. NOTE: `pickFramesForData` (Phase 2g) does NOT read
  * `accepts`; it returns one frameId from a hardcoded priority ladder. `accepts`
- * is descriptive metadata only — if a future picker ever reads it, fix the
- * `seasonal-radial`/`zhvi-area` `time-series` collision first.
+ * is descriptive metadata only. The `seasonal-radial`/`zhvi-area` `time-series`
+ * overlap is defused by `FrameDef.fixtureOnly`: seasonal-radial is fixture-only,
+ * and both the picker and the deliverable binder drop fixture-only frames via
+ * `isFixtureOnly()` — so even a future `accepts`-matching picker can't surface it.
  */
 export type DataShape =
   | "time-series"

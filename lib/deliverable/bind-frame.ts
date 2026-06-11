@@ -24,6 +24,7 @@ import type {
 } from "../../refinery/types/brain-output.mts";
 import { computeMetricChart } from "../../refinery/lib/chart-from-metrics.mts";
 import { pickFramesForData } from "../../components/charts/registry/pick-frames";
+import { isFixtureOnly } from "../../components/charts/registry/registry";
 import type { ChartSpec } from "../../components/charts/registry/chart-spec";
 
 /** What the caller knows about a frame before it is bound to live data. */
@@ -38,16 +39,14 @@ export interface FrameBindRequest {
   title?: string;
 }
 
-/** Frames this binder can populate from live brain data today. The data-array
- *  frames (zhvi-area, corridor-scatter) and the fixture-bound frames
- *  (seasonal-radial, storm-timeline, franchise-survival) are intentionally NOT
- *  here — their brains don't yet emit per-row data, so they bind to null and the
- *  caller drops them rather than render an empty frame. */
-const SUPPORTED_FRAMES = new Set(["composition", "z-gauge", "bar-table"]);
-
-export function isSupportedFrame(frameId: string): boolean {
-  return SUPPORTED_FRAMES.has(frameId);
-}
+// Two distinct, non-overlapping reasons a frame yields no live ChartSpec — kept
+// separate so neither becomes a second hardcoded list:
+//   1. fixtureOnly (FrameDef.fixtureOnly, the SINGLE registry gate read here):
+//      the frame renders from a fixture the brains don't emit (seasonal-radial,
+//      storm-timeline) → bindFrameSpec returns null and the caller drops it.
+//   2. not-yet-implemented: a live-bindable frame this binder has no `case` for
+//      (zhvi-area, corridor-scatter) → `buildFrame`'s switch default returns
+//      null. This is a property of the code below, not an exclusion list.
 
 // ---------------------------------------------------------------------------
 // Small pure helpers
@@ -85,20 +84,14 @@ function round2(n: number): number {
  * Bind one frame request to a `ChartSpec`, or `null` if it cannot be bound from
  * this brain's live data. Pure: no fetch, no Date.now, no randomness.
  */
-export function bindFrameSpec(output: BrainOutput, req: FrameBindRequest = {}): ChartSpec | null {
-  const asOf = asOfOf(output);
-  if (!asOf) return null;
-
-  let frameId = req.frame_id;
-  if (!frameId) {
-    // Auto-pick, but never land on a frame we cannot bind from live data —
-    // fall back to the generic bar/table. An EXPLICIT unsupported request
-    // (below) still returns null so the caller drops it.
-    const cand = pickFramesForData(output.detail_tables, output.key_metrics);
-    frameId = cand && isSupportedFrame(cand.frameId) ? cand.frameId : "bar-table";
-  }
-  if (!isSupportedFrame(frameId)) return null;
-
+/** Build the named frame if this binder implements it; null otherwise (the
+ *  switch default covers live-bindable frames not yet coded, e.g. zhvi-area). */
+function buildFrame(
+  frameId: string,
+  output: BrainOutput,
+  req: FrameBindRequest,
+  asOf: string,
+): ChartSpec | null {
   switch (frameId) {
     case "composition":
       return bindComposition(output, req, asOf);
@@ -109,6 +102,27 @@ export function bindFrameSpec(output: BrainOutput, req: FrameBindRequest = {}): 
     default:
       return null;
   }
+}
+
+export function bindFrameSpec(output: BrainOutput, req: FrameBindRequest = {}): ChartSpec | null {
+  const asOf = asOfOf(output);
+  if (!asOf) return null;
+
+  // Explicit recipe: a fixture-only frame (the single FrameDef.fixtureOnly gate)
+  // has no live data to bind → drop it. Otherwise build exactly what was named.
+  if (req.frame_id) {
+    if (isFixtureOnly(req.frame_id)) return null;
+    return buildFrame(req.frame_id, output, req, asOf);
+  }
+
+  // Auto: the picker already drops fixture-only frames (it reads the same flag).
+  // Bind the pick; if this binder hasn't implemented it, fall back to bar/table.
+  const cand = pickFramesForData(output.detail_tables, output.key_metrics);
+  if (cand) {
+    const spec = buildFrame(cand.frameId, output, req, asOf);
+    if (spec) return spec;
+  }
+  return buildFrame("bar-table", output, req, asOf);
 }
 
 // ---------------------------------------------------------------------------

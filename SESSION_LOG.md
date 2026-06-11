@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — FrameDef.fixtureOnly = single gate for fixture-bound frames (LOCAL, not pushed)
+
+- Q2 decision: promote the seasonal-radial exclusion to ONE registry flag, not a third guard. `FrameDef.fixtureOnly` (`registry.ts`) = true on `seasonal-radial` + `storm-timeline`; pure `isFixtureOnly(frameId)` reader.
+- BOTH consumers derive their exclusion from the flag — no hardcoded list remains: `pickFramesForData` drops any fixture-only candidate via a final `isFixtureOnly` guard; `bindFrameSpec` gates on `isFixtureOnly` and the old `SUPPORTED_FRAMES` allowlist is DELETED (the binder's switch-default now covers "live-bindable but not-yet-implemented" like zhvi-area/scatter — a code property, not an exclusion list).
+- Picker→`registry.ts` import is bun-test-safe (registry.test.ts already imports it → recharts); no cycle (registry never imports pick-frames).
+- Verify (operator condition 4): `seasonal-radial` AND `storm-timeline` recipes both return null; 204 tests pass / 0 fail; `tsc --noEmit` 0 errors; grep confirms `SUPPORTED_FRAMES`/`isSupportedFrame` gone + no seasonal-radial exclusion mechanism outside the flag. The `642c17f` "neutralized in two hardcoded places" tripwire is RESOLVED. NOT pushed.
+
 ## 2026-06-11 (main) — email-marketing: white-label digest + AI-hook samples, plan revision (LOCAL, not pushed)
 
 - Built two openable samples under `docs/email-marketing/samples/`: `agent-client-digest.html` (white-label per-ZIP client digest, real lake data for 33908 + 33931, agent brand slot) and `ai-hook-page.html` (AI landing wrapper — clickable real-data prompts, live MCP one-liner, document-gen capability cards).

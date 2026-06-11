@@ -2,6 +2,7 @@
 // Returns the single highest-priority registered frame for a brain's data, or null.
 import type { BrainOutputDetailTable, BrainOutputMetric } from "@/refinery/types/brain-output.mts";
 import { isDateColumn, numericQualifyingColumns } from "@/refinery/lib/chart-from-metrics.mts";
+import { isFixtureOnly } from "./registry";
 
 export interface FrameCandidate {
   frameId: string;
@@ -66,20 +67,24 @@ function tryRankedCategories(tables: readonly BrainOutputDetailTable[]): FrameCa
 
 /**
  * Returns the single highest-priority frame for a brain's data shape, or null.
- * Fixture-bound frames (franchise-survival, seasonal-radial, storm-timeline) are
- * never returned — Phase 3 wires those directly by brain ID.
+ * Frames flagged `FrameDef.fixtureOnly` (they render from a fixture, not live
+ * data) are never returned — the final guard drops any such candidate by reading
+ * the flag, so the registry is the single source of truth, not this ladder.
  */
 export function pickFramesForData(
   detail_tables: BrainOutputDetailTable[] | undefined,
   key_metrics: BrainOutputMetric[],
 ): FrameCandidate | null {
   const tables = detail_tables ?? [];
-  return (
+  const cand =
     tryTimeSeries(tables) ??
     tryRelationship(tables) ??
     tryComposition(key_metrics) ??
     trySingleVsTarget(key_metrics) ??
     tryRankedCategories(tables) ??
-    null
-  );
+    null;
+  // The flag is the single gate: never hand back a fixture-only frame, even if a
+  // future ladder rung were to name one. Today no rung does — this keeps the
+  // registry flag authoritative for the picker too.
+  return cand && !isFixtureOnly(cand.frameId) ? cand : null;
 }

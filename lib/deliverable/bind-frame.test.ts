@@ -150,9 +150,11 @@ describe("bindFrameSpec — bar-table & guards", () => {
     expect(spec!.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  test("an explicit unsupported frame returns null (caller drops it)", () => {
+  test("a fixture-only frame (FrameDef.fixtureOnly gate) returns null — both fixture frames", () => {
     const o = output({ key_metrics: [metric({ metric: "x", value: 5, label: "X" })] });
+    // Driven by the registry flag, not a binder-local list:
     expect(bindFrameSpec(o, { frame_id: "seasonal-radial" })).toBeNull();
+    expect(bindFrameSpec(o, { frame_id: "storm-timeline" })).toBeNull();
   });
 
   test("a brain with no refined_at cannot stamp an as-of → null", () => {
