@@ -15,6 +15,9 @@ import { ZHVIAreaChartFrame } from "./frames/ZHVIAreaChartFrame";
 import { CorridorMarketScatterFrame } from "./frames/CorridorMarketScatterFrame";
 import { TimelineFrame } from "./frames/TimelineFrame";
 import { SeasonalRadialFrame } from "./frames/SeasonalRadialFrame";
+import { CompositionFrame } from "./frames/CompositionFrame";
+import { ZGaugeFrame } from "./frames/ZGaugeFrame";
+import { FranchiseSurvivalFrame } from "./frames/FranchiseSurvivalFrame";
 
 export interface FrameDef {
   /** Renders a `ChartSpec`. Every registry component takes exactly `{ spec }`. */
@@ -50,6 +53,21 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     component: SeasonalRadialFrame,
     accepts: ["time-series"],
     label: "Seasonal Radial (corridor index)",
+  },
+  composition: {
+    component: CompositionFrame,
+    accepts: ["composition"],
+    label: "Composition Bar",
+  },
+  "z-gauge": {
+    component: ZGaugeFrame,
+    accepts: ["single-vs-target"],
+    label: "Z-Gauge / Index",
+  },
+  "franchise-survival": {
+    component: FranchiseSurvivalFrame,
+    accepts: ["ranked-categories"],
+    label: "Franchise Survival (SBA)",
   },
 };
 

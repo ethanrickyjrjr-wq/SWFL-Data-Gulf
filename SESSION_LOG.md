@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Presentation Deliverable Engine: Phase 2e SeasonalRadialFrame LOCAL
+
+- **Data-availability confirmed:** `cre-swfl` emits `seasonal_index` (0→1) per `CorridorNormalized`; no rebuild needed (read built output only).
+- **`SeasonalRadialEntry`** added to `types/viz.ts` (`corridor: string`, `seasonal_index: number`).
+- **`components/viz/SeasonalRadialChart.tsx`** — recharts `RadialBarChart`; corridors sorted ascending (highest-seasonality outermost ring); teal→sky→amber `fillFor` palette; UTC-safe `friendlyAsOf` caption; empty-data guard; tooltip shows full corridor name + `%` value.
+- **`components/charts/registry/frames/SeasonalRadialFrame.tsx`** — thin wrapper (reads `spec.options?.data`, forwards `spec.asOf`). `SeasonalRadialChart` stays `ChartSpec`-agnostic.
+- **`registry.ts`** — `seasonal-radial` entry added (`accepts: ["time-series"]`, per plan); `storm-timeline` entry already present from concurrent 2f session.
+- **`SeasonalRadialFrame.test.ts`** — 5 pure tests (registry entry shape + fixture round-trip); `registry.test.ts` auto-covers the new frame.
+- **Verify:** `bun test registry + SeasonalRadialFrame` → 10 pass / 0 fail; `tsc --noEmit` → 0 errors (2 pre-existing `TimelineFrame` errors in 2f were already fixed by the time I ran); full suite 1698+ pass.
+- **Next:** Phase 2g `pickFramesForData` mapper (Opus) — now all 5 UI-Kit frames registered.
+
 ## 2026-06-11 (main) — Presentation Deliverable Engine: Phase 2f TimelineFrame LOCAL
 
 - **Phase 2f — storm claims timeline frame (LOCAL, no push).** New `components/charts/registry/frames/TimelineFrame.tsx` — reusable event-timeline frame (bars over time axis + optional baseline ReferenceLine); `"storm-timeline"` registered in `CHART_REGISTRY` with `accepts: ["timeline"]`. 10 tests pass, tsc clean. **Data binding PARKED** — pre-check confirmed env-swfl emits combined `storm_year_total_usd` only, not per-storm breakdown; per-storm amounts need surfacing from `NfipCountyYear` fragments before live wiring. Plan `§DATA-PARK` note added. README row 2f ✅.
