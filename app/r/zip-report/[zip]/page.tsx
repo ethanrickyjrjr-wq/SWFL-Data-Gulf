@@ -251,7 +251,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                 key={l.brain_id}
                 className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
               >
-                <p className="text-sm leading-6 text-gray-200">{l.text}</p>
+                <p className="text-sm leading-6 text-gray-200">{stripStatAnnotation(l.text)}</p>
               </div>
             ))}
           </div>
@@ -268,7 +268,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                 key={l.brain_id}
                 className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
               >
-                <p className="text-sm leading-6 text-gray-200">{l.text}</p>
+                <p className="text-sm leading-6 text-gray-200">{stripStatAnnotation(l.text)}</p>
               </div>
             ))}
           </div>
@@ -285,7 +285,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                 key={l.brain_id}
                 className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
               >
-                <p className="text-sm leading-6 text-gray-200">{l.text}</p>
+                <p className="text-sm leading-6 text-gray-200">{stripStatAnnotation(l.text)}</p>
               </div>
             ))}
           </div>
@@ -346,6 +346,10 @@ function badgeColor(polarity: DirectionPolarity, isUp: boolean): string {
 function trendBadge(b: { text: string; polarity: DirectionPolarity; isUp: boolean } | null) {
   if (!b) return null;
   return <span className={`font-sans text-xs ${badgeColor(b.polarity, b.isUp)}`}>{b.text}</span>;
+}
+
+function stripStatAnnotation(text: string): string {
+  return text.replace(/\s*\([^()]*:\s*[^()]+\)\s*$/, "");
 }
 
 function formatDate(iso: string): string {
