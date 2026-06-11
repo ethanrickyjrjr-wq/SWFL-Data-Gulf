@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v10 | Token: SWFL-7421-v10-20260610 -->
+<!-- FRESHNESS: v11 | Token: SWFL-7421-v11-20260611 -->
 ---
 brain_id: city-pulse-swfl
-version: 10
-refined_at: 2026-06-10T10:03:57Z
-freshness_token: SWFL-7421-v10-20260610
+version: 11
+refined_at: 2026-06-11T10:28:24Z
+freshness_token: SWFL-7421-v11-20260611
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) daily current-events pulse — dated business openings/closings, transactions, construction, and disaster signals for 7 cities, each cited to a primary source.
@@ -29,43 +29,43 @@ SCOPE: SWFL (Lee + Collier) daily current-events pulse — dated business openin
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                       | verified   | expires
-s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-06-10 | 2026-06-11
+s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-06-11 | 2026-06-12
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"72 non-expired signals across 13 cities (Sanibel: 4, Marco Island: 4, North Naples: 3, Fort Myers: 11, Naples: 13, East Naples: 3, North Fort Myers: 2, Estero: 6, Lehigh Acres: 2, Cape Coral: 10, Fort Myers Beach: 5, Bonita Springs: 8, Golden Gate: 1).","src":"s01","date":"2026-06-10"},
-  {"id":"f002","topic":"city-pulse:breaking","fact":"Sanibel — breaking","value":"A large sandbar has sealed off Blind Pass near Sanibel and Lee County is planning future dredging to address the closure. (source: https://www.winknews.com/news/lee/large-sandbar-seals-off-blind-pass-as-county-plans-future-dredging/article_c3c99755-a737-4ecc-b386-d3c6841b020e.html)","src":"s01","date":"2026-06-10"},
-  {"id":"f003","topic":"city-pulse:breaking","fact":"Marco Island — breaking","value":"Naples business owner Octavio Sarmiento and his company ASSA Designs LLC agreed to pay a $100,000 fine (down from a recommended $425,000) for involvement in a permit fraud scheme affecting Collier, Naples, and Marco Island projects, approved by the state's Board of Architecture and Interior Design at a general meeting on April 21. (source: https://www.aol.com/news/business-owner-fined-collier-naples-234020768.html)","src":"s01","date":"2026-06-10"},
-  {"id":"f004","topic":"city-pulse:transactions","fact":"North Naples — transactions","value":"Phil McCabe initially put a deposit down on Jan. 31, 2024 on a unit at the Naples Beach Club, a newly reimagined Four Seasons-branded resort. (source: https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/)","src":"s01","date":"2026-06-10"},
-  {"id":"f005","topic":"city-pulse:transactions","fact":"Fort Myers — transactions","value":"Costco finalized the purchase of a prime 55-acre tract at the intersection of Colonial Boulevard and Plantation Road in Fort Myers for $55 million, closing on May 12, 2026, at approximately $1 million per acre ($22.96 per square foot). (source: https://leanesuarezgroup.com/costco-fort-myers-new-location/)","src":"s01","date":"2026-06-10"},
-  {"id":"f006","topic":"city-pulse:transactions","fact":"Fort Myers — transactions","value":"LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off Summerlin Road, in Fort Myers to a Wisconsin-based Culver's hamburger franchisee; the deal was reported June 7, 2026. (source: https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/)","src":"s01","date":"2026-06-10"},
-  {"id":"f007","topic":"city-pulse:transactions","fact":"Naples — transactions","value":"Phil McCabe initially put a deposit down on the Naples Beach Club unit on Jan. 31, 2024 (per cite 1 partial text: 'McCabe initially put a deposit down on Jan. 31, 202'). (source: https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/)","src":"s01","date":"2026-06-10"},
-  {"id":"f008","topic":"city-pulse:transactions","fact":"Marco Island — transactions","value":"A rare $11.5 million Marco Island Hideaway Beach waterfront estate was listed for sale as of June 2, 2026, the first such listing in the community in more than four years; the property has nearly 100 feet of water frontage and direct beach access. (source: https://www.msn.com/en-us/money/realestate/rare-11-5-million-marco-island-estate-hits-market/ar-AA24CAVw)","src":"s01","date":"2026-06-10"},
-  {"id":"f009","topic":"city-pulse:transactions","fact":"North Naples — transactions","value":"The Collier County BCC's May 26, 2026 agenda included a recommendation to approve a purchase and sales agreement for the acquisition of six parcels known as Everglades City Outpost at a price of $6,615,000 (the average of two appraisals), with the seller requesting closing on or before July 1, 2026. (source: https://www.collierclerk.com/clerk-urges-more-detailed-planning-before-6-6-million-property-acquisition/)","src":"s01","date":"2026-06-10"}
+  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"87 non-expired signals across 13 cities (Cape Coral: 13, Fort Myers: 14, North Naples: 8, Bonita Springs: 9, East Naples: 4, Naples: 14, Fort Myers Beach: 7, Marco Island: 3, North Fort Myers: 2, Estero: 7, Lehigh Acres: 2, Sanibel: 3, Golden Gate: 1).","src":"s01","date":"2026-06-11"},
+  {"id":"f002","topic":"city-pulse:breaking","fact":"Cape Coral — breaking","value":"A Cape Coral restaurant owner expressed fears for family in Cuba following a 6.1 magnitude earthquake near the island. (source: https://www.winknews.com/news/state/cape-coral-restaurant-owner-fears-for-cuba-family-after-earthquake/article_75cfe23e-f1ab-43c7-8bf3-f301e7589496.html)","src":"s01","date":"2026-06-11"},
+  {"id":"f003","topic":"city-pulse:breaking","fact":"Fort Myers — breaking","value":"A 6.1 magnitude earthquake near Cuba was felt across Southwest Florida. (source: https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html)","src":"s01","date":"2026-06-11"},
+  {"id":"f004","topic":"city-pulse:breaking","fact":"North Naples — breaking","value":"A 6.1 magnitude earthquake near Cuba was felt across Southwest Florida including Naples, as covered in a second report. (source: https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html)","src":"s01","date":"2026-06-11"},
+  {"id":"f005","topic":"city-pulse:transactions","fact":"Bonita Springs — transactions","value":"5100 Seagrass Way #706, Bonita Springs, FL 34134 — a 4-bed, 5-bath, 3,885 sqft condominium built in 2025 — is listed for sale at $7,675,000 ($1,976/sqft) with a $4,517/mo HOA fee. (source: https://www.zillow.com/homedetails/5100-Seagrass-Way-706-Bonita-Springs-FL-34134/463063814_zpid/)","src":"s01","date":"2026-06-11"},
+  {"id":"f006","topic":"city-pulse:transactions","fact":"East Naples — transactions","value":"Phil McCabe, hotelier behind Inn on Fifth in Naples, is the first person to close on a private residence at the newly reimagined Naples Beach Club; the purchase exceeded $20 million. McCabe initially put a deposit down on Jan. 31, 202[truncated]. (source: https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/)","src":"s01","date":"2026-06-11"},
+  {"id":"f007","topic":"city-pulse:transactions","fact":"Naples — transactions","value":"3580 Gin Lane, Naples (Port Royal) sold for $15,900,000 — the most expensive transaction in Collier County for May 2026; the 6,816 sq ft bayfront home built in 2003 was on the market for just 4 days. (source: https://www.naplesnews.com/story/news/local/2026/06/10/what-is-the-average-price-of-a-new-home-in-naples-florida-real-estate-waterfront-gulf-property/90383605007/)","src":"s01","date":"2026-06-11"},
+  {"id":"f008","topic":"city-pulse:transactions","fact":"Naples — transactions","value":"Phil McCabe, the hotelier behind Inn on Fifth in Naples, is the first person to close on a private residence at the Naples Beach Club; the purchase exceeded $20 million. (source: https://www.news-press.com/story/money/business/local/2026/06/09/developer-phil-mccabe-others-buying-into-naples-beach-club-in-florida/90457403007/)","src":"s01","date":"2026-06-11"},
+  {"id":"f009","topic":"city-pulse:transactions","fact":"Fort Myers Beach — transactions","value":"LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road, to a Wisconsin Culver's hamburger franchisee, as reported June 7, 2026. (source: https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/)","src":"s01","date":"2026-06-11"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "city-pulse-swfl",
-  "version": 10,
-  "refined_at": "2026-06-10T10:03:57Z",
+  "version": 11,
+  "refined_at": "2026-06-11T10:28:24Z",
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL city pulse as of 2026-06-10: 72 live current-events signals across 13 cities — Sanibel (4), Marco Island (4), North Naples (3), Fort Myers (11), Naples (13), East Naples (3), North Fort Myers (2), Estero (6), Lehigh Acres (2), Cape Coral (10), Fort Myers Beach (5), Bonita Springs (8), Golden Gate (1). Most current: Sanibel — A large sandbar has sealed off Blind Pass near Sanibel and Lee County is planning future dredging to address the closure. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+  "conclusion": "SWFL city pulse as of 2026-06-11: 87 live current-events signals across 13 cities — Cape Coral (13), Fort Myers (14), North Naples (8), Bonita Springs (9), East Naples (4), Naples (14), Fort Myers Beach (7), Marco Island (3), North Fort Myers (2), Estero (7), Lehigh Acres (2), Sanibel (3), Golden Gate (1). Most current: Cape Coral — A Cape Coral restaurant owner expressed fears for family in Cuba following a 6.1 magnitude earthquake near the island. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
   "key_metrics": [
     {
       "metric": "signal_breaking_1",
-      "value": "Sanibel: A large sandbar has sealed off Blind Pass near Sanibel and Lee County is planning future dredging to address the closure.",
+      "value": "Cape Coral: A Cape Coral restaurant owner expressed fears for family in Cuba following a 6.1 magnitude earthquake near the island.",
       "direction": "stable",
-      "label": "Sanibel — breaking",
+      "label": "Cape Coral — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.winknews.com/news/lee/large-sandbar-seals-off-blind-pass-as-county-plans-future-dredging/article_c3c99755-a737-4ecc-b386-d3c6841b020e.html",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.winknews.com/news/state/cape-coral-restaurant-owner-fears-for-cuba-family-after-earthquake/article_75cfe23e-f1ab-43c7-8bf3-f301e7589496.html",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Large sandbar seals off Blind Pass as county plans future dredging: \"[Skip to main content](https://www.winknews.com/news/lee/large-sandbar-seals-off-blind-pass-as-county-plans-future-dredging/article_c3c99755-a737-4ecc-b386-d3c6841b020e.html#main-page-container)\n\nYou are the owner of this article.\n\n[Edit Article](https://www.winknews.com/users/admin/contribute/article/?assetid=c3c99755-a737-4ecc-b386-d3c6841b020e&assettype=article) [Add New Article](https://www.winknews.com/users/admin/contribute/article/?from_section=/news/lee) Close\n\nYou have permission to edit this article.\n\n[Edit](https://www.winknews.com/tncms/admin/editorial-asset/?edit=c3c99755-a737-4ecc-b386-d3c6841b020e) Close\n\nShare This\n\n- [Facebook](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.winknews.com%2Fnews%2Flee%2Flarge-sandbar-seals-off-blind-pass-as-county-plans-future-dredging%2Farticle_c3c99755-a737-4ecc-b386-d3c6841b020e.html%3Futm_medium%3Dsocial%26utm_source%3Dfacebook%26utm_campaign%3Duser-share \"Share on Facebook\")\n- [Twitter](https://twitter.com/intent/tweet?&text=Large%20sandbar%20seals%20off%20Blind%20Pass%20as%20county%20plans%20future%20dredging&url=https%3A%2F%2Fwww.winknews.com%2Fnews%2Flee%2Flarge-sandbar-seals-off-blind-pass-as-county-plans-future-dredging%2Farticle_c3c99755-a737-4ecc-b386-d3c6841b020e.html%3Futm_medium%3Dsocial%26utm_source%3Dtwitter%26utm_campaign%3Duser-share \"Tweet\")\n- [WhatsApp](https://wa.me/?text=https://www.winknews.com/news/lee/large-sandbar-seals-off-blind-pass-as-county-plans-future-dredging/article_c3c99755-a7\""
+        "citation": "Cape Coral restaurant owner fears for Cuba family after earthquake: \"[Skip to main content](https://www.winknews.com/news/state/cape-coral-restaurant-owner-fears-for-cuba-family-after-earthquake/article_75cfe23e-f1ab-43c7-8bf3-f301e7589496.html#main-page-container)\n\nYou are the owner of this article.\n\n[Edit Article](https://www.winknews.com/users/admin/contribute/article/?assetid=75cfe23e-f1ab-43c7-8bf3-f301e7589496&assettype=article) [Add New Article](https://www.winknews.com/users/admin/contribute/article/?from_section=/news/state) Close\n\nYou have permission to edit this article.\n\n[Edit](https://www.winknews.com/tncms/admin/editorial-asset/?edit=75cfe23e-f1ab-43c7-8bf3-f301e7589496) Close\n\nShare This\n\n- [Facebook](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.winknews.com%2Fnews%2Fstate%2Fcape-coral-restaurant-owner-fears-for-cuba-family-after-earthquake%2Farticle_75cfe23e-f1ab-43c7-8bf3-f301e7589496.html%3Futm_medium%3Dsocial%26utm_source%3Dfacebook%26utm_campaign%3Duser-share \"Share on Facebook\")\n- [Twitter](https://twitter.com/intent/tweet?&text=Cape%20Coral%20restaurant%20owner%20fears%20for%20Cuba%20family%20after%20earthquake&url=https%3A%2F%2Fwww.winknews.com%2Fnews%2Fstate%2Fcape-coral-restaurant-owner-fears-for-cuba-family-after-earthquake%2Farticle_75cfe23e-f1ab-43c7-8bf3-f301e7589496.html%3Futm_medium%3Dsocial%26utm_source%3Dtwitter%26utm_campaign%3Duser-share \"Tweet\")\n- [WhatsApp](https://wa.me/?text=https://www.winknews.com/news/state/cape-coral-restaurant-owner-fears-for-cuba-family-after-earthquake/article_75c\""
       },
       "suggestions": [
         "What's driving signal breaking 1?",
@@ -74,15 +74,15 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     },
     {
       "metric": "signal_breaking_2",
-      "value": "Marco Island: Naples business owner Octavio Sarmiento and his company ASSA Designs LLC agreed to pay a $100,000 fine (down from a recommended $425,000) for involvement in a permit fraud scheme affecting Collier, Naples, and Marco Island projects, approved by the state's Board of Architecture and Interior Design at a general meeting on April 21.",
+      "value": "Fort Myers: A 6.1 magnitude earthquake near Cuba was felt across Southwest Florida.",
       "direction": "stable",
-      "label": "Marco Island — breaking",
+      "label": "Fort Myers — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.aol.com/news/business-owner-fined-collier-naples-234020768.html",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Business owner fined: Collier, Naples and Marco Island projects ...: \"[![Marco Eagle](https://s.yimg.com/lo/mysterio/api/232C1E841BC0BB863E0E9B74B574D5BADEBDCEDD7912DF6C56EBCD799BAD61E9/subgraphmysterio/resizefill_w0_h40;quality_80;format_webp/)](https://www.marconews.com/)\n\nLaura Layden, USA TODAY NETWORK - Florida\n\nFri, June 5, 2026 at 11:40 PM UTC\n\n0\n\nA Naples business owner has agreed to pay a $100,000 fine for his involvement in a [permit fraud scheme](https://www.marconews.com/story/news/local/2025/04/08/fraud-investigation-in-collier-county-involves-hundreds-of-permits/83000328007/).\n\nThe state's Board of Architecture and Interior Design approved the settlement with Octavio Sarmiento and his company, ASSA Designs LLC, at a general meeting on April 21.\n\nThe board is responsible for licensing and regulating the two professions in its name across the state. It's intertwined with the Florida Department of Business and Professional Regulation (DBPR).\n\nAccording to the minutes for the April meeting, Sarmiento faced a fine of up to $425,000, a recommendation that came out of a probable cause hearing last summer.\n\nThe recommended fine stemmed from a 107-count administrative complaint, with 53 counts for practicing architecture without a license, one count for using the title of architect, and 53 counts for using the license of another architect.\n\nThe complaint centers around the illegal use of an architectural seal belonging to Gene Cravillion, who is not only retired, but suffers from late-stage dementia. In his 90s, Cravillion has lived in a m\""
+        "citation": "6.1 Cuba earthquake felt across Southwest Florida: \"[Skip to main content](https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html#main-page-container)\n\nYou are the owner of this article.\n\n[Edit Article](https://www.winknews.com/users/admin/contribute/article/?assetid=d1615cf7-95ec-4e63-9afb-47fab751969d&assettype=article) [Add New Article](https://www.winknews.com/users/admin/contribute/article/?from_section=/news) Close\n\nYou have permission to edit this article.\n\n[Edit](https://www.winknews.com/tncms/admin/editorial-asset/?edit=d1615cf7-95ec-4e63-9afb-47fab751969d) Close\n\nShare This\n\n- [Facebook](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.winknews.com%2Fnews%2F6-1-cuba-earthquake-felt-across-southwest-florida%2Farticle_d1615cf7-95ec-4e63-9afb-47fab751969d.html%3Futm_medium%3Dsocial%26utm_source%3Dfacebook%26utm_campaign%3Duser-share \"Share on Facebook\")\n- [Twitter](https://twitter.com/intent/tweet?&text=6.1%20Cuba%20earthquake%20felt%20across%20Southwest%20Florida&url=https%3A%2F%2Fwww.winknews.com%2Fnews%2F6-1-cuba-earthquake-felt-across-southwest-florida%2Farticle_d1615cf7-95ec-4e63-9afb-47fab751969d.html%3Futm_medium%3Dsocial%26utm_source%3Dtwitter%26utm_campaign%3Duser-share \"Tweet\")\n- [WhatsApp](https://wa.me/?text=https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html \"WhatsApp\")\n- [SMS](sms:?body=Check%20out%20this%20link:%20www.winknews.com/tncms/asse\""
       },
       "suggestions": [
         "What's driving signal breaking 2?",
@@ -90,33 +90,33 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       ]
     },
     {
-      "metric": "signal_transactions_3",
-      "value": "North Naples: Phil McCabe initially put a deposit down on Jan. 31, 2024 on a unit at the Naples Beach Club, a newly reimagined Four Seasons-branded resort.",
+      "metric": "signal_breaking_3",
+      "value": "North Naples: A 6.1 magnitude earthquake near Cuba was felt across Southwest Florida including Naples, as covered in a second report.",
       "direction": "stable",
-      "label": "North Naples — transactions",
+      "label": "North Naples — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee: \"- ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n\n- Loading\n\n\n###### News & Notes\n\n# Fort Myers land sells to Wisconsin Culver's hamburger franchisee\n\n### In the week's top commercial real estate news, a former bakery is up for sale in Sarasota, a North Carolina developer buys land for apartments in Pasco, and a Clearwater CRE firm lands a Tampa client.\n\n* * *\n\n- By [Louis Llovio](https://www.businessobserverfl.com/staff/louis-llovio/stories/)\n- \\| 5:00 a.m. June 7, 2026\n- \\| 2 Free Articles Remaining!\n\n![LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.](https://media.yourobserver.com/img/photos/2026/06/04/Summerlin_Ridge_Drone_Outparcel_SOLD_t1100.jpg?31a214c4405663fd4bc7e33e8c8cedcc07d61559)\nLQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.\nImage courtesy of LQ Commercial Real Estate\n\n- Florida\n\n- Share\n\n\n#### Naples\n\n**Hotelier first to close on Naples Beach Club condo**\n\nPhil McCabe, the hotelier behind the iconic Inn on Fifth in Naples, is the first person to close on a private residence at the newly reimagined Naples Beach Club. The real estate brokerage behind the deal for the unit at the new Four Seasons-branded resort did not disclose the full selling price, saying in a statement the purchase exceeded $20 million. McCabe initially put a deposit down on Jan. 31, 202\""
+        "citation": "6.1 Cuba earthquake felt across Southwest Florida: \"[Skip to main content](https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html#main-page-container)\n\nYou are the owner of this article.\n\n[Edit Article](https://www.winknews.com/users/admin/contribute/article/?assetid=d1615cf7-95ec-4e63-9afb-47fab751969d&assettype=article) [Add New Article](https://www.winknews.com/users/admin/contribute/article/?from_section=/news) Close\n\nYou have permission to edit this article.\n\n[Edit](https://www.winknews.com/tncms/admin/editorial-asset/?edit=d1615cf7-95ec-4e63-9afb-47fab751969d) Close\n\nShare This\n\n- [Facebook](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.winknews.com%2Fnews%2F6-1-cuba-earthquake-felt-across-southwest-florida%2Farticle_d1615cf7-95ec-4e63-9afb-47fab751969d.html%3Futm_medium%3Dsocial%26utm_source%3Dfacebook%26utm_campaign%3Duser-share \"Share on Facebook\")\n- [Twitter](https://twitter.com/intent/tweet?&text=6.1%20Cuba%20earthquake%20felt%20across%20Southwest%20Florida&url=https%3A%2F%2Fwww.winknews.com%2Fnews%2F6-1-cuba-earthquake-felt-across-southwest-florida%2Farticle_d1615cf7-95ec-4e63-9afb-47fab751969d.html%3Futm_medium%3Dsocial%26utm_source%3Dtwitter%26utm_campaign%3Duser-share \"Tweet\")\n- [WhatsApp](https://wa.me/?text=https://www.winknews.com/news/6-1-cuba-earthquake-felt-across-southwest-florida/article_d1615cf7-95ec-4e63-9afb-47fab751969d.html \"WhatsApp\")\n- [SMS](sms:?body=Check%20out%20this%20link:%20www.winknews.com/tncms/asse\""
       },
       "suggestions": [
-        "What's driving signal transactions 3?",
-        "How does signal transactions 3 here compare to other SWFL areas?"
+        "What's driving signal breaking 3?",
+        "How does signal breaking 3 here compare to other SWFL areas?"
       ]
     },
     {
       "metric": "signal_transactions_4",
-      "value": "Fort Myers: Costco finalized the purchase of a prime 55-acre tract at the intersection of Colonial Boulevard and Plantation Road in Fort Myers for $55 million, closing on May 12, 2026, at approximately $1 million per acre ($22.96 per square foot).",
+      "value": "Bonita Springs: 5100 Seagrass Way #706, Bonita Springs, FL 34134 — a 4-bed, 5-bath, 3,885 sqft condominium built in 2025 — is listed for sale at $7,675,000 ($1,976/sqft) with a $4,517/mo HOA fee.",
       "direction": "stable",
-      "label": "Fort Myers — transactions",
+      "label": "Bonita Springs — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://leanesuarezgroup.com/costco-fort-myers-new-location/",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.zillow.com/homedetails/5100-Seagrass-Way-706-Bonita-Springs-FL-34134/463063814_zpid/",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Historic Costco Fort Myers New Location: Massive $55M Site Acquired: \"[Skip to the content](https://leanesuarezgroup.com/costco-fort-myers-new-location/#site-content)\n\n# Historic Costco Fort Myers New Location: Massive $55M Record-Breaking Site Acquired\n\nThe wait for the **Costco Fort Myers new location** is officially nearing its end. In a landmark transaction that has sent ripples through the Southwest Florida commercial real estate market, Costco has finalized the purchase of a prime 55-acre tract at the intersection of Colonial Boulevard and Plantation Road. The $55 million closing on May 12, 2026, represents one of the most significant land acquisitions in the city’s history, signaling a massive infrastructure shift for the region’s retail landscape near the **Gulf**.\n\n## A $55 Million Real Estate Milestone for Fort Myers\n\nThe scale of the **Costco Fort Myers new location** deal is difficult to overstate. At exactly $1 million per acre, or approximately $22.96 per square foot, the purchase price nearly doubles recent benchmarks for large-tract commercial land in Lee County. For context, regional developers Waypoint Residential paid roughly $12.64 per square foot for a similar-sized parcel at I-75 and Daniels Parkway earlier this year.\n\nAccording to Chase Mayhugh of Mayhugh Commercial Advisors, who brokered the deal alongside his father, Chuck Mayhugh, the premium price reflects the extreme scarcity of entitled land with high-visibility frontage in the Fort Myers core.\n\n#### Transaction Data Comparison\n\n| **Metric** | **Costco (Colonial Blv\""
+        "citation": "5100 Seagrass WAY #706, BONITA SPRINGS, FL 34134: \"[Skip main navigation](https://www.zillow.com/homedetails/5100-Seagrass-Way-706-Bonita-Springs-FL-34134/463063814_zpid/#skip-topnav-target)\n\nOverviewFacts & featuresMarket valuePayment calculatorNeighborhood\n\nFor sale\n\nSee all 38 photos\n\n![1st image of 5100 Seagrass WAY #706](https://photos.zillowstatic.com/fp/a7a4c73e2369e329b42e0dd4ea0a74b7-cc_ft_960.jpg)\n\n![2nd image of 5100 Seagrass WAY #706](https://photos.zillowstatic.com/fp/45817bc6ecc261268db0fd1b6fbca015-cc_ft_576.jpg)\n\n![3rd image of 5100 Seagrass WAY #706](https://photos.zillowstatic.com/fp/89e372ac9c4caa7dde34b31f1704e756-cc_ft_576.jpg)\n\n![4th image of 5100 Seagrass WAY #706](https://photos.zillowstatic.com/fp/1dd06a9d443353f8fd2c5d7353fc8003-cc_ft_576.jpg)\n\n![5th image of 5100 Seagrass WAY #706](https://photos.zillowstatic.com/fp/20d4c039a2b5e2349ac800d7c9208bc8-cc_ft_576.jpg)\n\n$7,675,000\n\n# 5100 Seagrass WAY \\#706,BONITA SPRINGS, FL 34134\n\n4beds\n\n5baths\n\n3,885sqft\n\nEst. **:** $55,446/mo\n\n[Get pre-qualified](https://www.zillow.com/homeloans/eligibility/?zga_z_guid=256d5423-e7f5-41a2-97e0-3dca1e6e11bc&source=Zillow&channel=FSHDP&utm_source=zillow&utm_medium=referral&utm_campaign=zhl_fshdp_chip_pre-qualification_pp&propertyValue=7675000&propertyType=CondoFourOrFewerStories&cityOrZip=34134&monthlyHOAFee=4517&propertyNotEligibleForPersonalization=true)\n\nCondominium\n\nBuilt in 2025\n\n\\-\\- sqft lot\n\n$\\-\\- Zestimate®\n\n$1,976/sqft\n\n$4,517/mo HOA\n\n## What's special\n\nTennis courtsTeen and kids clubPrivate training roomsState\""
       },
       "suggestions": [
         "What's driving signal transactions 4?",
@@ -125,13 +125,13 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     },
     {
       "metric": "signal_transactions_5",
-      "value": "Fort Myers: LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off Summerlin Road, in Fort Myers to a Wisconsin-based Culver's hamburger franchisee; the deal was reported June 7, 2026.",
+      "value": "East Naples: Phil McCabe, hotelier behind Inn on Fifth in Naples, is the first person to close on a private residence at the newly reimagined Naples Beach Club; the purchase exceeded $20 million. McCabe initially put a deposit down on Jan. 31, 202[truncated].",
       "direction": "stable",
-      "label": "Fort Myers — transactions",
+      "label": "East Naples — transactions",
       "variable_type": "categorical",
       "source": {
         "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
         "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee: \"- ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n\n- Loading\n\n\n###### News & Notes\n\n# Fort Myers land sells to Wisconsin Culver's hamburger franchisee\n\n### In the week's top commercial real estate news, a former bakery is up for sale in Sarasota, a North Carolina developer buys land for apartments in Pasco, and a Clearwater CRE firm lands a Tampa client.\n\n* * *\n\n- By [Louis Llovio](https://www.businessobserverfl.com/staff/louis-llovio/stories/)\n- \\| 5:00 a.m. June 7, 2026\n- \\| 2 Free Articles Remaining!\n\n![LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.](https://media.yourobserver.com/img/photos/2026/06/04/Summerlin_Ridge_Drone_Outparcel_SOLD_t1100.jpg?31a214c4405663fd4bc7e33e8c8cedcc07d61559)\nLQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.\nImage courtesy of LQ Commercial Real Estate\n\n- Florida\n\n- Share\n\n\n#### Naples\n\n**Hotelier first to close on Naples Beach Club condo**\n\nPhil McCabe, the hotelier behind the iconic Inn on Fifth in Naples, is the first person to close on a private residence at the newly reimagined Naples Beach Club. The real estate brokerage behind the deal for the unit at the new Four Seasons-branded resort did not disclose the full selling price, saying in a statement the purchase exceeded $20 million. McCabe initially put a deposit down on Jan. 31, 202\""
       },
@@ -142,15 +142,15 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     },
     {
       "metric": "signal_transactions_6",
-      "value": "Naples: Phil McCabe initially put a deposit down on the Naples Beach Club unit on Jan. 31, 2024 (per cite 1 partial text: 'McCabe initially put a deposit down on Jan. 31, 202').",
+      "value": "Naples: 3580 Gin Lane, Naples (Port Royal) sold for $15,900,000 — the most expensive transaction in Collier County for May 2026; the 6,816 sq ft bayfront home built in 2003 was on the market for just 4 days.",
       "direction": "stable",
       "label": "Naples — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.naplesnews.com/story/news/local/2026/06/10/what-is-the-average-price-of-a-new-home-in-naples-florida-real-estate-waterfront-gulf-property/90383605007/",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee: \"- ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n\n- Loading\n\n\n###### News & Notes\n\n# Fort Myers land sells to Wisconsin Culver's hamburger franchisee\n\n### In the week's top commercial real estate news, a former bakery is up for sale in Sarasota, a North Carolina developer buys land for apartments in Pasco, and a Clearwater CRE firm lands a Tampa client.\n\n* * *\n\n- By [Louis Llovio](https://www.businessobserverfl.com/staff/louis-llovio/stories/)\n- \\| 5:00 a.m. June 7, 2026\n- \\| 2 Free Articles Remaining!\n\n![LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.](https://media.yourobserver.com/img/photos/2026/06/04/Summerlin_Ridge_Drone_Outparcel_SOLD_t1100.jpg?31a214c4405663fd4bc7e33e8c8cedcc07d61559)\nLQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.\nImage courtesy of LQ Commercial Real Estate\n\n- Florida\n\n- Share\n\n\n#### Naples\n\n**Hotelier first to close on Naples Beach Club condo**\n\nPhil McCabe, the hotelier behind the iconic Inn on Fifth in Naples, is the first person to close on a private residence at the newly reimagined Naples Beach Club. The real estate brokerage behind the deal for the unit at the new Four Seasons-branded resort did not disclose the full selling price, saying in a statement the purchase exceeded $20 million. McCabe initially put a deposit down on Jan. 31, 202\""
+        "citation": "What is the average price of a new home in Naples, Florida?: \"[Close](https://www.naplesnews.com/news/) [Close](https://www.naplesnews.com/news/)\n\n[LOCAL](https://www.naplesnews.com/news/local/)\n\n# Naples house goes for $15.9M, most expensive transaction for May 2026\n\n[![Portrait of Mark H. Bickel](https://www.naplesnews.com/gcdn/presto/2019/08/29/PFTM/55fe576c-3b68-4a17-a206-9d35d4cfb0c5-BickelCel-2.jpg?crop=1668,1668,x805,y0&width=48&height=48&format=pjpg&auto=webp) Mark H. Bickel](https://www.news-press.com/staff/2646996001/mark-h-bickel/)\n\nFort Myers News-Press & Naples Daily News\n\nJune 10, 2026, 5:01 a.m. ET\n\nThese are the Top-10 most expensive houses sold in Collier County for May 2026.\n\nData and content provided by [Royal Shell Real Estate](https://www.royalshellrealestate.com/).\n\n## 1\\. 3580 Gin Lane, Naples\n\n**List price:** $15,900,000\n\n**Sold price:** $15,900,000\n\n**Neighborhood/Development:** Port Royal\n\n**Size:** 6,816 square feet\n\n**Year built:** 2003\n\n**Days on market:** 4\n\n**Amenities:** Bayfront, Boat Dock/Lift, Private Pool/Spa, Built-In Grill\n\n**View:** Bay\n\n[Close](https://www.naplesnews.com/news/)\""
       },
       "suggestions": [
         "What's driving signal transactions 6?",
@@ -159,15 +159,15 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     },
     {
       "metric": "signal_transactions_7",
-      "value": "Marco Island: A rare $11.5 million Marco Island Hideaway Beach waterfront estate was listed for sale as of June 2, 2026, the first such listing in the community in more than four years; the property has nearly 100 feet of water frontage and direct beach access.",
+      "value": "Naples: Phil McCabe, the hotelier behind Inn on Fifth in Naples, is the first person to close on a private residence at the Naples Beach Club; the purchase exceeded $20 million.",
       "direction": "stable",
-      "label": "Marco Island — transactions",
+      "label": "Naples — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.msn.com/en-us/money/realestate/rare-11-5-million-marco-island-estate-hits-market/ar-AA24CAVw",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.news-press.com/story/money/business/local/2026/06/09/developer-phil-mccabe-others-buying-into-naples-beach-club-in-florida/90457403007/",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Rare $11.5 million Marco Island estate hits market - MSN: \"![Promo Logo](https://assets.msn.com/staticsb/statics/latest/brand/new-msn-butterfly-color.svg)\n\nUpgrade your Chrome browser with MSN New Tab\n\nGet localized weather, trending news, AI powered search and more\n\nCloseAdd it now\n\n\nSkip to content\n\n\nSkip to footer\n\n\nBack to feed\n\n![Open Copilot](https://assets.msn.com/staticsb/statics/latest/common/icons/copilot_color.svg)\n\n[Virginia Beach\\\\\n\\\\\n![Clear](https://assets.msn.com/weathermapdata/1/static/weather/Icons/taskbar_v10/Condition_Card/ClearNightV3.svg)\\\\\n\\\\\n‎73‎\\\\\n\\\\\n‎°F‎](https://www.msn.com/en-us/weather/forecast/in-Virginia-Beach,VA?loc=eyJsIjoiVmlyZ2luaWEgQmVhY2giLCJyIjoiVkEiLCJjIjoiVW5pdGVkIFN0YXRlcyIsImkiOiJVUyIsImciOiJlbi11cyIsIngiOiItNzYuMTQ2Mjc4MzgxMzQ3NjYiLCJ5IjoiMzYuODM3MTM1MzE0OTQxNDA2In0%3D&weadegreetype=F&ocid=msnheader&cvid=6a2673fba0cc4b40b46c90dbdd32c30f \"Virginia Beach: Beach Hazards Statement, Clear, 73 °F  Click to see full forecast.\")\n\nPage settings\n\n## Page settings\n\nSign in to your account\n\nSign in\n\n- ![headphone stoped](https://assets.msn.com/staticsb/statics//latest/views/icons/fluent/headphones_sound_wave_20_regular.svg)\n\n\n\n![headphone](https://assets.msn.com/staticsb/statics/latest/views/icons/fluent/headphones_sound_wave_24_filled.svg)\n\nListen to this article\n\n\n- ![share](https://assets.msn.com/staticsb/statics/latest/views/icons/fluent/share_20_regular.svg)\n\n\n- ![more](https://assets.msn.com/staticsb/statics//latest/views/icons/More.svg)\n\nSponsored\n\n[![](https://img-s-msn-com.akamaized.net/tenant/\""
+        "citation": "Who are the 'big dogs' moving into Naples Beach Club: \"[Close](https://www.news-press.com/) [Close](https://www.news-press.com/)\n\nLOCAL BUSINESS\n\n# Who are the 'big dogs' moving into Naples Beach Club\n\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\n\nFort Myers News-Press & Naples Daily News\n\nJune 9, 2026, 5:09 a.m. ET\n\n[Share to Facebook](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F)[Share to Twitter](https://x.com/intent/post?url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F&text=Who%20are%20the%20%27big%20dogs%27%20moving%20into%20Naples%20Beach%20Club&via=thenewspress)[Share by email](mailto:?subject=Who%20are%20the%20%27big%20dogs%27%20moving%20into%20Naples%20Beach%20Club%20-%20from%20The%20News-Press&body=Who%20are%20the%20%27big%20dogs%27%20moving%20into%20Naples%20Beach%20Club%0A%0ANaples%20developer%20Phil%20McCabe%20is%20the%20first%20to%20close%20on%20a%20%2420%20million%20condo%20at%20the%20exclusive%20new%20Naples%20Beach%20Club.%0A%0ACheck%20out%20thi\""
       },
       "suggestions": [
         "What's driving signal transactions 7?",
@@ -176,15 +176,15 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     },
     {
       "metric": "signal_transactions_8",
-      "value": "North Naples: The Collier County BCC's May 26, 2026 agenda included a recommendation to approve a purchase and sales agreement for the acquisition of six parcels known as Everglades City Outpost at a price of $6,615,000 (the average of two appraisals), with the seller requesting closing on or before July 1, 2026.",
+      "value": "Fort Myers Beach: LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road, to a Wisconsin Culver's hamburger franchisee, as reported June 7, 2026.",
       "direction": "stable",
-      "label": "North Naples — transactions",
+      "label": "Fort Myers Beach — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.collierclerk.com/clerk-urges-more-detailed-planning-before-6-6-million-property-acquisition/",
-        "fetched_at": "2026-06-10T10:03:57Z",
+        "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
+        "fetched_at": "2026-06-11T10:28:24Z",
         "tier": 2,
-        "citation": "Clerk Urges More Detailed Planning Before $6.6 Million Property ...: \"All Collier Clerk Offices Closed Monday, May 25, 2026 for Memorial Day.\n\nMore Info\n\n\nDismiss this notification banner for 3\ndays\n\n## All Collier Clerk Offices Closed Monday, May 25, 2026 for Memorial Day\n\nIn observance of Memorial Day, all Collier Clerk offices will be closed on Monday, May 25, 2026. Regular business hours will resume on Tuesday, May 26.\n\nWe honor and remember the men and women who made the ultimate sacrifice while serving our country.\n\n* * *\n\nLast updated May 18, 2026\n\nClose\n\n\n![Everglades Outpost Map](https://www.collierclerk.com/wp-content/uploads/Everglades-FB-300x158.png)\n\n1. [Home](https://www.collierclerk.com/)\n2. >\n3. [Administration](https://www.collierclerk.com/category/administration/ \"Administration\")\n4. >\n5. [News and Announcements](https://www.collierclerk.com/category/administration/news-and-announcements/ \"News and Announcements\")\n6. >\n7. Clerk Urges More Detailed...\n\nThe May 26, 2026, BCC agenda included a recommendation to approve a purchase and sales agreement for the acquisition of six (6) parcels known as Everglades City Outpost. The final Letter of Intent provided for a purchase price of $6,900,000 or the average of two appraisals obtained by the County, whichever was lower. The average appraised value was determined to be $6,615,000. The Seller has specifically requested that closing occur on or before July 1, 2026.\n\nThe Executive Summary identified the following potential uses of the property:\n\n> “The Property is being considered for s\""
+        "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee: \"- ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n\n- Loading\n\n\n###### News & Notes\n\n# Fort Myers land sells to Wisconsin Culver's hamburger franchisee\n\n### In the week's top commercial real estate news, a former bakery is up for sale in Sarasota, a North Carolina developer buys land for apartments in Pasco, and a Clearwater CRE firm lands a Tampa client.\n\n* * *\n\n- By [Louis Llovio](https://www.businessobserverfl.com/staff/louis-llovio/stories/)\n- \\| 5:00 a.m. June 7, 2026\n- \\| 2 Free Articles Remaining!\n\n![LQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.](https://media.yourobserver.com/img/photos/2026/06/04/Summerlin_Ridge_Drone_Outparcel_SOLD_t1100.jpg?31a214c4405663fd4bc7e33e8c8cedcc07d61559)\nLQ Commercial Real Estate sold a 2.4-acre parcel at Summerlin Ridge on Pine Ridge Road, just off of Summerlin Road.\nImage courtesy of LQ Commercial Real Estate\n\n- Florida\n\n- Share\n\n\n#### Naples\n\n**Hotelier first to close on Naples Beach Club condo**\n\nPhil McCabe, the hotelier behind the iconic Inn on Fifth in Naples, is the first person to close on a private residence at the newly reimagined Naples Beach Club. The real estate brokerage behind the deal for the unit at the new Four Seasons-branded resort did not disclose the full selling price, saying in a statement the purchase exceeded $20 million. McCabe initially put a deposit down on Jan. 31, 202\""
       },
       "suggestions": [
         "What's driving signal transactions 8?",
@@ -193,7 +193,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     }
   ],
   "caveats": [
-    "64 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "79 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -206,7 +206,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-10T10:03:57Z"
+    "computed_at": "2026-06-11T10:28:24Z"
   },
   "exogenous_signals": []
 }
@@ -215,5 +215,5 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 - city-pulse-swfl: daily SWFL city-grain current-events reporter over data_lake.city_pulse (TTL'd, citation-backed).
 
 --- RECENT NOTES ---
-- 2026-06-10: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-06-11: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```
