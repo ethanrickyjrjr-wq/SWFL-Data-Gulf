@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — email-marketing: white-label digest + AI-hook samples, plan revision (LOCAL, not pushed)
+
+- Built two openable samples under `docs/email-marketing/samples/`: `agent-client-digest.html` (white-label per-ZIP client digest, real lake data for 33908 + 33931, agent brand slot) and `ai-hook-page.html` (AI landing wrapper — clickable real-data prompts, live MCP one-liner, document-gen capability cards).
+- All sample numbers pulled live via `swfl_fetch` (33908: $330k / −19.5% / 87 DOM / 7.2mo / $10,510 flood; 33931: $590k / −15.8% / 114 DOM / 11.7mo / $30,075 flood) — nothing invented.
+- Folded into README (Built Samples, Product shape, Interaction model, Highlighter = web-only, MCP-friction) + Phase 1 plan REVISION banner: **HISTORICAL HOOK cut from V1** (the hardcoded `historicalHook()` string was invented data — EMAIL.md Rule 4 violation); `DigestEmail.tsx` visual target = the white-label sample.
+- Next: fan-out agents building Phase 1 sections (fetch-digest-data, log-io, GHA workflow). NOT pushed — awaiting operator confirm.
+
 ## 2026-06-11 (main) — Presentation Engine Phase 3: wire the orphaned frame engine into deliverables (LOCAL, not pushed)
 
 - **Surprise found + verified before building:** Phase 3's deliverable spine (`/api/projects/[id]/build` + `/p/[id]` + first `auth.uid()` RLS) was ALREADY shipped by the sibling `2026-06-10-projects-briefcase-assembly` plan (commits `c7efb31`…`eca9c7c`, Task 06 prod-verified). The `phase-3-...__OPUS.md` brief was written greenfield — executing it literally would have rebuilt prod code. The README status board (Phase 3 ⬜) was stale.

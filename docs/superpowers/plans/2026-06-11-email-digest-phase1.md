@@ -2,6 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **REVISION 2026-06-11 (read before executing):**
+> 1. **HISTORICAL HOOK is CUT from V1.** The `historicalHook()` function returned a hardcoded string ("the last time 33908 DOM exceeded 75 days was Q3 2022…") — that is **invented data** and violates EMAIL.md Rule 4 + the platform's no-invention spine. The honest version needs historical ZIP-grain DOM data that is **not yet in the lake**. → Remove the HISTORICAL HOOK section from `DigestEmail.tsx` (section 7) and delete `historicalHook()` from `build-digest.mts`. Ship **7 sections**. Re-add only when historical rows exist and the value is **read, not written**.
+> 2. **`DigestEmail.tsx` visual target = `docs/email-marketing/samples/agent-client-digest.html`.** That white-label, per-ZIP sample (real data, agent brand block, "The Read", flood-cost callout) is the design to match — not the older internal layout sketched in Task 4 below. The white-label slot (agent name/logo/contact) is now part of V1.
+> 3. **Interaction model + highlighter:** see README "Interaction model" / "Highlighter" — reply-to-ask answers in email (Phase 3), click-to-chat opens the AI hook page (`samples/ai-hook-page.html`); the highlighter is **web-only, never in the email body** (JS is blocked).
+
 **Goal:** First successful daily email sent to hello@swfldatagulf.com by a GHA cron (Mon–Fri 6am ET), with a JSON log written to `docs/email-marketing/email-logs/` enabling cross-day dedup and delta.
 
 **Architecture:** A Bun script (`scripts/email/build-digest.mts`) fetches brain narrative from the live API and structured ZIP metrics from committed `brains/housing-swfl.md` on disk, renders a React Email template, sends via Resend, and writes a JSON log. Idempotency guard aborts if today's log already shows `send_status: "sent"`.

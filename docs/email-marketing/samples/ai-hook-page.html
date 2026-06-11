@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ask SWFL Data Gulf — AI hook page (mockup)</title>
+<style>
+  :root{ --navy:#0F2035; --teal:#1BB8C9; --sand:#F5E6C8; --ink:#1A1A2E; --muted:#6b7280; --line:#e5e9ee; --bg:#f4f6f8; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); font-family:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif; color:var(--ink); }
+  a{ color:var(--teal); }
+  .wrap{ max-width:880px; margin:0 auto; padding:0 18px 70px; }
+
+  /* top bar */
+  .bar{ background:var(--navy); border-bottom:3px solid var(--teal); }
+  .bar .inner{ max-width:880px; margin:0 auto; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; }
+  .brand{ color:#fff; font-weight:800; font-size:16px; letter-spacing:.02em; }
+  .brand .dot{ color:var(--teal); }
+  .barlink{ color:#9fb3c8; font-size:13px; text-decoration:none; }
+
+  /* hero */
+  .hero{ text-align:center; padding:40px 0 14px; }
+  .hero h1{ font-size:30px; line-height:1.15; margin:0 0 10px; color:var(--navy); }
+  .hero p{ font-size:16px; color:var(--muted); margin:0 auto; max-width:560px; line-height:1.6; }
+  .kicker{ display:inline-block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin-bottom:12px; }
+
+  /* chat card */
+  .chat{ background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 30px rgba(15,32,53,.08); overflow:hidden; margin-top:8px; }
+  .chat .head{ background:#fbfcfd; border-bottom:1px solid var(--line); padding:12px 18px; font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+  .chat .head .live{ width:8px;height:8px;border-radius:50%; background:#22c55e; display:inline-block; }
+  .transcript{ padding:18px; min-height:230px; }
+  .msg{ margin-bottom:16px; }
+  .who{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+  .user .bubble{ background:var(--navy); color:#fff; display:inline-block; padding:9px 14px; border-radius:12px 12px 12px 3px; font-size:14px; }
+  .ai h4{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--teal); margin:14px 0 4px; }
+  .ai h4:first-child{ margin-top:0; }
+  .ai p{ font-size:14px; line-height:1.62; margin:0 0 6px; }
+  .ai ul{ margin:0 0 6px; padding-left:18px; font-size:13.5px; line-height:1.6; }
+  .ai .tok{ font-family:monospace; font-size:11px; color:#9ca3af; margin-top:10px; }
+  .ai .src{ font-size:11px; color:#9ca3af; }
+
+  .prompts{ padding:0 18px 18px; }
+  .prompts .lab{ font-size:12px; color:var(--muted); margin:4px 0 9px; }
+  .chip{ display:inline-block; background:#eef7f9; color:#0b5563; border:1px solid #cfe9ee; border-radius:999px; padding:8px 13px; font-size:13px; margin:0 7px 8px 0; cursor:pointer; transition:.12s; }
+  .chip:hover{ background:var(--teal); color:#fff; border-color:var(--teal); }
+  .inputrow{ border-top:1px solid var(--line); padding:12px 14px; display:flex; gap:8px; align-items:center; }
+  .inputrow input{ flex:1; border:1px solid var(--line); border-radius:10px; padding:11px 13px; font-size:14px; font-family:inherit; color:var(--muted); }
+  .inputrow .send{ background:var(--navy); color:#fff; border:none; border-radius:10px; padding:11px 18px; font-size:14px; font-weight:700; cursor:pointer; }
+
+  /* section */
+  .sec{ margin-top:44px; }
+  .sec h2{ font-size:21px; color:var(--navy); margin:0 0 6px; }
+  .sec .sub{ font-size:14px; color:var(--muted); margin:0 0 18px; line-height:1.6; }
+
+  .mcp{ background:var(--navy); border-radius:14px; padding:22px; color:#fff; }
+  .mcp .ttl{ font-size:16px; font-weight:800; margin-bottom:4px; }
+  .mcp .desc{ font-size:13px; color:#9fb3c8; margin-bottom:14px; line-height:1.6; }
+  .code{ background:#06121f; border:1px solid #1b3a52; border-radius:9px; padding:13px 15px; font-family:monospace; font-size:13px; color:#7fe3ef; overflow-x:auto; }
+  .targets{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .target{ background:#13283f; border:1px solid #1b3a52; border-radius:8px; padding:7px 12px; font-size:12px; color:#cfe0ee; }
+
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; }
+  .card .ic{ width:34px;height:34px;border-radius:8px;background:#eef7f9;color:#0b5563;font-size:18px;text-align:center;line-height:34px;margin-bottom:10px; }
+  .card h3{ font-size:15px; margin:0 0 5px; color:var(--navy); }
+  .card p{ font-size:13px; color:var(--muted); line-height:1.55; margin:0; }
+  .card .ex{ font-size:12px; color:#0b5563; background:#f3fafb; border-radius:7px; padding:7px 9px; margin-top:9px; font-style:italic; }
+
+  .moat{ margin-top:40px; background:linear-gradient(135deg,#0F2035,#163050); border-radius:14px; padding:26px; color:#fff; text-align:center; }
+  .moat h2{ color:#fff; font-size:20px; margin:0 0 8px; }
+  .moat p{ color:#bcd0e2; font-size:14px; line-height:1.6; max-width:560px; margin:0 auto; }
+  .moat .price{ color:var(--teal); font-weight:800; }
+
+  .foot{ text-align:center; font-size:12px; color:#9ca3af; margin-top:34px; line-height:1.7; }
+
+  @media(max-width:620px){ .cards{ grid-template-columns:1fr; } .hero h1{ font-size:24px; } }
+</style>
+</head>
+<body>
+
+  <div class="bar"><div class="inner">
+    <div class="brand">SWFL DATA <span class="dot">GULF</span></div>
+    <a class="barlink" href="#add">Add to your AI ↓</a>
+  </div></div>
+
+  <div class="wrap">
+
+    <div class="hero">
+      <span class="kicker">Ask anything · cited in seconds</span>
+      <h1>The Southwest Florida market, in plain English — on demand.</h1>
+      <p>Every answer is pulled live from our data lake and sourced. No guesses, no national averages. Try a question — the answers below use this week's real numbers.</p>
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat">
+      <div class="head"><span class="live"></span> SWFL Data Gulf AI · grounded in the live lake</div>
+      <div class="transcript" id="transcript">
+        <!-- default answer injected by JS -->
+      </div>
+      <div class="prompts">
+        <div class="lab">Try one:</div>
+        <span class="chip" onclick="show('p1')">What's the play in 33908 right now?</span>
+        <span class="chip" onclick="show('p2')">Fort Myers Beach vs. the mainland for a buyer</span>
+        <span class="chip" onclick="show('p3')">Draft a client email for my 33908 buyers</span>
+        <span class="chip" onclick="show('p4')">Is now the time for CRE in the Fort Myers corridor?</span>
+      </div>
+      <div class="inputrow">
+        <input type="text" placeholder="Ask about any Lee or Collier ZIP, corridor, or sector…" />
+        <button class="send">Ask</button>
+      </div>
+    </div>
+
+    <!-- ADD TO YOUR AI -->
+    <div class="sec" id="add">
+      <h2>Already use AI? Plug us in.</h2>
+      <p class="sub">Connect SWFL Data Gulf to the assistant you already run — Claude, ChatGPT, Cursor — and query the lake from inside your own workflow. One line.</p>
+      <div class="mcp">
+        <div class="ttl">Add the SWFL data server</div>
+        <div class="desc">Live MCP endpoint. Your AI can now pull cited Lee &amp; Collier data — housing, CRE, permits, flood, traffic — on command.</div>
+        <div class="code">claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp</div>
+        <div class="targets">
+          <div class="target">✓ Claude</div>
+          <div class="target">✓ ChatGPT (MCP)</div>
+          <div class="target">✓ Cursor</div>
+          <div class="target">✓ Any MCP client</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUILT BY ASKING -->
+    <div class="sec">
+      <h2>Built by just asking.</h2>
+      <p class="sub">Templates, documents, and updates — generated from real data, on request. Emails, reports, listing one-pagers, all in one place.</p>
+      <div class="cards">
+        <div class="card">
+          <div class="ic">✉️</div>
+          <h3>Client emails &amp; digests</h3>
+          <p>Branded, per-ZIP market emails your clients actually open — generated and sent for you.</p>
+          <div class="ex">"Write this week's 33908 email for my buyer list."</div>
+        </div>
+        <div class="card">
+          <div class="ic">📄</div>
+          <h3>Documents on demand</h3>
+          <p>Listing-presentation one-pagers, market reports, CMAs context — drafted from live numbers in seconds.</p>
+          <div class="ex">"Build a one-page market report for a 33931 listing pitch."</div>
+        </div>
+        <div class="card">
+          <div class="ic">📈</div>
+          <h3>Live market updates</h3>
+          <p>Daily or weekly pushes when your ZIP or corridor moves past a threshold you set.</p>
+          <div class="ex">"Alert me when 33908 days-on-market crosses 90."</div>
+        </div>
+        <div class="card">
+          <div class="ic">🗂️</div>
+          <h3>All in one place</h3>
+          <p>Data, AI, emails, and documents in a single workspace — not five tabs and a spreadsheet.</p>
+          <div class="ex">"Show me everything moving in south Lee this month."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOAT / CRE POSITIONING -->
+    <div class="moat">
+      <h2>The same intelligence the big platforms charge thousands for.</h2>
+      <p>ZIP-level pricing, days-on-market, flood cost, CRE cap rates and absorption — sourced, current, and conversational. <span class="price">Without the $X,XXX/month seat.</span></p>
+    </div>
+
+    <div class="foot">
+      Answers above use live lake data · housing as of Jun 3, 2026 · <span style="font-family:monospace;">SWFL-7421-v6-20260603</span><br/>
+      Internal design mockup — chat answers are real data, scripted for preview. Live chat wiring is the build.
+    </div>
+
+  </div>
+
+<script>
+  const ANSWERS = {
+    p1: `
+      <div class="msg user"><div class="who">You</div><div class="bubble">What's the play in 33908 right now?</div></div>
+      <div class="msg ai"><div class="who">SWFL Data Gulf</div>
+        <h4>Bottom line</h4>
+        <p>Buyer's market, and you have real leverage — 33908 is repricing faster than the metro around it.</p>
+        <h4>The numbers</h4>
+        <ul>
+          <li>Median sale price <strong>$330,000</strong> — down <strong>19.5%</strong> year-over-year</li>
+          <li><strong>87 days</strong> on market (+13 days YoY); <strong>7.2 months</strong> of supply</li>
+          <li>Sale-to-list <strong>94.5%</strong> · 324 homes sold in 90 days · 778 active</li>
+          <li>Expected flood loss <strong>$10,510/yr</strong> per insured property</li>
+          <li>Cape Coral–Fort Myers metro down <strong>8.86%</strong> YoY (FL state −2.6%)</li>
+        </ul>
+        <h4>The road ahead</h4>
+        <p>33908's −19.5% is more than double the metro's −8.86% — local supply (7.2 mo) and 87-day market times mean sellers are negotiable now. <strong>IF</strong> supply holds above ~6 months <strong>THEN</strong> price softness likely runs into fall. <strong>Watch</strong> the 90-day sold count (324 today): a drop toward ~250 is the early tell that sellers are pulling listings instead of cutting — that's when the leverage flips back.</p>
+        <div class="tok">freshness · SWFL-7421-v6-20260603</div>
+      </div>`,
+    p2: `
+      <div class="msg user"><div class="who">You</div><div class="bubble">Fort Myers Beach vs. the mainland for a buyer</div></div>
+      <div class="msg ai"><div class="who">SWFL Data Gulf</div>
+        <h4>Bottom line</h4>
+        <p>The beach (33931) is the deeper buyer's market — but the flood carry is 3× the mainland (33908). It comes down to whether your buyer can absorb the insurance.</p>
+        <h4>The numbers</h4>
+        <ul>
+          <li><strong>33931 (beach):</strong> $590k (−15.8% YoY) · 114 days (+41 YoY) · 11.7 mo supply · flood <strong>$30,075/yr</strong></li>
+          <li><strong>33908 (mainland):</strong> $330k (−19.5% YoY) · 87 days · 7.2 mo supply · flood <strong>$10,510/yr</strong></li>
+        </ul>
+        <h4>The road ahead</h4>
+        <p>Nearly a year of inventory and 114-day market times on the beach mean maximum negotiating room in the county — but the $30k/yr flood line is exactly why it's stacking up. <strong>IF</strong> your buyer can carry the insurance <strong>THEN</strong> 33931 has the best price leverage right now. Optimizing total cost of ownership? The mainland wins. <strong>Watch</strong> beach days-on-market: above 120 and sellers start cutting, not just sitting.</p>
+        <div class="tok">freshness · SWFL-7421-v6-20260603</div>
+      </div>`,
+    p3: `
+      <div class="msg user"><div class="who">You</div><div class="bubble">Draft a client email for my 33908 buyers</div></div>
+      <div class="msg ai"><div class="who">SWFL Data Gulf</div>
+        <h4>Here's your draft — ready to send</h4>
+        <p style="background:#f9fafb;border:1px solid #eef1f4;border-radius:8px;padding:13px 15px;">
+          <strong>Subject:</strong> 33908 right now — you've got room to negotiate<br/><br/>
+          Hi [Name] —<br/><br/>
+          Quick read on San Carlos Park / south Fort Myers this month: the median is $330K, down about 20% from a year ago, and homes are sitting 87 days before they sell. With 7.2 months of supply, sellers are taking around 5.5% under asking.<br/><br/>
+          Translation: this is the most negotiating room buyers have had here in years. If you've been on the fence, it's worth a conversation before listings tighten up.<br/><br/>
+          Want me to pull a few that fit? — [Your name]
+        </p>
+        <p class="src">Numbers sourced from the live lake · edit the brackets and it's ready in your outbox.</p>
+        <div class="tok">freshness · SWFL-7421-v6-20260603</div>
+      </div>`,
+    p4: `
+      <div class="msg user"><div class="who">You</div><div class="bubble">Is now the time for CRE in the Fort Myers corridor?</div></div>
+      <div class="msg ai"><div class="who">SWFL Data Gulf</div>
+        <h4>Bottom line</h4>
+        <p>Mixed, leaning cautious — landlords are holding asking rents while vacancy creeps, which is stickiness, not strength.</p>
+        <h4>The numbers</h4>
+        <ul>
+          <li>Median cap rate <strong>6.7%</strong> (rising) · vacancy <strong>3.2%</strong> (stable)</li>
+          <li>Net absorption <strong>6,397 sqft</strong> (rising) · asking rent <strong>$30.88/sqft NNN</strong> (rising)</li>
+          <li>Area Factor <strong>45/100</strong> (neutral) across 27 verified Lee &amp; Collier submarkets</li>
+        </ul>
+        <h4>The road ahead</h4>
+        <p>Rising rents <em>and</em> rising vacancy together is the classic late-cycle tell: owners are quoting strong numbers they can't fully fill. <strong>IF</strong> that gap persists <strong>THEN</strong> expect concessions (free months, TI) before headline rents drop. <strong>Watch</strong> net absorption — it's positive now (6,397 sqft); the first negative print is your early warning the corridor is softening before the asking-rent number admits it.</p>
+        <div class="tok">freshness · SWFL-7421-v6-20260609</div>
+      </div>`
+  };
+  function show(k){ document.getElementById('transcript').innerHTML = ANSWERS[k]; }
+  show('p1');
+</script>
+</body>
+</html>

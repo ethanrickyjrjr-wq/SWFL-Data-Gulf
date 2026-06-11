@@ -7,6 +7,31 @@
 
 ---
 
+## Built Samples — open these (2026-06-11)
+
+Two clickable artifacts under `samples/`. Open in a browser:
+
+- **`samples/agent-client-digest.html`** — the **white-label client digest**. One template, real lake data, numbers + "The Read" paragraph swapped per ZIP (33908 and 33931 shown). The agent brand block up top is the white-label slot. This is the V1 product an agent sends their sphere under their own name.
+- **`samples/ai-hook-page.html`** — the **AI hook landing page**. Clickable starter prompts that answer from real lake data, an "Add to your own AI" MCP one-liner (live today), and "built by asking" capability cards (emails, documents, updates). Mockup note: chat answers are real lake data, the input box is not wired yet.
+
+### Product shape (what these prove)
+- **Free per-ZIP digest** = top of funnel. Same email, swapped numbers + narrative per ZIP.
+- **AI hook** = the digest links to a page wrapping our live AI (cited, no invention). The brain (MCP + `speak` API) is **LIVE**; the consumer chat page is the build.
+- **Self-select funnel:** pass-by / email-only (price-gated) / AI power-user — the page serves all three. High-value target = brokers/CRE paying thousands for the same data; the wow converts them, but only if the email gets opened (open-rate is the gate).
+
+### Interaction model — "does it answer in email or take them to our page?"
+Both, two distinct loops:
+1. **Reply-to-ask (answers in email):** subscriber replies to the digest → Resend Inbound webhook → AI answers by email. Zero friction, no app. (Phase 3 reply loop — already speced.)
+2. **Click-to-chat (takes them to our page):** the CTA/links open the AI hook page for the interactive experience (highlighter, ZIP drill, document generation).
+
+### Highlighter — can it live in the email?
+**No.** Email clients block JavaScript (same constraint as charts, EMAIL.md Rule 7). The highlighter is interactive → it lives on the **web version** of each issue (`/email/[date]`, Phase 5). Every email carries a "View on web" link to that page. Email stays static tables; the interactivity is one click away.
+
+### MCP hookup friction (the part we hate)
+Power users want their OWN AI. The hookup is one line today (`claude mcp add … swfl`) but still friction for non-technical brokers. Path of least resistance: lead everyone to the hosted chat page (no install); offer the MCP line as the "plug into your own stack" upsell for the technical ones.
+
+---
+
 ## What This Is
 
 A branded daily email digest that surfaces SWFL Data Gulf lake data — focused on ZIP 33908
