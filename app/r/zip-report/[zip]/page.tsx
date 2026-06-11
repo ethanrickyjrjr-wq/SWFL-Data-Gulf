@@ -1,9 +1,19 @@
 import { notFound } from "next/navigation";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
+import type { LocationInput } from "../../../../refinery/lib/location-resolver.mts";
+import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
 import { resolveGradeConfig, type DirectionPolarity } from "../../../../refinery/vocab/loader.mts";
 import { loadParsedBrain } from "../../../../lib/fetch-brain";
+import { assembleLocationDossier, selectDossierLines } from "../../../../lib/zip-dossier";
+import type { LocationDossierLine } from "../../../../lib/zip-dossier";
 import { identityForZip, didYouMeanBanner } from "../../../../lib/location-surface";
-import { ReportShell, ReportHeader, ReportFooter, Meta } from "../../_components/report-shell";
+import {
+  ReportShell,
+  ReportHeader,
+  ReportFooter,
+  SectionTitle,
+  Meta,
+} from "../../_components/report-shell";
 import { HighlighterLayer } from "../../../../components/highlighter/HighlighterLayer";
 import { HighlighterProvider } from "../../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
@@ -15,6 +25,8 @@ import {
   DidYouMeanBanner,
   OutOfScopePanel,
 } from "../../_components/location-ui";
+import { SourcesAccordion } from "../../_components/sources-accordion";
+import type { SourceEntry } from "../../_components/sources-accordion";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,6 +36,14 @@ const VALID_ZIP = /^\d{5}$/;
 interface PageProps {
   params: Promise<{ zip: string }>;
   searchParams: Promise<{ q?: string; matched?: string }>;
+}
+
+type SectionBucket = "city" | "county" | "swfl";
+
+function grainBucket(grain: Grain): SectionBucket {
+  if (grain === "city" || grain === "corridor") return "city";
+  if (grain === "county") return "county";
+  return "swfl"; // region, msa, national, state
 }
 
 function deltaForSlug(
@@ -45,8 +65,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   if (!VALID_ZIP.test(zip)) notFound();
   const sp = await searchParams;
 
-  // Resolve the ZIP's geography. Out of the 6-county footprint → a friendly
-  // page, never a bare 404 (notFound() is reserved for a non-ZIP-shaped URL).
   const res = resolveZip(zip);
   if (!res.in_scope) {
     return (
@@ -62,8 +80,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     );
   }
 
-  // The bespoke headline reads housing + flood structured, for the trend-badged
-  // tables. Resilient: a missing brain hides its section, never 500s the page.
+  const loc: LocationInput = { kind: "zip", resolution: res };
+  const dossier = await assembleLocationDossier(loc);
+
   const housing = await loadParsedBrain("housing-swfl");
   const env = await loadParsedBrain("env-swfl");
 
@@ -106,17 +125,45 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     ? (floodMetric as NonNullable<typeof floodMetric>).source.citation
     : "";
 
+  // Identity and did-you-mean
   const identity = identityForZip(res);
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);
 
-  // Freshness token — quoted once, in the header.
-  const freshnessToken = housing?.freshness_token ?? env?.freshness_token;
+  // Section titles derived from resolved geography
+  const primaryPlace =
+    (res.places.find((p) => p.match === "primary") ?? res.places[0])?.place ?? null;
+  const cityAreaTitle = primaryPlace ? `${primaryPlace} Area` : "Local Area";
+  const countyTitle = res.county_names[0] ? `${res.county_names[0]} County` : "County";
+
+  // All rollup lines (non-ZIP grains), bucketed into three consolidated sections
+  const rollupLines: LocationDossierLine[] = selectDossierLines(dossier.lines, 2).filter(
+    (l) => !l.is_true_zip,
+  );
+  const cityLines = rollupLines.filter((l) => grainBucket(l.grain) === "city");
+  const countyLines = rollupLines.filter((l) => grainBucket(l.grain) === "county");
+  const swflLines = rollupLines.filter((l) => grainBucket(l.grain) === "swfl");
+
+  // Collect all sources for the bottom accordion — no inline source links anywhere
+  const sources: SourceEntry[] = [];
+  if (hasFlood && floodSourceUrl) {
+    sources.push({ label: floodSourceCitation || "FEMA NFIP", url: floodSourceUrl });
+  }
+  for (const l of rollupLines) {
+    if (l.source_url) {
+      sources.push({ label: l.source_citation || l.brain_id, url: l.source_url });
+    }
+  }
+
+  // Freshness token — quoted once, in the header
+  const freshnessToken =
+    housing?.freshness_token ?? env?.freshness_token ?? Object.values(dossier.freshness_tokens)[0];
   const updatedAt = housing?.refined_at ?? env?.refined_at;
 
   const highlighterEnabled = highlighterUiEnabled();
 
   const pageContent = (
     <>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
       <ReportHeader title={`ZIP ${zip}`}>
         <dl className="mt-4 flex flex-wrap gap-5 text-sm">
           {freshnessToken && (
@@ -132,95 +179,123 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         </div>
       </ReportHeader>
 
-      {/* Identity — confirm WHERE before any number. */}
+      {/* ── Identity — WHERE before any number ──────────────────────────── */}
       <IdentityCard identity={identity} />
       {didYouMean && <DidYouMeanBanner message={didYouMean} />}
 
-      {/* True-ZIP headline: real estate + flood. */}
-      {hasHousing && (
-        <section className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
-            Housing Market
-          </h2>
-          <p className="mt-0.5 text-xs text-gray-500">90-day window</p>
-          <dl className="mt-4 divide-y divide-white/[0.06] rounded-xl glass-card-modern border border-white/10">
-            <DataRow
-              label="Median sale price"
-              value={`$${(price as number).toLocaleString()}`}
-              badge={trendBadge(priceBadge)}
-              valueClassName={priceColor}
-            />
-            <DataRow
-              label="Days on market"
-              value={String(dom)}
-              badge={trendBadge(domBadge)}
-              valueClassName={domColor}
-            />
-            {saleToList != null && <DataRow label="Sale-to-list ratio" value={`${saleToList}%`} />}
-            {mos != null && <DataRow label="Months of supply" value={String(mos)} />}
-            {homesSold != null && <DataRow label="Homes sold (90d)" value={String(homesSold)} />}
-            {inventory != null && <DataRow label="Active inventory" value={String(inventory)} />}
-          </dl>
-        </section>
-      )}
-
-      {hasFlood && (
-        <section className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
-            Flood Risk
-          </h2>
-          <p className="mt-0.5 text-xs text-gray-500">NFIP 10-yr average annual loss</p>
-          <dl className="mt-4 divide-y divide-white/[0.06] rounded-xl glass-card-modern border border-white/10">
-            <DataRow
-              label="Avg Annual Loss"
-              value={`$${aal.toLocaleString(undefined, {
-                maximumFractionDigits: 0,
-              })} / yr per insured property`}
-            />
-            <DataRow label="SWFL percentile rank" value={`${rank}th`} />
-          </dl>
-        </section>
-      )}
-
-      {/* Sources — collapsible, not scattered */}
+      {/* ── ZIP-Level: Housing + Flood ───────────────────────────────────── */}
       {(hasHousing || hasFlood) && (
-        <details className="mt-8 rounded-xl glass-card-modern border border-white/10">
-          <summary className="flex cursor-pointer list-none select-none items-center justify-between px-4 py-3 text-sm">
-            <span className="font-medium text-gray-400">Sources</span>
-            <span className="text-xs text-gray-600">▾</span>
-          </summary>
-          <div className="space-y-2.5 border-t border-white/[0.06] px-4 pb-4 pt-3">
-            {hasHousing && housingSourceUrl && (
-              <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
-                <span className="shrink-0 text-gray-500">Housing market:</span>
-                <a
-                  href={housingSourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
-                >
-                  {housingSourceCitation || "Source"}
-                </a>
-              </div>
-            )}
-            {hasFlood && floodSourceUrl && (
-              <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
-                <span className="shrink-0 text-gray-500">Flood risk:</span>
-                <a
-                  href={floodSourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#00d4aa] underline decoration-[#00d4aa]/40 underline-offset-2 hover:decoration-[#00d4aa]"
-                >
-                  {floodSourceCitation || "Source"}
-                </a>
-              </div>
-            )}
-          </div>
-        </details>
+        <section id="section-zip" className="mt-10">
+          <SectionTitle>ZIP-Level Data</SectionTitle>
+
+          {hasHousing && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Housing Market
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-500">90-day window</p>
+              <dl className="mt-3 divide-y divide-white/[0.06] rounded-xl glass-card-modern border border-white/10">
+                <DataRow
+                  label="Median sale price"
+                  value={`$${(price as number).toLocaleString()}`}
+                  badge={trendBadge(priceBadge)}
+                  valueClassName={priceColor}
+                />
+                <DataRow
+                  label="Days on market"
+                  value={String(dom)}
+                  badge={trendBadge(domBadge)}
+                  valueClassName={domColor}
+                />
+                {saleToList != null && (
+                  <DataRow label="Sale-to-list ratio" value={`${saleToList}%`} />
+                )}
+                {mos != null && <DataRow label="Months of supply" value={String(mos)} />}
+                {homesSold != null && (
+                  <DataRow label="Homes sold (90d)" value={String(homesSold)} />
+                )}
+                {inventory != null && (
+                  <DataRow label="Active inventory" value={String(inventory)} />
+                )}
+              </dl>
+            </div>
+          )}
+
+          {hasFlood && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Flood Risk
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-500">NFIP 10-yr average annual loss</p>
+              <dl className="mt-3 divide-y divide-white/[0.06] rounded-xl glass-card-modern border border-white/10">
+                <DataRow
+                  label="Avg Annual Loss"
+                  value={`$${aal.toLocaleString(undefined, {
+                    maximumFractionDigits: 0,
+                  })} / yr per insured property`}
+                />
+                <DataRow label="SWFL percentile rank" value={`${rank}th`} />
+              </dl>
+            </div>
+          )}
+        </section>
       )}
 
-      {/* CTA */}
+      {/* ── City / Corridor Area ─────────────────────────────────────────── */}
+      {cityLines.length > 0 && (
+        <section id="section-city" className="mt-10">
+          <SectionTitle>{cityAreaTitle}</SectionTitle>
+          <div className="mt-4 space-y-3">
+            {cityLines.map((l) => (
+              <div
+                key={l.brain_id}
+                className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
+              >
+                <p className="text-sm leading-6 text-gray-200">{l.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── County ──────────────────────────────────────────────────────── */}
+      {countyLines.length > 0 && (
+        <section id="section-county" className="mt-10">
+          <SectionTitle>{countyTitle}</SectionTitle>
+          <div className="mt-4 space-y-3">
+            {countyLines.map((l) => (
+              <div
+                key={l.brain_id}
+                className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
+              >
+                <p className="text-sm leading-6 text-gray-200">{l.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Southwest Florida ───────────────────────────────────────────── */}
+      {swflLines.length > 0 && (
+        <section id="section-swfl" className="mt-10">
+          <SectionTitle>Southwest Florida</SectionTitle>
+          <div className="mt-4 space-y-3">
+            {swflLines.map((l) => (
+              <div
+                key={l.brain_id}
+                className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
+              >
+                <p className="text-sm leading-6 text-gray-200">{l.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Sources accordion (collapsed by default) ────────────────────── */}
+      <SourcesAccordion sources={sources} />
+
+      {/* ── CTA ─────────────────────────────────────────────────────────── */}
       <div className="mt-10 rounded-xl glass-card-modern border border-white/10 px-6 py-6">
         <p className="text-center text-sm font-medium text-white">Get this for any SWFL ZIP</p>
         <div className="mt-3 flex flex-wrap justify-center gap-6 text-sm text-gray-300">
