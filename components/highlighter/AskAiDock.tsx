@@ -346,15 +346,6 @@ export function AskAiDock({
                 </button>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => triggerSummary("full")}
-                  className="w-full rounded-lg border border-[#00d4aa] bg-[#00d4aa]/5 px-3 py-2 text-left text-gray-900 transition-colors hover:bg-[#00d4aa]/20 hover:text-[#00d4aa]"
-                >
-                  Full session recap — key metrics + bottom line
-                </button>
-              </li>
-              <li>
                 <div className="flex gap-2">
                   <input
                     type="text"

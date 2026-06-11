@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — /ask page live + recap removed from AskAiDock
+
+- `app/ask/page.tsx` + `app/ask/AskPage.tsx`: standalone AI chat page — streams `/api/converse` grounded to `master`; `?q=` pre-fills and auto-submits (email deep-links); `?r=` overrides brain slug; 4 starter prompts matching email copy.
+- `components/highlighter/AskAiDock.tsx`: removed "Full session recap" option from summarize flow.
+- tsc clean. Prod `/ask` was 404; now deployed and live.
+- Next: still-pending save-button freeze (`PATCH /api/projects/[id]` hangs for auth'd users), Presentation Engine browser round-trip + push.
+
 ## 2026-06-11 (main) — Presentation Engine Phase 6: brand theming (LOCAL, not pushed)
 
 - **Phase 6 COMPLETE (local).** `lib/deliverable/brand-theme.ts`: pure `extractBrandTheme()` / `toChartTheme()` — reads `primary_color`, `accent_color`, `logo_url` from the branding blob; 10 tests.
