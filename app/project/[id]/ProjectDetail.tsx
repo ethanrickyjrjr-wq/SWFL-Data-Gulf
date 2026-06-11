@@ -30,6 +30,8 @@ interface Props {
   deliverables: DeliverableRow[];
   /** Server-minted 1h signed URLs for `{kind:"file"}` items, keyed by storage_path. */
   fileUrls: Record<string, string>;
+  /** The per-project capability key (null until first minted). */
+  mcpKey: string | null;
 }
 
 const BRANDING_FIELDS: { key: string; label: string }[] = [
@@ -54,6 +56,7 @@ export function ProjectDetail({
   charts,
   deliverables: initialDeliverables,
   fileUrls,
+  mcpKey: initialMcpKey,
 }: Props) {
   const [items, setItems] = useState<ProjectItem[]>(initialItems);
   const [title, setTitle] = useState(initialTitle ?? "");
@@ -166,7 +169,17 @@ export function ProjectDetail({
         {items.map((item, i) => (
           <li key={item.id} className="rounded-xl border border-white/10 bg-[#0d1e2b]/80 p-4">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500">{item.kind}</span>
+              <span className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-gray-500">
+                {item.kind}
+                {item.origin === "mcp" && (
+                  <span
+                    className="rounded-full border border-[#00d4aa]/40 px-1.5 py-0.5 text-[9px] font-medium text-[#00d4aa]"
+                    title="Filed by your connected AI"
+                  >
+                    via AI
+                  </span>
+                )}
+              </span>
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <button
                   type="button"
@@ -232,6 +245,9 @@ export function ProjectDetail({
         </button>
       </section>
 
+      {/* Connect your AI — per-project capability key (S9) */}
+      <ConnectYourAI projectId={id} initialKey={initialMcpKey} />
+
       {/* Shared deliverables — owner kill-switch (S7) */}
       {deliverables.length > 0 && (
         <section className="mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
@@ -284,6 +300,129 @@ export function ProjectDetail({
         {/* TODO(S6): POST /api/projects/[id]/build (forced-tool LLM) → /p/[id] */}
       </div>
     </main>
+  );
+}
+
+/** "Connect your AI" — mint / regenerate (= revoke) / clear the per-project key,
+ *  and show the copy-paste connect snippet. The key scopes ONE project,
+ *  write-only-into-items; regenerate invalidates the old key instantly. */
+function ConnectYourAI({
+  projectId,
+  initialKey,
+}: {
+  projectId: string;
+  initialKey: string | null;
+}) {
+  const [key, setKey] = useState<string | null>(initialKey);
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function mint() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/mcp-key`, { method: "POST" });
+      const json = (await res.json().catch(() => null)) as { mcp_key?: string } | null;
+      if (res.ok && json?.mcp_key) setKey(json.mcp_key);
+      else setError("Could not generate a key. Try again.");
+    } catch {
+      setError("Could not generate a key. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revoke() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/mcp-key`, { method: "DELETE" });
+      if (res.ok) setKey(null);
+      else setError("Could not revoke the key. Try again.");
+    } catch {
+      setError("Could not revoke the key. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const snippet = key
+    ? `claude mcp add --transport http swfl-project https://www.swfldatagulf.com/api/mcp \\\n  --header "X-Project-Key: ${key}"`
+    : "";
+
+  async function copy() {
+    if (!snippet) return;
+    try {
+      await navigator.clipboard.writeText(snippet);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard blocked — the user can select the text manually */
+    }
+  }
+
+  return (
+    <section className="mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
+      <h2 className="text-sm font-semibold text-white">Connect your AI</h2>
+      <p className="mt-1 text-xs text-gray-500">
+        Give your own Claude a key that can list this project, file items into it, and build a
+        deliverable — for <span className="text-gray-300">this one project only</span>. It can write
+        into items; it can’t read your other projects or your account. Regenerate any time to revoke
+        the old key.
+      </p>
+
+      {!key ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={mint}
+          className="mt-3 rounded-full bg-[#00d4aa] px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
+        >
+          {busy ? "Generating…" : "Generate key"}
+        </button>
+      ) : (
+        <div className="mt-3">
+          <p className="text-xs text-gray-400">
+            Paste this into your AI client’s terminal — the key rides as a header, so it never has
+            to appear in your chats:
+          </p>
+          <pre className="mt-2 overflow-x-auto rounded-lg border border-white/10 bg-[#04121b] p-3 text-[11px] leading-relaxed text-gray-200">
+            {snippet}
+          </pre>
+          <p className="mt-1 text-[11px] text-gray-500">
+            If your provider requires an access token, add an{" "}
+            <code className="text-gray-400">Authorization: Bearer</code> header too.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={copy}
+              className="rounded-full bg-[#00d4aa] px-4 py-1.5 text-xs font-medium text-[#04121b]"
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={mint}
+              className="rounded-full border border-[#00d4aa]/40 px-4 py-1.5 text-xs font-medium text-[#00d4aa] disabled:opacity-40"
+            >
+              Regenerate (revokes old)
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={revoke}
+              className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-red-400 disabled:opacity-40"
+            >
+              Revoke
+            </button>
+          </div>
+        </div>
+      )}
+      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+    </section>
   );
 }
 

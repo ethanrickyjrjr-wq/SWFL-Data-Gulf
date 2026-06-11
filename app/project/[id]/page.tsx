@@ -15,6 +15,7 @@ interface ProjectRow {
   title: string | null;
   items: ProjectItem[];
   branding: Record<string, string> | null;
+  mcp_key: string | null;
 }
 
 export async function generateMetadata({
@@ -39,7 +40,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   // RLS scopes this SELECT to the owner — another user's id returns no row → 404.
   const { data } = await supabase
     .from("projects")
-    .select("id, title, items, branding")
+    .select("id, title, items, branding, mcp_key")
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
@@ -85,6 +86,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       charts={charts}
       deliverables={deliverables}
       fileUrls={fileUrls}
+      mcpKey={project.mcp_key}
     />
   );
 }
