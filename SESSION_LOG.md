@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-10 (main) — S9 MCP co-build write tools COMPLETE (local) — HELD on bearer keystone + diff-review
+
+- **3 capability-keyed WRITE tools** on the MCP surface (`app/api/mcp/project-tools.ts`, registered by `server.ts`): `swfl_project_list/add/build`. Each resolves the per-project key FIRST, then writes service-role to the resolved project id ONLY.
+- **Auth = `X-Project-Key` header (preferred) or `project_key` arg (fallback).** Vendor-verified in-session that the MCP SDK web transport forwards request headers to the tool handler's `extra.requestInfo.headers` (mcp-handler 1.1.0 reconstructs the Request preserving headers → `webStandardStreamableHttp` builds `requestInfo` → `mcp.js` passes `extra`). Header keeps the key out of chat context (the leak-risk mitigation).
+- **`[LB-R6b]` hard-bind:** no tool arg carries a `project_id`; write target derived SOLELY from `mcp_key→project` lookup. Negative test proves a smuggled `project_id` is ignored.
+- **`POST/DELETE /api/projects/[id]/mcp-key`** mints/regenerates(=revoke)/clears `projects.mcp_key` (cookie-RLS owner-scoped). `/project/[id]` gains a "Connect your AI" panel + `via AI` badge on `origin:'mcp'` items.
+- **Shared `lib/deliverable/assemble.ts`** — one build path reused by the web build route + `swfl_project_build` (no divergence). New `recordUseForClient` meters `item_add`/`build` to `mcp:<owner_uid>`. `add` dedupes by `(kind,report_id,label,value)`; `chart_block`→lint→`saved_charts`→`{kind:chart}` ref.
+- Prod schema verified live: `projects.mcp_key text UNIQUE` already present. Tsc clean (0), eslint clean, **27 MCP tests green** + 175 deliverable/projects/charts/meter green.
+- **NOT pushed / NOT deployed.** Two gates remain, both operator-owned: **(a) the `MCP_BEARER_TOKEN` keystone must be SET in prod** (the MCP server is unauthenticated until then — `[AUDIT-FIX C6]`); **(b) the live MCP-surface diff-review** (RULE 1). `mcp_project_tools_live_verify` stays OPEN — closes only on the task-04 live two-Claude run post-deploy.
+
 ## 2026-06-10 (main) — S8 uploads COMPLETE (local) — images+PDF attach, per-user Storage RLS, signed-URL render
 
 - **Vendor-verified** Supabase Storage in-session (FINDINGS-storage.md): per-operation `storage.objects` policies, `TO authenticated`, `(storage.foldername(name))[1] = (select auth.uid()::text)`, `createSignedUrl(path,sec)`, `upload(path,file,{contentType,upsert})`.
