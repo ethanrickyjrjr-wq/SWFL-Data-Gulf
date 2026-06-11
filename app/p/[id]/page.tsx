@@ -17,6 +17,7 @@ import type {
   SnapshotItem,
 } from "@/lib/deliverable/templates";
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
+import { FrameRenderer } from "@/components/charts/registry/FrameRenderer";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { TemplateSwitcher } from "./TemplateSwitcher";
 import { PrintButton } from "@/components/PrintButton";
@@ -138,6 +139,14 @@ function renderExhibit(slot: ExhibitSlot) {
         <ChartBlockView block={slot.chart_block} />
       </div>
     );
+  } else if (slot.exhibit_kind === "frame" && slot.chart_spec) {
+    // Live-bound presentation frame — renders its OWN per-visual as-of + source
+    // caption, so the figure-level citation below is suppressed for frames.
+    body = (
+      <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0d1e2b]/80">
+        <FrameRenderer spec={slot.chart_spec} />
+      </div>
+    );
   } else if (slot.exhibit_kind === "table_slice" && slot.columns && slot.rows) {
     body = (
       <div className="overflow-x-auto rounded-xl border border-white/10">
@@ -205,7 +214,8 @@ function renderExhibit(slot: ExhibitSlot) {
       {slot.exhibit_kind === "file" ? (
         // User-supplied media — flag it so it's never mistaken for cited lake data.
         <figcaption className="mt-1 text-[11px] text-gray-500">Provided by agent</figcaption>
-      ) : (
+      ) : slot.exhibit_kind === "frame" ? null : (
+        // Frames self-caption their as-of + source; everything else gets the figure citation.
         citation
       )}
     </figure>

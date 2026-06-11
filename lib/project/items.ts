@@ -77,6 +77,21 @@ const kinds = z.discriminatedUnion("kind", [
     source_url: z.string().optional(),
     freshness_token: z.string(),
   }),
+  z.object({
+    // A LIVE frame recipe (Phase 3): NOT a snapshot — it names a brain + frame +
+    // metrics, and is bound to live data at BUILD time (`bindFrameSpec`), then
+    // frozen into the deliverable as a resolved ChartSpec. This is what lets a
+    // template re-bind for a new place without re-saving (the flywheel).
+    kind: z.literal("frame"),
+    brain_id: z.string(),
+    /** Registry frame id; absent → auto-pick from the brain's data shape. */
+    frame_id: z.string().optional(),
+    /** Metric slugs to pull (composition segments / the gauge value). */
+    metric_keys: z.array(z.string()).optional(),
+    /** Reserved for table-driven frames. */
+    table_id: z.string().optional(),
+    title: z.string(),
+  }),
 ]);
 
 export const projectItemSchema = z.intersection(base, kinds);

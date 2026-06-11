@@ -17,7 +17,16 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ProjectItem } from "../project/items";
-import type { Narrative, SnapshotItem, ResolvedChartItem, ChartBlock } from "./templates";
+import type {
+  Narrative,
+  SnapshotItem,
+  ResolvedChartItem,
+  ResolvedFrameItem,
+  ChartBlock,
+} from "./templates";
+import type { BrainOutput } from "../../refinery/types/brain-output.mts";
+import { loadParsedBrain } from "../fetch-brain";
+import { bindFrameSpec } from "./bind-frame";
 import { lintDeliverableNarrative, type NarrativeViolation } from "./narrative-lint";
 import {
   getAnthropic,
@@ -61,6 +70,24 @@ export async function freezeSnapshot(
     }
   }
 
+  // Live frame recipes bind to brain data at BUILD time (FLAG-2: the first
+  // live-data binding). Load each referenced brain once off disk; every frame on
+  // that brain binds against the SAME parsed output, stamping its own as-of.
+  const brainById = new Map<string, { output: BrainOutput; freshness_token: string }>();
+  const frameBrainIds = [
+    ...new Set(
+      items
+        .filter((i): i is Extract<ProjectItem, { kind: "frame" }> => i.kind === "frame")
+        .map((i) => i.brain_id),
+    ),
+  ];
+  for (const brainId of frameBrainIds) {
+    const parsed = await loadParsedBrain(brainId);
+    if (parsed) {
+      brainById.set(brainId, { output: parsed.output, freshness_token: parsed.freshness_token });
+    }
+  }
+
   const out: SnapshotItem[] = [];
   for (const item of items) {
     if (item.kind === "chart") {
@@ -77,6 +104,27 @@ export async function freezeSnapshot(
         freshness_token: resolved.freshness_token ?? undefined,
       };
       out.push(ri);
+    } else if (item.kind === "frame") {
+      const brain = brainById.get(item.brain_id);
+      if (!brain) continue; // brain missing/unreadable — cannot render, drop it
+      const spec = bindFrameSpec(brain.output, {
+        frame_id: item.frame_id,
+        metric_keys: item.metric_keys,
+        table_id: item.table_id,
+        title: item.title,
+      });
+      if (!spec) continue; // un-bindable from this brain's live data — drop it
+      const fi: ResolvedFrameItem = {
+        kind: "frame",
+        id: item.id,
+        added_at: item.added_at,
+        origin: item.origin,
+        brain_id: item.brain_id,
+        title: item.title,
+        chart_spec: spec,
+        freshness_token: brain.freshness_token,
+      };
+      out.push(fi);
     } else {
       // structuredClone keeps the snapshot a true deep copy (no shared refs)
       out.push(structuredClone(item));
@@ -109,6 +157,10 @@ export function collectSnapshotNumbers(items: SnapshotItem[]): string[] {
         break;
       case "chart":
         for (const row of item.chart_block.rows)
+          for (const cell of row) if (cell != null) out.push(String(cell));
+        break;
+      case "frame":
+        for (const row of item.chart_spec.rows)
           for (const cell of row) if (cell != null) out.push(String(cell));
         break;
       case "note":
@@ -147,6 +199,13 @@ function renderItem(item: SnapshotItem, n: number): string {
     }
     case "chart": {
       const body = item.chart_block.rows
+        .slice(0, 12)
+        .map((r) => r.map((c) => (c == null ? "" : String(c))).join("="))
+        .join("; ");
+      return `[${n}] CHART — ${item.title}: ${body}${citation(item)}`;
+    }
+    case "frame": {
+      const body = item.chart_spec.rows
         .slice(0, 12)
         .map((r) => r.map((c) => (c == null ? "" : String(c))).join("="))
         .join("; ");

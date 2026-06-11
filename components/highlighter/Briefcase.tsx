@@ -26,6 +26,8 @@ function describe(item: ProjectItem): { title: string; sub?: string } {
       return { title: item.caption ?? "Attachment", sub: item.mime };
     case "table_slice":
       return { title: item.title, sub: "Table" };
+    case "frame":
+      return { title: item.title, sub: "Chart" };
   }
 }
 

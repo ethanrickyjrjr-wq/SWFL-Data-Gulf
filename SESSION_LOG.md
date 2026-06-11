@@ -2,6 +2,17 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Presentation Engine Phase 3: wire the orphaned frame engine into deliverables (LOCAL, not pushed)
+
+- **Surprise found + verified before building:** Phase 3's deliverable spine (`/api/projects/[id]/build` + `/p/[id]` + first `auth.uid()` RLS) was ALREADY shipped by the sibling `2026-06-10-projects-briefcase-assembly` plan (commits `c7efb31`…`eca9c7c`, Task 06 prod-verified). The `phase-3-...__OPUS.md` brief was written greenfield — executing it literally would have rebuilt prod code. The README status board (Phase 3 ⬜) was stale.
+- **The real gap (built this session):** the Phase 2a–2g `ChartSpec`/`FrameRenderer` engine was ORPHANED — grep proved those symbols lived only in `components/charts/registry/**`; nothing fed them live brain data. Wired it in:
+  - `lib/deliverable/bind-frame.ts` (NEW) — pure binder `bindFrameSpec(BrainOutput, req) → ChartSpec`: composition (percent metrics → segments + complement), z-gauge (index/single metric), bar-table (reuses `computeMetricChart`); `asOf` from `refined_at`, `source.citation` verbatim (never policed); unsupported/un-bindable → null (caller drops).
+  - `lib/project/items.ts` — added `{kind:"frame"}` ProjectItem recipe (brain_id + frame_id? + metric_keys?): a LIVE recipe bound at BUILD time, not a save-time snapshot.
+  - `lib/deliverable/build.ts` `freezeSnapshot` — loads each referenced brain once (`loadParsedBrain`) + binds every frame → frozen `ResolvedFrameItem`; `templates.ts` exhibit slot gains `exhibit_kind:"frame"`+`chart_spec`; `/p/[id]/page.tsx` renders `<FrameRenderer>` (frame self-captions its as-of, so figure citation suppressed).
+  - type-lift backfill: `app/api/mcp/project-tools.ts` + `components/highlighter/Briefcase.tsx` frame label cases.
+- **Verify:** 204 tests pass / 0 fail across touched areas; root `tsc --noEmit -p tsconfig.json` = 0 errors. Live-binding proven vs real committed brains: env-swfl `swfl_sfha_pct_area_weighted` → composition, traffic-swfl `post_ian_recovery` → z-gauge; plus `freezeSnapshot` build-seam test.
+- **NOT pushed** (per plan contract — Ricky pushes). **Remaining: live browser round-trip** (create a project with frame items → POST build → see frames render on /p) — NOT yet verified (no live server/DB this session). Then Phase 4/5/6. README row 3 + build-queue reconciled.
+
 ## 2026-06-11 (main) — fix CI: add asOf to charts/save validBlock fixture
 
 - `app/api/charts/save/route.test.ts`: added `asOf: "2026-06-10"` to `validBlock` — `964dc4a` added `requireAsOf:true` to the route but didn't update this test, breaking CI for every run since.

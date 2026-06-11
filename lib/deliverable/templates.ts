@@ -12,6 +12,7 @@
 
 import type { ProjectItem } from "../project/items";
 import type { ChartBlock } from "../../refinery/validate/chart-block-lint.mts";
+import type { ChartSpec } from "../../components/charts/registry/chart-spec";
 
 // ---------------------------------------------------------------------------
 // Re-export ChartBlock so downstream importers of this module don't need a
@@ -41,10 +42,29 @@ export type ResolvedChartItem = {
 };
 
 /**
- * ProjectItem with the unresolved chart ref replaced by ResolvedChartItem.
- * buildRenderModel operates on SnapshotItem[].
+ * A live `frame` recipe that has been bound to live brain data at build time
+ * and frozen into an embedded `ChartSpec`. The deliverable snapshot stores this
+ * — never the bare recipe — so `/p/[id]` renders the exact numbers as of build.
  */
-export type SnapshotItem = Exclude<ProjectItem, { kind: "chart" }> | ResolvedChartItem;
+export type ResolvedFrameItem = {
+  kind: "frame";
+  id: string;
+  added_at: string;
+  origin: "web" | "mcp";
+  brain_id: string;
+  title: string;
+  chart_spec: ChartSpec;
+  freshness_token?: string;
+};
+
+/**
+ * ProjectItem with the unresolved chart/frame recipes replaced by their resolved
+ * forms. buildRenderModel operates on SnapshotItem[].
+ */
+export type SnapshotItem =
+  | Exclude<ProjectItem, { kind: "chart" } | { kind: "frame" }>
+  | ResolvedChartItem
+  | ResolvedFrameItem;
 
 // ---------------------------------------------------------------------------
 // Narrative — the LLM produces exactly this shape; build route imports it.
@@ -83,15 +103,17 @@ export type SectionSlot = {
   stats: StatSlot[];
 };
 
-/** A single visual exhibit — a chart block or a table slice. */
+/** A single visual exhibit — a chart block, a live-bound frame, or a table slice. */
 export type ExhibitSlot = {
   kind: "exhibit";
-  /** "chart" | "table_slice" | "file" */
-  exhibit_kind: "chart" | "table_slice" | "file";
+  /** "chart" | "frame" | "table_slice" | "file" */
+  exhibit_kind: "chart" | "frame" | "table_slice" | "file";
   id: string;
   title: string;
   /** The resolved chart block (present for chart exhibits). */
   chart_block?: ChartBlock;
+  /** The live-bound presentation frame spec (present for frame exhibits). */
+  chart_spec?: ChartSpec;
   /** Table columns (present for table_slice exhibits). */
   columns?: string[];
   /** Table rows (present for table_slice exhibits). */
@@ -203,6 +225,16 @@ function toExhibitSlot(item: SnapshotItem): ExhibitSlot | null {
       freshness_token: item.freshness_token,
     };
   }
+  if (item.kind === "frame") {
+    return {
+      kind: "exhibit",
+      exhibit_kind: "frame",
+      id: item.id,
+      title: item.title,
+      chart_spec: item.chart_spec,
+      freshness_token: item.freshness_token,
+    };
+  }
   if (item.kind === "table_slice") {
     return {
       kind: "exhibit",
@@ -263,6 +295,8 @@ function collectSources(items: SnapshotItem[]): SourcesSlot {
       add(item.source_url, item.source_label ?? item.source_url, "metric");
     } else if (item.kind === "table_slice" && item.source_url) {
       add(item.source_url, item.source_url, "table_slice");
+    } else if (item.kind === "frame" && item.chart_spec.source?.url) {
+      add(item.chart_spec.source.url, item.chart_spec.source.citation, "frame");
     }
   }
 

@@ -226,6 +226,8 @@ function describeItem(it: ProjectItem): string {
       return it.label;
     case "table_slice":
       return it.title;
+    case "frame":
+      return it.title;
     case "file":
       return it.caption ?? "attachment";
   }
