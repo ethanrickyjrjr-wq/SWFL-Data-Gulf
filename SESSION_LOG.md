@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — email digest Phase 1 plan + spec
+
+- Created `docs/email-marketing/` folder with `EMAIL.md` (11 rules + SOURCED THRESHOLDS) + `README.md` (full spec: business case, V1→V3 roadmap, 8-section layout, Phase 0–5 plan) + `email-logs/.gitkeep`.
+- Revised EMAIL.md through 12 corrections: per-section FreshnessManifest (not global token), RFC 8058 List-Unsubscribe headers, idempotency guard (write log BEFORE send), transaction floors (≥10 ZIP / ≥50 county), directional polarity table, most-recent-by-filename log lookup, PLACEHOLDER identity block (real address required pre-live), Rule 11 subject-line rules (50-char cap + spam-trigger prohibition).
+- Wrote Phase 1 implementation plan to `docs/superpowers/plans/2026-06-11-email-digest-phase1.md`: 7 tasks, full code, model assignments (OPUS: types/template/orchestrator; SONNET: fetch/log-IO/GHA), parallelism breakdown (Tasks 2/3/4/5 parallel after Task 1).
+- Next: operator confirms execution approach (subagent-driven vs inline), then Task 0 (install @react-email packages) → parallel Tasks 2/3/4/5 → Task 6 → smoke test.
+
 ## 2026-06-11 (main) — pick-frames v2 doc-drift correction + PUSH
 
 - **Correction to the `Phase 2c/2d/2g` entry below (it says `pickFramesForData reads CHART_REGISTRY at runtime`): that described the v1 build (`7323a8b`).** The shipped v2 picker (`642c17f`) does **NOT** read CHART_REGISTRY — `pickFramesForData` returns one `FrameCandidate | null` from a **hardcoded priority ladder** (time-series→relationship→composition→single-vs-target→ranked). New frames do NOT auto-plug into the picker; add a `tryX` rung in `pick-frames.ts` to make a frame selectable.
