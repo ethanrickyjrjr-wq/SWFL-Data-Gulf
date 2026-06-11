@@ -4,6 +4,8 @@
 
 > Scope note: this is the durable, in-repo copy of the approved brainstorm (the machine-local plan file is not on the cross-session git bus). It maps the full funnel against today's capabilities, flags every hole, records the resolved product forks, and specs the first shippable slice. Per RULE 3.5, each phase gets its own brainstorm/plan when built. Nothing here is "confirmed working" — that is the operator's job.
 
+> **Scope boundary.** The `docs/email-marketing/` folder owns the **email** (compose, send, list, reply, white-label template, copy rules). **This spec owns everything after the click** — landing preview → brand → pay → seeded project. The email earns the click; this funnel earns the seat. Two separate build tracks on purpose.
+
 ## Context
 
 The daily-digest email backend is mostly built (the "Email Digest — Finish to Live" plan covers Stage 0). The open question is everything *after the click*: where an email prompt lands, how a cold reader becomes a paying customer, and how they end up "with their first project already started." The spine for that already exists in this codebase — the net-new work is a conversion landing, a Stripe gate, a Brandfetch call, and three small fixes.

@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Conversion-funnel spec + separated it from the email folder
+
+- New spec `docs/superpowers/specs/2026-06-11-conversion-funnel-design.md`: the post-click funnel (email → landing preview → brand → pay → seeded project). Capability map vs live code (spine already exists: projects+RLS, deliverable engine, templates flywheel `/api/templates/[id]/run`, converse, branding blob); net-new = a `/preview/[zip]` landing, a Stripe gate, a Brandfetch call, 3 small fixes. Vendor calls verified in-session (Rule 1): Stripe Apple-Pay-on-web + recurring + Customer Portal cancel-anytime; Brandfetch `GET /v2/brands/domain/{domain}` logo+colors (verify free tier before wiring). Holes flagged: zero payment integration, **`project_templates` migration missing** (flywheel 500s), deliverable Build button disabled, PATCH-save hang. PDF auto-extract + "ask-for-data" deferred to follow-ups.
+- **De-overlap:** `docs/email-marketing/README.md` Phase 4/5 used to own the paywall/landing/billing — now they point to the funnel spec. Added a scope-boundary note: email folder owns the email; the funnel spec owns everything after the click. Bidirectional cross-links.
+- Committed the operator's Fable competitive research into the email folder (`competitive-edge-and-email-strategy.md` + `research/`) — kept as internal copy ammo + future email-strategy roadmap; routed its funnel bits (paid gate, signup capture) to the spec.
+- Left untouched: `app/api/waitlist/route.ts` (operator's in-progress Resend error-logging edit) and the untracked `Live Data/`. Funnel is spec-only — no code built; nothing verified.
+- Next: operator picks subscription price ($39–79/mo) vs one-time; then Phase-1 build (writing-plans) starting with the `project_templates` migration + `/preview/[zip]` + Stripe gate.
+
 ## 2026-06-11 (main) — RULE 3.5 brainstorm-before-you-build + vendor-scan beat
 
 - `CLAUDE.md`: added RULE 3.5 — brainstorming mandatory before any new feature/component; "Change Storming" keyword reverts to discretionary.

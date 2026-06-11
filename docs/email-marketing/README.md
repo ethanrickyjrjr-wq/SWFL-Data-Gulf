@@ -192,6 +192,8 @@ Options for data viz in email:
 
 ## Phase Plan
 
+> **Scope boundary (locked 2026-06-11).** This folder owns the **email itself** — composing, sending, the subscriber list, the reply loop, white-label email *templates*, and copy rules. Everything **after the click** — the personalized landing preview, brand auto-extraction, the paid checkout, and the seeded first project — is the **conversion funnel**, speced separately in `docs/superpowers/specs/2026-06-11-conversion-funnel-design.md`. The email earns the click; the funnel earns the seat. Keep the two build tracks separate so they don't collide. Phases 4–5 below point to that spec for the paywall / landing / billing pieces instead of re-describing them.
+
 ### Phase 0 — Spec + Structure (DONE)
 - [x] `docs/email-marketing/README.md`
 - [x] `docs/email-marketing/EMAIL.md`
@@ -228,18 +230,16 @@ Secrets needed: `RESEND_API_KEY` (already in GH secrets per feedback memory), `N
 - Digest builder reads prefs → adjusts section weights and ZIP focus
 - This is fully conversational — subscriber never touches a settings page
 
-### Phase 4 — Agent White-Label
+### Phase 4 — Agent White-Label (email template only)
 - Supabase `public.email_clients` table: agent_name, logo_url, brand_color, zip_focus[], client_emails[]
 - Dynamic React Email template: swaps logo, color, contact info from client record
 - Separate GHA per client (or parameterized workflow with client_id)
-- Billing: Stripe metered by send volume → Supabase records
-- Onboarding: `/dashboard/email-marketing` — agent fills out form → we handle rest
+- **Billing + onboarding (signup → pay → branded account) are the conversion funnel's job**, not this phase — see the funnel spec (Stripe checkout + Brandfetch logo-first branding). This phase only *consumes* the agent's branding record the funnel produces and renders it into the email; it builds no checkout of its own.
 
-### Phase 5 — Email Landing Page + Custom Digest Builder
-- `/email/[date]` — web version with full interactive data (highlighter, ZIP drill)
-- "Create your own" CTA → subscriber selects ZIPs + topics → we generate custom digest
-- This is the paywall: custom digest = paid tier ($39–$79/month)
-- Fiverr for initial HTML design skin (we own the data and composition engine; they do the visual polish)
+### Phase 5 — Email web archive (`/email/[date]`)
+- `/email/[date]` — the web version of each issue (highlighter, ZIP drill, share/forward). This is email-owned: the rendered archive of a sent issue, the "View on web" target, and the viral/share surface.
+- **The paywall, the "create your own" custom-digest builder, and the $39–79 tier are NOT here** — they are the conversion funnel (landing → brand → pay → seeded project), speced in `docs/superpowers/specs/2026-06-11-conversion-funnel-design.md`. A subscriber who wants their own branded product is handed off to that funnel; this phase just renders the public archive page.
+- Fiverr for initial HTML design skin of the web archive (we own the data + composition engine; they do the visual polish).
 
 ---
 
