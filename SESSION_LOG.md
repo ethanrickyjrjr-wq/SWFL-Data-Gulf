@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — pick-frames v2 doc-drift correction + PUSH
+
+- **Correction to the `Phase 2c/2d/2g` entry below (it says `pickFramesForData reads CHART_REGISTRY at runtime`): that described the v1 build (`7323a8b`).** The shipped v2 picker (`642c17f`) does **NOT** read CHART_REGISTRY — `pickFramesForData` returns one `FrameCandidate | null` from a **hardcoded priority ladder** (time-series→relationship→composition→single-vs-target→ranked). New frames do NOT auto-plug into the picker; add a `tryX` rung in `pick-frames.ts` to make a frame selectable.
+- Audited all 10 unpushed commits (Opus, read-only): **93 tests pass / 0 fail, root `tsc --noEmit` exit 0.** Code is correct. Findings were doc drift + history noise only — empty commit `77a42f2`; the 2e/2f revert→restore round-trip (`1f30d85`/`2f1316b`/`800f1bd`) nets to ZERO (originals already on origin/`cd1d570`, restore byte-identical). Left the messy history as-is (no rebase on main).
+- Fixed the "reads CHART_REGISTRY" lie in 4 live spots — `README.md` row 2g (now points to `__OPUS-v2.md`), `registry.ts:1`, `chart-spec.ts` DataShape doc — plus a SUPERSEDED banner on the v1 spec `phase-2g-…__OPUS.md` (the file the README had been pointing builders at).
+- **LANDMINE (flagged, intentionally NOT fixed):** `seasonal-radial` carries `accepts: ["time-series"]`, colliding with `zhvi-area`. Harmless ONLY because the v2 picker ignores `accepts`. If a later session rewires the picker to be registry-driven, `seasonal-radial` (fixture-bound, needs `options.data`) fires on generic time-series data = the franchise-class over-match via a different frame. NB: it is **seasonal-radial, not franchise** (franchise-survival was already removed from the registry, `dabc60c`). Real fix = a `fixtureOnly`/`selectable` flag on `FrameDef`, do it when Phase 3 next touches the registry.
+- Next: Phase 3 assembly + `/p/[id]` (SERIAL/EXCLUSIVE).
+
 ## 2026-06-11 (main) — pick-frames v2 audit + rewrite (local, not pushed)
 
 - Audited Phase 2g build: Sonnet grabbed an Opus-assigned task, duplicated `chart-from-metrics.mts` logic, returned a noisy candidate array, registered `franchise-survival` as generic `ranked-categories` consumer.

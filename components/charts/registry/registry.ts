@@ -1,4 +1,4 @@
-// CHART_REGISTRY — frameId → component map. One entry per frame; pick-frames.ts selects from this at runtime.
+// CHART_REGISTRY — frameId → component map. One entry per frame; FrameRenderer resolves frameId→component via getFrame(). NOTE: pick-frames.ts does NOT read this — it returns frameIds from a hardcoded priority ladder.
 import type React from "react";
 import type { ChartSpec, DataShape } from "./chart-spec";
 import { ChartBlockFrame } from "./frames/ChartBlockFrame";

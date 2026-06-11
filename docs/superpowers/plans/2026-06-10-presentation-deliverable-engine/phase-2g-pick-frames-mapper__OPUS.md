@@ -1,5 +1,10 @@
 # Phase 2g — `pickFramesForData` deterministic mapper · OPUS · parallel-ok with 2b–2f
 
+> ⛔ **SUPERSEDED by `phase-2g-pick-frames-mapper__OPUS-v2.md` — DO NOT BUILD FROM THIS FILE.**
+> The shipped picker (`642c17f`) is a **hardcoded priority ladder returning one `FrameCandidate | null`**,
+> NOT a registry-`accepts` scan. The "map each shape to a frameId whose `accepts` includes it" design
+> below was the v1 build (`7323a8b`) and caused a fixture-bound frame to fire on generic data. Read v2.
+
 > **Contract (inherited):** own ChartSpec registry; per-visual as-of; NO `git push`. Depends only on
 > **Phase 2a** (`ChartSpec` + `CHART_REGISTRY`) — may run alongside the frame ports.
 

@@ -26,8 +26,11 @@ export interface ChartTheme {
 }
 
 /**
- * The coarse shape of the data a frame consumes. `pickFramesForData` (Phase 2g)
- * maps an inferred `DataShape` → the set of frames whose `accepts` includes it.
+ * The coarse shape of the data a frame consumes — declared on each registry
+ * entry's `accepts`. NOTE: `pickFramesForData` (Phase 2g) does NOT read
+ * `accepts`; it returns one frameId from a hardcoded priority ladder. `accepts`
+ * is descriptive metadata only — if a future picker ever reads it, fix the
+ * `seasonal-radial`/`zhvi-area` `time-series` collision first.
  */
 export type DataShape =
   | "time-series"
