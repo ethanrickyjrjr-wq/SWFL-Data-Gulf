@@ -2,6 +2,22 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Phase 2c/2d/2g + registry merge (local, not pushed)
+
+- **Phase 2c** `CompositionFrame.tsx` — stacked-bar + callout + legend, pure Tailwind; `extractCompositionData` pure adapter; 9 tests; `composition` registered (`accepts: ["composition"]`).
+- **Phase 2d** `ZGaugeFrame.tsx` — 9-segment horizontal gauge + delta pill + baseline tick; `extractGaugeData` pure adapter; 14 tests; `z-gauge` registered (`accepts: ["single-vs-target"]`).
+- **Phase 2g** `pick-frames.ts` — `pickFramesForData` reads `CHART_REGISTRY` at runtime; shape inference from `detail_tables` (date→time-series, 2-numeric→relationship, 1-numeric→ranked) + `key_metrics` fallback (pct-sum→composition, single→single-vs-target); 8 tests.
+- **Registry merge** — `composition`, `z-gauge`, `franchise-survival` added to `registry.ts`; 8 frames total.
+- **73 tests, tsc 0** across all 7 files in `components/charts/registry/`.
+- Next: Phase 3 assembly + `/p/[id]` (SERIAL/EXCLUSIVE).
+
+## 2026-06-11 (main) — Phase 2b: FranchiseSurvivalFrame (local, not pushed)
+
+- **`components/charts/registry/frames/FranchiseSurvivalFrame.tsx`** — ranked h-bar frame: 4-KPI tile row (brands assessed, resolved loans, overall survival, total gross approval), sort controls (survival/chargeoff/sample/approval), color-by-median bars (mangrove/gold/coral), click-to-expand detail panel, median marker, as-of footer caption.
+- **`franchise-survival-utils.ts`** — pure adapter functions (prepareBrands, sortBrands, computeMedian, computeKPIs, barColor, fmtPct, fmtApproval); matches franchise-outcomes fixture shape.
+- **22 tests pass, tsc 0.** `franchise-survival` registered in `registry.ts` (`accepts: ["ranked-categories"]`). Fixture-bound; data-availability check: brain emits aggregate only (no detail_tables), raw data is in fixture.
+- **Next:** 2c (flood/composition) + 2d (freight z-gauge) still ⬜; 2g pickFramesForData ⬜; Phase 3 assembly.
+
 ## 2026-06-11 (main) — ZIP report layout redesign + stat-annotation strip PUSHED
 
 - **`feat(zip-report)`** (`d6f5a11`): consolidated layout — grouped sections (ZIP-Level / City Area / County / SWFL), sources accordion (collapsed by default), no inline source citations, removed GrainChips/DossierCards.
