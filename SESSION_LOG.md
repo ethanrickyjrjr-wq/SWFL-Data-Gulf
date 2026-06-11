@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — fix CI: add asOf to charts/save validBlock fixture
+
+- `app/api/charts/save/route.test.ts`: added `asOf: "2026-06-10"` to `validBlock` — `964dc4a` added `requireAsOf:true` to the route but didn't update this test, breaking CI for every run since.
+- 1713→1714 pass, 0 fail. Next: Presentation Deliverable Engine Phase 3 or Email Digest Phase 1.
+
 ## 2026-06-11 (main) — EMAIL.md: drop Rule 9 (CAN-SPAM), renumber 10→9 / 11→10
 
 ## 2026-06-11 (main) — email digest Phase 1 plan + spec
