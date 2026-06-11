@@ -19,17 +19,20 @@ type ToolHandler = (args: { report_id?: string; tier?: 1 | 2 | 3; zip?: string }
   _meta?: { freshness_token?: string; dossier?: LocationDossier };
 }>;
 
-/** Capture the handler `buildMcpServer` registers on a fake McpServer. */
+/** Capture the `swfl_fetch` handler `buildMcpServer` registers on a fake
+ *  McpServer. buildMcpServer now registers four tools (swfl_fetch + three
+ *  project write tools), so capture by name rather than last-write-wins. */
 function captureHandler(): ToolHandler {
-  let captured: ToolHandler | undefined;
+  const byName = new Map<string, ToolHandler>();
   const fake = {
-    registerTool(_name: string, _config: unknown, cb: ToolHandler) {
-      captured = cb;
+    registerTool(name: string, _config: unknown, cb: ToolHandler) {
+      byName.set(name, cb);
     },
   } as unknown as McpServer;
   buildMcpServer(fake);
-  if (!captured) throw new Error("buildMcpServer did not register a tool");
-  return captured;
+  const handler = byName.get("swfl_fetch");
+  if (!handler) throw new Error("buildMcpServer did not register swfl_fetch");
+  return handler;
 }
 
 describe("swfl_fetch — D1 location fan-out", () => {

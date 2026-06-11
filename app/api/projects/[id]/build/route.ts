@@ -1,12 +1,9 @@
-import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { recordUse } from "@/lib/highlighter/meter";
-import { buildDeliverableNarrative, freezeSnapshot } from "@/lib/deliverable/build";
-import type { TemplateId } from "@/lib/deliverable/templates";
-import { projectItemsSchema } from "@/lib/project/items";
+import { assembleDeliverable, isTemplateId, DeliverableError } from "@/lib/deliverable/assemble";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -15,14 +12,12 @@ export const maxDuration = 60;
  * POST /api/projects/[id]/build  — assemble a deliverable from a project.
  *
  * Ownership is proven via the COOKIE client (RLS: a non-owner's project row is
- * invisible → 404). The deliverable is a FROZEN snapshot (items + resolved chart
- * blocks). One forced-tool LLM call writes narrative-only prose, linted against
- * the snapshot numbers (the moat). The row is written via service-role because
- * `deliverables` has no INSERT policy — ownership is already proven above.
+ * invisible → 404). The actual assembly (freeze → forced-tool narrative → lint →
+ * insert) lives in the shared `assembleDeliverable` orchestrator — ONE build path
+ * reused by the MCP `swfl_project_build` tool. The row is written via service-role
+ * because `deliverables` has no INSERT policy; ownership is already proven above.
  * Returns `{ id }` → the client navigates to /p/[id].
  */
-
-const TEMPLATES = new Set<TemplateId>(["market-overview", "bov-lite", "client-email", "one-pager"]);
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -42,44 +37,29 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!project) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const body = (await req.json().catch(() => ({}))) as { template?: string; instruction?: string };
-  const template = body.template as TemplateId | undefined;
-  if (!template || !TEMPLATES.has(template)) {
+  const template = body.template;
+  if (!isTemplateId(template)) {
     return NextResponse.json({ error: "invalid template" }, { status: 400 });
   }
   const instruction = typeof body.instruction === "string" ? body.instruction : "";
 
-  // Validate the stored items before we freeze (defensive — they're trusted, but
-  // a malformed row must not reach the LLM path).
-  const parsedItems = projectItemsSchema.safeParse(project.items ?? []);
-  if (!parsedItems.success) {
-    return NextResponse.json({ error: "project items invalid" }, { status: 422 });
-  }
-
   await recordUse(req, { report_id: id, reach: [], action: "build" });
 
-  const itemsSnapshot = await freezeSnapshot(supabase, parsedItems.data);
-  const { narrative } = await buildDeliverableNarrative({
-    instruction,
-    items: itemsSnapshot,
-    template,
-  });
-
-  // Full-entropy slug (≥122 bits, [LB-R5]) — base64url of 16 random bytes = 128 bits.
-  const slug = crypto.randomBytes(16).toString("base64url");
-
-  const svc = createServiceRoleClient();
-  const { error: insErr } = await svc.from("deliverables").insert({
-    id: slug,
-    project_id: id,
-    user_id: user.id,
-    template,
-    instruction: instruction || null,
-    narrative,
-    items_snapshot: itemsSnapshot,
-    branding: project.branding ?? null,
-    status: "ready",
-  });
-  if (insErr) return NextResponse.json({ error: "build failed" }, { status: 500 });
-
-  return NextResponse.json({ id: slug });
+  try {
+    const { id: slug } = await assembleDeliverable({
+      db: createServiceRoleClient(),
+      projectId: id,
+      ownerId: user.id,
+      items: project.items,
+      branding: project.branding,
+      template,
+      instruction,
+    });
+    return NextResponse.json({ id: slug });
+  } catch (e) {
+    if (e instanceof DeliverableError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    throw e;
+  }
 }

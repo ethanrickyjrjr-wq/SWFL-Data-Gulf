@@ -18,6 +18,7 @@ import {
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { buildInventoryMarkdown, buildReportIdSet } from "./inventory";
+import { registerProjectTools } from "./project-tools";
 
 /**
  * MCP server callback. Registers `swfl_fetch` as a plain text tool.
@@ -56,7 +57,7 @@ const INVENTORY_MD = buildInventoryMarkdown();
 
 const TOOL_DESCRIPTION = `swfl_fetch — read the Southwest Florida data lake.
 
-This server hosts a library of analyst-grade reports about Southwest Florida (Lee, Collier, Charlotte counties): housing, commercial real estate, permits, traffic, tourism, hurricane risk, sector credit, logistics, and macro context (US, Florida, SWFL). Every numeric claim in a response is followed by a source URL — federal/state agencies, public datasets, or other reports in this same lake. Nothing is invented. This server is read-only.
+This server hosts a library of analyst-grade reports about Southwest Florida (Lee, Collier, Charlotte counties): housing, commercial real estate, permits, traffic, tourism, hurricane risk, sector credit, logistics, and macro context (US, Florida, SWFL). Every numeric claim in a response is followed by a source URL — federal/state agencies, public datasets, or other reports in this same lake. Nothing is invented. swfl_fetch is read-only. The swfl_project_* tools write into a single project you authorize with a per-project capability key.
 
 How to use it. Default behavior for an in-scope SWFL question: call swfl_fetch with no arguments. You will get the master report at tier 2 — a structured summary with a headline conclusion, key metrics with sources, caveats, a link to the full report page, and a freshness token. Read it first. One call answers the question — the master already aggregates every upstream report, so a single fetch is the norm. Only call swfl_fetch a second time if the master's conclusion explicitly names a specific report AND the user wants that report's per-ZIP or row-level detail; in that case call it once more with report_id set to that name. Never fire multiple calls in parallel to triangulate across reports.
 
@@ -361,4 +362,9 @@ export function buildMcpServer(server: McpServer): void {
       }
     },
   );
+
+  // Session 9 — the three capability-keyed project co-build WRITE tools.
+  // Registered AFTER swfl_fetch so the read tool stays the primary card. Each
+  // resolves a per-project key first; the bearer gate in auth.ts is untouched.
+  registerProjectTools(server);
 }

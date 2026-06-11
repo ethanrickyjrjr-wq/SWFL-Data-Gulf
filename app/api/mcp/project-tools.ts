@@ -1,0 +1,403 @@
+import crypto from "node:crypto";
+import { z } from "zod";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { projectItemSchema, projectItemsSchema, type ProjectItem } from "@/lib/project/items";
+import { lintChartBlock } from "@/refinery/validate/chart-block-lint.mts";
+import { assembleDeliverable, DeliverableError } from "@/lib/deliverable/assemble";
+import { recordUseForClient } from "@/lib/highlighter/meter";
+import { resolveOrigin } from "@/lib/fetch-brain";
+
+/**
+ * The three project co-build WRITE tools (Session 9).
+ *
+ * A user's own Claude, authorized by a per-project capability key, co-builds the
+ * SAME project: list it, add items into it, and build a deliverable. Every tool
+ * resolves the key → its ONE project FIRST, then writes via service-role (a
+ * documented second capability-authorized lane — the cookie-RLS lane is for the
+ * web UI; this is for the keyed agent). Items written carry `origin:"mcp"`.
+ *
+ * SECURITY (LB-R6b): the write target is derived SOLELY from the key→project
+ * lookup. No tool argument carries a `project_id`; the `item`/`template`/
+ * `instruction` args carry content only. A request can never name another
+ * project to write to. The bearer gate (`auth.ts`) is an orthogonal transport
+ * layer left fully intact (LB-R6a) — the key is an ADDITIONAL per-call authz.
+ */
+
+// ---------------------------------------------------------------------------
+// Key → project resolution
+// ---------------------------------------------------------------------------
+
+export interface ProjectKeyRow {
+  id: string;
+  user_id: string;
+  title: string | null;
+  items: ProjectItem[] | null;
+  branding: Record<string, unknown> | null;
+}
+
+/** The shape of the SDK tool `extra` we read — request headers, when the host
+ *  transport forwards them. Loose by design: absent on hosts that drop them. */
+interface ToolExtra {
+  requestInfo?: { headers?: Record<string, string | string[] | undefined> };
+}
+
+/**
+ * The capability key arrives in the `X-Project-Key` HEADER (preferred — set once
+ * in the user's MCP client config, so it never enters the model's chat context =
+ * no leak) OR the `project_key` tool arg (fallback for clients that can't set a
+ * custom header). Header wins.
+ *
+ * The SDK web transport builds `extra.requestInfo.headers` from the incoming
+ * Request (verified: webStandardStreamableHttp → `Object.fromEntries(
+ * req.headers.entries())`, lowercased keys; mcp-handler reconstructs the Request
+ * preserving all headers).
+ */
+export function keyFromCall(
+  args: { project_key?: string },
+  extra: ToolExtra | undefined,
+): string | null {
+  const header = extra?.requestInfo?.headers?.["x-project-key"];
+  const headerVal = Array.isArray(header) ? header[0] : header;
+  if (typeof headerVal === "string" && headerVal.trim()) return headerVal.trim();
+  if (typeof args.project_key === "string" && args.project_key.trim())
+    return args.project_key.trim();
+  return null;
+}
+
+/**
+ * Resolve a capability key → its single project via SERVICE-ROLE lookup on the
+ * UNIQUE `projects.mcp_key`. The returned `project.id` is the ONLY write target
+ * downstream — derived SOLELY from the key. Returns null on no / blank / unmatched
+ * key (regenerate overwrites `mcp_key`, so an old key matches no row = revoked).
+ */
+export async function resolveProjectByKey(
+  db: SupabaseClient,
+  key: string | null,
+): Promise<ProjectKeyRow | null> {
+  if (!key) return null;
+  const { data } = await db
+    .from("projects")
+    .select("id, user_id, title, items, branding")
+    .eq("mcp_key", key)
+    .maybeSingle();
+  return (data as ProjectKeyRow | null) ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// [ADDED] dedupe — a co-building Claude filing twice must not spam the project
+// ---------------------------------------------------------------------------
+
+/** True when `candidate` already exists by its identity fields (kind +
+ *  report_id + label/value for metric, + question/answer for qa, text for note,
+ *  slug for report). Charts are always unique (each carries a fresh chart_id). */
+export function isDuplicateItem(existing: ProjectItem[], candidate: ProjectItem): boolean {
+  return existing.some((e) => {
+    if (e.kind !== candidate.kind) return false;
+    if (e.kind === "metric" && candidate.kind === "metric")
+      return (
+        e.report_id === candidate.report_id &&
+        e.label === candidate.label &&
+        e.value === candidate.value
+      );
+    if (e.kind === "qa" && candidate.kind === "qa")
+      return (
+        e.report_id === candidate.report_id &&
+        e.question === candidate.question &&
+        e.answer === candidate.answer
+      );
+    if (e.kind === "note" && candidate.kind === "note") return e.text === candidate.text;
+    if (e.kind === "report" && candidate.kind === "report") return e.slug === candidate.slug;
+    return false;
+  });
+}
+
+/** Stamp the server-owned fields onto a validated content item. */
+function stamp<T extends object>(partial: T): T & { id: string; added_at: string; origin: "mcp" } {
+  return {
+    ...partial,
+    id: crypto.randomUUID(),
+    added_at: new Date().toISOString(),
+    origin: "mcp" as const,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Tool input schemas — NO field anywhere carries a project_id (LB-R6b)
+// ---------------------------------------------------------------------------
+
+const chartBlockInput = z
+  .object({
+    title: z.string(),
+    columns: z.array(z.string()),
+    rows: z.array(z.array(z.union([z.string(), z.number(), z.null()]))),
+    chart_type: z.enum(["bar", "area", "scatter", "table"]).optional(),
+    value_format: z.unknown().optional(),
+  })
+  .passthrough();
+
+/** The MCP `item` arg — the union restricted to the agent-fileable kinds.
+ *  `chart_block` is converted to a `{kind:"chart"}` ref server-side after lint. */
+const addItemInput = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("note"), text: z.string().min(1) }),
+  z.object({
+    kind: z.literal("metric"),
+    report_id: z.string(),
+    label: z.string(),
+    value: z.string(),
+    source_url: z.string().optional(),
+    source_label: z.string().optional(),
+    freshness_token: z.string(),
+  }),
+  z.object({
+    kind: z.literal("qa"),
+    report_id: z.string(),
+    question: z.string(),
+    answer: z.string(),
+    fact: z.string().optional(),
+    reach: z.array(z.string()).optional(),
+    freshness_token: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal("report"),
+    slug: z.string(),
+    title: z.string().optional(),
+    freshness_token: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal("chart_block"),
+    block: chartBlockInput,
+    title: z.string(),
+    report: z.string().optional(),
+  }),
+]);
+
+type AddItemInput = z.infer<typeof addItemInput>;
+
+const TEMPLATE_ENUM = z.enum(["market-overview", "bov-lite", "client-email", "one-pager"]);
+
+// ---------------------------------------------------------------------------
+// Response helpers
+// ---------------------------------------------------------------------------
+
+const text = (s: string) => ({ content: [{ type: "text" as const, text: s }] });
+const errText = (s: string) => ({ content: [{ type: "text" as const, text: s }], isError: true });
+const INVALID_KEY = errText(
+  "Invalid or expired project key — no changes were made. Ask the project owner for a fresh key from the “Connect your AI” panel on the project page.",
+);
+
+/** A short, customer-clean one-liner per item for the list view (no internal ids). */
+function describeItem(it: ProjectItem): string {
+  switch (it.kind) {
+    case "metric":
+      return `${it.label}: ${it.value}`;
+    case "qa":
+      return it.question;
+    case "note":
+      return it.text.length > 80 ? it.text.slice(0, 79) + "…" : it.text;
+    case "chart":
+      return it.title;
+    case "report":
+      return it.title ?? it.slug;
+    case "source":
+      return it.label;
+    case "table_slice":
+      return it.title;
+    case "file":
+      return it.caption ?? "attachment";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// chart_block → saved_charts → {kind:"chart"} ref
+// ---------------------------------------------------------------------------
+
+async function buildChartItem(
+  db: SupabaseClient,
+  input: Extract<AddItemInput, { kind: "chart_block" }>,
+): Promise<{ item: ProjectItem } | { error: string }> {
+  // Provenance/structure gate — same lint the web /api/charts/save path runs.
+  const lint = lintChartBlock(input.block);
+  if (!lint.ok) return { error: `Chart rejected: ${lint.errors.join("; ")}` };
+  const chart_id = crypto.randomUUID().slice(0, 8);
+  const { error } = await db.from("saved_charts").insert({
+    id: chart_id,
+    chart_block: input.block,
+    source_meta: input.report ? { report_id: input.report } : null,
+    freshness_token: null,
+  });
+  if (error) return { error: "Could not save the chart." };
+  return { item: stamp({ kind: "chart" as const, chart_id, title: input.title }) };
+}
+
+// ---------------------------------------------------------------------------
+// Registration
+// ---------------------------------------------------------------------------
+
+export function registerProjectTools(server: McpServer): void {
+  // -- swfl_project_list ----------------------------------------------------
+  server.registerTool(
+    "swfl_project_list",
+    {
+      title: "SWFL Project — list",
+      description:
+        "List the project you authorized with a per-project capability key: its title and a condensed view of the items already filed. Read-only.",
+      inputSchema: {
+        project_key: z
+          .string()
+          .optional()
+          .describe(
+            "Per-project capability key. Preferred: set it once as the `X-Project-Key` request header so it never enters the conversation. Pass it here only if your client cannot set a custom header.",
+          ),
+      },
+      annotations: {
+        title: "SWFL Project — list",
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
+    },
+    async (args, extra) => {
+      const db = createServiceRoleClient();
+      const project = await resolveProjectByKey(db, keyFromCall(args, extra as ToolExtra));
+      if (!project) return INVALID_KEY;
+      const items = Array.isArray(project.items) ? project.items : [];
+      const lines = items.length
+        ? items.map((it, i) => `${i + 1}. [${it.kind}] ${describeItem(it)}`).join("\n")
+        : "(no items filed yet)";
+      return text(`Project: ${project.title ?? "Untitled"}\n${items.length} item(s)\n\n${lines}`);
+    },
+  );
+
+  // -- swfl_project_add -----------------------------------------------------
+  server.registerTool(
+    "swfl_project_add",
+    {
+      title: "SWFL Project — add item",
+      description:
+        "File ONE item into the project you authorized with your capability key. File metrics with the exact value, source url, and freshness_token from the dossier you just fetched — verbatim, never recomputed. Kinds: note | metric | qa | report | chart_block.",
+      inputSchema: {
+        project_key: z
+          .string()
+          .optional()
+          .describe(
+            "Per-project capability key. Preferred: the `X-Project-Key` request header. Pass here only if your client cannot set a custom header.",
+          ),
+        item: addItemInput.describe(
+          "The single item to file. Quote every figure/source/freshness_token verbatim from the fetched dossier — never invent or recompute.",
+        ),
+      },
+      annotations: {
+        title: "SWFL Project — add item",
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+      },
+    },
+    async (args, extra) => {
+      const db = createServiceRoleClient();
+      const project = await resolveProjectByKey(db, keyFromCall(args, extra as ToolExtra));
+      if (!project) return INVALID_KEY;
+
+      // Build the final ProjectItem (chart_block → lint → saved_charts → ref).
+      let item: ProjectItem;
+      if (args.item.kind === "chart_block") {
+        const built = await buildChartItem(db, args.item);
+        if ("error" in built) return errText(built.error);
+        item = built.item;
+      } else {
+        item = stamp({ ...args.item });
+      }
+
+      // Validate against the canonical schema before it ever touches the row.
+      const validated = projectItemSchema.safeParse(item);
+      if (!validated.success) return errText("That item did not validate; nothing was filed.");
+      item = validated.data;
+
+      const existing = Array.isArray(project.items) ? project.items : [];
+      if (isDuplicateItem(existing, item)) {
+        return text(
+          `Already filed — skipped the duplicate. “${project.title ?? "Your project"}” has ${existing.length} item(s).`,
+        );
+      }
+
+      const next = [...existing, item];
+      const finalParse = projectItemsSchema.safeParse(next);
+      if (!finalParse.success)
+        return errText("The project item set did not validate; nothing was filed.");
+
+      // Write target = the resolved project id ONLY (LB-R6b).
+      const { error: upErr } = await db
+        .from("projects")
+        .update({ items: finalParse.data, updated_at: new Date().toISOString() })
+        .eq("id", project.id);
+      if (upErr) return errText("Could not file the item. Please try again.");
+
+      await recordUseForClient(`mcp:${project.user_id}`, {
+        report_id: project.id,
+        reach: [],
+        action: "item_add",
+      });
+      return text(
+        `Filed into “${project.title ?? "your project"}”. It now has ${next.length} item(s).`,
+      );
+    },
+  );
+
+  // -- swfl_project_build ---------------------------------------------------
+  server.registerTool(
+    "swfl_project_build",
+    {
+      title: "SWFL Project — build deliverable",
+      description:
+        "Assemble a client-ready deliverable from everything filed in the project and return a shareable link. Pick a template; an optional instruction steers the framing. Numbers are quoted verbatim from the filed items — nothing is invented.",
+      inputSchema: {
+        project_key: z
+          .string()
+          .optional()
+          .describe(
+            "Per-project capability key. Preferred: the `X-Project-Key` request header. Pass here only if your client cannot set a custom header.",
+          ),
+        template: TEMPLATE_ENUM.describe(
+          "Deliverable template: market-overview | bov-lite | client-email | one-pager.",
+        ),
+        instruction: z
+          .string()
+          .optional()
+          .describe("Optional framing instruction (e.g. “lead with the flood-risk caveat”)."),
+      },
+      annotations: {
+        title: "SWFL Project — build deliverable",
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+      },
+    },
+    async (args, extra) => {
+      const db = createServiceRoleClient();
+      const project = await resolveProjectByKey(db, keyFromCall(args, extra as ToolExtra));
+      if (!project) return INVALID_KEY;
+      try {
+        const { id } = await assembleDeliverable({
+          db,
+          projectId: project.id,
+          ownerId: project.user_id,
+          items: project.items,
+          branding: project.branding,
+          template: args.template,
+          instruction: args.instruction ?? "",
+        });
+        await recordUseForClient(`mcp:${project.user_id}`, {
+          report_id: project.id,
+          reach: [],
+          action: "build",
+        });
+        return text(`Built. Share this link: ${resolveOrigin()}/p/${id}`);
+      } catch (e) {
+        if (e instanceof DeliverableError) return errText(`Build failed: ${e.message}`);
+        return errText("Build failed unexpectedly. Please try again.");
+      }
+    },
+  );
+}

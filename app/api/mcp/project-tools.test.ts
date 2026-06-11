@@ -1,0 +1,314 @@
+import { test, expect, mock, beforeEach } from "bun:test";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+/**
+ * Session 9 — the capability-keyed project write tools.
+ *
+ * The security core is the resolver + the write-target binding (LB-R6b): the
+ * write target is derived SOLELY from the key→project lookup, and no payload
+ * field can redirect it. These tests drive the tool handlers directly over a
+ * fake service-role client and assert exactly that, plus dedupe + origin:"mcp".
+ */
+
+// --- shared fake service-role client state --------------------------------
+const seeded = new Map<string, unknown>();
+let inserts: { table: string; row: Record<string, unknown> }[] = [];
+let updates: {
+  table: string;
+  filters: Record<string, unknown>;
+  payload: Record<string, unknown>;
+}[] = [];
+
+function fakeDb() {
+  function qb(table: string) {
+    const state: {
+      op: string | null;
+      payload: Record<string, unknown> | null;
+      filters: Record<string, unknown>;
+    } = {
+      op: null,
+      payload: null,
+      filters: {},
+    };
+    const builder: Record<string, (...a: unknown[]) => unknown> = {
+      select() {
+        state.op = "select";
+        return builder;
+      },
+      insert(row: unknown) {
+        inserts.push({ table, row: row as Record<string, unknown> });
+        return Promise.resolve({ error: null });
+      },
+      update(payload: unknown) {
+        state.op = "update";
+        state.payload = payload as Record<string, unknown>;
+        return builder;
+      },
+      eq(col: unknown, val: unknown) {
+        state.filters[col as string] = val;
+        if (state.op === "update") {
+          updates.push({ table, filters: { ...state.filters }, payload: state.payload! });
+          return Promise.resolve({ error: null });
+        }
+        return builder;
+      },
+      in() {
+        return Promise.resolve({ data: [] });
+      },
+      maybeSingle() {
+        if (table === "projects" && state.op === "select") {
+          return Promise.resolve({
+            data: seeded.get(state.filters["mcp_key"] as string) ?? null,
+            error: null,
+          });
+        }
+        return Promise.resolve({ data: null, error: null });
+      },
+    };
+    return builder;
+  }
+  return { from: (t: string) => qb(t) };
+}
+
+mock.module("@/utils/supabase/service-role", () => ({
+  createServiceRoleClient: () => fakeDb(),
+}));
+
+// Stub the LLM assembly so build is deterministic + offline (no model call,
+// no saved_charts read). assemble.ts imports these from the same module.
+mock.module("@/lib/deliverable/build", () => ({
+  buildDeliverableNarrative: async () => ({
+    narrative: { exec_summary: "", sections: [], inference_notes: [] },
+    regenerations: 0,
+    stripped: false,
+  }),
+  freezeSnapshot: async (_db: unknown, items: unknown[]) => items,
+}));
+
+const { registerProjectTools, keyFromCall, isDuplicateItem, resolveProjectByKey } =
+  await import("./project-tools");
+
+type Handler = (
+  args: Record<string, unknown>,
+  extra?: unknown,
+) => Promise<{
+  content: { type: string; text: string }[];
+  isError?: boolean;
+}>;
+
+function tools(): Record<string, Handler> {
+  const map: Record<string, Handler> = {};
+  const fake = {
+    registerTool(name: string, _c: unknown, cb: Handler) {
+      map[name] = cb;
+    },
+  } as unknown as McpServer;
+  registerProjectTools(fake);
+  return map;
+}
+
+const project = (over: Record<string, unknown> = {}) => ({
+  id: "p1",
+  user_id: "u1",
+  title: "Test Project",
+  items: [],
+  branding: null,
+  ...over,
+});
+
+const metric = (over: Record<string, unknown> = {}) => ({
+  kind: "metric",
+  id: "m0",
+  added_at: "2026-06-10T00:00:00Z",
+  origin: "mcp",
+  report_id: "housing-swfl",
+  label: "Median sale price",
+  value: "$500,000",
+  freshness_token: "SWFL-7421-v1-20260610",
+  ...over,
+});
+
+beforeEach(() => {
+  seeded.clear();
+  inserts = [];
+  updates = [];
+});
+
+// --- keyFromCall (pure) ---------------------------------------------------
+
+test("keyFromCall: header wins over arg (key stays out of chat context)", () => {
+  expect(
+    keyFromCall({ project_key: "arg" }, { requestInfo: { headers: { "x-project-key": "hdr" } } }),
+  ).toBe("hdr");
+});
+
+test("keyFromCall: arg is the fallback when no header", () => {
+  expect(keyFromCall({ project_key: "arg" }, undefined)).toBe("arg");
+});
+
+test("keyFromCall: null when neither header nor arg is present", () => {
+  expect(keyFromCall({}, undefined)).toBeNull();
+  expect(keyFromCall({}, { requestInfo: { headers: {} } })).toBeNull();
+});
+
+// --- isDuplicateItem (pure) -----------------------------------------------
+
+test("isDuplicateItem: same (report_id,label,value) metric is a duplicate", () => {
+  expect(isDuplicateItem([metric()] as never, metric({ id: "m1" }) as never)).toBe(true);
+});
+
+test("isDuplicateItem: a changed value is NOT a duplicate", () => {
+  expect(
+    isDuplicateItem([metric()] as never, metric({ id: "m1", value: "$600,000" }) as never),
+  ).toBe(false);
+});
+
+test("isDuplicateItem: notes dedupe by text, reports by slug", () => {
+  const note = { kind: "note", id: "n0", added_at: "t", origin: "mcp", text: "same" };
+  expect(isDuplicateItem([note] as never, { ...note, id: "n1" } as never)).toBe(true);
+  const rep = { kind: "report", id: "r0", added_at: "t", origin: "mcp", slug: "housing-swfl" };
+  expect(isDuplicateItem([rep] as never, { ...rep, id: "r1" } as never)).toBe(true);
+});
+
+// --- resolveProjectByKey (mocked db) --------------------------------------
+
+test("resolveProjectByKey: null key short-circuits (no query, no match)", async () => {
+  expect(await resolveProjectByKey(fakeDb() as never, null)).toBeNull();
+});
+
+test("resolveProjectByKey: unknown key → null", async () => {
+  expect(await resolveProjectByKey(fakeDb() as never, "proj_nope")).toBeNull();
+});
+
+test("resolveProjectByKey: known key → its project", async () => {
+  seeded.set("proj_abc", project());
+  const r = await resolveProjectByKey(fakeDb() as never, "proj_abc");
+  expect(r?.id).toBe("p1");
+});
+
+// --- swfl_project_add -----------------------------------------------------
+
+test("swfl_project_add: files a note with origin:'mcp' onto the resolved project", async () => {
+  seeded.set("proj_abc", project());
+  const res = await tools().swfl_project_add({
+    project_key: "proj_abc",
+    item: { kind: "note", text: "hello" },
+  });
+  expect(res.isError).toBeFalsy();
+  const projUpdate = updates.find((u) => u.table === "projects");
+  expect(projUpdate?.filters.id).toBe("p1");
+  const written = projUpdate?.payload.items as Record<string, unknown>[];
+  expect(written).toHaveLength(1);
+  expect(written[0].origin).toBe("mcp");
+  expect(written[0].kind).toBe("note");
+});
+
+test("swfl_project_add: [LB-R6b] a smuggled project_id is ignored — write lands ONLY on the key's project", async () => {
+  seeded.set("proj_X", project({ id: "projectX", user_id: "u1" }));
+  seeded.set("proj_Y", project({ id: "projectY", user_id: "u2" }));
+  const res = await tools().swfl_project_add({
+    project_key: "proj_X",
+    // attacker attempts to redirect the write to projectY via the payload
+    item: { kind: "note", text: "hi", project_id: "projectY" },
+  });
+  expect(res.isError).toBeFalsy();
+  const targets = updates.filter((u) => u.table === "projects").map((u) => u.filters.id);
+  expect(targets).toEqual(["projectX"]); // only X — never Y
+  // and the smuggled field never persists on the item
+  const item = (
+    updates.find((u) => u.table === "projects")!.payload.items as Record<string, unknown>[]
+  )[0];
+  expect("project_id" in item).toBe(false);
+});
+
+test("swfl_project_add: bad/expired key → clean error, NO write", async () => {
+  const res = await tools().swfl_project_add({
+    project_key: "proj_nope",
+    item: { kind: "note", text: "x" },
+  });
+  expect(res.isError).toBe(true);
+  expect(updates).toHaveLength(0);
+  expect(inserts).toHaveLength(0);
+});
+
+test("swfl_project_add: dedupe drops a second identical metric (one item, no write)", async () => {
+  seeded.set("proj_abc", project({ items: [metric()] }));
+  const res = await tools().swfl_project_add({
+    project_key: "proj_abc",
+    item: {
+      kind: "metric",
+      report_id: "housing-swfl",
+      label: "Median sale price",
+      value: "$500,000",
+      freshness_token: "SWFL-7421-v1-20260610",
+    },
+  });
+  expect(res.isError).toBeFalsy();
+  expect(res.content[0].text.toLowerCase()).toContain("already filed");
+  expect(updates.filter((u) => u.table === "projects")).toHaveLength(0);
+});
+
+test("swfl_project_add: chart_block → lint → saves chart → files a {kind:'chart'} ref", async () => {
+  seeded.set("proj_abc", project());
+  const block = {
+    title: "Asking Rent",
+    columns: ["Period", "Rent"],
+    rows: [
+      ["Q1", 1850],
+      ["Q2", 1920],
+    ],
+    chart_type: "area",
+  };
+  const res = await tools().swfl_project_add({
+    project_key: "proj_abc",
+    item: { kind: "chart_block", block, title: "Rent chart" },
+  });
+  expect(res.isError).toBeFalsy();
+  expect(inserts.filter((i) => i.table === "saved_charts")).toHaveLength(1);
+  const item = (
+    updates.find((u) => u.table === "projects")!.payload.items as Record<string, unknown>[]
+  )[0];
+  expect(item.kind).toBe("chart");
+  expect(item.origin).toBe("mcp");
+  expect(typeof item.chart_id).toBe("string");
+});
+
+// --- swfl_project_list ----------------------------------------------------
+
+test("swfl_project_list: returns title + condensed items", async () => {
+  seeded.set(
+    "proj_abc",
+    project({
+      title: "My Project",
+      items: [{ kind: "note", id: "n1", added_at: "t", origin: "mcp", text: "hello world" }],
+    }),
+  );
+  const res = await tools().swfl_project_list({ project_key: "proj_abc" });
+  expect(res.isError).toBeFalsy();
+  expect(res.content[0].text).toContain("My Project");
+  expect(res.content[0].text).toContain("hello world");
+});
+
+test("swfl_project_list: bad key → clean error", async () => {
+  const res = await tools().swfl_project_list({ project_key: "proj_nope" });
+  expect(res.isError).toBe(true);
+});
+
+// --- swfl_project_build ---------------------------------------------------
+
+test("swfl_project_build: happy path returns a /p/ share URL + inserts a deliverable", async () => {
+  seeded.set(
+    "proj_abc",
+    project({ items: [{ kind: "note", id: "n1", added_at: "t", origin: "mcp", text: "hi" }] }),
+  );
+  const res = await tools().swfl_project_build({ project_key: "proj_abc", template: "one-pager" });
+  expect(res.isError).toBeFalsy();
+  expect(res.content[0].text).toMatch(/\/p\/[A-Za-z0-9_-]+/);
+  expect(inserts.filter((i) => i.table === "deliverables")).toHaveLength(1);
+});
+
+test("swfl_project_build: bad key → error, no deliverable written", async () => {
+  const res = await tools().swfl_project_build({ project_key: "proj_nope", template: "one-pager" });
+  expect(res.isError).toBe(true);
+  expect(inserts.filter((i) => i.table === "deliverables")).toHaveLength(0);
+});

@@ -42,10 +42,23 @@ export async function recordUse(
   request: Request,
   meta: { report_id: string; reach: string[]; action?: string },
 ): Promise<number> {
+  return recordUseForClient(clientIdFrom(request), meta);
+}
+
+/**
+ * Record a usage event for an EXPLICIT client id — for request-less surfaces
+ * (e.g. the MCP write tools, which have no `sdg_cid` cookie and attribute usage
+ * to the project owner as `mcp:<owner_uid>`). Mirrors `recordUse` exactly minus
+ * the cookie extraction. Never throws — metering must never break a write.
+ */
+export async function recordUseForClient(
+  clientId: string,
+  meta: { report_id: string; reach: string[]; action?: string },
+): Promise<number> {
   try {
     const db = createServiceRoleClient();
     await db.from("usage_events").insert({
-      client_id: clientIdFrom(request),
+      client_id: clientId,
       iso_week: isoWeek(new Date()),
       report_id: meta.report_id,
       reach: meta.reach,
