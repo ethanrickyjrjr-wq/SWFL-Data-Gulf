@@ -7,6 +7,7 @@ import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import { asOfFromToken } from "@/lib/project/as-of";
 import { PrintButton } from "@/components/PrintButton";
+import { UploadDrop } from "@/components/project/UploadDrop";
 
 export interface SavedChart {
   block: ChartBlock;
@@ -27,6 +28,8 @@ interface Props {
   items: ProjectItem[];
   charts: Record<string, SavedChart>;
   deliverables: DeliverableRow[];
+  /** Server-minted 1h signed URLs for `{kind:"file"}` items, keyed by storage_path. */
+  fileUrls: Record<string, string>;
 }
 
 const BRANDING_FIELDS: { key: string; label: string }[] = [
@@ -50,6 +53,7 @@ export function ProjectDetail({
   items: initialItems,
   charts,
   deliverables: initialDeliverables,
+  fileUrls,
 }: Props) {
   const [items, setItems] = useState<ProjectItem[]>(initialItems);
   const [title, setTitle] = useState(initialTitle ?? "");
@@ -58,6 +62,11 @@ export function ProjectDetail({
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [deliverables, setDeliverables] = useState<DeliverableRow[]>(initialDeliverables);
+  // Object-URL previews for files uploaded THIS session (server signed URLs only
+  // arrive on the next full page load). Keyed by item id.
+  const [localPreviews, setLocalPreviews] = useState<Record<string, string>>({});
+
+  const fileCount = items.filter((i) => i.kind === "file").length;
 
   function mutate(next: ProjectItem[]) {
     setItems(next);
@@ -94,6 +103,16 @@ export function ProjectDetail({
     } finally {
       setSaving(false);
     }
+  }
+
+  // Upload success → append the file item, persist the whole array (also saves any
+  // pending reorders/title), and keep a local preview so it renders immediately.
+  async function addFileItem(item: ProjectItem, objectUrl: string) {
+    const next = [...items, item];
+    setItems(next);
+    setLocalPreviews((p) => ({ ...p, [item.id]: objectUrl }));
+    setDirty(false);
+    await patch({ items: next, title: title || null }, "File attached");
   }
 
   async function toggleRevoke(deliverableId: string, currentStatus: string) {
@@ -177,10 +196,15 @@ export function ProjectDetail({
                 </button>
               </div>
             </div>
-            {renderItem(item, charts)}
+            {renderItem(item, charts, fileUrls, localPreviews)}
           </li>
         ))}
       </ul>
+
+      {/* Upload (images + PDFs) */}
+      <div className="mt-6">
+        <UploadDrop projectId={id} fileCount={fileCount} onUploaded={addFileItem} />
+      </div>
 
       {/* Branding */}
       <section className="mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
@@ -263,7 +287,12 @@ export function ProjectDetail({
   );
 }
 
-function renderItem(item: ProjectItem, charts: Record<string, SavedChart>) {
+function renderItem(
+  item: ProjectItem,
+  charts: Record<string, SavedChart>,
+  fileUrls: Record<string, string>,
+  localPreviews: Record<string, string>,
+) {
   switch (item.kind) {
     case "chart": {
       const saved = charts[item.chart_id];
@@ -352,13 +381,50 @@ function renderItem(item: ProjectItem, charts: Record<string, SavedChart>) {
           <AsOf token={item.freshness_token} />
         </div>
       );
-    case "file":
+    case "file": {
+      // Server signed URL (re-signed each page load) ?? this-session object-URL preview.
+      const url = fileUrls[item.storage_path] ?? localPreviews[item.id];
+      const isImage = item.mime.startsWith("image/");
+      if (isImage) {
+        return (
+          <figure>
+            {url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={url}
+                alt={item.caption || "Uploaded image"}
+                className="max-w-full rounded-lg"
+              />
+            ) : (
+              <p className="text-sm text-gray-500 italic">Image unavailable</p>
+            )}
+            {item.caption && (
+              <figcaption className="mt-2 text-sm text-gray-300">{item.caption}</figcaption>
+            )}
+            <p className="mt-1 text-[11px] text-gray-500">Provided by agent</p>
+          </figure>
+        );
+      }
+      // PDF (or any non-image) → appendix link.
       return (
-        <p className="text-sm text-gray-400">
-          {item.caption || "Attachment"}{" "}
-          <span className="text-xs text-gray-600">({item.mime})</span>
-          {/* S8 renders uploaded images/PDFs; placeholder until then. */}
-        </p>
+        <div>
+          {url ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-[#00d4aa] underline underline-offset-2"
+            >
+              {item.caption || "View attachment (PDF)"}
+            </a>
+          ) : (
+            <p className="text-sm text-gray-500 italic">
+              {item.caption || "Attachment"} (unavailable)
+            </p>
+          )}
+          <p className="mt-1 text-[11px] text-gray-500">Provided by agent</p>
+        </div>
       );
+    }
   }
 }

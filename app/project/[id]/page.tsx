@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
 import type { ProjectItem } from "@/lib/project/items";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
+import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { ProjectDetail, type SavedChart, type DeliverableRow } from "./ProjectDetail";
 
 export const runtime = "nodejs";
@@ -68,6 +69,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     .order("created_at", { ascending: false });
   const deliverables: DeliverableRow[] = (deliverableRows ?? []) as DeliverableRow[];
 
+  // Mint 1h signed URLs for uploaded files via the OWNER's session client
+  // (RLS lets the owner read their own private objects). Never expose raw paths.
+  const filePaths = items
+    .filter((i): i is Extract<ProjectItem, { kind: "file" }> => i.kind === "file")
+    .map((i) => i.storage_path);
+  const fileUrls = filePaths.length > 0 ? await signedUploadUrls(supabase, filePaths) : {};
+
   return (
     <ProjectDetail
       id={project.id}
@@ -76,6 +84,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       items={items}
       charts={charts}
       deliverables={deliverables}
+      fileUrls={fileUrls}
     />
   );
 }
