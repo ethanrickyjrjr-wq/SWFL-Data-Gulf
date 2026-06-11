@@ -100,6 +100,9 @@ export type ExhibitSlot = {
   mime?: string;
   /** Storage path (present for file exhibits). */
   storage_path?: string;
+  /** Short-lived signed URL for a file exhibit, attached at render time
+   *  (the private object path is never rendered directly; URLs expire). */
+  signed_url?: string;
   caption?: string;
   source_url?: string;
   freshness_token?: string;

@@ -17,6 +17,7 @@ import type {
   SnapshotItem,
 } from "@/lib/deliverable/templates";
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
+import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { TemplateSwitcher } from "./TemplateSwitcher";
 import { PrintButton } from "@/components/PrintButton";
 import { DeliveryButtons } from "./DeliveryButtons";
@@ -165,25 +166,31 @@ function renderExhibit(slot: ExhibitSlot) {
       </div>
     );
   } else if (slot.exhibit_kind === "file") {
+    // Always a fresh server signed URL — never the raw private path (not fetchable).
     const isImage = slot.mime?.startsWith("image/");
-    body =
-      isImage && slot.storage_path ? (
+    if (!slot.signed_url) {
+      body = <p className="text-sm text-gray-500 italic">[Attachment unavailable]</p>;
+    } else if (isImage) {
+      body = (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={slot.storage_path}
+          src={slot.signed_url}
           alt={slot.caption ?? slot.title}
           className="max-w-full rounded-xl"
         />
-      ) : (
+      );
+    } else {
+      body = (
         <a
-          href={slot.storage_path ?? "#"}
+          href={slot.signed_url}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[#00d4aa] underline underline-offset-2"
         >
-          {slot.caption ?? slot.title}
+          {slot.caption ?? slot.title} (PDF)
         </a>
       );
+    }
   } else {
     // Unknown exhibit_kind — render title as fallback
     body = <p className="text-sm text-gray-500 italic">[Exhibit: {slot.title}]</p>;
@@ -195,7 +202,12 @@ function renderExhibit(slot: ExhibitSlot) {
         <figcaption className="mb-2 text-sm font-medium text-gray-300">{slot.caption}</figcaption>
       )}
       {body}
-      {citation}
+      {slot.exhibit_kind === "file" ? (
+        // User-supplied media — flag it so it's never mistaken for cited lake data.
+        <figcaption className="mt-1 text-[11px] text-gray-500">Provided by agent</figcaption>
+      ) : (
+        citation
+      )}
     </figure>
   );
 }
@@ -297,6 +309,18 @@ function renderNote(slot: NoteSlot) {
   return <p className="mb-3 text-sm italic text-gray-500">{slot.text}</p>;
 }
 
+/** Every file exhibit in the model — top-level and nested inside sections. */
+function fileExhibitSlots(slots: Slot[]): ExhibitSlot[] {
+  const out: ExhibitSlot[] = [];
+  for (const slot of slots) {
+    if (slot.kind === "exhibit" && slot.exhibit_kind === "file") out.push(slot);
+    else if (slot.kind === "section") {
+      for (const ex of slot.exhibits) if (ex.exhibit_kind === "file") out.push(ex);
+    }
+  }
+  return out;
+}
+
 function renderSlot(slot: Slot, index: number): React.ReactNode {
   switch (slot.kind) {
     case "branding":
@@ -369,6 +393,18 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
     data.items_snapshot,
     data.branding ?? undefined,
   );
+
+  // Re-sign uploaded file exhibits on every render. The snapshot stores the raw
+  // `storage_path` (URLs expire); a public viewer can't read the owner's private
+  // object under their own JWT, so the service-role `db` client mints the link.
+  const fileSlots = fileExhibitSlots(model.slots);
+  if (fileSlots.length > 0) {
+    const urls = await signedUploadUrls(
+      db,
+      fileSlots.map((s) => s.storage_path).filter((p): p is string => Boolean(p)),
+    );
+    for (const s of fileSlots) if (s.storage_path) s.signed_url = urls[s.storage_path];
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
