@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — L2: franchise-survival live (franchise-outcomes) (LOCAL, not pushed)
+
+- `refinery/config/packs.mts`: added `let lastFranchiseNorms: FranchiseNormalized[] | null = null`; populated in `franchiseCorpusSummary`; `franchiseOutputProducer` now emits `detail_tables[franchise_survival]` — one row per SBA brand, `survival_rate` as 0–1 ratio (÷100 from `toRate`'s 0–100 output), `n_paid_in_full`/`n_charged_off` null when unassessable. Source receipt reuses `buildFranchiseSource`. Imported `BrainOutputDetailTable`.
+- `components/charts/registry/registry.ts`: flipped `franchise-survival` `fixtureOnly: true → false`; updated comment to mark L2 done.
+- `lib/deliverable/bind-frame.test.ts`: updated the "STILL gated" assertion to "L2 done: bindFrameSpec returns a live spec" — gate is now open.
+- `brains/franchise-outcomes.md` v31: OUTPUT carries `franchise_survival` detail_table (14 rows from fixture; 1 unassessable brand with `survival_rate: null`). `bindFrameSpec(output, {frame_id:"franchise-survival"})` returns live ChartSpec (verified).
+- `refinery/vocab/brain-vocabulary.json`: added `sba_franchise_survival_table` concept (documentation; not a metric slug; coverage checker still passes).
+- vocab `--all` green (29 brains, 0 orphans). Binder+registry tests 219 pass (1 test updated). tsc clean on touched files.
+- Next: Ricky pushes L0+L1+L2 together (all local/unpushed).
+
 ## 2026-06-12 (main) — L1: storm-timeline live (env-swfl) (LOCAL, not pushed)
 
 - `refinery/sources/fema-nfip-source.mts`: added `NfipStormTotal` interface + `HELENE_MILTON_SPLIT_DATE` export + `aggregateStormTotals()` (splits 2024 between Helene/Milton by `date_of_loss` cutoff) + emits 6 `nfip-storm-total` fragments per `femaNfipSource.fetch()`.

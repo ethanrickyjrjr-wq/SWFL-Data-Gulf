@@ -61,19 +61,14 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     fixtureOnly: true,
   },
   "franchise-survival": {
-    // fixtureOnly: franchise-outcomes' --- OUTPUT --- still emits ONE aggregate
-    // metric (overall_survival_rate) and no detail_tables. The per-brand ranked
-    // rows this frame draws live only in the brain's --- SAVED FACTS --- prose,
-    // which the thin-pipe rule forbids a consumer from reading.
     // L0 (done): bind-frame's `franchise-survival` case + `franchise_survival`
-    // detail_table column contract now exist (bindDetailTableFrame). REMAINING
-    // (Task L2): teach franchise-outcomes to emit the per-brand detail_table, then
-    // flip this flag to false in the SAME PR (brain-first gate). Until then the
-    // case is reachable only via bindDetailTableFrame, not bindFrameSpec.
+    // detail_table column contract exist; bindFranchiseSurvival maps rows → spec.
+    // L2 (done): franchise-outcomes now emits a `franchise_survival` detail_table
+    // (one row per SBA brand, survival_rate as 0–1 ratio). Flag flipped to false
+    // in the same PR as the emit (brain-first gate).
     component: FranchiseSurvivalFrame,
     accepts: ["ranked-categories"],
     label: "Franchise Survival (SBA)",
-    fixtureOnly: true,
   },
   // NOT fixtureOnly: a per-storm (date, paid-$) timeline is a normal live shape
   // a flood brain can emit as a detail_table.

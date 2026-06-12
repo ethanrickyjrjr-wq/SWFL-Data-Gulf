@@ -2,14 +2,12 @@ import type { PackDefinition, PackOutput } from "../types/pack.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
 import type {
+  BrainOutputDetailTable,
   BrainOutputMetric,
   BrainOutputMetricSource,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
-import {
-  franchiseSource,
-  type FranchiseNormalized,
-} from "../sources/franchise-source.mts";
+import { franchiseSource, type FranchiseNormalized } from "../sources/franchise-source.mts";
 import { env } from "./env.mts";
 
 /**
@@ -38,8 +36,7 @@ function franchiseFitScore(fragment: RawFragment): number {
   return score;
 }
 
-const resolvedOf = (n: FranchiseNormalized): number =>
-  n.n_paid_in_full + n.n_charged_off;
+const resolvedOf = (n: FranchiseNormalized): number => n.n_paid_in_full + n.n_charged_off;
 
 const usd = (n: number): string => `$${Math.round(n).toLocaleString("en-US")}`;
 
@@ -53,8 +50,7 @@ const pct = (n: number): string => String(Math.round(n * 10) / 10);
  * (keep the headline, drop the list, point at the sub-brain). Single source of
  * truth — keep producer and splitter in sync via this constant.
  */
-const CHARGEOFF_LIST_SEP =
-  " Full per-brand list (each brand's resolved-loan survival rate): ";
+const CHARGEOFF_LIST_SEP = " Full per-brand list (each brand's resolved-loan survival rate): ";
 
 // ---------------------------------------------------------------------
 // Franchise aggregate state — populated by franchiseCorpusSummary, read by
@@ -74,6 +70,9 @@ interface FranchiseAggregate {
 let lastFranchiseAggregate: FranchiseAggregate | null = null;
 
 let lastFranchiseFetchedAt: string | null = null;
+
+/** All per-brand normalized rows, stored by franchiseCorpusSummary for use in franchiseOutputProducer. */
+let lastFranchiseNorms: FranchiseNormalized[] | null = null;
 
 /**
  * Build the per-metric receipt for the franchise overall_survival_rate.
@@ -124,10 +123,9 @@ const chargeoffEntry = (n: FranchiseNormalized): string =>
 function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   if (allFragments.length === 0) return [];
   lastFranchiseFetchedAt = allFragments[0]?.fetched_at ?? null;
-  const norms = allFragments.map(
-    (f) => f.normalized as unknown as FranchiseNormalized,
-  );
+  const norms = allFragments.map((f) => f.normalized as unknown as FranchiseNormalized);
   const total = norms.length;
+  lastFranchiseNorms = norms;
   const assessable = norms.filter((n) => n.survival_rate != null);
   const tooNew = total - assessable.length;
 
@@ -136,21 +134,16 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     .filter((n) => n.n_charged_off > 0)
     .sort(
       (a, b) =>
-        (a.survival_rate ?? 0) - (b.survival_rate ?? 0) ||
-        b.n_charged_off - a.n_charged_off,
+        (a.survival_rate ?? 0) - (b.survival_rate ?? 0) || b.n_charged_off - a.n_charged_off,
     );
   const totalChargedOff = chargeoff.reduce((s, n) => s + n.n_charged_off, 0);
 
   // System-wide resolved-loan aggregates — weighted by loan count, not a mean
   // of per-brand rates. (`metric:overall_survival_rate` — MANDATORY Week 1.)
   const totalPaidInFull = assessable.reduce((s, n) => s + n.n_paid_in_full, 0);
-  const totalSystemChargedOff = assessable.reduce(
-    (s, n) => s + n.n_charged_off,
-    0,
-  );
+  const totalSystemChargedOff = assessable.reduce((s, n) => s + n.n_charged_off, 0);
   const totalResolved = totalPaidInFull + totalSystemChargedOff;
-  const overallSurvivalRate =
-    totalResolved === 0 ? 0 : (totalPaidInFull / totalResolved) * 100;
+  const overallSurvivalRate = totalResolved === 0 ? 0 : (totalPaidInFull / totalResolved) * 100;
   lastFranchiseAggregate = {
     assessableBrands: assessable.length,
     totalResolved,
@@ -160,16 +153,11 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   };
 
   // total approved capital
-  const capitalAssessable = assessable.reduce(
-    (s, n) => s + n.total_gross_approval,
-    0,
-  );
+  const capitalAssessable = assessable.reduce((s, n) => s + n.total_gross_approval, 0);
   const capitalAll = norms.reduce((s, n) => s + n.total_gross_approval, 0);
 
   // median survival rate across the assessable brands
-  const rates = assessable
-    .map((n) => n.survival_rate as number)
-    .sort((a, b) => a - b);
+  const rates = assessable.map((n) => n.survival_rate as number).sort((a, b) => a - b);
   const mid = Math.floor(rates.length / 2);
   const median =
     rates.length === 0
@@ -222,10 +210,7 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 
   if (strong.length > 0) {
     const named = strong
-      .map(
-        (n) =>
-          `${n.franchise_name} (${resolvedOf(n)} resolved, ${n.n_loans} total)`,
-      )
+      .map((n) => `${n.franchise_name} (${resolvedOf(n)} resolved, ${n.n_loans} total)`)
       .join("; ");
     facts.push({
       topic: "strong_performers",
@@ -275,9 +260,7 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
  */
 function franchiseOutputProducer(out: PackOutput): BrainOutputProducerResult {
   const agg = lastFranchiseAggregate;
-  const fetched_at =
-    lastFranchiseFetchedAt ??
-    new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFranchiseFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
   const conclusion = out.facts[0]?.value ?? "(no facts produced this run)";
   const key_metrics: BrainOutputMetric[] = [];
   if (agg && agg.totalResolved > 0) {
@@ -292,9 +275,53 @@ function franchiseOutputProducer(out: PackOutput): BrainOutputProducerResult {
       source: buildFranchiseSource(agg, fetched_at),
     });
   }
+
+  const detail_tables: BrainOutputDetailTable[] = [];
+  if (agg && lastFranchiseNorms && lastFranchiseNorms.length > 0) {
+    detail_tables.push({
+      id: "franchise_survival",
+      title: "SBA franchise loan survival — Lee & Collier counties, FL",
+      grain: "brand",
+      columns: [
+        {
+          id: "survival_rate",
+          label: "Survival rate",
+          display_format: "ratio",
+          units: "ratio",
+        },
+        { id: "n_paid_in_full", label: "Paid in full", display_format: "count", units: "loans" },
+        { id: "n_charged_off", label: "Charged off", display_format: "count", units: "loans" },
+        { id: "n_loans", label: "Total loans", display_format: "count", units: "loans" },
+        {
+          id: "total_gross_approval",
+          label: "Gross approval",
+          display_format: "currency",
+          units: "USD",
+        },
+      ],
+      rows: lastFranchiseNorms.map((n) => ({
+        key: n.franchise_code || n.franchise_name,
+        label: n.franchise_name,
+        cells: {
+          // toRate normalises to 0–100; frame expects 0–1 ratio (prepareBrands uses it as such)
+          survival_rate: n.survival_rate !== null ? n.survival_rate / 100 : null,
+          n_paid_in_full: n.survival_rate !== null ? n.n_paid_in_full : null,
+          n_charged_off: n.survival_rate !== null ? n.n_charged_off : null,
+          n_loans: n.n_loans,
+          total_gross_approval: n.total_gross_approval,
+        },
+      })),
+      source: buildFranchiseSource(agg, fetched_at),
+      note:
+        "survival_rate is a 0–1 ratio over resolved loans (n_paid_in_full + n_charged_off). " +
+        "Brands with only active loans (no resolved loans yet) have survival_rate: null and are excluded by the frame.",
+    });
+  }
+
   return {
     conclusion,
     key_metrics,
+    detail_tables,
     caveats: [],
     direction: "neutral",
     magnitude: 0.5,

@@ -50,7 +50,7 @@ real intelligence. That is the offline Tier-1 verification path.
 
 | Pack id              | Source                                  | Status                           |
 | -------------------- | --------------------------------------- | -------------------------------- |
-| `franchise-outcomes` | Supabase `sba_loans_franchise_outcomes` | built                            |
+| `franchise-outcomes` | Supabase `sba_loans_franchise_outcomes` | built — emits `franchise_survival` detail_table (L2 done) |
 | `cre-swfl`           | Sanity `corridorProfile` + `promptRule` | not yet registered (plan step 7) |
 
 A pack is just an entry in `config/packs.mts` plus a source connector. The engine

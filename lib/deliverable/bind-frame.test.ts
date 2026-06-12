@@ -374,9 +374,11 @@ describe("bindDetailTableFrame — franchise-survival (gated fixtureOnly until L
     expect(spec!.source?.citation).toBe("Example provenance citation");
   });
 
-  test("STILL gated: bindFrameSpec returns null while fixtureOnly is true (L2 flips it)", () => {
+  test("L2 done: bindFrameSpec returns a live spec now that fixtureOnly is false", () => {
     const o = output({ detail_tables: [franchiseTable] });
-    expect(bindFrameSpec(o, { frame_id: "franchise-survival" })).toBeNull();
+    const spec = bindFrameSpec(o, { frame_id: "franchise-survival" });
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("franchise-survival");
   });
 });
 
