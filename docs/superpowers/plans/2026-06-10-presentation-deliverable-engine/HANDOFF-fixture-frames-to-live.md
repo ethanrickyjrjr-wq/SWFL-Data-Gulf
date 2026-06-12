@@ -92,7 +92,45 @@ binder cases that consume them. Once L0 documents the per-frame column contract,
 
 ---
 
-## [OPUS] Task L0 — binder + column contracts  *(do first; blocks L1–L3)*
+## [OPUS] Task L0 — binder + column contracts — ✅ DELIVERED (2026-06-12, local, not pushed)
+
+**What landed** (`lib/deliverable/bind-frame.ts` + `bind-frame.test.ts` + registry comments):
+
+- Three `detail_tables`-driven binders (`bindStormTimeline` / `bindFranchiseSurvival` /
+  `bindSeasonalRadial`), each finds its named table, maps `rows`→ the frame's exact `spec.options`,
+  stamps `asOf = refined_at.slice(0,10)`, carries `source` verbatim. Wired into `buildFrame`'s switch.
+- New exported `bindDetailTableFrame(output, frameId, req?)` — binds a table-driven frame **bypassing the
+  `fixtureOnly` gate**, so L2/L3 (and tests) can prove the mapping BEFORE flipping the flag. Production
+  rendering still goes through `bindFrameSpec`, which keeps the gate.
+- New private `cellNum()` — a `null`/`undefined`/`boolean` cell stays `null` (the shared `num()` coerces
+  `null`→`0`, which would turn an absent paid total or an unassessable survival rate into a real-looking
+  zero). **L1/L2: emit `null` for genuinely-absent cells; the binder preserves it.**
+- 12 new tests (97 pass total, tsc clean on touched files). storm-timeline proven end-to-end via
+  `bindFrameSpec`; franchise/seasonal proven via `bindDetailTableFrame` + the gate asserted still-null.
+
+**FINAL column contract — emit these EXACT cell ids** (supersedes the "Proposed" sketch below):
+
+| table id (`detail_table.id`) | grain | row `key`/`label` | cells (id → meaning) |
+|---|---|---|---|
+| `storm_timeline` | `storm` | storm name | `year` int landfall year (count) · `paid_usd` per-storm NFIP paid total B+C+ICO (currency) · `date` *(optional)* ISO `YYYY-MM-DD` landfall — overrides the year-synthesized anchor for ordering |
+| `franchise_survival` | `brand` | franchise name | `survival_rate` ratio 0–1 (**null** = not assessable) · `n_paid_in_full` count (null when unassessable) · `n_charged_off` count (null when unassessable) · `n_loans` count · `total_gross_approval` currency |
+| `corridor_seasonality` | `corridor` | corridor name | `seasonal_index` ratio 0–1 (0 = none, 1 = extreme) |
+
+Notes for the pack tasks:
+- Cell ids for `franchise_survival` **match `FranchiseBrandRaw` field names exactly** — `prepareBrands`
+  consumes them with no remap. `franchise_name` is taken from the row's `label`, NOT a cell.
+- A row whose required numeric cell is absent/null is **dropped** by the binder (storm with no paid total,
+  corridor with no index) — empty-tolerant, never crashes. For franchise, a `null` `survival_rate` is
+  **passed through** (the frame filters unassessable brands itself).
+- storm-timeline `value_format` is `usd`; seasonal `number`; franchise `percent`.
+- Each task still flips its `fixtureOnly` (L2/L3) in the SAME PR as the emit; storm-timeline is already
+  `false`. The binder case already exists — the pack task is emit + (L2/L3) flag-flip + vocab + rebuild.
+
+---
+
+### Original L0 brief (kept for reference)
+
+**Goal:** binder + column contracts  *(do first; blocks L1–L3)*
 
 **Why Opus:** shared seam. All three frames route through the single `buildFrame` switch in
 `lib/deliverable/bind-frame.ts`; doing this once, generically, avoids three sessions colliding on one

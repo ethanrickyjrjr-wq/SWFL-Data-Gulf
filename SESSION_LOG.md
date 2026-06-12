@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — L0: detail_tables binder seam for the 3 fixture-only frames (LOCAL, not pushed)
+
+- `lib/deliverable/bind-frame.ts`: added the `detail_tables`-driven binder path. Three new binders (`bindStormTimeline`/`bindFranchiseSurvival`/`bindSeasonalRadial`) map a named detail_table's rows into each frame's exact `spec.options`, stamp `asOf` from `refined_at`, carry `source` verbatim; wired into `buildFrame`. New exported `bindDetailTableFrame()` binds table-driven frames bypassing the `fixtureOnly` gate (so L2/L3 + tests prove the mapping before flipping the flag). New `cellNum()` — null/undefined/boolean cells stay null (the shared `num()` coerced null→0, which would fake a zero paid total / zero survival).
+- `bind-frame.test.ts`: +12 tests (97 pass in file; 219 pass across `components/charts/registry/` + `lib/deliverable/`). storm-timeline proven end-to-end via `bindFrameSpec`; franchise/seasonal via `bindDetailTableFrame` + gate asserted still-null. tsc clean on touched files.
+- `registry.ts`: refreshed the franchise-survival + storm-timeline comments — L0 binder cases now exist; remaining per-frame work is emit (+ L2/L3 flag flip).
+- **FINAL column contract for L1–L3 written into the HANDOFF doc** (`storm_timeline` / `franchise_survival` / `corridor_seasonality` cell ids + null semantics). L0 marked ✅ DELIVERED.
+- Touched ONLY the 4 L0 files; left operator's `app/api/waitlist/route.ts`, `Live Data/`, `app/map/`, `ZipChoropleth.tsx` untouched. No brain packs changed (no OUTPUT-shape edits). **Not pushed — Ricky pushes; L1/L2(±L3) dispatch to Sonnets next.**
+
 ## 2026-06-11 (main) — ZIP choropleth map + image-charts email chart utility
 
 - `public/maps/lee-collier.svg`: Lee + Collier ZIP choropleth built from Census TIGER via mapshaper — 57 named paths (id=ZIP), free, no Fiverr needed. Source `fl_zips.geojson` gitignored (22MB).

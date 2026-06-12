@@ -21,11 +21,18 @@ import type {
   BrainOutput,
   BrainOutputMetric,
   BrainOutputMetricSource,
+  BrainOutputDetailTable,
 } from "../../refinery/types/brain-output.mts";
 import { computeMetricChart } from "../../refinery/lib/chart-from-metrics.mts";
 import { pickFramesForData } from "../../components/charts/registry/pick-frames";
 import { isFixtureOnly } from "../../components/charts/registry/registry";
 import type { ChartSpec } from "../../components/charts/registry/chart-spec";
+// Type-only imports of each frame's exact `spec.options` payload shape, so the
+// row→options mapping below is compile-checked against what the frame reads.
+// (Erased at build — no client component is pulled into this pure lib.)
+import type { TimelineEvent } from "../../components/charts/registry/frames/TimelineFrame";
+import type { FranchiseBrandRaw } from "../../components/charts/registry/frames/franchise-survival-utils";
+import type { SeasonalRadialEntry } from "../../types/viz";
 
 /** What the caller knows about a frame before it is bound to live data. */
 export interface FrameBindRequest {
@@ -39,14 +46,20 @@ export interface FrameBindRequest {
   title?: string;
 }
 
-// Two distinct, non-overlapping reasons a frame yields no live ChartSpec — kept
-// separate so neither becomes a second hardcoded list:
+// Three distinct, non-overlapping reasons a frame yields no live ChartSpec —
+// kept separate so none becomes a second hardcoded list:
 //   1. fixtureOnly (FrameDef.fixtureOnly, the SINGLE registry gate read here):
-//      the frame needs a bespoke fixture no brain emits (seasonal-radial's
-//      per-corridor seasonal index) → bindFrameSpec returns null, caller drops.
+//      the frame's data is not yet in any brain's --- OUTPUT --- thin pipe
+//      (franchise-survival / seasonal-radial until their emitting pack lands) →
+//      bindFrameSpec returns null at the gate, caller drops. A later PR flips the
+//      flag in the SAME commit as the pack that emits the table (brain-first).
 //   2. not-yet-implemented: a live-bindable frame this binder has no `case` for
-//      (zhvi-area, corridor-scatter, storm-timeline) → `buildFrame`'s switch
-//      default returns null. A property of the code below, not an exclusion list.
+//      (zhvi-area, corridor-scatter) → `buildFrame`'s switch default returns
+//      null. A property of the code below, not an exclusion list.
+//   3. table-absent: a detail_tables-driven frame whose `buildFrame` case exists
+//      but the brain hasn't emitted the named table yet (storm-timeline before
+//      env-swfl emits `storm_timeline`) → the binder returns null. The case is
+//      live; it just has no data. NEVER substitute a different geometry.
 
 // ---------------------------------------------------------------------------
 // Small pure helpers
@@ -68,6 +81,18 @@ function sourceOf(src: BrainOutputMetricSource | undefined): ChartSpec["source"]
 }
 
 function num(v: number | string | null | undefined): number | null {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Numeric coercion for a detail_table cell. Unlike `num`, a `null`/`undefined`/
+ * `boolean` cell stays `null` (never coerced to 0 — `Number(null)` is 0, which
+ * would silently turn an absent paid total or an unassessable survival rate into
+ * a real-looking zero). Only a finite number or numeric string yields a number.
+ */
+function cellNum(v: number | string | boolean | null | undefined): number | null {
+  if (v === null || v === undefined || typeof v === "boolean") return null;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : null;
 }
@@ -99,6 +124,12 @@ function buildFrame(
       return bindZGauge(output, req, asOf);
     case "bar-table":
       return bindBarTable(output, req, asOf);
+    case "storm-timeline":
+      return bindStormTimeline(output, req, asOf);
+    case "franchise-survival":
+      return bindFranchiseSurvival(output, req, asOf);
+    case "seasonal-radial":
+      return bindSeasonalRadial(output, req, asOf);
     default:
       return null;
   }
@@ -242,4 +273,178 @@ function bindBarTable(output: BrainOutput, req: FrameBindRequest, asOf: string):
     asOf: block.asOf || asOf,
     frameId: "bar-table",
   };
+}
+
+// ---------------------------------------------------------------------------
+// detail_tables-driven frames (Phase L0)
+// ---------------------------------------------------------------------------
+//
+// Three frames render PER-ROW data the thin pipe carries only as a
+// `detail_table` (never as a flat key_metric): storm-timeline, franchise-survival,
+// seasonal-radial. Each binder finds its named table in `output.detail_tables`,
+// maps `rows`/`columns` into the frame's exact `spec.options` payload, stamps
+// `asOf` from `refined_at`, and carries `source` verbatim from the table. Absent
+// or empty table → null (caller drops the exhibit; never substitute geometry).
+//
+// COLUMN CONTRACT each emitting pack (Tasks L1–L3) must produce — this is the
+// authoritative input to those tasks; the frame adapters consume these cell ids
+// with NO remap:
+//
+//   storm_timeline       grain "storm"     row.key/label = storm name
+//     cells: year         (count)    INTEGER calendar year of landfall
+//            paid_usd      (currency) per-storm NFIP paid total (B+C+ICO)
+//            date          (optional) ISO YYYY-MM-DD landfall date; when present
+//                          it overrides the year-synthesized date for ordering.
+//
+//   franchise_survival   grain "brand"     row.key/label = franchise name
+//     cells: survival_rate        (ratio 0–1; null = not yet assessable)
+//            n_paid_in_full        (count; null when unassessable)
+//            n_charged_off         (count; null when unassessable)
+//            n_loans               (count)
+//            total_gross_approval  (currency)
+//     — cell ids MATCH FranchiseBrandRaw field names exactly (the frame's
+//       `prepareBrands` consumes them directly; survival read as written over
+//       resolved loans, data-protocol rule 4 — never recomputed here).
+//
+//   corridor_seasonality grain "corridor"  row.key/label = corridor name
+//     cells: seasonal_index (ratio 0–1; 0 = no seasonality, 1 = extreme)
+//
+// fixtureOnly gate: franchise-survival & seasonal-radial stay `fixtureOnly:true`
+// in the registry until their pack lands, so `bindFrameSpec({frame_id})` returns
+// null at the gate even though the case below exists. L2/L3 flip the flag in the
+// SAME PR as the emit (brain-first). storm-timeline is already `fixtureOnly:false`
+// → its case is live the moment env-swfl emits `storm_timeline`.
+
+/** Find a named detail_table, or undefined. */
+function findDetailTable(output: BrainOutput, tableId: string): BrainOutputDetailTable | undefined {
+  return output.detail_tables?.find((t) => t.id === tableId);
+}
+
+/** Build a per-storm timeline from a `storm_timeline` detail_table. */
+function bindStormTimeline(
+  output: BrainOutput,
+  req: FrameBindRequest,
+  asOf: string,
+): ChartSpec | null {
+  const table = findDetailTable(output, "storm_timeline");
+  if (!table || table.rows.length === 0) return null;
+
+  const events: TimelineEvent[] = [];
+  for (const r of table.rows) {
+    const amount = cellNum(r.cells.paid_usd);
+    if (amount === null) continue; // a storm with no paid total → omit, don't crash
+    // Prefer an explicit ISO landfall date; else anchor the year for ordering.
+    const cellDate = r.cells.date;
+    const year = cellNum(r.cells.year);
+    const date =
+      typeof cellDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(cellDate)
+        ? cellDate
+        : year !== null
+          ? `${year}-01-01`
+          : null;
+    if (date === null) continue;
+    events.push({ label: r.label, date, amount_usd: amount });
+  }
+  if (events.length === 0) return null;
+
+  return {
+    title: req.title ?? table.title,
+    columns: ["storm", "paid_usd"],
+    rows: events.map((e) => [e.label, e.amount_usd]),
+    chart_type: "bar",
+    value_format: "usd",
+    asOf,
+    source: sourceOf(table.source),
+    frameId: "storm-timeline",
+    options: { events },
+  };
+}
+
+/** Build per-brand survival rows from a `franchise_survival` detail_table. */
+function bindFranchiseSurvival(
+  output: BrainOutput,
+  req: FrameBindRequest,
+  asOf: string,
+): ChartSpec | null {
+  const table = findDetailTable(output, "franchise_survival");
+  if (!table || table.rows.length === 0) return null;
+
+  // Map verbatim onto FranchiseBrandRaw — the frame's prepareBrands() filters to
+  // assessable brands (resolved>0) and derives the rest. Pass nulls through.
+  const data: FranchiseBrandRaw[] = table.rows.map((r) => ({
+    franchise_name: r.label,
+    survival_rate: cellNum(r.cells.survival_rate),
+    n_paid_in_full: cellNum(r.cells.n_paid_in_full),
+    n_charged_off: cellNum(r.cells.n_charged_off),
+    n_loans: cellNum(r.cells.n_loans) ?? 0,
+    total_gross_approval: cellNum(r.cells.total_gross_approval) ?? 0,
+  }));
+
+  return {
+    title: req.title ?? table.title,
+    columns: ["brand", "survival_rate"],
+    rows: data.map((d) => [d.franchise_name, d.survival_rate ?? 0]),
+    chart_type: "bar",
+    value_format: "percent",
+    asOf,
+    source: sourceOf(table.source),
+    frameId: "franchise-survival",
+    options: { data },
+  };
+}
+
+/** Build per-corridor seasonality rings from a `corridor_seasonality` table. */
+function bindSeasonalRadial(
+  output: BrainOutput,
+  req: FrameBindRequest,
+  asOf: string,
+): ChartSpec | null {
+  const table = findDetailTable(output, "corridor_seasonality");
+  if (!table || table.rows.length === 0) return null;
+
+  const data: SeasonalRadialEntry[] = [];
+  for (const r of table.rows) {
+    const idx = cellNum(r.cells.seasonal_index);
+    if (idx === null) continue;
+    data.push({ corridor: r.label, seasonal_index: idx });
+  }
+  if (data.length === 0) return null;
+
+  return {
+    title: req.title ?? table.title,
+    columns: ["corridor", "seasonal_index"],
+    rows: data.map((d) => [d.corridor, d.seasonal_index]),
+    chart_type: "bar",
+    value_format: "number",
+    asOf,
+    source: sourceOf(table.source),
+    frameId: "seasonal-radial",
+    options: { data },
+  };
+}
+
+/**
+ * Bind a detail_tables-driven frame DIRECTLY, bypassing the `fixtureOnly`
+ * registry gate that `bindFrameSpec` applies. Public so the per-frame column
+ * contract can be proven (in tests, and by L2/L3) BEFORE those frames flip
+ * `fixtureOnly → false`. Production rendering still goes through `bindFrameSpec`,
+ * which keeps the gate. Returns null for a non-table frame or a missing table.
+ */
+export function bindDetailTableFrame(
+  output: BrainOutput,
+  frameId: string,
+  req: FrameBindRequest = {},
+): ChartSpec | null {
+  const asOf = asOfOf(output);
+  if (!asOf) return null;
+  switch (frameId) {
+    case "storm-timeline":
+      return bindStormTimeline(output, req, asOf);
+    case "franchise-survival":
+      return bindFranchiseSurvival(output, req, asOf);
+    case "seasonal-radial":
+      return bindSeasonalRadial(output, req, asOf);
+    default:
+      return null;
+  }
 }

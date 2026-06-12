@@ -61,26 +61,29 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     fixtureOnly: true,
   },
   "franchise-survival": {
-    // fixtureOnly: franchise-outcomes' --- OUTPUT --- emits ONE aggregate metric
-    // (overall_survival_rate) and no detail_tables. The per-brand ranked rows this
-    // frame draws live only in the brain's --- SAVED FACTS --- prose, which the
-    // thin-pipe rule forbids a consumer from reading. Flip this to false in the
-    // SAME PR that teaches franchise-outcomes to emit a per-brand detail_table AND
-    // adds a `franchise-survival` case to bind-frame's buildFrame (brain-first gate).
+    // fixtureOnly: franchise-outcomes' --- OUTPUT --- still emits ONE aggregate
+    // metric (overall_survival_rate) and no detail_tables. The per-brand ranked
+    // rows this frame draws live only in the brain's --- SAVED FACTS --- prose,
+    // which the thin-pipe rule forbids a consumer from reading.
+    // L0 (done): bind-frame's `franchise-survival` case + `franchise_survival`
+    // detail_table column contract now exist (bindDetailTableFrame). REMAINING
+    // (Task L2): teach franchise-outcomes to emit the per-brand detail_table, then
+    // flip this flag to false in the SAME PR (brain-first gate). Until then the
+    // case is reachable only via bindDetailTableFrame, not bindFrameSpec.
     component: FranchiseSurvivalFrame,
     accepts: ["ranked-categories"],
     label: "Franchise Survival (SBA)",
     fixtureOnly: true,
   },
+  // NOT fixtureOnly: a per-storm (date, paid-$) timeline is a normal live shape
+  // a flood brain can emit as a detail_table.
+  // L0 (done): bind-frame's `storm-timeline` case + `storm_timeline` column
+  // contract now exist; the case binds the moment a brain emits the table and
+  // returns null (caller drops) until then — no fixture, no suppression.
+  // REMAINING (Task L1): env-swfl emits a `storm_timeline` detail_table (per
+  // storm: year + paid_usd) in place of today's single combined storm total.
+  // No flag flip needed (already false); just the emit side, same PR (brain-first).
   "storm-timeline": {
-    // NOT fixtureOnly: a per-storm (date, paid-$) timeline is a normal live shape
-    // a flood brain can emit as a detail_table — it's merely unimplemented in the
-    // binder today (env-swfl emits the combined storm total, not per-storm rows),
-    // same category as zhvi-area. Flagging it fixtureOnly would silently suppress
-    // a real frame once a brain emits per-storm rows.
-    // TWO-SIDED DEFERRED: when wired, BOTH sides land in the SAME PR (brain-first
-    // ingest gate) — the brain emitting a per-storm detail_table AND a matching
-    // `buildFrame` storm-timeline case. Never the emit side without the bind side.
     component: TimelineFrame,
     accepts: ["timeline"],
     label: "Storm Claims Timeline",

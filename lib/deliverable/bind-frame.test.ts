@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { bindFrameSpec } from "./bind-frame";
+import { bindFrameSpec, bindDetailTableFrame } from "./bind-frame";
 import { freezeSnapshot } from "./build";
 import { loadParsedBrain } from "../fetch-brain";
 import type { ProjectItem } from "../project/items";
@@ -159,6 +159,9 @@ describe("bindFrameSpec — bar-table & guards", () => {
     // storm-timeline + zhvi-area are NOT fixtureOnly (live shapes exist) — just
     // unimplemented here → null → caller drops. The recipe never silently gets a
     // bar-table in place of the frame it named (that would misrepresent on /p).
+    // storm-timeline is now a table-driven case (L0) — with no `storm_timeline`
+    // detail_table on this mock it returns null (table-absent), same observable
+    // result. zhvi-area stays default-null (no case). Neither is substituted.
     const o = output({ key_metrics: [metric({ metric: "x", value: 5, label: "X" })] });
     expect(bindFrameSpec(o, { frame_id: "storm-timeline" })).toBeNull();
     expect(bindFrameSpec(o, { frame_id: "zhvi-area" })).toBeNull();
@@ -237,6 +240,185 @@ describe("bindFrameSpec — auto-pick (no frame_id) never substitutes geometry",
     expect(spec).not.toBeNull();
     expect(spec!.frameId).toBe("bar-table");
     expect(spec!.rows.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// detail_tables-driven frames (L0): storm-timeline / franchise-survival /
+// seasonal-radial. Each maps a named detail_table's rows into the frame's exact
+// spec.options. franchise-survival & seasonal-radial stay fixtureOnly in the
+// registry until their pack lands, so they are proven via bindDetailTableFrame
+// (which bypasses the gate); the gate itself is asserted separately.
+// ---------------------------------------------------------------------------
+
+function detailTable(p: {
+  id: string;
+  grain: string;
+  columns: { id: string; label: string }[];
+  rows: { key: string; label: string; cells: Record<string, number | string | boolean | null> }[];
+  title?: string;
+}) {
+  return {
+    title: p.title ?? "table",
+    source: {
+      url: "https://example.gov/source",
+      fetched_at: "2026-06-01T00:00:00Z",
+      tier: 1,
+      citation: "Example provenance citation",
+    },
+    ...p,
+  };
+}
+
+describe("bindFrameSpec — storm-timeline (table-driven, NOT fixtureOnly)", () => {
+  const stormTable = detailTable({
+    id: "storm_timeline",
+    title: "SWFL named-storm NFIP paid claims",
+    grain: "storm",
+    columns: [
+      { id: "year", label: "Year" },
+      { id: "paid_usd", label: "Paid (USD)" },
+    ],
+    rows: [
+      { key: "ian", label: "Ian", cells: { year: 2022, paid_usd: 4_200_000_000 } },
+      { key: "irma", label: "Irma", cells: { year: 2017, paid_usd: 900_000_000 } },
+      // explicit ISO date overrides the year-synthesized anchor
+      {
+        key: "milton",
+        label: "Milton",
+        cells: { year: 2024, paid_usd: 50_000_000, date: "2024-10-09" },
+      },
+      // a storm with no paid total → omitted, not crashed
+      { key: "glades", label: "Glades", cells: { year: 2099, paid_usd: null } },
+    ],
+  });
+
+  test("binds 3 events (one row dropped for null paid), carries options + provenance + asOf", () => {
+    const o = output({ refined_at: "2026-06-09T13:41:21Z", detail_tables: [stormTable] });
+    const spec = bindFrameSpec(o, { frame_id: "storm-timeline" });
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("storm-timeline");
+    expect(spec!.asOf).toBe("2026-06-09");
+    const events = spec!.options!.events as { label: string; date: string; amount_usd: number }[];
+    expect(events).toHaveLength(3);
+    const ian = events.find((e) => e.label === "Ian")!;
+    expect(ian.date).toBe("2022-01-01"); // synthesized from year
+    expect(ian.amount_usd).toBe(4_200_000_000);
+    const milton = events.find((e) => e.label === "Milton")!;
+    expect(milton.date).toBe("2024-10-09"); // explicit date wins
+    // provenance carried verbatim, never sanitized
+    expect(spec!.source?.citation).toBe("Example provenance citation");
+    expect(spec!.source?.url).toBe("https://example.gov/source");
+  });
+
+  test("absent storm_timeline table → null (caller drops, no substitution)", () => {
+    const o = output({ detail_tables: [] });
+    expect(bindFrameSpec(o, { frame_id: "storm-timeline" })).toBeNull();
+  });
+});
+
+describe("bindDetailTableFrame — franchise-survival (gated fixtureOnly until L2)", () => {
+  const franchiseTable = detailTable({
+    id: "franchise_survival",
+    grain: "brand",
+    columns: [
+      { id: "survival_rate", label: "Survival" },
+      { id: "n_paid_in_full", label: "Paid" },
+      { id: "n_charged_off", label: "Charged off" },
+      { id: "n_loans", label: "Loans" },
+      { id: "total_gross_approval", label: "Gross approval" },
+    ],
+    rows: [
+      {
+        key: "subway",
+        label: "Subway",
+        cells: {
+          survival_rate: 0.92,
+          n_paid_in_full: 46,
+          n_charged_off: 4,
+          n_loans: 60,
+          total_gross_approval: 12_500_000,
+        },
+      },
+      {
+        // an unassessable brand: survival_rate null passes through to the frame
+        key: "newco",
+        label: "NewCo",
+        cells: {
+          survival_rate: null,
+          n_paid_in_full: null,
+          n_charged_off: null,
+          n_loans: 3,
+          total_gross_approval: 400_000,
+        },
+      },
+    ],
+  });
+
+  test("maps rows onto FranchiseBrandRaw verbatim (field names match the frame)", () => {
+    const o = output({ detail_tables: [franchiseTable] });
+    const spec = bindDetailTableFrame(o, "franchise-survival");
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("franchise-survival");
+    const data = spec!.options!.data as Array<Record<string, unknown>>;
+    expect(data).toHaveLength(2);
+    expect(data[0]).toEqual({
+      franchise_name: "Subway",
+      survival_rate: 0.92,
+      n_paid_in_full: 46,
+      n_charged_off: 4,
+      n_loans: 60,
+      total_gross_approval: 12_500_000,
+    });
+    expect(data[1].survival_rate).toBeNull(); // unassessable passthrough
+    expect(spec!.source?.citation).toBe("Example provenance citation");
+  });
+
+  test("STILL gated: bindFrameSpec returns null while fixtureOnly is true (L2 flips it)", () => {
+    const o = output({ detail_tables: [franchiseTable] });
+    expect(bindFrameSpec(o, { frame_id: "franchise-survival" })).toBeNull();
+  });
+});
+
+describe("bindDetailTableFrame — seasonal-radial (gated fixtureOnly until L3)", () => {
+  const seasonalTable = detailTable({
+    id: "corridor_seasonality",
+    grain: "corridor",
+    columns: [{ id: "seasonal_index", label: "Seasonal index" }],
+    rows: [
+      { key: "us41-dt", label: "US 41 — Downtown Fort Myers", cells: { seasonal_index: 0.35 } },
+      { key: "5th-ave", label: "5th Ave S — Naples", cells: { seasonal_index: 0.9 } },
+    ],
+  });
+
+  test("maps rows onto SeasonalRadialEntry (corridor + seasonal_index)", () => {
+    const o = output({ detail_tables: [seasonalTable] });
+    const spec = bindDetailTableFrame(o, "seasonal-radial");
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("seasonal-radial");
+    const data = spec!.options!.data as { corridor: string; seasonal_index: number }[];
+    expect(data).toHaveLength(2);
+    expect(data[0]).toEqual({ corridor: "US 41 — Downtown Fort Myers", seasonal_index: 0.35 });
+  });
+
+  test("STILL gated: bindFrameSpec returns null while fixtureOnly is true (L3 flips it)", () => {
+    const o = output({ detail_tables: [seasonalTable] });
+    expect(bindFrameSpec(o, { frame_id: "seasonal-radial" })).toBeNull();
+  });
+});
+
+describe("bindDetailTableFrame — guards", () => {
+  test("non-table frame id → null", () => {
+    const o = output({ key_metrics: [metric({ metric: "x", value: 1, label: "X" })] });
+    expect(bindDetailTableFrame(o, "composition")).toBeNull();
+  });
+  test("missing table → null", () => {
+    const o = output({ detail_tables: [] });
+    expect(bindDetailTableFrame(o, "storm-timeline")).toBeNull();
+  });
+  test("no refined_at → null", () => {
+    const o = output({ refined_at: "", detail_tables: [] });
+    expect(bindDetailTableFrame(o, "storm-timeline")).toBeNull();
   });
 });
 
