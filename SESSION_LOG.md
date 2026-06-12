@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Free ZIP investor composite: ZHVI ingest + home-values-swfl + investor-zip-swfl (value + rent + flood-adjusted yield)
+
+- **ZHVI ingest** (clone of ZORI): `ingest/duckdb_pipelines/zhvi_swfl/**` + `ingest/pipelines/zhvi_swfl/**` (Tier-1 DuckDB → Tier-2 dlt merge on `(zip_code,period_end)`), cadence `zhvi_swfl_duckdb`/`zhvi_swfl_tier2`, GHA `zhvi-tier1/2-monthly.yml` (day 22/23), npm `ingest:zhvi-swfl`. Verified live against the real Zillow CSV: 33,922 rows / 109 SWFL ZIPs / 2000→2026-04, 33931 present. 7 py tests.
+- **home-values-swfl** (new leaf: `refinery/packs/home-values-swfl.mts` + `refinery/sources/zhvi-source.mts` + fixture): per-ZIP `home_values_by_zip` detail table + regional metrics; `skipSynthesisAgent`. 6 vocab concepts + slug_index same-commit. 26 tests; renders clean.
+- **investor-zip-swfl** (new synthesis): joins value+rent+flood **by exact constructed key** (no regex) over `fixtures/swfl-zip-county.json` scope gate; gross rent yield → flood-adjusted cap rate computed in code; LEFT-join (no silent drops), null-guarded (value=0 → null, no NaN/Infinity); STR column null + `available_on_request` (ODD scaffold; parked `airdna_str_swfl` under `not_yet_running:`). 11 tests prove every branch. Flood overlay reaches only env's top-AAL ZIPs — surfaced via `investor_zip_cards_with_flood_overlay`.
+- Fixed a **pre-existing `rentals-swfl` smoothing-lint time-bomb** (`rentals-swfl.mts:496` dropped "smoothed") — the next monthly ZORI rebuild would have failed Stage 4. One word.
+- vocab `--all`: 30 brains, every metric resolves. **NOT staged:** `brains/*.md` (fixture builds — regenerate on first nightly after the ZHVI prod run), and the parallel storm-timeline work (`env-swfl.mts`/`fema-nfip-source.mts`/`brains/env-swfl.md`). I clobbered `brains/env-swfl.md` during fixture testing and restored it to `origin/main`; that session should rebuild it from its intact `.mts` changes.
+- **RUNBOOK to go live:** `gh workflow run zhvi-tier1-monthly.yml -f dry_run=false` → run the tier-2 workflow → `GRANT SELECT ON ALL TABLES IN SCHEMA data_lake TO service_role; NOTIFY pgrst,'reload schema'` → real `.md`s generate on the first nightly after that lands.
+
 ## 2026-06-12 (main) — Email Digest Phase 1 finished: themeable template + orchestrator + city-voice curation + Resend 3-key strategy
 
 - Built Tasks 4+6: `scripts/email/DigestEmail.tsx` (themeable via `BrandTheme`, SWFL default, 7 sections, white-label logo slot) + `build-digest.mts` orchestrator (delta floors, idempotency, RFC 8058). 32 email tests green; live dry-run renders ~20KB from real data.

@@ -44,6 +44,15 @@ pipelines:
     inventory_key_type: exact
     # Verified: ('lake-tier1/market/zori_swfl.parquet', '2026-05-23') ✓
 
+  - name: zhvi_swfl_duckdb
+    lane: tier-1-duckdb
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    inventory_id: lake-tier1/market/zhvi_swfl.parquet
+    inventory_key_type: exact
+    # Zillow ZHVI ZIP-level all-homes middle-tier (0.33-0.67) smoothed+SA home-value index.
+    # Cron: zhvi-tier1-monthly.yml (day 22). Pack: refinery/packs/home-values-swfl.mts.
+
   - name: redfin_swfl
     lane: tier-1-duckdb
     cadence_days: 30
@@ -327,6 +336,16 @@ pipelines:
     expected_rows_min: 4666 # 90% of 5,185 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-24 ✓
     # Separate from zori_swfl_duckdb; this is the Postgres promotion pipeline.
+
+  - name: zhvi_swfl_tier2
+    lane: tier-2
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    dlt_schema_name: zhvi_swfl
+    expected_rows_min: 1 # nascent — floor at 1 until first live run confirms ZIP×month volume
+    # Zillow ZHVI ZIP-level home-value index. Cron: zhvi-tier2-monthly.yml (day 23).
+    # Separate from zhvi_swfl_duckdb; this is the Postgres promotion pipeline.
+    # Pack: refinery/packs/home-values-swfl.mts. Set expected_rows_min after first run.
 
   - name: fgcu_reri_indicators
     lane: tier-2
@@ -622,7 +641,26 @@ pipelines:
 # Add here only for pipelines with no known expected date that should be
 # completely silent (no probe coverage at all).
 
-not_yet_running: []
+not_yet_running:
+  # ── AirDNA STR (short-term-rental) — Operation Dumbo Drop, parked ──────────
+  # STR revenue/occupancy/ADR has no free source; AirDNA is the only authoritative
+  # feed (MarketMinder single-market ~$40-100/mo, FL state $179/mo — manual portal,
+  # no cheap API → an ODD source). The consumer (investor-zip-swfl) already ships
+  # empty-tolerant: the str_revenue_est_monthly column is null with source_tag
+  # "available_on_request". Graduation is ZERO-CODE: buy a market sub, drop the
+  # monthly MarketMinder export, move this block up to pipelines: with a
+  # freshness_table + expected_rows_min. Until then it is probe-excluded (the
+  # probe reads only `pipelines:`), so no false LOW_VOLUME / STALE alerts.
+  - name: airdna_str_swfl
+    lane: tier-1-duckdb
+    cadence_days: 30 # AirDNA refreshes monthly (lags ~1-2 weeks)
+    tolerance_multiplier: 2.0
+    inventory_id: lake-tier1/market/airdna_str_swfl.parquet # reserved Tier-1 cold target
+    inventory_key_type: exact
+    # Consumer: refinery/packs/investor-zip-swfl.mts (str_revenue_est_monthly column).
+    # Idempotent merge key when it graduates: (zip_code, period_end), source_tag provenance.
+    # Pricing verified 2026-06-11: airdna.co/pricing — single market $19.95-99.95/mo by
+    # listing count; FL state $179/mo. API/Enterprise is sales-negotiated (not needed).
 
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
 # These tables have rows in Postgres but no active ingest pipeline. Adding them

@@ -1,0 +1,338 @@
+[
+  {
+    "zip_code": "33931",
+    "period_end": "2025-03-31",
+    "home_value": 640000.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-04-30",
+    "home_value": 643200.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-05-31",
+    "home_value": 646400.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-06-30",
+    "home_value": 649600.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-07-31",
+    "home_value": 652800.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-08-31",
+    "home_value": 656000.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-09-30",
+    "home_value": 659200.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-10-31",
+    "home_value": 662400.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-11-30",
+    "home_value": 665600.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2025-12-31",
+    "home_value": 668800.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2026-01-31",
+    "home_value": 672000.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2026-02-28",
+    "home_value": 675200.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2026-03-31",
+    "home_value": 678400.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "33931",
+    "period_end": "2026-04-30",
+    "home_value": 681600.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Fort Myers Beach"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-03-31",
+    "home_value": 580000.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-04-30",
+    "home_value": 582400.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-05-31",
+    "home_value": 584800.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-06-30",
+    "home_value": 587200.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-07-31",
+    "home_value": 589600.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-08-31",
+    "home_value": 592000.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-09-30",
+    "home_value": 594400.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-10-31",
+    "home_value": 596800.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-11-30",
+    "home_value": 599200.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2025-12-31",
+    "home_value": 601600.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2026-01-31",
+    "home_value": 604000.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2026-02-28",
+    "home_value": 606400.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2026-03-31",
+    "home_value": 608800.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34135",
+    "period_end": "2026-04-30",
+    "home_value": 611200.0,
+    "metro": "Cape Coral-Fort Myers, FL",
+    "county_name": "Lee County",
+    "city": "Bonita Springs"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-03-31",
+    "home_value": 1250000.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-04-30",
+    "home_value": 1254600.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-05-31",
+    "home_value": 1259200.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-06-30",
+    "home_value": 1263800.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-07-31",
+    "home_value": 1268400.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-08-31",
+    "home_value": 1273000.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-09-30",
+    "home_value": 1277600.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-10-31",
+    "home_value": 1282200.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-11-30",
+    "home_value": 1286800.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2025-12-31",
+    "home_value": 1291400.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2026-01-31",
+    "home_value": 1296000.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2026-02-28",
+    "home_value": 1300600.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2026-03-31",
+    "home_value": 1305200.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  },
+  {
+    "zip_code": "34102",
+    "period_end": "2026-04-30",
+    "home_value": 1309800.0,
+    "metro": "Naples-Marco Island, FL",
+    "county_name": "Collier County",
+    "city": "Naples"
+  }
+]

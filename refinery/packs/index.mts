@@ -47,11 +47,15 @@ import { newsSwfl } from "./news-swfl.mts";
 import { licensesSwfl } from "./licenses-swfl.mts";
 import { condoSirsSwfl } from "./condo-sirs-swfl.mts";
 import { permitsCommercialSwfl } from "./permits-commercial-swfl.mts";
+import { homeValuesSwfl } from "./home-values-swfl.mts";
+import { investorZipSwfl } from "./investor-zip-swfl.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   // scaffold:entries
   [rentalsSwfl.id]: rentalsSwfl,
+  [homeValuesSwfl.id]: homeValuesSwfl,
+  [investorZipSwfl.id]: investorZipSwfl,
   [permitsSwfl.id]: permitsSwfl,
   [hurricaneTracksFl.id]: hurricaneTracksFl,
   [propertiesLeeValue.id]: propertiesLeeValue,

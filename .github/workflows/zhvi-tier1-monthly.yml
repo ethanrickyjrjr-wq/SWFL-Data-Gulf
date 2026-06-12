@@ -1,0 +1,48 @@
+name: ZHVI SWFL Tier 1 fetch monthly
+
+on:
+  schedule:
+    # 0 13 22 * * — 13:00 UTC = 9:00 AM ET on the 22nd of each month.
+    # Zillow Research refreshes monthly (~3rd week); day 22 captures the typical release window.
+    # (Avoids clash with ZORI day-20/21 slots — see docs/standards/pipeline-freshness.md §3.)
+    - cron: "0 13 22 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip Storage upload"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run ZHVI Tier 1 fetch pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.duckdb_pipelines.zhvi_swfl.pipeline --dry-run
+          else
+            python -m ingest.duckdb_pipelines.zhvi_swfl.pipeline
+          fi
