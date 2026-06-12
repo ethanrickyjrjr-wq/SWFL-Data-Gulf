@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Multi-tenant email Wave 1: C ‖ D ‖ E ‖ G (COMMIT — awaiting push approval)
+
+- **Wave 1 of the multi-tenant email build** (`docs/superpowers/plans/2026-06-12-email-product-multitenant/plan.md`), orchestrated on Opus (ran the show + built G) with 4 fanned-out subagents. Zero file overlap; all gated only on Wave-0 A's tables.
+- **C1 (Sonnet)** `app/api/email/contacts/upload/route.ts` + `lib/email/parse-contacts-csv.ts` — CSV (JSON `{csv,tags?}`) → upsert `email_contacts`, cookie/RLS client, hand-rolled parser (no dep), 22 tests.
+- **C2 (Opus)** `app/api/email/contacts/sync/route.ts` + `lib/email/audience-sync.ts` — Vendor-First confirmed live the SDK is **`segments.*` not `audiences.*`** (`resend.audiences` is a back-compat alias); `email_audiences.resend_audience_id` = segment id (no schema change). Find-or-create (cache→list→create), idempotent, tag-less contacts skipped (surfaced as `skipped_untagged`). 8 tests.
+- **D (Opus)** `app/api/email/domain-verify/route.ts` + `lib/email/sender-config.ts` (`resolveSender` = F's verified-gating seam) — Vendor-First caught `domains.verify()` returns no status → always re-`get()`; `domain_verified` gates on exact `"verified"`.
+- **E (Sonnet)** `lib/email/usage.ts` + `app/billing/page.tsx` — never-throws meter + fail-open gate, calendar-month period key, tier limits (50/500/2000/10000), 17 tests.
+- **G (Opus, me)** `app/api/email/schedule-command/route.ts` + `lib/email/schedule-command.ts` + `lib/email/schedule-cadence.ts` — Haiku 4.5 forced tool_use (Vendor-First: confirmed `tool_choice:{type:"tool"}` + `{id,name,input}` block on Haiku), two-step propose→confirm (no silent mutations), 6 intents, ET→UTC DST-correct cadence helper (shared seam for F's `next_run_at` advance), 34 tests.
+- **Gap closed:** E's `recordEmailSent` called an RPC `increment_email_sent_count` that Unit A never created (metering would silently no-op). Added `docs/sql/20260612_email_usage_increment_fn.sql` + **applied live** (idempotent; EXECUTE = service_role+authenticated only, revoked PUBLIC/anon).
+- **Verify:** 98/98 `lib/email` tests pass · eslint `--max-warnings=0` clean on all 13 source files · `tsc` zero errors in any new file · package.json/bun.lock/Unit-A migration untouched (no new deps).
+- **NOT pushed** — committed on main, awaiting operator diff-review + push (multi-file, 4 new routes). **Next (Wave 2):** F (cron worker) consumes C/D/E/G seams. Flag: D's `reply_to` needs the broadcast route to plumb `reply_to` (Wave-0 B added only `segmentId/fromName/fromEmail`).
+
 ## 2026-06-12 (main) — Email template adapter S1+S4 + credential scrubbed (PUSH)
 
 - S1+S4 shipped (`lib/email/templates/`, 3 route edits); credential scrubbed from history via force push

@@ -1,0 +1,266 @@
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@/utils/supabase/server";
+import { computeNextRunAt } from "@/lib/email/schedule-cadence";
+import {
+  SCHEDULE_COMMAND_TOOL,
+  buildSystemPrompt,
+  validateToolInput,
+  summarizeCommand,
+  describeExisting,
+  type ExistingSchedule,
+  type ParsedCommand,
+} from "@/lib/email/schedule-command";
+
+export const runtime = "nodejs";
+
+/**
+ * POST /api/email/schedule-command — natural-language → email-schedule mutation.
+ *
+ * Two-step, NO silent mutations:
+ *   1. PROPOSE  { projectId, command }            → Claude (forced tool_use, Haiku)
+ *                                                    parses one action; the route
+ *                                                    validates + summarizes and
+ *                                                    returns it. NO write.
+ *   2. CONFIRM  { projectId, confirm:true,        → the route re-validates the
+ *                 proposal:{...} }                   agreed action and writes the row.
+ *
+ * Auth: cookie/RLS client (auth.uid() = user_id is the authorization), never
+ * service-role — same pattern as app/api/projects/route.ts and the sibling email
+ * routes. The Anthropic client is instantiated locally (the refinery agents live in
+ * a Bun module tree we don't pull into the Next runtime); the forced-tool_use +
+ * tool_use-extraction pattern mirrors refinery/agents/synthesis-agent.mts. Haiku 4.5
+ * verified (live, in-session) to support forced tool_choice + the standard tool_use
+ * block shape { type, id, name, input }.
+ */
+
+const COMMAND_MODEL = "claude-haiku-4-5";
+
+type Db = ReturnType<typeof createClient>;
+
+let _anthropic: Anthropic | null = null;
+function getAnthropic(): Anthropic {
+  if (_anthropic) return _anthropic;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+  _anthropic = new Anthropic({ apiKey });
+  return _anthropic;
+}
+
+const SCHEDULE_COLUMNS =
+  "id,status,cadence,day_of_week,day_of_month,send_hour_et,audience_slug,template_id";
+
+export async function POST(req: NextRequest) {
+  const supabase = createClient(await cookies());
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const body = await req.json().catch(() => null);
+  const projectId = typeof body?.projectId === "string" ? body.projectId : null;
+  if (!projectId) return NextResponse.json({ error: "projectId required" }, { status: 400 });
+
+  // ── CONFIRM: write the already-agreed action. No model, no re-parse. ──
+  if (body?.confirm === true) {
+    const v = validateToolInput(body?.proposal);
+    if (!v.ok) {
+      return NextResponse.json({ error: "invalid_proposal", detail: v.errors }, { status: 422 });
+    }
+    return writeAction(supabase, user.id, projectId, v.command);
+  }
+
+  // ── PROPOSE: parse the NL command into one structured action. No write. ──
+  const command = typeof body?.command === "string" ? body.command.trim() : "";
+  if (!command) return NextResponse.json({ error: "command required" }, { status: 400 });
+
+  const { data: existingRows } = await supabase
+    .from("email_schedules")
+    .select(SCHEDULE_COLUMNS)
+    .eq("project_id", projectId);
+  const existing = (existingRows ?? []) as ExistingSchedule[];
+
+  let toolInput: unknown;
+  try {
+    const resp = await getAnthropic().messages.create({
+      model: COMMAND_MODEL,
+      max_tokens: 1024,
+      system: buildSystemPrompt(existing),
+      tools: [SCHEDULE_COMMAND_TOOL] as Anthropic.Tool[],
+      tool_choice: { type: "tool", name: SCHEDULE_COMMAND_TOOL.name },
+      messages: [{ role: "user", content: command }],
+    });
+    const block = resp.content.find((b) => b.type === "tool_use");
+    if (!block || block.type !== "tool_use") {
+      return NextResponse.json({ error: "parse_failed" }, { status: 502 });
+    }
+    toolInput = block.input;
+  } catch (e) {
+    console.error("[schedule-command] anthropic error:", e);
+    return NextResponse.json({ error: "parser_unavailable" }, { status: 503 });
+  }
+
+  // Resolve the mutation target + merge existing-row defaults so the proposal is
+  // complete, THEN validate the merged command (send_hour_et is required by then).
+  const resolved = resolveAndMerge(toolInput as ParsedCommand, existing);
+  if ("needsClarification" in resolved) {
+    return NextResponse.json(resolved, { status: 200 });
+  }
+
+  const v = validateToolInput(resolved.command);
+  if (!v.ok) {
+    return NextResponse.json(
+      {
+        needsClarification: true,
+        message: "I couldn't fully read that request.",
+        errors: v.errors,
+      },
+      { status: 200 },
+    );
+  }
+
+  return NextResponse.json({
+    action: v.command.action,
+    proposal: v.command,
+    summary: summarizeCommand(v.command),
+    confirmationRequired: true,
+  });
+}
+
+type ResolveResult =
+  | { command: ParsedCommand }
+  | {
+      needsClarification: true;
+      message: string;
+      candidates: { id: number; summary: string }[];
+    };
+
+/** Resolve the target schedule for a mutation + merge existing-row defaults. */
+function resolveAndMerge(input: ParsedCommand, existing: ExistingSchedule[]): ResolveResult {
+  if (!input || input.action === "create") return { command: input };
+
+  // Resolve schedule_id: explicit match, else the sole non-stopped schedule.
+  let target = input.schedule_id ? existing.find((s) => s.id === input.schedule_id) : undefined;
+  if (!target) {
+    const active = existing.filter((s) => s.status !== "stopped");
+    if (active.length === 1) target = active[0];
+  }
+  if (!target) {
+    return {
+      needsClarification: true,
+      message: existing.length
+        ? "Which schedule did you mean?"
+        : "There are no schedules for this project yet — create one first.",
+      candidates: existing.map((s) => ({ id: s.id, summary: describeExisting(s) })),
+    };
+  }
+
+  const merged: ParsedCommand = { ...input, schedule_id: target.id };
+  // change-cadence may omit the hour ("just move it to Tuesdays") — inherit it.
+  if (
+    merged.action === "change-cadence" &&
+    merged.send_hour_et == null &&
+    target.send_hour_et != null
+  ) {
+    merged.send_hour_et = target.send_hour_et;
+  }
+  return { command: merged };
+}
+
+async function writeAction(
+  supabase: Db,
+  userId: string,
+  projectId: string,
+  command: ParsedCommand,
+): Promise<NextResponse> {
+  const now = new Date().toISOString();
+
+  if (command.action === "create") {
+    const next = computeNextRunAt({
+      cadence: command.cadence!,
+      day_of_week: command.day_of_week ?? null,
+      day_of_month: command.day_of_month ?? null,
+      send_hour_et: command.send_hour_et!,
+    });
+    const { data, error } = await supabase
+      .from("email_schedules")
+      .insert({
+        user_id: userId,
+        project_id: projectId,
+        status: "active",
+        cadence: command.cadence,
+        day_of_week: command.day_of_week ?? null,
+        day_of_month: command.day_of_month ?? null,
+        send_hour_et: command.send_hour_et,
+        audience_slug: command.audience_slug ?? null,
+        template_id: command.template_id ?? null,
+        next_run_at: next ? next.toISOString() : null,
+        updated_at: now,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      console.error("[schedule-command] create failed:", error);
+      return NextResponse.json({ error: "create_failed" }, { status: 500 });
+    }
+    return NextResponse.json({
+      ok: true,
+      action: "create",
+      schedule_id: data.id,
+      next_run_at: next ? next.toISOString() : null,
+    });
+  }
+
+  // All other actions mutate an existing row, scoped to this user's project (RLS
+  // also enforces ownership). schedule_id is guaranteed present post-resolve.
+  if (command.schedule_id == null) {
+    return NextResponse.json({ error: "schedule_id required" }, { status: 422 });
+  }
+
+  let patch: Record<string, unknown>;
+  switch (command.action) {
+    case "pause":
+      patch = { status: "paused", updated_at: now };
+      break;
+    case "stop":
+      patch = { status: "stopped", next_run_at: null, updated_at: now };
+      break;
+    case "change-template":
+      patch = { template_id: command.template_id, updated_at: now };
+      break;
+    case "change-audience":
+      patch = { audience_slug: command.audience_slug, updated_at: now };
+      break;
+    case "change-cadence": {
+      const next = computeNextRunAt({
+        cadence: command.cadence!,
+        day_of_week: command.day_of_week ?? null,
+        day_of_month: command.day_of_month ?? null,
+        send_hour_et: command.send_hour_et!,
+      });
+      patch = {
+        cadence: command.cadence,
+        day_of_week: command.day_of_week ?? null,
+        day_of_month: command.day_of_month ?? null,
+        send_hour_et: command.send_hour_et,
+        next_run_at: next ? next.toISOString() : null,
+        updated_at: now,
+      };
+      break;
+    }
+    default:
+      return NextResponse.json({ error: "unsupported_action" }, { status: 422 });
+  }
+
+  const { error } = await supabase
+    .from("email_schedules")
+    .update(patch)
+    .eq("id", command.schedule_id)
+    .eq("project_id", projectId);
+  if (error) {
+    console.error(`[schedule-command] ${command.action} failed:`, error);
+    return NextResponse.json({ error: `${command.action}_failed` }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true, action: command.action, schedule_id: command.schedule_id });
+}
