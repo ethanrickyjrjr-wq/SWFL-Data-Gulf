@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Email Digest Phase 2: subscriber-list CAPTURE path built + live-verified (LOCAL, not pushed)
+
+- **Separate list from `waitlist`** (locked decision — different consent). **Vendor correction (verified live vs installed SDK):** Resend migrated **Audiences → Segments**; built on the non-deprecated `segments`/`contacts.segments`/`broadcasts.segmentId` path. All need a **full_access** key (server-side only; never the GHA cron).
+- **Built + verified live (real Resend + Supabase, test rows cleaned):** `docs/sql/20260612_email_subscribers.sql` (table applied + PostgREST reloaded); `lib/email/marketing-client.ts` (full_access client `RESEND_AUDIENCES_KEY`??`full_access` + `getDigestSegmentId`); `lib/email/validation.ts` (+8 tests); `scripts/email/setup-digest-segment.mts` (ran live → segment `2d0cfaa0-…`); `app/api/email/subscribe/route.ts` (idempotent contact-create — dupe returns same id, verified — → DB mirror; resilient, never loses a signup; **e2e POST→200**); `components/email/DigestSubscribe.tsx` wired into landing `Footer` + every `/r/[slug]`; `app/api/email/broadcast/route.ts` (bearer `DIGEST_BROADCAST_SECRET`, **draft-by-default**, rejects HTML missing `{{{RESEND_UNSUBSCRIBE_URL}}}`).
+- 40 email tests pass; tsc + eslint clean on all touched files.
+- **NOT done (deliberate go-live flip — emails no strangers yet):** Vercel env (`RESEND_AUDIENCES_KEY`/`RESEND_DIGEST_SEGMENT_ID`/`DIGEST_BROADCAST_SECRET`) + redeploy; **CAN-SPAM `DIGEST_SENDER_ADDRESS` swap (hard gate)**; wire `build-digest.mts` cron → `/api/email/broadcast` (footer unsub token first). Cron still sends internal-only.
+- **NOT staged (not mine):** `app/api/waitlist/route.ts` (operator's open Resend-error-logging edit), `Live Data/`.
+
 ## 2026-06-12 (main) — L3 verify: negative tests + 5-point audit clean (LOCAL, not pushed)
 
 - `lib/deliverable/bind-frame.test.ts`: +2 negative tests for `seasonal-radial` — (1) corridor with `null seasonal_index` excluded from `spec.options.data`; (2) all-null table → binder returns `null` (empty-state path). 25 binder tests pass.

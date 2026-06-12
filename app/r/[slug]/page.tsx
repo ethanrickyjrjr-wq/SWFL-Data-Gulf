@@ -28,6 +28,7 @@ import { HighlighterLayer } from "../../../components/highlighter/HighlighterLay
 import { HighlighterProvider } from "../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
 import { PrintButton } from "../../../components/PrintButton";
+import DigestSubscribe from "../../../components/email/DigestSubscribe";
 import { CRESummaryBoxes, CRECorridorBreakdown } from "../cre-swfl/CREMetricsExplorer";
 import { CREMarketBeatChart } from "../cre-swfl/CREMarketBeatChart";
 import {
@@ -246,6 +247,10 @@ export default async function ReportPage({ params }: PageProps) {
       {hasDetail && <SourcesGate sourceCount={display.metrics.length} />}
 
       <ColorLegend />
+
+      <div className="mt-12">
+        <DigestSubscribe source="r-page" />
+      </div>
 
       <ReportFooter freshnessToken={display.freshnessToken} />
 

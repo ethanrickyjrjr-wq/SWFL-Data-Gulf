@@ -214,15 +214,34 @@ Files to create:
 Secrets needed: `RESEND_API_KEY` (already in GH secrets per feedback memory), `NEXT_PUBLIC_SITE_URL`
 
 ### Phase 2 — Subscriber List
-- **Wire Resend Audiences** for subscriber management. **Requires a `full_access` API key** — the
-  send-only key 401s on contacts/audiences (verified Resend model: `sending_access` = "can only send
-  emails", `full_access` = "create, delete, get, and update any resource"). Use a SEPARATE full-access
-  key, **server-side only** (the Vercel app) — NEVER in the GHA cron.
-- Add `/api/email/subscribe` endpoint (writes the Audience contact + `public.email_subscribers`).
-- Add subscribe CTA to the landing page + `/r/` pages.
-- Email landing page at `/email/[date]` (web version of each issue).
-- **Swap the residential CAN-SPAM address** (`DIGEST_SENDER_ADDRESS`) for a PO Box / registered-agent
-  address before the list goes public — a home address otherwise ships in every email to strangers.
+
+> **Capture path BUILT + live-verified 2026-06-12.** The subscribe machinery is shipped; the
+> public broadcast-send is a deliberate go-live flip (checklist below). The list is **separate
+> from `public.waitlist`** (launch-notify) — different consent, locked decision.
+
+> **VENDOR CORRECTION (verified live against the installed SDK 2026-06-12):** Resend has
+> **migrated Audiences → Segments**. `resend.audiences` is now just an alias for `Segments`. The
+> non-deprecated path the README originally called "audienceId" is now **Segments**:
+> `resend.segments.create({name})` → `resend.contacts.create({email, segments:[{id}]})` →
+> `resend.broadcasts.create({segmentId, …})`. The permission model is unchanged: all of these need
+> a **`full_access`** key; the send-only key 401s. Use it **server-side only** (Vercel) — NEVER in
+> the GHA cron.
+
+**Built (capture path):**
+- `docs/sql/20260612_email_subscribers.sql` — `public.email_subscribers` table (applied; PostgREST reloaded).
+- `lib/email/marketing-client.ts` — lazy full_access Resend client (`RESEND_AUDIENCES_KEY` ?? `full_access`) + `getDigestSegmentId()` from `RESEND_DIGEST_SEGMENT_ID`.
+- `scripts/email/setup-digest-segment.mts` — one-time idempotent segment creator (ran live; segment id captured).
+- `app/api/email/subscribe/route.ts` — validates → adds contact to the segment (idempotent on dupes, verified live) → mirrors to `email_subscribers`. Resilient: a Resend OR Supabase hiccup never loses the signup.
+- `components/email/DigestSubscribe.tsx` — subscribe CTA, wired into the landing `Footer` (`source="landing"`) and every `/r/[slug]` report (`source="r-page"`).
+- `app/api/email/broadcast/route.ts` — server-side broadcast trigger (bearer `DIGEST_BROADCAST_SECRET`). **Safe by default: creates a Resend DRAFT** unless `send:true`; **rejects HTML missing `{{{RESEND_UNSUBSCRIBE_URL}}}`** (CAN-SPAM guard).
+
+**Go-live checklist (the deliberate flip — none of this emails strangers until done):**
+1. **Vercel env** (redeploy after): `RESEND_AUDIENCES_KEY` (= the full_access key already in Vercel as `full_access`), `RESEND_DIGEST_SEGMENT_ID` (printed by the setup script), `DIGEST_BROADCAST_SECRET`.
+2. **Swap the residential CAN-SPAM address** (`DIGEST_SENDER_ADDRESS`) for a PO Box / registered-agent address — a home address otherwise ships in every email to strangers. **Hard gate.**
+3. **Wire the cron to broadcast:** render the digest footer's unsubscribe href as `{{{RESEND_UNSUBSCRIBE_URL}}}` (so Resend manages per-recipient unsubscribe), then have `build-digest.mts` POST `{subject, html}` to `/api/email/broadcast` (bearer) instead of the internal `emails.send`. Start with `send:false` (draft → review in Resend dashboard), flip to `send:true` when confident.
+4. (Phase 5) Email web archive at `/email/[date]` — the "View on web" target.
+
+**Resend dashboard hardening:** set the full_access key's Domain = `swfldatagulf.com` so a leak can't send from another domain.
 
 #### Resend API keys — 3-key model (locked 2026-06-12)
 

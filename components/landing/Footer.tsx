@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import DigestSubscribe from "@/components/email/DigestSubscribe";
 
 const footerLinks = {
   Product: [
@@ -41,9 +42,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed">
-              AI-ready data layer for Southwest Florida. Property, labor,
-              permits, CRE, and tourism intelligence — every number cited, every
-              source linked.
+              AI-ready data layer for Southwest Florida. Property, labor, permits, CRE, and tourism
+              intelligence — every number cited, every source linked.
             </p>
           </motion.div>
 
@@ -73,6 +73,16 @@ export default function Footer() {
         </div>
 
         <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(8px)" }}
+          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="mb-12 max-w-2xl"
+        >
+          <DigestSubscribe source="landing" />
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, scale: 0.98, filter: "blur(8px)" }}
           whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -80,12 +90,8 @@ export default function Footer() {
           className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6"
         >
           <div className="text-sm text-gray-500">
-            <p>
-              © {new Date().getFullYear()} SWFL Data Gulf. All rights reserved.
-            </p>
-            <p className="mt-1 text-xs">
-              Lee + Collier county data. Every number cited.
-            </p>
+            <p>© {new Date().getFullYear()} SWFL Data Gulf. All rights reserved.</p>
+            <p className="mt-1 text-xs">Lee + Collier county data. Every number cited.</p>
           </div>
           <div className="flex items-center gap-2 glass-card-modern border border-white/10 rounded-full px-4 py-2">
             <span className="w-2 h-2 bg-teal-primary rounded-full animate-pulse" />
