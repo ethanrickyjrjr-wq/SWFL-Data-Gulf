@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Multi-tenant email Wave 0: A migrations ‖ B broadcast override (PUSH)
+
+- **Wave 0 of the multi-tenant email build** (`docs/superpowers/plans/2026-06-12-email-product-multitenant/plan.md`), fanned out: Unit A (migrations) on **Sonnet** ‖ Unit B (broadcast override) on **Opus**. Zero file overlap.
+- **A — `docs/sql/20260612_email_product.sql`**: 5 tables (`email_schedules`, `email_contacts`, `email_audiences`, `email_usage`, `email_sender_config`), each with the `auth.uid() = user_id` FOR ALL policy + grant block copied verbatim from `20260612_projects.sql`. Idempotent. **Applied live + re-applied** (idempotency proven). **RLS proof is predicate-level** (auth.uid() isolation confirmed via psycopg direct query, 1/1/0 across two simulated users); **full prod two-account 404 proof deferred to first real API route exercising it under a Supabase JWT**. Migration itself needs no sequence grant.
+- **B — `app/api/email/broadcast/route.ts`** + new pure `lib/email/broadcast-overrides.ts` (`resolveSegmentId` / `resolveSender`) + 9 TDD tests (`lib/email/__tests__/broadcast-overrides.test.ts`): optional `segmentId` / `fromName` / `fromEmail` body overrides with env fallback. No overrides → byte-for-byte the SWFL digest. Falls back to `DIGEST_SENDER_*` (**NOT** `RESEND_FROM_EMAIL`); bearer auth + CAN-SPAM `{{{RESEND_UNSUBSCRIBE_URL}}}` guard + both 503 paths untouched. Minor plan deviation: resolution extracted to a pure helper (not inlined) so it's testable without mocking Resend. 17/17 `lib/email` tests pass; eslint + tsc clean on changed files.
+- **Next**: Wave 1 fans out from this checkpoint — C (contacts) ‖ D (sender iso) ‖ E (paywall) ‖ G (AI commands), each gated only on A's tables. Plan doc is the brief, not a status board.
+
 ## 2026-06-12 (main) — Email template adapter S1 + S4 brand persistence (COMMIT — migration pending)
 
 - **lib/email/templates/token-defaults.ts** — `SWFL_TOKEN_DEFAULTS` (11 tokens from shell grep) + `TokenKey` union

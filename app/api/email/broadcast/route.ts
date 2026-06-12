@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMarketingResend, getDigestSegmentId } from "@/lib/email/marketing-client";
+import { resolveSegmentId, resolveSender } from "@/lib/email/broadcast-overrides";
 
 /**
  * Server-side digest broadcast trigger (Email Marketing Phase 2).
@@ -12,6 +13,11 @@ import { getMarketingResend, getDigestSegmentId } from "@/lib/email/marketing-cl
  *
  * Safe by default: creates a Resend DRAFT (operator reviews + sends in the
  * dashboard) unless the caller passes `send: true` for an immediate send.
+ *
+ * Multi-tenant (Unit B): the body accepts OPTIONAL `segmentId` / `fromName` /
+ * `fromEmail` overrides so the cron worker (Unit F) can send per-tenant. Omit
+ * them and the send is byte-for-byte the single-tenant SWFL digest (env
+ * defaults DIGEST_SENDER_NAME / DIGEST_SENDER_ADDRESS + getDigestSegmentId()).
  *
  * Compliance guard: the HTML MUST contain Resend's managed-unsubscribe token
  * `{{{RESEND_UNSUBSCRIBE_URL}}}`. Without it a broadcast ships with no working
@@ -34,6 +40,10 @@ export async function POST(request: Request) {
     html?: unknown;
     send?: unknown;
     previewText?: unknown;
+    // Optional per-tenant overrides (Unit B). Absent → digest env defaults.
+    segmentId?: unknown;
+    fromName?: unknown;
+    fromEmail?: unknown;
   };
   try {
     body = await request.json();
@@ -50,16 +60,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "missing_unsubscribe_token" }, { status: 400 });
   }
 
-  const senderName = process.env.DIGEST_SENDER_NAME;
-  const senderAddress = process.env.DIGEST_SENDER_ADDRESS;
-  if (!senderName || !senderAddress) {
+  // Sender: per-tenant fromName/fromEmail override the digest env defaults
+  // (DIGEST_SENDER_NAME / DIGEST_SENDER_ADDRESS — never RESEND_FROM_EMAIL).
+  const sender = resolveSender(
+    { fromName: body.fromName, fromEmail: body.fromEmail },
+    { name: process.env.DIGEST_SENDER_NAME, address: process.env.DIGEST_SENDER_ADDRESS },
+  );
+  if (!sender) {
     return NextResponse.json({ error: "sender_not_configured" }, { status: 503 });
   }
-  const from = `${senderName} <${senderAddress}>`;
+  const from = `${sender.name} <${sender.address}>`;
 
+  // Segment: per-tenant override wins; else the digest default. The default is
+  // only evaluated when no override is present, so a tenant send doesn't require
+  // RESEND_DIGEST_SEGMENT_ID. getDigestSegmentId() still throws → 503 for the
+  // digest path when unset.
   let segmentId: string;
   try {
-    segmentId = getDigestSegmentId();
+    segmentId = resolveSegmentId(body.segmentId, getDigestSegmentId);
   } catch {
     return NextResponse.json({ error: "segment_not_configured" }, { status: 503 });
   }
