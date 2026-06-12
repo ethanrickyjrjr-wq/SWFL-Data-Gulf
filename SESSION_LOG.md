@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — fix: ZHVI/ZORI tier-2 freshness guard str<date TypeError (RUNBOOK unblock)
+
+- Firing the ZHVI RUNBOOK: tier-1 ✅ (GHA run 27389863897, 41s — inventory `lake-tier1/market/zhvi_swfl.parquet` stamped `2026-06-12`). Tier-2 ❌ `TypeError: '<' not supported between 'str' and 'datetime.date'` in `_ensure_tier1_fresh`: `_tier1_inventory.vintage` is a **text** column (verified live), so psycopg returns a `str` and `vintage < date.today()-1d` throws. **ZORI has the identical bug** (ZHVI cloned it) — its next tier-2 cron (the 21st) would fail the same way. Fixed both `ingest/pipelines/{zhvi,zori}_swfl/pipeline.py` with a `str→date` coercion. Re-running ZHVI tier-2 after this push.
+
 ## 2026-06-12 (main) — Free ZIP investor composite: ZHVI ingest + home-values-swfl + investor-zip-swfl (value + rent + flood-adjusted yield)
 
 - **ZHVI ingest** (clone of ZORI): `ingest/duckdb_pipelines/zhvi_swfl/**` + `ingest/pipelines/zhvi_swfl/**` (Tier-1 DuckDB → Tier-2 dlt merge on `(zip_code,period_end)`), cadence `zhvi_swfl_duckdb`/`zhvi_swfl_tier2`, GHA `zhvi-tier1/2-monthly.yml` (day 22/23), npm `ingest:zhvi-swfl`. Verified live against the real Zillow CSV: 33,922 rows / 109 SWFL ZIPs / 2000→2026-04, 33931 present. 7 py tests.

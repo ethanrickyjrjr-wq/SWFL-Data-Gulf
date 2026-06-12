@@ -42,6 +42,10 @@ def _ensure_tier1_fresh() -> None:
             f"Tier 1 fetch did not succeed: no _tier1_inventory row for {ZORI_PARQUET_ID}."
         )
     vintage = row[0]
+    # _tier1_inventory.vintage is a text column, so psycopg returns a str —
+    # coerce to date before the comparison (a bare str < date raises TypeError).
+    if isinstance(vintage, str):
+        vintage = date.fromisoformat(vintage)
     if vintage < date.today() - timedelta(days=1):
         sys.exit(
             f"Tier 1 fetch did not succeed today: vintage={vintage} is older than yesterday. "
