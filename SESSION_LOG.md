@@ -2,6 +2,22 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Pivoted-views build plan: adjudicated + sectioned + materialized (PUSHED `c12a5b0`)
+
+- **Shipped:** `docs/superpowers/plans/2026-06-12-pivoted-views-build/` — one folder, 11 files (README + `00-ADJUDICATION` + `§01`–`§08` + `99`). Each is a build brief: model-tagged (Sonnet/Opus), dependency-gated, with a verification block. **Docs-only — NO view / migration / GRANT / cron / cutover ran.**
+- **What it is:** the approved Pivoted Views spec (`docs/superpowers/specs/2026-06-12-pivoted-views-pattern-design.md`) adjudicated against code across 3 review rounds (assessment → LittleBird → operator flags → operator catches). Verdict: **correct path, with corrections.**
+- **Load-bearing corrections (all audited, file:line in `00-ADJUDICATION.md`):** (1) **WRONG BRAIN** — the spec calls `housing-swfl` the ZHVI/ZORI consumer; it's the *Redfin* brain. Real: `home-values-swfl`=ZHVI, `rentals-swfl`=ZORI. (2) YoY `LAG(12)` is a *view-introduced* bug → faithful **7-day-tolerance MAX-within-window** self-join (confirmed = pack's `lookbackObservation` rule, NOT closest-to-target; `rentals-swfl:94-115` byte-identical). (3) **Two views** (display-wide + latest-per-ZIP brain-input); the median/polarity/top-N rollup **stays in TS**. (4) GATE A = **4-part machine-diff ×3 cycles** (defends the forward `metric_observations` seam — `refined_at` is wall-clock, `4-output.mts:355`). (5) `view_vintages` (§08) = **3-phase GATED**; the `BACKTESTABLE` flip waits on ~9mo real captured history, separate operator greenlight.
+- **NEXT (fresh Claude) — read the folder `README.md` + `00-ADJUDICATION.md` first, then:** execute **§01 FIRST** (correct the spec: wrong-brain + YoY + naming) — nothing executes against the wrong-brain spec until it lands. Then serial spine **02→04→05**; **§07** fully parallel from the start; **§06** gated on consumer-brain-live (`tourism-tdt` is NOT confirmed live → display-only); **§08** needs its own operator greenlight.
+- **Open check:** `pivoted_views_build`.
+- **NOT staged (not mine, left in tree):** `app/api/waitlist/route.ts`, `brains/cre-swfl.md`, `Live Data/`, and the untracked spec doc (`§01` will amend it).
+
+## 2026-06-12 (main) — fix(lint): smoothing-lint scope bug — source-attributed caveats now exempt (LOCAL, not pushed)
+
+- `refinery/validate/facts-only-lint.mts`: extended `isQuotedSourceLine` with Class 2 branch — caveat array values opening with `"{place} local context [{source} (date)]:"` are verbatim source pass-throughs, NOT synthesized claim text, and are now exempt from smoothing lint. Linter was aborting Stage 4 rebuild on the `fmb_planning (2025-08-01)` caveat containing "approximately August 2025". Rewording the source quote was explicitly prohibited (falsifies citation).
+- `refinery/validate/smoothing-lint.test.mts`: pinning test added — exact cre-swfl fmb_planning caveat passes clean. 25 lint tests pass, tsc clean.
+- Root cause: `isQuotedSourceLine` previously matched only JSON key-value citation field **keys** (`"citation":`, `"cited_text":`), not attribution-prefixed JSON string **values** in the caveats array. Class 1 / Class 2 distinction now in the docstring.
+- **Pending:** Ricky retries `npm run refinery -- cre-swfl --target-only` to confirm Stage 4 passes with this fix.
+
 ## 2026-06-12 (main) — Email Digest Phase 2: subscriber-list CAPTURE path built + live-verified (LOCAL, not pushed)
 
 - **Separate list from `waitlist`** (locked decision — different consent). **Vendor correction (verified live vs installed SDK):** Resend migrated **Audiences → Segments**; built on the non-deprecated `segments`/`contacts.segments`/`broadcasts.segmentId` path. All need a **full_access** key (server-side only; never the GHA cron).
