@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — Data Table</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+  <tr>
+    <td align="center" style="padding:24px 16px;">
+
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:{{SURFACE}};border-radius:{{BORDER_RADIUS}};overflow:hidden;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background-color:{{PRIMARY}};padding:20px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td><img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="32" style="display:block;border:0;" /></td>
+                <td align="right"><span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Title -->
+        <tr>
+          <td style="padding:24px 28px 12px 28px;">
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT}};">Market Segment Overview</p>
+            <p style="margin:6px 0 0 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};opacity:0.6;">Q2 2025 · 5 segments × 3 KPIs</p>
+          </td>
+        </tr>
+
+        <!-- Table -->
+        <tr>
+          <td style="padding:0 28px 20px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+
+              <!-- Header row -->
+              <tr>
+                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;border-radius:4px 0 0 0;">Segment</td>
+                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Revenue</td>
+                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Units</td>
+                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;text-align:center;border-radius:0 4px 0 0;">Growth</td>
+              </tr>
+
+              <!-- Row 1 — strong performance (accent tint) -->
+              <tr>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;">Multifamily</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(0,180,120,0.08);">$2,140,000</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(0,180,120,0.08);">1,842</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{ACCENT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(0,180,120,0.08);">+18.4%</td>
+              </tr>
+
+              <!-- Row 2 — moderate (neutral) -->
+              <tr>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">Single-Family</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">$1,680,500</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">903</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:600;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">+4.1%</td>
+              </tr>
+
+              <!-- Row 3 — amber/caution -->
+              <tr>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;">Commercial</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(240,180,0,0.08);">$921,200</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(240,180,0,0.08);">247</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:#c08a00;text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(240,180,0,0.08);">+1.8%</td>
+              </tr>
+
+              <!-- Row 4 — decline (primary red tint) -->
+              <tr>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">Industrial</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(200,50,50,0.06);">$540,800</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(200,50,50,0.06);">118</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:#c0392b;text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(200,50,50,0.06);">−3.2%</td>
+              </tr>
+
+              <!-- Row 5 — strong decline -->
+              <tr>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;">Land / Other</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;background-color:rgba(200,50,50,0.10);">$184,300</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;background-color:rgba(200,50,50,0.10);">62</td>
+                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:#c0392b;text-align:center;background-color:rgba(200,50,50,0.10);">−9.7%</td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+
+        <!-- Legend -->
+        <tr>
+          <td style="padding:0 28px 12px 28px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{ACCENT}};padding-right:12px;">■ Strong</td>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:#c08a00;padding-right:12px;">■ Caution</td>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:#c0392b;">■ Decline</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:16px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
+                <td align="right"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

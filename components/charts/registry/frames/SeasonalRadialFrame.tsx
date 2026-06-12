@@ -1,4 +1,4 @@
-import { SeasonalRadialChart } from "@/components/viz/SeasonalRadialChart";
+import { SeasonalRadialChart } from "@/components/charts/SeasonalRadialChart";
 import type { SeasonalRadialEntry } from "@/types/viz";
 import type { ChartSpec } from "../chart-spec";
 

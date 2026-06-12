@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — Horizontal Bar Chart</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+  <tr>
+    <td align="center" style="padding:24px 16px;">
+
+      <!-- Card wrapper -->
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:{{SURFACE}};border-radius:{{BORDER_RADIUS}};overflow:hidden;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background-color:{{PRIMARY}};padding:20px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="32" style="display:block;border:0;height:32px;" />
+                </td>
+                <td align="right">
+                  <span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Title row -->
+        <tr>
+          <td style="padding:24px 28px 8px 28px;">
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT}};">Revenue by Region</p>
+            <p style="margin:6px 0 0 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};opacity:0.6;">Q2 2025 · All amounts in USD</p>
+          </td>
+        </tr>
+
+        <!-- Bar rows -->
+        <!-- Row 1 (surface bg) -->
+        <tr>
+          <td style="padding:0 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{SURFACE}};padding:10px 0;">
+              <tr>
+                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Northeast</td>
+                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                    <tr>
+                      <td width="82%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;"></td>
+                      <td width="18%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$1,284,500</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Row 2 (tinted bg) -->
+        <tr>
+          <td style="padding:0 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;padding:10px 0;">
+              <tr>
+                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Southeast</td>
+                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                    <tr>
+                      <td width="68%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;opacity:0.85;"></td>
+                      <td width="32%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$1,063,200</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Row 3 (surface bg) -->
+        <tr>
+          <td style="padding:0 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{SURFACE}};padding:10px 0;">
+              <tr>
+                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Midwest</td>
+                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                    <tr>
+                      <td width="55%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;"></td>
+                      <td width="45%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$861,750</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Row 4 (tinted bg) -->
+        <tr>
+          <td style="padding:0 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;padding:10px 0;">
+              <tr>
+                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Southwest</td>
+                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                    <tr>
+                      <td width="43%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;opacity:0.85;"></td>
+                      <td width="57%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$674,100</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Row 5 (surface bg) -->
+        <tr>
+          <td style="padding:0 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{SURFACE}};padding:10px 0;">
+              <tr>
+                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Mountain</td>
+                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                    <tr>
+                      <td width="29%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;"></td>
+                      <td width="71%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$453,800</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Row 6 (tinted bg) -->
+        <tr>
+          <td style="padding:0 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;padding:10px 0;">
+              <tr>
+                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Pacific</td>
+                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                    <tr>
+                      <td width="18%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;opacity:0.85;"></td>
+                      <td width="82%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$282,400</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:16px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
+                <td align="right" style="font-family:{{FONT_FAMILY}};font-size:11px;"><a href="{{WEBSITE_URL}}" style="color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

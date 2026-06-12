@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — Map + Metrics</title>
+<style>
+  :root {
+    --primary:        {{PRIMARY}};
+    --accent:         {{ACCENT}};
+    --surface:        {{SURFACE}};
+    --text:           {{TEXT}};
+    --font-family:    {{FONT_FAMILY}};
+    --border-radius:  {{BORDER_RADIUS}};
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-family); background: #f4f4f4; color: var(--text); }
+
+  .page {
+    width: 11in;
+    min-height: 8.5in;
+    background: var(--surface);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--primary);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 12px; }
+  .topbar-logo img { height: 28px; filter: brightness(0) invert(1); }
+  .topbar-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+  .topbar-meta { color: rgba(255,255,255,0.6); font-size: 11px; text-align: right; }
+
+  /* Body split */
+  .body-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Left: Map panel */
+  .map-panel {
+    position: relative;
+    background: #dde3e8;
+    overflow: hidden;
+  }
+
+  /* Map placeholder — inject Mapbox static image as background-image at runtime */
+  /* Runtime: replace this entire element's style background with Mapbox URL */
+  .map-image-target {
+    width: 100%;
+    height: 100%;
+    background-image: url('{{MAP_IMAGE_URL}}');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-placeholder-label {
+    background: rgba(0,0,0,0.45);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .map-overlay-badge {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: var(--primary);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* Right: Metrics panel */
+  .metrics-panel {
+    padding: 36px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    border-left: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .metrics-heading {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .metrics-subhead {
+    font-size: 12px;
+    opacity: 0.5;
+    margin-bottom: 32px;
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    gap: 16px;
+  }
+  .metric-row:first-of-type { border-top: 1px solid rgba(0,0,0,0.07); }
+
+  .metric-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.55; margin-bottom: 4px; }
+  .metric-value { font-size: 28px; font-weight: 800; line-height: 1.1; }
+  .metric-context { font-size: 12px; opacity: 0.5; margin-top: 3px; }
+
+  .metric-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+  .badge-up { background: rgba(0,180,120,0.12); color: var(--accent); }
+  .badge-dn { background: rgba(200,50,50,0.10); color: #c0392b; }
+  .badge-neutral { background: rgba(0,0,0,0.07); color: var(--text); }
+
+  /* Footer strip */
+  .footer-strip {
+    background: rgba(0,0,0,0.03);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 10px 32px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    opacity: 0.45;
+    flex-shrink: 0;
+  }
+
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 100%; min-height: 100vh; }
+    @page { size: letter landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" />
+      <span class="topbar-title">{{COMPANY_NAME}} · Market Intelligence</span>
+    </div>
+    <div class="topbar-meta">{{TAGLINE}}<br>Q2 2025 · ZIP Corridor Analysis</div>
+  </div>
+
+  <!-- Body split -->
+  <div class="body-split">
+
+    <!-- Map panel -->
+    <div class="map-panel">
+      <!--
+        RUNTIME INJECTION POINT:
+        Replace the background-image in .map-image-target with your Mapbox static image URL.
+        Alternatively inject a full <img> tag here.
+        Example Mapbox static URL format:
+        https://api.mapbox.com/styles/v1/{username}/{style_id}/static/{lon},{lat},{zoom}/{width}x{height}?access_token={token}
+      -->
+      <div class="map-image-target">
+        <!-- This label is removed at runtime when map image is injected -->
+        <span class="map-placeholder-label">MAP</span>
+      </div>
+      <div class="map-overlay-badge">847 Active ZIPs</div>
+    </div>
+
+    <!-- Metrics panel -->
+    <div class="metrics-panel">
+      <h2 class="metrics-heading">Corridor Performance</h2>
+      <p class="metrics-subhead">Northeast · Q2 2025 · ZIP clusters 100xx–129xx</p>
+
+      <div class="metric-row">
+        <div>
+          <div class="metric-label">Total Revenue</div>
+          <div class="metric-value">$2.84M</div>
+          <div class="metric-context">Across 214 active ZIP codes</div>
+        </div>
+        <span class="metric-badge badge-up">↑ 18.2%</span>
+      </div>
+
+      <div class="metric-row">
+        <div>
+          <div class="metric-label">Avg. Unit Value</div>
+          <div class="metric-value">$6,420</div>
+          <div class="metric-context">Per occupied unit per month</div>
+        </div>
+        <span class="metric-badge badge-up">↑ 4.7%</span>
+      </div>
+
+      <div class="metric-row">
+        <div>
+          <div class="metric-label">Occupancy Rate</div>
+          <div class="metric-value">96.1%</div>
+          <div class="metric-context">1,842 of 1,917 units filled</div>
+        </div>
+        <span class="metric-badge badge-neutral">Stable</span>
+      </div>
+
+      <div class="metric-row">
+        <div>
+          <div class="metric-label">Days on Market</div>
+          <div class="metric-value">12.4</div>
+          <div class="metric-context">Median days to lease · Q2 2025</div>
+        </div>
+        <span class="metric-badge badge-up">↓ 3.1 days</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer strip -->
+  <div class="footer-strip">
+    <span>{{DISCLAIMER}}</span>
+    <span>{{WEBSITE_URL}} · {{SENDER_ADDRESS}}</span>
+  </div>
+
+</div>
+</body>
+</html>

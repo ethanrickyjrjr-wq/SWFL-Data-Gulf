@@ -1,4 +1,4 @@
-import { ZHVIAreaChart } from "@/components/viz/ZHVIAreaChart";
+import { ZHVIAreaChart } from "@/components/charts/ZHVIAreaChart";
 import type { ZHVITrendEntry } from "@/types/viz";
 import type { ChartSpec } from "../chart-spec";
 

@@ -1,4 +1,4 @@
-import { CorridorMarketScatter } from "@/components/viz/CorridorMarketScatter";
+import { CorridorMarketScatter } from "@/components/charts/CorridorMarketScatter";
 import type { JoinedCorridorRow } from "@/types/viz";
 import type { ChartSpec } from "../chart-spec";
 

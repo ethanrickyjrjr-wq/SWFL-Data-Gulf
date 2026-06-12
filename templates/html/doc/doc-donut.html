@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — Donut Chart</title>
+<style>
+  :root {
+    --primary:        {{PRIMARY}};
+    --accent:         {{ACCENT}};
+    --surface:        {{SURFACE}};
+    --text:           {{TEXT}};
+    --font-family:    {{FONT_FAMILY}};
+    --border-radius:  {{BORDER_RADIUS}};
+
+    /* 5 segment tints derived from primary + accent */
+    --seg1: {{PRIMARY}};
+    --seg2: {{ACCENT}};
+    --seg3: color-mix(in srgb, {{PRIMARY}} 60%, white);
+    --seg4: color-mix(in srgb, {{ACCENT}} 60%, white);
+    --seg5: color-mix(in srgb, {{PRIMARY}} 30%, {{ACCENT}} 30%);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: var(--font-family); background: #f4f4f4; color: var(--text); }
+
+  .page {
+    width: 11in;
+    min-height: 8.5in;
+    background: var(--surface);
+    margin: 0 auto;
+    padding: 0.6in 0.75in;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 32px;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo img { height: 34px; }
+  .header-logo-text { font-size: 11px; opacity: 0.55; }
+  .header-meta { font-size: 11px; text-align: right; opacity: 0.5; }
+
+  .chart-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .chart-subtitle { font-size: 13px; opacity: 0.55; margin-bottom: 36px; }
+
+  .chart-body {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    flex: 1;
+  }
+
+  /* -------- Pure-CSS Donut -------- */
+  .donut-wrapper { position: relative; width: 320px; height: 320px; flex-shrink: 0; }
+
+  .donut {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    /*
+      5 segments summing to 100%:
+        Multifamily  42% →   0deg–151.2deg
+        Single-Fam   28% → 151.2deg–252deg
+        Commercial   16% → 252deg–309.6deg
+        Industrial    9% → 309.6deg–342deg
+        Other         5% → 342deg–360deg
+    */
+    background: conic-gradient(
+      var(--seg1)   0deg 151.2deg,
+      var(--seg2) 151.2deg 252deg,
+      var(--seg3) 252deg 309.6deg,
+      var(--seg4) 309.6deg 342deg,
+      var(--seg5) 342deg 360deg
+    );
+  }
+
+  /* Punch-out hole for donut effect */
+  .donut-hole {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 178px; height: 178px;
+    background: var(--surface);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .donut-total-label { font-size: 11px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .donut-total-value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .donut-total-unit { font-size: 11px; opacity: 0.55; margin-top: 4px; }
+
+  /* -------- Legend -------- */
+  .legend { display: flex; flex-direction: column; gap: 16px; }
+
+  .legend-row { display: flex; align-items: center; gap: 14px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .legend-text { flex: 1; }
+  .legend-label { font-size: 14px; font-weight: 600; }
+  .legend-sub { font-size: 11px; opacity: 0.55; margin-top: 1px; }
+  .legend-bar-track { height: 6px; background: rgba(0,0,0,0.07); border-radius: 3px; margin-top: 6px; }
+  .legend-bar-fill { height: 6px; border-radius: 3px; }
+  .legend-pct { font-size: 14px; font-weight: 700; white-space: nowrap; }
+
+  .chart-footer {
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    opacity: 0.4;
+  }
+
+  .page-footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    opacity: 0.4;
+  }
+
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 100%; min-height: 100vh; }
+    @page { size: letter landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-logo">
+      <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" />
+      <span class="header-logo-text">{{TAGLINE}}</span>
+    </div>
+    <div class="header-meta">{{COMPANY_NAME}}<br>Portfolio Mix · Q2 2025</div>
+  </header>
+
+  <h1 class="chart-title">Portfolio Composition by Asset Type</h1>
+  <p class="chart-subtitle">5 segments · Q2 2025 · 12,584 total units across all ZIP code corridors</p>
+
+  <div class="chart-body">
+
+    <!-- Donut -->
+    <div class="donut-wrapper">
+      <div class="donut"></div>
+      <div class="donut-hole">
+        <span class="donut-total-label">Total Units</span>
+        <span class="donut-total-value">12,584</span>
+        <span class="donut-total-unit">across 847 ZIPs</span>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:var(--seg1);"></div>
+        <div class="legend-text">
+          <div class="legend-label">Multifamily</div>
+          <div class="legend-sub">5,285 units · 42 markets</div>
+          <div class="legend-bar-track"><div class="legend-bar-fill" style="width:100%;background:var(--seg1);"></div></div>
+        </div>
+        <div class="legend-pct">42%</div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:var(--seg2);"></div>
+        <div class="legend-text">
+          <div class="legend-label">Single-Family</div>
+          <div class="legend-sub">3,523 units · 28 markets</div>
+          <div class="legend-bar-track"><div class="legend-bar-fill" style="width:66%;background:var(--seg2);"></div></div>
+        </div>
+        <div class="legend-pct">28%</div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:var(--seg3);"></div>
+        <div class="legend-text">
+          <div class="legend-label">Commercial</div>
+          <div class="legend-sub">2,013 units · 16 markets</div>
+          <div class="legend-bar-track"><div class="legend-bar-fill" style="width:38%;background:var(--seg3);"></div></div>
+        </div>
+        <div class="legend-pct">16%</div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:var(--seg4);"></div>
+        <div class="legend-text">
+          <div class="legend-label">Industrial</div>
+          <div class="legend-sub">1,133 units · 9 markets</div>
+          <div class="legend-bar-track"><div class="legend-bar-fill" style="width:21%;background:var(--seg4);"></div></div>
+        </div>
+        <div class="legend-pct">9%</div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:var(--seg5);"></div>
+        <div class="legend-text">
+          <div class="legend-label">Land / Other</div>
+          <div class="legend-sub">630 units · 5 markets</div>
+          <div class="legend-bar-track"><div class="legend-bar-fill" style="width:12%;background:var(--seg5);"></div></div>
+        </div>
+        <div class="legend-pct">5%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="chart-footer">
+    <span>Percentages based on unit count. Revenue mix differs. See full report for breakdown.</span>
+    <span>Source: {{COMPANY_NAME}} portfolio database · Exported 2025-06-01</span>
+  </div>
+
+  <footer class="page-footer">
+    <span>{{DISCLAIMER}}</span>
+    <span>{{WEBSITE_URL}} · {{SENDER_ADDRESS}}</span>
+  </footer>
+
+</div>
+</body>
+</html>

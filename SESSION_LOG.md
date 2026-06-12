@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Consolidate charts/viz + add HTML templates (PUSH)
+
+- **components/viz/ → components/charts/**: merged 6 viz components + barrel index; deleted `components/viz/`; updated 10 import sites. TypeScript clean.
+- **templates/html/**: new folder added to repo. 5 email shells (`email-*.html`) + 5 doc shells (`doc-*.html`) + README from freelancer delivery. `email-ranked.html` already has badge opacity fix. `doc-donut.html` flagged for replacement.
+
 ## 2026-06-12 (main) — §05 cutover code drafted + fixture tests fixed (PUSH)
 
 - **GATE A cycle 2/3 confirmed**: nightly rebuild ran 10:15 UTC after pivoted-views push (08:06 UTC); all 4 parity/equivalence harnesses 9/9 pass; `zhvi_gate_a_cycle_2` + `zori_gate_a_cycle_2` closed.

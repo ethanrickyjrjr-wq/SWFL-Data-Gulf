@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — Trend Sparkline</title>
+<style>
+  :root {
+    --primary:        {{PRIMARY}};
+    --accent:         {{ACCENT}};
+    --surface:        {{SURFACE}};
+    --text:           {{TEXT}};
+    --font-family:    {{FONT_FAMILY}};
+    --border-radius:  {{BORDER_RADIUS}};
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-family); background: #f4f4f4; color: var(--text); }
+
+  .page {
+    width: 11in;
+    min-height: 8.5in;
+    background: var(--surface);
+    margin: 0 auto;
+    padding: 0.6in 0.75in;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 28px;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo img { height: 34px; }
+  .header-logo-text { font-size: 11px; opacity: 0.55; }
+  .header-meta { font-size: 11px; text-align: right; opacity: 0.5; }
+
+  .chart-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .chart-subtitle { font-size: 13px; opacity: 0.55; margin-bottom: 24px; }
+
+  /* KPI strip */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: rgba(0,0,0,0.03);
+    border-radius: var(--border-radius);
+    padding: 14px 16px;
+    border-left: 3px solid var(--primary);
+  }
+  .kpi-card.accent { border-left-color: var(--accent); }
+  .kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.5; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 800; line-height: 1; }
+  .kpi-delta { font-size: 11px; margin-top: 4px; font-weight: 600; }
+  .kpi-delta.up { color: var(--accent); }
+  .kpi-delta.dn { color: #c0392b; }
+
+  /* SVG chart wrapper */
+  .chart-area { flex: 1; position: relative; }
+  .chart-svg-wrap { width: 100%; }
+  svg { width: 100%; display: block; }
+
+  /* Y axis labels */
+  .y-labels {
+    position: absolute;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 0 28px 0;
+  }
+  .y-label { font-size: 10px; opacity: 0.4; text-align: right; width: 50px; }
+
+  /* month label row */
+  .x-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0 0 0;
+  }
+  .x-label { font-size: 10px; opacity: 0.4; text-align: center; flex: 1; }
+
+  .chart-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    opacity: 0.4;
+    margin-top: 16px;
+  }
+
+  .page-footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    opacity: 0.4;
+  }
+
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 100%; min-height: 100vh; }
+    @page { size: letter landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-logo">
+      <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" />
+      <span class="header-logo-text">{{TAGLINE}}</span>
+    </div>
+    <div class="header-meta">{{COMPANY_NAME}}<br>12-Month Trend · 2024–2025</div>
+  </header>
+
+  <h1 class="chart-title">Monthly Revenue Trend — 12-Month View</h1>
+  <p class="chart-subtitle">Jan 2024 – Dec 2024 · All dollar amounts in USD thousands · Shaded area = revenue range</p>
+
+  <!-- KPI strip -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Full-Year Revenue</div>
+      <div class="kpi-value">$14.2M</div>
+      <div class="kpi-delta up">↑ 16.4% vs prior year</div>
+    </div>
+    <div class="kpi-card accent">
+      <div class="kpi-label">Best Month</div>
+      <div class="kpi-value">$1.84M</div>
+      <div class="kpi-delta up">Dec 2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Monthly</div>
+      <div class="kpi-value">$1.18M</div>
+      <div class="kpi-delta up">↑ $138K vs 2023 avg</div>
+    </div>
+    <div class="kpi-card accent">
+      <div class="kpi-label">Growth Streak</div>
+      <div class="kpi-value">7 mos</div>
+      <div class="kpi-delta up">Consecutive growth</div>
+    </div>
+  </div>
+
+  <!-- SVG area chart -->
+  <!--
+    Data points (USD thousands): 820, 890, 940, 1020, 1100, 1050, 1180, 1240, 1310, 1490, 1680, 1840
+    SVG viewBox: 0 0 1000 300
+    X range: 60 to 980 (12 points, step ~83.6)
+    Y range: 20 (top) to 270 (bottom), data min=800 max=1900
+    Y scale: (value - 800) / (1900 - 800) * 250 → subtract from 270
+  -->
+  <div class="chart-area">
+    <svg viewBox="0 0 1000 310" xmlns="http://www.w3.org/2000/svg" aria-label="Monthly revenue trend 2024">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="{{PRIMARY}}" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="{{PRIMARY}}" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Y grid lines -->
+      <line x1="60" y1="20"  x2="980" y2="20"  stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+      <line x1="60" y1="83"  x2="980" y2="83"  stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+      <line x1="60" y1="145" x2="980" y2="145" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+      <line x1="60" y1="207" x2="980" y2="207" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+      <line x1="60" y1="270" x2="980" y2="270" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+
+      <!-- Y axis labels -->
+      <text x="52" y="24"  text-anchor="end" font-size="10" fill="{{TEXT}}" opacity="0.4" font-family="{{FONT_FAMILY}}">$1,900k</text>
+      <text x="52" y="87"  text-anchor="end" font-size="10" fill="{{TEXT}}" opacity="0.4" font-family="{{FONT_FAMILY}}">$1,625k</text>
+      <text x="52" y="149" text-anchor="end" font-size="10" fill="{{TEXT}}" opacity="0.4" font-family="{{FONT_FAMILY}}">$1,350k</text>
+      <text x="52" y="211" text-anchor="end" font-size="10" fill="{{TEXT}}" opacity="0.4" font-family="{{FONT_FAMILY}}">$1,075k</text>
+      <text x="52" y="274" text-anchor="end" font-size="10" fill="{{TEXT}}" opacity="0.4" font-family="{{FONT_FAMILY}}">$800k</text>
+
+      <!--
+        Point coords (x, y):
+        Jan  x=60   y=270-((820-800)/1100*250)  = 270-4.5  = 265.5
+        Feb  x=143  y=270-((890-800)/1100*250)  = 270-20.5 = 249.5
+        Mar  x=227  y=270-((940-800)/1100*250)  = 270-31.8 = 238.2
+        Apr  x=310  y=270-((1020-800)/1100*250) = 270-50.0 = 220.0
+        May  x=394  y=270-((1100-800)/1100*250) = 270-68.2 = 201.8
+        Jun  x=477  y=270-((1050-800)/1100*250) = 270-56.8 = 213.2
+        Jul  x=560  y=270-((1180-800)/1100*250) = 270-86.4 = 183.6
+        Aug  x=644  y=270-((1240-800)/1100*250) = 270-100  = 170.0
+        Sep  x=727  y=270-((1310-800)/1100*250) = 270-115.9= 154.1
+        Oct  x=810  y=270-((1490-800)/1100*250) = 270-156.8= 113.2
+        Nov  x=894  y=270-((1680-800)/1100*250) = 270-200  = 70.0
+        Dec  x=977  y=270-((1840-800)/1100*250) = 270-236.4= 33.6
+      -->
+
+      <!-- Area fill -->
+      <path d="M60,265.5 L143,249.5 L227,238.2 L310,220 L394,201.8 L477,213.2 L560,183.6 L644,170 L727,154.1 L810,113.2 L894,70 L977,33.6 L977,270 L60,270 Z"
+            fill="url(#areaGrad)"/>
+
+      <!-- Trend line -->
+      <polyline
+        points="60,265.5 143,249.5 227,238.2 310,220 394,201.8 477,213.2 560,183.6 644,170 727,154.1 810,113.2 894,70 977,33.6"
+        fill="none"
+        stroke="{{PRIMARY}}"
+        stroke-width="2.5"
+        stroke-linejoin="round"
+        stroke-linecap="round"/>
+
+      <!-- Data points -->
+      <circle cx="60"  cy="265.5" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="143" cy="249.5" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="227" cy="238.2" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="310" cy="220"   r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="394" cy="201.8" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="477" cy="213.2" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="560" cy="183.6" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="644" cy="170"   r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="727" cy="154.1" r="4" fill="{{PRIMARY}}" stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="810" cy="113.2" r="4" fill="{{ACCENT}}"  stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="894" cy="70"    r="4" fill="{{ACCENT}}"  stroke="{{SURFACE}}" stroke-width="2"/>
+      <circle cx="977" cy="33.6"  r="5" fill="{{ACCENT}}"  stroke="{{SURFACE}}" stroke-width="2"/>
+
+      <!-- Dec highlight label -->
+      <text x="977" y="22" text-anchor="middle" font-size="10" font-weight="700" fill="{{ACCENT}}" font-family="{{FONT_FAMILY}}">$1,840k</text>
+
+      <!-- X axis month labels -->
+      <text x="60"  y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Jan</text>
+      <text x="143" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Feb</text>
+      <text x="227" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Mar</text>
+      <text x="310" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Apr</text>
+      <text x="394" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">May</text>
+      <text x="477" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Jun</text>
+      <text x="560" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Jul</text>
+      <text x="644" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Aug</text>
+      <text x="727" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Sep</text>
+      <text x="810" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Oct</text>
+      <text x="894" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Nov</text>
+      <text x="977" y="290" text-anchor="middle" font-size="10" fill="{{TEXT}}" opacity="0.5" font-family="{{FONT_FAMILY}}">Dec</text>
+    </svg>
+  </div>
+
+  <div class="chart-footer">
+    <span>Shaded area indicates revenue range. Accent dots highlight growth acceleration (Q4).</span>
+    <span>Source: {{COMPANY_NAME}} financial records · 2024 actuals</span>
+  </div>
+
+  <footer class="page-footer">
+    <span>{{DISCLAIMER}}</span>
+    <span>{{WEBSITE_URL}} · {{SENDER_ADDRESS}}</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — Horizontal Bar Chart</title>
+<style>
+  :root {
+    --primary:        {{PRIMARY}};
+    --accent:         {{ACCENT}};
+    --surface:        {{SURFACE}};
+    --text:           {{TEXT}};
+    --font-family:    {{FONT_FAMILY}};
+    --border-radius:  {{BORDER_RADIUS}};
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-family);
+    background: #f4f4f4;
+    color: var(--text);
+  }
+
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    background: var(--surface);
+    margin: 0 auto;
+    padding: 0.6in 0.7in 0.5in;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 28px;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo img { height: 36px; display: block; }
+  .header-logo-text { font-size: 11px; color: var(--text); opacity: 0.55; }
+  .header-meta { text-align: right; font-size: 11px; color: var(--text); opacity: 0.5; }
+
+  /* Title block */
+  .chart-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .chart-subtitle { font-size: 13px; color: var(--text); opacity: 0.55; margin-bottom: 28px; }
+
+  /* Chart area */
+  .chart { flex: 1; }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 90px;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .bar-row:first-child { border-top: 1px solid rgba(0,0,0,0.06); }
+
+  .bar-label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .bar-label small { display: block; font-size: 10px; font-weight: 400; opacity: 0.5; margin-top: 2px; }
+
+  .bar-track {
+    background: rgba(0,0,0,0.07);
+    border-radius: 3px;
+    height: 22px;
+    position: relative;
+    overflow: visible;
+  }
+  .bar-fill {
+    height: 22px;
+    border-radius: 3px;
+    background: var(--primary);
+    position: relative;
+    transition: width 0s;
+  }
+  .bar-fill.accent { background: var(--accent); }
+
+  .bar-value { font-size: 13px; font-weight: 700; text-align: right; color: var(--text); }
+  .bar-delta { font-size: 10px; font-weight: 600; text-align: right; margin-top: 2px; }
+  .bar-delta.up { color: var(--accent); }
+  .bar-delta.dn { color: #c0392b; }
+
+  /* Legend + source */
+  .chart-footer {
+    margin-top: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .legend { display: flex; gap: 20px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text); opacity: 0.7; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .source { font-size: 10px; color: var(--text); opacity: 0.4; }
+
+  /* Page footer */
+  .page-footer {
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text);
+    opacity: 0.4;
+  }
+
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 100%; min-height: 100vh; }
+    @page { size: letter portrait; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" />
+      <span class="header-logo-text">{{TAGLINE}}</span>
+    </div>
+    <div class="header-meta">
+      {{COMPANY_NAME}}<br>
+      Q2 2025 · Regional Analysis
+    </div>
+  </header>
+
+  <!-- Title -->
+  <h1 class="chart-title">Revenue by Metropolitan Region</h1>
+  <p class="chart-subtitle">8 regions · Q2 2025 · USD · Source: internal CRM export 2025-06-01</p>
+
+  <!-- Chart -->
+  <div class="chart">
+
+    <div class="bar-row">
+      <div class="bar-label">Northeast Metro<small>ZIP clusters 100xx–129xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;"></div></div>
+      <div class="bar-value">$2,840,500<div class="bar-delta up">+18.2%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Southeast Metro<small>ZIP clusters 300xx–349xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:85%;"></div></div>
+      <div class="bar-value">$2,414,200<div class="bar-delta up">+11.5%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Great Lakes<small>ZIP clusters 480xx–499xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:70%;"></div></div>
+      <div class="bar-value">$1,988,750<div class="bar-delta up">+5.1%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Texas Triangle<small>ZIP clusters 770xx–798xx</small></div>
+      <div class="bar-track"><div class="bar-fill accent" style="width:60%;"></div></div>
+      <div class="bar-value">$1,704,100<div class="bar-delta up">+22.8%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Pacific Coast<small>ZIP clusters 900xx–961xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:50%;"></div></div>
+      <div class="bar-value">$1,420,800<div class="bar-delta dn">−2.4%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Mountain West<small>ZIP clusters 800xx–840xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:38%;"></div></div>
+      <div class="bar-value">$1,079,300<div class="bar-delta up">+8.7%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Mid-Atlantic<small>ZIP clusters 190xx–219xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:26%;"></div></div>
+      <div class="bar-value">$738,600<div class="bar-delta dn">−4.1%</div></div>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-label">Plains States<small>ZIP clusters 570xx–620xx</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:14%;"></div></div>
+      <div class="bar-value">$397,400<div class="bar-delta dn">−9.3%</div></div>
+    </div>
+
+  </div>
+
+  <!-- Legend + source -->
+  <div class="chart-footer">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--primary);"></div>Primary Markets</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--accent);"></div>Emerging Markets</div>
+    </div>
+    <div class="source">Source: {{COMPANY_NAME}} internal data · Q2 2025 · Figures unaudited</div>
+  </div>
+
+  <!-- Page footer -->
+  <footer class="page-footer">
+    <span>{{DISCLAIMER}}</span>
+    <span>{{WEBSITE_URL}} · {{SENDER_ADDRESS}}</span>
+  </footer>
+
+</div>
+</body>
+</html>
