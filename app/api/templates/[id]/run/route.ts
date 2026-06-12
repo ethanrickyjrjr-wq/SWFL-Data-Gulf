@@ -6,6 +6,7 @@ import { projectItemsSchema } from "@/lib/project/items";
 import { instantiateTemplate, projectTemplateSchema } from "@/lib/deliverable/project-template";
 import { assembleDeliverable, isTemplateId, DeliverableError } from "@/lib/deliverable/assemble";
 import { recordUse } from "@/lib/highlighter/meter";
+import { resolveUserBrand } from "@/lib/email/templates/resolve-brand";
 
 export const runtime = "nodejs";
 export const maxDuration = 90;
@@ -93,6 +94,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   await recordUse(req, { report_id: projectId, reach: [], action: "template_run" });
 
+  // 4E: include resolved user brand so AI narrative has the brand context
+  const userBrand = await resolveUserBrand(supabase, user.id);
+  const branding = userBrand
+    ? {
+        primary_color: userBrand.primary,
+        accent_color: userBrand.accent,
+        logo_url: userBrand.logoUrl,
+      }
+    : null;
+
   // Assemble the deliverable (freeze → narrative → insert).
   try {
     const { id: deliverableId } = await assembleDeliverable({
@@ -100,7 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       projectId,
       ownerId: user.id,
       items: parsedItems.data,
-      branding: null,
+      branding,
       template: renderTemplate,
       instruction,
     });

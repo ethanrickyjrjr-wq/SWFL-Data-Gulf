@@ -2,6 +2,19 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Email template adapter S1 + S4 brand persistence (COMMIT — migration pending)
+
+- **lib/email/templates/token-defaults.ts** — `SWFL_TOKEN_DEFAULTS` (11 tokens from shell grep) + `TokenKey` union
+- **lib/email/templates/template-registry.ts** — 5 email slugs (`compare/hbar/hero/ranked/table`) → `renderHtmlTemplate` paths
+- **lib/email/templates/render-template.ts** — `renderEmailTemplate()` wraps `renderHtmlTemplate`; `brandThemeToTokens()`; unfilled-token assertion (uppercase only, no triple-brace guard here)
+- **lib/email/templates/resolve-brand.ts** — `resolveUserBrand()`: project → user_brand_profiles → null (never SWFL defaults for authed user)
+- **scripts/migrate-brand-persistence.py** — 4A migration: `user_brand_profiles` table (RLS + grants) + `email_subscribers.prospect_brand` column — **NEEDS MANUAL RUN: `! python scripts/migrate-brand-persistence.py`**
+- **app/api/projects/route.ts** (4C) — after project insert, copy user brand profile to new project branding
+- **app/auth/callback/route.ts** (4D) — after OTP exchange, look up `email_subscribers.prospect_brand` → upsert `user_brand_profiles` with `source='email_signup'`
+- **app/api/templates/[id]/run/route.ts** (4E) — replace hardcoded `branding: null` with `resolveUserBrand()` result
+- tsc clean; smoke: all 5 email slugs render clean (17 render-html-template tests pass)
+- **Next**: run migration (`! python scripts/migrate-brand-persistence.py`); commit `lib/templates/` + new API routes if operator approves staging them
+
 ## 2026-06-12 (main) — SWFL Visuals → template pipeline, Phase 1 (COMMIT — awaiting push approval)
 
 - **Goal**: tokenize the 6 UI-kit viz cards from `Downloads/SWFL-Visuals-UI-Kit.html` into the platform + stand up a render pipeline. The brief's "already exists" surfaces (`renderHtmlTemplate`, `token-contracts`, tokenized 003/004) were **verified absent** — built from scratch. Operator decisions: phase it (P1 only); welcome chat **stubbed** (live `/api/welcome/chat` is P2 w/ enrichment); repo-wide chart-color refactor **deferred to P3, own PR — chart components untouched**.

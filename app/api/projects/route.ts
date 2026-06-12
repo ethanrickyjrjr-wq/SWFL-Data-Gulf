@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { projectItemsSchema } from "@/lib/project/items";
 import { recordUse } from "@/lib/highlighter/meter";
+import { resolveUserBrand } from "@/lib/email/templates/resolve-brand";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,21 @@ export async function POST(req: NextRequest) {
     items: items.data,
   });
   if (error) return NextResponse.json({ error: "create failed" }, { status: 500 });
+
+  // 4C: propagate user brand to the new project so it starts branded
+  const userBrand = await resolveUserBrand(supabase, user.id);
+  if (userBrand) {
+    await supabase
+      .from("projects")
+      .update({
+        branding: {
+          primary_color: userBrand.primary,
+          accent_color: userBrand.accent,
+          logo_url: userBrand.logoUrl,
+        },
+      })
+      .eq("id", id);
+  }
 
   await recordUse(req, { report_id: "", reach: [], action: "project_create" });
   return NextResponse.json({ id });
