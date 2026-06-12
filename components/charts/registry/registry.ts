@@ -8,6 +8,7 @@ import { CompositionFrame } from "./frames/CompositionFrame";
 import { ZGaugeFrame } from "./frames/ZGaugeFrame";
 import { SeasonalRadialFrame } from "./frames/SeasonalRadialFrame";
 import { TimelineFrame } from "./frames/TimelineFrame";
+import { FranchiseSurvivalFrame } from "./frames/FranchiseSurvivalFrame";
 
 export interface FrameDef {
   /** Renders a `ChartSpec`. Every registry component takes exactly `{ spec }`. */
@@ -57,6 +58,18 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     component: SeasonalRadialFrame,
     accepts: ["time-series"],
     label: "Seasonal Radial (corridor index)",
+    fixtureOnly: true,
+  },
+  "franchise-survival": {
+    // fixtureOnly: franchise-outcomes' --- OUTPUT --- emits ONE aggregate metric
+    // (overall_survival_rate) and no detail_tables. The per-brand ranked rows this
+    // frame draws live only in the brain's --- SAVED FACTS --- prose, which the
+    // thin-pipe rule forbids a consumer from reading. Flip this to false in the
+    // SAME PR that teaches franchise-outcomes to emit a per-brand detail_table AND
+    // adds a `franchise-survival` case to bind-frame's buildFrame (brain-first gate).
+    component: FranchiseSurvivalFrame,
+    accepts: ["ranked-categories"],
+    label: "Franchise Survival (SBA)",
     fixtureOnly: true,
   },
   "storm-timeline": {

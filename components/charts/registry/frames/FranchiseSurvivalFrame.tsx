@@ -1,14 +1,7 @@
 "use client";
 /**
- * REGISTRY ENTRY — add to registry.ts once 2a + 2b branches are integrated:
- *
- *   import { FranchiseSurvivalFrame } from "./frames/FranchiseSurvivalFrame";
- *
- *   "franchise-survival": {
- *     component: FranchiseSurvivalFrame,
- *     accepts: ["ranked-categories"],
- *     label: "Franchise Survival (SBA)",
- *   },
+ * REGISTRY ENTRY — registered in registry.ts as `franchise-survival`
+ * (fixtureOnly: true; see the note on that entry for why it cannot bind live yet).
  *
  * DATA CONTRACT — spec.options.data: FranchiseBrandRaw[]
  *   Fields: franchise_name, survival_rate (null = not assessable),

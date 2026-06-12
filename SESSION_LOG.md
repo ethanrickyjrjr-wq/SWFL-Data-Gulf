@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-11 (main) — Audited the 3 fixture-only frames; registered franchise-survival; wrote live-data handoff
+
+- **Verified WHY they're not live** against the live brains: `franchise-survival`/`seasonal-radial`/`storm-timeline` render fine from fixtures but their upstream `--- OUTPUT ---` blocks don't emit per-row data — franchise-outcomes has 1 aggregate metric + 0 detail_tables; cre-swfl has 0 detail_tables (seasonality is one prose line); env-swfl emits a single combined storm total, not per-storm rows. The per-row data lives only in `--- SAVED FACTS ---` prose, which the thin-pipe rule forbids a consumer from reading. So "fixture-only" is the TRUE state, not a prior-session error.
+- **Fixed one real defect:** `franchise-survival` was built + tested but **never added to `CHART_REGISTRY`** (lived only in a docstring example; README row 2b falsely claimed "registered"). Now registered with `fixtureOnly: true` (matches seasonal-radial) in `components/charts/registry/registry.ts`; docstring + README row 2b corrected. 88 registry/binder tests green, tsc clean on touched files.
+- **Wrote `docs/superpowers/plans/2026-06-10-presentation-deliverable-engine/HANDOFF-fixture-frames-to-live.md`** — root-cause + dispatchable tasks: [OPUS] L0 (shared binder seam + per-frame detail_table column contracts, blocks the rest) → [SONNET] L1 storm-timeline / L2 franchise-survival / L3 seasonal-radial (each a brain-first pack PR: emit detail_table + register vocab + flip fixtureOnly + rebuild). Exact `BrainOutputDetailTable` contract + `housing-swfl:525` reference cited.
+- Left untouched: operator's `app/api/waitlist/route.ts`, untracked `Live Data/` `app/map/` `ZipChoropleth.tsx`. No brain packs changed (no OUTPUT-shape edits). Local commit only — NOT pushed.
+- Next: operator dispatches L0→Opus, then L1/L2 (±L3) to Sonnets.
+
 ## 2026-06-11 (main) — Conversion-funnel spec + separated it from the email folder
 
 - New spec `docs/superpowers/specs/2026-06-11-conversion-funnel-design.md`: the post-click funnel (email → landing preview → brand → pay → seeded project). Capability map vs live code (spine already exists: projects+RLS, deliverable engine, templates flywheel `/api/templates/[id]/run`, converse, branding blob); net-new = a `/preview/[zip]` landing, a Stripe gate, a Brandfetch call, 3 small fixes. Vendor calls verified in-session (Rule 1): Stripe Apple-Pay-on-web + recurring + Customer Portal cancel-anytime; Brandfetch `GET /v2/brands/domain/{domain}` logo+colors (verify free tier before wiring). Holes flagged: zero payment integration, **`project_templates` migration missing** (flywheel 500s), deliverable Build button disabled, PATCH-save hang. PDF auto-extract + "ask-for-data" deferred to follow-ups.
