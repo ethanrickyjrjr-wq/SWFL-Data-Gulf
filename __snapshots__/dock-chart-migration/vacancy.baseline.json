@@ -1,0 +1,27 @@
+{
+  "block": {
+    "title": "SWFL Corridor Vacancy Rates",
+    "columns": ["Corridor", "Vacancy (%)"],
+    "rows": [
+      ["Ben Hill Griffin Pkwy", 7.7],
+      ["Coconut Point Mall", 7.7],
+      ["Gulf Coast Town Center", 7.7],
+      ["Summerlin Rd Fort Myers", 7.2],
+      ["Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)", 5],
+      ["Six Mile Cypress Pkwy", 4],
+      ["Collier Blvd / CR-951", 3.3],
+      ["Davis Blvd East Naples", 3.3],
+      ["Immokalee Rd North Naples", 3.3],
+      ["Vanderbilt Beach Rd / Mercato", 3.3],
+      ["Colonial East", 3.2],
+      ["Daniels Pkwy", 3.2]
+    ],
+    "chart_type": "bar",
+    "value_format": "percent",
+    "asOf": "2026-06-30",
+    "source": {
+      "citation": "SWFL fixture sample"
+    }
+  },
+  "asOf": "Jun 2026"
+}

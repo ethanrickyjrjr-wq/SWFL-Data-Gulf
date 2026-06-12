@@ -9,15 +9,13 @@ import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 import { suggestionsForSpan, deriveSelectionType } from "@/lib/highlighter/suggestions";
 import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
 import type { ProjectItem } from "@/lib/project/items";
-import { ChartBlockView } from "@/components/charts/ChartBlockView";
-import { ZHVIAreaChart, CorridorMarketScatter } from "@/components/charts";
-import type { ZHVITrendEntry, JoinedCorridorRow } from "@/types/viz";
-import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
+import { DockChart } from "./DockChart";
+import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
-type LiveChart =
-  | { block: ChartBlock; asOf: string }
-  | { component: "zhvi"; data: ZHVITrendEntry[]; asOf: string }
-  | { component: "scatter"; data: JoinedCorridorRow[]; asOf: string };
+// Frames whose chart can be filed to a project (mirrors AskAiDock). bar-table
+// only today; zhvi-area + corridor-scatter stay gated. Extend by adding a
+// frameId here — explicit, never implicit on a type shape.
+const FILABLE_FRAMES = new Set<string>(["bar-table"]);
 
 /** The matched metric's value + provenance, threaded in by HighlighterLayer so
  *  "File this figure" can pin a sourced snapshot. Structurally a subset of
@@ -295,14 +293,14 @@ export function HighlightPopup({
   }
 
   async function fileChart() {
-    const lc = chart as LiveChart | null;
-    if (!lc || !("block" in lc)) return;
+    const cs = chart as ChartSpec | null;
+    if (!cs || !cs.frameId || !FILABLE_FRAMES.has(cs.frameId)) return;
     try {
       const res = await fetch("/api/charts/save", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          block: lc.block,
+          block: cs,
           source_meta: { report_id: reportId },
           freshness_token: freshnessToken,
         }),
@@ -315,7 +313,7 @@ export function HighlightPopup({
         origin: "web",
         kind: "chart",
         chart_id: id,
-        title: lc.block.title,
+        title: cs.title,
       });
       setFiled("chart");
       setTimeout(() => setFiled((k) => (k === "chart" ? null : k)), 1800);
@@ -488,14 +486,15 @@ export function HighlightPopup({
               {activeQuestion}
             </p>
             {(() => {
-              const lc = chart as LiveChart | null;
-              if (!lc || chart === dismissedChart) return null;
+              const cs = chart as ChartSpec | null;
+              if (!cs || chart === dismissedChart) return null;
+              const canFile = !!cs.frameId && FILABLE_FRAMES.has(cs.frameId);
               return (
                 <div className="mb-2 overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
                   <div className="flex items-center justify-between px-2 py-1">
                     <span className="text-[10px] text-gray-500">Chart</span>
                     <div className="flex items-center gap-2">
-                      {"block" in lc ? (
+                      {canFile ? (
                         <button
                           type="button"
                           onClick={() => {
@@ -539,13 +538,7 @@ export function HighlightPopup({
                       </button>
                     </div>
                   </div>
-                  {"block" in lc ? (
-                    <ChartBlockView block={lc.block} compact asOf={lc.asOf} />
-                  ) : lc.component === "zhvi" ? (
-                    <ZHVIAreaChart data={lc.data} loading={false} asOf={lc.asOf} />
-                  ) : lc.component === "scatter" ? (
-                    <CorridorMarketScatter data={lc.data} loading={false} asOf={lc.asOf} />
-                  ) : null}
+                  <DockChart spec={cs} compact />
                 </div>
               );
             })()}

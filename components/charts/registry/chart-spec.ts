@@ -48,6 +48,12 @@ export interface ChartSpec extends ChartBlock {
   /** Primary/accent/logo — resolved at render (Phase 6 fills it). */
   theme?: ChartTheme;
   /**
+   * Compact sizing hint for space-constrained surfaces (the in-page chat dock).
+   * Currently honored only by `ChartBlockFrame` → `ChartBlockView`; other frames
+   * ignore it. Threads through `blockToSpec(block, theme?, compact?)`.
+   */
+  compact?: boolean;
+  /**
    * Per-frame knobs: series keys, axis labels, and — for frames that wrap a
    * component taking a raw data array (ZHVI, scatter) — the data itself under
    * `options.data`. The frame wrapper is the only place that reads these.

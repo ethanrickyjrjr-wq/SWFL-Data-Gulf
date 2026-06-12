@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { bindFrameSpec, bindDetailTableFrame } from "./bind-frame";
+import { bindFrameSpec, bindDetailTableFrame, blockToSpec } from "./bind-frame";
+import type { ChartBlock } from "../../refinery/validate/chart-block-lint.mts";
 import { freezeSnapshot } from "./build";
 import { loadParsedBrain } from "../fetch-brain";
 import type { ProjectItem } from "../project/items";
@@ -534,5 +535,69 @@ describe("bindFrameSpec — live brains (FLAG-2: first live-data binding)", () =
     ];
     const snap = await freezeSnapshot({} as unknown as SupabaseClient, items);
     expect(snap).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// blockToSpec — the ChartBlock → ChartSpec adapter for the pre-computed path.
+// ---------------------------------------------------------------------------
+
+describe("blockToSpec", () => {
+  function barBlock(): ChartBlock {
+    return {
+      title: "Median price by ZIP",
+      columns: ["ZIP", "Median"],
+      rows: [
+        ["33901", 412000],
+        ["33907", 389000],
+        ["33913", 455000],
+      ],
+      chart_type: "bar",
+      value_format: "usd",
+      asOf: "2026-06-01",
+      source: { citation: "LeePA" },
+      frame_id: "bar-table",
+    };
+  }
+
+  test("lifts a bar-table block to a ChartSpec, preserving fields", () => {
+    const spec = blockToSpec(barBlock());
+    expect(spec.frameId).toBe("bar-table");
+    expect(spec.title).toBe("Median price by ZIP");
+    expect(spec.rows).toHaveLength(3);
+    expect(spec.asOf).toBe("2026-06-01");
+    expect(spec.source?.citation).toBe("LeePA");
+  });
+
+  test("threads theme and compact when provided", () => {
+    const spec = blockToSpec(barBlock(), { primary: "#abc" }, true);
+    expect(spec.theme?.primary).toBe("#abc");
+    expect(spec.compact).toBe(true);
+  });
+
+  test("omits theme/compact when not provided", () => {
+    const spec = blockToSpec(barBlock());
+    expect(spec.theme).toBeUndefined();
+    expect(spec.compact).toBeUndefined();
+  });
+
+  test("throws when frame_id is missing", () => {
+    const b = barBlock();
+    delete b.frame_id;
+    expect(() => blockToSpec(b)).toThrow(/frame_id is required/);
+  });
+
+  test("throws on an unknown frame_id", () => {
+    expect(() => blockToSpec({ ...barBlock(), frame_id: "no-such-frame" })).toThrow(
+      /unknown frame_id/,
+    );
+  });
+
+  test("throws on a known but non-bar-table frame (built via options.data, not columns)", () => {
+    // zhvi-area is a real registry frame but has no ChartBlock→Spec normalizer:
+    // it wraps a raw-array component fed by options.data. Refuse, loudly.
+    expect(() => blockToSpec({ ...barBlock(), frame_id: "zhvi-area" })).toThrow(
+      /no ChartBlock→ChartSpec normalizer/,
+    );
   });
 });

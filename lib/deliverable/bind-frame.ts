@@ -25,8 +25,9 @@ import type {
 } from "../../refinery/types/brain-output.mts";
 import { computeMetricChart } from "../../refinery/lib/chart-from-metrics.mts";
 import { pickFramesForData } from "../../components/charts/registry/pick-frames";
-import { isFixtureOnly } from "../../components/charts/registry/registry";
-import type { ChartSpec } from "../../components/charts/registry/chart-spec";
+import { isFixtureOnly, getFrame } from "../../components/charts/registry/registry";
+import type { ChartBlock } from "../../refinery/validate/chart-block-lint.mts";
+import type { ChartSpec, ChartTheme } from "../../components/charts/registry/chart-spec";
 // Type-only imports of each frame's exact `spec.options` payload shape, so the
 // row→options mapping below is compile-checked against what the frame reads.
 // (Erased at build — no client component is pulled into this pure lib.)
@@ -133,6 +134,49 @@ function buildFrame(
     default:
       return null;
   }
+}
+
+/**
+ * blockToSpec — the ChartBlock → ChartSpec adapter for the PRE-COMPUTED path.
+ *
+ * `computeMetricChart` persists a deterministic bar `ChartBlock` (stamped with
+ * `frame_id: "bar-table"`) into the brain `.md`. To render that block through the
+ * frame registry (`FrameRenderer`), it must first become a `ChartSpec`. This is
+ * that one-line lift: `{ ...block, frameId }`, plus optional brand `theme` and a
+ * `compact` sizing hint.
+ *
+ * SCOPE: `bar-table` only — and deliberately so. The pre-computed path is
+ * bar-only (`chart-from-metrics.mts` emits nothing else), so no persisted block
+ * is ever a time-series or a relationship. The rich frames that wrap a raw-array
+ * component (`zhvi-area`, `corridor-scatter`) are fed `options.data` DIRECTLY by
+ * their producer (`buildChartForIntent`, `bindFrameSpec`) — there is no faithful,
+ * lossless way to reconstruct their typed payload from flat columns, so this
+ * adapter refuses to try. A non-bar `frame_id` reaching here is a contract bug,
+ * not a render path — hence the loud throw.
+ *
+ * FAIL MODE (build contract): throws on a missing/unknown/unsupported `frame_id`.
+ * Refinery-time callers let it throw (hard fail); the live dock wraps the render
+ * in a boundary that degrades to `<ChartUnavailable>` instead of crashing.
+ */
+export function blockToSpec(block: ChartBlock, theme?: ChartTheme, compact?: boolean): ChartSpec {
+  const frameId = block.frame_id;
+  if (!frameId) {
+    throw new Error("blockToSpec: frame_id is required");
+  }
+  if (!getFrame(frameId)) {
+    throw new Error(`blockToSpec: unknown frame_id '${frameId}' (not in CHART_REGISTRY)`);
+  }
+  if (frameId !== "bar-table") {
+    throw new Error(
+      `blockToSpec: frame '${frameId}' has no ChartBlock→ChartSpec normalizer. ` +
+        `Frames wrapping a raw-array component (zhvi-area, corridor-scatter, …) are built ` +
+        `with options.data by their producer, never reconstructed from flat columns.`,
+    );
+  }
+  const spec: ChartSpec = { ...block, frameId };
+  if (theme) spec.theme = theme;
+  if (compact !== undefined) spec.compact = compact;
+  return spec;
 }
 
 export function bindFrameSpec(output: BrainOutput, req: FrameBindRequest = {}): ChartSpec | null {

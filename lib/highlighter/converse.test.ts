@@ -66,6 +66,46 @@ test("accumulates text deltas and reports reach on done", async () => {
   expect(c.errors).toEqual([]);
 });
 
+test("chart frame sets chart state; following text accumulates with no JSON leak into prose", async () => {
+  // Verification gap (chart-adapter migration): the SSE stream emits a chart
+  // frame (a ChartSpec) BEFORE the text deltas. The chart must land on the chart
+  // handler and the answer prose must accumulate cleanly — the chart JSON must
+  // never bleed into the displayed text.
+  const charts: unknown[] = [];
+  const c = collector();
+  const handlers: ConverseHandlers = { ...c.handlers, onChart: (ch) => charts.push(ch) };
+  const spec = {
+    frameId: "corridor-scatter",
+    title: "SWFL Corridor Market Scatter",
+    columns: ["vacancy_pct", "nnn_asking_rent_per_sqft", "corridor"],
+    rows: [],
+    asOf: "2026-06-30",
+    options: { data: [{ id: "x", permits: { headline_z: 1.2, n_current: 18 } }] },
+  };
+  const body = streamOf([
+    `data: ${JSON.stringify({ chart: spec })}\n\n`,
+    `data: {"text":"hello"}\n\n`,
+    `data: {"done":true}\n\n`,
+  ]);
+  await streamConverse(
+    { reportId: "cre-swfl", question: "show me the scatter" },
+    handlers,
+    fakeFetch({ ok: true, status: 200, body }),
+  );
+  expect(charts).toHaveLength(1);
+  expect((charts[0] as { frameId: string }).frameId).toBe("corridor-scatter");
+  // n_current survives the wire (the field the old flat-columns plan dropped).
+  expect(
+    (charts[0] as { options: { data: { permits: { n_current: number } }[] } }).options.data[0]
+      .permits.n_current,
+  ).toBe(18);
+  // The answer is exactly the text delta — no chart JSON, no "frameId" leak.
+  expect(c.texts).toEqual(["hello"]);
+  expect(c.texts.join("")).not.toContain("frameId");
+  expect(c.state.done).toBe(true);
+  expect(c.errors).toEqual([]);
+});
+
 test("surfaces an error frame and stops processing further frames", async () => {
   const c = collector();
   const body = streamOf([

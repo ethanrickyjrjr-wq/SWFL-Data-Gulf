@@ -1,0 +1,25 @@
+{
+  "title": "SWFL Corridor NNN Asking Rents",
+  "columns": ["Corridor", "NNN Asking Rent ($/sqft)"],
+  "rows": [
+    ["5th Ave South / 3rd Street South", 60.84],
+    ["Tamiami Naples", 60.84],
+    ["Waterside Shops", 60.84],
+    ["Airport-Pulling Naples", 45.88],
+    ["Pine Ridge Rd Naples", 39.2],
+    ["Ben Hill Griffin Pkwy", 34.24],
+    ["Coconut Point Mall", 34.24],
+    ["Gulf Coast Town Center", 34.24],
+    ["Summerlin Rd Fort Myers", 32.73],
+    ["Immokalee Rd North Naples", 30.91],
+    ["Vanderbilt Beach Rd / Mercato", 30.91],
+    ["Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)", 30.88]
+  ],
+  "chart_type": "bar",
+  "value_format": "currency",
+  "asOf": "2026-06-30",
+  "source": {
+    "citation": "SWFL fixture sample"
+  },
+  "frameId": "bar-table"
+}

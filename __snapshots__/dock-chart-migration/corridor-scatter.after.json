@@ -1,0 +1,556 @@
+{
+  "title": "SWFL Corridor Market Scatter",
+  "columns": ["vacancy_pct", "nnn_asking_rent_per_sqft", "corridor"],
+  "rows": [
+    [1.8, 60.84, "5th Ave South / 3rd Street South"],
+    [2.55, 45.88, "Airport-Pulling Naples"],
+    [2.3, 27.51, "Bonita Beach Rd / Bonita Beach"],
+    [3.3, 26.79, "Davis Blvd East Naples"],
+    [3.3, 30.91, "Immokalee Rd North Naples"],
+    [3.2, 39.2, "Pine Ridge Rd Naples"],
+    [1.8, 60.84, "Tamiami Naples"],
+    [3.3, 30.91, "Vanderbilt Beach Rd / Mercato"],
+    [1.8, 60.84, "Waterside Shops"]
+  ],
+  "chart_type": "scatter",
+  "asOf": "2026-06-30",
+  "source": {
+    "citation": "SWFL fixture sample"
+  },
+  "frameId": "corridor-scatter",
+  "options": {
+    "data": [
+      {
+        "id": "5th-ave-south-3rd-street-south",
+        "name": "5th Ave South / 3rd Street South",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 60.84,
+        "vacancy_pct": 1.8,
+        "absorption_sqft": 1500,
+        "permits": {
+          "corridor_id": "5th-ave-south-3rd-street-south",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 18
+        },
+        "centroid": {
+          "corridor_id": "5th-ave-south-3rd-street-south",
+          "corridor_label": "5th Ave South / 3rd Street South",
+          "display_name": "Downtown Naples",
+          "center_lat": 26.138,
+          "center_lon": -81.797,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "lee-blvd-lehigh-acres",
+        "name": "Lee Blvd Lehigh Acres",
+        "submarket": "Lehigh Acres",
+        "nnn_asking_rent_per_sqft": null,
+        "vacancy_pct": null,
+        "absorption_sqft": null,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "lee-blvd-lehigh-acres",
+          "corridor_label": "Lee Blvd Lehigh Acres",
+          "display_name": "Lee Blvd",
+          "center_lat": 26.61,
+          "center_lon": -81.67,
+          "submarket": "Lehigh Acres",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "joel-blvd-lehigh-acres",
+        "name": "Joel Blvd Lehigh Acres",
+        "submarket": "Lehigh Acres",
+        "nnn_asking_rent_per_sqft": null,
+        "vacancy_pct": null,
+        "absorption_sqft": null,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "joel-blvd-lehigh-acres",
+          "corridor_label": "Joel Blvd Lehigh Acres",
+          "display_name": "Joel Blvd",
+          "center_lat": 26.63,
+          "center_lon": -81.598,
+          "submarket": "Lehigh Acres",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "airport-pulling-naples",
+        "name": "Airport-Pulling Naples",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 45.88,
+        "vacancy_pct": 2.55,
+        "absorption_sqft": null,
+        "permits": {
+          "corridor_id": "airport-pulling-naples",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 63
+        },
+        "centroid": {
+          "corridor_id": "airport-pulling-naples",
+          "corridor_label": "Airport-Pulling Naples",
+          "display_name": "Airport-Pulling",
+          "center_lat": 26.19,
+          "center_lon": -81.776,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "ben-hill-griffin-pkwy",
+        "name": "Ben Hill Griffin Pkwy",
+        "submarket": "Estero",
+        "nnn_asking_rent_per_sqft": 34.24,
+        "vacancy_pct": 7.7,
+        "absorption_sqft": 4200,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "ben-hill-griffin-pkwy",
+          "corridor_label": "Ben Hill Griffin Pkwy",
+          "display_name": "Ben Hill Griffin",
+          "center_lat": 26.45,
+          "center_lon": -81.74,
+          "submarket": "Estero",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "bonita-beach-rd-bonita-beach",
+        "name": "Bonita Beach Rd / Bonita Beach",
+        "submarket": "Bonita Springs",
+        "nnn_asking_rent_per_sqft": 27.51,
+        "vacancy_pct": 2.3,
+        "absorption_sqft": 18000,
+        "permits": {
+          "corridor_id": "bonita-beach-rd-bonita-beach",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 11
+        },
+        "centroid": {
+          "corridor_id": "bonita-beach-rd-bonita-beach",
+          "corridor_label": "Bonita Beach Rd / Bonita Beach",
+          "display_name": "Bonita Beach",
+          "center_lat": 26.34,
+          "center_lon": -81.81,
+          "submarket": "Bonita Springs",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "bonita-trail",
+        "name": "Bonita Trail",
+        "submarket": "Bonita Springs",
+        "nnn_asking_rent_per_sqft": 27.51,
+        "vacancy_pct": 2.3,
+        "absorption_sqft": 12500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "bonita-trail",
+          "corridor_label": "Bonita Trail",
+          "display_name": "Bonita Trail",
+          "center_lat": 26.34,
+          "center_lon": -81.78,
+          "submarket": "Bonita Springs",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "cape-coral-coral-pointe",
+        "name": "Cape Coral – Coral Pointe",
+        "submarket": "Cape Coral",
+        "nnn_asking_rent_per_sqft": 23.09,
+        "vacancy_pct": 2.5,
+        "absorption_sqft": 4500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "cape-coral-coral-pointe",
+          "corridor_label": "Cape Coral – Coral Pointe",
+          "display_name": "Coral Pointe (Cape Coral)",
+          "center_lat": 26.56,
+          "center_lon": -81.97,
+          "submarket": "Cape Coral",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "cape-coral-pkwy-e",
+        "name": "Cape Coral Pkwy E",
+        "submarket": "Cape Coral",
+        "nnn_asking_rent_per_sqft": 23.09,
+        "vacancy_pct": 2.5,
+        "absorption_sqft": 3500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "cape-coral-pkwy-e",
+          "corridor_label": "Cape Coral Pkwy E",
+          "display_name": "Cape Coral Pkwy",
+          "center_lat": 26.55,
+          "center_lon": -81.95,
+          "submarket": "Cape Coral",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "cleveland-ave-fort-myers",
+        "name": "Cleveland Ave Fort Myers",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 16.04,
+        "vacancy_pct": 2.9,
+        "absorption_sqft": -8679,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "cleveland-ave-fort-myers",
+          "corridor_label": "Cleveland Ave Fort Myers",
+          "display_name": "Cleveland Ave",
+          "center_lat": 26.64,
+          "center_lon": -81.87,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "coconut-point-mall",
+        "name": "Coconut Point Mall",
+        "submarket": "Estero",
+        "nnn_asking_rent_per_sqft": 34.24,
+        "vacancy_pct": 7.7,
+        "absorption_sqft": null,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "coconut-point-mall",
+          "corridor_label": "Coconut Point Mall",
+          "display_name": "Coconut Point",
+          "center_lat": 26.4,
+          "center_lon": -81.81,
+          "submarket": "Estero",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "collier-blvd-cr-951",
+        "name": "Collier Blvd / CR-951",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 26.79,
+        "vacancy_pct": 3.3,
+        "absorption_sqft": 8500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "collier-blvd-cr-951",
+          "corridor_label": "Collier Blvd (CR-951)",
+          "display_name": "Collier Blvd",
+          "center_lat": 26.156,
+          "center_lon": -81.654,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "colonial-east",
+        "name": "Colonial East",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 23.27,
+        "vacancy_pct": 3.2,
+        "absorption_sqft": 5500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "colonial-east",
+          "corridor_label": "Colonial East",
+          "display_name": "Colonial East",
+          "center_lat": 26.61,
+          "center_lon": -81.84,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "daniels-pkwy",
+        "name": "Daniels Pkwy",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 23.27,
+        "vacancy_pct": 3.2,
+        "absorption_sqft": 4200,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "daniels-pkwy",
+          "corridor_label": "Daniels Pkwy",
+          "display_name": "Daniels",
+          "center_lat": 26.56,
+          "center_lon": -81.78,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "davis-blvd-east-naples",
+        "name": "Davis Blvd East Naples",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 26.79,
+        "vacancy_pct": 3.3,
+        "absorption_sqft": 9500,
+        "permits": {
+          "corridor_id": "davis-blvd-east-naples",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 51
+        },
+        "centroid": {
+          "corridor_id": "davis-blvd-east-naples",
+          "corridor_label": "Davis Blvd – East Naples",
+          "display_name": "East Naples",
+          "center_lat": 26.137,
+          "center_lon": -81.756,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "estero-blvd-fort-myers-beach",
+        "name": "Estero Blvd Fort Myers Beach",
+        "submarket": "Fort Myers Beach",
+        "nnn_asking_rent_per_sqft": 26.13,
+        "vacancy_pct": 2.9,
+        "absorption_sqft": -13220,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "estero-blvd-fort-myers-beach",
+          "corridor_label": "Estero Blvd Fort Myers Beach",
+          "display_name": "Fort Myers Beach",
+          "center_lat": 26.42,
+          "center_lon": -81.94,
+          "submarket": "Fort Myers Beach",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "gulf-coast-town-center",
+        "name": "Gulf Coast Town Center",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 34.24,
+        "vacancy_pct": 7.7,
+        "absorption_sqft": null,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "gulf-coast-town-center",
+          "corridor_label": "Gulf Coast Town Center",
+          "display_name": "Gulf Coast Town Center",
+          "center_lat": 26.49,
+          "center_lon": -81.81,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "immokalee-rd-north-naples",
+        "name": "Immokalee Rd North Naples",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 30.91,
+        "vacancy_pct": 3.3,
+        "absorption_sqft": 15000,
+        "permits": {
+          "corridor_id": "immokalee-rd-north-naples",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 81
+        },
+        "centroid": {
+          "corridor_id": "immokalee-rd-north-naples",
+          "corridor_label": "Immokalee Rd – North Naples",
+          "display_name": "North Naples (Immokalee Rd)",
+          "center_lat": 26.27,
+          "center_lon": -81.748,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "midpoint-bridge-corridor",
+        "name": "Midpoint Bridge Corridor",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 23.27,
+        "vacancy_pct": 3.2,
+        "absorption_sqft": -5500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "midpoint-bridge-corridor",
+          "corridor_label": "Midpoint Bridge Corridor",
+          "display_name": "Midpoint Bridge",
+          "center_lat": 26.6,
+          "center_lon": -81.92,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "pine-island-rd-cape-coral",
+        "name": "Pine Island Rd Cape Coral",
+        "submarket": "Cape Coral",
+        "nnn_asking_rent_per_sqft": 23.09,
+        "vacancy_pct": 2.5,
+        "absorption_sqft": 6200,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "pine-island-rd-cape-coral",
+          "corridor_label": "Pine Island Rd Cape Coral",
+          "display_name": "Pine Island Rd",
+          "center_lat": 26.65,
+          "center_lon": -81.97,
+          "submarket": "Cape Coral",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "pine-ridge-rd-naples",
+        "name": "Pine Ridge Rd Naples",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 39.2,
+        "vacancy_pct": 3.2,
+        "absorption_sqft": 21736,
+        "permits": {
+          "corridor_id": "pine-ridge-rd-naples",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 72
+        },
+        "centroid": {
+          "corridor_id": "pine-ridge-rd-naples",
+          "corridor_label": "Pine Ridge Rd Naples",
+          "display_name": "Pine Ridge",
+          "center_lat": 26.198,
+          "center_lon": -81.748,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "six-mile-cypress-pkwy",
+        "name": "Six Mile Cypress Pkwy",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 26.03,
+        "vacancy_pct": 4,
+        "absorption_sqft": 14000,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "six-mile-cypress-pkwy",
+          "corridor_label": "Six Mile Cypress Pkwy",
+          "display_name": "Six Mile Cypress",
+          "center_lat": 26.57,
+          "center_lon": -81.84,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "summerlin-rd-fort-myers",
+        "name": "Summerlin Rd Fort Myers",
+        "submarket": "Fort Myers",
+        "nnn_asking_rent_per_sqft": 32.73,
+        "vacancy_pct": 7.2,
+        "absorption_sqft": 8500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "summerlin-rd-fort-myers",
+          "corridor_label": "Summerlin Rd Fort Myers",
+          "display_name": "Summerlin",
+          "center_lat": 26.55,
+          "center_lon": -81.91,
+          "submarket": "Fort Myers",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "tamiami-naples",
+        "name": "Tamiami Naples",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 60.84,
+        "vacancy_pct": 1.8,
+        "absorption_sqft": 6200,
+        "permits": {
+          "corridor_id": "tamiami-naples",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 71
+        },
+        "centroid": {
+          "corridor_id": "tamiami-naples",
+          "corridor_label": "Tamiami Naples",
+          "display_name": "East Trail (Naples)",
+          "center_lat": 26.12,
+          "center_lon": -81.764,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "three-oaks-pkwy-coconut-rd-estero-bonita-boundary",
+        "name": "Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)",
+        "submarket": "Estero",
+        "nnn_asking_rent_per_sqft": 30.88,
+        "vacancy_pct": 5,
+        "absorption_sqft": 7500,
+        "permits": null,
+        "centroid": {
+          "corridor_id": "three-oaks-pkwy-coconut-rd-estero-bonita-boundary",
+          "corridor_label": "Three Oaks Pkwy / Coconut Rd (Estero/Bonita boundary)",
+          "display_name": "Estero / Bonita line",
+          "center_lat": 26.36,
+          "center_lon": -81.79,
+          "submarket": "Estero",
+          "county": "lee"
+        }
+      },
+      {
+        "id": "vanderbilt-beach-rd-mercato",
+        "name": "Vanderbilt Beach Rd / Mercato",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 30.91,
+        "vacancy_pct": 3.3,
+        "absorption_sqft": 8500,
+        "permits": {
+          "corridor_id": "vanderbilt-beach-rd-mercato",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 102
+        },
+        "centroid": {
+          "corridor_id": "vanderbilt-beach-rd-mercato",
+          "corridor_label": "Vanderbilt Beach Rd / Mercato",
+          "display_name": "Vanderbilt",
+          "center_lat": 26.252,
+          "center_lon": -81.776,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      },
+      {
+        "id": "waterside-shops",
+        "name": "Waterside Shops",
+        "submarket": "Naples",
+        "nnn_asking_rent_per_sqft": 60.84,
+        "vacancy_pct": 1.8,
+        "absorption_sqft": null,
+        "permits": {
+          "corridor_id": "waterside-shops",
+          "headline_z": 0,
+          "last_refined_at": "2026-06-09T06:39:27.974Z",
+          "n_current": 66
+        },
+        "centroid": {
+          "corridor_id": "waterside-shops",
+          "corridor_label": "Waterside Shops",
+          "display_name": "Waterside",
+          "center_lat": 26.22,
+          "center_lon": -81.802,
+          "submarket": "Naples",
+          "county": "collier"
+        }
+      }
+    ]
+  }
+}

@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Chart adapter: unify dock charts on ChartSpec/options.data (PUSH)
+
+- **Goal**: retire the dock's hardcoded 3-case LiveChart switch; one render path through the frame registry. `buildChartForIntent` now returns a ready `ChartSpec` (was a `{block}|{component,data}` union); the dock renders `<FrameRenderer>` via a thin `DockChart` guard — zero normalization in the dock.
+- **Key call (rejected the inherited plan's flatten→reconstruct)**: zhvi/scatter carry the raw typed array UNTOUCHED in `options.data` (the convention `ZHVIAreaChartFrame`/`CorridorMarketScatterFrame` + `bindFrameSpec` already use). The plan's positional-column serialization dropped `permits.n_current` → guaranteed `undefined.toLocaleString()` crash in the scatter, and broke the `permits:null` no-coverage filter. Both fixed structurally; regression tests lock `n_current` + null-permits survival.
+- **Files**: `chart-block-lint.mts` (+`frame_id?`), `chart-spec.ts` (+`compact?`), `ChartBlockFrame.tsx` (thread compact), `bind-frame.ts` (+`blockToSpec()` — bar-table only, throws on missing/unknown/non-bar frame_id; the pre-computed path), `chart-from-metrics.mts` (stamps `frame_id:"bar-table"`), `build-chart-for-intent.mts` (ChartSpec return, `ChartResult` deleted), new `DockChart.tsx`/`ChartUnavailable.tsx`, `AskAiDock.tsx`+`HighlightPopup.tsx` (switch+gate → `<DockChart>`+`FILABLE_FRAMES`).
+- **Deviation (operator-approved)**: zhvi `asOf` = honest ISO `2026-04-30` (its own last month), NOT corridor `FIXTURE_ASOF` 2026-06-30 — zhvi fixture is a separate file through Apr 2026; stamping June would claim a vintage newer than the data.
+- **Verify**: tsc 0 errors; eslint clean (14 files); `bun test` green except the PRE-EXISTING `home-values-swfl` catalog miss (in `index.mts`, absent from `catalog.mts` on HEAD — not this PR, untouched). New tests: blockToSpec throw-modes, scatter n_current/null regression, zhvi honest-asOf, chart-from-metrics frame_id, SSE parse-gap (no JSON leak). Snapshots in `__snapshots__/dock-chart-migration/`.
+- **Next/remaining**: live browser smoke (dock renders echarts zhvi/scatter via FrameRenderer; console error-path → `<ChartUnavailable>`) — logic unit-covered, paint not self-verifiable headless.
+
 ## 2026-06-12 (main) — Consolidate charts/viz + add HTML templates (PUSH)
 
 - **components/viz/ → components/charts/**: merged 6 viz components + barrel index; deleted `components/viz/`; updated 10 import sites. TypeScript clean.

@@ -1,59 +1,74 @@
 import { describe, it, expect } from "vitest";
 import { buildChartForIntent } from "./build-chart-for-intent.mts";
+import type { ZHVITrendEntry, JoinedCorridorRow } from "@/types/viz";
 
-describe("buildChartForIntent", () => {
-  it("returns a linted bar block for asking-rent", async () => {
-    const r = await buildChartForIntent({ chart_type: "bar", scope: "asking-rent" });
-    expect(r && "block" in r ? r.block.chart_type : null).toBe("bar");
-  });
+// buildChartForIntent now returns a ready ChartSpec (one normalization path).
+// Frames that wrap a raw-array component carry the untouched typed array under
+// `options.data` — these tests lock that the migration neither changed the data
+// nor dropped fields (the regression target: scatter `permits.n_current`).
 
-  it("asking-rent block passes lint (has title, columns, rows)", async () => {
+describe("buildChartForIntent → ChartSpec", () => {
+  it("asking-rent → bar-table spec (bar, fixture keystone, >=3 rows)", async () => {
     const r = await buildChartForIntent({ chart_type: "bar", scope: "asking-rent" });
     expect(r).not.toBeNull();
-    if (!r || !("block" in r)) throw new Error("expected block");
-    expect(typeof r.block.title).toBe("string");
-    expect(r.block.columns.length).toBeGreaterThanOrEqual(2);
-    expect(r.block.rows.length).toBeGreaterThanOrEqual(3);
+    expect(r?.frameId).toBe("bar-table");
+    expect(r?.chart_type).toBe("bar");
+    expect(r?.asOf).toBe("2026-06-30");
+    expect(typeof r?.title).toBe("string");
+    expect(r?.columns.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(r?.rows.length ?? 0).toBeGreaterThanOrEqual(3);
   });
 
-  it("returns a bar block for vacancy", async () => {
+  it("vacancy → bar-table spec", async () => {
     const r = await buildChartForIntent({ chart_type: "bar", scope: "vacancy" });
-    expect(r && "block" in r ? r.block.chart_type : null).toBe("bar");
+    expect(r?.frameId).toBe("bar-table");
+    expect(r?.chart_type).toBe("bar");
   });
 
-  it("returns a zhvi component marker with data array", async () => {
+  it("zhvi → zhvi-area spec; raw series in options.data, all three columns", async () => {
     const r = await buildChartForIntent({ chart_type: "area", scope: "zhvi" });
-    expect(r && "component" in r ? r.component : null).toBe("zhvi");
-    if (!r || !("component" in r) || r.component !== "zhvi") throw new Error("expected zhvi");
-    expect(Array.isArray(r.data)).toBe(true);
-    expect(r.data.length).toBeGreaterThanOrEqual(3);
+    expect(r?.frameId).toBe("zhvi-area");
+    const data = r?.options?.data as ZHVITrendEntry[] | undefined;
+    expect(Array.isArray(data)).toBe(true);
+    expect(data?.length ?? 0).toBeGreaterThanOrEqual(3);
+    const e = data![0];
+    expect(typeof e.month).toBe("string");
+    expect(typeof e.cape_coral).toBe("number");
+    expect(typeof e.fort_myers).toBe("number");
+    expect(typeof e.naples).toBe("number");
   });
 
-  it("zhvi data entries have month/cape_coral/fort_myers/naples", async () => {
+  it("zhvi asOf is honest ISO derived from its own last month (not the corridor keystone)", async () => {
     const r = await buildChartForIntent({ chart_type: "area", scope: "zhvi" });
-    if (!r || !("component" in r) || r.component !== "zhvi") throw new Error("expected zhvi");
-    const entry = r.data[0];
-    expect(typeof entry.month).toBe("string");
-    expect(typeof entry.cape_coral).toBe("number");
-    expect(typeof entry.fort_myers).toBe("number");
-    expect(typeof entry.naples).toBe("number");
+    expect(r?.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    // The zhvi fixture runs through Apr 2026 — it must NOT inherit the corridor
+    // sample's Jun 2026 keystone (that would claim a vintage newer than the data).
+    expect(r?.asOf).not.toBe("2026-06-30");
   });
 
-  it("returns a scatter component marker with JoinedCorridorRow data", async () => {
+  it("corridor-scatter → corridor-scatter spec; full rows untouched in options.data", async () => {
     const r = await buildChartForIntent({ chart_type: "scatter", scope: "corridor-scatter" });
-    expect(r && "component" in r ? r.component : null).toBe("scatter");
-    if (!r || !("component" in r) || r.component !== "scatter") throw new Error("expected scatter");
-    expect(Array.isArray(r.data)).toBe(true);
-    expect(r.data.length).toBeGreaterThanOrEqual(3);
+    expect(r?.frameId).toBe("corridor-scatter");
+    const data = r?.options?.data as JoinedCorridorRow[] | undefined;
+    expect(Array.isArray(data)).toBe(true);
+    expect(data?.length ?? 0).toBeGreaterThanOrEqual(3);
   });
 
-  it("scatter rows have id/name/submarket fields", async () => {
+  it("REGRESSION: scatter preserves permits.n_current (the field flat-columns dropped)", async () => {
     const r = await buildChartForIntent({ chart_type: "scatter", scope: "corridor-scatter" });
-    if (!r || !("component" in r) || r.component !== "scatter") throw new Error("expected scatter");
-    const row = r.data[0];
-    expect(typeof row.id).toBe("string");
-    expect(typeof row.name).toBe("string");
-    expect(typeof row.submarket).toBe("string");
+    const data = (r?.options?.data as JoinedCorridorRow[]) ?? [];
+    const covered = data.find((row) => row.permits != null);
+    expect(covered).toBeDefined();
+    expect(typeof covered!.permits!.n_current).toBe("number");
+    expect(typeof covered!.permits!.headline_z).toBe("number");
+  });
+
+  it("REGRESSION: scatter keeps no-coverage rows (permits === null) for the internal filter", async () => {
+    const r = await buildChartForIntent({ chart_type: "scatter", scope: "corridor-scatter" });
+    const data = (r?.options?.data as JoinedCorridorRow[]) ?? [];
+    // The producer passes ALL rows; null-permits (Collier) corridors must survive
+    // so the component's `permits != null` exclusion still has something to exclude.
+    expect(data.some((row) => row.permits === null)).toBe(true);
   });
 
   it("returns null for deferred vitals", async () => {

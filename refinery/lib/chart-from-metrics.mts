@@ -192,6 +192,9 @@ export function computeMetricChart(output: BrainOutput): ChartBlock | null {
   // by construction, so `refined_at` is the honest "data through" date.
   const asOf = output.refined_at.slice(0, 10);
   const fromTable = output.detail_tables ? chartFromDetailTable(output.detail_tables, asOf) : null;
-  if (fromTable) return fromTable;
-  return chartFromKeyMetrics(output.key_metrics, asOf);
+  // Every pre-computed chart is a bar — stamp its registry frame so the adapter
+  // (`blockToSpec`) can lift it to a ChartSpec without re-inferring shape.
+  if (fromTable) return { ...fromTable, frame_id: "bar-table" };
+  const fromMetrics = chartFromKeyMetrics(output.key_metrics, asOf);
+  return fromMetrics ? { ...fromMetrics, frame_id: "bar-table" } : null;
 }

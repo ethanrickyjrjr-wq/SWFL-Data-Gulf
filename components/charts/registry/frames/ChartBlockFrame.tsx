@@ -6,8 +6,9 @@ import type { ChartSpec } from "../chart-spec";
  * valid `block` — `ChartBlockView` reads only the `ChartBlock` fields (title,
  * columns, rows, chart_type, value_format, asOf, source) and picks bar vs table
  * internally. The registry adapter seam: the underlying view never knows about
- * `ChartSpec`.
+ * `ChartSpec`. `spec.compact` (set by the dock via `blockToSpec`) threads through
+ * to the view so the chat-dock chart keeps its compact sizing.
  */
 export function ChartBlockFrame({ spec }: { spec: ChartSpec }) {
-  return <ChartBlockView block={spec} />;
+  return <ChartBlockView block={spec} compact={spec.compact} />;
 }

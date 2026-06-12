@@ -387,6 +387,24 @@ test("computeMetricChart: asOf is set on the detail_table path too", () => {
   assert.equal(computeMetricChart(o)!.asOf, "2026-05-20");
 });
 
+// --- frame_id (drives the registry adapter `blockToSpec`) -------------------
+
+test("computeMetricChart: stamps frame_id 'bar-table' on the key_metrics path", () => {
+  const o = output({
+    key_metrics: [
+      metric({ metric: "a", value: 10, label: "Alpha", display_format: "count" }),
+      metric({ metric: "b", value: 20, label: "Bravo", display_format: "count" }),
+      metric({ metric: "c", value: 30, label: "Charlie", display_format: "count" }),
+    ],
+  });
+  assert.equal(computeMetricChart(o)!.frame_id, "bar-table");
+});
+
+test("computeMetricChart: stamps frame_id 'bar-table' on the detail_table path too", () => {
+  const o = output({ detail_tables: [housingByZip()] });
+  assert.equal(computeMetricChart(o)!.frame_id, "bar-table");
+});
+
 // --- value_format hint (drives the renderer's numeric formatter) -----------
 
 test("computeMetricChart: a percent key_metrics group -> value_format 'percent'", () => {

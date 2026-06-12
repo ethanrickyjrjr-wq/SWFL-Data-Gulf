@@ -55,6 +55,13 @@ export interface ChartBlock {
    */
   value_format?: ChartValueFormat;
   /**
+   * Which registry frame should render this block (`CHART_REGISTRY[frame_id]`).
+   * Optional for backward-compat (legacy persisted blocks predate it); the
+   * adapter (`blockToSpec`) enforces presence at runtime and maps it onto
+   * `ChartSpec.frameId`. Not validated by the structural/provenance lint.
+   */
+  frame_id?: string;
+  /**
    * KEYSTONE (Phase 1, presentation-deliverable-engine). ISO date `YYYY-MM-DD`
    * — the single-vintage as-of of every number in this block. Self-anchors the
    * chart so it travels honestly into a project/PDF without smuggling the date

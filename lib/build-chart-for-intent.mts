@@ -3,6 +3,7 @@ import path from "node:path";
 import type { ChartIntent } from "@/lib/route-chart";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { lintChartBlock } from "@/refinery/validate/chart-block-lint.mts";
+import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CORRIDOR_ALIASES } from "@/refinery/lib/corridor-aliases.mts";
 import type {
   CorridorEntry,
@@ -13,15 +14,11 @@ import type {
   ZHVITrendEntry,
 } from "@/types/viz";
 
-export type ChartResult =
-  | { block: ChartBlock; asOf: string }
-  | { component: "zhvi"; data: ZHVITrendEntry[]; asOf: string }
-  | { component: "scatter"; data: JoinedCorridorRow[]; asOf: string };
-
-// The corridor fixtures are a static "Jun 2026" sample. The block-level `asOf`
-// is the ISO keystone (end-of-month = data-through-June); the `source` citation
-// keeps the "fixture sample" provenance label on the caption. The outer
-// `ChartResult.asOf` display string ("Jun 2026") is retained for back-compat.
+// The corridor fixtures (rents + permits) are a static "Jun 2026" sample; their
+// block-level `asOf` is the ISO keystone for that snapshot. The ZHVI fixture is a
+// SEPARATE file (`zhvi-trend.json`) whose series runs through its own last month —
+// its `asOf` is derived from that month, NOT this constant, so the chart never
+// claims a vintage newer than its data (CLAUDE.md data-provenance).
 const FIXTURE_ASOF = "2026-06-30";
 const FIXTURE_SOURCE = "SWFL fixture sample";
 
@@ -31,16 +28,28 @@ async function loadFixture<T>(name: string): Promise<T> {
   return JSON.parse(raw) as T;
 }
 
+/** "YYYY-MM" → ISO last-day-of-that-month ("2026-04" → "2026-04-30"), UTC-safe.
+ *  The honest "data through" vintage for a monthly series. */
+function monthEndIso(ym: string): string {
+  const [y, m] = ym.split("-").map(Number);
+  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+}
+
 /**
- * Maps a ChartIntent → chart data.
+ * Maps a ChartIntent → a ready-to-render `ChartSpec` (or `null`).
+ *
+ * ONE normalization path: every case returns a `ChartSpec` carrying its
+ * `frameId`. Frames that wrap a raw-array component (`zhvi-area`,
+ * `corridor-scatter`) carry the untouched typed array under `options.data` — no
+ * flatten-to-columns, no lossy reconstruction. The dock renders the spec through
+ * `FrameRenderer` with zero normalization of its own.
  *
  * `[LB-R4]` Single source of truth: the persisted `chart_block` jsonb in
- * `saved_charts` is the FROZEN authority for a saved/filed chart. This
- * function is the LIVE render only. A filed chart is frozen at save time
- * and the ProjectItem references that frozen chart_id — it is NEVER
- * recomputed via this function after filing.
+ * `saved_charts` is the FROZEN authority for a saved/filed chart. This function
+ * is the LIVE render only. A filed chart is frozen at save time and the
+ * ProjectItem references that frozen chart_id — it is NEVER recomputed here.
  */
-export async function buildChartForIntent(intent: ChartIntent): Promise<ChartResult | null> {
+export async function buildChartForIntent(intent: ChartIntent): Promise<ChartSpec | null> {
   try {
     switch (intent.scope) {
       case "asking-rent":
@@ -65,7 +74,7 @@ export async function buildChartForIntent(intent: ChartIntent): Promise<ChartRes
   }
 }
 
-async function buildRentChart(): Promise<{ block: ChartBlock; asOf: string } | null> {
+async function buildRentChart(): Promise<ChartSpec | null> {
   const rents = await loadFixture<CorridorEntry[]>("corridor-rents.json");
 
   const rows = rents
@@ -89,12 +98,11 @@ async function buildRentChart(): Promise<{ block: ChartBlock; asOf: string } | n
     source: { citation: FIXTURE_SOURCE },
   };
 
-  const result = lintChartBlock(block);
-  if (!result.ok) return null;
-  return { block, asOf: "Jun 2026" };
+  if (!lintChartBlock(block).ok) return null;
+  return { ...block, frameId: "bar-table" };
 }
 
-async function buildVacancyChart(): Promise<{ block: ChartBlock; asOf: string } | null> {
+async function buildVacancyChart(): Promise<ChartSpec | null> {
   const rents = await loadFixture<CorridorEntry[]>("corridor-rents.json");
 
   const rows = rents
@@ -115,16 +123,11 @@ async function buildVacancyChart(): Promise<{ block: ChartBlock; asOf: string } 
     source: { citation: FIXTURE_SOURCE },
   };
 
-  const result = lintChartBlock(block);
-  if (!result.ok) return null;
-  return { block, asOf: "Jun 2026" };
+  if (!lintChartBlock(block).ok) return null;
+  return { ...block, frameId: "bar-table" };
 }
 
-async function buildZhviChart(): Promise<{
-  component: "zhvi";
-  data: ZHVITrendEntry[];
-  asOf: string;
-} | null> {
+async function buildZhviChart(): Promise<ChartSpec | null> {
   const raw = await loadFixture<ZHVIMonth[]>("zhvi-trend.json");
 
   const data = raw.filter(
@@ -133,20 +136,28 @@ async function buildZhviChart(): Promise<{
 
   if (data.length < 3) return null;
   const lastMonth = data.reduce((m, r) => (r.month > m ? r.month : m), data[0].month);
-  const [yr, mo] = lastMonth.split("-");
-  const asOf = new Date(Date.UTC(parseInt(yr), parseInt(mo) - 1, 1)).toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-  return { component: "zhvi", data, asOf };
+
+  // columns/rows satisfy the ChartBlock contract and are a faithful tabular view;
+  // the zhvi-area frame reads `options.data` (the raw ZHVITrendEntry[]) directly.
+  return {
+    title: "SWFL Home Values (ZHVI)",
+    columns: ["month", "cape_coral", "fort_myers", "naples"],
+    rows: data.map((e): [string, number, number, number] => [
+      e.month,
+      e.cape_coral,
+      e.fort_myers,
+      e.naples,
+    ]),
+    chart_type: "area",
+    value_format: "usd",
+    asOf: monthEndIso(lastMonth),
+    source: { citation: FIXTURE_SOURCE },
+    frameId: "zhvi-area",
+    options: { data },
+  };
 }
 
-async function buildScatterChart(): Promise<{
-  component: "scatter";
-  data: JoinedCorridorRow[];
-  asOf: string;
-} | null> {
+async function buildScatterChart(): Promise<ChartSpec | null> {
   const aliasMap = CORRIDOR_ALIASES as Record<string, string | null | undefined>;
 
   const [rents, permits, centroids] = await Promise.all([
@@ -183,5 +194,23 @@ async function buildScatterChart(): Promise<{
   );
   if (plottable.length < 3) return null;
 
-  return { component: "scatter", data: rows, asOf: "Jun 2026" };
+  // `options.data` carries the FULL JoinedCorridorRow[] UNTOUCHED — `permits`
+  // (incl. n_current) and the `permits: null` no-coverage marker are preserved so
+  // the scatter component's internal filter + tooltip work exactly as before. The
+  // columns/rows below exist only to satisfy the ChartBlock type (numeric-first so
+  // a degraded fallback still plots); the corridor-scatter frame ignores them.
+  return {
+    title: "SWFL Corridor Market Scatter",
+    columns: ["vacancy_pct", "nnn_asking_rent_per_sqft", "corridor"],
+    rows: plottable.map((c): [number, number, string] => [
+      c.vacancy_pct as number,
+      c.nnn_asking_rent_per_sqft as number,
+      c.name,
+    ]),
+    chart_type: "scatter",
+    asOf: FIXTURE_ASOF,
+    source: { citation: FIXTURE_SOURCE },
+    frameId: "corridor-scatter",
+    options: { data: rows },
+  };
 }
