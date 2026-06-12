@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Email template adapter S1+S4 + credential scrubbed (PUSH)
+
+- S1+S4 shipped (`lib/email/templates/`, 3 route edits); credential scrubbed from history via force push
+- Both migrations live: `user_brand_profiles` + `email_subscribers.prospect_brand` + 5 email product tables
+- `scripts/rotate-db-password.py` added
+
 ## 2026-06-12 (main) — Multi-tenant email Wave 0: A migrations ‖ B broadcast override (PUSH)
 
 - **Wave 0 of the multi-tenant email build** (`docs/superpowers/plans/2026-06-12-email-product-multitenant/plan.md`), fanned out: Unit A (migrations) on **Sonnet** ‖ Unit B (broadcast override) on **Opus**. Zero file overlap.
