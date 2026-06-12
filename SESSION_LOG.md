@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — L3 verify: negative tests + 5-point audit clean (LOCAL, not pushed)
+
+- `lib/deliverable/bind-frame.test.ts`: +2 negative tests for `seasonal-radial` — (1) corridor with `null seasonal_index` excluded from `spec.options.data`; (2) all-null table → binder returns `null` (empty-state path). 25 binder tests pass.
+- **5-point verify audit (all clean):** (1) URL branches on `env.source` — no `data_lake.` hardcoding; (2) `seasonal_index` is a DB column pass-through (`num(row.seasonal_index)`) — NOT LLM-synthesized; (3) `SeasonalRadialChart` handles variable/empty row count cleanly (`chartData.length===0` → empty-state div); `seasonal_index` is editorial, not window-cadence-driven; (4) negative tests added (above); (5) `master.mts` has zero references to `seasonal_index`/`corridor_seasonality` — display-only, no vote.
+- **Citation note (non-bug):** citation text says "Brains Supabase corridor_profiles" in both live and fixture mode — consistent with all other `buildCreAggregateSource` calls in the same file; the URL field (the actual data pointer) is what branches. Not a phantom-data risk.
+
 ## 2026-06-12 (main) — L3: seasonal-radial live (cre-swfl corridor_seasonality detail_table) (LOCAL, not pushed)
 
 - `refinery/packs/cre-swfl.mts`: emit `corridor_seasonality` detail_table in `creSwflOutputProducer` — one row per verified corridor with a non-null `seasonal_index` (0–1 ratio); row key = raw corridor name, label = `displayNameFor()` display name; `BrainOutputDetailTable` added to imports.
