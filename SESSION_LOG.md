@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Multi-tenant email product build plan saved (PUSH)
+
+- **docs/superpowers/plans/2026-06-12-email-product-multitenant/plan.md** — build-structure plan for the multi-tenant email product (data model + cron worker + AI command interface + paywall, plus sender isolation + a backward-compat broadcast extension). Decomposed into Sonnet/Opus build units **A–G** with a Wave 0→1→2 dependency graph (what runs in parallel vs blocked). Sits beside the `2026-06-12-email-template-adapter/` lane (templates/graphs = a separate Claude); this plan treats `renderEmailTemplate()` as an integration seam only.
+- **Key calls baked in**: broadcast extension falls back to live `DIGEST_SENDER_*` envs (NOT a new `RESEND_FROM_EMAIL`); cron idempotency = `FOR UPDATE SKIP LOCKED` in one txn; `DRY_RUN` never POSTs + real send asserts the `{{{RESEND_UNSUBSCRIBE_URL}}}` token; paywall is meter+gate only (Stripe deferred) with a static `/billing` so the CTA isn't a 404; Vendor-First WebFetch required for Resend Audiences/Domains + Haiku-4.5 `tool_use` shape before C2/D/G.
+- **Next**: dispatch the build — Wave 0 (A migrations Sonnet ‖ B broadcast ext Opus), then Wave 1 fan-out (C/D/E/G), then Wave 2 (F cron worker). The plan doc is the brief, not a status board — open obligations go in the `checks` ledger.
+- Plan + handoff only; **no product code written this session.**
+
 ## 2026-06-12 (main) — Chart adapter: unify dock charts on ChartSpec/options.data (PUSH)
 
 - **Goal**: retire the dock's hardcoded 3-case LiveChart switch; one render path through the frame registry. `buildChartForIntent` now returns a ready `ChartSpec` (was a `{block}|{component,data}` union); the dock renders `<FrameRenderer>` via a thin `DockChart` guard — zero normalization in the dock.
