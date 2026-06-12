@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — SWFL Visuals → template pipeline, Phase 1 (COMMIT — awaiting push approval)
+
+- **Goal**: tokenize the 6 UI-kit viz cards from `Downloads/SWFL-Visuals-UI-Kit.html` into the platform + stand up a render pipeline. The brief's "already exists" surfaces (`renderHtmlTemplate`, `token-contracts`, tokenized 003/004) were **verified absent** — built from scratch. Operator decisions: phase it (P1 only); welcome chat **stubbed** (live `/api/welcome/chat` is P2 w/ enrichment); repo-wide chart-color refactor **deferred to P3, own PR — chart components untouched**.
+- **Built**: `lib/templates/render-html-template.ts` (token-agnostic `{{key}}` render, slug-traversal guard, unknown→empty); `templates/html/viz/*.html` (all 6, self-contained — gulf `:root` inlined since the external `<link>` can't be served; `<style id="brand-override">` is the LAST `:root` so it wins by source order — operator-flagged footgun, gated); `lib/templates/token-contracts.ts` (6 types) + `manifest.ts` (previewData); `app/api/templates/render` (public GET preview by manifest previewData + bearer POST custom-token, `MCP_BEARER_TOKEN`) + `/list` (public); `app/showcase` + `app/welcome` (stub chat, CTAs→/pricing); `next.config.ts` `outputFileTracingIncludes` so the shells ship in the render lambda.
+- **Verified**: 17 renderer tests green (no residual tokens on any card; brand-override-after-base on all 6; JS-fill tokenization on 001/005; numeric `z_value` const on 004); 11 route checks green (list 200/no previewData, GET preview 200, bad slug 400, POST no-auth 401, authed 200 fills tokens). tsc + eslint clean on new files.
+- **Next (P2)**: `lib/prospects/enrich-brand.ts` (Firecrawl REST from TS — no TS client exists — + Claude forced-tool JSON, store `primary_color`/`accent_color`/`logo_url`), `build-arrival-url.ts`, live `/api/welcome/chat` (fixed system prompt, NO report grounding). **P3** = chart-color refactor PR (gulf palette canonical). `/pricing` is an intentional dangling CTA (paywall not built).
+
 ## 2026-06-12 (main) — Multi-tenant email product build plan saved (PUSH)
 
 - **docs/superpowers/plans/2026-06-12-email-product-multitenant/plan.md** — build-structure plan for the multi-tenant email product (data model + cron worker + AI command interface + paywall, plus sender isolation + a backward-compat broadcast extension). Decomposed into Sonnet/Opus build units **A–G** with a Wave 0→1→2 dependency graph (what runs in parallel vs blocked). Sits beside the `2026-06-12-email-template-adapter/` lane (templates/graphs = a separate Claude); this plan treats `renderEmailTemplate()` as an integration seam only.

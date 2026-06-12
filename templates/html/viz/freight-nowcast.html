@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!-- @dsCard group="UI Kit — Visuals" name="Visual — Freight nowcast" subtitle="FDOT z-score gauge · current vs rolling baseline" viewport="980x850" -->
+<!--
+  Tokenized viz card 004 — freight-nowcast.
+  Self-contained: gulf palette inlined; brand-override style block is the LAST :root
+  before the head close. The gauge SVG gradient stops + needle and the "valid" flag are
+  static markup; the teal/coral stops are tokenized to the brand pair so the override
+  reaches them. The z-readout + needle angle are driven by the JS const Z_VALUE, which
+  is itself a token ({{z_value}}).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf · Freight nowcast</title>
+<style id="gulf-base">
+  :root {
+    --gulf-midnight: #0a1419; --gulf-deep: #0f1d24; --gulf-slate: #152832;
+    --gulf-slate-hi: #1c3340; --gulf-haze: #22414f;
+    --gulf-teal: #3dc9c0; --gulf-teal-dim: #2a8c85;
+    --mangrove: #5bc97a; --mangrove-dim: #3d8a52;
+    --sunset-coral: #e08158; --coral-dim: #a45a3d; --neutral-gold: #d4b370;
+    --text-primary: #f0ede6; --text-secondary: #b8b4a8; --text-tertiary: #807e76;
+    --text-on-accent: #0a1419;
+    --font-display: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  }
+</style>
+<style>
+  body { margin: 0; background: var(--gulf-midnight); color: var(--text-primary); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .v-page { max-width: 980px; margin: 0 auto; padding: 48px 32px 80px; }
+  .v-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gulf-teal); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 45%, transparent); }
+  h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 8px 0 6px; }
+  .v-sub { color: var(--text-secondary); font-size: 1rem; margin: 0 0 36px; max-width: 62ch; line-height: 1.5; }
+
+  /* Hero gauge + verdict */
+  .v-hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; margin-bottom: 36px; background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 10px; padding: 32px; }
+  .v-gauge-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+  .v-gauge { width: 100%; max-width: 380px; height: auto; display: block; overflow: visible; }
+  .v-gauge-readout { text-align: center; margin-top: -56px; }
+  .v-gauge-num { font-family: var(--font-display); font-size: 3.5rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .v-gauge-sub { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; }
+
+  .v-verdict-block { display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+  .v-verdict-pill { display: inline-block; padding: 4px 10px; border: 1px solid var(--text-secondary); color: var(--text-secondary); border-radius: 3px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; align-self: flex-start; }
+  .v-state-name { font-family: var(--font-display); font-size: 2.25rem; font-weight: 600; letter-spacing: -0.03em; color: var(--gulf-teal); line-height: 1; text-shadow: 0 0 20px color-mix(in srgb, var(--gulf-teal) 35%, transparent); }
+  .v-state-detail { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; max-width: 36ch; }
+  .v-state-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .v-state-cell { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; }
+  .v-state-cl { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+  .v-state-cv { font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.015em; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* Current vs baseline comparison */
+  .v-compare { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 10px; padding: 24px 28px; margin-bottom: 24px; }
+  .v-compare-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--gulf-haze); }
+  .v-compare-row { display: grid; grid-template-columns: 220px 1fr 150px; align-items: center; gap: 18px; padding: 12px 0; }
+  .v-compare-label { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.3; }
+  .v-compare-sub { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); margin-top: 2px; letter-spacing: 0.04em; }
+  .v-compare-bar { position: relative; height: 22px; background: color-mix(in srgb, var(--gulf-slate-hi) 60%, transparent); border-radius: 2px; overflow: hidden; }
+  .v-compare-fill { height: 100%; background: var(--gulf-teal); transition: width 900ms cubic-bezier(.16,.84,.44,1); }
+  .v-compare-fill.is-baseline { background: var(--gulf-teal-dim); opacity: 0.7; }
+  .v-compare-val { font-family: var(--font-mono); font-size: 14px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .v-compare-val .delta { display: block; font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+  /* Footer rail of stats */
+  .v-rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .v-rail-cell { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 8px; padding: 14px 16px; }
+  .v-rail-l { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+  .v-rail-v { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .v-rail-s { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  .v-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 32px; border-top: 1px solid var(--gulf-haze); font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.02em; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 720px) {
+    .v-hero { grid-template-columns: 1fr; }
+    .v-rail { grid-template-columns: repeat(2, 1fr); }
+    .v-compare-row { grid-template-columns: 1fr; }
+  }
+</style>
+<style id="brand-override">
+  /* Brand override — MUST be the last :root so it wins by source order. */
+  :root { --gulf-teal: {{brand_primary}}; --sunset-coral: {{brand_secondary}}; }
+</style>
+</head>
+<body>
+<main class="v-page" data-screen-label="Visual: Freight nowcast">
+  <span class="v-eyebrow">SWFL freight activity · FDOT nowcast</span>
+  <h1>How far is current freight activity from its rolling baseline?</h1>
+  <p class="v-sub">Daily deviation gauge: current annualized FDOT freight
+    activity ({{segment_count}} freight-coded segments, Lee + Collier I-* and US-*) against
+    its own 90-day rolling history. Z-score is the math anchor — at
+    z = {{z_value}}, this run sits effectively on baseline.</p>
+
+  <!-- Hero gauge -->
+  <div class="v-hero">
+    <div class="v-gauge-wrap">
+      <svg class="v-gauge" viewBox="0 0 380 240">
+        <defs>
+          <linearGradient id="gauge-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="{{brand_secondary}}"/>
+            <stop offset="35%"  stop-color="#D4B370"/>
+            <stop offset="50%"  stop-color="{{brand_primary}}"/>
+            <stop offset="65%"  stop-color="#D4B370"/>
+            <stop offset="100%" stop-color="{{brand_secondary}}"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Track (full arc from -90° to +90°, i.e. semi-circle bottom-half-up) -->
+        <path d="M 40 190 A 150 150 0 0 1 340 190" fill="none" stroke="var(--gulf-haze)" stroke-width="22" stroke-linecap="round"/>
+
+        <!-- Color rail (subtle, just inside the track) -->
+        <path d="M 40 190 A 150 150 0 0 1 340 190" fill="none" stroke="url(#gauge-grad)" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+
+        <!-- Tick marks at z=-3, -2, -1, 0, +1, +2, +3 -->
+        <g font-family="var(--font-mono)" font-size="11" fill="var(--text-tertiary)" text-anchor="middle">
+          <text x="40" y="218">−3σ</text>
+          <text x="79" y="98">−2σ</text>
+          <text x="148" y="42">−1σ</text>
+          <text x="190" y="30">0</text>
+          <text x="232" y="42">+1σ</text>
+          <text x="301" y="98">+2σ</text>
+          <text x="340" y="218">+3σ</text>
+        </g>
+
+        <!-- Needle -->
+        <g id="needle">
+          <line x1="190" y1="190" x2="190" y2="80" stroke="{{brand_primary}}" stroke-width="3" stroke-linecap="round" />
+          <circle cx="190" cy="190" r="8" fill="var(--gulf-midnight)" stroke="{{brand_primary}}" stroke-width="2.5"/>
+          <circle cx="190" cy="80" r="4" fill="{{brand_primary}}" />
+        </g>
+      </svg>
+
+      <div class="v-gauge-readout">
+        <div class="v-gauge-num" id="z-readout">{{z_value}}σ</div>
+        <span class="v-gauge-sub">DEVIATION FROM 90-DAY ROLLING MEAN</span>
+      </div>
+    </div>
+
+    <div class="v-verdict-block">
+      <span class="v-verdict-pill">Shock state</span>
+      <span class="v-state-name">{{state_name}}</span>
+      <p class="v-state-detail">Current activity sits on baseline.
+        No anomaly. No structural break. No consecutive breach days
+        flagged by the daily classifier.</p>
+
+      <div class="v-state-grid">
+        <div class="v-state-cell">
+          <span class="v-state-cl">Deviation %</span>
+          <span class="v-state-cv">{{deviation_pct}}</span>
+        </div>
+        <div class="v-state-cell">
+          <span class="v-state-cl">Baseline flag</span>
+          <span class="v-state-cv" style="color:#5BC97A;">{{baseline_flag}}</span>
+        </div>
+        <div class="v-state-cell">
+          <span class="v-state-cl">History days</span>
+          <span class="v-state-cv">{{history_days}}</span>
+        </div>
+        <div class="v-state-cell">
+          <span class="v-state-cl">Breach days</span>
+          <span class="v-state-cv">{{breach_days}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current vs baseline comparison -->
+  <div class="v-compare">
+    <div class="v-compare-title">Activity · current vs rolling baseline</div>
+    <div class="v-compare-row">
+      <div>
+        <div class="v-compare-label">Current activity</div>
+        <span class="v-compare-sub">Σ AADT × tfctr × payload × 365 · annualized</span>
+      </div>
+      <div class="v-compare-bar"><div class="v-compare-fill" data-target="{{current_target}}" style="width:0%;"></div></div>
+      <div class="v-compare-val">{{current_activity}}<span class="delta">tons/year</span></div>
+    </div>
+    <div class="v-compare-row">
+      <div>
+        <div class="v-compare-label">Rolling-mean baseline</div>
+        <span class="v-compare-sub">90-day rolling window · math anchor (Path B)</span>
+      </div>
+      <div class="v-compare-bar"><div class="v-compare-fill is-baseline" data-target="{{mean_target}}" style="width:0%;"></div></div>
+      <div class="v-compare-val">{{baseline_mean}}<span class="delta">tons/year</span></div>
+    </div>
+    <div class="v-compare-row">
+      <div>
+        <div class="v-compare-label">Rolling-stddev baseline</div>
+        <span class="v-compare-sub">denominator of the z-score</span>
+      </div>
+      <div class="v-compare-bar"><div class="v-compare-fill is-baseline" data-target="{{stddev_target}}" style="width:0%;"></div></div>
+      <div class="v-compare-val">{{baseline_stddev}}<span class="delta">tons/year</span></div>
+    </div>
+  </div>
+
+  <!-- Rail of supporting stats -->
+  <div class="v-rail">
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Segment count</span>
+      <span class="v-rail-v">{{segment_count}}</span>
+      <span class="v-rail-s">freight-coded I-* + US-*</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Avg payload</span>
+      <span class="v-rail-v">{{avg_payload}}</span>
+      <span class="v-rail-s">tons / truck · FHWA HS 2023</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">FAF5 context</span>
+      <span class="v-rail-v">{{faf5_context}}</span>
+      <span class="v-rail-s">inbound tons/yr (CONTEXT only)</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Counties covered</span>
+      <span class="v-rail-v">{{counties_covered}}</span>
+      <span class="v-rail-s">Lee · Collier</span>
+    </div>
+  </div>
+
+  <div class="v-foot">
+    <span>FDOT freight-coded segments · 90-day rolling baseline (Path B) · prior shock-log history</span>
+    <span>Last computed · {{freshness_token}}</span>
+  </div>
+</main>
+
+<script type="module">
+// === Needle: set to target rotation (transitions don't run reliably in embeds) ===
+const Z_VALUE = {{z_value}};
+const Z_MAX = 3;
+const targetAngle = (Z_VALUE / Z_MAX) * 90;
+
+const needle = document.getElementById("needle");
+needle.style.transformOrigin = "190px 190px";
+needle.style.transform = `rotate(${targetAngle}deg)`;
+
+// z-readout: set to final value (count-up is optional polish)
+const readout = document.getElementById("z-readout");
+const sign = Z_VALUE < 0 ? "−" : (Z_VALUE > 0 ? "+" : "");
+readout.textContent = `${sign}${Math.abs(Z_VALUE).toFixed(2)}σ`;
+
+// Bar fills — set to target width (transition still works on width)
+requestAnimationFrame(() => {
+  document.querySelectorAll(".v-compare-fill").forEach((bar, i) => {
+    setTimeout(() => { bar.style.width = bar.dataset.target + "%"; }, 200 + i * 150);
+  });
+});
+</script>
+</body>
+</html>

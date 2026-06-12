@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<!-- @dsCard group="UI Kit — Visuals" name="Visual — Seasonal exposure" subtitle="Radial bars · corridors sorted by season-dependence" viewport="1000x800" -->
+<!--
+  Tokenized viz card 005 — seasonal-exposure.
+  Self-contained: gulf palette inlined; brand-override style block is the LAST :root
+  before the head close. Per-corridor data stays inline (CORRIDORS array). JS bar fills
+  come from colorForIdx — the coral tier (winter-dependent) is tokenized to
+  {{brand_secondary}} so the brand override reaches the bars; teal (active-row) is CSS.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf · Seasonal exposure</title>
+<style id="gulf-base">
+  :root {
+    --gulf-midnight: #0a1419; --gulf-deep: #0f1d24; --gulf-slate: #152832;
+    --gulf-slate-hi: #1c3340; --gulf-haze: #22414f;
+    --gulf-teal: #3dc9c0; --gulf-teal-dim: #2a8c85;
+    --mangrove: #5bc97a; --mangrove-dim: #3d8a52;
+    --sunset-coral: #e08158; --coral-dim: #a45a3d; --neutral-gold: #d4b370;
+    --text-primary: #f0ede6; --text-secondary: #b8b4a8; --text-tertiary: #807e76;
+    --text-on-accent: #0a1419;
+    --font-display: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  }
+</style>
+<style>
+  body { margin: 0; background: var(--gulf-midnight); color: var(--text-primary); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .v-page { max-width: 1000px; margin: 0 auto; padding: 56px 32px 88px; }
+  .v-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gulf-teal); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 45%, transparent); }
+  h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 8px 0 6px; }
+  .v-sub { color: var(--text-secondary); font-size: 1rem; margin: 0 0 44px; max-width: 64ch; line-height: 1.5; }
+
+  /* Summary KPIs */
+  .v-rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 36px; }
+  .v-rail-cell { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 8px; padding: 14px 16px; }
+  .v-rail-l { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+  .v-rail-v { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); font-variant-numeric: tabular-nums; line-height: 1; }
+  .v-rail-s { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  /* Chart frame */
+  .v-frame { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 10px; padding: 28px 28px 22px; }
+  .v-frame-head { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 14px; margin-bottom: 20px; border-bottom: 1px solid var(--gulf-haze); }
+  .v-frame-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+  .v-frame-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* Band axis (the 3 zones running behind the bars) */
+  .v-bands { position: relative; height: 24px; margin-bottom: 6px; }
+  .v-band { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 8px; font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; border-radius: 3px 3px 0 0; }
+  .v-band.is-year   { background: color-mix(in srgb, var(--mangrove) 14%, transparent);     color: var(--mangrove); text-shadow: 0 0 10px color-mix(in srgb, var(--mangrove) 50%, transparent); }
+  .v-band.is-season { background: color-mix(in srgb, var(--neutral-gold) 14%, transparent); color: var(--neutral-gold); text-shadow: 0 0 10px color-mix(in srgb, var(--neutral-gold) 45%, transparent); }
+  .v-band.is-winter { background: color-mix(in srgb, var(--sunset-coral) 14%, transparent); color: var(--sunset-coral); text-shadow: 0 0 10px color-mix(in srgb, var(--sunset-coral) 45%, transparent); justify-content: flex-end; }
+
+  /* Bar rows */
+  .v-rows { display: flex; flex-direction: column; }
+  .v-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 70px;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gulf-haze);
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .v-row:last-of-type { border-bottom: none; }
+  .v-row:hover { background: color-mix(in srgb, var(--gulf-slate-hi) 40%, transparent); }
+  .v-row.is-active { background: var(--gulf-slate-hi); box-shadow: inset 3px 0 0 var(--gulf-teal); }
+
+  .v-row-label { display: flex; flex-direction: column; gap: 2px; }
+  .v-row-name { font-size: 14px; color: var(--text-primary); font-weight: 500; line-height: 1.25; }
+  .v-row-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+
+  /* Bar track has 3 backing bands; bar sits on top */
+  .v-bar-wrap { position: relative; height: 22px; border-radius: 3px; overflow: hidden; background: color-mix(in srgb, var(--gulf-slate-hi) 50%, transparent); }
+  .v-bar-bands { position: absolute; inset: 0; display: flex; pointer-events: none; }
+  .v-bar-bands .b { height: 100%; }
+  .v-bar-bands .b1 { width: 30%; background: color-mix(in srgb, var(--mangrove) 10%, transparent); }
+  .v-bar-bands .b2 { width: 30%; background: color-mix(in srgb, var(--neutral-gold) 8%, transparent); }
+  .v-bar-bands .b3 { width: 40%; background: color-mix(in srgb, var(--sunset-coral) 10%, transparent); }
+  .v-bar-fill { position: relative; height: 100%; width: 0%; transition: width 700ms cubic-bezier(.16,.84,.44,1); border-radius: 3px; box-shadow: 0 0 14px color-mix(in srgb, currentColor 30%, transparent); }
+
+  .v-row-val { font-family: var(--font-mono); font-size: 14px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Axis ticks under the bars */
+  .v-ticks { display: grid; grid-template-columns: 200px 1fr 70px; gap: 18px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--gulf-haze); }
+  .v-ticks-wrap { position: relative; height: 12px; }
+  .v-tick { position: absolute; top: 0; transform: translateX(-50%); font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+
+  /* Detail strip */
+  .v-detail { margin-top: 20px; background: var(--gulf-deep); border: 1px solid var(--gulf-haze); border-radius: 8px; padding: 18px 22px; min-height: 70px; transition: border-color 200ms ease; }
+  .v-detail-empty { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; padding: 14px 0; }
+  .v-detail-row { display: grid; grid-template-columns: 220px 1fr; gap: 22px; align-items: center; }
+  .v-detail-name { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.015em; margin: 0; line-height: 1.2; }
+  .v-detail-sub { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .v-detail-quote { font-family: var(--font-display); font-style: italic; font-size: 14px; line-height: 1.5; color: var(--text-primary); margin: 0; max-width: 60ch; padding-left: 12px; border-left: 2px solid currentColor; }
+
+  .v-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 24px; border-top: 1px solid var(--gulf-haze); font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.02em; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 720px) {
+    .v-rail { grid-template-columns: repeat(2, 1fr); }
+    .v-row { grid-template-columns: 1fr 60px; }
+    .v-row .v-bar-wrap { grid-column: 1 / -1; }
+    .v-ticks { grid-template-columns: 1fr; }
+    .v-detail-row { grid-template-columns: 1fr; gap: 10px; }
+  }
+</style>
+<style id="brand-override">
+  /* Brand override — MUST be the last :root so it wins by source order. */
+  :root { --gulf-teal: {{brand_primary}}; --sunset-coral: {{brand_secondary}}; }
+</style>
+</head>
+<body>
+<main class="v-page" data-screen-label="Visual: Seasonal exposure">
+  <span class="v-eyebrow">SWFL CRE · seasonal index</span>
+  <h1>Which corridors live off winter — and which don't care?</h1>
+  <p class="v-sub">Bar position on the 0 → 1 scale tells you how much each
+    corridor depends on winter season revenue. Bands run year-round (left),
+    seasonal (middle), winter-dependent (right). Click any row for the read.</p>
+
+  <div class="v-rail">
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Corridors</span>
+      <span class="v-rail-v">{{corridor_count}}</span>
+      <span class="v-rail-s">with seasonal index</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Year-round (≤ 0.30)</span>
+      <span class="v-rail-v" style="color:var(--mangrove);">{{year_round_count}}</span>
+      <span class="v-rail-s">{{year_round_list}}</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Seasonal (0.30 – 0.60)</span>
+      <span class="v-rail-v" style="color:var(--neutral-gold);">{{seasonal_count}}</span>
+      <span class="v-rail-s">{{seasonal_list}}</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Winter-dependent (&gt; 0.60)</span>
+      <span class="v-rail-v" style="color:var(--sunset-coral);">{{winter_count}}</span>
+      <span class="v-rail-s">{{winter_list}}</span>
+    </div>
+  </div>
+
+  <div class="v-frame">
+    <div class="v-frame-head">
+      <span class="v-frame-title">Corridor seasonal exposure — sorted low → high</span>
+      <span class="v-frame-sub">{{corridor_count}} corridors · 0 = year-round, 1 = extreme winter</span>
+    </div>
+
+    <!-- Band header -->
+    <div class="v-bands">
+      <div class="v-band is-year"   style="left: 0%;   width: 30%;">YEAR-ROUND</div>
+      <div class="v-band is-season" style="left: 30%;  width: 30%;">SEASONAL</div>
+      <div class="v-band is-winter" style="left: 60%;  width: 40%;">WINTER-DEPENDENT</div>
+    </div>
+
+    <div class="v-rows" id="rows"></div>
+
+    <div class="v-ticks">
+      <div></div>
+      <div class="v-ticks-wrap">
+        <span class="v-tick" style="left: 0%;">0.0</span>
+        <span class="v-tick" style="left: 25%;">0.25</span>
+        <span class="v-tick" style="left: 50%;">0.50</span>
+        <span class="v-tick" style="left: 75%;">0.75</span>
+        <span class="v-tick" style="left: 100%;">1.0</span>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="v-detail" id="detail">
+      <div class="v-detail-empty">Click any corridor to read its seasonality →</div>
+    </div>
+  </div>
+
+  <div class="v-foot">
+    <span>Sourced from SWFL CRE corridor profiles · pack range {{pack_range}}</span>
+    <span>Last computed · {{freshness_token}}</span>
+  </div>
+</main>
+
+<script type="module">
+// Per-corridor data inline; not tokenized in v1.
+const CORRIDORS = [
+  { id: "alico",       short: "Alico Industrial",   city: "Fort Myers",        evolution: "growing",       seasonalIdx: 0.10, note: "Logistics and light-industrial flex corridor. Effectively zero seasonality — distribution demand is year-round." },
+  { id: "cape-coral",  short: "Cape Coral Pkwy E",  city: "Cape Coral",        evolution: "growing",       seasonalIdx: 0.25, note: "Neighborhood-serving retail spine for a fast-growing residential base. Demand is rooftop-driven, not destination-driven." },
+  { id: "immokalee",   short: "Immokalee Rd",       city: "Naples",            evolution: "stable",        seasonalIdx: 0.30, note: "'Suburban 5th Avenue' — commercial gravity center of north Collier, anchored by daytime medical-tech employment rather than tourists." },
+  { id: "pine-ridge",  short: "Pine Ridge Rd",      city: "Naples",            evolution: "stable",        seasonalIdx: 0.35, note: "Medical-office and health-services corridor. Demand is age-driven and stable, less exposed to tourist seasonality." },
+  { id: "us41-bonita", short: "US-41 Bonita",       city: "Bonita Springs",    evolution: "stable",        seasonalIdx: 0.40, note: "Strip retail mix — national QSR, big-box junior anchors. Moderate winter lift but not dependent on it." },
+  { id: "gulf-coast",  short: "Gulf Coast TC",      city: "Estero",            evolution: "repositioning", seasonalIdx: 0.45, note: "Big-box power center; anchor turnover is the dominant risk variable. Some winter lift but tracks anchor health more closely." },
+  { id: "estero",      short: "Estero Blvd",        city: "Fort Myers Beach",  evolution: "repositioning", seasonalIdx: 0.88, note: "Barrier-island tourism corridor mid-rebuild after Hurricane Ian. Extreme seasonality — winter-quarter revenue carries the year." },
+];
+
+// JS fills — coral tier tokenized so brand override reaches the bars (rule 7).
+const EVOLUTION_COLOR = {
+  growing:       "#5BC97A",
+  stable:        "{{brand_primary}}",
+  repositioning: "#D4B370",
+  declining:     "{{brand_secondary}}",
+};
+
+function colorForIdx(idx) {
+  if (idx <= 0.30) return "#5BC97A";
+  if (idx <= 0.60) return "#D4B370";
+  return "{{brand_secondary}}";
+}
+
+// Sort ascending
+const sorted = [...CORRIDORS].sort((a, b) => a.seasonalIdx - b.seasonalIdx);
+
+const rowsEl = document.getElementById("rows");
+rowsEl.innerHTML = sorted.map(c => {
+  const color = colorForIdx(c.seasonalIdx);
+  const widthPct = (c.seasonalIdx * 100).toFixed(2);
+  return `
+    <div class="v-row" data-id="${c.id}">
+      <div class="v-row-label">
+        <div class="v-row-name">${c.short}</div>
+        <span class="v-row-meta">${c.city} · ${c.evolution}</span>
+      </div>
+      <div class="v-bar-wrap">
+        <div class="v-bar-bands"><div class="b b1"></div><div class="b b2"></div><div class="b b3"></div></div>
+        <div class="v-bar-fill" data-target="${widthPct}" style="background:${color};color:${color};"></div>
+      </div>
+      <span class="v-row-val" style="color:${color};">${c.seasonalIdx.toFixed(2)}</span>
+    </div>
+  `;
+}).join("");
+
+// Animate bars
+requestAnimationFrame(() => {
+  rowsEl.querySelectorAll(".v-bar-fill").forEach((bar, i) => {
+    setTimeout(() => { bar.style.width = bar.dataset.target + "%"; }, 200 + i * 80);
+  });
+});
+
+// Row click → detail
+const detail = document.getElementById("detail");
+let selectedId = null;
+
+rowsEl.querySelectorAll(".v-row").forEach(row => {
+  row.addEventListener("click", () => {
+    const id = row.dataset.id;
+    if (id === selectedId) {
+      selectedId = null;
+      row.classList.remove("is-active");
+      detail.innerHTML = `<div class="v-detail-empty">Click any corridor to read its seasonality →</div>`;
+      detail.style.borderColor = "var(--gulf-haze)";
+      return;
+    }
+    selectedId = id;
+    rowsEl.querySelectorAll(".v-row").forEach(r => r.classList.toggle("is-active", r.dataset.id === id));
+    const c = CORRIDORS.find(x => x.id === id);
+    const color = colorForIdx(c.seasonalIdx);
+    detail.style.borderColor = color;
+    detail.innerHTML = `
+      <div class="v-detail-row">
+        <div>
+          <h4 class="v-detail-name" style="color:${color};">${c.short}</h4>
+          <span class="v-detail-sub">Seasonal index · ${c.seasonalIdx.toFixed(2)}</span>
+        </div>
+        <p class="v-detail-quote" style="color:${color};"><span style="color:var(--text-primary);">${c.note}</span></p>
+      </div>
+    `;
+  });
+});
+</script>
+</body>
+</html>

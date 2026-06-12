@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     // open host bug claude-ai-mcp#61/#165). Restore the line shipping
     // "./docs/fiverr-briefs/assets/Chat-Charts-Standalone.html" when re-enabling.
     "/data-intel": ["./docs/data-intel.md"],
+    // The render route reads template shells from disk at runtime — bundle them
+    // into the serverless function (otherwise renderHtmlTemplate 500s in prod).
+    "/api/templates/render": ["./templates/html/**/*.html"],
   },
   async redirects() {
     return [

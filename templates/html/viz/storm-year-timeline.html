@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<!-- @dsCard group="UI Kit — Visuals" name="Visual — Storm-year timeline" subtitle="named storms · NFIP paid claims vs baseline" viewport="1000x850" -->
+<!--
+  Tokenized viz card 006 — storm-year-timeline.
+  Self-contained: gulf palette inlined; brand-override style block is the LAST :root
+  before the head close. Per-storm data stays inline (STORMS array); the peak storm's
+  color (#E08158) is tokenized to {{brand_secondary}} so the brand override reaches the
+  peak bar. The baseline marker uses var(--gulf-teal) (CSS → brand primary).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf · Storm claims</title>
+<style id="gulf-base">
+  :root {
+    --gulf-midnight: #0a1419; --gulf-deep: #0f1d24; --gulf-slate: #152832;
+    --gulf-slate-hi: #1c3340; --gulf-haze: #22414f;
+    --gulf-teal: #3dc9c0; --gulf-teal-dim: #2a8c85;
+    --mangrove: #5bc97a; --mangrove-dim: #3d8a52;
+    --sunset-coral: #e08158; --coral-dim: #a45a3d; --neutral-gold: #d4b370;
+    --text-primary: #f0ede6; --text-secondary: #b8b4a8; --text-tertiary: #807e76;
+    --text-on-accent: #0a1419;
+    --font-display: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  }
+</style>
+<style>
+  body { margin: 0; background: var(--gulf-midnight); color: var(--text-primary); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .v-page { max-width: 1000px; margin: 0 auto; padding: 48px 32px 80px; }
+  .v-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gulf-teal); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 45%, transparent); }
+  h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 8px 0 6px; }
+  .v-sub { color: var(--text-secondary); font-size: 1rem; margin: 0 0 36px; max-width: 64ch; line-height: 1.5; }
+
+  /* KPI strip */
+  .v-rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 36px; }
+  .v-rail-cell { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 8px; padding: 14px 16px; }
+  .v-rail-l { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+  .v-rail-v { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .v-rail-s { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  .v-frame { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 10px; padding: 28px; }
+  .v-frame-head { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 14px; margin-bottom: 22px; border-bottom: 1px solid var(--gulf-haze); }
+  .v-frame-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+  .v-frame-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* Timeline */
+  .v-timeline { position: relative; padding-left: 22px; }
+  .v-timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--gulf-haze);
+  }
+  .v-event { position: relative; padding: 18px 0 18px 20px; cursor: pointer; transition: background 120ms ease; border-radius: 4px; }
+  .v-event:hover { background: color-mix(in srgb, var(--gulf-slate-hi) 50%, transparent); }
+  .v-event.is-active { background: color-mix(in srgb, var(--gulf-slate-hi) 80%, transparent); }
+  .v-event-dot {
+    position: absolute;
+    left: -22px; top: 25px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--gulf-midnight);
+    box-shadow: 0 0 12px currentColor;
+    transition: transform 200ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-event.is-active .v-event-dot { transform: scale(1.4); }
+  .v-event-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+  .v-event-year { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.08em; font-weight: 500; }
+  .v-event-name { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; letter-spacing: -0.015em; color: var(--text-primary); }
+  .v-event-cat3 { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border: 1px solid var(--gulf-haze); border-radius: 3px; }
+
+  /* Bar showing claims relative to peak */
+  .v-event-bar-wrap { display: grid; grid-template-columns: 1fr 110px; align-items: center; gap: 14px; margin-top: 6px; }
+  .v-event-bar { position: relative; height: 12px; background: color-mix(in srgb, var(--gulf-slate-hi) 60%, transparent); border-radius: 2px; overflow: hidden; }
+  .v-event-fill { height: 100%; width: 0%; transition: width 900ms cubic-bezier(.16,.84,.44,1); box-shadow: 0 0 12px color-mix(in srgb, currentColor 30%, transparent); }
+  .v-event-claims { font-family: var(--font-mono); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+
+  .v-event-note { color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin: 10px 0 0; max-width: 64ch; }
+
+  /* Baseline marker at bottom */
+  .v-baseline { display: flex; align-items: center; gap: 14px; margin-top: 24px; padding-top: 18px; border-top: 1px dashed var(--gulf-haze); font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+  .v-baseline strong { color: var(--gulf-teal); font-weight: 500; }
+
+  .v-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 24px; border-top: 1px solid var(--gulf-haze); font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.02em; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 720px) {
+    .v-rail { grid-template-columns: repeat(2, 1fr); }
+    .v-event-bar-wrap { grid-template-columns: 1fr; gap: 6px; }
+    .v-event-claims { text-align: left; }
+  }
+</style>
+<style id="brand-override">
+  /* Brand override — MUST be the last :root so it wins by source order. */
+  :root { --gulf-teal: {{brand_primary}}; --sunset-coral: {{brand_secondary}}; }
+</style>
+</head>
+<body>
+<main class="v-page" data-screen-label="Visual: Storm claims">
+  <span class="v-eyebrow">SWFL NFIP claims · named-storm history</span>
+  <h1>Six named storms account for the SWFL flood-claim record.</h1>
+  <p class="v-sub">Six SWFL counties × OpenFEMA NFIP paid-claim totals
+    across the named-storm years on record. The non-storm-year baseline
+    runs {{baseline_claims}} — Ian alone cleared 137× that in a single landfall.</p>
+
+  <div class="v-rail">
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Storms in record</span>
+      <span class="v-rail-v">{{storm_count}}</span>
+      <span class="v-rail-s">{{year_range}}</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Cumulative claims</span>
+      <span class="v-rail-v">{{cumulative_claims}}</span>
+      <span class="v-rail-s">B + C + ICO, paid</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Non-storm baseline</span>
+      <span class="v-rail-v">{{baseline_claims}}</span>
+      <span class="v-rail-s">median annual, non-storm</span>
+    </div>
+    <div class="v-rail-cell">
+      <span class="v-rail-l">Counties covered</span>
+      <span class="v-rail-v">{{counties_covered}}</span>
+      <span class="v-rail-s">Lee · Collier + 4 adjacent</span>
+    </div>
+  </div>
+
+  <div class="v-frame">
+    <div class="v-frame-head">
+      <span class="v-frame-title">Storm-year timeline</span>
+      <span class="v-frame-sub">paid claims · click for context</span>
+    </div>
+
+    <div class="v-timeline" id="timeline"></div>
+
+    <div class="v-baseline">
+      Non-storm baseline · <strong>{{baseline_claims}} / year</strong> · the median annual run-rate for years without a named storm
+    </div>
+  </div>
+
+  <div class="v-foot">
+    <span>OpenFEMA NFIP Paid Claims · 6 SWFL counties · storm-list reviewed 2026-05-17</span>
+    <span>Last computed · {{freshness_token}}</span>
+  </div>
+</main>
+
+<script type="module">
+// ============================================================
+// SWFL named storms — per-event claims are illustrative shares of the
+// cumulative total, weighted by reported damage scale. Data inline; the peak
+// storm's color is tokenized to the brand secondary so the override reaches it.
+// ============================================================
+const STORMS = [
+  { year: 2004, name: "Charley",  cat: "Cat 4", claims:  3200000, color: "#D4B370",
+    note: "First major SWFL landfall in decades — peaked on the Lee coast. Triggered baseline NFIP coverage build-out across barrier islands." },
+  { year: 2005, name: "Wilma",    cat: "Cat 3", claims:  1100000, color: "#D4B370",
+    note: "Crossed the peninsula east-to-west; SWFL caught the trailing storm-surge and rain bands. Smaller paid-claim footprint than Charley." },
+  { year: 2017, name: "Irma",     cat: "Cat 4", claims:  2900000, color: "#D4B370",
+    note: "Marco Island landfall. Widespread inland flood damage across Collier; Naples and Marco took the brunt of the surge." },
+  { year: 2022, name: "Ian",      cat: "Cat 5", claims:  8200000, color: "{{brand_secondary}}",
+    note: "Fort Myers Beach landfall. Single largest claim footprint in SWFL NFIP history. Estero Blvd corridor still in active rebuild." },
+  { year: 2024, name: "Helene",   cat: "Cat 4", claims:  2100000, color: "#D4B370",
+    note: "West-coast brush; surge damage on Sanibel and Captiva. Sliding-window claim activity through Q1 2025." },
+  { year: 2024, name: "Milton",   cat: "Cat 3", claims:  3881000, color: "#D4B370",
+    note: "Hit only weeks after Helene; compounding-loss claims slowed payout cycle. Largest 2024 contributor." },
+];
+
+const PEAK = Math.max(...STORMS.map(s => s.claims));
+
+// ============================================================
+// Render timeline
+// ============================================================
+const tl = document.getElementById("timeline");
+tl.innerHTML = STORMS.map((s, i) => {
+  const widthPct = (s.claims / PEAK) * 100;
+  return `
+    <div class="v-event" data-i="${i}">
+      <span class="v-event-dot" style="background:${s.color};color:${s.color};"></span>
+      <div class="v-event-head">
+        <span class="v-event-year">${s.year}</span>
+        <span class="v-event-name">${s.name}</span>
+        <span class="v-event-cat3">${s.cat}</span>
+      </div>
+      <div class="v-event-bar-wrap">
+        <div class="v-event-bar">
+          <div class="v-event-fill" style="background:${s.color};color:${s.color};" data-target="${widthPct.toFixed(2)}"></div>
+        </div>
+        <span class="v-event-claims" style="color:${s.color};">$${(s.claims / 1e6).toFixed(2)}M</span>
+      </div>
+      <p class="v-event-note">${s.note}</p>
+    </div>
+  `;
+}).join("");
+
+// Bars fill in stagger
+requestAnimationFrame(() => {
+  tl.querySelectorAll(".v-event-fill").forEach((bar, i) => {
+    setTimeout(() => { bar.style.width = bar.dataset.target + "%"; }, 200 + i * 100);
+  });
+});
+
+// Click expansion / highlight
+tl.querySelectorAll(".v-event").forEach(ev => {
+  ev.addEventListener("click", () => {
+    tl.querySelectorAll(".v-event").forEach(x => x.classList.remove("is-active"));
+    ev.classList.add("is-active");
+  });
+});
+</script>
+</body>
+</html>

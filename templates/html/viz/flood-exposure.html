@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<!-- @dsCard group="UI Kit — Visuals" name="Visual — Flood exposure" subtitle="Lee SFHA + V/VE · storm-year vs baseline" viewport="980x800" -->
+<!--
+  Tokenized viz card 003 — flood-exposure.
+  Colors come from the inlined gulf :root below (self-contained — no external CSS).
+  The brand-override style block is the LAST thing before </head> so its
+  :root re-declaration wins by source order over the base palette. Brand tokens
+  {{brand_primary}}/{{brand_secondary}} therefore override --gulf-teal/--sunset-coral.
+  This card is fully CSS-driven (no JS color fills), so the cascade override is all
+  that is needed.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf · Flood exposure</title>
+<style id="gulf-base">
+  /* Canonical SWFL gulf palette — inlined from docs/design-reference/colors_and_type.css */
+  :root {
+    --gulf-midnight: #0a1419; --gulf-deep: #0f1d24; --gulf-slate: #152832;
+    --gulf-slate-hi: #1c3340; --gulf-haze: #22414f;
+    --gulf-teal: #3dc9c0; --gulf-teal-dim: #2a8c85;
+    --mangrove: #5bc97a; --mangrove-dim: #3d8a52;
+    --sunset-coral: #e08158; --coral-dim: #a45a3d; --neutral-gold: #d4b370;
+    --text-primary: #f0ede6; --text-secondary: #b8b4a8; --text-tertiary: #807e76;
+    --text-on-accent: #0a1419;
+    --font-display: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  }
+</style>
+<style>
+  body { margin: 0; background: var(--gulf-midnight); color: var(--text-primary); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .v-page { max-width: 1000px; margin: 0 auto; padding: 56px 32px 88px; }
+  .v-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gulf-teal); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 45%, transparent); }
+  h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 8px 0 6px; }
+  .v-sub { color: var(--text-secondary); font-size: 1rem; margin: 0 0 56px; max-width: 64ch; line-height: 1.5; }
+
+  /* ============================================================
+     Section 1 — exposure bar (composition of Lee County land area)
+     ============================================================ */
+  .v-section { margin-bottom: 64px; }
+  .v-section-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin: 0 0 14px; }
+  .v-section-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 18px; line-height: 1.25; text-wrap: balance; }
+
+  /* Stacked bar showing land composition: safe / SFHA-non-VE / V-VE coastal */
+  .v-stack { position: relative; height: 56px; border-radius: 4px; overflow: hidden; display: flex; background: var(--gulf-haze); }
+  .v-stack-seg { height: 100%; transition: filter 150ms ease; cursor: pointer; position: relative; }
+  .v-stack-seg.is-safe   { background: var(--gulf-slate-hi); }
+  .v-stack-seg.is-sfha   { background: var(--neutral-gold); }
+  .v-stack-seg.is-ve     { background: var(--sunset-coral); background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(0,0,0,0.18) 4px 8px); }
+  .v-stack-seg:hover { filter: brightness(1.15); }
+
+  /* Tick markers underneath the bar */
+  .v-stack-axis { display: flex; margin-top: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.04em; }
+  .v-stack-axis span { flex: 1; text-align: right; }
+  .v-stack-axis span:first-child { text-align: left; }
+
+  .v-stack-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .v-legend-card { padding: 16px 18px; background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 8px; }
+  .v-legend-card[data-active="true"] { border-color: var(--gulf-teal-dim); background: var(--gulf-slate-hi); box-shadow: inset 3px 0 0 var(--gulf-teal); }
+  .v-legend-key { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .v-legend-swatch { width: 14px; height: 14px; border-radius: 2px; }
+  .v-legend-name { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
+  .v-legend-pct { font-family: var(--font-display); font-size: 1.875rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .v-legend-detail { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); display: block; margin-top: 8px; line-height: 1.4; letter-spacing: 0.02em; }
+
+  /* ============================================================
+     Section 2 — the storm multiple, rendered at size
+     ============================================================ */
+  .v-multiple { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 12px; padding: 40px 36px; }
+  .v-multiple-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+  .v-multiple-left { display: flex; flex-direction: column; gap: 14px; }
+  .v-multiple-num { font-family: var(--font-display); font-size: clamp(5rem, 12vw, 9rem); font-weight: 600; letter-spacing: -0.05em; color: var(--sunset-coral); line-height: 0.85; text-shadow: 0 0 40px color-mix(in srgb, var(--sunset-coral) 28%, transparent); font-variant-numeric: tabular-nums; }
+  .v-multiple-x { font-size: 0.55em; opacity: 0.7; margin-left: 0.05em; }
+  .v-multiple-cap { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; max-width: 30ch; line-height: 1.5; }
+
+  .v-multiple-right { display: flex; flex-direction: column; gap: 22px; padding-left: 28px; border-left: 1px solid var(--gulf-haze); }
+  .v-row { display: grid; grid-template-columns: 130px 1fr 120px; align-items: center; gap: 16px; }
+  .v-row-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; line-height: 1.3; }
+  .v-row-track { position: relative; height: 8px; background: color-mix(in srgb, var(--gulf-slate-hi) 60%, transparent); border-radius: 2px; overflow: hidden; }
+  .v-row-fill { height: 100%; transition: width 1100ms cubic-bezier(.16,.84,.44,1); box-shadow: 0 0 12px color-mix(in srgb, currentColor 30%, transparent); }
+  .v-row-val { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.015em; text-align: right; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* ============================================================
+     Section 3 — ZIP-level focus
+     ============================================================ */
+  .v-zip { background: var(--gulf-slate); border: 1px solid var(--gulf-haze); border-radius: 10px; padding: 28px 32px; display: grid; grid-template-columns: 240px 1fr; gap: 32px; align-items: center; }
+  .v-zip-tag { font-family: var(--font-mono); font-size: 11px; color: var(--sunset-coral); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 8px; text-shadow: 0 0 10px color-mix(in srgb, var(--sunset-coral) 40%, transparent); }
+  .v-zip-name { font-family: var(--font-display); font-size: 1.625rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+  .v-zip-place { display: block; font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); margin-top: 6px; font-weight: 500; letter-spacing: 0.04em; }
+
+  .v-zip-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .v-zip-cell { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-left: 1px solid var(--gulf-haze); padding-left: 16px; }
+  .v-zip-cell:first-child { border-left: none; padding-left: 0; }
+  .v-zip-cl { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+  .v-zip-cv { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); font-variant-numeric: tabular-nums; line-height: 1; }
+  .v-zip-cs { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.4; letter-spacing: 0.02em; }
+
+  /* ============================================================
+     Section 4 — CRE translation (the so-what)
+     ============================================================ */
+  .v-trans { background: var(--gulf-deep); border: 1px solid var(--sunset-coral); border-radius: 10px; padding: 22px 26px; }
+  .v-trans-row { display: grid; grid-template-columns: 150px 1fr; gap: 18px; align-items: center; }
+  .v-trans-lbl { font-family: var(--font-mono); font-size: 11px; color: var(--sunset-coral); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; text-shadow: 0 0 10px color-mix(in srgb, var(--sunset-coral) 40%, transparent); }
+  .v-trans-text { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 500; line-height: 1.45; color: var(--text-primary); margin: 0; max-width: 60ch; text-wrap: balance; }
+
+  .v-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 56px; border-top: 1px solid var(--gulf-haze); font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.02em; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 720px) {
+    .v-stack-legend { grid-template-columns: 1fr; }
+    .v-multiple-grid { grid-template-columns: 1fr; }
+    .v-multiple-right { padding-left: 0; border-left: none; padding-top: 24px; border-top: 1px solid var(--gulf-haze); }
+    .v-zip { grid-template-columns: 1fr; gap: 18px; }
+    .v-zip-stats { grid-template-columns: 1fr 1fr; }
+    .v-trans-row { grid-template-columns: 1fr; gap: 8px; }
+  }
+</style>
+<style id="brand-override">
+  /* Brand override — MUST be the last :root so it wins by source order. */
+  :root { --gulf-teal: {{brand_primary}}; --sunset-coral: {{brand_secondary}}; }
+</style>
+</head>
+<body>
+<main class="v-page" data-screen-label="Visual: Flood exposure">
+  <span class="v-eyebrow">Lee County · flood exposure</span>
+  <h1>{{vve_pct}}% of the land carries the entire CRE risk.</h1>
+  <p class="v-sub">Lee County splits into three flood layers: low-risk
+    interior, broad SFHA, and a thin coastal V/VE band on the barrier
+    islands. The whole CRE cap-rate adjustment lives in that thin band.</p>
+
+  <!-- Composition bar — replaces the schematic map -->
+  <section class="v-section">
+    <p class="v-section-label">Land composition · area-weighted</p>
+    <h2 class="v-section-title">Lee County by flood-zone class</h2>
+
+    <div class="v-stack" id="stack">
+      <div class="v-stack-seg is-safe" style="width:{{safe_pct}}%;" data-key="safe"></div>
+      <div class="v-stack-seg is-sfha" style="width:{{sfha_pct}}%;" data-key="sfha"></div>
+      <div class="v-stack-seg is-ve"   style="width:{{vve_pct}}%;"  data-key="ve"></div>
+    </div>
+
+    <div class="v-stack-axis">
+      <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+    </div>
+
+    <div class="v-stack-legend">
+      <div class="v-legend-card" data-key="safe">
+        <div class="v-legend-key">
+          <span class="v-legend-swatch" style="background:var(--gulf-slate-hi);border:1px solid var(--gulf-haze);"></span>
+          <span class="v-legend-name">Outside SFHA</span>
+        </div>
+        <span class="v-legend-pct">{{safe_pct}}%</span>
+        <span class="v-legend-detail">No FEMA-mapped flood hazard.<br/>Standard property risk.</span>
+      </div>
+
+      <div class="v-legend-card" data-key="sfha">
+        <div class="v-legend-key">
+          <span class="v-legend-swatch" style="background:var(--neutral-gold);"></span>
+          <span class="v-legend-name">SFHA — A zones</span>
+        </div>
+        <span class="v-legend-pct" style="color:var(--neutral-gold);">{{sfha_pct}}%</span>
+        <span class="v-legend-detail">Inland special-flood-hazard.<br/>100-yr floodplain, no wave action.</span>
+      </div>
+
+      <div class="v-legend-card" data-key="ve">
+        <div class="v-legend-key">
+          <span class="v-legend-swatch" style="background:var(--sunset-coral);"></span>
+          <span class="v-legend-name">V/VE — coastal high-hazard</span>
+        </div>
+        <span class="v-legend-pct" style="color:var(--sunset-coral);">{{vve_pct}}%</span>
+        <span class="v-legend-detail">Barrier-island wave-velocity zones.<br/>{{ve_polygons}} polygons. The risk lives here.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- The storm multiple rendered at size -->
+  <section class="v-section">
+    <p class="v-section-label">Storm year vs non-storm baseline · paid claims</p>
+    <h2 class="v-section-title">A named storm produces {{storm_multiplier}}× the claim load of a normal year.</h2>
+
+    <div class="v-multiple">
+      <div class="v-multiple-grid">
+        <div class="v-multiple-left">
+          <div class="v-multiple-num">{{storm_multiplier}}<span class="v-multiple-x">×</span></div>
+          <p class="v-multiple-cap">cumulative paid claims across storm years versus the median non-storm year on record</p>
+        </div>
+
+        <div class="v-multiple-right">
+          <div class="v-row">
+            <span class="v-row-label">Storm years</span>
+            <div class="v-row-track"><div class="v-row-fill" style="background:var(--sunset-coral);color:var(--sunset-coral);width:0%;" data-target="{{storm_years_target}}"></div></div>
+            <span class="v-row-val" style="color:var(--sunset-coral);">{{storm_years_claims}}</span>
+          </div>
+          <div class="v-row">
+            <span class="v-row-label">Non-storm yr (median)</span>
+            <div class="v-row-track"><div class="v-row-fill" style="background:var(--gulf-teal);color:var(--gulf-teal);width:0%;" data-target="{{baseline_target}}"></div></div>
+            <span class="v-row-val">{{baseline_claims}}</span>
+          </div>
+          <div class="v-row" style="padding-top:14px;border-top:1px dashed var(--gulf-haze);margin-top:4px;">
+            <span class="v-row-label" style="color:var(--text-tertiary);">Storms in record</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);letter-spacing:0.04em;">{{storm_names}}</span>
+            <span class="v-row-val" style="color:var(--text-secondary);">{{storm_count}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZIP-level focus -->
+  <section class="v-section">
+    <p class="v-section-label">100th-percentile ZIP exposure</p>
+    <h2 class="v-section-title">{{zip_label}} carries the highest per-property AAL in the dataset.</h2>
+
+    <div class="v-zip">
+      <div>
+        <span class="v-zip-tag">100th percentile · V/VE</span>
+        <span class="v-zip-name">{{zip_code}}</span>
+        <span class="v-zip-place">{{zip_place}}</span>
+      </div>
+      <div class="v-zip-stats">
+        <div class="v-zip-cell">
+          <span class="v-zip-cl">AAL per insured</span>
+          <span class="v-zip-cv" style="color:var(--sunset-coral);">{{zip_aal}}</span>
+          <span class="v-zip-cs">average annual loss<br/>per insured property</span>
+        </div>
+        <div class="v-zip-cell">
+          <span class="v-zip-cl">Flood insurance share of NOI</span>
+          <span class="v-zip-cv">{{zip_noi_share}}</span>
+          <span class="v-zip-cs">imputed @ 8% cap<br/>(materially affects valuation)</span>
+        </div>
+        <div class="v-zip-cell">
+          <span class="v-zip-cl">Cap-rate adjustment</span>
+          <span class="v-zip-cv" style="color:var(--sunset-coral);">{{zip_cap_adj}}</span>
+          <span class="v-zip-cs">barrier-island exposure<br/>vs comparable inland</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRE translation banner -->
+  <section class="v-section">
+    <div class="v-trans">
+      <div class="v-trans-row">
+        <span class="v-trans-lbl">CRE translation</span>
+        <p class="v-trans-text">For barrier-island assets in V/VE zones, add {{zip_cap_adj_plain}} to the
+          comparable inland cap rate before underwriting. Flood-insurance share of NOI
+          materially shifts valuation in coastal ZIPs.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="v-foot">
+    <span>FEMA NFHL Flood Hazard Zones · OpenFEMA NFIP claims · 6 SWFL counties</span>
+    <span>Last computed · {{freshness_token}}</span>
+  </div>
+</main>
+
+<script type="module">
+// Bar fills animate in
+requestAnimationFrame(() => {
+  document.querySelectorAll(".v-row-fill").forEach((bar, i) => {
+    setTimeout(() => { bar.style.width = bar.dataset.target + "%"; }, 200 + i * 150);
+  });
+});
+
+// Legend ↔ stack-segment interaction
+const stack = document.getElementById("stack");
+const segs = stack.querySelectorAll(".v-stack-seg");
+const cards = document.querySelectorAll(".v-legend-card");
+
+function setActive(key) {
+  cards.forEach(c => c.setAttribute("data-active", c.dataset.key === key ? "true" : "false"));
+}
+function clearActive() {
+  cards.forEach(c => c.setAttribute("data-active", "false"));
+}
+
+segs.forEach(s => {
+  s.addEventListener("mouseenter", () => setActive(s.dataset.key));
+  s.addEventListener("mouseleave", clearActive);
+  s.addEventListener("click", () => setActive(s.dataset.key));
+});
+cards.forEach(c => {
+  c.addEventListener("mouseenter", () => setActive(c.dataset.key));
+  c.addEventListener("mouseleave", clearActive);
+});
+</script>
+</body>
+</html>
