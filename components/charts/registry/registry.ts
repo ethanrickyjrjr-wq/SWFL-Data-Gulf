@@ -55,10 +55,14 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     label: "Z-Gauge / Index",
   },
   "seasonal-radial": {
+    // L0 (done): bind-frame's `seasonal-radial` case + `corridor_seasonality`
+    // detail_table column contract exist; bindSeasonalRadial maps rows → spec.
+    // L3 (done): cre-swfl now emits a `corridor_seasonality` detail_table
+    // (one row per corridor, seasonal_index as 0–1 ratio). Flag flipped here
+    // in the same PR as the emit (brain-first gate).
     component: SeasonalRadialFrame,
     accepts: ["time-series"],
     label: "Seasonal Radial (corridor index)",
-    fixtureOnly: true,
   },
   "franchise-survival": {
     // L0 (done): bind-frame's `franchise-survival` case + `franchise_survival`

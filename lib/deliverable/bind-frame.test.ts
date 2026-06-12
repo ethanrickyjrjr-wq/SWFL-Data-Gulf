@@ -382,7 +382,7 @@ describe("bindDetailTableFrame — franchise-survival (gated fixtureOnly until L
   });
 });
 
-describe("bindDetailTableFrame — seasonal-radial (gated fixtureOnly until L3)", () => {
+describe("bindDetailTableFrame — seasonal-radial", () => {
   const seasonalTable = detailTable({
     id: "corridor_seasonality",
     grain: "corridor",
@@ -403,9 +403,11 @@ describe("bindDetailTableFrame — seasonal-radial (gated fixtureOnly until L3)"
     expect(data[0]).toEqual({ corridor: "US 41 — Downtown Fort Myers", seasonal_index: 0.35 });
   });
 
-  test("STILL gated: bindFrameSpec returns null while fixtureOnly is true (L3 flips it)", () => {
+  test("L3 done: bindFrameSpec returns a live spec now that fixtureOnly is false", () => {
     const o = output({ detail_tables: [seasonalTable] });
-    expect(bindFrameSpec(o, { frame_id: "seasonal-radial" })).toBeNull();
+    const spec = bindFrameSpec(o, { frame_id: "seasonal-radial" });
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("seasonal-radial");
   });
 });
 

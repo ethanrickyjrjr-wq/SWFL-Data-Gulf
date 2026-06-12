@@ -7,6 +7,7 @@ import type {
   BrainOutput,
   BrainOutputMetric,
   BrainOutputMetricSource,
+  BrainOutputDetailTable,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
 
@@ -1730,9 +1731,48 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     }
   }
 
+  // --- corridor_seasonality detail_table (Task L3) ---
+  // One row per verified corridor that has a non-null seasonal_index.
+  // Row key = raw corridor name (stable lookup); label = display name.
+  const seasonalityRows = corridors
+    .filter((c) => c.seasonal_index != null)
+    .map((c) => ({
+      key: c.name,
+      label: displayNameFor(c.name),
+      cells: { seasonal_index: c.seasonal_index as number },
+    }));
+  const detail_tables: BrainOutputDetailTable[] = [];
+  if (seasonalityRows.length > 0) {
+    const seasonalityUrl =
+      env.source === "live" && env.supabaseUrl
+        ? `${env.supabaseUrl}/rest/v1/corridor_profiles?select=name,seasonal_index&verification_status=eq.verified&deleted_at=is.null&seasonal_index=not.is.null`
+        : "fixture://refinery/__fixtures__/corridor-profiles.sample.json";
+    detail_tables.push({
+      id: "corridor_seasonality",
+      title: "SWFL CRE corridor seasonality index",
+      grain: "corridor",
+      columns: [
+        {
+          id: "seasonal_index",
+          label: "Seasonal index",
+          display_format: "ratio",
+          units: "0–1 scale",
+        },
+      ],
+      rows: seasonalityRows,
+      source: {
+        url: seasonalityUrl,
+        fetched_at,
+        tier: 2,
+        citation: `Brains Supabase corridor_profiles (verified, non-deleted) — seasonal_index per corridor (0 = no seasonality, 1 = extreme). ${seasonalityRows.length} of ${corridors.length} corridors reporting.`,
+      },
+    });
+  }
+
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
+    detail_tables: detail_tables.length > 0 ? detail_tables : undefined,
     caveats: vote.caveats,
     direction: vote.direction,
     magnitude: vote.magnitude,

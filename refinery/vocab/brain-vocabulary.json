@@ -4064,6 +4064,16 @@
       "source_brains": ["franchise-outcomes"],
       "status": "active",
       "scope_note": "detail_table id 'franchise_survival' emitted by the franchise-outcomes pack. One row per SBA franchise brand in Lee & Collier counties. Columns: survival_rate (0–1 ratio over resolved loans; null = not yet assessable), n_paid_in_full, n_charged_off, n_loans (total incl. active), total_gross_approval (USD). Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids."
+    },
+    "cre_corridor_seasonality_table": {
+      "id": "cre_corridor_seasonality_table",
+      "prefLabel": "CRE Corridor Seasonality Detail Table",
+      "altLabels": ["corridor seasonality per-corridor table"],
+      "category": "real-estate",
+      "domain": ["real-estate"],
+      "source_brains": ["cre-swfl"],
+      "status": "active",
+      "scope_note": "detail_table id 'corridor_seasonality' emitted by the cre-swfl pack. One row per verified SWFL CRE corridor that has a non-null seasonal_index. Columns: seasonal_index (ratio 0–1; 0 = no seasonality, 1 = extreme seasonality). Row key = raw corridor name; label = displayNameFor() display name. Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids."
     }
   },
   "slug_index": {
