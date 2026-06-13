@@ -54,8 +54,11 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
   {
     id: "properties-lee-value",
     domain: "real-estate",
+    // Drift fix (2026-06-13): synced to the pack scope after the redfin-lee build
+    // added the market-grain (Redfin) source to properties-lee-value.mts but left
+    // this catalog entry on the old single-source text (catalog.test.mts was red).
     scope:
-      "Lee County (FL) parcel-value direction read — sales-velocity z-score (current year vs trailing 3yr) plus Save-Our-Homes gap median across homesteaded parcels, derived from the LeePA Property Appraiser snapshot.",
+      "Lee County (FL) real-estate direction read — LeePA parcel-grain: sales-velocity z-score (current year vs trailing 3yr) + Save-Our-Homes gap median. Redfin county tracker (market-grain): homes-sold z-score + median sale price YoY + months of supply from data_lake.redfin_lee_market. Two sources, two grains; county-grain peer to properties-collier-value.",
     ttl_seconds: 2592000,
   },
   {

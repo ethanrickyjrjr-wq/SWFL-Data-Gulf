@@ -169,3 +169,109 @@ test("propertiesCollierValue pack: empty-snapshot path -> neutral + zero-metrics
     "must surface a 0-row caveat naming the pipeline + grant SQL",
   );
 });
+
+// ---------------------------------------------------------------------------
+// POLARITY LOCK — bearish scenario.
+//
+// The bullish round-trip above can't catch a z->direction wire-up inversion:
+// every signal in that fixture points bullish. This loads a SECOND, bearish
+// fixture (homes_sold collapsing below the trailing-3yr baseline; MOS climbing
+// to 8.5) and pins that the brain reads BEARISH. Collier's brain direction is
+// the Redfin homes-sold z-score, so this fixture flips the actual brain
+// direction (parity with the Lee LeePA bearish test). MOS rising is
+// corroborating only — its polarity is locked separately in
+// refinery/vocab/properties-polarity-lock.test.mts (the pack emits MOS as a
+// 'stable' level metric and never applies its polarity).
+// ---------------------------------------------------------------------------
+test("propertiesCollierValue pack: BEARISH scenario → brain direction is bearish (polarity lock)", async () => {
+  const { aggregateFromRows } = await import("../sources/collier-market-source.mts");
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+
+  const fixturePath = join(
+    process.cwd(),
+    "refinery",
+    "__fixtures__",
+    "properties-collier-value.bearish.sample.json",
+  );
+  const data = JSON.parse(await readFile(fixturePath, "utf-8")) as {
+    rows: Parameters<typeof aggregateFromRows>[0];
+  };
+  const { yearly, summary } = aggregateFromRows(data.rows);
+
+  // Mirror the source's fragment emission (collier-sales-year + collier-summary).
+  // The hardwired source.fetch() only reads the bullish file, so we build the
+  // market fragments directly from the bearish fixture — no parcels/FHFA needed
+  // to exercise the velocity-driven direction.
+  const fetched_at = "2026-06-13T00:00:00Z";
+  const fragments = [
+    ...yearly.map((yr) => ({
+      fragment_id: `collier-bearish-sales-${yr.year}`,
+      source_id: "redfin_collier_market",
+      source_trust_tier: 2,
+      fetched_at,
+      raw: { year: yr.year, homes_sold: yr.homes_sold },
+      normalized: yr,
+    })),
+    {
+      fragment_id: "collier-bearish-summary",
+      source_id: "redfin_collier_market",
+      source_trust_tier: 2,
+      fetched_at,
+      raw: {
+        latest_period: summary.latest_period,
+        median_sale_price_yoy_pct: summary.median_sale_price_yoy_pct,
+        months_of_supply: summary.months_of_supply,
+      },
+      normalized: summary,
+    },
+  ];
+
+  propertiesCollierValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesCollierValue.corpusSummary>>[0],
+  );
+  const result = propertiesCollierValue.outputProducer!({
+    pack: propertiesCollierValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesCollierValue.outputProducer>>[0]);
+
+  // THE LOCK: a market whose current-year velocity collapsed below baseline
+  // MUST read bearish, never bullish.
+  assert.equal(
+    result.direction,
+    "bearish",
+    "current-year homes_sold below the trailing-3yr baseline must read bearish — a bullish read here is a z->direction polarity inversion",
+  );
+  assert.ok(result.magnitude > 0 && result.magnitude <= 1, "magnitude must be in (0, 1]");
+
+  // z-score metric: negative value + the 'falling' branch (the bullish fixture
+  // only ever exercises 'rising').
+  const z = result.key_metrics.find((m) => m.metric === "collier_homes_sold_zscore");
+  assert.ok(z, "collier_homes_sold_zscore metric must be present");
+  assert.ok((z!.value as number) < 0, "z-score must be negative in the bearish scenario");
+  assert.equal(
+    z!.direction,
+    "falling",
+    "z-score metric direction must be 'falling' in the bearish scenario",
+  );
+
+  // Months of supply climbs to >= 7.5 (a glutted market). It does NOT drive the
+  // pack direction — emitted as a 'stable' level metric; polarity is vocab-locked.
+  const mos = result.key_metrics.find((m) => m.metric === "collier_months_of_supply");
+  assert.ok(mos, "collier_months_of_supply metric must be present");
+  assert.ok((mos!.value as number) >= 7.5, "MOS must be >= 7.5 in the bearish scenario");
+  assert.equal(mos!.direction, "stable", "MOS is a level metric — pack emits 'stable'");
+
+  // The non-headline Condo/Co-op trap (homes_sold 99999) must STILL be filtered
+  // out under the bearish path — else current-year velocity would invert bullish.
+  const perYear = result.key_metrics.find((m) => m.metric === "collier_homes_sold_per_year");
+  assert.equal(
+    perYear!.value,
+    7000,
+    "non-headline property types must be filtered out — the filter is load-bearing for the bearish read",
+  );
+});

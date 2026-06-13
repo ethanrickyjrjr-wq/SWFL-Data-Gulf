@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "description": "BEARISH counterpart to properties-collier-value.sample.json — polarity lock for properties-collier-value. Engineered so the current complete year (year-1 relative to a 2026 run = 2025) sits WELL BELOW the trailing 3yr baseline (2022/2023/2024), forcing the homes-sold z-score negative -> brain direction 'bearish'. months_of_supply simultaneously climbs to 8.5 (>= 7.5) — a glutted, buyer-favorable market. If a polarity/threshold inversion ever made this collapsing market read 'bullish', the bearish test turns red. The bullish fixture is NOT touched; this is additive.",
+    "region": "Collier County, FL",
+    "headline_property_type": "All Residential",
+    "time_assumption": "Assumes 'now' is calendar 2026 so year-1 = 2025 is the current complete year.",
+    "engineering": "Baseline All-Residential homes_sold 2022=9000, 2023=8500, 2024=8000 (mean 8500, population std ~408). Current 2025=7000 -> z = (7000-8500)/408 ~= -3.67 (clearly bearish, z <= -1.0). Non-headline rows (Condo 99999, SFR 4800) MUST be filtered out — if the 99999 leaked in, current-year velocity would invert to bullish, so the property-type filter is load-bearing for the bearish read.",
+    "expected": {
+      "direction": "bearish",
+      "current_year_homes_sold": 7000,
+      "current_months_of_supply": 8.5
+    }
+  },
+  "rows": [
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2021-12-01",
+      "period_end": "2021-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 615000,
+      "median_sale_price_yoy": 0.06,
+      "homes_sold": 9500,
+      "inventory": 5500,
+      "months_of_supply": 1.5
+    },
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2022-12-01",
+      "period_end": "2022-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 620000,
+      "median_sale_price_yoy": 0.008,
+      "homes_sold": 9000,
+      "inventory": 6200,
+      "months_of_supply": 2.2
+    },
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2023-12-01",
+      "period_end": "2023-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 605000,
+      "median_sale_price_yoy": -0.024,
+      "homes_sold": 8500,
+      "inventory": 7100,
+      "months_of_supply": 3.5
+    },
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2024-12-01",
+      "period_end": "2024-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 588000,
+      "median_sale_price_yoy": -0.028,
+      "homes_sold": 8000,
+      "inventory": 8400,
+      "months_of_supply": 5.0
+    },
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2025-12-01",
+      "period_end": "2025-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 565000,
+      "median_sale_price_yoy": -0.04,
+      "homes_sold": 7000,
+      "inventory": 9200,
+      "months_of_supply": 8.5
+    },
+
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2025-12-01",
+      "period_end": "2025-12-31",
+      "property_type": "Condo/Co-op",
+      "median_sale_price": 410000,
+      "median_sale_price_yoy": -0.06,
+      "homes_sold": 99999,
+      "inventory": 4200,
+      "months_of_supply": 11.4
+    },
+    {
+      "region": "Collier County, FL",
+      "period_begin": "2024-12-01",
+      "period_end": "2024-12-31",
+      "property_type": "Single Family Residential",
+      "median_sale_price": 745000,
+      "median_sale_price_yoy": -0.019,
+      "homes_sold": 4800,
+      "inventory": 3900,
+      "months_of_supply": 4.6
+    }
+  ]
+}

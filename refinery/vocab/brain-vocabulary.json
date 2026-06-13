@@ -1915,6 +1915,7 @@
     },
     "properties_collier_months_of_supply": {
       "id": "properties_collier_months_of_supply",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Collier County Months of Supply (Redfin)",
       "altLabels": ["Collier months of supply", "Collier MOS"],
       "raw_slugs": ["collier_months_of_supply"],
@@ -1926,7 +1927,7 @@
       "value_range": [0, 36],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Redfin months-of-supply for Collier County ('All Residential') at the latest published period: inventory divided by the monthly sales pace. Lower = tighter, seller-favorable; higher = more buyer leverage. Level metric, no direction contribution."
+      "scope_note": "Redfin months-of-supply for Collier County ('All Residential') at the latest published period: inventory divided by the monthly sales pace. Lower = tighter, seller-favorable (lower_is_bullish); higher = more buyer leverage. Does NOT drive the leaf brain's direction (that is the homes-sold z-score; the pack emits MOS with direction 'stable'), but is independently gradeable with the same polarity as properties_lee_months_of_supply — identical Redfin All-Residential metric/units, so the polarity is verified on Collier's own semantics, not mirrored. Grade block added 2026-06-13 for Lee/Collier parity; the prior 'no direction contribution' note referred to the leaf direction only, not gradeability — so the next audit does not re-ask why Collier lacked a polarity."
     },
     "properties_lee_homes_sold_zscore": {
       "id": "properties_lee_homes_sold_zscore",

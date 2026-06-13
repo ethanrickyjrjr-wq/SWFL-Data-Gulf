@@ -3,24 +3,22 @@ import assert from "node:assert/strict";
 
 process.env["REFINERY_SOURCE"] = "fixture";
 
-const { directionFromZScore, propertiesLeeValue } =
-  await import("./properties-lee-value.mts");
+const { directionFromZScore, propertiesLeeValue } = await import("./properties-lee-value.mts");
 
 // Rule table for properties-lee-value direction derivation.
 // Bullish threshold: z ≥ +1.0. Bearish threshold: z ≤ −1.0. Neutral otherwise.
 // Boundary tests pin behavior at the exact ±1.0 cut-points so future-you
 // can't accidentally widen or narrow the band by an off-by-one.
-const RULES: Array<[number | null, "bullish" | "bearish" | "neutral", string]> =
-  [
-    [3, "bullish", "clearly bullish"],
-    [1.0, "bullish", "boundary: exactly +1σ → bullish (≥)"],
-    [0.99, "neutral", "just inside band → neutral"],
-    [0, "neutral", "zero → neutral"],
-    [-0.99, "neutral", "just inside band → neutral (negative)"],
-    [-1.0, "bearish", "boundary: exactly −1σ → bearish (≤)"],
-    [-3, "bearish", "clearly bearish"],
-    [null, "neutral", "null z (no current-year sales) → neutral"],
-  ];
+const RULES: Array<[number | null, "bullish" | "bearish" | "neutral", string]> = [
+  [3, "bullish", "clearly bullish"],
+  [1.0, "bullish", "boundary: exactly +1σ → bullish (≥)"],
+  [0.99, "neutral", "just inside band → neutral"],
+  [0, "neutral", "zero → neutral"],
+  [-0.99, "neutral", "just inside band → neutral (negative)"],
+  [-1.0, "bearish", "boundary: exactly −1σ → bearish (≤)"],
+  [-3, "bearish", "clearly bearish"],
+  [null, "neutral", "null z (no current-year sales) → neutral"],
+];
 
 for (const [z, expected, label] of RULES) {
   test(`directionFromZScore: ${label} (z=${z})`, () => {
@@ -43,23 +41,24 @@ test("propertiesLeeValue pack: deterministic (skipTriageAgent + skipSynthesisAge
   assert.equal(propertiesLeeValue.skipSynthesisAgent, true);
 });
 
-test("propertiesLeeValue pack: source connectors wired (leepa + fhfa-hpi)", () => {
-  assert.equal(propertiesLeeValue.sources.length, 2);
-  const leepa = propertiesLeeValue.sources.find(
-    (s) => s.source_id === "leepa_value_lee",
-  );
+test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-market + fhfa-hpi)", () => {
+  // Drift fix (2026-06-13): the redfin-lee build added leeMarketSource as a 3rd
+  // connector but this assertion still expected 2 — it was red on main. Pinned
+  // to 3 and the redfin_lee_market connector added below.
+  assert.equal(propertiesLeeValue.sources.length, 3);
+  const leepa = propertiesLeeValue.sources.find((s) => s.source_id === "leepa_value_lee");
   assert.ok(leepa, "leepa_value_lee source must be wired");
   assert.equal(leepa!.trust_tier, 2);
-  const fhfa = propertiesLeeValue.sources.find(
-    (s) => s.source_id === "fhfa_hpi",
-  );
+  const leeMarket = propertiesLeeValue.sources.find((s) => s.source_id === "redfin_lee_market");
+  assert.ok(leeMarket, "redfin_lee_market source must be wired");
+  assert.equal(leeMarket!.trust_tier, 2);
+  const fhfa = propertiesLeeValue.sources.find((s) => s.source_id === "fhfa_hpi");
   assert.ok(fhfa, "fhfa_hpi source must be wired");
   assert.equal(fhfa!.trust_tier, 1);
 });
 
 test("propertiesLeeValue pack: fixture round-trip produces expected metrics", async () => {
-  const { leepaValueSource } =
-    await import("../sources/leepa-value-source.mts");
+  const { leepaValueSource } = await import("../sources/leepa-value-source.mts");
   const allFragments = await leepaValueSource.fetch();
   // Fixture has 22 last-sales spread across 2022-2025; expect 4+ year fragments + 1 summary.
   const yearKinds = allFragments.filter(
@@ -79,17 +78,12 @@ test("propertiesLeeValue pack: fixture round-trip produces expected metrics", as
     citations: [],
     facts: [],
     recentNote: "",
-  } as unknown as Parameters<
-    NonNullable<typeof propertiesLeeValue.outputProducer>
-  >[0]);
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
 
   // Fixture is engineered so the current-year sales (year-1 relative to today)
   // sit well above the trailing 3yr baseline → bullish.
   assert.equal(result.direction, "bullish");
-  assert.ok(
-    result.magnitude > 0 && result.magnitude <= 1,
-    "magnitude must be in (0, 1]",
-  );
+  assert.ok(result.magnitude > 0 && result.magnitude <= 1, "magnitude must be in (0, 1]");
 
   // Expected metrics surface.
   const metricNames = result.key_metrics.map((m) => m.metric);
@@ -125,9 +119,7 @@ test("propertiesLeeValue pack: empty-snapshot path → neutral + zero-metrics fa
     citations: [],
     facts: [],
     recentNote: "",
-  } as unknown as Parameters<
-    NonNullable<typeof propertiesLeeValue.outputProducer>
-  >[0]);
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
 
   assert.equal(result.direction, "neutral");
   assert.equal(result.magnitude, 0);
@@ -135,5 +127,97 @@ test("propertiesLeeValue pack: empty-snapshot path → neutral + zero-metrics fa
   assert.ok(
     result.caveats.some((c) => /no rows/i.test(c)),
     "must surface a 0-row caveat naming the pipeline + grant SQL",
+  );
+});
+
+// ---------------------------------------------------------------------------
+// POLARITY LOCK — bearish scenario.
+//
+// The bullish round-trip above can't catch a z->direction wire-up inversion:
+// the fixture's current year sits above baseline, so it's always bullish. The
+// Lee BRAIN direction is parcel-driven (LeePA qualified-sale velocity z-score),
+// NOT the Redfin market fixture — so this loads a SECOND, bearish LeePA PARCEL
+// fixture whose current-year (2025) sale count is below the trailing-3yr
+// baseline, and pins that the brain reads BEARISH. Parity with the Collier
+// bearish test (which flips Collier's market-driven direction).
+// ---------------------------------------------------------------------------
+test("propertiesLeeValue pack: BEARISH parcel scenario → brain direction is bearish (polarity lock)", async () => {
+  const { aggregateFromParcels } = await import("../sources/leepa-value-source.mts");
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+
+  const fixturePath = join(
+    process.cwd(),
+    "refinery",
+    "__fixtures__",
+    "properties-lee-value.bearish.sample.json",
+  );
+  const data = JSON.parse(await readFile(fixturePath, "utf-8")) as {
+    parcels: Parameters<typeof aggregateFromParcels>[0];
+  };
+  const { yearly, summary } = aggregateFromParcels(data.parcels);
+
+  // Mirror the source's fragment emission (leepa-sales-year + leepa-summary).
+  // The hardwired source.fetch() only reads the bullish file, so we build the
+  // parcel fragments directly from the bearish fixture.
+  const fetched_at = "2026-06-13T00:00:00Z";
+  const fragments = [
+    ...yearly.map((yr) => ({
+      fragment_id: `lee-bearish-sales-${yr.year}`,
+      source_id: "leepa_value_lee",
+      source_trust_tier: 2,
+      fetched_at,
+      raw: { year: yr.year, sales_count: yr.sales_count },
+      normalized: yr,
+    })),
+    {
+      fragment_id: "lee-bearish-summary",
+      source_id: "leepa_value_lee",
+      source_trust_tier: 2,
+      fetched_at,
+      raw: {
+        total_parcels: summary.total_parcels,
+        soh_homesteaded_parcels: summary.soh_homesteaded_parcels,
+      },
+      normalized: summary,
+    },
+  ];
+
+  propertiesLeeValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesLeeValue.corpusSummary>>[0],
+  );
+  const result = propertiesLeeValue.outputProducer!({
+    pack: propertiesLeeValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
+
+  // THE LOCK: current-year qualified sales below the trailing-3yr baseline MUST
+  // read bearish, never bullish. A bullish read here is a z->direction inversion.
+  assert.equal(
+    result.direction,
+    "bearish",
+    "current-year sales below the trailing-3yr baseline must read bearish — a bullish read is a z->direction polarity inversion",
+  );
+  assert.ok(result.magnitude > 0 && result.magnitude <= 1, "magnitude must be in (0, 1]");
+
+  // Velocity z-score metric: negative value + the 'falling' branch (the bullish
+  // fixture only ever exercises 'rising').
+  const z = result.key_metrics.find((m) => m.metric === "sales_velocity_zscore");
+  assert.ok(z, "sales_velocity_zscore metric must be present");
+  assert.ok((z!.value as number) < 0, "z-score must be negative in the bearish scenario");
+  assert.equal(
+    z!.direction,
+    "falling",
+    "z-score metric direction must be 'falling' in the bearish scenario",
+  );
+
+  // Velocity-per-1k must still surface (level metric, parcel-grain).
+  assert.ok(
+    result.key_metrics.some((m) => m.metric === "sales_velocity_per_1k"),
+    "sales_velocity_per_1k must be present",
   );
 });
