@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — All lanes closed: Lane A/B reconciled into main as the UNION with reply-sensor + #88 — PUSH
+
+- Operator: "take care of all lanes, close them all, decide what's right so they don't overwrite each other." Squash-merged `wip/lane-ab-preserve` (the preserved uncommitted Lane A/B work) onto main. Only 2 conflicts; `scheduler.ts` auto-merged clean (orthogonal regions).
+- **Union, no overwrites:** ProcessDeps now carries all three send deps — `resolveReplyTo`/`recordSend` (reply-sensor) + `claimSend` (at-most-once idempotency). `run-schedules.mts` conflict = unioned all 3. `app/api/converse/route.ts` conflict = kept Lane A/B's cost-guards/weekly-cap/`sseMessage`, dropped `GAZETTEER_STR` (reply-sensor refactor already removed it → verified unused, no dangling import).
+- Verified reconciled tree: `tsc --noEmit` exit 0 + `bun test` **2235/0** (189 files; Lane A/B added ~41 tests — idempotency/proposal-nonce/scope/welcome/middleware). Pushed.
+- **4 migrations now on main, all UNAPPLIED** (`email_sends`, `buyer_intent_events`, `email_send_ledger`, `email_schedule_scope`) — distinct tables, no collision; consumers (digest cron + inbound webhook) are not live, so unapplied = non-breaking. Apply at the respective go-lives. (#88's `activation_sequence` IS applied — its subscribe consumer is live.)
+- Lane A/B live bits (converse cost-guards, welcome, middleware) deploy additively; weekly cap env-gated default-off. `wip/lane-ab-preserve` (`97c24d9`) now fully merged — deletable. Handoff updated: `docs/handoff/2026-06-13-multi-session-cleanup.md`.
+
 ## 2026-06-13 (main) — Reply-Sensor branch reviewed (3-agent fan-out) + squash-merged onto green main; #88 migration applied to PROD — PUSH
 
 - Operator (asleep): "no rules, figure it out, push merge squash, clear this up, will handle when I get up." Full writeup: **`docs/handoff/2026-06-13-multi-session-cleanup.md`**.

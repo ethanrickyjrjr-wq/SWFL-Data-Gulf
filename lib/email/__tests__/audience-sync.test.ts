@@ -4,6 +4,7 @@ import type { Resend } from "resend";
 import {
   enumerateAudiences,
   syncUserAudiences,
+  segmentName,
   type AudienceStore,
   type ContactRow,
   type AudienceRecord,
@@ -164,10 +165,10 @@ describe("syncUserAudiences", () => {
       ],
     });
 
-    const summary = await syncUserAudiences(resend, store);
+    const summary = await syncUserAudiences(resend, store, "user-1");
 
-    // Two segments created (newsletter, vip).
-    assert.deepEqual(calls.create.sort(), ["newsletter", "vip"]);
+    // Two segments created, NAMESPACED per tenant (newsletter, vip).
+    assert.deepEqual(calls.create.sort(), ["user-1:newsletter", "user-1:vip"]);
     // 3 contact adds: a→newsletter, b→newsletter, a→vip.
     assert.equal(calls.addContacts.length, 3);
     // Audience rows upserted with the right counts.
@@ -189,7 +190,7 @@ describe("syncUserAudiences", () => {
       audiences: [{ audience_slug: "newsletter", resend_audience_id: "seg_existing" }],
     });
 
-    const summary = await syncUserAudiences(resend, store);
+    const summary = await syncUserAudiences(resend, store, "user-1");
 
     assert.deepEqual(calls.create, []); // no create
     assert.deepEqual(calls.getById, ["seg_existing"]); // verified the cached id
@@ -206,10 +207,10 @@ describe("syncUserAudiences", () => {
       audiences: [{ audience_slug: "news", resend_audience_id: "seg_gone" }],
     });
 
-    const summary = await syncUserAudiences(resend, store);
+    const summary = await syncUserAudiences(resend, store, "user-1");
 
     assert.deepEqual(calls.getById, ["seg_gone"]); // tried the stale id
-    assert.deepEqual(calls.create, ["news"]); // then created
+    assert.deepEqual(calls.create, ["user-1:news"]); // then created (namespaced)
     assert.equal(summary.audiences[0].created, true);
   });
 
@@ -223,8 +224,34 @@ describe("syncUserAudiences", () => {
       ],
     });
 
-    const summary = await syncUserAudiences(resend, store);
+    const summary = await syncUserAudiences(resend, store, "user-1");
     assert.equal(summary.total_audiences, 1);
     assert.equal(summary.skipped_untagged, 2);
+  });
+
+  test("CRITICAL: a second tenant with the SAME bare tag does NOT reuse the first tenant's segment", () => {
+    // segmentName is the isolation boundary: two tenants both tagging "newsletter"
+    // resolve to DIFFERENT Resend segment names, so the list-scan can never bleed.
+    assert.notEqual(segmentName("user-A", "newsletter"), segmentName("user-B", "newsletter"));
+    assert.equal(segmentName("user-A", "newsletter"), "user-A:newsletter");
+  });
+
+  test("CRITICAL: tenant B's sync creates ITS OWN segment, ignoring tenant A's same-name segment", async () => {
+    // Tenant A already owns a "user-A:newsletter" segment (existing in Resend). Tenant
+    // B, with NO cache row and a contact tagged "newsletter", must create
+    // "user-B:newsletter" — never reuse A's segment.
+    const { resend, calls } = makeResendStub({
+      existingSegments: [{ id: "segA", name: "user-A:newsletter" }],
+    });
+    const { store, upserts } = makeStoreStub({
+      contacts: [{ email: "b@example.com", tags: ["newsletter"] }],
+      // no audiences cache for tenant B
+    });
+
+    const summary = await syncUserAudiences(resend, store, "user-B");
+
+    assert.deepEqual(calls.create, ["user-B:newsletter"]); // created its own, namespaced
+    assert.notEqual(summary.audiences[0].resend_audience_id, "segA"); // NOT tenant A's segment
+    assert.notEqual(upserts[0].resend_audience_id, "segA");
   });
 });

@@ -133,21 +133,43 @@ export interface SyncSummary {
 }
 
 /**
- * Find-or-create a Resend **segment** for `slug`, reusing a cached id when present.
+ * The Resend segment NAME for a tenant's audience. CRITICAL multi-tenant isolation:
+ * Resend segments live on ONE shared account, so a bare-slug name (e.g. "newsletter")
+ * would be SHARED across tenants — tenant B's sync would find + reuse tenant A's
+ * "newsletter" segment and either's broadcast would hit the other's recipients. We
+ * namespace the segment NAME by user id so the list-scan can only ever match THIS
+ * tenant's segment. The operator-facing `audience_slug` (the DB column) stays the
+ * bare slug — only the opaque Resend name carries the namespace.
+ *
+ * Migration for any legacy bare-named segments: scripts/email/migrate-segment-names.mts
+ * (resend@6.12.3 has no segment rename, so it re-creates → re-syncs → repoints →
+ * removes the old one last). Cached ids resolve by id regardless of name, so existing
+ * subscribers are never stranded by this change.
+ */
+export function segmentName(userId: string, slug: string): string {
+  return `${userId}:${slug}`;
+}
+
+/**
+ * Find-or-create a Resend **segment** by its (already namespaced) `name`, reusing a
+ * cached id when present.
  *
  * Order of resolution (idempotent — never creates a duplicate on re-sync):
  *   1. Reuse `existingId` from `email_audiences.resend_audience_id` if set, and
  *      confirm it still resolves via `segments.get(id)` (a deleted segment falls
- *      through to create).
- *   2. Else scan `segments.list()` for a segment whose name === slug and reuse it.
- *   3. Else `segments.create({ name: slug })`.
+ *      through to create). This path is name-independent, so existing rows keep
+ *      their existing segment even as naming changes.
+ *   2. Else scan `segments.list()` for a segment whose name === `name` and reuse it.
+ *      Because `name` is tenant-namespaced (see `segmentName`), this can only match
+ *      THIS tenant's segment — never another tenant's.
+ *   3. Else `segments.create({ name })`.
  *
  * Returns the segment id plus whether it was created this run. Throws on a hard
  * Resend error so the caller can isolate the failure per-audience.
  */
 export async function findOrCreateSegment(
   resend: Resend,
-  slug: string,
+  name: string,
   existingId: string | undefined,
 ): Promise<{ id: string; created: boolean }> {
   // 1) Reuse a cached id, verifying it still exists.
@@ -159,23 +181,22 @@ export async function findOrCreateSegment(
     // Cached id is stale (deleted in Resend) — fall through to re-create.
   }
 
-  // 2) Reuse an existing segment with the same name (covers the case where the
-  //    DB row is missing but the Resend segment already exists — e.g. a partial
-  //    prior run, or a segment created out-of-band).
+  // 2) Reuse an existing segment with the SAME (namespaced) name (covers a missing
+  //    DB row when the Resend segment already exists — e.g. a partial prior run).
   const listed = await resend.segments.list();
   if (listed.error) {
-    throw new Error(`segments.list failed for "${slug}": ${listed.error.message}`);
+    throw new Error(`segments.list failed for "${name}": ${listed.error.message}`);
   }
-  const match = listed.data?.data.find((s) => s.name === slug);
+  const match = listed.data?.data.find((s) => s.name === name);
   if (match) {
     return { id: match.id, created: false };
   }
 
   // 3) Create it.
-  const created = await resend.segments.create({ name: slug });
+  const created = await resend.segments.create({ name });
   if (created.error || !created.data?.id) {
     throw new Error(
-      `segments.create failed for "${slug}": ${created.error?.message ?? "no id returned"}`,
+      `segments.create failed for "${name}": ${created.error?.message ?? "no id returned"}`,
     );
   }
   return { id: created.data.id, created: true };
@@ -224,6 +245,7 @@ async function upsertContactIntoSegment(
 export async function syncUserAudiences(
   resend: Resend,
   store: AudienceStore,
+  userId: string,
 ): Promise<SyncSummary> {
   const contacts = await store.readContacts();
   const groups = enumerateAudiences(contacts);
@@ -246,9 +268,11 @@ export async function syncUserAudiences(
     let created = false;
 
     try {
+      // The DB cache keys by the bare slug; the Resend segment NAME is namespaced
+      // per tenant so the list-scan can't reuse another tenant's segment.
       const seg = await findOrCreateSegment(
         resend,
-        group.audience_slug,
+        segmentName(userId, group.audience_slug),
         idBySlug.get(group.audience_slug),
       );
       segmentId = seg.id;

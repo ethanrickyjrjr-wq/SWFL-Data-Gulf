@@ -55,3 +55,16 @@ test("/api/projects is NOT gated by the prefix (self-gates with 401)", async () 
   expect(res.headers.get("location")).toBeNull();
   expect(res.status).toBe(200);
 });
+
+test("/api/converse is burst-limited (rate-limit headers, no auth path / no redirect)", async () => {
+  // The paid-LLM streams join the burst limiter — proven by the X-RateLimit headers
+  // the limiter branch attaches (the updateSession path attaches none).
+  const res = await middleware(req("/api/converse"));
+  expect(res.headers.get("x-ratelimit-limit")).not.toBeNull();
+  expect(res.headers.get("location")).toBeNull();
+});
+
+test("/api/welcome/chat is burst-limited", async () => {
+  const res = await middleware(req("/api/welcome/chat"));
+  expect(res.headers.get("x-ratelimit-limit")).not.toBeNull();
+});

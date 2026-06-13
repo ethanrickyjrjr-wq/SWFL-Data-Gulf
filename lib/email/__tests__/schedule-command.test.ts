@@ -133,6 +133,55 @@ describe("summarizeCommand", () => {
       summarizeCommand({ action: "change-audience", schedule_id: 4, audience_slug: "vip" }),
     ).toBe('Change schedule #4 to send to audience "vip".');
   });
+
+  test("scoped create is GATED by default: honest 'coming soon' note, no active promise", () => {
+    const s = summarizeCommand({
+      action: "create",
+      cadence: "weekly",
+      day_of_week: 1,
+      send_hour_et: 8,
+      audience_slug: "newsletter",
+      scope_kind: "place",
+      scope_value: "cape coral",
+      topic: "flood",
+    });
+    // Echoes the captured intent, but promises a region-wide digest "for now".
+    expect(s).toContain("full Southwest Florida digest");
+    expect(s).toContain("coming soon");
+    expect(s).toContain("cape coral");
+    expect(s).toContain("flood");
+    // The ACTIVE promise clause must NOT appear while the consumer is dark.
+    expect(s).not.toContain('about flood for "cape coral"');
+  });
+
+  test("scoped create with scopeConsumerLive:true uses the ACTIVE scope clause", () => {
+    const s = summarizeCommand(
+      {
+        action: "create",
+        cadence: "weekly",
+        day_of_week: 1,
+        send_hour_et: 8,
+        audience_slug: "newsletter",
+        scope_kind: "place",
+        scope_value: "cape coral",
+        topic: "flood",
+      },
+      { scopeConsumerLive: true },
+    );
+    expect(s).toContain('about flood for "cape coral"');
+    expect(s).not.toContain("coming soon");
+  });
+
+  test("a NO-scope create is byte-identical to before (no note appended)", () => {
+    const s = summarizeCommand({
+      action: "create",
+      cadence: "weekly",
+      day_of_week: 2,
+      send_hour_et: 7,
+      audience_slug: "newsletter",
+    });
+    expect(s).toBe('Create a weekly schedule that sends every Tuesday at 7am ET to "newsletter".');
+  });
 });
 
 describe("prompt + tool surface", () => {

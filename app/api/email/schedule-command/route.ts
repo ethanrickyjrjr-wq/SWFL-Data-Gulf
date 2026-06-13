@@ -12,6 +12,8 @@ import {
   type ExistingSchedule,
   type ParsedCommand,
 } from "@/lib/email/schedule-command";
+import { issueProposalNonce, verifyProposalNonce } from "@/lib/email/proposal-nonce";
+import { claimOnce } from "@/lib/email/idempotency";
 
 export const runtime = "nodejs";
 
@@ -68,6 +70,32 @@ export async function POST(req: NextRequest) {
     if (!v.ok) {
       return NextResponse.json({ error: "invalid_proposal", detail: v.errors }, { status: 422 });
     }
+    // Signed, single-use proposal-nonce gate: a double-submitted confirm creates ONE
+    // schedule, not two (idempotency), plus anti-forgery. Enforced whenever a signing
+    // secret is configured; absent secret → legacy path (PROPOSE issued no nonce, so
+    // the client has nothing to echo). See lib/email/proposal-nonce.ts.
+    if (process.env.SDG_COOKIE_SECRET) {
+      const token = typeof body?.proposal_nonce === "string" ? body.proposal_nonce : null;
+      if (!token) {
+        return NextResponse.json({ error: "nonce_required" }, { status: 400 });
+      }
+      const vr = verifyProposalNonce(token, { uid: user.id, pid: projectId, proposal: v.command });
+      if (!vr.ok) {
+        return NextResponse.json({ error: "invalid_nonce", reason: vr.reason }, { status: 401 });
+      }
+      // Single-use: a DB-level UNIQUE claim (no TOCTOU). A replayed confirm loses the
+      // claim → 409. Cookie/RLS client — the ledger row is the user's own.
+      let won: boolean;
+      try {
+        won = await claimOnce(supabase, `nonce:${vr.nid}`, { userId: user.id, kind: "nonce" });
+      } catch (e) {
+        console.error("[schedule-command] nonce claim failed:", e);
+        return NextResponse.json({ error: "nonce_claim_failed" }, { status: 500 });
+      }
+      if (!won) {
+        return NextResponse.json({ error: "already_confirmed" }, { status: 409 });
+      }
+    }
     return writeAction(supabase, user.id, projectId, v.command);
   }
 
@@ -120,11 +148,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Issue a signed proposal nonce CONFIRM must echo (null when no secret is set →
+  // legacy non-nonce confirm). Binds this user + project + the exact proposal, 15-min TTL.
+  const proposalNonce = issueProposalNonce({ uid: user.id, pid: projectId, proposal: v.command });
   return NextResponse.json({
     action: v.command.action,
     proposal: v.command,
     summary: summarizeCommand(v.command),
     confirmationRequired: true,
+    ...(proposalNonce ? { proposal_nonce: proposalNonce } : {}),
   });
 }
 
@@ -195,6 +227,10 @@ async function writeAction(
         send_hour_et: command.send_hour_et,
         audience_slug: command.audience_slug ?? null,
         template_id: command.template_id ?? null,
+        // Additive nullable scope columns — NULL+NULL => whole-region digest.
+        scope_kind: command.scope_kind ?? null,
+        scope_value: command.scope_value ?? null,
+        topic: command.topic ?? null,
         next_run_at: next ? next.toISOString() : null,
         updated_at: now,
       })

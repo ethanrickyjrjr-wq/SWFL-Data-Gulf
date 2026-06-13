@@ -56,6 +56,14 @@ export interface ScheduleRow {
   template_id: string | null;
   next_run_at: string | null;
   last_run_at: string | null;
+  // Additive "scope" capability (optional + nullable — honest even though the
+  // claim RPC may not return these yet). scope_kind/scope_value pin the digest to
+  // a geography; topic to a subject. NULL+NULL => today's whole-region global
+  // digest. No behavior change to processSchedule/buildContent — a future
+  // build-time expander will read these in buildContent.
+  scope_kind?: string | null;
+  scope_value?: string | null;
+  topic?: string | null;
 }
 
 /** The minimal audience lookup the worker needs (subset of `email_audiences`). */
@@ -153,6 +161,14 @@ export interface ProcessDeps {
    *  deterministic and the worker shares ONE implementation with create-time. */
   computeNext: (spec: CadenceSpec, fromUtc: Date) => Date | null;
 
+  /** OPTIONAL idempotency claim, made just before a REAL send. Returns
+   *  proceed:false when this occurrence was already sent (the DB-unique claim was
+   *  lost to a prior run / crash-replay) → the core skips with reason
+   *  "already_sent" and re-arms. Absent → no idempotency (back-compat + a
+   *  pre-migration degrade). Never invoked in DRY_RUN (the core returns before
+   *  reaching it). See lib/email/idempotency.ts. */
+  claimSend?: (row: ScheduleRow, fromUtc: Date) => Promise<{ proceed: boolean }>;
+
   /** Structured logger (defaults to console in the runner). */
   log: (line: string) => void;
 }
@@ -244,17 +260,9 @@ export async function processSchedule(
   const tag = `schedule=${row.id} user=${row.user_id}`;
 
   try {
-    // 1. USAGE GATE — skip + notify, never throw. Over-limit must not crash.
-    const usage = await deps.checkUsage(row.user_id);
-    if (!usage.allowed) {
-      deps.log(
-        `[scheduler] SKIP ${tag} — usage limit reached (${usage.sent}/${usage.limit}, tier=${usage.tier}); not sending this cycle.`,
-      );
-      return { kind: "skipped", scheduleId: row.id, reason: "usage_limit" };
-    }
-
-    // 2. SEGMENT — a tenant schedule MUST resolve to a tenant segment. No slug /
-    //    no row / null id → skip (never fall through to the SWFL digest list).
+    // 1. SEGMENT — a tenant schedule MUST resolve to a tenant segment. Resolve it
+    //    FIRST: the usage gate's headroom check (step 2) needs the audience size. No
+    //    slug / no row / null id → skip (never fall through to the SWFL digest list).
     const slug = row.audience_slug?.trim() || null;
     if (!slug) {
       deps.log(`[scheduler] SKIP ${tag} — no audience_slug; can't target a send.`);
@@ -267,6 +275,28 @@ export async function processSchedule(
         `[scheduler] SKIP ${tag} — audience "${slug}" has no Resend segment id; not sending.`,
       );
       return { kind: "skipped", scheduleId: row.id, reason: "no_segment" };
+    }
+    const expectedRecipients = audience?.contact_count ?? 1;
+
+    // 2. USAGE GATE — skip + notify, never throw. TWO blocks:
+    //    (a) already at/over the period limit, and
+    //    (b) NO HEADROOM — this send (expectedRecipients) would CROSS the limit. A
+    //    broadcast goes to a WHOLE segment, so a partial send isn't possible; we
+    //    block the whole occurrence rather than overshoot the tier. `limit` comes
+    //    from email_usage.tier → TIER_LIMITS (Unit E); `expectedRecipients` from
+    //    email_audiences.contact_count. Over-limit never crashes a run.
+    const usage = await deps.checkUsage(row.user_id);
+    if (!usage.allowed) {
+      deps.log(
+        `[scheduler] SKIP ${tag} — usage limit reached (${usage.sent}/${usage.limit}, tier=${usage.tier}); not sending this cycle.`,
+      );
+      return { kind: "skipped", scheduleId: row.id, reason: "usage_limit" };
+    }
+    if (usage.sent + expectedRecipients > usage.limit) {
+      deps.log(
+        `[scheduler] SKIP ${tag} — no send headroom: ${usage.sent}+${expectedRecipients} would exceed ${usage.limit} (tier=${usage.tier}); blocking this occurrence (a segment broadcast can't partial-send).`,
+      );
+      return { kind: "skipped", scheduleId: row.id, reason: "usage_headroom" };
     }
 
     // 3. SENDER — Unit D owns the verified-gating rule. We only read + feed it.
@@ -297,6 +327,20 @@ export async function processSchedule(
       return { kind: "dry-run", scheduleId: row.id };
     }
 
+    // 6.5 IDEMPOTENCY — claim this occurrence BEFORE the POST (at-most-once: a
+    //     customer is never double-sent). The key is a DB-level UNIQUE — see
+    //     lib/email/idempotency.ts. DRY_RUN already returned above, so this is
+    //     real-run-only. Absent dep → no idempotency (back-compat / pre-migration).
+    if (deps.claimSend) {
+      const { proceed } = await deps.claimSend(row, fromUtc);
+      if (!proceed) {
+        deps.log(
+          `[scheduler] SKIP ${tag} — occurrence already sent (idempotency claim lost); not re-sending.`,
+        );
+        return { kind: "skipped", scheduleId: row.id, reason: "already_sent" };
+      }
+    }
+
     // 7. REAL SEND — assert the token is present before POST; fail loud if absent.
     if (!html.includes(UNSUBSCRIBE_TOKEN)) {
       throw new Error(
@@ -316,8 +360,8 @@ export async function processSchedule(
       };
     }
 
-    // 8. SUCCESS — record usage (recipients when known, else 1) AFTER the send.
-    const recipients = audience?.contact_count ?? 1;
+    // 8. SUCCESS — record usage (recipients = the audience size resolved above) AFTER the send.
+    const recipients = expectedRecipients;
     await deps.recordSent(row.user_id, recipients);
     // 8b. REPLY SENSOR — persist the send↔token row the inbound webhook reads.
     //     Best-effort: a failure here is logged, never fails the (already-sent) send.

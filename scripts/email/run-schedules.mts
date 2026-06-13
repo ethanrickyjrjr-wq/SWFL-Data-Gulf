@@ -26,6 +26,7 @@ import { computeNextRunAt } from "@/lib/email/schedule-cadence";
 import { renderEmailTemplate } from "@/lib/email/templates/render-template";
 import { EMAIL_TEMPLATES, type TemplateSlug } from "@/lib/email/templates/template-registry";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
+import { claimOnce } from "@/lib/email/idempotency";
 import type { SenderConfigRow } from "@/lib/email/sender-config";
 import { generateReplyToken, buildReplyAddress, replyDomain } from "@/lib/email/reply-token";
 import {
@@ -311,6 +312,22 @@ async function main(): Promise<void> {
       // Thrown here is caught by the core's best-effort wrapper (the email already
       // sent); it logs and continues rather than failing the batch.
       if (error) throw new Error(`insert email_sends: ${error.message}`);
+    },
+
+    // ── At-most-once idempotency (scope/digest lane) ──
+    async claimSend(row: ScheduleRow, fromUtc: Date): Promise<{ proceed: boolean }> {
+      // Occurrence key: scheduleId + the UTC date of this run instant. A same-day
+      // crash-replay re-claims the SAME key (dedupe → skip); the next cadence
+      // occurrence is a different date → a fresh key → sends. This is at-most-once
+      // defense-in-depth on top of the claim RPC's primary guarantee — it closes the
+      // crash-AFTER-POST-BEFORE-rearm window the reaper would otherwise re-fire.
+      const dateKey = fromUtc.toISOString().slice(0, 10);
+      const won = await claimOnce(db, `digest:${row.id}:${dateKey}`, {
+        userId: row.user_id,
+        kind: "digest",
+        scheduleId: row.id,
+      });
+      return { proceed: won };
     },
 
     computeNext: computeNextRunAt,

@@ -58,6 +58,22 @@ export const SCHEDULE_COMMAND_TOOL = {
         description:
           "Template to use. Only if named by the user or present on an existing schedule.",
       },
+      scope_kind: {
+        type: "string",
+        enum: ["zip", "place", "county"],
+        description:
+          "Geographic grain of the digest, ONLY when the user named a specific geography: a ZIP code -> 'zip', a named town/beach/corridor -> 'place', a county -> 'county'. Omit entirely for a whole-region digest.",
+      },
+      scope_value: {
+        type: "string",
+        description:
+          "The named geography verbatim, exactly as the user said it (e.g. 'Cape Coral', '33904', 'Lee County'). Set ONLY together with scope_kind; omit for a whole-region digest.",
+      },
+      topic: {
+        type: "string",
+        description:
+          "The subject the user wants the digest about, verbatim (e.g. 'flood', 'permits', 'prices', 'tourism', 'freight', 'jobs'). Free text. Set ONLY when the user named a subject; omit for a general digest.",
+      },
     },
     required: ["action"],
   },
@@ -83,6 +99,15 @@ export interface ParsedCommand {
   send_hour_et?: number;
   audience_slug?: string;
   template_id?: string;
+  // ── Additive "scope" capability (optional everywhere). ──
+  // scope_kind + scope_value pin the digest to a geography; topic pins it to a
+  // subject. All optional: the NULL+NULL absence is the valid default => today's
+  // whole-region global digest (there is deliberately NO 'general' magic value).
+  // scope_value and topic arrive ALREADY normalized to the canonical contract
+  // form (lowercase + trimmed) by the rawSchema transforms.
+  scope_kind?: "zip" | "place" | "county";
+  scope_value?: string;
+  topic?: string;
 }
 
 /** System prompt: the 6 intents, the ET-hour rule, and the tenant's existing rows
@@ -96,6 +121,7 @@ export function buildSystemPrompt(existing: ExistingSchedule[]): string {
     "- weekly needs day_of_week (0 = Sunday … 6 = Saturday). monthly needs day_of_month (1–28).",
     "- For pause / stop / change-*, set schedule_id to the matching row from EXISTING SCHEDULES. If none clearly matches, still pick the closest action and omit schedule_id — a confirmation step follows.",
     "- Never invent an audience_slug or template_id. Use only a value the user named or one already present on an existing schedule.",
+    "- SCOPE: when the user names a geography, set scope_kind (zip | place | county) AND scope_value (the named place verbatim, e.g. 'Cape Coral', '33904', 'Lee County'). When the user names a subject (flood, permits, prices, tourism, freight, jobs, etc.), set topic to it verbatim. Omit BOTH scope_kind/scope_value and topic for a whole-region general digest — never invent a geography or subject the user did not name.",
     "EXISTING SCHEDULES (JSON):",
     JSON.stringify(existing),
   ].join("\n");
@@ -116,6 +142,15 @@ const rawSchema = z.object({
   send_hour_et: hourSchema.optional(),
   audience_slug: z.string().min(1).optional(),
   template_id: z.string().min(1).optional(),
+  // ── Additive "scope" fields. The .trim().toLowerCase() transforms ENFORCE the
+  //    canonical contract form (lowercase + trimmed) at the parse boundary — this
+  //    is THE form the future build-time ZIP expander reads. scope_kind is a
+  //    geographic-grain enum; topic is free text (the consumer owns topic ->
+  //    brain-slug mapping). All optional: a no-scope create stays valid and the
+  //    NULL+NULL absence is the default => today's whole-region global digest.
+  scope_kind: z.enum(["zip", "place", "county"]).optional(),
+  scope_value: z.string().min(1).trim().toLowerCase().optional(),
+  topic: z.string().min(1).trim().toLowerCase().optional(),
 });
 
 export type ValidationResult =
@@ -136,6 +171,14 @@ export function validateToolInput(input: unknown): ValidationResult {
       errors: parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`),
     };
   }
+  // `parsed.data` already carries the CANONICAL CONTRACT FORM of the scope fields:
+  // rawSchema's `.trim().toLowerCase()` transforms ran during safeParse, so
+  // `c.scope_value` / `c.topic` are lowercase + trimmed here — THE form the
+  // future build-time ZIP expander reads. No scope is the valid default: a create
+  // with scope_kind/scope_value/topic all absent stays valid (NULL+NULL =>
+  // today's whole-region global digest; there is deliberately no 'general' magic
+  // value). The returned command therefore carries the normalized scope fields
+  // unchanged — we add NO new hard requirement for them below.
   const c = parsed.data as ParsedCommand;
   const errors: string[] = [];
 
@@ -184,8 +227,26 @@ function fmtHour(h?: number): string {
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-/** Plain-English confirmation line shown to the tenant before they confirm. */
-export function summarizeCommand(c: ParsedCommand): string {
+/** ` ("flood" / "cape coral")` from whichever of topic/scope_value is set — used in
+ *  the honest "coming soon" note when the scope consumer isn't live yet. */
+function scopeBitsForNote(c: ParsedCommand): string {
+  const bits = [c.topic, c.scope_value].filter((b): b is string => Boolean(b)).map((b) => `"${b}"`);
+  return bits.length ? ` (${bits.join(" / ")})` : "";
+}
+
+/**
+ * Plain-English confirmation line shown to the tenant before they confirm.
+ *
+ * SCOPE GATE: scope_kind/scope_value/topic are CAPTURED on the row, but the digest
+ * worker does not yet FILTER by them (Task 02 — scoped content via the grounded
+ * engine). Until it does, promising a scoped digest in this confirmation would be a
+ * lie ("flood digest for Cape Coral" → ships the region-wide digest). So when the
+ * consumer isn't live we drop the active "about X for Y" clause and instead append an
+ * honest note that still echoes the captured intent. Flip `SCOPE_CONSUMER_LIVE=true`
+ * (or pass scopeConsumerLive:true) the day the consumer ships and the promise returns.
+ */
+export function summarizeCommand(c: ParsedCommand, opts?: { scopeConsumerLive?: boolean }): string {
+  const scopeLive = opts?.scopeConsumerLive ?? process.env.SCOPE_CONSUMER_LIVE === "true";
   const when = (): string => {
     if (c.cadence === "daily") return `every day at ${fmtHour(c.send_hour_et)} ET`;
     if (c.cadence === "weekly")
@@ -196,9 +257,17 @@ export function summarizeCommand(c: ParsedCommand): string {
   };
   const to = c.audience_slug ? ` to "${c.audience_slug}"` : "";
   const tmpl = c.template_id ? ` using template "${c.template_id}"` : "";
+  // Active scope clause ONLY when the consumer is live — e.g. ` about flood for "cape coral"`.
+  const about = scopeLive && c.topic ? ` about ${c.topic}` : "";
+  const forPlace = scopeLive && c.scope_value ? ` for "${c.scope_value}"` : "";
+  // Scope captured but consumer not live → honest note (echoes intent, promises nothing).
+  const pendingScope =
+    !scopeLive && (c.topic || c.scope_value)
+      ? ` Note: it sends the full Southwest Florida digest for now — per-place/topic filtering${scopeBitsForNote(c)} is coming soon.`
+      : "";
   switch (c.action) {
     case "create":
-      return `Create a ${c.cadence} schedule that sends ${when()}${to}${tmpl}.`;
+      return `Create a ${c.cadence} schedule that sends ${when()}${about}${forPlace}${to}${tmpl}.${pendingScope}`;
     case "pause":
       return `Pause schedule #${c.schedule_id ?? "?"}.`;
     case "stop":

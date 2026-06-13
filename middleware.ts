@@ -2,13 +2,26 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 
-// Public, unauthenticated data endpoints. These bypass the Supabase auth client
-// entirely (they must stay reachable with no auth env vars present) but DO get
-// a best-effort per-IP burst limiter in front of them to break the trivial
-// "loop the sitemap → clone the whole lake" attack. See lib/rate-limit.ts and
-// the PR runbook for why the authoritative ceiling is a Vercel WAF dashboard
-// rule, not this code path.
-const RATE_LIMITED_PREFIXES = ["/api/b/", "/api/mcp", "/api/waitlist", "/p/"];
+// Public, unauthenticated endpoints that get a best-effort per-IP burst limiter
+// in front of them. Two classes share this guard:
+//   (1) DATA reads (`/api/b/*`, `/api/mcp`, `/api/waitlist`, `/p/`) — break the
+//       trivial "loop the sitemap → clone the whole lake" scrape.
+//   (2) PAID-LLM streams (`/api/converse`, `/api/welcome/chat`) — these spend
+//       Anthropic tokens per call and are public + unauthenticated, so an
+//       unthrottled loop is a direct billing-DoS. The per-IP burst here is the
+//       FIRST line; each route ALSO enforces an env-gated per-client weekly cap
+//       and bounds inbound content length. The authoritative cross-region ceiling
+//       remains a Vercel WAF dashboard rate-limit rule (see lib/rate-limit.ts +
+//       the PR runbook) — this code path is defense-in-depth, not the ceiling.
+// These all bypass the Supabase auth client (they need no auth env vars).
+const RATE_LIMITED_PREFIXES = [
+  "/api/b/",
+  "/api/mcp",
+  "/api/waitlist",
+  "/p/",
+  "/api/converse",
+  "/api/welcome/chat",
+];
 
 function isRateLimited(pathname: string): boolean {
   return RATE_LIMITED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));

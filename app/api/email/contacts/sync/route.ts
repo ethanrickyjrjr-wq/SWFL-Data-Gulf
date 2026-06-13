@@ -104,7 +104,7 @@ export async function POST(_req: NextRequest) {
 
   // --- Sync ---
   try {
-    const summary = await syncUserAudiences(resend, makeStore(supabase, user.id));
+    const summary = await syncUserAudiences(resend, makeStore(supabase, user.id), user.id);
     return NextResponse.json({ ok: true, ...summary }, { status: 200 });
   } catch (e) {
     console.error("[email/contacts/sync] failed:", e);

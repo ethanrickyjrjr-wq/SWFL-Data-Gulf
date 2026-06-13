@@ -1,5 +1,10 @@
 import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
-import { recordWelcomeChat } from "@/lib/welcome/chat-usage";
+import {
+  recordWelcomeChat,
+  welcomeCapEnabled,
+  welcomeChatWeeklyCount,
+} from "@/lib/welcome/chat-usage";
+import { clientIdFromRequest } from "@/lib/highlighter/meter";
 import { buildPlaceContext } from "@/lib/place-context";
 
 export const runtime = "nodejs";
@@ -7,6 +12,28 @@ export const dynamic = "force-dynamic";
 
 const MAX_TOKENS = 500;
 const MAX_HISTORY = 12;
+
+// Cost guards — public, unauthenticated, paid-Haiku surface (per-IP burst lives in
+// middleware RATE_LIMITED_PREFIXES). Only the last MAX_HISTORY messages reach the
+// model, so the aggregate bound is over THAT sliced set.
+const MAX_MSG_CHARS = 4000; // per-message content cap
+const MAX_TOTAL_CHARS = 16000; // aggregate over the model-bound slice (last MAX_HISTORY)
+const MAX_MESSAGES = 200; // raw-array sanity cap (parse-bomb insurance)
+// Env-gated per-client weekly cap (rolling 7-day). Read live (tunable without
+// redeploy). 0/unset → disabled.
+function freeWeeklyCap(): number {
+  return Number(process.env.WELCOME_CHAT_FREE_WEEKLY_CAP ?? "0");
+}
+
+/** Minimal SSE Response: one text line + done, NO model call (over-cap path). */
+function sseMessage(text: string): Response {
+  const body =
+    `data: ${JSON.stringify({ text })}\n\n` + `data: ${JSON.stringify({ done: true })}\n\n`;
+  return new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store" },
+  });
+}
 
 const FORMAT_RULE =
   "CRITICAL: Respond in plain text ONLY. " +
@@ -79,6 +106,32 @@ export async function POST(request: Request): Promise<Response> {
 
   if (messages.length === 0 || messages[messages.length - 1].role !== "user") {
     return Response.json({ error: "messages required (last must be user)" }, { status: 400 });
+  }
+
+  // Bound inbound size BEFORE any model spend. Only the sliced set (last
+  // MAX_HISTORY) reaches the model, so the aggregate gate is over THAT: a flood of
+  // short messages is dropped by the slice, and one giant message is caught
+  // per-message. The raw-array cap is parse-bomb insurance.
+  if (all.length > MAX_MESSAGES) {
+    return Response.json({ error: "too many messages" }, { status: 400 });
+  }
+  if (messages.some((m) => m.content.length > MAX_MSG_CHARS)) {
+    return Response.json({ error: "message too long" }, { status: 400 });
+  }
+  if (messages.reduce((n, m) => n + m.content.length, 0) > MAX_TOTAL_CHARS) {
+    return Response.json({ error: "conversation too long" }, { status: 400 });
+  }
+
+  // Env-gated per-client weekly cap (rolling 7-day). Anon cids are covered by the
+  // per-IP burst limiter in middleware. Fail-open (welcomeChatWeeklyCount → 0 on error).
+  const cap = freeWeeklyCap();
+  if (welcomeCapEnabled() && cap > 0) {
+    const cid = clientIdFromRequest(request);
+    if (cid !== "anon" && (await welcomeChatWeeklyCount(cid)) >= cap) {
+      return sseMessage(
+        "Thanks for the interest! You've hit this week's limit for the assistant — reach out and we'll keep going.",
+      );
+    }
   }
 
   // Fire-and-forget telemetry — zero enforcement.

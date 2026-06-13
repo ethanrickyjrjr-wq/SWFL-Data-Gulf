@@ -259,6 +259,22 @@ Hardening: in the Resend dashboard set each sending key's **Domain = `swfldatagu
 a leaked key can't send from another domain. One key per (permission × surface), created on demand —
 never upgrade the cron key to full access.
 
+### Env vars — cost guards, idempotency, scope gate (added 2026-06-13)
+
+Set these in **Vercel** (and `.env.local` for local runs). All documented in `.env.example`.
+
+| Env var | Surface | Default (unset) | Notes |
+|---|---|---|---|
+| `HIGHLIGHTER_FREE_WEEKLY_CAP` | `/api/converse` | disabled (no cap) | Per-client weekly question cap; read live (no redeploy). |
+| `WELCOME_CHAT_FREE_WEEKLY_CAP` | `/api/welcome/chat` | disabled (no cap) | Per-client rolling-7-day chat cap; read live. |
+| `SDG_COOKIE_SECRET` | cid cookie + confirm nonce | nonce enforcement OFF | HMAC key. **Set in prod** — signs the single-use schedule-command confirm nonce (`lib/email/proposal-nonce.ts`). Unset → legacy non-nonce confirm. |
+| `SCOPE_CONSUMER_LIVE` | schedule-command confirm copy | `false` (region-wide "for now" note) | Flip to `true` only when the scoped-content consumer (**Task 02**) ships, so the confirmation can honestly promise per-place/topic filtering. |
+| `DIGEST_BROADCAST_SECRET` | cron worker → `/api/email/broadcast` | worker fails loud | Already a GHA secret + Vercel env. |
+
+DB: apply **`docs/sql/20260613_email_send_ledger.sql`** (idempotency ledger) alongside the
+claim-fn migration at go-live, and run **`bun scripts/email/migrate-segment-names.mts`** once
+(no-op until a tenant audience exists) to namespace any legacy Resend segments.
+
 ### Phase 3 — Reply Feedback Loop
 **The subscriber tells us what to track more or less of — zero UI needed.**
 - Configure Resend Inbound: replies to `digest@swfldatagulf.com` → webhook `/api/email/reply`

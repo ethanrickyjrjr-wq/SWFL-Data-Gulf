@@ -35,13 +35,17 @@ mock.module("@/refinery/agents/anthropic.mts", () => ({
     },
   }),
 }));
+// Mutable meter state so a single file can exercise both the cap-disabled (default)
+// and cap-tripped paths without re-importing the route.
+const meterState = { weekly: 0, capEnabled: false, clientId: "cid-1" };
 mock.module("@/lib/highlighter/meter", () => ({
   recordUse: async () => 1,
   recordAsk: async (meta: AskMeta) => {
     lastAsk = meta;
   },
-  weeklyCount: async () => 0,
-  capEnabled: () => false,
+  weeklyCount: async () => meterState.weekly,
+  capEnabled: () => meterState.capEnabled,
+  clientIdFromRequest: () => meterState.clientId,
 }));
 
 const { POST } = await import("./route");
@@ -164,4 +168,46 @@ test("no slug => floor path: answered=true, no logged components", async () => {
   const ask = lastAsk as AskMeta | null;
   expect(ask?.answered).toBe(true);
   expect(ask?.needed_components).toEqual([]);
+});
+
+// --- Cost guards: input-length bounds + the env-gated per-client weekly cap ------
+
+test("400 when the question exceeds the length bound (no model spend)", async () => {
+  const req = new Request("https://x/api/converse", {
+    method: "POST",
+    body: JSON.stringify({ report_id: "master", question: "q".repeat(2001) }),
+  });
+  expect((await POST(req)).status).toBe(400);
+});
+
+test("400 when the fact exceeds the length bound", async () => {
+  const req = new Request("https://x/api/converse", {
+    method: "POST",
+    body: JSON.stringify({ report_id: "master", question: "ok", fact: "f".repeat(4001) }),
+  });
+  expect((await POST(req)).status).toBe(400);
+});
+
+test("over the weekly cap → graceful SSE message, model never streams", async () => {
+  const prev = process.env.HIGHLIGHTER_FREE_WEEKLY_CAP;
+  process.env.HIGHLIGHTER_FREE_WEEKLY_CAP = "5";
+  meterState.capEnabled = true;
+  meterState.weekly = 5;
+  meterState.clientId = "cid-over";
+  try {
+    const req = new Request("https://x/api/converse", {
+      method: "POST",
+      body: JSON.stringify({ report_id: "master", question: "is 34102 hot?" }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toContain("this week's free-question limit");
+    expect(body).not.toContain("$1.85M"); // the mocked model text never ran
+  } finally {
+    process.env.HIGHLIGHTER_FREE_WEEKLY_CAP = prev;
+    meterState.capEnabled = false;
+    meterState.weekly = 0;
+    meterState.clientId = "cid-1";
+  }
 });

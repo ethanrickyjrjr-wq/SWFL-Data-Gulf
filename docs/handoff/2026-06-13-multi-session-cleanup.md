@@ -4,6 +4,27 @@ Written by the autonomous session while operator was asleep ("no rules, figure i
 push merge squash, clear this up, will handle when I get up"). This is your morning
 to-do. Everything below is verified against `git` + the live DB, not assumed.
 
+## ⬆ UPDATE (later same session) — "close all lanes" done
+
+Operator follow-up: "take care of all lanes, close them all, decide what's right so they
+don't overwrite each other." **Done — Lane A/B is now merged into `main` as the union with
+reply-sensor + #88, verified green** (`tsc` 0, `bun test` 2235/0 across 189 files).
+- `scheduler.ts` auto-merged clean (different regions); the ProcessDeps interface now carries
+  **all three**: `resolveReplyTo`/`recordSend` (reply-sensor) + `claimSend` (idempotency).
+- 2 hand-merged conflicts: `run-schedules.mts` (union all 3 send deps) and
+  `app/api/converse/route.ts` (kept Lane A/B's cost-guards / weekly-cap / `sseMessage`; dropped
+  `GAZETTEER_STR` which the reply-sensor refactor had already removed — verified unused).
+- So **Item 1 below is DONE.** Item 2 (migrations) now has **4 unapplied on main**
+  (`email_sends`, `buyer_intent_events`, `email_send_ledger`, `email_schedule_scope`) — all 4
+  distinct tables, none colliding. STILL deferred to go-live: their only consumer is the digest
+  cron + the inbound webhook, neither of which is live, so nothing breaks while unapplied.
+- Lane A/B's branch `wip/lane-ab-preserve` (`97c24d9`) is now fully merged — safe to delete
+  once you're happy. It also dragged in `docs/audit/2026-06-13-project-audit/**` and a stray
+  `docs/superpowers/plans/2026-06-13-email-funnel-the-rest.md` (the folder version superseded it)
+  — harmless docs, delete the stray when convenient.
+- Welcome/middleware/converse cost-guards from Lane A/B are now LIVE on deploy (additive; the
+  weekly cap is env-gated `HIGHLIGHTER_FREE_WEEKLY_CAP`, default off → no behavior change).
+
 ## State of `main` right now
 
 - `main` is **GREEN**. Tip after this session: the squash-merge of the reply-sensor branch

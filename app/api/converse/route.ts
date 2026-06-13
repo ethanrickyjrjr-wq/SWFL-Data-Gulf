@@ -5,7 +5,13 @@ import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
 import { type GroundingBlock } from "@/lib/highlighter/grounding";
 import { resolveReachTargets } from "@/lib/highlighter/reach";
 import { fetchReachBlocks } from "@/lib/highlighter/fetch-reach";
-import { recordUse, recordAsk } from "@/lib/highlighter/meter";
+import {
+  recordUse,
+  recordAsk,
+  capEnabled,
+  weeklyCount,
+  clientIdFromRequest,
+} from "@/lib/highlighter/meter";
 import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 import { buildGroundedSystemPrompt } from "@/lib/grounded-answer";
 
@@ -14,6 +20,28 @@ export const dynamic = "force-dynamic";
 
 const MAX_TOKENS = 760; // +60 over the answer budget for the short follow-ups tail.
 
+// Cost guards — this route streams paid Haiku tokens on a public, unauthenticated
+// surface (see middleware RATE_LIMITED_PREFIXES + lib/rate-limit.ts for the per-IP
+// burst layer). These bound a single call's input and a single client's weekly volume.
+const MAX_QUESTION_CHARS = 2000;
+const MAX_FACT_CHARS = 4000;
+// Env-gated per-client weekly cap. capEnabled() is Boolean(HIGHLIGHTER_FREE_WEEKLY_CAP);
+// the limit IS that env's numeric value (read live so it's tunable without redeploy).
+// 0/unset → disabled (no behavior change).
+function freeWeeklyCap(): number {
+  return Number(process.env.HIGHLIGHTER_FREE_WEEKLY_CAP ?? "0");
+}
+
+/** A minimal SSE Response carrying one text line + done — answers an over-cap
+ *  request gracefully WITHOUT a model call (the whole point: zero token spend). */
+function sseMessage(text: string): Response {
+  const body =
+    `data: ${JSON.stringify({ text })}\n\n` + `data: ${JSON.stringify({ done: true })}\n\n`;
+  return new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store" },
+  });
+}
 /**
  * Produce an async iterable of text strings from whatever the SDK stream
  * object exposes. SDK v0.69.0 returns a MessageStream from messages.stream()
@@ -71,6 +99,26 @@ export async function POST(request: Request): Promise<Response> {
   }
   if (!question || typeof question !== "string") {
     return Response.json({ error: "question required" }, { status: 400 });
+  }
+  // Bound inbound length BEFORE any model spend (per-field — this route is not an
+  // array). Generous for a real highlight-ask; breaks a token-burn loop.
+  if (question.length > MAX_QUESTION_CHARS) {
+    return Response.json({ error: "question too long" }, { status: 400 });
+  }
+  if (typeof fact === "string" && fact.length > MAX_FACT_CHARS) {
+    return Response.json({ error: "fact too long" }, { status: 400 });
+  }
+  // Env-gated per-client weekly cap. Anonymous (no signed cid) callers are covered
+  // by the per-IP burst limiter in middleware, not this per-client cap. Fail-open:
+  // weeklyCount swallows DB errors and returns 0, so metering never blocks an answer.
+  const cap = freeWeeklyCap();
+  if (capEnabled() && cap > 0) {
+    const clientId = clientIdFromRequest(request);
+    if (clientId !== "anon" && (await weeklyCount(clientId)) >= cap) {
+      return sseMessage(
+        "You've reached this week's free-question limit. It resets next week — or reach out if you need more.",
+      );
+    }
   }
 
   const origin = new URL(request.url).origin;

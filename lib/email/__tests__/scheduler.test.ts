@@ -58,6 +58,8 @@ function makeDeps(opts: {
   throwIn?: "buildContent" | "renderHtml" | "postBroadcast";
   // a deterministic next-run; default just adds a day
   computeNext?: (spec: CadenceSpec, fromUtc: Date) => Date | null;
+  // optional idempotency claim; absent → no claim (back-compat default)
+  claimSend?: (row: ScheduleRow, fromUtc: Date) => Promise<{ proceed: boolean }>;
 }): { deps: ProcessDeps; rec: Recorded } {
   const rec: Recorded = { posts: [], recordSent: [], rearms: [], logs: [] };
 
@@ -103,6 +105,7 @@ function makeDeps(opts: {
       rec.rearms.push({ id, next });
     },
     computeNext: opts.computeNext ?? ((_spec, from) => new Date(from.getTime() + 86_400_000)),
+    claimSend: opts.claimSend,
     log: (line) => rec.logs.push(line),
   };
 
@@ -208,6 +211,73 @@ describe("processSchedule — usage gate", () => {
       rec.logs.some((l) => l.includes("usage limit reached")),
       "notify line logged",
     );
+  });
+});
+
+describe("processSchedule — usage headroom", () => {
+  test("a send that would CROSS the limit is blocked (usage_headroom), NO post", async () => {
+    // 40 already sent + 42 recipients = 82 > 50 cap → block the whole occurrence.
+    const { deps, rec } = makeDeps({
+      usage: { tier: "free", sent: 40, limit: 50 },
+      audience: { resend_audience_id: "seg_news", contact_count: 42 },
+    });
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "skipped");
+    if (outcome.kind === "skipped") assert.equal(outcome.reason, "usage_headroom");
+    assert.equal(rec.posts.length, 0, "no broadcast when there is no headroom");
+    assert.equal(rec.recordSent.length, 0);
+    assert.equal(rec.rearms.length, 1, "still re-armed for next occurrence");
+    assert.ok(rec.logs.some((l) => l.includes("no send headroom")));
+  });
+
+  test("a send that FITS the remaining headroom proceeds", async () => {
+    const { deps, rec } = makeDeps({
+      usage: { tier: "starter", sent: 100, limit: 500 },
+      audience: { resend_audience_id: "seg_news", contact_count: 42 }, // 142 <= 500
+    });
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "sent");
+    assert.deepEqual(rec.recordSent, [{ userId: "user-1", n: 42 }]);
+  });
+});
+
+describe("processSchedule — idempotency claim", () => {
+  test("claim lost (already sent) → skipped already_sent, NO post, still re-arms", async () => {
+    const { deps, rec } = makeDeps({ claimSend: async () => ({ proceed: false }) });
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "skipped");
+    if (outcome.kind === "skipped") assert.equal(outcome.reason, "already_sent");
+    assert.equal(rec.posts.length, 0, "a lost claim never POSTs");
+    assert.equal(rec.recordSent.length, 0);
+    assert.equal(rec.rearms.length, 1);
+  });
+
+  test("claim won → proceeds to the real send", async () => {
+    let claimedId: number | null = null;
+    const { deps, rec } = makeDeps({
+      claimSend: async (row) => {
+        claimedId = row.id;
+        return { proceed: true };
+      },
+    });
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "sent");
+    assert.equal(rec.posts.length, 1);
+    assert.equal(claimedId, 1);
+  });
+
+  test("DRY_RUN never invokes the claim (read-only)", async () => {
+    let called = false;
+    const { deps } = makeDeps({
+      dryRun: true,
+      claimSend: async () => {
+        called = true;
+        return { proceed: true };
+      },
+    });
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "dry-run");
+    assert.equal(called, false, "claim must not run in a dry run");
   });
 });
 
