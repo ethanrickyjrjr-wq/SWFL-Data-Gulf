@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — GATE-A parity finished (green==ran, closed) + Task-02 scoped-content hybrid plan saved
+
+- **GATE-A parity evidence run.** Fired `gate-a-parity.yml` (dispatch, run `27481987624`) — green in 52s and **proven green==ran, not skip**: `18 pass / 0 fail / 58 expect() across the 4 zhvi/zori parity+view-equivalence files`, incl. the bite-proof rolled-back perturbations (1-cent change → PART 1 RED; rank-flip → PART 3 RED). Closed check `gate_a_parity_job_ran` with the run id. No code, no push — pure evidence run on the already-shipped harness (`a973e1b`).
+- **Task-02 scoped-content plan saved** to `docs/superpowers/plans/2026-06-13-task-02-scoped-content-hybrid/` (README + 6 step files). Locked operator decision: **hybrid cards-now** — reuse `buildWelcomeAnswer` as-is (zero LLM, $0/send), inline `ScopedContent` type, wire `row.scope_kind/scope_value/topic` (task-02 doc's `row.scope` jsonb ref is stale; columns live on `ScheduleRow:64-66`), no claim-RPC change (`claim_due_email_schedules` returns `s.*`). Corrects the funnel `task-02-scoped-content.md` contract. Build not started.
+- **Next:** step-01 (Opus) — verify the 3 scope columns are live in prod + audit the dossier-assembler signature, then pin the `ScopedContent`/`resolveScope` contract so render+tests parallelize. Go-live flip still gated on a non-residential CAN-SPAM sender address (operator).
+
 ## 2026-06-13 (main) — Data source discovery (22 sources, 18 searches) + ingest/.env.local
 
 - **Data source discovery:** 18 Firecrawl searches + 5 deep scrapes surfaced 22 sources across 6 friction tiers. Written to `docs/data-sources-discovery-2026-06-13.md`. Top finds: FHFA HPI at ZIP5 grain (free, direct CSV), Redfin Data Center with 12 columns at ZIP level (months of supply, delistings, cancellations, financing), HUD Small Area FMRs at ZIP, Cushman & Wakefield SWFL CRE PDFs with stable URLs, HUD Cape Coral CHMA PDF (May 2025), Citizens Insurance county/ZIP policy counts.
