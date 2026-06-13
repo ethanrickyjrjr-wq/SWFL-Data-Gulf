@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Unit F go-live runbook saved to `GO-LIVE/` (PUSH)
+
+- `GO-LIVE/email-scheduler-unit-f.md` (`5caae08`) — self-contained runbook for taking the multi-tenant email cron scheduler live: 3 ordered gates (apply `claim_due_email_schedules` migration via psycopg → `gh secret set DIGEST_BROADCAST_SECRET` = Vercel value → uncomment `schedule:` in `email-scheduler.yml`) + 5-point verify (DRY_RUN → real send → no-double-send → over-limit skip → close check `email_scheduler_f_live_verify`) + rollback. Doc-only; Unit F code already on origin (`63dbbf1`/`982c3d3`/`616dd3b`), schedule paused (dispatch-only) until the gates clear.
+
 ## 2026-06-12 (main) — Welcome-Arrival Phase 2: 5 TDD tasks (enrichBrand ‖ buildArrivalUrl → /api/welcome/chat → wired stub) — COMMITTED, push pending operator
 
 - **Subagent-driven execution** of `docs/superpowers/plans/2026-06-12-welcome-arrival-phase2.md` — fresh subagent per task + controller spec/quality review each. 14/14 new tests green (5 `enrichBrand` + 5 `buildArrivalUrl` + 4 chat-route), tsc clean on all touched files, eslint `--max-warnings=0` (pre-commit hook).
