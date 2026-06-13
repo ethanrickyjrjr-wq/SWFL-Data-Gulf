@@ -1,0 +1,68 @@
+name: GATE A — DB parity (zhvi/zori view ⇆ pack)
+
+# Live-DB parity + view-equivalence for the §05 zhvi/zori brain-input cutover.
+# These tests read data_lake views via psycopg, so they CANNOT run on PR/push
+# (no DB creds there) — they live here, gated, with the DB secret. The PR gate
+# (ci.yml) leaves RUN_DB_PARITY unset, so the same 4 files register as inert
+# describe.skip on PRs (assert nothing, no connects).
+
+on:
+  schedule:
+    # 7 AM UTC daily — an hour after the 6 AM daily rebuild, so the views are fresh.
+    - cron: "0 7 * * *"
+  workflow_dispatch: {}
+
+# One parity run at a time (a manual dispatch landing on the nightly can't race it).
+concurrency:
+  group: gate-a-parity
+  cancel-in-progress: false
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Setup Python (psycopg for the parity subprocess)
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Python dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run GATE A parity + view-equivalence (opt-in, fail-loud)
+        env:
+          RUN_DB_PARITY: "1"
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        # ONE bun invocation → one process → the psycopg connects are serialized by
+        # bun's default sequential runner. Never pass --concurrent. dbUri() reads the
+        # env DSN first, so runnable=true here; if the secret is ever missing, the
+        # harness fail-loud branch turns this job RED — proving "green == the parity
+        # assertions ran", never "green == silently skipped".
+        run: |
+          bun test \
+            refinery/packs/zhvi-zip-latest-gate-a-parity.test.mts \
+            refinery/packs/zori-zip-latest-gate-a-parity.test.mts \
+            refinery/packs/zhvi-zip-latest-view-equivalence.test.mts \
+            refinery/packs/zori-zip-latest-view-equivalence.test.mts
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { GITHUB_RUN_ID, GITHUB_REPOSITORY } = process.env;
+            const runUrl = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
+            core.warning(`GATE A DB-parity run failed. Check: ${runUrl}`);

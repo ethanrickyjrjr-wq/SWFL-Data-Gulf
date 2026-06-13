@@ -28,40 +28,14 @@
  * ran the migration). If creds/python are absent the suite SKIPS rather than
  * false-greens (it never silently passes without proving the SQL).
  */
-import { describe, it, expect } from "vitest";
+import { it, expect } from "vitest";
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, mkdtempSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { ZhviZipRow } from "../sources/zhvi-source.mts";
 import { buildSnapshot } from "./home-values-swfl.mts";
-
-const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const SECRETS = path.join(REPO_ROOT, ".dlt", "secrets.toml");
-
-function dbUri(): string | null {
-  if (!existsSync(SECRETS)) return null;
-  const toml = readFileSync(SECRETS, "utf-8");
-  const block = toml.split("[destination.postgres.credentials]")[1];
-  if (!block) return null;
-  const grab = (k: string) => block.match(new RegExp(`${k}\\s*=\\s*"([^"]+)"`))?.[1];
-  const pw = grab("password");
-  const host = grab("host");
-  const port = grab("port") ?? "5432";
-  const db = grab("database") ?? "postgres";
-  const user = grab("username") ?? "postgres";
-  if (!pw || !host) return null;
-  return `postgresql://${user}:${pw}@${host}:${port}/${db}`;
-}
-
-function pythonBin(): string | null {
-  for (const bin of ["python", "python3", "py"]) {
-    const r = spawnSync(bin, ["-c", "import psycopg"], { encoding: "utf-8" });
-    if (r.status === 0) return bin;
-  }
-  return null;
-}
+import { dbUri, pythonBin, gateDescribe } from "./_db-parity-harness.mts";
 
 /**
  * Run the view's VERBATIM 12-month-YoY selection SQL for each ZIP against a TEMP
@@ -130,71 +104,67 @@ const row = (zip: string, period_end: string, home_value: number): ZhviZipRow =>
   ...META,
 });
 
-const uri = dbUri();
+const uri = process.env.RUN_DB_PARITY === "1" ? dbUri() : null;
 const py = uri ? pythonBin() : null;
-const runnable = Boolean(uri && py);
 
-(runnable ? describe : describe.skip)(
-  "zhvi_zip_latest VIEW ⇆ home-values-swfl PACK YoY equivalence",
-  () => {
-    // CASE 1 — GAPPED: latest 2026-04-30; the 12-mo target (~2025-04-30) is absent
-    // and the nearest existing row (2025-08-31) is far outside ±7d → both NULL.
-    const gapped: ZhviZipRow[] = [
-      row("90001", "2025-08-31", 400000),
-      row("90001", "2025-12-31", 410000),
-      row("90001", "2026-04-30", 264505.672125785),
-    ];
+gateDescribe("zhvi_zip_latest VIEW ⇆ home-values-swfl PACK YoY equivalence", () => {
+  // CASE 1 — GAPPED: latest 2026-04-30; the 12-mo target (~2025-04-30) is absent
+  // and the nearest existing row (2025-08-31) is far outside ±7d → both NULL.
+  const gapped: ZhviZipRow[] = [
+    row("90001", "2025-08-31", 400000),
+    row("90001", "2025-12-31", 410000),
+    row("90001", "2026-04-30", 264505.672125785),
+  ];
 
-    // CASE 2 — DRIFTED: the ONLY 12-mo-back candidate sits 2025-04-19, which is
-    // 11 days before the 2025-04-30 target (>7d) → outside tolerance → both NULL.
-    const drifted: ZhviZipRow[] = [
-      row("90002", "2025-04-19", 300000),
-      row("90002", "2026-04-30", 330000),
-    ];
+  // CASE 2 — DRIFTED: the ONLY 12-mo-back candidate sits 2025-04-19, which is
+  // 11 days before the 2025-04-30 target (>7d) → outside tolerance → both NULL.
+  const drifted: ZhviZipRow[] = [
+    row("90002", "2025-04-19", 300000),
+    row("90002", "2026-04-30", 330000),
+  ];
 
-    // CASE 3 — TWO-IN-WINDOW: target 2025-04-30; two rows inside ±7d:
-    //   2025-04-25 (5d before, CLOSER)  value 280000
-    //   2025-05-02 (2d after,  NEWER)   value 250000   ← MAX-within-window wins
-    // Newer (250000) → YoY = (330000/250000 - 1)*100 = +32%.
-    // Closer (280000) would give +17.857…% — so the cases are distinguishable.
-    const twoInWindow: ZhviZipRow[] = [
-      row("90003", "2025-04-25", 280000),
-      row("90003", "2025-05-02", 250000),
-      row("90003", "2026-04-30", 330000),
-    ];
+  // CASE 3 — TWO-IN-WINDOW: target 2025-04-30; two rows inside ±7d:
+  //   2025-04-25 (5d before, CLOSER)  value 280000
+  //   2025-05-02 (2d after,  NEWER)   value 250000   ← MAX-within-window wins
+  // Newer (250000) → YoY = (330000/250000 - 1)*100 = +32%.
+  // Closer (280000) would give +17.857…% — so the cases are distinguishable.
+  const twoInWindow: ZhviZipRow[] = [
+    row("90003", "2025-04-25", 280000),
+    row("90003", "2025-05-02", 250000),
+    row("90003", "2026-04-30", 330000),
+  ];
 
-    const allRows = [...gapped, ...drifted, ...twoInWindow];
+  const allRows = [...gapped, ...drifted, ...twoInWindow];
 
-    it("agrees on all three crafted cases (gapped / drifted / two-in-window)", () => {
-      const pack = packYoyByZip(allRows);
-      const view = viewYoyByZip(allRows, uri!, py!);
+  it("agrees on all three crafted cases (gapped / drifted / two-in-window)", () => {
+    const pack = packYoyByZip(allRows);
+    const view = viewYoyByZip(allRows, uri!, py!);
 
-      // Case 1 — both NULL
-      expect(pack["90001"]).toBeNull();
-      expect(view["90001"]).toBeNull();
+    // Case 1 — both NULL
+    expect(pack["90001"]).toBeNull();
+    expect(view["90001"]).toBeNull();
 
-      // Case 2 — both NULL
-      expect(pack["90002"]).toBeNull();
-      expect(view["90002"]).toBeNull();
+    // Case 2 — both NULL
+    expect(pack["90002"]).toBeNull();
+    expect(view["90002"]).toBeNull();
 
-      // Case 3 — both pick the NEWER row (= +32%), not the closer (+17.857…%)
-      const expectedNewer = (330000 / 250000 - 1) * 100; // 32
-      const closerWrong = (330000 / 280000 - 1) * 100; // ≈17.857
-      expect(pack["90003"]).toBeCloseTo(expectedNewer, 10);
-      expect(view["90003"]).toBeCloseTo(expectedNewer, 10);
-      expect(pack["90003"]).not.toBeCloseTo(closerWrong, 3);
+    // Case 3 — both pick the NEWER row (= +32%), not the closer (+17.857…%)
+    const expectedNewer = (330000 / 250000 - 1) * 100; // 32
+    const closerWrong = (330000 / 280000 - 1) * 100; // ≈17.857
+    expect(pack["90003"]).toBeCloseTo(expectedNewer, 10);
+    expect(view["90003"]).toBeCloseTo(expectedNewer, 10);
+    expect(pack["90003"]).not.toBeCloseTo(closerWrong, 3);
 
-      // The load-bearing assertion: pack == view (float8, within 1e-9 to absorb
-      // only last-bit float-print noise — the math engine is identical).
-      for (const zip of ["90001", "90002", "90003"]) {
-        const p = pack[zip];
-        const v = view[zip];
-        if (p === null || v === null) {
-          expect(p).toBe(v);
-        } else {
-          expect(Math.abs(p - v)).toBeLessThan(1e-9);
-        }
+    // The load-bearing assertion: pack == view (float8, within 1e-9 to absorb
+    // only last-bit float-print noise — the math engine is identical).
+    for (const zip of ["90001", "90002", "90003"]) {
+      const p = pack[zip];
+      const v = view[zip];
+      if (p === null || v === null) {
+        expect(p).toBe(v);
+      } else {
+        expect(Math.abs(p - v)).toBeLessThan(1e-9);
       }
-    });
-  },
-);
+    }
+  });
+});

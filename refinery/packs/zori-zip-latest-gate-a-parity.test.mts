@@ -40,17 +40,14 @@
  * RAW shift turns PART 1 RED, and (b) a rank-flipping shift turns PART 3 RED.
  * Requires DB creds + python/psycopg; absent → SKIP, never false-green.
  */
-import { describe, it, expect } from "vitest";
+import { it, expect } from "vitest";
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, mkdtempSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { ZoriZipRow } from "../sources/zori-source.mts";
 import { buildSnapshot } from "./rentals-swfl.mts";
-
-const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const SECRETS = path.join(REPO_ROOT, ".dlt", "secrets.toml");
+import { dbUri, pythonBin, runPy, gateDescribe } from "./_db-parity-harness.mts";
 
 // ── RAW-vs-RAW float-noise tolerance — RE-DERIVED FOR ZORI'S SCALE ───────────
 //
@@ -88,44 +85,6 @@ const SECRETS = path.join(REPO_ROOT, ".dlt", "secrets.toml");
 const EPS_RAW = 1e-9;
 
 const TOP_N = 3; // mirrors rentals-swfl.mts:24
-
-function dbUri(): string | null {
-  if (!existsSync(SECRETS)) return null;
-  const toml = readFileSync(SECRETS, "utf-8");
-  const block = toml.split("[destination.postgres.credentials]")[1];
-  if (!block) return null;
-  const grab = (k: string) => block.match(new RegExp(`${k}\\s*=\\s*"([^"]+)"`))?.[1];
-  const pw = grab("password");
-  const host = grab("host");
-  const port = grab("port") ?? "5432";
-  const db = grab("database") ?? "postgres";
-  const user = grab("username") ?? "postgres";
-  if (!pw || !host) return null;
-  return `postgresql://${user}:${pw}@${host}:${port}/${db}`;
-}
-
-function pythonBin(): string | null {
-  for (const bin of ["python", "python3", "py"]) {
-    const r = spawnSync(bin, ["-c", "import psycopg"], { encoding: "utf-8" });
-    if (r.status === 0) return bin;
-  }
-  return null;
-}
-
-/** Run a python snippet that emits JSON to a temp file; return the parsed JSON. */
-function runPy<T>(py: string, uri: string, body: string): T {
-  const dir = mkdtempSync(path.join(tmpdir(), "zori-gatea-"));
-  const outPath = path.join(dir, "out.json");
-  const script = `
-import json, psycopg
-uri = ${JSON.stringify(uri)}
-out_path = ${JSON.stringify(outPath)}
-${body}
-`;
-  const r = spawnSync(py, ["-c", script], { encoding: "utf-8", maxBuffer: 64 * 1024 * 1024 });
-  if (r.status !== 0) throw new Error(`psycopg subprocess failed:\n${r.stderr}\n${r.stdout}`);
-  return JSON.parse(readFileSync(outPath, "utf-8")) as T;
-}
 
 // ── View shape (mirror of data_lake.zori_zip_latest) ─────────────────────────
 interface ViewRow {
@@ -312,18 +271,11 @@ function viewDetailCells(view: ViewRow[]): Map<string, DetailCells> {
   return out;
 }
 
-const uri = dbUri();
+// Opt-in (RUN_DB_PARITY=1) + fail-loud gate lives in the shared harness
+// (_db-parity-harness.mts). uri/py are resolved ONLY when opted in, so the default
+// `bun test` never spawns python or touches the DB.
+const uri = process.env.RUN_DB_PARITY === "1" ? dbUri() : null;
 const py = uri ? pythonBin() : null;
-const runnable = Boolean(uri && py);
-
-// CI-safe skip: describe.skip STILL invokes its body, and this body does a live psycopg
-// fetch at collection time (fetchRawRows/fetchViewRows below) that THROWS — not skips —
-// when creds/python are absent (CI). So when not runnable, register an empty skipped block
-// and never touch the body. Manual cycle — runs only with .dlt creds + python (see header).
-function gateDescribe(name: string, body: () => void): void {
-  if (runnable) describe(name, body);
-  else describe.skip(name, () => {});
-}
 
 gateDescribe("§06 GATE A — ZORI view ⇆ pack parity (cycle)", () => {
   const sinceIso = sinceIso24mo();
