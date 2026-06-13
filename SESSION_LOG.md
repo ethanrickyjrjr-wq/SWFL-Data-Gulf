@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — Follow-up: 1bbda2d's `import.meta.main` guard broke CI typecheck — fixed with tsc-safe idiom — PUSH
+
+- `1bbda2d` made the Test step green, but the `import.meta.main` guard I added to `scripts/email/build-digest.mts` broke the **Typecheck** step: `TS2339: Property 'main' does not exist on type 'ImportMeta'`. `import.meta.main` is a Bun-only runtime feature; tsc checks `scripts/**` (but `refinery/**` is tsconfig-excluded, which is why bare `import.meta.main` in 4 refinery files was never flagged). CI runs typecheck BEFORE test, so main stayed red — a regression I introduced.
+- My miss: I verified `bun test` (2162/0) but NOT `bunx tsc --noEmit` before pushing. Fixed by switching to the repo's tsc-safe CLI-detect idiom — `process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))` (matches `lib/route-chart.ts` + `refinery/tools`) + `import path from "node:path"`. Verified this time: `bunx tsc --noEmit` exit 0 (whole tree clean) + build-digest test 8/0.
+- Lane A/B email work still uncommitted/untouched; committed only `build-digest.mts` + this entry.
+
 ## 2026-06-13 (main) — CI "build" red on main (12 runs): 3 pre-existing test failures fixed — COMMITTED, push pending operator
 
 - `ci.yml` "build" failed on every push since `c1ca6c5` (00:03 UTC). Audited PR #88 ("It's Alive" activation-delta): it reproduces the IDENTICAL 3 failures and adds none → merge-safe, but the red is REAL (two are code/test bugs, not "just environmental"). All 3 pre-existing, none in #88's diff:
