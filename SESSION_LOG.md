@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — S4 Brand Persistence finished off: 4A migration file + resolve-brand test coverage — COMMITTED, push pending operator
+
+- **State found:** S4 code (4B–4E) was already committed in `571c6cf` ("S1 template adapter + S4 brand persistence wiring") and the 4A schema was already applied to prod — but the **migration file was never saved** and `resolve-brand.ts` had **zero test coverage**. Two gaps closed.
+- **4A file (`docs/sql/20260612_brand_persistence.sql`):** idempotent, authored to match the *deployed* schema (verified live via the us-east-1 Supavisor pooler — direct `db.*.supabase.co:5432` times out from here): `public.user_brand_profiles` (13 cols, `UNIQUE(user_id)`, FK→`auth.users` ON DELETE CASCADE, RLS `own brand` USING+CHECK `auth.uid()=user_id`, grants to `authenticated`+`service_role`) + `email_subscribers.prospect_brand jsonb`. Kept in `docs/sql/` (repo has no `supabase/` CLI). rows=0, column present — DB confirmed matching.
+- **4B tests (`lib/email/templates/resolve-brand.test.ts`):** 6 cases lock the resolution hierarchy — project brand wins (most-specific short-circuits before user profile), falls through to `user_brand_profiles` when project has no branding, user-scoped filter asserted, returns `null` for a new user / all-empty profile (NEVER SWFL defaults for an authed user). 189 email tests pass (was 183), tsc 0, eslint `--max-warnings=0`.
+- **Next/open:** opened check `prospect_brand_write_side` [email] — the 4D *read* side (signup pre-fill from `prospect_brand`) is live; the *write* side (stamp brand onto `prospect_brand` at branded-prospecting-send time) has no hook yet — build when Email Digest Phase 2 go-live lands the prospecting-send path. `docs/rstudio-showcase.R` left untracked (operator's in-progress work, not staged).
+
 ## 2026-06-12 (main) — Un-grounded welcome-chat ZIP→place gloss fixed (deterministic crosswalk injection) — PUSH
 
 - **Bug:** the un-grounded `/api/welcome/chat` (Haiku, no lake fetch) glossed ZIP 33931 as Lehigh Acres — 33931 is Fort Myers Beach. An un-grounded model resolves ZIP→place from its own weights and gets it wrong, at the front door, for a product whose moat is "the system can't invent a SWFL fact." Place identity is a lookup, not speculation.
