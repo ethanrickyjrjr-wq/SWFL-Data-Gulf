@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — Scheduler scope schema: zod-order fix (.trim() before .min(1)) — COMMITTED, push pending operator
+
+- Follow-up on the already-shipped email-schedule scope feature (`c7322bb`): in `lib/email/schedule-command.ts` the `rawSchema` scope fields were `.min(1).trim().toLowerCase()`, so `.min(1)` ran BEFORE `.trim()` — a whitespace-only `scope_value`/`topic` (`'   '`) passed the length check, then trimmed to `''`, reaching storage empty. Swapped to `.trim().min(1).toLowerCase()` (scope_value + topic) so trim runs first and an all-whitespace value is correctly rejected. No behavior change for real values; the lowercase+trimmed canonical contract is intact.
+- Scoped fix only — `route.ts` left as-is on purpose: the route→migration coupling is correct-by-design (the `email_schedule_scope` migration applies as step 1 of go-live; making the insert column-tolerant would hide a sequencing bug, not fix it).
+- Verified: `bun test` **2235/0** (189 files) — baseline holds.
+- Housekeeping (outside repo): deleted a stale auto-memory file (`project_email-funnel-built-vs-gap.md`) that listed already-shipped gaps as open, and removed its MEMORY.md pointer.
+
 ## 2026-06-13 (main) — All lanes closed: Lane A/B reconciled into main as the UNION with reply-sensor + #88 — PUSH
 
 - Operator: "take care of all lanes, close them all, decide what's right so they don't overwrite each other." Squash-merged `wip/lane-ab-preserve` (the preserved uncommitted Lane A/B work) onto main. Only 2 conflicts; `scheduler.ts` auto-merged clean (orthogonal regions).

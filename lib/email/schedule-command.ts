@@ -149,8 +149,8 @@ const rawSchema = z.object({
   //    brain-slug mapping). All optional: a no-scope create stays valid and the
   //    NULL+NULL absence is the default => today's whole-region global digest.
   scope_kind: z.enum(["zip", "place", "county"]).optional(),
-  scope_value: z.string().min(1).trim().toLowerCase().optional(),
-  topic: z.string().min(1).trim().toLowerCase().optional(),
+  scope_value: z.string().trim().min(1).toLowerCase().optional(),
+  topic: z.string().trim().min(1).toLowerCase().optional(),
 });
 
 export type ValidationResult =
