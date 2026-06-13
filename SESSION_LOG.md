@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-12 (main) — Welcome-arrival Phase 2: design spec + impl plan + Phase 3 funnel notes (docs-only)
+
+- **Breadcrumb for `23dc5ab` (spec + Phase 3 notes) + `a929e90` (impl plan)** — already on origin (rode a concurrent co-session `safe-push`); this entry is the RULE-0 record that raced and is landing now.
+- **Brainstorm → spec → plan for Phase 2 of the welcome-arrival flow** (Phase 1 = `92501f6` viz cards). **Docs only — no product code yet.**
+- **Live vendor bake-off (3 domains: century21 / premier-sothebys / sagerealtor)** chose the enrichment path: Firecrawl v2 `branding` format (1 call) → `claude-haiku-4-5` selects primary/secondary from the FULL labeled color map. Findings baked into the spec: the real brand color often hides under `colors.link`/`accent` (C21 gold `#BEAF87` came back under `link`); `branding.images.logo` is the real logo path (top-level `branding.logo` is `null`). Spike scripts run + deleted.
+- **Spec** `docs/superpowers/specs/2026-06-12-welcome-arrival-phase2-design.md`: `lib/prospects/enrich-brand.ts` (hybrid; nulls-on-fail; NEVER SWFL-defaults inside the lib) + `build-arrival-url.ts` (pure) + un-grounded `/api/welcome/chat` explainer (illustrative ranges not hardcoded stats; never invents a SWFL number — moat) + wire `/welcome` stub + insert-only `welcome_chat_usage` telemetry (zero enforcement) + `firecrawlApiKey` env. Caller deferred (pure libs).
+- **Plan** `docs/superpowers/plans/2026-06-12-welcome-arrival-phase2.md`: 5 TDD tasks, full code per step, spike-derived fixtures; `strict`-tool deviation flagged (omitted — forced `tool_choice` + defensive parse; unverified SDK feature).
+- **Phase 3 funnel decomposed out** (DB-backed state machine — own brainstorm later): `docs/superpowers/plans/2026-06-12-welcome-funnel-phase3-notes.md` + ledger `phase3_welcome_funnel`. Locked corrections: free branded build routes through the GROUNDED engine (not the chat LLM — moat); illustrative seeds not hardcoded stats; two enrich callers; freemail "connect your work domain" hook.
+- **Next:** execute Phase 2 Tasks 1–5 (build not started).
+
 ## 2026-06-12 (main) — Email template adapter S2: chart renderer (PUSH)
 
 - **S2 of the email-template-adapter plan** (`docs/superpowers/plans/2026-06-12-email-template-adapter/s2-charts__OPUS__BLOCKED-shells.md`). New `lib/email/templates/charts/`: `chart-types.ts` (`EmailChartSpec` union — bar/sparkline/gauge/heat-row/stacked-bar), `chart-defaults.ts` (`SWFL_CHART_DEFAULTS` + `resolveChartTheme()`; primary/accent derive from `SWFL_THEME`, never re-hardcoded), `chart-renderer.ts` (`renderChart(spec, theme?)` → email-safe HTML string).
