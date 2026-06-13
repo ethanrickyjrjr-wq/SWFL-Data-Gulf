@@ -42,7 +42,12 @@ export default async function ProjectListPage() {
 
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-white">Your projects</h1>
-        <NewProjectButton />
+        <div className="flex items-center gap-3">
+          <Link href="/alerts" className="text-xs text-gray-400 hover:text-[#00d4aa]">
+            Buyer-intent alerts →
+          </Link>
+          <NewProjectButton />
+        </div>
       </div>
 
       {projects.length === 0 ? (

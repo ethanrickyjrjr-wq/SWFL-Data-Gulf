@@ -518,3 +518,73 @@ describe("reapOrphans", () => {
     assert.ok(rec.logs.some((l) => l.includes("REAP FAILED")));
   });
 });
+
+// ---------------------------------------------------------------------------
+// Buyer-Intent Reply Sensor — reply-token override + send persistence
+// ---------------------------------------------------------------------------
+
+describe("reply sensor deps", () => {
+  test("resolveReplyTo overrides the broadcast reply_to and threads the token to recordSend", async () => {
+    const { deps, rec } = makeDeps({
+      // tenant has its own verified reply_to which the sensor must override
+      senderConfig: {
+        domain: "janerealty.com",
+        resend_domain_id: "dom_1",
+        from_name: "Jane",
+        from_email: "jane@janerealty.com",
+        reply_to: "jane@janerealty.com",
+        domain_verified: true,
+      },
+    });
+    const recorded: { token: string; address: string; broadcastId?: string; scheduleId: number }[] =
+      [];
+    deps.resolveReplyTo = (_row) => ({ token: "tok123", address: "r-tok123@reply.example.com" });
+    deps.recordSend = async (row, result, reply) => {
+      if (reply) recorded.push({ ...reply, broadcastId: result.broadcast_id, scheduleId: row.id });
+    };
+
+    const out = await processSchedule(makeRow({ id: 9 }), deps, FIXED_NOW);
+    assert.equal(out.kind, "sent");
+
+    // The POSTed broadcast carries the sensor address, NOT the tenant reply_to.
+    assert.equal(rec.posts.length, 1);
+    assert.equal(rec.posts[0].replyTo, "r-tok123@reply.example.com");
+
+    // recordSend saw the SAME token + the broadcast id + the schedule id.
+    assert.deepEqual(recorded, [
+      {
+        token: "tok123",
+        address: "r-tok123@reply.example.com",
+        broadcastId: "bc_1",
+        scheduleId: 9,
+      },
+    ]);
+  });
+
+  test("recordSend failure is swallowed — the send still counts (email already went out)", async () => {
+    const { deps, rec } = makeDeps({});
+    deps.resolveReplyTo = () => ({ token: "t", address: "r-t@reply.example.com" });
+    deps.recordSend = async () => {
+      throw new Error("db down");
+    };
+    const out = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(out.kind, "sent", "send outcome unchanged despite recordSend throwing");
+    assert.ok(rec.logs.some((l) => l.includes("recordSend FAILED")));
+  });
+
+  test("without the sensor deps, reply_to falls back to the tenant config (legacy unchanged)", async () => {
+    const { deps, rec } = makeDeps({
+      senderConfig: {
+        domain: "janerealty.com",
+        resend_domain_id: "dom_1",
+        from_name: "Jane",
+        from_email: "jane@janerealty.com",
+        reply_to: "jane@janerealty.com",
+        domain_verified: true,
+      },
+    });
+    const out = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(out.kind, "sent");
+    assert.equal(rec.posts[0].replyTo, "jane@janerealty.com");
+  });
+});

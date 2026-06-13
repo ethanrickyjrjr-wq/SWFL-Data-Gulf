@@ -27,6 +27,7 @@ import { renderEmailTemplate } from "@/lib/email/templates/render-template";
 import { EMAIL_TEMPLATES, type TemplateSlug } from "@/lib/email/templates/template-registry";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import type { SenderConfigRow } from "@/lib/email/sender-config";
+import { generateReplyToken, buildReplyAddress, replyDomain } from "@/lib/email/reply-token";
 import {
   processBatch,
   reapOrphans,
@@ -283,6 +284,33 @@ async function main(): Promise<void> {
         .update({ next_run_at: nextRunAt, updated_at: new Date().toISOString() })
         .eq("id", scheduleId);
       if (error) throw new Error(`re-arm schedule ${scheduleId}: ${error.message}`);
+    },
+
+    // ── Buyer-Intent Reply Sensor ──
+    // Each fire gets a fresh monitored reply address; the core overrides the
+    // broadcast's reply_to with it and threads the SAME token into recordSend.
+    resolveReplyTo(_row: ScheduleRow) {
+      const token = generateReplyToken();
+      return { token, address: buildReplyAddress(token, replyDomain()) };
+    },
+
+    async recordSend(
+      row: ScheduleRow,
+      result: BroadcastResult,
+      reply: { token: string; address: string } | null,
+    ): Promise<void> {
+      if (!reply) return;
+      const { error } = await db.from("email_sends").insert({
+        user_id: row.user_id,
+        schedule_id: row.id,
+        audience_slug: row.audience_slug,
+        broadcast_id: result.broadcast_id ?? null,
+        reply_token: reply.token,
+        reply_address: reply.address,
+      });
+      // Thrown here is caught by the core's best-effort wrapper (the email already
+      // sent); it logs and continues rather than failing the batch.
+      if (error) throw new Error(`insert email_sends: ${error.message}`);
     },
 
     computeNext: computeNextRunAt,

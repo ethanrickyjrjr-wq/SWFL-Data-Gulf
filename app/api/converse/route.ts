@@ -1,23 +1,18 @@
 import { fetchBrain, buildDossier, BrainNotFoundError } from "@/lib/fetch-brain";
 import { routeChart } from "@/lib/route-chart";
 import { buildChartForIntent } from "@/lib/build-chart-for-intent.mts";
-import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
-import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
-import { buildGroundingContext, type GroundingBlock } from "@/lib/highlighter/grounding";
+import { type GroundingBlock } from "@/lib/highlighter/grounding";
 import { resolveReachTargets } from "@/lib/highlighter/reach";
 import { fetchReachBlocks } from "@/lib/highlighter/fetch-reach";
 import { recordUse, recordAsk } from "@/lib/highlighter/meter";
 import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
-import { buildPlaceContext } from "@/lib/place-context";
+import { buildGroundedSystemPrompt } from "@/lib/grounded-answer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MAX_TOKENS = 760; // +60 over the answer budget for the short follow-ups tail.
-
-// GEOGRAPHY_GAZETTEER is an object; buildGroundingContext expects a string.
-const GAZETTEER_STR = JSON.stringify(GEOGRAPHY_GAZETTEER, null, 2);
 
 /**
  * Produce an async iterable of text strings from whatever the SDK stream
@@ -111,45 +106,17 @@ export async function POST(request: Request): Promise<Response> {
   // definition, a gap — deterministic, no answer-text parsing.
   const answered = neededComponents.length === 0;
 
-  const FORMAT_RULE =
-    "CRITICAL: Respond in plain text ONLY. " +
-    "NEVER use markdown — no asterisks (* or **), no # headers, no - bullet lists, no backticks (`), no > blockquotes. " +
-    "Plain prose sentences only. If you use any markdown symbol the answer will be unreadable to the user.\n\n";
-
-  // Real-time follow-ups: ask the model to append a strict, non-markdown tail the
-  // client splits off into "Follow up" chips. GATED on selection_type — the popup
-  // sends it; the report-level Ask-AI dock does not (it renders no chips), so the
-  // dock never spends tokens on a tail that would only be stripped.
-  const followupsDirective =
-    typeof selection_type === "string" && selection_type
-      ? "\n\nAFTER your answer, on its very own final line, output exactly this marker " +
-        "then 2-3 natural next questions separated by ' | ':\n" +
-        "⟦FOLLOWUPS⟧ first question | second question | third question\n" +
-        `Each must be a complete question (<= 12 words), grounded in the data you have, ` +
-        `tailored to your answer and to what the user highlighted (a ${selection_type}). ` +
-        "Do not number them. Write nothing after the last one. Keep them CLEAN — no internal " +
-        "ids/slugs, never the words 'master', 'brain', 'payload', or 'grain'."
-      : "";
-
-  // Top-line deterministic ZIP<->place ground truth for any SWFL place the user
-  // named in the fact or question. The crosswalk also rides inside the gazetteer
-  // blob below, but that JSON is large enough for a small triage model to misread
-  // (33931 was once glossed as Lehigh Acres); surfacing the SPECIFIC referenced
-  // identity up front pins it. No-op ("") when no SWFL place is named — additive,
-  // never replaces the gazetteer/grounding wiring.
-  const placeContext = buildPlaceContext(`${fact ?? ""} ${question}`);
-
-  const system =
-    placeContext +
-    FORMAT_RULE +
-    buildGroundingContext({
-      rules: RULES_OF_ENGAGEMENT,
-      gazetteer: GAZETTEER_STR,
-      blocks: [primary, ...reachBlocks],
-      method,
-    }) +
-    "\n\nSpeak like a knowledgeable friend. Give a real, useful answer from the data. No markdown. Never say 'master', 'brain', 'grounded data', 'payload', or 'grain'." +
-    followupsDirective;
+  // The grounded system prompt — place-pin → format rule → grounding context →
+  // speak line → follow-ups tail — is assembled by the shared core so the inbound
+  // auto-reply path (Buyer-Intent Reply Sensor) grounds on the SAME engine. The
+  // follow-ups tail stays gated on selection_type (popup yes, dock/email no).
+  const system = buildGroundedSystemPrompt({
+    fact,
+    question,
+    selectionType: selection_type,
+    blocks: [primary, ...reachBlocks],
+    method,
+  });
 
   // Tell the model the SHAPE of what was grabbed so the answer (not just the
   // follow-ups) is tailored — e.g. a date/token reads differently than a metric.

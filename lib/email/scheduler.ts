@@ -129,6 +129,26 @@ export interface ProcessDeps {
   /** Re-arm next_run_at for a processed row. null → leave parked (invalid spec). */
   rearm: (scheduleId: number, nextRunAt: string | null) => Promise<void>;
 
+  /**
+   * Buyer-Intent Reply Sensor (optional). When present, returns a per-send
+   * monitored reply address `r-{token}@reply...` that OVERRIDES the tenant's
+   * reply_to for this fire, so an inbound reply traces back to this exact issue.
+   * Undefined (tests/legacy) → the tenant's own reply_to is used unchanged.
+   */
+  resolveReplyTo?: (row: ScheduleRow) => { token: string; address: string } | null;
+
+  /**
+   * Buyer-Intent Reply Sensor (optional). Called AFTER a successful send with the
+   * broadcast result + the reply token, to persist the `email_sends` row the
+   * inbound webhook looks the token up in. Best-effort — a failure here must not
+   * fail the send (the email already went out).
+   */
+  recordSend?: (
+    row: ScheduleRow,
+    result: BroadcastResult,
+    reply: { token: string; address: string } | null,
+  ) => Promise<void>;
+
   /** Shared cadence/DST math (Unit's computeNextRunAt). Injected so the test is
    *  deterministic and the worker shares ONE implementation with create-time. */
   computeNext: (spec: CadenceSpec, fromUtc: Date) => Date | null;
@@ -253,21 +273,26 @@ export async function processSchedule(
     const senderConfig = await deps.readSenderConfig(row.user_id);
     const sender = resolveSender(senderConfig, deps.platform);
 
+    // 3b. REPLY SENSOR — override reply_to with a per-send monitored token when
+    //     the dep is wired. Optional + additive: undefined → tenant reply_to.
+    const reply = deps.resolveReplyTo ? deps.resolveReplyTo(row) : null;
+    const effectiveSender = reply ? { ...sender, replyTo: reply.address } : sender;
+
     // 4. CONTENT + RENDER + token injection.
     const { subject, body, chart } = await deps.buildContent(row);
     const rendered = await deps.renderHtml(row, body, chart);
     const html = ensureUnsubscribeToken(rendered);
 
     // 5. PAYLOAD.
-    const payload = buildBroadcastPayload({ subject, html, segmentId, sender });
+    const payload = buildBroadcastPayload({ subject, html, segmentId, sender: effectiveSender });
 
     // 6. DRY_RUN — log the would-send, NEVER POST, NEVER record.
     if (deps.dryRun) {
       deps.log(
         `[scheduler] DRY_RUN ${tag} — would send: subject=${JSON.stringify(subject)} ` +
-          `htmlBytes=${html.length} from="${sender.fromName} <${sender.fromEmail}>" ` +
-          `replyTo=${sender.replyTo ?? "(none)"} segmentId=${segmentId} ` +
-          `usingTenantDomain=${sender.usingTenantDomain} gate=allowed(${usage.sent}/${usage.limit}).`,
+          `htmlBytes=${html.length} from="${effectiveSender.fromName} <${effectiveSender.fromEmail}>" ` +
+          `replyTo=${effectiveSender.replyTo ?? "(none)"}${reply ? " (sensor)" : ""} segmentId=${segmentId} ` +
+          `usingTenantDomain=${effectiveSender.usingTenantDomain} gate=allowed(${usage.sent}/${usage.limit}).`,
       );
       return { kind: "dry-run", scheduleId: row.id };
     }
@@ -294,8 +319,19 @@ export async function processSchedule(
     // 8. SUCCESS — record usage (recipients when known, else 1) AFTER the send.
     const recipients = audience?.contact_count ?? 1;
     await deps.recordSent(row.user_id, recipients);
+    // 8b. REPLY SENSOR — persist the send↔token row the inbound webhook reads.
+    //     Best-effort: a failure here is logged, never fails the (already-sent) send.
+    if (deps.recordSend) {
+      try {
+        await deps.recordSend(row, result, reply);
+      } catch (recErr) {
+        deps.log(
+          `[scheduler] recordSend FAILED ${tag} — ${recErr instanceof Error ? recErr.message : String(recErr)} (send already went out).`,
+        );
+      }
+    }
     deps.log(
-      `[scheduler] SENT ${tag} — broadcast_id=${result.broadcast_id ?? "?"} recipients=${recipients}.`,
+      `[scheduler] SENT ${tag} — broadcast_id=${result.broadcast_id ?? "?"} recipients=${recipients}${reply ? ` reply_token=${reply.token}` : ""}.`,
     );
     return {
       kind: "sent",
