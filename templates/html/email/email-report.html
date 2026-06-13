@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COMPANY_NAME}} — SWFL Market Report</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+  <tr>
+    <td align="center" style="padding:24px 16px;">
+
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;border-radius:{{BORDER_RADIUS}};overflow:hidden;background-color:{{SURFACE}};">
+
+        <!-- Logo bar -->
+        <tr>
+          <td style="background-color:{{PRIMARY}};padding:18px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td><img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" /></td>
+                <td align="right"><span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Report body (filled deterministically — metrics, lines, delta, freshness, CTA) -->
+        <tr>
+          <td style="background-color:{{SURFACE}};padding:28px 28px 8px 28px;color:{{TEXT}};font-family:{{FONT_FAMILY}};">
+[ BODY TEXT ]
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:{{SURFACE}};padding:16px 28px 24px 28px;border-top:1px solid #ececec;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
+                <td align="right"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

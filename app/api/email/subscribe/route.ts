@@ -2,6 +2,27 @@ import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { getMarketingResend, getDigestSegmentId } from "@/lib/email/marketing-client";
 import { normalizeEmail, isValidEmail, sanitizeSource } from "@/lib/email/validation";
+import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
+
+/**
+ * The canonical opt-in wording — defined server-side so the recorded consent can't
+ * be spoofed by the client. Stored verbatim with a timestamp when `consent === true`
+ * (Resend AUP requires explicit opt-in; CAN-SPAM requires a clear consent record).
+ */
+const CONSENT_TEXT =
+  "Yes, send me my SWFL market report and what changes each week. I can unsubscribe anytime.";
+
+/** A brand skin a prospect may carry in (white-label producer for prospect_brand). */
+function sanitizeBrand(raw: unknown): Record<string, string> | null {
+  if (!raw || typeof raw !== "object") return null;
+  const b = raw as Record<string, unknown>;
+  const out: Record<string, string> = {};
+  for (const k of ["primary_color", "accent_color", "logo_url", "company_name"]) {
+    const v = b[k];
+    if (typeof v === "string" && v.trim().length > 0 && v.length <= 256) out[k] = v.trim();
+  }
+  return Object.keys(out).length ? out : null;
+}
 
 /**
  * Daily-digest subscribe endpoint (Email Marketing Phase 2).
@@ -15,7 +36,13 @@ import { normalizeEmail, isValidEmail, sanitizeSource } from "@/lib/email/valida
  * returns the same contact id, no error), so re-subscribing is a no-op upsert.
  */
 export async function POST(request: Request) {
-  let payload: { email?: unknown; source?: unknown };
+  let payload: {
+    email?: unknown;
+    source?: unknown;
+    zip?: unknown;
+    consent?: unknown;
+    brand?: unknown;
+  };
   try {
     payload = await request.json();
   } catch {
@@ -27,6 +54,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
   const source = sanitizeSource(payload.source);
+
+  // Scope: a prospect's patch. Stored ONLY when it resolves inside the 6-county
+  // footprint (the MOAT gate) — never an out-of-scope ZIP, never an invented grain.
+  const rawZip = typeof payload.zip === "string" ? payload.zip.trim() : "";
+  let scope: { zip: string } | null = null;
+  if (/^\d{5}$/.test(rawZip) && resolveZip(rawZip).in_scope) {
+    scope = { zip: rawZip };
+  }
+
+  // Explicit opt-in record (Resend AUP / CAN-SPAM). We store the canonical wording,
+  // never client-supplied text, so the consent record is authoritative.
+  const consented = payload.consent === true;
+  const prospectBrand = sanitizeBrand(payload.brand);
 
   // 1) Add to the Resend Segment — the list the digest broadcast actually sends to.
   let segmentId: string | null = null;
@@ -58,6 +98,10 @@ export async function POST(request: Request) {
         source,
         segment_id: segmentId,
         contact_id: contactId,
+        // Additive: only set when supplied, so the legacy capture path is unchanged.
+        ...(scope ? { scope } : {}),
+        ...(consented ? { consent_text: CONSENT_TEXT, consent_at: new Date().toISOString() } : {}),
+        ...(prospectBrand ? { prospect_brand: prospectBrand } : {}),
         updated_at: new Date().toISOString(),
       },
       { onConflict: "email" },
