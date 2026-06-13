@@ -1,6 +1,16 @@
 from unittest.mock import patch, MagicMock
 
+import pytest
+
 from ingest.pipelines.census_cbp.constants import CBP_YEARS
+
+
+@pytest.fixture(autouse=True)
+def _bypass_volume_floor(monkeypatch):
+    # The production min-rows floor (230k) would reject the tiny fixtures these
+    # tests use; bypass it so they exercise field mapping. The guard itself is
+    # covered by TestVolumeGuard.
+    monkeypatch.setattr("ingest.pipelines.census_cbp.resources._MIN_ROWS", 0)
 
 FAKE_RESPONSE = [
     ["NAICS2017", "NAICS2017_LABEL", "ESTAB", "EMP", "PAYANN", "NAME", "state", "county"],
@@ -66,3 +76,33 @@ class TestCensusCbpFl:
         with patch("requests.get", return_value=_mock_get()):
             rows = list(census_cbp_fl())
         assert all("ingested_at" in r for r in rows)
+
+
+class TestVolumeGuard:
+    # The guard raises VolumeGuardError inside the @dlt.resource generator; dlt
+    # re-wraps it as ResourceExtractionError (VolumeGuardError is the __cause__),
+    # preserving the "[volume-guard]" message. Either way the pull is rejected
+    # before any replace — assert on the message, not the wrapped type.
+    def test_raises_when_estab_all_zero(self):
+        """A silent ESTAB field rename (all zeros) trips the non-zero floor; the pull is rejected."""
+        from ingest.pipelines.census_cbp.resources import census_cbp_fl
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.text = "["
+        resp.json.return_value = [
+            ["NAICS2017", "NAICS2017_LABEL", "ESTAB", "EMP", "PAYANN", "NAME", "state", "county"],
+            ["--", "Total", "0", "0", "0", "Lee County", "12", "071"],
+        ]
+        with patch("requests.get", return_value=resp):
+            with pytest.raises(Exception) as ei:
+                list(census_cbp_fl())
+        assert "volume-guard" in str(ei.value)
+
+    def test_raises_below_min_rows(self, monkeypatch):
+        """A partial pull (fewer rows than the floor) is rejected by assert_min_rows before any yield."""
+        from ingest.pipelines.census_cbp.resources import census_cbp_fl
+        monkeypatch.setattr("ingest.pipelines.census_cbp.resources._MIN_ROWS", 1000)
+        with patch("requests.get", return_value=_mock_get()):
+            with pytest.raises(Exception) as ei:
+                list(census_cbp_fl())
+        assert "volume-guard" in str(ei.value)

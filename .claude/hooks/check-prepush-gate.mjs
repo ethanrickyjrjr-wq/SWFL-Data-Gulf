@@ -22,13 +22,17 @@ import { execSync } from "node:child_process";
 
 const BANNER = "=".repeat(72);
 
-// Gate 4 (ingest hardening, BIBLE §0.2 rule 5) ships in ADVISE mode. The
-// 2026-06-13 dry run found 4 known-good `replace` pipelines with NO non-null
-// guard (census_cbp, faf5, fdot, fl_dbpr_licenses) — flipping the block before
-// they are guarded would wedge every push that touches them. Add the guard to
-// all four, re-run the dry run clean, THEN set this to true. Operator override
-// for a legitimate one-off: ALLOW_REPLACE_WITHOUT_GUARD=1 (reason is logged).
-const BLOCK_REPLACE_WITHOUT_GUARD = false;
+// Gate 4 (ingest hardening, BIBLE §0.2 rule 5) is LIVE (fail-closed). 2026-06-13:
+// census_cbp + fdot now carry a real non-null guard (assert_min_rows + a load-bearing
+// non-null/non-zero floor); a clean re-run of the dry run confirmed they no longer
+// trip the predicate. faf5 and fl_dbpr_licenses are deliberately HELD unguarded —
+// their replace targets (faf_flows/faf_zone_lookup/faf_sctg_lookup; fl_dbpr_applicants)
+// are MISSING from data_lake (open incident), so a guard there would just fail loudly
+// every run. The block is PER-TOUCHED-FILE, so a held pipeline is protected the moment
+// anyone edits it — the push that touches it is blocked until a guard lands, which is
+// exactly when the incident should be dealt with. Operator override for a legitimate
+// one-off: ALLOW_REPLACE_WITHOUT_GUARD=1 (reason is logged).
+const BLOCK_REPLACE_WITHOUT_GUARD = true;
 
 let raw = "";
 process.stdin.setEncoding("utf8");

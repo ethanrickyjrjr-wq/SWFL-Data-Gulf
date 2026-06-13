@@ -5,7 +5,15 @@ import dlt
 from ingest.lib.arcgis_paginator import paginate_arcgis
 from ingest.lib.geo_utils import FL_BBOX
 from ingest.lib.storage_uploader import upload_csv_gz, write_tier1_pointer
+from ingest.lib.guards import assert_min_rows, VolumeGuardError
 from .constants import FDOT_AADT_URL, TABULAR_BUCKET
+
+# Volume-guard floors before the Tier-2 `replace` (THE BIBLE §0.2 rule 5).
+# 93_295 = 90% of the 103,662 rows live 2026-06-13. The aadt non-null rate catches a
+# silent vendor field rename (AADT missing → _coerce_int → None) that would otherwise
+# replace the consumer table with traffic-less rows.
+_MIN_ROWS = 93_295
+_AADT_NONNULL_FLOOR = 0.50
 
 
 # Tier 2 column hints — pin the 24 fields from FTO_PROD/MapServer/7 to explicit dlt types
@@ -100,6 +108,20 @@ def ingest_fdot_aadt(tier1_pipeline) -> None:
         print("FDOT AADT: 0 features returned — skipping upload")
         return
     rows = [f.get("properties", {}) for f in features]
+
+    # ── Volume guard — gate the REAL pull before EITHER write (THE BIBLE §0.2 rule 5).
+    # Fail fast (before the Tier-1 archive AND the Tier-2 replace) so a partial pull or
+    # a silent AADT field rename can never overwrite the consumer table with bad data.
+    normalized = [_normalize(r) for r in rows]
+    assert_min_rows(len(normalized), _MIN_ROWS, label="fdot_aadt_fl")
+    nonnull_aadt = sum(1 for r in normalized if r["aadt"] is not None)
+    rate = nonnull_aadt / len(normalized) if normalized else 0.0
+    print(f"  fdot_aadt_fl aadt non-null rate: {rate:.1%} ({nonnull_aadt:,}/{len(normalized):,})")
+    if rate < _AADT_NONNULL_FLOOR:
+        raise VolumeGuardError(
+            f"[volume-guard] fdot_aadt_fl: aadt non-null {rate:.1%} < {_AADT_NONNULL_FLOOR:.0%} "
+            f"floor — likely a vendor field rename; aborting before replace"
+        )
 
     # Tier 1 (cold archive): full raw CSV.gz + pointer row in data_lake._tier1_inventory.
     object_path = f"fdot_aadt/{today}.csv.gz"

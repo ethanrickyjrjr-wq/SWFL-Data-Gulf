@@ -1,5 +1,14 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _bypass_volume_floor(monkeypatch):
+    # Dry-run materializes the resource (list(census_cbp_fl())) to print a sample,
+    # which runs the volume guard; the tiny fixture would trip the 230k floor.
+    monkeypatch.setattr("ingest.pipelines.census_cbp.resources._MIN_ROWS", 0)
+
 
 def _fake_census_response():
     m = MagicMock()

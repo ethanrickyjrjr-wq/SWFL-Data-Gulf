@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — ingest-hardening A1: census_cbp + fdot guarded, Gate-4 block flipped LIVE — PUSHED
+
+- **A1 (correctness guards, BIBLE §0.2 rule 5).** Real non-null/min-rows guard before the destructive `replace` in `census_cbp` (assert_min_rows 230_006 + establishment_count non-zero ≥50%) and `fdot` (assert_min_rows 93_295 + aadt non-null ≥50%) — each gates the REAL pull (materialize → guard → write), so a partial pull or silent vendor field-rename aborts before wiping good data. 28 pipeline tests green (4 new guard tests prove the gate fires; dlt re-wraps the resource-level raise as ResourceExtractionError, the `[volume-guard]` message preserved).
+- **faf5 + fl_dbpr_licenses HELD (not guarded).** DB probe: `faf_flows`/`faf_zone_lookup`/`faf_sctg_lookup` AND `fl_dbpr_applicants` are ALL MISSING from `data_lake` — their replace targets never landed (open incidents). Guarding a broken/empty pull would just fail loudly every run; bolting a guard onto a pipeline in a bad state is the entanglement we avoid. They stay protected by the per-touched-file block (next edit must add a guard).
+- **Gate-4 block flipped LIVE** (`BLOCK_REPLACE_WITHOUT_GUARD = true`, `.claude/hooks/check-prepush-gate.mjs`). Re-ran the dry run after guarding: would-block = {faf5, fl_dbpr_licenses} only (census_cbp + fdot cleared). Per-touched-file; override `ALLOW_REPLACE_WITHOUT_GUARD=1` (logged).
+- **Next:** A3 dead-key audit; A4 ArcGIS outFields (fdot/fema/leepa + paginator guardrail); A5 noaa current-year; A6 redfin retries + docstring; A7 over-frequent crons. `faf5` + `fl_dbpr_applicants` "table missing" are separate incidents to triage before those can be guarded/edited.
+
 ## 2026-06-13 (main) — redfin-lee first live ingest: 660 rows, grant applied, brain citation flipped — PUSHED
 
 - **Dry-run confirmed** `redfin_lee_county_parity` workflow_dispatch → 660 Lee County, FL rows, filter `"Lee County, FL"` fires, all 5 property_types present, data 2015–2026.

@@ -1,6 +1,15 @@
 from unittest.mock import patch, MagicMock
 
+import pytest
+
 FAKE_STATION = {"type": "Feature", "geometry": None, "properties": {"SITE_ID": "FL001", "AADT": "15000"}}
+
+
+@pytest.fixture(autouse=True)
+def _bypass_volume_floor(monkeypatch):
+    # The production min-rows floor (93k) would reject the 1-row fixtures the
+    # plumbing tests use; bypass it. The guard itself is covered by TestVolumeGuard.
+    monkeypatch.setattr("ingest.pipelines.fdot.resources._MIN_ROWS", 0)
 
 # Mirrors a real row from the FDOT FTO_PROD/MapServer/7 layer (24 properties + Shape geometry).
 FAKE_FDOT_RAW = {
@@ -215,3 +224,32 @@ class TestTier2Promotion:
         assert captured_kwargs["write_disposition"] == "replace"
         assert "columns" in captured_kwargs
         assert len(captured_kwargs["columns"]) == 24
+
+
+class TestVolumeGuard:
+    def test_raises_when_aadt_mostly_null(self):
+        """A silent AADT field rename (all None) trips the non-null floor → VolumeGuardError, no write."""
+        from ingest.pipelines.fdot.resources import ingest_fdot_aadt
+        from ingest.lib.guards import VolumeGuardError
+        feature = {"type": "Feature", "properties": {"OBJECTID": 1, "AADT": None}}
+        with patch("ingest.pipelines.fdot.resources.paginate_arcgis", return_value=iter([feature])), \
+             patch("ingest.pipelines.fdot.resources.upload_csv_gz") as mock_upload, \
+             patch("ingest.pipelines.fdot.resources.write_tier1_pointer"), \
+             patch("ingest.pipelines.fdot.resources._promote_to_tier2") as mock_tier2:
+            with pytest.raises(VolumeGuardError):
+                ingest_fdot_aadt(MagicMock())
+        assert not mock_upload.called
+        assert not mock_tier2.called
+
+    def test_raises_below_min_rows(self, monkeypatch):
+        """A partial pull (fewer rows than the floor) trips assert_min_rows before any write."""
+        from ingest.pipelines.fdot.resources import ingest_fdot_aadt
+        from ingest.lib.guards import VolumeGuardError
+        monkeypatch.setattr("ingest.pipelines.fdot.resources._MIN_ROWS", 1000)
+        with patch("ingest.pipelines.fdot.resources.paginate_arcgis", return_value=iter([FAKE_STATION])), \
+             patch("ingest.pipelines.fdot.resources.upload_csv_gz") as mock_upload, \
+             patch("ingest.pipelines.fdot.resources.write_tier1_pointer"), \
+             patch("ingest.pipelines.fdot.resources._promote_to_tier2"):
+            with pytest.raises(VolumeGuardError):
+                ingest_fdot_aadt(MagicMock())
+        assert not mock_upload.called
