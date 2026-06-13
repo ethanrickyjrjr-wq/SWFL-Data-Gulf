@@ -201,11 +201,18 @@ def _fetch_all_nfip_claims() -> list[dict]:
                 wait = min(30 * 2 ** attempt, 300)
                 print(f"  FEMA API {resp.status_code} at skip={skip}, retry {attempt+1}/5 in {wait}s...")
                 time.sleep(wait)
-            except (requests.ConnectionError, requests.Timeout):
+            except (
+                requests.ConnectionError,
+                requests.Timeout,
+                # FEMA's chunked stream drops mid-body on long pulls (observed at
+                # skip~330k). It is NOT a subclass of ConnectionError, so without
+                # this it kills the whole fetch one page short of the Tier-2 replace.
+                requests.exceptions.ChunkedEncodingError,
+            ):
                 if attempt == 5:
                     raise
                 wait = min(30 * 2 ** attempt, 300)
-                print(f"  FEMA connection error at skip={skip}, retry {attempt+1}/5 in {wait}s...")
+                print(f"  FEMA connection/stream error at skip={skip}, retry {attempt+1}/5 in {wait}s...")
                 time.sleep(wait)
         data = resp.json()
         batch = data.get("value") or data.get("FimaNfipClaims", [])
