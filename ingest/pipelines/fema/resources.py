@@ -3,11 +3,9 @@ from datetime import date
 import dlt
 import requests
 
-from ingest.lib.arcgis_paginator import paginate_arcgis
-from ingest.lib.geo_utils import FL_BBOX
 from ingest.lib.guards import assert_min_rows, assert_vs_canonical, VolumeGuardError
-from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz, write_tier1_pointer
-from .constants import GEOMETRY_BUCKET, NFIP_CLAIMS_URL, TABULAR_BUCKET
+from ingest.lib.storage_uploader import upload_csv_gz, write_tier1_pointer
+from .constants import NFIP_CLAIMS_URL, TABULAR_BUCKET
 
 
 # Tier 2 column hints for data_lake.fema_nfip_claims.
@@ -241,15 +239,6 @@ def _fetch_all_nfip_claims() -> list[dict]:
         skip += len(batch)
         time.sleep(1.5)
     return rows
-
-
-def ingest_nfhl_layer(pipeline, layer: dict) -> None:
-    today = date.today().isoformat()
-    name = layer["name"]
-    features = list(paginate_arcgis(layer["url"], bbox=FL_BBOX))
-    object_path = f"fema/{name}/{today}.geojson.gz"
-    upload_geojson_gz(GEOMETRY_BUCKET, object_path, features)
-    write_tier1_pointer(pipeline, f"fema_{name}", GEOMETRY_BUCKET, object_path, len(features), layer["url"])
 
 
 def ingest_nfip_claims(pipeline) -> None:

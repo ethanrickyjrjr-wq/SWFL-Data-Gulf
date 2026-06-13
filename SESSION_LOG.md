@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — fema pipeline: drop dead NFHL geometry ingest; NFIP claims narrow-fetch remains
+
+- **Removed 4 NFHL geometry layer calls** from `ingest/pipelines/fema/` (pipeline.py, resources.py, constants.py). `env-swfl-source.mts` hits FEMA ArcGIS directly on every refinery build — the stored `raw-geometry` files were never read by any brain connector. Dead weight eating GHA time before the NFIP claims run.
+- **NFIP claims path unchanged** — narrow 16-column `$select`, `$top=10000`, correct v2 field names (`ratedFloodZone`, `numberOfFloorsInTheInsuredBuilding`), zip + flood_zone volume guards, `write_disposition=replace` (no stable key). Tests updated: `TestIngestNfhlLayer` removed, dry-run test cleaned. 20/20 green.
+- **Next:** trigger `gh workflow run fema-nfip-quarterly.yml` (operator call — see session end).
+
 ## 2026-06-13 (main) — Welcome live {answer} producer (cited hero cards + flood gate) + shared DB-parity harness — PUSHED
 
 - **Workstream A — the live `{answer}` producer (closes the dead-cards gap).** New `lib/welcome/answer.ts` (`buildWelcomeAnswer`) turns the assembled `LocationDossier` into the typed `WelcomeAnswer` hero cards; `app/api/welcome/chat/route.ts` grounded path now streams `{type:"place"}` then `{type:"data"}` ahead of the prose (`streamAnswer` gained a backward-compatible `prelude` param — clients ignore unknown frame types). 3 cited cards: home value = Redfin median **sale price** (`housing-swfl`/`housing_by_zip`/`median_sale_price`); rent = ZORI (`rentals-swfl`/`rentals_by_zip`/`rent_index_latest`); flood = FEMA per-ZIP AAL (`env-swfl`/`swfl_zip_<zip>_flood_aal_usd_per_insured_property`). Gating (`is_true_zip`/`coverage_label`/freshness) rides VERBATIM from the dossier line; the brain reload supplies ONLY value/format/units/direction/fetched_at for the SAME row. Flood double-gated (explicit ZIP + true-ZIP, mirrors grounded.ts env filter). Sources default-deny (`prettySource` + drop `isInternalSource` URLs). `pickPerZip`/`pickCoarse` split keyed on `is_true_zip` → card value grain matches the label by construction (the MOAT). `representativeFreshnessToken` exported from grounded.ts. 7 unit (`answer.test.ts`) + 13 route (`route.test.ts`) green.
