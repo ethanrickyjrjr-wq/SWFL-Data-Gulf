@@ -29,6 +29,7 @@ export interface RefineryEnv {
   supabaseUrl: string | undefined;
   supabaseKey: string | undefined;
   anthropicApiKey: string | undefined;
+  firecrawlApiKey: string | undefined;
   fredApiKey: string | undefined;
   /** Voyage AI embedding API key (P4b). Never logged. Used only as Bearer auth. */
   voyageKey: string | undefined;
@@ -73,10 +74,9 @@ function readEnvSnapshot(): EnvSnapshot {
     // lines 9-10). Fall back to legacy BRAINS_-prefixed names so any deploy
     // env still carrying the old keys keeps working.
     supabaseUrl: process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL,
-    supabaseKey:
-      process.env.SUPABASE_SERVICE_KEY ??
-      process.env.BRAINS_SUPABASE_SERVICE_KEY,
+    supabaseKey: process.env.SUPABASE_SERVICE_KEY ?? process.env.BRAINS_SUPABASE_SERVICE_KEY,
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    firecrawlApiKey: process.env.FIRECRAWL_API_KEY,
     fredApiKey: process.env.FRED_API_KEY,
     voyageKey: process.env.VOYAGE_KEY,
     supabasePgHost: process.env.SUPABASE_PG_HOST,
