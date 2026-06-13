@@ -1,8 +1,14 @@
 -- =====================================================================
+-- RETIRED 2026-06-13 — DO NOT RUN. Kept for history only.
+-- The dlt→Postgres FAF5 pipeline (ingest/pipelines/faf5/{pipeline,resources}.py)
+-- was deleted; these Postgres tables never landed and are not the live path.
+-- The live freight path is Tier-1 Parquet: ingest/scripts/faf5_to_parquet.py
+-- → lake-tier1 S3 → refinery/sources/faf5-source.mts (DuckDB views, not Postgres).
+-- =====================================================================
 -- data_lake.faf_flows + faf_zone_lookup + faf_sctg_lookup
 -- =====================================================================
--- FAF5 freight flows (and lookup tables) populated by the dlt pipeline at
--- ingest/pipelines/faf5/pipeline.py. Read live by refinery/sources/faf5-source.mts.
+-- FAF5 freight flows (and lookup tables) — formerly populated by the dlt pipeline
+-- at ingest/pipelines/faf5/pipeline.py (now deleted).
 --
 -- This file is version-controlled DDL — exact column shape is pinned in
 -- ingest/pipelines/faf5/resources.py (_FLOW_COLUMNS + the zone/sctg lookup
