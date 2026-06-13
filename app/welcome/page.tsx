@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SWFL_BRAND_PRIMARY, SWFL_BRAND_SECONDARY } from "@/lib/templates/manifest";
+import { safeLogoUrl } from "@/lib/welcome/logo-allowlist";
 import WelcomeChat from "./WelcomeChat";
 
 export const metadata: Metadata = {
@@ -9,10 +10,6 @@ export const metadata: Metadata = {
 const HEX_RE = /^#[0-9a-fA-F]{3,8}$/;
 function safeHex(value: string | undefined, fallback: string): string {
   return value && HEX_RE.test(value) ? value : fallback;
-}
-function safeUrl(value: string | undefined): string | null {
-  if (!value) return null;
-  return /^https?:\/\//i.test(value) ? value : null;
 }
 function first(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
@@ -25,9 +22,9 @@ function first(v: string | string[] | undefined): string | undefined {
  * Phase 2's prospect-enrichment flow). Brand colors are injected as CSS vars on
  * the page wrapper; everything falls back to SWFL defaults when params are absent.
  *
- * PHASE 1: the chat is a STUB. The four prompt buttons link to /pricing for now.
- * Phase 2 wires them to a live, non-report-scoped /api/welcome/chat endpoint and
- * routes the conversion prompts (2 + 4) through the paywall on the "yes" step.
+ * The ZIP hero drives the grounded answer (cited metric cards — fixture frames via
+ * /api/welcome/demo under ?demo=1, else the live /api/welcome/chat grounding); the
+ * conversational chat carries the recurring-email hook. Conversion routes to /billing.
  */
 export default async function WelcomePage({
   searchParams,
@@ -38,7 +35,8 @@ export default async function WelcomePage({
   const name = first(params.name);
   const primary = safeHex(first(params.primary), SWFL_BRAND_PRIMARY);
   const secondary = safeHex(first(params.secondary), SWFL_BRAND_SECONDARY);
-  const logo = safeUrl(first(params.logo));
+  const logo = safeLogoUrl(first(params.logo));
+  const demo = first(params.demo) === "1";
 
   return (
     <main
@@ -64,7 +62,7 @@ export default async function WelcomePage({
         economy — grounded in live, cited data. Start with a prompt below.
       </p>
 
-      <WelcomeChat />
+      <WelcomeChat demo={demo} />
     </main>
   );
 }
