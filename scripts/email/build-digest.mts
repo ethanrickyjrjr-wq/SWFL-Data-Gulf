@@ -264,7 +264,13 @@ async function main() {
   writeLog(log);
 }
 
-main().catch((err) => {
-  console.error("[DIGEST FATAL]", err);
-  process.exit(1);
-});
+// Only self-execute when invoked directly (`bun scripts/email/build-digest.mts`), NOT
+// when a test or run-schedules.mts imports a named export (buildSubjectLine/computeDelta).
+// Without this guard the import runs main() → live fetch to localhost:3000 → ECONNREFUSED
+// aborts the whole `bun test` runner (and the process.exit(1) would kill it outright).
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error("[DIGEST FATAL]", err);
+    process.exit(1);
+  });
+}

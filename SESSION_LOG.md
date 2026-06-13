@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — CI "build" red on main (12 runs): 3 pre-existing test failures fixed — COMMITTED, push pending operator
+
+- `ci.yml` "build" failed on every push since `c1ca6c5` (00:03 UTC). Audited PR #88 ("It's Alive" activation-delta): it reproduces the IDENTICAL 3 failures and adds none → merge-safe, but the red is REAL (two are code/test bugs, not "just environmental"). All 3 pre-existing, none in #88's diff:
+  1. `refinery/packs/catalog.test.mts` — `home-values-swfl` + `investor-zip-swfl` are in PER_PACK_REGISTRY (`4a4154e`, 06-11, parked "free ZIP investor composite" / pivoted-views work) but absent from `catalog.mts`. Both registrations predate `c1ca6c5` → added a `KNOWN_INCOMPLETE` test exclusion, NOT a fake catalog entry (a fake entry would advertise an ungraduated brain).
+  2. `app/api/projects/route.test.ts` — supabase mock `from()` lacked `.select`, which `resolveUserBrand()` calls on `user_brand_profiles`. Stubbed a chainable `.select().eq().single()` → `{data:null}`.
+  3. `scripts/email/build-digest.mts` — unguarded top-level `main()` self-executed on import (the test + `run-schedules.mts:41`) → live `fetch(localhost:3000)` → ECONNREFUSED ABORTED the whole `bun test` runner (this is the failure that actually flipped the step red; the BRAIN_CATALOG fail printed but exited 0 pre-abort). Wrapped in `if (import.meta.main)`.
+- 3 target test files green (catalog 4, projects 3, build-digest 8 pass). Committed ONLY these 3 files + this entry; the in-progress Lane A/B email work in the tree left uncommitted/untouched (no mixing). NOT pushed — awaiting operator go.
+
 ## 2026-06-13 (main) — Email-funnel "the rest" tasks foldered + welcome copy confirmed live — PUSH
 
 - Operator: "PUSH AND PUT THE TASKS WE NEED TO COMPLETE IN A FOLDER." The welcome-chat copy fix + the single "the rest" plan `.md` were already committed AND pushed by a prior beat (`233fc06` copy, `1b03f8a` plan+rstudio; local main == origin/main, 0/0). Verified `233fc06`'s committed `WELCOME_SYSTEM`/`route.test.ts` are byte-identical to the intended spec — no parallel-session drift; 4/4 route tests green.
