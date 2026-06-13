@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — Pivoted-views state audit + tracker reconcile + §07 ZORI freshness gap — COMMITTED (push sequenced after parallel session lands, per operator)
+
+- **Audited `2026-06-12-pivoted-views-build` against code/git** (README "docs-only" line is STALE): spine §01–07 SHIPPED + cut over — `zhvi_pivoted`(316)/`zhvi_zip_latest`(109) + `zori_pivoted`(136)/`zori_zip_latest`(94) live; §03 `/charts` (ZHVI) live; §04 Gate A 3/3 (`426df6e`); §05 cutover LIVE (`e29d21d`) + Gate B floor (`72465f0`, ZHVI 90/ZORI 79); §99 slug coverage GREEN (`--all` exit 0). §08 view_vintages unbuilt → operator GREENLIT today.
+- **§07 gap fixed:** `zori_swfl_tier2` had no `liveness_view` → the daily freshness probe watched ZHVI but not the live `zori_zip_latest` (a dropped ZORI grant would go undetected). Added `liveness_view: data_lake.zori_zip_latest` (mirrors zhvi_swfl_tier2). cadence_registry parses.
+- **Trackers reconciled:** build-queue line 43 flipped "Gate A cycle 2/3 / cutover pending" → true state; checks `pivoted_views_build` + `view_vintages_greenlight` updated via check.mjs.
+- **Vendor-First firecrawl:** Zillow ZHVI publishes mid-month (≈3rd Thu) → day-23 ingest is safely after → §08b capture-cron day 26 sound.
+- **Next:** building the ZORI panel on `/charts` (connect live `zori_pivoted`); §08a scaffold + buildSnapshot cleanup queued (operator-directed). Untouched parallel tree work (welcome backend, Gate-A harness refactor) left for its own session.
+
 ## 2026-06-13 (main) — KILL the ~6.5%/push flaky test that kept reddening `main` + new pre-push Gate 5 (pack⇆catalog) — READY (awaiting push approval)
 
 - **Root cause of "red main every ~2h" was TWO classes, only one of which a gate can catch.** (1) A **flaky test**: `proposal-nonce` "tampered signature" (`lib/email/__tests__/proposal-nonce.test.ts`) flipped the FINAL base64url char of a 32-byte HMAC. The last char of a 43-char base64url string carries only 4 meaningful bits (low 2 = decode-ignored padding), so `A`↔`B` decode to the IDENTICAL 32 bytes → the "tampered" token still verified → `r.ok===true` → assert failed. **Measured 6.52% over 5000 runs** (≈1/16). This — not any diff — reddened `72465f0`/GATE B and ~6% of all pushes. **Fix: flip a decoded digest byte (deterministic); 25/25 loop runs now green.** (2) The redfin-lee **catalog/per-pack drift** (`d9aa670`) — already fixed by `d59e5c2`, but NO pre-push gate caught it, so it sat red ~2h across 5 pushes.

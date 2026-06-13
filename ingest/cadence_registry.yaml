@@ -343,8 +343,11 @@ pipelines:
     tolerance_multiplier: 2.0
     dlt_schema_name: zori_swfl
     expected_rows_min: 4666 # 90% of 5,185 confirmed 2026-05-31
+    liveness_view: data_lake.zori_zip_latest
     # Verified: MAX(inserted_at) = 2026-05-24 ✓
     # Separate from zori_swfl_duckdb; this is the Postgres promotion pipeline.
+    # liveness_view (§06 pivoted view) probed daily via PostgREST — catches a missing GRANT on
+    # zori_zip_latest, mirroring zhvi_swfl_tier2. Added 2026-06-13 (§07 had wired ZHVI but not ZORI).
 
   - name: zhvi_swfl_tier2
     lane: tier-2
