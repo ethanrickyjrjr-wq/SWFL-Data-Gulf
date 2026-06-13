@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — ZHVI/ZORI Gate A cycle 3/3 VERIFIED — view⇆pack YoY parity green (manual; no code change; committed-local, push pending operator OK)
+
+- **Gate A satisfied, both lanes.** `npx vitest run refinery/packs/zhvi-zip-latest-view-equivalence.test.mts` → **Tests 1 passed (1)**, 2.68s in-test; `…zori-zip-latest-view-equivalence.test.mts` → **1 passed (1)**, 1.87s in-test. **RAN, not skipped** (the in-test durations prove real psycopg work — a skip is instant). Prereqs confirmed first: `.dlt/secrets.toml` `[destination.postgres.credentials]` (host+password present) + `psycopg 3.3.4` on `python`, so the suites' `runnable = Boolean(uri && py)` is true.
+- **What it proved.** Each test runs the view's *verbatim* `DISTINCT ON … BETWEEN (latest−12mo) ± 7d … ORDER BY period_end DESC LIMIT 1` SQL against an `ON COMMIT DROP` temp table inside a **rolled-back** txn (zero live-data touch), and asserts view == pack `buildSnapshot()` on gapped / drifted / two-in-window. Case 3 pins newer-in-window (+32%) over closer-to-target (+17.857%). ZORI deviates only in `rent_index numeric ::float8`.
+- **Ledger (RULE 2 UPDATE).** Closed `zhvi_gate_a_cycle_3` + `zori_gate_a_cycle_3` with the pass evidence. The 3-cycle Gate A arc is now complete.
+- **Unblocked but NOT entered.** `home_values_cutover_gate_b` + `zori_cutover_gate_b` (§05 cutover, **operator diff-review gates**) are now clear; per the `buildSnapshot_deletion` order (cycle 3 close → §05 push → retire/repoint view-equiv tests → delete) the next step is operator-gated. **Handed back to Ricky — did not proceed.**
+- **No code changed this turn** (verification only). Did not run the full bun suite — targeted vitest only, as instructed.
+
 ## 2026-06-13 (main) — ingest-hardening A1: census_cbp + fdot guarded, Gate-4 block flipped LIVE — PUSHED
 
 - **A1 (correctness guards, BIBLE §0.2 rule 5).** Real non-null/min-rows guard before the destructive `replace` in `census_cbp` (assert_min_rows 230_006 + establishment_count non-zero ≥50%) and `fdot` (assert_min_rows 93_295 + aadt non-null ≥50%) — each gates the REAL pull (materialize → guard → write), so a partial pull or silent vendor field-rename aborts before wiping good data. 28 pipeline tests green (4 new guard tests prove the gate fires; dlt re-wraps the resource-level raise as ResourceExtractionError, the `[volume-guard]` message preserved).
