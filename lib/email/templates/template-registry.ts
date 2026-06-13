@@ -4,6 +4,7 @@ export const EMAIL_TEMPLATES = {
   hbar: "email/email-hbar",
   hero: "email/email-hero",
   ranked: "email/email-ranked",
+  report: "email/email-report",
   table: "email/email-table",
 } as const;
 

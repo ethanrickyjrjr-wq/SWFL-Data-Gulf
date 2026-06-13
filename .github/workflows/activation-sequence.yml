@@ -1,0 +1,41 @@
+# .github/workflows/activation-sequence.yml
+name: Activation Sequence
+on:
+  # NO schedule cron here on purpose. Phase C exercises the 2-step "It's Alive"
+  # delta sequence via manual DRY_RUN ONLY. Flipping a live */15 tick is Phase D and
+  # is HARD-GATED on: city_pulse_supersession closed (due 2026-06-15), the CAN-SPAM
+  # address swapped, the 1:1 send mechanism chosen + verified against Resend, and the
+  # secrets set. Until then the runner refuses a non-dry run (exits 1).
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — re-assemble, diff, render, and LOG only. Leave true."
+        required: false
+        default: "true"
+concurrency:
+  group: activation-sequence
+  cancel-in-progress: false
+jobs:
+  run-activation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run activation sequence (DRY_RUN)
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BRAINS_SUPABASE_URL: ${{ secrets.BRAINS_SUPABASE_URL }}
+          BRAINS_SUPABASE_SERVICE_KEY: ${{ secrets.BRAINS_SUPABASE_SERVICE_KEY }}
+          ACTIVATION_CTA_URL: ${{ vars.ACTIVATION_CTA_URL }}
+        run: bun scripts/email/run-activation.mts

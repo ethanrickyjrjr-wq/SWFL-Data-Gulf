@@ -14,23 +14,38 @@ export default function DigestSubscribe({
   source = "landing",
   heading = "Get the free daily SWFL data digest",
   blurb = "ZIP-level prices, permits, and the day's market read — one short email each weekday. Cited, no spam.",
+  activation = false,
 }: {
   source?: string;
   heading?: string;
   blurb?: string;
+  /**
+   * Activation mode (the "It's Alive" surface): also collect the prospect's ZIP and
+   * an explicit, unchecked opt-in. Off everywhere else — the landing/report forms keep
+   * their one-field behavior unchanged.
+   */
+  activation?: boolean;
 }) {
   const [email, setEmail] = useState("");
+  const [zip, setZip] = useState("");
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+
+  const blocked = activation && (!/^\d{5}$/.test(zip) || !consent);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || blocked) return;
     setStatus("submitting");
     try {
       const res = await fetch("/api/email/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source }),
+        body: JSON.stringify({
+          email,
+          source,
+          ...(activation ? { zip, consent } : {}),
+        }),
       });
       setStatus(res.ok ? "done" : "error");
     } catch {
@@ -48,23 +63,53 @@ export default function DigestSubscribe({
           You&apos;re subscribed. Watch for the next weekday digest.
         </p>
       ) : (
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col sm:flex-row gap-3">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            disabled={status === "submitting"}
-            className="flex-1 input-modern rounded-xl px-4 py-3 text-white placeholder-gray-500"
-          />
-          <button
-            type="submit"
-            disabled={status === "submitting"}
-            className="btn-gradient text-navy-dark px-6 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {status === "submitting" ? "Subscribing…" : "Subscribe"}
-          </button>
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {activation && (
+              <input
+                type="text"
+                inputMode="numeric"
+                required
+                value={zip}
+                onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                placeholder="Your ZIP (e.g. 33931)"
+                disabled={status === "submitting"}
+                className="sm:w-44 input-modern rounded-xl px-4 py-3 text-white placeholder-gray-500"
+              />
+            )}
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              disabled={status === "submitting"}
+              className="flex-1 input-modern rounded-xl px-4 py-3 text-white placeholder-gray-500"
+            />
+            <button
+              type="submit"
+              disabled={status === "submitting" || blocked}
+              className="btn-gradient text-navy-dark px-6 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {status === "submitting" ? "Sending…" : activation ? "Send my report" : "Subscribe"}
+            </button>
+          </div>
+
+          {activation && (
+            <label className="flex items-start gap-2 text-xs text-gray-400 leading-relaxed">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                disabled={status === "submitting"}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-teal-primary"
+              />
+              <span>
+                Yes, send me my SWFL market report and what changes each week. I can unsubscribe
+                anytime.
+              </span>
+            </label>
+          )}
         </form>
       )}
 
