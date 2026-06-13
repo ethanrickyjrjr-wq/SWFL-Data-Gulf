@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — /charts: ZORI rent panel connected (§06 zori_pivoted) + generic MetroAreaChart — COMMITTED (awaiting push direction)
+
+- **Connected the orphaned `zori_pivoted` view to the UI.** `/charts` now renders a second stacked panel (Zillow ZORI asking rents) below ZHVI, both read server-side from `data_lake.{zhvi,zori}_pivoted`. `zori_pivoted` was live since §06 but had ZERO UI consumers.
+- **Generalized `ZHVIAreaChart` → `MetroAreaChart`** (same file): optional eyebrow/title/subtitle/formatValue/asOfNote/empty/rootId props, each defaulting to the exact ZHVI look; `export const ZHVIAreaChart = MetroAreaChart` alias keeps embed/demo/registry-frame call sites byte-identical (they pass only data/loading/asOf). ZHVI + ZORI share the same 3 cities → colors/series untouched; only labels + value format differ.
+- **Page is config-driven** (`app/charts/page.tsx` `PANELS[]`): add a chart = one row (view + labels + formatter). Dropped the redundant double-header + the internal `data_lake.*` table-name leak on this public page; fixed the stale "SWFL fixture sample" caption → cites Zillow Research.
+- **New** pure mapper `lib/charts/pivoted-series.ts` (`mapPivotedCityRows`: incomplete-month filter + asOf anchor + rowCount), TDD'd (4 tests). Generic `PivotedCityMonth`/`MetroTrendEntry` aliases added to `types/viz.ts`.
+- **Verified:** mapper 4/4 green; eslint clean (5 files); tsc 0 errors in touched files. `zori_pivoted` grant-confirmed live (§06, 136 rows) so the data path matches the working ZHVI section. ⬜ browser paint smoke = operator eyeball post-deploy.
+- **Next (operator-directed):** §08a view_vintages scaffold (greenlit) + buildSnapshot cleanup remain.
+
 ## 2026-06-13 (main) — Pivoted-views state audit + tracker reconcile + §07 ZORI freshness gap — COMMITTED (push sequenced after parallel session lands, per operator)
 
 - **Audited `2026-06-12-pivoted-views-build` against code/git** (README "docs-only" line is STALE): spine §01–07 SHIPPED + cut over — `zhvi_pivoted`(316)/`zhvi_zip_latest`(109) + `zori_pivoted`(136)/`zori_zip_latest`(94) live; §03 `/charts` (ZHVI) live; §04 Gate A 3/3 (`426df6e`); §05 cutover LIVE (`e29d21d`) + Gate B floor (`72465f0`, ZHVI 90/ZORI 79); §99 slug coverage GREEN (`--all` exit 0). §08 view_vintages unbuilt → operator GREENLIT today.

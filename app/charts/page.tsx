@@ -1,46 +1,85 @@
-import { ZHVIAreaChart } from "@/components/charts";
-import type { ZHVITrendEntry } from "@/types/viz";
+import { MetroAreaChart } from "@/components/charts";
+import { mapPivotedCityRows, type PivotedSeries } from "@/lib/charts/pivoted-series";
+import type { PivotedCityMonth } from "@/types/viz";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const revalidate = 3600;
 
-export default async function ChartsPage() {
-  let zhvi: ZHVITrendEntry[] = [];
-  let asOf: string | undefined;
-  let rowCount = 0;
-  let error: string | null = null;
+// ── Add a chart = add a row here ──────────────────────────────────────────────
+// Every data_lake.*_pivoted view is wide { month, cape_coral, fort_myers, naples },
+// so a new panel only needs its view name + how to label/format it. The page maps
+// over PANELS, so nothing else changes when you add one.
+interface ChartPanel {
+  /** data_lake view name (must expose month/cape_coral/fort_myers/naples). */
+  view: string;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  /** Customer-facing provenance — no internal table names on this public page. */
+  source: string;
+  formatValue: (value: number) => string;
+}
 
+const usd = (value: number) =>
+  value >= 1_000_000
+    ? `$${(value / 1_000_000).toFixed(2)}M`
+    : `$${Math.round(value).toLocaleString()}`;
+const usdPerMonth = (value: number) => `$${Math.round(value).toLocaleString()}`;
+
+const PANELS: ChartPanel[] = [
+  {
+    view: "zhvi_pivoted",
+    eyebrow: "Zillow Home Value Index (ZHVI)",
+    title: "Home values across SWFL",
+    subtitle: "Typical home value · Cape Coral · Fort Myers · Naples",
+    source: "Zillow Research · ZHVI",
+    formatValue: usd,
+  },
+  {
+    view: "zori_pivoted",
+    eyebrow: "Zillow Observed Rent Index (ZORI)",
+    title: "Asking rents across SWFL",
+    subtitle: "Typical asking rent / month · Cape Coral · Fort Myers · Naples",
+    source: "Zillow Research · ZORI",
+    formatValue: usdPerMonth,
+  },
+];
+
+type LoadedPanel = PivotedSeries & { error: string | null };
+
+async function loadSeries(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  view: string,
+): Promise<LoadedPanel> {
   try {
-    const supabase = createServiceRoleClient();
-    const { data, error: sbError } = await supabase
+    const { data, error } = await supabase
       .schema("data_lake")
-      .from("zhvi_pivoted")
+      .from(view)
       .select("month, cape_coral, fort_myers, naples")
       .order("month", { ascending: true });
 
-    if (sbError) {
-      error = sbError.message;
-    } else if (data) {
-      rowCount = data.length;
-      // Filter to non-nullable rows before passing to ZHVIAreaChart
-      zhvi = data.filter(
-        (
-          m,
-        ): m is {
-          month: string;
-          cape_coral: number;
-          fort_myers: number;
-          naples: number;
-        } => m.cape_coral != null && m.fort_myers != null && m.naples != null,
-      );
-      // asOf = latest month in the sorted result
-      if (zhvi.length > 0) {
-        asOf = zhvi[zhvi.length - 1].month;
-      }
+    if (error) {
+      return { entries: [], asOf: undefined, rowCount: 0, error: error.message };
     }
+    // ~24–136 rows per view → a single .select() is safe (well under the 1000-row
+    // PostgREST cap). If a panel is ever pointed at a long ZIP×month view, switch
+    // to selectAllPaged from refinery/lib/paginate.mts instead.
+    return { ...mapPivotedCityRows(data as PivotedCityMonth[] | null), error: null };
   } catch (err) {
-    error = err instanceof Error ? err.message : String(err);
+    return {
+      entries: [],
+      asOf: undefined,
+      rowCount: 0,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
+}
+
+export default async function ChartsPage() {
+  const supabase = createServiceRoleClient();
+  const panels = await Promise.all(
+    PANELS.map(async (panel) => ({ panel, series: await loadSeries(supabase, panel.view) })),
+  );
 
   return (
     <main
@@ -62,14 +101,7 @@ export default async function ChartsPage() {
         }}
       >
         <header>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 24,
-              fontWeight: 700,
-              color: "#F0EDE6",
-            }}
-          >
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#F0EDE6" }}>
             SWFL Market Charts
           </h1>
           <p
@@ -80,46 +112,29 @@ export default async function ChartsPage() {
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             }}
           >
-            {rowCount > 0
-              ? `${rowCount} months loaded from data_lake.zhvi_pivoted`
-              : error
-                ? `Data unavailable: ${error}`
-                : "Loading…"}
+            Home values and asking rents across Southwest Florida — Zillow ZHVI &amp; ZORI.
           </p>
         </header>
 
-        <section
-          style={{
-            background: "#152832",
-            border: "1px solid #22414F",
-            borderRadius: 12,
-            padding: 24,
-          }}
-        >
-          <header style={{ marginBottom: 16 }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 600,
-                color: "#F0EDE6",
-              }}
-            >
-              Home values across SWFL
-            </h2>
-            <p
-              style={{
-                margin: "4px 0 0",
-                fontSize: 13,
-                color: "#807E76",
-                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-              }}
-            >
-              Zillow ZHVI · Cape Coral · Fort Myers · Naples
-            </p>
-          </header>
-          <ZHVIAreaChart data={zhvi} loading={false} asOf={asOf} />
-        </section>
+        {panels.map(({ panel, series }) => (
+          <MetroAreaChart
+            key={panel.view}
+            data={series.entries}
+            asOf={series.asOf}
+            eyebrow={panel.eyebrow}
+            title={panel.title}
+            subtitle={panel.subtitle}
+            formatValue={panel.formatValue}
+            asOfNote={panel.source}
+            rootId={`${panel.view}-chart`}
+            emptyTitle={series.error ? "Data unavailable" : "No data loaded yet"}
+            emptyHint={
+              series.error
+                ? series.error
+                : `No ${panel.title.toLowerCase()} to graph yet — check back after the next refresh.`
+            }
+          />
+        ))}
       </div>
     </main>
   );

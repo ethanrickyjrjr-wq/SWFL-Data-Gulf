@@ -12,20 +12,54 @@ import {
 } from "recharts";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { Calendar, HelpCircle, Eye, EyeOff, AreaChart as ChartIcon, Sparkles } from "lucide-react";
-import type { ZHVITrendEntry } from "@/types/viz";
+import type { ZHVITrendEntry, MetroTrendEntry } from "@/types/viz";
 
 export type { ZHVITrendEntry };
 
-export interface ZHVIAreaChartProps {
-  data: ZHVITrendEntry[];
+export interface MetroAreaChartProps {
+  data: MetroTrendEntry[];
   loading?: boolean;
   className?: string;
   asOf?: string;
+  /** Small uppercase eyebrow above the title. Defaults to the ZHVI source line. */
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  /** Y-axis + tooltip value formatter. Defaults to ZHVI currency ($1.15M / $420k). */
+  formatValue?: (value: number) => string;
+  /** Trailing note in the "as of …" caption. Defaults to "SWFL fixture sample". */
+  asOfNote?: string;
+  /** Empty-state heading + body. */
+  emptyTitle?: string;
+  emptyHint?: string;
+  /** Root element id — override so two charts on one page stay unique. */
+  rootId?: string;
 }
+
+/** @deprecated Prefer {@link MetroAreaChart}; alias kept so ZHVI call sites are unchanged. */
+export type ZHVIAreaChartProps = MetroAreaChartProps;
 
 type TimeRangeOption = "6M" | "1Y" | "2Y" | "ALL";
 
-export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: ZHVIAreaChartProps) {
+const defaultFormatValue = (value: number) => {
+  if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
+  return `$${value.toLocaleString()}`;
+};
+
+export function MetroAreaChart({
+  data,
+  loading = false,
+  className = "",
+  asOf,
+  eyebrow = "Zillow Home Value Index (ZHVI)",
+  title = "SWFL Residential Valuations",
+  subtitle = "Typical middle-tier market estimates across standard coastal metros.",
+  formatValue = defaultFormatValue,
+  asOfNote = "SWFL fixture sample",
+  emptyTitle = "No Market Trends Loaded",
+  emptyHint = "Supply a historical sequence of Zillow Home Value Index records to graph home valuations.",
+  rootId = "zhvi-area-chart-root",
+}: MetroAreaChartProps) {
   const [range, setRange] = useState<TimeRangeOption>("ALL");
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -71,14 +105,6 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
     }
   };
 
-  // Turn numeric numbers into premium currency strings (e.g. $1.15M, $420k)
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(2)}M`;
-    }
-    return `$${value.toLocaleString()}`;
-  };
-
   // Skeleton framework
   if (loading) {
     return (
@@ -104,11 +130,8 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
         className={`p-12 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center gap-3 ${className}`}
       >
         <ChartIcon className="h-10 w-10 text-slate-500" />
-        <h3 className="text-slate-200 font-medium text-lg">No Market Trends Loaded</h3>
-        <p className="text-slate-400 text-sm max-w-sm">
-          Supply a historical sequence of Zillow Home Value Index records to graph home val
-          valuations.
-        </p>
+        <h3 className="text-slate-200 font-medium text-lg">{emptyTitle}</h3>
+        <p className="text-slate-400 text-sm max-w-sm">{emptyHint}</p>
       </div>
     );
   }
@@ -124,7 +147,7 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
   return (
     <div
       ref={containerRef}
-      id="zhvi-area-chart-root"
+      id={rootId}
       className={`p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 text-slate-100 shadow-xl select-none ${className}`}
     >
       {/* Header Controller Bar */}
@@ -132,14 +155,10 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-sky-450 uppercase tracking-wider">
             <Sparkles className="h-3 w-3 animate-pulse text-sky-400" />
-            <span>Zillow Home Value Index (ZHVI)</span>
+            <span>{eyebrow}</span>
           </div>
-          <h2 className="text-xl font-semibold tracking-tight text-white mt-1">
-            SWFL Residential Valuations
-          </h2>
-          <p className="text-sm text-slate-400 mt-0.5">
-            Typical middle-tier market estimates across standard coastal metros.
-          </p>
+          <h2 className="text-xl font-semibold tracking-tight text-white mt-1">{title}</h2>
+          <p className="text-sm text-slate-400 mt-0.5">{subtitle}</p>
         </div>
 
         {/* Chronological Range Selector */}
@@ -258,7 +277,7 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
             />
 
             <YAxis
-              tickFormatter={formatCurrency}
+              tickFormatter={formatValue}
               stroke="#3b4252"
               tick={{ fill: "#94a3b8", fontSize: 10, fontFamily: "monospace" }}
               dx={-5}
@@ -293,7 +312,7 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
                               {it.name}
                             </span>
                             <span className="font-bold text-white tracking-tight">
-                              {formatCurrency(it.value)}
+                              {formatValue(it.value)}
                             </span>
                           </div>
                         );
@@ -363,9 +382,13 @@ export function ZHVIAreaChart({ data, loading = false, className = "", asOf }: Z
       </div>
       {asOf && (
         <p className="mt-2 font-mono text-[11px] tracking-wide" style={{ color: "#4a5a6a" }}>
-          as of {asOf} · SWFL fixture sample
+          as of {asOf} · {asOfNote}
         </p>
       )}
     </div>
   );
 }
+
+// Back-compat alias: existing ZHVI call sites (embed/demo/charts/registry frame) import
+// `ZHVIAreaChart`; the prop defaults above reproduce the original ZHVI look exactly.
+export const ZHVIAreaChart = MetroAreaChart;

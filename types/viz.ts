@@ -76,6 +76,13 @@ export interface ZHVITrendEntry {
   naples: number;
 }
 
+// Generic pivoted-view city series — the wide { month, <city>… } shape shared by
+// every data_lake.*_pivoted view (ZHVI home values, ZORI rents, …) on /charts.
+// Same structure as ZHVIMonth/ZHVITrendEntry, named neutrally so a ZORI panel
+// isn't typed as "ZHVI". Add a city here only if every pivoted view exposes it.
+export type PivotedCityMonth = ZHVIMonth; // raw view row; a city may be null for a month
+export type MetroTrendEntry = ZHVITrendEntry; // chart-ready row (all cities present)
+
 export interface ZORIEntry {
   zip: string;
   city: string;
