@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — Welcome-chat repositioned to lead with the auto-email-to-clients hook — COMMITTED, push pending operator
+
+- Cleaned a dirty tree for `--teleport`. Committed the welcome-chat repositioning that was sitting uncommitted: `WELCOME_SYSTEM` (`app/api/welcome/chat/route.ts`) now opens by treating the visitor as an agent/investor who just clicked through from a branded market-data email — leads with the real magic (that same branded, cited data **auto-emailed to THEIR clients** weekly/daily, set up by plain-English conversation; "their database is going cold, this works it") instead of the old "sign up and you can build it" pitch. No-invention guardrail kept verbatim.
+- `app/welcome/WelcomeChat.tsx`: 4 arrival prompts re-pointed (#1 = auto-email hook, #2 = instant cited one-pager, #3 = buyers-vs-sellers lead-gen, #4 = run inside your own AI) + footer line. `route.test.ts` updated to assert `auto-email` + `client` lead the prompt (no longer "sign up"); 4/4 green, no-`freshness_token` leak still asserted.
+- Two untracked docs committed alongside (operator said "get it all out"): `docs/superpowers/plans/2026-06-13-email-funnel-the-rest.md` (brief documenting the gap between the built-but-off multi-tenant email engine and what the new `/welcome` copy now promises — Slices 1–4, grounded in in-session file reads) + `docs/rstudio-showcase.R` (4-panel RStudio demo dashboard on the live ZIP grain).
+- **NOT pushed** (operator-confirmation rule) — committed locally to clean the tree for `--teleport`; push awaits explicit go.
+
 ## 2026-06-13 (main) — ZIP→place ground truth extended to ALL model surfaces (shared helper + converse + MCP) — PUSH
 
 - Follow-up to the welcome-chat fix (`42fece5`): full coverage of the un-grounded-gloss class. Lifted `buildPlaceContext` out of welcome's route into `lib/place-context.ts` (shared single source of truth, built from the gazetteer crosswalk) + `lib/place-context.test.ts` (4 edge-case tests: 33931→FMB, 33936→Lehigh, non-SWFL→"", 33913→Gateway-not-Fort-Myers-alt, longest-match `fort myers beach`). Welcome route now imports it.

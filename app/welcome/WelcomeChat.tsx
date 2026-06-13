@@ -4,12 +4,13 @@ import { useRef, useState } from "react";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-/** The four hardcoded arrival prompts. All open the chat; #2 and #4 are conversion prompts. */
+/** The four hardcoded arrival prompts. #1 leads with the recurring-email hook (the
+ *  product); #2 is the instant "try it" build; #3 and #4 are conversion prompts. */
 const PROMPTS = [
-  "What can you do?",
-  "Build me a daily market email like the one that brought me here",
-  "Create a PDF comparing two ZIP codes in Southwest Florida",
-  "Show me how you work inside my own AI tools",
+  "Auto-email fresh market data to my clients every week, in my brand",
+  "Build me a cited one-pager for a ZIP right now",
+  "What's the best lead-gen send for my buyers vs. sellers?",
+  "Run this inside my own AI (Claude / ChatGPT)",
 ];
 
 export default function WelcomeChat() {
@@ -127,7 +128,7 @@ export default function WelcomeChat() {
           </button>
         </form>
         <p className="mt-3 font-mono text-[11px] text-text-tertiary">
-          Building, branded deliverables, and your own AI tools come with a plan.{" "}
+          Set it once. It emails your clients fresh, cited SWFL data on autopilot.{" "}
           <a href="/pricing" className="text-gulf-teal underline underline-offset-2">
             See pricing →
           </a>

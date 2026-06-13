@@ -18,10 +18,11 @@ mock.module("@/lib/welcome/chat-usage", () => ({ recordWelcomeChat: async () => 
 
 const { POST, WELCOME_SYSTEM } = await import("./route");
 
-test("system prompt forbids inventing a SWFL number and steers to sign-up", () => {
+test("system prompt forbids inventing a SWFL number and leads with the recurring-email hook", () => {
   const lc = WELCOME_SYSTEM.toLowerCase();
-  expect(lc).toContain("never");
-  expect(lc).toContain("sign up");
+  expect(lc).toContain("never"); // no-invention guardrail intact
+  expect(lc).toContain("auto-email"); // leads with the recurring client-feed hook, not "sign up"
+  expect(lc).toContain("client"); // the value is mailing THEIR clients
   expect(lc).not.toContain("freshness_token"); // un-grounded: no payload mechanics leak
 });
 
