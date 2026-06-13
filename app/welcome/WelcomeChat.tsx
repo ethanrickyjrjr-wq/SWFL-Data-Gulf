@@ -129,7 +129,7 @@ export default function WelcomeChat() {
         </form>
         <p className="mt-3 font-mono text-[11px] text-text-tertiary">
           Set it once. It emails your clients fresh, cited SWFL data on autopilot.{" "}
-          <a href="/pricing" className="text-gulf-teal underline underline-offset-2">
+          <a href="/billing" className="text-gulf-teal underline underline-offset-2">
             See pricing →
           </a>
         </p>

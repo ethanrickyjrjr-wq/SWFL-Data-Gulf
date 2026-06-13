@@ -6,11 +6,22 @@ import {
 } from "@/lib/welcome/chat-usage";
 import { clientIdFromRequest } from "@/lib/highlighter/meter";
 import { buildPlaceContext } from "@/lib/place-context";
+import { resolveLocation } from "@/refinery/lib/location-resolver.mts";
+import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
+import { renderLocationDossierText } from "@/lib/zip-dossier";
+import { assembleGuardedDossier } from "@/lib/welcome/dossier-cache";
+import {
+  detectWelcomeLocation,
+  buildWelcomeGroundedSystem,
+  OUT_OF_SCOPE_GAP,
+  BUSY_GAP,
+} from "@/lib/welcome/grounded";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_TOKENS = 500;
+const MAX_TOKENS = 500; // un-grounded explainer
+const GROUNDED_MAX_TOKENS = 700; // grounded path — more real, cited data to relay
 const MAX_HISTORY = 12;
 
 // Cost guards — public, unauthenticated, paid-Haiku surface (per-IP burst lives in
@@ -89,6 +100,47 @@ async function* extractText(
   }
 }
 
+/** Stream a Haiku answer for the given system prompt as SSE — the shared tail for
+ * both the un-grounded explainer and the grounded paths. */
+function streamAnswer(
+  system: string,
+  messages: { role: "user" | "assistant"; content: string }[],
+  maxTokens: number,
+): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        const client = getAnthropic();
+        const ai = client.messages.stream({
+          model: TRIAGE_MODEL, // claude-haiku-4-5
+          max_tokens: maxTokens,
+          system,
+          messages,
+        });
+        for await (const text of extractText(ai)) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+        }
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+      } catch (e) {
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify({ error: (e as Error).message })}\n\n`),
+        );
+      } finally {
+        controller.close();
+      }
+    },
+  });
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-store",
+      Connection: "keep-alive",
+    },
+  });
+}
+
 export async function POST(request: Request): Promise<Response> {
   let body: { messages?: { role?: string; content?: string }[] };
   try {
@@ -137,41 +189,49 @@ export async function POST(request: Request): Promise<Response> {
   // Fire-and-forget telemetry — zero enforcement.
   void recordWelcomeChat(request, messages.length);
 
-  // Last message is guaranteed role "user" (checked above). Prepend deterministic
-  // ZIP->place ground truth for any SWFL place it names — no-op for everything else.
+  // Does the conversation name a SWFL location? If not, keep the un-grounded
+  // explainer (steers "give me a ZIP or place"). If so, ground Haiku on the real
+  // per-location dossier — the converse pattern, no invention.
+  const detected = detectWelcomeLocation(messages);
   const lastUser = messages[messages.length - 1].content;
-  const system = buildPlaceContext(lastUser) + FORMAT_RULE + WELCOME_SYSTEM;
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        const client = getAnthropic();
-        const ai = client.messages.stream({
-          model: TRIAGE_MODEL, // claude-haiku-4-5
-          max_tokens: MAX_TOKENS,
-          system,
-          messages,
-        });
-        for await (const text of extractText(ai)) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
-        }
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
-      } catch (e) {
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ error: (e as Error).message })}\n\n`),
-        );
-      } finally {
-        controller.close();
-      }
-    },
-  });
 
-  return new Response(stream, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-store",
-      Connection: "keep-alive",
-    },
+  if (!detected) {
+    const system = buildPlaceContext(lastUser) + FORMAT_RULE + WELCOME_SYSTEM;
+    return streamAnswer(system, messages, MAX_TOKENS);
+  }
+
+  // A typed ZIP outside the six-county footprint → honest gap, no fetch, no model.
+  if (detected.explicitZip && !resolveLocationIsInScope(detected.token)) {
+    return sseMessage(OUT_OF_SCOPE_GAP);
+  }
+
+  const origin = new URL(request.url).origin;
+  const loc = await resolveLocation(detected.token);
+  if (loc.kind === "out-of-scope" || loc.kind === "address-unsupported") {
+    return sseMessage(OUT_OF_SCOPE_GAP);
+  }
+
+  // Cache + daily-ceiling guarded fan-out (the expensive op). Over the ceiling → busy.
+  const guarded = await assembleGuardedDossier(loc, { origin });
+  if (guarded.capped || !guarded.dossier) return sseMessage(BUSY_GAP);
+  const dossier = guarded.dossier;
+
+  // Out-of-scope or no covering reads → stream the honest dossier text verbatim
+  // (it cannot invent — no model call).
+  if (!dossier.in_scope || dossier.lines.length === 0) {
+    return sseMessage(renderLocationDossierText(dossier, 2));
+  }
+
+  const system = buildWelcomeGroundedSystem({
+    dossier,
+    detectedText: detected.token,
+    explicitZip: detected.explicitZip,
+    tier: 2,
   });
+  return streamAnswer(system, messages, GROUNDED_MAX_TOKENS);
+}
+
+/** Cheap in-memory scope check for a 5-digit ZIP (resolveZip via resolveLocation's gate). */
+function resolveLocationIsInScope(zip: string): boolean {
+  return /^\d{5}$/.test(zip) && resolveZip(zip).in_scope;
 }
