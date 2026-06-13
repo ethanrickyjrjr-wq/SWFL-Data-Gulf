@@ -16,6 +16,9 @@ import {
   OUT_OF_SCOPE_GAP,
   BUSY_GAP,
 } from "@/lib/welcome/grounded";
+import { buildWelcomeAnswer } from "@/lib/welcome/answer";
+import { identityForLocation } from "@/lib/location-surface";
+import type { WelcomeFrame, PlaceEcho } from "@/lib/welcome/frames";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -106,11 +109,18 @@ function streamAnswer(
   system: string,
   messages: { role: "user" | "assistant"; content: string }[],
   maxTokens: number,
+  prelude: WelcomeFrame[] = [],
 ): Response {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        // Typed prelude (place + grounded cards) rides ahead of the model's text
+        // frames. Clients branch on `type` and ignore unknown types, so this is a
+        // backward-compatible extension of the existing SSE stream.
+        for (const frame of prelude) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+        }
         const client = getAnthropic();
         const ai = client.messages.stream({
           model: TRIAGE_MODEL, // claude-haiku-4-5
@@ -222,13 +232,29 @@ export async function POST(request: Request): Promise<Response> {
     return sseMessage(renderLocationDossierText(dossier, 2));
   }
 
+  // Build the typed prelude: an optimistic place echo, then the grounded hero
+  // cards (when any brain covers this location). identityForLocation gives the
+  // clean place name for every location kind; the same `place` rides in both the
+  // place frame and the answer so the client never sees two identities.
+  const place: PlaceEcho = {
+    zip: dossier.zip ?? detected.token,
+    name: identityForLocation(loc).headline,
+  };
+  const answer = await buildWelcomeAnswer({
+    dossier,
+    explicitZip: detected.explicitZip,
+    place,
+  });
+  const prelude: WelcomeFrame[] = [{ type: "place", place }];
+  if (answer) prelude.push({ type: "data", answer });
+
   const system = buildWelcomeGroundedSystem({
     dossier,
     detectedText: detected.token,
     explicitZip: detected.explicitZip,
     tier: 2,
   });
-  return streamAnswer(system, messages, GROUNDED_MAX_TOKENS);
+  return streamAnswer(system, messages, GROUNDED_MAX_TOKENS, prelude);
 }
 
 /** Cheap in-memory scope check for a 5-digit ZIP (resolveZip via resolveLocation's gate). */

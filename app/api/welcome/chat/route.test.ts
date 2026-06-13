@@ -1,5 +1,7 @@
 import { test, expect, mock } from "bun:test";
 import type { LocationDossier } from "@/lib/zip-dossier";
+import * as fetchBrain from "@/lib/fetch-brain";
+import { parseSseFrame, type WelcomeFrame } from "@/lib/welcome/frames";
 
 // Capture the system prompt handed to Haiku + a sentinel proving the model streamed.
 const captured: { system?: string } = {};
@@ -38,6 +40,24 @@ const guardState: { result: { dossier?: LocationDossier; capped: boolean; fromCa
 mock.module("@/lib/welcome/dossier-cache", () => ({
   assembleGuardedDossier: async () => guardState.result,
 }));
+// Stub ONLY the {answer} producer's brain loader; keep every other fetch-brain
+// export real (the prose path imports renderDetailRowText etc. from this module).
+const brainState: { map: Record<string, unknown> } = { map: {} };
+mock.module("@/lib/fetch-brain", () => ({
+  ...fetchBrain,
+  loadParsedBrain: async (slug: string) => brainState.map[slug] ?? null,
+}));
+function stubBrain(output: Record<string, unknown>) {
+  return {
+    brain_id: "stub",
+    version: 1,
+    freshness_token: "SWFL-7421-v9-20260601",
+    scope: "",
+    refined_at: "2026-06-01",
+    raw_md: "",
+    output,
+  };
+}
 
 function dossierWith(lines: LocationDossier["lines"]): LocationDossier {
   return {
@@ -197,4 +217,157 @@ test("daily ceiling tripped → busy message, no model", async () => {
   const body = await res.text();
   expect(body).toContain("paused live reads");
   expect(body).not.toContain(MODEL_SENTINEL);
+});
+
+// --- Live {answer} producer on the grounded route (typed SSE frames) ----------
+
+/** Parse the SSE body into typed WelcomeFrames (drops blanks/noise). */
+function frames(body: string): WelcomeFrame[] {
+  return body
+    .split("\n")
+    .map((l) => parseSseFrame(l))
+    .filter((f): f is WelcomeFrame => f !== null);
+}
+
+const HOUSING_STUB = stubBrain({
+  detail_tables: [
+    {
+      id: "housing_by_zip",
+      title: "",
+      grain: "zip",
+      columns: [{ id: "median_sale_price", label: "", display_format: "currency", units: "USD" }],
+      rows: [{ key: "33913", label: "33913", cells: { median_sale_price: 512000 } }],
+      source: {
+        url: "https://www.redfin.com/news/data-center/",
+        fetched_at: "2026-06-03T00:00:00Z",
+        tier: 1,
+        citation: "Redfin Data Center.",
+      },
+    },
+  ],
+  key_metrics: [],
+});
+const RENTALS_STUB = stubBrain({
+  detail_tables: [
+    {
+      id: "rentals_by_zip",
+      title: "",
+      grain: "zip",
+      columns: [
+        { id: "rent_index_latest", label: "", display_format: "currency", units: "USD/month" },
+      ],
+      rows: [{ key: "33913", label: "33913", cells: { rent_index_latest: 2075 } }],
+      source: {
+        url: "https://files.zillowstatic.com/x.csv",
+        fetched_at: "2026-06-12T00:00:00Z",
+        tier: 2,
+        citation: "Zillow ZORI.",
+      },
+    },
+  ],
+  key_metrics: [],
+});
+const ENV_STUB = stubBrain({
+  detail_tables: [],
+  key_metrics: [
+    {
+      metric: "swfl_zip_33931_flood_aal_usd_per_insured_property",
+      value: 30074.61,
+      direction: "stable",
+      label: "",
+      variable_type: "intensive",
+      units: "USD/year",
+      display_format: "currency",
+      source: {
+        url: "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+        fetched_at: "2026-06-12T01:08:17Z",
+        tier: 1,
+        citation: "OpenFEMA.",
+      },
+    },
+  ],
+});
+
+test("grounded ZIP streams typed place + data (cited cards) BEFORE any prose text", async () => {
+  brainState.map = { "housing-swfl": HOUSING_STUB, "rentals-swfl": RENTALS_STUB };
+  guardState.result = {
+    capped: false,
+    fromCache: false,
+    dossier: dossierWith([
+      {
+        brain_id: "housing-swfl",
+        domain: "real-estate",
+        grain: "zip",
+        coverage_label: "ZIP 33913",
+        is_true_zip: true,
+        text: "",
+        source_citation: "Redfin Data Center.",
+        source_url: "https://www.redfin.com/news/data-center/",
+      },
+      {
+        brain_id: "rentals-swfl",
+        domain: "real-estate",
+        grain: "zip",
+        coverage_label: "ZIP 33913",
+        is_true_zip: true,
+        text: "",
+        source_citation: "Zillow ZORI.",
+        source_url: "https://files.zillowstatic.com/x.csv",
+      },
+    ]),
+  };
+  const res = await post("what's the read for 33913?");
+  const fs = frames(await res.text());
+  const placeIdx = fs.findIndex((f) => f.type === "place");
+  const dataIdx = fs.findIndex((f) => f.type === "data");
+  const firstText = fs.findIndex((f) => f.type === "text");
+  expect(placeIdx).toBeGreaterThanOrEqual(0);
+  expect(dataIdx).toBeGreaterThanOrEqual(0);
+  expect(firstText).toBeGreaterThanOrEqual(0);
+  expect(placeIdx).toBeLessThan(firstText); // place before prose
+  expect(dataIdx).toBeLessThan(firstText); // cards before prose
+  const data = fs[dataIdx] as Extract<WelcomeFrame, { type: "data" }>;
+  expect(data.answer.metrics.length).toBeGreaterThanOrEqual(1);
+  for (const m of data.answer.metrics) {
+    expect(typeof m.is_true_zip).toBe("boolean");
+    expect(m.coverage_label.length).toBeGreaterThan(0); // honest scope, always present
+  }
+});
+
+test("FLOOD GATE on the route — an explicit ZIP whose env line is coarse emits cards but no flood card", async () => {
+  brainState.map = { "housing-swfl": HOUSING_STUB, "env-swfl": ENV_STUB };
+  guardState.result = {
+    capped: false,
+    fromCache: false,
+    dossier: dossierWith([
+      {
+        brain_id: "housing-swfl",
+        domain: "real-estate",
+        grain: "zip",
+        coverage_label: "ZIP 33913",
+        is_true_zip: true,
+        text: "",
+        source_citation: "Redfin Data Center.",
+        source_url: "https://www.redfin.com/news/data-center/",
+      },
+      {
+        brain_id: "env-swfl",
+        domain: "environment",
+        grain: "county",
+        coverage_label: "Collier county-wide — covers 33913",
+        is_true_zip: false,
+        text: "",
+        source_citation: "OpenFEMA.",
+        source_url: "https://www.fema.gov",
+      },
+    ]),
+  };
+  const res = await post("flood read for 33913?");
+  const fs = frames(await res.text());
+  const data = fs.find((f) => f.type === "data") as
+    | Extract<WelcomeFrame, { type: "data" }>
+    | undefined;
+  expect(data).toBeDefined();
+  expect(data!.answer.metrics.some((m) => m.key === "home_value")).toBe(true);
+  expect(data!.answer.metrics.some((m) => m.key === "flood_aal")).toBe(false);
 });

@@ -180,7 +180,7 @@ function applyPrettySource(text: string): string {
 // ---------------------------------------------------------------------------
 
 /** One token to quote — first emitted line's brain token (mirrors MCP server.ts). */
-function representativeFreshnessToken(dossier: LocationDossier): string | undefined {
+export function representativeFreshnessToken(dossier: LocationDossier): string | undefined {
   for (const line of selectDossierLines(dossier.lines, 3)) {
     const tok = dossier.freshness_tokens[line.brain_id];
     if (tok) return tok;
