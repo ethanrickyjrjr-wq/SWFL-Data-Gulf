@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — Email-funnel "the rest" tasks foldered + welcome copy confirmed live — PUSH
+
+- Operator: "PUSH AND PUT THE TASKS WE NEED TO COMPLETE IN A FOLDER." The welcome-chat copy fix + the single "the rest" plan `.md` were already committed AND pushed by a prior beat (`233fc06` copy, `1b03f8a` plan+rstudio; local main == origin/main, 0/0). Verified `233fc06`'s committed `WELCOME_SYSTEM`/`route.test.ts` are byte-identical to the intended spec — no parallel-session drift; 4/4 route tests green.
+- Restructured the single `2026-06-13-email-funnel-the-rest.md` into a TASK FOLDER `docs/superpowers/plans/2026-06-13-email-funnel-the-rest/`: `README.md` (overview + grounded gap + ordering + correctness flags) + 5 one-per-check task briefs — `task-01-scope-additive` (`email_scope_column`), `task-02-scoped-content` (`email_scoped_content`), `task-03-go-live` (existing `email_scheduler_f_live_verify`, NOT duplicated), `task-04-stripe-billing` (`email_stripe_billing`), `task-05-inbound-reply` (`email_inbound_reply`). No ⬜/✅ status markers — status lives in checks (RULE 2).
+- The wedge (all grounded in in-session reads): the multi-tenant engine is built + OFF; gaps = no `scope` column on `email_schedules` (`docs/sql/20260612_email_product.sql:21`), `buildContent(_row)` ignores the row → one global digest to all tenants (`run-schedules.mts:223`), parser has no scope param (`schedule-command.ts:33`), no `app/api/email/inbound` route, no Stripe, `*/15` cron commented (`email-scheduler.yml:12`).
+- build-queue: welcome copy marked `[x]`, the foldered "the rest" tasks added `[ ]`. Opened 4 new checks (scope / scoped-content / stripe / inbound); go-live folds into the existing `email_scheduler_f_live_verify`.
+- `docs/rstudio-showcase.R` is the prior beat's (committed in `1b03f8a`); left as-is — not mine to unwind on `main`.
+
 ## 2026-06-13 (main) — Welcome-chat repositioned to lead with the auto-email-to-clients hook — COMMITTED, push pending operator
 
 - Cleaned a dirty tree for `--teleport`. Committed the welcome-chat repositioning that was sitting uncommitted: `WELCOME_SYSTEM` (`app/api/welcome/chat/route.ts`) now opens by treating the visitor as an agent/investor who just clicked through from a branded market-data email — leads with the real magic (that same branded, cited data **auto-emailed to THEIR clients** weekly/daily, set up by plain-English conversation; "their database is going cold, this works it") instead of the old "sign up and you can build it" pitch. No-invention guardrail kept verbatim.
