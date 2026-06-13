@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "description": "Synthetic Redfin Lee County market-tracker fixture for properties-lee-value tests (market source only). One 'All Residential' row per year 2021-2025 (homes_sold = annual total) plus non-headline rows that MUST be filtered out. Engineered so the current complete year (year-1 relative to a 2026 run) sits >1 sigma above the trailing 3yr baseline -> bullish.",
+    "region": "Lee County, FL",
+    "headline_property_type": "All Residential",
+    "time_assumption": "Assumes 'now' is calendar 2026 so year-1 = 2025 is the current complete year.",
+    "expected": { "direction": "bullish", "current_year_homes_sold": 11000 }
+  },
+  "rows": [
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2021-12-01",
+      "period_end": "2021-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 360000,
+      "median_sale_price_yoy": 0.18,
+      "homes_sold": 6800,
+      "inventory": 2200,
+      "months_of_supply": 1.8
+    },
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2022-12-01",
+      "period_end": "2022-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 410000,
+      "median_sale_price_yoy": 0.139,
+      "homes_sold": 7000,
+      "inventory": 2900,
+      "months_of_supply": 2.6
+    },
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2023-12-01",
+      "period_end": "2023-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 430000,
+      "median_sale_price_yoy": 0.048,
+      "homes_sold": 7500,
+      "inventory": 3800,
+      "months_of_supply": 3.9
+    },
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2024-12-01",
+      "period_end": "2024-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 445000,
+      "median_sale_price_yoy": 0.035,
+      "homes_sold": 7800,
+      "inventory": 4500,
+      "months_of_supply": 4.2
+    },
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2025-12-01",
+      "period_end": "2025-12-31",
+      "property_type": "All Residential",
+      "median_sale_price": 460000,
+      "median_sale_price_yoy": 0.057,
+      "homes_sold": 11000,
+      "inventory": 4800,
+      "months_of_supply": 4.5
+    },
+
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2025-12-01",
+      "period_end": "2025-12-31",
+      "property_type": "Condo/Co-op",
+      "median_sale_price": 280000,
+      "median_sale_price_yoy": -0.018,
+      "homes_sold": 99999,
+      "inventory": 2800,
+      "months_of_supply": 6.2
+    },
+    {
+      "region": "Lee County, FL",
+      "period_begin": "2024-12-01",
+      "period_end": "2024-12-31",
+      "property_type": "Single Family Residential",
+      "median_sale_price": 510000,
+      "median_sale_price_yoy": 0.041,
+      "homes_sold": 4800,
+      "inventory": 2400,
+      "months_of_supply": 3.7
+    }
+  ]
+}

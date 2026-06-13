@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — feat(redfin-lee): Lee County market-tracker parity build — PUSHED
+
+- **New ingest pipeline** `ingest/pipelines/redfin_lee/` (4 files) — streaming filter of Redfin's free county TSV to `"Lee County, FL"`, merge disposition with stable composite PK `(region, period_end, property_type)` → idempotent monthly upserts, never re-ingests history from scratch. GHA cron `.github/workflows/redfin-lee-monthly.yml` 18th of each month.
+- **Cadence registry** — `redfin_lee` entry added after `redfin_collier` (lane tier-2, 31-day, `expected_rows_min: 600` placeholder — update after first run).
+- **Grant SQL** `docs/sql/redfin_lee_grant.sql` — GRANT USAGE + GRANT SELECT + NOTIFY pgrst (all three required; PostgREST silently returns 0 rows without the reload).
+- **Source connector** `refinery/sources/lee-market-source.mts` — kinds `"lee-sales-year"` / `"lee-summary"` (strict `===`, never cross-matches `"leepa-*"`).
+- **Fixture** `refinery/__fixtures__/properties-lee-market.sample.json` — synthetic Lee market rows (bullish 2025 baseline).
+- **Pack** `refinery/packs/properties-lee-value.mts` — `leeMarketSource` wired into sources; `LeeMarketAggregates` interface + `lastLeeMarket` var + `aggregateLeeMarket()` (reuses same `populationStd` + trailing-3yr-baseline — no second implementation); 4 new metrics emitted: `lee_homes_sold_zscore` / `lee_homes_sold_per_year` / `lee_median_sale_price_yoy` / `lee_months_of_supply`. LeePA parcel metrics untouched.
+- **Vocab** — 4 new concepts (`properties_lee_*`) + 4 slug_index entries. `lee_months_of_supply` has `lower_is_bullish`; `lee_homes_sold_per_year` has no grade block (level metric, mirrors Collier).
+- **Gates all green**: corridor-aliases 7/7 · vocab `--all` 30 brains clean · `REFINERY_SOURCE=fixture` target-only rebuild wrote v13 with all 4 metrics · pytest 3/3 Lee pipeline tests pass.
+- **Next**: trigger `redfin-lee-monthly.yml` `workflow_dispatch` → confirm ~600+ rows land → run `docs/sql/redfin_lee_grant.sql` directly → update `expected_rows_min` in cadence registry → close `redfin_lee_county_parity` check.
+
 ## 2026-06-13 (main) — NFIP fix corrected: 2nd dead-key (numberOfFloorsInsured) + narrow-$select fetch + probe-first rule — PUSHED
 
 - **CORRECTION to my earlier entry below.** The flood_zone fix stands (`cb2a023`), but the prod populate took a wrong turn worth recording: I ran a full ~50-min `replace` re-ingest (twice) BEFORE the cheap check. A targeted backfill-by-`id` then matched **0** of 433k rows — **OpenFEMA regenerates `id` every refresh** (verified: a stored id returns EMPTY from the live API), so there is no stable key and `replace` is the only correct path. `$select`-narrowing that path surfaced a **second dead-key**: `_normalize_nfip` read `numberOfFloorsInsured` but the real field is `numberOfFloorsInTheInsuredBuilding` → `number_of_floors_insured` was 0/433,381 non-null. Fixed both spots + test (22/22).

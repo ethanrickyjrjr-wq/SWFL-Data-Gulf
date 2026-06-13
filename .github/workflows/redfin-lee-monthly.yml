@@ -1,0 +1,43 @@
+name: Redfin Lee market monthly
+
+on:
+  schedule:
+    # Redfin Data Center refreshes the county market tracker monthly (mid-month).
+    # The dlt merge is idempotent, so a mid-month run that predates the refresh
+    # is a harmless no-op and the next run catches the update.
+    - cron: "0 13 18 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — download + filter only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run Redfin Lee pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python -m ingest.pipelines.redfin_lee.pipeline $ARGS

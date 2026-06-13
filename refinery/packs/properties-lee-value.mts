@@ -11,10 +11,12 @@ import {
   type LeepaSummaryNormalized,
   type SalesVelocityYearNormalized,
 } from "../sources/leepa-value-source.mts";
+import { fhfaHpiSource, type HpiSwflSummary } from "../sources/fhfa-hpi-source.mts";
 import {
-  fhfaHpiSource,
-  type HpiSwflSummary,
-} from "../sources/fhfa-hpi-source.mts";
+  leeMarketSource,
+  type LeeSalesYearNormalized,
+  type LeeSummaryNormalized,
+} from "../sources/lee-market-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -64,10 +66,26 @@ interface PropertyValueAggregates {
   sohGapMedianPct: number | null;
 }
 
+/** Aggregated Lee County market data from Redfin (separate from LeePA parcel agg). */
+interface LeeMarketAggregates {
+  currentYear: number;
+  baselineYears: number[];
+  currentSalesCount: number | null;
+  baselineSalesCounts: number[];
+  baselineMean: number | null;
+  baselineStd: number | null;
+  zScore: number | null;
+  yearsObserved: number;
+  latestPeriod: string | null;
+  medianSalePriceYoyPct: number | null;
+  monthsOfSupply: number | null;
+}
+
 let lastAggregate: PropertyValueAggregates | null = null;
 let lastFetchedAt: string | null = null;
 
 let lastFhfaSummary: HpiSwflSummary | null = null;
+let lastLeeMarket: LeeMarketAggregates | null = null;
 
 function salesByYearFrom(fragments: RawFragment[]): Map<number, number> {
   const out = new Map<number, number>();
@@ -98,9 +116,72 @@ function fhfaSummaryFrom(fragments: RawFragment[]): HpiSwflSummary | null {
 function populationStd(values: number[]): number {
   if (values.length === 0) return 0;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const sq =
-    values.reduce((acc, v) => acc + (v - mean) ** 2, 0) / values.length;
+  const sq = values.reduce((acc, v) => acc + (v - mean) ** 2, 0) / values.length;
   return Math.sqrt(sq);
+}
+
+// ── Lee market helpers (Redfin county tracker, market-grain) ─────────────────
+// Strict === kind matching — "lee-sales-year" / "lee-summary" must NEVER
+// cross-match with "leepa-sales-year" / "leepa-summary" (parcel-grain).
+
+function leeMarketSalesFrom(fragments: RawFragment[]): Map<number, number> {
+  const out = new Map<number, number>();
+  for (const f of fragments) {
+    const n = f.normalized as unknown as LeeSalesYearNormalized;
+    if (n?.kind !== "lee-sales-year") continue;
+    out.set(n.year, n.homes_sold);
+  }
+  return out;
+}
+
+function leeMarketSummaryFrom(fragments: RawFragment[]): LeeSummaryNormalized | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as LeeSummaryNormalized;
+    if (n?.kind === "lee-summary") return n;
+  }
+  return null;
+}
+
+/**
+ * Compute Lee market z-score using the SAME populationStd + trailing-3yr-baseline
+ * math as the LeePA parcel aggregate() above — no ad-hoc reimplementation.
+ * currentYear = UTCFullYear - 1 (most recent complete calendar year).
+ */
+function aggregateLeeMarket(
+  salesByYear: Map<number, number>,
+  summary: LeeSummaryNormalized | null,
+): LeeMarketAggregates {
+  const currentYear = new Date().getUTCFullYear() - 1;
+  const baselineYears = Array.from(
+    { length: BASELINE_YEAR_COUNT },
+    (_, i) => currentYear - BASELINE_YEAR_COUNT + i,
+  );
+  const currentSalesCount = salesByYear.has(currentYear)
+    ? (salesByYear.get(currentYear) ?? 0)
+    : null;
+  const baselineSalesCounts = baselineYears.map((y) => salesByYear.get(y) ?? 0);
+  const baselineMean =
+    baselineSalesCounts.length === 0
+      ? null
+      : baselineSalesCounts.reduce((a, b) => a + b, 0) / baselineSalesCounts.length;
+  const baselineStd = populationStd(baselineSalesCounts);
+  const zScore =
+    currentSalesCount != null && baselineMean != null && baselineStd > 0
+      ? (currentSalesCount - baselineMean) / baselineStd
+      : null;
+  return {
+    currentYear,
+    baselineYears,
+    currentSalesCount,
+    baselineSalesCounts,
+    baselineMean,
+    baselineStd: baselineStd > 0 ? baselineStd : null,
+    zScore,
+    yearsObserved: salesByYear.size,
+    latestPeriod: summary?.latest_period ?? null,
+    medianSalePriceYoyPct: summary?.median_sale_price_yoy_pct ?? null,
+    monthsOfSupply: summary?.months_of_supply ?? null,
+  };
 }
 
 function aggregate(
@@ -126,8 +207,7 @@ function aggregate(
   const baselineMean =
     baselineSalesCounts.length === 0
       ? null
-      : baselineSalesCounts.reduce((a, b) => a + b, 0) /
-        baselineSalesCounts.length;
+      : baselineSalesCounts.reduce((a, b) => a + b, 0) / baselineSalesCounts.length;
   const baselineStd = populationStd(baselineSalesCounts);
   const zScore =
     currentSalesCount != null && baselineMean != null && baselineStd > 0
@@ -141,9 +221,7 @@ function aggregate(
       ? (currentSalesCount / totalParcels) * 1000
       : null;
   const velocityBaselineMeanPer1k =
-    baselineMean != null && totalParcels > 0
-      ? (baselineMean / totalParcels) * 1000
-      : null;
+    baselineMean != null && totalParcels > 0 ? (baselineMean / totalParcels) * 1000 : null;
 
   return {
     currentYear,
@@ -164,19 +242,14 @@ function aggregate(
 const fmt1 = (n: number): string =>
   Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
 
-export function directionFromZScore(
-  z: number | null,
-): "bullish" | "bearish" | "neutral" {
+export function directionFromZScore(z: number | null): "bullish" | "bearish" | "neutral" {
   if (z == null) return "neutral";
   if (z >= Z_BULL_THRESHOLD) return "bullish";
   if (z <= Z_BEAR_THRESHOLD) return "bearish";
   return "neutral";
 }
 
-function buildLeepaSource(
-  fetched_at: string,
-  totalParcels: number,
-): BrainOutputMetricSource {
+function buildLeepaSource(fetched_at: string, totalParcels: number): BrainOutputMetricSource {
   const url =
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code`
@@ -198,14 +271,20 @@ function buildLeepaSource(
   };
 }
 
-function propertyValueCorpusSummary(
-  allFragments: RawFragment[],
-): SynthesisFact[] {
+function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const salesByYear = salesByYearFrom(allFragments);
   const summary = summaryFrom(allFragments);
   lastAggregate = aggregate(salesByYear, summary);
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
   lastFhfaSummary = fhfaSummaryFrom(allFragments);
+
+  // Lee market (Redfin county tracker — market-grain, separate from LeePA parcel-grain).
+  const leeMarketSales = leeMarketSalesFrom(allFragments);
+  const leeMarketSummary = leeMarketSummaryFrom(allFragments);
+  lastLeeMarket =
+    leeMarketSales.size > 0 || leeMarketSummary != null
+      ? aggregateLeeMarket(leeMarketSales, leeMarketSummary)
+      : null;
 
   const agg = lastAggregate;
   if (agg.totalParcels === 0) return [];
@@ -292,15 +371,54 @@ function propertyValueCorpusSummary(
     });
   }
 
+  // Lee market facts (Redfin county tracker — market-grain complement to LeePA parcel-grain).
+  const mkt = lastLeeMarket;
+  if (mkt && mkt.yearsObserved > 0) {
+    if (mkt.currentSalesCount != null) {
+      facts.push({
+        topic: "metric:lee_homes_sold_per_year",
+        fact: `Lee homes sold (year ${mkt.currentYear}, Redfin market-grain)`,
+        value: `${mkt.currentSalesCount} residential closings recorded by Redfin for Lee County in ${mkt.currentYear}.`,
+        source_fragment_ids: [],
+      });
+    }
+    if (mkt.zScore != null) {
+      facts.push({
+        topic: "metric:lee_homes_sold_zscore",
+        fact: "Lee homes-sold z-score (Redfin market-grain, current year vs trailing 3yr)",
+        value:
+          `Baseline counts ${mkt.baselineYears.map((y, i) => `${y}=${mkt.baselineSalesCounts[i]}`).join(", ")}; ` +
+          `mean ${mkt.baselineMean != null ? fmt1(mkt.baselineMean) : "n/a"}, ` +
+          `population std ${mkt.baselineStd != null ? fmt1(mkt.baselineStd) : "n/a"}. ` +
+          `Current ${mkt.currentSalesCount}. z = ${fmt1(mkt.zScore)}. ` +
+          `Market-grain Redfin closed sales — NOT directly comparable to LeePA sales_velocity_zscore (parcel-grain); compare direction, not raw counts.`,
+        source_fragment_ids: [],
+      });
+    }
+    if (mkt.medianSalePriceYoyPct != null) {
+      facts.push({
+        topic: "metric:lee_median_sale_price_yoy",
+        fact: `Lee median sale price YoY (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
+        value: `${mkt.medianSalePriceYoyPct > 0 ? "+" : ""}${fmt1(mkt.medianSalePriceYoyPct)}% year-over-year. Source: Redfin market tracker — NOT LeePA (LeePA last_sale_amount is null).`,
+        source_fragment_ids: [],
+      });
+    }
+    if (mkt.monthsOfSupply != null) {
+      facts.push({
+        topic: "metric:lee_months_of_supply",
+        fact: `Lee months of supply (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
+        value: `${fmt1(mkt.monthsOfSupply)} months of supply — inventory vs sales pace (lower = tighter, seller-favorable).`,
+        source_fragment_ids: [],
+      });
+    }
+  }
+
   return facts;
 }
 
-function propertyValueOutputProducer(
-  _out: PackOutput,
-): BrainOutputProducerResult {
+function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const agg = lastAggregate;
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!agg || agg.totalParcels === 0) {
     return {
@@ -392,11 +510,7 @@ function propertyValueOutputProducer(
       metric: "fhfa_cape_coral_msa_yoy_pct",
       value: msa.yoy_change_pct ?? 0,
       direction:
-        msa.yoy_change_pct == null
-          ? "stable"
-          : msa.yoy_change_pct > 0
-            ? "rising"
-            : "falling",
+        msa.yoy_change_pct == null ? "stable" : msa.yoy_change_pct > 0 ? "rising" : "falling",
       label: `FHFA Cape Coral-Fort Myers MSA HPI YoY (${msa.latest_period}) — Lee County price-level proxy`,
       variable_type: "intensive",
       units: "percent",
@@ -415,11 +529,7 @@ function propertyValueOutputProducer(
       metric: "fhfa_fl_state_yoy_pct",
       value: st.yoy_change_pct ?? 0,
       direction:
-        st.yoy_change_pct == null
-          ? "stable"
-          : st.yoy_change_pct > 0
-            ? "rising"
-            : "falling",
+        st.yoy_change_pct == null ? "stable" : st.yoy_change_pct > 0 ? "rising" : "falling",
       label: `FHFA Florida state HPI YoY (${st.latest_period}) — statewide baseline`,
       variable_type: "intensive",
       units: "percent",
@@ -433,12 +543,86 @@ function propertyValueOutputProducer(
     });
   }
 
+  // Lee market metrics (Redfin county tracker — market-grain, separate source from LeePA).
+  const mkt = lastLeeMarket;
+  if (mkt && mkt.yearsObserved > 0) {
+    const mktSourceMeta: BrainOutputMetricSource = {
+      url:
+        env.source === "live" && env.supabaseUrl
+          ? `${env.supabaseUrl}/rest/v1/redfin_lee_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential`
+          : "fixture://refinery/__fixtures__/properties-lee-market.sample.json",
+      fetched_at,
+      tier: 2,
+      citation:
+        env.source === "live"
+          ? 'Redfin Data Center county market tracker via data_lake.redfin_lee_market (free public TSV, filtered to "Lee County, FL"; monthly HOMES_SOLD summed to calendar-year velocity).'
+          : "Redfin Lee County market tracker (fixture; refinery/__fixtures__/properties-lee-market.sample.json).",
+    };
+    if (mkt.zScore != null) {
+      key_metrics.push({
+        metric: "lee_homes_sold_zscore",
+        value: Math.round(mkt.zScore * 100) / 100,
+        direction:
+          mkt.zScore >= Z_BULL_THRESHOLD
+            ? "rising"
+            : mkt.zScore <= Z_BEAR_THRESHOLD
+              ? "falling"
+              : "stable",
+        label: `Lee homes-sold z-score, year ${mkt.currentYear} vs trailing ${BASELINE_YEAR_COUNT}yr (${mkt.baselineYears[0]}-${mkt.baselineYears[mkt.baselineYears.length - 1]}) — Redfin market-grain`,
+        variable_type: "intensive",
+        units: "z-score",
+        display_format: "ratio",
+        source: mktSourceMeta,
+      });
+    }
+    if (mkt.currentSalesCount != null) {
+      key_metrics.push({
+        metric: "lee_homes_sold_per_year",
+        value: mkt.currentSalesCount,
+        direction: "stable",
+        label: `Lee residential homes sold, year ${mkt.currentYear} (Redfin closed sales, All Residential)`,
+        variable_type: "extensive",
+        units: "home sales",
+        display_format: "count",
+        source: mktSourceMeta,
+      });
+    }
+    if (mkt.medianSalePriceYoyPct != null) {
+      key_metrics.push({
+        metric: "lee_median_sale_price_yoy",
+        value: mkt.medianSalePriceYoyPct,
+        direction:
+          mkt.medianSalePriceYoyPct > 0
+            ? "rising"
+            : mkt.medianSalePriceYoyPct < 0
+              ? "falling"
+              : "stable",
+        label: `Lee median sale price YoY (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
+        variable_type: "intensive",
+        units: "percent",
+        display_format: "percent",
+        source: mktSourceMeta,
+      });
+    }
+    if (mkt.monthsOfSupply != null) {
+      key_metrics.push({
+        metric: "lee_months_of_supply",
+        value: Math.round(mkt.monthsOfSupply * 10) / 10,
+        direction: "stable",
+        label: `Lee months of supply (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
+        variable_type: "intensive",
+        units: "months",
+        display_format: "ratio",
+        source: mktSourceMeta,
+      });
+    }
+  }
+
   const direction = directionFromZScore(agg.zScore);
   // Magnitude: |z| / 3, clamped to [0,1]. z=+3 ⇒ full magnitude.
   //   - When z is null (no current-year data), default to 0.3 so master still
   //     sees us as a low-weight contributor in voteDirection without a directional vote.
-  const magnitude =
-    agg.zScore == null ? 0.3 : Math.min(1, Math.abs(agg.zScore) / 3);
+  const magnitude = agg.zScore == null ? 0.3 : Math.min(1, Math.abs(agg.zScore) / 3);
 
   const conclusionParts: string[] = [];
   conclusionParts.push(
@@ -517,9 +701,9 @@ export const propertiesLeeValue: PackDefinition = {
   public_label: "Lee County Properties",
   domain: "real-estate",
   scope:
-    "Lee County (FL) parcel-value direction read — sales-velocity z-score (current year vs trailing 3yr) plus Save-Our-Homes gap median across homesteaded parcels, derived from the LeePA Property Appraiser snapshot.",
-  ttl_seconds: 2592000, // 30 days — LeePA pulls are scheduled monthly
-  sources: [leepaValueSource, fhfaHpiSource],
+    "Lee County (FL) real-estate direction read — LeePA parcel-grain: sales-velocity z-score (current year vs trailing 3yr) + Save-Our-Homes gap median. Redfin county tracker (market-grain): homes-sold z-score + median sale price YoY + months of supply from data_lake.redfin_lee_market. Two sources, two grains; county-grain peer to properties-collier-value.",
+  ttl_seconds: 2592000, // 30 days — both LeePA and Redfin refresh monthly
+  sources: [leepaValueSource, leeMarketSource, fhfaHpiSource],
   input_brains: [],
   fitScore: (): number => 8,
   compositeCutoff: 0,
