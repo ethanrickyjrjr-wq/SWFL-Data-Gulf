@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-13 (main) — fema pipeline: fix Tier 1 pointer in CI (write_tier1_pointer → upsert_inventory_row)
+
+- `write_tier1_pointer` hardcodes `.dlt/secrets.toml` for Postgres creds — file doesn't exist in CI. Migrated `ingest_nfip_claims` to `upsert_inventory_row` (reads `DESTINATION__POSTGRES__CREDENTIALS` env var first). Tier 1 CSV.gz + inventory row now lands correctly on next CI run. 20/20 tests green.
+
 ## 2026-06-14 (main) — RSW v3 live: 2,580 rows upserted (5 metrics × 516 rows, 1983–2026)
 
 - **RSW v3 live write confirmed** (GHA run `27484730507`): 2,580 rows upserted into `public.rsw_airport_monthly` — all 5 metrics (enplanements, deplanements, total_passengers, aircraft_operations, total_freight_lbs) covering 1983–2026. Dry run (`27484697788`) verified parse before write. `expected_rows_min` re-baselined to 2,322 (90% of 2,580).

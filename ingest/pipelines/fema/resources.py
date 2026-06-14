@@ -4,7 +4,8 @@ import dlt
 import requests
 
 from ingest.lib.guards import assert_min_rows, assert_vs_canonical, VolumeGuardError
-from ingest.lib.storage_uploader import upload_csv_gz, write_tier1_pointer
+from ingest.lib.storage_uploader import upload_csv_gz
+from ingest.lib.tier1_inventory import upsert_inventory_row
 from .constants import NFIP_CLAIMS_URL, TABULAR_BUCKET
 
 
@@ -261,7 +262,14 @@ def ingest_nfip_claims(pipeline) -> None:
     object_path = f"fema/nfip_claims/{today}.csv.gz"
     try:
         upload_csv_gz(TABULAR_BUCKET, object_path, rows, list(rows[0].keys()))
-        write_tier1_pointer(pipeline, "fema_nfip_claims", TABULAR_BUCKET, object_path, len(rows), NFIP_CLAIMS_URL)
+        upsert_inventory_row(
+            bucket=TABULAR_BUCKET,
+            path=object_path,
+            vintage=today,
+            byte_size=None,
+            pack_id="env-swfl",
+            source_url=NFIP_CLAIMS_URL,
+        )
         print(f"  Tier 1 pointer written: {len(rows):,} rows → {object_path}")
     except Exception as exc:
         print(f"  WARNING: Tier 1 write failed (non-fatal) — {exc}")

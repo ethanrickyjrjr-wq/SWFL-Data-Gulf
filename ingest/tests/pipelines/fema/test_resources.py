@@ -35,7 +35,7 @@ class TestIngestNfipClaims:
              patch("ingest.pipelines.fema.resources.assert_min_rows"), \
              patch("ingest.pipelines.fema.resources._current_tier2_count", return_value=None), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz") as mock_upload, \
-             patch("ingest.pipelines.fema.resources.write_tier1_pointer"), \
+             patch("ingest.pipelines.fema.resources.upsert_inventory_row"), \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2"):
             ingest_nfip_claims(MagicMock())
         assert mock_upload.call_args[0][0] == "raw-tabular-cold"
@@ -45,7 +45,7 @@ class TestIngestNfipClaims:
         from ingest.pipelines.fema.resources import ingest_nfip_claims
         with patch("ingest.pipelines.fema.resources._fetch_all_nfip_claims", return_value=[]), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz") as mock_upload, \
-             patch("ingest.pipelines.fema.resources.write_tier1_pointer"), \
+             patch("ingest.pipelines.fema.resources.upsert_inventory_row"), \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2") as mock_tier2:
             ingest_nfip_claims(MagicMock())
         assert not mock_upload.called
@@ -57,23 +57,24 @@ class TestIngestNfipClaims:
              patch("ingest.pipelines.fema.resources.assert_min_rows"), \
              patch("ingest.pipelines.fema.resources._current_tier2_count", return_value=None), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz"), \
-             patch("ingest.pipelines.fema.resources.write_tier1_pointer"), \
+             patch("ingest.pipelines.fema.resources.upsert_inventory_row"), \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2") as mock_tier2:
             ingest_nfip_claims(MagicMock())
         assert mock_tier2.called
         rows_arg = mock_tier2.call_args[0][0]
         assert rows_arg[0]["id"] == "1"
 
-    def test_tier1_uses_fema_nfip_claims_table_name(self):
+    def test_tier1_uses_fema_nfip_claims_source_url(self):
         from ingest.pipelines.fema.resources import ingest_nfip_claims
         with patch("ingest.pipelines.fema.resources._fetch_all_nfip_claims", return_value=[FAKE_CLAIM]), \
              patch("ingest.pipelines.fema.resources.assert_min_rows"), \
              patch("ingest.pipelines.fema.resources._current_tier2_count", return_value=None), \
              patch("ingest.pipelines.fema.resources.upload_csv_gz"), \
-             patch("ingest.pipelines.fema.resources.write_tier1_pointer") as mock_ptr, \
+             patch("ingest.pipelines.fema.resources.upsert_inventory_row") as mock_ptr, \
              patch("ingest.pipelines.fema.resources._promote_nfip_to_tier2"):
             ingest_nfip_claims(MagicMock())
-        assert mock_ptr.call_args[0][1] == "fema_nfip_claims"
+        assert mock_ptr.call_args.kwargs["source_url"] == "https://www.fema.gov/api/open/v2/FimaNfipClaims"
+        assert mock_ptr.call_args.kwargs["pack_id"] == "env-swfl"
 
 
 class TestNormalizeNfip:
