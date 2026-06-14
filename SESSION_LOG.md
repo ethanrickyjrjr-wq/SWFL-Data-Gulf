@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — 3 new Redfin Data Center pipelines wired: price_drops + contract_cancellations + delistings_relistings
+
+- **3 new Tier-1 ingest pipelines** from Redfin's new Data Center S3 prefix (`redfin_data_center/`) vs the old market tracker. All confirmed live (200 OK + SWFL ZIPs present): `price_drops` (333MB), `contract_cancellations` (278MB), `delistings_relistings` (328MB) — plain CSV, sorted metro-size descending, Cape Coral at ~100MB offset.
+- **Key metrics unlocked**: `pct_active_with_drops` + `avg_price_drop_pct` (price_drops), `cancellation_rate_pct` (contract_cancellations), `share_delisted_pct` + `share_relisted_pct` (delistings_relistings). These are the seller-stress signals that were NULL in the old ZIP tracker.
+- **Files**: `ingest/duckdb_pipelines/redfin_{price_drops,contract_cancellations,delistings_relistings}/` (pipeline.py + constants.py + test_dry_run.py × 3), `cadence_registry.yaml` (+3 entries, 30-day cadence), `.github/workflows/redfin-{price-drops,contract-cancellations,delistings-relistings}-monthly.yml` (cron: 17:00/18:00/19:00 UTC on the 15th, staggered after existing 13:00 slot).
+- **Tests**: 3/3 dry-run tests green. First real run is GHA workflow_dispatch.
+- **Brain-first gate**: Tier-1 only for now. Brain wire-up (housing-swfl extension or new seller-stress-swfl) is the next PR once we confirm the first real ingest lands clean data.
+- **Next**: trigger workflow_dispatch on all 3 GHAs to do first real ingest; then decide if we extend housing-swfl or build a new seller-stress-swfl brain for these signals.
+
 ## 2026-06-14 (main) — rsw-airport BRAIN v3: trailing-12 total_passengers YoY direction + 5-metric roster (commit 4941950, awaiting push)
 
 - **rsw-airport pack rewrite** (`refinery/packs/rsw-airport.mts`): brain now surfaces all 5 LCPA metrics (was enplanements-only). **Direction = trailing-12-mo `total_passengers` YoY** (rolling 12 vs prior 12) — deseasonalizes RSW's snowbird seasonality (live seasonality ratio 1.71); `total_passengers` is the SOLE direction input (enplanements + deplanements = decomposition, avoids the double-count / DWU Direction-Counting-Error). Magnitude divisor recalibrated 20→15 (empirical P85 of |trailing-12 YoY|, 1985–2026 COVID-excluded). **PGD dropped** (0 rows live; separate operator, no LCPA source).
