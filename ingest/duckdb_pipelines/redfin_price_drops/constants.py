@@ -5,7 +5,7 @@ Grain: ZIP × rolling-3-month period
 Filter: Lee County (Cape Coral MSA) + Collier County (Naples MSA) + Punta Gorda + North Port
 Output: s3://lake-tier1/market/redfin_price_drops.parquet
 
-Consuming brain: housing-swfl (to be wired in the same PR as the Tier-2 write).
+Consuming brain: seller-stress-swfl.
 Publishes: ~15th of each month (Redfin 2026 release calendar).
 """
 
@@ -22,7 +22,7 @@ BUCKET = "lake-tier1"
 PARQUET_PATH = "market/redfin_price_drops.parquet"
 PARQUET_TARGET = f"s3://{BUCKET}/{PARQUET_PATH}"
 
-PACK_ID = "housing-swfl"
+PACK_ID = "seller-stress-swfl"
 
 # ── Geographic filter ─────────────────────────────────────────────────────────
 

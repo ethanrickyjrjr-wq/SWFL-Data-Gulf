@@ -15,22 +15,33 @@ import {
   type CancellationsRow,
 } from "../sources/stress-cancellations-source.mts";
 import { stressDelistSource, type DelistingsRow } from "../sources/stress-delistings-source.mts";
+import { subtractMonthsUtc, isoDate } from "../lib/dates.mts";
 
 const BRAIN_ID = "seller-stress-swfl";
 
 // ── Weights (all signals are NEGATIVE-ON-RISE: higher value = more stress = bearish) ──
 
-const DELISTING_WEIGHT = 0.3; // Redfin Nov 2025: delistings lead price unlock
-const PRICE_DROP_BREADTH_WEIGHT = 0.25; // Zillow MHI (2024): price cut share = primary coincident
-const CANCELLATION_WEIGHT = 0.25; // Calibrated: equal-weight with price-drop breadth as first-order proxy; no published ZIP-grain cancellation composite precedent — pending empirical tuning
-const PRICE_DROP_DEPTH_WEIGHT = 0.15; // Dallas Fed (2023): depth amplifies breadth signal but lags it
-const RELISTING_WEIGHT = 0.05; // Low-information at ZIP grain
+// Exported so the test can assert on the SHIPPING weights (not hardcoded literals).
+export const DELISTING_WEIGHT = 0.3; // Redfin Nov 2025: delistings lead price unlock
+export const PRICE_DROP_BREADTH_WEIGHT = 0.25; // Zillow MHI (2024): price cut share = primary coincident
+export const CANCELLATION_WEIGHT = 0.25; // Calibrated: equal-weight with price-drop breadth as first-order proxy; no published ZIP-grain cancellation composite precedent — pending empirical tuning
+export const PRICE_DROP_DEPTH_WEIGHT = 0.15; // Dallas Fed (2023): depth amplifies breadth signal but lags it
+export const RELISTING_WEIGHT = 0.05; // Low-information at ZIP grain
 
 const BASELINE_START = "2019-01-01"; // Pre-COVID, pre-rate-shock equilibrium
 const BASELINE_END = "2021-12-31"; // Fed rate shock (Mar 2022) + Ian (Sept 2022) excluded
 
 const N_BASELINE_MIN = 18; // Min monthly observations in baseline window to compute a score
 const N_TRAILING_MIN = 3; // Min recent periods required to compute a current reading
+
+// Judgment floor, NOT a derived value (calibration, pending empirical tuning — same status as
+// CANCELLATION_WEIGHT). Require >= 3 of the 5 signals present at the latest period so a
+// published composite reflects multiple independent signals. Below 3, renormalization would
+// stretch one or two metrics (incl. the low-information relisting share) across the full
+// 0–100 range and print a lone-signal score that isn't interpretable at ZIP grain. Set to 3,
+// not 2 (too thin — could publish on one informative signal + relisting noise) and not 4
+// (would suppress the ~9 live ZIPs that drop a single signal in a given monthly vintage).
+const MIN_SIGNALS_AT_LATEST = 3;
 
 const SCORE_FLOOR_SIGMA = -2.0; // raw composite <= this → score 0
 const SCORE_CEIL_SIGMA = 2.0; // raw composite >= this → score 100
@@ -178,8 +189,13 @@ function sellerStressCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
 
     // Split baseline vs trailing
     const baselinePeriods = periods.filter((p) => p >= BASELINE_START && p <= BASELINE_END);
-    // Trailing: recent periods (up to last 12 months from latest)
-    const trailingCutoff = latestPeriod.slice(0, 4) + "-01-01"; // start of latest year - 1
+    // Trailing: the 12 months ending at (and including) the latest period — a true rolling
+    // window via the tested dates.mts util. The old `latestPeriod.slice(0,4)+"-01-01"` was
+    // calendar-YTD, which silently starved the N_TRAILING_MIN guard every Jan–Mar (≤2 in-year
+    // periods → every ZIP suppressed → brain flips to neutral with NO error thrown).
+    const trailingCutoff = isoDate(
+      subtractMonthsUtc(new Date(`${latestPeriod}T00:00:00.000Z`), 11),
+    );
     const recentPeriods = periods.filter((p) => p >= trailingCutoff);
 
     // Baseline guard runs first: a ZIP with no usable baseline is suppressed regardless of trailing data
@@ -190,7 +206,11 @@ function sellerStressCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
     const statsDepth = computeStats(baselineRows.map((r) => r.avg_price_drop_pct));
     const statsRelisting = computeStats(baselineRows.map((r) => r.share_relisted_pct));
 
-    // At least 2 of the 5 signals must have >= N_BASELINE_MIN observations
+    // DEVIATION FROM SPEC (documented): the spec suppressed a ZIP unless it had
+    // N_BASELINE_MIN observations outright. Instead we require >= 2 of the 5 signals to each
+    // carry a usable baseline (>= N_BASELINE_MIN obs). This is only a cheap early filter —
+    // the binding constraint is MIN_SIGNALS_AT_LATEST below, which requires >= 3
+    // baseline-backed signals to actually be present at the latest period before scoring.
     const validBaseline = [
       statsDelisting,
       statsBreadth,
@@ -237,7 +257,8 @@ function sellerStressCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
     const zDepth = zScore(latestRow.avg_price_drop_pct, statsDepth);
     const zRelisting = zScore(latestRow.share_relisted_pct, statsRelisting);
 
-    // Weighted composite — renormalize weights when signals are missing
+    // Weighted composite. A signal is "present" only when it has both a latest value AND a
+    // usable baseline (zScore returns null otherwise).
     const weightedTerms: Array<[number | null, number]> = [
       [zDelisting, DELISTING_WEIGHT],
       [zBreadth, PRICE_DROP_BREADTH_WEIGHT],
@@ -245,15 +266,12 @@ function sellerStressCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
       [zDepth, PRICE_DROP_DEPTH_WEIGHT],
       [zRelisting, RELISTING_WEIGHT],
     ];
-    let rawComposite = 0;
-    let totalWeight = 0;
-    for (const [z, w] of weightedTerms) {
-      if (z !== null) {
-        rawComposite += z * w;
-        totalWeight += w;
-      }
-    }
-    if (totalWeight === 0) {
+    // CAP (documented decision): require >= MIN_SIGNALS_AT_LATEST present signals before
+    // publishing a composite. Without it a ZIP carrying a single signal would have that lone
+    // z-score renormalized across the full 0–100 range and printed as a confident score — an
+    // ungrounded claim. Below the floor we suppress, exactly like the baseline guard.
+    const presentSignals = weightedTerms.filter(([z]) => z !== null).length;
+    if (presentSignals < MIN_SIGNALS_AT_LATEST) {
       suppressedZips.push({
         zip_code: zip,
         baseline_suppressed: false,
@@ -262,7 +280,17 @@ function sellerStressCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
       });
       continue;
     }
-    // Renormalize if some signals were missing
+    let rawComposite = 0;
+    let totalWeight = 0;
+    for (const [z, w] of weightedTerms) {
+      if (z !== null) {
+        rawComposite += z * w;
+        totalWeight += w;
+      }
+    }
+    // Renormalize over the present weights so a ZIP missing 1–2 signals lands on the same
+    // 0–100 scale. Bounded by the cap above (>= 3 signals always contribute), so no single
+    // metric can dominate the composite. totalWeight is guaranteed > 0 by the cap.
     if (totalWeight < 1.0) rawComposite = rawComposite / totalWeight;
 
     const score = rawCompositeToScore(rawComposite);

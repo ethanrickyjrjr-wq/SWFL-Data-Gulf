@@ -4,26 +4,17 @@ import type { RawFragment } from "../types/fragment.mts";
 
 process.env["REFINERY_SOURCE"] = "fixture";
 
-// Weight constants must be imported after env is set
+// Real imports of the pack's EXPORTED weight constants — assert on the shipping values, not
+// on hardcoded literals. The old version discarded the module and returned its own numbers,
+// so a weight change in the pack could never fail the "weights sum to 1.00" test.
 const {
+  sellerStressSwfl,
   DELISTING_WEIGHT,
   PRICE_DROP_BREADTH_WEIGHT,
   CANCELLATION_WEIGHT,
   PRICE_DROP_DEPTH_WEIGHT,
   RELISTING_WEIGHT,
-} = await import("./seller-stress-swfl.mts").then((_m) => {
-  // Access named exports — constants are module-level
-  // We test them through the pack directly; weight sum is an arithmetic assertion
-  return {
-    DELISTING_WEIGHT: 0.3,
-    PRICE_DROP_BREADTH_WEIGHT: 0.25,
-    CANCELLATION_WEIGHT: 0.25,
-    PRICE_DROP_DEPTH_WEIGHT: 0.15,
-    RELISTING_WEIGHT: 0.05,
-  };
-});
-
-const { sellerStressSwfl } = await import("./seller-stress-swfl.mts");
+} = await import("./seller-stress-swfl.mts");
 const { stressDropsSource } = await import("../sources/stress-price-drops-source.mts");
 const { stressCancSource } = await import("../sources/stress-cancellations-source.mts");
 const { stressDelistSource } = await import("../sources/stress-delistings-source.mts");
@@ -127,6 +118,78 @@ describe("seller-stress-swfl outputProducer", () => {
     assert.ok(
       slugs.includes("seller_stress_score_swfl"),
       `missing seller_stress_score_swfl; got: ${slugs.join(", ")}`,
+    );
+  });
+});
+
+describe("seller-stress-swfl rolling-12 trailing window (regression: early-year must not blank)", () => {
+  function monthsBetween(start: string, end: string): string[] {
+    const out: string[] = [];
+    let [y, m] = start.split("-").map(Number);
+    const [ey, em] = end.split("-").map(Number);
+    while (y < ey || (y === ey && m <= em)) {
+      out.push(`${y}-${String(m).padStart(2, "0")}-01`);
+      m += 1;
+      if (m > 12) {
+        m = 1;
+        y += 1;
+      }
+    }
+    return out;
+  }
+
+  function syntheticZip(zip: string, periods: string[]): RawFragment[] {
+    const frags: RawFragment[] = [];
+    for (const p of periods) {
+      const base = { source_trust_tier: 3, fetched_at: "2026-02-15T00:00:00.000Z", raw: {} };
+      frags.push({
+        fragment_id: `drops|${zip}|${p}`,
+        source_id: "redfin_price_drops_swfl",
+        ...base,
+        normalized: {
+          zip_code: zip,
+          period_begin: p,
+          pct_active_with_drops: 40,
+          avg_price_drop_pct: 5,
+        },
+      } as unknown as RawFragment);
+      frags.push({
+        fragment_id: `canc|${zip}|${p}`,
+        source_id: "redfin_contract_cancellations_swfl",
+        ...base,
+        normalized: { zip_code: zip, period_begin: p, cancellation_rate_pct: 15 },
+      } as unknown as RawFragment);
+      frags.push({
+        fragment_id: `delist|${zip}|${p}`,
+        source_id: "redfin_delistings_relistings_swfl",
+        ...base,
+        normalized: {
+          zip_code: zip,
+          period_begin: p,
+          share_delisted_pct: 18,
+          share_relisted_pct: 3,
+        },
+      } as unknown as RawFragment);
+    }
+    return frags;
+  }
+
+  test("a ZIP whose latest period is February is still scored (calendar-YTD bug would suppress it)", () => {
+    // 36 baseline months (2019–2021) + a trailing year ending 2026-02. Under the OLD
+    // calendar-YTD cutoff only Jan + Feb 2026 (2 periods) qualified → < N_TRAILING_MIN(3) →
+    // suppressed → brain flips to neutral. Rolling-12 spans Mar 2025..Feb 2026 (12) → scored.
+    const periods = [
+      ...monthsBetween("2019-01-01", "2021-12-01"),
+      ...monthsBetween("2025-03-01", "2026-02-01"),
+    ];
+    sellerStressSwfl.corpusSummary!(syntheticZip("99999", periods));
+    const result = sellerStressSwfl.outputProducer!({} as never);
+    const row = result.detail_tables![0].rows.find((r) => r.key === "99999");
+    assert.ok(row, "synthetic ZIP 99999 missing from detail table");
+    assert.notStrictEqual(
+      row!.cells["seller_stress_score"],
+      null,
+      "ZIP with a February latest period was suppressed — the calendar-YTD trailing-window bug is back",
     );
   });
 });

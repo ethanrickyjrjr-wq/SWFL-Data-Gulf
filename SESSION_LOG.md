@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — fix(seller-stress-swfl): rolling-12 window + signal cap + live render
+
+- **Audit follow-up to 581d707** (6 files): trailing window calendar-YTD → **rolling-12** via tested `dates.mts subtractMonthsUtc` (old `slice(0,4)+"-01-01"` silently suppressed all ZIPs each Jan–Mar → brain flipped to neutral with NO error; regression test added). `MIN_SIGNALS_AT_LATEST=3` cap (≥3 of 5 signals present at latest or suppress; bounds renormalization so a lone z-score can't hit the 0–100 extremes). Documented the ≥2-of-5 baseline guard as a deliberate deviation. Weights test made real (export+import the 5 consts — was asserting hardcoded literals). Provenance `PACK_ID housing-swfl → seller-stress-swfl` ×3 pipelines. Cadence "pending first GHA dispatch" → real first-run (9,955 rows / 126 ZIPs) ×3.
+- **Live render confirmed** (`REFINERY_SOURCE=live bun refinery/cli.mts seller-stress-swfl --target-only`): 29,865 live fragments → **bearish, SWFL median 76.6/100, 111 scored / 15 suppressed**, latest 2026-03-01. 13/13 pack tests, Gate 5 catalog 4/4, vocab `--all` clean. `brains/seller-stress-swfl.md` committed (v1).
+- Ledger: `seller_stress_brain` CLOSED (live evidence). Opened `seller_stress_ceiling_tuning` — 11 ZIPs pegged at ceiling 100 (~10% of scored); evaluate `SCORE_CEIL_SIGMA` 2.0→2.5/3.0 with distribution analysis. Display-resolution, not data-integrity; worked when there's data to make the call.
+- **Next/blocked:** brain is **standalone by decision** (not a master upstream; not in the nightly cascade → renders only via manual dispatch until promoted). NOT YET PUSHED at time of commit — awaiting operator push confirmation.
+
 ## 2026-06-14 (main) — handoff: tier-divergence chart on /charts (executable plan)
 
 - Wrote `docs/handoff/2026-06-14-tier-divergence-chart-on-charts.md` — executable plan for a future session to add the luxury–starter gap chart to `/charts`. Drop-in: the display view `data_lake.tier_divergence_pivoted` is already live (363 mo, GRANTed); single luxury-to-starter ratio line + 12-mo trend overlay (mirrors the airline panel), honest in every regime (brain reads bearish w/ K-shape=0, both tiers falling — a two-line chart would mislead). Exact files/exports/code blocks (`"ratio"` format token, `mapTierSpreadWithTrend` reusing `movingAverage`, `TIER_SPREAD_SERIES`, loader+panel) + RSC/`next build` gates. **No chart code written; chart not built.** Two-line "K" documented as an optional later enhancement (needs a view change + indexing).

@@ -79,7 +79,7 @@ pipelines:
     inventory_key_type: exact
     # Source: redfin_data_center/price_drops/monthly/all_zips.csv (333 MB plain CSV)
     # Cron: 0 17 15 * * (15th 17:00 UTC, staggered after redfin-monthly 13:00 slot)
-    # First run: pending first GHA dispatch
+    # First run: 2026-06-14 (workflow_dispatch) — 9,955 rows / 126 ZIPs ✓
 
   - name: redfin_contract_cancellations
     lane: tier-1-duckdb
@@ -89,7 +89,7 @@ pipelines:
     inventory_key_type: exact
     # Source: redfin_data_center/contract_cancellations/monthly/all_zips.csv (278 MB)
     # Cron: 0 18 15 * * (15th 18:00 UTC, staggered 1h after price-drops slot)
-    # First run: pending first GHA dispatch
+    # First run: 2026-06-14 (workflow_dispatch) — 9,955 rows / 126 ZIPs ✓
 
   - name: redfin_delistings_relistings
     lane: tier-1-duckdb
@@ -99,7 +99,7 @@ pipelines:
     inventory_key_type: exact
     # Source: redfin_data_center/delistings_relistings/monthly/all_zips.csv (328 MB)
     # Cron: 0 19 15 * * (15th 19:00 UTC, staggered 1h after cancellations slot)
-    # First run: pending first GHA dispatch
+    # First run: 2026-06-14 (workflow_dispatch) — 9,955 rows / 126 ZIPs ✓
 
   - name: hurdat2_fl
     lane: tier-1-duckdb
