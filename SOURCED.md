@@ -245,4 +245,34 @@ methodology (peersense.com/industry-data, methodology page, verified 2026-06-14)
 `borrcity + projectcounty` via `ingest.utils.zip_approx.get_zip_approx()` (Census Geocoder →
 nearest ZCTA centroid). `zip_is_approx` is always `True`; these cells go to `detail_tables`
 only and are never used to compute county-level direction signals.
-and surfaced in the fixture's `discrepancies[]`.
+
+At 453 total rows across ~26 years, most brand×ZIP cells will have far fewer than 3 resolved loans
+(453 rows ÷ ~50 active brands ÷ ~15 distinct borrower cities ≈ <1 loan per brand/city). The
+original Firecrawl-era estimate of "15-25 loans per high-volume ZIP over 25 years" was a projection
+for a dense national dataset, not the SWFL-filtered slice. In practice, N_MIN_RESOLVED=3 will
+suppress the vast majority of ZIP-approx cells. This is acceptable: the ZIP Parquet is
+supplemental detail-layer only; the county Parquet drives all direction signals.
+
+**Graduation threshold (operational gate, not a scoring constant):**
+`franchise_foia_first_run` check uses "≥50 brands in Parquet" as the flip-to-live gate. Rationale:
+the fixture has 15 synthetic brands; at ≥50 real brands the county Parquet is demonstrably broader
+than the fixture and worth switching. This is an operational sanity check, not a mathematical
+threshold — it does not affect scoring, confidence, or ranking. No citation required.
+
+**Polarity table (for direction-vote build, Phase 2, see concern #5):**
+| metric              | direction vote        | notes                                                  |
+|---------------------|-----------------------|--------------------------------------------------------|
+| `survival_rate`     | rising = **bullish**  | PIF/(PIF+CHGOFF); YoY comparison drives the vote       |
+| `chargeoff_rate`    | rising = **bearish**  | CHGOFF/(PIF+CHGOFF); inverse of survival_rate          |
+| `n_loans`           | volume only, no vote  | total loans including active/delinquent                |
+| `total_gross_approval` | volume only, no vote | avg_loan_size useful for context, not polarity        |
+Both rates are over **resolved loans only** (PeerSense methodology). Do not compute rates over all
+loans including active/delinquent — that dilutes toward neutral as cohort ages and is not
+comparable across brands with different loan-age profiles.
+
+**ZIP citation deferred (TODO):**
+If the ZIP-approx Parquet is ever surfaced in a `detail_tables` consumer, the citation source
+string MUST carry the `zip_is_approx=True` signal — e.g.
+`"SBA 7(a) FOIA — franchise loan outcomes, ZIP-approx (borrower city → nearest ZCTA centroid; NOT project ZIP)"`.
+The franchise-source.mts live path reads only the county Parquet; the ZIP citation is wired when a
+consumer is built (see TODO comment in franchise-source.mts).

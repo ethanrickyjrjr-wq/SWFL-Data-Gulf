@@ -174,7 +174,16 @@ export async function fetch(): Promise<RawFragment[]> {
   return rowsToFragments(await loadFixtureRows());
 }
 
-/** Citation metadata for this source. Stage 4 assigns the citation `id` (s01...). */
+/**
+ * Citation metadata for this source. Stage 4 assigns the citation `id` (s01...).
+ *
+ * County-grain live citation: states "county-grain Parquet" — this connector reads
+ * only sba_foia_franchise_county.parquet. The ZIP-approx Parquet (franchise_zip_approx)
+ * is not yet consumed by this connector. TODO: when a ZIP-approx detail_tables consumer
+ * is added, its citation source string MUST carry "ZIP-approx (borrower city → nearest
+ * ZCTA centroid; NOT project ZIP)" so zip_is_approx=True is legible to downstream callers.
+ * See SOURCED.md#sba-foia-franchise-row-counts → "ZIP citation deferred".
+ */
 export function citationMeta(verifiedDate: string, ttlSeconds: number): Omit<CitationRow, "id"> {
   const isLive = process.env["REFINERY_FRANCHISE_SOURCE"] === "live";
   return {

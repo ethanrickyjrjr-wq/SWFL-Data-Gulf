@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — fix(franchise-outcomes): post-commit verification fixes (5 concerns)
+
+- **SOURCED.md#sba-foia-franchise-row-counts**: removed stray sentence; added ZIP density correction (453 rows ÷ ~50 brands ÷ ~15 cities → most ZIP cells suppressed by N_MIN_RESOLVED=3, acceptable because ZIP is detail-layer only); added graduation threshold justification (≥50 brands = operational gate, not scoring constant); added polarity table (survival_rate↑=bullish, chargeoff_rate↑=bearish, n_loans/avg_loan=volume only, rates over resolved loans only); added ZIP citation deferred note.
+- **franchise-source.mts**: citationMeta now carries TODO comment for when ZIP-approx consumer is built, pointing to SOURCED.md.
+- **Check detail updated**: `franchise_foia_first_run` detail now explains ≥50 brands gate rationale.
+- Gate 5 catalog: 4/4 pass. No direction vote changes (Phase 2, deferred).
+
 ## 2026-06-14 (main) — feat(franchise-outcomes): SBA FOIA DuckDB pipeline + fixture swap gate
 
 - **SBA FOIA Tier-1 pipeline built** (`ingest/duckdb_pipelines/franchise_outcomes/`): downloads 3 CSVs (FY2000-2009 / 2010-2019 / 2020-present), DuckDB filters to 453 Lee+Collier franchise rows, enriches with `get_zip_approx()`, writes county-grain + ZIP-approx Parquets to `s3://lake-tier1/franchise/`. Row counts cited in `SOURCED.md#sba-foia-franchise-row-counts`. `N_MIN_RESOLVED=3` sourced from pack logic + PeerSense methodology. GHA cron: `franchise-outcomes-quarterly.yml` (15th Jan/Apr/Jul/Oct 08:00 UTC). Pipeline added to `cadence_registry.yaml:not_yet_running:` (probe-excluded until first run).
