@@ -21,7 +21,7 @@ on:
       - "Collier County permits monthly"
       - "Corridor pulse weekly"
       - "Daily Brain Rebuild"
-      - "FAF5 Tier 2 annual"
+      - "FAF5 freight annual (S3 parquet cold lane)"
       - "FDOT AADT annual"
       - "FEMA NFIP quarterly"
       - "FHFA HPI quarterly"

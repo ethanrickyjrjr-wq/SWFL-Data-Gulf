@@ -96,8 +96,22 @@ function recordFailure() {
   gitCommitAndPush(`docs(cron-failures): log ${workflowName} failure [skip ci]`, () =>
     insertRow(row),
   );
-  if (issueNumber) postComment(buildFailureBody(logTail));
-  openIncidentIssue(logTail, cls, suggestedAction);
+  // The ledger row (the durable record) is already committed above. The issue
+  // feed below is cosmetic relative to that — a transient GitHub API 5xx on the
+  // comment/issue calls must NOT redden the logger or abort before
+  // openIncidentIssue. (A 504 on `gh issue comment` did exactly that 2026-06-14.)
+  if (issueNumber) {
+    try {
+      postComment(buildFailureBody(logTail));
+    } catch (e) {
+      log(`WARN: postComment failed (non-fatal; ledger row already committed): ${e.message}`);
+    }
+  }
+  try {
+    openIncidentIssue(logTail, cls, suggestedAction);
+  } catch (e) {
+    log(`WARN: openIncidentIssue failed (non-fatal): ${e.message}`);
+  }
 }
 
 function maybeResolve() {
