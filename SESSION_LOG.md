@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — fix(zip-report): remove $39/$79 paywall CTA → free email capture
+
+- Per operator ("no one pays per-ZIP"): removed the bottom "$39 one-time / $79/mo · Order this report" mailto CTA from `app/r/zip-report/[zip]/page.tsx` (the only place it lived) and replaced it with the existing `<DigestSubscribe source="zip-report" />` free email capture (same component already on every `/r/[slug]`). ESLint clean; mirrors the known-good `/r/[slug]` usage.
+- Ledger: `paid_path_wtp` detail updated — per-ZIP micro-pay is dead; the paid path is the bearer gate (`app/api/mcp/auth.ts`) + a higher-value surface, NOT a per-ZIP page. Build-queue marked done (`/ops` auto-syncs within 5 min).
+
 ## 2026-06-14 (main) — log: franchise-outcomes ops sync + build-queue entry
 
 - `build-queue.md`: `[~] franchise-outcomes real data` entry added (pipeline BUILT, awaiting first quarterly cron run to flip `REFINERY_FRANCHISE_SOURCE=live`).

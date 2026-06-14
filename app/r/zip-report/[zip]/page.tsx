@@ -27,6 +27,7 @@ import {
 } from "../../_components/location-ui";
 import { SourcesAccordion } from "../../_components/sources-accordion";
 import type { SourceEntry } from "../../_components/sources-accordion";
+import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -88,8 +89,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const housingTable = housing?.output.detail_tables?.find((t) => t.id === "housing_by_zip");
   const housingRow = housingTable?.rows.find((r) => r.key === zip);
-  const housingSourceUrl = housingTable?.source.url ?? "";
-  const housingSourceCitation = housingTable?.source.citation ?? "";
 
   const price = housingRow?.cells["median_sale_price"] as number | undefined;
   const priceYoy = housingRow?.cells["median_sale_price_yoy_pct"] as number | null | undefined;
@@ -295,25 +294,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       {/* ── Sources accordion (collapsed by default) ────────────────────── */}
       <SourcesAccordion sources={sources} />
 
-      {/* ── CTA ─────────────────────────────────────────────────────────── */}
-      <div className="mt-10 rounded-xl glass-card-modern border border-white/10 px-6 py-6">
-        <p className="text-center text-sm font-medium text-white">Get this for any SWFL ZIP</p>
-        <div className="mt-3 flex flex-wrap justify-center gap-6 text-sm text-gray-300">
-          <span>
-            One-time report <span className="font-semibold text-white">$39</span>
-          </span>
-          <span>
-            Weekly updates <span className="font-semibold text-white">$79/mo</span>
-          </span>
-        </div>
-        <div className="mt-4 flex justify-center">
-          <a
-            href={`mailto:support@swfldatagulf.com?subject=ZIP%20Report%20${zip}`}
-            className="btn-gradient inline-flex items-center rounded-lg px-6 py-2.5 text-sm font-semibold text-navy-dark transition-all hover:opacity-90"
-          >
-            Order this report
-          </a>
-        </div>
+      {/* ── Free digest capture (replaces the old $39/$79 paid CTA) ─────── */}
+      <div className="mt-10">
+        <DigestSubscribe source="zip-report" />
       </div>
 
       <ColorLegend />
