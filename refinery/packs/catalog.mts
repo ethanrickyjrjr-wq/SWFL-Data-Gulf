@@ -179,7 +179,7 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     id: "rsw-airport",
     domain: "hospitality",
     scope:
-      "Southwest Florida airport passenger demand — RSW (Southwest Florida International, Fort Myers/Cape Coral) and PGD (Punta Gorda) monthly enplanements from Lee County Port Authority",
+      "Southwest Florida airport throughput — RSW (Southwest Florida International, Fort Myers / Cape Coral) monthly total passengers, arrivals (deplanements), departures (enplanements), aircraft operations, and air freight from the Lee County Port Authority. Direction tracks the trailing-12-month total-passengers YoY.",
     ttl_seconds: 86400 * 30,
   },
   {

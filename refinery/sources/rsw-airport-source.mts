@@ -16,14 +16,18 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
  *
  * Columns read:
  *   report_month      date   -- first day of reporting month
- *   airport_code      text   -- "RSW" | "PGD"
+ *   airport_code      text   -- "RSW" (RSW-only; PGD is a separate airport with no LCPA source)
  *   metric            text   -- "enplanements" | "deplanements" | "total_passengers" | "aircraft_operations" | "total_freight_lbs"
  *   value             bigint -- monthly count
- *   yoy_pct_change    numeric -- YoY % change (null = prior-year row absent)
+ *   yoy_pct_change    numeric -- YoY % change (sparse: pipeline back-fills recent months only; pack computes YoY from value)
  *   period_label      text   -- "March 2026"
  *   source_url        text   -- LCPA statistics page URL
  *
- * Window: last 15 months — covers trailing 12-month sum + 3 months context.
+ * Window: last 30 months — the trailing-12 total_passengers YoY direction signal needs
+ * two non-overlapping 12-month windows (24 months of DATA). LCPA publishes with a ~2–3
+ * month lag, so a 30-month wall-clock window yields ~27 months of actual data — comfortably
+ * above the 24-month floor. A shorter window leaves the prior-year window half-empty as the
+ * lag grows → YoY null → direction stuck neutral.
  *
  * Trust tier: 1 (Lee County Port Authority — primary airport operator source).
  */
@@ -43,9 +47,9 @@ export interface RswAirportNormalized {
   kind: "rsw-airport-row";
   /** "YYYY-MM" — month grain. */
   report_month: string;
-  /** "RSW" | "PGD" */
+  /** "RSW" — PGD has no LCPA source; the pack filters to RSW. */
   airport_code: string;
-  /** "enplanements" | "total_passengers" | "aircraft_operations" | "cargo_lbs" */
+  /** "enplanements" | "deplanements" | "total_passengers" | "aircraft_operations" | "total_freight_lbs" */
   metric: string;
   value: number | null;
   /** YoY percentage change; null when prior-year row was absent. */
@@ -100,7 +104,7 @@ async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
 async function fetchRows(): Promise<Record<string, unknown>[]> {
   if (env.source === "fixture") return loadFixtureRows();
   const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 15);
+  cutoff.setMonth(cutoff.getMonth() - 30);
   const cutoffDate = cutoff.toISOString().slice(0, 10);
   const { data, error } = await getSupabase()
     .from(TABLE)

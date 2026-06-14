@@ -1,144 +1,1315 @@
 {
   "__meta": {
-    "source": "Synthetic fixture mirroring rsw_airport_monthly schema — RSW + PGD, 3 report months",
-    "verified": "2026-05-30",
-    "note": "Replace by querying live table in non-fixture mode. Values are representative of RSW monthly enplanements (LCPA public data)."
+    "source": "Real LCPA data pulled from public.rsw_airport_monthly (RSW only) \u2014 all 5 metrics, last 29 months",
+    "verified": "2026-06-13",
+    "note": "RSW 2023-12-01..2026-04-01, 5 metrics (enplanements, deplanements, total_passengers, aircraft_operations, total_freight_lbs). >=24 months so trailing-12 total_passengers YoY is computable. Regenerate via the same SELECT.",
+    "row_count": 145
   },
   "rows": [
     {
-      "report_month": "2026-03-01",
+      "report_month": "2023-12-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 432456,
-      "yoy_pct_change": 3.2,
-      "period_label": "March 2026",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "aircraft_operations",
+      "value": 9873,
+      "yoy_pct_change": null,
+      "period_label": "December 2023",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
     },
     {
-      "report_month": "2026-02-01",
+      "report_month": "2023-12-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 445123,
-      "yoy_pct_change": 3.4,
-      "period_label": "February 2026",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "deplanements",
+      "value": 567439,
+      "yoy_pct_change": null,
+      "period_label": "December 2023",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
     },
     {
-      "report_month": "2026-01-01",
+      "report_month": "2023-12-01",
       "airport_code": "RSW",
       "metric": "enplanements",
-      "value": 389234,
-      "yoy_pct_change": 1.9,
-      "period_label": "January 2026",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "value": 527344,
+      "yoy_pct_change": null,
+      "period_label": "December 2023",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
     },
     {
-      "report_month": "2025-12-01",
+      "report_month": "2023-12-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 412876,
-      "yoy_pct_change": 2.7,
-      "period_label": "December 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "total_freight_lbs",
+      "value": 3789438,
+      "yoy_pct_change": null,
+      "period_label": "December 2023",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
     },
     {
-      "report_month": "2025-11-01",
+      "report_month": "2023-12-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 378210,
-      "yoy_pct_change": -0.8,
-      "period_label": "November 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "total_passengers",
+      "value": 1094793,
+      "yoy_pct_change": null,
+      "period_label": "December 2023",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
     },
     {
-      "report_month": "2025-10-01",
+      "report_month": "2024-01-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 312540,
-      "yoy_pct_change": 4.1,
-      "period_label": "October 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "aircraft_operations",
+      "value": 10082,
+      "yoy_pct_change": null,
+      "period_label": "January 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
     },
     {
-      "report_month": "2025-09-01",
+      "report_month": "2024-01-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 195430,
-      "yoy_pct_change": 1.2,
-      "period_label": "September 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "deplanements",
+      "value": 542929,
+      "yoy_pct_change": null,
+      "period_label": "January 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
     },
     {
-      "report_month": "2025-08-01",
+      "report_month": "2024-01-01",
       "airport_code": "RSW",
       "metric": "enplanements",
-      "value": 218760,
-      "yoy_pct_change": 2.5,
-      "period_label": "August 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "value": 565261,
+      "yoy_pct_change": null,
+      "period_label": "January 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
     },
     {
-      "report_month": "2025-07-01",
+      "report_month": "2024-01-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 302180,
-      "yoy_pct_change": 3.8,
-      "period_label": "July 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "total_freight_lbs",
+      "value": 3168767,
+      "yoy_pct_change": null,
+      "period_label": "January 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
     },
     {
-      "report_month": "2025-06-01",
+      "report_month": "2024-01-01",
       "airport_code": "RSW",
-      "metric": "enplanements",
-      "value": 285920,
-      "yoy_pct_change": -1.3,
-      "period_label": "June 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "metric": "total_passengers",
+      "value": 1108190,
+      "yoy_pct_change": null,
+      "period_label": "January 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
     },
     {
-      "report_month": "2025-05-01",
+      "report_month": "2024-02-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10362,
+      "yoy_pct_change": null,
+      "period_label": "February 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-02-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 628786,
+      "yoy_pct_change": null,
+      "period_label": "February 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-02-01",
       "airport_code": "RSW",
       "metric": "enplanements",
-      "value": 298340,
-      "yoy_pct_change": 2.1,
-      "period_label": "May 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "value": 594975,
+      "yoy_pct_change": null,
+      "period_label": "February 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-02-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3216606,
+      "yoy_pct_change": null,
+      "period_label": "February 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-02-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1223761,
+      "yoy_pct_change": null,
+      "period_label": "February 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-03-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 11621,
+      "yoy_pct_change": null,
+      "period_label": "March 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-03-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 759836,
+      "yoy_pct_change": null,
+      "period_label": "March 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-03-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 749941,
+      "yoy_pct_change": null,
+      "period_label": "March 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-03-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3196605,
+      "yoy_pct_change": null,
+      "period_label": "March 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-03-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1509777,
+      "yoy_pct_change": null,
+      "period_label": "March 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-04-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 9336,
+      "yoy_pct_change": null,
+      "period_label": "April 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-04-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 514166,
+      "yoy_pct_change": null,
+      "period_label": "April 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-04-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 619090,
+      "yoy_pct_change": null,
+      "period_label": "April 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-04-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2975102,
+      "yoy_pct_change": null,
+      "period_label": "April 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-04-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1133256,
+      "yoy_pct_change": null,
+      "period_label": "April 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-05-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 6945,
+      "yoy_pct_change": null,
+      "period_label": "May 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-05-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 401868,
+      "yoy_pct_change": null,
+      "period_label": "May 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-05-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 441402,
+      "yoy_pct_change": null,
+      "period_label": "May 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-05-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3263989,
+      "yoy_pct_change": null,
+      "period_label": "May 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-05-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 843270,
+      "yoy_pct_change": null,
+      "period_label": "May 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-06-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 5468,
+      "yoy_pct_change": null,
+      "period_label": "June 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-06-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 343614,
+      "yoy_pct_change": null,
+      "period_label": "June 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-06-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 353253,
+      "yoy_pct_change": null,
+      "period_label": "June 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-06-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2930249,
+      "yoy_pct_change": null,
+      "period_label": "June 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-06-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 696867,
+      "yoy_pct_change": null,
+      "period_label": "June 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-07-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 5688,
+      "yoy_pct_change": null,
+      "period_label": "July 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-07-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 336069,
+      "yoy_pct_change": null,
+      "period_label": "July 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-07-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 341068,
+      "yoy_pct_change": null,
+      "period_label": "July 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-07-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2766888,
+      "yoy_pct_change": null,
+      "period_label": "July 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-07-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 677137,
+      "yoy_pct_change": null,
+      "period_label": "July 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-08-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 5423,
+      "yoy_pct_change": null,
+      "period_label": "August 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-08-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 303982,
+      "yoy_pct_change": null,
+      "period_label": "August 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-08-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 310549,
+      "yoy_pct_change": null,
+      "period_label": "August 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-08-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3081356,
+      "yoy_pct_change": null,
+      "period_label": "August 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-08-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 614531,
+      "yoy_pct_change": null,
+      "period_label": "August 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-09-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 5597,
+      "yoy_pct_change": null,
+      "period_label": "September 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-09-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 264625,
+      "yoy_pct_change": null,
+      "period_label": "September 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-09-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 258379,
+      "yoy_pct_change": null,
+      "period_label": "September 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-09-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2712941,
+      "yoy_pct_change": null,
+      "period_label": "September 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-09-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 523004,
+      "yoy_pct_change": null,
+      "period_label": "September 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-10-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 7529,
+      "yoy_pct_change": null,
+      "period_label": "October 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-10-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 356316,
+      "yoy_pct_change": null,
+      "period_label": "October 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-10-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 301172,
+      "yoy_pct_change": null,
+      "period_label": "October 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-10-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3212114,
+      "yoy_pct_change": null,
+      "period_label": "October 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-10-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 657488,
+      "yoy_pct_change": null,
+      "period_label": "October 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-11-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 8664,
+      "yoy_pct_change": null,
+      "period_label": "November 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-11-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 463688,
+      "yoy_pct_change": null,
+      "period_label": "November 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-11-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 455420,
+      "yoy_pct_change": null,
+      "period_label": "November 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-11-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3460921,
+      "yoy_pct_change": null,
+      "period_label": "November 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-11-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 919108,
+      "yoy_pct_change": null,
+      "period_label": "November 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2024-12-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10362,
+      "yoy_pct_change": null,
+      "period_label": "December 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2024-12-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 596290,
+      "yoy_pct_change": null,
+      "period_label": "December 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2024-12-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 525503,
+      "yoy_pct_change": null,
+      "period_label": "December 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2024-12-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3681606,
+      "yoy_pct_change": null,
+      "period_label": "December 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2024-12-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1121793,
+      "yoy_pct_change": null,
+      "period_label": "December 2024",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-01-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10312,
+      "yoy_pct_change": null,
+      "period_label": "January 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-01-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 526231,
+      "yoy_pct_change": null,
+      "period_label": "January 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-01-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 541563,
+      "yoy_pct_change": null,
+      "period_label": "January 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-01-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3186045,
+      "yoy_pct_change": null,
+      "period_label": "January 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-01-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1067794,
+      "yoy_pct_change": null,
+      "period_label": "January 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-02-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10221,
+      "yoy_pct_change": null,
+      "period_label": "February 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-02-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 601672,
+      "yoy_pct_change": null,
+      "period_label": "February 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-02-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 571966,
+      "yoy_pct_change": null,
+      "period_label": "February 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-02-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3070547,
+      "yoy_pct_change": null,
+      "period_label": "February 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-02-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1173638,
+      "yoy_pct_change": null,
+      "period_label": "February 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-03-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 12010,
+      "yoy_pct_change": null,
+      "period_label": "March 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-03-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 722642,
+      "yoy_pct_change": null,
+      "period_label": "March 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-03-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 740986,
+      "yoy_pct_change": null,
+      "period_label": "March 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-03-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2971460,
+      "yoy_pct_change": null,
+      "period_label": "March 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-03-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1463628,
+      "yoy_pct_change": null,
+      "period_label": "March 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-04-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10215,
+      "yoy_pct_change": null,
+      "period_label": "April 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-04-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 549572,
+      "yoy_pct_change": null,
+      "period_label": "April 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
     },
     {
       "report_month": "2025-04-01",
       "airport_code": "RSW",
       "metric": "enplanements",
-      "value": 410820,
-      "yoy_pct_change": 1.5,
+      "value": 629408,
+      "yoy_pct_change": null,
       "period_label": "April 2025",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
     },
     {
-      "report_month": "2026-03-01",
-      "airport_code": "PGD",
-      "metric": "enplanements",
-      "value": 38240,
-      "yoy_pct_change": 5.6,
-      "period_label": "March 2026",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "report_month": "2025-04-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2944379,
+      "yoy_pct_change": null,
+      "period_label": "April 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
     },
     {
-      "report_month": "2026-02-01",
-      "airport_code": "PGD",
+      "report_month": "2025-04-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1178980,
+      "yoy_pct_change": null,
+      "period_label": "April 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-05-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 7648,
+      "yoy_pct_change": 10.12,
+      "period_label": "May 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-05-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 389793,
+      "yoy_pct_change": -3.0,
+      "period_label": "May 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-05-01",
+      "airport_code": "RSW",
       "metric": "enplanements",
-      "value": 41520,
-      "yoy_pct_change": 6.2,
-      "period_label": "February 2026",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "value": 445069,
+      "yoy_pct_change": 0.83,
+      "period_label": "May 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-05-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3128215,
+      "yoy_pct_change": -4.16,
+      "period_label": "May 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-05-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 834862,
+      "yoy_pct_change": -1.0,
+      "period_label": "May 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-06-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 5972,
+      "yoy_pct_change": 9.22,
+      "period_label": "June 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-06-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 345133,
+      "yoy_pct_change": 0.44,
+      "period_label": "June 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-06-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 353440,
+      "yoy_pct_change": 0.05,
+      "period_label": "June 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-06-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2755782,
+      "yoy_pct_change": -5.95,
+      "period_label": "June 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-06-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 698573,
+      "yoy_pct_change": 0.24,
+      "period_label": "June 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-07-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 6353,
+      "yoy_pct_change": 11.69,
+      "period_label": "July 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-07-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 359761,
+      "yoy_pct_change": 7.05,
+      "period_label": "July 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-07-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 361212,
+      "yoy_pct_change": 5.91,
+      "period_label": "July 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-07-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3091487,
+      "yoy_pct_change": 11.73,
+      "period_label": "July 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-07-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 720973,
+      "yoy_pct_change": 6.47,
+      "period_label": "July 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-08-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 6013,
+      "yoy_pct_change": 10.88,
+      "period_label": "August 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-08-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 319590,
+      "yoy_pct_change": 5.13,
+      "period_label": "August 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-08-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 328327,
+      "yoy_pct_change": 5.72,
+      "period_label": "August 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-08-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3060037,
+      "yoy_pct_change": -0.69,
+      "period_label": "August 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-08-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 647917,
+      "yoy_pct_change": 5.43,
+      "period_label": "August 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-09-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 5342,
+      "yoy_pct_change": -4.56,
+      "period_label": "September 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-09-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 277820,
+      "yoy_pct_change": 4.99,
+      "period_label": "September 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-09-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 272439,
+      "yoy_pct_change": 5.44,
+      "period_label": "September 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-09-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 2941140,
+      "yoy_pct_change": 8.41,
+      "period_label": "September 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-09-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 550259,
+      "yoy_pct_change": 5.21,
+      "period_label": "September 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-10-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 7230,
+      "yoy_pct_change": -3.97,
+      "period_label": "October 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-10-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 413639,
+      "yoy_pct_change": 16.09,
+      "period_label": "October 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-10-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 361050,
+      "yoy_pct_change": 19.88,
+      "period_label": "October 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-10-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3360439,
+      "yoy_pct_change": 4.62,
+      "period_label": "October 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-10-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 774689,
+      "yoy_pct_change": 17.83,
+      "period_label": "October 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-11-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 8533,
+      "yoy_pct_change": -1.51,
+      "period_label": "November 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-11-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 475420,
+      "yoy_pct_change": 2.53,
+      "period_label": "November 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-11-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 465269,
+      "yoy_pct_change": 2.16,
+      "period_label": "November 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-11-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3094220,
+      "yoy_pct_change": -10.6,
+      "period_label": "November 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-11-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 940689,
+      "yoy_pct_change": 2.35,
+      "period_label": "November 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2025-12-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10109,
+      "yoy_pct_change": -2.44,
+      "period_label": "December 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2025-12-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 586707,
+      "yoy_pct_change": -1.61,
+      "period_label": "December 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2025-12-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 515749,
+      "yoy_pct_change": -1.86,
+      "period_label": "December 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2025-12-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3895543,
+      "yoy_pct_change": 5.81,
+      "period_label": "December 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2025-12-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1102456,
+      "yoy_pct_change": -1.72,
+      "period_label": "December 2025",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
     },
     {
       "report_month": "2026-01-01",
-      "airport_code": "PGD",
-      "metric": "enplanements",
-      "value": 35890,
-      "yoy_pct_change": 4.8,
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 9961,
+      "yoy_pct_change": -3.4,
       "period_label": "January 2026",
-      "source_url": "https://www.flylcpa.com/about/statistics"
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2026-01-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 524451,
+      "yoy_pct_change": -0.34,
+      "period_label": "January 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2026-01-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 539194,
+      "yoy_pct_change": -0.44,
+      "period_label": "January 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2026-01-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3147334,
+      "yoy_pct_change": -1.22,
+      "period_label": "January 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2026-01-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1063645,
+      "yoy_pct_change": -0.39,
+      "period_label": "January 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2026-02-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10152,
+      "yoy_pct_change": -0.68,
+      "period_label": "February 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2026-02-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 614075,
+      "yoy_pct_change": 2.06,
+      "period_label": "February 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2026-02-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 575995,
+      "yoy_pct_change": 0.7,
+      "period_label": "February 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2026-02-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3127422,
+      "yoy_pct_change": 1.85,
+      "period_label": "February 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2026-02-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1190070,
+      "yoy_pct_change": 1.4,
+      "period_label": "February 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2026-03-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 12577,
+      "yoy_pct_change": 4.72,
+      "period_label": "March 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2026-03-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 760329,
+      "yoy_pct_change": 5.22,
+      "period_label": "March 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2026-03-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 760820,
+      "yoy_pct_change": 2.68,
+      "period_label": "March 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2026-03-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3384965,
+      "yoy_pct_change": 13.92,
+      "period_label": "March 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2026-03-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1521149,
+      "yoy_pct_change": 3.93,
+      "period_label": "March 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
+    },
+    {
+      "report_month": "2026-04-01",
+      "airport_code": "RSW",
+      "metric": "aircraft_operations",
+      "value": 10797,
+      "yoy_pct_change": 5.7,
+      "period_label": "April 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf"
+    },
+    {
+      "report_month": "2026-04-01",
+      "airport_code": "RSW",
+      "metric": "deplanements",
+      "value": 512534,
+      "yoy_pct_change": -6.74,
+      "period_label": "April 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf"
+    },
+    {
+      "report_month": "2026-04-01",
+      "airport_code": "RSW",
+      "metric": "enplanements",
+      "value": 640135,
+      "yoy_pct_change": 1.7,
+      "period_label": "April 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf"
+    },
+    {
+      "report_month": "2026-04-01",
+      "airport_code": "RSW",
+      "metric": "total_freight_lbs",
+      "value": 3463896,
+      "yoy_pct_change": 17.64,
+      "period_label": "April 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf"
+    },
+    {
+      "report_month": "2026-04-01",
+      "airport_code": "RSW",
+      "metric": "total_passengers",
+      "value": 1152669,
+      "yoy_pct_change": -2.23,
+      "period_label": "April 2026",
+      "source_url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf"
     }
   ]
 }
