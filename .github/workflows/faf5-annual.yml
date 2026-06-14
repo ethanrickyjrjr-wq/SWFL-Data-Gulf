@@ -1,4 +1,4 @@
-name: FAF5 Tier 2 annual
+name: FAF5 freight annual (S3 parquet cold lane)
 
 on:
   schedule:

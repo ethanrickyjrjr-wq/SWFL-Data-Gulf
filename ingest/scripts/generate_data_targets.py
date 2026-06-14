@@ -214,7 +214,11 @@ def upsert_targets(conn, targets: list[dict], *, dry_run: bool) -> tuple[set[str
 
 def collect_targets(conn) -> list[dict]:
     registry = load_registry(Path(__file__).parent.parent / "cadence_registry.yaml")
-    probe = run_probe(conn, registry)
+    # run_probe returns (pipeline_results, view_results) — only the pipeline
+    # results carry STALE/MISSING/LOW_VOLUME status; view-liveness is the freshness
+    # probe's concern, not the shopping list. (Was passing the whole tuple →
+    # build_stale_targets iterated the tuple's two lists → 'list'.get crash.)
+    probe, _view_results = run_probe(conn, registry)
     claim_counts, slug_preds = read_claim_counts(conn)
     targets: list[dict] = []
     targets += build_stale_targets(probe)

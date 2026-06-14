@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — fix(ci): unstick Data Targets daily cron + triage all GitHub reds (FAF5 + Collier were stale)
+
+- **Data Targets (daily) — REAL bug, FIXED.** `ingest/scripts/generate_data_targets.py` passed `run_probe(conn, registry)` straight into `build_stale_targets`, but `run_probe` now returns a TUPLE `(pipeline_results, view_results)` (check_freshness.py:599 — view-liveness probe bolted on later). Iterating the tuple → `r` was a `list` → `r.get("status")` → `AttributeError: 'list' object has no attribute 'get'`, crashing the cron every run (latest 06-13 15:59). Fix: `probe, _view_results = run_probe(...)`. Verified: 7/7 unit tests green + real-DB `--dry-run` reproduces the exact path, now prints 13 targets clean (3 `redfin_*` MISSING = expected, first ingest pending).
+- **FAF5 — stale red, now GREEN + workflow renamed.** Last fail (05-26) was the PRE-rewrite dlt→Postgres path (`faf_sctg_lookup` missing); the workflow has run `faf5_to_parquet` (live S3 cold lane) since 05-29 and the dead Tier-2 modules were retired 06-13. Dry-run dispatch (run 27491047049, 45s success) cleared the red — NO Tier-2 resurrection, NO write. Renamed `faf5-annual.yml` `FAF5 Tier 2 annual` → `FAF5 freight annual (S3 parquet cold lane)` so it stops reading like the retired pipeline.
+- **Collier permits monthly — stale red, ALREADY fixed (no code change).** 06-05 failure ran pre-fix commit `6fdff57`; graceful publish-lag fallback landed `d2e73d4` (06-06) + cron shifted 5th→15th. Probed the live listing 06-14: newest issued = **April 2026** (May still NOT published), but the fixed code falls back to latest-available within 60-day tolerance → next cron (06-15) greens. Dry-run dispatch (run 27491235505) to clear the stale red now.
+- **Untouched:** the email scoped-content work (03b wire + 03a/04, operator-review-gated, atomic w/ parallel session) stays unpushed in the tree.
+
 ## 2026-06-14 (main) — 3 new Redfin Data Center pipelines wired: price_drops + contract_cancellations + delistings_relistings
 
 - **3 new Tier-1 ingest pipelines** from Redfin's new Data Center S3 prefix (`redfin_data_center/`) vs the old market tracker. All confirmed live (200 OK + SWFL ZIPs present): `price_drops` (333MB), `contract_cancellations` (278MB), `delistings_relistings` (328MB) — plain CSV, sorted metro-size descending, Cape Coral at ~100MB offset.
