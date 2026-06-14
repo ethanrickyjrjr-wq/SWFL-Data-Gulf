@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — feat(franchise-outcomes): SBA FOIA DuckDB pipeline + fixture swap gate
+
+- **SBA FOIA Tier-1 pipeline built** (`ingest/duckdb_pipelines/franchise_outcomes/`): downloads 3 CSVs (FY2000-2009 / 2010-2019 / 2020-present), DuckDB filters to 453 Lee+Collier franchise rows, enriches with `get_zip_approx()`, writes county-grain + ZIP-approx Parquets to `s3://lake-tier1/franchise/`. Row counts cited in `SOURCED.md#sba-foia-franchise-row-counts`. `N_MIN_RESOLVED=3` sourced from pack logic + PeerSense methodology. GHA cron: `franchise-outcomes-quarterly.yml` (15th Jan/Apr/Jul/Oct 08:00 UTC). Pipeline added to `cadence_registry.yaml:not_yet_running:` (probe-excluded until first run).
+- **Fixture swap gate wired** (`refinery/sources/franchise-source.mts`): `REFINERY_FRANCHISE_SOURCE=live` reads county Parquet via DuckDB (`composeQuery` + S3 creds); default `fixture` reads committed 15-brand sample. Citation branches on mode. Gate 5 catalog test: 4/4 pass.
+- **Open check**: `franchise_foia_first_run` — flip `REFINERY_FRANCHISE_SOURCE=live` + rebuild once first quarterly cron lands ≥50 brands in Parquet.
+- **Next**: `_AUDIT_AND_ROADMAP/build-queue.md` still needs franchise item; direction upgrade (survival_rate YoY comparison) is Phase 2 deferred.
+
 ## 2026-06-14 (main) — docs/plans folder reorganization + VS Code icon associations
 
 - **48 completed plans** moved to `docs/superpowers/plans/_FINISHED/` (all May + Jun 1–11 items). Active work split into `email/` and `data-pipeline/` category subfolders; only the current-session Redfin + ODD standard remain at plans root.

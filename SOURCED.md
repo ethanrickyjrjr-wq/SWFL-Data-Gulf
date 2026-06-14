@@ -209,4 +209,40 @@ This is the **only** population override. The 2020 relationship layout carries n
 field (verified live 2026-06-10), so overrides are documented case-by-case here rather than computed.
 Census remains the sole *scope* authority; this override only re-ranks the primary among the
 ZCTA's in-scope counties. Codified in `scripts/build_swfl_zip_county.py` (`POP_PRIMARY_OVERRIDE`)
+
+---
+
+## sba-foia-franchise-row-counts
+
+**SBA 7(a) FOIA — Lee + Collier franchise row counts (verified 2026-06-14, full-file reads)**
+
+Source: U.S. SBA FOIA data portal — `https://data.sba.gov/en/dataset/7-a-504-foia`
+Filter applied: `projectstate='FL' AND projectcounty IN ('LEE','COLLIER') AND franchisename != ''`
+
+| File          | Franchise rows | Total rows in file |
+|---------------|---------------:|-------------------:|
+| FY2000–2009   |             83 |            690,333 |
+| FY2010–2019   |          160   |            545,751 |
+| FY2020–pres   |          210   |            373,981 |
+| **Total**     |        **453** |          1,610,065 |
+
+Row counts are from a full-file DuckDB read on 2026-06-14. The SBA updates these files quarterly
+(~1 month after each quarter end); row counts will grow. The pipeline guard
+(`if len(rows) == 0: sys.exit(1)`) ensures a stale/empty pull aborts rather than overwriting the
+Parquet with nothing.
+
+**N_MIN_RESOLVED = 3** — minimum resolved loans (PIF + CHGOFF) required to compute a
+`survival_rate` or `chargeoff_rate` at the ZIP-approx grain. At county grain, all brands are
+included regardless of resolved count (rates are NULL when resolved = 0).
+
+This threshold is consistent with existing pack logic (`refinery/config/packs.mts:168`,
+`resolvedOf(n) >= 3` for the "strong performers" filter) and with PeerSense SBA franchise
+methodology (peersense.com/industry-data, methodology page, verified 2026-06-14):
+> "Brands with fewer than three resolved loans are excluded from rate calculations to avoid
+> statistically unstable ratios."
+
+**ZIP-approx note:** the SBA FOIA has no `projectzip` column. `zip_approx` is derived from
+`borrcity + projectcounty` via `ingest.utils.zip_approx.get_zip_approx()` (Census Geocoder →
+nearest ZCTA centroid). `zip_is_approx` is always `True`; these cells go to `detail_tables`
+only and are never used to compute county-level direction signals.
 and surfaced in the fixture's `discrepancies[]`.

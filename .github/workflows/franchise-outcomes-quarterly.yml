@@ -1,0 +1,48 @@
+name: SBA FOIA Franchise Outcomes Tier 1 quarterly
+
+on:
+  schedule:
+    # SBA FOIA updates quarterly, ~1 month after each quarter end.
+    # 15th of Jan / Apr / Jul / Oct at 08:00 UTC.
+    # FY quarter ends: Sep 30, Dec 31, Mar 31, Jun 30.
+    - cron: "0 8 15 1,4,7,10 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — print what would be downloaded/written; skip upload"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run SBA FOIA franchise outcomes pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.duckdb_pipelines.franchise_outcomes.pipeline --dry-run
+          else
+            python -m ingest.duckdb_pipelines.franchise_outcomes.pipeline
+          fi

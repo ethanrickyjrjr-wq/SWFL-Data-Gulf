@@ -723,6 +723,26 @@ pipelines:
 # completely silent (no probe coverage at all).
 
 not_yet_running:
+  # ── SBA FOIA franchise outcomes — Tier-1 DuckDB pipeline ────────────────────
+  # Writes two Parquet files to Tier-1 Storage:
+  #   lake-tier1/franchise/sba_foia_franchise_county.parquet  (county-grain, primary)
+  #   lake-tier1/franchise/sba_foia_franchise_zip_approx.parquet (ZIP-approx, supplemental)
+  # Consumer: franchise-outcomes brain (refinery/packs/franchise-outcomes.mts).
+  # Pipeline: ingest/duckdb_pipelines/franchise_outcomes/pipeline.py
+  # GHA cron: .github/workflows/franchise-outcomes-quarterly.yml (15th Jan/Apr/Jul/Oct 08:00 UTC)
+  # FOIA source row counts: see SOURCED.md#sba-foia-franchise-row-counts (453 franchise rows total).
+  # Graduation: move to `pipelines:` with freshness_table + expected_rows_min once first cron runs.
+  # ODD-ready: empty-tolerant consumer (REFINERY_FRANCHISE_SOURCE defaults to fixture),
+  #   source_tag provenance in Parquet, idempotent overwrite, parked cadence (probe-excluded).
+  - name: sba_foia_franchise_outcomes
+    lane: tier-1-duckdb
+    cadence_days: 90 # SBA FOIA updates quarterly
+    tolerance_multiplier: 1.5
+    inventory_id: lake-tier1/franchise/sba_foia_franchise_county.parquet
+    inventory_key_type: exact
+    # Merge key (county-grain): (franchise_code, franchise_name) — stable across quarterly refreshes.
+    # Pipeline does a full-replace (overwrite in place); the Parquet is regenerated from all 3 FOIA files.
+
   # ── AirDNA STR (short-term-rental) — Operation Dumbo Drop, parked ──────────
   # STR revenue/occupancy/ADR has no free source; AirDNA is the only authoritative
   # feed (MarketMinder single-market ~$40-100/mo, FL state $179/mo — manual portal,

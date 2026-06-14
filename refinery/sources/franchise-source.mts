@@ -1,20 +1,31 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { DuckDBInstance } from "@duckdb/node-api";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SourceConnector, CitationRow } from "../types/pack.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
+import { composeQuery } from "./duckdb-source.mts";
 
 /**
  * Franchise Outcomes source connector.
  *
- * Fixture-only: SBA franchise loan outcomes is a curated, point-in-time
- * reference with no live pipeline. The former live aggregation source + its
- * backing table were dropped 2026-06-14 (see
- * docs/sql/20260614_drop_sba_franchise_outcomes.sql), so fetch() always reads
- * the committed sample. normalize() is the single point of schema knowledge for
- * that sample's column shape.
+ * Two modes controlled by REFINERY_FRANCHISE_SOURCE:
+ *   fixture (default) — reads the committed 15-brand curated sample. Safe with
+ *     no credentials; used until the first quarterly SBA FOIA pipeline run lands.
+ *   live              — reads s3://lake-tier1/franchise/sba_foia_franchise_county.parquet
+ *     via DuckDB. Requires SUPABASE_S3_* env vars.
+ *
+ * The REFINERY_FRANCHISE_SOURCE flag is intentionally separate from the global
+ * REFINERY_SOURCE so franchise can be graduated to live independently of the rest
+ * of the refinery (or vice versa).
+ *
+ * The former live RPC source + its backing Postgres table were dropped 2026-06-14
+ * (see docs/sql/20260614_drop_sba_franchise_outcomes.sql). The Parquet lane is
+ * its replacement (Tier-1 Storage, ingest/duckdb_pipelines/franchise_outcomes/).
  */
+
+const COUNTY_PARQUET_URL = "s3://lake-tier1/franchise/sba_foia_franchise_county.parquet";
 
 const SOURCE_ID = "sba_loans_franchise_outcomes";
 
@@ -87,7 +98,7 @@ async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   return rows as Record<string, unknown>[];
 }
 
-/** Wrap raw view/RPC rows into RawFragments — shared by the fixture and live paths. */
+/** Wrap raw rows into RawFragments — shared by the fixture and live paths. */
 function rowsToFragments(rows: Record<string, unknown>[]): RawFragment[] {
   const fetched_at = isoTimestamp();
   return rows.map((row) => {
@@ -105,18 +116,71 @@ function rowsToFragments(rows: Record<string, unknown>[]): RawFragment[] {
 }
 
 /**
- * Fetch raw fragments from the committed curated sample. Fixture-only — there is
- * no live source (the former aggregation table was dropped 2026-06-14). Rows go
- * through rowsToFragments() in the shape normalize() expects.
+ * Live path: read county-grain Parquet from Tier-1 Storage via DuckDB.
+ * Only called when REFINERY_FRANCHISE_SOURCE=live.
+ * Requires SUPABASE_S3_ENDPOINT, SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY.
+ */
+async function fetchLive(): Promise<RawFragment[]> {
+  const endpointRaw = process.env["SUPABASE_S3_ENDPOINT"] ?? "";
+  const accessKey = process.env["SUPABASE_S3_ACCESS_KEY_ID"];
+  const secretKey = process.env["SUPABASE_S3_SECRET_ACCESS_KEY"];
+  if (!endpointRaw || !accessKey || !secretKey) {
+    throw new Error(
+      "REFINERY_FRANCHISE_SOURCE=live requires SUPABASE_S3_ENDPOINT, " +
+        "SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY",
+    );
+  }
+  const statements = composeQuery({
+    source_id: SOURCE_ID,
+    parquetViews: [{ name: "county_brands", s3_url: COUNTY_PARQUET_URL }],
+    query: `
+      SELECT
+        franchise_code,
+        franchise_name,
+        n_loans::BIGINT        AS n_loans,
+        n_paid_in_full::BIGINT AS n_paid_in_full,
+        n_charged_off::BIGINT  AS n_charged_off,
+        survival_rate,
+        chargeoff_rate,
+        total_gross_approval
+      FROM county_brands
+      ORDER BY franchise_name
+    `,
+    s3: {
+      endpoint: endpointRaw.replace(/^https?:\/\//, ""),
+      accessKey,
+      secretKey,
+    },
+  });
+  const instance = await DuckDBInstance.create(":memory:");
+  const conn = await instance.connect();
+  try {
+    for (let i = 0; i < statements.length - 1; i++) {
+      await conn.run(statements[i]!);
+    }
+    const reader = await conn.runAndReadAll(statements[statements.length - 1]!);
+    return rowsToFragments(reader.getRowObjects() as Record<string, unknown>[]);
+  } finally {
+    conn.closeSync();
+  }
+}
+
+/**
+ * Fetch raw fragments from the franchise outcomes source.
+ * Defaults to fixture; set REFINERY_FRANCHISE_SOURCE=live to read the Tier-1 Parquet.
  */
 export async function fetch(): Promise<RawFragment[]> {
+  if (process.env["REFINERY_FRANCHISE_SOURCE"] === "live") return fetchLive();
   return rowsToFragments(await loadFixtureRows());
 }
 
 /** Citation metadata for this source. Stage 4 assigns the citation `id` (s01...). */
 export function citationMeta(verifiedDate: string, ttlSeconds: number): Omit<CitationRow, "id"> {
+  const isLive = process.env["REFINERY_FRANCHISE_SOURCE"] === "live";
   return {
-    source: "SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL",
+    source: isLive
+      ? "SBA 7(a) FOIA — franchise loan outcomes, Lee & Collier FL (county-grain Parquet, Tier-1 Storage)"
+      : "SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL",
     verified: verifiedDate,
     expires: expiresDate(verifiedDate, ttlSeconds),
   };
