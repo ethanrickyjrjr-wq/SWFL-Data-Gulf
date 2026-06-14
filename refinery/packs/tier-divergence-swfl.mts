@@ -331,6 +331,23 @@ function tierDivergenceOutputProducer(_out: PackOutput): BrainOutputProducerResu
     source,
   });
 
+  // 5b. K-shape intensity — normalized 0–100 score (% of both-tier ZIPs in K-shape).
+  // direction: no prior-period kshape_zip_count in tier_divergence_zip_latest (latest-only
+  // view; one row per ZIP). Explicit "stable" fallback — extend the source view with a
+  // prior-period kshape count to enable MoM direction when K-shape activates.
+  const kshapeIntensity =
+    snap.zips_covered > 0 ? Math.round((snap.kshape_zip_count / snap.zips_covered) * 100) : 0;
+  key_metrics.push({
+    metric: "tier_kshape_intensity_swfl",
+    value: kshapeIntensity,
+    direction: "stable" as const, // explicit fallback — no prior-period count available
+    label: `K-shape intensity: ${snap.kshape_zip_count} of ${snap.zips_covered} SWFL both-tier ZIPs with luxury holding, starter falling (${kshapeIntensity}/100)`,
+    variable_type: "intensive",
+    units: "percent",
+    display_format: "percent",
+    source,
+  });
+
   // 6. Per-ZIP widest fractures — resolved through the patterns hook (raw_slug_patterns).
   for (const z of widest) {
     if (z.tier_spread_yoy_pct === null) continue;

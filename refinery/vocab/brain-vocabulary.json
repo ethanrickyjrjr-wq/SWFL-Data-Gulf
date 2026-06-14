@@ -4564,6 +4564,37 @@
       "status": "active",
       "scope_note": "Count of SWFL ZIPs in a K-shape - luxury tier YoY >= 0 while starter tier YoY < 0 (luxury holding, starter falling) - of the ~107 both-tier ZIPs. MORE K-shape ZIPs = MORE fracturing = bearish (lower_is_bullish). Breakpoints at 0 are natural. Computed by tier-divergence-swfl."
     },
+    "tier_kshape_intensity_swfl": {
+      "id": "tier_kshape_intensity_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
+      "prefLabel": "K-Shape Intensity Score — SWFL (0–100)",
+      "altLabels": [
+        "K-shape intensity",
+        "K-shape score",
+        "fractured ZIP share"
+      ],
+      "raw_slugs": [
+        "tier_kshape_intensity_swfl"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "tier-divergence-swfl"
+      ],
+      "value_type": "intensive",
+      "unit": "percent",
+      "value_range": [
+        0,
+        100
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Normalized K-shape intensity: (SWFL both-tier ZIPs with luxury YoY >= 0 AND starter YoY < 0) / total both-tier ZIPs × 100. 0 = no market fracturing; 100 = every ZIP in full K-shape. lower_is_bullish. Direction emits 'stable' as explicit fallback — source view lacks prior-period K-shape count; extend tier_divergence_zip_latest for MoM direction once K-shape activates. Computed by tier-divergence-swfl."
+    },
     "home_value_yoy_pct_top_appreciating_zips": {
       "id": "home_value_yoy_pct_top_appreciating_zips",
       "prefLabel": "Top-Appreciating SWFL ZIPs by ZHVI Home Value YoY %",
@@ -7764,6 +7795,7 @@
     "tier_bottom_yoy_pct_swfl": "tier_bottom_yoy_pct_swfl",
     "tier_top_yoy_pct_swfl": "tier_top_yoy_pct_swfl",
     "tier_kshape_zip_count_swfl": "tier_kshape_zip_count_swfl",
+    "tier_kshape_intensity_swfl": "tier_kshape_intensity_swfl",
     "investor_gross_rent_yield_pct": "investor_gross_rent_yield_pct",
     "investor_gross_rent_yield_pct_regional_median": "investor_gross_rent_yield_pct_regional_median",
     "investor_flood_adj_cap_rate_pct": "investor_flood_adj_cap_rate_pct",
