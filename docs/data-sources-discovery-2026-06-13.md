@@ -462,39 +462,58 @@ Florida vacation markets are heavily represented (42 FL markets tracked).
 **Cost:** Paid subscription for full data. City-level overview is free.
 
 **Build path:** ODD scaffold (can't auto-ingest the paid tier). The free 2026 Outlook PDF
-is a one-time snapshot. Consider the Rabbu and AirROI free alternatives below for
-signal-level STR data without the subscription.
+is a one-time snapshot. AirROI (entry 20) covers SWFL city-level STR metrics via a pay-per-call
+API ($0.10/call) and free static scrape pages — viable for a city-grain `str-swfl` brain without
+an AirDNA subscription. Rabbu (entry 19) was audited and removed — no programmatic access.
 
 ---
 
-### 19. Rabbu — Free STR Analytics (Airbnb/VRBO)
+### 19. ~~Rabbu — Free STR Analytics~~ — REMOVED (2026-06-14)
 
 **URL:** https://rabbu.com/airbnb-data
 
-**What it covers:** Free Airbnb/VRBO analytics by city, county, or ZIP code.
-Occupancy rates, ADR, revenue estimates — without the AirDNA paywall.
+**Verdict: Dead-end. Removed from build queue.**
 
-**Coverage:** US markets including SWFL. No stated coverage limit.
-**Cost:** Free
-**Cadence:** Updated frequently (scrapes OTA listings)
-
-**Build path:** Auto-ingest (web scrape / API). Provides a free proxy for STR demand
-that AirDNA charges for. Validate against AirDNA free-tier spot checks.
+Live audit (2026-06-14): Rabbu's market data lives entirely behind a JS search-bar web app.
+Every market URL pattern tried 404s — no addressable static pages, no documented API, no
+programmatic access path. Their "city/county/ZIP" claim is true for human browsing only.
+Auto-ingest would require full browser automation against a non-deterministic URL structure
+with no reliability guarantee. Not worth the engineering cost vs. AirROI below.
 
 ---
 
-### 20. AirROI — Free STR Data API
+### 20. AirROI — STR Data API (City-Level, Pay-Per-Call)
 
 **URL:** https://www.airroi.com/
 
-**What it covers:** Free market analytics and Airbnb data API. 20M+ properties tracked.
-Revenue estimates, dynamic pricing, market occupancy/ADR by area.
+**What it covers:** Airbnb/STR market analytics. 20M+ listings, 190+ countries, 15 years
+of historical data. City-level metrics: occupancy rate, ADR, RevPAR, revenue, active
+listings, supply growth YoY, seasonality, booking lead time.
 
-**Cost:** Free (API available)
-**Coverage:** 190+ countries, US ZIP-level data mentioned.
+**Live SWFL data confirmed (2026-06-14, TTM June 2025–May 2026):**
+- Fort Myers: 606 listings, $19,239/yr avg, 37.2% occupancy, $222 ADR, +55.8% supply YoY
+- Naples: 2,280 listings, $40,869/yr avg, 37.9% occupancy, $386 ADR, +17.0% revenue YoY
+- Static pages at: `airroi.com/airbnb-data/united-states/florida/{city}`
 
-**Build path:** Evaluate API against Rabbu for STR brain. One of these is the free tier
-for AirDNA-equivalent data.
+**Cost:** NOT free. Pay-per-call API:
+- `GET /markets/lookup` / `GET /markets/search`: $0.01/call
+- `POST /markets/summary`: $0.10/call (standard)
+- `POST /markets/metrics/all`: $0.50/call
+- `POST /listings/search/radius`: $0.25–$0.50/call (ZIP-approximation workaround)
+- A monthly SWFL run (10 cities, summary only) ≈ $1/month — cheap but not free.
+- No monthly minimum; API key activated instantly.
+
+**Grain:** City-level markets (Fort Myers, Naples, Cape Coral, Fort Myers Beach, Bonita
+Springs, Marco Island, Sanibel, Estero, Lehigh Acres, Port Charlotte). No native ZIP grain.
+ZIP-level approximation possible via radius search but at $0.25–$0.50/call per ZIP.
+
+**Cadence:** Monthly refresh. TTM rolling window. Data timestamp on each page.
+
+**Build path:** AirROI API for a `str-swfl` brain at **city/market grain**. Scrape static
+city pages (no API cost) for the 10 SWFL markets monthly as Tier 1, or use
+`POST /markets/summary` ($0.10/call × 10 cities = $1/month) for structured JSON. ZIP grain
+requires either AirDNA subscription or radius API calls — evaluate cost vs. value before
+wiring ZIP level. Static page scrape is the free path; API is the clean path.
 
 ---
 
@@ -624,7 +643,7 @@ The following 6 Redfin datasets appear in the Redfin Data Center but are **Metro
 | 15 | HUD Cape Coral CHMA PDF | Low | Medium | One-time snapshot | citation in `housing-market-swfl` |
 | 16 | Collaboratory Housing Study | Low | Medium | One-time snapshot | citation in affordability brain |
 | 17 | First Street ZIP aggregates | Low | Medium | Auto-ingest (Zenodo) | extend `env-swfl` |
-| 18 | Rabbu / AirROI STR | Medium | Medium | Web scrape / API | `str-swfl` (new) |
+| 18 | AirROI STR (city grain) | Low | Medium | Static page scrape or $0.10/call API | `str-swfl` (new, city-level only) |
 | 19 | FL EDR population forecasts | Low | Low | Auto-ingest | extend `macro-swfl` |
 
 ---
@@ -635,7 +654,7 @@ The following 6 Redfin datasets appear in the Redfin Data Center but are **Metro
 |---|---|---|
 | Live MLS per-property listings | Business/legal decision | Requires RESO Web API + MLS membership. ATTOM MCP may shortcut this — check before paying. |
 | CoStar CRE data | Paid ($$$) | Cushman & Wakefield public PDFs are the free proxy. |
-| AirDNA full STR data | Paid | Rabbu + AirROI are free alternatives worth evaluating first. |
+| AirDNA full STR data | Paid | AirROI covers SWFL city-level STR free via static pages (or $0.10/call API). Rabbu audited 2026-06-14 — no programmatic access, removed. ZIP-grain STR still requires AirDNA or AirROI radius API ($0.25–$0.50/call/ZIP). |
 | CoreLogic reports | Mostly paywalled | Some free PDF market reports exist but no bulk download. |
 | NAR metro-level data | NAR member gated | The county-level data in Florida Realtors is the sanctioned free path. |
 | Collier parcel-level (CCPA) | Needs DOR assessment roll request | Submit FL DOR data request for Collier assessment roll; same format as LeePA. |
@@ -643,4 +662,4 @@ The following 6 Redfin datasets appear in the Redfin Data Center but are **Metro
 
 ---
 
-*Generated 2026-06-13. Updated 2026-06-14 with ZIP moat exclusion analysis + Zillow ZHVI tier URLs verified live. Sources verified via live Firecrawl scrapes — not from model memory.*
+*Generated 2026-06-13. Updated 2026-06-14 with ZIP moat exclusion analysis + Zillow ZHVI tier URLs verified live + Rabbu/AirROI live audit (Rabbu removed, AirROI corrected to city-grain pay-per-call). Sources verified via live Firecrawl scrapes — not from model memory.*

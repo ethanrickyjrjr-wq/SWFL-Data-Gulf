@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — Redfin data strategy: full inventory audit + seller-stress-swfl design spec
+
+- **Full data lake inventory audit** (`docs/superpowers/plans/2026-06-14-redfin-data-strategy/06-data-inventory.md`): what we have (3 new stress Tier-1 tables, 31 live brains, full table inventory with row counts + status), what's extra (FHFA HPI unbraned, lee permits pagination bug, sparse rainfall), what we need (housing_market new format, city-level 4×, Zillow ZHVI tiers, neighborhood grain). ZIP-grain moat confirmed: no competitor publishes composite seller stress at ZIP with cancellations.
+- **4-agent Firecrawl research sweep committed** (`docs/superpowers/plans/2026-06-14-redfin-data-strategy/`): 12 files — dataset inventory, proposed clusters, 4 research briefs, 4 findings docs (algorithms, AI products, SWFL dynamics, industry methodology), synthesis + build order. Key findings: Zillow MHI is equal-weight (3 inputs, no cancellations, no ZIP grain); Realtor.com Hotness is buyer-demand-only; no vendor has built what we're building. Ian (Sept 2022) is a labeled distress event for model calibration.
+- **seller-stress-swfl design spec written** (`docs/superpowers/specs/2026-06-14-seller-stress-swfl-design.md`): 5-signal composite (delistings 30%, price drop breadth 25%, cancellations 25%, price drop depth 15%, relistings 5%); z-score normalization against 2019–2021 baseline per ZIP; 0-100 scale; direction thresholds (≥65 bearish, 45-64 mixed, 35-44 neutral, <35 bullish); minimum sample guards (N_BASELINE_MIN=18, N_TRAILING_MIN=3); 3 required SWFL caveats (50% cash buyers, Ian spike, condo SB 4-D).
+- **Determination: Sonnet build.** skipSynthesisAgent=true, deterministic math, established pack patterns. Opus reserved for HMM Regime Classifier (v2, separate spec).
+- **Next:** implement `seller-stress-swfl` pack (probe 3 Tier-1 tables first, confirm column names, then write 3 sources + pack + test + vocab + catalog in one PR).
+
 ## 2026-06-14 (main) — feat(email): scoped per-tenant digest content SHIPPED (03b wire + 03a render + 04 tests)
 
 - **Task-02 scoped content is live in the worker.** `scripts/email/run-schedules.mts` `buildContent` now branches: `scope_kind==null && topic==null` → the UNCHANGED global digest (regression contract); else → in-run scope-cache → `assembleScopedContent` → `renderScopedBody`; unresolvable scope falls back to the global digest. Seams (`defaultScopedDeps`, `origin=SITE_URL`) built once per run.
