@@ -53,6 +53,16 @@ pipelines:
     # Zillow ZHVI ZIP-level all-homes middle-tier (0.33-0.67) smoothed+SA home-value index.
     # Cron: zhvi-tier1-monthly.yml (day 22). Pack: refinery/packs/home-values-swfl.mts.
 
+  - name: tier_divergence_swfl_duckdb
+    lane: tier-1-duckdb
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    inventory_id: lake-tier1/market/tier_divergence_swfl.parquet
+    inventory_key_type: exact
+    # Zillow ZHVI tier split (top 0.67-1.0 luxury vs bottom 0.0-0.33 starter), RAW, ZIP-level.
+    # FULL OUTER JOIN of the two tiers per zip x month. Cron: tier-divergence-tier1-monthly.yml
+    # (day 21). Pack: refinery/packs/tier-divergence-swfl.mts.
+
   - name: redfin_swfl
     lane: tier-1-duckdb
     cadence_days: 30
@@ -390,6 +400,18 @@ pipelines:
     # Separate from zhvi_swfl_duckdb; this is the Postgres promotion pipeline.
     # Pack: refinery/packs/home-values-swfl.mts. Set expected_rows_min after first run.
     # liveness_view probed daily via PostgREST REST surface (catches missing GRANT on the view).
+
+  - name: tier_divergence_swfl_tier2
+    lane: tier-2
+    cadence_days: 30
+    tolerance_multiplier: 2.0
+    dlt_schema_name: tier_divergence_swfl
+    expected_rows_min: 107 # probe-anchored (2026-06-14): >=107 both-tier SWFL ZIPs at the latest month. Table holds full zip x month history (~30k+); recalibrate to ~90% of the observed total after first run (cf. zori_swfl_tier2=4666). Brain-input view floor MIN_VIEW_ROWS=85 in the source.
+    liveness_view: data_lake.tier_divergence_zip_latest
+    # Zillow ZHVI tier-split divergence (K-shaped market). Cron: tier-divergence-tier2-monthly.yml (day 22).
+    # Separate from tier_divergence_swfl_duckdb; this is the Postgres promotion pipeline.
+    # Pack: refinery/packs/tier-divergence-swfl.mts. Set expected_rows_min after first run (~107 ZIPs x months).
+    # liveness_view probed daily via PostgREST (catches missing GRANT on data_lake.tier_divergence_zip_latest).
 
   - name: fgcu_reri_indicators
     lane: tier-2

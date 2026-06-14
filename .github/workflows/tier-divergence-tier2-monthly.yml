@@ -1,0 +1,49 @@
+name: Tier Divergence SWFL Tier 2 load monthly
+
+on:
+  schedule:
+    # 0 12 22 * * — 12:00 UTC on the 22nd of each month.
+    # Stage 2 of 2: reads the Tier 1 Parquet written by tier-divergence-tier1-monthly (day 21)
+    # and merges into data_lake.tier_divergence_swfl. Scheduled 1 day after Tier 1 fetch.
+    # See docs/standards/pipeline-freshness.md §3.
+    - cron: "0 12 22 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — read Tier 1 Parquet and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run Tier Divergence Tier 2 load pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.tier_divergence_swfl.pipeline --dry-run
+          else
+            python -m ingest.pipelines.tier_divergence_swfl.pipeline
+          fi

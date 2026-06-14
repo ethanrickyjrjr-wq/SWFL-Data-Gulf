@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — SHIP: tier-divergence-swfl → main + charts branch merged + live ingest
+
+- **Merged `claude/charts-airline-total-passengers-yoy` (939d07e) into main** (fast-forward) — /charts airline panel = `total_passengers` + 12-mo trend, YoY-momentum 4th chart. `next build` green (`/charts` prerenders static, no RSC-boundary break). Charts task done.
+- **tier-divergence-swfl shipped to main** — K-shaped brain: Tier-1/2 ingest + 2 views + pack + oracle + 2 tests + 5 vocab slugs + cadence ×2 + 2 crons. **Audit window-bug fix INCLUDED:** the spread-LEVEL "3-month trailing average" averaged **4 calendar months** at the Apr-30 anchor; fixed lockstep to `date_trunc('month', period_end) > date_trunc('month', latest_period) − INTERVAL '3 months'` in the view + oracle; regression-locked (4-month-dense + gap cases, `view == oracle` 4/4 live; pack 21/21). YoY/polarity unaffected. Catalog `KNOWN_INCOMPLETE`.
+- **Live ingest this session via GHA** (`DESTINATION__POSTGRES__CREDENTIALS` absent locally → Tier-2 can't run local): `tier-divergence-tier1-monthly` (writes Tier-1 Parquet) → `tier-divergence-tier2-monthly` (merges `data_lake.tier_divergence_swfl`) → apply `docs/sql/20260614_tier_divergence_views.sql` (2 views + GRANT + NOTIFY) → verify ~107-row liveness view. Graduation check `tier_divergence_graduation` open (DEADBAND recompute + `expected_rows_min` 107→~27k + fixture regen + tier-geography confirm).
+
 ## 2026-06-14 (claude/charts-airline-total-passengers-yoy) — /charts airline fix + YoY momentum chart
 
 - **Airline panel fixed:** switched `enplanements` → `total_passengers` (arrivals + departures); added 12-month moving-average trend overlay (`REGION_AIR_TRAVEL_SERIES`, neutral-gold dashed). `movingAverage()` pure helper + `mapAirportTotalWithTrend()` in `lib/charts/airport-series.ts`; trend pre-computed on full series so range-slices (6M/1Y/2Y) carry it correctly.

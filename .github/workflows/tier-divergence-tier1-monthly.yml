@@ -1,0 +1,49 @@
+name: Tier Divergence SWFL Tier 1 fetch monthly
+
+on:
+  schedule:
+    # 0 12 21 * * — 12:00 UTC on the 21st of each month.
+    # Zillow Research refreshes monthly (~3rd week); day 21 captures the release window
+    # and staggers 1h before the ZHVI Tier 1 day-22/13:00 slot (shared Zillow source).
+    # See docs/standards/pipeline-freshness.md §3.
+    - cron: "0 12 21 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip Storage upload"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run Tier Divergence Tier 1 fetch pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.duckdb_pipelines.tier_divergence_swfl.probe_grain
+          else
+            python -m ingest.duckdb_pipelines.tier_divergence_swfl.pipeline
+          fi

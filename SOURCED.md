@@ -6,6 +6,51 @@ comment in the code.
 
 ---
 
+## tier-divergence-swfl-deadband
+
+**DEADBAND: ±1.0 percentage point on the regional-median YoY signals (tier_spread_yoy_pct, tier_bottom_yoy_pct)**
+
+`tier-divergence-swfl` reads a region bearish when the median luxury/starter spread YoY widens past
++1.0pp OR the median starter-tier YoY falls past −1.0pp; bullish only when the spread compresses past
+−1.0pp AND the starter tier rises past +1.0pp (see `classifyPolarity`, `refinery/packs/tier-divergence-swfl.mts`).
+The K-shape breakpoints (luxury YoY ≥ 0 AND starter YoY < 0) sit at the natural 0 line and need no citation.
+
+**PROVISIONAL v1 — empirical, not published.** No vendor publishes a tier-divergence noise floor (no
+vendor publishes a ZIP-level tier divergence at all). 1.0pp is a placeholder dead zone to ignore
+sub-1pp month-to-month wobble in a RAW (not seasonally adjusted) index.
+
+**Calibration instruction (graduation gate):** before this brain graduates from `KNOWN_INCOMPLETE` to
+`BRAIN_CATALOG` (first clean live cycle), recompute the deadband as ≈1 SD of `tier_spread_yoy_pct`
+across the ~107 both-tier SWFL ZIPs over a baseline that **EXCLUDES the 2020–2021 COVID appreciation
+spike** (folding it in inflates the SD and over-widens the band) — e.g. 2018–2019 pre-shock plus
+2023-onward post-normalization, or a robust dispersion (MAD/IQR) over the full series. Replace 1.0 with
+the measured value. The code comments the update point at the `DEADBAND` constant.
+
+---
+
+## tier-divergence-swfl-tier-geography
+
+**Zillow ZHVI tier cut geography = PER METRO/REGION (RESOLVED 2026-06-14, Zillow ZHVI User Guide).**
+
+The bottom (5th–35th pct) and top (65th–95th pct) cutpoints in the ZIP-level tier files
+(`Zip_zhvi_uc_sfrcondo_tier_0.0_0.33_month.csv` / `…_0.67_1.0_…`) are computed **per metro/region and
+then applied to each ZIP** — NOT per-ZIP quantiles, NOT a national cut. A ZIP's `top_tier_value` is the
+ZHVI of that ZIP's homes falling in the metro's upper band (Cape Coral-Fort Myers / Naples-Marco
+Island), not "that ZIP's own top third." `tier-divergence-swfl` keeps its claim text observable —
+top-tier $ value vs bottom-tier $ value and their ratio — and never asserts per-ZIP percentile semantics.
+
+**Coverage note (33972 / 33974 Lehigh Acres):** these publish a top-tier value but no bottom-tier
+series. As the cheap end of the metro they would be full of metro-bottom-band homes, so the missing
+bottom tier is a **Zillow publish-coverage gap**, not percentile semantics. They have no both-present
+anchor → the brain-input view excludes them (no spread computable); their single-tier history is
+retained in `data_lake.tier_divergence_swfl` (FULL OUTER JOIN keeps it; not truncated).
+
+Was an open question at build time (the methodology HTML was CAPTCHA-blocked); resolved against the
+Zillow ZHVI User Guide. Filename percentile encoding (0.0_0.33 = bottom, 0.67_1.0 = top) confirmed by
+live dollar values (luxury > starter for 33901/33914/34102/34108).
+
+---
+
 ## labor-demand-swfl-wow-threshold
 
 **wowDirection threshold: ±3% WoW**

@@ -4414,6 +4414,156 @@
       "status": "active",
       "scope_note": "Median YoY % across SWFL ZIPs - the headline signal that drives home-values-swfl direction polarity per the locked band table (bearish < 0; neutral [0,3); bullish [3,10]; bullish with caveat (10,15]; neutral with caveat > 15)."
     },
+    "tier_spread_ratio_swfl": {
+      "id": "tier_spread_ratio_swfl",
+      "prefLabel": "Tier Spread (Luxury / Starter) - SWFL Regional Median",
+      "altLabels": [
+        "luxury-to-starter price multiple",
+        "tier spread ratio"
+      ],
+      "raw_slugs": [
+        "tier_spread_ratio_swfl"
+      ],
+      "raw_slug_patterns": [
+        "tier_spread_ratio_zip_*"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "tier-divergence-swfl"
+      ],
+      "value_type": "ratio",
+      "unit": "x",
+      "value_range": [
+        1,
+        30
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Regional median of (top-tier / bottom-tier) Zillow ZHVI per SWFL ZIP - the luxury-to-starter price multiple (e.g. 2.5x). Level metric, no standalone bullish/bearish polarity. Per-ZIP slugs tier_spread_ratio_zip_{ZIP} resolve via refinery/vocab/patterns.mts. Computed deterministically by tier-divergence-swfl from data_lake.tier_divergence_zip_latest."
+    },
+    "tier_spread_yoy_pct_swfl": {
+      "id": "tier_spread_yoy_pct_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
+      "prefLabel": "Tier Spread YoY % - SWFL Regional Median",
+      "altLabels": [
+        "luxury-starter divergence YoY",
+        "tier spread widening rate"
+      ],
+      "raw_slugs": [
+        "tier_spread_yoy_pct_swfl"
+      ],
+      "raw_slug_patterns": [
+        "tier_spread_yoy_pct_zip_*"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "tier-divergence-swfl"
+      ],
+      "value_type": "percent_change",
+      "unit": "%",
+      "value_range": [
+        -50,
+        50
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year % change in the luxury/starter spread ratio, regional median across both-tier SWFL ZIPs. WIDENING (positive) is BEARISH for the entry market (lower_is_bullish). The headline polarity driver for tier-divergence-swfl. Per-ZIP slugs tier_spread_yoy_pct_zip_{ZIP} resolve via patterns.mts. RAW (not seasonally adjusted) index; YoY cancels seasonality."
+    },
+    "tier_bottom_yoy_pct_swfl": {
+      "id": "tier_bottom_yoy_pct_swfl",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Starter-Tier (Bottom) ZHVI YoY % - SWFL Regional Median",
+      "altLabels": [
+        "starter tier appreciation",
+        "bottom-tier YoY"
+      ],
+      "raw_slugs": [
+        "tier_bottom_yoy_pct_swfl"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "tier-divergence-swfl"
+      ],
+      "value_type": "percent_change",
+      "unit": "%",
+      "value_range": [
+        -50,
+        50
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year % change in the bottom-tier (starter, 0.0-0.33 percentile) Zillow ZHVI, regional median across both-tier SWFL ZIPs. A FALLING starter tier is BEARISH (higher_is_bullish). Bearish co-driver with the spread. Computed deterministically by tier-divergence-swfl."
+    },
+    "tier_top_yoy_pct_swfl": {
+      "id": "tier_top_yoy_pct_swfl",
+      "prefLabel": "Luxury-Tier (Top) ZHVI YoY % - SWFL Regional Median",
+      "altLabels": [
+        "luxury tier appreciation",
+        "top-tier YoY"
+      ],
+      "raw_slugs": [
+        "tier_top_yoy_pct_swfl"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "tier-divergence-swfl"
+      ],
+      "value_type": "percent_change",
+      "unit": "%",
+      "value_range": [
+        -50,
+        50
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year % change in the top-tier (luxury, 0.67-1.0 percentile) Zillow ZHVI, regional median across both-tier SWFL ZIPs. INFORMATIONAL ONLY - intentionally carries NO grade/direction_polarity: ~50% cash buyers insulate the luxury tier, so a rising top tier is part of the K-shape divergence, NOT a standalone bullish signal (polarity audit, design spec section 5.1). Computed by tier-divergence-swfl."
+    },
+    "tier_kshape_zip_count_swfl": {
+      "id": "tier_kshape_zip_count_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
+      "prefLabel": "Count of SWFL ZIPs in K-Shape (Luxury Holding, Starter Falling)",
+      "altLabels": [
+        "K-shape ZIP count",
+        "fractured ZIP count"
+      ],
+      "raw_slugs": [
+        "tier_kshape_zip_count_swfl"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "tier-divergence-swfl"
+      ],
+      "value_type": "count",
+      "unit": "count",
+      "value_range": [
+        0,
+        130
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of SWFL ZIPs in a K-shape - luxury tier YoY >= 0 while starter tier YoY < 0 (luxury holding, starter falling) - of the ~107 both-tier ZIPs. MORE K-shape ZIPs = MORE fracturing = bearish (lower_is_bullish). Breakpoints at 0 are natural. Computed by tier-divergence-swfl."
+    },
     "home_value_yoy_pct_top_appreciating_zips": {
       "id": "home_value_yoy_pct_top_appreciating_zips",
       "prefLabel": "Top-Appreciating SWFL ZIPs by ZHVI Home Value YoY %",
@@ -7609,6 +7759,11 @@
     "home_value_yoy_pct_regional_median": "home_value_yoy_pct_regional_median",
     "home_value_yoy_pct_top_appreciating_zips": "home_value_yoy_pct_top_appreciating_zips",
     "home_values_zips_covered": "home_values_zips_covered",
+    "tier_spread_ratio_swfl": "tier_spread_ratio_swfl",
+    "tier_spread_yoy_pct_swfl": "tier_spread_yoy_pct_swfl",
+    "tier_bottom_yoy_pct_swfl": "tier_bottom_yoy_pct_swfl",
+    "tier_top_yoy_pct_swfl": "tier_top_yoy_pct_swfl",
+    "tier_kshape_zip_count_swfl": "tier_kshape_zip_count_swfl",
     "investor_gross_rent_yield_pct": "investor_gross_rent_yield_pct",
     "investor_gross_rent_yield_pct_regional_median": "investor_gross_rent_yield_pct_regional_median",
     "investor_flood_adj_cap_rate_pct": "investor_flood_adj_cap_rate_pct",

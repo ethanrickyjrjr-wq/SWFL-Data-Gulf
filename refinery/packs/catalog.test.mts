@@ -20,7 +20,10 @@ test("BRAIN_CATALOG: every catalog id exists in PER_PACK_REGISTRY", () => {
 //   home-values-swfl, investor-zip-swfl: "free ZIP investor composite" / pivoted-views
 //   build (parked; both registered together in 4a4154e 2026-06-11, predating this
 //   requirement). docs/superpowers/plans/2026-06-12-pivoted-views-build/
-const KNOWN_INCOMPLETE = new Set(["home-values-swfl", "investor-zip-swfl"]);
+//   tier-divergence-swfl: NEW 2026-06-14, standalone leaf. Graduate to BRAIN_CATALOG
+//   only after the first clean live cycle (probe clean + view-parity oracle passes
+//   live). docs/superpowers/specs/2026-06-14-tier-divergence-swfl-design.md
+const KNOWN_INCOMPLETE = new Set(["home-values-swfl", "investor-zip-swfl", "tier-divergence-swfl"]);
 
 test("BRAIN_CATALOG: every PER_PACK_REGISTRY id exists in catalog", () => {
   const catalogIds = new Set(BRAIN_CATALOG.map((e) => e.id));
