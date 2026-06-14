@@ -407,7 +407,7 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     freshness_table: public.rsw_airport_monthly
-    expected_rows_min: 600 # placeholder; re-baseline after first v3 run (5 metrics × ~516 rows ≈ 2,580 total; set to 90% of actual)
+    expected_rows_min: 2322 # 90% of 2,580 (5 metrics × 516 rows, confirmed dry-run 2026-06-14)
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # Source: LCPA reports page (https://www.flylcpa.com/about-lcpa/reports-and-statistics/). Scrapes via Firecrawl.
     # Airport: RSW (Southwest Florida International).
