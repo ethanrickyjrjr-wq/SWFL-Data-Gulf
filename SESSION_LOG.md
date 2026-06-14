@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — fix(data-intel): point page at moved doc + guard the read
+
+- `app/data-intel/page.tsx` did an unguarded `fs.readFileSync("docs/data-intel.md")`, but the docs-reorg commit `fb09fca` renamed that file to `docs/data-sources/data-intel.md` (R100) — so `next build` aborted at prerender (`/data-intel` ENOENT), reddening CI for any push. Updated the path + wrapped in try/catch with a fallback so a future move degrades to a message instead of crashing the build. `npm run build` now green end-to-end (`○ /data-intel`, `○ /charts`).
+
 ## 2026-06-14 (main) — feat(charts): luxury vs. starter indexed K-chart on /charts
 
 - New `/charts` panel: median top/bottom-tier ZHVI each indexed to 100 at Jan 2019. Added `"index"` `ValueFormat` token (`lib/charts/format.ts` + tests), `mapTierIndexed` mapper (`lib/charts/tier-divergence-series.ts` + 7 tests), `TIER_INDEXED_SERIES` preset, `loadTierIndexed` loader + panel in `app/charts/page.tsx`.

@@ -11,10 +11,15 @@ export const metadata: Metadata = {
 };
 
 export default function DataIntelPage() {
-  const content = fs.readFileSync(
-    path.join(process.cwd(), "docs/data-intel.md"),
-    "utf8",
-  );
+  // Doc moved docs/ -> docs/data-sources/ in the 2026-06-14 reorg (fb09fca).
+  // Guard the read so a future move degrades to a message instead of aborting
+  // `next build` at prerender — the previously-unguarded readFileSync reddened CI.
+  let content: string;
+  try {
+    content = fs.readFileSync(path.join(process.cwd(), "docs/data-sources/data-intel.md"), "utf8");
+  } catch {
+    content = "# Data Intelligence Map\n\nThis page is being updated — check back shortly.";
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-16">
