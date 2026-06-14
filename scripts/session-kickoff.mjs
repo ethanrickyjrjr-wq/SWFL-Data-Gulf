@@ -6,11 +6,13 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { chronicFlappers } from "../.github/scripts/lib/ledger-flap.mjs";
 
 const ROOT = process.cwd();
 const QUEUE_PATH = resolve(ROOT, "_AUDIT_AND_ROADMAP/build-queue.md");
 const SECRETS_PATH = resolve(ROOT, ".dlt/secrets.toml");
 const LOG_PATH = resolve(ROOT, "SESSION_LOG.md");
+const LEDGER_PATH = resolve(ROOT, "docs/cron-rebuild-failures.md");
 
 function parseTomlStr(toml, key) {
   const m = toml.match(new RegExp(`^${key}\\s*=\\s*"([^"]+)"`, "m"));
@@ -62,9 +64,7 @@ function summariseChecks(rows) {
   if (!rows || rows.length === 0) return "none open ✓";
   return rows
     .map((r) => {
-      const due = r.due_at
-        ? ` [${r.resolution}, due ${fmtDate(r.due_at)}]`
-        : ` [${r.resolution}]`;
+      const due = r.due_at ? ` [${r.resolution}, due ${fmtDate(r.due_at)}]` : ` [${r.resolution}]`;
       return r.label + due;
     })
     .join("\n    · ");
@@ -87,8 +87,7 @@ async function main() {
   try {
     const secrets = readFileSync(SECRETS_PATH, "utf8");
     const sbUrl =
-      parseTomlStr(secrets, "SUPABASE_URL") ??
-      parseTomlStr(secrets, "BRAINS_SUPABASE_URL");
+      parseTomlStr(secrets, "SUPABASE_URL") ?? parseTomlStr(secrets, "BRAINS_SUPABASE_URL");
     const sbKey =
       parseTomlStr(secrets, "SUPABASE_SERVICE_KEY") ??
       parseTomlStr(secrets, "BRAINS_SUPABASE_SERVICE_KEY");
@@ -106,9 +105,7 @@ async function main() {
   // Build queue from local markdown
   let queueLine = "(build-queue.md not found)";
   try {
-    const { building, next } = parseBuildQueue(
-      readFileSync(QUEUE_PATH, "utf8"),
-    );
+    const { building, next } = parseBuildQueue(readFileSync(QUEUE_PATH, "utf8"));
     const parts = [];
     if (building.length) parts.push(`[~] ${building[0]}`);
     if (next.length) parts.push(`[ ] ${next[0]}`);
@@ -120,6 +117,20 @@ async function main() {
     /* skip */
   }
 
+  // Chronic flappers — workflows that keep auto-resolving while never diagnosed.
+  let flappersLine = "";
+  try {
+    const flappers = chronicFlappers(readFileSync(LEDGER_PATH, "utf8"), { threshold: 3 });
+    if (flappers.length) {
+      flappersLine =
+        `⚠ Flappers   : ` +
+        flappers.map((f) => `${f.workflow} (${f.count}×)`).join(", ") +
+        `\n               ^ keep auto-resolving UNTRIAGED — find the cause, don't trust the green\n`;
+    }
+  } catch {
+    /* skip */
+  }
+
   process.stdout.write(
     `\n${banner}\n` +
       `KICKOFF — ${today} · brain-platform · main\n` +
@@ -127,8 +138,9 @@ async function main() {
       `${banner}\n\n` +
       `Last shipped : ${lastShip}\n` +
       `Open checks  : ${checksLine}\n` +
-      `Build queue  : ${queueLine}\n\n` +
-      `What should we work on?\n` +
+      `Build queue  : ${queueLine}\n` +
+      flappersLine +
+      `\nWhat should we work on?\n` +
       `${banner}\n`,
   );
 }

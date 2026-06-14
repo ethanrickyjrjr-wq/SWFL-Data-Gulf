@@ -16,10 +16,9 @@ import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import { classify, isLocalModule } from "./classify-cron-failure.mjs";
 import { deriveWorkflowName, fetchLogTail } from "./lib/cron-run.mjs";
+import { flipMostRecentOpenRow, START } from "./lib/ledger-flap.mjs";
 
 const LEDGER_PATH = resolve(process.cwd(), "docs/cron-rebuild-failures.md");
-const START = "<!-- INCIDENT_TABLE_START -->";
-const END = "<!-- INCIDENT_TABLE_END -->";
 const SYMPTOM_RX =
   /\b(?:Error|FAILED|Traceback|exit code|KeyError|ModuleNotFoundError|TimeoutError|ReadTimeout|SSLError|relation [^ ]+ does not exist)[^\n]*/;
 
@@ -123,7 +122,9 @@ function maybeResolve() {
   if (!after) return log(`no OPEN row for ${workflowName}; nothing to resolve`);
 
   if (dryRun) {
-    log(`DRY-RUN: would flip OPEN → RESOLVED (auto) for most-recent ${workflowName} row`);
+    log(
+      `DRY-RUN: would flip OPEN → RESOLVED (auto — self-healed if still 'pending triage') for most-recent ${workflowName} row`,
+    );
     if (issueNumber) log(`DRY-RUN: would comment ✅ on issue #${issueNumber}`);
     log(`DRY-RUN: would close open incident issue tagged ${INCIDENT_TAG}`);
     return;
@@ -174,25 +175,8 @@ function insertRow(row) {
   writeFileSync(LEDGER_PATH, updated, "utf8");
 }
 
-function flipMostRecentOpenRow(ledger, name) {
-  const s = ledger.indexOf(START);
-  const e = ledger.indexOf(END);
-  if (s < 0 || e < 0 || e < s) return null;
-  const block = ledger.slice(s, e);
-  const lines = block.split("\n");
-  const nameRx = new RegExp(`\\\`${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\\``);
-  // Status column is delimited by pipes with single-space padding: ` | OPEN | `.
-  // Newest-first order: first match from the top wins.
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line.startsWith("|")) continue;
-    if (!nameRx.test(line)) continue;
-    if (!/\|\s+OPEN\s+\|/.test(line)) continue;
-    lines[i] = line.replace(/\|\s+OPEN\s+\|/, "| RESOLVED (auto) |");
-    return ledger.slice(0, s) + lines.join("\n") + ledger.slice(e);
-  }
-  return null;
-}
+// flipMostRecentOpenRow moved to ./lib/ledger-flap.mjs (now relabel-aware +
+// unit-tested; imported above).
 
 // ---------- git ----------
 
