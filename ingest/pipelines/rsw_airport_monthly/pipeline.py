@@ -52,8 +52,11 @@ REPORTS_PAGE_URL = "https://www.flylcpa.com/about-lcpa/reports-and-statistics/"
 TABLE = "rsw_airport_monthly"
 
 # All 5 LCPA PDFs.  Keys are metric names stored in the DB.
-# pattern: regex matched against S3 URLs found on the reports page
-# fallback: known-good S3 URL; update if LCPA re-uploads the file
+# pattern: regex matched against S3 URLs found on the reports page (live scrape path)
+# fallback: known-good S3 URL — each embeds a Wasabi upload timestamp that goes stale
+#   whenever LCPA re-uploads a PDF.  The regex scrape fires first; these only activate
+#   on scrape failure.  If the pipeline starts returning 0 rows for a metric, check
+#   whether the live PDF moved (scrape REPORTS_PAGE_URL and grab the new S3 URL).
 METRICS: dict[str, dict[str, str]] = {
     "enplanements": {
         "pattern": r"(https://s3\.wasabisys\.com/[^\s\"'<>)]*[Ee]nplane[^\s\"'<>)]*\.pdf)",
