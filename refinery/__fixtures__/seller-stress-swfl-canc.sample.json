@@ -1,0 +1,2592 @@
+[
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "24.24"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "22.76"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-06-01",
+    "cancellation_rate_pct": "26.67"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-07-01",
+    "cancellation_rate_pct": "18.18"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-08-01",
+    "cancellation_rate_pct": "20.33"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-09-01",
+    "cancellation_rate_pct": "16.67"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-10-01",
+    "cancellation_rate_pct": "19.35"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-11-01",
+    "cancellation_rate_pct": "13.74"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-12-01",
+    "cancellation_rate_pct": "18.84"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-01-01",
+    "cancellation_rate_pct": "23.48"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-02-01",
+    "cancellation_rate_pct": "25.93"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-03-01",
+    "cancellation_rate_pct": "28.16"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-04-01",
+    "cancellation_rate_pct": "24.32"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-05-01",
+    "cancellation_rate_pct": "22.92"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-06-01",
+    "cancellation_rate_pct": "17.69"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-07-01",
+    "cancellation_rate_pct": "18.57"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-08-01",
+    "cancellation_rate_pct": "19.23"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-09-01",
+    "cancellation_rate_pct": "22.22"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-10-01",
+    "cancellation_rate_pct": "19.55"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-11-01",
+    "cancellation_rate_pct": "21.64"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-12-01",
+    "cancellation_rate_pct": "28.1"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-01-01",
+    "cancellation_rate_pct": "23.94"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-02-01",
+    "cancellation_rate_pct": "24.6"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-03-01",
+    "cancellation_rate_pct": "19.27"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-04-01",
+    "cancellation_rate_pct": "21.39"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-05-01",
+    "cancellation_rate_pct": "23.91"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-06-01",
+    "cancellation_rate_pct": "25.45"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-07-01",
+    "cancellation_rate_pct": "30.61"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-08-01",
+    "cancellation_rate_pct": "24.44"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-09-01",
+    "cancellation_rate_pct": "20.98"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-10-01",
+    "cancellation_rate_pct": "18.92"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-11-01",
+    "cancellation_rate_pct": "21.09"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-12-01",
+    "cancellation_rate_pct": "19.48"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-01-01",
+    "cancellation_rate_pct": "22.52"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-02-01",
+    "cancellation_rate_pct": "26.57"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-03-01",
+    "cancellation_rate_pct": "29.79"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-04-01",
+    "cancellation_rate_pct": "29.13"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-05-01",
+    "cancellation_rate_pct": "23.88"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-06-01",
+    "cancellation_rate_pct": "21.55"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-07-01",
+    "cancellation_rate_pct": "18.63"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-08-01",
+    "cancellation_rate_pct": "23.46"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-09-01",
+    "cancellation_rate_pct": "33.33"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-10-01",
+    "cancellation_rate_pct": "33.85"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-11-01",
+    "cancellation_rate_pct": "24.66"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-12-01",
+    "cancellation_rate_pct": "16.47"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "15.84"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "17.43"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "19.27"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "16.67"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "23.66"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-06-01",
+    "cancellation_rate_pct": "29.35"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-07-01",
+    "cancellation_rate_pct": "35.63"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-08-01",
+    "cancellation_rate_pct": "30"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-09-01",
+    "cancellation_rate_pct": "31.08"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "32.88"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "24.18"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "26.21"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "24.59"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "27.19"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "23.48"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "19.81"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-05-01",
+    "cancellation_rate_pct": "22.11"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-06-01",
+    "cancellation_rate_pct": "21.05"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-07-01",
+    "cancellation_rate_pct": "24.44"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-08-01",
+    "cancellation_rate_pct": "23.75"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-09-01",
+    "cancellation_rate_pct": "30.16"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-10-01",
+    "cancellation_rate_pct": "32.65"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-11-01",
+    "cancellation_rate_pct": "25.86"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-12-01",
+    "cancellation_rate_pct": "17.65"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-01-01",
+    "cancellation_rate_pct": "18.75"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-02-01",
+    "cancellation_rate_pct": "20.25"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-03-01",
+    "cancellation_rate_pct": "24.66"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-04-01",
+    "cancellation_rate_pct": "19.7"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-05-01",
+    "cancellation_rate_pct": "20.29"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-06-01",
+    "cancellation_rate_pct": "18.31"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-07-01",
+    "cancellation_rate_pct": "17.72"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-08-01",
+    "cancellation_rate_pct": "14.71"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-09-01",
+    "cancellation_rate_pct": "17.74"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-10-01",
+    "cancellation_rate_pct": "19.23"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-11-01",
+    "cancellation_rate_pct": "18.75"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-12-01",
+    "cancellation_rate_pct": "17.57"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-01-01",
+    "cancellation_rate_pct": "16.67"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-02-01",
+    "cancellation_rate_pct": "10.71"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-03-01",
+    "cancellation_rate_pct": "12.74"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "14.74"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "13.92"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-06-01",
+    "cancellation_rate_pct": "14.42"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-07-01",
+    "cancellation_rate_pct": "13.44"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-08-01",
+    "cancellation_rate_pct": "14.74"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-09-01",
+    "cancellation_rate_pct": "15.41"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-10-01",
+    "cancellation_rate_pct": "15.54"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-11-01",
+    "cancellation_rate_pct": "12.47"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-12-01",
+    "cancellation_rate_pct": "13.79"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-01-01",
+    "cancellation_rate_pct": "16.2"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-02-01",
+    "cancellation_rate_pct": "17.6"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-03-01",
+    "cancellation_rate_pct": "19.21"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-04-01",
+    "cancellation_rate_pct": "16.56"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-05-01",
+    "cancellation_rate_pct": "19.73"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-06-01",
+    "cancellation_rate_pct": "16.84"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-07-01",
+    "cancellation_rate_pct": "17.84"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-08-01",
+    "cancellation_rate_pct": "14.46"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-09-01",
+    "cancellation_rate_pct": "14.35"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-10-01",
+    "cancellation_rate_pct": "15.87"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-11-01",
+    "cancellation_rate_pct": "17.51"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-12-01",
+    "cancellation_rate_pct": "16.73"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-01-01",
+    "cancellation_rate_pct": "14.31"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-02-01",
+    "cancellation_rate_pct": "15"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-03-01",
+    "cancellation_rate_pct": "17.03"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-04-01",
+    "cancellation_rate_pct": "17.94"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-05-01",
+    "cancellation_rate_pct": "18.8"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-06-01",
+    "cancellation_rate_pct": "18.29"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-07-01",
+    "cancellation_rate_pct": "18.32"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-08-01",
+    "cancellation_rate_pct": "19.08"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-09-01",
+    "cancellation_rate_pct": "18.43"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-10-01",
+    "cancellation_rate_pct": "17.81"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-11-01",
+    "cancellation_rate_pct": "16.61"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-12-01",
+    "cancellation_rate_pct": "13.58"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-01-01",
+    "cancellation_rate_pct": "15.38"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-02-01",
+    "cancellation_rate_pct": "14.32"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-03-01",
+    "cancellation_rate_pct": "16.49"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-04-01",
+    "cancellation_rate_pct": "13.96"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-05-01",
+    "cancellation_rate_pct": "15.31"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-06-01",
+    "cancellation_rate_pct": "12.54"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-07-01",
+    "cancellation_rate_pct": "12.83"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-08-01",
+    "cancellation_rate_pct": "17.13"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-09-01",
+    "cancellation_rate_pct": "18.93"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-10-01",
+    "cancellation_rate_pct": "19.27"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-11-01",
+    "cancellation_rate_pct": "13.87"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-12-01",
+    "cancellation_rate_pct": "11.08"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "10.54"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "14.12"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "13.86"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "18.87"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "16.38"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-06-01",
+    "cancellation_rate_pct": "19.39"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-07-01",
+    "cancellation_rate_pct": "16.23"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-08-01",
+    "cancellation_rate_pct": "21.11"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-09-01",
+    "cancellation_rate_pct": "21.6"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "21.58"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "18.11"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "15.86"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "16.43"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "13.93"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "13.52"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "14.34"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-05-01",
+    "cancellation_rate_pct": "17.39"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-06-01",
+    "cancellation_rate_pct": "14.87"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-07-01",
+    "cancellation_rate_pct": "13.9"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-08-01",
+    "cancellation_rate_pct": "12.43"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-09-01",
+    "cancellation_rate_pct": "18.92"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-10-01",
+    "cancellation_rate_pct": "15.9"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-11-01",
+    "cancellation_rate_pct": "13.1"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-12-01",
+    "cancellation_rate_pct": "9.89"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-01-01",
+    "cancellation_rate_pct": "11.05"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-02-01",
+    "cancellation_rate_pct": "11.72"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-03-01",
+    "cancellation_rate_pct": "14.14"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-04-01",
+    "cancellation_rate_pct": "12.94"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-05-01",
+    "cancellation_rate_pct": "12.5"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-06-01",
+    "cancellation_rate_pct": "12.45"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-07-01",
+    "cancellation_rate_pct": "14.55"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-08-01",
+    "cancellation_rate_pct": "14.29"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-09-01",
+    "cancellation_rate_pct": "13.41"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-10-01",
+    "cancellation_rate_pct": "10.55"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-11-01",
+    "cancellation_rate_pct": "10.71"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-12-01",
+    "cancellation_rate_pct": "11.49"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-01-01",
+    "cancellation_rate_pct": "12.38"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-02-01",
+    "cancellation_rate_pct": "12.59"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-03-01",
+    "cancellation_rate_pct": "12.76"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "16.47"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "16.11"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-06-01",
+    "cancellation_rate_pct": "15.54"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-07-01",
+    "cancellation_rate_pct": "16.01"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-08-01",
+    "cancellation_rate_pct": "18.6"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-09-01",
+    "cancellation_rate_pct": "17.1"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-10-01",
+    "cancellation_rate_pct": "16.05"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-11-01",
+    "cancellation_rate_pct": "14.02"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-12-01",
+    "cancellation_rate_pct": "16.93"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-01-01",
+    "cancellation_rate_pct": "20.66"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-02-01",
+    "cancellation_rate_pct": "20"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-03-01",
+    "cancellation_rate_pct": "22.18"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-04-01",
+    "cancellation_rate_pct": "16.61"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-05-01",
+    "cancellation_rate_pct": "17.98"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-06-01",
+    "cancellation_rate_pct": "16.38"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-07-01",
+    "cancellation_rate_pct": "18.97"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-08-01",
+    "cancellation_rate_pct": "18.21"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-09-01",
+    "cancellation_rate_pct": "18.32"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-10-01",
+    "cancellation_rate_pct": "22.71"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-11-01",
+    "cancellation_rate_pct": "19.87"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-12-01",
+    "cancellation_rate_pct": "20.06"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-01-01",
+    "cancellation_rate_pct": "15.76"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-02-01",
+    "cancellation_rate_pct": "16.86"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-03-01",
+    "cancellation_rate_pct": "17.45"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-04-01",
+    "cancellation_rate_pct": "17.89"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-05-01",
+    "cancellation_rate_pct": "18.29"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-06-01",
+    "cancellation_rate_pct": "22.04"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-07-01",
+    "cancellation_rate_pct": "22.84"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-08-01",
+    "cancellation_rate_pct": "22.48"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-09-01",
+    "cancellation_rate_pct": "18.06"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-10-01",
+    "cancellation_rate_pct": "19.12"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-11-01",
+    "cancellation_rate_pct": "18.77"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-12-01",
+    "cancellation_rate_pct": "19.56"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-01-01",
+    "cancellation_rate_pct": "20.78"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-02-01",
+    "cancellation_rate_pct": "18.89"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-03-01",
+    "cancellation_rate_pct": "21.26"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-04-01",
+    "cancellation_rate_pct": "21.96"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-05-01",
+    "cancellation_rate_pct": "20.97"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-06-01",
+    "cancellation_rate_pct": "22.69"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-07-01",
+    "cancellation_rate_pct": "22.81"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-08-01",
+    "cancellation_rate_pct": "29.41"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-09-01",
+    "cancellation_rate_pct": "22.07"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-10-01",
+    "cancellation_rate_pct": "21.57"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-11-01",
+    "cancellation_rate_pct": "15.58"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-12-01",
+    "cancellation_rate_pct": "12.85"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "16.12"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "18.51"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "18.53"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "16.79"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "16.32"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-06-01",
+    "cancellation_rate_pct": "16.74"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-07-01",
+    "cancellation_rate_pct": "17.02"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-08-01",
+    "cancellation_rate_pct": "17.89"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-09-01",
+    "cancellation_rate_pct": "16.93"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "18.78"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "15.58"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "15.55"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "14.83"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "18.34"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "18.05"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "19.57"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-05-01",
+    "cancellation_rate_pct": "16.67"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-06-01",
+    "cancellation_rate_pct": "20"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-07-01",
+    "cancellation_rate_pct": "18.29"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-08-01",
+    "cancellation_rate_pct": "19.4"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-09-01",
+    "cancellation_rate_pct": "13.57"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-10-01",
+    "cancellation_rate_pct": "16"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-11-01",
+    "cancellation_rate_pct": "12.66"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-12-01",
+    "cancellation_rate_pct": "16.75"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-01-01",
+    "cancellation_rate_pct": "15.63"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-02-01",
+    "cancellation_rate_pct": "18.04"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-03-01",
+    "cancellation_rate_pct": "17.01"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-04-01",
+    "cancellation_rate_pct": "15.42"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-05-01",
+    "cancellation_rate_pct": "14.22"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-06-01",
+    "cancellation_rate_pct": "12.77"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-07-01",
+    "cancellation_rate_pct": "13.58"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-08-01",
+    "cancellation_rate_pct": "11.45"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-09-01",
+    "cancellation_rate_pct": "15.85"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-10-01",
+    "cancellation_rate_pct": "13.38"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-11-01",
+    "cancellation_rate_pct": "12.43"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-12-01",
+    "cancellation_rate_pct": "10.55"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-01-01",
+    "cancellation_rate_pct": "10.18"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-02-01",
+    "cancellation_rate_pct": "13.01"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-03-01",
+    "cancellation_rate_pct": "12.71"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "14.07"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "13.18"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-06-01",
+    "cancellation_rate_pct": "14.55"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-07-01",
+    "cancellation_rate_pct": "16.83"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-08-01",
+    "cancellation_rate_pct": "19.3"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-09-01",
+    "cancellation_rate_pct": "17.56"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-10-01",
+    "cancellation_rate_pct": "18.06"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-11-01",
+    "cancellation_rate_pct": "15.25"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-12-01",
+    "cancellation_rate_pct": "14.86"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-01-01",
+    "cancellation_rate_pct": "22.73"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-02-01",
+    "cancellation_rate_pct": "23.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-03-01",
+    "cancellation_rate_pct": "27.68"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-04-01",
+    "cancellation_rate_pct": "14.78"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-05-01",
+    "cancellation_rate_pct": "12.05"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-06-01",
+    "cancellation_rate_pct": "14.36"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-07-01",
+    "cancellation_rate_pct": "15.5"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-08-01",
+    "cancellation_rate_pct": "13.86"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-09-01",
+    "cancellation_rate_pct": "16.08"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-10-01",
+    "cancellation_rate_pct": "15.21"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-11-01",
+    "cancellation_rate_pct": "17.77"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-12-01",
+    "cancellation_rate_pct": "17.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-01-01",
+    "cancellation_rate_pct": "16.15"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-02-01",
+    "cancellation_rate_pct": "18.08"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-03-01",
+    "cancellation_rate_pct": "17.41"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-04-01",
+    "cancellation_rate_pct": "21.98"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-05-01",
+    "cancellation_rate_pct": "16.87"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-06-01",
+    "cancellation_rate_pct": "24.64"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-07-01",
+    "cancellation_rate_pct": "23.02"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-08-01",
+    "cancellation_rate_pct": "20.74"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-09-01",
+    "cancellation_rate_pct": "14.62"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-10-01",
+    "cancellation_rate_pct": "13.48"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-11-01",
+    "cancellation_rate_pct": "14.8"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-12-01",
+    "cancellation_rate_pct": "12.12"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-01-01",
+    "cancellation_rate_pct": "11.9"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-02-01",
+    "cancellation_rate_pct": "12.31"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-03-01",
+    "cancellation_rate_pct": "14.29"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-04-01",
+    "cancellation_rate_pct": "16.27"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-05-01",
+    "cancellation_rate_pct": "18.8"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-06-01",
+    "cancellation_rate_pct": "22.97"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-07-01",
+    "cancellation_rate_pct": "17.65"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-08-01",
+    "cancellation_rate_pct": "28.3"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-09-01",
+    "cancellation_rate_pct": "36.84"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-10-01",
+    "cancellation_rate_pct": "42.19"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-11-01",
+    "cancellation_rate_pct": "21.9"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-12-01",
+    "cancellation_rate_pct": "13.57"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "12.57"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "13.94"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "17.99"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "20.69"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "19.63"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-06-01",
+    "cancellation_rate_pct": "21.11"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-07-01",
+    "cancellation_rate_pct": "13.92"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-08-01",
+    "cancellation_rate_pct": "14.93"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-09-01",
+    "cancellation_rate_pct": "15.15"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "15.87"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "17.39"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "12.64"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "10.48"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "11.54"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "14.29"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "17.95"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-05-01",
+    "cancellation_rate_pct": "13.51"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-06-01",
+    "cancellation_rate_pct": "15.52"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-07-01",
+    "cancellation_rate_pct": "8.77"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-08-01",
+    "cancellation_rate_pct": "22.22"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-09-01",
+    "cancellation_rate_pct": "17.31"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-10-01",
+    "cancellation_rate_pct": "20"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-11-01",
+    "cancellation_rate_pct": "17.46"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-12-01",
+    "cancellation_rate_pct": "16.18"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-01-01",
+    "cancellation_rate_pct": "12.79"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-02-01",
+    "cancellation_rate_pct": "10.59"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-03-01",
+    "cancellation_rate_pct": "10"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-04-01",
+    "cancellation_rate_pct": "10.67"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-05-01",
+    "cancellation_rate_pct": "10"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-06-01",
+    "cancellation_rate_pct": "16.22"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-07-01",
+    "cancellation_rate_pct": "18.42"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-08-01",
+    "cancellation_rate_pct": "21.92"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-09-01",
+    "cancellation_rate_pct": "18.92"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-10-01",
+    "cancellation_rate_pct": "11.11"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-11-01",
+    "cancellation_rate_pct": "11.93"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-12-01",
+    "cancellation_rate_pct": "14.29"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-01-01",
+    "cancellation_rate_pct": "15.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-02-01",
+    "cancellation_rate_pct": "13.67"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-03-01",
+    "cancellation_rate_pct": "13.49"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "10"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "12.98"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-06-01",
+    "cancellation_rate_pct": "14.81"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-07-01",
+    "cancellation_rate_pct": "15.63"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-08-01",
+    "cancellation_rate_pct": "11.21"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-09-01",
+    "cancellation_rate_pct": "12.2"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-10-01",
+    "cancellation_rate_pct": "10.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-11-01",
+    "cancellation_rate_pct": "9.94"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-12-01",
+    "cancellation_rate_pct": "12.35"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-01-01",
+    "cancellation_rate_pct": "16.17"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-02-01",
+    "cancellation_rate_pct": "19.67"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-03-01",
+    "cancellation_rate_pct": "17.59"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-04-01",
+    "cancellation_rate_pct": "12.23"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-05-01",
+    "cancellation_rate_pct": "11.83"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-06-01",
+    "cancellation_rate_pct": "10.31"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-07-01",
+    "cancellation_rate_pct": "11.7"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-08-01",
+    "cancellation_rate_pct": "11.11"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-09-01",
+    "cancellation_rate_pct": "13.64"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-10-01",
+    "cancellation_rate_pct": "10.73"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-11-01",
+    "cancellation_rate_pct": "10.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-12-01",
+    "cancellation_rate_pct": "8.59"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-01-01",
+    "cancellation_rate_pct": "10.44"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-02-01",
+    "cancellation_rate_pct": "11.01"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-03-01",
+    "cancellation_rate_pct": "13.03"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-04-01",
+    "cancellation_rate_pct": "13.08"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-05-01",
+    "cancellation_rate_pct": "13.33"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-06-01",
+    "cancellation_rate_pct": "15.86"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-07-01",
+    "cancellation_rate_pct": "14.29"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-08-01",
+    "cancellation_rate_pct": "11.18"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-09-01",
+    "cancellation_rate_pct": "7.41"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-10-01",
+    "cancellation_rate_pct": "9.88"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-11-01",
+    "cancellation_rate_pct": "12.1"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-12-01",
+    "cancellation_rate_pct": "12.73"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-01-01",
+    "cancellation_rate_pct": "12.56"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-02-01",
+    "cancellation_rate_pct": "10.78"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-03-01",
+    "cancellation_rate_pct": "13.99"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-04-01",
+    "cancellation_rate_pct": "14.18"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-05-01",
+    "cancellation_rate_pct": "18.95"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-06-01",
+    "cancellation_rate_pct": "12.35"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-07-01",
+    "cancellation_rate_pct": "7.59"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-08-01",
+    "cancellation_rate_pct": "13.19"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-09-01",
+    "cancellation_rate_pct": "13.86"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-10-01",
+    "cancellation_rate_pct": "15.45"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-11-01",
+    "cancellation_rate_pct": "8.94"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-12-01",
+    "cancellation_rate_pct": "12.12"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "11.83"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "14.04"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "13.77"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "14.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "10.09"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-06-01",
+    "cancellation_rate_pct": "9.57"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-07-01",
+    "cancellation_rate_pct": "7.89"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-08-01",
+    "cancellation_rate_pct": "12"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-09-01",
+    "cancellation_rate_pct": "9.33"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "11.24"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "9.8"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "7.91"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "7.74"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "6.62"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "7.38"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "6.86"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-05-01",
+    "cancellation_rate_pct": "9.68"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-06-01",
+    "cancellation_rate_pct": "12.5"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-07-01",
+    "cancellation_rate_pct": "13.7"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-08-01",
+    "cancellation_rate_pct": "11.48"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-09-01",
+    "cancellation_rate_pct": "10.39"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-10-01",
+    "cancellation_rate_pct": "11.9"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-11-01",
+    "cancellation_rate_pct": "10.62"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-12-01",
+    "cancellation_rate_pct": "8.85"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-01-01",
+    "cancellation_rate_pct": "6.92"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-02-01",
+    "cancellation_rate_pct": "10.16"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-03-01",
+    "cancellation_rate_pct": "10.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-04-01",
+    "cancellation_rate_pct": "12.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-05-01",
+    "cancellation_rate_pct": "9.47"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-06-01",
+    "cancellation_rate_pct": "10.81"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-07-01",
+    "cancellation_rate_pct": "6.76"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-08-01",
+    "cancellation_rate_pct": "5.48"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-09-01",
+    "cancellation_rate_pct": "7.61"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-10-01",
+    "cancellation_rate_pct": "9.35"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-11-01",
+    "cancellation_rate_pct": "10.94"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-12-01",
+    "cancellation_rate_pct": "7.93"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-01-01",
+    "cancellation_rate_pct": "6.74"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-02-01",
+    "cancellation_rate_pct": "4.95"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-03-01",
+    "cancellation_rate_pct": "6.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "12.64"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "14.05"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-06-01",
+    "cancellation_rate_pct": "16.74"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-07-01",
+    "cancellation_rate_pct": "15.74"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-08-01",
+    "cancellation_rate_pct": "14.14"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-09-01",
+    "cancellation_rate_pct": "10.75"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-10-01",
+    "cancellation_rate_pct": "12.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-11-01",
+    "cancellation_rate_pct": "13.41"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-12-01",
+    "cancellation_rate_pct": "12.54"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-01-01",
+    "cancellation_rate_pct": "17.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-02-01",
+    "cancellation_rate_pct": "20.34"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-03-01",
+    "cancellation_rate_pct": "26.26"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-04-01",
+    "cancellation_rate_pct": "17.02"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-05-01",
+    "cancellation_rate_pct": "13.19"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-06-01",
+    "cancellation_rate_pct": "11.52"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-07-01",
+    "cancellation_rate_pct": "10.64"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-08-01",
+    "cancellation_rate_pct": "11.41"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-09-01",
+    "cancellation_rate_pct": "11.96"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-10-01",
+    "cancellation_rate_pct": "11.32"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-11-01",
+    "cancellation_rate_pct": "8.61"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-12-01",
+    "cancellation_rate_pct": "11.16"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-01-01",
+    "cancellation_rate_pct": "13.54"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-02-01",
+    "cancellation_rate_pct": "14.39"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-03-01",
+    "cancellation_rate_pct": "14.16"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-04-01",
+    "cancellation_rate_pct": "12.61"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-05-01",
+    "cancellation_rate_pct": "14.08"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-06-01",
+    "cancellation_rate_pct": "15.33"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-07-01",
+    "cancellation_rate_pct": "16.59"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-08-01",
+    "cancellation_rate_pct": "16.41"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-09-01",
+    "cancellation_rate_pct": "13.66"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-10-01",
+    "cancellation_rate_pct": "13"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-11-01",
+    "cancellation_rate_pct": "14.78"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-12-01",
+    "cancellation_rate_pct": "11.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-01-01",
+    "cancellation_rate_pct": "12.37"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-02-01",
+    "cancellation_rate_pct": "15.41"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-03-01",
+    "cancellation_rate_pct": "17.36"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-04-01",
+    "cancellation_rate_pct": "17.17"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-05-01",
+    "cancellation_rate_pct": "12.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-06-01",
+    "cancellation_rate_pct": "11.29"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-07-01",
+    "cancellation_rate_pct": "12.8"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-08-01",
+    "cancellation_rate_pct": "16.78"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-09-01",
+    "cancellation_rate_pct": "21.64"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-10-01",
+    "cancellation_rate_pct": "22.9"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-11-01",
+    "cancellation_rate_pct": "15.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-12-01",
+    "cancellation_rate_pct": "9.42"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "7.81"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "7.89"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "11.07"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "13.57"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "17.03"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-06-01",
+    "cancellation_rate_pct": "14.62"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-07-01",
+    "cancellation_rate_pct": "14.63"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-08-01",
+    "cancellation_rate_pct": "12.9"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-09-01",
+    "cancellation_rate_pct": "12.58"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "11.27"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "9.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "9.52"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "9.54"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "12.02"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "13.41"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "13.78"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-05-01",
+    "cancellation_rate_pct": "9.87"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-06-01",
+    "cancellation_rate_pct": "9.7"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-07-01",
+    "cancellation_rate_pct": "13.33"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-08-01",
+    "cancellation_rate_pct": "12.8"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-09-01",
+    "cancellation_rate_pct": "9.93"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-10-01",
+    "cancellation_rate_pct": "8.23"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-11-01",
+    "cancellation_rate_pct": "8.47"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-12-01",
+    "cancellation_rate_pct": "10.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-01-01",
+    "cancellation_rate_pct": "9.41"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-02-01",
+    "cancellation_rate_pct": "10.44"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-03-01",
+    "cancellation_rate_pct": "7.19"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-04-01",
+    "cancellation_rate_pct": "10.19"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-05-01",
+    "cancellation_rate_pct": "9.47"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-06-01",
+    "cancellation_rate_pct": "9.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-07-01",
+    "cancellation_rate_pct": "8.92"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-08-01",
+    "cancellation_rate_pct": "10.71"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-09-01",
+    "cancellation_rate_pct": "14.17"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-10-01",
+    "cancellation_rate_pct": "12.03"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-11-01",
+    "cancellation_rate_pct": "10.46"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-12-01",
+    "cancellation_rate_pct": "7.73"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-01-01",
+    "cancellation_rate_pct": "7.39"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-02-01",
+    "cancellation_rate_pct": "8.21"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-03-01",
+    "cancellation_rate_pct": "10.48"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2019-04-01",
+    "cancellation_rate_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2019-05-01",
+    "cancellation_rate_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-01-01",
+    "cancellation_rate_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-02-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-03-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-04-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-05-01",
+    "cancellation_rate_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-10-01",
+    "cancellation_rate_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-11-01",
+    "cancellation_rate_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-12-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-01-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-02-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-03-01",
+    "cancellation_rate_pct": "0"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-04-01",
+    "cancellation_rate_pct": "0"
+  }
+]

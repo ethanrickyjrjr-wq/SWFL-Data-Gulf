@@ -231,4 +231,11 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "SWFL commercial building permits — annual issued-permit dataset from the Maxwell, Hendry & Simmons Data Book (calendar year 2025), aggregated by submarket and site ZIP into permit count, declared value, and building square footage for commercial-real-estate operators.",
     ttl_seconds: 31536000,
   },
+  {
+    id: "seller-stress-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers 126 SWFL ZIPs, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.",
+    ttl_seconds: 30 * 24 * 60 * 60,
+  },
 ];

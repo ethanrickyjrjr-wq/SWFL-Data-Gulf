@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — seller-stress-swfl brain: full build + all gates green
+
+- **seller-stress-swfl brain shipped**: 3 DuckDB sources (`stress-price-drops-source.mts`, `stress-cancellations-source.mts`, `stress-delistings-source.mts`), pack (`refinery/packs/seller-stress-swfl.mts`), 3 fixtures (514+ rows each), test file (12/12 pass), vocab (5 slugs), catalog entry, index registration. All VARCHAR metric columns handled via `toNum()` — probed live parquets first.
+- **Bug fixed**: baseline suppression guard was firing AFTER the trailing guard; reordered to check baseline first (ZIP 33932 with 2 baseline obs now correctly flagged `baseline_suppressed: true`). Also fixed `recentPeriods.length === 0` dead condition in trailing guard.
+- **All acceptance gates passed**: `bun test seller-stress-swfl.test.mts` 12/12, `catalog.test.mts` 4/4, vocab `--all` 30 brains 0 orphans. Render (`--target-only`) pending live data confirmation.
+- **Next**: open `seller_stress_brain` check, run `npm run refinery -- seller-stress-swfl --target-only` after Vercel deploy to verify direction=bearish on live data.
+
 ## 2026-06-14 (main) — Redfin data strategy: full inventory audit + seller-stress-swfl design spec
 
 - **Full data lake inventory audit** (`docs/superpowers/plans/2026-06-14-redfin-data-strategy/06-data-inventory.md`): what we have (3 new stress Tier-1 tables, 31 live brains, full table inventory with row counts + status), what's extra (FHFA HPI unbraned, lee permits pagination bug, sparse rainfall), what we need (housing_market new format, city-level 4×, Zillow ZHVI tiers, neighborhood grain). ZIP-grain moat confirmed: no competitor publishes composite seller stress at ZIP with cancellations.

@@ -1,0 +1,3110 @@
+[
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "17.7",
+    "share_relisted_pct": "0.33"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "20.76",
+    "share_relisted_pct": "2.77"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-06-01",
+    "share_delisted_pct": "19.49",
+    "share_relisted_pct": "5.51"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-07-01",
+    "share_delisted_pct": "18.82",
+    "share_relisted_pct": "6.27"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-08-01",
+    "share_delisted_pct": "14.38",
+    "share_relisted_pct": "5.48"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-09-01",
+    "share_delisted_pct": "11.99",
+    "share_relisted_pct": "4.11"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-10-01",
+    "share_delisted_pct": "12.06",
+    "share_relisted_pct": "4.96"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-11-01",
+    "share_delisted_pct": "15.14",
+    "share_relisted_pct": "4.58"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-12-01",
+    "share_delisted_pct": "13.56",
+    "share_relisted_pct": "5.76"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-01-01",
+    "share_delisted_pct": "15.28",
+    "share_relisted_pct": "4.98"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-02-01",
+    "share_delisted_pct": "13.48",
+    "share_relisted_pct": "5.67"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-03-01",
+    "share_delisted_pct": "16.54",
+    "share_relisted_pct": "7.72"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-04-01",
+    "share_delisted_pct": "15.07",
+    "share_relisted_pct": "1.47"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-05-01",
+    "share_delisted_pct": "16.12",
+    "share_relisted_pct": "0.73"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-06-01",
+    "share_delisted_pct": "17.05",
+    "share_relisted_pct": "0.78"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-07-01",
+    "share_delisted_pct": "16.46",
+    "share_relisted_pct": "2.88"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-08-01",
+    "share_delisted_pct": "17.35",
+    "share_relisted_pct": "4.11"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-09-01",
+    "share_delisted_pct": "12.15",
+    "share_relisted_pct": "7.01"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-10-01",
+    "share_delisted_pct": "12.16",
+    "share_relisted_pct": "6.31"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-11-01",
+    "share_delisted_pct": "8.48",
+    "share_relisted_pct": "8.48"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-12-01",
+    "share_delisted_pct": "9.69",
+    "share_relisted_pct": "6.17"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-01-01",
+    "share_delisted_pct": "7.69",
+    "share_relisted_pct": "5.26"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-02-01",
+    "share_delisted_pct": "7.72",
+    "share_relisted_pct": "3.47"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-03-01",
+    "share_delisted_pct": "7.52",
+    "share_relisted_pct": "3.76"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-04-01",
+    "share_delisted_pct": "6.58",
+    "share_relisted_pct": "3.7"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-05-01",
+    "share_delisted_pct": "5.44",
+    "share_relisted_pct": "3.77"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-06-01",
+    "share_delisted_pct": "5.58",
+    "share_relisted_pct": "3"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-07-01",
+    "share_delisted_pct": "8.72",
+    "share_relisted_pct": "4.59"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-08-01",
+    "share_delisted_pct": "9.31",
+    "share_relisted_pct": "5.39"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-09-01",
+    "share_delisted_pct": "8.04",
+    "share_relisted_pct": "6.03"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-10-01",
+    "share_delisted_pct": "5.61",
+    "share_relisted_pct": "4.08"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-11-01",
+    "share_delisted_pct": "7.61",
+    "share_relisted_pct": "3.55"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-12-01",
+    "share_delisted_pct": "8.67",
+    "share_relisted_pct": "2.04"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-01-01",
+    "share_delisted_pct": "8.21",
+    "share_relisted_pct": "1.54"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-02-01",
+    "share_delisted_pct": "5.05",
+    "share_relisted_pct": "1.01"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-03-01",
+    "share_delisted_pct": "5.08",
+    "share_relisted_pct": "1.52"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-04-01",
+    "share_delisted_pct": "8.29",
+    "share_relisted_pct": "1.95"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-05-01",
+    "share_delisted_pct": "10.28",
+    "share_relisted_pct": "2.34"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-06-01",
+    "share_delisted_pct": "13.66",
+    "share_relisted_pct": "2.44"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-07-01",
+    "share_delisted_pct": "11.05",
+    "share_relisted_pct": "3.68"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-08-01",
+    "share_delisted_pct": "14.46",
+    "share_relisted_pct": "4.22"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-09-01",
+    "share_delisted_pct": "16.46",
+    "share_relisted_pct": "4.43"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-10-01",
+    "share_delisted_pct": "20.12",
+    "share_relisted_pct": "3.05"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-11-01",
+    "share_delisted_pct": "17.88",
+    "share_relisted_pct": "2.79"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-12-01",
+    "share_delisted_pct": "16.49",
+    "share_relisted_pct": "3.19"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "13.21",
+    "share_relisted_pct": "3.3"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "11.16",
+    "share_relisted_pct": "3.72"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "10.6",
+    "share_relisted_pct": "5.07"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "9.86",
+    "share_relisted_pct": "6.1"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "13.27",
+    "share_relisted_pct": "7.58"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-06-01",
+    "share_delisted_pct": "13",
+    "share_relisted_pct": "5.38"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-07-01",
+    "share_delisted_pct": "13.48",
+    "share_relisted_pct": "6.09"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-08-01",
+    "share_delisted_pct": "11.24",
+    "share_relisted_pct": "5.22"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-09-01",
+    "share_delisted_pct": "13.49",
+    "share_relisted_pct": "6.75"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "16.93",
+    "share_relisted_pct": "6.3"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "16.03",
+    "share_relisted_pct": "6.62"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "13.82",
+    "share_relisted_pct": "6.58"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "12.96",
+    "share_relisted_pct": "6.48"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "14.33",
+    "share_relisted_pct": "6.05"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "16.61",
+    "share_relisted_pct": "6.07"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "17.17",
+    "share_relisted_pct": "5.39"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-05-01",
+    "share_delisted_pct": "20.82",
+    "share_relisted_pct": "5.12"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-06-01",
+    "share_delisted_pct": "19.37",
+    "share_relisted_pct": "6.34"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-07-01",
+    "share_delisted_pct": "19.23",
+    "share_relisted_pct": "6.99"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-08-01",
+    "share_delisted_pct": "16.23",
+    "share_relisted_pct": "7.92"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-09-01",
+    "share_delisted_pct": "16.97",
+    "share_relisted_pct": "10.7"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-10-01",
+    "share_delisted_pct": "16.3",
+    "share_relisted_pct": "10.74"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-11-01",
+    "share_delisted_pct": "15.53",
+    "share_relisted_pct": "12.62"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-12-01",
+    "share_delisted_pct": "13.25",
+    "share_relisted_pct": "8.2"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-01-01",
+    "share_delisted_pct": "13.13",
+    "share_relisted_pct": "6.57"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-02-01",
+    "share_delisted_pct": "16.18",
+    "share_relisted_pct": "3.76"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-03-01",
+    "share_delisted_pct": "19.06",
+    "share_relisted_pct": "4.69"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-04-01",
+    "share_delisted_pct": "20.48",
+    "share_relisted_pct": "5.42"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-05-01",
+    "share_delisted_pct": "21.1",
+    "share_relisted_pct": "5.19"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-06-01",
+    "share_delisted_pct": "25.59",
+    "share_relisted_pct": "6.73"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-07-01",
+    "share_delisted_pct": "23.28",
+    "share_relisted_pct": "6.89"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-08-01",
+    "share_delisted_pct": "20",
+    "share_relisted_pct": "11.72"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-09-01",
+    "share_delisted_pct": "14.87",
+    "share_relisted_pct": "12.27"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-10-01",
+    "share_delisted_pct": "21.03",
+    "share_relisted_pct": "12.7"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-11-01",
+    "share_delisted_pct": "19.19",
+    "share_relisted_pct": "9.96"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-12-01",
+    "share_delisted_pct": "18.25",
+    "share_relisted_pct": "10.58"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-01-01",
+    "share_delisted_pct": "15.75",
+    "share_relisted_pct": "11.72"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-02-01",
+    "share_delisted_pct": "20.71",
+    "share_relisted_pct": "9.64"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-03-01",
+    "share_delisted_pct": "22.79",
+    "share_relisted_pct": "8.71"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "18",
+    "share_relisted_pct": "0.98"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "18.46",
+    "share_relisted_pct": "3.26"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-06-01",
+    "share_delisted_pct": "19.74",
+    "share_relisted_pct": "5.26"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-07-01",
+    "share_delisted_pct": "15.95",
+    "share_relisted_pct": "6.83"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-08-01",
+    "share_delisted_pct": "13.94",
+    "share_relisted_pct": "9.41"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-09-01",
+    "share_delisted_pct": "10.7",
+    "share_relisted_pct": "10.13"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-10-01",
+    "share_delisted_pct": "10.87",
+    "share_relisted_pct": "10.07"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-11-01",
+    "share_delisted_pct": "9.97",
+    "share_relisted_pct": "7.32"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-12-01",
+    "share_delisted_pct": "8.65",
+    "share_relisted_pct": "6.77"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-01-01",
+    "share_delisted_pct": "10.28",
+    "share_relisted_pct": "6.51"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-02-01",
+    "share_delisted_pct": "16.47",
+    "share_relisted_pct": "5.88"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-03-01",
+    "share_delisted_pct": "18.63",
+    "share_relisted_pct": "7.2"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-04-01",
+    "share_delisted_pct": "17.08",
+    "share_relisted_pct": "2.98"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-05-01",
+    "share_delisted_pct": "10.59",
+    "share_relisted_pct": "1.16"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-06-01",
+    "share_delisted_pct": "10.32",
+    "share_relisted_pct": "1"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-07-01",
+    "share_delisted_pct": "9.01",
+    "share_relisted_pct": "0.86"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-08-01",
+    "share_delisted_pct": "8.6",
+    "share_relisted_pct": "2"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-09-01",
+    "share_delisted_pct": "8.47",
+    "share_relisted_pct": "2.55"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-10-01",
+    "share_delisted_pct": "8.56",
+    "share_relisted_pct": "3.42"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-11-01",
+    "share_delisted_pct": "8.65",
+    "share_relisted_pct": "4.11"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-12-01",
+    "share_delisted_pct": "7.73",
+    "share_relisted_pct": "3.79"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-01-01",
+    "share_delisted_pct": "6.69",
+    "share_relisted_pct": "3.14"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-02-01",
+    "share_delisted_pct": "5.29",
+    "share_relisted_pct": "2.94"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-03-01",
+    "share_delisted_pct": "5.46",
+    "share_relisted_pct": "3.64"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-04-01",
+    "share_delisted_pct": "6.74",
+    "share_relisted_pct": "5.28"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-05-01",
+    "share_delisted_pct": "6.94",
+    "share_relisted_pct": "4.37"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-06-01",
+    "share_delisted_pct": "7.32",
+    "share_relisted_pct": "3.77"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-07-01",
+    "share_delisted_pct": "4.29",
+    "share_relisted_pct": "1.93"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-08-01",
+    "share_delisted_pct": "5.37",
+    "share_relisted_pct": "2.91"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-09-01",
+    "share_delisted_pct": "5.45",
+    "share_relisted_pct": "3.79"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-10-01",
+    "share_delisted_pct": "6.23",
+    "share_relisted_pct": "4.24"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-11-01",
+    "share_delisted_pct": "5.24",
+    "share_relisted_pct": "2.99"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-12-01",
+    "share_delisted_pct": "3.34",
+    "share_relisted_pct": "2.39"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-01-01",
+    "share_delisted_pct": "3.17",
+    "share_relisted_pct": "1.9"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-02-01",
+    "share_delisted_pct": "3.42",
+    "share_relisted_pct": "2.28"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-03-01",
+    "share_delisted_pct": "3.99",
+    "share_relisted_pct": "2.17"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-04-01",
+    "share_delisted_pct": "4.36",
+    "share_relisted_pct": "2"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-05-01",
+    "share_delisted_pct": "7.01",
+    "share_relisted_pct": "1.52"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-06-01",
+    "share_delisted_pct": "8.96",
+    "share_relisted_pct": "1.79"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-07-01",
+    "share_delisted_pct": "11.86",
+    "share_relisted_pct": "2.33"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-08-01",
+    "share_delisted_pct": "18.28",
+    "share_relisted_pct": "2.86"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-09-01",
+    "share_delisted_pct": "16.04",
+    "share_relisted_pct": "3.77"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-10-01",
+    "share_delisted_pct": "14.45",
+    "share_relisted_pct": "3.82"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-11-01",
+    "share_delisted_pct": "7.82",
+    "share_relisted_pct": "4.06"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-12-01",
+    "share_delisted_pct": "7.43",
+    "share_relisted_pct": "3.18"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "7.23",
+    "share_relisted_pct": "3.5"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "9.27",
+    "share_relisted_pct": "3.83"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "10.82",
+    "share_relisted_pct": "3.89"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "12.5",
+    "share_relisted_pct": "3.77"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "13.98",
+    "share_relisted_pct": "3.47"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-06-01",
+    "share_delisted_pct": "15.89",
+    "share_relisted_pct": "4.65"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-07-01",
+    "share_delisted_pct": "14.65",
+    "share_relisted_pct": "5.7"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-08-01",
+    "share_delisted_pct": "11.51",
+    "share_relisted_pct": "8.03"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-09-01",
+    "share_delisted_pct": "8.91",
+    "share_relisted_pct": "8.4"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "9.75",
+    "share_relisted_pct": "7.39"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "9.68",
+    "share_relisted_pct": "6.79"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "10.54",
+    "share_relisted_pct": "5.82"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "11.35",
+    "share_relisted_pct": "5.76"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "15.38",
+    "share_relisted_pct": "4.19"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "17.99",
+    "share_relisted_pct": "4.13"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "22.65",
+    "share_relisted_pct": "4.32"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-05-01",
+    "share_delisted_pct": "23.68",
+    "share_relisted_pct": "5.97"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-06-01",
+    "share_delisted_pct": "26.08",
+    "share_relisted_pct": "7.5"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-07-01",
+    "share_delisted_pct": "23.56",
+    "share_relisted_pct": "9.62"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-08-01",
+    "share_delisted_pct": "21.03",
+    "share_relisted_pct": "13.25"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-09-01",
+    "share_delisted_pct": "15.44",
+    "share_relisted_pct": "14.08"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-10-01",
+    "share_delisted_pct": "14.9",
+    "share_relisted_pct": "13.06"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-11-01",
+    "share_delisted_pct": "11.05",
+    "share_relisted_pct": "11.29"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-12-01",
+    "share_delisted_pct": "9.7",
+    "share_relisted_pct": "9.27"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-01-01",
+    "share_delisted_pct": "8.52",
+    "share_relisted_pct": "8.65"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-02-01",
+    "share_delisted_pct": "13.33",
+    "share_relisted_pct": "5.24"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-03-01",
+    "share_delisted_pct": "21.04",
+    "share_relisted_pct": "4.39"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-04-01",
+    "share_delisted_pct": "26.59",
+    "share_relisted_pct": "4.42"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-05-01",
+    "share_delisted_pct": "29.1",
+    "share_relisted_pct": "5.62"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-06-01",
+    "share_delisted_pct": "29.24",
+    "share_relisted_pct": "6.89"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-07-01",
+    "share_delisted_pct": "27.11",
+    "share_relisted_pct": "10.16"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-08-01",
+    "share_delisted_pct": "22.6",
+    "share_relisted_pct": "15.65"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-09-01",
+    "share_delisted_pct": "15.87",
+    "share_relisted_pct": "20.11"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-10-01",
+    "share_delisted_pct": "14.53",
+    "share_relisted_pct": "18.74"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-11-01",
+    "share_delisted_pct": "12.36",
+    "share_relisted_pct": "14.98"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-12-01",
+    "share_delisted_pct": "11.05",
+    "share_relisted_pct": "11.38"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-01-01",
+    "share_delisted_pct": "11.01",
+    "share_relisted_pct": "11.42"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-02-01",
+    "share_delisted_pct": "13.33",
+    "share_relisted_pct": "9.28"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-03-01",
+    "share_delisted_pct": "15.95",
+    "share_relisted_pct": "7.42"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "14.61",
+    "share_relisted_pct": "0.8"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "14.25",
+    "share_relisted_pct": "1.55"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-06-01",
+    "share_delisted_pct": "12.71",
+    "share_relisted_pct": "2.33"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-07-01",
+    "share_delisted_pct": "11",
+    "share_relisted_pct": "3.72"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-08-01",
+    "share_delisted_pct": "10.05",
+    "share_relisted_pct": "5.27"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-09-01",
+    "share_delisted_pct": "9.69",
+    "share_relisted_pct": "6.24"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-10-01",
+    "share_delisted_pct": "10.62",
+    "share_relisted_pct": "5.82"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-11-01",
+    "share_delisted_pct": "9.61",
+    "share_relisted_pct": "6.46"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-12-01",
+    "share_delisted_pct": "9.26",
+    "share_relisted_pct": "5.86"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-01-01",
+    "share_delisted_pct": "9.41",
+    "share_relisted_pct": "5.92"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-02-01",
+    "share_delisted_pct": "12.56",
+    "share_relisted_pct": "4.36"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-03-01",
+    "share_delisted_pct": "12.61",
+    "share_relisted_pct": "7.01"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-04-01",
+    "share_delisted_pct": "11.21",
+    "share_relisted_pct": "2.28"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-05-01",
+    "share_delisted_pct": "9.84",
+    "share_relisted_pct": "0.72"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-06-01",
+    "share_delisted_pct": "11.79",
+    "share_relisted_pct": "1.61"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-07-01",
+    "share_delisted_pct": "11.33",
+    "share_relisted_pct": "1.06"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-08-01",
+    "share_delisted_pct": "9.7",
+    "share_relisted_pct": "2.47"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-09-01",
+    "share_delisted_pct": "7.01",
+    "share_relisted_pct": "2.4"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-10-01",
+    "share_delisted_pct": "5.68",
+    "share_relisted_pct": "2.73"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-11-01",
+    "share_delisted_pct": "5.73",
+    "share_relisted_pct": "2.42"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-12-01",
+    "share_delisted_pct": "5.6",
+    "share_relisted_pct": "3.02"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-01-01",
+    "share_delisted_pct": "6.21",
+    "share_relisted_pct": "2.61"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-02-01",
+    "share_delisted_pct": "4.9",
+    "share_relisted_pct": "2.55"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-03-01",
+    "share_delisted_pct": "4.9",
+    "share_relisted_pct": "2.04"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-04-01",
+    "share_delisted_pct": "4.49",
+    "share_relisted_pct": "3.15"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-05-01",
+    "share_delisted_pct": "4.83",
+    "share_relisted_pct": "2.42"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-06-01",
+    "share_delisted_pct": "4.57",
+    "share_relisted_pct": "3.23"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-07-01",
+    "share_delisted_pct": "3.03",
+    "share_relisted_pct": "2.48"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-08-01",
+    "share_delisted_pct": "2.89",
+    "share_relisted_pct": "2.1"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-09-01",
+    "share_delisted_pct": "3.24",
+    "share_relisted_pct": "1.62"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-10-01",
+    "share_delisted_pct": "3.88",
+    "share_relisted_pct": "1.19"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-11-01",
+    "share_delisted_pct": "3.81",
+    "share_relisted_pct": "1.27"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-12-01",
+    "share_delisted_pct": "2.49",
+    "share_relisted_pct": "2.18"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-01-01",
+    "share_delisted_pct": "2.2",
+    "share_relisted_pct": "2.2"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-02-01",
+    "share_delisted_pct": "2.25",
+    "share_relisted_pct": "1.75"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-03-01",
+    "share_delisted_pct": "3.5",
+    "share_relisted_pct": "0.47"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-04-01",
+    "share_delisted_pct": "4.03",
+    "share_relisted_pct": "0.24"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-05-01",
+    "share_delisted_pct": "6.47",
+    "share_relisted_pct": "0.25"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-06-01",
+    "share_delisted_pct": "6.23",
+    "share_relisted_pct": "1"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-07-01",
+    "share_delisted_pct": "9.12",
+    "share_relisted_pct": "1.34"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-08-01",
+    "share_delisted_pct": "11.36",
+    "share_relisted_pct": "2.49"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-09-01",
+    "share_delisted_pct": "13.35",
+    "share_relisted_pct": "3.54"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-10-01",
+    "share_delisted_pct": "11.98",
+    "share_relisted_pct": "4.17"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-11-01",
+    "share_delisted_pct": "8.92",
+    "share_relisted_pct": "4.58"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-12-01",
+    "share_delisted_pct": "6.4",
+    "share_relisted_pct": "3.53"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "5.44",
+    "share_relisted_pct": "3.38"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "6.26",
+    "share_relisted_pct": "2.85"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "8.42",
+    "share_relisted_pct": "3.11"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "10.42",
+    "share_relisted_pct": "3.28"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "10.64",
+    "share_relisted_pct": "3.29"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-06-01",
+    "share_delisted_pct": "11.73",
+    "share_relisted_pct": "3.38"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-07-01",
+    "share_delisted_pct": "11.99",
+    "share_relisted_pct": "4.07"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-08-01",
+    "share_delisted_pct": "11.88",
+    "share_relisted_pct": "5.48"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-09-01",
+    "share_delisted_pct": "11.52",
+    "share_relisted_pct": "6.74"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "10.73",
+    "share_relisted_pct": "5.79"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "8.17",
+    "share_relisted_pct": "5.55"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "6.67",
+    "share_relisted_pct": "4.35"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "7.68",
+    "share_relisted_pct": "4.34"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "10.71",
+    "share_relisted_pct": "2.86"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "13.95",
+    "share_relisted_pct": "2.69"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "15.1",
+    "share_relisted_pct": "2.86"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-05-01",
+    "share_delisted_pct": "17.21",
+    "share_relisted_pct": "3.95"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-06-01",
+    "share_delisted_pct": "18.92",
+    "share_relisted_pct": "5.12"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-07-01",
+    "share_delisted_pct": "20.96",
+    "share_relisted_pct": "7.08"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-08-01",
+    "share_delisted_pct": "21.88",
+    "share_relisted_pct": "8.99"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-09-01",
+    "share_delisted_pct": "17.05",
+    "share_relisted_pct": "11.37"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-10-01",
+    "share_delisted_pct": "14.93",
+    "share_relisted_pct": "11.94"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-11-01",
+    "share_delisted_pct": "11.53",
+    "share_relisted_pct": "11.65"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-12-01",
+    "share_delisted_pct": "10.93",
+    "share_relisted_pct": "8.36"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-01-01",
+    "share_delisted_pct": "11.82",
+    "share_relisted_pct": "7.03"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-02-01",
+    "share_delisted_pct": "14.42",
+    "share_relisted_pct": "4.77"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-03-01",
+    "share_delisted_pct": "20.07",
+    "share_relisted_pct": "5.32"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-04-01",
+    "share_delisted_pct": "23.56",
+    "share_relisted_pct": "5.3"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-05-01",
+    "share_delisted_pct": "25.81",
+    "share_relisted_pct": "5.76"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-06-01",
+    "share_delisted_pct": "28.19",
+    "share_relisted_pct": "5.81"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-07-01",
+    "share_delisted_pct": "26.86",
+    "share_relisted_pct": "7.9"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-08-01",
+    "share_delisted_pct": "21.03",
+    "share_relisted_pct": "13.16"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-09-01",
+    "share_delisted_pct": "14.13",
+    "share_relisted_pct": "15.71"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-10-01",
+    "share_delisted_pct": "14.48",
+    "share_relisted_pct": "15.1"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-11-01",
+    "share_delisted_pct": "13.25",
+    "share_relisted_pct": "13.25"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-12-01",
+    "share_delisted_pct": "12.46",
+    "share_relisted_pct": "11.47"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-01-01",
+    "share_delisted_pct": "11.1",
+    "share_relisted_pct": "9.73"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-02-01",
+    "share_delisted_pct": "14.97",
+    "share_relisted_pct": "6.87"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-03-01",
+    "share_delisted_pct": "18.11",
+    "share_relisted_pct": "5.88"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "16.89",
+    "share_relisted_pct": "2.67"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "19.04",
+    "share_relisted_pct": "4.59"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-06-01",
+    "share_delisted_pct": "21.27",
+    "share_relisted_pct": "5.82"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-07-01",
+    "share_delisted_pct": "20.81",
+    "share_relisted_pct": "7.61"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-08-01",
+    "share_delisted_pct": "16.62",
+    "share_relisted_pct": "12.02"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-09-01",
+    "share_delisted_pct": "13.55",
+    "share_relisted_pct": "12.32"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-10-01",
+    "share_delisted_pct": "14.69",
+    "share_relisted_pct": "11.14"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-11-01",
+    "share_delisted_pct": "13.2",
+    "share_relisted_pct": "8.95"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-12-01",
+    "share_delisted_pct": "10.75",
+    "share_relisted_pct": "9.03"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-01-01",
+    "share_delisted_pct": "11.88",
+    "share_relisted_pct": "7.4"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-02-01",
+    "share_delisted_pct": "23.02",
+    "share_relisted_pct": "4.7"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-03-01",
+    "share_delisted_pct": "24.05",
+    "share_relisted_pct": "7.09"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-04-01",
+    "share_delisted_pct": "22.68",
+    "share_relisted_pct": "5.41"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-05-01",
+    "share_delisted_pct": "11.69",
+    "share_relisted_pct": "1"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-06-01",
+    "share_delisted_pct": "11.89",
+    "share_relisted_pct": "0.78"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-07-01",
+    "share_delisted_pct": "9.55",
+    "share_relisted_pct": "0.75"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-08-01",
+    "share_delisted_pct": "8.74",
+    "share_relisted_pct": "1.8"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-09-01",
+    "share_delisted_pct": "7.85",
+    "share_relisted_pct": "2.62"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-10-01",
+    "share_delisted_pct": "7.22",
+    "share_relisted_pct": "2.78"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-11-01",
+    "share_delisted_pct": "7.75",
+    "share_relisted_pct": "3.48"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-12-01",
+    "share_delisted_pct": "6.1",
+    "share_relisted_pct": "3.98"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-01-01",
+    "share_delisted_pct": "6.99",
+    "share_relisted_pct": "3.76"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-02-01",
+    "share_delisted_pct": "6.86",
+    "share_relisted_pct": "3.71"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-03-01",
+    "share_delisted_pct": "8.17",
+    "share_relisted_pct": "3.59"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-04-01",
+    "share_delisted_pct": "6.46",
+    "share_relisted_pct": "3.8"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-05-01",
+    "share_delisted_pct": "8.27",
+    "share_relisted_pct": "2.36"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-06-01",
+    "share_delisted_pct": "6.38",
+    "share_relisted_pct": "2.55"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-07-01",
+    "share_delisted_pct": "9.09",
+    "share_relisted_pct": "3.46"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-08-01",
+    "share_delisted_pct": "7.98",
+    "share_relisted_pct": "4.62"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-09-01",
+    "share_delisted_pct": "11.28",
+    "share_relisted_pct": "4.67"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-10-01",
+    "share_delisted_pct": "9.09",
+    "share_relisted_pct": "3.79"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-11-01",
+    "share_delisted_pct": "5.93",
+    "share_relisted_pct": "3.33"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-12-01",
+    "share_delisted_pct": "1.52",
+    "share_relisted_pct": "3.8"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-01-01",
+    "share_delisted_pct": "1.03",
+    "share_relisted_pct": "3.79"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-02-01",
+    "share_delisted_pct": "3.3",
+    "share_relisted_pct": "3.63"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-03-01",
+    "share_delisted_pct": "4.7",
+    "share_relisted_pct": "2.19"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-04-01",
+    "share_delisted_pct": "8.06",
+    "share_relisted_pct": "1.94"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-05-01",
+    "share_delisted_pct": "12.37",
+    "share_relisted_pct": "0.71"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-06-01",
+    "share_delisted_pct": "15.93",
+    "share_relisted_pct": "0.74"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-07-01",
+    "share_delisted_pct": "17.37",
+    "share_relisted_pct": "1.16"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-08-01",
+    "share_delisted_pct": "32.5",
+    "share_relisted_pct": "2.92"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-09-01",
+    "share_delisted_pct": "29.96",
+    "share_relisted_pct": "5.24"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-10-01",
+    "share_delisted_pct": "30.13",
+    "share_relisted_pct": "5.77"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-11-01",
+    "share_delisted_pct": "15.58",
+    "share_relisted_pct": "6.54"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-12-01",
+    "share_delisted_pct": "12.26",
+    "share_relisted_pct": "4.9"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "8.13",
+    "share_relisted_pct": "5.5"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "10.7",
+    "share_relisted_pct": "5.35"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "14.29",
+    "share_relisted_pct": "5.26"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "14.21",
+    "share_relisted_pct": "3.55"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "13.54",
+    "share_relisted_pct": "2.59"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-06-01",
+    "share_delisted_pct": "16.26",
+    "share_relisted_pct": "3.68"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-07-01",
+    "share_delisted_pct": "20.58",
+    "share_relisted_pct": "4.5"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-08-01",
+    "share_delisted_pct": "21.02",
+    "share_relisted_pct": "7.01"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-09-01",
+    "share_delisted_pct": "16.31",
+    "share_relisted_pct": "8.76"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "12.24",
+    "share_relisted_pct": "9.62"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "11.32",
+    "share_relisted_pct": "10"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "8.85",
+    "share_relisted_pct": "7.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "8.37",
+    "share_relisted_pct": "6.28"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "10.66",
+    "share_relisted_pct": "4.03"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "15.18",
+    "share_relisted_pct": "3.86"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "19.71",
+    "share_relisted_pct": "3.33"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-05-01",
+    "share_delisted_pct": "21.95",
+    "share_relisted_pct": "4.63"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-06-01",
+    "share_delisted_pct": "22.78",
+    "share_relisted_pct": "6.08"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-07-01",
+    "share_delisted_pct": "20.3",
+    "share_relisted_pct": "6.27"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-08-01",
+    "share_delisted_pct": "22.28",
+    "share_relisted_pct": "8.75"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-09-01",
+    "share_delisted_pct": "19.47",
+    "share_relisted_pct": "12.26"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-10-01",
+    "share_delisted_pct": "16.67",
+    "share_relisted_pct": "15.37"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-11-01",
+    "share_delisted_pct": "10.26",
+    "share_relisted_pct": "13.92"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-12-01",
+    "share_delisted_pct": "8.99",
+    "share_relisted_pct": "10.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-01-01",
+    "share_delisted_pct": "9.68",
+    "share_relisted_pct": "7.26"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-02-01",
+    "share_delisted_pct": "12.59",
+    "share_relisted_pct": "5.93"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-03-01",
+    "share_delisted_pct": "18.61",
+    "share_relisted_pct": "4.73"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-04-01",
+    "share_delisted_pct": "24.85",
+    "share_relisted_pct": "4.63"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-05-01",
+    "share_delisted_pct": "29.27",
+    "share_relisted_pct": "3.58"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-06-01",
+    "share_delisted_pct": "31.88",
+    "share_relisted_pct": "5.23"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-07-01",
+    "share_delisted_pct": "30.39",
+    "share_relisted_pct": "7.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-08-01",
+    "share_delisted_pct": "27.59",
+    "share_relisted_pct": "15.13"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-09-01",
+    "share_delisted_pct": "17.74",
+    "share_relisted_pct": "20.19"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-10-01",
+    "share_delisted_pct": "15.09",
+    "share_relisted_pct": "21.51"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-11-01",
+    "share_delisted_pct": "11.48",
+    "share_relisted_pct": "17.67"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-12-01",
+    "share_delisted_pct": "11.73",
+    "share_relisted_pct": "13.27"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-01-01",
+    "share_delisted_pct": "10.95",
+    "share_relisted_pct": "12.25"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-02-01",
+    "share_delisted_pct": "14.86",
+    "share_relisted_pct": "8.78"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-03-01",
+    "share_delisted_pct": "20.74",
+    "share_relisted_pct": "6.81"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "17.48",
+    "share_relisted_pct": "1.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "18.84",
+    "share_relisted_pct": "1.86"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-06-01",
+    "share_delisted_pct": "19.27",
+    "share_relisted_pct": "3.65"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-07-01",
+    "share_delisted_pct": "14.37",
+    "share_relisted_pct": "7.04"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-08-01",
+    "share_delisted_pct": "10.34",
+    "share_relisted_pct": "10.34"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-09-01",
+    "share_delisted_pct": "6.24",
+    "share_relisted_pct": "10.31"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-10-01",
+    "share_delisted_pct": "5.83",
+    "share_relisted_pct": "8.16"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-11-01",
+    "share_delisted_pct": "6.05",
+    "share_relisted_pct": "5.85"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-12-01",
+    "share_delisted_pct": "6.43",
+    "share_relisted_pct": "6.02"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-01-01",
+    "share_delisted_pct": "11.65",
+    "share_relisted_pct": "5.05"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-02-01",
+    "share_delisted_pct": "16.23",
+    "share_relisted_pct": "4.11"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-03-01",
+    "share_delisted_pct": "20.28",
+    "share_relisted_pct": "7.6"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-04-01",
+    "share_delisted_pct": "14.38",
+    "share_relisted_pct": "3.6"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-05-01",
+    "share_delisted_pct": "9.77",
+    "share_relisted_pct": "0.42"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-06-01",
+    "share_delisted_pct": "11.94",
+    "share_relisted_pct": "1.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-07-01",
+    "share_delisted_pct": "12.56",
+    "share_relisted_pct": "2.56"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-08-01",
+    "share_delisted_pct": "11.06",
+    "share_relisted_pct": "4.97"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-09-01",
+    "share_delisted_pct": "7.48",
+    "share_relisted_pct": "4.76"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-10-01",
+    "share_delisted_pct": "6.43",
+    "share_relisted_pct": "4.29"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-11-01",
+    "share_delisted_pct": "8.12",
+    "share_relisted_pct": "2.78"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-12-01",
+    "share_delisted_pct": "6.44",
+    "share_relisted_pct": "2.39"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-01-01",
+    "share_delisted_pct": "5.35",
+    "share_relisted_pct": "3.95"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-02-01",
+    "share_delisted_pct": "2.93",
+    "share_relisted_pct": "4.16"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-03-01",
+    "share_delisted_pct": "3.38",
+    "share_relisted_pct": "5.63"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-04-01",
+    "share_delisted_pct": "5",
+    "share_relisted_pct": "4"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-05-01",
+    "share_delisted_pct": "7.11",
+    "share_relisted_pct": "3.56"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-06-01",
+    "share_delisted_pct": "8.22",
+    "share_relisted_pct": "3.65"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-07-01",
+    "share_delisted_pct": "7.88",
+    "share_relisted_pct": "2.46"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-08-01",
+    "share_delisted_pct": "5.71",
+    "share_relisted_pct": "3.33"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-09-01",
+    "share_delisted_pct": "3.46",
+    "share_relisted_pct": "3.46"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-10-01",
+    "share_delisted_pct": "2.64",
+    "share_relisted_pct": "3.96"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-11-01",
+    "share_delisted_pct": "1.8",
+    "share_relisted_pct": "4.5"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-12-01",
+    "share_delisted_pct": "1.68",
+    "share_relisted_pct": "3.78"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-01-01",
+    "share_delisted_pct": "2.69",
+    "share_relisted_pct": "3.37"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-02-01",
+    "share_delisted_pct": "5.63",
+    "share_relisted_pct": "1.99"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-03-01",
+    "share_delisted_pct": "7.33",
+    "share_relisted_pct": "1"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-04-01",
+    "share_delisted_pct": "8.3",
+    "share_relisted_pct": "0.75"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-05-01",
+    "share_delisted_pct": "10.26",
+    "share_relisted_pct": "0.85"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-06-01",
+    "share_delisted_pct": "14.35",
+    "share_relisted_pct": "1.74"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-07-01",
+    "share_delisted_pct": "15.72",
+    "share_relisted_pct": "2.62"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-08-01",
+    "share_delisted_pct": "13.55",
+    "share_relisted_pct": "5.18"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-09-01",
+    "share_delisted_pct": "11.36",
+    "share_relisted_pct": "5.68"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-10-01",
+    "share_delisted_pct": "9.38",
+    "share_relisted_pct": "5.9"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-11-01",
+    "share_delisted_pct": "8.13",
+    "share_relisted_pct": "4.52"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-12-01",
+    "share_delisted_pct": "7.2",
+    "share_relisted_pct": "4.8"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "6.7",
+    "share_relisted_pct": "3.7"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "7.95",
+    "share_relisted_pct": "3.53"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "11.37",
+    "share_relisted_pct": "3.02"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "16.62",
+    "share_relisted_pct": "3.78"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "18.62",
+    "share_relisted_pct": "2.39"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-06-01",
+    "share_delisted_pct": "19.47",
+    "share_relisted_pct": "2.36"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-07-01",
+    "share_delisted_pct": "18.79",
+    "share_relisted_pct": "4.85"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-08-01",
+    "share_delisted_pct": "14.21",
+    "share_relisted_pct": "9.75"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-09-01",
+    "share_delisted_pct": "11.08",
+    "share_relisted_pct": "12.11"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "10.02",
+    "share_relisted_pct": "11"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "8.98",
+    "share_relisted_pct": "10.23"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "7.44",
+    "share_relisted_pct": "8.59"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "6.25",
+    "share_relisted_pct": "7.86"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "10.2",
+    "share_relisted_pct": "5.37"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "18.48",
+    "share_relisted_pct": "5.18"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "28.49",
+    "share_relisted_pct": "5.04"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-05-01",
+    "share_delisted_pct": "31.6",
+    "share_relisted_pct": "4.57"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-06-01",
+    "share_delisted_pct": "33.1",
+    "share_relisted_pct": "6.15"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-07-01",
+    "share_delisted_pct": "25.95",
+    "share_relisted_pct": "10.43"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-08-01",
+    "share_delisted_pct": "20.56",
+    "share_relisted_pct": "17.51"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-09-01",
+    "share_delisted_pct": "12.41",
+    "share_relisted_pct": "22.72"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-10-01",
+    "share_delisted_pct": "8.61",
+    "share_relisted_pct": "21.22"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-11-01",
+    "share_delisted_pct": "7.29",
+    "share_relisted_pct": "17.19"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-12-01",
+    "share_delisted_pct": "7.08",
+    "share_relisted_pct": "10.53"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-01-01",
+    "share_delisted_pct": "9",
+    "share_relisted_pct": "7.82"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-02-01",
+    "share_delisted_pct": "13.41",
+    "share_relisted_pct": "3.94"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-03-01",
+    "share_delisted_pct": "21.11",
+    "share_relisted_pct": "2.99"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-04-01",
+    "share_delisted_pct": "28.91",
+    "share_relisted_pct": "2.24"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-05-01",
+    "share_delisted_pct": "32.92",
+    "share_relisted_pct": "3.33"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-06-01",
+    "share_delisted_pct": "32.17",
+    "share_relisted_pct": "5.23"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-07-01",
+    "share_delisted_pct": "27.83",
+    "share_relisted_pct": "8.48"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-08-01",
+    "share_delisted_pct": "18.53",
+    "share_relisted_pct": "20.91"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-09-01",
+    "share_delisted_pct": "11.98",
+    "share_relisted_pct": "25.15"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-10-01",
+    "share_delisted_pct": "12.01",
+    "share_relisted_pct": "25.39"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-11-01",
+    "share_delisted_pct": "10.5",
+    "share_relisted_pct": "16.19"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-12-01",
+    "share_delisted_pct": "9.41",
+    "share_relisted_pct": "11.6"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-01-01",
+    "share_delisted_pct": "7.33",
+    "share_relisted_pct": "9.5"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-02-01",
+    "share_delisted_pct": "10.98",
+    "share_relisted_pct": "6.08"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-03-01",
+    "share_delisted_pct": "19.92",
+    "share_relisted_pct": "3.96"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "16.24",
+    "share_relisted_pct": "1.4"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "15.83",
+    "share_relisted_pct": "3.38"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-06-01",
+    "share_delisted_pct": "16.1",
+    "share_relisted_pct": "3.85"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-07-01",
+    "share_delisted_pct": "14.95",
+    "share_relisted_pct": "6.19"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-08-01",
+    "share_delisted_pct": "12.44",
+    "share_relisted_pct": "8.45"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-09-01",
+    "share_delisted_pct": "9.39",
+    "share_relisted_pct": "10.58"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-10-01",
+    "share_delisted_pct": "8.23",
+    "share_relisted_pct": "8.66"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-11-01",
+    "share_delisted_pct": "8.09",
+    "share_relisted_pct": "7.14"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-12-01",
+    "share_delisted_pct": "7.49",
+    "share_relisted_pct": "5.88"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-01-01",
+    "share_delisted_pct": "9.79",
+    "share_relisted_pct": "5.29"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-02-01",
+    "share_delisted_pct": "14.62",
+    "share_relisted_pct": "3.22"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-03-01",
+    "share_delisted_pct": "17.76",
+    "share_relisted_pct": "4.32"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-04-01",
+    "share_delisted_pct": "15.87",
+    "share_relisted_pct": "3.37"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-05-01",
+    "share_delisted_pct": "10.47",
+    "share_relisted_pct": "1.52"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-06-01",
+    "share_delisted_pct": "10.01",
+    "share_relisted_pct": "0.99"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-07-01",
+    "share_delisted_pct": "9.7",
+    "share_relisted_pct": "1.55"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-08-01",
+    "share_delisted_pct": "8.86",
+    "share_relisted_pct": "3.32"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-09-01",
+    "share_delisted_pct": "7.12",
+    "share_relisted_pct": "4.45"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-10-01",
+    "share_delisted_pct": "6.56",
+    "share_relisted_pct": "3.77"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-11-01",
+    "share_delisted_pct": "5.78",
+    "share_relisted_pct": "2.72"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-12-01",
+    "share_delisted_pct": "4.98",
+    "share_relisted_pct": "3.26"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-01-01",
+    "share_delisted_pct": "3.72",
+    "share_relisted_pct": "3.88"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-02-01",
+    "share_delisted_pct": "3.85",
+    "share_relisted_pct": "3.85"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-03-01",
+    "share_delisted_pct": "5.2",
+    "share_relisted_pct": "3.47"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-04-01",
+    "share_delisted_pct": "4.73",
+    "share_relisted_pct": "2.93"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-05-01",
+    "share_delisted_pct": "5.18",
+    "share_relisted_pct": "3.81"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-06-01",
+    "share_delisted_pct": "4.55",
+    "share_relisted_pct": "3.33"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-07-01",
+    "share_delisted_pct": "3.82",
+    "share_relisted_pct": "2.78"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-08-01",
+    "share_delisted_pct": "4.36",
+    "share_relisted_pct": "1.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-09-01",
+    "share_delisted_pct": "3.05",
+    "share_relisted_pct": "1.91"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-10-01",
+    "share_delisted_pct": "4.26",
+    "share_relisted_pct": "1.94"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-11-01",
+    "share_delisted_pct": "3.11",
+    "share_relisted_pct": "1.73"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-12-01",
+    "share_delisted_pct": "3.75",
+    "share_relisted_pct": "3.13"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-01-01",
+    "share_delisted_pct": "3.85",
+    "share_relisted_pct": "2.56"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-02-01",
+    "share_delisted_pct": "4.71",
+    "share_relisted_pct": "1.99"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-03-01",
+    "share_delisted_pct": "4.68",
+    "share_relisted_pct": "0.7"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-04-01",
+    "share_delisted_pct": "7.65",
+    "share_relisted_pct": "1.73"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-05-01",
+    "share_delisted_pct": "9.64",
+    "share_relisted_pct": "2.2"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-06-01",
+    "share_delisted_pct": "12.82",
+    "share_relisted_pct": "2.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-07-01",
+    "share_delisted_pct": "10.7",
+    "share_relisted_pct": "2.75"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-08-01",
+    "share_delisted_pct": "10.29",
+    "share_relisted_pct": "3.22"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-09-01",
+    "share_delisted_pct": "8.13",
+    "share_relisted_pct": "4.06"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-10-01",
+    "share_delisted_pct": "8.76",
+    "share_relisted_pct": "3.02"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-11-01",
+    "share_delisted_pct": "7.85",
+    "share_relisted_pct": "3.8"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-12-01",
+    "share_delisted_pct": "7.21",
+    "share_relisted_pct": "3.6"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "6.97",
+    "share_relisted_pct": "3.59"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "8.3",
+    "share_relisted_pct": "3.56"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "8.76",
+    "share_relisted_pct": "3.67"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "11.78",
+    "share_relisted_pct": "4"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "14.14",
+    "share_relisted_pct": "3.23"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-06-01",
+    "share_delisted_pct": "15.35",
+    "share_relisted_pct": "3.22"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-07-01",
+    "share_delisted_pct": "13.42",
+    "share_relisted_pct": "3.68"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-08-01",
+    "share_delisted_pct": "9.15",
+    "share_relisted_pct": "6.81"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-09-01",
+    "share_delisted_pct": "7.66",
+    "share_relisted_pct": "7.66"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "6.81",
+    "share_relisted_pct": "6.59"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "6.08",
+    "share_relisted_pct": "5.16"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "5.99",
+    "share_relisted_pct": "4.49"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "5.88",
+    "share_relisted_pct": "3.97"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "9.1",
+    "share_relisted_pct": "2.94"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "12.8",
+    "share_relisted_pct": "3.42"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "17.84",
+    "share_relisted_pct": "3.91"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-05-01",
+    "share_delisted_pct": "22.8",
+    "share_relisted_pct": "3.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-06-01",
+    "share_delisted_pct": "23.69",
+    "share_relisted_pct": "3.73"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-07-01",
+    "share_delisted_pct": "20.42",
+    "share_relisted_pct": "7.13"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-08-01",
+    "share_delisted_pct": "13.33",
+    "share_relisted_pct": "12"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-09-01",
+    "share_delisted_pct": "10.28",
+    "share_relisted_pct": "14.72"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-10-01",
+    "share_delisted_pct": "9.39",
+    "share_relisted_pct": "12.03"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-11-01",
+    "share_delisted_pct": "9.48",
+    "share_relisted_pct": "9.91"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-12-01",
+    "share_delisted_pct": "9.1",
+    "share_relisted_pct": "7.07"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-01-01",
+    "share_delisted_pct": "7.78",
+    "share_relisted_pct": "6.12"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-02-01",
+    "share_delisted_pct": "11.08",
+    "share_relisted_pct": "4.08"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-03-01",
+    "share_delisted_pct": "18.72",
+    "share_relisted_pct": "3.19"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-04-01",
+    "share_delisted_pct": "25.99",
+    "share_relisted_pct": "3.55"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-05-01",
+    "share_delisted_pct": "28.24",
+    "share_relisted_pct": "3.97"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-06-01",
+    "share_delisted_pct": "26.03",
+    "share_relisted_pct": "5.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-07-01",
+    "share_delisted_pct": "20.49",
+    "share_relisted_pct": "10.07"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-08-01",
+    "share_delisted_pct": "17.15",
+    "share_relisted_pct": "17.15"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-09-01",
+    "share_delisted_pct": "12.94",
+    "share_relisted_pct": "19.86"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-10-01",
+    "share_delisted_pct": "10.54",
+    "share_relisted_pct": "17.22"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-11-01",
+    "share_delisted_pct": "8.16",
+    "share_relisted_pct": "12.8"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-12-01",
+    "share_delisted_pct": "8.07",
+    "share_relisted_pct": "9.42"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-01-01",
+    "share_delisted_pct": "8.1",
+    "share_relisted_pct": "8.1"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-02-01",
+    "share_delisted_pct": "10.94",
+    "share_relisted_pct": "4.97"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-03-01",
+    "share_delisted_pct": "17.79",
+    "share_relisted_pct": "4.25"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2019-04-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2019-05-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-01-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-02-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-03-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-04-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-05-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-10-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-11-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-12-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-01-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-02-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-03-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-04-01",
+    "share_delisted_pct": "NA",
+    "share_relisted_pct": "NA"
+  }
+]

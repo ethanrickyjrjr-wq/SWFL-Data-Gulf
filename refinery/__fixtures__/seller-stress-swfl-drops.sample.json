@@ -1,0 +1,3110 @@
+[
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "32.79",
+    "avg_price_drop_pct": "4.13"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "32.53",
+    "avg_price_drop_pct": "4.52"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-06-01",
+    "pct_active_with_drops": "32.35",
+    "avg_price_drop_pct": "4.93"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-07-01",
+    "pct_active_with_drops": "35.42",
+    "avg_price_drop_pct": "5.13"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-08-01",
+    "pct_active_with_drops": "32.19",
+    "avg_price_drop_pct": "4.6"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-09-01",
+    "pct_active_with_drops": "29.11",
+    "avg_price_drop_pct": "4.05"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-10-01",
+    "pct_active_with_drops": "25.89",
+    "avg_price_drop_pct": "3.33"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-11-01",
+    "pct_active_with_drops": "32.04",
+    "avg_price_drop_pct": "3.71"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2019-12-01",
+    "pct_active_with_drops": "31.86",
+    "avg_price_drop_pct": "4"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-01-01",
+    "pct_active_with_drops": "33.22",
+    "avg_price_drop_pct": "4.25"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-02-01",
+    "pct_active_with_drops": "31.21",
+    "avg_price_drop_pct": "4.36"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-03-01",
+    "pct_active_with_drops": "31.25",
+    "avg_price_drop_pct": "4.11"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-04-01",
+    "pct_active_with_drops": "29.78",
+    "avg_price_drop_pct": "4.22"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-05-01",
+    "pct_active_with_drops": "30.77",
+    "avg_price_drop_pct": "3.67"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-06-01",
+    "pct_active_with_drops": "27.13",
+    "avg_price_drop_pct": "4.34"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-07-01",
+    "pct_active_with_drops": "27.98",
+    "avg_price_drop_pct": "4.07"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-08-01",
+    "pct_active_with_drops": "30.14",
+    "avg_price_drop_pct": "4.09"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-09-01",
+    "pct_active_with_drops": "25.23",
+    "avg_price_drop_pct": "3.68"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-10-01",
+    "pct_active_with_drops": "20.72",
+    "avg_price_drop_pct": "4.08"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-11-01",
+    "pct_active_with_drops": "22.32",
+    "avg_price_drop_pct": "4.51"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2020-12-01",
+    "pct_active_with_drops": "24.67",
+    "avg_price_drop_pct": "4.04"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-01-01",
+    "pct_active_with_drops": "24.29",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-02-01",
+    "pct_active_with_drops": "19.31",
+    "avg_price_drop_pct": "3.81"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-03-01",
+    "pct_active_with_drops": "16.54",
+    "avg_price_drop_pct": "3.96"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-04-01",
+    "pct_active_with_drops": "18.11",
+    "avg_price_drop_pct": "4.01"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-05-01",
+    "pct_active_with_drops": "22.18",
+    "avg_price_drop_pct": "4.09"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-06-01",
+    "pct_active_with_drops": "23.18",
+    "avg_price_drop_pct": "4.41"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-07-01",
+    "pct_active_with_drops": "22.48",
+    "avg_price_drop_pct": "4.91"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-08-01",
+    "pct_active_with_drops": "24.02",
+    "avg_price_drop_pct": "4.91"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-09-01",
+    "pct_active_with_drops": "23.12",
+    "avg_price_drop_pct": "4.34"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-10-01",
+    "pct_active_with_drops": "20.41",
+    "avg_price_drop_pct": "3.84"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-11-01",
+    "pct_active_with_drops": "14.72",
+    "avg_price_drop_pct": "4.15"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2021-12-01",
+    "pct_active_with_drops": "12.24",
+    "avg_price_drop_pct": "5.07"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-01-01",
+    "pct_active_with_drops": "13.33",
+    "avg_price_drop_pct": "5.14"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-02-01",
+    "pct_active_with_drops": "13.64",
+    "avg_price_drop_pct": "5.18"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-03-01",
+    "pct_active_with_drops": "20.81",
+    "avg_price_drop_pct": "5.32"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-04-01",
+    "pct_active_with_drops": "21.46",
+    "avg_price_drop_pct": "5.41"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-05-01",
+    "pct_active_with_drops": "26.17",
+    "avg_price_drop_pct": "5.27"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-06-01",
+    "pct_active_with_drops": "27.32",
+    "avg_price_drop_pct": "5.26"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-07-01",
+    "pct_active_with_drops": "31.05",
+    "avg_price_drop_pct": "5.03"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-08-01",
+    "pct_active_with_drops": "31.33",
+    "avg_price_drop_pct": "5.75"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-09-01",
+    "pct_active_with_drops": "32.91",
+    "avg_price_drop_pct": "5.74"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-10-01",
+    "pct_active_with_drops": "26.22",
+    "avg_price_drop_pct": "6.69"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-11-01",
+    "pct_active_with_drops": "26.26",
+    "avg_price_drop_pct": "5.39"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2022-12-01",
+    "pct_active_with_drops": "31.91",
+    "avg_price_drop_pct": "4.66"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "36.79",
+    "avg_price_drop_pct": "4.77"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "38.6",
+    "avg_price_drop_pct": "4.82"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "38.25",
+    "avg_price_drop_pct": "4.85"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "35.68",
+    "avg_price_drop_pct": "4.39"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "37.44",
+    "avg_price_drop_pct": "4.45"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-06-01",
+    "pct_active_with_drops": "33.63",
+    "avg_price_drop_pct": "4.37"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-07-01",
+    "pct_active_with_drops": "34.78",
+    "avg_price_drop_pct": "4.65"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-08-01",
+    "pct_active_with_drops": "38.15",
+    "avg_price_drop_pct": "4.38"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-09-01",
+    "pct_active_with_drops": "38.89",
+    "avg_price_drop_pct": "4.46"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "42.52",
+    "avg_price_drop_pct": "4.44"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "44.25",
+    "avg_price_drop_pct": "4.43"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "46.05",
+    "avg_price_drop_pct": "4.56"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "50.62",
+    "avg_price_drop_pct": "4.57"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "54.46",
+    "avg_price_drop_pct": "4.82"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "52.72",
+    "avg_price_drop_pct": "4.8"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "50.51",
+    "avg_price_drop_pct": "4.81"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-05-01",
+    "pct_active_with_drops": "39.59",
+    "avg_price_drop_pct": "4.72"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-06-01",
+    "pct_active_with_drops": "37.32",
+    "avg_price_drop_pct": "4.92"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-07-01",
+    "pct_active_with_drops": "37.41",
+    "avg_price_drop_pct": "5.25"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-08-01",
+    "pct_active_with_drops": "39.25",
+    "avg_price_drop_pct": "5.29"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-09-01",
+    "pct_active_with_drops": "36.9",
+    "avg_price_drop_pct": "5.25"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-10-01",
+    "pct_active_with_drops": "37.41",
+    "avg_price_drop_pct": "4.89"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-11-01",
+    "pct_active_with_drops": "36.57",
+    "avg_price_drop_pct": "4.86"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2024-12-01",
+    "pct_active_with_drops": "42.9",
+    "avg_price_drop_pct": "4.95"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-01-01",
+    "pct_active_with_drops": "45.37",
+    "avg_price_drop_pct": "5.28"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-02-01",
+    "pct_active_with_drops": "49.13",
+    "avg_price_drop_pct": "5.47"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-03-01",
+    "pct_active_with_drops": "51.61",
+    "avg_price_drop_pct": "5.33"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-04-01",
+    "pct_active_with_drops": "49.4",
+    "avg_price_drop_pct": "5.29"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-05-01",
+    "pct_active_with_drops": "46.1",
+    "avg_price_drop_pct": "5.41"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-06-01",
+    "pct_active_with_drops": "46.13",
+    "avg_price_drop_pct": "5.59"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-07-01",
+    "pct_active_with_drops": "41.31",
+    "avg_price_drop_pct": "5.42"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-08-01",
+    "pct_active_with_drops": "42.76",
+    "avg_price_drop_pct": "5.1"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-09-01",
+    "pct_active_with_drops": "43.87",
+    "avg_price_drop_pct": "5.11"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-10-01",
+    "pct_active_with_drops": "41.67",
+    "avg_price_drop_pct": "5.35"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-11-01",
+    "pct_active_with_drops": "38.75",
+    "avg_price_drop_pct": "5.79"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2025-12-01",
+    "pct_active_with_drops": "42.7",
+    "avg_price_drop_pct": "5.59"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-01-01",
+    "pct_active_with_drops": "47.62",
+    "avg_price_drop_pct": "5.64"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-02-01",
+    "pct_active_with_drops": "47.5",
+    "avg_price_drop_pct": "5.64"
+  },
+  {
+    "zip_code": "33901",
+    "period_begin": "2026-03-01",
+    "pct_active_with_drops": "43.92",
+    "avg_price_drop_pct": "5.78"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "38.16",
+    "avg_price_drop_pct": "3.68"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "32.14",
+    "avg_price_drop_pct": "3.38"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-06-01",
+    "pct_active_with_drops": "28.86",
+    "avg_price_drop_pct": "3.29"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-07-01",
+    "pct_active_with_drops": "26.14",
+    "avg_price_drop_pct": "3.39"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-08-01",
+    "pct_active_with_drops": "25.9",
+    "avg_price_drop_pct": "3.3"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-09-01",
+    "pct_active_with_drops": "28.65",
+    "avg_price_drop_pct": "3.5"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-10-01",
+    "pct_active_with_drops": "29.41",
+    "avg_price_drop_pct": "3.34"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-11-01",
+    "pct_active_with_drops": "33.72",
+    "avg_price_drop_pct": "3.51"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2019-12-01",
+    "pct_active_with_drops": "37.19",
+    "avg_price_drop_pct": "3.37"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-01-01",
+    "pct_active_with_drops": "43.55",
+    "avg_price_drop_pct": "3.42"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-02-01",
+    "pct_active_with_drops": "40.78",
+    "avg_price_drop_pct": "3.35"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-03-01",
+    "pct_active_with_drops": "37.27",
+    "avg_price_drop_pct": "3.45"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-04-01",
+    "pct_active_with_drops": "29.62",
+    "avg_price_drop_pct": "3.52"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-05-01",
+    "pct_active_with_drops": "29.46",
+    "avg_price_drop_pct": "3.59"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-06-01",
+    "pct_active_with_drops": "23.76",
+    "avg_price_drop_pct": "3.41"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-07-01",
+    "pct_active_with_drops": "24.07",
+    "avg_price_drop_pct": "3.26"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-08-01",
+    "pct_active_with_drops": "23.82",
+    "avg_price_drop_pct": "3.11"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-09-01",
+    "pct_active_with_drops": "25.27",
+    "avg_price_drop_pct": "3.07"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-10-01",
+    "pct_active_with_drops": "24.11",
+    "avg_price_drop_pct": "3.08"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-11-01",
+    "pct_active_with_drops": "20.67",
+    "avg_price_drop_pct": "3"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2020-12-01",
+    "pct_active_with_drops": "17.78",
+    "avg_price_drop_pct": "3.05"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-01-01",
+    "pct_active_with_drops": "12.84",
+    "avg_price_drop_pct": "3.32"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-02-01",
+    "pct_active_with_drops": "12.04",
+    "avg_price_drop_pct": "4.16"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-03-01",
+    "pct_active_with_drops": "11.26",
+    "avg_price_drop_pct": "4.44"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-04-01",
+    "pct_active_with_drops": "12.2",
+    "avg_price_drop_pct": "4.62"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-05-01",
+    "pct_active_with_drops": "14.29",
+    "avg_price_drop_pct": "4.29"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-06-01",
+    "pct_active_with_drops": "14.85",
+    "avg_price_drop_pct": "4.31"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-07-01",
+    "pct_active_with_drops": "16.74",
+    "avg_price_drop_pct": "4.58"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-08-01",
+    "pct_active_with_drops": "14.54",
+    "avg_price_drop_pct": "4.77"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-09-01",
+    "pct_active_with_drops": "14.22",
+    "avg_price_drop_pct": "5.14"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-10-01",
+    "pct_active_with_drops": "9.98",
+    "avg_price_drop_pct": "5.17"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-11-01",
+    "pct_active_with_drops": "7.48",
+    "avg_price_drop_pct": "5.88"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2021-12-01",
+    "pct_active_with_drops": "8.11",
+    "avg_price_drop_pct": "5.28"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-01-01",
+    "pct_active_with_drops": "9.51",
+    "avg_price_drop_pct": "5.56"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-02-01",
+    "pct_active_with_drops": "12.74",
+    "avg_price_drop_pct": "4.88"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-03-01",
+    "pct_active_with_drops": "17.75",
+    "avg_price_drop_pct": "4.62"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-04-01",
+    "pct_active_with_drops": "24.73",
+    "avg_price_drop_pct": "4.33"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-05-01",
+    "pct_active_with_drops": "28.79",
+    "avg_price_drop_pct": "4.4"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-06-01",
+    "pct_active_with_drops": "30.28",
+    "avg_price_drop_pct": "4.25"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-07-01",
+    "pct_active_with_drops": "26.69",
+    "avg_price_drop_pct": "4.16"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-08-01",
+    "pct_active_with_drops": "22.25",
+    "avg_price_drop_pct": "4.78"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-09-01",
+    "pct_active_with_drops": "18.68",
+    "avg_price_drop_pct": "6.65"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-10-01",
+    "pct_active_with_drops": "16.61",
+    "avg_price_drop_pct": "7.6"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-11-01",
+    "pct_active_with_drops": "23.61",
+    "avg_price_drop_pct": "6.43"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2022-12-01",
+    "pct_active_with_drops": "25.86",
+    "avg_price_drop_pct": "5.48"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "33.79",
+    "avg_price_drop_pct": "4.82"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "37.49",
+    "avg_price_drop_pct": "4.54"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "43.17",
+    "avg_price_drop_pct": "4.31"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "43.53",
+    "avg_price_drop_pct": "4.18"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "38.57",
+    "avg_price_drop_pct": "4.06"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-06-01",
+    "pct_active_with_drops": "36.55",
+    "avg_price_drop_pct": "4.01"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-07-01",
+    "pct_active_with_drops": "33.22",
+    "avg_price_drop_pct": "4.03"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-08-01",
+    "pct_active_with_drops": "35.69",
+    "avg_price_drop_pct": "3.92"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-09-01",
+    "pct_active_with_drops": "38.22",
+    "avg_price_drop_pct": "4.08"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "36.55",
+    "avg_price_drop_pct": "4.1"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "44.43",
+    "avg_price_drop_pct": "4.15"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "48.82",
+    "avg_price_drop_pct": "4.2"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "54.83",
+    "avg_price_drop_pct": "4.25"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "53.37",
+    "avg_price_drop_pct": "4.23"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "51.46",
+    "avg_price_drop_pct": "4.22"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "45.96",
+    "avg_price_drop_pct": "4.2"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-05-01",
+    "pct_active_with_drops": "41.8",
+    "avg_price_drop_pct": "4.35"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-06-01",
+    "pct_active_with_drops": "37.06",
+    "avg_price_drop_pct": "4.28"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-07-01",
+    "pct_active_with_drops": "33.85",
+    "avg_price_drop_pct": "4.35"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-08-01",
+    "pct_active_with_drops": "35.71",
+    "avg_price_drop_pct": "4.69"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-09-01",
+    "pct_active_with_drops": "36.41",
+    "avg_price_drop_pct": "4.88"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-10-01",
+    "pct_active_with_drops": "38.27",
+    "avg_price_drop_pct": "5.1"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-11-01",
+    "pct_active_with_drops": "42.48",
+    "avg_price_drop_pct": "5.11"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2024-12-01",
+    "pct_active_with_drops": "51.7",
+    "avg_price_drop_pct": "5.19"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-01-01",
+    "pct_active_with_drops": "59.89",
+    "avg_price_drop_pct": "5.1"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-02-01",
+    "pct_active_with_drops": "59.15",
+    "avg_price_drop_pct": "5.01"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-03-01",
+    "pct_active_with_drops": "55.31",
+    "avg_price_drop_pct": "4.97"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-04-01",
+    "pct_active_with_drops": "45.62",
+    "avg_price_drop_pct": "4.99"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-05-01",
+    "pct_active_with_drops": "41.57",
+    "avg_price_drop_pct": "5.13"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-06-01",
+    "pct_active_with_drops": "38.82",
+    "avg_price_drop_pct": "5.19"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-07-01",
+    "pct_active_with_drops": "35.35",
+    "avg_price_drop_pct": "5.18"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-08-01",
+    "pct_active_with_drops": "34.22",
+    "avg_price_drop_pct": "4.93"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-09-01",
+    "pct_active_with_drops": "35.7",
+    "avg_price_drop_pct": "4.84"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-10-01",
+    "pct_active_with_drops": "37.49",
+    "avg_price_drop_pct": "4.77"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-11-01",
+    "pct_active_with_drops": "43.95",
+    "avg_price_drop_pct": "4.88"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2025-12-01",
+    "pct_active_with_drops": "48.34",
+    "avg_price_drop_pct": "4.72"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-01-01",
+    "pct_active_with_drops": "52.9",
+    "avg_price_drop_pct": "4.69"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-02-01",
+    "pct_active_with_drops": "53.59",
+    "avg_price_drop_pct": "4.59"
+  },
+  {
+    "zip_code": "33908",
+    "period_begin": "2026-03-01",
+    "pct_active_with_drops": "52.64",
+    "avg_price_drop_pct": "4.63"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "40.5",
+    "avg_price_drop_pct": "3.82"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "36.11",
+    "avg_price_drop_pct": "3.81"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-06-01",
+    "pct_active_with_drops": "34.11",
+    "avg_price_drop_pct": "3.56"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-07-01",
+    "pct_active_with_drops": "31.23",
+    "avg_price_drop_pct": "3.65"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-08-01",
+    "pct_active_with_drops": "32.13",
+    "avg_price_drop_pct": "3.45"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-09-01",
+    "pct_active_with_drops": "30.54",
+    "avg_price_drop_pct": "3.47"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-10-01",
+    "pct_active_with_drops": "29.45",
+    "avg_price_drop_pct": "3.43"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-11-01",
+    "pct_active_with_drops": "32.6",
+    "avg_price_drop_pct": "3.54"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2019-12-01",
+    "pct_active_with_drops": "36.27",
+    "avg_price_drop_pct": "3.42"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-01-01",
+    "pct_active_with_drops": "36.42",
+    "avg_price_drop_pct": "3.38"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-02-01",
+    "pct_active_with_drops": "34.51",
+    "avg_price_drop_pct": "3.33"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-03-01",
+    "pct_active_with_drops": "31.17",
+    "avg_price_drop_pct": "3.16"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-04-01",
+    "pct_active_with_drops": "26.27",
+    "avg_price_drop_pct": "3.01"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-05-01",
+    "pct_active_with_drops": "27.37",
+    "avg_price_drop_pct": "2.96"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-06-01",
+    "pct_active_with_drops": "27.14",
+    "avg_price_drop_pct": "3.15"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-07-01",
+    "pct_active_with_drops": "25.49",
+    "avg_price_drop_pct": "3.3"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-08-01",
+    "pct_active_with_drops": "25.1",
+    "avg_price_drop_pct": "3.19"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-09-01",
+    "pct_active_with_drops": "24.25",
+    "avg_price_drop_pct": "3.19"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-10-01",
+    "pct_active_with_drops": "27.73",
+    "avg_price_drop_pct": "3.23"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-11-01",
+    "pct_active_with_drops": "25.11",
+    "avg_price_drop_pct": "3.54"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2020-12-01",
+    "pct_active_with_drops": "25.22",
+    "avg_price_drop_pct": "3.62"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-01-01",
+    "pct_active_with_drops": "19.64",
+    "avg_price_drop_pct": "3.79"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-02-01",
+    "pct_active_with_drops": "16.67",
+    "avg_price_drop_pct": "3.74"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-03-01",
+    "pct_active_with_drops": "14.49",
+    "avg_price_drop_pct": "4.35"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-04-01",
+    "pct_active_with_drops": "14.16",
+    "avg_price_drop_pct": "4.39"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-05-01",
+    "pct_active_with_drops": "16.67",
+    "avg_price_drop_pct": "4.71"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-06-01",
+    "pct_active_with_drops": "15.59",
+    "avg_price_drop_pct": "4.45"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-07-01",
+    "pct_active_with_drops": "16.53",
+    "avg_price_drop_pct": "4.34"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-08-01",
+    "pct_active_with_drops": "13.12",
+    "avg_price_drop_pct": "4.33"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-09-01",
+    "pct_active_with_drops": "11.62",
+    "avg_price_drop_pct": "4.09"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-10-01",
+    "pct_active_with_drops": "9.25",
+    "avg_price_drop_pct": "4.28"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-11-01",
+    "pct_active_with_drops": "12.06",
+    "avg_price_drop_pct": "4.1"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2021-12-01",
+    "pct_active_with_drops": "11.53",
+    "avg_price_drop_pct": "4.95"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-01-01",
+    "pct_active_with_drops": "12.91",
+    "avg_price_drop_pct": "5.1"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-02-01",
+    "pct_active_with_drops": "15",
+    "avg_price_drop_pct": "4.77"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-03-01",
+    "pct_active_with_drops": "19.35",
+    "avg_price_drop_pct": "4.19"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-04-01",
+    "pct_active_with_drops": "23.46",
+    "avg_price_drop_pct": "4.03"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-05-01",
+    "pct_active_with_drops": "27.11",
+    "avg_price_drop_pct": "3.97"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-06-01",
+    "pct_active_with_drops": "31.17",
+    "avg_price_drop_pct": "4.02"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-07-01",
+    "pct_active_with_drops": "32.44",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-08-01",
+    "pct_active_with_drops": "29.36",
+    "avg_price_drop_pct": "4.12"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-09-01",
+    "pct_active_with_drops": "26.16",
+    "avg_price_drop_pct": "4.08"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-10-01",
+    "pct_active_with_drops": "21.09",
+    "avg_price_drop_pct": "4.5"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-11-01",
+    "pct_active_with_drops": "26.51",
+    "avg_price_drop_pct": "4.36"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2022-12-01",
+    "pct_active_with_drops": "30.68",
+    "avg_price_drop_pct": "4.42"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "35.46",
+    "avg_price_drop_pct": "4.19"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "41.56",
+    "avg_price_drop_pct": "4.07"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "43.22",
+    "avg_price_drop_pct": "4"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "42.08",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "37.91",
+    "avg_price_drop_pct": "3.9"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-06-01",
+    "pct_active_with_drops": "36.38",
+    "avg_price_drop_pct": "4.02"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-07-01",
+    "pct_active_with_drops": "37.8",
+    "avg_price_drop_pct": "4.06"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-08-01",
+    "pct_active_with_drops": "35.65",
+    "avg_price_drop_pct": "3.92"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-09-01",
+    "pct_active_with_drops": "40.6",
+    "avg_price_drop_pct": "3.94"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "38.67",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "42.37",
+    "avg_price_drop_pct": "4.02"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "45.31",
+    "avg_price_drop_pct": "3.87"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "54.03",
+    "avg_price_drop_pct": "4.01"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "54.05",
+    "avg_price_drop_pct": "4.07"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "53.98",
+    "avg_price_drop_pct": "4.21"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "49.87",
+    "avg_price_drop_pct": "4.11"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-05-01",
+    "pct_active_with_drops": "48.66",
+    "avg_price_drop_pct": "4.17"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-06-01",
+    "pct_active_with_drops": "44.52",
+    "avg_price_drop_pct": "4.31"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-07-01",
+    "pct_active_with_drops": "38.67",
+    "avg_price_drop_pct": "4.46"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-08-01",
+    "pct_active_with_drops": "37.25",
+    "avg_price_drop_pct": "4.57"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-09-01",
+    "pct_active_with_drops": "37.89",
+    "avg_price_drop_pct": "4.5"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-10-01",
+    "pct_active_with_drops": "42.88",
+    "avg_price_drop_pct": "4.8"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-11-01",
+    "pct_active_with_drops": "49.58",
+    "avg_price_drop_pct": "4.81"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2024-12-01",
+    "pct_active_with_drops": "55.85",
+    "avg_price_drop_pct": "4.86"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-01-01",
+    "pct_active_with_drops": "60.17",
+    "avg_price_drop_pct": "4.81"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-02-01",
+    "pct_active_with_drops": "62.14",
+    "avg_price_drop_pct": "4.83"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-03-01",
+    "pct_active_with_drops": "58.76",
+    "avg_price_drop_pct": "4.81"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-04-01",
+    "pct_active_with_drops": "52.89",
+    "avg_price_drop_pct": "4.87"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-05-01",
+    "pct_active_with_drops": "42.86",
+    "avg_price_drop_pct": "4.74"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-06-01",
+    "pct_active_with_drops": "41.78",
+    "avg_price_drop_pct": "4.94"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-07-01",
+    "pct_active_with_drops": "37.76",
+    "avg_price_drop_pct": "4.76"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-08-01",
+    "pct_active_with_drops": "35.63",
+    "avg_price_drop_pct": "4.95"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-09-01",
+    "pct_active_with_drops": "35.4",
+    "avg_price_drop_pct": "4.61"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-10-01",
+    "pct_active_with_drops": "37.9",
+    "avg_price_drop_pct": "4.57"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-11-01",
+    "pct_active_with_drops": "43.74",
+    "avg_price_drop_pct": "4.75"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2025-12-01",
+    "pct_active_with_drops": "48.02",
+    "avg_price_drop_pct": "4.86"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-01-01",
+    "pct_active_with_drops": "55.48",
+    "avg_price_drop_pct": "4.9"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-02-01",
+    "pct_active_with_drops": "56.32",
+    "avg_price_drop_pct": "4.88"
+  },
+  {
+    "zip_code": "33919",
+    "period_begin": "2026-03-01",
+    "pct_active_with_drops": "53.63",
+    "avg_price_drop_pct": "4.93"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "34.22",
+    "avg_price_drop_pct": "4.27"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "27.29",
+    "avg_price_drop_pct": "4.17"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-06-01",
+    "pct_active_with_drops": "27.85",
+    "avg_price_drop_pct": "3.91"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-07-01",
+    "pct_active_with_drops": "22.08",
+    "avg_price_drop_pct": "3.89"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-08-01",
+    "pct_active_with_drops": "23.53",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-09-01",
+    "pct_active_with_drops": "25.37",
+    "avg_price_drop_pct": "4.03"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-10-01",
+    "pct_active_with_drops": "27.01",
+    "avg_price_drop_pct": "4.43"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-11-01",
+    "pct_active_with_drops": "30.43",
+    "avg_price_drop_pct": "4.16"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2019-12-01",
+    "pct_active_with_drops": "35.05",
+    "avg_price_drop_pct": "4.12"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-01-01",
+    "pct_active_with_drops": "43.27",
+    "avg_price_drop_pct": "3.68"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-02-01",
+    "pct_active_with_drops": "37.38",
+    "avg_price_drop_pct": "3.83"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-03-01",
+    "pct_active_with_drops": "28.61",
+    "avg_price_drop_pct": "3.72"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-04-01",
+    "pct_active_with_drops": "20.62",
+    "avg_price_drop_pct": "3.91"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-05-01",
+    "pct_active_with_drops": "25.37",
+    "avg_price_drop_pct": "3.84"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-06-01",
+    "pct_active_with_drops": "27.39",
+    "avg_price_drop_pct": "3.56"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-07-01",
+    "pct_active_with_drops": "27.89",
+    "avg_price_drop_pct": "3.67"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-08-01",
+    "pct_active_with_drops": "21.08",
+    "avg_price_drop_pct": "3.46"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-09-01",
+    "pct_active_with_drops": "22.51",
+    "avg_price_drop_pct": "4.37"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-10-01",
+    "pct_active_with_drops": "21.11",
+    "avg_price_drop_pct": "4.19"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-11-01",
+    "pct_active_with_drops": "21.12",
+    "avg_price_drop_pct": "4.07"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2020-12-01",
+    "pct_active_with_drops": "21.49",
+    "avg_price_drop_pct": "3.63"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-01-01",
+    "pct_active_with_drops": "17.74",
+    "avg_price_drop_pct": "3.47"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-02-01",
+    "pct_active_with_drops": "13.14",
+    "avg_price_drop_pct": "3.54"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-03-01",
+    "pct_active_with_drops": "11.44",
+    "avg_price_drop_pct": "2.95"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-04-01",
+    "pct_active_with_drops": "11.79",
+    "avg_price_drop_pct": "3.26"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-05-01",
+    "pct_active_with_drops": "11.02",
+    "avg_price_drop_pct": "3.33"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-06-01",
+    "pct_active_with_drops": "11.91",
+    "avg_price_drop_pct": "4.25"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-07-01",
+    "pct_active_with_drops": "12.99",
+    "avg_price_drop_pct": "4.52"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-08-01",
+    "pct_active_with_drops": "13.87",
+    "avg_price_drop_pct": "5.05"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-09-01",
+    "pct_active_with_drops": "12.45",
+    "avg_price_drop_pct": "5.93"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-10-01",
+    "pct_active_with_drops": "11.36",
+    "avg_price_drop_pct": "6.02"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-11-01",
+    "pct_active_with_drops": "12.59",
+    "avg_price_drop_pct": "6.06"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2021-12-01",
+    "pct_active_with_drops": "12.17",
+    "avg_price_drop_pct": "5.75"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-01-01",
+    "pct_active_with_drops": "13.45",
+    "avg_price_drop_pct": "6.19"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-02-01",
+    "pct_active_with_drops": "14.52",
+    "avg_price_drop_pct": "5.86"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-03-01",
+    "pct_active_with_drops": "20.69",
+    "avg_price_drop_pct": "5.69"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-04-01",
+    "pct_active_with_drops": "25.81",
+    "avg_price_drop_pct": "5.32"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-05-01",
+    "pct_active_with_drops": "30.04",
+    "avg_price_drop_pct": "5.78"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-06-01",
+    "pct_active_with_drops": "31.85",
+    "avg_price_drop_pct": "5.6"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-07-01",
+    "pct_active_with_drops": "32.05",
+    "avg_price_drop_pct": "5.55"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-08-01",
+    "pct_active_with_drops": "27.5",
+    "avg_price_drop_pct": "8.2"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-09-01",
+    "pct_active_with_drops": "23.6",
+    "avg_price_drop_pct": "12.38"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-10-01",
+    "pct_active_with_drops": "20.51",
+    "avg_price_drop_pct": "15.33"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-11-01",
+    "pct_active_with_drops": "26.17",
+    "avg_price_drop_pct": "10.28"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2022-12-01",
+    "pct_active_with_drops": "25.61",
+    "avg_price_drop_pct": "8.15"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "27.51",
+    "avg_price_drop_pct": "6.87"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "27.21",
+    "avg_price_drop_pct": "6.78"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "31.08",
+    "avg_price_drop_pct": "6.24"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "29.23",
+    "avg_price_drop_pct": "6.37"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "27.09",
+    "avg_price_drop_pct": "6"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-06-01",
+    "pct_active_with_drops": "24.23",
+    "avg_price_drop_pct": "6.82"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-07-01",
+    "pct_active_with_drops": "26.37",
+    "avg_price_drop_pct": "6.56"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-08-01",
+    "pct_active_with_drops": "24.2",
+    "avg_price_drop_pct": "6.56"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-09-01",
+    "pct_active_with_drops": "24.47",
+    "avg_price_drop_pct": "6.01"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "20.7",
+    "avg_price_drop_pct": "5.46"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "27.11",
+    "avg_price_drop_pct": "5.5"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "33.42",
+    "avg_price_drop_pct": "5.56"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "41.16",
+    "avg_price_drop_pct": "5.55"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "43.36",
+    "avg_price_drop_pct": "5.6"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "41.93",
+    "avg_price_drop_pct": "5.48"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "37.29",
+    "avg_price_drop_pct": "5.29"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-05-01",
+    "pct_active_with_drops": "30.24",
+    "avg_price_drop_pct": "5.21"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-06-01",
+    "pct_active_with_drops": "29.62",
+    "avg_price_drop_pct": "5.29"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-07-01",
+    "pct_active_with_drops": "28.57",
+    "avg_price_drop_pct": "5.6"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-08-01",
+    "pct_active_with_drops": "31.03",
+    "avg_price_drop_pct": "6.34"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-09-01",
+    "pct_active_with_drops": "31.25",
+    "avg_price_drop_pct": "7.15"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-10-01",
+    "pct_active_with_drops": "28.79",
+    "avg_price_drop_pct": "8.15"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-11-01",
+    "pct_active_with_drops": "34.25",
+    "avg_price_drop_pct": "6.75"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2024-12-01",
+    "pct_active_with_drops": "40.36",
+    "avg_price_drop_pct": "6.32"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-01-01",
+    "pct_active_with_drops": "44.18",
+    "avg_price_drop_pct": "6.03"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-02-01",
+    "pct_active_with_drops": "46.22",
+    "avg_price_drop_pct": "6.08"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-03-01",
+    "pct_active_with_drops": "42.84",
+    "avg_price_drop_pct": "6.01"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-04-01",
+    "pct_active_with_drops": "38.43",
+    "avg_price_drop_pct": "5.8"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-05-01",
+    "pct_active_with_drops": "34.96",
+    "avg_price_drop_pct": "6.46"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-06-01",
+    "pct_active_with_drops": "29.27",
+    "avg_price_drop_pct": "6.71"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-07-01",
+    "pct_active_with_drops": "28.14",
+    "avg_price_drop_pct": "7.14"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-08-01",
+    "pct_active_with_drops": "21.65",
+    "avg_price_drop_pct": "5.81"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-09-01",
+    "pct_active_with_drops": "25.47",
+    "avg_price_drop_pct": "5.04"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-10-01",
+    "pct_active_with_drops": "30.75",
+    "avg_price_drop_pct": "4.84"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-11-01",
+    "pct_active_with_drops": "39.05",
+    "avg_price_drop_pct": "5.09"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2025-12-01",
+    "pct_active_with_drops": "44.22",
+    "avg_price_drop_pct": "4.9"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-01-01",
+    "pct_active_with_drops": "48.53",
+    "avg_price_drop_pct": "5.03"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-02-01",
+    "pct_active_with_drops": "48.82",
+    "avg_price_drop_pct": "5.04"
+  },
+  {
+    "zip_code": "33931",
+    "period_begin": "2026-03-01",
+    "pct_active_with_drops": "43.24",
+    "avg_price_drop_pct": "5.34"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "42.22",
+    "avg_price_drop_pct": "4.46"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "28.84",
+    "avg_price_drop_pct": "4.2"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-06-01",
+    "pct_active_with_drops": "21.61",
+    "avg_price_drop_pct": "4.41"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-07-01",
+    "pct_active_with_drops": "21.69",
+    "avg_price_drop_pct": "4.6"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-08-01",
+    "pct_active_with_drops": "21.19",
+    "avg_price_drop_pct": "4.75"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-09-01",
+    "pct_active_with_drops": "24.22",
+    "avg_price_drop_pct": "4.7"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-10-01",
+    "pct_active_with_drops": "24.48",
+    "avg_price_drop_pct": "4.29"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-11-01",
+    "pct_active_with_drops": "27.35",
+    "avg_price_drop_pct": "4.37"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2019-12-01",
+    "pct_active_with_drops": "34.94",
+    "avg_price_drop_pct": "4.5"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-01-01",
+    "pct_active_with_drops": "41.17",
+    "avg_price_drop_pct": "4.71"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-02-01",
+    "pct_active_with_drops": "39.39",
+    "avg_price_drop_pct": "4.81"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-03-01",
+    "pct_active_with_drops": "32.03",
+    "avg_price_drop_pct": "4.73"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-04-01",
+    "pct_active_with_drops": "25.84",
+    "avg_price_drop_pct": "4.46"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-05-01",
+    "pct_active_with_drops": "27.39",
+    "avg_price_drop_pct": "4.34"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-06-01",
+    "pct_active_with_drops": "27.51",
+    "avg_price_drop_pct": "4.12"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-07-01",
+    "pct_active_with_drops": "24.42",
+    "avg_price_drop_pct": "4.04"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-08-01",
+    "pct_active_with_drops": "23.48",
+    "avg_price_drop_pct": "4.42"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-09-01",
+    "pct_active_with_drops": "22.45",
+    "avg_price_drop_pct": "4.67"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-10-01",
+    "pct_active_with_drops": "23.81",
+    "avg_price_drop_pct": "4.75"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-11-01",
+    "pct_active_with_drops": "24.83",
+    "avg_price_drop_pct": "4.15"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2020-12-01",
+    "pct_active_with_drops": "23.63",
+    "avg_price_drop_pct": "4.43"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-01-01",
+    "pct_active_with_drops": "20.93",
+    "avg_price_drop_pct": "4.45"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-02-01",
+    "pct_active_with_drops": "16.38",
+    "avg_price_drop_pct": "4.94"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-03-01",
+    "pct_active_with_drops": "14.08",
+    "avg_price_drop_pct": "4.53"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-04-01",
+    "pct_active_with_drops": "12",
+    "avg_price_drop_pct": "4.7"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-05-01",
+    "pct_active_with_drops": "10.67",
+    "avg_price_drop_pct": "4.69"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-06-01",
+    "pct_active_with_drops": "10.05",
+    "avg_price_drop_pct": "4.97"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-07-01",
+    "pct_active_with_drops": "12.32",
+    "avg_price_drop_pct": "5.07"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-08-01",
+    "pct_active_with_drops": "11.43",
+    "avg_price_drop_pct": "4.84"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-09-01",
+    "pct_active_with_drops": "8.23",
+    "avg_price_drop_pct": "5.06"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-10-01",
+    "pct_active_with_drops": "7.93",
+    "avg_price_drop_pct": "4.52"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-11-01",
+    "pct_active_with_drops": "10.36",
+    "avg_price_drop_pct": "5.48"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2021-12-01",
+    "pct_active_with_drops": "11.34",
+    "avg_price_drop_pct": "5.45"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-01-01",
+    "pct_active_with_drops": "13.13",
+    "avg_price_drop_pct": "5.53"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-02-01",
+    "pct_active_with_drops": "16.89",
+    "avg_price_drop_pct": "5.87"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-03-01",
+    "pct_active_with_drops": "25.67",
+    "avg_price_drop_pct": "6.32"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-04-01",
+    "pct_active_with_drops": "31.32",
+    "avg_price_drop_pct": "7.38"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-05-01",
+    "pct_active_with_drops": "33.33",
+    "avg_price_drop_pct": "7.25"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-06-01",
+    "pct_active_with_drops": "28.26",
+    "avg_price_drop_pct": "7.29"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-07-01",
+    "pct_active_with_drops": "28.38",
+    "avg_price_drop_pct": "5.8"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-08-01",
+    "pct_active_with_drops": "23.51",
+    "avg_price_drop_pct": "6.84"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-09-01",
+    "pct_active_with_drops": "26.89",
+    "avg_price_drop_pct": "7.28"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-10-01",
+    "pct_active_with_drops": "27.78",
+    "avg_price_drop_pct": "7.26"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-11-01",
+    "pct_active_with_drops": "31.93",
+    "avg_price_drop_pct": "6.58"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2022-12-01",
+    "pct_active_with_drops": "33.87",
+    "avg_price_drop_pct": "5.92"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "42.49",
+    "avg_price_drop_pct": "6.06"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "47.02",
+    "avg_price_drop_pct": "5.76"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "49.42",
+    "avg_price_drop_pct": "5.91"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "44.08",
+    "avg_price_drop_pct": "5.65"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "34.84",
+    "avg_price_drop_pct": "5.59"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-06-01",
+    "pct_active_with_drops": "28.32",
+    "avg_price_drop_pct": "4.99"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-07-01",
+    "pct_active_with_drops": "26.06",
+    "avg_price_drop_pct": "4.98"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-08-01",
+    "pct_active_with_drops": "27.58",
+    "avg_price_drop_pct": "4.94"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-09-01",
+    "pct_active_with_drops": "32.22",
+    "avg_price_drop_pct": "5.15"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "29.83",
+    "avg_price_drop_pct": "5.23"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "37.58",
+    "avg_price_drop_pct": "5.26"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "44.66",
+    "avg_price_drop_pct": "5.42"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "52.32",
+    "avg_price_drop_pct": "5.36"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "54.74",
+    "avg_price_drop_pct": "5.46"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "50.65",
+    "avg_price_drop_pct": "5.49"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "41.67",
+    "avg_price_drop_pct": "5.55"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-05-01",
+    "pct_active_with_drops": "32.85",
+    "avg_price_drop_pct": "5.62"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-06-01",
+    "pct_active_with_drops": "28.13",
+    "avg_price_drop_pct": "5.54"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-07-01",
+    "pct_active_with_drops": "25.19",
+    "avg_price_drop_pct": "5.53"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-08-01",
+    "pct_active_with_drops": "26.4",
+    "avg_price_drop_pct": "5.86"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-09-01",
+    "pct_active_with_drops": "31.38",
+    "avg_price_drop_pct": "6.12"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-10-01",
+    "pct_active_with_drops": "31.3",
+    "avg_price_drop_pct": "6.06"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-11-01",
+    "pct_active_with_drops": "40.1",
+    "avg_price_drop_pct": "5.88"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2024-12-01",
+    "pct_active_with_drops": "48.9",
+    "avg_price_drop_pct": "5.77"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-01-01",
+    "pct_active_with_drops": "57.23",
+    "avg_price_drop_pct": "5.87"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-02-01",
+    "pct_active_with_drops": "56.41",
+    "avg_price_drop_pct": "6.02"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-03-01",
+    "pct_active_with_drops": "51.35",
+    "avg_price_drop_pct": "6.14"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-04-01",
+    "pct_active_with_drops": "41.21",
+    "avg_price_drop_pct": "6.4"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-05-01",
+    "pct_active_with_drops": "30.12",
+    "avg_price_drop_pct": "6.19"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-06-01",
+    "pct_active_with_drops": "26.36",
+    "avg_price_drop_pct": "6.42"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-07-01",
+    "pct_active_with_drops": "25.22",
+    "avg_price_drop_pct": "5.67"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-08-01",
+    "pct_active_with_drops": "28.02",
+    "avg_price_drop_pct": "5.98"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-09-01",
+    "pct_active_with_drops": "27.11",
+    "avg_price_drop_pct": "5.76"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-10-01",
+    "pct_active_with_drops": "29.33",
+    "avg_price_drop_pct": "5.87"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-11-01",
+    "pct_active_with_drops": "35.41",
+    "avg_price_drop_pct": "6.01"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2025-12-01",
+    "pct_active_with_drops": "44.71",
+    "avg_price_drop_pct": "6.14"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-01-01",
+    "pct_active_with_drops": "55",
+    "avg_price_drop_pct": "6.16"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-02-01",
+    "pct_active_with_drops": "52.87",
+    "avg_price_drop_pct": "5.82"
+  },
+  {
+    "zip_code": "34103",
+    "period_begin": "2026-03-01",
+    "pct_active_with_drops": "46.3",
+    "avg_price_drop_pct": "5.48"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "39.09",
+    "avg_price_drop_pct": "3.79"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "33.02",
+    "avg_price_drop_pct": "3.63"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-06-01",
+    "pct_active_with_drops": "28.92",
+    "avg_price_drop_pct": "3.72"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-07-01",
+    "pct_active_with_drops": "29.46",
+    "avg_price_drop_pct": "3.75"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-08-01",
+    "pct_active_with_drops": "32.26",
+    "avg_price_drop_pct": "3.79"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-09-01",
+    "pct_active_with_drops": "32.94",
+    "avg_price_drop_pct": "3.66"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-10-01",
+    "pct_active_with_drops": "31.6",
+    "avg_price_drop_pct": "3.87"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-11-01",
+    "pct_active_with_drops": "33.83",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2019-12-01",
+    "pct_active_with_drops": "44.92",
+    "avg_price_drop_pct": "3.92"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-01-01",
+    "pct_active_with_drops": "50.93",
+    "avg_price_drop_pct": "3.85"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-02-01",
+    "pct_active_with_drops": "49.42",
+    "avg_price_drop_pct": "3.89"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-03-01",
+    "pct_active_with_drops": "38.56",
+    "avg_price_drop_pct": "4.02"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-04-01",
+    "pct_active_with_drops": "27.88",
+    "avg_price_drop_pct": "4.05"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-05-01",
+    "pct_active_with_drops": "28.83",
+    "avg_price_drop_pct": "3.67"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-06-01",
+    "pct_active_with_drops": "25.39",
+    "avg_price_drop_pct": "3.66"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-07-01",
+    "pct_active_with_drops": "24.33",
+    "avg_price_drop_pct": "3.63"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-08-01",
+    "pct_active_with_drops": "25.07",
+    "avg_price_drop_pct": "3.87"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-09-01",
+    "pct_active_with_drops": "22.26",
+    "avg_price_drop_pct": "3.63"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-10-01",
+    "pct_active_with_drops": "20.82",
+    "avg_price_drop_pct": "3.72"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-11-01",
+    "pct_active_with_drops": "15.48",
+    "avg_price_drop_pct": "3.66"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2020-12-01",
+    "pct_active_with_drops": "14.95",
+    "avg_price_drop_pct": "3.95"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-01-01",
+    "pct_active_with_drops": "14.72",
+    "avg_price_drop_pct": "4.55"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-02-01",
+    "pct_active_with_drops": "12.88",
+    "avg_price_drop_pct": "4.85"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-03-01",
+    "pct_active_with_drops": "13.68",
+    "avg_price_drop_pct": "5"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-04-01",
+    "pct_active_with_drops": "11.49",
+    "avg_price_drop_pct": "4.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-05-01",
+    "pct_active_with_drops": "12.53",
+    "avg_price_drop_pct": "4.52"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-06-01",
+    "pct_active_with_drops": "11.21",
+    "avg_price_drop_pct": "4.37"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-07-01",
+    "pct_active_with_drops": "10.76",
+    "avg_price_drop_pct": "4.23"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-08-01",
+    "pct_active_with_drops": "9.82",
+    "avg_price_drop_pct": "4.93"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-09-01",
+    "pct_active_with_drops": "8.02",
+    "avg_price_drop_pct": "5.36"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-10-01",
+    "pct_active_with_drops": "6.2",
+    "avg_price_drop_pct": "5.5"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-11-01",
+    "pct_active_with_drops": "7.61",
+    "avg_price_drop_pct": "7.46"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2021-12-01",
+    "pct_active_with_drops": "7.5",
+    "avg_price_drop_pct": "8.26"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-01-01",
+    "pct_active_with_drops": "10.26",
+    "avg_price_drop_pct": "6.99"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-02-01",
+    "pct_active_with_drops": "12.9",
+    "avg_price_drop_pct": "5.47"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-03-01",
+    "pct_active_with_drops": "19.44",
+    "avg_price_drop_pct": "4.88"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-04-01",
+    "pct_active_with_drops": "26.91",
+    "avg_price_drop_pct": "4.8"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-05-01",
+    "pct_active_with_drops": "33.33",
+    "avg_price_drop_pct": "4.82"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-06-01",
+    "pct_active_with_drops": "30.77",
+    "avg_price_drop_pct": "4.96"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-07-01",
+    "pct_active_with_drops": "27.22",
+    "avg_price_drop_pct": "4.83"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-08-01",
+    "pct_active_with_drops": "24.76",
+    "avg_price_drop_pct": "4.78"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-09-01",
+    "pct_active_with_drops": "24.69",
+    "avg_price_drop_pct": "4.76"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-10-01",
+    "pct_active_with_drops": "25.08",
+    "avg_price_drop_pct": "5.05"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-11-01",
+    "pct_active_with_drops": "27.85",
+    "avg_price_drop_pct": "5.05"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2022-12-01",
+    "pct_active_with_drops": "36.04",
+    "avg_price_drop_pct": "4.68"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "42.03",
+    "avg_price_drop_pct": "4.52"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "42.69",
+    "avg_price_drop_pct": "4.29"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "40.53",
+    "avg_price_drop_pct": "4.3"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "37.56",
+    "avg_price_drop_pct": "4.2"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "33.25",
+    "avg_price_drop_pct": "4.32"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-06-01",
+    "pct_active_with_drops": "29.46",
+    "avg_price_drop_pct": "4.03"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-07-01",
+    "pct_active_with_drops": "27.63",
+    "avg_price_drop_pct": "3.93"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-08-01",
+    "pct_active_with_drops": "26.29",
+    "avg_price_drop_pct": "4.18"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-09-01",
+    "pct_active_with_drops": "31.09",
+    "avg_price_drop_pct": "4.22"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "32.31",
+    "avg_price_drop_pct": "4.22"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "36.46",
+    "avg_price_drop_pct": "4.12"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "43.43",
+    "avg_price_drop_pct": "4.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "49.41",
+    "avg_price_drop_pct": "4.42"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "51.25",
+    "avg_price_drop_pct": "4.56"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "50.15",
+    "avg_price_drop_pct": "4.59"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "44.44",
+    "avg_price_drop_pct": "4.52"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-05-01",
+    "pct_active_with_drops": "36.1",
+    "avg_price_drop_pct": "4.26"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-06-01",
+    "pct_active_with_drops": "31.34",
+    "avg_price_drop_pct": "4.11"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-07-01",
+    "pct_active_with_drops": "32.56",
+    "avg_price_drop_pct": "4.25"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-08-01",
+    "pct_active_with_drops": "31.62",
+    "avg_price_drop_pct": "4.49"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-09-01",
+    "pct_active_with_drops": "34.57",
+    "avg_price_drop_pct": "4.74"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-10-01",
+    "pct_active_with_drops": "32.13",
+    "avg_price_drop_pct": "4.73"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-11-01",
+    "pct_active_with_drops": "41.4",
+    "avg_price_drop_pct": "4.59"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2024-12-01",
+    "pct_active_with_drops": "49.05",
+    "avg_price_drop_pct": "4.8"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-01-01",
+    "pct_active_with_drops": "57.53",
+    "avg_price_drop_pct": "4.94"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-02-01",
+    "pct_active_with_drops": "55.16",
+    "avg_price_drop_pct": "5.15"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-03-01",
+    "pct_active_with_drops": "56.03",
+    "avg_price_drop_pct": "5.24"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-04-01",
+    "pct_active_with_drops": "47.3",
+    "avg_price_drop_pct": "5.28"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-05-01",
+    "pct_active_with_drops": "38.02",
+    "avg_price_drop_pct": "5.3"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-06-01",
+    "pct_active_with_drops": "31.16",
+    "avg_price_drop_pct": "4.92"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-07-01",
+    "pct_active_with_drops": "30.39",
+    "avg_price_drop_pct": "4.99"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-08-01",
+    "pct_active_with_drops": "32.3",
+    "avg_price_drop_pct": "4.84"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-09-01",
+    "pct_active_with_drops": "34.4",
+    "avg_price_drop_pct": "5.03"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-10-01",
+    "pct_active_with_drops": "34.27",
+    "avg_price_drop_pct": "5.09"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-11-01",
+    "pct_active_with_drops": "39.36",
+    "avg_price_drop_pct": "5.1"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2025-12-01",
+    "pct_active_with_drops": "42.75",
+    "avg_price_drop_pct": "5.4"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-01-01",
+    "pct_active_with_drops": "48.3",
+    "avg_price_drop_pct": "5.43"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-02-01",
+    "pct_active_with_drops": "50.57",
+    "avg_price_drop_pct": "5.79"
+  },
+  {
+    "zip_code": "34110",
+    "period_begin": "2026-03-01",
+    "pct_active_with_drops": "48.45",
+    "avg_price_drop_pct": "5.76"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2019-04-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2019-05-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-01-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-02-01",
+    "pct_active_with_drops": "100",
+    "avg_price_drop_pct": "3.27"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-03-01",
+    "pct_active_with_drops": "100",
+    "avg_price_drop_pct": "3.27"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-04-01",
+    "pct_active_with_drops": "100",
+    "avg_price_drop_pct": "3.27"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-05-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-10-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-11-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2023-12-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-01-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-02-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-03-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  },
+  {
+    "zip_code": "33932",
+    "period_begin": "2024-04-01",
+    "pct_active_with_drops": "NA",
+    "avg_price_drop_pct": "NA"
+  }
+]
