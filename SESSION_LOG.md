@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — franchise-outcomes orphan removal: fixture-pin + dead chart (SECOND half; chart files shipped via ae50e45)
+
+- **Dropped the orphaned SBA franchise DB artifact + pinned the brain to its fixture** (`ccaf90a`). Cut `sba_loans_franchise_outcomes` + `get_franchise_outcomes_aggregated()` out of the shared `docs/sql/20260517_brains_data_tables.sql` (kept corridor_profiles / fl_dor_tdt / sba_by_naics DDL); added idempotent DROP migration `docs/sql/20260614_drop_sba_franchise_outcomes.sql` (**NOT run yet** — deploy the fixture-pin first); `brain_registry.sql` source ref fixed. `refinery/sources/franchise-source.mts` + `refinery/config/packs.mts` now read the committed 15-brand fixture only (live-RPC path removed); `brains/franchise-outcomes.md` citation no longer claims the RPC.
+- **HALF SHIPPED VIA A DIFFERENT PUSH.** The 4 dead `franchise-survival` chart files (`FranchiseSurvivalFrame.tsx` + `-utils.ts` + `.test.ts` + `templates/html/viz/franchise-survival.html`) were already deleted by `ae50e45` (on origin). `ccaf90a` carries only the matching reference removals (registry / manifest / token-contracts / bind-frame / deliverable-binder / pick-frames + render-html tests) so the tip is consistent.
+- **Verified this session (runtime, not assumed):** app `tsc --noEmit` exit 0; the 4 touched test files 55/55 pass; refinery typecheck 0 franchise errors (170 total = pre-existing baseline debt, unrelated); `franchiseSource.fetch()` loads 15 brands at runtime (tier 1, fixture). Remaining `sba_loans_franchise_outcomes` hits are all benign — rendered `.md`/`_build-report.json` (refresh on next master rebuild), historical docs, code comments, the DROP migration itself.
+- **Next:** run the DROP migration once the fixture-pin deploy is confirmed live; `brains/master.md` + `brains/_build-report.json` citations refresh on the next master rebuild.
+- **Held (NOT in this push, operator decision):** `tier-divergence-swfl` brain stays uncommitted in the tree awaiting a diff review.
+
 ## 2026-06-14 (main) — auto-resolve mask KILLED: relabel self-healed + surface chronic flappers
 
 - **The cure for "told it's fixed, breaks again."** Auto-resolve used to stamp every recovery `RESOLVED (auto)`, conflating a self-healed transient with a real fix. Now (`.github/scripts/lib/ledger-flap.mjs`, unit-tested 7/7): `flipMostRecentOpenRow` writes **`RESOLVED (auto — self-healed, untriaged)`** when the row's Root Cause is still `pending triage`, plain `RESOLVED (auto)` only when a human diagnosed it. `chronicFlappers()` counts per-workflow untriaged self-heals (old + new labels).
