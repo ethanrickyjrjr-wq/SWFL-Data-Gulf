@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — items 4+5: seller-stress ceiling tuning + Glass §6-A leaf-yield hygiene
+
+- **Item 4 (`seller_stress_ceiling_tuning` CLOSED):** 11/111 ZIPs pegged at score 100. Measured live dist (29,865 fragments): the 11 spanned raw **2.02–3.05σ** (3σ outlier 33983 over a 2.02–2.58 cluster). DECOUPLED direction+magnitude to the median raw composite FIRST (sigma gates 0.6/−0.2/−0.6, inverted from the old 65/45/35 score gates) so a display change can't flip the call, THEN widened `SCORE_CEIL_SIGMA` 2.0→3.0 (data-driven; NOT the 3.8 a note suggested). Result: saturation 11→1, top decile spreads ~80–100, median score 76.6→61.3, direction stays **bearish**, magnitude 0.53 unchanged. Exported `rawCompositeToScore` + 3 regression tests (ceiling map, measured-cohort ≤3-at-100, decouple-stays-bearish); 16/16 pack tests, Gate-5 catalog 4/4, vocab `--all` clean. Cited `SOURCED.md#seller-stress-swfl-score-ceiling-sigma`.
+- **Item 5 (`glass_section6_leaf_yield` CLOSED):** §6-A per-slug leaf logging confirmed LIVE — 19 `prediction_kind='slug'` gradeable rows across 9 brains (latest refined today 09:10 UTC); code already wired Stage 4 for every pack. Hygiene: reclassified the 29 legacy `synthesis`/`pending` empty-claim husks → `ungradeable` (guarded SQL, 0 collateral, 0 pending left). Added `scripts/check-slug-logging-freshness.mjs` (>2d slug-stall watchdog) wired warn-only into `.github/workflows/grade-predictions.yml`.
+- **Item 3 (`parcels_lee_zip_source_layer`) DEFERRED** to its own session — real ingest PR (probe LeePA MapServer → join FOLIOID → site-ZIP via centroid point-in-polygon → backfill → surface per-ZIP in properties-lee-value; G2/G3).
+- **CAVEAT (git race):** the 6 item-4/5 files were swept into the parallel session's `951db4f` "feat(ui)" commit by a concurrent `git add -A` — work is preserved on main but attributed to that commit, not a separate seller-stress commit. This is the correcting log entry. `951db4f` is unpushed (1 ahead of origin/main); NOT pushed — awaiting operator approval.
+
 ## 2026-06-14 (main) — feat(ui): global design standardization — teal #0a8078, dark AI dock, professional chart titles
 
 - All `#00d4aa` + `#3dc9c0` → `#0a8078` site-wide (54 files). `#0b6b5a` → `#0a8078`, `#00b894` → `#076358`.
