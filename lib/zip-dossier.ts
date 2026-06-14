@@ -93,6 +93,12 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   },
   // Redfin `housing_by_zip` detail table, grain="zip" (site-grade, 4-county metro) + a SWFL regional read.
   "housing-swfl": { grains: ["zip", "region"], covers: METRO_4 },
+  // Seller-stress composite (Redfin Data Center price-drops / cancellations / delistings,
+  // per-ZIP). Same Redfin ZIP family as housing/rentals → METRO_4 (Lee/Collier/Charlotte/
+  // Sarasota), per the anti-under-claim note above. ZIP-grain only (no regional aggregate).
+  // (Added 2026-06-14 to fix a red main: the brain shipped in 581d707 without this entry —
+  // owner should confirm the 3 stress datasets' live ZIP coverage matches METRO_4.)
+  "seller-stress-swfl": { grains: ["zip"], covers: METRO_4 },
   // NOAA HURDAT2 best-track × OpenFEMA NFIP across the 6-county footprint.
   "hurricane-tracks-fl": { grains: ["county", "region"], covers: SIX_COUNTY },
   // LeePA parcel snapshot → Lee County only.
