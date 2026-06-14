@@ -29,11 +29,17 @@ from ingest.pipelines.faf5.constants import (
 )
 from ingest.lib.storage_uploader import upload_parquet
 from ingest.lib.tier1_inventory import upsert_inventory_row
+from ingest.lib.guards import assert_min_rows
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 BUCKET = "lake-tier1"
 TODAY = date.today().isoformat()
+
+# Catastrophe floor — a bad/empty ORNL pull (or schema change) must NOT overwrite
+# the non-date-stamped year-partitioned Tier-1 backfill (faf5/year=*/…parquet)
+# with empties. FL-zone flows are normally hundreds of thousands of rows.
+FAF5_FLOWS_MIN = 1000
 
 _YEAR_COLS: list[str] = (
     [f"tons_{y}" for y in FAF5_YEARS]
@@ -106,6 +112,9 @@ def main() -> None:
         return
 
     flows_rows = _build_flows_rows()
+    # Guard: abort before any upload if the pull collapsed — protects the
+    # in-place year-partitioned Tier-1 backfill from being overwritten empty.
+    assert_min_rows(len(flows_rows), FAF5_FLOWS_MIN, "faf5 FL-zone flows")
 
     datasets: list[tuple[str, list[dict]]] = [
         ("faf_flows",       flows_rows),
