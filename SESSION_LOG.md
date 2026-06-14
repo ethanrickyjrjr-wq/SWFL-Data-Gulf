@@ -2,6 +2,10 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — ingest: delete write_tier1_pointer entirely + clean its tests
+
+- `write_tier1_pointer` in `ingest/lib/storage_uploader.py` fully deleted (function + `tomllib`/`psycopg2` imports + `_SECRETS_PATH` constant). Dead `TestWriteTier1Pointer` class + `_FAKE_CREDS` fixture removed from `ingest/tests/lib/test_storage_uploader.py`. 69/69 affected tests green; 13 pre-existing failures unchanged (pipeline drift + arcgis flake + bls_qcew).
+
 ## 2026-06-14 (main) — ZIP moat exclusion analysis: 6 Redfin metro-only datasets confirmed skippable + Zillow ZHVI tier URLs found
 
 - **6 Redfin datasets confirmed Metro/State/US only** (Financing Trends, Investor Purchases, Balance of Power, Luxury, Starter Home, Redfin HPI) — excluded from build queue; they add no ZIP-grain edge.

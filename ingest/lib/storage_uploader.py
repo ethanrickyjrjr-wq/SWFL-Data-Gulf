@@ -4,16 +4,12 @@ import io
 import json
 import os
 import time
-import tomllib
 from pathlib import Path
 
-import psycopg2
 import requests
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / ".env")
-
-_SECRETS_PATH = Path(__file__).resolve().parents[2] / ".dlt" / "secrets.toml"
 
 
 def upload_parquet(bucket: str, object_path: str, rows: list[dict]) -> int:
@@ -80,58 +76,3 @@ def _upload_bytes(bucket: str, object_path: str, data: bytes, content_type: str)
             raise
 
 
-def write_tier1_pointer(
-    pipeline,  # unused — kept for call-site API compat
-    table_name: str,
-    bucket: str,
-    object_path: str,
-    row_count: int,
-    source_url: str,
-    pack_id: str | None = None,
-    vintage: str | None = None,
-) -> None:
-    """Insert/update a row in data_lake._tier1_inventory via psycopg2.
-
-    dlt cannot write to this table — its hand-crafted schema (id/bucket/path/vintage/
-    byte_size/pack_id) conflicts with dlt's required NOT NULL meta-columns. Direct
-    psycopg2 insert keeps the schema contract clean.
-    """
-    import warnings
-
-    warnings.warn(
-        "write_tier1_pointer is deprecated; use ingest.lib.tier1_inventory.upsert_inventory_row "
-        "(handles env-var fallback for Postgres creds; this helper requires .dlt/secrets.toml).",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    from datetime import date
-
-    if vintage is None:
-        vintage = date.today().isoformat()
-
-    with _SECRETS_PATH.open("rb") as f:
-        creds = tomllib.load(f)["destination"]["postgres"]["credentials"]
-    row_id = f"{bucket}/{object_path}"
-
-    conn = psycopg2.connect(
-        host=creds["host"],
-        port=int(creds["port"]),
-        database=creds.get("database", "postgres"),
-        user=creds["username"],
-        password=creds["password"],
-        connect_timeout=30,
-    )
-    conn.autocommit = True
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO data_lake._tier1_inventory
-            (id, bucket, path, vintage, byte_size, pack_id, source_url, created_at, updated_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, now(), now())
-        ON CONFLICT (id) DO UPDATE SET
-            byte_size = EXCLUDED.byte_size,
-            updated_at = now()
-        """,
-        (row_id, bucket, object_path, vintage, row_count, pack_id, source_url),
-    )
-    conn.close()
