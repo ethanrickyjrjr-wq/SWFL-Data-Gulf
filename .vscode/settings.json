@@ -33,5 +33,22 @@
     "editor.formatOnSave": false,
     "editor.defaultFormatter": null,
     "editor.codeActionsOnSave": {}
-  }
+  },
+
+  "material-icon-theme.folders.associations": {
+    "_FINISHED": "archive",
+    "data-sources": "database",
+    "data-pipeline": "pipe",
+    "email": "mail",
+    "charts": "stats",
+    "handoff": "connection",
+    "standards": "rules",
+    "sql": "database"
+  },
+
+  "vsicons.associations.folders": [
+    { "icon": "archive", "extensions": ["_FINISHED"], "format": "svg" },
+    { "icon": "database", "extensions": ["data-sources"], "format": "svg" },
+    { "icon": "mail", "extensions": ["email"], "format": "svg" }
+  ]
 }

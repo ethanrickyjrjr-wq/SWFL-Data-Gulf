@@ -68,23 +68,18 @@ function buildCreAggregateSource(
 
 // Number.EPSILON guard: without it (0.3 + 0.35) / 2 = 0.32499999999999996
 // floors to 0.32 instead of rounding to 0.33.
-const round2 = (n: number): string =>
-  (Math.round((n + Number.EPSILON) * 100) / 100).toString();
+const round2 = (n: number): string => (Math.round((n + Number.EPSILON) * 100) / 100).toString();
 
 /** Median of a numeric array. Returns null on empty input. */
 function medianOf(xs: number[]): number | null {
   if (xs.length === 0) return null;
   const sorted = [...xs].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 1
-    ? sorted[mid]
-    : (sorted[mid - 1] + sorted[mid]) / 2;
+  return sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 /** Most-common direction across a slice of corridors (modal direction). */
-function modalDirection(
-  values: (CorridorMetricDirection | null)[],
-): CorridorMetricDirection {
+function modalDirection(values: (CorridorMetricDirection | null)[]): CorridorMetricDirection {
   const counts: Record<CorridorMetricDirection, number> = {
     rising: 0,
     falling: 0,
@@ -130,9 +125,7 @@ function creFitScore(fragment: RawFragment): number {
  * type, count by county, seasonal-index stats, and active-flag stats.
  */
 function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
-  const corridors = allFragments.map(
-    (f) => f.normalized as unknown as CorridorNormalized,
-  );
+  const corridors = allFragments.map((f) => f.normalized as unknown as CorridorNormalized);
   // Stash for creSwflOutputProducer — typed values + nullable metric fields can't
   // survive in SynthesisFact.value (string-only). Same pattern as macro-swfl.
   lastCorridors = corridors;
@@ -160,10 +153,7 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
       : seasonal.length % 2 === 1
         ? seasonal[mid]
         : (seasonal[mid - 1] + seasonal[mid]) / 2;
-  const avg =
-    seasonal.length === 0
-      ? null
-      : seasonal.reduce((s, v) => s + v, 0) / seasonal.length;
+  const avg = seasonal.length === 0 ? null : seasonal.reduce((s, v) => s + v, 0) / seasonal.length;
 
   const flags = corridors.flatMap((c) => c.flags);
   const byFlagType: Record<string, number> = {};
@@ -286,14 +276,14 @@ function voteCorridor(c: CorridorNormalized): CorridorVote {
     c.cap_rate_direction,
     c.vacancy_rate_direction,
     c.absorption_sqft_direction,
-    c.asking_rent_psf_direction
-  ].filter(s => s != null);
+    c.asking_rent_psf_direction,
+  ].filter((s) => s != null);
 
   if (signals.length === 0) return "no-data";
-  
+
   const hasFalling = signals.includes("falling");
   const hasRising = signals.includes("rising");
-  
+
   if (hasFalling && hasRising) return "mixed";
   if (hasFalling) return "bullish";
   if (hasRising) return "bearish";
@@ -368,8 +358,7 @@ function creSwflOutputProducer(out: PackOutput): BrainOutputProducerResult {
   // P2 provenance — single-query fetched_at shared across all corridors in
   // this run. If the closure capture missed (zero fragments), fall back to a
   // generated timestamp so the receipt is still well-formed.
-  const fetched_at =
-    lastCorridorFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastCorridorFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   const key_metrics: BrainOutputMetric[] = [];
   if (capMedian != null) {
@@ -470,8 +459,7 @@ export const creSwfl: PackDefinition = {
     "The user reads corridor intelligence to qualify tenants against what a corridor can actually support, and to arm the landlord-value conversation.",
     "The user treats the active-flags layer — infrastructure, new projects, regulatory shifts — as the on-the-ground intelligence that is not in public listings.",
   ],
-  activeProject:
-    "cre-swfl: standing reference on verified SWFL commercial real estate corridors.",
+  activeProject: "cre-swfl: standing reference on verified SWFL commercial real estate corridors.",
   prompts: {
     triageContext:
       "These fragments are SWFL CRE corridor profiles. Score how decision-relevant each corridor is to a commercial real estate broker working Southwest Florida. A corridor with a clear character narrative and active ground-truth flags is highly relevant. Score on substance, not length.",

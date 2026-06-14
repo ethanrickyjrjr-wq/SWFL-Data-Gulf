@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — docs/plans folder reorganization + VS Code icon associations
+
+- **48 completed plans** moved to `docs/superpowers/plans/_FINISHED/` (all May + Jun 1–11 items). Active work split into `email/` and `data-pipeline/` category subfolders; only the current-session Redfin + ODD standard remain at plans root.
+- **22 historical docs** moved to `docs/_FINISHED/`; 6 data-source docs consolidated into new `docs/data-sources/`; duplicate `audits/` + `handoffs/` folders collapsed into `handoff/` + `_FINISHED/`.
+- `.vscode/settings.json` updated with Material Icon Theme + vscode-icons folder associations (`_FINISHED`→archive, `data-sources`→database, `email`→mail, `data-pipeline`→pipe). `desktop.ini` + system attribute applied to both `_FINISHED` folders for Windows Explorer visual distinction.
+- `CLAUDE.md` corridor-character-generator path updated to `plans/_FINISHED/2026-05-26-corridor-character-generator/`.
+
 ## 2026-06-14 (main) — tier-divergence K-shape intensity + chart handoff restructure
 
 - `tier_kshape_intensity_swfl` metric added to `tier-divergence-swfl` pack: 0–100 normalized score (kshape_zip_count / zips_covered × 100), `display_format: "percent"`, `lower_is_bullish`. Registered in `brain-vocabulary.json` concepts + slug_index same commit.
