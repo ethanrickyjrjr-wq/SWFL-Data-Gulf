@@ -218,13 +218,16 @@ pages").
 
 **On `/charts` today (the hub):**
 
-| Chart                          | Source view                   | Shape       |
-| ------------------------------ | ----------------------------- | ----------- |
-| Typical home value             | `data_lake.zhvi_pivoted`      | 3-metro     |
-| Typical monthly rent           | `data_lake.zori_pivoted`      | 3-metro     |
-| Air travel through the region¹ | `public.rsw_airport_monthly`  | single line |
+| Chart                          | Source view                        | Shape                         |
+| ------------------------------ | ---------------------------------- | ----------------------------- |
+| Typical home value             | `data_lake.zhvi_pivoted`           | 3-metro area                  |
+| Typical monthly rent           | `data_lake.zori_pivoted`           | 3-metro line                  |
+| Air travel through the region  | `public.rsw_airport_monthly`       | total_passengers + 12-mo trend |
+| Home value momentum            | `data_lake.zhvi_pivoted` (derived) | 3-metro YoY % line            |
 
-¹ Verified live: monthly enplanements, →2026-04 (640,135, +1.7% YoY).
+RSW airport: all 5 LCPA metrics live as of 2026-06-14 (516 rows each, 1983-05 → 2026-04).
+Air travel panel plots `total_passengers` (arrivals + departures) with a 12-month moving-average
+trend overlay. Apr 2026 = 1,152,669 · Mar = 1,521,149 (snowbird peak).
 
 **Known clean candidates for later charts** (verified in the lake, but
 need reshaping — not drop-ins): regional airport already wired above;

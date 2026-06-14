@@ -20,6 +20,12 @@ describe("formatChartValue", () => {
     expect(formatChartValue("count", 1_200_000)).toBe("1.2M");
     expect(formatChartValue("count", 512)).toBe("512");
   });
+
+  it("pct: one decimal, leading + for non-negative", () => {
+    expect(formatChartValue("pct", 4.2)).toBe("+4.2%");
+    expect(formatChartValue("pct", -1.5)).toBe("-1.5%");
+    expect(formatChartValue("pct", 0)).toBe("+0.0%");
+  });
 });
 
 describe("formatAxisTick (compact, so phone Y-axis labels don't clip)", () => {

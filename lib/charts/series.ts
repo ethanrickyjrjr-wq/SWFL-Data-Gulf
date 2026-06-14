@@ -17,3 +17,9 @@ export const SWFL_METRO_SERIES: ChartSeriesDef[] = [
 export const REGION_PASSENGER_SERIES: ChartSeriesDef[] = [
   { key: "passengers", label: "Passengers", color: "#3dc9c0", dash: "" }, // gulf-teal, solid
 ];
+
+/** Two-series feed for the total-passengers + 12-month trend panel. */
+export const REGION_AIR_TRAVEL_SERIES: ChartSeriesDef[] = [
+  { key: "passengers", label: "Monthly passengers", color: "#3dc9c0", dash: "" }, // gulf-teal, solid
+  { key: "trend", label: "12-month trend", color: "#d4b370", dash: "8 5" }, // neutral-gold, dashed
+];

@@ -1,7 +1,7 @@
 import { MetroAreaChart } from "@/components/charts";
-import { mapPivotedCityRows } from "@/lib/charts/pivoted-series";
-import { mapAirportRows, type AirportMonthRow } from "@/lib/charts/airport-series";
-import { SWFL_METRO_SERIES, REGION_PASSENGER_SERIES } from "@/lib/charts/series";
+import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
+import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
+import { SWFL_METRO_SERIES, REGION_AIR_TRAVEL_SERIES } from "@/lib/charts/series";
 import type { ChartRow, ChartSeriesDef, PivotedCityMonth } from "@/types/viz";
 import type { ValueFormat } from "@/lib/charts/format";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
@@ -44,17 +44,39 @@ async function loadMetros(supabase: Supabase, view: string): Promise<LoadedPanel
   }
 }
 
-// Single-series regional airport feed (public.rsw_airport_monthly).
+// YoY % momentum derived from the same zhvi_pivoted view — zero new source.
+async function loadHomeValueMomentum(supabase: Supabase): Promise<LoadedPanel> {
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("zhvi_pivoted")
+      .select("month, cape_coral, fort_myers, naples")
+      .order("month", { ascending: true });
+    if (error) return { data: [], asOf: undefined, error: error.message };
+    const mapped = mapPivotedCityYoY(data as PivotedCityMonth[] | null);
+    const rows: ChartRow[] = mapped.entries.map((e) => ({
+      month: e.month,
+      cape_coral: e.cape_coral,
+      fort_myers: e.fort_myers,
+      naples: e.naples,
+    }));
+    return { data: rows, asOf: mapped.asOf, error: null };
+  } catch (err) {
+    return { data: [], asOf: undefined, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+// Total-passenger feed with 12-month trend overlay (public.rsw_airport_monthly).
 async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
   try {
     const { data, error } = await supabase
       .from("rsw_airport_monthly")
       .select("report_month, value")
       .eq("airport_code", "RSW")
-      .eq("metric", "enplanements")
+      .eq("metric", "total_passengers")
       .order("report_month", { ascending: true });
     if (error) return { data: [], asOf: undefined, error: error.message };
-    const mapped = mapAirportRows(data as AirportMonthRow[] | null);
+    const mapped = mapAirportTotalWithTrend(data as AirportMonthRow[] | null);
     return { data: mapped.entries, asOf: mapped.asOf, error: null };
   } catch (err) {
     return { data: [], asOf: undefined, error: err instanceof Error ? err.message : String(err) };
@@ -73,10 +95,11 @@ interface RenderedPanel extends LoadedPanel {
 
 export default async function ChartsPage() {
   const supabase = createServiceRoleClient();
-  const [homeValues, rents, passengers] = await Promise.all([
+  const [homeValues, rents, passengers, homeValueMomentum] = await Promise.all([
     loadMetros(supabase, "zhvi_pivoted"),
     loadMetros(supabase, "zori_pivoted"),
     loadPassengers(supabase),
+    loadHomeValueMomentum(supabase),
   ]);
 
   const panels: RenderedPanel[] = [
@@ -103,10 +126,19 @@ export default async function ChartsPage() {
       rootId: "air-travel",
       eyebrow: "Southwest Florida",
       title: "Air travel through the region",
-      subtitle: "Departing passengers, per month",
+      subtitle: "Total passengers per month — arrivals + departures, with 12-month trend",
       valueFormat: "count",
-      series: REGION_PASSENGER_SERIES,
+      series: REGION_AIR_TRAVEL_SERIES,
       ...passengers,
+    },
+    {
+      rootId: "home-value-momentum",
+      eyebrow: "Southwest Florida",
+      title: "Home value momentum",
+      subtitle: "Year-over-year change — Cape Coral · Fort Myers · Naples",
+      valueFormat: "pct",
+      series: SWFL_METRO_SERIES,
+      ...homeValueMomentum,
     },
   ];
 
@@ -141,7 +173,7 @@ export default async function ChartsPage() {
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             }}
           >
-            Home values, rents, and air travel across Lee and Collier County.
+            Home values, rents, air travel, and market momentum across Lee and Collier County.
           </p>
         </header>
 

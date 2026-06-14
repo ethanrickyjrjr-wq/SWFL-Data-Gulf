@@ -1,9 +1,8 @@
 # /charts — airline graph fix + a second chart (HANDOFF, 2026-06-14)
 
-**Status: NOT DONE.** This was the session's actual task and it didn't get built —
-the session got pulled into an unrelated data-integrity cleanup and never came
-back to the charts. Everything below is discovery + an approved design, ready to
-execute. No code was written for either part. Pick this up and build it.
+**Status: DONE — built 2026-06-14 on branch `claude/charts-airline-total-passengers-yoy`.**
+Part 1 (airline graph): `total_passengers` + 12-month trend line. Part 2 (second chart):
+YoY% momentum from `zhvi_pivoted`. All tests pass, tsc clean. See SESSION_LOG for commit.
 
 The forward-looking chart *rules* live in `app/_design/07-charts-and-dataviz.md`
 (read §1, §2, §6 before touching anything). The previous charts story is

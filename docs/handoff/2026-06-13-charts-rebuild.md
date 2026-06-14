@@ -112,16 +112,18 @@ All three are brain-backed (the airport panel reads the same table as
 
 ---
 
-## Air travel = departures only (read this before "add arrivals")
+## Air travel panel — UPDATED 2026-06-14 (this section is now stale, kept for history)
 
-The airport panel plots **enplanements = passengers *boarding*** (departures).
-That is the **only** metric in `rsw_airport_monthly` — it is **not** arrivals +
-departures. We do **not** hold deplanement (arrival) data.
+~~The airport panel plots **enplanements = passengers *boarding*** (departures).
+That is the **only** metric in `rsw_airport_monthly`…~~
 
-To show arrivals separately is a **data/ingest task, not a chart change**:
-1. Verify the Lee County Port Authority source actually publishes deplanements.
-2. Add the deplanement metric to the `rsw-airport` ingest pipeline + brain.
-3. Then the chart can plot two series (boardings vs. arrivals) for free.
+**Correction (2026-06-14):** RSW v3 ingest landed all 5 LCPA metrics on 2026-06-14:
+`enplanements`, `deplanements`, `total_passengers`, `aircraft_operations`,
+`total_freight_lbs` — 516 rows each, 1983-05 → 2026-04. The claim that "we do not
+hold deplanement data" is now FALSE. The panel was updated in the same session:
+- Metric switched from `enplanements` → **`total_passengers`** (arrivals + departures)
+- A 12-month moving-average trend series added (gold dashed, deseasonalizes the ~1.71 snowbird ratio)
+- Title "Air travel through the region" now accurate
 
 ---
 
