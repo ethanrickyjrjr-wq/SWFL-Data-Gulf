@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — rsw-airport BRAIN v3: trailing-12 total_passengers YoY direction + 5-metric roster (commit 4941950, awaiting push)
+
+- **rsw-airport pack rewrite** (`refinery/packs/rsw-airport.mts`): brain now surfaces all 5 LCPA metrics (was enplanements-only). **Direction = trailing-12-mo `total_passengers` YoY** (rolling 12 vs prior 12) — deseasonalizes RSW's snowbird seasonality (live seasonality ratio 1.71); `total_passengers` is the SOLE direction input (enplanements + deplanements = decomposition, avoids the double-count / DWU Direction-Counting-Error). Magnitude divisor recalibrated 20→15 (empirical P85 of |trailing-12 YoY|, 1985–2026 COVID-excluded). **PGD dropped** (0 rows live; separate operator, no LCPA source).
+- Files: `refinery/sources/rsw-airport-source.mts` (window 15→30mo: trailing-12 needs 24mo data + LCPA ~2-3mo lag), `packs/rsw-airport.test.mts` (8/8), `packs/catalog.mts` (scope mirror — Gate 5), `vocab/brain-vocabulary.json` (+8 output +4 raw-metric slugs, −3 dropped grep-clean), `__fixtures__/rsw-airport.sample.json` (real 29-mo pull from live table), `brains/rsw-airport.md` (v5). Spec: `docs/superpowers/specs/2026-06-13-rsw-airport-v3-redesign-design.md`.
+- **Verify (green):** tests 12/12, `check-vocab-coverage --all` OK (30 brains), render 0 orphans (bullish +2.4%), `master --target-only` 0 orphans. cadence `expected_rows_min` already 2322 (unchanged — table row count unaffected); cron `rsw-airport-monthly.yml` already live (brain-side change only, no new pipeline).
+- **Real-data proof:** April 2026 single-month total passengers −2.2% YoY but trailing-12 +2.4% → correctly **bullish**; the old single-month signal would have falsely flipped bearish on that one snowbird-departure month.
+- **Next:** push 4941950 (operator-gated; currently stacked beneath email commit 7a4b690). After deploy, live-verify `swfl_fetch rsw-airport` renders the throughput framing cleanly.
+
 ## 2026-06-14 (main) — email Task-02 step-02: scoped-content assembly (resolveScope + assembleScopedContent) + ASYNC contract correction
 
 - **Implemented `lib/email/scoped-content.ts`** (step-02, the no-invention spine): `resolveScope(row)` (scope_kind/value → grain-honest `ResolvedScope` | `null`, MOAT-gated on `loc.resolution.in_scope`), `assembleScopedContent(row, deps)` (resolve → dossier → `buildWelcomeAnswer` → topic filter → `ScopedContent` | `null`), and `defaultScopedDeps({origin,log})`. Cards come ONLY from `buildWelcomeAnswer` — no second source, no regex, no recompute. Pure + DI-seamed (tests inject stubs, no DB/network).
