@@ -7,6 +7,12 @@
 - New `CLAUDE.md` RULE 1.5 + `scripts/worktree.mjs` (`new`/`land`/`cleanup`): a second concurrent session can work in a LOCAL self-deleting worktree (`../bp-<label>`, branch `wt/<label>` off `origin/main`) instead of colliding on the shared `main` checkout. Lands via `git push origin HEAD:main` — never pushed as a remote branch, never a PR — so the 2026-06-08 no-branch/no-PR decree stays intact. Also codifies `git add <explicit paths>` (never `-A`) to kill the staging sweep that put seller-stress work into `951db4f`.
 - **Pushed BY ITSELF**: committed at a detached HEAD on `origin/main` (49d9c28) and pushed `HEAD:main`, so it does NOT carry the parallel session's unpushed `925e125` (weekly-pulse freshness-bridge scaffold, impl pending) to origin. `925e125` stays local for its author to land; local `main` is intentionally left diverged (behind by this commit, ahead by `925e125`) and self-heals on the next `safe-push`.
 - Experimental: revert = delete the RULE 1.5 block + `scripts/worktree.mjs` in one commit.
+## 2026-06-14 (claude/swfl-data-freshness-pipeline-w6pyim) — plan: Weekly Pulse freshness-bridge (branch created, impl pending)
+
+- New branch off `main` (49d9c28) for the freshness-pulse build. Pushed so it's checkout-able on terminal; **no implementation yet — awaiting operator go**.
+- Added `docs/superpowers/plans/2026-06-14-weekly-pulse-freshness-bridge.md` (plan-of-record). Builds a weekly cited pulse into a new Tier-2 `data_lake.weekly_pulse` (Redfin weekly file = median sale price for Cape Coral metro=Lee / Naples metro=Collier; FRED `MORTGAGE30US` = mortgage rate; Claude-Haiku estimate is a *tagged fallback*, no `gpt-4o-mini`). Cron writes to the lake, `contents: read`, **no bot commit to main**. `/charts` appends a *visually distinct dashed* pulse point (ZHVI≠Redfin median sale price — honesty) + a reusable freshness badge generalized from `app/welcome/_components/FreshnessBadge.tsx`.
+- Research-backed pushback on the original spec: authoritative vendor files replace search+regex/mini-LLM estimation (MOAT: the system cannot invent a number); probed the Redfin TSV live (Cape Coral + Naples metros present, real `median_sale_price`).
+- **Next:** on approval, execute steps 1–9 in the plan doc (migration → ingest → cadence entry → workflow → provider → page merge → chart UI → shared badge → tests).
 
 ## 2026-06-14 (main) — feat(charts): tier-momentum panel completion — mapTierYoY + tests + docs
 
