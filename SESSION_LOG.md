@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — green red main: seller-stress BRAIN_GEO + FAF5 healer drift
+
+- **Main was RED before AND after my cron push** (`581d707` seller-stress + `206f9d5` mine). Root cause = the prior session's `seller-stress-swfl` brain (`581d707`) shipped to the catalog **without a `BRAIN_GEO` entry** → `assembleLocationDossier` G2 throws → ~13 `lib/zip-dossier.test.ts` tests fail. (That session's log said "all gates passed" — it ran the pack/catalog/vocab tests but NOT the dossier G2 sweep. Exact "told it's fixed" pattern.) Fix: added `"seller-stress-swfl": { grains: ["zip"], covers: METRO_4 }` (mirrors sibling Redfin ZIP brains; owner to confirm the 3 stress datasets' live coverage). zip-dossier 28/28 green.
+- **Also fixed a drift I introduced:** my FAF5 logger-trigger rename (`206f9d5`) was not mirrored in `heal-cron-failure.yml` → `trigger-list-drift.test.mjs` failed (caught locally, not in CI's bun-test). Aligned the healer's FAF5 name. Drift test 3/3 green.
+
 ## 2026-06-14 (main) — Collier permits WAF fix (Spider binary) + permits/faf5 volume guards + cron-logger hardening
 
 - **Collier permits monthly unstuck (was 4/4 fails since 05-27).** Root cause = Akamai bot-wall 403 on the XLSX binary download from `www.collier.gov` — blocks plain HTTP by TLS fingerprint, so even a residential curl 403s (the handoff's "200 from residential" was WRONG; re-verified live). Fix: `download_month()` now fetches via new `spider_client.download_binary()` — `request:http` + `return_format:bytes` + `stealth` + `proxy_enabled`, the ONLY combo that round-trips a binary (chrome/smart HTML-wrap it; raw text-corrupts it). Firecrawl can't return raw bytes (verified vs live docs) → listing-discovery stays Firecrawl, binary goes Spider. Added `SPIDER_API_KEY` to the workflow `env:`. **Proven locally:** live dry-run pulled 5,030 April rows through the wall, exit 0; 61 tests green. ⬜ post-push `gh workflow run collier-permits-monthly.yml -f dry_run=true` → then close check `collier_permits_runner_ip_403`.
