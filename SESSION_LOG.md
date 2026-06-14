@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-14 (main) — auto-resolve mask KILLED: relabel self-healed + surface chronic flappers
+
+- **The cure for "told it's fixed, breaks again."** Auto-resolve used to stamp every recovery `RESOLVED (auto)`, conflating a self-healed transient with a real fix. Now (`.github/scripts/lib/ledger-flap.mjs`, unit-tested 7/7): `flipMostRecentOpenRow` writes **`RESOLVED (auto — self-healed, untriaged)`** when the row's Root Cause is still `pending triage`, plain `RESOLVED (auto)` only when a human diagnosed it. `chronicFlappers()` counts per-workflow untriaged self-heals (old + new labels).
+- **SessionStart now SCREAMS the flappers.** `scripts/session-kickoff.mjs` prints `⚠ Flappers` for any workflow auto-resolved-untriaged ≥3×. Live proof: `daily-rebuild (10×), freshness-probe-daily (4×)` — the exact pipelines that kept "resolving" with no root cause. The next session can't miss them.
+- Logic lives in a pure, importable lib so it is unit-tested (the logger is a top-level CLI, untestable inline). Spec: `docs/superpowers/specs/2026-06-14-auto-resolve-mask-fix-design.md`. Not a new gate (RULE 3 C2) — extends the existing ledger mechanism. **This closes the systemic root of the operator's recurring frustration.**
+
 ## 2026-06-14 (main) — green red main: seller-stress BRAIN_GEO + FAF5 healer drift
 
 - **Main was RED before AND after my cron push** (`581d707` seller-stress + `206f9d5` mine). Root cause = the prior session's `seller-stress-swfl` brain (`581d707`) shipped to the catalog **without a `BRAIN_GEO` entry** → `assembleLocationDossier` G2 throws → ~13 `lib/zip-dossier.test.ts` tests fail. (That session's log said "all gates passed" — it ran the pack/catalog/vocab tests but NOT the dossier G2 sweep. Exact "told it's fixed" pattern.) Fix: added `"seller-stress-swfl": { grains: ["zip"], covers: METRO_4 }` (mirrors sibling Redfin ZIP brains; owner to confirm the 3 stress datasets' live coverage). zip-dossier 28/28 green.
