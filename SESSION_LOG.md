@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — debug(freshness): Firecrawl logging — complete cascade visibility
+
+- Added `[firecrawl]` print logging to `firecrawl_search()` (exception + 0-results + "results but no $-number" cases). Mirrors the Gemini logging from `2af3227`. Cascade is now fully visible in GHA logs.
+- **Root cause confirmed (2af3227 dry-run):** Gemini is `RESOURCE_EXHAUSTED` — `"Your prepayment credits are depleted"`. Key is valid; model + tool format confirmed correct (live-verified vs `ai.google.dev/gemini-api/docs/google-search`). **Operator must top up at https://ai.studio/projects to unblock the search path.**
+- FRED/api path (`mortgage_30yr_fixed`) is unaffected and will land rows on every cron. Firecrawl is the active fallback until Gemini billing is restored.
+- **Next:** operator tops up Gemini credits → dispatch live run (no `--dry-run`) → first `daily_truth` rows for search metrics land → `freshness-pulse` renders a real snapshot.
+
 ## 2026-06-15 (main) — debug(freshness): Gemini logging — expose silent cascade failure
 
 - Dry-run (`71d9aac`) confirmed FRED/api path works (mortgage `6.52`), but all 3 `search` leg areas returned `None` with `search queries fired=0` — Gemini leg failing silently before `record_queries()` is reached.

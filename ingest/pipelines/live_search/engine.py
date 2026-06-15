@@ -185,7 +185,8 @@ def firecrawl_search(question: str, denylist: list[str]) -> Candidate | None:
             exclude_domains=list(denylist or []) + list(DENYLIST_DEFAULT),
             scrape_markdown=True,
         )
-    except Exception:  # noqa: BLE001 - a leg failure must fall through, not crash
+    except Exception as exc:  # noqa: BLE001 - a leg failure must fall through, not crash
+        print(f"[firecrawl] exception: {type(exc).__name__}: {exc}")
         return None
     data = res.get("data") if isinstance(res, dict) else None
     results: list[dict] = []
@@ -200,6 +201,10 @@ def firecrawl_search(question: str, denylist: list[str]) -> Candidate | None:
         nums = extract_numbers(r.get("markdown") or r.get("description") or "")
         if nums:
             return Candidate(nums[0], _domain_of(url), url, "firecrawl", grounded=True, source_title=r.get("title", ""))
+    if results:
+        print(f"[firecrawl] {len(results)} results but no parseable $-number for: {question[:80]}")
+    else:
+        print(f"[firecrawl] 0 results for: {question[:80]}")
     return None
 
 
