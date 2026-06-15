@@ -7596,9 +7596,133 @@
       ],
       "status": "active",
       "scope_note": "detail_table id 'corridor_seasonality' emitted by the cre-swfl pack. One row per verified SWFL CRE corridor that has a non-null seasonal_index. Columns: seasonal_index (ratio 0–1; 0 = no seasonality, 1 = extreme seasonality). Row key = raw corridor name; label = displayNameFor() display name. Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids. PROVENANCE (verified 2026-06-12): corridor_profiles.seasonal_index is populated only by curator/editorial process (Supabase Studio direct edits). corridor_profiles has zero cadence_registry entries — no ingest pipeline, dlt run, PDF import, or ODD feed targets this column today. corridor_grounded reads corridor_profiles (to enumerate verified corridors) but writes only to lake-tier1 NDJSON, not back to corridor_profiles. TRIPWIRE: if any feed later populates seasonal_index automatically, the null semantics invert from 'not yet editorially assigned' to 'window not filled yet'. At that point: (1) the SeasonalRadialChart empty-state copy ('No seasonality data available.') must be revisited; (2) the non-null filter in bindSeasonalRadial and creSwflOutputProducer must be re-evaluated for cadence-window semantics; (3) the row-vs-brain classification may need an ODD scaffold review. Flag this before activating any such feed."
+    },
+    "freshness_median_sale_price_cape_coral_usd": {
+      "id": "freshness_median_sale_price_cape_coral_usd",
+      "prefLabel": "Cape Coral — Today's Sourced Median Sale Price",
+      "altLabels": [
+        "Cape Coral current median sale price",
+        "Cape Coral daily freshness median price"
+      ],
+      "raw_slugs": [
+        "freshness_median_sale_price_cape_coral_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's cited median residential sale price for Cape Coral, FL from the daily freshness layer (data_lake.daily_truth, fetch_mode=search). One grounded source's current figure, provenance-gated to a real source URL (never a model-memory number) and screened against our own prior value for anomalies. Surfaces between the slower monthly Redfin/ZHVI vendor refreshes; the vendor re-anchors the baseline on its native cadence (plan file 05)."
+    },
+    "freshness_median_sale_price_fort_myers_usd": {
+      "id": "freshness_median_sale_price_fort_myers_usd",
+      "prefLabel": "Fort Myers — Today's Sourced Median Sale Price",
+      "altLabels": [
+        "Fort Myers current median sale price",
+        "Fort Myers daily freshness median price"
+      ],
+      "raw_slugs": [
+        "freshness_median_sale_price_fort_myers_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's cited median residential sale price for Fort Myers, FL from the daily freshness layer (data_lake.daily_truth, fetch_mode=search). One grounded source's current figure, provenance-gated to a real source URL and anomaly-screened against our own prior value. Bridges the gap between the slower monthly vendor refreshes."
+    },
+    "freshness_median_sale_price_naples_usd": {
+      "id": "freshness_median_sale_price_naples_usd",
+      "prefLabel": "Naples — Today's Sourced Median Sale Price",
+      "altLabels": [
+        "Naples current median sale price",
+        "Naples daily freshness median price"
+      ],
+      "raw_slugs": [
+        "freshness_median_sale_price_naples_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's cited median residential sale price for Naples, FL (Collier) from the daily freshness layer (data_lake.daily_truth, fetch_mode=search). One grounded source's current figure, provenance-gated to a real source URL and anomaly-screened against our own prior value. Bridges the gap between the slower monthly vendor refreshes."
+    },
+    "freshness_mortgage_30yr_fixed_pct": {
+      "id": "freshness_mortgage_30yr_fixed_pct",
+      "prefLabel": "30-Year Fixed Mortgage Rate — Today's Sourced Value",
+      "altLabels": [
+        "current 30-year fixed mortgage rate",
+        "daily freshness mortgage rate"
+      ],
+      "raw_slugs": [
+        "freshness_mortgage_30yr_fixed_pct"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "ratio",
+      "unit": "%",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's 30-year fixed mortgage rate (US average) from the daily freshness layer in api mode — a deterministic pull from FRED MORTGAGE30US (Freddie Mac PMMS, weekly Thursday release, units Percent). Area 'swfl' carries the single national rate; FRED is its own authority (no separate vendor anchor)."
+    },
+    "freshness_zip_pulse_median_price_approx": {
+      "id": "freshness_zip_pulse_median_price_approx",
+      "prefLabel": "Per-ZIP Pulse Median Price (approx, [INFERENCE])",
+      "altLabels": [
+        "ZIP Baseline-Delta median price projection",
+        "approx ZIP pulse median price"
+      ],
+      "raw_slugs": [],
+      "raw_slug_patterns": [
+        "swfl_zip_*_pulse_median_price_approx_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Per-ZIP pulse median price PROJECTION from the freshness-pulse Baseline-Delta machine — today's county-grain fresh delta applied to that ZIP's vendor baseline (ZHVI/Redfin). source_tag='approx', an [INFERENCE] (never a cited ZIP fact), superseded by the next ZIP-grain vendor file; a same-period vendor value wins. Today these ride in the freshness_by_zip detail_table (cells, not key_metrics — check-vocab-coverage does not scan detail_table ids); the pattern is registered now so a future key_metrics emission never orphans. Mirrors env-swfl's swfl_zip_*_flood_aal_usd_per_insured_property per-ZIP pattern."
     }
   },
   "slug_index": {
+    "freshness_median_sale_price_cape_coral_usd": "freshness_median_sale_price_cape_coral_usd",
+    "freshness_median_sale_price_fort_myers_usd": "freshness_median_sale_price_fort_myers_usd",
+    "freshness_median_sale_price_naples_usd": "freshness_median_sale_price_naples_usd",
+    "freshness_mortgage_30yr_fixed_pct": "freshness_mortgage_30yr_fixed_pct",
     "commercial_permits_count": "commercial_permits_count",
     "commercial_permits_value_usd": "commercial_permits_value_usd",
     "commercial_permits_sf": "commercial_permits_sf",

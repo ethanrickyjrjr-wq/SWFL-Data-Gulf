@@ -33,6 +33,52 @@
 # pipeline_name argument in pipeline.py (they sometimes differ — see verified values below).
 
 pipelines:
+  # ── Tier-2 live-search freshness (daily; cascade Gemini->Firecrawl->Spider->Claude) ──
+  # Sourced metrics: value + real source URL from the cascade; anomaly check vs OUR OWN prior value
+  # (anomaly_threshold_pct is per-metric). Writes data_lake.daily_truth (consumer: freshness-pulse brain).
+  - name: live_search_daily_median_price
+    lane: tier-2
+    cadence_days: 1
+    tolerance_multiplier: 1.5
+    freshness_table: data_lake.daily_truth
+    freshness_column: retrieved_at
+    source_name: live_search
+    expected_rows_min: 1
+    note: "Daily sourced median sale price; cascade Gemini->Firecrawl->Spider->Claude; anomaly vs own prior."
+    live_search_config:
+      fetch_mode: search
+      metric_key: median_sale_price
+      areas: ["cape_coral", "fort_myers", "naples"]
+      questions:
+        - "What is the current median home sale price in {area_label}, Florida?"
+        - "{area_label} FL median home sale price this month"
+      denylist_domains: ["littlebird"]
+      vendor_anchor_table: data_lake.redfin_lee_market
+      unit: usd
+      expected_range: [200000, 900000]
+      tolerance_pct: 10
+      anomaly_threshold_pct: 8
+
+  - name: live_search_daily_mortgage
+    lane: tier-2
+    cadence_days: 1
+    tolerance_multiplier: 1.5
+    freshness_table: data_lake.daily_truth
+    freshness_column: retrieved_at
+    source_name: live_search
+    expected_rows_min: 1
+    note: "Daily 30-yr fixed mortgage from FRED MORTGAGE30US (weekly Thu; api mode = authoritative, no search)."
+    live_search_config:
+      fetch_mode: api
+      metric_key: mortgage_30yr_fixed
+      areas: ["swfl"]
+      api_config: { provider: fred, series_id: MORTGAGE30US, source_url: "https://fred.stlouisfed.org/series/MORTGAGE30US" }
+      vendor_anchor_table: null
+      unit: pct
+      expected_range: [2.0, 12.0]
+      tolerance_pct: 5
+      anomaly_threshold_pct: 8
+
   # ── Tier-1 DuckDB (fixed-path Parquet, overwritten each run) ─────────────
   # Verified: SELECT id, updated_at FROM data_lake._tier1_inventory WHERE id = '<id>'
 

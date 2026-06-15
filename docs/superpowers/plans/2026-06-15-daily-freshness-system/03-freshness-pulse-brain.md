@@ -10,6 +10,13 @@
 
 ## §0 corrections this file MUST honor (do not use the original draft's anchors)
 
+> **BUILT 2026-06-15 — code-over-plan corrections (verify against `git`, not this brief).** While building W4–W5 the following draft anchors were found wrong against the live contract and corrected in code (RULE 1/C1 — a plan names a hypothesis; the code is authority):
+> 1. **`domain: "real-estate"`, NOT `"market"`.** `BrainDomain` (`refinery/types/pack.mts`) is a closed set with no `"market"` — `"market"` would fail typecheck + the SQL CHECK. Median sale price + mortgage are real-estate signals.
+> 2. **`raw_slug_patterns` lives in `brain-vocabulary.json` concepts, NOT `patterns.mts`.** `patterns.mts` is the read-only compiler that reads `concept.raw_slug_patterns`; you add the glob as a field on a JSON concept (env-swfl `swfl_zip_*_flood_aal_*` is the exemplar).
+> 3. **Refinery source uses `getSupabase()` from `refinery/sources/supabase.mts`, NOT `createServiceRoleClient` from `@/utils/...`.** The `@/` alias is the Next.js app and does not resolve in the bun refinery context; `getSupabase()` is the proven source-connector path (city-pulse-source).
+> 4. **`edge_type: "modifier"` (Step 3.3 said `input` — documented deviation, kept `modifier`).** Operator decision: keep `modifier` because it is provably HARMLESS for a neutral/magnitude-0 reporter. Verified against the consumer: `edge_type` is consumed ONLY by `liftDrivers` (`stages/4-output.mts`) as the `OUTPUT.drivers` receipt label — it never enters `voteDirection`/`applyOverrideCascade`. AND magnitude 0 ⇒ vote weight `magnitude×conf×factor = 0`, so freshness-pulse cannot shift master's direction or magnitude under ANY edge_type. NOT veto, NOT critical (a missing daily pulse must not abort the rebuild).
+
+
 - **Per-ZIP `detail_tables` exemplar = `refinery/packs/housing-swfl.mts:525-530`** (`id: "housing_by_zip"`, `grain: "zip"`), **NOT env-swfl** (env-swfl emits per-ZIP data as templated `key_metrics`, no zip `detail_table`).
 - **Two registries:** add the pack to `PER_PACK_REGISTRY` in `refinery/packs/index.mts` **AND** `BRAIN_CATALOG` in `refinery/packs/catalog.mts` (lean `{ id, domain, scope, ttl_seconds }`). Gate-5 test = `refinery/packs/catalog.test.mts`.
 - **Master upstream wiring is two arrays** in `refinery/packs/master.mts`: `sources` (`makeBrainInputSource("freshness-pulse")`) **and** `input_brains` (`{ id: "freshness-pulse", edge_type: "input" }`). A leaf must NOT name master (the DAG throws `DAG: cycle detected — {…}`).
@@ -111,7 +118,7 @@ test("vendor row wins over approx for the same area", async () => {
 - [ ] **Step 2.3: Implement `freshness-pulse.mts`.** Pack metadata + the producer:
 
 ```ts
-// id "freshness-pulse"; domain "market"; scope "SWFL daily sourced freshness snapshot";
+// id "freshness-pulse"; domain "real-estate" (NOT "market" — see §0 BUILT note); scope "SWFL daily sourced freshness snapshot";
 // ttl_seconds 86400 (daily); trust_tier reporter. sources: [make... daily-truth-source, ZIP-baseline source].
 
 export function projectZipPulse(a: { zip: string; zipBaseline: number; countyToday: number; countyBaseline: number }) {
@@ -164,7 +171,7 @@ export const freshnessPulse: PackDefinition = {
 ## Task 3 — Register the pack everywhere (Gate 5 + vocab, SAME commit)
 
 - [ ] **Step 3.1:** Add `[freshnessPulse.id]: freshnessPulse` to `PER_PACK_REGISTRY` in `refinery/packs/index.mts`.
-- [ ] **Step 3.2:** Add `{ id: "freshness-pulse", domain: "market", scope: "SWFL daily sourced freshness snapshot", ttl_seconds: 86400 }` to `BRAIN_CATALOG` in `refinery/packs/catalog.mts`.
+- [ ] **Step 3.2:** Add `{ id: "freshness-pulse", domain: "real-estate", scope: "<FRESHNESS_PULSE_SCOPE — verbatim from the pack>", ttl_seconds: 86400 }` to `BRAIN_CATALOG` in `refinery/packs/catalog.mts`. (`domain "market"` was invalid — see §0 BUILT note; scope must match the pack's `FRESHNESS_PULSE_SCOPE` char-for-char for Gate 5.)
 - [ ] **Step 3.3:** In `refinery/packs/master.mts`, add `makeBrainInputSource("freshness-pulse")` to `sources` **and** `{ id: "freshness-pulse", edge_type: "input" }` to `input_brains` (not `critical` — a missing daily pulse must not abort master).
 - [ ] **Step 3.4:** Register slugs in `refinery/vocab/brain-vocabulary.json` — for each county-grain slug add a `concepts["<slug>"]` entry (with `prefLabel`, `scope_note`, `raw_slugs:["<slug>"]`, `domain:["market"]`, `value_type`, `unit`) **and** a `slug_index["<slug>"] = "<slug>"`. For the per-ZIP family, add a `raw_slug_patterns` entry in `refinery/vocab/patterns.mts` matching `^swfl_zip_\d{5}_pulse_median_price_approx_usd$`.
 - [ ] **Step 3.5: Verify the Gate-5 + vocab gates pass.**

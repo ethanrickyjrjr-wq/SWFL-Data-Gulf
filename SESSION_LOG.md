@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — feat(brain): freshness-pulse — daily sourced-freshness reporter (Daily Freshness System Wave 1, W4–W6) [NOT PUSHED — handed to Ricky]
+
+- **Brain-first atomic PR (table + brain ship together).** New Tier-1 reporter `refinery/packs/freshness-pulse.mts` + source `refinery/sources/daily-truth-source.mts` over `data_lake.daily_truth` (live in prod, empty). **Empty-tolerant** — renders `brains/freshness-pulse.md` before data; `direction: neutral`, `magnitude: 0` (reporter; master forms the call). **MOAT 3-gate:** a row enters `key_metrics` only if `value!=null && source_url && !anomaly_flag` (no model-memory number, no held anomaly; no LLM in the math path). `projectZipPulse` Baseline-Delta + `freshness_by_zip` detail_table (approx=`[INFERENCE]`, vendor-wins) built+tested; runtime ZIP join lights up with plan files 08/09 (`lastZipBaselines=[]` for now).
+- **Registered same commit:** `index.mts` (PER_PACK_REGISTRY) + `catalog.mts` (Gate-5 scope verbatim) + `master.mts` (both upstream arrays). **Master edge = `modifier`** (NOT veto, NOT critical; plan Step 3.3 said `input` — documented deviation): confirmed harmless — `edge_type` is consumed only by `liftDrivers` (`stages/4-output.mts`, a receipt label, never in `voteDirection`/override) AND magnitude 0 ⇒ vote weight 0, so a neutral/mag-0 reporter cannot shift master's direction or magnitude under any edge_type. Vocab: 4 county concepts + 1 per-ZIP `raw_slug_patterns` concept + 4 `slug_index` entries.
+- **Code-over-plan corrections (File 03 §0 BUILT note + 3 lines flipped, RULE 2):** `domain "real-estate"` (plan's `"market"` ≠ valid `BrainDomain`, would not compile), `getSupabase()` from `refinery/sources/supabase.mts` (not the Next.js `@/utils/...` alias), `raw_slug_patterns` in vocab JSON (not `patterns.mts`, which is the compiler).
+- **Green:** 15 py tests (live_search engine + cadence) · 10 pack tests + Gate-5 catalog parity · vocab `--all` (32 brains, freshness-pulse incl., 0 orphans) · refinery typecheck (mine clean) · `--target-only` render valid. 4-agent adversarial audit → commit-ready, 0 blockers. **Not pushed — handed to Ricky** (W1–W3 engine/pipeline/table by prior session, untouched).
+
 ## 2026-06-15 (main) — docs(plan): Briefcase Everywhere Plan A — operator decisions folded in (unified pill + watermark ladder)
 
 - Rewrote `docs/superpowers/plans/2026-06-15-briefcase-everywhere/A/` (README + 7 task briefs) with the audit corrections + locked 2026-06-15 operator decisions. **A-only; no B/C talk.**

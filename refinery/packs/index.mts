@@ -51,6 +51,7 @@ import { sellerStressSwfl } from "./seller-stress-swfl.mts";
 import { homeValuesSwfl } from "./home-values-swfl.mts";
 import { investorZipSwfl } from "./investor-zip-swfl.mts";
 import { tierDivergenceSwfl } from "./tier-divergence-swfl.mts";
+import { freshnessPulse } from "./freshness-pulse.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
@@ -88,4 +89,5 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [permitsCommercialSwfl.id]: permitsCommercialSwfl,
   [sellerStressSwfl.id]: sellerStressSwfl,
   [tierDivergenceSwfl.id]: tierDivergenceSwfl,
+  [freshnessPulse.id]: freshnessPulse,
 };

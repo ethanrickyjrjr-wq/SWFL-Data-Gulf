@@ -238,4 +238,14 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers 126 SWFL ZIPs, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.",
     ttl_seconds: 30 * 24 * 60 * 60,
   },
+  {
+    // Scope DUPLICATED VERBATIM from FRESHNESS_PULSE_SCOPE in freshness-pulse.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
+    // id/domain/scope/ttl — edit both strings together.
+    id: "freshness-pulse",
+    domain: "real-estate",
+    scope:
+      "SWFL daily sourced freshness snapshot — today's cited median sale price (Cape Coral / Fort Myers / Naples) and 30-year fixed mortgage rate, each provenance-gated to a real source URL, with ZIP-grain Baseline-Delta projections ([INFERENCE]).",
+    ttl_seconds: 86400,
+  },
 ];

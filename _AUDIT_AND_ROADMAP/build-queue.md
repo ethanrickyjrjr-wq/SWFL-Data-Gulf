@@ -7,6 +7,7 @@
 > Format: priority = line order. `- [x]` done · `- [~]` building now · `- [ ]` up next.
 > Edit this file on GitHub; /ops picks it up within 5 minutes.
 
+- [x] Daily Freshness System — Wave 1 (brain-first atomic PR, `docs/superpowers/plans/2026-06-15-daily-freshness-system/`). `data_lake.daily_truth` migration + `ingest/pipelines/live_search/` cascade engine (Gemini→Firecrawl real legs; Spider/Claude honest-None stubs) + pipeline + `cadence_registry.yaml` `live_search_config:` entries (W1–W3); `freshness-pulse` Tier-1 reporter brain + `daily-truth-source` connector + tests + registration (index/catalog/master `modifier` edge/vocab) + empty-tolerant `brains/freshness-pulse.md` (W4–W6). MOAT 3-gate (value+source_url+!anomaly); no LLM in math path. 15 py + 10 pack + Gate-5 + vocab `--all` green.
 - [x] Section 1 — stamp THE-GOAL.md + lean rules-of-engagement block
 - [x] Section 2 — /ops live operations ledger (this dashboard)
 - [x] Apply predictions/outcomes SQL to live Supabase + verify a prediction row lands

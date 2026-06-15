@@ -245,6 +245,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("city-pulse-swfl"),
     makeBrainInputSource("rsw-airport"),
     makeBrainInputSource("news-swfl"),
+    makeBrainInputSource("freshness-pulse"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
   // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
@@ -283,6 +284,17 @@ export const master: PackDefinition = {
     { id: "city-pulse-swfl", edge_type: "input" },
     { id: "rsw-airport", edge_type: "input" },
     { id: "news-swfl", edge_type: "modifier" },
+    // freshness-pulse is a Tier-1 data-freshness REPORTER (direction "neutral",
+    // magnitude 0). Wired as `modifier` (NOT veto, NOT critical). The plan's
+    // Step 3.3 said `input`; `modifier` is kept as a documented deviation and is
+    // CONFIRMED HARMLESS — a neutral/magnitude-0 reporter cannot shift master's
+    // direction or magnitude under ANY edge_type: (1) magnitude 0 ⇒ vote weight
+    // magnitude×conf×factor = 0 in voteDirection (lib/synth.mts), so it adds
+    // nothing to any direction bucket; (2) edge_type never enters the direction/
+    // magnitude math at all — it is consumed ONLY by liftDrivers
+    // (stages/4-output.mts) as the OUTPUT.drivers receipt LABEL. A missing daily
+    // pulse therefore can neither abort nor move the master rebuild.
+    { id: "freshness-pulse", edge_type: "modifier" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.
