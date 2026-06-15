@@ -43,9 +43,18 @@ mock.module("@/lib/welcome/dossier-cache", () => ({
 // Stub ONLY the {answer} producer's brain loader; keep every other fetch-brain
 // export real (the prose path imports renderDetailRowText etc. from this module).
 const brainState: { map: Record<string, unknown> } = { map: {} };
+// Master read for the analyst no-location path. null → the mock throws and
+// buildAnalystSystem falls back to the un-grounded analyst premise.
+const masterState: { output: Record<string, unknown> | null } = { output: null };
 mock.module("@/lib/fetch-brain", () => ({
   ...fetchBrain,
   loadParsedBrain: async (slug: string) => brainState.map[slug] ?? null,
+  fetchBrain: async (slug: string) => {
+    if (slug === "master" && masterState.output) {
+      return { output: masterState.output, freshness_token: "SWFL-7421-v9-20260601" };
+    }
+    throw new Error(`unexpected fetchBrain("${slug}") in test`);
+  },
 }));
 function stubBrain(output: Record<string, unknown>) {
   return {
@@ -370,4 +379,80 @@ test("FLOOD GATE on the route — an explicit ZIP whose env line is coarse emits
   expect(data).toBeDefined();
   expect(data!.answer.metrics.some((m) => m.key === "home_value")).toBe(true);
   expect(data!.answer.metrics.some((m) => m.key === "flood_aal")).toBe(false);
+});
+
+// --- Voice split: analyst mode vs welcome funnel + summarize ------------------
+
+// Minimal master read — enough for buildDossier + renderBlock (conclusion is the
+// grounding sentinel; refined_at is required by computeMetricChart).
+const MASTER_OUTPUT = {
+  conclusion: "SWFL is cooling into summer 2026 as inventory builds.",
+  direction: "bearish",
+  magnitude: 0.42,
+  confidence: 0.71,
+  refined_at: "2026-06-12",
+  key_metrics: [],
+  detail_tables: [],
+  caveats: [],
+};
+
+test("analyst mode, no location → grounds on the master read, not the funnel hook", async () => {
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT;
+  const res = await POST(
+    new Request("https://x/api/welcome/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        mode: "analyst",
+        messages: [{ role: "user", content: "what's the bottom line right now?" }],
+      }),
+    }),
+  );
+  const body = await res.text();
+  expect(body).toContain(MODEL_SENTINEL); // the model streamed a grounded answer
+  expect(captured.system).toContain("cooling into summer 2026"); // grounded on the master read
+  expect(captured.system).toContain("market analyst"); // analyst premise, not the funnel bot
+  expect(captured.system).not.toContain("auto-email"); // never the recurring-email pitch
+  masterState.output = null;
+});
+
+test("default (welcome) mode, no location → funnel explainer, never touches master", async () => {
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT; // present but must NOT be used
+  const res = await POST(
+    new Request("https://x/api/welcome/chat", {
+      method: "POST",
+      body: JSON.stringify({ messages: [{ role: "user", content: "what can you do?" }] }),
+    }),
+  );
+  await res.text();
+  expect(captured.system).toContain("auto-email"); // the funnel hook IS the welcome voice
+  expect(captured.system).not.toContain("cooling into summer 2026"); // master never fetched
+  masterState.output = null;
+});
+
+test("summarize mode → synthesis prompt over the thread, dedups against filed Q&A", async () => {
+  captured.system = undefined;
+  const res = await POST(
+    new Request("https://x/api/welcome/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        mode: "summarize",
+        alreadyFiled: [{ question: "flood read for 33931?", answer: "AAL is $30,074/yr." }],
+        messages: [
+          { role: "user", content: "flood read for 33931?" },
+          { role: "assistant", content: "AAL is $30,074/yr for ZIP 33931 [OpenFEMA]." },
+          {
+            role: "user",
+            content: "Summarize the important findings from this conversation so far.",
+          },
+        ],
+      }),
+    }),
+  );
+  const body = await res.text();
+  expect(body).toContain(MODEL_SENTINEL); // the model streamed the summary
+  expect(captured.system).toContain("summarizing"); // the summarize premise
+  expect(captured.system).toContain("flood read for 33931?"); // filed question in the dedup list
+  expect(captured.system).not.toContain("auto-email");
 });

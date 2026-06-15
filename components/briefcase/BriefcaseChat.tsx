@@ -1,27 +1,132 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useChatStream } from "@/lib/chat/use-chat-stream";
+import { useChatStream, parseChatFrame, type ChatFrame } from "@/lib/chat/use-chat-stream";
+import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
+import { buildQaItem } from "@/lib/briefcase/qa-item";
+import type { ProjectItem } from "@/lib/project/items";
 
 /**
  * The global Briefcase's standalone chat (off /r/*). Streams via the SHARED
- * useChatStream hook against /api/welcome/chat — the same Haiku-grounded SWFL
- * funnel chat the welcome page uses — so there is no forked stream (A-6 DRY).
+ * useChatStream hook against /api/welcome/chat in ANALYST mode — a project-aware,
+ * grounded SWFL market analyst (not the cold-lead funnel bot the public landing
+ * page uses). Two capabilities ride on top of the stream:
+ *   - "File this answer" — files the last answer as a `qa` item into the briefcase.
+ *   - "Summarize…" — condenses the whole session into one filed item (server
+ *     `mode:"summarize"`), deduping against what's already filed.
+ *
  * `starterPrompts` are the context-aware prompts the panel computes from A-7
  * (page + anon revisit count); shown only until the first message.
  *
  * The free weekly cap is enforced server-side by /api/welcome/chat when
  * WELCOME_CHAT_FREE_WEEKLY_CAP is set — no metering code lives here (A-6 step 3).
  */
+
+/** Drain a complete SSE response (the short summarize reply) into one string. */
+async function drainSseText(res: Response): Promise<string> {
+  const raw = await res.text();
+  return raw
+    .split("\n\n")
+    .map((f) => parseChatFrame(f))
+    .filter((e): e is ChatFrame => e !== null && typeof e.text === "string")
+    .map((e) => e.text as string)
+    .join("");
+}
+
 export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string[] }) {
-  const { messages, busy, send } = useChatStream("/api/welcome/chat");
+  const briefcase = useBriefcase();
+  // Grounding identity captured from the prelude `place` frame, so a filed Q&A
+  // pins the same ZIP + freshness token the answer was grounded on. Refs (not
+  // state) — these change mid-stream and must not trigger re-render.
+  const placeRef = useRef<{ zip: string; name: string } | null>(null);
+  const tokenRef = useRef<string | undefined>(undefined);
+  const onFrame = (f: ChatFrame) => {
+    if (f.type === "place") {
+      const place = f.place as { zip?: string; name?: string } | undefined;
+      if (place) placeRef.current = { zip: place.zip ?? "", name: place.name ?? "" };
+      if (typeof f.freshness_token === "string") tokenRef.current = f.freshness_token;
+    }
+  };
+
+  const { messages, busy, send } = useChatStream("/api/welcome/chat", {
+    body: { mode: "analyst" },
+    onFrame,
+  });
   const [input, setInput] = useState("");
+  const [filed, setFiled] = useState<string | null>(null);
+  const [summaryState, setSummaryState] = useState<"idle" | "saving" | "done" | "error">("idle");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Keep the latest message in view while streaming — DOM-only effect (no setState).
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [messages]);
+
+  function fileAnswer(answer: string) {
+    // The most recent user turn is the question this answer responds to.
+    const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+    briefcase?.fileItem(
+      buildQaItem({
+        report_id: placeRef.current?.zip || "swfl",
+        question: lastUser,
+        answer,
+        freshness_token: tokenRef.current,
+      }),
+    );
+    setFiled("qa");
+    setTimeout(() => setFiled((k) => (k === "qa" ? null : k)), 1800);
+  }
+
+  async function summarize() {
+    if (messages.length < 4 || summaryState === "saving") return;
+    setSummaryState("saving");
+    try {
+      // Pass the qa items already filed so the model synthesizes without repeating
+      // them verbatim (the basic dedup; F-3 narrows to this-session items).
+      const alreadyFiled = (briefcase?.draftItems ?? [])
+        .filter((i): i is Extract<ProjectItem, { kind: "qa" }> => i.kind === "qa")
+        .map((i) => ({ question: i.question, answer: i.answer }));
+      // Append a final user turn so the route's last-must-be-user gate passes;
+      // the summarize system prompt does the actual synthesis over the thread.
+      const convo = [
+        ...messages,
+        {
+          role: "user" as const,
+          content: "Summarize the important findings from this conversation so far.",
+        },
+      ];
+      const res = await fetch("/api/welcome/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "summarize", messages: convo, alreadyFiled }),
+      });
+      if (!res.ok) throw new Error("summarize failed");
+      const text = (await drainSseText(res)).trim();
+      if (!text) throw new Error("empty summary");
+      briefcase?.fileItem(
+        buildQaItem({
+          report_id: placeRef.current?.zip || "swfl",
+          question: "Conversation summary",
+          answer: text,
+          freshness_token: tokenRef.current,
+        }),
+      );
+      setSummaryState("done");
+      setTimeout(() => setSummaryState((s) => (s === "done" ? "idle" : s)), 1800);
+    } catch {
+      setSummaryState("error");
+      setTimeout(() => setSummaryState((s) => (s === "error" ? "idle" : s)), 2500);
+    }
+  }
+
+  const summarizeLabel =
+    summaryState === "saving"
+      ? "Summarizing…"
+      : summaryState === "done"
+        ? "Filed ✓"
+        : summaryState === "error"
+          ? "Couldn't summarize — try again"
+          : "Summarize conversation → file to project";
 
   return (
     <div className="flex flex-col">
@@ -44,21 +149,54 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       {messages.length > 0 && (
         <div
           ref={scrollRef}
-          className="mb-3 max-h-64 space-y-2 overflow-y-auto rounded-lg bg-[#0f1d24] p-3"
+          className="mb-2 max-h-64 space-y-2 overflow-y-auto rounded-lg bg-[#0f1d24] p-3"
         >
-          {messages.map((m, i) => (
-            <p
-              key={i}
-              className={
-                m.role === "user"
-                  ? "text-xs font-medium text-[#f0ede6]"
-                  : "whitespace-pre-wrap text-xs leading-5 text-gray-300"
-              }
-            >
-              {m.content || (busy ? "…" : "")}
-            </p>
-          ))}
+          {messages.map((m, i) => {
+            const showFile =
+              i === messages.length - 1 && m.role === "assistant" && !busy && m.content.length > 0;
+            return (
+              <div key={i}>
+                <p
+                  className={
+                    m.role === "user"
+                      ? "text-xs font-medium text-[#f0ede6]"
+                      : "whitespace-pre-wrap text-xs leading-5 text-gray-300"
+                  }
+                >
+                  {m.content || (busy ? "…" : "")}
+                </p>
+                {showFile && (
+                  <button
+                    type="button"
+                    onClick={() => fileAnswer(m.content)}
+                    disabled={filed === "qa"}
+                    className="mt-1 text-xs text-[#0a8078] transition-colors hover:text-[#0a8078]/80 disabled:opacity-60"
+                  >
+                    {filed === "qa" ? "Filed ✓" : "File this answer"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
+      )}
+
+      {/* Persistent: summarize the whole session into one filed item. Visible once
+          the conversation has started; needs ≥ 2 exchanges (4 messages) of substance. */}
+      {messages.length > 0 && (
+        <button
+          type="button"
+          onClick={() => void summarize()}
+          disabled={messages.length < 4 || summaryState === "saving"}
+          title={
+            messages.length < 4
+              ? "Ask a couple of questions first"
+              : "Summarize this conversation and file it to your project"
+          }
+          className="mb-3 w-full rounded-lg border border-[#0a8078]/40 px-3 py-2 text-xs text-gray-400 transition-colors hover:border-[#0a8078] hover:text-[#0a8078] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {summarizeLabel}
+        </button>
       )}
 
       <form

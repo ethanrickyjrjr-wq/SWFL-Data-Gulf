@@ -189,7 +189,18 @@ export function representativeFreshnessToken(dossier: LocationDossier): string |
 }
 
 /** The no-math / no-estimate floor + coverage-label rule + the welcome hook. */
-function welcomeGroundedSpeakLine(token?: string): string {
+export function welcomeGroundedSpeakLine(
+  token?: string,
+  voice: "welcome" | "analyst" = "welcome",
+): string {
+  // The data-reader floor is identical for both voices; only the CLOSING line
+  // differs. `welcome` (public landing) closes on the recurring-email hook;
+  // `analyst` (standalone in-app chat) closes by offering to file the read into
+  // the user's project — no pitch.
+  const close =
+    voice === "analyst"
+      ? "When the user wants to keep an answer, tell them they can save it with the 'File this answer' link and build it into a client-ready deliverable in their project. Do not pitch."
+      : "Close in one line by connecting it to the hook: this is the kind of cited, branded market read they can auto-email their own clients every week.";
   return (
     "\n\nANSWER ONLY FROM THE DATA ABOVE. Every Southwest Florida number you state must appear " +
     "verbatim on a line above, with its source. You are a data reader, not an analyst: relay the cited " +
@@ -202,9 +213,8 @@ function welcomeGroundedSpeakLine(token?: string): string {
     "covers 33913'), carry that label when you relay it — never present a county-wide or regional figure " +
     "as the specific place's own number. " +
     (token ? `Quote this freshness token exactly once, verbatim: ${token}. ` : "") +
-    "Close in one line by connecting it to the hook: this is the kind of cited, branded market read " +
-    "they can auto-email their own clients every week. Plain text only — no markdown. Never say " +
-    "'master', 'brain', 'payload', 'grain', or 'dossier'."
+    close +
+    " Plain text only — no markdown. Never say 'master', 'brain', 'payload', 'grain', or 'dossier'."
   );
 }
 
@@ -215,6 +225,9 @@ export interface WelcomeGroundedInput {
   /** Whether the user typed the 5-digit ZIP (gates flood AAL — see DetectedLocation). */
   explicitZip: boolean;
   tier?: 1 | 2 | 3;
+  /** "welcome" (public landing, default) keeps the recurring-email-hook close;
+   *  "analyst" (standalone in-app chat) closes by offering to file into a project. */
+  voice?: "welcome" | "analyst";
 }
 
 /**
@@ -238,7 +251,7 @@ export function buildWelcomeGroundedSystem(input: WelcomeGroundedInput): string 
     RULES_OF_ENGAGEMENT +
     "\n\n=== LIVE SOUTHWEST FLORIDA DATA — ANSWER ONLY FROM THIS ===\n\n" +
     block +
-    welcomeGroundedSpeakLine(token)
+    welcomeGroundedSpeakLine(token, input.voice)
   );
 }
 

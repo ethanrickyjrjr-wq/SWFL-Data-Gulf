@@ -41,6 +41,9 @@ export interface UseChatStreamOptions {
   /** Called for EVERY parsed frame, including typed prelude frames (place/data).
    *  Lets a consumer paint cards without the hook needing to know about them. */
   onFrame?: (frame: ChatFrame) => void;
+  /** Extra fields merged into the POST body (e.g. { mode: "analyst" }). Spread
+   *  BEFORE `messages` so the real conversation array always wins on a key clash. */
+  body?: Record<string, unknown>;
 }
 
 export function useChatStream(
@@ -77,7 +80,7 @@ export function useChatStream(
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ ...opts.body, messages: next }),
         signal: controller.signal,
       });
       // fetch only rejects on a network error — a 4xx/5xx still resolves. Without

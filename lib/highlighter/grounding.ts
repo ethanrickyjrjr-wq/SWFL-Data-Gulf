@@ -64,7 +64,7 @@ const DIRECTION_LABEL: Record<Dossier["direction"], string> = {
   neutral: "Neutral",
 };
 
-function renderBlock(b: GroundingBlock): string {
+export function renderBlock(b: GroundingBlock): string {
   const d = b.dossier;
   const parts = [
     `### ${b.label}`,

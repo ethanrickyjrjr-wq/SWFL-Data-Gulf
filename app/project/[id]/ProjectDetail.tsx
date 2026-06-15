@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import type { ProjectItem } from "@/lib/project/items";
+import type { TemplateId } from "@/lib/deliverable/templates";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import { asOfFromToken } from "@/lib/project/as-of";
@@ -42,6 +43,16 @@ const BRANDING_FIELDS: { key: string; label: string }[] = [
   { key: "brokerage", label: "Brokerage" },
 ];
 
+/** The four deliverable templates the Build button offers (ids mirror
+ *  DELIVERABLE_TEMPLATES in lib/deliverable/assemble.ts; the build route
+ *  re-validates via isTemplateId, so this list can't drift unchecked). */
+const DELIVERABLE_TEMPLATE_OPTIONS: { id: TemplateId; label: string }[] = [
+  { id: "market-overview", label: "Market overview" },
+  { id: "bov-lite", label: "Broker opinion (BOV lite)" },
+  { id: "client-email", label: "Client email" },
+  { id: "one-pager", label: "One-pager" },
+];
+
 /** A plain "as of {date}" citation line — the only v1 freshness surface (no badge). */
 function AsOf({ token }: { token: string | null | undefined }) {
   const date = asOfFromToken(token);
@@ -69,6 +80,9 @@ export function ProjectDetail({
   // Object-URL previews for files uploaded THIS session (server signed URLs only
   // arrive on the next full page load). Keyed by item id.
   const [localPreviews, setLocalPreviews] = useState<Record<string, string>>({});
+  const [template, setTemplate] = useState<TemplateId>("market-overview");
+  const [building, setBuilding] = useState(false);
+  const [buildError, setBuildError] = useState<string | null>(null);
 
   const fileCount = items.filter((i) => i.kind === "file").length;
 
@@ -85,6 +99,26 @@ export function ProjectDetail({
     const next = [...items];
     [next[i], next[j]] = [next[j], next[i]];
     mutate(next);
+  }
+
+  async function runBuild() {
+    if (building || items.length === 0) return;
+    setBuilding(true);
+    setBuildError(null);
+    try {
+      const res = await fetch(`/api/projects/${id}/build`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ template }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { id?: string; error?: string };
+      if (!res.ok || !data.id) throw new Error(data.error || "Build failed — please try again.");
+      // Success → the deliverable page (page unloads; no need to clear `building`).
+      window.location.assign(`/p/${data.id}`);
+    } catch (e) {
+      setBuildError(e instanceof Error ? e.message : "Build failed — please try again.");
+      setBuilding(false);
+    }
   }
 
   async function patch(body: Record<string, unknown>, okMsg: string) {
@@ -318,17 +352,40 @@ export function ProjectDetail({
       )}
 
       {/* Deliverable actions */}
-      <div className="print-hide mt-6 flex gap-3">
-        <PrintButton reportId={id} />
-        <button
-          type="button"
-          disabled
-          title="Coming soon"
-          className="rounded-full border border-white/10 px-4 py-2 text-sm text-gray-500"
-        >
-          Build deliverable
-        </button>
-        {/* TODO(S6): POST /api/projects/[id]/build (forced-tool LLM) → /p/[id] */}
+      <div className="print-hide mt-6 flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <PrintButton reportId={id} />
+          <select
+            value={template}
+            onChange={(e) => setTemplate(e.target.value as TemplateId)}
+            disabled={building}
+            aria-label="Deliverable template"
+            className="rounded-full border border-white/10 bg-transparent px-3 py-2 text-sm text-[#f0ede6] disabled:opacity-50"
+          >
+            {DELIVERABLE_TEMPLATE_OPTIONS.map((t) => (
+              <option key={t.id} value={t.id} className="bg-[#0f1d24]">
+                {t.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => void runBuild()}
+            disabled={building || items.length === 0}
+            title={
+              items.length === 0 ? "File at least one answer, chart, or figure first" : undefined
+            }
+            className="btn-gradient rounded-full px-4 py-2 text-sm font-semibold text-navy-dark disabled:opacity-50"
+          >
+            {building ? "Building…" : "Build deliverable"}
+          </button>
+        </div>
+        {items.length === 0 && (
+          <p className="text-xs text-gray-500">
+            File at least one answer, chart, or figure to build a deliverable.
+          </p>
+        )}
+        {buildError && <p className="text-xs text-red-400">{buildError}</p>}
       </div>
     </main>
   );

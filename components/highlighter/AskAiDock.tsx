@@ -12,6 +12,7 @@ import {
 } from "@/lib/highlighter/dock-geom";
 import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
+import { buildQaItem } from "@/lib/briefcase/qa-item";
 import { DockChart } from "./DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
@@ -249,6 +250,22 @@ export function AskAiDock({
     }
   }
 
+  // Capability parity with the standalone analyst chat: file the current grounded
+  // answer as a `qa` item (same builder, so both surfaces produce identical items).
+  function fileAnswer() {
+    if (!answer) return;
+    briefcase?.fileItem(
+      buildQaItem({
+        report_id: reportId,
+        question: activeQuestion,
+        answer,
+        freshness_token: freshnessToken,
+      }),
+    );
+    setFiled("qa");
+    setTimeout(() => setFiled((k) => (k === "qa" ? null : k)), 1800);
+  }
+
   const containerClass = isMobile
     ? "fixed inset-x-0 bottom-0 top-16 z-[58] flex flex-col rounded-t-2xl border border-[#0a8078] bg-[#0f1d24] text-sm text-[#f0ede6] shadow-2xl shadow-black/50"
     : "fixed z-[58] flex flex-col overflow-hidden rounded-xl border border-[#0a8078] bg-[#0f1d24] text-sm text-[#f0ede6] shadow-2xl shadow-black/50";
@@ -461,13 +478,23 @@ export function AskAiDock({
                 </button>
               )}
               {!streaming && !error && !isSummaryAnswer && (
-                <button
-                  type="button"
-                  onClick={archiveAndReset}
-                  className="mt-3 block text-xs text-gray-500 underline underline-offset-2 hover:text-[#0a8078]"
-                >
-                  Ask another →
-                </button>
+                <div className="mt-3 flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => fileAnswer()}
+                    disabled={filed === "qa"}
+                    className="text-xs text-[#0a8078] transition-colors hover:text-[#0a8078]/80 disabled:opacity-60"
+                  >
+                    {filed === "qa" ? "Filed ✓" : "File this answer"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={archiveAndReset}
+                    className="text-xs text-gray-500 underline underline-offset-2 hover:text-[#0a8078]"
+                  >
+                    Ask another →
+                  </button>
+                </div>
               )}
             </div>
           </>

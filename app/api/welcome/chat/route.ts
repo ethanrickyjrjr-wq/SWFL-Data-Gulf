@@ -13,9 +13,14 @@ import { assembleGuardedDossier } from "@/lib/welcome/dossier-cache";
 import {
   detectWelcomeLocation,
   buildWelcomeGroundedSystem,
+  welcomeGroundedSpeakLine,
+  representativeFreshnessToken,
   OUT_OF_SCOPE_GAP,
   BUSY_GAP,
 } from "@/lib/welcome/grounded";
+import { fetchBrain, buildDossier } from "@/lib/fetch-brain";
+import { renderBlock, type GroundingBlock } from "@/lib/highlighter/grounding";
+import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { buildWelcomeAnswer } from "@/lib/welcome/answer";
 import { identityForLocation } from "@/lib/location-surface";
 import type { WelcomeFrame, PlaceEcho } from "@/lib/welcome/frames";
@@ -76,6 +81,27 @@ export const WELCOME_SYSTEM =
   'the real, cited read — give me a ZIP or a place" and set up that build. Inventing a ' +
   "SWFL number is the one thing you must never do; every number being real and sourced " +
   "is the entire point.\n\n" +
+  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
+  '(no "master", "brain", "payload", "grain", "dossier").';
+
+// The standalone in-app chat (off /r/*) speaks as a project-aware market ANALYST,
+// not the cold-lead funnel bot. Same no-invention floor as WELCOME_SYSTEM; the
+// premise is "help build a cited, client-ready project" and it can file answers
+// into the user's briefcase. No "branded email you just saw", no email-hook pitch.
+export const ANALYST_SYSTEM =
+  "You are a Southwest Florida market analyst helping this person build a cited, " +
+  "client-ready project. The data covers Lee, Collier, Charlotte, Glades, Hendry, and " +
+  "Sarasota counties — prices, permits, flood risk, tourism, and the local economy, down " +
+  "to the ZIP and named place. Answer the question directly and usefully, in plain prose, " +
+  "from the cited data below. You CAN file answers, figures, and charts into their " +
+  "project: when they save something it lands in their briefcase to build into a " +
+  "client-ready deliverable — point them to the 'File this answer' link when it would " +
+  "help, but do not pitch and do not steer the conversation toward a product. When no " +
+  "place is named yet and the question needs one, ask which ZIP or area they mean — do " +
+  "not guess.\n\n" +
+  "NEVER invent a Southwest Florida number — no flood loss, sale price, rate, or count " +
+  "from memory or a guess; every figure must come from the cited data. If you don't hold " +
+  "a number at the grain asked, say so plainly and offer to pull it — never fabricate.\n\n" +
   "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
   '(no "master", "brain", "payload", "grain", "dossier").';
 
@@ -151,8 +177,70 @@ function streamAnswer(
   });
 }
 
+/**
+ * No-location analyst path: ground the standalone in-app chat on the region-wide
+ * master read so "what's the bottom line on SWFL right now?" answers from cited
+ * data instead of the funnel explainer. Mirrors the converse pattern (buildDossier
+ * → renderBlock). Failsafe: if master can't load, fall back to the un-grounded
+ * analyst premise — the no-invention floor in ANALYST_SYSTEM still holds.
+ */
+async function buildAnalystSystem(
+  lastUser: string,
+  origin: string,
+): Promise<{ system: string; token?: string }> {
+  try {
+    const { output, freshness_token } = await fetchBrain("master", { tier: 2, origin });
+    const block: GroundingBlock = {
+      // Clean, customer-facing label — never the internal "master" id (CLEAN rule).
+      label: "Southwest Florida (region-wide)",
+      dossier: buildDossier(output, freshness_token),
+    };
+    const system =
+      buildPlaceContext(lastUser) +
+      FORMAT_RULE +
+      ANALYST_SYSTEM +
+      "\n\n=== RULES OF ENGAGEMENT ===\n" +
+      RULES_OF_ENGAGEMENT +
+      "\n\n=== LIVE SOUTHWEST FLORIDA DATA — ANSWER ONLY FROM THIS ===\n\n" +
+      renderBlock(block) +
+      welcomeGroundedSpeakLine(freshness_token, "analyst");
+    return { system, token: freshness_token };
+  } catch {
+    return { system: buildPlaceContext(lastUser) + FORMAT_RULE + ANALYST_SYSTEM };
+  }
+}
+
+/**
+ * System prompt for the summarize path: synthesize the whole session into one
+ * cited block, folding in (without repeating verbatim) the Q&A the user already
+ * filed. Same no-invention floor as the analyst voice; plain text only.
+ */
+function buildSummarizeSystem(alreadyFiled: { question?: string; answer?: string }[]): string {
+  const questions = alreadyFiled.map((f) => (f.question ?? "").trim()).filter((q) => q.length > 0);
+  const dedup =
+    questions.length > 0
+      ? "\n\nThe user has ALREADY filed answers to these questions — fold their substance into the " +
+        "summary, but do NOT repeat them word-for-word:\n" +
+        questions.map((q) => `- ${q}`).join("\n")
+      : "";
+  return (
+    FORMAT_RULE +
+    "You are summarizing a Southwest Florida market-research conversation for the user's project. " +
+    "Read the whole conversation and write ONE concise summary of the important findings. Include the " +
+    "key numbers exactly as they appeared — never invent, round, average, or recompute a figure — and " +
+    "name the source or topic each came from. Lead with the bottom line, then the supporting points, in " +
+    "a short paragraph or two. Plain text only. Never use internal jargon (no 'master', 'brain', " +
+    "'payload', 'grain', 'dossier')." +
+    dedup
+  );
+}
+
 export async function POST(request: Request): Promise<Response> {
-  let body: { messages?: { role?: string; content?: string }[] };
+  let body: {
+    messages?: { role?: string; content?: string }[];
+    mode?: string;
+    alreadyFiled?: { question?: string; answer?: string }[];
+  };
   try {
     body = await request.json();
   } catch {
@@ -199,13 +287,40 @@ export async function POST(request: Request): Promise<Response> {
   // Fire-and-forget telemetry — zero enforcement.
   void recordWelcomeChat(request, messages.length);
 
-  // Does the conversation name a SWFL location? If not, keep the un-grounded
-  // explainer (steers "give me a ZIP or place"). If so, ground Haiku on the real
-  // per-location dossier — the converse pattern, no invention.
-  const detected = detectWelcomeLocation(messages);
+  // Voice select. "welcome" (default — public landing) is unchanged. "analyst"
+  // (standalone in-app chat) grounds even with no place named (on the master read).
+  // "summarize" condenses the session into one filed item (handled in its own
+  // early branch, added in step 4).
+  const mode: "welcome" | "analyst" | "summarize" =
+    body.mode === "analyst" ? "analyst" : body.mode === "summarize" ? "summarize" : "welcome";
+  const origin = new URL(request.url).origin;
   const lastUser = messages[messages.length - 1].content;
 
+  // Summarize the session into one cited block (no location detection — it reads
+  // the conversation, not a new question). The client appends a final "summarize"
+  // user turn so the last-must-be-user gate passes; the prompt does the synthesis.
+  if (mode === "summarize") {
+    return streamAnswer(
+      buildSummarizeSystem(body.alreadyFiled ?? []),
+      messages,
+      GROUNDED_MAX_TOKENS,
+    );
+  }
+
+  // Does the conversation name a SWFL location? If not: welcome → un-grounded
+  // funnel explainer (steers "give me a ZIP or place"); analyst → ground on the
+  // region-wide master read so the bottom-line question actually answers. If so,
+  // ground Haiku on the real per-location dossier — the converse pattern, no invention.
+  const detected = detectWelcomeLocation(messages);
+
   if (!detected) {
+    if (mode === "analyst") {
+      const { system, token } = await buildAnalystSystem(lastUser, origin);
+      const prelude: WelcomeFrame[] = token
+        ? [{ type: "place", place: { zip: "", name: "Southwest Florida" }, freshness_token: token }]
+        : [];
+      return streamAnswer(system, messages, GROUNDED_MAX_TOKENS, prelude);
+    }
     const system = buildPlaceContext(lastUser) + FORMAT_RULE + WELCOME_SYSTEM;
     return streamAnswer(system, messages, MAX_TOKENS);
   }
@@ -215,7 +330,6 @@ export async function POST(request: Request): Promise<Response> {
     return sseMessage(OUT_OF_SCOPE_GAP);
   }
 
-  const origin = new URL(request.url).origin;
   const loc = await resolveLocation(detected.token);
   if (loc.kind === "out-of-scope" || loc.kind === "address-unsupported") {
     return sseMessage(OUT_OF_SCOPE_GAP);
@@ -245,7 +359,10 @@ export async function POST(request: Request): Promise<Response> {
     explicitZip: detected.explicitZip,
     place,
   });
-  const prelude: WelcomeFrame[] = [{ type: "place", place }];
+  // The representative freshness token rides on the place frame so the client can
+  // pin it to a filed Q&A ("File this answer") without re-deriving it.
+  const token = representativeFreshnessToken(dossier);
+  const prelude: WelcomeFrame[] = [{ type: "place", place, freshness_token: token }];
   if (answer) prelude.push({ type: "data", answer });
 
   const system = buildWelcomeGroundedSystem({
@@ -253,6 +370,7 @@ export async function POST(request: Request): Promise<Response> {
     detectedText: detected.token,
     explicitZip: detected.explicitZip,
     tier: 2,
+    voice: mode === "analyst" ? "analyst" : "welcome",
   });
   return streamAnswer(system, messages, GROUNDED_MAX_TOKENS, prelude);
 }

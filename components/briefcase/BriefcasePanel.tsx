@@ -101,6 +101,9 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
             Ask anything about SWFL, then file the answers, charts, and figures into a project — and
             turn them into a cited, client-ready deliverable.
           </p>
+          <p className="text-[10px] text-gray-500">
+            Answers and figures you file land here — open a project to build &amp; send.
+          </p>
 
           <div>
             <p className="mb-1.5 text-[10px] uppercase tracking-wider text-gray-500">

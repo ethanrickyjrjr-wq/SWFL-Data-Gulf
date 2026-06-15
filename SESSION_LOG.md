@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — feat(R1): unify AI + project flow — analyst chat voice, File this answer, wired Build button
+
+- Built Root 1 steps 1–7 (`docs/superpowers/plans/2026-06-15-root-R1-unify-ai-project.md`). **bun test 2569/0; lint (touched files) + `next build` green, routes still static.**
+- `app/api/welcome/chat/route.ts`: added `mode:"analyst"|"welcome"|"summarize"` — default `welcome` = public landing UNCHANGED. Analyst no-location → `buildAnalystSystem` grounds on the master read (`fetchBrain("master")`→`buildDossier`→newly-exported `renderBlock`; failsafe to un-grounded analyst premise if master can't load). Analyst location → `voice:"analyst"` threaded through `buildWelcomeGroundedSystem`/`welcomeGroundedSpeakLine` (file-into-project close, not the email hook). `mode:"summarize"` → `buildSummarizeSystem` synthesis over the thread, dedups vs filed Q&A. `place` prelude frame now carries `freshness_token`.
+- `lib/chat/use-chat-stream.ts`: `body?` option spread BEFORE `messages` (messages always wins). `components/briefcase/BriefcaseChat.tsx`: analyst mode + onFrame place/token capture + teal "File this answer" (last assistant msg only) + persistent "Summarize conversation → file" (client appends a final user turn so the last-must-be-user gate passes). `BriefcasePanel.tsx`: one pitch-state copy line. `AskAiDock.tsx`: capability-parity "File this answer". New `lib/briefcase/qa-item.ts` shared `buildQaItem` (both surfaces → identical schema-valid `qa` items; unit-tested vs `projectItemsSchema`).
+- `app/project/[id]/ProjectDetail.tsx` (BTN-1): dead "Coming soon" button → template `<select>` + "Build deliverable" → `POST /api/projects/[id]/build {template}` → `/p/[id]`; disabled while building / when empty; inline error surface.
+- MCP / `/api/b/*` / `/api/converse` UNTOUCHED. Follow-ups F-1/F-2/F-3 deferred → `docs/superpowers/plans/2026-06-15-root-R1-followups-handoff.md`.
+- Next: prod live-verify after Vercel deploy (check `root1_unify_live_verify`, due 2026-06-18). Build-queue R1 marked `[~]`.
+
 ## 2026-06-15 (main) — docs(R1): update Root 1 plan with code-verified checks + follow-ups
 
 - Rewrote `docs/superpowers/plans/2026-06-15-root-R1-unify-ai-project.md`: folded in 4 pre-execution checks (all verified against actual files — spread order fix, master-read injection pattern, instruction default confirmed, file-button placement). Added persistent "Summarize conversation to file" UX (step 3 + new step 4 summarize API path). Fixed mermaid diagram.

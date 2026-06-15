@@ -73,7 +73,7 @@ export interface WelcomeAnswer {
 }
 
 export type WelcomeFrame =
-  | { type: "place"; place: PlaceEcho }
+  | { type: "place"; place: PlaceEcho; freshness_token?: string }
   | { type: "data"; answer: WelcomeAnswer }
   | { type: "text"; text: string }
   | { type: "done" }
