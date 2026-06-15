@@ -255,14 +255,10 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "categorical",
       source: sourceMeta,
     });
-    key_metrics.push({
-      metric: "storm_last_billion_dollar_event_type",
-      value: corpus.last_billion_dollar_event_type,
-      direction: "stable",
-      label: "Most recent SWFL billion-dollar storm event type",
-      variable_type: "categorical",
-      source: sourceMeta,
-    });
+    // Name before type so the proper name ("Ian") lands inside the visible
+    // tier-2 metric table (slice(0,6)); the generic NOAA type drops to the
+    // cut row. "(Typhoon)" stripped from the type value for the audit/report
+    // surfaces that do show it.
     if (corpus.last_billion_dollar_event_name) {
       key_metrics.push({
         metric: "storm_last_billion_dollar_event_name",
@@ -273,6 +269,14 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         source: sourceMeta,
       });
     }
+    key_metrics.push({
+      metric: "storm_last_billion_dollar_event_type",
+      value: corpus.last_billion_dollar_event_type.replace(/\s*\(Typhoon\)\s*/i, ""),
+      direction: "stable",
+      label: "Most recent SWFL billion-dollar storm event type",
+      variable_type: "categorical",
+      source: sourceMeta,
+    });
   }
 
   key_metrics.push({
@@ -308,7 +312,7 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
   conclusionParts.push(
     `Trailing 10-year window: ${snapshot.swflPropertyDamageEvents10yr.toLocaleString()} property-damage events, ` +
-      `${snapshot.swflDistinctTropicalCyclones10yr.toLocaleString()} distinct tropical cyclones in the trailing 10-year window — ${direction} read on near-term physical risk.`,
+      `${snapshot.swflDistinctTropicalCyclones10yr.toLocaleString()} distinct tropical cyclones — ${direction} read on near-term physical risk.`,
   );
 
   const caveats: string[] = [];

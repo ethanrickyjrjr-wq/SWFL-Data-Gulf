@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v15 | Token: SWFL-7421-v15-20260615 -->
+<!-- FRESHNESS: v16 | Token: SWFL-7421-v16-20260615 -->
 ---
 brain_id: storm-history-swfl
-version: 15
-refined_at: 2026-06-15T22:14:24Z
-freshness_token: SWFL-7421-v15-20260615
+version: 16
+refined_at: 2026-06-15T23:24:26Z
+freshness_token: SWFL-7421-v16-20260615
 ttl_seconds: 31536000
 context_type: user_saved_reference
 scope: NOAA Storm Events history for Southwest Florida (LEE + COLLIER + CHARLOTTE), 1996-2025 modern-schema vintage. Surfaces SWFL-wide event counts (total / major / 10yr property-damage / 10yr distinct tropical cyclones) and the most recent billion-dollar event for risk-history framing. Pairs with env-swfl (modeled NFHL exposure) — exposure says WHERE flood risk lives, storm-history says WHAT has hit historically.
@@ -44,15 +44,15 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
 --- OUTPUT ---
 {
   "brain_id": "storm-history-swfl",
-  "version": 15,
-  "refined_at": "2026-06-15T22:14:24Z",
-  "expires": "2027-06-15T22:14:24Z",
+  "version": 16,
+  "refined_at": "2026-06-15T23:24:26Z",
+  "expires": "2027-06-15T23:24:26Z",
   "ttl_seconds": 31536000,
   "direction": "bearish",
   "magnitude": 0.5,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Southwest Florida storm history (LEE + COLLIER + CHARLOTTE) — 135 total NOAA Storm Events across the 2022-2024 modern-schema vintage, 9 qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}). Most recent billion-dollar event in scope: Hurricane Ian on 2022-09-28. Trailing 10-year window: 40 property-damage events, 6 distinct tropical cyclones in the trailing 10-year window — bearish read on near-term physical risk.",
+  "conclusion": "Southwest Florida storm history (LEE + COLLIER + CHARLOTTE) — 135 total NOAA Storm Events across the 2022-2024 modern-schema vintage, 9 qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}). Most recent billion-dollar event in scope: Hurricane Ian on 2022-09-28. Trailing 10-year window: 40 property-damage events, 6 distinct tropical cyclones — bearish read on near-term physical risk.",
   "key_metrics": [
     {
       "metric": "storm_property_damage_events_10yr",
@@ -64,7 +64,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -83,7 +83,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -102,7 +102,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -121,7 +121,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "display_format": "count",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -138,30 +138,13 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "variable_type": "categorical",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
       "suggestions": [
         "What's driving storm last billion dollar event date?",
         "How does storm last billion dollar event date here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "storm_last_billion_dollar_event_type",
-      "value": "Hurricane (Typhoon)",
-      "direction": "stable",
-      "label": "Most recent SWFL billion-dollar storm event type",
-      "variable_type": "categorical",
-      "source": {
-        "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
-        "tier": 1,
-        "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-      },
-      "suggestions": [
-        "What's driving storm last billion dollar event type?",
-        "How does storm last billion dollar event type here compare to other SWFL areas?"
       ]
     },
     {
@@ -172,13 +155,30 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "variable_type": "categorical",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
       "suggestions": [
         "What's driving storm last billion dollar event name?",
         "How does storm last billion dollar event name here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "storm_last_billion_dollar_event_type",
+      "value": "Hurricane",
+      "direction": "stable",
+      "label": "Most recent SWFL billion-dollar storm event type",
+      "variable_type": "categorical",
+      "source": {
+        "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
+        "fetched_at": "2026-06-15T23:24:26Z",
+        "tier": 1,
+        "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
+      },
+      "suggestions": [
+        "What's driving storm last billion dollar event type?",
+        "How does storm last billion dollar event type here compare to other SWFL areas?"
       ]
     },
     {
@@ -189,7 +189,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "variable_type": "categorical",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -206,7 +206,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
       "variable_type": "categorical",
       "source": {
         "url": "fixture://refinery/__fixtures__/storm-history-swfl.sample.parquet",
-        "fetched_at": "2026-06-15T22:14:24Z",
+        "fetched_at": "2026-06-15T23:24:26Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER+CHARLOTTE; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -233,7 +233,7 @@ s01 | NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-15T22:14:24Z"
+    "computed_at": "2026-06-15T23:24:26Z"
   },
   "exogenous_signals": []
 }
