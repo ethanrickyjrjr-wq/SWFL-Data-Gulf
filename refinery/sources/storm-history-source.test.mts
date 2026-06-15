@@ -53,7 +53,6 @@ test("per-county fragments cover LEE, COLLIER, CHARLOTTE with non-zero counts an
     assert.equal(typeof n["county"], "string");
     assert.equal(typeof n["total_storm_count"], "number");
     assert.equal(typeof n["property_damage_event_count"], "number");
-    assert.equal(typeof n["extreme_wind_event_count"], "number");
     assert.equal(typeof n["major_storm_count"], "number");
     // Each county has >= 1 event in the 2022-2024 fixture window.
     assert.ok(
@@ -70,13 +69,10 @@ test("corpus fragment populates required fields and covers all 3 SWFL counties",
   );
   assert.ok(corpus, "expected a corpus-summary fragment");
   const n = corpus!.normalized as Record<string, unknown>;
-  // Fixture (2022-2024) intentionally does NOT contain a billion-dollar event —
-  // Hurricane Ian is in the LIVE Parquet only. Fixture validates the field is
-  // null + correctly typed; live validation runs at refinery-render time.
-  assert.ok(
-    n["last_billion_dollar_event_date"] === null ||
-      typeof n["last_billion_dollar_event_date"] === "string",
-  );
+  // Fixture now contains Hurricane Ian (2022) — billion-dollar event IS present.
+  assert.equal(typeof n["last_billion_dollar_event_date"], "string");
+  assert.equal(n["last_billion_dollar_event_name"], "Ian");
+  assert.ok((n["distinct_tropical_cyclones_10yr"] as number) >= 1);
   assert.deepEqual(n["counties_covered"], ["CHARLOTTE", "COLLIER", "LEE"]);
   assert.equal(typeof n["total_storm_count"], "number");
   assert.ok((n["total_storm_count"] as number) > 0);

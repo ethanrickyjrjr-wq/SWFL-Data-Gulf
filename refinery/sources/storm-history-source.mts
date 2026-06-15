@@ -45,8 +45,18 @@ const FIXTURE_PATH = path.resolve(
 );
 
 const SWFL_COUNTIES = ["LEE", "COLLIER", "CHARLOTTE"] as const;
-const MAJOR_EVENT_TYPES = new Set(["Hurricane", "Tornado", "Flash Flood", "Storm Surge/Tide"]);
-const EXTREME_WIND_MAGNITUDE_KT = 74; // hurricane-force minimum
+const MAJOR_EVENT_TYPES = new Set([
+  "Hurricane (Typhoon)",
+  "Tropical Storm",
+  "Tornado",
+  "Flash Flood",
+  "Storm Surge/Tide",
+]);
+const TROPICAL_CYCLONE_EVENT_TYPES = new Set([
+  "Hurricane (Typhoon)",
+  "Tropical Storm",
+  "Tropical Depression",
+]);
 const MAJOR_STORM_DAMAGE_USD = 1_000_000;
 const BILLION_DOLLAR_USD = 1_000_000_000;
 const TEN_YEAR_MS = 10 * 365.25 * 24 * 60 * 60 * 1000;
@@ -58,6 +68,10 @@ interface StormRow {
   damage_property: string | null;
   begin_date_time: string | null;
   cz_name: string | null;
+  cz_type: string | null;
+  episode_id: string | null;
+  episode_narrative: string | null;
+  event_narrative: string | null;
 }
 
 /** Per-county aggregate — one fragment per logical county in scope. */
@@ -68,8 +82,6 @@ export interface StormPerCountyAggregate {
   total_storm_count: number;
   /** Events with parseable, non-zero property damage in the trailing 10yr window. */
   property_damage_event_count: number;
-  /** Events with MAGNITUDE >= 74 kt in the trailing 10yr window (hurricane-force wind). */
-  extreme_wind_event_count: number;
   /** Major storm count (full corpus): damage >= $1M AND event_type in MAJOR_EVENT_TYPES. */
   major_storm_count: number;
 }
@@ -90,6 +102,10 @@ export interface StormCorpusSummary {
   counties_covered: string[];
   /** Count of events per major event type across the full corpus. */
   major_event_type_counts: Record<string, number>;
+  /** Distinct named tropical cyclones (hurricane / TS / TD) affecting the footprint in the trailing 10yr window. Dedup key = UPPER(name)|year. */
+  distinct_tropical_cyclones_10yr: number;
+  /** Proper name of the most recent billion-dollar storm (e.g. "Ian"). Null if not extractable. */
+  last_billion_dollar_event_name: string | null;
 }
 
 /**
@@ -264,7 +280,11 @@ async function queryStormRows(): Promise<StormRow[]> {
        MAGNITUDE AS magnitude,
        DAMAGE_PROPERTY AS damage_property,
        BEGIN_DATE_TIME AS begin_date_time,
-       CZ_NAME AS cz_name
+       CZ_NAME AS cz_name,
+       CZ_TYPE AS cz_type,
+       EPISODE_ID AS episode_id,
+       EPISODE_NARRATIVE AS episode_narrative,
+       EVENT_NARRATIVE AS event_narrative
      FROM read_parquet('${target}')`,
   );
   const rowObjects = reader.getRowObjects();
@@ -276,6 +296,10 @@ async function queryStormRows(): Promise<StormRow[]> {
     damage_property: toStr(r["damage_property"]),
     begin_date_time: toStr(r["begin_date_time"]),
     cz_name: toStr(r["cz_name"]),
+    cz_type: toStr(r["cz_type"]),
+    episode_id: toStr(r["episode_id"]),
+    episode_narrative: toStr(r["episode_narrative"]),
+    event_narrative: toStr(r["event_narrative"]),
   }));
 }
 
@@ -293,7 +317,6 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
     {
       total: number;
       damage10yr: number;
-      extremeWind10yr: number;
       majorAll: number;
     }
   >();
@@ -301,7 +324,6 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
     perCountyMap.set(c, {
       total: 0,
       damage10yr: 0,
-      extremeWind10yr: 0,
       majorAll: 0,
     });
   }
@@ -312,8 +334,10 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
   let latestYear = -Infinity;
   let lastBillionDate: string | null = null;
   let lastBillionType: string | null = null;
+  let lastBillionName: string | null = null;
   const countiesCovered = new Set<string>();
   const majorEventTypeCounts: Record<string, number> = {};
+  const tropicalCycloneKeys = new Set<string>(); // corpus-level distinct count
 
   for (const row of rows) {
     const isoDate = parseNoaaDate(row.begin_date_time);
@@ -324,7 +348,7 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
         if (y > latestYear) latestYear = y;
       }
     }
-    const county = row.cz_name?.toUpperCase().trim() ?? null;
+    const county = normalizeCounty(row.cz_name);
     if (county) countiesCovered.add(county);
 
     const damageRaw = row.damage_property;
@@ -351,6 +375,20 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
     ) {
       lastBillionDate = isoDate;
       lastBillionType = eventType !== "" ? eventType : null;
+      lastBillionName = extractStormName(row.episode_narrative, row.event_narrative);
+    }
+
+    // Distinct tropical cyclones in the 10yr window (corpus-level, NOT per-county).
+    if (isoDate != null && TROPICAL_CYCLONE_EVENT_TYPES.has(eventType)) {
+      const ts = Date.parse(`${isoDate}T00:00:00Z`);
+      if (Number.isFinite(ts) && ts >= tenYearsAgo) {
+        const name = extractStormName(row.episode_narrative, row.event_narrative);
+        const year = isoDate.slice(0, 4);
+        const key = name
+          ? `${name.toUpperCase()}|${year}`
+          : `episode:${row.episode_id ?? `${eventType}|${isoDate}`}`;
+        tropicalCycloneKeys.add(key);
+      }
     }
 
     // Per-county increments.
@@ -368,9 +406,6 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
       const ts = Date.parse(`${isoDate}T00:00:00Z`);
       if (Number.isFinite(ts) && ts >= tenYearsAgo) {
         if (damage != null && damage > 0) bucket.damage10yr += 1;
-        if (row.magnitude != null && row.magnitude >= EXTREME_WIND_MAGNITUDE_KT) {
-          bucket.extremeWind10yr += 1;
-        }
       }
     }
   }
@@ -382,7 +417,6 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
       county: c,
       total_storm_count: b.total,
       property_damage_event_count: b.damage10yr,
-      extreme_wind_event_count: b.extremeWind10yr,
       major_storm_count: b.majorAll,
     };
   });
@@ -397,6 +431,8 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
     unparseable_damage_count: unparseableDamage,
     counties_covered: [...countiesCovered].sort(),
     major_event_type_counts: majorEventTypeCounts,
+    distinct_tropical_cyclones_10yr: tropicalCycloneKeys.size,
+    last_billion_dollar_event_name: lastBillionName,
   };
 
   return { perCounty, corpus };

@@ -1938,15 +1938,15 @@
       "status": "active",
       "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE in the trailing 10-year window with a parseable, non-zero damage_property value. Source: s3://lake-tier1/environmental/storm_events_swfl.parquet via DuckDB httpfs; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py. Excludes rows with unparseable damage strings (counted separately, not summed)."
     },
-    "env_storm_extreme_wind_events_10yr_swfl": {
-      "id": "env_storm_extreme_wind_events_10yr_swfl",
-      "prefLabel": "SWFL Hurricane-Force Wind Events (10-Year Window)",
+    "env_storm_tropical_cyclones_10yr_swfl": {
+      "id": "env_storm_tropical_cyclones_10yr_swfl",
+      "prefLabel": "SWFL Tropical Cyclones Affecting the Footprint (10-Year Window)",
       "altLabels": [
-        "SWFL extreme-wind events",
-        "hurricane-force wind count"
+        "SWFL hurricanes 10yr",
+        "distinct tropical cyclones SWFL"
       ],
       "raw_slugs": [
-        "storm_extreme_wind_events_10yr"
+        "storm_tropical_cyclones_10yr"
       ],
       "category": "environmental",
       "domain": [
@@ -1957,14 +1957,14 @@
         "storm-history-swfl"
       ],
       "value_type": "count",
-      "unit": "events",
+      "unit": "storms",
       "value_range": [
         0,
-        1000
+        100
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of NOAA Storm Events across LEE+COLLIER+CHARLOTTE in the trailing 10-year window with MAGNITUDE >= 74 kt (hurricane-force wind threshold). Drives storm-history-swfl's bearish/neutral direction read: >= 3 events in the window flips the brain bearish."
+      "scope_note": "Count of DISTINCT named tropical cyclones (NOAA EVENT_TYPE in {Hurricane (Typhoon), Tropical Storm, Tropical Depression}) that affected the SWFL footprint (LEE+COLLIER+CHARLOTTE) in the trailing 10-year window. Distinct = deduplicated on UPPER(storm name)|year, the name extracted from NOAA episode/event narratives (e.g. 'Ian'); rows with no extractable name fall back to a per-episode key so they are never double-counted. Drives storm-history-swfl's bearish/neutral direction read: >= 3 distinct cyclones flips the brain bearish, which for SWFL is effectively always met (Irma 2017, Ian 2022, Helene + Milton 2024). Replaces the retired storm_extreme_wind_events_10yr slug, which counted rows where MAGNITUDE >= 74 kt and read 0 because NOAA logs Hurricane (Typhoon) events with a null MAGNITUDE — the old slug silently masked Hurricane Ian."
     },
     "env_storm_major_storm_count_30yr_swfl": {
       "id": "env_storm_major_storm_count_30yr_swfl",
@@ -2075,7 +2075,30 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "NOAA EVENT_TYPE string of the most recent billion-dollar storm in the SWFL corpus. Pairs with env_storm_last_billion_dollar_event_date_swfl. Examples observed in the 1996-2025 vintage: Hurricane (Charley 2004, Ian 2022), Tornado, Flash Flood, Storm Surge/Tide."
+      "scope_note": "NOAA EVENT_TYPE string of the most recent billion-dollar storm in the SWFL corpus. Pairs with env_storm_last_billion_dollar_event_date_swfl (and env_storm_last_billion_dollar_event_name_swfl for the proper name). The live answer is now Hurricane (Typhoon) for Hurricane Ian on 2022-09-28 (~$12.2B across LEE+CHARLOTTE+COLLIER). Other examples observed in the 1996-2025 vintage: Hurricane Charley 2004, Tornado, Flash Flood, Storm Surge/Tide."
+    },
+    "env_storm_last_billion_dollar_event_name_swfl": {
+      "id": "env_storm_last_billion_dollar_event_name_swfl",
+      "prefLabel": "Most Recent SWFL Billion-Dollar Storm Event Name",
+      "altLabels": [
+        "last $1B event name",
+        "most recent billion-dollar storm name SWFL"
+      ],
+      "raw_slugs": [
+        "storm_last_billion_dollar_event_name"
+      ],
+      "category": "environmental",
+      "domain": [
+        "environmental",
+        "real-estate"
+      ],
+      "source_brains": [
+        "storm-history-swfl"
+      ],
+      "value_type": "string",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Proper name (e.g. 'Ian') of the most recent NOAA Storm Event across the SWFL footprint (LEE+COLLIER+CHARLOTTE) with damage_property >= $1B, extracted from the NOAA episode/event narrative text. Pairs with env_storm_last_billion_dollar_event_date_swfl and env_storm_last_billion_dollar_event_type_swfl so the brain can render 'Hurricane Ian on 2022-09-28' rather than a bare event type. Null when no billion-dollar event exists in the corpus window or no proper name is extractable from the narrative."
     },
     "env_storm_counties_covered_swfl": {
       "id": "env_storm_counties_covered_swfl",
@@ -7808,11 +7831,12 @@
     "post_ian_claims_ratio": "env_flood_losses_swfl_post_ian_ratio",
     "swfl_flood_recovery_ratio": "env_flood_losses_swfl_post_ian_ratio",
     "storm_property_damage_events_10yr": "env_storm_property_damage_events_10yr_swfl",
-    "storm_extreme_wind_events_10yr": "env_storm_extreme_wind_events_10yr_swfl",
+    "storm_tropical_cyclones_10yr": "env_storm_tropical_cyclones_10yr_swfl",
     "storm_major_storm_count_30yr": "env_storm_major_storm_count_30yr_swfl",
     "storm_total_storm_count_30yr": "env_storm_total_storm_count_30yr_swfl",
     "storm_last_billion_dollar_event_date": "env_storm_last_billion_dollar_event_date_swfl",
     "storm_last_billion_dollar_event_type": "env_storm_last_billion_dollar_event_type_swfl",
+    "storm_last_billion_dollar_event_name": "env_storm_last_billion_dollar_event_name_swfl",
     "storm_counties_covered": "env_storm_counties_covered_swfl",
     "storm_ingest_vintage": "env_storm_ingest_vintage_swfl",
     "hurricane_landfalls_30yr": "env_hurricane_landfalls_swfl_30yr",

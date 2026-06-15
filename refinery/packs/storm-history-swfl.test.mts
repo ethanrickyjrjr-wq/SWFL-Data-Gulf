@@ -4,16 +4,15 @@ import assert from "node:assert/strict";
 // Fixture mode BEFORE import — env.mts reads at module-init time.
 process.env["REFINERY_SOURCE"] = "fixture";
 
-const { stormHistorySwfl, directionFromExtremeWind } =
+const { stormHistorySwfl, directionFromTropicalCyclones } =
   await import("./storm-history-swfl.mts");
-const { stormHistorySource } =
-  await import("../sources/storm-history-source.mts");
+const { stormHistorySource } = await import("../sources/storm-history-source.mts");
 
-test("directionFromExtremeWind returns bearish at >= 3 extreme-wind events, neutral otherwise", () => {
-  assert.equal(directionFromExtremeWind(0), "neutral");
-  assert.equal(directionFromExtremeWind(2), "neutral");
-  assert.equal(directionFromExtremeWind(3), "bearish");
-  assert.equal(directionFromExtremeWind(50), "bearish");
+test("directionFromTropicalCyclones returns bearish at >= 3 distinct cyclones, neutral otherwise", () => {
+  assert.equal(directionFromTropicalCyclones(0), "neutral");
+  assert.equal(directionFromTropicalCyclones(2), "neutral");
+  assert.equal(directionFromTropicalCyclones(3), "bearish");
+  assert.equal(directionFromTropicalCyclones(50), "bearish");
 });
 
 test("stormHistorySwfl: outputProducer returns valid BrainOutputProducerResult against fixture", async () => {
@@ -34,11 +33,12 @@ test("stormHistorySwfl: outputProducer returns valid BrainOutputProducerResult a
     recentNote: "",
   });
 
-  // 6-8 metrics. Fixture has no billion-dollar event so the 2 last-billion metrics drop,
-  // leaving 4 numeric + counties_covered + ingest_vintage = 6 metrics.
+  // Fixture now carries Hurricane Ian, so the 3 billion-dollar metrics (date +
+  // type + name) appear: 4 numeric + counties_covered + ingest_vintage + 3
+  // billion-dollar = 9 metrics. Assert the floor at >= 7.
   assert.ok(
-    result.key_metrics.length >= 6,
-    `expected at least 6 key_metrics, got ${result.key_metrics.length}`,
+    result.key_metrics.length >= 7,
+    `expected at least 7 key_metrics, got ${result.key_metrics.length}`,
   );
 
   // Every metric carries source provenance.
@@ -49,25 +49,29 @@ test("stormHistorySwfl: outputProducer returns valid BrainOutputProducerResult a
     assert.match(m.source.citation, /_tier1_inventory/);
   }
 
-  // Counties metric reflects alphabetical sort across the 3 SWFL counties.
-  const counties = result.key_metrics.find(
-    (m) => m.metric === "storm_counties_covered",
+  // The billion-dollar proper-name metric surfaces "Ian" (Hurricane Ian, 2022).
+  const billionName = result.key_metrics.find(
+    (m) => m.metric === "storm_last_billion_dollar_event_name",
   );
+  assert.ok(billionName, "expected storm_last_billion_dollar_event_name metric");
+  assert.equal(billionName!.value, "Ian");
+
+  // The renamed distinct-tropical-cyclone metric is present.
+  const cyclones = result.key_metrics.find((m) => m.metric === "storm_tropical_cyclones_10yr");
+  assert.ok(cyclones, "expected storm_tropical_cyclones_10yr metric");
+
+  // Counties metric reflects alphabetical sort across the 3 SWFL counties.
+  const counties = result.key_metrics.find((m) => m.metric === "storm_counties_covered");
   assert.ok(counties, "expected storm_counties_covered metric");
   assert.equal(counties!.value, "CHARLOTTE+COLLIER+LEE");
 
   // Ingest vintage is a categorical YYYY-YYYY span.
-  const vintage = result.key_metrics.find(
-    (m) => m.metric === "storm_ingest_vintage",
-  );
+  const vintage = result.key_metrics.find((m) => m.metric === "storm_ingest_vintage");
   assert.ok(vintage, "expected storm_ingest_vintage metric");
   assert.match(String(vintage!.value), /^\d{4}-\d{4}$/);
 
   // Caveats: at least 3, including schema-drift + parser limits + vintage range.
-  assert.ok(
-    result.caveats.length >= 3,
-    `expected >= 3 caveats, got ${result.caveats.length}`,
-  );
+  assert.ok(result.caveats.length >= 3, `expected >= 3 caveats, got ${result.caveats.length}`);
 
   // Substantive prose conclusion.
   assert.ok(

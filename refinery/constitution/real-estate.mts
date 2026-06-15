@@ -30,10 +30,7 @@ const exogenousCriticalConfirmed: OverrideRule = {
   effect: "force_signal_direction",
   condition: (_upstreams: BrainOutput[], signals: ExogenousSignal[]): boolean =>
     signals.some(
-      (s) =>
-        s.severity === "critical" &&
-        s.classification === "confirmed" &&
-        s.confidence > 0.85,
+      (s) => s.severity === "critical" && s.classification === "confirmed" && s.confidence > 0.85,
     ),
 };
 
@@ -102,10 +99,7 @@ function computeFloodBarrierZips(upstreams: BrainOutput[]): {
     //   AAL emitted, barrier missing  → undefined === 1.0 is false
     //   barrier emitted, AAL missing  → (undefined ?? 0) >= 800 is false
     for (const e of zipMap.values()) {
-      if (
-        e.barrier === 1.0 &&
-        (e.aal ?? 0) >= FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD
-      ) {
+      if (e.barrier === 1.0 && (e.aal ?? 0) >= FLOOD_BARRIER_MODE_1_AAL_THRESHOLD_USD) {
         count++;
         if ((e.aal ?? 0) > worstAal) worstAal = e.aal ?? 0;
       }
@@ -147,19 +141,25 @@ const naicsDistressVeto: OverrideRule = {
  * priority 70 — storm-history-modifier.
  *
  * Fires `add_caveat` when the storm-history-swfl upstream emits
- * `storm_extreme_wind_events_10yr >= 3` (the same EXTREME_WIND_BEARISH_THRESHOLD
+ * `storm_tropical_cyclones_10yr >= 3` (the same TROPICAL_CYCLONE_BEARISH_THRESHOLD
  * the pack itself uses to determine direction). This signals an active storm
  * climate in the trailing 10-year window — corridor z-scores in permits-swfl
  * may understate normal construction activity because storm-driven rebuild
  * activity inflates the denominator.
+ *
+ * Near-permanent by design: for the SWFL footprint this predicate is almost
+ * always true (Irma 2017, Ian 2022, Helene + Milton 2024 each clear the bar on
+ * their own), so the caveat is a standing reminder that permit z-scores may be
+ * storm-rebuild-inflated, not a rare alarm. That is intentional — the active-
+ * storm climate is the SWFL baseline.
  *
  * Scope: scoped to the storm-history-swfl upstream by `brain_id` check so
  * the rule does not misfire on env-swfl or other environmental upstreams that
  * happen to emit a metric with a similar slug.
  *
  * No 90-day trailing window exists in storm-history-swfl's output — the pack
- * is an annual NCEI vintage (10yr and 30yr aggregates only). The 10yr
- * extreme-wind count is the closest-fit "active storm climate" signal and
+ * is an annual NCEI vintage (10yr and 30yr aggregates only). The 10yr distinct
+ * tropical-cyclone count is the closest-fit "active storm climate" signal and
  * matches the pack's own bearish threshold. Per spec decision #14: constitution
  * rule does NOT touch numeric metric math — clean measurement parity.
  *
@@ -168,23 +168,21 @@ const naicsDistressVeto: OverrideRule = {
  * rebuild activity may inflate the activity read. Master's direction synthesis
  * weighs this as a modifier, not a kill-switch.
  */
-const STORM_EXTREME_WIND_METRIC = "storm_extreme_wind_events_10yr";
-const STORM_EXTREME_WIND_BEARISH_THRESHOLD = 3;
+const STORM_TROPICAL_CYCLONE_METRIC = "storm_tropical_cyclones_10yr";
+const STORM_TROPICAL_CYCLONE_THRESHOLD = 3;
 
 const stormHistoryModifier: OverrideRule = {
   priority: 70,
   override_id: "storm-history-modifier",
   effect: "add_caveat",
   condition: (upstreams: BrainOutput[]): boolean => {
-    const stormUpstream = upstreams.find(
-      (u) => u.brain_id === "storm-history-swfl",
-    );
+    const stormUpstream = upstreams.find((u) => u.brain_id === "storm-history-swfl");
     if (!stormUpstream) return false;
     const metric = stormUpstream.key_metrics.find(
-      (m) => m.metric === STORM_EXTREME_WIND_METRIC,
+      (m) => m.metric === STORM_TROPICAL_CYCLONE_METRIC,
     );
     if (!metric || typeof metric.value !== "number") return false;
-    return metric.value >= STORM_EXTREME_WIND_BEARISH_THRESHOLD;
+    return metric.value >= STORM_TROPICAL_CYCLONE_THRESHOLD;
   },
 };
 

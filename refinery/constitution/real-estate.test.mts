@@ -59,9 +59,7 @@ function barrier(zip: string, score: number): BrainOutputMetric {
 }
 
 function rule(id: string): OverrideRule {
-  const r = realEstateConstitution.overrideCascade.find(
-    (x) => x.override_id === id,
-  );
+  const r = realEstateConstitution.overrideCascade.find((x) => x.override_id === id);
   if (!r) throw new Error(`override rule "${id}" not in real-estate cascade`);
   return r;
 }
@@ -206,24 +204,24 @@ test("naics-distress-veto: stub still returns false until baseline lands", () =>
 // storm-history-modifier — permits-swfl modifier rule
 // ---------------------------------------------------------------------------
 // Fires `add_caveat` when a storm-history-swfl upstream emits
-// storm_extreme_wind_events_10yr >= EXTREME_WIND_BEARISH_THRESHOLD (3).
+// storm_tropical_cyclones_10yr >= TROPICAL_CYCLONE_BEARISH_THRESHOLD (3).
 // The condition scopes to the storm-history-swfl upstream by brain_id so it
 // does not misfire on env-swfl or other environmental upstreams.
-// No 90d slug exists in the storm-history pack — the 10yr extreme-wind count
-// is the closest-fit signal for "active storm climate".
+// No 90d slug exists in the storm-history pack — the 10yr distinct tropical-
+// cyclone count is the closest-fit signal for "active storm climate".
 
-function stormBrain(extremeWindCount: number): BrainOutput {
+function stormBrain(cycloneCount: number): BrainOutput {
   return {
     brain_id: "storm-history-swfl",
     version: 1,
     refined_at: NOW,
-    direction: extremeWindCount >= 3 ? "bearish" : "neutral",
-    magnitude: extremeWindCount >= 3 ? 0.5 : 0.2,
+    direction: cycloneCount >= 3 ? "bearish" : "neutral",
+    magnitude: cycloneCount >= 3 ? 0.5 : 0.2,
     drivers: [],
     overrides: [],
     conclusion: "test fixture",
     key_metrics: [
-      metric("storm_extreme_wind_events_10yr", extremeWindCount),
+      metric("storm_tropical_cyclones_10yr", cycloneCount),
       metric("storm_property_damage_events_10yr", 20),
       metric("storm_major_storm_count_30yr", 8),
     ],
@@ -244,29 +242,29 @@ test("storm-history-modifier: effect is add_caveat", () => {
   assert.equal(rule("storm-history-modifier").effect, "add_caveat");
 });
 
-test("storm-history-modifier: extreme wind >= 3 → fires", () => {
+test("storm-history-modifier: tropical cyclones >= 3 → fires", () => {
   const r = rule("storm-history-modifier");
   assert.equal(r.condition([stormBrain(3)], []), true);
 });
 
-test("storm-history-modifier: extreme wind above threshold (5) → fires", () => {
+test("storm-history-modifier: tropical cyclones above threshold (5) → fires", () => {
   const r = rule("storm-history-modifier");
   assert.equal(r.condition([stormBrain(5)], []), true);
 });
 
-test("storm-history-modifier: extreme wind below threshold (2) → does NOT fire", () => {
+test("storm-history-modifier: tropical cyclones below threshold (2) → does NOT fire", () => {
   const r = rule("storm-history-modifier");
   assert.equal(r.condition([stormBrain(2)], []), false);
 });
 
-test("storm-history-modifier: extreme wind zero → does NOT fire", () => {
+test("storm-history-modifier: tropical cyclones zero → does NOT fire", () => {
   const r = rule("storm-history-modifier");
   assert.equal(r.condition([stormBrain(0)], []), false);
 });
 
 test("storm-history-modifier: non-storm-history upstream with matching metric slug → does NOT fire (brain_id guard)", () => {
   // drift watch: an env-swfl or other upstream that happens to emit a metric
-  // named storm_extreme_wind_events_10yr must NOT trigger this rule.
+  // named storm_tropical_cyclones_10yr must NOT trigger this rule.
   const r = rule("storm-history-modifier");
   const impostor: BrainOutput = {
     ...stormBrain(5),
@@ -295,7 +293,7 @@ test("storm-history-modifier: storm-history above threshold alongside other upst
   assert.equal(r.condition([stormy, other], []), true);
 });
 
-test("storm-history-modifier: storm_extreme_wind_events_10yr metric absent → does NOT fire (cleanly silent)", () => {
+test("storm-history-modifier: storm_tropical_cyclones_10yr metric absent → does NOT fire (cleanly silent)", () => {
   const r = rule("storm-history-modifier");
   const noWind: BrainOutput = {
     brain_id: "storm-history-swfl",
@@ -305,7 +303,7 @@ test("storm-history-modifier: storm_extreme_wind_events_10yr metric absent → d
     magnitude: 0.2,
     drivers: [],
     overrides: [],
-    conclusion: "test fixture — no wind metric",
+    conclusion: "test fixture — no cyclone metric",
     key_metrics: [metric("storm_property_damage_events_10yr", 20)],
     caveats: [],
     contradicts: [],

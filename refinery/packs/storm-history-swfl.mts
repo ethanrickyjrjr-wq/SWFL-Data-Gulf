@@ -25,23 +25,24 @@ import { env } from "../config/env.mts";
  * raw rows into per-county totals + one corpus summary; this pack is a pure
  * reader of those aggregates.
  *
- * Risk-history brain — direction is "bearish" when recent extreme-wind activity
- * is elevated (>= 3 hurricane-force events in the trailing 10yr window across
- * the SWFL footprint), "neutral" otherwise. Never emits "bullish" — the absence
- * of named storms is the baseline, not an upside signal.
+ * Risk-history brain — direction is "bearish" when >= 3 distinct named tropical
+ * cyclones (hurricane / tropical storm / depression) affected the SWFL footprint
+ * in the trailing 10yr window, "neutral" otherwise. Never emits "bullish" — it is
+ * a backward-looking hazard record, not an upside signal.
  *
  * Leaf brain (no upstream brains). Pure deterministic — no synthesis agent.
  */
 
 const SWFL_COUNTIES = ["LEE", "COLLIER", "CHARLOTTE"] as const;
-const EXTREME_WIND_BEARISH_THRESHOLD = 3;
+const TROPICAL_CYCLONE_BEARISH_THRESHOLD = 3;
 
 interface StormSnapshot {
   perCounty: StormPerCountyAggregate[];
   corpus: StormCorpusSummary;
   /** SWFL-wide rollups across the per-county aggregates. */
   swflPropertyDamageEvents10yr: number;
-  swflExtremeWindEvents10yr: number;
+  /** Distinct named tropical cyclones in the trailing 10yr window (corpus-level). */
+  swflDistinctTropicalCyclones10yr: number;
   swflMajorStormCount30yr: number;
   swflTotalStormCount: number;
 }
@@ -57,9 +58,7 @@ function perCountyFrom(fragments: RawFragment[]): StormPerCountyAggregate[] {
 
 function corpusFrom(fragments: RawFragment[]): StormCorpusSummary | null {
   const hit = fragments.find(
-    (f) =>
-      (f.normalized as { kind?: string } | null)?.kind ===
-      "storm-corpus-summary",
+    (f) => (f.normalized as { kind?: string } | null)?.kind === "storm-corpus-summary",
   );
   return hit ? (hit.normalized as unknown as StormCorpusSummary) : null;
 }
@@ -71,28 +70,25 @@ function buildSnapshot(
   return {
     perCounty,
     corpus,
-    swflPropertyDamageEvents10yr: perCounty.reduce(
-      (s, c) => s + c.property_damage_event_count,
-      0,
-    ),
-    swflExtremeWindEvents10yr: perCounty.reduce(
-      (s, c) => s + c.extreme_wind_event_count,
-      0,
-    ),
-    swflMajorStormCount30yr: perCounty.reduce(
-      (s, c) => s + c.major_storm_count,
-      0,
-    ),
+    swflPropertyDamageEvents10yr: perCounty.reduce((s, c) => s + c.property_damage_event_count, 0),
+    swflDistinctTropicalCyclones10yr: corpus.distinct_tropical_cyclones_10yr,
+    swflMajorStormCount30yr: perCounty.reduce((s, c) => s + c.major_storm_count, 0),
     swflTotalStormCount: perCounty.reduce((s, c) => s + c.total_storm_count, 0),
   };
 }
 
-export function directionFromExtremeWind(
-  extremeWindCount: number,
-): "bearish" | "neutral" {
-  return extremeWindCount >= EXTREME_WIND_BEARISH_THRESHOLD
-    ? "bearish"
-    : "neutral";
+export function directionFromTropicalCyclones(cycloneCount: number): "bearish" | "neutral" {
+  return cycloneCount >= TROPICAL_CYCLONE_BEARISH_THRESHOLD ? "bearish" : "neutral";
+}
+
+/**
+ * Render "Hurricane Ian" from a corpus's billion-dollar type + name. The NOAA
+ * EVENT_TYPE "Hurricane (Typhoon)" is collapsed to "Hurricane" for prose. Falls
+ * back to the bare type when no proper name was extractable.
+ */
+function billionDollarLabel(c: StormCorpusSummary): string {
+  const type = (c.last_billion_dollar_event_type ?? "storm").replace(/\s*\(Typhoon\)\s*/i, "");
+  return c.last_billion_dollar_event_name ? `${type} ${c.last_billion_dollar_event_name}` : type;
 }
 
 function buildStormSource(fetched_at: string): BrainOutputMetricSource {
@@ -139,9 +135,9 @@ function stormCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   });
 
   facts.push({
-    topic: "metric:extreme_wind_events_10yr",
-    fact: "SWFL hurricane-force-wind events (>= 74 kt) in the trailing 10-year window",
-    value: `${snapshot.swflExtremeWindEvents10yr.toLocaleString()} events with MAGNITUDE >= 74 kt across the SWFL footprint in the trailing 10-year window.`,
+    topic: "metric:tropical_cyclones_10yr",
+    fact: "SWFL distinct tropical cyclones in the trailing 10-year window",
+    value: `${snapshot.swflDistinctTropicalCyclones10yr.toLocaleString()} distinct named tropical cyclones (hurricane / tropical storm) affected the SWFL footprint in the trailing 10-year window.`,
     source_fragment_ids: [],
   });
 
@@ -159,14 +155,11 @@ function stormCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     source_fragment_ids: [],
   });
 
-  if (
-    corpus.last_billion_dollar_event_date &&
-    corpus.last_billion_dollar_event_type
-  ) {
+  if (corpus.last_billion_dollar_event_date && corpus.last_billion_dollar_event_type) {
     facts.push({
       topic: "metric:last_billion_dollar_event",
       fact: "Most recent SWFL billion-dollar storm event",
-      value: `Last billion-dollar event in the SWFL footprint: ${corpus.last_billion_dollar_event_type} on ${corpus.last_billion_dollar_event_date}.`,
+      value: `Last billion-dollar event in the SWFL footprint: ${billionDollarLabel(corpus)} on ${corpus.last_billion_dollar_event_date}.`,
       source_fragment_ids: [],
     });
   }
@@ -176,8 +169,7 @@ function stormCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 
 function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const snapshot = lastSnapshot;
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!snapshot) {
     return {
@@ -198,8 +190,8 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
 
   const corpus = snapshot.corpus;
   const sourceMeta = buildStormSource(fetched_at);
-  const direction: BrainOutputDirection = directionFromExtremeWind(
-    snapshot.swflExtremeWindEvents10yr,
+  const direction: BrainOutputDirection = directionFromTropicalCyclones(
+    snapshot.swflDistinctTropicalCyclones10yr,
   );
   // Magnitude: explicit baseline-not-zero on the neutral path so master sees a
   // low-weight contributor; bearish path bumps to 0.5 (risk-history brains
@@ -212,8 +204,7 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "storm_property_damage_events_10yr",
     value: snapshot.swflPropertyDamageEvents10yr,
     direction: "stable",
-    label:
-      "SWFL property-damage event count (trailing 10-year window, all 3 SWFL counties)",
+    label: "SWFL property-damage event count (trailing 10-year window, all 3 SWFL counties)",
     variable_type: "extensive",
     units: "events",
     display_format: "count",
@@ -221,13 +212,13 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   });
 
   key_metrics.push({
-    metric: "storm_extreme_wind_events_10yr",
-    value: snapshot.swflExtremeWindEvents10yr,
+    metric: "storm_tropical_cyclones_10yr",
+    value: snapshot.swflDistinctTropicalCyclones10yr,
     direction: "stable",
     label:
-      "SWFL hurricane-force wind event count (MAGNITUDE >= 74 kt, trailing 10-year window)",
+      "SWFL tropical cyclones — distinct hurricanes / tropical storms affecting the footprint, trailing 10-year window",
     variable_type: "extensive",
-    units: "events",
+    units: "storms",
     display_format: "count",
     source: sourceMeta,
   });
@@ -255,10 +246,7 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     source: sourceMeta,
   });
 
-  if (
-    corpus.last_billion_dollar_event_date &&
-    corpus.last_billion_dollar_event_type
-  ) {
+  if (corpus.last_billion_dollar_event_date && corpus.last_billion_dollar_event_type) {
     key_metrics.push({
       metric: "storm_last_billion_dollar_event_date",
       value: corpus.last_billion_dollar_event_date,
@@ -275,6 +263,16 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "categorical",
       source: sourceMeta,
     });
+    if (corpus.last_billion_dollar_event_name) {
+      key_metrics.push({
+        metric: "storm_last_billion_dollar_event_name",
+        value: corpus.last_billion_dollar_event_name,
+        direction: "stable",
+        label: "Most recent SWFL billion-dollar storm — proper name",
+        variable_type: "categorical",
+        source: sourceMeta,
+      });
+    }
   }
 
   key_metrics.push({
@@ -299,23 +297,18 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   conclusionParts.push(
     `Southwest Florida storm history (${SWFL_COUNTIES.join(" + ")}) — ` +
       `${snapshot.swflTotalStormCount.toLocaleString()} total NOAA Storm Events across the ${corpus.vintage_start_year}-${corpus.vintage_end_year} modern-schema vintage, ` +
-      `${snapshot.swflMajorStormCount30yr.toLocaleString()} qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tornado, Flash Flood, Storm Surge/Tide}).`,
+      `${snapshot.swflMajorStormCount30yr.toLocaleString()} qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}).`,
   );
-  if (
-    corpus.last_billion_dollar_event_date &&
-    corpus.last_billion_dollar_event_type
-  ) {
+  if (corpus.last_billion_dollar_event_date && corpus.last_billion_dollar_event_type) {
     conclusionParts.push(
-      `Most recent billion-dollar event in scope: ${corpus.last_billion_dollar_event_type} on ${corpus.last_billion_dollar_event_date}.`,
+      `Most recent billion-dollar event in scope: ${billionDollarLabel(corpus)} on ${corpus.last_billion_dollar_event_date}.`,
     );
   } else {
-    conclusionParts.push(
-      "No billion-dollar events present in the current corpus window.",
-    );
+    conclusionParts.push("No billion-dollar events present in the current corpus window.");
   }
   conclusionParts.push(
     `Trailing 10-year window: ${snapshot.swflPropertyDamageEvents10yr.toLocaleString()} property-damage events, ` +
-      `${snapshot.swflExtremeWindEvents10yr.toLocaleString()} events at hurricane-force wind (>= 74 kt) — ${direction} read on near-term physical risk.`,
+      `${snapshot.swflDistinctTropicalCyclones10yr.toLocaleString()} distinct tropical cyclones in the trailing 10-year window — ${direction} read on near-term physical risk.`,
   );
 
   const caveats: string[] = [];
@@ -329,11 +322,11 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     `Vintage end year is ${corpus.vintage_end_year} — bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py and re-run the ingest when NCEI publishes the next yearly file.`,
   );
   caveats.push(
-    "Direction is bearish when SWFL-wide extreme-wind event count (>= 74 kt) in the trailing 10-year window crosses 3; neutral otherwise. This brain never emits bullish — absence of named storms is the baseline, not an upside.",
+    "Direction is bearish when >= 3 distinct named tropical cyclones (hurricane / tropical storm / depression) affected the SWFL footprint in the trailing 10-year window; neutral otherwise. This brain never emits bullish — it is a backward-looking hazard record. For SWFL this threshold is effectively always met (Irma 2017, Ian 2022, Helene + Milton 2024), so the brain reads structurally bearish on physical risk by design.",
   );
   if (env.source === "fixture") {
     caveats.unshift(
-      "Storm-history aggregates in this build are derived from the 91-row fixture Parquet (2022-2024 only) — unset REFINERY_SOURCE or set it to `live` to read the full 1,178-row NOAA vintage from Tier 1 Storage.",
+      "Storm-history aggregates in this build are derived from the fixture Parquet (2022-2024 sample including Hurricane Ian) — unset REFINERY_SOURCE or set it to `live` to read the full 1996-2025 NOAA vintage from Tier 1 Storage.",
     );
   }
 
@@ -356,7 +349,7 @@ export const stormHistorySwfl: PackDefinition = {
   public_label: "Storm History",
   domain: "environmental",
   scope:
-    "NOAA Storm Events history for Southwest Florida (LEE + COLLIER + CHARLOTTE), 1996-2025 modern-schema vintage. Surfaces SWFL-wide event counts (total / major / 10yr property-damage / 10yr extreme-wind) and the most recent billion-dollar event for risk-history framing. Pairs with env-swfl (modeled NFHL exposure) — exposure says WHERE flood risk lives, storm-history says WHAT has hit historically.",
+    "NOAA Storm Events history for Southwest Florida (LEE + COLLIER + CHARLOTTE), 1996-2025 modern-schema vintage. Surfaces SWFL-wide event counts (total / major / 10yr property-damage / 10yr distinct tropical cyclones) and the most recent billion-dollar event for risk-history framing. Pairs with env-swfl (modeled NFHL exposure) — exposure says WHERE flood risk lives, storm-history says WHAT has hit historically.",
   ttl_seconds: 31536000, // 1 year — NCEI publishes annually
   sources: [stormHistorySource],
   input_brains: [],
