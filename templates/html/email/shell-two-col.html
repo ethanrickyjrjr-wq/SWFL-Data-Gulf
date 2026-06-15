@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<!--
+  shell-two-col.html
+  Layout: header -> hero number -> [ BODY TEXT (left) | CHART/MAP slot (right) ] -> footer
+  Two-column row stacks on mobile (375px) with NO media query (hybrid inline-block + MSO ghost table).
+  Rules: inline CSS only, table-based, no JS, 600px max.
+  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
+               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
+               SENDER_ADDRESS, DISCLAIMER, MAP_URL
+-->
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{{COMPANY_NAME}}</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
+
+  <center style="width:100%; background-color:{{SURFACE}};">
+  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
+  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
+
+    <!-- ===== HEADER ===== -->
+    <tr>
+      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
+        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
+        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
+      </td>
+    </tr>
+
+    <!-- ===== HERO NUMBER ===== -->
+    <tr>
+      <td style="padding:24px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td align="center" bgcolor="{{PRIMARY}}" style="padding:34px 24px; background-color:{{PRIMARY}}; border-radius:{{BORDER_RADIUS}};">
+              <div style="font-family:{{FONT_FAMILY}}; font-size:50px; line-height:1; font-weight:bold; color:{{TEXT}};">[ HERO NUMBER ]</div>
+              <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:10px; opacity:0.9;">[ LABEL ]</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ===== TWO-COLUMN ROW: BODY TEXT (left) | CHART/MAP (right) ===== -->
+    <tr>
+      <td align="center" style="padding:0 16px 8px 16px; font-size:0;">
+        <!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td width="50%" valign="top"><![endif]-->
+        <div style="display:inline-block; width:100%; max-width:270px; vertical-align:top;">
+          <div style="padding:8px;">
+            <div style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:44px 12px; text-align:center; background-color:{{SURFACE}}; font-family:{{FONT_FAMILY}}; font-size:13px; letter-spacing:1px; color:{{TEXT}};">[ BODY TEXT ]</div>
+          </div>
+        </div>
+        <!--[if mso]></td><td width="50%" valign="top"><![endif]-->
+        <div style="display:inline-block; width:100%; max-width:270px; vertical-align:top;">
+          <div style="padding:8px;">
+            <div style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:8px; text-align:center; background-color:{{SURFACE}};">
+              <img src="{{MAP_URL}}" alt="[ CHART / MAP ]" width="100%" style="display:block; width:100%; max-width:240px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
+              <div style="font-family:{{FONT_FAMILY}}; font-size:11px; letter-spacing:1px; color:{{TEXT}}; margin-top:6px; opacity:0.7;">[ CHART / MAP SLOT ]</div>
+            </div>
+          </div>
+        </div>
+        <!--[if mso]></td></tr></table><![endif]-->
+      </td>
+    </tr>
+
+    <!-- ===== FOOTER ===== -->
+    <tr>
+      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
+        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
+        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
+        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
+        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
+        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
+      </td>
+    </tr>
+
+  </table>
+  <!--[if mso]></td></tr></table><![endif]-->
+  </center>
+</body>
+</html>

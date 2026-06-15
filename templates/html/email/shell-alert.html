@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<!--
+  shell-alert.html
+  Layout: header -> full-width callout -> single stat -> CTA -> footer
+  Callout is a full-width band in {{ACCENT}}; single stat sits on {{PRIMARY}}.
+  MAP_URL available as an optional visual strip inside the callout.
+  Rules: inline CSS only, table-based, no JS, 600px max, mobile-readable at 375px.
+  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
+               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
+               SENDER_ADDRESS, DISCLAIMER, MAP_URL
+-->
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{{COMPANY_NAME}}</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
+
+  <center style="width:100%; background-color:{{SURFACE}};">
+  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
+  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
+
+    <!-- ===== HEADER ===== -->
+    <tr>
+      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
+        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
+        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
+      </td>
+    </tr>
+
+    <!-- ===== FULL-WIDTH CALLOUT ===== -->
+    <tr>
+      <td bgcolor="{{ACCENT}}" style="background-color:{{ACCENT}}; padding:28px 24px;">
+        <div style="font-family:{{FONT_FAMILY}}; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:{{SURFACE}}; opacity:0.85; margin-bottom:6px;">[ ALERT LABEL ]</div>
+        <div style="font-family:{{FONT_FAMILY}}; font-size:20px; line-height:28px; font-weight:bold; color:{{SURFACE}};">[ FULL-WIDTH CALLOUT MESSAGE ]</div>
+        <!-- Optional visual strip inside callout (uses MAP_URL) -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:16px;">
+          <tr>
+            <td align="center" style="background-color:{{SURFACE}}; border-radius:{{BORDER_RADIUS}}; padding:6px;">
+              <img src="{{MAP_URL}}" alt="[ MAP / VISUAL ]" width="100%" style="display:block; width:100%; max-width:520px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ===== SINGLE STAT ===== -->
+    <tr>
+      <td style="padding:24px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td align="center" bgcolor="{{PRIMARY}}" style="padding:36px 24px; background-color:{{PRIMARY}}; border-radius:{{BORDER_RADIUS}};">
+              <div style="font-family:{{FONT_FAMILY}}; font-size:48px; line-height:1; font-weight:bold; color:{{TEXT}};">[ SINGLE STAT ]</div>
+              <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:10px; opacity:0.9;">[ STAT LABEL ]</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ===== CTA ===== -->
+    <tr>
+      <td align="center" style="padding:0 24px 32px 24px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+          <tr>
+            <td align="center" bgcolor="{{ACCENT}}" style="background-color:{{ACCENT}}; border-radius:{{BORDER_RADIUS}};">
+              <a href="{{WEBSITE_URL}}" style="display:inline-block; padding:14px 30px; font-family:{{FONT_FAMILY}}; font-size:15px; font-weight:bold; color:{{SURFACE}}; text-decoration:none; border-radius:{{BORDER_RADIUS}};">[ CTA BUTTON ]</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ===== FOOTER ===== -->
+    <tr>
+      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
+        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
+        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
+        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
+        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
+        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
+      </td>
+    </tr>
+
+  </table>
+  <!--[if mso]></td></tr></table><![endif]-->
+  </center>
+</body>
+</html>

@@ -9,6 +9,10 @@
   - `2026-06-15-root-R3-data-truth.md` — data correctness/grain/format. Headline: DAT-6 Hurricane Ian missing (ingest vintage <2022 OR ≥74kt wind filter reads null magnitude on surge/hurricane rows OR stale billion-dollar scan — lives in `refinery/sources/storm-history-source.mts` + `ingest/duckdb_pipelines/storm_history_swfl/`, NOT the pack). Plus DAT-5/OUT-4/DAT-2/DAT-1/3/4/FMT-1.
   - `2026-06-15-root-R4R5-visuals-discoverability.md` — IA/nav, brand-style gallery, metric-card redesign, App Router error boundaries, the lying buttons (BTN-2/3/4/5/6/7/8/9/10).
 - **Grounded in code this session** (read AiBriefcasePill, welcome/chat route, converse route, BriefcaseChat/Panel, AskAiDock, ProjectDetail, build route, storm-history pack, briefcase provider, use-chat-stream, items schema). **NO code changed — plans only** (operator: "JUST SAVE THE FUCKING PLANS"). Next: implement R1 here; R3 + R4R5 go to separate sessions. On branch `claude/root-cause-analysis-5wb9ji`.
+## 2026-06-15 (main) — feat(email): land 5 CAN-SPAM-ready HTML email shells from wt/work
+
+- Landed email templates from `wt/work` worktree: 5 inline-CSS table-based layout shells (`shell-single`, `shell-two-col`, `shell-digest`, `shell-alert`, `shell-report`) under `templates/html/email/`. 600px max-width, fluid to 375px, Outlook ghost tables, 17 token slots. README updated with Deliverable C section.
+- No app code changed. Next: Root 1 build (analyst voice + "File This Answer" + Build button wire).
 
 ## 2026-06-15 (main) — docs: MASTER PROBLEM INVENTORY (full-site, end-user POV) — diagnosis only, no code
 

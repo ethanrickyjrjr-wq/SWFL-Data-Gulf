@@ -1,4 +1,4 @@
-# Chart & Graph HTML Templates — README
+﻿# Chart & Graph HTML Templates — README
 
 Static HTML chart templates for runtime token replacement. All 10 files are self-contained and render standalone in any modern browser.
 
@@ -23,6 +23,10 @@ Every color, font, copy, and URL value is a placeholder replaced at runtime via 
 | `{{SENDER_NAME}}` | Email from name | `Acme Reports` |
 | `{{SENDER_ADDRESS}}` | Email from address | `reports@example.com` |
 | `{{DISCLAIMER}}` | Footer legal / disclaimer text | `Data is unaudited and for internal use only.` |
+| `{{MAP_URL}}` | Static image URL for map/chart slot in email shells | `https://cdn.example.com/map.png` |
+| `{{PREHEADER}}` | Inbox preview text shown after subject line | `Lee County inventory dropped again this week.` |
+| `{{PHYSICAL_ADDRESS}}` | Physical mailing address (CAN-SPAM required) | `123 Main St, Fort Myers FL 33901` |
+| `{{UNSUBSCRIBE_URL}}` | Opt-out link URL (CAN-SPAM required) | `https://example.com/unsubscribe` |
 
 ### doc-split.html only
 | Token | Purpose |
@@ -114,6 +118,27 @@ All 5 files use CSS custom properties mapping to the 13 tokens, support flexbox/
 
 ---
 
+## Deliverable C - Email Layout Shells
+
+Five table-based, token-driven **layout shells** — complete CAN-SPAM-compliant email frames. Each uses all 17 tokens (13 base + MAP_URL, PREHEADER, PHYSICAL_ADDRESS, UNSUBSCRIBE_URL). Inline CSS only, 600px max, mobile-fluid to 375px, no media queries.
+
+### `shell-single.html` - Single column: hero stat + visual + body + CTA
+Header / PRIMARY hero stat block / MAP_URL image slot / body text slot / CTA / footer. Single focused metric send.
+
+### `shell-two-col.html` - Hero number + two-column body/chart
+Header / hero number / two-column row (body text left, MAP_URL chart right, mobile-stacking) / footer.
+
+### `shell-digest.html` - Three-section digest
+Header / Section 1 / divider / Section 2 with MAP_URL visual / divider / Section 3 / footer. Use for weekly digest.
+
+### `shell-alert.html` - Full-width callout + single stat + CTA
+Header / ACCENT-band callout with optional MAP_URL strip / single stat block / CTA / footer. Flood alerts, rate spikes, market events.
+
+### `shell-report.html` - Title + full-width chart + two-column stats + source
+Header / title + subtitle / full-width MAP_URL chart slot / two-column stat row / source line / footer. Corridor pulse or monthly overview.
+
+---
+
 ## File list
 
 ```
@@ -121,7 +146,12 @@ email-hbar.html       — Email: horizontal bar chart (6 rows)
 email-compare.html    — Email: before/after period comparison (4 metrics)
 email-hero.html       — Email: hero stat card (giant number + strip)
 email-ranked.html     — Email: ranked top-5 list with opacity bars
-email-table.html      — Email: 5×3 color-coded data table
+email-table.html      — Email: 5x3 color-coded data table
+shell-single.html     — Shell: header / hero stat / visual / body / CTA / footer (17 tokens)
+shell-two-col.html    — Shell: hero number / two-col body+chart / footer (17 tokens)
+shell-digest.html     — Shell: header / 3 sections / footer (17 tokens)
+shell-alert.html      — Shell: header / callout band / single stat / CTA / footer (17 tokens)
+shell-report.html     — Shell: title / full-width chart / two-col stats / footer (17 tokens)
 doc-hbar.html         — PDF:   full-width bar chart (8 rows, portrait)
 doc-donut.html        — PDF:   CSS conic-gradient donut (5 segments, landscape)
 doc-sparkline.html    — PDF:   SVG trend area chart 12 months (landscape)
