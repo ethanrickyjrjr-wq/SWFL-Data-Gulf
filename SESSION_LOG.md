@@ -2,6 +2,18 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — fix(storm-history): surface Hurricane Ian (A1/A2 data-truth fix)
+
+- **Root cause:** NOAA logs hurricanes/surge at the NWS **zone** level (`CZ_TYPE='Z'`, `CZ_NAME`="COASTAL LEE"/"INLAND COLLIER COUNTY"…), but the ingest filtered `cz_name IN ('LEE','COLLIER','CHARLOTTE')` (county-type only) → **every Hurricane Ian row dropped at ingest**, so the read claimed "ZERO hurricane-force / last billion-dollar = 2004 Charley." Compounded by `MAJOR_EVENT_TYPES` holding "Hurricane" (NOAA's string is "Hurricane (Typhoon)") and an `extreme_wind` metric that counted a null MAGNITUDE column. Vintage hypothesis was wrong (corpus already 1996–2025).
+- **Fix — 6 commits, rebased clean onto `origin/main` 5f61a29, tip `2f64e14`** (worktree `transient-sparking-fox`):
+  - `ea45181` ingest: keep hazard **zone** rows + volume guard (`assert_min_rows` total≥1000 AND hurricane/TS≥5 BEFORE the destructive parquet replace — BIBLE §0.2 rule 5; pipeline had none).
+  - `7b17676` source: pure `normalizeCounty` (zone→county) + `extractStormName` (NOAA narrative → "Ian"), unit-tested.
+  - `7f53f8a` **atomic truth-fix**: corpus-level **distinct named tropical cyclones (10yr, dedup `UPPER(name)|year`)** replaces the bogus extreme-wind count; storm name from narratives; `MAJOR_EVENT_TYPES` fixed; slug **`storm_extreme_wind_events_10yr` → `storm_tropical_cyclones_10yr`** + new `storm_last_billion_dollar_event_name` across source+pack+vocab+constitution+fixture in ONE commit (no dangling slug); fixture regenerated to actually contain Ian.
+  - `2f64e14` regen `semantic-ledger` + `brains/storm-history-swfl.md` + `catalog.mts` scope string.
+- **Fixture-built read now:** direction **bearish**, `storm_tropical_cyclones_10yr=6` (Ian/Nicole '22, Idalia '23, Debby/Helene/Milton '24), billion-dollar = **"Hurricane Ian on 2022-09-28"**, `storm_last_billion_dollar_event_name="Ian"`.
+- **Gates green:** 42 source/pack/constitution/catalog tests + 11 ingest tests pass; `check-vocab-coverage --all` CLEAN (32 brains); Gate-4 guard in place; live NOAA probe confirmed Ian = 6 zone rows. NOTE: the ledger regen also caught up ~870 lines of **pre-existing** drift (last generated at `4bc8076`) — generated doc, not storm logic.
+- **Next / BLOCKED on operator:** PUSH HELD (no-autonomous-push) — `git push origin HEAD:main` from the worktree (FF; all pre-push hooks fire). **After merge:** `gh workflow run storm-history-monthly.yml` (live re-ingest with the zone-row fix) → next refinery rebuild corrects the LIVE client read (local fixture read already correct). Then open/close check `storm_ian_live_verify`. Spec `docs/superpowers/specs/2026-06-15-storm-history-ian-truth-fix-design.md`; plan `docs/superpowers/plans/2026-06-15-storm-history-ian-truth-fix.md`. `hurricane-tracks-fl` was correct + out of scope.
+
 ## 2026-06-15 (main) — feat(R1): unify AI + project flow — analyst chat voice, File this answer, wired Build button
 
 - Built Root 1 steps 1–7 (`docs/superpowers/plans/2026-06-15-root-R1-unify-ai-project.md`). **bun test 2569/0; lint (touched files) + `next build` green, routes still static.**
