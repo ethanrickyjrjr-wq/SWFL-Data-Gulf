@@ -1,6 +1,7 @@
 # Briefcase Everywhere — Master Plan
 
-**Status:** A planned (audited, correct) · **B planned** (this folder) · C = kickoff brief only.
+**Status:** A planned (audited, correct) · **B planned** · **C decomposed** (`C/README.md` + tasks 1–6,
+audited + operator live-code-reviewed 2026-06-15).
 **Created:** 2026-06-15. **Scope of this folder:** planning docs only — zero app/MCP/lake code.
 
 ## What this is
@@ -14,7 +15,8 @@
 
 Built in order: **A → B → C.** A is audited and correct (its files here are a faithful
 decomposition). **B is fully planned here** from an in-session codebase audit (3 Explore passes + 1
-adversarial Plan pass). **C gets a getting-started brief only** — it starts its own brainstorm cycle.
+adversarial Plan pass). **C is now fully decomposed too** (`C/README.md` + tasks 1–6) from a 6-audit +
+adversarial pass and a multi-round operator live-code review.
 
 The funnel the three plans serve: **use it free in Claude → want to save/share → handoff → claim →
 account → eventually pay for the send/deliver side.**
@@ -99,4 +101,5 @@ MCP-discount price. A lays the funnel + substrate so these are **config/feature 
 
 - **`A/`** — Plan A (Front Door): `A/README.md` + tasks 1–9 (incl. 8.5).
 - **`B/`** — Plan B (Carry-Back Bridge): `B/README.md` + tasks 1, 2, 3a, 3b, 4, 5, 6.
-- **`C/`** — `C/GETTING-STARTED.md` (kickoff brief — start C's own brainstorm here).
+- **`C/`** — Plan C (Reconciliation Engine): **decomposed** — `C/README.md` + tasks 1–6
+  (`C/GETTING-STARTED.md` kept as the historical kickoff).
