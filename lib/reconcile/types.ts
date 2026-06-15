@@ -77,6 +77,13 @@ export interface ReconciliationVerdict {
   };
   /** Their side — always present; the assertion is the thing being checked. */
   theirs: { value: string; freshness_token: string; source_url?: string };
+  /**
+   * The lake fact's expiry (ISO), surfaced as NON-VALUE metadata whenever a TTL
+   * basis exists — notably on `cannot_assert_stale`, so a read surface can say
+   * "expired {date}" without leaking the withheld number. Absent on `not_found`
+   * (no basis). Never the metric value.
+   */
+  expires_at?: string;
   /** Signed `(theirs − ours) / ours × 100`, 2dp. Numeric `needs_review` only. */
   delta_pct?: number;
   /** Which side is fresher. `"unknown"` when `ours` is withheld OR a date is unparseable. */

@@ -19,6 +19,10 @@ import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 import { buildInventoryMarkdown, buildReportIdSet } from "./inventory";
 import { registerProjectTools } from "./project-tools";
+import { reconcileMetric } from "@/lib/reconcile/reconcile";
+import { lookupLakeFact } from "@/lib/reconcile/lane1";
+import { renderVerdictLine } from "@/lib/reconcile/render-verdict";
+import type { LaneTwoAssertion } from "@/lib/reconcile/types";
 
 /**
  * MCP server callback. Registers `swfl_fetch` as a plain text tool.
@@ -358,6 +362,95 @@ export function buildMcpServer(server: McpServer): void {
 
         return {
           content: [{ type: "text" as const, text: message }],
+          isError: true,
+        };
+      }
+    },
+  );
+
+  // Plan C — keyless, read-only reconciliation. ANONYMOUS like swfl_fetch (no
+  // key, no metering, no per-user scoping): it compares a figure the caller's AI
+  // is asserting against our live lake fact under the hard TTL gate and returns
+  // an honest verdict — never asserts a stale or invented number. swfl_fetch
+  // above stays byte-for-byte untouched.
+  server.registerTool(
+    "swfl_reconcile",
+    {
+      title: "SWFL Data Gulf — reconcile",
+      description: `swfl_reconcile — check a figure before you assert it, against the live Southwest Florida data lake.
+
+Pass the report, the metric label (or slug), the value your answer is about to state, and the freshness token it was filed under. You get back ONE honest verdict:
+- verified — your number matches our current cited figure (fresh).
+- needs review — both are fresh but the numbers differ; both are shown with the gap.
+- cannot assert — our figure is past its freshness window; pull a fresh read, never assert the stale number.
+- out of grain — we hold this coarser than you asked (e.g. ZIP, not parcel); we offer the grain we hold.
+- not found — we do not hold a matching figure (or have no freshness basis for it); never claimed as "expired".
+
+Read-only, anonymous, no key. Use it to keep an asserted SWFL number honest; relay the verdict as written and never present a refused or out-of-grain figure as confirmed.`,
+      inputSchema: {
+        report_id: z
+          .string()
+          .describe(
+            'Report the figure came from, e.g. "housing-swfl". Unknown/uncataloged → not found.',
+          ),
+        label: z
+          .string()
+          .optional()
+          .describe('Human metric label, e.g. "Median sale price". Provide this OR metric_slug.'),
+        metric_slug: z
+          .string()
+          .optional()
+          .describe("Lake metric slug, if known (wins over label)."),
+        value: z.string().describe('The figure being asserted, e.g. "$362,000".'),
+        freshness_token: z.string().describe("The SWFL-… token quoted when the figure was filed."),
+        zip: z
+          .string()
+          .optional()
+          .describe('Optional 5-digit ZIP for a per-ZIP reconciliation, e.g. "33908".'),
+      },
+      annotations: { readOnlyHint: true, title: "SWFL Data Gulf — reconcile" },
+    },
+    async ({ report_id, label, metric_slug, value, freshness_token, zip }) => {
+      const slugOrLabel = metric_slug ?? label;
+      if (slugOrLabel === undefined || slugOrLabel.trim() === "") {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: "Provide a metric label or metric_slug to reconcile against the lake.",
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      try {
+        const assertion: LaneTwoAssertion = {
+          report_id,
+          label: label ?? slugOrLabel,
+          value,
+          freshness_token,
+          ...(metric_slug !== undefined ? { metric_slug } : {}),
+          origin: "mcp",
+        };
+        // lookupLakeFact is null-resilient (missing/invalid/uncataloged brain →
+        // null → not_found); reconcileMetric is pure and never throws.
+        const fact = await lookupLakeFact(report_id, slugOrLabel, zip?.trim() || undefined);
+        const verdict = reconcileMetric(fact, assertion);
+        return {
+          content: [
+            { type: "text" as const, text: renderVerdictLine(verdict, label ?? metric_slug) },
+          ],
+          _meta: { rules: RULES_OF_ENGAGEMENT },
+        };
+      } catch (err) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Unexpected error reconciling "${slugOrLabel}" in "${report_id}": ${(err as Error).message}`,
+            },
+          ],
           isError: true,
         };
       }

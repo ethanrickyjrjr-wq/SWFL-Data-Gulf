@@ -177,6 +177,7 @@ export function reconcileMetric(
       theirs,
       fresher_side: "unknown",
       grain,
+      expires_at: expires, // non-value: lets the surface say "expired {date}"
       reason: `lake fact expired ${expires} — refuse to assert; offer re-pull`,
     };
   }
