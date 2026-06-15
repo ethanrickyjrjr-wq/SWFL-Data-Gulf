@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-
-type Msg = { role: "user" | "assistant"; content: string };
+import { useEffect, useRef, useState } from "react";
+import { useChatStream } from "@/lib/chat/use-chat-stream";
 
 /** The four hardcoded arrival prompts. #1 leads with the recurring-email hook (the
  *  product); #2 is the instant "try it" build; #3 and #4 are conversion prompts. */
@@ -15,68 +14,21 @@ const PROMPTS = [
 
 /**
  * The general, multi-turn conversational chat — the recurring-email hook and the
- * conversational prompts. Extracted verbatim from the original WelcomeChat so its
- * streaming behavior (and the grounded `/api/welcome/chat` route it now drives)
- * is unchanged; the ZIP-first grounded answer lives in its sibling GroundedAnswer.
+ * conversational prompts. Streaming now runs on the shared `useChatStream` hook
+ * (lib/chat/use-chat-stream) so there is ONE multi-turn implementation across the
+ * welcome page and the global Briefcase pill (A-6 DRY); behavior is unchanged.
+ * The ZIP-first grounded answer lives in its sibling GroundedAnswer.
  */
 export function ConversationalChat() {
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const { messages, busy, send } = useChatStream("/api/welcome/chat");
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  async function send(text: string) {
-    const q = text.trim();
-    if (!q || busy) return;
-    const next: Msg[] = [...messages, { role: "user", content: q }];
-    setMessages([...next, { role: "assistant", content: "" }]);
-    setInput("");
-    setBusy(true);
-    try {
-      const res = await fetch("/api/welcome/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
-      });
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const frames = buf.split("\n\n");
-        buf = frames.pop() ?? "";
-        for (const frame of frames) {
-          const line = frame.replace(/^data: /, "").trim();
-          if (!line) continue;
-          const evt = JSON.parse(line) as { text?: string; done?: boolean; error?: string };
-          if (evt.text) {
-            setMessages((m) => {
-              const copy = [...m];
-              copy[copy.length - 1] = {
-                role: "assistant",
-                content: copy[copy.length - 1].content + evt.text,
-              };
-              return copy;
-            });
-          }
-        }
-        scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
-      }
-    } catch {
-      setMessages((m) => {
-        const copy = [...m];
-        copy[copy.length - 1] = {
-          role: "assistant",
-          content: "Sorry — something went wrong. Try again.",
-        };
-        return copy;
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
+  // Keep the latest message in view as it streams. DOM-only effect (no setState),
+  // so it does not trip react-hooks/set-state-in-effect.
+  useEffect(() => {
+    scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
+  }, [messages]);
 
   return (
     <div>
@@ -113,6 +65,7 @@ export function ConversationalChat() {
           onSubmit={(e) => {
             e.preventDefault();
             send(input);
+            setInput("");
           }}
           className="flex items-center gap-2 rounded-lg border border-gulf-haze bg-gulf-slate px-4 py-3"
         >
