@@ -10,10 +10,6 @@ project — and the "Open project" affordance should actually work.
   ... })`, cookie client + RLS `WITH CHECK`) → clears localStorage → `router.replace('/project/{id}')`.
 - Fix the dead "Open project" link to route to `/project/{id}`.
 
-## Note (shared with B)
-This is the **web** carry-back path; B's `/claim` flow is the **MCP** analog of the same pattern
-(`ImportDraftOnLogin` + `/api/projects/import`). Keep them consistent.
-
 ## Acceptance test
 - File an item logged-out → persists across nav → "Sign in to build" → OTP login → draft imported to
   a `projects` row → "Open project" lands on `/project/{id}` → Build produces a `/p/{id}`.

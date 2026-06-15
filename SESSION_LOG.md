@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — docs(plan): Briefcase Everywhere Plan A — operator decisions folded in (unified pill + watermark ladder)
+
+- Rewrote `docs/superpowers/plans/2026-06-15-briefcase-everywhere/A/` (README + 7 task briefs) with the audit corrections + locked 2026-06-15 operator decisions. **A-only; no B/C talk.**
+- **Unified "AI + Briefcase" pill (Option 4):** one global bottom-right pill, two modes (standalone off `/r/*`; bridges `HighlighterContext` on `/r/*`), **retire `AskAiFab`/`AskAiDock`**, keep highlight-to-ask popup `/r/*`-only. A-3 upgraded SONNET→OPUS; A-2 adds a non-throwing `useOptionalHighlighterContext()` bridge.
+- **Ladder = watermark, don't block (Option 1):** builds free forever; trial expiry = watermark toggle keyed to first-build timestamp; SEND is the only paywall; MCP-connected = discount. Watermark render named Tier-2 (slot reserved in A).
+- **Guardrails:** copy "context-aware" not "learns how you work"; A-7 net-new page-context + anon `localStorage` visit store; `DELIVERABLE_MODEL` pinned Sonnet; `is_example` excluded from metering; A-8.5 prod-evidence migration gate; A-9 full `bun test` suite. Line numbers stripped (grep-anchored).
+- **Docs only.** `C/GETTING-STARTED.md` + untracked `ingest/scripts/migrate_daily_truth.py` left untouched (not mine).
+
 ## 2026-06-15 (main) — plan: Daily Freshness System — revised per operator (cascade restored, anomaly layer, vendor re-anchor)
 
 - `docs/superpowers/plans/2026-06-15-daily-freshness-system/` (README + 00–09 + 99) revised after two operator correction rounds. Engine = **fallback cascade** `Gemini → Firecrawl → Spider → Claude` (failsafe uptime; normal path = ONE Gemini grounded search → number + real source → brain; no daily cross-check). Provenance-only gate: real source URL present (never memory), LittleBird denylisted. **Pricing corrected** to the Gemini 3 tier (5,000 prompts/mo free, $14/1k search queries, billed per query; instrument `webSearchQueries.length`; <100/day = $0).
