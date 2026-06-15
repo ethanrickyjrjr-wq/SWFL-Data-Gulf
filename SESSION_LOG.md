@@ -19,6 +19,15 @@
 - Next: build Root 1.
 
 ## 2026-06-15 (claude/root-cause-analysis-5wb9wi) — docs: ULTRA PLAN split into 3 root-cause briefs — plans only, no code
+## 2026-06-15 (squishy-wondering-corbato) — fix: output format sweep A3–A6 (grain label, metric format, citation bloat, date format)
+
+- **A3 (OUT-4):** `lib/zip-dossier.ts` BRAIN_GEO — swapped `storm-history-swfl` + `hurricane-tracks-fl` to `grains: ["region", "county"]` so their SWFL-wide rollup uses "Southwest Florida region" label (not "Lee county-wide") when no ZIP-grain row exists. No scopePhrase logic change — grain order is the correct seam.
+- **A4 (DAT-2):** New `lib/format-metric.ts` shared formatter (`formatMetricValue`/`formatDetailCell`). `harvestMetricItems` in `lib/deliverable/examples.ts` now emits `"$400,000"` not `"400000"` for currency metrics. `lib/fetch-brain.ts` local `formatDetailCell` removed; imports from shared module.
+- **A5 (DAT-1/3/4):** `refinery/packs/cre-swfl.mts` — corridor/submarket citation truncated to first 3 + "and N more" (removes per-row URL bloat that grew to 87k chars); dead `METRIC_SOURCE_FIELD`+`resolveMetricSource` removed. `refinery/packs/labor-demand-swfl.mts` — raw `CITATION_URL` removed from conclusion + synthesisFactValue prose; stays in `source.url` only.
+- **A6 (FMT-1):** `lib/project/as-of.ts` `asOfFromToken` → MM/DD/YYYY (e.g. `"06/10/2026"`); `MONTHS` array removed. Tests updated. 2563/0 full suite.
+- Next: R4R5 visual/discoverability work (IA/nav, metric-card redesign, error boundaries, lying buttons BTN-2..10) per `docs/superpowers/plans/2026-06-15-root-R4R5-visuals-discoverability.md`.
+
+## 2026-06-15 (claude/root-cause-analysis-5wb9ji) — docs: ULTRA PLAN split into 3 root-cause briefs — plans only, no code
 
 - From the MASTER PROBLEM INVENTORY (~47 problems → ~5 roots), operator picked ONE root tightly scoped + wanted the other two as standalone files to hand to two other Claudes. Wrote 3 plan docs under `docs/superpowers/plans/`:
   - `2026-06-15-root-R1-unify-ai-project.md` — **the implementable root.** Kill the `/api/welcome/chat` funnel premise on the in-app pill (add `mode:"analyst"` — public welcome landing UNCHANGED via default `mode:"welcome"`), ground analyst no-location path on the master read, give BOTH chat surfaces (`BriefcaseChat` + `AskAiDock`) the missing "File this answer" → `qa` ProjectItem, and wire the dead `ProjectDetail` "Build deliverable" button → `POST /api/projects/[id]/build` → `/p/[id]`. Operator-decided: ONE pill, dock preserved on `/r/*` (not a widget rebuild). Fixes BRF-1/5/6/8/9/10 + BTN-1.

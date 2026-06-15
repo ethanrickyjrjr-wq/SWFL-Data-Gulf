@@ -19,6 +19,7 @@ import { buildDeliverableNarrative, freezeSnapshot } from "./build";
 import type { TemplateId } from "./templates";
 import type { ProjectItem } from "../project/items";
 import type { BrainOutputMetric } from "../../refinery/types/brain-output.mts";
+import { formatMetricValue } from "../format-metric";
 import { loadParsedBrain } from "../fetch-brain";
 
 /** Reserved owner uid for seeded examples — a fixed, non-user UUID. Never a real
@@ -94,7 +95,7 @@ export function harvestMetricItems(
       kind: "metric",
       report_id: ctx.brainId,
       label: m.label,
-      value: String(m.value),
+      value: formatMetricValue(m),
       freshness_token: ctx.freshnessToken,
       ...(m.source?.url ? { source_url: m.source.url } : {}),
       ...(m.source?.citation ? { source_label: m.source.citation } : {}),

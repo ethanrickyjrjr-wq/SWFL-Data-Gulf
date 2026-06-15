@@ -13,8 +13,8 @@ import type {
   BrainOutput,
   BrainOutputDetailTable,
   BrainOutputDetailRow,
-  BrainOutputMetricDisplayFormat,
 } from "../refinery/types/brain-output.mts";
+import { formatDetailCell } from "./format-metric";
 import type { ChartBlock } from "../refinery/validate/chart-block-lint.mts";
 import { computeMetricChart } from "../refinery/lib/chart-from-metrics.mts";
 
@@ -243,23 +243,7 @@ export function buildDossier(output: BrainOutput, freshnessToken: string): Dossi
 // already-rendered detail_tables baked into brains/{slug}.md).
 
 /** Format one detail cell for prose, honoring the column's display hint. */
-function formatDetailCell(
-  v: number | string | boolean,
-  fmt?: BrainOutputMetricDisplayFormat,
-): string {
-  if (typeof v === "boolean") return v ? "yes" : "no";
-  if (typeof v === "string") return v;
-  switch (fmt) {
-    case "currency":
-      return `$${v.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-    case "percent":
-      return `${v}%`;
-    case "count":
-      return v.toLocaleString("en-US");
-    default:
-      return String(v);
-  }
-}
+// Shared via lib/format-metric.ts — removed local copy.
 
 /**
  * Render one detail-table row as a clean, customer-facing text block. Pure —

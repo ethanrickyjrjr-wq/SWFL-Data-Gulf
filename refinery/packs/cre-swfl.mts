@@ -147,23 +147,6 @@ function brainInputFrom(fragments: RawFragment[], upstreamId: string): BrainOutp
   return null;
 }
 
-const METRIC_SOURCE_FIELD = {
-  cap_rate_pct: "cap_rate_source_url",
-  vacancy_rate_pct: "vacancy_rate_source_url",
-  absorption_sqft: "absorption_sqft_source_url",
-  asking_rent_psf: "asking_rent_psf_source_url",
-} as const satisfies Record<
-  "cap_rate_pct" | "vacancy_rate_pct" | "absorption_sqft" | "asking_rent_psf",
-  keyof CorridorNormalized
->;
-
-function resolveMetricSource(
-  c: CorridorNormalized,
-  field: keyof typeof METRIC_SOURCE_FIELD,
-): string | null {
-  return (c[METRIC_SOURCE_FIELD[field]] as string | null) ?? c.source_url;
-}
-
 /**
  * Build a BrainOutputMetricSource for a cre-swfl aggregate metric.
  *
@@ -186,13 +169,12 @@ function buildCreAggregateSource(
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&${field}=not.is.null`
       : "fixture://refinery/__fixtures__/corridor-profiles.sample.json";
-  const named = contributing
-    .map((c) => {
-      const resolved = resolveMetricSource(c, field);
-      const tail = resolved ? ` [${resolved}]` : "";
-      return `${displayNameFor(c.name)} (${c.city}, ${c.county})${tail}`;
-    })
-    .join("; ");
+  const MAX_NAMED = 3;
+  const namedParts = contributing
+    .slice(0, MAX_NAMED)
+    .map((c) => `${displayNameFor(c.name)} (${c.city}, ${c.county})`);
+  const rest = contributing.length - MAX_NAMED;
+  const named = namedParts.join("; ") + (rest > 0 ? `; and ${rest} more` : "");
   return {
     url,
     fetched_at,
@@ -222,12 +204,10 @@ function buildMarketbeatAggregateSource(
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&${field}=not.is.null`
       : "fixture://refinery/__fixtures__/marketbeat-swfl.sample.json";
-  const named = contributing
-    .map((r) => {
-      const tail = r.source_url ? ` [${r.source_url}]` : "";
-      return `${r.submarket} ${r.quarter}${tail}`;
-    })
-    .join("; ");
+  const MAX_NAMED = 3;
+  const namedParts = contributing.slice(0, MAX_NAMED).map((r) => `${r.submarket} ${r.quarter}`);
+  const rest = contributing.length - MAX_NAMED;
+  const named = namedParts.join("; ") + (rest > 0 ? `; and ${rest} more` : "");
   return {
     url,
     fetched_at,

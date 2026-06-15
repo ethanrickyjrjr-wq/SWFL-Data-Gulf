@@ -45,11 +45,11 @@ describe("harvestMetricItems", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("stringifies numeric values and maps source.url/citation", () => {
+  it("formats numeric values per display_format and maps source.url/citation", () => {
     const [m] = harvestMetricItems([metric({ value: 400000 })], ctx);
     expect(m.kind).toBe("metric");
     if (m.kind !== "metric") throw new Error("kind");
-    expect(m.value).toBe("400000");
+    expect(m.value).toBe("$400,000"); // display_format:"currency" → formatted
     expect(m.source_url).toBe("https://www.redfin.com/news/data-center/");
     expect(m.source_label).toBe("Redfin Data Center — SWFL MSAs");
     expect(m.freshness_token).toBe("SWFL-7421-v6-20260603");

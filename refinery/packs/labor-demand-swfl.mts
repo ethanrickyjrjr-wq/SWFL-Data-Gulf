@@ -12,7 +12,6 @@ import {
 } from "../sources/bls-oews-source.mts";
 
 const SOURCE_ID = "bls_oews_swfl";
-const CITATION_URL = "https://www.bls.gov/oes/tables.htm";
 
 /**
  * labor-demand-swfl — SWFL workforce composition + wage benchmarks from BLS OEWS.
@@ -61,12 +60,9 @@ function makeSource(
 
 // ── outputProducer ────────────────────────────────────────────────────────────
 
-function laborDemandOutputProducer(
-  _out: PackOutput,
-): BrainOutputProducerResult {
+function laborDemandOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const summary = lastSummary;
-  const fetchedAt =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetchedAt = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!summary || !summary.ref_year) {
     return {
@@ -85,13 +81,8 @@ function laborDemandOutputProducer(
     };
   }
 
-  const {
-    ref_year,
-    cape_coral,
-    naples,
-    cape_coral_employment_yoy_pct,
-    naples_employment_yoy_pct,
-  } = summary;
+  const { ref_year, cape_coral, naples, cape_coral_employment_yoy_pct, naples_employment_yoy_pct } =
+    summary;
 
   const key_metrics: BrainOutputMetric[] = [];
 
@@ -100,9 +91,7 @@ function laborDemandOutputProducer(
   function addMsaMetrics(msa: OewsMsaSnapshot, yoy: number | null): void {
     const areaTag = msa.area_code === "15980" ? "lee" : "collier";
     const areaLabel =
-      msa.area_code === "15980"
-        ? "Lee (Cape Coral-Fort Myers)"
-        : "Collier (Naples)";
+      msa.area_code === "15980" ? "Lee (Cape Coral-Fort Myers)" : "Collier (Naples)";
 
     // Top occupation group by employment
     const top = msa.top_groups[0];
@@ -206,12 +195,8 @@ function laborDemandOutputProducer(
 
   let direction: BrainOutputDirection = "neutral";
 
-  if (
-    cape_coral_employment_yoy_pct != null &&
-    naples_employment_yoy_pct != null
-  ) {
-    const avgYoy =
-      (cape_coral_employment_yoy_pct + naples_employment_yoy_pct) / 2;
+  if (cape_coral_employment_yoy_pct != null && naples_employment_yoy_pct != null) {
+    const avgYoy = (cape_coral_employment_yoy_pct + naples_employment_yoy_pct) / 2;
     direction = avgYoy > 1 ? "bullish" : avgYoy < -1 ? "bearish" : "neutral";
   } else if (cape_coral_employment_yoy_pct != null) {
     direction =
@@ -256,12 +241,9 @@ function laborDemandOutputProducer(
     `BLS OEWS May ${ref_year} — SWFL workforce. ` +
     `Lee (Cape Coral-Fort Myers MSA): ${leeParts}. ` +
     `Collier (Naples MSA): ${naplesParts}. ` +
-    `Source: BLS Occupational Employment and Wage Statistics (${CITATION_URL}).`;
+    `Source: BLS Occupational Employment and Wage Statistics.`;
 
-  const maxLocQ = Math.max(
-    cape_coral.construction_loc_q ?? 0,
-    naples.construction_loc_q ?? 0,
-  );
+  const maxLocQ = Math.max(cape_coral.construction_loc_q ?? 0, naples.construction_loc_q ?? 0);
   const magnitude = Math.min((maxLocQ - 1) / 1.5, 1.0);
 
   return {
@@ -332,7 +314,7 @@ export const laborDemandSwfl: PackDefinition = {
         value:
           `Lee (Cape Coral-Fort Myers): top sector ${leeTop?.occ_title ?? "n/a"} (${fmtK(leeTop?.tot_emp ?? 0)} workers), Construction ${fmt2(cape_coral.construction_loc_q ?? 0)}× national LOC_Q. ` +
           `Collier (Naples): top sector ${naplesTop?.occ_title ?? "n/a"} (${fmtK(naplesTop?.tot_emp ?? 0)} workers), Construction ${fmt2(naples.construction_loc_q ?? 0)}× national LOC_Q. ` +
-          `Source: BLS OEWS (${CITATION_URL}).`,
+          `Source: BLS OEWS.`,
         source_fragment_ids: [],
       },
     ];

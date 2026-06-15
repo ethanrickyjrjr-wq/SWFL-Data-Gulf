@@ -25,6 +25,7 @@ import {
   type ParsedBrain,
 } from "../refinery/render/speaker.mts";
 import type { BrainOutputMetric } from "../refinery/types/brain-output.mts";
+import { formatMetricValue } from "./format-metric";
 import { loadParsedBrain, renderDetailRowText } from "./fetch-brain.ts";
 
 // ---------------------------------------------------------------------------
@@ -100,7 +101,8 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // owner should confirm the 3 stress datasets' live ZIP coverage matches METRO_4.)
   "seller-stress-swfl": { grains: ["zip"], covers: METRO_4 },
   // NOAA HURDAT2 best-track × OpenFEMA NFIP across the 6-county footprint.
-  "hurricane-tracks-fl": { grains: ["county", "region"], covers: SIX_COUNTY },
+  // Region-first: hurricane metrics are SWFL-wide aggregates, not per-county rows.
+  "hurricane-tracks-fl": { grains: ["region", "county"], covers: SIX_COUNTY },
   // LeePA parcel snapshot → Lee County only.
   "properties-lee-value": { grains: ["county"], covers: [LEE] },
   // FDOR CO_NO=21 parcels + Redfin Collier tracker → Collier only.
@@ -126,7 +128,8 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // FDOT-AADT activity proxy for the SWFL region — region footprint; no county gate.
   "logistics-swfl-nowcast": { grains: ["region"], covers: "all" },
   // NOAA Storm Events history, Lee + Collier + Charlotte.
-  "storm-history-swfl": { grains: ["county", "region"], covers: [LEE, COLLIER, CHARLOTTE] },
+  // Region-first: the pack emits a SWFL-wide aggregate rollup, not per-county rows.
+  "storm-history-swfl": { grains: ["region", "county"], covers: [LEE, COLLIER, CHARLOTTE] },
   // FGCU RERI monthly regional indicators — region footprint; no county gate.
   "fgcu-reri": { grains: ["region"], covers: "all" },
   // FBI CDE NIBRS property-crime rate, Lee + Collier.
@@ -313,21 +316,6 @@ function coveredPlace(loc: EmittingInput): string | null {
 // ---------------------------------------------------------------------------
 // Per-metric value formatting (mirrors fetch-brain's private formatDetailCell)
 // ---------------------------------------------------------------------------
-
-function formatMetricValue(m: BrainOutputMetric): string {
-  const v = m.value;
-  if (typeof v === "string") return v;
-  switch (m.display_format) {
-    case "currency":
-      return `$${v.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-    case "percent":
-      return `${v}%`;
-    case "count":
-      return v.toLocaleString("en-US");
-    default:
-      return String(v);
-  }
-}
 
 function cleanCitation(citation: string): string {
   return scrubCaveatTechnical(sanitizeProse(citation));
