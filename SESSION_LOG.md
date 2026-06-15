@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — docs(briefcase): follow-up brief for chart lint/insert split
+
+- The `6ef8cb3` #6 fix is a best-effort cleanup band-aid and only covered `swfl_project_handoff`; the SAME orphan window is still open in `swfl_project_add` (chart inserted before its schema/dup/set checks + project UPDATE).
+- Wrote execution brief `docs/superpowers/plans/2026-06-15-briefcase-everywhere/A/followup-chart-lint-insert-split.md` (pure `planChartItem` + atomic `insertChartRows`, defer all DB writes past validation, fix BOTH callers, 5 tests).
+- Opened check `chart_lint_insert_split` `[briefcase]` to track it. Next session: execute the brief.
+
 ## 2026-06-15 (main) — fix(briefcase): Plan A triage — verified + fixed (12 real, 3 not)
 
 - Re-checked the inherited Plan A triage against the live checkout (its line numbers were all drifted). Verdict + real paths + fixes in `docs/superpowers/plans/2026-06-15-briefcase-everywhere/A/AUDIT-VERIFICATION.md`.
