@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DRAFT_KEY, addItem } from "@/lib/highlighter/context";
+import { DRAFT_KEY, addItem } from "@/lib/briefcase/draft";
 import type { ProjectItem } from "@/lib/project/items";
 
 interface Props {

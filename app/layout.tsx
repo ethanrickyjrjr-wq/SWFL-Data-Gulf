@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { BriefcaseProvider } from "@/components/briefcase/BriefcaseProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,11 +29,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">
+        {/* BriefcaseProvider owns the anonymous draft globally (A-2) so the unified
+            pill files into it on every page, on or off /r/*. The highlighter
+            conversation thread stays per-/r/* page (HighlighterProvider). */}
+        <BriefcaseProvider>{children}</BriefcaseProvider>
+      </body>
     </html>
   );
 }

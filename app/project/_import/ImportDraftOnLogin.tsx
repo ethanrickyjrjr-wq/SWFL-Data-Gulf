@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { DRAFT_KEY } from "@/lib/highlighter/context";
+import { DRAFT_KEY } from "@/lib/briefcase/draft";
 import { projectItemsSchema } from "@/lib/project/items";
 
 /**

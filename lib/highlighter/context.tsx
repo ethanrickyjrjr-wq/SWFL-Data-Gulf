@@ -2,7 +2,6 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import type { SelectedFact } from "./use-highlight";
-import { projectItemsSchema, type ProjectItem } from "@/lib/project/items";
 
 /**
  * Context that lets FactChip instances anywhere in the /r/ report tree feed a
@@ -39,16 +38,8 @@ export interface HighlighterContextValue {
   thread: (reportId: string) => ChatEntry[];
   archiveExchange: (reportId: string, entry: ChatEntry) => void;
   clearThread: (reportId: string) => void;
-  // draft project (briefcase)
-  draftItems: ProjectItem[];
-  fileItem: (item: ProjectItem) => void;
-  removeItem: (id: string) => void;
-  /** True when the draft is within 5 of the cap — tray shows a "sign in to save" nudge. */
-  draftNearCap: boolean;
 }
 
-export const DRAFT_KEY = "swfl_project_draft_v1";
-export const DRAFT_CAP = 50;
 /** Beyond this many exchanges in one report, condense the oldest to question-only. */
 export const THREAD_CAP = 12;
 
@@ -83,44 +74,6 @@ export function clearThreadFor(
   return { ...threads, [reportId]: [] };
 }
 
-/** Append an item to the draft, keeping only the most recent DRAFT_CAP. */
-export function addItem(items: ProjectItem[], item: ProjectItem): ProjectItem[] {
-  return [...items, item].slice(-DRAFT_CAP);
-}
-
-/** Remove a draft item by id. */
-export function removeItemById(items: ProjectItem[], id: string): ProjectItem[] {
-  return items.filter((i) => i.id !== id);
-}
-
-/** Read + validate the draft from a Storage-like source. Returns [] on any failure. */
-export function loadDraftFrom(storage: Pick<Storage, "getItem"> | null | undefined): ProjectItem[] {
-  if (!storage) return [];
-  try {
-    const raw = storage.getItem(DRAFT_KEY);
-    return raw ? projectItemsSchema.parse(JSON.parse(raw)) : [];
-  } catch {
-    return [];
-  }
-}
-
-/** Write the draft to a Storage-like sink. Swallows quota errors (caller warns via draftNearCap). */
-export function saveDraftTo(
-  storage: Pick<Storage, "setItem"> | null | undefined,
-  items: ProjectItem[],
-): void {
-  if (!storage) return;
-  try {
-    storage.setItem(DRAFT_KEY, JSON.stringify(items));
-  } catch {
-    /* quota — surfaced to the user via the draftNearCap nudge, not thrown */
-  }
-}
-
-function browserStorage(): Storage | null {
-  return typeof window !== "undefined" ? window.localStorage : null;
-}
-
 // ---------------------------------------------------------------------------
 // Context + provider
 // ---------------------------------------------------------------------------
@@ -131,6 +84,15 @@ export const HighlighterContext = createContext<HighlighterContextValue | null>(
 export function useHighlighterContext(): HighlighterContextValue | null {
   return useContext(HighlighterContext);
 }
+
+/**
+ * Non-throwing accessor the global AI+Briefcase pill (A-3) uses to BRIDGE to the
+ * highlighter thread on /r/* and degrade to standalone off it. It is an alias of
+ * useHighlighterContext (which already returns null when no provider is present) —
+ * NOT a separate throwing variant. Naming it explicitly documents the bridge
+ * intent at the call site.
+ */
+export const useOptionalHighlighterContext = useHighlighterContext;
 
 export function HighlighterProvider({ children }: { children: ReactNode }) {
   const [chipFact, setChipFact] = useState<SelectedFact | null>(null);
@@ -145,28 +107,6 @@ export function HighlighterProvider({ children }: { children: ReactNode }) {
     setThreads((t) => clearThreadFor(t, reportId));
   }, []);
 
-  // Lazy initializer reads localStorage exactly once (no effect, SSR-guarded).
-  const [draftItems, setDraftItems] = useState<ProjectItem[]>(() =>
-    loadDraftFrom(browserStorage()),
-  );
-  const fileItem = useCallback((item: ProjectItem) => {
-    setDraftItems((items) => {
-      const next = addItem(items, item);
-      saveDraftTo(browserStorage(), next); // write-through INSIDE the callback — not an effect
-      return next;
-    });
-  }, []);
-  const removeItem = useCallback((id: string) => {
-    setDraftItems((items) => {
-      const next = removeItemById(items, id);
-      saveDraftTo(browserStorage(), next);
-      return next;
-    });
-  }, []);
-
-  // Derived during render (NOT an effect): warn when nearing the draft cap.
-  const draftNearCap = draftItems.length >= DRAFT_CAP - 5;
-
   const value = useMemo<HighlighterContextValue>(
     () => ({
       chipFact,
@@ -175,22 +115,8 @@ export function HighlighterProvider({ children }: { children: ReactNode }) {
       thread,
       archiveExchange,
       clearThread,
-      draftItems,
-      fileItem,
-      removeItem,
-      draftNearCap,
     }),
-    [
-      chipFact,
-      onActivate,
-      thread,
-      archiveExchange,
-      clearThread,
-      draftItems,
-      fileItem,
-      removeItem,
-      draftNearCap,
-    ],
+    [chipFact, onActivate, thread, archiveExchange, clearThread],
   );
 
   return <HighlighterContext.Provider value={value}>{children}</HighlighterContext.Provider>;

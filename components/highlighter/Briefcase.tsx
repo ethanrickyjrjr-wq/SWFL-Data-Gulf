@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useHighlighterContext } from "@/lib/highlighter/context";
+import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import type { ProjectItem } from "@/lib/project/items";
 
 const TRAY_ID = "briefcase-tray";
@@ -34,7 +34,7 @@ function describe(item: ProjectItem): { title: string; sub?: string } {
 /**
  * The Briefcase capture tray. A floating button (count badge) that opens a
  * bottom-sheet (mobile) / popover (desktop) listing the anonymous draft project.
- * Reads draftItems/removeItem/draftNearCap from the HighlighterProvider; renders
+ * Reads draftItems/removeItem/draftNearCap from the root BriefcaseProvider; renders
  * nothing until something has been filed. Mounted once by AskAi (inside the
  * provider). Its root carries `id="briefcase-tray"` so the highlighter's
  * SUPPRESS_CLOSEST leaves selections inside it alone.
@@ -48,7 +48,7 @@ export function Briefcase({
   reportId: string;
   freshnessToken?: string;
 }) {
-  const ctx = useHighlighterContext();
+  const ctx = useBriefcase();
   const [open, setOpen] = useState(false);
 
   if (!ctx || ctx.draftItems.length === 0) return null;

@@ -11,6 +11,7 @@ import {
   type DockGeom,
 } from "@/lib/highlighter/dock-geom";
 import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
+import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import { DockChart } from "./DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
@@ -71,6 +72,7 @@ export function AskAiDock({
   // one continuous conversation per report. When no provider is in the tree
   // (dock mounted standalone), fall back to a local thread so it never crashes.
   const ctx = useHighlighterContext();
+  const briefcase = useBriefcase();
   const [localThread, setLocalThread] = useState<ChatEntry[]>([]);
   const thread = ctx ? ctx.thread(reportId) : localThread;
   const archive = (entry: ChatEntry) =>
@@ -231,7 +233,7 @@ export function AskAiDock({
       });
       if (!res.ok) throw new Error("save failed");
       const { id } = (await res.json()) as { id: string };
-      ctx?.fileItem({
+      briefcase?.fileItem({
         id: crypto.randomUUID(),
         added_at: new Date().toISOString(),
         origin: "web",
