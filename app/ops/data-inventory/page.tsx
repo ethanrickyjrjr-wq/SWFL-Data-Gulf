@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useCallback } from "react";
 import {
   CADENCE_ORDER,
@@ -427,6 +428,19 @@ export default function DataInventoryPage() {
       <div className="mx-auto max-w-screen-2xl px-6 py-10">
         {/* Header */}
         <div className="mb-8 border-b border-white/10 pb-6">
+          <div className="mb-3 flex items-center gap-3">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-[#0a8078]"
+            >
+              <span>←</span>
+              <span>swfldatagulf.com</span>
+            </Link>
+            <span className="text-gray-700">/</span>
+            <span className="text-xs text-gray-500">ops</span>
+            <span className="text-gray-700">/</span>
+            <span className="text-xs text-gray-400">data-inventory</span>
+          </div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gray-500">
             <span className="text-[#0a8078]">SWFL Data Gulf</span>
             <span>·</span>
