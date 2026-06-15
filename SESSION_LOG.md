@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — feat(ops): /ops/data-inventory — ZIP grain + cadence inventory page
+
+- New page at `app/ops/data-inventory/page.tsx` (+ `_data.ts` catalog). All 48 pipelines from `ingest/cadence_registry.yaml` cataloged with cadence, lane, grain, ZIP status, table, cron schedule, and notes. Sections: Daily → Weekly → Monthly → Quarterly → Annual; within each section non-ZIP grain items appear first (sorted by priority).
+- Identifies 30+ datasets missing ZIP grain and what it would take to add each (G2 geocoding gaps, crosswalk needs, raw-column surface work). Per-section localStorage-persisted "Mark ZIP Grain Routing Done" action panel with notes textarea for Claude or operator to track progress.
+- Build green (`○ /ops/data-inventory`). `build-queue.md` updated `[x]`.
+
 ## 2026-06-14 (main) — feat(workflow): RULE 1.5 parallel-session isolation (experimental, revertible)
 
 - New `CLAUDE.md` RULE 1.5 + `scripts/worktree.mjs` (`new`/`land`/`cleanup`): a second concurrent session can work in a LOCAL self-deleting worktree (`../bp-<label>`, branch `wt/<label>` off `origin/main`) instead of colliding on the shared `main` checkout. Lands via `git push origin HEAD:main` — never pushed as a remote branch, never a PR — so the 2026-06-08 no-branch/no-PR decree stays intact. Also codifies `git add <explicit paths>` (never `-A`) to kill the staging sweep that put seller-stress work into `951db4f`.
