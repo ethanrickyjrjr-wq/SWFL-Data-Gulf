@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 // Force fixture mode BEFORE importing — env.mts reads process.env at module init.
 process.env["REFINERY_SOURCE"] = "fixture";
 
-const { stormHistorySource, parseDamageString, parseNoaaDate } =
+const { stormHistorySource, parseDamageString, parseNoaaDate, normalizeCounty, extractStormName } =
   await import("./storm-history-source.mts");
 
 test("parseDamageString handles K/M/B suffixes, plain numbers, and unparseable input", () => {
@@ -37,11 +37,7 @@ test("fixture mode returns one fragment per SWFL county + one corpus fragment", 
     (f) => (f.normalized as { kind: string }).kind === "storm-corpus-summary",
   );
   assert.equal(perCounty.length, 3, "expected one fragment per SWFL county");
-  assert.equal(
-    corpus.length,
-    1,
-    "expected exactly one corpus-summary fragment",
-  );
+  assert.equal(corpus.length, 1, "expected exactly one corpus-summary fragment");
 });
 
 test("per-county fragments cover LEE, COLLIER, CHARLOTTE with non-zero counts and numeric (not BigInt) fields", async () => {
@@ -101,4 +97,29 @@ test("citationMeta points at NOAA / data_lake._tier1_inventory in either mode", 
   assert.match(meta.source, /NOAA Storm Events/);
   assert.equal(typeof meta.verified, "string");
   assert.equal(typeof meta.expires, "string");
+});
+
+test("normalizeCounty maps zone names to canonical county", () => {
+  assert.equal(normalizeCounty("COASTAL LEE"), "LEE");
+  assert.equal(normalizeCounty("INLAND COLLIER COUNTY"), "COLLIER");
+  assert.equal(normalizeCounty("coastal charlotte"), "CHARLOTTE");
+  assert.equal(normalizeCounty("LEE"), "LEE"); // county row unchanged
+  assert.equal(normalizeCounty(null), null);
+  assert.equal(normalizeCounty("   "), null);
+});
+
+test("extractStormName pulls the proper name from NOAA narratives", () => {
+  assert.equal(
+    extractStormName("Hurricane Ian formed in the central Caribbean Sea on September 23", null),
+    "Ian",
+  );
+  // No "Hurricane <Name>" present -> falls back to the tropical-storm match.
+  assert.equal(
+    extractStormName(
+      "A tropical depression formed... upgraded to Tropical Storm Ian at 11 PM. Ian moved",
+      null,
+    ),
+    "Ian",
+  );
+  assert.equal(extractStormName(null, "Wind gusts of 100-110 mph were measured"), null);
 });

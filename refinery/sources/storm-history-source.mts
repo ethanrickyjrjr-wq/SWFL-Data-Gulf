@@ -45,12 +45,7 @@ const FIXTURE_PATH = path.resolve(
 );
 
 const SWFL_COUNTIES = ["LEE", "COLLIER", "CHARLOTTE"] as const;
-const MAJOR_EVENT_TYPES = new Set([
-  "Hurricane",
-  "Tornado",
-  "Flash Flood",
-  "Storm Surge/Tide",
-]);
+const MAJOR_EVENT_TYPES = new Set(["Hurricane", "Tornado", "Flash Flood", "Storm Surge/Tide"]);
 const EXTREME_WIND_MAGNITUDE_KT = 74; // hurricane-force minimum
 const MAJOR_STORM_DAMAGE_USD = 1_000_000;
 const BILLION_DOLLAR_USD = 1_000_000_000;
@@ -111,14 +106,7 @@ export function parseDamageString(raw: string | null): number | null {
   const base = parseFloat(match[1]);
   if (!Number.isFinite(base)) return null;
   const unit = match[2].toUpperCase();
-  const mult =
-    unit === "K"
-      ? 1_000
-      : unit === "M"
-        ? 1_000_000
-        : unit === "B"
-          ? 1_000_000_000
-          : 1;
+  const mult = unit === "K" ? 1_000 : unit === "M" ? 1_000_000 : unit === "B" ? 1_000_000_000 : 1;
   return base * mult;
 }
 
@@ -191,6 +179,43 @@ export function parseNoaaDate(raw: string | null): string | null {
   return null;
 }
 
+/**
+ * Map a NOAA CZ_NAME to its canonical SWFL county. Zone rows arrive as
+ * "COASTAL LEE" / "INLAND COLLIER COUNTY"; county rows as "LEE". Returns the
+ * bare uppercase county, or null when the string is empty.
+ */
+export function normalizeCounty(czName: string | null): string | null {
+  if (czName == null) return null;
+  const s = czName
+    .toUpperCase()
+    .trim()
+    .replace(/^(COASTAL|INLAND)\s+/, "")
+    .replace(/\s+COUNTY$/, "")
+    .trim();
+  return s === "" ? null : s;
+}
+
+const HURRICANE_NAME_RE = /\bHurricane\s+([A-Z][a-z]+)\b/;
+const TROPICAL_NAME_RE =
+  /\b(?:Hurricane|Tropical Storm|Tropical Depression|Subtropical Storm)\s+([A-Z][a-z]+)\b/;
+
+/**
+ * Extract a storm's proper name (e.g. "Ian") from NOAA narrative text. Prefers
+ * a "Hurricane <Name>" match over a generic tropical match so a row that first
+ * mentions the depression phase still resolves to the hurricane name. Returns
+ * null when no name is present.
+ */
+export function extractStormName(...narratives: (string | null)[]): string | null {
+  for (const re of [HURRICANE_NAME_RE, TROPICAL_NAME_RE]) {
+    for (const n of narratives) {
+      if (!n) continue;
+      const m = n.match(re);
+      if (m) return m[1];
+    }
+  }
+  return null;
+}
+
 async function queryStormRows(): Promise<StormRow[]> {
   const isFixture = env.source === "fixture";
   const instance = await DuckDBInstance.create(":memory:");
@@ -259,10 +284,7 @@ interface AggregateBundle {
   corpus: StormCorpusSummary;
 }
 
-export function aggregateStormRows(
-  rows: StormRow[],
-  now: Date = new Date(),
-): AggregateBundle {
+export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): AggregateBundle {
   const tenYearsAgo = now.getTime() - TEN_YEAR_MS;
 
   // Per-county counters.
@@ -316,8 +338,7 @@ export function aggregateStormRows(
     const eventType = row.event_type?.trim() ?? "";
     if (eventType !== "") {
       if (MAJOR_EVENT_TYPES.has(eventType)) {
-        majorEventTypeCounts[eventType] =
-          (majorEventTypeCounts[eventType] ?? 0) + 1;
+        majorEventTypeCounts[eventType] = (majorEventTypeCounts[eventType] ?? 0) + 1;
       }
     }
 
@@ -338,11 +359,7 @@ export function aggregateStormRows(
     bucket.total += 1;
 
     // Major storm: damage >= $1M AND major event type, full corpus.
-    if (
-      damage != null &&
-      damage >= MAJOR_STORM_DAMAGE_USD &&
-      MAJOR_EVENT_TYPES.has(eventType)
-    ) {
+    if (damage != null && damage >= MAJOR_STORM_DAMAGE_USD && MAJOR_EVENT_TYPES.has(eventType)) {
       bucket.majorAll += 1;
     }
 
@@ -351,10 +368,7 @@ export function aggregateStormRows(
       const ts = Date.parse(`${isoDate}T00:00:00Z`);
       if (Number.isFinite(ts) && ts >= tenYearsAgo) {
         if (damage != null && damage > 0) bucket.damage10yr += 1;
-        if (
-          row.magnitude != null &&
-          row.magnitude >= EXTREME_WIND_MAGNITUDE_KT
-        ) {
+        if (row.magnitude != null && row.magnitude >= EXTREME_WIND_MAGNITUDE_KT) {
           bucket.extremeWind10yr += 1;
         }
       }
@@ -399,10 +413,7 @@ export const stormHistorySource: SourceConnector = {
     const fragments: RawFragment[] = [];
     for (const agg of perCounty) {
       fragments.push({
-        fragment_id: fragmentId(
-          SOURCE_ID,
-          `per-county-${agg.county.toLowerCase()}`,
-        ),
+        fragment_id: fragmentId(SOURCE_ID, `per-county-${agg.county.toLowerCase()}`),
         source_id: SOURCE_ID,
         source_trust_tier: 1,
         fetched_at,
