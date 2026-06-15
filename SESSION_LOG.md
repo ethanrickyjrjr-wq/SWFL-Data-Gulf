@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-15 (main) — chore(repo): board cleanup — sync local main, push freshness plan docs, delete stray branch
+
+- **Sync:** local `main` was 4 behind origin with phantom "staged" files (CLAUDE.md, SESSION_LOG.md, build-queue.md, weekly-pulse plan, worktree.mjs) — all byte-identical to `origin/main` (prior session pushed them via detached-HEAD; local pointer lagged). Fast-forwarded `49d9c28 → 7a89e39`; phantoms cleared, nothing re-committed.
+- **Pushed (doc-only, zero build risk):** the 3 untracked plan/handoff docs — `2026-06-14-freshness-sonnet-handoff.md`, `2026-06-15-ops-data-inventory-handoff.md`, and the 12-file `2026-06-15-daily-freshness-system/` plan set. Explicit-path staging only.
+- **Deleted stray remote branch** `claude/swfl-data-freshness-pipeline-w6pyim` (tip `925e125`): its only unique commit was the weekly-pulse plan doc, already on `main` identically — restore if ever needed via `git push origin 925e125:refs/heads/<name>`. Board now: `main` only, no open PRs.
+- **Left untouched** (per "don't mess things up"): local `wip/lane-ab-preserve` — operator's Lane A/B recovery snapshot, not merged to main, local-only.
+
 ## 2026-06-15 (main) — feat(ops): /ops/data-inventory — ZIP grain + cadence inventory page
 
 - New page at `app/ops/data-inventory/page.tsx` (+ `_data.ts` catalog). All 48 pipelines from `ingest/cadence_registry.yaml` cataloged with cadence, lane, grain, ZIP status, table, cron schedule, and notes. Sections: Daily → Weekly → Monthly → Quarterly → Annual; within each section non-ZIP grain items appear first (sorted by priority).
