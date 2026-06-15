@@ -15,6 +15,8 @@ import requests
 
 from ingest.duckdb_pipelines.storm_history_swfl.constants import (
     BUCKET,
+    MIN_HURRICANE_ROWS,
+    MIN_TOTAL_ROWS,
     NOAA_BASE_URL,
     NOAA_URL_GLOB,
     PACK_ID,
@@ -24,7 +26,9 @@ from ingest.duckdb_pipelines.storm_history_swfl.constants import (
     VINTAGE,
     YEAR_RANGE_END,
     YEAR_RANGE_START,
+    swfl_filter_sql,
 )
+from ingest.lib.guards import assert_min_rows
 from ingest.lib.tier1_inventory import upsert_inventory_row
 
 
@@ -105,21 +109,28 @@ def run() -> None:
         SET s3_use_ssl=true;
     """)
 
-    counties_sql_list = ", ".join(f"'{c}'" for c in SWFL_COUNTIES_CZ)
     urls_sql_list = ", ".join(f"'{u}'" for u in urls)
     con.execute(f"""
-        COPY (
-            SELECT *
-            FROM read_csv_auto(
-                [{urls_sql_list}],
-                union_by_name=true,
-                ignore_errors=true,
-                null_padding=true
-            )
-            WHERE state = 'FLORIDA'
-              AND cz_name IN ({counties_sql_list})
-        ) TO '{PARQUET_TARGET}' (FORMAT PARQUET, COMPRESSION ZSTD);
+        CREATE TABLE staged AS
+        SELECT *
+        FROM read_csv_auto(
+            [{urls_sql_list}],
+            union_by_name=true,
+            ignore_errors=true,
+            null_padding=true
+        )
+        WHERE {swfl_filter_sql()};
     """)
+
+    total = con.execute("SELECT count(*) FROM staged").fetchone()[0]
+    hurricane = con.execute(
+        "SELECT count(*) FROM staged WHERE event_type IN ('Hurricane (Typhoon)', 'Tropical Storm')"
+    ).fetchone()[0]
+    print(f"  staged rows: {total:,} (hurricane/TS: {hurricane:,})")
+    assert_min_rows(total, MIN_TOTAL_ROWS, "storm_events_swfl total")
+    assert_min_rows(hurricane, MIN_HURRICANE_ROWS, "storm_events_swfl hurricane/TS rows")
+
+    con.execute(f"COPY staged TO '{PARQUET_TARGET}' (FORMAT PARQUET, COMPRESSION ZSTD);")
 
     # Get the written file's size for inventory record
     size_rows = con.execute(
