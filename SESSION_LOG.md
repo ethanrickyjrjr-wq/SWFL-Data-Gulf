@@ -2,7 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
-## 2026-06-15 (claude/root-cause-analysis-5wb9ji) — docs: ULTRA PLAN split into 3 root-cause briefs — plans only, no code
+## 2026-06-15 (main) — docs(R1): update Root 1 plan with code-verified checks + follow-ups
+
+- Rewrote `docs/superpowers/plans/2026-06-15-root-R1-unify-ai-project.md`: folded in 4 pre-execution checks (all verified against actual files — spread order fix, master-read injection pattern, instruction default confirmed, file-button placement). Added persistent "Summarize conversation to file" UX (step 3 + new step 4 summarize API path). Fixed mermaid diagram.
+- Added Follow-ups section (F-1 project-context awareness, F-2 cross-project AI suggestion post-file, F-3 smart-dedup summarize) — deferred until Root 1 verified in prod.
+- Also committed `docs/superpowers/plans/2026-06-15-site-scope-audit.md` (was staged by operator).
+- Next: build Root 1.
+
+## 2026-06-15 (claude/root-cause-analysis-5wb9wi) — docs: ULTRA PLAN split into 3 root-cause briefs — plans only, no code
 
 - From the MASTER PROBLEM INVENTORY (~47 problems → ~5 roots), operator picked ONE root tightly scoped + wanted the other two as standalone files to hand to two other Claudes. Wrote 3 plan docs under `docs/superpowers/plans/`:
   - `2026-06-15-root-R1-unify-ai-project.md` — **the implementable root.** Kill the `/api/welcome/chat` funnel premise on the in-app pill (add `mode:"analyst"` — public welcome landing UNCHANGED via default `mode:"welcome"`), ground analyst no-location path on the master read, give BOTH chat surfaces (`BriefcaseChat` + `AskAiDock`) the missing "File this answer" → `qa` ProjectItem, and wire the dead `ProjectDetail` "Build deliverable" button → `POST /api/projects/[id]/build` → `/p/[id]`. Operator-decided: ONE pill, dock preserved on `/r/*` (not a widget rebuild). Fixes BRF-1/5/6/8/9/10 + BTN-1.
