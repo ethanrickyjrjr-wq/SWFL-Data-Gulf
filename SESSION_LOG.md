@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat(email): email-hero wired DATA-DRIVEN — kills the fabricated digest mockup
+
+- **Operator-directed (chose "wire data-driven"):** `email-hero.html` was a STATIC mockup with hardcoded SWFL numbers ($412K, 62 days, 4,847, "Fort Myers Beach (33931) +14.2%") — the digest `DEFAULT_TEMPLATE`, so a live digest shipped INVENTED data (MOAT violation) and ignored real content. Now every figure is a token filled from the lake.
+- **New `scripts/email/hero-tokens.mts` (pure, tested):** `buildHeroTokens(digest)` → hero value/label/prose + 3 stats + signal from `county_metrics`/`top_line`/`top_story`/`city_voices`. **No-fabrication contract:** a null metric → em-dash "—" (never a number); grain-honest ("Southwest Florida", not "Lee County"); prose verbatim from master's `top_line`; QoQ delta lines + the static map REMOVED (DigestPayload carries no prior period / no per-send map — can't tokenize what we don't have).
+- **`email-hero.html` tokenized** (`{{HERO_VALUE}}`/`{{STAT*}}`/`{{SIGNAL_*}}` …); 13 neutral defaults added to `token-defaults.ts` so a tokenless hero render (report-digest fallback, scoped, plain) stays valid + sparse — `renderEmailTemplate` throws on any unfilled `{{}}`. Threaded optional `tokens?` through `scheduler.ts` → `run-schedules.mts` (`digestContent()` emits them on every digest path) → `renderRecurringHtml`.
+- **Verified:** `bun test lib/email scripts/email` **389/0**; tsc 0; eslint clean. LIVE smoke (prod `/api/b`): hero rendered `$400K` / `72 days` / `6.0 mo` / `95.2%` + a real $30.5M city-pulse signal, 0 unfilled tokens, every fabricated mockup literal gone. `email-hero` is NOT in `TEMPLATE_MANIFEST` (no /showcase coupling); only the dev `preview-style-gallery.mts` also renders it (neutral defaults, no throw).
+- **Push note (shared-main):** my commit sat atop the parallel session's 3 unpushed corridor-vacancy commits (`7ef12bd`/`94a4e78`/`c996044`, the open coherent-corridor-vacancy plan) + their uncommitted collier/Task-4 work. Dirty tree blocked safe-push's rebase; origin unmoved → FF `git push origin HEAD:main` carried my commit + their 3 (their pack work clears its own Gate 5). Their uncommitted files left untouched (explicit-path staging).
+
 ## 2026-06-16 (main) — feat(collier_permits): crawl4ai migration + GHA dry-run probe setup
 
 - Replaced Firecrawl stealth (listing HTML) + Spider residential (XLSX binary) with crawl4ai

@@ -87,8 +87,13 @@ export function reportSubject(model: GroundedReportModel): string {
 export interface RecurringRenderDeps {
   /** The Task-2 spine: `renderGroundedReport(model, {skin:"email", brand:null})`. */
   renderGrounded: (model: GroundedReportModel) => Promise<string>;
-  /** The plain template lane: `renderEmailTemplate(slug, undefined, {body, chart})`. */
-  renderTemplate: (slug: TemplateSlug, body: string, chart?: string) => Promise<string>;
+  /** The plain template lane: `renderEmailTemplate(slug, tokens, {body, chart})`. */
+  renderTemplate: (
+    slug: TemplateSlug,
+    body: string,
+    chart?: string,
+    tokens?: Record<string, string | number>,
+  ) => Promise<string>;
   /** Slug to use when a "report" row fell back (the report shell has no body slot). */
   defaultSlug: TemplateSlug;
 }
@@ -98,13 +103,20 @@ export interface RecurringRenderDeps {
  * template lane — EXCEPT a `"report"` slug WITHOUT a model means the report fell back
  * to the digest body, and the report shell has no `[ BODY TEXT ]` slot (Phase 1 removed
  * it), so rendering through it would emit an empty masthead+footer. Use `defaultSlug`
- * instead. This is the slot-break guard Task 3 exists for.
+ * instead. This is the slot-break guard Task 3 exists for. `tokens` (the data-driven
+ * digest-hero values) flow to the plain template lane unchanged.
  */
 export async function renderRecurringHtml(
-  args: { slug: TemplateSlug; body: string; chart?: string; model?: GroundedReportModel | null },
+  args: {
+    slug: TemplateSlug;
+    body: string;
+    chart?: string;
+    model?: GroundedReportModel | null;
+    tokens?: Record<string, string | number>;
+  },
   deps: RecurringRenderDeps,
 ): Promise<string> {
   if (args.model) return deps.renderGrounded(args.model);
   const slug = args.slug === "report" ? deps.defaultSlug : args.slug;
-  return deps.renderTemplate(slug, args.body, args.chart);
+  return deps.renderTemplate(slug, args.body, args.chart, args.tokens);
 }

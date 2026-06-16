@@ -134,20 +134,28 @@ export interface ProcessDeps {
    * instead of the (removed) plain `[ BODY TEXT ]` slot. Absent `model` = the
    * unchanged plain/digest path.
    */
-  buildContent: (
-    row: ScheduleRow,
-  ) => Promise<{ subject: string; body: string; chart?: string; model?: GroundedReportModel }>;
+  buildContent: (row: ScheduleRow) => Promise<{
+    subject: string;
+    body: string;
+    chart?: string;
+    model?: GroundedReportModel;
+    /** Single-value template tokens (the data-driven digest hero fills these from
+     *  the lake; absent → the template's neutral defaults). */
+    tokens?: Record<string, string | number>;
+  }>;
 
   /**
    * Render the template HTML (Unit's template lane). `model`, when present, is the
    * grounded report assembled in `buildContent` — the runner routes it through
-   * `renderGroundedReport`; absent → the plain template render (unchanged).
+   * `renderGroundedReport`; absent → the plain template render. `tokens`, when
+   * present, fill the chosen template's single-value placeholders (the digest hero).
    */
   renderHtml: (
     row: ScheduleRow,
     body: string,
     chart?: string,
     model?: GroundedReportModel,
+    tokens?: Record<string, string | number>,
   ) => Promise<string>;
 
   /** POST the broadcast (Unit B). Only called on a real send. */
@@ -328,9 +336,10 @@ export async function processSchedule(
     const effectiveSender = reply ? { ...sender, replyTo: reply.address } : sender;
 
     // 4. CONTENT + RENDER + token injection. `model` (Task 3) is the grounded report
-    //    assembled for a "report" schedule; the core just threads it to renderHtml.
-    const { subject, body, chart, model } = await deps.buildContent(row);
-    const rendered = await deps.renderHtml(row, body, chart, model);
+    //    assembled for a "report" schedule; `tokens` are the data-driven digest-hero
+    //    values. The core just threads both to renderHtml.
+    const { subject, body, chart, model, tokens } = await deps.buildContent(row);
+    const rendered = await deps.renderHtml(row, body, chart, model, tokens);
     const html = ensureUnsubscribeToken(rendered);
 
     // 5. PAYLOAD.

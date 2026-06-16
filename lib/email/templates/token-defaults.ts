@@ -24,7 +24,25 @@ export type TokenKey =
   | "WEBSITE_URL"
   | "CONTACT_EMAIL" // reply-to / contact address shown in footer
   | "CONTACT_PHONE" // phone number shown in footer
-  | "DISCLAIMER";
+  | "DISCLAIMER"
+  // ── email-hero CONTENT tokens (data-driven digest; filled by buildHeroTokens) ──
+  // Neutral fallbacks below so a hero render WITHOUT digest data (report-digest
+  // fallback, scoped, or a plain hero send) stays valid + sparse — renderEmailTemplate
+  // throws on any unfilled {{TOKEN}}, so every one must have a default. "—" = not held
+  // this run (never an invented number).
+  | "HERO_KICKER"
+  | "HERO_VALUE"
+  | "HERO_LABEL"
+  | "HERO_PROSE"
+  | "STAT1_VALUE"
+  | "STAT1_LABEL"
+  | "STAT2_VALUE"
+  | "STAT2_LABEL"
+  | "STAT3_VALUE"
+  | "STAT3_LABEL"
+  | "SIGNAL_KICKER"
+  | "SIGNAL_TITLE"
+  | "SIGNAL_BODY";
 
 // PRIMARY/ACCENT/LOGO_URL derive from SWFL_THEME — never hardcoded.
 export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
@@ -52,6 +70,20 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   CONTACT_PHONE: "(239) 555-5555",
   DISCLAIMER:
     "You are receiving this email because you subscribed to SWFL Data Gulf. To unsubscribe, use the link below.",
+  // email-hero content fallbacks — "—" never reads as an invented figure.
+  HERO_KICKER: "Market Spotlight",
+  HERO_VALUE: "—",
+  HERO_LABEL: "Southwest Florida",
+  HERO_PROSE: "Southwest Florida market intelligence.",
+  STAT1_VALUE: "—",
+  STAT1_LABEL: "Median DOM",
+  STAT2_VALUE: "—",
+  STAT2_LABEL: "Months of Supply",
+  STAT3_VALUE: "—",
+  STAT3_LABEL: "Sale / List Ratio",
+  SIGNAL_KICKER: "Signal to Watch",
+  SIGNAL_TITLE: "This week in Southwest Florida",
+  SIGNAL_BODY: "From this week's Southwest Florida city pulse.",
 };
 
 export type TemplateTokens = Partial<Record<TokenKey, string>>;

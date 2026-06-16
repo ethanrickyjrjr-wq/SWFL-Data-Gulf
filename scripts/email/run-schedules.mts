@@ -50,6 +50,7 @@ import { renderGroundedReport, type GroundedReportModel } from "@/lib/email/grou
 import { assembleActivationReport } from "@/lib/email/activation/snapshot";
 import { fetchDigestData } from "./fetch-digest-data.mts";
 import { buildSubjectLine } from "./build-digest.mts";
+import { buildHeroTokens } from "./hero-tokens.mts";
 
 const DRY_RUN = process.env.DRY_RUN === "true";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
@@ -96,6 +97,25 @@ function buildBody(digest: Awaited<ReturnType<typeof fetchDigestData>>): string 
     for (const v of voices) lines.push(`• ${v.city}: ${v.title}`);
   }
   return lines.join("\n");
+}
+
+/**
+ * The whole-region digest content: subject + plain body + the DATA-DRIVEN hero
+ * tokens (`buildHeroTokens`) that fill `email-hero.html` from the lake — never the
+ * old hardcoded mockup. The single source for every "fall back to the global
+ * digest" path (global, unassemblable report, out-of-footprint scope).
+ */
+async function digestContent(): Promise<{
+  subject: string;
+  body: string;
+  tokens: Record<string, string>;
+}> {
+  const digest = await getDigest();
+  return {
+    subject: buildSubjectLine(digest, []),
+    body: buildBody(digest),
+    tokens: buildHeroTokens(digest),
+  };
 }
 
 /** Validate the row's template_id against the registry; fall back for v1. */
@@ -270,14 +290,12 @@ async function main(): Promise<void> {
       if (resolveTemplateSlug(row.template_id) === "report") {
         const model = await getReportModel(row);
         if (model) return { subject: reportSubject(model), body: "", model };
-        const digest = await getDigest();
-        return { subject: buildSubjectLine(digest, []), body: buildBody(digest) };
+        return digestContent();
       }
       // Global path — UNCHANGED (regression contract). scope_kind==NULL &&
       // topic==NULL is today's whole-region digest, byte-for-byte as before.
       if (row.scope_kind == null && row.topic == null) {
-        const digest = await getDigest();
-        return { subject: buildSubjectLine(digest, []), body: buildBody(digest) };
+        return digestContent();
       }
       // Scoped path — in-run cache keyed by the canonical scope (multiple tenants
       // on the same scope reuse one assembly, mirroring getDigest()).
@@ -290,8 +308,7 @@ async function main(): Promise<void> {
       if (!content) {
         // Unresolvable / out-of-footprint scope → fall back to the global digest,
         // never invent below grain (the no-invention floor; logged in assembly).
-        const digest = await getDigest();
-        return { subject: buildSubjectLine(digest, []), body: buildBody(digest) };
+        return digestContent();
       }
       return renderScopedBody(content);
     },
@@ -301,17 +318,19 @@ async function main(): Promise<void> {
       body: string,
       chart?: string,
       model?: GroundedReportModel,
+      tokens?: Record<string, string | number>,
     ): Promise<string> {
       // Route via the tested router: a grounded model → the spine; a "report" row
       // that fell back (no model) → the default template, never the bodyless report
-      // shell; every other template → the unchanged plain render. Recurring rows
+      // shell; every other template → the unchanged plain render. `tokens` (the
+      // data-driven digest-hero values) flow into the plain render. Recurring rows
       // carry no white-label brand → the SWFL house brand (brand:null).
       return renderRecurringHtml(
-        { slug: resolveTemplateSlug(row.template_id), body, chart, model },
+        { slug: resolveTemplateSlug(row.template_id), body, chart, model, tokens },
         {
           renderGrounded: (m) => renderGroundedReport(m, { skin: "email", brand: null }),
-          renderTemplate: (slug, b, c) =>
-            renderEmailTemplate(slug, undefined, { body: b, ...(c ? { chart: c } : {}) }),
+          renderTemplate: (slug, b, c, tok) =>
+            renderEmailTemplate(slug, tok, { body: b, ...(c ? { chart: c } : {}) }),
           defaultSlug: DEFAULT_TEMPLATE,
         },
       );
