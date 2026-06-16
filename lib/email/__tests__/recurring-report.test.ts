@@ -7,6 +7,7 @@ import type { GroundedReportModel } from "../grounded-report.ts";
 import { renderGroundedReport, assembledReportToModel } from "../grounded-report.ts";
 import { renderEmailTemplate } from "../templates/render-template.ts";
 import type { TemplateSlug } from "../templates/template-registry.ts";
+import type { BrandTheme } from "@/lib/deliverable/brand-theme";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -243,6 +244,85 @@ describe("renderRecurringHtml", () => {
 });
 
 // ---------------------------------------------------------------------------
+// White-label brand — a recurring send renders in the schedule owner's brand
+// (colors + logo) when one is on file; the SWFL house brand otherwise.
+// ---------------------------------------------------------------------------
+
+describe("renderRecurringHtml — white-label brand", () => {
+  const BRAND = { primary: "#111111", accent: "#222222", logoUrl: "https://x/logo.png" };
+
+  test("forwards the brand to the grounded renderer (report path)", async () => {
+    let seenBrand: unknown = "unset";
+    await renderRecurringHtml(
+      {
+        slug: "report",
+        body: "",
+        model: { zip: "33904" } as unknown as GroundedReportModel,
+        brand: BRAND,
+      },
+      {
+        renderGrounded: async (_m, brand) => {
+          seenBrand = brand;
+          return "<g/>";
+        },
+        renderTemplate: async () => "<t/>",
+        defaultSlug: "hero",
+      },
+    );
+    assert.deepEqual(seenBrand, BRAND, "the owner's brand reaches the grounded renderer");
+  });
+
+  test("merges brand tokens (PRIMARY/ACCENT/LOGO_URL) into the plain template tokens", async () => {
+    let seenTokens: Record<string, string | number> | undefined;
+    await renderRecurringHtml(
+      { slug: "hero", body: "b", tokens: { HERO_VALUE: "$400K" }, brand: BRAND },
+      {
+        renderGrounded: async () => "<g/>",
+        renderTemplate: async (_s, _b, _c, tok) => {
+          seenTokens = tok;
+          return "<t/>";
+        },
+        defaultSlug: "hero",
+      },
+    );
+    assert.equal(seenTokens?.HERO_VALUE, "$400K", "content tokens preserved");
+    assert.equal(seenTokens?.PRIMARY, "#111111", "brand primary merged");
+    assert.equal(seenTokens?.ACCENT, "#222222", "brand accent merged");
+    assert.equal(seenTokens?.LOGO_URL, "https://x/logo.png", "brand logo merged");
+  });
+
+  test("no brand → plain tokens unchanged; report path gets null (house brand)", async () => {
+    let plainTokens: Record<string, string | number> | undefined;
+    await renderRecurringHtml(
+      { slug: "hero", body: "b", tokens: { HERO_VALUE: "$400K" } },
+      {
+        renderGrounded: async () => "<g/>",
+        renderTemplate: async (_s, _b, _c, tok) => {
+          plainTokens = tok;
+          return "<t/>";
+        },
+        defaultSlug: "hero",
+      },
+    );
+    assert.deepEqual(plainTokens, { HERO_VALUE: "$400K" }, "no brand → no brand tokens added");
+
+    let seenBrand: unknown = "unset";
+    await renderRecurringHtml(
+      { slug: "report", body: "", model: { zip: "1" } as unknown as GroundedReportModel },
+      {
+        renderGrounded: async (_m, brand) => {
+          seenBrand = brand;
+          return "<g/>";
+        },
+        renderTemplate: async () => "<t/>",
+        defaultSlug: "hero",
+      },
+    );
+    assert.equal(seenBrand, null, "no brand → grounded renderer gets null (house brand)");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // REAL-RENDER byte-identity across the additive `model?` seam + the Phase-1
 // slot-break regression lock. These use the ACTUAL renderEmailTemplate /
 // renderGroundedReport (no mocks) so "byte-identical" is proven, not asserted.
@@ -251,10 +331,14 @@ describe("renderRecurringHtml", () => {
 describe("renderRecurringHtml — real-render byte-identity + slot-break regression lock", () => {
   // The real seam the runner binds (run-schedules.mts renderHtml dep).
   const realDeps = {
-    renderGrounded: (m: GroundedReportModel) =>
-      renderGroundedReport(m, { skin: "email", brand: null }),
-    renderTemplate: (slug: TemplateSlug, body: string, chart?: string) =>
-      renderEmailTemplate(slug, undefined, { body, ...(chart ? { chart } : {}) }),
+    renderGrounded: (m: GroundedReportModel, brand: BrandTheme | null) =>
+      renderGroundedReport(m, { skin: "email", brand }),
+    renderTemplate: (
+      slug: TemplateSlug,
+      body: string,
+      chart?: string,
+      tokens?: Record<string, string | number>,
+    ) => renderEmailTemplate(slug, tokens, { body, ...(chart ? { chart } : {}) }),
     defaultSlug: "hero" as const,
   };
 

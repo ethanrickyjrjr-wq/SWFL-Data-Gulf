@@ -48,6 +48,8 @@ import {
 import { buildReportModel, reportSubject, renderRecurringHtml } from "@/lib/email/recurring-report";
 import { renderGroundedReport, type GroundedReportModel } from "@/lib/email/grounded-report";
 import { assembleActivationReport } from "@/lib/email/activation/snapshot";
+import { resolveUserBrand } from "@/lib/email/templates/resolve-brand";
+import type { BrandTheme } from "@/lib/deliverable/brand-theme";
 import { fetchDigestData } from "./fetch-digest-data.mts";
 import { buildSubjectLine } from "./build-digest.mts";
 import { buildHeroTokens } from "./hero-tokens.mts";
@@ -254,6 +256,22 @@ async function main(): Promise<void> {
     return model;
   }
 
+  // ── white-label brand (the schedule OWNER's colors + logo) ──
+  // A recurring send renders in the owner's brand when one is on file (project →
+  // user-account default), else null → the SWFL house brand. Cached per
+  // user+project for the run (a brand lookup is two SELECTs; tenants repeat).
+  // `null` (no brand on file) is cached too, so we don't re-query every fire.
+  const brandCache = new Map<string, BrandTheme | null>();
+  async function getBrand(row: ScheduleRow): Promise<BrandTheme | null> {
+    const key = `${row.user_id}|${row.project_id ?? ""}`;
+    let brand = brandCache.get(key);
+    if (brand === undefined) {
+      brand = await resolveUserBrand(db, row.user_id, row.project_id ?? undefined);
+      brandCache.set(key, brand);
+    }
+    return brand;
+  }
+
   const deps: ProcessDeps = {
     dryRun: DRY_RUN,
     platform: PLATFORM,
@@ -323,12 +341,13 @@ async function main(): Promise<void> {
       // Route via the tested router: a grounded model → the spine; a "report" row
       // that fell back (no model) → the default template, never the bodyless report
       // shell; every other template → the unchanged plain render. `tokens` (the
-      // data-driven digest-hero values) flow into the plain render. Recurring rows
-      // carry no white-label brand → the SWFL house brand (brand:null).
+      // data-driven digest-hero values) flow into the plain render. `brand` = the
+      // schedule owner's white-label theme (colors + logo), or null → SWFL house brand.
+      const brand = await getBrand(row);
       return renderRecurringHtml(
-        { slug: resolveTemplateSlug(row.template_id), body, chart, model, tokens },
+        { slug: resolveTemplateSlug(row.template_id), body, chart, model, tokens, brand },
         {
-          renderGrounded: (m) => renderGroundedReport(m, { skin: "email", brand: null }),
+          renderGrounded: (m, b) => renderGroundedReport(m, { skin: "email", brand: b }),
           renderTemplate: (slug, b, c, tok) =>
             renderEmailTemplate(slug, tok, { body: b, ...(c ? { chart: c } : {}) }),
           defaultSlug: DEFAULT_TEMPLATE,

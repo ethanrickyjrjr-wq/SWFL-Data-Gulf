@@ -26,6 +26,8 @@ import { assembledReportToModel } from "./grounded-report";
 import type { AssembledReport } from "./activation/snapshot";
 import type { ActivationScope } from "./activation/types";
 import type { TemplateSlug } from "./templates/template-registry";
+import { brandThemeToTokens } from "./templates/render-template";
+import type { BrandTheme } from "@/lib/deliverable/brand-theme";
 
 /** I/O seam for `buildReportModel` — the runner binds `assembleActivationReport`. */
 export interface ReportContentDeps {
@@ -85,8 +87,8 @@ export function reportSubject(model: GroundedReportModel): string {
 
 /** Render seam for `renderRecurringHtml` — the runner binds the spine + template lane. */
 export interface RecurringRenderDeps {
-  /** The Task-2 spine: `renderGroundedReport(model, {skin:"email", brand:null})`. */
-  renderGrounded: (model: GroundedReportModel) => Promise<string>;
+  /** The Task-2 spine: `renderGroundedReport(model, {skin:"email", brand})`. */
+  renderGrounded: (model: GroundedReportModel, brand: BrandTheme | null) => Promise<string>;
   /** The plain template lane: `renderEmailTemplate(slug, tokens, {body, chart})`. */
   renderTemplate: (
     slug: TemplateSlug,
@@ -105,6 +107,11 @@ export interface RecurringRenderDeps {
  * it), so rendering through it would emit an empty masthead+footer. Use `defaultSlug`
  * instead. This is the slot-break guard Task 3 exists for. `tokens` (the data-driven
  * digest-hero values) flow to the plain template lane unchanged.
+ *
+ * `brand` (the schedule owner's white-label theme, or null for the SWFL house brand)
+ * is applied uniformly: the grounded renderer takes it directly; the plain lane gets
+ * its `PRIMARY`/`ACCENT`/`LOGO_URL` tokens merged OVER the content tokens (so brand
+ * colors + logo win, while content/semantic defaults remain).
  */
 export async function renderRecurringHtml(
   args: {
@@ -113,10 +120,13 @@ export async function renderRecurringHtml(
     chart?: string;
     model?: GroundedReportModel | null;
     tokens?: Record<string, string | number>;
+    brand?: BrandTheme | null;
   },
   deps: RecurringRenderDeps,
 ): Promise<string> {
-  if (args.model) return deps.renderGrounded(args.model);
+  const brand = args.brand ?? null;
+  if (args.model) return deps.renderGrounded(args.model, brand);
   const slug = args.slug === "report" ? deps.defaultSlug : args.slug;
-  return deps.renderTemplate(slug, args.body, args.chart, args.tokens);
+  const tokens = brand ? { ...args.tokens, ...brandThemeToTokens(brand) } : args.tokens;
+  return deps.renderTemplate(slug, args.body, args.chart, tokens);
 }

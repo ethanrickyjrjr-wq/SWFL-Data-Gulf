@@ -2,7 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
-## 2026-06-16 (main) — feat: coherent per-corridor vacancy (Tasks 1/2/3b) — chart+prose draw ONE source
+## 2026-06-16 (main) — feat(email): recurring/digest sends adopt the schedule owner's white-label brand — PUSH PENDING
+
+- **Why:** the recurring lane rendered the SWFL house brand only. Now a recurring send (digest hero OR grounded report) renders in the SCHEDULE OWNER's colors + logo when one is on file — the white-label product (a realtor sends SWFL market intel under their own brand).
+- **`renderRecurringHtml` (lib/email/recurring-report.ts):** added `brand?: BrandTheme | null`. Report path → forwards brand to the grounded renderer; plain/digest path → merges `brandThemeToTokens(brand)` (PRIMARY/ACCENT/LOGO_URL) OVER the content tokens (brand colors+logo win; semantic defaults stay). `renderGrounded` dep is now `(model, brand)`.
+- **`run-schedules.mts`:** new per-run `brandCache` + `getBrand(row)` → `resolveUserBrand(db, row.user_id, row.project_id)` (project brand → user-account default → null=house; null cached too). `renderHtml` resolves brand and threads it. **No migration** — reads existing `projects.branding` / `user_brand_profiles`. No scheduler.ts core change (brand is a render-side concern resolved from the row).
+- **Verified:** `bun test lib/email scripts/email` **392/0** (+3 brand tests: forwards to grounded, merges plain tokens, null→house); tsc 0; eslint clean. No-DB render smoke (real prod digest): house → SWFL navy `#0f1d24`; ACME brand → purple/amber + ACME logo, navy GONE, real `$400K` data intact.
+- **PUSH PENDING** — awaiting operator confirm (no-autonomous-push). Files: `recurring-report.ts` + its test, `run-schedules.mts`, this log.
 
 - **Plan `docs/superpowers/plans/2026-06-16-coherent-corridor-vacancy-chart.md`. Three commits ALREADY ON ORIGIN** (`7ef12bd`/`94a4e78`/`c996044`) — a concurrent email-hero session FF-pushed them (its own push note below); they were not reviewed pre-push (shared-main hazard), but pack Gate 5 + all touched suites are green (cre-swfl 27/0, vacancy-chart 11/0, route 18/0, catalog 4/0).
 - **Task 1** (`7ef12bd`): deterministic `corridor_vacancy` detail_table on cre-swfl (mirrors `corridor_seasonality`, never synth). **Step-0 DB finding settled the open question → operator picked Option 1:** all 27 verified corridors have vacancy, but only **Lehigh** carries a `vacancy_rate_source_url` (Cushman/MarketBeat); **FMB (2.90%) is UNSOURCED** — so guardrail-2's "FMB+Lehigh" is wrong. `coverage_note` rides **Lehigh-only** (data-driven `marketbeat` URL signature); FMB gets none (no fabricated provenance).
