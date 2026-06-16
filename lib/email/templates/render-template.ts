@@ -8,6 +8,8 @@ import type { TemplateSlug } from "./template-registry";
 export interface TemplateData {
   chart?: string; // fills [ CHART ] placeholder if present in shell
   body?: string; // fills [ BODY TEXT ] placeholder if present in shell
+  delta?: string; // fills [ DELTA ] placeholder; ALWAYS replaced (empty when absent)
+  repeats?: Record<string, Array<Record<string, string | number>>>; // per-block row data
 }
 
 // NULL = no brand on file. Caller must prompt user — never fall back to SWFL colors.
@@ -28,10 +30,12 @@ export async function renderEmailTemplate(
   const resolvedSlug = EMAIL_TEMPLATES[slug];
   const merged = { ...SWFL_TOKEN_DEFAULTS, ...tokens };
 
-  let html = await renderHtmlTemplate(resolvedSlug, merged);
+  let html = await renderHtmlTemplate(resolvedSlug, merged, data?.repeats);
 
   if (data?.chart) html = html.replace(/\[\s*CHART\s*\]/g, data.chart);
   if (data?.body) html = html.replace(/\[\s*BODY TEXT\s*\]/g, data.body);
+  // DELTA is always replaced — an absent delta must not leave a literal `[ DELTA ]`.
+  html = html.replace(/\[\s*DELTA\s*\]/g, data?.delta ?? "");
 
   // Assert no uppercase tokens remain — any still-unfilled {{KEY}} is a bug.
   // Triple-brace {{{RESEND_UNSUBSCRIBE_URL}}} is NOT checked here; that guard
