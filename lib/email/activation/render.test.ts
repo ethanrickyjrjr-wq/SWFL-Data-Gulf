@@ -11,9 +11,30 @@ function report(over: Partial<AssembledReport> = {}): AssembledReport {
     countyName: "Lee",
     freshness_token: "SWFL-7421-v6-20260613",
     metrics: [
-      { key: "housing.median_sale_price", label: "Median sale price", value: 412000, unit: "", direction: "neutral", display: "$412,000" },
-      { key: "housing.median_dom", label: "Days on market", value: 45, unit: " days", direction: "lower_is_better", display: "45" },
-      { key: "env.flood_aal_usd", label: "Flood avg annual loss", value: 30074, unit: "", direction: "lower_is_better", display: "$30,074 / yr" },
+      {
+        key: "housing.median_sale_price",
+        label: "Median sale price",
+        value: 412000,
+        unit: "",
+        direction: "neutral",
+        display: "$412,000",
+      },
+      {
+        key: "housing.median_dom",
+        label: "Days on market",
+        value: 45,
+        unit: " days",
+        direction: "lower_is_better",
+        display: "45",
+      },
+      {
+        key: "env.flood_aal_usd",
+        label: "Flood avg annual loss",
+        value: 30074,
+        unit: "",
+        direction: "lower_is_better",
+        display: "$30,074 / yr",
+      },
     ],
     lines: [
       {
@@ -27,7 +48,13 @@ function report(over: Partial<AssembledReport> = {}): AssembledReport {
       },
     ],
     coverage_caveats: [],
-    snapshot: { zip: "33931", freshness_token: "SWFL-7421-v6-20260613", captured_at: "2026-06-13T00:00:00.000Z", metrics: [], lines: [] },
+    snapshot: {
+      zip: "33931",
+      freshness_token: "SWFL-7421-v6-20260613",
+      captured_at: "2026-06-13T00:00:00.000Z",
+      metrics: [],
+      lines: [],
+    },
     ...over,
   };
 }
@@ -67,7 +94,16 @@ describe("reportToEmailHtml", () => {
       freshness_token_prev: "SWFL-7421-v5-20260610",
       freshness_token_current: "SWFL-7421-v6-20260613",
       metric_changes: [
-        { key: "housing.median_sale_price", label: "Median sale price", from: 400000, to: 412000, delta: 12000, direction: "up", favorable: null, unit: "" },
+        {
+          key: "housing.median_sale_price",
+          label: "Median sale price",
+          from: 400000,
+          to: 412000,
+          delta: 12000,
+          direction: "up",
+          favorable: null,
+          unit: "",
+        },
       ],
       signal_changes: [{ brain_id: "city-pulse-swfl", label: "Local city pulse" }],
     };
@@ -94,7 +130,21 @@ describe("reportToEmailHtml", () => {
   });
 
   it("points the CTA at the gate", async () => {
-    const html = await reportToEmailHtml(report(), { ctaUrl: "https://www.swfldatagulf.com/pricing" });
+    const html = await reportToEmailHtml(report(), {
+      ctaUrl: "https://www.swfldatagulf.com/pricing",
+    });
     expect(html).toContain('href="https://www.swfldatagulf.com/pricing"');
+  });
+
+  it("contains none of the mockup's fabricated literals (no-fabrication tripwire)", async () => {
+    const html = await reportToEmailHtml(report());
+    for (const literal of [
+      "Median Price by ZIP",
+      "33971 · Lehigh",
+      "Q3 Outlook",
+      "Cautious optimism heading into summer",
+    ]) {
+      expect(html).not.toContain(literal);
+    }
   });
 });
