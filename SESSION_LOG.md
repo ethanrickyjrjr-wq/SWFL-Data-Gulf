@@ -2,6 +2,16 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat(lee_permits): crawl4ai Accela port BUILT + locally verified (lake write HELD for review)
+
+- Ported `lee_permits` off Firecrawl (gone) to **crawl4ai 0.8.9 + UndetectedAdapter**, per plan `docs/superpowers/plans/2026-06-16-crawl4ai-accela-port.md`. 6 commits `0942c71`→`81d8250` (clean, explicit-path staged; NOT pushed):
+  - `ingest/lib/crawl4ai_client.py` — generic `Crawl4aiSession` (one reused browser, session_id chaining) + `fetch_many` (arun_many parallel). Fixture `raw://` smoke green.
+  - `ingest/pipelines/lee_permits/scraper.py` — `fetch_permit_pages` now a `Crawl4aiSession` loop (page 1 date-fill+search via `build_date_search_js`/`GRID_OR_TERMINAL_WAIT`; pages 2..N pager-click + defined-marker first-row-id wait `page_changed_wait`). `enrich_rows_with_details` → `fetch_many` (concurrency=5), **absolutizes root-relative `cap_detail_url`**. Restored the spec's silent-wrong-date guard (`_committed_date` reads the form's echoed value; confirmed mismatch aborts). Last Firecrawl refs removed from this module.
+  - `pipeline.py` `scraped_via`→`crawl4ai`; `requirements.txt` pins `crawl4ai>=0.8.9` (GHA needs `playwright install chromium` + non-datacenter IP — deferred). Installed crawl4ai into repo system python (bumped cryptography 48→49, ingest stack still imports).
+- **Verified live (home IP):** 05/01-06/16 + 05/16-06/16 dry-runs → pagecount=11, all 11 pages captured, 91 rows; date guard passed (committed dates exact, no false raise); enrich 5/5 (real permit types + an $8k valuation). 23 unit tests + 16 parser tests green. Diagnostic: dates commit exactly across 3 ranges; recent overlapping windows return an identical capped set (Accela native search semantics, faithfully reproduced — NOT a port bug).
+- **HELD for operator (Task 7 STOP):** the full lake-writing run is NOT done — (1) RULE 1 diff-review before pushing ingest changes; (2) a **pre-existing `_extract_zip` bug** stores the 5-digit house number as `zip_code` (e.g. `12116` for a `...33966` address) → would write invented-grain ZIPs to the lake (MOAT violation). Needs a decision before any lake write. Pending ledger opens on approval: `crawl4ai_accela_gha_ip`, a new zip-bug check.
+- Note: pre-existing failing tests `test_arcgis_paginator` + 4 `test_pipeline_has_workflow` are unrelated (untouched files). Parallel session active on this main (interleaved commits; untracked `deliverable-convergence/` plan dir — left alone).
+
 ## 2026-06-16 (main) — fix(welcome-chat): analyst stops claiming charts it can't render (B) + per-corridor vacancy plan + defect logged
 
 - **Trigger:** operator pasted a maddening live BriefcaseChat transcript — user asked for a CRE-vacancy chart of 4 submarkets; the analyst refused ("need time series", "don't have the submarkets") and looped "want me to pull it?" 4×.
