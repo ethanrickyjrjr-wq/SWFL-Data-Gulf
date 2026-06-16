@@ -22,7 +22,7 @@
 - **Create** `lib/templates/render-html-template.test.ts` — unit tests for `expandRepeats` + no-repeats regression.
 - **Modify** `lib/email/activation/render.test.ts` — add the no-fabrication tripwire test.
 
-Per spec §6: **do not edit `_shared.ts`** (stale comment is non-load-bearing) and **change no color value** (the test fix is by-reference / navy-agnostic).
+Per spec §6: **do not edit `_shared.ts`** and **change no color value** (the test fix is by-reference / navy-agnostic).
 
 ---
 
