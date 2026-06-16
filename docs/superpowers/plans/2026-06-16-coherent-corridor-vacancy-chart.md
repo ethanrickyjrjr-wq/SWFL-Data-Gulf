@@ -2,6 +2,20 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## EXECUTION STATUS — 2026-06-16 (this overrides the stale `- [ ]` boxes below)
+
+**SHIPPED (committed, held for operator push review):**
+
+- **Task 1 ✅** `7ef12bd` — deterministic `corridor_vacancy` detail_table on `cre-swfl`. **Step 0 data finding settled the open question (Option 1, operator-approved):** all 27 verified corridors have a non-null `vacancy_rate_pct`; only **Lehigh Acres** (Joel + Lee Blvd, 0.20%) carries a `vacancy_rate_source_url` (the Cushman/MarketBeat survey). **Fort Myers Beach (2.90%) is UNSOURCED** like 24 others — so guardrail 2's "FMB+Lehigh" pairing is contradicted by the data. The at-grain `coverage_note` rides **Lehigh-only**, data-driven by the `marketbeat` URL signature; FMB gets none (no fabricated provenance). `coverage_note` is a cell (no column) — spec-validator validates id/title/grain/columns/rows/source only, never cells, so it's render-safe.
+- **Task 2 ✅** `94a4e78` — `buildVacancyChart` reads cre-swfl's `corridor_vacancy` via `fetchBrain` (off the fixture's fabricated `asOf 2026-06-30`); real `asOf` from the table's `fetched_at`. Logic extracted to a pure `vacancyChartSpecFromTable()` and unit-tested directly (bun's vitest shim lacks `vi.mocked`).
+- **Task 3b ✅** `c996044` — `buildAnalystSystem` adds cre-swfl's dossier (per-corridor `corridor_vacancy` + coverage flag) to grounding when `routeChart` flags a corridor-grain CRE intent; master stays for the region-wide line. **This is the actual contradiction-fix** (prose now answers AT corridor grain).
+
+**DEFERRED (operator decision 2026-06-16) → ledger check `corridor_vacancy_chart_in_chat` [charts, due Jun 18]:**
+
+- **Task 3a + 3c held until post-nightly.** The chart + 3a are **inert until the nightly regenerates `brains/cre-swfl.md`** (local egress hangs at stage 3, so the table isn't rendered locally; `buildVacancyChart` returns null and the route emits no chart frame until then). **3c (restore the "you can file charts" claim) is held** to avoid re-introducing the INTERIM "claim-but-don't-deliver" refusal-flailing until charts are verified to render. Build + e2e-verify 3a/3c together once the nightly proves the table is live.
+
+**Corrections folded in vs the plan-as-written:** test helper is `creSwfl.outputProducer!(minimalPackOutput())` (not `runCreSwfl`); `fetchBrain` was NOT imported in `build-chart-for-intent.mts` (Task 2 added it); `displayNameFor` IS a real helper (not a placeholder); live citation URL uses the real `corridor_name` column (the seasonality block's `select=name` would 400).
+
 **Goal:** Make per-corridor CRE vacancy a first-class, deterministic brain artifact so the in-app chart AND the analyst's prose draw from ONE source at ONE read-time — killing the "chart shows per-corridor bars while the prose denies having per-corridor data" contradiction.
 
 **Architecture:** Three coupled changes, in strict order. (1) `cre-swfl` emits a new deterministic `corridor_vacancy` `detail_table` from `corridor_profiles` (mirrors the existing `corridor_seasonality` table; NO synth-agent math). (2) The vacancy chart re-points off the frozen `fixtures/corridor-rents.json` snapshot to that live `detail_table` (this also fixes the fabricated/future `asOf`). (3) The welcome/chat analyst surface routes CRE-vacancy questions to ground on `cre-swfl` (so the prose sees the same `detail_table`) and emits + renders a chart frame; the interim B prompt line is restored.

@@ -2,6 +2,14 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat: coherent per-corridor vacancy (Tasks 1/2/3b) — chart+prose draw ONE source
+
+- **Plan `docs/superpowers/plans/2026-06-16-coherent-corridor-vacancy-chart.md`. Three commits ALREADY ON ORIGIN** (`7ef12bd`/`94a4e78`/`c996044`) — a concurrent email-hero session FF-pushed them (its own push note below); they were not reviewed pre-push (shared-main hazard), but pack Gate 5 + all touched suites are green (cre-swfl 27/0, vacancy-chart 11/0, route 18/0, catalog 4/0).
+- **Task 1** (`7ef12bd`): deterministic `corridor_vacancy` detail_table on cre-swfl (mirrors `corridor_seasonality`, never synth). **Step-0 DB finding settled the open question → operator picked Option 1:** all 27 verified corridors have vacancy, but only **Lehigh** carries a `vacancy_rate_source_url` (Cushman/MarketBeat); **FMB (2.90%) is UNSOURCED** — so guardrail-2's "FMB+Lehigh" is wrong. `coverage_note` rides **Lehigh-only** (data-driven `marketbeat` URL signature); FMB gets none (no fabricated provenance).
+- **Task 2** (`94a4e78`): `buildVacancyChart` reads the live cre-swfl table via `fetchBrain` (off the fixture's fabricated `asOf 2026-06-30`); pure `vacancyChartSpecFromTable()` extracted + tested.
+- **Task 3b** (`c996044`): `buildAnalystSystem` grounds corridor-grain CRE questions on cre-swfl's per-corridor detail (the actual contradiction-fix); master stays for the region line.
+- **3a + 3c DEFERRED (operator 2026-06-16) → check `corridor_vacancy_chart_in_chat` [charts, due Jun 18].** Chart + 3a are INERT until the nightly regenerates `brains/cre-swfl.md` (local egress hangs at stage 3); 3c (restore "can file charts" claim) held to not re-break the INTERIM claim-but-don't-deliver fix until charts verify to render.
+
 ## 2026-06-16 (main) — feat(email): email-hero wired DATA-DRIVEN — kills the fabricated digest mockup
 
 - **Operator-directed (chose "wire data-driven"):** `email-hero.html` was a STATIC mockup with hardcoded SWFL numbers ($412K, 62 days, 4,847, "Fort Myers Beach (33931) +14.2%") — the digest `DEFAULT_TEMPLATE`, so a live digest shipped INVENTED data (MOAT violation) and ignored real content. Now every figure is a token filled from the lake.
