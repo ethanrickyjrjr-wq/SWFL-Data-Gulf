@@ -1,9 +1,9 @@
-"""Firecrawl-driven Lee County Accela permit scraper.
+"""crawl4ai-driven Lee County Accela permit scraper.
 
 Public API:
   fetch_permit_pages(start_date, end_date) -> list[str]
-      Fetches all paginated results via Firecrawl REST (stealth proxy). Returns
-      one HTML string per page.
+      Fetches all paginated results via crawl4ai (UndetectedAdapter, one reused
+      browser session). Returns one HTML string per page.
 
   parse_accela_result_page(html, issued_date_fallback) -> list[PermitRow]
       Pure parser — no network. Extracts permit rows including cap_detail_url.
@@ -20,26 +20,28 @@ Public API:
       Parallel-fetches each row's CapDetail.aspx URL and fills issued_date,
       declared_value_usd, permit_type_raw in place.
 
-v2 — 2026-05-26
-----------------
-Migrated from firecrawl-py SDK to the shared REST client
-(ingest.lib.firecrawl_client.scrape_with_actions). Stealth proxy is required
-for the Accela portal and the SDK lacks the proxy flag in its CLI surface.
+v3 — 2026-06-16 (crawl4ai cutover)
+----------------------------------
+Replaced Firecrawl (gone) with crawl4ai + UndetectedAdapter. fetch_permit_pages
+now drives one reused browser session (Crawl4aiSession): page 1 fills the date
+range via build_date_search_js and clicks search; pages 2..N click the "Next >"
+pager (build_next_page_js) and wait on a defined-marker first-row-id change
+(page_changed_wait) — the partial ASP.NET UpdatePanel postback preserves the
+window across the js_only click. pagecount is read from page 1's GridView. There
+is no Firecrawl-style 60 s wait cap; per-page browser cost is amortized by the
+single session. Requires a non-datacenter IP (local-first; GHA IP is deferred).
 
-Pagination: repeated /v2/scrape calls — each call for page K re-submits the
-search form then clicks the "Next >" pager link K-1 times before scraping.
-pagecount is read from the table's pagecount="N" attribute on page 1.
-Wait budget: Firecrawl caps total wait actions at 60 s. Base actions consume
-~13 s; each next-click adds _PAGER_NEXT_WAIT_MS. At 4 000 ms/click the cap
-hits at page 15 (13 + 14×4 = 69 s). Monthly cron handles ≤4 pages; a 90-day
-backfill needs 11 pages (53 s total). Longer ranges require date-range chunking.
+Per-permit detail: after pagination, each row's CapDetail.aspx URL is fetched in
+a clean context (crawl4ai_client.fetch_many, independent + parallel) to extract
+issued_date, declared_value_usd, permit_type_raw.
 
-Per-permit detail: after pagination, (permit_id, cap_detail_url) tuples are
-parallel-scraped via /v2/scrape with stealth proxy to extract issued_date,
-declared_value_usd, and permit_type_raw. Stealth assumed until proven otherwise.
+The parsers below (parse_accela_result_page, parse_page_count, parse_cap_detail_html)
+are pure and unchanged by the cutover. firecrawl_client is intentionally left
+imported as the rollback path until the cutover is proven in production.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -49,6 +51,7 @@ from typing import Any, Optional
 
 from bs4 import BeautifulSoup
 
+from ingest.lib.crawl4ai_client import Crawl4aiError, Crawl4aiSession
 from ingest.lib.firecrawl_client import FirecrawlError, scrape_with_actions
 
 log = logging.getLogger(__name__)
@@ -376,102 +379,71 @@ _ACCELA_SEARCH_URL = (
 #   [td.aca_pagination_PrevNext: Next >]
 # "Next >" is always the last td in the row AND the last td.aca_pagination_PrevNext.
 # href is always empty so text is not selectable via attribute; positional works.
+# This is the canonical pager selector; build_next_page_js() inlines the same string.
 _PAGER_NEXT_SELECTOR = "td.aca_pagination_PrevNext:last-child > a"
-
-# Wait after clicking "Next >" before scraping (ms).
-# Keep (13_000 + (page_count-1) * _PAGER_NEXT_WAIT_MS) < 60_000 — Firecrawl cap.
-_PAGER_NEXT_WAIT_MS = 4000
-
-
-def _base_search_actions(start_str: str, end_str: str) -> list[dict]:
-    """Action sequence that fills and submits the Accela date-range search form."""
-    return [
-        {"type": "wait",  "selector": 'input[id$="txtGSStartDate"]'},
-        {"type": "write", "text": start_str, "selector": 'input[id$="txtGSStartDate"]'},
-        {"type": "write", "text": end_str,   "selector": 'input[id$="txtGSEndDate"]'},
-        {"type": "wait",  "milliseconds": 1000},
-        {"type": "click", "selector": "#ctl00_PlaceHolderMain_btnNewSearch"},
-        {"type": "wait",  "milliseconds": 12000},
-    ]
 
 
 def _extract_html(resp: dict) -> str:
-    """Pull HTML from a /v2/scrape REST response."""
+    """Pull HTML from a /v2/scrape REST response (still used by enrich until cutover)."""
     return (resp.get("data") or {}).get("html") or ""
 
 
+# Server-side validation banners that mean the search itself was rejected (bad
+# date / form state) — distinct from a legitimate empty "no records" result.
+_TERMINAL_ERR = ("unable to proceed", "valid datetime")
+
+
 def fetch_permit_pages(start_date: date, end_date: date) -> list[str]:
-    """Live Firecrawl scrape — returns one HTML string per results page.
-
-    Page 1: form-fill + search-click + wait + scrape.
-    Page K (K > 1): same form re-submit then (click Next + wait) × (K-1) + scrape.
-
-    Falls back gracefully if a page scrape fails (logs a warning, stops early).
-    Requires FIRECRAWL_API_KEY in the environment.
-    """
-    import os
-
-    if not os.environ.get("FIRECRAWL_API_KEY"):
-        raise RuntimeError(
-            "FIRECRAWL_API_KEY missing — invoke firecrawl-build-onboarding first"
-        )
-
+    """Live crawl4ai scrape — one HTML string per results page. A single browser
+    session (UndetectedAdapter) is reused across pages via Next-click chaining
+    (partial ASP.NET UpdatePanel postback). Requires a non-datacenter IP (local)."""
     if not log.handlers:
         logging.basicConfig(level=logging.INFO, format="[%(name)s] %(message)s")
-
     start_str = start_date.strftime("%m/%d/%Y")
-    end_str   = end_date.strftime("%m/%d/%Y")
-    log.info("fetching Lee Accela permits %s → %s", start_str, end_str)
+    end_str = end_date.strftime("%m/%d/%Y")
+    log.info("fetching Lee Accela permits %s -> %s (crawl4ai)", start_str, end_str)
+    return asyncio.run(_fetch_async(start_str, end_str))
 
-    base_actions = _base_search_actions(start_str, end_str)
 
-    # --- Page 1 ---
-    resp       = scrape_with_actions(_ACCELA_SEARCH_URL, base_actions + [{"type": "scrape"}])
-    page1_html = _extract_html(resp)
-    log.info(
-        "page 1: html_len=%d  has_grid=%s",
-        len(page1_html),
-        "gdvPermitList" in page1_html,
-    )
-    if "gdvPermitList" not in page1_html:
-        raise RuntimeError(
-            "Page 1 HTML has no gdvPermitList grid — form submission likely failed. "
-            f"Preview: {page1_html[:400]!r}"
+async def _fetch_async(start_str: str, end_str: str) -> list[str]:
+    async with Crawl4aiSession(session_id="lee_permits") as s:
+        # Page 1: fill dates + search.
+        html1 = await s.step(
+            _ACCELA_SEARCH_URL,
+            js_before=build_date_search_js(start_str, end_str),
+            wait_for=GRID_OR_TERMINAL_WAIT,
         )
-
-    page_count = parse_page_count(page1_html)
-    log.info("pagecount=%d", page_count)
-    pages: list[str] = [page1_html]
-
-    # --- Pages 2..N ---
-    for page_num in range(2, page_count + 1):
-        # Build (click Next + wait) repeated K-1 times to reach page K
-        next_actions: list[dict] = []
-        for _ in range(page_num - 1):
-            next_actions.extend([
-                {"type": "click", "selector": _PAGER_NEXT_SELECTOR},
-                {"type": "wait",  "milliseconds": _PAGER_NEXT_WAIT_MS},
-            ])
-
-        actions = base_actions + next_actions + [{"type": "scrape"}]
-        try:
-            resp = scrape_with_actions(_ACCELA_SEARCH_URL, actions)
-            html = _extract_html(resp)
-            log.info(
-                "page %d: html_len=%d  has_grid=%s",
-                page_num,
-                len(html),
-                "gdvPermitList" in html,
+        low = html1.lower()
+        if any(t in low for t in _TERMINAL_ERR):
+            raise Crawl4aiError(
+                f"Accela rejected the search (date/validation). Preview: {html1[:300]!r}"
+            )
+        if "gdvPermitList" not in html1:
+            if "no records" in low:
+                log.info("no permits in range")
+                return []
+            raise Crawl4aiError(
+                f"page 1 has no grid and no 'no records'. Preview: {html1[:300]!r}"
+            )
+        page_count = parse_page_count(html1)
+        log.info("pagecount=%d", page_count)
+        pages = [html1]
+        # Pages 2..N: click Next, wait for the first-row id to change.
+        for page_num in range(2, page_count + 1):
+            html = await s.step(
+                _ACCELA_SEARCH_URL,
+                js_only=True,
+                js_before=build_next_page_js(),
+                wait_for=page_changed_wait(),
+                timeout=45_000,
             )
             if "gdvPermitList" not in html:
-                log.warning("page %d has no grid — stopping early", page_num)
-                break
+                raise Crawl4aiError(
+                    f"page {page_num} (<= pagecount {page_count}) lost the grid — aborting"
+                )
             pages.append(html)
-        except FirecrawlError as exc:
-            log.warning("page %d fetch failed (%s) — stopping early", page_num, exc)
-            break
-
-    return pages
+            log.info("page %d captured", page_num)
+        return pages
 
 
 def enrich_rows_with_details(
