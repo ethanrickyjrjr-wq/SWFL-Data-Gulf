@@ -28,6 +28,7 @@ import { TemplateSwitcher } from "./TemplateSwitcher";
 import { StatCard } from "./StatCard";
 import { PrintButton } from "@/components/PrintButton";
 import { DeliveryButtons } from "./DeliveryButtons";
+import { EmailPreviewFrame } from "./EmailPreviewFrame";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -435,7 +436,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
     }
     const emailHtml = await renderGroundedReport(emailModel, { skin: "email" });
     return (
-      <main className="deliverable-page mx-auto max-w-3xl px-4 py-10">
+      <main className="deliverable-page mx-auto max-w-4xl px-4 py-10">
         <div className="print-hide mb-6 flex flex-wrap items-center justify-end gap-2">
           {/* The email preview is a full <html> doc in an iframe; window.print() on it
               is unreliable, so the PDF affordance opens the dedicated print route, which
@@ -449,12 +450,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
             Save as PDF
           </a>
         </div>
-        <iframe
-          srcDoc={emailHtml}
-          title="Email preview"
-          className="w-full rounded-lg border border-black/10"
-          style={{ height: "1000px" }}
-        />
+        <EmailPreviewFrame srcDoc={emailHtml} />
       </main>
     );
   }
@@ -498,7 +494,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
   }
 
   return (
-    <main className="deliverable-page mx-auto max-w-3xl px-4 py-10">
+    <main className="deliverable-page mx-auto max-w-4xl px-4 py-10">
       {/* Brand accent bar — print-visible top rule, hidden when no brand color set */}
       {brandTheme?.primary && (
         <div

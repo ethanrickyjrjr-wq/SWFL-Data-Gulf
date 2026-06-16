@@ -4977,3 +4977,10 @@ Test deltas: bun suite **687 → 738 pass** (+51 new tests across `dates.test.mt
 ## 2026-06-06 (Sonnet 4.6 · main) — fix(city-pulse): narrow search window 60d→7d to break dedup-fatigue
 
 - `ingest/pipelines/city_pulse/pipeline.py`: Firecrawl `tbs="qdr:m"` → `tbs="qdr:w"` (last week); Anthropic fallback query "LAST 60 DAYS" → "LAST 7 DAYS". Pipeline was running green daily but writing 0 new rows because both search paths returned the same article URLs that were already deduped in the DB. Narrowing to 7 days forces fresher results the dedup hasn't seen. corridor-pulse is healthy (cron Sundays, next run June 8).
+
+## 2026-06-16 (main) — fix(p/[id]): email deliverable fills viewport on desktop + phone
+
+- `/p/example-email` was rendering at 600px (email-client width) — on HiDPI desktop = ~2–3 inches. Root cause: email HTML has hard-coded 600px table widths (required for email clients); iframe was `w-full` inside `max-w-3xl` container but content never stretched.
+- Fix: new `EmailPreviewFrame` client component uses `ResizeObserver` to scale the 600px iframe to fill the wrapper width via `transform: scale(containerWidth / 600)`. Auto-sizes height from `iframe.contentWindow.document.scrollHeight` after load. Works on all screen sizes.
+- Also widened `max-w-3xl → max-w-4xl` on BOTH the email branch and regular-template `<main>` (all builds get more breathing room).
+- 554/0 deliverable + email tests. Staged: `app/p/[id]/EmailPreviewFrame.tsx` (new) + `page.tsx` (updated).
