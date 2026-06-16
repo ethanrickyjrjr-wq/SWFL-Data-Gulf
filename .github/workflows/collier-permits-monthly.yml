@@ -1,11 +1,12 @@
 name: Collier County permits monthly
 
 on:
-  schedule:
-    # 8:00 AM ET on the 15th of each month — Collier publishes prior-month XLSXs
-    # mid-month (confirmed June 6 2026: May still absent). Pipeline falls back to
-    # latest-available if the exact month isn't posted yet (belt-and-suspenders).
-    - cron: "0 12 15 * *"
+  # SCHEDULE HELD (2026-06-16): crawl4ai migration landed. Re-enable after:
+  # (1) GHA dry-run probe passes green (confirms UndetectedAdapter clears Akamai
+  #     from datacenter IP, XLSX download succeeds, size logged).
+  # (2) collier_first_lake_ingestion gate clears (first live run confirmed clean).
+  #   schedule:
+  #     - cron: "0 12 15 * *"
   workflow_dispatch:
     inputs:
       month:
@@ -15,7 +16,7 @@ on:
       dry_run:
         description: "Dry run — download and parse only; skip geocode + dlt write"
         required: false
-        default: "false"
+        default: "true"
 
 permissions:
   contents: read
@@ -29,18 +30,21 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Install ingest dependencies
         run: pip install -r ingest/requirements.txt
+
+      - name: Install Chromium for crawl4ai
+        run: |
+          python -m playwright install --with-deps chromium
+          python -m patchright install chromium
 
       - name: Run Collier permits pipeline
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-          SPIDER_API_KEY: ${{ secrets.SPIDER_API_KEY }}
         run: |
           ARGS=""
           if [ -n "${{ github.event.inputs.month }}" ]; then
