@@ -2,7 +2,8 @@
 
 Three surfaces:
   Crawl4aiSession  — one persistent browser + UndetectedAdapter; stealth interactive
-                     scraping (Accela, Qlik). SEQUENTIAL only.
+                     scraping (Accela, Qlik). SEQUENTIAL only. Supports file downloads
+                     via accept_downloads=True + download_step().
   fetch_many       — arun_many for INDEPENDENT parallel page fetches (e.g. detail pages).
   fetch_page_markdown / fetch_page_html
                    — simple sync helpers for static pages (no stealth needed).
@@ -10,6 +11,9 @@ Three surfaces:
 from __future__ import annotations
 
 import asyncio
+import shutil
+import tempfile
+from pathlib import Path
 from typing import Iterable, Optional
 
 from crawl4ai import (
@@ -31,14 +35,29 @@ class Crawl4aiSession:
     same page persists across calls (js_only=True applies JS without re-navigating).
     SEQUENTIAL only — never issue concurrent steps on one session."""
 
-    def __init__(self, *, session_id: str = "accela", headless: bool = True) -> None:
+    def __init__(
+        self,
+        *,
+        session_id: str = "accela",
+        headless: bool = True,
+        accept_downloads: bool = False,
+    ) -> None:
         self.session_id = session_id
         self.headless = headless
+        self.accept_downloads = accept_downloads
+        self._downloads_dir: Optional[str] = (
+            tempfile.mkdtemp(prefix="crawl4ai_dl_") if accept_downloads else None
+        )
         self._crawler: Optional[AsyncWebCrawler] = None
 
     async def __aenter__(self) -> "Crawl4aiSession":
         adapter = UndetectedAdapter()
-        bc = BrowserConfig(headless=self.headless, enable_stealth=True)
+        bc = BrowserConfig(
+            headless=self.headless,
+            enable_stealth=True,
+            accept_downloads=self.accept_downloads,
+            downloads_path=self._downloads_dir,
+        )
         strategy = AsyncPlaywrightCrawlerStrategy(browser_adapter=adapter, browser_config=bc)
         self._crawler = AsyncWebCrawler(crawler_strategy=strategy, config=bc)
         await self._crawler.start()
@@ -71,12 +90,47 @@ class Crawl4aiSession:
             raise Crawl4aiError(f"step failed for {url}: {getattr(r, 'error_message', '?')}")
         return r.html or ""
 
+    async def download_step(
+        self,
+        *,
+        click_js: str,
+        wait_seconds: float = 10.0,
+    ) -> bytes:
+        """Click a download anchor in the current session page and return file bytes.
+
+        Must be called after a step() that navigated to the page containing the anchor.
+        Uses js_only=True — the page is NOT re-navigated. The browser clicks the anchor
+        and the file lands in self._downloads_dir (set at __init__ time).
+
+        Guard: raises Crawl4aiError if downloaded_files is empty after wait_seconds.
+        The caller must have opened this session with accept_downloads=True.
+        """
+        assert self._crawler is not None, "use within 'async with'"
+        cfg = CrawlerRunConfig(
+            session_id=self.session_id,
+            cache_mode=CacheMode.BYPASS,
+            js_code_before_wait=click_js,
+            js_only=True,
+            page_timeout=int(wait_seconds * 1_000) + 10_000,
+            delay_before_return_html=wait_seconds,
+        )
+        r = await self._crawler.arun(url="", config=cfg)
+        files = getattr(r, "downloaded_files", None) or []
+        if not files:
+            raise Crawl4aiError(
+                f"download_step: no file in downloaded_files after {wait_seconds:.0f}s — "
+                "anchor may not have been found or clicked"
+            )
+        return Path(files[0]).read_bytes()
+
     async def __aexit__(self, *exc) -> None:
         if self._crawler is not None:
             try:
                 await self._crawler.crawler_strategy.kill_session(self.session_id)
             finally:
                 await self._crawler.close()
+        if self._downloads_dir:
+            shutil.rmtree(self._downloads_dir, ignore_errors=True)
 
 
 async def _scrape_page(url: str) -> tuple[str, str]:
