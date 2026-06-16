@@ -1,7 +1,7 @@
 # Data-driven `email-report.html` — repeat-block design
 
 **Date:** 2026-06-16
-**Status:** Design — approved, pending spec review
+**Status:** Design — approved; spec-review fixes folded in (BLOCKING-1/2/3 + CLARIFY)
 **Owner:** session (Opus)
 
 ## Problem
@@ -65,7 +65,7 @@ Before the existing global `{{token}}` pass, expand HTML-comment-delimited block
 
 ```html
 <!-- repeat:metrics -->
-  <td …>{{M_VALUE}}<br>{{M_LABEL}}<br><span style="color:{{M_DELTA_COLOR}}">{{M_DELTA}}</span></td>
+  <td …>{{M_VALUE}}<br>{{M_LABEL}}</td>
 <!-- /repeat:metrics -->
 ```
 
@@ -103,9 +103,11 @@ Keep masthead + footer (token-driven: `{{LOGO_URL}}`, `{{COMPANY_NAME}}`, `{{ACC
 `{{CONTACT_EMAIL}}`, `{{CONTACT_PHONE}}`, `{{DISCLAIMER}}`, `{{WEBSITE_URL}}`) **as-is**.
 Replace the hardcoded middle with, top to bottom:
 
-1. **Headline** — `{{PLACE}}` / `{{COUNTY}}` / ZIP `{{ZIP}}`, hero number `{{HERO_VALUE}}`
-   + `{{HERO_LABEL}}` (= the **first** item in `report.metrics`; no fabricated YoY/blurb —
-   real prose lives in the reads below).
+1. **Headline** — `{{PLACE}}` / `{{COUNTY}}` / ZIP `{{ZIP}}` (always present). The hero
+   number is a **`<!-- repeat:hero -->` 0-or-1 block** = `{{HERO_VALUE}}` + `{{HERO_LABEL}}`
+   from the **first** `report.metrics` item; when `report.metrics` is empty the block
+   renders to nothing (no empty styled number). No fabricated YoY/blurb — real prose lives
+   in the reads below.
 2. **`[ DELTA ]`** slot — conditional "what changed" / "re-verified" block (built in `render.ts`).
 3. **Key figures** — `<!-- repeat:metrics -->` card block; one card per `report.metrics`
    item, showing **`{{M_VALUE}}` (display) + `{{M_LABEL}}` only**. No per-card delta line —
@@ -121,11 +123,13 @@ Remove the parked sections (bars, outlook, sparkline) — keep their *styling vo
 
 Gets simpler. Instead of one monolithic light-themed `body`, `reportToEmailHtml`:
 
-- Computes `tokens`: brand tokens (unchanged) + `PLACE`, `COUNTY`, `ZIP`, `HERO_VALUE`,
-  `HERO_LABEL`, `FRESHNESS_TOKEN`, `CTA_URL`.
-- Computes `repeats.metrics` (from `report.metrics`, capped `MAX_METRIC_ROWS`, with a
-  direction→color value via the existing GOOD/BAD/NEUTRAL logic) and `repeats.reads`
-  (from `report.lines`, capped `MAX_LINES`, markdown→email-safe HTML via `lineToHtml`).
+- Computes `tokens`: brand tokens (unchanged) + `PLACE`, `COUNTY`, `ZIP`,
+  `FRESHNESS_TOKEN`, `CTA_URL`.
+- Computes `repeats.hero` (`[{HERO_VALUE, HERO_LABEL}]` from `report.metrics[0]`, or `[]`
+  when empty), `repeats.metrics` (from `report.metrics`, **value + label only**), and
+  `repeats.reads` (from `report.lines`, markdown→email-safe HTML via `lineToHtml`). Reuse
+  the existing `MAX_METRIC_ROWS` / `MAX_LINES` caps (`render.ts:20-21`) — do **not**
+  redeclare them. No direction→color here; GOOD/BAD/NEUTRAL stays in the delta block only.
 - Builds **only** the conditional `delta` block (the one piece with if/else + nesting),
   **dark-restyled** to sit on the dark shell (replace `#f6f8f7`/`#333` with an
   accent-tinted surface + light text), injected via `[ DELTA ]`.
@@ -140,29 +144,39 @@ directly, never via `reportToEmailHtml` — never shows it. This "unsubscribe on
 emails" behavior is preserved and asserted by the existing test
 (`emits the literal unsubscribe token`).
 
-### 6. `renderCallout` color (5th test) — separate, small
+### 6. `renderCallout` color (5th test) — separate, small, navy-agnostic
 
-`renderCallout("highlight")` borders with `COMPONENT_DEFAULTS.primary = SWFL_THEME.primary`,
-now `#0f1d24` (set by the overhaul, "dark-first / body bg = PRIMARY"). The test
-(`components.test.ts:13`) hardcodes `SWFL_PRIMARY = "#0F2035"` and the `_shared.ts:12`
-comment also says `#0F2035` — both stale. Fix: align the stale test constant **and** the
-comment to the single source of truth, `#0f1d24`.
+`renderCallout("highlight")` borders with `COMPONENT_DEFAULTS.primary = SWFL_THEME.primary`
+(live value `#0f1d24`). The test (`components.test.ts:13`) hardcodes
+`const SWFL_PRIMARY = "#0F2035"` — stale, and the sole cause of this failure.
 
-> **Confirm at spec review:** `#0f1d24` is taken as the canonical brand navy (the live,
-> deliberately-set value). If it should be `#0F2035`, we fix `SWFL_THEME.primary` instead.
+**Fix by single-source reference, not a new literal:** import `SWFL_THEME` into the test and
+set `const SWFL_PRIMARY = SWFL_THEME.primary` (matches what `callout-box` actually emits and
+honors the `_shared.ts` "never re-hardcode these hex values" rule). Re-hardcoding `#0f1d24`
+would just rot again.
+
+**This de-blocks the navy decision.** A by-reference test passes for *whatever*
+`SWFL_THEME.primary` holds, so this work does **not** wait on a brand-navy ruling and
+changes **no color value**. The value question (`#0f1d24` vs `#0F2035`) is a separate brand
+decision, out of scope here, tracked as `check: email_brand_navy_canonical`.
+
+**Not touched:** `_shared.ts:12` carries a stale `// #0F2035` *comment*, but it is
+non-load-bearing (the code reads `SWFL_THEME.primary`). Left as-is per review — cosmetic only.
 
 ## Testing
 
-- The 5 current failures go green (token, delta-changes, re-verified, CTA, callout).
+- The 5 current failures go green: freshness token, delta-changes, re-verified, CTA, and
+  callout (the last via the by-reference test fix in §6 — navy-agnostic).
 - **New — repeat mechanism** (`render-html-template` unit): N items → N rows; 0 items →
-  empty; per-row tokens filled, globals still filled by the outer pass; `repeats` absent →
-  output unchanged (snapshot of an existing template).
-- **New — no-fabrication guard** (`render.test.ts`): a rendered report contains **none** of
-  the distinctive mockup-only literals (`Median Price by ZIP`, `33971 · Lehigh`,
-  `Q3 Outlook`, `Cautious optimism heading into summer`) — prose that can't legitimately
-  appear in real data — so a future showcase edit that reintroduces hardcoded data fails
-  loudly. (Bare numbers like `$412K` are avoided; a real median could match them.)
-- Pre-push: Gate 5 runs `catalog.test` (unaffected); full `bun test lib/email` must pass.
+  empty (covers the empty-metrics hero guard); per-row tokens filled, globals still filled
+  by the outer pass; `repeats` absent → output unchanged (snapshot of an existing template).
+- **New — no-fabrication guard** (`render.test.ts`) — **tripwire**: asserts a rendered
+  report contains none of the distinctive mockup-only *prose* literals (`Median Price by
+  ZIP`, `33971 · Lehigh`, `Q3 Outlook`, `Cautious optimism heading into summer`). It catches
+  a re-paste of *these* sections, not arbitrary new hardcoded data (accepted limitation).
+  Bare numbers like `$412K` are avoided — a real median could match them.
+- Pre-push / CI: `bun test` runs **recursively** (already covers `lib/email/activation` — no
+  new CI wiring needed); Gate 5 `catalog.test` is unaffected. Full `bun test lib/email` must pass.
 
 ## Risks
 
@@ -179,3 +193,6 @@ comment to the single source of truth, `#0f1d24`.
 
 - `email_report_multizip_revival` — revive bar chart + sparkline with real multi-ZIP /
   time-series data.
+- `email_brand_navy_canonical` — operator ruling: is `#0f1d24` (live) the canonical brand
+  navy, or should `SWFL_THEME.primary` revert to `#0F2035`? Does **not** block this work
+  (the §6 test fix is by-reference / navy-agnostic); only affects the brand value itself.
