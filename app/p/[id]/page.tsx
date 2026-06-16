@@ -29,6 +29,8 @@ import { StatCard } from "./StatCard";
 import { PrintButton } from "@/components/PrintButton";
 import { DeliveryButtons } from "./DeliveryButtons";
 import { EmailPreviewFrame } from "./EmailPreviewFrame";
+import { CitationList } from "@/components/CitationList";
+import { cleanCitation } from "@/lib/citations/clean-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -126,26 +128,28 @@ function renderCitation({
   freshness_token?: string;
 }) {
   const asOf = asOfFromToken(freshness_token);
-  const hasSource = Boolean(source_url || source_label);
-  if (!asOf && !hasSource) return null;
+  // Route through the shared root: strips internal/supabase/api URLs, cleans labels.
+  const c =
+    source_url || source_label ? cleanCitation({ url: source_url, label: source_label }) : null;
+  if (!asOf && !c) return null;
   return (
     <p className="citation mt-1 text-xs text-gray-500">
-      {hasSource && source_url && (
+      {c && c.linkable && c.href && (
         <>
           <a
-            href={source_url}
+            href={c.href}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#00d4aa] underline underline-offset-2"
           >
-            {source_label ?? source_url}
+            {c.label}
           </a>
           {asOf && " · "}
         </>
       )}
-      {hasSource && !source_url && source_label && (
+      {c && !(c.linkable && c.href) && (
         <>
-          {source_label}
+          {c.label}
           {asOf && " · "}
         </>
       )}
@@ -274,26 +278,8 @@ function renderSection(slot: SectionSlot, deliverableId: string) {
 }
 
 function renderSources(slot: SourcesSlot) {
-  if (slot.sources.length === 0) return null;
-  return (
-    <footer className="mt-8 border-t border-white/10 pt-4">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Sources</p>
-      <ul className="space-y-1">
-        {slot.sources.map((src) => (
-          <li key={src.url} className="text-xs text-gray-500">
-            <a
-              href={src.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
-            >
-              {src.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </footer>
-  );
+  // The ONE collapsible Sources box — cleans every URL/label at display time.
+  return <CitationList sources={slot.sources} />;
 }
 
 function renderInferenceNotes(slot: InferenceNotesSlot) {
@@ -429,14 +415,14 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
     const emailModel = buildEmailDeliverableModel(data);
     if (!emailModel) {
       return (
-        <main className="deliverable-page mx-auto max-w-3xl px-4 py-10">
+        <main className="deliverable-page w-full px-4 py-10">
           <GlobalDigestFallback narrative={data.narrative} />
         </main>
       );
     }
     const emailHtml = await renderGroundedReport(emailModel, { skin: "email" });
     return (
-      <main className="deliverable-page mx-auto max-w-4xl px-4 py-10">
+      <main className="deliverable-page w-full px-4 py-10">
         <div className="print-hide mb-6 flex flex-wrap items-center justify-end gap-2">
           {/* The email preview is a full <html> doc in an iframe; window.print() on it
               is unreliable, so the PDF affordance opens the dedicated print route, which
@@ -494,7 +480,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
   }
 
   return (
-    <main className="deliverable-page mx-auto max-w-4xl px-4 py-10">
+    <main className="deliverable-page mx-auto max-w-5xl px-4 py-10">
       {/* Brand accent bar — print-visible top rule, hidden when no brand color set */}
       {brandTheme?.primary && (
         <div
