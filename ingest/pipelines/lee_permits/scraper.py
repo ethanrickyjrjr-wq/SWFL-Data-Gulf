@@ -36,23 +36,23 @@ a clean context (crawl4ai_client.fetch_many, independent + parallel) to extract
 issued_date, declared_value_usd, permit_type_raw.
 
 The parsers below (parse_accela_result_page, parse_page_count, parse_cap_detail_html)
-are pure and unchanged by the cutover. firecrawl_client is intentionally left
-imported as the rollback path until the cutover is proven in production.
+are pure and unchanged by the cutover. firecrawl_client.py is intentionally left in
+the repo (other pipelines import it) as the git-revert rollback path; this module no
+longer references it.
 """
 from __future__ import annotations
 
 import asyncio
 import logging
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Optional
+from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl4ai_client import Crawl4aiError, Crawl4aiSession
-from ingest.lib.firecrawl_client import FirecrawlError, scrape_with_actions
+from ingest.lib.crawl4ai_client import Crawl4aiError, Crawl4aiSession, fetch_many
 
 log = logging.getLogger(__name__)
 
@@ -369,8 +369,9 @@ def parse_cap_detail_html(html: str) -> dict[str, Any]:
 # Live fetching — requires FIRECRAWL_API_KEY
 # ---------------------------------------------------------------------------
 
+_ACCELA_HOST = "https://aca-prod.accela.com"
 _ACCELA_SEARCH_URL = (
-    "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx"
+    f"{_ACCELA_HOST}/LEECO/Cap/CapHome.aspx"
     "?module=Permitting&TabName=Permitting"
 )
 
@@ -383,14 +384,23 @@ _ACCELA_SEARCH_URL = (
 _PAGER_NEXT_SELECTOR = "td.aca_pagination_PrevNext:last-child > a"
 
 
-def _extract_html(resp: dict) -> str:
-    """Pull HTML from a /v2/scrape REST response (still used by enrich until cutover)."""
-    return (resp.get("data") or {}).get("html") or ""
-
-
 # Server-side validation banners that mean the search itself was rejected (bad
 # date / form state) — distinct from a legitimate empty "no records" result.
 _TERMINAL_ERR = ("unable to proceed", "valid datetime")
+
+
+def _committed_date(html: str, id_suffix: str) -> str:
+    """Read the value the Accela form actually committed for a masked date input.
+
+    After search, the post-back re-renders the form echoing the submitted value
+    (`<input id="...txtGSStartDate" value="05/01/2026">`). Returns "" if the field
+    isn't present (un-verifiable) — the caller must NOT treat that as a mismatch.
+    """
+    if not html:
+        return ""
+    soup = BeautifulSoup(html, "html.parser")
+    el = soup.find("input", id=re.compile(re.escape(id_suffix) + r"$"))
+    return ((el.get("value") if el else None) or "").strip()
 
 
 def fetch_permit_pages(start_date: date, end_date: date) -> list[str]:
@@ -425,6 +435,18 @@ async def _fetch_async(start_str: str, end_str: str) -> list[str]:
             raise Crawl4aiError(
                 f"page 1 has no grid and no 'no records'. Preview: {html1[:300]!r}"
             )
+        # Never proceed on a silently-wrong date: the masked start field has a known
+        # corruption history (fix3: 05/01 -> 05/17). The post-search form echoes the
+        # committed values; a CONFIRMED mismatch aborts (un-verifiable => warn only).
+        got_start = _committed_date(html1, "txtGSStartDate")
+        got_end = _committed_date(html1, "txtGSEndDate")
+        if (got_start and got_start != start_str) or (got_end and got_end != end_str):
+            raise Crawl4aiError(
+                f"date mismatch — requested {start_str}..{end_str} but the form "
+                f"committed {got_start!r}..{got_end!r}; aborting to avoid a wrong search"
+            )
+        if not (got_start and got_end):
+            log.warning("could not read back committed dates from page 1 — proceeding unverified")
         page_count = parse_page_count(html1)
         log.info("pagecount=%d", page_count)
         pages = [html1]
@@ -449,43 +471,41 @@ async def _fetch_async(start_str: str, end_str: str) -> list[str]:
 def enrich_rows_with_details(
     rows: list[PermitRow],
     *,
-    max_workers: int = 10,
+    concurrency: int = 5,
 ) -> list[PermitRow]:
-    """Parallel-fetch each row's CapDetail.aspx URL and fill issued_date,
-    declared_value_usd, permit_type_raw in place.
+    """Fetch each row's CapDetail.aspx (independent URLs, parallel via crawl4ai
+    arun_many) and fill issued_date, declared_value_usd, permit_type_raw in place.
 
-    Rows without cap_detail_url are skipped (already filtered TMP rows won't
-    appear here). On fetch failure the row keeps its fallback values.
+    cap_detail_url is root-relative in the list view (/LEECO/Cap/CapDetail.aspx?...),
+    so it is absolutized against the Accela host before fetching. Rows without a
+    cap_detail_url are skipped; an empty/failed detail fetch leaves fallback values.
     """
-    detail_targets = [(i, r.cap_detail_url) for i, r in enumerate(rows) if r.cap_detail_url]
-    if not detail_targets:
+    targets = {
+        urljoin(_ACCELA_HOST, r.cap_detail_url): i
+        for i, r in enumerate(rows)
+        if r.cap_detail_url
+    }
+    if not targets:
         return rows
 
     log.info(
-        "enriching %d/%d rows from CapDetail pages (workers=%d)",
-        len(detail_targets),
+        "enriching %d/%d rows from CapDetail (crawl4ai, concurrency=%d)",
+        len(targets),
         len(rows),
-        max_workers,
+        concurrency,
     )
-
-    def _fetch_one(idx: int, url: str) -> tuple[int, dict]:
-        try:
-            resp = scrape_with_actions(url, [], proxy="stealth", wait_for_ms=3000, timeout=60_000)
-            html = _extract_html(resp)
-            return idx, parse_cap_detail_html(html)
-        except Exception as exc:
-            log.warning("detail fetch failed idx=%d url=%s: %s", idx, url, exc)
-            return idx, {}
-
-    with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = {pool.submit(_fetch_one, i, url): i for i, url in detail_targets}
-        for fut in as_completed(futures):
-            idx, detail = fut.result()
-            if detail.get("issued_date"):
-                rows[idx].issued_date = detail["issued_date"]
-            if detail.get("declared_value_usd") is not None:
-                rows[idx].declared_value_usd = detail["declared_value_usd"]
-            if detail.get("permit_type_raw"):
-                rows[idx].permit_type_raw = detail["permit_type_raw"]
+    htmls = asyncio.run(fetch_many(list(targets), concurrency=concurrency))
+    for url, idx in targets.items():
+        html = htmls.get(url, "")
+        if not html:
+            log.warning("detail fetch empty idx=%d url=%s", idx, url)
+            continue
+        detail = parse_cap_detail_html(html)
+        if detail.get("issued_date"):
+            rows[idx].issued_date = detail["issued_date"]
+        if detail.get("declared_value_usd") is not None:
+            rows[idx].declared_value_usd = detail["declared_value_usd"]
+        if detail.get("permit_type_raw"):
+            rows[idx].permit_type_raw = detail["permit_type_raw"]
 
     return rows

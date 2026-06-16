@@ -3,6 +3,7 @@ import asyncio
 from ingest.lib.crawl4ai_client import Crawl4aiSession, Crawl4aiError  # noqa: F401
 from ingest.pipelines.lee_permits.scraper import (
     GRID_OR_TERMINAL_WAIT,
+    _committed_date,
     build_date_search_js,
     build_next_page_js,
     page_changed_wait,
@@ -57,3 +58,18 @@ def test_grid_or_terminal_wait_covers_terminal_states():
     # terms compared lowercase — the predicate's regex is lowercase + /i flag
     for term in ("no records", "unable to proceed", "valid datetime"):
         assert term in GRID_OR_TERMINAL_WAIT.lower()
+
+
+def test_committed_date_reads_input_value_by_id_suffix():
+    # the post-search Accela form echoes the submitted value on the masked input
+    html = (
+        '<div id="ctl00_..._txtGSStartDate_parentGrid" class="grid_7">'
+        '<input name="x" id="ctl00_PlaceHolderMain_generalSearchForm_txtGSStartDate"'
+        ' type="text" value="05/01/2026" class="masked"></div>'
+    )
+    assert _committed_date(html, "txtGSStartDate") == "05/01/2026"
+
+
+def test_committed_date_empty_when_field_absent():
+    # un-verifiable (field not echoed) returns "" — caller must NOT treat as a mismatch
+    assert _committed_date("<html><body>no form here</body></html>", "txtGSStartDate") == ""
