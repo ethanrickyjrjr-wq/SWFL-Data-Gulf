@@ -14,6 +14,8 @@ import {
 } from "@/lib/email/schedule-command";
 import { issueProposalNonce, verifyProposalNonce } from "@/lib/email/proposal-nonce";
 import { claimOnce } from "@/lib/email/idempotency";
+import { createOrTouchSchedule, type ScheduleUpsertDb } from "@/lib/email/schedule-upsert";
+import { deliverableToScheduleRecipe } from "@/lib/deliverable/schedule-recipe";
 
 export const runtime = "nodejs";
 
@@ -97,6 +99,60 @@ export async function POST(req: NextRequest) {
       }
     }
     return writeAction(supabase, user.id, projectId, v.command);
+  }
+
+  // ── PROPOSE from a built deliverable (the build→schedule bridge, Task 7). ──
+  // No LLM: load the deliverable (public SELECT, ownership verified in code — the
+  // restyle/revoke pattern), derive the recurring RECIPE (never the frozen snapshot),
+  // and return the SAME proposal shape. The confirm path below writes it unchanged.
+  if (body?.fromDeliverable && typeof body.fromDeliverable === "object") {
+    const fd = body.fromDeliverable as Record<string, unknown>;
+    const deliverableId = typeof fd.deliverableId === "string" ? fd.deliverableId : null;
+    if (!deliverableId) {
+      return NextResponse.json({ error: "deliverableId required" }, { status: 400 });
+    }
+    const { data: deliv, error: dErr } = await supabase
+      .from("deliverables")
+      .select("user_id, template, scope_kind, scope_value")
+      .eq("id", deliverableId)
+      .maybeSingle();
+    if (dErr) {
+      console.error("[schedule-command] deliverable lookup failed:", dErr);
+      return NextResponse.json({ error: "deliverable_lookup_failed" }, { status: 500 });
+    }
+    if (!deliv) return NextResponse.json({ error: "deliverable_not_found" }, { status: 404 });
+    if (deliv.user_id !== user.id) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
+
+    const recipe = deliverableToScheduleRecipe(
+      {
+        template: deliv.template as string,
+        scope_kind: (deliv.scope_kind as string | null) ?? null,
+        scope_value: (deliv.scope_value as string | null) ?? null,
+      },
+      {
+        audience_slug: typeof fd.audience_slug === "string" ? fd.audience_slug : undefined,
+        cadence: fd.cadence as never,
+        day_of_week: typeof fd.day_of_week === "number" ? fd.day_of_week : undefined,
+        day_of_month: typeof fd.day_of_month === "number" ? fd.day_of_month : undefined,
+        send_hour_et: fd.send_hour_et as never,
+      },
+    );
+    if (!recipe.ok) {
+      return NextResponse.json(
+        { needsClarification: true, message: recipe.error },
+        { status: 200 },
+      );
+    }
+    const dNonce = issueProposalNonce({ uid: user.id, pid: projectId, proposal: recipe.command });
+    return NextResponse.json({
+      action: recipe.command.action,
+      proposal: recipe.command,
+      summary: summarizeCommand(recipe.command),
+      confirmationRequired: true,
+      ...(dNonce ? { proposal_nonce: dNonce } : {}),
+    });
   }
 
   // ── PROPOSE: parse the NL command into one structured action. No write. ──
@@ -215,37 +271,30 @@ async function writeAction(
       day_of_month: command.day_of_month ?? null,
       send_hour_et: command.send_hour_et!,
     });
-    const { data, error } = await supabase
-      .from("email_schedules")
-      .insert({
-        user_id: userId,
-        project_id: projectId,
-        status: "active",
-        cadence: command.cadence,
-        day_of_week: command.day_of_week ?? null,
-        day_of_month: command.day_of_month ?? null,
-        send_hour_et: command.send_hour_et,
-        audience_slug: command.audience_slug ?? null,
-        template_id: command.template_id ?? null,
-        // Additive nullable scope columns — NULL+NULL => whole-region digest.
-        scope_kind: command.scope_kind ?? null,
-        scope_value: command.scope_value ?? null,
-        topic: command.topic ?? null,
-        next_run_at: next ? next.toISOString() : null,
-        updated_at: now,
-      })
-      .select("id")
-      .single();
-    if (error) {
-      console.error("[schedule-command] create failed:", error);
+    const nextIso = next ? next.toISOString() : null;
+    // Idempotent create (Task 7, D2): re-issuing the SAME recipe reactivates/updates the
+    // existing schedule rather than inserting a duplicate. NULL-equal matching lives in
+    // createOrTouchSchedule (IS NOT DISTINCT FROM, never `=` against null). One create
+    // path for both the NL `create` and the build→schedule bridge.
+    try {
+      const { id, created } = await createOrTouchSchedule(supabase as unknown as ScheduleUpsertDb, {
+        userId,
+        projectId,
+        command,
+        nowIso: now,
+        nextRunAtIso: nextIso,
+      });
+      return NextResponse.json({
+        ok: true,
+        action: "create",
+        schedule_id: id,
+        created,
+        next_run_at: nextIso,
+      });
+    } catch (e) {
+      console.error("[schedule-command] create failed:", e);
       return NextResponse.json({ error: "create_failed" }, { status: 500 });
     }
-    return NextResponse.json({
-      ok: true,
-      action: "create",
-      schedule_id: data.id,
-      next_run_at: next ? next.toISOString() : null,
-    });
   }
 
   // All other actions mutate an existing row, scoped to this user's project (RLS
