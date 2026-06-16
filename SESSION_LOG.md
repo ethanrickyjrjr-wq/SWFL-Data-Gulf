@@ -2,6 +2,19 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat(collier_permits): crawl4ai migration + GHA dry-run probe setup
+
+- Replaced Firecrawl stealth (listing HTML) + Spider residential (XLSX binary) with crawl4ai
+  UndetectedAdapter. `Crawl4aiSession` gains `accept_downloads` + `download_step()` (native
+  browser file download via `result.downloaded_files`). Two distinct session IDs
+  (`collier_listing` / `collier_download`); both `async with` to ensure temp-dir cleanup.
+- `fetcher.py` fully rewritten; public interface preserved (`pipeline.py` zero edits).
+  Pure functions `_parse_listing_html` + `_build_click_js` extracted and unit-tested (10 tests).
+- `collier-permits-monthly.yml`: cron held, `workflow_dispatch` dry-run default ON,
+  Chromium install added, `FIRECRAWL_API_KEY` + `SPIDER_API_KEY` env refs removed.
+- Next: run GHA dry-run probe (workflow_dispatch) → confirm green → open check
+  `collier_first_lake_ingestion` → first live run → re-enable cron.
+
 ## 2026-06-16 (main) — verify(email): Task 3 pre-push checks (5) all pass; 39e2f50 reached origin via a concurrent push
 
 - **Operator-requested verification of `39e2f50` (Task 3).** All 5 items pass: (1) the no-DB smoke's token `SWFL-7421-v6-20260603` is a REAL disk read — `brains/housing-swfl.md` literally holds `freshness_token: SWFL-7421-v6-20260603`; `fetch-brain.ts` reads `brains/{slug}.md` with NO fixture branch (it's rebuild-stale at 06-03, not a fixture echo). (2) Delta: recurring lane is `delta=null` BY DESIGN (no stored prior snapshot) — nothing to verify; delta lives in the activation email-#2 lane (check detail corrected). (3)+(4) Added 4 REAL-render tests to `recurring-report.test.ts`: hero + table renders byte-identical across the additive `model?` seam; regression lock — a report WITH a model quotes its fresh token, a model-less fallback routes to the hero shell (NOT the data-less report shell). (5) Commit hygiene: `39e2f50` = 8 files, zero collier bleed.

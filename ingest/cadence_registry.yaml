@@ -396,6 +396,8 @@ pipelines:
     dlt_schema_name: collier_permits
     expected_rows_min: 4477 # 90% of 4,975 confirmed 2026-05-31
     count_table: data_lake.collier_building_permits # dlt schema_name != table name
+    # 2026-06-16: fetcher rewritten — crawl4ai UndetectedAdapter replaces Firecrawl stealth
+    # + Spider residential. GHA dry-run probe required before re-enabling cron.
     # Verified: April 2026 XLSX loaded 2026-05-27 (operator-confirmed, pre-WAF window).
 
   - name: fl_dor_tdt
