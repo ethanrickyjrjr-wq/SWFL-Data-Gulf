@@ -10,6 +10,7 @@ import { asOfFromToken } from "@/lib/project/as-of";
 import { cleanCitation } from "@/lib/citations/clean-url";
 import { PrintButton } from "@/components/PrintButton";
 import { UploadDrop } from "@/components/project/UploadDrop";
+import { SendWeeklyHandle } from "@/app/p/[id]/SendWeeklyHandle";
 
 export interface SavedChart {
   block: ChartBlock;
@@ -21,6 +22,8 @@ export interface DeliverableRow {
   template: string;
   status: string;
   created_at: string;
+  scope_kind: string | null;
+  scope_value: string | null;
 }
 
 interface Props {
@@ -285,32 +288,42 @@ export function ProjectDetail({
           <h2 className="text-sm font-semibold text-white">Shared Deliverables</h2>
           <ul className="mt-3 flex flex-col gap-2">
             {deliverables.map((d) => (
-              <li key={d.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`/p/${d.id}`}
-                    className="text-sm text-[#00d4aa] underline underline-offset-2"
+              <li key={d.id} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`/p/${d.id}`}
+                      className="text-sm text-[#00d4aa] underline underline-offset-2"
+                    >
+                      {d.template}
+                    </a>
+                    <span className="text-xs text-gray-500">
+                      {new Date(d.created_at).toLocaleDateString()}
+                    </span>
+                    {d.status === "revoked" && (
+                      <span className="text-xs font-medium text-red-400">revoked</span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleRevoke(d.id, d.status)}
+                    className={
+                      d.status === "revoked"
+                        ? "text-xs text-[#00d4aa] underline underline-offset-2"
+                        : "text-xs text-red-400 underline underline-offset-2"
+                    }
                   >
-                    {d.template}
-                  </a>
-                  <span className="text-xs text-gray-500">
-                    {new Date(d.created_at).toLocaleDateString()}
-                  </span>
-                  {d.status === "revoked" && (
-                    <span className="text-xs font-medium text-red-400">revoked</span>
-                  )}
+                    {d.status === "revoked" ? "Restore" : "Revoke"}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => toggleRevoke(d.id, d.status)}
-                  className={
-                    d.status === "revoked"
-                      ? "text-xs text-[#00d4aa] underline underline-offset-2"
-                      : "text-xs text-red-400 underline underline-offset-2"
-                  }
-                >
-                  {d.status === "revoked" ? "Restore" : "Revoke"}
-                </button>
+                {d.status !== "revoked" && d.scope_kind && (
+                  <SendWeeklyHandle
+                    deliverableId={d.id}
+                    projectId={id}
+                    scopeKind={d.scope_kind}
+                    scopeValue={d.scope_value}
+                  />
+                )}
               </li>
             ))}
           </ul>

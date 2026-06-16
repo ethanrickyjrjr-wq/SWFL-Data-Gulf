@@ -40,6 +40,8 @@
     "mcp-widget",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/*.test.mts"
+    "**/*.test.mts",
+    "scratch-*.mts",
+    "scratch-*.ts"
   ]
 }

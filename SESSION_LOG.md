@@ -1,3 +1,14 @@
+## 2026-06-16 (main) — feat(deliverable): Task 6 — Send weekly handle on /p/[id] and /project deliverable cards
+
+- **What:** owners of scoped email deliverables now see a "Send weekly" affordance directly on `/p/[id]` (email branch + any branch with `scope_kind` set) and on each deliverable card in `/project/[id]`. Existing schedule shows inline status + Pause control.
+- **New files:** `app/api/email/send-status/route.ts` (GET, cookie-auth; returns `{ audiences[], schedule | null }` for a deliverable's recipe shape — NULL-safe IS NOT DISTINCT FROM matching on scope cols, same guard as Task 7); `app/p/[id]/SendWeeklyHandle.tsx` (client, 5-step flow: idle → audience chips → cadence/day/hour picker → `fromDeliverable` propose → confirm writes schedule).
+- **Wired into:** `app/p/[id]/page.tsx` (email branch + scoped non-email, owners only); `app/project/[id]/ProjectDetail.tsx` + `page.tsx` (`scope_kind`/`scope_value` added to deliverable select + `DeliverableRow` interface; `SendWeeklyHandle` rendered per card when scope set + not revoked).
+- **Migration applied in prod:** `20260616_deliverables_scope.sql` (ADD COLUMN IF NOT EXISTS `scope_kind`/`scope_value` on `deliverables`) — was 4th unapplied; now live. Confirmed cols present.
+- **tsconfig:** excluded `scratch-*.mts`/`scratch-*.ts` from build (operator scratch files were breaking `next build`; pre-existing, not introduced by this diff).
+- **Tests/build:** `bun test lib/email lib/deliverable` 577/0; `next build` green; tsc clean (excluding operator scratch file).
+- **Check opened:** `built_work_send_handle` (due 2026-06-20) — live-verify: Send weekly flow produces one `email_schedules` row, Pause control pauses it, existing schedule shows status.
+- **One-off "Send" (not built here):** `scratch-send-oneoff.mts` in operator's tree suggests one-off send backend in progress; this task ships the weekly/recurring handle only.
+
 ## 2026-06-16 (main) — fix(test): align renderDetailRowText ZIP-drill assertion to asOfFromToken (un-reds main)
 
 - The chat-context work below SHIPPED as `98e395d` (safe-pushed, `bd7997e..98e395d`). While verifying, `main` was red on `renderDetailRowText (ZIP drill) > renders the ZIP row with real numbers` — UNRELATED to that diff. Root cause: concurrent commit `bd7997e` routed freshness-token DISPLAY through `asOfFromToken` → MM/DD/YYYY (`lib/fetch-brain.ts:285` `_Freshness:_` line) but left `lib/fetch-brain.test.ts:88` asserting the raw `SWFL-7421-v6-20260603` token. Deterministic red (confirmed on clean origin/main), NOT a flake.

@@ -65,7 +65,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   // Deliverables for this project — table exists after S6 SQL migration; graceful empty on error.
   const { data: deliverableRows } = await supabase
     .from("deliverables")
-    .select("id, template, status, created_at")
+    .select("id, template, status, created_at, scope_kind, scope_value")
     .eq("project_id", id)
     .order("created_at", { ascending: false });
   const deliverables: DeliverableRow[] = (deliverableRows ?? []) as DeliverableRow[];

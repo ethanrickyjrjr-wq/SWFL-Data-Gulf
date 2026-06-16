@@ -29,6 +29,7 @@ import { StatCard } from "./StatCard";
 import { PrintButton } from "@/components/PrintButton";
 import { DeliveryButtons } from "./DeliveryButtons";
 import { EmailPreviewFrame } from "./EmailPreviewFrame";
+import { SendWeeklyHandle } from "./SendWeeklyHandle";
 import { CitationList } from "@/components/CitationList";
 import { cleanCitation } from "@/lib/citations/clean-url";
 
@@ -423,7 +424,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
     const emailHtml = await renderGroundedReport(emailModel, { skin: "email" });
     return (
       <main className="deliverable-page w-full px-4 py-10">
-        <div className="print-hide mb-6 flex flex-wrap items-center justify-end gap-2">
+        <div className="print-hide mb-6 flex flex-wrap items-center justify-between gap-3">
           {/* The email preview is a full <html> doc in an iframe; window.print() on it
               is unreliable, so the PDF affordance opens the dedicated print route, which
               renders the skin:"pdf" doc skin and auto-prints. */}
@@ -435,6 +436,14 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
           >
             Save as PDF
           </a>
+          {isOwner && (
+            <SendWeeklyHandle
+              deliverableId={id}
+              projectId={data.project_id}
+              scopeKind={data.scope_kind}
+              scopeValue={data.scope_value}
+            />
+          )}
         </div>
         <EmailPreviewFrame srcDoc={emailHtml} />
       </main>
@@ -506,6 +515,17 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
           <PrintButton reportId={id} />
         </div>
       </div>
+      {/* Send weekly handle — owners only, requires a ZIP scope on the deliverable */}
+      {isOwner && data.scope_kind && (
+        <div className="print-hide mb-4">
+          <SendWeeklyHandle
+            deliverableId={id}
+            projectId={data.project_id}
+            scopeKind={data.scope_kind}
+            scopeValue={data.scope_value}
+          />
+        </div>
+      )}
 
       {/* Render every slot in model order */}
       {model.slots.map((slot, i) => renderSlot(slot, i, id))}
