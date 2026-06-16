@@ -1,3 +1,10 @@
+## 2026-06-16 (main) — fix(p/[id]): email full-width + regular templates max-w-5xl
+
+- Email branch: removed max-w constraint entirely (w-full) so EmailPreviewFrame fills 100% of viewport on any screen size.
+- GlobalDigestFallback branch: same (w-full).
+- All other templates (one-pager, market-overview, bov-lite, client-email): max-w-3xl → max-w-5xl (1024px).
+- No code logic changes — layout-only.
+
 # SESSION_LOG.md — Append-Only Cross-Session Memory
 
 **Read this on session start. Append to it before every `git push`.**
