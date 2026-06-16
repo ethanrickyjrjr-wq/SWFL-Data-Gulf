@@ -50,7 +50,7 @@ def permits_resource(rows: Optional[Iterable[dict]] = None):
             "status": r.get("status"),
             "_ingest_metadata": {
                 "source": "lee_accela_citizen_access",
-                "scraped_via": "firecrawl",
+                "scraped_via": "crawl4ai",
             },
         }
 

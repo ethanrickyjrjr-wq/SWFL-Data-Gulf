@@ -7,6 +7,11 @@ pandas>=2.0.0
 pyarrow>=14.0
 anthropic>=0.49.0
 firecrawl-py>=4.28.0
+# crawl4ai drives the Accela permit portals (lee_permits) via UndetectedAdapter,
+# the Firecrawl replacement for interactive/stealth scraping. GHA needs a
+# `crawl4ai-setup` / `playwright install chromium` step + a non-datacenter IP
+# (deferred with the GHA-IP follow-on; local-first for now).
+crawl4ai>=0.8.9
 psycopg[binary]>=3.2
 pyyaml>=6.0
 beautifulsoup4>=4.12
