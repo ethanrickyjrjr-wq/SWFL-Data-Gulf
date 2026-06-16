@@ -26,6 +26,29 @@ const TOKEN_RE = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
 /** A slug may only contain lowercase letters, digits, `-`, and `/` path segments. */
 const SLUG_RE = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/;
 
+/** Matches `<!-- repeat:key -->…<!-- /repeat:key -->` (single-level, non-greedy). */
+const REPEAT_RE = /<!--\s*repeat:([a-zA-Z0-9_]+)\s*-->([\s\S]*?)<!--\s*\/repeat:\1\s*-->/g;
+
+/**
+ * Expand `<!-- repeat:KEY -->inner<!-- /repeat:KEY -->` blocks: clone `inner` once per
+ * item in `repeats[KEY]`, filling that item's `{{tokens}}`. Tokens NOT on the item are
+ * left verbatim (`{{token}}`) so the normal global pass fills them. Absent/empty list →
+ * the block renders to nothing. Single-level only (no nested repeats).
+ */
+export function expandRepeats(html: string, repeats: Record<string, TemplateTokens[]>): string {
+  return html.replace(REPEAT_RE, (_match, key: string, inner: string) => {
+    const items = repeats[key] ?? [];
+    return items
+      .map((item) =>
+        inner.replace(TOKEN_RE, (whole, k: string) => {
+          const value = item[k];
+          return value === undefined ? whole : String(value);
+        }),
+      )
+      .join("");
+  });
+}
+
 export class TemplateNotFoundError extends Error {
   constructor(public readonly slug: string) {
     super(`Template not found: ${slug}`);
@@ -51,7 +74,11 @@ export class InvalidSlugError extends Error {
  * @throws InvalidSlugError    if the slug fails validation / escapes the root.
  * @throws TemplateNotFoundError if the resolved file does not exist.
  */
-export async function renderHtmlTemplate(slug: string, tokens: TemplateTokens): Promise<string> {
+export async function renderHtmlTemplate(
+  slug: string,
+  tokens: TemplateTokens,
+  repeats?: Record<string, TemplateTokens[]>,
+): Promise<string> {
   if (!SLUG_RE.test(slug) || slug.includes("..")) throw new InvalidSlugError(slug);
 
   const filePath = path.join(TEMPLATE_ROOT, `${slug}.html`);
@@ -66,6 +93,8 @@ export async function renderHtmlTemplate(slug: string, tokens: TemplateTokens): 
     if ((e as NodeJS.ErrnoException).code === "ENOENT") throw new TemplateNotFoundError(slug);
     throw e;
   }
+
+  if (repeats) shell = expandRepeats(shell, repeats);
 
   return shell.replace(TOKEN_RE, (_match, key: string) => {
     const value = tokens[key];
