@@ -35,6 +35,7 @@
 import type { CadenceSpec } from "./schedule-cadence";
 import type { ResolvedSender, SenderConfigRow, PlatformSenderDefaults } from "./sender-config";
 import { resolveSender } from "./sender-config";
+import type { GroundedReportModel } from "./grounded-report";
 
 /** The literal Resend managed-unsubscribe token the broadcast route requires. */
 export const UNSUBSCRIBE_TOKEN = "{{{RESEND_UNSUBSCRIBE_URL}}}";
@@ -125,11 +126,29 @@ export interface ProcessDeps {
   /** Resolve a user's audience_slug → segment id (Unit C). null when absent. */
   readAudience: (userId: string, slug: string) => Promise<AudienceLookup | null>;
 
-  /** Fetch the brain data and build the email body string for this schedule. */
-  buildContent: (row: ScheduleRow) => Promise<{ subject: string; body: string; chart?: string }>;
+  /**
+   * Fetch the brain data and build the email body for this schedule. Returns the
+   * subject + plain-template body/chart, AND — for the grounded `template_id:"report"`
+   * lane (Task 3) — an optional `model`: a fully-assembled `GroundedReportModel` the
+   * core threads to `renderHtml` so the report renders through the convergence spine
+   * instead of the (removed) plain `[ BODY TEXT ]` slot. Absent `model` = the
+   * unchanged plain/digest path.
+   */
+  buildContent: (
+    row: ScheduleRow,
+  ) => Promise<{ subject: string; body: string; chart?: string; model?: GroundedReportModel }>;
 
-  /** Render the template HTML (Unit's template lane). */
-  renderHtml: (row: ScheduleRow, body: string, chart?: string) => Promise<string>;
+  /**
+   * Render the template HTML (Unit's template lane). `model`, when present, is the
+   * grounded report assembled in `buildContent` — the runner routes it through
+   * `renderGroundedReport`; absent → the plain template render (unchanged).
+   */
+  renderHtml: (
+    row: ScheduleRow,
+    body: string,
+    chart?: string,
+    model?: GroundedReportModel,
+  ) => Promise<string>;
 
   /** POST the broadcast (Unit B). Only called on a real send. */
   postBroadcast: (req: BroadcastRequest) => Promise<BroadcastResult>;
@@ -308,9 +327,10 @@ export async function processSchedule(
     const reply = deps.resolveReplyTo ? deps.resolveReplyTo(row) : null;
     const effectiveSender = reply ? { ...sender, replyTo: reply.address } : sender;
 
-    // 4. CONTENT + RENDER + token injection.
-    const { subject, body, chart } = await deps.buildContent(row);
-    const rendered = await deps.renderHtml(row, body, chart);
+    // 4. CONTENT + RENDER + token injection. `model` (Task 3) is the grounded report
+    //    assembled for a "report" schedule; the core just threads it to renderHtml.
+    const { subject, body, chart, model } = await deps.buildContent(row);
+    const rendered = await deps.renderHtml(row, body, chart, model);
     const html = ensureUnsubscribeToken(rendered);
 
     // 5. PAYLOAD.

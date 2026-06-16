@@ -16,6 +16,7 @@ import {
   type BroadcastResult,
   type AudienceLookup,
 } from "../scheduler.ts";
+import type { GroundedReportModel } from "../grounded-report.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures + a recording-mock dep factory
@@ -506,6 +507,51 @@ describe("processSchedule — per-row error isolation", () => {
     assert.equal(outcomes[1].kind, "sent");
     assert.equal(rec.posts.length, 1, "second row still sent despite first row throwing");
     assert.equal(rec.rearms.length, 2, "both rows re-armed");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// processSchedule — content-model threading (Task 3: recurring "report" lane)
+// ---------------------------------------------------------------------------
+
+describe("processSchedule — content model threading", () => {
+  test("a model returned by buildContent is threaded into renderHtml (report → grounded renderer)", async () => {
+    const { deps } = makeDeps({});
+    const model = {
+      zip: "33904",
+      scope: { kind: "zip", value: "33904", grain: "zip" },
+    } as unknown as GroundedReportModel;
+    let renderedWith: GroundedReportModel | undefined | "unset" = "unset";
+    const d: ProcessDeps = {
+      ...deps,
+      async buildContent() {
+        return { subject: "Cape Coral — your area report", body: "", model };
+      },
+      async renderHtml(_row, _body, _chart, m) {
+        renderedWith = m;
+        return "<html><body>grounded</body></html>";
+      },
+    };
+    const out = await processSchedule(makeRow({ template_id: "report" }), d, FIXED_NOW);
+    assert.equal(out.kind, "sent");
+    assert.equal(renderedWith, model, "the assembled grounded model reached renderHtml");
+  });
+
+  test("no model from buildContent → renderHtml receives undefined (plain path unchanged)", async () => {
+    const { deps } = makeDeps({});
+    let renderedWith: GroundedReportModel | undefined | "unset" = "unset";
+    const d: ProcessDeps = {
+      ...deps,
+      async buildContent() {
+        return { subject: "S", body: "B" };
+      },
+      async renderHtml(_row, _body, _chart, m) {
+        renderedWith = m;
+        return "<html><body>x</body></html>";
+      },
+    };
+    await processSchedule(makeRow(), d, FIXED_NOW);
+    assert.equal(renderedWith, undefined, "a plain (no-model) content carries no model");
   });
 });
 

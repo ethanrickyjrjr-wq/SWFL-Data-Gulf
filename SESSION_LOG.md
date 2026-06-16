@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat(email): Task 3 — recurring "report" lane adopts the convergence spine (Wave B, Opus) — PUSH HELD
+
+- **Wave B / Task 3 built** (`docs/superpowers/plans/2026-06-16-deliverable-convergence/task-3-recurring-adopts-spine.md`). A `template_id:"report"` schedule now renders the GROUNDED report (Task-2 spine) with FRESH per-ZIP data each run, and the Phase-1 removal of the `[ BODY TEXT ]` slot can no longer silently render an empty masthead+footer.
+- **Plan correction (code audit, RULE 0/C1):** the plan said "assemble a `GroundedReportModel` via `assembleScopedContent`" — that does NOT typecheck (`assembleScopedContent` returns `ScopedContent`/`cards`, not a model). Real fresh-data assembler is `assembleActivationReport(scope) → assembledReportToModel()`. Corrected task-3.md + README in this commit.
+- **New `lib/email/recurring-report.ts`** (pure, DI, tested): `buildReportModel(row,…)` (ZIP scope only → fresh model; non-ZIP/out-of-footprint/empty → null fallback), `reportSubject(model)`, `renderRecurringHtml(args,deps)` — the slot-break guard: a "report" row WITHOUT a model renders the DEFAULT template, never the bodyless report shell.
+- **`scheduler.ts` core:** additive optional `model?` on `buildContent`'s return + `renderHtml`'s 4th param (RULE 3 C2 — extend the seam, no new gate); threaded in `processSchedule` step 4. Plain/digest path byte-identical (model=undefined). **`run-schedules.mts`:** report branch checked FIRST in `buildContent` (a report row is scope_kind="zip", must precede the scoped path), per-run `reportModelCache` by ZIP, `renderHtml` routes via `renderRecurringHtml`.
+- **Verified:** `bun test lib/email` **346/0** (added recurring-report.test.ts 13 + scheduler model-threading 2); tsc **0 errors** project-wide; eslint clean. No-DB smoke (ZIP 33904) → grounded 12KB HTML quoting fresh token `SWFL-7421-v6-20260603`, 6 metrics/12 lines, `delta:null`. Opened check `email_recurring_report_template` (closes on a live DRY_RUN against a seeded report schedule). Cron stays PAUSED (`email-scheduler.yml`) — go-live separate.
+- **PUSH HELD** — touches the cron worker + scheduler core; awaiting operator diff review (no-autonomous-push).
+
 ## 2026-06-16 (main) — docs(lee_permits): Firecrawl→crawl4ai reference sweep + fix 80 bad ZIP rows
 
 - Updated `pipeline.py`, `scraper.py`, `README.md`, `probe-findings-2026-05-26.md`: removed all stale Firecrawl references, updated to crawl4ai. Probe doc marked SUPERSEDED; README rewritten (live run steps, GHA cron, known limitations). Stale "datacenter IP deferred" comment corrected.

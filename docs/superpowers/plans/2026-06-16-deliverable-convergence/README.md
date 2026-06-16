@@ -16,13 +16,13 @@ Most of the recurring engine, AI schedule-setup, and contacts upload **already e
 
 ## Gate before Wave A — the artifact must be real and green (Phase 0)
 
-**Do not start Wave A until this is true.** As of 2026-06-16 the foundation is **local-only and red:**
+**SATISFIED 2026-06-16** (verify against `git`/the ledger, never this line). The blocking state below was real when written; it has since resolved:
 
-- Local `main` is **ahead of origin/main by 7 commits, unpushed.** origin/main has the **old** spec, **no** companion plan, **no** Phase-1 code.
-- Phase 1 is **half-built:** renderer (`render-html-template.ts`), wrapper (`render-template.ts`), and template (`email-report.html` → `repeat:hero/metrics/reads`) are done; **`lib/email/activation/render.ts` still feeds the removed `[ BODY TEXT ]` slot** → `bun test lib/email` = **312 pass / 5 fail** (freshness token, delta block, re-verified, CTA, callout border).
-- One of the 7 unpushed commits is **unrelated** (`f6a8b0f` crawl4ai→Accela).
+- Local `main` **== origin/main (0/0)** — everything pushed.
+- Phase 1 is **green on origin/main**: `bun test lib/email` was **318/0** before the spine, **333/0** after the goldens. The removed `[ BODY TEXT ]` slot no longer breaks the activation render (`reportToEmailHtml` now delegates into the spine).
+- **Wave A (Task 2 — the convergence spine) is shipped** (`5ea26cb`): `lib/email/grounded-report.ts` carries `GroundedReportModel` + `renderGroundedReport`; `2750a2e`/`7c904d5` froze 10 pre-spine goldens that prove the email output is byte-identical.
 
-**Phase 0 = finish Phase 1 to 5-green (per the companion plan) → push spec + companion plan + green Phase 1 to origin/main** (the crawl4ai doc rides along, harmless). Only then is there a real approved artifact to build Phases 2–7 against. Owner of Phase 0 = TBD by operator (parallel session vs. isolated worktree). Pushing before green = red `main` — forbidden.
+**→ Wave B (Task 3 ‖ Task 4) is unblocked.** Phase 1 (the companion plan) and the spec are both on origin/main; the crawl4ai docs that rode along are harmless. No push-before-green risk remains.
 
 ---
 
@@ -64,8 +64,8 @@ Buttons for every finite choice. The "weekly?" confirm reuses `schedule-command.
 
 | Wave | Tasks (parallel within the wave) | Builder | Depends on |
 |------|----------------------------------|---------|-----------|
-| **0 (gate)** | Finish + push Phase 1 to green — *companion plan, NOT in this folder* | — | — |
-| **A** | [Task 2 — Convergence spine](./task-2-convergence-spine.md) | **Opus** | Phase 1 green on origin/main |
+| **0 (gate)** ✅ | Finish + push Phase 1 to green — *companion plan, NOT in this folder* | — | — |
+| **A** ✅ | [Task 2 — Convergence spine](./task-2-convergence-spine.md) (`5ea26cb`) | **Opus** | Phase 1 green on origin/main |
 | **B** | [Task 3 — Recurring adopts spine](./task-3-recurring-adopts-spine.md) ‖ [Task 4 — Briefcase email + PDF](./task-4-briefcase-email-pdf.md) | **Opus** ‖ **Sonnet** | Task 2 |
 | **C** | [Task 7 — Build→schedule bridge](./task-7-build-to-schedule-bridge.md) | **Opus** | Task 4 |
 | **D** | [Task 5 — In-chat flow](./task-5-inchat-flow.md) ‖ [Task 6 — Send-later on built work](./task-6-send-later-built-work.md) | **Opus** ‖ **Sonnet** | Task 7 |

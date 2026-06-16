@@ -45,6 +45,9 @@ import {
   defaultScopedDeps,
   type ScopedContent,
 } from "@/lib/email/scoped-content";
+import { buildReportModel, reportSubject, renderRecurringHtml } from "@/lib/email/recurring-report";
+import { renderGroundedReport, type GroundedReportModel } from "@/lib/email/grounded-report";
+import { assembleActivationReport } from "@/lib/email/activation/snapshot";
 import { fetchDigestData } from "./fetch-digest-data.mts";
 import { buildSubjectLine } from "./build-digest.mts";
 
@@ -212,6 +215,25 @@ async function main(): Promise<void> {
   const scopedDeps = defaultScopedDeps({ origin: SITE_URL, log: (line) => console.log(line) });
   const scopeCache = new Map<string, ScopedContent | null>();
 
+  // ── grounded "report" lane (Task 3) ──
+  // A `template_id:"report"` schedule renders the grounded report (the Task-2 spine)
+  // with FRESH per-ZIP data this run via `assembleActivationReport`. Cached per ZIP
+  // for the run (mirrors getDigest()/scopeCache): multiple tenants on the same ZIP
+  // reuse one assembly; a cached `null` = a known-unassemblable scope (→ digest).
+  const reportModelCache = new Map<string, GroundedReportModel | null>();
+  async function getReportModel(row: ScheduleRow): Promise<GroundedReportModel | null> {
+    const key = `${(row.scope_kind ?? "").trim().toLowerCase()}|${(row.scope_value ?? "").trim()}`;
+    let model = reportModelCache.get(key);
+    if (model === undefined) {
+      model = await buildReportModel(row, {
+        assembleReport: (scope) => assembleActivationReport(scope),
+        log: (line) => console.log(line),
+      });
+      reportModelCache.set(key, model);
+    }
+    return model;
+  }
+
   const deps: ProcessDeps = {
     dryRun: DRY_RUN,
     platform: PLATFORM,
@@ -240,6 +262,17 @@ async function main(): Promise<void> {
     },
 
     async buildContent(row: ScheduleRow) {
+      // Grounded "report" lane (Task 3) — checked FIRST: a report row IS scoped
+      // (scope_kind="zip"), so this must precede the scoped path below. Fresh ZIP
+      // report via the spine; the model rides to renderHtml. Unassemblable (non-ZIP /
+      // out-of-footprint / empty) → global digest, rendered through the default
+      // template (renderHtml maps the bodyless "report" slug away).
+      if (resolveTemplateSlug(row.template_id) === "report") {
+        const model = await getReportModel(row);
+        if (model) return { subject: reportSubject(model), body: "", model };
+        const digest = await getDigest();
+        return { subject: buildSubjectLine(digest, []), body: buildBody(digest) };
+      }
       // Global path — UNCHANGED (regression contract). scope_kind==NULL &&
       // topic==NULL is today's whole-region digest, byte-for-byte as before.
       if (row.scope_kind == null && row.topic == null) {
@@ -263,9 +296,25 @@ async function main(): Promise<void> {
       return renderScopedBody(content);
     },
 
-    async renderHtml(row: ScheduleRow, body: string, chart?: string): Promise<string> {
-      const slug = resolveTemplateSlug(row.template_id);
-      return renderEmailTemplate(slug, undefined, { body, ...(chart ? { chart } : {}) });
+    async renderHtml(
+      row: ScheduleRow,
+      body: string,
+      chart?: string,
+      model?: GroundedReportModel,
+    ): Promise<string> {
+      // Route via the tested router: a grounded model → the spine; a "report" row
+      // that fell back (no model) → the default template, never the bodyless report
+      // shell; every other template → the unchanged plain render. Recurring rows
+      // carry no white-label brand → the SWFL house brand (brand:null).
+      return renderRecurringHtml(
+        { slug: resolveTemplateSlug(row.template_id), body, chart, model },
+        {
+          renderGrounded: (m) => renderGroundedReport(m, { skin: "email", brand: null }),
+          renderTemplate: (slug, b, c) =>
+            renderEmailTemplate(slug, undefined, { body: b, ...(c ? { chart: c } : {}) }),
+          defaultSlug: DEFAULT_TEMPLATE,
+        },
+      );
     },
 
     async postBroadcast(req: BroadcastRequest): Promise<BroadcastResult> {

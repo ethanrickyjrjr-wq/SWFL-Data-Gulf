@@ -12,9 +12,11 @@ Subtle correctness: the recurring lane already maps `report → email/email-repo
 
 ## Build
 
-1. **`buildContent` for the "report" template** (`scripts/email/run-schedules.mts`): when `resolveTemplateSlug(row.template_id) === "report"`, assemble a `GroundedReportModel` from the row's scope via the existing `assembleScopedContent` (`lib/email/scoped-content.ts`) → fresh data this run. Non-"report" templates keep the current `{subject, body, chart}` path unchanged.
-2. **`renderHtml`**: route "report" through `renderGroundedReport(model, {skin:"email", brand})` (Task 2). Plain templates (hero/table/compare/ranked/hbar) keep `renderEmailTemplate(slug, {body, chart})` — `[ BODY TEXT ]` path **unchanged** (backward-compat).
-3. **Guard:** if a "report" schedule can't assemble a model (out-of-footprint scope), fall back to the global digest (never invent below grain) — mirror the existing `assembleScopedContent` null-fallback.
+> **Plan correction (2026-06-16, found by code audit — RULE 0/C1):** the original step 1 said "assemble a `GroundedReportModel` via `assembleScopedContent`." That does **not** typecheck — `assembleScopedContent` returns `ScopedContent` (`cards: WelcomeMetric[]`), NOT a `GroundedReportModel` (`metrics: ReportMetric[]` + `lines: ReportLine[]`, no dossier prose). The real fresh-data grounded assembler is **`assembleActivationReport(scope) → assembledReportToModel()`** (`lib/email/activation/snapshot.ts`): it pulls housing/flood/dossier from the brains live each call (= "fresh data each run") and yields the exact shape `assembledReportToModel` consumes. Built against that instead.
+
+1. **`buildContent` for the "report" template** (`scripts/email/run-schedules.mts`): when `resolveTemplateSlug(row.template_id) === "report"`, build a `GroundedReportModel` via `buildReportModel(row, …)` (`lib/email/recurring-report.ts`) → `assembleActivationReport({ zip: scope_value }) → assembledReportToModel(report)` → fresh data this run. **ZIP-scoped only** (the report grain); the assembler is ZIP-keyed. Non-"report" templates keep the current `{subject, body, chart}` path unchanged.
+2. **`renderHtml`**: route "report" through `renderGroundedReport(model, {skin:"email", brand:null})` (Task 2; recurring rows carry no white-label brand → house brand). Plain templates (hero/table/compare/ranked/hbar) keep `renderEmailTemplate(slug, {body, chart})` — `[ BODY TEXT ]` path **unchanged** (backward-compat). The model travels `buildContent → renderHtml` via an additive optional `model?` on the existing `ProcessDeps` seam (RULE 3 C2 — extend, no new gate).
+3. **Guard:** if a "report" schedule can't assemble a model (not a ZIP scope, out-of-footprint ZIP, or in-scope but zero metrics+lines), fall back to the global digest (never invent below grain) — `buildReportModel` returns `null`, mirroring `assembleScopedContent`'s null-fallback.
 
 ## Tests / acceptance
 
