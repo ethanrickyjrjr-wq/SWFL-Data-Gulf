@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — fix(briefcase): Task 4 CI red — example-email needs a card + count bump
+
+- CI #769 (`7630b32`) failed at `bun test` (Typecheck + Lint passed): adding the `example-email` build scenario without a matching `EXAMPLE_CARDS` entry orphaned it (the cards⇄scenarios sync lock, `lib/briefcase/example-cards.test.ts`). **Root cause:** I scoped local runs to lib/deliverable + lib/email; this cross-cutting consumer lives in `lib/briefcase`.
+- Fix: added the `example-email` card to `lib/briefcase/example-cards.ts` + bumped `panel-logic.test.ts` "exactly 4 cards" → 5. **FULL `bun test` 2648/0**, tsc + eslint clean.
+- **Lesson:** run the FULL `bun test` before pushing a change to a shared registry (`EXAMPLE_SCENARIOS`), not just the touched dirs — CI runs the whole suite.
+
 ## 2026-06-16 (main) — feat(briefcase): Task 4 — "email" deliverable + PDF doc skin (grounded spine) — PUSH PENDING
 
 - **What:** new `"email"` TemplateId renders via the Task-2 grounded spine, NOT `buildRenderModel`. `lib/deliverable/email-deliverable.ts` — pure `buildEmailDeliverableModel(row)`: ZIP-only via shared `resolveReportZip` (extracted from `recurring-report.ts`, normalization preserved), metrics from frozen `items_snapshot`, **reads from NARRATIVE PROSE (exec_summary + sections), not a metric echo**, `freshness_token` lifted from items, deterministic `captured_at = row.created_at` (no `new Date()`). 21 unit tests.

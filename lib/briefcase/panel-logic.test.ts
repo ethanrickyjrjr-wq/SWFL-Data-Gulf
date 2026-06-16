@@ -29,10 +29,10 @@ describe("resolveBuildAction (create-gate)", () => {
 });
 
 describe("EXAMPLE_CARDS (client-safe, logged-out popup)", () => {
-  it("ships exactly 4 cards with unique example-* ids, titles, and blurbs", () => {
-    expect(EXAMPLE_CARDS).toHaveLength(4);
+  it("ships exactly 5 cards with unique example-* ids, titles, and blurbs", () => {
+    expect(EXAMPLE_CARDS).toHaveLength(5);
     const ids = EXAMPLE_CARDS.map((c) => c.id);
-    expect(new Set(ids).size).toBe(4);
+    expect(new Set(ids).size).toBe(5);
     for (const c of EXAMPLE_CARDS) {
       expect(c.id.startsWith("example-")).toBe(true);
       expect(c.title.length).toBeGreaterThan(0);

@@ -35,4 +35,9 @@ export const EXAMPLE_CARDS: ExampleCard[] = [
     title: "Workforce Demand Email",
     blurb: "Top sectors & construction labor",
   },
+  {
+    id: "example-email",
+    title: "ZIP Market Email (33901)",
+    blurb: "Grounded housing brief — email & PDF",
+  },
 ];
