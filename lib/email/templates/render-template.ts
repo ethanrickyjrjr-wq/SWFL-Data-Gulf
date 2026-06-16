@@ -24,7 +24,7 @@ export function brandThemeToTokens(theme: BrandTheme | null | undefined): Partia
 
 export async function renderEmailTemplate(
   slug: TemplateSlug,
-  tokens?: TemplateTokens,
+  tokens?: Record<string, string | number>,
   data?: TemplateData,
 ): Promise<string> {
   const resolvedSlug = EMAIL_TEMPLATES[slug];
