@@ -1,3 +1,8 @@
+## 2026-06-16 (main) — fix(briefcase): Task 7 idempotence — stopped recipe reactivates in place (like pause), not a tombstone
+
+- **Correction to the Task 7 entry below (`a5d1858`).** That commit's `createOrTouchSchedule` excluded `status='stopped'` from the recipe match, so re-scheduling an identical-to-stopped recipe inserted a NEW row (stopped twin lingered). Operator decision (2026-06-16): a stopped match should **reactivate in place exactly like un-pausing** — one entry per recipe, and it's data-safe because the schedule row stores only a recipe (no numbers); the next run re-fetches current data via `assembleActivationReport` regardless of how long it sat stopped (confirmed `scripts/email/run-schedules.mts:250`).
+- Change: dropped `.neq("status","stopped")` from the find in `lib/email/schedule-upsert.ts` → a match in ANY status reactivates (`status:'active'` + re-arm `next_run_at` + touch). Full-signature match means only a byte-identical recipe reactivates; a different cadence/audience still inserts fresh. Flipped the one upsert test (`stopped → created:false`, reactivated) + updated spec D2 / build-queue wording. `bun test lib/email lib/deliverable` 577/0; tsc/eslint clean.
+
 ## 2026-06-16 (main) — fix(fetch-brain): route MCP "not found" freshness text through asOfFromToken
 
 - `lib/fetch-brain.ts`: import `asOfFromToken`; `fetchDetailRow` fallback text now emits MM/DD/YYYY date instead of raw `SWFL-7421-vN-YYYYMMDD` token.

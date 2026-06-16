@@ -35,11 +35,11 @@ The bridge is **one pure function + one additive propose branch** on `POST /api/
 
 Re-issuing the same recipe **updates/reactivates** the existing schedule instead of duplicating it. Applied to the **create write path universally** (both `fromDeliverable` and NL `create`) — one create behavior, no divergence.
 
-- **Signature tuple** (what makes two schedules "the same recipe"), scoped to `(user_id, project_id)` and `status != 'stopped'`:
+- **Signature tuple** (what makes two schedules "the same recipe"), scoped to `(user_id, project_id)` across **any status**:
   `template_id, scope_kind, scope_value, topic, audience_slug, cadence, day_of_week, day_of_month, send_hour_et`.
 - **NULL-equal is mandatory.** The lookup matches each nullable column with **`IS NOT DISTINCT FROM`** semantics, **never `=`** — `col = NULL` returns zero rows in Postgres (the NULL-distinct trap), which would silently duplicate exactly the scoped recipes this feature creates. Through PostgREST this is expressed per-column as `.is(col, null)` when the target is null and `.eq(col, value)` when non-null (the two together = `IS NOT DISTINCT FROM`, ANDed across columns). The non-null columns `cadence`/`send_hour_et` use `.eq`.
   - **Rejected:** a DB partial-unique index + `ON CONFLICT` — Postgres treats `NULL` as distinct in unique indexes, so a NULL `audience_slug`/`scope_*` row never conflicts → silent dupes on the scoped recipes. (Operator-locked: do not reopen.)
-- **On match:** set `status:'active'` (reactivate a paused identical recipe), recompute `next_run_at`, touch `updated_at`; return that `id` with `{ created:false }`. **No match:** insert as today; `{ created:true }`. `'stopped'` rows are terminal — never resurrected (a new active row is inserted).
+- **On match (active / paused / stopped):** set `status:'active'`, recompute `next_run_at`, touch `updated_at`; return that `id` with `{ created:false }`. A **stopped** match reactivates in place **exactly like un-pausing** (operator decision 2026-06-16) — data-safe because the row stores only a recipe, never numbers, so the next run re-fetches current data regardless of how long it sat stopped. The full-signature match means only a byte-identical recipe reactivates; a different cadence/audience inserts fresh. **No match:** insert; `{ created:true }`. One row per recipe — never a duplicate alongside a stopped/paused twin.
 
 ## Build units
 

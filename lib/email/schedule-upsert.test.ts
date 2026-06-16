@@ -177,7 +177,7 @@ describe("createOrTouchSchedule", () => {
     expect(store.updates[0].patch).toMatchObject({ status: "active" });
   });
 
-  test("a STOPPED identical row is terminal — a new active row is inserted instead", async () => {
+  test("a STOPPED identical recipe reactivates in place (same as paused), not duplicated", async () => {
     const { db, store } = makeDb([baseRow({ id: 5, status: "stopped" })]);
     const r = await createOrTouchSchedule(db, {
       userId: "u1",
@@ -186,8 +186,10 @@ describe("createOrTouchSchedule", () => {
       nowIso: NOW,
       nextRunAtIso: NEXT,
     });
-    expect(r.created).toBe(true);
-    expect(store.inserts).toHaveLength(1);
+    expect(r.created).toBe(false);
+    expect(r.id).toBe(5);
+    expect(store.inserts).toHaveLength(0);
+    expect(store.updates[0].patch).toMatchObject({ status: "active", next_run_at: NEXT });
   });
 
   test("NULL-equal: an existing row differing ONLY by a NULL-vs-value optional is NOT a match → inserts", async () => {
