@@ -54,6 +54,77 @@ from ingest.lib.firecrawl_client import FirecrawlError, scrape_with_actions
 log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
+# crawl4ai interaction builders (lee Accela form)
+# ---------------------------------------------------------------------------
+# Pure string functions → fully unit-testable without a browser. These encode the
+# fix3-proven date entry (masked fields mangle bulk sets) + the defined-marker
+# pagination guard from docs/superpowers/specs/2026-06-16-crawl4ai-accela-port-design.md.
+
+_START_SEL = "input[id$='txtGSStartDate']"
+_END_SEL = "input[id$='txtGSEndDate']"
+_SEARCH_BTN = "#ctl00_PlaceHolderMain_btnNewSearch"
+_FIRST_ROW_JS = (
+    "(g => g ? g.querySelector(\"a[href*='CapDetail.aspx']\") : null)"
+    "(document.querySelector(\"table[id*='gdvPermitList']\"))"
+)
+
+
+def build_date_search_js(start_str: str, end_str: str) -> str:
+    """JS for js_code_before_wait: set both date inputs with full event dispatch +
+    bounded (<=3) readback-verify (masked fields mangle bulk sets — proven in fix3),
+    then click search. Wrong value after 3 tries falls through; the server's
+    'valid DateTime' banner is caught by the wait predicate + Python post-check."""
+    return f"""(() => {{
+  const setDate = (sel, val) => {{
+    const el = document.querySelector(sel);
+    if (!el) return;
+    for (let i = 0; i < 3; i++) {{
+      el.value = val;
+      for (const ev of ['input','change','keyup','blur'])
+        el.dispatchEvent(new Event(ev, {{bubbles:true}}));
+      if (el.value === val) return;
+    }}
+  }};
+  setDate("{_START_SEL}", "{start_str}");
+  setDate("{_END_SEL}", "{end_str}");
+  const b = document.querySelector("{_SEARCH_BTN}");
+  if (b) b.click();
+}})();"""
+
+
+def build_next_page_js() -> str:
+    """JS for js_code_before_wait on pages 2..N: stash the current first-row id
+    (primary change signal) BEFORE clicking the pager Next. The stash must precede
+    the click so page_changed_wait has a reference value."""
+    return f"""(() => {{
+  const firstLink = {_FIRST_ROW_JS};
+  window.__prevFirstRow = firstLink ? firstLink.getAttribute('href') : undefined;
+  const next = document.querySelector("td.aca_pagination_PrevNext:last-child > a");
+  if (next) next.click();
+}})();"""
+
+
+# Page 1: resolve on grid OR a terminal state (so we never hang); Python classifies after.
+GRID_OR_TERMINAL_WAIT = (
+    "js:() => !!document.querySelector(\"table[id*='gdvPermitList']\") "
+    "|| /no records|unable to proceed|valid datetime/i.test(document.body.innerText)"
+)
+
+
+def page_changed_wait() -> str:
+    """Pages 2..N: resolve only when the marker is DEFINED and the live first-row id
+    differs. Undefined marker (window wiped / stash didn't run) => NOT ready => keep
+    polling => timeout => clear error. Never resolve on a stale grid."""
+    return (
+        "js:() => { "
+        "const link = " + _FIRST_ROW_JS + "; "
+        "const live = link ? link.getAttribute('href') : undefined; "
+        "return window.__prevFirstRow !== undefined && live !== undefined "
+        "&& live !== window.__prevFirstRow; }"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Data model
 # ---------------------------------------------------------------------------
 
