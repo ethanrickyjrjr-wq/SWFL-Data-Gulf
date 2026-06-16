@@ -5,12 +5,13 @@ import { renderStatRow } from "../templates/components/stat-row.ts";
 import { renderCallout } from "../templates/components/callout-box.ts";
 import { renderBadge } from "../templates/components/badge.ts";
 import { renderMapPlaceholder } from "../templates/components/map-placeholder.ts";
+import { SWFL_THEME } from "@/scripts/email/types";
 
 // Section 3 (S3) — visual components. These assert the HARD email constraints
 // (no <script>/<canvas>/<style>, inline-only, width-bounded, data escaped) plus
 // each component's contracted behavior. Same rigor as the S2 chart-renderer tests.
 
-const SWFL_PRIMARY = "#0F2035";
+const SWFL_PRIMARY = SWFL_THEME.primary; // single-source: matches what callout-box emits
 const SWFL_ACCENT = "#1BB8C9";
 const GREEN = "#16A34A";
 const RED = "#DC2626";
