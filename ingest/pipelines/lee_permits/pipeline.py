@@ -1,7 +1,7 @@
 """Lee County building permits dlt pipeline.
 
 Writes to `data_lake.lee_building_permits` in Tier 2 Postgres via merge on permit_id.
-Live runs pull via Firecrawl (see scraper.py); tests inject fixture rows directly.
+Live runs pull via crawl4ai + UndetectedAdapter (see scraper.py); tests inject fixture rows directly.
 """
 from __future__ import annotations
 from datetime import date
@@ -56,7 +56,7 @@ def permits_resource(rows: Optional[Iterable[dict]] = None):
 
 
 def run_pipeline(start_date: date, end_date: date) -> None:
-    """Live entry point. Pulls Firecrawl pages, parses, enriches, loads via dlt."""
+    """Live entry point. Pulls crawl4ai pages, parses, enriches, loads via dlt."""
     pages = fetch_permit_pages(start_date, end_date)
     # issued_date_fallback is overwritten for each row by enrich_rows_with_details();
     # it stays as the search end_date only for rows whose detail fetch fails.

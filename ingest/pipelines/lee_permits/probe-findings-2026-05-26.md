@@ -1,5 +1,10 @@
 # Lee Accela probe findings — 2026-05-26
 
+> **SUPERSEDED 2026-06-16.** Firecrawl was replaced by crawl4ai 0.8.9 +
+> UndetectedAdapter. The portal facts below (host, selectors, grid structure) remain
+> accurate; the Firecrawl-specific API calls and workarounds no longer apply.
+> See `scraper.py` for the live implementation.
+
 **What this is:** one-shot discovery notes from poking the live Lee Accela portal with
 Firecrawl. Captures the open questions v1 left for v2 (pagination + per-permit detail
 fetch). **Not a plan, not a contract** — just what the portal does right now and the

@@ -1,25 +1,28 @@
 # lee_permits ingest
 
-Lee County Accela building permits → Tier 2 Postgres via Firecrawl + dlt.
+Lee County Accela building permits → Tier 2 Postgres via crawl4ai + dlt.
 
 ## Live run
 
-1. Confirm `FIRECRAWL_API_KEY` in `ingest/.env` (invoke `firecrawl-build-onboarding` if missing).
-2. Confirm `SUPABASE_PG_*` creds in `.dlt/secrets.toml`.
+1. Confirm `DESTINATION__POSTGRES__CREDENTIALS` in `.dlt/secrets.toml`.
+2. Install deps: `pip install -r ingest/requirements.txt && python -m patchright install chromium`.
 3. Run the DDL: `docs/sql/20260522_lee_building_permits.sql` (manual paste into Supabase SQL editor).
 4. Run:
    ```
-   python -c "from dotenv import load_dotenv; load_dotenv('ingest/.env'); from ingest.pipelines.lee_permits.pipeline import run_pipeline; from datetime import date; run_pipeline(date(2026,5,15), date(2026,5,22))"
+   python -m ingest.pipelines.lee_permits.pipeline --start 2026-06-09 --end 2026-06-16
    ```
+   Add `--dry-run` to fetch and parse only (skip dlt write).
 
-## Firecrawl scrape recipe (confirmed against live portal 2026-05-25)
+Production runs via GHA: `gh workflow run lee-permits-weekly.yml` (cron: Mondays 07:00 ET).
+
+## crawl4ai scrape recipe (confirmed against live portal 2026-06-16)
 
 The Accela portal is an Angular SPA (`ng-app="appAca"`) — the date-range
-form is rendered client-side, so a plain `/scrape` returns a stub HTML
-without the inputs. The working recipe uses **firecrawl-py 4.28+ `app.scrape(...)`
-with `proxy='stealth'` and an `actions=[...]` array** in a single call.
+form is rendered client-side. The working recipe uses **crawl4ai 0.8.9 with
+`UndetectedAdapter`** to drive a real Chromium session that fills the date
+inputs, clicks submit, and paginates through the result grid.
 
-**Confirmed against live portal 2026-05-25:**
+**Confirmed against live portal 2026-06-16 (GHA datacenter IP, 11 pages, 94 rows):**
 
 - Real host: `aca-prod.accela.com/LEECO/` (the vanity `aca.leegov.com` 302s here; `accela.leegov.com` is NXDOMAIN — the prior recipe pointed at a dead hostname).
 - Module: `?module=Permitting&TabName=Permitting` (Lee's instance does NOT have a `module=Building`).
@@ -30,13 +33,11 @@ with `proxy='stealth'` and an `actions=[...]` array** in a single call.
 
 Implementation lives in `scraper.py:fetch_permit_pages`.
 
-## v1 limitations (tracked for v2)
+## Known limitations
 
-- **First page only** (10 rows max per run). Lee shows "Showing 1-10 of 100+" for any non-trivial window. v2 needs pagination.
-- **No issued_date on list view.** v1 stamps every row with the search `end_date` as a documented approximation. v2 needs a per-permit detail-page fetch for real issued_date + declared_value_usd + permit_type.
-- **`26TMP-*` temporary applications are included** alongside issued permits. v2 should filter or tag them.
-
-See `MEMORY.md` → `[[permits-swfl-v2-pagination-detail]]` for the v2 plan.
+- **Detail page 429s.** The Accela CapDetail pages rate-limit concurrent fetches (`concurrency=5`). Affected rows land with `permit_type_raw=NULL` and `declared_value_usd=NULL`; subsequent weekly runs re-merge and fill them if the permit re-appears in the window.
+- **Date filter is inert.** The Accela General Search date range does not filter pre-2026 history — queries always return current active permits regardless of start date. History before 2026 is not loadable from this portal (check `lee_permits_history_source`).
+- **`26TMP-*` temporary applications are filtered out** at parse time.
 
 ## Schema
 

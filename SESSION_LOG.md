@@ -2,6 +2,11 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — docs(lee_permits): Firecrawl→crawl4ai reference sweep + fix 80 bad ZIP rows
+
+- Updated `pipeline.py`, `scraper.py`, `README.md`, `probe-findings-2026-05-26.md`: removed all stale Firecrawl references, updated to crawl4ai. Probe doc marked SUPERSEDED; README rewritten (live run steps, GHA cron, known limitations). Stale "datacenter IP deferred" comment corrected.
+- Fixed 80 bad `zip_code` rows in `data_lake.lee_building_permits` via SQL UPDATE (street number had been stored as ZIP from pre-fix runs). Zero non-33xxx ZIPs remaining. Closed `lee_permits_legacy_zip_fix`.
+
 ## 2026-06-16 (main) — ingest(crexi): port to crawl4ai UndetectedAdapter + Anthropic extraction
 
 - `ingest/pipelines/crexi_listings/extract.py` fully rewritten: `Crawl4aiSession` + `UndetectedAdapter` (stealth), 2-step navigate+scroll, BeautifulSoup text strip, Anthropic Haiku structured extraction. Firecrawl agent gone.

@@ -29,7 +29,7 @@ pager (build_next_page_js) and wait on a defined-marker first-row-id change
 (page_changed_wait) — the partial ASP.NET UpdatePanel postback preserves the
 window across the js_only click. pagecount is read from page 1's GridView. There
 is no Firecrawl-style 60 s wait cap; per-page browser cost is amortized by the
-single session. Requires a non-datacenter IP (local-first; GHA IP is deferred).
+single session. Works from both home IP and GHA datacenter IP (proven 2026-06-16).
 
 Per-permit detail: after pagination, each row's CapDetail.aspx URL is fetched in
 a clean context (crawl4ai_client.fetch_many, independent + parallel) to extract
