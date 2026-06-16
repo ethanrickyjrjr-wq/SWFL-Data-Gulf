@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — fix(welcome-chat): analyst stops claiming charts it can't render (B) + per-corridor vacancy plan + defect logged
+
+- **Trigger:** operator pasted a maddening live BriefcaseChat transcript — user asked for a CRE-vacancy chart of 4 submarkets; the analyst refused ("need time series", "don't have the submarkets") and looped "want me to pull it?" 4×.
+- **Root cause (traced, not guessed):** surface = `BriefcaseChat` → `/api/welcome/chat {mode:"analyst"}`, which is TEXT-ONLY (no `routeChart`, no chart frame, no renderer — that lives on `/api/converse`+`AskAiDock`). The analyst grounds on `fetchBrain("master")` whose vacancy is a single MEDIAN (no `detail_tables`). cre-swfl ALSO carries only median + a `corridor_seasonality` detail_table — per-corridor `vacancy_rate_pct` exists only in `corridor_profiles` + the `fixtures/corridor-rents.json` snapshot the chart reads. So the "only the median" refusal was TRUE and correctly grounded; this is a missing-wiring/grounding gap, not a behavior bug.
+- **B (shipped, interim):** `app/api/welcome/chat/route.ts` `ANALYST_SYSTEM` no longer claims "figures, and charts" — only the wired "File this answer". Marked INTERIM (restore when charts are wired). `route.test.ts` 16/0.
+- **(a) logged:** check `charts_vacancy_asof_fabricated` [charts] — live /charts vacancy+rent charts stamp a hardcoded FUTURE `asOf 2026-06-30` + "SWFL fixture sample" citation over a frozen 06-06 `corridor_profiles` snapshot. Real data, fabricated vintage. Distinct from `chart_asof_anchoring`.
+- **(b) planned:** `docs/superpowers/plans/2026-06-16-coherent-corridor-vacancy-chart.md` — 3 coupled steps (cre-swfl emits deterministic `corridor_vacancy` detail_table → chart re-points to it (kills fake asOf) → analyst grounds on cre-swfl + renders chart frame). Guardrails: deterministic-only (no synth math), MarketBeat coverage at corridor grain, cite constants. NOT started (feature build, no urgency).
+- **Next:** operator pushes B. Build is operator-gated.
+
 ## 2026-06-16 (main) — spike(lee_permits): crawl4ai Accela port — DECISION GATE PASSED (4/4)
 
 - Ran the Task-1 decision-gate spike (`crawl4ai-test/spike_port.py` + `spike_markers.py`, scratch, NOT committed) live against `aca-prod.accela.com/LEECO`, home IP, crawl4ai 0.8.9 + UndetectedAdapter. **All four gates PASS:**
