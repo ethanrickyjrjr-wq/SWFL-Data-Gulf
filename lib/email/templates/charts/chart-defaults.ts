@@ -5,7 +5,7 @@ import { SWFL_THEME } from "@/scripts/email/types";
 // primary/accent derive from SWFL_THEME — never re-hardcode those hex values
 // (same single-source rule as SWFL_TOKEN_DEFAULTS in token-defaults.ts).
 export const SWFL_CHART_DEFAULTS = {
-  primary: SWFL_THEME.primary, // #0F2035
+  primary: SWFL_THEME.primary, // #0f1d24
   accent: SWFL_THEME.accent, // #1BB8C9
   neutral: "#6B7280",
   danger: "#EF4444",

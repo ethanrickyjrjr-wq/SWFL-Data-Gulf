@@ -9,7 +9,7 @@ import { SWFL_TOKEN_DEFAULTS } from "../token-defaults";
 // <style>, ≤600px wide, all data escaped.
 
 export const COMPONENT_DEFAULTS = {
-  primary: SWFL_THEME.primary, // #0F2035 — headings, value text
+  primary: SWFL_THEME.primary, // #0f1d24 — headings, value text
   accent: SWFL_THEME.accent, // #1BB8C9 — badges, info callouts
   surface: SWFL_TOKEN_DEFAULTS.SURFACE, // #ffffff — stat-row background
   text: SWFL_TOKEN_DEFAULTS.TEXT, // #111827 — body copy
