@@ -3,115 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{COMPANY_NAME}} — Data Table</title>
+<title>{{COMPANY_NAME}} — Market Segment Digest</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
   <tr>
-    <td align="center" style="padding:24px 16px;">
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:{{SURFACE}};border-radius:{{BORDER_RADIUS}};overflow:hidden;">
-
-        <!-- Header -->
+        <!-- ━━━━ MASTHEAD ━━━━ -->
         <tr>
-          <td style="background-color:{{PRIMARY}};padding:20px 28px;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td><img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="32" style="display:block;border:0;" /></td>
-                <td align="right"><span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span></td>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
+                </td>
+                <td align="right" valign="middle">
+                  <span style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{TAGLINE}}</span>
+                </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Title -->
+        <!-- ━━━━ SECTION 1: INTRO ━━━━ -->
         <tr>
-          <td style="padding:24px 28px 12px 28px;">
-            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT}};">Market Segment Overview</p>
-            <p style="margin:6px 0 0 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};opacity:0.6;">Q2 2025 · 5 segments × 3 KPIs</p>
+          <td style="padding:32px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 16px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">&#9646; CRE Segment Digest · Q2 2026</p>
+            <p style="margin:0 0 16px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT_PRIMARY}};letter-spacing:-0.3px;">SWFL Commercial Performance</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:14px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.85;">Industrial and multifamily continue to lead Southwest Florida's commercial market, while retail shows the first meaningful absorption gain since 2023. Office vacancy is softening but still elevated against the 5-year average.</p>
           </td>
         </tr>
 
-        <!-- Table -->
+        <!-- ━━━━ SECTION 2: DATA TABLE ━━━━ -->
         <tr>
-          <td style="padding:0 28px 20px 28px;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.08);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
 
-              <!-- Header row -->
+              <!-- Table header -->
               <tr>
-                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;border-radius:4px 0 0 0;">Segment</td>
-                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Revenue</td>
-                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Units</td>
-                <td style="background-color:{{PRIMARY}};padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.5px;text-align:center;border-radius:0 4px 0 0;">Growth</td>
+                <td style="background-color:{{ACCENT}};padding:10px 14px;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:#0f1d24;text-transform:uppercase;letter-spacing:0.8px;">Segment</td>
+                <td style="background-color:{{ACCENT}};padding:10px 10px;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:#0f1d24;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Vacancy</td>
+                <td style="background-color:{{ACCENT}};padding:10px 10px;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:#0f1d24;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Avg Rent</td>
+                <td style="background-color:{{ACCENT}};padding:10px 10px;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:#0f1d24;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Net Abs.</td>
+                <td style="background-color:{{ACCENT}};padding:10px 14px;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:#0f1d24;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">QoQ</td>
               </tr>
 
-              <!-- Row 1 — strong performance (accent tint) -->
+              <!-- Row 1: Multifamily — strong -->
               <tr>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;">Multifamily</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(0,180,120,0.08);">$2,140,000</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(0,180,120,0.08);">1,842</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{ACCENT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(0,180,120,0.08);">+18.4%</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};font-weight:600;border-bottom:1px solid rgba(255,255,255,0.08);">Multifamily</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">5.2%</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">$1,840</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{MANGROVE}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);font-weight:700;">+312K sf</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:12px;color:{{MANGROVE}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);font-weight:700;">&#9650; +4.2%</td>
               </tr>
 
-              <!-- Row 2 — moderate (neutral) -->
+              <!-- Row 2: Industrial — strong -->
               <tr>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">Single-Family</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">$1,680,500</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">903</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:600;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">+4.1%</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};font-weight:600;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);">Industrial</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);">3.8%</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);">$11.40 NNN</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{MANGROVE}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);font-weight:700;">+498K sf</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:12px;color:{{MANGROVE}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);font-weight:700;">&#9650; +6.8%</td>
               </tr>
 
-              <!-- Row 3 — amber/caution -->
+              <!-- Row 3: Retail — moderate -->
               <tr>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;">Commercial</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(240,180,0,0.08);">$921,200</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(240,180,0,0.08);">247</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:#c08a00;text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(240,180,0,0.08);">+1.8%</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};font-weight:600;border-bottom:1px solid rgba(255,255,255,0.08);">Retail</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">8.1%</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);">$22.80 NNN</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{ACCENT}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);font-weight:700;">+84K sf</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:12px;color:{{ACCENT}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);font-weight:700;">&#9650; +1.4%</td>
               </tr>
 
-              <!-- Row 4 — decline (primary red tint) -->
+              <!-- Row 4: Office — soft -->
               <tr>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;border-bottom:1px solid #eeeeee;background-color:#f9f9f9;">Industrial</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(200,50,50,0.06);">$540,800</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(200,50,50,0.06);">118</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:#c0392b;text-align:center;border-bottom:1px solid #eeeeee;background-color:rgba(200,50,50,0.06);">−3.2%</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};font-weight:600;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);">Office</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);">14.3%</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);">$18.50 FS</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{CORAL}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);font-weight:700;">&#8722;42K sf</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:12px;color:{{CORAL}};text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);background-color:rgba(255,255,255,0.04);font-weight:700;">&#9660; &#8722;0.8%</td>
               </tr>
 
-              <!-- Row 5 — strong decline -->
+              <!-- Row 5: Land/Dev — mixed -->
               <tr>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;">Land / Other</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;background-color:rgba(200,50,50,0.10);">$184,300</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};text-align:center;background-color:rgba(200,50,50,0.10);">62</td>
-                <td style="padding:10px 12px;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:#c0392b;text-align:center;background-color:rgba(200,50,50,0.10);">−9.7%</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};font-weight:600;">Land / Dev</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_DIM}};text-align:center;">—</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};text-align:center;">$4.20/sf</td>
+                <td style="padding:12px 10px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_DIM}};text-align:center;">14 deals</td>
+                <td style="padding:12px 14px;font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_DIM}};text-align:center;font-weight:700;">&#8773; Flat</td>
               </tr>
 
             </table>
           </td>
         </tr>
 
-        <!-- Legend -->
+        <!-- ━━━━ SECTION 3: LEGEND + INSIGHT ━━━━ -->
         <tr>
-          <td style="padding:0 28px 12px 28px;">
-            <table cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{ACCENT}};padding-right:12px;">■ Strong</td>
-                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:#c08a00;padding-right:12px;">■ Caution</td>
-                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:#c0392b;">■ Decline</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Divider -->
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Footer -->
-        <tr>
-          <td style="padding:16px 28px;">
+          <td style="padding:24px 32px;border-bottom:1px solid rgba(255,255,255,0.08);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
-                <td align="right"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+                <td valign="top" width="200">
+                  <p style="margin:0 0 10px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;">Performance Key</p>
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:12px;color:{{MANGROVE}};">&#9650; Growth / Positive absorption</p>
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:12px;color:{{ACCENT}};">&#9650; Modest improvement</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:12px;color:{{CORAL}};">&#9660; Contraction</p>
+                </td>
+                <td width="20"></td>
+                <td valign="top">
+                  <p style="margin:0 0 8px 0;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT_PRIMARY}};">Bottom line</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:13px;line-height:1.60;color:{{TEXT_PRIMARY}};opacity:0.85;">Industrial is the clear standout — 3.8% vacancy with positive net absorption puts SWFL in the top quartile of Sun Belt mid-markets. Office remains the drag, but at 14% vacancy it is no longer accelerating downward.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td colspan="2" style="padding:0 0 12px 0;font-family:{{FONT_FAMILY}};font-size:12px;">
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="color:{{ACCENT}};text-decoration:none;font-weight:700;">{{CONTACT_EMAIL}}</a>
+                  <span style="color:{{TEXT_DIM}};">&nbsp;&middot;&nbsp;</span>
+                  <a href="tel:{{CONTACT_PHONE}}" style="color:{{TEXT_DIM}};text-decoration:none;">{{CONTACT_PHONE}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;max-width:380px;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
               </tr>
             </table>
           </td>

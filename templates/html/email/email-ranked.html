@@ -3,170 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{COMPANY_NAME}} — Ranked List</title>
+<title>{{COMPANY_NAME}} — Top ZIP Codes</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
   <tr>
-    <td align="center" style="padding:24px 16px;">
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:{{SURFACE}};border-radius:{{BORDER_RADIUS}};overflow:hidden;">
-
-        <!-- Header -->
+        <!-- ━━━━ MASTHEAD ━━━━ -->
         <tr>
-          <td style="background-color:{{PRIMARY}};padding:20px 28px;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td><img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="32" style="display:block;border:0;" /></td>
-                <td align="right"><span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span></td>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
+                </td>
+                <td align="right" valign="middle">
+                  <span style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{TAGLINE}}</span>
+                </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Title -->
+        <!-- ━━━━ SECTION 1: INTRO ━━━━ -->
         <tr>
-          <td style="padding:24px 28px 12px 28px;">
-            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT}};">Top ZIP Codes by Volume</p>
-            <p style="margin:6px 0 0 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};opacity:0.6;">Ranked by transaction count · Last 30 days</p>
+          <td style="padding:32px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">&#9646; Top ZIP Codes · Transaction Volume</p>
+            <p style="margin:0 0 8px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT_PRIMARY}};letter-spacing:-0.3px;">Where SWFL Is Trading — April 2026</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:14px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.85;">These five ZIP codes captured <strong style="color:{{ACCENT}};">61% of all Lee County residential transactions</strong> last month — an unusual concentration driven by coastal recovery demand colliding with Lehigh Acres' entry-level inventory surge. The top two ZIPs alone moved 38% of total volume.</p>
           </td>
         </tr>
 
-        <!-- Rank 1 — 100% opacity -->
+        <!-- ━━━━ SECTION 2: RANKED LIST ━━━━ -->
         <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:10px 0;border-bottom:1px solid #eeeeee;">
+          <td style="padding:24px 32px;border-bottom:1px solid rgba(255,255,255,0.08);">
+
+            <!-- Rank 1 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
               <tr>
-                <td width="32" valign="middle">
+                <td width="44" valign="middle">
                   <table cellpadding="0" cellspacing="0" border="0">
-                    <tr><td width="28" height="28" align="center" style="background-color:{{PRIMARY}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:#ffffff;">1</td></tr>
+                    <tr><td width="36" height="36" align="center" style="background-color:{{ACCENT}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:14px;font-weight:900;color:#0f1d24;line-height:36px;">1</td></tr>
                   </table>
                 </td>
-                <td style="padding:0 10px 0 8px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};font-weight:600;" valign="middle">10001 — New York, NY</td>
-                <td valign="middle" style="padding-right:10px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eee;border-radius:3px;height:10px;">
+                <td style="padding:0 12px;vertical-align:middle;">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{TEXT_PRIMARY}};">33919 — Fort Myers SW</p>
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:10px;margin-top:6px;">
                     <tr>
-                      <td width="100%" style="background-color:{{PRIMARY}};border-radius:3px;height:10px;"></td>
+                      <td width="100%" style="background-color:{{ACCENT}};border-radius:3px;height:10px;font-size:0;line-height:0;">&nbsp;</td>
                       <td width="0%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="52" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};white-space:nowrap;">4,820</td>
+                <td width="64" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:13px;font-weight:800;color:{{ACCENT}};white-space:nowrap;">284 sales</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Rank 2 — ~80% opacity -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:10px 0;border-bottom:1px solid #eeeeee;">
+            <!-- Rank 2 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
               <tr>
-                <td width="32" valign="middle">
+                <td width="44" valign="middle">
                   <table cellpadding="0" cellspacing="0" border="0">
-                    <tr><td width="28" height="28" align="center" style="background-color:{{PRIMARY}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:#ffffff;">2</td></tr>
+                    <tr><td width="36" height="36" align="center" style="background-color:{{MANGROVE}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:14px;font-weight:900;color:#0f1d24;line-height:36px;">2</td></tr>
                   </table>
                 </td>
-                <td style="padding:0 10px 0 8px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};" valign="middle">90210 — Beverly Hills, CA</td>
-                <td valign="middle" style="padding-right:10px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eee;border-radius:3px;height:10px;">
+                <td style="padding:0 12px;vertical-align:middle;">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{TEXT_PRIMARY}};">33971 — Lehigh Acres</p>
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:10px;margin-top:6px;">
                     <tr>
-                      <td width="80%" style="background-color:{{PRIMARY}};opacity:0.80;border-radius:3px;height:10px;"></td>
-                      <td width="20%"></td>
+                      <td width="83%" style="background-color:{{MANGROVE}};border-radius:3px;height:10px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="17%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="52" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};white-space:nowrap;">3,861</td>
+                <td width="64" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:13px;font-weight:800;color:{{MANGROVE}};white-space:nowrap;">235 sales</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Rank 3 — ~60% opacity -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:10px 0;border-bottom:1px solid #eeeeee;">
+            <!-- Rank 3 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
               <tr>
-                <td width="32" valign="middle">
+                <td width="44" valign="middle">
                   <table cellpadding="0" cellspacing="0" border="0">
-                    <tr><td width="28" height="28" align="center" style="background-color:{{PRIMARY}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:#ffffff;">3</td></tr>
+                    <tr><td width="36" height="36" align="center" style="background-color:{{BAR_ACCENT2}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:14px;font-weight:900;color:#0f1d24;line-height:36px;">3</td></tr>
                   </table>
                 </td>
-                <td style="padding:0 10px 0 8px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};" valign="middle">60601 — Chicago, IL</td>
-                <td valign="middle" style="padding-right:10px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eee;border-radius:3px;height:10px;">
+                <td style="padding:0 12px;vertical-align:middle;">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{TEXT_PRIMARY}};">33931 — Fort Myers Beach</p>
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:10px;margin-top:6px;">
                     <tr>
-                      <td width="60%" style="background-color:{{PRIMARY}};opacity:0.60;border-radius:3px;height:10px;"></td>
-                      <td width="40%"></td>
+                      <td width="66%" style="background-color:{{BAR_ACCENT2}};border-radius:3px;height:10px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="34%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="52" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};white-space:nowrap;">2,914</td>
+                <td width="64" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:13px;font-weight:800;color:{{BAR_ACCENT2}};white-space:nowrap;">188 sales</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Rank 4 — ~40% opacity -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:10px 0;border-bottom:1px solid #eeeeee;">
+            <!-- Rank 4 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
               <tr>
-                <td width="32" valign="middle">
+                <td width="44" valign="middle">
                   <table cellpadding="0" cellspacing="0" border="0">
-                    <tr><td width="28" height="28" align="center" style="background-color:{{PRIMARY}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:#ffffff;">4</td></tr>
+                    <tr><td width="36" height="36" align="center" style="background-color:{{BAR_MID}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:14px;font-weight:900;color:{{TEXT_PRIMARY}};line-height:36px;">4</td></tr>
                   </table>
                 </td>
-                <td style="padding:0 10px 0 8px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};" valign="middle">77001 — Houston, TX</td>
-                <td valign="middle" style="padding-right:10px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eee;border-radius:3px;height:10px;">
+                <td style="padding:0 12px;vertical-align:middle;">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_DIM}};">33908 — Fort Myers SW</p>
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:10px;margin-top:6px;">
                     <tr>
-                      <td width="40%" style="background-color:{{PRIMARY}};opacity:0.40;border-radius:3px;height:10px;"></td>
-                      <td width="60%"></td>
+                      <td width="47%" style="background-color:{{BAR_MID}};border-radius:3px;height:10px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="53%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="52" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};white-space:nowrap;">1,937</td>
+                <td width="64" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{BAR_MID}};white-space:nowrap;">134 sales</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Rank 5 — ~20% opacity -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:10px 0;">
-              <tr>
-                <td width="32" valign="middle">
-                  <table cellpadding="0" cellspacing="0" border="0">
-                    <tr><td width="28" height="28" align="center" style="background-color:{{PRIMARY}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:#ffffff;">5</td></tr>
-                  </table>
-                </td>
-                <td style="padding:0 10px 0 8px;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};" valign="middle">85001 — Phoenix, AZ</td>
-                <td valign="middle" style="padding-right:10px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eee;border-radius:3px;height:10px;">
-                    <tr>
-                      <td width="22%" style="background-color:{{PRIMARY}};opacity:0.20;border-radius:3px;height:10px;"></td>
-                      <td width="78%"></td>
-                    </tr>
-                  </table>
-                </td>
-                <td width="52" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};white-space:nowrap;">1,062</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Divider -->
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Footer -->
-        <tr>
-          <td style="padding:16px 28px;">
+            <!-- Rank 5 -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
-                <td align="right"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+                <td width="44" valign="middle">
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr><td width="36" height="36" align="center" style="background-color:{{BAR_LOW}};border-radius:50%;font-family:{{FONT_FAMILY}};font-size:14px;font-weight:900;color:{{TEXT_PRIMARY}};line-height:36px;">5</td></tr>
+                  </table>
+                </td>
+                <td style="padding:0 12px;vertical-align:middle;">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_DIM}};">33912 — Fort Myers</p>
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:10px;margin-top:6px;">
+                    <tr>
+                      <td width="28%" style="background-color:{{BAR_LOW}};border-radius:3px;height:10px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="72%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="64" align="right" valign="middle" style="font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{BAR_LOW}};white-space:nowrap;">80 sales</td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- ━━━━ SECTION 3: ANALYSIS CALLOUT ━━━━ -->
+        <tr>
+          <td style="padding:28px 32px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{MANGROVE}};text-transform:uppercase;letter-spacing:2.5px;">&#9646; Why This Ranking Matters</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="4" style="background-color:{{MANGROVE}};border-radius:2px 0 0 2px;font-size:0;line-height:0;">&nbsp;</td>
+                <td style="background-color:rgba(91,201,122,0.09);padding:18px 20px;border-radius:0 6px 6px 0;">
+                  <p style="margin:0 0 8px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{TEXT_PRIMARY}};">33931 at #3 despite being the highest-priced ZIP is the tell</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:13px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.88;">Fort Myers Beach closing 188 transactions at a $587K median — while ranking third in volume — signals deep demand from qualified cash buyers, not just entry-level velocity. The contrast with Lehigh Acres (#2, $247K median) shows a bifurcated market where both extremes are active simultaneously.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td colspan="2" style="padding:0 0 12px 0;font-family:{{FONT_FAMILY}};font-size:12px;">
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="color:{{ACCENT}};text-decoration:none;font-weight:700;">{{CONTACT_EMAIL}}</a>
+                  <span style="color:{{TEXT_DIM}};">&nbsp;&middot;&nbsp;</span>
+                  <a href="tel:{{CONTACT_PHONE}}" style="color:{{TEXT_DIM}};text-decoration:none;">{{CONTACT_PHONE}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;max-width:380px;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
               </tr>
             </table>
           </td>

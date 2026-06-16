@@ -89,7 +89,11 @@ export interface BrandTheme {
 }
 
 /** SWFL Data Gulf house brand — the default when no white-label theme is passed. */
-export const SWFL_THEME = { primary: "#0F2035", accent: "#1BB8C9", logoUrl: null } as const;
+export const SWFL_THEME = {
+  primary: "#0f1d24",
+  accent: "#1BB8C9",
+  logoUrl: "https://www.swfldatagulf.com/logo-name.png",
+} as const;
 
 /** Merge a nullable/partial theme over the SWFL defaults. Null/undefined fields fall back. */
 export function resolveTheme(theme?: BrandTheme | null): {

@@ -3,171 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{COMPANY_NAME}} — Horizontal Bar Chart</title>
+<title>{{COMPANY_NAME}} — Corridor Intelligence</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
   <tr>
-    <td align="center" style="padding:24px 16px;">
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-      <!-- Card wrapper -->
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:{{SURFACE}};border-radius:{{BORDER_RADIUS}};overflow:hidden;">
-
-        <!-- Header -->
+        <!-- ━━━━ MASTHEAD ━━━━ -->
         <tr>
-          <td style="background-color:{{PRIMARY}};padding:20px 28px;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td>
-                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="32" style="display:block;border:0;height:32px;" />
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
                 </td>
-                <td align="right">
-                  <span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span>
+                <td align="right" valign="middle">
+                  <span style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{TAGLINE}}</span>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Title row -->
+        <!-- ━━━━ SECTION 1: LEDE ━━━━ -->
         <tr>
-          <td style="padding:24px 28px 8px 28px;">
-            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT}};">Revenue by Region</p>
-            <p style="margin:6px 0 0 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};opacity:0.6;">Q2 2025 · All amounts in USD</p>
+          <td style="padding:32px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">&#9646; Corridor Rent Index · Q2 2026</p>
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT_PRIMARY}};letter-spacing:-0.3px;">SWFL Commercial Corridors by NNN Rent</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:14px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.85;">US-41 and Metro Pkwy lead SWFL corridors by asking rent — a reflection of the post-Ian rebuild demand that concentrated investment along Lee County's two main commercial spines. The Immokalee gateway shows the quarter's sharpest uptick at +9.4% as Naples-adjacent logistics demand spills north.</p>
           </td>
         </tr>
 
-        <!-- Bar rows -->
-        <!-- Row 1 (surface bg) -->
+        <!-- ━━━━ SECTION 2: H-BAR CHART ━━━━ -->
         <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{SURFACE}};padding:10px 0;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.08);">
+
+            <!-- Bar row 1 — top performer -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
               <tr>
-                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Northeast</td>
-                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                <td width="148" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_PRIMARY}};padding:8px 12px 8px 0;vertical-align:middle;white-space:nowrap;">US-41 Corridor</td>
+                <td style="vertical-align:middle;padding:8px 12px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:20px;">
                     <tr>
-                      <td width="82%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;"></td>
-                      <td width="18%"></td>
+                      <td width="100%" style="background-color:{{ACCENT}};border-radius:3px;height:20px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="0%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$1,284,500</td>
+                <td width="80" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:800;color:{{ACCENT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$24.80 NNN</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Row 2 (tinted bg) -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;padding:10px 0;">
+            <!-- Bar row 2 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
               <tr>
-                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Southeast</td>
-                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                <td width="148" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_PRIMARY}};padding:8px 12px 8px 0;vertical-align:middle;white-space:nowrap;">Metro Pkwy</td>
+                <td style="vertical-align:middle;padding:8px 12px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:20px;">
                     <tr>
-                      <td width="68%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;opacity:0.85;"></td>
-                      <td width="32%"></td>
+                      <td width="90%" style="background-color:{{MANGROVE}};border-radius:3px;height:20px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="10%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$1,063,200</td>
+                <td width="80" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:800;color:{{MANGROVE}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$22.40 NNN</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Row 3 (surface bg) -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{SURFACE}};padding:10px 0;">
+            <!-- Bar row 3 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
               <tr>
-                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Midwest</td>
-                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                <td width="148" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_PRIMARY}};padding:8px 12px 8px 0;vertical-align:middle;white-space:nowrap;">Daniels Pkwy</td>
+                <td style="vertical-align:middle;padding:8px 12px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:20px;">
                     <tr>
-                      <td width="55%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;"></td>
-                      <td width="45%"></td>
+                      <td width="77%" style="background-color:{{BAR_ACCENT2}};border-radius:3px;height:20px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="23%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$861,750</td>
+                <td width="80" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:800;color:{{BAR_ACCENT2}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$19.10 NNN</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Row 4 (tinted bg) -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;padding:10px 0;">
+            <!-- Bar row 4 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
               <tr>
-                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Southwest</td>
-                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                <td width="148" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_DIM}};padding:8px 12px 8px 0;vertical-align:middle;white-space:nowrap;">Colonial Blvd</td>
+                <td style="vertical-align:middle;padding:8px 12px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:20px;">
                     <tr>
-                      <td width="43%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;opacity:0.85;"></td>
-                      <td width="57%"></td>
+                      <td width="62%" style="background-color:{{BAR_MID}};border-radius:3px;height:20px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="38%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$674,100</td>
+                <td width="80" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT_DIM}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$15.40 NNN</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Row 5 (surface bg) -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{SURFACE}};padding:10px 0;">
+            <!-- Bar row 5 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
               <tr>
-                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Mountain</td>
-                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
+                <td width="148" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_DIM}};padding:8px 12px 8px 0;vertical-align:middle;white-space:nowrap;">Lee Blvd · Lehigh</td>
+                <td style="vertical-align:middle;padding:8px 12px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:20px;">
                     <tr>
-                      <td width="29%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;"></td>
-                      <td width="71%"></td>
+                      <td width="46%" style="background-color:{{BAR_LOW}};border-radius:3px;height:20px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="54%"></td>
                     </tr>
                   </table>
                 </td>
-                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$453,800</td>
+                <td width="80" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT_DIM}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$11.40 NNN</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Row 6 (tinted bg) -->
-        <tr>
-          <td style="padding:0 28px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;padding:10px 0;">
-              <tr>
-                <td width="120" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT}};padding:8px 0;vertical-align:middle;">Pacific</td>
-                <td style="vertical-align:middle;padding:8px 8px 8px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e8e8e8;border-radius:3px;height:18px;">
-                    <tr>
-                      <td width="18%" style="background-color:{{PRIMARY}};border-radius:3px;height:18px;opacity:0.85;"></td>
-                      <td width="82%"></td>
-                    </tr>
-                  </table>
-                </td>
-                <td width="72" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$282,400</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Divider -->
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Footer -->
-        <tr>
-          <td style="padding:16px 28px;">
+            <!-- Bar row 6 -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
-                <td align="right" style="font-family:{{FONT_FAMILY}};font-size:11px;"><a href="{{WEBSITE_URL}}" style="color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+                <td width="148" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{CORAL}};padding:8px 12px 8px 0;vertical-align:middle;white-space:nowrap;">Immokalee Rd</td>
+                <td style="vertical-align:middle;padding:8px 12px 8px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{BAR_TRACK}};border-radius:3px;height:20px;">
+                    <tr>
+                      <td width="36%" style="background-color:{{CORAL}};border-radius:3px;height:20px;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="64%"></td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="80" align="right" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{CORAL}};padding:8px 0;vertical-align:middle;white-space:nowrap;">$8.90 NNN</td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- ━━━━ MAP ━━━━ -->
+        <tr>
+          <td style="padding:0;line-height:0;font-size:0;">
+            <img src="{{MAP_URL}}" alt="SWFL Corridor Map" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+          </td>
+        </tr>
+
+        <!-- ━━━━ SECTION 3: INSIGHT PANEL ━━━━ -->
+        <tr>
+          <td style="padding:24px 32px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">&#9646; Corridor to Watch</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="4" style="background-color:{{CORAL}};border-radius:2px 0 0 2px;font-size:0;line-height:0;">&nbsp;</td>
+                <td style="background-color:rgba(224,129,88,0.10);padding:18px 20px;border-radius:0 6px 6px 0;">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{TEXT_PRIMARY}};">Immokalee Rd — the surprising move</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:13px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.88;">Immokalee's $8.90 NNN is the lowest on this list, but the quarter-over-quarter move is +9.4% — the fastest appreciation in the region. Naples logistics demand is pushing north and early-stage industrial tenants are signing longer terms in this corridor than anywhere else in SWFL right now.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ SECTION 4: MINI STAT ROW ━━━━ -->
+        <tr>
+          <td style="padding:0;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="200" align="center" style="padding:20px 16px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:20px;font-weight:800;color:{{MANGROVE}};">+9.4%</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;">Fastest QoQ Gain</p>
+                </td>
+                <td width="200" align="center" style="padding:20px 16px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:20px;font-weight:800;color:{{TEXT_PRIMARY}};">3.8%</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;">Industrial Vacancy</p>
+                </td>
+                <td width="200" align="center" style="padding:20px 16px;">
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:20px;font-weight:800;color:{{ACCENT}};">498K sf</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;">Net Absorption</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td colspan="2" style="padding:0 0 12px 0;font-family:{{FONT_FAMILY}};font-size:12px;">
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="color:{{ACCENT}};text-decoration:none;font-weight:700;">{{CONTACT_EMAIL}}</a>
+                  <span style="color:{{TEXT_DIM}};">&nbsp;&middot;&nbsp;</span>
+                  <a href="tel:{{CONTACT_PHONE}}" style="color:{{TEXT_DIM}};text-decoration:none;">{{CONTACT_PHONE}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;max-width:380px;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
               </tr>
             </table>
           </td>

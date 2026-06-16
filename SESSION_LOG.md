@@ -14,6 +14,17 @@
 - **A2 table polish:** reordered the name metric ahead of the type metric so **"Ian" lands in the visible tier-2 6-row table** (`slice(0,6)`) instead of being cut at row 7; stripped "(Typhoon)" from the type value; de-duped a repeated "trailing 10-year window" in the conclusion.
 - **Gates green:** 42 source/pack/constitution/catalog tests + 11 ingest tests pass; `check-vocab-coverage --all` CLEAN (32 brains); Gate-4 guard in place; live NOAA probe confirmed Ian = 6 zone rows. NOTE: the ledger regen also caught up ~870 lines of **pre-existing** drift (last generated at `4bc8076`) — generated doc, not storm logic.
 - **Next / BLOCKED on operator:** PUSH HELD (no-autonomous-push) — `git push origin HEAD:main` from the worktree (FF; all pre-push hooks fire). **After merge:** `gh workflow run storm-history-monthly.yml` (live re-ingest with the zone-row fix) → next refinery rebuild corrects the LIVE client read (local fixture read already correct). Then open/close check `storm_ian_live_verify`. Spec `docs/superpowers/specs/2026-06-15-storm-history-ian-truth-fix-design.md`; plan `docs/superpowers/plans/2026-06-15-storm-history-ian-truth-fix.md`. `hurricane-tracks-fl` was correct + out of scope.
+## 2026-06-16 (main) — feat(email): full visual overhaul — 6 templates + style gallery
+
+- Rebuilt all 6 email templates (`email-hero/report/hbar/table/compare/ranked.html`) dark-first: `body{background:{{PRIMARY}}}`, no white card on gray.
+- Added token system: `BAR_ACCENT2` (teal — 3rd bar tier), `BAR_MID` (indigo), `BAR_LOW` (dark slate), `TEXT_PRIMARY`, `BAR_TRACK`, `BADGE_DIM`, `CONTACT_EMAIL`, `CONTACT_PHONE`, `MAP_URL` — all distinct, visible on both dark and white/print backgrounds.
+- Every bar row now uses a unique color token; no two consecutive bars share a token.
+- `{{MAP_URL}}` slot wired into `email-hero.html` (coastal overview) and `email-hbar.html` (corridor close-up); gallery embeds maps as base64 data URIs (Mapbox token Referer bypass) so they load in local file:// preview.
+- Analysis copy moved inline — no separate "WHAT IT MEANS" section; callout sits directly below the data it explains.
+- `scripts/preview-style-gallery.mts` ships: 3 brand variants × 6 templates, lightbox, thumbnail grid. Light/print variant uses solid legible colors throughout.
+- `bun test lib/email/templates`: 6 pass / 0 fail.
+- Next: wire MAP_URL into remaining 4 templates if needed; consider adding map to email-report.
+
 ## 2026-06-15 (main) — feat(ingest): fred_listing_swfl — Realtor.com MSA listing series wired
 
 - New pipeline `ingest/pipelines/fred_listing_swfl/` (constants + resources + pipeline): 8 FRED Realtor.com series for Lee (15980) + Collier (34940) MSAs — active listing count, median DOM, median list price, new listing count. Monthly, Jul 2016–present, 952 rows ingested. **bun test 2569/0.**

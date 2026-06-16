@@ -3,77 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{COMPANY_NAME}} — Hero Stat</title>
+<title>{{COMPANY_NAME}} — Market Intelligence</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
   <tr>
-    <td align="center" style="padding:24px 16px;">
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;border-radius:{{BORDER_RADIUS}};overflow:hidden;">
-
-        <!-- Logo bar -->
+        <!-- ━━━━ MASTHEAD ━━━━ -->
         <tr>
-          <td style="background-color:{{PRIMARY}};padding:18px 28px;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td><img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="28" style="display:block;border:0;" /></td>
-                <td align="right"><span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.8;">{{TAGLINE}}</span></td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Hero card body -->
-        <tr>
-          <td align="center" style="background-color:{{PRIMARY}};padding:48px 28px 56px 28px;">
-
-            <!-- Label -->
-            <p style="margin:0 0 12px 0;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:#ffffff;opacity:0.7;text-transform:uppercase;letter-spacing:1.5px;">Total Portfolio Value</p>
-
-            <!-- Giant number -->
-            <p style="margin:0 0 20px 0;font-family:{{FONT_FAMILY}};font-size:64px;font-weight:800;color:{{TEXT}};line-height:1;letter-spacing:-2px;">$4.2M</p>
-
-            <!-- Divider line -->
-            <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px auto;">
-              <tr><td width="60" height="3" style="background-color:{{ACCENT}};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
-            </table>
-
-            <!-- Supporting sentence -->
-            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:16px;color:#ffffff;opacity:0.88;line-height:1.55;max-width:380px;">Up <strong style="color:{{TEXT}};">12.4%</strong> from last quarter — the strongest single-period gain in 18 months across all ZIP code segments.</p>
-
-          </td>
-        </tr>
-
-        <!-- Stats strip -->
-        <tr>
-          <td style="background-color:{{ACCENT}};padding:0;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="33%" align="center" style="padding:16px 8px;border-right:1px solid rgba(255,255,255,0.2);">
-                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:#ffffff;">847</p>
-                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:#ffffff;opacity:0.75;text-transform:uppercase;letter-spacing:0.5px;">Active ZIPs</p>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
                 </td>
-                <td width="33%" align="center" style="padding:16px 8px;border-right:1px solid rgba(255,255,255,0.2);">
-                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:#ffffff;">94.3%</p>
-                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:#ffffff;opacity:0.75;text-transform:uppercase;letter-spacing:0.5px;">Occupancy</p>
-                </td>
-                <td width="33%" align="center" style="padding:16px 8px;">
-                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:#ffffff;">$5,210</p>
-                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:#ffffff;opacity:0.75;text-transform:uppercase;letter-spacing:0.5px;">Avg. Unit</p>
+                <td align="right" valign="middle">
+                  <span style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{TAGLINE}}</span>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Footer -->
+        <!-- ━━━━ HERO METRIC ━━━━ -->
         <tr>
-          <td style="background-color:{{SURFACE}};padding:14px 28px;">
+          <td style="padding:44px 32px 36px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 20px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">Market Spotlight · Q2 2026</p>
+            <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:58px;font-weight:900;color:{{ACCENT}};line-height:1;letter-spacing:-2px;">$412K</p>
+            <p style="margin:0 0 24px 0;font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_PRIMARY}};opacity:0.75;letter-spacing:0.3px;">Median Sale Price · Lee County Single-Family</p>
+            <table cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px 0;">
+              <tr>
+                <td width="64" height="3" style="background-color:{{ACCENT}};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
+                <td width="20" height="3">&nbsp;</td>
+                <td width="32" height="3" style="background-color:{{MANGROVE}};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
+              </tr>
+            </table>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:15px;line-height:1.70;color:{{TEXT_PRIMARY}};max-width:490px;">Southwest Florida single-family homes held at <strong style="color:{{MANGROVE}};">$412,000 median</strong> in April 2026—up 8.4% from a year ago as coastal recovery demand absorbed new inventory from the post-Ian reconstruction pipeline. Lee County's 62-day median DOM signals a modest buyer advantage not seen since mid-2023, even as active listings climbed 12% above year-ago levels.</p>
+          </td>
+        </tr>
+
+        <!-- ━━━━ 3-STAT STRIP ━━━━ -->
+        <tr>
+          <td style="padding:0;border-bottom:1px solid rgba(255,255,255,0.08);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.45;">{{DISCLAIMER}}</td>
-                <td align="right"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+                <td width="200" align="center" style="padding:26px 16px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:26px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.5px;">62 days</p>
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">Median DOM</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{CORAL}};font-weight:600;">&#9650; +8 days vs Q1</p>
+                </td>
+                <td width="200" align="center" style="padding:26px 16px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:26px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.5px;">4,847</p>
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">Active Listings</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{MANGROVE}};font-weight:600;">&#9650; +12.3% YoY</p>
+                </td>
+                <td width="200" align="center" style="padding:26px 16px;">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:26px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.5px;">96.2%</p>
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">Sale / List Ratio</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{MANGROVE}};font-weight:600;">&#9679; Holding strong</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ SIGNAL CALLOUT ━━━━ -->
+        <tr>
+          <td style="padding:32px 32px 36px;">
+            <p style="margin:0 0 16px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">Signal to Watch</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="4" style="background-color:{{ACCENT}};border-radius:2px 0 0 2px;font-size:0;line-height:0;">&nbsp;</td>
+                <td style="background-color:rgba(255,255,255,0.07);padding:20px 22px;border-radius:0 6px 6px 0;">
+                  <p style="margin:0 0 8px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{MANGROVE}};">Fort Myers Beach (33931) · Coastal Recovery Surge</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:13px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.9;">The 33931 ZIP is posting a <strong style="color:{{MANGROVE}};">+14.2% YoY</strong> gain in median sale price — the strongest in Lee County — as insurance-diaspora buyers compete for limited post-Ian move-in-ready supply. Watch for premium compression in Q3 as 340 reconstruction units are slated for certificate of occupancy by September.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ MAP ━━━━ -->
+        <tr>
+          <td style="padding:0;line-height:0;font-size:0;">
+            <img src="{{MAP_URL}}" alt="Southwest Florida Market Map" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td colspan="2" style="padding:0 0 12px 0;font-family:{{FONT_FAMILY}};font-size:12px;">
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="color:{{ACCENT}};text-decoration:none;font-weight:700;">{{CONTACT_EMAIL}}</a>
+                  <span style="color:{{TEXT_DIM}};">&nbsp;&middot;&nbsp;</span>
+                  <a href="tel:{{CONTACT_PHONE}}" style="color:{{TEXT_DIM}};text-decoration:none;">{{CONTACT_PHONE}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;max-width:380px;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
               </tr>
             </table>
           </td>

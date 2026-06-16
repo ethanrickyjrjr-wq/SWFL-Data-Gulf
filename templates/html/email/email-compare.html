@@ -5,129 +5,142 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{COMPANY_NAME}} — Period Comparison</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:{{FONT_FAMILY}};">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;">
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
   <tr>
-    <td align="center" style="padding:24px 16px;">
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:{{SURFACE}};border-radius:{{BORDER_RADIUS}};overflow:hidden;">
-
-        <!-- Header -->
+        <!-- ━━━━ MASTHEAD ━━━━ -->
         <tr>
-          <td style="background-color:{{PRIMARY}};padding:20px 28px;">
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td><img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="32" style="display:block;border:0;" /></td>
-                <td align="right"><span style="color:#ffffff;font-size:11px;font-family:{{FONT_FAMILY}};opacity:0.85;">{{TAGLINE}}</span></td>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
+                </td>
+                <td align="right" valign="middle">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2px;">Q1 vs Q2 2026</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};letter-spacing:0.5px;">Lee County · All Residential</p>
+                </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Title -->
+        <!-- ━━━━ SECTION 1: INTRO ━━━━ -->
         <tr>
-          <td style="padding:24px 28px 4px 28px;">
-            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:700;color:{{TEXT}};">Performance Comparison</p>
-            <p style="margin:6px 0 0 0;font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};opacity:0.6;">Last Period vs. This Period</p>
+          <td style="padding:32px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">&#9646; Quarter-over-Quarter Shift</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:14px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.9;">Three of five headline metrics improved from Q1 to Q2 — a mixed picture consistent with a market transitioning from post-hurricane rebound into a more measured expansion. The DOM softening is the key signal; everything else is moving in the right direction.</p>
           </td>
         </tr>
 
-        <!-- Column headers -->
+        <!-- ━━━━ SECTION 2: COMPARISON ROWS ━━━━ -->
         <tr>
-          <td style="padding:16px 28px 4px 28px;">
+          <td style="padding:20px 32px;border-bottom:1px solid rgba(255,255,255,0.08);">
+
+            <!-- Column header -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td width="36%">&nbsp;</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:{{TEXT}};opacity:0.5;text-transform:uppercase;letter-spacing:0.5px;">Last Period</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:11px;font-weight:700;color:{{TEXT}};opacity:0.5;text-transform:uppercase;letter-spacing:0.5px;">This Period</td>
+                <td width="44%">&nbsp;</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;padding-bottom:10px;">Q1 2026</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:1px;padding-bottom:10px;">Q2 2026</td>
+                <td width="14%" align="center" style="font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;padding-bottom:10px;">&#916;</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <!-- Divider -->
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Row 1 — improvement -->
-        <tr>
-          <td style="padding:0 28px;background-color:{{SURFACE}};">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <!-- Row 1: Median price — UP -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(255,255,255,0.07);">
               <tr>
-                <td width="36%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};padding:14px 0;">Total Revenue</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT}};opacity:0.65;padding:14px 0;">$482,310</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:700;color:{{ACCENT}};padding:14px 0;">$541,890 ↑</td>
+                <td width="44%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};padding:14px 0;font-weight:600;">Median Sale Price</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_DIM}};padding:14px 0;">$381K</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:800;color:{{ACCENT}};padding:14px 0;">$412K</td>
+                <td width="14%" align="center" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{MANGROVE}};padding:14px 0;">&#9650; +8.1%</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#f0f0f0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Row 2 — decline -->
-        <tr>
-          <td style="padding:0 28px;background-color:#f7f7f7;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <!-- Row 2: Active listings — UP -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(255,255,255,0.07);background-color:rgba(255,255,255,0.04);">
               <tr>
-                <td width="36%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};padding:14px 0;">Avg. Order Value</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT}};opacity:0.65;padding:14px 0;">$127.40</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:700;color:#c0392b;padding:14px 0;">$114.20 ↓</td>
+                <td width="44%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};padding:14px 0 14px 12px;font-weight:600;">Active Listings</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_DIM}};padding:14px 0;">4,320</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:800;color:{{ACCENT}};padding:14px 0;">4,847</td>
+                <td width="14%" align="center" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{MANGROVE}};padding:14px 0;">&#9650; +12.2%</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Row 3 — improvement -->
-        <tr>
-          <td style="padding:0 28px;background-color:{{SURFACE}};">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <!-- Row 3: Sale/list — FLAT -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(255,255,255,0.07);">
               <tr>
-                <td width="36%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};padding:14px 0;">New Customers</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT}};opacity:0.65;padding:14px 0;">1,203</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:700;color:{{ACCENT}};padding:14px 0;">1,589 ↑</td>
+                <td width="44%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};padding:14px 0;font-weight:600;">Sale / List Ratio</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_DIM}};padding:14px 0;">96.4%</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:800;color:{{ACCENT}};padding:14px 0;">96.2%</td>
+                <td width="14%" align="center" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT_DIM}};padding:14px 0;">&#8773; Flat</td>
               </tr>
             </table>
-          </td>
-        </tr>
 
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#f0f0f0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Row 4 — decline -->
-        <tr>
-          <td style="padding:0 28px;background-color:#f7f7f7;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <!-- Row 4: DOM — SOFTENING -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(255,255,255,0.07);background-color:rgba(255,255,255,0.04);">
               <tr>
-                <td width="36%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT}};padding:14px 0;">Conversion Rate</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT}};opacity:0.65;padding:14px 0;">3.82%</td>
-                <td width="32%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:700;color:#c0392b;padding:14px 0;">3.41% ↓</td>
+                <td width="44%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};padding:14px 0 14px 12px;font-weight:600;">Median Days on Market</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_DIM}};padding:14px 0;">54 days</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:800;color:{{CORAL}};padding:14px 0;">62 days</td>
+                <td width="14%" align="center" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{CORAL}};padding:14px 0;">&#9660; +14.8%</td>
               </tr>
             </table>
+
+            <!-- Row 5: New listings — UP -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(255,255,255,0.07);">
+              <tr>
+                <td width="44%" style="font-family:{{FONT_FAMILY}};font-size:13px;color:{{TEXT_PRIMARY}};padding:14px 0;font-weight:600;">New Listings (month)</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_DIM}};padding:14px 0;">713</td>
+                <td width="21%" align="center" style="font-family:{{FONT_FAMILY}};font-size:14px;font-weight:800;color:{{ACCENT}};padding:14px 0;">842</td>
+                <td width="14%" align="center" style="font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{MANGROVE}};padding:14px 0;">&#9650; +18.1%</td>
+              </tr>
+            </table>
+
+            <!-- Inline analysis — directly below the data -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;">
+              <tr>
+                <td style="padding:16px 20px;background-color:rgba(255,255,255,0.05);border-radius:6px;border-left:3px solid {{ACCENT}};">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:700;color:{{TEXT_PRIMARY}};">Rising inventory is doing its job without killing the market</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:12px;line-height:1.60;color:{{TEXT_PRIMARY}};opacity:0.85;">DOM softening (54 → 62 days) is absorbed by the price gain — demand still outpaces supply. Watch 75+ days DOM: that's when list-price cuts historically follow within 45 days in SWFL coastal submarkets.</p>
+                </td>
+              </tr>
+            </table>
+
           </td>
         </tr>
 
-        <!-- Legend -->
+        <!-- ━━━━ SECTION 3: LEGEND ━━━━ -->
         <tr>
-          <td style="padding:14px 28px 8px 28px;">
+          <td style="padding:16px 32px 28px;">
             <table cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};padding-right:16px;">↑ Improvement</td>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:#c0392b;">↓ Decline</td>
+                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{MANGROVE}};padding-right:20px;">&#9650; Improvement</td>
+                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{CORAL}};padding-right:20px;">&#9660; Softening</td>
+                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};">&#8773; Unchanged</td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Divider -->
-        <tr><td style="padding:0 28px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="1" style="background-color:#e0e0e0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-        <!-- Footer -->
+        <!-- ━━━━ FOOTER ━━━━ -->
         <tr>
-          <td style="padding:16px 28px;">
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT}};opacity:0.5;">{{DISCLAIMER}}</td>
-                <td align="right" style="font-family:{{FONT_FAMILY}};font-size:11px;"><a href="{{WEBSITE_URL}}" style="color:{{PRIMARY}};text-decoration:none;">{{WEBSITE_URL}}</a></td>
+                <td colspan="2" style="padding:0 0 12px 0;font-family:{{FONT_FAMILY}};font-size:12px;">
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="color:{{ACCENT}};text-decoration:none;font-weight:700;">{{CONTACT_EMAIL}}</a>
+                  <span style="color:{{TEXT_DIM}};">&nbsp;&middot;&nbsp;</span>
+                  <a href="tel:{{CONTACT_PHONE}}" style="color:{{TEXT_DIM}};text-decoration:none;">{{CONTACT_PHONE}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;max-width:380px;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
               </tr>
             </table>
           </td>
