@@ -1749,6 +1749,60 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     });
   }
 
+  // --- corridor_vacancy detail_table (per-corridor vacancy as a consumable artifact) ---
+  // One row per verified corridor with a non-null vacancy_rate_pct (0–100).
+  // Row key = raw corridor name (stable lookup); label = display name.
+  // DETERMINISTIC — never synth (guardrail 1). Direct pass-through of
+  // corridor_profiles.vacancy_rate_pct introduces no constant.
+  //
+  // Guardrail 2 (Step-0 finding, operator-approved Option 1): the at-grain
+  // coverage_note is a SOURCE claim and rides ONLY on rows whose
+  // vacancy_rate_source_url IS the incomplete Cushman & Wakefield MarketBeat
+  // submarket survey — detected by the "marketbeat" URL signature observed in
+  // corridor_profiles (that is Lehigh Acres Joel/Lee Blvd only). An unsourced
+  // corridor (FMB Estero Blvd + 24 others, null source_url) NEVER receives it:
+  // attaching a MarketBeat note to an unsourced row would fabricate provenance.
+  const vacancyRows = corridors
+    .filter((c) => c.vacancy_rate_pct != null)
+    .map((c) => {
+      const cells: Record<string, number | string> = {
+        vacancy_rate_pct: c.vacancy_rate_pct as number,
+      };
+      const src = c.vacancy_rate_source_url;
+      if (src && /marketbeat/i.test(src)) {
+        cells.coverage_note =
+          "From the MarketBeat submarket survey — incomplete corridor-level coverage.";
+      }
+      return { key: c.name, label: displayNameFor(c.name), cells };
+    });
+  if (vacancyRows.length > 0) {
+    const vacancyUrl =
+      env.source === "live" && env.supabaseUrl
+        ? `${env.supabaseUrl}/rest/v1/corridor_profiles?select=corridor_name,vacancy_rate_pct,vacancy_rate_source_url&verification_status=eq.verified&deleted_at=is.null&vacancy_rate_pct=not.is.null`
+        : "fixture://refinery/__fixtures__/corridor-profiles.sample.json";
+    const flaggedCount = vacancyRows.filter((r) => r.cells.coverage_note != null).length;
+    detail_tables.push({
+      id: "corridor_vacancy",
+      title: "SWFL CRE corridor vacancy rate",
+      grain: "corridor",
+      columns: [
+        { id: "vacancy_rate_pct", label: "Vacancy", display_format: "percent", units: "%" },
+      ],
+      rows: vacancyRows,
+      source: {
+        url: vacancyUrl,
+        fetched_at,
+        tier: 2,
+        citation:
+          `Brains Supabase corridor_profiles (verified, non-deleted) — vacancy_rate_pct per corridor. ` +
+          `${vacancyRows.length} of ${corridors.length} corridors reporting.` +
+          (flaggedCount > 0
+            ? ` ${flaggedCount} flagged coverage_note draw on the incomplete MarketBeat submarket survey.`
+            : ``),
+      },
+    });
+  }
+
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,

@@ -558,6 +558,7 @@ function makeCorridorFragmentWithMetrics(
   vac: number,
   abs: number,
   rent: number,
+  vacancySourceUrl: string | null = null,
 ): RawFragment {
   const norm: CorridorNormalized = {
     kind: "corridor",
@@ -572,7 +573,7 @@ function makeCorridorFragmentWithMetrics(
     flags: [],
     source_url: null,
     cap_rate_source_url: null,
-    vacancy_rate_source_url: null,
+    vacancy_rate_source_url: vacancySourceUrl,
     absorption_sqft_source_url: null,
     asking_rent_psf_source_url: null,
     cap_rate_pct: cap,
@@ -799,4 +800,66 @@ test("sanitizeScrapedCitation: bounds length with an ellipsis; short clean text 
   const clean = sanitizeScrapedCitation("x".repeat(500));
   assert.ok(clean.length <= 221, `expected bounded length, got ${clean.length}`);
   assert.ok(clean.endsWith("…"), "expected an ellipsis on truncation");
+});
+
+// ── corridor_vacancy detail_table (per-corridor vacancy as a consumable artifact) ──
+// DETERMINISTIC emission, mirrors corridor_seasonality. Guardrail 2 (Step-0
+// finding, operator-approved Option 1): the at-grain coverage_note rides ONLY on
+// rows whose vacancy_rate_source_url is the incomplete MarketBeat submarket
+// survey (per corridor_profiles that is Lehigh Acres only) — never an unsourced
+// corridor, never a blanket footnote.
+const MARKETBEAT_URL = "https://assets.cushmanwakefield.com/-/media/cw/marketbeat-pdf";
+
+test("cre-swfl emits a deterministic corridor_vacancy detail_table", () => {
+  creSwfl.corpusSummary!([
+    // MarketBeat-sourced corridor → row present WITH coverage_note
+    makeCorridorFragmentWithMetrics(
+      "Lee Blvd Lehigh Acres",
+      "Lehigh Acres",
+      7,
+      0.2,
+      500,
+      18,
+      MARKETBEAT_URL,
+    ),
+    // unsourced corridor with vacancy → row present, NO coverage_note
+    makeCorridorFragmentWithMetrics("Pine Ridge Rd Naples", "Naples", 6, 3.2, 4000, 32),
+    // null-vacancy corridor → excluded from the table entirely
+    makeCorridorFragment("Cape Coral Pkwy E", "Cape Coral"),
+  ]);
+  const out = creSwfl.outputProducer!(minimalPackOutput());
+
+  const t = out.detail_tables?.find((d) => d.id === "corridor_vacancy");
+  assert.ok(t, "corridor_vacancy detail_table must be present");
+  assert.equal(t!.grain, "corridor");
+  assert.equal(t!.columns[0].id, "vacancy_rate_pct");
+  assert.equal(t!.columns[0].display_format, "percent");
+
+  // one row per corridor with non-null vacancy; null-vacancy corridors excluded
+  assert.equal(t!.rows.length, 2, "null-vacancy corridor must be excluded");
+  assert.ok(
+    t!.rows.every((r) => typeof r.cells.vacancy_rate_pct === "number"),
+    "every row carries a numeric vacancy_rate_pct",
+  );
+
+  // coverage_note rides ONLY on the MarketBeat-sourced row, as a string.
+  // Match on the stable `key` (raw corridor name); `label` is display-rewritten.
+  const lehigh = t!.rows.find((r) => r.key.includes("Lehigh"));
+  const naples = t!.rows.find((r) => r.key.includes("Naples"));
+  assert.ok(lehigh, "Lehigh row present");
+  assert.ok(naples, "Naples row present");
+  assert.equal(
+    typeof lehigh!.cells.coverage_note,
+    "string",
+    "MarketBeat-sourced row carries a coverage_note",
+  );
+  assert.ok(
+    /marketbeat/i.test(lehigh!.cells.coverage_note as string),
+    "coverage_note names the MarketBeat survey",
+  );
+  assert.equal(
+    naples!.cells.coverage_note,
+    undefined,
+    "unsourced corridor must NOT carry a coverage_note (no fabricated provenance)",
+  );
 });
