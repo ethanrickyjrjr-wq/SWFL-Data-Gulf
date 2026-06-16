@@ -2,6 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat(charts): Task 0 guardrail — in-chat charts fail-closed against template-build frames (corridor-vacancy plan)
+
+- **Why:** operator decree — template-build frames (the wider `CHART_REGISTRY`: composition/z-gauge/seasonal-radial/storm-timeline/future) must NOT be addable to the in-chat charts. Landed FIRST as its own commit (no pack/brain) so the fence exists before plan Task 3 adds a 2nd chart-emission edge on `/api/welcome/chat`.
+- **New `lib/chat/in-chat-frames.ts`** — ONE source of truth: `IN_CHAT_FRAME_ALLOWLIST={bar-table,zhvi-area,corridor-scatter}` + `isInChatFrameAllowed()` + `screenInChatChartFrame(chart,source)` (drops + logs frameId+source; fail-closed on unknown/missing/malformed).
+- **Two enforcement points, same constant:** producer refusal in `buildChartForIntent` (`lib/build-chart-for-intent.mts`, switch extracted to `buildSpecForScope`); runtime strip at THE single SSE edge `app/api/converse/route.ts` (`screenInChatChartFrame(chart,"converse")`).
+- **`lib/chat/in-chat-frames.test.ts`** — negative, registry-driven (auto-covers future frames): every non-allowlisted `CHART_REGISTRY` frame rejected at route + dropped at SSE boundary (forged spec); unknown/missing drops; drop logs; allowlisted pass. `bun test` touched suites **32/0**; eslint + tsc clean on touched files.
+- **Pre-build-state-check (RULE 1, verified in code):** 1 in-chat SSE edge today (`/api/converse`); `/api/welcome/chat` text-only. OPEN answers recorded in plan doc (`docs/superpowers/plans/2026-06-16-coherent-corridor-vacancy-chart.md` Task 0 + OPEN section).
+- **Next:** Task 1 (cre-swfl `corridor_vacancy` detail_table — ROW passthrough, NOT a directional vote) → Step 0 read-only `corridor_profiles` probe. **Push HELD** — touches live `/api/converse`; no-autonomous-push. Awaiting operator diff review.
+
 ## 2026-06-16 (main) — feat(email): Task 2 convergence spine — GroundedReportModel + renderGroundedReport (Wave A, Opus, solo)
 
 - Reconciled stale Phase-0 reading: local `main` == origin/main (0/0; tip `91b6aec`), `bun test lib/email` **318/0** GREEN before this work. The README's "ahead 7 / 5-red" gate is satisfied — email impl + `4d30306` (renderCallout→`SWFL_THEME.primary` by-ref) already shipped.
