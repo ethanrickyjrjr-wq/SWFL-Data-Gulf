@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — test(email): de-circularize spine equivalence — frozen pre-spine goldens (`89e2452`; CORRECTS the spine entry below)
+
+- **Correction:** the Task-2 spine entry below claimed "byte-identical (golden-equivalence test)" on a CIRCULAR assertion — `renderGroundedReport(model) === reportToEmailHtml(report)` is tautological now that `reportToEmailHtml` delegates into the spine. It proved the wrapper composes, NOT that output matches the pre-refactor code. (Operator caught it in pre-push review.)
+- **Real proof:** captured the PRE-spine `reportToEmailHtml` output (commit `91b6aec`, parent of `a9a7cd1`) into 10 frozen golden `.html` fixtures over a branch-covering matrix; diffed post-spine vs golden → **all 10 byte-identical, diff empty.** `lib/email/render-golden.test.ts` makes it a durable non-circular guard; removed the 2 tautological asserts. `bun test lib/email` **333/0**; tsc clean. Goldens are LF (`.gitattributes eol=lf`) → CI-stable.
+- **Concurrency note:** built solo but on a SHARED `main` checkout with ≥1 other live session. Interleaved history: `a9a7cd1` (spine, me) → `8b0e05e` (charts Task 0, other session) → `89e2452` (goldens, me). Staged explicit paths only; never touched SESSION_LOG/their files. Local **ahead of origin by 3**; an unrelated ingest/crawl4ai stream is still UNCOMMITTED in the tree (not mine).
+- **Pre-push answers:** `a9a7cd1` purity = 4 files (3 spine + mandatory SESSION_LOG), zero dbpr/crawl4ai. `scope.kind` only ever `"zip"` (hardcoded in `assembledReportToModel`; no consumer branches on it). `skin:"pdf"` unreachable from `sequence.ts` (hardcodes `"email"`); pdf stub hit only by a unit test. Push still operator-gated.
+
 ## 2026-06-16 (main) — feat(charts): Task 0 guardrail — in-chat charts fail-closed against template-build frames (corridor-vacancy plan)
 
 - **Why:** operator decree — template-build frames (the wider `CHART_REGISTRY`: composition/z-gauge/seasonal-radial/storm-timeline/future) must NOT be addable to the in-chat charts. Landed FIRST as its own commit (no pack/brain) so the fence exists before plan Task 3 adds a 2nd chart-emission edge on `/api/welcome/chat`.
