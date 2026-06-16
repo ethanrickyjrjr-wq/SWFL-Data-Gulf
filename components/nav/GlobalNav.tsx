@@ -21,14 +21,18 @@ import { LoginModal } from "@/components/landing/LoginModal";
  */
 
 /** Paths that must NOT show the bar. Home has its own header; /login + /auth are
- *  focused auth screens; /embed/* are iframe fragments meant to live in other sites. */
+ *  focused auth screens; /embed/* are iframe fragments meant to live in other sites;
+ *  /p/* are finished deliverables a user sends to clients — they stay clean (may be
+ *  white-labeled with the client's brand, so no SWFL chrome). "/p/" can't match
+ *  "/project" (that's "/pr…") or "/privacy". */
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
   return (
     pathname === "/" ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth") ||
-    pathname.startsWith("/embed")
+    pathname.startsWith("/embed") ||
+    pathname.startsWith("/p/")
   );
 }
 

@@ -26,8 +26,9 @@ Trends") — never internal route slugs. URLs are plumbing.
 - **Tabs:** Logo→Home · Search · Projects · **Data ▾** (Market Trends, Map, Data Inventory) · Account (right).
 - **Account menu (signed in):** email (header row) · My Projects · Billing · Sign out.
 - **Account area (signed out):** Log In (modal) · Get Access (`/#waitlist`).
-- **Shows on:** every page EXCEPT home (`/`), the auth screens (`/login`, `/auth/*`), and embedded
-  widgets (`/embed/*`). Client deliverable pages (`/p/[id]`) ARE included per operator choice.
+- **Shows on:** every page EXCEPT home (`/`), the auth screens (`/login`, `/auth/*`), embedded
+  widgets (`/embed/*`), and **client deliverable pages (`/p/[id]`)** — deliverables stay clean (may
+  be white-labeled with the client's brand, so no SWFL chrome).
 
 ## Implementation
 
@@ -61,6 +62,6 @@ Trends") — never internal route slugs. URLs are plumbing.
 
 ## Out of scope / notes
 
-- **White-label tension:** a `/p/[id]` deliverable may carry a client's brand; the app bar there is
-  per operator choice. If clean recipient views are needed later, add `/p` to `isHiddenPath`.
+- **White-label:** `/p/[id]` deliverables are kept clean (excluded in `isHiddenPath`) so a report
+  sent under a client's brand carries no SWFL chrome.
 - No new auth flow, no Stripe/paywall — purely navigation.

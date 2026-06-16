@@ -9,7 +9,7 @@
 - **Mounted once** in `app/layout.tsx` (first child of `<body>`, inside `BriefcaseProvider`); self-suppresses on `/`, `/login`, `/auth/*`, `/embed/*`.
 - **Reconciled double-headers:** dropped `<ProjectNav/>` from `app/project/page.tsx`; dropped the inline breadcrumb + Sign out from `app/project/[id]/ProjectDetail.tsx` (+ orphaned `signOut`/`createClient`); deleted `app/project/ProjectNav.tsx` (now unreferenced).
 - **Verified:** `next build` ✓ (43/43 static, exit 0), eslint clean on all touched files; SSR proof — bar renders on `/r`, suppressed on `/` (landing Header intact) and `/embed/*`. Did NOT run full `bun test` (presentational change, no tested logic touched). Spec: `docs/superpowers/specs/2026-06-16-global-top-navigation-design.md`.
-- **Next / open:** operator review + push (held — no autonomous push); on deploy live-verify Account ▾ shows email + Sign out when signed in; decide whether `/p/[id]` client deliverables keep the app bar (white-label tension — add `/p` to `isHiddenPath` if not).
+- **Next / open:** operator review + push (held — no autonomous push); on deploy live-verify Account ▾ shows email + Sign out when signed in. **Decision (operator): `/p/[id]` deliverables EXCLUDED from the bar** — sent reports stay clean / white-label (follow-up commit adds `/p/` to `isHiddenPath`).
 
 ## 2026-06-16 (main) — fix(ci): unblock red Vercel + GitHub CI (two stacked breakers)
 
