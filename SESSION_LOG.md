@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — fix+ship(lee_permits): crawl4ai port zip-bug fixed; PUSHED; lake ingestion is the pick-up
+
+- Operator approved (07:39 UTC): fixed the ZIP-MOAT bug + pushed everything + updated /ops. `_extract_zip` now takes the ZIP after the 2-letter state (else the LAST 5-digit run), never the leading house number (`88a6b90`; was `"12116 ... FORT MYERS FL 33966"`→`"12116"`). TDD test added; 24 unit+parser tests green.
+- `node scripts/safe-push.mjs` pushed the full local-ahead stack (crawl4ai port `0942c71`→`88a6b90` + this session's + the parallel session's email/nav/welcome/briefcase commits — 25 ahead). Pre-push gates clear (no package.json/bun.lock; no refinery packs/vocab; lee_permits is `write_disposition="merge"`, not a destructive replace).
+- **PICK UP HERE (next session):** the **live lake ingestion has NOT been run** — the crawl4ai code is shipped + verified by dry-run/enrich-smoke, but no rows written to `data_lake.lee_building_permits` yet (a prod dlt merge — gated on a backfill-range choice). Run `python -m ingest.pipelines.lee_permits.pipeline --start <d> --end <d>` to land rows, then spot-check zips are real (33xxx, not house numbers). Then **GHA datacenter-IP** is unresolved (only home IP tested — probe from a GHA runner before wiring the cron; check `crawl4ai_accela_gha_ip`). `collier_permits`/`dbpr_sirs` are one-`.step()` cutovers after.
+- Accela search semantics noted: recent overlapping date windows return an identical ~11-page capped set (native behavior, faithfully reproduced — not a bug). crawl4ai installed into repo system python (cryptography 48→49, stack OK). Scratch spikes live in `~/Downloads/crawl4ai-test/` (uncommitted).
+
 ## 2026-06-16 (main) — feat(lee_permits): crawl4ai Accela port BUILT + locally verified (lake write HELD for review)
 
 - Ported `lee_permits` off Firecrawl (gone) to **crawl4ai 0.8.9 + UndetectedAdapter**, per plan `docs/superpowers/plans/2026-06-16-crawl4ai-accela-port.md`. 6 commits `0942c71`→`81d8250` (clean, explicit-path staged; NOT pushed):
