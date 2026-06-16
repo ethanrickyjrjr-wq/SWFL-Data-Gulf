@@ -20,6 +20,7 @@ import {
 } from "@/lib/welcome/grounded";
 import { fetchBrain, buildDossier } from "@/lib/fetch-brain";
 import { renderBlock, type GroundingBlock } from "@/lib/highlighter/grounding";
+import { routeChart } from "@/lib/route-chart";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { buildWelcomeAnswer } from "@/lib/welcome/answer";
 import { identityForLocation } from "@/lib/location-surface";
@@ -189,17 +190,43 @@ function streamAnswer(
  * → renderBlock). Failsafe: if master can't load, fall back to the un-grounded
  * analyst premise — the no-invention floor in ANALYST_SYSTEM still holds.
  */
-async function buildAnalystSystem(
+export async function buildAnalystSystem(
   lastUser: string,
   origin: string,
 ): Promise<{ system: string; token?: string }> {
   try {
     const { output, freshness_token } = await fetchBrain("master", { tier: 2, origin });
-    const block: GroundingBlock = {
-      // Clean, customer-facing label — never the internal "master" id (CLEAN rule).
-      label: "Southwest Florida (region-wide)",
-      dossier: buildDossier(output, freshness_token),
-    };
+    const blocks: GroundingBlock[] = [
+      {
+        // Clean, customer-facing label — never the internal "master" id (CLEAN rule).
+        label: "Southwest Florida (region-wide)",
+        dossier: buildDossier(output, freshness_token),
+      },
+    ];
+    // CRE corridor-grain questions (vacancy / asking-rent / corridor positioning)
+    // need the per-corridor numbers master rolls into a single median. Add
+    // cre-swfl's dossier — it carries the corridor_vacancy detail_table — so the
+    // prose answers AT corridor grain and lines up with the chart, instead of "I
+    // only have the regional median" (the chart-vs-prose contradiction this fixes).
+    // Nested failsafe: if cre-swfl can't load, master-only grounding still holds
+    // and the no-invention floor is unchanged.
+    const intent = routeChart(lastUser);
+    if (
+      intent &&
+      (intent.scope === "vacancy" ||
+        intent.scope === "asking-rent" ||
+        intent.scope === "corridor-scatter")
+    ) {
+      try {
+        const cre = await fetchBrain("cre-swfl", { tier: 2, origin });
+        blocks.push({
+          label: "SWFL commercial corridors",
+          dossier: buildDossier(cre.output, cre.freshness_token),
+        });
+      } catch {
+        // cre-swfl unavailable → master-only grounding is the graceful floor.
+      }
+    }
     const system =
       buildPlaceContext(lastUser) +
       FORMAT_RULE +
@@ -207,7 +234,7 @@ async function buildAnalystSystem(
       "\n\n=== RULES OF ENGAGEMENT ===\n" +
       RULES_OF_ENGAGEMENT +
       "\n\n=== LIVE SOUTHWEST FLORIDA DATA — ANSWER ONLY FROM THIS ===\n\n" +
-      renderBlock(block) +
+      blocks.map(renderBlock).join("\n\n") +
       welcomeGroundedSpeakLine(freshness_token, "analyst");
     return { system, token: freshness_token };
   } catch {

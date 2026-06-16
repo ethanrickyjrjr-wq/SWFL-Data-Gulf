@@ -46,12 +46,17 @@ const brainState: { map: Record<string, unknown> } = { map: {} };
 // Master read for the analyst no-location path. null → the mock throws and
 // buildAnalystSystem falls back to the un-grounded analyst premise.
 const masterState: { output: Record<string, unknown> | null } = { output: null };
+// cre-swfl read for the analyst CRE-grain grounding (3b). null → not pulled.
+const creState: { output: Record<string, unknown> | null } = { output: null };
 mock.module("@/lib/fetch-brain", () => ({
   ...fetchBrain,
   loadParsedBrain: async (slug: string) => brainState.map[slug] ?? null,
   fetchBrain: async (slug: string) => {
     if (slug === "master" && masterState.output) {
       return { output: masterState.output, freshness_token: "SWFL-7421-v9-20260601" };
+    }
+    if (slug === "cre-swfl" && creState.output) {
+      return { output: creState.output, freshness_token: "SWFL-7421-v9-20260601" };
     }
     throw new Error(`unexpected fetchBrain("${slug}") in test`);
   },
@@ -429,6 +434,92 @@ test("default (welcome) mode, no location → funnel explainer, never touches ma
   expect(captured.system).toContain("auto-email"); // the funnel hook IS the welcome voice
   expect(captured.system).not.toContain("cooling into summer 2026"); // master never fetched
   masterState.output = null;
+});
+
+// cre-swfl read carrying the per-corridor vacancy detail_table (Task 1's artifact).
+const CRE_OUTPUT = {
+  conclusion: "SWFL commercial corridors are holding steady into summer 2026.",
+  direction: "neutral",
+  magnitude: 0.3,
+  confidence: 0.7,
+  refined_at: "2026-06-12",
+  key_metrics: [],
+  detail_tables: [
+    {
+      id: "corridor_vacancy",
+      title: "SWFL CRE corridor vacancy rate",
+      grain: "corridor",
+      columns: [
+        { id: "vacancy_rate_pct", label: "Vacancy", display_format: "percent", units: "%" },
+      ],
+      rows: [
+        { key: "Pine Ridge Rd Naples", label: "Pine Ridge Rd", cells: { vacancy_rate_pct: 3.2 } },
+        {
+          key: "Lee Blvd Lehigh Acres",
+          label: "Lee Blvd",
+          cells: {
+            vacancy_rate_pct: 0.2,
+            coverage_note:
+              "From the MarketBeat submarket survey — incomplete corridor-level coverage.",
+          },
+        },
+      ],
+      source: {
+        url: "https://x.supabase.co/rest/v1/corridor_profiles?select=corridor_name,vacancy_rate_pct",
+        fetched_at: "2026-06-15T00:00:00Z",
+        tier: 2,
+        citation:
+          "Brains Supabase corridor_profiles (verified, non-deleted) — vacancy_rate_pct per corridor.",
+      },
+    },
+  ],
+  caveats: [],
+};
+
+test("analyst CRE-vacancy question → grounds on cre-swfl per-corridor detail, not just master's median", async () => {
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT;
+  creState.output = CRE_OUTPUT;
+  const res = await POST(
+    new Request("https://x/api/welcome/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        mode: "analyst",
+        messages: [{ role: "user", content: "commercial real estate vacancy by corridor" }],
+      }),
+    }),
+  );
+  const body = await res.text();
+  expect(body).toContain(MODEL_SENTINEL); // grounded answer streamed
+  // per-corridor grain reached the system prompt (the table + a corridor name)
+  expect(captured.system).toContain("SWFL CRE corridor vacancy rate");
+  expect(captured.system).toContain("Pine Ridge Rd");
+  // the at-grain coverage flag rode along for the prose to surface
+  expect(captured.system).toContain("MarketBeat submarket survey");
+  // master is still present for the region-wide bottom line
+  expect(captured.system).toContain("cooling into summer 2026");
+  masterState.output = null;
+  creState.output = null;
+});
+
+test("analyst NON-corridor question → does NOT pull cre-swfl (master-only grounding)", async () => {
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT;
+  creState.output = CRE_OUTPUT; // present, but the intent must NOT route to CRE
+  const res = await POST(
+    new Request("https://x/api/welcome/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        mode: "analyst",
+        messages: [{ role: "user", content: "what's the bottom line right now?" }],
+      }),
+    }),
+  );
+  await res.text();
+  expect(captured.system).toContain("cooling into summer 2026"); // master grounding
+  expect(captured.system).not.toContain("SWFL CRE corridor vacancy rate"); // cre-swfl NOT pulled
+  masterState.output = null;
+  creState.output = null;
 });
 
 test("summarize mode → synthesis prompt over the thread, dedups against filed Q&A", async () => {
