@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — ci(lee_permits): GHA-IP probe — fix workflow for crawl4ai, schedule HELD, manual dry-run dispatch
+
+- Resolving the GHA datacenter-IP unknown (`crawl4ai_accela_gha_ip`). Rewrote `.github/workflows/lee-permits-weekly.yml`: added the missing browser-install step (`playwright install --with-deps chromium` + `patchright install chromium` — UndetectedAdapter drives **patchright**, verified at `crawl4ai/browser_manager.py:625`), pinned python 3.12 (match proven local), dropped the dead `FIRECRAWL_API_KEY` env, flipped `dry_run` default to `true`.
+- **Schedule COMMENTED OUT** (manual-dispatch only) so a now-functional workflow can't do an unattended first lake write before (a) the IP clears from a GHA runner and (b) operator approves the lake write. Re-enable the Monday cron once both gates clear.
+- Next in this session: `gh workflow run lee-permits-weekly.yml -f dry_run=true` → read logs → does the grid render + 91 rows from a datacenter IP, or WAF/timeout block? That's the binary answer for whether the cron can run on GHA vs needs self-hosted/residential proxy.
+
 ## 2026-06-16 (main) — fix+ship(lee_permits): crawl4ai port zip-bug fixed; PUSHED; lake ingestion is the pick-up
 
 - Operator approved (07:39 UTC): fixed the ZIP-MOAT bug + pushed everything + updated /ops. `_extract_zip` now takes the ZIP after the 2-letter state (else the LAST 5-digit run), never the leading house number (`88a6b90`; was `"12116 ... FORT MYERS FL 33966"`→`"12116"`). TDD test added; 24 unit+parser tests green.

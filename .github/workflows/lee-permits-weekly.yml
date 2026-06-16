@@ -1,18 +1,20 @@
 name: Lee County permits weekly
 
 on:
-  schedule:
-    # 0 11 * * 1 — 11:00 UTC = 7:00 AM ET every Monday.
-    # Rolling weekly window: captures Mon→Mon permit activity.
-    # v1 (first-page only) + weekly cron is strictly better than v1 + manual; v2 pagination supersedes when ready.
-    # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
-    - cron: "0 11 * * 1"
+  # SCHEDULE HELD (2026-06-16): the Firecrawl→crawl4ai cutover landed, but two gates
+  # remain before an unattended run: (1) confirm crawl4ai+UndetectedAdapter clears the
+  # Accela WAF from a GitHub datacenter IP (only a home IP is proven — check
+  # crawl4ai_accela_gha_ip), and (2) operator approval for the first prod lake write
+  # (check lee_permits_first_lake_ingestion). Until then this is manual-dispatch only.
+  # Re-enable the cron once both clear.
+  #   schedule:
+  #     - cron: "0 11 * * 1"   # 11:00 UTC = 7:00 AM ET Mondays; rolling Mon→Mon window
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run — fetch and validate only; skip dlt write"
+        description: "Dry run — fetch and validate only; skip dlt write (use for the GHA-IP probe)"
         required: false
-        default: "false"
+        default: "true"
 
 permissions:
   contents: read
@@ -20,7 +22,7 @@ permissions:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -28,22 +30,30 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          # Pinned to 3.12 to match the locally-proven crawl4ai 0.8.9 env.
+          python-version: "3.12"
 
       - name: Install ingest dependencies
         run: pip install -r ingest/requirements.txt
 
+      - name: Install Chromium for crawl4ai
+        # UndetectedAdapter drives patchright (browser_manager.py: from patchright.async_api
+        # import async_playwright), so patchright's own browser is required. playwright
+        # --with-deps installs the shared OS libraries Chromium needs on the runner.
+        run: |
+          python -m playwright install --with-deps chromium
+          python -m patchright install chromium
+
       - name: Run Lee permits pipeline
         env:
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
         run: |
           START=$(date -u -d "7 days ago" +%Y-%m-%d)
           END=$(date -u +%Y-%m-%d)
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            python -m ingest.pipelines.lee_permits.pipeline --start "$START" --end "$END" --dry-run
-          else
+          if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
             python -m ingest.pipelines.lee_permits.pipeline --start "$START" --end "$END"
+          else
+            python -m ingest.pipelines.lee_permits.pipeline --start "$START" --end "$END" --dry-run
           fi
