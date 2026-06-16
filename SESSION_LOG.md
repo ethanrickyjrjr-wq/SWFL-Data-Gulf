@@ -2,7 +2,15 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
-## 2026-06-16 (main) — ci(lee_permits): first live GHA run — 94 rows in data_lake.lee_building_permits, cron re-enabled
+## 2026-06-16 (main) — feat(email): Task 2 convergence spine — GroundedReportModel + renderGroundedReport (Wave A, Opus, solo)
+
+- Reconciled stale Phase-0 reading: local `main` == origin/main (0/0; tip `91b6aec`), `bun test lib/email` **318/0** GREEN before this work. The README's "ahead 7 / 5-red" gate is satisfied — email impl + `4d30306` (renderCallout→`SWFL_THEME.primary` by-ref) already shipped.
+- **New `lib/email/grounded-report.ts`** (the spine): `GroundedReportModel extends AssembledReport` (+`delta?` + general `scope{kind,value,grain,topic?}` + `cta_url`/`site_origin`); `renderGroundedReport(model,{skin,brand})` ports the hero/metrics/reads repeats + dark `[ DELTA ]` block verbatim from `reportToEmailHtml`; `assembledReportToModel` maps the activation ZIP into `kind:"zip"` scope. pdf skin stubs to the email shell (`renderSkin`) until Task 4 wires `doc/doc-report`.
+- **Thinned `lib/email/activation/render.ts`**: `reportToEmailHtml` is now `assembledReportToModel → renderGroundedReport({skin:"email"}) → ensureUnsubscribeToken`. Public signature (`RenderReportOptions`) unchanged → `sequence.ts` consumer untouched. Output byte-identical (golden-equivalence test).
+- New `lib/email/grounded-report.test.ts`: golden equivalence (plain + brand/delta/ctaUrl) == `reportToEmailHtml`, delta=null → no DELTA, has_change=false → "Re-verified", scope-maps-to-zip, pdf-skin smoke. **`bun test lib/email` 325/0**; project `tsc --noEmit` clean across all of `lib/email`.
+- Opened check `email_grounded_render_spine` (closes on push + CI green). **Push HELD** — live render path = diff-review gate + no-autonomous-push; awaiting operator confirm.
+
+
 
 - GHA run 27624394217 (dry_run=false): crawl4ai cleared Accela WAF on datacenter IP, 11 pages, 94 rows, 100% 33xxx ZIPs. First live write to `data_lake.lee_building_permits` confirmed.
 - Closed `lee_permits_first_lake_ingestion`. Re-enabled cron (`0 11 * * 1`, Mondays 07:00 ET) in `lee-permits-weekly.yml`.
