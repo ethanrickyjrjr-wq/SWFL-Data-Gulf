@@ -480,7 +480,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
   }
 
   return (
-    <main className="deliverable-page mx-auto max-w-5xl px-4 py-10">
+    <main className="deliverable-page mx-auto max-w-6xl px-4 py-10">
       {/* Brand accent bar — print-visible top rule, hidden when no brand color set */}
       {brandTheme?.primary && (
         <div

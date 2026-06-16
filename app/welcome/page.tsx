@@ -40,7 +40,7 @@ export default async function WelcomePage({
 
   return (
     <main
-      className="mx-auto min-h-dvh max-w-3xl px-6 py-16"
+      className="mx-auto min-h-dvh max-w-6xl px-6 py-16"
       style={{ "--brand-primary": primary, "--brand-secondary": secondary } as React.CSSProperties}
     >
       <header className="mb-10 flex items-center gap-4">

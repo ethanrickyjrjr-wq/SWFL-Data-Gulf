@@ -23,8 +23,8 @@ export function ReportShell({
 }) {
   const main =
     width === "2xl"
-      ? "mx-auto max-w-2xl px-6 py-12 sm:px-8 sm:py-16"
-      : "mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16";
+      ? "mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16"
+      : "mx-auto max-w-6xl px-6 py-12 sm:px-8 sm:py-16";
   return (
     <div className="min-h-dvh bg-navy-dark font-sans text-white">
       <main className={main}>{children}</main>

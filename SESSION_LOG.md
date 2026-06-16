@@ -1,3 +1,10 @@
+## 2026-06-16 (main) — fix(layout): standardize page widths to max-w-6xl across all app pages
+
+- `/welcome/`: max-w-3xl → max-w-6xl (was 768px, now 1152px)
+- `/r/` report shell: max-w-2xl → max-w-4xl, max-w-4xl → max-w-6xl (was 672–896px, now 896–1152px)
+- `/p/[id]/` deliverable: max-w-5xl → max-w-6xl (was 1024px, now 1152px)
+- Landing already used max-w-7xl — app pages now consistent at max-w-6xl. Mobile unaffected (max-w only kicks in above the breakpoint; px-4/px-6 padding already correct).
+
 ## 2026-06-16 (main) — fix: commit missing citation files (broke build since 76a940c) + remove Ops nav from public Header
 
 - `components/CitationList.tsx`, `lib/citations/clean-url.ts`, `lib/citations/internal-markers.ts`, `lib/citations/clean-url.test.ts` were created by the citations session but NEVER committed — left untracked. `76a940c` imported them; every Vercel build since then has been broken → `/p/[id]` 404. Committing them now unblocks the deploy.
