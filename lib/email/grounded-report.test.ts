@@ -4,10 +4,8 @@ import {
   assembledReportToModel,
   type GroundedReportModel,
 } from "./grounded-report";
-import { reportToEmailHtml } from "./activation/render";
-import { ensureUnsubscribeToken } from "./scheduler";
 import type { AssembledReport } from "./activation/snapshot";
-import type { ActivationBrand, ReportDelta } from "./activation/types";
+import type { ReportDelta } from "./activation/types";
 
 function report(over: Partial<AssembledReport> = {}): AssembledReport {
   return {
@@ -101,35 +99,10 @@ function model(over: Partial<GroundedReportModel> = {}): GroundedReportModel {
 }
 
 describe("renderGroundedReport — convergence spine", () => {
-  // The behavior-preservation proof: the email skin, after the email lane's unsubscribe
-  // injection, is byte-identical to the thinned reportToEmailHtml wrapper for the same
-  // data. (The wrapper IS spine + ensureUnsubscribeToken, so this is the contract.)
-  it("email skin (+unsub) is byte-identical to reportToEmailHtml — plain", async () => {
-    const r = report();
-    const viaSpine = ensureUnsubscribeToken(
-      await renderGroundedReport(assembledReportToModel(r), { skin: "email" }),
-    );
-    const viaWrapper = await reportToEmailHtml(r);
-    expect(viaSpine).toBe(viaWrapper);
-  });
-
-  it("email skin (+unsub) is byte-identical to reportToEmailHtml — brand + delta + ctaUrl", async () => {
-    const r = report();
-    const brand: ActivationBrand = {
-      primary: "#7b2d8e",
-      accent: "#f0a",
-      companyName: "Gulf Coast Realty",
-    };
-    const ctaUrl = "https://gulfcoast.example/start";
-    const viaSpine = ensureUnsubscribeToken(
-      await renderGroundedReport(assembledReportToModel(r, { delta: CHANGE_DELTA, ctaUrl }), {
-        skin: "email",
-        brand,
-      }),
-    );
-    const viaWrapper = await reportToEmailHtml(r, { delta: CHANGE_DELTA, ctaUrl, brand });
-    expect(viaSpine).toBe(viaWrapper);
-  });
+  // NOTE: behavior-preservation ("the refactor didn't change email output") is proven by
+  // render-golden.test.ts, which diffs the post-spine output against frozen PRE-spine bytes.
+  // Asserting renderGroundedReport === reportToEmailHtml here would be circular (the wrapper
+  // now delegates into the spine). The tests below cover the spine's OWN behavior instead.
 
   it("delta=null renders no [ DELTA ] content (no change block, no re-verified)", async () => {
     const html = await renderGroundedReport(model({ delta: null }), { skin: "email" });
