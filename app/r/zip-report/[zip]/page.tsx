@@ -27,6 +27,7 @@ import {
 } from "../../_components/location-ui";
 import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
+import { asOfFromToken } from "../../../../lib/project/as-of";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 
 export const runtime = "nodejs";
@@ -169,7 +170,11 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           {freshnessToken && (
             <Meta
               label="Freshness"
-              value={<code className="text-xs text-[#0a8078]">{freshnessToken}</code>}
+              value={
+                <code className="text-xs text-[#0a8078]">
+                  {asOfFromToken(freshnessToken) ?? freshnessToken}
+                </code>
+              }
             />
           )}
           {updatedAt && <Meta label="Updated" value={formatDate(updatedAt)} />}

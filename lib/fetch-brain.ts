@@ -282,7 +282,7 @@ export function renderDetailRowText(
   if (ctx.origin) {
     blocks.push(`Full report → ${ctx.origin.replace(/\/$/, "")}/r/${ctx.slug}`);
   }
-  blocks.push(`_Freshness:_ \`${ctx.freshnessToken}\``);
+  blocks.push(`_Freshness:_ ${asOfFromToken(ctx.freshnessToken) ?? ctx.freshnessToken}`);
   return blocks.join("\n\n");
 }
 

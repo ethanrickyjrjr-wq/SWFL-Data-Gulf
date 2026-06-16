@@ -1,4 +1,5 @@
 import { RadialConfidenceGauge } from "@/components/charts";
+import { asOfFromToken } from "@/lib/project/as-of";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -70,7 +71,7 @@ export default async function EmbedFooterTokenPage() {
               color: "#0a8078",
             }}
           >
-            {token}
+            {asOfFromToken(token) ?? token}
           </div>
           <div style={{ fontSize: 14, color: "#B8B4A8" }}>
             Confidence: <span style={{ color: "#F0EDE6", fontWeight: 600 }}>{confidencePct}%</span>

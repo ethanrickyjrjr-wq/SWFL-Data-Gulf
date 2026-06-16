@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { asOfFromToken } from "../../../../lib/project/as-of";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -105,7 +106,11 @@ export default async function CorridorPage({ params }: PageProps) {
           {freshnessToken && (
             <Meta
               label="Freshness"
-              value={<code className="text-xs text-[#0a8078]">{freshnessToken}</code>}
+              value={
+                <code className="text-xs text-[#0a8078]">
+                  {asOfFromToken(freshnessToken) ?? freshnessToken}
+                </code>
+              }
             />
           )}
           {c.metrics_verified_date && (

@@ -1,4 +1,5 @@
 import { CorridorRentChart, ZHVIAreaChart } from "@/components/charts";
+import { asOfFromToken } from "@/lib/project/as-of";
 import corridorRents from "@/fixtures/corridor-rents.json";
 import zhviTrend from "@/fixtures/zhvi-trend.json";
 import brainOutput from "@/fixtures/brain-output.json";
@@ -43,7 +44,8 @@ export default function DemoPage() {
           {statsData.flood_records.toLocaleString()} flood records. One verified answer.
         </p>
         <p className="mt-4 font-mono text-xs text-[#807E76]">
-          Confidence: {statsData.brain_confidence}% · {brainData.freshness_token}
+          Confidence: {statsData.brain_confidence}% ·{" "}
+          {asOfFromToken(brainData.freshness_token) ?? brainData.freshness_token}
         </p>
       </section>
 

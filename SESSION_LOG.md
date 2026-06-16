@@ -1,3 +1,7 @@
+## 2026-06-16 (main) — fix(freshness): route all freshness token display through asOfFromToken → MM/DD/YYYY
+
+- 8 sites: `lib/fetch-brain.ts` (found + not-found MCP text), `app/r/_components/report-shell.tsx` (ReportFooter), `app/r/zip-report/[zip]/page.tsx`, `app/r/cre-swfl/[corridor]/page.tsx`, `app/c/[id]/page.tsx`, `app/demo/page.tsx`, `app/embed/footer-token/page.tsx`. Raw `SWFL-7421-vN-YYYYMMDD` tokens no longer leak to any render surface.
+
 ## 2026-06-16 (main) — fix(briefcase): Task 7 idempotence — stopped recipe reactivates in place (like pause), not a tombstone
 
 - **Correction to the Task 7 entry below (`a5d1858`).** That commit's `createOrTouchSchedule` excluded `status='stopped'` from the recipe match, so re-scheduling an identical-to-stopped recipe inserted a NEW row (stopped twin lingered). Operator decision (2026-06-16): a stopped match should **reactivate in place exactly like un-pausing** — one entry per recipe, and it's data-safe because the schedule row stores only a recipe (no numbers); the next run re-fetches current data via `assembleActivationReport` regardless of how long it sat stopped (confirmed `scripts/email/run-schedules.mts:250`).

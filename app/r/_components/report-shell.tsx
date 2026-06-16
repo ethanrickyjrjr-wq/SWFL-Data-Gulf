@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { asOfFromToken } from "@/lib/project/as-of";
 
 /**
  * Shared chrome for every /r/ report read, so all pages render identical
@@ -73,7 +74,9 @@ export function ReportFooter({
           {freshnessToken && (
             <>
               {" · "}
-              <code className="freshness-token text-xs text-[#0a8078]">{freshnessToken}</code>
+              <code className="freshness-token text-xs text-[#0a8078]">
+                {asOfFromToken(freshnessToken) ?? freshnessToken}
+              </code>
             </>
           )}
         </span>

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { asOfFromToken } from "@/lib/project/as-of";
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { AddToProject } from "./AddToProject";
@@ -55,7 +56,7 @@ export default async function SavedChartPage({ params }: { params: Promise<{ id:
 
       <div className="mt-4 flex items-center justify-between">
         <div className="freshness-token text-[11px] font-mono text-gray-500">
-          {freshness_token ?? ""}
+          {asOfFromToken(freshness_token) ?? ""}
         </div>
         <div className="flex items-center gap-3">
           <AddToProject chartId={id} title={chart_block.title} />
