@@ -2,6 +2,13 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — feat(email): data-driven email-report.html (repeat-block, Route A)
+
+- Restored the live activation email broken by 9f976f4 (static mockup, no body slot → fabricated data, no token/CTA). Repeat-block expansion added to `renderHtmlTemplate` (opt-in `repeats` + exported `expandRepeats`, clones `<!-- repeat:KEY -->` per item); `renderEmailTemplate` threads it + an always-replaced `[ DELTA ]` slot. `email-report.html` keeps masthead/footer; middle is now headline + `repeat:hero` + `[ DELTA ]` + `repeat:metrics` + `repeat:reads` + token + CTA. `reportToEmailHtml` feeds real data; delta block dark-restyled; dead `metricsTable` removed.
+- `renderCallout` test fixed by referencing `SWFL_THEME.primary` (navy-agnostic). Parked the fabricated ZIP-comparison bars + Q3 outlook + sparkline (no single-ZIP data) behind checks `email_report_multizip_revival` + `email_brand_navy_canonical`.
+- Full suite **2577 pass / 0 fail** (was 2566/5) + repeat + no-fabrication tripwire tests. Spec/plan: `docs/superpowers/{specs,plans}/2026-06-16-email-report-data-driven*`. Commits `b0b036b`→`ea1f2a2`.
+- Next: operator to confirm brand navy; push when approved (CI now green, Vercel will redeploy).
+
 ## 2026-06-16 (main) — feat(nav): global top navigation — kill the "stuck on every page" dead ends
 
 - **Problem (operator):** only home `/` had a nav (`components/landing/Header.tsx`); every other page (Search, Projects, Charts, Alerts, `/p/[id]` deliverables) was a dead end — no Home/Projects/account/menu. "A website where people can't get anywhere."
