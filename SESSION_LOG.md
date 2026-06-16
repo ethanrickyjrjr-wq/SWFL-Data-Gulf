@@ -2,6 +2,12 @@
 
 **Read this on session start. Append to it before every `git push`.**
 
+## 2026-06-16 (main) — fix(briefcase) + chore(collier-permits): deixis fix + crawl4ai GHA hold
+
+- `fix(briefcase)` (`a8acdf8`): `CHARTS_PROMPTS` in `visits.ts` were deictic ("this trend", "these areas") — unanswerable because the pill chat sends no chart identity, only the region-wide master read. Replaced with subject-naming prompts; test updated to assert `/SWFL|home|rent/` present and `/\bthis (trend|now|chart)\b/` absent.
+- `chore(collier-permits)` (`04a9618`): GHA schedule commented out pending GHA dry-run probe (UndetectedAdapter from datacenter IP unverified). `workflow_dispatch` dry_run defaults `true`, py→3.12, Chromium install added, Firecrawl/Spider env refs removed. Plan + spec docs (`docs/superpowers/plans/` + `specs/`) landed; no pipeline implementation yet.
+- **Next:** run the GHA dry-run probe manually; if green, re-enable cron + implement `crawl4ai_client.py` download_step (Task 1 of the plan).
+
 ## 2026-06-16 (main) — fix(briefcase): Task 4 CI red — example-email needs a card + count bump
 
 - CI #769 (`7630b32`) failed at `bun test` (Typecheck + Lint passed): adding the `example-email` build scenario without a matching `EXAMPLE_CARDS` entry orphaned it (the cards⇄scenarios sync lock, `lib/briefcase/example-cards.test.ts`). **Root cause:** I scoped local runs to lib/deliverable + lib/email; this cross-cutting consumer lives in `lib/briefcase`.
