@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from .scraper import (
     PermitRow,
+    _extract_zip,
     parse_accela_result_page,
     parse_cap_detail_html,
     parse_page_count,
@@ -57,6 +58,21 @@ def test_parse_accela_result_page_column_mapping() -> None:
 def test_parse_accela_result_page_empty_returns_empty_list() -> None:
     assert parse_accela_result_page("") == []
     assert parse_accela_result_page("<html><body>no permits</body></html>") == []
+
+
+def test_extract_zip_prefers_trailing_state_zip_not_house_number() -> None:
+    """ZIP-MOAT: a 5-digit house number at the front must NOT be stored as the ZIP.
+    The real ZIP follows the 2-letter state; fall back to the last 5-digit run."""
+    # house number 12116 + real ZIP 33966 — the bug returned 12116
+    assert _extract_zip("12116 SHORTLEAF PINE TRL, FORT MYERS FL 33966") == "33966"
+    # +4 ZIP — keep the 5-digit base
+    assert _extract_zip("123 MAIN ST, NAPLES FL 34102-1234") == "34102"
+    assert _extract_zip("456 OAK AVE, CAPE CORAL FL 33904") == "33904"
+    # no state token: still take the LAST 5-digit run, never the leading house number
+    assert _extract_zip("33880 SOME RD 33901") == "33901"
+    # no ZIP at all
+    assert _extract_zip("UNKNOWN ADDRESS") is None
+    assert _extract_zip("") is None
 
 
 # ---------------------------------------------------------------------------

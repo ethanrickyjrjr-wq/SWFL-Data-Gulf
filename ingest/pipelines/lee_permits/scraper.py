@@ -159,6 +159,11 @@ _COL_STATUS     = 4
 # Regex helpers
 # ---------------------------------------------------------------------------
 
+# US addresses end with "... ST 33966" or "... ST 33966-1234". The 5-digit run at
+# the FRONT is the house number, NOT a ZIP (ZIP-MOAT: never store invented grain).
+# Prefer the ZIP that follows a 2-letter state token; fall back to the LAST 5-digit
+# run (the trailing ZIP), never the leading house number.
+_ZIP_AFTER_STATE_RE = re.compile(r"\b[A-Z]{2}\s+(\d{5})(?:-\d{4})?\b")
 _ZIP_RE = re.compile(r"\b(\d{5})(?:-\d{4})?\b")
 
 # Lee permit IDs: BLD2026-NNNNN, MEC2026-NNNNN-R01, 26TMP-NNNNNN, etc.
@@ -170,8 +175,12 @@ _TMP_PREFIX_RE = re.compile(r"^\d{2}TMP-", re.IGNORECASE)
 
 
 def _extract_zip(address: str) -> Optional[str]:
-    m = _ZIP_RE.search(address or "")
-    return m.group(1) if m else None
+    a = address or ""
+    m = _ZIP_AFTER_STATE_RE.search(a)
+    if m:
+        return m.group(1)
+    all_zips = _ZIP_RE.findall(a)
+    return all_zips[-1] if all_zips else None
 
 
 def _parse_mm_dd_yyyy(value: str) -> Optional[str]:
