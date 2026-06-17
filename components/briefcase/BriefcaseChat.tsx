@@ -80,6 +80,20 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       briefcase: briefcaseDigest(briefcase?.draftItems ?? []),
     }),
   });
+
+  // Every new question re-grounds from scratch — clear the PRIOR answer's grounding
+  // (place + freshness token) before streaming the next one, so the in-chat "Send
+  // weekly" card never lingers from a previous ZIP. Without this, a region-wide
+  // "Southwest Florida" follow-up (whose prelude carries no 5-digit place) keeps the
+  // last town's card. The next answer's prelude `place` frame re-populates these.
+  const submit = (text: string) => {
+    if (busy || !text.trim()) return; // mirror useChatStream.send's own guard
+    placeRef.current = null;
+    tokenRef.current = undefined;
+    setPlace(null);
+    send(text);
+  };
+
   const [input, setInput] = useState("");
   const [filed, setFiled] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<"idle" | "saving" | "done" | "error">("idle");
@@ -179,7 +193,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
             <li key={p}>
               <button
                 type="button"
-                onClick={() => send(p)}
+                onClick={() => submit(p)}
                 className="w-full rounded-lg border border-[#0a8078] bg-[#0a8078]/10 px-3 py-2 text-left text-xs text-[#f0ede6] transition-colors hover:bg-[#0a8078]/20 hover:text-[#0a8078]"
               >
                 {p}
@@ -253,7 +267,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          send(input);
+          submit(input);
           setInput("");
         }}
         className="flex items-end gap-2"
@@ -264,7 +278,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              send(input);
+              submit(input);
               setInput("");
             }
           }}
