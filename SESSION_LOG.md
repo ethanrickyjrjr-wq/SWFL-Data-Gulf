@@ -1,3 +1,7 @@
+## 2026-06-17 (main) — fix(nav): rip out Data dropdown (map + data-inventory) → single Charts link
+
+- `components/nav/GlobalNav.tsx`: removed `DATA_ITEMS` array, `dataOpen` state, and the entire "Data ▾" dropdown (which exposed `/map` and `/ops/data-inventory`). Replaced with a plain **Charts** tab (→ `/charts`) on desktop and mobile. Dead `dataActive` calc also removed.
+
 ## 2026-06-16 (main) — feat(briefcase): Task 5 — in-chat "Send weekly" card + Task 6 dead-link fix (contacts upload page)
 
 - **Task 5 (in-chat send, Slice 1):** the briefcase chat now offers "Send weekly" directly under an answer grounded on an in-scope ZIP. New `components/briefcase/ChatScheduleCard.tsx` (~290 lines, props `{zip, placeName, projectId}`): on `/project/[id]` it probes `GET /api/email/send-status` (doubles as auth check: 401→sign-in CTA; existing schedule→"already getting it"; else day/hour/audience picker → propose → confirm → one `email_schedules` row, fresh data each run). Off a project / signed-out → the **login-capture CTA** (the locked monetization moment, not a block). Region-wide "Southwest Florida" answers (empty ZIP) correctly show no card.

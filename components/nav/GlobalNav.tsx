@@ -36,21 +36,12 @@ function isHiddenPath(pathname: string | null): boolean {
   );
 }
 
-/** Data ▾ menu — real, distinct user-facing data pages (Charts and "Market Trends"
- *  are the same page, merged to one item). */
-const DATA_ITEMS: { href: string; label: string }[] = [
-  { href: "/charts", label: "Market Trends" },
-  { href: "/map", label: "Map" },
-  { href: "/ops/data-inventory", label: "Data Inventory" },
-];
-
 export function GlobalNav() {
   const pathname = usePathname();
   const hidden = isHiddenPath(pathname);
 
   const [user, setUser] = useState<User | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dataOpen, setDataOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -73,15 +64,12 @@ export function GlobalNav() {
   }, [hidden]);
 
   const closeMenus = useCallback(() => {
-    setDataOpen(false);
     setAccountOpen(false);
   }, []);
 
-  // Close the open dropdown on an outside click or Escape. (State is set inside the
-  // event handlers, never synchronously in the effect body — keeps the
-  // react-hooks/set-state-in-effect lint happy.)
+  // Close the open dropdown on an outside click or Escape.
   useEffect(() => {
-    if (!dataOpen && !accountOpen) return;
+    if (!accountOpen) return;
     function onPointerDown(e: PointerEvent) {
       if (headerRef.current && !headerRef.current.contains(e.target as Node)) closeMenus();
     }
@@ -94,7 +82,7 @@ export function GlobalNav() {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [dataOpen, accountOpen, closeMenus]);
+  }, [accountOpen, closeMenus]);
 
   async function signOut() {
     const supabase = createClient();
@@ -105,7 +93,6 @@ export function GlobalNav() {
   if (hidden) return null;
 
   const isActive = (href: string) => !!pathname && pathname.startsWith(href);
-  const dataActive = DATA_ITEMS.some((d) => isActive(d.href));
   const email = user?.email ?? "";
   const initial = (email[0] ?? "?").toUpperCase();
 
@@ -132,36 +119,9 @@ export function GlobalNav() {
               Projects
             </TabLink>
 
-            {/* Data ▾ */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setAccountOpen(false);
-                  setDataOpen((o) => !o);
-                }}
-                aria-expanded={dataOpen}
-                aria-haspopup="menu"
-                className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm transition-colors ${
-                  dataActive ? "text-white" : "text-gray-300 hover:text-white"
-                }`}
-              >
-                Data
-                <Caret open={dataOpen} />
-              </button>
-              {dataOpen && (
-                <div
-                  role="menu"
-                  className="absolute left-0 z-50 mt-1 w-52 overflow-hidden rounded-xl border border-white/10 bg-navy-dark p-1 shadow-2xl"
-                >
-                  {DATA_ITEMS.map((d) => (
-                    <MenuLink key={d.href} href={d.href} onClick={closeMenus}>
-                      {d.label}
-                    </MenuLink>
-                  ))}
-                </div>
-              )}
-            </div>
+            <TabLink href="/charts" active={isActive("/charts")} onClick={closeMenus}>
+              Charts
+            </TabLink>
           </nav>
         </div>
 
@@ -172,7 +132,6 @@ export function GlobalNav() {
               <button
                 type="button"
                 onClick={() => {
-                  setDataOpen(false);
                   setAccountOpen((o) => !o);
                 }}
                 aria-expanded={accountOpen}
@@ -271,12 +230,9 @@ export function GlobalNav() {
           <MobileLink href="/project" onClick={() => setMobileOpen(false)}>
             Projects
           </MobileLink>
-          <p className="px-3 pt-3 text-[10px] uppercase tracking-wider text-gray-500">Data</p>
-          {DATA_ITEMS.map((d) => (
-            <MobileLink key={d.href} href={d.href} onClick={() => setMobileOpen(false)}>
-              {d.label}
-            </MobileLink>
-          ))}
+          <MobileLink href="/charts" onClick={() => setMobileOpen(false)}>
+            Charts
+          </MobileLink>
           <div className="mt-2 border-t border-white/10 pt-3">
             {user ? (
               <>
