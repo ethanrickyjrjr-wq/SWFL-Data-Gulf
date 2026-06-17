@@ -1,3 +1,9 @@
+## 2026-06-17 (main) — docs(planning): FINAL BOSS — Live Work Environment master plan + 4-piece decomposition
+
+- Added `FINAL BOSS/` (planning docs only — NO code): `README.md`, `00-MASTER-PLAN.md`, `01-piece-1-workspace-shell.md` (ready-to-build, code-verified), `02-piece-2-project-aware-ai.md`, `03-piece-3-signal-layer.md`, `04-piece-4-editing-refresh-trash.md`, `HANDOFF.md`.
+- Captures: the north star (Project Page = live AI workspace, not a file cabinet); the spine (ONE persistent assistant in two contexts, everything keyed to `project_id`, converges at Projects); the context bus; the email-through-Projects flagship flow (+ 3 concrete gaps: seed-on-load, `"email"` template/scope through the build route+MCP tool, the "Ready to send?" prompt); REAL/SELECTIVE/REACH convergence tiers; and the cross-build contract matrix.
+- Next: brainstorm → spec → build **Piece 1 (Workspace Shell)**. Pieces 2–4 are scoped drafts needing their own brainstorm (RULE 3.5). Plan file: `~/.claude/plans/virtual-meandering-dewdrop.md`.
+
 ## 2026-06-17 (main) — fix(nav): rip out Data dropdown (map + data-inventory) → single Charts link
 
 - `components/nav/GlobalNav.tsx`: removed `DATA_ITEMS` array, `dataOpen` state, and the entire "Data ▾" dropdown (which exposed `/map` and `/ops/data-inventory`). Replaced with a plain **Charts** tab (→ `/charts`) on desktop and mobile. Dead `dataActive` calc also removed.
