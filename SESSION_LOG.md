@@ -1,3 +1,10 @@
+## 2026-06-17 (main) — feat(projects): Piece 2 deferred steps — §8 writeback + §9 flags + G1 action surface — HELD for push
+
+- **§9**: `lib/project/flags.ts` — 3 default-OFF env-injectable LLM accelerator flags (`PROMPT_POLISH_ENABLED`, `PREBUILD_ENABLED`, `ASSEMBLE_LLM_ENABLED`). 9 tests green. Check `piece2_gated_llm_accelerators` CLOSED.
+- **§8**: `ProjectUiState` now types `last_freshness_token_seen` + `dismissed_overlap_keys`. Freshness banner in `ProjectWorkspace.tsx` — shows when `digest.freshnessChangedSinceSeen`; "Got it →" writes back token via `patchUiState`. Check `piece2_ui_state_writeback` CLOSED.
+- **G1**: `POST /api/projects/[id]/action` (cookie-auth, PROPOSE→CONFIRM via Haiku `classify_action` forced-tool; `schedule_send` → `createOrTouchSchedule`, `build_deliverable` → `assembleDeliverable`; nonce signed via `issueProposalNonce`/`claimOnce`). `workspace/ProjectActionBar.tsx` — `➜` command-prompt UI, authed-only, wired below `<BuildActions />`. tsc 0, eslint 0, 2851/0 tests. **HELD for push** — live authed response surface → RULE 1 diff-review before push.
+- Spec: `docs/superpowers/specs/2026-06-17-piece2-deferred-steps-design.md`.
+
 ## 2026-06-17 (main) — feat(projects): Piece 2 — Project-Aware AI (deterministic core, J2 live, §D + §E) — HELD for push
 
 - **Scope: FINAL BOSS Piece 2 (operator: "Start Project 02; build correctly, improve where you can").** 7 commits on `main`, **all HELD for push** (live `/project` + `/api/projects/assemble` surfaces → RULE 1 diff-review; no-autonomous-push). Spec: `docs/superpowers/specs/2026-06-17-piece2-project-aware-ai-design.md`.

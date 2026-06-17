@@ -52,6 +52,10 @@ export interface EmailScheduleRow {
 export interface ProjectUiState {
   /** How many times the user dismissed the Connect-MCP block (collapses at ≥2). */
   mcp_dismissed_count?: number;
+  /** The freshness token the user last acknowledged — drives `freshnessChangedSinceSeen`. */
+  last_freshness_token_seen?: string;
+  /** Overlap dedupe keys suppressed from cross-project prompts (dismissed by user). */
+  dismissed_overlap_keys?: string[];
   [key: string]: unknown;
 }
 

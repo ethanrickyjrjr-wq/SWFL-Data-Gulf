@@ -17,6 +17,7 @@ import { BrandingBlock } from "./workspace/BrandingBlock";
 import { ConnectMcpBlock } from "./workspace/ConnectMcpBlock";
 import { DeliverableLanes } from "./workspace/DeliverableLanes";
 import { BuildActions } from "./workspace/BuildActions";
+import { ProjectActionBar } from "./workspace/ProjectActionBar";
 import type {
   SavedChart,
   DeliverableRow,
@@ -298,6 +299,23 @@ export function ProjectWorkspace({
         savedMsg={savedMsg}
       />
 
+      {/* §8 — freshness write-back: show when the project's data moved since last seen */}
+      {digest.freshnessChangedSinceSeen && digest.freshnessToken && (
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-[#00d4aa]/20 bg-[#00d4aa]/5 px-3 py-2">
+          <span className="flex items-center gap-2 text-xs text-gray-300">
+            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#00d4aa]" />
+            Your data has fresh figures.
+          </span>
+          <button
+            type="button"
+            onClick={() => void patchUiState({ last_freshness_token_seen: digest.freshnessToken })}
+            className="text-xs text-[#00d4aa] hover:underline"
+          >
+            Got it →
+          </button>
+        </div>
+      )}
+
       <ItemsBoard
         items={items}
         charts={charts}
@@ -347,6 +365,9 @@ export function ProjectWorkspace({
         buildError={buildError}
         itemCount={items.length}
       />
+
+      {/* G1 — authenticated free-form action surface (Piece 2) */}
+      <ProjectActionBar projectId={id} />
     </main>
   );
 }
