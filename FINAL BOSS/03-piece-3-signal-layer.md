@@ -54,3 +54,222 @@ PROBE FIRST before any multi-minute job · destructive writes need a non-null gu
 new `docs/sql/<date>_project_feed.sql` (+ maybe `_email_events.sql`) · new `app/api/webhooks/resend/route.ts` ·
 new ingest/cron under `ingest/` + `ingest/cadence_registry.yaml` · `app/api/.../meter` & `usage_events` writers ·
 `lib/email/agent-alert.ts` (mirror the reply-sensor pattern). P2 reads `project_feed` via its digest/prompt engine.
+
+---
+
+# OUTSIDE ↔ PROJECTS — how they work together while apart (framing + MVP)
+
+> Added 2026-06-17. Design for the part of P3 that makes the two AI contexts collaborate — verified against the
+> code. This is the brainstorm/design output; the spec still gets written under
+> `docs/superpowers/specs/2026-06-17-piece3-signal-layer-design.md` before building (RULE 3.5). MVP scope locked
+> with the operator: **own-work (`outside-action`) + `data-change` only**; engagement / external-event /
+> platform-feature designed-and-deferred.
+
+## The problem this solves
+
+The north star is **one persistent assistant in two contexts** — **OUTSIDE mode** (whole site: `/r/*`, `/charts`,
+`/welcome`, the pill/briefcase; saves to a localStorage draft; project-agnostic) and **PROJECTS mode** (inside
+`/project/[id]`; all-project-aware, current-project focused). The operator's requirement: they **"work together
+while apart"** — work done Outside flows toward Projects so *by the time the user opens a project, the pieces are
+already lined up.* The mechanism is the **context bus + `project_id`**, in two halves: the **in-session half**
+(`setAiContext`, P1, ephemeral) and the **durable half** (`project_feed`, **P3**).
+
+Two facts (both code-verified) make this non-trivial:
+
+1. **P3 as drafted above only reports the *external* world.** It has no concept of the user's *own* Outside
+   footprints reaching a project — so as written it cannot deliver "the pieces are already lined up" for the work
+   the user actually did.
+2. **Today the Outside→Project handoff is a one-shot, items-only, lossy transfer.** Anon work rides
+   `localStorage swfl_project_draft_v1` → `ImportDraftOnLogin.tsx` → `POST /api/projects/import`, or MCP
+   `swfl_project_handoff` → `mintClaimToken()` → `/api/claim`. It copies `items`; it carries **no durable memory of
+   what the user was doing** and dies when the draft is consumed. No `setAiContext`, no `projectId` on the pill, no
+   per-project signal store (`project_feed`/`notifications` do **not** exist).
+
+**Outcome:** one durable substrate — `project_feed` — that is the shared asynchronous memory between the two modes,
+so Project mode arrives already knowing (a) what the user did Outside and (b) what changed in the world for this
+project's scope — **no AI re-fetch, no live "two bots talking."**
+
+## The mental model
+
+> **APART** = different routes, different sessions, **different clocks** (author Outside Tuesday; open the project
+> Friday; data refreshed Wednesday; an email got clicked Thursday).
+> **TOGETHER** = one table (`project_feed`), one key (`project_id`). The two modes **never talk directly** — they
+> collaborate **asynchronously through the feed.** Outside mode + the invisible reporter *write*; Project mode (via
+> P2) *reads* and arrives prepared.
+
+P3 is the **durable half** of the context bus; P1's `setAiContext` is the *right-now* half. **P2 reads both** and
+ranks them into the 3+1 prompts. This MVP builds **only the durable write side + one read seam** — not P2.
+
+### The reframe (vs. the external-only draft above)
+
+`project_feed` carries **the world AND the user's own Outside footprints** — but it is a **signal/notification log,
+not a work store.** Get this distinction right:
+
+- **The *work* stays where it already lives** — the briefcase draft + `projects.items`, which already have a
+  claim/import flow. Do **not** melt the work into the feed (duplicates a flow; overloads one row shape for two jobs).
+- **The feed carries a *pointer-class* signal** that work happened — a **5th kind `outside-action`** ("you saved a
+  33931 flood chart Outside") with `ref_url` to the real item and a `payload` identity key the convergence engine
+  matches on. **Not** folded into `data-change` (different verb: *"the data moved"* vs *"you did something"* — P2
+  phrases them oppositely).
+
+## The two-clock problem → 3 binding tiers
+
+Signals aren't natively keyed to a project (data-change → ZIP/topic; engagement → send token; authoring may precede
+the project). Route by **late binding**:
+
+1. **Bound** — project exists and the signal is about it → write `project_feed(project_id=…)` directly.
+2. **Scope-keyed (read-time match)** — no project yet but the signal has a ZIP/topic → store with
+   `scope_kind/scope_value`, **`project_id` NULL**; bind at **read time** in the digest query
+   (`WHERE project_id=$id OR (project_id IS NULL AND scope overlaps the project's scope)`). **The only design that
+   survives late binding** — write-time fan-out can't reach a project created *tomorrow* without re-running fan-out
+   on every create (= read-time match with extra writes + a consistency bug).
+3. **Claim-time emit (replaces "anon staging")** — pre-project authoring needs **no staging table.** The *work*
+   rides the existing draft; the *signal* is **emitted at project birth** — inside `/api/claim` and
+   `/api/projects/import`, where a `project_id` and `items` both exist. Anon-staged collapses into a deferred Bound emit.
+
+### Load-bearing: reuse the existing scope contract; `projects` has no scope column
+
+`scope_kind/scope_value` is **already a binding contract** (`docs/sql/20260613_email_schedule_scope.sql` +
+`docs/sql/20260616_deliverables_scope.sql`, latter unapplied): enum `{NULL,'zip','place','county'}`; `scope_value` =
+canonical **lowercase+trimmed** ("canonical form IS the contract"); `topic` free-text; **"for 'place', ZIP expansion
+is DEFERRED to read/build time — a place may span many ZIPs; collapsing to one ZIP is lossy."** P3 reuses this
+**verbatim** or it forks the contract (no-invention violation).
+
+**The real gap:** `projects` (`docs/sql/20260612_projects.sql`) has **no scope column** — a project's scope is
+derivable from its `items`. MVP: **derive the project's scope set on the fly inside the read seam** (no migration),
+reusing the place→ZIP expander the `deliverables` build path already needs.
+
+## `project_feed` schema (MVP)
+
+```sql
+-- docs/sql/20260617_project_feed.sql  (run directly per RULE 1; idempotent)
+CREATE TABLE IF NOT EXISTS public.project_feed (
+  id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id      uuid NOT NULL,                        -- RLS anchor
+  project_id   text REFERENCES public.projects(id),  -- NULLABLE (Tier-2 scope-keyed); text to match projects.id PK
+  kind         text NOT NULL,                        -- outside-action | data-change | engagement | external-event | platform-feature (free-text, NO enum; mirror email_schedules.topic)
+  scope_kind   text,                                 -- {NULL,'zip','place','county'}   VERBATIM email_schedules contract
+  scope_value  text,                                 -- canonical lowercase+trimmed     VERBATIM contract
+  title        text NOT NULL,                        -- one-line; deterministic or lint-passing (no-invention)
+  detail       text,                                 -- optional body; same lint gate
+  ref_url      text,                                 -- deep link to the item/chart/send/feature
+  payload      jsonb NOT NULL DEFAULT '{}'::jsonb,   -- convergence fuel: identity key, recipe ref, counts, broadcast_id
+  dedup_key    text NOT NULL,                        -- idempotency; UNIQUE — mirrors email_send_ledger
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  read_at      timestamptz,                          -- P2/UI sets when a derived prompt is shown-and-dismissed
+  void_at      timestamptz                           -- soft-invalidate when source item is deleted (REAL-tier guard)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS project_feed_dedup_uidx ON public.project_feed (dedup_key);
+CREATE INDEX IF NOT EXISTS project_feed_project_created_idx ON public.project_feed (project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS project_feed_scope_idx ON public.project_feed (user_id, scope_kind, scope_value, created_at DESC) WHERE project_id IS NULL;
+ALTER TABLE public.project_feed ENABLE ROW LEVEL SECURITY;
+-- owner-all policy copied VERBATIM from buyer_intent_events (service_role writes, owner reads)
+REVOKE ALL ON public.project_feed FROM anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_feed TO authenticated;
+GRANT ALL ON public.project_feed TO service_role;
+NOTIFY pgrst, 'reload schema';
+```
+
+Non-obvious columns: **`project_id` NULLABLE** is the entire Tier-2 mechanism. **`dedup_key` UNIQUE**
+(INSERT … ON CONFLICT DO NOTHING) is mandatory — cron re-runs + webhook retries would double-post otherwise.
+**`payload`** carries the convergence identity key so P2's REAL-tier cross-project index ("you already have this
+33931 flood metric in *Luxury Clients*") matches without re-deriving. **`void_at`** self-heals on source-item delete.
+
+## The two seams (the whole P3 surface for now)
+
+`lib/project/feed.ts` — one writer, one reader, both mirroring `recordUse`'s **never-throws** discipline
+(`lib/highlighter/meter.ts:43-82`):
+
+- **`writeFeed(row)`** — dedup-enforcing durable write. `dedup_key` per kind: `outside-action:<item_id>` ·
+  `datachange:<scope|project>:<brain_slug>:<freshness_token>` · (later) `engagement:<broadcast_id>:<day>`.
+- **`readProjectFeed(projectId, scopeSet, {window})`** — Bound rows + Tier-2 scope-matched rows within a recency
+  window (e.g. 14d), unread/un-void first. The single read seam **P2's `lib/project/digest.ts` consumes.** P3 does
+  not rank; P2 does not bind.
+
+## Emit → carry → read, per kind
+
+| Kind | Emit (writer + seam) | Carry | Read (P2) | MVP? |
+|---|---|---|---|---|
+| **outside-action** | `writeFeed()` at item-file/build (project open) **and deferred at project birth** in `/api/claim` + `/api/projects/import` | Bound (incl. claim-time) | "pick up the flood chart you saved"; cross-project "you already have this" | **YES — the half that makes 'together while apart' real** |
+| **data-change** | daily change-detection cron under `ingest/`; per-scope `freshness_token` diff (`refinery/lib/freshness.mts`) + new `city-pulse`/permit rows vs last-seen; **material-delta gate via `swfl_reconcile`** | Scope-keyed (project_id NULL) | "the new data shows X" | **YES** |
+| engagement | new branch on existing `app/api/webhooks/resend/route.ts` (Svix verify already there) | Bound | "your property got 7 clicks" | Deferred — verify Resend open/click shapes live + per-send/day rollup |
+| external-event | "near your property" geo-matcher cron | Scope-keyed | "Walmart is building nearby" | Deferred (draft above defers it) |
+| platform-feature | release-triggered writer | Scope-keyed / broadcast | "new charts that fit this — want to see?" | Deferred (release cadence, not a pipeline) |
+
+## MVP build sequence (ship + verify each)
+
+1. **Migration** — `docs/sql/20260617_project_feed.sql`. Run directly (RULE 1), idempotent, `NOTIFY pgrst`. Verify
+   table + indexes + RLS; non-owner `select` → 0 rows.
+2. **`lib/project/feed.ts`** — `writeFeed()` (dedup ON CONFLICT DO NOTHING, never-throws) + `readProjectFeed()`
+   (Bound ∪ Tier-2 scope-match, recency-windowed). Tests: dedup + scope-match + place→ZIP. `bun test lib/project/`.
+3. **`lib/project/project-scope.ts`** — pure `projectScopeSet(items)` (reuse the ZIP/place scan in
+   `lib/project/derive-name.ts` + the deliverables place→ZIP expander). Feeds `readProjectFeed`. Tests per kind.
+4. **outside-action emit** — call `writeFeed()` from `app/api/claim/route.ts` + `app/api/projects/import/route.ts`
+   (one row per claimed/imported item, `payload` = identity key) and from the open-project file/build call sites
+   (wrap alongside the existing `recordUse`/`fileItem`/build calls). Verify: claim a draft → bound feed rows appear.
+5. **data-change cron** — new `ingest/` job + GHA wrapper + `--dry-run` in the **same PR** (pipeline-freshness rule).
+   **PROBE FIRST.** Per-scope freshness-token diff; emit only on a material delta per `swfl_reconcile` verdict (the
+   verdict text is the deterministic `title`). Tier-2 rows. Verify: `--dry-run` prints; real run after a token bump
+   writes one row per (scope, brain, token); re-run writes nothing (dedup).
+6. **Seam test (falsifiability)** — a ~20-line read calling `readProjectFeed` proving Bound outside-action rows +
+   Tier-2 data-change rows surface together. Otherwise P3 ships *dark* (a feed no one reads).
+
+## Noise control (the draft above warns about spammy feeds)
+
+All deterministic: **`dedup_key` UNIQUE** kills replays; **rollup at emit** (data-change = one row per
+scope/brain/token, naturally capped to the daily-rebuild cadence); **material-delta gate** via `swfl_reconcile` (no
+row unless a number the user cares about moved — also the no-invention guard); **recency window** on read (14d);
+**`read_at` dampener** so P2 doesn't re-surface acted-on signals; **`void_at`** on source-item delete. A
+per-project/day cap is a backstop only — don't build speculatively.
+
+## Composition with the rest of the program
+
+- **P1 `setAiContext`** (in-session) and **P3 `project_feed`** (durable) are orthogonal halves of the one bus; P3
+  never touches `setAiContext`.
+- **P2 is the only reader** of `project_feed`, via `readProjectFeed` inside `lib/project/digest.ts`. The `payload`
+  jsonb is the P3→P2 convergence handoff. **Do not build P2 here.**
+- **Sequencing win:** outside-action emit depends on the **existing** claim/import seams, not on P1 — so this MVP
+  can ship **before or in parallel with Piece 1**. Add the `outside-action` kind + `writeFeed`/`readProjectFeed`
+  seams to the `00-MASTER-PLAN.md` cross-build contract matrix in the **same commit** (FINAL BOSS rename rule).
+
+## Standards that bind
+
+PROBE FIRST before the change-detection cron · cron wrapper + `--dry-run` same PR · `swfl_reconcile`/freshness
+cadence verified live · destructive writes need a non-null guard (none here — append + soft-void only) · brain-first
+gate if the cron touches any Tier-2 write · no-invention: every `title`/`detail` deterministic or passes the lints ·
+monetization: this is authoring-side fuel — **never gate it; SEND stays the only paywall** · vendor-first (verify
+Resend `email.opened`/`email.clicked` shapes in-session) when the engagement branch later lands.
+
+## Open decisions for the operator (defaults chosen; flag to override)
+
+1. **`projects.scope` store vs. derive** — default **derive from items at read time** (no migration); store only if
+   projects routinely span many disjoint ZIPs and the query gets hot.
+2. **outside-action granularity** — default **one row per filed item** + a per-day cap (vs. a rolled-up "you staged
+   4 things").
+3. **Self-heal on delete** — default **yes** (`void_at` when the source item is removed).
+4. **`kind` free-text vs. enum** — default **free-text** + a lint warning on unknown kinds (mirrors
+   `email_schedules.topic`; avoids an ALTER per new kind).
+
+## Verification (end to end)
+
+`bun test lib/project/` green (feed dedup, scope-match, place→ZIP, scope-derivation). Run the migration; non-owner
+select → 0. Claim/import a draft → `outside-action` rows land **bound** to the new project. Bump a brain's freshness
+token, run the cron `--dry-run` then for real → one `data-change` row per (scope, brain, token); re-run → zero.
+`readProjectFeed(projectId, projectScopeSet(items))` for a project whose scope overlaps → **both** the bound
+outside-action rows and the scope-keyed data-change row return in one read. Full suite + `next build` + lint green.
+
+## Critical files
+
+- **New:** `docs/sql/20260617_project_feed.sql` · `lib/project/feed.ts` (`writeFeed`/`readProjectFeed`) ·
+  `lib/project/project-scope.ts` (`projectScopeSet`) + tests · `ingest/<change-detection>/` job + GHA wrapper.
+- **Wire emit into:** `app/api/claim/route.ts` · `app/api/projects/import/route.ts` · open-project file/build call
+  sites (near existing `recordUse`).
+- **Reuse (don't rebuild):** `lib/highlighter/meter.ts:43-82` (never-throws writer) ·
+  `docs/sql/20260613_buyer_intent_events.sql` (owner-RLS shape) · `docs/sql/20260613_email_send_ledger.sql`
+  (dedup_key idempotency) · `docs/sql/20260613_email_schedule_scope.sql` (scope contract verbatim) ·
+  `refinery/lib/freshness.mts` (token diff) · `swfl_reconcile` (material-delta gate) · `lib/project/derive-name.ts`
+  (place/ZIP scan).
+- **Update same commit:** `00-MASTER-PLAN.md` cross-build contracts (add `outside-action` + the two seams) · this
+  file's header status when built.
+- **Defer (named, not built):** engagement branch on `app/api/webhooks/resend/route.ts` · external-event matcher ·
+  platform-feature writer · `lib/project/digest.ts` (P2's reader).
