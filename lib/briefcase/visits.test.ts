@@ -128,6 +128,13 @@ describe("promptsForPage (context-aware)", () => {
     const ps = promptsForPage({ kind: "home" }, 0);
     expect(ps.some((p) => /SWFL|bottom line|right now/i.test(p))).toBe(true);
   });
+  it("on a project surfaces project-scoped prompts, NOT the generic home set (Piece 2)", () => {
+    const ps = promptsForPage({ kind: "project", projectId: "p1" }, 0);
+    expect(ps.length).toBeGreaterThan(0);
+    expect(ps.some((p) => /this project|one-pager|changed/i.test(p))).toBe(true);
+    // The BLOCKER-2 trap: a project page must not silently fall to the home default.
+    expect(ps).not.toEqual(promptsForPage({ kind: "home" }, 0));
+  });
   it("tunes length by visit count (fuller early, leaner later)", () => {
     const early = promptsForPage({ kind: "home" }, 0);
     const later = promptsForPage({ kind: "home" }, 6);
@@ -140,11 +147,17 @@ describe("createSuggestion", () => {
   it("on a report suggests creating from this report", () => {
     expect(/report|one-pager|brief/i.test(createSuggestion({ kind: "report" }))).toBe(true);
   });
+  it("on a project suggests building a deliverable from the project (Piece 2)", () => {
+    expect(
+      /project|deliverable/i.test(createSuggestion({ kind: "project", projectId: "p1" })),
+    ).toBe(true);
+  });
   it("always returns non-empty actionable copy", () => {
     for (const page of [
       { kind: "report" as const },
       { kind: "charts" as const },
       { kind: "home" as const },
+      { kind: "project" as const, projectId: "p1" },
       { kind: "generic" as const },
     ]) {
       expect(createSuggestion(page).length).toBeGreaterThan(0);

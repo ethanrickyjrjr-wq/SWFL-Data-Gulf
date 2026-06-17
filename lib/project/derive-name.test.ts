@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { deriveProjectName } from "./derive-name";
+import { deriveProjectName, inferScopeFromItems } from "./derive-name";
 import type { ProjectItem } from "./items";
 
 const base = { id: "x", added_at: "2026-06-17T08:00:00Z", origin: "web" as const };
@@ -74,5 +74,57 @@ describe("deriveProjectName", () => {
   it("does not mistake an ordinary word for a place ('landscape' ≠ Cape Coral)", () => {
     const items: ProjectItem[] = [{ ...base, kind: "note", text: "office landscape redesign" }];
     expect(deriveProjectName(items)).toBe("Project Jun 17, 2026");
+  });
+});
+
+describe("inferScopeFromItems (the shared scope root)", () => {
+  it("resolves a ZIP to {zip, place} and detects the topic", () => {
+    const items: ProjectItem[] = [
+      {
+        ...base,
+        kind: "qa",
+        report_id: "33931",
+        question: "What is the annual flood loss here?",
+        answer: "About $30,074/yr.",
+      },
+    ];
+    expect(inferScopeFromItems(items)).toEqual({
+      zip: "33931",
+      place: "Fort Myers Beach",
+      topic: "Flood",
+    });
+  });
+
+  it("returns a place name without a ZIP when only a place is named", () => {
+    const items: ProjectItem[] = [{ ...base, kind: "note", text: "Naples rental comps to review" }];
+    expect(inferScopeFromItems(items)).toEqual({ place: "Naples", topic: "Rentals" });
+  });
+
+  it("returns only a topic when no place/ZIP is detectable", () => {
+    const items: ProjectItem[] = [{ ...base, kind: "report", slug: "permits-swfl" }];
+    expect(inferScopeFromItems(items)).toEqual({ place: undefined, topic: "Permits" });
+  });
+
+  it("returns an all-undefined scope when nothing is detectable", () => {
+    const items: ProjectItem[] = [{ ...base, kind: "note", text: "misc thoughts" }];
+    expect(inferScopeFromItems(items)).toEqual({ place: undefined, topic: undefined });
+  });
+
+  it("does not read a decimal (cap rate 33901.5) as a ZIP", () => {
+    const items: ProjectItem[] = [{ ...base, kind: "note", text: "cap rate 33901.5 here" }];
+    expect(inferScopeFromItems(items)).toEqual({ place: undefined, topic: "CRE" });
+  });
+
+  it("picks the most-frequent ZIP across items", () => {
+    const items: ProjectItem[] = [
+      { ...base, id: "a", kind: "report", slug: "33901" },
+      { ...base, id: "b", kind: "report", slug: "33901" },
+      { ...base, id: "c", kind: "report", slug: "33931" },
+    ];
+    expect(inferScopeFromItems(items)).toEqual({
+      zip: "33901",
+      place: "Fort Myers",
+      topic: undefined,
+    });
   });
 });

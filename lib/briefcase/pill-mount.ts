@@ -1,10 +1,23 @@
 import type { PillPage } from "./visits";
 
+/**
+ * THE single root for the /project/[id] id-extraction regex (Piece 2). Both the
+ * pill's page context (below) and `BriefcaseChat`'s schedule card read it — keep it
+ * one place so the pattern can never drift between the two. `/project` (the list,
+ * no id) returns null and stays generic; only `/project/[id]` is a project page.
+ */
+export function projectIdFromPath(pathname: string): string | null {
+  const m = pathname.match(/^\/project\/([^/]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
 /** Map a pathname to the pill's page context (drives A-7 context-aware prompts). */
 export function pageFromPath(pathname: string): PillPage {
   if (pathname === "/") return { kind: "home" };
   if (pathname === "/charts" || pathname.startsWith("/charts/")) return { kind: "charts" };
   if (pathname.startsWith("/r/")) return { kind: "report" };
+  const projectId = projectIdFromPath(pathname);
+  if (projectId) return { kind: "project", projectId };
   return { kind: "generic" };
 }
 

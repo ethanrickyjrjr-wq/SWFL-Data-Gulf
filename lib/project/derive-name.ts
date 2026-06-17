@@ -111,9 +111,26 @@ function datedFallback(items: ProjectItem[]): string {
   return `Project ${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
 }
 
-export function deriveProjectName(items: ProjectItem[]): string {
-  if (items.length === 0) return "Untitled project";
+/**
+ * The grounded scope a set of items is "about": the dominant SWFL ZIP (only when
+ * it resolves to a known place — never a bare 5-digit number), the resolved place
+ * name (from that ZIP, else a whole-word place-name scan), and a topic.
+ *
+ * This is the ONE scope-inference root (Piece 2 §A digest, §C/§E assemble-command,
+ * and Piece 3's `projectScopeSet` all read it) so there is never a second copy of
+ * the ZIP regex / place crosswalk drifting out of sync. `deriveProjectName` (below)
+ * composes a title from it; downstream consumers read the structured fields.
+ */
+export interface InferredScope {
+  /** Dominant ZIP, present only when it resolves to a SWFL place. */
+  zip?: string;
+  /** Resolved place name — from the ZIP if present, else the place-name scan. */
+  place?: string;
+  /** Topic label (Flood / Permits / Rentals / CRE / Prices). */
+  topic?: string;
+}
 
+export function inferScopeFromItems(items: ProjectItem[]): InferredScope {
   const zipCounts = new Map<string, number>();
   const placeNameCounts = new Map<string, number>();
   const topicCounts = new Map<string, number>();
@@ -139,15 +156,26 @@ export function deriveProjectName(items: ProjectItem[]): string {
   const topZip = topKey(zipCounts);
   const topic = topKey(topicCounts);
 
-  // ZIP is the dominant signal: resolve its place + keep the ZIP for the title.
-  if (topZip) {
-    const place = placeForZip(topZip);
-    if (place) return `${place} ${topZip}`;
-    return topic ? `SWFL ${topic}` : `SWFL ${topZip}`;
-  }
+  // ZIP is the dominant signal: resolve its place. (zipCounts only ever holds ZIPs
+  // that already resolved, so `place` is defined whenever `zip` is.)
+  if (topZip) return { zip: topZip, place: placeForZip(topZip), topic };
 
   const namePlace = topKey(placeNameCounts);
-  if (namePlace) return topic ? `${namePlace} ${topic}` : namePlace;
+  return { place: namePlace, topic };
+}
+
+export function deriveProjectName(items: ProjectItem[]): string {
+  if (items.length === 0) return "Untitled project";
+
+  const { zip, place, topic } = inferScopeFromItems(items);
+
+  // ZIP is the dominant signal: resolve its place + keep the ZIP for the title.
+  if (zip) {
+    if (place) return `${place} ${zip}`;
+    return topic ? `SWFL ${topic}` : `SWFL ${zip}`;
+  }
+
+  if (place) return topic ? `${place} ${topic}` : place;
 
   if (topic) return `SWFL ${topic}`;
   return datedFallback(items);

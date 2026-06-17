@@ -78,6 +78,7 @@ export type PillPage =
   | { kind: "report"; reportLabel?: string }
   | { kind: "charts" }
   | { kind: "home" }
+  | { kind: "project"; projectId: string }
   | { kind: "generic" };
 
 const HOME_PROMPTS = [
@@ -109,6 +110,18 @@ const CHARTS_PROMPTS = [
   "What's the bottom line on SWFL home values?",
 ];
 
+// Static floor for the project page. Piece 2's dynamic prompt engine
+// (`lib/project/prompt-engine.ts`) OVERRIDES these with digest-grounded prompts when
+// a project digest is available; this set is the fallback so a project page never
+// silently shows the generic home prompts (the BLOCKER-2 trap). These are deictic
+// ("this project") on purpose — Piece 2 §D injects the project's scope into the
+// analyst, so "this project" resolves; before §D they degrade to a region-wide read.
+const PROJECT_PROMPTS = [
+  "What's the bottom line for this project?",
+  "What's changed in the data since I last looked?",
+  "Turn this project into a client-ready one-pager",
+];
+
 /** Generic SWFL prompt set, count-tuned (fuller early, leaner later). */
 export function promptSetForVisits(n: number): string[] {
   return HOME_PROMPTS.slice(0, limitForVisits(n));
@@ -122,6 +135,8 @@ export function promptsForPage(page: PillPage, n: number): string[] {
       return REPORT_PROMPTS.slice(0, limit);
     case "charts":
       return CHARTS_PROMPTS.slice(0, Math.min(limit, CHARTS_PROMPTS.length));
+    case "project":
+      return PROJECT_PROMPTS.slice(0, Math.min(limit, PROJECT_PROMPTS.length));
     case "home":
     case "generic":
     default:
@@ -136,6 +151,8 @@ export function createSuggestion(page: PillPage): string {
       return "Turn this report into a branded one-pager";
     case "charts":
       return "Save this chart into a project";
+    case "project":
+      return "Build a branded deliverable from this project";
     case "home":
       return "Start a project from what you're reading";
     case "generic":

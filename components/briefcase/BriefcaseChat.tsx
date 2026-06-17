@@ -8,14 +8,8 @@ import { buildQaItem } from "@/lib/briefcase/qa-item";
 import { describePage } from "@/lib/chat/page-context";
 import { briefcaseDigest } from "@/lib/briefcase/briefcase-digest";
 import { ChatScheduleCard } from "@/components/briefcase/ChatScheduleCard";
+import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
 import type { ProjectItem } from "@/lib/project/items";
-
-/** A briefcase chat on /project/[id] is project-scoped → a schedule can attach there.
- *  Anywhere else (the global pill) returns null → the card is the login-capture CTA. */
-function projectIdFromPath(pathname: string): string | null {
-  const m = pathname.match(/^\/project\/([^/]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
-}
 
 /**
  * The global Briefcase's standalone chat (off /r/*). Streams via the SHARED

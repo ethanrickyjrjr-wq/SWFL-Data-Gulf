@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { pageFromPath, shouldRenderStandalone } from "./pill-mount";
+import { pageFromPath, shouldRenderStandalone, projectIdFromPath } from "./pill-mount";
 
 /**
  * A-3 pill-mount logic — pure. pageFromPath drives A-7 context prompts;
@@ -19,9 +19,31 @@ describe("pageFromPath", () => {
     expect(pageFromPath("/r/env-swfl")).toEqual({ kind: "report" });
     expect(pageFromPath("/r/zip-report/33931")).toEqual({ kind: "report" });
   });
+  it("maps /project/[id] to project context with the decoded id (Piece 2)", () => {
+    expect(pageFromPath("/project/abc123")).toEqual({ kind: "project", projectId: "abc123" });
+    expect(pageFromPath("/project/FMB%2033931")).toEqual({
+      kind: "project",
+      projectId: "FMB 33931",
+    });
+  });
+  it("leaves the /project list (no id) as generic", () => {
+    expect(pageFromPath("/project")).toEqual({ kind: "generic" });
+    expect(pageFromPath("/project/")).toEqual({ kind: "generic" });
+  });
   it("maps anything else to generic", () => {
     expect(pageFromPath("/welcome")).toEqual({ kind: "generic" });
     expect(pageFromPath("/billing")).toEqual({ kind: "generic" });
+  });
+});
+
+describe("projectIdFromPath (the single regex root)", () => {
+  it("extracts + decodes the id on a project page, null elsewhere", () => {
+    expect(projectIdFromPath("/project/abc123")).toBe("abc123");
+    expect(projectIdFromPath("/project/abc123/edit")).toBe("abc123");
+    expect(projectIdFromPath("/project/FMB%2033931")).toBe("FMB 33931");
+    expect(projectIdFromPath("/project")).toBeNull();
+    expect(projectIdFromPath("/")).toBeNull();
+    expect(projectIdFromPath("/charts")).toBeNull();
   });
 });
 
