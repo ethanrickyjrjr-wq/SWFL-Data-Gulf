@@ -1,8 +1,11 @@
-# 03 — PIECE 3: Signal Layer (the invisible reporter)  🟡 DRAFT (needs brainstorm)
+# 03 — PIECE 3: Signal Layer (the invisible reporter)  🟢 BRAINSTORM DONE — build contract locked 2026-06-17
 
-> ⚠️ SCOPED DRAFT — not an approved design. Run `superpowers:brainstorming` first; write
-> `docs/superpowers/specs/<date>-piece3-signal-layer-design.md`. Also re-read **THE BIBLE**
-> (`docs/standards/data-and-build-bible.md`) + **PROBE FIRST** before any ingest/cron work.
+> ✅ BRAINSTORM DONE (2026-06-17). Scope locked with the operator + verified against the live
+> code by an 8-agent ground-truth audit. **The authoritative build contract is the
+> "AUDIT-VERIFIED BUILD CONTRACT" section at the bottom of this file** — it supersedes the
+> draft below wherever they differ (7 corrections + 2 locked decisions). No separate spec file:
+> per operator decree this doc IS the spec. Still re-read **THE BIBLE**
+> (`docs/standards/data-and-build-bible.md`) + **PROBE FIRST** before the change-detection cron.
 
 ## Intent
 
@@ -278,4 +281,101 @@ outside-action rows and the scope-keyed data-change row return in one read. Full
 - **Update same commit:** `00-MASTER-PLAN.md` cross-build contracts (add `outside-action` + the two seams) · this
   file's header status when built.
 - **Defer (named, not built):** engagement branch on `app/api/webhooks/resend/route.ts` · external-event matcher ·
-  platform-feature writer · `lib/project/digest.ts` (P2's reader).
+  platform-feature writer.
+
+---
+
+# AUDIT-VERIFIED BUILD CONTRACT (2026-06-17) — LOCKED · supersedes the draft above on conflict
+
+> Brainstorm output. Scope locked with the operator; every load-bearing claim below was verified
+> against the live code by an 8-agent ground-truth audit (P1 + P2 are built on `main`). This is
+> what gets built. Held for operator diff-review per RULE 1 (live surfaces) — operator pushes.
+
+## Locked scope (2 operator decisions)
+1. **Wire it through — P3 ships LIVE, not dark.** This piece wires `readProjectFeed` into P2's
+   `digest.ts` + adds ONE capped feed-fueled prompt, so the broker actually sees the signals.
+   (`lib/project/digest.ts` is therefore IN scope, not deferred — corrects the draft's defer line.)
+2. **Both kinds this piece** — `outside-action` (birth emit) **and** the `data-change` cron.
+   Deferred (designed, not built): engagement · external-event · platform-feature.
+
+## 7 ground-truth corrections to the draft above
+1. **Emit surfaces = birth (claim/import) + build — NOT "item-file."** `briefcase.fileItem` is
+   localStorage-only; the item-add PATCH is silent (no `recordUse`). The draft's "near
+   `recordUse`/`fileItem`" is a red herring. MVP `outside-action` emits at the **birth** seams:
+   `app/api/claim/route.ts` (after the insert/`23505` check) + `app/api/projects/import/route.ts`
+   (after the insert) — one row per claimed/imported item.
+2. **`writeFeed` opens its OWN service-role client.** claim/import run on the cookie client; the
+   feed is owner-reads / service_role-writes. Mirror `lib/highlighter/meter.ts:63-82`
+   (`createServiceRoleClient`, never-throws).
+3. **The draft SQL omits the RLS policy → DENY-ALL.** It `ENABLE`s RLS but defines no policy. Add
+   the `buyer_intent_events_owner_all` block verbatim (idempotent `DO $$ … EXCEPTION WHEN
+   duplicate_object`): `FOR ALL USING (auth.uid()=user_id) WITH CHECK (auth.uid()=user_id)`.
+4. **IDENTITY PK confirmed safe** — `id bigint GENERATED ALWAYS AS IDENTITY` sidesteps the
+   bigserial `42501` sequence-grant trap that bit the email tables (no `GRANT USAGE` needed).
+5. **`projectScopeSet` WRAPS the existing `inferScopeFromItems`** (`lib/project/derive-name.ts` —
+   P2's one scope root, returns `{zip?,place?,topic?}`), NOT a re-derive. Returns a **set** of
+   `{scope_kind,scope_value}` so a place-scoped project matches ZIP-keyed rows.
+6. **The "place→ZIP expander" the draft says to reuse does NOT exist** (the deliverables build path
+   stores scope verbatim, defers to render). The DATA does: `PLACE_ZIP_CROSSWALK`
+   (`refinery/lib/geography-gazetteer.mts`, entries `{place,zip,alt_zips[]}`). Add one small
+   `zipsForPlace(place): string[]` = `[entry.zip, ...entry.alt_zips]`.
+7. **data-change cron wrinkle: freshness tokens are PER-BRAIN (lake-wide), no geo dimension; there
+   is NO last-seen store.** Resolution below (the feed row IS the snapshot).
+
+## Schema — `docs/sql/20260617_project_feed.sql`
+The draft schema (§ above) **with correction #3 applied** (the missing `CREATE POLICY` block) and
+correction #4 (IDENTITY PK). Run directly per RULE 1, idempotent, `NOTIFY pgrst`. Verify: table +
+3 indexes + RLS policy present; non-owner `select` → 0 rows.
+
+## Seams — `lib/project/feed.ts` (one writer, one reader, both never-throw, mirror `meter.ts:63-82`)
+- `writeFeed(rows)` — own service-role client; `upsert(rows,{onConflict:'dedup_key',
+  ignoreDuplicates:true})` (= ON CONFLICT DO NOTHING); `try/catch → count|0`.
+- `readProjectFeed(projectId, scopeSet, {windowDays=14})` — Bound (`project_id=$id`) ∪ Tier-2
+  scope-matched (`project_id IS NULL AND (scope_kind,scope_value) ∈ scopeSet`); unread + un-void
+  first; recency-windowed; owner-scoped (cookie client / RLS).
+- `markFeedSeen(feedIds)` — sets `read_at` so acted-on signals stop surfacing (mirror
+  `buyer_intent_events.read_at`).
+
+## `lib/project/project-scope.ts`
+`projectScopeSet(items): {scope_kind,scope_value}[]` = `inferScopeFromItems(items)` → expand
+`place` via `zipsForPlace`. Pure; fully `bun:test`'d (zip / place→ZIPs / topic-only / empty).
+
+## `outside-action` emit (birth)
+One `writeFeed` row per item at the two birth seams. `project_id=new id`,
+`dedup_key=outside-action:<item.id>`, `payload.identityKey = identityKeyForItem(item)`
+(`lib/project/identity-key.ts` — kind-prefixed; lets P2's cross-project index match without
+re-deriving). claim is idempotent (deterministic id + `23505` absorb); import uses a random id.
+
+## `data-change` cron — `ingest/project-feed-change-detection/` + GHA wrapper
+Honest design around correction #7:
+- **Live scope set** = union of `projectScopeSet` over all projects; **read-deduped by scope**
+  (read each unique live ZIP once), **write-fanned-out per user** (rows need `user_id`; owner-RLS
+  forces per-user, `project_id` NULL → late-bind at read time in `readProjectFeed`).
+- **Material gate, no new table — the feed row IS the snapshot.** Each `data-change` row's
+  `payload` carries the observed headline value(s) + token for its (scope, brain). The cron
+  compares current vs the **last `data-change` row's `payload`** for that (user, scope, brain);
+  emits ONLY when the number actually moved (not on a bare daily token bump → that's noise).
+  `title` = the deterministic `swfl_reconcile` `reason` string (`lib/reconcile/reconcile.ts`).
+- **Cold-start mute:** no prior (user, scope, brain) row → insert the baseline with `read_at=now()`
+  (recorded, not surfaced); a real move later → unread (live) row.
+- `dedup_key=datachange:<scope>:<brain>:<token>` kills replays. **Append-only to an app table (not
+  `data_lake.*`)** → brain-first / destructive-write gates DON'T apply; **PROBE FIRST DOES** (time
+  the per-scope reads). Runs daily AFTER the rebuild. GHA wrapper + `--dry-run` in the **same PR**
+  (mirror `.github/workflows/bls-laus-monthly.yml`); `ingest/cadence_registry.yaml` entry.
+
+## P2 wiring (the "ships live" fix — 3 additive wires, P2 is built so additive-only)
+1. `app/project/[id]/page.tsx` (server) loads `readProjectFeed(projectId, projectScopeSet(items))`
+   → passes `feedRows` prop (alongside the `ui_state`/`schedules` it already loads).
+2. `lib/project/digest.ts`: add optional `feedRows` to `ProjectDigestInput`; fold top signals into
+   a new `feedSignals` field on `ProjectDigest` (pure; bumps `rev` via existing `computeRev` basis).
+3. `lib/project/prompt-engine.ts`: extend `ProjectSignals`; add ONE feed candidate in
+   `openProjectCandidates`, ranked (between `freshData` and `staleMetric`), capped to top-1,
+   respecting `read_at` / `ui_state.dismissed_overlap_keys`. Dismiss → `markFeedSeen`.
+
+## Build order (TDD; ship + verify each)
+Schema → `feed.ts` → `project-scope.ts` → `outside-action` emit → **P2 wire** → `data-change` cron
+→ seam test. (P2 wire before the cron so `outside-action` is live end-to-end first.) Seam test:
+`readProjectFeed(projectId, projectScopeSet(items))` returns bound `outside-action` AND scope-keyed
+`data-change` rows together (else P3 ships dark). Gate each step: `bunx tsc --noEmit && bunx eslint
+. && bun test`; full `next build` before the hold. Update `00-MASTER-PLAN.md` cross-build contracts
+(add `outside-action` kind + the `writeFeed`/`readProjectFeed` seams) in the same commit.
