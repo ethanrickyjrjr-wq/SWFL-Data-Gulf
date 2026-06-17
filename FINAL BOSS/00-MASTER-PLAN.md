@@ -87,7 +87,11 @@ so the user **sees exactly what's going out.**
 4. The user tells the Project AI to tweak (section, color, swap a chart), sees it update, then the prompt **"Ready to
    send?"** → send.
 
-**Honest status:** the in-chat "Send weekly" card already shipped (commit `962ad12`, on `/project/[id]`). The receiving
+**Honest status:** the email *engine* is built — Task 2 spine (`5ea26cb`), Task 3 brand/recurring (`ed8e77e`), Task 4
+email+PDF deliverable (`7630b32`), Task 7 build→schedule bridge (`a5d1858`), Task 6 send handle on `/p/[id]`+`/project`
+(`f8bc3cc`), and Task 5 Slice 1 — the in-chat "Send weekly" card (`962ad12`). That work lives in
+`docs/superpowers/plans/2026-06-16-deliverable-convergence/` (its scope-handoff block points back here). So this is a
+**rewire onto the project workspace, not a rebuild.** The receiving
 end is largely built — `/p/[id]` renders the email preview and `SendWeeklyHandle` is already on it + project cards. The
 *outside→project→preview→send* handoff is **not built** and needs three concrete gaps closed (P1 + email lane, see
 `01-…` §I): (a) the project page can't **seed/auto-build on load** (no `?seed=` today); (b) `/api/projects/[id]/build`

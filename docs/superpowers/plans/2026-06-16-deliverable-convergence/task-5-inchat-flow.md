@@ -2,6 +2,15 @@
 
 **Builder:** Opus · **Wave:** D (parallel with Task 6) · **Depends on:** Task 7 (bridge), Task 4 (email deliverable)
 
+> 🔒 **STATUS / SCOPE LOCK (2026-06-17 — do not revert on checkout/push).** Slice 1 shipped: the in-chat "Send weekly"
+> card (`962ad12`, reusing Task 7's recipe lane). **Remaining work here = live-verify the flow end-to-end + close
+> `inchat_build_send_schedule_flow` on the runtime signal — nothing more in this folder.** The "build an email *outside*
+> → into a project → see it → send from the project page" experience is **no longer Task 5** — it moved to **`FINAL BOSS/`**
+> (flagship "email through Projects": `00-MASTER-PLAN.md` → Flagship flow; seed/scope gaps in `01-…` §I; Emailing-lane
+> live preview in Piece 4). That is a **rewire onto new project-workspace seams that don't exist yet** — do **not** build
+> it on the current `app/project/[id]/ProjectDetail.tsx` (Piece 1 decomposes it). If this banner is wrong, add a
+> correcting note; don't delete it.
+
 ## Goal
 
 The whole flow lives in the briefcase chat with inline buttons: build → "Looks good?" → pick audience → send → **"Send this every week?"** → confirm. No leaving the chat.

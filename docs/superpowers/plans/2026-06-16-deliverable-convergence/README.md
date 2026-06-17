@@ -59,6 +59,31 @@ Buttons for every finite choice. The "weekly?" confirm reuses `schedule-command.
 3. **Two skins, same data** — `email/email-report.html` (Phase 1) for email; new `doc/doc-report.html` (same `repeats`/tokens) for PDF via the existing `window.print()` path.
 
 ---
+---
+
+## 🔒 SCOPE HANDOFF → FINAL BOSS (locked 2026-06-17 — do not revert/rewrite)
+
+**Status (verified vs. git, not memory):** the email *engine* is built. Task 2 spine (`5ea26cb`), Task 3 recurring/brand
+(`ed8e77e`), Task 4 email+PDF deliverable (`7630b32`), Task 7 build→schedule bridge (`a5d1858`, idempotence `b80eea4`),
+Task 6 send handle on `/p/[id]`+`/project` (`f8bc3cc`, contacts page `66ba208`), and **Task 5 Slice 1** — the in-chat
+"Send weekly" card (`962ad12`). So: 2/3/4/6/7 done; Task 5 = Slice 1 done.
+
+**What MOVED, and where:** the *remaining* email ambition — building an email **outside** a project, dropping it **into**
+a project, **seeing** it on the project page, and **sending** from there — is now owned by **`FINAL BOSS/`** (the
+"email through Projects" flagship flow: `FINAL BOSS/00-MASTER-PLAN.md` → "Flagship flow"; the three concrete gaps +
+seed/scope wiring are `FINAL BOSS/01-piece-1-workspace-shell.md` §I; the Emailing-lane live preview is Piece 4). It is a
+**rewire/relocate onto the new project-workspace seams — NOT a rebuild of this engine.**
+
+**To the Task 5 session (and any session working this folder):**
+
+- ✅ **Do:** live-verify the shipped in-chat flow end-to-end, then close `inchat_build_send_schedule_flow` on the
+  **runtime** signal (not "code looks right" — `public.checks` is prod evidence, not dev attestation).
+- 🚫 **Don't:** extend Task 5/6 toward the outside→project→send experience *here*. Those seams (`?seed=`, the `"email"`
+  template through `/api/projects/[id]/build` + `swfl_project_build`, the Emailing lane) live in FINAL BOSS and don't
+  exist yet — building them now means building on the 743-line `app/project/[id]/ProjectDetail.tsx` that Piece 1 is about
+  to decompose (throwaway work + a guaranteed merge collision with the Final Boss build).
+- 🔒 **Don't revert or rewrite** this block, the Task 5/6 banners, or the FINAL BOSS docs when you checkout/commit/push.
+  If something here is wrong, **add a correcting note** — never delete (append-only handoff).
 
 ## Wave / builder / concurrency matrix
 
@@ -66,9 +91,9 @@ Buttons for every finite choice. The "weekly?" confirm reuses `schedule-command.
 |------|----------------------------------|---------|-----------|
 | **0 (gate)** ✅ | Finish + push Phase 1 to green — *companion plan, NOT in this folder* | — | — |
 | **A** ✅ | [Task 2 — Convergence spine](./task-2-convergence-spine.md) (`5ea26cb`) | **Opus** | Phase 1 green on origin/main |
-| **B** | [Task 3 — Recurring adopts spine](./task-3-recurring-adopts-spine.md) ‖ [Task 4 — Briefcase email + PDF](./task-4-briefcase-email-pdf.md) | **Opus** ‖ **Sonnet** | Task 2 |
-| **C** | [Task 7 — Build→schedule bridge](./task-7-build-to-schedule-bridge.md) | **Opus** | Task 4 |
-| **D** | [Task 5 — In-chat flow](./task-5-inchat-flow.md) ‖ [Task 6 — Send-later on built work](./task-6-send-later-built-work.md) | **Opus** ‖ **Sonnet** | Task 7 |
+| **B** ✅ | [Task 3 — Recurring adopts spine](./task-3-recurring-adopts-spine.md) (`ed8e77e`) ‖ [Task 4 — Briefcase email + PDF](./task-4-briefcase-email-pdf.md) (`7630b32`) | **Opus** ‖ **Sonnet** | Task 2 |
+| **C** ✅ | [Task 7 — Build→schedule bridge](./task-7-build-to-schedule-bridge.md) (`a5d1858`, `b80eea4`) | **Opus** | Task 4 |
+| **D** ✅ | [Task 5 — In-chat flow](./task-5-inchat-flow.md) (Slice 1 `962ad12`) ‖ [Task 6 — Send-later on built work](./task-6-send-later-built-work.md) (`f8bc3cc`, `66ba208`) | **Opus** ‖ **Sonnet** | Task 7 |
 
 **Parallelism rules:** within a wave, tasks touch disjoint files (B: scheduler/scoped-content vs. deliverable/doc-skin; D: chat components vs. deliverable/project buttons). If two are built concurrently by separate sessions, **isolate in a git worktree (RULE 1.5)** — Wave D's two tasks may share a small client schedule-action util; whoever lands second rebases.
 

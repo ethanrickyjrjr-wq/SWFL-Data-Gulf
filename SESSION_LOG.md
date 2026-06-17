@@ -1,3 +1,9 @@
+## 2026-06-17 (main) — docs(handoff): relocate remaining email scope → FINAL BOSS (engine built; rewire, not rebuild)
+
+- Confirmed vs. git: the email **engine** is built — Task 2 spine (`5ea26cb`), Task 3 (`ed8e77e`), Task 4 (`7630b32`), Task 7 (`a5d1858`,`b80eea4`), Task 6 (`f8bc3cc`,`66ba208`), Task 5 **Slice 1** in-chat Send-weekly card (`962ad12`). 2/3/4/6/7 done; Task 5 = Slice 1 done.
+- Added a 🔒 **SCOPE HANDOFF** block to `docs/superpowers/plans/2026-06-16-deliverable-convergence/README.md` (replaced the stray `finish with Final Boss` line) + commit anchors on the Wave B/C/D rows; added 🔒 STATUS/SCOPE-LOCK banners to `task-5-inchat-flow.md` + `task-6-send-later-built-work.md`; reciprocal engine-built/“rewire not rebuild” note in `FINAL BOSS/00-MASTER-PLAN.md` flagship section.
+- Decision: the outside→project→see→send experience is **no longer Task 5** — it's a rewire onto FINAL BOSS project-workspace seams (Piece 1 §I seed/scope + Piece 4 Emailing lane) that don't exist yet. Task 5 session's only remaining job = live-verify + close `inchat_build_send_schedule_flow` on the runtime signal. Banners are append-only / do-not-revert (guards against parallel-session drift).
+
 ## 2026-06-17 (main) — docs(planning): FINAL BOSS — Live Work Environment master plan + 4-piece decomposition
 
 - Added `FINAL BOSS/` (planning docs only — NO code): `README.md`, `00-MASTER-PLAN.md`, `01-piece-1-workspace-shell.md` (ready-to-build, code-verified), `02-piece-2-project-aware-ai.md`, `03-piece-3-signal-layer.md`, `04-piece-4-editing-refresh-trash.md`, `HANDOFF.md`.

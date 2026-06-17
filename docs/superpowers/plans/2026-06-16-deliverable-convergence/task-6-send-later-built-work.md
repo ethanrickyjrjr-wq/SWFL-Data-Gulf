@@ -2,6 +2,12 @@
 
 **Builder:** Sonnet · **Wave:** D (parallel with Task 5) · **Depends on:** Task 7 (bridge), Task 4 (email deliverable)
 
+> 🔒 **STATUS / SCOPE LOCK (2026-06-17 — do not revert on checkout/push).** Built: Send / Send-weekly handle on
+> `/p/[id]` + `/project` (`f8bc3cc`; contacts-upload page `66ba208`), riding Task 7's recipe→schedule bridge. The
+> **project-page** send affordance now evolves under **`FINAL BOSS/`** (Piece 1 §I seed/scope wiring + Piece 4
+> Emailing-lane live "this week's email") — a rewire onto the new project workspace, not a change in this folder. Don't
+> extend or revert this here; if something's wrong, add a correcting note rather than deleting.
+
 ## Goal
 
 Every built deliverable carries a permanent **Send** and **Send weekly** handle, so a user can return days/weeks later and send something already made — re-entering the same flow with a **fresh** render (never mailing stale frozen numbers).
