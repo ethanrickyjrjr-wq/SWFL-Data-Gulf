@@ -7,7 +7,11 @@
  * badge, and we never silently re-fetch. The token stays pinned (the moat).
  * Returns null when there's no parseable trailing date.
  */
-export function asOfFromToken(token: string | null | undefined): string | null {
+/** The validated {y,mo,d} of a token's trailing date, or null. ONE parser for
+ *  both the display form (`asOfFromToken`) and the compare key (`tokenDayKey`). */
+function parseTokenDate(
+  token: string | null | undefined,
+): { y: string; mo: string; d: string } | null {
   if (!token) return null;
   const m = /(\d{4})(\d{2})(\d{2})\b/.exec(token);
   if (!m) return null;
@@ -15,5 +19,21 @@ export function asOfFromToken(token: string | null | undefined): string | null {
   const month = Number(mo);
   const day = Number(d);
   if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-  return `${mo}/${d}/${y}`;
+  return { y, mo, d };
+}
+
+export function asOfFromToken(token: string | null | undefined): string | null {
+  const p = parseTokenDate(token);
+  return p ? `${p.mo}/${p.d}/${p.y}` : null;
+}
+
+/**
+ * The sortable "YYYYMMDD" day key of a freshness token's trailing date, or null.
+ * 8-digit zero-padded → a plain lexical `>` IS chronological (the same day-granular
+ * basis as reconcile's `fresher_side`). Use this for "newer than last seen"
+ * comparisons; use `asOfFromToken` for display. Piece 2's digest reads it.
+ */
+export function tokenDayKey(token: string | null | undefined): string | null {
+  const p = parseTokenDate(token);
+  return p ? `${p.y}${p.mo}${p.d}` : null;
 }

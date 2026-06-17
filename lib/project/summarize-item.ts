@@ -21,7 +21,7 @@ export function summarizeItem(item: ProjectItem): string {
     case "qa":
       return clip(item.question);
     case "metric":
-      return `${item.label}: ${item.value}`;
+      return clip(`${item.label}: ${item.value}`);
     case "chart":
     case "frame":
       return item.title;
