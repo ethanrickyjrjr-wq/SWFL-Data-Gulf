@@ -130,5 +130,5 @@ export function useChatStream(
     }
   }
 
-  return { messages, busy, send };
+  return { messages, setMessages, busy, send };
 }

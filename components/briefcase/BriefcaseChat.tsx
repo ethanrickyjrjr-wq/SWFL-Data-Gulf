@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useChatStream, parseChatFrame, type ChatFrame } from "@/lib/chat/use-chat-stream";
+import { useProjectThread } from "@/lib/chat/use-project-thread";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
+import { useAiContext } from "@/components/briefcase/use-ai-context";
 import { buildQaItem } from "@/lib/briefcase/qa-item";
 import { describePage, projectPageContextForPath } from "@/lib/chat/page-context";
 import { briefcaseDigest } from "@/lib/briefcase/briefcase-digest";
@@ -42,6 +44,12 @@ async function drainSseText(res: Response): Promise<string> {
 export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string[] }) {
   const briefcase = useBriefcase();
   const pathname = usePathname();
+
+  // Active project — drives per-project thread isolation.
+  const aiContext = useAiContext();
+  const projectId = aiContext?.projectId ?? null;
+  const { thread, save, clear, nudgeItems, nudgeTimeLabel } = useProjectThread(projectId);
+
   // Grounding identity captured from the prelude `place` frame, so a filed Q&A
   // pins the same ZIP + freshness token the answer was grounded on. Refs (not
   // state) — these change mid-stream and must not trigger re-render.
@@ -65,7 +73,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
     }
   };
 
-  const { messages, busy, send } = useChatStream("/api/welcome/chat", {
+  const { messages, setMessages, busy, send } = useChatStream("/api/welcome/chat", {
     body: { mode: "analyst" },
     onFrame,
     // The single capture point: every send (chip or typed) carries WHERE the user
@@ -102,6 +110,22 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
   const [filed, setFiled] = useState<string | null>(null);
   const [summaryState, setSummaryState] = useState<"idle" | "saving" | "done" | "error">("idle");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
+
+  // Swap to the new project's stored thread when the active project changes.
+  // "Set state during render" pattern — avoids react-hooks/set-state-in-effect.
+  const [loadedProjectId, setLoadedProjectId] = useState(projectId);
+  if (loadedProjectId !== projectId) {
+    setLoadedProjectId(projectId);
+    setMessages(thread.messages);
+    setNudgeDismissed(false);
+  }
+
+  // Persist messages to localStorage after each exchange (localStorage write only —
+  // no setState here, so useEffect is safe per the rule).
+  useEffect(() => {
+    if (messages.length > 0) save(messages);
+  }, [messages, save]);
 
   // Keep the latest message in view while streaming — DOM-only effect (no setState).
   useEffect(() => {
@@ -205,6 +229,45 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
             </li>
           ))}
         </ul>
+      )}
+
+      {!nudgeDismissed && nudgeItems && nudgeItems.length > 0 && (
+        <div className="mb-2 rounded-lg border border-[#0a8078]/30 bg-[#0f1d24] p-3">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs text-gray-500">Last session · {nudgeTimeLabel}</span>
+            <button
+              type="button"
+              onClick={() => setNudgeDismissed(true)}
+              aria-label="Dismiss"
+              className="text-xs text-gray-600 transition-colors hover:text-gray-400"
+            >
+              ×
+            </button>
+          </div>
+          <ul className="space-y-0.5">
+            {nudgeItems.map((item, i) => (
+              <li key={i} className="text-xs text-gray-400">
+                · {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {messages.length > 0 && (
+        <div className="mb-1 flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              clear();
+              setMessages([]);
+              setNudgeDismissed(false);
+            }}
+            className="text-xs text-gray-500 transition-colors hover:text-red-400"
+          >
+            × Clear
+          </button>
+        </div>
       )}
 
       {messages.length > 0 && (

@@ -1,3 +1,10 @@
+## 2026-06-18 (main) — feat(chat): per-project thread isolation with localStorage persistence
+
+- **`lib/chat/use-project-thread.ts`** — new hook; localStorage slot per project (`chat-thread-{id}`), 50-msg cap, time-gated nudge (>5 min gap → last ≤3 user questions), all impure calls (Date.now/localStorage) in `loadFromStorage` not render body
+- **`lib/chat/use-chat-stream.ts`** — expose `setMessages` in return (1 line; welcome chat unaffected)
+- **`components/briefcase/BriefcaseChat.tsx`** — wires `useProjectThread` + `useAiContext`; "set state during render" pattern swaps thread on project switch; `useEffect` persists on message change; nudge banner + × Clear button
+- **Next:** live-verify switch between two projects restores independent threads; nudge appears after 5-min gap
+
 ## 2026-06-18 (main) — fix: coerce empty branding strings to null in PATCH /api/user/brand
 
 - **`app/api/user/brand/route.ts`** — empty/whitespace agent fields now write null instead of "", preventing silent divergence at future consumers
