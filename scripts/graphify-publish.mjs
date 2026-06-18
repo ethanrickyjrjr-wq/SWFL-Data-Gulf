@@ -102,7 +102,17 @@ if (!existsSync(OPS_ROOT)) {
 const graph = JSON.parse(readFileSync(GRAPH_PATH, "utf8"));
 
 const outNodes = graph.nodes.map(transformNode);
-const outEdges = graph.edges.map(transformEdge);
+const nodeIds = new Set(outNodes.map((n) => n.id));
+const droppedEdges = graph.edges.filter((e) => !nodeIds.has(e.source) || !nodeIds.has(e.target));
+if (droppedEdges.length) {
+  console.warn(
+    `graphify-publish: dropping ${droppedEdges.length} dangling edge(s):`,
+    droppedEdges.map((e) => `${e.source} → ${e.target}`).join(", "),
+  );
+}
+const outEdges = graph.edges
+  .filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
+  .map(transformEdge);
 
 // Count by type for the summary
 const byType = {};
