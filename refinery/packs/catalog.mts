@@ -239,6 +239,17 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     ttl_seconds: 30 * 24 * 60 * 60,
   },
   {
+    // Scope DUPLICATED VERBATIM from franchiseOutcomes.scope in franchise-outcomes.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
+    // id/domain/scope/ttl — edit both strings together.
+    id: "franchise-outcomes",
+    domain: "finance",
+    scope:
+      "SBA 7(a) FOIA named-brand franchise loan outcomes — Lee & Collier counties, FL. " +
+      "Per-brand survival rates over resolved loans; corpus-level direction signal for the SWFL franchise credit environment.",
+    ttl_seconds: 7776000,
+  },
+  {
     // Scope DUPLICATED VERBATIM from FRESHNESS_PULSE_SCOPE in freshness-pulse.mts.
     // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
     // id/domain/scope/ttl — edit both strings together.

@@ -1,3 +1,9 @@
+## 2026-06-18 (main) — feat(refinery): build franchise-outcomes pack
+
+- **`refinery/packs/franchise-outcomes.mts`** — new leaf brain reading `franchiseSource` (SBA 7(a) FOIA). Emits `overall_survival_rate` (n_resolved-weighted, assessable brands ≥ 3 resolved loans) + `franchise_survival` detail table per brand. Direction: ≥ 80% bullish, < 65% bearish. Fixture mode by default; `REFINERY_FRANCHISE_SOURCE=live` reads the Tier-1 Parquet.
+- **`refinery/packs/catalog.mts`** + **`index.mts`** — `franchise-outcomes` registered in both. catalog.test 4/4, vocab --all clean.
+- **Next:** push both this commit + the earlier 7-brain wire commit (`672180c`). Then run a rebuild to produce `.md` output for all 8 newly wired brains.
+
 ## 2026-06-18 (main) — feat(refinery): wire 7 disconnected brains into master
 
 - **master.mts sources +7:** `seller-stress-swfl` · `storm-history-swfl` · `hurricane-tracks-fl` · `licenses-swfl` · `condo-sirs-swfl` · `fgcu-reri` · `permits-commercial-swfl` — all were fully built (BRAIN_CATALOG + vocab + ingest) but missing the `makeBrainInputSource()` call. catalog.test passes, typecheck baseline unchanged.
