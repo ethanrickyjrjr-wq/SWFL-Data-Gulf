@@ -16,14 +16,12 @@ function buildSnippet(client: McpClient, key: string): string {
   const url = "https://www.swfldatagulf.com/api/mcp";
   switch (client) {
     case "windsurf":
-      // Windsurf uses `serverUrl`, not `url` — verified from docs.windsurf.com
       return JSON.stringify(
         { mcpServers: { "swfl-project": { serverUrl: url, headers: { "X-Project-Key": key } } } },
         null,
         2,
       );
     case "cline":
-      // Cline supports optional disabled/autoApprove fields
       return JSON.stringify(
         {
           mcpServers: {
@@ -41,7 +39,6 @@ function buildSnippet(client: McpClient, key: string): string {
     case "other":
       return `Endpoint:  ${url}\nTransport: Streamable HTTP\nHeader:    X-Project-Key: ${key}`;
     default:
-      // Claude Desktop and Cursor share the same shape
       return JSON.stringify(
         { mcpServers: { "swfl-project": { url, headers: { "X-Project-Key": key } } } },
         null,
@@ -68,47 +65,43 @@ const CLIENT_INSTRUCTIONS: Record<McpClient, { instruction: string; note?: strin
     note: "Windsurf uses serverUrl — not url. This snippet has the right key.",
   },
   other: {
-    instruction: "Paste the endpoint and header into your client’s MCP settings.",
+    instruction: "Paste the endpoint and header into your client's MCP settings.",
   },
 };
 
 /**
- * "Connect your AI" — mint / regenerate (= revoke) / clear the per-project key plus
- * the copy-paste connect snippet (key scopes ONE project, write-only-into-items).
+ * Connect your AI — mint / regenerate / revoke the per-project capability key.
  *
- * Piece 1 §E adds the three display modes:
- *   • CONNECTED (mcp_key set) — compact "✓ Connected", expandable details, and a
- *     disconnect-with-confirm. Connected-state derives from the KEY, never ui_state.
- *   • COLLAPSED (not keyed AND dismissed ≥2×) — a slim "Connect your AI" the user
- *     can re-open; persisted in `projects.ui_state.mcp_dismissed_count` (cross-device).
- *   • OPEN (default) — the full pitch + Generate, with a Dismiss (×) that increments
- *     the count and collapses for this view.
- *
- * Collapse is event-driven local state lazily seeded from the persisted count — no
- * props→state effect (this repo build-blocks `react-hooks/set-state-in-effect`).
+ * Two render modes:
+ *   • Panel mode (`onClose` provided) — flat content inside the pill popover, always
+ *     fully expanded, × to close. `onKeyChange` fires when the key is minted/revoked
+ *     so the parent pill can stay in sync.
+ *   • Legacy static section (no `onClose`) — the collapsible card with 3 display states
+ *     (open / collapsed / connected). Kept for any non-pill callers.
  */
 export function ConnectMcpBlock({
   projectId,
   initialKey,
   dismissedCount,
   onDismiss,
+  onClose,
+  onKeyChange,
 }: {
   projectId: string;
   initialKey: string | null;
   dismissedCount: number;
-  /** Persist a +1 to ui_state.mcp_dismissed_count (PATCHed by the orchestrator). */
   onDismiss: () => void;
+  onClose?: () => void;
+  onKeyChange?: (key: string | null) => void;
 }) {
   const [key, setKey] = useState<string | null>(initialKey);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [client, setClient] = useState<McpClient>("desktop");
-  // Not-connected collapse: start collapsed only if already dismissed twice.
   const [view, setView] = useState<"open" | "collapsed">(() =>
     dismissedCount >= 2 ? "collapsed" : "open",
   );
-  // Connected details + disconnect confirm.
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -120,7 +113,8 @@ export function ConnectMcpBlock({
       const json = (await res.json().catch(() => null)) as { mcp_key?: string } | null;
       if (res.ok && json?.mcp_key) {
         setKey(json.mcp_key);
-        setDetailsOpen(true); // show the snippet immediately after minting
+        setDetailsOpen(true);
+        onKeyChange?.(json.mcp_key);
       } else setError("Could not generate a key. Try again.");
     } catch {
       setError("Could not generate a key. Try again.");
@@ -138,6 +132,7 @@ export function ConnectMcpBlock({
         setKey(null);
         setConfirming(false);
         setDetailsOpen(false);
+        onKeyChange?.(null);
       } else setError("Could not revoke the key. Try again.");
     } catch {
       setError("Could not revoke the key. Try again.");
@@ -165,9 +160,6 @@ export function ConnectMcpBlock({
     setCopied(false);
   }
 
-  const wrap = "mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4";
-
-  // The connect snippet UI, shared by "connected → details" and "fresh mint".
   const snippetUi = (
     <div className="mt-3">
       <div className="flex flex-wrap gap-1">
@@ -245,7 +237,62 @@ export function ConnectMcpBlock({
     </div>
   );
 
-  // CONNECTED — compact, with expandable connection details.
+  // ── PANEL MODE (inside pill popover) ────────────────────────────────────────
+  if (onClose) {
+    return (
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-white">
+            {key ? "✓ Connected to your AI" : "Connect your AI"}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-full px-2 text-lg leading-none text-gray-500 hover:text-gray-300"
+          >
+            ×
+          </button>
+        </div>
+
+        {key ? (
+          <>
+            <p className="text-xs text-gray-500">Scoped to this project only.</p>
+            <button
+              type="button"
+              onClick={() => setDetailsOpen((o) => !o)}
+              className="mt-1 text-xs text-gray-400 hover:text-gray-200"
+            >
+              {detailsOpen ? "Hide details" : "Connection details"}
+            </button>
+            {detailsOpen && snippetUi}
+          </>
+        ) : (
+          <>
+            <p className="mb-3 text-xs text-gray-500">
+              Give your AI a key scoped to <span className="text-gray-300">this project only</span>{" "}
+              — it can add items and trigger builds, but cannot read your other projects. Regenerate
+              any time to revoke.
+            </p>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={mint}
+              className="rounded-full bg-[#00d4aa] px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
+            >
+              {busy ? "Generating…" : "Generate key"}
+            </button>
+          </>
+        )}
+
+        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      </div>
+    );
+  }
+
+  // ── LEGACY STATIC SECTION ───────────────────────────────────────────────────
+  const wrap = "mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4";
+
   if (key) {
     return (
       <section className={wrap}>
@@ -268,7 +315,6 @@ export function ConnectMcpBlock({
     );
   }
 
-  // COLLAPSED — dismissed twice; slim, re-openable.
   if (view === "collapsed") {
     return (
       <section className={wrap}>
@@ -284,7 +330,6 @@ export function ConnectMcpBlock({
     );
   }
 
-  // OPEN — the full pitch + Generate, dismissible.
   return (
     <section className={wrap}>
       <div className="flex items-start justify-between gap-2">
@@ -292,7 +337,7 @@ export function ConnectMcpBlock({
           <h2 className="text-sm font-semibold text-white">Connect your AI</h2>
           <p className="mt-1 text-xs text-gray-500">
             Give your AI a key scoped to <span className="text-gray-300">this project only</span> —
-            it can add items and trigger builds, but can’t read your other projects. Regenerate any
+            it can add items and trigger builds, but cannot read your other projects. Regenerate any
             time to revoke.
           </p>
         </div>

@@ -1,11 +1,7 @@
 "use client";
 
 import type { TemplateId } from "@/lib/deliverable/templates";
-import { PrintButton } from "@/components/PrintButton";
 
-/** The deliverable templates the Build button offers (ids mirror
- *  DELIVERABLE_TEMPLATES in lib/deliverable/assemble.ts; the build route
- *  re-validates via isTemplateId, so this list can't drift unchecked). */
 const DELIVERABLE_TEMPLATE_OPTIONS: { id: TemplateId; label: string }[] = [
   { id: "market-overview", label: "Market overview" },
   { id: "bov-lite", label: "Broker opinion (BOV lite)" },
@@ -13,9 +9,8 @@ const DELIVERABLE_TEMPLATE_OPTIONS: { id: TemplateId; label: string }[] = [
   { id: "one-pager", label: "One-pager" },
 ];
 
-/** Template select + Build + Print. State owned by the orchestrator. */
+/** Template select + Build. State owned by the orchestrator. */
 export function BuildActions({
-  projectId,
   template,
   onTemplate,
   onBuild,
@@ -23,7 +18,6 @@ export function BuildActions({
   buildError,
   itemCount,
 }: {
-  projectId: string;
   template: TemplateId;
   onTemplate: (t: TemplateId) => void;
   onBuild: () => void;
@@ -34,7 +28,6 @@ export function BuildActions({
   return (
     <div className="print-hide mt-6 flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-3">
-        <PrintButton reportId={projectId} />
         <select
           value={template}
           onChange={(e) => onTemplate(e.target.value as TemplateId)}

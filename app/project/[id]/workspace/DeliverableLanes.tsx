@@ -77,6 +77,8 @@ export function DeliverableLanes({
   emailSchedules,
   items,
   projectBranding,
+  mcpConnected,
+  onConnectMcp,
   onToggleRevoke,
   onRefresh,
   onEdit,
@@ -90,6 +92,10 @@ export function DeliverableLanes({
   items: ProjectItem[];
   /** Project branding — default for the edit panel's color pickers. */
   projectBranding: Record<string, string> | null;
+  /** Whether a per-project MCP key is active — shown as a status badge in the header. */
+  mcpConnected: boolean;
+  /** Opens the Connect AI pill popover (called when the "Connect AI →" link is clicked). */
+  onConnectMcp: () => void;
   onToggleRevoke: (deliverableId: string, currentStatus: string) => void;
   /** P4 refresh → returns the new version id (so the modal swaps to it). */
   onRefresh: (deliverableId: string) => Promise<string | null>;
@@ -156,7 +162,23 @@ export function DeliverableLanes({
     <>
       {deliverables.length > 0 && (
         <section className="mt-8 rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
-          <h2 className="text-sm font-semibold text-white">Built deliverables</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white">Built deliverables</h2>
+            {mcpConnected ? (
+              <span className="flex items-center gap-1.5 text-[11px] text-[#00d4aa]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#00d4aa]" />
+                AI connected
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={onConnectMcp}
+                className="text-[11px] text-gray-500 transition-colors hover:text-[#00d4aa]"
+              >
+                Connect AI →
+              </button>
+            )}
+          </div>
           <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {deliverables.map((d) => (
               <DeliverableThumbnail
