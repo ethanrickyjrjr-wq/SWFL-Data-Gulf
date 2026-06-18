@@ -171,3 +171,6 @@ public/maps/fl_zips.geojson
 # Email style-gallery preview — regenerated build artifact (scripts/preview-style-gallery.mts).
 # A frozen design snapshot lives at docs/design/email/. Ignore the live regenerated root copy.
 /style-gallery-preview.html
+
+# graphify generated output
+graphify-out/
