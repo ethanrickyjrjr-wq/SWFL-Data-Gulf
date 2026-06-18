@@ -80,9 +80,14 @@ export function useProjectThread(projectId: string | null) {
   const [thread, setThread] = useState<StoredThread>(() => loadFromStorage(projectId));
 
   // Reset to the new project's thread during render when projectId changes.
+  // Compute the fresh thread inline so callers see the new data in THIS render —
+  // setThread schedules a state update for next render, but the returned value is
+  // used immediately by BriefcaseChat's own set-state-during-render swap.
+  let currentThread = thread;
   if (loadedForId !== projectId) {
     setLoadedForId(projectId);
-    setThread(loadFromStorage(projectId));
+    currentThread = loadFromStorage(projectId);
+    setThread(currentThread);
   }
 
   const save = useCallback(
@@ -112,10 +117,10 @@ export function useProjectThread(projectId: string | null) {
   }, [projectId]);
 
   return {
-    thread,
+    thread: currentThread,
     save,
     clear,
-    nudgeItems: thread.nudgeItems,
-    nudgeTimeLabel: thread.nudgeTimeLabel,
+    nudgeItems: currentThread.nudgeItems,
+    nudgeTimeLabel: currentThread.nudgeTimeLabel,
   };
 }

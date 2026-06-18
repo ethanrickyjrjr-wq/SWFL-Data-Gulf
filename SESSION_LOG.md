@@ -1,3 +1,9 @@
+## 2026-06-18 (main) — fix(chat): use-project-thread race — thread history now loads on project open
+
+- **`lib/chat/use-project-thread.ts`** — `currentThread` computed inline during the set-state-during-render swap; returned instead of stale `thread` state so `BriefcaseChat.setMessages` gets the actual loaded data in the same render where projectId changes (not empty EMPTY_THREAD)
+- **Root cause:** `c4a78c0` thread isolation called `setMessages(thread.messages)` while `thread` was still pre-update EMPTY_THREAD — swap guard already satisfied in next render so messages stayed empty; nudge titles appeared but history never loaded
+- **Next:** live-verify on `/project/[id]` — prior session thread should restore on project open (>5 min gap shows nudge + messages)
+
 ## 2026-06-18 (main) — chore(freeze): pause LLM crons + migrate scraping to crawl4ai
 
 - **GHA paused** — `daily-rebuild`, `city-pulse-daily`, `dbpr-public-notices-weekly`, `gate-a-parity` schedules commented out; `workflow_dispatch` still works for manual runs
