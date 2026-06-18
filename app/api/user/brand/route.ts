@@ -49,8 +49,10 @@ export async function PATCH(req: NextRequest) {
 
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
   for (const key of AGENT_FIELDS) {
-    if (key in body)
-      update[key] = typeof body[key as AgentField] === "string" ? body[key as AgentField] : null;
+    if (key in body) {
+      const v = body[key as AgentField];
+      update[key] = typeof v === "string" && v.trim() ? v : null;
+    }
   }
 
   const { error } = await supabase
