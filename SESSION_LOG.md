@@ -1,3 +1,8 @@
+## 2026-06-18 (main) — feat(refinery): wire 7 disconnected brains into master
+
+- **master.mts sources +7:** `seller-stress-swfl` · `storm-history-swfl` · `hurricane-tracks-fl` · `licenses-swfl` · `condo-sirs-swfl` · `fgcu-reri` · `permits-commercial-swfl` — all were fully built (BRAIN_CATALOG + vocab + ingest) but missing the `makeBrainInputSource()` call. catalog.test passes, typecheck baseline unchanged.
+- **Next:** these brains need a rebuild run to produce `.md` output before master picks them up. `franchise-outcomes` still a ghost — master calls it but no pack exists.
+
 ## 2026-06-17 (main) — feat(projects): FINAL BOSS Piece 4 — editing + live refresh + soft-delete trash — HELD for push
 
 - **Scope: FINAL BOSS Piece 4 (operator: "build the project, don't re-brainstorm — the resolved plan IS the scope").** The `04-piece-4-…md` "RESOLVED PLAN" was the build contract (its stale "needs brainstorm" header flipped). All work **HELD for push** (live `/project` + `/p/[id]` + the shared deliverable pipeline → RULE 1 diff-review; no-autonomous-push). Operator pushes.
