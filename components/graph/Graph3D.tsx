@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import ForceGraph3D, {
-  type ForceGraphMethods,
-  type NodeObject,
-  type LinkObject,
-} from "react-force-graph-3d";
+import ForceGraph3D from "react-force-graph-3d";
 import * as THREE from "three";
 
 // ── palette: 20 distinct hues, cycled across 100 communities ──────────────
@@ -72,9 +68,7 @@ interface NodeObj extends RawNode {
 type ColorMode = "community" | "type";
 
 export default function Graph3D() {
-  const fgRef = useRef<
-    ForceGraphMethods<NodeObject<NodeObj>, LinkObject<NodeObj, RawLink>> | undefined
-  >(undefined);
+  const fgRef = useRef<ReturnType<typeof ForceGraph3D> | null>(null);
   const [graphData, setGraphData] = useState<{ nodes: NodeObj[]; links: RawLink[] } | null>(null);
   const [selected, setSelected] = useState<NodeObj | null>(null);
   const [hovered, setHovered] = useState<NodeObj | null>(null);
@@ -117,7 +111,9 @@ export default function Graph3D() {
   const handleNodeClick = useCallback((node: NodeObj) => {
     setSelected((prev) => (prev?.id === node.id ? null : node));
     // fly camera toward clicked node
-    const fg = fgRef.current;
+    const fg = fgRef.current as {
+      cameraPosition: (pos: object, lookAt: object, ms: number) => void;
+    } | null;
     if (fg && node.x != null) {
       const dist = 120;
       const { x = 0, y = 0, z = 0 } = node;
@@ -182,7 +178,7 @@ export default function Graph3D() {
       <div style={{ flex: 1, position: "relative" }}>
         {graphData && (
           <ForceGraph3D
-            ref={fgRef}
+            ref={fgRef as React.MutableRefObject<typeof ForceGraph3D>}
             width={dims.w}
             height={dims.h}
             graphData={graphData}
