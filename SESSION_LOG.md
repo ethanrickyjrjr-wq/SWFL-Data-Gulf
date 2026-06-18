@@ -1,3 +1,12 @@
+## 2026-06-18 (main) — feat(brand): branding save fix + global default
+
+- **`docs/sql/20260618_user_brand_agent_fields.sql`** — adds agent_name/photo_url/license/brokerage to user_brand_profiles (applied to prod)
+- **`app/api/user/brand/route.ts`** — new GET+PATCH /api/user/brand; used for pre-fill (funnel arrivals) and global default save
+- **`lib/project/apply-brand.ts`** — extended to copy agent identity fields to projects.branding at creation time
+- **`BrandingBlock.tsx`** — two save buttons: "Save" (global+project) / "Save To This Project" (project only)
+- **`ProjectWorkspace.tsx`** — pre-fill on first pill-open from /api/user/brand when branding is empty
+- **Next:** live-verify: create new project → check branding auto-populated; save global → confirm persists on reload; save project-only → confirm new projects still start clean
+
 ## 2026-06-18 (main) — feat(refinery): build franchise-outcomes pack
 
 - **`refinery/packs/franchise-outcomes.mts`** — new leaf brain reading `franchiseSource` (SBA 7(a) FOIA). Emits `overall_survival_rate` (n_resolved-weighted, assessable brands ≥ 3 resolved loans) + `franchise_survival` detail table per brand. Direction: ≥ 80% bullish, < 65% bearish. Fixture mode by default; `REFINERY_FRANCHISE_SOURCE=live` reads the Tier-1 Parquet.
