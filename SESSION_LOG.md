@@ -1,3 +1,8 @@
+## 2026-06-18 (main) — fix(zip-dossier): add franchise-outcomes to BRAIN_GEO registry
+
+- **`lib/zip-dossier.ts`** — added `franchise-outcomes` entry (county-grain, Lee+Collier); brain shipped without G2 entry, causing 29 CI test failures across 3 pushes
+- **Next:** CI should go green on this push; no other open red causes found
+
 ## 2026-06-18 (main) — feat(chat): per-project thread isolation with localStorage persistence
 
 - **`lib/chat/use-project-thread.ts`** — new hook; localStorage slot per project (`chat-thread-{id}`), 50-msg cap, time-gated nudge (>5 min gap → last ≤3 user questions), all impure calls (Date.now/localStorage) in `loadFromStorage` not render body
