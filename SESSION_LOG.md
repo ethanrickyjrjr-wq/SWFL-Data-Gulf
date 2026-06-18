@@ -1,3 +1,7 @@
+## 2026-06-18 (main) — fix: coerce empty branding strings to null in PATCH /api/user/brand
+
+- **`app/api/user/brand/route.ts`** — empty/whitespace agent fields now write null instead of "", preventing silent divergence at future consumers
+
 ## 2026-06-18 (main) — feat(brand): branding save fix + global default
 
 - **`docs/sql/20260618_user_brand_agent_fields.sql`** — adds agent_name/photo_url/license/brokerage to user_brand_profiles (applied to prod)
