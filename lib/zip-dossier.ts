@@ -150,6 +150,8 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   "licenses-swfl": { grains: ["county"], covers: LEE_COLLIER },
   // DBPR SIRS confirmed filings, Lee + Collier.
   "condo-sirs-swfl": { grains: ["county"], covers: LEE_COLLIER },
+  // SBA FOIA county-grain franchise loan outcomes, Lee + Collier.
+  "franchise-outcomes": { grains: ["county"], covers: LEE_COLLIER },
 };
 
 /**
