@@ -7,9 +7,9 @@ name: GATE A — DB parity (zhvi/zori view ⇆ pack)
 # describe.skip on PRs (assert nothing, no connects).
 
 on:
-  schedule:
-    # 7 AM UTC daily — an hour after the 6 AM daily rebuild, so the views are fresh.
-    - cron: "0 7 * * *"
+  # PAUSED 2026-06-18 — credit freeze; no value while rebuild is paused
+  # schedule:
+  #   - cron: "0 7 * * *"
   workflow_dispatch: {}
 
 # One parity run at a time (a manual dispatch landing on the nightly can't race it).

@@ -1,9 +1,9 @@
 name: Daily Brain Rebuild
 
 on:
-  schedule:
-    # 6 AM UTC daily (2 AM ET / 1 AM CT)
-    - cron: "0 6 * * *"
+  # PAUSED 2026-06-18 — credit freeze; re-enable when ready to launch
+  # schedule:
+  #   - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
       pack_id:

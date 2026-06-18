@@ -1,9 +1,9 @@
 name: DBPR Public Notices — Weekly SWFL
 
 on:
-  schedule:
-    # Monday 10:00 UTC — after daily rebuild (06:00) and press releases (09:00).
-    - cron: "0 10 * * 1"
+  # PAUSED 2026-06-18 — credit freeze (ANTHROPIC_API_KEY); re-enable at launch
+  # schedule:
+  #   - cron: "0 10 * * 1"
   workflow_dispatch:
     inputs:
       dry_run:

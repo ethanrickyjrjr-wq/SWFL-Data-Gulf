@@ -1,3 +1,12 @@
+## 2026-06-18 (main) — chore(freeze): pause LLM crons + migrate scraping to crawl4ai
+
+- **GHA paused** — `daily-rebuild`, `city-pulse-daily`, `dbpr-public-notices-weekly`, `gate-a-parity` schedules commented out; `workflow_dispatch` still works for manual runs
+- **`refinery/agents/anthropic.mts`** — `SYNTHESIS_MODEL` Sonnet→Haiku (~5× cheaper per rebuild when re-enabled)
+- **`refinery/agents/synthesis-agent.mts`** — `max_tokens` 16000→4096
+- **`ingest/lib/extract_client.py`** — `scrape_with_fallback()` now crawl4ai primary → spider → firecrawl last-resort (no API credits for static page scrapes)
+- **`lib/prospects/enrich-brand.ts`** — Firecrawl branding API replaced with direct HTML fetch + meta-tag extraction; tests updated (5/5 pass)
+- **Next:** Re-enable crons at launch; consider bumping SYNTHESIS_MODEL back to Sonnet once revenue covers it
+
 ## 2026-06-18 (main) — fix(zip-dossier): add franchise-outcomes to BRAIN_GEO registry
 
 - **`lib/zip-dossier.ts`** — added `franchise-outcomes` entry (county-grain, Lee+Collier); brain shipped without G2 entry, causing 29 CI test failures across 3 pushes

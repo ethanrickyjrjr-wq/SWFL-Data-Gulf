@@ -2,11 +2,7 @@ import type { TriagedFragment } from "../types/fragment.mts";
 import type { PackDefinition } from "../types/pack.mts";
 import type { SynthesisFact } from "../types/event.mts";
 import { SMOOTHING_TOKENS } from "../lib/smoothing-tokens.mts";
-import {
-  getAnthropic,
-  SYNTHESIS_MODEL,
-  agentsAreMocked,
-} from "./anthropic.mts";
+import { getAnthropic, SYNTHESIS_MODEL, agentsAreMocked } from "./anthropic.mts";
 
 export type { SynthesisFact };
 
@@ -36,10 +32,7 @@ const SMOOTHING_PATTERN = new RegExp(
   "gi",
 );
 
-function scrubSmoothing(
-  text: string,
-  ctx: { factId: string; field: "fact" | "value" },
-): string {
+function scrubSmoothing(text: string, ctx: { factId: string; field: "fact" | "value" }): string {
   let scrubbed = text;
   const hits = text.match(SMOOTHING_PATTERN);
   if (hits && hits.length > 0) {
@@ -114,7 +107,7 @@ export async function synthesize(
 
   const response = await client.messages.create({
     model: SYNTHESIS_MODEL,
-    max_tokens: 16000,
+    max_tokens: 4096,
     system: [
       {
         type: "text",
@@ -125,8 +118,7 @@ export async function synthesize(
     tools: [
       {
         name: "record_facts",
-        description:
-          "Record the refined, citable reference facts synthesized from the fragments.",
+        description: "Record the refined, citable reference facts synthesized from the fragments.",
         input_schema: SYNTHESIS_SCHEMA,
       },
     ],

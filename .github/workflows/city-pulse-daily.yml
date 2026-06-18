@@ -1,11 +1,9 @@
 name: City pulse daily
 
 on:
-  schedule:
-    # 09:00 UTC = 5 AM ET daily.
-    # Slot confirmed free: daily-rebuild uses 0 6 * * *,
-    # freshness-probe uses 0 14 * * *. 0 9 * * * has no collision.
-    - cron: "0 9 * * *"
+  # PAUSED 2026-06-18 — credit freeze (ANTHROPIC_API_KEY + FIRECRAWL_API_KEY); re-enable at launch
+  # schedule:
+  #   - cron: "0 9 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
