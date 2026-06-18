@@ -157,6 +157,9 @@ export function GlobalNav() {
                   <MenuLink href="/project" onClick={closeMenus}>
                     My Projects
                   </MenuLink>
+                  <MenuLink href="/contacts" onClick={closeMenus}>
+                    Contacts
+                  </MenuLink>
                   <MenuLink href="/billing" onClick={closeMenus}>
                     Billing
                   </MenuLink>
@@ -237,6 +240,9 @@ export function GlobalNav() {
             {user ? (
               <>
                 <p className="truncate px-3 pb-1 text-xs text-gray-400">{email}</p>
+                <MobileLink href="/contacts" onClick={() => setMobileOpen(false)}>
+                  Contacts
+                </MobileLink>
                 <MobileLink href="/billing" onClick={() => setMobileOpen(false)}>
                   Billing
                 </MobileLink>

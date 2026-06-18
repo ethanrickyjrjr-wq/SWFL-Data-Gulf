@@ -30,6 +30,7 @@ import { PrintButton } from "@/components/PrintButton";
 import { DeliveryButtons } from "./DeliveryButtons";
 import { EmailPreviewFrame } from "./EmailPreviewFrame";
 import { SendWeeklyHandle } from "./SendWeeklyHandle";
+import { SendToContactsHandle } from "./SendToContactsHandle";
 import { CitationList } from "@/components/CitationList";
 import { cleanCitation } from "@/lib/citations/clean-url";
 
@@ -456,12 +457,15 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
             Save as PDF
           </a>
           {isOwner && (
-            <SendWeeklyHandle
-              deliverableId={id}
-              projectId={data.project_id}
-              scopeKind={data.scope_kind}
-              scopeValue={data.scope_value}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SendToContactsHandle deliverableId={id} />
+              <SendWeeklyHandle
+                deliverableId={id}
+                projectId={data.project_id}
+                scopeKind={data.scope_kind}
+                scopeValue={data.scope_value}
+              />
+            </div>
           )}
         </div>
         <EmailPreviewFrame srcDoc={emailHtml} />

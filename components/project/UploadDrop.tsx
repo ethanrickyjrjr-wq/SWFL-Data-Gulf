@@ -30,14 +30,19 @@ interface Props {
   fileCount: number;
   /** Called after a successful upload + filing; parent appends + persists. */
   onUploaded: (item: FileItem, objectUrl: string) => void;
+  /** Called after a PDF's extraction settles (done or failed) so the parent can
+   *  re-fetch items to reflect the new `extraction_status`. Optional — the build
+   *  path reads `extracted_text` straight from the DB regardless. */
+  onExtractionComplete?: () => void;
 }
 
-export function UploadDrop({ projectId, fileCount, onUploaded }: Props) {
+export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionComplete }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [caption, setCaption] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
+  const [reading, setReading] = useState(false);
 
   async function handleFile(file: File) {
     setError(null);
@@ -96,6 +101,24 @@ export function UploadDrop({ projectId, fileCount, onUploaded }: Props) {
 
       onUploaded(item, URL.createObjectURL(file));
       setCaption("");
+
+      // Fire PDF extraction — non-blocking. The route reads the PDF with Claude
+      // and patches `extracted_text` on the item in the DB, so the next build
+      // quotes the flyer's real figures. We surface a transient "reading" note;
+      // builds don't wait on it.
+      if (file.type === "application/pdf") {
+        setReading(true);
+        void fetch(`/api/projects/${projectId}/extract-pdf`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ item_id: item.id }),
+        })
+          .catch(() => {})
+          .finally(() => {
+            setReading(false);
+            onExtractionComplete?.();
+          });
+      }
 
       // Best-effort meter — never block the UI on it.
       void fetch("/api/meter", {
@@ -166,6 +189,12 @@ export function UploadDrop({ projectId, fileCount, onUploaded }: Props) {
       </div>
 
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      {reading && (
+        <p className="mt-2 flex items-center gap-2 text-xs text-[#0a8078]">
+          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[#0a8078]" />
+          Reading the PDF so your email can use its contents…
+        </p>
+      )}
     </section>
   );
 }

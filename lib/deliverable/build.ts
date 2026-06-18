@@ -226,8 +226,9 @@ function citation(item: SnapshotItem): string {
   return parts.length ? ` (${parts.join(" · ")})` : "";
 }
 
-/** Render one filed item as a numbered, customer-clean fact line for the prompt. */
-function renderItem(item: SnapshotItem, n: number): string {
+/** Render one filed item as a numbered, customer-clean fact line for the prompt.
+ *  Exported for unit coverage of the file/extracted-text branches. */
+export function renderItem(item: SnapshotItem, n: number): string {
   switch (item.kind) {
     case "metric":
       return `[${n}] METRIC — ${item.label}: ${item.value}${citation(item)}`;
@@ -262,7 +263,14 @@ function renderItem(item: SnapshotItem, n: number): string {
     case "note":
       return `[${n}] NOTE — ${item.text}`;
     case "file":
-      return `[${n}] FILE — ${item.caption ?? item.storage_path}`;
+      // A PDF read at upload time carries its distilled content in
+      // `extracted_text` — feed it to the narrative as a DOCUMENT so the prose
+      // can quote real figures from the flyer, not just name the file. No
+      // extraction (image, failed, or still processing) → the file-name label.
+      if (item.extracted_text && item.extracted_text.trim()) {
+        return `[${n}] DOCUMENT — ${item.caption ?? item.storage_path}\n${item.extracted_text.trim()}`;
+      }
+      return `[${n}] FILE — ${item.caption ?? item.storage_path} (pdf, content not available)`;
   }
 }
 

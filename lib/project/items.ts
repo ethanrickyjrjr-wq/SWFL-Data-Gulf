@@ -71,6 +71,13 @@ const kinds = z.discriminatedUnion("kind", [
     mime: z.string(),
     size: z.number(),
     caption: z.string().optional(),
+    // PDF extraction (briefcase-email feature): at upload time a PDF is read by
+    // Claude vision and its text distilled into `extracted_text`, so every
+    // downstream build sees the real content, not just the file name. `_status`
+    // drives the upload-surface spinner/warn-banner. Both optional + non-breaking
+    // — items filed before this lift simply omit them.
+    extracted_text: z.string().optional(),
+    extraction_status: z.enum(["processing", "done", "failed"]).optional(),
   }),
   z.object({
     kind: z.literal("table_slice"),
