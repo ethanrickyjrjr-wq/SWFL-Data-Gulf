@@ -1,6 +1,7 @@
 # PDF Extraction + Contact List + Email Blast — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 11 tasks, 15 files, keywords: migration, schema, architecture
 
 **Goal:** Let a user upload a property flyer PDF → Claude reads it → "Create Email" drafts a real email from real content → user blasts it to their contact list.
 

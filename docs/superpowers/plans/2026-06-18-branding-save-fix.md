@@ -1,6 +1,7 @@
 # Branding Save Fix + Global Default Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 7 files, keywords: migration, schema, architecture
 
 **Goal:** Fix the BrandingBlock save (currently only writes per-project, never propagates to new projects) by wiring a `/api/user/brand` GET+PATCH endpoint into a two-button save flow ("Save" = global default + current project; "Save To This Project" = current project only), and pre-filling the panel from the user's brand profile on first open.
 

@@ -1,0 +1,53 @@
+# Per-category tolerances for the data verification ladder (Phase 3C).
+# tolerance_abs: absolute difference acceptable between two crawl results
+# tolerance_pct: relative tolerance (% of value) between two crawl results
+# max_stale_days: how old the last-known value can be before we omit rather than substitute
+# z_flag_threshold: z-score vs 30-day rolling mean triggering "implausible" flag (null = not a time-series)
+
+mortgage_rate:
+  tolerance_abs: 0.15
+  tolerance_pct: null
+  max_stale_days: 14
+  z_flag_threshold: 3.0
+
+median_sale_price:
+  tolerance_pct: 5.0
+  tolerance_abs: null
+  max_stale_days: 45
+  z_flag_threshold: 3.0
+
+active_listings_count:
+  tolerance_pct: 10.0
+  tolerance_abs: null
+  max_stale_days: 14
+  z_flag_threshold: 3.0
+
+days_on_market:
+  tolerance_pct: 10.0
+  tolerance_abs: null
+  max_stale_days: 30
+  z_flag_threshold: 3.0
+
+unemployment_rate:
+  tolerance_abs: 0.30
+  tolerance_pct: null
+  max_stale_days: 45
+  z_flag_threshold: 2.0
+
+cap_rate:
+  tolerance_abs: 0.25
+  tolerance_pct: null
+  max_stale_days: 90
+  z_flag_threshold: 2.5
+
+flood_risk_aal:
+  tolerance_pct: 5.0
+  tolerance_abs: null
+  max_stale_days: 365
+  z_flag_threshold: null
+
+_default:
+  tolerance_pct: 10.0
+  tolerance_abs: null
+  max_stale_days: 30
+  z_flag_threshold: 3.0
