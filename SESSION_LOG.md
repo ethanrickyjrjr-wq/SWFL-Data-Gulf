@@ -1,3 +1,9 @@
+## 2026-06-19 (main) — chore(plans): retroactive annotation sweep + _FINISHED excluded
+
+- **`scripts/annotate-plan.mjs`** — now recurses into subdirectories, skips `_FINISHED/`, covers `docs/superpowers/plans/` + `FINAL BOSS/` in one `node scripts/annotate-plan.mjs` (no args).
+- **40 active plans annotated** with conflict-group color badges + Recommended model line; `_FINISHED/` left clean.
+- **Next:** hook fires automatically on every `.md` write going forward.
+
 ## 2026-06-19 (main) — fix(hooks): annotate-plan fires on any .md, handles FINAL BOSS letter-section format
 
 - **`.claude/hooks/annotate-plan.mjs`** — two bugs: (1) hardcoded `PLANS_SEGMENT` path guard silently dropped every plan outside `docs/superpowers/plans/` (incl. all `FINAL BOSS/` files); (2) parser only knew `## Task N` + `**Files:**` format — FINAL BOSS plans use `### A.` / `### B.` letter sections with files in Markdown tables + inline backticks. Fix: removed path guard (any `.md` self-filters via parser); added `parseLetterFormat()` with file-path heuristic. Hook now fires universally on any `.md` write.
