@@ -26,6 +26,7 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, basename, dirname, relative } from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 import { parse as parseYaml } from "yaml";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -491,20 +492,34 @@ writeFileSync(
 console.log(`\n  → ${relative(ROOT, APP_GRAPH_PATH)}`);
 
 // ── Patch graph.json (merge app plane into brains graph) ─────────────────────
+// graphify CLI outputs `links`; older snapshots used `edges` — normalise both
+const brainEdges = brainGraph.edges ?? brainGraph.links ?? [];
+
 const existingNodeIds = new Set(brainGraph.nodes.map((n) => n.id));
 const newNodes = appNodes.filter((n) => !existingNodeIds.has(n.id));
 
-const existingEdgeKeys = new Set(
-  brainGraph.edges.map((e) => `${e.source}→${e.target}→${e.relation}`),
-);
+const existingEdgeKeys = new Set(brainEdges.map((e) => `${e.source}→${e.target}→${e.relation}`));
 const newEdges = appEdges.filter(
   (e) => !existingEdgeKeys.has(`${e.source}→${e.target}→${e.relation}`),
 );
 
+const headCommit = (() => {
+  try {
+    return execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+  } catch {
+    return "unknown";
+  }
+})();
+
 const merged = {
   ...brainGraph,
   nodes: [...brainGraph.nodes, ...newNodes],
-  edges: [...brainGraph.edges, ...newEdges],
+  edges: [...brainEdges, ...newEdges],
+  meta: {
+    ...(brainGraph.meta ?? {}),
+    app_plane_commit: headCommit,
+    app_plane_generated: new Date().toISOString(),
+  },
 };
 writeFileSync(GRAPH_PATH, JSON.stringify(merged, null, 2));
 console.log(`  → graphify-out/graph.json  (+${newNodes.length} nodes, +${newEdges.length} edges)`);
