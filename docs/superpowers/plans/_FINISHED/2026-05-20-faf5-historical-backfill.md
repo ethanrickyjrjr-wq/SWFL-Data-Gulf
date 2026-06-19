@@ -1,7 +1,6 @@
 # FAF5 Historical Backfill (Cold Lane) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** ⚡ Sonnet — keywords: architecture
 
 **Goal:** Backfill FAF5 freight flow data for years 2020–2023 into Cold Lane (`lake-tier1` S3) alongside existing 2024 data, year-partitioned, and update the DuckDB source connector to expose all 5 years as YoY fragments for `logistics-swfl`.
 

@@ -1,7 +1,6 @@
 # Source Links + Methodology Surface — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 6 tasks, 9 files, keywords: schema, architecture
 
 **Goal:** Add a public, allowlist-gated `/r/method/[metric]` page (formula + provenance only) reached by a small `ƒ` affordance on metric rows, and fix the one real citation leak ("Brains Supabase").
 
@@ -262,7 +261,7 @@ git commit -m "feat(method): curated methodology registry + resolver (allowlist 
 ### Task 2: Hygiene scrub — kill the "Brains Supabase" leak  ·  **Sonnet · Wave A**
 
 **Files:**
-- 🔴 Modify: `refinery/render/speaker.mts:315-354` (`scrubCaveatTechnical`)
+- Modify: `refinery/render/speaker.mts:315-354` (`scrubCaveatTechnical`)
 - Test: `refinery/render/scrub-host.test.mts` (new)
 
 - [ ] **Step 1: Write the failing test**
@@ -347,7 +346,7 @@ git commit -m "fix(speaker): scrub internal 'Brains Supabase' host phrase from c
 ### Task 3: Speaker wiring — leak-gated `methodHref`  ·  **Opus · Wave B (needs Task 1)**
 
 **Files:**
-- 🔴 Modify: `refinery/render/speaker.mts` (import; `DisplayMetric` ~588-599; `toDisplayBrain` ~684-692)
+- Modify: `refinery/render/speaker.mts` (import; `DisplayMetric` ~588-599; `toDisplayBrain` ~684-692)
 - Test: `refinery/render/display-leak.test.mts` (add one test)
 
 - [ ] **Step 1: Write the failing test**
@@ -813,15 +812,3 @@ Then open a PR (`gh pr create`) targeting `main`. No `checks` ledger row maps to
 **3. Type consistency:** `MethodologyEntry` fields (`label/measures/formula/denominator?/sourceTable?/brain?/doc?`) are identical across Task 1 (definition), Task 4 (consumption). `methodHref` is `string | undefined` on `DisplayMetric` (Task 3) and `string | null | undefined` on `MetricRow` (Task 5) — compatible (the report map passes `m.methodHref`, an optional string, into an optional-nullable field; assignable). `methodHrefForSlug` returns `string | undefined`, matching `DisplayMetric.methodHref?`. `resolveMethod` returns `MethodologyEntry | null`, handled by truthy checks in both the gate and the route. ✓
 
 **4. Ambiguity:** Import paths spelled out exactly (`../../../../refinery/lib/...`, `../../source/_tables`, `../../_components/report-shell`) and match the sibling source page's depth. Test-vs-manual split stated per task. Push gate explicit. ✓
-
----
-
-## Parallel Safety
-
-> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
-
-| Group | Tasks | Shared Files |
-|-------|-------|--------------|
-| 🔴 | Task 2, Task 3 | `refinery/render/speaker.mts` |
-
-Tasks with no color badge have no file conflicts — safe to parallelize freely.

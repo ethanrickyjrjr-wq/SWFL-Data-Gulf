@@ -1,7 +1,6 @@
 # The Glass §4 — `data_targets` generator + table — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** ⚡ Sonnet — 6 tasks, keywords: migration, architecture
 
 **Goal:** Generate the auto-ranked "Shopping List" that feeds The Glass Pane 4 — a `data_targets` table populated nightly with every data gap the system can detect (stale sources, low-skill slugs, under-sampled slugs, deliberately-excluded-but-wanted signals, and the §6 falsifiability gap), each carrying its N.
 
@@ -154,7 +153,7 @@ git commit -m "feat(glass): §4 data_targets table + backtest_skill_by_slug view
 ### Task 2: Pure builders + ranking (TDD)
 
 **Files:**
-- 🔴 Create: `ingest/scripts/generate_data_targets.py` (pure section only)
+- Create: `ingest/scripts/generate_data_targets.py` (pure section only)
 - Test: `ingest/tests/scripts/test_generate_data_targets.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -425,7 +424,7 @@ git commit -m "feat(glass): §4 data_targets pure builders + tests"
 ### Task 3: DB glue (`main`) + upsert/auto-drop + `--dry-run`
 
 **Files:**
-- 🔴 Modify: `ingest/scripts/generate_data_targets.py` (append the I/O section)
+- Modify: `ingest/scripts/generate_data_targets.py` (append the I/O section)
 
 - [ ] **Step 1: Append the DB readers, writer, and main**
 
@@ -692,15 +691,3 @@ Run: `git --no-pager diff --stat main` and summarize. **Do not push until the op
 **3. Type/name consistency:** `target_key`, `kind`, `subject`, `label`, `reason`, `status`, `priority`, `metric`, `source` identical across the migration, the `_target()` helper, the upsert SQL, and the tests. Builder names (`build_stale_targets`, `build_skill_targets`, `build_low_n_targets`, `build_excluded_targets`, `build_falsifiability_targets`, `keys_to_drop`) match between the test imports (Task 2 Step 1) and the implementation (Task 2 Step 3 / Task 3). View columns (`slug, n, system_accuracy, persistence_accuracy, lift`) match `read_skill_rows` and `build_skill_targets`.
 
 **Note on DRY (skill formula in two places):** the persistence-null lift lives canonically in TS (`computeSkillScore`) and is re-expressed once in SQL (`backtest_skill_by_slug`) because the Python consumer can't import TS. Task 5 Step 1 reconciles them against the live corpus and blocks the write on a mismatch — the duplication is converted into a checked invariant, not left to drift.
-
----
-
-## Parallel Safety
-
-> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
-
-| Group | Tasks | Shared Files |
-|-------|-------|--------------|
-| 🔴 | Task 2, Task 3 | `ingest/scripts/generate_data_targets.py` |
-
-Tasks with no color badge have no file conflicts — safe to parallelize freely.

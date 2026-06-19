@@ -1,7 +1,6 @@
 # Highlighter Reach (R0 + R1 + R4) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or
-> **Recommended model:** 🧠 Opus — 8 tasks, 20 files, keywords: migration, architecture
 > superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for
 > tracking.
 

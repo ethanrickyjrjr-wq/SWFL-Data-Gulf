@@ -1,7 +1,5 @@
 # env-swfl Flood-Logic Restructure
 
-> **Recommended model:** ⚡ Sonnet — 9 files, keywords: migration, redesign
-
 **Date:** 2026-05-19
 **Author:** Opus 4.7 (planning) — wins head-to-head against independent analysis
 **Status:** APPROVED 2026-05-19 — executing Group B → C → D in sequence. Group C blocked until Group B renders clean.

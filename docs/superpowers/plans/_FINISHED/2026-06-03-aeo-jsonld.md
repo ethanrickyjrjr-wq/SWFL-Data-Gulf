@@ -1,7 +1,6 @@
 # AEO JSON-LD Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** ⚡ Sonnet — keywords: schema, architecture
 
 **Goal:** Add `Dataset` + `FAQPage` JSON-LD to brain report pages and `Place` + `FAQPage` to corridor drill-down pages so AI engines (Claude, Perplexity, ChatGPT) cite swfldatagulf.com organically on SWFL real estate and economic queries.
 
@@ -27,7 +26,7 @@
 **Files:**
 
 - Create: `lib/jsonld.ts`
-- 🔴 Create: `lib/jsonld.test.ts`
+- Create: `lib/jsonld.test.ts`
 
 - [ ] **Step 1: Write the failing tests for `brainJsonLd`**
 
@@ -339,7 +338,7 @@ git commit -m "feat(aeo): add brainJsonLd + corridorJsonLd helpers"
 
 **Files:**
 
-- 🔴 Modify: `lib/jsonld.test.ts`
+- Modify: `lib/jsonld.test.ts`
 
 - [ ] **Step 1: Add corridor tests to `lib/jsonld.test.ts`**
 
@@ -617,15 +616,3 @@ node scripts/safe-push.mjs
 - `DisplayBrain` and `CorridorNormalized` types used consistently ✅
 
 **No placeholders:** All steps contain complete code. ✅
-
----
-
-## Parallel Safety
-
-> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
-
-| Group | Tasks | Shared Files |
-|-------|-------|--------------|
-| 🔴 | Task 1, Task 2 | `lib/jsonld.test.ts` |
-
-Tasks with no color badge have no file conflicts — safe to parallelize freely.

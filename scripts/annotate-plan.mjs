@@ -21,6 +21,7 @@ const PLAN_ROOTS = ["docs/superpowers/plans", "FINAL BOSS"];
 function collectMdFiles(dir) {
   const results = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "_FINISHED") continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) results.push(...collectMdFiles(full));
     else if (entry.name.endsWith(".md")) results.push(full);

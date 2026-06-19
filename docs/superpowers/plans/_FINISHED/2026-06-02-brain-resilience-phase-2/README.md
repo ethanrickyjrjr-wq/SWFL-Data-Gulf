@@ -1,7 +1,6 @@
 # Brain Resilience System — Phase 2+3+5 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 6 tasks, keywords: refactor, schema, architecture
 
 **Goal:** Make the CLI build walk non-fatal under `--resilient`, thread the degraded-upstream set through `harvestUpstreams` to populate `BrainOutput.degraded_inputs`, and render a compact `(Label · Date)` token in tier-1/2 speaker output.
 
@@ -533,7 +532,7 @@ git commit -m "feat(resilient): Phase 2 resilient-build lib — types, buildOne,
 
 **Files:**
 
-- 🔴 Modify: `refinery/cli.mts`
+- Modify: `refinery/cli.mts`
 
 The current cli.mts `runPipeline` function (~lines 60–128) takes `opts: { dryRun: boolean; strict: boolean }` and calls `outputStage(events, pack, fragments, { dryRun: opts.dryRun })`. The main build walk (~lines 163–216) currently hard-throws on a missing upstream at ~lines 185–190.
 
@@ -726,7 +725,7 @@ git commit -m "feat(cli): --resilient flag — outcome-collection walk, degraded
 
 **Files:**
 
-- 🔴 Modify: `refinery/cli.mts`
+- Modify: `refinery/cli.mts`
 
 - [ ] **Step 1: Add report emission and exit code logic after the master block**
 
@@ -1112,15 +1111,3 @@ node scripts/safe-push.mjs
 ## Done-Test
 
 `bun test refinery/` fully green (906+ pass, 0 changed existing assertions) + `brains/_build-report.json` written on a `--resilient` non-dry-run + speaker renders `_(Label · Date)_` tokens when `degraded_inputs` is populated.
-
----
-
-## Parallel Safety
-
-> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
-
-| Group | Tasks | Shared Files |
-|-------|-------|--------------|
-| 🔴 | Task 3, Task 4 | `refinery/cli.mts` |
-
-Tasks with no color badge have no file conflicts — safe to parallelize freely.

@@ -1,7 +1,6 @@
 # BLS QCEW Pipeline Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 8 tasks, 9 files, keywords: schema, architecture
 
 **Goal:** Ship the BLS QCEW Tier 2 ingest pipeline and TS source connector that outputs `labor-swfl-summary` — private-sector vs total wages and employment YoY deltas for Florida, Lee County, and Collier County.
 
@@ -68,8 +67,8 @@ git commit -m "feat(bls-qcew): scaffold package skeleton + FIPS constants"
 **Files:**
 
 - Create: `ingest/tests/__init__.py` (if it doesn't exist — empty)
-- 🔴 Create: `ingest/tests/test_bls_qcew.py`
-- 🔴 Create: `ingest/pipelines/bls_qcew/resources.py` (stub — key function only)
+- Create: `ingest/tests/test_bls_qcew.py`
+- Create: `ingest/pipelines/bls_qcew/resources.py` (stub — key function only)
 
 The surrogate key uniquely identifies one ownership×industry×area×period row. dlt uses it for merge idempotency so re-runs don't duplicate rows.
 
@@ -156,7 +155,7 @@ Expected: `3 passed`
 
 **Files:**
 
-- 🔴 Modify: `ingest/tests/test_bls_qcew.py` (append 3 tests)
+- Modify: `ingest/tests/test_bls_qcew.py` (append 3 tests)
 - Create: `ingest/pipelines/bls_qcew/pipeline.py` (detection function only)
 
 QCEW lags ~5–6 months. The detector probes the BLS API backward from the previous calendar quarter until it gets a non-empty JSON array (max 6 attempts). `_now_year`/`_now_month` are test injection points to avoid datetime coupling.
@@ -313,7 +312,7 @@ Expected: `3 passed`
 
 **Files:**
 
-- 🔴 Modify: `ingest/pipelines/bls_qcew/resources.py` (replace stub with full implementation)
+- Modify: `ingest/pipelines/bls_qcew/resources.py` (replace stub with full implementation)
 
 The BLS QCEW JSON API returns all values as strings. `_coerce_int` handles empty strings, spaces, and commas from the API before dlt writes bigint columns.
 
@@ -1483,15 +1482,3 @@ After dlt ingest runs against live Supabase:
 1. Apply `docs/sql/bls_qcew_grant.sql` in the Supabase SQL editor
 2. Run `REFINERY_SOURCE=live npx tsx refinery/sources/bls-qcew-source.mts` — confirm live data shape matches fixture shape
 3. Wire `blsQcewSource` into `macro-swfl` pack in a follow-on sprint
-
----
-
-## Parallel Safety
-
-> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
-
-| Group | Tasks | Shared Files |
-|-------|-------|--------------|
-| 🔴 | Task 2, Task 3, Task 4 | `ingest/tests/test_bls_qcew.py`, `ingest/pipelines/bls_qcew/resources.py` |
-
-Tasks with no color badge have no file conflicts — safe to parallelize freely.

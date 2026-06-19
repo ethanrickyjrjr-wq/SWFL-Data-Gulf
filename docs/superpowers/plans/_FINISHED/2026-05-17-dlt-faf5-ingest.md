@@ -1,7 +1,6 @@
 # FAF5 dlt Ingest Pipeline — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 7 tasks, 8 files, keywords: schema, architecture
 
 **Goal:** Build a three-resource dlt pipeline that downloads FAF5 freight flow data from ORNL, filters to Florida-zone rows, and writes `faf_flows`, `faf_zone_lookup`, and `faf_sctg_lookup` into the `data_lake` dataset on Supabase Postgres.
 

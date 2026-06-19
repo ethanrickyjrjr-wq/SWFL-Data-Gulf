@@ -1,7 +1,5 @@
 # Lehigh Acres → Fort Myers / Naples parity — parallel agent sprint (AUDITED)
 
-> **Recommended model:** ⚡ Sonnet — keywords: migration
-
 **Status:** brief for execution, not a status board (RULE 2). Open obligations live in the
 `checks` ledger, never as ⬜/✅ here. Audited 2026-06-06 against live code + DB + git — every
 claim below was re-verified this session, not inherited. Corrections from the audit are marked

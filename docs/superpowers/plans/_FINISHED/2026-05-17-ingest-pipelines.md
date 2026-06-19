@@ -1,7 +1,6 @@
 # Ingest Pipelines Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 12 tasks, 27 files, keywords: schema, architecture
 
 **Goal:** Ship four new ingest pipelines (census_cbp Tier 2, fema/leepa/fdot Tier 1) + TS CBP source connector that extends macro-florida with real Census business-sector data.
 
