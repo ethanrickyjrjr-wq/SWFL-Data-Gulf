@@ -1,0 +1,128 @@
+/**
+ * change-evaluator — pure significance evaluator for metric items.
+ *
+ * Compares a filed snapshot value against the current brain value and returns
+ * a SignificantChange when the delta exceeds the slug's registry threshold.
+ * Pure: no DB, no I/O, no Date/random — directly unit-testable.
+ */
+
+import type { SignificantChange, SignificanceRegistry } from "./types";
+
+/**
+ * Parse a formatted metric value string to a number.
+ * Handles common SWFL brain output formats:
+ *   "$1,750" → 1750   |   "-3.5% YoY" → -3.5   |   "5.25%" → 5.25
+ *   "312" → 312        |   "14,293" → 14293
+ * Returns null when the string cannot be parsed as a finite number.
+ */
+export function parseNumeric(raw: string): number | null {
+  const cleaned = raw
+    .replace(/[$,]/g, "")
+    .replace(/\s*(YoY|MoM|sqft|lbs|tons|per\s+\w+|\/\w+)\s*/gi, "")
+    .replace(/%$/, "")
+    .trim();
+  const n = parseFloat(cleaned);
+  return isFinite(n) ? n : null;
+}
+
+function directionWord(delta: number): string {
+  if (delta > 0) return "rose";
+  if (delta < 0) return "dropped";
+  return "unchanged";
+}
+
+function formatAbsDelta(absDelta: number, unit?: string): string {
+  if (unit === "basis points") {
+    return `${Math.round(absDelta * 100)}bps`;
+  }
+  const formatted = absDelta % 1 === 0 ? absDelta.toFixed(0) : absDelta.toFixed(2);
+  return unit ? `${formatted} ${unit}` : formatted;
+}
+
+function buildDescription(
+  delta: number,
+  thresholdType: "absolute_change" | "percent_change",
+  unit?: string,
+): string {
+  const dir = directionWord(delta);
+  if (delta === 0) return dir;
+  const abs = Math.abs(delta);
+  if (thresholdType === "percent_change") {
+    return `${dir} ${abs.toFixed(1)}%`;
+  }
+  return `${dir} ${formatAbsDelta(abs, unit)}`;
+}
+
+/**
+ * Evaluate whether the move from prevValue → currValue for the given slug
+ * clears the significance threshold defined in the registry.
+ *
+ * @param slug        Brain output slug (key into registry)
+ * @param label       Human-readable metric label (for the returned shape)
+ * @param prevValue   Snapshot value string from the filed metric item
+ * @param currValue   Current brain value string
+ * @param registry    Loaded from ingest/significance-registry.yaml
+ * @returns SignificantChange when threshold exceeded, null otherwise
+ */
+export function evaluateChange(
+  slug: string,
+  label: string,
+  prevValue: string,
+  currValue: string,
+  registry: SignificanceRegistry,
+): SignificantChange | null {
+  const entry = registry[slug] ?? registry["_default"];
+  if (!entry) return null;
+
+  const { threshold_type, threshold, monitored_transitions, impact_weight, unit } = entry;
+
+  // ── State change ────────────────────────────────────────────────────────────
+  if (threshold_type === "state_change") {
+    const transition = `${prevValue}→${currValue}`;
+    if (!monitored_transitions?.includes(transition)) return null;
+    return {
+      slug,
+      label,
+      previous_value: prevValue,
+      current_value: currValue,
+      delta_description: `changed from ${prevValue} to ${currValue}`,
+      signal_strength: 1.0,
+      impact_weight,
+      priority: impact_weight,
+    };
+  }
+
+  // ── Numeric evaluation ──────────────────────────────────────────────────────
+  if (threshold === undefined) return null;
+
+  const prev = parseNumeric(prevValue);
+  const curr = parseNumeric(currValue);
+  if (prev === null || curr === null) return null;
+
+  let delta: number;
+  let signal_strength: number;
+
+  if (threshold_type === "percent_change") {
+    // Guard: can't compute relative change from zero
+    if (prev === 0) return null;
+    delta = ((curr - prev) / Math.abs(prev)) * 100;
+    signal_strength = Math.abs(delta) / threshold;
+  } else {
+    // absolute_change
+    delta = curr - prev;
+    signal_strength = Math.abs(delta) / threshold;
+  }
+
+  if (signal_strength < 1.0) return null;
+
+  return {
+    slug,
+    label,
+    previous_value: prevValue,
+    current_value: currValue,
+    delta_description: buildDescription(delta, threshold_type, unit),
+    signal_strength,
+    impact_weight,
+    priority: signal_strength * impact_weight,
+  };
+}

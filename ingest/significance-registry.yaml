@@ -1,0 +1,357 @@
+# Significance registry — per-slug thresholds for the change evaluator.
+#
+# Three threshold_type values:
+#   absolute_change  — fires when |curr - prev| >= threshold (use for rates, indexes, %)
+#   percent_change   — fires when |(curr-prev)/prev| * 100 >= threshold (use for counts, $)
+#   state_change     — fires when the transition is in monitored_transitions
+#
+# impact_weight: 1–10 (how consequential a move at-threshold is to a CRE/RE project)
+# unit: optional, shapes the delta_description ("rose 25bps" vs "rose 0.25")
+#
+# _default: catch-all for any slug not listed here. threshold 99999 = never fires.
+# Rule: unregistered slugs are SILENT. Add a slug here to enable its nudge.
+
+_default:
+  threshold_type: percent_change
+  threshold: 99999
+  impact_weight: 1
+
+# ─── Macro rates ──────────────────────────────────────────────────────────────
+
+freshness_mortgage_30yr_fixed_pct:
+  threshold_type: absolute_change
+  threshold: 0.25
+  impact_weight: 10
+  unit: "percentage points"
+
+sofr_rate:
+  threshold_type: absolute_change
+  threshold: 0.25
+  impact_weight: 9
+  unit: "percentage points"
+
+cpi_yoy:
+  threshold_type: absolute_change
+  threshold: 0.5
+  impact_weight: 9
+  unit: "percentage points"
+
+fl_laus_unemployment_rate:
+  threshold_type: absolute_change
+  threshold: 0.5
+  impact_weight: 8
+  unit: "percentage points"
+
+# ─── Housing — SWFL aggregate ─────────────────────────────────────────────────
+
+housing_median_sale_price_swfl:
+  threshold_type: percent_change
+  threshold: 5.0
+  impact_weight: 9
+
+swfl_median_sale_price:
+  threshold_type: percent_change
+  threshold: 5.0
+  impact_weight: 9
+
+housing_months_of_supply_swfl:
+  threshold_type: percent_change
+  threshold: 15.0
+  impact_weight: 7
+
+housing_sold_above_list_pct_swfl:
+  threshold_type: absolute_change
+  threshold: 3.0
+  impact_weight: 7
+  unit: "percentage points"
+
+swfl_sold_above_list:
+  threshold_type: absolute_change
+  threshold: 3.0
+  impact_weight: 7
+  unit: "percentage points"
+
+housing_off_market_in_two_weeks_pct_swfl:
+  threshold_type: absolute_change
+  threshold: 5.0
+  impact_weight: 6
+  unit: "percentage points"
+
+swfl_off_market_two_weeks:
+  threshold_type: absolute_change
+  threshold: 5.0
+  impact_weight: 6
+  unit: "percentage points"
+
+# ─── Housing — county YoY rates (already percentages → absolute_change) ───────
+
+lee_median_sale_price_yoy:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 8
+  unit: "percentage points"
+
+collier_median_sale_price_yoy:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 8
+  unit: "percentage points"
+
+median_sale_price_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 8
+  unit: "percentage points"
+
+lee_months_of_supply:
+  threshold_type: percent_change
+  threshold: 15.0
+  impact_weight: 6
+
+collier_months_of_supply:
+  threshold_type: percent_change
+  threshold: 15.0
+  impact_weight: 6
+
+lee_homes_sold_per_year:
+  threshold_type: percent_change
+  threshold: 10.0
+  impact_weight: 7
+
+collier_homes_sold_per_year:
+  threshold_type: percent_change
+  threshold: 10.0
+  impact_weight: 7
+
+# ─── Home values (ZHVI) ───────────────────────────────────────────────────────
+
+home_value_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 8
+  unit: "percentage points"
+
+home_value_yoy_pct_regional_median:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 7
+  unit: "percentage points"
+
+fhfa_cape_coral_msa_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 8
+  unit: "percentage points"
+
+fhfa_naples_msa_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 8
+  unit: "percentage points"
+
+fhfa_fl_state_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 7
+  unit: "percentage points"
+
+# ─── Rentals (ZORI) ───────────────────────────────────────────────────────────
+
+rental_rent_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 7
+  unit: "percentage points"
+
+rental_rent_yoy_pct_regional_median:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 6
+  unit: "percentage points"
+
+# ─── Seller stress ────────────────────────────────────────────────────────────
+
+seller_stress_score_swfl:
+  threshold_type: absolute_change
+  threshold: 5.0
+  impact_weight: 8
+
+seller_stress_delistings_rate_swfl:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+seller_stress_price_drops_rate_swfl:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+seller_stress_cancellation_rate_swfl:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 6
+  unit: "percentage points"
+
+# ─── CRE ──────────────────────────────────────────────────────────────────────
+
+cap_rate:
+  threshold_type: absolute_change
+  threshold: 0.25
+  impact_weight: 8
+  unit: "percentage points"
+
+cap_rate_median:
+  threshold_type: absolute_change
+  threshold: 0.25
+  impact_weight: 8
+  unit: "percentage points"
+
+vacancy_rate:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+vacancy_rate_median:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+vacancy_rate_marketbeat_swfl:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+asking_rent_psf:
+  threshold_type: percent_change
+  threshold: 5.0
+  impact_weight: 7
+
+asking_rent_psf_median:
+  threshold_type: percent_change
+  threshold: 5.0
+  impact_weight: 7
+
+asking_rent_nnn_marketbeat_swfl:
+  threshold_type: percent_change
+  threshold: 5.0
+  impact_weight: 7
+
+# ─── Labor ────────────────────────────────────────────────────────────────────
+
+laus_lee_unemployment_rate:
+  threshold_type: absolute_change
+  threshold: 0.5
+  impact_weight: 8
+  unit: "percentage points"
+
+lee_unemployment_rate:
+  threshold_type: absolute_change
+  threshold: 0.5
+  impact_weight: 8
+  unit: "percentage points"
+
+laus_collier_unemployment_rate:
+  threshold_type: absolute_change
+  threshold: 0.5
+  impact_weight: 8
+  unit: "percentage points"
+
+collier_unemployment_rate:
+  threshold_type: absolute_change
+  threshold: 0.5
+  impact_weight: 8
+  unit: "percentage points"
+
+lee_private_wage_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+collier_private_wage_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+qcew_lee_private_avg_wkly_wage_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+qcew_collier_private_avg_wkly_wage_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+# ─── Economy / Tourism ────────────────────────────────────────────────────────
+
+swfl_taxable_sales_yoy_pct:
+  threshold_type: absolute_change
+  threshold: 3.0
+  impact_weight: 7
+  unit: "percentage points"
+
+yoy_delta_pct:
+  threshold_type: absolute_change
+  threshold: 3.0
+  impact_weight: 6
+  unit: "percentage points"
+
+rsw_yoy_pct_change:
+  threshold_type: absolute_change
+  threshold: 5.0
+  impact_weight: 6
+  unit: "percentage points"
+
+rsw_trailing_12mo_total_passengers_yoy:
+  threshold_type: absolute_change
+  threshold: 5.0
+  impact_weight: 6
+  unit: "percentage points"
+
+# ─── Safety / Flood ───────────────────────────────────────────────────────────
+
+safety_property_crime_per_1k_swfl:
+  threshold_type: absolute_change
+  threshold: 1.0
+  impact_weight: 7
+
+safety_property_crime_yoy_pct_swfl:
+  threshold_type: absolute_change
+  threshold: 5.0
+  impact_weight: 7
+  unit: "percentage points"
+
+flood_risk_pct:
+  threshold_type: absolute_change
+  threshold: 2.0
+  impact_weight: 7
+  unit: "percentage points"
+
+# ─── Commercial permits ───────────────────────────────────────────────────────
+
+commercial_permits_count:
+  threshold_type: percent_change
+  threshold: 20.0
+  impact_weight: 6
+
+commercial_permits_value_usd:
+  threshold_type: percent_change
+  threshold: 15.0
+  impact_weight: 6
+
+# ─── Franchise / sector survival ─────────────────────────────────────────────
+
+overall_survival_rate:
+  threshold_type: absolute_change
+  threshold: 3.0
+  impact_weight: 7
+  unit: "percentage points"

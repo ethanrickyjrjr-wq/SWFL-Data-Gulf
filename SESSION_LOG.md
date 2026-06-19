@@ -1,3 +1,12 @@
+## 2026-06-19 (main) — feat(phase2ab): significance registry + pure change evaluator
+
+- **`ingest/significance-registry.yaml`** — NEW: ~50 slugs registered across macro rates, housing, CRE, labor, economy, safety, flood, permits, franchise. Three threshold types: `absolute_change` / `percent_change` / `state_change`. `_default` silences all unregistered slugs (no false-positive noise).
+- **`lib/signals/types.ts`** — NEW: `RegistryEntry`, `SignificanceRegistry`, `SignificantChange` interfaces. Pure data shapes, no I/O.
+- **`lib/signals/change-evaluator.ts`** — NEW: `parseNumeric()` + `evaluateChange()` pure function. Returns `SignificantChange | null`; `signal_strength = |delta|/threshold`; human-readable `delta_description` ("rose 50bps", "dropped 17.9%", "changed from active to pending").
+- **`lib/signals/change-evaluator.test.ts`** — NEW: 21 tests covering all three threshold types + edge cases. 21/0.
+- **Gates:** `bun test lib/signals` → 21/0.
+- **Next:** Phase 2C (wire into ProjectDigest) + Phase 2D (brain value lookup) + Phase 2E (prompt engine).
+
 ## 2026-06-19 (main) — chore(graphify): add lib_module + app_component node types
 
 - **`scripts/graphify-app-nodes.mjs`** — two new node types: `lib_module` (146 nodes — all non-test lib/ files, the entire business logic layer previously dark) + `app_component` (47 nodes — co-located tsx in app/ that aren't page/layout/error). New `imports` edge relation wires any `@/lib/…` import to its lib_module node. `fileToNodeId()` extended to source edges FROM lib files and co-located app components. `queries` edge now fires from lib_module nodes directly (was hook-fallback only). Graph: 577 → 771 nodes, 541 → 865 edges.
