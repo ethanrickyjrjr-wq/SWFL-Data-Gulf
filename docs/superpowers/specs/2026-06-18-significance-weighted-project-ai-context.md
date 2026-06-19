@@ -382,13 +382,13 @@ A cron that fires 60 minutes before any `email_schedules` row whose `next_run_at
 **Verification ladder (per stale metric item):**
 
 ```
-TIER 1: 2 independent Firecrawl searches agree within tolerance
+TIER 1: 2 independent crawl4ai searches agree within tolerance
    → search "[metric label] [scope] [current month/year] site:*.gov OR site:freddiemac.com OR site:nar.realtor OR site:redfin.com OR site:zillow.com"
    → extract numeric value from each result
    → if both values within category tolerance → USE IT (source: "crawl_consensus")
    → write value + source URLs to a verification_result
 
-TIER 2: 1 Firecrawl result + 1 Haiku confirmation
+TIER 2: 1 crawl4ai result + 1 Haiku confirmation
    → take the single crawl result
    → Haiku prompt: "Does this page confirm [metric label] for [scope] is approximately [value] as of [date]? Answer YES:[value] or NO."
    → if YES and value within tolerance → USE IT (source: "crawl_haiku")
@@ -472,7 +472,7 @@ _default:
 
 ---
 
-#### 3C-3. Verification sources (what Firecrawl searches)
+#### 3C-3. Verification sources (what crawl4ai searches)
 
 **New file:** `lib/email/verification-sources.ts`
 
@@ -493,7 +493,7 @@ Reputable source domain allowlist (not vendor-specific — any authoritative sou
 - Financial: `freddiemac.com`, `bankrate.com`, `mortgagenewsdaily.com`, `wsj.com/market-data`
 - Local news (SWFL): `news-press.com`, `naplesnews.com`, `bizjournals.com/southwest-florida`
 
-Two Firecrawl searches using different queries from this list. Parsed with a lightweight numeric extraction regex (+ optional Haiku-assist for messy HTML).
+Two crawl4ai searches using different queries from this list. Parsed with a lightweight numeric extraction regex (+ optional Haiku-assist for messy HTML).
 
 ---
 
@@ -970,7 +970,7 @@ NEARBY EVENTS (scored by proximity + brand significance):
    - `ingest/data-verification-tolerances.yaml` (data file, zero risk)
    - `docs/sql/20260619_data_readiness_alerts.sql` migration → apply to prod
    - `lib/email/verification-sources.ts` — query generator + source allowlist (pure)
-   - `lib/email/data-readiness.ts` — verification ladder (Firecrawl → Haiku → Sonnet → last-known)
+   - `lib/email/data-readiness.ts` — verification ladder (crawl4ai → Haiku → Sonnet → last-known)
    - `app/api/cron/data-readiness/route.ts` — T-60 preflight cron endpoint
    - `app/api/deliverables/[id]/blast/route.ts` — in-memory refresh + pre-computed result lookup before render
 9. **Phase 4A** — `ingest/brand-tier-registry.yaml` (data file, no code)
