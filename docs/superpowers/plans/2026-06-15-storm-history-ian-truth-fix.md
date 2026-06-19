@@ -1,6 +1,7 @@
 # storm-history-swfl Hurricane Ian Truth Fix — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 6 tasks, 16 files, keywords: architecture
 
 **Goal:** Make Hurricane Ian (and all NOAA zone-logged tropical cyclones) appear correctly in `storm-history-swfl`, fixing the "ZERO hurricane-force / last billion-dollar = 2004" lie (A1) and surfacing the storm's proper name (A2).
 
@@ -181,8 +182,8 @@ zone types; guard the destructive replace with a hurricane-presence floor."
 ## Task 2: Source connector — pure helpers `normalizeCounty` + `extractStormName`
 
 **Files:**
-- Modify: `refinery/sources/storm-history-source.mts`
-- Test: `refinery/sources/storm-history-source.test.mts`
+- 🔴 Modify: `refinery/sources/storm-history-source.mts`
+- 🔴 Test: `refinery/sources/storm-history-source.test.mts`
 
 - [ ] **Step 1: Write the failing tests** — append to `storm-history-source.test.mts` (extend the existing import on line 7 to also pull the two new exports):
 
@@ -281,8 +282,8 @@ NOAA narratives; wired into the aggregator in the next commit."
 ## Task 3: Regenerate the fixture parquet (produce file; commit deferred to Task 4)
 
 **Files:**
-- Create: `ingest/duckdb_pipelines/storm_history_swfl/make_fixture.py`
-- Produce (do NOT commit yet): `refinery/__fixtures__/storm-history-swfl.sample.parquet`
+- 🔴 Create: `ingest/duckdb_pipelines/storm_history_swfl/make_fixture.py`
+- 🔴 Produce (do NOT commit yet): `refinery/__fixtures__/storm-history-swfl.sample.parquet`
 
 > Why deferred commit: the new fixture contains zone rows that the *old* aggregator mis-handles (it would put "COASTAL LEE" into `counties_covered`, reddening the existing source test). The fixture must land in the same commit as the Task-4 aggregator fix. Generate it here; stage it in Task 4.
 
@@ -355,15 +356,15 @@ Expected: `Ian hurricane rows: 6` (or more), fixture file rewritten. The file is
 ## Task 4: Atomic truth-fix + slug rename (source aggregation + pack + vocab + constitution + fixture + tests)
 
 **Files:**
-- Modify: `refinery/sources/storm-history-source.mts`
-- Modify: `refinery/sources/storm-history-source.test.mts`
+- 🔴 Modify: `refinery/sources/storm-history-source.mts`
+- 🔴 Modify: `refinery/sources/storm-history-source.test.mts`
 - Modify: `refinery/packs/storm-history-swfl.mts`
 - Modify: `refinery/packs/storm-history-swfl.test.mts`
 - Modify: `refinery/vocab/brain-vocabulary.json`
 - Modify: `refinery/constitution/real-estate.mts`
 - Modify: `refinery/constitution/real-estate.test.mts`
-- Stage: `refinery/__fixtures__/storm-history-swfl.sample.parquet` (from Task 3)
-- Create: `ingest/duckdb_pipelines/storm_history_swfl/make_fixture.py` (from Task 3)
+- 🔴 Stage: `refinery/__fixtures__/storm-history-swfl.sample.parquet` (from Task 3)
+- 🔴 Create: `ingest/duckdb_pipelines/storm_history_swfl/make_fixture.py` (from Task 3)
 
 ### 4A — Source connector aggregation
 
@@ -713,3 +714,15 @@ Then watch the run; confirm the volume guard passes (logs `staged rows … hurri
 **Placeholder scan:** none — every step shows the actual code/command/expected output.
 
 **Type consistency:** `swflDistinctTropicalCyclones10yr` (snapshot), `distinct_tropical_cyclones_10yr` (corpus), `storm_tropical_cyclones_10yr` (slug), `directionFromTropicalCyclones`, `STORM_TROPICAL_CYCLONE_METRIC`/`_THRESHOLD`, `last_billion_dollar_event_name` — used consistently across source, pack, vocab, constitution, and tests. `normalizeCounty`/`extractStormName` defined in Task 2, consumed in Task 4A.
+
+---
+
+## Parallel Safety
+
+> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
+
+| Group | Tasks | Shared Files |
+|-------|-------|--------------|
+| 🔴 | Task 2, Task 3, Task 4 | `refinery/sources/storm-history-source.mts`, `refinery/sources/storm-history-source.test.mts`, `ingest/duckdb_pipelines/storm_history_swfl/make_fixture.py`, `refinery/__fixtures__/storm-history-swfl.sample.parquet` |
+
+Tasks with no color badge have no file conflicts — safe to parallelize freely.

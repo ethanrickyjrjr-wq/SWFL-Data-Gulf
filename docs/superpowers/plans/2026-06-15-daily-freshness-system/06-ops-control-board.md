@@ -1,5 +1,7 @@
 # 06 — Ops Control Board (in the **swfldatagulf-ops** repo)
 
+> **Recommended model:** ⚡ Sonnet — keywords: schema
+
 > Build file for the Daily Freshness System. **Read `README.md` §0 (two corrections matter here) + the memory `feedback_ops-page-belongs-in-ops-repo`.** The control board is the one place a human sees the whole machine green/red. It lives in the **separate** ops repo — building it in brain-platform is the documented catastrophic mistake.
 
 **Model:** Sonnet · **Repo:** `C:\Users\ethan\dev\swfldatagulf-ops` (App Router, Next ^15.1.6, React ^19, **npm**, deploys `vercel --prod`) · **Wave:** 2 · **Depends:** 02.

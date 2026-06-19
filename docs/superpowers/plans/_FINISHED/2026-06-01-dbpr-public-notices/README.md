@@ -1,6 +1,7 @@
 # DBPR Public Notices — SWFL Ingest Pipeline
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 6 tasks, keywords: migration, schema, architecture
 
 **Goal:** Scrape the DBPR public notices index weekly, extract PDF links for SWFL-region counties, parse notice metadata from each PDF, generate a Claude summary, and upsert into `public.dbpr_public_notices`.
 

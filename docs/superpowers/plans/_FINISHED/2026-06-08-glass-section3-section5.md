@@ -1,6 +1,7 @@
 # Glass §3 + §5 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 9 tasks, 7 files, keywords: schema, architecture
 
 **Goal:** Build Pane 3 "The Scoreboard" (skill-over-time line + calibration scatter) and Pane 4 "Shopping List" + Pane 1 "The Flow" (lean-strip) into the `/glass` page in `swfldatagulf-ops`, replacing the Wave 2 placeholders.
 

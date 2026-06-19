@@ -1,6 +1,7 @@
 # Data-driven `email-report.html` Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** ⚡ Sonnet — 7 tasks, 8 files, keywords: architecture
 
 **Goal:** Restore the live per-ZIP activation email (broken by `9f976f4`'s static mockup) by making `email-report.html` data-driven via a repeat-block renderer, while keeping the new dark design in the `.html`.
 
@@ -368,7 +369,7 @@ git commit -m "feat(email): data-driven email-report.html (repeat blocks + DELTA
 
 **Files:**
 - Modify: `lib/email/activation/render.ts`
-- Test (existing, currently failing): `lib/email/activation/render.test.ts`
+- 🔴 Test (existing, currently failing): `lib/email/activation/render.test.ts`
 
 - [ ] **Step 1: Run the existing tests to confirm the 4 failures**
 
@@ -554,7 +555,7 @@ git commit -m "test(email): fix renderCallout highlight by referencing SWFL_THEM
 ## Task 6: No-fabrication tripwire + full suite green
 
 **Files:**
-- Modify: `lib/email/activation/render.test.ts`
+- 🔴 Modify: `lib/email/activation/render.test.ts`
 
 - [ ] **Step 1: Add the tripwire test**
 
@@ -650,3 +651,15 @@ Per operator policy (never push without explicit confirmation): present the comm
 - **Spec coverage:** §1 renderer → Task 1; §2 wrapper → Task 2; §3 template → Task 3; §4 render.ts → Task 4; §5 unsubscribe invariant → preserved in Task 4 Step 5 (`ensureUnsubscribeToken` kept, not in template); §6 callout fix → Task 5; Testing (repeat, tripwire, 5 green) → Tasks 1/6; Parked checks → Task 7. All covered.
 - **Placeholder scan:** none — every code step shows full code.
 - **Type consistency:** `expandRepeats(html, repeats)` signature identical in Task 1 def and Task 2 usage; `repeats: { hero, metrics, reads }` keys match the template's `repeat:hero|metrics|reads`; per-row token names (`HERO_VALUE/HERO_LABEL`, `M_LABEL/M_VALUE`, `READ_HTML`) match between Task 3 template and Task 4 `render.ts`; tokens (`PLACE/COUNTY/ZIP/FRESHNESS_TOKEN/CTA_URL/REPORT_URL`) match template and render.ts; `deltaBlock(delta, accent)` signature matches its single call site.
+
+---
+
+## Parallel Safety
+
+> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
+
+| Group | Tasks | Shared Files |
+|-------|-------|--------------|
+| 🔴 | Task 4, Task 6 | `lib/email/activation/render.test.ts` |
+
+Tasks with no color badge have no file conflicts — safe to parallelize freely.

@@ -1,5 +1,7 @@
 # Step 01 — Verify substrate + fix the contract (Opus)
 
+> **Recommended model:** ⚡ Sonnet — keywords: migration, schema
+
 **Check:** `email_scoped_content` (shared) · **Owner:** Opus · **Risk:** low (read-only verify + a type def)
 
 ## Goal

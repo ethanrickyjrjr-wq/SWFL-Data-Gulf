@@ -1,6 +1,7 @@
 # Collier Permits — crawl4ai Migration Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 6 tasks, 7 files, keywords: migration, schema, architecture
 
 **Goal:** Replace Firecrawl stealth + Spider residential in the Collier permits pipeline with crawl4ai UndetectedAdapter, using native browser file download to bypass the Akamai WAF on both the listing page and the XLSX binary.
 

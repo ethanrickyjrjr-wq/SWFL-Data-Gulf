@@ -1,6 +1,7 @@
 # Welcome-Arrival Phase 2 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 12 files, keywords: migration, schema, architecture
 
 **Goal:** Ship three tested, caller-free building blocks for the welcome-arrival flow — `enrichBrand` (Firecrawl `branding` → Haiku selection over the full color map), `buildArrivalUrl` (pure), and an un-grounded `/api/welcome/chat` explainer — and wire the `/welcome` stub to a live chat.
 

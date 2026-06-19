@@ -1,5 +1,7 @@
 # 01 — Daily Truth Engine **[SPINE]** (Wave 1)
 
+> **Recommended model:** ⚡ Sonnet — keywords: migration, schema, architecture
+
 > Build file for the Daily Freshness System. **Read `README.md` §0 (ledger), §2 (loop), §3a (the `daily_truth` schema this file defines).** This is the MOAT core: a **fallback cascade** (`Gemini → Firecrawl → Spider → Claude`) returns a number **+ its real source URL** in one normal-path call and loads it to the brain; the cascade is the **uptime failsafe**; the only integrity gate is **a real source URL present** (never memory; LittleBird denylisted); and an **anomaly check vs our OWN prior value** holds a suspiciously large day-over-day move for a second-source confirm before it reaches the brain.
 
 **Model:** Opus · **Repo:** brain-platform · **Wave:** 1 · **Depends:** 00 · **Ships in the SAME PR as 02 + 03** (brain-first gate).

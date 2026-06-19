@@ -1,6 +1,7 @@
 # DuckDB-on-Parquet Query Layer + NOAA Storm-History Pilot — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 14 tasks, 24 files, keywords: schema, architecture
 
 **Goal:** Ship `storm-history-swfl` end-to-end through a new DuckDB-as-ETL + Parquet-in-Storage + DuckDB-on-read pattern, without touching any existing dlt pipeline or shipped brain.
 

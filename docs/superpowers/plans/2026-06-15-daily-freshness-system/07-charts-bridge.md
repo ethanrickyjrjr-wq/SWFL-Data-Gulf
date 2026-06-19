@@ -1,5 +1,7 @@
 # 07 — Charts Bridge (fold into the EXISTING freshness branch)
 
+> **Recommended model:** ⚡ Sonnet
+
 > Build file for the Daily Freshness System. **Read `README.md` §3c (the locked `PulsePoint`/`MarketContext` contract) + §0 (three chart-anchor corrections).** This makes `/charts` stop reading "as of April 2026" by appending a fresher, **visually distinct dashed** "Weekly Pulse" point and putting a real dynamic freshness badge on every panel — plus the now-mandatory legal layer.
 
 **Model:** Opus (plumbing) + Sonnet (UI/legal, in a worktree) · **Repo:** brain-platform · **Branch:** `claude/swfl-data-freshness-pipeline-w6pyim` (tip `925e125`) · **Wave:** 1 (parallel) · **Depends:** —

@@ -1,5 +1,7 @@
 # 08 — ZIP Machine Core (Wave 1, independent)
 
+> **Recommended model:** ⚡ Sonnet
+
 > Build file for the Daily Freshness System. **Read `README.md` §3d (the `zip_stamp` signature) + the ZIP COLUMNS 3 GATES in CLAUDE.md (G1/G2/G3).** One scope-gated stamper that turns a site address or lat/lon into a SWFL `zip_code`, replacing three duplicated geocoders. Serves the broader ZIP-grain backlog the ops board tracks; independent of the pulse.
 
 **Model:** Opus · **Repo:** brain-platform · **Wave:** 1 (independent) · **Depends:** —

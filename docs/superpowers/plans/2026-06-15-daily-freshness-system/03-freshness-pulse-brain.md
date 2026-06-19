@@ -1,5 +1,7 @@
 # 03 — Freshness-Pulse Brain **[brain-first gate]** + ZIP machine (Wave 2)
 
+> **Recommended model:** ⚡ Sonnet — keywords: schema
+
 > Build file for the Daily Freshness System. **Read `README.md` §1.1 (gate), §3a (daily_truth), §3e (vocab slugs), and the §0 corrections — they re-point three reuse anchors this file depends on.** This brain is what makes the `daily_truth` table a *first-class Tier-2 citizen the brains reason over* (decision #1) rather than orphan substrate. It MUST ship in the **same PR** as file 01's table.
 
 **Model:** Opus · **Repo:** brain-platform · **Wave:** 2 · **Depends:** 01, 02 · **Same PR as 01 + 02.**

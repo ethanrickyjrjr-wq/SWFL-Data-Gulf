@@ -1,6 +1,7 @@
 # crawl4ai → Accela Port (lee_permits) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** ⚡ Sonnet — 7 tasks, keywords: architecture, redesign
 
 **Goal:** Replace Firecrawl with crawl4ai (UndetectedAdapter) for the Lee County Accela permit scrape, so `lee_permits` runs end-to-end locally again and lands correct rows in `data_lake.lee_building_permits`.
 
@@ -157,7 +158,7 @@ Write the four outcomes into `SESSION_LOG.md` before continuing. No commit (scra
 
 **Files:**
 - Create: `ingest/lib/crawl4ai_client.py`
-- Test: `ingest/tests/lib/test_crawl4ai_client.py`
+- 🔴 Test: `ingest/tests/lib/test_crawl4ai_client.py`
 
 - [ ] **Step 1: Write the failing test (fixture-HTML session smoke test)**
 
@@ -310,8 +311,8 @@ git commit -m "feat(ingest): add crawl4ai_client (Crawl4aiSession + fetch_many)"
 These are lee-specific (its selectors). Pure string functions → fully unit-testable without a browser.
 
 **Files:**
-- Modify: `ingest/pipelines/lee_permits/scraper.py` (add builders near the top, below imports)
-- Test: `ingest/tests/lib/test_crawl4ai_client.py` (add builder tests — co-located with the other crawl4ai tests)
+- 🔴 Modify: `ingest/pipelines/lee_permits/scraper.py` (add builders near the top, below imports)
+- 🔴 Test: `ingest/tests/lib/test_crawl4ai_client.py` (add builder tests — co-located with the other crawl4ai tests)
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -440,7 +441,7 @@ git commit -m "feat(lee_permits): crawl4ai JS builders (date search, pager, wait
 ## Task 4: Rewrite `fetch_permit_pages` to drive Accela via `Crawl4aiSession`
 
 **Files:**
-- Modify: `ingest/pipelines/lee_permits/scraper.py` — replace `fetch_permit_pages` (and delete `_base_search_actions`, `_extract_html`, the Firecrawl import usage in this fn). Keep `parse_page_count`, `_ACCELA_SEARCH_URL`, `_PAGER_*`.
+- 🔴 Modify: `ingest/pipelines/lee_permits/scraper.py` — replace `fetch_permit_pages` (and delete `_base_search_actions`, `_extract_html`, the Firecrawl import usage in this fn). Keep `parse_page_count`, `_ACCELA_SEARCH_URL`, `_PAGER_*`.
 
 - [ ] **Step 1: Replace the function body**
 
@@ -515,7 +516,7 @@ git commit -m "feat(lee_permits): fetch_permit_pages via crawl4ai session (pagin
 Pick **5a** (parallel) if Task 1 spike (d) PASSED; **5b** (sequential) if it FAILED. Default: 5a.
 
 **Files:**
-- Modify: `ingest/pipelines/lee_permits/scraper.py` — replace `enrich_rows_with_details` body. `parse_cap_detail_html` unchanged.
+- 🔴 Modify: `ingest/pipelines/lee_permits/scraper.py` — replace `enrich_rows_with_details` body. `parse_cap_detail_html` unchanged.
 
 - [ ] **Step 1 (5a — parallel, spike(d) passed): replace the body**
 
@@ -618,3 +619,15 @@ Note in `SESSION_LOG.md` whether the full multi-page + ~100-detail-page run hit 
 - **Spec coverage:** wiring (T2), js_code_before_wait order (T2/T4), Crawl4aiSession+fetch_many (T2), date readback-verify (T3), defined-marker pagination guard (T3 `page_changed_wait` + test), terminal conditions (T3/T4), pages-2..N loud timeout (T4), arun_many concurrency=5 (T2/T5), spike incl. window-survival + CapDetail addressability (T1), GHA-IP deferred (T6/T7). All present.
 - **Open dependency on spike:** Tasks 4/5 are written for the expected-pass path; T1 Step 3 documents the exact fallbacks if (a)/(b)/(d) fail. This is intentional, not a placeholder.
 - **Type consistency:** `Crawl4aiSession`, `.step(js_before=, wait_for=, js_only=)`, `fetch_many(concurrency=)`, `build_date_search_js`, `build_next_page_js`, `GRID_OR_TERMINAL_WAIT`, `page_changed_wait` — names identical across tasks.
+
+---
+
+## Parallel Safety
+
+> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
+
+| Group | Tasks | Shared Files |
+|-------|-------|--------------|
+| 🔴 | Task 2, Task 3, Task 4, Task 5 | `ingest/tests/lib/test_crawl4ai_client.py`, `ingest/pipelines/lee_permits/scraper.py` |
+
+Tasks with no color badge have no file conflicts — safe to parallelize freely.

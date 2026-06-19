@@ -1,5 +1,7 @@
 # /r/ Highlighter AI — live-testing iteration (2026-06-09)
 
+> **Recommended model:** ⚡ Sonnet
+
 Working doc for the in-page Highlighter on `/r/[slug]` reports (drag-select →
 popup → ask; `/api/converse` answer-brain grounded only by
 `lib/highlighter/grounding.ts`). Captures what was fixed from live testing, the

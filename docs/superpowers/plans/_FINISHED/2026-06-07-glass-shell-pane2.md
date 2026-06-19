@@ -1,6 +1,7 @@
 # The Glass — Shell + Pane 2 "The Calls" Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 7 tasks, keywords: migration, schema, architecture
 
 **Goal:** Build the `/glass` page in `swfldatagulf-ops` with a live Pane 2 rendering every open master prediction that carries a conditional claim, plus Wave-2 placeholders for the three remaining panes.
 

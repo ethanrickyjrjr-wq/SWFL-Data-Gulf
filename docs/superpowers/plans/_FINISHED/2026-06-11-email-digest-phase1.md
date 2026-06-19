@@ -1,6 +1,7 @@
 # Email Digest Phase 1 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 8 tasks, 9 files, keywords: schema, architecture, breaking
 
 > **REVISION 2026-06-11 (read before executing):**
 > 1. **HISTORICAL HOOK is CUT from V1.** The `historicalHook()` function returned a hardcoded string ("the last time 33908 DOM exceeded 75 days was Q3 2022…") — that is **invented data** and violates EMAIL.md Rule 4 + the platform's no-invention spine. The honest version needs historical ZIP-grain DOM data that is **not yet in the lake**. → Remove the HISTORICAL HOOK section from `DigestEmail.tsx` (section 7) and delete `historicalHook()` from `build-digest.mts`. Ship **7 sections**. Re-add only when historical rows exist and the value is **read, not written**.

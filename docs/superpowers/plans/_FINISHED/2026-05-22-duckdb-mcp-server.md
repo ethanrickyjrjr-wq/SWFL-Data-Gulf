@@ -1,6 +1,7 @@
 # DuckDB Lake MCP Server Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** ⚡ Sonnet — keywords: schema, architecture
 
 **Goal:** Add a local MCP server (`tools/lake-mcp-server.mts`) that lets Claude Code query the Tier 1 Parquet lake and Tier 2 Postgres `data_lake.*` interactively, without running a full refinery pack build.
 

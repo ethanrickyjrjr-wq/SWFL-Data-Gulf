@@ -1,6 +1,7 @@
 # pick-frames v2 + comment-block cleanup Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** ⚡ Sonnet — keywords: architecture
 
 **Goal:** Rewrite `pickFramesForData` to import from `chart-from-metrics.mts` (not duplicate it), return a single ranked best-match instead of a candidate array, and strip illegal multi-paragraph comment blocks from `pick-frames.ts` and `registry.ts`.
 

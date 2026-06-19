@@ -1,6 +1,7 @@
 # City Pulse SWFL Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Recommended model:** 🧠 Opus — 16 tasks, 17 files, 4 conflict groups, keywords: migration, schema, architecture
 
 **Goal:** Add a daily, city-grain current-events layer — a `city-pulse-swfl` reporter brain fed by a daily web-search ingest, distilled into a TTL'd `data_lake.city_pulse` table, wired as a `master` upstream.
 
@@ -105,8 +106,8 @@ git commit -m "feat(city-pulse): data_lake.city_pulse Tier-2 table migration"
 **Files:**
 
 - Create: `ingest/pipelines/city_pulse/__init__.py` (empty)
-- Create: `ingest/pipelines/city_pulse/pipeline.py`
-- Test: `ingest/pipelines/city_pulse/test_pipeline.py`
+- 🔴 Create: `ingest/pipelines/city_pulse/pipeline.py`
+- 🔴 Test: `ingest/pipelines/city_pulse/test_pipeline.py`
 
 - [ ] **Step 1: Write the failing test for the city list + slug**
 
@@ -230,8 +231,8 @@ git commit -m "feat(city-pulse): capture pipeline skeleton (CITIES + slug)"
 
 **Files:**
 
-- Modify: `ingest/pipelines/city_pulse/pipeline.py`
-- Test: `ingest/pipelines/city_pulse/test_pipeline.py`
+- 🔴 Modify: `ingest/pipelines/city_pulse/pipeline.py`
+- 🔴 Test: `ingest/pipelines/city_pulse/test_pipeline.py`
 
 - [ ] **Step 1: Write the failing test for `_extract_citations` and `build_record`**
 
@@ -371,8 +372,8 @@ git commit -m "feat(city-pulse): web_search capture call + citation extractor + 
 
 **Files:**
 
-- Create: `ingest/pipelines/city_pulse/distill.py`
-- Test: `ingest/pipelines/city_pulse/test_distill.py`
+- 🟡 Create: `ingest/pipelines/city_pulse/distill.py`
+- 🟡 Test: `ingest/pipelines/city_pulse/test_distill.py`
 
 - [ ] **Step 1: Write failing tests for TTL + dedup_key + normalization (pure functions)**
 
@@ -493,8 +494,8 @@ git commit -m "feat(city-pulse): distill helpers — TTL classes, dedup key, nor
 
 **Files:**
 
-- Modify: `ingest/pipelines/city_pulse/distill.py`
-- Test: `ingest/pipelines/city_pulse/test_distill.py`
+- 🟡 Modify: `ingest/pipelines/city_pulse/distill.py`
+- 🟡 Test: `ingest/pipelines/city_pulse/test_distill.py`
 
 - [ ] **Step 1: Write a failing test for `rows_from_extraction` (the pure post-processor)**
 
@@ -655,8 +656,8 @@ git commit -m "feat(city-pulse): distill LLM extraction + citation-drop enforcem
 
 **Files:**
 
-- Modify: `ingest/pipelines/city_pulse/distill.py`
-- Test: `ingest/pipelines/city_pulse/test_distill.py`
+- 🟡 Modify: `ingest/pipelines/city_pulse/distill.py`
+- 🟡 Test: `ingest/pipelines/city_pulse/test_distill.py`
 
 - [ ] **Step 1: Write a failing test for the INSERT SQL builder (`_insert_sql`)**
 
@@ -738,8 +739,8 @@ git commit -m "feat(city-pulse): distill Tier-2 upsert with ON CONFLICT dedup"
 
 **Files:**
 
-- Modify: `ingest/pipelines/city_pulse/distill.py`
-- Test: `ingest/pipelines/city_pulse/test_distill.py`
+- 🟡 Modify: `ingest/pipelines/city_pulse/distill.py`
+- 🟡 Test: `ingest/pipelines/city_pulse/test_distill.py`
 
 - [ ] **Step 1: Write a failing test for `_prune_sql`**
 
@@ -802,8 +803,8 @@ git commit -m "feat(city-pulse): prune expired Tier-2 rows (Tier-1 keeps the aud
 
 **Files:**
 
-- Modify: `ingest/pipelines/city_pulse/pipeline.py`
-- Test: `ingest/pipelines/city_pulse/test_pipeline.py`
+- 🔴 Modify: `ingest/pipelines/city_pulse/pipeline.py`
+- 🔴 Test: `ingest/pipelines/city_pulse/test_pipeline.py`
 
 - [ ] **Step 1: Write a failing test for `to_ndjson` + `tier1_path`**
 
@@ -1130,8 +1131,8 @@ git commit -m "feat(city-pulse): source connector reading non-expired data_lake.
 
 **Files:**
 
-- Create: `refinery/packs/city-pulse-swfl.mts`
-- Test: `refinery/packs/city-pulse-swfl.test.mts` (Task 10)
+- 🟢 Create: `refinery/packs/city-pulse-swfl.mts`
+- 🟢 Test: `refinery/packs/city-pulse-swfl.test.mts` (Task 10)
 
 > Model the whole pack on `refinery/packs/tourism-tdt.mts`: module-level closure state (`let lastSnapshot`), `corpusSummary` builds `SynthesisFact[]` and stashes the snapshot, `outputProducer` reads the snapshot and builds the `BrainOutputProducerResult`. Imports mirror `tourism-tdt.mts:1-14` (`env`, `PackDefinition`, `SynthesisFact`, `RawFragment`, `PackOutput`, `BrainOutputProducerResult`, `BrainOutputMetric`).
 
@@ -1255,8 +1256,8 @@ git commit -m "feat(city-pulse): pack corpusSummary + snapshot stash"
 
 **Files:**
 
-- Modify: `refinery/packs/city-pulse-swfl.mts`
-- Test: `refinery/packs/city-pulse-swfl.test.mts`
+- 🟢 Modify: `refinery/packs/city-pulse-swfl.mts`
+- 🟢 Test: `refinery/packs/city-pulse-swfl.test.mts`
 
 - [ ] **Step 1: Write the failing pack test**
 
@@ -1620,7 +1621,7 @@ git commit -m "feat(city-pulse): daily GHA cron wrapper with --dry-run"
 
 **Files:**
 
-- Modify: `ingest/cadence_registry.yaml`
+- 🔵 Modify: `ingest/cadence_registry.yaml`
 
 - [ ] **Step 1: Add the city_pulse entry under `pipelines:`**
 
@@ -1658,7 +1659,7 @@ git commit -m "feat(city-pulse): cadence_registry entry (daily, tier-1 prefix)"
 
 - Delete: `ingest/pipelines/news_swfl/` (whole directory)
 - Delete: `.github/workflows/news-daily.yml` (if present)
-- Modify: `ingest/cadence_registry.yaml` (remove the `not_yet_running: news_swfl` entry)
+- 🔵 Modify: `ingest/cadence_registry.yaml` (remove the `not_yet_running: news_swfl` entry)
 
 - [ ] **Step 1: Confirm the workflow filename**
 
@@ -1738,3 +1739,18 @@ gh pr create --title "feat: city-pulse-swfl daily current-events reporter + flyw
 
 - **Spec coverage:** §2 cadence (Task 13 daily cron), §3 cities (Task 2 CITIES), §4 vendor lock 20250305 (Tasks 3/16), §5 hybrid storage (Tasks 1/7), §5a capture+distill (Tasks 3/5), §6 schema (Task 1), §7 TTL + dedup (Tasks 4/6), §8 reporter pack (Tasks 9/10) — corrected to key_metrics[].source provenance, §9 carry contract (no task — already live, correctly), §10 single-PR brain-first (one branch, all tasks), §13 testing (per-task TDD + Task 16), §14 decisions (naming city-pulse, scraper delete Task 15, batch deferred). All covered.
 - **Open risk flagged for executor:** exact helper export names in `refinery/sources/util.mts` and the `BrainDomain` union value — verify against `tourism-tdt` rather than assume. The master dry-run command and bun typecheck script names are repo-specific; use the documented ones.
+
+---
+
+## Parallel Safety
+
+> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
+
+| Group | Tasks | Shared Files |
+|-------|-------|--------------|
+| 🔴 | Task 2, Task 3, Task 7 | `ingest/pipelines/city_pulse/pipeline.py`, `ingest/pipelines/city_pulse/test_pipeline.py` |
+| 🟡 | Task 4, Task 5, Task 6 | `ingest/pipelines/city_pulse/distill.py`, `ingest/pipelines/city_pulse/test_distill.py` |
+| 🟢 | Task 9, Task 10 | `refinery/packs/city-pulse-swfl.mts`, `refinery/packs/city-pulse-swfl.test.mts` |
+| 🔵 | Task 14, Task 15 | `ingest/cadence_registry.yaml` |
+
+Tasks with no color badge have no file conflicts — safe to parallelize freely.
