@@ -1,3 +1,12 @@
+## 2026-06-19 (main) — wip(homepage): HOMEPAGE folder + handoff + competitor research
+
+- **`HOMEPAGE/`** — new folder committed to repo root with full handoff for next Claude
+- **`HOMEPAGE/build_demo4.py`** — latest demo builder; run it to regenerate `swfl-demo-wip.html`; requires contractor SVG at `c:\Users\ethan\Downloads\Lee County and Collier County-01.svg`
+- **`HOMEPAGE/research_competitors.py`** — crawl4ai scrape that sourced real competitor pricing (Mailchimp $68/mo, CC $68/mo, Follow Up Boss $499/mo) used in the comparison strip
+- **`HOMEPAGE/HANDOFF.md`** — full integration spec: SVG handling strategy, component breakdown, live data wiring, approved copy
+- **Demo:** `c:\Users\ethan\Downloads\swfl-demo-wip.html` — choropleth map + 4 capability cards + competitor comparison strip; homepage NOT touched, awaiting operator approval
+- **Next:** Operator reviews demo then: clean SVG to `public/map/lee-collier.svg`, build `components/landing/Capabilities.tsx`, remove `FloridaDataViz` from `Hero.tsx`
+
 ## 2026-06-19 (main) — wip(homepage): choropleth map demo + capabilities section (standalone, not in repo)
 
 - **WIP demo:** `c:\Users\ethan\Downloads\swfl-demo-wip.html` (1170KB, self-contained — open in browser to review)
