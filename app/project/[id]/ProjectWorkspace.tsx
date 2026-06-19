@@ -101,6 +101,9 @@ export function ProjectWorkspace({
   // Tracks whether a per-project MCP key is active this session (stays in sync with
   // ConnectMcpBlock's internal key state via the onKeyChange callback).
   const [hasMcpKey, setHasMcpKey] = useState(!!mcpKey);
+  // Phase 3B: refresh state for the significant-changes nudge chip.
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshDismissed, setRefreshDismissed] = useState(false);
 
   // Pre-fill branding from the user's saved brand profile on first pill-open
   // when the project has no agent fields yet (funnel arrivals, new projects).
@@ -287,6 +290,20 @@ export function ProjectWorkspace({
     return { id: data.id ?? deliverableId, inPlace: !!data.inPlace };
   }
 
+  async function refreshItems() {
+    setRefreshing(true);
+    try {
+      const res = await fetch(`/api/projects/${id}/refresh`, { method: "POST" });
+      if (res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { items?: ProjectItem[] };
+        if (Array.isArray(data.items)) setItems(data.items);
+      }
+    } finally {
+      setRefreshing(false);
+      setRefreshDismissed(true);
+    }
+  }
+
   async function trashDeliverable(deliverableId: string, restore = false): Promise<boolean> {
     const res = await fetch(`/api/deliverables/${deliverableId}/trash`, {
       method: "POST",
@@ -441,20 +458,41 @@ export function ProjectWorkspace({
         )}
       </div>
 
-      {/* §8 freshness write-back */}
-      {digest.freshnessChangedSinceSeen && digest.freshnessToken && (
+      {/* §8 freshness nudge — specific when significantChanges present, generic fallback */}
+      {digest.freshnessChangedSinceSeen && digest.freshnessToken && !refreshDismissed && (
         <div className="mb-4 mt-4 flex items-center justify-between rounded-lg border border-[#00d4aa]/20 bg-[#00d4aa]/5 px-3 py-2">
           <span className="flex items-center gap-2 text-xs text-gray-300">
             <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#00d4aa]" />
-            Your data has fresh figures.
+            {significantChanges.length > 0
+              ? significantChanges.length === 1
+                ? significantChanges[0]!.delta_description.charAt(0).toUpperCase() +
+                  significantChanges[0]!.delta_description.slice(1) +
+                  " since you last visited."
+                : `${significantChanges.length} of your metrics moved significantly since your last visit.`
+              : "Your filed data has fresh figures."}
           </span>
-          <button
-            type="button"
-            onClick={() => void patchUiState({ last_freshness_token_seen: digest.freshnessToken })}
-            className="text-xs text-[#00d4aa] hover:underline"
-          >
-            Got it →
-          </button>
+          <div className="flex items-center gap-3">
+            {significantChanges.length > 0 && (
+              <button
+                type="button"
+                disabled={refreshing}
+                onClick={() => void refreshItems()}
+                className="text-xs font-medium text-[#00d4aa] hover:underline disabled:opacity-50"
+              >
+                {refreshing ? "Refreshing…" : "Refresh items →"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setRefreshDismissed(true);
+                void patchUiState({ last_freshness_token_seen: digest.freshnessToken });
+              }}
+              className="text-xs text-gray-500 hover:text-gray-300"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 

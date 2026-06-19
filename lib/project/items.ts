@@ -29,6 +29,9 @@ const kinds = z.discriminatedUnion("kind", [
     selection_type: z.string().optional(),
     reach: z.array(z.string()).optional(),
     freshness_token: z.string().optional(),
+    // Phase 3A: grain at which this qa answer was filed.
+    scope_kind: z.enum(["zip", "county", "city", "state", "national", "msa"]).optional(),
+    scope_value: z.string().optional(),
   }),
   z.object({
     // ref → saved_charts (the linted chart_block lives there)
@@ -48,6 +51,11 @@ const kinds = z.discriminatedUnion("kind", [
     // the filing surface knows it. Optional + non-breaking — items filed before
     // this lift omit it, and C-3's lane bridge falls back to label resolution.
     metric_slug: z.string().optional(),
+    // Phase 3A: grain at which this metric was filed — enables scope-aware refresh
+    // and email pre-send data verification. Non-breaking: items without scope fields
+    // fall back to headline (no-scope) brain fetch on refresh.
+    scope_kind: z.enum(["zip", "county", "city", "state", "national", "msa"]).optional(),
+    scope_value: z.string().optional(),
   }),
   z.object({
     kind: z.literal("source"),

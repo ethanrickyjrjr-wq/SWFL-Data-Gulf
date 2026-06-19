@@ -155,6 +155,16 @@ const addItemInput = z.discriminatedUnion("kind", [
     source_url: z.string().optional(),
     source_label: z.string().optional(),
     freshness_token: z.string(),
+    scope_kind: z
+      .enum(["zip", "county", "city", "state", "national", "msa"])
+      .optional()
+      .describe(
+        "Grain at which this metric applies — enables scope-aware refresh on project open.",
+      ),
+    scope_value: z
+      .string()
+      .optional()
+      .describe("Scope value e.g. '33931' for zip, 'lee' for county, 'us' for national."),
   }),
   z.object({
     kind: z.literal("qa"),
@@ -164,6 +174,11 @@ const addItemInput = z.discriminatedUnion("kind", [
     fact: z.string().optional(),
     reach: z.array(z.string()).optional(),
     freshness_token: z.string().optional(),
+    scope_kind: z
+      .enum(["zip", "county", "city", "state", "national", "msa"])
+      .optional()
+      .describe("Grain at which this answer applies."),
+    scope_value: z.string().optional().describe("Scope value matching scope_kind."),
   }),
   z.object({
     kind: z.literal("report"),

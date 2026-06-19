@@ -1,3 +1,13 @@
+## 2026-06-19 (main) — feat(phase3ab): scope-aware item filing + refresh-on-access
+
+- **`lib/project/items.ts`** — Phase 3A: `scope_kind` + `scope_value` optional fields added to `metric` and `qa` schemas. Non-breaking — existing items without scope pass Zod unchanged.
+- **`app/api/mcp/project-tools.ts`** — Phase 3A: `addItemInput` metric + qa schemas extended with `scope_kind`/`scope_value`; MCP tool description updated so the agent knows to pass grain when filing from a dossier.
+- **`lib/project/refresh-on-access.ts`** — NEW Phase 3B: pure `applyRefresh(items, brainValues)` — walks items, patches metric/qa whose brain freshness_token is newer than snapshot. Returns new array + count + summary. `refreshKey()` helper shared with the route.
+- **`app/api/projects/[id]/refresh/route.ts`** — NEW Phase 3B: `POST` endpoint — auth, load items, batch-fetch current brain values via `lookupLakeFact`, call `applyRefresh`, PATCH `projects.items` JSONB, log `item_refreshed` activity. One failed brain lookup never reverts others.
+- **`app/project/[id]/ProjectWorkspace.tsx`** — Phase 3B: `refreshing`/`refreshDismissed` state + `refreshItems()` handler. Freshness chip now shows specific delta description when `significantChanges` present ("Median sale prices dropped 4.2% since you last visited.") with "Refresh items →" CTA; generic "fresh figures" fallback when no registered changes. Dismiss writes `last_freshness_token_seen`.
+- **Tests:** 33/0 (lib/project/items + lib/signals) — no regressions.
+- **Next:** Phase 3C plan — crawlai research on pre-send data verification underway; will add best-practices section to spec then commit.
+
 ## 2026-06-19 (main) — feat(phase2cde): significant changes wired — brain snapshot + prompt engine + AI context
 
 - **`lib/signals/brain-snapshot.ts`** — NEW: `computeSignificantChanges()` batch-fetches current brain values for all metric items via `lookupLakeFact`, deduplicates by `report_id|slug|zip` (Promise cache — no race), evaluates via `evaluateChange`, returns top-N by priority desc. `loadSignificanceRegistry()` reads `ingest/significance-registry.yaml` with `yaml` package, cached per-process.
