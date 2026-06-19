@@ -1,3 +1,9 @@
+## 2026-06-19 (main) — fix(hooks): annotate-plan fires on any .md, handles FINAL BOSS letter-section format
+
+- **`.claude/hooks/annotate-plan.mjs`** — two bugs: (1) hardcoded `PLANS_SEGMENT` path guard silently dropped every plan outside `docs/superpowers/plans/` (incl. all `FINAL BOSS/` files); (2) parser only knew `## Task N` + `**Files:**` format — FINAL BOSS plans use `### A.` / `### B.` letter sections with files in Markdown tables + inline backticks. Fix: removed path guard (any `.md` self-filters via parser); added `parseLetterFormat()` with file-path heuristic. Hook now fires universally on any `.md` write.
+- **`FINAL BOSS/01-piece-1-workspace-shell.md` + `02`** — retroactively annotated: model badge + Parallel Safety table now injected (sections A/B/D/F share files → 🔴 conflict group).
+- **Next:** hook is live — any new plan written anywhere gets auto-annotated on save.
+
 ## 2026-06-19 (main) — feat(signals): strict Gate-1 scope match + Phase F handoff (§3 resolved)
 
 - **`lib/signals/brain-snapshot.ts`** — Gate 1 A2 now STRICT: zip→own scope_value, explicit non-zip→headline (no zip), no/partial scope→silent. Never substitutes the project-level zip for a missing item scope (apples-to-oranges kill). A1 (no metric_slug→silent) confirmed.
