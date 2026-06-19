@@ -1,3 +1,11 @@
+## 2026-06-19 (main) — refactor(ingest): drop Firecrawl search legs from city_pulse, corridors, live_search
+
+- **`ingest/pipelines/city_pulse/pipeline.py`** — removed `capture_firecrawl()`, `capture()` dispatch, `--source-provider` flag; `main()` calls `run_city_search()` (Anthropic `web_search_20250305`) directly
+- **`ingest/pipelines/city_pulse_corridors/pipeline.py`** — same treatment; `main()` calls `run_corridor_search()` directly
+- **`ingest/pipelines/live_search/engine.py`** — `firecrawl_search()` stubbed to `return None` (like `spider_search`); `firecrawl_client` import removed
+- All Firecrawl-specific tests removed; 26 remaining tests green. `firecrawl_client.py` stays (used by `extract_client` scrape fallback + `/v2/agent` structured extraction)
+- **Next:** corridors + live_search crawl4ai URL-seeded legs when Gemini supplies candidate URLs
+
 ## 2026-06-19 (main) — feat(phase5-session1): TypeScript foundation — news-event-extractor + cron handler + type expansion
 
 - **`lib/signals/types.ts`** — `ScoredEventSummary` expanded to 10 fields (added `id`, `entity_name`, `distance_miles`, `headline`, `source_url`); feeds NewsBar UI in Session 3

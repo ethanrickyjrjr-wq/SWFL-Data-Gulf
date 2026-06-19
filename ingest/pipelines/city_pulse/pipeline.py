@@ -32,7 +32,6 @@ from typing import Any
 
 import anthropic
 from dotenv import load_dotenv
-from ingest.lib import firecrawl_client
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
@@ -157,87 +156,6 @@ def run_city_search(city: str, run_at: str) -> dict[str, Any]:
     return build_record(city, query, response.model_dump(), run_at)
 
 
-_FIRECRAWL_CITATION_MAX_CHARS = 1500
-
-
-def capture(city: str, run_at: str, provider: str) -> dict[str, Any]:
-    """Dispatch to the appropriate capture provider.
-
-    'anthropic' and 'firecrawl' force that provider with no fallback.
-    'auto' tries Firecrawl first; falls back to Anthropic web_search if
-    Firecrawl raises or returns zero citations.
-    """
-    if provider == "anthropic":
-        return run_city_search(city, run_at)
-    if provider == "firecrawl":
-        return capture_firecrawl(city, run_at)
-    # auto: Firecrawl primary, Anthropic web_search fallback on failure/empty.
-    try:
-        rec = capture_firecrawl(city, run_at)
-        if rec.get("cited_text_count", 0) > 0:
-            return rec
-        print("  -> firecrawl returned 0 citations; falling back to anthropic web_search")
-    except Exception as exc:
-        print(f"  -> firecrawl capture failed ({exc!r}); falling back to anthropic web_search")
-    return run_city_search(city, run_at)
-
-
-def capture_firecrawl(city: str, run_at: str) -> dict[str, Any]:
-    """Capture city pulse signals via Firecrawl /v2/search (side-by-side with Anthropic path).
-
-    Returns a record with the same keys as build_record() so distill_capture()
-    works unchanged. Token fields are None (Firecrawl has no token concept).
-    """
-    query = (
-        f"{city} Florida business news openings closings construction "
-        "real estate development"
-    )
-    response = firecrawl_client.search(
-        query,
-        limit=15,
-        sources=[{"type": "web"}, {"type": "news"}],
-        tbs="qdr:w",
-        location=f"{city}, Florida, United States",
-        # A cited business-news reporter should not source from social/UGC.
-        # Excluding at the API also saves the scrape credits on those results.
-        exclude_domains=[
-            "facebook.com", "instagram.com", "twitter.com", "x.com",
-            "tiktok.com", "reddit.com", "youtube.com", "pinterest.com",
-        ],
-        scrape_markdown=True,
-    )
-
-    data = response.get("data") or {}
-    web_results = data.get("web") or []
-    news_results = data.get("news") or []
-    all_results = web_results + news_results
-
-    citations: list[dict[str, Any]] = []
-    for result in all_results:
-        url = result.get("url") or (result.get("metadata") or {}).get("sourceURL")
-        if not url:
-            continue
-        title = result.get("title") or ""
-        raw_text = result.get("markdown") or result.get("description") or ""
-        cited_text = raw_text[:_FIRECRAWL_CITATION_MAX_CHARS] if raw_text else ""
-        if not cited_text:
-            continue
-        citations.append({"url": url, "title": title, "cited_text": cited_text})
-
-    return {
-        "city": city,
-        "city_slug": slug(city),
-        "query": query,
-        "model": "firecrawl/v2/search",
-        "tool_version": "firecrawl-search",
-        "run_at": run_at,
-        "input_tokens": None,
-        "output_tokens": None,
-        "response": response,
-        "citations": citations,
-        "cited_text_count": len(citations),
-        "credits_used": response.get("creditsUsed"),
-    }
 
 
 def to_ndjson(records: list[dict[str, Any]]) -> bytes:
@@ -253,13 +171,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--city", metavar="NAME", help="Run a single city by exact name.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Run search + distill; print rows, skip Tier-1 upload and DB write.")
-    parser.add_argument(
-        "--source-provider",
-        choices=["auto", "firecrawl", "anthropic"],
-        default="auto",
-        help="Capture provider: 'auto' (default — Firecrawl primary, Anthropic web_search fallback), "
-             "'firecrawl' (/v2/search, no fallback), or 'anthropic' (web_search_20250305, no fallback).",
-    )
     args = parser.parse_args(argv)
 
     cities = [args.city] if args.city else CITIES
@@ -274,20 +185,17 @@ def main(argv: list[str] | None = None) -> int:
     errors: list[str] = []
     total_new = 0
     for city in cities:
-        print(f"city_pulse: querying '{city}' via {args.source_provider}...")
+        print(f"city_pulse: querying '{city}'...")
         try:
-            record = capture(city, run_at, args.source_provider)
+            record = run_city_search(city, run_at)
         except Exception as exc:
             print(f"  -> ERROR (search): {exc!r}")
             errors.append(city)
             continue
 
         cited = record["cited_text_count"]
-        if record.get("tool_version") == "firecrawl-search":
-            print(f"  -> {cited} cited_text spans | credits_used={record.get('credits_used')}")
-        else:
-            print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
-        if cited == 0 and record.get("tool_version") != "firecrawl-search":
+        print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
+        if cited == 0:
             print(f"  -> WARNING: zero cited_text spans — verify SEARCH_TOOL_VERSION is '{SEARCH_TOOL_VERSION}'")
 
         path = tier1_path(city, run_key, yyyy, mm)

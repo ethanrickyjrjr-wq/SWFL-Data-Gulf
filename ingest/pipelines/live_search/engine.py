@@ -22,7 +22,6 @@ import time
 
 import requests
 
-from ingest.lib import firecrawl_client
 
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")  # Gemini 3 stable; confirm grounding live (STEP 0)
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
@@ -189,35 +188,8 @@ def gemini_grounded(question: str) -> Candidate | None:
 
 
 def firecrawl_search(question: str, denylist: list[str]) -> Candidate | None:
-    """REAL failsafe leg #1: Firecrawl /v2/search (query -> results+markdown). Denylist via exclude_domains."""
-    try:
-        res = firecrawl_client.search(
-            question,
-            limit=5,
-            tbs="qdr:m",  # last month — bias toward fresh pages
-            exclude_domains=list(denylist or []) + list(DENYLIST_DEFAULT),
-            scrape_markdown=True,
-        )
-    except Exception as exc:  # noqa: BLE001 - a leg failure must fall through, not crash
-        print(f"[firecrawl] exception: {type(exc).__name__}: {exc}")
-        return None
-    data = res.get("data") if isinstance(res, dict) else None
-    results: list[dict] = []
-    if isinstance(data, dict):
-        results = list(data.get("web") or []) + list(data.get("news") or [])
-    elif isinstance(data, list):
-        results = data
-    for r in results:
-        url = r.get("url") or ""
-        if not url or is_denylisted(url, denylist):
-            continue
-        nums = extract_numbers(r.get("markdown") or r.get("description") or "")
-        if nums:
-            return Candidate(nums[0], _domain_of(url), url, "firecrawl", grounded=True, source_title=r.get("title", ""))
-    if results:
-        print(f"[firecrawl] {len(results)} results but no parseable $-number for: {question[:80]}")
-    else:
-        print(f"[firecrawl] 0 results for: {question[:80]}")
+    """Stub — Firecrawl removed. crawl4ai has no web-search API; wire a URL-seeded
+    crawl4ai leg here once Gemini/Claude supply candidate URLs from an upstream leg."""
     return None
 
 

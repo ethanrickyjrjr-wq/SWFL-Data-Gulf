@@ -69,37 +69,3 @@ def test_build_record_has_distill_required_keys():
     assert rec["corridor"] == "Immokalee Rd North Naples"
     assert rec["citations"][0]["url"] == "https://gulfshorebusiness.com/a"
     assert rec["cited_text_count"] == 1
-
-
-# ── capture dispatch (auto-fallback) ─────────────────────────────────────────
-
-def _firecrawl_rec(corridor, n):
-    return {"corridor": corridor, "run_at": "t", "citations": [{}] * n,
-            "cited_text_count": n, "tool_version": "firecrawl-search"}
-
-
-def test_capture_auto_uses_firecrawl_when_it_returns_citations(monkeypatch):
-    monkeypatch.setattr(pipeline, "capture_firecrawl",
-                        lambda c, r: _firecrawl_rec(c, 3))
-    monkeypatch.setattr(pipeline, "run_corridor_search",
-                        lambda c, r: pytest.fail("anthropic should not be called"))
-    rec = pipeline.capture("Immokalee Rd North Naples", "t", "auto")
-    assert rec["tool_version"] == "firecrawl-search"
-    assert rec["cited_text_count"] == 3
-
-
-def test_capture_auto_falls_back_to_anthropic_on_zero_citations(monkeypatch):
-    monkeypatch.setattr(pipeline, "capture_firecrawl",
-                        lambda c, r: _firecrawl_rec(c, 0))
-    sentinel = {"corridor": "x", "tool_version": "web_search_20250305", "cited_text_count": 1}
-    monkeypatch.setattr(pipeline, "run_corridor_search", lambda c, r: sentinel)
-    assert pipeline.capture("Immokalee Rd North Naples", "t", "auto") is sentinel
-
-
-def test_capture_auto_falls_back_to_anthropic_on_firecrawl_error(monkeypatch):
-    def boom(c, r):
-        raise RuntimeError("firecrawl down")
-    monkeypatch.setattr(pipeline, "capture_firecrawl", boom)
-    sentinel = {"corridor": "x", "tool_version": "web_search_20250305", "cited_text_count": 1}
-    monkeypatch.setattr(pipeline, "run_corridor_search", lambda c, r: sentinel)
-    assert pipeline.capture("Immokalee Rd North Naples", "t", "auto") is sentinel
