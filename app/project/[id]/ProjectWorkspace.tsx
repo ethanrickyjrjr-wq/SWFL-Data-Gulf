@@ -480,14 +480,16 @@ export function ProjectWorkspace({
               : "Your filed data has fresh figures."}
           </span>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              disabled={refreshing}
-              onClick={() => void refreshItems()}
-              className="text-xs font-medium text-[#00d4aa] hover:underline disabled:opacity-50"
-            >
-              {refreshing ? "Refreshing…" : "Refresh items →"}
-            </button>
+            {significantChanges.length > 0 && (
+              <button
+                type="button"
+                disabled={refreshing}
+                onClick={() => void refreshItems()}
+                className="text-xs font-medium text-[#00d4aa] hover:underline disabled:opacity-50"
+              >
+                {refreshing ? "Refreshing…" : "Refresh items →"}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
