@@ -1,3 +1,11 @@
+## 2026-06-19 (main) — feat(phase5-session2): Python DLT crawler + SQL schema + GHA workflow
+
+- **`docs/sql/20260619_news_articles_swfl.sql`** — `data_lake.news_articles_swfl` table + partial index on `processed_at IS NULL`; applied to prod (row count: 0 ✓)
+- **`ingest/pipelines/news_swfl/`** — crawl4ai 4-source scraper (Naples Daily News, News-Press, Lee/Collier govt); DLT merge on `article_url`; `--dry-run` flag; normalizer with SWFL ZIP + term filter
+- **`.github/workflows/news-swfl-ingest.yml`** — daily 6am UTC GHA cron + manual `dry_run` dispatch; uses `DESTINATION__POSTGRES__CREDENTIALS`; `crawl4ai-setup` browser install step
+- **`.github/workflows/log-cron-incident.yml`** — added `"SWFL business news ingest daily"` to workflow_run listener
+- **Next:** Session 3 — NewsBar + NewsArticleDrawer + clip-news route (blocked on Piece 1 workspace shell reaching prod)
+
 ## 2026-06-19 (main) — refactor(ingest): drop Firecrawl search legs from city_pulse, corridors, live_search
 
 - **`ingest/pipelines/city_pulse/pipeline.py`** — removed `capture_firecrawl()`, `capture()` dispatch, `--source-provider` flag; `main()` calls `run_city_search()` (Anthropic `web_search_20250305`) directly

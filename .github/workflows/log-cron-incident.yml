@@ -41,6 +41,7 @@ on:
       - "fred-g17 monthly"
       - "ingest-crexi-listings"
       - "DBPR SIRS Submissions — Monthly SWFL"
+      - "SWFL business news ingest daily"
     types: [completed]
 
 permissions:
