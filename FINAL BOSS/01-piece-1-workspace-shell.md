@@ -1,5 +1,11 @@
 # 01 — PIECE 1: Workspace Shell  ✅ READY TO BUILD
 
+> **Recommended model:** 🧠 Opus — 9 tasks, 22 files, keywords: migration, schema, architecture
+
+
+
+
+
 > Status: fully planned, every claim verified against the code. This is the foundation; build it first.
 > Brainstorm done (decisions locked below). Next step on approval: write the repo spec under
 > `docs/superpowers/specs/2026-06-17-workspace-shell-piece1-design.md`, then implement the build sequence.
@@ -152,3 +158,15 @@ Lake-view search; two-projects-on-one-page; slot-level thumbnails (would need ex
 `lib/briefcase/item-title.ts` · `components/charts/ChartBlockView.tsx` · `app/p/[id]/StatCard.tsx` ·
 `app/project/_import/ImportDraftOnLogin.tsx` · `app/api/projects/import/route.ts` · `app/api/claim/route.ts` ·
 `refinery/packs/catalog.mts`.
+
+---
+
+## Parallel Safety
+
+> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
+
+| Group | Tasks | Shared Files |
+|-------|-------|--------------|
+| 🔴 | Task 1, Task 2, Task 4, Task 6 | `app/project/layout.tsx`, `components/project/ProjectSearch.tsx`, `components/ui/Modal.tsx` |
+
+Tasks with no color badge have no file conflicts — safe to parallelize freely.

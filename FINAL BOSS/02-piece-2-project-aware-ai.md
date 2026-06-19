@@ -1,5 +1,9 @@
 # 02 — PIECE 2: Project-Aware AI  🟡 DRAFT (needs brainstorm)
 
+> **Recommended model:** ⚡ Sonnet — 8 tasks, 7 files, keywords: redesign
+
+
+
 > ⚠️ This is a SCOPED DRAFT derived from the operator's vision + the codebase map — **not an approved design.**
 > Before building, run `superpowers:brainstorming` (RULE 3.5) and write `docs/superpowers/specs/<date>-piece2-project-aware-ai-design.md`.
 

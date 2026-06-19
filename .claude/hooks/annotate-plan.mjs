@@ -29,7 +29,6 @@ const OPUS_KEYWORDS = [
   "redesign",
   "overhaul",
 ];
-const PLANS_SEGMENT = "/docs/superpowers/plans/";
 const COLOR_RE = new RegExp(`^([ \\t]*- )(?:${COLORS.map(escRe).join("|")}) `);
 
 // ── entry ─────────────────────────────────────────────────────────────────────
@@ -52,8 +51,7 @@ async function main() {
   }
 
   const abs = path.resolve(process.cwd(), filePath);
-  const norm = abs.split(path.sep).join("/");
-  if (!norm.includes(PLANS_SEGMENT) || !norm.endsWith(".md")) process.exit(0);
+  if (!abs.endsWith(".md")) process.exit(0);
 
   let src;
   try {
@@ -124,6 +122,14 @@ function annotate(src) {
 // ── parse tasks ───────────────────────────────────────────────────────────────
 
 function parseTasks(lines) {
+  // Format A: ## Task N / ### Task N with **Files:** blocks
+  const tasks = parseTaskFormat(lines);
+  if (tasks.length > 0) return tasks;
+  // Format B: ### A. / ### B. letter sections (FINAL BOSS style)
+  return parseLetterFormat(lines);
+}
+
+function parseTaskFormat(lines) {
   const TASK_HDR = /^#{2,3}\s+Task\s+(\d+)[:\s]/;
   const tasks = [];
   let cur = null;
@@ -150,6 +156,56 @@ function parseTasks(lines) {
         if (f) cur.files.push(f);
       }
     }
+  }
+  return tasks;
+}
+
+// Parse ### A. / ### B. letter-section format (FINAL BOSS plans)
+// Files from: table first-cell | bullet lead | any inline backtick that looks like a path
+function parseLetterFormat(lines) {
+  const LETTER_HDR = /^#{2,3}\s+([A-Z][0-9]?)\.[\s—]/;
+  const FILE_EXT = /\.(ts|tsx|mts|mjs|js|jsx|css|json|yaml|yml|md|sql|py|txt|sh)$/;
+  const tasks = [];
+  let cur = null;
+
+  function pushFile(raw) {
+    const f = normFile(raw);
+    if (f && !cur.files.includes(f)) cur.files.push(f);
+  }
+
+  function extractInlineFiles(line) {
+    // grab every `...` token in the line; keep only those that look like file paths
+    const re = /`([^`]+)`/g;
+    let m;
+    while ((m = re.exec(line)) !== null) {
+      const tok = m[1].trim();
+      if (tok.includes("/") && FILE_EXT.test(tok)) pushFile(tok);
+    }
+  }
+
+  for (const line of lines) {
+    const m = LETTER_HDR.exec(line);
+    if (m) {
+      const num = m[1].charCodeAt(0) - 64; // A=1, B=2 …
+      cur = { num, label: m[1], files: [] };
+      tasks.push(cur);
+      continue;
+    }
+    if (!cur) continue;
+    if (/^## /.test(line)) {
+      cur = null;
+      continue;
+    }
+
+    // Table first-cell: | `path` | ...  (highest signal — check first)
+    const tbl = line.match(/^\|[ \t]*`([^`]+)`[ \t]*\|/);
+    if (tbl) {
+      pushFile(tbl[1]);
+      continue;
+    }
+
+    // Any line: scan all inline backticks for file-path tokens
+    extractInlineFiles(line);
   }
   return tasks;
 }
