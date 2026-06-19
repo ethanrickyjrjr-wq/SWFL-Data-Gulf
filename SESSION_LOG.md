@@ -1,3 +1,16 @@
+## 2026-06-19 (main) — feat(phase0): unified project activity root — AI always current
+
+- **`docs/sql/20260619_project_activity.sql`** — `project_activity` table (text FK on projects.id, significance 1–10, RLS owner-read, idx on project_id+significance+created_at). **Applied to prod.** 0 rows, schema verified.
+- **`lib/project/activity.ts`** — NEW: `logActivity()` (fire-and-forget insert, never throws) + `readRecentActivity()` (top-N significant rows, last 30d, pre-formatted for AI). Covers all 12 `ActivityType` values with default significance map.
+- **`lib/project/digest.ts`** — `ProjectDigestInput` + `ProjectDigest` extended with optional `branding` + `recentActivity` fields (non-breaking; existing callers pass neither, defaults to `{}` / `[]`).
+- **`lib/chat/page-context.ts`** — `ProjectPageContext` carries `branding?` + `recentActivity?`; `describeProject()` appends agent name·brokerage + recent activity when present; `projectPageContextForPath()` extracts both from digest (defensive null guards).
+- **`app/api/projects/[id]/route.ts`** — PATCH logs `project_renamed` / `branding_changed` / `item_filed` (item_filed only on count increase via pre-read snapshot). Fire-and-forget after successful write.
+- **`app/api/projects/route.ts`** — POST logs `project_created` immediately after insert + brand apply.
+- **`app/api/deliverables/[id]/blast/route.ts`** — logs `email_sent` (sent count + subject) when `sent > 0 && deliverable.project_id`.
+- **`app/api/user/brand/route.ts`** — logs `branding_changed` when caller passes `project_id` in body (global-only saves skip; per-project branding is live-read anyway).
+- **Gates:** `bun test` 3001/0 · tsc errors pre-existing only (`.next/` graph revert artifacts).
+- **Next:** Phase 1 (briefcase digest values + freshnessIsNew) → Phase 2 (significance registry + change evaluator). Branding live-read fix is live — AI can no longer reference stale agent names.
+
 ## 2026-06-18 (main) — feat(graphify): app-plane CLI — pages/components/api_routes/hooks/tables in graph.json
 
 - **`scripts/graphify-app-nodes.mjs`** — scans `app/`, `components/`, `lib/`, `app/api/`, `docs/sql/`; extracts 5 node types (page/component/api_route/hook/table) + 5 edge relations (renders/uses/fetches/queries/writes); patches `graph.json` in-place + writes `graphify-out/app-graph.json` + generates `graphify-out/wiki/index.md`. 577 total nodes (was 366), 541 edges.

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { logActivity } from "@/lib/project/activity";
 
 export const runtime = "nodejs";
 
@@ -60,5 +61,28 @@ export async function PATCH(req: NextRequest) {
     .upsert({ user_id: user.id, ...update }, { onConflict: "user_id" });
 
   if (error) return NextResponse.json({ error: "update failed" }, { status: 500 });
+
+  // If the client passes a project_id, log branding_changed for that project so the AI
+  // knows the agent identity updated. Global-only saves (no project_id) don't log here —
+  // per-project branding is live-read from projects.branding on every context build.
+  const projectId = typeof body?.project_id === "string" ? body.project_id : null;
+  if (projectId) {
+    const agentName = typeof update.agent_name === "string" ? update.agent_name : null;
+    const brokerage = typeof update.brokerage === "string" ? update.brokerage : null;
+    await logActivity(supabase, {
+      projectId,
+      type: "branding_changed",
+      actor: "user",
+      summary: [
+        "Branding updated",
+        agentName ? `agent: ${agentName}` : null,
+        brokerage ? `brokerage: ${brokerage}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      detail: { agent_name: agentName, brokerage },
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }

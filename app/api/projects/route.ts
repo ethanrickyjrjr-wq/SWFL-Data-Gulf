@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { projectItemsSchema } from "@/lib/project/items";
 import { recordUse } from "@/lib/highlighter/meter";
 import { applyUserBrandToProject } from "@/lib/project/apply-brand";
+import { logActivity } from "@/lib/project/activity";
 
 export const runtime = "nodejs";
 
@@ -42,6 +43,17 @@ export async function POST(req: NextRequest) {
   // 4C / G2: propagate user brand to the new project so it starts branded. Shared
   // with import + claim so every creation path brands identically (00 → J1/G2).
   await applyUserBrandToProject(supabase, user.id, id);
+
+  // Activity root: first row establishes this project's history.
+  const titleLabel =
+    typeof body?.title === "string" && body.title.trim() ? body.title.trim() : "Untitled";
+  await logActivity(supabase, {
+    projectId: id,
+    type: "project_created",
+    actor: "user",
+    summary: `Project created: "${titleLabel}"`,
+    detail: { title: titleLabel },
+  });
 
   // A-8.5: stamp the owner's auth.uid — project_create is a funnel/trial event and
   // the user is proven here (401'd above otherwise), so it must carry user_id.

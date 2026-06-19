@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { projectItemsSchema } from "@/lib/project/items";
 import { markFeedSeen } from "@/lib/project/feed";
+import { logActivity } from "@/lib/project/activity";
 
 export const runtime = "nodejs";
 
@@ -42,6 +43,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
+
+  // Snapshot title + item count before the update so activity summaries are accurate.
+  const { data: before } = await supabase
+    .from("projects")
+    .select("title, items")
+    .eq("id", id)
+    .maybeSingle();
+  const prevTitle: string | null = before?.title ?? null;
+  const prevItemCount: number = Array.isArray(before?.items) ? before.items.length : 0;
 
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if ("items" in body) {
@@ -86,6 +96,50 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .maybeSingle();
   if (error) return NextResponse.json({ error: "update failed" }, { status: 500 });
   if (!data) return NextResponse.json({ error: "not found" }, { status: 404 });
+
+  // Activity log — fire-and-forget after successful write.
+  if ("title" in body && typeof body.title === "string" && body.title !== prevTitle) {
+    await logActivity(supabase, {
+      projectId: id,
+      type: "project_renamed",
+      actor: "user",
+      summary: `Project renamed to "${body.title}"`,
+      detail: { from: prevTitle, to: body.title },
+    });
+  }
+  if ("branding" in body && body.branding) {
+    const b = body.branding as Record<string, unknown>;
+    const agentName =
+      typeof b.name === "string" ? b.name : typeof b.agent_name === "string" ? b.agent_name : null;
+    const brokerage = typeof b.brokerage === "string" ? b.brokerage : null;
+    await logActivity(supabase, {
+      projectId: id,
+      type: "branding_changed",
+      actor: "user",
+      summary: [
+        "Branding updated",
+        agentName ? `agent: ${agentName}` : null,
+        brokerage ? `brokerage: ${brokerage}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      detail: { branding: b },
+    });
+  }
+  if ("items" in body) {
+    const newCount = Array.isArray(update.items) ? (update.items as unknown[]).length : 0;
+    if (newCount > prevItemCount) {
+      const added = newCount - prevItemCount;
+      await logActivity(supabase, {
+        projectId: id,
+        type: "item_filed",
+        actor: "user",
+        summary: `${added} item${added === 1 ? "" : "s"} filed`,
+        detail: { prev: prevItemCount, next: newCount },
+      });
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
 

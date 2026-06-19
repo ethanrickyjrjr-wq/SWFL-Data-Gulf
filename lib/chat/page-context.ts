@@ -36,6 +36,10 @@ export interface ProjectPageContext {
   kindCounts?: Record<string, number>;
   freshnessToken?: string;
   hasEmailSchedule?: boolean;
+  /** Live branding — always re-read from projects.branding, never a stale snapshot. */
+  branding?: { agentName?: string; brokerage?: string; license?: string };
+  /** Recent significant activity (last 30d, sig ≥ 5), pre-formatted for the AI. */
+  recentActivity?: string[];
 }
 
 /** Singular kind → display noun (Piece 2 §D contents summary). */
@@ -86,6 +90,20 @@ function describeProject(p: ProjectPageContext): string {
   if (p.hasEmailSchedule) s += "; it has an email schedule";
   const asOf = asOfFromToken(p.freshnessToken);
   if (asOf) s += ` (filed data as of ${asOf})`;
+
+  // Live branding — always current, never a snapshot. If the agent name changed an hour
+  // ago, the AI sees the new name on the next message. Never omit if present.
+  const b = p.branding;
+  if (b?.agentName) {
+    const parts = [b.agentName, b.brokerage, b.license].filter(Boolean);
+    s += `. Agent: ${parts.join(" · ")}`;
+  }
+
+  // Recent significant activity — gives the AI a "what happened since you were last here"
+  // without requiring it to ask. Capped at 3 so it doesn't crowd the context.
+  const activity = p.recentActivity?.slice(0, 3) ?? [];
+  if (activity.length > 0) s += `. Recent: ${activity.join("; ")}`;
+
   return s;
 }
 
@@ -157,5 +175,8 @@ export function projectPageContextForPath(
     kindCounts: digest.kindCounts,
     freshnessToken: digest.freshnessToken,
     hasEmailSchedule: digest.schedules.length > 0,
+    branding:
+      digest.branding && Object.keys(digest.branding).length > 0 ? digest.branding : undefined,
+    recentActivity: digest.recentActivity?.length > 0 ? digest.recentActivity : undefined,
   };
 }

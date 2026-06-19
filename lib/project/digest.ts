@@ -38,6 +38,17 @@ export interface ProjectDigest {
   /** Stale-metric verdicts from reconcile; `[]` when the TTL gate is off. */
   staleMetrics: { label: string; expiredAt?: string }[];
   /**
+   * Live branding for this project — read from projects.branding at digest-build time.
+   * Always current; never a stale snapshot. The AI uses this to refer to the agent by name.
+   */
+  branding: { agentName?: string; brokerage?: string; license?: string };
+  /**
+   * Recent significant activity for this project (last 30d, significance ≥ 5), pre-formatted
+   * for AI context ("Branding updated 2 days ago", "Email blast sent to 14 contacts today").
+   * Empty array when the project_activity table has no qualifying rows yet.
+   */
+  recentActivity: string[];
+  /**
    * Top situational signals from the durable context bus (`project_feed`, Piece 3) —
    * Bound + Tier-2 scope-matched rows the read seam returned, pre-folded for the prompt
    * engine. Only UNREAD rows (`read_at IS NULL`) are folded in (read rows stop
@@ -92,6 +103,16 @@ export interface ProjectDigestInput {
    * into `feedSignals`. Omit / `[]` when the feed is empty.
    */
   feedRows?: FeedRow[];
+  /**
+   * Live branding from projects.branding — passed by the caller so buildProjectDigest
+   * stays pure. Omit when branding is not loaded (branding fields will be empty).
+   */
+  branding?: { agentName?: string; brokerage?: string; license?: string };
+  /**
+   * Pre-formatted recent activity strings from readRecentActivity() — passed by the
+   * caller (page.tsx). Omit when the project_activity table hasn't been wired yet.
+   */
+  recentActivity?: string[];
 }
 
 /** The freshness token an item carries, if its kind has one. */
@@ -253,6 +274,8 @@ export function buildProjectDigest(input: ProjectDigestInput): ProjectDigest {
     freshnessToken,
     freshnessChangedSinceSeen,
     latestActivityAt,
+    branding: input.branding ?? {},
+    recentActivity: input.recentActivity ?? [],
     deliverables: deliverables.map((d) => ({
       id: d.id,
       template: d.template,

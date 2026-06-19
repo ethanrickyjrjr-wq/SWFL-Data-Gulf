@@ -15,6 +15,7 @@ import { getMarketingResend } from "@/lib/email/marketing-client";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
 import { renderGroundedReport } from "@/lib/email/grounded-report";
+import { logActivity } from "@/lib/project/activity";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -190,6 +191,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .eq("id", blast.id);
   }
   if (sent > 0) await recordEmailSent(user.id, sent);
+
+  // Activity log on any successful send so the AI knows "email blast sent to N contacts".
+  if (sent > 0 && deliverable.project_id) {
+    await logActivity(supabase, {
+      projectId: deliverable.project_id,
+      type: "email_sent",
+      actor: "system",
+      summary: `Email blast sent to ${sent} contact${sent === 1 ? "" : "s"}`,
+      detail: { sent, failed, deliverable_id: id, subject },
+    });
+  }
 
   return NextResponse.json({ sent, failed });
 }
