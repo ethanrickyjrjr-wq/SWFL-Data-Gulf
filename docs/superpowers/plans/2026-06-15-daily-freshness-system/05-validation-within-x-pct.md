@@ -2,6 +2,7 @@
 
 > **Recommended model:** ⚡ Sonnet
 
+
 > Build file for the Daily Freshness System. **Read `README.md` §2 (the vendor is a periodic re-anchor, NOT a kill-switch) + §0.** The daily data-quality gate is the **anomaly-vs-our-own-history** check in the **engine (file 01)** — this file is what happens when the **vendor finally refreshes on its native cadence**: a retrospective "was our daily system tracking?" health check + **re-anchoring** the anomaly baseline to the vendor's fresh number. It does **NOT** reject fresh sourced numbers, and a **stale vendor NEVER overrides a fresher sourced value.**
 
 **Model:** Opus · **Repo:** brain-platform · **Wave:** 3 · **Depends:** 01, 04, and a vendor pipeline landing (Redfin county tracker is monthly).

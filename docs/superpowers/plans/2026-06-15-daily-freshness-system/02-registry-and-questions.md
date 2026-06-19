@@ -2,6 +2,7 @@
 
 > **Recommended model:** ⚡ Sonnet — keywords: schema
 
+
 > Build file for the Daily Freshness System. **Read `README.md` §1.3 (single-spine decision), §3b (the `live_search_config` contract this file authors).** No second "question catalog" file — sourced metrics live in `ingest/cadence_registry.yaml` next to vendor data, so the freshness probe + ops board + brains all derive from one source of truth.
 
 **Model:** Opus · **Repo:** brain-platform · **Wave:** 1 (parallel with 01) · **Depends:** — · **Ships in the SAME PR as 01 + 03.**

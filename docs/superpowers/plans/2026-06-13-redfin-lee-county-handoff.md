@@ -2,6 +2,7 @@
 
 > **Recommended model:** ⚡ Sonnet — 7 files, keywords: migration, schema
 
+
 **For:** a fresh build session (Sonnet). **Author:** Opus session 2026-06-13.
 **Status of obligation:** tracked in the `checks` ledger as `redfin_lee_county_parity` (not in this doc — this is a brief, not a status board; RULE 2).
 

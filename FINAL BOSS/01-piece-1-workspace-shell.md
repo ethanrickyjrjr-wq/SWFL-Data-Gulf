@@ -7,6 +7,7 @@
 
 
 
+
 > Status: fully planned, every claim verified against the code. This is the foundation; build it first.
 > Brainstorm done (decisions locked below). Next step on approval: write the repo spec under
 > `docs/superpowers/specs/2026-06-17-workspace-shell-piece1-design.md`, then implement the build sequence.

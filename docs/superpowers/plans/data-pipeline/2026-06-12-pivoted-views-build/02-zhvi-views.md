@@ -2,6 +2,7 @@
 
 > **Recommended model:** ⚡ Sonnet — keywords: migration, schema
 
+
 **Model:** Opus (the calendar-honest YoY is the silent-corruption trap; get the `MAX`-within-window rule and the float8 casting exactly right)
 **Gate:** raw `data_lake.zhvi_swfl` exists (it does). **Blocks** §03, §04, §06-cutover, §08-capture.
 **Parallel with:** §01, §07, §08a.
