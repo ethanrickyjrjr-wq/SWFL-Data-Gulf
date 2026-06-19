@@ -160,6 +160,31 @@ describe("evaluateChange — state_change", () => {
   });
 });
 
+describe("evaluateChange — Gate 1 A3: kind mismatch", () => {
+  it("returns null when filed value is percent but current is plain numeric", () => {
+    // "5.2% YoY" vs "5.2" → same number, different series → must be silent
+    const result = evaluateChange("mortgage_rate", "Rate", "6.8%", "7300", registry);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when filed value is dollar but current is percent", () => {
+    const result = evaluateChange("listing_count", "Price", "$350,000", "15%", registry);
+    expect(result).toBeNull();
+  });
+
+  it("fires when both values are percent (same kind)", () => {
+    const result = evaluateChange("mortgage_rate", "Rate", "5.25%", "5.75%", registry);
+    expect(result).not.toBeNull();
+  });
+
+  it("fires when both values are plain numeric (same kind)", () => {
+    // fed_funds_rate not in registry → _default (threshold 99999, never fires)
+    // Use listing_count with plain numbers
+    const result = evaluateChange("listing_count", "Listings", "312", "256", registry);
+    expect(result).not.toBeNull(); // 17.9% drop > 12% threshold, both numeric kind
+  });
+});
+
 describe("evaluateChange — edge cases", () => {
   it("returns null when values cannot be parsed as numbers", () => {
     const result = evaluateChange("mortgage_rate", "Rate", "n/a", "5.75%", registry);

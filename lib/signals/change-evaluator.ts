@@ -25,6 +25,18 @@ export function parseNumeric(raw: string): number | null {
   return isFinite(n) ? n : null;
 }
 
+/**
+ * Infer the value kind from a raw metric string.
+ * Gate 1 A3: filed value and current value must share the same kind before
+ * numeric comparison. "5.2% YoY" vs "5.2 (index)" → percent vs numeric → mismatch.
+ */
+function inferValueKind(raw: string): "percent" | "dollar" | "numeric" {
+  const trimmed = raw.trim();
+  if (/%/.test(trimmed)) return "percent";
+  if (/^\$/.test(trimmed)) return "dollar";
+  return "numeric";
+}
+
 function directionWord(delta: number): string {
   if (delta > 0) return "rose";
   if (delta < 0) return "dropped";
@@ -94,6 +106,11 @@ export function evaluateChange(
 
   // ── Numeric evaluation ──────────────────────────────────────────────────────
   if (threshold === undefined) return null;
+
+  // Gate 1 A3: kind guard — both values must be the same format class.
+  // Catches "5.2% YoY" (percent) vs "5.2" (numeric): they parse to the same
+  // number but are completely different series. Mismatch → silent.
+  if (inferValueKind(prevValue) !== inferValueKind(currValue)) return null;
 
   const prev = parseNumeric(prevValue);
   const curr = parseNumeric(currValue);

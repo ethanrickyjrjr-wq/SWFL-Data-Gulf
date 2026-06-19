@@ -466,21 +466,21 @@ export function ProjectWorkspace({
         )}
       </div>
 
-      {/* §8 freshness nudge — specific when significantChanges present, generic fallback */}
-      {digest.freshnessChangedSinceSeen && digest.freshnessToken && !refreshDismissed && (
-        <div className="mb-4 mt-4 flex items-center justify-between rounded-lg border border-[#00d4aa]/20 bg-[#00d4aa]/5 px-3 py-2">
-          <span className="flex items-center gap-2 text-xs text-gray-300">
-            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#00d4aa]" />
-            {significantChanges.length > 0
-              ? significantChanges.length === 1
-                ? significantChanges[0]!.delta_description.charAt(0).toUpperCase() +
-                  significantChanges[0]!.delta_description.slice(1) +
-                  " since you last visited."
-                : `${significantChanges.length} of your metrics moved significantly since your last visit.`
-              : "Your filed data has fresh figures."}
-          </span>
-          <div className="flex items-center gap-3">
-            {significantChanges.length > 0 && (
+      {/* §8 freshness nudge — only fires when at least one metric moved significantly.
+           Phase E1: removed generic "fresh figures" fallback (noise when nothing moved).
+           Phase C1: single-change shows filed→current both-values text (not just direction). */}
+      {digest.freshnessChangedSinceSeen &&
+        digest.freshnessToken &&
+        !refreshDismissed &&
+        significantChanges.length > 0 && (
+          <div className="mb-4 mt-4 flex items-center justify-between rounded-lg border border-[#00d4aa]/20 bg-[#00d4aa]/5 px-3 py-2">
+            <span className="flex items-center gap-2 text-xs text-gray-300">
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#00d4aa]" />
+              {significantChanges.length === 1
+                ? `${significantChanges[0]!.label}: filed ${significantChanges[0]!.previous_value} → ${significantChanges[0]!.delta_description}. Want to refresh?`
+                : `${significantChanges.length} of your metrics moved since your last visit.`}
+            </span>
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 disabled={refreshing}
@@ -489,20 +489,19 @@ export function ProjectWorkspace({
               >
                 {refreshing ? "Refreshing…" : "Refresh items →"}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setRefreshDismissed(true);
-                void patchUiState({ last_freshness_token_seen: digest.freshnessToken });
-              }}
-              className="text-xs text-gray-500 hover:text-gray-300"
-            >
-              Dismiss
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRefreshDismissed(true);
+                  void patchUiState({ last_freshness_token_seen: digest.freshnessToken });
+                }}
+                className="text-xs text-gray-500 hover:text-gray-300"
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <ItemsBoard
         items={items}

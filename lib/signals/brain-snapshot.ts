@@ -36,7 +36,9 @@ export function loadSignificanceRegistry(): SignificanceRegistry {
  *
  * @param items     All project items (only kind==="metric" are evaluated)
  * @param registry  Loaded via loadSignificanceRegistry()
- * @param zip       Optional ZIP for scope-matched brain lookups
+ * @param zip       Reserved / legacy. Per-item scope now drives the lookup
+ *                  (Gate 1 A2) — the project-level zip is no longer substituted
+ *                  for a missing item scope. Retained for call-site compatibility.
  * @param limit     Max results returned (default 5)
  */
 export async function computeSignificantChanges(
@@ -58,11 +60,36 @@ export async function computeSignificantChanges(
 
   await Promise.all(
     metrics.map(async (item) => {
-      const slug = item.metric_slug ?? item.label;
-      const key = `${item.report_id}|${slug}|${zip ?? ""}`;
+      // Gate 1 A1: no metric_slug → can't verify same exact data → silent.
+      // The label is NOT a reliable metric identity (a human label like "Median
+      // Price" can map to different series; only the slug is stable).
+      if (!item.metric_slug) return;
+      const slug = item.metric_slug;
+
+      // Gate 1 A2: look the metric up at its OWN filed scope — NEVER substitute
+      // the project-level zip for a missing/different item scope. Comparing the
+      // user's number against a different grain is the exact apples-to-oranges
+      // this gate exists to kill (operator: "SAME EXACT DATA … we don't worry
+      // unless we know for sure").
+      //   zip + scope_value → ZIP-drilled lookup (the one grain lookupLakeFact targets)
+      //   explicit non-zip  → headline lookup (no zip); grain is carried by the slug
+      //   zip w/o a value   → can't target the ZIP → silent
+      //   no scope at all   → unknown grain (legacy pre-3A) → silent; fires again
+      //                       once the item is refiled with a scope
+      let itemZip: string | undefined;
+      if (item.scope_kind === "zip") {
+        if (!item.scope_value) return;
+        itemZip = item.scope_value;
+      } else if (item.scope_kind) {
+        itemZip = undefined;
+      } else {
+        return;
+      }
+
+      const key = `${item.report_id}|${slug}|${itemZip ?? ""}`;
 
       if (!cache.has(key)) {
-        cache.set(key, lookupLakeFact(item.report_id, slug, zip));
+        cache.set(key, lookupLakeFact(item.report_id, slug, itemZip));
       }
       const fact = await cache.get(key)!;
 

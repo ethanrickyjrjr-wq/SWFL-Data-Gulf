@@ -1,3 +1,12 @@
+## 2026-06-19 (main) — feat(signals): strict Gate-1 scope match + Phase F handoff (§3 resolved)
+
+- **`lib/signals/brain-snapshot.ts`** — Gate 1 A2 now STRICT: zip→own scope_value, explicit non-zip→headline (no zip), no/partial scope→silent. Never substitutes the project-level zip for a missing item scope (apples-to-oranges kill). A1 (no metric_slug→silent) confirmed.
+- **`lib/signals/change-evaluator.ts`** — A3 `inferValueKind` guard (percent/dollar/numeric must match before magnitude eval).
+- **`lib/signals/types.ts` + `ingest/significance-registry.yaml`** — B1 groundwork: registry carries `category`/`z_flag_threshold`/`max_stale_days` (12 slugs); INERT until B2.
+- **`app/project/[id]/ProjectWorkspace.tsx`** — C1 single-change nudge shows `Label: filed X → delta`; E1 generic "fresh figures" noise row removed (nudge gated on significantChanges.length>0).
+- **`TODO/01..03`** — findings/decisions (D1–D10), build scope/plan, + Phase F handoff. §3 RESOLVED 2026-06-19: staged (b) — structured-metrics-first v1, vision structured-extraction proposes `{slug,scope,value}` for user confirm (v1.5); HOLD≠COLLIDE; propose-never-override for identity AND scope; per-project aliases never in system vocab; address→ZIP, nothing finer invented.
+- Gates: 41/41 signals tests, 0 tsc, eslint clean. **Next:** Phase F brainstorm (RULE 3.5) then build v1; B2/C2/Phase-D still deferred.
+
 ## 2026-06-19 (main) — feat(geo): coord-to-ZIP centroid-nearest resolution (Python + TypeScript)
 
 - **`fixtures/swfl-zip-centroids.json`** — NEW: 100-ZIP centroid table (92 Census TIGER 2020 ZCTA5 + 9 gap-filled from fl_zips.geojson); shared source of truth for both layers

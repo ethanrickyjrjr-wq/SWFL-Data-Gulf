@@ -10,11 +10,19 @@
 #
 # _default: catch-all for any slug not listed here. threshold 99999 = never fires.
 # Rule: unregistered slugs are SILENT. Add a slug here to enable its nudge.
+#
+# Phase B1 fields (absorbed from data-verification-tolerances.yaml):
+#   category       — maps to a category row in data-verification-tolerances.yaml for fallback
+#   z_flag_threshold — z-score vs 30-day rolling mean that flags a value as implausible
+#   max_stale_days  — how old the last-known value can be before we omit rather than substitute
 
 _default:
   threshold_type: percent_change
   threshold: 99999
   impact_weight: 1
+  category: _default
+  z_flag_threshold: 3.0
+  max_stale_days: 30
 
 # ─── Macro rates ──────────────────────────────────────────────────────────────
 
@@ -23,24 +31,36 @@ freshness_mortgage_30yr_fixed_pct:
   threshold: 0.25
   impact_weight: 10
   unit: "percentage points"
+  category: mortgage_rate
+  z_flag_threshold: 3.0
+  max_stale_days: 14
 
 sofr_rate:
   threshold_type: absolute_change
   threshold: 0.25
   impact_weight: 9
   unit: "percentage points"
+  category: mortgage_rate
+  z_flag_threshold: 3.0
+  max_stale_days: 14
 
 cpi_yoy:
   threshold_type: absolute_change
   threshold: 0.5
   impact_weight: 9
   unit: "percentage points"
+  category: _default
+  z_flag_threshold: 3.0
+  max_stale_days: 45
 
 fl_laus_unemployment_rate:
   threshold_type: absolute_change
   threshold: 0.5
   impact_weight: 8
   unit: "percentage points"
+  category: unemployment_rate
+  z_flag_threshold: 2.0
+  max_stale_days: 45
 
 # ─── Housing — SWFL aggregate ─────────────────────────────────────────────────
 
@@ -48,11 +68,17 @@ housing_median_sale_price_swfl:
   threshold_type: percent_change
   threshold: 5.0
   impact_weight: 9
+  category: median_sale_price
+  z_flag_threshold: 3.0
+  max_stale_days: 45
 
 swfl_median_sale_price:
   threshold_type: percent_change
   threshold: 5.0
   impact_weight: 9
+  category: median_sale_price
+  z_flag_threshold: 3.0
+  max_stale_days: 45
 
 housing_months_of_supply_swfl:
   threshold_type: percent_change
@@ -201,30 +227,45 @@ cap_rate:
   threshold: 0.25
   impact_weight: 8
   unit: "percentage points"
+  category: cap_rate
+  z_flag_threshold: 2.5
+  max_stale_days: 90
 
 cap_rate_median:
   threshold_type: absolute_change
   threshold: 0.25
   impact_weight: 8
   unit: "percentage points"
+  category: cap_rate
+  z_flag_threshold: 2.5
+  max_stale_days: 90
 
 vacancy_rate:
   threshold_type: absolute_change
   threshold: 2.0
   impact_weight: 7
   unit: "percentage points"
+  category: _default
+  z_flag_threshold: 3.0
+  max_stale_days: 90
 
 vacancy_rate_median:
   threshold_type: absolute_change
   threshold: 2.0
   impact_weight: 7
   unit: "percentage points"
+  category: _default
+  z_flag_threshold: 3.0
+  max_stale_days: 90
 
 vacancy_rate_marketbeat_swfl:
   threshold_type: absolute_change
   threshold: 2.0
   impact_weight: 7
   unit: "percentage points"
+  category: _default
+  z_flag_threshold: 3.0
+  max_stale_days: 90
 
 asking_rent_psf:
   threshold_type: percent_change
@@ -248,24 +289,36 @@ laus_lee_unemployment_rate:
   threshold: 0.5
   impact_weight: 8
   unit: "percentage points"
+  category: unemployment_rate
+  z_flag_threshold: 2.0
+  max_stale_days: 45
 
 lee_unemployment_rate:
   threshold_type: absolute_change
   threshold: 0.5
   impact_weight: 8
   unit: "percentage points"
+  category: unemployment_rate
+  z_flag_threshold: 2.0
+  max_stale_days: 45
 
 laus_collier_unemployment_rate:
   threshold_type: absolute_change
   threshold: 0.5
   impact_weight: 8
   unit: "percentage points"
+  category: unemployment_rate
+  z_flag_threshold: 2.0
+  max_stale_days: 45
 
 collier_unemployment_rate:
   threshold_type: absolute_change
   threshold: 0.5
   impact_weight: 8
   unit: "percentage points"
+  category: unemployment_rate
+  z_flag_threshold: 2.0
+  max_stale_days: 45
 
 lee_private_wage_yoy_pct:
   threshold_type: absolute_change

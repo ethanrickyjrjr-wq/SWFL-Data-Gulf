@@ -51,6 +51,11 @@ function metricItem(
     value: "-3.5%",
     freshness_token: "SWFL-7421-v4-20260601",
     metric_slug: "median_sale_price_yoy",
+    // Default fixture is ZIP-scoped — reflects the post-Phase-3A reality that
+    // filed items carry a scope. Tests that exercise the silent paths override
+    // scope_kind/scope_value explicitly.
+    scope_kind: "zip",
+    scope_value: "33931",
     ...overrides,
   };
 }
@@ -190,15 +195,58 @@ describe("computeSignificantChanges", () => {
     expect(result[0].slug).toBe("median_sale_price_yoy");
   });
 
-  test("passes zip to lookupLakeFact", async () => {
+  // Gate 1 A2 (strict): an item with NO scope has an unknown grain → we never
+  // substitute the project-level zip → silent. (Legacy pre-3A items; they fire
+  // again once refiled with a scope.)
+  test("skips item silently when it has no scope (Gate 1 A2)", async () => {
     mockLookup.mockResolvedValue(null);
-    await computeSignificantChanges([metricItem()], REGISTRY, "33931");
+    const result = await computeSignificantChanges(
+      [metricItem({ scope_kind: undefined, scope_value: undefined })],
+      REGISTRY,
+      "33931",
+    );
+    expect(result).toEqual([]);
+    expect(mockLookup).not.toHaveBeenCalled();
+  });
+
+  // Gate 1 A2 (strict): zip grain but no scope_value → can't target the ZIP → silent.
+  test("skips zip-grain item with no scope_value (Gate 1 A2)", async () => {
+    mockLookup.mockResolvedValue(null);
+    const result = await computeSignificantChanges(
+      [metricItem({ scope_kind: "zip", scope_value: undefined })],
+      REGISTRY,
+      "33931",
+    );
+    expect(result).toEqual([]);
+    expect(mockLookup).not.toHaveBeenCalled();
+  });
+
+  // Gate 1 A1: no metric_slug → skip silently, never fall back to label
+  test("skips item silently when metric_slug is absent (Gate 1 A1)", async () => {
+    mockLookup.mockResolvedValue(null);
+    const result = await computeSignificantChanges(
+      [metricItem({ metric_slug: undefined })],
+      REGISTRY,
+    );
+    expect(result).toEqual([]);
+    expect(mockLookup).not.toHaveBeenCalled();
+  });
+
+  // Gate 1 A2: item with scope_kind=zip uses item's own zip, not the project-level zip
+  test("uses item scope_value when scope_kind is zip (Gate 1 A2)", async () => {
+    mockLookup.mockResolvedValue(null);
+    const item = metricItem({ scope_kind: "zip", scope_value: "33931" });
+    await computeSignificantChanges([item], REGISTRY, "99999");
     expect(mockLookup).toHaveBeenCalledWith("master", "median_sale_price_yoy", "33931");
   });
 
-  test("falls back to label when metric_slug absent", async () => {
+  // Gate 1 A2 (strict): explicit non-zip scope → headline lookup (no zip), NEVER
+  // the project-level zip. The grain is carried by the slug; we do not substitute
+  // a ZIP the user never filed.
+  test("uses headline lookup (no zip) for non-zip scope (Gate 1 A2)", async () => {
     mockLookup.mockResolvedValue(null);
-    await computeSignificantChanges([metricItem({ metric_slug: undefined })], REGISTRY);
-    expect(mockLookup).toHaveBeenCalledWith("master", "Median sale price YoY", undefined);
+    const item = metricItem({ scope_kind: "county", scope_value: "lee" });
+    await computeSignificantChanges([item], REGISTRY, "33931");
+    expect(mockLookup).toHaveBeenCalledWith("master", "median_sale_price_yoy", undefined);
   });
 });

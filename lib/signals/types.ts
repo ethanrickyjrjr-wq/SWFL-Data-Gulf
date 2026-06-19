@@ -14,6 +14,13 @@ export interface RegistryEntry {
   impact_weight: number;
   /** Optional unit label for delta_description, e.g. "basis points", "percentage points". */
   unit?: string;
+  // ── Phase B1: unified threshold fields (absorbed from data-verification-tolerances.yaml) ──
+  /** Category key for fallback to data-verification-tolerances.yaml (e.g. "mortgage_rate"). */
+  category?: string;
+  /** Z-score vs 30-day rolling mean that flags the metric as implausible. Null = not a time series. */
+  z_flag_threshold?: number | null;
+  /** Max days since last known value before we omit rather than substitute. */
+  max_stale_days?: number;
 }
 
 /** Registry loaded from ingest/significance-registry.yaml. */
