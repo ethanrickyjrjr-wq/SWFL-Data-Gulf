@@ -1,10 +1,19 @@
 #!/usr/bin/env node
 // scripts/graphify-app-nodes.mjs
 //
-// Extracts app-layer nodes (pages, components, API routes, hooks, tables) from
-// the Next.js codebase and merges them into graphify-out/graph.json so that
-// `graphify query/path/explain` works across BOTH the data plane (brains,
-// slugs, pipelines) and the application plane.
+// Extracts app-layer nodes (pages, components, API routes, hooks, tables,
+// lib_modules, app_components) from the Next.js codebase and merges them into
+// graphify-out/graph.json so that `graphify query/path/explain` works across
+// BOTH the data plane (brains, slugs, pipelines) and the application plane.
+//
+// Node types:
+//   page          — app/**/page.tsx
+//   component     — components/**/*.tsx
+//   api_route     — app/api/**/route.ts
+//   hook          — use* exports from lib/**
+//   table         — CREATE TABLE in docs/sql/*.sql
+//   lib_module    — non-test utility/service files in lib/** (business logic layer)
+//   app_component — co-located tsx files in app/** that aren't page/layout/error
 //
 // Outputs:
 //   graphify-out/app-graph.json  — standalone app-plane graph (networkx format)
@@ -69,6 +78,15 @@ function fileToRoute(absPath, baseDir) {
   return "/" + (route || "");
 }
 
+const APP_COMPONENT_SKIP = new Set([
+  "page.tsx",
+  "layout.tsx",
+  "error.tsx",
+  "loading.tsx",
+  "not-found.tsx",
+  "template.tsx",
+]);
+
 // Return the graph node ID for a source file, or null if not a primary node.
 function fileToNodeId(absPath) {
   const rel = relative(ROOT, absPath).replace(/\\/g, "/");
@@ -80,6 +98,19 @@ function fileToNodeId(absPath) {
   }
   if (rel.startsWith("components/") && absPath.endsWith(".tsx")) {
     return `component:${basename(absPath, ".tsx")}`;
+  }
+  // Co-located tsx files in app/ that aren't special Next.js files
+  if (
+    rel.startsWith("app/") &&
+    !rel.startsWith("app/api/") &&
+    absPath.endsWith(".tsx") &&
+    !APP_COMPONENT_SKIP.has(basename(absPath))
+  ) {
+    return `app_component:${basename(absPath, ".tsx")}`;
+  }
+  // Lib utility/service files (covers hooks too, for cross-file import edges)
+  if (rel.startsWith("lib/") && (absPath.endsWith(".ts") || absPath.endsWith(".tsx"))) {
+    return `lib_module:${rel.replace(/\.(tsx?)$/, "")}`;
   }
   return null;
 }
@@ -164,14 +195,52 @@ function extractTables() {
   return [...seen.values()];
 }
 
+function extractAppComponents() {
+  const appDir = join(ROOT, "app");
+  return walk(appDir, (n) => n.endsWith(".tsx") && !APP_COMPONENT_SKIP.has(n))
+    .filter((f) => !relative(ROOT, f).replace(/\\/g, "/").startsWith("app/api/"))
+    .map((f) => ({
+      id: `app_component:${basename(f, ".tsx")}`,
+      label: basename(f, ".tsx"),
+      type: "app_component",
+      source_file: relative(ROOT, f).replace(/\\/g, "/"),
+    }));
+}
+
+function extractLibModules() {
+  const libDir = join(ROOT, "lib");
+  const seen = new Map();
+  for (const f of walk(
+    libDir,
+    (n) =>
+      (n.endsWith(".ts") || n.endsWith(".tsx")) && !n.includes(".test.") && !n.includes(".spec."),
+  )) {
+    const content = readFileSync(f, "utf8");
+    // Skip files with no exports (type stubs, barrel re-exports only)
+    if (!/^export\s/m.test(content)) continue;
+    const rel = relative(ROOT, f).replace(/\\/g, "/");
+    const id = `lib_module:${rel.replace(/\.(tsx?)$/, "")}`;
+    if (!seen.has(id)) {
+      seen.set(id, {
+        id,
+        label: basename(f).replace(/\.(tsx?)$/, ""),
+        type: "lib_module",
+        source_file: rel,
+      });
+    }
+  }
+  return [...seen.values()];
+}
+
 // ── Edge extraction ───────────────────────────────────────────────────────────
 //
-// Edge relations (mirror the data-plane vocabulary):
-//   renders  — page/component → component   (import from @/components/…)
-//   uses     — any file       → hook        (import of a use* export from @/lib/…)
-//   fetches  — any file       → api_route   (fetch('/api/…') call)
-//   queries  — api_route/hook → table       (.from('tableName') Supabase call)
-//   writes   — pipeline       → table       (cadence_registry dlt_schema_name)
+// Edge relations:
+//   renders  — page/component/app_component → component/app_component
+//   uses     — any file → hook        (use* import from @/lib/…)
+//   imports  — any file → lib_module  (non-hook import from @/lib/…)
+//   fetches  — any file → api_route   (fetch('/api/…') call)
+//   queries  — api_route/hook/lib_module → table  (.from('tableName'))
+//   writes   — pipeline → table       (cadence_registry dlt_schema_name)
 
 function extractEdges(allNodes) {
   const nodeIds = new Set(allNodes.map((n) => n.id));
@@ -209,15 +278,20 @@ function extractEdges(allNodes) {
         if (sourceId) addEdge(sourceId, `component:${name}`, "renders");
       }
 
-      // uses: import { useXxx } from '@/lib/...'
-      // Capture the full import statement so we can see named exports
+      // uses / imports: any import from '@/lib/...'
       for (const [, namedA, namedB, fromPath] of content.matchAll(
         /import\s+(?:type\s+)?(?:\{([^}]+)\}|\w+)(?:\s*,\s*\{([^}]+)\})?\s+from\s+['"](@\/lib\/[^'"]+)['"]/g,
       )) {
         const libPath = fromPath.slice(2); // strip '@/'  → 'lib/chat/use-project-thread'
         const fileBase = libPath.split("/").pop() ?? "";
 
-        // Named imports that are hooks
+        // imports edge → lib_module (file-level, works for any @/lib import)
+        const libModuleId = `lib_module:${libPath}`;
+        if (sourceId && nodeIds.has(libModuleId)) {
+          addEdge(sourceId, libModuleId, "imports");
+        }
+
+        // uses edge → hook (named symbol level)
         const namedRaw = ((namedA ?? "") + "," + (namedB ?? ""))
           .split(",")
           .map((s) =>
@@ -232,7 +306,7 @@ function extractEdges(allNodes) {
           if (sourceId && nodeIds.has(`hook:${h}`)) addEdge(sourceId, `hook:${h}`, "uses");
         }
 
-        // Fallback: infer from filename (use-project-thread → useProjectThread)
+        // Fallback: infer hook from filename (use-project-thread → useProjectThread)
         if (namedRaw.length === 0 && fileBase.startsWith("use")) {
           const camel = fileBase.replace(/-(\w)/g, (_, c) => c.toUpperCase());
           if (sourceId && nodeIds.has(`hook:${camel}`)) addEdge(sourceId, `hook:${camel}`, "uses");
@@ -252,13 +326,10 @@ function extractEdges(allNodes) {
         for (const [, tableName] of content.matchAll(/\.from\(\s*['"](\w+)['"]\s*\)/g)) {
           const target = `table:${tableName}`;
           if (!nodeIds.has(target)) continue;
-          if (sourceId) {
-            addEdge(sourceId, target, "queries");
-          } else {
-            // lib file: wire from each hook defined in this file
-            const hooksHere = hooksByFile.get(rel) ?? [];
-            for (const hookId of hooksHere) addEdge(hookId, target, "queries");
-          }
+          if (sourceId) addEdge(sourceId, target, "queries");
+          // Also wire from any hooks defined in this file
+          const hooksHere = hooksByFile.get(rel) ?? [];
+          for (const hookId of hooksHere) addEdge(hookId, target, "queries");
         }
       }
     }
@@ -335,8 +406,10 @@ ${edgeCounts}
 |------|-------------|
 | \`page\` | Next.js route pages (\`app/**/page.tsx\`) |
 | \`component\` | React components (\`components/**/*.tsx\`) |
+| \`app_component\` | Co-located tsx files in \`app/**\` (non-page) |
 | \`api_route\` | API handlers (\`app/api/**/route.ts\`) |
-| \`hook\` | Data/state hooks exported from \`lib/**\` |
+| \`hook\` | Data/state hooks exported from \`lib/**\` (use* symbols) |
+| \`lib_module\` | Utility/service files in \`lib/**\` (business logic) |
 | \`table\` | Supabase tables from migrations |
 
 ## Example Queries
@@ -372,14 +445,26 @@ const components = extractComponents();
 const apiRoutes = extractApiRoutes();
 const hooks = extractHooks();
 const tables = extractTables();
+const appComponents = extractAppComponents();
+const libModules = extractLibModules();
 
-console.log(`  pages:       ${pages.length}`);
-console.log(`  components:  ${components.length}`);
-console.log(`  api_routes:  ${apiRoutes.length}`);
-console.log(`  hooks:       ${hooks.length}`);
-console.log(`  tables:      ${tables.length}`);
+console.log(`  pages:         ${pages.length}`);
+console.log(`  components:    ${components.length}`);
+console.log(`  app_components:${appComponents.length}`);
+console.log(`  api_routes:    ${apiRoutes.length}`);
+console.log(`  hooks:         ${hooks.length}`);
+console.log(`  lib_modules:   ${libModules.length}`);
+console.log(`  tables:        ${tables.length}`);
 
-const appNodes = [...pages, ...components, ...apiRoutes, ...hooks, ...tables];
+const appNodes = [
+  ...pages,
+  ...components,
+  ...apiRoutes,
+  ...hooks,
+  ...tables,
+  ...appComponents,
+  ...libModules,
+];
 
 // Load the existing brains graph
 const brainGraph = JSON.parse(readFileSync(GRAPH_PATH, "utf8"));

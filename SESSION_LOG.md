@@ -1,3 +1,9 @@
+## 2026-06-19 (main) — chore(graphify): add lib_module + app_component node types
+
+- **`scripts/graphify-app-nodes.mjs`** — two new node types: `lib_module` (146 nodes — all non-test lib/ files, the entire business logic layer previously dark) + `app_component` (47 nodes — co-located tsx in app/ that aren't page/layout/error). New `imports` edge relation wires any `@/lib/…` import to its lib_module node. `fileToNodeId()` extended to source edges FROM lib files and co-located app components. `queries` edge now fires from lib_module nodes directly (was hook-fallback only). Graph: 577 → 771 nodes, 541 → 865 edges.
+- **Effect:** `graphify query "briefcase-digest"`, `graphify query "page-context"`, `graphify query "WelcomeChat grounded dossier"`, workspace shell components (`ProjectWorkspace`, `BrandingBlock`, etc.) all now surface with their import chains. Claude can navigate to business logic without raw grep.
+- **Next:** no follow-up needed — generated output is gitignored, script is the artifact.
+
 ## 2026-06-19 (main) — feat(phase1): AI context gap fix — briefcase values + freshnessIsNew
 
 - **`lib/briefcase/briefcase-digest.ts`** — Phase 1A: metric items now render `[metric] Label: value (as of MM/DD/YYYY)` and qa items include first 120 chars of answer `"..."`. maxChars raised 1000→1500. Imports `asOfFromToken`. New `itemLine()` helper.
