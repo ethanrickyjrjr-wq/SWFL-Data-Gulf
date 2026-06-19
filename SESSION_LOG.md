@@ -1,3 +1,12 @@
+## 2026-06-19 (main) — wip(homepage): choropleth map demo + capabilities section (standalone, not in repo)
+
+- **WIP demo:** `c:\Users\ethan\Downloads\swfl-demo-wip.html` (1170KB, self-contained — open in browser to review)
+- **Build script:** `c:\Users\ethan\Downloads\build_demo4.py` — regenerates from contractor SVG at `c:\Users\ethan\Downloads\Lee County and Collier County-01.svg`
+- **What changed vs swfl-demo-v2.html:** Tighter hero copy ("Real Data. Instant Answers."), new capabilities section below the stats bar with 4 cards: Ask/Get Answers, Tell AI What to Build, Add Projects+Clients, One Ask/AI Emails It. Gulf color system applied throughout.
+- **Contractor SVG:** `Lee County and Collier County-01.svg` — 57 ZIP groups as `<g id="33931" class="zip-group">`, 949 sub-paths, coastline layer. IDs fixed (underscore stripped), Illustrator styles stripped, JS applies choropleth fills to child `<path>` elements.
+- **Homepage NOT touched** — waiting for operator approval of the WIP demo before modifying `components/landing/Hero.tsx`
+- **Next:** Operator reviews `swfl-demo-wip.html`. On approval: remove `FloridaDataViz` from `Hero.tsx`, inline the SVG map + capabilities section. The contractor SVG is 1MB+ so may need a separate component file or fetched asset rather than full inline.
+
 ## 2026-06-19 (main) — fix(ci): add news-swfl to heal-cron-failure.yml trigger list
 
 - `.github/workflows/heal-cron-failure.yml` — added `"SWFL business news ingest daily"` to `workflow_run` trigger list; was added to logger in `86bd9b35` but missed in the healer, causing `trigger-list-drift.test.mjs` test 25 to fail on the last 3 CI runs
