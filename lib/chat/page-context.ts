@@ -13,7 +13,7 @@
 import { asOfFromToken } from "@/lib/project/as-of";
 import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
 import type { ProjectDigest } from "@/lib/project/digest";
-import type { SignificantChange } from "@/lib/signals/types";
+import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types";
 
 /** Normalize: strip a single trailing slash (except root); empty → "/". */
 function norm(pathname: string): string {
@@ -46,6 +46,9 @@ export interface ProjectPageContext {
   /** Metric changes that cleared the significance threshold since the snapshot was filed.
    *  Top 3 by priority. The AI leads with these when present. */
   significantChanges?: SignificantChange[];
+  /** Nearby scored events (openings, closings, permits) that cleared inject_ai threshold.
+   *  Top 3 by final_score. The AI weaves these into analysis when present. */
+  activeEvents?: ScoredEventSummary[];
 }
 
 /** Singular kind → display noun (Piece 2 §D contents summary). */
@@ -119,6 +122,14 @@ function describeProject(p: ProjectPageContext): string {
   if (changes.length > 0) {
     const descriptions = changes.map((c) => `${c.label} ${c.delta_description}`).join("; ");
     s += `. Changes since last visit: ${descriptions}`;
+  }
+
+  // Nearby scored events — real-world signals the AI should weave into analysis.
+  // Capped at 3; ordered by score descending (highest-impact first).
+  const events = (p.activeEvents ?? []).slice(0, 3);
+  if (events.length > 0) {
+    const summaries = events.map((e) => e.ai_summary).join("; ");
+    s += `. Nearby events: ${summaries}`;
   }
 
   return s;
@@ -198,5 +209,6 @@ export function projectPageContextForPath(
     recentActivity: digest.recentActivity?.length > 0 ? digest.recentActivity : undefined,
     significantChanges:
       digest.significantChanges?.length > 0 ? digest.significantChanges.slice(0, 3) : undefined,
+    activeEvents: digest.activeEvents?.length > 0 ? digest.activeEvents.slice(0, 3) : undefined,
   };
 }

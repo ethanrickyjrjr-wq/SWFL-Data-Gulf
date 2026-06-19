@@ -1,3 +1,20 @@
+## 2026-06-19 (main) — feat(phase4cdefg): qualitative event intelligence — full Phase 4
+
+- **`lib/signals/event-evaluator.ts`** — Phase 4C: pure scorer — `scoreEvent()` with haversine distance, brand-tier lookup from YAML, permit two-axis weighting (type_multiplier × value_multiplier), radius-band resolution, `notify_user`/`inject_ai` gating, pre-written `ai_summary`. Loads `brand-tier-registry.yaml` + `event-radius-config.yaml` at runtime (lazy-cached).
+- **`lib/geo/zip-centroid.ts`** — Phase 4C.geo: ZIP machine — `zipToCentroid()` with static Census TIGER 2020 ZCTA centroids for all 6-county SWFL ZIPs. Geocoding fallback for permits without lat/lng; skips 0.25mi band for centroid-resolved rows.
+- **`lib/signals/permit-event-extractor.ts`** — Phase 4E: `extractEventFromPermit()` — brand detection in `contractor_name`+`work_description`, coord resolution (exact → zip_centroid fallback), event_type inference from permit status.
+- **`docs/sql/20260619_project_events.sql`** — Phase 4D: migration written + **applied to prod** (`project_events` table + `project_type`/`derived_project_type` columns on `projects`; `project_id text` FK — projects.id is text, not uuid).
+- **`lib/project/event-insert.ts`** — NEW Phase 4G: `insertProjectEvent()` — cooldown check (same entity+project+event_type within cooldown_until → suppress), 48h notify-batch window (max 1 user notification per project per 48h; inject_ai unaffected), per-event-type cooldown defaults (openings 90d, closings 30d, news 14d), fire-and-forget insert with full anti-fatigue rules.
+- **`lib/project/infer-project-type.ts`** — NEW Phase 4B.infer: `inferProjectType()` — Haiku call on project name+ZIP+item labels → one of 8 project types + `_default`; fire-and-forget write to `projects.derived_project_type`; only runs when both type fields null.
+- **`lib/project/digest.ts`** — Phase 4F: `activeEvents: ScoredEventSummary[]` added to `ProjectDigest` + `ProjectDigestInput`; threaded through `buildProjectDigest`.
+- **`lib/chat/page-context.ts`** — Phase 4F: `activeEvents?: ScoredEventSummary[]` on `ProjectPageContext`; `describeProject()` appends "Nearby events: …" block; `projectPageContextForPath()` maps from digest.
+- **`lib/project/prompt-engine.ts`** — Phase 4F: `nearbyEvent` situational prompt in `openProjectCandidates()` — fires when `digest.activeEvents[0]` exists.
+- **`app/api/welcome/chat/route.ts`** — Phase 4F: `ANALYST_SYSTEM` extended with nearby-events weaving instruction + permit_filed hedge ("a permit was filed", not "it's opening").
+- **`app/project/[id]/page.tsx`** — Phase 4F: queries `project_events` (inject_ai=true, dismissed_at=null, 180d window, limit 3, final_score desc) → passes `activeEvents` prop.
+- **`app/project/[id]/ProjectWorkspace.tsx`** — Phase 4F: accepts `activeEvents: ScoredEventSummary[]` prop; threads into `buildProjectDigest` + useMemo deps.
+- **Tests:** 84/0 (signals + digest + prompt-engine + page-context), tsc baseline held.
+- **Next:** Phase 4 complete. Phase 5 (news crawl + NewsBar UI + clip-to-project) or Phase 3C pre-send verification ladder.
+
 ## 2026-06-19 (main) — feat(phase4ab): brand-tier-registry + event-radius-config
 
 - **`ingest/brand-tier-registry.yaml`** — NEW Phase 4A: brand tier allowlist (Tier 1–4 + `_unclassified` silent default). Classifies 50+ brands by tier, category, and open/close weights. Used by `lib/signals/event-evaluator.ts` (Phase 4C). SWFL-context extras: Publix promoted to tier 1 (anchor-tier in SWFL despite regional Census classification), Wawa flagged for FL expansion.

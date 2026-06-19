@@ -8,7 +8,7 @@ import type { TemplateId } from "@/lib/deliverable/templates";
 import { templateLabel } from "@/lib/deliverable/template-labels";
 import { reorderWithinKind } from "@/lib/project/reorder";
 import { buildProjectDigest } from "@/lib/project/digest";
-import type { SignificantChange } from "@/lib/signals/types";
+import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types";
 import type { FeedRow } from "@/lib/project/feed";
 import { deriveProjectName } from "@/lib/project/derive-name";
 import { ProjectAiContextBridge } from "./workspace/ProjectAiContextBridge";
@@ -53,6 +53,8 @@ interface Props {
   seed: Seed | null;
   /** Pre-computed from computeSignificantChanges() server-side. */
   significantChanges: SignificantChange[];
+  /** Scored nearby events from project_events (inject_ai=true, dismissed_at=null, 180d). */
+  activeEvents: ScoredEventSummary[];
 }
 
 interface BuildOpts {
@@ -83,6 +85,7 @@ export function ProjectWorkspace({
   mcpKey,
   seed,
   significantChanges,
+  activeEvents,
 }: Props) {
   const router = useRouter();
   const [items, setItems] = useState<ProjectItem[]>(initialItems);
@@ -340,6 +343,7 @@ export function ProjectWorkspace({
         staleMetrics: [],
         feedRows,
         significantChanges,
+        activeEvents,
       }),
     [
       id,
@@ -350,6 +354,7 @@ export function ProjectWorkspace({
       lastFreshnessSeen,
       feedRows,
       significantChanges,
+      activeEvents,
     ],
   );
 

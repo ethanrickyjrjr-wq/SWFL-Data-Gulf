@@ -3,7 +3,7 @@ import { identityKeyForItem } from "./identity-key";
 import { tokenDayKey, tokenVersion } from "./as-of";
 import type { ProjectItem } from "./items";
 import type { FeedRow } from "./feed";
-import type { SignificantChange } from "@/lib/signals/types";
+import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types";
 
 /**
  * The project digest — a small, deterministic "what's in here" summary of ONE project,
@@ -56,6 +56,14 @@ export interface ProjectDigest {
    * Computed server-side in page.tsx (async disk read) and passed through ProjectDigestInput.
    */
   significantChanges: SignificantChange[];
+  /**
+   * Scored real-world events nearby the project that cleared inject_ai threshold —
+   * openings, closings, permits, construction starts. Top 3 by final_score. Fetched from
+   * project_events (inject_ai=true, dismissed_at=null, within 180 days) by the caller
+   * (page.tsx) and passed through so buildProjectDigest stays pure. Empty when the table
+   * has no qualifying events or hasn't been populated yet.
+   */
+  activeEvents: ScoredEventSummary[];
   /**
    * Top situational signals from the durable context bus (`project_feed`, Piece 3) —
    * Bound + Tier-2 scope-matched rows the read seam returned, pre-folded for the prompt
@@ -127,6 +135,12 @@ export interface ProjectDigestInput {
    * project has no metric items or when brain lookups are skipped (e.g. MCP list calls).
    */
   significantChanges?: SignificantChange[];
+  /**
+   * Scored nearby events from project_events (inject_ai=true, dismissed_at=null).
+   * Fetched by the caller (page.tsx) and passed through. Omit when the table hasn't been
+   * wired or no events exist for this project.
+   */
+  activeEvents?: ScoredEventSummary[];
 }
 
 /** The freshness token an item carries, if its kind has one. */
@@ -291,6 +305,7 @@ export function buildProjectDigest(input: ProjectDigestInput): ProjectDigest {
     branding: input.branding ?? {},
     recentActivity: input.recentActivity ?? [],
     significantChanges: input.significantChanges ?? [],
+    activeEvents: input.activeEvents ?? [],
     deliverables: deliverables.map((d) => ({
       id: d.id,
       template: d.template,

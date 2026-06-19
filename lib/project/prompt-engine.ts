@@ -108,6 +108,13 @@ function openProjectCandidates(input: PromptEngineInput, digest: ProjectDigest):
   );
   if (feedSignal) out.push(feedSignal.title);
 
+  // nearbyEvent — highest-scored qualitative signal for this project (Phase 4F).
+  // ai_summary is already pre-written: "Walmart (1.1 mi N): permit filed 2026-06-10"
+  const topEvent = digest.activeEvents?.[0];
+  if (topEvent) {
+    out.push(`${topEvent.ai_summary} — want to add this context to your project?`);
+  }
+
   // staleMetric — a filed figure is past its TTL (reconcile verdict; [] when gate off).
   const stale = digest.staleMetrics[0];
   if (stale) out.push(`${stale.label} may be out of date — refresh it?`);

@@ -40,3 +40,72 @@ export interface SignificantChange {
   /** signal_strength × impact_weight — the sort key for ranking changes. */
   priority: number;
 }
+
+// ── Qualitative Event Intelligence (Phase 4) ─────────────────────────────────
+
+export type EventType =
+  | "opening"
+  | "closing"
+  | "permit_filed"
+  | "construction_start"
+  | "zoning_change"
+  | "anchor_announced"
+  | "business_news";
+
+export type EventSource = "permits_swfl" | "news_crawl" | "google_places_delta" | "operator_manual";
+
+export interface QualEvent {
+  entity_name: string;
+  entity_brand_key?: string;
+  event_type: EventType;
+  lat: number;
+  lng: number;
+  event_date: string;
+  source: EventSource;
+  headline?: string;
+  source_url?: string;
+}
+
+export interface ScoredEvent extends QualEvent {
+  brand_tier: number;
+  brand_weight: number;
+  distance_miles: number;
+  radius_band: string;
+  final_score: number;
+  notify_user: boolean;
+  inject_ai: boolean;
+  ai_summary: string;
+  suppressed_reason?: string;
+  geocode_source?: "zip_centroid" | "exact";
+}
+
+export interface ScoredEventSummary {
+  ai_summary: string;
+  event_type: EventType;
+  event_date: string;
+  brand_tier: number;
+  final_score: number;
+}
+
+export interface BrandEntry {
+  tier: number;
+  category: string;
+  aliases?: string[];
+  weight_open?: number;
+  weight_close?: number;
+}
+
+export type BrandRegistry = Record<string, BrandEntry>;
+
+export interface RadiusBand {
+  radius_miles: number;
+  weight_multiplier: number;
+}
+
+export interface ProjectTypeConfig {
+  radius_bands: RadiusBand[];
+  min_score_to_notify: number;
+  min_score_for_ai_context: number;
+}
+
+export type RadiusConfig = Record<string, ProjectTypeConfig>;

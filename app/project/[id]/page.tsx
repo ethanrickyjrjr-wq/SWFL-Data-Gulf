@@ -12,6 +12,7 @@ import { readProjectFeed, type FeedRow } from "@/lib/project/feed";
 import { projectScopeSet } from "@/lib/project/project-scope";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import { computeSignificantChanges, loadSignificanceRegistry } from "@/lib/signals/brain-snapshot";
+import type { ScoredEventSummary } from "@/lib/signals/types";
 import { ProjectWorkspace } from "./ProjectWorkspace";
 import type {
   SavedChart,
@@ -194,6 +195,21 @@ export default async function ProjectPage({
     inferScopeFromItems(items).zip,
   );
 
+  // Phase 4F: scored nearby events for AI context injection.
+  // project_events table may not exist yet on older deployments → graceful empty fallback.
+  // eslint-disable-next-line react-hooks/purity -- server component; Date.now() is valid here
+  const staleEventCutoff = new Date(Date.now() - 180 * 86_400_000).toISOString();
+  const { data: eventRows } = await supabase
+    .from("project_events")
+    .select("ai_summary, event_type, event_date, brand_tier, final_score")
+    .eq("project_id", id)
+    .eq("inject_ai", true)
+    .is("dismissed_at", null)
+    .gte("created_at", staleEventCutoff)
+    .order("final_score", { ascending: false })
+    .limit(3);
+  const activeEvents: ScoredEventSummary[] = (eventRows as ScoredEventSummary[] | null) ?? [];
+
   // Seed-on-load (§I): an outside "email this" hands off via ?seed=<template>
   // [&scope_kind=&scope_value=]. P1 pre-stages a one-click build (no auto-fire LLM
   // pass — that selective pre-build is P2); the build route re-validates the template.
@@ -229,6 +245,7 @@ export default async function ProjectPage({
       mcpKey={project.mcp_key}
       seed={seed}
       significantChanges={significantChanges}
+      activeEvents={activeEvents}
     />
   );
 }
