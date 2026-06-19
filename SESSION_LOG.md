@@ -1,3 +1,9 @@
+## 2026-06-19 (main) — fix(daily-rebuild): build + commit hurricane-tracks-fl brain (issue #91)
+
+- **`brains/hurricane-tracks-fl.md`** — first build (v1, 336 HURDAT2×NFIP fragments). Master was failing deterministically because this file was missing despite the pack being registered as a `brain-input-source` in master. HURDAT2 Parquet was already in S3 (`lake-tier1/environmental/hurdat2_fl.parquet`, vintage 1851-2024). Built locally; unblocks next master rebuild.
+- **Issue #89** (lee-permits-weekly Firecrawl 402): already resolved by the 2026-06-16 crawl4ai cutover (`scraper.py` v3); no code change needed.
+- **Next:** re-enable daily rebuild when ready.
+
 ## 2026-06-19 (main) — fix(tsc): thread freshness_token through LaneOneFact + lane1 buildFact
 
 - **`lib/reconcile/types.ts`** — added `freshness_token?: string` to `LaneOneFact` (refresh route reads it to detect data-vintage changes; field was missing, causing the lone baseline tsc error).
