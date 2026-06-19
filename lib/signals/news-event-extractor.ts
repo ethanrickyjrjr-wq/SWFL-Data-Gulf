@@ -56,15 +56,15 @@ function detectBrandInText(
 
 function inferEventType(headline: string): QualEvent["event_type"] {
   if (CONSTRUCTION_RE.test(headline)) return "construction_start";
-  if (CLOSING_RE.test(headline)) return "closing";
   if (OPENING_RE.test(headline)) return "opening";
+  if (CLOSING_RE.test(headline)) return "closing";
   return "business_news";
 }
 
 /**
  * Extract a QualEvent from a raw news article row.
  * Returns null when: no known brand found, or no SWFL ZIP in text, or ZIP has no centroid.
-brief */
+ */
 export function extractEventFromArticle(
   article: NewsArticleRow,
   brands: BrandRegistry,
