@@ -201,13 +201,15 @@ export default async function ProjectPage({
   const staleEventCutoff = new Date(Date.now() - 180 * 86_400_000).toISOString();
   const { data: eventRows } = await supabase
     .from("project_events")
-    .select("ai_summary, event_type, event_date, brand_tier, final_score")
+    .select(
+      "id, entity_name, event_type, event_date, brand_tier, final_score, distance_miles, headline, source_url, ai_summary",
+    )
     .eq("project_id", id)
     .eq("inject_ai", true)
     .is("dismissed_at", null)
     .gte("created_at", staleEventCutoff)
     .order("final_score", { ascending: false })
-    .limit(3);
+    .limit(10);
   const activeEvents: ScoredEventSummary[] = (eventRows as ScoredEventSummary[] | null) ?? [];
 
   // Seed-on-load (§I): an outside "email this" hands off via ?seed=<template>

@@ -80,11 +80,16 @@ export interface ScoredEvent extends QualEvent {
 }
 
 export interface ScoredEventSummary {
-  ai_summary: string;
+  id: string;
+  entity_name: string;
   event_type: EventType;
   event_date: string;
   brand_tier: number;
   final_score: number;
+  distance_miles: number | null;
+  headline: string | null;
+  source_url: string | null;
+  ai_summary: string;
 }
 
 export interface BrandEntry {
