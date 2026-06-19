@@ -353,11 +353,215 @@ On project open (client-side, after first render):
 - Updates item `value` + `freshness_token` in Supabase in place (same item id, no re-filing)
 - No LLM call — pure data fetch + write
 
-### 3C. Email send trigger
+### 3C. Pre-send data verification + fallback sourcing (email blast)
+
+> **Research basis (2026-06-19 web research):**
+> - No major ESP (Mailchimp, Klaviyo, HubSpot, Marketo) has a native data-freshness gate — this is custom work at the integration layer.
+> - Data journalism standard: two independent sources + 3σ anomaly detection (Data Journalism Handbook). "2 crawlai sources agree" is stronger than any published standard.
+> - AI confirmation accuracy: ~87.3% end-to-end in the best published modular pipeline (OpenFactCheck, COLING 2025) — so AI-only confirmation is the lowest-confidence tier, not a substitute for crawl agreement.
+> - Preflight timing: T-60min check → T-15min final gate (derived from Adobe Campaign preparation-phase pattern). Enough lead time for alert + human override before the send window.
+> - Category-specific tolerances must be set empirically. Published stats: ±2–3σ from rolling mean for financial series; z≥10 for extreme outlier detection only. Derived reasonable defaults below.
+
+**The problem:** A weekly email is scheduled for 10:00 UTC Monday. A brain rebuild failed silently at 06:00. At 10:00 the blast fires with figures that are 7 days stale. The user's client receives a rate that was superseded by a Fed decision on Thursday. One failed brain metric should never revert the entire email to frozen state — and we should know about the failure at 09:00, not 10:00.
+
+**The fix: a tiered verification cron that fires before any scheduled blast.**
+
+---
+
+#### 3C-1. Data readiness check cron (T-60 before each scheduled send)
+
+**New file:** `lib/email/data-readiness.ts`
+
+A cron that fires 60 minutes before any `email_schedules` row whose `next_run_at` is within the next 75 minutes (75-min window catches scheduling drift). For each upcoming send:
+
+1. Load the project's metric items
+2. For each item: check if the brain's current freshness_token is newer than the item's snapshot
+3. If brain is fresh → no action (3B's on-access refresh handles the rest)
+4. If brain is stale/failed → enter the **verification ladder** for that metric
+
+**Verification ladder (per stale metric item):**
+
+```
+TIER 1: 2 independent Firecrawl searches agree within tolerance
+   → search "[metric label] [scope] [current month/year] site:*.gov OR site:freddiemac.com OR site:nar.realtor OR site:redfin.com OR site:zillow.com"
+   → extract numeric value from each result
+   → if both values within category tolerance → USE IT (source: "crawl_consensus")
+   → write value + source URLs to a verification_result
+
+TIER 2: 1 Firecrawl result + 1 Haiku confirmation
+   → take the single crawl result
+   → Haiku prompt: "Does this page confirm [metric label] for [scope] is approximately [value] as of [date]? Answer YES:[value] or NO."
+   → if YES and value within tolerance → USE IT (source: "crawl_haiku")
+   
+TIER 3: 1 Sonnet verification (last resort — ~87% reliable)
+   → Sonnet prompt: "What is the current [metric label] for [scope] as of [today]? Cite a reputable source (government data, major real estate platform, or financial institution). Return: value, source name, source URL, as-of date."
+   → if within tolerance of last known value → USE IT (source: "sonnet_only")
+
+TIER 4: Use last known value with staleness caveat
+   → if the last known value is within max_stale_days for this category → USE IT with caveat
+   → if too stale → FLAG for human review; do NOT send this metric; omit from email or replace with "Data currently unavailable"
+
+ALERT: fire at any tier if the ladder runs (brain was stale) — Supabase insert into
+  `data_readiness_alerts` table so the operator knows a substitution occurred.
+```
+
+---
+
+#### 3C-2. Category-specific tolerances
+
+**New file:** `ingest/data-verification-tolerances.yaml`
+
+Determines when two sources "agree" and when a last-known value is too stale to use:
+
+```yaml
+# tolerance_pct: relative tolerance between two crawl values (% of value)
+# tolerance_abs: absolute tolerance (for low-variance metrics like rates)
+# max_stale_days: max age of last known value before we omit rather than substitute
+# z_flag_threshold: z-score vs. 30-day rolling mean that triggers "implausible" flag
+
+mortgage_rate:
+  tolerance_abs: 0.15        # 0.15% — "6.80% vs 6.93% = acceptable; 6.80% vs 7.50% = reject"
+  tolerance_pct: null
+  max_stale_days: 14         # weekly publish cadence; 2 weeks = too stale
+  z_flag_threshold: 3.0      # rate jumps >3σ are implausible without a Fed event
+
+median_sale_price:
+  tolerance_pct: 5.0         # ±5% relative — prices lag and vary by source methodology
+  tolerance_abs: null
+  max_stale_days: 45         # monthly publish cadence
+  z_flag_threshold: 3.0
+
+active_listings_count:
+  tolerance_pct: 10.0        # ±10% — counts vary by scrape timing and de-dup logic
+  tolerance_abs: null
+  max_stale_days: 14
+  z_flag_threshold: 3.0
+
+days_on_market:
+  tolerance_pct: 10.0
+  tolerance_abs: null
+  max_stale_days: 30
+  z_flag_threshold: 3.0
+
+unemployment_rate:
+  tolerance_abs: 0.30        # BLS rounds to 1 decimal; 0.3% absolute is generous
+  tolerance_pct: null
+  max_stale_days: 45         # monthly BLS publish
+  z_flag_threshold: 2.0
+
+cap_rate:
+  tolerance_abs: 0.25        # CRE cap rates in basis points — 25bp tolerance
+  tolerance_pct: null
+  max_stale_days: 90         # quarterly publish cadence
+  z_flag_threshold: 2.5
+
+flood_risk_aal:
+  tolerance_pct: 5.0         # FEMA recalculates infrequently; small drift = methodology diff
+  tolerance_abs: null
+  max_stale_days: 365        # annual NFIP updates
+  z_flag_threshold: null     # not a time-series; no rolling mean
+
+_default:
+  tolerance_pct: 10.0
+  tolerance_abs: null
+  max_stale_days: 30
+  z_flag_threshold: 3.0
+```
+
+**Matching:** Each metric item's `metric_slug` (or label-match fallback) resolves to a tolerance entry. Unknown slugs use `_default`.
+
+---
+
+#### 3C-3. Verification sources (what Firecrawl searches)
+
+**New file:** `lib/email/verification-sources.ts`
+
+Returns a prioritized search query for a given metric slug + scope. Not a hardcoded list — a function that generates the right query for the metric:
+
+```typescript
+function verificationQuery(slug: string, scope: { zip?: string; place?: string }, asOf: Date): string {
+  // mortgage_rate → "30-year fixed mortgage rate [month year] site:freddiemac.com OR site:bankrate.com OR site:mortgagenewsdaily.com"
+  // median_sale_price + zip → "median home sale price [place] [month year] site:redfin.com OR site:zillow.com OR site:realtor.com"
+  // unemployment_rate + county → "Lee County unemployment rate [month year] site:bls.gov"
+  // active_listings → "homes for sale [place] [month year] site:redfin.com OR site:zillow.com"
+}
+```
+
+Reputable source domain allowlist (not vendor-specific — any authoritative source):
+- Government: `bls.gov`, `census.gov`, `hud.gov`, `federalreserve.gov`, `fhfa.gov`
+- Real estate platforms: `redfin.com`, `zillow.com`, `realtor.com`, `costar.com`
+- Financial: `freddiemac.com`, `bankrate.com`, `mortgagenewsdaily.com`, `wsj.com/market-data`
+- Local news (SWFL): `news-press.com`, `naplesnews.com`, `bizjournals.com/southwest-florida`
+
+Two Firecrawl searches using different queries from this list. Parsed with a lightweight numeric extraction regex (+ optional Haiku-assist for messy HTML).
+
+---
+
+#### 3C-4. Blast route integration
 
 **File:** `app/api/deliverables/[id]/blast/route.ts`
 
-Before building the deliverable HTML, call `refreshProjectItems(project_id)` for all metric items whose `freshness_token` is older than the current brain's token. This ensures a blast always goes out with current figures, not the snapshot from whenever the user filed.
+Before `buildEmailDeliverableModel`:
+
+```
+1. Load project metric items + their scope
+2. For each metric item:
+   a. Check brain freshness (reuse refresh-on-access.ts lookupLakeFact pattern)
+   b. If brain is fresh → use brain value (applyRefresh in-memory, don't persist here — 3B's cron handles the persistent update)
+   c. If brain is stale → check `data_readiness_alerts` for a pre-computed verification result from the T-60 cron
+      - If a verification result exists and is <90min old → use it
+      - If no pre-computed result → run TIER 1 inline (fast; <3s per metric)
+        * If TIER 1 succeeds → use crawl_consensus value
+        * If TIER 1 fails → use last known value with staleness caveat in email footer
+3. Patch `deliverable.items_snapshot` IN MEMORY with any refreshed values (do not persist the snapshot change — the deliverable remains a frozen historical record, but the SEND uses current figures)
+4. Add a `data_freshness_note` to the email footer if any value came from a non-brain source:
+   "Data for [Median Sale Price] sourced from Redfin as of [date] (our data pipeline was unavailable at send time)"
+5. Log what happened to `data_readiness_alerts` regardless of outcome
+```
+
+**Never fail the send over a stale metric.** One metric being unavailable does not cancel the blast. The fallback ladder ensures something always goes out — and the footer note is honest about the source.
+
+---
+
+#### 3C-5. Alert table + operator visibility
+
+**Migration:** `docs/sql/20260619_data_readiness_alerts.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS data_readiness_alerts (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id      uuid REFERENCES projects(id) ON DELETE CASCADE,
+  schedule_id     uuid,                     -- the email_schedule that triggered the check
+  metric_slug     text NOT NULL,
+  metric_label    text NOT NULL,
+  scope_kind      text,
+  scope_value     text,
+  tier_used       text,                     -- "brain_fresh" | "crawl_consensus" | "crawl_haiku" | "sonnet_only" | "last_known" | "omitted"
+  value_used      text,
+  source_urls     text[],                   -- crawl sources if tier 1/2/3
+  snapshot_value  text,                     -- what the item had before this check
+  within_tolerance boolean,
+  alert_at        timestamptz NOT NULL DEFAULT now(),
+  resolved_at     timestamptz,             -- null = still open / human hasn't acknowledged
+  send_at         timestamptz              -- when the blast fired (null = cron check only, no send yet)
+);
+```
+
+The `/ops` dashboard (swfldatagulf-ops repo) reads this table and surfaces a "Data readiness" card: green when all metrics were `brain_fresh`, amber when any used `crawl_*` or `last_known`, red when anything was `omitted`.
+
+---
+
+#### 3C-6. Files summary
+
+| File | Change |
+|------|--------|
+| `lib/email/data-readiness.ts` | NEW — verification ladder (T-60 cron logic) |
+| `lib/email/verification-sources.ts` | NEW — search query generator + source allowlist |
+| `ingest/data-verification-tolerances.yaml` | NEW — per-slug tolerances |
+| `docs/sql/20260619_data_readiness_alerts.sql` | NEW — alert table migration |
+| `app/api/deliverables/[id]/blast/route.ts` | Add in-memory refresh + pre-computed result lookup before render |
+| `app/api/cron/data-readiness/route.ts` | NEW — GHA/Vercel cron endpoint, fires T-60 before each upcoming send |
+| `ingest/cadence_registry.yaml` | Append `data_readiness_preflight` cron entry |
 
 ---
 
@@ -760,9 +964,15 @@ NEARBY EVENTS (scored by proximity + brand significance):
 3. **Phase 2B** — `lib/signals/change-evaluator.ts` + `lib/signals/types.ts` — pure, fully unit-testable before wiring anything
 4. **Phase 2C + 2D** — wire into `ProjectDigest` (requires brain lookup; add cache guard)
 5. **Phase 2E** — prompt engine + `ProjectPageContext` + `ANALYST_SYSTEM` update
-6. **Phase 3A** — schema migration + `items.ts` field addition (non-breaking)
-7. **Phase 3B** — refresh-on-access logic + `/api/projects/[id]/refresh` route
-8. **Phase 3C** — email send pre-refresh
+6. **Phase 3A** — `items.ts` scope fields (SHIPPED `e4d927d`). Non-breaking — JSONB, no DDL.
+7. **Phase 3B** — `lib/project/refresh-on-access.ts` + `POST /api/projects/[id]/refresh` + ProjectWorkspace nudge chip (SHIPPED `e4d927d`).
+8. **Phase 3C** — Data readiness verification ladder before email blast. Build order:
+   - `ingest/data-verification-tolerances.yaml` (data file, zero risk)
+   - `docs/sql/20260619_data_readiness_alerts.sql` migration → apply to prod
+   - `lib/email/verification-sources.ts` — query generator + source allowlist (pure)
+   - `lib/email/data-readiness.ts` — verification ladder (Firecrawl → Haiku → Sonnet → last-known)
+   - `app/api/cron/data-readiness/route.ts` — T-60 preflight cron endpoint
+   - `app/api/deliverables/[id]/blast/route.ts` — in-memory refresh + pre-computed result lookup before render
 9. **Phase 4A** — `ingest/brand-tier-registry.yaml` (data file, no code)
 10. **Phase 4B** — `ingest/event-radius-config.yaml` (data file, no code)
 11. **Phase 4C** — `lib/signals/event-evaluator.ts` + extend `lib/signals/types.ts` — pure, unit-testable (includes permit two-axis scoring)
