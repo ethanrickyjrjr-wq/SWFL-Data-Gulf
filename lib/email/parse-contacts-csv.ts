@@ -10,9 +10,11 @@
  * same tag list to every row, e.g. from the JSON request body). Duplicates are
  * removed; all tags are lowercased and trimmed.
  *
- * Parser is intentionally minimal (handles quoted fields containing commas,
- * trims whitespace, skips blank lines). Not RFC-4180-complete — covers
- * typical spreadsheet exports.
+ * Tokenisation is a single pass over the whole string that tracks quote state
+ * ACROSS physical lines, so a double-quoted field may contain commas AND
+ * embedded newlines (a normal RFC-4180 shape that Google / Outlook / spreadsheet
+ * exports of free-text fields produce). A leading UTF-8 BOM is stripped so a
+ * BOM-prefixed header still matches. Internal `""` is unescaped to a literal `"`.
  */
 
 export interface ContactRow {
@@ -27,59 +29,104 @@ export interface ParseResult {
   skippedCount: number;
 }
 
+// Defensive caps so a single malicious cell can't carry an unbounded tag list
+// (the row count itself is bounded downstream in upsert-contacts).
+const MAX_TAGS_PER_ROW = 50;
+const MAX_TAG_LEN = 64;
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
 /**
- * Split a single CSV line into fields, respecting double-quoted fields that
- * may contain commas. Strips the outer quotes and unescapes internal `""`.
+ * Tokenise an entire CSV string into records (one array of fields per record).
+ *
+ * Quote state is carried across physical newlines, so a `"…"` field containing
+ * a newline stays a single field instead of tearing across two records. Each
+ * field is trimmed; `""` inside a quoted field becomes a literal `"`. A record
+ * is emitted at every UNQUOTED newline. A purely empty physical line yields the
+ * single-empty-field record `[""]`, which callers treat as a blank line.
  */
-function splitCsvLine(line: string): string[] {
-  const fields: string[] = [];
+function tokenizeCsv(text: string): string[][] {
+  const records: string[][] = [];
+  let fields: string[] = [];
   let current = "";
   let inQuotes = false;
+  let started = false; // any content seen toward the current record
   let i = 0;
+  const n = text.length;
 
-  while (i < line.length) {
-    const ch = line[i];
+  while (i < n) {
+    const ch = text[i];
 
     if (inQuotes) {
       if (ch === '"') {
-        // Peek ahead: escaped quote `""` → literal `"`
-        if (i + 1 < line.length && line[i + 1] === '"') {
+        // Escaped quote `""` → literal `"`
+        if (i + 1 < n && text[i + 1] === '"') {
           current += '"';
           i += 2;
           continue;
         }
-        // Closing quote
         inQuotes = false;
-      } else {
-        current += ch;
+        i++;
+        continue;
       }
-    } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ",") {
-        fields.push(current.trim());
-        current = "";
-      } else {
-        current += ch;
-      }
+      current += ch;
+      i++;
+      continue;
     }
+
+    // Not in quotes.
+    if (ch === '"') {
+      inQuotes = true;
+      started = true;
+      i++;
+      continue;
+    }
+    if (ch === ",") {
+      fields.push(current.trim());
+      current = "";
+      started = true;
+      i++;
+      continue;
+    }
+    if (ch === "\n") {
+      fields.push(current.trim());
+      records.push(fields);
+      fields = [];
+      current = "";
+      started = false;
+      i++;
+      continue;
+    }
+    current += ch;
+    started = true;
     i++;
   }
-  fields.push(current.trim());
-  return fields;
+
+  // Flush the trailing record only if it carried any content (so a trailing
+  // newline does not synthesise a spurious blank record).
+  if (started || current !== "" || fields.length > 0) {
+    fields.push(current.trim());
+    records.push(fields);
+  }
+
+  return records;
 }
 
-/** Parse semicolon-or-pipe separated tag string into clean, deduped tags. */
+/** A record corresponding to an empty physical line (skipped silently). */
+function isBlankRecord(record: string[]): boolean {
+  return record.length === 1 && record[0] === "";
+}
+
+/** Parse semicolon-or-pipe separated tag string into clean, deduped, capped tags. */
 function parseTags(raw: string): string[] {
   if (!raw.trim()) return [];
   return raw
     .split(/[|;]/)
-    .map((t) => t.trim().toLowerCase())
-    .filter((t) => t.length > 0);
+    .map((t) => t.trim().toLowerCase().slice(0, MAX_TAG_LEN))
+    .filter((t) => t.length > 0)
+    .slice(0, MAX_TAGS_PER_ROW);
 }
 
 /** Merge two tag arrays, deduplicating. */
@@ -98,29 +145,29 @@ function mergeTags(a: string[], b: string[]): string[] {
  * @param bodyTags  - tags to apply to every row from the request body
  */
 export function parseContactsCsv(csv: string, bodyTags: string[] = []): ParseResult {
-  // Normalise line endings from Windows or Mac exports
-  const lines = csv.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+  // Strip a leading UTF-8 BOM (Excel / Windows exports prepend one) so the
+  // header's first column still matches, then normalise line endings.
+  const deBommed = csv.charCodeAt(0) === 0xfeff ? csv.slice(1) : csv;
+  const normalised = deBommed.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-  if (lines.length === 0) {
+  const records = tokenizeCsv(normalised);
+  if (records.length === 0) {
     return { rows: [], skippedCount: 0 };
   }
 
-  // First non-blank line is the header
-  let headerLine = "";
-  let headerIndex = 0;
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim().length > 0) {
-      headerLine = lines[i];
+  // First non-blank record is the header.
+  let headerIndex = -1;
+  for (let i = 0; i < records.length; i++) {
+    if (!isBlankRecord(records[i])) {
       headerIndex = i;
       break;
     }
   }
-
-  if (!headerLine) {
+  if (headerIndex === -1) {
     return { rows: [], skippedCount: 0 };
   }
 
-  const headers = splitCsvLine(headerLine).map((h) => h.toLowerCase());
+  const headers = records[headerIndex].map((h) => h.toLowerCase());
   const emailCol = headers.indexOf("email");
   const nameCol = headers.indexOf("name");
   const tagsCol = headers.indexOf("tags");
@@ -133,11 +180,9 @@ export function parseContactsCsv(csv: string, bodyTags: string[] = []): ParseRes
   const rows: ContactRow[] = [];
   let skippedCount = 0;
 
-  for (let i = headerIndex + 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line.length === 0) continue; // blank line
-
-    const fields = splitCsvLine(line);
+  for (let i = headerIndex + 1; i < records.length; i++) {
+    const fields = records[i];
+    if (isBlankRecord(fields)) continue; // blank line
 
     const rawEmail = fields[emailCol] ?? "";
     const rawName = nameCol !== -1 ? (fields[nameCol] ?? "") : "";

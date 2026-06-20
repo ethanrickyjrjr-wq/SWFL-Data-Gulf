@@ -184,3 +184,75 @@ describe("column order independence", () => {
     assert.deepEqual(rows[0].tags, ["newsletter"]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Embedded newlines inside quoted fields (RFC-4180; real spreadsheet exports)
+// Regression: the splitter used to tear a quoted field across physical lines,
+// mangling the row and injecting a phantom {email:"corp"} row.
+// ---------------------------------------------------------------------------
+
+describe("quoted fields with embedded newlines", () => {
+  test("newline inside a quoted name stays one field — no phantom row", () => {
+    const csv = 'email,name\n"foo@bar.com","Acme\nCorp"\nbaz@qux.io,Bob\n';
+    const { rows, skippedCount } = parseContactsCsv(csv);
+    assert.equal(rows.length, 2);
+    assert.equal(rows[0].email, "foo@bar.com");
+    assert.equal(rows[0].name, "Acme\nCorp");
+    assert.equal(rows[1].email, "baz@qux.io");
+    assert.equal(rows[1].name, "Bob");
+    // No mangled/injected rows leaked in.
+    assert.ok(!rows.some((r) => r.email === "corp"));
+    assert.equal(skippedCount, 0);
+  });
+
+  test("newline inside a quoted email does not split into a garbage row", () => {
+    const csv = 'email,name\n"foo\n@bar.com",Alice\ncbaz@qux.io,Bob\n';
+    const { rows } = parseContactsCsv(csv);
+    assert.equal(rows.length, 2);
+    // first email keeps both halves joined (then lowercased)
+    assert.equal(rows[0].email, "foo\n@bar.com");
+    assert.equal(rows[1].email, "cbaz@qux.io");
+    assert.ok(!rows.some((r) => r.email === "@bar.com" || r.email === "alice"));
+  });
+
+  test("CRLF inside a quoted field is normalised, field stays whole", () => {
+    const csv = 'email,name\r\nfoo@bar.com,"Line1\r\nLine2"\r\nbaz@qux.io,Bob\r\n';
+    const { rows } = parseContactsCsv(csv);
+    assert.equal(rows.length, 2);
+    assert.equal(rows[0].name, "Line1\nLine2");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// UTF-8 BOM (Excel / Windows exports) — header must still match
+// ---------------------------------------------------------------------------
+
+describe("BOM handling", () => {
+  test("strips a leading UTF-8 BOM so the email header matches", () => {
+    const csv = "﻿email,name\nfoo@bar.com,Alice\n";
+    const { rows } = parseContactsCsv(csv);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].email, "foo@bar.com");
+    assert.equal(rows[0].name, "Alice");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Defensive tag caps — a single cell can't carry an unbounded tag list
+// ---------------------------------------------------------------------------
+
+describe("tag caps", () => {
+  test("caps the number of tags per row at 50", () => {
+    const many = Array.from({ length: 120 }, (_, i) => `t${i}`).join(";");
+    const csv = `email,tags\nfoo@bar.com,${many}\n`;
+    const { rows } = parseContactsCsv(csv);
+    assert.equal(rows[0].tags.length, 50);
+  });
+
+  test("clamps an over-long tag to 64 chars", () => {
+    const longTag = "x".repeat(200);
+    const csv = `email,tags\nfoo@bar.com,${longTag}\n`;
+    const { rows } = parseContactsCsv(csv);
+    assert.equal(rows[0].tags[0].length, 64);
+  });
+});

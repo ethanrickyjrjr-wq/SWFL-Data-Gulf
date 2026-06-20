@@ -25,7 +25,7 @@ export default async function MobileContactsPage({
 }) {
   const { token } = await params;
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-10">
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-10">
       <h1 className="text-lg font-semibold text-white">Add your contacts</h1>
       <p className="mt-1 text-sm text-gray-400">
         Pick the people you want to be able to email. We only read names and email addresses, and
