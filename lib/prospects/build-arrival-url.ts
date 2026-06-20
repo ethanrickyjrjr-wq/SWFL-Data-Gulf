@@ -11,6 +11,8 @@ const HEX_RE = /^#[0-9a-fA-F]{3,8}$/;
 export function buildArrivalUrl(input: {
   name?: string;
   brand?: BrandEnrichment | null;
+  /** Prospect scope ZIP — carried so the arrival's "Open your project" CTA can seed. */
+  zip?: string;
   base?: string;
 }): string {
   const { brand, base = "" } = input;
@@ -20,6 +22,7 @@ export function buildArrivalUrl(input: {
   if (brand?.primary && HEX_RE.test(brand.primary)) params.set("primary", brand.primary);
   if (brand?.secondary && HEX_RE.test(brand.secondary)) params.set("secondary", brand.secondary);
   if (brand?.logo_url && /^https?:\/\//i.test(brand.logo_url)) params.set("logo", brand.logo_url);
+  if (input.zip && /^\d{5}$/.test(input.zip)) params.set("zip", input.zip);
   const qs = params.toString();
   const path = qs ? `/welcome?${qs}` : "/welcome";
   return base ? new URL(path, base).href : path;

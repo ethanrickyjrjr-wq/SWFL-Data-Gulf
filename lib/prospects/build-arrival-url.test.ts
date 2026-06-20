@@ -42,3 +42,12 @@ test("base → absolute url", () => {
   const url = buildArrivalUrl({ name: "Z", base: "https://www.swfldatagulf.com" });
   expect(url).toBe("https://www.swfldatagulf.com/welcome?name=Z");
 });
+
+test("5-digit zip → adds zip param (carries scope into the arrival)", () => {
+  expect(buildArrivalUrl({ name: "Z", zip: "33931" })).toBe("/welcome?name=Z&zip=33931");
+});
+
+test("non-5-digit zip is dropped", () => {
+  expect(buildArrivalUrl({ name: "Z", zip: "abc" })).toBe("/welcome?name=Z");
+  expect(buildArrivalUrl({ name: "Z", zip: "3393" })).toBe("/welcome?name=Z");
+});
