@@ -9,9 +9,9 @@ delete blind. Most calls here are the operator's; this file executes them.
 |---|---|---|
 | `/ask` (md 941) | Clean "Ask anything" box + SWFL example queries | **KEEP + promote** into nav (strong top-of-funnel; complements the in-page pill) |
 | `/showcase` (md 1955) | "What we can build for you" — live-data template gallery | **KEEP + promote prominently** (research-backed lead surface; primary nav + a home door) |
-| `/demo` (md 2642) | Self-contained "Real data makes AI real" proof (live CRE conclusion + charts) | **KEEP + forward CTA (B3)**, or fold into `/showcase` — operator's call |
-| `/data-intel` (md 21,511) | **Internal** data-coverage doc ("read before building a source", LIVE/COLD badges, cites `docs/data-coverage.md`) | **NOT customer-facing** → `noindex` + keep out of customer nav, or move under `/ops` |
-| `/ops/data-inventory` | Operator data-inventory page | **Relocate to `swfldatagulf-ops`** (per the ops-repo rule) or gate in place — never customer nav |
+| `/demo` (md 2642) | Self-contained "Real data makes AI real" proof (live CRE conclusion + charts) | **RESOLVED (op 2026-06-20): keep STANDALONE, NOT in top nav.** Footer-listed only (stays connected, not an orphan); add the B3 forward CTA; revisit later |
+| `/data-intel` (md 21,511) | **Internal** data-coverage doc ("read before building a source", LIVE/COLD badges, cites `docs/data-coverage.md`) | **OPEN** → rec `noindex` + keep out of customer nav, or move to the ops repo |
+| `/ops/data-inventory` | Operator data-inventory page | **DONE (commit 2):** removed from brain-platform; canonical lives in `swfldatagulf-ops` (`app/data-inventory/`, ahead of the dup) |
 
 ## Build
 1. Execute the confirmed keep/kill: promote kept pages into B1/B2 `NAV_GROUPS` + `SiteFooter`; for internal ones add `robots: noindex` (or move to `/ops`/the ops repo) and ensure they're NOT in customer nav.

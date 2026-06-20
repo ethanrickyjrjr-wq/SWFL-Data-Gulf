@@ -71,7 +71,7 @@ Only real conflicts are same-file edits or a hard dependency. **B1 owns all nav/
 - **Probe first (RULE 0.5):** re-read the file:line anchors in your brief before editing — they were captured 2026-06-20 and may have drifted. graphify/grep, don't assume.
 - **Preserve the white-label rule:** `/p/*` and `/embed/*` stay chrome-free (no nav, no footer, no pill). Breaking this leaks SWFL branding into a broker's client-facing deliverable.
 
-## Decisions needed from operator (blocks B6, informs B1/B2 nav)
-1. `/data-intel` — it's a 21KB **internal** coverage doc currently public. Noindex + keep out of customer nav, or move under `/ops`? (recommend: internal-only)
-2. `/demo` — promote as a proof page, or fold into `/showcase`?
-3. `/ops/data-inventory` — relocate to `swfldatagulf-ops` repo (per the ops-repo rule) or gate in place?
+## Decisions — operator calls (2026-06-20)
+1. `/data-intel` — **OPEN.** 21KB **internal** coverage doc currently public. Rec: `noindex` + keep out of customer nav (or move under the ops repo like `data-inventory` was).
+2. `/demo` — **RESOLVED: keep STANDALONE, do NOT put it in the top nav** (revisit later). It may be **footer-listed** so it stays connected (not an orphan), but never a primary tab. B1/B2/B6 reflect this.
+3. `/ops/data-inventory` — **RESOLVED + DONE.** Removed from brain-platform. The canonical, more-evolved copy already lives in the `swfldatagulf-ops` repo (`app/data-inventory/`, with `section-actions.tsx` + a newer `_data.ts`); brain-platform's was a stale orphan dup.
