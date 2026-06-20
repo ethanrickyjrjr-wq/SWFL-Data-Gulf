@@ -186,7 +186,7 @@ describe("computeSignificantChanges", () => {
       }),
     ];
 
-    const result = await computeSignificantChanges(items, REGISTRY, undefined, 2);
+    const result = await computeSignificantChanges(items, REGISTRY, undefined, undefined, 2);
     expect(result).toHaveLength(2);
     // priority = signal_strength × impact_weight
     // median_sale_price_yoy: signal_strength ≈ 120%/3% = 40, weight=8 → priority≈320
@@ -248,5 +248,51 @@ describe("computeSignificantChanges", () => {
     const item = metricItem({ scope_kind: "county", scope_value: "lee" });
     await computeSignificantChanges([item], REGISTRY, "33931");
     expect(mockLookup).toHaveBeenCalledWith("master", "median_sale_price_yoy", undefined);
+  });
+
+  // Phase F F2/F4: a value confirmed at its EXACT filed value never re-alerts;
+  // editing the filed value lifts the suppression (key no longer matches).
+  test("suppresses a confirmed value, re-surfaces after an edit (Phase F)", async () => {
+    // Current brain value clears the 3% threshold from 6.8% (≈13% relative move).
+    mockLookup.mockResolvedValue({
+      value: "7.7%",
+      brain_id: "master",
+      metric_slug: "median_sale_price_yoy",
+      label: "Median sale price YoY",
+      grain: "zip-month",
+    });
+    const item = metricItem({
+      id: "i1",
+      value: "6.8%",
+      metric_slug: "median_sale_price_yoy",
+      scope_kind: "zip",
+      scope_value: "33931",
+    });
+
+    // No confirm → the change fires, bound to item i1.
+    const fired = await computeSignificantChanges([item], REGISTRY);
+    expect(fired).toHaveLength(1);
+    expect(fired[0].item_id).toBe("i1");
+
+    // Confirm at the exact filed value → suppressed.
+    const suppressed = await computeSignificantChanges([item], REGISTRY, undefined, {
+      i1: "6.8%",
+    });
+    expect(suppressed).toHaveLength(0);
+
+    // Item edited to a different filed value, SAME confirm map → key no longer
+    // matches → the change re-surfaces.
+    const editedItem = metricItem({
+      id: "i1",
+      value: "6.5%",
+      metric_slug: "median_sale_price_yoy",
+      scope_kind: "zip",
+      scope_value: "33931",
+    });
+    const resurfaced = await computeSignificantChanges([editedItem], REGISTRY, undefined, {
+      i1: "6.8%",
+    });
+    expect(resurfaced).toHaveLength(1);
+    expect(resurfaced[0].item_id).toBe("i1");
   });
 });

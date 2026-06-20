@@ -13,6 +13,7 @@ import { parse } from "yaml";
 import type { ProjectItem } from "@/lib/project/items";
 import type { SignificantChange, SignificanceRegistry } from "./types";
 import { evaluateChange } from "./change-evaluator";
+import { isConfirmed, type ConfirmedValues } from "./confirmed-values";
 import { lookupLakeFact } from "@/lib/reconcile/lane1";
 
 let _registry: SignificanceRegistry | null = null;
@@ -45,6 +46,7 @@ export async function computeSignificantChanges(
   items: ProjectItem[],
   registry: SignificanceRegistry,
   zip?: string,
+  confirmedValues?: ConfirmedValues,
   limit = 5,
 ): Promise<SignificantChange[]> {
   const metrics = items.filter(
@@ -65,6 +67,10 @@ export async function computeSignificantChanges(
       // Price" can map to different series; only the slug is stable).
       if (!item.metric_slug) return;
       const slug = item.metric_slug;
+
+      // Phase F F2/F4: a value the user confirmed at THIS exact filed value never
+      // re-alerts. A later edit changes item.value → key differs → not suppressed.
+      if (isConfirmed(confirmedValues, item.id, item.value)) return;
 
       // Gate 1 A2: look the metric up at its OWN filed scope — NEVER substitute
       // the project-level zip for a missing/different item scope. Comparing the
@@ -96,7 +102,7 @@ export async function computeSignificantChanges(
       if (!fact) return;
 
       const currentValue = String(fact.value);
-      const change = evaluateChange(slug, item.label, item.value, currentValue, registry);
+      const change = evaluateChange(slug, item.id, item.label, item.value, currentValue, registry);
       if (change) changes.push(change);
     }),
   );

@@ -32,6 +32,8 @@ export type SignificanceRegistry = Record<string, RegistryEntry>;
  */
 export interface SignificantChange {
   slug: string;
+  /** The project item this change belongs to — binds the chip + the sticky confirm. */
+  item_id: string;
   /** Human-readable metric label from the filed item. */
   label: string;
   /** The snapshot value stored in the metric item (e.g. "-3.5% YoY"). */

@@ -93,6 +93,7 @@ function buildConsequence(slug: string, prevRate: number, currRate: number): str
  * clears the significance threshold defined in the registry.
  *
  * @param slug        Brain output slug (key into registry)
+ * @param itemId      The project item this change belongs to (binds chip + confirm)
  * @param label       Human-readable metric label (for the returned shape)
  * @param prevValue   Snapshot value string from the filed metric item
  * @param currValue   Current brain value string
@@ -101,6 +102,7 @@ function buildConsequence(slug: string, prevRate: number, currRate: number): str
  */
 export function evaluateChange(
   slug: string,
+  itemId: string,
   label: string,
   prevValue: string,
   currValue: string,
@@ -117,6 +119,7 @@ export function evaluateChange(
     if (!monitored_transitions?.includes(transition)) return null;
     return {
       slug,
+      item_id: itemId,
       label,
       previous_value: prevValue,
       current_value: currValue,
@@ -157,6 +160,7 @@ export function evaluateChange(
 
   return {
     slug,
+    item_id: itemId,
     label,
     previous_value: prevValue,
     current_value: currValue,
