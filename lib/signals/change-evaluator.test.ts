@@ -26,6 +26,13 @@ const registry: SignificanceRegistry = {
     monitored_transitions: ["active→pending", "pending→sold"],
     impact_weight: 9,
   },
+  freshness_mortgage_30yr_fixed_pct: {
+    threshold_type: "absolute_change",
+    threshold: 0.25,
+    impact_weight: 10,
+    unit: "percentage points",
+    category: "mortgage_rate",
+  },
 };
 
 describe("parseNumeric", () => {
@@ -195,5 +202,40 @@ describe("evaluateChange — edge cases", () => {
     const emptyRegistry: SignificanceRegistry = {};
     const result = evaluateChange("mortgage_rate", "Rate", "5.25%", "5.75%", emptyRegistry);
     expect(result).toBeNull();
+  });
+});
+
+describe("evaluateChange — C2: deterministic consequence", () => {
+  it("attaches a per-$100K payment delta for a 30-yr mortgage rate rise", () => {
+    const result = evaluateChange(
+      "freshness_mortgage_30yr_fixed_pct",
+      "30-yr fixed",
+      "6.8%",
+      "7.3%",
+      registry,
+    );
+    expect(result).not.toBeNull();
+    // Deterministic, no invented inputs: a rate RISE → a POSITIVE monthly delta.
+    expect(result!.consequence).toMatch(/^≈ \+\$\d+\/mo per \$100K financed \(30-yr fixed\)$/);
+  });
+
+  it("uses a minus sign when the rate drops", () => {
+    const result = evaluateChange(
+      "freshness_mortgage_30yr_fixed_pct",
+      "30-yr fixed",
+      "7.3%",
+      "6.8%",
+      registry,
+    );
+    expect(result!.consequence).toMatch(/^≈ −\$\d+\/mo per \$100K financed/);
+  });
+
+  it("leaves consequence undefined for non-mortgage slugs (never invents one)", () => {
+    const mortgageish = evaluateChange("mortgage_rate", "Rate", "5.25%", "5.75%", registry);
+    expect(mortgageish).not.toBeNull();
+    expect(mortgageish!.consequence).toBeUndefined();
+
+    const listings = evaluateChange("listing_count", "Listings", "312", "256", registry);
+    expect(listings!.consequence).toBeUndefined();
   });
 });

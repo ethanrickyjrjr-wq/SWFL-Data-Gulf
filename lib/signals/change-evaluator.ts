@@ -65,6 +65,29 @@ function buildDescription(
   return `${dir} ${formatAbsDelta(abs, unit)}`;
 }
 
+/** Monthly payment on a fully-amortizing loan. ratePct = annual rate in percent. */
+function monthlyPayment(ratePct: number, principal: number, months: number): number {
+  const r = ratePct / 100 / 12;
+  if (r === 0) return principal / months;
+  const factor = Math.pow(1 + r, months);
+  return (principal * r * factor) / (factor - 1);
+}
+
+/**
+ * C2 — decision-framed consequence, computed ONLY where it follows deterministically
+ * from the move with no external assumptions. Returns undefined otherwise (never invent).
+ *
+ * 30-yr fixed mortgage rate → amortized monthly-payment delta per $100K financed.
+ * Expressed per-$100K so it needs no listing price; the reader scales it to their loan.
+ */
+function buildConsequence(slug: string, prevRate: number, currRate: number): string | undefined {
+  if (slug !== "freshness_mortgage_30yr_fixed_pct") return undefined;
+  const per100k = monthlyPayment(currRate, 100_000, 360) - monthlyPayment(prevRate, 100_000, 360);
+  if (!isFinite(per100k) || Math.round(per100k) === 0) return undefined;
+  const sign = per100k > 0 ? "+" : "−";
+  return `≈ ${sign}$${Math.abs(Math.round(per100k))}/mo per $100K financed (30-yr fixed)`;
+}
+
 /**
  * Evaluate whether the move from prevValue → currValue for the given slug
  * clears the significance threshold defined in the registry.
@@ -138,6 +161,7 @@ export function evaluateChange(
     previous_value: prevValue,
     current_value: currValue,
     delta_description: buildDescription(delta, threshold_type, unit),
+    consequence: buildConsequence(slug, prev, curr),
     signal_strength,
     impact_weight,
     priority: signal_strength * impact_weight,

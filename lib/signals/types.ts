@@ -40,6 +40,13 @@ export interface SignificantChange {
   current_value: string;
   /** Pre-written phrase for the AI: "dropped 4.2 percentage points". */
   delta_description: string;
+  /**
+   * C2 — decision-framed consequence, present only where it is DETERMINISTIC from
+   * the move alone (no invented inputs). E.g. a 30-yr-fixed mortgage-rate move →
+   * the amortized monthly-payment delta per $100K financed. Undefined when no
+   * consequence can be computed without external assumptions. Never invented.
+   */
+  consequence?: string;
   /** How far past the threshold: 1.0 = exactly at threshold, 2.0 = 2× threshold. */
   signal_strength: number;
   /** From the registry — how consequential this metric is (1–10). */

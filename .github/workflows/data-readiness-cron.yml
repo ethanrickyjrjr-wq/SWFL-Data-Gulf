@@ -1,0 +1,39 @@
+name: Data-readiness verification (hourly)
+
+# Fires the pre-send data-verification ladder. The handler at
+# app/api/cron/data-readiness was written for an external hourly trigger
+# (Bearer CRON_SECRET) but no vercel.json exists, so it never ran — this is
+# the GHA trigger that turns it on (the repo's scheduling spine is GHA, not
+# Vercel). Each run verifies every metric item in any project with a send
+# in the next 75 min and logs the outcome to data_readiness_alerts (/ops reads it).
+
+on:
+  schedule:
+    # Top of every hour — matches the handler's 75-min look-ahead window.
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: data-readiness-cron
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hit the data-readiness cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/body.json -w "%{http_code}" \
+            -H "authorization: Bearer ${CRON_SECRET}" \
+            "https://www.swfldatagulf.com/api/cron/data-readiness")
+          echo "HTTP $code"
+          cat /tmp/body.json
+          echo
+          test "$code" = "200"

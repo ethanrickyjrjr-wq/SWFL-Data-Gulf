@@ -1,3 +1,11 @@
+## 2026-06-19 (main) — feat(signals): C2 consequence math + fix Phase D orphan cron
+
+- **`.github/workflows/data-readiness-cron.yml`** (NEW) — hourly GHA trigger for `app/api/cron/data-readiness`. The verification ladder was built (`a9fdc985`) but no `vercel.json` exists, so the route never fired (orphan). The route was already written for external trigger (Bearer `CRON_SECRET`). Verified live: `CRON_SECRET` in gh secrets, prod route returns 401 without it. GHA is the repo's scheduling spine, not Vercel.
+- **`lib/signals/change-evaluator.ts` + `types.ts`** — C2: new optional `consequence` field on `SignificantChange`, computed deterministically (no invented inputs) — 30-yr amortized payment delta per $100K financed for `freshness_mortgage_30yr_fixed_pct` only (e.g. 6.8%→7.3% = `≈ +$34/mo per $100K`). `undefined` for all other slugs. `delta_description` unchanged (back-compat).
+- **Scope note:** B2 dropped (per-slug thresholds already ARE the noise floor; evaluator already applies them). Phase F EXCLUDED per operator decree. The 4 collision-log columns were Phase-F-coupled → not added.
+- **Gates:** `bun test lib/signals/` 44/44 (41 + 3 new C2), tsc clean on signals files, eslint exit 0.
+- **Next:** Phase D's 4 ops-log columns only if collision logging is revived; otherwise this closes the v1 remaining-work list (C2 + Phase D cron).
+
 ## 2026-06-19 (main) — chore(plans): retroactive annotation sweep + _FINISHED excluded
 
 - **`scripts/annotate-plan.mjs`** — now recurses into subdirectories, skips `_FINISHED/`, covers `docs/superpowers/plans/` + `FINAL BOSS/` in one `node scripts/annotate-plan.mjs` (no args).
