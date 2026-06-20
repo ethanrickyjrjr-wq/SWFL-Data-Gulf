@@ -302,6 +302,21 @@ export const master: PackDefinition = {
     // (stages/4-output.mts) as the OUTPUT.drivers receipt LABEL. A missing daily
     // pulse therefore can neither abort nor move the master rebuild.
     { id: "freshness-pulse", edge_type: "modifier" },
+    // Reconcile 2026-06-20: these 7 were added to sources[] in 672180c but never
+    // to input_brains[], so the DAG resolver (dag.mts resolveBuildOrder) never
+    // scheduled them to build and synthesis never counted their votes — and a
+    // missing brains/<id>.md (fgcu-reri, never committed) threw a deterministic
+    // master HOLD (the 06-18 rebuild failure). Wired as plain `input`,
+    // non-critical: they are factual reporters (hazard history, seller stress,
+    // licenses, condo SIRS, commercial permits, FGCU RERI), so a stale one adds
+    // a caveat but never holds master; only cre-swfl/macro/env-swfl stay critical.
+    { id: "seller-stress-swfl", edge_type: "input" },
+    { id: "storm-history-swfl", edge_type: "input" },
+    { id: "hurricane-tracks-fl", edge_type: "input" },
+    { id: "licenses-swfl", edge_type: "input" },
+    { id: "condo-sirs-swfl", edge_type: "input" },
+    { id: "fgcu-reri", edge_type: "input" },
+    { id: "permits-commercial-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.
