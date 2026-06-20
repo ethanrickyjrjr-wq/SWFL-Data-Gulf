@@ -1,8 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import type { ProjectItem } from "@/lib/project/items";
+import type { SignificantChange } from "@/lib/signals/types";
 import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import { asOfFromToken } from "@/lib/project/as-of";
 import { cleanCitation } from "@/lib/citations/clean-url";
+import { CollisionChip } from "@/components/project/CollisionChip";
+import { FrozenSnapshotNote } from "@/components/project/FrozenSnapshotNote";
 import type { SavedChart } from "./types";
 
 /** A plain "as of {date}" citation line — the only v1 freshness surface (no badge). */
@@ -23,12 +29,25 @@ export function ItemDetail({
   charts,
   fileUrls,
   localPreviews,
+  change,
+  confirming,
+  onKeepMine,
+  onEditValue,
 }: {
   item: ProjectItem;
   charts: Record<string, SavedChart>;
   fileUrls: Record<string, string>;
   localPreviews: Record<string, string>;
+  change?: SignificantChange;
+  confirming?: boolean;
+  onKeepMine?: () => void;
+  onEditValue?: (itemId: string, newValue: string) => void;
 }) {
+  // Inline-edit state for the metric value (U11). Declared unconditionally so the
+  // hook order is stable; only the metric branch reads it.
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(item.kind === "metric" ? item.value : "");
+
   switch (item.kind) {
     case "chart": {
       const saved = charts[item.chart_id];
@@ -46,7 +65,32 @@ export function ItemDetail({
       return (
         <div>
           <p className="text-sm text-gray-300">{item.label}</p>
-          <p className="text-lg font-semibold text-white">{item.value}</p>
+          {editing && onEditValue ? (
+            <input
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={() => {
+                setEditing(false);
+                if (draft !== item.value) onEditValue(item.id, draft);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+              }}
+              className="bg-transparent text-lg font-semibold text-white border-b border-gray-500 focus:outline-none"
+            />
+          ) : (
+            <p
+              className="text-lg font-semibold text-white cursor-text hover:underline decoration-dotted"
+              onClick={() => onEditValue && (setDraft(item.value), setEditing(true))}
+              title={onEditValue ? "Click to edit" : undefined}
+            >
+              {item.value}
+            </p>
+          )}
+          {change && onKeepMine && (
+            <CollisionChip change={change} confirming={!!confirming} onKeepMine={onKeepMine} />
+          )}
           {(item.source_url || item.source_label) &&
             (() => {
               // Shared root: internal/supabase/api never render as a link.
@@ -151,6 +195,7 @@ export function ItemDetail({
               <figcaption className="mt-2 text-sm text-gray-300">{item.caption}</figcaption>
             )}
             <p className="mt-1 text-[11px] text-gray-500">Provided by agent</p>
+            <FrozenSnapshotNote filedAt={item.added_at} />
           </figure>
         );
       }
@@ -172,6 +217,7 @@ export function ItemDetail({
             </p>
           )}
           <p className="mt-1 text-[11px] text-gray-500">Provided by agent</p>
+          <FrozenSnapshotNote filedAt={item.added_at} />
         </div>
       );
     }

@@ -1,4 +1,5 @@
 import type { ProjectItem } from "@/lib/project/items";
+import type { SignificantChange } from "@/lib/signals/types";
 import { groupItemsByKind } from "@/lib/project/group-items";
 import { ItemCard } from "./ItemCard";
 import type { SavedChart } from "./types";
@@ -29,6 +30,10 @@ export function ItemsBoard({
   localPreviews,
   onMove,
   onRemove,
+  changesByItemId,
+  confirmingId,
+  onKeepMine,
+  onEditValue,
 }: {
   items: ProjectItem[];
   charts: Record<string, SavedChart>;
@@ -36,6 +41,10 @@ export function ItemsBoard({
   localPreviews: Record<string, string>;
   onMove: (id: string, dir: -1 | 1) => void;
   onRemove: (id: string) => void;
+  changesByItemId: Record<string, SignificantChange>;
+  confirmingId: string | null;
+  onKeepMine: (item: ProjectItem) => void;
+  onEditValue?: (itemId: string, newValue: string) => void;
 }) {
   if (items.length === 0) {
     return <p className="mt-6 text-sm text-gray-400">No items in this project yet.</p>;
@@ -60,6 +69,10 @@ export function ItemsBoard({
                 isLast={i === g.items.length - 1}
                 onMove={onMove}
                 onRemove={onRemove}
+                change={changesByItemId[item.id]}
+                confirming={confirmingId === item.id}
+                onKeepMine={onKeepMine}
+                onEditValue={onEditValue}
               />
             ))}
           </ul>

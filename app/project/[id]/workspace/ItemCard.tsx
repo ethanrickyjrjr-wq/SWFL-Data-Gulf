@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ProjectItem } from "@/lib/project/items";
+import type { SignificantChange } from "@/lib/signals/types";
 import { summarizeItem } from "@/lib/project/summarize-item";
 import { ItemDetail } from "./ItemDetail";
 import type { SavedChart } from "./types";
@@ -22,6 +23,10 @@ export function ItemCard({
   isLast,
   onMove,
   onRemove,
+  change,
+  confirming,
+  onKeepMine,
+  onEditValue,
 }: {
   item: ProjectItem;
   charts: Record<string, SavedChart>;
@@ -31,6 +36,10 @@ export function ItemCard({
   isLast: boolean;
   onMove: (id: string, dir: -1 | 1) => void;
   onRemove: (id: string) => void;
+  change?: SignificantChange;
+  confirming?: boolean;
+  onKeepMine: (item: ProjectItem) => void;
+  onEditValue?: (itemId: string, newValue: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -89,6 +98,10 @@ export function ItemCard({
             charts={charts}
             fileUrls={fileUrls}
             localPreviews={localPreviews}
+            change={change}
+            confirming={confirming}
+            onKeepMine={() => onKeepMine(item)}
+            onEditValue={onEditValue}
           />
         </div>
       )}

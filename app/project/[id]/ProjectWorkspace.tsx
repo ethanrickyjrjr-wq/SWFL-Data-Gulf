@@ -9,6 +9,7 @@ import { templateLabel } from "@/lib/deliverable/template-labels";
 import { reorderWithinKind } from "@/lib/project/reorder";
 import { buildProjectDigest } from "@/lib/project/digest";
 import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types";
+import { withoutConfirmed } from "@/lib/signals/confirmed-values";
 import type { FeedRow } from "@/lib/project/feed";
 import { deriveProjectName } from "@/lib/project/derive-name";
 import { ProjectAiContextBridge } from "./workspace/ProjectAiContextBridge";
@@ -175,6 +176,56 @@ export function ProjectWorkspace({
     const next = reorderWithinKind(items, itemId, dir);
     if (next !== items) mutate(next);
   }
+
+  // Phase F: metric collision chip ("Keep mine") + inline value edit.
+  const changesByItemId = useMemo(
+    () => Object.fromEntries(significantChanges.map((c) => [c.item_id, c])),
+    [significantChanges],
+  );
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [localSuppressed, setLocalSuppressed] = useState<Record<string, boolean>>({});
+
+  async function onKeepMine(item: ProjectItem) {
+    if (item.kind !== "metric") return;
+    setConfirmingId(item.id);
+    try {
+      await patchUiState({
+        confirmed_values: { ...(uiState.confirmed_values ?? {}), [item.id]: item.value },
+      });
+      await fetch(`/api/projects/${id}/confirm-value`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          change: changesByItemId[item.id],
+          scope_kind: item.scope_kind,
+          scope_value: item.scope_value,
+        }),
+      });
+      setLocalSuppressed((s) => ({ ...s, [item.id]: true }));
+    } finally {
+      setConfirmingId(null);
+    }
+  }
+
+  async function onEditValue(itemId: string, newValue: string) {
+    const nextItems = items.map((it) =>
+      it.kind === "metric" && it.id === itemId ? { ...it, value: newValue } : it,
+    );
+    setItems(nextItems);
+    const nextUi = withoutConfirmed(uiState, itemId);
+    setUiState(nextUi);
+    await patch({ items: nextItems, ui_state: nextUi }, "Updated your number");
+  }
+
+  // Chip map with locally-suppressed (just-confirmed) entries removed so the chip
+  // disappears immediately on "Keep mine".
+  const visibleChanges = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(changesByItemId).filter(([itemId]) => !localSuppressed[itemId]),
+      ),
+    [changesByItemId, localSuppressed],
+  );
 
   async function runBuild(opts?: BuildOpts) {
     if (building || items.length === 0) return;
@@ -510,6 +561,10 @@ export function ProjectWorkspace({
         localPreviews={localPreviews}
         onMove={move}
         onRemove={removeById}
+        changesByItemId={visibleChanges}
+        confirmingId={confirmingId}
+        onKeepMine={onKeepMine}
+        onEditValue={onEditValue}
       />
 
       <div className="mt-6">
