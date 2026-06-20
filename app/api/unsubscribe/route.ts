@@ -16,17 +16,40 @@ async function unsubscribe(contactId: string | null): Promise<void> {
   }
 }
 
+// Cold-outreach recipients (Increment 2) carry ?rid=<outreach_recipients.id> instead of
+// ?id=. Flip their status to 'unsubscribed' (the drip runner's shouldSend then excludes
+// them) and log the event for our internal numbers. Best-effort, same as above.
+async function unsubscribeOutreach(rid: string | null): Promise<void> {
+  if (!rid) return;
+  try {
+    const supabase = createServiceRoleClient();
+    await supabase
+      .from("outreach_recipients")
+      .update({ status: "unsubscribed", updated_at: new Date().toISOString() })
+      .eq("id", rid);
+    await supabase
+      .from("outreach_events")
+      .insert({ recipient_id: rid, event: "unsubscribed" });
+  } catch {
+    // best-effort
+  }
+}
+
+async function handle(req: NextRequest): Promise<void> {
+  const params = new URL(req.url).searchParams;
+  await unsubscribe(params.get("id"));
+  await unsubscribeOutreach(params.get("rid"));
+}
+
 // Gmail's one-click List-Unsubscribe-Post sends a POST.
 export async function POST(req: NextRequest) {
-  const id = new URL(req.url).searchParams.get("id");
-  await unsubscribe(id);
+  await handle(req);
   return new NextResponse("unsubscribed", { status: 200 });
 }
 
 // A recipient clicking the footer link sends a GET — confirm in plain HTML.
 export async function GET(req: NextRequest) {
-  const id = new URL(req.url).searchParams.get("id");
-  await unsubscribe(id);
+  await handle(req);
   return new NextResponse(
     '<!doctype html><html><body style="font-family:sans-serif;padding:40px;text-align:center">' +
       "<h2>You've been unsubscribed.</h2><p>You won't receive further emails from this sender.</p>" +

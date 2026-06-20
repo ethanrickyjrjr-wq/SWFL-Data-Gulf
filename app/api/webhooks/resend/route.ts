@@ -24,6 +24,7 @@ import {
   type InboundDeps,
   type InboundEvent,
 } from "@/lib/email/process-inbound";
+import { extractOutreachAction, type ResendWebhookPayload } from "@/lib/email/outreach/lifecycle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -60,6 +61,36 @@ export async function POST(request: Request): Promise<Response> {
     event = JSON.parse(raw) as InboundEvent;
   } catch {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+
+  // ── Outreach Increment 2: outbound tracking ───────────────────────────────
+  // A tagged outreach event (delivered/opened/clicked/bounced/complained) → record it
+  // for our internal numbers + apply suppression (click → 'engaged' stops the drip),
+  // then ack. Non-outreach events (e.g. the reply sensor's email.received) fall through.
+  const outreachAction = extractOutreachAction(event as unknown as ResendWebhookPayload);
+  if (outreachAction) {
+    try {
+      const odb = createServiceRoleClient();
+      await odb.from("outreach_events").insert({
+        recipient_id: outreachAction.rid,
+        event: outreachAction.event,
+        resend_email_id: outreachAction.emailId,
+      });
+      if (outreachAction.suppressTo) {
+        await odb
+          .from("outreach_recipients")
+          .update({ status: outreachAction.suppressTo, updated_at: new Date().toISOString() })
+          .eq("id", outreachAction.rid);
+      }
+    } catch (err) {
+      console.error(
+        `[resend-webhook] outreach tracking failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    return NextResponse.json(
+      { ok: true, kind: "outreach", event: outreachAction.event },
+      { status: 200 },
+    );
   }
 
   const db = createServiceRoleClient();
