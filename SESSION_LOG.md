@@ -1,3 +1,10 @@
+## 2026-06-20 (main) — Map take 3: reverted served file to contractor (only version with REAL island separation)
+
+- **ZCTA build was a no-op:** rendered the original census 57-path map from git (blob `fba7e6e`) — outline is IDENTICAL to the ZCTA build. Census ZIPs tile edge-to-edge with no water between, so 33931 still butts the mainland → same "connected" look the operator complained about. ZCTA ≠ a fix.
+- **Only the contractor SVG separates islands with water** (it carries a real `the_rest_of_the_coast` layer + per-island outlines — Sanibel/Captiva/Pine Island render as true islands). Its one defect is 33931 (covers mainland), which is exactly what Fiverr is fixing.
+- **Reverted served `public/maps/lee-collier.svg` back to the contractor build** (re-ran `clean-contractor-map.mjs`, 949 paths, coastline layer present). This is the correct base + matches the Fiverr swap-back. ZCTA build (`scripts/build-zcta-map.mjs` + `public/maps/swfl-zcta.geojson`) kept in-repo as reference, not served.
+- **Open:** 33931 stays wrong until Fiverr delivers (re-run clean script then). No-Fiverr alternative = clip ZCTA to a real coastline (turf + detailed shoreline) — deferred.
+
 ## 2026-06-20 (main) — Map take 2: served file now Census-ZCTA (33931 = island, correct assignment) as a hedge vs Fiverr
 
 - **Contractor SVG was wrong for 33931:** it assigned the south-Lee MAINLAND to ZIP 33931 (Fort Myers Beach) → island rendered as a mainland blob (verified by rendering 33931's 3 sub-paths via resvg). Operator confirmed against official ESRI/TomTom ZIP map + Google Maps: 33931 is a thin barrier island. Contractor split Sanibel/Captiva/Pine Island correctly but not FMB.
