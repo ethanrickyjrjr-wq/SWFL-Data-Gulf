@@ -1,7 +1,7 @@
 """DBPR Press Releases ingest pipeline.
 
 Scrapes the DBPR press-release listing pages (myfloridalicense.com/press-releases/)
-via Firecrawl, parses full article text from the listing markdown (articles are
+via crawl4ai, parses full article text from the listing markdown (articles are
 rendered inline — no per-article scrape needed), and upserts raw rows into
 public.dbpr_press_releases.
 
@@ -16,7 +16,7 @@ Usage:
   python -m ingest.pipelines.dbpr_press_releases.pipeline --dry-run
 
 Environment:
-  FIRECRAWL_API_KEY                  — required for scrape
+  (scraping runs on crawl4ai locally — no scrape API key required)
   ANTHROPIC_API_KEY                  — required for --enrich-only
   DESTINATION__POSTGRES__CREDENTIALS — psycopg3 connection URI (required unless --dry-run)
 """

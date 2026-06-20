@@ -1,7 +1,7 @@
 """SWFL corridor pulse — weekly current-events capture -> Tier-1 cold + Tier-2 distilled (Build #2).
 
 Corridor-grained, weekly sibling of ingest/pipelines/city_pulse. Per corridor: one
-capture (Firecrawl /v2/search primary, Anthropic web_search_20250305 fallback)
+capture (Anthropic web_search_20250305)
 surfaces recent commercial-real-estate / current-events signals on that corridor;
 the raw response + flattened citations[] is written to Tier-1 cold storage; distill.py
 then turns it into citation-backed rows in data_lake.city_pulse_corridors.
@@ -17,7 +17,7 @@ not justify the Batch API poll loop (Build #2 decision).
 Tool version: web_search_20250305 — NOT web_search_20260209 (which suppresses
 per-claim citations[], the no-hallucination spine). See the daily city_pulse pipeline.
 
-Env: ANTHROPIC_API_KEY + FIRECRAWL_API_KEY + SUPABASE_URL + SUPABASE_SERVICE_KEY +
+Env: ANTHROPIC_API_KEY + SUPABASE_URL + SUPABASE_SERVICE_KEY +
 DESTINATION__POSTGRES__CREDENTIALS.
 
 CLI:

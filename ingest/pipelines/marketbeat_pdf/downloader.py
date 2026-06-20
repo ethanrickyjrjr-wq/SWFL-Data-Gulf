@@ -65,7 +65,7 @@ def _curl_download(url: str, dest: Path, referer: str = "") -> bool:
     return False
 
 
-def _firecrawl_scrape(url: str) -> str:
+def _scrape_html(url: str) -> str:
     """Scrape a URL and return raw HTML for PDF link extraction."""
     try:
         from ingest.lib.crawl4ai_client import fetch_page_html
@@ -147,7 +147,7 @@ def try_download_colliers(quarter: str, dest_dir: Path) -> Path | None:
     research_url = _COLLIERS_RESEARCH_URL.format(
         quarter_lower=_quarter_to_colliers_slug(quarter)
     )
-    html = _firecrawl_scrape(research_url)
+    html = _scrape_html(research_url)
     if html:
         pdf_url = _extract_pdf_url(html)
         if pdf_url and "colliers.com" in pdf_url:
@@ -187,7 +187,7 @@ def try_download_cw(quarter: str, dest_dir: Path) -> Path | None:
         return dest
 
     # Scrape the research page for a PDF link matching this quarter
-    html = _firecrawl_scrape(_CW_RESEARCH_URL)
+    html = _scrape_html(_CW_RESEARCH_URL)
     if not html:
         print(f"[cw] could not scrape {_CW_RESEARCH_URL}", flush=True)
         return None

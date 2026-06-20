@@ -1,12 +1,18 @@
-"""Three-vendor extraction layer.
+"""Extraction layer — crawl4ai is the live scraper; Firecrawl/Spider are dormant.
 
-scrape_with_fallback()  — plain page→markdown:  crawl4ai (primary) → spider → firecrawl
+scrape_with_fallback()  — plain page→markdown:  crawl4ai (primary, live) → spider → firecrawl
 extract()               — AI structured extract: firecrawl /v2/agent → spider /ai/scrape
+                          (NO production callers — see note below)
 
-crawl4ai is now primary for plain scraping: it runs locally (no API credits) and handles
-JS-rendered pages. Spider is the first paid fallback; firecrawl is last-resort.
+crawl4ai is the ONLY live scraper (operator decree 2026-06-16): it runs locally (no API
+credits) and handles JS-rendered pages. Spider and Firecrawl remain only as DORMANT paid
+fallbacks — each gated on its API key (SPIDER_API_KEY / FIRECRAWL_API_KEY, both unset), and
+`firecrawl-py` is no longer a dependency (the SDK import in firecrawl_client.agent() is lazy
+and raises a caught FirecrawlError if absent). Neither fires today.
 
-extract() keeps firecrawl primary because the /v2/agent endpoint has no crawl4ai analogue.
+extract() (AI structured rows) has zero production callers, so its firecrawl-primary branch
+is inert. Rewiring it to a crawl4ai-native path (LLMExtractionStrategy, or the proven
+crexi/Haiku fetch→strip→Haiku pattern) is a tracked follow-on that needs a live battle-test.
 
 Contract preserved from `firecrawl_client.agent()`:
     extract(prompt, *, urls=[...], schema={...}, max_credits=N,

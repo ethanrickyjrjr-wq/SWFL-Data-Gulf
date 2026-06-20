@@ -375,7 +375,7 @@ def parse_cap_detail_html(html: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Live fetching — requires FIRECRAWL_API_KEY
+# Live fetching — via crawl4ai (UndetectedAdapter, stealth); no scrape API key required
 # ---------------------------------------------------------------------------
 
 _ACCELA_HOST = "https://aca-prod.accela.com"

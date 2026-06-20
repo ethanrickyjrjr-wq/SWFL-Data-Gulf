@@ -2,7 +2,7 @@
 FGCU RERI Regional Economic Indicators — monthly ingest pipeline.
 
 Scrapes the FGCU Regional Economic Research Institute homepage
-(https://www.fgcu.edu/cob/reri/) using Firecrawl, extracts the 8
+(https://www.fgcu.edu/cob/reri/) using crawl4ai, extracts the 8
 "Southwest Florida Economic Outlook" monthly metrics, and upserts into
 public.fgcu_reri_indicators.
 
@@ -16,7 +16,7 @@ Usage:
   python -m ingest.pipelines.fgcu_reri_indicators.pipeline [--current] [--dry-run]
 
 Environment:
-  FIRECRAWL_API_KEY                  — Firecrawl API key (required)
+  (scraping runs on crawl4ai locally — no scrape API key required)
   DESTINATION__POSTGRES__CREDENTIALS — psycopg3 connection URI (required unless --dry-run)
 """
 from __future__ import annotations
@@ -154,7 +154,7 @@ def parse_indicators(markdown: str, source_url: str) -> list[Row]:
 
     # Walk indicator name / value pairs.
     # After the report-month header, expect alternating: blank → indicator_name → blank → value_sentence
-    # Allow extra blank lines between them (the Firecrawl output has variable spacing).
+    # Allow extra blank lines between them (the crawl4ai output has variable spacing).
     indicator_names = set(INDICATOR_LABELS.keys())
     current_indicator: str | None = None
 
@@ -311,7 +311,7 @@ def run(dry_run: bool, conn_str: str | None) -> None:
     markdown = fetch_homepage()
 
     if not markdown:
-        raise RuntimeError("fgcu_reri_indicators: Firecrawl returned empty markdown.")
+        raise RuntimeError("fgcu_reri_indicators: crawl4ai returned empty markdown.")
 
     rows = parse_indicators(markdown, source_url=RERI_HOME_URL)
 

@@ -2,7 +2,7 @@
 SWFL Inc. Economic Development Announcements — weekly ingest pipeline.
 
 Scrapes the SWFL Inc. blog category feeds (https://www.swflinc.com/blog/...) via
-Firecrawl (primary) / Spider (fallback), extracts economic development
+crawl4ai, extracts economic development
 announcement records, writes raw NDJSON to Tier-1 cold storage, and
 upserts structured rows into public.swfl_inc_announcements.
 
@@ -16,7 +16,7 @@ Usage:
   python -m ingest.pipelines.swfl_inc.pipeline [--dry-run]
 
 Environment:
-  FIRECRAWL_API_KEY                  — Firecrawl API key (required)
+  (scraping runs on crawl4ai locally — no scrape API key required)
   DESTINATION__POSTGRES__CREDENTIALS — psycopg3 connection URI (required unless --dry-run)
   SUPABASE_URL                       — Supabase project URL (required unless --dry-run)
   SUPABASE_SERVICE_KEY               — Supabase service key (required unless --dry-run)
