@@ -107,7 +107,7 @@ export async function synthesize(
 
   const response = await client.messages.create({
     model: SYNTHESIS_MODEL,
-    max_tokens: 4096,
+    max_tokens: 16000,
     system: [
       {
         type: "text",

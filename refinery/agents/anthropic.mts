@@ -3,8 +3,8 @@ import { env, requireEnv } from "../config/env.mts";
 
 /** Triage = cheap classification. Haiku 4.5. */
 export const TRIAGE_MODEL = "claude-haiku-4-5";
-/** Synthesis = turning data into refined prose facts. Haiku 4.5 (credit-freeze 2026-06-18). */
-export const SYNTHESIS_MODEL = "claude-haiku-4-5";
+/** Synthesis = turning data into refined prose facts. Sonnet 4.6. */
+export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
 
 /**
  * When no ANTHROPIC_API_KEY is set, the agents run in deterministic mock mode

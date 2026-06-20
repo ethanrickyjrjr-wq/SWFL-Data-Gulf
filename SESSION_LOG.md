@@ -1,3 +1,11 @@
+## 2026-06-20 (main) — Turn-on: restored Sonnet 4.6 synthesis + re-enabled 5 safe workflows; engine left ON
+
+- **Synthesis model restored to Sonnet 4.6 / 16k** (reverting the freeze `e9f148f9`): `refinery/agents/anthropic.mts:7` `SYNTHESIS_MODEL` haiku→`claude-sonnet-4-6`, `refinery/agents/synthesis-agent.mts:110` `max_tokens` 4096→16000. `TRIAGE_MODEL` stays Haiku. `bun test refinery/agents/synthesis-agent.test.mts` → 3/3 (mock.module stub already expected sonnet).
+- **Re-enabled the 5 safe gh-disabled workflows** (`gh workflow enable`): Live Search Daily (296334778), Corridor pulse weekly (286625675), City pulse daily (286204238), DBPR Press Releases weekly (286661731), DBPR Public Notices weekly (286686475). Now run on schedule (engine ON).
+- **Engine left ON** (`ENGINE_ENABLED=true`) — operator is primary user; flip with `node scripts/engine.mjs off`.
+- **Still parked (operator's call, verify from a GHA runner IP first):** Collier permits monthly (283985192), FGCU RERI monthly (285460384), DBPR SIRS monthly (286714663), ingest-crexi-listings (291833372, may be dead broker-scrape).
+- **Handoff:** `ENGINE-HANDOFF.md` (repo root) updated to current state.
+
 ## 2026-06-20 (main) — Engine ON/OFF switch: ENGINE_ENABLED guard on 68 workflows + engine.mjs; core re-armed
 
 - **Single on/off switch for the whole automated engine.** Repo variable `ENGINE_ENABLED` (`true`/`false`) is the source of truth; every scheduled workflow (68) now carries a job guard `if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}` → when off, scheduled runs SKIP cleanly (no compute/credit spend, shown skipped not failed); manual `workflow_dispatch` always works. Control: **`node scripts/engine.mjs on|off|status`** (status self-discovers the guarded set by scanning for the marker — no list to rot). Migrator `scripts/engine-guard-migrate.mjs` (pure text-insertion, preserves comments incl. freeze crons). Verified all 68: yaml parses, every job guarded, triggers intact. Variable created = `true` (engine ON).
