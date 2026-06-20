@@ -27,6 +27,10 @@
 - **HELD (not on main, awaiting operator OK — RULE 1 live `/api` surface):** the G2 branding-parity fix in `app/api/templates/[id]/run/route.ts` (6 lines, `applyUserBrandToProject` after project create) — also on that branch. Show-and-confirm before it lands.
 - **Next:** outreach engine is greenfield on top of the existing spine (`enrichBrand`, `buildArrivalUrl`, `/welcome` arrival, Resend bulk paths). FIRST resolve the open design decision w/ operator (CLI script recommended) before building (RULE 3.5 brainstorm).
 
+## 2026-06-20 (main) — Wrote Increment 2 handoff + starting the build (operator: "push and build it after scoping out")
+
+- **`_AUDIT_AND_ROADMAP/HANDOFF-outreach-increment-2.md`** — durable scope for live outreach send + our-own tracking + click-to-stop: send via Resend, WE own data/logic (outreach_recipients + outreach_events tables, Resend webhook → our events + click→engaged suppress, CAN-SPAM unsub keyed on recipient id, daily drip runner reusing `lib/email/scheduler`). File:line refs verified (`blast/route.ts` batch send, `unsubscribe/route.ts` `?id=` pattern, `webhooks/resend/route.ts` Svix+`email.received`, `marketing-client.ts`). Building next; sends stay DRY_RUN-gated; migrations can't apply here (no DB creds) → operator applies.
+
 ## 2026-06-20 (main) — Tracked the map as an OPEN item (operator: "still want a map, leave it open, we will add")
 
 - Added a build-queue open item under Rich `/r/zip-report`: re-add the ZIP choropleth ONLY after the corrected contractor SVG lands + 33931 verified as an island. Builder + component kept ready. Map is paused, not abandoned.
