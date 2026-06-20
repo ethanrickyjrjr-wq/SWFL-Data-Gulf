@@ -15,6 +15,12 @@
 We **flag with confidence**, we **never override**. Phase F is the product-safety layer on top of
 the Gate-1 certainty engine that is already live.
 
+**Scope:** we provide market **data**. We never *change* a user's number — including a number
+inside a contract (emailing contract data is fine; mutating it is not). The user edits their own
+figures (U11); the AI only **answers/advises** about a number when asked — it never rewrites it. A
+"kept" number is a market data point the user chose to anchor in their own project view, not a
+transaction term we manage.
+
 ---
 
 ## 1. What is already built (verified on the tree, do NOT rebuild)
