@@ -20,6 +20,10 @@ mock.module("@/utils/supabase/server", () => ({
         }),
       }),
       delete: () => ({ eq: async () => ({ error: null }) }),
+      // fire-and-forget logActivity() inserts a project_activity row on every
+      // PATCH that changes name/branding/scope; stub it so the caught insert
+      // doesn't log a TypeError (it never affects assertions — logActivity swallows errors).
+      insert: async () => ({ error: null }),
     }),
   }),
 }));

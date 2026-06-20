@@ -1,3 +1,13 @@
+## 2026-06-20 (main) — AI-surface audit (9 surfaces, burden flipped) + 2 safe fixes; handoff written
+
+- **Audited every AI surface vs code** (multi-agent workflow, "prove the gap absent, not present" per operator decree). Verdicts: MCP tools ✅, two-agent voice routing ✅, per-project deep context 🟡 (engine built, wiring/UI gaps), AI-builds-templates 🟡, schedule-by-asking 🟡 (built but cron paused), print/uploads 🟡, refinery synthesis 🟡, **cross-project knowledge 🔴 (in-project AI sees ONLY current project — `page-context.ts:198` "stale-leak defense"; the operator's #1 ask is unmet)**.
+- **Build was a FALSE red.** "next build RED / Vercel risk" was a local `node_modules/prettier` extracted empty — `bun install` fixed it (`next build` EXIT 0, suite 3169/0/0). `prettier@3.8.3` pinned in `bun.lock`; CI/Vercel never affected. Corrected my own earlier misdiagnosis.
+- **Fix 1 — silenced noisy test:** `app/api/projects/[id]/route.test.ts` fake supabase now stubs `.insert` (project_activity fire-and-forget logActivity stopped logging a caught TypeError). 7/0, no noise.
+- **Fix 2 — killed the `report` 422 dead-end:** `app/api/projects/[id]/action/route.ts` ask-to-build classify enum/prompt listed `report` (not a valid `TemplateId`) → non-deterministic 422. Pointed at the 4 scope-free templates. (`email` excluded — the scope-less action branch renders it empty; deferred.) eslint clean.
+- **Confirmed already-built (did NOT rebuild):** RESTYLE strip is LIVE (`app/p/[id]/TemplateSwitcher.tsx`); Phase 0–4 project-AI engine; news pipeline backend; schedule create-path.
+- **Handoff + prioritized punch list + cross-project spec (Approach A):** `docs/superpowers/specs/2026-06-20-ai-surface-audit-and-handoff.md`. Opened check `cross_project_ai_knowledge`.
+- **Next:** P1 = wire `recentActivity` read-path + expose `email` build w/ scope guard; P2 = cross-project knowledge (spec ready), email-blast stale-verify, NewsBar UI.
+
 ## 2026-06-20 (main) — Turn-on: restored Sonnet 4.6 synthesis + re-enabled 5 safe workflows; engine left ON
 
 - **Synthesis model restored to Sonnet 4.6 / 16k** (reverting the freeze `e9f148f9`): `refinery/agents/anthropic.mts:7` `SYNTHESIS_MODEL` haiku→`claude-sonnet-4-6`, `refinery/agents/synthesis-agent.mts:110` `max_tokens` 4096→16000. `TRIAGE_MODEL` stays Haiku. `bun test refinery/agents/synthesis-agent.test.mts` → 3/3 (mock.module stub already expected sonnet).

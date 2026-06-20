@@ -74,7 +74,7 @@ const CLASSIFY_ACTION_TOOL: Anthropic.Tool = {
       template_id: {
         type: "string",
         description:
-          "For schedule_send: the email template (e.g. 'report', 'market-overview'). Omit to default.",
+          "For schedule_send: the email template (e.g. 'market-overview'). Omit to default.",
       },
       scope_kind: {
         type: "string",
@@ -89,7 +89,7 @@ const CLASSIFY_ACTION_TOOL: Anthropic.Tool = {
       // ── build_deliverable params ──
       template: {
         type: "string",
-        enum: ["market-overview", "bov-lite", "client-email", "one-pager", "report"],
+        enum: ["market-overview", "bov-lite", "client-email", "one-pager"],
         description: "For build_deliverable: the deliverable template.",
       },
     },
@@ -101,7 +101,7 @@ const SYSTEM_PROMPT = `You are a project assistant for a SWFL commercial real es
 The user will describe an action they want to take on their project.
 Classify it into ONE of: schedule_send (create/modify an email schedule), build_deliverable (build a deliverable from the project's filed items), or unknown (anything else).
 For schedule_send: extract cadence (daily/weekly/monthly), day_of_week/day_of_month if clear, and scope if the user names a place or ZIP.
-For build_deliverable: pick the closest template (market-overview, bov-lite, client-email, one-pager, report).
+For build_deliverable: pick the closest template (market-overview, bov-lite, client-email, one-pager).
 Write the summary in plain English for the user to confirm — no jargon, no internal IDs.`;
 
 export interface ActionProposal {
