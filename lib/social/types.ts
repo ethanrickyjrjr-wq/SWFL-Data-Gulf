@@ -46,10 +46,25 @@ export interface SocialAccount {
   updated_at: string;
 }
 
+/**
+ * Frozen-on-confirm post artifact (social_schedules.frozen_post jsonb).
+ * Persisted at PROPOSE→CONFIRM (U2/U3) so the first fire posts exactly what the user
+ * previewed; the cron (build 04) re-composes only when freshness_token advances.
+ */
+export interface FrozenPost {
+  caption: string;
+  media_url: string | null;
+  hashtags: string[];
+  freshness_token: string | null;
+  composed_at: string; // ISO timestamptz
+}
+
 /** social_schedules row — recipe / cadence spec per user + platform. */
 export interface SocialSchedule {
   id: number;
   user_id: string;
+  /** Soft-link to projects.id (mirrors email_schedules.project_id; project-scopes the lane). */
+  project_id: string | null;
   social_account_id: string;
   platform: Platform;
   status: ScheduleStatus;
@@ -66,6 +81,7 @@ export interface SocialSchedule {
   media_kind: string | null; // e.g. "image" | "carousel"
   freshness_gate: boolean; // skip if freshness_token unchanged
   signature: string | null; // idempotent-upsert fingerprint
+  frozen_post: FrozenPost | null; // freeze-on-confirm artifact (U2/U3); first fire posts this verbatim
   // Timestamps
   next_run_at: string | null; // NULL while claimed (park-on-claim)
   last_run_at: string | null;
