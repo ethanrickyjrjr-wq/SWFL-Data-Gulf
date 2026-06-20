@@ -147,6 +147,41 @@ describe("inferScopeFromItems (the shared scope root)", () => {
     });
   });
 
+  it("caps a PDF's extracted_text — scope beyond FILE_TEXT_MAX (1000) is not read", () => {
+    // A scope signal within the first 1000 chars IS read; the same signal pushed past the
+    // cap is NOT (the cap keeps a long multi-ZIP document from swamping the dominant count
+    // and bounds the regex scan). Two files isolate the boundary.
+    const within: ProjectItem[] = [
+      {
+        ...base,
+        kind: "file",
+        storage_path: "u/p/a.pdf",
+        mime: "application/pdf",
+        size: 1000,
+        extracted_text: "Fort Myers Beach 33931 flood study. " + "a".repeat(1001),
+        extraction_status: "done",
+      },
+    ];
+    expect(inferScopeFromItems(within)).toEqual({
+      zip: "33931",
+      place: "Fort Myers Beach",
+      topic: "Flood",
+    });
+
+    const beyond: ProjectItem[] = [
+      {
+        ...base,
+        kind: "file",
+        storage_path: "u/p/b.pdf",
+        mime: "application/pdf",
+        size: 1000,
+        extracted_text: "a".repeat(1001) + " Fort Myers Beach 33931 flood study.",
+        extraction_status: "done",
+      },
+    ];
+    expect(inferScopeFromItems(beyond)).toEqual({ place: undefined, topic: undefined });
+  });
+
   it("an uncaptioned file with no extracted_text still contributes no scope (only its UUID path)", () => {
     const items: ProjectItem[] = [
       { ...base, kind: "file", storage_path: "u/p/2b9f.png", mime: "image/png", size: 500 },

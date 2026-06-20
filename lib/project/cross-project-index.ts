@@ -2,6 +2,7 @@ import { inferScopeFromItems, type InferredScope } from "./derive-name";
 import { identityKeyForItem } from "./identity-key";
 import { summarizeItem } from "./summarize-item";
 import { itemFreshnessToken } from "./digest";
+import { tokenDayKey, tokenVersion } from "./as-of";
 import type { ProjectItem } from "./items";
 
 /**
@@ -79,12 +80,36 @@ export function buildCrossProjectIndex(projects: ProjectItemsRow[]): CrossProjec
       const keys = new Set<string>();
       const labelByKey = new Map<string, string>();
       const tokenByKey = new Map<string, string | undefined>();
+      // Per key, keep the FRESHEST grounded (token-bearing) copy's token AND label
+      // together — a metric re-filed after a refresh shares its identity key, and a fresh
+      // date stamped onto a stale value would mis-represent a reuse offer. "Freshest" =
+      // max YYYYMMDD day, then higher refinery version on a same-day tie — the SAME recency
+      // tiebreak digest.ts uses for the project-newest token. Token-less / undateable kinds
+      // (note/source/file/uncited qa) fall back to a first-wins label and carry their token
+      // as-is (undefined for token-less), so the offer gate behaves exactly as before.
+      const bestDay = new Map<string, string>();
+      const bestVer = new Map<string, number>();
       for (const it of p.items) {
         const k = identityKeyForItem(it);
         keys.add(k);
-        if (!labelByKey.has(k)) {
+        const tok = itemFreshnessToken(it);
+        const day = tok ? tokenDayKey(tok) : null;
+        if (tok && day) {
+          const ver = tokenVersion(tok) ?? -1;
+          const curDay = bestDay.get(k);
+          const newer =
+            curDay === undefined ||
+            day > curDay ||
+            (day === curDay && ver > (bestVer.get(k) ?? -1));
+          if (newer) {
+            bestDay.set(k, day);
+            bestVer.set(k, ver);
+            labelByKey.set(k, summarizeItem(it));
+            tokenByKey.set(k, tok);
+          }
+        } else if (!labelByKey.has(k)) {
           labelByKey.set(k, summarizeItem(it));
-          tokenByKey.set(k, itemFreshnessToken(it));
+          tokenByKey.set(k, tok);
         }
       }
       return {

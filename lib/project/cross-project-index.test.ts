@@ -34,6 +34,41 @@ describe("buildCrossProjectIndex", () => {
   });
 });
 
+describe("buildCrossProjectIndex newest-wins per key", () => {
+  it("stamps the NEWEST same-key item's token + value, regardless of item order", () => {
+    // One project files the SAME datum (metric:Median rent@33931) twice — a refreshed
+    // metric. The index must keep the FRESHEST copy's token AND label together (never a
+    // fresh date on a stale value), independent of the DB-returned item order.
+    const stale: ProjectItem = {
+      ...base,
+      id: "s",
+      kind: "metric",
+      report_id: "33931",
+      label: "Median rent",
+      value: "1700",
+      freshness_token: "SWFL-7421-v5-20260101",
+    };
+    const fresh: ProjectItem = {
+      ...base,
+      id: "f",
+      kind: "metric",
+      report_id: "33931",
+      label: "Median rent",
+      value: "1900",
+      freshness_token: "SWFL-7421-v6-20260615",
+    };
+    const k = "metric:Median rent@33931";
+    for (const order of [
+      [stale, fresh],
+      [fresh, stale],
+    ]) {
+      const p = buildCrossProjectIndex([proj("p", "FMB 33931", order)]).projects[0];
+      expect(p.tokenByKey.get(k)).toBe("SWFL-7421-v6-20260615"); // newest token
+      expect(p.labelByKey.get(k)).toBe("Median rent: 1900"); // newest value, kept in sync
+    }
+  });
+});
+
 describe("findOverlap", () => {
   // p1 (open) and p2 share ZIP 33931; p3 is a different ZIP.
   const projects = [
