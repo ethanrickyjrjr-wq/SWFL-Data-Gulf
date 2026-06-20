@@ -1,3 +1,13 @@
+## 2026-06-20 (main) — Organized the rescued work into named off-machine branches (operator-directed)
+
+- **Pushed the two local-only rescue branches to `origin`** so the operator can work off this machine (explicit operator decree — a deliberate exception to RULE 1.5's no-orphan-branch invariant). These are NAMED, documented backups — **NOT litter; do not auto-prune:**
+  - `wip/style-gallery-visual-polish` @ `f973dcf2` — the B2 style-gallery feature ("work to handle"). **~240 commits behind main; it edits `app/project/[id]/ProjectDetail.tsx`, which main refactored into `ProjectWorkspace` → landing needs reconciliation, not just visual polish.**
+  - `archive/email-shell-screenshots` @ `0dea55e6` — email-shell cross-client QA screenshots + README ("off-machine backup, no action needed").
+- **Cleaned up the cryptic duplicates:** removed the `.claude/worktrees/abstract-dreaming-origami` worktree + deleted local branches `worktree-abstract-dreaming-origami` and `wt/work` (their commits are preserved on the two well-named branches, local + origin).
+- **Updated `GET DONE/style-gallery-visual-polish.md`** — new branch names, off-machine `git fetch` / `git switch` access, and the reconciliation heads-up.
+- **"Done, needs review" bucket = empty right now** — the only WIP (style-gallery) isn't done (needs reconcile + polish); everything finished already landed on main. Future convention: `review/<feature>`.
+- **Next:** off-machine → `git fetch origin` then `git switch wip/style-gallery-visual-polish`. No autonomous push of either branch onto main.
+
 ## 2026-06-20 (main) — Outreach: CAN-SPAM postal-address gate + unified the from-address env name
 
 - **CAN-SPAM physical address** — the drip footer carried only an unsubscribe link, no postal address (the legally-required piece). Added `appendPostalAddress` (pure, escaped, idempotent) to `lib/email/outreach/drip-email.ts`, threaded `postalAddress` through `composeCampaign` (`campaign.ts`). **Both live-send adapters now REFUSE to send without `OUTREACH_POSTAL_ADDRESS`** (`outreach-campaign.mts` + `outreach-drip-run.mts`) — structural guarantee; the address value is operator-supplied (never invented). DRY_RUN/previews render it only when configured.

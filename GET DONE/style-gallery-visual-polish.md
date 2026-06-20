@@ -1,23 +1,35 @@
-# B2 Style Gallery — Visual Polish (saved local, NOT live)
+# B2 Style Gallery — Visual Polish (backed up to origin, NOT live)
 
 Saved 2026-06-20 during a worktree cleanup. This work was sitting **uncommitted** in a stray
-worktree and would have been lost in the prune — it's now committed to local branches so it
-survives. **Nothing here is on `main` or live.** Land it when ready (see "How to land it").
+worktree and would have been lost in the prune — it's now committed **and pushed to `origin`**
+so it survives and is reachable off-machine. **Nothing here is on `main` or live.** Land it
+when ready (see "How to land it").
 
 ---
 
-## Saved artifacts — where "them" lives (LOCAL branches, this machine only)
+## Saved artifacts — pushed to origin (available off-machine)
 
-Both are committed locally but **not pushed** — a fresh clone on another machine won't have
-them. To make either portable, push the branch (operator's call).
+Both are committed AND on `origin` — `git fetch` on any machine, then `git switch` the branch.
+These are **intentional, operator-directed backup branches — NOT litter; do not auto-prune.**
 
-| What | Branch | Commit | Notes |
+| What | Category | Branch (on origin) | Commit |
 |---|---|---|---|
-| **B2 Style Gallery feature** (code) | `worktree-abstract-dreaming-origami` | `f973dcf2` | Worktree still checked out at `.claude/worktrees/abstract-dreaming-origami` — work there directly. 14 files, ~1,100 lines. |
-| **Email-shell QA screenshots** (reference) | `wt/work` | `0dea55e6` | Cross-client render proofs (Gmail/Outlook/phone) + README under `tmp-email-review/email-layout-shells/`. Branch only, no worktree dir. |
+| **B2 Style Gallery feature** (code, ~1,100 lines) | work to handle (needs reconcile + polish) | `wip/style-gallery-visual-polish` | `f973dcf2` |
+| **Email-shell QA screenshots** (reference) | off-machine backup, no action needed | `archive/email-shell-screenshots` | `0dea55e6` |
 
-Recover the screenshots if ever needed: `git show wt/work:tmp-email-review/email-layout-shells/README.md`
-(or `git switch wt/work`).
+Access from another machine:
+
+```
+git fetch origin
+git switch wip/style-gallery-visual-polish     # the feature, to continue/polish
+git switch archive/email-shell-screenshots     # screenshots under tmp-email-review/email-layout-shells/
+```
+
+**Heads-up — this branch is ~240 commits behind `main`.** It edits
+`app/project/[id]/ProjectDetail.tsx`, which `main` has since refactored into `ProjectWorkspace`
+(per the FINAL BOSS Piece 1 work). So landing it is **not just visual polish — it needs
+reconciliation with the current codebase first.** The branch preserves the work exactly as
+saved; don't rebase it blindly into the refactor.
 
 ---
 
@@ -71,9 +83,11 @@ Full self-contained brief (in the saved commit):
 ## How to land it
 
 Touches live `/api` surfaces (`app/api/email/test-send`, `app/api/projects/[id]/print`) and
-`/project/[id]` — RULE 1 "ask for diff review before pushing." So: do the visual work in the
-`.claude/worktrees/abstract-dreaming-origami` worktree, keep tests green, then bring it onto
-`main` via review + `git push origin HEAD:main` on the operator's go (no autonomous push).
+`/project/[id]` — RULE 1 "ask for diff review before pushing." So: `git switch
+wip/style-gallery-visual-polish`, **reconcile with current `main` first** (the ProjectDetail →
+ProjectWorkspace refactor — see the heads-up above), do the visual work, keep tests green, then
+bring it onto `main` via review + `git push origin HEAD:main` on the operator's go (no
+autonomous push).
 
 ## Trigger to build
 
