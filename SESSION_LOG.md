@@ -1,3 +1,9 @@
+## 2026-06-20 (main) — Social USER-SIDE audit fixes PUSHED (X v2 / schema seam / link-dodge)
+
+- Landed the 3 backend-audit-fix commits on `main` (cherry-picked clean onto origin via an isolated worktree, kept separate from the still-held cross-project commit `cb5e4acc`). The entry below logged them as committed-but-held; they are now PUSHED. Recap: X media v1.1→v2 (legacy endpoint sunset 2025-06-09), `social_schedules` project_id + frozen_post seam cols (idempotent migration applied + verified live), X link-in-reply dodge removed (operator decree). Gates: tsc 0, eslint 0, `bun test lib/social/` 151/0.
+- NOTE: the concurrent selective-push (`271379f6`) swept the shared SESSION_LOG text (my held entry + the cross-project entry) into its commit ahead of the code; the duplicate-looking entry below is that swept copy, not a rewrite.
+- Next: U1 (OAuth connect) — grounded; add the missing `revokeToken` seam to oauth-tokens.ts. mediaUrl/CDN-upload (build-04 gap) being handled in parallel.
+
 ## 2026-06-20 (main) — Social USER-SIDE: backend audit fixes (X v1.1→v2, schema seam, link-dodge) — 3 commits, gates green (HELD for diff-review push); U1 grounded
 
 - **Started the USER-SIDE builds "1 by 1, audit as you go." Audited backend 01/03 first; found + fixed 3 real issues before building.** All 3 committed locally, NOT pushed (RULE-1 diff-review — adapter/publish-path + schema).
