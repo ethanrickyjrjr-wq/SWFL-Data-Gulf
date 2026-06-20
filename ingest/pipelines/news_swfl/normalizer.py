@@ -15,7 +15,7 @@ class ArticleRow(TypedDict):
     headline: str
     body_text: str
     source_name: str
-    published_date: str
+    published_date: date
     swfl_relevance: bool
 
 
@@ -24,15 +24,29 @@ def is_swfl_relevant(text: str) -> bool:
     return bool(SWFL_ZIP_RE.search(text)) or any(t in lower for t in SWFL_TERMS)
 
 
+def _coerce_pub_date(value: date | str | None) -> date:
+    """Always return a real datetime.date so dlt loads into the Postgres `date`
+    column (the source emits None today; parse leading ISO `YYYY-MM-DD` if a
+    future fetcher supplies a string, else fall back to today)."""
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value[:10])
+        except ValueError:
+            pass
+    return date.today()
+
+
 def normalize(
     article_url: str,
     headline: str,
     body_text: str,
     source_name: str,
-    published_date: str | None,
+    published_date: date | str | None,
 ) -> ArticleRow:
     clean_body = body_text[:3000].strip()
-    pub = published_date or str(date.today())
+    pub = _coerce_pub_date(published_date)
     return ArticleRow(
         article_url=article_url,
         headline=headline.strip(),
