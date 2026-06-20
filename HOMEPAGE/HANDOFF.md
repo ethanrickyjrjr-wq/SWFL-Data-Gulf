@@ -117,7 +117,16 @@ Replace hardcoded `FLOOD`/`VALUE`/`PERMITS` dicts with a fetch from `/api/b/mast
 
 | File | Purpose |
 |---|---|
-| `build_demo4.py` | Latest demo builder — generates `swfl-demo-wip.html` |
+| `demo-current.html` | **Current working demo** — use this until Fiverr delivers corrected SVG |
+| `build_demo4.py` | Demo builder — run `python HOMEPAGE/build_demo4.py` to regenerate |
+| `fix_33931.py` | Patches 33931 boundary from ZCTA (imperfect — Fiverr is the real fix) |
 | `build_demo3.py` | Previous version (v2 demo, for reference) |
 | `research_competitors.py` | crawl4ai scrape of Mailchimp/CC/FUB pricing |
 | `HANDOFF.md` | This file |
+
+### When Fiverr delivers the corrected SVG
+
+1. Save it to `c:\Users\ethan\Downloads\` with the same filename (`Lee County and Collier County-01 (1).svg`)
+2. Run `python HOMEPAGE/build_demo4.py`
+3. Copy output to `HOMEPAGE/demo-current.html`
+4. Verify 33931 shows as a thin barrier island

@@ -1,3 +1,9 @@
+## 2026-06-20 (main) — Homepage demo: fixed black ZIPs + saved current demo to HOMEPAGE/
+
+- **Root cause of black ZIP patches:** `build_demo4.py` line 49 regex `<g\s+id="(\d{5})"` only matched when `id=` was the first attribute on `<g>`. Illustrator exports some groups with `data-name` before `id`, so those ZIP groups never got `class="zip-group"` → JS skipped them → SVG default black. Fixed with `<g\b[^>]*\bid="\d{5}"[^>]*>` (matches regardless of attribute order).
+- **demo-current.html** saved to `HOMEPAGE/` as the working demo until Fiverr delivers corrected 33931 SVG. `HANDOFF.md` updated with Fiverr swap-in instructions.
+- **33931 (Fort Myers Beach) still wrong** in the demo — contractor drew it as a mainland blob. Fiverr is fixing it; `fix_33931.py` is a partial workaround (71 SVG unit transform residual, not production-ready). Message sent to contractor describing the correct barrier island shape.
+
 ## 2026-06-20 (main) — Fixed CI red (2 eslint no-explicit-any in test fixtures) — step 1 of engine restart-readiness
 
 - **CI was hard-red on every push since ~06-15** purely from 2 `@typescript-eslint/no-explicit-any` errors in test fixtures: `components/project/collision-copy.test.ts:11` + `lib/signals/log-collision.test.ts:9` (pre-existing on origin/main from Phase-F `af5ee0bc`/`c0375003`; unrelated to the contacts land). Typed both fixtures as `SignificantChange` instead of `as any`. Verified: `bunx eslint .` exit 0, `bunx tsc --noEmit` exit 0, both tests pass (audit confirmed full suite 3158/0).

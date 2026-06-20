@@ -42,11 +42,14 @@ DATA_JS = json.dumps({
 })
 
 # Load + clean contractor SVG
-with open(r'c:\Users\ethan\Downloads\Lee County and Collier County-01.svg', 'r', encoding='utf-8', errors='replace') as f:
+with open(r'c:\Users\ethan\Downloads\Lee County and Collier County-01 (1).svg', 'r', encoding='utf-8', errors='replace') as f:
     svg = f.read()
 svg = re.sub(r'id="_(\d{5})"', r'id="\1"', svg)
 svg = re.sub(r'<style>.*?</style>', '', svg, flags=re.DOTALL)
-svg = re.sub(r'<g\s+id="(\d{5})"', r'<g id="\1" class="zip-group"', svg)
+def _tag_zip(m):
+    tag = m.group(0)
+    return tag[:-1] + ' class="zip-group">' if 'class=' not in tag else re.sub(r'class="', 'class="zip-group ', tag)
+svg = re.sub(r'<g\b[^>]*\bid="\d{5}"[^>]*>', _tag_zip, svg)
 svg = svg.replace('<svg ', '<svg id="contractor-map" ', 1)
 
 HTML = """<!DOCTYPE html>
