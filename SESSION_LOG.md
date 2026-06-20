@@ -27,6 +27,11 @@
 - **HELD (not on main, awaiting operator OK — RULE 1 live `/api` surface):** the G2 branding-parity fix in `app/api/templates/[id]/run/route.ts` (6 lines, `applyUserBrandToProject` after project create) — also on that branch. Show-and-confirm before it lands.
 - **Next:** outreach engine is greenfield on top of the existing spine (`enrichBrand`, `buildArrivalUrl`, `/welcome` arrival, Resend bulk paths). FIRST resolve the open design decision w/ operator (CLI script recommended) before building (RULE 3.5 brainstorm).
 
+## 2026-06-20 (main) — CORRECTION: pulled the choropleth map off /r/zip-report (33931 welded to mainland)
+
+- **My mistake:** I wired the contractor map into a CLIENT-FACING report while the map session's OWN log already documented the served `/maps/lee-collier.svg` welds Fort Myers Beach (33931) to the Fort Myers mainland (Fiverr is fixing it). Operator caught it on the deployed page. A geographically-wrong map must never ship to prospects, "fix in flight" notwithstanding.
+- **Fix:** removed the choropleth block + its imports/build from `app/r/zip-report/[zip]/page.tsx` (commit on top of `d218232`). The **metro trend chart stays**. `lib/report/zip-choropleth-data.ts` (+test) + `ZipChoropleth` are left ready; re-add the map block ONLY after the corrected contractor SVG lands (re-run `scripts/clean-contractor-map.mjs`) and the 33931 island is verified. eslint + tsc clean.
+
 ## 2026-06-20 (main) — Rich /r/zip-report: real choropleth MAP + metro trend CHART into the 4 existing sections
 
 - **Operator: "one page on a zip won't work — needs charts, graphs, commentary, 4 sections, a map."** The 4 grain sections already existed (ZIP/City/County/SWFL); the gap was visuals. Enriched (operator picked "enrich /r/zip-report"):

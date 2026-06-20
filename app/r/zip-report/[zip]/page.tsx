@@ -29,10 +29,8 @@ import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
-import { ZipChoropleth } from "../../../../components/charts/ZipChoropleth";
 import { MetroAreaChart } from "../../../../components/charts";
 import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
-import { buildZipChoropleth, type ZipRow } from "../../../../lib/report/zip-choropleth-data";
 import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
 
 export const runtime = "nodejs";
@@ -167,12 +165,11 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const highlighterEnabled = highlighterUiEnabled();
 
-  // Region price map — colored from the housing-swfl per-ZIP table already loaded
-  // above (no extra fetch). Hidden when too few ZIPs carry a price.
-  const priceChoro = housingTable
-    ? buildZipChoropleth((housingTable.rows ?? []) as ZipRow[], "median_sale_price")
-    : null;
-  const showPriceMap = (priceChoro?.count ?? 0) >= 3;
+  // NOTE: the ZIP choropleth map is intentionally NOT rendered here yet — the served
+  // contractor map (/maps/lee-collier.svg) still welds Fort Myers Beach (33931) to the
+  // mainland (Fiverr is correcting it). Do not put a geographically-wrong map on a
+  // client-facing report. The builder + ZipChoropleth are ready; re-add the block once
+  // the corrected SVG lands (re-run scripts/clean-contractor-map.mjs).
 
   // 3-metro home-value trend (data_lake.zhvi_pivoted). Guarded loader degrades to an
   // empty result where lake creds are absent — never throws the report render.
@@ -280,24 +277,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       )}
 
       {/* ── County ──────────────────────────────────────────────────────── */}
-      {(countyLines.length > 0 || (showPriceMap && priceChoro)) && (
+      {countyLines.length > 0 && (
         <section id="section-county" className="mt-10">
           <SectionTitle>{countyTitle}</SectionTitle>
-          {showPriceMap && priceChoro && (
-            <div className="mt-5">
-              <p className="mb-3 text-sm leading-6 text-gray-300">
-                Median sale price across Lee &amp; Collier ZIPs — {primaryPlace ?? `ZIP ${zip}`} in
-                context. Brighter means a higher typical price.
-              </p>
-              <ZipChoropleth
-                county="both"
-                colorLow="#0b2b2b"
-                colorHigh="#1bb8c9"
-                className="h-[460px] rounded-xl border border-white/10"
-                data={priceChoro.data}
-              />
-            </div>
-          )}
           <div className="mt-4 space-y-3">
             {countyLines.map((l) => (
               <div
