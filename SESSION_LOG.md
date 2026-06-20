@@ -1,3 +1,14 @@
+## 2026-06-19 (main) — feat(funnel): FINAL BOSS 05 arrival→claim-bridge→seeded-project (plumbing, HELD for diff-review)
+
+- **Scope:** operator chose **plumbing only** — full funnel wired end-to-end; the conversational qualify→demonstrate→close arc inside `/project/[id]` is DEFERRED. Spec: `docs/superpowers/specs/2026-06-19-funnel-arrival-bridge-design.md`.
+- **Unit 1 (`ed6199bd`)** — claim token carries brand+seed: `mintClaimToken(items,title,{brand,seed})`; `/api/claim` maps brand→`projects.branding` at insert + echoes seed; `ClaimOnLogin`→`claimRedirectUrl`→`/project/[id]?seed=` (reuses §I). Migration `20260619_claim_token_brand_seed.sql` **APPLIED to prod** (additive nullable cols + `consume_claim_token` RETURNS widened; backward-compatible).
+- **Unit 2 (`3863c143`)** — `buildArrivalUrl` `zip` param; `lib/prospects/open-project.ts` (`planOpenProject` gates ZIP via `resolveZip` 6-county MOAT, grounded title, email seed); `POST /api/prospect/open-project` mints token, returns `/claim?t=`.
+- **Unit 3 (`58729d4c`)** — `/welcome` reframes on in-scope `?zip=` to the offer + `OpenProjectCta`; no-zip → unchanged demo.
+- **Units 4+5 (`1f633cd1`)** — `scripts/email/enroll-prospect.mts` (closes "enrollProspect had zero callers"; prints the **click-testable arrival URL**; DRY_RUN default, live send refused = Phase D); `enrollProspect` `cadence:"daily-trial"` schedules +1 day (enroll-side seam; 30× repeating processor + close-button trigger deferred).
+- **Gates:** 81/81 tests across touched areas, tsc clean on all funnel files, eslint clean (lint-staged). **HELD for operator diff-review before push** (Units 1+3 touch live claim/welcome surfaces, RULE 1).
+- **TEST RUN:** `bun scripts/email/enroll-prospect.mts --email you@x.com --zip 33931 --domain acme.com` → open the printed arrival URL → "Open your project" → OTP login → branded, ZIP-seeded `/project/[id]`. (For localhost set `SITE_ORIGIN=http://localhost:3000`.)
+- **Next:** operator reviews diff + pushes; deploy; then live-verify the click path. Conversational takeover arc is the next net-new piece.
+
 ## 2026-06-19 (main) — feat(signals): C2 consequence math + fix Phase D orphan cron
 
 - **`.github/workflows/data-readiness-cron.yml`** (NEW) — hourly GHA trigger for `app/api/cron/data-readiness`. The verification ladder was built (`a9fdc985`) but no `vercel.json` exists, so the route never fired (orphan). The route was already written for external trigger (Bearer `CRON_SECRET`). Verified live: `CRON_SECRET` in gh secrets, prod route returns 401 without it. GHA is the repo's scheduling spine, not Vercel.
