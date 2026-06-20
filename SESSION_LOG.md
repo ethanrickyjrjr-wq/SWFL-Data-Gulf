@@ -1,3 +1,12 @@
+## 2026-06-20 (main) — .claude hooks speed/correctness cleanup (16-agent audit)
+
+- **Removed 2 misfiring graphify-reminder hooks** from `.claude/settings.json` (PreToolUse Bash grep-detector + Read|Glob source-detector). They used Python *substring* ext-matching, so they fired on every `.json`/`.csv`/`.md` (`.js` ⊂ `.json`, `.c` ⊂ `.claude/`) and IRONICALLY missed the repo's real `.mts`/`.mjs` source — pure banner-blindness, redundant with locked CLAUDE.md RULE 0.5, ~30–48ms cold-python spawn per call. Prior session's "rewrite as node for speed" premise **debunked**: node benchmarked ~7ms SLOWER cold than python3 here → removal (not rewrite) was the fix. Kept the PostToolUse git-commit → graphify-app-nodes regen (does real work).
+- **Deleted dead `refinery-tsc.mjs`** (unwired + `git rm`). It was a ~1.4s-blocking no-op on every `refinery/` edit: `npx tsc` hits the npm decoy ("This is not the tsc command you are looking for") and root `tsconfig.json` excludes `refinery`, so it never typechecked the files it gated on.
+- **Added read-only POSIX** (`ls/cat/head/tail/wc`) to gitignored `settings.local.json` (this machine only). Skipped grep/find (repo steers toward Grep/Glob tools; `find -exec` mutates).
+- **All 4 enforced gates intact** (session-log, prepush 5-gate, no-branch, project-path — separate hooks, kept verbatim; verified by the gate-safety auditor). Both settings files valid JSON.
+- **NOT done — needs operator:** `check.mjs open/close/update` allow-lines (~267 RULE 2 prompts) were blocked by the auto-mode self-permission-widening guard — operator to paste 3 lines into settings.json (given in chat). safe-push stays prompting (no-autonomous-push stands).
+- **Next:** committed; push deferred for operator confirm. Operator files (GO-LIVE email-scheduler, `runs.json`, news_swfl ingest) left untouched — `runs.json` is a 61KB `gh run list` dump that should likely be gitignored.
+
 ## 2026-06-20 (main) — news_swfl fix v2: published_date date→text (dlt insert-values won't cast string→date)
 
 - The `date` approach (`6c2e0a28`) FAILED on the GHA re-run (run 27879193357): even with the physical column `date`, dlt's own stored schema `date`, AND a real `datetime.date` value, dlt[postgres]>=1.26 still emitted `character varying` into the date column. Switched to **text everywhere** (functionally identical — published_date is only read back, never date-math'd: app/api/cron/news-crawl). normalizer emits ISO string, pipeline hints `data_type:text`, DDL → `text`, and ALTERed the empty live column to `text`. Re-dispatching to confirm green.
