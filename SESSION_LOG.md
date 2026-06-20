@@ -27,6 +27,14 @@
 - **HELD (not on main, awaiting operator OK — RULE 1 live `/api` surface):** the G2 branding-parity fix in `app/api/templates/[id]/run/route.ts` (6 lines, `applyUserBrandToProject` after project create) — also on that branch. Show-and-confirm before it lands.
 - **Next:** outreach engine is greenfield on top of the existing spine (`enrichBrand`, `buildArrivalUrl`, `/welcome` arrival, Resend bulk paths). FIRST resolve the open design decision w/ operator (CLI script recommended) before building (RULE 3.5 brainstorm).
 
+## 2026-06-20 (main) — Rich /r/zip-report: real choropleth MAP + metro trend CHART into the 4 existing sections
+
+- **Operator: "one page on a zip won't work — needs charts, graphs, commentary, 4 sections, a map."** The 4 grain sections already existed (ZIP/City/County/SWFL); the gap was visuals. Enriched (operator picked "enrich /r/zip-report"):
+  - **County section — choropleth MAP** (`components/charts/ZipChoropleth` → the CONTRACTOR/Fiverr `/maps/lee-collier.svg`, NOT Claude-built): median sale price across Lee+Collier ZIPs, current ZIP in context. Colored from `buildZipChoropleth` (`lib/report/zip-choropleth-data.ts` + 4✓ test) off the `housing_by_zip` table ALREADY loaded on the page — **no new fetch**. Shown only when ≥3 ZIPs carry a price.
+  - **SWFL section — metro trend CHART** (`MetroAreaChart` area variant, `zhvi_pivoted`): new GUARDED loader `lib/charts/load-metro-trend.ts` (try/catch around `createServiceRoleClient` so the report never 500s where lake creds are absent — degrades to empty, chart hidden). Mirrors the proven `app/charts` pattern; RSC-safe (`valueFormat` token, no fn props).
+- **Gates:** `bun test lib/report` 4/0, eslint clean, tsc clean on touched files; `next build` **✓ Compiled + ✓ TypeScript**, fails ONLY at prerender of the UNRELATED `/charts` page (pre-existing env-gated `createServiceRoleClient` w/o creds — Phase F logged this exact thing; `/charts` untouched, `revalidate=300` so it prerenders; my page is `force-dynamic`).
+- **Could NOT render-verify locally** (no browser, no lake creds) → **operator: eyeball the deployed `/r/zip-report/<zip>`** (map colors + trend chart). v2: more charts (rents/tier), per-recipient brand on the page, fuller commentary; crawl4ai design recreate still env-blocked (ready-to-run plan exists).
+
 ## 2026-06-20 (main) — Outreach DRIP engine Increment 1: per-recipient branded chart-email composer + DRY-RUN CLI
 
 - **New, pure, tested core** under `lib/email/outreach/`: `targets.ts` (CSV parse: email,name,domain,zip; header-or-positional, dedupe, shape-validate), `drip-email.ts` (render ONE branded chart+explainer email + "create your own" CTA), `campaign.ts` (per-recipient orchestration: brand scrape → confidence gate → arrival URL → render; never throws per recipient). **16/0 bun:test.**

@@ -29,6 +29,11 @@ import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
+import { ZipChoropleth } from "../../../../components/charts/ZipChoropleth";
+import { MetroAreaChart } from "../../../../components/charts";
+import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
+import { buildZipChoropleth, type ZipRow } from "../../../../lib/report/zip-choropleth-data";
+import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -162,6 +167,17 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const highlighterEnabled = highlighterUiEnabled();
 
+  // Region price map — colored from the housing-swfl per-ZIP table already loaded
+  // above (no extra fetch). Hidden when too few ZIPs carry a price.
+  const priceChoro = housingTable
+    ? buildZipChoropleth((housingTable.rows ?? []) as ZipRow[], "median_sale_price")
+    : null;
+  const showPriceMap = (priceChoro?.count ?? 0) >= 3;
+
+  // 3-metro home-value trend (data_lake.zhvi_pivoted). Guarded loader degrades to an
+  // empty result where lake creds are absent — never throws the report render.
+  const metroTrend = await loadMetroTrend("zhvi_pivoted");
+
   const pageContent = (
     <>
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -264,9 +280,24 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       )}
 
       {/* ── County ──────────────────────────────────────────────────────── */}
-      {countyLines.length > 0 && (
+      {(countyLines.length > 0 || (showPriceMap && priceChoro)) && (
         <section id="section-county" className="mt-10">
           <SectionTitle>{countyTitle}</SectionTitle>
+          {showPriceMap && priceChoro && (
+            <div className="mt-5">
+              <p className="mb-3 text-sm leading-6 text-gray-300">
+                Median sale price across Lee &amp; Collier ZIPs — {primaryPlace ?? `ZIP ${zip}`} in
+                context. Brighter means a higher typical price.
+              </p>
+              <ZipChoropleth
+                county="both"
+                colorLow="#0b2b2b"
+                colorHigh="#1bb8c9"
+                className="h-[460px] rounded-xl border border-white/10"
+                data={priceChoro.data}
+              />
+            </div>
+          )}
           <div className="mt-4 space-y-3">
             {countyLines.map((l) => (
               <div
@@ -281,9 +312,24 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       )}
 
       {/* ── Southwest Florida ───────────────────────────────────────────── */}
-      {swflLines.length > 0 && (
+      {(swflLines.length > 0 || metroTrend.data.length > 0) && (
         <section id="section-swfl" className="mt-10">
           <SectionTitle>Southwest Florida</SectionTitle>
+          {metroTrend.data.length > 0 && (
+            <div className="mt-5">
+              <MetroAreaChart
+                data={metroTrend.data}
+                series={SWFL_METRO_SERIES}
+                variant="area"
+                asOf={metroTrend.asOf}
+                eyebrow="Southwest Florida"
+                title="Median Home Value Trend"
+                subtitle="Cape Coral · Fort Myers · Naples"
+                valueFormat="usd"
+                rootId="zip-report-zhvi"
+              />
+            </div>
+          )}
           <div className="mt-4 space-y-3">
             {swflLines.map((l) => (
               <div
