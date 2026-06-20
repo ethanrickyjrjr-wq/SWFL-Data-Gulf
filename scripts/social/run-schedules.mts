@@ -33,6 +33,7 @@ import { composePosts } from "@/lib/social/compose";
 import { buildSocialContent } from "@/lib/social/build-content";
 import { passesFreshnessGate } from "@/lib/social/lifecycle";
 import { renderSocialImage } from "@/lib/social/render-social-image";
+import { uploadSocialImage } from "@/lib/social/media-upload";
 import { postToChannel } from "@/lib/social/channels/index";
 import type { SocialSchedule, SocialTarget, SocialContent } from "@/lib/social/types";
 import type { BuildSocialContentDeps } from "@/lib/social/build-content";
@@ -334,12 +335,14 @@ async function processSchedule(
     return "skipped";
   }
 
-  // 5. Render social image (build 02).
-  //    renderSocialImage returns a PNG Buffer; we upload it or skip gracefully on error.
-  //    In v1, mediaUrl stays null (no CDN upload yet — the publish adapters handle
-  //    media separately). The render still runs to validate the card composition.
-  //    Future: replace this with `mediaUrl = await uploadToStorage(imageBuffer)`.
-  const mediaUrl: string | null = null;
+  // 5. Render social image (build 02) → upload to public Storage → mediaUrl.
+  //    Every adapter consumes a URL (Meta/IG fetch server-side from a PUBLIC url;
+  //    X v2 upload fetches the bytes from the url too), so the rendered PNG must be
+  //    uploaded. Render OR upload failure is NON-FATAL: log and post without an
+  //    image rather than skip the row.
+  //    DRY_RUN stays read-only (no Storage write); the upload runs on the normal
+  //    path (PUBLISH_ENABLED=false still writes a dry_run record carrying media_url).
+  let mediaUrl: string | null = null;
   try {
     const imageBuffer = await renderSocialImage({
       model: {
@@ -357,15 +360,17 @@ async function processSchedule(
       format: "square",
       now,
     });
-    // In a full implementation, upload imageBuffer to Supabase Storage / CDN and
-    // set mediaUrl. For v1, we store the buffer size as a confirmation and skip
-    // the actual upload (the publish adapters handle media separately).
-    log(`rendered image: ${imageBuffer.byteLength} bytes (square, 1080×1080)`);
-    // mediaUrl would be set here after upload: mediaUrl = await uploadToStorage(imageBuffer);
+    if (DRY_RUN) {
+      log(`rendered image: ${imageBuffer.byteLength} bytes (DRY_RUN — Storage upload skipped)`);
+    } else {
+      const key = `${scheduleId}/${now.toISOString().slice(0, 10)}.png`;
+      mediaUrl = await uploadSocialImage(db, imageBuffer, key);
+      log(`rendered + uploaded image: ${imageBuffer.byteLength} bytes → ${mediaUrl}`);
+    }
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
-    // Image render failures are non-fatal: post without an image rather than skip.
-    log(`image render failed (non-fatal): ${reason}`);
+    // Image render/upload failures are non-fatal: post without an image rather than skip.
+    log(`image render/upload failed (non-fatal): ${reason}`);
   }
 
   // 6. Publish gate + write social_posts.
