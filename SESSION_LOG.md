@@ -1,3 +1,12 @@
+## 2026-06-19 (main) — docs(spec+plan): Phase F confirmed-value lifecycle — SCOPED + PLANNED, not built
+
+- **Brainstormed + specced + planned Phase F** (`TODO/03-phase-F-handoff.md`). No code shipped — design only.
+- **Spec** `docs/superpowers/specs/2026-06-19-phase-f-confirmed-value-lifecycle-design.md` + **plan** `docs/superpowers/plans/2026-06-19-phase-f-confirmed-value-lifecycle.md` (9 TDD tasks, 3 waves) + **build handoff** `TODO/04-phase-F-build-handoff.md`.
+- **Locked decisions:** (A) "Keep mine" protects a metric from the "Refresh items →" overwrite (`applyRefresh` skips confirmed); inline-**editable** metric value is F4's re-eval trigger; per-item **confidence chip** advises (both numbers, never overrides); sticky in `ui_state.confirmed_values` + evidence row in `data_readiness_alerts` (`surface='in_project'`). Scope: we provide data, never *change* a user's number.
+- **Key finding (code-verified):** the scheduled email already renders our **current** brain data every send and reads neither `projects.items` nor `ui_state` → kept numbers can't leak into email → **zero email work**. (`scripts/email/run-schedules.mts`, `lib/welcome/answer.ts:174`, `docs/sql/20260612_email_product.sql:21-36` no `deliverable_id`.)
+- **HONESTY:** engine (`brain-snapshot.ts`/`change-evaluator.ts`) read directly; UI/refresh/ui_state/alerts/email came from subagent probes. **`TODO/04` §4 has a 9-item verify-first checklist** the builder MUST run before coding (signals test-harness stubs, `ProjectWorkspace` patch helper, service-role import, `refreshKey` format, route auth, prod table exists, secrets path, build scripts).
+- **Next:** new session — do `TODO/04` §4, then execute the plan (Wave 1 = Tasks 1‖2‖3). Operator handed off due to time. Nothing pushed; docs-only commits on `main`.
+
 ## 2026-06-19 (main) — feat(funnel): FINAL BOSS 05 arrival→claim-bridge→seeded-project (plumbing, HELD for diff-review)
 
 - **Scope:** operator chose **plumbing only** — full funnel wired end-to-end; the conversational qualify→demonstrate→close arc inside `/project/[id]` is DEFERRED. Spec: `docs/superpowers/specs/2026-06-19-funnel-arrival-bridge-design.md`.
