@@ -75,6 +75,15 @@ export interface ActivationDeps {
   ) => Promise<void>;
   /** Days between step 1 and step 2 (default 3). */
   intervalDays?: number;
+  /**
+   * Send cadence (default "delta" — the 2-step "It's Alive" sequence). "daily-trial"
+   * is the no-signup 30-day-at-9 AM trial: it schedules the NEXT send at +1 day. NOTE
+   * (G-F3 scope): this seam sets the enroll-side interval only. The repeating
+   * processor that re-sends daily up to 30× (and the close-button that starts the
+   * trial) are the deferred remainder — they cannot run until live send (Phase D) and
+   * the deferred conversational close exist.
+   */
+  cadence?: "delta" | "daily-trial";
   /** CTA target (default the gate at /pricing). */
   ctaUrl?: string;
   log: (line: string) => void;
@@ -112,7 +121,8 @@ export async function enrollProspect(
 ): Promise<EnrollOutcome> {
   const assemble = deps.assemble ?? assembleActivationReport;
   const render = deps.render ?? reportToEmailHtml;
-  const interval = deps.intervalDays ?? 3;
+  // daily-trial sends again tomorrow; the delta sequence waits the full interval.
+  const interval = deps.cadence === "daily-trial" ? 1 : (deps.intervalDays ?? 3);
 
   try {
     const report = await assemble(input.scope);
@@ -151,7 +161,9 @@ export async function enrollProspect(
     deps.log(`[activation] ENROLLED ${input.email} id=${id} — email#1 sent, step2 at ${nextSend}.`);
     return { kind: "enrolled", id };
   } catch (err) {
-    deps.log(`[activation] ERROR enroll ${input.email} — ${err instanceof Error ? err.message : String(err)}`);
+    deps.log(
+      `[activation] ERROR enroll ${input.email} — ${err instanceof Error ? err.message : String(err)}`,
+    );
     return { kind: "error", error: err instanceof Error ? err.message : String(err) };
   }
 }
@@ -211,7 +223,9 @@ export async function processActivationStep(
     deps.log(`[activation] SENT step2 id=${row.id} hasChange=${delta.has_change}.`);
     return { kind: "sent", id: row.id, hadChange: delta.has_change };
   } catch (err) {
-    deps.log(`[activation] ERROR step2 id=${row.id} — ${err instanceof Error ? err.message : String(err)}`);
+    deps.log(
+      `[activation] ERROR step2 id=${row.id} — ${err instanceof Error ? err.message : String(err)}`,
+    );
     return { kind: "error", id: row.id, error: err instanceof Error ? err.message : String(err) };
   }
 }

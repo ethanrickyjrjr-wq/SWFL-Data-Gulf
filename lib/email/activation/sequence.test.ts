@@ -1,8 +1,17 @@
 import { describe, expect, it } from "bun:test";
-import { enrollProspect, processActivationStep, type ActivationDeps, type ActivationRow } from "./sequence";
+import {
+  enrollProspect,
+  processActivationStep,
+  type ActivationDeps,
+  type ActivationRow,
+} from "./sequence";
 import type { AssembledReport, ReportMetric } from "./snapshot";
 
-function metric(key: string, value: number, direction: ReportMetric["direction"] = "neutral"): ReportMetric {
+function metric(
+  key: string,
+  value: number,
+  direction: ReportMetric["direction"] = "neutral",
+): ReportMetric {
   return { key, label: key, value, unit: "", direction, display: String(value) };
 }
 
@@ -16,20 +25,46 @@ function reportFor(zip: string, price: number, inScope = true): AssembledReport 
     freshness_token: `SWFL-7421-v5-2026061${price === 400000 ? "0" : "3"}`,
     metrics,
     lines: [
-      { brain_id: "city-pulse-swfl", grain: "city", is_true_zip: false, label: "pulse", text: `signal ${price}`, source_url: "", source_citation: "" },
+      {
+        brain_id: "city-pulse-swfl",
+        grain: "city",
+        is_true_zip: false,
+        label: "pulse",
+        text: `signal ${price}`,
+        source_url: "",
+        source_citation: "",
+      },
     ],
     coverage_caveats: [],
     snapshot: {
       zip,
       freshness_token: `SWFL-7421-v5-2026061${price === 400000 ? "0" : "3"}`,
       captured_at: "2026-06-10T00:00:00.000Z",
-      metrics: metrics.map(({ key, label, value, unit, direction }) => ({ key, label, value, unit, direction })),
-      lines: [{ brain_id: "city-pulse-swfl", grain: "city", is_true_zip: false, label: "pulse", fingerprint: `signal ${price}` }],
+      metrics: metrics.map(({ key, label, value, unit, direction }) => ({
+        key,
+        label,
+        value,
+        unit,
+        direction,
+      })),
+      lines: [
+        {
+          brain_id: "city-pulse-swfl",
+          grain: "city",
+          is_true_zip: false,
+          label: "pulse",
+          fingerprint: `signal ${price}`,
+        },
+      ],
     },
   };
 }
 
-function baseDeps(over: Partial<ActivationDeps> = {}): { deps: ActivationDeps; log: string[]; sends: { to: string; subject: string }[] } {
+function baseDeps(over: Partial<ActivationDeps> = {}): {
+  deps: ActivationDeps;
+  log: string[];
+  sends: { to: string; subject: string }[];
+} {
   const log: string[] = [];
   const sends: { to: string; subject: string }[] = [];
   const deps: ActivationDeps = {
@@ -52,23 +87,63 @@ function baseDeps(over: Partial<ActivationDeps> = {}): { deps: ActivationDeps; l
 describe("enrollProspect", () => {
   it("sends email #1 and enrolls, scheduling step 2 at +3 days", async () => {
     const { deps, sends } = baseDeps();
-    const r = await enrollProspect({ email: "a@b.com", scope: { zip: "33931" }, brand: null }, deps);
+    const r = await enrollProspect(
+      { email: "a@b.com", scope: { zip: "33931" }, brand: null },
+      deps,
+    );
     expect(r).toEqual({ kind: "enrolled", id: 99 });
     expect(sends).toHaveLength(1);
     expect(sends[0].subject).toContain("Fort Myers Beach");
   });
 
+  it("default (delta) cadence schedules step 2 at +3 days", async () => {
+    let next: string | undefined;
+    const { deps } = baseDeps({
+      insertEnrollment: async (row) => {
+        next = row.next_send_at;
+        return { id: 1 };
+      },
+    });
+    await enrollProspect({ email: "a@b.com", scope: { zip: "33931" }, brand: null }, deps);
+    expect(next).toBe("2026-06-16T12:00:00.000Z"); // now (06-13 12:00) + 3 days
+  });
+
+  it("daily-trial cadence schedules the next send at +1 day", async () => {
+    let next: string | undefined;
+    const { deps } = baseDeps({
+      cadence: "daily-trial",
+      insertEnrollment: async (row) => {
+        next = row.next_send_at;
+        return { id: 1 };
+      },
+    });
+    await enrollProspect({ email: "a@b.com", scope: { zip: "33931" }, brand: null }, deps);
+    expect(next).toBe("2026-06-14T12:00:00.000Z"); // now (06-13 12:00) + 1 day
+  });
+
   it("parks an out-of-scope scope and never sends", async () => {
     const { deps, sends } = baseDeps({ assemble: async (s) => reportFor(s.zip, 0, false) });
-    const r = await enrollProspect({ email: "a@b.com", scope: { zip: "90210" }, brand: null }, deps);
+    const r = await enrollProspect(
+      { email: "a@b.com", scope: { zip: "90210" }, brand: null },
+      deps,
+    );
     expect(r.kind).toBe("parked");
     expect(sends).toHaveLength(0);
   });
 
   it("DRY_RUN renders but never sends or inserts", async () => {
     let inserted = false;
-    const { deps, sends } = baseDeps({ dryRun: true, insertEnrollment: async () => { inserted = true; return { id: 1 }; } });
-    const r = await enrollProspect({ email: "a@b.com", scope: { zip: "33931" }, brand: null }, deps);
+    const { deps, sends } = baseDeps({
+      dryRun: true,
+      insertEnrollment: async () => {
+        inserted = true;
+        return { id: 1 };
+      },
+    });
+    const r = await enrollProspect(
+      { email: "a@b.com", scope: { zip: "33931" }, brand: null },
+      deps,
+    );
     expect(r.kind).toBe("sent-dry-run");
     expect(sends).toHaveLength(0);
     expect(inserted).toBe(false);
@@ -125,7 +200,9 @@ describe("processActivationStep — beat 2 delta", () => {
     const { deps, sends } = baseDeps({
       dryRun: true,
       assemble: async (s) => reportFor(s.zip, 412000),
-      completeStep: async () => { completed = true; },
+      completeStep: async () => {
+        completed = true;
+      },
     });
     const out = await processActivationStep(rowAtStep1(), deps);
     expect(out.kind).toBe("dry-run");
