@@ -1,3 +1,7 @@
+## 2026-06-20 (main) - U1 handoff doc landed (OAuth connect, probe-verified grounding)
+
+- SOCIAL BUILD/U1-HANDOFF.md: probe-first supplement to the U1 build file. Key drift flagged: revokeToken does NOT exist in oauth-tokens.ts (U1 must add it). Captures verified precedent symbols (google-oauth start/callback), build-03 seam shapes (TokenBundle.expires_at = epoch SECONDS; AccountInfo), schema state (social_schedules now has project_id + frozen_post), X media.write requirement, and the plan correction (U4 unblocked; order U1||U2 -> U3 -> U4). U1 is ready to build.
+
 ## 2026-06-20 (main) - Social go-live Fix A PUSHED: rendered PNG -> public Storage -> mediaUrl (build 04)
 
 - Closed the build-04 image-less-post gap (07 handoff Fix A). NEW lib/social/media-upload.ts:uploadSocialImage uploads the rendered card to a PUBLIC social-media Storage bucket (created idempotently, verified public=true) and returns getPublicUrl; scripts/social/run-schedules.mts now uploads after render + sets mediaUrl (key=<scheduleId>/<YYYY-MM-DD>.png), which already flows into both social_posts writes + postToChannel media[]. Public is required: Meta/IG fetch server-side, X v2 fetches the bytes from the URL. Render/upload failure stays non-fatal. DRY_RUN stays read-only (no Storage write); PUBLISH_ENABLED=false writes a dry_run record carrying the real media_url. Gates: tsc 0, eslint 0, bun test 33/0.
