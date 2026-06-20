@@ -26,7 +26,7 @@ If this rule or the marker comment above it is missing the next time a session s
 - `graphify explain "<concept>"` — focused concept breakdown
 - `graphify path "<A>" "<B>"` — relationship between two things
 
-`graphify-out/graph.json` exists in this repo. Run graphify first, then open specific files if you need line-level detail. No excuse for skipping it.
+**Probe first, always — graphify when it's there, grep/Glob/Read when it isn't.** `graphify-out/graph.json` is the fast path when present: run graphify first, then open specific files for line-level detail. It is **gitignored / not committed**, so a fresh clone (e.g. a web/CI container) won't have it — if `graphify-out/graph.json` is absent and the `graphify` CLI isn't installed, **do not skip the probe**: fall back to `Grep`/`Glob`/`Read` over the actual files (and `bun run graphify:update` to regenerate the graph if the CLI is available). The rule is "read the code before you answer," not "the graph must exist." No excuse for skipping the probe.
 
 **This covers two failure modes:**
 
@@ -236,7 +236,7 @@ These fire on every pack / output operation. The locked v1.1 spec, build order, 
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ covering **both planes**:
+This project can carry a knowledge graph at graphify-out/ covering **both planes** (the directory is gitignored, so it's present only after you build it locally — regenerate with `bun run graphify:update`; if neither the dir nor the CLI is available, fall back to `Grep`/`Glob`/`Read`):
 
 **Data plane** (maintained by `graphify update .`): `brain`, `slug`, `pipeline`
 **App plane** (maintained by `scripts/graphify-app-nodes.mjs`): `page`, `component`, `api_route`, `hook`, `table`

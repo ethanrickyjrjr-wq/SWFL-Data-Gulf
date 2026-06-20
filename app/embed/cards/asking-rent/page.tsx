@@ -4,11 +4,7 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { HBarChart, type HBarCorridor } from "@/components/charts/HBarChart";
 import type { CorridorEntry } from "@/types/viz";
 import { medianOf } from "@/lib/stats";
-import {
-  BULLISH_MULTIPLIER,
-  BEARISH_MULTIPLIER,
-  tierFor,
-} from "@/refinery/lib/chart-adapter.mts";
+import { tierFor } from "@/refinery/lib/chart-adapter.mts";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const revalidate = 3600;

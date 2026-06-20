@@ -47,7 +47,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!isTemplateId(template)) {
     return NextResponse.json({ error: "invalid template" }, { status: 400 });
   }
-  const instruction = typeof body.instruction === "string" ? body.instruction : "";
+  // Cap the free-text framing instruction before it reaches the LLM — an unbounded
+  // field is a token-burn vector (M1). 2000 chars is ample for a framing steer.
+  const instruction =
+    typeof body.instruction === "string" ? body.instruction.slice(0, 2000) : "";
 
   // G4: thread the deliverable scope (the email_schedules contract, verbatim) so an
   // "email" deliverable seeded from outside carries its ZIP/place/county scope into

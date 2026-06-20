@@ -56,7 +56,6 @@ import {
   SPECULATIVE_DISCLAIMER,
   type CorridorCharacterOutput,
   type CharacterCitations,
-  type WebCite,
   type CorridorCharacterLintResult,
 } from "../validate/corridor-character-lint.mts";
 import type { ChartBlock } from "../validate/chart-block-lint.mts";
@@ -590,7 +589,10 @@ export function slug(corridorName: string): string {
     .replace(/^-|-$/g, "");
 }
 
-async function resolveGroundedPath(
+// NOTE: currently unwired (no call site) — kept for the corridor-grounded NDJSON
+// resolution path documented above. Prefixed `_` to satisfy no-unused-vars until
+// a caller is restored; delete if the grounded-path lookup is abandoned.
+async function _resolveGroundedPath(
   dir: string,
   corridorName: string,
 ): Promise<string> {

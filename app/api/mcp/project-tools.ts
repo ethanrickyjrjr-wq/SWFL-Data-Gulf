@@ -393,6 +393,7 @@ export function registerProjectTools(server: McpServer): void {
         ),
         instruction: z
           .string()
+          .max(2000)
           .optional()
           .describe("Optional framing instruction (e.g. “lead with the flood-risk caveat”)."),
         scope_kind: SCOPE_KIND_ENUM.optional().describe(

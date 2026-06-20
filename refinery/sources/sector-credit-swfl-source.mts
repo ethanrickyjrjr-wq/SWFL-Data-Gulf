@@ -46,8 +46,7 @@ const FIXTURE_PATH = path.join(
 );
 
 /** Display-cased SWFL county names — what surfaces to the brain consumer. */
-const SWFL_COUNTIES = ["Lee", "Collier"] as const;
-type SwflCounty = (typeof SWFL_COUNTIES)[number];
+type SwflCounty = "Lee" | "Collier";
 
 /**
  * The live MV stores `project_county` in UPPER CASE ("LEE", "COLLIER"); the

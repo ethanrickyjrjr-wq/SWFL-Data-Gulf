@@ -67,10 +67,7 @@ import {
 } from "../sources/bls-laus-source.mts";
 import { submarketFor } from "../lib/marketbeat-submarket-aliases.mts";
 import { getSupabase } from "../sources/supabase.mts";
-import {
-  buildCorridorFactPack,
-  type BuildFactPackInput,
-} from "./build-corridor-fact-pack.mts";
+import { buildCorridorFactPack } from "./build-corridor-fact-pack.mts";
 import {
   synthesizeCorridorCharacter,
   slug,

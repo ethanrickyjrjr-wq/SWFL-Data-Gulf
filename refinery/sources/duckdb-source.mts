@@ -129,7 +129,7 @@ export function sqlEscape(s: string): string {
  * each in order. (DuckDB will parse a multi-statement string fine, but
  * stepping one-at-a-time gives better error messages on failure.)
  */
-export function composeQuery<TRow>(opts: {
+export function composeQuery(opts: {
   source_id: string;
   parquetViews?: ParquetView[];
   pgAttachments?: PgAttachment[];

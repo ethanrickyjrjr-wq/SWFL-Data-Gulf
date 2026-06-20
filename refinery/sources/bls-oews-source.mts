@@ -24,7 +24,7 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 const SOURCE_ID = "bls_oews_swfl";
 const SCHEMA = "data_lake";
 const TABLE = "bls_oews_swfl";
-const CITATION_URL = "https://www.bls.gov/oes/tables.htm";
+export const CITATION_URL = "https://www.bls.gov/oes/tables.htm";
 
 export const CAPE_CORAL_MSA = "15980";
 export const NAPLES_MSA = "34940";

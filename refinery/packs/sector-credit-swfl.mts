@@ -68,7 +68,9 @@ interface SectorAggregate {
 let lastSectors: SectorAggregate[] = [];
 let lastFranchiseOutput: BrainOutput | null = null;
 let lastMacroUsOutput: BrainOutput | null = null;
-let lastMacroFloridaOutput: BrainOutput | null = null;
+// Captured for provenance (macro-florida is a wired input + named in the macro fact
+// line) but not read by the producer today; `_` keeps it lint-clean until consumed.
+let _lastMacroFloridaOutput: BrainOutput | null = null;
 let lastFetchedAt: string | null = null;
 let lastSinceFy: number | null = null;
 
@@ -298,7 +300,7 @@ function sectorCreditCorpusSummary(
   lastSectors = aggregateBySector(rows);
   lastFranchiseOutput = franchise;
   lastMacroUsOutput = macroUs;
-  lastMacroFloridaOutput = macroFl;
+  _lastMacroFloridaOutput = macroFl;
 
   // Capture fetched_at + since_fy from the first sector-credit row so the
   // outputProducer can rebuild the exact PostgREST query URL the source ran.
@@ -466,7 +468,6 @@ function sectorCreditOutputProducer(
 ): BrainOutputProducerResult {
   const sectors = lastSectors;
   const macroUs = lastMacroUsOutput;
-  const macroFl = lastMacroFloridaOutput;
   const franchise = lastFranchiseOutput;
   const fetched_at =
     lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");

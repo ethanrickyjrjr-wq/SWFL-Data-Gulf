@@ -23,8 +23,13 @@ export const maxDuration = 300;
 const BATCH_SIZE = 50;
 
 export async function GET(request: Request) {
-  // Vercel Cron auth — mirror data-readiness pattern exactly
+  // Vercel Cron auth — mirror data-readiness pattern exactly.
+  // Fail-closed in production: a missing secret is a misconfiguration, not an
+  // open door (L2). In dev/preview the secret is optional so local runs work.
   const cronSecret = process.env.CRON_SECRET;
+  if (process.env.VERCEL_ENV === "production" && !cronSecret) {
+    return NextResponse.json({ error: "Cron secret not configured" }, { status: 503 });
+  }
   if (cronSecret) {
     const authHeader = request.headers.get("authorization");
     if (authHeader !== `Bearer ${cronSecret}`) {

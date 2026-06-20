@@ -107,9 +107,9 @@ export function lintSmoothing(md: string): SmoothingLintResult {
       // Global scan so a number-qualified occurrence early in the line doesn't
       // mask a genuine softening occurrence later.
       const g = new RegExp(re.source, "gi");
-      let hit: RegExpExecArray | null;
       let flagged = false;
-      while ((hit = g.exec(line)) !== null) {
+      // exec advances g.lastIndex (read below); the match object itself is unused.
+      while (g.exec(line) !== null) {
         if (
           group === "numeric_softening" &&
           FIGURE_QUALIFIER_TOKENS.has(token) &&

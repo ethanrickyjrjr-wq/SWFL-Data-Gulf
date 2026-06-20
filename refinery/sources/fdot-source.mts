@@ -102,12 +102,6 @@ interface FixtureShape {
   segments: SegmentRow[];
 }
 
-function toNum(v: unknown): number | null {
-  if (v == null) return null;
-  const n = typeof v === "string" ? parseFloat(v) : Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
 function median(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);

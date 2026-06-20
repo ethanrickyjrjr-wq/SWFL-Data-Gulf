@@ -7,6 +7,7 @@ import type {
 } from "../types/brain-output.mts";
 import {
   blsOewsSource,
+  CITATION_URL,
   type BlsOewsSummary,
   type OewsMsaSnapshot,
 } from "../sources/bls-oews-source.mts";
