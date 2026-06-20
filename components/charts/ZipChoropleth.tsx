@@ -106,31 +106,36 @@ export function ZipChoropleth({
         svg.setAttribute("height", "100%");
         svg.style.display = "block";
 
-        svg.querySelectorAll<SVGPathElement>("path[id]").forEach((path) => {
-          const zip = path.getAttribute("id")!;
+        // Each ZIP is a <g class="zip-group" id="33931"> holding one or more
+        // <path> sub-shapes (islands split out), so fill the whole group.
+        svg.querySelectorAll<SVGGElement>("g.zip-group[id]").forEach((group) => {
+          const zip = group.getAttribute("id")!;
           const isLee = LEE_ZIPS.has(zip);
 
           // County filter
           if (county === "Lee" && !isLee) {
-            path.style.display = "none";
+            group.style.display = "none";
             return;
           }
           if (county === "Collier" && isLee) {
-            path.style.display = "none";
+            group.style.display = "none";
             return;
           }
 
           const entry = data[zip];
           const fill = entry != null ? valueToColor(entry.value, colorLow, colorHigh) : "#e5e7eb";
 
-          path.style.fill = fill;
-          path.style.stroke = "#fff";
-          path.style.strokeWidth = "0.5";
-          path.style.cursor = onZipClick ? "pointer" : "default";
-          path.style.transition = "fill 0.2s";
+          const paths = group.querySelectorAll<SVGPathElement>("path");
+          paths.forEach((path) => {
+            path.style.fill = fill;
+            path.style.stroke = "#fff";
+            path.style.strokeWidth = "0.5";
+            path.style.transition = "fill 0.2s";
+          });
+          group.style.cursor = onZipClick ? "pointer" : "default";
 
-          path.addEventListener("mouseenter", (e) => {
-            path.style.opacity = "0.8";
+          group.addEventListener("mouseenter", (e) => {
+            paths.forEach((p) => (p.style.opacity = "0.8"));
             const rect = container.getBoundingClientRect();
             const me = e as MouseEvent;
             setTooltip({
@@ -140,12 +145,21 @@ export function ZipChoropleth({
               y: me.clientY - rect.top,
             });
           });
-          path.addEventListener("mouseleave", () => {
-            path.style.opacity = "1";
+          group.addEventListener("mousemove", (e) => {
+            const rect = container.getBoundingClientRect();
+            const me = e as MouseEvent;
+            setTooltip((t) =>
+              t && t.zip === zip
+                ? { ...t, x: me.clientX - rect.left, y: me.clientY - rect.top }
+                : t,
+            );
+          });
+          group.addEventListener("mouseleave", () => {
+            paths.forEach((p) => (p.style.opacity = "1"));
             setTooltip(null);
           });
           if (onZipClick) {
-            path.addEventListener("click", () => onZipClick(zip));
+            group.addEventListener("click", () => onZipClick(zip));
           }
         });
       });

@@ -1,3 +1,11 @@
+## 2026-06-20 (main) — Fixed homepage ZIP map: swapped 57-path census SVG → 949-path contractor coastline (islands)
+
+- **Problem:** `public/maps/lee-collier.svg` served by `components/charts/ZipChoropleth.tsx` was a 57-path Census-TIGER export with NO coastline — every ZIP one merged polygon, so Fort Myers Beach (33931), Pine Island, Sanibel rendered welded to the mainland. The good 949-path contractor SVG (islands split as sub-paths) was only ever read from the operator's local `Downloads` by `HOMEPAGE/build_demo*.py` (line 45), never committed.
+- **Operator committed the raw file** to `public/maps/Lee County and Collier County-01.svg` (`a8e5be2`). This session: added `scripts/clean-contractor-map.mjs` (strip `_NNNNN` id prefix, tag each ZIP `<g class="zip-group">`, keep contractor `<style>` so cls-2/3/4 stay `fill:none` — KEEP not strip, or stray paths default to black; reset the 3 dimmed ZIPs 33922/34110/34139 cls-1/cls-5 → normal fill) → regenerates `public/maps/lee-collier.svg` (949 paths, coastline + county layers).
+- **Rewired** `ZipChoropleth.tsx` from `path[id]` (one path per ZIP) → `g.zip-group[id]` (group of island sub-paths), fills all child paths, group-level hover/move/click.
+- **Verified via resvg render** (no node_modules in container → can't `next build`): islands separate, Matlacha Pass + Caloosahatchee water show, no black blobs. **Real-browser verify still pending deploy.** Mapbox was considered — NOT present in repo (no `mapbox-gl`/token); would be a from-scratch build, deferred.
+- **Next:** deploy + eyeball `/map` in a real browser; if good, homepage integration per `HOMEPAGE/HANDOFF.md` is the follow-on.
+
 ## 2026-06-20 (main) — Got back ON main + landed outreach-engine handoff brief (docs)
 
 - **On `main` now.** Prior session was sitting on `claude/handoff-outreach-engine-d3kph6` (byte-identical to `origin/main` `12ff984` — nothing stranded). Local `main` was orphaned stale history (no common ancestor w/ origin/main — old 2026-06-08 PR-merge commits); hard-reset local `main` to `origin/main`. Old tip recoverable via reflog at `789fec0`.
