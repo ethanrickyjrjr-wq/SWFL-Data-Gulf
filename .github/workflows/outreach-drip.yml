@@ -1,0 +1,54 @@
+# .github/workflows/outreach-drip.yml
+name: Outreach Drip
+on:
+  # SCHEDULE PAUSED until go-live (operator call). Before uncommenting:
+  #   (1) apply docs/sql/20260620_outreach_*.sql to prod (the tables),
+  #   (2) set the secrets/vars below (RESEND_AUDIENCES_KEY + a verified
+  #       OUTREACH_FROM_ADDRESS), and
+  #   (3) do a workflow_dispatch DRY-RUN first and read the log.
+  # GO-LIVE: apply migrations → set secrets → dispatch dry-run → uncomment.
+  # Once live this fires daily and the runner only sends to recipients whose
+  # next_send_at is due (the cursor self-paces the drip).
+  # schedule:
+  #   - cron: "0 14 * * *" # 14:00 UTC daily (~9–10am ET)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — log what would send, do NOT send or mutate"
+        required: false
+        default: "true"
+concurrency:
+  group: outreach-drip
+  cancel-in-progress: false
+jobs:
+  drip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run outreach drip
+        env:
+          # DRY_RUN defaults true on manual dispatch; the (paused) schedule will run live.
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || github.event.inputs.dry_run || 'true' }}
+          SITE_ORIGIN: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # assembleActivationReport reads the lake → the brains project creds.
+          BRAINS_SUPABASE_URL: ${{ secrets.BRAINS_SUPABASE_URL }}
+          BRAINS_SUPABASE_SERVICE_KEY: ${{ secrets.BRAINS_SUPABASE_SERVICE_KEY }}
+          # Full-access Resend key (batch.send) — the same key marketing-client.ts uses.
+          RESEND_AUDIENCES_KEY: ${{ secrets.RESEND_AUDIENCES_KEY }}
+          # Verified CAN-SPAM sender (falls back to the digest sender if unset).
+          OUTREACH_FROM_NAME: ${{ vars.OUTREACH_FROM_NAME || vars.DIGEST_SENDER_NAME }}
+          OUTREACH_FROM_EMAIL: ${{ vars.OUTREACH_FROM_ADDRESS || vars.DIGEST_SENDER_ADDRESS }}
+          OUTREACH_INTERVAL_DAYS: ${{ vars.OUTREACH_INTERVAL_DAYS || '3' }}
+        run: bun scripts/email/outreach-drip-run.mts

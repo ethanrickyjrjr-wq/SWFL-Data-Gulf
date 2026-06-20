@@ -1,3 +1,14 @@
+## 2026-06-20 (main) — Outreach Engine Increment 2: live send + daily drip runner + GHA (built + gated; HELD for push)
+
+- **Finished the last mile of the cold-outreach engine** (server-side primitives — `send.ts` batch / `lifecycle.ts` state machine, the `?rid=` unsubscribe branch, the Resend webhook outbound→`engaged` suppression — were already built+tested by a prior session; **verified against code, not rebuilt**):
+  - **CLI live send** (`scripts/email/outreach-campaign.mts`) — replaced `refuseLiveSend` with a real send: upsert `outreach_recipients` (per-recipient unsub id + drip cursor) → `buildBatchMessages`/`sendBatches` (Resend batch, 100-chunk, List-Unsubscribe + `rid` tag) → record `sent` event + advance cursor. `DRY_RUN` still default; live only on `DRY_RUN=false`; requires `OUTREACH_FROM_EMAIL` (verified CAN-SPAM sender).
+  - **Daily drip runner** (`scripts/email/outreach-drip-run.mts`) — selects active+due recipients (`shouldSend`, capped at `OUTREACH_MAX_STEPS`), RE-composes fresh per-recipient content each cycle, sends, advances the cursor. DRY_RUN-safe (read-only select, no send/mutate). Mirrors `run-schedules.mts` (RULE 3 C2 — extend the seam, reuse `scheduler`/`lifecycle`).
+  - **GHA** `.github/workflows/outreach-drip.yml` — schedule PAUSED until go-live; `workflow_dispatch` dry-run open; env wired.
+  - **Extracted** `lib/email/outreach/build-content.ts` (shared CLI + runner) + **pure** `lib/email/outreach/recipients.ts` (`buildRecipientRow`/`normalizeEmail`) + test.
+- **Migrations APPLIED to prod** (psycopg, idempotent): `outreach_recipients` + `outreach_events` (RLS on, service-role only) + `outreach_campaign_metrics` view — verified 0 rows, RLS enabled.
+- **Gates:** outreach tests 40/0, eslint clean, tsc 0 errors.
+- **HELD for operator OK (RULE 1 — 6 files + new prod tables):** committed, NOT pushed. **To go live:** set GHA var `OUTREACH_FROM_ADDRESS` (verified sender; rest of secrets already exist) → `workflow_dispatch` dry-run → `DRY_RUN=false` test to 1–2 own addresses → uncomment the schedule. Follow-up: register the runner in `cadence_registry.yaml` (probe-excluded).
+
 ## 2026-06-20 (main) — Homepage demo: fixed black ZIPs + saved current demo to HOMEPAGE/
 
 - **Root cause of black ZIP patches:** `build_demo4.py` line 49 regex `<g\s+id="(\d{5})"` only matched when `id=` was the first attribute on `<g>`. Illustrator exports some groups with `data-name` before `id`, so those ZIP groups never got `class="zip-group"` → JS skipped them → SVG default black. Fixed with `<g\b[^>]*\bid="\d{5}"[^>]*>` (matches regardless of attribute order).

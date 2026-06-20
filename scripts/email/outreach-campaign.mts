@@ -10,35 +10,38 @@
 // (the tracking artifact) + per-recipient HTML previews under outreach-runs/, and
 // prints a summary + each branded arrival URL. It NEVER sends and NEVER mutates.
 //
-// LIVE SEND IS NOT WIRED (same posture as enroll-prospect's Phase D). A bulk cold
-// send is not CAN-SPAM-compliant until three things are decided/built (Increment 2):
-//   1. Per-recipient unsubscribe identity (a stored id → /api/unsubscribe URL), since
-//      resend.batch.send to raw addresses has no managed-contact unsubscribe.
-//   2. Click → suppress: first click from a recipient stops their drip (Resend webhook).
-//   3. Secrets + a verified CAN-SPAM sender address in the send env.
-// A DRY_RUN=false invocation refuses with that checklist — but still writes the run
-// report so the preview/tracking works now.
+// LIVE SEND (DRY_RUN=false) — Increment 2, now WIRED. For each ready message it:
+//   1. Upserts an outreach_recipients row (the per-recipient unsubscribe id AND the
+//      drip cursor); the row id rides the email as a `rid` tag + the unsub URL.
+//   2. Sends via Resend batch (chunks of 100, CAN-SPAM List-Unsubscribe headers).
+//   3. Records a `sent` event and advances the drip cursor (step/next_send_at).
+// Suppression (click → 'engaged', unsubscribe, bounce) is handled by the Resend
+// webhook + /api/unsubscribe; the daily drip runner (outreach-drip-run.mts) then
+// only re-sends to still-active recipients. Requires OUTREACH_FROM_EMAIL (a verified
+// CAN-SPAM sender) + RESEND_AUDIENCES_KEY + the SUPABASE_* creds.
 //
 // Usage:
-//   bun scripts/email/outreach-campaign.mts --csv targets.csv
+//   bun scripts/email/outreach-campaign.mts --csv targets.csv [--campaign <label>]
 //   env: SITE_ORIGIN (default https://www.swfldatagulf.com), DRY_RUN (default true),
-//        CONFIDENCE_THRESHOLD (default 0.5)
+//        CONFIDENCE_THRESHOLD (default 0.5), OUTREACH_INTERVAL_DAYS (default 3),
+//        OUTREACH_FROM_NAME / OUTREACH_FROM_EMAIL (live send only)
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { parseTargetsCsv, type OutreachTarget } from "@/lib/email/outreach/targets";
-import {
-  composeCampaign,
-  type CampaignContent,
-  type ComposedMessage,
-} from "@/lib/email/outreach/campaign";
+import { parseTargetsCsv } from "@/lib/email/outreach/targets";
+import { composeCampaign, type ComposedMessage } from "@/lib/email/outreach/campaign";
+import { buildContent } from "@/lib/email/outreach/build-content";
 import { enrichBrand } from "@/lib/prospects/enrich-brand";
-import { assembleActivationReport } from "@/lib/email/activation/snapshot";
-import type { EmailChartSpec } from "@/lib/email/templates/charts/chart-types";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { getMarketingResend } from "@/lib/email/marketing-client";
+import { buildBatchMessages, sendBatches, type BatchSender } from "@/lib/email/outreach/send";
+import { nextStep } from "@/lib/email/outreach/lifecycle";
+import { buildRecipientRow } from "@/lib/email/outreach/recipients";
 
 const DRY_RUN = process.env.DRY_RUN !== "false"; // default true — must opt OUT to send
 const SITE_ORIGIN = process.env.SITE_ORIGIN ?? "https://www.swfldatagulf.com";
 const CONFIDENCE_THRESHOLD = Number(process.env.CONFIDENCE_THRESHOLD ?? "0.5");
+const INTERVAL_DAYS = Number(process.env.OUTREACH_INTERVAL_DAYS ?? "3");
 
 /** Parse `--key value` and `--key=value` from argv. */
 function arg(name: string): string | undefined {
@@ -51,68 +54,114 @@ function arg(name: string): string | undefined {
   return undefined;
 }
 
-/**
- * Build the per-recipient content from their ZIP's grounded report. The scope MOAT
- * gate (resolveZip) lives inside assembleActivationReport — out-of-scope → in_scope:false
- * → we return null (the recipient is skipped, never sent an empty report).
- *
- * v1 chart: a bar of the report's largest same-unit metric group (honest comparison;
- * never mixes $/%/days in one bar). v2 upgrade is a trend sparkline off lib/charts
- * series — left as a clear seam; needs lake access this CLI runs against in the
- * operator's env.
- */
-async function buildContent(target: OutreachTarget): Promise<CampaignContent | null> {
-  if (!target.zip) return null;
-  const report = await assembleActivationReport({ zip: target.zip });
-  if (!report.in_scope) return null;
-
-  const finite = report.metrics.filter((m) => m.value !== null && Number.isFinite(m.value));
-  if (finite.length === 0) return null;
-
-  // Largest group of metrics sharing one unit → a comparable bar.
-  const byUnit = new Map<string, typeof finite>();
-  for (const m of finite) {
-    const u = m.unit ?? "";
-    byUnit.set(u, [...(byUnit.get(u) ?? []), m]);
+/** "Name <email>" sender — a verified CAN-SPAM address is required for a live send. */
+function outreachFrom(): string {
+  const name = process.env.OUTREACH_FROM_NAME ?? process.env.DIGEST_SENDER_NAME ?? "SWFL Data Gulf";
+  const email = process.env.OUTREACH_FROM_EMAIL ?? process.env.DIGEST_SENDER_ADDRESS;
+  if (!email) {
+    throw new Error(
+      "OUTREACH_FROM_EMAIL (or DIGEST_SENDER_ADDRESS) is required for a live send — a verified CAN-SPAM sender address.",
+    );
   }
-  const group = [...byUnit.values()].sort((a, b) => b.length - a.length)[0].slice(0, 5);
-
-  const chart: EmailChartSpec = {
-    type: "bar",
-    title: `${report.primaryPlace ?? `ZIP ${report.zip}`} — key figures`,
-    subtitle: report.freshness_token ? `as of token ${report.freshness_token}` : undefined,
-    unit: group[0].unit || undefined,
-    data: group.map((m) => ({ label: m.label, value: m.value as number })),
-  };
-
-  const place = report.primaryPlace ?? `ZIP ${report.zip}`;
-  const explanation =
-    report.lines
-      .slice(0, 2)
-      .map((l) => l.text)
-      .join(" ") || `The latest Southwest Florida market read for ${place}.`;
-
-  return {
-    kicker: `${place} · Market Pulse`,
-    title: `Your ${place} market snapshot`,
-    chart,
-    explanation,
-    subject: `${place}: your latest Southwest Florida market read`,
-    freshness: report.freshness_token
-      ? `Live data token: ${report.freshness_token}`
-      : "Live Southwest Florida market data",
-  };
+  return `${name} <${email}>`;
 }
 
-function refuseLiveSend(summary: unknown): never {
-  console.error(
-    "\n[outreach] LIVE SEND REFUSED — not wired (Increment 2). Before a compliant cold send:\n" +
-      "  1. Per-recipient unsubscribe identity (stored id → /api/unsubscribe URL).\n" +
-      "  2. Click → suppress (Resend webhook stops a recipient's drip on first click).\n" +
-      "  3. Secrets + a verified CAN-SPAM sender address in the send env.\n" +
-      `Run report was still written. Summary: ${JSON.stringify(summary)}\n`,
+/**
+ * Select-or-insert the recipient by (campaign_id, lower(email)); return its id. The
+ * unique index is on the functional (campaign_id, lower(email)), so we match on the
+ * already-normalized email rather than PostgREST onConflict over an expression. A
+ * re-run of the same campaign updates the row in place (idempotent).
+ */
+async function upsertRecipient(
+  db: ReturnType<typeof createServiceRoleClient>,
+  campaignId: string,
+  m: ComposedMessage,
+): Promise<string> {
+  const row = buildRecipientRow(campaignId, m);
+  const { data: existing, error: selErr } = await db
+    .from("outreach_recipients")
+    .select("id")
+    .eq("campaign_id", campaignId)
+    .eq("email", row.email)
+    .maybeSingle();
+  if (selErr) throw new Error(`select recipient ${row.email}: ${selErr.message}`);
+  if (existing?.id) {
+    const { error: upErr } = await db
+      .from("outreach_recipients")
+      .update({
+        name: row.name,
+        domain: row.domain,
+        zip: row.zip,
+        brand: row.brand,
+        brand_source: row.brand_source,
+        brand_confidence: row.brand_confidence,
+        arrival_url: row.arrival_url,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id as string);
+    if (upErr) throw new Error(`update recipient ${row.email}: ${upErr.message}`);
+    return existing.id as string;
+  }
+  const { data: inserted, error: insErr } = await db
+    .from("outreach_recipients")
+    .insert(row)
+    .select("id")
+    .single();
+  if (insErr || !inserted) {
+    throw new Error(`insert recipient ${row.email}: ${insErr?.message ?? "no row returned"}`);
+  }
+  return inserted.id as string;
+}
+
+/** Live send the ready messages: persist recipients → batch send → events + cursor. */
+async function liveSend(messages: ComposedMessage[], campaignId: string): Promise<void> {
+  const ready = messages.filter((m) => m.status === "ready" && !!m.html);
+  if (ready.length === 0) {
+    console.log("[outreach] live send: 0 ready messages — nothing to send.");
+    return;
+  }
+  const from = outreachFrom();
+  const db = createServiceRoleClient();
+  const resend = getMarketingResend();
+  const now = new Date();
+
+  // 1. Persist each recipient (unsub id + drip cursor) and map email → id.
+  const idByEmail = new Map<string, string>();
+  for (const m of ready) idByEmail.set(m.email, await upsertRecipient(db, campaignId, m));
+
+  // 2. Build per-recipient Resend batches — unsub URL + rid tag injected, chunked 100.
+  const batches = buildBatchMessages({
+    messages: ready,
+    from,
+    unsubBase: SITE_ORIGIN,
+    recipientId: (m) => idByEmail.get(m.email) ?? "",
+  });
+
+  // 3. Send.
+  const result = await sendBatches(resend as unknown as BatchSender, batches);
+  console.log(`[outreach] live send: sent=${result.sent} failed=${result.failed}`);
+  for (const e of result.errors) console.error(`  send error: ${e}`);
+
+  // 4. Record a `sent` event + advance the drip cursor (step 0 → 1, next due +interval).
+  for (const m of ready) {
+    const rid = idByEmail.get(m.email);
+    if (!rid) continue;
+    const cursor = nextStep({ step: 0 }, INTERVAL_DAYS, now);
+    await db
+      .from("outreach_events")
+      .insert({ recipient_id: rid, campaign_id: campaignId, event: "sent" });
+    await db
+      .from("outreach_recipients")
+      .update({
+        step: cursor.step,
+        next_send_at: cursor.next_send_at,
+        updated_at: now.toISOString(),
+      })
+      .eq("id", rid);
+  }
+  console.log(
+    `[outreach] recorded ${ready.length} sent event(s); drip cursor advanced (+${INTERVAL_DAYS}d).`,
   );
-  process.exit(1);
 }
 
 async function main(): Promise<void> {
@@ -121,6 +170,7 @@ async function main(): Promise<void> {
     console.error("usage: --csv <path-to-targets.csv>  (columns: email,name,domain,zip)");
     process.exit(1);
   }
+  const campaignId = arg("campaign") || "cold-outreach";
 
   const text = await readFile(csvPath, "utf8");
   const { rows, errors } = parseTargetsCsv(text);
@@ -134,7 +184,7 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `[outreach] composing ${rows.length} target(s) · DRY_RUN=${DRY_RUN} · origin=${SITE_ORIGIN}`,
+    `[outreach] composing ${rows.length} target(s) · campaign=${campaignId} · DRY_RUN=${DRY_RUN} · origin=${SITE_ORIGIN}`,
   );
 
   const { messages, summary } = await composeCampaign(rows, {
@@ -154,7 +204,11 @@ async function main(): Promise<void> {
   }));
   await writeFile(
     join(outDir, "run-report.json"),
-    JSON.stringify({ generated_at: new Date().toISOString(), summary, rows: reportRows }, null, 2),
+    JSON.stringify(
+      { generated_at: new Date().toISOString(), campaign: campaignId, summary, rows: reportRows },
+      null,
+      2,
+    ),
   );
   for (const m of messages) {
     if (m.html) {
@@ -175,7 +229,7 @@ async function main(): Promise<void> {
   }
   console.log("========================================================================\n");
 
-  if (!DRY_RUN) refuseLiveSend(summary);
+  if (!DRY_RUN) await liveSend(messages, campaignId);
 }
 
 main().catch((err) => {
