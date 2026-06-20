@@ -8,6 +8,8 @@ interface Row {
   token: string;
   items: unknown[];
   title: string | null;
+  brand: unknown;
+  seed: unknown;
   project_id: string | null;
   created_at: string;
   expires_at: string;
@@ -26,6 +28,8 @@ function makeDb() {
               project_id: null,
               consumed_at: null,
               title: null,
+              brand: null,
+              seed: null,
               ...row,
             } as Row,
           );
@@ -57,7 +61,10 @@ function makeDb() {
       if (new Date(row.expires_at).getTime() <= Date.now()) return { data: [], error: null };
       row.consumed_at = new Date().toISOString(); // atomic flip at call time
       store.set(p_token, row);
-      return { data: [{ items: row.items, title: row.title }], error: null };
+      return {
+        data: [{ items: row.items, title: row.title, brand: row.brand, seed: row.seed }],
+        error: null,
+      };
     },
   };
 }
@@ -107,6 +114,8 @@ test("expired token (past expires_at) → expired, not consumed", async () => {
     token,
     items: [item("a")],
     title: null,
+    brand: null,
+    seed: null,
     project_id: null,
     created_at: "2020-01-01T00:00:00Z",
     expires_at: "2020-01-01T00:15:00Z",
@@ -136,6 +145,8 @@ test("peek of an expired row reports expired:true", async () => {
     token,
     items: [item("a")],
     title: null,
+    brand: null,
+    seed: null,
     project_id: null,
     created_at: "2020-01-01T00:00:00Z",
     expires_at: "2020-01-01T00:15:00Z",
@@ -149,6 +160,35 @@ test("two simultaneous consumes → exactly one won, one consumed", async () => 
   const [r1, r2] = await Promise.all([consumeClaimToken(token), consumeClaimToken(token)]);
   const statuses = [r1.status, r2.status].sort();
   expect(statuses).toEqual(["consumed", "won"]);
+});
+
+test("mint stores brand + seed; consume returns them on the won path", async () => {
+  const brand = {
+    primary: "#0a7",
+    secondary: "#012",
+    logo_url: "https://x/l.png",
+    company_name: "Acme",
+  };
+  const seed = { template: "email", scopeKind: "zip", scopeValue: "33931" };
+  const token = await mintClaimToken([item("a")], "T", { brand, seed });
+  expect(store.get(token)?.brand).toEqual(brand);
+  expect(store.get(token)?.seed).toEqual(seed);
+  const res = await consumeClaimToken(token);
+  expect(res.status).toBe("won");
+  if (res.status === "won") {
+    expect(res.brand).toEqual(brand);
+    expect(res.seed).toEqual(seed);
+  }
+});
+
+test("mint without opts → brand/seed are null on the won path", async () => {
+  const token = await mintClaimToken([item("a")], "T");
+  const res = await consumeClaimToken(token);
+  expect(res.status).toBe("won");
+  if (res.status === "won") {
+    expect(res.brand).toBeNull();
+    expect(res.seed).toBeNull();
+  }
 });
 
 test("deterministicProjectId is stable, 12 hex chars", () => {

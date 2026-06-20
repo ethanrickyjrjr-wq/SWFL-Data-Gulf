@@ -19,8 +19,37 @@ import type { ProjectItem } from "@/lib/project/items";
 /** ~15-minute time-to-live, matching the locked decision. */
 const TTL_MS = 15 * 60 * 1000;
 
+/**
+ * Prospect brand carried into a claimed project (funnel bridge). Mirrors the
+ * `BrandEnrichment`/arrival-URL shape, NOT the `projects.branding` column shape —
+ * `/api/claim` maps these onto branding keys (primary→primary_color, …). All
+ * optional: a prospect with no scraped brand still claims cleanly.
+ */
+export interface ClaimBrand {
+  primary?: string;
+  secondary?: string;
+  logo_url?: string;
+  company_name?: string;
+}
+
+/**
+ * One-click seed carried into a claimed project — replays the existing §I
+ * `/project/[id]?seed=` mechanism so the project lands pre-staging a deliverable.
+ */
+export interface ClaimSeed {
+  template: string;
+  scopeKind: string | null;
+  scopeValue: string | null;
+}
+
 export type ConsumeResult =
-  | { status: "won"; items: ProjectItem[]; title: string | null }
+  | {
+      status: "won";
+      items: ProjectItem[];
+      title: string | null;
+      brand: ClaimBrand | null;
+      seed: ClaimSeed | null;
+    }
   | { status: "consumed" }
   | { status: "expired" }
   | { status: "missing" };
@@ -36,8 +65,17 @@ export interface ClaimPreview {
   consumed: boolean;
 }
 
-/** Mint an opaque single-use carry-back token holding `items` for ~15 minutes. */
-export async function mintClaimToken(items: ProjectItem[], title?: string | null): Promise<string> {
+/**
+ * Mint an opaque single-use carry-back token holding `items` for ~15 minutes.
+ * `opts.brand` / `opts.seed` are the funnel-bridge carriers: a prospect's scraped
+ * brand and a one-click deliverable seed, both surviving the login round-trip in the
+ * token row (never the URL) and replayed by `/api/claim`.
+ */
+export async function mintClaimToken(
+  items: ProjectItem[],
+  title?: string | null,
+  opts?: { brand?: ClaimBrand | null; seed?: ClaimSeed | null },
+): Promise<string> {
   const token = crypto.randomBytes(24).toString("base64url"); // URL-safe; survives redirects
   const now = Date.now();
   const db = createServiceRoleClient();
@@ -45,6 +83,8 @@ export async function mintClaimToken(items: ProjectItem[], title?: string | null
     token,
     items,
     title: title ?? null,
+    brand: opts?.brand ?? null,
+    seed: opts?.seed ?? null,
     created_at: new Date(now).toISOString(),
     expires_at: new Date(now + TTL_MS).toISOString(),
   });
@@ -70,6 +110,8 @@ export async function consumeClaimToken(token: string): Promise<ConsumeResult> {
       status: "won",
       items: (Array.isArray(row.items) ? row.items : []) as ProjectItem[],
       title: (row.title as string | null) ?? null,
+      brand: (row.brand as ClaimBrand | null) ?? null,
+      seed: (row.seed as ClaimSeed | null) ?? null,
     };
   }
 

@@ -14,7 +14,24 @@ import {
 import { writeFeed } from "@/lib/project/feed";
 import { identityKeyForItem, titleForItem } from "@/lib/project/identity-key";
 
+import type { ClaimBrand } from "@/lib/claim/claim-store";
+
 export const runtime = "nodejs";
+
+/**
+ * Map a prospect's carried brand (arrival-URL shape) onto the `projects.branding`
+ * jsonb keys. `company_name` is intentionally dropped — it feeds the project TITLE
+ * (deriveProjectName at mint), not the branding theme. Returns null when nothing
+ * maps so the insert omits the column entirely.
+ */
+function brandToBranding(brand: ClaimBrand | null | undefined): Record<string, string> | null {
+  if (!brand) return null;
+  const branding: Record<string, string> = {};
+  if (brand.primary) branding.primary_color = brand.primary;
+  if (brand.secondary) branding.accent_color = brand.secondary;
+  if (brand.logo_url) branding.logo_url = brand.logo_url;
+  return Object.keys(branding).length ? branding : null;
+}
 
 /**
  * POST /api/claim { token } — turn a valid carry-back token + a logged-in user
@@ -75,11 +92,16 @@ export async function POST(req: NextRequest) {
   // thing that binds it, never a hand-set user_id on a service-role write.
   // §G: a carried-back project keeps its handoff title, else auto-names from items.
   const title = res.title?.trim() ? res.title : deriveProjectName(items.data);
+  // Funnel bridge: a prospect carries their scraped brand in the token (no auth.uid
+  // brand profile exists yet for applyUserBrandToProject to read), so write it onto
+  // the project at birth. A direct-create/MCP claim carries no brand → omitted.
+  const branding = brandToBranding(res.brand);
   const { error } = await supabase.from("projects").insert({
     id,
     user_id: user.id,
     title,
     items: items.data,
+    ...(branding ? { branding } : {}),
   });
   // 23505 = unique_violation: a racing winner already inserted this exact id →
   // idempotent success. Any other error is a real failure.
@@ -116,5 +138,8 @@ export async function POST(req: NextRequest) {
     })),
   );
 
-  return NextResponse.json({ id });
+  // Echo the seed so ClaimOnLogin can replay the §I `/project/[id]?seed=` mechanism
+  // (winner only — a concurrent "consumed" loser returned earlier without it and
+  // simply lands on the unseeded project, which already exists branded).
+  return NextResponse.json({ id, ...(res.seed ? { seed: res.seed } : {}) });
 }

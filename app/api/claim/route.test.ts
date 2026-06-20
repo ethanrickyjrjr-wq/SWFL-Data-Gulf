@@ -11,7 +11,13 @@ let inserts: Record<string, unknown>[] = [];
 
 // consumeClaimToken is stubbed per-test; default = a fresh winner.
 type Consume = () => Promise<
-  | { status: "won"; items: unknown[]; title: string | null }
+  | {
+      status: "won";
+      items: unknown[];
+      title: string | null;
+      brand?: unknown;
+      seed?: unknown;
+    }
   | { status: "consumed" }
   | { status: "expired" }
   | { status: "missing" }
@@ -98,6 +104,41 @@ test("won → 200, inserts under auth.uid at the deterministic id", async () => 
   expect(inserts[0].user_id).toBe("user-a");
   expect(inserts[0].title).toBe("Carried");
   expect(inserts[0].items).toEqual([validItem]);
+});
+
+test("won with prospect brand → insert carries mapped branding; response carries seed", async () => {
+  consumeImpl = async () => ({
+    status: "won",
+    items: [validItem],
+    title: "Fort Myers Beach 33931",
+    brand: {
+      primary: "#0a7",
+      secondary: "#012",
+      logo_url: "https://x/l.png",
+      company_name: "Acme",
+    },
+    seed: { template: "email", scopeKind: "zip", scopeValue: "33931" },
+  });
+  const res = await POST(makeReq({ token: "t1" }));
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.id).toBe(FIXED_ID);
+  // seed echoed so ClaimOnLogin can replay the §I ?seed= mechanism
+  expect(body.seed).toEqual({ template: "email", scopeKind: "zip", scopeValue: "33931" });
+  // brand mapped onto projects.branding keys (company_name is NOT a branding field)
+  expect(inserts[0].branding).toEqual({
+    primary_color: "#0a7",
+    accent_color: "#012",
+    logo_url: "https://x/l.png",
+  });
+});
+
+test("won with no brand/seed → no branding key, no seed in response", async () => {
+  const res = await POST(makeReq({ token: "t1" }));
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.seed ?? null).toBeNull();
+  expect(inserts[0].branding ?? null).toBeNull();
 });
 
 test("consumed (loser/replay) → 200 same id, NO insert", async () => {

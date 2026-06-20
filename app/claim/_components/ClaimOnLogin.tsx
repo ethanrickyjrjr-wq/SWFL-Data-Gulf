@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { claimRedirectUrl } from "@/lib/claim/claim-redirect";
+import type { ClaimSeed } from "@/lib/claim/claim-store";
 
 /** Fire-and-forget failure beacon (mirrors ImportDraftOnLogin's reportImportFailure)
  *  so a dropped claim is visible in usage_events, never a silent swallow. */
@@ -47,9 +49,10 @@ export function ClaimOnLogin({ token }: { token: string }) {
           setState("error");
           return;
         }
-        const { id } = (await res.json()) as { id?: string };
+        const { id, seed } = (await res.json()) as { id?: string; seed?: ClaimSeed | null };
         if (id) {
-          router.replace(`/project/${id}`); // the editor; immediately rebuildable
+          // Seed (funnel bridge) replays the §I ?seed= pre-stage; else the bare editor.
+          router.replace(claimRedirectUrl(id, seed));
         } else {
           reportClaimFailure("no_id");
           setState("error");
