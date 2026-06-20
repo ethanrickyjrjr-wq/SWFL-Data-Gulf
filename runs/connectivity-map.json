@@ -1,0 +1,234 @@
+{
+  "/": {
+    "status": "IN-CHROME",
+    "chrome": ["components/landing/Header.tsx", "components/nav/GlobalNav.tsx"],
+    "body": [
+      "app/ask/AskPage.tsx",
+      "app/ops/data-inventory/page.tsx",
+      "app/r/[slug]/page.tsx",
+      "app/r/cre-swfl/[corridor]/page.tsx",
+      "app/terms/page.tsx"
+    ]
+  },
+  "/alerts": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/project/page.tsx"]
+  },
+  "/alerts/[id]": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/api/webhooks/resend/route.ts", "app/project/page.tsx"]
+  },
+  "/ask": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/showcase/page.tsx"]
+  },
+  "/auth/auth-code-error": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/billing": {
+    "status": "IN-CHROME",
+    "chrome": ["components/nav/GlobalNav.tsx"],
+    "body": ["app/welcome/_components/ConversationalChat.tsx"]
+  },
+  "/c/[id]": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/charts": {
+    "status": "IN-CHROME",
+    "chrome": ["components/nav/GlobalNav.tsx"],
+    "body": []
+  },
+  "/claim": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/contacts": {
+    "status": "IN-CHROME",
+    "chrome": ["components/nav/GlobalNav.tsx"],
+    "body": ["components/contacts/ContactPickerModal.tsx"]
+  },
+  "/contacts/upload": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/p/[id]/SendWeeklyHandle.tsx"]
+  },
+  "/d/[...slug]": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/data-intel": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/demo": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/embed/cards/asking-rent": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/embed/charts": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/embed/footer-token": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/embed/waitlist": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/login": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": [
+      "app/alerts/[id]/page.tsx",
+      "app/alerts/page.tsx",
+      "app/auth/auth-code-error/page.tsx",
+      "app/contacts/upload/page.tsx",
+      "app/project/[id]/page.tsx",
+      "app/project/page.tsx"
+    ]
+  },
+  "/m/contacts/[token]": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/contacts/upload/page.tsx"]
+  },
+  "/map": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/ops/data-inventory": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/p/[id]": {
+    "status": "IN-CHROME",
+    "chrome": ["components/briefcase/BriefcasePanel.tsx"],
+    "body": [
+      "app/api/deliverables/[id]/blast/route.ts",
+      "app/api/mcp/project-tools.ts",
+      "app/api/templates/[id]/run/route.ts",
+      "app/project/[id]/ProjectWorkspace.tsx",
+      "app/project/[id]/workspace/DeliverableModal.tsx",
+      "app/project/[id]/workspace/DeliverableThumbnail.tsx"
+    ]
+  },
+  "/privacy": {
+    "status": "IN-CHROME",
+    "chrome": ["components/landing/Footer.tsx"],
+    "body": [
+      "app/support/page.tsx",
+      "app/terms/page.tsx",
+      "app/waitlist-form.tsx",
+      "components/email/DigestSubscribe.tsx",
+      "components/landing/Waitlist.tsx"
+    ]
+  },
+  "/project": {
+    "status": "IN-CHROME",
+    "chrome": [
+      "components/briefcase/BriefcasePanel.tsx",
+      "components/landing/Header.tsx",
+      "components/nav/GlobalNav.tsx"
+    ],
+    "body": ["app/alerts/page.tsx", "app/p/[id]/error.tsx"]
+  },
+  "/project/[id]": {
+    "status": "IN-CHROME",
+    "chrome": [
+      "components/briefcase/BriefcasePanel.tsx",
+      "components/landing/Header.tsx",
+      "components/nav/GlobalNav.tsx"
+    ],
+    "body": [
+      "app/alerts/page.tsx",
+      "app/p/[id]/error.tsx",
+      "components/briefcase/ChatScheduleCard.tsx",
+      "components/project/UploadDrop.tsx",
+      "lib/claim/claim-redirect.ts"
+    ]
+  },
+  "/r": {
+    "status": "IN-CHROME",
+    "chrome": ["components/nav/GlobalNav.tsx"],
+    "body": []
+  },
+  "/r/[slug]": {
+    "status": "IN-CHROME",
+    "chrome": ["components/nav/GlobalNav.tsx"],
+    "body": [
+      "app/ask/AskPage.tsx",
+      "app/c/[id]/page.tsx",
+      "app/project/[id]/workspace/ItemDetail.tsx",
+      "app/sitemap.ts",
+      "components/charts/ReportChart.tsx",
+      "components/charts/registry/FrameRenderer.tsx"
+    ]
+  },
+  "/r/cre-swfl/[corridor]": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/sitemap.ts"]
+  },
+  "/r/method/[metric]": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/r/search": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/r/_components/location-ui.tsx"]
+  },
+  "/r/source/[table]": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["app/r/method/[metric]/page.tsx", "app/sitemap.ts"]
+  },
+  "/r/zip-report/[zip]": {
+    "status": "body-link-only",
+    "chrome": [],
+    "body": ["lib/email/grounded-report.ts", "lib/location-surface.ts"]
+  },
+  "/showcase": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/support": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  },
+  "/terms": {
+    "status": "IN-CHROME",
+    "chrome": ["components/landing/Footer.tsx"],
+    "body": ["app/support/page.tsx"]
+  },
+  "/welcome": {
+    "status": "ORPHAN",
+    "chrome": [],
+    "body": []
+  }
+}
