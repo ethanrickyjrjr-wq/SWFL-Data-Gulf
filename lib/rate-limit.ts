@@ -104,3 +104,23 @@ export function clientIpFromHeaders(headers: Headers): string {
 export function __resetRateLimitState(): void {
   buckets.clear();
 }
+
+/**
+ * Build the standard 429 response headers for a limited result — Retry-After +
+ * X-RateLimit-* — matching what the middleware emits, so per-route inline limits
+ * (e.g. the contact-import endpoints, which aren't in the middleware prefix list)
+ * speak the same protocol. Returns a plain header bag (keeps this module
+ * Next-free for the Edge middleware import).
+ */
+export function rateLimitHeaders(
+  result: RateLimitResult,
+  now: number = Date.now(),
+): Record<string, string> {
+  return {
+    "Cache-Control": "no-store",
+    "Retry-After": String(Math.max(1, Math.ceil((result.resetAt - now) / 1000))),
+    "X-RateLimit-Limit": String(result.limit),
+    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Reset": String(Math.ceil(result.resetAt / 1000)),
+  };
+}

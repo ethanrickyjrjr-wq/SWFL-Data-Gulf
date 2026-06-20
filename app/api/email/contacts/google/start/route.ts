@@ -13,6 +13,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { randomBytes } from "node:crypto";
 import { createClient } from "@/utils/supabase/server";
 import { buildGoogleAuthUrl, googleRedirectUri, googleOauthConfigured } from "@/lib/email/google-oauth";
+import { checkRateLimit, clientIpFromHeaders, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +21,12 @@ export const dynamic = "force-dynamic";
 export const OAUTH_STATE_COOKIE = "g_contacts_oauth";
 
 export async function GET(req: NextRequest) {
+  // Per-IP rate limit — guards OAuth-mint spam (not in the middleware prefix list).
+  const rl = checkRateLimit(clientIpFromHeaders(req.headers));
+  if (rl.limited) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
+  }
+
   const supabase = createClient(await cookies());
   const {
     data: { user },

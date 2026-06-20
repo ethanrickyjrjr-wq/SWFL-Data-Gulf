@@ -9,11 +9,24 @@ beforeAll(() => {
 });
 
 describe("contact-import-token", () => {
-  test("round-trip recovers uid + workOnly", () => {
+  test("round-trip recovers uid + workOnly + a nid", () => {
     const token = issueContactImportToken({ uid: "user-9", workOnly: true })!;
     expect(token).toBeTruthy();
     const v = verifyContactImportToken(token);
-    expect(v).toEqual({ ok: true, uid: "user-9", workOnly: true });
+    expect(v.ok).toBe(true);
+    if (v.ok) {
+      expect(v.uid).toBe("user-9");
+      expect(v.workOnly).toBe(true);
+      expect(typeof v.nid).toBe("string");
+      expect(v.nid.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("each issue gets a distinct nid (the single-use claim key)", () => {
+    const a = verifyContactImportToken(issueContactImportToken({ uid: "u", workOnly: false })!);
+    const b = verifyContactImportToken(issueContactImportToken({ uid: "u", workOnly: false })!);
+    expect(a.ok && b.ok).toBe(true);
+    if (a.ok && b.ok) expect(a.nid).not.toBe(b.nid);
   });
 
   test("workOnly false is preserved", () => {

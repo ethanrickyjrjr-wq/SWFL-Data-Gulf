@@ -26,11 +26,25 @@ import { parseContactsCsv } from "@/lib/email/parse-contacts-csv";
 import { parseVcard } from "@/lib/email/parse-vcard";
 import { partitionContacts } from "@/lib/email/work-email-filter";
 import { upsertContacts } from "@/lib/email/upsert-contacts";
+import { checkRateLimit, clientIpFromHeaders, rateLimitHeaders } from "@/lib/rate-limit";
 import type { ContactRow } from "@/lib/email/parse-contacts-csv";
 
 export const runtime = "nodejs";
 
+const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB — bound the CSV/vCard text before parse
+
 export async function POST(req: NextRequest) {
+  // Per-IP rate limit (not in the middleware RATE_LIMITED_PREFIXES) + a pre-parse
+  // body-size cap so a giant CSV/vCard can't be pulled into memory.
+  const rl = checkRateLimit(clientIpFromHeaders(req.headers));
+  if (rl.limited) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
+  }
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
   // --- Auth (copy pattern from app/api/projects/route.ts) ---
   const supabase = createClient(await cookies());
   const {

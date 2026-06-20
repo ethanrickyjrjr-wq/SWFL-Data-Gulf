@@ -108,7 +108,16 @@ export async function exchangeCodeForToken({
   return json.access_token;
 }
 
-/** Read ALL of the user's connections, following People API pagination. */
+/**
+ * Hard ceiling on connections held in memory. The upsert caps STORED contacts at
+ * MAX_CONTACT_ROWS (10k), so fetching beyond a generous multiple of that can never
+ * increase the result — it's pure memory waste. 50k leaves ample headroom for
+ * multi-email contacts the work-email filter may drop, while bounding a giant
+ * address book.
+ */
+const MAX_CONNECTIONS = 50_000;
+
+/** Read the user's connections, following People API pagination (memory-bounded). */
 export async function fetchAllConnections(accessToken: string): Promise<GooglePerson[]> {
   const out: GooglePerson[] = [];
   let pageToken: string | undefined;
@@ -125,7 +134,7 @@ export async function fetchAllConnections(accessToken: string): Promise<GooglePe
     if (!res.ok) throw new Error(`people.connections.list failed (${res.status})`);
     const json = (await res.json()) as { connections?: GooglePerson[]; nextPageToken?: string };
     if (json.connections?.length) out.push(...json.connections);
-    if (!json.nextPageToken) break;
+    if (!json.nextPageToken || out.length >= MAX_CONNECTIONS) break;
     pageToken = json.nextPageToken;
   }
   return out;

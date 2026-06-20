@@ -5,17 +5,17 @@
  * session, so the token itself must carry the authorization. We mirror the
  * `proposal-nonce.ts` seam: an HMAC-SHA256 token keyed on `SDG_COOKIE_SECRET`
  * (already set in prod), domain-separated, binding the user id + the "work only"
- * choice + an issued-at with a 10-minute TTL.
+ * choice + a unique `nid` + an issued-at with a 5-minute TTL.
  *
- * RESIDUAL RISK (accepted for v1, documented): the token is NOT single-use. A
- * captured token (the QR is photographed, or the `/m/contacts/<token>` URL leaks
- * via history/referrer/proxy logs) lets the holder POST attacker-CHOSEN contacts
- * into the victim's list until it expires — bounded by the short TTL and an
- * additive-only blast radius (you can add contacts, never read them). The 5-min
- * TTL keeps the window tight; a follow-up can make it single-use via a small
- * claim table (mirroring proposal-nonce's email_send_ledger claim) if needed.
- * Integrity is verified with `crypto.timingSafeEqual` on the raw digests before
- * any payload field is read.
+ * SINGLE-USE: the payload carries a random `nid`; the consuming route (the phone
+ * import) claims `contact-import:<nid>` via `claimOnce` against `email_send_ledger`
+ * (the same single-use seam proposal-nonce uses), so a captured token — the QR is
+ * photographed, or the `/m/contacts/<token>` URL leaks via history/referrer/proxy
+ * logs — works AT MOST ONCE, and only within the 5-min TTL. Blast radius is
+ * additive-only (you can add contacts, never read them). If the ledger migration
+ * isn't applied (claimOnce 42P01-degrades to a win), single-use falls back to the
+ * TTL-bounded behavior — never worse than before. Integrity is verified with
+ * `crypto.timingSafeEqual` on the raw digests before any payload field is read.
  *
  * No signing secret configured → `issueContactImportToken` returns null and the
  * desktop QR section is hidden (env-gated, non-breaking).
@@ -40,6 +40,7 @@ interface TokenPayload {
   uid: string;
   wo: 0 | 1; // work-only flag
   iat: number; // epoch ms
+  nid: string; // single-use id (the ledger claim key is `contact-import:<nid>`)
 }
 
 /** Issue a token for the signed-in user, or null when no signing secret is set. */
@@ -55,6 +56,7 @@ export function issueContactImportToken(args: {
     uid: args.uid,
     wo: args.workOnly ? 1 : 0,
     iat: args.nowMs ?? Date.now(),
+    nid: crypto.randomUUID(),
   };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = hmac(payloadB64, secret).toString("base64url");
@@ -62,7 +64,7 @@ export function issueContactImportToken(args: {
 }
 
 export type TokenVerifyResult =
-  | { ok: true; uid: string; workOnly: boolean }
+  | { ok: true; uid: string; workOnly: boolean; nid: string }
   | { ok: false; reason: "missing_secret" | "malformed" | "bad_signature" | "expired" };
 
 /** Verify a token: integrity (timing-safe) first, then TTL, then extract claims. */
@@ -95,7 +97,12 @@ export function verifyContactImportToken(token: string, nowMs?: number): TokenVe
   } catch {
     return { ok: false, reason: "malformed" };
   }
-  if (payload?.v !== 1 || typeof payload.uid !== "string" || typeof payload.iat !== "number") {
+  if (
+    payload?.v !== 1 ||
+    typeof payload.uid !== "string" ||
+    typeof payload.iat !== "number" ||
+    typeof payload.nid !== "string"
+  ) {
     return { ok: false, reason: "malformed" };
   }
 
@@ -103,5 +110,5 @@ export function verifyContactImportToken(token: string, nowMs?: number): TokenVe
   if (now - payload.iat > TTL_MS || payload.iat - now > CLOCK_SKEW_MS) {
     return { ok: false, reason: "expired" };
   }
-  return { ok: true, uid: payload.uid, workOnly: payload.wo === 1 };
+  return { ok: true, uid: payload.uid, workOnly: payload.wo === 1, nid: payload.nid };
 }
