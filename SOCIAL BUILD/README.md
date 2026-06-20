@@ -1,61 +1,59 @@
-# SOCIAL BUILD — assignment files
+# SOCIAL BUILD — assignment files (OUR SIDE)
 
 One file = one ultracode Claude's complete job. Hand each file to a separate session.
 Design source of truth: `docs/superpowers/specs/2026-06-20-social-auto-posting-design.md`.
+Live-verify research: run `ingest/pipelines/social_best_practices/crawl_social_practices.py` (where the web is open) → `social-practices.json` feeds cadence/format defaults + verifies every platform API claim.
 
-**Go-live model (applies to every file):** everything is built and exercised in a **cost-free DRY mode** (`SOCIAL_PUBLISH_ENABLED=false`, the default). No real post, no X API spend. When payments are in we flip one switch (`node scripts/social.mjs go-live`) — no code change. Build 01 owns that switch; every other build must respect it (the runner gates publish, so connectors are never called in dry mode).
+## The model (confirmed this session)
+- **NO paid middleman at the start.** Direct platform APIs only — **X, Facebook + Instagram (Meta Graph), LinkedIn, Google Business Profile.** No Ayrshare/Buffer/Hootsuite we pay for.
+- **Clients connect their own accounts** (OAuth) → we store + refresh their tokens → our cron posts on their behalf. Multi-tenant from day 1, `user_id`-namespaced. We dogfood on our own accounts as tenant #1 while app-reviews clear.
+- **Go-live switch:** the whole pipeline runs in cost-free DRY mode (`SOCIAL_PUBLISH_ENABLED=false`, default). One flip (`node scripts/social.mjs go-live`) when payments are in. No code change at go-live.
+- **App-review is the long pole** — a non-code track that must start **day 1** in parallel (X, Meta ×2 for Pages+IG with Business Verification, LinkedIn Community Management, Google Business Profile). Weeks each. Owner: operator.
 
----
+## OUR SIDE vs USER SIDE
+This folder is **OUR SIDE** — the backend/platform spine (data model, image rasterizer, platform adapters + token refresh, cron worker, deliverable template, engagement tracking).
+The **USER SIDE** (connect-your-socials OAuth UX, the "just ask AI" command, the `swfl_social_*` MCP tool, the workspace Social lane) is a separate planning brief: **`USER-SIDE-HANDOFF.md`** — hand that to another Claude to plan out (its own brainstorm → spec → plan).
+They meet at the seam: **`social_accounts` token store** (schema in 01, read/refresh lib in 03) + the **compose cores** (01) + the **`social_schedules` recipe + claim** (01).
 
-## Who builds what (model assignment)
+## Who builds what
+**Opus** = visual/quality + no-invention + shared-file judgment. **Sonnet** = clone-and-rename of the proven email/outreach engine + vendor-doc-following.
 
-**Opus** = net-new / judgment-heavy / LLM-prompt / no-invention-moat work.
-**Sonnet** = clone-and-rename of the well-understood email engine / vendor-doc-following / mechanical.
+| File | Build | Model |
+|---|---|---|
+| `01-spine-cores-and-go-live-switch.md` | Tables, claim RPC, pure DI cores, `lib/social/types.ts`, go-live switch | **Sonnet** |
+| `02-social-image-rasterizer.md` | Reuse `chart-renderer` SVG + brand → PNG card per platform size | **Opus** |
+| `03-platform-adapters-and-token-refresh.md` | X / Meta(FB+IG) / LinkedIn / GBP publish adapters + encrypted token store/refresh | **Sonnet** |
+| `04-cron-worker-and-gha.md` | `run-schedules.mts` worker + `social-scheduler.yml` | **Sonnet** |
+| `05-social-template-and-grain.md` | `"social"` deliverable template + place/county/ZIP grain | **Opus** |
+| `06-engagement-tracking.md` | Engagement poll → `social_events` → metrics view | **Sonnet** |
 
-| File | Build | Model | New files only? |
-|---|---|---|---|
-| `01-spine-and-go-live-switch.md` | Scheduling spine, tables, claim RPC, runner, go-live switch | **Sonnet** | New (+ owns `lib/social/types.ts`) |
-| `02-satori-renderer.md` | Server-side branded-graphic renderer (Satori) | **Opus** | New |
-| `03-platform-connectors.md` | LinkedIn + Bluesky + X direct connectors + token store | **Sonnet** | New |
-| `04-compose-engine-and-mcp-tool.md` | Brain→caption fan-out + `swfl_social_post` MCP tool | **Opus** | New + edits MCP registry |
-| `05-grain-lift.md` | ZIP-only → place/county/corridor, no-invention guard | **Opus** | Edits shared scope resolver |
-| `06-publish-paywall-gate.md` | `channel`-metered 402-before-publish | **Sonnet** | Edits 01's runner + 03's adapter |
-| `07-tracking-and-engagement-poll.md` | Post tracking + engagement poll → /ops rollup | **Sonnet** | New |
+## What can run together — concurrency matrix
+The only real conflicts are same-file edits or a hard dependency. Run in stages:
 
----
+### STAGE 1 — start now (2 Claudes)
+- **01** (Sonnet) + **02** (Opus). No overlap.
+- **01 must merge `lib/social/types.ts` + the migration FIRST** (small) — it's the shared interface + schema everyone codes against.
 
-## What can run together — the concurrency matrix
+### STAGE 2 — after 01's types + migration land (2 Claudes)
+- **03** (Sonnet) + **05** (Opus).
+- 03 owns `lib/social/oauth-tokens.ts` (the USER SIDE seam). 05 **edits shared deliverable files** (`lib/deliverable/templates.ts`, `assemble.ts`) — see ⚠ below.
 
-The only real conflicts are (a) two files editing the same code, or (b) a file needing another's output to exist. Run in stages:
+### STAGE 3 — after 01 + 02 + 03 merge (2 Claudes)
+- **04** (Sonnet) + **06** (Sonnet). Both integrate the earlier builds via interfaces; neither edits the other's files.
 
-### STAGE 1 — start now, fully parallel (2 Claudes)
-- **01** (Sonnet) and **02** (Opus) run together. Zero overlap (all new files).
-- **01 must merge `lib/social/types.ts` + the migration FIRST** (small, fast) — it is the shared interface + schema everyone else codes against. The rest of 01 (runner, switch) continues after.
-
-### STAGE 2 — after 01's `types.ts` + migration land (3 Claudes)
-- **03** (Sonnet), **04** (Opus), **05** (Opus) run together.
-- ⚠ **04 and 05 must NOT edit scope-resolution at the same time.** 05 owns the grain resolver — it publishes the grain interface stub first, then 04 consumes it. If you can't sequence them, run 05 alone first.
-
-### STAGE 3 — after 03 merges (2 Claudes)
-- **06** (Sonnet) and **07** (Sonnet) run together.
-- ⚠ **06 CANNOT run while 01 or 03 are in flight** — it edits the runner's publish path (01) and the adapter (03). Those must be merged first.
-
-### CANNOT-RUN-AT-SAME-TIME (quick reference)
+### CANNOT-RUN-AT-SAME-TIME
 | Pair | Why | Fix |
 |---|---|---|
-| 06 ✕ 01 | both edit `run-posts.mts` publish path | 06 waits for 01 to merge |
-| 06 ✕ 03 | both edit the channel adapter | 06 waits for 03 to merge |
-| 04 ✕ 05 | both touch scope/grain resolution | 05 publishes grain interface first, then 04 |
-| 03/04/05/06/07 ✕ 01 (schema) | all read 01's `social_*` tables + `types.ts` | 01 merges schema + types first |
+| 03/04/05/06 ✕ 01 (schema) | all import `lib/social/types.ts` + read `social_*` tables | 01 merges types + migration first |
+| 04 ✕ 01, 02, 03 | 04's worker calls their code; needs them present (doesn't edit them) | run 04 in Stage 3 |
+| 06 ✕ 01, 03 | poll needs the tables + platform read APIs | run 06 in Stage 3 |
+| 05 ✕ any EMAIL deliverable work | 05 edits `lib/deliverable/templates.ts` + `assemble.ts` (shared with email) | don't run 05 while another session edits those two files |
+| **USER SIDE** ✕ 01, 03 | connect-OAuth writes via 03's `oauth-tokens.ts`; command writes `social_schedules` (01) | plan anytime; build after 01 + 03 merge |
 
-Everything not listed is safe in parallel. **02 (renderer) conflicts with nothing — always parallelizable.**
-
-Max useful concurrency: **3 Claudes** (Stage 2).
-
----
+Peak useful concurrency: **2 Claudes** per stage. **02 (renderer) conflicts with nothing.**
 
 ## Every file's done-bar (house rules)
-- Build in DRY mode; never wire a live post path that fires without `SOCIAL_PUBLISH_ENABLED=true`.
-- Gates before push: `real-tsc` 0, eslint clean, `next build` ✓, relevant `bun test` green. Migrations idempotent + verified by row count.
-- `SESSION_LOG.md` entry on push; stage only your own files (explicit paths, never `git add -A`); no autonomous push (stop, show log, ask).
-- Vendor-First: re-verify the §8 vendor items live before coding the connector/renderer slice.
+- Build in DRY mode; never wire a live post that fires without `SOCIAL_PUBLISH_ENABLED=true`.
+- Gates before push: `real-tsc` 0, eslint clean, `next build` ✓, relevant `bun test` green. Migrations idempotent + verified by row count. **New deps (sharp/@vercel/og/resvg-js) → `bun install` + commit `bun.lock` same push (lockfile gate).**
+- `SESSION_LOG.md` entry on push; stage only your own files (explicit paths, never `git add -A`); no autonomous push.
+- **Vendor-First:** re-verify the platform API claim (scopes/token TTL/app-review/rate limit/media-upload) against live docs — or the crawl output — before coding each adapter.

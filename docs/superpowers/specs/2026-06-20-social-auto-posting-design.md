@@ -4,6 +4,8 @@
 **Status:** Design approved (brainstorm complete). Program-level spec; Wave 1 goes to an implementation plan next.
 **Author:** session 2026-06-20 (grounded by a 7-agent code-verified probe + crawl4ai platform research)
 
+> **Revision 2 (2026-06-20) — operator decisions, code-verified against the actual files; supersede the rows below where they conflict.** (1) **No paid middleman, ever-at-start** — direct platform APIs only; the aggregator is NOT a Phase-2 dependency (D2). (2) **Client-connect multi-tenant from day 1** — clients connect their own accounts (OAuth), we store+refresh tokens, cron posts on their behalf; we dogfood on our own accounts as tenant #1 while app-reviews clear (D1). (3) **Platforms = X, Facebook + Instagram, LinkedIn, Google Business Profile** (no Bluesky; the realtor channels) (D3). (4) **Renderer reuses the existing SVG `chart-renderer.ts` → rasterize** (`@vercel/og`/`resvg-js`) rather than re-authoring viz under Satori (D4). **App-review is the long pole** — a non-code track started day 1. Execution is decomposed into per-Claude build files under `SOCIAL BUILD/` (OUR SIDE) + `SOCIAL BUILD/USER-SIDE-HANDOFF.md` (USER SIDE). Live-verify research: `ingest/pipelines/social_best_practices/crawl_social_practices.py`.
+
 ---
 
 ## 0. One-paragraph summary
