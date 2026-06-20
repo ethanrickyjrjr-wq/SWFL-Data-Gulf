@@ -47,6 +47,7 @@
     "@notionhq/client": "^5.22.0",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.8",
+    "@resvg/resvg-js": "2.6.2",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.1",
     "dotenv": "^17.4.2",

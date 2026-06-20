@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // @resvg/resvg-js is a native (napi) addon; Turbopack cannot place its .node
+  // binary in an ESM chunk. Opt it out of bundling so the App Route /api/social/
+  // render/[format] requires it natively at runtime (the documented fix for
+  // native node addons). Build 02 — social image rasterizer.
+  serverExternalPackages: ["@resvg/resvg-js"],
   outputFileTracingIncludes: {
     // NOTE: the /api/mcp chart-widget bundle is intentionally NOT shipped — the
     // tool is text-only (see app/api/mcp/server.ts; MCP App widget blocked by the
