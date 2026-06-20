@@ -58,6 +58,9 @@ describe("findOverlap", () => {
       otherProjectTitle: "Luxury 33931",
       label: "Median rent: 1",
       dedupeKey: "reuse:metric:Median rent@33931",
+      // The matched item's OWN freshness token rides on the hit (so an offer is stamped
+      // with the datum's real vintage, not the source project's newest item's date).
+      freshnessToken: "SWFL-7421-v5-20260610",
     });
   });
 
@@ -85,6 +88,9 @@ describe("findOverlap", () => {
     // b's note as a reuse candidate.
     const { reuse } = findOverlap("a", idx);
     expect(reuse.some((h) => h.otherProjectId === "b")).toBe(true);
+    // a note carries no freshness token → the hit's token is undefined (this is the gate
+    // other-projects uses to keep free-text notes out of value-bearing offers).
+    expect(reuse.find((h) => h.otherProjectId === "b")?.freshnessToken).toBeUndefined();
   });
 
   it("topic alone does NOT anchor a match (avoids nagging)", () => {

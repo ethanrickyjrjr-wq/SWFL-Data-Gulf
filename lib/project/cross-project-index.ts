@@ -1,6 +1,7 @@
 import { inferScopeFromItems, type InferredScope } from "./derive-name";
 import { identityKeyForItem } from "./identity-key";
 import { summarizeItem } from "./summarize-item";
+import { itemFreshnessToken } from "./digest";
 import type { ProjectItem } from "./items";
 
 /**
@@ -33,6 +34,11 @@ export interface IndexedProject {
   keys: Set<string>;
   /** identityKey → a human label for prompt copy (first item wins per key). */
   labelByKey: Map<string, string>;
+  /** identityKey → the matched item's OWN freshness token (first item wins per key), or
+   *  undefined for kinds that carry none (note/source/file/chart/frame, uncited qa/report).
+   *  Lets an overlap offer be stamped with the datum's real vintage + gated to grounded,
+   *  dated items only. */
+  tokenByKey: Map<string, string | undefined>;
 }
 
 export interface CrossProjectIndex {
@@ -46,6 +52,9 @@ export interface OverlapHit {
   identityKey: string;
   /** Human label for the data point (drives the prompt copy). */
   label: string;
+  /** The matched item's own freshness token, or undefined for token-less kinds. Renderers
+   *  stamp the offer with this vintage and gate offers to grounded (token-bearing) items. */
+  freshnessToken?: string;
   otherProjectId: string;
   otherProjectTitle: string;
   /** Stable key for `ui_state.dismissed_overlap_keys`. */
@@ -69,10 +78,14 @@ export function buildCrossProjectIndex(projects: ProjectItemsRow[]): CrossProjec
     projects: projects.map((p) => {
       const keys = new Set<string>();
       const labelByKey = new Map<string, string>();
+      const tokenByKey = new Map<string, string | undefined>();
       for (const it of p.items) {
         const k = identityKeyForItem(it);
         keys.add(k);
-        if (!labelByKey.has(k)) labelByKey.set(k, summarizeItem(it));
+        if (!labelByKey.has(k)) {
+          labelByKey.set(k, summarizeItem(it));
+          tokenByKey.set(k, itemFreshnessToken(it));
+        }
       }
       return {
         projectId: p.projectId,
@@ -80,6 +93,7 @@ export function buildCrossProjectIndex(projects: ProjectItemsRow[]): CrossProjec
         scope: inferScopeFromItems(p.items),
         keys,
         labelByKey,
+        tokenByKey,
       };
     }),
   };
@@ -129,6 +143,7 @@ export function findOverlap(
         type: "reuse",
         identityKey: k,
         label: o.labelByKey.get(k) ?? k,
+        freshnessToken: o.tokenByKey.get(k),
         otherProjectId: o.projectId,
         otherProjectTitle: o.title,
         dedupeKey,
@@ -146,6 +161,7 @@ export function findOverlap(
         type: "gap",
         identityKey: k,
         label: self.labelByKey.get(k) ?? k,
+        freshnessToken: self.tokenByKey.get(k),
         otherProjectId: o.projectId,
         otherProjectTitle: o.title,
         dedupeKey,

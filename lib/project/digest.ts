@@ -143,8 +143,14 @@ export interface ProjectDigestInput {
   activeEvents?: ScoredEventSummary[];
 }
 
-/** The freshness token an item carries, if its kind has one. */
-function freshnessOf(item: ProjectItem): string | undefined {
+/**
+ * The freshness token an item carries, if its kind has one — the ONE per-item vintage
+ * root. metric/table_slice always carry it; qa/report optionally; note/source/file/chart/
+ * frame never do. Exported so the cross-project index can stamp a reuse offer with the
+ * MATCHED item's own vintage (and so "has a token" == "is a grounded, dated datum" — the
+ * gate that keeps free-text notes out of cross-project offers).
+ */
+export function itemFreshnessToken(item: ProjectItem): string | undefined {
   switch (item.kind) {
     case "metric":
     case "table_slice":
@@ -292,7 +298,7 @@ export function buildProjectDigest(input: ProjectDigestInput): ProjectDigest {
   let newestDay: string | undefined;
   let newestVer = -1;
   for (const it of items) {
-    const tok = freshnessOf(it);
+    const tok = itemFreshnessToken(it);
     if (!tok) continue;
     const day = tokenDayKey(tok);
     if (!day) continue;

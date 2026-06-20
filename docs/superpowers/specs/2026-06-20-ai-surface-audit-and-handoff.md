@@ -70,6 +70,8 @@ If a fresh clone shows the prettier error locally: `bun install`. Done.
 
 ## Cross-project AI knowledge — spec (Approach A)
 
+> **EXPANDED + BUILT (2026-06-20):** see `docs/superpowers/specs/2026-06-20-cross-project-enrichment-design.md` — the brainstormed, operator-approved design supersedes this section on any conflict. Two refinements landed there: (a) the leak-boundary guardrail below is relaxed for **confirmed scope+identity overlaps** (those carry the matched item's value, per the "client data can be used by a client" decree — own-files-only); (b) "success on email clicks" is **deferred** (no per-project engagement data exists today).
+
 **Problem:** The in-project AI sees only the current project. Confirmed: `lib/chat/page-context.ts:198` hard-scopes context (`digest.projectId !== pid → undefined`, commented "stale-leak defense"); the cross-project layer (`lib/project/cross-project-index.ts` `findOverlap`/`buildCrossProjectIndex`) is **dead-wired** (`BriefcasePanel.tsx:67` calls `projectPrompts({digest, visits})` with no `overlap`; zero non-test callers); `app/api/welcome/chat/route.ts` has no `projects`-table query.
 
 **Design (read-only "your projects" digest):**

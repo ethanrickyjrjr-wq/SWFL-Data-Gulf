@@ -52,6 +52,11 @@ function flatten(s: string): string {
     .trim();
 }
 
+/** Cap a file's extracted_text fed into scope inference — the scope signal lives near
+ *  the top, and an uncapped multi-page PDF would both slow the regex scan and let a
+ *  document that name-drops many ZIPs swamp the dominant-ZIP count. */
+const FILE_TEXT_MAX = 1000;
+
 /** Fields worth scanning for a place / topic — excludes opaque tokens
  *  (freshness_token, added_at) so an "8-digit token date" can't read as a ZIP. */
 function itemText(item: ProjectItem): string {
@@ -72,7 +77,13 @@ function itemText(item: ProjectItem): string {
     case "table_slice":
       return `${item.report_id} ${item.title}`;
     case "file":
-      return item.caption ?? item.storage_path;
+      // A PDF carries distilled `extracted_text` (Claude-vision at upload) — fold it in
+      // (capped) so a PDF upload becomes scope-bearing instead of contributing only its
+      // random storage UUID. Caption + extracted text; fall back to the path when neither.
+      return (
+        [item.caption, item.extracted_text?.slice(0, FILE_TEXT_MAX)].filter(Boolean).join(" ") ||
+        item.storage_path
+      );
   }
 }
 

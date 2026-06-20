@@ -25,6 +25,10 @@ import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { buildWelcomeAnswer } from "@/lib/welcome/answer";
 import { identityForLocation } from "@/lib/location-surface";
 import type { WelcomeFrame, PlaceEcho } from "@/lib/welcome/frames";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
+import { buildOtherProjectsContext, type OtherProjectRow } from "@/lib/project/other-projects";
+import type { ProjectItem } from "@/lib/project/items";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -307,6 +311,64 @@ export function buildClientContextBlock(pageContext?: unknown, briefcase?: unkno
   );
 }
 
+/**
+ * TIER B cross-project awareness (analyst path only). The in-project AI sees a shallow,
+ * frozen, advisory index of the user's OTHER projects so it can answer "have I pulled this
+ * before?" and offer scope-matched reuse — without ever destabilizing the current project
+ * (the deep TIER A context + the `page-context.ts` projectId guard are untouched).
+ *
+ * This is the route's ONLY untested glue: a cookie-authed RLS read of the user's own
+ * projects (own-files-only; anon → no session → ""). Everything downstream is the pure,
+ * unit-tested `buildOtherProjectsContext`. ANY failure falls open to "" (no block) — the
+ * chat still answers (mirrors the cre-swfl nested failsafe). Returns "" unless the user
+ * has at least one OTHER project.
+ */
+async function otherProjectsBlockFor(currentProjectId: string): Promise<string> {
+  try {
+    const supabase = createClient(await cookies());
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return ""; // public /welcome (anon) — no session, no projects.
+
+    // RLS scopes this to the user's own projects (auth.uid() = user_id). Include the
+    // current project so findOverlap can resolve "self"; ui_state carries dismissed keys.
+    const { data: rows } = await supabase
+      .from("projects")
+      .select("id, title, items, updated_at, ui_state")
+      .order("updated_at", { ascending: false })
+      .limit(50); // newest-first at the DB; the in-memory cap (8) trims from here. Bounds
+    // the read for a power user so newest rows survive PostgREST's 1000-row default.
+    if (!rows || rows.length < 2) return ""; // only the current project → nothing to add.
+
+    const current = rows.find((r) => r.id === currentProjectId) as
+      | { ui_state?: { dismissed_overlap_keys?: unknown } | null }
+      | undefined;
+    const dismissedRaw = current?.ui_state?.dismissed_overlap_keys;
+    const dismissed = Array.isArray(dismissedRaw)
+      ? dismissedRaw.filter((k): k is string => typeof k === "string")
+      : [];
+
+    const mapped: OtherProjectRow[] = (
+      rows as {
+        id: string;
+        title: string | null;
+        items: ProjectItem[] | null;
+        updated_at: string | null;
+      }[]
+    ).map((r) => ({
+      projectId: r.id,
+      title: r.title ?? "",
+      items: r.items ?? [],
+      updatedAt: r.updated_at ?? undefined,
+    }));
+
+    return buildOtherProjectsContext(mapped, currentProjectId, { dismissed });
+  } catch {
+    return "";
+  }
+}
+
 export async function POST(request: Request): Promise<Response> {
   let body: {
     messages?: { role?: string; content?: string }[];
@@ -317,6 +379,10 @@ export async function POST(request: Request): Promise<Response> {
     // bounded + framed as data, never instructions, by buildClientContextBlock.
     pageContext?: unknown;
     briefcase?: unknown;
+    // The open project's id (analyst mode, on a /project/* page). Server-side only:
+    // drives the cookie-authed cross-project (TIER B) read + excludes itself. Untrusted
+    // hint — RLS still scopes the read to the caller's own projects regardless of value.
+    currentProjectId?: unknown;
   };
   try {
     body = await request.json();
@@ -376,6 +442,13 @@ export async function POST(request: Request): Promise<Response> {
   // location-irrelevant, so it's the one exception). Single inject point.
   const clientContext = buildClientContextBlock(body.pageContext, body.briefcase);
 
+  // TIER B cross-project awareness — analyst mode + an open project only. Synchronous
+  // "" (no DB read) for welcome/summarize or when no project is open; otherwise a
+  // cookie-authed, RLS-scoped, fail-open read of the user's OTHER projects.
+  const currentProjectId = typeof body.currentProjectId === "string" ? body.currentProjectId : "";
+  const otherProjectsBlock =
+    mode === "analyst" && currentProjectId ? await otherProjectsBlockFor(currentProjectId) : "";
+
   // Summarize the session into one cited block (no location detection — it reads
   // the conversation, not a new question). The client appends a final "summarize"
   // user turn so the last-must-be-user gate passes; the prompt does the synthesis.
@@ -399,7 +472,12 @@ export async function POST(request: Request): Promise<Response> {
       const prelude: WelcomeFrame[] = token
         ? [{ type: "place", place: { zip: "", name: "Southwest Florida" }, freshness_token: token }]
         : [];
-      return streamAnswer(system + clientContext, messages, GROUNDED_MAX_TOKENS, prelude);
+      return streamAnswer(
+        system + clientContext + otherProjectsBlock,
+        messages,
+        GROUNDED_MAX_TOKENS,
+        prelude,
+      );
     }
     const system = buildPlaceContext(lastUser) + FORMAT_RULE + WELCOME_SYSTEM;
     return streamAnswer(system + clientContext, messages, MAX_TOKENS);
@@ -452,7 +530,14 @@ export async function POST(request: Request): Promise<Response> {
     tier: 2,
     voice: mode === "analyst" ? "analyst" : "welcome",
   });
-  return streamAnswer(system + clientContext, messages, GROUNDED_MAX_TOKENS, prelude);
+  // otherProjectsBlock is "" unless analyst-mode with an open project, so welcome-mode
+  // located answers are unchanged.
+  return streamAnswer(
+    system + clientContext + otherProjectsBlock,
+    messages,
+    GROUNDED_MAX_TOKENS,
+    prelude,
+  );
 }
 
 /** Cheap in-memory scope check for a 5-digit ZIP (resolveZip via resolveLocation's gate). */

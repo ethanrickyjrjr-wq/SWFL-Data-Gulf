@@ -89,6 +89,10 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       return {
         pageContext: describePage(path, projectPageContextForPath(path, getAiContext())),
         briefcase: briefcaseDigest(briefcase?.draftItems ?? []),
+        // The open project's id → the route's cookie-authed TIER B cross-project read
+        // (shallow, frozen, advisory index of the user's OTHER projects). Null off a
+        // project page → no read. RLS still scopes the read server-side regardless.
+        currentProjectId: projectId ?? undefined,
       };
     },
   });

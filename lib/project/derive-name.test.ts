@@ -127,4 +127,30 @@ describe("inferScopeFromItems (the shared scope root)", () => {
       topic: undefined,
     });
   });
+
+  it("reads a PDF file's extracted_text for scope (a PDF upload becomes scope-bearing)", () => {
+    const items: ProjectItem[] = [
+      {
+        ...base,
+        kind: "file",
+        storage_path: "u/p/abc.pdf",
+        mime: "application/pdf",
+        size: 1000,
+        extracted_text: "Flood insurance study for Fort Myers Beach 33931 — annual loss estimates.",
+        extraction_status: "done",
+      },
+    ];
+    expect(inferScopeFromItems(items)).toEqual({
+      zip: "33931",
+      place: "Fort Myers Beach",
+      topic: "Flood",
+    });
+  });
+
+  it("an uncaptioned file with no extracted_text still contributes no scope (only its UUID path)", () => {
+    const items: ProjectItem[] = [
+      { ...base, kind: "file", storage_path: "u/p/2b9f.png", mime: "image/png", size: 500 },
+    ];
+    expect(inferScopeFromItems(items)).toEqual({ place: undefined, topic: undefined });
+  });
 });
