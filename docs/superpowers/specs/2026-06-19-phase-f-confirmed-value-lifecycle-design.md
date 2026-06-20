@@ -76,6 +76,11 @@ From the handoff (D1–D10) plus four design forks resolved this session:
   plus an evidence row in `data_readiness_alerts`.
 - **Protect-on-Refresh (operator "A"):** a confirmed item is **skipped by the "Refresh items →"
   overwrite** (`applyRefresh`), so "Keep mine" actually protects the number — not just the chip.
+- **Editable metric value (operator decree 2026-06-19):** metric items get an **inline edit
+  control**. Editing the number is the real user-side re-eval trigger (F4): the new value ≠ the
+  confirmed value, so suppression lifts and the item re-checks; the edit also clears that item's
+  `confirmed_values` entry. This replaces the earlier "no edit UI exists" boundary — it is now
+  in scope, not deferred.
 
 ### Hard constraints (violating any = a rebuild)
 1. Never override / disconfirm / overwrite a user's filed number — flag with confidence only.
@@ -166,6 +171,17 @@ chip and the confirm key attach to the right item by it. **Goes first** (U2/U6 t
      `snapshot_value:filedValue`, `value_used:change.current_value`, slug/scope from the change) via
      a thin helper (**U10**). Optimistically hide the chip locally.
 
+**U11 — editable metric value (inline control in `ItemDetail.tsx` metric branch +
+`ProjectWorkspace.onEditValue`).** Operator decree: the user can change a filed number.
+- `ItemDetail` metric branch (`:45-71`): the value `<p>` (`:49`) becomes an inline-editable field
+  (click-to-edit text → input → save). On save, call `onEditValue(item.id, newValue)`.
+- `ProjectWorkspace.onEditValue(itemId, newValue)`:
+  1. Build the next `items` array with that item's `value` replaced (the established
+     whole-array pattern — same as add/remove; `PATCH /api/projects/[id]` with `{ items }`).
+  2. `next = withoutConfirmed(uiState, itemId)` → PATCH `ui_state` (drop the stale confirm so the
+     new value re-evaluates cleanly on next load).
+- This makes F4's user-side re-eval **real** (was "no edit path" before this decree).
+
 **U10 — `lib/signals/log-collision.ts`** — thin insert helper for the in-project evidence row
 (mirrors `lib/email/data-readiness.ts:299` `logVerificationResult`, but `surface:'in_project'`).
 Called from the confirm path (server route preferred so the service-role client writes it). Keeps
@@ -199,10 +215,8 @@ the alerts write off the email module.
   gone). ✅ full **in-project**. Email already uses our number by design (§2) — that is intended,
   not a violation of F3, because F3 governs the user's *reference* surface, not outbound sends.
 - **F4 (D9) — re-evaluate only on a genuinely new number.**
-  - **User edits the metric value:** key differs → re-surfaced. ⚠️ **There is no metric value-edit
-    UI today** (`action/route.ts` has no edit action; value changes only via Refresh or
-    remove/re-add). So in practice the user-side re-eval fires when an item is **removed and
-    re-added** with a new value. Documented, not papered over.
+  - **User edits the metric value:** ✅ **full** — the inline edit control (U11) replaces the
+    value and clears that item's confirmed entry, so the new number re-evaluates on next load.
   - **Our number drifts again after a confirm:** **deferred to handoff.** Filed-value keying means a
     re-confirmed item stays suppressed even if our number moves further. The handoff itself accepts
     this ("keying to the filed value gives most of this for free"). Re-alerting on a *widening* gap
@@ -225,6 +239,7 @@ Wave 2 (serial, 1 agent — signals domain):
         U8 refresh-on-access skip-confirmed  →  refresh/route.ts pass-through
 Wave 3 (serial, 1 agent — the workspace hotspot, single owner):
         U10 log-collision helper  →  U9 ItemsBoard/ItemCard/ItemDetail mount + ProjectWorkspace.onKeepMine
+        →  U11 inline editable value (ItemDetail + ProjectWorkspace.onEditValue)
 Verify:  signals tests + 3 new tests, tsc 0, eslint, next build
 ```
 
@@ -242,7 +257,8 @@ Verify:  signals tests + 3 new tests, tsc 0, eslint, next build
       never a block, never a mutation of the user's value.
 - [ ] "Keep mine" persists `ui_state.confirmed_values[itemId]=filedValue`; the same filed value
       never re-alerts (server-suppressed) **and** the next "Refresh items →" skips it.
-- [ ] Editing/removing+re-adding with a new value clears suppression and re-evaluates.
+- [ ] The metric value is **inline-editable**; editing it replaces the value, clears the confirm,
+      and re-evaluates against the new number.
 - [ ] `kind:"file"` items show the frozen-snapshot note.
 - [ ] Each confirm writes one `data_readiness_alerts` row (`surface:'in_project'`,
       `user_action:'confirmed'`) — visible on /ops.
