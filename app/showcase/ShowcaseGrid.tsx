@@ -67,7 +67,10 @@ export function ShowcaseGrid() {
           aria-modal="true"
           aria-label={`Preview: ${preview.name}`}
           onClick={close}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm sm:p-8"
+          // z-50 keeps the preview ABOVE page/nav but BELOW the universal AI pill
+          // (z-56) + its panel (z-57), so the outside/data pill stays visible and
+          // clickable while previewing — preview a template, then build with the pill.
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm sm:p-8"
         >
           {/* Stop propagation so clicks inside the panel don't dismiss; the backdrop does. */}
           <div
