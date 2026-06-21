@@ -1,3 +1,8 @@
+## 2026-06-21 (main) — fix(map): MapCanvas — extract Hero map logic; /map = full + Lee/Collier side-by-side [PUSHED]
+
+- `components/charts/MapCanvas.tsx`: new component extracted from Hero — same SVG, same 3-stop color gradient, same tooltip, county filter prop ("Lee"|"Collier"|"both"). Wraps in `.home-explorer` so home-explorer.css coast rules fire automatically.
+- `app/map/page.tsx`: full Lee+Collier map at top; Lee + Collier side by side below. ZipChoropleth not used.
+
 ## 2026-06-21 (main) — fix(map): ZipChoropleth coast layer black areas — style #the_rest_of_the_coast + county outlines in JS [PUSHED]
 
 - `ZipChoropleth.tsx`: after SVG load, force `#the_rest_of_the_coast *` → fill #152832 (gulf-deep); county outline groups → fill none + subtle stroke; container bg set to #152832 to prevent pre-load flash. The home-explorer.css rule only fires under `.home-explorer` wrapper — ZipChoropleth never had that, so coast defaulted to SVG black.
