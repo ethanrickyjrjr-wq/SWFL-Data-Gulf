@@ -8,7 +8,7 @@
 // never "Request failed (404)", never a "we don't have that" dead-end.
 import { resolveReportGrounding } from "@/lib/highlighter/report-grounding";
 import { routeChart } from "@/lib/route-chart";
-import { buildChartForIntent } from "@/lib/build-chart-for-intent.mts";
+import { buildChartForIntent, summarizeChartForGrounding } from "@/lib/build-chart-for-intent.mts";
 import { getAnthropic, TRIAGE_MODEL } from "@/refinery/agents/anthropic.mts";
 import { resolveReachTargets } from "@/lib/highlighter/reach";
 import { fetchReachBlocks } from "@/lib/highlighter/fetch-reach";
@@ -107,10 +107,26 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
   // "we failed to answer". A metric with `need` components is, by definition, a gap.
   const answered = neededComponents.length === 0;
 
+  // Build the chart BEFORE the system prompt so the model can be TOLD a chart is on screen
+  // and describe it — instead of refusing ("I can't chart that" / "outside this report's
+  // scope"), the exact deflection the screenshot showed. buildChartForIntent reads LIVE data
+  // (zhvi_pivoted home values, cre-swfl vacancy) and returns null on any miss; a chart is
+  // best-effort and never blocks the answer. routeChart returns null for non-chart asks, so
+  // a normal question pays zero extra latency.
+  let chart: Awaited<ReturnType<typeof buildChartForIntent>> = null;
+  try {
+    const intent = routeChart(question);
+    if (intent) chart = await buildChartForIntent(intent);
+  } catch {
+    /* chart is best-effort — a failed build degrades to a text-only answer */
+  }
+
   // The grounded system prompt — place-pin → format rule → grounding context → speak line
   // → follow-ups tail — is assembled by the shared core so the inbound auto-reply path
   // (Buyer-Intent Reply Sensor) grounds on the SAME engine. The follow-ups tail stays
-  // gated on selection_type (popup yes, dock/email no).
+  // gated on selection_type (popup yes, dock/email no). `chartNote` tells the grounding the
+  // chart's title so the CHARTS directive flips from "you can't chart" to "describe what's
+  // on screen".
   const system = buildGroundedSystemPrompt({
     fact,
     question,
@@ -118,6 +134,10 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
     blocks: [...grounding.blocks, ...reachBlocks],
     method,
     surfaceNote: grounding.surfaceNote,
+    // The chart's REAL figures (endpoints + peak), so the narrator cites truth instead of
+    // hallucinating home-value numbers it was never given. Just the title would make the
+    // model invent figures (a moat violation that the deflection/leak detectors miss).
+    chartNote: chart ? summarizeChartForGrounding(chart) : undefined,
   });
 
   // Tell the model the SHAPE of what was grabbed so the answer (not just the follow-ups)
@@ -130,18 +150,11 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        // Best-effort chart frame — emitted before the text stream. Failure is silently
-        // swallowed; a chart never blocks the answer.
-        try {
-          const intent = routeChart(question);
-          if (intent) {
-            const chart = await buildChartForIntent(intent);
-            if (chart) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chart })}\n\n`));
-            }
-          }
-        } catch {
-          /* chart is best-effort */
+        // The chart was built up front (above) so the prompt could reference it; emit its
+        // frame before the text stream. A null chart (non-chart ask, or a live-data miss)
+        // simply streams text only.
+        if (chart) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chart })}\n\n`));
         }
 
         const client = getAnthropic();

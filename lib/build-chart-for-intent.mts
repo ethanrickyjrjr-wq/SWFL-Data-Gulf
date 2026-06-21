@@ -6,13 +6,14 @@ import { lintChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CORRIDOR_ALIASES } from "@/refinery/lib/corridor-aliases.mts";
 import { fetchBrain } from "@/lib/fetch-brain";
+import { loadMetroTrend } from "@/lib/charts/load-metro-trend";
 import type { BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
 import type {
   CorridorEntry,
   CorridorPermitsEntry,
   CorridorCentroidEntry,
   JoinedCorridorRow,
-  ZHVIMonth,
+  ChartRow,
   ZHVITrendEntry,
 } from "@/types/viz";
 
@@ -148,15 +149,67 @@ async function buildVacancyChart(): Promise<ChartSpec | null> {
   return vacancyChartSpecFromTable(table);
 }
 
-async function buildZhviChart(): Promise<ChartSpec | null> {
-  const raw = await loadFixture<ZHVIMonth[]>("zhvi-trend.json");
+/**
+ * Pure mapping: live `data_lake.zhvi_pivoted` rows (month + 3 metros) → a ZHVI area
+ * ChartSpec. Exported for unit testing with no I/O (mirrors `vacancyChartSpecFromTable`:
+ * the live read lives in `buildZhviChart`, the mapping is tested here deterministically).
+ * Drops incomplete months, derives a REAL `asOf` from the newest covered month, and
+ * returns null when fewer than 3 complete months are present.
+ */
+/**
+ * Render a drawn chart's REAL figures as a compact, customer-clean grounding block so the
+ * model narrates the chart from TRUTH, never invented numbers. Without this, telling the
+ * model "a SWFL Home Values chart is on screen" while grounding it ONLY on cre-swfl made it
+ * hallucinate home-value dollar figures (a moat violation that scored "clean" on the
+ * deflection/leak detectors). The chart carries the deterministic numbers; this hands the
+ * narrator the endpoints + peak so any figure it states is real and cited, and an in-between
+ * month defers to the chart. (Brain-factory rule 2: deterministic math, narrative prose.)
+ */
+export function summarizeChartForGrounding(chart: ChartSpec): string {
+  const src = chart.source?.citation ? ` Source: ${chart.source.citation}.` : "";
+  if (chart.frameId === "zhvi-area") {
+    const data = (chart.options?.data ?? []) as ZHVITrendEntry[];
+    if (data.length === 0) return `${chart.title}.${src}`;
+    const first = data[0];
+    const last = data[data.length - 1];
+    const cities: Array<[string, keyof ZHVITrendEntry]> = [
+      ["Cape Coral", "cape_coral"],
+      ["Fort Myers", "fort_myers"],
+      ["Naples", "naples"],
+    ];
+    const lines = cities.map(([name, key]) => {
+      const series = data.map((d) => d[key] as number);
+      const max = Math.max(...series);
+      const maxMonth = data[series.indexOf(max)].month;
+      const fmt = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+      return `- ${name}: ${fmt(first[key] as number)} (${first.month}) to ${fmt(last[key] as number)} (${last.month}); peak ${fmt(max)} (${maxMonth}).`;
+    });
+    return (
+      `${chart.title} — the chart now on screen, monthly ${first.month} through ${last.month}.${src}\n` +
+      lines.join("\n") +
+      `\nThese are the ONLY home-value figures you may state; for any in-between month, say "see the chart" rather than name a number. Never invent a home-value figure.`
+    );
+  }
+  if (Array.isArray(chart.rows) && chart.rows.length > 0) {
+    const lines = chart.rows.slice(0, 12).map((r) => `- ${r[0]}: ${r[1]}`);
+    const through = chart.asOf ? ` Data through ${chart.asOf}.` : "";
+    return (
+      `${chart.title} — the chart now on screen.${through}${src}\n` +
+      lines.join("\n") +
+      `\nState ONLY these figures; never invent one not listed here.`
+    );
+  }
+  return `${chart.title}.${chart.asOf ? ` Data through ${chart.asOf}.` : ""}${src}`;
+}
 
-  const data = raw.filter(
-    (r): r is ZHVITrendEntry => r.cape_coral != null && r.fort_myers != null && r.naples != null,
+export function zhviChartSpecFromRows(rows: ChartRow[], asOf?: string): ChartSpec | null {
+  const data = rows.filter(
+    (r): r is ZHVITrendEntry =>
+      typeof r.cape_coral === "number" &&
+      typeof r.fort_myers === "number" &&
+      typeof r.naples === "number",
   );
-
-  if (data.length < 3) return null;
-  const lastMonth = data.reduce((m, r) => (r.month > m ? r.month : m), data[0].month);
+  if (data.length < 3 || !asOf) return null;
 
   // columns/rows satisfy the ChartBlock contract and are a faithful tabular view;
   // the zhvi-area frame reads `options.data` (the raw ZHVITrendEntry[]) directly.
@@ -171,11 +224,21 @@ async function buildZhviChart(): Promise<ChartSpec | null> {
     ]),
     chart_type: "area",
     value_format: "usd",
-    asOf: monthEndIso(lastMonth),
-    source: { citation: FIXTURE_SOURCE },
+    asOf: monthEndIso(asOf), // REAL latest covered month from the live view
+    source: { citation: "Zillow Home Value Index (ZHVI)" },
     frameId: "zhvi-area",
     options: { data },
   };
+}
+
+async function buildZhviChart(): Promise<ChartSpec | null> {
+  // LIVE home values from `data_lake.zhvi_pivoted` — the SAME view /charts reads — NOT the
+  // old `fixtures/zhvi-trend.json`, which stamped a fabricated `asOf` and sample numbers
+  // (a no-invention moat hole on a customer-facing chart, and the reason "Chart home values
+  // over time" could never draw REAL data). `loadMetroTrend` guards missing lake creds →
+  // empty (no throw), so a credless env degrades to "no chart", never a 500.
+  const { data: rows, asOf } = await loadMetroTrend("zhvi_pivoted");
+  return zhviChartSpecFromRows(rows, asOf);
 }
 
 async function buildScatterChart(): Promise<ChartSpec | null> {

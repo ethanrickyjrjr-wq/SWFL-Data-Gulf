@@ -116,6 +116,25 @@ export const DEFLECTION_PHRASES = [
   "tracked per zip code",
   "does not cover residential",
   "narrow this down",
+  // --- chart-deflection vocabulary. The 2026-06-21 screenshot asked "Chart home
+  // values over time" and got "I can't chart that for you … outside this report's
+  // scope." NONE of the phrases above caught a chart refusal, so the gate (and the
+  // proof harness that imports findDeflection) was BLIND to the exact bug it exists
+  // for — a chart-deflecting answer scored "clean". A real chart answer DESCRIBES the
+  // chart on screen; it never says these. ---
+  "i can't chart",
+  "i cannot chart",
+  "can't chart that",
+  "cannot chart that",
+  "can't chart it",
+  "cannot chart it",
+  "unable to chart",
+  "outside this report's scope",
+  "outside the report's scope",
+  "outside the scope of this report",
+  "don't surface on this live report",
+  "do not surface on this live report",
+  "that's a different dataset",
 ];
 
 const CLAIM_RE =

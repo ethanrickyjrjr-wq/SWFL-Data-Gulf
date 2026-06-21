@@ -1,7 +1,18 @@
 import { describe, it, expect } from "vitest";
-import { buildChartForIntent, vacancyChartSpecFromTable } from "./build-chart-for-intent.mts";
-import type { ZHVITrendEntry, JoinedCorridorRow } from "@/types/viz";
+import {
+  buildChartForIntent,
+  vacancyChartSpecFromTable,
+  zhviChartSpecFromRows,
+} from "./build-chart-for-intent.mts";
+import type { ChartRow, ZHVITrendEntry, JoinedCorridorRow } from "@/types/viz";
 import type { BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
+
+// Deterministic stand-in for the live data_lake.zhvi_pivoted read (3 complete months).
+const SAMPLE_ZHVI_ROWS: ChartRow[] = [
+  { month: "2026-02", cape_coral: 380000, fort_myers: 360000, naples: 600000 },
+  { month: "2026-03", cape_coral: 382000, fort_myers: 361000, naples: 605000 },
+  { month: "2026-04", cape_coral: 384000, fort_myers: 362500, naples: 610000 },
+];
 
 // The disk-backed `fetchBrain` read (brains/cre-swfl.md) is exercised in
 // production; here we unit-test the pure mapping `vacancyChartSpecFromTable`,
@@ -56,8 +67,10 @@ describe("buildChartForIntent → ChartSpec", () => {
     expect(r?.rows.length ?? 0).toBeGreaterThanOrEqual(3);
   });
 
-  it("zhvi → zhvi-area spec; raw series in options.data, all three columns", async () => {
-    const r = await buildChartForIntent({ chart_type: "area", scope: "zhvi" });
+  it("zhvi (pure mapper) → zhvi-area spec; raw series in options.data, all three columns", () => {
+    // Pure mapping is tested directly (no I/O); the live data_lake.zhvi_pivoted read in
+    // buildZhviChart is exercised in production (mirrors vacancyChartSpecFromTable).
+    const r = zhviChartSpecFromRows(SAMPLE_ZHVI_ROWS, "2026-04");
     expect(r?.frameId).toBe("zhvi-area");
     const data = r?.options?.data as ZHVITrendEntry[] | undefined;
     expect(Array.isArray(data)).toBe(true);
@@ -69,12 +82,23 @@ describe("buildChartForIntent → ChartSpec", () => {
     expect(typeof e.naples).toBe("number");
   });
 
-  it("zhvi asOf is honest ISO derived from its own last month (not the corridor keystone)", async () => {
-    const r = await buildChartForIntent({ chart_type: "area", scope: "zhvi" });
-    expect(r?.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    // The zhvi fixture runs through Apr 2026 — it must NOT inherit the corridor
-    // sample's Jun 2026 keystone (that would claim a vintage newer than the data).
+  it("zhvi asOf is the honest month-end ISO of the newest covered month", () => {
+    const r = zhviChartSpecFromRows(SAMPLE_ZHVI_ROWS, "2026-04");
+    expect(r?.asOf).toBe("2026-04-30");
+    // Never the corridor sample's fabricated Jun 2026 keystone.
     expect(r?.asOf).not.toBe("2026-06-30");
+  });
+
+  it("zhvi maps from LIVE data: credless/empty env degrades to null, never a fixture", async () => {
+    // buildZhviChart now reads data_lake.zhvi_pivoted via loadMetroTrend; in a credless test
+    // env that returns empty → null. In prod (lake creds present) it returns a real spec.
+    const r = await buildChartForIntent({ chart_type: "area", scope: "zhvi" });
+    expect(r === null || r.frameId === "zhvi-area").toBe(true);
+  });
+
+  it("zhvi (pure mapper) returns null when fewer than 3 complete months are present", () => {
+    expect(zhviChartSpecFromRows(SAMPLE_ZHVI_ROWS.slice(0, 2), "2026-03")).toBeNull();
+    expect(zhviChartSpecFromRows(SAMPLE_ZHVI_ROWS, undefined)).toBeNull();
   });
 
   it("corridor-scatter → corridor-scatter spec; full rows untouched in options.data", async () => {

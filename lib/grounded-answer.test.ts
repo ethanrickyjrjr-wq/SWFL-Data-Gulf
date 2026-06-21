@@ -69,6 +69,8 @@ test("no selection_type → no follow-ups tail (email/dock path)", () => {
 test("place pin fires for a named SWFL ZIP", () => {
   const sys = buildGroundedSystemPrompt({ question: "is 33931 a good buy?", blocks });
   expect(sys).toContain("33931");
-  // The freshness token from the block is carried into the grounding.
-  expect(sys).toContain("SWFL-7421-v5-20260613");
+  // Freshness is carried as the clean as-of DATE (rule 5), never the raw internal token
+  // (the leak the screenshot showed; this test used to ASSERT the raw token appear).
+  expect(sys).toContain("06/13/2026");
+  expect(sys).not.toContain("SWFL-7421-v5-20260613");
 });

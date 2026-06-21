@@ -63,7 +63,11 @@ function fakeDossier(token: string, withZips = false): Dossier {
   };
 }
 
-test("primary freshness token is quoted exactly once", () => {
+test("rule 5: the raw freshness token NEVER appears; the as-of date is used instead", () => {
+  // REGRESSION: this test previously asserted the token appear EXACTLY ONCE — it was the
+  // oracle that LOCKED IN the raw-token leak ("SWFL-7421-v53-20260609" in the screenshot).
+  // The report path now uses freshnessDirective(token): the customer-facing as-of DATE,
+  // never the internal token (mirrors the already-proven conversation path).
   const blocks: GroundingBlock[] = [
     { label: "Naples housing", dossier: fakeDossier("SWFL-7421-v5-20260607") },
   ];
@@ -72,8 +76,36 @@ test("primary freshness token is quoted exactly once", () => {
     gazetteer: "GEO",
     blocks,
   });
-  const matches = ctx.match(/SWFL-7421-v5-20260607/g) ?? [];
-  expect(matches.length).toBe(1);
+  // The raw internal token must NEVER leak into customer-facing prompt prose.
+  expect(ctx).not.toContain("SWFL-7421-v5-20260607");
+  // It is rendered as the clean as-of date (asOfFromToken → MM/DD/YYYY).
+  expect(ctx).toContain("06/07/2026");
+});
+
+test("CHARTS directive: a drawn chart is described from its OWN figures, never refused or invented", () => {
+  const blocks: GroundingBlock[] = [{ label: "x", dossier: fakeDossier("SWFL-7421-v5-20260607") }];
+  // A chart IS on screen → its real figures ride in a labeled block the model must cite.
+  const chartFigures =
+    "SWFL Home Values (ZHVI) — the chart now on screen.\n- Naples: $600,000 (2026-02) to $610,000 (2026-04).";
+  const withChart = buildGroundingContext({
+    rules: "RULES",
+    gazetteer: "GEO",
+    blocks,
+    chartShown: chartFigures,
+  });
+  // The real figures are injected as a cite-only block (anti-fabrication: the model was
+  // hallucinating home-value numbers when given only the title).
+  expect(withChart).toContain("=== CHART ON SCREEN");
+  expect(withChart).toContain(chartFigures);
+  expect(withChart).toContain("ON SCREEN");
+  expect(withChart).toContain("outside this report's scope"); // present as a FORBIDDEN phrase
+  expect(withChart).toContain("NEVER invent"); // the moat guard for a drawn chart
+  // No chart available → still forbids the flat refusal AND the build-it-yourself punt.
+  const noChart = buildGroundingContext({ rules: "RULES", gazetteer: "GEO", blocks });
+  expect(noChart).toContain("CHARTS");
+  expect(noChart).toContain("Excel");
+  expect(noChart).toContain("NEVER flatly refuse");
+  expect(noChart).not.toContain("=== CHART ON SCREEN");
 });
 
 test("detail_tables rows are inlined so cross-area compare is in-context (R0)", () => {
@@ -186,7 +218,9 @@ test("coverage invariant: every header-shown data field is in the grounding", ()
   expect(ctx).toContain("Direction: Bearish");
   expect(ctx).toContain("Strength: 40%");
   expect(ctx).toContain("Confidence: 70%");
-  expect(ctx).toContain("SWFL-7421-v5-20260607");
+  // Freshness is carried as the clean as-of DATE (rule 5), never the raw token.
+  expect(ctx).toContain("06/07/2026");
+  expect(ctx).not.toContain("SWFL-7421-v5-20260607");
 });
 
 test("jargon guard: key-metric slugs are NEVER serialized into the grounding", () => {

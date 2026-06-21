@@ -1,6 +1,7 @@
 import type { Dossier } from "../fetch-brain";
 import type { BrainOutputMetric } from "../../refinery/types/brain-output.mts";
 import type { MethodologyEntry } from "../../refinery/lib/methodology-registry.mts";
+import { freshnessDirective } from "@/lib/assistant/system-prompt";
 
 export interface GroundingBlock {
   /** Human label the model uses to attribute a number ("Naples housing", "Naples flood (env-swfl)"). */
@@ -16,6 +17,12 @@ export interface GroundingInput {
    *  registry entry. Injected so the model recites the real equation + held/need
    *  components instead of guessing (never-dead-end doctrine). */
   method?: MethodologyEntry | null;
+  /** Title of a chart being rendered to the user RIGHT NOW (the caller built it
+   *  before this prompt). When set, the CHARTS directive tells the model a chart is
+   *  on screen and to describe it — NEVER "I can't chart that / outside this report's
+   *  scope" (the live deflection bug). Absent → the no-chart guard (still no flat
+   *  refusal, still no "go build it in Excel"). */
+  chartShown?: string;
 }
 
 /** Inline a dossier's detail_tables as compact rows so cross-area lookups are in-context (R0). */
@@ -124,6 +131,18 @@ function renderMethod(m: MethodologyEntry): string {
 export function buildGroundingContext(input: GroundingInput): string {
   const primary = input.blocks[0];
   const token = primary?.dossier.freshness_token ?? "";
+  // CHARTS directive — the line that, when the report was commercial (cre-swfl) and the user
+  // asked to "chart home values", produced "I can't chart that for you / outside this report's
+  // scope". Two states: a chart IS being drawn (describe it, never refuse) vs. none available
+  // (still never flatly refuse, still never punt to "build it in Excel").
+  const chartsLine = input.chartShown
+    ? `CHARTS — A chart is ON SCREEN right now, drawn from our live data; its real figures are in the "=== CHART ON SCREEN ===" block below. Describe what the chart shows — its trend and shape — citing ONLY the figures in that block (for an in-between value, say "see the chart"). NEVER say you cannot chart it, cannot visualize it, or that it is "outside this report's scope": it is already drawn. NEVER invent a number that is not in that block — a fabricated figure is worse than a refusal.`
+    : `CHARTS — if asked to chart or visualize: NEVER tell the user to build it themselves (no "pull it into Excel / Sheets / Tableau / Python") and NEVER flatly refuse with "I can't chart that" or "that's outside this report's scope." Keep your answer about the numbers; the report shows a chart of its key data, and you can offer to pull a specific view we don't already show.`;
+  // The chart's real figures, when one is drawn — the narrator cites these instead of
+  // inventing home-value numbers it was never given.
+  const chartBlock = input.chartShown
+    ? `=== CHART ON SCREEN (cite ONLY these figures) ===\n${input.chartShown}`
+    : "";
   return [
     "You are the SWFL Data Gulf in-page analyst. The user highlighted something on a live report and asked about it. Lead straight with the substance in plain prose — no 'I'll pull…', no setup sentence, and do NOT echo back what they highlighted (they can see it; skip 'That $22.29 you're looking at is…' openers). Keep it tight: a few sentences for a simple ask, a short paragraph or two at most. Don't define obvious words — if they highlighted 'rising', give the number and what's rising, not a definition of the word. Surface the key point and let the follow-up chips carry the rest.",
     "Three kinds of question; pick the lane and answer in it:",
@@ -136,10 +155,15 @@ export function buildGroundingContext(input: GroundingInput): string {
     "FOCUS — answer about exactly what was highlighted. If it names a place (a county like Lee or Collier, a corridor, a town, a ZIP), speak to THAT place using its specific row in the data below — do not fall back to the SWFL-wide aggregate. Match the grain of the highlight.",
     "NATURAL — sound like a person, not a template. Don't mechanically repeat the same count or framing in every answer (not '27 corridors' every time — say 'across our corridors', or name the relevant ones). Vary it.",
     "BUILD — prior questions and answers from this session may be included in the question; build on them, don't repeat what you already said.",
-    "CHARTS — if asked to chart or visualize, NEVER tell the user to build it themselves (no 'pull it into Excel / Sheets / Tableau / Python'). Keep your answer about the numbers; the report shows a chart of its key data.",
+    chartsLine,
     "ABOUT SWFL DATA GULF — only if asked what the platform/system is (2-3 sentences, precise, never cheesy, never sector-locked): a data-analytics engine for Southwest Florida (Lee + Collier) spanning real estate, permits, the economy, and risk — not one sector. Every answer is grounded in verified local data, which keeps the AI honest and surfaces real patterns across the region. It compounds — the more it's used the sharper its read on SWFL gets, and the more YOU use it the better it works as your data-grounded sidekick: faster answers, simpler workflows, better calls on real deals.",
     "Tag any projection beyond the cited numbers inline with [INFERENCE] and give one falsifying condition.",
-    `Quote this freshness token exactly once in your answer: ${token}`,
+    // Rule 5: state the as-of DATE (MM/DD/YYYY), NEVER the raw freshness token. This is
+    // the SAME directive the conversation path uses (system-prompt.ts freshnessDirective).
+    // The report path historically ordered the model to "Quote this freshness token exactly
+    // once: ${token}" — that is the raw-token leak (e.g. "SWFL-7421-v53-20260609") that kept
+    // shipping because this path was never migrated and the proof harness never exercised it.
+    freshnessDirective(token),
     "",
     input.method ? "=== METHOD ===\n" + renderMethod(input.method) + "\n" : "",
     "=== RULES OF ENGAGEMENT ===",
@@ -148,6 +172,7 @@ export function buildGroundingContext(input: GroundingInput): string {
     "=== GEOGRAPHY ===",
     input.gazetteer,
     "",
+    chartBlock,
     "=== GROUNDED DATA ===",
     input.blocks.map(renderBlock).join("\n\n"),
   ]

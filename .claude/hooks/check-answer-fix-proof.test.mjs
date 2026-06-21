@@ -100,6 +100,33 @@ check("findDeflection catches the live-observed prod deflections", () => {
   for (const a of live) assert.ok(findDeflection(a), `should flag: ${a.slice(0, 40)}…`);
 });
 
+// The 2026-06-21 CHART screenshot ("Chart home values over time" → "I can't chart
+// that for you … outside this report's scope"). The detector was blind to this until
+// the chart-deflection vocabulary was added — so a chart-deflecting proof scored clean.
+check(
+  "findDeflection catches the chart-deflection screenshot ('I can't chart' / 'outside this report's scope')",
+  () => {
+    const chartDeflections = [
+      "I can't chart that for you — but I can point you to what the data holds.",
+      "Residential home-value trends are outside this report's scope.",
+      "That's a different dataset — one we don't surface on this live report.",
+    ];
+    for (const a of chartDeflections)
+      assert.ok(findDeflection(a), `should flag: ${a.slice(0, 40)}…`);
+  },
+);
+
+// A real chart answer DESCRIBES the on-screen chart with a number — must pass clean.
+check("findDeflection passes a real chart-describing answer", () => {
+  assert.equal(
+    findDeflection(
+      "The chart shows home values across Cape Coral, Fort Myers, and Naples climbing " +
+        "steadily, with Naples near $610,000 and the others rising in step through Apr 2026.",
+    ),
+    null,
+  );
+});
+
 // --- ask #9: raw token / backwards date leak (the thing I walked past) ---
 check("findLeak catches raw token + backwards YYYYMMDD, passes MM/DD/YYYY", () => {
   assert.ok(findLeak("Region-wide values are up, as of SWFL-7421-v83-20260620."), "raw token");

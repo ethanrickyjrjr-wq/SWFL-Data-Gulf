@@ -70,6 +70,10 @@ export interface GroundedSystemPromptInput {
    *  resolver (synthetic ZIP/corridor/method/source surfaces). Prepended so the
    *  model answers about that exact surface, not the SWFL-wide aggregate. */
   surfaceNote?: string;
+  /** The title of a chart being rendered to the user RIGHT NOW (the report path
+   *  builds it before this prompt). When set, the CHARTS directive flips from
+   *  "you can't chart here" to "a chart is on screen — describe it, never refuse". */
+  chartNote?: string;
 }
 
 /**
@@ -91,6 +95,7 @@ export function buildGroundedSystemPrompt(input: GroundedSystemPromptInput): str
       gazetteer: GAZETTEER_STR,
       blocks: input.blocks,
       method: input.method ?? null,
+      chartShown: input.chartNote,
     }) +
     SPEAK_LINE +
     ANSWER_FIRST +
