@@ -1,3 +1,11 @@
+## 2026-06-21 (main) — homepage: integrated the approved HOMEPAGE/ map demo (choropleth + capabilities) [PUSHED]
+
+- **What:** replaced the old "Real Data. Real Answers." marketing hero with the operator-approved `HOMEPAGE/` demo. New files: `public/map/lee-collier.svg` (cleaned contractor map extracted from `HOMEPAGE/demo-current.html` — 57 ZIP groups, viewBox intact); `lib/landing/home-map-data.ts` (FLOOD/VALUE/PERMITS + place names, auto-ported from `build_demo4.py` — **MOCK data, swap for live lake = TODO**); `components/landing/home-explorer.css` (demo `<style>` auto-namespaced under `.home-explorer`, colors → `--gulf-*` vars, + hand-authored mobile/a11y/reduced-motion floor); `components/landing/Hero.tsx` (hero + search + metric pills + choropleth + data rail + stats — demo JS ported into one scoped effect, ZIPs keyboard-focusable); `components/landing/Capabilities.tsx` (cards + comparison strip + CTA→`#waitlist`); `app/page.tsx` (`Hero → Capabilities → Waitlist`).
+- **Parked (files kept, not imported):** `ComparisonSection`, `MCPInstall`, `Charts` — not in the approved demo; the comp strip replaces `ComparisonSection`.
+- **Deferred (operator):** 33931 / Fort Myers Beach boundary is still the imperfect ZCTA patch; the Fiverr SVG is the real fix.
+- **Gates:** `tsc --noEmit` exit 0 · eslint exit 0 · dev server HTTP 200 with the new hero/capabilities/CTA/stats · SVG asset 200 (`image/svg+xml`). Full `next build` not run locally (would clash with the live dev server) — watching the Vercel prod deploy after push.
+- **Parallel-session note:** staged ONLY my explicit paths; left the concurrent session's `app/showcase/ShowcaseGrid.tsx` + `refinery/render/{speaker.mts,display-leak.test.mts}` untouched.
+
 ## 2026-06-21 (main) — showcase Preview = in-place popup (was new-tab) [BUILT, gates green, HELD for push]
 
 - **Why:** on `/showcase` the "Preview →" did `window.open(_blank)` → dumped the visitor in a bare new tab (no AI pill, no way to build) — operator: "what the fuck is this." The standalone AI pill (`AppShell`/`AiBriefcasePill`) DOES render on `/showcase` (`shouldRenderStandalone` true), so keeping the preview ON the page means the build-pill stays right there.

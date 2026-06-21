@@ -1,8 +1,15 @@
 # HOMEPAGE — Handoff
 
-**Status:** WIP. Demo approved → integrate into `components/landing/Hero.tsx`. Homepage NOT touched yet.
+**Status:** INTEGRATED (2026-06-21). The demo is now the live homepage:
+- `public/map/lee-collier.svg` — cleaned contractor SVG (extracted from `demo-current.html`; 57 ZIP groups, viewBox present).
+- `lib/landing/home-map-data.ts` — mock FLOOD/VALUE/PERMITS + placeNames (auto-ported from `build_demo4.py`; **swap for live lake = HANDOFF step 4, still TODO**).
+- `components/landing/home-explorer.css` — demo `<style>` namespaced under `.home-explorer`, colors → `--gulf-*` vars (auto-generated from `build_demo4.py`; do not hand-edit) + a hand-authored mobile/a11y/reduced-motion floor.
+- `components/landing/Hero.tsx` — hero + search + metric pills + choropleth + data rail + stats (demo JS ported into one scoped effect).
+- `components/landing/Capabilities.tsx` — cards + comparison strip + CTA (CTA → `#waitlist`).
+- `app/page.tsx` — `<Hero/> <Capabilities/> <Waitlist/>`. Parked (files kept, not imported): `ComparisonSection`, `MCPInstall`, `Charts`.
+- 33931/Fort Myers Beach boundary still the imperfect ZCTA patch — deferred (Fiverr SVG is the real fix), per operator.
 
-**Last session:** 2026-06-19
+**Last session:** 2026-06-21 (integrated) · prior 2026-06-19 (demo build)
 
 ---
 
