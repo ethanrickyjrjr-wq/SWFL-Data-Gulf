@@ -33,6 +33,10 @@ jobs:
       - name: Install crawl4ai browser
         run: crawl4ai-setup
 
+      - name: crawl4ai preflight (advisory)
+        continue-on-error: true
+        run: crawl4ai-doctor
+
       - name: Run news ingest
         env:
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}

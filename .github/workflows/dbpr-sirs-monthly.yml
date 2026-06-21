@@ -32,6 +32,13 @@ jobs:
           playwright install --with-deps chromium
           patchright install chromium
 
+      - name: crawl4ai preflight (advisory)
+        continue-on-error: true
+        run: crawl4ai-doctor
+
+      - name: patchright stealth smoke (required)
+        run: python -c "from patchright.async_api import async_playwright; print('patchright ok')"
+
       - name: Run ingest
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

@@ -34,6 +34,10 @@ jobs:
       - name: Install Playwright browser
         run: playwright install --with-deps chromium
 
+      - name: crawl4ai preflight (advisory)
+        continue-on-error: true
+        run: crawl4ai-doctor
+
       - name: Run dbpr_public_notices pipeline
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -41,6 +41,13 @@ jobs:
       - name: Install patchright browser
         run: patchright install chromium
 
+      - name: crawl4ai preflight (advisory)
+        continue-on-error: true
+        run: crawl4ai-doctor
+
+      - name: patchright stealth smoke (required)
+        run: python -c "from patchright.async_api import async_playwright; print('patchright ok')"
+
       - name: Run Crexi listings pipeline
         run: |
           CORRIDOR_FLAG=""
