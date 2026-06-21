@@ -177,6 +177,55 @@ describe("projectPrompts — open project", () => {
   });
 });
 
+describe("projectPrompts — empty project (nothing filed yet)", () => {
+  it("emits start-here prompts, NOT the content-presuming floor", () => {
+    const out = projectPrompts({ digest: digest({ itemCount: 0, kindCounts: {} }) });
+    expect(out.prompts).toHaveLength(3);
+    // The floor copy presumes content — must be gone for an empty project.
+    expect(out.prompts.some((p) => /since i last looked/i.test(p))).toBe(false);
+    expect(
+      out.prompts.some((p) => /turn this project into a client-ready one-pager/i.test(p)),
+    ).toBe(false);
+    // Every start-here prompt brings data IN.
+    expect(out.prompts.every((p) => /pull|add|bottom line/i.test(p))).toBe(true);
+  });
+
+  it("scopes start-here prompts to the project's place when it has one", () => {
+    const out = projectPrompts({
+      digest: digest({ itemCount: 0, kindCounts: {}, scope: { place: "Fort Myers Beach" } }),
+    });
+    expect(out.prompts.every((p) => /fort myers beach/i.test(p))).toBe(true);
+  });
+
+  it("never uses the project TITLE as a fake place in start-here prompts", () => {
+    // A brand-new "Test" project has no scope — must fall back to region-wide SWFL,
+    // not "Pull the latest Test market data".
+    const out = projectPrompts({
+      digest: digest({ itemCount: 0, kindCounts: {}, scope: {}, title: "Test" }),
+    });
+    expect(out.prompts.some((p) => /\bTest\b market data/i.test(p))).toBe(false);
+    expect(out.prompts.some((p) => /SWFL/i.test(p))).toBe(true);
+  });
+
+  it("empty-state wins even if a stray situational signal is present", () => {
+    const out = projectPrompts({
+      digest: digest({
+        itemCount: 0,
+        kindCounts: {},
+        freshnessChangedSinceSeen: true,
+        freshnessToken: "SWFL-7421-v5-20260610",
+      }),
+    });
+    expect(out.prompts.some((p) => /new data landed/i.test(p))).toBe(false);
+    expect(out.prompts.every((p) => /pull|add|bottom line/i.test(p))).toBe(true);
+  });
+
+  it("offers a project build action on an empty project", () => {
+    const out = projectPrompts({ digest: digest({ itemCount: 0, kindCounts: {} }) });
+    expect(/project|deliverable/i.test(out.offer)).toBe(true);
+  });
+});
+
 describe("projectPrompts — no project (Outside / list)", () => {
   it("offers to pick up the most-recent project and refresh a stale one", () => {
     const out = projectPrompts({
