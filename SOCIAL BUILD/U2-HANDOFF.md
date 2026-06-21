@@ -1,5 +1,14 @@
 # U2 — HANDOFF (ask-AI schedule + compose, frozen preview) — probe-verified grounding
 
+> ### 🎯 READ THIS FIRST — do not skim, do not skip to the code.
+> This was written by reading the **actual code** (RULE 0.5), and it already caught **two integration traps** that each cost ~a day if you hit them at build time instead of now. **Before writing one line: read the "TWO gaps that WILL bite" section below in full, then the "REUSE, do not rebuild" seams.** The build itself is small and mechanical once those are internalized — *the gotchas are the whole game.* Concrete focus, in order:
+> 1. **Don't write a second `fetchBrain`** — extract the cron's into a shared lib (Gap 1).
+> 2. **Don't rebuild the card model** — reuse build 05's dossier→`SocialModel` mapper (Gap 2).
+> 3. **Numbers are sacred** — captions are prose-only over a verbatim dossier; lint every variant.
+> 4. **Resolve a connected account on CONFIRM** or route to connect-first (the U1↔U2 seam).
+>
+> If you build without reading the two gaps, you will duplicate the brain-fetch and the card model, and your preview will silently diverge from what the cron actually posts. Don't.
+
 **Read `U2-ask-ai-schedule-and-compose.md` + spec `docs/superpowers/specs/2026-06-20-social-user-side-design.md` §2.2/§2.5/§5 for the full assignment.** This is the *probe-first* supplement (every anchor re-opened 2026-06-20): the seams U2 reuses verbatim, and — more important — the **two gaps a blind build will miss**. U2 is **unblocked**: backend 01 (compose core) + 02 (renderer) + 03 (tokens) + **U1 (connect, now on `main`)** are all live.
 
 ## Model + shape

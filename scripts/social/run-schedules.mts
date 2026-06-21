@@ -31,8 +31,10 @@ import { claimSocialOnce } from "@/lib/social/idempotency";
 import { buildTargetsFromSchedules, buildIdempotencyKey } from "@/lib/social/targets";
 import { composePosts } from "@/lib/social/compose";
 import { buildSocialContent } from "@/lib/social/build-content";
+import { buildContentDeps } from "@/lib/social/brain-fetch";
 import { passesFreshnessGate } from "@/lib/social/lifecycle";
 import { renderSocialImage } from "@/lib/social/render-social-image";
+import { composedPostToSocialModel } from "@/lib/social/render-model";
 import { uploadSocialImage } from "@/lib/social/media-upload";
 import { postToChannel } from "@/lib/social/channels/index";
 import type { SocialSchedule, SocialTarget, SocialContent } from "@/lib/social/types";
@@ -41,66 +43,11 @@ import type { BuildSocialContentDeps } from "@/lib/social/build-content";
 const DRY_RUN = process.env.DRY_RUN === "true";
 const PUBLISH_ENABLED = process.env.SOCIAL_PUBLISH_ENABLED === "true";
 const CLAIM_LIMIT = 50;
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 
 // Crash-orphan reaper window: a parked row (next_run_at=NULL) whose last_run_at
 // is older than this is a genuine crash-orphan, safe to re-arm. A freshly-claimed
 // row has last_run_at=now, so it will NOT be reaped mid-flight by a concurrent run.
 const ORPHAN_STALE_MS = 60 * 60 * 1000; // 1 hour
-
-// ── content deps ──────────────────────────────────────────────────────────────
-
-/**
- * Build the injectable BuildSocialContentDeps for this run. Fetches the brain
- * dossier for a scope from the live API (or from a per-run cache when the same
- * scope is requested multiple times across schedules).
- */
-function buildContentDeps(): BuildSocialContentDeps {
-  const cache = new Map<string, Awaited<ReturnType<BuildSocialContentDeps["fetchBrain"]>>>();
-
-  return {
-    async fetchBrain(scopeKind, scopeValue) {
-      const key = `${scopeKind ?? ""}|${scopeValue ?? ""}`;
-      if (cache.has(key)) return cache.get(key) ?? null;
-
-      try {
-        const params = new URLSearchParams({ format: "json", view: "speak", tier: "2" });
-        if (scopeKind && scopeValue) {
-          params.set("scope_kind", scopeKind);
-          params.set("scope_value", scopeValue);
-        }
-        const url = `${SITE_URL}/api/b/master?${params.toString()}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
-        if (!res.ok) {
-          console.warn(`[social] brain fetch ${res.status} for scope ${key}`);
-          cache.set(key, null);
-          return null;
-        }
-        const json = (await res.json()) as {
-          in_scope?: boolean;
-          freshness_token?: string;
-          conclusion?: string | null;
-          key_metrics?: Array<{ label: string; value: string | number }>;
-          brain_id?: string;
-        };
-        const dossier = {
-          in_scope: json.in_scope ?? false,
-          freshness_token: json.freshness_token ?? "",
-          conclusion: json.conclusion ?? null,
-          key_metrics: json.key_metrics ?? [],
-          brain_id: json.brain_id,
-        };
-        cache.set(key, dossier);
-        return dossier;
-      } catch (err) {
-        const reason = err instanceof Error ? err.message : String(err);
-        console.warn(`[social] brain fetch error for scope ${key}: ${reason}`);
-        cache.set(key, null);
-        return null;
-      }
-    },
-  };
-}
 
 // ── main ───────────────────────────────────────────────────────────────────────
 
@@ -345,18 +292,7 @@ async function processSchedule(
   let mediaUrl: string | null = null;
   try {
     const imageBuffer = await renderSocialImage({
-      model: {
-        headline: composed.post.caption.split("\n\n")[0] ?? composed.post.caption,
-        stat: target.scopeValue
-          ? {
-              label: target.scopeValue,
-              value: composed.post.freshness,
-            }
-          : undefined,
-        freshness_token: composed.post.freshness,
-        source: `${target.scopeKind ?? "region"}:${target.scopeValue ?? "swfl"}`,
-        as_of: now.toISOString().slice(0, 10),
-      },
+      model: composedPostToSocialModel(composed.post, target, now),
       format: "square",
       now,
     });
