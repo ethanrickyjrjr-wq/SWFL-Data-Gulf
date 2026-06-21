@@ -405,6 +405,77 @@ test("computeMetricChart: stamps frame_id 'bar-table' on the detail_table path t
   assert.equal(computeMetricChart(o)!.frame_id, "bar-table");
 });
 
+// --- comparability: same display_format but different UNITS must NOT chart ---
+// Master's "Key metrics" bug: 7 metrics all display_format:"count" but units
+// storms / permits / workers / thousand-tons-per-year landed on ONE axis, so
+// freight (1.2M) dwarfed every other bar to sub-pixel and "Median 281 · range
+// 9–1,226,969" was dimensionless nonsense. Different units => not comparable.
+test("computeMetricChart: same display_format but different units does NOT chart (master grab-bag)", () => {
+  const o = output({
+    key_metrics: [
+      metric({
+        metric: "a",
+        value: 9,
+        label: "Hurricane landfalls",
+        variable_type: "extensive",
+        display_format: "count",
+        units: "storms",
+      }),
+      metric({
+        metric: "b",
+        value: 281,
+        label: "Commercial permits",
+        variable_type: "extensive",
+        display_format: "count",
+        units: "permits",
+      }),
+      metric({
+        metric: "c",
+        value: 1226969,
+        label: "Inbound freight",
+        variable_type: "extensive",
+        display_format: "count",
+        units: "thousand tons/year",
+      }),
+    ],
+  });
+  assert.equal(computeMetricChart(o), null);
+});
+
+test("computeMetricChart: >=3 metrics sharing UNITS still chart", () => {
+  const o = output({
+    key_metrics: [
+      metric({
+        metric: "a",
+        value: 12,
+        label: "Cape Coral",
+        variable_type: "extensive",
+        display_format: "count",
+        units: "permits",
+      }),
+      metric({
+        metric: "b",
+        value: 18,
+        label: "Fort Myers",
+        variable_type: "extensive",
+        display_format: "count",
+        units: "permits",
+      }),
+      metric({
+        metric: "c",
+        value: 7,
+        label: "Naples",
+        variable_type: "extensive",
+        display_format: "count",
+        units: "permits",
+      }),
+    ],
+  });
+  const chart = computeMetricChart(o);
+  assert.ok(chart, "same-units metrics should still produce a chart");
+  assert.equal(chart!.rows.length, 3);
+});
+
 // --- value_format hint (drives the renderer's numeric formatter) -----------
 
 test("computeMetricChart: a percent key_metrics group -> value_format 'percent'", () => {

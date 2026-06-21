@@ -144,40 +144,53 @@ function chartFromDetailTable(
   return null;
 }
 
-/** Fallback: largest comparable (same display_format) key_metrics group. */
+/** Fallback: largest comparable key_metrics group.
+ *
+ * Comparability keys on `units`, NOT `display_format`. A "count" of storms (9)
+ * and a "count" of inbound freight tons (1,226,969) share a display_format but
+ * are NOT comparable on one axis — putting them together makes every small bar
+ * sub-pixel and the median/range dimensionless (the master "Key metrics" bug,
+ * where 7 distinct-unit metrics shared `display_format: "count"`). Grouping by
+ * units splits that grab-bag into singletons → no group clears MIN_POINTS → no
+ * chart → the report correctly falls through to its labeled key-metrics TABLE.
+ * `display_format` is only a fallback key for the rare metric carrying no units
+ * (test fixtures; real numeric metrics always carry units, spec-validator-
+ * enforced) and still drives the value formatter for the chosen group. */
 function chartFromKeyMetrics(
   metrics: readonly BrainOutputMetric[],
   asOf: string,
 ): ChartBlock | null {
-  const groups = new Map<BrainOutputMetricDisplayFormat, BrainOutputMetric[]>();
+  const groups = new Map<string, BrainOutputMetric[]>();
+  const fmtOf = new Map<string, BrainOutputMetricDisplayFormat>();
   for (const m of metrics) {
     if (m.variable_type === "categorical") continue; // value is a string
     if (typeof m.value !== "number") continue;
-    const fmt = m.display_format ?? "raw";
-    const g = groups.get(fmt);
+    const key = (m.units ?? "").trim().toLowerCase() || (m.display_format ?? "raw");
+    const g = groups.get(key);
     if (g) g.push(m);
-    else groups.set(fmt, [m]);
+    else {
+      groups.set(key, [m]);
+      fmtOf.set(key, m.display_format ?? "raw");
+    }
   }
 
-  let best: {
-    fmt: BrainOutputMetricDisplayFormat;
-    metrics: BrainOutputMetric[];
-  } | null = null;
-  for (const [fmt, ms] of groups) {
+  let best: { key: string; metrics: BrainOutputMetric[] } | null = null;
+  for (const [key, ms] of groups) {
     if (ms.length >= MIN_POINTS && (best === null || ms.length > best.metrics.length)) {
-      best = { fmt, metrics: ms };
+      best = { key, metrics: ms };
     }
   }
   if (best === null) return null;
+  const fmt = fmtOf.get(best.key) ?? "raw";
 
   const truncated = best.metrics.length > MAX_BARS;
   const picked = truncated ? best.metrics.slice(0, MAX_BARS) : best.metrics;
   return finalize({
     title: `Key metrics${truncated ? ` (top ${MAX_BARS})` : ""}`,
-    columns: ["Metric", FORMAT_AXIS_LABEL[best.fmt]],
+    columns: ["Metric", FORMAT_AXIS_LABEL[fmt]],
     rows: picked.map((m) => [m.label, m.value as number]),
     chart_type: "bar",
-    value_format: valueFormatFor(best.fmt),
+    value_format: valueFormatFor(fmt),
     asOf,
   });
 }
