@@ -61,22 +61,48 @@ def _strip_html(html: str) -> str:
     return soup.get_text(separator="\n", strip=True)
 
 
-def _chunk_text(text: str, *, size: int = _CHUNK_CHARS) -> list[str]:
-    """Split on paragraph boundaries so a row is never cut mid-record. No truncation."""
+_OVERLAP_FRAC = 0.1  # carry ~10% of the prior chunk's tail so a boundary-straddling row survives
+
+
+def _chunk_text(text: str, *, size: int = _CHUNK_CHARS, overlap: float = _OVERLAP_FRAC) -> list[str]:
+    """Split on paragraph boundaries; carry an ~overlap tail into the next chunk so a record
+    straddling a boundary appears whole in at least one chunk. No truncation. Duplicate rows the
+    overlap introduces are removed at merge by _dedup_rows."""
     if len(text) <= size:
         return [text]
+    overlap_chars = int(size * overlap)
     chunks: list[str] = []
     cur: list[str] = []
     cur_len = 0
     for para in text.split("\n"):
         if cur and cur_len + len(para) + 1 > size:
             chunks.append("\n".join(cur))
-            cur, cur_len = [], 0
+            # seed the next chunk with the trailing paragraphs (~overlap_chars) of the flushed one
+            tail: list[str] = []
+            tail_len = 0
+            for p in reversed(cur):
+                if tail_len + len(p) + 1 > overlap_chars:
+                    break
+                tail.insert(0, p)
+                tail_len += len(p) + 1
+            cur, cur_len = list(tail), tail_len
         cur.append(para)
         cur_len += len(para) + 1
     if cur:
         chunks.append("\n".join(cur))
     return chunks
+
+
+def _dedup_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Drop exact-duplicate row dicts introduced by chunk overlap, preserving order."""
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        key = json.dumps(r, sort_keys=True, default=str)
+        if key not in seen:
+            seen.add(key)
+            out.append(r)
+    return out
 
 
 def _build_instruction(prompt: str, schema: Optional[dict[str, Any]]) -> str:
@@ -127,7 +153,7 @@ def _llm_extract_rows(
             messages=[{"role": "user", "content": f"{instruction}\n\nPage text:\n{chunk}"}],
         )
         rows.extend(_parse_rows(msg.content[0].text))
-    return rows
+    return _dedup_rows(rows)
 
 
 def extract(

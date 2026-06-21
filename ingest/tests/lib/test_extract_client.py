@@ -228,3 +228,25 @@ def test_scrape_all_vendors_fail_raises_extract_error(monkeypatch):
         extract_client.scrape_with_fallback("https://dead.example.com")
     msg = str(exc.value)
     assert "c4 nav fail" in msg and "sp 404" in msg and "fc 5xx" in msg
+
+
+# ─── _chunk_text overlap + _dedup_rows (no boundary drops) ───────────────────
+
+
+def test_chunk_text_overlaps_boundary():
+    text = "\n".join(f"row {i}" for i in range(4000))  # forces multiple chunks
+    chunks = extract_client._chunk_text(text, size=2000)
+    assert len(chunks) >= 2
+    # the tail of chunk 0 reappears at the head of chunk 1 (overlap), so a row straddling the
+    # boundary survives in at least one chunk
+    tail = chunks[0].split("\n")[-1]
+    assert tail in chunks[1].split("\n")
+
+
+def test_chunk_text_short_text_unchanged():
+    assert extract_client._chunk_text("a\nb\nc", size=2000) == ["a\nb\nc"]
+
+
+def test_dedup_rows_drops_identical_records():
+    rows = [{"a": 1}, {"a": 1}, {"a": 2}]
+    assert extract_client._dedup_rows(rows) == [{"a": 1}, {"a": 2}]
