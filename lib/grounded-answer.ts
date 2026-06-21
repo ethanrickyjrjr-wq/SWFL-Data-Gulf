@@ -31,6 +31,18 @@ export const FORMAT_RULE =
 export const SPEAK_LINE =
   "\n\nSpeak like a knowledgeable friend. Give a real, useful answer from the data. No markdown. Never say 'master', 'brain', 'grounded data', 'payload', or 'grain'.";
 
+/** Kills the "tell me which place you highlighted first" punt. The model has real data in
+ *  front of it — it must ANSWER at the grain it holds, then OFFER to go finer. Never gate
+ *  the answer on the user naming a place. Shared by every grounded surface. */
+export const ANSWER_FIRST =
+  "\n\nANSWER FIRST — NEVER PUNT FOR A LOCATION. You already have real data in front of you. " +
+  "Answer the question NOW at the grain you hold: if the user names no specific place, answer for " +
+  "this report's own scope (region-wide if that is what you have) and give the actual numbers. Only " +
+  "AFTER you have answered may you offer to narrow — e.g. 'want this for a specific ZIP or town? I can " +
+  "pull that.' Never ask the user to name a place, or to 'point you at' which place they highlighted, " +
+  "before you answer; never make a place a precondition. If you produced a chart, your words must " +
+  "describe THAT chart — never ask what it shows.";
+
 /**
  * The follow-up-chips tail, gated on `selectionType` exactly as the popup does
  * (the report-level dock and the email auto-reply render no chips, so they spend
@@ -81,6 +93,7 @@ export function buildGroundedSystemPrompt(input: GroundedSystemPromptInput): str
       method: input.method ?? null,
     }) +
     SPEAK_LINE +
+    ANSWER_FIRST +
     followupsDirective
   );
 }

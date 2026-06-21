@@ -4,6 +4,7 @@ import {
   buildFollowupsDirective,
   FORMAT_RULE,
   SPEAK_LINE,
+  ANSWER_FIRST,
 } from "./grounded-answer";
 import { buildGroundingContext, type GroundingBlock } from "@/lib/highlighter/grounding";
 import { buildPlaceContext } from "@/lib/place-context";
@@ -49,6 +50,7 @@ test("buildGroundedSystemPrompt matches the canonical assembly (golden)", () => 
       method: null,
     }) +
     SPEAK_LINE +
+    ANSWER_FIRST +
     buildFollowupsDirective(selectionType);
 
   const actual = buildGroundedSystemPrompt({ fact, question, selectionType, blocks });
@@ -58,7 +60,10 @@ test("buildGroundedSystemPrompt matches the canonical assembly (golden)", () => 
 test("no selection_type → no follow-ups tail (email/dock path)", () => {
   const sys = buildGroundedSystemPrompt({ question: "flood risk in 33931?", blocks });
   expect(sys).not.toContain("⟦FOLLOWUPS⟧");
-  expect(sys.endsWith(SPEAK_LINE)).toBe(true);
+  // No followups tail → the prompt now ends with the ANSWER_FIRST directive (which sits
+  // right after SPEAK_LINE). SPEAK_LINE is still present, just no longer the last line.
+  expect(sys).toContain(SPEAK_LINE);
+  expect(sys.endsWith(ANSWER_FIRST)).toBe(true);
 });
 
 test("place pin fires for a named SWFL ZIP", () => {
