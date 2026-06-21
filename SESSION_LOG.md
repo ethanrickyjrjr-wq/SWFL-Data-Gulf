@@ -1,3 +1,10 @@
+## 2026-06-21 (main) — showcase Preview = in-place popup (was new-tab) [BUILT, gates green, HELD for push]
+
+- **Why:** on `/showcase` the "Preview →" did `window.open(_blank)` → dumped the visitor in a bare new tab (no AI pill, no way to build) — operator: "what the fuck is this." The standalone AI pill (`AppShell`/`AiBriefcasePill`) DOES render on `/showcase` (`shouldRenderStandalone` true), so keeping the preview ON the page means the build-pill stays right there.
+- **What:** `app/showcase/ShowcaseGrid.tsx` — Preview now opens an in-place modal (backdrop `bg-black/75` + blur, iframe of `/api/templates/render?slug=…`), dismiss by **clicking the backdrop or Escape**; body-scroll locked while open; `role=dialog`/`aria-modal`/close button. No navigation, no new tab.
+- **Gates:** eslint exit 0 · `next build` exit 0. Single isolated client component; no new deps.
+- **NOT done (flagged, not built):** the page's bottom "Ask the AI →" CTA still routes to `/ask` (a new page); could repoint to open the pill in place — offered as follow-up. Showcase product gaps from the walkthrough (AI not a card, emails not surfaced) still open.
+
 ## 2026-06-21 (main) — supercrawl4ai Phase 1: enhanced in-process crawl layer + #6/#10 riders [BUILT + tested; landed on main via a parallel session's push, NOT mine]
 
 - **What:** new `ingest/lib/supercrawl4ai.py` (269 lines) — enhanced crawl layer reusing `crawl4ai_client.py` core. `SuperConfig` (all powers default-off → byte-identical to old client), `fetch_super`, `fetch_many_super` (dispatcher-hardened + jitter + memory ceiling + dispatch telemetry), `fetch_tables` (deterministic zero-LLM table capture — the #9 star). `+ supercrawl4ai_bench.py` (prove-it benchmark, tiers 1–3 offline). Riders: **#10** in-process-only docstring + 400-reject server landmine in `crawl4ai_client.py` (+ correcting notes appended to the 06-20 audit docs — `CRAWL4AI_API_URL` now has zero live consumers); **#6** advisory `crawl4ai-doctor` preflight across all 7 crawl crons + hard-fail patchright smoke on the 4 stealth jobs; free-win `extract_client._chunk_text` ~10% overlap + `_dedup_rows` (no boundary row drops).
