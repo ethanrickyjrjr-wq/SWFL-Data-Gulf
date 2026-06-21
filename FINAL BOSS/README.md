@@ -20,16 +20,12 @@ touching any piece, because a later build depends on the exact names a earlier b
 5. **`05-funnel-arrival-and-takeover.md`** — the acquisition funnel: brand scrape → email → branded `/welcome` arrival → prospect→project bridge. Grounded in existing code. Read before building anything that touches the prospect/activation surface.
 6. **`06-convergence-and-journeys.md`** — the end-to-end convergence map: four journeys (J1–J4) traced through seams + gaps, the gap table, the W0–W3 wave sequence, and per-journey acceptance bars.
 
-## Status (2026-06-17)
+## Status
 
-| # | Title | State |
-|---|---|---|
-| 1 | Workspace Shell | ✅ **Built** — shell decomposition + §A/§D/§E/§F/§G/§I + foundation (HELD for push) |
-| 2 | Project-Aware AI | ✅ **Built** — digest + index + prompt engine + J2 wiring + §D/§E/§8/§9/G1 action surface (HELD for push) |
-| 3 | Signal Layer (invisible reporter) | 🟢 **Track A built** — `project_feed` + `outside-action` emit + P2 wire (HELD for push) · data-change cron = PR2 |
-| 4 | Editing + Live Refresh + Trash | ✅ **Built** — refresh/edit/trash routes + modal controls + retention sweep (HELD for push) |
-| — | Acquisition Funnel (05) | ✅ Grounded in existing code — read before touching prospect/activation |
-| — | Convergence + Journeys (06) | ✅ Map only — no code; sequences the journeys across pieces |
+> Per the rule below ("documentation, not status"), live status lives in the durable trackers, not here.
+> As of **2026-06-21**, FINAL BOSS Pieces 1–5 are all built and on `origin/main` (`4f42df31`;
+> `git log @{u}..HEAD` empty). The only open work is the prod-verify `*_verify` checks in the
+> `checks` ledger — see `_AUDIT_AND_ROADMAP/build-queue.md` and `node scripts/check.mjs list`.
 
 ## Rules of the road (do not skip)
 

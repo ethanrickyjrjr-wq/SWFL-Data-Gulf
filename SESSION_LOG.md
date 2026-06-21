@@ -1,3 +1,13 @@
+## 2026-06-21 (main) — orient + PUSH tangled WIP + board reconciled (operator: "no clue where we are / push / clean up")
+
+- **State found:** HEAD `4f42df31` == `origin/main` (0 ahead) — nothing *committed* was unpushed. All pending work was UNCOMMITTED WIP: two tangled streams + stray files. Verified everything (tests + diffs) before touching it; explicit-path staging only (RULE 1.5, no `git add -A`).
+- **PUSHED 2 clean commits:**
+  - `chore(ingest)` — crawl4ai handoff execution. `requirements.txt` 0.8.9→**0.9.0** (verified the installed version IS 0.9.0) + both Accela/PDF workflows now `pip install -r ingest/requirements.txt` (kills the `>=0.8.9` pin drift; one source of truth). `extract_client.py` rewired off the inert firecrawl path → crawl4ai-fetch→BeautifulSoup-strip→Haiku-JSON w/ token-aware chunking (generalizes crexi = C1; **zero prod callers**, no live risk). `crawl4ai_client.py` MemoryAdaptiveDispatcher+RateLimiter. Test tree moved `ingest/lib`→`ingest/tests/lib` + `pyproject testpaths=["ingest"]` (C2). **26 pytest pass.**
+  - `refactor(social)` — U2 Gap-1/Gap-2: extracted `lib/social/brain-fetch.ts` (`buildContentDeps`) + `lib/social/render-model.ts` (`composedPostToSocialModel`) VERBATIM from the cron; `run-schedules.mts` re-pointed (behavior-preserving; cron paused regardless). Removed 2 duplicate `__tests__/` test copies, kept the more-thorough co-located ones. **22 bun tests pass.**
+- **Stray `runs.json` (61KB `gh run list` dump) deleted — not committed.**
+- **BOARD RECONCILED (the "clean up" ask):** `build-queue.md` reconciliation note cited a **fabricated** "2,278-file commit `e9ad3fd`" (it's a 3-file hooks change) — rewritten. FINAL BOSS Pieces 1–4 flipped `[~]`→`[x]`, stale "HELD for push / commit pending push" stripped; **added the missing Piece 5** (Funnel Arrival, shipped `ed6199bd`+). Lines 46/48/56/57 "awaiting push" stripped. `FINAL BOSS/README.md` stale status table → tracker pointer. Umbrella note added: every remaining "PUSH HELD" marker is stale (HEAD==origin); the real gates are PROD-verify `*_verify` checks.
+- **Ledger:** opened `crawl4ai_native_extract_rewire` (C1 code shipped; live Crexi battle-test still pending before close). `crawl4ai_search_ladder_dead` (`data-readiness.ts:95` dead `/search`) untouched — separate RULE-1 fix.
+
 ## 2026-06-20 (main) — crawl4ai self-improvement research landed (3 checks resolved + prod bug found)
 
 - **Artifact:** `docs/audit/2026-06-20-crawl4ai/{research.md,HANDOFF.md}` — 7-lens workflow (code-probe + 5 WebFetch lenses + a live dogfood run of our own `fetch_page_markdown` against docs.crawl4ai.com). HANDOFF.md = action plan; research.md = verbatim-source proof. Docs + checks only this push; NO code changed.

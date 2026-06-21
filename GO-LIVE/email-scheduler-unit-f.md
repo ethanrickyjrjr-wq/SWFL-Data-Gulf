@@ -102,3 +102,13 @@ inert when unused — safe to leave applied. No data migration to undo.
 Until step 3, the workflow is **dispatch-only** — no scheduled runs, no failing-cron noise.
 The worker fails loud (`exit 1`) if `DIGEST_BROADCAST_SECRET` or `NEXT_PUBLIC_SITE_URL` is missing on a
 real run, so a misconfigured go-live is visible, never a silent half-send.
+
+
+─────────────────────────┬────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────┐
+  │           Var           │        Needed?         │                                          Value                                           │
+  ├─────────────────────────┼────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
+  │ OUTREACH_POSTAL_ADDRESS │ Required for live send │ your real business mailing address (e.g. SWFL Data Gulf, <street>, Fort Myers, FL 33901) │
+  ├─────────────────────────┼────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
+  │ OUTREACH_FROM_EMAIL     │ Optional               │ a @swfldatagulf.com sender; falls back to DIGEST_SENDER_ADDRESS if unset                 │
+  ├─────────────────────────┼────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Resend key              │ Already set            │ uses full_access (already in .env.local)                                            
