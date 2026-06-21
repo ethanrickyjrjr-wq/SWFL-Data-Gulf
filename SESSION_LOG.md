@@ -1,3 +1,11 @@
+## 2026-06-21 (main) — fix(ci): unblock the BUILD — eslint error in StandaloneBackBar froze every deploy (root of "still holes / still boxes") [PUSHED]
+
+- **THE root cause the operator kept hitting:** map fixes (SVG style, color-scale c0, /map stacking) were all on `main` but NONE were live — because the build was RED, so Vercel never deployed them. Prod stayed frozen on an OLD build = original black holes + original `/map` boxes. I'd been pushing into a broken pipeline and verifying nothing locally (no deps installed) — exactly what the pre-push gate / CI exist to stop.
+- **The breaker:** `components/nav/StandaloneBackBar.tsx:24` called `setState` inside `useEffect` → `react-hooks/set-state-in-effect` **error** → `bunx eslint .` exit 1 → CI `build` job fails AND `next build` (runs eslint) fails → no deploy. (Confirmed from the failed CI job log for `1bb9f78`.)
+- **Fix:** removed the effect+state from `StandaloneBackBar` — decide `router.back()` vs home at CLICK time (`window.history.length`). Removed a now-unused `eslint-disable` in `MapCanvas.tsx` (warning).
+- **VERIFIED LOCALLY THIS TIME** (installed deps): `bunx tsc --noEmit` 0 · `bunx eslint .` 0 · `bunx next build` compiles + TypeScript pass (only /charts prerender fails locally on missing SUPABASE_SERVICE_KEY — env present on Vercel, not a code issue).
+- **NEXT:** once green main deploys, ALL accrued fixes (no holes, /map stacked, cutout, zoom, back bar, mobile-fit) finally go live. Verify on the wire.
+
 ## 2026-06-21 (main) — fix(root): one-root fixes — every page fits on mobile + white-label pages get a "← Back" [PUSHED]
 
 - **Operator:** "homepage fits on phone, many other pages don't — find the ROOT and change every page at once. Also the one-page example has no working back button." (graphify CLI absent in this fresh container + graph gitignored → fell back to grep/Read per CLAUDE.md; confirmed there is ONE root: `app/layout.tsx` + `app/globals.css`, every page renders through it.)

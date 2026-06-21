@@ -201,7 +201,6 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [county, metric]);
 
   return (
