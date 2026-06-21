@@ -1,3 +1,9 @@
+## 2026-06-21 (main) — verify: deflection #1 + token #9 confirmed live on the DEPLOYED route; check closed [PUSHED]
+
+- After `04e6c4a7` deployed, hit the live route with the exact screenshot question. **In-app analyst (mode=analyst) 0/22** deflect-or-leak + **public (no mode) 0/5**, scored by the hardened `findDeflection`/`findLeak` AND eyeballed — every roll leads with the 400000 price + 2169 rent headline and MM/DD/YYYY dates. Deployed `/api/b/master?view=speak` (the MCP/connector channel): `_Freshness:_ as of 06/21/2026`, **zero raw SWFL tokens**.
+- Closed check `deflection_fix_live_verify`; appended the deployed gold proof to `verification/answer-proofs.jsonl` (endpoint `deployed:…`). The ~23×-declared deflection bug is, for the first time, proven fixed **on the wire** — not in a commit message.
+- Caveat (honest): one roll deflected during the deploy-propagation window (stale instance), clean post-propagation. Temp 1.0 means ~0%, not a mathematical hard 0.
+
 ## 2026-06-21 (main) — fix(assistant): kill the in-app + public deflection (#1) + raw-token leak (#9); one AI grounds everywhere; new verify-before-claim push gate [PUSHED]
 
 - **Why:** operator screenshot — the dock answered a region-wide "what's driving SWFL prices and rents" with "I don't have it at the regional level… here's what I can pull" (the deflection bug declared fixed ~23× and never observed live). Forensics + 5-roll live prod probe proved it deflects ~80% of the time (non-deterministic) AND leaks a raw YYYYMMDD token in the same payload.
