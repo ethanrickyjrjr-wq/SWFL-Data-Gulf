@@ -7,6 +7,16 @@ Three surfaces:
   fetch_many       — arun_many for INDEPENDENT parallel page fetches (e.g. detail pages).
   fetch_page_markdown / fetch_page_html
                    — simple sync helpers for static pages (no stealth needed).
+
+RUNTIME MODE — IN-PROCESS SDK ONLY (verified 2026-06-21). crawl4ai runs here only as the
+in-process Python SDK. There is NO live remote-server consumer: the former email data-readiness
+ladder (CRAWL4AI_API_URL -> /search) was replaced by Anthropic web_search on 2026-06-21 (commit
+32b4eb5b), and CRAWL4AI_API_URL is now referenced nowhere in the live tree.
+LANDMINE: stealth/interactive crawling can NEVER move to the 0.9.0 remote server. The server
+rejects js_code / js_code_before_wait / proxy / proxy_config / cookies / extra_args /
+simulate_user / magic over the network with HTTP 400 (deploy/docker/MIGRATION.md), and
+Crawl4aiSession.step depends on js_code_before_wait. Do not "consolidate onto the server".
+The enhanced surface (ingest/lib/supercrawl4ai.py) is also in-process SDK — same constraint.
 """
 from __future__ import annotations
 

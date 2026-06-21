@@ -169,3 +169,14 @@ Why #1 > #2: the bump is the named check, but the dead verification ladder is ac
 - `ingest/requirements.txt:16` pins `crawl4ai==0.8.9`.
 - GHA: `ingest-crexi-listings.yml:36` + `marketbeat-pdf-ingest.yml:41` use `"crawl4ai>=0.8.9"` (float to 0.9.0); lee-permits/collier/dbpr/news use `pip install -r ingest/requirements.txt` (pinned 0.8.9). lee-permits/collier install `patchright install chromium` separately; news uses `crawl4ai-setup` (no patchright). Accela GHA-IP CLOSED (run 27602909470); collier schedule HELD pending GHA probe.
 - C2: both test trees read; `ingest/tests/lib/test_crawl4ai_client.py:4-10` imports `lee_permits.scraper` (the coupling to decouple).
+
+---
+
+## CORRECTION (2026-06-21): remote-server path is dead; crawl4ai is in-process SDK only
+
+The "FIX THE DEAD REMOTE-SERVER PATH" finding (#1) shipped — `data-readiness.ts` moved to Anthropic
+`web_search` (commit `32b4eb5b`), and `CRAWL4AI_API_URL` is now consumed **nowhere** in the live
+tree. So the in-process-vs-remote-server split this doc describes no longer exists at runtime: it is
+**in-process SDK only**. The remaining value is the landmine — stealth can never move to the 0.9.0
+server (400-reject). #2–#5 also shipped. The #6–#11 tail was carried into
+`docs/superpowers/specs/2026-06-21-supercrawl4ai-design.md` (the supercrawl4ai enhanced layer).

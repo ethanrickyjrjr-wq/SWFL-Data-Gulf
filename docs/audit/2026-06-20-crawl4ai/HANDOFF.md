@@ -176,3 +176,15 @@ Full ranked table with effort/risk/confidence: `research.md` → "Prioritized ac
 1 (prod bug, diff-review) → 2 (bump, smallest named check) → 3 (dispatcher, cheap hardening) → 5 (test cleanup, independent) → 4 (extract rewire, needs Crexi battle-test) → 6 (GHA installs) → enhancements as capacity allows.
 
 Each piece: commit + SESSION_LOG entry + reconcile its check (`node scripts/check.mjs close <key> "<note>"` only on **prod evidence**, not "code looks right") + `node scripts/safe-push.mjs`. Stage explicit paths only — the tree has concurrent-session WIP.
+
+---
+
+## CORRECTION (2026-06-21): the remote-server row (#10 / §0 table) is now stale
+
+`CRAWL4AI_API_URL` is consumed **nowhere** in the live tree. The dead `/search` ladder (#1) was
+replaced by Anthropic `web_search` (commit `32b4eb5b`), which removed the last consumer. crawl4ai
+here is **in-process SDK only**; there is no remote-server consumer to document. The "remote HTTP
+server" mode row above survives only as a landmine: stealth/interactive crawling can never move to
+the 0.9.0 server (400-rejects `js_code`/`proxy`/`cookies` over the network). Canonical statement now
+lives in the `crawl4ai_client.py` module docstring + `docs/superpowers/specs/2026-06-21-supercrawl4ai-design.md`.
+Enhancements #6–#11 were taken forward in that spec + `docs/superpowers/plans/2026-06-21-supercrawl4ai-phase1.md`.
