@@ -32,14 +32,7 @@ export interface NavItem {
  * Reports points at `/r/search` because `/r/zip-report` is dynamic-only (no index).
  */
 export const NAV_GROUPS: NavItem[] = [
-  {
-    label: "Explore",
-    children: [
-      { label: "Search", href: "/r" },
-      { label: "Maps", href: "/map" },
-      { label: "ZIP Reports", href: "/r/search" },
-    ],
-  },
+  { label: "Search", href: "/r" },
   { label: "Charts", href: "/charts" },
   { label: "Showcase", href: "/showcase" },
   { label: "Projects", href: "/project" },

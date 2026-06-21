@@ -1,3 +1,8 @@
+## 2026-06-21 (main) — nav: collapse Explore dropdown (remove ZIP Reports + Maps); /map → renders Hero map instead of redirect [PUSHED]
+
+- `components/nav/nav-config.ts`: flattened Explore group — Search is now a top-level nav item, ZIP Reports and Maps removed (ZIP Reports was a duplicate of Search at /r/search; Maps is gone as standalone)
+- `app/map/page.tsx`: renders `<Hero />` (the dark interactive choropleth) instead of redirecting to /
+
 ## 2026-06-21 (main) — display-chokepoint hygiene: killed raw-float + override-machinery customer leaks (+ CI WALL); PDF back-fill; sentiment-badge chips; units-grouped key-metrics chart [PUSHED]
 
 - **Why (operator, live screenshots):** 6 customer-facing report defects. Probed each to the real file before touching (RULE 0.5). 5 fixed + walled; 2 paused on a foreign file.
