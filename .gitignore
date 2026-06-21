@@ -177,3 +177,8 @@ graphify-out/
 
 # Outreach campaign dry-run artifacts (rendered previews + run reports)
 outreach-runs/
+
+# cloud-secrets: ONLY the encrypted vault.enc is committed. The passphrase and any
+# decrypted/plaintext key material must NEVER be committed.
+cloud-secrets/.passphrase
+cloud-secrets/*.key

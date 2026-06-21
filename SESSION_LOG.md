@@ -1,3 +1,9 @@
+## 2026-06-21 (main) — cloud-secrets: encrypted key vault for phone/cloud Claude sessions [scaffold built; vault + push run by operator]
+
+- `cloud-secrets/setup.sh` + `README.md` added. Vault = AES-256 (openssl, PBKDF2 600k) tarball of `.env`, `.env.local`, `ingest/.env`, `ingest/.env.local`, `.dlt/secrets.toml`, `.dlt/config.toml` → `cloud-secrets/vault.enc`; `setup.sh` decrypts it at cloud-session boot from `$SECRETS_PASSPHRASE`. Only ciphertext is committed; passphrase held by operator (set once in the Claude cloud env config), never in git or transcript.
+- Auto-mode classifier (correctly) blocked the agent from bundling the full credential set + pushing, so the cred-touching build+commit+push is run by the operator in their own terminal. `BLS_API_KEY`/`FBI_CDE_API_KEY` skipped — gh-vault-only, unretrievable, not needed for phone dev.
+- Next: operator sets `SECRETS_PASSPHRASE` + setup command `bash cloud-secrets/setup.sh` + network=Full in the Claude cloud environment; opens a phone session; verifies the 6 files land on disk.
+
 ## 2026-06-21 (main) — B2: grouped Explore ▾ nav + teal active-marker + per-page breadcrumbs [BUILT, gates green, HELD for push approval]
 
 - **What (SITE FLOW Wave 2, B2):** flat 4-tab app bar → grouped `Explore ▾ · Charts · Showcase · Projects · Alerts`. `Explore ▾` folds the tail (Search `/r` · Maps `/map` · ZIP Reports `/r/search`); `/data-intel` stays out (B6). Static 2px **teal** active-marker (system color; sentiment green/coral/gold stay reserved for data direction) — `Explore ▾` lights when any child is active. Mobile drawer mirrors the groups (filled `bg-white/10` active row). Disclosure clones the account-menu mechanics (button + Caret + shared outside-click/Escape effect; NOT `role=menu`).
