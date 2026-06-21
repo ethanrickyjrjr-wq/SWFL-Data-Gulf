@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { HOME_MAP_DATA as DATA, type MetricKey } from "@/lib/landing/home-map-data";
 
 // Lee County ZIPs (source of truth: fixtures/swfl-zip-county.json)
@@ -51,7 +50,6 @@ interface Props {
 
 export function MapCanvas({ county = "both", metric = "flood", className = "" }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const [tooltip, setTooltip] = useState<{
     zip: string;
     place: string;
@@ -157,7 +155,11 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
             group.querySelectorAll<SVGPathElement>("path").forEach((p) => (p.style.filter = ""));
             setTooltip(null);
           });
-          group.addEventListener("click", () => router.push(`/z/${zip}`));
+          // Full page load (not router.push) so mobile pinch-zoom on the map
+          // resets to fit-width on the ZIP page instead of opening zoomed-in.
+          group.addEventListener("click", () => {
+            window.location.href = `/z/${zip}`;
+          });
         });
 
         // Single-county views: zoom the viewBox to just that county's ZIPs so

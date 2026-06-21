@@ -1,3 +1,10 @@
+## 2026-06-21 (main) — fix(map): ZIP page opened pinch-zoomed — map click was SPA nav; use full load to reset zoom [PUSHED]
+
+- **Operator:** "zoom in on the map, click a zip → zip page opens zoomed in. Want it not zoomed."
+- **Cause:** map ZIP clicks used `router.push("/z/…")` (client-side SPA nav), which preserves mobile Safari's pinch-zoom (visual viewport). A full document load resets zoom to fit-width.
+- **Fix:** map-click navigations now do a hard nav `window.location.href = "/z/${zip}"` — `components/charts/MapCanvas.tsx` (/map) and `components/landing/Hero.tsx` `selectZip` (homepage). Removed now-unused `useRouter` in MapCanvas; Hero keeps `router` for the search handler (search→/z or /ask stays SPA). 
+- Pushed to branch + main.
+
 ## 2026-06-21 (main) — fix(home): kill "big area of nothing" — hidden rail-detail reserved layout space on mobile [PUSHED]
 
 - **Operator:** "why is this such a big area of nothing?" (homepage, below "Select a ZIP code").

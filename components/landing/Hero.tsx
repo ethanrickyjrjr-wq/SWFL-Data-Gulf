@@ -161,7 +161,9 @@ export default function Hero() {
       host.querySelectorAll(".zip-group.selected").forEach((s) => s.classList.remove("selected"));
       zipEl(zip)?.classList.add("selected");
       fillRail(zip);
-      routerRef.current.push(`/z/${zip}`);
+      // Full page load (not router.push) so mobile pinch-zoom on the map resets
+      // to fit-width on the ZIP page instead of opening zoomed-in.
+      window.location.href = `/z/${zip}`;
     };
 
     // Filter pills + metric rows (present immediately — no SVG needed)
