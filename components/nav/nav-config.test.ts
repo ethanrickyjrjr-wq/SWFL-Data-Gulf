@@ -79,14 +79,20 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
     expect(NAV_GROUPS.map((n) => n.label)).toEqual([
       "Explore",
       "Charts",
+      "Maps",
       "Showcase",
       "Projects",
       "Alerts",
     ]);
   });
-  it("folds the long tail into Explore (Search/Maps/ZIP Reports)", () => {
+  it("keeps only Search under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
     const explore = NAV_GROUPS.find((n) => n.label === "Explore");
-    expect(explore?.children?.map((c) => c.href)).toEqual(["/r", "/map", "/r/search"]);
+    expect(explore?.children?.map((c) => c.href)).toEqual(["/r"]);
+  });
+  it("exposes Maps as a top-level leaf at /map", () => {
+    const maps = NAV_GROUPS.find((n) => n.label === "Maps");
+    expect(maps?.href).toBe("/map");
+    expect(maps?.children).toBeUndefined();
   });
   it("does NOT surface /data-intel anywhere (internal-only, B6)", () => {
     const allHrefs = (item: NavItem): string[] => [
@@ -115,12 +121,11 @@ describe("isItemActive (group lights when any child is active)", () => {
   it("lights Explore on any of its children", () => {
     expect(isItemActive("/r", explore)).toBe(true);
     expect(isItemActive("/r/env-swfl", explore)).toBe(true);
-    expect(isItemActive("/map", explore)).toBe(true);
-    expect(isItemActive("/r/search", explore)).toBe(true);
   });
-  it("does NOT light Explore on a marquee route", () => {
+  it("does NOT light Explore on a marquee route (incl. Maps, now top-level)", () => {
     expect(isItemActive("/charts", explore)).toBe(false);
     expect(isItemActive("/project/abc", explore)).toBe(false);
+    expect(isItemActive("/map", explore)).toBe(false);
   });
   it("lights a leaf marquee on its own path", () => {
     expect(isItemActive("/charts", charts)).toBe(true);
@@ -133,17 +138,25 @@ describe("isItemActive (group lights when any child is active)", () => {
 
 describe("activeChildHref (longest match wins in the dropdown)", () => {
   const children = NAV_GROUPS.find((n) => n.label === "Explore")!.children!;
-  it("lights ZIP Reports (not also Search) on /r/search", () => {
-    expect(activeChildHref("/r/search", children)).toBe("/r/search");
-  });
-  it("lights Search on a generic report path", () => {
+  it("lights Search on any report path under /r", () => {
+    expect(activeChildHref("/r", children)).toBe("/r");
     expect(activeChildHref("/r/env-swfl", children)).toBe("/r");
   });
-  it("lights Maps on /map", () => {
-    expect(activeChildHref("/map", children)).toBe("/map");
-  });
-  it("returns null when nothing under Explore matches", () => {
+  it("returns null when nothing under Explore matches (incl. top-level Maps)", () => {
     expect(activeChildHref("/charts", children)).toBe(null);
+    expect(activeChildHref("/map", children)).toBe(null);
     expect(activeChildHref(null, children)).toBe(null);
+  });
+  // The longest-match tiebreak is the whole reason this helper exists. Explore
+  // currently holds one child, so assert the tiebreak on a local fixture — that
+  // keeps it covered if a child under /r/* (e.g. a future ZIP Reports) returns,
+  // so it can't double-light Search.
+  it("picks the LONGEST matching child href", () => {
+    const multi: NavItem[] = [
+      { label: "Search", href: "/r" },
+      { label: "ZIP Reports", href: "/r/search" },
+    ];
+    expect(activeChildHref("/r/search", multi)).toBe("/r/search");
+    expect(activeChildHref("/r/env-swfl", multi)).toBe("/r");
   });
 });

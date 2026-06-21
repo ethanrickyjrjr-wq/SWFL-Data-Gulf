@@ -1,3 +1,11 @@
+## 2026-06-21 (main) — fix(test): realign nav-config tests with shipped nav (Maps top-level, Explore=Search) [PUSHED]
+
+- **Bug:** `components/nav/nav-config.test.ts` failed 5/24 even in isolation on `main` — a genuine red, not a leak.
+- **Cause:** commits `7a37725` + `b013ad2` deliberately changed the nav (Maps promoted from the Explore dropdown to a static top-level tab; Explore collapsed to just Search `/r`; ZIP Reports `/r/search` retired) but the co-located tests were never updated — they still asserted the old B2 layout (`Explore = [/r,/map,/r/search]`). Source is truth; the tests rotted.
+- **Fix (test-only):** updated the 5 stale assertions to current `NAV_GROUPS` — top-level order now includes Maps; Explore holds only Search; added a Maps-is-top-level-leaf check; `isItemActive`/`activeChildHref` no longer expect `/map` or `/r/search` under Explore. Kept the longest-match tiebreak covered via a LOCAL multi-child fixture (so the helper stays tested if a `/r/*` child returns). Did NOT touch `nav-config.ts` (a concurrent session may be editing it) — note: its header comment (lines 28-32) still describes the old "Search/Maps/ZIP Reports fold into Explore" layout and is now stale.
+- **Gates:** `bun test components/nav/nav-config.test.ts` 24/0 (was 19/5) · full subset `lib app components refinery` **3460/0** · tsc 0 · eslint 0.
+- **Recurring-breakage note (operator):** this red recurs because nav structure changes ship without updating the co-located deterministic tests in the SAME commit. The tests are correct guards — the fix is "edit NAV_GROUPS → edit nav-config.test.ts together," not delete the tests.
+
 ## 2026-06-21 (main) — feat(nav): reset mobile pinch-zoom on EVERY in-app navigation (global) [PUSHED]
 
 - **Operator:** "any click to another page should reset the pinch-in to regular screen."
