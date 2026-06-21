@@ -63,6 +63,35 @@ function scopeLabel(digest: ProjectDigest): string {
   return digest.scope.place ?? digest.scope.zip ?? digest.title;
 }
 
+/**
+ * Start-here prompts for a project with NOTHING filed yet (`itemCount === 0`). EVERY
+ * situational candidate in `openProjectCandidates` requires content the project doesn't
+ * have (fresh data, a filed metric gone stale, a feed signal, prior activity…), and the
+ * static project floor copy ("…since I last looked", "turn this project into a one-pager")
+ * presumes content too — so at minute zero the engine used to emit a list that reads as
+ * nonsense for a brand-new project (the empty-state hole every project starts in). These
+ * instead invite the user to bring data IN, scoped to the project's place ONLY when it
+ * carries a real one (place/zip from a schedule or a place-named title via inferScope —
+ * NEVER `scopeLabel`'s title fallback, which would say "Pull the latest Test market
+ * data"). Self-contained + answerable by the project/region analyst grounding (the answer
+ * path correctly tells the analyst "nothing filed in it yet").
+ */
+function emptyProjectPrompts(digest: ProjectDigest): string[] {
+  const place = digest.scope.place ?? digest.scope.zip;
+  if (place) {
+    return [
+      `Pull the latest ${place} market data into this project`,
+      `What's the bottom line on ${place} right now?`,
+      `Add flood risk for ${place} to this project`,
+    ];
+  }
+  return [
+    "Pull SWFL housing prices and rents into this project",
+    "What's the bottom line on SWFL right now?",
+    "Add flood risk for a ZIP to this project",
+  ];
+}
+
 /** Ordered, de-duplicated situational prompts for an OPEN project. */
 function openProjectCandidates(input: PromptEngineInput, digest: ProjectDigest): string[] {
   const out: string[] = [];
@@ -196,6 +225,19 @@ export function projectPrompts(input: PromptEngineInput): ProjectPrompts {
   }
 
   const digest = input.digest;
+
+  // Empty project (nothing filed yet): the situational signals all require content and
+  // the static floor copy presumes content — both are nonsense at minute zero. Emit
+  // start-here prompts that bring data IN. This is the empty-state branch the whole
+  // project-aware stack (digest, context bus, answer grounding) shipped WITHOUT — the
+  // first thing every new project showed was a floor written for a populated one.
+  if (digest.itemCount === 0) {
+    return {
+      prompts: emptyProjectPrompts(digest),
+      offer: createSuggestion({ kind: "project", projectId: digest.projectId }),
+    };
+  }
+
   // Situational candidates, then the static project floor so we always reach 3.
   const floor = promptsForPage({ kind: "project", projectId: digest.projectId }, visits);
   const prompts = pickFirst([...openProjectCandidates(input, digest), ...floor], SITUATIONAL_LIMIT);

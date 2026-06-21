@@ -95,13 +95,13 @@ const REPORT_PROMPTS = [
   "Pull the key numbers into a one-pager",
 ];
 
-// The standalone pill chat (BriefcaseChat → /api/assistant, outside/project context) is
-// CONTEXT-FREE: it sends only the prompt text + the region-wide master read. It does
-// NOT receive which of the charts on screen the user is looking at — so a charts prompt
-// must be SELF-CONTAINED. Name the SWFL subject it's about; never a bare on-screen
-// referent ("this trend", "this now", "these areas"). A deictic prompt here is
-// unanswerable: the analyst has no "this" to resolve, so it answers blind or punts —
-// the exact bug suggestions.ts already guards ("What's driving our freshness token").
+// The standalone pill chat (BriefcaseChat → /api/assistant) DOES send context now —
+// `getExtraBody` ships the page + open-project scope/contents + briefcase digest via
+// `describePage` (Piece 2 §D). It is NOT context-free. BUT that context is page-LEVEL: it
+// does NOT include WHICH of the charts on screen the user is looking at. So a charts
+// prompt must still be SELF-CONTAINED — name the SWFL subject it's about; never a bare
+// on-screen referent ("this trend", "this now", "these areas"), which the analyst has no
+// way to resolve and would answer blind or punt on (the bug suggestions.ts also guards).
 // Each prompt below is verified answerable by the region-wide analyst grounding
 // (master + corridor rents): names prices/rents/market direction, resolves no deixis.
 const CHARTS_PROMPTS = [
