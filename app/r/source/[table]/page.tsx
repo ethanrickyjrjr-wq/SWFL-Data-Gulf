@@ -10,6 +10,8 @@ import { HighlighterLayer } from "../../../../components/highlighter/Highlighter
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
 import { HighlighterProvider } from "../../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
+import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
+import { sourceTrail } from "@/lib/nav/breadcrumbs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -198,6 +200,7 @@ function Shell({
   const highlighterEnabled = highlighterUiEnabled();
   const content = (
     <>
+      <Breadcrumbs trail={sourceTrail(label)} />
       <ReportHeader title={label}>
         <p className="mt-3 font-mono text-sm text-gray-400">{table}</p>
       </ReportHeader>

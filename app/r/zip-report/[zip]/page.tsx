@@ -28,6 +28,8 @@ import {
 } from "../../_components/location-ui";
 import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
+import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
+import { zipReportTrail } from "@/lib/nav/breadcrumbs";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 import { MetroAreaChart } from "../../../../components/charts";
@@ -178,6 +180,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const pageContent = (
     <>
+      <Breadcrumbs trail={zipReportTrail(primaryPlace, zip)} />
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <ReportHeader title={headerTitle}>
         <dl className="mt-4 flex flex-wrap gap-5 text-sm">

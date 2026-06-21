@@ -23,6 +23,8 @@ import {
 } from "../_components/report-shell";
 import { MetricsTable } from "../_components/metrics-table";
 import { ColorLegend } from "../_components/color-legend";
+import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
+import { reportTrail } from "@/lib/nav/breadcrumbs";
 import { ReportChart } from "../../../components/charts/ReportChart";
 import { HighlighterLayer } from "../../../components/highlighter/HighlighterLayer";
 import { HighlighterProvider } from "../../../lib/highlighter/context";
@@ -169,6 +171,7 @@ export default async function ReportPage({ params }: PageProps) {
 
   const pageContent = (
     <>
+      <Breadcrumbs trail={reportTrail(display.title)} />
       <ReportHeader title={display.title}>
         <p className="mt-3 max-w-3xl text-base leading-7 text-gray-300">{display.scope}</p>
         <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">

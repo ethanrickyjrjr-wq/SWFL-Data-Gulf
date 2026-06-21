@@ -9,6 +9,8 @@ import { HighlighterLayer } from "../../../../components/highlighter/Highlighter
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
 import { HighlighterProvider } from "../../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
+import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
+import { methodTrail } from "@/lib/nav/breadcrumbs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,6 +44,7 @@ function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) 
 
   const content = (
     <>
+      <Breadcrumbs trail={methodTrail(entry.label)} />
       <ReportHeader title={entry.label}>
         <p className="mt-3 font-mono text-sm text-gray-400">{metric}</p>
         <p className="mt-4 max-w-3xl text-base leading-7 text-gray-300">{entry.measures}</p>

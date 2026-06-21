@@ -12,21 +12,38 @@ import type { User } from "@supabase/supabase-js";
 
 export interface NavItem {
   label: string;
-  href: string;
+  /** Present on a leaf (a real destination) and on simple top-level tabs. A pure
+   *  group HEADER (Explore) has no href of its own — it only opens its children. */
+  href?: string;
+  /** Present on a GROUP (Explore). The disclosure renders these as the dropdown. */
+  children?: NavItem[];
 }
 
 /**
- * Primary app tabs — shown in the solid app-variant bar, and to logged-out
- * visitors as proof-of-product (every route here is public per middleware.ts; only
- * /project* is auth-gated, and its page handles the redirect). B1 ships these FLAT;
- * B2 turns them into the grouped `Explore ▾` disclosure. Labels are plain verbs/nouns
+ * Primary app nav — shown in the solid app-variant bar, and to logged-out visitors
+ * as proof-of-product (every route here is public per middleware.ts; only /project*
+ * is auth-gated, and its page handles the redirect). Labels are plain verbs/nouns
  * (NN/g: unfamiliar nomenclature is a top cause of navigation cognitive strain).
+ *
+ * B2 grouped the flat tail under `Explore ▾` so the bar stays ~5 items, not a flat
+ * row of every surface. Operator decision (Option A): the marquees (Charts, Showcase,
+ * Projects, Alerts) stay top-level; the long tail (Search, Maps, ZIP Reports) folds
+ * into Explore. `/data-intel` is deliberately NOT here (internal-only — B6). ZIP
+ * Reports points at `/r/search` because `/r/zip-report` is dynamic-only (no index).
  */
 export const NAV_GROUPS: NavItem[] = [
-  { label: "Search", href: "/r" },
+  {
+    label: "Explore",
+    children: [
+      { label: "Search", href: "/r" },
+      { label: "Maps", href: "/map" },
+      { label: "ZIP Reports", href: "/r/search" },
+    ],
+  },
   { label: "Charts", href: "/charts" },
   { label: "Showcase", href: "/showcase" },
   { label: "Projects", href: "/project" },
+  { label: "Alerts", href: "/alerts" },
 ];
 
 /**
@@ -73,4 +90,30 @@ export function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(href + "/");
+}
+
+/**
+ * Active test for a nav ITEM (leaf or group). A group (Explore) is active when the
+ * path sits under ANY of its children — so standing on `/map` lights the `Explore ▾`
+ * marker even though Maps lives inside the dropdown. A leaf falls back to `isActive`.
+ */
+export function isItemActive(pathname: string | null, item: NavItem): boolean {
+  if (item.children?.length) return item.children.some((c) => isItemActive(pathname, c));
+  return item.href ? isActive(pathname, item.href) : false;
+}
+
+/**
+ * Inside an open group dropdown, return the single child href that should read as
+ * active — the LONGEST matching href wins. Without this, `/r/search` would light both
+ * "Search" (`/r`) and "ZIP Reports" (`/r/search`), since the former is a prefix of
+ * the latter. Returns null when no child matches.
+ */
+export function activeChildHref(pathname: string | null, children: NavItem[]): string | null {
+  let best: string | null = null;
+  for (const c of children) {
+    if (c.href && isActive(pathname, c.href) && (!best || c.href.length > best.length)) {
+      best = c.href;
+    }
+  }
+  return best;
 }

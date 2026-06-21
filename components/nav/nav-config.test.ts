@@ -1,6 +1,15 @@
 import { describe, it, expect } from "bun:test";
 import type { User } from "@supabase/supabase-js";
-import { NAV_GROUPS, SHELL_HIDDEN_PREFIXES, isHiddenPath, homeHref, isActive } from "./nav-config";
+import {
+  NAV_GROUPS,
+  SHELL_HIDDEN_PREFIXES,
+  isHiddenPath,
+  homeHref,
+  isActive,
+  isItemActive,
+  activeChildHref,
+  type NavItem,
+} from "./nav-config";
 
 /**
  * Pure nav-config logic — the cross-build seam B1 exposes (and B2/B4/B5 extend).
@@ -63,14 +72,76 @@ describe("homeHref (B4 seam)", () => {
   });
 });
 
-describe("NAV_GROUPS (primary tabs)", () => {
-  it("carries the four public app surfaces in order", () => {
-    expect(NAV_GROUPS.map((n) => n.href)).toEqual(["/r", "/charts", "/showcase", "/project"]);
+describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
+  it("carries the top-level marquees + Explore group in order", () => {
+    expect(NAV_GROUPS.map((n) => n.label)).toEqual([
+      "Explore",
+      "Charts",
+      "Showcase",
+      "Projects",
+      "Alerts",
+    ]);
   });
-  it("every item has a label and an absolute href", () => {
-    for (const item of NAV_GROUPS) {
+  it("folds the long tail into Explore (Search/Maps/ZIP Reports)", () => {
+    const explore = NAV_GROUPS.find((n) => n.label === "Explore");
+    expect(explore?.children?.map((c) => c.href)).toEqual(["/r", "/map", "/r/search"]);
+  });
+  it("does NOT surface /data-intel anywhere (internal-only, B6)", () => {
+    const allHrefs = (item: NavItem): string[] => [
+      ...(item.href ? [item.href] : []),
+      ...(item.children ?? []).flatMap(allHrefs),
+    ];
+    const everyHref = NAV_GROUPS.flatMap(allHrefs);
+    expect(everyHref).not.toContain("/data-intel");
+  });
+  it("every LEAF has a label and an absolute href; every GROUP has children", () => {
+    const check = (item: NavItem) => {
       expect(item.label.length).toBeGreaterThan(0);
-      expect(item.href.startsWith("/")).toBe(true);
-    }
+      if (item.children?.length) {
+        item.children.forEach(check);
+      } else {
+        expect(item.href?.startsWith("/")).toBe(true);
+      }
+    };
+    NAV_GROUPS.forEach(check);
+  });
+});
+
+describe("isItemActive (group lights when any child is active)", () => {
+  const explore = NAV_GROUPS.find((n) => n.label === "Explore")!;
+  const charts = NAV_GROUPS.find((n) => n.label === "Charts")!;
+  it("lights Explore on any of its children", () => {
+    expect(isItemActive("/r", explore)).toBe(true);
+    expect(isItemActive("/r/env-swfl", explore)).toBe(true);
+    expect(isItemActive("/map", explore)).toBe(true);
+    expect(isItemActive("/r/search", explore)).toBe(true);
+  });
+  it("does NOT light Explore on a marquee route", () => {
+    expect(isItemActive("/charts", explore)).toBe(false);
+    expect(isItemActive("/project/abc", explore)).toBe(false);
+  });
+  it("lights a leaf marquee on its own path", () => {
+    expect(isItemActive("/charts", charts)).toBe(true);
+    expect(isItemActive("/r", charts)).toBe(false);
+  });
+  it("is false for a null path", () => {
+    expect(isItemActive(null, explore)).toBe(false);
+  });
+});
+
+describe("activeChildHref (longest match wins in the dropdown)", () => {
+  const children = NAV_GROUPS.find((n) => n.label === "Explore")!.children!;
+  it("lights ZIP Reports (not also Search) on /r/search", () => {
+    expect(activeChildHref("/r/search", children)).toBe("/r/search");
+  });
+  it("lights Search on a generic report path", () => {
+    expect(activeChildHref("/r/env-swfl", children)).toBe("/r");
+  });
+  it("lights Maps on /map", () => {
+    expect(activeChildHref("/map", children)).toBe("/map");
+  });
+  it("returns null when nothing under Explore matches", () => {
+    expect(activeChildHref("/charts", children)).toBe(null);
+    expect(activeChildHref(null, children)).toBe(null);
   });
 });

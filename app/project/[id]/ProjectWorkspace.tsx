@@ -13,6 +13,8 @@ import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types"
 import { withConfirmed, withoutConfirmed } from "@/lib/signals/confirmed-values";
 import type { FeedRow } from "@/lib/project/feed";
 import { deriveProjectName } from "@/lib/project/derive-name";
+import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
+import { projectTrail } from "@/lib/nav/breadcrumbs";
 import { ProjectAiContextBridge } from "./workspace/ProjectAiContextBridge";
 import { UploadDrop } from "@/components/project/UploadDrop";
 import { ProjectTitle } from "./workspace/ProjectTitle";
@@ -451,6 +453,7 @@ export function ProjectWorkspace({
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <ProjectAiContextBridge digest={digest} />
+      <Breadcrumbs trail={projectTrail(title || deriveProjectName(items))} />
 
       {seed && (
         <div className="mb-6 rounded-xl border border-[#00d4aa]/40 bg-[#00d4aa]/10 p-4">

@@ -8,7 +8,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 import { LoginModal } from "@/components/landing/LoginModal";
-import { NAV_GROUPS, homeHref, isActive, isHiddenPath } from "./nav-config";
+import {
+  NAV_GROUPS,
+  homeHref,
+  isActive,
+  isItemActive,
+  activeChildHref,
+  isHiddenPath,
+} from "./nav-config";
 
 /**
  * THE one auth-aware navigation shell, mounted once in the root layout in place of
@@ -24,7 +31,15 @@ import { NAV_GROUPS, homeHref, isActive, isHiddenPath } from "./nav-config";
  * re-exported below so the README seam resolves from "@/components/nav/SiteShell".
  */
 
-export { NAV_GROUPS, homeHref, SHELL_HIDDEN_PREFIXES, isActive, isHiddenPath } from "./nav-config";
+export {
+  NAV_GROUPS,
+  homeHref,
+  SHELL_HIDDEN_PREFIXES,
+  isActive,
+  isItemActive,
+  activeChildHref,
+  isHiddenPath,
+} from "./nav-config";
 
 /** Sign the visitor out, then send them home. Shared by both variants. */
 async function signOut() {
@@ -290,17 +305,28 @@ function AppBar({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const barRef = useRef<HTMLElement>(null);
 
   const closeAccount = useCallback(() => setAccountOpen(false), []);
+  const closeExplore = useCallback(() => setExploreOpen(false), []);
 
+  // One outside-click / Escape listener for BOTH bar disclosures (account + Explore).
+  // Clicking inside the bar never closes via this path (barRef contains the target);
+  // opening one trigger explicitly closes the other (see the toggle handlers) so the
+  // two popovers can't stack open.
+  const anyOpen = accountOpen || exploreOpen;
   useEffect(() => {
-    if (!accountOpen) return;
+    if (!anyOpen) return;
+    function closeAll() {
+      setAccountOpen(false);
+      setExploreOpen(false);
+    }
     function onPointerDown(e: PointerEvent) {
-      if (barRef.current && !barRef.current.contains(e.target as Node)) closeAccount();
+      if (barRef.current && !barRef.current.contains(e.target as Node)) closeAll();
     }
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") closeAccount();
+      if (e.key === "Escape") closeAll();
     }
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKey);
@@ -308,7 +334,7 @@ function AppBar({
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [accountOpen, closeAccount]);
+  }, [anyOpen]);
 
   const email = user?.email ?? "";
   const initial = (email[0] ?? "?").toUpperCase();
@@ -334,18 +360,67 @@ function AppBar({
           <nav aria-label="Main" className="hidden md:block">
             <ul className="flex items-center gap-1">
               {NAV_GROUPS.map((item) => {
-                const active = isActive(pathname, item.href);
+                const active = isItemActive(pathname, item);
+                // A GROUP (Explore ▾) → disclosure button + dropdown of its children.
+                if (item.children?.length) {
+                  const childActive = activeChildHref(pathname, item.children);
+                  return (
+                    <li key={item.label} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountOpen(false);
+                          setExploreOpen((o) => !o);
+                        }}
+                        aria-expanded={exploreOpen}
+                        aria-controls="explore-menu"
+                        className={`relative flex items-center gap-1 rounded-lg px-3 py-2 text-sm transition-colors ${
+                          active ? "font-medium text-white" : "text-gray-300 hover:text-white"
+                        }`}
+                      >
+                        {item.label}
+                        <Caret open={exploreOpen} />
+                        {active && <ActiveMarker />}
+                      </button>
+                      {exploreOpen && (
+                        <div
+                          id="explore-menu"
+                          className="absolute left-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-white/10 bg-navy-dark p-1 shadow-2xl"
+                        >
+                          {item.children.map((c) => (
+                            <Link
+                              key={c.href}
+                              href={c.href ?? "#"}
+                              aria-current={c.href === childActive ? "page" : undefined}
+                              onClick={closeExplore}
+                              className={`block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10 hover:text-white ${
+                                c.href === childActive ? "text-white" : "text-gray-300"
+                              }`}
+                            >
+                              {c.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </li>
+                  );
+                }
+                // A leaf marquee (Charts / Showcase / Projects / Alerts).
                 return (
-                  <li key={item.href}>
+                  <li key={item.href} className="relative">
                     <Link
-                      href={item.href}
+                      href={item.href ?? "#"}
                       aria-current={active ? "page" : undefined}
-                      onClick={closeAccount}
-                      className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-                        active ? "text-white" : "text-gray-300 hover:text-white"
+                      onClick={() => {
+                        closeAccount();
+                        closeExplore();
+                      }}
+                      className={`relative block rounded-lg px-3 py-2 text-sm transition-colors ${
+                        active ? "font-medium text-white" : "text-gray-300 hover:text-white"
                       }`}
                     >
                       {item.label}
+                      {active && <ActiveMarker />}
                     </Link>
                   </li>
                 );
@@ -359,7 +434,10 @@ function AppBar({
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setAccountOpen((o) => !o)}
+                onClick={() => {
+                  setExploreOpen(false);
+                  setAccountOpen((o) => !o);
+                }}
                 aria-expanded={accountOpen}
                 aria-controls="account-menu"
                 aria-label="Account menu"
@@ -439,18 +517,55 @@ function AppBar({
           className="flex flex-col gap-1 border-t border-white/10 bg-navy-dark px-4 py-3 md:hidden"
         >
           <ul className="flex flex-col gap-1">
-            {NAV_GROUPS.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  aria-current={isActive(pathname, item.href) ? "page" : undefined}
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-white/10 hover:text-white"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {NAV_GROUPS.map((item) => {
+              // A GROUP → a non-collapsing labeled section with its children indented.
+              if (item.children?.length) {
+                const childActive = activeChildHref(pathname, item.children);
+                return (
+                  <li key={item.label}>
+                    <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+                      {item.label}
+                    </p>
+                    <ul className="flex flex-col gap-1">
+                      {item.children.map((c) => (
+                        <li key={c.href}>
+                          <Link
+                            href={c.href ?? "#"}
+                            aria-current={c.href === childActive ? "page" : undefined}
+                            onClick={() => setMobileOpen(false)}
+                            className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                              c.href === childActive
+                                ? "bg-white/10 text-white"
+                                : "text-gray-200 hover:bg-white/10 hover:text-white"
+                            }`}
+                          >
+                            {c.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              }
+              // A leaf marquee.
+              const active = isActive(pathname, item.href ?? "#");
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href ?? "#"}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                      active
+                        ? "bg-white/10 text-white"
+                        : "text-gray-200 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
           <div className="mt-2 border-t border-white/10 pt-3">
             {user ? (
@@ -502,6 +617,20 @@ function AppBar({
 }
 
 /* ── small shared pieces ──────────────────────────────────────────────────── */
+
+/**
+ * The "you-are-here" marker for the active app-bar tab: a static 2px teal underline.
+ * Teal is the SYSTEM/brand color — the sentiment colors (mangrove/coral/gold) stay
+ * reserved for data direction, so navigation never borrows them. Positioned against
+ * the tab's own padding box (`inset-x-3` matches the tab's `px-3`), this is the
+ * committed form of the hover-grown underline `HomeAnchor` uses, so the home bar and
+ * the app bar share one wayfinding grammar.
+ */
+function ActiveMarker() {
+  return (
+    <span className="absolute inset-x-3 -bottom-1 h-0.5 rounded-full bg-teal-primary" aria-hidden />
+  );
+}
 
 function HomeAnchor({ href, children }: { href: string; children: React.ReactNode }) {
   return (

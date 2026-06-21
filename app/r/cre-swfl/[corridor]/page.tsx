@@ -26,6 +26,8 @@ import { HighlighterLayer } from "../../../../components/highlighter/Highlighter
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
 import { HighlighterProvider } from "../../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
+import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
+import { corridorTrail } from "@/lib/nav/breadcrumbs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -87,14 +89,7 @@ export default async function CorridorPage({ params }: PageProps) {
 
   const pageContent = (
     <>
-      <nav className="mb-6">
-        <Link
-          href="/r/cre-swfl"
-          className="text-xs text-gray-400 transition-colors hover:text-white"
-        >
-          ← Commercial Real Estate
-        </Link>
-      </nav>
+      <Breadcrumbs trail={corridorTrail(displayN)} />
 
       <ReportHeader title={displayN}>
         <div className="mt-3 flex flex-wrap gap-2">
