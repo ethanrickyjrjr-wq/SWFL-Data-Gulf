@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { HOME_MAP_DATA as DATA, METRIC_ORDER, type MetricKey } from "@/lib/landing/home-map-data";
 
 /**
@@ -14,6 +15,13 @@ import { HOME_MAP_DATA as DATA, METRIC_ORDER, type MetricKey } from "@/lib/landi
 export default function Hero() {
   const rootRef = useRef<HTMLElement>(null);
   const svgHostRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  // Latest-router ref so the imperative (DOM-wired) search handlers below can
+  // navigate without making the heavy map-setup effect depend on `router`.
+  const routerRef = useRef(router);
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -162,12 +170,22 @@ export default function Hero() {
     root
       .querySelectorAll<HTMLElement>(".metric-row")
       .forEach((r) => on(r, "click", () => applyMetric(r.dataset.metric as MetricKey)));
+    // Search → a real cited answer (the hero's whole promise). A 5-digit ZIP opens
+    // its cited report; a town / neighborhood / free-text question goes to /ask,
+    // which runs the assistant and answers from the live lake. Clicking the map
+    // still highlights a ZIP for visual explore — this is the "get an answer" path.
     const search = byId("search-input") as HTMLInputElement | null;
+    const searchBtn = byId("search-btn");
+    const submitSearch = () => {
+      const val = (search?.value ?? "").trim();
+      if (!val) return;
+      const zip = /^\d{5}$/.test(val) ? val : "";
+      routerRef.current.push(zip ? `/r/zip-report/${zip}` : `/ask?q=${encodeURIComponent(val)}`);
+    };
     on(search, "keydown", (e) => {
-      if ((e as KeyboardEvent).key !== "Enter" || !search) return;
-      const val = search.value.trim();
-      if (zipEl(val)) selectZip(val);
+      if ((e as KeyboardEvent).key === "Enter") submitSearch();
     });
+    on(searchBtn, "click", submitSearch);
 
     // Fetch + inject the contractor SVG, then wire ZIP interactivity.
     fetch("/map/lee-collier.svg")
@@ -243,7 +261,7 @@ export default function Hero() {
               id="search-input"
               aria-label="Search by ZIP code"
             />
-            <button className="search-btn" type="button">
+            <button className="search-btn" type="button" id="search-btn">
               Search
             </button>
           </div>
