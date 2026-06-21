@@ -33,7 +33,7 @@ export function parseChatFrame(frame: string): ChatFrame | null {
 
 /**
  * Multi-turn SSE chat against a token-streaming endpoint (default
- * /api/welcome/chat). Owns the messages + busy state and the fetch-reader loop;
+ * /api/assistant). Owns the messages + busy state and the fetch-reader loop;
  * all dispatches happen inside the submit-triggered async callback — never an
  * effect body — so it's clear of react-hooks/set-state-in-effect.
  */
@@ -41,7 +41,7 @@ export interface UseChatStreamOptions {
   /** Called for EVERY parsed frame, including typed prelude frames (place/data).
    *  Lets a consumer paint cards without the hook needing to know about them. */
   onFrame?: (frame: ChatFrame) => void;
-  /** Extra fields merged into the POST body (e.g. { mode: "analyst" }). Spread
+  /** Extra fields merged into the POST body (e.g. { context: "public" }). Spread
    *  BEFORE `messages` so the real conversation array always wins on a key clash. */
   body?: Record<string, unknown>;
   /** Evaluated at EACH send (not once at mount) so live context — what page the
@@ -52,7 +52,7 @@ export interface UseChatStreamOptions {
 }
 
 export function useChatStream(
-  endpoint: string = "/api/welcome/chat",
+  endpoint: string = "/api/assistant",
   opts: UseChatStreamOptions = {},
 ) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);

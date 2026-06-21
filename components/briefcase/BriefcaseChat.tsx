@@ -16,17 +16,17 @@ import type { ProjectItem } from "@/lib/project/items";
 
 /**
  * The global Briefcase's standalone chat (off /r/*). Streams via the SHARED
- * useChatStream hook against /api/welcome/chat in ANALYST mode — a project-aware,
- * grounded SWFL market analyst (not the cold-lead funnel bot the public landing
- * page uses). Two capabilities ride on top of the stream:
+ * useChatStream hook against /api/assistant in the OUTSIDE/PROJECT context — a
+ * project-aware, grounded SWFL market analyst (not the cold-lead funnel voice the
+ * public /welcome landing page uses). Two capabilities ride on top of the stream:
  *   - "File this answer" — files the last answer as a `qa` item into the briefcase.
- *   - "Summarize…" — condenses the whole session into one filed item (server
- *     `mode:"summarize"`), deduping against what's already filed.
+ *   - "Summarize…" — condenses the whole session into one filed item (the assistant
+ *     `action:"summarize"`), deduping against what's already filed.
  *
  * `starterPrompts` are the context-aware prompts the panel computes from A-7
  * (page + anon revisit count); shown only until the first message.
  *
- * The free weekly cap is enforced server-side by /api/welcome/chat when
+ * The free weekly cap is enforced server-side by the conversation path when
  * WELCOME_CHAT_FREE_WEEKLY_CAP is set — no metering code lives here (A-6 step 3).
  */
 
@@ -73,8 +73,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
     }
   };
 
-  const { messages, setMessages, busy, send } = useChatStream("/api/welcome/chat", {
-    body: { mode: "analyst" },
+  const { messages, setMessages, busy, send } = useChatStream("/api/assistant", {
     onFrame,
     // The single capture point: every send (chip or typed) carries WHERE the user
     // is + WHAT'S in their briefcase, read live so it's current at click time. On a
@@ -87,12 +86,16 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       // projectPageContextForPath reads the live store + guards projectId===path (so a
       // stale digest from a previous project never leaks into this project's chat).
       return {
+        // The honest AssistantRequest contract, computed client-side (was the legacy
+        // {mode:"analyst"} the deleted shim mapped): PROJECT AI when a project is open,
+        // else OUTSIDE AI — never the public funnel voice (that's /welcome only).
+        context: projectId ? ("project" as const) : ("outside" as const),
+        // The open project's id → the engine's cookie-authed TIER B cross-project read
+        // (shallow, frozen, advisory index of the user's OTHER projects). Undefined off a
+        // project page → no read. RLS still scopes the read server-side regardless.
+        project_id: projectId ?? undefined,
         pageContext: describePage(path, projectPageContextForPath(path, getAiContext())),
         briefcase: briefcaseDigest(briefcase?.draftItems ?? []),
-        // The open project's id → the route's cookie-authed TIER B cross-project read
-        // (shallow, frozen, advisory index of the user's OTHER projects). Null off a
-        // project page → no read. RLS still scopes the read server-side regardless.
-        currentProjectId: projectId ?? undefined,
       };
     },
   });
@@ -169,10 +172,18 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
           content: "Summarize the important findings from this conversation so far.",
         },
       ];
-      const res = await fetch("/api/welcome/chat", {
+      const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "summarize", messages: convo, alreadyFiled }),
+        // summarize is an ACTION within outside/project, not a context (was the legacy
+        // {mode:"summarize"} the deleted shim mapped to action:"summarize").
+        body: JSON.stringify({
+          context: projectId ? "project" : "outside",
+          action: "summarize",
+          messages: convo,
+          alreadyFiled,
+          project_id: projectId ?? undefined,
+        }),
       });
       if (!res.ok) throw new Error("summarize failed");
       const text = (await drainSseText(res)).trim();

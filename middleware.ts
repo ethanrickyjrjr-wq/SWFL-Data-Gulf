@@ -6,21 +6,21 @@ import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 // in front of them. Two classes share this guard:
 //   (1) DATA reads (`/api/b/*`, `/api/mcp`, `/api/waitlist`, `/p/`) — break the
 //       trivial "loop the sitemap → clone the whole lake" scrape.
-//   (2) PAID-LLM streams (`/api/converse`, `/api/welcome/chat`) — these spend
-//       Anthropic tokens per call and are public + unauthenticated, so an
+//   (2) PAID-LLM streams (`/api/assistant`) — the one assistant endpoint spends
+//       Anthropic tokens per call and is public + unauthenticated, so an
 //       unthrottled loop is a direct billing-DoS. The per-IP burst here is the
-//       FIRST line; each route ALSO enforces an env-gated per-client weekly cap
-//       and bounds inbound content length. The authoritative cross-region ceiling
-//       remains a Vercel WAF dashboard rate-limit rule (see lib/rate-limit.ts +
-//       the PR runbook) — this code path is defense-in-depth, not the ceiling.
+//       FIRST line; the engine's path modules ALSO enforce an env-gated per-client
+//       weekly cap and bound inbound content length. The authoritative cross-region
+//       ceiling remains a Vercel WAF dashboard rate-limit rule (see lib/rate-limit.ts
+//       + the PR runbook) — this code path is defense-in-depth, not the ceiling.
+//       (Replaces the deprecated /api/converse + /api/welcome/chat shims, now deleted.)
 // These all bypass the Supabase auth client (they need no auth env vars).
 const RATE_LIMITED_PREFIXES = [
   "/api/b/",
   "/api/mcp",
   "/api/waitlist",
   "/p/",
-  "/api/converse",
-  "/api/welcome/chat",
+  "/api/assistant",
   "/api/claim",
 ];
 

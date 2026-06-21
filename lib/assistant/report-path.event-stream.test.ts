@@ -2,12 +2,23 @@
  * Pins the event-iteration branch of extractText() — the REAL production path
  * when @anthropic-ai/sdk v0.69.0 is installed (no .textStream on MessageStream).
  *
- * Kept in a separate file so its top-level mock.module() gets a fresh Bun
- * module registry, uncontaminated by route.test.ts's textStream mock.
+ * Relocated from app/api/converse/route.event-stream.test.ts (the /api/converse shim
+ * was deleted); it now drives the report path directly. Kept in a separate file so its
+ * top-level mock.module() gets a fresh Bun module registry, uncontaminated by
+ * report-path.test.ts's textStream mock.
  */
-import { test, expect, mock } from "bun:test";
+import { test, expect, mock, afterAll } from "bun:test";
+import * as meterModule from "@/lib/highlighter/meter";
 
-// Mock the anthropic module BEFORE importing route.
+// mock.module is process-global and mock.restore() does NOT undo it (Bun docs); snapshot
+// + re-install the real meter in afterAll so the stub below doesn't leak into later test
+// files (meter-userid, project-tools, …). See conversation-path.test.ts.
+const meterOrig = { ...meterModule };
+afterAll(() => {
+  mock.module("@/lib/highlighter/meter", () => meterOrig);
+});
+
+// Mock the anthropic module BEFORE importing the path module.
 // Returns a stream object that is async-iterable over MessageStreamEvent
 // shapes — no .textStream property — forcing extractText() into branch (2).
 mock.module("@/refinery/agents/anthropic.mts", () => ({
@@ -38,19 +49,27 @@ mock.module("@/refinery/agents/anthropic.mts", () => ({
 
 mock.module("@/lib/highlighter/meter", () => ({
   recordUse: async () => 1,
+  recordUseForClient: async () => 1,
   recordAsk: async () => {},
+  actionCount: async () => 0,
   weeklyCount: async () => 0,
   capEnabled: () => false,
+  clientIdFromRequest: () => "cid-1",
 }));
 
-const { POST } = await import("./route");
+const { runReportPath } = await import("./report-path");
 
 test("streams via the event-iteration branch (real SDK shape, no textStream)", async () => {
-  const req = new Request("https://x/api/converse", {
+  const req = {
+    context: "outside" as const,
+    report_id: "master",
+    messages: [{ role: "user" as const, content: "flood risk?" }],
+  };
+  const request = new Request("https://x/api/assistant", {
     method: "POST",
-    body: JSON.stringify({ report_id: "master", question: "flood risk?" }),
+    body: JSON.stringify(req),
   });
-  const res = await POST(req);
+  const res = await runReportPath(request, req);
   expect(res.status).toBe(200);
   const body = await res.text();
 

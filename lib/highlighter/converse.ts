@@ -101,17 +101,21 @@ export async function streamConverse(
 
   let res: Awaited<ReturnType<typeof fetch>>;
   try {
-    res = await fetchImpl("/api/converse", {
+    res = await fetchImpl("/api/assistant", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      // The AssistantRequest contract, spoken directly (was the deleted /api/converse
+      // shim's mapping): report_id present → the engine's report-grounding path; the
+      // dock's single question becomes the one user turn. context:"outside" = OUTSIDE AI.
       body: JSON.stringify({
+        context: "outside",
         report_id: input.reportId,
         fact: input.fact,
         slug: input.slug,
         selection_type: input.selectionType,
         is_realtime: input.isRealtime,
         from_chip: input.fromChip,
-        question,
+        messages: [{ role: "user", content: question }],
       }),
     });
   } catch (e) {

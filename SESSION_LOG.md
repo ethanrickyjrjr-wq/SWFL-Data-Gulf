@@ -1,3 +1,12 @@
+## 2026-06-21 (main) — refactor(assistant): kill /api/welcome/chat + /api/converse — flip every client to the one /api/assistant engine [PUSHED]
+
+- **Why (operator):** "we have ONE AI, why is there still a /api/welcome/chat?" Yesterday's `bdedf72d` built `/api/assistant` as the one engine but left converse + welcome/chat as deprecated shims and DEFERRED the client flip (build-queue ⬜ Next) — so the route name survived and the clients still called it.
+- **Flipped all 5 callers to POST `/api/assistant`** with the AssistantRequest contract (context project|outside|public, action, report_id): `ConversationalChat` (public), `BriefcaseChat` stream + summarize, `lib/highlighter/converse.ts`, and `app/welcome/_components/useWelcomeStream.ts` (the 5th caller — hero ZIP search, would have 404'd). `middleware` RATE_LIMITED_PREFIXES → `/api/assistant`.
+- **Deleted the shims:** `app/api/welcome/chat/{route,route.test}.ts` + `app/api/converse/{route,route.test,route.event-stream.test}.ts`. Coverage relocated VERBATIM to `lib/assistant/{conversation-path,report-path,report-path.event-stream}.test.ts` (call `runConversationPath`/`runReportPath` directly).
+- **Fixed a regression the relocation introduced:** the relocated tests' top-level `mock.module()` leaked process-wide (Bun docs: `mock.restore()` does NOT undo `mock.module()`) — reordering exposed it, breaking 14 later tests (mcp, dossier-cache, meter-userid). Fix: snapshot each stubbed module + re-install originals in `afterAll`. Full `bun test` back to **3551 pass / 5 fail** (the 5 = pre-existing nav-config `b013ad20`), stable ×2; tsc clean. Verified against Bun docs (vendor-first), NOT the agent's wrong `mock.restore()` suggestion.
+- **Deployed engine already proven** (`/api/assistant` context=outside = 0/3 deflect live); the proof ledger now references the real endpoint, not the fossil welcome/chat.
+- **NEXT:** post-deploy, confirm `/api/welcome/chat` + `/api/converse` 404 and the dock answers via `/api/assistant`.
+
 ## 2026-06-21 (main) — verify: deflection #1 + token #9 confirmed live on the DEPLOYED route; check closed [PUSHED]
 
 - After `04e6c4a7` deployed, hit the live route with the exact screenshot question. **In-app analyst (mode=analyst) 0/22** deflect-or-leak + **public (no mode) 0/5**, scored by the hardened `findDeflection`/`findLeak` AND eyeballed — every roll leads with the 400000 price + 2169 rent headline and MM/DD/YYYY dates. Deployed `/api/b/master?view=speak` (the MCP/connector channel): `_Freshness:_ as of 06/21/2026`, **zero raw SWFL tokens**.

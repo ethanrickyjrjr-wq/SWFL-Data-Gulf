@@ -23,7 +23,9 @@ const PROMPTS = [
  */
 export function ConversationalChat() {
   const pathname = usePathname();
-  const { messages, busy, send } = useChatStream("/api/welcome/chat", {
+  const { messages, busy, send } = useChatStream("/api/assistant", {
+    // The public /welcome funnel context of the one assistant (OUTSIDE AI, no auth).
+    body: { context: "public" },
     // Context-aware on /welcome too: tell the backend where the visitor landed.
     // (No briefcase here — the funnel page has no draft yet.)
     getExtraBody: () => ({ pageContext: describePage(pathname ?? "/welcome") }),

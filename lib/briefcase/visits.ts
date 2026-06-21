@@ -95,7 +95,7 @@ const REPORT_PROMPTS = [
   "Pull the key numbers into a one-pager",
 ];
 
-// The standalone pill chat (BriefcaseChat → /api/welcome/chat in "analyst" mode) is
+// The standalone pill chat (BriefcaseChat → /api/assistant, outside/project context) is
 // CONTEXT-FREE: it sends only the prompt text + the region-wide master read. It does
 // NOT receive which of the charts on screen the user is looking at — so a charts prompt
 // must be SELF-CONTAINED. Name the SWFL subject it's about; never a bare on-screen

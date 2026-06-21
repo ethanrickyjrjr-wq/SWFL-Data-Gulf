@@ -20,11 +20,17 @@ export function useWelcomeStream(demo: boolean) {
       if (!q) return;
       dispatch({ type: "submit", zip: q });
       try {
-        const url = demo ? "/api/welcome/demo" : "/api/welcome/chat";
+        // Live: the one assistant's public funnel context (was the deleted /api/welcome/chat
+        // shim, which mapped a no-`mode` body to context "public"). Demo stays its own route.
+        const url = demo ? "/api/welcome/demo" : "/api/assistant";
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: [{ role: "user", content: q }] }),
+          body: JSON.stringify(
+            demo
+              ? { messages: [{ role: "user", content: q }] }
+              : { context: "public", messages: [{ role: "user", content: q }] },
+          ),
         });
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();

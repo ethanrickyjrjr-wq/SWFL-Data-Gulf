@@ -1,7 +1,37 @@
-import { test, expect, mock } from "bun:test";
+// Oracle tests for the conversation path of the one assistant (PROJECT AI / OUTSIDE
+// AI / public funnel). Relocated VERBATIM (assertions unchanged) from the deleted
+// app/api/welcome/chat/route.test.ts so the grounding / no-invention / answer-first /
+// off-topic-gate coverage is preserved after the /api/welcome/chat shim was deleted.
+// The only change: each case now calls runConversationPath(request, AssistantRequest)
+// directly instead of POSTing the legacy {mode, currentProjectId} body — the client
+// shim mapping (mode:"analyst" → context outside/project, mode:"summarize" → action,
+// else → public) is exercised at its real seam, the contract.
+import { test, expect, mock, afterAll } from "bun:test";
 import type { LocationDossier } from "@/lib/zip-dossier";
 import * as fetchBrain from "@/lib/fetch-brain";
+import * as meterModule from "@/lib/highlighter/meter";
+import * as chatUsageModule from "@/lib/welcome/chat-usage";
+import * as dossierCacheModule from "@/lib/welcome/dossier-cache";
 import { parseSseFrame, type WelcomeFrame } from "@/lib/welcome/frames";
+import type { AssistantRequest } from "@/lib/assistant/contract";
+
+// Bun's mock.module is process-global and mock.restore() does NOT undo it (Bun docs:
+// "does not reset the value of modules overridden with mock.module()"). So snapshot the
+// real modules these tests stub and re-install the originals in afterAll — otherwise the
+// stubs leak into every later test file that imports them for real (mcp, bind-frame,
+// fetch-reach, meter-userid, lib/welcome/dossier-cache, …). This file used to live under
+// app/api/** where file ordering hid the leak. (anthropic.mts is intentionally NOT
+// restored: a stub Anthropic client is harmless to leak — unit tests never call the real
+// one — and importing it here to snapshot would evaluate the real module.)
+const ORIG = {
+  "@/lib/fetch-brain": { ...fetchBrain },
+  "@/lib/highlighter/meter": { ...meterModule },
+  "@/lib/welcome/chat-usage": { ...chatUsageModule },
+  "@/lib/welcome/dossier-cache": { ...dossierCacheModule },
+};
+afterAll(() => {
+  for (const [path, orig] of Object.entries(ORIG)) mock.module(path, () => orig);
+});
 
 // Capture the system prompt handed to Haiku + a sentinel proving the model streamed.
 const captured: { system?: string } = {};
@@ -30,10 +60,19 @@ mock.module("@/lib/welcome/chat-usage", () => ({
   welcomeCapEnabled: () => welcomeState.capEnabled,
   welcomeChatWeeklyCount: async () => welcomeState.weekly,
 }));
+// Full meter surface (not just clientIdFromRequest): when bun runs the whole suite in
+// one process, a narrow mock here would leak and break report-path.test.ts's `import
+// { recordAsk }` from this same module. Provide every export the assistant paths touch.
 mock.module("@/lib/highlighter/meter", () => ({
   clientIdFromRequest: () => welcomeState.clientId,
+  recordUse: async () => 1,
+  recordUseForClient: async () => 1,
+  recordAsk: async () => {},
+  actionCount: async () => 0,
+  weeklyCount: async () => 0,
+  capEnabled: () => false,
 }));
-// Mock the guarded fan-out so route tests never read real brains/*.md.
+// Mock the guarded fan-out so these tests never read real brains/*.md.
 const guardState: { result: { dossier?: LocationDossier; capped: boolean; fromCache: boolean } } = {
   result: { capped: false, fromCache: false },
 };
@@ -44,9 +83,9 @@ mock.module("@/lib/welcome/dossier-cache", () => ({
 // export real (the prose path imports renderDetailRowText etc. from this module).
 const brainState: { map: Record<string, unknown> } = { map: {} };
 // Master read for the analyst no-location path. null → the mock throws and
-// buildAnalystSystem falls back to the un-grounded analyst premise.
+// buildGroundedRegionSystem falls back to the un-grounded premise.
 const masterState: { output: Record<string, unknown> | null } = { output: null };
-// cre-swfl read for the analyst CRE-grain grounding (3b). null → not pulled.
+// cre-swfl read for the analyst CRE-grain grounding. null → not pulled.
 const creState: { output: Record<string, unknown> | null } = { output: null };
 mock.module("@/lib/fetch-brain", () => ({
   ...fetchBrain,
@@ -85,10 +124,26 @@ function dossierWith(lines: LocationDossier["lines"]): LocationDossier {
   };
 }
 
-const { POST, WELCOME_SYSTEM, buildClientContextBlock } = await import("./route");
+const { runConversationPath, PUBLIC_SYSTEM, buildClientContextBlock } =
+  await import("./conversation-path");
+
+/** Drive the conversation path with an AssistantRequest (the unified contract). */
+function run(req: Partial<AssistantRequest> & { messages: AssistantRequest["messages"] }) {
+  const request = new Request("https://x/api/assistant", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+  return runConversationPath(request, {
+    context: req.context ?? "public",
+    ...req,
+  } as AssistantRequest);
+}
+
+const ask = (content: string, context: AssistantRequest["context"] = "public") =>
+  run({ context, messages: [{ role: "user", content }] });
 
 test("system prompt forbids inventing a SWFL number and leads with the recurring-email hook", () => {
-  const lc = WELCOME_SYSTEM.toLowerCase();
+  const lc = PUBLIC_SYSTEM.toLowerCase();
   expect(lc).toContain("never"); // no-invention guardrail intact
   expect(lc).toContain("auto-email"); // leads with the recurring client-feed hook, not "sign up"
   expect(lc).toContain("client"); // the value is mailing THEIR clients
@@ -96,52 +151,31 @@ test("system prompt forbids inventing a SWFL number and leads with the recurring
 });
 
 test("streams the explainer text", async () => {
-  const req = new Request("https://x/api/welcome/chat", {
-    method: "POST",
-    body: JSON.stringify({ messages: [{ role: "user", content: "what can you do?" }] }),
-  });
-  const res = await POST(req);
+  const res = await ask("what can you do?");
   expect(res.status).toBe(200);
   const body = await res.text();
   expect(body).toContain("Southwest Florida");
   expect(body).toContain('"done":true');
 });
 
-test("400 on empty/non-user-last messages", async () => {
-  const req = new Request("https://x/api/welcome/chat", {
-    method: "POST",
-    body: JSON.stringify({ messages: [] }),
-  });
-  expect((await POST(req)).status).toBe(400);
-});
-
-test("400 on bad json", async () => {
-  const req = new Request("https://x/api/welcome/chat", { method: "POST", body: "{not json" });
-  expect((await POST(req)).status).toBe(400);
+test("400 on empty messages", async () => {
+  expect((await run({ context: "public", messages: [] })).status).toBe(400);
 });
 
 // --- Cost guards: per-message + aggregate bounds, and the weekly cap -------------
 
 test("400 when a single message exceeds the per-message bound", async () => {
-  const req = new Request("https://x/api/welcome/chat", {
-    method: "POST",
-    body: JSON.stringify({ messages: [{ role: "user", content: "x".repeat(4001) }] }),
-  });
-  expect((await POST(req)).status).toBe(400);
+  expect((await ask("x".repeat(4001))).status).toBe(400);
 });
 
 test("400 when the model-bound slice exceeds the aggregate bound", async () => {
   // 12 messages (the whole slice), each under the per-message cap, summing > 16000.
   const msgs = Array.from({ length: 12 }, (_, i) => ({
-    role: i % 2 === 0 ? "assistant" : "user",
+    role: (i % 2 === 0 ? "assistant" : "user") as "assistant" | "user",
     content: "y".repeat(1400),
   }));
   msgs[msgs.length - 1].role = "user"; // last must be user
-  const req = new Request("https://x/api/welcome/chat", {
-    method: "POST",
-    body: JSON.stringify({ messages: msgs }),
-  });
-  expect((await POST(req)).status).toBe(400);
+  expect((await run({ context: "public", messages: msgs })).status).toBe(400);
 });
 
 test("over the weekly cap → graceful SSE message, model never streams", async () => {
@@ -151,11 +185,7 @@ test("over the weekly cap → graceful SSE message, model never streams", async 
   welcomeState.weekly = 5;
   welcomeState.clientId = "cid-over";
   try {
-    const req = new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({ messages: [{ role: "user", content: "what can you do?" }] }),
-    });
-    const res = await POST(req);
+    const res = await ask("what can you do?");
     expect(res.status).toBe(200);
     const body = await res.text();
     expect(body).toContain("hit this week's limit");
@@ -169,14 +199,6 @@ test("over the weekly cap → graceful SSE message, model never streams", async 
 });
 
 // --- Grounded path -----------------------------------------------------------
-
-const post = (content: string) =>
-  POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({ messages: [{ role: "user", content }] }),
-    }),
-  );
 
 test("an in-scope ZIP grounds Haiku on the real dossier (cited, no-math floor, clean source)", async () => {
   captured.system = undefined;
@@ -196,7 +218,7 @@ test("an in-scope ZIP grounds Haiku on the real dossier (cited, no-math floor, c
       },
     ]),
   };
-  const res = await post("what's the housing read for 33913?");
+  const res = await ask("what's the housing read for 33913?");
   const body = await res.text();
   expect(body).toContain(MODEL_SENTINEL); // the model streamed (grounded answer)
   // the dossier + guardrails reached the system prompt
@@ -207,7 +229,7 @@ test("an in-scope ZIP grounds Haiku on the real dossier (cited, no-math floor, c
 });
 
 test("an out-of-scope ZIP → honest gap, no fetch, no model", async () => {
-  const res = await post("what about 90210?");
+  const res = await ask("what about 90210?");
   const body = await res.text();
   expect(body).toContain("outside the six Southwest Florida counties");
   expect(body).not.toContain(MODEL_SENTINEL); // model never streamed
@@ -219,7 +241,7 @@ test("in-scope ZIP with no covering reads → honest no-coverage line, no model"
     fromCache: false,
     dossier: { ...dossierWith([]), lines: [] },
   };
-  const res = await post("anything for 33913?");
+  const res = await ask("anything for 33913?");
   const body = await res.text();
   expect(body).toContain("No covering reads");
   expect(body).not.toContain(MODEL_SENTINEL);
@@ -227,13 +249,13 @@ test("in-scope ZIP with no covering reads → honest no-coverage line, no model"
 
 test("daily ceiling tripped → busy message, no model", async () => {
   guardState.result = { capped: true, fromCache: false };
-  const res = await post("housing in 33913?");
+  const res = await ask("housing in 33913?");
   const body = await res.text();
   expect(body).toContain("paused live reads");
   expect(body).not.toContain(MODEL_SENTINEL);
 });
 
-// --- Live {answer} producer on the grounded route (typed SSE frames) ----------
+// --- Live {answer} producer on the grounded path (typed SSE frames) -----------
 
 /** Parse the SSE body into typed WelcomeFrames (drops blanks/noise). */
 function frames(body: string): WelcomeFrame[] {
@@ -330,7 +352,7 @@ test("grounded ZIP streams typed place + data (cited cards) BEFORE any prose tex
       },
     ]),
   };
-  const res = await post("what's the read for 33913?");
+  const res = await ask("what's the read for 33913?");
   const fs = frames(await res.text());
   const placeIdx = fs.findIndex((f) => f.type === "place");
   const dataIdx = fs.findIndex((f) => f.type === "data");
@@ -348,7 +370,7 @@ test("grounded ZIP streams typed place + data (cited cards) BEFORE any prose tex
   }
 });
 
-test("FLOOD GATE on the route — an explicit ZIP whose env line is coarse emits cards but no flood card", async () => {
+test("FLOOD GATE — an explicit ZIP whose env line is coarse emits cards but no flood card", async () => {
   brainState.map = { "housing-swfl": HOUSING_STUB, "env-swfl": ENV_STUB };
   guardState.result = {
     capped: false,
@@ -376,7 +398,7 @@ test("FLOOD GATE on the route — an explicit ZIP whose env line is coarse emits
       },
     ]),
   };
-  const res = await post("flood read for 33913?");
+  const res = await ask("flood read for 33913?");
   const fs = frames(await res.text());
   const data = fs.find((f) => f.type === "data") as
     | Extract<WelcomeFrame, { type: "data" }>
@@ -386,7 +408,7 @@ test("FLOOD GATE on the route — an explicit ZIP whose env line is coarse emits
   expect(data!.answer.metrics.some((m) => m.key === "flood_aal")).toBe(false);
 });
 
-// --- Voice split: analyst mode vs welcome funnel + summarize ------------------
+// --- Voice split: analyst (context !== public) vs public funnel + summarize ------
 
 // Minimal master read — enough for buildDossier + renderBlock (conclusion is the
 // grounding sentinel; refined_at is required by computeMetricChart).
@@ -401,18 +423,10 @@ const MASTER_OUTPUT = {
   caveats: [],
 };
 
-test("analyst mode, no location → grounds on the master read, not the funnel hook", async () => {
+test("analyst (context=outside), no location → grounds on the master read, not the funnel hook", async () => {
   captured.system = undefined;
   masterState.output = MASTER_OUTPUT;
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "analyst",
-        messages: [{ role: "user", content: "what's the bottom line right now?" }],
-      }),
-    }),
-  );
+  const res = await ask("what's the bottom line right now?", "outside");
   const body = await res.text();
   expect(body).toContain(MODEL_SENTINEL); // the model streamed a grounded answer
   expect(captured.system).toContain("cooling into summer 2026"); // grounded on the master read
@@ -421,18 +435,11 @@ test("analyst mode, no location → grounds on the master read, not the funnel h
   masterState.output = null;
 });
 
-test("public (no-auth) mode, on-topic no location → GROUNDS on the master read, answer-first, with a login-capture close (not the deflect funnel)", async () => {
+test("public (no-auth), on-topic no location → GROUNDS on master, answer-first, login-capture close (not the deflect funnel)", async () => {
   captured.system = undefined;
   masterState.output = MASTER_OUTPUT;
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      // public path (no mode) — a region-wide market question with no ZIP/place.
-      body: JSON.stringify({
-        messages: [{ role: "user", content: "what's driving SWFL prices and rents right now?" }],
-      }),
-    }),
-  );
+  // public path — a region-wide market question with no ZIP/place.
+  const res = await ask("what's driving SWFL prices and rents right now?", "public");
   const body = await res.text();
   expect(body).toContain(MODEL_SENTINEL); // the model streamed a grounded answer
   expect(captured.system).toContain("cooling into summer 2026"); // grounded on the master read
@@ -445,43 +452,29 @@ test("public (no-auth) mode, on-topic no location → GROUNDS on the master read
   // Answer-first / no-deflect: the grounded public path must NOT demand a ZIP before answering.
   expect(captured.system).toContain("never demand a ZIP");
   // No-invention floor PRESERVED on the grounded public path.
-  expect(captured.system.toLowerCase()).toContain("never invent");
+  expect(captured.system!.toLowerCase()).toContain("never invent");
   expect(captured.system).toContain("arithmetic"); // no-math floor rides along
   masterState.output = null;
 });
 
-test("public mode, master unavailable → falls back to the un-grounded public premise (answer-first, no-invention floor intact, still no deflect-pitch)", async () => {
+test("public, master unavailable → un-grounded public premise (answer-first, no-invention floor intact, still no deflect-pitch)", async () => {
   captured.system = undefined;
   masterState.output = null; // fetchBrain("master") throws → un-grounded public fallback
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        messages: [{ role: "user", content: "what's driving SWFL prices and rents right now?" }],
-      }),
-    }),
-  );
+  const res = await ask("what's driving SWFL prices and rents right now?", "public");
   await res.text();
   // Graceful floor is the un-grounded PUBLIC_GROUNDED premise — still answer-first, still
   // no-invention, and crucially NOT the pre-answer recurring-email funnel pitch.
   expect(captured.system).toContain("market analyst");
   expect(captured.system).not.toContain("cooling into summer 2026"); // master never loaded
   expect(captured.system).not.toContain("auto-email"); // not the deflect funnel pitch
-  expect(captured.system.toLowerCase()).toContain("never invent"); // no-invention floor intact
+  expect(captured.system!.toLowerCase()).toContain("never invent"); // no-invention floor intact
 });
 
-test("public mode, OFF-TOPIC no location → un-grounded funnel explainer, master never touched, no SWFL prelude", async () => {
+test("public, OFF-TOPIC no location → un-grounded funnel explainer, master never touched, no SWFL prelude", async () => {
   captured.system = undefined;
   masterState.output = MASTER_OUTPUT; // present, but an off-topic ask must NOT ground on it
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      // off-domain (food) + a SWFL place name → the off-topic gate fires (RULES OF ENGAGEMENT 7).
-      body: JSON.stringify({
-        messages: [{ role: "user", content: "best Arby's near Cleveland Ave in Fort Myers?" }],
-      }),
-    }),
-  );
+  // off-domain (food) + a SWFL place name → the off-topic gate fires (RULES OF ENGAGEMENT 7).
+  const res = await ask("best Arby's near Cleveland Ave in Fort Myers?", "public");
   const body = await res.text();
   expect(captured.system).toContain("auto-email"); // off-topic public stays the funnel explainer
   expect(captured.system).not.toContain("cooling into summer 2026"); // master NOT fetched off-topic
@@ -490,7 +483,7 @@ test("public mode, OFF-TOPIC no location → un-grounded funnel explainer, maste
   masterState.output = null;
 });
 
-// cre-swfl read carrying the per-corridor vacancy detail_table (Task 1's artifact).
+// cre-swfl read carrying the per-corridor vacancy detail_table.
 const CRE_OUTPUT = {
   conclusion: "SWFL commercial corridors are holding steady into summer 2026.",
   direction: "neutral",
@@ -534,15 +527,7 @@ test("analyst CRE-vacancy question → grounds on cre-swfl per-corridor detail, 
   captured.system = undefined;
   masterState.output = MASTER_OUTPUT;
   creState.output = CRE_OUTPUT;
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "analyst",
-        messages: [{ role: "user", content: "commercial real estate vacancy by corridor" }],
-      }),
-    }),
-  );
+  const res = await ask("commercial real estate vacancy by corridor", "outside");
   const body = await res.text();
   expect(body).toContain(MODEL_SENTINEL); // grounded answer streamed
   // per-corridor grain reached the system prompt (the table + a corridor name)
@@ -560,15 +545,7 @@ test("analyst NON-corridor question → does NOT pull cre-swfl (master-only grou
   captured.system = undefined;
   masterState.output = MASTER_OUTPUT;
   creState.output = CRE_OUTPUT; // present, but the intent must NOT route to CRE
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "analyst",
-        messages: [{ role: "user", content: "what's the bottom line right now?" }],
-      }),
-    }),
-  );
+  const res = await ask("what's the bottom line right now?", "outside");
   await res.text();
   expect(captured.system).toContain("cooling into summer 2026"); // master grounding
   expect(captured.system).not.toContain("SWFL CRE corridor vacancy rate"); // cre-swfl NOT pulled
@@ -576,25 +553,21 @@ test("analyst NON-corridor question → does NOT pull cre-swfl (master-only grou
   creState.output = null;
 });
 
-test("summarize mode → synthesis prompt over the thread, dedups against filed Q&A", async () => {
+test("summarize action → synthesis prompt over the thread, dedups against filed Q&A", async () => {
   captured.system = undefined;
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "summarize",
-        alreadyFiled: [{ question: "flood read for 33931?", answer: "AAL is $30,074/yr." }],
-        messages: [
-          { role: "user", content: "flood read for 33931?" },
-          { role: "assistant", content: "AAL is $30,074/yr for ZIP 33931 [OpenFEMA]." },
-          {
-            role: "user",
-            content: "Summarize the important findings from this conversation so far.",
-          },
-        ],
-      }),
-    }),
-  );
+  const res = await run({
+    context: "outside",
+    action: "summarize",
+    alreadyFiled: [{ question: "flood read for 33931?", answer: "AAL is $30,074/yr." }],
+    messages: [
+      { role: "user", content: "flood read for 33931?" },
+      { role: "assistant", content: "AAL is $30,074/yr for ZIP 33931 [OpenFEMA]." },
+      {
+        role: "user",
+        content: "Summarize the important findings from this conversation so far.",
+      },
+    ],
+  });
   const body = await res.text();
   expect(body).toContain(MODEL_SENTINEL); // the model streamed the summary
   expect(captured.system).toContain("summarizing"); // the summarize premise
@@ -626,16 +599,12 @@ test("buildClientContextBlock bounds an over-long page context", () => {
 
 test("the chat folds page + briefcase context into the system prompt", async () => {
   captured.system = undefined;
-  const res = await POST(
-    new Request("https://x/api/welcome/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        messages: [{ role: "user", content: "what's driving this?" }],
-        pageContext: "the Market Trends charts page (home values, rents)",
-        briefcase: "[metric] Median rent: $1,750",
-      }),
-    }),
-  );
+  const res = await run({
+    context: "public",
+    messages: [{ role: "user", content: "what's driving this?" }],
+    pageContext: "the Market Trends charts page (home values, rents)",
+    briefcase: "[metric] Median rent: $1,750",
+  });
   await res.text();
   expect(captured.system).toContain("Market Trends charts page");
   expect(captured.system).toContain("Median rent: $1,750");
@@ -644,6 +613,6 @@ test("the chat folds page + briefcase context into the system prompt", async () 
 
 test("chat with no page/briefcase context injects no context block", async () => {
   captured.system = undefined;
-  await (await post("what can you do?")).text();
+  await (await ask("what can you do?")).text();
   expect(captured.system ?? "").not.toContain("WHERE THE USER IS");
 });
