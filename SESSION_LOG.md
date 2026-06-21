@@ -1,4 +1,15 @@
-## 2026-06-21 (main) — fix(ci): unblock the BUILD — eslint error in StandaloneBackBar froze every deploy (root of "still holes / still boxes") [PUSHED]
+## 2026-06-21 (main) — harvest(branches): squash-merge branding color-palette branch; SKIP 5 stale/superseded claude/* branches [PUSHED]
+
+- **Operator: "bring in whatever is good on branches, squash merge, make sure they follow the rules and aren't fucking everything up more."** Vetted all 7 `claude/*` branches read-only (workflow, `git merge-tree` + diff vs current main). The 5 nav-config failures the operator flagged were ALREADY fixed on `origin/main` (`6ee952d6`), pulled in by my safe-push rebase → full suite now 3565/0.
+- **MERGED (squash): `claude/hex-color-chart-branding-svusth`** → account-level saved color-palette library (`lib/brand/palette.ts` + `sanitizePalettes`, hex input + 20-swatch chart + 3 save slots in `BrandingBlock`, carry-to-new-projects prefill, graceful pre-migration degradation in `app/api/user/brand/route.ts`). Clean merge-tree (only SESSION_LOG overlap), strong tests. **Rule cleanup:** flipped `palette.test.ts` `from "vitest"` → `"bun:test"` (repo convention; 151 lib tests use bun:test). **Migration applied directly to prod** (`docs/sql/20260621_user_brand_color_palettes.sql`, idempotent `ADD COLUMN IF NOT EXISTS` + `NOTIFY pgrst`) — verified `user_brand_profiles.color_palettes jsonb` live. Branding tests 23/0.
+- **SKIPPED (with reason, not merged):**
+  - `branch-status-check-84t7dh` (contacts) — feature already 100% on main + 3 hardening commits AHEAD; merging would REGRESS: re-open a `//evil.com` open-redirect (reverts `f0572ca1`), revert `dvh→screen` (Layout rule 5), drop `@resvg/resvg-js`. **The "fucking everything up more" branch — caught it.**
+  - `404-errors-investigation-oeu3yf` — STALE: edits the DELETED `app/api/converse/route.ts`; its resolver (`resolveReportGrounding`/`surfaceNote`) already on main.
+  - `repo-sync-check-zcrd7u` — EMPTY (its StandaloneBackBar setState fix already merged as `eef2e7d4`).
+  - `page-behavior-inconsistency-78ub79` + `session-status-check-d96sjx` — DOCS-ONLY, superseded (unification shipped `21eaea8a`; the chart-anything bug they scope = my `8bd1874b`). Their still-open residual (WS3 don't-file-refusals, WS4 brand-colors-on-generic-charts, the `reach.ts` home-values route) → tracked, not landed as stale docs.
+- **NEXT:** squash `claude/project-ai-fixes-review-q0j5n1` (empty-project starter prompts, clean/tested); recommend deleting the 5 skipped orphan branches (operator call).
+
+
 
 - **THE root cause the operator kept hitting:** map fixes (SVG style, color-scale c0, /map stacking) were all on `main` but NONE were live — because the build was RED, so Vercel never deployed them. Prod stayed frozen on an OLD build = original black holes + original `/map` boxes. I'd been pushing into a broken pipeline and verifying nothing locally (no deps installed) — exactly what the pre-push gate / CI exist to stop.
 - **The breaker:** `components/nav/StandaloneBackBar.tsx:24` called `setState` inside `useEffect` → `react-hooks/set-state-in-effect` **error** → `bunx eslint .` exit 1 → CI `build` job fails AND `next build` (runs eslint) fails → no deploy. (Confirmed from the failed CI job log for `1bb9f78`.)

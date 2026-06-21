@@ -2,11 +2,21 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { logActivity } from "@/lib/project/activity";
+import { sanitizePalettes } from "@/lib/brand/palette";
 
 export const runtime = "nodejs";
 
 const AGENT_FIELDS = ["agent_name", "photo_url", "license", "brokerage"] as const;
 type AgentField = (typeof AGENT_FIELDS)[number];
+
+// Theme fields persisted at the account level so saved colors carry to NEW
+// projects (pre-fill). primary_color/accent_color also feed legacy consumers
+// (resolve-brand.ts). logo_url rides along when present.
+const COLOR_FIELDS = ["primary_color", "accent_color", "logo_url"] as const;
+type ColorField = (typeof COLOR_FIELDS)[number];
+
+const BASE_SELECT =
+  "agent_name, photo_url, license, brokerage, primary_color, accent_color, logo_url";
 
 async function authed() {
   const supabase = createClient(await cookies());
@@ -17,27 +27,48 @@ async function authed() {
 }
 
 /**
- * GET /api/user/brand — returns the signed-in user's brand profile.
- * Used to pre-fill BrandingBlock when a project has no branding yet
- * (funnel arrivals whose brand was scraped at prospect time land here).
+ * GET /api/user/brand — returns the signed-in user's brand profile, including
+ * the saved color-palette library. Used to pre-fill BrandingBlock when a
+ * project has no branding yet (funnel arrivals + new projects land here).
+ *
+ * Degrades if the `color_palettes` column hasn't been migrated yet: retries
+ * the select without it so the route never 500s pre-migration.
  */
 export async function GET(_req: NextRequest) {
   const { supabase, user } = await authed();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { data } = await supabase
+  let { data } = await supabase
     .from("user_brand_profiles")
-    .select("agent_name, photo_url, license, brokerage, primary_color, accent_color, logo_url")
+    .select(`${BASE_SELECT}, color_palettes`)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  return NextResponse.json(data ?? {});
+  // Column missing (pre-migration) → the select above errors and data is null;
+  // fall back to the base columns so the rest of the profile still loads.
+  if (!data) {
+    ({ data } = await supabase
+      .from("user_brand_profiles")
+      .select(BASE_SELECT)
+      .eq("user_id", user.id)
+      .maybeSingle());
+  }
+
+  const profile = data ?? {};
+  return NextResponse.json({
+    ...profile,
+    color_palettes: sanitizePalettes((profile as Record<string, unknown>).color_palettes),
+  });
 }
 
 /**
- * PATCH /api/user/brand — upserts agent identity fields into the user's brand profile.
- * Only the four BrandingBlock fields are written; theme fields (colors, logo) are
- * managed separately (scraped at funnel time, not edited here).
+ * PATCH /api/user/brand — upserts the user's account-level brand default:
+ * agent identity fields, theme colors (so they seed new projects), and the
+ * saved color-palette library.
+ *
+ * The `color_palettes` write is best-effort + isolated: if that column hasn't
+ * been migrated, the agent/color upsert still succeeds and only the library
+ * write is skipped.
  */
 export async function PATCH(req: NextRequest) {
   const { supabase, user } = await authed();
@@ -55,12 +86,31 @@ export async function PATCH(req: NextRequest) {
       update[key] = typeof v === "string" && v.trim() ? v : null;
     }
   }
+  for (const key of COLOR_FIELDS) {
+    if (key in body) {
+      const v = body[key as ColorField];
+      update[key] = typeof v === "string" && v.trim() ? v : null;
+    }
+  }
 
   const { error } = await supabase
     .from("user_brand_profiles")
     .upsert({ user_id: user.id, ...update }, { onConflict: "user_id" });
 
   if (error) return NextResponse.json({ error: "update failed" }, { status: 500 });
+
+  // Palette library — isolated so a missing column (pre-migration) doesn't fail
+  // the whole save. Validated/clamped server-side before it lands.
+  if ("color_palettes" in body) {
+    const palettes = sanitizePalettes(body.color_palettes);
+    const { error: palErr } = await supabase
+      .from("user_brand_profiles")
+      .update({ color_palettes: palettes })
+      .eq("user_id", user.id);
+    if (palErr) {
+      console.warn("[user/brand] color_palettes write skipped:", palErr.message);
+    }
+  }
 
   // If the client passes a project_id, log branding_changed for that project so the AI
   // knows the agent identity updated. Global-only saves (no project_id) don't log here —

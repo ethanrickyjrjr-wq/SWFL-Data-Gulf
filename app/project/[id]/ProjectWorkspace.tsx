@@ -20,6 +20,16 @@ import { UploadDrop } from "@/components/project/UploadDrop";
 import { ProjectTitle } from "./workspace/ProjectTitle";
 import { ItemsBoard } from "./workspace/ItemsBoard";
 import { BrandingBlock } from "./workspace/BrandingBlock";
+import {
+  type BrandPalette,
+  PALETTE_SLOT_KEYS,
+  defaultScheme,
+  newPaletteId,
+  sanitizePalettes,
+  schemeFromBranding,
+  schemeHasColor,
+  schemesEqual,
+} from "@/lib/brand/palette";
 import { ConnectMcpBlock } from "./workspace/ConnectMcpBlock";
 import { DeliverableLanes } from "./workspace/DeliverableLanes";
 import { BuildActions } from "./workspace/BuildActions";
@@ -98,6 +108,8 @@ export function ProjectWorkspace({
   const [items, setItems] = useState<ProjectItem[]>(initialItems);
   const [title, setTitle] = useState(initialTitle ?? "");
   const [branding, setBranding] = useState<Record<string, string>>(initialBranding ?? {});
+  // Account-level saved color palettes (schemes), loaded with the brand profile.
+  const [palettes, setPalettes] = useState<BrandPalette[]>([]);
   const [uiState, setUiState] = useState<ProjectUiState>(initialUiState);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -118,8 +130,9 @@ export function ProjectWorkspace({
   // True when this project has at least one agent branding field saved.
   const hasBranding = AGENT_KEYS.some((k) => !!branding[k]);
 
-  // Pre-fill branding from the user's saved brand profile on first pill-open
-  // when the project has no agent fields yet (funnel arrivals, new projects).
+  // On first brand-pill open, load the user's saved brand profile: seed agent
+  // fields + empty color slots from the account default (funnel arrivals, new
+  // projects) and load the saved-palette library.
   const brandPrefillAttempted = useRef(false);
 
   useEffect(() => {
@@ -127,24 +140,28 @@ export function ProjectWorkspace({
     if (brandPrefillAttempted.current) return;
     brandPrefillAttempted.current = true;
 
-    const hasAny = AGENT_KEYS.some((k) => branding[k]);
-    if (hasAny) return;
-
     fetch("/api/user/brand")
       .then((r) => (r.ok ? r.json() : {}))
       .then((data: Record<string, unknown>) => {
+        setPalettes(sanitizePalettes(data.color_palettes));
         setBranding((prev) => {
-          const filled = Object.fromEntries(
-            AGENT_KEYS.filter((k) => typeof data[k] === "string" && data[k]).map((k) => [
-              k,
-              data[k] as string,
-            ]),
-          );
-          return Object.keys(filled).length > 0 ? { ...prev, ...filled } : prev;
+          const next = { ...prev };
+          // Agent fields: only seed when the project has none yet.
+          if (!AGENT_KEYS.some((k) => prev[k])) {
+            for (const k of AGENT_KEYS) {
+              if (typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
+            }
+          }
+          // Colors: seed each empty slot from the account default scheme so a
+          // saved palette carries to new projects without rewriting set colors.
+          const scheme = defaultScheme(data);
+          PALETTE_SLOT_KEYS.forEach((k, i) => {
+            if (!prev[k] && scheme[i]) next[k] = scheme[i];
+          });
+          return next;
         });
       })
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePill]);
 
   const fileCount = items.filter((i) => i.kind === "file").length;
@@ -325,13 +342,36 @@ export function ProjectWorkspace({
     }
   }
 
-  async function saveBrandGlobal(): Promise<boolean> {
-    // Fire the user-level brand save in parallel — best-effort (failure is silent;
-    // the project save is the authoritative gate for the OK/close signal).
+  // Persist the saved-palette library to the account (best-effort) and keep
+  // local state in sync. Called when a palette is added or removed in BrandingBlock.
+  function persistPalettes(next: BrandPalette[]) {
+    setPalettes(next);
     void fetch("/api/user/brand", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(branding),
+      body: JSON.stringify({ color_palettes: next }),
+    });
+  }
+
+  async function saveBrandGlobal(): Promise<boolean> {
+    // Auto-add the current scheme to the account palette library so it carries
+    // to new projects (dedup against what's already saved).
+    const scheme = schemeFromBranding(branding);
+    let nextPalettes = palettes;
+    if (schemeHasColor(scheme) && !palettes.some((p) => schemesEqual(p.colors, scheme))) {
+      nextPalettes = [
+        ...palettes,
+        { id: newPaletteId(), name: `Palette ${palettes.length + 1}`, colors: scheme },
+      ];
+      setPalettes(nextPalettes);
+    }
+    // Fire the user-level brand save in parallel — best-effort (failure is silent;
+    // the project save is the authoritative gate for the OK/close signal). Sends
+    // the agent + color fields (in `branding`) plus the palette library.
+    void fetch("/api/user/brand", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
     });
     return patch({ branding }, "Branding saved");
   }
@@ -531,6 +571,8 @@ export function ProjectWorkspace({
               <BrandingBlock
                 branding={branding}
                 onChange={setBranding}
+                palettes={palettes}
+                onPalettesChange={persistPalettes}
                 onSaveGlobal={saveBrandGlobal}
                 onSaveProjectOnly={saveBrandProjectOnly}
                 saving={saving}
