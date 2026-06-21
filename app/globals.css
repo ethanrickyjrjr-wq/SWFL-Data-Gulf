@@ -143,6 +143,20 @@ body {
   color: var(--foreground);
 }
 
+/* ── ROOT responsive guard ──────────────────────────────────────────────────
+   One root layout, one <body> — so this reaches EVERY page at once. Stops any
+   page whose content has a stray wide child from forcing mobile "shrink-to-fit"
+   (the whole page rendering zoomed-out) or a horizontal scrollbar. The homepage
+   already had its own overflow guards; this gives every other page the same
+   floor. `overflow-x: clip` (not `hidden`) clips horizontal overflow WITHOUT
+   creating a scroll container, so `position: sticky` headers keep working.
+   Vertical scrolling and inner `overflow-x:auto` (wide tables) are unaffected. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 /* ── Print / Save-as-PDF stylesheet ── */
 
 @media print {

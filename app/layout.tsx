@@ -6,6 +6,7 @@ import { AppShell } from "@/components/briefcase/AppShell";
 import { SiteShell } from "@/components/nav/SiteShell";
 import { SiteFooter } from "@/components/nav/SiteFooter";
 import { ResetZoomOnRouteChange } from "@/components/nav/ResetZoomOnRouteChange";
+import { StandaloneBackBar } from "@/components/nav/StandaloneBackBar";
 import { highlighterUiEnabled } from "@/lib/highlighter/flag";
 
 const geistSans = Geist({
@@ -53,6 +54,8 @@ export default function RootLayout({
         <BriefcaseProvider>
           {/* Reset mobile pinch-zoom to fit-width on every in-app navigation. */}
           <ResetZoomOnRouteChange />
+          {/* "← Back" for white-label pages (/p/*, /embed/*) that render no nav shell. */}
+          <StandaloneBackBar />
           {/* B1: the ONE auth-aware nav shell — home variant on `/`, solid app bar
               everywhere else, nothing on the white-label/auth prefixes. Replaces the
               old split (Header on `/` only + GlobalNav elsewhere) that sealed home. */}

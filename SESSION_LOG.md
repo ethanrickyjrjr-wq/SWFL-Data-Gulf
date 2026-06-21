@@ -1,3 +1,10 @@
+## 2026-06-21 (main) — fix(root): one-root fixes — every page fits on mobile + white-label pages get a "← Back" [PUSHED]
+
+- **Operator:** "homepage fits on phone, many other pages don't — find the ROOT and change every page at once. Also the one-page example has no working back button." (graphify CLI absent in this fresh container + graph gitignored → fell back to grep/Read per CLAUDE.md; confirmed there is ONE root: `app/layout.tsx` + `app/globals.css`, every page renders through it.)
+- **Responsive root (`app/globals.css`):** added `html, body { max-width:100%; overflow-x:clip }`. Charts already use recharts `ResponsiveContainer width=100%` and tables are `overflow-x-auto`, but nothing stopped a stray wide child from forcing mobile shrink-to-fit (page renders zoomed-out). The homepage had its own guards; this gives every other page the same floor. `clip` (not `hidden`) keeps `position:sticky` working; inner table scroll unaffected.
+- **Back root (`components/nav/StandaloneBackBar.tsx`, mounted in `app/layout.tsx`):** white-label pages (`/p/*`, `/embed/*`) render NO nav shell (`SHELL_HIDDEN_PREFIXES`), and the only back link (`← Back to project`) is owner-only — so a public viewer of an example deliverable had NO way back. New sticky "← Back" (`router.back()` + homepage fallback) shows on those prefixes; reuses the route convention from `nav-config`.
+- Rebased onto `main` after concurrent sessions landed the nav-config test realignment + header-comment fix.
+
 ## 2026-06-21 (main) — docs(nav): fix stale nav-config header comment (was describing the retired B2 layout) [PUSHED]
 
 - **Why:** `components/nav/nav-config.ts` lines 28-32 still said "the long tail (Search, Maps, ZIP Reports) folds into Explore" — the OLD layout. That lying comment is what keeps misleading editors into re-breaking the nav tests (the recurring red). Comment-only change; no code/behavior touched.
