@@ -5,7 +5,9 @@
  */
 export default function Capabilities() {
   return (
-    <section className="capabilities">
+    // id="comparison" is the nav "How It Works" anchor target (this section carries the
+    // capability cards + the competitor comparison strip).
+    <section className="capabilities" id="comparison">
       <div className="cap-eyebrow">What you can do</div>
       <h2 className="cap-headline">
         Tell it what you want. <span>It happens.</span>
@@ -98,7 +100,7 @@ export default function Capabilities() {
           >
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
-          Get Early Access
+          Get Access
         </a>
         <p>
           <strong>Realtors, investors, and property managers</strong> in Southwest Florida — built

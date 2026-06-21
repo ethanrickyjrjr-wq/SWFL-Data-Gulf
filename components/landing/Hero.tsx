@@ -229,7 +229,10 @@ export default function Hero() {
   return (
     <section ref={rootRef}>
       <div className="hero">
-        <div className="hero-badge">Live Data · Lee &amp; Collier Counties</div>
+        {/* Sample, not live: this hero map + stat bar are illustrative fixture data
+            (lib/landing/home-map-data.ts). Honesty over the "every number cited" promise
+            until it's wired to the live lake — the real cited reads are one Search away. */}
+        <div className="hero-badge">Sample data · Lee &amp; Collier Counties</div>
         <h1>
           Real Data.
           <br />
@@ -279,7 +282,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="map-section">
+      <div className="map-section" id="data">
         <div className="map-layout">
           <div className="data-rail">
             <div className="rail-header">
