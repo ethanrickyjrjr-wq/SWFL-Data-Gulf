@@ -1,3 +1,7 @@
+## 2026-06-21 (main) — fix(map): ZipChoropleth coast layer black areas — style #the_rest_of_the_coast + county outlines in JS [PUSHED]
+
+- `ZipChoropleth.tsx`: after SVG load, force `#the_rest_of_the_coast *` → fill #152832 (gulf-deep); county outline groups → fill none + subtle stroke; container bg set to #152832 to prevent pre-load flash. The home-explorer.css rule only fires under `.home-explorer` wrapper — ZipChoropleth never had that, so coast defaulted to SVG black.
+
 ## 2026-06-21 (main) — nav: Maps as static top-level next to Charts; /map page: 3 labeled county sections [PUSHED]
 
 - `nav-config.ts`: Maps is now a static top-level link next to Charts; Explore dropdown keeps only Search; ZIP Reports removed

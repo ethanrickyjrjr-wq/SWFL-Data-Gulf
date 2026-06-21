@@ -105,6 +105,23 @@ export function ZipChoropleth({
         svg.setAttribute("width", "100%");
         svg.setAttribute("height", "100%");
         svg.style.display = "block";
+        svg.style.background = "#152832";
+
+        // Coast layer — SVG default is black; force to gulf-deep so it matches the theme.
+        svg.querySelectorAll<SVGElement>("#the_rest_of_the_coast *").forEach((el) => {
+          el.style.fill = "#152832";
+          el.style.stroke = "none";
+          el.style.opacity = "1";
+        });
+        // County outline groups — fill none, subtle stroke only.
+        ["#Lee_county", "#Collier_County"].forEach((sel) => {
+          svg.querySelectorAll<SVGElement>(`${sel} > *`).forEach((el) => {
+            el.style.fill = "none";
+            el.style.stroke = "rgba(240,237,230,0.14)";
+            el.style.strokeWidth = "0.8px";
+            el.style.opacity = "1";
+          });
+        });
 
         // Each ZIP is a <g class="zip-group" id="33931"> holding one or more
         // <path> sub-shapes (islands split out), so fill the whole group.
@@ -167,7 +184,7 @@ export function ZipChoropleth({
   }, [JSON.stringify(data), colorLow, colorHigh, county]);
 
   return (
-    <div className={`relative ${className}`} style={{ minHeight: 200 }}>
+    <div className={`relative ${className}`} style={{ minHeight: 200, background: "#152832" }}>
       <div ref={ref} className="w-full h-full" />
       {tooltip && (
         <div
