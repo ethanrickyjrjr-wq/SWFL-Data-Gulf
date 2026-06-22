@@ -1,3 +1,11 @@
+## 2026-06-22 (main) — Universal Highlighter Phase 1 plan saved (highlighter → app root, twin of the AI pill) [PUSHED]
+
+Doc-only. New plan `docs/superpowers/plans/2026-06-22-universal-highlighter-phase1.md` — Phase 3C of the One-Assistant unification.
+- **What:** lift the Highlighter from its 5 per-`/r/*`-page mounts to ONE root mount (`GlobalHighlighter` in `app/layout.tsx`, inside `BriefcaseProvider` + a lifted `HighlighterProvider`), as the selection-triggered twin of the click-triggered AI pill — same engine, same briefcase. Off-report grounds via `context:"outside"` (already works server-side). `/r/*` preserved via a new report-context bus (`ReportHighlightBridge` → store); `AppShell` becomes the sole pill owner (bridged on `/r/*`, standalone elsewhere).
+- **Audited across 3 review passes:** B1 ("off-report filing fails") REFUTED — the pill already files off-report via `report_id: zip || "swfl"`; fix is parity, not suppression. Folded: B2 (guard repointed to `ReportHighlightBridge`), M3 (DiscoveryTicker context-aware), M4 (`ConverseInput.reportId` optional + test), M5 (`shouldMountHighlighter` ≠ `shouldRenderStandalone`: suppresses `/login`+`/auth`, NOT `/r/*`), S6/S7.
+- **INVARIANTS:** `use-highlight.ts` snap-to-word/number + phone/desktop breakpoint rules MOVED not rewritten; exactly one pill + one highlighter on all 36 pages EXCEPT the clean white-label/auth set (`/p/*`, `/embed/*`, `/login`, `/auth/*`) — proven by an exhaustive `app/**/page.tsx` coverage test.
+- **Next:** build Phase 1 (no code yet). Phase 2 (project highlighter, edit-capable) deferred to its own brainstorm.
+
 ## 2026-06-22 (main) — SOLO-27 plan rewritten: never-dead-end text answer (inline find on gap, collapsed sources); Citations API + "I don't know" both killed [PUSHED]
 
 Doc-only. Operator rescope of phase-7 AI-layer **SOLO-27** (`docs/audit/2026-06-21-full-platform-audit/PLAN/phase-7-best-practices-hardening/ai-layer/SOLO-27-citations-and-retract--OPUS.md`).
