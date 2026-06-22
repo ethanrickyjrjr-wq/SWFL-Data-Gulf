@@ -13,7 +13,6 @@
 import type { ProjectItem } from "../project/items";
 import type { ChartBlock } from "../../refinery/validate/chart-block-lint.mts";
 import type { ChartSpec } from "../../components/charts/registry/chart-spec";
-import swflZipCounty from "../../fixtures/swfl-zip-county.json";
 
 // ---------------------------------------------------------------------------
 // Re-export ChartBlock so downstream importers of this module don't need a
@@ -97,74 +96,13 @@ export type TemplateId =
   | "social";
 
 // ---------------------------------------------------------------------------
-// Social grain guard (the MOAT at the deliverable layer)
+// A `"social"` card builds at ANY scope. There is no geographic refusal: the moat
+// is the no-invention narrative lint (a number not in the frozen filed items is
+// stripped), NOT the lake footprint. "Outside our 6-county lake" ≠ "no data" — a
+// number can come from our data, the user's upload, a sourced web lookup, or a
+// figure the user gave us (the four-lane rule). Only invention is forbidden, never
+// building. (The former `checkSocialGrain` footprint gate was removed 2026-06-22.)
 // ---------------------------------------------------------------------------
-
-/**
- * A `"social"` post is a single-visual headline aimed at ONE geography. Because a
- * card is so terse, an off-target scope is more dangerous than in a long report:
- * the only honest scopes are the ones we actually hold. This guard is the synchronous
- * footprint gate at the assemble layer.
- *
- * Authority: `fixtures/swfl-zip-county.json` — the SAME 6-county ZIP authority
- * `resolveZip()` keys against (Charlotte/Collier/Glades/Hendry/Lee/Sarasota).
- *   - ZIP scope → must be a ZIP in the footprint, else REFUSE. Never substitute a
- *     "representative" ZIP — that would be invented precision.
- *   - place/county scope → accepted at the declared grain (the live brain `in_scope`
- *     flag is the runtime authority, enforced at fetch time in
- *     `lib/social/build-content.ts`); the deliverable layer only rejects an
- *     unrecognized scope_kind.
- *   - no scope → whole region (allowed; the master read covers the 6-county lake).
- *
- * Pure + deterministic (static JSON import, no I/O) so it unit-tests offline.
- */
-const SWFL_FOOTPRINT_ZIPS: ReadonlySet<string> = new Set(
-  (swflZipCounty.entries as Array<{ zip: string }>).map((e) => e.zip),
-);
-
-const SOCIAL_SCOPE_KINDS: ReadonlySet<string> = new Set(["zip", "place", "county"]);
-
-export type SocialGrainGuard =
-  | { ok: true }
-  | { ok: false; reason: string; held_grain: "zip" | "place" | "county" | "region" };
-
-/**
- * Decide whether a `"social"` deliverable may be assembled at the requested scope.
- * Returns `{ ok: true }` to proceed, or `{ ok: false, reason, held_grain }` so the
- * caller can REFUSE and offer the grain we DO hold — never fabricate a sub-grain
- * number, never fall through to a representative ZIP.
- */
-export function checkSocialGrain(
-  scope_kind: string | undefined,
-  scope_value: string | undefined,
-): SocialGrainGuard {
-  // No scope → whole-region post (master synthesis covers the 6-county lake).
-  if (!scope_kind) return { ok: true };
-
-  if (!SOCIAL_SCOPE_KINDS.has(scope_kind)) {
-    return {
-      ok: false,
-      reason: `Scope "${scope_kind}" is not a grain we hold for a social post. We hold ZIP, place, and county within the 6-county Southwest Florida footprint.`,
-      held_grain: "county",
-    };
-  }
-
-  if (scope_kind === "zip") {
-    const zip = (scope_value ?? "").trim();
-    if (!SWFL_FOOTPRINT_ZIPS.has(zip)) {
-      return {
-        ok: false,
-        // The moat: refuse, do NOT swap in a "representative" ZIP.
-        reason: `ZIP ${zip || "(none)"} is outside the 6-county Southwest Florida footprint (Charlotte, Collier, Glades, Hendry, Lee, Sarasota). We can post at the county or place grain we hold instead — we won't substitute a different ZIP.`,
-        held_grain: "county",
-      };
-    }
-  }
-
-  // place / county within the footprint → the live brain in_scope flag is the
-  // runtime authority (enforced in lib/social/build-content.ts at fetch time).
-  return { ok: true };
-}
 
 // ---------------------------------------------------------------------------
 // Slot discriminated union

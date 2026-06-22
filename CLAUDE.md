@@ -54,6 +54,23 @@ If this rule or the marker comment above it is missing the next time a session s
 
 ---
 
+# RULE 0.7 — NEVER HANDCUFF A BUILD: FOUR-LANE SOURCING, ONLY INVENTION IS FORBIDDEN
+
+**Locked by operator decree 2026-06-22 — after the send-ready email AND the social card each REFUSED to build for "we don't hold a ZIP" / "that scope is outside our lake." Both were the SAME bug: confusing "not in our 6-county `data_lake.*`" with "no data exists." This rule OUTRANKS any instinct to gate a build on what's in the lake.**
+
+**The law:** a build — a deliverable, an email, a card, an answer — is **NEVER refused because we don't hold the number.** Every number has FOUR lanes to a real source, tried in this order:
+
+1. **Our data** — the SWFL lake (brains / `data_lake.*`).
+2. **The user's upload** — a filed doc's `extracted_text`, a figure they attached.
+3. **The internet, with a named source** — a sourced web lookup, cited verbatim.
+4. **The user writes it in** — a figure the user hands us directly.
+
+A gap fills from the next lane; failing all four, the build ships with what IS sourced and omits only the genuinely-unsourceable line. **The ONLY thing ever blocked is an INVENTED number** (one with no real source). Build: never blocked. Invent: always blocked. ("Client data, not police" — a sourced user/upload/web number MUST survive; only fabrication dies.)
+
+**So: never write or keep a gate that refuses a build because a scope is outside the lake footprint, lacks a ZIP, or names a place we hold no lake rows for.** That was the email ZIP gate and the social footprint gate — both removed. The real moat is the **no-invention lint** (a number not traceable to a named lane is stripped — `lib/deliverable/build.ts` `gateNarrative`), enforced on the OUTPUT, never on geography. Same law for every deliverable, every grain, every scope. This is the lean-block Rule 1 (`refinery/lib/rules-of-engagement.mts`) made structural.
+
+---
+
 # RULE 1 — COMMIT & PUSH AUTONOMY
 
 Operator policy (locked 2026-05-26): you decide when to commit and push. Don't ask permission for every diff — exercise judgment. The session-log hook is the failsafe; the rubric below is the judgment.
@@ -156,7 +173,7 @@ Live at `https://www.swfldatagulf.com`. MCP at `/api/mcp` (`claude mcp add --tra
 
 ```text
 RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: every number has a real source — our data, your uploaded doc, a named web source, or a figure you gave us — in the collapsed sources, not inline in prose. No real source → don't state it; never invent one.
+1. CITE: every number names a real source — our data, your uploaded doc, a named web source, or a figure you gave us; fill a gap from those in that order, never refuse the build. Sources ride in the collapsed list, not inline; only an INVENTED number (no real source) is forbidden.
 2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
 3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
 4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.

@@ -37,11 +37,12 @@
  * Do NOT embed the full ~2000-token contract in payloads — it is 10× the token
  * cost for zero additional discipline. The lean block is the whole point.
  *
- * TOKEN BUDGET — hard-capped at 280 tokens (chars/4 proxy) by the test. The cap
- * is a re-bloat guard, not a context constraint. (Bumped 220→280 when rules 1/3/7
- * adopted the four-lane provenance model above — naming all four real sources in
- * plain words costs ~46 tokens and is the whole point; +46 tokens per payload is
- * negligible against the clarity it buys.)
+ * TOKEN BUDGET — hard-capped at 300 tokens (chars/4 proxy) by the test. The cap
+ * is a re-bloat guard, not a context constraint. (Bumped 220→280 for the four-lane
+ * provenance model; 280→300 when rule 1 added the four-lane CASCADE ORDER + "fill the
+ * gap from those in order, never refuse the build; only an INVENTED number is
+ * forbidden" — operator decree 2026-06-22, the generalization of CLAUDE.md RULE 0.7
+ * that killed the email + social build-handcuffs. The clarity is the whole point.)
  *
  * RULE 7 (SCOPE) is load-bearing — TWO behaviors + ONE guard:
  *   (1) An in-grain SWFL lake question (county down to ZIP / named place — Fort
@@ -57,7 +58,7 @@
  * and a store-hours question answered with "we don't hold that grain."
  */
 export const RULES_OF_ENGAGEMENT = `RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: every number has a real source — our data, your uploaded doc, a named web source, or a figure you gave us — in the collapsed sources, not inline in prose. No real source → don't state it; never invent one.
+1. CITE: every number names a real source — our data, your uploaded doc, a named web source, or a figure you gave us; fill a gap from those in that order, never refuse the build. Sources ride in the collapsed list, not inline; only an INVENTED number (no real source) is forbidden.
 2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
 3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
 4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.

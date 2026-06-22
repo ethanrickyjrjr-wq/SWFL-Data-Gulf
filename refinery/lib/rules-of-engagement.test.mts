@@ -4,14 +4,15 @@ import { join } from "node:path";
 import { RULES_OF_ENGAGEMENT } from "./rules-of-engagement.mts";
 
 // The block rides in every payload's `_meta.rules`. Keep it lean: a rough
-// chars/4 token proxy must stay under the 280-token ceiling so embedding it
-// per-response never blows the consuming Claude's context budget. The cap was
-// 210, then 220 (rule 5 date-display), then 280 when rules 1/3/7 adopted the
-// four-lane provenance model (naming our data / your doc / web / your figure in
-// plain words). See the constant's header.
+// chars/4 token proxy must stay under the ceiling so embedding it per-response
+// never blows the consuming Claude's context budget. The cap was 210, then 220
+// (rule 5 date-display), then 280 (rules 1/3/7 four-lane provenance), then 300
+// when rule 1 added the four-lane CASCADE ORDER + "fill the gap, never refuse the
+// build; only an INVENTED number is forbidden" (operator decree 2026-06-22 — the
+// generalization of CLAUDE.md RULE 0.7). See the constant's header.
 test("RULES_OF_ENGAGEMENT stays under the lean token budget", () => {
   const approxTokens = Math.ceil(RULES_OF_ENGAGEMENT.length / 4);
-  expect(approxTokens).toBeLessThanOrEqual(280);
+  expect(approxTokens).toBeLessThanOrEqual(300);
 });
 
 test("RULES_OF_ENGAGEMENT carries all seven numbered rules", () => {

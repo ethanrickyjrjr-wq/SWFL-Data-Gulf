@@ -1,7 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import {
   buildRenderModel,
-  checkSocialGrain,
   type Narrative,
   type SnapshotItem,
   type ExhibitSlot,
@@ -227,47 +226,12 @@ describe('buildRenderModel — "social" single-visual model', () => {
 });
 
 // ---------------------------------------------------------------------------
-// checkSocialGrain — the MOAT: at-grain or refuse, never a representative ZIP
+// No geographic refusal. The former `checkSocialGrain` footprint gate was removed
+// (2026-06-22): a social card builds at ANY scope, and the real moat is the
+// no-invention guarantee proven by the "no-invention" + "never fabricates a
+// stat/exhibit when none was filed" tests above — values come verbatim from the
+// frozen filed items, never from the lake footprint.
 // ---------------------------------------------------------------------------
-
-describe("checkSocialGrain — grain guard (the MOAT)", () => {
-  test("no scope → whole-region post is allowed", () => {
-    expect(checkSocialGrain(undefined, undefined)).toEqual({ ok: true });
-  });
-
-  test("county scope resolves AT-grain (not downcast to a ZIP)", () => {
-    const guard = checkSocialGrain("county", "lee county");
-    expect(guard.ok).toBe(true);
-  });
-
-  test("place scope resolves AT-grain (not downcast to a ZIP)", () => {
-    const guard = checkSocialGrain("place", "naples");
-    expect(guard.ok).toBe(true);
-  });
-
-  test("an in-footprint ZIP is allowed", () => {
-    // 33901 (Fort Myers, Lee) is in fixtures/swfl-zip-county.json.
-    expect(checkSocialGrain("zip", "33901").ok).toBe(true);
-  });
-
-  test("out-of-footprint ZIP REFUSES and never substitutes a representative ZIP", () => {
-    // 90210 (Beverly Hills) is outside the 6-county footprint.
-    const guard = checkSocialGrain("zip", "90210");
-    expect(guard.ok).toBe(false);
-    if (guard.ok) throw new Error("expected refusal");
-    expect(guard.reason).toContain("outside the 6-county");
-    // The refusal must NOT contain another ZIP-looking substitute.
-    expect(guard.reason).not.toMatch(/\b3\d{4}\b/);
-    expect(guard.held_grain).toBe("county");
-  });
-
-  test("unrecognized scope_kind REFUSES (corridor is not a deliverable grain yet)", () => {
-    const guard = checkSocialGrain("corridor", "us-41");
-    expect(guard.ok).toBe(false);
-    if (guard.ok) throw new Error("expected refusal");
-    expect(guard.reason).toContain("not a grain we hold");
-  });
-});
 
 // ---------------------------------------------------------------------------
 // REGRESSION — every OTHER template behaves EXACTLY as before this build.
