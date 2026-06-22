@@ -46,8 +46,8 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install Python dependencies
-        run: pip install -r ingest/requirements.txt
+      - name: Install Python dependencies (slim — gate only needs psycopg+pyyaml)
+        run: pip install -r ingest/requirements-probe.txt
 
       - name: Decide whether a rebuild is due
         id: gate

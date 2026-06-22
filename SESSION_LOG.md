@@ -1,3 +1,9 @@
+## 2026-06-22 (main) — Phase 2 build 09: slim pip install for probe/gate crons [PUSHED]
+
+- **09 requirements-probe.txt** — created `ingest/requirements-probe.txt` with only `psycopg[binary]>=3.2` + `pyyaml>=6.0` (verified: `check_freshness.py` + `rebuild_due.py` import only those two; all others stdlib). Pointed `freshness-probe-daily.yml` + the `daily-rebuild.yml` gate step at the slim file. Full ~100-pkg tree stays on all ingest/crawl workflows — only the two lightweight probe/gate steps that run `check_freshness.py` + `rebuild_due.py` switch. Removes the biggest daily-failure surface (yanked wheel / PyPI blip on any of ~100 unneeded packages reddens a cron that never uses them).
+
+**Next:** remaining Phase 2 builds (07).
+
 ## 2026-06-22 (main) — Phase 2 build 08: collapse 11 crawl-job GHA installs → crawl4ai-setup [PUSHED]
 
 Standardized all 11 crawl-job workflows to uniform `crawl4ai-setup` + `crawl4ai-doctor` (advisory `continue-on-error: true`). Dropped 5 distinct bespoke spellings (`python -m playwright ... + python -m patchright`, bare `playwright ... + patchright`, `playwright --with-deps` alone). Added missing `crawl4ai-doctor` to 4 jobs (dbpr-press-releases, fgcu-reri, rsw-airport, swfl-inc). Removed redundant patchright smoke tests from 4 stealth jobs (covered by `crawl4ai-setup`). Confirmed: `CRAWL4AI_MODE=api` not set anywhere. Chose uniform over split (simplest; vendor-proven: `crawl4ai-setup` calls `post_install()` → both playwright + patchright `--with-deps`, stricter than the old bespoke steps).
