@@ -13,24 +13,32 @@ belt-and-suspenders layer on the **TEXT answer**), not a daily red.
 > that floor is shipped. Do not regress the chart surfaces listed below.
 
 > **PROVENANCE MODEL — READ FIRST (locked 2026-06-22).** The moat is **"sourced, not payload-only."** A
-> number is allowed when it NAMES a real source in plain words: **(1) our data, (2) the user's uploaded
-> document, (3) a named web source, (4) a figure the user gave us** (RULES OF ENGAGEMENT rule 1, the same
-> four lanes the chart engine enforces). The ONLY thing forbidden is an **invented** number. So this build's
-> "retract" self-check is **NOT** "retract anything not in the payload" — that would wrongly delete a
-> user/upload/web number and is exactly the behavior we removed. It is **"retract a number that names NO real
-> source"** (i.e. an invented one). Citations attach to lane (1); lanes (2)/(3)/(4) are named by their own
-> footnote, not retracted.
+> number is allowed when it has a real source: **(1) our data, (2) the user's uploaded document, (3) a named
+> web source, (4) a figure the user gave us** (RULES OF ENGAGEMENT rule 1, the same four lanes the chart
+> engine enforces). The ONLY thing forbidden is an **invented** number. So this build's "retract" self-check
+> is **NOT** "retract anything not in the payload" — that would wrongly delete a user/upload/web number and is
+> exactly the behavior we removed. It is **"retract a number that has NO real source"** (i.e. an invented one).
+>
+> **DISPLAY — DO NOT INLINE-CITE THE PROSE (locked 2026-06-22).** The chat/text answer stays clean prose; it
+> does **not** weave "(per Colliers)" / `cited_text` into sentences. Sources ride in the **collapsed sources
+> list** (`components/CitationList.tsx` — short, collapsed, expand or visit the link), populated from each
+> number's lane provenance (our citation / the upload's filename / the web URL / "you provided"). So this
+> build is **NOT** about surfacing per-claim `cited_text` in the answer — it's about (i) making sure every
+> number IS sourced (the retract self-check) and (ii) feeding the collapsed list, NOT decorating the prose.
 
 ## The gap (verified)
 We ground the conversational answer **structurally** — the payload controls the model's *baseline* context.
 That floor is strong, but the prose answer has no claim-by-claim provenance surface and no post-generation
 "is every number actually sourced?" pass. On the **conversational follow-up path**, two things are absent:
-- **No per-claim citation surface.** The grounded prompt is assembled inline in
-  `lib/assistant/conversation-path.ts` (the path that actually runs — `:204-215`, `:245/:446/:527` per build
-  20's verification) and again in `lib/grounded-answer.ts` (`buildGroundedSystemPrompt`, ~`:85`). Neither emits
-  a machine-checkable `cited_text` per claim — the answer is grounded but not **auditable** claim-by-claim.
-  Anthropic's native **Citations API** returns `cited_text` per claim, and `cited_text` does **not** count
-  toward output tokens (`round3/q-anthropic-citations.md`).
+- **No collapsed sources list on the text answer.** The grounded prompt is assembled inline in
+  `lib/assistant/conversation-path.ts` (the path that actually runs) and again in `lib/grounded-answer.ts`
+  (`buildGroundedSystemPrompt`) — re-probe; line numbers predate chart increments A–D. The answer is grounded
+  but the sources behind its numbers are not collected into the collapsed `CitationList` the way the report
+  path does. **The fix is to POPULATE that collapsed list from the four lanes' provenance** (our citation /
+  upload filename / web URL / "you provided"), NOT to inline-cite the prose and NOT (necessarily) to adopt the
+  native Citations API's per-claim `cited_text` — that surfaces inline auditability the operator explicitly
+  does not want in chat. Keep `cited_text` (if used at all) as an internal check that feeds the list, never as
+  prose decoration.
 - **No "name the source or retract" self-check.** The authoritative reduce-hallucinations guidance is: cite a
   source per claim, and **have the model check each number after generating; if it can name no real source,
   retract it** (`round1/brains-anthropic-reduce-hallucinations.md`). Here "real source" = the **four lanes**
@@ -96,31 +104,34 @@ new UI citation through it, don't rebuild).
      check (`gap-fill.ts`). SOLO-27's Citations request belongs solely to the grounded TEXT answer.
 3. **RULE 3.5 brainstorm (this is a behavior change — invoke `superpowers:brainstorming` at execution time):**
    decide the layering. The two designs to weigh:
-   - **(a) Native Citations API** — pass the grounded dossier rows as `document`/custom-content blocks with
-     `citations:{enabled:true}` so the model returns `cited_text` per claim natively. Pro: structurally
-     reliable pointers, `cited_text` free on output tokens. Con: changes the request shape on the live
-     conversational surface; verify it composes with the existing streaming + chart-frame emit (build 20).
+   - **(a) Collapsed sources list, populated from lane provenance** — collect each cited number's source
+     (our citation / upload filename / web URL / "you provided") and render it through the EXISTING collapsed
+     `CitationList` (`lib/citations/clean-url.ts` + `components/CitationList.tsx`). The prose is NOT touched —
+     no inline `cited_text`, no "(per X)". This is the operator-preferred display. The native Citations API is
+     **optional and internal-only**: if used at all, its `cited_text` feeds the list / the retract check, never
+     the prose. (If it's not needed to populate the list from existing lane provenance, skip it — and then the
+     Citations↔Structured-Outputs 400 caveat is moot.)
    - **(b) Name-the-source-or-retract self-check** — a lighter prompt-level pass: after the answer, the model
      checks each NUMBER and keeps it only if it can name one of the **four lanes** (our data / the user's doc /
      a named web source / a figure the user gave); a number that names NO lane (invented) is retracted; allow
      "I don't know." **Do NOT retract a user/upload/web number for being absent from the payload** — that is
      the removed payload-only behavior. Pro: minimal surface change, additive to the structural floor. Con:
      prompt-level, not machine-guaranteed.
-   - These are **complementary, not exclusive** — (a) for the citation surface (esp. for build-20 chart
-     rows), (b) as the cheap self-check. Decide whether to ship one, both, or stage (b) first then (a). Keep
-     the structural moat intact either way — this is belt-and-suspenders, never a replacement.
+   - These are **complementary, not exclusive** — (a) is the display (collapsed list, clean prose), (b) is the
+     cheap no-fabrication self-check. Decide whether to ship one, both, or stage (b) first then (a). Keep the
+     structural moat intact either way — this is belt-and-suspenders, never a replacement.
 4. Implement on the path that **actually runs** (conversation-path inline) and the shared `grounded-answer.ts`
    assembly **together** so the two do not silently diverge (the exact divergence build 20 calls out). Wire any
    surfaced citation through `lib/citations/clean-url.ts` + `components/CitationList.tsx` — do not rebuild the
    citation root.
 
 ## Done when
-- A live conversation-path follow-up that states a number either (a) carries a `cited_text` pointer back to a
-  real grounding row (lane 1), OR (b) names its lane (your doc / a web source / a figure you gave), OR (c) is
-  retracted only when it can name NO real source (invented) — verified against a deployed request, not a unit
-  mock. A properly-sourced user/upload/web number must **survive**, not be retracted. Add a proof line to
-  `verification/answer-proofs.jsonl` (the answer-fix-proof gate, per MEMORY) showing a live, non-deflecting,
-  leak-free, four-lane-honest answer.
+- A live conversation-path follow-up that states a number keeps **clean prose with NO inline citation**, and
+  its source appears in the **collapsed sources list** (our citation / upload filename / web URL / "you
+  provided") — OR the number is retracted only when it can name NO real source (invented). A properly-sourced
+  user/upload/web number must **survive**, not be retracted; the prose must NOT sprout "(per X)" inline. Verify
+  against a deployed request, not a unit mock. Add a proof line to `verification/answer-proofs.jsonl` (the
+  answer-fix-proof gate, per MEMORY) showing a live, non-deflecting, leak-free, four-lane-honest answer.
 - ~~A build-20 chart with no citable grounding row is dropped, not emitted via this build~~ — **VOID, already
   shipped by builds A–D** (per-lane drop: held/web/upload/user). SOLO-27 neither adds nor changes this; just
   confirm at review that the chart surfaces in "Dependencies" are untouched and still green

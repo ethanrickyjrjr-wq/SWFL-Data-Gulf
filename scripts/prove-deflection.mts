@@ -78,7 +78,7 @@ const OUTSIDE_SYSTEM_FIXED =
   "dismissed from their project.";
 
 const RULES_FIXED = `RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: every number names its real source in plain words — our data, your uploaded doc, a named web source, or a figure you gave us. No real source → don't state it; never invent one.
+1. CITE: every number has a real source — our data, your uploaded doc, a named web source, or a figure you gave us — in the collapsed sources, not inline in prose. No real source → don't state it; never invent one.
 2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
 3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
 4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.
@@ -140,7 +140,7 @@ const OUTSIDE_SYSTEM_BASELINE =
   "dismissed from their project.";
 
 const RULES_BASELINE = `RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: every number names its real source in plain words — our data, your uploaded doc, a named web source, or a figure you gave us. No real source → don't state it; never invent one.
+1. CITE: every number has a real source — our data, your uploaded doc, a named web source, or a figure you gave us — in the collapsed sources, not inline in prose. No real source → don't state it; never invent one.
 2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
 3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
 4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.

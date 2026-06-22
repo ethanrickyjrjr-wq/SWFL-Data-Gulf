@@ -1,3 +1,10 @@
+## 2026-06-22 (main) — contract: text answers don't inline-cite; sources ride in the collapsed list [PUSHED]
+
+**Operator clarification on the four-lane moat:** chat/text answers stay **clean prose — NO inline citation**. Numbers are still real (four lanes, never invent), but the source is surfaced in the **collapsed `CitationList`** (short, collapsed, expand or visit link), not written into sentences. Charts keep their small-print footnote.
+- **Rule 1** (canonical `rules-of-engagement.mts` + 3 byte-identical mirrors `CLAUDE.md`/`consumption-contract.md`/`THE-CONTRACT.md` + `prove-deflection.mts` copy): `…has a real source — our data / your uploaded doc / a named web source / a figure you gave us — in the collapsed sources, not inline in prose. …never invent one.` Header comment gained a DISPLAY note. Cap unchanged (272/280); test 10/10.
+- **SOLO-27 realigned to the collapsed list:** banner + gap bullet now say populate the EXISTING `CitationList` from lane provenance, NOT inline `cited_text`; the native Citations API is downgraded to optional/internal (skip it if the list can be built from existing provenance → the Citations↔Structured-Outputs 400 caveat goes moot); design (a) is "collapsed list, clean prose"; "Done when" requires clean prose + source-in-collapse (no "(per X)" inline).
+- Memory [[project_four-lane-provenance-moat]] gained the display rule. No code touched.
+
 ## 2026-06-22 (main) — dbpr_sirs self-hosted runner: pwsh shell (bash hit a WSL/Store python stub) [PUSHED]
 
 **Run 27972074901 failed at `Install Python deps`:** under `shell: bash` the `python` command resolved to a Windows app-execution-alias / WSL stub ("Windows Subsystem for Linux has no installed distributions"), not the machine's real Python. The operator's Python works in PowerShell (where they ran `playwright install`).

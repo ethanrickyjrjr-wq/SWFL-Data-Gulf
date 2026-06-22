@@ -10,12 +10,17 @@
  *
  * PROVENANCE MODEL (locked 2026-06-22 — "sourced, not payload-only"). Rule 1 is
  * the FOUR-LANE rule the chart engine already enforces, now universal to every
- * answer: a number is allowed when it NAMES a real source in plain words —
+ * answer: a number is allowed when it has a real source —
  *   (1) our data,  (2) the user's uploaded document,  (3) a named web source,
  *   (4) a figure the user gave us.
  * The ONLY thing forbidden is an INVENTED number (one with no real source). The
  * old "no source in THIS PAYLOAD → no claim" framing was payload-only — it wrongly
  * refused user/upload/web numbers; that is gone. "Never invent" stays absolute.
+ * DISPLAY: in a chat/text answer the source is NOT cited inline — it rides in the
+ * collapsed sources list (`components/CitationList.tsx`, short + collapsed, expand
+ * or visit the link). Charts name their source in the small-print footnote. The
+ * prose stays clean either way; the requirement is that the source EXISTS and is
+ * surfaced, never that it's woven into every sentence.
  * Rule 5 keeps "NNN = triple-net rent, never a place name" (the acronym's meaning
  * AND the place-name-misread guard).
  *
@@ -52,7 +57,7 @@
  * and a store-hours question answered with "we don't hold that grain."
  */
 export const RULES_OF_ENGAGEMENT = `RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: every number names its real source in plain words — our data, your uploaded doc, a named web source, or a figure you gave us. No real source → don't state it; never invent one.
+1. CITE: every number has a real source — our data, your uploaded doc, a named web source, or a figure you gave us — in the collapsed sources, not inline in prose. No real source → don't state it; never invent one.
 2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
 3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
 4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.
