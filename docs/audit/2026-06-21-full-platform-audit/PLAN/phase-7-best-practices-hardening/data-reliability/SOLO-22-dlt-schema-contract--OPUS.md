@@ -1,5 +1,15 @@
 # 22 — dlt `schema_contract` on load-bearing pipelines (durable schema-drift guard)
 
+> **STATUS — SHIPPED on news_swfl (2026-06-22).** `schema_contract={"data_type":"freeze"}`
+> on the `news_articles_swfl` resource + two pure helpers in `ingest/lib/schema_contract.py`
+> (`explain_contract_failure` walks the full `__context__` chain; `log_schema_update` surfaces
+> column deltas). All 4 "Done when" gates proven live: real load exit 0 / 64 rows / `published_date`
+> still `text`; drift → `PipelineStepFailed`→`DataValidationError` (table/column/`freeze`), not a bare
+> `DatatypeMismatch`; forced added column emits `[schema-update]`. 11/11 tests green. **Started
+> NARROW (news_swfl only)** — the other ~46 pipelines opt in later per-pipeline (RULE 3 C2). The
+> freeze line uses the `schema-contract failed validation` token → routes to the cron classifier's
+> existing SCHEMA_DRIFT arm today (no build-04 dependency). See SESSION_LOG 2026-06-22.
+
 **Model: OPUS.** Per-pipeline dlt config touching multiple `pipeline.py` files + a vendor-API surface
 (`schema_contract` request shape) whose exact keys must be confirmed live — the choice of evolve-vs-freeze
 per table is judgment, not mechanical. **Priority: P2.** Best-practices *hardening* (durable

@@ -1,3 +1,14 @@
+## 2026-06-22 (main) — SOLO-22: dlt `schema_contract` on news_swfl (durable schema-drift guard)
+
+**Phase-7 audit SOLO-22.** Build 01 ALTERed `news_articles_swfl.published_date` date→text once (2026-06-20, `79f924c9`); SOLO-22 is the durable recurrence-prevention so the *next* type drift fails loud with context instead of re-opening the opaque psycopg `DatatypeMismatch`. Vendor-first reconfirmed live against dlt 1.28.1 docs (entities/modes/`DataValidationError` context/`load_info.load_packages[].schema_update`); installed dlt 1.27.2 import paths + DVE attrs introspected.
+
+- **`ingest/lib/schema_contract.py` (NEW):** two pure formatters — `log_schema_update(load_info, label)` prints `[schema-update] …added (type)` for every column delta on a successful load (returns count); `explain_contract_failure(exc, label)` **walks the whole `__context__` chain** (not a hardcoded 2 levels) and on a `DataValidationError` prints an ASCII `… schema-contract failed validation` line (routes to the cron classifier's SCHEMA_DRIFT arm, ships today — no build-04 dep) then re-raises the original. NOT a `run()` wrapper (RULE 3 C2 — per-pipeline opt-in, never a global gate).
+- **`ingest/pipelines/news_swfl/pipeline.py`:** `schema_contract={"data_type":"freeze"}` on the resource (tables/columns stay `evolve`); `run()` wraps `pipeline.run()` in `try/except PipelineStepFailed → explain_contract_failure`, then `log_schema_update` on success.
+- **Tests:** `tests/lib/test_schema_contract.py` (8 — incl. chain-walk-deeper-than-2) + `tests/pipelines/news_swfl/test_schema_contract_drift.py` (3 live-dlt-on-DuckDB: freeze drift raises with context, added column surfaces in schema_update, in-type load passes). **11/11 green.**
+- **All 4 SOLO-22 gates proven (not code-read):** #1 grep+clean import; #2 real `news_swfl` load exit 0, 64 rows landed, `published_date` still `text`; #3 drift → `PipelineStepFailed`→`DataValidationError` (table/column/`freeze`), NOT bare `DatatypeMismatch`; #4 forced added column emits the `[schema-update]` token. Note: under freeze, dlt reports `column_name` as the would-be variant `val__v_text` (real behavior, verified live).
+
+Next: other phase-7 hardening builds (23/25 independent; 27/28 after their deps).
+
 ## 2026-06-22 (main) — SOLO-24: freshness as an SLA (per-source warn_after/error_after)
 
 **Phase-7 audit SOLO-24.** `check_freshness.py` exits 1 when any opted-in source breaches `error_after_days`; `warn_after_days` logs 🟡 SLA WARN (exit 0). Ungated sources untouched — opt-in contract, build 03 invariant preserved.
