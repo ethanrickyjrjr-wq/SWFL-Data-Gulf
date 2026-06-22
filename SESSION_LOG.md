@@ -1,3 +1,12 @@
+## 2026-06-22 (main) — SOLO-25 verified on main; tonight's rebuild disabled; probe-artifact gitignore
+
+- **SOLO-25 (data-quality probe)** confirmed fully on `main` (`db4544f1` + spec commits, carried up by parallel rebases): `ingest/scripts/check_data_quality.py` + `ingest/quality/quality_registry.yaml` + 4 `schema_baselines/*.json` + the data-quality `run:` step in `freshness-probe-daily.yml`. Value tests (not_null/unique/accepted_values) + at-rest column-type-change detector; non-gating, opt-in per table. Live-verify check `solo25_dq_probe_live_verify` open (next freshness-probe run).
+- **Master rebuilt to v85** earlier today via Daily Brain Rebuild dispatch (run 27974141415) — cleared the stale ops "rebuild BROKEN" banner caused by the `freshness_mortgage_30yr_fixed_pct` orphan (concept sat in `ordered_collections`, which the resolver ignores; fixed at root by `144ee21d`). `_build-report.json` exit 0, deterministic NONE; live `/api/build-report` + ops banner now green.
+- **Disabled `daily-rebuild` workflow** to skip tonight's 06:00 UTC run (master fresh to 06-29; `rebuild_due` would otherwise fire on newer sources). Re-enable tracked: check `reenable_daily_rebuild_after_tonight` (due 06-23).
+- **.gitignore:** broadened throwaway probe/proof patterns (`scripts/.prove-*`, `scripts/probe_*.py`, `scripts/deep_probe_*.py`, `*_probe_results.json`) to keep the commit board clean.
+
+**Next:** re-enable `daily-rebuild` after 06:00 UTC 06-23; live-verify the data-quality GHA step on the next freshness-probe run.
+
 ## 2026-06-22 (main) — dbpr_sirs self-hosted runner: pin a uv venv (machine python env was broken) [PUSHED]
 
 **Two more self-hosted failures, both Python-env chaos on the machine (not the runner, not the code):**

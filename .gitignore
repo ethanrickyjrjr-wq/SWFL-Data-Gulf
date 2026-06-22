@@ -114,8 +114,12 @@ ingest/*.log
 # Scratch / throwaway scripts — never commit
 refinery/__scratch__/
 __scratch__/
-# Chart-deflection proof-harness output (scripts/prove-chart-deflection.mts) — scratch, never commit
-scripts/.prove-chart-*
+# Throwaway probe/proof artifacts — left untracked by convention, never committed.
+# Proof-harness outputs (scripts/prove-*.mts), one-off probe scripts, and result JSON.
+scripts/.prove-*
+scripts/probe_*.py
+scripts/deep_probe_*.py
+*_probe_results.json
 
 # RLS prod-probe — connects to the prod DB with a HARDCODED password on line 4.
 # Operator's local-only verification tool; one `git add .` away from leaking the
