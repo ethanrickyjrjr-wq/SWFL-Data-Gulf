@@ -3,7 +3,14 @@
 **Model: Opus.** It touches the **no-invention moat** — the two grounded-prompt assemblies a no-invention
 fix must touch (per NOTES §1) — plus a vendor surface (Anthropic Citations API) whose request/response
 shape and model-id support drift. **Priority: P3.** This is AI-layer best-practices hardening (a
-belt-and-suspenders layer + a citation surface for build-20 charts), not a daily red.
+belt-and-suspenders layer on the **TEXT answer**), not a daily red.
+
+> **SCOPE NARROWED 2026-06-22 — build 20 (charts on the conversation path) HAS LANDED** as the chart
+> increments A–D (commits `51997bb0` select-rows, `8d647077` web gap-fill, `304e5aa8` user-provided lane,
+> `00975527` upload-scan). Those builds **already gave every charted number a per-lane provenance + a
+> verbatim-source check** (see "Dependencies" below). **SOLO-27 is now ONLY about the prose TEXT answer's
+> per-claim citations / retract self-check. It must NOT touch, reroute, or re-implement chart provenance** —
+> that floor is shipped. Do not regress the chart surfaces listed below.
 
 ## The gap (verified)
 We ground the conversational answer **structurally** — the payload controls the model's context, so "no
@@ -32,11 +39,27 @@ conversation-path.ts`, `lib/grounded-answer.ts`, the Anthropic client `refinery/
 new UI citation through it, don't rebuild).
 
 ## Dependencies / file-conflicts
-- **AFTER build 20 (charts on the conversation path).** Both builds touch `conversation-path.ts` +
-  `grounded-answer.ts` — the two grounded-prompt assemblies. Do **not** run concurrently with 20.
-- **A build-20 chart must cite its source rows via this build.** Build 20's fold-in already pins it: a chart
-  with no citable grounding row is **dropped, not emitted** — the same floor as the text answer. The chart's
-  `key_metrics` provenance flows through the surface this build adds.
+- **Build 20 (charts on the conversation path) is DONE — do not run against a stale picture.** It shipped as
+  chart increments A–D. Both this build and 20 touch `conversation-path.ts` + `grounded-answer.ts`, so REBASE
+  on current `main` and re-probe before editing — the line numbers in this doc predate A–D and are dead.
+- **DO NOT REGRESS the shipped chart surfaces (these are NOT this build's job):**
+  - `lib/assistant/compose-chart.ts` — the chart composer. It owns chart provenance via a **4-lane
+    `source.citation` footnote** (`SWFL Data Gulf — …` · `From your upload (<file>)` · `Peer data (web): …` ·
+    `Provided by you: …`) and a belt `lintChartBlock` over an expanded number set. Leave its tool schema,
+    lanes, and footnote format intact.
+  - `lib/assistant/gap-fill.ts` — **already does per-claim citation verification for charted web numbers**
+    (`valueAppearsInText` / `valueAppearsInCitations`: a web figure is plotted only if its digits appear
+    verbatim in a returned `web_search_20250305` `cited_text` span). This is the chart's citation surface; it
+    is separate from the prose Citations API SOLO-27 adds. Do not merge, reroute, or replace it.
+  - `conversation-path.ts` chart wiring — `chartForConversation(...)`, the `uploadsText` thread, and the
+    injected `=== CHART ON SCREEN === / <groundingNote>` block + the `streamAnswer(system + chartBlock + …)`
+    composition. SOLO-27 edits the **grounded TEXT system assembly** (`buildGroundedRegionSystem` /
+    `buildGroundedSystemPrompt`); it must leave the chart block and its composition untouched.
+- **Chart provenance is ALREADY shipped — this build does NOT add it.** A chart number with no citable/
+  verifiable source is already **dropped, not emitted** per-lane (held = `lintChartBlock` anchor; web =
+  `cited_text` verbatim check; upload = `valueAppearsInText` against the doc; user = footnoted as theirs).
+  SOLO-27 does **not** re-implement or move that floor; the earlier "chart must cite via this build" coupling
+  is **void**.
 
 ## Steps
 1. **Probe first (RULE 0.5 — read the actual files, do not trust the line numbers above):**
@@ -58,6 +81,10 @@ new UI citation through it, don't rebuild).
      is **prose, not strict-JSON**, so they don't collide here — but the brainstorm must confirm this path does
      not also carry an `output_config.format`. Do not hardcode any of this from memory or from the round
      capture; the captured `round3/q-anthropic-citations.md` is a starting pointer, not authority.
+   - **Keep the Citations API on the PROSE answer call only.** The chart composer (`compose-chart.ts`) already
+     issues its own Anthropic calls — a **forced `tool_use`** selection call and a `web_search_20250305`
+     gap-fill call. Do **not** add `citations:{enabled:true}` to those; charts have their own verbatim-source
+     check (`gap-fill.ts`). SOLO-27's Citations request belongs solely to the grounded TEXT answer.
 3. **RULE 3.5 brainstorm (this is a behavior change — invoke `superpowers:brainstorming` at execution time):**
    decide the layering. The two designs to weigh:
    - **(a) Native Citations API** — pass the grounded dossier rows as `document`/custom-content blocks with
@@ -81,8 +108,10 @@ new UI citation through it, don't rebuild).
   claim back to a real grounding row, OR (b) is retracted when no supporting quote exists in the payload —
   verified against a deployed request, not a unit mock. Add a proof line to `verification/answer-proofs.jsonl`
   (the answer-fix-proof gate, per MEMORY) showing a live, non-deflecting, leak-free cited answer.
-- A build-20 chart with no citable grounding row is **dropped, not emitted** (same floor as the text answer) —
-  demonstrable on the conversation path.
+- ~~A build-20 chart with no citable grounding row is dropped, not emitted via this build~~ — **VOID, already
+  shipped by builds A–D** (per-lane drop: held/web/upload/user). SOLO-27 neither adds nor changes this; just
+  confirm at review that the chart surfaces in "Dependencies" are untouched and still green
+  (`bun test lib/assistant/compose-chart.test.ts lib/assistant/gap-fill.test.ts`).
 - The structural moat is unchanged (no payload fact is reachable that wasn't before); the
   `buildGroundedSystemPrompt` golden snapshot test still passes (or is updated deliberately, with the diff
   reviewed). Live-verify after deploy (sibling to build 20's `one_assistant_unify_live_verify`).
@@ -99,5 +128,5 @@ the Citations↔Structured-Outputs 400 incompatibility check in the vendor-first
 - `docs/audit/2026-06-21-best-practices-research/round1/brains-anthropic-reduce-hallucinations.md` — quote-first grounding; cite a source per claim, retract if no supporting quote; allow "I don't know"
 **crawl4ai-live (docs/audit/2026-06-21-crawl4ai-live/):**
 - (n/a — AI-layer build)
-**Ties to existing builds:** build 20 (charts must cite their source rows), the structural payload moat (CLAUDE.md THE-GOAL)
+**Ties to existing builds:** build 20 / chart increments A–D — **SHIPPED**; charts already carry per-lane provenance + a verbatim-source check (`compose-chart.ts` + `gap-fill.ts`), so SOLO-27 is scoped to the prose TEXT answer ONLY and must not touch those surfaces. Structural payload moat: CLAUDE.md THE-GOAL.
 **Verified (live docs, 2026-06-22 — re-fetch at build time):** Citations API request = `document` block + `citations:{enabled:true}`; response = text blocks each carrying `citations[].cited_text` + `document_index` + location (char/page/block); `cited_text` is free on output tokens; **Citations + Structured Outputs are incompatible (400)** — folded into Steps 2/3 above.
