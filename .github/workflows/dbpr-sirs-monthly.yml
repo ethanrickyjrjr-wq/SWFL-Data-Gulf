@@ -22,8 +22,10 @@ jobs:
     timeout-minutes: 30
     defaults:
       run:
-        # Git Bash on the Windows runner, so the existing bash steps work unchanged.
-        shell: bash
+        # PowerShell on the Windows runner — `python` resolves to the machine's real Python
+        # here (the env the operator runs the pipeline in). Under `bash` it hit a Windows
+        # app-execution-alias/WSL stub instead ("WSL has no installed distributions").
+        shell: pwsh
 
     steps:
       - uses: actions/checkout@v6
@@ -50,8 +52,6 @@ jobs:
           # the datacenter-IP block without touching code.
           CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
         run: |
-          DRY_RUN_FLAG=""
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            DRY_RUN_FLAG="--dry-run"
-          fi
-          python -m ingest.pipelines.dbpr_sirs.pipeline $DRY_RUN_FLAG
+          $pyArgs = @()
+          if ("${{ github.event.inputs.dry_run }}" -eq "true") { $pyArgs += "--dry-run" }
+          python -m ingest.pipelines.dbpr_sirs.pipeline @pyArgs

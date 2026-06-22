@@ -1,3 +1,10 @@
+## 2026-06-22 (main) — dbpr_sirs self-hosted runner: pwsh shell (bash hit a WSL/Store python stub) [PUSHED]
+
+**Run 27972074901 failed at `Install Python deps`:** under `shell: bash` the `python` command resolved to a Windows app-execution-alias / WSL stub ("Windows Subsystem for Linux has no installed distributions"), not the machine's real Python. The operator's Python works in PowerShell (where they ran `playwright install`).
+
+- Fix: `defaults.run.shell: bash` → `pwsh`; rewrote the dry-run flag logic in PowerShell (`$pyArgs` splat, avoiding the `$args` automatic var). `python -m pip` / `python -m playwright` / `python -m ingest` now run in the shell where `python` resolves correctly.
+- Next: re-dispatch; expect the QIX pull to land rows from the residential IP, then `svc.cmd install`.
+
 ## 2026-06-22 (main) — dbpr_sirs self-hosted runner: drop actions/setup-python (HKLM perm fail) [PUSHED]
 
 **Self-hosted runner `MYNAMEJEFF` (swfl-local) is online; first test dispatch (run 27971849045) failed at `actions/setup-python@v6`** — it does `Remove-Item Registry::HKLM\...\Uninstall -Recurse -Force` during install, which the non-elevated runner account can't do ("Requested registry access is not allowed" → "Error happened during Python installation"). Steps 3+ skipped; never reached the QIX pull.
