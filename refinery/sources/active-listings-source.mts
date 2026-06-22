@@ -128,7 +128,7 @@ async function fetchLive(): Promise<RawAggRow[]> {
         cityRows.find((r) => r.source_url)?.source_url ??
         buildSourceCitationUrl(TABLE, {
           label: "Crexi active CRE listings",
-          source: "Crexi (Firecrawl agent weekly scrape)",
+          source: "Crexi (crawl4ai weekly scrape)",
           brain: "cre-swfl",
           date_col: "_ingested_at",
         }),
@@ -168,7 +168,7 @@ export const activeListingsSource: SourceConnector = {
       source:
         env.source === "fixture"
           ? `Active CRE listings — Estero + FMB (fixture; ${SCHEMA}.${TABLE})`
-          : `Active CRE listings via ${SCHEMA}.${TABLE} (Crexi Firecrawl weekly scrape; available-only filter)`,
+          : `Active CRE listings via ${SCHEMA}.${TABLE} (Crexi crawl4ai weekly scrape; available-only filter)`,
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

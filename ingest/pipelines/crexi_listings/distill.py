@@ -71,12 +71,16 @@ def _parse_status(raw: str | None) -> str:
 
 
 def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Validate and normalize raw Firecrawl rows. Drops rows missing address+city."""
+    """Validate and normalize raw Crexi rows. Drops rows missing address, city, or state."""
     out = []
     for raw in rows:
         addr = (raw.get("address") or "").strip()
         city = (raw.get("city") or "").strip()
-        if not addr or not city:
+        # state is recorded from the listing's own location.state.code (build 11) — NEVER hardcoded.
+        # The old `state = "FL"` mislabeled nationwide rows; drop a row we can't place rather than
+        # invent a state (MOAT: the system cannot invent a location).
+        state = (raw.get("state") or "").strip().upper()
+        if not addr or not city or not state:
             continue
 
         sqft = raw.get("sqft")
@@ -88,7 +92,7 @@ def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "corridor_name": None,
             "address": addr,
             "city": city,
-            "state": "FL",
+            "state": state,
             "property_type": (raw.get("property_type") or "").strip().lower() or None,
             "sqft": int(sqft) if sqft is not None else None,
             "asking_price_psf": float(asking_psf) if asking_psf is not None else None,
