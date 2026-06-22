@@ -14,8 +14,16 @@ on:
 jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Self-hosted runner on the operator's machine: its residential IP reaches the DBPR WAF
+    # directly (GitHub datacenter IPs are silently dropped — page.goto times out). The
+    # 'swfl-local' label scopes this job to that one runner. Keeps SIRS on GHA + the ops
+    # dashboard (logs, retries, visibility) instead of an invisible local Task Scheduler job.
+    runs-on: [self-hosted, swfl-local]
+    timeout-minutes: 30
+    defaults:
+      run:
+        # Git Bash on the Windows runner, so the existing bash steps work unchanged.
+        shell: bash
 
     steps:
       - uses: actions/checkout@v6
@@ -39,10 +47,10 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
-          # Datacenter-IP escape: the DBPR WAF drops GitHub runner IPs (page.goto times out),
-          # so this cron is DISABLED and SIRS is pulled locally monthly. Wired and ready for
-          # the day a residential proxy is provisioned — set the CRAWL4AI_PROXY secret + run
-          # `gh workflow enable dbpr-sirs-monthly.yml`. Unset today -> qix.py goes direct.
+          # Runs on the self-hosted 'swfl-local' runner (residential IP), so it reaches the
+          # DBPR WAF directly and CRAWL4AI_PROXY stays unset -> qix.py goes direct. Kept wired
+          # as a fallback: if this ever moves back to a cloud runner, set the secret to escape
+          # the datacenter-IP block without touching code.
           CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
         run: |
           DRY_RUN_FLAG=""

@@ -1,3 +1,10 @@
+## 2026-06-22 (main) — dbpr_sirs: move monthly cron to a self-hosted runner (residential IP) [PUSHED]
+
+**Operator chose Option B** over a local Task Scheduler job: run the existing GHA cron on a self-hosted runner on the operator's machine, so SIRS reaches the DBPR WAF from a residential IP (datacenter IPs are dropped) AND stays visible on GHA + the ops dashboard.
+
+- `dbpr-sirs-monthly.yml`: `runs-on: ubuntu-latest` → `[self-hosted, swfl-local]`; `defaults.run.shell: bash` (Git Bash on the Windows runner so the existing steps work unchanged); timeout 15→30; CRAWL4AI_PROXY comment updated (stays unset → qix.py direct; kept as a cloud-runner fallback). YAML validated.
+- **Pending operator step:** register the self-hosted runner on the machine (label `swfl-local`, install as a service), then re-enable + test-dispatch. Workflow stays `disabled_manually` until the runner is online so no job queues against a missing runner.
+
 ## 2026-06-22 (main) — dbpr_sirs: deptry green + QIX proxy-ready; cron disabled (local monthly) [PUSHED]
 
 **Verdict from the workflow_dispatch egress test (run 27968418364):** the GitHub datacenter IP is silently dropped by the DBPR WAF — `page.goto` timed out at 60s for BOTH apps (browsers installed ✓, preflight ✓, creds ✓; code is correct — it pulled 1,358 rows from a home IP). The `CRAWL4AI_PROXY` "datacenter escape" secret is UNSET (never provisioned), so there is no non-datacenter egress to fix it with today.
