@@ -1,3 +1,11 @@
+## 2026-06-22 (main) — Phase 3 build 13: `fetch_tables()` zero-LLM helper (STEP 1 only; dbpr parser swap gated OUT) [COMMITTED — awaiting push OK]
+
+Added `_scrape_tables()` + sync `fetch_tables()` to `ingest/lib/crawl4ai_client.py` — reads crawl4ai's `result.tables` (DefaultTableExtraction, `table_score_threshold=7`, ON by default) and returns one header-keyed `pd.DataFrame` per real `<table>`, with provenance on `df.attrs` (headers/caption/summary/metadata/source_url). Empty-tolerant (no qualifying table → `[]`) and ragged-row-tolerant (width mismatch → column-less frame, never raises). Added `import pandas as pd` (already an ingest dep, 6 other callers). Nothing existing modified. Tests +4 (header-keyed+provenance, empty-tolerant, ragged fallback, failed-crawl raises); **18/18 passing** offline (mocked `AsyncWebCrawler`).
+
+**Gate verdict (probed the code, RULE 0.5):** dbpr_sirs Qlik grid IS a real `<table>` — `pipeline.py:56` settle-JS polls `document.querySelectorAll('table tbody tr').length` and both `parse_*_rows` read `<td>`/`<th>`. So STEP 2 (swap positional parser → `result.tables`) is architecturally eligible, BUT its "Done when" requires a brain-first parity rebuild of `condo-sirs-swfl` (live DB + scrape + LLM egress) which can't be verified offline; risk note flags it medium (output-shape drift on a consumed brain). **Deferred STEP 2** rather than swap blind. `refinery/packs/**` untouched → Gate 5 not triggered.
+
+**Next:** STEP 2 needs a live rig — fetch the Qlik grid, confirm `result.tables` scores it ≥7 and maps the 7-col (pre-July) / 5-col (July+) layouts, then rebuild `condo-sirs-swfl` and diff `--- OUTPUT ---` key_metrics before/after (must be identical or strictly more correct).
+
 ## 2026-06-22 (main) — Phase 3 build 12: `CRAWL4AI_PROXY` wiring — default-off residential-proxy escape [COMMITTED — awaiting push OK]
 
 Added `_proxy_from_env()` to `ingest/lib/crawl4ai_client.py` (reads `CRAWL4AI_PROXY` → `ProxyConfig.from_string()` or `None`). Threaded `proxy_config` into `Crawl4aiSession.step()` and `fetch_many()` via their `CrawlerRunConfig` kwargs — injected only when the var is set; zero behavior change otherwise. Added `ProxyConfig` to the crawl4ai import block. Tests: +2 (default-off returns None; `from_string` roundtrip); 14/14 passing.

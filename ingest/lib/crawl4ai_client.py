@@ -29,6 +29,7 @@ import tempfile
 from pathlib import Path
 from typing import Iterable, Optional
 
+import pandas as pd
 from crawl4ai import (
     AsyncWebCrawler,
     BrowserConfig,
@@ -225,10 +226,84 @@ def fetch_page_markdown(url: str, *, fit_markdown: bool = False) -> str:
     return md
 
 
-def fetch_page_html(url: str) -> str:
-    """Sync: fetch a static page, return raw HTML. No stealth."""
-    html, _ = asyncio.run(_scrape_page(url))
-    return html
+def _tables_to_frames(tables: list, source_url: str) -> list[pd.DataFrame]:
+    """Convert crawl4ai's result.tables (list of {headers, rows, caption, summary,
+    metadata}) into a list of pandas DataFrames, header-keyed where possible.
+
+    Provenance rides on df.attrs (caption / summary / metadata / source_url) so a
+    downstream consumer never has to guess which table a frame came from. Tolerant of
+    ragged rows: if a row's width doesn't match the headers, the frame is built
+    column-less (headers preserved in df.attrs['headers']) rather than raising — the
+    zero-LLM path must never abort a run on a single odd table."""
+    frames: list[pd.DataFrame] = []
+    for t in tables or []:
+        headers = list(t.get("headers") or [])
+        rows = list(t.get("rows") or [])
+        try:
+            df = (
+                pd.DataFrame(rows, columns=headers)
+                if headers and all(len(r) == len(headers) for r in rows)
+                else pd.DataFrame(rows)
+            )
+        except (ValueError, TypeError):
+            df = pd.DataFrame(rows)
+        df.attrs["headers"] = headers
+        df.attrs["caption"] = t.get("caption", "")
+        df.attrs["summary"] = t.get("summary", "")
+        df.attrs["metadata"] = t.get("metadata", {})
+        df.attrs["source_url"] = source_url
+        frames.append(df)
+    return frames
+
+
+async def _scrape_tables(
+    url: str,
+    *,
+    table_score_threshold: int = 7,
+    wait_for: Optional[str] = None,
+    timeout: int = 60_000,
+) -> list[pd.DataFrame]:
+    """Fetch a page and return its real <table> elements as DataFrames — zero-LLM.
+
+    Uses crawl4ai's DefaultTableExtraction (ON by default; table_score_threshold=7 keeps
+    layout/presentation tables out). Header-keyed, so it does not silently shift on column
+    re-order the way a positional parser does (Brain-Factory rule 2). No stealth — for the
+    class of static government summary tables. wait_for lets a JS-rendered grid settle.
+    Empty-tolerant: a page with no qualifying <table> yields []."""
+    bc = BrowserConfig(headless=True)
+    strategy = AsyncPlaywrightCrawlerStrategy(browser_config=bc)
+    cfg = CrawlerRunConfig(
+        cache_mode=CacheMode.BYPASS,
+        delay_before_return_html=1.0,
+        table_score_threshold=table_score_threshold,
+        wait_for=wait_for,
+        page_timeout=timeout,
+    )
+    async with AsyncWebCrawler(crawler_strategy=strategy, config=bc) as crawler:
+        r = await crawler.arun(url=url, config=cfg)
+    if not getattr(r, "success", False):
+        raise Crawl4aiError(f"scrape failed for {url}: {getattr(r, 'error_message', '?')}")
+    return _tables_to_frames(getattr(r, "tables", None) or [], url)
+
+
+def fetch_tables(
+    url: str,
+    *,
+    table_score_threshold: int = 7,
+    wait_for: Optional[str] = None,
+    timeout: int = 60_000,
+) -> list[pd.DataFrame]:
+    """Sync: fetch a page, return its real <table> elements as header-keyed DataFrames
+    (zero-LLM via DefaultTableExtraction). Provenance on df.attrs. Empty-tolerant (no
+    qualifying table => []). See _scrape_tables for the contract."""
+    return asyncio.run(
+        _scrape_tables(
+            url,
+            table_score_threshold=table_score_threshold,
+            wait_for=wait_for,
+            timeout=timeout,
+        )
+    )
 
 
 async def fetch_many(

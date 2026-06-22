@@ -21,6 +21,7 @@ from ingest.lib.crawl4ai_client import (
     _proxy_from_env,
     fetch_many,
     fetch_page_markdown,
+    fetch_tables,
 )
 
 # Local raw-HTML page (no network). crawl4ai accepts raw:// HTML.
@@ -204,6 +205,67 @@ def test_fetch_many_jitter_and_memory_and_monitor_knobs_reachable(monkeypatch) -
         )
     )
     assert out == {"https://a": "<a>"}
+
+
+# ─── build 13: fetch_tables (zero-LLM result.tables -> DataFrames) ────────────
+
+
+def _tables_result(tables):
+    return MagicMock(success=True, html="<html></html>", tables=tables)
+
+
+def test_fetch_tables_header_keyed_frame_with_provenance(monkeypatch) -> None:
+    table = {
+        "headers": ["Project Name", "County"],
+        "rows": [["Bay Tower", "LEE"], ["Gulf Villas", "COLLIER"]],
+        "caption": "SIRS Submissions",
+        "summary": "",
+        "metadata": {"row_count": 2, "column_count": 2},
+    }
+    monkeypatch.setattr(
+        mod, "AsyncWebCrawler", lambda **kw: _FakeArunCrawler(_tables_result([table]))
+    )
+
+    frames = fetch_tables("https://x")
+    assert len(frames) == 1
+    df = frames[0]
+    assert list(df.columns) == ["Project Name", "County"]
+    assert df.iloc[0]["Project Name"] == "Bay Tower"
+    assert df.iloc[1]["County"] == "COLLIER"
+    # provenance rides on df.attrs
+    assert df.attrs["caption"] == "SIRS Submissions"
+    assert df.attrs["metadata"]["row_count"] == 2
+    assert df.attrs["source_url"] == "https://x"
+
+
+def test_fetch_tables_empty_tolerant_when_no_tables(monkeypatch) -> None:
+    monkeypatch.setattr(
+        mod, "AsyncWebCrawler", lambda **kw: _FakeArunCrawler(_tables_result([]))
+    )
+    assert fetch_tables("https://x") == []
+
+
+def test_fetch_tables_ragged_rows_fall_back_to_columnless(monkeypatch) -> None:
+    # A row narrower than the headers must not raise — build column-less, keep headers in attrs.
+    table = {
+        "headers": ["A", "B", "C"],
+        "rows": [["1", "2"], ["3", "4", "5"]],
+        "metadata": {},
+    }
+    monkeypatch.setattr(
+        mod, "AsyncWebCrawler", lambda **kw: _FakeArunCrawler(_tables_result([table]))
+    )
+    frames = fetch_tables("https://x")
+    assert len(frames) == 1
+    assert frames[0].attrs["headers"] == ["A", "B", "C"]
+    assert len(frames[0]) == 2
+
+
+def test_fetch_tables_raises_on_failed_crawl(monkeypatch) -> None:
+    result = MagicMock(success=False, error_message="boom")
+    monkeypatch.setattr(mod, "AsyncWebCrawler", lambda **kw: _FakeArunCrawler(result))
+    with pytest.raises(Crawl4aiError, match="scrape failed"):
+        fetch_tables("https://x")
 
 
 # ─── build 12: _proxy_from_env (default OFF) ──────────────────────────────────
