@@ -9,7 +9,7 @@ filters to Lee + Collier counties, and upserts into data_lake.dbpr_sirs_submissi
 
 Extraction notes:
 - URL-based county pre-filter does not work; filter in Python after scrape.
-- 15s wait needed for Qlik to render rows into DOM.
+- Row-count stabilisation wait for Qlik hypercube render (polls until count stops growing).
 - result_truncated=True when "Load more" still visible at scrape end (hypercube limit fired).
 - July 2025+ schema has no ID column; row_hash is the dedup key.
 - row_hash = SHA256(project_name + '|' + association_name + '|' + zip + '|' + county)
@@ -45,7 +45,20 @@ APPS = [
 
 BASE_URL = 'https://dbpr-publicrecords.myfloridalicense.com/qpr/single/'
 
-_WAIT_SECONDS = 16.0  # Qlik needs ~15s to render rows into DOM
+_SAFETY_MARGIN_SECONDS = 2.0  # residual margin after row-count stabilises
+
+# Poll until the tbody row count stops increasing (Qlik hypercube settle).
+# Stash the count on first qualifying read; resolve when the next poll sees
+# the same value.  Never resolves until ≥3 rows are present.
+_QLIK_SETTLE_JS = (
+    "js:() => {"
+    " const n = document.querySelectorAll('table tbody tr').length;"
+    " if (n < 3) return false;"
+    " if (window.__sirsRowCount === undefined) { window.__sirsRowCount = n; return false; }"
+    " if (n !== window.__sirsRowCount) { window.__sirsRowCount = n; return false; }"
+    " return true;"
+    "}"
+)
 
 
 async def _fetch_html(url: str) -> str:
@@ -53,8 +66,8 @@ async def _fetch_html(url: str) -> str:
     async with Crawl4aiSession(session_id="dbpr_sirs") as session:
         return await session.step(
             url,
-            wait_for="js:document.querySelectorAll('table tbody tr').length > 2",
-            delay_after=_WAIT_SECONDS,
+            wait_for=_QLIK_SETTLE_JS,
+            delay_after=_SAFETY_MARGIN_SECONDS,
             timeout=120_000,
         )
 

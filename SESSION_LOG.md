@@ -1,3 +1,9 @@
+## 2026-06-22 (main) — Phase 2 build 10: dbpr_sirs blind-sleep → row-count stabilisation [PUSHED]
+
+- **10 dbpr_sirs settle** — replaced `_WAIT_SECONDS=16.0` + trivial `wait_for="> 2"` anti-pattern with `_QLIK_SETTLE_JS`: polls until `table tbody tr` count stops increasing (stash-on-first-read, resolve-on-repeat). `delay_after` dropped to 2 s residual margin. Extraction/parse untouched (build 13 owns that). Updated docstring.
+
+**Next:** remaining Phase 2 builds.
+
 ## 2026-06-22 (main) — Phase 2 build 06: fix extract_client 8-min per-page timeout [PUSHED]
 
 - **06 extract_client timeout** — `timeout * 1000` with `timeout=480` → 480,000 ms = 8 min/page (firecrawl-era job-budget reused as crawl4ai per-page browser timeout). Fixed: pass `timeout=75_000` (75 s in ms) directly; legacy `timeout` param marked inert. `fetch_many` default for other callers (lee_permits) unchanged. **Overlap was already done** — `_OVERLAP_FRAC = 0.1`, `_chunk_text` tail-carry, and `_dedup_rows` were already live; no change needed. Tests: 19/19 green.
