@@ -1,3 +1,13 @@
+## 2026-06-22 (main) — build 11 PUSHED (`01baa078`) + P0b verdict from live GHA run [DONE]
+
+Pushed the XHR-branch rewrite; all pre-push gates green. Ran the operator-authorized P0b sequence: `gh workflow enable` → `workflow_dispatch dry_run=true` (run **27931881053**) → re-disabled.
+
+**P0b = CONFIRMED VIABLE.** The GHA **datacenter IP cleared Crexi's Cloudflare** — Fort Myers Beach returned **35 rows on the runner, identical to the home-IP 35**. Whole run finished in ~2.5 min (vs the old 29-min Firecrawl timeout). So prod CAN run this; 11/12/13 are NOT egress-blocked.
+
+**Caveat — CF clearance is intermittent on datacenter IPs.** Estero's session this run was `Blocked by anti-bot protection: Cloudflare JS challenge` → 0 rows; FMB cleared. The per-city try/except + total-empty guard handled it (run succeeded, 35 > 0, no fake-green). The fix for the flakiness is **build 12 (proxy)** — already the next item in the plan. Recommend the workflow stays `disabled_manually` until build 12 hardens CF clearance, else a scheduled run could land a partial (one-city) result.
+
+Check `build_11_crexi_p0b_verify` CLOSED with this evidence. Build 11 complete.
+
 ## 2026-06-22 (main) — Phase 3 build 11: Crexi under-capture overhaul — XHR branch (probe-first, SOLO) [COMMITTED — awaiting push OK]
 
 Rewrote `ingest/pipelines/crexi_listings/extract.py` from scroll+`[:28000]`+Haiku to the grid's **backing JSON API**. Probed live home-IP first (RULE 0.5 + plan P0a): the first capture was 49,437 chars (the `[:28000]` cut amputated ~43%), the grid is virtualized behind `POST https://api-lease.crexi.com/assets/search` (offset pagination + `totalCount`), the API is Cloudflare-gated (plain POST → 403 "Just a moment…", 200 only from inside the cleared browser), the geo filter is the `term` field (`{"term":"Fort Myers Beach, FL"}` → 35 rows), and the listing URL is `/lease/properties/{id}/{urlSlug}`. Also found two more live root causes: the `js:` `wait_for` form **throws on crawl4ai 0.9.x** (`extract.py`'s old step-1 → 0 rows), and the pipeline loaded the *generic* `/lease` page (nationwide ML recs) with `distill.normalize()` hardcoding `state="FL"` → mislabeled out-of-state listings (MOAT violation).
