@@ -3,6 +3,7 @@ import {
   wantsCustomChart,
   buildHeldChartBlock,
   attachExternalPoints,
+  attachUserPoints,
   type Menu,
   type MenuPoint,
 } from "./compose-chart";
@@ -145,5 +146,51 @@ describe("attachExternalPoints — gap-fill merge (Increment B)", () => {
     expect(r.block.source?.citation).toContain(
       "Peer data (web): Tampa office vacancy — colliers.com",
     );
+  });
+});
+
+describe("attachUserPoints — the user-provided lane (footnoted, never our data)", () => {
+  const heldBlock: ChartBlock = {
+    title: "Vacancy by corridor",
+    columns: ["Corridor", "Vacancy (percent)"],
+    rows: [["Estero", 0.4]],
+    chart_type: "bar",
+    value_format: "percent",
+    asOf: "2026-06-20",
+    source: { citation: "SWFL Data Gulf — cre-swfl" },
+  };
+
+  it("appends the user's figure, footnotes 'Provided by you', and allows the value", () => {
+    const r = attachUserPoints(
+      heldBlock,
+      [{ label: "Tampa (my read)", value: 11 }],
+      new Set([0.4]),
+    );
+    expect(r.block.rows).toEqual([
+      ["Estero", 0.4],
+      ["Tampa (my read)", 11],
+    ]);
+    expect(r.numbers.has(11)).toBe(true); // user-supplied → allowed anchor, not rejected
+    expect(r.block.source?.citation).toContain("Provided by you: Tampa (my read)");
+  });
+
+  it("charts a user-ONLY figure when we hold nothing (empty base block)", () => {
+    const empty: ChartBlock = {
+      title: "Tampa",
+      columns: ["Item", "Value"],
+      rows: [],
+      chart_type: "bar",
+      value_format: "number",
+      asOf: "2026-06-20",
+      source: { citation: "" },
+    };
+    const r = attachUserPoints(empty, [{ label: "Tampa office vacancy", value: 11 }], new Set());
+    expect(r.block.rows).toEqual([["Tampa office vacancy", 11]]);
+    expect(r.block.source?.citation).toBe("Provided by you: Tampa office vacancy");
+  });
+
+  it("no user points → unchanged", () => {
+    const r = attachUserPoints(heldBlock, [], new Set([0.4]));
+    expect(r.block).toBe(heldBlock);
   });
 });

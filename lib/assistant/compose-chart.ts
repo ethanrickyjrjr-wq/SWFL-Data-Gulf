@@ -209,7 +209,12 @@ const RECORD_CHART_TOOL = {
     "the system will fetch it live, verify it against a real cited source, and cite " +
     "that source. Request external peers that share the same metric/unit as your " +
     "selected points so the comparison is apples-to-apples. Do NOT request a figure " +
-    "we already hold in the menu. Never put a number in the query.",
+    "we already hold in the menu. Never put a number in the query.\n\n" +
+    "If the USER stated a figure themselves in their message (e.g. 'chart Tampa at " +
+    "11%', 'add our Q2 absorption of 40,000 sqft'), put it in user_points with the " +
+    "label and the exact number the user gave. These are charted as the user's own " +
+    "data and footnoted 'Provided by you' — copy the user's number exactly; only ever " +
+    "include a number the user actually stated.",
   input_schema: {
     type: "object",
     additionalProperties: false,
@@ -247,6 +252,26 @@ const RECORD_CHART_TOOL = {
           required: ["label", "search_query"],
         },
       },
+      user_points: {
+        type: "array",
+        description:
+          "Optional figures the USER stated in their own message. Charted as their " +
+          "data, footnoted 'Provided by you'. Copy the user's number exactly; only " +
+          "numbers the user actually stated.",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            label: { type: "string", description: "Bar label, e.g. 'Tampa office vacancy'." },
+            value: { type: "number", description: "The exact number the user stated." },
+            unit: {
+              type: "string",
+              description: "Unit if the user gave one, e.g. 'percent', 'usd'.",
+            },
+          },
+          required: ["label", "value"],
+        },
+      },
     },
     required: ["title", "category_label", "point_ids", "chart_type"],
   },
@@ -260,8 +285,16 @@ interface HeldSelection {
   chart_type: "bar" | "table";
 }
 
+/** A figure the user stated themselves — charted as their data, footnoted. */
+export interface UserPoint {
+  label: string;
+  value: number;
+  unit?: string;
+}
+
 interface BuildChartInput extends HeldSelection {
   external_points: ExternalRequest[];
+  user_points: UserPoint[];
 }
 
 /** Pure assembler: resolve the model's selected ids against the menu and build a
@@ -348,7 +381,8 @@ export function attachExternalPoints(
   const rows = [...block.rows, ...extraRows].slice(0, MAX_BARS);
 
   const peerNote = externals.map((e) => `${e.label} — ${hostOf(e.url)}`).join("; ");
-  const citation = `${block.source?.citation ?? ""} · Peer data (web): ${peerNote}`.trim();
+  const base = block.source?.citation ?? "";
+  const citation = base ? `${base} · Peer data (web): ${peerNote}` : `Peer data (web): ${peerNote}`;
 
   return {
     block: {
@@ -356,6 +390,34 @@ export function attachExternalPoints(
       rows,
       source: { ...(block.source ?? { citation: "" }), citation },
     },
+    numbers,
+  };
+}
+
+/** Append USER-PROVIDED rows: the user's own figures, charted as their data and
+ *  footnoted "Provided by you" so they are never mistaken for our cited numbers or a
+ *  web peer. Their values join the lint anchor (the user supplied them — we mark
+ *  them, we don't verify them; the no-invention moat is about the AI, not the user).
+ *  Pure — exported for unit testing. */
+export function attachUserPoints(
+  block: ChartBlock,
+  userPoints: UserPoint[],
+  baseNumbers: ReadonlySet<number>,
+): { block: ChartBlock; numbers: Set<number> } {
+  const numbers = new Set(baseNumbers);
+  const clean = userPoints.filter((u) => u && typeof u.value === "number" && u.label);
+  if (clean.length === 0) return { block, numbers };
+
+  const extraRows = clean.map((u): [string, number] => [u.label, u.value]);
+  for (const u of clean) numbers.add(u.value);
+  const rows = [...block.rows, ...extraRows].slice(0, MAX_BARS);
+
+  const userNote = clean.map((u) => u.label).join("; ");
+  const base = block.source?.citation ?? "";
+  const citation = base ? `${base} · Provided by you: ${userNote}` : `Provided by you: ${userNote}`;
+
+  return {
+    block: { ...block, rows, source: { ...(block.source ?? { citation: "" }), citation } },
     numbers,
   };
 }
@@ -401,6 +463,7 @@ export async function composeChartFromRequest(
       | undefined;
     const raw = (tool?.input ?? {}) as Record<string, unknown>;
     const rawExternals = Array.isArray(raw.external_points) ? raw.external_points : [];
+    const rawUser = Array.isArray(raw.user_points) ? raw.user_points : [];
     input = {
       title: typeof raw.title === "string" ? raw.title : "Chart",
       category_label: typeof raw.category_label === "string" ? raw.category_label : "Item",
@@ -411,13 +474,34 @@ export async function composeChartFromRequest(
         .filter((e) => typeof e.label === "string" && typeof e.search_query === "string")
         .slice(0, MAX_EXTERNAL)
         .map((e) => ({ label: e.label as string, search_query: e.search_query as string })),
+      user_points: rawUser
+        .map((u) => u as Record<string, unknown>)
+        .filter((u) => typeof u.label === "string" && typeof u.value === "number")
+        .slice(0, MAX_BARS)
+        .map((u) => ({
+          label: u.label as string,
+          value: u.value as number,
+          unit: typeof u.unit === "string" ? u.unit : undefined,
+        })),
     };
   } catch {
     return null;
   }
 
-  let block = buildHeldChartBlock(input, menu);
-  if (!block) return null; // model declined / no valid selection → fall back to canned
+  // Base block from held data. May be null when the user is charting ONLY external or
+  // their own figures (e.g. "chart Tampa at 11%") — synthesize an empty base so those
+  // lanes can still produce a chart.
+  let block =
+    buildHeldChartBlock(input, menu) ??
+    ({
+      title: input.title || "Chart",
+      columns: [input.category_label || "Item", "Value"],
+      rows: [],
+      chart_type: input.chart_type === "table" ? "table" : "bar",
+      value_format: "number",
+      asOf: menu.asOf,
+      source: { citation: "" },
+    } satisfies ChartBlock);
 
   // Increment B — live cited gap-fill. Fetch each requested peer/context figure and
   // keep ONLY those verified verbatim against a real cited source (gap-fill.ts is the
@@ -431,26 +515,37 @@ export async function composeChartFromRequest(
     );
     externals = settled.filter((e): e is ExternalPoint => e !== null);
   }
-  const merged = attachExternalPoints(block, externals, menu.numbers);
-  block = merged.block;
+  const withExternal = attachExternalPoints(block, externals, menu.numbers);
+  // User-provided lane — the user's own figures, footnoted "Provided by you".
+  const withUser = attachUserPoints(withExternal.block, input.user_points, withExternal.numbers);
+  block = withUser.block;
 
-  // BELT-AND-SUSPENDERS: every plotted number must trace either to a held figure or
-  // to a gap-filled value already verified against a real citation (merged.numbers).
-  // Trivially true given construction; guards against a future assembler regression.
-  if (!lintChartBlock(block, merged.numbers).ok) return null;
+  if (block.rows.length < 1) return null; // nothing to chart from any lane → canned fallback
+
+  // BELT-AND-SUSPENDERS: every plotted number must trace to a held figure, a
+  // citation-verified web value, or a user-supplied value (all in withUser.numbers).
+  if (!lintChartBlock(block, withUser.numbers).ok) return null;
 
   const chart: ChartSpec = {
     ...block,
     frameId: "bar-table",
-    ...(externals.length > 0 ? { options: { externalSources: externals } } : {}),
+    ...(externals.length > 0 || input.user_points.length > 0
+      ? { options: { externalSources: externals, userSources: input.user_points } }
+      : {}),
   };
-  // The grounding note lists every plotted row (held + external) and the "state ONLY
-  // these" rule; append the external sources so the analyst can cite them in prose.
+  // The grounding note lists every plotted row and the "state ONLY these" rule; name
+  // the external sources (to cite) and the user-provided figures (to attribute).
   let groundingNote = summarizeChartForGrounding(chart);
   if (externals.length > 0) {
     groundingNote +=
       "\nPeer/context figures fetched live and cited (state the source if you mention them): " +
       externals.map((e) => `${e.label} = ${e.value} (${hostOf(e.url)})`).join("; ") +
+      ".";
+  }
+  if (input.user_points.length > 0) {
+    groundingNote +=
+      "\nUser-provided figures (attribute to the user — 'you provided', not our data): " +
+      input.user_points.map((u) => `${u.label} = ${u.value}`).join("; ") +
       ".";
   }
   return { chart, groundingNote };
