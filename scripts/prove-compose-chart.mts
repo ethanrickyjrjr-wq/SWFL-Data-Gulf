@@ -22,7 +22,6 @@ const ORIGIN = "https://www.swfldatagulf.com";
 const ROLLS = 6;
 const MAX_TOKENS = 700;
 const fs = await import("node:fs/promises");
-const { execSync } = await import("node:child_process");
 
 async function callHaiku(client: Anthropic, system: string): Promise<string> {
   const res = await client.messages.create({
@@ -45,9 +44,7 @@ async function main() {
     return;
   }
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const observedAt = execSync('bash -lc "date -u +%Y-%m-%dT%H:%M:%SZ"', {
-    encoding: "utf-8",
-  }).trim();
+  const observedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   // Tier C: compose the chart the user asked for. Null = the provenance gate rejected
   // it or the menu couldn't answer — either way Tier C did NOT fabricate.
@@ -100,7 +97,8 @@ async function main() {
     chart_title: composed.chart.title,
     chart_rows: composed.chart.rows.length,
     chart_type: composed.chart.chart_type,
-    provenance_gate: "passed (lintChartBlock with held-number set, inside composeChartFromRequest)",
+    provenance_gate:
+      "select-rows: cells assembled from selected menu points (no model-emitted numbers); lintChartBlock belt passed",
     rolls: ROLLS,
     bad,
     worked: bad === 0,
@@ -117,7 +115,7 @@ async function main() {
       endpoint: "/api/assistant",
       observed_at: observedAt,
       commit_claim:
-        "Tier C user-directed custom chart: composeChartFromRequest built a provenance-clean chart from held corridor figures; analyst describes it, cites real numbers, no deflection/leak",
+        "Tier C select-rows redesign: composeChartFromRequest builds the chart by SELECTING menu points (model emits no numbers), so wrong-entity/wrong-column mispairing is impossible by construction; analyst describes it, cites real numbers, no deflection/leak",
     };
     await fs.appendFile("verification/answer-proofs.jsonl", JSON.stringify(proof) + "\n");
     process.stderr.write("✅ appended live proof to verification/answer-proofs.jsonl\n");
