@@ -2,10 +2,10 @@
   "meta": {
     "schema_version": "1.0.0",
     "created_at": "2026-05-16",
-    "description": "SWFL Intelligence Lake â€” canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
+    "description": "SWFL Intelligence Lake — canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
     "next_review": "2026-08-15",
     "audit_doc": "docs/vocab-audit.md",
-    "concept_count": 214
+    "concept_count": 277
   },
   "concepts": {
     "sba_overall_survival_rate": {
