@@ -39,7 +39,23 @@ import { streamAnswer, sseMessage } from "@/lib/assistant/stream";
 import { FORMAT_RULE } from "@/lib/assistant/system-prompt";
 import { isOffTopicQuestion } from "@/lib/assistant/off-topic";
 import { asOfFromToken } from "@/lib/project/as-of";
-import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
+import { buildChartForQuestion, type ChartForQuestion } from "@/lib/assistant/chart-for-question";
+import { composeChartFromRequest } from "@/lib/assistant/compose-chart";
+
+/**
+ * Pick the chart for a conversation answer. An explicit "chart X / plot Y" request
+ * first tries the user-DIRECTED composer (Tier C: the LLM selects which HELD numbers
+ * to plot and the shape, provenance-gated so it can never invent) — honoring the exact
+ * ask. On any miss (not a chart request, lint reject, nothing to plot) it falls back to
+ * the canned producer (rich zhvi/scatter visuals + the any-brain deterministic bar).
+ */
+async function chartForConversation(
+  question: string,
+  origin: string,
+): Promise<ChartForQuestion | null> {
+  const composed = await composeChartFromRequest(question, origin);
+  return composed ?? (await buildChartForQuestion(question, origin));
+}
 
 const MAX_TOKENS = 500; // un-grounded explainer
 const GROUNDED_MAX_TOKENS = 700; // grounded path — more real, cited data to relay
@@ -466,7 +482,7 @@ export async function runConversationPath(
     // When present, inject the chart's REAL figures + a "describe it, never refuse"
     // directive (the report path's proven technique) so prose and chart agree and no
     // figure is invented.
-    const chartResult = await buildChartForQuestion(lastUser, origin);
+    const chartResult = await chartForConversation(lastUser, origin);
     const chartBlock = chartResult
       ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +
         "it shows; never say you can't chart or that it's out of scope. State ONLY the figures " +
@@ -544,7 +560,7 @@ export async function runConversationPath(
   // A located question charts too — "chart anything" includes when the user names a
   // place. The chart is region/corridor-grain (e.g. the 3-metro ZHVI trend, a brain's
   // by-ZIP bar) and includes the named place; brain numbers ONLY (the moat). Best-effort.
-  const locatedChart = await buildChartForQuestion(lastUser, origin);
+  const locatedChart = await chartForConversation(lastUser, origin);
   if (locatedChart) prelude.push({ type: "chart", chart: locatedChart.chart });
   const locatedChartBlock = locatedChart
     ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +

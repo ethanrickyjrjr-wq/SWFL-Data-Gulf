@@ -1,3 +1,15 @@
+## 2026-06-22 (main) — feat(charts): user-DIRECTED custom chart (Tier C) — "chart different numbers" with a two-layer moat gate [PUSHED]
+
+**Operator: "if someone wants different numbers charted, we can chart that."** Built Tier C: an explicit "chart X / plot Y / graph Z" request now composes the chart the user actually asked for, instead of only the canned default.
+
+- NEW `lib/assistant/compose-chart.ts` — `composeChartFromRequest(q, origin)`: gated on `wantsCustomChart` (only pays the LLM call on an explicit chart verb). Builds a bounded data MENU + anchor sets from the relevant brains (master + `resolveReachTargets`), then a forced-tool `record_chart_block` Haiku call (mirrors the proven `enrich-brand.ts` tool-use shape, `claude-haiku-4-5`) where the model SELECTS which held numbers to plot + the shape — it never supplies a figure.
+- **TWO-LAYER MOAT GATE (the important part):** (1) `lintChartBlock(block, numberSet)` provenance ON — every numeric cell anchors to a real held figure; (2) NEW `pairsAreFaithful(block, pairs)` — every cell traces to a real (entity-label, value) PAIR, so a real number can't be plotted under the WRONG corridor/ZIP (the number-only check can't catch misattribution). Either failure → null → caller falls back to the deterministic canned chart (which can't mispair). 6 unit tests pin it (faithful passes; real-number-wrong-label REJECTED; unknown label REJECTED; reword tolerated).
+- `lib/assistant/conversation-path.ts` — `chartForConversation()` tries compose first on an explicit chart ask, else the canned producer; wired into both branches.
+- NEW `scripts/prove-compose-chart.mts` — live proof: compose built a 16-row vacancy-by-corridor chart, BOTH gate layers passed, **6/6 clean** answers describing it with real figures. Proof appended to `verification/answer-proofs.jsonl`.
+- **Gates:** `bunx tsc` 0 · `bunx next build` exit 0 · `bun test` (compose-chart/conversation-path/frames/assistant-route) 63/0.
+
+**Honest residual:** pair-attribution keys on the entity label (corridor/ZIP), so a wrong-COLUMN-within-the-same-entity value (e.g. plotting Estero's rent under a "vacancy" header) isn't caught — softer than gross misattribution, which IS caught. Tighter (label+column) pairing or a select-real-rows design is the next hardening if we want it. Increment 2 (live cited gap-fill for numbers we don't hold) still pending.
+
 ## 2026-06-22 (main) — feat(charts): charts on the CONVERSATION path — any chartable brain, not the 4 fixtures (dynamic-chart Increment 1) [PUSHED]
 
 **The unlock (operator: "stop handcuffing — chart anything"):** the deterministic any-brain producer already exists — `computeMetricChart(output)` (`refinery/lib/chart-from-metrics.mts`) builds a cited, lint-passed, leak-guarded bar from ANY brain's key_metrics/detail_tables, and `buildDossier` already sets `dossier.chart` from it. The handcuff was only that chat called the narrow 4-fixture `routeChart`/`buildChartForIntent`. Fixed by bypassing that limit, NOT extending it. **Moat intact: every plotted number is a real audited brain number; the LLM never touches a figure.**
