@@ -37,8 +37,6 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Company",
     links: [
       { label: "Support", href: "/support" },
-      // Marketing anchors live on home — prefix with "/" so they work from any page.
-      { label: "Install MCP", href: "/#install" },
       { label: "API Reference", href: "/api/b/master" },
     ],
   },

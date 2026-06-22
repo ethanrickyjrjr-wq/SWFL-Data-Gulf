@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { projectItemsSchema } from "@/lib/project/items";
 import { recordUse } from "@/lib/highlighter/meter";
-import { applyUserBrandToProject } from "@/lib/project/apply-brand";
+import { applyUserBrandToProject, persistClaimBrandToProfile } from "@/lib/project/apply-brand";
 import { deriveProjectName } from "@/lib/project/derive-name";
 import {
   consumeClaimToken,
@@ -109,13 +109,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "claim failed" }, { status: 500 });
   }
 
-  // Both are best-effort, post-insert, and independent (each swallows its own
-  // errors) — run them concurrently rather than serially. G2: brand the claimed
-  // project on the winner path so a carried-back project starts branded like a
-  // direct create (a loser navigates to the same id the winner branded).
+  // All best-effort, post-insert, independent (each swallows its own errors) — run
+  // them concurrently. G2: brand the claimed project on the winner path so a
+  // carried-back project starts branded like a direct create. persistClaimBrandToProfile
+  // ALSO saves the funnel prospect's carried brand onto their ACCOUNT profile (creating
+  // it) so it carries to EVERY future project — brandToBranding above only stamps this
+  // first claimed one; without the profile persist, project #2 would land unbranded.
   await Promise.all([
     attachProjectId(token, id), // winner-side observability/cleanup
     recordUse(req, { report_id: id, reach: [], action: "claim" }, user.id),
+    persistClaimBrandToProfile(supabase, user.id, res.brand),
     applyUserBrandToProject(supabase, user.id, id),
   ]);
 

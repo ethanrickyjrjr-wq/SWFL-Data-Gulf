@@ -62,3 +62,62 @@ export async function applyUserBrandToProject(
     /* best-effort — a brand-copy failure must never fail project creation */
   }
 }
+
+/**
+ * A funnel prospect's brand carried in the claim token (arrival-URL shape).
+ * Structural so this module doesn't couple to claim-store's `ClaimBrand`.
+ */
+type CarriedBrand = {
+  primary?: string;
+  secondary?: string;
+  logo_url?: string;
+};
+
+/**
+ * Save a funnel prospect's carried brand onto their ACCOUNT brand profile
+ * (`user_brand_profiles`) at claim/signup, creating the row if absent.
+ *
+ * This is what makes their colors + logo carry to EVERY future project: the claim
+ * route's `brandToBranding` only stamps the first claimed project, while
+ * `applyUserBrandToProject` (direct create / import) reads THIS profile. Without
+ * this persist, a prospect's second project would land unbranded.
+ *
+ * Never clobbers a brand the user already chose — if a profile already carries any
+ * color/logo, we leave it untouched (first brand wins). Best-effort + never throws:
+ * a profile write must never fail the claim (branding is a nicety, not a gate on
+ * account birth). Mirrors the PATCH /api/user/brand upsert shape (onConflict user_id).
+ */
+export async function persistClaimBrandToProfile(
+  supabase: SupabaseClient,
+  userId: string,
+  brand: CarriedBrand | null | undefined,
+): Promise<void> {
+  if (!brand) return;
+  const colors: Record<string, string> = {};
+  if (brand.primary) colors.primary_color = brand.primary;
+  if (brand.secondary) colors.accent_color = brand.secondary;
+  if (brand.logo_url) colors.logo_url = brand.logo_url;
+  if (Object.keys(colors).length === 0) return;
+
+  try {
+    const { data: existing } = await supabase
+      .from("user_brand_profiles")
+      .select("primary_color, accent_color, logo_url")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    // Respect a brand the user already set — only create/fill an empty profile.
+    if (existing && (existing.primary_color || existing.accent_color || existing.logo_url)) {
+      return;
+    }
+
+    await supabase
+      .from("user_brand_profiles")
+      .upsert(
+        { user_id: userId, ...colors, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+  } catch {
+    /* best-effort — profile creation must never fail the claim */
+  }
+}

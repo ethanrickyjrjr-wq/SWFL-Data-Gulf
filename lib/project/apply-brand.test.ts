@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { applyUserBrandToProject } from "./apply-brand";
+import { applyUserBrandToProject, persistClaimBrandToProfile } from "./apply-brand";
 
 /** A minimal recorder standing in for the supabase update chain. */
 function recorderClient() {
@@ -171,5 +171,100 @@ describe("applyUserBrandToProject", () => {
     );
 
     expect(updates).toHaveLength(0);
+  });
+});
+
+/** Recorder for the persist path: a configurable existing profile + captured upserts. */
+function profileClient(existing: Record<string, unknown> | null) {
+  const upserts: { payload: Record<string, unknown>; opts: unknown }[] = [];
+  const client = {
+    from(_table: string) {
+      return {
+        select() {
+          return {
+            eq() {
+              return { maybeSingle: async () => ({ data: existing }) };
+            },
+          };
+        },
+        upsert(payload: Record<string, unknown>, opts: unknown) {
+          upserts.push({ payload, opts });
+          return Promise.resolve({ error: null });
+        },
+      };
+    },
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return { client: client as any, upserts };
+}
+
+describe("persistClaimBrandToProfile", () => {
+  it("creates a profile mapping carried brand → canonical color keys when none exists", async () => {
+    const { client, upserts } = profileClient(null);
+    await persistClaimBrandToProfile(client, "user-1", {
+      primary: "#7c3aed",
+      secondary: "#f59e0b",
+      logo_url: "https://cdn/fake.png",
+    });
+    expect(upserts).toHaveLength(1);
+    expect(upserts[0].payload).toMatchObject({
+      user_id: "user-1",
+      primary_color: "#7c3aed",
+      accent_color: "#f59e0b",
+      logo_url: "https://cdn/fake.png",
+    });
+    expect(upserts[0].opts).toEqual({ onConflict: "user_id" });
+  });
+
+  it("does NOT clobber a profile the user already branded (first brand wins)", async () => {
+    const { client, upserts } = profileClient({
+      primary_color: "#000000",
+      accent_color: null,
+      logo_url: null,
+    });
+    await persistClaimBrandToProfile(client, "user-1", { primary: "#7c3aed" });
+    expect(upserts).toHaveLength(0);
+  });
+
+  it("fills an empty (rows-exist-but-blank) profile", async () => {
+    const { client, upserts } = profileClient({
+      primary_color: null,
+      accent_color: null,
+      logo_url: null,
+    });
+    await persistClaimBrandToProfile(client, "user-1", { primary: "#7c3aed" });
+    expect(upserts).toHaveLength(1);
+    expect(upserts[0].payload).toMatchObject({ user_id: "user-1", primary_color: "#7c3aed" });
+  });
+
+  it("writes nothing when there is no carried brand", async () => {
+    const { client, upserts } = profileClient(null);
+    await persistClaimBrandToProfile(client, "user-1", null);
+    await persistClaimBrandToProfile(client, "user-1", {});
+    expect(upserts).toHaveLength(0);
+  });
+
+  it("never throws when the profile read/write fails (best-effort, not a gate)", async () => {
+    const throwing = {
+      from() {
+        return {
+          select() {
+            return {
+              eq() {
+                return {
+                  maybeSingle: async () => {
+                    throw new Error("boom");
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+    await expect(
+      persistClaimBrandToProfile(throwing, "user-1", { primary: "#7c3aed" }),
+    ).resolves.toBeUndefined();
   });
 });

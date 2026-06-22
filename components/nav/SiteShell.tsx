@@ -136,9 +136,6 @@ function HomeBar({ user, onLogin }: { user: User | null; onLogin: () => void }) 
               <HomeAnchor href="#comparison">How It Works</HomeAnchor>
             </li>
             <li>
-              <HomeAnchor href="#install">Install</HomeAnchor>
-            </li>
-            <li>
               <HomeAnchor href="#data">Live Data</HomeAnchor>
             </li>
             <li>
@@ -213,15 +210,6 @@ function HomeBar({ user, onLogin }: { user: User | null; onLogin: () => void }) 
                 onClick={() => setMobileOpen(false)}
               >
                 How It Works
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#install"
-                className="block text-gray-300 hover:text-white"
-                onClick={() => setMobileOpen(false)}
-              >
-                Install
               </Link>
             </li>
             <li>
