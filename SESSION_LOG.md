@@ -1,3 +1,9 @@
+## 2026-06-22 (main) — Phase 3 build 12: `CRAWL4AI_PROXY` wiring — default-off residential-proxy escape [COMMITTED — awaiting push OK]
+
+Added `_proxy_from_env()` to `ingest/lib/crawl4ai_client.py` (reads `CRAWL4AI_PROXY` → `ProxyConfig.from_string()` or `None`). Threaded `proxy_config` into `Crawl4aiSession.step()` and `fetch_many()` via their `CrawlerRunConfig` kwargs — injected only when the var is set; zero behavior change otherwise. Added `ProxyConfig` to the crawl4ai import block. Tests: +2 (default-off returns None; `from_string` roundtrip); 14/14 passing.
+
+**Gate:** check `build_12_crexi_proxy_live_verify` remains OPEN — a live Crexi yield probe with a real residential proxy credential (and the CF-flake on Estero lifting) is required before flipping any cron or calling this done. Wiring is dormant until then.
+
 ## 2026-06-22 (main) — build 11 PUSHED (`01baa078`) + P0b verdict from live GHA run [DONE]
 
 Pushed the XHR-branch rewrite; all pre-push gates green. Ran the operator-authorized P0b sequence: `gh workflow enable` → `workflow_dispatch dry_run=true` (run **27931881053**) → re-disabled.

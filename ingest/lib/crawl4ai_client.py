@@ -23,6 +23,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import logging
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -36,6 +37,7 @@ from crawl4ai import (
     CrawlerRunConfig,
     DefaultMarkdownGenerator,
     MemoryAdaptiveDispatcher,
+    ProxyConfig,
     PruningContentFilter,
     RateLimiter,
     UndetectedAdapter,
@@ -43,6 +45,15 @@ from crawl4ai import (
 from crawl4ai.async_crawler_strategy import AsyncPlaywrightCrawlerStrategy
 
 logger = logging.getLogger(__name__)
+
+
+def _proxy_from_env() -> Optional[ProxyConfig]:
+    """Return a ProxyConfig from CRAWL4AI_PROXY env var, or None when unset.
+    Zero behavior change when the var is absent — all callers stay byte-identical."""
+    val = os.environ.get("CRAWL4AI_PROXY", "").strip()
+    if not val:
+        return None
+    return ProxyConfig.from_string(val)
 
 
 class Crawl4aiError(RuntimeError):
@@ -115,7 +126,7 @@ class Crawl4aiSession:
         """Run one arun(): navigate (unless js_only) -> js_before -> wait_for ->
         delay_after -> capture. Returns result.html. Raises Crawl4aiError on failure."""
         assert self._crawler is not None, "use within 'async with'"
-        cfg = CrawlerRunConfig(
+        cfg_kwargs: dict = dict(
             session_id=self.session_id,
             cache_mode=CacheMode.BYPASS,
             js_code_before_wait=js_before,
@@ -124,6 +135,10 @@ class Crawl4aiSession:
             page_timeout=timeout,
             delay_before_return_html=delay_after,
         )
+        _pc = _proxy_from_env()
+        if _pc is not None:
+            cfg_kwargs["proxy_config"] = _pc
+        cfg = CrawlerRunConfig(**cfg_kwargs)
         r = await self._crawler.arun(url=url, config=cfg)
         if not getattr(r, "success", False):
             raise Crawl4aiError(f"step failed for {url}: {getattr(r, 'error_message', '?')}")
@@ -262,6 +277,9 @@ async def fetch_many(
         cfg_kwargs["max_range"] = max_range
     if stream:
         cfg_kwargs["stream"] = True
+    _pc = _proxy_from_env()
+    if _pc is not None:
+        cfg_kwargs["proxy_config"] = _pc
     cfg = CrawlerRunConfig(**cfg_kwargs)
     # MemoryAdaptiveDispatcher + RateLimiter replace the legacy `semaphore_count` knob: it caps
     # concurrent sessions at `concurrency`, backs off on 429/503 (base 1-3s, cap 60s, 3 retries),

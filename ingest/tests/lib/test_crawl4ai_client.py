@@ -18,6 +18,7 @@ import ingest.lib.crawl4ai_client as mod
 from ingest.lib.crawl4ai_client import (
     Crawl4aiError,
     Crawl4aiSession,
+    _proxy_from_env,
     fetch_many,
     fetch_page_markdown,
 )
@@ -203,3 +204,18 @@ def test_fetch_many_jitter_and_memory_and_monitor_knobs_reachable(monkeypatch) -
         )
     )
     assert out == {"https://a": "<a>"}
+
+
+# ─── build 12: _proxy_from_env (default OFF) ──────────────────────────────────
+
+
+def test_proxy_from_env_returns_none_when_unset(monkeypatch) -> None:
+    monkeypatch.delenv("CRAWL4AI_PROXY", raising=False)
+    assert _proxy_from_env() is None
+
+
+def test_proxy_from_env_from_string_roundtrip(monkeypatch) -> None:
+    monkeypatch.setenv("CRAWL4AI_PROXY", "http://user:pass@proxy.example.com:8080")
+    pc = _proxy_from_env()
+    assert pc is not None
+    assert "proxy.example.com" in pc.server
