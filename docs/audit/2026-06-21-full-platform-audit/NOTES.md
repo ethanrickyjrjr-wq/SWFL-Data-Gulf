@@ -84,7 +84,10 @@ grounding selection, never to emit). Two parallel grounded-prompt assemblies
   (27,437). The app-nodes script appends 116 app edges to `edges[]` only — a consumer reading `links[]`
   silently misses the app plane.
 - Two **orphaned** Python generators (`scripts/graphify/build-graph.py`, `export-ops-graph.py`) — in no
-  npm script/doc/hook; superseded by the CLI + `.mjs`.
+  npm script/doc/hook/workflow. **Node path supersedes them 1:1** (verified 2026-06-22): the `graphify` CLI
+  builds `graph.json`; `scripts/graphify-publish.mjs` writes the SAME target the `.py` did
+  (`swfldatagulf-ops/app/graph/brain-graph.json`) — plus the app plane the `.py` never had. The /ops
+  `/graph` page reads that **committed JSON**; it runs **no python**. Safe to retire (build 16).
 
 ---
 
