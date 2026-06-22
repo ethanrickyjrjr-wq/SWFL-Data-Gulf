@@ -28,19 +28,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
+      # NO actions/setup-python here: on a self-hosted runner it edits HKLM during install
+      # and fails with "registry access is not allowed" under the non-elevated runner account.
+      # Use the machine's own Python — the env that already runs this pipeline — via `python`.
       - name: Install Python deps
-        run: pip install -r ingest/requirements.txt
+        run: python -m pip install -r ingest/requirements.txt
 
-      - name: Install crawl4ai browsers
-        run: crawl4ai-setup
-
-      - name: crawl4ai preflight (advisory)
-        continue-on-error: true
-        run: crawl4ai-doctor
+      - name: Ensure Playwright Chromium
+        # qix.py drives raw Playwright; chromium is the only browser it needs. Idempotent —
+        # reuses the runner user's ms-playwright cache when already present.
+        run: python -m playwright install chromium
 
       - name: Run ingest
         env:

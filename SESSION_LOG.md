@@ -1,3 +1,10 @@
+## 2026-06-22 (main) — dbpr_sirs self-hosted runner: drop actions/setup-python (HKLM perm fail) [PUSHED]
+
+**Self-hosted runner `MYNAMEJEFF` (swfl-local) is online; first test dispatch (run 27971849045) failed at `actions/setup-python@v6`** — it does `Remove-Item Registry::HKLM\...\Uninstall -Recurse -Force` during install, which the non-elevated runner account can't do ("Requested registry access is not allowed" → "Error happened during Python installation"). Steps 3+ skipped; never reached the QIX pull.
+
+- Fix: removed `actions/setup-python` + `crawl4ai-setup`/`crawl4ai-doctor`. The runner uses the machine's OWN Python (the env that already runs this pipeline): `python -m pip install -r ingest/requirements.txt` + `python -m playwright install chromium` (qix.py drives raw Playwright; chromium is all it needs, idempotent against the user's ms-playwright cache).
+- Next: re-dispatch; confirm the QIX pull lands rows from the residential IP, then `svc.cmd install` to make the runner a service.
+
 ## 2026-06-22 (main) — MOAT rewritten: "sourced, not payload-only" (the four-lane rule, everywhere) [PUSHED]
 
 **Operator decree: stop refusing numbers from anyone but us.** The traveling contract's Rule 1 was payload-only — `CITE: no source in this payload → no claim` — which is what made the AI retract/refuse a user-supplied, uploaded-doc, or web number ("no one else can add a number"). Replaced with the **four-lane provenance model** the chart engine already enforces: a number is allowed when it NAMES its real source in plain words — **(1) our data, (2) the user's uploaded doc, (3) a named web source, (4) a figure the user gave us**. The ONLY thing forbidden is an **invented** number. "Never invent" stays absolute; "payload-only" is gone.
