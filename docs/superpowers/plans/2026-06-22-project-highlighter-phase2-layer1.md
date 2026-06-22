@@ -157,7 +157,9 @@ git commit -m "feat(highlighter): converse engine threads project context to /ap
 
 **Interfaces:**
 - Consumes: the four `ConverseInput` fields from Task 1.
-- Produces: `PopupProps` gains optional `context` / `projectId` / `pageContext` / `briefcase`; the popup forwards them into `ask(...)`. (`GlobalHighlighter` in Task 3 supplies them.)
+- Produces: `PopupProps` gains optional `context` / `projectId` / `pageContext` / `briefcaseText`; the popup forwards them into `ask(...)`. (`GlobalHighlighter` in Task 3 supplies them.)
+
+> **⚠ NAMING — avoid the `briefcase` collision:** `HighlightPopup` already binds `const briefcase = useBriefcase();` at **line 82** (used at `:285`/`:347` for filing). A prop also named `briefcase` is a duplicate identifier → `next build` fails. So the **prop is `briefcaseText`**; only the wire field passed to `ask` stays `briefcase` (i.e. `ask({ briefcase: briefcaseText })` → `ConverseInput.briefcase`). The other three names (`context`/`projectId`/`pageContext`) have no existing binding and are passed as-is.
 
 - [ ] **Step 1: Add the type import** — under the existing imports at the top of `HighlightPopup.tsx` (e.g. after the `ChartSpec` import at line 14):
 
@@ -169,11 +171,13 @@ import type { AssistantContext } from "@/lib/assistant/contract";
 
 ```ts
   /** Assistant grounding for the converse call — computed by GlobalHighlighter from the
-   *  project-context store (mirrors the pill's getExtraBody). Undefined off a project. */
+   *  project-context store (mirrors the pill's getExtraBody). Undefined off a project.
+   *  NOTE: the digest prop is `briefcaseText` (NOT `briefcase`) — `briefcase` is already the
+   *  useBriefcase() binding at line 82; reusing it would be a duplicate identifier. */
   context?: Exclude<AssistantContext, "public">;
   projectId?: string;
   pageContext?: string;
-  briefcase?: string;
+  briefcaseText?: string;
 ```
 
 - [ ] **Step 3: Destructure the new props** — in the `HighlightPopup({ … })` parameter list (lines 61-70), add them alongside the existing destructured props (before `onClose`):
@@ -190,7 +194,7 @@ export function HighlightPopup({
   context,
   projectId,
   pageContext,
-  briefcase,
+  briefcaseText,
   onClose,
 }: PopupProps) {
 ```
@@ -203,7 +207,7 @@ export function HighlightPopup({
       context,
       projectId,
       pageContext,
-      briefcase,
+      briefcase: briefcaseText, // ConverseInput.briefcase ← the popup's briefcaseText prop
       fact: factWithContext,
       slug: fact.slug,
       selectionType: deriveSelectionType(fact),
@@ -286,7 +290,7 @@ with:
           context={assistantContext}
           projectId={projectId ?? undefined}
           pageContext={pageContext}
-          briefcase={briefcaseText}
+          briefcaseText={briefcaseText}
           fact={fact}
           suggestions={fact.mode === "section" ? [] : resolveSuggestions(fact, carried)}
           fileableMetric={fact.mode === "section" ? null : resolveMetric(fact, carried)}
