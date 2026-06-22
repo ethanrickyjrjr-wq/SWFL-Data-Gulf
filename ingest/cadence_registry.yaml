@@ -715,6 +715,17 @@ pipelines:
     # SQL migration: docs/sql/20260609_active_listings_cre.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/crexi_listings/pipeline.py.
 
+  - name: brevitas_listings
+    lane: tier-2
+    probe_mode: odd_window
+    cadence_days: 7
+    tolerance_multiplier: 3.0
+    freshness_table: data_lake.active_listings_cre
+    freshness_column: _ingested_at
+    source_name: brevitas
+    expected_rows_min: 1
+    note: "Brevitas active CRE lease listings — Estero + Fort Myers Beach. Supplements Crexi (same table, source_name=brevitas). Clean JSON API (brevitas.com/api/search), no auth. ~1-4 confirmed leases/city; for-sale listings filtered by price threshold. Weekly Sunday 12:00 UTC. Pipeline: ingest/pipelines/brevitas_listings/pipeline.py."
+
   - name: lee_associates_swfl
     lane: tier-2
     probe_mode: odd_window

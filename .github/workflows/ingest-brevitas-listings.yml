@@ -1,0 +1,50 @@
+name: ingest-brevitas-listings
+
+on:
+  schedule:
+    # Weekly: Sunday 12:00 UTC — offset from Crexi (11:00 UTC) to avoid overlap.
+    - cron: "0 12 * * 0"
+  workflow_dispatch:
+    inputs:
+      corridor:
+        description: "Limit to a specific city, e.g. 'Estero' (blank = all)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Dry-run (extract only, no DB write)"
+        type: boolean
+        default: false
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Install Playwright browser
+        run: playwright install chromium --with-deps
+
+      - name: Run Brevitas listings pipeline
+        run: |
+          CORRIDOR_FLAG=""
+          if [ -n "${{ inputs.corridor }}" ]; then
+            CORRIDOR_FLAG="--corridor '${{ inputs.corridor }}'"
+          fi
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          python -m ingest.pipelines.brevitas_listings.pipeline $CORRIDOR_FLAG $DRY_FLAG

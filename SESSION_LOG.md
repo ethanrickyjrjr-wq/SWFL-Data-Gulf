@@ -1,3 +1,9 @@
+## 2026-06-22 (main) — Brevitas CRE pipeline: new lease source for Estero + Fort Myers Beach
+
+Built `ingest/pipelines/brevitas_listings/` (extract/distill/pipeline) + `.github/workflows/ingest-brevitas-listings.yml` (weekly Sunday 12:00 UTC). Probed 15 candidate sites via crawl4ai; Brevitas was the only one with a clean no-auth JSON API (`/api/search` + `/api/search/listings/{uuids}`, plain urllib with Referer header). Pipeline supplemented `data_lake.active_listings_cre` (same table as Crexi, `source_name=brevitas`); for-sale listings filtered by price threshold (>$500/sqft/yr). DB write verified: 1 row upserted for Estero (office, 11,270 sqft, $19 psf). FMB currently 0 lease listings on Brevitas (all for-sale). Cadence registry updated. Probe scripts left untracked.
+
+**Next:** monitor first weekly Brevitas cron run; if FMB stays 0, expand search to Bonita Springs / Naples as fallback sub-markets.
+
 ## 2026-06-22 (main) — Phase 3 build 13: `fetch_tables()` zero-LLM helper (STEP 1 only; dbpr parser swap gated OUT) [COMMITTED — awaiting push OK]
 
 Added `_scrape_tables()` + sync `fetch_tables()` to `ingest/lib/crawl4ai_client.py` — reads crawl4ai's `result.tables` (DefaultTableExtraction, `table_score_threshold=7`, ON by default) and returns one header-keyed `pd.DataFrame` per real `<table>`, with provenance on `df.attrs` (headers/caption/summary/metadata/source_url). Empty-tolerant (no qualifying table → `[]`) and ragged-row-tolerant (width mismatch → column-less frame, never raises). Added `import pandas as pd` (already an ingest dep, 6 other callers). Nothing existing modified. Tests +4 (header-keyed+provenance, empty-tolerant, ragged fallback, failed-crawl raises); **18/18 passing** offline (mocked `AsyncWebCrawler`).
