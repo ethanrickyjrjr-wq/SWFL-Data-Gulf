@@ -1,3 +1,7 @@
+## 2026-06-22 (main) — Universal Highlighter Phase 2 (PROJECT highlighter) HANDOFF written [LOCAL]
+
+Doc-only. New `docs/superpowers/plans/2026-06-22-universal-highlighter-phase2-PROJECT-handoff.md` — the brief for the next Claude to SCOPE the in-project (PROJECT AI, edit-capable) highlighter. Key findings folded in from building Phase 1: the engine already speaks `context:"project"` + the project digest bus (`ai-context-store`/`ProjectAiContextBridge`) already feeds the root, so Phase 2 is mostly wiring (GlobalHighlighter reads `useAiContext()`); the converse client hard-codes `context:"outside"` (the real gap); the edit-EXECUTION layer already exists and is moat-safe (`/api/deliverables/[id]/edit` → gated regen + 4 lints). Plus the recurring landmines (set-state-in-effect ban, hooks-before-return, threads-are-two-stores, store-not-pathname signal, nested `*/` build break, `use-highlight.ts` untouchable) and the must-keep functions. Next Claude: probe → brainstorm the edit UI (RULE 3.5) → plan → build.
+
 ## 2026-06-22 (main) — Universal Highlighter Phase 1 BUILT (highlighter → app root) [LOCAL — awaiting diff review, NOT pushed]
 
 Executed `docs/superpowers/plans/2026-06-22-universal-highlighter-phase1.md` (Phase 3C of One-Assistant). The Highlighter is now the app-root, selection-triggered twin of the click-triggered AI pill — one engine (`/api/assistant`), one briefcase, on EVERY page (not just the 5 `/r/*` routes).
