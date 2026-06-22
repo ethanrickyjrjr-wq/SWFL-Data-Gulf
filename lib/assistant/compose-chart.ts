@@ -35,6 +35,7 @@ import {
 import { summarizeChartForGrounding } from "@/lib/build-chart-for-intent.mts";
 import {
   fillExternalPoint,
+  valueAppearsInText,
   type ExternalPoint,
   type ExternalRequest,
 } from "@/lib/assistant/gap-fill";
@@ -51,6 +52,7 @@ const MAX_TABLE_ROWS = 40; // per detail_table, into the menu
 const MAX_POINTS = 240; // hard cap on selectable points (menu size guard)
 const MAX_BARS = 12; // cap rendered bars (mirrors computeMetricChart)
 const MAX_EXTERNAL = 4; // cap live gap-fill lookups per chart (cost/latency guard)
+const MAX_UPLOADS_CHARS = 20_000; // bound the uploaded-document text fed to the model
 
 /** The user is explicitly asking us to build a chart (vs. an analytical question
  *  that may auto-chart). Only then do we pay for the compose LLM call. */
@@ -203,13 +205,17 @@ const RECORD_CHART_TOOL = {
     "points that share one metric/unit for a clean comparison (e.g. all the vacancy " +
     "points across corridors). If the menu has nothing that answers the request, " +
     "return an empty point_ids array.\n\n" +
-    "If a helpful PEER or CONTEXT figure would complete the comparison but is NOT in " +
-    "the menu (e.g. a comparable market's vacancy, a national average, a current " +
-    "rate), add it to external_points with a label and a focused web-search query — " +
-    "the system will fetch it live, verify it against a real cited source, and cite " +
-    "that source. Request external peers that share the same metric/unit as your " +
-    "selected points so the comparison is apples-to-apples. Do NOT request a figure " +
-    "we already hold in the menu. Never put a number in the query.\n\n" +
+    "If a needed figure is NOT in the menu, look in PRIORITY ORDER:\n" +
+    "(1) If YOUR UPLOADED DOCUMENTS (when present below) contain it, put it in " +
+    "upload_points with the label, the exact number from the document, and the " +
+    "source_doc — do NOT web-search for something the uploads already answer.\n" +
+    "(2) Otherwise, if a helpful PEER or CONTEXT figure would complete the comparison " +
+    "(a comparable market's vacancy, a national average, a current rate), add it to " +
+    "external_points with a label and a focused web-search query — the system fetches " +
+    "it live, verifies it against a real cited source, and cites it. Share the same " +
+    "metric/unit as your selected points so the comparison is apples-to-apples. Do NOT " +
+    "request a figure we already hold in the menu or in the uploads. Never put a number " +
+    "in the query.\n\n" +
     "If the USER stated a figure themselves in their message (e.g. 'chart Tampa at " +
     "11%', 'add our Q2 absorption of 40,000 sqft'), put it in user_points with the " +
     "label and the exact number the user gave. These are charted as the user's own " +
@@ -252,6 +258,22 @@ const RECORD_CHART_TOOL = {
           required: ["label", "search_query"],
         },
       },
+      upload_points: {
+        type: "array",
+        description:
+          "Figures taken from the user's UPLOADED DOCUMENTS (when present below). Copy " +
+          "the exact number from the document; only numbers actually in the documents.",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            label: { type: "string", description: "Bar label." },
+            value: { type: "number", description: "The exact number from the document." },
+            source_doc: { type: "string", description: "Which document, e.g. the filename." },
+          },
+          required: ["label", "value"],
+        },
+      },
       user_points: {
         type: "array",
         description:
@@ -292,8 +314,18 @@ export interface UserPoint {
   unit?: string;
 }
 
+/** A figure the model read out of the user's uploaded document(s). Verified to
+ *  appear verbatim in the upload text before it's plotted. */
+export interface UploadPoint {
+  label: string;
+  value: number;
+  /** The document it came from, e.g. a filename — for the footnote. */
+  source_doc?: string;
+}
+
 interface BuildChartInput extends HeldSelection {
   external_points: ExternalRequest[];
+  upload_points: UploadPoint[];
   user_points: UserPoint[];
 }
 
@@ -394,6 +426,38 @@ export function attachExternalPoints(
   };
 }
 
+/** Append UPLOAD-DERIVED rows: figures the model read out of the user's uploaded
+ *  documents. THE MOAT: each is kept ONLY if its digits appear verbatim in the upload
+ *  text (`valueAppearsInText`) — the model can't fabricate a number and attribute it
+ *  to an upload. Footnoted "From your upload". Their values join the lint anchor.
+ *  Pure — exported for unit testing. */
+export function attachUploadPoints(
+  block: ChartBlock,
+  uploadPoints: UploadPoint[],
+  uploadsText: string,
+  baseNumbers: ReadonlySet<number>,
+): { block: ChartBlock; numbers: Set<number> } {
+  const numbers = new Set(baseNumbers);
+  const verified = uploadPoints.filter(
+    (u) => u && typeof u.value === "number" && u.label && valueAppearsInText(u.value, uploadsText),
+  );
+  if (verified.length === 0) return { block, numbers };
+
+  const extraRows = verified.map((u): [string, number] => [u.label, u.value]);
+  for (const u of verified) numbers.add(u.value);
+  const rows = [...block.rows, ...extraRows].slice(0, MAX_BARS);
+
+  const docs = [...new Set(verified.map((u) => u.source_doc).filter(Boolean))].join(", ");
+  const note = `From your upload${docs ? ` (${docs})` : ""}: ${verified.map((u) => u.label).join("; ")}`;
+  const base = block.source?.citation ?? "";
+  const citation = base ? `${base} · ${note}` : note;
+
+  return {
+    block: { ...block, rows, source: { ...(block.source ?? { citation: "" }), citation } },
+    numbers,
+  };
+}
+
 /** Append USER-PROVIDED rows: the user's own figures, charted as their data and
  *  footnoted "Provided by you" so they are never mistaken for our cited numbers or a
  *  web peer. Their values join the lint anchor (the user supplied them — we mark
@@ -425,8 +489,13 @@ export function attachUserPoints(
 export async function composeChartFromRequest(
   question: string,
   origin: string,
+  opts: { uploadsText?: string } = {},
 ): Promise<ChartForQuestion | null> {
   if (!wantsCustomChart(question)) return null;
+
+  // The user's uploaded-document text (bounded) — scanned BEFORE the internet for any
+  // figure we don't hold. "" when there are no uploads (public / no project).
+  const uploadsText = (opts.uploadsText ?? "").slice(0, MAX_UPLOADS_CHARS);
 
   let menu: Menu | null;
   try {
@@ -439,6 +508,10 @@ export async function composeChartFromRequest(
   let input: BuildChartInput | null = null;
   try {
     const client = getAnthropic();
+    const uploadsBlock = uploadsText
+      ? `\n\n=== YOUR UPLOADED DOCUMENTS (the user's own files — prefer these over a web ` +
+        `search; copy numbers exactly) ===\n${uploadsText}`
+      : "";
     const msg = await client.messages.create({
       model: TRIAGE_MODEL,
       max_tokens: MAX_TOKENS,
@@ -453,8 +526,9 @@ export async function composeChartFromRequest(
             `Never write a number — only select [pN] ids. If the menu can't answer the ` +
             `request, return an empty point_ids array.\n` +
             `If the user names a comparison target (a place, market, rate, or metric) that ` +
-            `is NOT in the menu, you MUST add it to external_points with a label + a focused ` +
-            `web-search query so we can fetch and cite it.\n\n=== DATA MENU ===\n${renderMenu(menu)}`,
+            `is NOT in the menu: take it from YOUR UPLOADED DOCUMENTS if present there ` +
+            `(upload_points), otherwise add it to external_points for a live cited web ` +
+            `fetch.\n\n=== DATA MENU ===\n${renderMenu(menu)}${uploadsBlock}`,
         },
       ],
     });
@@ -463,6 +537,7 @@ export async function composeChartFromRequest(
       | undefined;
     const raw = (tool?.input ?? {}) as Record<string, unknown>;
     const rawExternals = Array.isArray(raw.external_points) ? raw.external_points : [];
+    const rawUploads = Array.isArray(raw.upload_points) ? raw.upload_points : [];
     const rawUser = Array.isArray(raw.user_points) ? raw.user_points : [];
     input = {
       title: typeof raw.title === "string" ? raw.title : "Chart",
@@ -474,6 +549,15 @@ export async function composeChartFromRequest(
         .filter((e) => typeof e.label === "string" && typeof e.search_query === "string")
         .slice(0, MAX_EXTERNAL)
         .map((e) => ({ label: e.label as string, search_query: e.search_query as string })),
+      upload_points: rawUploads
+        .map((u) => u as Record<string, unknown>)
+        .filter((u) => typeof u.label === "string" && typeof u.value === "number")
+        .slice(0, MAX_BARS)
+        .map((u) => ({
+          label: u.label as string,
+          value: u.value as number,
+          source_doc: typeof u.source_doc === "string" ? u.source_doc : undefined,
+        })),
       user_points: rawUser
         .map((u) => u as Record<string, unknown>)
         .filter((u) => typeof u.label === "string" && typeof u.value === "number")
@@ -503,6 +587,13 @@ export async function composeChartFromRequest(
       source: { citation: "" },
     } satisfies ChartBlock);
 
+  // Increment D — upload-fill (PRIORITY before the web). Keep only the figures the
+  // model read from the uploaded docs that verify verbatim against the upload text.
+  const withUpload = attachUploadPoints(block, input.upload_points, uploadsText, menu.numbers);
+  const verifiedUploads = input.upload_points.filter((u) =>
+    valueAppearsInText(u.value, uploadsText),
+  );
+
   // Increment B — live cited gap-fill. Fetch each requested peer/context figure and
   // keep ONLY those verified verbatim against a real cited source (gap-fill.ts is the
   // moat). Best-effort: a failed/unverifiable lookup is dropped, never blocks.
@@ -515,27 +606,42 @@ export async function composeChartFromRequest(
     );
     externals = settled.filter((e): e is ExternalPoint => e !== null);
   }
-  const withExternal = attachExternalPoints(block, externals, menu.numbers);
+  const withExternal = attachExternalPoints(withUpload.block, externals, withUpload.numbers);
   // User-provided lane — the user's own figures, footnoted "Provided by you".
   const withUser = attachUserPoints(withExternal.block, input.user_points, withExternal.numbers);
   block = withUser.block;
 
   if (block.rows.length < 1) return null; // nothing to chart from any lane → canned fallback
 
-  // BELT-AND-SUSPENDERS: every plotted number must trace to a held figure, a
-  // citation-verified web value, or a user-supplied value (all in withUser.numbers).
+  // BELT-AND-SUSPENDERS: every plotted number must trace to a held figure, an
+  // upload-verified value, a citation-verified web value, or a user-supplied value.
   if (!lintChartBlock(block, withUser.numbers).ok) return null;
 
+  const hasExtras =
+    externals.length > 0 || verifiedUploads.length > 0 || input.user_points.length > 0;
   const chart: ChartSpec = {
     ...block,
     frameId: "bar-table",
-    ...(externals.length > 0 || input.user_points.length > 0
-      ? { options: { externalSources: externals, userSources: input.user_points } }
+    ...(hasExtras
+      ? {
+          options: {
+            externalSources: externals,
+            uploadSources: verifiedUploads,
+            userSources: input.user_points,
+          },
+        }
       : {}),
   };
   // The grounding note lists every plotted row and the "state ONLY these" rule; name
-  // the external sources (to cite) and the user-provided figures (to attribute).
+  // the upload figures (attribute to the user's doc), the web sources (to cite), and
+  // the user-provided figures (to attribute).
   let groundingNote = summarizeChartForGrounding(chart);
+  if (verifiedUploads.length > 0) {
+    groundingNote +=
+      "\nFigures from the user's uploaded document(s) (attribute to their upload, not our data): " +
+      verifiedUploads.map((u) => `${u.label} = ${u.value}`).join("; ") +
+      ".";
+  }
   if (externals.length > 0) {
     groundingNote +=
       "\nPeer/context figures fetched live and cited (state the source if you mention them): " +

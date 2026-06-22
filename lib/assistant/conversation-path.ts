@@ -52,8 +52,9 @@ import { composeChartFromRequest } from "@/lib/assistant/compose-chart";
 async function chartForConversation(
   question: string,
   origin: string,
+  uploadsText: string,
 ): Promise<ChartForQuestion | null> {
-  const composed = await composeChartFromRequest(question, origin);
+  const composed = await composeChartFromRequest(question, origin, { uploadsText });
   return composed ?? (await buildChartForQuestion(question, origin));
 }
 
@@ -360,6 +361,35 @@ async function otherProjectsBlockFor(currentProjectId: string): Promise<string> 
   }
 }
 
+/** The text of the CURRENT project's uploaded files (and notes) — so the chart
+ *  composer can scan the user's own work for a figure BEFORE going to the web. A
+ *  cookie-authed, RLS-scoped, fail-open read (own project only; anon → ""). Each
+ *  `kind:"file"` item carries `extracted_text` (Claude-vision-distilled at upload);
+ *  `kind:"note"` carries free text. Returns "" on any miss — the chart still builds. */
+async function currentProjectUploadsText(currentProjectId: string): Promise<string> {
+  try {
+    const supabase = createClient(await cookies());
+    const { data } = await supabase
+      .from("projects")
+      .select("items")
+      .eq("id", currentProjectId)
+      .maybeSingle();
+    const items = ((data?.items ?? []) as ProjectItem[]) ?? [];
+    const parts: string[] = [];
+    for (const it of items) {
+      if (it.kind === "file" && typeof it.extracted_text === "string" && it.extracted_text.trim()) {
+        const name = it.caption || it.storage_path?.split("/").pop() || "upload";
+        parts.push(`DOCUMENT "${name}":\n${it.extracted_text.trim()}`);
+      } else if (it.kind === "note" && typeof it.text === "string" && it.text.trim()) {
+        parts.push(`NOTE: ${it.text.trim()}`);
+      }
+    }
+    return parts.join("\n\n");
+  } catch {
+    return "";
+  }
+}
+
 /** Cheap in-memory scope check for a 5-digit ZIP (resolveZip via resolveLocation's gate). */
 function resolveLocationIsInScope(zip: string): boolean {
   return /^\d{5}$/.test(zip) && resolveZip(zip).in_scope;
@@ -434,6 +464,10 @@ export async function runConversationPath(
   const currentProjectId = typeof req.project_id === "string" ? req.project_id : "";
   const otherProjectsBlock =
     analyst && currentProjectId ? await otherProjectsBlockFor(currentProjectId) : "";
+  // The user's own uploaded-document text — scanned by the chart composer BEFORE the
+  // web for any figure we don't hold. "" for public / no project (no uploads exist).
+  const uploadsText =
+    analyst && currentProjectId ? await currentProjectUploadsText(currentProjectId) : "";
 
   // Summarize the session into one cited block (no location detection — it reads the
   // conversation, not a new question). The client appends a final "summarize" user turn
@@ -482,7 +516,7 @@ export async function runConversationPath(
     // When present, inject the chart's REAL figures + a "describe it, never refuse"
     // directive (the report path's proven technique) so prose and chart agree and no
     // figure is invented.
-    const chartResult = await chartForConversation(lastUser, origin);
+    const chartResult = await chartForConversation(lastUser, origin, uploadsText);
     const chartBlock = chartResult
       ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +
         "it shows; never say you can't chart or that it's out of scope. State ONLY the figures " +
@@ -560,7 +594,7 @@ export async function runConversationPath(
   // A located question charts too — "chart anything" includes when the user names a
   // place. The chart is region/corridor-grain (e.g. the 3-metro ZHVI trend, a brain's
   // by-ZIP bar) and includes the named place; brain numbers ONLY (the moat). Best-effort.
-  const locatedChart = await chartForConversation(lastUser, origin);
+  const locatedChart = await chartForConversation(lastUser, origin, uploadsText);
   if (locatedChart) prelude.push({ type: "chart", chart: locatedChart.chart });
   const locatedChartBlock = locatedChart
     ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +

@@ -3,6 +3,7 @@ import {
   wantsCustomChart,
   buildHeldChartBlock,
   attachExternalPoints,
+  attachUploadPoints,
   attachUserPoints,
   type Menu,
   type MenuPoint,
@@ -191,6 +192,52 @@ describe("attachUserPoints — the user-provided lane (footnoted, never our data
 
   it("no user points → unchanged", () => {
     const r = attachUserPoints(heldBlock, [], new Set([0.4]));
+    expect(r.block).toBe(heldBlock);
+  });
+});
+
+describe("attachUploadPoints — scan the user's uploads (verified against the doc text)", () => {
+  const heldBlock: ChartBlock = {
+    title: "Vacancy by corridor",
+    columns: ["Corridor", "Vacancy (percent)"],
+    rows: [["Estero", 0.4]],
+    chart_type: "bar",
+    value_format: "percent",
+    asOf: "2026-06-20",
+    source: { citation: "SWFL Data Gulf — cre-swfl" },
+  };
+  const uploadsText =
+    'DOCUMENT "broker-memo.pdf":\nOur Q2 absorption came in at 42,000 sqft and Tampa office vacancy is 13.5%.';
+
+  it("charts an upload figure that appears verbatim in the doc, footnoted 'From your upload'", () => {
+    const r = attachUploadPoints(
+      heldBlock,
+      [{ label: "Tampa office vacancy", value: 13.5, source_doc: "broker-memo.pdf" }],
+      uploadsText,
+      new Set([0.4]),
+    );
+    expect(r.block.rows).toEqual([
+      ["Estero", 0.4],
+      ["Tampa office vacancy", 13.5],
+    ]);
+    expect(r.numbers.has(13.5)).toBe(true);
+    expect(r.block.source?.citation).toContain("From your upload (broker-memo.pdf): Tampa office vacancy"); // prettier-ignore
+  });
+
+  it("REJECTS a number the model claims is in the upload but ISN'T (no fabrication)", () => {
+    // 99 is not anywhere in the doc text → dropped, even attributed to an upload.
+    const r = attachUploadPoints(
+      heldBlock,
+      [{ label: "Tampa office vacancy", value: 99, source_doc: "broker-memo.pdf" }],
+      uploadsText,
+      new Set([0.4]),
+    );
+    expect(r.block).toBe(heldBlock); // unchanged
+    expect(r.numbers.has(99)).toBe(false);
+  });
+
+  it("no uploads text → nothing attached", () => {
+    const r = attachUploadPoints(heldBlock, [{ label: "x", value: 13.5 }], "", new Set([0.4]));
     expect(r.block).toBe(heldBlock);
   });
 });

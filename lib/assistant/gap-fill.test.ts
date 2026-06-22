@@ -2,10 +2,23 @@ import { describe, expect, it } from "bun:test";
 import {
   parseCitedSpans,
   valueAppearsInCitations,
+  valueAppearsInText,
   fillExternalPoint,
   parseBlockedDomains,
   type CitedSpan,
 } from "./gap-fill";
+
+describe("valueAppearsInText — shared verbatim-digit moat check", () => {
+  const doc = "Our Q2 absorption came in at 42,000 sqft and Tampa office vacancy is 13.5%.";
+  it("matches a value present verbatim (ignoring separators/symbols)", () => {
+    expect(valueAppearsInText(13.5, doc)).toBe(true);
+    expect(valueAppearsInText(42000, doc)).toBe(true); // "42,000" → digits "42000"
+  });
+  it("rejects a value not in the text and trivially-short numbers", () => {
+    expect(valueAppearsInText(99, doc)).toBe(false);
+    expect(valueAppearsInText(5, doc)).toBe(false); // <2 digits → never matches
+  });
+});
 
 describe("parseBlockedDomains — self-heal around vendor crawler blocks", () => {
   it("extracts the blocked domains named in a 400 message", () => {

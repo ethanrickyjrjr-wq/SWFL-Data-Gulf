@@ -129,15 +129,21 @@ function digitsOf(s: string | number): string {
   return String(s).replace(/[^0-9]/g, "");
 }
 
-/** THE MOAT CHECK: does `value` appear VERBATIM (digit-for-digit) in any returned
- *  citation span? Returns the matching span when so, else null. A 3+-digit run is
- *  required so trivially-short numbers (a "5") don't match incidentally — peers
- *  with <3 significant digits are not gap-fillable (they fall through to dropped). */
-export function valueAppearsInCitations(value: number, spans: CitedSpan[]): CitedSpan | null {
+/** THE MOAT CHECK (shared): does `value` appear VERBATIM (digit-for-digit) in `text`?
+ *  At least 2 significant digits are required so a trivially-short number (a "5")
+ *  can't match incidentally. Used to verify both web citations (gap-fill) and the
+ *  user's uploaded-document text (upload-fill) — a number must literally be IN the
+ *  bytes we read, never from the model's memory. */
+export function valueAppearsInText(value: number, text: string): boolean {
   const target = digitsOf(value);
-  if (target.length < 2) return null;
+  if (target.length < 2) return false;
+  return digitsOf(text).includes(target);
+}
+
+/** Like valueAppearsInText, but returns the matching citation span (for the URL). */
+export function valueAppearsInCitations(value: number, spans: CitedSpan[]): CitedSpan | null {
   for (const span of spans) {
-    if (digitsOf(span.cited_text).includes(target)) return span;
+    if (valueAppearsInText(value, span.cited_text)) return span;
   }
   return null;
 }
