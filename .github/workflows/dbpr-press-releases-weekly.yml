@@ -40,8 +40,12 @@ jobs:
       - name: Install ingest dependencies
         run: pip install -r ingest/requirements.txt
 
-      - name: Install Playwright browser
-        run: playwright install --with-deps chromium
+      - name: Install crawl4ai browsers
+        run: crawl4ai-setup
+
+      - name: crawl4ai preflight (advisory)
+        continue-on-error: true
+        run: crawl4ai-doctor
 
       - name: Run dbpr_press_releases pipeline
         env:

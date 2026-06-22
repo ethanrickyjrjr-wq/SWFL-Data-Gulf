@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r ingest/requirements.txt
 
-      - name: Install crawl4ai browser
+      - name: Install crawl4ai browsers
         run: crawl4ai-setup
 
       - name: crawl4ai preflight (advisory)

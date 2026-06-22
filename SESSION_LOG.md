@@ -1,3 +1,17 @@
+## 2026-06-22 (main) — Phase 2 build 08: collapse 11 crawl-job GHA installs → crawl4ai-setup [PUSHED]
+
+Standardized all 11 crawl-job workflows to uniform `crawl4ai-setup` + `crawl4ai-doctor` (advisory `continue-on-error: true`). Dropped 5 distinct bespoke spellings (`python -m playwright ... + python -m patchright`, bare `playwright ... + patchright`, `playwright --with-deps` alone). Added missing `crawl4ai-doctor` to 4 jobs (dbpr-press-releases, fgcu-reri, rsw-airport, swfl-inc). Removed redundant patchright smoke tests from 4 stealth jobs (covered by `crawl4ai-setup`). Confirmed: `CRAWL4AI_MODE=api` not set anywhere. Chose uniform over split (simplest; vendor-proven: `crawl4ai-setup` calls `post_install()` → both playwright + patchright `--with-deps`, stricter than the old bespoke steps).
+
+**Open gate (prod-evidence required):** dispatch ≥1 stealth job (e.g. lee-permits) + ≥1 static job (e.g. fgcu-reri); doctor preflight passes, pipeline produces rows → close `build_08_gha_install_collapse_verify`.
+
+**Next:** remaining Phase 2 builds (07, others).
+
+## 2026-06-22 (main) — Phase 2 build 09: slim pip install for probe/gate crons [PUSHED]
+
+- **09 requirements-probe.txt** — created `ingest/requirements-probe.txt` with only `psycopg[binary]>=3.2` + `pyyaml>=6.0` (verified: `check_freshness.py` + `rebuild_due.py` import only those two; all other stdlib). Pointed `freshness-probe-daily.yml` + the `daily-rebuild.yml` gate step at the slim file. The full `requirements.txt` tree (~100 pkgs, crawl4ai/playwright/patchright/dlt/pandas/…) stays on all actual ingest/crawl workflows — only the two lightweight probe/gate steps switch.
+
+**Next:** remaining Phase 2 builds (07, 08).
+
 ## 2026-06-22 (main) — Phase 2 build 10: dbpr_sirs blind-sleep → row-count stabilisation [PUSHED]
 
 - **10 dbpr_sirs settle** — replaced `_WAIT_SECONDS=16.0` + trivial `wait_for="> 2"` anti-pattern with `_QLIK_SETTLE_JS`: polls until `table tbody tr` count stops increasing (stash-on-first-read, resolve-on-repeat). `delay_after` dropped to 2 s residual margin. Extraction/parse untouched (build 13 owns that). Updated docstring.

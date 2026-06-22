@@ -36,17 +36,12 @@ jobs:
       - name: Install ingest dependencies
         run: pip install -r ingest/requirements.txt
 
-      - name: Install Chromium for crawl4ai
-        run: |
-          python -m playwright install --with-deps chromium
-          python -m patchright install chromium
+      - name: Install crawl4ai browsers
+        run: crawl4ai-setup
 
       - name: crawl4ai preflight (advisory)
         continue-on-error: true
         run: crawl4ai-doctor
-
-      - name: patchright stealth smoke (required)
-        run: python -c "from patchright.async_api import async_playwright; print('patchright ok')"
 
       - name: Run Collier permits pipeline
         env:

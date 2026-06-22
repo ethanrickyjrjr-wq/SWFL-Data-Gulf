@@ -27,17 +27,12 @@ jobs:
       - name: Install Python deps
         run: pip install -r ingest/requirements.txt
 
-      - name: Install browser (crawl4ai / patchright)
-        run: |
-          playwright install --with-deps chromium
-          patchright install chromium
+      - name: Install crawl4ai browsers
+        run: crawl4ai-setup
 
       - name: crawl4ai preflight (advisory)
         continue-on-error: true
         run: crawl4ai-doctor
-
-      - name: patchright stealth smoke (required)
-        run: python -c "from patchright.async_api import async_playwright; print('patchright ok')"
 
       - name: Run ingest
         env:
