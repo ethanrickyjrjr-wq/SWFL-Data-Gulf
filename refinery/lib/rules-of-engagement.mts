@@ -6,11 +6,18 @@
  *
  * FORM — seven verb-keyed rules (CITE / [INFERENCE] / GRAIN / MASTER ONLY /
  * CLEAN / PLACES / SCOPE). This is the compressed form: the same discipline the
- * old full-sentence block carried (~346 tokens), in ~206. Two phrases are kept
- * in full because terseness would cost real reliability: rule 1 keeps "in this
- * payload" (the model must cite a source IN the payload, not a half-remembered
- * external one) and rule 5 keeps "NNN = triple-net rent, never a place name"
- * (the acronym's meaning AND the place-name-misread guard).
+ * old full-sentence block carried, verb-keyed.
+ *
+ * PROVENANCE MODEL (locked 2026-06-22 — "sourced, not payload-only"). Rule 1 is
+ * the FOUR-LANE rule the chart engine already enforces, now universal to every
+ * answer: a number is allowed when it NAMES a real source in plain words —
+ *   (1) our data,  (2) the user's uploaded document,  (3) a named web source,
+ *   (4) a figure the user gave us.
+ * The ONLY thing forbidden is an INVENTED number (one with no real source). The
+ * old "no source in THIS PAYLOAD → no claim" framing was payload-only — it wrongly
+ * refused user/upload/web numbers; that is gone. "Never invent" stays absolute.
+ * Rule 5 keeps "NNN = triple-net rent, never a place name" (the acronym's meaning
+ * AND the place-name-misread guard).
  *
  * VERBATIM MIRROR — this constant is the machine-embeddable copy. Three
  * human-facing mirrors must stay byte-identical, all guarded by
@@ -25,11 +32,11 @@
  * Do NOT embed the full ~2000-token contract in payloads — it is 10× the token
  * cost for zero additional discipline. The lean block is the whole point.
  *
- * TOKEN BUDGET — hard-capped at 220 tokens (chars/4 proxy) by the test. Current
- * is 218. The cap is a re-bloat guard, not a context constraint. (Bumped 210→220
- * when rule 5 traded "quote freshness_token once" for the date-display rule:
- * "state the as-of date (MM/DD/YYYY) once, never the raw token" — the raw token
- * is the backwards-looking YYYYMMDD form that must never reach the user.)
+ * TOKEN BUDGET — hard-capped at 280 tokens (chars/4 proxy) by the test. The cap
+ * is a re-bloat guard, not a context constraint. (Bumped 220→280 when rules 1/3/7
+ * adopted the four-lane provenance model above — naming all four real sources in
+ * plain words costs ~46 tokens and is the whole point; +46 tokens per payload is
+ * negligible against the clarity it buys.)
  *
  * RULE 7 (SCOPE) is load-bearing — TWO behaviors + ONE guard:
  *   (1) An in-grain SWFL lake question (county down to ZIP / named place — Fort
@@ -45,10 +52,10 @@
  * and a store-hours question answered with "we don't hold that grain."
  */
 export const RULES_OF_ENGAGEMENT = `RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: no source in this payload → no claim.
+1. CITE: every number names its real source in plain words — our data, your uploaded doc, a named web source, or a figure you gave us. No real source → don't state it; never invent one.
 2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
-3. GRAIN: answer at the grain held; a gap = offer to pull, never invent.
+3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
 4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.
 5. CLEAN: no internal IDs, no jargon (NNN = triple-net rent, never a place name), no hedge-encoding hard numbers; state the as-of date (MM/DD/YYYY) once, never the raw token.
 6. PLACES: SWFL; named places = Florida, not elsewhere; zoom on named spot.
-7. SCOPE: in-grain = SWFL lake data (Lee/Collier, county→ZIP; named town/beach = ZIP) → fetch + route. Else be Claude — no fetch/framing/pitch: off-topic, other regions, OR ordinary answerables (Arby's on Cleveland Ave = answer normally). GUARD: never invent a SWFL number below ZIP.`;
+7. SCOPE: in-grain = SWFL lake data (Lee/Collier, county→ZIP; named town/beach = ZIP) → fetch + route. Else be Claude — no fetch/framing/pitch: off-topic, other regions, OR ordinary answerables (Arby's on Cleveland Ave = answer normally). GUARD: never invent a SWFL number — state only one with a named source (rule 1).`;

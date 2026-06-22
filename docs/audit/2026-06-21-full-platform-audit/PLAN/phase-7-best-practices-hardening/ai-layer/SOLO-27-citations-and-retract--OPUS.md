@@ -12,21 +12,30 @@ belt-and-suspenders layer on the **TEXT answer**), not a daily red.
 > per-claim citations / retract self-check. It must NOT touch, reroute, or re-implement chart provenance** —
 > that floor is shipped. Do not regress the chart surfaces listed below.
 
+> **PROVENANCE MODEL — READ FIRST (locked 2026-06-22).** The moat is **"sourced, not payload-only."** A
+> number is allowed when it NAMES a real source in plain words: **(1) our data, (2) the user's uploaded
+> document, (3) a named web source, (4) a figure the user gave us** (RULES OF ENGAGEMENT rule 1, the same
+> four lanes the chart engine enforces). The ONLY thing forbidden is an **invented** number. So this build's
+> "retract" self-check is **NOT** "retract anything not in the payload" — that would wrongly delete a
+> user/upload/web number and is exactly the behavior we removed. It is **"retract a number that names NO real
+> source"** (i.e. an invented one). Citations attach to lane (1); lanes (2)/(3)/(4) are named by their own
+> footnote, not retracted.
+
 ## The gap (verified)
-We ground the conversational answer **structurally** — the payload controls the model's context, so "no
-source in payload → no claim" (CLAUDE.md THE-GOAL). That moat is arguably **stronger** than a prompt-level
-citation instruction (the model literally cannot reach an un-payloaded fact). But on the **conversational
-follow-up path**, two things the authoritative source recommends are absent:
+We ground the conversational answer **structurally** — the payload controls the model's *baseline* context.
+That floor is strong, but the prose answer has no claim-by-claim provenance surface and no post-generation
+"is every number actually sourced?" pass. On the **conversational follow-up path**, two things are absent:
 - **No per-claim citation surface.** The grounded prompt is assembled inline in
   `lib/assistant/conversation-path.ts` (the path that actually runs — `:204-215`, `:245/:446/:527` per build
   20's verification) and again in `lib/grounded-answer.ts` (`buildGroundedSystemPrompt`, ~`:85`). Neither emits
   a machine-checkable `cited_text` per claim — the answer is grounded but not **auditable** claim-by-claim.
   Anthropic's native **Citations API** returns `cited_text` per claim, and `cited_text` does **not** count
   toward output tokens (`round3/q-anthropic-citations.md`).
-- **No "retract if no supporting quote" self-check.** The authoritative reduce-hallucinations guidance is:
-  cite a quote+source per claim, and **have the model find a supporting quote after generating; if it can't,
-  it must retract the claim** (`round1/brains-anthropic-reduce-hallucinations.md`). We rely on the structural
-  floor alone; there is no post-generation retract pass.
+- **No "name the source or retract" self-check.** The authoritative reduce-hallucinations guidance is: cite a
+  source per claim, and **have the model check each number after generating; if it can name no real source,
+  retract it** (`round1/brains-anthropic-reduce-hallucinations.md`). Here "real source" = the **four lanes**
+  (our data / the user's doc / a named web source / a figure the user gave) — NOT "the payload." A number that
+  names one of the four lanes STAYS; only an invented number (no lane) is retracted. "I don't know" is allowed.
 
 This complements — does **not** replace — the structural moat. REPORT verdict for this row: *"✅ aligned
 (arguably stronger: structural vs prompt) — ⚠️ could add the native Citations API + the 'retract if no quote'
@@ -91,10 +100,12 @@ new UI citation through it, don't rebuild).
      `citations:{enabled:true}` so the model returns `cited_text` per claim natively. Pro: structurally
      reliable pointers, `cited_text` free on output tokens. Con: changes the request shape on the live
      conversational surface; verify it composes with the existing streaming + chart-frame emit (build 20).
-   - **(b) Retract-if-no-quote self-check** — a lighter prompt-level pass: after the grounded answer, the model
-     must find a supporting quote in the payload for each claim and retract any it can't support; allow
-     "I don't know." Pro: minimal surface change, additive to the structural floor. Con: prompt-level, not
-     machine-guaranteed.
+   - **(b) Name-the-source-or-retract self-check** — a lighter prompt-level pass: after the answer, the model
+     checks each NUMBER and keeps it only if it can name one of the **four lanes** (our data / the user's doc /
+     a named web source / a figure the user gave); a number that names NO lane (invented) is retracted; allow
+     "I don't know." **Do NOT retract a user/upload/web number for being absent from the payload** — that is
+     the removed payload-only behavior. Pro: minimal surface change, additive to the structural floor. Con:
+     prompt-level, not machine-guaranteed.
    - These are **complementary, not exclusive** — (a) for the citation surface (esp. for build-20 chart
      rows), (b) as the cheap self-check. Decide whether to ship one, both, or stage (b) first then (a). Keep
      the structural moat intact either way — this is belt-and-suspenders, never a replacement.
@@ -104,10 +115,12 @@ new UI citation through it, don't rebuild).
    citation root.
 
 ## Done when
-- A live conversation-path follow-up that makes a factual claim either (a) carries a `cited_text` pointer per
-  claim back to a real grounding row, OR (b) is retracted when no supporting quote exists in the payload —
-  verified against a deployed request, not a unit mock. Add a proof line to `verification/answer-proofs.jsonl`
-  (the answer-fix-proof gate, per MEMORY) showing a live, non-deflecting, leak-free cited answer.
+- A live conversation-path follow-up that states a number either (a) carries a `cited_text` pointer back to a
+  real grounding row (lane 1), OR (b) names its lane (your doc / a web source / a figure you gave), OR (c) is
+  retracted only when it can name NO real source (invented) — verified against a deployed request, not a unit
+  mock. A properly-sourced user/upload/web number must **survive**, not be retracted. Add a proof line to
+  `verification/answer-proofs.jsonl` (the answer-fix-proof gate, per MEMORY) showing a live, non-deflecting,
+  leak-free, four-lane-honest answer.
 - ~~A build-20 chart with no citable grounding row is dropped, not emitted via this build~~ — **VOID, already
   shipped by builds A–D** (per-lane drop: held/web/upload/user). SOLO-27 neither adds nor changes this; just
   confirm at review that the chart surfaces in "Dependencies" are untouched and still green

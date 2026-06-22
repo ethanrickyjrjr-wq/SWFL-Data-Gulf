@@ -4,15 +4,14 @@ import { join } from "node:path";
 import { RULES_OF_ENGAGEMENT } from "./rules-of-engagement.mts";
 
 // The block rides in every payload's `_meta.rules`. Keep it lean: a rough
-// chars/4 token proxy must stay under the 220-token ceiling so embedding it
-// per-response never blows the consuming Claude's context budget. The block was
-// compressed 346 → 206 tokens (full-sentence rules → verb-keyed rules); the cap
-// dropped 350 → 210, then bumped 210 → 220 when rule 5 traded "quote
-// freshness_token once" for the date-display rule ("state the as-of date
-// (MM/DD/YYYY) once, never the raw token"). See the constant's header.
+// chars/4 token proxy must stay under the 280-token ceiling so embedding it
+// per-response never blows the consuming Claude's context budget. The cap was
+// 210, then 220 (rule 5 date-display), then 280 when rules 1/3/7 adopted the
+// four-lane provenance model (naming our data / your doc / web / your figure in
+// plain words). See the constant's header.
 test("RULES_OF_ENGAGEMENT stays under the lean token budget", () => {
   const approxTokens = Math.ceil(RULES_OF_ENGAGEMENT.length / 4);
-  expect(approxTokens).toBeLessThanOrEqual(220);
+  expect(approxTokens).toBeLessThanOrEqual(280);
 });
 
 test("RULES_OF_ENGAGEMENT carries all seven numbered rules", () => {
