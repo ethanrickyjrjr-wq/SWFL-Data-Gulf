@@ -315,3 +315,41 @@ test("splitFollowupTail hides a partial marker streamed across chunks (no leak)"
   expect(visibles).toEqual(["Answer.", "Answer.", "Answer."]);
   expect(splitFollowupTail(fragments[2]).followups).toEqual(["a", "b"]);
 });
+
+test("sends project context (context/project_id/pageContext/briefcase) when provided, omits them off-project", async () => {
+  type Body = { context?: string; project_id?: string; pageContext?: string; briefcase?: string };
+
+  // PROJECT context — all four fields ride the body.
+  const inProject: { body?: Body } = {};
+  const projFetch = (async (_url: string, init: RequestInit) => {
+    inProject.body = JSON.parse(init.body as string) as Body;
+    return { ok: true, status: 200, body: streamOf([`data: {"done":true,"reach":[]}\n\n`]) };
+  }) as unknown as typeof fetch;
+  await streamConverse(
+    {
+      question: "how does this project look?",
+      context: "project",
+      projectId: "proj-123",
+      pageContext: 'their project "Cape Coral CRE"',
+      briefcase: "The user has already saved these…",
+    },
+    collector().handlers,
+    projFetch,
+  );
+  expect(inProject.body?.context).toBe("project");
+  expect(inProject.body?.project_id).toBe("proj-123");
+  expect(inProject.body?.pageContext).toBe('their project "Cape Coral CRE"');
+  expect(inProject.body?.briefcase).toBe("The user has already saved these…");
+
+  // No project fields → context defaults to "outside" and the keys are ABSENT (not null).
+  const off: { body?: Body } = {};
+  const offFetch = (async (_url: string, init: RequestInit) => {
+    off.body = JSON.parse(init.body as string) as Body;
+    return { ok: true, status: 200, body: streamOf([`data: {"done":true,"reach":[]}\n\n`]) };
+  }) as unknown as typeof fetch;
+  await streamConverse({ question: "general q" }, collector().handlers, offFetch);
+  expect(off.body?.context).toBe("outside");
+  expect("project_id" in (off.body ?? {})).toBe(false);
+  expect("pageContext" in (off.body ?? {})).toBe(false);
+  expect("briefcase" in (off.body ?? {})).toBe(false);
+});

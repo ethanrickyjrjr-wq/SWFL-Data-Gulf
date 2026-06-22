@@ -7,6 +7,7 @@
 // (use-converse.ts) only wires this to React state.
 
 import { parseSSEFrames } from "./sse";
+import type { AssistantContext } from "@/lib/assistant/contract";
 
 export interface ConverseInput {
   /**
@@ -32,6 +33,15 @@ export interface ConverseInput {
   isRealtime?: boolean;
   /** True when this ask came from a chip click (vs free-form textarea). Analytics only. */
   fromChip?: boolean;
+  /** Assistant context. "project" inside an open project (the engine grounds on the project
+   *  digest server-side), else "outside". Never "public" — that is the funnel/welcome voice. */
+  context?: Exclude<AssistantContext, "public">;
+  /** The open project's id → the engine's cookie-authed cross-project read. Undefined off a project. */
+  projectId?: string;
+  /** Plain-English "where the user is" + open-project summary (the `describePage` output). */
+  pageContext?: string;
+  /** Short customer-clean digest of what's filed (the `briefcaseDigest` output). */
+  briefcase?: string;
   question: string;
 }
 
@@ -121,8 +131,11 @@ export async function streamConverse(
       // shim's mapping): report_id present → the engine's report-grounding path; the
       // dock's single question becomes the one user turn. context:"outside" = OUTSIDE AI.
       body: JSON.stringify({
-        context: "outside",
+        context: input.context ?? "outside",
         report_id: input.reportId,
+        project_id: input.projectId,
+        pageContext: input.pageContext,
+        briefcase: input.briefcase,
         fact: input.fact,
         slug: input.slug,
         selection_type: input.selectionType,
