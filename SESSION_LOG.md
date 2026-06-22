@@ -1,3 +1,12 @@
+## 2026-06-22 (main) — build 26: Anthropic structured outputs in extract_client (kill the swallow-to-[]) [PUSHED]
+
+**Phase-7 audit build 26.** Scope collapsed to ONE file: build 11 (`01baa078`) already removed crexi's LLM/fence path (its own log entry: "build 26 moot for this path"), so `grep 'if "```" in raw' ingest/` now had a single hit — `ingest/lib/extract_client.py`. `extract()` has zero prod callers (dormant since the 2026-06-20 firecrawl rewire); change is cheap + permanent, not urgent.
+
+- **`extract_client.py`:** `_llm_extract_rows` now passes GA `output_config={"format":{"type":"json_schema","schema":…}}` when a row schema is given (verified live in-session: GA on `claude-haiku-4-5` + `claude-opus-4-8`, no beta header; SDK 0.106.0 accepts the param). Loose `{field:type}` map → strict row schema (`additionalProperties:false`, all fields nullable+required) via new `_row_schema`/`_output_config`. `_parse_rows` no longer swallows to `[]` — malformed JSON RAISES (propagates to `extract()`'s per-URL handler → provenance/`ExtractError`), so a broken extraction can't masquerade as an empty page. Added a `stop_reason in (refusal, max_tokens)` guard that raises. Deleted the fragile `if "```" in raw` split (a tolerant regex handles a stray fence on the schema-less path).
+- **Tests:** `pytest ingest/tests/lib/test_extract_client.py -q` → **22 passed**. `{rows:[...]}` contract + fence-strip test stay green; garbage test flipped to assert-raises; +3 tests (strict output_config carried, schema-less omits it, refusal raises).
+
+**Next:** the live single-URL smoke = the still-open `crawl4ai_native_extract_rewire` Crexi battle-test (needs a real page + key + crawl4ai fetch); hardening is in place for whenever `extract()` gets wired.
+
 ## 2026-06-22 (main) — dbpr_sirs: QIX ingest RUN + brain rebuilt — 1,358 SWFL filings live [PUSHED]
 
 **Follow-through on the QIX websocket build (`933576c0`, already on `main`):** ran the real ingest (no `--dry-run`) against prod `data_lake.dbpr_sirs_submissions`. Upserted 1,405 → **1,358 distinct SWFL rows** after `row_hash` dedup (Lee 604, Collier 754; July 2025+/HB 913 era 656; `result_truncated=false` — full hypercube pull). vs the broken DOM scrape's ~0. Creds from `.dlt/secrets.toml` (URI assembled from username/password/host/port/db, pw `urllib.parse.quote`'d, `?sslmode=require`).

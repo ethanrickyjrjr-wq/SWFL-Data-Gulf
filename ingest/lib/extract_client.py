@@ -2,7 +2,8 @@
 
 scrape_with_fallback()  — plain page→markdown:    crawl4ai (primary, live) → spider → firecrawl
 extract()               — AI structured rows:     crawl4ai stealth fetch → BeautifulSoup strip
-                          → Anthropic Haiku JSON (generalizes the proven crexi DIY pattern)
+                          → Anthropic Haiku JSON via structured outputs (output_config.format,
+                          GA) when a row schema is given; prompt-guided JSON otherwise
 
 crawl4ai is the ONLY live scraper (operator decree 2026-06-16): it runs locally (no API
 credits) and handles JS-rendered pages. Spider and Firecrawl remain only as DORMANT paid
@@ -28,6 +29,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 from typing import Any, Iterable, Optional
 
 from bs4 import BeautifulSoup
@@ -108,26 +110,63 @@ def _dedup_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _build_instruction(prompt: str, schema: Optional[dict[str, Any]]) -> str:
     base = prompt.strip()
     if schema:
-        base += "\n\nSchema (fields to extract per row):\n" + json.dumps(schema)
-    base += (
-        '\n\nReturn ONLY valid JSON with a single key: {"rows": [...]}. '
-        'No markdown fences. If nothing matches, return {"rows": []}.'
-    )
+        base += "\n\nExtract one object per matching record with these fields:\n" + json.dumps(schema)
+    base += '\n\nReturn an object {"rows": [...]} — one entry per record, or {"rows": []} if nothing matches.'
     return base
 
 
+# Anthropic structured outputs (GA, output_config.format) requires a rigid JSON Schema:
+# additionalProperties:false on every object and `required` listing all properties (verified live
+# 2026-06-22, platform.claude.com/docs/en/build-with-claude/structured-outputs). We can only honor
+# that when the caller hands us a per-row field map; the schema-less path stays prompt-guided.
+_TYPE_MAP = {
+    "str": "string", "string": "string", "text": "string",
+    "int": "integer", "integer": "integer",
+    "float": "number", "number": "number", "decimal": "number",
+    "bool": "boolean", "boolean": "boolean",
+}
+
+
+def _row_schema(fields: dict[str, Any]) -> dict[str, Any]:
+    """Convert extract()'s loose {field: type-hint} map into a strict per-row JSON Schema object.
+    Every field is nullable + required so the model emits null when a page lacks it (rather than
+    omitting the key, which additionalProperties:false would otherwise forbid)."""
+    props = {
+        name: {"type": [_TYPE_MAP.get(str(hint).strip().lower(), "string"), "null"]}
+        for name, hint in fields.items()
+    }
+    return {
+        "type": "object",
+        "properties": props,
+        "required": list(fields.keys()),
+        "additionalProperties": False,
+    }
+
+
+def _output_config(schema: dict[str, Any]) -> dict[str, Any]:
+    """GA structured-outputs config constraining the model to {"rows": [ <row>, ... ]}."""
+    return {
+        "format": {
+            "type": "json_schema",
+            "schema": {
+                "type": "object",
+                "properties": {"rows": {"type": "array", "items": _row_schema(schema)}},
+                "required": ["rows"],
+                "additionalProperties": False,
+            },
+        }
+    }
+
+
+_FENCE_RE = re.compile(r"^\s*`{3}(?:json)?\s*|\s*`{3}\s*$", re.IGNORECASE)
+
+
 def _parse_rows(raw: str) -> list[dict[str, Any]]:
-    """Defensive JSON parse lifted from crexi: strip accidental fences, never throw."""
-    raw = raw.strip()
-    if "```" in raw:
-        parts = raw.split("```")
-        raw = parts[1] if len(parts) > 1 else parts[0]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    try:
-        data = json.loads(raw)
-    except (json.JSONDecodeError, AttributeError):
-        return []
+    """Parse the model's {"rows":[...]} envelope. Structured outputs guarantees schema-valid JSON
+    on the schema path; the schema-less path is prompt-guided, so we tolerate a stray code fence —
+    but a genuinely malformed body RAISES (JSONDecodeError propagates to extract()'s per-URL handler
+    and surfaces in provenance). The old swallow-to-[] masked broken extraction as an empty page."""
+    data = json.loads(_FENCE_RE.sub("", raw.strip()))
     rows = data.get("rows", []) if isinstance(data, dict) else []
     return [r for r in rows if isinstance(r, dict)]
 
@@ -139,19 +178,32 @@ def _llm_extract_rows(
     schema: Optional[dict[str, Any]],
     model: str,
 ) -> list[dict[str, Any]]:
-    """Anthropic Haiku structured extraction, chunk-and-merge for long pages."""
+    """Anthropic structured extraction, chunk-and-merge for long pages. When the caller supplies a
+    field map, the call carries an output_config.format JSON Schema so the model emits schema-valid
+    JSON via constrained decoding (no fence-stripping needed). A refusal/truncation stop_reason can
+    still return off-schema text, so it RAISES rather than silently parsing to []."""
     import anthropic
 
     client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
     instruction = _build_instruction(prompt, schema)
+    output_config = _output_config(schema) if schema else None
     rows: list[dict[str, Any]] = []
     for chunk in _chunk_text(text):
-        msg = client.messages.create(
+        kwargs: dict[str, Any] = dict(
             model=model,
             max_tokens=4096,
             temperature=0,
             messages=[{"role": "user", "content": f"{instruction}\n\nPage text:\n{chunk}"}],
         )
+        if output_config is not None:
+            kwargs["output_config"] = output_config
+        msg = client.messages.create(**kwargs)
+        if msg.stop_reason in ("refusal", "max_tokens"):
+            raise RuntimeError(
+                f"Anthropic extraction returned stop_reason={msg.stop_reason!r} — output is not "
+                "schema-valid (safety refusal or token truncation). Raise max_tokens or audit the "
+                "prompt/page; do NOT treat as an empty page."
+            )
         rows.extend(_parse_rows(msg.content[0].text))
     return _dedup_rows(rows)
 

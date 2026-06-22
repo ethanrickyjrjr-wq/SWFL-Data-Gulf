@@ -10,6 +10,8 @@ these run offline and deterministically — no network, no browser, no API keys 
 """
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from ingest.lib import extract_client
@@ -129,9 +131,86 @@ def test_parse_rows_strips_fences_and_filters_non_dicts():
     assert extract_client._parse_rows('{"rows":[{"a":1}, "nope", 5]}') == [{"a": 1}]
 
 
-def test_parse_rows_returns_empty_on_garbage():
-    assert extract_client._parse_rows("not json at all") == []
+def test_parse_rows_raises_on_malformed():
+    """Malformed JSON must RAISE (surfaces via provenance), NOT silently degrade to [] — the old
+    swallow-to-[] masked broken extraction as an empty page."""
+    with pytest.raises(json.JSONDecodeError):
+        extract_client._parse_rows("not json at all")
+    # a well-formed object that simply lacks a rows key is a valid empty, not malformed
     assert extract_client._parse_rows('{"no_rows_key": true}') == []
+
+
+def test_llm_extract_rows_passes_strict_output_config(monkeypatch):
+    """When a row schema is given, the call carries output_config.format with additionalProperties
+    false + a required field list (the structured-outputs contract)."""
+    captured: dict = {}
+
+    class _Msg:
+        stop_reason = "end_turn"
+        content = [type("C", (), {"text": '{"rows":[{"addr":"1 Main"}]}'})()]
+
+    class _Client:
+        class messages:  # noqa: N801 - mimic the SDK's `client.messages.create`
+            @staticmethod
+            def create(**kwargs):
+                captured.update(kwargs)
+                return _Msg()
+
+    monkeypatch.setattr("anthropic.Anthropic", lambda: _Client())
+
+    rows = extract_client._llm_extract_rows(
+        "get listings", "page text", schema={"addr": "str"}, model="claude-haiku-4-5-20251001"
+    )
+
+    assert rows == [{"addr": "1 Main"}]
+    fmt = captured["output_config"]["format"]
+    assert fmt["type"] == "json_schema"
+    item = fmt["schema"]["properties"]["rows"]["items"]
+    assert item["additionalProperties"] is False
+    assert item["required"] == ["addr"]
+    assert "addr" in item["properties"]
+
+
+def test_llm_extract_rows_no_schema_omits_output_config(monkeypatch):
+    """Schema-less path stays prompt-guided — no output_config (free-form rows can't be expressed
+    under structured outputs' additionalProperties:false)."""
+    captured: dict = {}
+
+    class _Msg:
+        stop_reason = "end_turn"
+        content = [type("C", (), {"text": '{"rows":[]}'})()]
+
+    class _Client:
+        class messages:  # noqa: N801
+            @staticmethod
+            def create(**kwargs):
+                captured.update(kwargs)
+                return _Msg()
+
+    monkeypatch.setattr("anthropic.Anthropic", lambda: _Client())
+
+    extract_client._llm_extract_rows("p", "text", schema=None, model="m")
+    assert "output_config" not in captured
+
+
+def test_llm_extract_rows_raises_on_refusal(monkeypatch):
+    """A refusal/max_tokens stop_reason can still return off-schema text — it must RAISE, not be
+    parsed as an empty page."""
+
+    class _Msg:
+        stop_reason = "refusal"
+        content = [type("C", (), {"text": "I can't help with that."})()]
+
+    class _Client:
+        class messages:  # noqa: N801
+            @staticmethod
+            def create(**kwargs):
+                return _Msg()
+
+    monkeypatch.setattr("anthropic.Anthropic", lambda: _Client())
+
+    with pytest.raises(RuntimeError, match="refusal"):
+        extract_client._llm_extract_rows("p", "text", schema=None, model="m")
 
 
 def test_strip_html_drops_scripts_and_chrome():
