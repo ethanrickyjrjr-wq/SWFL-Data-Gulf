@@ -18,8 +18,10 @@ export function deriveWorkflowName(run) {
 }
 
 // Last `lines` lines of the failed jobs' logs for the given run id.
+// Default widened 30→200 (Phase-1 build 04): a traceback's root line is often
+// above a 30-line window, so the classifier was bucketing real roots as UNKNOWN.
 // Returns a short diagnostic string (never throws) if the logs can't be fetched.
-export function fetchLogTail(id, lines = 30) {
+export function fetchLogTail(id, lines = 200) {
   try {
     const out = execSync(`gh run view ${id} --log-failed`, {
       encoding: "utf8",

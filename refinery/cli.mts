@@ -15,6 +15,7 @@ import {
   computeMasterDecision,
   masterIsStaleVsUpstreams,
   deriveExitCode,
+  formatCronDiag,
   type BrainBuildOutcome,
   type BuildReport,
 } from "./lib/resilient-build.mts";
@@ -115,10 +116,7 @@ async function runPipeline(
     `[stage 1] ingest: ${fragments.length} fragment(s) — ${JSON.stringify(sourceCounts)}`,
   );
 
-  const { triaged, droppedByFit, droppedByCutoff } = await triageStage(
-    fragments,
-    pack,
-  );
+  const { triaged, droppedByFit, droppedByCutoff } = await triageStage(fragments, pack);
   console.log(
     `[stage 2] triage: ${triaged.length} kept · ${droppedByFit} dropped (pack-fit) · ${droppedByCutoff} dropped (cutoff)`,
   );
@@ -150,9 +148,7 @@ async function runPipeline(
     neverBuiltIds: opts.neverBuiltIds,
   });
   if (result.written) {
-    console.log(
-      `[stage 4] output: wrote ${result.brainPath} (version ${result.version})`,
-    );
+    console.log(`[stage 4] output: wrote ${result.brainPath} (version ${result.version})`);
   } else {
     console.log(
       `[stage 4] output: dry-run — validated OK, not written (would be version ${result.version})`,
@@ -162,16 +158,9 @@ async function runPipeline(
 }
 
 async function main(): Promise<void> {
-  const {
-    packId,
-    dryRun,
-    force,
-    targetOnly,
-    listConsumers,
-    strict,
-    report,
-    resilient,
-  } = parseArgs(process.argv);
+  const { packId, dryRun, force, targetOnly, listConsumers, strict, report, resilient } = parseArgs(
+    process.argv,
+  );
 
   // --list-consumers: pure registry query, no build
   if (listConsumers) {
@@ -179,9 +168,7 @@ async function main(): Promise<void> {
     if (consumers.length === 0) {
       console.log(`[refinery] no consumers depend on "${packId}".`);
     } else {
-      console.log(
-        `[refinery] consumers of "${packId}": ${consumers.join(", ")}`,
-      );
+      console.log(`[refinery] consumers of "${packId}": ${consumers.join(", ")}`);
     }
     return;
   }
@@ -239,9 +226,7 @@ async function main(): Promise<void> {
               : status.kind === "stale"
                 ? `stale (expired ${status.expires_at})`
                 : `fresh (expires ${status.expires_at})`;
-          console.log(
-            `[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`,
-          );
+          console.log(`[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`);
           continue;
         }
         if (status.kind === "missing") {
@@ -251,9 +236,7 @@ async function main(): Promise<void> {
                 `Run \`npm run refinery ${id}\` first, or pass --force to build it now.`,
             );
           }
-          console.log(
-            `[refinery] upstream ${id}: missing — building (--force)`,
-          );
+          console.log(`[refinery] upstream ${id}: missing — building (--force)`);
         } else if (status.kind === "stale") {
           console.log(
             `[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`,
@@ -263,9 +246,7 @@ async function main(): Promise<void> {
             `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — rebuilding (--force)`,
           );
         } else {
-          console.log(
-            `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`,
-          );
+          console.log(`[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`);
           continue;
         }
       }
@@ -291,9 +272,7 @@ async function main(): Promise<void> {
             : status.kind === "stale"
               ? `stale (expired ${status.expires_at})`
               : `fresh (expires ${status.expires_at})`;
-        console.log(
-          `[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`,
-        );
+        console.log(`[refinery] upstream ${id}: ${statusBlurb} — skip (--target-only)`);
         // Record actual status so computeMasterDecision sees missing upstreams correctly.
         // target-only skipped upstreams never have a last-good read, so they are
         // "not-yet-online" from the HOLD gate's perspective (no lastGoodRefinedAt).
@@ -305,20 +284,14 @@ async function main(): Promise<void> {
         continue;
       }
       if (status.kind === "fresh" && !force) {
-        console.log(
-          `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`,
-        );
+        console.log(`[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`);
         outcomes.push({ packId: id, status: "skipped-fresh", written: false });
         continue;
       }
       if (status.kind === "missing") {
-        console.log(
-          `[refinery] upstream ${id}: missing — building (resilient)`,
-        );
+        console.log(`[refinery] upstream ${id}: missing — building (resilient)`);
       } else if (status.kind === "stale") {
-        console.log(
-          `[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`,
-        );
+        console.log(`[refinery] upstream ${id}: stale (expired ${status.expires_at}) — rebuilding`);
       } else if (force) {
         console.log(
           `[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — rebuilding (--force)`,
@@ -334,31 +307,22 @@ async function main(): Promise<void> {
       }
     }
 
-    const outcome = await buildOne(
-      pack,
-      { dryRun, degradedUpstreamIds: degradedIds },
-      (p, o) =>
-        runPipeline(p, {
-          dryRun: o.dryRun,
-          strict,
-          degradedUpstreamIds: o.degradedUpstreamIds,
-        }),
+    const outcome = await buildOne(pack, { dryRun, degradedUpstreamIds: degradedIds }, (p, o) =>
+      runPipeline(p, {
+        dryRun: o.dryRun,
+        strict,
+        degradedUpstreamIds: o.degradedUpstreamIds,
+      }),
     );
 
     if (outcome.status === "degraded" || outcome.status === "missing") {
       degradedIds.add(id);
     }
-    if (
-      outcome.status === "missing" &&
-      outcome.lastGoodRefinedAt !== undefined
-    ) {
+    if (outcome.status === "missing" && outcome.lastGoodRefinedAt !== undefined) {
       // Re-darkened: had a last-good, eligibility expired. The gate's HOLD trigger.
       criticalHoleIds.add(id);
     }
-    if (
-      outcome.status === "missing" &&
-      outcome.lastGoodRefinedAt === undefined
-    ) {
+    if (outcome.status === "missing" && outcome.lastGoodRefinedAt === undefined) {
       // Never-built ("not-yet-online"): soft-skipped via degradedIds (above), but kept
       // OUT of the gate's degraded-fraction numerator. See computeDegradedCriticalIds.
       neverBuiltIds.add(id);
@@ -473,7 +437,18 @@ async function main(): Promise<void> {
       console.log(`[cli] build report → ${reportPath} (exit ${exitCode})`);
     }
 
-    if (exitCode !== 0) process.exit(exitCode);
+    if (exitCode !== 0) {
+      // CRON-DIAG (Phase-1 build 02 / Phase-1 _CONTRACT.md "Contract A"): surface
+      // the REAL cause to the failed-run log tail so classify-cron-failure.mjs
+      // records DETERMINISTIC_HOLD instead of bucketing UNKNOWN →
+      // "_auto-captured; pending triage_" (the masking chain). Logic + unit tests
+      // live in resilient-build.mts (formatCronDiag — the master HOLD outcome has
+      // no failureClass, so it reads the deterministic outcome). console.error →
+      // captured by `gh run view --log-failed`. Runs on dry-run too (a dry-run
+      // HOLD still exits 1).
+      console.error(formatCronDiag(outcomes));
+      process.exit(exitCode);
+    }
   }
 
   if (report) {
@@ -484,8 +459,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  console.error(
-    `[refinery] FAILED: ${err instanceof Error ? err.message : String(err)}`,
-  );
+  console.error(`[refinery] FAILED: ${err instanceof Error ? err.message : String(err)}`);
   process.exit(1);
 });

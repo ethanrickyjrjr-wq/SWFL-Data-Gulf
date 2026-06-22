@@ -198,6 +198,13 @@ jobs:
         if: steps.rebuild.outputs.exit_code != '0' && steps.rebuild.outputs.exit_code != '2' && steps.rebuild.outputs.exit_code != ''
         run: |
           echo "Master HELD, a deterministic build failure occurred, or the run crashed (exit ${{ steps.rebuild.outputs.exit_code }}). Prior master.md still serving."
+          # Phase-1 build 02: surface the REAL cause into THIS step's log. The rebuild step
+          # is continue-on-error (its conclusion is rewritten to success), so its CRON-DIAG
+          # line is excluded from `gh run view --log-failed`; THIS step's conclusion is
+          # failure, so emitting the line here lets classify-cron-failure.mjs record
+          # DETERMINISTIC_HOLD instead of UNKNOWN (Phase-1 _CONTRACT A). `|| true` so a
+          # missing report can never mask the real exit 1 below.
+          bun refinery/tools/print-cron-diag.mts || true
           exit 1
 
       # Layer-2 silent-freeze watchdog (part 2/2): an INDEPENDENT process that

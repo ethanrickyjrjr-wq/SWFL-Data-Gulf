@@ -1,7 +1,17 @@
-# 01 — news_swfl `published_date` schema mismatch (the one OPEN daily red)
+# 01 — news_swfl `published_date` schema mismatch
 
 **Model: Sonnet.** Single-file + one idempotent migration; the fix direction is pinned below.
-**Priority: P0.** This is the only flapper that fails *every* run (ledger row OPEN, not auto-resolved).
+**Priority: P0.**
+
+> **STATUS — ALREADY RESOLVED (audit re-verify 2026-06-22).** This red was fixed on
+> **2026-06-20** by commit `79f924c9` (idempotent `date→text` ALTER), the day before this
+> doc was authored. A live read-only `information_schema` probe (2026-06-22) confirms
+> `data_lake.news_articles_swfl.published_date` is **already `text`** with **28 rows**, and
+> `daily-rebuild` is **green** (run 27879193913). **Do NOT re-run the ALTER as a "fix" — it
+> is a confirmed no-op.** Re-scoped to: (1) confirm green (done), (2) close the still-OPEN
+> `news-swfl-ingest` ledger row (done — `docs/cron-rebuild-failures.md`), (3) carry the
+> durable recurrence-prevention to Phase-7 build 22 (dlt `schema_contract`). The original
+> migration spec is retained below for the record.
 
 ## The defect (verified)
 `news-swfl` crawl SUCCEEDS; the dlt LOAD fails every run:
@@ -16,7 +26,8 @@ The live table column is legacy `date`. dlt never ALTERs an existing column → 
 ## Steps
 1. **Probe first.** Read `pipelines/news_swfl/pipeline.py`, `normalizer.py`, and confirm the live column
    type: `SELECT data_type FROM information_schema.columns WHERE table_schema='data_lake' AND
-   table_name='news_swfl_articles' (or the real table) AND column_name='published_date';`
+   table_name='news_articles_swfl' AND column_name='published_date';` (the real table is
+   `news_articles_swfl` — words in that order; an earlier draft of this doc had it backwards)
 2. **Idempotent ALTER `date → text`** (align the DB to the pipeline's committed intent). Run it directly
    (creds in `.dlt/secrets.toml`, psycopg3 — RULE 1 SQL-migrations-run-directly):
    `ALTER TABLE data_lake.<news table> ALTER COLUMN published_date TYPE text USING published_date::text;`
@@ -26,8 +37,8 @@ The live table column is legacy `date`. dlt never ALTERs an existing column → 
    `pipeline.py:12` comment documents — out of scope for this P0; note it for later if a consumer needs it.
 
 ## Done when
-- A `news-swfl-ingest` `workflow_dispatch` (or local run) completes the dlt LOAD with **exit 0** and rows land.
-- The ledger row for news-swfl can be closed; `scripts/check.mjs` updated.
+- ✅ `news-swfl-ingest` / `daily-rebuild` completes the dlt LOAD with **exit 0** and rows land — confirmed green (run 27879193913), 28 rows in `data_lake.news_articles_swfl` (live probe 2026-06-22).
+- ✅ The still-OPEN `news-swfl-ingest` ledger row closed with the real root cause (`docs/cron-rebuild-failures.md`, triaged 2026-06-22). No `scripts/check.mjs` row exists for this — it was only ever a cron-ledger row.
 
 ## Best-practice fold-in
 dlt's `schema_contract` setting is the durable recurrence-prevention complement to this one-off ALTER.

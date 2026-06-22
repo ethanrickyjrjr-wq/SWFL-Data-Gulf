@@ -12,6 +12,7 @@ import {
   masterIsStaleVsUpstreams,
   buildOne,
   deriveExitCode,
+  formatCronDiag,
   type BrainBuildOutcome,
 } from "./resilient-build.mts";
 
@@ -65,9 +66,7 @@ function minOutput(refinedAt: string): BrainOutputRead {
 }
 
 // Build a BrainBuildOutcome literal for deriveExitCode tests.
-function oc(
-  partial: Partial<BrainBuildOutcome> & { packId: string },
-): BrainBuildOutcome {
+function oc(partial: Partial<BrainBuildOutcome> & { packId: string }): BrainBuildOutcome {
   return {
     status: "built",
     written: true,
@@ -78,12 +77,7 @@ function oc(
 // ── isTransientError ───────────────────────────────────────────────────────
 
 test("isTransientError: network keywords → true", () => {
-  for (const msg of [
-    "socket hang up",
-    "ECONNRESET",
-    "ETIMEDOUT",
-    "fetch failed",
-  ]) {
+  for (const msg of ["socket hang up", "ECONNRESET", "ETIMEDOUT", "fetch failed"]) {
     assert.ok(isTransientError(new Error(msg)), `expected transient: ${msg}`);
   }
 });
@@ -94,10 +88,7 @@ test("isTransientError: validator/type errors → false", () => {
     "schema validation failed",
     "TypeError: undefined is not",
   ]) {
-    assert.ok(
-      !isTransientError(new Error(msg)),
-      `expected non-transient: ${msg}`,
-    );
+    assert.ok(!isTransientError(new Error(msg)), `expected non-transient: ${msg}`);
   }
 });
 
@@ -105,28 +96,16 @@ test("isTransientError: validator/type errors → false", () => {
 
 test("isEligibleLastGood: 1-day TTL pack → floor = 2 days", () => {
   const pack = minPack({ ttl_seconds: 86400 }); // 1 day → window = max(2,1) = 2
-  const twoAgoDays = new Date(
-    Date.now() - 2 * 86400_000 + 60_000,
-  ).toISOString(); // 2d minus 1min
+  const twoAgoDays = new Date(Date.now() - 2 * 86400_000 + 60_000).toISOString(); // 2d minus 1min
   assert.ok(isEligibleLastGood(pack, twoAgoDays), "just within 2-day floor");
-  const twoAgoExpired = new Date(
-    Date.now() - 2 * 86400_000 - 60_000,
-  ).toISOString();
-  assert.ok(
-    !isEligibleLastGood(pack, twoAgoExpired),
-    "just outside 2-day floor",
-  );
+  const twoAgoExpired = new Date(Date.now() - 2 * 86400_000 - 60_000).toISOString();
+  assert.ok(!isEligibleLastGood(pack, twoAgoExpired), "just outside 2-day floor");
 });
 
 test("isEligibleLastGood: 30-day TTL pack → ceiling = 14 days", () => {
   const pack = minPack({ ttl_seconds: 30 * 86400 }); // 30 days → window = min(14,30) = 14
-  const fourteenAgo = new Date(
-    Date.now() - 14 * 86400_000 + 60_000,
-  ).toISOString();
-  assert.ok(
-    isEligibleLastGood(pack, fourteenAgo),
-    "just within 14-day ceiling",
-  );
+  const fourteenAgo = new Date(Date.now() - 14 * 86400_000 + 60_000).toISOString();
+  assert.ok(isEligibleLastGood(pack, fourteenAgo), "just within 14-day ceiling");
   const tooOld = new Date(Date.now() - 15 * 86400_000).toISOString();
   assert.ok(!isEligibleLastGood(pack, tooOld), "outside 14-day ceiling");
 });
@@ -137,12 +116,7 @@ test("classifyFailure: eligible last-good → degraded with lastGoodRefinedAt", 
   const pack = minPack({ ttl_seconds: 604_800 }); // 7 days → window = 7
   const refinedAt = new Date(Date.now() - 3 * 86400_000).toISOString(); // 3 days ago
   const read = minOutput(refinedAt);
-  const outcome = classifyFailure(
-    pack,
-    new Error("socket hang up"),
-    read,
-    "transient",
-  );
+  const outcome = classifyFailure(pack, new Error("socket hang up"), read, "transient");
   assert.equal(outcome.status, "degraded");
   assert.equal(outcome.lastGoodRefinedAt, refinedAt);
   assert.equal(outcome.version, 3);
@@ -163,22 +137,14 @@ test("classifyFailure: ineligible last-good → missing WITH lastGoodRefinedAt",
   assert.equal(outcome.status, "missing");
   // lastGoodRefinedAt IS set — this is the HOLD trigger
   assert.equal(outcome.lastGoodRefinedAt, oldRefinedAt);
-  assert.ok(
-    outcome.reason?.includes("schema"),
-    "reason should carry the error message",
-  );
+  assert.ok(outcome.reason?.includes("schema"), "reason should carry the error message");
   assert.equal(outcome.failureClass, "deterministic");
 });
 
 test("classifyFailure: never-built (read.kind=missing) → missing WITHOUT lastGoodRefinedAt", () => {
   const pack = minPack();
   const read: BrainOutputRead = { kind: "missing", reason: "file not found" };
-  const outcome = classifyFailure(
-    pack,
-    new Error("any error"),
-    read,
-    "deterministic",
-  );
+  const outcome = classifyFailure(pack, new Error("any error"), read, "deterministic");
   assert.equal(outcome.status, "missing");
   // lastGoodRefinedAt ABSENT — this is the "not-yet-online" case, no HOLD
   assert.equal(outcome.lastGoodRefinedAt, undefined);
@@ -251,13 +217,7 @@ test("Guard 3 — deterministic error → runPipeline called exactly once, no re
   const readFn = async () => minOutput(freshAt);
   const pack = minPack({ ttl_seconds: 604_800 });
 
-  const outcome = await buildOne(
-    pack,
-    { dryRun: false },
-    runPipeline,
-    readFn,
-    0,
-  );
+  const outcome = await buildOne(pack, { dryRun: false }, runPipeline, readFn, 0);
 
   assert.equal(callCount, 1, "must not retry deterministic errors");
   assert.equal(outcome.status, "degraded"); // last-good within 7-day window
@@ -278,13 +238,7 @@ test("Guard 2 — transient error → retry once, then degraded on eligible last
   const readFn = async () => minOutput(freshAt);
   const pack = minPack({ ttl_seconds: 604_800 });
 
-  const outcome = await buildOne(
-    pack,
-    { dryRun: false },
-    runPipeline,
-    readFn,
-    0,
-  );
+  const outcome = await buildOne(pack, { dryRun: false }, runPipeline, readFn, 0);
 
   assert.equal(callCount, 2, "must retry exactly once");
   assert.equal(outcome.status, "degraded");
@@ -317,9 +271,7 @@ test("deriveExitCode: all built → 0", () => {
 });
 
 test("deriveExitCode: skipped-fresh master → 0", () => {
-  const outcomes = [
-    oc({ packId: "master", status: "skipped-fresh", written: false }),
-  ];
+  const outcomes = [oc({ packId: "master", status: "skipped-fresh", written: false })];
   assert.equal(deriveExitCode(outcomes, "skipped-fresh", { dryRun: false }), 0);
 });
 
@@ -420,6 +372,65 @@ test("deriveExitCode: deterministic dominates a mixed transient+deterministic se
   assert.equal(deriveExitCode(outcomes, "published", { dryRun: false }), 1);
 });
 
+// ── formatCronDiag (Phase-1 build 02 — surface the master-HOLD cause) ────────
+// The whole point: the naive `master.failureClass` reads `unknown` on a HOLD (the
+// master outcome carries no failureClass), which would NOT match build 04's
+// DETERMINISTIC_HOLD rule keyed on `failureClass=deterministic`. formatCronDiag
+// must emit that token for both the HOLD path and a deterministic leaf (Contract A).
+
+test("formatCronDiag: master HOLD (no failureClass) → deterministic, not unknown", () => {
+  const outcomes = [
+    oc({ packId: "cre-swfl" }),
+    oc({
+      packId: "master",
+      status: "missing",
+      written: false,
+      reason: "HOLD: critical upstream eligibility expired",
+    }),
+  ];
+  const line = formatCronDiag(outcomes);
+  assert.match(line, /^CRON-DIAG failureClass=deterministic /);
+  assert.match(line, /reason=HOLD: critical upstream eligibility expired/);
+});
+
+test("formatCronDiag: deterministic leaf (.md not found) is surfaced over master", () => {
+  const outcomes = [
+    oc({
+      packId: "fgcu-reri",
+      status: "missing",
+      written: false,
+      failureClass: "deterministic",
+      reason: "brains/fgcu-reri.md not found. Run `npm run refinery fgcu-reri` first.",
+    }),
+    oc({ packId: "master", status: "missing", written: false }),
+  ];
+  const line = formatCronDiag(outcomes);
+  assert.match(line, /^CRON-DIAG failureClass=deterministic /);
+  assert.match(line, /brains\/fgcu-reri\.md not found/);
+});
+
+test("formatCronDiag: newlines in reason are collapsed to a single line", () => {
+  const outcomes = [
+    oc({
+      packId: "master",
+      status: "missing",
+      written: false,
+      failureClass: "deterministic",
+      reason: "line one\nline two\n  indented three",
+    }),
+  ];
+  const line = formatCronDiag(outcomes);
+  assert.doesNotMatch(line, /\n/);
+  assert.match(line, /line one line two indented three/);
+});
+
+test("formatCronDiag: no deterministic + non-missing master → unknown (honest)", () => {
+  // The silent-unpublished case (built+written:false) is the freeze-watchdog's
+  // domain, not a deterministic HOLD; stay honest rather than mislabel it.
+  const outcomes = [oc({ packId: "master", status: "built", written: false })];
+  assert.match(formatCronDiag(outcomes), /^CRON-DIAG failureClass=unknown /);
+});
+
 // ── masterIsStaleVsUpstreams ─────────────────────────────────────────────────
 // The upstream-aware rebuild trigger: master is TTL-fresh by its own clock, but
 // an upstream brain.md was rebuilt MORE RECENTLY than master's last synthesis,
@@ -440,11 +451,7 @@ test("masterIsStaleVsUpstreams: an upstream refined AFTER master → stale (true
 
 test("masterIsStaleVsUpstreams: all upstreams refined before master → fresh (false)", () => {
   const masterRefinedAt = "2026-06-05T12:00:00Z";
-  const upstreams = [
-    "2026-06-01T00:00:00Z",
-    "2026-06-03T15:57:48Z",
-    "2026-05-28T00:00:00Z",
-  ];
+  const upstreams = ["2026-06-01T00:00:00Z", "2026-06-03T15:57:48Z", "2026-05-28T00:00:00Z"];
   assert.equal(masterIsStaleVsUpstreams(masterRefinedAt, upstreams), false);
 });
 

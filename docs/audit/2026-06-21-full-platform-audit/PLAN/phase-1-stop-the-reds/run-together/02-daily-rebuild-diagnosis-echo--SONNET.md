@@ -14,13 +14,33 @@ triage_` → next green run auto-flips to RESOLVED. **The real reason exists in 
 and 476**, while the report object is in hand. (TS — NOT `daily-rebuild.yml`, so this never collides with
 build 09's gate-install edit.)
 
+> **CORRECTION (audit re-verify 2026-06-22) — the field-sourcing in the original Steps was WRONG.**
+> The master-HOLD outcome pushed in `cli.mts` (the `computeMasterDecision === "held"` branch) is
+> `{ packId:"master", status:"missing", reason:"HOLD: critical upstream eligibility expired" }` with
+> **NO `failureClass`**, and there is **no `master` variable in scope** at the echo site. The real
+> deterministic cause (`failureClass:"deterministic"`, `reason:"brains/<id>.md not found"`) lives on
+> whichever outcome `classifyFailure` marked — NOT a top-level `master` field. A literal
+> `master.failureClass` would print `unknown` in the exact HOLD case this build targets, so build 04's
+> `DETERMINISTIC_HOLD` rule (keyed on `failureClass=deterministic`) would never match — silently
+> defeating Contract A. The corrected steps below source from the deterministic outcome.
+
 ## Steps
-1. **Probe first.** Read `refinery/cli.mts` ~440–490 and the `_build-report.json` shape (the master
-   outcome carries `failureClass` + `reason`; confirm field names).
-2. When `exitCode !== 0`, before `process.exit`, `console.error` a single line per the Phase-1 `_CONTRACT.md`
-   **Contract A**: `CRON-DIAG failureClass=<master.failureClass> reason=<master.reason>` (plus any held
-   brain id). Use `console.error`/stdout so `gh run view --log-failed` captures it in the tail.
-3. Keep it dependency-free and guard against missing fields (echo `unknown` rather than throw).
+1. **Probe first.** Read `refinery/cli.mts` ~440–490 and the outcome shape in
+   `refinery/lib/resilient-build.mts` (`BrainBuildOutcome`: `packId` / `status` / `failureClass?` /
+   `reason?`). Confirm the master-HELD push carries no `failureClass`.
+2. When `exitCode !== 0`, before `process.exit`, `console.error` a single Contract-A line
+   (`CRON-DIAG failureClass=<x> reason=<y>`), sourcing `<x>`/`<y>` from
+   `outcomes.find(o => o.failureClass === "deterministic")` if present, else the master outcome
+   (`outcomes.find(o => o.packId === "master")`), treating a `missing` master as `deterministic`.
+   `console.error` so `gh run view --log-failed` captures it in the tail.
+3. Keep it dependency-free, collapse whitespace in `reason` (it's a raw error message), and guard
+   missing fields (echo `unknown` rather than throw).
+
+> **IMPLEMENTED 2026-06-22.** Landed as a pure, unit-tested helper `formatCronDiag(outcomes)` in
+> `refinery/lib/resilient-build.mts` (next to `deriveExitCode`); `cli.mts` calls
+> `console.error(formatCronDiag(outcomes))` inside the `if (exitCode !== 0)` block. Tests:
+> `resilient-build.test.mts` (HOLD→deterministic · leaf `.md not found` · newline-collapse ·
+> honest-unknown) + `classify-cron-failure.test.mjs` (the emitted line classifies DETERMINISTIC_HOLD).
 
 ## Done when
 - A forced HOLD (or a dry-run that simulates one) prints the `CRON-DIAG …` line to the run log, and a

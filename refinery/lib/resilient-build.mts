@@ -59,10 +59,7 @@ export interface BuildReport {
 
 /** Classify a build error as transient (retry eligible) or deterministic. */
 export function isTransientError(err: unknown): boolean {
-  const msg =
-    err instanceof Error
-      ? err.message.toLowerCase()
-      : String(err).toLowerCase();
+  const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
   return (
     msg.includes("socket hang up") ||
     msg.includes("econnreset") ||
@@ -73,10 +70,7 @@ export function isTransientError(err: unknown): boolean {
 
 /** Whether a prior brain read is within the eligibility window for use as a
  *  last-good degraded fallback. Uses pack.ttl_seconds as the reference TTL. */
-export function isEligibleLastGood(
-  pack: PackDefinition,
-  refinedAt: string,
-): boolean {
+export function isEligibleLastGood(pack: PackDefinition, refinedAt: string): boolean {
   const ttlDays = pack.ttl_seconds / 86400;
   const windowDays = Math.min(
     LAST_GOOD_ABSOLUTE_MAX_DAYS,
@@ -111,8 +105,7 @@ export function classifyFailure(
   }
   // `missing` with lastGoodRefinedAt → expired eligibility (HOLD trigger).
   // `missing` without it → never built ("not-yet-online", no HOLD).
-  const lastGoodRefinedAt =
-    read.kind === "ok" ? read.output.refined_at : undefined;
+  const lastGoodRefinedAt = read.kind === "ok" ? read.output.refined_at : undefined;
   return {
     packId: pack.id,
     status: "missing",
@@ -135,11 +128,7 @@ export function computeMasterDecision(
   for (const edge of masterPack.input_brains ?? []) {
     if (!edge.critical) continue;
     const outcome = outcomeById.get(edge.id);
-    if (
-      outcome &&
-      outcome.status === "missing" &&
-      outcome.lastGoodRefinedAt !== undefined
-    ) {
+    if (outcome && outcome.status === "missing" && outcome.lastGoodRefinedAt !== undefined) {
       return "held";
     }
   }
@@ -189,19 +178,14 @@ export function deriveExitCode(
   opts: { dryRun: boolean },
 ): 0 | 1 | 2 {
   const masterHeld = masterDecision === "held";
-  const hasDeterministicFailure = outcomes.some(
-    (o) => o.failureClass === "deterministic",
-  );
+  const hasDeterministicFailure = outcomes.some((o) => o.failureClass === "deterministic");
   // Stage-4 master gate HOLD: outcome is `built` (runPipeline returned, no throw)
   // but the gate set written:false. Not a failure status, not degraded/missing —
   // it would otherwise trip nothing and conclude exit 0. dry-run legitimately
   // produces written:false (validate-only), so exclude it.
   const master = outcomes.find((o) => o.packId === "master");
   const masterSilentlyUnpublished =
-    !opts.dryRun &&
-    master !== undefined &&
-    master.status === "built" &&
-    master.written === false;
+    !opts.dryRun && master !== undefined && master.status === "built" && master.written === false;
   if (masterHeld || hasDeterministicFailure || masterSilentlyUnpublished) {
     return 1;
   }
@@ -209,6 +193,34 @@ export function deriveExitCode(
     (o) => o.status === "degraded" || o.status === "missing",
   );
   return hasDegradedOrMissing ? 2 : 0;
+}
+
+/**
+ * Phase-1 build 02 — the one-line CRON-DIAG string for the failed-run log tail.
+ *
+ * The cron-incident logger only sees a log tail; on a master HOLD it saw just
+ * "exit code 1" → classifier bucketed UNKNOWN → ledger wrote
+ * "_auto-captured; pending triage_" → next green run auto-flipped to RESOLVED.
+ * The real cause was in `_build-report.json` but never reached the tail. This
+ * surfaces it. The master HOLD outcome pushed by cli.mts carries NO `failureClass`
+ * and only a generic reason ("HOLD: critical upstream eligibility expired"); the
+ * real deterministic cause ("brains/<id>.md not found") lives on whichever outcome
+ * `classifyFailure` marked. So prefer the deterministic outcome, else master, and
+ * treat a `missing` master as deterministic. Single line, whitespace collapsed,
+ * fields guarded → never throws. classify-cron-failure.mjs keys DETERMINISTIC_HOLD
+ * on the `failureClass=deterministic` token this emits (Phase-1 _CONTRACT.md A).
+ * Exported for direct unit testing — see resilient-build.test.mts.
+ */
+export function formatCronDiag(outcomes: BrainBuildOutcome[]): string {
+  const masterOut = outcomes.find((o) => o.packId === "master");
+  const deterministic = outcomes.find((o) => o.failureClass === "deterministic");
+  const cause = deterministic ?? masterOut;
+  const failureClass =
+    cause?.failureClass ?? (masterOut?.status === "missing" ? "deterministic" : "unknown");
+  const reason = String(cause?.reason ?? "unknown")
+    .replace(/\s+/g, " ")
+    .slice(0, 300);
+  return `CRON-DIAG failureClass=${failureClass} reason=${reason}`;
 }
 
 // ── buildOne ──────────────────────────────────────────────────────────────
@@ -225,9 +237,7 @@ export async function buildOne(
   pack: PackDefinition,
   opts: { dryRun: boolean; degradedUpstreamIds?: ReadonlySet<string> },
   runPipeline: RunPipelineFn,
-  readBrainOutputFn: (
-    brainId: string,
-  ) => Promise<BrainOutputRead> = readBrainOutput,
+  readBrainOutputFn: (brainId: string) => Promise<BrainOutputRead> = readBrainOutput,
   delaySec: number = 5,
 ): Promise<BrainBuildOutcome> {
   let result!: OutputResult;

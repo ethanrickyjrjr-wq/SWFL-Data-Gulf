@@ -396,6 +396,51 @@ for (const pack of Object.values(PACKS)) {
   }
 }
 
+/**
+ * Phase-1 build 05 — brain-input parity check, exported for the parity test.
+ * Returns an error message if `pack` declares a `brain-input:*` source with no
+ * matching `input_brains` edge, else null.
+ *
+ * Why this is load-bearing: the DAG resolver (refinery/lib/dag.mts
+ * `resolveBuildOrder`) walks ONLY `input_brains` — it never reads `sources`. So a
+ * `brain-input:<id>` source with no `input_brains` edge is fetched-but-never-built:
+ * the upstream's `brains/<id>.md` is missing at fetch time → deterministic master
+ * HOLD (the 2026-06-18 / fgcu-reri rebuild failure, reconciled in 672180c). Only
+ * the brain-input ⊆ input_brains direction is checked — vendor/data sources
+ * (bls-laus, fdot-…) legitimately sit in `sources` with no edge, so they are
+ * skipped via the canonical `brain-input:` prefix filter (cf. stages/4-output.mts).
+ */
+export function brainInputParityError(pack: PackDefinition): string | null {
+  const declared = new Set((pack.input_brains ?? []).map((e) => e.id));
+  for (const source of pack.sources ?? []) {
+    if (!source.source_id.startsWith("brain-input:")) continue;
+    const upstreamId = source.source_id.slice("brain-input:".length);
+    if (!declared.has(upstreamId)) {
+      return (
+        `pack "${pack.brain_id}" declares brain-input source "${source.source_id}" ` +
+        `but has no matching input_brains edge for "${upstreamId}" — the DAG ` +
+        `resolver only builds input_brains, so this upstream would be ` +
+        `fetched-but-never-built → deterministic master HOLD. Add ` +
+        `{ id: "${upstreamId}", edge_type: "input" } to ${pack.brain_id}'s input_brains[].`
+      );
+    }
+  }
+  return null;
+}
+
+// Registry invariant (Phase-1 build 05): every brain-input source a pack declares
+// must have a matching `input_brains` edge. Checked at module load — same as the
+// public_label invariant above — so the drift throws before any build runs, not at
+// the nightly rebuild. Every pack currently passes (all brain-input sources are
+// mirrored); this locks that good state and kills the recurring sources[]⇆
+// input_brains[] master-HOLD class (672180c; 2026-06-18).
+for (const pack of Object.values(PACKS)) {
+  const parityError = brainInputParityError(pack);
+  if (parityError) {
+    throw new Error(`Registry invariant: ${parityError}`);
+  }
+}
+
 export function getPack(id: string): PackDefinition {
   const pack = PACKS[id];
   if (!pack) {

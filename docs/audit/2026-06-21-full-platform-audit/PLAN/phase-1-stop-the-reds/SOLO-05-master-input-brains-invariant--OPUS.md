@@ -33,6 +33,24 @@ runs"). Add the parity check right beside it, same style.
    and which list it's missing from. Mirror the existing message style.
 4. Add/extend a test asserting: mirrored lists pass; a planted orphan throws with the expected message.
 
+> **FOLD-IN (audit re-verify 2026-06-22) — two implementation gotchas the original Steps under-specified:**
+> (a) The `SourceConnector` type exposes **only `source_id`** (no `.upstreamId` field) — recover the
+> upstream id by stripping the prefix: `source.source_id.slice("brain-input:".length)`.
+> (b) **Filter to brain-input sources first** (`source.source_id.startsWith("brain-input:")`) — packs
+> `macro-swfl` / `macro-florida` / `logistics-swfl-nowcast` legitimately mix vendor connectors
+> (`bls-laus`, `fdot-…`) into `sources[]`; a naïve "every source ∈ input_brains" check would false-throw
+> on a currently-valid registry and brick import for ALL packs. Assert **brain-input-source ⊆
+> input_brains** (the direction that causes the HOLD); the reverse is optional. **Scope chosen: all packs**
+> — every one of the 7 `makeBrainInputSource` consumers is mirrored today, so it passes on load and gives
+> broader coverage than master-only.
+
+> **IMPLEMENTED 2026-06-22.** Landed as an exported pure predicate `brainInputParityError(pack)` in
+> `refinery/config/packs.mts`, called by a module-scope loop right after the existing `public_label`
+> invariant (`throw new Error("Registry invariant: …")`). Test: `refinery/packs/brain-input-parity.test.mts`
+> (real registry passes · planted orphan rejected · matching edge passes · vendor source ignored).
+> Verified in isolation: `bun test refinery/packs/brain-input-parity.test.mts` (4/4) + `bun test refinery/`
+> (1448/0 — every PACKS import exercises the new throw) + refinery typecheck adds 0 real errors.
+
 ## Best-practice fold-in
 The load-time invariant catches drift but still maintains **two hand-kept lists**. The durable fix (authoritative
 parallel: declarative-asset-dependencies, REPORT "three things" row 3) is to **derive one list from the other** so

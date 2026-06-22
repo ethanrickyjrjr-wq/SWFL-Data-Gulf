@@ -93,9 +93,10 @@ export function classify(logTail) {
     };
   }
 
-  // 5. SCHEMA_DRIFT — vocab orphan / missing relation or column / failed render validation / stale alias.
+  // 5. SCHEMA_DRIFT — vocab orphan / missing relation or column / Postgres column
+  //    type drift (DatatypeMismatch) / failed render validation / stale alias.
   m = text.match(
-    /(Orphan Concept[^\n]*|relation ["'][\w.]+["'] does not exist|column ["'][\w.]+["'] does not exist|[^\n]*failed validation[^\n]*|CORRIDOR_ALIASES[^\n]*)/i,
+    /(Orphan Concept[^\n]*|relation ["'][\w.]+["'] does not exist|column ["'][\w.]+["'] does not exist|column ["']?[\w.]+["']? is of type [^\n]+? but expression is of type [\w ]+|[^\n]*failed validation[^\n]*|CORRIDOR_ALIASES[^\n]*)/i,
   );
   if (m) {
     return {
@@ -106,7 +107,27 @@ export function classify(logTail) {
     };
   }
 
-  // 6. DATA_EMPTY — source returned nothing (dead/changed URL, WAF, async job not polled).
+  // 6. DETERMINISTIC_HOLD — master held / a brain's brains/<id>.md missing. Root:
+  //    a pack lists a brain in `sources[]` but not `input_brains[]`, so the DAG
+  //    resolver never builds it → deterministic master HOLD (the 06-18 flap).
+  //    Surfaced by build 02's `CRON-DIAG failureClass=deterministic …` echo and/or
+  //    the raw `_build-report.json`. Deterministic: never auto-retry, no LLM.
+  // Two arms only: the `failureClass=deterministic` token build 02's formatCronDiag
+  // emits (also matches the raw `"failureClass": "deterministic"` in _build-report.json),
+  // and the literal `brains/<id>.md not found` thrown by brain-input-source. A 3rd
+  // generic-`.md not found` arm was dropped — it false-matched benign lines
+  // (CHANGELOG.md, docs/guide.md) and was already covered by the `brains/` arm.
+  m = text.match(/("?failureClass"?\s*[:=]\s*"?deterministic\b|brains\/[\w.-]+\.md not found)/i);
+  if (m) {
+    return {
+      klass: "DETERMINISTIC_HOLD",
+      signal: m[1].slice(0, 120).trim(),
+      suggestedAction:
+        "Master held — a brain in a pack's `sources[]` is missing from its `input_brains[]` (or its `brains/<id>.md` was never built), so the DAG resolver never built it → deterministic HOLD. Reconcile the two lists; the load-time invariant in `refinery/config/packs.mts` (Phase-1 build 05) now blocks this drift. Do NOT auto-retry.",
+    };
+  }
+
+  // 7. DATA_EMPTY — source returned nothing (dead/changed URL, WAF, async job not polled).
   m = text.match(
     /\b(0 rows|0 permits?|0 decisions|0 URLs?|0 records|no rows|returned 0|empty (?:HTML|response|result)|0 \w+ (?:discovered|returned|loaded))\b/i,
   );
@@ -119,7 +140,7 @@ export function classify(logTail) {
     };
   }
 
-  // 7. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
+  // 8. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
   if (
     /ReadTimeout|TimeoutError|ConnectTimeout|Connection error|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|SSL[: ][^\n]*EOF|HTTP 429|\b429\b|rate.?limit|Temporary failure in name resolution|Connection reset|ECONNRESET|ETIMEDOUT|EAI_AGAIN|Max retries exceeded/i.test(
       text,
@@ -136,7 +157,7 @@ export function classify(logTail) {
     };
   }
 
-  // 8. UNKNOWN — unrecognised shape; route to the LLM narrative.
+  // 9. UNKNOWN — unrecognised shape; route to the LLM narrative.
   return {
     klass: "UNKNOWN",
     signal: "",

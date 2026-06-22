@@ -1,5 +1,35 @@
 # BUILD PLAN — 2026-06-21 full-platform audit → executable, ordered, parallelized
 
+## ⛔ EXECUTION POLICY (locked 2026-06-22) — NO MORE AUDITS. CLAUDE DECIDES. JUST BUILD.
+
+This plan has already been audited to death (a 6-agent audit, three `crawl4ai-live` rounds, three
+`best-practices-research` rounds, a 28-agent references pass). **It is DONE being analyzed.** Do NOT run
+another audit, an audit-of-the-audit, or a multi-agent verification pass over it, and do NOT make the
+operator pick between options Claude can already call. (CLAUDE.md RULE 0.6.)
+
+**Per build — do it yourself, one build ≈ one session, no agent fleets:**
+
+1. Open the build doc + the files it names; do the RULE 0.5 code-probe (line numbers are anchors, not gospel).
+2. **Take the build's recommended option. Don't re-brainstorm a settled call; don't ask the operator to
+   choose.** Decisions already made (do not re-litigate): **05** = all packs · **08** = uniform
+   `crawl4ai-setup` (keep `CRAWL4AI_MODE` unset) · **14** = Option B (shared-client migrate) unless the
+   local battle-test clearly beats it · **23** = convert only stable-key pipelines, **FEMA stays `replace`** ·
+   **22** = lean `freeze` on news_swfl. Where a build lists options + a recommendation, the recommendation
+   IS the decision.
+3. **Trust the code over the doc — builds can be stale.** Phase 1 proved it: **01** was already fixed (a
+   no-op) and **02**'s field-sourcing premise was wrong. If the probe shows the defect is gone or the spec
+   is wrong, fix reality and correct the doc in the same commit — never execute a stale spec.
+4. Make the change → run the build's Done-when gate → SESSION_LOG entry → commit + push. **Only stop to ask
+   on:** an irreversible prod write, or a genuine architecture-shape change (RULE 3). Vendor-First builds
+   (22/23/26/27) still WebFetch the live vendor doc at build time.
+
+**The `## References` sections + the `crawl4ai-live/` and `best-practices-research/` folders are POINTERS,
+not required reading.** Open one only if a build's fix is unclear; otherwise skip them.
+
+**Status:** **Phase 1 (builds 01–05) SHIPPED 2026-06-22** — see `SESSION_LOG.md`. Next up: **Phase 2 (06–10)**.
+
+---
+
 **Written 2026-06-22.** This folder is the **build plan** that operationalizes the 2026-06-21 audit. It
 consolidates three source docs into one ordered, model-tagged, parallel-grouped sequence:
 

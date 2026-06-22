@@ -280,19 +280,42 @@ def check_tier1_entry(conn, entry: dict) -> dict:
     tolerance = float(entry["tolerance_multiplier"])
     threshold = int(cadence * tolerance)
 
-    with conn.cursor() as cur:
-        if key_type == "prefix":
-            cur.execute(
-                "SELECT updated_at FROM data_lake._tier1_inventory"
-                " WHERE id LIKE %s ORDER BY updated_at DESC LIMIT 1",
-                (inv_id + "%",),
-            )
-        else:
-            cur.execute(
-                "SELECT updated_at FROM data_lake._tier1_inventory WHERE id = %s",
-                (inv_id,),
-            )
-        row = cur.fetchone()
+    try:
+        with conn.cursor() as cur:
+            if key_type == "prefix":
+                cur.execute(
+                    "SELECT updated_at FROM data_lake._tier1_inventory"
+                    " WHERE id LIKE %s ORDER BY updated_at DESC LIMIT 1",
+                    (inv_id + "%",),
+                )
+            else:
+                cur.execute(
+                    "SELECT updated_at FROM data_lake._tier1_inventory WHERE id = %s",
+                    (inv_id,),
+                )
+            row = cur.fetchone()
+    except Exception as exc:  # noqa: BLE001 — probe is observability, never gate
+        # _tier1_inventory (or a referenced table) may not exist. Mirror the tier-2
+        # guard in _fetch_max_freshness: roll back so the shared connection stays
+        # usable, log, and surface as MISSING — never raise (docstring contract:
+        # "Always exits 0"). This is the collier_parcels UndefinedTable crash path.
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(
+            f"[freshness] tier-1 query failed for {name} ({inv_id}): {exc}",
+            file=sys.stderr,
+        )
+        return {
+            "name": name,
+            "lane": lane,
+            "last_run": None,
+            "age_days": None,
+            "cadence_days": cadence,
+            "threshold_days": threshold,
+            "status": "MISSING",
+        }
 
     if row is None or row[0] is None:
         return {
@@ -801,6 +824,26 @@ def main(argv: list[str] | None = None) -> int:
             gap_sync = None if args.dry_run else sync_gap_checks(conn, gaps)
         except Exception as exc:  # noqa: BLE001 — observability, never gate
             gaps, gap_sync = None, {"error": str(exc)}
+    except Exception as exc:  # noqa: BLE001 — probe is observability, never gate CI
+        # An unexpected error in run_probe (a missing table the per-entry guards
+        # didn't catch, or the historical `KeyError: dlt_schema_name` from 05-29)
+        # must NOT break the "Always exits 0" contract. Write a degraded summary and
+        # return 0, mirroring the connection-failure handler above. (finally still
+        # runs conn.close() before the return.)
+        today = date.today()
+        msg = (
+            f"## Pipeline Freshness Probe — {today}\n\n"
+            f"⚠️ **Probe run errored — partial/empty result this run.**\n\n"
+            f"```\n{exc}\n```\n\n"
+            f"Probe is observability-only (non-gating); this did not fail CI.\n"
+        )
+        step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if args.dry_run or not step_summary:
+            sys.stdout.buffer.write(msg.encode("utf-8"))
+        else:
+            with open(step_summary, "a", encoding="utf-8") as fh:
+                fh.write(msg)
+        return 0
     finally:
         conn.close()
 

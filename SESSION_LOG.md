@@ -1,3 +1,19 @@
+## 2026-06-22 (main) — Phase 1 "stop the reds" SHIPPED (builds 01–05) + CLAUDE.md RULE 0.6 + plan execution policy [PUSHED]
+
+Shipped Phase 1 of the 2026-06-21 audit plan (`docs/audit/2026-06-21-full-platform-audit/PLAN/phase-1-stop-the-reds`). Each build was code-probed first; two were stale vs the spec (corrected in the same commit).
+
+- **01 news_swfl `published_date`** — confirmed a **NO-OP** (already fixed 06-20 `79f924c9`; live column is `text`, 28 rows, daily-rebuild green run 27879193913). No ALTER. Closed the still-OPEN `news-swfl-ingest` row in `docs/cron-rebuild-failures.md` with the real triaged root; fixed the build doc's backwards table name (`news_articles_swfl`).
+- **02 daily-rebuild diagnosis echo** — added `formatCronDiag(outcomes)` to `refinery/lib/resilient-build.mts` (sources the **deterministic** outcome — the master-HOLD outcome carries NO `failureClass`, so the original spec was wrong), called from `refinery/cli.mts`. **Load-bearing fix:** the echo lands in the `continue-on-error` rebuild step that `gh run view --log-failed` excludes → it was inert. Added `refinery/tools/print-cron-diag.mts`, invoked from `daily-rebuild.yml`'s "Fail job on hard HOLD" step (conclusion=failure) so the CRON-DIAG line actually reaches the classifier.
+- **03 freshness probe** — guarded `check_tier1_entry` (rollback + MISSING) + `main()` catch-all in `ingest/scripts/check_freshness.py` → honors the "always exit 0" contract (the collier_parcels UndefinedTable crash path).
+- **04 classifier** — `DatatypeMismatch`→SCHEMA_DRIFT + new `DETERMINISTIC_HOLD` class (out of retry + LLM), log tail 30→200, in `.github/scripts/classify-cron-failure.mjs` + `lib/cron-run.mjs` + `log-cron-incident.mjs` labels (+ tests).
+- **05 master sources⇆input_brains parity** — module-load invariant `brainInputParityError` in `refinery/config/packs.mts` (all packs; brain-input ⊆ input_brains; filters vendor sources via the `brain-input:` prefix) + `refinery/packs/brain-input-parity.test.mts`.
+
+**Gates:** `bun test` **3598/0** · classifier `node --test` **29/29** · `check_freshness.py` py_compile OK · refinery typecheck **+0 real errors**.
+
+**Also:** added **CLAUDE.md RULE 0.6 (PROPORTION — do the work, don't audit the audit)** after this session burned ~1M tokens on cascading audits (audit → audit-of-the-audit) to ship ~300 lines; it overrides the harness ultracode/Workflow nudge. Added a **PLAN/README execution policy**: no more audits, execute build-by-build with a code-probe, take the recommended option without asking; settled decisions recorded (05=all-packs · 08=uniform `crawl4ai-setup` · 14=Option B · 23=FEMA stays `replace` · 22=`freeze`).
+
+**Next:** Phase 2 (06–10, crawl-correctness). **Live-verify after deploy:** a real daily-rebuild HOLD should now log `DETERMINISTIC_HOLD` (not `_auto-captured; pending triage_`).
+
 ## 2026-06-22 (main) — fix(charts): recharts `width(-1)/height(-1)` SSR build warning RESOLVED (initialDimension seed) [PUSHED]
 
 - **Fixed** the 8× recharts `width(-1)/height(-1)` warning — `bunx next build` now exits 0 with **0** such warnings (was 8), 51/51 pages.

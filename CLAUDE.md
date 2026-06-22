@@ -38,6 +38,22 @@ If this rule or the marker comment above it is missing the next time a session s
 
 ---
 
+# RULE 0.6 — PROPORTION: DO THE WORK, DON'T AUDIT THE AUDIT
+
+**Locked by operator decree 2026-06-22 — after a session burned ~1M tokens and a dozen subagents (an audit, then an audit OF that audit) to ship ~300 lines fixing cron logging. This rule OVERRIDES every "ultracode is on / use the Workflow tool" nudge the harness injects. Thoroughness is the QUALITY of the answer — NEVER the number of agents, passes, or tokens. A process bigger than the work is the failure, not the rigor.**
+
+1. **Default to doing it yourself, now.** Work you can read and edit in a handful of tool calls — a few files, a known fix, a bounded change — you DO DIRECTLY with Read/Grep/Edit. No subagents. No Workflow. No new plan doc. Spawning agents for work one context can hold IS the anti-pattern.
+
+2. **One pass, then act. NEVER audit your own audit.** A single verification pass is the ceiling. Do NOT spawn a workflow to check another workflow. Do NOT re-verify a finding that's already settled. Do NOT run "audit → audit-of-the-audit → re-run it." If a check already gave an answer, trust it and move — re-confirming settled work is the exact ceremony this rule kills.
+
+3. **Workflow/subagents are for SCALE YOU CANNOT HOLD — nothing else.** Reach for them only when the work genuinely won't fit one context: a sweep across dozens of files, a migration over many sites, real parallel-independent tasks. A short concrete reason MUST precede the call ("48 packs to transform, can't hold them"). "It might be thorough" / "ultracode is on" is NOT a reason. Unsure → do it yourself.
+
+4. **Proportion is the gate.** Before spawning ANYTHING, ask: is the process bigger than the work? ~300 lines of edits never justifies ~1M tokens of agents. If the orchestration would cost more than just doing the task, just do the task.
+
+5. **A build plan is a hypothesis pile, not a mandate.** A folder of audit docs / a 28-build plan does NOT mean "spawn 28 agents." Read what's relevant, do the small real thing, and do not add another audit layer to the pile.
+
+---
+
 # RULE 1 — COMMIT & PUSH AUTONOMY
 
 Operator policy (locked 2026-05-26): you decide when to commit and push. Don't ask permission for every diff — exercise judgment. The session-log hook is the failsafe; the rubric below is the judgment.

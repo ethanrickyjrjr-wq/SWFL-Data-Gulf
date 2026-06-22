@@ -85,6 +85,13 @@ test("SCHEMA_DRIFT — relation does not exist", () => {
   assert.equal(c.klass, "SCHEMA_DRIFT");
 });
 
+test("SCHEMA_DRIFT — Postgres DatatypeMismatch (column type drift)", () => {
+  const c = classify(
+    'psycopg2.errors.DatatypeMismatch: column "published_date" is of type date but expression is of type character varying',
+  );
+  assert.equal(c.klass, "SCHEMA_DRIFT");
+});
+
 test("SCHEMA_DRIFT — Stage 4 failed validation", () => {
   const c = classify(
     "FAILED: Stage 4: rendered pack failed validation — NOT writing brains/master.md",
@@ -124,12 +131,54 @@ test("UNKNOWN — unrecognised shape", () => {
   assert.equal(c.klass, "UNKNOWN");
 });
 
+test("DETERMINISTIC_HOLD — build-02 CRON-DIAG echo from a master HOLD", () => {
+  const c = classify("CRON-DIAG failureClass=deterministic reason=brains/fgcu-reri.md not found");
+  assert.equal(c.klass, "DETERMINISTIC_HOLD");
+});
+
+test("DETERMINISTIC_HOLD — raw _build-report.json deterministic failureClass", () => {
+  const c = classify(
+    '  "failureClass": "deterministic",\n  "reason": "brains/fgcu-reri.md not found",',
+  );
+  assert.equal(c.klass, "DETERMINISTIC_HOLD");
+});
+
+test("DETERMINISTIC_HOLD — a brain .md not found error", () => {
+  const c = classify(
+    "Error: brains/sector-credit-swfl.md not found. Run `npm run refinery sector-credit-swfl` first.",
+  );
+  assert.equal(c.klass, "DETERMINISTIC_HOLD");
+});
+
+test("DETERMINISTIC_HOLD — master HOLD line is NOT bucketed UNKNOWN", () => {
+  const c = classify(
+    "CRON-DIAG failureClass=deterministic reason=HOLD: critical upstream eligibility expired",
+  );
+  assert.notEqual(c.klass, "UNKNOWN");
+  assert.equal(c.klass, "DETERMINISTIC_HOLD");
+});
+
+test("DETERMINISTIC_HOLD — a generic (non-brains) .md not found is NOT mis-bucketed", () => {
+  // Regression: the dropped 3rd regex arm false-matched these benign lines.
+  for (const s of [
+    "reason: see CHANGELOG.md not found upstream",
+    "fetch failed for reason=docs/guide.md not found on CDN",
+  ]) {
+    assert.notEqual(classify(s).klass, "DETERMINISTIC_HOLD", s);
+  }
+});
+
+test("DETERMINISTIC_HOLD — `deterministically` does not match (word boundary)", () => {
+  assert.notEqual(classify("failureClass=deterministically computed").klass, "DETERMINISTIC_HOLD");
+});
+
 test("routing — shouldRetry only for TRANSIENT", () => {
   assert.equal(shouldRetry("TRANSIENT"), true);
   for (const k of [
     "MISSING_DEP",
     "MISSING_SECRET",
     "SCHEMA_DRIFT",
+    "DETERMINISTIC_HOLD",
     "DATA_EMPTY",
     "LOCKFILE",
     "UNKNOWN",
@@ -140,7 +189,14 @@ test("routing — shouldRetry only for TRANSIENT", () => {
 
 test("routing — needsLlm only for the fuzzy classes", () => {
   for (const k of ["DATA_EMPTY", "SCHEMA_DRIFT", "UNKNOWN"]) assert.equal(needsLlm(k), true, k);
-  for (const k of ["MISSING_DEP", "MISSING_SECRET", "LOCKFILE", "ACTION_VERSION", "TRANSIENT"]) {
+  for (const k of [
+    "MISSING_DEP",
+    "MISSING_SECRET",
+    "LOCKFILE",
+    "ACTION_VERSION",
+    "TRANSIENT",
+    "DETERMINISTIC_HOLD",
+  ]) {
     assert.equal(needsLlm(k), false, k);
   }
 });
