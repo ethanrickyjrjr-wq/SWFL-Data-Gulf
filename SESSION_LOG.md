@@ -13,7 +13,7 @@
 
 **Next:** build `ingest/pipelines/dbpr_sirs/` using Playwright session harvest + websockets QIX client (GetHyperCubeData 32 pages) + Lee/Collier filter → `data_lake.dbpr_sirs`. GHA-runner datacenter-IP egress MUST be verified before push (see Crexi P0b pattern). Also: condo-sirs-swfl brain pack must be in same PR (brain-first gate).
 
-## 2026-06-22 (main) — Phase 3 SOLO-14: news_swfl adaptive BestFirst frontier (default-off NEWS_ADAPTIVE flag) [COMMITTED — awaiting push OK]
+## 2026-06-22 (main) — Phase 3 SOLO-14: news_swfl adaptive BestFirst frontier (default-off NEWS_ADAPTIVE flag) [PUSHED `4ef244f7`]
 
 New `ingest/pipelines/news_swfl/adaptive_fetcher.py`: per-source `BestFirstCrawlingStrategy(max_depth=1, url_scorer=KeywordRelevanceScorer(SWFL terms), filter_chain=[DomainFilter, URLPatternFilter(/story/,/article/,/news/,/releases/)], max_pages=25)` — pure keyword math, ZERO API cost; each depth-1 page → existing `normalize()` → same `ArticleRow` (dlt `primary_key=article_url` preserved), stealth via UndetectedAdapter. `fetcher.py` lazily dispatches to it only when `NEWS_ADAPTIVE` is set → **flag-off path byte-identical** to the live cron. Probed live first (RULE 0.5): crawl4ai **0.9.0**, all deep-crawl imports + signatures confirmed; build-01 schema fix (`79f924c9` date→text) is on main. +4 offline tests (mocked crawler) **green**; full `news_swfl/` suite 4/4.
 
@@ -27,7 +27,7 @@ Built `ingest/pipelines/brevitas_listings/` (extract/distill/pipeline) + `.githu
 
 **Next:** monitor first weekly Brevitas cron run; if FMB stays 0, expand search to Bonita Springs / Naples as fallback sub-markets.
 
-## 2026-06-22 (main) — Phase 3 build 13: `fetch_tables()` zero-LLM helper (STEP 1 only; dbpr parser swap gated OUT) [COMMITTED — awaiting push OK]
+## 2026-06-22 (main) — Phase 3 build 13: `fetch_tables()` zero-LLM helper (STEP 1 only; dbpr parser swap gated OUT) [PUSHED `c3051f91`]
 
 Added `_scrape_tables()` + sync `fetch_tables()` to `ingest/lib/crawl4ai_client.py` — reads crawl4ai's `result.tables` (DefaultTableExtraction, `table_score_threshold=7`, ON by default) and returns one header-keyed `pd.DataFrame` per real `<table>`, with provenance on `df.attrs` (headers/caption/summary/metadata/source_url). Empty-tolerant (no qualifying table → `[]`) and ragged-row-tolerant (width mismatch → column-less frame, never raises). Added `import pandas as pd` (already an ingest dep, 6 other callers). Nothing existing modified. Tests +4 (header-keyed+provenance, empty-tolerant, ragged fallback, failed-crawl raises); **18/18 passing** offline (mocked `AsyncWebCrawler`).
 
@@ -35,7 +35,7 @@ Added `_scrape_tables()` + sync `fetch_tables()` to `ingest/lib/crawl4ai_client.
 
 **Next:** STEP 2 needs a live rig — fetch the Qlik grid, confirm `result.tables` scores it ≥7 and maps the 7-col (pre-July) / 5-col (July+) layouts, then rebuild `condo-sirs-swfl` and diff `--- OUTPUT ---` key_metrics before/after (must be identical or strictly more correct).
 
-## 2026-06-22 (main) — Phase 3 build 12: `CRAWL4AI_PROXY` wiring — default-off residential-proxy escape [COMMITTED — awaiting push OK]
+## 2026-06-22 (main) — Phase 3 build 12: `CRAWL4AI_PROXY` wiring — default-off residential-proxy escape [PUSHED `31023f4f`]
 
 Added `_proxy_from_env()` to `ingest/lib/crawl4ai_client.py` (reads `CRAWL4AI_PROXY` → `ProxyConfig.from_string()` or `None`). Threaded `proxy_config` into `Crawl4aiSession.step()` and `fetch_many()` via their `CrawlerRunConfig` kwargs — injected only when the var is set; zero behavior change otherwise. Added `ProxyConfig` to the crawl4ai import block. Tests: +2 (default-off returns None; `from_string` roundtrip); 14/14 passing.
 
