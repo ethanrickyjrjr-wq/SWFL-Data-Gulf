@@ -1,4 +1,5 @@
 import asyncio
+import os
 import re
 
 from crawl4ai import AsyncWebCrawler
@@ -70,7 +71,16 @@ async def _process_source(source: dict) -> list[ArticleRow]:
 
 
 def fetch_all_sources() -> list[ArticleRow]:
-    """Synchronously run all source scrapers and return merged article list."""
+    """Synchronously run all source scrapers and return merged article list.
+
+    NEWS_ADAPTIVE (default off): when set, dispatch to the BestFirst scored frontier
+    (adaptive_fetcher) instead of the bare-crawler + ~40-cap + regex baseline. The import is
+    lazy so the baseline path — and its dependency surface — stays byte-identical when off."""
+    if os.environ.get("NEWS_ADAPTIVE", "").strip():
+        from .adaptive_fetcher import fetch_all_sources_adaptive
+
+        return fetch_all_sources_adaptive()
+
     async def _run():
         results = await asyncio.gather(
             *[_process_source(s) for s in SOURCES],
