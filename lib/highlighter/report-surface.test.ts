@@ -66,21 +66,24 @@ test("resolveReportGrounding returns a real block + token for every kind", async
 });
 
 // ---------------------------------------------------------------------------
-// THE GUARD — this is the test that ends the 404 class. Every page that mounts
-// the Ask-AI dock (HighlighterLayer) must declare its surface via buildReportId,
-// so converse can always resolve its reportId. The single exception is the
-// canonical brain report page `app/r/[slug]/page.tsx`, whose `[slug]` param IS a
-// brain slug (the bare = brain contract). A new synthetic page that mounts the
-// dock with a raw expression fails here BEFORE it can 404 in production.
+// THE GUARD — this is the test that ends the 404 class. Every page that publishes
+// a report context to the app-root highlighter/pill (via ReportHighlightBridge)
+// must declare its surface via buildReportId, so the engine can always resolve its
+// reportId. The single exception is the canonical brain report page
+// `app/r/[slug]/page.tsx`, whose `[slug]` param IS a brain slug (the bare = brain
+// contract). A new synthetic page that publishes a raw id fails here BEFORE it can
+// 404 in production. (Phase 3C lifted the highlighter UI to the root, but the
+// per-page bridge still carries the encoded reportId — so this guard moved with it,
+// from <HighlighterLayer> to <ReportHighlightBridge>.)
 // ---------------------------------------------------------------------------
 
-test("GUARD: every dock-mounting report page declares its surface kind", () => {
+test("GUARD: every report page publishes its surface kind via the bridge", () => {
   const glob = new Glob("app/r/**/page.tsx");
   const offenders: string[] = [];
 
   for (const rel of glob.scanSync(REPO_ROOT)) {
     const src = readFileSync(path.join(REPO_ROOT, rel), "utf-8");
-    if (!src.includes("HighlighterLayer")) continue;
+    if (!src.includes("ReportHighlightBridge")) continue;
 
     const norm = rel.replace(/\\/g, "/");
     // The one allowed bare-slug mount: the canonical brain report page.

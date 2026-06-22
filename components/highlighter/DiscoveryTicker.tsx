@@ -8,7 +8,10 @@ import { useEffect, useRef, useState } from "react";
 // phones (mobile discovery is the coachmark + chips). Pauses on hover; under
 // prefers-reduced-motion it shows a single static tip and never auto-advances.
 
-const TIPS = [
+// On a /r/* report, the report-flavored set. Off-report (home/charts/maps/…) the
+// generic set — drops the report/figure-specific tips that would read as nonsense
+// off a report (M3). `GlobalHighlighter` picks the set via the report-context store.
+const REPORT_TIPS = [
   "Double-tap any figure to ask about it",
   "Compare any two SWFL ZIPs",
   "Ask “what’s driving this?”",
@@ -16,10 +19,20 @@ const TIPS = [
   "Every answer cites its source — or declines",
 ];
 
+const GENERIC_TIPS = [
+  "Highlight any figure to ask about it",
+  "Compare any two SWFL ZIPs",
+  "Ask “what’s driving this?”",
+  "Open AI + Briefcase (bottom-right) to chat",
+  "Every answer cites its source — or declines",
+];
+
 const VISIBLE_MS = 4600;
 const FADE_MS = 350;
 
-export function DiscoveryTicker() {
+export function DiscoveryTicker({ onReport }: { onReport: boolean }) {
+  const TIPS = onReport ? REPORT_TIPS : GENERIC_TIPS;
+  const tipCount = TIPS.length;
   const [i, setI] = useState(0);
   const [visible, setVisible] = useState(true);
   const paused = useRef(false);
@@ -35,7 +48,7 @@ export function DiscoveryTicker() {
       if (paused.current) return;
       setVisible(false); // fade out
       fade = setTimeout(() => {
-        setI((n) => (n + 1) % TIPS.length);
+        setI((n) => (n + 1) % tipCount);
         setVisible(true); // fade the next one in
       }, FADE_MS);
     }, VISIBLE_MS);
@@ -43,7 +56,7 @@ export function DiscoveryTicker() {
       clearInterval(cycle);
       clearTimeout(fade);
     };
-  }, []);
+  }, [tipCount]);
 
   return (
     <div

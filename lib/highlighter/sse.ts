@@ -22,6 +22,15 @@ export interface SSEEvent {
   error?: string;
   /** Best-effort chart emitted before the text stream. See buildChartForIntent. */
   chart?: unknown;
+  /** Frame discriminator the conversation path uses for its typed prelude
+   *  (`{type:"place", …}`). The highlighter only acts on `place` frames. */
+  type?: string;
+  /** Prelude `place` frame — the grounded SWFL location an OFF-report answer resolved
+   *  to (`{zip,name}`); rides with `freshness_token`. Lets an off-report filed Q&A pin
+   *  the same ZIP the answer was grounded on (parity with the pill's `placeRef`). */
+  place?: { zip?: string; name?: string };
+  /** Representative freshness token carried on the `place` frame. */
+  freshness_token?: string;
 }
 
 export interface ParsedSSE {

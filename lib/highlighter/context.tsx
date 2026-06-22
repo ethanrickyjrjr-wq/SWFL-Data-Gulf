@@ -4,19 +4,22 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import type { SelectedFact } from "./use-highlight";
 
 /**
- * Context that lets FactChip instances anywhere in the /r/ report tree feed a
- * chip-tap into the HighlighterLayer without prop-threading through server pages,
- * AND owns the highlighter conversation thread + the anonymous draft-project
- * (briefcase) so both survive popup close/reopen and are shared with the Ask-AI
- * dock.
+ * Context that lets FactChip instances anywhere in the report tree feed a chip-tap
+ * into the highlighter without prop-threading through server pages, AND owns the
+ * highlighter conversation thread so it survives popup close/reopen and is shared
+ * with the Ask-AI dock.
+ *
+ * Phase 3C: this provider is now LIFTED to the app root (`app/layout.tsx`, inside
+ * BriefcaseProvider, flag-gated) — NOT per-/r/* page anymore — so the root
+ * GlobalHighlighter and the bridged AppShell pill share ONE thread across the whole
+ * site (off-report under the single `"outside"` bucket; per-report on /r/*).
  *
  * Usage:
- *   - Server page wraps its content in <HighlighterProvider> (exported below).
- *   - HighlighterLayer reads chipFact from context instead of its own useState.
+ *   - app/layout.tsx wraps the app in <HighlighterProvider> when the flag is on.
+ *   - GlobalHighlighter reads chipFact from context instead of its own useState.
  *   - MetricsTable reads onActivate via useHighlighterContext and passes it to FactChip.
- *   - HighlightPopup + AskAiDock read thread(reportId)/archiveExchange so they
- *     show one continuous conversation per report.
- *   - The Briefcase tray reads draftItems/fileItem/removeItem.
+ *   - HighlightPopup + AskAiDock read thread(key)/archiveExchange so they show one
+ *     continuous conversation per thread bucket.
  *
  * STATE-LIFT FOOTGUN: this repo treats `react-hooks/set-state-in-effect` as a
  * hard error. Persistence is therefore event-driven — the localStorage write

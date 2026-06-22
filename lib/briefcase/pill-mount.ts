@@ -1,4 +1,5 @@
 import type { PillPage } from "./visits";
+import { isHiddenPath } from "@/components/nav/nav-config";
 
 /**
  * THE single root for the /project/[id] id-extraction regex (Piece 2). Both the
@@ -23,11 +24,11 @@ export function pageFromPath(pathname: string): PillPage {
 
 /**
  * The root standalone pill renders everywhere EXCEPT on /r/* while the highlighter
- * is enabled — there the per-page BRIDGED pill (rendered inside HighlighterLayer,
- * which knows the reportId and bridges the report thread) takes over, so the
- * standalone one suppresses to keep exactly ONE visible pill. When the highlighter
- * flag is OFF, no bridged pill mounts, so the standalone one shows on /r/* as the
- * fallback (closes the zero-pill edge).
+ * is enabled — there the BRIDGED pill (AppShell renders it when the /r/* page's
+ * ReportHighlightBridge has published a report context, bridging the report thread)
+ * takes over, so the standalone one suppresses to keep exactly ONE visible pill. When
+ * the highlighter flag is OFF, no bridge mounts → no report context → the standalone
+ * pill shows on /r/* as the fallback (closes the zero-pill edge).
  */
 export function shouldRenderStandalone(pathname: string, highlighterEnabled: boolean): boolean {
   // Finished deliverables (/p/*) AND iframe fragments (/embed/*) stay client-clean —
@@ -39,6 +40,24 @@ export function shouldRenderStandalone(pathname: string, highlighterEnabled: boo
   if (pathname.startsWith("/p/") || pathname.startsWith("/embed/")) return false;
   const onReport = pathname.startsWith("/r/");
   return !(onReport && highlighterEnabled);
+}
+
+/**
+ * Mount gate for the unified Highlighter (`GlobalHighlighter`), the SELECTION-triggered
+ * twin of the click-triggered pill. It mounts wherever SWFL chrome renders — i.e.
+ * everywhere EXCEPT the white-label/auth prefixes (`/p/`, `/embed/`, `/login`, `/auth`),
+ * via the shared `isHiddenPath` so the clean set never drifts from the shell/footer.
+ *
+ * This is deliberately the BROADER of the two mount rules and is NOT a parity twin of
+ * `shouldRenderStandalone`:
+ *  - the PILL (`shouldRenderStandalone`) only hides on `/p/` + `/embed/` and still shows
+ *    on `/login`/`/auth` (a logged-out visitor can pop the funnel there);
+ *  - the HIGHLIGHTER also suppresses `/login` + `/auth` — there is nothing to highlight on
+ *    an auth form.
+ * It does NOT suppress `/r/*` — that is the highlighter's home, report-grounded.
+ */
+export function shouldMountHighlighter(pathname: string | null): boolean {
+  return !isHiddenPath(pathname);
 }
 
 /**

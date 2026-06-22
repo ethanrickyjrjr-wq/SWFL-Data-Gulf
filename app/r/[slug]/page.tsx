@@ -26,8 +26,7 @@ import { ColorLegend } from "../_components/color-legend";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { reportTrail } from "@/lib/nav/breadcrumbs";
 import { ReportChart } from "../../../components/charts/ReportChart";
-import { HighlighterLayer } from "../../../components/highlighter/HighlighterLayer";
-import { HighlighterProvider } from "../../../lib/highlighter/context";
+import { ReportHighlightBridge } from "../../../components/highlighter/ReportHighlightBridge";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
 import { PrintButton } from "../../../components/PrintButton";
 import DigestSubscribe from "../../../components/email/DigestSubscribe";
@@ -264,13 +263,13 @@ export default async function ReportPage({ params }: PageProps) {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
-      {/* The Highlighter — an additive client sibling. It overlays the popup /
-          coachmark and listens for text selection. It is rendered LAST and is
-          not a wrapper, so a throw inside it cannot blank the report above.
-          Gated behind HIGHLIGHTER_UI (default OFF): the verified server engine
-          ships regardless; the popup stays dark on prod until browser-verified. */}
+      {/* Publishes this report's context to the app-root highlighter + pill (both
+          siblings of this page). The highlighter UI itself lives at the root now
+          (GlobalHighlighter); this just feeds it the report identity. Gated behind
+          HIGHLIGHTER_UI (default ON): when off, no bridge → the root pill falls back
+          to standalone and MetricsTable renders plain <span> values (no FactChips). */}
       {highlighterEnabled && (
-        <HighlighterLayer
+        <ReportHighlightBridge
           reportId={slug}
           conclusion={display.conclusion}
           freshnessToken={display.freshnessToken}
@@ -289,16 +288,9 @@ export default async function ReportPage({ params }: PageProps) {
     </>
   );
 
-  return (
-    <ReportShell>
-      {/* HighlighterProvider owns chipFact state and exposes onActivate via
-          context so MetricsTable's FactChips and HighlighterLayer share state
-          without prop-threading through this server component. Only rendered
-          when the Highlighter flag is on — when off, MetricsTable falls back to
-          plain <span> values with no chip affordance. */}
-      {highlighterEnabled ? <HighlighterProvider>{pageContent}</HighlighterProvider> : pageContent}
-    </ReportShell>
-  );
+  // The app-root HighlighterProvider (app/layout.tsx) now owns chipFact + the thread, so
+  // MetricsTable's FactChips find the context without a per-page wrapper.
+  return <ReportShell>{pageContent}</ReportShell>;
 }
 
 /** Title-case a corridor_type slug ("power-center" → "Power Center"). */

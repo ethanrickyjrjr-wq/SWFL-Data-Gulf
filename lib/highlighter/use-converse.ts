@@ -18,9 +18,15 @@ export interface UseConverse {
   answered: boolean | null;
   /** Best-effort chart payload emitted before the text stream. null until received. */
   chart: unknown;
+  /** Grounded SWFL location from the OFF-report prelude `place` frame (null until one
+   *  arrives, and on the report-grounding path which emits none). Lets an off-report
+   *  filed Q&A pin the same ZIP the answer resolved to — parity with the pill. */
+  groundedPlace: { zip?: string; name?: string } | null;
+  /** Representative freshness token carried on that `place` frame, if any. */
+  groundedToken: string | undefined;
   error: string | null;
   streaming: boolean;
-  /** Clear answer/reach/answered/chart/error back to the empty state. */
+  /** Clear answer/reach/answered/chart/place/error back to the empty state. */
   reset: () => void;
 }
 
@@ -36,6 +42,8 @@ export function useConverse(): UseConverse {
   const [followups, setFollowups] = useState<string[]>([]);
   const [answered, setAnswered] = useState<boolean | null>(null);
   const [chart, setChart] = useState<unknown>(null);
+  const [groundedPlace, setGroundedPlace] = useState<{ zip?: string; name?: string } | null>(null);
+  const [groundedToken, setGroundedToken] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
 
@@ -45,6 +53,8 @@ export function useConverse(): UseConverse {
     setFollowups([]);
     setAnswered(null);
     setChart(null);
+    setGroundedPlace(null);
+    setGroundedToken(undefined);
     setError(null);
     setStreaming(false);
   }, []);
@@ -56,6 +66,8 @@ export function useConverse(): UseConverse {
     setFollowups([]);
     setAnswered(null);
     setChart(null);
+    setGroundedPlace(null);
+    setGroundedToken(undefined);
     setError(null);
     setStreaming(true);
     await streamConverse(input, {
@@ -64,10 +76,26 @@ export function useConverse(): UseConverse {
       onFollowups: setFollowups,
       onAnswered: setAnswered,
       onChart: setChart,
+      onPlace: (place, token) => {
+        setGroundedPlace(place);
+        if (token) setGroundedToken(token);
+      },
       onError: (m) => setError(m),
     });
     setStreaming(false);
   }, []);
 
-  return { ask, answer, reach, followups, answered, chart, error, streaming, reset };
+  return {
+    ask,
+    answer,
+    reach,
+    followups,
+    answered,
+    chart,
+    groundedPlace,
+    groundedToken,
+    error,
+    streaming,
+    reset,
+  };
 }

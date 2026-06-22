@@ -26,7 +26,13 @@ function fakeFetch(res: {
 function collector() {
   const texts: string[] = [];
   const errors: string[] = [];
-  const state: { reach?: string[]; followups?: string[]; done: boolean } = { done: false };
+  const state: {
+    reach?: string[];
+    followups?: string[];
+    place?: { zip?: string; name?: string };
+    placeToken?: string;
+    done: boolean;
+  } = { done: false };
   const handlers: ConverseHandlers = {
     onText: (acc) => {
       texts.push(acc);
@@ -36,6 +42,10 @@ function collector() {
     },
     onFollowups: (f) => {
       state.followups = f;
+    },
+    onPlace: (p, token) => {
+      state.place = p;
+      state.placeToken = token;
     },
     onError: (m) => {
       errors.push(m);
@@ -148,7 +158,7 @@ test("reassembles a frame split across read chunks", async () => {
 });
 
 test("sends slug in the POST body when provided, omits it when not", async () => {
-  type ConverseBody = { report_id: string; fact?: string; slug?: string; question: string };
+  type ConverseBody = { report_id?: string; fact?: string; slug?: string; question: string };
   // Capture the request body the stub receives, return a minimal done frame.
   function capturingFetch(sink: { body?: ConverseBody }): typeof fetch {
     return (async (_url: string, init: RequestInit) => {
@@ -178,6 +188,47 @@ test("sends slug in the POST body when provided, omits it when not", async () =>
   );
   // JSON.stringify drops an undefined value — the key must be absent, not null.
   expect("slug" in (noSlug.body ?? {})).toBe(false);
+});
+
+test("OFF-report (no reportId) omits report_id entirely → the conversation path", async () => {
+  // The headline of the universal-highlighter lift: an off-report selection sends NO
+  // report_id, so the engine's isReportRequest is false and it answers as OUTSIDE AI.
+  type Body = { report_id?: string; context?: string; question?: string };
+  let captured: Body = {};
+  const capturingFetch = (async (_url: string, init: RequestInit) => {
+    captured = JSON.parse(init.body as string) as Body;
+    return { ok: true, status: 200, body: streamOf([`data: {"done":true,"reach":[]}\n\n`]) };
+  }) as unknown as typeof fetch;
+  await streamConverse(
+    { question: "what's the flood outlook here?" },
+    collector().handlers,
+    capturingFetch,
+  );
+  // The key must be ABSENT (JSON.stringify drops undefined), not null/empty.
+  expect("report_id" in captured).toBe(false);
+  expect(captured.context).toBe("outside");
+});
+
+test("captures the prelude place frame off-report (grounded ZIP + freshness)", async () => {
+  const c = collector();
+  const body = streamOf([
+    `data: ${JSON.stringify({
+      type: "place",
+      place: { zip: "33931", name: "Fort Myers Beach" },
+      freshness_token: "SWFL-7421-v5-20260622",
+    })}\n\n`,
+    `data: {"text":"Fort Myers Beach carries elevated flood loss."}\n\n`,
+    `data: {"done":true,"reach":[]}\n\n`,
+  ]);
+  await streamConverse(
+    { question: "flood outlook for FMB?" },
+    c.handlers,
+    fakeFetch({ ok: true, status: 200, body }),
+  );
+  expect(c.state.place).toEqual({ zip: "33931", name: "Fort Myers Beach" });
+  expect(c.state.placeToken).toBe("SWFL-7421-v5-20260622");
+  // The place frame must not leak into the displayed prose.
+  expect(c.texts.at(-1)).toBe("Fort Myers Beach carries elevated flood loss.");
 });
 
 test("skips the request entirely when the question is blank", async () => {

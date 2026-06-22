@@ -22,9 +22,8 @@ import {
 } from "../../_components/report-shell";
 import { MetricsTable, type MetricRow } from "../../_components/metrics-table";
 import { ColorLegend } from "../../_components/color-legend";
-import { HighlighterLayer } from "../../../../components/highlighter/HighlighterLayer";
+import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
-import { HighlighterProvider } from "../../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { corridorTrail } from "@/lib/nav/breadcrumbs";
@@ -169,7 +168,7 @@ export default async function CorridorPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
       {highlighterEnabled && (
-        <HighlighterLayer
+        <ReportHighlightBridge
           reportId={buildReportId("corridor", corridor)}
           conclusion={
             c.character_render ? stripCitations(c.character_render).slice(0, 500) : undefined
@@ -191,11 +190,7 @@ export default async function CorridorPage({ params }: PageProps) {
     </>
   );
 
-  return (
-    <ReportShell>
-      {highlighterEnabled ? <HighlighterProvider>{pageContent}</HighlighterProvider> : pageContent}
-    </ReportShell>
-  );
+  return <ReportShell>{pageContent}</ReportShell>;
 }
 
 // ---------------------------------------------------------------------------

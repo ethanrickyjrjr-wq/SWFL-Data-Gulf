@@ -15,11 +15,11 @@ import { shouldAutoOpenPill } from "@/lib/briefcase/pill-mount";
  * from the root BriefcaseProvider.
  *
  * Mode (operator decision — Option 1, dock preserved):
- *  - BRIDGED (reportId present, rendered per /r/* page by HighlighterLayer): opens the
- *    EXISTING AskAiDock with ZERO behavior change — the report thread + file-this-chart
- *    stay exactly as they were. (Bridging the dock chat into the panel via use-converse
- *    is PHASE 2, deferred — see A/README.md.)
- *  - STANDALONE (no reportId, mounted once at root by AppShell): opens the A-5
+ *  - BRIDGED (reportId present): AppShell mounts this once at the app root and passes the
+ *    reportId from the report-context store (published by the /r/* page's
+ *    ReportHighlightBridge). Opens the EXISTING AskAiDock with ZERO behavior change — the
+ *    report thread + file-this-chart stay exactly as they were.
+ *  - STANDALONE (no reportId, also mounted at root by AppShell): opens the A-5
  *    BriefcasePanel (chat + examples + draft + build), no HighlighterContext needed.
  *
  * First-visit auto-open (2026-06-21): the standalone pill pops itself open ONCE for a

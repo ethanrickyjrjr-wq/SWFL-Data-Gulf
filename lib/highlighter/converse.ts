@@ -9,7 +9,15 @@
 import { parseSSEFrames } from "./sse";
 
 export interface ConverseInput {
-  reportId: string;
+  /**
+   * Encoded report surface (`buildReportId(...)`) to GROUND on. Optional: OFF-report
+   * selections (home/charts/maps/…) omit it, so `JSON.stringify` drops `report_id` from
+   * the body → the engine's `isReportRequest` is false → the OUTSIDE-AI conversation path.
+   * On `/r/*` it carries the surface id and the answer is report-grounded. NOTE: this is
+   * GROUNDING only — it is NOT the popup's conversation-thread key (see HighlightPopup's
+   * `threadKey`); passing a pathname here would wrongly flip `isReportRequest`.
+   */
+  reportId?: string;
   /** Optional fact context (the selected figure). Omitted for report-level chat. */
   fact?: string;
   /** Metric slug for the highlighted figure, when known (chip/row path). Lets the
@@ -80,6 +88,11 @@ export interface ConverseHandlers {
   onAnswered?: (answered: boolean) => void;
   /** Called with the chart frame payload when the server emits one. */
   onChart?: (chart: unknown) => void;
+  /** Called with the prelude `place` frame the OFF-report conversation path emits — the
+   *  grounded SWFL location + its freshness token. Lets an off-report filed Q&A pin the
+   *  same ZIP the answer resolved to (parity with the pill's `placeRef`). Absent on the
+   *  report-grounding path; the caller falls back to the `"swfl"` sentinel. */
+  onPlace?: (place: { zip?: string; name?: string }, freshnessToken?: string) => void;
   /** Called with a human-readable message on any failure. Terminal. */
   onError: (message: string) => void;
   /** Called once when the stream completes cleanly. */
@@ -146,6 +159,11 @@ export async function streamConverse(
         }
         if (ev.chart !== undefined) {
           handlers.onChart?.(ev.chart);
+        }
+        if (ev.place !== undefined) {
+          // Prelude `place` frame (OFF-report conversation path) — capture the grounded
+          // ZIP + freshness so an off-report filed Q&A pins it (parity with the pill).
+          handlers.onPlace?.(ev.place, ev.freshness_token);
         }
         if (typeof ev.text === "string") {
           acc += ev.text;

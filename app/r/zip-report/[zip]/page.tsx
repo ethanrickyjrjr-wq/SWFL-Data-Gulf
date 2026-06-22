@@ -14,9 +14,8 @@ import {
   SectionTitle,
   Meta,
 } from "../../_components/report-shell";
-import { HighlighterLayer } from "../../../../components/highlighter/HighlighterLayer";
+import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
-import { HighlighterProvider } from "../../../../lib/highlighter/context";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
 import { DataRow } from "../../_components/metrics-table";
 import { ColorLegend } from "../../_components/color-legend";
@@ -342,16 +341,15 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       <ReportFooter freshnessToken={freshnessToken} />
 
       {highlighterEnabled && (
-        <HighlighterLayer reportId={buildReportId("zip", zip)} freshnessToken={freshnessToken} />
+        <ReportHighlightBridge
+          reportId={buildReportId("zip", zip)}
+          freshnessToken={freshnessToken}
+        />
       )}
     </>
   );
 
-  return (
-    <ReportShell width="2xl">
-      {highlighterEnabled ? <HighlighterProvider>{pageContent}</HighlighterProvider> : pageContent}
-    </ReportShell>
-  );
+  return <ReportShell width="2xl">{pageContent}</ReportShell>;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────

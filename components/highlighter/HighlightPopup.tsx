@@ -18,9 +18,9 @@ import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 // frameId here — explicit, never implicit on a type shape.
 const FILABLE_FRAMES = new Set<string>(["bar-table"]);
 
-/** The matched metric's value + provenance, threaded in by HighlighterLayer so
- *  "File this figure" can pin a sourced snapshot. Structurally a subset of
- *  MetricSuggestion. Null for prose / unmatched selections. */
+/** The matched metric's value + provenance, resolved by GlobalHighlighter (via the
+ *  report-context store) so "File this figure" can pin a sourced snapshot. Structurally
+ *  a subset of MetricSuggestion. Null for prose / unmatched selections. */
 interface FileableMetric {
   label: string;
   value?: string;
@@ -30,7 +30,20 @@ interface FileableMetric {
 }
 
 interface PopupProps {
-  reportId: string;
+  /**
+   * Encoded report surface to GROUND on (`buildReportId(...)`). Optional: undefined
+   * OFF-report (home/charts/…), where the answer comes from the OUTSIDE-AI conversation
+   * path. This is GROUNDING only — NOT the conversation-thread key (see `threadKey`) and
+   * NOT the filing report_id (see the `"swfl"` sentinel). Never pass a pathname here.
+   */
+  reportId?: string;
+  /**
+   * The bucket for this popup's conversation thread in the shared HighlighterProvider
+   * (`ctx.thread`/`archiveExchange`). On `/r/*` it equals the reportId (per-report
+   * thread); OFF-report it is the single `"outside"` bucket so the whole site shares one
+   * continuous conversation (parity with the pill's off-project thread).
+   */
+  threadKey: string;
   fact: SelectedFact;
   suggestions: string[];
   fileableMetric?: FileableMetric | null;
@@ -47,6 +60,7 @@ function isNarrow(): boolean {
 
 export function HighlightPopup({
   reportId,
+  threadKey,
   fact,
   suggestions,
   fileableMetric,
@@ -66,14 +80,34 @@ export function HighlightPopup({
   // shared with the Ask-AI dock. activeQuestion stays local (transient live state).
   const ctx = useHighlighterContext();
   const briefcase = useBriefcase();
-  const thread = useMemo(() => ctx?.thread(reportId) ?? [], [ctx, reportId]);
+  const thread = useMemo(() => ctx?.thread(threadKey) ?? [], [ctx, threadKey]);
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   // Transient "Filed ✓" feedback, keyed per file affordance (figure / live / a<i>).
   const [filed, setFiled] = useState<string | null>(null);
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
   const [showChips, setShowChips] = useState(true);
-  const { ask, answer, reach, followups, answered, chart, error, streaming, reset } = useConverse();
+  const {
+    ask,
+    answer,
+    reach,
+    followups,
+    answered,
+    chart,
+    groundedPlace,
+    groundedToken,
+    error,
+    streaming,
+    reset,
+  } = useConverse();
   const [dismissedChart, setDismissedChart] = useState<unknown>(null);
+
+  // Filing identity. ON /r/*: the real reportId + the report's freshness token. OFF-report:
+  // the grounded ZIP captured from the conversation path's prelude `place` frame, falling
+  // back to the "swfl" region sentinel — the pill's EXACT off-report convention
+  // (`report_id: groundedZip || "swfl"`), so a filed item is always schema-valid and never
+  // suppressed (INVARIANT #2). Grounding/threading do NOT use these.
+  const filingReportId = reportId ?? (groundedPlace?.zip || "swfl");
+  const filingToken = freshnessToken ?? groundedToken;
 
   // Mobile breakpoint subscription (initial value from lazy initializer above)
   useEffect(() => {
@@ -227,9 +261,10 @@ export function HighlightPopup({
           allEntries.map((m) => `Q: ${m.question}\nA: ${m.answer}`).join("\n\n")
         : "";
 
-    // Archive current live exchange to the shared provider thread
+    // Archive current live exchange to the shared provider thread (keyed by threadKey,
+    // NOT the grounding reportId — off-report this is the single "outside" bucket).
     if (activeQuestion && answer) {
-      ctx?.archiveExchange(reportId, { question: activeQuestion, answer });
+      ctx?.archiveExchange(threadKey, { question: activeQuestion, answer });
     }
 
     setActiveQuestion(trimmed);
@@ -253,7 +288,7 @@ export function HighlightPopup({
     void fetch("/api/meter", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "item_add", report_id: reportId }),
+      body: JSON.stringify({ action: "item_add", report_id: filingReportId }),
     }).catch(() => {});
   }
 
@@ -264,13 +299,13 @@ export function HighlightPopup({
         added_at: new Date().toISOString(),
         origin: "web",
         kind: "qa",
-        report_id: reportId,
+        report_id: filingReportId,
         question: q,
         answer: a,
         fact: factWithContext,
         selection_type: deriveSelectionType(fact),
         reach: withReach && reach.length > 0 ? reach : undefined,
-        freshness_token: freshnessToken,
+        freshness_token: filingToken,
       },
       key,
     );
@@ -283,12 +318,12 @@ export function HighlightPopup({
         added_at: new Date().toISOString(),
         origin: "web",
         kind: "metric",
-        report_id: reportId,
+        report_id: filingReportId,
         label: fileableMetric?.label ?? fact.context ?? "Figure",
         value: fileableMetric?.value ?? fact.text,
         source_url: fileableMetric?.sourceUrl,
         source_label: fileableMetric?.sourceLabel,
-        freshness_token: fileableMetric?.freshnessToken ?? freshnessToken ?? "",
+        freshness_token: fileableMetric?.freshnessToken ?? filingToken ?? "",
       },
       "figure",
     );
@@ -303,8 +338,8 @@ export function HighlightPopup({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           block: cs,
-          source_meta: { report_id: reportId },
-          freshness_token: freshnessToken,
+          source_meta: { report_id: filingReportId },
+          freshness_token: filingToken,
         }),
       });
       if (!res.ok) throw new Error("save failed");
@@ -325,12 +360,18 @@ export function HighlightPopup({
     }
   }
 
-  const handoff = buildClaudeHandoff({
-    report_id: reportId,
-    fact: factWithContext,
-    conclusion: conclusion ?? "",
-    freshness_token: freshnessToken ?? "",
-  });
+  // The Claude handoff is inherently report-referencing — it emits a `swfl_fetch
+  // report_id="…"` MCP line that is meaningless with the "swfl" sentinel. So it is
+  // built (and its UI shown) ONLY on a real report; off-report the affordances hide
+  // entirely rather than ship a 404-on-call prompt (#9).
+  const handoff = reportId
+    ? buildClaudeHandoff({
+        report_id: reportId,
+        fact: factWithContext,
+        conclusion: conclusion ?? "",
+        freshness_token: freshnessToken ?? "",
+      })
+    : "";
 
   function copyText(text: string) {
     void navigator.clipboard?.writeText(text).then(
@@ -656,58 +697,62 @@ export function HighlightPopup({
           </button>
         </div>
 
-        <div className="mt-2 flex items-center justify-between gap-2">
-          {/* Copy options menu */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowCopyMenu((v) => !v)}
-              className="text-xs text-blue-400 underline decoration-blue-400/40 underline-offset-2 hover:decoration-blue-400"
-            >
-              {copied ? "Copied ✓" : "Copy for Claude ▾"}
-            </button>
-            {showCopyMenu && (
-              <div className="absolute bottom-full left-0 z-10 mb-1 w-52 overflow-hidden rounded-lg border border-gray-700 bg-[#1e2b30] py-1 shadow-xl">
-                <button
-                  type="button"
-                  onClick={() =>
-                    copyText(
-                      `${factWithContext}${freshnessToken ? `\nFreshness: ${freshnessToken}` : ""}`,
-                    )
-                  }
-                  className="w-full px-3 py-2 text-left text-xs text-gray-200 hover:bg-[#0a8078]/10 hover:text-[#0a8078]"
-                >
-                  Copy key facts
-                </button>
-                <button
-                  type="button"
-                  onClick={() => copyText(handoff)}
-                  className="w-full px-3 py-2 text-left text-xs text-gray-200 hover:bg-[#0a8078]/10 hover:text-[#0a8078]"
-                >
-                  Copy research prompt
-                </button>
-                {lastAnswer && (
+        {/* Claude-handoff row — report-grounded only. Hidden OFF-report (#9): the handoff
+            MCP line needs a real report_id, not the "swfl" sentinel. */}
+        {reportId && (
+          <div className="mt-2 flex items-center justify-between gap-2">
+            {/* Copy options menu */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowCopyMenu((v) => !v)}
+                className="text-xs text-blue-400 underline decoration-blue-400/40 underline-offset-2 hover:decoration-blue-400"
+              >
+                {copied ? "Copied ✓" : "Copy for Claude ▾"}
+              </button>
+              {showCopyMenu && (
+                <div className="absolute bottom-full left-0 z-10 mb-1 w-52 overflow-hidden rounded-lg border border-gray-700 bg-[#1e2b30] py-1 shadow-xl">
                   <button
                     type="button"
-                    onClick={() => copyText(lastAnswer)}
+                    onClick={() =>
+                      copyText(
+                        `${factWithContext}${freshnessToken ? `\nFreshness: ${freshnessToken}` : ""}`,
+                      )
+                    }
                     className="w-full px-3 py-2 text-left text-xs text-gray-200 hover:bg-[#0a8078]/10 hover:text-[#0a8078]"
                   >
-                    Copy this answer
+                    Copy key facts
                   </button>
-                )}
-              </div>
-            )}
-          </div>
+                  <button
+                    type="button"
+                    onClick={() => copyText(handoff)}
+                    className="w-full px-3 py-2 text-left text-xs text-gray-200 hover:bg-[#0a8078]/10 hover:text-[#0a8078]"
+                  >
+                    Copy research prompt
+                  </button>
+                  {lastAnswer && (
+                    <button
+                      type="button"
+                      onClick={() => copyText(lastAnswer)}
+                      className="w-full px-3 py-2 text-left text-xs text-gray-200 hover:bg-[#0a8078]/10 hover:text-[#0a8078]"
+                    >
+                      Copy this answer
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
 
-          <a
-            href={`https://claude.ai/new?q=${encodeURIComponent(handoff)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-blue-400 underline decoration-blue-400/40 underline-offset-2 hover:decoration-blue-400"
-          >
-            Open in Claude ↗
-          </a>
-        </div>
+            <a
+              href={`https://claude.ai/new?q=${encodeURIComponent(handoff)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 underline decoration-blue-400/40 underline-offset-2 hover:decoration-blue-400"
+            >
+              Open in Claude ↗
+            </a>
+          </div>
+        )}
       </form>
     </div>
   );

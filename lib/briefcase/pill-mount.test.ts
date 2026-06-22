@@ -2,6 +2,7 @@ import { describe, it, expect } from "bun:test";
 import {
   pageFromPath,
   shouldRenderStandalone,
+  shouldMountHighlighter,
   projectIdFromPath,
   shouldAutoOpenPill,
 } from "./pill-mount";
@@ -72,6 +73,31 @@ describe("shouldRenderStandalone (exactly one visible pill)", () => {
     expect(shouldRenderStandalone("/embed/charts", true)).toBe(false);
     expect(shouldRenderStandalone("/embed/waitlist", false)).toBe(false);
     expect(shouldRenderStandalone("/embed/cards/asking-rent", true)).toBe(false);
+  });
+});
+
+describe("shouldMountHighlighter (the selection-triggered twin — broader suppression)", () => {
+  it("mounts on the highlighter's home (/r/*) and on every ordinary page", () => {
+    expect(shouldMountHighlighter("/r/env-swfl")).toBe(true);
+    expect(shouldMountHighlighter("/r/zip-report/33931")).toBe(true);
+    expect(shouldMountHighlighter("/")).toBe(true);
+    expect(shouldMountHighlighter("/charts")).toBe(true);
+    expect(shouldMountHighlighter("/map")).toBe(true);
+    expect(shouldMountHighlighter("/project/abc123")).toBe(true);
+  });
+  it("SUPPRESSES on the white-label deliverable + iframe prefixes (parity with the pill)", () => {
+    expect(shouldMountHighlighter("/p/abc123")).toBe(false);
+    expect(shouldMountHighlighter("/embed/charts")).toBe(false);
+  });
+  it("ALSO suppresses /login + /auth — UNLIKE the pill (nothing to highlight on an auth form)", () => {
+    // The load-bearing asymmetry (#6/M5): the pill shows on /login/auth, the highlighter does not.
+    expect(shouldMountHighlighter("/login")).toBe(false);
+    expect(shouldRenderStandalone("/login", true)).toBe(true);
+    expect(shouldMountHighlighter("/auth/callback")).toBe(false);
+    expect(shouldRenderStandalone("/auth/callback", true)).toBe(true);
+  });
+  it("treats a null pathname as suppressed", () => {
+    expect(shouldMountHighlighter(null)).toBe(false);
   });
 });
 
