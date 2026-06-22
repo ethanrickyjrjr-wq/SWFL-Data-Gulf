@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-06-21T09:34:07.498Z",
-    "finished": "2026-06-21T09:34:07.521Z"
+    "started": "2026-06-22T11:30:16.176Z",
+    "finished": "2026-06-22T11:30:16.760Z"
   },
   "source": "live",
   "outcomes": [
@@ -108,13 +108,260 @@
     },
     {
       "packId": "econ-dev-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 4,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "econ-dev-swfl",
+        "version": 4,
+        "refined_at": "2026-06-22T11:30:16Z",
+        "expires": "2026-06-29T11:30:16Z",
+        "ttl_seconds": 604800,
+        "direction": "neutral",
+        "magnitude": 0.3,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL Inc. logged 1 economic development announcement in the last 90 days. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.",
+        "key_metrics": [
+          {
+            "metric": "econ_dev_announcements_90d",
+            "label": "Economic development announcements (last 90 days)",
+            "value": 1,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "count",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.swflinc.com/blog/florida-policy-updates-housing-property-taxes-and-the-state-budget--what-southwest-florida-busin",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (1 announcements in last 90 days via swfl_inc_announcements)"
+            },
+            "suggestions": [
+              "What's driving econ dev announcements 90d?",
+              "How does econ dev announcements 90d here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "econ_dev_announcements_prior_90d",
+            "label": "Economic development announcements (prior 90-day window)",
+            "value": 0,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "count",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.swflinc.com/blog/florida-policy-updates-housing-property-taxes-and-the-state-budget--what-southwest-florida-busin",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (0 announcements in 90–180 days prior window)"
+            },
+            "suggestions": [
+              "What's driving econ dev announcements prior 90d?",
+              "How does econ dev announcements prior 90d here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "1 of 5 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
+          "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
+          "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-06-22T11:30:16Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Systematic Collier and Charlotte coverage — the feed is the Lee County EDO (SWFL Inc.); other counties appear only when announced via partnerships",
+            "Investment and job figures beyond what is disclosed at announcement — no audited or updated totals",
+            "Sub-county grain — announcements are county-attributed only (no ZIP, corridor, or parcel detail)"
+          ],
+          "finest_grain": "project-announcement"
+        }
+      }
     },
     {
       "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 17,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "city-pulse-swfl",
+        "version": 17,
+        "refined_at": "2026-06-22T11:30:16Z",
+        "expires": "2026-06-23T11:30:16Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL city pulse as of 2026-06-22: 130 live current-events signals across 13 cities — Lehigh Acres (6), Fort Myers (15), Naples (16), Estero (14), Bonita Springs (8), Sanibel (12), North Fort Myers (3), Marco Island (6), Cape Coral (9), Fort Myers Beach (10), East Naples (9), North Naples (16), Golden Gate (6). Most current: Lehigh Acres — A 68-acre commercial property in eastern Lee County sold for $14.15 million, highlighting continued development momentum in the Lehigh Acres area. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "signal_transactions_1",
+            "value": "Lehigh Acres: A 68-acre commercial property in eastern Lee County sold for $14.15 million, highlighting continued development momentum in the Lehigh Acres area.",
+            "direction": "stable",
+            "label": "Lehigh Acres — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/continued-growth-sparks-1415m-land-purchase-in-lee-county/article_bf6413b3-84d3-4e73-909e-2ce49dbfbdd9.html",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Eastern Lee County sees $14.15 million land sale deal | Real Estate | gulfshorebusiness.com: \"LSI Companies Inc. ... A 68-acre commercial property in eastern Lee County sold for $14.15 million, highlighting continued development momentum along ...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_2",
+            "value": "Fort Myers: The Meridian Business Center in Fort Myers sold to a Minneapolis commercial real estate firm; the buyer borrowed $30.5 million for the industrial property.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/09/buyer-borrows-fort-myers-industrial-property/",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Minnesota buyer borrows $30.5M for Fort Myers industrial property | Business Observer: \"The Meridian Business Center in Fort Myers sold to a Minneapolis commercial real estate firm. Courtesy image · Charlotte–Lee–Collier · Share · Capital...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 2?",
+              "How does signal transactions 2 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_3",
+            "value": "Fort Myers: A 68-acre commercial property in eastern Lee County sold for $14.15 million, highlighting continued development momentum along the State Road 82 corridor.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/continued-growth-sparks-1415m-land-purchase-in-lee-county/article_bf6413b3-84d3-4e73-909e-2ce49dbfbdd9.html",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Eastern Lee County sees $14.15 million land sale deal | Real Estate | gulfshorebusiness.com: \"A 68-acre commercial property in eastern Lee County sold for $14.15 million, highlighting continued development momentum along the State Road 82 corri...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 3?",
+              "How does signal transactions 3 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_4",
+            "value": "Fort Myers: A 223-acre parcel of residential property in North Fort Myers at 18300 Leetana Road was bought by a New York-based LLC.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/may/17/fort-myers-land-single-family-houses-sold/",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Fort Myers land zoned for single-family houses sold | Business Observer: \"A 223-acre parcel of residential property in North Fort Myers has sold. The property at 18300 Leetana Road was bought by a New York based LLC tied to ...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 4?",
+              "How does signal transactions 4 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_5",
+            "value": "Naples: Hibiscus Golf Club in East Naples has been sold for $28 million and will be transformed into an exclusive private golf club called The Lantern Club, with a nonrefundable initiation fee per a November 2025 FAQ document by Winfield.",
+            "direction": "stable",
+            "label": "Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/hibiscus-golf-club-sold-what-does-it-mean-for-naples/article_6776f2f8-9958-4375-bb5f-8a8c4973ba88.html",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Big changes coming to East Naples' Hibiscus Golf Club: \"The Hibiscus Golf Club in Naples has been sold for $28 million and will be transformed into an exclusive private golf club. Despite the change in owne...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 5?",
+              "How does signal transactions 5 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_6",
+            "value": "Naples: A gulf-front property in Naples sold for $37 million; the purchase covers three parcels — 25 Fifth Ave. S., 45 Fifth Ave. S., and a third parcel — and the seller had acquired the property in 2024 for $31.5 million per Collier County property records.",
+            "direction": "stable",
+            "label": "Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/may/17/fort-myers-land-single-family-houses-sold/",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Fort Myers land zoned for single-family houses sold | Business Observer: \"A gulf-front property in Naples has sold for $37 million. One buyer purchased the property, which includes three parcels: 25 Fifth Ave. S., 45 Fifth A...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_7",
+            "value": "Naples: On Oct. 24, Costco Wholesale Corp. purchased a 25.86-acre undeveloped wooded property in East Naples for nearly $19.4 million from Hacienda Lakes of Naples LLC.",
+            "direction": "stable",
+            "label": "Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/development/local-opposition-group-natl-retailer-costco-reach-agreement/article_986b91de-4dd7-4450-bd9d-59fdcc1f0122.html",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "Agreement Reached: Costco Makes Concessions in East Naples | Development | gulfshorebusiness.com: \"On Oct. 24, Costco Wholesale Corp. purchased the 25.86-acre undeveloped wooded property for nearly $19.4 million from Hacienda Lakes of Naples LLC. Co...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 7?",
+              "How does signal transactions 7 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_8",
+            "value": "Estero: A church property at 8681 County Road, Estero sold for $2,100,000; buyer is TL Glen Creek LB LLC.",
+            "direction": "stable",
+            "label": "Estero — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/apr/20/commercial-real-estate-transactions/",
+              "fetched_at": "2026-06-22T11:30:16Z",
+              "tier": 2,
+              "citation": "The week's top commercial real estate transactions in Charlotte, Collier, Hillsborough, Lee, Manatee, Pasco, Pinellas, Polk, Sarasota | Business Observer: \"Address: 8681 County Road, Estero Property Type: Church Price: $2,100,000 · Buyer: TL Glen Creek LB LLC Seller: GTIS I VGC LP Address: Bradenton Prope...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 8?",
+              "How does signal transactions 8 here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "122 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-06-22T11:30:16Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "rsw-airport",
@@ -128,8 +375,59 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 6,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 6,
+        "refined_at": "2026-06-22T11:30:16Z",
+        "expires": "2026-06-23T11:30:16Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-06-18) 6.47%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.47,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-06-18)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-06-21T13:51:29.39143+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-06-18"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-06-22T11:30:16Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -163,10 +461,14 @@
     },
     {
       "packId": "master",
-      "status": "skipped-fresh",
+      "status": "degraded",
+      "failureClass": "deterministic",
+      "reason": "[normalize] Orphan Concept error: 1 slug claim(s) in pack \"master\" are not registered in refinery/vocab/brain-vocabulary.json:\n  - frag_c44be206abbc :: normalized.output.key_metrics[0].metric :: \"freshness_mortgage_30yr_fixed_pct\"\nAdd the missing concept(s) to the vocabulary or fix the brain. Pass { strict: false } to collect orphans without aborting.",
+      "lastGoodRefinedAt": "2026-06-21T18:14:58Z",
+      "version": 84,
       "written": false
     }
   ],
-  "exitCode": 0,
-  "masterDecision": "skipped-fresh"
+  "exitCode": 1,
+  "masterDecision": "published"
 }
