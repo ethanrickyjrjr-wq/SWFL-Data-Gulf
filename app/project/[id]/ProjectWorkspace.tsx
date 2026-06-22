@@ -262,23 +262,17 @@ export function ProjectWorkspace({
       const tmpl = opts?.template ?? template;
       const body: Record<string, unknown> = { template: tmpl };
       if (tmpl === "email") {
-        // An email is ZIP-only. Honor a caller/seed scope ONLY if it's a ZIP; otherwise
-        // ignore it (a place/county scope — incl. a tampered ?seed= URL — must never reach
-        // an email) and derive the project's ZIP, or ask for one instead of shipping an
-        // empty email. This makes the ZIP-only contract structural, not caller-dependent.
+        // An email builds at WHATEVER grain the project holds — a ZIP seed wins, else the
+        // project's inferred ZIP/place, else whole-region (null → NULL/NULL scope → a SWFL
+        // read). Never refuse for a missing ZIP; the numbers are the frozen filed items.
         const s =
           opts?.scopeKind === "zip" && opts?.scopeValue
             ? { scope_kind: "zip" as const, scope_value: opts.scopeValue }
             : emailDeliverableScope(items);
-        if (!s) {
-          setBuildError(
-            "An email needs a single ZIP to ground its numbers — this project isn't scoped to a ZIP yet.",
-          );
-          setBuilding(false);
-          return;
+        if (s) {
+          body.scope_kind = s.scope_kind;
+          body.scope_value = s.scope_value;
         }
-        body.scope_kind = s.scope_kind;
-        body.scope_value = s.scope_value;
       } else if (opts?.scopeKind && opts?.scopeValue) {
         body.scope_kind = opts.scopeKind;
         body.scope_value = opts.scopeValue;

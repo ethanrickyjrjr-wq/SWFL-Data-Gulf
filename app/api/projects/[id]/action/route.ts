@@ -205,23 +205,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (!isTemplateId(template)) {
         return NextResponse.json({ error: "invalid_template" }, { status: 422 });
       }
-      // An email is ZIP-only — ground it on the project's inferred ZIP. If the project
-      // names no ZIP, ask for one instead of building an empty email (the same rule the
-      // workspace Build menu enforces). Other templates carry no scope.
+      // An email builds at whatever grain the project holds — the inferred ZIP/place, else
+      // whole-region (null → NULL/NULL scope → a SWFL read). Never refuse for a missing ZIP;
+      // the numbers are the frozen filed items. Other templates carry no scope.
       let scope: { scope_kind?: string; scope_value?: string } = {};
       if (template === "email") {
         const s = emailDeliverableScope((project.items ?? []) as ProjectItem[]);
-        if (!s) {
-          return NextResponse.json(
-            {
-              type: "NEEDS_SCOPE",
-              message:
-                "An email needs a single ZIP to ground its numbers. This project isn't scoped to a ZIP yet — open it from a ZIP-level read first, or build a market overview instead.",
-            },
-            { status: 422 },
-          );
-        }
-        scope = s;
+        if (s) scope = s;
       }
       try {
         const { id: slug } = await assembleDeliverable({

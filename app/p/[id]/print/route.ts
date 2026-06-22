@@ -46,8 +46,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const model = buildEmailDeliverableModel(data);
   if (!model) {
-    return new NextResponse("scope unavailable — no ZIP scope on this deliverable", {
-      status: 422,
+    // After the any-grain change, a null model means NO CONTENT (no figures AND no prose) —
+    // not "no ZIP". Mirror the /p/[id] page's graceful degrade instead of refusing: a
+    // content-bearing email of any grain yields a model, so this only hits a truly empty one.
+    const empty = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Deliverable</title><style>@page{size:letter;margin:1in;}body{font-family:system-ui,-apple-system,sans-serif;padding:2rem;color:#333;}</style></head><body><p>This deliverable has no content to print yet.</p>${AUTOPRINT}</body></html>`;
+    return new NextResponse(empty, {
+      status: 200,
+      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
     });
   }
 

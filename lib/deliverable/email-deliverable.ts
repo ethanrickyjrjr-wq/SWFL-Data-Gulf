@@ -7,14 +7,17 @@
  * frozen `items_snapshot` + `narrative` + the persisted ZIP scope. That is the moat:
  * the email and PDF skins can never drift from what the deliverable froze.
  *
- * Scope is ZIP-only (the recurring lane's `resolveReportZip` guard, shared so the two
- * lanes can never diverge). A non-ZIP / blank scope returns null → the caller renders
- * the global digest fallback rather than inventing sub-grain precision.
+ * Scope is grain-flexible: ZIP, place, county, or whole-region — the header only FRAMES;
+ * the numbers are the frozen filed items, so no grain invents precision. A blank/unknown
+ * scope is a whole-region (Southwest Florida) read, never a refusal. The model is null
+ * ONLY when there is genuinely nothing to render (no figures AND no prose). The recurring
+ * scheduled-send lane keeps its own ZIP-only `resolveReportZip` guard (it re-fetches live
+ * by ZIP); this briefcase lane does not re-fetch, so it has no such constraint.
  */
 
-import { resolveReportZip } from "../email/recurring-report";
+import { resolvePlaceZip } from "@/refinery/lib/geography-gazetteer.mts";
 import type { ActivationSnapshot } from "../email/activation/types";
-import type { GroundedReportModel } from "../email/grounded-report";
+import type { GroundedReportModel, GroundedReportScope } from "../email/grounded-report";
 import type { ReportMetric, ReportLine } from "../email/activation/snapshot";
 import type { SnapshotItem, Narrative } from "./templates";
 
@@ -56,12 +59,86 @@ function firstFreshnessToken(items: SnapshotItem[]): string | null {
   return null;
 }
 
+function capitalize(s: string): string {
+  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
+/** Title-case a free-text place value for display when it isn't in the crosswalk. */
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Header/scope fields for the grounded model at WHATEVER grain the deliverable holds. The
+ * numbers are the frozen filed items regardless of grain; these fields only LABEL the
+ * header, so a coarser grain never invents precision. A blank/unknown scope → whole-region
+ * (Southwest Florida), never a refusal. Case-insensitive on the value (the build route
+ * lowercases it via `parse-scope`; the action route passes canonical case). Pure.
+ *
+ * The ZIP case is left byte-identical to the prior ZIP-only behavior (`primaryPlace` /
+ * `countyName` stay null → the renderer shows `ZIP {zip}` / "Southwest Florida"), so
+ * existing ZIP deliverables render unchanged.
+ */
+export function emailHeaderScope(
+  scope_kind: string | null | undefined,
+  scope_value: string | null | undefined,
+): {
+  zip: string;
+  primaryPlace: string | null;
+  countyName: string | null;
+  scope: GroundedReportScope;
+} {
+  const kind = (scope_kind ?? "").trim().toLowerCase();
+  const value = (scope_value ?? "").trim();
+
+  if (kind === "zip" && value) {
+    return {
+      zip: value,
+      primaryPlace: null,
+      countyName: null,
+      scope: { kind: "zip", value, grain: "zip" },
+    };
+  }
+
+  if (kind === "place" && value) {
+    const entry = resolvePlaceZip(value);
+    const place = entry ? entry.place : titleCase(value);
+    const countyName = entry ? capitalize(entry.county) : null;
+    return {
+      zip: "",
+      primaryPlace: place,
+      countyName,
+      scope: { kind: "place", value: place, grain: "place" },
+    };
+  }
+
+  if (kind === "county" && value) {
+    const county = capitalize(value.replace(/\s*county$/i, "").trim());
+    return {
+      zip: "",
+      primaryPlace: county,
+      countyName: county,
+      scope: { kind: "county", value: county, grain: "county" },
+    };
+  }
+
+  // Whole-region (blank / unknown / null) — never a refusal.
+  return {
+    zip: "",
+    primaryPlace: "Southwest Florida",
+    countyName: null,
+    scope: { kind: "region", value: "Southwest Florida", grain: "region" },
+  };
+}
+
 export function buildEmailDeliverableModel(
   row: EmailDeliverableRow,
   opts?: { ctaUrl?: string; siteOrigin?: string },
 ): GroundedReportModel | null {
-  const zip = resolveReportZip(row.scope_kind, row.scope_value);
-  if (!zip) return null;
+  const { zip, primaryPlace, countyName, scope } = emailHeaderScope(
+    row.scope_kind,
+    row.scope_value,
+  );
 
   const metricItems = row.items_snapshot.filter(
     (item): item is Extract<SnapshotItem, { kind: "metric" }> => item.kind === "metric",
@@ -86,8 +163,8 @@ export function buildEmailDeliverableModel(
     if (!text) return;
     lines.push({
       brain_id: row.template,
-      grain: "zip",
-      is_true_zip: true,
+      grain: scope.grain,
+      is_true_zip: scope.kind === "zip",
       label,
       text,
       source_url: "",
@@ -99,18 +176,22 @@ export function buildEmailDeliverableModel(
     pushLine(s.title, [s.title, s.intro].filter(Boolean).join(" — "));
   }
 
+  // Never refuse for a missing ZIP — only return null when there is genuinely nothing to
+  // render (no figures AND no prose). Every real build, at any grain, yields a model.
+  if (metrics.length === 0 && lines.length === 0) return null;
+
   return {
     in_scope: true,
     zip,
-    primaryPlace: null,
-    countyName: null,
+    primaryPlace,
+    countyName,
     freshness_token: firstFreshnessToken(row.items_snapshot),
     metrics,
     lines,
     coverage_caveats: [],
     snapshot: emptyActivationSnapshot(zip, row.created_at),
     delta: null,
-    scope: { kind: "zip", value: zip, grain: "zip" },
+    scope,
     cta_url: opts?.ctaUrl,
     site_origin: opts?.siteOrigin,
   };

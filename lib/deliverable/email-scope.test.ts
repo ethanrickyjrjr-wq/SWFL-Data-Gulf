@@ -23,12 +23,20 @@ describe("emailDeliverableScope", () => {
     });
   });
 
-  it("returns null when no item grounds a ZIP (the caller must clarify, not build empty)", () => {
+  it("derives a place scope when an item names a place but no ZIP", () => {
+    const placeNote: ProjectItem = { ...base, kind: "note", text: "Notes on Cape Coral inventory" };
+    expect(emailDeliverableScope([placeNote])).toEqual({
+      scope_kind: "place",
+      scope_value: "Cape Coral",
+    });
+  });
+
+  it("returns null (whole-region) when no item names a ZIP or place — the caller builds a SWFL read, NOT a refusal", () => {
     expect(emailDeliverableScope([{ ...base, kind: "note", text: "misc" }])).toBeNull();
     expect(emailDeliverableScope([])).toBeNull();
   });
 
-  it("ignores a non-ZIP report slug (a brain slug is not a place)", () => {
+  it("a bare brain slug grounds neither a ZIP nor a place → null (whole-region)", () => {
     expect(emailDeliverableScope([metric("rentals-swfl")])).toBeNull();
   });
 });

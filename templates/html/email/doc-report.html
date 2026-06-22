@@ -38,7 +38,7 @@
         <tr>
           <td style="padding:32px 32px 8px;">
             <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">{{PLACE}} market read</p>
-            <p style="margin:0 0 20px 0;font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_DIM}};">{{COUNTY}} &middot; ZIP {{ZIP}}</p>
+            <p style="margin:0 0 20px 0;font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_DIM}};">{{COUNTY}}<!-- repeat:zipsuffix --> &middot; ZIP {{ZIP}}<!-- /repeat:zipsuffix --></p>
             <!-- repeat:hero -->
             <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:44px;font-weight:900;color:{{ACCENT}};line-height:1;letter-spacing:-1.5px;">{{HERO_VALUE}}</p>
             <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1px;">{{HERO_LABEL}}</p>
@@ -80,7 +80,7 @@
         <tr>
           <td style="padding:8px 32px 28px;">
             <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};">Live data token: <span style="color:{{ACCENT}};">{{FRESHNESS_TOKEN}}</span></p>
-            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};"><a href="{{REPORT_URL}}" style="color:{{TEXT_DIM}};">View the full {{ZIP}} report online</a></p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};"><a href="{{REPORT_URL}}" style="color:{{TEXT_DIM}};">View the full <!-- repeat:zipsuffix -->{{ZIP}} <!-- /repeat:zipsuffix -->report online</a></p>
           </td>
         </tr>
 

@@ -41,20 +41,44 @@ function row(over: Partial<EmailDeliverableRow> = {}): EmailDeliverableRow {
 
 // --- scope guard ----------------------------------------------------------
 
-describe("buildEmailDeliverableModel — scope guard", () => {
-  it("returns null for a non-zip scope_kind", () => {
-    expect(buildEmailDeliverableModel(row({ scope_kind: "county" }))).toBeNull();
+describe("buildEmailDeliverableModel — grain (never refuses for a missing ZIP)", () => {
+  it("builds a place-grain model for a place scope (county from the crosswalk)", () => {
+    const model = buildEmailDeliverableModel(
+      row({ scope_kind: "place", scope_value: "Cape Coral" }),
+    )!;
+    expect(model).not.toBeNull();
+    expect(model.scope).toEqual({ kind: "place", value: "Cape Coral", grain: "place" });
+    expect(model.primaryPlace).toBe("Cape Coral");
+    expect(model.countyName).toBe("Lee");
+    expect(model.zip).toBe("");
   });
 
-  it("returns null for an empty scope_value", () => {
-    expect(buildEmailDeliverableModel(row({ scope_value: "" }))).toBeNull();
+  it("is case-insensitive on a place value (build route lowercases it)", () => {
+    const model = buildEmailDeliverableModel(
+      row({ scope_kind: "place", scope_value: "cape coral" }),
+    )!;
+    expect(model.primaryPlace).toBe("Cape Coral");
+    expect(model.countyName).toBe("Lee");
   });
 
-  it("returns null for a null scope_kind (pre-migration row)", () => {
-    expect(buildEmailDeliverableModel(row({ scope_kind: null, scope_value: null }))).toBeNull();
+  it("builds a county-grain model for a county scope", () => {
+    const model = buildEmailDeliverableModel(row({ scope_kind: "county", scope_value: "Lee" }))!;
+    expect(model.scope).toEqual({ kind: "county", value: "Lee", grain: "county" });
+    expect(model.countyName).toBe("Lee");
   });
 
-  it("normalizes whitespace + case in the scope (shared resolveReportZip guard)", () => {
+  it("treats an empty scope_value as a whole-region read (NOT a refusal)", () => {
+    const model = buildEmailDeliverableModel(row({ scope_value: "" }))!;
+    expect(model.scope.kind).toBe("region");
+    expect(model.primaryPlace).toBe("Southwest Florida");
+  });
+
+  it("treats a null scope (pre-migration row) as a whole-region read", () => {
+    const model = buildEmailDeliverableModel(row({ scope_kind: null, scope_value: null }))!;
+    expect(model.scope.kind).toBe("region");
+  });
+
+  it("normalizes whitespace + case in a ZIP scope", () => {
     const model = buildEmailDeliverableModel(row({ scope_kind: " ZIP ", scope_value: " 33901 " }));
     expect(model).not.toBeNull();
     expect(model!.zip).toBe("33901");
@@ -64,6 +88,16 @@ describe("buildEmailDeliverableModel — scope guard", () => {
     const model = buildEmailDeliverableModel(row());
     expect(model).not.toBeNull();
     expect(model!.zip).toBe("33901");
+  });
+
+  it("returns null ONLY when there is no content (no figures AND no prose)", () => {
+    const empty = buildEmailDeliverableModel(
+      row({
+        items_snapshot: [],
+        narrative: { exec_summary: "", sections: [], inference_notes: [] },
+      }),
+    );
+    expect(empty).toBeNull();
   });
 });
 

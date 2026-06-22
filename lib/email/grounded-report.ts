@@ -202,11 +202,19 @@ export async function renderGroundedReport(
   const ctaUrl = model.cta_url ?? DEFAULT_CTA_URL;
   const origin = model.site_origin ?? DEFAULT_SITE_ORIGIN;
 
-  // PLACE/COUNTY/ZIP derive from the model's display fields — identical to the Phase-1
-  // activation render (golden-equivalence). Non-ZIP lanes will derive these from
-  // `model.scope`; that generalization is Task 3, not here.
+  // PLACE/COUNTY derive from the model's display fields. The ZIP lane is byte-identical to
+  // the Phase-1 activation render (golden-equivalence); non-ZIP lanes (briefcase email at
+  // place/county/region grain) read `model.primaryPlace`/`countyName`/`scope`.
+  const isZip = model.scope.kind === "zip";
   const place = model.primaryPlace ?? `ZIP ${model.zip}`;
-  const county = model.countyName ? `${model.countyName} County` : "Southwest Florida";
+  // Region de-dupes: PLACE already reads "Southwest Florida", so the subtitle carries a
+  // footprint descriptor instead of repeating it.
+  const county =
+    model.scope.kind === "region"
+      ? "6-county region"
+      : model.countyName
+        ? `${model.countyName} County`
+        : "Southwest Florida";
 
   // Hero = the first key figure, as a 0-or-1 repeat (empty metrics → no hero number).
   const hero = model.metrics.length
@@ -227,10 +235,11 @@ export async function renderGroundedReport(
   const tokens: Record<string, string | number> = {
     PLACE: esc(place),
     COUNTY: esc(county),
-    ZIP: esc(model.zip),
     FRESHNESS_TOKEN: model.freshness_token ? esc(model.freshness_token) : "",
     CTA_URL: esc(ctaUrl),
-    REPORT_URL: esc(`${origin}/r/zip-report/${model.zip}`),
+    // The ZIP lane links to the live ZIP report; any other grain links to the site home so
+    // we never emit a broken `/r/zip-report/` URL with no ZIP.
+    REPORT_URL: esc(isZip ? `${origin}/r/zip-report/${model.zip}` : origin),
   };
   Object.assign(
     tokens,
@@ -248,7 +257,12 @@ export async function renderGroundedReport(
 
   const delta = model.delta ? deltaBlock(model.delta, accent) : "";
 
-  return renderSkin(opts.skin, tokens, { hero, metrics, reads }, delta);
+  // The "· ZIP nnnnn" subtitle suffix + the "nnnnn" in the report link render ONLY for a
+  // true ZIP scope. A 1-row repeat is byte-identical to the pre-change shell (golden test);
+  // an empty one drops the suffix cleanly — no dangling "ZIP ", no broken link.
+  const zipsuffix = isZip ? [{ ZIP: esc(model.zip) }] : [];
+
+  return renderSkin(opts.skin, tokens, { hero, metrics, reads, zipsuffix }, delta);
 }
 
 /**

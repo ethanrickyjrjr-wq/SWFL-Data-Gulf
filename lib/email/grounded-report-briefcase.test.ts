@@ -43,6 +43,10 @@ describe("briefcase grounded render — both skins", () => {
     const model = buildEmailDeliverableModel(row)!;
     const html = await renderGroundedReport(model, { skin: "email" });
     expect(html).toContain("33901");
+    // The zipsuffix repeat (1 row) renders the ZIP subtitle + report link byte-for-byte
+    // as the pre-change flat shell did — the local lock for the golden equivalence.
+    expect(html).toContain("&middot; ZIP 33901");
+    expect(html).toContain("View the full 33901 report online");
     expect(html).toContain("$412,000"); // hero + metrics table (display)
     expect(html).toContain("SWFL-7421-v5-20260610"); // freshness token rendered
     expect(html).toContain("seller-leaning"); // exec_summary prose in the reads
@@ -53,6 +57,7 @@ describe("briefcase grounded render — both skins", () => {
     const model = buildEmailDeliverableModel(row)!;
     const html = await renderGroundedReport(model, { skin: "pdf" });
     expect(html).toContain("33901");
+    expect(html).toContain("&middot; ZIP 33901"); // zipsuffix 1-row, byte-correct in the doc shell too
     expect(html).toContain("$412,000");
     expect(html).toContain("Built with SWFL Data Gulf"); // free-tier watermark
     expect(html).toContain("@page"); // letter-size print CSS
@@ -64,5 +69,41 @@ describe("briefcase grounded render — both skins", () => {
     const model = buildEmailDeliverableModel(row)!;
     const html = await renderGroundedReport(model, { skin: "email" });
     expect(html).toContain("Get this for your whole book");
+  });
+});
+
+describe("briefcase grounded render — non-ZIP grains build honestly (no handcuff)", () => {
+  it("a PLACE-scoped email renders a place header, county subtitle, no dangling ZIP", async () => {
+    const model = buildEmailDeliverableModel({
+      ...row,
+      scope_kind: "place",
+      scope_value: "Cape Coral",
+    })!;
+    const html = await renderGroundedReport(model, { skin: "email" });
+    expect(html).toContain("Cape Coral market read");
+    expect(html).toContain("Lee County"); // county resolved from the crosswalk
+    expect(html).not.toContain("&middot; ZIP"); // the ZIP suffix is dropped, not left dangling
+    expect(html).toContain("View the full report online"); // no ZIP in the link text
+    expect(html).toContain("$412,000"); // the frozen number survives regardless of grain
+    expect(html).not.toMatch(/\{\{[A-Z_]+\}\}/);
+  });
+
+  it("a COUNTY-scoped email renders a county header", async () => {
+    const model = buildEmailDeliverableModel({ ...row, scope_kind: "county", scope_value: "Lee" })!;
+    const html = await renderGroundedReport(model, { skin: "email" });
+    expect(html).toContain("Lee market read");
+    expect(html).toContain("Lee County");
+    expect(html).not.toContain("&middot; ZIP");
+    expect(html).not.toMatch(/\{\{[A-Z_]+\}\}/);
+  });
+
+  it("a REGION (null-scope) email renders a Southwest Florida header with a de-duped subtitle", async () => {
+    const model = buildEmailDeliverableModel({ ...row, scope_kind: null, scope_value: null })!;
+    const html = await renderGroundedReport(model, { skin: "email" });
+    expect(html).toContain("Southwest Florida market read");
+    expect(html).toContain("6-county region"); // subtitle does NOT repeat "Southwest Florida"
+    expect(html).not.toContain("&middot; ZIP");
+    expect(html).toContain("$412,000");
+    expect(html).not.toMatch(/\{\{[A-Z_]+\}\}/);
   });
 });
