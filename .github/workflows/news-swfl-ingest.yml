@@ -9,6 +9,10 @@ on:
         description: "Dry run (no DB writes)"
         required: false
         default: "false"
+      news_adaptive:
+        description: "Crawl strategy: '1' = adaptive BestFirst frontier, 'off' = baseline ~40-cap"
+        required: false
+        default: "1"
 
 permissions:
   contents: read
@@ -40,6 +44,9 @@ jobs:
       - name: Run news ingest
         env:
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          # Adaptive BestFirst frontier by default (SOLO-14). Scheduled runs send no input
+          # (-> '1' = adaptive); dispatch with news_adaptive='off' for a baseline comparison.
+          NEWS_ADAPTIVE: ${{ github.event.inputs.news_adaptive == 'off' && '' || '1' }}
         run: |
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             python -m ingest.pipelines.news_swfl.pipeline --dry-run

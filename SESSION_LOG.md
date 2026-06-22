@@ -1,3 +1,9 @@
+## 2026-06-22 (main) — SOLO-14 follow-up: flip NEWS_ADAPTIVE ON in news-swfl-ingest cron + GHA-runner test
+
+Wired `NEWS_ADAPTIVE` into `.github/workflows/news-swfl-ingest.yml`: scheduled runs now use the adaptive BestFirst frontier by default (`NEWS_ADAPTIVE: ${{ inputs.news_adaptive == 'off' && '' || '1' }}`); `workflow_dispatch` gains a `news_adaptive` input (`'1'` adaptive / `'off'` baseline) for A/B on the runner. Local end-to-end `NEWS_ADAPTIVE=1 ... pipeline --dry-run` = **48 articles** (full pipeline path, not just the fetcher). Pushed to enable the GHA-runner battle-test (home-IP only so far; Gannett may block datacenter IPs — that's the thing being tested).
+
+**Next:** dispatch the workflow (dry-run first), confirm datacenter-IP yield ~48; if Gannett blocks the runner IP, wire `CRAWL4AI_PROXY`. Then a live (non-dry) run to confirm DB upsert.
+
 ## 2026-06-22 (main) — DBPR SIRS QIX probe: path 2 clear (GetHyperCubeData, no ExportData needed)
 
 **Probe scripts:** `scripts/probe_dbpr_sirs.py` (phase 1: WS capture) + `scripts/probe_dbpr_sirs_phase2.py` (phase 2: direct Python QIX client).
