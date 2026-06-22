@@ -14,7 +14,7 @@ They split into three tracks:
 | 24 | freshness as an **SLA that can ERROR** (`warn_after`/`error_after`) | Sonnet | data-reliability | `check_freshness.py` + `cadence_registry.yaml` | **03** (the guard) + **19** (the registry) | — |
 | 25 | value-level data tests (Quality) + column-type-change detector (Schema) | Opus | data-reliability | mostly NEW probe/test files | complements **22** (write) / **24** (volume) | — |
 | 26 | Structured Outputs `strict:true` (kill fence-stripping) | Opus | ai-layer | `extract_client.py` + refinery JSON path + crexi | **06** + coordinate **11** | **Anthropic API** |
-| 27 | Citations API + retract-if-no-quote on conversation path | Opus | ai-layer | `conversation-path.ts` + `grounded-answer.ts` | **20** (charts must cite rows) | **Anthropic API** |
+| 27 | Never-dead-end text answer: try-to-find (uploads → cited web) + collected sources link | Opus | ai-layer | `conversation-path.ts` + `grounded-answer.ts` | **20** (charts shipped) | **Anthropic API** (`web_search` only — Citations API DROPPED) |
 | 28 | cron ledger → real postmortem record; alert on significant only | Sonnet | ops | `cron-rebuild-failures.md` + `log-cron-incident`/`ledger-flap`/`classify` | **02** (reason echo) + **04** (classifier) | — |
 
 ## Sequencing / file-conflicts (why these are mostly SOLO, not a clean run-together group)
@@ -42,8 +42,8 @@ They split into three tracks:
    gate). Do not re-erect it here. (Build 28 is ops-tooling — it gates the agent's record, not the
    materialization path, so C2 does not constrain it.)
 2. **RULE 1 — Vendor-First on 22/23/26/27.** dlt (`schema_contract`/`merge`/`refresh`) and the Anthropic
-   API (`strict:true` Structured Outputs, Citations API) are **vendor surfaces whose exact shape + GA status
-   drift**. Each of these builds MUST `WebFetch` the **live** vendor docs **in-session at build time** to
+   API (26 = `strict:true` Structured Outputs; 27 = the `web_search_20250305` server tool — the native
+   Citations API is DROPPED from 27) are **vendor surfaces whose exact shape + GA status drift**. Each of these builds MUST `WebFetch` the **live** vendor docs **in-session at build time** to
    confirm the request shape / model-id support before coding. The round captures under
    `best-practices-research/` are starting pointers, **not** authority for verbatim values.
 

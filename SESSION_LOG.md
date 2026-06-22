@@ -1,3 +1,11 @@
+## 2026-06-22 (main) — SOLO-27 plan rewritten: never-dead-end text answer (inline find on gap, collapsed sources); Citations API + "I don't know" both killed [PUSHED]
+
+Doc-only. Operator rescope of phase-7 AI-layer **SOLO-27** (`docs/audit/2026-06-21-full-platform-audit/PLAN/phase-7-best-practices-hardening/ai-layer/SOLO-27-citations-and-retract--OPUS.md`).
+- **Killed two contaminants:** (1) the native Anthropic **Citations API** (inline per-claim `cited_text`) — chat prose stays clean, no inline citations (also moots the Citations↔Structured-Outputs 400); (2) the three **"allow 'I don't know'"** lines — they contradicted this repo's STANDING never-dead-end law already shipped in `lib/highlighter/grounding.ts:153` (LANE 1/2/3, "do not refuse"). Both were stock advice copied from `round1/brains-anthropic-reduce-hallucinations.md` without reconciling against our rules.
+- **New locked shape:** clean prose; sources collect in a **collapsed `CitationList` box** (collapsed by default, NOT a link — reuse the single citation root, save chat room); a number we don't hold triggers a find-ladder **INLINE on the gap** — check the user's uploads (`currentProjectUploadsText`) → cited web search (reuse `lib/assistant/gap-fill.ts`); if not found, **never "I don't know"** → "google this, here's the link, hand it to me and I'll source it." One-click find = user-requestable fallback, not v1-gating.
+- **Net:** SOLO-27 collapses to "port the grounding.ts LANE pattern into `conversation-path.ts`/`grounded-answer.ts` + wire the existing upload→cited-web find-ladder + add the collapsed sources box." No new vendor surface beyond the `web_search` already in use.
+- Also corrected the build-27 one-liner + vendor-first note in `_CONTRACT.md` to match. No code touched.
+
 ## 2026-06-22 (main) — SOLO-25 verified on main; tonight's rebuild disabled; probe-artifact gitignore
 
 - **SOLO-25 (data-quality probe)** confirmed fully on `main` (`db4544f1` + spec commits, carried up by parallel rebases): `ingest/scripts/check_data_quality.py` + `ingest/quality/quality_registry.yaml` + 4 `schema_baselines/*.json` + the data-quality `run:` step in `freshness-probe-daily.yml`. Value tests (not_null/unique/accepted_values) + at-rest column-type-change detector; non-gating, opt-in per table. Live-verify check `solo25_dq_probe_live_verify` open (next freshness-probe run).
