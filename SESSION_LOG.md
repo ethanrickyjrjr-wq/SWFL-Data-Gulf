@@ -1,3 +1,13 @@
+## 2026-06-22 (main) — SOLO-24: freshness as an SLA (per-source warn_after/error_after)
+
+**Phase-7 audit SOLO-24.** `check_freshness.py` exits 1 when any opted-in source breaches `error_after_days`; `warn_after_days` logs 🟡 SLA WARN (exit 0). Ungated sources untouched — opt-in contract, build 03 invariant preserved.
+
+- **`ingest/scripts/check_freshness.py`:** `check_sla_violations` + `format_sla_section` added; `run_probe` carries `freshness_sla` from each registry entry into result dicts; `main` computes violations, prepends SLA section to summary, returns 1 on errors (unless `--sla-dry-run`). DB-connection and probe-error paths stay exit 0.
+- **`ingest/cadence_registry.yaml`:** schema comment documents `freshness_sla:` fields; 3 pilot entries added (`live_search_daily_median_price` warn/2d error/4d, `city_pulse` warn/4d error/7d, `leepa` warn/540d error/730d — all ≥2× cadence_days so transient delays never trigger exit 1).
+- **`ingest/tests/scripts/test_check_freshness_sla.py`:** 6 new unit tests; all 17 (new + existing) green.
+
+Next: other phase-7 hardening builds from the audit PLAN.
+
 ## 2026-06-22 (main) — build 26: Anthropic structured outputs in extract_client (kill the swallow-to-[]) [PUSHED]
 
 **Phase-7 audit build 26.** Scope collapsed to ONE file: build 11 (`01baa078`) already removed crexi's LLM/fence path (its own log entry: "build 26 moot for this path"), so `grep 'if "```" in raw' ingest/` now had a single hit — `ingest/lib/extract_client.py`. `extract()` has zero prod callers (dormant since the 2026-06-20 firecrawl rewire); change is cheap + permanent, not urgent.

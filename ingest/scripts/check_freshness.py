@@ -23,7 +23,12 @@ View liveness probe (check_view_liveness):
   Logs VIEW_STALE on timeout / 404 / zero rows. Non-gating, same as the rest of the
   probe. Gracefully skipped when SUPABASE_URL or SUPABASE_SERVICE_KEY is unset.
 
-Always exits 0 (probe is observability, not gating).
+Freshness SLA (opt-in, check_sla_violations):
+  Registry entries may declare a ``freshness_sla:`` block with ``warn_after_days``
+  and/or ``error_after_days``.  Sources without this block are observability-only
+  and never change the exit code.  When at least one opted-in source breaches its
+  ``error_after_days`` threshold the probe exits 1 (unless --sla-dry-run).
+  DB-connection failure and probe errors always exit 0 (build 03 invariant).
 """
 import argparse
 import os
@@ -643,6 +648,7 @@ def run_probe(conn, registry: dict) -> tuple[list[dict], list[dict]]:
         r["volume_status"] = vol["status"] if vol else None
         r["volume_landed"] = vol["landed"] if vol else None
         r["volume_min"] = vol["min_rows"] if vol else None
+        r["freshness_sla"] = entry.get("freshness_sla")
         pipeline_results.append(r)
 
         # View liveness — runs independently so a broken view never masks the
@@ -654,6 +660,74 @@ def run_probe(conn, registry: dict) -> tuple[list[dict], list[dict]]:
             view_results.append(vr)
 
     return pipeline_results, view_results
+
+
+# ── SLA checks ───────────────────────────────────────────────────────────────
+
+
+def check_sla_violations(results: list[dict]) -> tuple[list[str], list[str]]:
+    """Return (sla_error_names, sla_warn_names) for opted-in sources.
+
+    Only evaluates entries that carry a 'freshness_sla' key (populated by
+    run_probe from the registry entry).  Sources without it are untouched —
+    the opt-in contract means ungated sources never change the exit code.
+    age_days=None (MISSING/WAITING) is skipped: we can't compare an unknown age.
+    """
+    sla_errors: list[str] = []
+    sla_warns: list[str] = []
+    for r in results:
+        sla = r.get("freshness_sla")
+        if not sla:
+            continue
+        age = r.get("age_days")
+        if age is None:
+            continue
+        error_days = sla.get("error_after_days")
+        warn_days = sla.get("warn_after_days")
+        if error_days is not None and age > error_days:
+            sla_errors.append(r["name"])
+        elif warn_days is not None and age > warn_days:
+            sla_warns.append(r["name"])
+    return sla_errors, sla_warns
+
+
+def format_sla_section(
+    sla_errors: list[str], sla_warns: list[str], results: list[dict]
+) -> str:
+    """Render the SLA violations block. Returns empty string when no violations."""
+    if not sla_errors and not sla_warns:
+        return ""
+    by_name = {r["name"]: r for r in results}
+    lines: list[str] = ["### SLA Violations\n"]
+    if sla_errors:
+        lines.append(
+            "🔴 **SLA ERROR** — source(s) past `error_after_days`; probe exits 1:\n"
+        )
+        lines += [
+            "| Source | Age (days) | error_after_days |",
+            "| --- | --- | --- |",
+        ]
+        for name in sla_errors:
+            r = by_name.get(name, {})
+            age = r.get("age_days", "—")
+            threshold = r.get("freshness_sla", {}).get("error_after_days", "—")
+            lines.append(f"| {name} | {age} | {threshold}d |")
+        lines.append("")
+    if sla_warns:
+        lines.append(
+            "🟡 **SLA WARN** — source(s) past `warn_after_days` (exit 0):\n"
+        )
+        lines += [
+            "| Source | Age (days) | warn_after_days |",
+            "| --- | --- | --- |",
+        ]
+        for name in sla_warns:
+            r = by_name.get(name, {})
+            age = r.get("age_days", "—")
+            threshold = r.get("freshness_sla", {}).get("warn_after_days", "—")
+            lines.append(f"| {name} | {age} | {threshold}d |")
+        lines.append("")
+    return "\n".join(lines) + "\n"
 
 
 # ── output formatting ─────────────────────────────────────────────────────────
@@ -787,6 +861,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Print to stdout instead of writing to $GITHUB_STEP_SUMMARY.",
     )
+    parser.add_argument(
+        "--sla-dry-run",
+        action="store_true",
+        help="Show SLA violations in output but do not exit 1 (local testing).",
+    )
     args = parser.parse_args(argv)
 
     registry_path = Path(__file__).parent.parent / "cadence_registry.yaml"
@@ -847,8 +926,10 @@ def main(argv: list[str] | None = None) -> int:
     finally:
         conn.close()
 
+    sla_errors, sla_warns = check_sla_violations(results)
     summary = (
-        format_summary(results)
+        format_sla_section(sla_errors, sla_warns, results)
+        + format_summary(results)
         + format_view_liveness(view_results, views_manifest)
         + format_gaps(gaps, gap_sync)
     )
@@ -860,6 +941,8 @@ def main(argv: list[str] | None = None) -> int:
         with open(step_summary, "a", encoding="utf-8") as fh:
             fh.write(summary)
 
+    if sla_errors and not args.sla_dry_run:
+        return 1
     return 0
 
 

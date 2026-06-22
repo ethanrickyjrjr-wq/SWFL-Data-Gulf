@@ -29,6 +29,13 @@
 #                                # Falls back to freshness_table for non-dlt entries.
 #                                # Tier-1 entries: volume check is skipped (no SQL table).
 #
+#   SLA fields (optional, any lane — opt-in; absent = observability-only, no exit-code change):
+#     freshness_sla:
+#       warn_after_days: N   # log 🟡 SLA WARN in summary; exit 0
+#       error_after_days: N  # exit 1 if ANY opted-in source breaches this; set ≥ 2× cadence_days
+#                            # so only genuinely dead sources trigger it, not transient delays.
+#                            # DB-connection failure and probe errors always exit 0 (build 03 invariant).
+#
 # Naming note: dlt_schema_name is the schema_name column in _dlt_loads, NOT the
 # pipeline_name argument in pipeline.py (they sometimes differ — see verified values below).
 
@@ -44,6 +51,9 @@ pipelines:
     freshness_column: retrieved_at
     source_name: live_search
     expected_rows_min: 1
+    freshness_sla:
+      warn_after_days: 2    # past 1.5× tolerance threshold; log WARN but keep exit 0
+      error_after_days: 4   # 4× cadence — genuinely dead (transient outages resolve in <2d)
     note: "Daily sourced median sale price; cascade Gemini->Firecrawl->Spider->Claude; anomaly vs own prior."
     live_search_config:
       fetch_mode: search
@@ -244,6 +254,9 @@ pipelines:
     tolerance_multiplier: 3.0
     inventory_id: lake-tier1/city_pulse/
     inventory_key_type: prefix
+    freshness_sla:
+      warn_after_days: 4    # past the 3d tolerance window; log WARN but keep exit 0
+      error_after_days: 7   # 7× cadence — a full week dark is a production defect
     # Daily web_search current-events capture for 7 SWFL cities; distilled into
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
@@ -331,6 +344,9 @@ pipelines:
     dlt_schema_name: leepa_parcels_tier2
     expected_rows_min: 493918 # 90% of 548,798 confirmed 2026-05-31
     count_table: data_lake.leepa_parcels # dlt schema_name != table name
+    freshness_sla:
+      warn_after_days: 540  # ~1.5yr — at the tolerance threshold boundary
+      error_after_days: 730 # 2yr — genuinely abandoned (annual publish, generous margin)
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name is leepa_parcels_tier2.
 
