@@ -66,12 +66,14 @@ Two load-bearing files:
             context discriminator: "project" | "outside" | (public)
        ┌──────────────────┼──────────────────────┬───────────────────┐
        ▼                  ▼                       ▼
-  PROJECT AI          OUTSIDE AI            public funnel
-  context=project     context=outside       (degenerate STATE of OUTSIDE AI)
-   • TIER-A digest     • whole-site          • WELCOME_SYSTEM cold-lead pitch
-   • isolation guard     analyst voice       • email hook
-   • TIER-B (cap 8)    • file/summarize      • NO project ctx / NO auth
-   • per-proj threads  • highlighter /r/*    • route tests BYTE-FOR-BYTE
+  PROJECT AI            OUTSIDE AI              public funnel
+  context=project       context=outside         (degenerate STATE of OUTSIDE AI)
+   • TIER-A digest       • whole-site            • WELCOME_SYSTEM cold-lead pitch
+   • isolation guard       analyst voice         • email hook
+   • TIER-B (cap 8)      • file/summarize        • NO project ctx / NO auth
+   • per-proj threads    • highlighter EVERY     • route tests BYTE-FOR-BYTE
+   • PROJECT HIGHLIGHTER    PAGE (twin of pill)
+     (Phase 2 — next)
    • OFFERS → authed
        │ offers only; never mutates
        ▼
@@ -98,7 +100,8 @@ mutations — assistant only *offers*; authed routes execute (G1's correct resol
 | Quote `freshness_token` verbatim | ✅ | ✅ | ✅ | engine |
 | **Degrade-never-throw (no user 404)** ⚠ | ✅ | ✅ | ✅ | engine — **NET-NEW (3 throw sites)** |
 | Report-dossier grounding (`/r/*`) | ✅ | ✅ | — | engine (harvested resolver) |
-| Highlighter | on /r/* | on /r/* | — | engine, behind `highlighterUiEnabled()` |
+| Highlighter (extension of the AI — twin of the pill) | Phase 2 (next) | ✅ **every page** | — | engine, root mount (`GlobalHighlighter`, `3554411d`) |
+| ↳ highlighter knows page + active project (parity w/ pill) | Phase 2 | ⚠ **NET-NEW** — `converse.ts` sends no `pageContext`/`project_id` | — | client (mirror `BriefcaseChat.getExtraBody`) |
 | **Charts in panel** ⚠ | ✅ | ✅ | — | engine — **NET-NEW (lift DockChart first)** |
 | **WEB fallback rung (#12)** ⚠ | ✅ | ✅ | ✅ | engine — **NET-NEW, shared `lib/ai/web-grounding.ts`** |
 | File this answer / chart | ✅ | ✅ | — | engine + briefcase (live on main) |
@@ -116,8 +119,30 @@ mutations — assistant only *offers*; authed routes execute (G1's correct resol
 | **Execute** schedule_send / build | ✅ | — | — | **authed route** (`/api/projects/[id]/action`) |
 | Prospect→project claim bridge | — | — | ✅ | `/api/claim` (built); arrival takeover convo = DEFERRED |
 
+**✅ marks capability OWNERSHIP (which AI the capability belongs to), NOT build status — for what is actually
+shipped see §7 + `_AUDIT_AND_ROADMAP/build-queue.md`.** A matrix full of ✅ does not mean "all built."
 ⚠ = the three things the design spec mislabels as "preserve"; they are net-new. **Nothing is orphaned** by the
 two-assistant model — every capability has exactly one home.
+
+### Highlighter: OUTSIDE vs PROJECT (the thing everyone keeps confusing)
+
+The highlighter is the **selection-triggered twin of the pill** — same engine (`/api/assistant`), same briefcase. ONE
+highlighter, TWO environments, one per AI — never two highlighters:
+
+| | **OUTSIDE highlighter** | **PROJECT highlighter** |
+|---|---|---|
+| Status | ✅ **SHIPPED** — Phase 1 (`3554411d`, root mount) | ⬜ **Phase 2 — NOT built** |
+| Lives on | every page except `/p`,`/embed`,`/login`,`/auth` | inside `/project/[id]` |
+| `context` sent | `"outside"` | `"project"` |
+| Grounds on | page / region / `/r/*` dossier | the OPEN project (digest) |
+| Files into | briefcase (`qa`, `report_id = zip ‖ "swfl"`) | the project |
+| Can EDIT deliverable? | **No** — ask / summarize / file | **Yes** — highlight → PROPOSE → CONFIRM (`/api/deliverables/[id]/edit` + 4 lints) |
+
+**Phase-2 net-new is small** — the plumbing exists (engine speaks `context:"project"`; the
+`ai-context-store`/`ProjectAiContextBridge` digest bus already feeds the root for the pill; `/api/deliverables/[id]/edit`
+already gates edits). Missing: (1) thread `context`/`projectId` through the highlighter client (`converse.ts:124` hard-codes
+`"outside"` today); (2) the propose→confirm CTA in `HighlightPopup`. **Full scope, invariants, must-keep functions, and
+open design questions: `docs/superpowers/plans/2026-06-22-universal-highlighter-phase2-PROJECT-handoff.md`** (brainstorm the UI first — RULE 3.5).
 
 ---
 

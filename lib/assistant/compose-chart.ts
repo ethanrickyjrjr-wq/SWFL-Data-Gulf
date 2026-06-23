@@ -57,7 +57,7 @@ const MAX_UPLOADS_CHARS = 20_000; // bound the uploaded-document text fed to the
 /** The user is explicitly asking us to build a chart (vs. an analytical question
  *  that may auto-chart). Only then do we pay for the compose LLM call. */
 export function wantsCustomChart(question: string): boolean {
-  return /\b(chart|plot|graph|visuali[sz]e|bar chart|line chart|pie chart|trend\s+line)\b/i.test(
+  return /\b(charts?|charting|plots?|plotting|graphs?|graphing|visuali[sz]e[sd]?|visuali[sz]ation|bar chart|line chart|pie chart|trend\s+line)\b/i.test(
     question || "",
   );
 }

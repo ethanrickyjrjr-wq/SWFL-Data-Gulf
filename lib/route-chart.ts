@@ -71,7 +71,7 @@ export function routeChart(question: string): ChartIntent | null {
     q.includes("zhvi") ||
     q.includes("home value") ||
     q.includes("valuation") ||
-    q.includes("home price")
+    q.includes("price") // bare "price"/"prices" → home-value trend (was missed; "SWFL prices" charted nothing)
   ) {
     return { chart_type: "area", scope: "zhvi" };
   }
