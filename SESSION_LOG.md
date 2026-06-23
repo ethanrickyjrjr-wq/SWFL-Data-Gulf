@@ -1,3 +1,17 @@
+## 2026-06-23 (main) — Email Lab: AI-connected design surface + project integration + PDF export
+
+**Email Lab (`/email-lab`):** standalone split-pane canvas — AI prompt → Claude Haiku fills tokens → live 600px `EmailPreviewFrame`. 10 templates, brand color pickers, fine-tune accordion. API routes: `/api/email-lab/render` (token fill) + `/api/email-lab/ai` (Haiku generates content).
+
+**Project Email Lab (`/project/[id]/email-lab`):** project-aware version — pre-loads brand colors from `projects.branding`, infers scope from items, always fetches real master brain data (ZIP-specific if available, SWFL-wide otherwise). Entry point: "Design email in Email Lab →" link in `BuildActions`.
+
+**PDF export:** `email-print.html` — same tokens as email templates, white/light background, `@page letter` + `print-color-adjust: exact`. "Export PDF" button opens print skin in new window + auto-triggers browser print dialog.
+
+**Aggregate-at-source handoff:** `docs/superpowers/plans/2026-06-23-aggregate-at-source-handoff.md` — 4 SQL candidates (macro-cbp 43K rows, fdot 4.6K, usgs, fema 86K partial) with exact target SQL, views, and migration steps.
+
+**Next:** wire "Save to project" from canvas → deliverable DB row; add Send button; wire real data directly into hero tokens on page load.
+
+---
+
 ## 2026-06-23 (main) — answer-fix-proof gate: deflection harness run + proof appended
 
 `scripts/prove-deflection.mts`: fixed Windows date (`bash -lc date` → `new Date().toISOString()`). Ran 40 Haiku calls — baseline 55% bad (raw-token leak), fixed 0/20 bad. Appended clean proof to `verification/answer-proofs.jsonl`. Push unblocked.

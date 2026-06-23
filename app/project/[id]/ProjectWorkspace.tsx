@@ -663,6 +663,7 @@ export function ProjectWorkspace({
       />
 
       <BuildActions
+        id={id}
         template={template}
         onTemplate={setTemplate}
         onBuild={() => void runBuild()}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { TemplateId } from "@/lib/deliverable/templates";
 
 const DELIVERABLE_TEMPLATE_OPTIONS: { id: TemplateId; label: string }[] = [
@@ -12,6 +13,7 @@ const DELIVERABLE_TEMPLATE_OPTIONS: { id: TemplateId; label: string }[] = [
 
 /** Template select + Build. State owned by the orchestrator. */
 export function BuildActions({
+  id,
   template,
   onTemplate,
   onBuild,
@@ -19,6 +21,7 @@ export function BuildActions({
   buildError,
   itemCount,
 }: {
+  id: string;
   template: TemplateId;
   onTemplate: (t: TemplateId) => void;
   onBuild: () => void;
@@ -58,6 +61,12 @@ export function BuildActions({
         </p>
       )}
       {buildError && <p className="text-xs text-red-400">{buildError}</p>}
+      <Link
+        href={`/project/${id}/email-lab`}
+        className="self-start text-xs text-white/40 hover:text-[#1BB8C9] transition-colors mt-1"
+      >
+        Design email in Email Lab →
+      </Link>
     </div>
   );
 }
