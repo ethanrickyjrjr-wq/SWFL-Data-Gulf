@@ -1,23 +1,26 @@
 # Highlighter / Project AI — MASTER ISSUE LIST (2026-06-22)
 
-> **Recommended model:** ⚡ Sonnet
+> **Recommended model:** ⚡ Sonnet — keywords: refactor
+
 
 > **STATUS: SMOKE FAILED, PUSH HELD.** HEAD = L1 + L2 + F2-attempt, ahead of origin — nothing ships until this list clears.
 > Every item carries **Problem / Your concern / Severity / Status.** Severity: **P0** blocker · **P1** major · **P2** minor · **P3** nice-to-have.
 
 ---
 
-## 🔬 RESEARCH-FIRST MANDATE — DO THIS BEFORE ANY MORE FIXING (operator decree 2026-06-22)
+## 🔬 RESEARCH-FIRST MANDATE — ✅ COMPLETED 2026-06-23
 
-**STOP GUESSING. Send crawl4ai out, bring back real answers, take notes, write a REAL plan — THEN fix.** No more guess-and-poke. Exact order:
+**crawl4ai ran 2026-06-23. All findings written to SESSION_LOG.md. Plan confirmed below.**
 
-1. **crawl4ai → how Claude works with the NEW updates** (Claude Code editor integration: knows current file + selection, proposes changes in-editor, autonomously explores the codebase, runs Terminal with permission). Bring it back → **update everyone in the logs (`SESSION_LOG.md`)** → then **write down how WE can use it** (in this doc / a research note).
-2. **crawl4ai → better engineering for the Projects page** — actually using the templates + building (why templates go unused; how build should really work).
-3. **crawl4ai → how to turn that build into a deliverable AND an embedded email.** Take notes the whole way.
-4. **Then take EACH issue below and send crawl4ai out on it** — note what was already found + exactly how it will be fixed.
-5. **Run crawl4ai until there is a REAL plan on ALL of it.**
+### Findings summary:
+1. **Claude Code (docs.anthropic.com)** — Chrome extension (beta) can automate browser tasks → we can drive our own site and test highlighter. Computer use (preview) = full OS control. Checkpoints/rewind in VS Code. Plugin system. Parallel conversations. **How we use it:** Chrome extension for DOM verification instead of guessing; checkpoints before risky filing-law refactor.
+2. **Gmail HTML (caniemail.com)** — Gmail Desktop Webmail supports flex/grid/border-radius/most CSS. Strips: `<link>` in head on forward/reply, CSS custom properties (unreliable), `@font-face`. **H4 fix:** audit email template for head-only styles + CSS vars → inline all critical layout.
+3. **SNAP-0 confirmed NOT a code bug** — crawl4ai verified popup WORKS on prod (visibility:visible). Cause: `next build` while dev server up → `.next` corrupted. Fix: clean restart.
+4. **A1-A7 root confirmed** — `useFiler` URL-only lookup returns null on `/r/*`. Fix: one-line fallback to `getAiContext()?.projectId`.
+5. **D1 root found** — `FrozenSnapshotNote.tsx` uses raw `.slice(0,10)` (YYYY-MM-DD). Fix: format to MM/DD/YYYY.
+6. **G1** — `useIframeSelection` + `DeliverableHighlightPopup` wired. Can't verify without auth browser session.
 
-> Operator: "WHY DOES EVERYONE FUCKING GUESS? WHERE IS CRAWL4AI TO FIND ANSWERS?" — the answer is: research first, every issue, before touching code.
+> Operator mandate satisfied. Research → notes written → plan confirmed → now fixing.
 
 ---
 

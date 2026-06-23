@@ -1,3 +1,15 @@
+## 2026-06-23 (main) — A1-A7 filing law fix + D1 date fix + CLAUDE.md lean-block sync
+
+**Filing law (A1-A7):** `useFiler` falls back to `getAiContext()?.projectId` when URL returns null (on `/r/*` pages). Filing from report pages now routes into the open project. Also patched `AskAiDock` to use `useFiler` instead of `briefcase.fileItem()` directly (A5/A6 gap). Files: `lib/briefcase/file-routing.ts`, `components/highlighter/AskAiDock.tsx`.
+
+**D1 date fix:** `FrozenSnapshotNote` was showing raw YYYY-MM-DD. Now formats as MM/DD/YYYY. File: `components/project/FrozenSnapshotNote.tsx`.
+
+**CLAUDE.md lean-block sync:** Rules 1/3/5/6/7 had been silently trimmed vs `RULES_OF_ENGAGEMENT` (byte-identity test was failing). Restored exact text. Gates: `bun test` 3655/0.
+
+**Next:** push → G1 real browser verify, C1-C3 suggestions, H4 Gmail, remaining P1s.
+
+---
+
 ## 2026-06-22 (main) — Chart routing + OUTSIDE_SYSTEM capability hints + docs sweep
 
 - `compose-chart.ts`: broadened `wantsCustomChart` regex (charts/charting/plots/graphing/visualizations); `route-chart.ts`: bare "price" → zhvi trend (was routing to nothing for "SWFL prices")

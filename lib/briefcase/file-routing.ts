@@ -6,6 +6,7 @@ import type { ProjectItem } from "@/lib/project/items";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
 import { dispatchAddItem } from "@/lib/project/add-item-event";
+import { getAiContext } from "@/lib/project/ai-context-store";
 
 /**
  * F2 — where a filed item LANDS. Inside an open project, file straight into THAT project
@@ -42,7 +43,11 @@ export function routeFiledItem(
  */
 export function useFiler(): { file: (item: ProjectItem) => FileTarget; projectId: string | null } {
   const pathname = usePathname();
-  const projectId = projectIdFromPath(pathname ?? "/");
+  const urlProjectId = projectIdFromPath(pathname ?? "/");
+  // On /r/* report pages the URL has no project id, but a project can be active in the
+  // module-level store (set by ProjectAiContextBridge on navigation). Fall back to it so
+  // filing from a report page lands in the open project, not the anonymous tray.
+  const projectId = urlProjectId ?? getAiContext()?.projectId ?? null;
   const briefcase = useBriefcase();
   const file = useCallback(
     (item: ProjectItem): FileTarget =>

@@ -11,7 +11,7 @@ import {
   type DockGeom,
 } from "@/lib/highlighter/dock-geom";
 import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
-import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
+import { useFiler } from "@/lib/briefcase/file-routing";
 import { buildQaItem } from "@/lib/briefcase/qa-item";
 import { DockChart } from "./DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
@@ -73,7 +73,7 @@ export function AskAiDock({
   // one continuous conversation per report. When no provider is in the tree
   // (dock mounted standalone), fall back to a local thread so it never crashes.
   const ctx = useHighlighterContext();
-  const briefcase = useBriefcase();
+  const { file } = useFiler();
   const [localThread, setLocalThread] = useState<ChatEntry[]>([]);
   const thread = ctx ? ctx.thread(reportId) : localThread;
   const archive = (entry: ChatEntry) =>
@@ -234,7 +234,7 @@ export function AskAiDock({
       });
       if (!res.ok) throw new Error("save failed");
       const { id } = (await res.json()) as { id: string };
-      briefcase?.fileItem({
+      file({
         id: crypto.randomUUID(),
         added_at: new Date().toISOString(),
         origin: "web",
@@ -254,7 +254,7 @@ export function AskAiDock({
   // answer as a `qa` item (same builder, so both surfaces produce identical items).
   function fileAnswer() {
     if (!answer) return;
-    briefcase?.fileItem(
+    file(
       buildQaItem({
         report_id: reportId,
         question: activeQuestion,
