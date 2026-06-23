@@ -42,7 +42,28 @@ export type TokenKey =
   | "STAT3_LABEL"
   | "SIGNAL_KICKER"
   | "SIGNAL_TITLE"
-  | "SIGNAL_BODY";
+  | "SIGNAL_BODY"
+  // ── real-estate / agent tokens (filled by fine-tune or AI) ──
+  | "PROPERTY_PHOTO_URL"
+  | "PROPERTY_ADDRESS"
+  | "PROPERTY_PRICE"
+  | "PROPERTY_BEDS"
+  | "PROPERTY_BATHS"
+  | "PROPERTY_SQFT"
+  | "PROPERTY_TYPE"
+  | "AGENT_PHOTO_URL"
+  | "AGENT_NAME"
+  | "AGENT_TITLE"
+  | "AGENT_BIO"
+  | "NEIGHBORHOOD_PHOTO_URL"
+  | "NEIGHBORHOOD_NAME"
+  | "EVENT_DATE"
+  | "EVENT_TIME"
+  | "CTA_URL"
+  | "CTA_LABEL"
+  | "PRICE_FROM"
+  | "PRICE_TO"
+  | "REDUCE_PCT";
 
 // PRIMARY/ACCENT/LOGO_URL derive from SWFL_THEME — never hardcoded.
 export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
@@ -84,6 +105,28 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   SIGNAL_KICKER: "Signal to Watch",
   SIGNAL_TITLE: "This week in Southwest Florida",
   SIGNAL_BODY: "From this week's Southwest Florida city pulse.",
+  // real-estate / agent defaults
+  PROPERTY_PHOTO_URL: "",
+  PROPERTY_ADDRESS: "123 Gulf Shore Blvd, Naples, FL 34102",
+  PROPERTY_PRICE: "$850,000",
+  PROPERTY_BEDS: "4",
+  PROPERTY_BATHS: "3",
+  PROPERTY_SQFT: "2,850",
+  PROPERTY_TYPE: "Single Family",
+  AGENT_PHOTO_URL: "",
+  AGENT_NAME: "Your Name",
+  AGENT_TITLE: "Licensed Real Estate Agent",
+  AGENT_BIO:
+    "Helping buyers and sellers navigate Southwest Florida real estate with local expertise and market intelligence.",
+  NEIGHBORHOOD_PHOTO_URL: "",
+  NEIGHBORHOOD_NAME: "Naples Park",
+  EVENT_DATE: "Saturday, July 12",
+  EVENT_TIME: "12:00 PM – 3:00 PM",
+  CTA_URL: "https://www.swfldatagulf.com",
+  CTA_LABEL: "View Listing",
+  PRICE_FROM: "$925,000",
+  PRICE_TO: "$850,000",
+  REDUCE_PCT: "8.1%",
 };
 
 export type TemplateTokens = Partial<Record<TokenKey, string>>;

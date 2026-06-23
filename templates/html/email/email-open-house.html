@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open House — {{PROPERTY_ADDRESS}}</title>
+</head>
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
+  <tr>
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+
+        <!-- ━━━━ MASTHEAD ━━━━ -->
+        <tr>
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
+                </td>
+                <td align="right" valign="middle">
+                  <span style="display:inline-block;background-color:{{ACCENT}};color:#0f1d24;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;padding:4px 10px;border-radius:4px;">OPEN HOUSE</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ PROPERTY PHOTO ━━━━ -->
+        <tr>
+          <td style="padding:0;line-height:0;font-size:0;">
+            <img src="{{PROPERTY_PHOTO_URL}}" alt="{{PROPERTY_ADDRESS}}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+          </td>
+        </tr>
+
+        <!-- ━━━━ DATE + TIME HERO ━━━━ -->
+        <tr>
+          <td align="center" style="padding:36px 32px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">YOU'RE INVITED</p>
+            <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:42px;font-weight:900;color:{{TEXT_PRIMARY}};line-height:1.1;letter-spacing:-1px;">{{EVENT_DATE}}</p>
+            <p style="margin:0 0 16px 0;font-family:{{FONT_FAMILY}};font-size:22px;font-weight:700;color:{{ACCENT}};">{{EVENT_TIME}}</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_PRIMARY}};opacity:0.75;">{{PROPERTY_ADDRESS}}</p>
+          </td>
+        </tr>
+
+        <!-- ━━━━ SPECS: price / beds / baths / sqft ━━━━ -->
+        <tr>
+          <td style="padding:0;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="150" align="center" style="padding:18px 8px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 3px 0;font-family:{{FONT_FAMILY}};font-size:18px;font-weight:800;color:{{ACCENT}};letter-spacing:-0.3px;">{{PROPERTY_PRICE}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:9px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">List Price</p>
+                </td>
+                <td width="150" align="center" style="padding:18px 8px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 3px 0;font-family:{{FONT_FAMILY}};font-size:22px;font-weight:800;color:{{TEXT_PRIMARY}};">{{PROPERTY_BEDS}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:9px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">Beds</p>
+                </td>
+                <td width="150" align="center" style="padding:18px 8px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 3px 0;font-family:{{FONT_FAMILY}};font-size:22px;font-weight:800;color:{{TEXT_PRIMARY}};">{{PROPERTY_BATHS}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:9px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">Baths</p>
+                </td>
+                <td width="150" align="center" style="padding:18px 8px;">
+                  <p style="margin:0 0 3px 0;font-family:{{FONT_FAMILY}};font-size:22px;font-weight:800;color:{{TEXT_PRIMARY}};">{{PROPERTY_SQFT}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:9px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">Sq Ft</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ DESCRIPTION ━━━━ -->
+        <tr>
+          <td style="padding:28px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:15px;line-height:1.70;color:{{TEXT_PRIMARY}};">{{HERO_PROSE}}</p>
+          </td>
+        </tr>
+
+        <!-- ━━━━ CTA + AGENT ━━━━ -->
+        <tr>
+          <td style="padding:28px 32px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td valign="middle">
+                  <a href="{{CTA_URL}}" style="display:inline-block;background-color:{{ACCENT}};color:#0f1d24;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:800;text-decoration:none;padding:12px 28px;border-radius:{{BORDER_RADIUS}};">{{CTA_LABEL}}</a>
+                </td>
+                <td align="right" valign="middle">
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td align="right" valign="middle" style="padding-right:12px;">
+                        <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{TEXT_PRIMARY}};text-align:right;">{{AGENT_NAME}}</p>
+                        <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};text-align:right;">{{CONTACT_PHONE}}</p>
+                      </td>
+                      <td valign="middle">
+                        <img src="{{AGENT_PHOTO_URL}}" alt="{{AGENT_NAME}}" width="48" height="48" style="display:block;border-radius:50%;border:2px solid {{ACCENT}};width:48px;height:48px;object-fit:cover;" />
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

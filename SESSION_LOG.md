@@ -1,3 +1,22 @@
+## 2026-06-23 (main) — Email Lab: 7 professional templates + token system
+
+**Templates added** (all in `templates/html/email/`):
+- `email-listing.html` — new listing spotlight: full-width property photo, price hero, beds/baths/sqft strip, agent card + CTA
+- `email-just-sold.html` — sold announcement: MANGROVE sold price, comp stats, agent signature
+- `email-agent-intro.html` — agent bio: 110px circular headshot, career stats, centered CTA
+- `email-open-house.html` — invite: date/time hero, 4-col spec strip, agent row
+- `email-neighborhood.html` — neighborhood spotlight: aerial photo, market stats, signal callout
+- `email-price-drop.html` — price alert: strikethrough old price → MANGROVE new price, CORAL badge
+- `email-market-snapshot.html` — data-only 2×2 KPI grid, no photo
+
+**Token system** (`lib/email/templates/token-defaults.ts`): added `CONTACT_PHONE` + 20 real-estate tokens (`PROPERTY_*`, `AGENT_*`, `NEIGHBORHOOD_*`, `EVENT_*`, `CTA_*`, `PRICE_FROM/TO`, `REDUCE_PCT`).
+
+**Both Email Lab clients** updated: 17-template TEMPLATES array (4 sections), full DEFAULTS, 3 new fine-tune groups (Property, Agent, Event/Price).
+
+**Next:** push once off proxy; apply 5 SQL aggregate views via Supabase Dashboard.
+
+---
+
 ## 2026-06-23 (main) — Aggregate-at-source: 4 sources rewritten + 5 SQL views
 
 **Plan:** `docs/superpowers/plans/2026-06-23-aggregate-at-source-handoff.md`

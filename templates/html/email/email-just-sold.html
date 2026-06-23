@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Sold — {{COMPANY_NAME}}</title>
+</head>
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
+  <tr>
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+
+        <!-- ━━━━ MASTHEAD ━━━━ -->
+        <tr>
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
+                </td>
+                <td align="right" valign="middle">
+                  <span style="display:inline-block;background-color:{{MANGROVE}};color:#0f1d24;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;padding:4px 10px;border-radius:4px;">JUST SOLD</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ PROPERTY PHOTO ━━━━ -->
+        <tr>
+          <td style="padding:0;line-height:0;font-size:0;">
+            <img src="{{PROPERTY_PHOTO_URL}}" alt="{{PROPERTY_ADDRESS}}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+          </td>
+        </tr>
+
+        <!-- ━━━━ SOLD PRICE ━━━━ -->
+        <tr>
+          <td style="padding:32px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{MANGROVE}};text-transform:uppercase;letter-spacing:2.5px;">SOLD FOR</p>
+            <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:52px;font-weight:900;color:{{MANGROVE}};line-height:1;letter-spacing:-2px;">{{PROPERTY_PRICE}}</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:14px;color:{{TEXT_PRIMARY}};opacity:0.75;">{{PROPERTY_ADDRESS}}</p>
+          </td>
+        </tr>
+
+        <!-- ━━━━ COMP STATS ━━━━ -->
+        <tr>
+          <td style="padding:0;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="200" align="center" style="padding:22px 16px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:24px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.3px;">{{STAT1_VALUE}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{STAT1_LABEL}}</p>
+                </td>
+                <td width="200" align="center" style="padding:22px 16px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:24px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.3px;">{{STAT2_VALUE}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{STAT2_LABEL}}</p>
+                </td>
+                <td width="200" align="center" style="padding:22px 16px;">
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:24px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.3px;">{{STAT3_VALUE}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{STAT3_LABEL}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ NARRATIVE ━━━━ -->
+        <tr>
+          <td style="padding:28px 32px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:15px;line-height:1.70;color:{{TEXT_PRIMARY}};">{{HERO_PROSE}}</p>
+          </td>
+        </tr>
+
+        <!-- ━━━━ AGENT SIGNATURE ━━━━ -->
+        <tr>
+          <td style="padding:24px 32px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="68" valign="middle" style="padding-right:16px;">
+                  <img src="{{AGENT_PHOTO_URL}}" alt="{{AGENT_NAME}}" width="56" height="56" style="display:block;border-radius:50%;border:2px solid {{MANGROVE}};width:56px;height:56px;object-fit:cover;" />
+                </td>
+                <td valign="middle">
+                  <p style="margin:0 0 2px 0;font-family:{{FONT_FAMILY}};font-size:14px;font-weight:700;color:{{TEXT_PRIMARY}};">{{AGENT_NAME}}</p>
+                  <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:11px;color:{{TEXT_DIM}};">{{AGENT_TITLE}}</p>
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;">{{CONTACT_EMAIL}}</a>
+                </td>
+                <td align="right" valign="middle">
+                  <a href="{{CTA_URL}}" style="display:inline-block;background-color:{{ACCENT}};color:#0f1d24;font-family:{{FONT_FAMILY}};font-size:12px;font-weight:800;text-decoration:none;padding:10px 20px;border-radius:{{BORDER_RADIUS}};">{{CTA_LABEL}}</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

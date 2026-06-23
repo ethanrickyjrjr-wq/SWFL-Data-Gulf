@@ -5,13 +5,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { EmailPreviewFrame } from "@/app/p/[id]/EmailPreviewFrame";
 
 const TEMPLATES = [
+  // ── Property / Listing
+  { id: "email/email-listing", label: "New Listing", icon: "🏠" },
+  { id: "email/email-just-sold", label: "Just Sold", icon: "✅" },
+  { id: "email/email-open-house", label: "Open House", icon: "🔑" },
+  { id: "email/email-price-drop", label: "Price Drop", icon: "📉" },
+  // ── Agent / Brand
+  { id: "email/email-agent-intro", label: "Agent Intro", icon: "👤" },
+  // ── Neighborhood / Market
+  { id: "email/email-neighborhood", label: "Neighborhood", icon: "📍" },
+  // ── Market Data
   { id: "email/email-hero", label: "Hero Digest", icon: "⚡" },
+  { id: "email/email-market-snapshot", label: "Snapshot", icon: "📊" },
   { id: "email/email-report", label: "Full Report", icon: "📋" },
   { id: "email/email-hbar", label: "Bar Chart", icon: "📊" },
   { id: "email/email-ranked", label: "Ranked List", icon: "🏆" },
   { id: "email/email-table", label: "Data Table", icon: "📈" },
   { id: "email/email-compare", label: "Compare", icon: "↔" },
   { id: "email/email-outreach", label: "Outreach", icon: "✉" },
+  // ── Shells
   { id: "email/shell-two-col", label: "Two Column", icon: "⊞" },
   { id: "email/shell-single", label: "Single", icon: "▤" },
   { id: "email/shell-alert", label: "Alert", icon: "🔔" },
@@ -26,6 +38,7 @@ const BASE_DEFAULTS: Tokens = {
   TAGLINE: "Southwest Florida Intelligence",
   WEBSITE_URL: "https://www.swfldatagulf.com",
   CONTACT_EMAIL: "hello@swfldatagulf.com",
+  CONTACT_PHONE: "(239) 555-5555",
   HERO_KICKER: "Market Spotlight",
   HERO_VALUE: "—",
   HERO_LABEL: "Southwest Florida",
@@ -39,6 +52,28 @@ const BASE_DEFAULTS: Tokens = {
   SIGNAL_KICKER: "Signal to Watch",
   SIGNAL_TITLE: "This week in Southwest Florida",
   SIGNAL_BODY: "Use Generate with AI to pull real data for this project scope.",
+  // property / agent / listing
+  PROPERTY_PHOTO_URL: "",
+  PROPERTY_ADDRESS: "123 Gulf Shore Blvd, Naples, FL 34102",
+  PROPERTY_PRICE: "$850,000",
+  PROPERTY_BEDS: "4",
+  PROPERTY_BATHS: "3",
+  PROPERTY_SQFT: "2,850",
+  PROPERTY_TYPE: "Single Family",
+  AGENT_PHOTO_URL: "",
+  AGENT_NAME: "Your Name",
+  AGENT_TITLE: "Licensed Real Estate Agent",
+  AGENT_BIO:
+    "Helping buyers and sellers navigate Southwest Florida real estate with local expertise and market intelligence.",
+  NEIGHBORHOOD_PHOTO_URL: "",
+  NEIGHBORHOOD_NAME: "Naples Park",
+  EVENT_DATE: "Saturday, July 12",
+  EVENT_TIME: "12:00 PM – 3:00 PM",
+  CTA_URL: "https://www.swfldatagulf.com",
+  CTA_LABEL: "View Listing",
+  PRICE_FROM: "$925,000",
+  PRICE_TO: "$850,000",
+  REDUCE_PCT: "8.1%",
 };
 
 const FINE_TUNE_GROUPS = [
@@ -76,6 +111,41 @@ const FINE_TUNE_GROUPS = [
     fields: [
       { key: "SIGNAL_TITLE", label: "Title", type: "text" },
       { key: "SIGNAL_BODY", label: "Body", type: "textarea" },
+    ],
+  },
+  {
+    label: "Property",
+    fields: [
+      { key: "PROPERTY_PHOTO_URL", label: "Photo URL", type: "text" },
+      { key: "PROPERTY_ADDRESS", label: "Address", type: "text" },
+      { key: "PROPERTY_PRICE", label: "Price", type: "text" },
+      { key: "PROPERTY_BEDS", label: "Beds", type: "text" },
+      { key: "PROPERTY_BATHS", label: "Baths", type: "text" },
+      { key: "PROPERTY_SQFT", label: "Sq Ft", type: "text" },
+      { key: "PROPERTY_TYPE", label: "Type", type: "text" },
+    ],
+  },
+  {
+    label: "Agent",
+    fields: [
+      { key: "AGENT_PHOTO_URL", label: "Headshot URL", type: "text" },
+      { key: "AGENT_NAME", label: "Name", type: "text" },
+      { key: "AGENT_TITLE", label: "Title", type: "text" },
+      { key: "AGENT_BIO", label: "Bio", type: "textarea" },
+      { key: "CTA_URL", label: "CTA URL", type: "text" },
+      { key: "CTA_LABEL", label: "CTA Label", type: "text" },
+    ],
+  },
+  {
+    label: "Event / Price",
+    fields: [
+      { key: "EVENT_DATE", label: "Date", type: "text" },
+      { key: "EVENT_TIME", label: "Time", type: "text" },
+      { key: "PRICE_FROM", label: "Original Price", type: "text" },
+      { key: "PRICE_TO", label: "Reduced Price", type: "text" },
+      { key: "REDUCE_PCT", label: "Reduction %", type: "text" },
+      { key: "NEIGHBORHOOD_PHOTO_URL", label: "Neighborhood Photo", type: "text" },
+      { key: "NEIGHBORHOOD_NAME", label: "Neighborhood", type: "text" },
     ],
   },
 ];
@@ -208,21 +278,13 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
             <p className="text-[10px] uppercase tracking-[0.15em] text-[#1BB8C9] mb-2 font-medium">
               AI Generate
             </p>
-            <p className="text-[10px] text-white/30 mb-2 leading-relaxed">
-              Pulling real data for <span className="text-white/50">{scopeLabel}</span> — just
-              describe the email.
-            </p>
             <textarea
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleAiGenerate();
               }}
-              placeholder={
-                scope
-                  ? `e.g. Weekly digest for ${scopeLabel} — show price trend and DOM…`
-                  : "e.g. Weekly digest for Cape Coral agents — show inventory drop…"
-              }
+              placeholder={`e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`}
               rows={4}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 resize-none focus:outline-none focus:ring-1 focus:ring-[#1BB8C9] focus:border-[#1BB8C9]/50 transition-colors"
             />
@@ -234,7 +296,7 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
               {aiLoading ? (
                 <>
                   <span className="inline-block w-3.5 h-3.5 border-2 border-[#070f14]/30 border-t-[#070f14] rounded-full animate-spin" />
-                  Fetching real data…
+                  Generating…
                 </>
               ) : (
                 "Generate with AI"
@@ -285,11 +347,14 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
                   >
                     <span className="text-xs font-medium text-white/60">{group.label}</span>
                     <span
-                      className={`text-white/30 text-xs transition-transform ${openGroup === group.label ? "rotate-180" : ""}`}
+                      className={`text-white/30 text-xs transition-transform ${
+                        openGroup === group.label ? "rotate-180" : ""
+                      }`}
                     >
                       ▾
                     </span>
                   </button>
+
                   {openGroup === group.label && (
                     <div className="px-3 pt-2 pb-3 space-y-2.5 bg-white/2">
                       {group.fields.map((f) => (
@@ -349,13 +414,14 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
 
       {/* ══════════ CANVAS ══════════ */}
       <main className="flex flex-col overflow-hidden bg-[#0d1920]">
+        {/* Canvas toolbar */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-white/8 shrink-0">
           <div className="flex items-center gap-3">
             <div
               className={`w-2 h-2 rounded-full ${rendering || aiLoading ? "bg-[#1BB8C9] animate-pulse" : "bg-white/20"}`}
             />
             <span className="text-xs text-white/35">
-              {aiLoading ? "Fetching real data…" : rendering ? "Rendering…" : "600px email canvas"}
+              {aiLoading ? "AI generating…" : rendering ? "Rendering…" : "600px email canvas"}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -376,6 +442,7 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
           </div>
         </div>
 
+        {/* Canvas area */}
         <div className="flex-1 overflow-y-auto px-8 py-8">
           <div className="max-w-[660px] mx-auto">
             {html ? (
@@ -384,9 +451,7 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
               <div className="h-96 rounded-xl border border-white/8 flex flex-col items-center justify-center gap-3">
                 <div className="text-2xl opacity-20">✉</div>
                 <p className="text-sm text-white/25">
-                  {scope
-                    ? `Describe the email — real data for ${scopeLabel} is ready`
-                    : "Pick a template to preview"}
+                  Describe your email above, or pick a template to preview
                 </p>
               </div>
             )}

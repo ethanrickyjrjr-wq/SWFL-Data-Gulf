@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Snapshot — {{COMPANY_NAME}}</title>
+</head>
+<body style="margin:0;padding:0;background-color:{{PRIMARY}};font-family:{{FONT_FAMILY}};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:{{PRIMARY}};">
+  <tr>
+    <td align="center" style="padding:0;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+
+        <!-- ━━━━ MASTHEAD ━━━━ -->
+        <tr>
+          <td style="padding:24px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td valign="middle">
+                  <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" height="26" style="display:block;border:0;max-height:26px;" />
+                  <p style="margin:4px 0 0 0;font-family:{{FONT_FAMILY}};font-size:15px;font-weight:800;color:{{TEXT_PRIMARY}};letter-spacing:-0.4px;">{{COMPANY_NAME}}</p>
+                </td>
+                <td align="right" valign="middle">
+                  <span style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.2px;">{{TAGLINE}}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ HEADER ━━━━ -->
+        <tr>
+          <td style="padding:36px 32px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <p style="margin:0 0 4px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">{{HERO_KICKER}}</p>
+            <p style="margin:0 0 16px 0;font-family:{{FONT_FAMILY}};font-size:32px;font-weight:900;color:{{TEXT_PRIMARY}};letter-spacing:-0.8px;">{{HERO_LABEL}}</p>
+            <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:15px;line-height:1.70;color:{{TEXT_PRIMARY}};">{{HERO_PROSE}}</p>
+          </td>
+        </tr>
+
+        <!-- ━━━━ 2×2 KPI GRID ━━━━ -->
+        <tr>
+          <td style="padding:0;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="300" valign="top" style="padding:30px 32px 28px;border-right:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.5px;">{{HERO_LABEL}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:44px;font-weight:900;color:{{ACCENT}};letter-spacing:-1.5px;line-height:1;">{{HERO_VALUE}}</p>
+                </td>
+                <td width="300" valign="top" style="padding:30px 32px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.5px;">{{STAT1_LABEL}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:44px;font-weight:900;color:{{TEXT_PRIMARY}};letter-spacing:-1.5px;line-height:1;">{{STAT1_VALUE}}</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="300" valign="top" style="padding:30px 32px 28px;border-right:1px solid rgba(255,255,255,0.08);">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.5px;">{{STAT2_LABEL}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:44px;font-weight:900;color:{{TEXT_PRIMARY}};letter-spacing:-1.5px;line-height:1;">{{STAT2_VALUE}}</p>
+                </td>
+                <td width="300" valign="top" style="padding:30px 32px 28px;">
+                  <p style="margin:0 0 6px 0;font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};text-transform:uppercase;letter-spacing:1.5px;">{{STAT3_LABEL}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:44px;font-weight:900;color:{{ACCENT}};letter-spacing:-1.5px;line-height:1;">{{STAT3_VALUE}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ SIGNAL ━━━━ -->
+        <tr>
+          <td style="padding:28px 32px 32px;">
+            <p style="margin:0 0 14px 0;font-family:{{FONT_FAMILY}};font-size:10px;font-weight:700;color:{{ACCENT}};text-transform:uppercase;letter-spacing:2.5px;">{{SIGNAL_KICKER}}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="4" style="background-color:{{ACCENT}};border-radius:2px 0 0 2px;font-size:0;line-height:0;">&nbsp;</td>
+                <td style="background-color:rgba(255,255,255,0.07);padding:20px 22px;border-radius:0 6px 6px 0;">
+                  <p style="margin:0 0 8px 0;font-family:{{FONT_FAMILY}};font-size:13px;font-weight:700;color:{{MANGROVE}};">{{SIGNAL_TITLE}}</p>
+                  <p style="margin:0;font-family:{{FONT_FAMILY}};font-size:13px;line-height:1.65;color:{{TEXT_PRIMARY}};opacity:0.9;">{{SIGNAL_BODY}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ━━━━ FOOTER ━━━━ -->
+        <tr>
+          <td style="padding:16px 32px 24px;border-top:1px solid rgba(255,255,255,0.10);">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td colspan="2" style="padding:0 0 10px 0;">
+                  <a href="mailto:{{CONTACT_EMAIL}}" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{ACCENT}};text-decoration:none;font-weight:700;">{{CONTACT_EMAIL}}</a>
+                  <span style="color:{{TEXT_DIM}};">&nbsp;&middot;&nbsp;</span>
+                  <a href="tel:{{CONTACT_PHONE}}" style="font-family:{{FONT_FAMILY}};font-size:12px;color:{{TEXT_DIM}};text-decoration:none;">{{CONTACT_PHONE}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:{{FONT_FAMILY}};font-size:10px;color:{{TEXT_DIM}};line-height:1.5;">{{DISCLAIMER}}</td>
+                <td align="right" valign="top"><a href="{{WEBSITE_URL}}" style="font-family:{{FONT_FAMILY}};font-size:11px;color:{{ACCENT}};text-decoration:none;font-weight:600;">{{WEBSITE_URL}}</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

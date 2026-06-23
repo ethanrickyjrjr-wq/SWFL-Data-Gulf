@@ -5,13 +5,25 @@ import { EmailPreviewFrame } from "@/app/p/[id]/EmailPreviewFrame";
 
 // ── Templates ──────────────────────────────────────────────────────────────
 const TEMPLATES = [
+  // ── Property / Listing
+  { id: "email/email-listing", label: "New Listing", icon: "🏠" },
+  { id: "email/email-just-sold", label: "Just Sold", icon: "✅" },
+  { id: "email/email-open-house", label: "Open House", icon: "🔑" },
+  { id: "email/email-price-drop", label: "Price Drop", icon: "📉" },
+  // ── Agent / Brand
+  { id: "email/email-agent-intro", label: "Agent Intro", icon: "👤" },
+  // ── Neighborhood / Market
+  { id: "email/email-neighborhood", label: "Neighborhood", icon: "📍" },
+  // ── Market Data
   { id: "email/email-hero", label: "Hero Digest", icon: "⚡" },
+  { id: "email/email-market-snapshot", label: "Snapshot", icon: "📊" },
   { id: "email/email-report", label: "Full Report", icon: "📋" },
   { id: "email/email-hbar", label: "Bar Chart", icon: "📊" },
   { id: "email/email-ranked", label: "Ranked List", icon: "🏆" },
   { id: "email/email-table", label: "Data Table", icon: "📈" },
   { id: "email/email-compare", label: "Compare", icon: "↔" },
   { id: "email/email-outreach", label: "Outreach", icon: "✉" },
+  // ── Shells
   { id: "email/shell-two-col", label: "Two Column", icon: "⊞" },
   { id: "email/shell-single", label: "Single", icon: "▤" },
   { id: "email/shell-alert", label: "Alert", icon: "🔔" },
@@ -27,6 +39,7 @@ const DEFAULTS: Tokens = {
   TAGLINE: "Southwest Florida Intelligence",
   WEBSITE_URL: "https://www.swfldatagulf.com",
   CONTACT_EMAIL: "hello@swfldatagulf.com",
+  CONTACT_PHONE: "(239) 555-5555",
   HERO_KICKER: "Market Spotlight",
   HERO_VALUE: "$485K",
   HERO_LABEL: "Median Sale Price · Lee County",
@@ -42,6 +55,28 @@ const DEFAULTS: Tokens = {
   SIGNAL_TITLE: "Cape Coral permits up 18% MoM",
   SIGNAL_BODY:
     "Single-family permit filings in Cape Coral accelerated in June, the highest monthly count since Q3 2023. Suggests builder confidence is returning to the 33914 corridor.",
+  // property / agent / listing
+  PROPERTY_PHOTO_URL: "",
+  PROPERTY_ADDRESS: "123 Gulf Shore Blvd, Naples, FL 34102",
+  PROPERTY_PRICE: "$850,000",
+  PROPERTY_BEDS: "4",
+  PROPERTY_BATHS: "3",
+  PROPERTY_SQFT: "2,850",
+  PROPERTY_TYPE: "Single Family",
+  AGENT_PHOTO_URL: "",
+  AGENT_NAME: "Your Name",
+  AGENT_TITLE: "Licensed Real Estate Agent",
+  AGENT_BIO:
+    "Helping buyers and sellers navigate Southwest Florida real estate with local expertise and market intelligence.",
+  NEIGHBORHOOD_PHOTO_URL: "",
+  NEIGHBORHOOD_NAME: "Naples Park",
+  EVENT_DATE: "Saturday, July 12",
+  EVENT_TIME: "12:00 PM – 3:00 PM",
+  CTA_URL: "https://www.swfldatagulf.com",
+  CTA_LABEL: "View Listing",
+  PRICE_FROM: "$925,000",
+  PRICE_TO: "$850,000",
+  REDUCE_PCT: "8.1%",
 };
 
 const FINE_TUNE_GROUPS = [
@@ -79,6 +114,41 @@ const FINE_TUNE_GROUPS = [
     fields: [
       { key: "SIGNAL_TITLE", label: "Title", type: "text" },
       { key: "SIGNAL_BODY", label: "Body", type: "textarea" },
+    ],
+  },
+  {
+    label: "Property",
+    fields: [
+      { key: "PROPERTY_PHOTO_URL", label: "Photo URL", type: "text" },
+      { key: "PROPERTY_ADDRESS", label: "Address", type: "text" },
+      { key: "PROPERTY_PRICE", label: "Price", type: "text" },
+      { key: "PROPERTY_BEDS", label: "Beds", type: "text" },
+      { key: "PROPERTY_BATHS", label: "Baths", type: "text" },
+      { key: "PROPERTY_SQFT", label: "Sq Ft", type: "text" },
+      { key: "PROPERTY_TYPE", label: "Type", type: "text" },
+    ],
+  },
+  {
+    label: "Agent",
+    fields: [
+      { key: "AGENT_PHOTO_URL", label: "Headshot URL", type: "text" },
+      { key: "AGENT_NAME", label: "Name", type: "text" },
+      { key: "AGENT_TITLE", label: "Title", type: "text" },
+      { key: "AGENT_BIO", label: "Bio", type: "textarea" },
+      { key: "CTA_URL", label: "CTA URL", type: "text" },
+      { key: "CTA_LABEL", label: "CTA Label", type: "text" },
+    ],
+  },
+  {
+    label: "Event / Price",
+    fields: [
+      { key: "EVENT_DATE", label: "Date", type: "text" },
+      { key: "EVENT_TIME", label: "Time", type: "text" },
+      { key: "PRICE_FROM", label: "Original Price", type: "text" },
+      { key: "PRICE_TO", label: "Reduced Price", type: "text" },
+      { key: "REDUCE_PCT", label: "Reduction %", type: "text" },
+      { key: "NEIGHBORHOOD_PHOTO_URL", label: "Neighborhood Photo", type: "text" },
+      { key: "NEIGHBORHOOD_NAME", label: "Neighborhood", type: "text" },
     ],
   },
 ];
