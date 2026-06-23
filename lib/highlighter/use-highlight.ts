@@ -94,12 +94,16 @@ function expandRangeToWordEnd(range: Range): Range | null {
  * punctuation/whitespace. Caller should clear the DOM selection on false.
  */
 function isWorthySelection(text: string): boolean {
-  if (text.length < 4) return false;
   if (!/[a-zA-Z0-9]/.test(text)) return false;
   // Unclosed parenthesis = mid-drag fragment
   const opens = (text.match(/\(/g) ?? []).length;
   const closes = (text.match(/\)/g) ?? []).length;
   if (opens > closes) return false;
+  // Numeric/currency/percent figures are worth surfacing at any length ≥1 digit
+  // ("356", "42", "5%", "$1,200" were all silently killed by the old length < 4 gate)
+  if (/^\s*[$€£¥+\-]?\d[\d,.$%+\-/kmbKMB\s]*$/.test(text)) return true;
+  // Text selections need at least 4 chars to avoid accidental 1-2 char fragments
+  if (text.length < 4) return false;
   return true;
 }
 

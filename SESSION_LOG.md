@@ -6775,3 +6775,17 @@ Test deltas: bun suite **687 → 738 pass** (+51 new tests across `dates.test.mt
 - Fix: new `EmailPreviewFrame` client component uses `ResizeObserver` to scale the 600px iframe to fill the wrapper width via `transform: scale(containerWidth / 600)`. Auto-sizes height from `iframe.contentWindow.document.scrollHeight` after load. Works on all screen sizes.
 - Also widened `max-w-3xl → max-w-4xl` on BOTH the email branch and regular-template `<main>` (all builds get more breathing room).
 - 554/0 deliverable + email tests. Staged: `app/p/[id]/EmailPreviewFrame.tsx` (new) + `page.tsx` (updated).
+
+## 2026-06-23 (main) — Highlight root fix: short numbers + conversation-path fact injection
+
+**Bug 1 (`lib/highlighter/use-highlight.ts`):** `isWorthySelection` had `text.length < 4` as its FIRST check — killed every number ≤ 3 chars ("356", "82", "5%") before any logic ran. Fixed: numeric/currency/percent figures now bypass the length gate entirely.
+
+**Bug 2 (`lib/assistant/conversation-path.ts`):** `req.fact` (the highlighted figure) was received at `/api/assistant` but never injected into the user message on the conversation path. All 25 non-report pages (/z/[zip], /, /charts, /map, /welcome, etc.) got "I don't see a number." Fixed: fact now prepended to last user turn after location detection, same pattern as `report-path.ts` line 147.
+
+**Root cause of Bug 2:** One-Assistant unification (Phase 0-2) ported `runConversationPath` verbatim from `/api/welcome/chat` — a no-highlighting surface that never had a `fact` concept. The fact was wired into the contract and sent from the client correctly, but the conversation path never got the injection.
+
+**Proof (`lib/assistant/conversation-path.test.ts`):** 5 new tests covering off-topic path, no-location grounded path, located-ZIP path, no-fact (unchanged), no-selection_type — all assert the final user message content directly. Mock extended to capture `messages` array alongside `system`.
+
+**Gates:** 3660/0 tests pass.
+
+**Next:** prod verify — highlight a number on /z/33920, popup should answer with context.
