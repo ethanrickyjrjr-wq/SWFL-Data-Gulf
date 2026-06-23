@@ -1,3 +1,67 @@
+## 2026-06-22 (main) — Chart routing + OUTSIDE_SYSTEM capability hints + docs sweep
+
+- `compose-chart.ts`: broadened `wantsCustomChart` regex (charts/charting/plots/graphing/visualizations); `route-chart.ts`: bare "price" → zhvi trend (was routing to nothing for "SWFL prices")
+- `conversation-path.ts` + `prove-deflection.mts`: added chart + data capability truth to OUTSIDE_SYSTEM prompt — model lacked the context to offer charts proactively
+- Docs: one-assistant spec highlighter ownership table + Phase 2 scope note; audit PLAN/NOTES.md; layer2 plan doc
+
+---
+
+## 2026-06-23 (main) — crawl4ai research: Claude Code new features + Gmail email + per-issue plans
+
+**RULE 0.4 research pass — results written here before any fixing.**
+
+### 1. Claude Code — what's new (docs.anthropic.com/en/docs/claude-code, 2026-06-23)
+Source: 3 pages crawled (overview + ide-integrations + settings). All loaded (19k / 50k / 112k chars).
+
+**New capabilities (post-training):**
+- **Chrome extension (beta)** — Claude Code can automate browser tasks from within VS Code/terminal. Drive our own site to verify highlighter behavior.
+- **Computer use (preview)** — Claude controls the OS UI (cursor, clicks). Could literally test our DOM interactions.
+- **Checkpoints / Rewind** — VS Code extension stores checkpoints; rewind to any prior state. Use before risky refactors.
+- **Plugin system via marketplaces** — installed from `.claude/settings.json` `enabledPlugins`. Already using hooks.
+- **Remote Control** — operate Claude Code from a remote session (cloud CI).
+- **Parallel conversations** — run multiple Claude Code tabs on independent problems.
+- **`/config key=value`** (v2.1.181+) — set a single config option without opening full settings.
+- **Worktrees built-in** — "Use git worktrees for parallel tasks" is a documented pattern.
+
+**How WE should use this:**
+- The Chrome extension would let us drive `/r/zip-report/34135`, select text, verify the popup appears — this eliminates the "can't test DOM" problem that produced phantom "SNAP-0 broken" diagnosis.
+- Checkpoints before fixing `useFiler` / filing law (risky cross-cutting change).
+- Already have MCP wired (`swfl`), hooks wired, CLAUDE.md — no new wiring needed.
+
+### 2. Gmail HTML email compatibility (caniemail.com/clients/gmail, 2026-06-23)
+Source: caniemail.com/clients/gmail — loaded (97k chars).
+
+**Gmail Desktop Webmail SUPPORTS:** flexbox, grid, display:none, border-radius, background-color/image, padding, opacity, float, font-size/weight, min/max-width/height, clamp/min/max functions, linear/radial-gradient, :hover, CSS comments, column-count, box-sizing.
+
+**What Gmail STRIPS or LIMITS (not in supported list):**
+- `<link>` stylesheets in `<head>` — Gmail strips head on forward/reply
+- CSS custom properties (`--var: value`) — partial/unreliable in Gmail clients  
+- `@font-face` web fonts — stripped, falls back to system font
+- `position: fixed` / `position: sticky` — not supported
+
+**H4 fix approach:** Audit our email template for (a) head-only styles that won't survive Gmail processing, (b) CSS variables, (c) web font imports. Convert critical layout to inline styles. Table-based layout is safest cross-client.
+
+### 3. Per-issue fix plans (confirmed from code reading)
+
+**SNAP-0 — NOT A CODE BUG.** Previous session confirmed via crawl4ai: popup WORKS on prod (`/r/zip-report/34135`, popup visible, `top: 281px; left: 427.406px; visibility: visible`). The "broken" state was `next build` run while dev server was up → crashed `.next` dir → phantom errors. Fix: `rm -rf .next && bun dev`.
+
+**A1-A7 (P0) — Filing goes to tray not project:**
+- Root confirmed: `lib/briefcase/file-routing.ts:45` — `projectIdFromPath(pathname)` only matches `/project/[id]`. On `/r/*` returns null → tray.
+- F2 (commit `a24d9e09`) is correct for the `/project/[id]` page case. STILL BROKEN on report pages because URL is `/r/zip-report/34135`, not `/project/[id]`.
+- **Real fix:** fall back to `getAiContext()?.projectId` when URL gives null. One line in `useFiler`.
+
+**D1 (P1) — Dates backwards:**
+- `components/project/FrozenSnapshotNote.tsx:2` — `filedAt.slice(0,10)` shows raw YYYY-MM-DD. Fix: `new Date(filedAt).toLocaleDateString("en-US", {month:"2-digit",day:"2-digit",year:"numeric"})`.
+- Chart `asOf` uses `friendlyAsOf` with UTC-safe Date + toLocaleDateString — should produce "Jun 23, 2026". If showing `2026-01-01`, the stored `as_of` field in the chart block is wrong at build time (data issue, not display issue).
+
+**G1 (P0) — L2 popup not appearing in deliverable:**
+- `DeliverableModal.tsx` renders iframe at `/p/[id]?r={nonce}`, `useIframeSelection(iframeRef)` attached. Same-origin so should work.
+- Cannot verify without authenticated browser session. Need real browser test.
+
+**Next:** fix A1-A7 (useFiler fallback) + FrozenSnapshotNote date format. Then push.
+
+---
+
 ## 2026-06-22 (main) — Cut CLAUDE.md from 326 → 196 lines
 
 Trimmed all incident backstories, origin narratives, and redundant cross-references. Every rule intact; pointers to source files kept. No behavior changes.
