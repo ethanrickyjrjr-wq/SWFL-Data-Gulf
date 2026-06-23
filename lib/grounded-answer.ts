@@ -55,6 +55,8 @@ export function buildFollowupsDirective(selectionType?: string): string {
         "⟦FOLLOWUPS⟧ first question | second question | third question\n" +
         `Each must be a complete question (<= 12 words), grounded in the data you have, ` +
         `tailored to your answer and to what the user highlighted (a ${selectionType}). ` +
+        "Every question must be answerable from this same grounded context — no external lookups, " +
+        "no place names not in the data, no metrics not shown on the report. " +
         "Do not number them. Write nothing after the last one. Keep them CLEAN — no internal " +
         "ids/slugs, never the words 'master', 'brain', 'payload', or 'grain'."
     : "";

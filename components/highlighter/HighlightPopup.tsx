@@ -14,11 +14,6 @@ import { DockChart } from "./DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { AssistantContext } from "@/lib/assistant/contract";
 
-// Frames whose chart can be filed to a project (mirrors AskAiDock). bar-table
-// only today; zhvi-area + corridor-scatter stay gated. Extend by adding a
-// frameId here — explicit, never implicit on a type shape.
-const FILABLE_FRAMES = new Set<string>(["bar-table"]);
-
 /** The matched metric's value + provenance, resolved by GlobalHighlighter (via the
  *  report-context store) so "File this figure" can pin a sourced snapshot. Structurally
  *  a subset of MetricSuggestion. Null for prose / unmatched selections. */
@@ -256,7 +251,10 @@ export function HighlightPopup({
   // to that answer); fall back to the static set if the tail was missing.
   const hasCompletedAnswer = Boolean(activeQuestion && answer && !streaming && !error);
   const realtimeChips = hasCompletedAnswer && followups.length > 0;
-  const chips = realtimeChips ? followups : staticChips;
+  const chartOnScreen = chart !== null && chart !== dismissedChart;
+  const chips = (realtimeChips ? followups : staticChips).filter(
+    (c) => !(chartOnScreen && c.toLowerCase().startsWith("chart ")),
+  );
 
   function submit(q: string, opts?: { fromChip?: boolean; isRealtime?: boolean }) {
     const trimmed = q.trim();
@@ -349,7 +347,7 @@ export function HighlightPopup({
 
   async function fileChart() {
     const cs = chart as ChartSpec | null;
-    if (!cs || !cs.frameId || !FILABLE_FRAMES.has(cs.frameId)) return;
+    if (!cs || !cs.frameId) return;
     try {
       const res = await fetch("/api/charts/save", {
         method: "POST",
@@ -549,7 +547,7 @@ export function HighlightPopup({
             {(() => {
               const cs = chart as ChartSpec | null;
               if (!cs || chart === dismissedChart) return null;
-              const canFile = !!cs.frameId && FILABLE_FRAMES.has(cs.frameId);
+              const canFile = !!cs.frameId;
               return (
                 <div className="mb-2 overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
                   <div className="flex items-center justify-between px-2 py-1">

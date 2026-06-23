@@ -1,3 +1,19 @@
+## 2026-06-23 (main) — P0/P1 bug sweep: filing / charts / suggestions / PDF
+
+**Filing (A1-A7, Task 1-2):** `useFiler` now has three-mode routing (`chooseFilingMode` → `"event" | "api" | "tray"`). On `/project/[id]`: dispatch (unchanged). Off-project on `/r/*` with an active project: new `POST /api/projects/[id]/add-item` does a fresh read → dedup → append so items never silently vanish. No active project: anonymous tray. `AskAiDock` summary branch now has "File this summary" alongside "Copy this summary".
+
+**Charts (B1, Task 3):** Removed `FILABLE_FRAMES` gate from both `AskAiDock` and `HighlightPopup` — all charts with a `frameId` are filable. Gate remains at `/api/charts/save` (structural). Chip filter: when a chart is on screen, chips starting with "Chart " are stripped so the same chart isn't re-offered.
+
+**PDF uploads (I1-I2, Task 4):** `buildUploadsBlock()` added to `conversation-path.ts` and injected into all 3 `streamAnswer()` paths (off-topic, region-wide, located). The AI can now read uploaded documents when answering questions.
+
+**PDF viewer (I3-I4, Task 5):** `ItemDetail.tsx` file kind replaced `<a target="_blank">` with `<object data={url} type="application/pdf">` — PDF opens inline (480px) with fallback link.
+
+**Follow-ups (C3, Task 6):** `buildFollowupsDirective` now requires each chip to be "answerable from this same grounded context". Build: clean. Tests: 3337/0.
+
+**Next:** Task 7 (CH-SCOPE — ZIP threading into chart builder), push.
+
+---
+
 ## 2026-06-23 (main) — Email Lab: AI-connected design surface + project integration + PDF export
 
 **Email Lab (`/email-lab`):** standalone split-pane canvas — AI prompt → Claude Haiku fills tokens → live 600px `EmailPreviewFrame`. 10 templates, brand color pickers, fine-tune accordion. API routes: `/api/email-lab/render` (token fill) + `/api/email-lab/ai` (Haiku generates content).

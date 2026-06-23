@@ -18,11 +18,6 @@ import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
 const GEOM_KEY = "swfl_ai_dock_geom";
 
-// Frames whose chart can be filed to a project. Today only the deterministic
-// bar/table; zhvi-area + corridor-scatter stay gated ("coming soon"). Extend by
-// adding a frameId here — explicit, one line, never implicit on a type shape.
-const FILABLE_FRAMES = new Set<string>(["bar-table"]);
-
 const PROMPTS = [
   "What's the bottom line on this market?",
   "Compare this to other SWFL areas",
@@ -221,7 +216,7 @@ export function AskAiDock({
 
   async function fileChart() {
     const cs = chart as ChartSpec | null;
-    if (!cs || !cs.frameId || !FILABLE_FRAMES.has(cs.frameId)) return;
+    if (!cs || !cs.frameId) return;
     try {
       const res = await fetch("/api/charts/save", {
         method: "POST",
@@ -400,7 +395,7 @@ export function AskAiDock({
             {(() => {
               const cs = chart as ChartSpec | null;
               if (!cs || chart === dismissedChart) return null;
-              const canFile = !!cs.frameId && FILABLE_FRAMES.has(cs.frameId);
+              const canFile = !!cs.frameId;
               return (
                 <div className="mb-3 overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
                   <div className="flex items-center justify-between px-2 py-1">
@@ -469,13 +464,23 @@ export function AskAiDock({
                 <p className="mt-3 text-xs text-gray-500">Also pulled: {reach.join(", ")}</p>
               )}
               {!streaming && !error && isSummaryAnswer && (
-                <button
-                  type="button"
-                  onClick={copySummary}
-                  className="mt-3 block rounded-lg border border-[#0a8078] bg-[#0a8078]/10 px-4 py-2 text-xs font-semibold text-[#0a8078] transition-colors hover:bg-[#0a8078]/20"
-                >
-                  {copied ? "Copied ✓" : "Copy this summary"}
-                </button>
+                <div className="mt-3 flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={copySummary}
+                    className="rounded-lg border border-[#0a8078] bg-[#0a8078]/10 px-4 py-2 text-xs font-semibold text-[#0a8078] transition-colors hover:bg-[#0a8078]/20"
+                  >
+                    {copied ? "Copied ✓" : "Copy this summary"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileAnswer()}
+                    disabled={filed === "qa"}
+                    className="text-xs text-[#0a8078] transition-colors hover:text-[#0a8078]/80 disabled:opacity-60"
+                  >
+                    {filed === "qa" ? "Filed ✓" : "File this summary"}
+                  </button>
+                </div>
               )}
               {!streaming && !error && !isSummaryAnswer && (
                 <div className="mt-3 flex items-center gap-4">

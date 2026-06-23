@@ -8,51 +8,63 @@ import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
 import { dispatchAddItem } from "@/lib/project/add-item-event";
 import { getAiContext } from "@/lib/project/ai-context-store";
 
-/**
- * F2 — where a filed item LANDS. Inside an open project, file straight into THAT project
- * (the `ADD_ITEM_EVENT` channel the workspace already listens for → it appends to its own
- * items + persists); off a project, the anonymous briefcase tray. This kills the old bug
- * where filing inside a project dumped to the tray, and "build" then spawned a NEW project.
- *
- * The workspace is the sole writer of `projects.items` (see `lib/project/add-item-event.ts`),
- * so we dispatch rather than PATCH here — no dual read-modify-write, no lost items.
- */
 export type FileTarget = "project" | "tray";
 
-/** Pure routing: project open → dispatch into the open workspace; else → tray. Returns where it landed. */
+/**
+ * Three-mode routing for filing:
+ * - "event"  → on the project page; dispatch to the mounted workspace (fast, in-memory)
+ * - "api"    → off the project page (report/r/* etc.); POST to add-item route (persistent)
+ * - "tray"   → no active project; file to anonymous briefcase tray
+ */
+export function chooseFilingMode(
+  pathname: string,
+  projectId: string | null,
+): "event" | "api" | "tray" {
+  if (!projectId) return "tray";
+  if (projectIdFromPath(pathname) === projectId) return "event";
+  return "api";
+}
+
+async function addItemViaApi(projectId: string, item: ProjectItem): Promise<void> {
+  try {
+    await fetch(`/api/projects/${projectId}/add-item`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ item }),
+    });
+  } catch {
+    // fire-and-forget; caller already returned "project" so UI is optimistic
+  }
+}
+
 export function routeFiledItem(
   item: ProjectItem,
   projectId: string | null,
+  pathname: string,
   fileToTray: (item: ProjectItem) => void,
 ): FileTarget {
-  if (projectId) {
-    dispatchAddItem({ projectId, item });
+  const mode = chooseFilingMode(pathname, projectId);
+  if (mode === "event") {
+    dispatchAddItem({ projectId: projectId!, item });
+    return "project";
+  }
+  if (mode === "api") {
+    void addItemViaApi(projectId!, item);
     return "project";
   }
   fileToTray(item);
   return "tray";
 }
 
-/**
- * Hook form for all filing call sites (highlighter popup + pill chat).
- *
- * Keys off the URL (`/project/[id]`), NOT the async `useAiContext()` store — the store can
- * be null mid-load, which made filing silently fall back to the tray even on a project page
- * (the F2-not-working bug). The workspace's `ADD_ITEM_EVENT` id is also URL-derived, so the
- * dispatch target always matches the listening workspace.
- */
 export function useFiler(): { file: (item: ProjectItem) => FileTarget; projectId: string | null } {
-  const pathname = usePathname();
-  const urlProjectId = projectIdFromPath(pathname ?? "/");
-  // On /r/* report pages the URL has no project id, but a project can be active in the
-  // module-level store (set by ProjectAiContextBridge on navigation). Fall back to it so
-  // filing from a report page lands in the open project, not the anonymous tray.
+  const pathname = usePathname() ?? "/";
+  const urlProjectId = projectIdFromPath(pathname);
   const projectId = urlProjectId ?? getAiContext()?.projectId ?? null;
   const briefcase = useBriefcase();
   const file = useCallback(
     (item: ProjectItem): FileTarget =>
-      routeFiledItem(item, projectId, (i) => briefcase?.fileItem(i)),
-    [projectId, briefcase],
+      routeFiledItem(item, projectId, pathname, (i) => briefcase?.fileItem(i)),
+    [projectId, pathname, briefcase],
   );
   return { file, projectId };
 }

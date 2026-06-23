@@ -199,18 +199,27 @@ export function ItemDetail({
           </figure>
         );
       }
-      // PDF (or any non-image) → appendix link.
+      // PDF → inline viewer with fallback link.
       return (
         <div>
           {url ? (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-[#00d4aa] underline underline-offset-2"
-            >
-              {item.caption || "View attachment (PDF)"}
-            </a>
+            <>
+              <object
+                data={url}
+                type="application/pdf"
+                className="w-full rounded border border-white/10"
+                style={{ height: "480px" }}
+              >
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-[#00d4aa] underline underline-offset-2"
+                >
+                  {item.caption || "Open PDF"}
+                </a>
+              </object>
+            </>
           ) : (
             <p className="text-sm text-gray-500 italic">
               {item.caption || "Attachment"} (unavailable)
