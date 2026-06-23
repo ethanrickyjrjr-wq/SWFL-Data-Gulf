@@ -33,15 +33,16 @@ afterAll(() => {
   for (const [path, orig] of Object.entries(ORIG)) mock.module(path, () => orig);
 });
 
-// Capture the system prompt handed to Haiku + a sentinel proving the model streamed.
-const captured: { system?: string } = {};
+// Capture the system prompt AND messages handed to Haiku + a sentinel proving the model streamed.
+const captured: { system?: string; messages?: { role: string; content: string }[] } = {};
 const MODEL_SENTINEL = "We track flood risk"; // appears only when the model actually streams
 mock.module("@/refinery/agents/anthropic.mts", () => ({
   TRIAGE_MODEL: "claude-haiku-4-5",
   getAnthropic: () => ({
     messages: {
-      stream: (args: { system?: string }) => {
+      stream: (args: { system?: string; messages?: { role: string; content: string }[] }) => {
         captured.system = args?.system;
+        captured.messages = args?.messages;
         return {
           async *[Symbol.asyncIterator]() {},
           textStream: (async function* () {
@@ -615,4 +616,102 @@ test("chat with no page/briefcase context injects no context block", async () =>
   captured.system = undefined;
   await (await ask("what can you do?")).text();
   expect(captured.system ?? "").not.toContain("WHERE THE USER IS");
+});
+
+// --- Fact injection: the highlighted figure must reach the model on ALL paths ------
+// This is the root of the "$340K / 356 — I don't see a number" regression.
+// The conversation path received req.fact but never injected it into the user
+// message, so the model always answered "I don't see a specific number".
+// Every path below must surface "About this fact" in the final user turn.
+
+test("FACT INJECTION — off-topic path: fact prepended to user message", async () => {
+  captured.messages = undefined;
+  masterState.output = MASTER_OUTPUT;
+  const res = await run({
+    context: "outside",
+    fact: "$340K",
+    selection_type: "metric",
+    messages: [{ role: "user", content: "What does this number tell me?" }],
+  });
+  await res.text();
+  const lastContent = captured.messages?.[captured.messages.length - 1]?.content ?? "";
+  expect(lastContent).toContain('About this fact (a metric): "$340K"');
+  expect(lastContent).toContain("What does this number tell me?");
+  masterState.output = null;
+});
+
+test("FACT INJECTION — no-location grounded path: fact prepended to user message", async () => {
+  captured.messages = undefined;
+  masterState.output = MASTER_OUTPUT;
+  const res = await run({
+    context: "outside",
+    fact: "356",
+    selection_type: "metric",
+    messages: [{ role: "user", content: "What does this number tell me?" }],
+  });
+  await res.text();
+  const lastContent = captured.messages?.[captured.messages.length - 1]?.content ?? "";
+  expect(lastContent).toContain('About this fact (a metric): "356"');
+  expect(lastContent).toContain("What does this number tell me?");
+  masterState.output = null;
+});
+
+test("FACT INJECTION — located ZIP path: fact prepended to user message", async () => {
+  captured.messages = undefined;
+  guardState.result = {
+    capped: false,
+    fromCache: false,
+    dossier: dossierWith([
+      {
+        brain_id: "housing-swfl",
+        domain: "real-estate",
+        grain: "zip",
+        coverage_label: "ZIP 33920",
+        is_true_zip: true,
+        text: "**Median value** — $340,000.",
+        source_citation: "Zillow ZHVI",
+        source_url: "https://www.zillow.com",
+      },
+    ]),
+  };
+  const res = await run({
+    context: "outside",
+    fact: "$340K",
+    selection_type: "metric",
+    messages: [{ role: "user", content: "What does this median value tell me about 33920?" }],
+  });
+  await res.text();
+  const lastContent = captured.messages?.[captured.messages.length - 1]?.content ?? "";
+  expect(lastContent).toContain('About this fact (a metric): "$340K"');
+  expect(lastContent).toContain("What does this median value tell me about 33920?");
+});
+
+test("FACT INJECTION — no fact in request: user message is unchanged", async () => {
+  captured.messages = undefined;
+  masterState.output = MASTER_OUTPUT;
+  const res = await run({
+    context: "outside",
+    messages: [{ role: "user", content: "What is the bottom line?" }],
+  });
+  await res.text();
+  const lastContent = captured.messages?.[captured.messages.length - 1]?.content ?? "";
+  expect(lastContent).toBe("What is the bottom line?");
+  expect(lastContent).not.toContain("About this fact");
+  masterState.output = null;
+});
+
+test("FACT INJECTION — selection_type absent: typeHint omitted from prefix", async () => {
+  captured.messages = undefined;
+  masterState.output = MASTER_OUTPUT;
+  const res = await run({
+    context: "outside",
+    fact: "82",
+    messages: [{ role: "user", content: "What does this tell me?" }],
+  });
+  await res.text();
+  const lastContent = captured.messages?.[captured.messages.length - 1]?.content ?? "";
+  // No type hint when selection_type is absent
+  expect(lastContent).toContain('About this fact: "82"');
+  expect(lastContent).not.toContain("About this fact (");
+  masterState.output = null;
 });

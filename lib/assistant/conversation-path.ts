@@ -511,6 +511,21 @@ export async function runConversationPath(
   // If located, ground Haiku on the real per-location dossier — the converse pattern.
   const detected = offTopic ? null : detectWelcomeLocation(messages);
 
+  // Prepend the highlighted fact to the final user turn — same pattern as report-path.ts
+  // line 147. Without this, the conversation path receives the question but never sees
+  // what the user selected ("$340K", "356", etc.) and replies "I don't see a number".
+  if (typeof req.fact === "string" && req.fact.trim()) {
+    const typeHint =
+      typeof req.selection_type === "string" && req.selection_type
+        ? ` (a ${req.selection_type})`
+        : "";
+    const last = messages[messages.length - 1];
+    messages[messages.length - 1] = {
+      ...last,
+      content: `About this fact${typeHint}: "${req.fact}". ${last.content}`,
+    };
+  }
+
   if (!detected) {
     // An off-topic no-location ask never grounds on the region read — answer it plainly
     // from the un-grounded premise, no SWFL place/data prelude (RULES OF ENGAGEMENT 7).
