@@ -1,3 +1,13 @@
+## 2026-06-23 (main) — fix: highlighted fact dropped on conversation path + short numbers suppressed
+
+**Bug 1 (use-highlight.ts):** `isWorthySelection` killed numbers ≤3 chars ("88", "356") — popup never opened. Fixed: numeric figures bypass the length gate.
+
+**Bug 2 (conversation-path.ts):** `req.fact` silently dropped on all 25 non-report pages (/z/[zip], /, /charts, etc.) — AI replied "I don't see a specific number." Fixed: fact prepended to last user turn after location detection, matching report-path.ts pattern. 5 proof tests added.
+
+**Next:** prod verify on /z/[zip] — highlight a number, popup should answer with context.
+
+---
+
 ## 2026-06-23 (main) — Map fixes: Lehigh Acres holes + North Fort Myers top clip
 
 **Problem**: `public/maps/lee-collier.svg` had two visual bugs — dark holes/gaps between Lehigh-area ZIPs (33936/33971-33976) and ZIP 33917 (North Fort Myers) extending too far north using ZCTA postal boundary instead of the CDP boundary.
