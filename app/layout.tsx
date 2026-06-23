@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 import { BriefcaseProvider } from "@/components/briefcase/BriefcaseProvider";
 import { AppShell } from "@/components/briefcase/AppShell";
 import { SiteShell } from "@/components/nav/SiteShell";
@@ -52,6 +53,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {/* BriefcaseProvider owns the anonymous draft globally (A-2) so the unified
             pill + highlighter both file into it on every page, on or off /r/*. */}
+        <Toaster theme="dark" position="bottom-right" richColors />
         <BriefcaseProvider>
           {/* Reset mobile pinch-zoom to fit-width on every in-app navigation. */}
           <ResetZoomOnRouteChange />

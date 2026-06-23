@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import type { ProjectItem } from "@/lib/project/items";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
@@ -26,14 +27,14 @@ export function chooseFilingMode(
 }
 
 async function addItemViaApi(projectId: string, item: ProjectItem): Promise<void> {
-  try {
-    await fetch(`/api/projects/${projectId}/add-item`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ item }),
-    });
-  } catch {
-    // fire-and-forget; caller already returned "project" so UI is optimistic
+  const res = await fetch(`/api/projects/${projectId}/add-item`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ item }),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body?.error ?? `HTTP ${res.status}`);
   }
 }
 
@@ -49,7 +50,10 @@ export function routeFiledItem(
     return "project";
   }
   if (mode === "api") {
-    void addItemViaApi(projectId!, item);
+    addItemViaApi(projectId!, item).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : "network error";
+      toast.error(`Couldn't save to project — ${msg}`);
+    });
     return "project";
   }
   fileToTray(item);
