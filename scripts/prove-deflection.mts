@@ -293,12 +293,7 @@ async function main() {
   const fixed = buildSystem(fixedMaster, creMaster, "fixed");
   const baseline = buildSystem(baselineMaster, creMaster, "baseline");
 
-  // observed_at: captured from a real `date -u` call (NOT invented). On Windows the
-  // bare `date` resolves to cmd's interactive date prompt, so invoke bash's coreutils
-  // date explicitly.
-  const observedAt = execSync('bash -lc "date -u +%Y-%m-%dT%H:%M:%SZ"', {
-    encoding: "utf-8",
-  }).trim();
+  const observedAt = new Date().toISOString();
 
   process.stderr.write(`BASELINE (HEAD master v? token ${baseline.token}):\n`);
   const baseResults = await runBatch(client, baseline.system, ROLLS);

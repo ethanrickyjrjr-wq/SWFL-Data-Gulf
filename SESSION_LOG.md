@@ -1,3 +1,9 @@
+## 2026-06-23 (main) — answer-fix-proof gate: deflection harness run + proof appended
+
+`scripts/prove-deflection.mts`: fixed Windows date (`bash -lc date` → `new Date().toISOString()`). Ran 40 Haiku calls — baseline 55% bad (raw-token leak), fixed 0/20 bad. Appended clean proof to `verification/answer-proofs.jsonl`. Push unblocked.
+
+---
+
 ## 2026-06-23 (main) — A1-A7 filing law fix + D1 date fix + CLAUDE.md lean-block sync
 
 **Filing law (A1-A7):** `useFiler` falls back to `getAiContext()?.projectId` when URL returns null (on `/r/*` pages). Filing from report pages now routes into the open project. Also patched `AskAiDock` to use `useFiler` instead of `briefcase.fileItem()` directly (A5/A6 gap). Files: `lib/briefcase/file-routing.ts`, `components/highlighter/AskAiDock.tsx`.
