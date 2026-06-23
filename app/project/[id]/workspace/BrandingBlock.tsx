@@ -11,11 +11,22 @@ import {
   schemesEqual,
 } from "@/lib/brand/palette";
 
-const BRANDING_FIELDS: { key: string; label: string }[] = [
-  { key: "agent_name", label: "Agent name" },
-  { key: "photo_url", label: "Photo URL" },
-  { key: "license", label: "License #" },
+const AGENT_FIELDS: { key: string; label: string; span?: "full" }[] = [
+  { key: "agent_name", label: "Name" },
+  { key: "agent_title", label: "Title / Role" },
   { key: "brokerage", label: "Brokerage" },
+  { key: "license", label: "License #" },
+];
+
+const CONTACT_FIELDS: { key: string; label: string }[] = [
+  { key: "contact_email", label: "Email" },
+  { key: "contact_phone", label: "Phone" },
+  { key: "website_url", label: "Website" },
+];
+
+const MEDIA_FIELDS: { key: string; label: string }[] = [
+  { key: "photo_url", label: "Headshot URL" },
+  { key: "logo_url", label: "Logo URL" },
 ];
 
 // The three saved-color slots. The first two map onto the canonical theme
@@ -51,6 +62,9 @@ const COLOR_CHART: string[] = [
   "#cbd5e1",
   "#ffffff",
 ];
+
+const INPUT_CLS =
+  "rounded-lg border border-white/10 bg-[#04121b] px-2 py-1.5 text-sm text-white outline-none focus:border-[#00d4aa]/40";
 
 /**
  * Branding panel — rendered inside the Brand pill popover.
@@ -130,7 +144,7 @@ export function BrandingBlock({
       <div className="mb-3 flex items-center justify-between">
         <div>
           <span className="text-sm font-semibold text-white">Branding</span>
-          <span className="ml-2 text-xs text-gray-500">Appears on shared deliverables.</span>
+          <span className="ml-2 text-xs text-gray-500">Auto-fills Email Lab + deliverables.</span>
         </div>
         <button
           type="button"
@@ -141,14 +155,59 @@ export function BrandingBlock({
           ×
         </button>
       </div>
+
+      {/* ── Agent identity ── */}
       <div className="grid grid-cols-2 gap-3">
-        {BRANDING_FIELDS.map((f) => (
+        {AGENT_FIELDS.map((f) => (
           <label key={f.key} className="flex flex-col gap-1 text-xs text-gray-400">
             {f.label}
             <input
               value={branding[f.key] ?? ""}
               onChange={(e) => onChange({ ...branding, [f.key]: e.target.value })}
-              className="rounded-lg border border-white/10 bg-[#04121b] px-2 py-1.5 text-sm text-white outline-none focus:border-[#00d4aa]/40"
+              className={INPUT_CLS}
+            />
+          </label>
+        ))}
+      </div>
+
+      {/* ── Bio ── */}
+      <label className="mt-3 flex flex-col gap-1 text-xs text-gray-400">
+        Bio
+        <textarea
+          value={branding.agent_bio ?? ""}
+          onChange={(e) => onChange({ ...branding, agent_bio: e.target.value })}
+          rows={2}
+          placeholder="Short professional bio shown on listing and agent intro emails…"
+          className={`${INPUT_CLS} resize-none`}
+        />
+      </label>
+
+      {/* ── Contact ── */}
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        {CONTACT_FIELDS.map((f) => (
+          <label
+            key={f.key}
+            className={`flex flex-col gap-1 text-xs text-gray-400 ${f.key === "website_url" ? "col-span-2" : ""}`}
+          >
+            {f.label}
+            <input
+              value={branding[f.key] ?? ""}
+              onChange={(e) => onChange({ ...branding, [f.key]: e.target.value })}
+              className={INPUT_CLS}
+            />
+          </label>
+        ))}
+      </div>
+
+      {/* ── Media URLs ── */}
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        {MEDIA_FIELDS.map((f) => (
+          <label key={f.key} className="flex flex-col gap-1 text-xs text-gray-400">
+            {f.label}
+            <input
+              value={branding[f.key] ?? ""}
+              onChange={(e) => onChange({ ...branding, [f.key]: e.target.value })}
+              className={INPUT_CLS}
             />
           </label>
         ))}

@@ -1,3 +1,19 @@
+## 2026-06-23 (main) — Brand auto-fill: branding → email token bridge complete
+
+**BrandingBlock** (`app/project/[id]/workspace/BrandingBlock.tsx`): added `agent_title`, `agent_bio` (textarea), `contact_email`, `contact_phone`, `website_url`, `logo_url` fields — all previously missing from the save form despite being used downstream.
+
+**Email token bridge** (`app/project/[id]/email-lab/page.tsx`): branding now seeds ALL new real-estate tokens:
+- `agent_name` → `COMPANY_NAME` + `AGENT_NAME`
+- `photo_url` → `AGENT_PHOTO_URL`
+- `agent_title` → `AGENT_TITLE`
+- `agent_bio` → `AGENT_BIO`
+- `contact_phone` → `CONTACT_PHONE`
+- `website_url` → `WEBSITE_URL` + `CTA_URL`
+
+**Flow now complete:** save brand once → open Email Lab from any project → all agent card, contact, and listing tokens pre-filled.
+
+---
+
 ## 2026-06-23 (main) — Email Lab: 7 professional templates + token system
 
 **Templates added** (all in `templates/html/email/`):

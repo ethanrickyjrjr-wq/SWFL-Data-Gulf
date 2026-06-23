@@ -13,9 +13,13 @@ interface Branding {
   primary_color?: string;
   accent_color?: string;
   agent_name?: string;
+  agent_title?: string;
+  agent_bio?: string;
   brokerage?: string;
   logo_url?: string;
+  photo_url?: string;
   contact_email?: string;
+  contact_phone?: string;
   website_url?: string;
 }
 
@@ -43,13 +47,27 @@ export default async function ProjectEmailLabPage({ params }: { params: Promise<
 
   // Map project branding → email token overrides
   const initialTokens: Record<string, string> = {};
+  // visual identity
   if (branding.primary_color) initialTokens.PRIMARY = branding.primary_color;
   if (branding.accent_color) initialTokens.ACCENT = branding.accent_color;
-  if (branding.agent_name) initialTokens.COMPANY_NAME = branding.agent_name;
-  if (branding.brokerage) initialTokens.TAGLINE = branding.brokerage;
   if (branding.logo_url) initialTokens.LOGO_URL = branding.logo_url;
+  // agent identity — feeds COMPANY_NAME (masthead) AND the agent card tokens
+  if (branding.agent_name) {
+    initialTokens.COMPANY_NAME = branding.agent_name;
+    initialTokens.AGENT_NAME = branding.agent_name;
+  }
+  if (branding.agent_title) initialTokens.AGENT_TITLE = branding.agent_title;
+  if (branding.agent_bio) initialTokens.AGENT_BIO = branding.agent_bio;
+  if (branding.photo_url) initialTokens.AGENT_PHOTO_URL = branding.photo_url;
+  if (branding.brokerage) initialTokens.TAGLINE = branding.brokerage;
+  // contact
   if (branding.contact_email) initialTokens.CONTACT_EMAIL = branding.contact_email;
-  if (branding.website_url) initialTokens.WEBSITE_URL = branding.website_url;
+  if (branding.contact_phone) initialTokens.CONTACT_PHONE = branding.contact_phone;
+  // website doubles as CTA destination
+  if (branding.website_url) {
+    initialTokens.WEBSITE_URL = branding.website_url;
+    initialTokens.CTA_URL = branding.website_url;
+  }
   // Location label from scope
   if (scope.place) {
     initialTokens.HERO_LABEL = `${scope.place}${scope.zip ? ` ${scope.zip}` : ""}`;
