@@ -147,6 +147,10 @@ export function suggestionsForSelection(text: string, factType: FactType): strin
       `How does ${text} compare?`,
     ];
   }
-  // A number with no metric label of its own — explain/compare the figure.
-  return ["What does this number tell me?", "How does it compare across our areas?"];
+  // A number with no metric label of its own. Explain it in place — but NEVER offer
+  // "compare across our areas" here: with no metric identity the converse path can't
+  // resolve WHAT is being compared, so it dead-ended on "I need to know what you're
+  // comparing" (punchlist C3). Both chips must be answerable from the figure + the
+  // page grounding (the ZIP/report) alone.
+  return ["What does this number tell me?", "Why does this matter for this area?"];
 }

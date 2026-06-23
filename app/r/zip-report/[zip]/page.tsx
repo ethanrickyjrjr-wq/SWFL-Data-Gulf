@@ -16,6 +16,8 @@ import {
 } from "../../_components/report-shell";
 import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
+import { suggestionsForMetric } from "../../../../lib/highlighter/suggestions";
+import type { MetricSuggestion } from "../../../../lib/highlighter/report-context-store";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
 import { DataRow } from "../../_components/metrics-table";
 import { ColorLegend } from "../../_components/color-legend";
@@ -166,6 +168,59 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const updatedAt = housing?.refined_at ?? env?.refined_at;
 
   const highlighterEnabled = highlighterUiEnabled();
+
+  // ── Per-metric highlighter suggestions (punchlist C1/C3) ──────────────────
+  // The dossier-suggestion wiring was dropped when <HighlighterLayer> became the
+  // app-root <GlobalHighlighter> + this bridge — so EVERY highlight fell to the
+  // generic "What does this number tell me?" fallback. Rebuild it here, keyed by
+  // the DataRow labels rendered below: resolveSuggestions() matches the selected
+  // fact's row label to one of these and surfaces metric-specific, answerable
+  // follow-ups (and value + provenance for "File this figure"). Lowercase the
+  // metric string so the chips read naturally ("What's driving median sale price?").
+  const metricSuggestions: MetricSuggestion[] = [];
+  if (hasHousing) {
+    const housingMetric = (label: string, value: string): MetricSuggestion => ({
+      label,
+      suggestions: suggestionsForMetric({ metric: label.toLowerCase(), value }, "housing-swfl"),
+      value,
+      freshnessToken,
+    });
+    metricSuggestions.push(
+      housingMetric("Median sale price", `$${(price as number).toLocaleString()}`),
+      housingMetric("Days on market", String(dom)),
+    );
+    if (saleToList != null)
+      metricSuggestions.push(housingMetric("Sale-to-list ratio", `${saleToList}%`));
+    if (mos != null) metricSuggestions.push(housingMetric("Months of supply", String(mos)));
+    if (homesSold != null)
+      metricSuggestions.push(housingMetric("Homes sold (90d)", String(homesSold)));
+    if (inventory != null)
+      metricSuggestions.push(housingMetric("Active inventory", String(inventory)));
+  }
+  if (hasFlood) {
+    const floodProvenance = {
+      sourceUrl: floodSourceUrl,
+      sourceLabel: floodSourceCitation || "FEMA NFIP",
+      freshnessToken,
+    };
+    metricSuggestions.push(
+      {
+        label: "Avg Annual Loss",
+        suggestions: suggestionsForMetric({ metric: "avg annual loss", value: aal }, "env-swfl"),
+        value: `$${aal.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr per insured property`,
+        ...floodProvenance,
+      },
+      {
+        label: "SWFL percentile rank",
+        suggestions: suggestionsForMetric(
+          { metric: "SWFL percentile rank", value: rank },
+          "env-swfl",
+        ),
+        value: `${rank}th`,
+        ...floodProvenance,
+      },
+    );
+  }
 
   // NOTE: the ZIP choropleth map is intentionally NOT rendered here yet — the served
   // contractor map (/maps/lee-collier.svg) still welds Fort Myers Beach (33931) to the
@@ -344,6 +399,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         <ReportHighlightBridge
           reportId={buildReportId("zip", zip)}
           freshnessToken={freshnessToken}
+          metricSuggestions={metricSuggestions}
         />
       )}
     </>
