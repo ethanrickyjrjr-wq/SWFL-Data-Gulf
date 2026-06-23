@@ -1,3 +1,18 @@
+## 2026-06-23 (main) — Map fixes: Lehigh Acres holes + North Fort Myers top clip
+
+**Problem**: `public/maps/lee-collier.svg` had two visual bugs — dark holes/gaps between Lehigh-area ZIPs (33936/33971-33976) and ZIP 33917 (North Fort Myers) extending too far north using ZCTA postal boundary instead of the CDP boundary.
+
+**Root cause**: Contractor SVG used ZCTA boundaries (postal delivery areas). Lehigh Acres and North Fort Myers are CDPs (unincorporated) — correct boundaries are in TIGERweb layer 5 (CDPs), not layer 4 (incorporated places). Must query with `BASENAME` not `NAME` because TIGER appends " CDP" to the full name field.
+
+**Fixes in `public/maps/lee-collier.svg`**:
+1. `<clipPath id="clip-nfm-cdp">` added inside `<defs>` — North Fort Myers CDP boundary (TIGERweb layer 5, BASENAME='North Fort Myers') projected to SVG coords via affine transform x=769.9936·lon+63379.5249, y=-852.0531·lat+22963.5216
+2. `clip-path="url(#clip-nfm-cdp)"` applied to `<g id="33917">` — trims the northern overshoot to the CDP boundary (~26.77°N vs ZCTA 26.806°N)
+3. `<g id="lehigh-cdp-bg">` with Lehigh Acres CDP boundary path (fill=`#2a3942`) inserted before all zip-groups — fills the gap areas between contractor ZIPs with the no-data color so no dark holes show through
+
+**Verified visually**: Red fill proof-screenshots saved to Downloads confirming both polygons correct before finalizing. `MapCanvas.tsx` selects `g.zip-group[id]` only — `lehigh-cdp-bg` is unaffected by choropleth coloring.
+
+---
+
 ## 2026-06-23 (main) — Brand auto-fill: branding → email token bridge complete
 
 **BrandingBlock** (`app/project/[id]/workspace/BrandingBlock.tsx`): added `agent_title`, `agent_bio` (textarea), `contact_email`, `contact_phone`, `website_url`, `logo_url` fields — all previously missing from the save form despite being used downstream.
