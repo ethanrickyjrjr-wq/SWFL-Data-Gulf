@@ -1,3 +1,15 @@
+## 2026-06-24 (main) — feat(ingest): census_acs ZCTA pipeline — per-ZIP demographics for the Quick Summary [Section A]
+
+Built `ingest/pipelines/census_acs/` (constants/resources/pipeline/__init__) per the approved 2026-05-30 design — Census ACS 5-year, per-ZCTA, for the in-scope SWFL ZIPs → `data_lake.census_acs_zcta`. Feeds `lib/zip-summary` (the ZIP report "Quick data summary"). Follows the `census_cbp` pattern (dlt `replace` + volume guard + `--dry-run`).
+
+**RULE-0.4 live-API verification (with key from secrets):** `for=zip code tabulation area:<zcta>` works; the design's assumed `&in=state:12` nesting is DEPRECATED (HTTP 400 "unknown/unsupported geography hierarchy") → per-ZIP queries, never state-nested. CENSUS_API_KEY is REQUIRED (keyless → 302 missing_key.html). Dry-run caught a DESIGN BUG: `B07003_004E` = "Same house 1 year ago" (non-movers, ~83%), NOT "moved" — fixed `moved_pct = (B07003_001E universe − same_house) / universe`. Suppression sentinels (−666666666) → NULL.
+
+**Dry-run (no write):** 100 in-scope ZCTAs, ACS 2022; income populated 95/100 (5 suppressed → NULL). 33440 (Clewiston/Hendry): pop 19,800, income $54,938, age 38.9, owner-occ 70.1%, moved 16.5%, poverty 20.8%, employment 93.9%, HH 2.7.
+
+**Section A remaining:** grant for `census_acs_zcta` after first dlt run, GHA Dec-15 cron + cadence_registry entry, dry-run test, wire `loadZipQuickSummary` to read the table (cited to census.gov, MM/DD/YYYY), + the crawl4ai current-data pass. NOT yet ingested to the lake (code + dry-run only; ingest write = ask first per RULE 1).
+
+---
+
 ## 2026-06-24 (main) — spec+plan(materials-hub): v2 design + 9-task plan folder (audit-corrected, vendor-verified)
 
 Audited the v1 "Marketing Hub" plan (`.claude/plans/greedy-soaring-fog.md`) against real code via 4 parallel scouts — it would fail to compile: wrong Supabase client (`createCookieClient`/`@/lib/supabase/server` don't exist → `createClient` from `@/utils/supabase/server` + `createServiceRoleClient`), RLS-rejected writes (deliverables has no owner INSERT policy → write via service-role after ownership check), `nanoid` non-dep (→ `crypto.randomUUID()`), `exec_summary`-not-a-column, string-vs-object `scope`, ignored `applied:false` 200s, `never`-switch break in `buildRenderModel`, 12-prop `DeliverableLanes`, `runBuild` navigates-away. crawl4ai UX pass + vendor verify: `@supabase/storage-js@2.106.1` supports native cross-bucket `copy({destinationBucket})` (docs prose stale).
