@@ -1,3 +1,15 @@
+## 2026-06-24 (main) — Email Lab block-canvas: file-isolated build plan folder
+
+Added `docs/superpowers/plans/email-lab-block-canvas/` — README + 13 task cards decomposing the rev-3 spec into a build with **disjoint file ownership** so parallel sessions never collide.
+
+- Collision rule: two cards run concurrently iff deps done AND `Owns` file sets disjoint. README has the file-ownership matrix.
+- Waves: `00` foundation (Opus, blocks all) → Wave 1 = `10/11/12/31/32` (5 parallel tracks) → `20→21` renderers → `30/31/32→33` canvas → `40` clients (Opus, live files) → `50` drag (last, re-opens 30/33). `90` persistence+recurring deferred pending sequencing decision.
+- Model split: Opus owns contract (`00`), AI prompt (`12`), orchestrator (`33`), live-file swap (`40`); Sonnet owns each single fully-specified file.
+
+**Next:** operator picks `90` sequencing, then dispatch `00`.
+
+---
+
 ## 2026-06-24 (main) — Email Lab block-canvas spec: rev 3 (audit + vendor-verify + tier model)
 
 Reworked `docs/superpowers/specs/2026-06-24-email-lab-block-canvas-design.md` (folded a Sonnet audit + 3 crawl4ai passes).
