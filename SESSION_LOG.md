@@ -1,3 +1,15 @@
+## 2026-06-24 (main) — feat(materials-hub): task-04 AI new-material API
+
+Built `POST /api/projects/[id]/ai-material` — the steerable intent → seed pick + fill route (Task 4 of the materials-hub v2 plan, 9-task sequential chain).
+
+- **TDD:** wrote `pick-seed.test.ts` first (5 cases), confirmed red, then implemented `pick-seed.ts` (keyword heuristic, first-match wins, falls back to `market-spotlight`). 5/5 green.
+- **Route (`route.ts`):** ownership check via cookie-client (RLS), then service-role insert. Picks seed with `pickSeedId`, calls `/api/email-lab/ai` with `{ doc, scope: {kind, value}, prompt }`, validates response with `EmailDocSchema.safeParse` only when `applied === true`. Never a dead end — falls back to seeded doc on AI failure/invalid output.
+- **`crypto.randomUUID()`** — not nanoid. `createServiceRoleClient` for write (no owner INSERT policy on `deliverables`).
+- **Gate:** `bunx next build` clean · 5 pick-seed tests pass · `/api/projects/[id]/ai-material` appears in build output.
+- **Next (Task 5):** Email-lab save/load (Opus) — depends on Task 2 (materials API, POST + PATCH). Check dependency chain before starting.
+
+---
+
 ## 2026-06-24 (main) — feat(zip-summary): LIVE ingest + loader wiring + cron — census_acs lights up the ZIP Quick Summary [Section A]
 
 Took the census_acs pipeline from "dry-run only" to LIVE end-to-end (operator-approved the ingest + push):
