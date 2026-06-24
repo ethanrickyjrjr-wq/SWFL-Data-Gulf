@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { PageShell } from "@/components/PageShell";
 import { MetroAreaChart } from "@/components/charts";
+import { AddChartToProject } from "./AddChartToProject";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
 import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
 import {
@@ -240,24 +241,28 @@ export default async function ChartsPage() {
 
         <div className="flex flex-col gap-6">
           {panels.map((panel) => (
-            <MetroAreaChart
-              key={panel.rootId}
-              data={panel.data}
-              series={panel.series}
-              variant={panel.variant}
-              asOf={panel.asOf}
-              eyebrow={panel.eyebrow}
-              title={panel.title}
-              subtitle={panel.subtitle}
-              valueFormat={panel.valueFormat}
-              rootId={`${panel.rootId}-chart`}
-              emptyTitle={panel.error ? "Data unavailable" : "No data yet"}
-              emptyHint={
-                panel.error
-                  ? panel.error
-                  : `No ${panel.title.toLowerCase()} to graph yet — check back after the next refresh.`
-              }
-            />
+            <div key={panel.rootId}>
+              <div className="flex justify-end mb-2">
+                <AddChartToProject rootId={panel.rootId} title={panel.title} />
+              </div>
+              <MetroAreaChart
+                data={panel.data}
+                series={panel.series}
+                variant={panel.variant}
+                asOf={panel.asOf}
+                eyebrow={panel.eyebrow}
+                title={panel.title}
+                subtitle={panel.subtitle}
+                valueFormat={panel.valueFormat}
+                rootId={`${panel.rootId}-chart`}
+                emptyTitle={panel.error ? "Data unavailable" : "No data yet"}
+                emptyHint={
+                  panel.error
+                    ? panel.error
+                    : `No ${panel.title.toLowerCase()} to graph yet — check back after the next refresh.`
+                }
+              />
+            </div>
           ))}
         </div>
 
