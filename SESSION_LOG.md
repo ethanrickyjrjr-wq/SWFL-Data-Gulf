@@ -1,3 +1,17 @@
+## 2026-06-24 (main) — fix(highlighter): retire mock /z/ ZIP page → real /r/zip-report + grounding-coverage guard
+
+**Root cause of "the AI interrogates the user about our own number"** (screenshot: `/z/34112`, asks user what "89 New Permits" means): `/z/[zip]` — the canonical ZIP page the homepage map + hero search route to (`Hero.tsx:166,186`, `MapCanvas.tsx:161`) — rendered MOCK fixture numbers (`lib/landing/home-map-data`: "mock data; swap for live lake later") with NO grounding bridge. You can't honestly ground an AI on an invented number, and the page never published a report context, so the highlighter ran off-report → naked number → interrogation. The `/r/*` family was wired (`ReportHighlightBridge`); `/z/` never was. Grounding is opt-in per page with no guard → recurrence.
+
+**Fix:**
+- `app/z/[zip]/page.tsx` → 307 redirect to `/r/zip-report/[zip]` (the real, fully-wired report: live brains, sourced chips, grounding). One ZIP truth; mock data no longer user-facing. Temporary redirect on purpose — Hero pages are being reworked.
+- `lib/highlighter/grounding-coverage.test.ts` (NEW guard, 3 checks, matched on real import specifiers so comments don't false-positive): (1) mock `home-map-data` importers ⊆ allowlist `{Hero.tsx, MapCanvas.tsx}`; (2) every `/r/*` report route keeps `ReportHighlightBridge`; (3) any `app/**/page.tsx` using `DataRow`/`MetricsTable`/`FactChip` must be a registered grounded route. Falsified with a probe (2 checks red), then green.
+
+**Audit (verified against the real tree, not agent-trusted):** the only genuine ungrounded *text-number* surface left is the homepage hero (mock + ungrounded) — deferred to the Hero rework, now guard-enforced. `/p/` + `/embed/` are highlighter-SUPPRESSED by design (white-label) → no bug there (the subagent's `/p/` finding came from stale `.claude/worktrees` copies). `/r/*` prose numbers are grounded (reportId present) but lack per-number source — soft, deferred.
+
+**Gate:** `bun test` 3685/0 · `bunx next build` clean. Did NOT touch the pre-existing uncommitted `M app/charts/page.tsx`.
+
+---
+
 ## 2026-06-24 (main) — feat(email-lab): insert slot expanding seam UX
 
 `components/email-lab/BlockCanvas.tsx` only. InsertSlots between blocks now have a persistent 1px teal seam at rest (`h-2 border-t border-[#1BB8C9]/25`), expand to `h-10` on hover with a `+ Add block` pill, and illuminate as a magnetic drop zone (`bg-[#1BB8C9]/20` + 2px top bar) while a drag is in flight. `atEnd` slot updated to teal palette (`border-[#1BB8C9]/30`). Drag state wired via new `onDragOver`/`onDragCancel` on `DndContext` → `dragOverId` → `dragOverIndex` → `isDragTarget` prop.
