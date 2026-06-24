@@ -166,6 +166,10 @@ export async function POST(req: NextRequest) {
     doc?: unknown;
     currentTokens?: Record<string, string>;
     scope?: { kind?: string; value?: string };
+    // Informational label so callers (the materials refresh route) can pass mode:"refresh"
+    // without it being an unknown field. No behavior change — ContentPatchSchema already
+    // enforces content-only when a doc is present.
+    mode?: string;
   };
   const prompt = body.prompt ?? "";
 
