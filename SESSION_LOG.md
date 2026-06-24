@@ -1,3 +1,13 @@
+## 2026-06-24 (main) — spec: Email Lab block canvas design
+
+Researched Beefree/RGE Studio + EmailBuilder.js + dnd-kit + react-email via crawl4ai. Discovered `@react-email/components` + `@react-email/render` already installed (DigestEmail.tsx). Spec written: block-based EmailDoc replaces token system, `@dnd-kit/sortable` for drag-to-reorder, react-email components for both canvas DOM view and HTML export. `@usewaypoint/email-builder` skipped (React 19 peer dep conflict — unnecessary since react-email covers it).
+
+Spec: `docs/superpowers/specs/2026-06-24-email-lab-block-canvas-design.md`
+
+**Next:** Phase 1 — types.ts + block components + EmailDocRenderer + update API routes.
+
+---
+
 ## 2026-06-23 (main) — fix: highlighted fact dropped on conversation path + short numbers suppressed
 
 **Bug 1 (use-highlight.ts):** `isWorthySelection` killed numbers ≤3 chars ("88", "356") — popup never opened. Fixed: numeric figures bypass the length gate.
