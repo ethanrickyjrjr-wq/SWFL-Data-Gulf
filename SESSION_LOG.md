@@ -1,3 +1,11 @@
+## 2026-06-24 (main) — chore(materials-hub): build-queue sync 2/3/6 + Task-3 ownership-guard note
+
+Build-queue line 21 still read "Next: Task 2" though Tasks 2 (`42e83239`), 3 (`fab3745f`), 6 (`6b4afd28`) are all on `main`. Flipped 2/3/6 → ✅, Next → Task 5. Status board now matches git.
+
+Augmenting the prior entry's Task-3 line: the `app/api/email-lab/ai/route.ts` change is the additive `mode?: string` body label (informational — `ContentPatchSchema` already enforces content-only when a doc is present; no behavior change). The Task-3 refresh route ALSO adds an explicit cross-user **403 ownership guard** the plan's literal select omitted — `deliverables` SELECT is public (`USING (true)`, `20260613_deliverables.sql:37`), so RLS does NOT scope the read; mirrored `app/api/deliverables/[id]/refresh/route.ts:40`. Without it, a caller knowing a `(project_id, did)` pair could fork another user's block-canvas email onto that project and pollute its `supersedes_id` version chain. Build verified clean (`bunx next build`).
+
+---
+
 ## 2026-06-24 (main) — feat(materials-hub): Tasks 2, 3, 6 — materials API + refresh API + status logic
 
 Three tasks shipped in the materials-hub v2 chain:
