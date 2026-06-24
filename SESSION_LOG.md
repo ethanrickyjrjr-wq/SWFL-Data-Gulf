@@ -1,3 +1,15 @@
+## 2026-06-24 (main) — fix(zip-report): MM/DD/YYYY dates + city-data jargon scrub [ZIP rebuild Phase 0]
+
+**Backwards dates (rule 5).** All three report surfaces rendered year-first ISO dates via per-page `formatDate()` = `toISOString().slice(0,10)` ("2026-06-03"). Consolidated to ONE "As of" date in MM/DD/YYYY via a new shared `asOfFromIso()` (twin of `asOfFromToken`): `app/r/zip-report/[zip]`, `app/r/[slug]` (dropped redundant "Updated" + the ISO fallback), `app/r/cre-swfl/[corridor]` ("Verified" date). Also removed a latent raw-token leak (`?? freshnessToken`). Guard: `lib/project/report-date-format.test.ts` fails the build if any `app/r/**` page slices a date to ISO again — the "SOME FUCKING HOW" backstop.
+
+**City-data jargon.** `sanitizeProse` (the chokepoint the ZIP city section flows through via `toDisplayBrain` in zip-dossier) didn't strip "CRE pack" (only the literal id `cre-swfl`). Extended `BANNED_PROSE`: "CRE pack" → "commercial real estate read", "verified corridors/areas" → plain. One fix covers the ZIP city section, the corridor page, AND the chat. Guard: `refinery/render/jargon-scrub.test.mts`. (Phase 3 rewrites the cre-swfl emitter at source.)
+
+**Gate:** `bun test` 3690/0 · `bunx next build` clean. Did not touch the pre-existing uncommitted `app/charts/page.tsx`.
+
+Spec: `docs/superpowers/specs/2026-06-24-zip-report-rebuild-design.md`. Phase 1 (page layout + crawl-fed Quick Summary) scaffolding — `lib/zip-summary/` contract + the Section A crawl handoff — committed alongside.
+
+---
+
 ## 2026-06-24 (main) — fix(highlighter): retire mock /z/ ZIP page → real /r/zip-report + grounding-coverage guard
 
 **Root cause of "the AI interrogates the user about our own number"** (screenshot: `/z/34112`, asks user what "89 New Permits" means): `/z/[zip]` — the canonical ZIP page the homepage map + hero search route to (`Hero.tsx:166,186`, `MapCanvas.tsx:161`) — rendered MOCK fixture numbers (`lib/landing/home-map-data`: "mock data; swap for live lake later") with NO grounding bridge. You can't honestly ground an AI on an invented number, and the page never published a report context, so the highlighter ran off-report → naked number → interrogation. The `/r/*` family was wired (`ReportHighlightBridge`); `/z/` never was. Grounding is opt-in per page with no guard → recurrence.

@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { asOfFromToken, tokenDayKey, tokenVersion } from "./as-of";
+import { asOfFromToken, asOfFromIso, tokenDayKey, tokenVersion } from "./as-of";
 
 test("tokenVersion extracts the numeric refinery version (for same-day tie-breaks)", () => {
   expect(tokenVersion("SWFL-7421-v5-20260610")).toBe(5);
@@ -35,4 +35,19 @@ test("rejects an impossible month", () => {
 
 test("single-digit day renders with leading zero (MM/DD/YYYY)", () => {
   expect(asOfFromToken("SWFL-7421-v2-20260103")).toBe("01/03/2026");
+});
+
+test("asOfFromIso formats a raw ISO date/timestamp as MM/DD/YYYY — never year-first", () => {
+  expect(asOfFromIso("2026-06-03")).toBe("06/03/2026");
+  expect(asOfFromIso("2026-06-03T12:00:00Z")).toBe("06/03/2026");
+  // The exact backwards-date the operator kept seeing must NOT survive.
+  expect(asOfFromIso("2026-06-03")).not.toMatch(/^\d{4}-\d{2}-\d{2}/);
+});
+
+test("asOfFromIso → null on null/empty/garbage/impossible month", () => {
+  expect(asOfFromIso(null)).toBeNull();
+  expect(asOfFromIso(undefined)).toBeNull();
+  expect(asOfFromIso("")).toBeNull();
+  expect(asOfFromIso("not-a-date")).toBeNull();
+  expect(asOfFromIso("2026-13-01")).toBeNull();
 });

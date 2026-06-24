@@ -28,6 +28,26 @@ export function asOfFromToken(token: string | null | undefined): string | null {
 }
 
 /**
+ * Format a raw ISO date/timestamp (`refined_at`, `metrics_verified_date`, …) as
+ * MM/DD/YYYY — rule 5. The twin of `asOfFromToken` for dates that are NOT freshness
+ * tokens. Returns null when there's no parseable leading `YYYY-MM-DD`.
+ *
+ * ALL user-facing date display goes through this or `asOfFromToken` — NEVER raw ISO
+ * (`toISOString().slice(0,10)` / `.slice(0,10)`), which is year-first and reads
+ * "backwards". The grounding/date guard enforces this on the report pages.
+ */
+export function asOfFromIso(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const m = /(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return null;
+  const [, y, mo, d] = m;
+  const month = Number(mo);
+  const day = Number(d);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return `${mo}/${d}/${y}`;
+}
+
+/**
  * The sortable "YYYYMMDD" day key of a freshness token's trailing date, or null.
  * 8-digit zero-padded → a plain lexical `>` IS chronological (the same day-granular
  * basis as reconcile's `fresher_side`). Use this for "newer than last seen"

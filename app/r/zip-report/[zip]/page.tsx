@@ -162,10 +162,10 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     }
   }
 
-  // Freshness token — quoted once, in the header
+  // Freshness token stays INTERNAL; the as-of date is shown once, MM/DD/YYYY (rule 5).
   const freshnessToken =
     housing?.freshness_token ?? env?.freshness_token ?? Object.values(dossier.freshness_tokens)[0];
-  const updatedAt = housing?.refined_at ?? env?.refined_at;
+  const asOf = asOfFromToken(freshnessToken);
 
   const highlighterEnabled = highlighterUiEnabled();
 
@@ -238,17 +238,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <ReportHeader title={headerTitle}>
         <dl className="mt-4 flex flex-wrap gap-5 text-sm">
-          {freshnessToken && (
-            <Meta
-              label="Freshness"
-              value={
-                <code className="text-xs text-[#0a8078]">
-                  {asOfFromToken(freshnessToken) ?? freshnessToken}
-                </code>
-              }
-            />
-          )}
-          {updatedAt && <Meta label="Updated" value={formatDate(updatedAt)} />}
+          {asOf && <Meta label="As of" value={asOf} />}
         </dl>
         <div className="mt-5">
           <LocationSearchBox defaultValue={zip} />
@@ -425,10 +415,4 @@ function trendBadge(b: { text: string; polarity: DirectionPolarity; isUp: boolea
 
 function stripStatAnnotation(text: string): string {
   return text.replace(/\s*\([^()]*:\s*[^()]+\)\s*$/, "");
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toISOString().slice(0, 10);
 }

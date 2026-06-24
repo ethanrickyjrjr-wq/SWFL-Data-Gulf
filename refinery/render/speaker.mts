@@ -108,6 +108,14 @@ const BANNED_PROSE: Array<[RegExp, string]> = [
   [/sub-brain\s+pointers?:?/gi, ""],
   // Brand: the lake's internal name never reaches a reader — it is SWFL Data Gulf.
   [/\bSWFL Intelligence Lake\b/gi, "SWFL Data Gulf"],
+  // Internal pack framing — "the <X> pack" is build-system jargon, never a reader
+  // concept. Map CRE pack → the same human label PACK_ID_LABELS gives `cre-swfl`.
+  // (Phase 3 rewrites the cre-swfl emitter at source; this is the render-time net.)
+  [/\bSWFL\s+CRE\s+pack\b/gi, "SWFL commercial real estate read"],
+  [/\bCRE\s+pack\b/gi, "commercial real estate read"],
+  // "verified corridors/areas" — "verified" is internal corpus-QA jargon to a reader.
+  // deCorridor runs FIRST, so by here "corridors" has already become "areas".
+  [/\bverified\s+(areas?|corridors?)\b/gi, "$1"],
 ];
 
 // ---------------------------------------------------------------------------

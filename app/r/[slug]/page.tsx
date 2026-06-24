@@ -41,7 +41,7 @@ import {
   type MBCityMetric,
   type MetricBox,
 } from "../cre-swfl/cre-metrics";
-import { asOfFromToken } from "@/lib/project/as-of";
+import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -176,14 +176,13 @@ export default async function ReportPage({ params }: PageProps) {
         <p className="mt-3 max-w-3xl text-base leading-7 text-gray-300">{display.scope}</p>
         <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
           <Meta
-            label="Freshness"
+            label="As of"
             value={
               <span className="text-xs text-[#00d4aa]">
-                {asOfFromToken(display.freshnessToken) ?? formatDate(display.refinedAt)}
+                {asOfFromToken(display.freshnessToken) ?? asOfFromIso(display.refinedAt)}
               </span>
             }
           />
-          <Meta label="Updated" value={formatDate(display.refinedAt)} />
           <Meta label="Confidence" value={`${display.confidencePct}%`} />
         </dl>
       </ReportHeader>
@@ -405,12 +404,6 @@ function RawFallback({ slug, content }: { slug: string; content: string }) {
       </pre>
     </ReportShell>
   );
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toISOString().slice(0, 10);
 }
 
 function SourcesGate({ sourceCount }: { sourceCount: number }) {
