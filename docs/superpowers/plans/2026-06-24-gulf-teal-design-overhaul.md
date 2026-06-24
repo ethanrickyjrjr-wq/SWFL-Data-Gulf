@@ -13,6 +13,112 @@
 
 **Tech Stack:** Next.js 15 App Router, Tailwind CSS v4 (`@theme inline`), CSS custom properties, Lucide React icons.
 
+---
+
+## Design System Map (graphify-verified, 90+ files)
+
+```
+ONE ROOT
+app/globals.css  ──── --gulf-teal: #3DC9C0 ──► --brand-primary
+                       --brand-surface / --brand-border / --brand-border-subtle
+                       --text-on-brand     (dark text on teal — WCAG)
+                       body::before        (2px waterline, EVERY page)
+                       @theme inline       → bg-brand / text-brand / border-brand
+                       .btn-gradient       → bright teal gradient
+                       .input-modern:focus → brand-border
+
+══ AI OVERLAY SYSTEM (on EVERY page via AppShell) ══════════════════════════════
+AppShell
+  └── AiBriefcasePill [T5]          ← floating ✦ pill, notification badge
+        ├── BriefcasePanel [T5]      ← slide-out panel
+        │     ├── BriefcaseChat [T5] ← AI chat inside panel
+        │     │     └── ChatScheduleCard [T5]  ← schedule chips in chat
+        │     └── MCPInstallCard [T5]           ← MCP CTA card
+        └── AskAiDock [T5]           ← full AI dock (fixed, slides up)
+
+  + HighlightPopup [T5]              ← text-selection popup, any page
+  + DeliverableModal
+      └── DeliverableHighlightPopup [T4b] ← in deliverable iframe
+  + FactChip [T5]                    ← inline underlined fact chip
+  + DiscoveryTicker [T5]             ← ✦ live discovery ticker
+  + FirstTouchHint [T5]              ← ✦ first-visit overlay
+
+══ NAV & SHELL (wraps every page) ══════════════════════════════════════════════
+SiteShell [T6]                       ← site-wide nav, 8× navy-dark
+GlobalNav                            ← top nav bar
+SiteFooter [T6]                      ← footer bg-navy-dark
+  └── DigestSubscribe [T6]           ← email subscribe, btn-gradient text-navy-dark
+
+══ LANDING PAGE (/) ═════════════════════════════════════════════════════════════
+page:/
+  ├── Hero [T4a]                     ← hero badge, teal dot, search button
+  ├── Capabilities [T8]              ← emoji → Lucide icons
+  └── Waitlist [T6,T7]              ← submit btn-gradient text-navy-dark
+  + home-explorer.css [T3]           ← rgba hardcodes, text-on-accent
+  + MCPInstall [T6]                  ← btn-gradient text-navy-dark
+
+══ EMAIL LAB (/email-lab  +  /project/[id]/email-lab) ══════════════════════════
+EmailLabClient ─────────────────────────────────► EmailLabShell [T4c]
+ProjectEmailLabClient [T4e] ─────────────────────► EmailLabShell [T4c]
+  EmailLabShell uses:
+    ├── BlockCanvas [T4c]            ← #1BB8C9 drop zones, add-block row
+    ├── BlockInspector [T4c]         ← #1BB8C9 focus rings, color placeholder
+    └── CanvasBlock [T4c]            ← #1BB8C9 selection ring
+
+══ PROJECT WORKSPACE (/project/[id]) ════════════════════════════════════════════
+ProjectsRail [T4d]                   ← sidebar rail, badges, hover links
+  ├── ProjectActionBar [T4d]         ← AI action bar, ➜ prompt, 10+ #00d4aa
+  ├── BrandingBlock [T4d]            ← color swatch palette, save button
+  ├── ConnectMcpBlock [T4d]          ← 5× CTA buttons #00d4aa
+  ├── ProjectTitle [T4d]             ← title input focus + save button
+  ├── DeliverableLanes [T4d]         ← schedule chip
+  ├── DeliverableModal [T4d]
+  │     └── DeliverableHighlightPopup [T4b]
+  ├── DeliverableThumbnail [T4d]     ← preview links
+  ├── DeliverableEditPanel [T4d]     ← DEFAULT_COLOR, focus, accent-checkbox
+  ├── ItemCard [T4d]                 ← badge chip
+  └── ItemDetail [T4d]               ← link colors
+
+══ MATERIALS HUB (inside /project/[id]) ═════════════════════════════════════════
+MaterialsHub
+  ├── IntentLine [T4e]               ← AI intent input, #1BB8C9 ring + icons
+  ├── TemplateRail [T4e]             ← template chips, #1BB8C9 borders
+  ├── MaterialRow [T4e]              ← row focus ring #1BB8C9
+  └── ProjectSearch [T4e]           ← badge + focus border #00d4aa
+
+══ REPORTS & CONTENT PAGES ══════════════════════════════════════════════════════
+page:/r/[slug]          [T4a,T6]     ← CTA button, navy-dark bg
+page:/r/method/[metric] [T4e]        ← #00d4aa links
+page:/r/source/[table]  [T4e]        ← #00d4aa links
+page:/r/zip-report/[zip][T4a,T6]     ← inline color, navy-dark
+page:/r/cre-swfl/[corr] [T4a,T6]     ← badges, navy-dark
+page:/charts            [T4a,T6]     ← chart config, navy-dark
+page:/p/[id]            [T4a,T4e]    ← action buttons, TemplateSwitcher
+page:/c/[id]            [T4e]        ← conversation link, AddToProject
+
+══ CHARTS ENGINE ════════════════════════════════════════════════════════════════
+lib/charts/series [T2]               ← 4 series presets, all #0a8078 → #3DC9C0
+  ├── page:/charts
+  ├── ZHVIAreaChart
+  └── lib/charts/gallery-loaders
+
+══ EMAIL TEMPLATE ROOT ══════════════════════════════════════════════════════════
+scripts/email/types.ts [T4f]         ← SWFL_THEME.accent: "#1BB8C9" → "#3DC9C0"
+  ├── lib/email/templates/components/_shared.ts  (COMPONENT_DEFAULTS.accent)
+  ├── lib/email/templates/charts/chart-defaults.ts
+  └── lib/email/templates/token-defaults.ts      (ACCENT token in all HTML)
+
+lib/email/doc/default-docs.ts [T4f]  ← accentColor default for new docs
+  ├── EmailLabShell
+  ├── ProjectEmailLabClient
+  └── /api/projects/[id]/ai-material
+
+lib/deliverable/material-status.ts [T4f] ← color + bg class for email badges
+  └── (renders badge chips across project UI)
+```
+
+---
+
 ## Global Constraints
 
 - `bunx next build` must pass after every task — never push a broken build.
