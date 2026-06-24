@@ -1,22 +1,110 @@
-/* ZIP Report page — /r/zip-report/[zip] */
-/* Ported from app/z/[zip]/zip-page.css (the approved design). Uses project design tokens. */
+/* ZIP Report page — /r/zip-report/[zip]                                   */
+/* Full port of the approved /z/[zip] design onto the real report surface.  */
+/* Uses project design tokens from globals.css.                             */
 
-/* ─── TOP STAT BAR ─── */
-.zr-stats-bar {
+/* ─── TOP SEARCH BAR ─── */
+.zr-search-bar {
+  background: var(--gulf-midnight);
+  border-bottom: 1px solid var(--gulf-slate);
+  padding: 10px 24px;
+}
+
+/* ─── HERO ─── */
+.zp-hero {
+  background: var(--gulf-midnight);
+  border-bottom: 1px solid var(--gulf-slate);
+}
+.zp-hero-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 56px 40px 48px;
+  display: flex;
+  align-items: center;
+  gap: 56px;
+}
+.zp-shape-wrap {
+  flex: 0 0 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.zp-shape-wrap svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 32px var(--zip-glow, rgba(10,128,120,0.55)));
+}
+.zp-shape-wrap svg path,
+.zp-shape-wrap svg polygon {
+  fill: var(--zip-fill, #0a8078);
+  stroke: var(--gulf-midnight);
+  stroke-width: 0.6px;
+  stroke-linejoin: round;
+}
+.zp-shape-placeholder {
+  flex: 0 0 260px;
+  height: 260px;
+  background: var(--gulf-slate);
+  border-radius: 8px;
+}
+.zp-identity {
+  flex: 1;
+  min-width: 0;
+}
+.zp-nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+.zp-nav-back:hover { color: var(--text-secondary); }
+.zp-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gulf-teal);
+  margin-bottom: 14px;
+}
+.zp-number {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: clamp(56px, 8vw, 88px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+.zp-name {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.zp-county {
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+/* ─── STATS BAR — 3 columns ─── */
+.zp-stats-bar {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 1px solid var(--gulf-slate);
-  border-radius: 12px;
-  overflow: hidden;
+  border-bottom: 1px solid var(--gulf-slate);
   background: var(--gulf-deep);
-  margin-top: 24px;
 }
-.zr-stat-cell {
+.zp-stat-cell {
   padding: 18px 22px;
   border-right: 1px solid var(--gulf-slate);
 }
-.zr-stat-cell:last-child { border-right: none; }
-.zr-stat-label {
+.zp-stat-cell:last-child { border-right: none; }
+.zp-stat-label {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -24,20 +112,49 @@
   color: var(--text-tertiary);
   margin-bottom: 5px;
 }
-.zr-stat-value {
+.zp-stat-value {
   font-family: var(--font-geist-mono), monospace;
   font-size: 22px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.1;
 }
-.zr-stat-sub {
+.zp-stat-sub {
   font-size: 11px;
   color: var(--text-tertiary);
   margin-top: 3px;
 }
+.zp-stat-tag {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(10,128,120,.12);
+  color: var(--gulf-teal);
+  border: 1px solid rgba(10,128,120,.2);
+}
 
-/* ─── AT A GLANCE — metric blocks ─── */
+/* ─── CONTENT WRAPPER (below hero + stats bar) ─── */
+.zr-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+}
+
+/* ─── BREAKDOWN — at a glance metric blocks ─── */
+.zp-breakdown-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--gulf-slate);
+  margin-bottom: 8px;
+}
+.zp-breakdown-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
 .zp-metric-block {
   padding: 22px 0;
   border-bottom: 1px solid var(--gulf-slate);
@@ -86,6 +203,7 @@
   border-radius: 4px;
 }
 .zp-bar-fill--flood   { background: linear-gradient(to right, #1c3a2e, #d4b370, #e08158); }
+.zp-bar-fill--value   { background: linear-gradient(to right, #1c3a2e, #0a8078, #5bc97a); }
 .zp-bar-fill--permits { background: linear-gradient(to right, #1c3a2e, #4a6fa8, #a0c4ff); }
 .zp-percentile {
   font-size: 11px;
@@ -93,8 +211,21 @@
 }
 
 /* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .zp-stats-bar { grid-template-columns: 1fr; }
+  .zp-stat-cell { border-right: none; border-bottom: 1px solid var(--gulf-slate); }
+  .zp-stat-cell:last-child { border-bottom: none; }
+}
 @media (max-width: 640px) {
-  .zr-stats-bar { grid-template-columns: 1fr; }
-  .zr-stat-cell { border-right: none; border-bottom: 1px solid var(--gulf-slate); }
-  .zr-stat-cell:last-child { border-bottom: none; }
+  .zp-hero-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 24px 36px;
+    gap: 18px;
+  }
+  .zp-shape-wrap { flex: 0 0 auto; width: 132px; height: 132px; }
+  .zp-number { font-size: clamp(44px, 14vw, 72px); }
+  .zr-search-bar { padding: 10px 16px; }
+  .zr-content { padding: 32px 16px 72px; }
 }

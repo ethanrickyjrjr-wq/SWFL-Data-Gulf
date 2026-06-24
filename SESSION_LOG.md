@@ -1,3 +1,17 @@
+## 2026-06-24 (main) — feat(zip-report): exact hero port — ZIP cutout + 3-stat bar + ← Back + search-at-top
+
+**Matched the approved screenshot design exactly:**
+- Hero: full-bleed `zp-hero` section with real ZIP cutout SVG (`extractZipShape`) left + identity right (large mono ZIP number, place name, county via `zp-number/name/county`). Shape fill color driven by flood percentile (green → gold → coral). `← Back` (→ `/`) replaces `← Map`.
+- Search bar at the very top (`zr-search-bar`) above the hero — per operator request.
+- Stats bar: 3 columns (flood / home value / permits), each with `#X of N ZIPs` ranking pill computed from live data: flood from percentile rank metric, home value by sorting housing detail_table, permits by sorting Lee ZIP totals.
+- "At a glance": 3 metric blocks with gradient bars (`--flood` brown-gold, `--value` teal-green, `--permits` blue) + percentile text. No mock "Sample data" badge. All from live brains.
+- `zip-report.css` fully updated: hero, nav-back, eyebrow, shape, stats-bar (3-col), breakdown, all three bar gradients. Responsive collapse at 900px/640px.
+- `ReportShell` replaced with raw `<div>` wrapper so hero/stats-bar span full bleed; report sections in `.zr-content` centered max-width column below.
+
+**Gate:** `bunx tsc` clean · `bun test` 17/0 on guard suites · `bunx next build` clean.
+
+---
+
 ## 2026-06-24 (main) — feat(zip-report): Phase 1 layout rebuild — stat bar + at-a-glance + Quick Summary section
 
 **Layout rebuilt** per `docs/superpowers/specs/2026-06-24-zip-report-rebuild-design.md` §Phase 1:
