@@ -1,3 +1,11 @@
+## 2026-06-24 (main) — fix(materials-hub): post-audit patches (`b2a6d9c4`, `f1307ffe`)
+
+- `EmailLabShell` upload tile: `disabled={promotingPath !== null}` — was only disabled during its own upload, now disabled during any promotion (race fix).
+- `EmailLabShell` `applyPhotoUrl`: update path now calls `commit` (discrete undo frame) instead of `updateBlock`/`liveEdit`.
+- **Next:** Task 9 (wire ProjectWorkspace + DeliverableLanes refactor).
+
+---
+
 ## 2026-06-24 (main) — feat(materials-hub): Task 8 — hub UI (`19ddd2e7`)
 
 - `IntentLine.tsx` (NEW): hero input with 2-step progress strip (picking→filling→done/fail), teal ring, `aria-live` status, failure state triggers parent highlight.
