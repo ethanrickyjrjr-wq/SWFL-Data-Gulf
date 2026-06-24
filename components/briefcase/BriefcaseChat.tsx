@@ -251,7 +251,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
               <button
                 type="button"
                 onClick={() => submit(p)}
-                className="w-full rounded-lg border border-[#3DC9C0] bg-[#3DC9C0]/10 px-3 py-2 text-left text-xs text-[#f0ede6] transition-colors hover:bg-[#3DC9C0]/20 hover:text-[#3DC9C0]"
+                className="w-full rounded-lg border border-gulf-teal bg-gulf-teal/10 px-3 py-2 text-left text-xs text-[#f0ede6] transition-colors hover:bg-gulf-teal/20 hover:text-gulf-teal"
               >
                 {p}
               </button>
@@ -261,7 +261,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       )}
 
       {!nudgeDismissed && nudgeItems && nudgeItems.length > 0 && (
-        <div className="mb-2 rounded-lg border border-[#3DC9C0]/30 bg-[#0f1d24] p-3">
+        <div className="mb-2 rounded-lg border border-gulf-teal/30 bg-[#0f1d24] p-3">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs text-gray-500">Last session · {nudgeTimeLabel}</span>
             <button
@@ -323,7 +323,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
                     type="button"
                     onClick={() => fileAnswer(m.content)}
                     disabled={filed === "qa"}
-                    className="mt-1 text-xs text-[#3DC9C0] transition-colors hover:text-[#3DC9C0]/80 disabled:opacity-60"
+                    className="mt-1 text-xs text-gulf-teal transition-colors hover:text-gulf-teal/80 disabled:opacity-60"
                   >
                     {filed === "qa" ? "Filed ✓" : "File this answer"}
                   </button>
@@ -360,7 +360,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
               ? "Ask a couple of questions first"
               : "Summarize this conversation and file it to your project"
           }
-          className="mb-3 w-full rounded-lg border border-[#3DC9C0]/40 px-3 py-2 text-xs text-gray-400 transition-colors hover:border-[#3DC9C0] hover:text-[#3DC9C0] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mb-3 w-full rounded-lg border border-gulf-teal/40 px-3 py-2 text-xs text-gray-400 transition-colors hover:border-gulf-teal hover:text-gulf-teal disabled:cursor-not-allowed disabled:opacity-50"
         >
           {summarizeLabel}
         </button>
@@ -387,7 +387,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
           rows={2}
           disabled={busy}
           placeholder="Ask about SWFL real estate, permits, flood risk…"
-          className="min-w-0 flex-1 resize-none rounded-lg border border-[#3DC9C0] bg-[#152832] px-3 py-2 text-xs text-[#f0ede6] placeholder:text-gray-500 focus:border-[#3DC9C0] focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]/40 disabled:opacity-50"
+          className="min-w-0 flex-1 resize-none rounded-lg border border-gulf-teal bg-[#152832] px-3 py-2 text-xs text-[#f0ede6] placeholder:text-gray-500 focus:border-gulf-teal focus:outline-none focus:ring-1 focus:ring-gulf-teal/40 disabled:opacity-50"
         />
         <button
           type="submit"

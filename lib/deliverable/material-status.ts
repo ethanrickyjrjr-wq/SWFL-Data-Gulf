@@ -20,8 +20,8 @@ export interface FormatBadge {
 }
 
 const FORMAT_BADGES: Record<string, FormatBadge> = {
-  "block-canvas": { label: "email", color: "#3DC9C0", bg: "bg-[#3DC9C0]/15" },
-  "client-email": { label: "email", color: "#3DC9C0", bg: "bg-[#3DC9C0]/15" },
+  "block-canvas": { label: "email", color: "#3DC9C0", bg: "bg-gulf-teal/15" },
+  "client-email": { label: "email", color: "#3DC9C0", bg: "bg-gulf-teal/15" },
   email: { label: "digest", color: "#f97316", bg: "bg-[#f97316]/15" },
   "market-overview": { label: "overview", color: "#f97316", bg: "bg-[#f97316]/15" },
   "one-pager": { label: "one-pager", color: "#8b5cf6", bg: "bg-[#8b5cf6]/15" },

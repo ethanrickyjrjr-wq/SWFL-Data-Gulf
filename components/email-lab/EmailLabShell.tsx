@@ -385,7 +385,7 @@ export function EmailLabShell({
             <>
               {/* ── AI Generate ── */}
               <div className="border-b border-white/8 px-4 pb-4 pt-4">
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[#3DC9C0]">
+                <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
                   Fill with AI
                 </p>
                 <textarea
@@ -396,12 +396,12 @@ export function EmailLabShell({
                   }}
                   placeholder={aiPlaceholder}
                   rows={4}
-                  className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-[#3DC9C0]/50 focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]"
+                  className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
                 />
                 <button
                   onClick={() => runAi(aiPrompt)}
                   disabled={aiLoading || !aiPrompt.trim()}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#3DC9C0] py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
                 >
                   {aiLoading ? (
                     <>
@@ -441,7 +441,7 @@ export function EmailLabShell({
                   <select
                     value={doc.globalStyle.fontFamily}
                     onChange={(e) => setGlobalStyle({ fontFamily: e.target.value as FontFamily })}
-                    className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]"
+                    className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
                   >
                     {FONT_OPTIONS.map((f) => (
                       <option key={f.value} value={f.value} className="text-black">
@@ -485,11 +485,11 @@ export function EmailLabShell({
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={promotingPath !== null}
-                      className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-[#3DC9C0]/50 hover:text-[#3DC9C0]/70 disabled:opacity-40"
+                      className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal/70 disabled:opacity-40"
                       title="Upload a new photo"
                     >
                       {promotingPath === "__upload__" ? (
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-[#3DC9C0]" />
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
                       ) : (
                         <span className="text-lg leading-none">＋</span>
                       )}
@@ -505,8 +505,8 @@ export function EmailLabShell({
                         title={photo.caption ?? photo.storage_path.split("/").pop()}
                         className={`relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
                           promotingPath === photo.storage_path
-                            ? "border-[#3DC9C0]"
-                            : "border-transparent hover:border-[#3DC9C0] disabled:opacity-60"
+                            ? "border-gulf-teal"
+                            : "border-transparent hover:border-gulf-teal disabled:opacity-60"
                         }`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -517,7 +517,7 @@ export function EmailLabShell({
                         />
                         {promotingPath === photo.storage_path && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-[#3DC9C0]" />
+                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
                           </div>
                         )}
                       </button>
@@ -566,7 +566,7 @@ export function EmailLabShell({
                         onClick={() => pickClassic(t.id)}
                         className={`flex items-center gap-2 rounded-md border px-2.5 py-2 text-left transition-colors ${
                           mode === "classic" && classicId === t.id
-                            ? "border-[#3DC9C0]/40 bg-[#3DC9C0]/15 text-[#3DC9C0]"
+                            ? "border-gulf-teal/40 bg-gulf-teal/15 text-gulf-teal"
                             : "border-white/8 bg-white/4 text-white/55 hover:bg-white/8"
                         }`}
                       >
@@ -587,7 +587,7 @@ export function EmailLabShell({
         <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-6 py-3">
           <div className="flex items-center gap-3">
             <div
-              className={`h-2 w-2 rounded-full ${busy ? "animate-pulse bg-[#3DC9C0]" : "bg-white/20"}`}
+              className={`h-2 w-2 rounded-full ${busy ? "animate-pulse bg-gulf-teal" : "bg-white/20"}`}
             />
             <span className="text-xs text-white/35">
               {aiLoading
@@ -652,7 +652,7 @@ export function EmailLabShell({
                 type="button"
                 onClick={() => onSave(doc)}
                 disabled={saving}
-                className="px-3 py-1.5 text-sm rounded-lg bg-[#3DC9C0]/20 text-[#3DC9C0] border border-[#3DC9C0]/30 hover:bg-[#3DC9C0]/30 disabled:opacity-40 transition-colors focus-visible:ring-2 focus-visible:ring-[#3DC9C0]/40"
+                className="px-3 py-1.5 text-sm rounded-lg bg-gulf-teal/20 text-gulf-teal border border-gulf-teal/30 hover:bg-gulf-teal/30 disabled:opacity-40 transition-colors focus-visible:ring-2 focus-visible:ring-gulf-teal/40"
               >
                 {saving ? "Saving…" : "Save"}
               </button>
@@ -711,7 +711,7 @@ function ColorControl({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]"
+          className="w-full rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
         />
       </div>
     </label>

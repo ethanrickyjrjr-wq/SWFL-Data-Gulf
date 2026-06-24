@@ -100,7 +100,7 @@ export function AiBriefcasePill({
           </svg>
           <span>{open ? "Close" : "AI + Briefcase"}</span>
           {count > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-navy-dark px-1 text-[11px] font-bold text-[#3DC9C0]">
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-navy-dark px-1 text-[11px] font-bold text-gulf-teal">
               {count}
             </span>
           )}
@@ -127,7 +127,7 @@ export function AiBriefcasePill({
           // PHONE ONLY: the auto-open sheet was max-h-[80vh] and buried the homepage map
           // on first visit. Cap it at 60vh so the map stays visible above it. Desktop
           // (sm:) keeps its 70vh / 360px popover unchanged.
-          className="fixed inset-x-0 bottom-0 z-[57] flex max-h-[60vh] flex-col overflow-y-auto rounded-t-2xl border border-[#3DC9C0] bg-[#2c3539] p-4 shadow-2xl shadow-black/50 sm:inset-x-auto sm:bottom-20 sm:right-4 sm:max-h-[70vh] sm:w-[360px] sm:rounded-xl"
+          className="fixed inset-x-0 bottom-0 z-[57] flex max-h-[60vh] flex-col overflow-y-auto rounded-t-2xl border border-gulf-teal bg-[#2c3539] p-4 shadow-2xl shadow-black/50 sm:inset-x-auto sm:bottom-20 sm:right-4 sm:max-h-[70vh] sm:w-[360px] sm:rounded-xl"
         >
           <BriefcasePanel page={page} />
         </div>

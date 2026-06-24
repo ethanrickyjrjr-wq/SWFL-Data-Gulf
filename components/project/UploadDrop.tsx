@@ -140,7 +140,7 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
         Sign in to attach files.{" "}
         <Link
           href={`/login?next=/project/${projectId}`}
-          className="text-[#3DC9C0] underline underline-offset-2"
+          className="text-gulf-teal underline underline-offset-2"
         >
           Log in
         </Link>
@@ -161,7 +161,7 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
         value={caption}
         onChange={(e) => setCaption(e.target.value)}
         placeholder="Caption (optional)"
-        className="mt-3 w-full rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 text-sm text-white outline-none focus:border-[#3DC9C0]/40"
+        className="mt-3 w-full rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 text-sm text-white outline-none focus:border-gulf-teal/40"
       />
 
       <div className="mt-3 flex items-center gap-3">
@@ -170,7 +170,7 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
             "cursor-pointer rounded-full px-4 py-2 text-sm font-medium " +
             (busy || atLimit
               ? "cursor-not-allowed bg-white/10 text-gray-500"
-              : "bg-[#3DC9C0] text-[#04121b]")
+              : "bg-gulf-teal text-[#04121b]")
           }
         >
           {busy ? "Uploading…" : "Choose image or PDF"}
@@ -190,8 +190,8 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
 
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
       {reading && (
-        <p className="mt-2 flex items-center gap-2 text-xs text-[#3DC9C0]">
-          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[#3DC9C0]" />
+        <p className="mt-2 flex items-center gap-2 text-xs text-gulf-teal">
+          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-gulf-teal" />
           Reading the PDF so your email can use its contents…
         </p>
       )}

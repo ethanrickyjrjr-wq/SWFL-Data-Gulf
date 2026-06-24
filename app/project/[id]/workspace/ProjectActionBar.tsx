@@ -127,8 +127,8 @@ export function ProjectActionBar({ projectId }: { projectId: string }) {
       {/* Input row — terminal command aesthetic */}
       {(state.phase === "idle" || state.phase === "error") && (
         <>
-          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0d1e2b]/50 px-3 py-2.5 transition-colors focus-within:border-[#3DC9C0]/40">
-            <span className="select-none font-mono text-sm text-[#3DC9C0]">➜</span>
+          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0d1e2b]/50 px-3 py-2.5 transition-colors focus-within:border-gulf-teal/40">
+            <span className="select-none font-mono text-sm text-gulf-teal">➜</span>
             <input
               type="text"
               value={state.input}
@@ -146,7 +146,7 @@ export function ProjectActionBar({ projectId }: { projectId: string }) {
                 type="button"
                 onClick={() => void propose()}
                 aria-label="Submit"
-                className="text-xs text-[#3DC9C0] hover:opacity-80"
+                className="text-xs text-gulf-teal hover:opacity-80"
               >
                 →
               </button>
@@ -156,7 +156,7 @@ export function ProjectActionBar({ projectId }: { projectId: string }) {
           {state.resultHref && (
             <a
               href={state.resultHref}
-              className="mt-1.5 inline-block text-xs text-[#3DC9C0] underline underline-offset-2 hover:opacity-80"
+              className="mt-1.5 inline-block text-xs text-gulf-teal underline underline-offset-2 hover:opacity-80"
             >
               View last deliverable →
             </a>
@@ -176,22 +176,22 @@ export function ProjectActionBar({ projectId }: { projectId: string }) {
       {/* Loading */}
       {state.phase === "loading" && (
         <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0d1e2b]/50 px-3 py-2.5">
-          <span className="select-none font-mono text-sm text-[#3DC9C0]">➜</span>
+          <span className="select-none font-mono text-sm text-gulf-teal">➜</span>
           <span className="text-sm text-gray-500">Thinking…</span>
         </div>
       )}
 
       {/* Proposal card */}
       {(state.phase === "proposed" || state.phase === "confirming") && (
-        <div className="animate-in fade-in rounded-xl border border-[#3DC9C0]/30 bg-[#3DC9C0]/5 p-4 duration-150">
-          <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[#3DC9C0]">Proposed</p>
+        <div className="animate-in fade-in rounded-xl border border-gulf-teal/30 bg-gulf-teal/5 p-4 duration-150">
+          <p className="mb-0.5 text-[10px] uppercase tracking-widest text-gulf-teal">Proposed</p>
           <p className="text-sm text-[#f0ede6]">{state.summary}</p>
           <div className="mt-3 flex items-center gap-3">
             <button
               type="button"
               onClick={() => void confirm()}
               disabled={state.phase === "confirming"}
-              className="rounded-full bg-[#3DC9C0] px-4 py-1.5 text-xs font-medium text-[#04121b] disabled:opacity-50"
+              className="rounded-full bg-gulf-teal px-4 py-1.5 text-xs font-medium text-[#04121b] disabled:opacity-50"
             >
               {state.phase === "confirming" ? "Confirming…" : "Confirm"}
             </button>
@@ -209,12 +209,12 @@ export function ProjectActionBar({ projectId }: { projectId: string }) {
 
       {/* Confirmed */}
       {state.phase === "confirmed" && (
-        <div className="flex items-center gap-2 rounded-xl border border-[#3DC9C0]/20 bg-[#3DC9C0]/5 px-3 py-2.5">
-          <span className="text-sm text-[#3DC9C0]">✓</span>
+        <div className="flex items-center gap-2 rounded-xl border border-gulf-teal/20 bg-gulf-teal/5 px-3 py-2.5">
+          <span className="text-sm text-gulf-teal">✓</span>
           {state.resultHref ? (
             <a
               href={state.resultHref}
-              className="text-sm text-[#3DC9C0] underline underline-offset-2 hover:opacity-80"
+              className="text-sm text-gulf-teal underline underline-offset-2 hover:opacity-80"
             >
               {state.result} →
             </a>

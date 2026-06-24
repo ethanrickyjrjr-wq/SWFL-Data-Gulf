@@ -170,7 +170,7 @@ export function ConnectMcpBlock({
             onClick={() => selectClient(p.id)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               client === p.id
-                ? "bg-[#3DC9C0] text-[#04121b]"
+                ? "bg-gulf-teal text-[#04121b]"
                 : "border border-white/10 text-gray-400 hover:text-gray-200"
             }`}
           >
@@ -192,7 +192,7 @@ export function ConnectMcpBlock({
         <button
           type="button"
           onClick={copy}
-          className="rounded-full bg-[#3DC9C0] px-4 py-1.5 text-xs font-medium text-[#04121b]"
+          className="rounded-full bg-gulf-teal px-4 py-1.5 text-xs font-medium text-[#04121b]"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -200,7 +200,7 @@ export function ConnectMcpBlock({
           type="button"
           disabled={busy}
           onClick={mint}
-          className="rounded-full border border-[#3DC9C0]/40 px-4 py-1.5 text-xs font-medium text-[#3DC9C0] disabled:opacity-40"
+          className="rounded-full border border-gulf-teal/40 px-4 py-1.5 text-xs font-medium text-gulf-teal disabled:opacity-40"
         >
           Regenerate (revokes old)
         </button>
@@ -278,7 +278,7 @@ export function ConnectMcpBlock({
               type="button"
               disabled={busy}
               onClick={mint}
-              className="rounded-full bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
+              className="rounded-full bg-gulf-teal px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
             >
               {busy ? "Generating…" : "Generate key"}
             </button>
@@ -357,7 +357,7 @@ export function ConnectMcpBlock({
         type="button"
         disabled={busy}
         onClick={mint}
-        className="mt-3 rounded-full bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
+        className="mt-3 rounded-full bg-gulf-teal px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
       >
         {busy ? "Generating…" : "Generate key"}
       </button>

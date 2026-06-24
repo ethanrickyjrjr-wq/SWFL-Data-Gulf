@@ -32,7 +32,7 @@ export function StandaloneBackBar() {
       <button
         type="button"
         onClick={goBack}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#3DC9C0] transition-colors hover:text-[#3DC9C0]"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-gulf-teal transition-colors hover:text-gulf-teal"
         aria-label="Go back to the previous page"
       >
         <span aria-hidden="true">←</span> Back

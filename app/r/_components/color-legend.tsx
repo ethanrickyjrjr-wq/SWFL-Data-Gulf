@@ -9,7 +9,7 @@ export function ColorLegend() {
     <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-xs text-gray-400">
       <span className="font-medium uppercase tracking-wider text-gray-500">Sources</span>
       <span className="flex items-center gap-1.5">
-        <span className="text-[#3DC9C0] underline decoration-[#3DC9C0]/40 underline-offset-2">
+        <span className="text-gulf-teal underline decoration-gulf-teal/40 underline-offset-2">
           SWFL Data Gulf
         </span>
         <span>our own data</span>

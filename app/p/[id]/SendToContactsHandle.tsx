@@ -13,7 +13,7 @@ export function SendToContactsHandle({ deliverableId }: { deliverableId: string 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#3DC9C0] px-4 py-1.5 text-xs font-semibold text-navy-dark transition-opacity hover:opacity-90"
+        className="rounded-full bg-gulf-teal px-4 py-1.5 text-xs font-semibold text-navy-dark transition-opacity hover:opacity-90"
       >
         Send to contacts
       </button>

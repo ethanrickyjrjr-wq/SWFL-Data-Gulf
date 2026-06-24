@@ -59,9 +59,9 @@ type Step =
   | { name: "error"; message: string };
 
 const BTN =
-  "rounded-full border border-[#3DC9C0]/60 px-3 py-1 text-[11px] font-medium text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/10 disabled:opacity-50";
+  "rounded-full border border-gulf-teal/60 px-3 py-1 text-[11px] font-medium text-gulf-teal transition-colors hover:bg-gulf-teal/10 disabled:opacity-50";
 const BTN_GO =
-  "rounded-full bg-[#3DC9C0] px-3 py-1 text-[11px] font-semibold text-navy-dark transition-opacity hover:opacity-90 disabled:opacity-50";
+  "rounded-full bg-gulf-teal px-3 py-1 text-[11px] font-semibold text-navy-dark transition-opacity hover:opacity-90 disabled:opacity-50";
 const BTN_GHOST = "rounded-full px-2 py-1 text-[11px] text-gray-500 hover:text-gray-300";
 
 export function ChatScheduleCard({ zip, placeName, projectId }: Props) {
@@ -152,7 +152,7 @@ export function ChatScheduleCard({ zip, placeName, projectId }: Props) {
   );
 
   // ── render ──
-  const shell = "mt-2 rounded-lg border border-[#3DC9C0]/30 bg-[#3DC9C0]/5 px-3 py-2";
+  const shell = "mt-2 rounded-lg border border-gulf-teal/30 bg-gulf-teal/5 px-3 py-2";
   const place = placeName || `ZIP ${zip}`;
 
   if (step.name === "loading") return null;
@@ -163,7 +163,7 @@ export function ChatScheduleCard({ zip, placeName, projectId }: Props) {
         <p className="text-[11px] text-gray-300">📧 Get {place} market updates in your inbox.</p>
         <a
           href={`/login?next=/project`}
-          className="mt-1.5 inline-block rounded-full bg-[#3DC9C0] px-3 py-1 text-[11px] font-semibold text-navy-dark"
+          className="mt-1.5 inline-block rounded-full bg-gulf-teal px-3 py-1 text-[11px] font-semibold text-navy-dark"
         >
           Sign in to set up weekly sends
         </a>
@@ -174,7 +174,7 @@ export function ChatScheduleCard({ zip, placeName, projectId }: Props) {
   if (step.name === "already") {
     return (
       <div className={shell}>
-        <p className="text-[11px] text-[#3DC9C0]">✓ You’re already getting {place} weekly.</p>
+        <p className="text-[11px] text-gulf-teal">✓ You’re already getting {place} weekly.</p>
         <a href={`/project/${projectId}`} className="text-[11px] text-gray-500 underline">
           Manage on your project
         </a>
@@ -185,7 +185,7 @@ export function ChatScheduleCard({ zip, placeName, projectId }: Props) {
   if (step.name === "success") {
     return (
       <div className={shell}>
-        <p className="text-[11px] text-[#3DC9C0]">✓ {step.summary}</p>
+        <p className="text-[11px] text-gulf-teal">✓ {step.summary}</p>
         <p className="text-[10px] text-gray-500">
           Fresh data each send — re-fetched, never frozen.
         </p>

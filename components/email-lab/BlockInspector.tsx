@@ -249,7 +249,7 @@ function FieldShell({ label, children }: { label: string; children: ReactNode })
 }
 
 const inputCls =
-  "w-full rounded-md border border-gray-200 px-2.5 py-1.5 text-sm text-gray-900 focus:border-[#3DC9C0] focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]";
+  "w-full rounded-md border border-gray-200 px-2.5 py-1.5 text-sm text-gray-900 focus:border-gulf-teal focus:outline-none focus:ring-1 focus:ring-gulf-teal";
 
 function TextField({
   label,

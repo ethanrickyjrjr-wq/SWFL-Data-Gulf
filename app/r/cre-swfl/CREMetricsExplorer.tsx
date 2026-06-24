@@ -24,8 +24,8 @@ const DIRECTION_CONFIG: Record<string, { label: string; className: string }> = {
 };
 
 function directionClass(direction: string | null): string {
-  if (!direction) return "text-[#3DC9C0]";
-  return DIRECTION_CONFIG[direction]?.className ?? "text-[#3DC9C0]";
+  if (!direction) return "text-gulf-teal";
+  return DIRECTION_CONFIG[direction]?.className ?? "text-gulf-teal";
 }
 
 function DirectionBadge({ direction }: { direction: string | null }) {
@@ -103,8 +103,8 @@ function CorridorRow({
         className={[
           "flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-left transition-colors",
           isOpen
-            ? "border-[#3DC9C0] bg-[#3DC9C0]/[0.08]"
-            : "border-white/10 bg-white/[0.02] hover:border-[#3DC9C0]/50 hover:bg-[#3DC9C0]/[0.04]",
+            ? "border-gulf-teal bg-gulf-teal/[0.08]"
+            : "border-white/10 bg-white/[0.02] hover:border-gulf-teal/50 hover:bg-gulf-teal/[0.04]",
         ].join(" ")}
       >
         <span className="flex flex-col">
@@ -134,7 +134,7 @@ function CorridorRow({
       </button>
 
       {isOpen && (
-        <div className="relative mt-2 rounded-xl border border-[#3DC9C0]/25 bg-[#3DC9C0]/[0.03] p-4">
+        <div className="relative mt-2 rounded-xl border border-gulf-teal/25 bg-gulf-teal/[0.03] p-4">
           <button
             onClick={onToggle}
             aria-label="Close corridor detail"
@@ -160,7 +160,7 @@ function CorridorRow({
           )}
           <a
             href={`/r/cre-swfl/${corridor.slug}`}
-            className="mt-3 inline-block text-xs font-medium text-[#3DC9C0]/80 transition-colors hover:text-[#3DC9C0]"
+            className="mt-3 inline-block text-xs font-medium text-gulf-teal/80 transition-colors hover:text-gulf-teal"
           >
             Full {corridor.name} report →
           </a>
@@ -197,8 +197,8 @@ function CityBriefcase({
         className={[
           "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors",
           isOpen
-            ? "border-[#3DC9C0] bg-[#3DC9C0]/[0.08] text-[#3DC9C0]"
-            : "border-[#3DC9C0]/30 bg-[#3DC9C0]/[0.04] text-gray-200 hover:border-[#3DC9C0]/60 hover:text-[#3DC9C0]",
+            ? "border-gulf-teal bg-gulf-teal/[0.08] text-gulf-teal"
+            : "border-gulf-teal/30 bg-gulf-teal/[0.04] text-gray-200 hover:border-gulf-teal/60 hover:text-gulf-teal",
         ].join(" ")}
       >
         <span className="flex items-center gap-2.5">
@@ -216,7 +216,7 @@ function CityBriefcase({
           <span className="text-sm font-semibold">{city}</span>
         </span>
         <span className="flex items-center gap-2">
-          <span className={`text-xs ${isOpen ? "text-[#3DC9C0]/70" : "text-gray-500"}`}>
+          <span className={`text-xs ${isOpen ? "text-gulf-teal/70" : "text-gray-500"}`}>
             {corridors.length} corridor{corridors.length !== 1 ? "s" : ""}
           </span>
           <svg

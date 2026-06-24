@@ -262,8 +262,8 @@ export function AskAiDock({
   }
 
   const containerClass = isMobile
-    ? "fixed inset-x-0 bottom-0 top-16 z-[58] flex flex-col rounded-t-2xl border border-[#3DC9C0] bg-[#0f1d24] text-sm text-[#f0ede6] shadow-2xl shadow-black/50"
-    : "fixed z-[58] flex flex-col overflow-hidden rounded-xl border border-[#3DC9C0] bg-[#0f1d24] text-sm text-[#f0ede6] shadow-2xl shadow-black/50";
+    ? "fixed inset-x-0 bottom-0 top-16 z-[58] flex flex-col rounded-t-2xl border border-gulf-teal bg-[#0f1d24] text-sm text-[#f0ede6] shadow-2xl shadow-black/50"
+    : "fixed z-[58] flex flex-col overflow-hidden rounded-xl border border-gulf-teal bg-[#0f1d24] text-sm text-[#f0ede6] shadow-2xl shadow-black/50";
 
   const containerStyle: React.CSSProperties | undefined = isMobile
     ? undefined
@@ -285,7 +285,7 @@ export function AskAiDock({
       {/* Header / drag handle */}
       <div
         onPointerDown={(e) => startPointer(e, applyDockDrag)}
-        className={`flex items-center justify-between gap-2 border-b border-[#3DC9C0]/30 px-4 py-2.5 ${
+        className={`flex items-center justify-between gap-2 border-b border-gulf-teal/30 px-4 py-2.5 ${
           isMobile ? "" : "cursor-move select-none"
         }`}
         style={isMobile ? undefined : { touchAction: "none" }}
@@ -299,7 +299,7 @@ export function AskAiDock({
             height={20}
             className="shrink-0"
           />
-          <span className="font-semibold text-[#3DC9C0]">SWFL Data Gulf</span>
+          <span className="font-semibold text-gulf-teal">SWFL Data Gulf</span>
         </div>
         <button
           type="button"
@@ -327,7 +327,7 @@ export function AskAiDock({
                   <button
                     type="button"
                     onClick={() => submit(p)}
-                    className="w-full rounded-lg border border-[#3DC9C0] bg-[#3DC9C0]/10 px-3 py-2 text-left text-[#f0ede6] transition-colors hover:bg-[#3DC9C0]/20 hover:text-[#3DC9C0]"
+                    className="w-full rounded-lg border border-gulf-teal bg-gulf-teal/10 px-3 py-2 text-left text-[#f0ede6] transition-colors hover:bg-gulf-teal/20 hover:text-gulf-teal"
                   >
                     {p}
                   </button>
@@ -337,7 +337,7 @@ export function AskAiDock({
             <button
               type="button"
               onClick={() => setStage("summarize")}
-              className="mt-4 text-xs text-gray-400 underline underline-offset-2 hover:text-[#3DC9C0]"
+              className="mt-4 text-xs text-gray-400 underline underline-offset-2 hover:text-gulf-teal"
             >
               Summarize for my AI →
             </button>
@@ -352,7 +352,7 @@ export function AskAiDock({
                 <button
                   type="button"
                   onClick={() => triggerSummary("highlights")}
-                  className="w-full rounded-lg border border-[#3DC9C0] bg-[#3DC9C0]/10 px-3 py-2 text-left text-[#f0ede6] transition-colors hover:bg-[#3DC9C0]/20 hover:text-[#3DC9C0]"
+                  className="w-full rounded-lg border border-gulf-teal bg-gulf-teal/10 px-3 py-2 text-left text-[#f0ede6] transition-colors hover:bg-gulf-teal/20 hover:text-gulf-teal"
                 >
                   Just the highlights — 2-3 sentences
                 </button>
@@ -367,7 +367,7 @@ export function AskAiDock({
                       if (e.key === "Enter" && customFocus.trim()) triggerSummary("custom");
                     }}
                     placeholder="Tell me what you care about most…"
-                    className="min-w-0 flex-1 rounded-lg border border-[#3DC9C0] bg-[#152832] px-3 py-2 text-sm text-[#f0ede6] placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]/40"
+                    className="min-w-0 flex-1 rounded-lg border border-gulf-teal bg-[#152832] px-3 py-2 text-sm text-[#f0ede6] placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gulf-teal/40"
                   />
                   <button
                     type="button"
@@ -383,7 +383,7 @@ export function AskAiDock({
             <button
               type="button"
               onClick={() => setStage("compose")}
-              className="mt-3 text-xs text-gray-400 underline underline-offset-2 hover:text-[#3DC9C0]"
+              className="mt-3 text-xs text-gray-400 underline underline-offset-2 hover:text-gulf-teal"
             >
               ← Back
             </button>
@@ -408,7 +408,7 @@ export function AskAiDock({
                             void fileChart();
                           }}
                           disabled={filed === "chart" || filed === "chartErr"}
-                          className="text-[10px] text-[#3DC9C0] transition-colors hover:text-[#3DC9C0]/80 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="text-[10px] text-gulf-teal transition-colors hover:text-gulf-teal/80 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {filed === "chart"
                             ? "Filed ✓"
@@ -456,7 +456,7 @@ export function AskAiDock({
                 <>
                   {answer}
                   {streaming && (
-                    <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-[#3DC9C0]/80 align-middle" />
+                    <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-gulf-teal/80 align-middle" />
                   )}
                 </>
               )}
@@ -468,7 +468,7 @@ export function AskAiDock({
                   <button
                     type="button"
                     onClick={copySummary}
-                    className="rounded-lg border border-[#3DC9C0] bg-[#3DC9C0]/10 px-4 py-2 text-xs font-semibold text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/20"
+                    className="rounded-lg border border-gulf-teal bg-gulf-teal/10 px-4 py-2 text-xs font-semibold text-gulf-teal transition-colors hover:bg-gulf-teal/20"
                   >
                     {copied ? "Copied ✓" : "Copy this summary"}
                   </button>
@@ -476,7 +476,7 @@ export function AskAiDock({
                     type="button"
                     onClick={() => fileAnswer()}
                     disabled={filed === "qa"}
-                    className="text-xs text-[#3DC9C0] transition-colors hover:text-[#3DC9C0]/80 disabled:opacity-60"
+                    className="text-xs text-gulf-teal transition-colors hover:text-gulf-teal/80 disabled:opacity-60"
                   >
                     {filed === "qa" ? "Filed ✓" : "File this summary"}
                   </button>
@@ -488,14 +488,14 @@ export function AskAiDock({
                     type="button"
                     onClick={() => fileAnswer()}
                     disabled={filed === "qa"}
-                    className="text-xs text-[#3DC9C0] transition-colors hover:text-[#3DC9C0]/80 disabled:opacity-60"
+                    className="text-xs text-gulf-teal transition-colors hover:text-gulf-teal/80 disabled:opacity-60"
                   >
                     {filed === "qa" ? "Filed ✓" : "File this answer"}
                   </button>
                   <button
                     type="button"
                     onClick={archiveAndReset}
-                    className="text-xs text-gray-500 underline underline-offset-2 hover:text-[#3DC9C0]"
+                    className="text-xs text-gray-500 underline underline-offset-2 hover:text-gulf-teal"
                   >
                     Ask another →
                   </button>
@@ -512,7 +512,7 @@ export function AskAiDock({
           e.preventDefault();
           submit(question);
         }}
-        className="border-t border-[#3DC9C0]/30 p-3"
+        className="border-t border-gulf-teal/30 p-3"
       >
         <div className="flex items-end gap-2">
           <textarea
@@ -526,7 +526,7 @@ export function AskAiDock({
             }}
             rows={2}
             placeholder="Ask about this report…"
-            className="min-w-0 flex-1 resize-none rounded-lg border border-[#3DC9C0] bg-[#152832] px-3 py-2 text-[#f0ede6] placeholder:text-gray-500 focus:border-[#3DC9C0] focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]/40"
+            className="min-w-0 flex-1 resize-none rounded-lg border border-gulf-teal bg-[#152832] px-3 py-2 text-[#f0ede6] placeholder:text-gray-500 focus:border-gulf-teal focus:outline-none focus:ring-1 focus:ring-gulf-teal/40"
           />
           <button
             type="submit"

@@ -152,7 +152,7 @@ function InsertSlot({
         <button
           type="button"
           onClick={onOpen}
-          className="flex w-full items-center justify-center gap-1.5 border-t border-dashed border-[#3DC9C0]/30 py-3 text-sm text-[#3DC9C0] transition-all duration-150 ease-out hover:bg-[#3DC9C0]/10"
+          className="flex w-full items-center justify-center gap-1.5 border-t border-dashed border-gulf-teal/30 py-3 text-sm text-gulf-teal transition-all duration-150 ease-out hover:bg-gulf-teal/10"
         >
           <span className="text-base leading-none">+</span> Add block
         </button>
@@ -165,10 +165,10 @@ function InsertSlot({
       className={[
         "group relative transition-all duration-150 ease-out",
         isDragTarget
-          ? "h-10 bg-[#3DC9C0]/20"
+          ? "h-10 bg-gulf-teal/20"
           : open
-            ? "h-10 bg-[#3DC9C0]/10"
-            : "h-2 border-t border-[#3DC9C0]/25 hover:h-10 hover:bg-[#3DC9C0]/10",
+            ? "h-10 bg-gulf-teal/10"
+            : "h-2 border-t border-gulf-teal/25 hover:h-10 hover:bg-gulf-teal/10",
       ].join(" ")}
     >
       {open && (
@@ -180,7 +180,7 @@ function InsertSlot({
         </>
       )}
       {isDragTarget && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-[#3DC9C0]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gulf-teal" />
       )}
       <button
         type="button"
@@ -189,7 +189,7 @@ function InsertSlot({
         className="flex h-full w-full items-center justify-center"
       >
         {!isDragTarget && (
-          <span className="flex items-center gap-1 rounded-full border border-[#3DC9C0] bg-white px-3 py-1 text-sm text-[#3DC9C0] opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="flex items-center gap-1 rounded-full border border-gulf-teal bg-white px-3 py-1 text-sm text-gulf-teal opacity-0 transition-opacity group-hover:opacity-100">
             + Add block
           </span>
         )}

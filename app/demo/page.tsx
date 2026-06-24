@@ -33,7 +33,7 @@ export default function DemoPage() {
     <main className="min-h-dvh bg-[#0A1419] text-[#F0EDE6]">
       {/* SECTION 1 — Hero (DataStreamBg + headline) */}
       <section className="flex min-h-dvh flex-col items-center justify-center px-6">
-        <p className="mb-4 font-mono text-xs uppercase tracking-widest text-[#3DC9C0]">
+        <p className="mb-4 font-mono text-xs uppercase tracking-widest text-gulf-teal">
           Intelligence · {statsData.data_sources} verified sources
         </p>
         <h1 className="max-w-3xl text-center text-5xl font-semibold leading-tight tracking-tight">
@@ -132,7 +132,7 @@ export default function DemoPage() {
           </p>
           <a
             href="/welcome"
-            className="inline-block rounded-full bg-[#3DC9C0] px-8 py-3 text-sm font-semibold text-[#0a1419] transition-colors hover:bg-[#3DC9C0]/80"
+            className="inline-block rounded-full bg-gulf-teal px-8 py-3 text-sm font-semibold text-[#0a1419] transition-colors hover:bg-gulf-teal/80"
           >
             Start a project →
           </a>

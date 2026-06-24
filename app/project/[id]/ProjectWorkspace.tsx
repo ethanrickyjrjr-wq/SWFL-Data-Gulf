@@ -471,7 +471,7 @@ export function ProjectWorkspace({
       <Breadcrumbs trail={projectTrail(title || deriveProjectName(items))} />
 
       {seed && (
-        <div className="mb-6 rounded-xl border border-[#3DC9C0]/40 bg-[#3DC9C0]/10 p-4">
+        <div className="mb-6 rounded-xl border border-gulf-teal/40 bg-gulf-teal/10 p-4">
           <p className="text-sm font-medium text-white">
             Ready to build a {templateLabel(seed.template)}
             {seed.scopeValue ? ` for ${seed.scopeValue.toUpperCase()}` : ""}.
@@ -517,8 +517,8 @@ export function ProjectWorkspace({
             onClick={() => setActivePill((p) => (p === "brand" ? null : "brand"))}
             className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
               activePill === "brand"
-                ? "bg-[#3DC9C0] text-[#04121b]"
-                : "border border-[#3DC9C0]/40 bg-[#3DC9C0]/10 text-[#3DC9C0] hover:bg-[#3DC9C0]/20"
+                ? "bg-gulf-teal text-[#04121b]"
+                : "border border-gulf-teal/40 bg-gulf-teal/10 text-gulf-teal hover:bg-gulf-teal/20"
             }`}
           >
             {hasBranding ? "✓ Brand" : "Brand"}
@@ -528,8 +528,8 @@ export function ProjectWorkspace({
             onClick={() => setActivePill((p) => (p === "mcp" ? null : "mcp"))}
             className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
               activePill === "mcp"
-                ? "bg-[#3DC9C0] text-[#04121b]"
-                : "border border-[#3DC9C0]/40 bg-[#3DC9C0]/10 text-[#3DC9C0] hover:bg-[#3DC9C0]/20"
+                ? "bg-gulf-teal text-[#04121b]"
+                : "border border-gulf-teal/40 bg-gulf-teal/10 text-gulf-teal hover:bg-gulf-teal/20"
             }`}
           >
             {hasMcpKey ? "✓ AI" : "Connect AI"}
@@ -580,9 +580,9 @@ export function ProjectWorkspace({
         digest.freshnessToken &&
         !refreshDismissed &&
         significantChanges.length > 0 && (
-          <div className="mb-4 mt-4 flex items-center justify-between rounded-lg border border-[#3DC9C0]/20 bg-[#3DC9C0]/5 px-3 py-2">
+          <div className="mb-4 mt-4 flex items-center justify-between rounded-lg border border-gulf-teal/20 bg-gulf-teal/5 px-3 py-2">
             <span className="flex items-center gap-2 text-xs text-gray-300">
-              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#3DC9C0]" />
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-gulf-teal" />
               {significantChanges.length === 1
                 ? `${significantChanges[0]!.label}: filed ${significantChanges[0]!.previous_value} → ${significantChanges[0]!.delta_description}. Want to refresh?`
                 : `${significantChanges.length} of your metrics moved since your last visit.`}
@@ -592,7 +592,7 @@ export function ProjectWorkspace({
                 type="button"
                 disabled={refreshing}
                 onClick={() => void refreshItems()}
-                className="text-xs font-medium text-[#3DC9C0] hover:underline disabled:opacity-50"
+                className="text-xs font-medium text-gulf-teal hover:underline disabled:opacity-50"
               >
                 {refreshing ? "Refreshing…" : "Refresh items →"}
               </button>

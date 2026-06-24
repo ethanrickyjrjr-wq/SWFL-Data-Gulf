@@ -24,18 +24,18 @@ export function MCPInstallCard() {
   }
 
   return (
-    <div className="rounded-lg border border-[#3DC9C0]/40 bg-[#0f1d24] p-3">
+    <div className="rounded-lg border border-gulf-teal/40 bg-[#0f1d24] p-3">
       <p className="mb-2 text-[11px] text-gray-300">
         Use it free inside your own Claude — paste this once:
       </p>
       <div className="flex items-center gap-2">
-        <code className="min-w-0 flex-1 truncate rounded bg-black/40 px-2 py-1.5 font-mono text-[10px] text-[#3DC9C0]">
+        <code className="min-w-0 flex-1 truncate rounded bg-black/40 px-2 py-1.5 font-mono text-[10px] text-gulf-teal">
           {MCP_CMD}
         </code>
         <button
           type="button"
           onClick={copy}
-          className="shrink-0 rounded border border-[#3DC9C0]/60 px-2 py-1 text-[10px] font-semibold text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/15"
+          className="shrink-0 rounded border border-gulf-teal/60 px-2 py-1 text-[10px] font-semibold text-gulf-teal transition-colors hover:bg-gulf-teal/15"
         >
           {copied ? "Copied ✓" : "Copy"}
         </button>

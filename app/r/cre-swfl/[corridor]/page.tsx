@@ -102,7 +102,7 @@ export default async function CorridorPage({ params }: PageProps) {
             <Meta
               label="Freshness"
               value={
-                <code className="text-xs text-[#3DC9C0]">{asOfFromToken(freshnessToken)}</code>
+                <code className="text-xs text-gulf-teal">{asOfFromToken(freshnessToken)}</code>
               }
             />
           )}
@@ -157,7 +157,7 @@ export default async function CorridorPage({ params }: PageProps) {
       <ReportFooter freshnessToken={freshnessToken || undefined}>
         <Link
           href="/r/cre-swfl"
-          className="text-[#3DC9C0] underline underline-offset-2 hover:text-[#3DC9C0]/80"
+          className="text-gulf-teal underline underline-offset-2 hover:text-gulf-teal/80"
         >
           All SWFL commercial areas
         </Link>
@@ -311,7 +311,7 @@ function SourcesGate({ sourceCount }: { sourceCount: number }) {
     <div className="rounded-xl glass-card-modern border border-white/10 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <span className="text-sm font-medium text-gray-300">Sources</span>
-        <span className="flex items-center gap-1.5 rounded-full bg-[#3DC9C0]/10 px-2.5 py-0.5 text-xs font-medium text-[#3DC9C0]">
+        <span className="flex items-center gap-1.5 rounded-full bg-gulf-teal/10 px-2.5 py-0.5 text-xs font-medium text-gulf-teal">
           <svg className="h-3 w-3" viewBox="0 0 12 12" fill="currentColor">
             <path
               fillRule="evenodd"

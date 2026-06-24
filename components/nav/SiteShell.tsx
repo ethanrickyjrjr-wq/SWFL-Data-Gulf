@@ -431,7 +431,7 @@ function AppBar({
                 aria-label="Account menu"
                 className="flex items-center gap-2 rounded-full border border-white/15 py-1 pl-1 pr-2 text-sm text-white transition-colors hover:bg-white/10"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#3DC9C0] text-xs font-semibold text-[#0a1419]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gulf-teal text-xs font-semibold text-[#0a1419]">
                   {initial}
                 </span>
                 <span className="hidden max-w-[14rem] truncate text-gray-200 lg:inline">

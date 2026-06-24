@@ -63,9 +63,9 @@ function describeSchedule(s: ScheduleSummary): string {
 }
 
 const BTN =
-  "rounded-full border border-[#3DC9C0]/60 px-3 py-1.5 text-xs font-medium text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/10 disabled:opacity-50";
+  "rounded-full border border-gulf-teal/60 px-3 py-1.5 text-xs font-medium text-gulf-teal transition-colors hover:bg-gulf-teal/10 disabled:opacity-50";
 const BTN_CONFIRM =
-  "rounded-full bg-[#3DC9C0] px-4 py-1.5 text-xs font-semibold text-navy-dark transition-opacity hover:opacity-90 disabled:opacity-50";
+  "rounded-full bg-gulf-teal px-4 py-1.5 text-xs font-semibold text-navy-dark transition-opacity hover:opacity-90 disabled:opacity-50";
 const BTN_GHOST =
   "rounded-full border border-white/10 px-3 py-1.5 text-xs text-gray-400 transition-colors hover:text-white";
 
@@ -187,7 +187,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
   // ── Success ──────────────────────────────────────────────────────────────
   if (step.name === "success") {
     return (
-      <div className="mt-2 rounded-lg border border-[#3DC9C0]/30 bg-[#3DC9C0]/10 px-3 py-2 text-xs text-[#3DC9C0]">
+      <div className="mt-2 rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-2 text-xs text-gulf-teal">
         ✓ {step.summary}
       </div>
     );
@@ -210,7 +210,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
     const isPaused = schedule.status === "paused";
     return (
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-[#3DC9C0]/30 bg-[#3DC9C0]/10 px-3 py-1.5 text-xs text-[#3DC9C0]">
+        <span className="rounded-full border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-1.5 text-xs text-gulf-teal">
           {isPaused ? "⏸ Paused — " : "📧 "}
           {describeSchedule(schedule)}
         </span>
@@ -322,7 +322,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
               onClick={() => setDayOfWeek(i + 1)}
               className={
                 dayOfWeek === i + 1
-                  ? "rounded-full bg-[#3DC9C0] px-3 py-1.5 text-xs font-semibold text-navy-dark"
+                  ? "rounded-full bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-navy-dark"
                   : BTN
               }
             >
@@ -338,7 +338,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
               onClick={() => setSendHour(h.value)}
               className={
                 sendHour === h.value
-                  ? "rounded-full bg-[#3DC9C0] px-3 py-1.5 text-xs font-semibold text-navy-dark"
+                  ? "rounded-full bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-navy-dark"
                   : BTN
               }
             >
@@ -373,7 +373,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
   if (step.name === "confirm") {
     const { summary, proposal, nonce } = step;
     return (
-      <div className="mt-2 rounded-lg border border-[#3DC9C0]/30 bg-[#3DC9C0]/5 px-3 py-3">
+      <div className="mt-2 rounded-lg border border-gulf-teal/30 bg-gulf-teal/5 px-3 py-3">
         <p className="mb-3 text-xs text-gray-200">{summary}</p>
         <p className="mb-3 text-[11px] text-gray-500">
           Fresh data pulled each send — not the frozen preview.

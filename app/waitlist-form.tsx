@@ -75,7 +75,7 @@ export default function WaitlistForm() {
         style={{
           fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
           fontSize: 15,
-          color: "#3DC9C0",
+          color: "var(--gulf-teal)",
         }}
       >
         {status === "done" ? "You're on the list." : "You're already on the list."}
@@ -120,7 +120,7 @@ export default function WaitlistForm() {
               type="checkbox"
               checked={checked.has(item.id)}
               onChange={() => toggle(item.id)}
-              style={{ marginTop: 3, accentColor: "#3DC9C0", flexShrink: 0 }}
+              style={{ marginTop: 3, accentColor: "var(--gulf-teal)", flexShrink: 0 }}
             />
             <span>
               <span style={{ color: "#F0EDE6", fontSize: 14 }}>{item.label}</span>
@@ -138,8 +138,8 @@ export default function WaitlistForm() {
           disabled={status === "submitting"}
           style={{
             background: "rgba(61,201,192,0.12)",
-            border: "1px solid #3DC9C0",
-            color: "#3DC9C0",
+            border: "1px solid var(--gulf-teal)",
+            color: "var(--gulf-teal)",
             padding: "10px 24px",
             borderRadius: 6,
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",

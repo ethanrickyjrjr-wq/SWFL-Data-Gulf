@@ -134,8 +134,8 @@ export function UploadForm({
   // ---- Google success banner --------------------------------------------------
   if (fromGoogle && googleImported > 0) {
     return (
-      <div className="mt-6 rounded-xl border border-[#3DC9C0]/30 bg-[#3DC9C0]/10 p-4">
-        <p className="text-sm text-[#3DC9C0]">
+      <div className="mt-6 rounded-xl border border-gulf-teal/30 bg-gulf-teal/10 p-4">
+        <p className="text-sm text-gulf-teal">
           ✓ Imported {googleImported} contact{googleImported === 1 ? "" : "s"} from Google
           {googlePersonal > 0 ? `, skipped ${googlePersonal} personal` : ""}
           {googleSkipped > 0 ? `, ${googleSkipped} skipped` : ""}.
@@ -149,7 +149,7 @@ export function UploadForm({
         </p>
         <Link
           href={backHref}
-          className="mt-3 inline-block rounded-full bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#04121b]"
+          className="mt-3 inline-block rounded-full bg-gulf-teal px-4 py-2 text-sm font-medium text-[#04121b]"
         >
           Back to your work
         </Link>
@@ -162,8 +162,8 @@ export function UploadForm({
     const total = result.inserted + result.updated;
     const personal = result.skippedPersonal ?? 0;
     return (
-      <div className="mt-6 rounded-xl border border-[#3DC9C0]/30 bg-[#3DC9C0]/10 p-4">
-        <p className="text-sm text-[#3DC9C0]">
+      <div className="mt-6 rounded-xl border border-gulf-teal/30 bg-gulf-teal/10 p-4">
+        <p className="text-sm text-gulf-teal">
           ✓ Added {total} contact{total === 1 ? "" : "s"} to “{listName.trim().toLowerCase()}”
           {personal > 0 ? `, skipped ${personal} personal` : ""}
           {result.skipped > 0 ? ` (${result.skipped} skipped)` : ""}.
@@ -173,7 +173,7 @@ export function UploadForm({
         </p>
         <Link
           href={backHref}
-          className="mt-3 inline-block rounded-full bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#04121b]"
+          className="mt-3 inline-block rounded-full bg-gulf-teal px-4 py-2 text-sm font-medium text-[#04121b]"
         >
           Back to your work
         </Link>
@@ -189,7 +189,7 @@ export function UploadForm({
           type="checkbox"
           checked={workOnly}
           onChange={(e) => setWorkOnly(e.target.checked)}
-          className="mt-0.5 accent-[#3DC9C0]"
+          className="mt-0.5 accent-gulf-teal"
         />
         <span>
           Work emails only
@@ -207,7 +207,7 @@ export function UploadForm({
         </p>
         <a
           href={`/api/email/contacts/google/start?work_only=${workOnly ? "1" : "0"}`}
-          className="mt-3 inline-block rounded-full bg-[#3DC9C0] px-4 py-2 text-sm font-semibold text-[#04121b]"
+          className="mt-3 inline-block rounded-full bg-gulf-teal px-4 py-2 text-sm font-semibold text-[#04121b]"
         >
           Import from Google
         </a>
@@ -255,7 +255,7 @@ export function UploadForm({
           value={listName}
           onChange={(e) => setListName(e.target.value)}
           placeholder="e.g. buyers"
-          className="rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 text-white outline-none focus:border-[#3DC9C0]/40"
+          className="rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 text-white outline-none focus:border-gulf-teal/40"
         />
       </label>
 
@@ -267,12 +267,12 @@ export function UploadForm({
           onChange={(e) => setCsv(e.target.value)}
           placeholder={SAMPLE}
           rows={8}
-          className="rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 font-mono text-xs text-white outline-none focus:border-[#3DC9C0]/40"
+          className="rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 font-mono text-xs text-white outline-none focus:border-gulf-teal/40"
         />
       </label>
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="cursor-pointer text-xs text-[#3DC9C0] underline underline-offset-2">
+        <label className="cursor-pointer text-xs text-gulf-teal underline underline-offset-2">
           Choose a .csv or .vcf file
           <input
             type="file"
@@ -299,7 +299,7 @@ export function UploadForm({
           type="button"
           disabled={busy}
           onClick={() => void submit()}
-          className="rounded-full bg-[#3DC9C0] px-5 py-2 text-sm font-semibold text-[#04121b] disabled:opacity-40"
+          className="rounded-full bg-gulf-teal px-5 py-2 text-sm font-semibold text-[#04121b] disabled:opacity-40"
         >
           {busy ? "Uploading…" : "Upload + create list"}
         </button>

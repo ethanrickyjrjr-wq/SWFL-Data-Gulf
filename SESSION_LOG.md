@@ -1,3 +1,14 @@
+## 2026-06-24 (main) — design(gulf-teal): semantic token upgrade — [#3DC9C0] → gulf-teal utilities
+
+75 files, 424 Tailwind class replacements + 10 inline-style `color`/`border`/`accentColor` conversions to `var(--gulf-teal)`. Zero arbitrary `[#3DC9C0]` values remain in production TSX/TS/CSS. Preserved: email HTML hardcode (can't use CSS vars), color-picker defaults (BrandingBlock/DeliverableEditPanel), chart series hex (charting library data), CSS var() fallbacks already correct, Mapbox fill (canvas).
+
+**What changed:**
+- 424× `[#3DC9C0]` → `gulf-teal` in Tailwind class strings across 69 production components
+- `color: "#3DC9C0"` / `border: "1px solid #3DC9C0"` / `accentColor: "#3DC9C0"` → `var(--gulf-teal)` in inline style props (install-tabs.tsx, waitlist-form.tsx, embed/waitlist, embed/footer-token)
+- `bun test` 3717/0 ✓, `bunx next build` ✓
+
+**Next:** prod spot-check all routes after deploy; `text-navy-dark → text-on-accent` rename (functionally identical, purity only).
+
 ## 2026-06-24 (main) — design(gulf-teal): full brand token sweep T2–T10
 
 Single-root CSS token system + complete rogue-hex eradication across 115 files.

@@ -191,7 +191,7 @@ export function MetroAreaChart({
               height={14}
               className="h-3.5 w-3.5 rounded opacity-60"
             />
-            <span className="text-xs font-mono font-medium uppercase tracking-wider text-[#3DC9C0]">
+            <span className="text-xs font-mono font-medium uppercase tracking-wider text-gulf-teal">
               SWFL Data Gulf · {eyebrow}
             </span>
           </div>
@@ -327,7 +327,7 @@ export function MetroAreaChart({
                   return (
                     <div className="bg-[#0f1d24] border border-[#22414f] p-3 shadow-2xl rounded-lg text-xs space-y-1.5 font-mono">
                       <p className="text-[#807e76] font-semibold mb-1 flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-[#3DC9C0]" />
+                        <Calendar className="h-3 w-3 text-gulf-teal" />
                         <span>{formatXAxis(String(label ?? ""))}</span>
                       </p>
                       <div className="h-px bg-[#22414f]" />

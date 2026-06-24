@@ -39,7 +39,7 @@ export default function ReportIndexPage() {
             <Link
               key={e.q}
               href={`/r/search?q=${encodeURIComponent(e.q)}`}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-sm text-gray-200 transition-colors hover:border-[#3DC9C0]/50 hover:text-white"
+              className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-sm text-gray-200 transition-colors hover:border-gulf-teal/50 hover:text-white"
             >
               {e.label}
             </Link>

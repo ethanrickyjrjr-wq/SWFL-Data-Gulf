@@ -70,7 +70,7 @@ export function DeliverableThumbnail({
           onClick={() => onToggleRevoke(d.id, d.status)}
           className={
             revoked
-              ? "shrink-0 text-xs text-[#3DC9C0] underline underline-offset-2"
+              ? "shrink-0 text-xs text-gulf-teal underline underline-offset-2"
               : "shrink-0 text-xs text-red-400 underline underline-offset-2"
           }
         >
@@ -92,7 +92,7 @@ export function DeliverableThumbnail({
                   href={`/p/${v.id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[#3DC9C0] underline underline-offset-2"
+                  className="text-gulf-teal underline underline-offset-2"
                 >
                   view ↗
                 </a>

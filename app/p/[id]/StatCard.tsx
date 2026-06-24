@@ -56,7 +56,7 @@ export function StatCard({ slot, deliverableId }: { slot: StatSlot; deliverableI
                 href={c.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#3DC9C0] underline underline-offset-2"
+                className="text-gulf-teal underline underline-offset-2"
               >
                 {c.label}
               </a>
@@ -73,7 +73,7 @@ export function StatCard({ slot, deliverableId }: { slot: StatSlot; deliverableI
           type="button"
           onClick={handleFile}
           disabled={filed}
-          className="mt-2 text-[10px] text-[#3DC9C0] transition-colors hover:text-[#3DC9C0] disabled:opacity-60"
+          className="mt-2 text-[10px] text-gulf-teal transition-colors hover:text-gulf-teal disabled:opacity-60"
         >
           {filed ? "Filed ✓" : "+ File"}
         </button>

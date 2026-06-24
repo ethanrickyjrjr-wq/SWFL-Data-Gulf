@@ -68,7 +68,7 @@ export default async function EmbedFooterTokenPage() {
             style={{
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
               fontSize: 14,
-              color: "#3DC9C0",
+              color: "var(--gulf-teal)",
             }}
           >
             {asOfFromToken(token) ?? token}
@@ -80,7 +80,7 @@ export default async function EmbedFooterTokenPage() {
             href="https://www.swfldatagulf.com/r/master"
             style={{
               fontSize: 13,
-              color: "#3DC9C0",
+              color: "var(--gulf-teal)",
               textDecoration: "none",
               marginTop: 4,
             }}

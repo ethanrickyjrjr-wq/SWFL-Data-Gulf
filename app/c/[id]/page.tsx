@@ -70,7 +70,7 @@ export default async function SavedChartPage({ params }: { params: Promise<{ id:
           Source:{" "}
           <a
             href={`/r/${source_meta.report_id}`}
-            className="text-[#3DC9C0] underline underline-offset-2"
+            className="text-gulf-teal underline underline-offset-2"
           >
             {source_meta.report_id}
           </a>

@@ -87,7 +87,7 @@ export function ProjectEmailLabClient({
             ← {projectTitle}
           </Link>
           <p className="text-sm font-semibold text-white/80">Email Lab</p>
-          <p className="mt-0.5 text-[10px] text-[#3DC9C0]">
+          <p className="mt-0.5 text-[10px] text-gulf-teal">
             {scope ? `Scope: ${scopeLabel}` : "Southwest Florida"} · real data enabled
           </p>
         </>

@@ -59,7 +59,7 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
 
   return (
     <PageShell width="narrow">
-      <Link href="/alerts" className="text-xs text-gray-400 hover:text-[#3DC9C0]">
+      <Link href="/alerts" className="text-xs text-gray-400 hover:text-gulf-teal">
         ← All alerts
       </Link>
 
@@ -100,7 +100,7 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
         </p>
         <a
           href={`mailto:${alert.contact_email}`}
-          className="mt-4 inline-block rounded-xl border border-[#3DC9C0]/40 px-4 py-2 text-sm font-medium text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/10"
+          className="mt-4 inline-block rounded-xl border border-gulf-teal/40 px-4 py-2 text-sm font-medium text-gulf-teal transition-colors hover:bg-gulf-teal/10"
         >
           Reply to {alert.contact_email}
         </a>

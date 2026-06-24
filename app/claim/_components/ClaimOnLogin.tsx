@@ -87,7 +87,7 @@ export function ClaimOnLogin({ token }: { token: string }) {
   }
   return (
     <p className="mt-4 flex items-center gap-2 text-sm text-gray-400">
-      <span className="h-2 w-2 animate-pulse rounded-full bg-[#3DC9C0]" aria-hidden />
+      <span className="h-2 w-2 animate-pulse rounded-full bg-gulf-teal" aria-hidden />
       Claiming your work…
     </p>
   );

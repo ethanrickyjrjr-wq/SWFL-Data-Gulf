@@ -45,8 +45,8 @@ export default function InstallTabs() {
             onClick={() => setActive(tab)}
             style={{
               background: active === tab ? "rgba(61,201,192,0.12)" : "transparent",
-              border: `1px solid ${active === tab ? "#3DC9C0" : "#22414F"}`,
-              color: active === tab ? "#3DC9C0" : "#8BAAB8",
+              border: `1px solid ${active === tab ? "var(--gulf-teal)" : "#22414F"}`,
+              color: active === tab ? "var(--gulf-teal)" : "#8BAAB8",
               padding: "6px 16px",
               borderRadius: 6,
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
@@ -90,8 +90,8 @@ export default function InstallTabs() {
               style={{
                 flexShrink: 0,
                 background: copied ? "rgba(61,201,192,0.2)" : "rgba(61,201,192,0.12)",
-                border: "1px solid #3DC9C0",
-                color: "#3DC9C0",
+                border: "1px solid var(--gulf-teal)",
+                color: "var(--gulf-teal)",
                 padding: "6px 14px",
                 borderRadius: 6,
                 fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
@@ -303,8 +303,8 @@ function CodeBlock({ text }: { text: string }) {
           top: 8,
           right: 8,
           background: copied ? "rgba(61,201,192,0.2)" : "rgba(61,201,192,0.10)",
-          border: "1px solid #3DC9C0",
-          color: "#3DC9C0",
+          border: "1px solid var(--gulf-teal)",
+          color: "var(--gulf-teal)",
           padding: "4px 10px",
           borderRadius: 4,
           fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",

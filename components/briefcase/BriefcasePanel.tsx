@@ -85,7 +85,7 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
   return (
     <div className="flex flex-col gap-3 text-sm text-[#f0ede6]">
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-[#3DC9C0]">AI + Briefcase</span>
+        <span className="font-semibold text-gulf-teal">AI + Briefcase</span>
         <span className="text-[10px] text-gray-500">context-aware</span>
       </div>
 
@@ -113,7 +113,7 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
                 <li key={c.id} className={i === 0 ? undefined : "hidden sm:block"}>
                   <Link
                     href={`/p/${c.id}`}
-                    className="block rounded-lg border border-[#3DC9C0]/40 bg-[#3DC9C0]/5 px-3 py-2 transition-colors hover:border-[#3DC9C0] hover:bg-[#3DC9C0]/15"
+                    className="block rounded-lg border border-gulf-teal/40 bg-gulf-teal/5 px-3 py-2 transition-colors hover:border-gulf-teal hover:bg-gulf-teal/15"
                   >
                     <span className="block text-xs font-semibold text-[#f0ede6]">{c.title}</span>
                     <span className="block text-[10px] text-gray-400">{c.blurb}</span>
@@ -134,7 +134,7 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
             <button
               type="button"
               onClick={() => setShowMcp((v) => !v)}
-              className="w-full rounded-lg border border-[#3DC9C0]/60 px-4 py-2 text-center text-xs font-semibold text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/15"
+              className="w-full rounded-lg border border-gulf-teal/60 px-4 py-2 text-center text-xs font-semibold text-gulf-teal transition-colors hover:bg-gulf-teal/15"
             >
               Use me in your own Claude — free
             </button>
@@ -145,7 +145,7 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          <p className="text-xs text-[#3DC9C0]">{createSuggestion(page)}</p>
+          <p className="text-xs text-gulf-teal">{createSuggestion(page)}</p>
 
           <div>
             <p className="mb-1.5 text-[10px] uppercase tracking-wider text-gray-500">

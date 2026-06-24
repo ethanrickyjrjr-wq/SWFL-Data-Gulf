@@ -213,7 +213,7 @@ function Shell({
               brain ? (
                 <a
                   href={`/r/${brain}`}
-                  className="text-[#3DC9C0] underline underline-offset-2 hover:text-[#3DC9C0]/80"
+                  className="text-gulf-teal underline underline-offset-2 hover:text-gulf-teal/80"
                 >
                   {brain}
                 </a>
@@ -240,7 +240,7 @@ function Shell({
               href={docHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#3DC9C0] underline decoration-[#3DC9C0]/40 underline-offset-2 hover:decoration-[#3DC9C0]"
+              className="text-gulf-teal underline decoration-gulf-teal/40 underline-offset-2 hover:decoration-gulf-teal"
             >
               Source documentation ↗
             </a>

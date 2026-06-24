@@ -23,13 +23,13 @@ export function ProjectTitle({
           value={title}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Untitled project"
-          className="flex-1 rounded-lg border border-white/10 bg-[#0d1e2b]/80 px-3 py-2 text-lg font-semibold text-white outline-none focus:border-[#3DC9C0]/40"
+          className="flex-1 rounded-lg border border-white/10 bg-[#0d1e2b]/80 px-3 py-2 text-lg font-semibold text-white outline-none focus:border-gulf-teal/40"
         />
         <button
           type="button"
           disabled={!dirty || saving}
           onClick={onSave}
-          className="rounded-full bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
+          className="rounded-full bg-gulf-teal px-4 py-2 text-sm font-medium text-[#04121b] disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save"}
         </button>

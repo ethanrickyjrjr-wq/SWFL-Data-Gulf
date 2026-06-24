@@ -110,7 +110,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
             )}
             <button
               onClick={onClose}
-              className="mt-2 rounded-lg bg-[#3DC9C0] px-6 py-2 text-sm font-medium text-[#0a1419]"
+              className="mt-2 rounded-lg bg-gulf-teal px-6 py-2 text-sm font-medium text-[#0a1419]"
             >
               Done
             </button>
@@ -134,7 +134,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => setActiveTag(null)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${!activeTag ? "bg-[#3DC9C0] text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${!activeTag ? "bg-gulf-teal text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
                   >
                     All
                   </button>
@@ -142,7 +142,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                     <button
                       key={tag}
                       onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${activeTag === tag ? "bg-[#3DC9C0] text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${activeTag === tag ? "bg-gulf-teal text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
                     >
                       {tag}
                     </button>
@@ -157,7 +157,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                   {contacts.length === 0 ? (
                     <>
                       No contacts yet —{" "}
-                      <a href="/contacts" className="text-[#3DC9C0] underline">
+                      <a href="/contacts" className="text-gulf-teal underline">
                         add some
                       </a>
                     </>
@@ -175,7 +175,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                       type="checkbox"
                       readOnly
                       checked={selected.size === visible.length && visible.length > 0}
-                      className="h-4 w-4 accent-[#3DC9C0]"
+                      className="h-4 w-4 accent-gulf-teal"
                     />
                     <span className="text-sm text-gray-400">
                       {selected.size === visible.length && visible.length > 0
@@ -193,7 +193,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                         type="checkbox"
                         readOnly
                         checked={selected.has(c.id)}
-                        className="h-4 w-4 accent-[#3DC9C0]"
+                        className="h-4 w-4 accent-gulf-teal"
                       />
                       <div className="min-w-0 flex-1">
                         {c.name && (
@@ -216,7 +216,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
               <button
                 disabled={selected.size === 0 || sending}
                 onClick={handleSend}
-                className="w-full rounded-xl bg-[#3DC9C0] py-2.5 text-sm font-semibold text-[#0a1419] disabled:opacity-40"
+                className="w-full rounded-xl bg-gulf-teal py-2.5 text-sm font-semibold text-[#0a1419] disabled:opacity-40"
               >
                 {sending
                   ? "Sending…"
