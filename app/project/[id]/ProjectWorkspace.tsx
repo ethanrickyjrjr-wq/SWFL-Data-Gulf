@@ -623,8 +623,8 @@ export function ProjectWorkspace({
       {/* Scheduled sends — schedule-driven lane (the Built lane now lives in the hub) */}
       <DeliverableLanes emailSchedules={emailSchedules} />
 
-      {/* Filed data — the raw items board + uploader, collapsed by default once the
-           user has materials. Collapse state persists via ui_state across reloads. */}
+      {/* Filed data — the raw items board + uploader. Defaults to expanded; user can
+           collapse and the state persists via ui_state.materials_filed_collapsed. */}
       <details
         open={!(uiState.materials_filed_collapsed ?? false)}
         onToggle={(e) =>

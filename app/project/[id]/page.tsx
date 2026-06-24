@@ -164,8 +164,8 @@ export default async function ProjectPage({
     doc: d.doc ?? null,
     data_as_of: d.data_as_of ?? null,
   }));
-  // P4: split into live "heads" (Built lane, with older versions attached) + trashed
-  // (Recently deleted). A content edit/refresh forks a new row that supersedes the old.
+  // P4: split into live "heads" (each with older versions attached via splitDeliverableVersions).
+  // A content edit/refresh forks a new row that supersedes the old.
   const { heads: deliverables } = splitDeliverableVersions(allDeliverables);
 
   // Active email schedules for the project (§D Emailing lane is schedule-driven).

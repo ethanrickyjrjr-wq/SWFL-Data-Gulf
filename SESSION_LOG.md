@@ -1,3 +1,10 @@
+## 2026-06-24 (main) — docs: fix two stale comments from Task 9 audit
+
+- `ProjectWorkspace.tsx`: comment on the `<details>` block claimed "collapsed by default once the user has materials" — code actually defaults to expanded (`?? false`). Corrected.
+- `page.tsx`: comment on `splitDeliverableVersions` still referenced "Built lane" and "trashed / Recently deleted" which no longer exist post-Task-9. Corrected.
+
+---
+
 ## 2026-06-24 (main) — feat(materials-hub): Task 9 wire workspace + Task 8 audit fixes
 
 Closes the Marketing Hub v2 chain (`1→…→9`). Built on top of the parallel session's `c4c7e2ac`/`c6996f00`.
