@@ -1,3 +1,20 @@
+## 2026-06-24 (main) — feat(zip-report): Phase 1 layout rebuild — stat bar + at-a-glance + Quick Summary section
+
+**Layout rebuilt** per `docs/superpowers/specs/2026-06-24-zip-report-rebuild-design.md` §Phase 1:
+
+- **Top stat bar** (3 cells): Avg Annual Loss (env-swfl), Median Home Value (housing-swfl), New Permits 90d (permits-swfl, Lee county only; `—` for others). Parallel `Promise.all` across all 4 brains + Quick Summary loader for perf.
+- **"[ZIP] at a glance"** section: flood-risk percentile bar (real rank from env-swfl) + permit-activity bar (z-score normalized 0–100%); only renders when real data exists — never `—` with a visual bar.
+- **"Quick data summary of [ZIP]"** section: renders crawl-fed `ZipQuickSummary` figures (Section A populates); empty stub → "Demographic summary is being populated" — never a fabricated number.
+- **CSS port**: `app/r/zip-report/[zip]/zip-report.css` — stat bar (`.zr-stats-bar/cell/label/value/sub`) + metric-block/bar classes (`.zp-metric-block/header/value/bar-track/bar-fill--flood/permits`) adapted from the approved `zip-page.css` design.
+- **display-leak guards**: ISO date (`\d{4}-\d{2}-\d{2}`) now checked on `speak()` tier-1/2 output (rule 5 — must be MM/DD/YYYY); jargon-scrub test block verifies `sanitizeProse` kills "CRE pack", "SWFL CRE pack", "verified corridors/areas".
+- Sources accordion picks up permits source + Quick Summary per-figure citations.
+
+**Gate:** `bun test` 3694/0 · `bunx next build` clean.
+
+**Next:** Section A (crawl4ai pipeline in `wt/zip-crawl` worktree) populates `data_lake.zip_quick_summary` + replaces `lib/zip-summary/load.ts` stub body. Phase 3: cre-swfl source rewrite (own spec).
+
+---
+
 ## 2026-06-24 (main) — fix(zip-report): MM/DD/YYYY dates + city-data jargon scrub [ZIP rebuild Phase 0]
 
 **Backwards dates (rule 5).** All three report surfaces rendered year-first ISO dates via per-page `formatDate()` = `toISOString().slice(0,10)` ("2026-06-03"). Consolidated to ONE "As of" date in MM/DD/YYYY via a new shared `asOfFromIso()` (twin of `asOfFromToken`): `app/r/zip-report/[zip]`, `app/r/[slug]` (dropped redundant "Updated" + the ISO fallback), `app/r/cre-swfl/[corridor]` ("Verified" date). Also removed a latent raw-token leak (`?? freshnessToken`). Guard: `lib/project/report-date-format.test.ts` fails the build if any `app/r/**` page slices a date to ISO again — the "SOME FUCKING HOW" backstop.

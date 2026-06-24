@@ -13,7 +13,13 @@ import { describe, test } from "bun:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { parseBrainMarkdown, speak, toDisplayBrain, type ParsedBrain } from "./speaker.mts";
+import {
+  parseBrainMarkdown,
+  speak,
+  toDisplayBrain,
+  type ParsedBrain,
+  sanitizeProse,
+} from "./speaker.mts";
 import type { BrainOutputMetric } from "../types/brain-output.mts";
 
 const PROJECT_ROOT = path.resolve(import.meta.dir, "..", "..");
@@ -191,6 +197,13 @@ const FORBIDDEN: Array<[string, RegExp]> = [
   ["an engine field name", /\b(?:trust_tier|chain_depth|upstream_count|joint_integrity)\b/],
 ];
 
+// Date-format guard for speak() — the only surface that produces a plain-text
+// string read directly by users. toDisplayBrain() has some internal ISO fields
+// (fetchedAt, chart.asOf) that are not plain text; they are checked separately.
+// Rule 5: user-facing dates must be MM/DD/YYYY. An ISO YYYY-MM-DD in speak()
+// means formatDate / toISOString slipped back.
+const ISO_DATE_RE = /\b\d{4}-\d{2}-\d{2}\b/;
+
 function assertClean(label: string, text: string) {
   for (const [why, pat] of FORBIDDEN) {
     assert.ok(!pat.test(text), `${label} leaked ${why} (matched ${pat}):\n${text}`);
@@ -209,11 +222,15 @@ describe("display-leak guard", () => {
   });
 
   test("speak() tier-1 emits no internal token", () => {
-    assertClean("speak tier 1", speak(DIRTY, { tier: 1 }));
+    const out = speak(DIRTY, { tier: 1 });
+    assertClean("speak tier 1", out);
+    assert.ok(!ISO_DATE_RE.test(out), `speak tier 1 leaked a backwards ISO date:\n${out}`);
   });
 
   test("speak() tier-2 emits no internal token", () => {
-    assertClean("speak tier 2", speak(DIRTY, { tier: 2 }));
+    const out = speak(DIRTY, { tier: 2 });
+    assertClean("speak tier 2", out);
+    assert.ok(!ISO_DATE_RE.test(out), `speak tier 2 leaked a backwards ISO date:\n${out}`);
   });
 
   test("detail_tables: comparable column rides ONLY the sanctioned chart; prose stays clean; internal cell never leaks", () => {
@@ -382,4 +399,40 @@ describe("display hygiene: bounded numbers + scrubbed caveats", () => {
       }
     }
   });
+});
+
+/**
+ * Jargon guard — BANNED_PROSE blocklist enforcement (Phase 0.2).
+ * "CRE pack" / "SWFL CRE pack" and "verified corridors" are build-system jargon
+ * that must be scrubbed before any customer-facing surface. This test shoves each
+ * phrase through sanitizeProse() (the single maintenance point) and asserts it
+ * comes out clean. Adding a new banned phrase? Add it to BANNED_PROSE in speaker.mts
+ * AND add a row here — both or neither.
+ */
+describe("jargon scrub guard (BANNED_PROSE)", () => {
+  const cases: Array<[string, string, RegExp]> = [
+    ["CRE pack → scrubbed", "The CRE pack covers 27 verified corridors.", /\bCRE\s+pack\b/i],
+    [
+      "SWFL CRE pack → scrubbed",
+      "The SWFL CRE pack covers 27 verified corridors.",
+      /\bSWFL\s+CRE\s+pack\b/i,
+    ],
+    [
+      "verified corridors → scrubbed",
+      "27 verified corridors across Lee and Collier.",
+      /\bverified\s+corridors?\b/i,
+    ],
+    [
+      "verified areas (post-deCorridor) → scrubbed",
+      "27 verified areas across Lee and Collier.",
+      /\bverified\s+areas?\b/i,
+    ],
+  ];
+
+  for (const [label, input, forbidden] of cases) {
+    test(label, () => {
+      const out = sanitizeProse(input);
+      assert.ok(!forbidden.test(out), `"${input}" → "${out}" still contains jargon (${forbidden})`);
+    });
+  }
 });
