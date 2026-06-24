@@ -1,3 +1,15 @@
+## 2026-06-24 (main) — feat(materials-hub): Task 8 — hub UI (`19ddd2e7`)
+
+- `IntentLine.tsx` (NEW): hero input with 2-step progress strip (picking→filling→done/fail), teal ring, `aria-live` status, failure state triggers parent highlight.
+- `TemplateRail.tsx` (NEW): 6 SEED_DOCS email starter chips (name + description, Link to `?seed=<id>`); `highlight` prop flashes teal ring (one-pulse on AI fail); quieter "…or build a report" chip group when `onBuildReport` wired.
+- `MaterialRow.tsx` (NEW): list row — 4px brand-color swatch bar (`accentColor` or badge color), derived title (hero.label→hero.value→header.tagline→fallback), format badge, amber "Update ↻" when `needs_update`, `aria-expanded` version accordion (Updated N× ⌄ expands dated sub-rows with Open + Trash); exports `deriveTitle` for testing.
+- `MaterialRow.test.tsx` (NEW): 5 pure `bun:test` cases (title derivation + version count string, no DOM env needed).
+- `MaterialsHub.tsx` (NEW): elevated create-rail panel (1px teal top border, `bg-[#0d1e2b]/70`, `rounded-xl`) + quiet library list + Gap 6 guided empty state; wraps `onAiMaterial` to set highlight on fail.
+- Verification: `bun test components/project/MaterialRow.test.tsx` 5/5 ✓; `bunx next build` ✓.
+- **Next:** Task 9 (wire ProjectWorkspace + DeliverableLanes refactor). Dep chain: 1→(2✅,3✅,6✅)→4✅→5✅→7✅→8✅→9.
+
+---
+
 ## 2026-06-24 (main) — feat(materials-hub): Task 7 — photos bridge
 
 - `app/api/projects/[id]/email-media/route.ts` (NEW): `POST` promotes a filed private photo → `email-media` public bucket (idempotent `copy`), returns durable URL. `PUT` accepts multipart upload direct to public bucket. Auth: cookie client ownership check on uid prefix, writes via service-role.
