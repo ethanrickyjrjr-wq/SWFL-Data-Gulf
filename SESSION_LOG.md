@@ -1,3 +1,19 @@
+## 2026-06-24 (main) — Email Lab block-canvas spec: rev 3 (audit + vendor-verify + tier model)
+
+Reworked `docs/superpowers/specs/2026-06-24-email-lab-block-canvas-design.md` (folded a Sonnet audit + 3 crawl4ai passes).
+
+**crawl4ai verified (registry.npmjs.org + docs):**
+- `@react-email/render@2.0.9` exposes ONLY the `.` export — rev-1's claimed `./dist/browser` / client-side `render()` was **invented**; dropped. Both react-email pkgs DO declare a React peer dep (rev-1 said "none"), but R19 is in range → safe.
+- `@dnd-kit/core@6.3.1` / `sortable@10.0.0` last stable publish **2024-12-05** (~18mo, not "2yr"); peer `react >=16.8.0` → installs clean on R19, risk is *runtime* not install. Fallback `@hello-pangea/dnd@18.0.1` peer-deps R19 explicitly. → drag moved to final phase.
+- dnd-kit docs confirm `useSensor` must wrap in `useSensors` + `activationConstraint` (rev-1 code bug fixed).
+- Anthropic docs: `claude-haiku-4-5` = **200K ctx / 64K out** — the route's `max_tokens: 1024` is an artificial cap, not a model limit.
+
+**Design decisions captured:** two editing tiers (Token Fill ↔ Block Canvas) sharing one `EmailDoc`; "adjust-until-freeze" = save project design; **different design = different project** (today's model, not multi-layout-per-project); AI fills *content only*, colors/backgrounds sticky & user-owned; zod-validated AI output; undo/redo; blocks in `lib/email/blocks/` (shared); template regression (5 structural templates) kept on legacy rail; saved-layout + recurring-refresh as Phase 6–7.
+
+**Next:** operator picks sequencing (fold persistence+recurring into this spec or split), then Phase 1.
+
+---
+
 ## 2026-06-24 (main) — Email Lab: 5 new campaign templates + token/fine-tune wiring
 
 **Templates added** (`templates/html/email/`):
