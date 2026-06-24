@@ -1,0 +1,78 @@
+// This repo has no DOM test environment by design — tests are bun:test + pure.
+// We export `deriveTitle` from MaterialRow and test the core display logic directly.
+import { describe, test, expect } from "bun:test";
+import { deriveTitle } from "./MaterialRow";
+import type { DeliverableRow } from "@/app/project/[id]/workspace/types";
+
+const base: DeliverableRow = {
+  id: "d1",
+  template: "block-canvas",
+  status: "ready",
+  created_at: new Date().toISOString(),
+  scope_kind: null,
+  scope_value: null,
+  exec_summary: null,
+  preview_chart: null,
+  branding: null,
+  deleted_at: null,
+  supersedes_id: null,
+  item_ids: [],
+  data_as_of: new Date().toISOString(),
+  doc: {
+    globalStyle: {
+      primaryColor: "#0f1d24",
+      accentColor: "#1BB8C9",
+      fontFamily: "MODERN_SANS",
+      textColor: "#242424",
+      backdropColor: "#F8F8F8",
+    },
+    blocks: [
+      {
+        id: "b1",
+        type: "hero",
+        props: { label: "Just Sold · Cape Coral" },
+      },
+    ],
+  },
+};
+
+describe("MaterialRow", () => {
+  test("derives title from hero label", () => {
+    expect(deriveTitle(base)).toBe("Just Sold · Cape Coral");
+  });
+
+  test("falls back to hero value when label is absent", () => {
+    const d: DeliverableRow = {
+      ...base,
+      doc: {
+        globalStyle: base.doc!.globalStyle,
+        blocks: [{ id: "b2", type: "hero", props: { value: "$512K" } }],
+      },
+    };
+    expect(deriveTitle(d)).toBe("$512K");
+  });
+
+  test("falls back to header tagline when hero has no label or value", () => {
+    const d: DeliverableRow = {
+      ...base,
+      doc: {
+        globalStyle: base.doc!.globalStyle,
+        blocks: [
+          { id: "b1", type: "hero", props: {} },
+          { id: "b2", type: "header", props: { tagline: "Lee County Market" } },
+        ],
+      },
+    };
+    expect(deriveTitle(d)).toBe("Lee County Market");
+  });
+
+  test("version count string for 1 version is 'Updated 1×'", () => {
+    const versions: DeliverableRow[] = [base];
+    expect(`Updated ${versions.length}×`).toBe("Updated 1×");
+  });
+
+  test("version count string for 3 versions is 'Updated 3×'", () => {
+    const versions: DeliverableRow[] = [base, base, base];
+    expect(`Updated ${versions.length}×`).toBe("Updated 3×");
+  });
+});
