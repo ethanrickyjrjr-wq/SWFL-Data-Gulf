@@ -38,7 +38,7 @@ export function CitationChip({ source }: { source: WelcomeMetricSource }) {
       aria-label={label}
       className={cn(
         base,
-        "cursor-pointer transition-colors hover:border-[var(--brand-primary,#0a8078)]/60 hover:text-text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--brand-primary,#0a8078)]/60",
+        "cursor-pointer transition-colors hover:border-[var(--brand-primary,#3DC9C0)]/60 hover:text-text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--brand-primary,#3DC9C0)]/60",
       )}
     >
       {inner}

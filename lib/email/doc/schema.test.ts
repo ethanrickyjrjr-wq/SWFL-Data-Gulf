@@ -10,7 +10,7 @@ import type { EmailDoc } from "./types";
 const fullDoc: EmailDoc = {
   globalStyle: {
     primaryColor: "#0f1d24",
-    accentColor: "#1BB8C9",
+    accentColor: "#3DC9C0",
     fontFamily: "BOOK_SERIF",
     textColor: "#242424",
     backdropColor: "#F8F8F8",

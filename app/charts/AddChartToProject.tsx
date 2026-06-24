@@ -47,8 +47,8 @@ export function AddChartToProject({ rootId, title }: Props) {
       disabled={state !== "idle"}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium border transition-all duration-200 cursor-pointer disabled:cursor-default ${
         state === "done"
-          ? "bg-[#0a8078]/20 border-[#0a8078]/50 text-[#0a8078]"
-          : "bg-[#0a1419]/80 border-[#22414f] text-[#807e76] hover:border-[#0a8078]/50 hover:text-[#0a8078]"
+          ? "bg-[#3DC9C0]/20 border-[#3DC9C0]/50 text-[#3DC9C0]"
+          : "bg-[#0a1419]/80 border-[#22414f] text-[#807e76] hover:border-[#3DC9C0]/50 hover:text-[#3DC9C0]"
       }`}
     >
       {state === "saving" ? (

@@ -110,7 +110,7 @@ export default function ContactsPage() {
           />
           <button
             onClick={() => setShowAdd(true)}
-            className="rounded-lg bg-[#0a8078] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#0a8078]/80"
+            className="rounded-lg bg-[#3DC9C0] px-3 py-1.5 text-sm font-medium text-[#0a1419] hover:bg-[#3DC9C0]/80"
           >
             Add contact
           </button>
@@ -118,7 +118,7 @@ export default function ContactsPage() {
       </div>
 
       {importMsg && (
-        <div className="mb-4 flex items-center justify-between rounded-lg border border-[#0a8078]/30 bg-[#0a8078]/10 px-4 py-2 text-sm text-[#0a8078]">
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-[#3DC9C0]/30 bg-[#3DC9C0]/10 px-4 py-2 text-sm text-[#3DC9C0]">
           <span>{importMsg}</span>
           <button className="opacity-60 hover:opacity-100" onClick={() => setImportMsg(null)}>
             ×
@@ -130,14 +130,14 @@ export default function ContactsPage() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by name or email…"
-        className="mb-4 w-full rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#0a8078]"
+        className="mb-4 w-full rounded-lg border border-white/10 bg-[#0d1e2b] px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]"
       />
 
       {allTags.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTag(null)}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${!activeTag ? "bg-[#0a8078] text-white" : "border border-white/10 text-gray-400 hover:text-white"}`}
+            className={`rounded-full px-3 py-1 text-xs font-medium ${!activeTag ? "bg-[#3DC9C0] text-[#0a1419]" : "border border-white/10 text-gray-400 hover:text-white"}`}
           >
             All
           </button>
@@ -145,7 +145,7 @@ export default function ContactsPage() {
             <button
               key={tag}
               onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${activeTag === tag ? "bg-[#0a8078] text-white" : "border border-white/10 text-gray-400 hover:text-white"}`}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${activeTag === tag ? "bg-[#3DC9C0] text-[#0a1419]" : "border border-white/10 text-gray-400 hover:text-white"}`}
             >
               {tag}
             </button>
@@ -253,7 +253,7 @@ export default function ContactsPage() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-lg bg-[#0a8078] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="rounded-lg bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#0a1419] disabled:opacity-50"
                 >
                   {busy ? "Saving…" : "Save contact"}
                 </button>

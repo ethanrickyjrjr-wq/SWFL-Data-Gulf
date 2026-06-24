@@ -96,7 +96,7 @@ export function CREMarketBeatChart({ metrics }: { metrics: MBCityMetric[] }) {
               className={[
                 "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
                 active
-                  ? "border-[#0a8078] bg-[#0a8078]/10 text-[#0a8078]"
+                  ? "border-[#3DC9C0] bg-[#3DC9C0]/10 text-[#3DC9C0]"
                   : "border-white/15 bg-white/[0.04] text-gray-400 hover:text-gray-200 hover:border-white/30",
               ].join(" ")}
             >
@@ -119,7 +119,7 @@ export function CREMarketBeatChart({ metrics }: { metrics: MBCityMetric[] }) {
               className={[
                 "rounded-md border px-3 py-1 text-[11px] font-medium transition-colors",
                 active
-                  ? "border-[#0a8078]/60 bg-[#0a8078]/[0.08] text-[#0a8078]"
+                  ? "border-[#3DC9C0]/60 bg-[#3DC9C0]/[0.08] text-[#3DC9C0]"
                   : "border-white/10 bg-white/[0.02] text-gray-500 hover:text-gray-300",
               ].join(" ")}
             >

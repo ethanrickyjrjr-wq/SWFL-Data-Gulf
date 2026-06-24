@@ -120,7 +120,7 @@ export default function Charts() {
                   >
                     <defs>
                       <linearGradient id="rentGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#0a8078" stopOpacity={0.8} />
+                        <stop offset="0%" stopColor="#3DC9C0" stopOpacity={0.8} />
                         <stop offset="100%" stopColor="#076358" stopOpacity={0.4} />
                       </linearGradient>
                     </defs>
@@ -164,7 +164,7 @@ export default function Charts() {
                   >
                     <defs>
                       <linearGradient id="eventGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#0a8078" stopOpacity={0.9} />
+                        <stop offset="0%" stopColor="#3DC9C0" stopOpacity={0.9} />
                         <stop offset="100%" stopColor="#076358" stopOpacity={0.4} />
                       </linearGradient>
                     </defs>

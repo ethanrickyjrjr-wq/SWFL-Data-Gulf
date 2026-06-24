@@ -6,7 +6,7 @@ import { SWFL_THEME } from "@/scripts/email/types";
 // (same single-source rule as SWFL_TOKEN_DEFAULTS in token-defaults.ts).
 export const SWFL_CHART_DEFAULTS = {
   primary: SWFL_THEME.primary, // #0f1d24
-  accent: SWFL_THEME.accent, // #1BB8C9
+  accent: SWFL_THEME.accent, // #3DC9C0
   neutral: "#6B7280",
   danger: "#EF4444",
   // Arial, not Inter: web fonts are unavailable in email clients, so the chart

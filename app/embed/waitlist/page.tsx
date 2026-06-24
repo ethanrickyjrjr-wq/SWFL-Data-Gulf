@@ -37,7 +37,7 @@ export default function EmbedWaitlistPage() {
       {status === "done" ? (
         <p
           style={{
-            color: "#0a8078",
+            color: "#3DC9C0",
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             fontSize: 16,
           }}
@@ -70,8 +70,8 @@ export default function EmbedWaitlistPage() {
             disabled={status === "submitting"}
             style={{
               background: "rgba(61,201,192,0.12)",
-              border: "1px solid #0a8078",
-              color: "#0a8078",
+              border: "1px solid #3DC9C0",
+              color: "#3DC9C0",
               padding: "12px 22px",
               borderRadius: 6,
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",

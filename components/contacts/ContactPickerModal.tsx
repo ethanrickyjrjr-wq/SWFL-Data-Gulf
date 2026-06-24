@@ -110,7 +110,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
             )}
             <button
               onClick={onClose}
-              className="mt-2 rounded-lg bg-[#0a8078] px-6 py-2 text-sm font-medium text-white"
+              className="mt-2 rounded-lg bg-[#3DC9C0] px-6 py-2 text-sm font-medium text-[#0a1419]"
             >
               Done
             </button>
@@ -134,7 +134,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => setActiveTag(null)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${!activeTag ? "bg-[#0a8078] text-white" : "border border-white/10 text-gray-400"}`}
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${!activeTag ? "bg-[#3DC9C0] text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
                   >
                     All
                   </button>
@@ -142,7 +142,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                     <button
                       key={tag}
                       onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${activeTag === tag ? "bg-[#0a8078] text-white" : "border border-white/10 text-gray-400"}`}
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${activeTag === tag ? "bg-[#3DC9C0] text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
                     >
                       {tag}
                     </button>
@@ -157,7 +157,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                   {contacts.length === 0 ? (
                     <>
                       No contacts yet —{" "}
-                      <a href="/contacts" className="text-[#0a8078] underline">
+                      <a href="/contacts" className="text-[#3DC9C0] underline">
                         add some
                       </a>
                     </>
@@ -175,7 +175,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                       type="checkbox"
                       readOnly
                       checked={selected.size === visible.length && visible.length > 0}
-                      className="h-4 w-4 accent-[#0a8078]"
+                      className="h-4 w-4 accent-[#3DC9C0]"
                     />
                     <span className="text-sm text-gray-400">
                       {selected.size === visible.length && visible.length > 0
@@ -193,7 +193,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                         type="checkbox"
                         readOnly
                         checked={selected.has(c.id)}
-                        className="h-4 w-4 accent-[#0a8078]"
+                        className="h-4 w-4 accent-[#3DC9C0]"
                       />
                       <div className="min-w-0 flex-1">
                         {c.name && (
@@ -216,7 +216,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
               <button
                 disabled={selected.size === 0 || sending}
                 onClick={handleSend}
-                className="w-full rounded-xl bg-[#0a8078] py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+                className="w-full rounded-xl bg-[#3DC9C0] py-2.5 text-sm font-semibold text-[#0a1419] disabled:opacity-40"
               >
                 {sending
                   ? "Sending…"

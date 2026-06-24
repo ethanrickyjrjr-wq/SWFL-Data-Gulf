@@ -16,7 +16,7 @@ import { cleanCitation } from "@/lib/citations/clean-url";
  *       falling / bearish → sunset coral  #e08158
  *       mixed             → mixed gold    #d4b370
  *       stable            → muted gray    #b8b4a8
- *       no signal         → teal (ours)   #0a8078
+ *       no signal         → teal (ours)   #3DC9C0
  *  2. SOURCE links are colored by ORIGIN: teal = SWFL Data Gulf (our own /r/
  *     pages / data), blue #60a5fa = an outside website (City Pulse, news,
  *     FRED, Census, …). Identical rule for metric provenance AND WEB-N
@@ -39,8 +39,8 @@ const DIRECTION_CONFIG: Record<string, { label: string; className: string }> = {
 /** The one state color a metric's value and its trend badge share. No
  *  direction signal → teal: it's our own SWFL Data Gulf figure. */
 export function directionClassName(direction: string | null): string {
-  if (!direction) return "text-[#0a8078]";
-  return DIRECTION_CONFIG[direction]?.className ?? "text-[#0a8078]";
+  if (!direction) return "text-[#3DC9C0]";
+  return DIRECTION_CONFIG[direction]?.className ?? "text-[#3DC9C0]";
 }
 
 export interface MetricRow {
@@ -86,14 +86,14 @@ export function SourceLink({
   if (!c.linkable || !c.href) {
     // Internal (our lake) or unusable → label only, no outbound link.
     return (
-      <span className={web ? "text-[#60a5fa]" : "text-[#0a8078]"} title={c.label}>
+      <span className={web ? "text-[#60a5fa]" : "text-[#3DC9C0]"} title={c.label}>
         {text}
       </span>
     );
   }
   const cls = web
     ? "text-[#60a5fa] decoration-[#60a5fa]/40 hover:decoration-[#60a5fa]"
-    : "text-[#0a8078] decoration-[#0a8078]/40 hover:decoration-[#0a8078]";
+    : "text-[#3DC9C0] decoration-[#3DC9C0]/40 hover:decoration-[#3DC9C0]";
   return (
     <a
       href={c.href}
@@ -175,7 +175,7 @@ function MethodBadge({ href }: { href?: string | null }) {
       href={href}
       title="How this is computed"
       aria-label="How this metric is computed"
-      className="ml-1.5 align-super text-[10px] font-semibold text-[#0a8078] no-underline hover:underline"
+      className="ml-1.5 align-super text-[10px] font-semibold text-[#3DC9C0] no-underline hover:underline"
     >
       ƒ
     </a>
@@ -240,7 +240,7 @@ export function DataRow({
   label,
   value,
   badge,
-  valueClassName = "text-[#0a8078]",
+  valueClassName = "text-[#3DC9C0]",
 }: {
   label: string;
   value: ReactNode;

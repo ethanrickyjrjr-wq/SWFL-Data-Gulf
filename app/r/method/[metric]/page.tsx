@@ -74,7 +74,7 @@ function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) 
               showSourceLink ? (
                 <a
                   href={`/r/source/${entry.sourceTable}`}
-                  className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
+                  className="text-[#3DC9C0] underline underline-offset-2 hover:text-[#3DC9C0]/80"
                 >
                   view the rows ↗
                 </a>
@@ -89,7 +89,7 @@ function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) 
               entry.brain ? (
                 <a
                   href={`/r/${entry.brain}`}
-                  className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
+                  className="text-[#3DC9C0] underline underline-offset-2 hover:text-[#3DC9C0]/80"
                 >
                   {entry.brain}
                 </a>
@@ -106,7 +106,7 @@ function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) 
                   href={entry.doc}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#00d4aa] underline underline-offset-2 hover:text-[#00d4aa]/80"
+                  className="text-[#3DC9C0] underline underline-offset-2 hover:text-[#3DC9C0]/80"
                 >
                   methodology doc ↗
                 </a>

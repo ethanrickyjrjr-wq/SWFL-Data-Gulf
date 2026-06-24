@@ -104,7 +104,7 @@ export function DeliverableModal({
             type="button"
             onClick={() => setEditing((e) => !e)}
             disabled={busy !== null}
-            className="text-xs text-[#00d4aa] underline underline-offset-2 disabled:opacity-40"
+            className="text-xs text-[#3DC9C0] underline underline-offset-2 disabled:opacity-40"
           >
             {editing ? "Close editor" : "Edit"}
           </button>
@@ -112,7 +112,7 @@ export function DeliverableModal({
             type="button"
             onClick={() => void refresh()}
             disabled={busy !== null}
-            className="text-xs text-[#00d4aa] underline underline-offset-2 disabled:opacity-40"
+            className="text-xs text-[#3DC9C0] underline underline-offset-2 disabled:opacity-40"
           >
             {busy === "refresh" ? "Refreshing…" : "Refresh data"}
           </button>
@@ -129,7 +129,7 @@ export function DeliverableModal({
           href={`/p/${d.id}`}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-[#00d4aa] underline underline-offset-2"
+          className="text-xs text-[#3DC9C0] underline underline-offset-2"
         >
           Open in new tab ↗
         </a>

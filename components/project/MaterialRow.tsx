@@ -81,7 +81,7 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
             router.push(href);
           }
         }}
-        className="flex cursor-pointer items-center gap-3 border-b border-white/[0.08] py-3 pl-4 pr-3 hover:bg-white/[0.03] focus:outline-none focus:ring-inset focus:ring-1 focus:ring-[#1BB8C9]/40"
+        className="flex cursor-pointer items-center gap-3 border-b border-white/[0.08] py-3 pl-4 pr-3 hover:bg-white/[0.03] focus:outline-none focus:ring-inset focus:ring-1 focus:ring-[#3DC9C0]/40"
       >
         {/* 4px brand swatch bar */}
         <div

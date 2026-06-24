@@ -48,7 +48,7 @@ export function TemplateSwitcher({ id, current }: { id: string; current: string 
           aria-pressed={t.id === current}
           className={`rounded-full px-3 py-1 text-xs transition-colors ${
             t.id === current
-              ? "bg-[#00d4aa] text-black"
+              ? "bg-[#3DC9C0] text-black"
               : "bg-white/10 text-gray-300 hover:bg-white/20"
           } ${pending === t.id ? "opacity-50" : ""}`}
         >

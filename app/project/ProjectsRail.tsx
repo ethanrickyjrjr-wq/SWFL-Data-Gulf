@@ -117,7 +117,7 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
                 </svg>
               </button>
             )}
-            <Link href="/project" className="text-xs text-gray-400 hover:text-[#00d4aa]">
+            <Link href="/project" className="text-xs text-gray-400 hover:text-[#3DC9C0]">
               All
             </Link>
             <button
@@ -126,7 +126,7 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
               disabled={creating}
               aria-label="New project"
               title="New project"
-              className="rounded-full bg-[#00d4aa]/15 px-2 py-0.5 text-xs font-semibold text-[#00d4aa] hover:bg-[#00d4aa]/30 disabled:opacity-40 transition-colors"
+              className="rounded-full bg-[#3DC9C0]/15 px-2 py-0.5 text-xs font-semibold text-[#3DC9C0] hover:bg-[#3DC9C0]/30 disabled:opacity-40 transition-colors"
             >
               {creating ? "…" : "+ New"}
             </button>
@@ -148,7 +148,7 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
                     aria-current={active ? "page" : undefined}
                     className={`flex flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                       active
-                        ? "bg-[#00d4aa]/15 text-white"
+                        ? "bg-[#3DC9C0]/15 text-white"
                         : "text-gray-300 hover:bg-white/5 hover:text-white"
                     }`}
                   >

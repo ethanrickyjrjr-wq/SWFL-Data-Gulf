@@ -118,7 +118,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     baseHtml =
       `<!doctype html><html><body style="font-family:Arial,sans-serif;padding:24px">` +
       `<p style="font-size:16px;color:#111">Your market report is ready.</p>` +
-      `<p><a href="${escAttr(webUrl)}" style="display:inline-block;background:#0a8078;color:#fff;` +
+      `<p><a href="${escAttr(webUrl)}" style="display:inline-block;background:#3DC9C0;color:#fff;` +
       `padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">View Report</a></p>` +
       `</body></html>`;
   }

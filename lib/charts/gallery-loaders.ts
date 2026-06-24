@@ -37,7 +37,7 @@ export interface GalleryPanel {
 
 // Exported so page.tsx can use the same tier-yoy series definition.
 export const TIER_YOY_SERIES: ChartSeriesDef[] = [
-  { key: "luxury_yoy", label: "Luxury homes", color: "#0a8078", dash: "" },
+  { key: "luxury_yoy", label: "Luxury homes", color: "#3DC9C0", dash: "" },
   { key: "starter_yoy", label: "Starter homes", color: "#5bc97a", dash: "8 5" },
 ];
 

@@ -100,7 +100,7 @@ export function ItemDetail({
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-[#00d4aa] underline underline-offset-2"
+                  className="text-xs text-[#3DC9C0] underline underline-offset-2"
                 >
                   {c.label}
                 </a>
@@ -125,14 +125,14 @@ export function ItemDetail({
       return (
         <Link
           href={`/r/${item.slug}`}
-          className="text-sm text-[#00d4aa] underline underline-offset-2"
+          className="text-sm text-[#3DC9C0] underline underline-offset-2"
         >
           {item.title || item.slug}
         </Link>
       );
     case "source":
       return (
-        <a href={item.url} className="text-sm text-[#00d4aa] underline underline-offset-2">
+        <a href={item.url} className="text-sm text-[#3DC9C0] underline underline-offset-2">
           {item.label}
         </a>
       );
@@ -214,7 +214,7 @@ export function ItemDetail({
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-[#00d4aa] underline underline-offset-2"
+                  className="text-sm text-[#3DC9C0] underline underline-offset-2"
                 >
                   {item.caption || "Open PDF"}
                 </a>

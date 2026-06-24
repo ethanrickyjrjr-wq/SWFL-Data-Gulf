@@ -186,10 +186,7 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
             const w = x1 - x0;
             const h = y1 - y0;
             const pad = Math.max(w, h) * 0.06;
-            svg.setAttribute(
-              "viewBox",
-              `${x0 - pad} ${y0 - pad} ${w + pad * 2} ${h + pad * 2}`,
-            );
+            svg.setAttribute("viewBox", `${x0 - pad} ${y0 - pad} ${w + pad * 2} ${h + pad * 2}`);
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
           }
         }
@@ -217,7 +214,7 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
             left: tooltip.x + 14,
             top: tooltip.y - 8,
             background: "rgba(10,20,25,0.96)",
-            borderColor: "var(--gulf-teal, #0a8078)",
+            borderColor: "var(--gulf-teal, #3DC9C0)",
             minWidth: 140,
           }}
         >

@@ -41,7 +41,7 @@ const COLOR_SLOTS: { key: string; label: string }[] = [
 
 // The color chart — a fixed palette you can pick from instead of typing a hex.
 const COLOR_CHART: string[] = [
-  "#00d4aa",
+  "#3DC9C0",
   "#0ea5e9",
   "#6366f1",
   "#8b5cf6",
@@ -64,7 +64,7 @@ const COLOR_CHART: string[] = [
 ];
 
 const INPUT_CLS =
-  "rounded-lg border border-white/10 bg-[#04121b] px-2 py-1.5 text-sm text-white outline-none focus:border-[#00d4aa]/40";
+  "rounded-lg border border-white/10 bg-[#04121b] px-2 py-1.5 text-sm text-white outline-none focus:border-[#3DC9C0]/40";
 
 /**
  * Branding panel — rendered inside the Brand pill popover.
@@ -102,8 +102,8 @@ export function BrandingBlock({
 }) {
   // The color currently held in the picker — typed as hex or picked from the
   // chart, then dropped into one of the three save slots.
-  const [draft, setDraft] = useState("#00d4aa");
-  const [hexText, setHexText] = useState("#00d4aa");
+  const [draft, setDraft] = useState("#3DC9C0");
+  const [hexText, setHexText] = useState("#3DC9C0");
 
   function setColor(raw: string) {
     setHexText(raw);
@@ -230,10 +230,10 @@ export function BrandingBlock({
             value={hexText}
             onChange={(e) => setColor(e.target.value)}
             onBlur={() => setHexText(draft)}
-            placeholder="#00d4aa"
+            placeholder="#3DC9C0"
             aria-label="Hex color"
             spellCheck={false}
-            className="w-28 rounded-lg border border-white/10 bg-[#04121b] px-2 py-1.5 font-mono text-sm text-white outline-none focus:border-[#00d4aa]/40"
+            className="w-28 rounded-lg border border-white/10 bg-[#04121b] px-2 py-1.5 font-mono text-sm text-white outline-none focus:border-[#3DC9C0]/40"
           />
           <input
             type="color"
@@ -289,7 +289,7 @@ export function BrandingBlock({
                   <button
                     type="button"
                     onClick={() => saveToSlot(slot.key)}
-                    className="flex-1 rounded-md border border-white/15 px-1 py-1 text-[10px] text-gray-300 hover:border-[#00d4aa]/50 hover:text-white"
+                    className="flex-1 rounded-md border border-white/15 px-1 py-1 text-[10px] text-gray-300 hover:border-[#3DC9C0]/50 hover:text-white"
                   >
                     Save
                   </button>
@@ -319,7 +319,7 @@ export function BrandingBlock({
             type="button"
             onClick={saveAsPalette}
             disabled={!canSavePalette}
-            className="rounded-full border border-[#00d4aa]/40 px-2 py-0.5 text-[10px] text-[#00d4aa] hover:bg-[#00d4aa]/10 disabled:opacity-40"
+            className="rounded-full border border-[#3DC9C0]/40 px-2 py-0.5 text-[10px] text-[#3DC9C0] hover:bg-[#3DC9C0]/10 disabled:opacity-40"
           >
             + Save as new palette
           </button>
@@ -337,7 +337,7 @@ export function BrandingBlock({
                 <div
                   key={p.id}
                   className={`group flex items-center gap-1 rounded-full border py-0.5 pl-1 pr-1.5 ${
-                    active ? "border-[#00d4aa]" : "border-white/15 hover:border-white/40"
+                    active ? "border-[#3DC9C0]" : "border-white/15 hover:border-white/40"
                   }`}
                 >
                   <button
@@ -382,7 +382,7 @@ export function BrandingBlock({
               const ok = await onSaveGlobal();
               if (ok) onClose();
             }}
-            className="rounded-full bg-[#00d4aa] px-4 py-1.5 text-xs font-medium text-[#04121b] disabled:opacity-40"
+            className="rounded-full bg-[#3DC9C0] px-4 py-1.5 text-xs font-medium text-[#04121b] disabled:opacity-40"
           >
             {saving ? "Saving…" : "Save"}
           </button>

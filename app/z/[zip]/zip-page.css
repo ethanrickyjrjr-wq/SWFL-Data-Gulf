@@ -29,7 +29,7 @@
 }
 .zp-shape-wrap svg path,
 .zp-shape-wrap svg polygon {
-  fill: var(--zip-fill, #0a8078);
+  fill: var(--zip-fill, #3DC9C0);
   stroke: var(--gulf-midnight);
   stroke-width: 0.6px;
   stroke-linejoin: round;
@@ -220,7 +220,7 @@
   border-radius: 4px;
 }
 .zp-bar-fill--flood  { background: linear-gradient(to right, #1c3a2e, #d4b370, #e08158); }
-.zp-bar-fill--value  { background: linear-gradient(to right, #1c3a2e, #0a8078, #5bc97a); }
+.zp-bar-fill--value  { background: linear-gradient(to right, #1c3a2e, #3DC9C0, #5bc97a); }
 .zp-bar-fill--permits{ background: linear-gradient(to right, #1c3a2e, #4a6fa8, #a0c4ff); }
 .zp-percentile {
   font-size: 11px;

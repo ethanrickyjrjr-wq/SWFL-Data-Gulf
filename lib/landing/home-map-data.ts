@@ -212,7 +212,7 @@ export const HOME_MAP_DATA: HomeMapData = {
       low: 185000,
       high: 1250000,
       c0: "#1f4f4a",
-      c1: "#0a8078",
+      c1: "#3DC9C0",
       c2: "#5bc97a",
     },
     permits: {

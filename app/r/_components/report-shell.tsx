@@ -74,7 +74,7 @@ export function ReportFooter({
           {freshnessToken && (
             <>
               {" · "}
-              <code className="freshness-token text-xs text-[#0a8078]">
+              <code className="freshness-token text-xs text-[#3DC9C0]">
                 {asOfFromToken(freshnessToken) ?? freshnessToken}
               </code>
             </>
@@ -89,7 +89,7 @@ export function ReportFooter({
 
 /** One section heading style for every report. */
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return <h2 className="text-xl font-semibold tracking-tight text-[#0a8078]">{children}</h2>;
+  return <h2 className="text-xl font-semibold tracking-tight text-[#3DC9C0]">{children}</h2>;
 }
 
 export function Meta({ label, value }: { label: string; value: ReactNode }) {

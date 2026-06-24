@@ -97,7 +97,7 @@ export default async function ClaimPage({
         </p>
         <Link
           href={`/login?next=${encodeURIComponent(next)}`}
-          className="mt-5 inline-flex items-center justify-center rounded-xl bg-[#0a8078] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0a8078]/80"
+          className="mt-5 inline-flex items-center justify-center rounded-xl bg-[#3DC9C0] px-4 py-2 text-sm font-medium text-[#0a1419] transition-colors hover:bg-[#3DC9C0]/80"
         >
           Sign in to claim
         </Link>

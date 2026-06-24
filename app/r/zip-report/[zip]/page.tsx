@@ -193,7 +193,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const totalPermitsZips = allPermitEntries.length;
 
   // ── Fill color — rgb() string so glow replace() works ────────────────────
-  const fillColor = hasFlood ? floodFillColor(floodPct) : "#0a8078";
+  const fillColor = hasFlood ? floodFillColor(floodPct) : "#3DC9C0";
 
   // ── Identity ──────────────────────────────────────────────────────────────
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);

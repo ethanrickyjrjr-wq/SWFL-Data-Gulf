@@ -91,7 +91,7 @@ export interface BrandTheme {
 /** SWFL Data Gulf house brand — the default when no white-label theme is passed. */
 export const SWFL_THEME = {
   primary: "#0f1d24",
-  accent: "#1BB8C9",
+  accent: "#3DC9C0",
   logoUrl: "https://www.swfldatagulf.com/logo-name.png",
 } as const;
 

@@ -29,7 +29,7 @@ describe("getMaterialStatus", () => {
 
 describe("getFormatBadge", () => {
   test("block-canvas → email / teal", () => {
-    expect(getFormatBadge("block-canvas")).toMatchObject({ label: "email", color: "#1BB8C9" });
+    expect(getFormatBadge("block-canvas")).toMatchObject({ label: "email", color: "#3DC9C0" });
   });
   test("market-overview → overview", () => {
     expect(getFormatBadge("market-overview").label).toBe("overview");

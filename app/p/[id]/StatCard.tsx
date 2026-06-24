@@ -38,7 +38,7 @@ export function StatCard({ slot, deliverableId }: { slot: StatSlot; deliverableI
   return (
     <div
       className="rounded-lg border border-white/10 bg-white/5 px-4 py-3"
-      style={{ borderLeftColor: "var(--chart-accent, #00d4aa)", borderLeftWidth: "3px" }}
+      style={{ borderLeftColor: "var(--chart-accent, #3DC9C0)", borderLeftWidth: "3px" }}
     >
       <p className="text-2xl font-bold leading-tight text-white">{slot.value}</p>
       <p className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-400">
@@ -56,7 +56,7 @@ export function StatCard({ slot, deliverableId }: { slot: StatSlot; deliverableI
                 href={c.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#00d4aa] underline underline-offset-2"
+                className="text-[#3DC9C0] underline underline-offset-2"
               >
                 {c.label}
               </a>
@@ -73,7 +73,7 @@ export function StatCard({ slot, deliverableId }: { slot: StatSlot; deliverableI
           type="button"
           onClick={handleFile}
           disabled={filed}
-          className="mt-2 text-[10px] text-[#0a8078] transition-colors hover:text-[#00d4aa] disabled:opacity-60"
+          className="mt-2 text-[10px] text-[#3DC9C0] transition-colors hover:text-[#3DC9C0] disabled:opacity-60"
         >
           {filed ? "Filed ✓" : "+ File"}
         </button>

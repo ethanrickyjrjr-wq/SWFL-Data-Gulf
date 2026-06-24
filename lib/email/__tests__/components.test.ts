@@ -12,7 +12,7 @@ import { SWFL_THEME } from "@/scripts/email/types";
 // each component's contracted behavior. Same rigor as the S2 chart-renderer tests.
 
 const SWFL_PRIMARY = SWFL_THEME.primary; // single-source: matches what callout-box emits
-const SWFL_ACCENT = "#1BB8C9";
+const SWFL_ACCENT = "#3DC9C0";
 const GREEN = "#16A34A";
 const RED = "#DC2626";
 const WARN = "#F59E0B";

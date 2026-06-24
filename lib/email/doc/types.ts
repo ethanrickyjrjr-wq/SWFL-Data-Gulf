@@ -128,7 +128,7 @@ export type BlockOf<K extends BlockType> = Extract<EmailBlock, { type: K }>;
 
 export interface EmailGlobalStyle {
   primaryColor: string; // e.g. "#0f1d24"
-  accentColor: string; // e.g. "#1BB8C9"
+  accentColor: string; // e.g. "#3DC9C0"
   fontFamily: FontFamily;
   textColor: string; // e.g. "#242424"
   backdropColor: string; // e.g. "#F8F8F8"

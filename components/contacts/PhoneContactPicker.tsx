@@ -105,7 +105,7 @@ export function PhoneContactPicker({ token }: { token: string }) {
 
   if (phase === "done") {
     return (
-      <div className="rounded-xl border border-[#0a8078]/30 bg-[#0a8078]/10 p-4 text-sm text-[#0a8078]">
+      <div className="rounded-xl border border-[#3DC9C0]/30 bg-[#3DC9C0]/10 p-4 text-sm text-[#3DC9C0]">
         ✓ {message}
       </div>
     );
@@ -117,7 +117,7 @@ export function PhoneContactPicker({ token }: { token: string }) {
         type="button"
         onClick={() => void pick()}
         disabled={phase === "picking" || phase === "saving"}
-        className="rounded-full bg-[#00d4aa] px-5 py-3 text-base font-semibold text-[#04121b] disabled:opacity-40"
+        className="rounded-full bg-[#3DC9C0] px-5 py-3 text-base font-semibold text-[#04121b] disabled:opacity-40"
       >
         {phase === "saving" ? "Saving…" : phase === "picking" ? "Choosing…" : "Choose contacts"}
       </button>

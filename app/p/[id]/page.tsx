@@ -145,7 +145,7 @@ function renderCitation({
             href={c.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#00d4aa] underline underline-offset-2"
+            className="text-[#3DC9C0] underline underline-offset-2"
           >
             {c.label}
           </a>
@@ -231,7 +231,7 @@ function renderExhibit(slot: ExhibitSlot) {
           href={slot.signed_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#00d4aa] underline underline-offset-2"
+          className="text-[#3DC9C0] underline underline-offset-2"
         >
           {slot.caption ?? slot.title} (PDF)
         </a>
@@ -313,7 +313,7 @@ function renderQa(slot: QaSlot) {
     <div className="mb-4 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
       <p className="mb-1 text-xs font-semibold text-gray-400">{slot.question}</p>
       <p className="text-sm text-gray-200 leading-relaxed">{slot.answer}</p>
-      {slot.fact && <p className="mt-1 text-xs text-[#00d4aa]">{slot.fact}</p>}
+      {slot.fact && <p className="mt-1 text-xs text-[#3DC9C0]">{slot.fact}</p>}
       {citation}
     </div>
   );
@@ -457,7 +457,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
             href={`/p/${id}/print`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full border border-[#0a8078]/40 px-4 py-2 text-sm font-medium text-[#0a8078] transition-colors hover:bg-[#0a8078]/10"
+            className="rounded-full border border-[#3DC9C0]/40 px-4 py-2 text-sm font-medium text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/10"
           >
             Save as PDF
           </a>
@@ -465,7 +465,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`/project/${data.project_id}`}
-                className="rounded-full border border-[#0a8078]/40 px-4 py-2 text-sm font-medium text-[#0a8078] transition-colors hover:bg-[#0a8078]/10"
+                className="rounded-full border border-[#3DC9C0]/40 px-4 py-2 text-sm font-medium text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/10"
               >
                 ← Back to project
               </a>
@@ -543,7 +543,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
           <div className="flex items-center gap-3">
             <a
               href={`/project/${data.project_id}`}
-              className="rounded-full border border-[#0a8078]/40 px-4 py-2 text-sm font-medium text-[#0a8078] transition-colors hover:bg-[#0a8078]/10"
+              className="rounded-full border border-[#3DC9C0]/40 px-4 py-2 text-sm font-medium text-[#3DC9C0] transition-colors hover:bg-[#3DC9C0]/10"
             >
               ← Back to project
             </a>

@@ -63,7 +63,7 @@ export function BuildActions({
       {buildError && <p className="text-xs text-red-400">{buildError}</p>}
       <Link
         href={`/project/${id}/email-lab`}
-        className="self-start text-xs text-white/40 hover:text-[#1BB8C9] transition-colors mt-1"
+        className="self-start text-xs text-white/40 hover:text-[#3DC9C0] transition-colors mt-1"
       >
         Design email in Email Lab →
       </Link>

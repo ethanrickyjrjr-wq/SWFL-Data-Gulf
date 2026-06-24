@@ -3,6 +3,8 @@
  * a real-price competitor comparison strip (crawl4ai-sourced), and the CTA.
  * Static; styles live in home-explorer.css (namespaced under .home-explorer).
  */
+import { Zap, FileText, Users, CalendarClock } from "lucide-react";
+
 export default function Capabilities() {
   return (
     // id="comparison" is the nav "How It Works" anchor target (this section carries the
@@ -19,7 +21,7 @@ export default function Capabilities() {
       <div className="cap-grid">
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            ⚡
+            <Zap size={22} />
           </span>
           <div className="cap-card-title">Ask anything. Get the answer.</div>
           <div className="cap-card-desc">
@@ -29,7 +31,7 @@ export default function Capabilities() {
 
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            📋
+            <FileText size={22} />
           </span>
           <div className="cap-card-title">Describe it. AI builds it.</div>
           <div className="cap-card-desc">
@@ -40,7 +42,7 @@ export default function Capabilities() {
 
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            📂
+            <Users size={22} />
           </span>
           <div className="cap-card-title">Add clients. AI tracks everything.</div>
           <div className="cap-card-desc">
@@ -50,7 +52,7 @@ export default function Capabilities() {
 
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            🕑
+            <CalendarClock size={22} />
           </span>
           <div className="cap-card-title">Scheduled. Automatic. Just say when.</div>
           <div className="cap-card-desc">

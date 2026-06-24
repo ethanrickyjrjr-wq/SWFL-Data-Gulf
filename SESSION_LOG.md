@@ -1,3 +1,25 @@
+## 2026-06-24 (main) — design(gulf-teal): full brand token sweep T2–T10
+
+Single-root CSS token system + complete rogue-hex eradication across 115 files.
+
+**What changed:**
+- `globals.css` (T0+T1, prev session): `--gulf-teal: #3DC9C0` + brand semantic tokens cascade + waterline
+- `lib/charts/series.ts` (T2): 4 series presets `#0a8078` → `#3DC9C0`
+- `home-explorer.css` (T3): 3 `rgba(10,128,120,...)` → `rgba(61,201,192,...)` + search-btn/filter-pill/cap-btn text fixed to `var(--text-on-accent)` (WCAG)
+- T4a: ~62 files — all `#0a8078` replaced with `#3DC9C0` (AI overlays, charts, reports, landing, contacts, claims, nav, embed, MCP widget)
+- T4b/T4c/T4d/T4e: ~48 files — all `#00d4aa` (project workspace, deliverables, contacts, reports) and `#1BB8C9` (email lab, materials hub) replaced with `#3DC9C0`. Preserved 5 test files using these as user-submitted brand color fixtures (apply-brand.test, brand/route.test, palette.test, resolve-brand.test, chart-renderer.test)
+- T4f: `scripts/email/types.ts` SWFL_THEME.accent, `lib/email/doc/default-docs.ts`, `lib/deliverable/material-status.ts`, email template components + chart-defaults
+- T5 (partial): AI overlay hex updated (AskAiDock, HighlightPopup, BriefcasePanel/Chat/Pill, ChatScheduleCard, MCPInstallCard, FactChip, DiscoveryTicker, FirstTouchHint, DeliverableHighlightPopup)
+- T7: WCAG — white text on solid teal bg → `text-[#0a1419]` in demo, contacts, ContactPickerModal, claim, SiteShell nav badge
+- T8: Capabilities.tsx — emojis (⚡📋📂🕑) → Lucide icons (Zap, FileText, Users, CalendarClock)
+- T9: `.stat-value` font-size 20px → 32px display scale
+- Golden email fixtures regenerated to match new `#3DC9C0` accent
+- `bun test` 3717/0 ✓, `bunx next build` ✓
+
+**Next:** manual prod-verify on deploy; push needs confirmation.
+
+---
+
 ## 2026-06-24 (main) — docs: fix two stale comments from Task 9 audit
 
 - `ProjectWorkspace.tsx`: comment on the `<details>` block claimed "collapsed by default once the user has materials" — code actually defaults to expanded (`?? false`). Corrected.

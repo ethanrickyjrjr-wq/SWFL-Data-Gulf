@@ -9,7 +9,7 @@ import type { EmailDoc } from "../doc/types";
 const ALL_BLOCKS_DOC: EmailDoc = {
   globalStyle: {
     primaryColor: "#0f1d24",
-    accentColor: "#1BB8C9",
+    accentColor: "#3DC9C0",
     fontFamily: "MODERN_SANS",
     textColor: "#242424",
     backdropColor: "#F8F8F8",
@@ -75,7 +75,7 @@ const ALL_BLOCKS_DOC: EmailDoc = {
     {
       id: "b8",
       type: "button",
-      props: { label: "View Full Report", url: "https://example.com/report", bgColor: "#1BB8C9" },
+      props: { label: "View Full Report", url: "https://example.com/report", bgColor: "#3DC9C0" },
     },
     { id: "b9", type: "divider", props: { color: "#E5E7EB" } },
     {

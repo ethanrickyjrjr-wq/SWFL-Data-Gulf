@@ -178,7 +178,7 @@ export default async function ReportPage({ params }: PageProps) {
           <Meta
             label="As of"
             value={
-              <span className="text-xs text-[#00d4aa]">
+              <span className="text-xs text-[#3DC9C0]">
                 {asOfFromToken(display.freshnessToken) ?? asOfFromIso(display.refinedAt)}
               </span>
             }
@@ -413,7 +413,7 @@ function SourcesGate({ sourceCount }: { sourceCount: number }) {
         <span className="text-sm font-medium text-gray-300">
           Full detail — every source and note
         </span>
-        <span className="flex items-center gap-1.5 rounded-full bg-[#00d4aa]/10 px-2.5 py-0.5 text-xs font-medium text-[#00d4aa]">
+        <span className="flex items-center gap-1.5 rounded-full bg-[#3DC9C0]/10 px-2.5 py-0.5 text-xs font-medium text-[#3DC9C0]">
           <svg className="h-3 w-3" viewBox="0 0 12 12" fill="currentColor">
             <path
               fillRule="evenodd"

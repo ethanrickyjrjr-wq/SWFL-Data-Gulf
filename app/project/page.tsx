@@ -50,25 +50,25 @@ export default async function ProjectListPage() {
         aria-label="Quick links"
         className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-400"
       >
-        <Link href="/charts" className="hover:text-[#0a8078]">
+        <Link href="/charts" className="hover:text-[#3DC9C0]">
           Charts
         </Link>
         <span aria-hidden className="text-white/15">
           ·
         </span>
-        <Link href="/r" className="hover:text-[#0a8078]">
+        <Link href="/r" className="hover:text-[#3DC9C0]">
           Search
         </Link>
         <span aria-hidden className="text-white/15">
           ·
         </span>
-        <Link href="/alerts" className="hover:text-[#0a8078]">
+        <Link href="/alerts" className="hover:text-[#3DC9C0]">
           Buyer-intent alerts
         </Link>
         <span aria-hidden className="text-white/15">
           ·
         </span>
-        <Link href="/contacts" className="hover:text-[#0a8078]">
+        <Link href="/contacts" className="hover:text-[#3DC9C0]">
           Contacts
         </Link>
       </nav>
@@ -85,7 +85,7 @@ export default async function ProjectListPage() {
               <li key={p.id}>
                 <Link
                   href={`/project/${p.id}`}
-                  className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0d1e2b]/80 px-4 py-3 transition-colors hover:border-[#0a8078]/40"
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0d1e2b]/80 px-4 py-3 transition-colors hover:border-[#3DC9C0]/40"
                 >
                   <span className="text-sm font-medium text-white">
                     {p.title || "Untitled project"}

@@ -29,8 +29,8 @@ export function IntentLine({
 
   return (
     <div>
-      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0d1e2b]/80 px-3 py-2 focus-within:ring-2 focus-within:ring-[#1BB8C9]/40">
-        <span className="text-[#1BB8C9]" aria-hidden="true">
+      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0d1e2b]/80 px-3 py-2 focus-within:ring-2 focus-within:ring-[#3DC9C0]/40">
+        <span className="text-[#3DC9C0]" aria-hidden="true">
           ✦
         </span>
         <input
@@ -45,7 +45,7 @@ export function IntentLine({
           onClick={go}
           disabled={busy}
           aria-label="Build"
-          className="text-[#1BB8C9] transition-opacity disabled:opacity-40"
+          className="text-[#3DC9C0] transition-opacity disabled:opacity-40"
         >
           →
         </button>
@@ -54,7 +54,7 @@ export function IntentLine({
         <p className="mt-1.5 text-xs text-white/45" aria-live="polite">
           {phase.k === "picking" && "Picking a template…"}
           {phase.k === "filling" && "Filling in your numbers…"}
-          {phase.k === "done" && <span className="text-[#1BB8C9]">Built a {phase.name} ✓</span>}
+          {phase.k === "done" && <span className="text-[#3DC9C0]">Built a {phase.name} ✓</span>}
           {phase.k === "fail" && "Couldn't build that one automatically — pick a starter below."}
         </p>
       )}

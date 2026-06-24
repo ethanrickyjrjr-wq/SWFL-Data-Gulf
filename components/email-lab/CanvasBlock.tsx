@@ -38,7 +38,7 @@ export function CanvasBlock({
       onClick={onSelect}
       className={`group relative cursor-pointer transition-shadow ${
         selected
-          ? "ring-2 ring-inset ring-[#1BB8C9]"
+          ? "ring-2 ring-inset ring-[#3DC9C0]"
           : "ring-1 ring-inset ring-transparent hover:ring-gray-300"
       }`}
     >

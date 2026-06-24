@@ -39,7 +39,7 @@ export function AddToProject({ chartId, title }: Props) {
     <button
       type="button"
       onClick={handleAdd}
-      className="text-xs text-[#00d4aa] underline underline-offset-2 transition-colors hover:text-[#00d4aa]/80"
+      className="text-xs text-[#3DC9C0] underline underline-offset-2 transition-colors hover:text-[#3DC9C0]/80"
     >
       {filed ? "Added ✓" : "Add to project"}
     </button>

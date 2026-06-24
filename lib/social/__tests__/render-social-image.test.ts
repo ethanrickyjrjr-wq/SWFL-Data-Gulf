@@ -160,7 +160,7 @@ describe("brand colors carry through", () => {
   test("falls back to SWFL house theme when no brand passed", () => {
     const svg = composeCardSvg({ model: BASE_MODEL, theme: null, format: "square" });
     expect(svg).toContain("#0f1d24"); // SWFL primary
-    expect(svg).toContain("#1BB8C9"); // SWFL accent
+    expect(svg).toContain("#3DC9C0"); // SWFL accent
   });
 });
 

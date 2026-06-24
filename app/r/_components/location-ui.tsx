@@ -34,7 +34,7 @@ export function LocationSearchBox({
         aria-label="Search a Southwest Florida location"
         autoComplete="off"
         autoFocus={autoFocus}
-        className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:border-[#0a8078]/60 focus:outline-none focus:ring-1 focus:ring-[#0a8078]/40"
+        className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:border-[#3DC9C0]/60 focus:outline-none focus:ring-1 focus:ring-[#3DC9C0]/40"
       />
       <button
         type="submit"
@@ -86,7 +86,7 @@ function CardSourceLink({ url, label }: { url: string; label: string }) {
   const c = cleanCitation({ url, label });
   if (!c.linkable || !c.href) {
     return (
-      <span className="text-[#0a8078]" title={c.label}>
+      <span className="text-[#3DC9C0]" title={c.label}>
         {c.label}
       </span>
     );
@@ -96,7 +96,7 @@ function CardSourceLink({ url, label }: { url: string; label: string }) {
       href={c.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[#0a8078] underline decoration-[#0a8078]/40 underline-offset-2 hover:decoration-[#0a8078]"
+      className="text-[#3DC9C0] underline decoration-[#3DC9C0]/40 underline-offset-2 hover:decoration-[#3DC9C0]"
     >
       {c.label}
     </a>
@@ -125,7 +125,7 @@ export function DossierCards({
             key={l.brain_id}
             className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
           >
-            <p className="text-xs font-medium uppercase tracking-wider text-[#0a8078]">
+            <p className="text-xs font-medium uppercase tracking-wider text-[#3DC9C0]">
               {l.coverage_label}
             </p>
             <p className="mt-1.5 text-sm leading-6 text-gray-200">{l.text}</p>
@@ -161,15 +161,15 @@ export function OutOfScopePanel({ query }: { query?: string }) {
       </div>
       <p className="mt-4 text-xs text-gray-600">
         Examples:{" "}
-        <Link href="/r/search?q=33931" className="text-[#0a8078] hover:underline">
+        <Link href="/r/search?q=33931" className="text-[#3DC9C0] hover:underline">
           33931
         </Link>{" "}
         ·{" "}
-        <Link href="/r/search?q=Naples" className="text-[#0a8078] hover:underline">
+        <Link href="/r/search?q=Naples" className="text-[#3DC9C0] hover:underline">
           Naples
         </Link>{" "}
         ·{" "}
-        <Link href="/r/search?q=Lee%20County" className="text-[#0a8078] hover:underline">
+        <Link href="/r/search?q=Lee%20County" className="text-[#3DC9C0] hover:underline">
           Lee County
         </Link>
       </p>

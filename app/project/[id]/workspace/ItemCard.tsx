@@ -55,7 +55,7 @@ export function ItemCard({
           <span className="truncate text-sm text-white">{summarizeItem(item)}</span>
           {item.origin === "mcp" && (
             <span
-              className="shrink-0 rounded-full border border-[#00d4aa]/40 px-1.5 py-0.5 text-[9px] font-medium text-[#00d4aa]"
+              className="shrink-0 rounded-full border border-[#3DC9C0]/40 px-1.5 py-0.5 text-[9px] font-medium text-[#3DC9C0]"
               title="Filed by your connected AI"
             >
               via AI

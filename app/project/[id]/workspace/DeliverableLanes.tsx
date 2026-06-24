@@ -38,7 +38,7 @@ function EmailScheduleCard({ s }: { s: EmailScheduleRow }) {
         <span className="truncate text-sm font-medium text-white">{scopeLabel(s)}</span>
         <span
           className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
-            paused ? "border border-white/10 text-gray-400" : "bg-[#00d4aa]/15 text-[#00d4aa]"
+            paused ? "border border-white/10 text-gray-400" : "bg-[#3DC9C0]/15 text-[#3DC9C0]"
           }`}
         >
           {paused ? s.status : "active"}

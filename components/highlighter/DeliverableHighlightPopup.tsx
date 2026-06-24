@@ -96,12 +96,12 @@ export function DeliverableHighlightPopup({
       ref={ref}
       role="dialog"
       aria-label="Edit or ask about selection"
-      className="fixed z-[70] flex w-[min(94vw,340px)] flex-col overflow-hidden rounded-xl border border-[#00d4aa]/60 bg-[#0d1e2b] text-sm text-gray-100 shadow-2xl shadow-black/60"
+      className="fixed z-[70] flex w-[min(94vw,340px)] flex-col overflow-hidden rounded-xl border border-[#3DC9C0]/60 bg-[#0d1e2b] text-sm text-gray-100 shadow-2xl shadow-black/60"
       style={containerStyle}
     >
       {/* Header — selected span preview + close */}
       <div className="flex items-start justify-between gap-2 border-b border-white/10 px-3 py-2.5">
-        <p className="line-clamp-2 min-w-0 flex-1 break-words font-mono text-xs text-[#00d4aa]">
+        <p className="line-clamp-2 min-w-0 flex-1 break-words font-mono text-xs text-[#3DC9C0]">
           &ldquo;{selection.text.length > 120 ? `${selection.text.slice(0, 120)}…` : selection.text}
           &rdquo;
         </p>
@@ -126,7 +126,7 @@ export function DeliverableHighlightPopup({
             onClick={() => setPanel(p)}
             className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
               panel === p
-                ? "border-b-2 border-[#00d4aa] text-[#00d4aa]"
+                ? "border-b-2 border-[#3DC9C0] text-[#3DC9C0]"
                 : "text-gray-500 hover:text-gray-300"
             }`}
           >
@@ -145,7 +145,7 @@ export function DeliverableHighlightPopup({
 
             {steersLoading && (
               <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span className="inline-block h-3 w-3 animate-spin rounded-full border border-[#00d4aa] border-t-transparent" />
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border border-[#3DC9C0] border-t-transparent" />
                 Suggesting steers…
               </div>
             )}
@@ -168,8 +168,8 @@ export function DeliverableHighlightPopup({
                       }}
                       className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                         selectedSteer === s
-                          ? "border-[#00d4aa] bg-[#00d4aa]/15 text-[#00d4aa]"
-                          : "border-white/15 bg-white/5 text-gray-200 hover:border-[#00d4aa]/60"
+                          ? "border-[#3DC9C0] bg-[#3DC9C0]/15 text-[#3DC9C0]"
+                          : "border-white/15 bg-white/5 text-gray-200 hover:border-[#3DC9C0]/60"
                       }`}
                     >
                       {s}
@@ -191,7 +191,7 @@ export function DeliverableHighlightPopup({
                   if (e.target.value) setSelectedSteer(null);
                 }}
                 placeholder='e.g. "lead with the vacancy trend"'
-                className="w-full rounded-md border border-white/15 bg-[#0a1722] px-2.5 py-1.5 text-xs text-white placeholder:text-gray-500 focus:border-[#00d4aa] focus:outline-none"
+                className="w-full rounded-md border border-white/15 bg-[#0a1722] px-2.5 py-1.5 text-xs text-white placeholder:text-gray-500 focus:border-[#3DC9C0] focus:outline-none"
               />
             </div>
 
@@ -216,7 +216,7 @@ export function DeliverableHighlightPopup({
                 <p className="whitespace-pre-wrap text-xs leading-5 text-gray-200">
                   {converse.answer}
                   {converse.streaming && (
-                    <span className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#00d4aa]/80 align-middle" />
+                    <span className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#3DC9C0]/80 align-middle" />
                   )}
                 </p>
                 {!converse.streaming && !converse.error && (
@@ -228,7 +228,7 @@ export function DeliverableHighlightPopup({
                       setSelectedSteer(null);
                       setPanel("edit");
                     }}
-                    className="text-xs text-[#00d4aa] underline underline-offset-2 transition-colors hover:text-[#00d4aa]/80"
+                    className="text-xs text-[#3DC9C0] underline underline-offset-2 transition-colors hover:text-[#3DC9C0]/80"
                   >
                     Rebuild with a steer →
                   </button>
@@ -254,7 +254,7 @@ export function DeliverableHighlightPopup({
                 }}
                 rows={2}
                 placeholder={converse.answer ? "Ask a follow-up…" : "Ask about this passage…"}
-                className="min-w-0 flex-1 resize-none rounded-lg border border-[#00d4aa]/40 bg-[#0a1722] px-2.5 py-1.5 text-xs text-white placeholder:text-gray-500 focus:border-[#00d4aa] focus:outline-none"
+                className="min-w-0 flex-1 resize-none rounded-lg border border-[#3DC9C0]/40 bg-[#0a1722] px-2.5 py-1.5 text-xs text-white placeholder:text-gray-500 focus:border-[#3DC9C0] focus:outline-none"
               />
               <button
                 type="submit"

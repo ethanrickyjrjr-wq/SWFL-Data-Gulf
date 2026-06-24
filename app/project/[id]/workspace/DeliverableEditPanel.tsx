@@ -9,7 +9,7 @@ import type { DeliverableRow, DeliverableEditPatch } from "./types";
 // "email" is intentionally excluded: it renders through a scope-bound path, so swapping
 // a deliverable to/from it would break a frozen /p/[id] link (mirrors the restyle set).
 const NON_EMAIL_TEMPLATES = ["market-overview", "bov-lite", "client-email", "one-pager"] as const;
-const DEFAULT_COLOR = "#00d4aa";
+const DEFAULT_COLOR = "#3DC9C0";
 
 /**
  * Guided edit (FINAL BOSS Piece 4). The broker adjusts INPUTS only — pick items,
@@ -89,7 +89,7 @@ export function DeliverableEditPanel({
   }
 
   const inputCls =
-    "rounded-md border border-white/10 bg-[#0a1722] px-2 py-1 text-sm text-white focus:border-[#00d4aa] focus:outline-none";
+    "rounded-md border border-white/10 bg-[#0a1722] px-2 py-1 text-sm text-white focus:border-[#3DC9C0] focus:outline-none";
 
   return (
     <div className="max-h-[78vh] space-y-5 overflow-y-auto bg-[#0a1722] p-4 text-sm text-gray-200">
@@ -133,7 +133,7 @@ export function DeliverableEditPanel({
                     type="checkbox"
                     checked={selected.has(it.id)}
                     onChange={() => toggle(it.id)}
-                    className="mt-0.5 accent-[#00d4aa]"
+                    className="mt-0.5 accent-[#3DC9C0]"
                   />
                   <span className="text-xs leading-snug text-gray-300">{summarizeItem(it)}</span>
                 </label>

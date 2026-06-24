@@ -87,7 +87,7 @@ export function ProjectSearch({ entries }: { entries: SearchEntry[] }) {
                     onClick={() => add(e)}
                     disabled={!activeId || isAdded}
                     title={activeId ? undefined : "Open a project to add"}
-                    className="shrink-0 rounded-full border border-[#00d4aa]/40 px-2.5 py-1 text-xs font-medium text-[#00d4aa] disabled:opacity-40"
+                    className="shrink-0 rounded-full border border-[#3DC9C0]/40 px-2.5 py-1 text-xs font-medium text-[#3DC9C0] disabled:opacity-40"
                   >
                     {isAdded ? "Added ✓" : "Add"}
                   </button>
@@ -103,7 +103,7 @@ export function ProjectSearch({ entries }: { entries: SearchEntry[] }) {
             activeId ? "Add to this project — search reports & charts…" : "Open a project to add…"
           }
           aria-label="Search reports and charts to add to the project"
-          className="w-full rounded-full border border-white/10 bg-[#0d1e2b] px-4 py-2 text-sm text-white outline-none placeholder:text-gray-500 focus:border-[#00d4aa]/40"
+          className="w-full rounded-full border border-white/10 bg-[#0d1e2b] px-4 py-2 text-sm text-white outline-none placeholder:text-gray-500 focus:border-[#3DC9C0]/40"
         />
       </div>
     </div>

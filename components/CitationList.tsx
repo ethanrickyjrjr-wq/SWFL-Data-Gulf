@@ -27,7 +27,7 @@ function CitationLine({ c }: { c: CleanCitation }) {
         target="_blank"
         rel="noopener noreferrer"
         title={c.label}
-        className="block max-w-full truncate text-xs text-[#0a8078] underline decoration-[#0a8078]/40 underline-offset-2 hover:decoration-[#0a8078]"
+        className="block max-w-full truncate text-xs text-[#3DC9C0] underline decoration-[#3DC9C0]/40 underline-offset-2 hover:decoration-[#3DC9C0]"
       >
         {c.label}
       </a>
@@ -37,7 +37,7 @@ function CitationLine({ c }: { c: CleanCitation }) {
     // Our lake — brand it so the user knows the data came from us; no outbound link.
     return (
       <span title={c.label} className="flex max-w-full items-center gap-1.5 text-xs text-gray-300">
-        <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#0a8078]" aria-hidden />
+        <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#3DC9C0]" aria-hidden />
         <span className="truncate">{c.label}</span>
       </span>
     );

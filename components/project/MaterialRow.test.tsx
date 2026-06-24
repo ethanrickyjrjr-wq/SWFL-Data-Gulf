@@ -22,7 +22,7 @@ const base: DeliverableRow = {
   doc: {
     globalStyle: {
       primaryColor: "#0f1d24",
-      accentColor: "#1BB8C9",
+      accentColor: "#3DC9C0",
       fontFamily: "MODERN_SANS",
       textColor: "#242424",
       backdropColor: "#F8F8F8",
