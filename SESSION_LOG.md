@@ -1,3 +1,13 @@
+## 2026-06-24 (main) — spec+plan(materials-hub): v2 design + 9-task plan folder (audit-corrected, vendor-verified)
+
+Audited the v1 "Marketing Hub" plan (`.claude/plans/greedy-soaring-fog.md`) against real code via 4 parallel scouts — it would fail to compile: wrong Supabase client (`createCookieClient`/`@/lib/supabase/server` don't exist → `createClient` from `@/utils/supabase/server` + `createServiceRoleClient`), RLS-rejected writes (deliverables has no owner INSERT policy → write via service-role after ownership check), `nanoid` non-dep (→ `crypto.randomUUID()`), `exec_summary`-not-a-column, string-vs-object `scope`, ignored `applied:false` 200s, `never`-switch break in `buildRenderModel`, 12-prop `DeliverableLanes`, `runBuild` navigates-away. crawl4ai UX pass + vendor verify: `@supabase/storage-js@2.106.1` supports native cross-bucket `copy({destinationBucket})` (docs prose stale).
+
+Brainstormed the full reframe (operator-approved): template-first + list-default library + version-collapse (rides existing `splitDeliverableVersions` + `SEED_DOCS`); scheduler block-canvas lane + charts-in-email deferred to own specs; filing sidebar / suggestion banner / "AI surprise me" cut; photos bridge added (promote filed photos to public `email-media`). Wrote spec `docs/superpowers/specs/2026-06-24-marketing-materials-hub-v2-design.md` (verified facts + visual design gaps 1–6 resolved + Opus/Sonnet per task) and broke it into `docs/superpowers/plans/2026-06-24-marketing-materials-hub-v2/` (README + task-01…09). Execution = `executing-plans`, sequential (dependency chain + shared files), NOT a Workflow fan-out.
+
+**Gate:** docs-only — no code, no build/test impact.
+
+---
+
 ## 2026-06-24 (main) — feat(zip-report): exact hero port — ZIP cutout + 3-stat bar + ← Back + search-at-top
 
 **Matched the approved screenshot design exactly:**
