@@ -1,3 +1,11 @@
+## 2026-06-24 (main) — test(email-lab): add missing EmailDocRenderer render test (Task 20 acceptance)
+
+Added `lib/email/blocks/EmailDocRenderer.test.ts` — 5 tests covering all 10 block types rendering to HTML, per-block content assertions, `backdropColor` in output, `preview` prop, and every seed doc. Closes the Task 20 acceptance gap found in the plan audit.
+
+**Gate:** `bun test` 5/0 new · `bunx next build` unchanged.
+
+---
+
 ## 2026-06-24 (main) — fix(email-lab): 6 block canvas bugs (undo, delete guard, export, button href, agent-card email rendering)
 
 **Bugs fixed:**
