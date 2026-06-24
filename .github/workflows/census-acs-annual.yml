@@ -1,0 +1,49 @@
+name: Census ACS annual
+
+on:
+  schedule:
+    # 10:00 UTC on the 15th of Nov / Dec / Jan. The ACS 5-year next vintage is
+    # published each December; the surrounding-month retries prevent a single GHA
+    # failure from orphaning the pipeline for a year. Runs are idempotent (dlt replace).
+    # NOTE: ACS_LATEST_YEAR in ingest/pipelines/census_acs/constants.py is a MANUAL
+    # one-line bump once a new vintage is confirmed published — the cron only refreshes.
+    - cron: "0 10 15 11,12,1 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run census_acs pipeline
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.census_acs.pipeline --dry-run
+          else
+            python -m ingest.pipelines.census_acs.pipeline
+          fi

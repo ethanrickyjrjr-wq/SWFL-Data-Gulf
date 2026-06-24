@@ -317,6 +317,18 @@ pipelines:
     count_table: data_lake.census_cbp_fl # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-20 ✓
 
+  - name: census_acs
+    lane: tier-2
+    cadence_days: 365
+    tolerance_multiplier: 1.5
+    dlt_schema_name: census_acs
+    expected_rows_min: 90 # 90% of 100 in-scope ZCTAs confirmed 2026-06-24
+    count_table: data_lake.census_acs_zcta # dlt schema_name != table name
+    # Consuming surface: lib/zip-summary (ZIP report "Quick data summary").
+    # ACS 5-year publishes a new vintage each December; the GHA cron re-runs idempotently
+    # (dlt replace). ACS_LATEST_YEAR in constants.py is a MANUAL one-line bump per vintage.
+    # Verified: 100 ZCTAs loaded 2026-06-24 ✓ (income 95/100; 5 suppressed → NULL)
+
   - name: usgs_tier2
     lane: tier-2
     cadence_days: 30

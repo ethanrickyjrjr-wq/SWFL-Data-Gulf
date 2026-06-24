@@ -1,3 +1,18 @@
+## 2026-06-24 (main) — feat(zip-summary): LIVE ingest + loader wiring + cron — census_acs lights up the ZIP Quick Summary [Section A]
+
+Took the census_acs pipeline from "dry-run only" to LIVE end-to-end (operator-approved the ingest + push):
+
+- **Ingest (real write):** ran `python -m ingest.pipelines.census_acs.pipeline` → **100 ZCTAs in `data_lake.census_acs_zcta`**, income populated 95/100 (5 suppressed → NULL). dlt `replace`, 1.63s.
+- **PostgREST grant:** `GRANT USAGE ON SCHEMA data_lake` + `GRANT SELECT ON data_lake.census_acs_zcta TO service_role, anon, authenticated` + `NOTIFY pgrst,'reload schema'` (per the dlt→PostgREST grant rule). Verified live: 33908 pop 38,844 / income $68,445 / owner-occ 70.6% / poverty 8.85%; 34112 (the page that triggered the "what does 89 tell me" rage) pop 26,597 / income $66,692 / owner-occ 76.5%.
+- **Loader wired:** `lib/zip-summary/load.ts` replaced the empty stub — reads `census_acs_zcta` for the ZIP via service-role, maps each non-suppressed covariate to a **cited** `ZipSummaryFigure` (source `data.census.gov`, label `U.S. Census ACS 5-year (2018–2022)`, as-of `12/31/2022` MM/DD/YYYY). Empty-tolerant: no creds / no ZCTA / error → `figures: []`, never fabricated. Market figures (housing/rents) intentionally NOT duplicated — they already render in the ZIP-Level tables.
+- **Cron + cadence:** `.github/workflows/census-acs-annual.yml` (15th of Nov/Dec/Jan, `workflow_dispatch` dry_run input, ENGINE_ENABLED gate — mirrors census-cbp) + `census_acs` entry in `ingest/cadence_registry.yaml` (expected_rows_min 90, count_table `data_lake.census_acs_zcta`). ACS_LATEST_YEAR is a documented MANUAL one-line bump per December vintage; cron only refreshes idempotently.
+
+**No standalone pytest** — census_cbp ships none; the `--dry-run` flag (exercised via `workflow_dispatch`) IS the established gate, so I didn't invent a new test pattern (RULE 0.6).
+
+**NEXT — crawl4ai current-data pass (scoped, not yet built):** ACS is the demographic layer; the remaining gap is *current* figures NOT already in the lake. housing-swfl/rentals-swfl already hold per-ZIP market data (median sale, DOM, rents), so crawl4ai should target genuinely-uncovered current signals only — candidates: per-ZIP new-construction permit counts (the original "89" number — confirm it isn't already in permits-swfl first), active for-sale inventory, school ratings. Each must be cron-able from a named public source and land as additional cited `ZipSummaryFigure`s. Brainstorm + a fresh design doc before building (RULE 3.5).
+
+---
+
 ## 2026-06-24 (main) — feat(ingest): census_acs ZCTA pipeline — per-ZIP demographics for the Quick Summary [Section A]
 
 Built `ingest/pipelines/census_acs/` (constants/resources/pipeline/__init__) per the approved 2026-05-30 design — Census ACS 5-year, per-ZCTA, for the in-scope SWFL ZIPs → `data_lake.census_acs_zcta`. Feeds `lib/zip-summary` (the ZIP report "Quick data summary"). Follows the `census_cbp` pattern (dlt `replace` + volume guard + `--dry-run`).
