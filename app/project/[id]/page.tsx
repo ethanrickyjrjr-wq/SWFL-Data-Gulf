@@ -52,6 +52,10 @@ interface RawDeliverable {
   items_snapshot:
     | { id?: string; kind: string; chart_block?: ChartBlock; chart_spec?: ChartBlock }[]
     | null;
+  // Materials Hub v2: block-canvas email doc + last-refresh stamp. Carried through to
+  // DeliverableRow below — without these on the raw type, the .map() projection won't compile.
+  doc: import("@/lib/email/doc/types").EmailDoc | null;
+  data_as_of: string | null;
 }
 
 function snapshotItemIds(snapshot: RawDeliverable["items_snapshot"]): string[] {
@@ -138,7 +142,7 @@ export default async function ProjectPage({
       supabase
         .from("deliverables")
         .select(
-          "id, template, status, created_at, scope_kind, scope_value, deleted_at, supersedes_id, branding, narrative, items_snapshot",
+          "id, template, status, created_at, scope_kind, scope_value, deleted_at, supersedes_id, branding, narrative, items_snapshot, doc, data_as_of",
         )
         .eq("project_id", id) as unknown as PagedQuery<RawDeliverable>,
     ["created_at", "id"],
@@ -157,6 +161,8 @@ export default async function ProjectPage({
     item_ids: snapshotItemIds(d.items_snapshot),
     exec_summary: d.narrative?.exec_summary ?? null,
     preview_chart: firstSnapshotChart(d.items_snapshot),
+    doc: d.doc ?? null,
+    data_as_of: d.data_as_of ?? null,
   }));
   // P4: split into live "heads" (Built lane, with older versions attached) + trashed
   // (Recently deleted). A content edit/refresh forks a new row that supersedes the old.

@@ -93,7 +93,8 @@ export type TemplateId =
   | "client-email"
   | "one-pager"
   | "email"
-  | "social";
+  | "social"
+  | "block-canvas";
 
 // ---------------------------------------------------------------------------
 // A `"social"` card builds at ANY scope. There is no geographic refusal: the moat
@@ -431,6 +432,11 @@ export function buildRenderModel(
       throw new Error(
         "email template renders via the grounded spine — call buildEmailDeliverableModel, not buildRenderModel",
       );
+    case "block-canvas":
+      // block-canvas materials render via EmailDocEmail (the email-lab spine), NOT the
+      // React slot model. Like "email", every render surface special-cases it before
+      // calling buildRenderModel; reaching here means a caller didn't — fail loud.
+      throw new Error("block-canvas renders via EmailDocEmail, not buildRenderModel");
     default: {
       const _exhaustive: never = template;
       throw new Error(`unknown template: ${String(_exhaustive)}`);

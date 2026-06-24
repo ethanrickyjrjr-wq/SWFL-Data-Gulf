@@ -49,6 +49,11 @@ export interface DeliverableRow {
   /** P4: older LIVE versions this head superseded (newest-first), attached by the
    *  page server component via `splitDeliverableVersions`. Absent on non-heads. */
   versions?: DeliverableRow[];
+  /** Materials Hub v2: block-canvas email document (null for report templates). */
+  doc: import("@/lib/email/doc/types").EmailDoc | null;
+  /** When the data in this material was last refreshed; drives the "needs update"
+   *  affordance once it ages past 30 days (null for rows that never carried data). */
+  data_as_of: string | null;
 }
 
 /**
