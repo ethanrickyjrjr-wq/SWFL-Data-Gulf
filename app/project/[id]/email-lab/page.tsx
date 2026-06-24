@@ -23,8 +23,18 @@ interface Branding {
   website_url?: string;
 }
 
-export default async function ProjectEmailLabPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectEmailLabPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const { id } = await params;
+  const sp = await searchParams;
+  const did = sp.did ?? null;
+  const seedId = sp.seed ?? null;
+
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -75,6 +85,21 @@ export default async function ProjectEmailLabPage({ params }: { params: Promise<
     initialTokens.HERO_LABEL = scope.zip;
   }
 
+  let initialDoc: import("@/lib/email/doc/types").EmailDoc | null = null;
+  if (did) {
+    const { data } = await supabase
+      .from("deliverables")
+      .select("id, doc")
+      .eq("id", did)
+      .eq("project_id", id)
+      .eq("template", "block-canvas")
+      .single();
+    if (data?.doc) initialDoc = data.doc as import("@/lib/email/doc/types").EmailDoc;
+  } else if (seedId) {
+    const { seedById } = await import("@/lib/email/doc/default-docs");
+    initialDoc = seedById(seedId)?.build() ?? null;
+  }
+
   return (
     <ProjectEmailLabClient
       projectId={id}
@@ -87,6 +112,8 @@ export default async function ProjectEmailLabPage({ params }: { params: Promise<
             ? { kind: "place", value: scope.place }
             : undefined
       }
+      initialDoc={initialDoc}
+      deliverableId={did}
     />
   );
 }

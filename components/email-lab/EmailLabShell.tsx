@@ -116,6 +116,9 @@ export interface EmailLabShellProps {
   autoGenerate?: boolean;
   headerSlot: ReactNode;
   aiPlaceholder?: string;
+  /** When provided, renders a Save button that calls back with the current doc. */
+  onSave?: (doc: EmailDoc) => Promise<void>;
+  saving?: boolean;
 }
 
 export function EmailLabShell({
@@ -126,6 +129,8 @@ export function EmailLabShell({
   autoGenerate = false,
   headerSlot,
   aiPlaceholder = "Describe the email — the AI fills real SWFL numbers into the layout…",
+  onSave,
+  saving,
 }: EmailLabShellProps) {
   const [history, setHistory] = useState<DocHistory>(() =>
     initHistory(applyBrand(initialDoc, brandTokens)),
@@ -508,6 +513,16 @@ export function EmailLabShell({
             >
               {copied ? "Copied ✓" : "Copy HTML"}
             </button>
+            {onSave && (
+              <button
+                type="button"
+                onClick={() => onSave(doc)}
+                disabled={saving}
+                className="px-3 py-1.5 text-sm rounded-lg bg-[#1BB8C9]/20 text-[#1BB8C9] border border-[#1BB8C9]/30 hover:bg-[#1BB8C9]/30 disabled:opacity-40 transition-colors focus-visible:ring-2 focus-visible:ring-[#1BB8C9]/40"
+              >
+                {saving ? "Saving…" : "Save"}
+              </button>
+            )}
           </div>
         </div>
 

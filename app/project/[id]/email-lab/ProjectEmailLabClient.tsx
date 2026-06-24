@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { EmailLabShell } from "@/components/email-lab/EmailLabShell";
-import { SEED_DOCS } from "@/lib/email/doc/default-docs";
+import { defaultDoc } from "@/lib/email/doc/default-docs";
+import type { EmailDoc } from "@/lib/email/doc/types";
 
 interface Props {
   projectId: string;
@@ -12,13 +13,24 @@ interface Props {
    *  COMPANY_NAME, AGENT_*, CTA_URL, …). The shell applies these onto the doc's
    *  globalStyle + brand-bearing blocks. */
   initialTokens: Record<string, string>;
-  scope?: { kind: string; value: string };
+  scope?: { kind: string; value: string } | null;
+  initialDoc?: EmailDoc | null;
+  deliverableId?: string | null;
 }
 
 // Project-scoped Email Lab — block canvas with the project's brand + lake scope.
-// Auto-fills on mount so the user lands on a real, brand-applied email.
-export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, scope }: Props) {
-  const [initialDoc] = useState(() => SEED_DOCS[0].build());
+// Auto-fills on mount when no saved doc is loaded (?did absent).
+export function ProjectEmailLabClient({
+  projectId,
+  projectTitle,
+  initialTokens,
+  scope,
+  initialDoc,
+  deliverableId,
+}: Props) {
+  const [savedId, setSavedId] = useState<string | null>(deliverableId ?? null);
+  const [saving, setSaving] = useState(false);
+  const [doc0] = useState<EmailDoc>(() => initialDoc ?? defaultDoc());
 
   const scopeLabel = scope
     ? `${scope.kind === "zip" ? "ZIP " : ""}${scope.value}`
@@ -26,14 +38,42 @@ export function ProjectEmailLabClient({ projectId, projectTitle, initialTokens, 
   const effectiveScope = scope ?? { kind: "region", value: "swfl" };
   const aiPrompt = `Market spotlight email for ${scopeLabel} — fill in realistic market context and agent copy`;
 
+  async function handleSave(doc: EmailDoc) {
+    setSaving(true);
+    try {
+      if (savedId) {
+        await fetch(`/api/projects/${projectId}/materials`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deliverable_id: savedId, doc }),
+        });
+      } else {
+        const res = await fetch(`/api/projects/${projectId}/materials`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ doc }),
+        });
+        if (res.ok) {
+          const { id } = await res.json();
+          setSavedId(id);
+          window.history.replaceState({}, "", `/project/${projectId}/email-lab?did=${id}`);
+        }
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <EmailLabShell
-      initialDoc={initialDoc}
+      initialDoc={doc0}
       brandTokens={initialTokens}
       scope={effectiveScope}
       initialAiPrompt={aiPrompt}
-      autoGenerate
+      autoGenerate={!deliverableId}
       aiPlaceholder={`e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`}
+      onSave={handleSave}
+      saving={saving}
       headerSlot={
         <>
           <Link
