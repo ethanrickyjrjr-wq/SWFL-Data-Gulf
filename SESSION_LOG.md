@@ -1,3 +1,13 @@
+## 2026-06-24 (main) — feat(materials-hub): Task 5 — email-lab save/load (`15cb830b`)
+
+- `EmailLabShell`: added optional `onSave?: (doc) => Promise<void>` + `saving?: boolean` props; Save button renders only when `onSave` is set (standalone `/email-lab` unaffected).
+- `ProjectEmailLabClient`: rewrote to accept `initialDoc` + `deliverableId`; `handleSave` POSTs first-time → stores `?did=<id>` in URL via `history.replaceState`, PATCHes on subsequent saves; `autoGenerate={!deliverableId}` (never auto-fills a loaded doc); brand bridge + headerSlot kept intact.
+- `page.tsx` (`/project/[id]/email-lab`): added `searchParams`; `?did` loads saved `block-canvas` doc from `deliverables`; `?seed` opens a chosen seed template; both passed to client.
+- Verification: `bunx next build` ✓ compiled, `bun test` 3710/0 ✓.
+- **Next:** Task 7 (photos bridge — touches `EmailLabShell.tsx`). Dep chain: 1→(2✅,3✅,6✅)→4✅→5✅→7→8→9.
+
+---
+
 ## 2026-06-24 (main) — chore(materials-hub): build-queue sync 2/3/6 + Task-3 ownership-guard note
 
 Build-queue line 21 still read "Next: Task 2" though Tasks 2 (`42e83239`), 3 (`fab3745f`), 6 (`6b4afd28`) are all on `main`. Flipped 2/3/6 → ✅, Next → Task 5. Status board now matches git.
