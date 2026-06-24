@@ -153,8 +153,9 @@ export function EmailLabShell({
   }
 
   function liveEdit(next: EmailDoc) {
+    const wasEditing = editingRef.current;
     setHistory((h) =>
-      editingRef.current
+      wasEditing
         ? { ...h, present: next }
         : { past: [...h.past, h.present].slice(-HISTORY_LIMIT), present: next, future: [] },
     );
@@ -242,7 +243,7 @@ export function EmailLabShell({
   }
 
   function deleteSelected() {
-    if (!selectedId) return;
+    if (!selectedId || doc.blocks.length <= 1) return;
     commit({ ...doc, blocks: doc.blocks.filter((b) => b.id !== selectedId) });
     setSelectedId(null);
   }
@@ -285,10 +286,11 @@ export function EmailLabShell({
       const html = mode === "classic" ? classicHtml : await renderDocHtml(doc);
       const win = window.open("", "_blank");
       if (!win) return;
+      // onload must be set BEFORE write()/close() so it fires when the document
+      // and its resources finish loading — not after, when the event is already gone.
+      win.onload = () => win.print();
       win.document.write(html);
       win.document.close();
-      win.addEventListener("load", () => win.print());
-      setTimeout(() => win.print(), 400);
     } finally {
       setExporting(false);
     }

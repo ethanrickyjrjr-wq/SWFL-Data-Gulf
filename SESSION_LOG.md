@@ -1,3 +1,16 @@
+## 2026-06-24 (main) — fix(email-lab): 6 block canvas bugs (undo, delete guard, export, button href, agent-card email rendering)
+
+**Bugs fixed:**
+1. `liveEdit` undo broken — `editingRef.current = true` ran before React evaluated the `setHistory` updater; first keystroke never pushed a history frame. Fixed: capture `wasEditing` before `setHistory`.
+2. Delete to 0 blocks — no min-1 guard on `BlockCanvas.remove` or `EmailLabShell.deleteSelected`. Fixed: guard `doc.blocks.length <= 1`.
+3. `exportPdf` double-print + dead listener — listener added after `document.close()`. Fixed: `win.onload` set before `write()`/`close()`, removed duplicate `setTimeout`.
+4. `ButtonBlock` sent `href="#"` in exported email when no URL set. Fixed: renders label as `<Text>` (not `<Button>`) when `props.url` is absent.
+5. `AgentCardBlock` had `objectFit: "cover"` — not supported in Gmail/Outlook/Apple Mail; photo distorted in delivery. Fixed: removed.
+
+**Gate:** `bun test` 507/0 · `bunx next build` clean.
+
+---
+
 ## 2026-06-24 (main) — Email Lab block canvas: full build (Waves 0–5) [HELD for push]
 
 Built the entire block-canvas spec (`docs/superpowers/specs/2026-06-24-email-lab-block-canvas-design.md`) from the file-isolated plan folder. Click-to-edit canvas replaces the token/iframe surface; AI fills content into a fixed skeleton (never restyles).

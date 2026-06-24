@@ -1,5 +1,5 @@
 // lib/email/blocks/ButtonBlock.tsx — PURE. Single centered CTA.
-import { Section, Button } from "@react-email/components";
+import { Section, Button, Text } from "@react-email/components";
 import type { ButtonProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, CARD_BG, BORDER } from "./styles";
 
@@ -13,6 +13,17 @@ export function ButtonBlock({
   const font = fontStack(globalStyle.fontFamily);
   if (!props.label) return null;
   const bg = props.bgColor ?? globalStyle.primaryColor;
+  const sharedStyle = {
+    backgroundColor: bg,
+    color: "#ffffff",
+    padding: "12px 28px",
+    borderRadius: "6px",
+    fontFamily: font,
+    fontSize: "14px",
+    fontWeight: 600,
+    textDecoration: "none",
+    display: "inline-block",
+  };
   return (
     <Section
       style={{
@@ -22,22 +33,13 @@ export function ButtonBlock({
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      <Button
-        href={props.url || "#"}
-        style={{
-          backgroundColor: bg,
-          color: "#ffffff",
-          padding: "12px 28px",
-          borderRadius: "6px",
-          fontFamily: font,
-          fontSize: "14px",
-          fontWeight: 600,
-          textDecoration: "none",
-          display: "inline-block",
-        }}
-      >
-        {props.label}
-      </Button>
+      {props.url ? (
+        <Button href={props.url} style={sharedStyle}>
+          {props.label}
+        </Button>
+      ) : (
+        <Text style={{ ...sharedStyle, margin: 0 }}>{props.label}</Text>
+      )}
     </Section>
   );
 }

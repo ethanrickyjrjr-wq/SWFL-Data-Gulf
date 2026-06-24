@@ -43,6 +43,7 @@ export function BlockCanvas({
   }
 
   function remove(id: string) {
+    if (doc.blocks.length <= 1) return;
     onChangeDoc({ ...doc, blocks: doc.blocks.filter((b) => b.id !== id) });
     if (selectedId === id) onSelectBlock(null);
   }

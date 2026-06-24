@@ -27,7 +27,7 @@ export function AgentCardBlock({
               alt={props.name ?? ""}
               width={64}
               height={64}
-              style={{ borderRadius: "50%", display: "block", objectFit: "cover" }}
+              style={{ borderRadius: "50%", display: "block" }}
             />
           </Column>
         ) : null}
