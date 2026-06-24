@@ -17,6 +17,7 @@ import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { projectTrail } from "@/lib/nav/breadcrumbs";
 import { ProjectAiContextBridge } from "./workspace/ProjectAiContextBridge";
 import { UploadDrop } from "@/components/project/UploadDrop";
+import { MaterialsHub } from "@/components/project/MaterialsHub";
 import { ProjectTitle } from "./workspace/ProjectTitle";
 import { ItemsBoard } from "./workspace/ItemsBoard";
 import { BrandingBlock } from "./workspace/BrandingBlock";
@@ -37,7 +38,6 @@ import { ProjectActionBar } from "./workspace/ProjectActionBar";
 import type {
   SavedChart,
   DeliverableRow,
-  DeliverableEditPatch,
   EmailScheduleRow,
   ProjectUiState,
 } from "./workspace/types";
@@ -57,8 +57,8 @@ interface Props {
   branding: Record<string, string> | null;
   items: ProjectItem[];
   charts: Record<string, SavedChart>;
-  deliverables: DeliverableRow[];
-  trashedDeliverables: DeliverableRow[];
+  /** Live heads (each with its older versions attached) from splitDeliverableVersions. */
+  deliverables: (DeliverableRow & { versions: DeliverableRow[] })[];
   emailSchedules: EmailScheduleRow[];
   feedRows: FeedRow[];
   uiState: ProjectUiState;
@@ -93,7 +93,6 @@ export function ProjectWorkspace({
   items: initialItems,
   charts,
   deliverables,
-  trashedDeliverables,
   emailSchedules,
   feedRows,
   uiState: initialUiState,
@@ -382,37 +381,29 @@ export function ProjectWorkspace({
     await patch({ items: next, title: title || null }, "File attached");
   }
 
-  async function toggleRevoke(deliverableId: string, currentStatus: string) {
-    const restore = currentStatus === "revoked";
-    const res = await fetch(`/api/deliverables/${deliverableId}/revoke`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ restore }),
-    });
-    if (res.ok) router.refresh();
+  // Materials Hub v2 — block-canvas materials use their OWN endpoints, not the legacy
+  // /api/deliverables/* edit/refresh modal flow (retired with the Built lane in Task 9).
+  async function handleRefreshMaterial(did: string): Promise<void> {
+    const res = await fetch(`/api/projects/${id}/materials/${did}/refresh`, { method: "POST" });
+    if (res.ok) router.refresh(); // re-runs the server component → fresh heads via splitDeliverableVersions
   }
 
-  async function refreshDeliverable(deliverableId: string): Promise<string | null> {
-    const res = await fetch(`/api/deliverables/${deliverableId}/refresh`, { method: "POST" });
-    if (!res.ok) return null;
-    const data = (await res.json().catch(() => ({}))) as { id?: string };
-    router.refresh();
-    return data.id ?? null;
-  }
-
-  async function editDeliverable(
-    deliverableId: string,
-    body: DeliverableEditPatch,
-  ): Promise<{ id: string; inPlace: boolean } | null> {
-    const res = await fetch(`/api/deliverables/${deliverableId}/edit`, {
+  async function handleAiMaterial(
+    intent: string,
+  ): Promise<{ template: { name: string }; id: string } | null> {
+    const res = await fetch(`/api/projects/${id}/ai-material`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ intent }),
     });
     if (!res.ok) return null;
-    const data = (await res.json().catch(() => ({}))) as { id?: string; inPlace?: boolean };
-    router.refresh();
-    return { id: data.id ?? deliverableId, inPlace: !!data.inPlace };
+    const data = (await res.json().catch(() => null)) as {
+      id: string;
+      template: { id: string; name: string };
+    } | null;
+    if (!data?.id) return null;
+    router.push(`/project/${id}/email-lab?did=${data.id}`); // open the new material to edit
+    return data;
   }
 
   async function refreshItems() {
@@ -427,16 +418,6 @@ export function ProjectWorkspace({
       setRefreshing(false);
       setRefreshDismissed(true);
     }
-  }
-
-  async function trashDeliverable(deliverableId: string, restore = false): Promise<boolean> {
-    const res = await fetch(`/api/deliverables/${deliverableId}/trash`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ restore }),
-    });
-    if (res.ok) router.refresh();
-    return res.ok;
   }
 
   const lastFreshnessSeen =
@@ -629,38 +610,51 @@ export function ProjectWorkspace({
           </div>
         )}
 
-      <ItemsBoard
-        items={items}
-        charts={charts}
-        fileUrls={fileUrls}
-        localPreviews={localPreviews}
-        onMove={move}
-        onRemove={removeById}
-        changesByItemId={visibleChanges}
-        confirmingId={confirmingId}
-        onKeepMine={onKeepMine}
-        onEditValue={onEditValue}
-      />
-
+      {/* Materials Hub — template-first create rail over the materials library */}
       <div className="mt-6">
-        <UploadDrop projectId={id} fileCount={fileCount} onUploaded={addFileItem} />
+        <MaterialsHub
+          projectId={id}
+          materials={deliverables}
+          onRefresh={handleRefreshMaterial}
+          onAiMaterial={handleAiMaterial}
+        />
       </div>
 
-      {/* Built deliverables + emailing lanes — immediately below UploadDrop */}
-      <DeliverableLanes
-        projectId={id}
-        deliverables={deliverables}
-        trashedDeliverables={trashedDeliverables}
-        emailSchedules={emailSchedules}
-        items={items}
-        projectBranding={branding}
-        mcpConnected={hasMcpKey}
-        onConnectMcp={() => setActivePill("mcp")}
-        onToggleRevoke={toggleRevoke}
-        onRefresh={refreshDeliverable}
-        onEdit={editDeliverable}
-        onTrash={trashDeliverable}
-      />
+      {/* Scheduled sends — schedule-driven lane (the Built lane now lives in the hub) */}
+      <DeliverableLanes emailSchedules={emailSchedules} />
+
+      {/* Filed data — the raw items board + uploader, collapsed by default once the
+           user has materials. Collapse state persists via ui_state across reloads. */}
+      <details
+        open={!(uiState.materials_filed_collapsed ?? false)}
+        onToggle={(e) =>
+          void patchUiState({
+            materials_filed_collapsed: !(e.currentTarget as HTMLDetailsElement).open,
+          })
+        }
+        className="mt-6"
+      >
+        <summary className="cursor-pointer select-none text-sm text-white/35 transition-colors hover:text-white/60">
+          Filed data · {items.length} items
+        </summary>
+        <div className="mt-3">
+          <ItemsBoard
+            items={items}
+            charts={charts}
+            fileUrls={fileUrls}
+            localPreviews={localPreviews}
+            onMove={move}
+            onRemove={removeById}
+            changesByItemId={visibleChanges}
+            confirmingId={confirmingId}
+            onKeepMine={onKeepMine}
+            onEditValue={onEditValue}
+          />
+          <div className="mt-6">
+            <UploadDrop projectId={id} fileCount={fileCount} onUploaded={addFileItem} />
+          </div>
+        </div>
+      </details>
 
       <BuildActions
         id={id}

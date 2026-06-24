@@ -1,3 +1,22 @@
+## 2026-06-24 (main) — feat(materials-hub): Task 9 wire workspace + Task 8 audit fixes
+
+Closes the Marketing Hub v2 chain (`1→…→9`). Built on top of the parallel session's `c4c7e2ac`/`c6996f00`.
+
+**Task 8 audit (line-by-line) — 2 real bugs fixed in `MaterialRow.tsx`:**
+- `deriveTitle` scanned blocks in DOCUMENT order, but every `SEED_DOC` is header-first and the default header carries a brand tagline (`default-docs.ts:24`) — so EVERY material titled to "Southwest Florida Real Estate" instead of its hero headline. Fixed to FIELD-precedence (`hero.label → hero.value → header.tagline`). Locked with 2 failing-first tests (a header-first doc + the real `just-sold` seed); `MaterialRow.test.tsx` now 7/7.
+- Row `role="button"` `onKeyDown` fired `router.push` on keydowns bubbling from the inner buttons (accordion/Update) — their click-time `stopPropagation` doesn't stop keydown, so Enter on those controls navigated instead of acting. Scoped to `e.target === e.currentTarget` (+ Space).
+
+**Task 9 — wired `<MaterialsHub>` into the workspace:**
+- `ProjectWorkspace.tsx`: hub (`materials={deliverables}` heads-with-versions) above a `<details>` filed-data board (ItemsBoard + UploadDrop, real props incl. `visibleChanges`/`onEditValue`) collapsed via `ui_state.materials_filed_collapsed` (new key in `workspace/types.ts`, persisted through existing `patchUiState`). New `handleRefreshMaterial`→`POST /materials/[did]/refresh` + `handleAiMaterial`→`POST /ai-material` (201 `{id,template:{id,name}}` → `router.push` to email-lab). Removed orphaned `toggleRevoke`/`refreshDeliverable`/`editDeliverable`/`trashDeliverable` + `DeliverableEditPatch` import + `trashedDeliverables` prop.
+- `DeliverableLanes.tsx`: stripped the Built lane + modal/thumbnail/version machinery → schedules-only (`{ emailSchedules }`), header "Emailing" → "Scheduled sends". `DeliverableModal`/`DeliverableThumbnail` now orphaned (left on disk).
+- `page.tsx`: dropped `trashedDeliverables` threading.
+- Deferred in v2 (honest): version-row Trash + Recently-deleted/restore + per-deliverable revoke + the report-template chips (`onBuildReport` left unwired — reports still build via the retained `BuildActions`).
+- Verification: `bunx next build` ✓, `bun test` **3717/0**.
+
+**Next:** manual prod-verify acceptance walk after deploy.
+
+---
+
 ## 2026-06-24 (main) — fix(zip-report): exact original structure — lerpColor glow + .zp-body rail
 
 - `zip-report.css`: rebuilt from original `zip-page.css` — adds `.zp-body` (2-col), `.zp-rail` sidebar, and all rail classes that were missing. Stats bar 3-col. `.zr-search-bar` added.

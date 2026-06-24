@@ -89,6 +89,8 @@ export interface ProjectUiState {
   dismissed_overlap_keys?: string[];
   /** Phase F: per-item sticky confirm — itemId → the filed value the user kept. */
   confirmed_values?: Record<string, string>;
+  /** Materials Hub v2: whether the filed-data board is collapsed in the workspace. */
+  materials_filed_collapsed?: boolean;
   [key: string]: unknown;
 }
 

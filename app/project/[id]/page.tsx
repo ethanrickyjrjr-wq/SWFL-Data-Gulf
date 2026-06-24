@@ -166,8 +166,7 @@ export default async function ProjectPage({
   }));
   // P4: split into live "heads" (Built lane, with older versions attached) + trashed
   // (Recently deleted). A content edit/refresh forks a new row that supersedes the old.
-  const { heads: deliverables, trashed: trashedDeliverables } =
-    splitDeliverableVersions(allDeliverables);
+  const { heads: deliverables } = splitDeliverableVersions(allDeliverables);
 
   // Active email schedules for the project (§D Emailing lane is schedule-driven).
   const { data: scheduleRows } = await supabase
@@ -252,7 +251,6 @@ export default async function ProjectPage({
       items={items}
       charts={charts}
       deliverables={deliverables}
-      trashedDeliverables={trashedDeliverables}
       emailSchedules={emailSchedules}
       feedRows={feedRows}
       uiState={project.ui_state ?? {}}
