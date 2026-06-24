@@ -1,3 +1,12 @@
+## 2026-06-24 (main) — fix(zip-report): stats bar dynamic cols + unified data grid + glow fix
+
+- Stats bar: only renders cells where real data exists; `gridTemplateColumns` set dynamically so 2 cells don't leave an empty third column.
+- Unified data section: removed separate "Quick data summary" and "ZIP-Level Data" sections; replaced with ONE 2-column card grid (census demographics + housing market + flood metrics, same card style throughout). Removed unused `DataRow` import + `trendBadge` helper.
+- Glow fix: removed broken `fillColor.replace("rgb(…")` no-op; CSS default `rgba(10,128,120,0.55)` now applies cleanly to every ZIP shape.
+- `bunx next build` ✓.
+
+---
+
 ## 2026-06-24 (main) — refactor(materials-hub): Task-3 refresh ownership guard → project-gate
 
 Swapped the Task-3 refresh route's ownership check from a `deliverables.user_id` compare to a cookie-client `projects` SELECT gate — `projects_owner_all` RLS (`auth.uid() = user_id`, `20260612_projects.sql:20`) returns no row to a non-owner → 404. Better because: (1) `deliverables` SELECT is public (`USING (true)`) so it can't prove ownership; (2) it guards the actual write target (the fork inserts into `project_id = id`); (3) it matches the house pattern (`build/route.ts` + `ai-material/route.ts`, per the README "mirror build/route.ts"). Dropped the now-redundant `user_id` select/compare.
