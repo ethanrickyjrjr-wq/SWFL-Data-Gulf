@@ -246,6 +246,16 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     ttl_seconds: 30 * 24 * 60 * 60,
   },
   {
+    // Scope DUPLICATED VERBATIM from marketHeatSwfl.scope in market-heat-swfl.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
+    // id/domain/scope/ttl — edit both strings together.
+    id: "market-heat-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL market-heat directional call per ZIP from realtor.com's free public-S3 market aggregates (Core Inventory + Market Hotness, monthly, ZIP grain). The vote is driven by absolute year-over-year time-series — active-listing count (falling = bullish), median days-on-market (falling = bullish), and pending ratio (rising = bullish) — so market tightening reads bullish. Market Hotness is used as a RELATIVE cross-sectional descriptor only, never the vote driver. List-side only: no closed/sold prices. All math deterministic; no LLM synthesis.",
+    ttl_seconds: 35 * 24 * 60 * 60,
+  },
+  {
     // Scope DUPLICATED VERBATIM from franchiseOutcomes.scope in franchise-outcomes.mts.
     // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
     // id/domain/scope/ttl — edit both strings together.

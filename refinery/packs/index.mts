@@ -49,6 +49,7 @@ import { licensesSwfl } from "./licenses-swfl.mts";
 import { condoSirsSwfl } from "./condo-sirs-swfl.mts";
 import { permitsCommercialSwfl } from "./permits-commercial-swfl.mts";
 import { sellerStressSwfl } from "./seller-stress-swfl.mts";
+import { marketHeatSwfl } from "./market-heat-swfl.mts";
 import { homeValuesSwfl } from "./home-values-swfl.mts";
 import { investorZipSwfl } from "./investor-zip-swfl.mts";
 import { tierDivergenceSwfl } from "./tier-divergence-swfl.mts";
@@ -91,6 +92,7 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [condoSirsSwfl.id]: condoSirsSwfl,
   [permitsCommercialSwfl.id]: permitsCommercialSwfl,
   [sellerStressSwfl.id]: sellerStressSwfl,
+  [marketHeatSwfl.id]: marketHeatSwfl,
   [tierDivergenceSwfl.id]: tierDivergenceSwfl,
   [freshnessPulse.id]: freshnessPulse,
   [activeListingsSwfl.id]: activeListingsSwfl,

@@ -1,0 +1,52 @@
+[
+  {
+    "zip_code": "33901",
+    "month": "202605",
+    "hotness_score": 72.5,
+    "supply_score": 70.1,
+    "demand_score": 74.9,
+    "hotness_rank": 4120,
+    "median_dom_vs_us": -0.18,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "34102",
+    "month": "202605",
+    "hotness_score": 38.2,
+    "supply_score": 33.0,
+    "demand_score": 43.4,
+    "hotness_rank": 18840,
+    "median_dom_vs_us": 0.42,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "33904",
+    "month": "202605",
+    "hotness_score": 61.0,
+    "supply_score": 58.5,
+    "demand_score": 63.5,
+    "hotness_rank": 8200,
+    "median_dom_vs_us": -0.04,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "33905",
+    "month": "202605",
+    "hotness_score": 55.0,
+    "supply_score": 52.0,
+    "demand_score": 58.0,
+    "hotness_rank": 11000,
+    "median_dom_vs_us": 0.01,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "33990",
+    "month": "202605",
+    "hotness_score": 66.0,
+    "supply_score": 64.0,
+    "demand_score": 68.0,
+    "hotness_rank": 6500,
+    "median_dom_vs_us": -0.1,
+    "quality_flag": 1
+  }
+]

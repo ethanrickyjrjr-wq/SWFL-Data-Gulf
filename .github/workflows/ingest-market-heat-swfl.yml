@@ -1,0 +1,46 @@
+name: market-heat-swfl monthly
+
+on:
+  schedule:
+    # 0 13 8 * * — realtor.com restates its Data Library ~first week of the month;
+    # day 8 = safe buffer. REPLACE semantics (full-history overwrite), no API key
+    # (public S3). See docs/standards/pipeline-freshness.md §3.
+    - cron: "0 13 8 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch, filter, validate only; skip Storage upload"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run market_heat_swfl pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.market_heat_swfl.pipeline --dry-run
+          else
+            python -m ingest.pipelines.market_heat_swfl.pipeline
+          fi

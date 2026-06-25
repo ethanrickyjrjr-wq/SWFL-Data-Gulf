@@ -1,3 +1,13 @@
+## 2026-06-25 (main) — feat(market-heat-swfl): realtor.com ZIP-grain market-tightening brain (completes build; vocab+cadence already landed in 1fb32c1f)
+
+ZIP-grain reporter from realtor.com's free public-S3 Core Inventory + Hotness History CSVs (re-verified live in-session — exact columns, `_yy` = fractional). Sibling of seller-stress: Tier-1 parquet → DuckDB source → deterministic pack (`skipSynthesis/Triage`, no LLM in math).
+
+- **Vote** = sign+magnitude off the inline `_yy` deltas: inventory↓ / DOM↓ / pending_ratio↑ = bullish (tightening). Pending-ratio inversion trap PINNED (realtor's pending_ratio = pending÷active → rising = bullish; `+`-sign test-asserted). Hotness is a RELATIVE cross-sectional descriptor only — a test asserts permuting it cannot move direction/magnitude. Falsifier ("pending falls 2+ months while inventory rises") computed off History. List-side only — no sold prices (ATTOM lane), stated as a caveat.
+- **Storage** = Tier-1 parquet, NOT Tier-2 (consumers read the brain's `detail_table`; data already ZIP-aggregated). Pipeline `ingest/pipelines/market_heat_swfl/` REPLACE-overwrites 2 fixed-path parquets; Gate-4 `MIN_ROWS=200` floor aborts a short fetch before any write; `--dry-run`. GHA `ingest-market-heat-swfl.yml` monthly (public S3, no API key).
+- **Wiring**: index/catalog/master(×2) in THIS commit. vocab (5 `market_heat_*` slugs + slug_index) + the cadence entry were swept into the concurrent JRW commit `1fb32c1f` (its `git add -u` grabbed my modified-tracked files) — already in HEAD, deliberately NOT re-added here to avoid duplicate keys.
+- **Gates**: pack `bun test` 25/25, python 8/8, vocab `--all` OK (35 brains), catalog mirror 4/4, full refinery render clean (0 orphans, spec-validator + Stage-4 lints), `bunx next build` ✓.
+- Spec `docs/superpowers/specs/2026-06-25-market-heat-swfl-design.md`. First ingest run + prod verify after deploy.
+
 ## 2026-06-25 (main) — feat(listings): JRW active residential listings pipeline + active-listings-swfl brain + Bible §0.3
 
 New end-to-end pipeline → table → brain for region-wide SWFL active residential listings ("for now" scrape; licensed RESO feed swaps into the SAME table later). **Seeded LIVE: 9,368 listings, 92 ZIPs, 5 counties** (Lee 2,413 · Charlotte 2,370 · Collier 2,265 · Sarasota 2,119 · Hendry 201; Glades 0). Brain `active-listings-swfl` built v2 from live data: 9,368 listings, median asking $325k (SQL percentile per-grain, NOT median-of-medians), avg 196 DOM.

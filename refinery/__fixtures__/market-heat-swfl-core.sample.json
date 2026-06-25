@@ -1,0 +1,132 @@
+[
+  {
+    "zip_code": "33901",
+    "month": "202603",
+    "active_listing_count": 320,
+    "active_listing_count_yy": null,
+    "median_days_on_market": 44,
+    "median_days_on_market_yy": null,
+    "pending_ratio": 0.2,
+    "pending_ratio_yy": null,
+    "new_listing_count": 55,
+    "price_reduced_share": 0.22,
+    "median_listing_price": 505000,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "33901",
+    "month": "202604",
+    "active_listing_count": 310,
+    "active_listing_count_yy": null,
+    "median_days_on_market": 42,
+    "median_days_on_market_yy": null,
+    "pending_ratio": 0.22,
+    "pending_ratio_yy": null,
+    "new_listing_count": 52,
+    "price_reduced_share": 0.21,
+    "median_listing_price": 502000,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "33901",
+    "month": "202605",
+    "active_listing_count": 300,
+    "active_listing_count_yy": -0.15,
+    "median_days_on_market": 40,
+    "median_days_on_market_yy": -0.2,
+    "pending_ratio": 0.25,
+    "pending_ratio_yy": 0.18,
+    "new_listing_count": 50,
+    "price_reduced_share": 0.2,
+    "median_listing_price": 500000,
+    "quality_flag": 0
+  },
+
+  {
+    "zip_code": "34102",
+    "month": "202603",
+    "active_listing_count": 180,
+    "active_listing_count_yy": null,
+    "median_days_on_market": 80,
+    "median_days_on_market_yy": null,
+    "pending_ratio": 0.16,
+    "pending_ratio_yy": null,
+    "new_listing_count": 28,
+    "price_reduced_share": 0.3,
+    "median_listing_price": 1180000,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "34102",
+    "month": "202604",
+    "active_listing_count": 190,
+    "active_listing_count_yy": null,
+    "median_days_on_market": 85,
+    "median_days_on_market_yy": null,
+    "pending_ratio": 0.13,
+    "pending_ratio_yy": null,
+    "new_listing_count": 29,
+    "price_reduced_share": 0.33,
+    "median_listing_price": 1190000,
+    "quality_flag": 0
+  },
+  {
+    "zip_code": "34102",
+    "month": "202605",
+    "active_listing_count": 200,
+    "active_listing_count_yy": 0.3,
+    "median_days_on_market": 90,
+    "median_days_on_market_yy": 0.25,
+    "pending_ratio": 0.1,
+    "pending_ratio_yy": -0.2,
+    "new_listing_count": 30,
+    "price_reduced_share": 0.35,
+    "median_listing_price": 1200000,
+    "quality_flag": 0
+  },
+
+  {
+    "zip_code": "33904",
+    "month": "202605",
+    "active_listing_count": 150,
+    "active_listing_count_yy": -0.05,
+    "median_days_on_market": 55,
+    "median_days_on_market_yy": -0.08,
+    "pending_ratio": 0.18,
+    "pending_ratio_yy": 0.06,
+    "new_listing_count": 40,
+    "price_reduced_share": 0.25,
+    "median_listing_price": 420000,
+    "quality_flag": 0
+  },
+
+  {
+    "zip_code": "33905",
+    "month": "202605",
+    "active_listing_count": 80,
+    "active_listing_count_yy": -0.1,
+    "median_days_on_market": null,
+    "median_days_on_market_yy": null,
+    "pending_ratio": null,
+    "pending_ratio_yy": null,
+    "new_listing_count": 18,
+    "price_reduced_share": 0.28,
+    "median_listing_price": 300000,
+    "quality_flag": 0
+  },
+
+  {
+    "zip_code": "33990",
+    "month": "202605",
+    "active_listing_count": 120,
+    "active_listing_count_yy": -0.2,
+    "median_days_on_market": 45,
+    "median_days_on_market_yy": -0.15,
+    "pending_ratio": 0.22,
+    "pending_ratio_yy": 0.1,
+    "new_listing_count": 25,
+    "price_reduced_share": 0.19,
+    "median_listing_price": 360000,
+    "quality_flag": 1
+  }
+]

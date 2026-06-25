@@ -249,6 +249,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("news-swfl"),
     makeBrainInputSource("freshness-pulse"),
     makeBrainInputSource("seller-stress-swfl"),
+    makeBrainInputSource("market-heat-swfl"),
     makeBrainInputSource("storm-history-swfl"),
     makeBrainInputSource("hurricane-tracks-fl"),
     makeBrainInputSource("licenses-swfl"),
@@ -313,6 +314,7 @@ export const master: PackDefinition = {
     // licenses, condo SIRS, commercial permits, FGCU RERI), so a stale one adds
     // a caveat but never holds master; only cre-swfl/macro/env-swfl stay critical.
     { id: "seller-stress-swfl", edge_type: "input" },
+    { id: "market-heat-swfl", edge_type: "input" },
     { id: "storm-history-swfl", edge_type: "input" },
     { id: "hurricane-tracks-fl", edge_type: "input" },
     { id: "licenses-swfl", edge_type: "input" },
