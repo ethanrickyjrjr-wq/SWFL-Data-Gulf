@@ -1,3 +1,9 @@
+## 2026-06-25 (main) — docs(audit): spec/plan cleanup + AUDIT-GAPS-2026-06-24.md
+
+Cross-checked all active specs + plans against git log + code. Moved finished work to `_FINISHED`: Task-02 scoped email content (shipped `689bbcb1`→`34af5789`), both highlighter specs (GlobalHighlighter live app-root, flag default ON). Created `docs/superpowers/AUDIT-GAPS-2026-06-24.md` — 35 open gaps catalogued (critical: One Assistant client flip, market-sentiment-swfl brain, Ian storm rows, crawl4ai permit ports). Corrected two false audit findings (highlighter dark + scoped email not started — both wrong).
+
+---
+
 ## 2026-06-25 (main) — feat(market-heat-swfl): realtor.com ZIP-grain market-tightening brain (completes build; vocab+cadence already landed in 1fb32c1f)
 
 ZIP-grain reporter from realtor.com's free public-S3 Core Inventory + Hotness History CSVs (re-verified live in-session — exact columns, `_yy` = fractional). Sibling of seller-stress: Tier-1 parquet → DuckDB source → deterministic pack (`skipSynthesis/Triage`, no LLM in math).
