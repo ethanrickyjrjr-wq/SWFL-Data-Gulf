@@ -181,6 +181,13 @@ public/maps/fl_zips.geojson
 # graphify generated output
 graphify-out/
 
+# crawl4ai — local-only research tool; all outputs, audits, scraped docs,
+# specs, plans, and source stay off GitHub. The venv lives at
+# C:\Users\ethan\crawl4ai-venv\ (outside repo). Pattern catches any file or
+# directory whose name contains "crawl4ai" (supercrawl4ai, test_crawl4ai, etc.)
+*crawl4ai*
+.crawl4ai/
+
 # Outreach campaign dry-run artifacts (rendered previews + run reports)
 outreach-runs/
 
