@@ -114,6 +114,8 @@ Plan docs are briefs, not status boards. Flip or delete markers in the same comm
 
 Invoke `superpowers:brainstorming` before any new feature, component, or non-trivial behavior change. No exceptions. **Escape hatch:** operator says "Change Storming" → brainstorming is discretionary.
 
+**ALWAYS RESEARCH WHEN BRAINSTORMING (locked 2026-06-25).** Every brainstorm dispatches a crawl4ai research pass (per RULE 0.4) BEFORE settling on a design — best practices, better engineering, better ways, and verbatim vendor-contract facts (model IDs, API shapes). crawl4ai ONLY, never Firecrawl. Findings feed the approaches/design; write evidence into the spec + `SESSION_LOG.md`. No design is presented on memory alone.
+
 ---
 
 # RULE 3 — ARCHITECTURE DISCIPLINE

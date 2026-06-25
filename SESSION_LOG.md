@@ -1,3 +1,13 @@
+## 2026-06-25 (main) — design(snicklefritz): branded-email system spec (Approach A) + lock crawl4ai-on-brainstorm rule
+
+Brainstormed the SNICKLEFRITZ branded-email system with a **crawl4ai research pass first** (RULE 0.4): Anthropic structured-outputs (GA) + forced-tool for the template pick, model IDs confirmed verbatim (`claude-haiku-4-5` / `claude-sonnet-4-6` / `claude-opus-4-8`), Resend batch ≤100 / `Idempotency-Key` / `List-Unsubscribe` one-click / NO native cron, React-email `pixelBasedPreset` + dark-mode, `enrichBrand` reuse. **Approach A approved:** pure core (`lib/email/snicklefritz/*`) + thin CLIs; the "builder" = exactly 2 AI calls (forced-tool template pick + structured-output **no-invention** fill, every number paired with a source). Spec: `docs/superpowers/specs/2026-06-25-snicklefritz-email-system-design.md` — phases (discovery → prep/gated-preview → send → true-landing → 3-day cron), per-target "folders", the structural no-invention gate, and what must be found upfront. Build-time flags: verify Haiku-4.5 structured-output support (else Sonnet); web_search type drift (`web_search_20260209`).
+
+Also locked **CLAUDE.md RULE 3.5**: every brainstorm now dispatches a crawl4ai research pass (best practices / better engineering / verbatim vendor facts) before settling a design.
+
+Next: writing-plans → Phase 0 discovery (crawl4ai → prospect folders for a real Century 21 agent + a small independent SWFL broker). Nothing sends; SNICKLEFRITZ stays the operator's word.
+
+---
+
 ## 2026-06-25 (main) — feat(email-socials): wire socials end-to-end — 8-platform registry root + social-icons block + footer reorder + brand form/API/migration
 
 Closed the three upstream gaps that left the footer/applyBrand social wiring receiving no data (DB cols → form inputs → API fields), and added the standalone `social-icons` block. Built to ONE root: `lib/email/social/platforms.ts` (8 platforms: label, brand color, token key, branding key, footer-prop key, domain detection) — the footer's social row, the new block, the icon set, applyBrand, the BrandingBlock form, and the PDF all read from it. Add a platform in one place.
