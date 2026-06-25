@@ -32,7 +32,7 @@ _RAW_LAND = {
 
 def test_normalize_home_row_types_and_fields():
     [r] = normalize([_RAW_HOME])
-    assert r["source_name"] == "john_r_wood"
+    assert r["source_name"] == "active_listings_seed"
     assert r["mls_id"] == "225073939"
     assert r["list_price"] == 17950000.0
     assert r["beds"] == 5

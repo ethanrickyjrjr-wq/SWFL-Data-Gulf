@@ -17,7 +17,7 @@ from typing import Any
 import psycopg
 
 _TABLE = "data_lake.active_listings_residential"
-_SOURCE_NAME = "john_r_wood"
+_SOURCE_NAME = "active_listings_seed"
 
 _RE_BEDS = re.compile(r"([\d.]+)\s*Beds?", re.I)
 _RE_BATHS = re.compile(r"([\d.]+)\s*Baths?", re.I)

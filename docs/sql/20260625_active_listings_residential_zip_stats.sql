@@ -19,7 +19,7 @@ SELECT
   round(avg(list_price))::bigint                                       AS avg_list_price,
   max(scraped_at)                                                      AS latest_scraped_at
 FROM data_lake.active_listings_residential
-WHERE source_name = 'john_r_wood'
+WHERE source_name = 'active_listings_seed'
   AND status = 'active'
   AND list_price IS NOT NULL
 GROUP BY GROUPING SETS ((county, zip_code), (county), ());

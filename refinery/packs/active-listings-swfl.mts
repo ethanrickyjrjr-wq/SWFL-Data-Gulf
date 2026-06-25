@@ -51,7 +51,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
         "Seed the active listings pipeline (python -m ingest.pipelines.active_listings.pipeline).",
       key_metrics: [],
       caveats: [
-        "data_lake.active_listings_residential returned 0 active rows for source_name='john_r_wood'.",
+        "data_lake.active_listings_residential returned 0 active rows for source_name='active_listings_seed'.",
       ],
       direction: "neutral",
       magnitude: 0,

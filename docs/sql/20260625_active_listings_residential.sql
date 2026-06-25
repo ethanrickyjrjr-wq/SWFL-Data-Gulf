@@ -1,6 +1,6 @@
 -- data_lake.active_listings_residential — region-wide SWFL residential active listings.
 --
--- "For now" source = John R. Wood scrape (source_name='john_r_wood'); the licensed RESO feed
+-- "For now" source = the seed listings scrape (source_name='active_listings_seed'); the licensed RESO feed
 -- (swfl_mls/nabor) drops into the SAME table later (RESO ListingKey -> mls_id, StandardStatus ->
 -- status, PostalCode -> zip_code), so the consuming brain never rebuilds when the source swaps.
 --

@@ -1,3 +1,11 @@
+## 2026-06-25 (main) — chore(active-listings): migrate source_name 'john_r_wood' → 'active_listings_seed' (data tag + reader view + DB rows)
+
+Drop the last company-name dependency in the active-listings data tag, in lockstep so the live brain never reads 0. Changed the writer (`distill.py` `_SOURCE_NAME`), the reader filter (`active_listings_residential_zip_stats` view `WHERE source_name=…`), the pack zero-row guard, the python test assertion, and the SQL/pipeline/cadence comments. **DB migrated live + verified:** `UPDATE data_lake.active_listings_residential` re-tagged all **9,368** rows (john_r_wood → active_listings_seed; 0 left), and `CREATE OR REPLACE VIEW` now returns **98** aggregate rows under the new tag. Served brain unaffected (same data, identical on next rebuild). Gates: pack + catalog mirror `bun test` 7/0, python `pytest` 4/4.
+
+Still references the company (functional / out of "naming" scope — FLAGGED, not changed): the live scrape URL `https://www.johnrwood.com/listings/` in `extract.py` + its test-fixture listing URLs (the actual site), and the `jrw_runner_ip_waf_proof` check key in the checks ledger (renaming = a ledger migration). Say the word to genericize those too.
+
+---
+
 ## 2026-06-25 (main) — feat(email-lab): background skeleton templates + agent-hero block + footer contact/socials + brand auto-fill
 
 Email Lab skeleton templates + full brand auto-population on seed pick:
