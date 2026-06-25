@@ -211,6 +211,40 @@ process.stdin.on("end", () => {
     }
   }
 
+  // ---- Gate 6: BRAIN_GEO coverage (located-answer prod-500 backstop) --------
+  // A brain added to BRAIN_CATALOG (refinery/packs/index.mts → catalog.mts) MUST have
+  // a matching entry in lib/zip-dossier.ts BRAIN_GEO. assembleLocationDossier throws on
+  // any catalog brain with no geo entry, so POST /api/assistant returns HTTP 500 for
+  // EVERY question naming a SWFL place — a live located-answer outage. This shipped
+  // TWICE (active-listings-swfl 1fb32c1f + market-heat-swfl ffdd28d9, incident
+  // 2026-06-25): the G2 reproduction test (lib/zip-dossier.test.ts) was red locally the
+  // whole time but was NOT a pre-push gate, so the outage went to prod. This is that
+  // gate. Fires on a catalog/registry/geo edit; runs the canonical G2 assertion, which
+  // is env-safe (fixtures only — no DB, no network).
+  const geoTouched = changed.some(
+    (f) =>
+      f === "refinery/packs/catalog.mts" ||
+      f === "refinery/packs/index.mts" ||
+      f === "lib/zip-dossier.ts",
+  );
+  if (geoTouched) {
+    const geo = run('bun test lib/zip-dossier.test.ts -t "BRAIN_GEO"');
+    if (geo.ran && geo.code !== 0) {
+      block(
+        "BRAIN_GEO — a catalog brain has no geo entry (located answers will 500)",
+        `A brain is in BRAIN_CATALOG but missing from lib/zip-dossier.ts BRAIN_GEO.\n` +
+          `assembleLocationDossier throws on any catalog brain with no geo entry, so\n` +
+          `POST /api/assistant returns HTTP 500 for EVERY question naming a SWFL place\n` +
+          `(incident 2026-06-25: active-listings-swfl + market-heat-swfl each shipped a\n` +
+          `live prod outage exactly this way — the test was red locally but ungated).\n\n` +
+          `Fix: add a BRAIN_GEO entry { grains, covers } for the brain named below, in\n` +
+          `THIS commit — grains finest-first; covers = the CountyFips[] it actually holds,\n` +
+          `or "all" for a region/national footprint — then retry.\n\n` +
+          truncate(geo.out),
+      );
+    }
+  }
+
   // ---- Gate 3: secret-wiring reminder (advisory, never blocks) --------------
   const touchedPipelineOrWorkflow = changed.some(
     (f) =>

@@ -1,3 +1,12 @@
+## 2026-06-25 (main) — gate(prepush): add Gate 6 — BRAIN_GEO coverage, so a catalog brain without a geo entry can never ship a located-answer prod 500 again
+
+The BRAIN_GEO prod-500 (active-listings-swfl + market-heat-swfl, both this session) shipped because the G2 reproduction test (`lib/zip-dossier.test.ts`) was red locally but was NOT a pre-push gate. Added Gate 6 to `.claude/hooks/check-prepush-gate.mjs`: when a push touches `refinery/packs/catalog.mts`, `refinery/packs/index.mts`, or `lib/zip-dossier.ts`, it runs `bun test lib/zip-dossier.test.ts -t "BRAIN_GEO"` (env-safe — fixtures only) and BLOCKS (exit 2) if any catalog brain lacks a geo entry, naming the brain.
+
+- Proven both directions: with entries present → 3 pass, exit 0 (no block); drop one entry → `(fail) … every non-excluded catalog brain has a BRAIN_GEO entry`, exit 1 (would block). Restored from git, green again. `node --check` on the hook passes.
+- Closes the exact gap that let two sev1 outages reach prod — a deterministic failure with a reproduction test but no gate, the same shape as the 2026-06-13 catalog-drift incident that birthed Gate 5.
+
+---
+
 ## 2026-06-25 (main) — fix(dossier): add missing BRAIN_GEO entries for active-listings-swfl + market-heat-swfl — STOPS a live prod 500 on EVERY located assistant question
 
 Live-verify of the web-fallback fix surfaced a SEPARATE, pre-existing sev1: `POST /api/assistant` returned **HTTP 500** for any question naming a SWFL place (Vercel log: `Error: BRAIN_GEO missing entry for catalog brain 'active-listings-swfl'`). Isolated cleanly — located non-figure ask → 500; region figure ask (the web-fallback) → 200 — so the 500 is the located fanout, NOT the web-fallback.
