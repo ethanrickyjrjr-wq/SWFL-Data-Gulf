@@ -209,11 +209,13 @@ const RECORD_CHART_TOOL = {
     "(1) If YOUR UPLOADED DOCUMENTS (when present below) contain it, put it in " +
     "upload_points with the label, the exact number from the document, and the " +
     "source_doc — do NOT web-search for something the uploads already answer.\n" +
-    "(2) Otherwise, if a helpful PEER or CONTEXT figure would complete the comparison " +
-    "(a comparable market's vacancy, a national average, a current rate), add it to " +
-    "external_points with a label and a focused web-search query — the system fetches " +
-    "it live, verifies it against a real cited source, and cites it. Share the same " +
-    "metric/unit as your selected points so the comparison is apples-to-apples. Do NOT " +
+    "(2) Otherwise, use external_points to fetch it live from the web — this applies to " +
+    "ANY figure the user explicitly asked for that is NOT in the menu, including SWFL " +
+    "primary metrics (active listings, days on market, inventory, absorption rate, etc.) " +
+    "AND peer/context figures (a comparable market's vacancy, a national average, a " +
+    "current rate). Add it to external_points with a label and a focused web-search " +
+    "query — the system fetches it live from authoritative sources (Redfin, Zillow, " +
+    "Census, BLS, etc.), verifies it against a real cited source, and cites it. Do NOT " +
     "request a figure we already hold in the menu or in the uploads. Never put a number " +
     "in the query.\n\n" +
     "If the USER stated a figure themselves in their message (e.g. 'chart Tampa at " +

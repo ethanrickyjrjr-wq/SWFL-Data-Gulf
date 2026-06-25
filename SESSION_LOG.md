@@ -1,3 +1,9 @@
+## 2026-06-25 (main) — fix(compose-chart): external_points now fires for primary metrics not in lake
+
+Chart path `build_chart` tool was instructing the LLM to add `external_points` only for "peer/context comparison figures" — so explicit user asks for primary SWFL metrics (active listings, DOM, inventory) not in the lake were skipped. Fixed to cover ANY figure the user asked for that's missing from the menu. Complements `e97bb350` (text answer web-fallback); this closes the same gap in the chart path.
+
+---
+
 ## 2026-06-25 (main) — feat(assistant-ui): render the lane-3 web sources as the locked collapsed accordion on all three chat surfaces
 
 Visible half of the web-fallback fix (server cascade shipped in `e97bb350`). The `sources` frame now paints THE one locked `CitationList` box — collapsed by default, click-to-open, each line naming the figure it backs (e.g. "Cape Coral median days on market: 60 — redfin.com") and linking to the publisher; URLs cleaned through the single `clean-url` root (no rebuilt SourcesAccordion).
