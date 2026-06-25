@@ -7,7 +7,8 @@ name: ingest-active-listings
 # scraper failure (Collier, Crexi). UNCOMMENT the schedule ONLY after a manual workflow_dispatch
 # run from the runner lands rows (proves the IP is clear). Until then the seed runs locally
 # (home IP, proven) and the cadence entry is probe_mode: odd_window (probe-excluded).
-# Tracking check: jrw_runner_ip_waf_proof.  (check key unchanged — data in checks ledger)
+# Tracking check: listings_runner_ip_waf_proof.
+# Source URL is NOT in the repo: the pipeline reads it from the LISTINGS_SOURCE_BASE_URL secret.
 
 on:
   # schedule:
@@ -30,6 +31,8 @@ jobs:
     timeout-minutes: 30
     env:
       DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+      # Listings source base URL — kept out of this public repo; injected from the secret.
+      LISTINGS_SOURCE_BASE_URL: ${{ secrets.LISTINGS_SOURCE_BASE_URL }}
 
     steps:
       - uses: actions/checkout@v6

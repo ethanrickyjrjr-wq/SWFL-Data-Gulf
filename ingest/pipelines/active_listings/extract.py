@@ -1,4 +1,8 @@
-"""crawl4ai extraction of active residential listings from johnrwood.com.
+"""crawl4ai extraction of active residential listings from the configured listings source.
+
+INCOGNITO SOURCE: the target site's base URL is NOT committed (this is a public repo). It is read
+from the `LISTINGS_SOURCE_BASE_URL` env var — a GitHub Actions secret for the cron, a shell/.env
+var for a local seed. The code here is generic; only the secret names the site.
 
 Strategy (probed live 2026-06-25 — design: docs/superpowers/specs/2026-06-25-active-listings-residential-design.md):
   - The listing page at /listings/ is SERVER-RENDERED HTML. A browser render VIRTUALIZES the list to
@@ -21,9 +25,11 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig, HTTPCrawlerConfig
@@ -34,7 +40,6 @@ from ingest.lib.crawl4ai_client import Crawl4aiError
 # Covers Naples/Fort Myers heavily; the rural pair (Glades/Hendry) returns 0 and is harmless.
 SWFL_COUNTIES: list[str] = ["Collier", "Lee", "Charlotte", "Sarasota", "Glades", "Hendry"]
 
-_BASE = "https://www.johnrwood.com/listings/"
 _UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -43,6 +48,25 @@ _MAX_PAGES = 300  # runaway backstop (~3,600/county); real counties exhaust ~120
 _PAGE_DELAY = 1.0  # inter-page politeness (site 403-throttles sustained bursts ~420+ reqs)
 _FETCH_ATTEMPTS = 3  # per-page retries with backoff before giving up the page
 _DETAIL_RE = re.compile(r"/listing/([A-Za-z0-9]+)/.*?-fl-(\d{5})", re.I)
+
+
+def _source_base_url() -> str:
+    """The listings base URL — read from the LISTINGS_SOURCE_BASE_URL secret/env so the target
+    site is never committed to this public repo. Set it as a GitHub Actions secret (cron) and a
+    shell/.env var (local seed). Loud failure when unset — never silently scrape nothing."""
+    url = os.environ.get("LISTINGS_SOURCE_BASE_URL", "").strip()
+    if not url:
+        raise Crawl4aiError(
+            "LISTINGS_SOURCE_BASE_URL is not set — the listings source URL is configured via a "
+            "secret/env var (kept out of the public repo). Set it before seeding."
+        )
+    return url
+
+
+def _origin_of(url: str) -> str:
+    """scheme://host for absolute-ifying site-relative hrefs, derived from the configured base."""
+    p = urlparse(url)
+    return f"{p.scheme}://{p.netloc}"
 
 
 def _ascii(s: str) -> str:
@@ -62,7 +86,7 @@ def _text(node, sel: str) -> str | None:
     return el.get_text(" ", strip=True) if el else None
 
 
-def _parse_cards(html: str, county: str) -> list[dict[str, Any]]:
+def _parse_cards(html: str, county: str, origin: str = "") -> list[dict[str, Any]]:
     soup = BeautifulSoup(html, "html.parser")
     rows: list[dict[str, Any]] = []
     for a in soup.select("a.listing__link[href*='/listing/']"):
@@ -85,9 +109,7 @@ def _parse_cards(html: str, county: str) -> list[dict[str, Any]]:
                 "state": _text(a, ".listing__state"),
                 "community": _text(a, ".listing__subdivision"),
                 "details": details,
-                "listing_url": "https://www.johnrwood.com" + href
-                if href.startswith("/")
-                else href,
+                "listing_url": (origin + href) if href.startswith("/") else href,
             }
         )
     return rows
@@ -122,10 +144,12 @@ async def _fetch_county(county: str, in_scope: set[str]) -> list[dict[str, Any]]
     """Paginate one county until a page yields no NEW mls_id (or the page cap). A persistent page
     failure (e.g. a 403 that backoff can't clear) ENDS the county keeping the rows gathered so far —
     it never raises out, so other counties continue and the partial result still upserts."""
+    base = _source_base_url()
+    origin = _origin_of(base)
     seen: set[str] = set()
     out: list[dict[str, Any]] = []
     for page in range(1, _MAX_PAGES + 1):
-        url = f"{_BASE}?county={county}&page={page}"
+        url = f"{base}?county={county}&page={page}"
         try:
             html = await _fetch_html(url)
         except Crawl4aiError as exc:
@@ -135,7 +159,7 @@ async def _fetch_county(county: str, in_scope: set[str]) -> list[dict[str, Any]]
                 flush=True,
             )
             break
-        cards = _parse_cards(html, county)
+        cards = _parse_cards(html, county, origin)
         new = [c for c in cards if c["mls_id"] not in seen]
         if not new:
             break  # exhausted (empty page, or all duplicates = past the last real page)

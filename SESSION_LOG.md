@@ -1,3 +1,13 @@
+## 2026-06-25 (main) — chore(active-listings): make the scrape source incognito — base URL moves to the LISTINGS_SOURCE_BASE_URL secret; check key renamed
+
+Operator concern: the scrape target (johnrwood.com) was visible in the **public** repo. Reality check that prompted this: the `*crawl4ai*` gitignore rule only hides crawl4ai's own dump/cache/audit files — it never covered the pipeline CODE (which must be tracked so the GHA cron can run it). So the source URL was committed in `extract.py`.
+
+- **Source URL out of the repo:** `extract.py` no longer hard-codes the domain — it reads `LISTINGS_SOURCE_BASE_URL` (loud failure if unset) and derives the listing-URL origin from it. GH Actions **secret `LISTINGS_SOURCE_BASE_URL` set** (`gh secret set`) and wired into `active-listings-daily.yml` `env:`. Local seed reads the same env var (set it in your shell). Test fixtures use a neutral `listings.example.com` host (parser reads the path, host-independent). `pytest` 4/4.
+- **Check renamed:** `jrw_runner_ip_waf_proof` → `listings_runner_ip_waf_proof` (opened neutral, closed old) + cadence note + workflow comment de-branded.
+- **CAVEAT — does NOT scrub history:** the repo is PUBLIC and `johnrwood.com` is already in two pushed commits (`1fb32c1f`, `d597e0b6`). Genericizing HEAD stops *new* exposure; the only way to remove the existing public record is to **make the repo private** (crons + Vercel are unaffected by visibility — both use authenticated access) or rewrite history (banned on main). Operator decision pending.
+
+---
+
 ## 2026-06-25 (main) — chore(active-listings): migrate source_name 'john_r_wood' → 'active_listings_seed' (data tag + reader view + DB rows)
 
 Drop the last company-name dependency in the active-listings data tag, in lockstep so the live brain never reads 0. Changed the writer (`distill.py` `_SOURCE_NAME`), the reader filter (`active_listings_residential_zip_stats` view `WHERE source_name=…`), the pack zero-row guard, the python test assertion, and the SQL/pipeline/cadence comments. **DB migrated live + verified:** `UPDATE data_lake.active_listings_residential` re-tagged all **9,368** rows (john_r_wood → active_listings_seed; 0 left), and `CREATE OR REPLACE VIEW` now returns **98** aggregate rows under the new tag. Served brain unaffected (same data, identical on next rebuild). Gates: pack + catalog mirror `bun test` 7/0, python `pytest` 4/4.

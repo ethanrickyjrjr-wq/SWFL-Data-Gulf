@@ -14,7 +14,7 @@ _RAW_HOME = {
     "state": "FL",
     "community": "OLDE NAPLES",
     "details": "5 Beds 8 Baths 0.34 Acres 6,822 SqFt 244 Days on Market",
-    "listing_url": "https://www.johnrwood.com/listing/225073939/285-central-avenue-naples-fl-34102/",
+    "listing_url": "https://listings.example.com/listing/225073939/285-central-avenue-naples-fl-34102/",
 }
 _RAW_LAND = {
     "mls_id": "226014932",
@@ -26,7 +26,7 @@ _RAW_LAND = {
     "state": "FL",
     "community": "PORT ROYAL",
     "details": "Land 5.39 Acres 77 Days on Market",
-    "listing_url": "https://www.johnrwood.com/listing/226014932/x-bay-road-naples-fl-34102/",
+    "listing_url": "https://listings.example.com/listing/226014932/x-bay-road-naples-fl-34102/",
 }
 
 
