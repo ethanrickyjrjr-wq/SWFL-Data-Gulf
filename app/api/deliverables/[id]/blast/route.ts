@@ -15,6 +15,10 @@ import { getMarketingResend } from "@/lib/email/marketing-client";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
 import { renderGroundedReport } from "@/lib/email/grounded-report";
+import { render } from "@react-email/render";
+import { EmailDocEmail } from "@/lib/email/blocks/EmailDocRenderer";
+import { EmailDocSchema } from "@/lib/email/doc/schema";
+import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
 
 export const runtime = "nodejs";
@@ -76,8 +80,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .eq("id", id)
     .maybeSingle();
   if (!deliverable) return NextResponse.json({ error: "not found" }, { status: 404 });
-  if (deliverable.template !== "email") {
-    return NextResponse.json({ error: "deliverable is not an email" }, { status: 400 });
+  // Block-canvas (Email Lab) emails are first-class senders alongside the legacy
+  // "email" template — both carry frozen, ready content.
+  const BLASTABLE = new Set(["email", "block-canvas"]);
+  if (!BLASTABLE.has(deliverable.template)) {
+    return NextResponse.json({ error: "deliverable is not sendable" }, { status: 400 });
   }
   if (deliverable.status !== "ready") {
     return NextResponse.json({ error: "deliverable is not ready" }, { status: 400 });
@@ -110,17 +117,35 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // swap the footer's unsubscribe link. Non-ZIP deliverables (model null) fall
   // back to a minimal wrapper linking to the web version.
   const webUrl = `${BASE_URL}/p/${id}`;
+  // Opt-in PDF attachment — block-canvas only (the only template the PDF root
+  // renders). Default off: attachments inflate every message.
+  const includePdf = body?.include_pdf === true && deliverable.template === "block-canvas";
   let baseHtml: string;
-  const model = buildEmailDeliverableModel(deliverable, { siteOrigin: BASE_URL });
-  if (model) {
-    baseHtml = await renderGroundedReport(model, { skin: "email" });
+  let pdfBuffer: Buffer | null = null;
+
+  if (deliverable.template === "block-canvas") {
+    // Render the SAME block-canvas HTML the Email Lab preview shows (single
+    // renderer), and — when requested — a real PDF through the single PDF root.
+    const parsedDoc = EmailDocSchema.safeParse(deliverable.doc);
+    if (!parsedDoc.success) {
+      return NextResponse.json({ error: "invalid email document" }, { status: 422 });
+    }
+    baseHtml = await render(EmailDocEmail({ doc: parsedDoc.data }));
+    if (includePdf) {
+      pdfBuffer = await renderEmailDocToBuffer(parsedDoc.data);
+    }
   } else {
-    baseHtml =
-      `<!doctype html><html><body style="font-family:Arial,sans-serif;padding:24px">` +
-      `<p style="font-size:16px;color:#111">Your market report is ready.</p>` +
-      `<p><a href="${escAttr(webUrl)}" style="display:inline-block;background:#3DC9C0;color:#fff;` +
-      `padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">View Report</a></p>` +
-      `</body></html>`;
+    const model = buildEmailDeliverableModel(deliverable, { siteOrigin: BASE_URL });
+    if (model) {
+      baseHtml = await renderGroundedReport(model, { skin: "email" });
+    } else {
+      baseHtml =
+        `<!doctype html><html><body style="font-family:Arial,sans-serif;padding:24px">` +
+        `<p style="font-size:16px;color:#111">Your market report is ready.</p>` +
+        `<p><a href="${escAttr(webUrl)}" style="display:inline-block;background:#3DC9C0;color:#fff;` +
+        `padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">View Report</a></p>` +
+        `</body></html>`;
+    }
   }
 
   // Deliverability-safe sender: verified platform address, agent's name shown,
@@ -154,28 +179,46 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let sent = 0;
   let failed = 0;
 
-  for (let i = 0; i < contacts.length; i += 100) {
-    const batch = contacts.slice(i, i + 100);
-    const messages = batch.map((c) => {
-      const unsubUrl = `${BASE_URL}/api/unsubscribe?id=${c.id}`;
-      return {
-        from,
-        to: [c.email],
-        subject,
-        html: withFooter(baseHtml, webUrl, unsubUrl),
-        ...(replyTo ? { replyTo } : {}),
-        headers: {
-          "List-Unsubscribe": `<${unsubUrl}>`,
-          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-        },
-      };
-    });
-    try {
-      const { error } = await resend.batch.send(messages);
-      if (error) failed += batch.length;
-      else sent += batch.length;
-    } catch {
-      failed += batch.length;
+  const messageFor = (c: { id: string; email: string }) => {
+    const unsubUrl = `${BASE_URL}/api/unsubscribe?id=${c.id}`;
+    return {
+      from,
+      to: [c.email],
+      subject,
+      html: withFooter(baseHtml, webUrl, unsubUrl),
+      ...(replyTo ? { replyTo } : {}),
+      headers: {
+        "List-Unsubscribe": `<${unsubUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+    };
+  };
+
+  if (pdfBuffer) {
+    // Resend's BATCH endpoint strips attachments — its payload type is
+    // Omit<CreateEmailOptions, "attachments"> (verified against the installed SDK,
+    // index.d.cts:630). So an attached PDF forces per-recipient emails.send().
+    const attachments = [{ content: pdfBuffer, filename: pdfFilename() }];
+    for (const c of contacts) {
+      try {
+        const { error } = await resend.emails.send({ ...messageFor(c), attachments });
+        if (error) failed += 1;
+        else sent += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+  } else {
+    // No attachment → fast path: batch up to 100 per call.
+    for (let i = 0; i < contacts.length; i += 100) {
+      const batch = contacts.slice(i, i + 100);
+      try {
+        const { error } = await resend.batch.send(batch.map(messageFor));
+        if (error) failed += batch.length;
+        else sent += batch.length;
+      } catch {
+        failed += batch.length;
+      }
     }
   }
 

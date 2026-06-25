@@ -1,3 +1,11 @@
+## 2026-06-24 (main) — feat(pdf): single PDF root (lib/pdf) + full PDF capability
+
+New `lib/pdf/` root — the ONE place every PDF concern lives (same single-root discipline as `lib/citations`), with `README.md` as the "PDF issue → this is where I go → every page it feeds" map. Contains: `email-doc-pdf.tsx` (EmailDoc→PDF, ALL 10 block types, `never`-guarded so a block kind can't be silently dropped), `render.ts`, `extract.ts` (pdf-parse fallback), `doc-type.ts` (doc-type-aware prompt + sizing), pinned `pdfjs-worker.ts`, `PdfViewer.tsx`, `PdfCapture.tsx`. Wired every surface to it: block-canvas blast (T1) + per-recipient PDF attach (T4 — Resend `batch.send` OMITS attachments, verified in installed SDK `index.d.cts:630`); new GET/POST `/api/deliverables/[id]/pdf`; Email Lab Export→**Download PDF** (real file) + **Send to contacts**; Materials Hub row Send; ContactPicker attach-PDF checkbox; ItemDetail `<object>`→`PdfViewer` + thumbnails; UploadDrop `PdfCapture` + new thumbnail route (reuses existing `email-media` bucket, no SQL); extract-pdf pdf-parse fallback (`PDFParse` is the MAIN export not `/node`; ctor field is `data` not `buffer`) + offline path. Deps: `@react-pdf/renderer@4.5.1`, `react-pdf@10.4.1`, `pdf-parse@2.4.5` + `serverExternalPackages`. Corrected 5 ship-breaking defects in the inherited plan (Resend batch attach, wrong UI surface for block-canvas, out-of-scope `pdfBuffer` in T6, wrong pdf-parse import, PdfBlock dropping 3 block types).
+
+**`bun test` 3721/0 ✓, `bunx next build` ✓, PDF round-trip audit 16/16 data fields present in rendered output.**
+
+**Next:** prod-verify (needs a real browser/live key) — react-pdf viewer + thumbnail capture render in-browser; one live Resend send with the PDF attached.
+
 ## 2026-06-24 (main) — design(gulf-teal): semantic token upgrade — [#3DC9C0] → gulf-teal utilities
 
 75 files, 424 Tailwind class replacements + 10 inline-style `color`/`border`/`accentColor` conversions to `var(--gulf-teal)`. Zero arbitrary `[#3DC9C0]` values remain in production TSX/TS/CSS. Preserved: email HTML hardcode (can't use CSS vars), color-picker defaults (BrandingBlock/DeliverableEditPanel), chart series hex (charting library data), CSS var() fallbacks already correct, Mapbox fill (canvas).

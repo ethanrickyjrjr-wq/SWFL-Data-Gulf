@@ -10,6 +10,10 @@ import { cleanCitation } from "@/lib/citations/clean-url";
 import { CollisionChip } from "@/components/project/CollisionChip";
 import { FrozenSnapshotNote } from "@/components/project/FrozenSnapshotNote";
 import type { SavedChart } from "./types";
+import dynamic from "next/dynamic";
+const PdfViewer = dynamic(() => import("@/lib/pdf/PdfViewer").then((m) => m.PdfViewer), {
+  ssr: false,
+});
 
 /** A plain "as of {date}" citation line — the only v1 freshness surface (no badge). */
 export function AsOf({ token }: { token: string | null | undefined }) {
@@ -199,27 +203,20 @@ export function ItemDetail({
           </figure>
         );
       }
-      // PDF → inline viewer with fallback link.
+      // PDF → thumbnail (if captured) + cross-browser viewer (replaces dead <object>).
       return (
         <div>
+          {item.thumbnail_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.thumbnail_url}
+              alt="Page 1 preview"
+              className="mb-2 w-full rounded border border-white/10 object-contain"
+              style={{ maxHeight: 200 }}
+            />
+          )}
           {url ? (
-            <>
-              <object
-                data={url}
-                type="application/pdf"
-                className="w-full rounded border border-white/10"
-                style={{ height: "480px" }}
-              >
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-gulf-teal underline underline-offset-2"
-                >
-                  {item.caption || "Open PDF"}
-                </a>
-              </object>
-            </>
+            <PdfViewer url={url} label={item.caption || "Open PDF"} />
           ) : (
             <p className="text-sm text-gray-500 italic">
               {item.caption || "Attachment"} (unavailable)

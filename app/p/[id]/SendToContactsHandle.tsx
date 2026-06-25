@@ -6,7 +6,13 @@
 import { useState } from "react";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 
-export function SendToContactsHandle({ deliverableId }: { deliverableId: string }) {
+export function SendToContactsHandle({
+  deliverableId,
+  isBlockCanvas = false,
+}: {
+  deliverableId: string;
+  isBlockCanvas?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -17,7 +23,13 @@ export function SendToContactsHandle({ deliverableId }: { deliverableId: string 
       >
         Send to contacts
       </button>
-      {open && <ContactPickerModal deliverableId={deliverableId} onClose={() => setOpen(false)} />}
+      {open && (
+        <ContactPickerModal
+          deliverableId={deliverableId}
+          isBlockCanvas={isBlockCanvas}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </>
   );
 }

@@ -5,17 +5,20 @@ import type { Contact } from "@/lib/contacts/types";
 
 interface Props {
   deliverableId: string;
+  /** Block-canvas emails can ship a generated PDF attachment — gates the checkbox. */
+  isBlockCanvas: boolean;
   onClose: () => void;
 }
 
 type SendResult = { sent: number; failed: number } | { error: string; limit?: number };
 
-export function ContactPickerModal({ deliverableId, onClose }: Props) {
+export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Props) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [subject, setSubject] = useState("");
+  const [attachPdf, setAttachPdf] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<SendResult | null>(null);
 
@@ -60,6 +63,7 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
         body: JSON.stringify({
           contact_ids: Array.from(selected),
           ...(subject.trim() ? { subject: subject.trim() } : {}),
+          ...(attachPdf ? { include_pdf: true } : {}),
         }),
       });
       setResult(await res.json());
@@ -124,6 +128,17 @@ export function ContactPickerModal({ deliverableId, onClose }: Props) {
                 placeholder="Subject (optional — a clean default is used)"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none"
               />
+              {isBlockCanvas && (
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={attachPdf}
+                    onChange={(e) => setAttachPdf(e.target.checked)}
+                    className="h-4 w-4 accent-gulf-teal"
+                  />
+                  Attach PDF report
+                </label>
+              )}
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

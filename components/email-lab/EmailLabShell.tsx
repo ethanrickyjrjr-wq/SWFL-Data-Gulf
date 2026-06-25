@@ -28,6 +28,7 @@ import {
 import { BlockCanvas } from "./BlockCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { EmailPreviewFrame } from "@/app/p/[id]/EmailPreviewFrame";
+import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 
 // Legacy templates kept on the preview-only "classic" rail.
 const CLASSIC_TEMPLATES = [
@@ -116,9 +117,14 @@ export interface EmailLabShellProps {
   autoGenerate?: boolean;
   headerSlot: ReactNode;
   aiPlaceholder?: string;
-  /** When provided, renders a Save button that calls back with the current doc. */
-  onSave?: (doc: EmailDoc) => Promise<void>;
+  /** When provided, renders a Save button that calls back with the current doc.
+   *  Returns the saved deliverable id (so "Send to contacts" can blast the row
+   *  that was just persisted); legacy callers may still return void. */
+  onSave?: (doc: EmailDoc) => Promise<string | void>;
   saving?: boolean;
+  /** The saved block-canvas deliverable id (the `?did`), when this lab is editing
+   *  a persisted material — enables "Send to contacts". */
+  deliverableId?: string | null;
   /** Project id — required when projectPhotos is provided; used to call /api/projects/[id]/email-media. */
   projectId?: string;
   /** Filed image items from the project. When provided, a Photos panel is shown. */
@@ -135,6 +141,7 @@ export function EmailLabShell({
   aiPlaceholder = "Describe the email — the AI fills real SWFL numbers into the layout…",
   onSave,
   saving,
+  deliverableId,
   projectId,
   projectPhotos,
 }: EmailLabShellProps) {
@@ -148,6 +155,8 @@ export function EmailLabShell({
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [sendOpen, setSendOpen] = useState(false);
+  const [sendId, setSendId] = useState<string | null>(null);
   const [mode, setMode] = useState<"canvas" | "classic">("canvas");
   const [classicHtml, setClassicHtml] = useState("");
   const [classicId, setClassicId] = useState<string | null>(null);
@@ -345,19 +354,64 @@ export function EmailLabShell({
     }
   }
 
-  async function exportPdf() {
+  /** Print-to-PDF fallback (classic templates, or when the server route is
+   *  unavailable, e.g. the signed-out standalone lab). */
+  function printToPdf(html: string) {
+    const win = window.open("", "_blank");
+    if (!win) return;
+    // onload must be set BEFORE write()/close() so it fires when the document and
+    // its resources finish loading — not after, when the event is already gone.
+    win.onload = () => win.print();
+    win.document.write(html);
+    win.document.close();
+  }
+
+  // Download a REAL .pdf (single PDF root) for the live block-canvas doc. POST so
+  // it reflects unsaved edits; the route ignores [id] for POST. Classic templates
+  // and any server failure fall back to browser print-to-PDF.
+  async function downloadPdf() {
     setExporting(true);
     try {
-      const html = mode === "classic" ? classicHtml : await renderDocHtml(doc);
-      const win = window.open("", "_blank");
-      if (!win) return;
-      // onload must be set BEFORE write()/close() so it fires when the document
-      // and its resources finish loading — not after, when the event is already gone.
-      win.onload = () => win.print();
-      win.document.write(html);
-      win.document.close();
+      if (mode === "canvas") {
+        try {
+          const res = await fetch(`/api/deliverables/${deliverableId ?? "live"}/pdf`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ doc }),
+          });
+          if (res.ok) {
+            const blob = await res.blob();
+            const href = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = href;
+            a.download = "report.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(href);
+            return;
+          }
+        } catch {
+          // fall through to print
+        }
+      }
+      printToPdf(mode === "classic" ? classicHtml : await renderDocHtml(doc));
     } finally {
       setExporting(false);
+    }
+  }
+
+  // Send to contacts: the blast reads `deliverables.doc` from the DB, so persist
+  // the live doc first (onSave returns the id), then open the contact picker.
+  async function openSend() {
+    let id = deliverableId ?? null;
+    if (onSave) {
+      const saved = await onSave(doc);
+      if (typeof saved === "string") id = saved;
+    }
+    if (id) {
+      setSendId(id);
+      setSendOpen(true);
     }
   }
 
@@ -634,11 +688,11 @@ export function EmailLabShell({
               </button>
             )}
             <button
-              onClick={exportPdf}
+              onClick={downloadPdf}
               disabled={exporting}
               className="rounded border border-white/10 px-2.5 py-1 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white/70 disabled:opacity-30"
             >
-              Export PDF
+              Download PDF
             </button>
             <button
               onClick={copyHtml}
@@ -647,6 +701,16 @@ export function EmailLabShell({
             >
               {copied ? "Copied ✓" : "Copy HTML"}
             </button>
+            {onSave && (
+              <button
+                type="button"
+                onClick={openSend}
+                disabled={busy}
+                className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/20 disabled:opacity-40"
+              >
+                Send to contacts
+              </button>
+            )}
             {onSave && (
               <button
                 type="button"
@@ -683,6 +747,14 @@ export function EmailLabShell({
           )}
         </div>
       </main>
+
+      {sendOpen && sendId && (
+        <ContactPickerModal
+          deliverableId={sendId}
+          isBlockCanvas
+          onClose={() => setSendOpen(false)}
+        />
+      )}
     </div>
   );
 }

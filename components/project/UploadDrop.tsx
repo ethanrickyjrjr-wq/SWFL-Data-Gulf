@@ -2,9 +2,15 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { createClient } from "@/utils/supabase/client";
 import type { ProjectItem } from "@/lib/project/items";
 import { UPLOADS_BUCKET } from "@/lib/project/signed-upload-url";
+
+// Page-1 capture runs only in the browser (canvas/pdf.js) → ssr:false, lazy.
+const PdfCapture = dynamic(() => import("@/lib/pdf/PdfCapture").then((m) => m.PdfCapture), {
+  ssr: false,
+});
 
 /** A filed file item plus a local object-URL preview for instant in-session render. */
 type FileItem = Extract<ProjectItem, { kind: "file" }>;
@@ -43,6 +49,8 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
   const [error, setError] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
   const [reading, setReading] = useState(false);
+  // Mounted off-screen PdfCapture instances awaiting their page-1 PNG export.
+  const [captures, setCaptures] = useState<{ id: string; url: string }[]>([]);
 
   async function handleFile(file: File) {
     setError(null);
@@ -99,7 +107,8 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
         ...(caption.trim() ? { caption: caption.trim() } : {}),
       };
 
-      onUploaded(item, URL.createObjectURL(file));
+      const objectUrl = URL.createObjectURL(file);
+      onUploaded(item, objectUrl);
       setCaption("");
 
       // Fire PDF extraction — non-blocking. The route reads the PDF with Claude
@@ -107,6 +116,8 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
       // quotes the flyer's real figures. We surface a transient "reading" note;
       // builds don't wait on it.
       if (file.type === "application/pdf") {
+        // Capture page 1 → PNG thumbnail off-screen, reusing the same object URL.
+        setCaptures((c) => [...c, { id: item.id, url: objectUrl }]);
         setReading(true);
         void fetch(`/api/projects/${projectId}/extract-pdf`, {
           method: "POST",
@@ -195,6 +206,16 @@ export function UploadDrop({ projectId, fileCount, onUploaded, onExtractionCompl
           Reading the PDF so your email can use its contents…
         </p>
       )}
+
+      {captures.map((c) => (
+        <PdfCapture
+          key={c.id}
+          url={c.url}
+          projectId={projectId}
+          itemId={c.id}
+          onDone={() => setCaptures((list) => list.filter((x) => x.id !== c.id))}
+        />
+      ))}
     </section>
   );
 }

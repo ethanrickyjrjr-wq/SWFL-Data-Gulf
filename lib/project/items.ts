@@ -86,6 +86,8 @@ const kinds = z.discriminatedUnion("kind", [
     // — items filed before this lift simply omit them.
     extracted_text: z.string().optional(),
     extraction_status: z.enum(["processing", "done", "failed"]).optional(),
+    // Page-1 PNG preview captured at upload time (lib/pdf/PdfCapture → thumbnail route).
+    thumbnail_url: z.string().optional(),
   }),
   z.object({
     kind: z.literal("table_slice"),

@@ -40,7 +40,7 @@ export function ProjectEmailLabClient({
   const effectiveScope = scope ?? { kind: "region", value: "swfl" };
   const aiPrompt = `Market spotlight email for ${scopeLabel} — fill in realistic market context and agent copy`;
 
-  async function handleSave(doc: EmailDoc) {
+  async function handleSave(doc: EmailDoc): Promise<string | void> {
     setSaving(true);
     try {
       if (savedId) {
@@ -49,17 +49,18 @@ export function ProjectEmailLabClient({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deliverable_id: savedId, doc }),
         });
-      } else {
-        const res = await fetch(`/api/projects/${projectId}/materials`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ doc }),
-        });
-        if (res.ok) {
-          const { id } = await res.json();
-          setSavedId(id);
-          window.history.replaceState({}, "", `/project/${projectId}/email-lab?did=${id}`);
-        }
+        return savedId;
+      }
+      const res = await fetch(`/api/projects/${projectId}/materials`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doc }),
+      });
+      if (res.ok) {
+        const { id } = await res.json();
+        setSavedId(id);
+        window.history.replaceState({}, "", `/project/${projectId}/email-lab?did=${id}`);
+        return id;
       }
     } finally {
       setSaving(false);
@@ -76,6 +77,7 @@ export function ProjectEmailLabClient({
       aiPlaceholder={`e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`}
       onSave={handleSave}
       saving={saving}
+      deliverableId={savedId}
       projectId={projectId}
       projectPhotos={projectPhotos}
       headerSlot={

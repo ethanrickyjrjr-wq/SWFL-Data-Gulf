@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DeliverableRow } from "@/app/project/[id]/workspace/types";
 import { getMaterialStatus, getFormatBadge } from "@/lib/deliverable/material-status";
+import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 
 /** Derive a human-readable title from the material's doc or fallback fields. */
 export function deriveTitle(d: DeliverableRow): string {
@@ -46,6 +47,7 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [sendOpen, setSendOpen] = useState(false);
 
   const badge = getFormatBadge(d.template);
   const status = getMaterialStatus(d);
@@ -112,6 +114,18 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
           </button>
         )}
 
+        {/* Send to contacts */}
+        <button
+          title="Send to contacts"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSendOpen(true);
+          }}
+          className="shrink-0 text-xs text-white/40 hover:text-white/70 transition-colors"
+        >
+          Send
+        </button>
+
         {/* Version accordion toggle */}
         {d.versions.length > 0 && (
           <button
@@ -159,6 +173,15 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
             );
           })}
         </div>
+      )}
+
+      {/* Send-to-contacts modal (fixed inset-0 overlay; stops its own propagation) */}
+      {sendOpen && (
+        <ContactPickerModal
+          deliverableId={d.id}
+          isBlockCanvas={d.template === "block-canvas"}
+          onClose={() => setSendOpen(false)}
+        />
       )}
     </div>
   );

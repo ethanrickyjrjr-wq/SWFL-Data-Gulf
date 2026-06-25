@@ -14,17 +14,12 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { projectItemsSchema, type ProjectItem } from "@/lib/project/items";
 import { UPLOADS_BUCKET } from "@/lib/project/signed-upload-url";
 import { getAnthropic, agentsAreMocked } from "@/refinery/agents/anthropic.mts";
+import { parsePdfText, buildExtractionPrompt, EXTRACTION_MAX_TOKENS } from "@/lib/pdf";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const EXTRACTION_MODEL = "claude-haiku-4-5";
-
-const EXTRACTION_PROMPT =
-  "Extract every meaningful fact from this document: prices, sizes, addresses, " +
-  "dates, names, financial figures, features, and descriptive details. Return a " +
-  "clean plain-text summary suitable for drafting a professional real-estate email. " +
-  "Quote every number exactly as printed. Do not invent anything not in the document.";
 
 /** Re-read the latest items and replace just the target item by id, so a
  *  concurrent edit elsewhere in the project isn't clobbered by a stale array. */
@@ -83,13 +78,37 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "item is not a PDF" }, { status: 400 });
   }
 
-  // No model key (offline/dev) → can't extract. Leave the item un-extracted so
-  // the build falls back to the file-name label; surface it plainly.
+  // No model key (offline/dev) → Claude vision is unavailable, but a text-layer
+  // PDF can still be read with zero API cost via pdf-parse. Try that first; only
+  // image-only / unreadable PDFs fall through to "skipped".
   if (agentsAreMocked()) {
+    try {
+      const sr = createServiceRoleClient();
+      const { data: fileData, error: dlErr } = await sr.storage
+        .from(UPLOADS_BUCKET)
+        .download(item.storage_path);
+      if (!dlErr && fileData) {
+        const bytes = Buffer.from(await fileData.arrayBuffer());
+        const fb = await parsePdfText(bytes);
+        if (fb && fb.text) {
+          await patchItemById(supabase, id, itemId, {
+            extracted_text: fb.text,
+            extraction_status: "done",
+          });
+          return NextResponse.json({ status: "done", via: "pdf-parse" });
+        }
+      }
+    } catch {
+      // fall through to skipped — leave the item un-extracted
+    }
     return NextResponse.json({ status: "skipped", reason: "extraction unavailable" });
   }
 
   await patchItemById(supabase, id, itemId, { extraction_status: "processing" });
+
+  // Held outside the try so the downloaded bytes survive into the catch, where
+  // the zero-cost pdf-parse text-layer fallback can reuse them.
+  let pdfBytes: Buffer | null = null;
 
   try {
     // Private bucket → only the service role can read the object bytes.
@@ -100,12 +119,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (dlErr || !fileData) {
       throw new Error(`storage download failed: ${dlErr?.message ?? "no data"}`);
     }
-    const pdfBase64 = Buffer.from(await fileData.arrayBuffer()).toString("base64");
+    pdfBytes = Buffer.from(await fileData.arrayBuffer());
+    const pdfBase64 = pdfBytes.toString("base64");
 
     const client = getAnthropic();
     const response = await client.messages.create({
       model: EXTRACTION_MODEL,
-      max_tokens: 4096,
+      max_tokens: EXTRACTION_MAX_TOKENS,
       messages: [
         {
           role: "user",
@@ -114,7 +134,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
               type: "document",
               source: { type: "base64", media_type: "application/pdf", data: pdfBase64 },
             },
-            { type: "text", text: EXTRACTION_PROMPT },
+            { type: "text", text: buildExtractionPrompt() },
           ],
         },
       ],
@@ -134,6 +154,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
     return NextResponse.json({ status: "done" });
   } catch (err) {
+    // Claude vision failed — try the zero-cost text-layer fallback on the bytes
+    // we already downloaded. A text-layer PDF is still recoverable here.
+    if (pdfBytes) {
+      const fb = await parsePdfText(pdfBytes);
+      if (fb && fb.text) {
+        await patchItemById(supabase, id, itemId, {
+          extracted_text: fb.text,
+          extraction_status: "done",
+        });
+        return NextResponse.json({ status: "done", via: "pdf-parse" });
+      }
+    }
     const reason = err instanceof Error ? err.message : "extraction failed";
     await patchItemById(supabase, id, itemId, { extraction_status: "failed" });
     return NextResponse.json({ status: "failed", reason }, { status: 500 });
