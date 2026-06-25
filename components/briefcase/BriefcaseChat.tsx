@@ -16,6 +16,8 @@ import { getAiContext } from "@/lib/project/ai-context-store";
 import type { ProjectItem } from "@/lib/project/items";
 import { DockChart } from "@/components/highlighter/DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
+import { CitationList } from "@/components/CitationList";
+import type { WelcomeSource } from "@/lib/welcome/frames";
 
 /**
  * The global Briefcase's standalone chat (off /r/*). Streams via the SHARED
@@ -67,6 +69,9 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
   // The deterministic, cited chart for the current answer (prelude `chart` frame).
   // Reset per question in submit() so it never lingers from a prior turn.
   const [chart, setChart] = useState<ChartSpec | null>(null);
+  // Lane-3 web-verified sources for the current answer (prelude `sources` frame).
+  // Reset per question in submit() like `chart`, so they never linger across turns.
+  const [sources, setSources] = useState<WelcomeSource[]>([]);
   const onFrame = (f: ChatFrame) => {
     if (f.type === "place") {
       const p = f.place as { zip?: string; name?: string } | undefined;
@@ -80,6 +85,8 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       if (typeof f.freshness_token === "string") tokenRef.current = f.freshness_token;
     } else if (f.type === "chart" && f.chart) {
       setChart(f.chart as ChartSpec);
+    } else if (f.type === "sources" && Array.isArray(f.sources)) {
+      setSources(f.sources as WelcomeSource[]);
     }
   };
 
@@ -121,6 +128,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
     tokenRef.current = undefined;
     setPlace(null);
     setChart(null);
+    setSources([]);
     send(text);
   };
 
@@ -335,6 +343,18 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
             <div className="overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
               <div className="px-2 py-1 text-[10px] text-gray-500">Chart</div>
               <DockChart spec={chart} compact />
+            </div>
+          )}
+          {sources.length > 0 && (
+            // Lane-3 web sources — THE locked collapsed Sources box. Its built-in mt-10
+            // is pulled up here so it sits snug under the answer in the compact dock.
+            <div className="-mt-8">
+              <CitationList
+                sources={sources.map((s) => ({
+                  label: `${s.label}: ${s.value.toLocaleString("en-US")} — ${s.domain}`,
+                  url: s.url,
+                }))}
+              />
             </div>
           )}
           {scheduleCardPlace && (

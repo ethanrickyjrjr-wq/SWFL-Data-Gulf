@@ -88,6 +88,34 @@ describe("reduceWelcome", () => {
     expect(s.status).toBe("done");
   });
 
+  test("sources frame stores lane-3 citations without changing status", () => {
+    let s = reduceWelcome(initialWelcomeState, { type: "submit", zip: "33931" });
+    s = reduceWelcome(s, { type: "frame", frame: { type: "text", text: "60 days." } });
+    const before = s.status;
+    s = reduceWelcome(s, {
+      type: "frame",
+      frame: {
+        type: "sources",
+        sources: [
+          {
+            label: "Cape Coral median DOM",
+            value: 60,
+            url: "https://redfin.com/x",
+            domain: "redfin.com",
+          },
+        ],
+      },
+    });
+    expect(s.sources).toHaveLength(1);
+    expect(s.sources[0]).toEqual({
+      label: "Cape Coral median DOM",
+      value: 60,
+      url: "https://redfin.com/x",
+      domain: "redfin.com",
+    });
+    expect(s.status).toBe(before); // order-tolerant: never disturbs the stream status
+  });
+
   test("error frame surfaces message", () => {
     const s = reduceWelcome(initialWelcomeState, {
       type: "frame",
@@ -136,6 +164,14 @@ describe("parseSseFrame", () => {
     expect(parseSseFrame('data: {"type":"place","place":{"zip":"33931","name":"FMB"}}')).toEqual({
       type: "place",
       place: { zip: "33931", name: "FMB" },
+    });
+    expect(
+      parseSseFrame(
+        'data: {"type":"sources","sources":[{"label":"DOM","value":60,"url":"https://redfin.com/x","domain":"redfin.com"}]}',
+      ),
+    ).toEqual({
+      type: "sources",
+      sources: [{ label: "DOM", value: 60, url: "https://redfin.com/x", domain: "redfin.com" }],
     });
   });
 

@@ -1,3 +1,14 @@
+## 2026-06-25 (main) — feat(assistant-ui): render the lane-3 web sources as the locked collapsed accordion on all three chat surfaces
+
+Visible half of the web-fallback fix (server cascade shipped in `e97bb350`). The `sources` frame now paints THE one locked `CitationList` box — collapsed by default, click-to-open, each line naming the figure it backs (e.g. "Cape Coral median days on market: 60 — redfin.com") and linking to the publisher; URLs cleaned through the single `clean-url` root (no rebuilt SourcesAccordion).
+
+- **/welcome hero** (`AnswerBlock.tsx`, via `state.sources` already on `reduceWelcome`).
+- **Global dock pill** (`BriefcaseChat.tsx`) + **/welcome multi-turn** (`ConversationalChat.tsx`): mirror the existing `chart`-frame pattern exactly — single current-answer `sources` state, captured in `onFrame`, reset per question, rendered once under the answer.
+- Closed the TDD gap on the frame contract: `frames.test.ts` now covers the `sources` parse + reducer (order-tolerant, never disturbs stream status). `bun test` 69/0, `bunx next build` ✓.
+- Sonnet's `compose-chart.ts` `external_points` broadening is KEPT (complementary — it lets the chart composer PLOT a not-held primary metric; same fillExternalPoint moat) and left uncommitted for its owner.
+
+---
+
 ## 2026-06-25 (main) — fix(assistant): wire the four-lane web-fallback into the conversational TEXT answer (rung 3 web + rung 4 ask-user) — kills the Days-on-Market deflection
 
 ROOT CAUSE (proven in code, not memory): the chart path web-fetches a figure we don't hold (`compose-chart.ts` → `fillExternalPoint`), but the plain TEXT answer (`stream.ts streamAnswer`) is a bare `messages.stream` with **NO tools** — and the only web search was locked behind `wantsCustomChart` (`compose-chart.ts:496`). So a plain "active listings / days on market" ask never reached any web lookup. Meanwhile `RULES_OF_ENGAGEMENT` promised lane 3 ("a named web source… never refuse") and `OUTSIDE_SYSTEM`/`PUBLIC_GROUNDED_SYSTEM` said "offer to pull" — a contradiction with no executable path, so the model deflected or invented.
