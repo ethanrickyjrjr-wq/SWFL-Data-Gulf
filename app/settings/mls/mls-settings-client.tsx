@@ -121,12 +121,18 @@ export function MlsSettingsClient() {
   async function handleDisconnect() {
     if (!activeConn) return;
     setLoading(true);
+    setError(null);
     try {
-      await fetch("/api/mls/disconnect", {
+      const res = await fetch("/api/mls/disconnect", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ connection_id: activeConn.id }),
       });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(body.error ?? "Disconnect failed");
+        return;
+      }
       setConn(null);
       setPreview(null);
       setMlsId("");
@@ -170,7 +176,11 @@ export function MlsSettingsClient() {
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             className="w-full bg-black text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
-            disabled={loading || !mlsId.trim()}
+            disabled={
+              loading ||
+              !mlsId.trim() ||
+              boards.find((b) => b.slug === selectedSlug)?.live === false
+            }
             onClick={handleConnect}
           >
             {loading ? "Connecting…" : "Connect"}
