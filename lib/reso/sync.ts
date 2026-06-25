@@ -83,7 +83,7 @@ export async function syncConnection(
     return { listings: 0, zips: [] };
   }
 
-  const maxSeq = Math.max(...events.map((e) => e.EntityEventSequence));
+  const maxSeq = events.reduce((m, e) => Math.max(m, e.EntityEventSequence), 0);
   const changedKeys = [...new Set(events.map((e) => e.EntityKey))];
 
   // Re-fetch changed listings that belong to this agent — batch in chunks of 50
