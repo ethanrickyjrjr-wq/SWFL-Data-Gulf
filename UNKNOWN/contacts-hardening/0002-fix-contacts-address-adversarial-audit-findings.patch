@@ -1,0 +1,268 @@
+From 884f17132304ddf9b64fdcce88682d638bab0662 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 20 Jun 2026 04:26:50 +0000
+Subject: [PATCH 2/3] fix(contacts): address adversarial audit findings
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+3 reviewers (security/correctness/integration) over the contact-import
+diff — no BLOCKER/HIGH. Fixes:
+
+- Google return banner now gates on /sync res.ok (was claiming a pickable
+  audience even when /sync 500'd).
+- Clamp contact name to 200 chars in prepareContacts — closes the
+  unbounded-name write on the token-authed phone path (all paths covered).
+- QR/import token TTL 10->5 min + honest doc on within-TTL replay.
+- parse-vcard strips a mailto: scheme (iCloud exports) so addresses don't
+  hard-bounce.
+- emailDomain strips a trailing dot so gmail.com. can't evade the filter.
+- QR generated at 176px to match its render size.
+
++3 regression tests (name-clamp, mailto, trailing-dot). 407 email tests
+pass, tsc 0, eslint clean, next build compiles + typechecks.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011W3SXdAff3nufkN8m5bXVC
+---
+ SESSION_LOG.md                                |  6 +++++
+ app/contacts/upload/UploadForm.tsx            | 24 +++++++++++--------
+ app/contacts/upload/page.tsx                  |  2 +-
+ lib/email/__tests__/parse-vcard.test.ts       |  5 ++++
+ lib/email/__tests__/upsert-contacts.test.ts   |  7 ++++++
+ lib/email/__tests__/work-email-filter.test.ts |  5 ++++
+ lib/email/contact-import-token.ts             | 15 ++++++++----
+ lib/email/parse-vcard.ts                      |  4 +++-
+ lib/email/upsert-contacts.ts                  | 13 +++++++++-
+ lib/email/work-email-filter.ts                |  5 ++--
+ 10 files changed, 66 insertions(+), 20 deletions(-)
+
+diff --git a/SESSION_LOG.md b/SESSION_LOG.md
+index 5baf35fa..7e5be989 100644
+--- a/SESSION_LOG.md
++++ b/SESSION_LOG.md
+@@ -1,3 +1,9 @@
++## 2026-06-20 (claude/branch-status-check-84t7dh) — audit + fixes: 3 adversarial auditors over the contact-import diff
++
++- **Audited the whole contact-import diff against code** (3 parallel adversarial reviewers: security, correctness, integration). Verdict: **no BLOCKER/HIGH.** Verified-solid: cross-tenant isolation (service-role phone path scopes every read/write by `user_id`; `makeSupabaseAudienceStore` reads `.eq("user_id")`), token integrity (timing-safe, integrity-before-parse), OAuth state/redirect_uri, and the `inserted`/`updated` disjointness (confirmed `ignoreDuplicates + .select()` → `ON CONFLICT DO NOTHING RETURNING` at postgrest-js 2.106.1).
++- **Fixes applied (6):** (A) `UploadForm` Google return now gates the "pickable audience" banner on real `/sync` `res.ok` (was flipping success in `.finally()` even on a 500). (B) `prepareContacts` clamps `name` to 200 chars — closes the unbounded-name write on the token-authed phone path (covers every path). (C) QR/import token TTL 10→5 min + honest doc on the within-TTL replay window (single-use deferred to a claim table). (D) QR generated at 176px to match its 176px render. (E) `parse-vcard` strips a `mailto:` scheme so iCloud exports don't store `mailto:x@y.com` (hard-bounce). (F) `emailDomain` strips a trailing dot so `gmail.com.` can't evade the work-email filter.
++- **Gates:** tsc 0, eslint clean, `next build` ✓ Compiled + ✓ TypeScript (env-gated `/charts` prerender only), **407 email tests** (+3 regression: name-clamp, mailto, trailing-dot) / 0 fail. Pushed to `claude/branch-status-check-84t7dh`.
++
+ ## 2026-06-20 (main) — feat(contacts): phone + CSV/vCard contact import + work-email filter (Google sign-in first)
+ 
+ - **Context:** "get contacts + emails onto the site, build for phone and csv." Probing remote `main` (this container was a stale shallow clone — fast-forwarded 621 commits to `02a9bac` first) showed the **CSV path already ships** (`email_contacts` + `/api/email/contacts/upload` + `/sync` + `/contacts/upload` UI). So this build is the **missing phone import + work-email filter**, extending the existing pipeline — operator chose **Google sign-in first**, then Android QR, then vCard-accept.
+diff --git a/app/contacts/upload/UploadForm.tsx b/app/contacts/upload/UploadForm.tsx
+index 4fb76a7f..21003072 100644
+--- a/app/contacts/upload/UploadForm.tsx
++++ b/app/contacts/upload/UploadForm.tsx
+@@ -61,16 +61,18 @@ export function UploadForm({
+   const googleImported = Number(params.get("imported") ?? 0);
+   const googlePersonal = Number(params.get("personal") ?? 0);
+   const googleSkipped = Number(params.get("skipped") ?? 0);
+-  const [googleSynced, setGoogleSynced] = useState(false);
++  const [googleSyncState, setGoogleSyncState] = useState<"pending" | "ok" | "failed">("pending");
+ 
+   useEffect(() => {
+     // Materialize the freshly-imported Google contacts into a pickable audience.
+-    if (fromGoogle && googleImported > 0 && !googleSynced) {
+-      void fetch("/api/email/contacts/sync", { method: "POST" }).finally(() =>
+-        setGoogleSynced(true),
+-      );
++    // Reflect the REAL outcome (res.ok) so the banner can't claim success when
++    // /sync 500s (e.g. resend_unconfigured) — mirrors the CSV path's sync.ok gate.
++    if (fromGoogle && googleImported > 0 && googleSyncState === "pending") {
++      void fetch("/api/email/contacts/sync", { method: "POST" })
++        .then((res) => setGoogleSyncState(res.ok ? "ok" : "failed"))
++        .catch(() => setGoogleSyncState("failed"));
+     }
+-  }, [fromGoogle, googleImported, googleSynced]);
++  }, [fromGoogle, googleImported, googleSyncState]);
+ 
+   async function onFile(file: File) {
+     setError(null);
+@@ -139,9 +141,11 @@ export function UploadForm({
+           {googleSkipped > 0 ? `, ${googleSkipped} skipped` : ""}.
+         </p>
+         <p className="mt-1 text-xs text-gray-400">
+-          {googleSynced
++          {googleSyncState === "ok"
+             ? "They’re now a pickable “google” audience on your reports’ Send weekly."
+-            : "Building your audience list…"}
++            : googleSyncState === "failed"
++              ? "Saved — but the audience list didn’t finish building. Reopen this page to retry."
++              : "Building your audience list…"}
+         </p>
+         <Link
+           href={backHref}
+@@ -227,8 +231,8 @@ export function UploadForm({
+             <img
+               src={qr}
+               alt="QR code to import contacts from your phone"
+-              width={132}
+-              height={132}
++              width={176}
++              height={176}
+               className="rounded-lg bg-white p-2"
+             />
+             <p className="text-xs text-gray-400">
+diff --git a/app/contacts/upload/page.tsx b/app/contacts/upload/page.tsx
+index 2fb00a05..aa7a51a6 100644
+--- a/app/contacts/upload/page.tsx
++++ b/app/contacts/upload/page.tsx
+@@ -40,7 +40,7 @@ export default async function ContactsUploadPage({
+   const toQr = async (workOnly: boolean): Promise<string | null> => {
+     const token = issueContactImportToken({ uid: user.id, workOnly });
+     if (!token) return null;
+-    return QRCode.toDataURL(`${base}/m/contacts/${token}`, { width: 220, margin: 1 });
++    return QRCode.toDataURL(`${base}/m/contacts/${token}`, { width: 176, margin: 1 });
+   };
+   const [qrAll, qrWork] = await Promise.all([toQr(false), toQr(true)]);
+ 
+diff --git a/lib/email/__tests__/parse-vcard.test.ts b/lib/email/__tests__/parse-vcard.test.ts
+index 51b0143b..552d54c4 100644
+--- a/lib/email/__tests__/parse-vcard.test.ts
++++ b/lib/email/__tests__/parse-vcard.test.ts
+@@ -47,6 +47,11 @@ describe("parseVcard", () => {
+     expect(skippedCards).toBe(1);
+   });
+ 
++  test("strips a mailto: scheme so the stored address is bare", () => {
++    const { rows } = parseVcard(card("FN:Mailto\nEMAIL;TYPE=INTERNET:mailto:m@acme.com"));
++    expect(rows[0].email).toBe("m@acme.com");
++  });
++
+   test("tolerates a missing final END:VCARD", () => {
+     const { rows } = parseVcard("BEGIN:VCARD\nFN:Dangling\nEMAIL:d@acme.com");
+     expect(rows).toEqual([{ email: "d@acme.com", name: "Dangling", tags: [] }]);
+diff --git a/lib/email/__tests__/upsert-contacts.test.ts b/lib/email/__tests__/upsert-contacts.test.ts
+index 8df469e0..5720ed60 100644
+--- a/lib/email/__tests__/upsert-contacts.test.ts
++++ b/lib/email/__tests__/upsert-contacts.test.ts
+@@ -58,4 +58,11 @@ describe("prepareContacts (pure)", () => {
+     const { records } = prepareContacts("abc", [{ email: "a@b.com", name: null, tags: [] }]);
+     expect(records[0].user_id).toBe("abc");
+   });
++
++  test("an over-long name is clamped (untrusted phone-path input guard)", () => {
++    const { records } = prepareContacts("u", [
++      { email: "a@b.com", name: "x".repeat(5000), tags: [] },
++    ]);
++    expect(records[0].name).toHaveLength(200);
++  });
+ });
+diff --git a/lib/email/__tests__/work-email-filter.test.ts b/lib/email/__tests__/work-email-filter.test.ts
+index d852e57d..0eec4adf 100644
+--- a/lib/email/__tests__/work-email-filter.test.ts
++++ b/lib/email/__tests__/work-email-filter.test.ts
+@@ -24,6 +24,11 @@ describe("emailDomain / isWorkEmail", () => {
+     expect(emailDomain("not-an-email")).toBe("");
+   });
+ 
++  test("a trailing dot does not let a personal domain evade the blocklist", () => {
++    expect(emailDomain("x@gmail.com.")).toBe("gmail.com");
++    expect(isWorkEmail("x@gmail.com.")).toBe(false);
++  });
++
+   test("the blocklist covers the operator's named personal domains", () => {
+     for (const d of ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "aol.com", "me.com", "live.com", "msn.com", "comcast.net", "att.net", "verizon.net"]) {
+       expect(PERSONAL_EMAIL_DOMAINS.has(d)).toBe(true);
+diff --git a/lib/email/contact-import-token.ts b/lib/email/contact-import-token.ts
+index c92e1950..591d22f6 100644
+--- a/lib/email/contact-import-token.ts
++++ b/lib/email/contact-import-token.ts
+@@ -7,17 +7,22 @@
+  * (already set in prod), domain-separated, binding the user id + the "work only"
+  * choice + an issued-at with a 10-minute TTL.
+  *
+- * Single-use is intentionally NOT enforced: the import is an idempotent upsert,
+- * so a replay inside the short window re-imports the same contacts as no-op
+- * updates — there is nothing to double. Integrity is verified with
+- * `crypto.timingSafeEqual` on the raw digests, before any payload field is read.
++ * RESIDUAL RISK (accepted for v1, documented): the token is NOT single-use. A
++ * captured token (the QR is photographed, or the `/m/contacts/<token>` URL leaks
++ * via history/referrer/proxy logs) lets the holder POST attacker-CHOSEN contacts
++ * into the victim's list until it expires — bounded by the short TTL and an
++ * additive-only blast radius (you can add contacts, never read them). The 5-min
++ * TTL keeps the window tight; a follow-up can make it single-use via a small
++ * claim table (mirroring proposal-nonce's email_send_ledger claim) if needed.
++ * Integrity is verified with `crypto.timingSafeEqual` on the raw digests before
++ * any payload field is read.
+  *
+  * No signing secret configured → `issueContactImportToken` returns null and the
+  * desktop QR section is hidden (env-gated, non-breaking).
+  */
+ import crypto from "node:crypto";
+ 
+-const TTL_MS = 10 * 60 * 1000;
++const TTL_MS = 5 * 60 * 1000;
+ const CLOCK_SKEW_MS = 60 * 1000;
+ const DOMAIN = "contact-import:v1"; // HMAC-key domain separation
+ 
+diff --git a/lib/email/parse-vcard.ts b/lib/email/parse-vcard.ts
+index 0023f779..68cb2b56 100644
+--- a/lib/email/parse-vcard.ts
++++ b/lib/email/parse-vcard.ts
+@@ -128,7 +128,9 @@ export function parseVcard(text: string): VcardParseResult {
+         structured = nameFromStructured(decodeValue(prop.value, prop.params));
+         break;
+       case "EMAIL": {
+-        const email = prop.value.trim();
++        // Some exporters emit RFC-6350 `mailto:` URIs — strip the scheme so the
++        // stored address is a bare email, not `mailto:x@y.com` (which hard-bounces).
++        const email = prop.value.trim().replace(/^mailto:/i, "").trim();
+         if (email) emails.push(email);
+         break;
+       }
+diff --git a/lib/email/upsert-contacts.ts b/lib/email/upsert-contacts.ts
+index b740c342..f840283e 100644
+--- a/lib/email/upsert-contacts.ts
++++ b/lib/email/upsert-contacts.ts
+@@ -19,6 +19,17 @@ import { normalizeEmail, isValidEmail } from "./validation";
+ /** Hard cap on rows accepted in a single import (runaway-payload guard). */
+ export const MAX_CONTACT_ROWS = 10_000;
+ 
++/** Max stored contact-name length — clamps untrusted input (e.g. the token-authed
++ *  phone path, where `name` is otherwise unbounded) before it hits the DB. */
++export const MAX_NAME_LEN = 200;
++
++/** Trim + clamp a contact name; null stays null. */
++function clampName(name: string | null): string | null {
++  if (name == null) return null;
++  const trimmed = name.trim();
++  return trimmed ? trimmed.slice(0, MAX_NAME_LEN) : null;
++}
++
+ export interface ContactRecord {
+   user_id: string;
+   email: string;
+@@ -67,7 +78,7 @@ export function prepareContacts(
+       skipped++;
+       continue;
+     }
+-    records.push({ user_id: userId, email, name: v.name, tags: v.tags });
++    records.push({ user_id: userId, email, name: clampName(v.name), tags: v.tags });
+   }
+ 
+   return { records, skipped, errors };
+diff --git a/lib/email/work-email-filter.ts b/lib/email/work-email-filter.ts
+index 44ce1697..ec265d92 100644
+--- a/lib/email/work-email-filter.ts
++++ b/lib/email/work-email-filter.ts
+@@ -45,11 +45,12 @@ export const PERSONAL_EMAIL_DOMAINS: ReadonlySet<string> = new Set([
+   "gmx.com",
+ ]);
+ 
+-/** The domain part of an email, lowercased; "" when there is no `@domain`. */
++/** The domain part of an email, lowercased; "" when there is no `@domain`. A
++ *  trailing dot (`gmail.com.`) is stripped so it can't evade the blocklist. */
+ export function emailDomain(email: string): string {
+   const at = email.lastIndexOf("@");
+   if (at < 0) return "";
+-  return email.slice(at + 1).trim().toLowerCase();
++  return email.slice(at + 1).trim().toLowerCase().replace(/\.+$/, "");
+ }
+ 
+ /**
+-- 
+2.53.0.windows.3
+

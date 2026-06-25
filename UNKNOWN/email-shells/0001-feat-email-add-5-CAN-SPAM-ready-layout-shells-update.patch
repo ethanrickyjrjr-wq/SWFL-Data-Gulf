@@ -1,0 +1,614 @@
+From 8a607881f30284111dc5bb1e66efe913061ce938 Mon Sep 17 00:00:00 2001
+From: Ricky Cooper <ethanrickyjrjr@gmail.com>
+Date: Mon, 15 Jun 2026 04:50:19 -0400
+Subject: [PATCH 1/2] feat(email): add 5 CAN-SPAM-ready layout shells + update
+ template README
+
+shell-single / shell-two-col / shell-digest / shell-alert / shell-report
+- Inline CSS only, table-based, 600px max, fluid to 375px, no media queries
+- 17 tokens: 13 base + MAP_URL + PREHEADER + PHYSICAL_ADDRESS + UNSUBSCRIBE_URL
+- Outlook 2016+ ghost tables; two-col rows stack on mobile via hybrid inline-block
+- README updated with Deliverable C section and 4 new token definitions
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ templates/html/README.md                |  34 +++++++-
+ templates/html/email/shell-alert.html   |  96 +++++++++++++++++++++
+ templates/html/email/shell-digest.html  |  96 +++++++++++++++++++++
+ templates/html/email/shell-report.html  | 106 ++++++++++++++++++++++++
+ templates/html/email/shell-single.html  | 105 +++++++++++++++++++++++
+ templates/html/email/shell-two-col.html |  88 ++++++++++++++++++++
+ 6 files changed, 523 insertions(+), 2 deletions(-)
+ create mode 100644 templates/html/email/shell-alert.html
+ create mode 100644 templates/html/email/shell-digest.html
+ create mode 100644 templates/html/email/shell-report.html
+ create mode 100644 templates/html/email/shell-single.html
+ create mode 100644 templates/html/email/shell-two-col.html
+
+diff --git a/templates/html/README.md b/templates/html/README.md
+index 6804a1c2..f75f2641 100644
+--- a/templates/html/README.md
++++ b/templates/html/README.md
+@@ -1,4 +1,4 @@
+-# Chart & Graph HTML Templates — README
++﻿# Chart & Graph HTML Templates — README
+ 
+ Static HTML chart templates for runtime token replacement. All 10 files are self-contained and render standalone in any modern browser.
+ 
+@@ -23,6 +23,10 @@ Every color, font, copy, and URL value is a placeholder replaced at runtime via
+ | `{{SENDER_NAME}}` | Email from name | `Acme Reports` |
+ | `{{SENDER_ADDRESS}}` | Email from address | `reports@example.com` |
+ | `{{DISCLAIMER}}` | Footer legal / disclaimer text | `Data is unaudited and for internal use only.` |
++| `{{MAP_URL}}` | Static image URL for map/chart slot in email shells | `https://cdn.example.com/map.png` |
++| `{{PREHEADER}}` | Inbox preview text shown after subject line | `Lee County inventory dropped again this week.` |
++| `{{PHYSICAL_ADDRESS}}` | Physical mailing address (CAN-SPAM required) | `123 Main St, Fort Myers FL 33901` |
++| `{{UNSUBSCRIBE_URL}}` | Opt-out link URL (CAN-SPAM required) | `https://example.com/unsubscribe` |
+ 
+ ### doc-split.html only
+ | Token | Purpose |
+@@ -114,6 +118,27 @@ All 5 files use CSS custom properties mapping to the 13 tokens, support flexbox/
+ 
+ ---
+ 
++## Deliverable C - Email Layout Shells
++
++Five table-based, token-driven **layout shells** — complete CAN-SPAM-compliant email frames. Each uses all 17 tokens (13 base + MAP_URL, PREHEADER, PHYSICAL_ADDRESS, UNSUBSCRIBE_URL). Inline CSS only, 600px max, mobile-fluid to 375px, no media queries.
++
++### `shell-single.html` - Single column: hero stat + visual + body + CTA
++Header / PRIMARY hero stat block / MAP_URL image slot / body text slot / CTA / footer. Single focused metric send.
++
++### `shell-two-col.html` - Hero number + two-column body/chart
++Header / hero number / two-column row (body text left, MAP_URL chart right, mobile-stacking) / footer.
++
++### `shell-digest.html` - Three-section digest
++Header / Section 1 / divider / Section 2 with MAP_URL visual / divider / Section 3 / footer. Use for weekly digest.
++
++### `shell-alert.html` - Full-width callout + single stat + CTA
++Header / ACCENT-band callout with optional MAP_URL strip / single stat block / CTA / footer. Flood alerts, rate spikes, market events.
++
++### `shell-report.html` - Title + full-width chart + two-column stats + source
++Header / title + subtitle / full-width MAP_URL chart slot / two-column stat row / source line / footer. Corridor pulse or monthly overview.
++
++---
++
+ ## File list
+ 
+ ```
+@@ -121,7 +146,12 @@ email-hbar.html       — Email: horizontal bar chart (6 rows)
+ email-compare.html    — Email: before/after period comparison (4 metrics)
+ email-hero.html       — Email: hero stat card (giant number + strip)
+ email-ranked.html     — Email: ranked top-5 list with opacity bars
+-email-table.html      — Email: 5×3 color-coded data table
++email-table.html      — Email: 5x3 color-coded data table
++shell-single.html     — Shell: header / hero stat / visual / body / CTA / footer (17 tokens)
++shell-two-col.html    — Shell: hero number / two-col body+chart / footer (17 tokens)
++shell-digest.html     — Shell: header / 3 sections / footer (17 tokens)
++shell-alert.html      — Shell: header / callout band / single stat / CTA / footer (17 tokens)
++shell-report.html     — Shell: title / full-width chart / two-col stats / footer (17 tokens)
+ doc-hbar.html         — PDF:   full-width bar chart (8 rows, portrait)
+ doc-donut.html        — PDF:   CSS conic-gradient donut (5 segments, landscape)
+ doc-sparkline.html    — PDF:   SVG trend area chart 12 months (landscape)
+diff --git a/templates/html/email/shell-alert.html b/templates/html/email/shell-alert.html
+new file mode 100644
+index 00000000..2d9825f0
+--- /dev/null
++++ b/templates/html/email/shell-alert.html
+@@ -0,0 +1,96 @@
++﻿<!DOCTYPE html>
++<!--
++  shell-alert.html
++  Layout: header -> full-width callout -> single stat -> CTA -> footer
++  Callout is a full-width band in {{ACCENT}}; single stat sits on {{PRIMARY}}.
++  MAP_URL available as an optional visual strip inside the callout.
++  Rules: inline CSS only, table-based, no JS, 600px max, mobile-readable at 375px.
++  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
++               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
++               SENDER_ADDRESS, DISCLAIMER, MAP_URL
++-->
++<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <meta http-equiv="X-UA-Compatible" content="IE=edge">
++  <meta name="x-apple-disable-message-reformatting">
++  <title>{{COMPANY_NAME}}</title>
++  <!--[if mso]>
++  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
++  <![endif]-->
++</head>
++<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
++  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
++
++  <center style="width:100%; background-color:{{SURFACE}};">
++  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
++  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
++
++    <!-- ===== HEADER ===== -->
++    <tr>
++      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
++        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
++      </td>
++    </tr>
++
++    <!-- ===== FULL-WIDTH CALLOUT ===== -->
++    <tr>
++      <td bgcolor="{{ACCENT}}" style="background-color:{{ACCENT}}; padding:28px 24px;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:{{SURFACE}}; opacity:0.85; margin-bottom:6px;">[ ALERT LABEL ]</div>
++        <div style="font-family:{{FONT_FAMILY}}; font-size:20px; line-height:28px; font-weight:bold; color:{{SURFACE}};">[ FULL-WIDTH CALLOUT MESSAGE ]</div>
++        <!-- Optional visual strip inside callout (uses MAP_URL) -->
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:16px;">
++          <tr>
++            <td align="center" style="background-color:{{SURFACE}}; border-radius:{{BORDER_RADIUS}}; padding:6px;">
++              <img src="{{MAP_URL}}" alt="[ MAP / VISUAL ]" width="100%" style="display:block; width:100%; max-width:520px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== SINGLE STAT ===== -->
++    <tr>
++      <td style="padding:24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" bgcolor="{{PRIMARY}}" style="padding:36px 24px; background-color:{{PRIMARY}}; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:48px; line-height:1; font-weight:bold; color:{{TEXT}};">[ SINGLE STAT ]</div>
++              <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:10px; opacity:0.9;">[ STAT LABEL ]</div>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== CTA ===== -->
++    <tr>
++      <td align="center" style="padding:0 24px 32px 24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
++          <tr>
++            <td align="center" bgcolor="{{ACCENT}}" style="background-color:{{ACCENT}}; border-radius:{{BORDER_RADIUS}};">
++              <a href="{{WEBSITE_URL}}" style="display:inline-block; padding:14px 30px; font-family:{{FONT_FAMILY}}; font-size:15px; font-weight:bold; color:{{SURFACE}}; text-decoration:none; border-radius:{{BORDER_RADIUS}};">[ CTA BUTTON ]</a>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== FOOTER ===== -->
++    <tr>
++      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
++        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
++        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
++        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
++        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
++        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
++      </td>
++    </tr>
++
++  </table>
++  <!--[if mso]></td></tr></table><![endif]-->
++  </center>
++</body>
++</html>
+diff --git a/templates/html/email/shell-digest.html b/templates/html/email/shell-digest.html
+new file mode 100644
+index 00000000..d2841e85
+--- /dev/null
++++ b/templates/html/email/shell-digest.html
+@@ -0,0 +1,96 @@
++﻿<!DOCTYPE html>
++<!--
++  shell-digest.html
++  Layout: header -> section 1 -> divider -> section 2 (uses MAP_URL) -> divider -> section 3 -> footer
++  Rules: inline CSS only, table-based, no JS, 600px max, mobile-readable at 375px.
++  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
++               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
++               SENDER_ADDRESS, DISCLAIMER, MAP_URL
++-->
++<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <meta http-equiv="X-UA-Compatible" content="IE=edge">
++  <meta name="x-apple-disable-message-reformatting">
++  <title>{{COMPANY_NAME}}</title>
++  <!--[if mso]>
++  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
++  <![endif]-->
++</head>
++<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
++  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
++
++  <center style="width:100%; background-color:{{SURFACE}};">
++  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
++  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
++
++    <!-- ===== HEADER ===== -->
++    <tr>
++      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
++        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
++      </td>
++    </tr>
++
++    <!-- ===== SECTION 1 ===== -->
++    <tr>
++      <td style="padding:24px 24px 8px 24px;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:14px; font-weight:bold; color:{{PRIMARY}}; margin-bottom:10px;">[ SECTION 1 TITLE ]</div>
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:34px 16px; background-color:{{SURFACE}}; font-family:{{FONT_FAMILY}}; font-size:13px; letter-spacing:1px; color:{{TEXT}};">[ SECTION 1 CONTENT ]</td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== DIVIDER ===== -->
++    <tr><td style="padding:8px 24px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="border-top:1px solid {{ACCENT}}; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
++
++    <!-- ===== SECTION 2 (visual / map) ===== -->
++    <tr>
++      <td style="padding:8px 24px;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:14px; font-weight:bold; color:{{PRIMARY}}; margin-bottom:10px;">[ SECTION 2 TITLE ]</div>
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:8px; background-color:{{SURFACE}};">
++              <img src="{{MAP_URL}}" alt="[ MAP / VISUAL ]" width="100%" style="display:block; width:100%; max-width:520px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:11px; letter-spacing:1px; color:{{TEXT}}; margin-top:6px; opacity:0.7;">[ MAP / VISUAL SLOT ]</div>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== DIVIDER ===== -->
++    <tr><td style="padding:8px 24px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="border-top:1px solid {{ACCENT}}; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
++
++    <!-- ===== SECTION 3 ===== -->
++    <tr>
++      <td style="padding:8px 24px 24px 24px;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:14px; font-weight:bold; color:{{PRIMARY}}; margin-bottom:10px;">[ SECTION 3 TITLE ]</div>
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:34px 16px; background-color:{{SURFACE}}; font-family:{{FONT_FAMILY}}; font-size:13px; letter-spacing:1px; color:{{TEXT}};">[ SECTION 3 CONTENT ]</td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== FOOTER ===== -->
++    <tr>
++      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
++        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
++        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
++        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
++        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
++        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
++      </td>
++    </tr>
++
++  </table>
++  <!--[if mso]></td></tr></table><![endif]-->
++  </center>
++</body>
++</html>
+diff --git a/templates/html/email/shell-report.html b/templates/html/email/shell-report.html
+new file mode 100644
+index 00000000..c5b1414d
+--- /dev/null
++++ b/templates/html/email/shell-report.html
+@@ -0,0 +1,106 @@
++﻿<!DOCTYPE html>
++<!--
++  shell-report.html
++  Layout: header -> title -> full-width chart/map slot (MAP_URL) -> two-col stat row -> source line -> footer
++  Two-column stat row stacks on mobile (375px) with NO media query (hybrid inline-block + MSO ghost table).
++  Rules: inline CSS only, table-based, no JS, 600px max.
++  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
++               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
++               SENDER_ADDRESS, DISCLAIMER, MAP_URL
++-->
++<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <meta http-equiv="X-UA-Compatible" content="IE=edge">
++  <meta name="x-apple-disable-message-reformatting">
++  <title>{{COMPANY_NAME}}</title>
++  <!--[if mso]>
++  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
++  <![endif]-->
++</head>
++<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
++  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
++
++  <center style="width:100%; background-color:{{SURFACE}};">
++  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
++  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
++
++    <!-- ===== HEADER ===== -->
++    <tr>
++      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
++        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
++      </td>
++    </tr>
++
++    <!-- ===== TITLE ===== -->
++    <tr>
++      <td style="padding:24px 24px 4px 24px;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:22px; line-height:28px; font-weight:bold; color:{{PRIMARY}};">[ REPORT TITLE ]</div>
++        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:4px; opacity:0.8;">[ SUBTITLE / DATE RANGE ]</div>
++      </td>
++    </tr>
++
++    <!-- ===== FULL-WIDTH CHART / MAP SLOT ===== -->
++    <tr>
++      <td style="padding:16px 24px 8px 24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:8px; background-color:{{SURFACE}};">
++              <img src="{{MAP_URL}}" alt="[ CHART / MAP ]" width="100%" style="display:block; width:100%; max-width:520px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:11px; letter-spacing:1px; color:{{TEXT}}; margin-top:6px; opacity:0.7;">[ FULL-WIDTH CHART / MAP SLOT ]</div>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== TWO-COLUMN STAT ROW ===== -->
++    <tr>
++      <td align="center" style="padding:8px 16px; font-size:0;">
++        <!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td width="50%" valign="top"><![endif]-->
++        <div style="display:inline-block; width:100%; max-width:270px; vertical-align:top;">
++          <div style="padding:8px;">
++            <div style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:22px 12px; text-align:center; background-color:{{SURFACE}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:30px; font-weight:bold; color:{{PRIMARY}};">[ STAT A ]</div>
++              <div style="font-family:{{FONT_FAMILY}}; font-size:12px; color:{{TEXT}}; margin-top:6px; opacity:0.8;">[ LABEL A ]</div>
++            </div>
++          </div>
++        </div>
++        <!--[if mso]></td><td width="50%" valign="top"><![endif]-->
++        <div style="display:inline-block; width:100%; max-width:270px; vertical-align:top;">
++          <div style="padding:8px;">
++            <div style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:22px 12px; text-align:center; background-color:{{SURFACE}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:30px; font-weight:bold; color:{{ACCENT}};">[ STAT B ]</div>
++              <div style="font-family:{{FONT_FAMILY}}; font-size:12px; color:{{TEXT}}; margin-top:6px; opacity:0.8;">[ LABEL B ]</div>
++            </div>
++          </div>
++        </div>
++        <!--[if mso]></td></tr></table><![endif]-->
++      </td>
++    </tr>
++
++    <!-- ===== SOURCE LINE ===== -->
++    <tr>
++      <td style="padding:8px 24px 20px 24px;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:11px; line-height:16px; color:{{TEXT}}; opacity:0.7;">[ SOURCE LINE ]</div>
++      </td>
++    </tr>
++
++    <!-- ===== FOOTER ===== -->
++    <tr>
++      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
++        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
++        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
++        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
++        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
++        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
++      </td>
++    </tr>
++
++  </table>
++  <!--[if mso]></td></tr></table><![endif]-->
++  </center>
++</body>
++</html>
+diff --git a/templates/html/email/shell-single.html b/templates/html/email/shell-single.html
+new file mode 100644
+index 00000000..d5ea9309
+--- /dev/null
++++ b/templates/html/email/shell-single.html
+@@ -0,0 +1,105 @@
++﻿<!DOCTYPE html>
++<!--
++  shell-single.html
++  Layout: header -> hero stat -> visual (map/chart) -> body text -> CTA -> footer
++  Rules: inline CSS only, table-based, no JS, 600px max, mobile-readable at 375px.
++  Targets: Gmail web, Outlook desktop 2016+, mobile 375px.
++  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
++               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
++               SENDER_ADDRESS, DISCLAIMER, MAP_URL
++-->
++<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <meta http-equiv="X-UA-Compatible" content="IE=edge">
++  <meta name="x-apple-disable-message-reformatting">
++  <title>{{COMPANY_NAME}}</title>
++  <!--[if mso]>
++  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
++  <![endif]-->
++</head>
++<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
++  <!-- Hidden preheader (optional preview text). Replace at runtime or leave blank. -->
++  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
++
++  <center style="width:100%; background-color:{{SURFACE}};">
++  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
++  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
++
++    <!-- ===== HEADER ===== -->
++    <tr>
++      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
++        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
++      </td>
++    </tr>
++
++    <!-- ===== HERO STAT ===== -->
++    <tr>
++      <td style="padding:24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" bgcolor="{{PRIMARY}}" style="padding:40px 24px; background-color:{{PRIMARY}}; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:50px; line-height:1; font-weight:bold; color:{{TEXT}};">[ HERO STAT ]</div>
++              <div style="font-family:{{FONT_FAMILY}}; font-size:14px; line-height:20px; color:{{TEXT}}; margin-top:12px; opacity:0.9;">[ SUPPORTING SENTENCE ]</div>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== VISUAL SLOT (map or chart image — uses MAP_URL) ===== -->
++    <tr>
++      <td style="padding:0 24px 8px 24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:8px; background-color:{{SURFACE}};">
++              <img src="{{MAP_URL}}" alt="[ MAP / VISUAL ]" width="100%" style="display:block; width:100%; max-width:520px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:11px; letter-spacing:1px; color:{{TEXT}}; margin-top:6px; opacity:0.7;">[ MAP / VISUAL ]</div>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== BODY TEXT SLOT ===== -->
++    <tr>
++      <td style="padding:16px 24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:40px 16px; background-color:{{SURFACE}}; font-family:{{FONT_FAMILY}}; font-size:13px; letter-spacing:1px; color:{{TEXT}};">[ BODY TEXT ]</td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== CTA ===== -->
++    <tr>
++      <td align="center" style="padding:8px 24px 32px 24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
++          <tr>
++            <td align="center" bgcolor="{{ACCENT}}" style="background-color:{{ACCENT}}; border-radius:{{BORDER_RADIUS}};">
++              <a href="{{WEBSITE_URL}}" style="display:inline-block; padding:14px 30px; font-family:{{FONT_FAMILY}}; font-size:15px; font-weight:bold; color:{{SURFACE}}; text-decoration:none; border-radius:{{BORDER_RADIUS}};">[ CTA BUTTON ]</a>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== FOOTER ===== -->
++    <tr>
++      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
++        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
++        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
++        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
++        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
++        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
++      </td>
++    </tr>
++
++  </table>
++  <!--[if mso]></td></tr></table><![endif]-->
++  </center>
++</body>
++</html>
+diff --git a/templates/html/email/shell-two-col.html b/templates/html/email/shell-two-col.html
+new file mode 100644
+index 00000000..66f11cd1
+--- /dev/null
++++ b/templates/html/email/shell-two-col.html
+@@ -0,0 +1,88 @@
++﻿<!DOCTYPE html>
++<!--
++  shell-two-col.html
++  Layout: header -> hero number -> [ BODY TEXT (left) | CHART/MAP slot (right) ] -> footer
++  Two-column row stacks on mobile (375px) with NO media query (hybrid inline-block + MSO ghost table).
++  Rules: inline CSS only, table-based, no JS, 600px max.
++  Tokens used: PRIMARY, ACCENT, SURFACE, TEXT, FONT_FAMILY, BORDER_RADIUS,
++               COMPANY_NAME, LOGO_URL, TAGLINE, WEBSITE_URL, SENDER_NAME,
++               SENDER_ADDRESS, DISCLAIMER, MAP_URL
++-->
++<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <meta http-equiv="X-UA-Compatible" content="IE=edge">
++  <meta name="x-apple-disable-message-reformatting">
++  <title>{{COMPANY_NAME}}</title>
++  <!--[if mso]>
++  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
++  <![endif]-->
++</head>
++<body style="margin:0; padding:0; width:100%; background-color:{{SURFACE}};">
++  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:{{SURFACE}};">{{PREHEADER}}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
++
++  <center style="width:100%; background-color:{{SURFACE}};">
++  <!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
++  <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; margin:0 auto; background-color:{{SURFACE}};">
++
++    <!-- ===== HEADER ===== -->
++    <tr>
++      <td align="center" style="padding:28px 24px 20px 24px; background-color:{{SURFACE}}; border-bottom:2px solid {{PRIMARY}};">
++        <img src="{{LOGO_URL}}" alt="{{COMPANY_NAME}}" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; max-width:150px; height:auto;">
++        <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:8px;">{{TAGLINE}}</div>
++      </td>
++    </tr>
++
++    <!-- ===== HERO NUMBER ===== -->
++    <tr>
++      <td style="padding:24px;">
++        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
++          <tr>
++            <td align="center" bgcolor="{{PRIMARY}}" style="padding:34px 24px; background-color:{{PRIMARY}}; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:50px; line-height:1; font-weight:bold; color:{{TEXT}};">[ HERO NUMBER ]</div>
++              <div style="font-family:{{FONT_FAMILY}}; font-size:13px; line-height:18px; color:{{TEXT}}; margin-top:10px; opacity:0.9;">[ LABEL ]</div>
++            </td>
++          </tr>
++        </table>
++      </td>
++    </tr>
++
++    <!-- ===== TWO-COLUMN ROW: BODY TEXT (left) | CHART/MAP (right) ===== -->
++    <tr>
++      <td align="center" style="padding:0 16px 8px 16px; font-size:0;">
++        <!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td width="50%" valign="top"><![endif]-->
++        <div style="display:inline-block; width:100%; max-width:270px; vertical-align:top;">
++          <div style="padding:8px;">
++            <div style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:44px 12px; text-align:center; background-color:{{SURFACE}}; font-family:{{FONT_FAMILY}}; font-size:13px; letter-spacing:1px; color:{{TEXT}};">[ BODY TEXT ]</div>
++          </div>
++        </div>
++        <!--[if mso]></td><td width="50%" valign="top"><![endif]-->
++        <div style="display:inline-block; width:100%; max-width:270px; vertical-align:top;">
++          <div style="padding:8px;">
++            <div style="border:2px dashed {{PRIMARY}}; border-radius:{{BORDER_RADIUS}}; padding:8px; text-align:center; background-color:{{SURFACE}};">
++              <img src="{{MAP_URL}}" alt="[ CHART / MAP ]" width="100%" style="display:block; width:100%; max-width:240px; height:auto; border:0; border-radius:{{BORDER_RADIUS}};">
++              <div style="font-family:{{FONT_FAMILY}}; font-size:11px; letter-spacing:1px; color:{{TEXT}}; margin-top:6px; opacity:0.7;">[ CHART / MAP SLOT ]</div>
++            </div>
++          </div>
++        </div>
++        <!--[if mso]></td></tr></table><![endif]-->
++      </td>
++    </tr>
++
++    <!-- ===== FOOTER ===== -->
++    <tr>
++      <td style="padding:24px; background-color:{{SURFACE}}; border-top:2px solid {{PRIMARY}}; font-family:{{FONT_FAMILY}}; font-size:12px; line-height:18px; color:{{TEXT}};">
++        <div style="margin-bottom:6px;"><a href="{{WEBSITE_URL}}" style="color:{{ACCENT}}; text-decoration:none;">{{WEBSITE_URL}}</a></div>
++        <div style="margin-bottom:6px;">{{COMPANY_NAME}} &middot; Sent by {{SENDER_NAME}} &lt;{{SENDER_ADDRESS}}&gt;</div>
++        <div style="margin-bottom:6px; opacity:0.7;">{{PHYSICAL_ADDRESS}}</div>
++        <div style="opacity:0.7;">{{DISCLAIMER}}</div>
++        <div style="margin-top:10px; font-size:11px; opacity:0.6;"><a href="{{UNSUBSCRIBE_URL}}" style="color:{{TEXT}}; text-decoration:underline;">Unsubscribe</a></div>
++      </td>
++    </tr>
++
++  </table>
++  <!--[if mso]></td></tr></table><![endif]-->
++  </center>
++</body>
++</html>
+-- 
+2.53.0.windows.3
+

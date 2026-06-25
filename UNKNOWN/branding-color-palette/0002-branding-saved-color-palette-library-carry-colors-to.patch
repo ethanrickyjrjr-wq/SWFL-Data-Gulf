@@ -1,0 +1,844 @@
+From 2f00e1037566ee1db8bf1720973e51bf0abd624f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 21 Jun 2026 20:13:16 +0000
+Subject: [PATCH 2/2] branding: saved color-palette library + carry colors to
+ new projects
+
+Add an account-level library of color schemes you build over time and pick
+from per project. Fix colors not following to new projects: global save now
+persists primary/accent + the palette library, and pre-fill seeds empty color
+slots from the account default. Past projects are never rewritten.
+
+Code degrades gracefully if the new color_palettes column is unmigrated.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01MQxgxD34thXVj1J4w6i4ED
+---
+ SESSION_LOG.md                                |   7 +
+ app/api/user/brand/route.test.ts              |  65 ++++++++-
+ app/api/user/brand/route.ts                   |  68 ++++++++--
+ app/project/[id]/ProjectWorkspace.tsx         |  72 +++++++---
+ app/project/[id]/workspace/BrandingBlock.tsx  | 123 ++++++++++++++++--
+ .../20260621_user_brand_color_palettes.sql    |  25 ++++
+ lib/brand/palette.test.ts                     |  92 +++++++++++++
+ lib/brand/palette.ts                          | 110 ++++++++++++++++
+ 8 files changed, 521 insertions(+), 41 deletions(-)
+ create mode 100644 docs/sql/20260621_user_brand_color_palettes.sql
+ create mode 100644 lib/brand/palette.test.ts
+ create mode 100644 lib/brand/palette.ts
+
+diff --git a/SESSION_LOG.md b/SESSION_LOG.md
+index 42360b7b..13b8e2fe 100644
+--- a/SESSION_LOG.md
++++ b/SESSION_LOG.md
+@@ -1,3 +1,10 @@
++## 2026-06-21 (claude/hex-color-chart-branding-svusth) — branding: saved color-palette library + colors now carry to new projects [PUSHED]
++
++- **Why:** colors didn't actually follow to new projects — global `/api/user/brand` PATCH dropped them (only wrote the 4 agent fields) and pre-fill only seeded agent fields. Operator also wants a library of saved schemes you pick from per project.
++- **What:** `lib/brand/palette.ts` (+ test, 11 cases) — `BrandPalette` shape `{id,name,colors:[primary,accent,extra]}`, `normalizeHex`/`sanitizePalettes` (validates, dedupes by scheme, caps 24), `defaultScheme`. `BrandingBlock.tsx` — always-visible **Saved palettes** row: click a chip to apply a scheme to THIS project, "+ Save as new palette" snapshots the 3 slots into the account library, `×` deletes. `ProjectWorkspace.tsx` — pre-fill now seeds empty color slots from the account default scheme (palette[0] → primary/accent/legacy columns) + loads the library; global **Save** auto-adds the current scheme to the library and persists colors. `app/api/user/brand/route.ts` — GET returns sanitized `color_palettes`; PATCH persists `primary_color`/`accent_color`/`logo_url` + the library. **Past projects never rewritten** — project.branding stays authoritative; the account default only seeds NEW projects.
++- **DB:** `docs/sql/20260621_user_brand_color_palettes.sql` adds `user_brand_profiles.color_palettes jsonb DEFAULT '[]'` (idempotent). **NOT YET APPLIED** — no Supabase creds in this web container. Code degrades gracefully (GET retries w/o the column; PATCH isolates the palette write) so it ships safe pre-migration: colors still save, library no-ops until the column lands. **Operator: run the migration to enable the library.**
++- **Gates:** `tsc --noEmit` exit 0 · eslint exit 0 · `bun test` brand+palette+digest **52/0** (route 12, palette 11, apply/resolve/projects/digest 40 unchanged). No deps, no lockfile change.
++
+ ## 2026-06-21 (claude/hex-color-chart-branding-svusth) — branding: hex input + color chart + 3 save slots [PUSHED]
+ 
+ - **What:** `app/project/[id]/workspace/BrandingBlock.tsx` — added a "Brand colors" section to the Brand pill popover. Live preview swatch + a hex text input (loose-hex `normalizeHex`: accepts `abc`/`#ABC`/`001122` → `#rrggbb`) + native `<input type=color>` + a 20-swatch **color chart** grid you click to pick. Three **save slots** below — clicking "Save" drops the current draft color into a slot; clicking a filled slot loads it back into the picker; `×` clears it.
+diff --git a/app/api/user/brand/route.test.ts b/app/api/user/brand/route.test.ts
+index 784cdb0c..2a7f5550 100644
+--- a/app/api/user/brand/route.test.ts
++++ b/app/api/user/brand/route.test.ts
+@@ -4,10 +4,16 @@ const scenario: {
+   user: { id: string } | null;
+   profile: Record<string, unknown> | null;
+   upsertError: { message: string } | null;
++  updateError: { message: string } | null;
++  lastUpsert: Record<string, unknown> | null;
++  lastUpdate: Record<string, unknown> | null;
+ } = {
+   user: { id: "user-a" },
+   profile: null,
+   upsertError: null,
++  updateError: null,
++  lastUpsert: null,
++  lastUpdate: null,
+ };
+ 
+ mock.module("@/utils/supabase/server", () => ({
+@@ -19,7 +25,14 @@ mock.module("@/utils/supabase/server", () => ({
+           maybeSingle: async () => ({ data: scenario.profile, error: null }),
+         }),
+       }),
+-      upsert: async () => ({ error: scenario.upsertError }),
++      upsert: async (payload: Record<string, unknown>) => {
++        scenario.lastUpsert = payload;
++        return { error: scenario.upsertError };
++      },
++      update: (payload: Record<string, unknown>) => {
++        scenario.lastUpdate = payload;
++        return { eq: async () => ({ error: scenario.updateError }) };
++      },
+     }),
+   }),
+ }));
+@@ -39,6 +52,9 @@ beforeEach(() => {
+   scenario.user = { id: "user-a" };
+   scenario.profile = null;
+   scenario.upsertError = null;
++  scenario.updateError = null;
++  scenario.lastUpsert = null;
++  scenario.lastUpdate = null;
+ });
+ 
+ // --- GET ---
+@@ -49,11 +65,11 @@ test("GET unauthenticated → 401", async () => {
+   expect(res.status).toBe(401);
+ });
+ 
+-test("GET no profile → 200 empty object", async () => {
++test("GET no profile → 200 empty palette library", async () => {
+   scenario.profile = null;
+   const res = await GET(req("GET"));
+   expect(res.status).toBe(200);
+-  expect(await res.json()).toEqual({});
++  expect(await res.json()).toEqual({ color_palettes: [] });
+ });
+ 
+ test("GET with profile → 200 returns selected fields", async () => {
+@@ -75,6 +91,19 @@ test("GET with profile → 200 returns selected fields", async () => {
+   expect(body.primary_color).toBe("#00d4aa");
+ });
+ 
++test("GET sanitizes stored palettes (drops junk, normalizes hex)", async () => {
++  scenario.profile = {
++    color_palettes: [
++      { id: "p1", name: "Gulf", colors: ["#00d4aa", "abc", ""] },
++      { colors: [] }, // dropped
++    ],
++  };
++  const res = await GET(req("GET"));
++  const body = await res.json();
++  expect(body.color_palettes).toHaveLength(1);
++  expect(body.color_palettes[0]).toMatchObject({ name: "Gulf", colors: ["#00d4aa", "#aabbcc", ""] });
++});
++
+ // --- PATCH ---
+ 
+ test("PATCH unauthenticated → 401", async () => {
+@@ -96,14 +125,40 @@ test("PATCH valid agent fields → 200", async () => {
+   expect(await res.json()).toEqual({ ok: true });
+ });
+ 
++test("PATCH persists color fields onto the profile", async () => {
++  const res = await PATCH(req("PATCH", { primary_color: "#00d4aa", accent_color: "  " }));
++  expect(res.status).toBe(200);
++  expect(scenario.lastUpsert?.primary_color).toBe("#00d4aa");
++  expect(scenario.lastUpsert?.accent_color).toBeNull(); // blank → null
++});
++
++test("PATCH writes a sanitized palette library", async () => {
++  const res = await PATCH(
++    req("PATCH", {
++      color_palettes: [
++        { name: "Gulf", colors: ["#00D4AA", "#000000", ""] },
++        { colors: ["#00d4aa", "#000000", ""] }, // dup → deduped
++      ],
++    }),
++  );
++  expect(res.status).toBe(200);
++  expect(scenario.lastUpdate?.color_palettes).toHaveLength(1);
++});
++
+ test("PATCH DB error → 500", async () => {
+   scenario.upsertError = { message: "db fail" };
+   const res = await PATCH(req("PATCH", { agent_name: "Jane" }));
+   expect(res.status).toBe(500);
+ });
+ 
+-test("PATCH ignores unknown keys (only agent fields written)", async () => {
+-  // Should not throw even if extra keys are passed
++test("PATCH tolerates a missing color_palettes column (no 500)", async () => {
++  scenario.updateError = { message: "column does not exist" };
++  const res = await PATCH(req("PATCH", { agent_name: "Jane", color_palettes: [] }));
++  expect(res.status).toBe(200); // palette write skipped, agent save still succeeds
++});
++
++test("PATCH ignores unknown keys (only known fields written)", async () => {
+   const res = await PATCH(req("PATCH", { agent_name: "Jane", hacker_field: "evil" }));
+   expect(res.status).toBe(200);
++  expect(scenario.lastUpsert).not.toHaveProperty("hacker_field");
+ });
+diff --git a/app/api/user/brand/route.ts b/app/api/user/brand/route.ts
+index 1f00ef85..334c50f5 100644
+--- a/app/api/user/brand/route.ts
++++ b/app/api/user/brand/route.ts
+@@ -2,12 +2,22 @@ import { cookies } from "next/headers";
+ import { NextResponse, type NextRequest } from "next/server";
+ import { createClient } from "@/utils/supabase/server";
+ import { logActivity } from "@/lib/project/activity";
++import { sanitizePalettes } from "@/lib/brand/palette";
+ 
+ export const runtime = "nodejs";
+ 
+ const AGENT_FIELDS = ["agent_name", "photo_url", "license", "brokerage"] as const;
+ type AgentField = (typeof AGENT_FIELDS)[number];
+ 
++// Theme fields persisted at the account level so saved colors carry to NEW
++// projects (pre-fill). primary_color/accent_color also feed legacy consumers
++// (resolve-brand.ts). logo_url rides along when present.
++const COLOR_FIELDS = ["primary_color", "accent_color", "logo_url"] as const;
++type ColorField = (typeof COLOR_FIELDS)[number];
++
++const BASE_SELECT =
++  "agent_name, photo_url, license, brokerage, primary_color, accent_color, logo_url";
++
+ async function authed() {
+   const supabase = createClient(await cookies());
+   const {
+@@ -17,27 +27,48 @@ async function authed() {
+ }
+ 
+ /**
+- * GET /api/user/brand — returns the signed-in user's brand profile.
+- * Used to pre-fill BrandingBlock when a project has no branding yet
+- * (funnel arrivals whose brand was scraped at prospect time land here).
++ * GET /api/user/brand — returns the signed-in user's brand profile, including
++ * the saved color-palette library. Used to pre-fill BrandingBlock when a
++ * project has no branding yet (funnel arrivals + new projects land here).
++ *
++ * Degrades if the `color_palettes` column hasn't been migrated yet: retries
++ * the select without it so the route never 500s pre-migration.
+  */
+ export async function GET(_req: NextRequest) {
+   const { supabase, user } = await authed();
+   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+ 
+-  const { data } = await supabase
++  let { data } = await supabase
+     .from("user_brand_profiles")
+-    .select("agent_name, photo_url, license, brokerage, primary_color, accent_color, logo_url")
++    .select(`${BASE_SELECT}, color_palettes`)
+     .eq("user_id", user.id)
+     .maybeSingle();
+ 
+-  return NextResponse.json(data ?? {});
++  // Column missing (pre-migration) → the select above errors and data is null;
++  // fall back to the base columns so the rest of the profile still loads.
++  if (!data) {
++    ({ data } = await supabase
++      .from("user_brand_profiles")
++      .select(BASE_SELECT)
++      .eq("user_id", user.id)
++      .maybeSingle());
++  }
++
++  const profile = data ?? {};
++  return NextResponse.json({
++    ...profile,
++    color_palettes: sanitizePalettes((profile as Record<string, unknown>).color_palettes),
++  });
+ }
+ 
+ /**
+- * PATCH /api/user/brand — upserts agent identity fields into the user's brand profile.
+- * Only the four BrandingBlock fields are written; theme fields (colors, logo) are
+- * managed separately (scraped at funnel time, not edited here).
++ * PATCH /api/user/brand — upserts the user's account-level brand default:
++ * agent identity fields, theme colors (so they seed new projects), and the
++ * saved color-palette library.
++ *
++ * The `color_palettes` write is best-effort + isolated: if that column hasn't
++ * been migrated, the agent/color upsert still succeeds and only the library
++ * write is skipped.
+  */
+ export async function PATCH(req: NextRequest) {
+   const { supabase, user } = await authed();
+@@ -55,6 +86,12 @@ export async function PATCH(req: NextRequest) {
+       update[key] = typeof v === "string" && v.trim() ? v : null;
+     }
+   }
++  for (const key of COLOR_FIELDS) {
++    if (key in body) {
++      const v = body[key as ColorField];
++      update[key] = typeof v === "string" && v.trim() ? v : null;
++    }
++  }
+ 
+   const { error } = await supabase
+     .from("user_brand_profiles")
+@@ -62,6 +99,19 @@ export async function PATCH(req: NextRequest) {
+ 
+   if (error) return NextResponse.json({ error: "update failed" }, { status: 500 });
+ 
++  // Palette library — isolated so a missing column (pre-migration) doesn't fail
++  // the whole save. Validated/clamped server-side before it lands.
++  if ("color_palettes" in body) {
++    const palettes = sanitizePalettes(body.color_palettes);
++    const { error: palErr } = await supabase
++      .from("user_brand_profiles")
++      .update({ color_palettes: palettes })
++      .eq("user_id", user.id);
++    if (palErr) {
++      console.warn("[user/brand] color_palettes write skipped:", palErr.message);
++    }
++  }
++
+   // If the client passes a project_id, log branding_changed for that project so the AI
+   // knows the agent identity updated. Global-only saves (no project_id) don't log here —
+   // per-project branding is live-read from projects.branding on every context build.
+diff --git a/app/project/[id]/ProjectWorkspace.tsx b/app/project/[id]/ProjectWorkspace.tsx
+index 0267c02b..fe54906f 100644
+--- a/app/project/[id]/ProjectWorkspace.tsx
++++ b/app/project/[id]/ProjectWorkspace.tsx
+@@ -20,6 +20,16 @@ import { UploadDrop } from "@/components/project/UploadDrop";
+ import { ProjectTitle } from "./workspace/ProjectTitle";
+ import { ItemsBoard } from "./workspace/ItemsBoard";
+ import { BrandingBlock } from "./workspace/BrandingBlock";
++import {
++  type BrandPalette,
++  PALETTE_SLOT_KEYS,
++  defaultScheme,
++  newPaletteId,
++  sanitizePalettes,
++  schemeFromBranding,
++  schemeHasColor,
++  schemesEqual,
++} from "@/lib/brand/palette";
+ import { ConnectMcpBlock } from "./workspace/ConnectMcpBlock";
+ import { DeliverableLanes } from "./workspace/DeliverableLanes";
+ import { BuildActions } from "./workspace/BuildActions";
+@@ -98,6 +108,8 @@ export function ProjectWorkspace({
+   const [items, setItems] = useState<ProjectItem[]>(initialItems);
+   const [title, setTitle] = useState(initialTitle ?? "");
+   const [branding, setBranding] = useState<Record<string, string>>(initialBranding ?? {});
++  // Account-level saved color palettes (schemes), loaded with the brand profile.
++  const [palettes, setPalettes] = useState<BrandPalette[]>([]);
+   const [uiState, setUiState] = useState<ProjectUiState>(initialUiState);
+   const [dirty, setDirty] = useState(false);
+   const [saving, setSaving] = useState(false);
+@@ -118,8 +130,9 @@ export function ProjectWorkspace({
+   // True when this project has at least one agent branding field saved.
+   const hasBranding = AGENT_KEYS.some((k) => !!branding[k]);
+ 
+-  // Pre-fill branding from the user's saved brand profile on first pill-open
+-  // when the project has no agent fields yet (funnel arrivals, new projects).
++  // On first brand-pill open, load the user's saved brand profile: seed agent
++  // fields + empty color slots from the account default (funnel arrivals, new
++  // projects) and load the saved-palette library.
+   const brandPrefillAttempted = useRef(false);
+ 
+   useEffect(() => {
+@@ -127,24 +140,28 @@ export function ProjectWorkspace({
+     if (brandPrefillAttempted.current) return;
+     brandPrefillAttempted.current = true;
+ 
+-    const hasAny = AGENT_KEYS.some((k) => branding[k]);
+-    if (hasAny) return;
+-
+     fetch("/api/user/brand")
+       .then((r) => (r.ok ? r.json() : {}))
+       .then((data: Record<string, unknown>) => {
++        setPalettes(sanitizePalettes(data.color_palettes));
+         setBranding((prev) => {
+-          const filled = Object.fromEntries(
+-            AGENT_KEYS.filter((k) => typeof data[k] === "string" && data[k]).map((k) => [
+-              k,
+-              data[k] as string,
+-            ]),
+-          );
+-          return Object.keys(filled).length > 0 ? { ...prev, ...filled } : prev;
++          const next = { ...prev };
++          // Agent fields: only seed when the project has none yet.
++          if (!AGENT_KEYS.some((k) => prev[k])) {
++            for (const k of AGENT_KEYS) {
++              if (typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
++            }
++          }
++          // Colors: seed each empty slot from the account default scheme so a
++          // saved palette carries to new projects without rewriting set colors.
++          const scheme = defaultScheme(data);
++          PALETTE_SLOT_KEYS.forEach((k, i) => {
++            if (!prev[k] && scheme[i]) next[k] = scheme[i];
++          });
++          return next;
+         });
+       })
+       .catch(() => {});
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [activePill]);
+ 
+   const fileCount = items.filter((i) => i.kind === "file").length;
+@@ -325,13 +342,36 @@ export function ProjectWorkspace({
+     }
+   }
+ 
++  // Persist the saved-palette library to the account (best-effort) and keep
++  // local state in sync. Called when a palette is added or removed in BrandingBlock.
++  function persistPalettes(next: BrandPalette[]) {
++    setPalettes(next);
++    void fetch("/api/user/brand", {
++      method: "PATCH",
++      headers: { "content-type": "application/json" },
++      body: JSON.stringify({ color_palettes: next }),
++    });
++  }
++
+   async function saveBrandGlobal(): Promise<boolean> {
++    // Auto-add the current scheme to the account palette library so it carries
++    // to new projects (dedup against what's already saved).
++    const scheme = schemeFromBranding(branding);
++    let nextPalettes = palettes;
++    if (schemeHasColor(scheme) && !palettes.some((p) => schemesEqual(p.colors, scheme))) {
++      nextPalettes = [
++        ...palettes,
++        { id: newPaletteId(), name: `Palette ${palettes.length + 1}`, colors: scheme },
++      ];
++      setPalettes(nextPalettes);
++    }
+     // Fire the user-level brand save in parallel — best-effort (failure is silent;
+-    // the project save is the authoritative gate for the OK/close signal).
++    // the project save is the authoritative gate for the OK/close signal). Sends
++    // the agent + color fields (in `branding`) plus the palette library.
+     void fetch("/api/user/brand", {
+       method: "PATCH",
+       headers: { "content-type": "application/json" },
+-      body: JSON.stringify(branding),
++      body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
+     });
+     return patch({ branding }, "Branding saved");
+   }
+@@ -531,6 +571,8 @@ export function ProjectWorkspace({
+               <BrandingBlock
+                 branding={branding}
+                 onChange={setBranding}
++                palettes={palettes}
++                onPalettesChange={persistPalettes}
+                 onSaveGlobal={saveBrandGlobal}
+                 onSaveProjectOnly={saveBrandProjectOnly}
+                 saving={saving}
+diff --git a/app/project/[id]/workspace/BrandingBlock.tsx b/app/project/[id]/workspace/BrandingBlock.tsx
+index 9854bbbc..e322becb 100644
+--- a/app/project/[id]/workspace/BrandingBlock.tsx
++++ b/app/project/[id]/workspace/BrandingBlock.tsx
+@@ -1,6 +1,15 @@
+ "use client";
+ 
+ import { useState } from "react";
++import {
++  type BrandPalette,
++  PALETTE_SLOT_KEYS,
++  newPaletteId,
++  normalizeHex,
++  schemeFromBranding,
++  schemeHasColor,
++  schemesEqual,
++} from "@/lib/brand/palette";
+ 
+ const BRANDING_FIELDS: { key: string; label: string }[] = [
+   { key: "agent_name", label: "Agent name" },
+@@ -11,11 +20,12 @@ const BRANDING_FIELDS: { key: string; label: string }[] = [
+ 
+ // The three saved-color slots. The first two map onto the canonical theme
+ // fields (`primary_color` / `accent_color`) read by brand-theme.ts, so saving
+-// them actually themes deliverables; the third is a free extra swatch.
++// them actually themes deliverables; the third is a free extra swatch. Keys
++// come from PALETTE_SLOT_KEYS so the slots and the palette colors stay aligned.
+ const COLOR_SLOTS: { key: string; label: string }[] = [
+-  { key: "primary_color", label: "Primary" },
+-  { key: "accent_color", label: "Accent" },
+-  { key: "saved_color_3", label: "Extra" },
++  { key: PALETTE_SLOT_KEYS[0], label: "Primary" },
++  { key: PALETTE_SLOT_KEYS[1], label: "Accent" },
++  { key: PALETTE_SLOT_KEYS[2], label: "Extra" },
+ ];
+ 
+ // The color chart — a fixed palette you can pick from instead of typing a hex.
+@@ -26,24 +36,24 @@ const COLOR_CHART: string[] = [
+   "#0f172a", "#334155", "#64748b", "#cbd5e1", "#ffffff",
+ ];
+ 
+-/** Normalize loose hex input (`abc`, `#ABC`, `001122`) to `#rrggbb`, or null. */
+-function normalizeHex(raw: string): string | null {
+-  let v = raw.trim().replace(/^#/, "").toLowerCase();
+-  if (/^[0-9a-f]{3}$/.test(v)) v = v.split("").map((c) => c + c).join("");
+-  if (/^[0-9a-f]{6}$/.test(v)) return `#${v}`;
+-  return null;
+-}
+-
+ /**
+  * Branding panel — rendered inside the Brand pill popover.
+  * Two save modes:
+  *   "Save"               → writes to user's account default + current project
+  *   "Save To This Project" → writes to current project only
+  * Auto-closes on successful save; the × button closes without saving.
++ *
++ * Saved palettes (`palettes` / `onPalettesChange`) are an account-level library
++ * of color schemes: pick a chip to apply it to THIS project, or "Save as new
++ * palette" to snapshot the current colors into the library so they carry to new
++ * projects. Applying never rewrites past projects (project.branding is saved
++ * per-project via the buttons below).
+  */
+ export function BrandingBlock({
+   branding,
+   onChange,
++  palettes,
++  onPalettesChange,
+   onSaveGlobal,
+   onSaveProjectOnly,
+   saving,
+@@ -52,6 +62,8 @@ export function BrandingBlock({
+ }: {
+   branding: Record<string, string>;
+   onChange: (next: Record<string, string>) => void;
++  palettes: BrandPalette[];
++  onPalettesChange: (next: BrandPalette[]) => void;
+   onSaveGlobal: () => Promise<boolean>;
+   onSaveProjectOnly: () => Promise<boolean>;
+   saving: boolean;
+@@ -73,6 +85,30 @@ export function BrandingBlock({
+     onChange({ ...branding, [key]: draft });
+   }
+ 
++  // Apply a saved palette's three colors to this project's slots.
++  function applyPalette(p: BrandPalette) {
++    const next = { ...branding };
++    PALETTE_SLOT_KEYS.forEach((key, i) => {
++      next[key] = p.colors[i] ?? "";
++    });
++    onChange(next);
++  }
++
++  // Snapshot the current three slot colors into the account palette library.
++  function saveAsPalette() {
++    const colors = schemeFromBranding(branding);
++    if (!schemeHasColor(colors)) return;
++    if (palettes.some((p) => schemesEqual(p.colors, colors))) return; // already saved
++    onPalettesChange([
++      ...palettes,
++      { id: newPaletteId(), name: `Palette ${palettes.length + 1}`, colors },
++    ]);
++  }
++
++  const currentScheme = schemeFromBranding(branding);
++  const canSavePalette =
++    schemeHasColor(currentScheme) && !palettes.some((p) => schemesEqual(p.colors, currentScheme));
++
+   return (
+     <div>
+       <div className="mb-3 flex items-center justify-between">
+@@ -197,6 +233,69 @@ export function BrandingBlock({
+             );
+           })}
+         </div>
++
++        {/* Saved palettes — account-level library. Pick a chip to apply to this
++            project; "Save as new palette" snapshots the current colors. */}
++        <div className="mt-3 flex items-center justify-between">
++          <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
++            Saved palettes
++          </span>
++          <button
++            type="button"
++            onClick={saveAsPalette}
++            disabled={!canSavePalette}
++            className="rounded-full border border-[#00d4aa]/40 px-2 py-0.5 text-[10px] text-[#00d4aa] hover:bg-[#00d4aa]/10 disabled:opacity-40"
++          >
++            + Save as new palette
++          </button>
++        </div>
++        {palettes.length === 0 ? (
++          <p className="mt-1 text-[10px] text-gray-600">
++            No saved palettes yet — build one above, then &quot;Save as new palette&quot; to reuse it
++            on future projects.
++          </p>
++        ) : (
++          <div className="mt-1.5 flex flex-wrap gap-1.5">
++            {palettes.map((p) => {
++              const active = schemesEqual(p.colors, currentScheme);
++              return (
++                <div
++                  key={p.id}
++                  className={`group flex items-center gap-1 rounded-full border py-0.5 pl-1 pr-1.5 ${
++                    active ? "border-[#00d4aa]" : "border-white/15 hover:border-white/40"
++                  }`}
++                >
++                  <button
++                    type="button"
++                    onClick={() => applyPalette(p)}
++                    title={`Apply ${p.name} (${p.colors.filter(Boolean).join(", ")})`}
++                    aria-label={`Apply palette ${p.name}`}
++                    className="flex items-center gap-1"
++                  >
++                    <span className="flex">
++                      {p.colors.map((c, i) => (
++                        <span
++                          key={i}
++                          className="h-4 w-3 border border-black/20 first:rounded-l-sm last:rounded-r-sm"
++                          style={{ backgroundColor: c || "transparent" }}
++                        />
++                      ))}
++                    </span>
++                    <span className="text-[10px] text-gray-300">{p.name}</span>
++                  </button>
++                  <button
++                    type="button"
++                    onClick={() => onPalettesChange(palettes.filter((x) => x.id !== p.id))}
++                    aria-label={`Delete palette ${p.name}`}
++                    className="text-xs leading-none text-gray-600 hover:text-gray-300"
++                  >
++                    ×
++                  </button>
++                </div>
++              );
++            })}
++          </div>
++        )}
+       </div>
+ 
+       <div className="mt-3 flex flex-col gap-2">
+diff --git a/docs/sql/20260621_user_brand_color_palettes.sql b/docs/sql/20260621_user_brand_color_palettes.sql
+new file mode 100644
+index 00000000..c9dd2330
+--- /dev/null
++++ b/docs/sql/20260621_user_brand_color_palettes.sql
+@@ -0,0 +1,25 @@
++-- Brand color palettes (saved schemes) on user_brand_profiles
++--
++-- Adds an account-level library of color schemes the user builds over time.
++-- Each palette: { id, name, colors: [primary, accent, extra] }. The library
++-- carries to NEW projects (pre-fill in ProjectWorkspace) but never rewrites
++-- branding already saved on past projects (project.branding stays authoritative).
++--
++-- Consumers: app/api/user/brand/route.ts (GET returns it, PATCH replaces it),
++--   app/project/[id]/ProjectWorkspace.tsx (pre-fill + persist),
++--   app/project/[id]/workspace/BrandingBlock.tsx (picker UI).
++-- Shape + validation: lib/brand/palette.ts (sanitizePalettes).
++--
++-- Idempotent. This repo has no supabase/ CLI — migrations live in docs/sql/
++-- and are applied to prod directly. The API degrades gracefully if this
++-- column is missing (colors still save; the palette library just no-ops),
++-- so deploying the code before this runs does not 500.
++
++ALTER TABLE public.user_brand_profiles
++  ADD COLUMN IF NOT EXISTS color_palettes jsonb NOT NULL DEFAULT '[]'::jsonb;
++
++NOTIFY pgrst, 'reload schema';
++
++-- Verify:
++--   SELECT column_name FROM information_schema.columns
++--     WHERE table_name = 'user_brand_profiles' AND column_name = 'color_palettes';
+diff --git a/lib/brand/palette.test.ts b/lib/brand/palette.test.ts
+new file mode 100644
+index 00000000..5204cc4b
+--- /dev/null
++++ b/lib/brand/palette.test.ts
+@@ -0,0 +1,92 @@
++import { describe, expect, it } from "vitest";
++import {
++  defaultScheme,
++  normalizeHex,
++  sanitizePalettes,
++  schemeFromBranding,
++  schemesEqual,
++} from "./palette";
++
++describe("normalizeHex", () => {
++  it("expands shorthand and adds #", () => {
++    expect(normalizeHex("abc")).toBe("#aabbcc");
++    expect(normalizeHex("#ABC")).toBe("#aabbcc");
++    expect(normalizeHex("001122")).toBe("#001122");
++    expect(normalizeHex("#00D4AA")).toBe("#00d4aa");
++  });
++  it("rejects junk", () => {
++    expect(normalizeHex("nope")).toBeNull();
++    expect(normalizeHex("#12")).toBeNull();
++    expect(normalizeHex(42)).toBeNull();
++    expect(normalizeHex(undefined)).toBeNull();
++  });
++});
++
++describe("schemeFromBranding", () => {
++  it("reads the three slot keys, normalizing", () => {
++    expect(
++      schemeFromBranding({ primary_color: "#00d4aa", accent_color: "abc", saved_color_3: "" }),
++    ).toEqual(["#00d4aa", "#aabbcc", ""]);
++  });
++});
++
++describe("sanitizePalettes", () => {
++  it("drops malformed entries and normalizes colors", () => {
++    const out = sanitizePalettes([
++      { id: "a", name: "Gulf", colors: ["#00d4aa", "abc", ""] },
++      { colors: [] }, // no colors → dropped
++      "garbage", // not an object → dropped
++      { colors: ["nope"] }, // all invalid → dropped
++    ]);
++    expect(out).toHaveLength(1);
++    expect(out[0]).toMatchObject({ id: "a", name: "Gulf", colors: ["#00d4aa", "#aabbcc", ""] });
++  });
++
++  it("dedupes by scheme (case-insensitive)", () => {
++    const out = sanitizePalettes([
++      { colors: ["#00D4AA", "#000000", "#ffffff"] },
++      { colors: ["#00d4aa", "#000000", "#FFFFFF"] },
++    ]);
++    expect(out).toHaveLength(1);
++  });
++
++  it("caps the library at 24", () => {
++    const many = Array.from({ length: 40 }, (_, i) => ({
++      colors: [`#0000${(i + 16).toString(16).padStart(2, "0")}`, "", ""],
++    }));
++    expect(sanitizePalettes(many)).toHaveLength(24);
++  });
++
++  it("returns [] for non-arrays", () => {
++    expect(sanitizePalettes(null)).toEqual([]);
++    expect(sanitizePalettes({})).toEqual([]);
++  });
++});
++
++describe("defaultScheme", () => {
++  it("prefers the first saved palette", () => {
++    expect(
++      defaultScheme({
++        primary_color: "#111111",
++        color_palettes: [{ colors: ["#00d4aa", "#222222", "#333333"] }],
++      }),
++    ).toEqual(["#00d4aa", "#222222", "#333333"]);
++  });
++  it("falls back to legacy primary/accent columns", () => {
++    expect(defaultScheme({ primary_color: "#111111", accent_color: "#222222" })).toEqual([
++      "#111111",
++      "#222222",
++      "",
++    ]);
++  });
++  it("handles an empty profile", () => {
++    expect(defaultScheme(null)).toEqual(["", "", ""]);
++  });
++});
++
++describe("schemesEqual", () => {
++  it("compares the three slots case-insensitively", () => {
++    expect(schemesEqual(["#AAA000", "#000", ""], ["#aaa000", "#000", ""])).toBe(true);
++    expect(schemesEqual(["#aaa000", "", ""], ["#bbb000", "", ""])).toBe(false);
++  });
++});
+diff --git a/lib/brand/palette.ts b/lib/brand/palette.ts
+new file mode 100644
+index 00000000..8e99c976
+--- /dev/null
++++ b/lib/brand/palette.ts
+@@ -0,0 +1,110 @@
++/**
++ * Brand color palettes — account-level "schemes" a user builds over time.
++ *
++ * A palette is three colors mapped to the three BrandingBlock save slots:
++ *   colors[0] = primary  (→ branding.primary_color, read by brand-theme.ts)
++ *   colors[1] = accent   (→ branding.accent_color)
++ *   colors[2] = extra    (→ branding.saved_color_3)
++ *
++ * Palettes live on `user_brand_profiles.color_palettes` (jsonb) so they carry
++ * to NEW projects (pre-fill) without rewriting branding already saved on past
++ * projects. This module is the single place that defines the shape + validates
++ * it, so the API route, the workspace, and the picker all agree.
++ */
++
++export interface BrandPalette {
++  id: string;
++  name: string;
++  colors: [string, string, string]; // [primary, accent, extra]
++}
++
++/** The three branding-blob keys the three palette colors map onto, in order. */
++export const PALETTE_SLOT_KEYS = ["primary_color", "accent_color", "saved_color_3"] as const;
++
++const MAX_PALETTES = 24;
++const MAX_NAME = 40;
++
++/** Normalize loose hex (`abc`, `#ABC`, `001122`) to `#rrggbb`, or null. */
++export function normalizeHex(raw: unknown): string | null {
++  if (typeof raw !== "string") return null;
++  let v = raw.trim().replace(/^#/, "").toLowerCase();
++  if (/^[0-9a-f]{3}$/.test(v)) v = v.split("").map((c) => c + c).join("");
++  if (/^[0-9a-f]{6}$/.test(v)) return `#${v}`;
++  return null;
++}
++
++/** The three slot colors currently set on a branding blob (empty string if unset). */
++export function schemeFromBranding(
++  branding: Record<string, string> | null | undefined,
++): [string, string, string] {
++  const b = branding ?? {};
++  return PALETTE_SLOT_KEYS.map((k) => normalizeHex(b[k]) ?? "") as [string, string, string];
++}
++
++/** True when a scheme has at least one real color. */
++export function schemeHasColor(scheme: [string, string, string]): boolean {
++  return scheme.some((c) => !!c);
++}
++
++/** Two schemes are the same palette when all three slots match (case-insensitive). */
++export function schemesEqual(a: string[], b: string[]): boolean {
++  return [0, 1, 2].every((i) => (a[i] ?? "").toLowerCase() === (b[i] ?? "").toLowerCase());
++}
++
++/**
++ * The default scheme to seed a NEW project's colors with: the first saved
++ * palette if any, else the legacy single primary/accent columns. Empty extra
++ * when only the legacy columns exist.
++ */
++export function defaultScheme(
++  profile: Record<string, unknown> | null | undefined,
++): [string, string, string] {
++  const pals = sanitizePalettes(profile?.color_palettes);
++  if (pals.length) return pals[0].colors;
++  const p = normalizeHex(profile?.primary_color) ?? "";
++  const a = normalizeHex(profile?.accent_color) ?? "";
++  return [p, a, ""];
++}
++
++/** Stable id for a new palette (browser/runtime crypto, falls back to time+rand). */
++export function newPaletteId(): string {
++  try {
++    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
++  } catch {
++    /* ignore */
++  }
++  return `pal_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
++}
++
++/**
++ * Validate/clean an untrusted palettes array (request body or DB row). Drops
++ * malformed entries, normalizes colors, caps count + name length, and dedupes
++ * by scheme so the library never grows unbounded or stores junk.
++ */
++export function sanitizePalettes(input: unknown): BrandPalette[] {
++  if (!Array.isArray(input)) return [];
++  const out: BrandPalette[] = [];
++  const seen = new Set<string>();
++  for (const raw of input) {
++    if (!raw || typeof raw !== "object") continue;
++    const r = raw as Record<string, unknown>;
++    const rawColors = Array.isArray(r.colors) ? r.colors : [];
++    const colors = [0, 1, 2].map((i) => normalizeHex(rawColors[i]) ?? "") as [
++      string,
++      string,
++      string,
++    ];
++    if (!schemeHasColor(colors)) continue;
++    const key = colors.map((c) => c.toLowerCase()).join("|");
++    if (seen.has(key)) continue;
++    seen.add(key);
++    const id = typeof r.id === "string" && r.id.trim() ? r.id.trim().slice(0, 64) : newPaletteId();
++    const name =
++      typeof r.name === "string" && r.name.trim()
++        ? r.name.trim().slice(0, MAX_NAME)
++        : `Palette ${out.length + 1}`;
++    out.push({ id, name, colors });
++    if (out.length >= MAX_PALETTES) break;
++  }
++  return out;
++}
+-- 
+2.53.0.windows.3
+

@@ -1,0 +1,1305 @@
+From 059dd062562a3df64021b6b482b48b98ebe1b2ea Mon Sep 17 00:00:00 2001
+From: Ricky Cooper <ethanrickyjrjr@gmail.com>
+Date: Sat, 20 Jun 2026 17:14:49 -0400
+Subject: [PATCH] =?UTF-8?q?feat(social):=20engagement=20polling=20?=
+ =?UTF-8?q?=E2=80=94=20per-platform=20metrics=20fetchers=20+=20SocialEvent?=
+ =?UTF-8?q?=20upsert=20cron=20(06)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Build 06 (Stage 3): social metrics are PULL, not push — a scheduled poll that
+reads each published post's engagement and upserts deduped rows into social_events.
+
+New files only (no edits to 01/02/03 or shared lib; zero new deps):
+- lib/social/engagement.ts        — pure mappers per platform → SocialEvent rows
+- lib/social/channels/metrics.ts  — per-platform metrics fetchers (empty-tolerant)
+- scripts/social/poll-engagement.mts — single fan-out cron (pure DI core + adapter)
+- .github/workflows/social-engagement-poll.yml — ENGINE-guarded, schedule commented
+- lib/social/engagement.test.ts   — mappers, dedup, empty-tolerance, dry_run-skip
+
+Vendor-verified live (2026-06-20): X public_metrics, Meta FB/IG /insights,
+LinkedIn organizationalEntityShareStatistics. GBP per-post insights API was
+REMOVED (v4 reportInsights sunset) → GBP mapper/fetcher are permanently empty.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01NBQhcAcCLGTfKkBEkAB6sm
+---
+ .github/workflows/social-engagement-poll.yml |  66 ++++
+ lib/social/channels/metrics.ts               | 213 +++++++++++
+ lib/social/engagement.test.ts                | 359 +++++++++++++++++++
+ lib/social/engagement.ts                     | 289 +++++++++++++++
+ scripts/social/poll-engagement.mts           | 306 ++++++++++++++++
+ 5 files changed, 1233 insertions(+)
+ create mode 100644 .github/workflows/social-engagement-poll.yml
+ create mode 100644 lib/social/channels/metrics.ts
+ create mode 100644 lib/social/engagement.test.ts
+ create mode 100644 lib/social/engagement.ts
+ create mode 100644 scripts/social/poll-engagement.mts
+
+diff --git a/.github/workflows/social-engagement-poll.yml b/.github/workflows/social-engagement-poll.yml
+new file mode 100644
+index 00000000..7893e43d
+--- /dev/null
++++ b/.github/workflows/social-engagement-poll.yml
+@@ -0,0 +1,66 @@
++# .github/workflows/social-engagement-poll.yml
++#
++# Social engagement poller (build 06). Single FAN-OUT cron (mirrors daily-rebuild,
++# NOT one workflow per platform): one run polls every recently-published post
++# across all platforms, maps the metrics, and upserts deduped rows into
++# social_events. A gated/silent platform yields nothing and is skipped — it never
++# fails the poll.
++name: Social Engagement Poll
++on:
++  # SCHEDULE PAUSED until go-live (operator call). The poller is not runnable yet:
++  # a real run needs (1) the docs/sql/20260620_social_schema.sql migration applied
++  # (the social_posts/social_events tables + the dedup unique index), (2) live
++  # connected accounts in social_accounts with valid tokens, and (3) actual
++  # published posts carrying a platform_post_id (post-go-live). Until then there is
++  # nothing to poll and the run exits clean (0).
++  # GO-LIVE ORDER: apply migration -> connect accounts (OAuth) -> publish posts ->
++  #   workflow_dispatch a DRY_RUN and read the log -> uncomment the schedule below.
++  # Once live the hourly tick re-polls recent posts; overlap is guarded by the
++  # concurrency.group below (a second run won't start while one is in flight).
++  # schedule:
++  #   - cron: "0 * * * *" # hourly — engagement accrues for a while after publish
++  # workflow_dispatch stays open in the meantime for manual DRY_RUN testing.
++  workflow_dispatch:
++    inputs:
++      dry_run:
++        description: "Dry run — log what would be upserted, do NOT write social_events"
++        required: false
++        default: "true"
++concurrency:
++  group: social-engagement
++  cancel-in-progress: false
++jobs:
++  poll:
++    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
++    runs-on: ubuntu-latest
++    timeout-minutes: 10
++    permissions:
++      contents: read
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v6
++      - name: Setup Bun
++        uses: oven-sh/setup-bun@v2
++        with:
++          bun-version: "1.3.14"
++      - name: Install dependencies
++        run: bun install --frozen-lockfile
++      - name: Run social engagement poll
++        env:
++          # DRY_RUN defaults true on manual dispatch; the (paused) schedule runs live.
++          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || github.event.inputs.dry_run || 'true' }}
++          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
++          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
++          # Token decryption at rest (AES-256-GCM key; see lib/social/oauth-tokens.ts).
++          SDG_CRYPTO_KEY: ${{ secrets.SDG_CRYPTO_KEY }}
++          # Per-platform OAuth app creds — used by oauth-tokens.ts when a stored
++          # access token needs a refresh before the metrics read.
++          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
++          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
++          META_APP_ID: ${{ secrets.META_APP_ID }}
++          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
++          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
++          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
++          GBP_CLIENT_ID: ${{ secrets.GBP_CLIENT_ID }}
++          GBP_CLIENT_SECRET: ${{ secrets.GBP_CLIENT_SECRET }}
++        run: bun scripts/social/poll-engagement.mts
+diff --git a/lib/social/channels/metrics.ts b/lib/social/channels/metrics.ts
+new file mode 100644
+index 00000000..297869b4
+--- /dev/null
++++ b/lib/social/channels/metrics.ts
+@@ -0,0 +1,213 @@
++/**
++ * lib/social/channels/metrics.ts
++ *
++ * Per-platform engagement-metrics FETCHERS (the read side; sibling to the
++ * write-side adapters x.ts / meta.ts / linkedin.ts / gbp.ts — this is a NEW file,
++ * those are untouched). Given a resolved access token + a platform_post_id, each
++ * fetcher calls the platform's live read API and returns the RAW JSON response.
++ * The pure mappers in ../engagement.ts turn that raw shape into SocialEvent rows.
++ *
++ * EMPTY-TOLERANT CONTRACT (Operation Dumbo Drop): a gated / unavailable / errored
++ * read returns `null` — never throws. The poller treats null as "this platform
++ * told us nothing this cycle" and writes zero rows for that post. A silent
++ * platform must never fail the whole poll.
++ *
++ * VENDOR-VERIFIED (2026-06-20) — endpoints + response shapes confirmed in-session:
++ *   X:        GET https://api.x.com/2/tweets/:id?tweet.fields=public_metrics
++ *             scope tweet.read; public_metrics has like/reply/retweet/quote/impression/bookmark_count.
++ *             Docs: https://docs.x.com/x-api/fundamentals/metrics
++ *   Meta FB:  GET https://graph.facebook.com/v19.0/{post-id}/insights?metric=...
++ *             perms pages_read_engagement, read_insights.
++ *             Docs: https://developers.facebook.com/docs/graph-api/reference/post/insights
++ *   Meta IG:  GET https://graph.facebook.com/v19.0/{ig-media-id}/insights?metric=...
++ *             perms instagram_basic, instagram_manage_insights, pages_read_engagement.
++ *             Docs: https://developers.facebook.com/docs/instagram-api/reference/ig-media/insights
++ *   LinkedIn: GET https://api.linkedin.com/rest/organizationalEntityShareStatistics
++ *             ?q=organizationalEntity&organizationalEntity={org}&shares=List({urn})  (or ugcPosts[0]=)
++ *             perm rw_organization_admin; header LinkedIn-Version: YYYYMM.
++ *             Docs: https://learn.microsoft.com/en-us/linkedin/marketing/community-management/organizations/share-statistics
++ *   GBP:      NO per-post insights API — v4 localPosts.reportInsights REMOVED, the
++ *             Business Performance API is location-grain only. fetchGBPMetrics → null always.
++ *             Docs: https://developers.google.com/my-business/content/sunset-dates
++ */
++
++import type {
++  XTweetMetricsResponse,
++  MetaInsightsResponse,
++  LinkedInShareStatisticsResponse,
++} from "../engagement";
++
++const GRAPH_BASE = "https://graph.facebook.com/v19.0";
++const LINKEDIN_API = "https://api.linkedin.com";
++// Keep in lockstep with channels/linkedin.ts's LINKEDIN_VERSION (write side).
++const LINKEDIN_VERSION = "202501";
++
++/** Per-fetch timeout so one hung read can't stall the sequential poll batch. */
++const READ_TIMEOUT_MS = 15_000;
++
++/** Parse a JSON body, returning null on any non-2xx / parse failure (never throws). */
++async function readJsonOrNull<T>(res: Response): Promise<T | null> {
++  if (!res.ok) return null;
++  try {
++    return (await res.json()) as T;
++  } catch {
++    return null;
++  }
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// X (Twitter)
++// ─────────────────────────────────────────────────────────────────────────────
++
++/**
++ * Fetch public engagement metrics for one tweet.
++ * GET /2/tweets/:id?tweet.fields=public_metrics. Returns the raw response, or
++ * null if gated / errored / unparseable.
++ */
++export async function fetchXMetrics(
++  platformPostId: string,
++  accessToken: string,
++): Promise<XTweetMetricsResponse | null> {
++  try {
++    const url = `https://api.x.com/2/tweets/${encodeURIComponent(
++      platformPostId,
++    )}?tweet.fields=public_metrics`;
++    const res = await fetch(url, {
++      headers: { Authorization: `Bearer ${accessToken}` },
++      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
++    });
++    return await readJsonOrNull<XTweetMetricsResponse>(res);
++  } catch {
++    return null; // network/timeout → empty-tolerant
++  }
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Meta — Facebook Page post
++// ─────────────────────────────────────────────────────────────────────────────
++
++const FB_POST_METRICS = ["post_impressions", "post_clicks", "post_reactions_by_type_total"];
++
++/**
++ * Fetch insights for one Facebook Page post.
++ * GET /{post-id}/insights?metric=post_impressions,post_clicks,post_reactions_by_type_total.
++ * The Page access token (FB Page tokens are permanent) goes in the query per Graph
++ * convention. Returns null if gated (no read_insights) / errored.
++ */
++export async function fetchMetaPostMetrics(
++  platformPostId: string,
++  accessToken: string,
++): Promise<MetaInsightsResponse | null> {
++  try {
++    const params = new URLSearchParams({
++      metric: FB_POST_METRICS.join(","),
++      access_token: accessToken,
++    });
++    const url = `${GRAPH_BASE}/${encodeURIComponent(platformPostId)}/insights?${params.toString()}`;
++    const res = await fetch(url, { signal: AbortSignal.timeout(READ_TIMEOUT_MS) });
++    return await readJsonOrNull<MetaInsightsResponse>(res);
++  } catch {
++    return null;
++  }
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Meta — Instagram media
++// ─────────────────────────────────────────────────────────────────────────────
++
++const IG_MEDIA_METRICS = ["likes", "comments", "shares", "impressions"];
++
++/**
++ * Fetch insights for one Instagram media object.
++ * GET /{ig-media-id}/insights?metric=likes,comments,shares,impressions.
++ * Returns null if gated (account not Business/Creator, missing instagram_manage_insights)
++ * or errored — empty-tolerant.
++ */
++export async function fetchIGMetrics(
++  platformPostId: string,
++  accessToken: string,
++): Promise<MetaInsightsResponse | null> {
++  try {
++    const params = new URLSearchParams({
++      metric: IG_MEDIA_METRICS.join(","),
++      access_token: accessToken,
++    });
++    const url = `${GRAPH_BASE}/${encodeURIComponent(platformPostId)}/insights?${params.toString()}`;
++    const res = await fetch(url, { signal: AbortSignal.timeout(READ_TIMEOUT_MS) });
++    return await readJsonOrNull<MetaInsightsResponse>(res);
++  } catch {
++    return null;
++  }
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// LinkedIn — organization share statistics (per share/ugcPost URN)
++// ─────────────────────────────────────────────────────────────────────────────
++
++/**
++ * Fetch share statistics for one LinkedIn post URN.
++ *
++ * organizationalEntityShareStatistics requires the owning organization URN AND a
++ * share/ugcPost URN. `orgUrn` comes from the social_accounts.platform_account_id
++ * (the connected org). The post URN form (urn:li:share:… vs urn:li:ugcPost:…)
++ * selects the query param. Member-post statistics use a different endpoint and a
++ * different permission — not supported here (returns null, empty-tolerant).
++ *
++ * @param platformPostId  the stored post URN (urn:li:share:… or urn:li:ugcPost:…)
++ * @param accessToken     org-admin token
++ * @param orgUrn          urn:li:organization:{id} that owns the post
++ */
++export async function fetchLinkedInMetrics(
++  platformPostId: string,
++  accessToken: string,
++  orgUrn: string | null | undefined,
++): Promise<LinkedInShareStatisticsResponse | null> {
++  // Org URN is mandatory for this endpoint, and only org shares/ugcPosts are
++  // supported. A member post (or a missing org) → nothing we can read.
++  if (!orgUrn) return null;
++  const isUgc = platformPostId.includes(":ugcPost:");
++  const isShare = platformPostId.includes(":share:");
++  if (!isUgc && !isShare) return null;
++
++  try {
++    const params = new URLSearchParams({
++      q: "organizationalEntity",
++      organizationalEntity: orgUrn,
++    });
++    // Restli list syntax differs by URN kind (verified shapes in the docs):
++    //   shares=List({shareUrn})   |   ugcPosts[0]={ugcPostUrn}
++    if (isUgc) {
++      params.set("ugcPosts[0]", platformPostId);
++    } else {
++      params.set("shares", `List(${platformPostId})`);
++    }
++    const url = `${LINKEDIN_API}/rest/organizationalEntityShareStatistics?${params.toString()}`;
++    const res = await fetch(url, {
++      headers: {
++        Authorization: `Bearer ${accessToken}`,
++        "LinkedIn-Version": LINKEDIN_VERSION,
++        "X-Restli-Protocol-Version": "2.0.0",
++      },
++      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
++    });
++    return await readJsonOrNull<LinkedInShareStatisticsResponse>(res);
++  } catch {
++    return null;
++  }
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Google Business Profile — no per-post insights API
++// ─────────────────────────────────────────────────────────────────────────────
++
++/**
++ * GBP has NO per-localPost engagement read. Always returns null.
++ * Present so the poller's per-platform fetch switch is total; when/if Google
++ * ships a per-post surface, wire it here without touching the caller.
++ */
++export async function fetchGBPMetrics(
++  _platformPostId: string,
++  _accessToken: string,
++): Promise<null> {
++  return null;
++}
+diff --git a/lib/social/engagement.test.ts b/lib/social/engagement.test.ts
+new file mode 100644
+index 00000000..ff79ff43
+--- /dev/null
++++ b/lib/social/engagement.test.ts
+@@ -0,0 +1,359 @@
++import { describe, expect, it } from "bun:test";
++import {
++  mapXMetrics,
++  mapMetaPostMetrics,
++  mapIGMetrics,
++  mapLinkedInMetrics,
++  mapGBPMetrics,
++  type MappedEvent,
++} from "./engagement";
++import {
++  pollEngagement,
++  fetchAndMapFor,
++  type PollablePost,
++  type PollEvent,
++  type FetchSeams,
++} from "../../scripts/social/poll-engagement.mts";
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Per-platform mapper correctness (mock responses → expected SocialEvent rows)
++// ─────────────────────────────────────────────────────────────────────────────
++
++describe("mapXMetrics", () => {
++  it("maps public_metrics to like/comment/share/impression (no click)", () => {
++    const out = mapXMetrics("tweet-1", {
++      data: {
++        id: "tweet-1",
++        public_metrics: {
++          like_count: 10,
++          reply_count: 3,
++          retweet_count: 4,
++          quote_count: 2,
++          impression_count: 500,
++          bookmark_count: 7,
++        },
++      },
++    });
++    // share = reposts(4) + quotes(2) = 6; bookmark is NOT in our vocab.
++    expect(out).toEqual([
++      { platform_post_id: "tweet-1", metric: "like", value: 10, source: "poll" },
++      { platform_post_id: "tweet-1", metric: "comment", value: 3, source: "poll" },
++      { platform_post_id: "tweet-1", metric: "share", value: 6, source: "poll" },
++      { platform_post_id: "tweet-1", metric: "impression", value: 500, source: "poll" },
++    ]);
++    // X never emits a click from the public read (non_public_metrics is gated).
++    expect(out.find((e) => e.metric === "click")).toBeUndefined();
++  });
++
++  it("emits only the metrics present (no zero-fill)", () => {
++    const out = mapXMetrics("t", { data: { public_metrics: { like_count: 1 } } });
++    expect(out).toEqual([{ platform_post_id: "t", metric: "like", value: 1, source: "poll" }]);
++  });
++
++  it("returns [] when public_metrics is absent (gated/empty)", () => {
++    expect(mapXMetrics("t", { data: {} })).toEqual([]);
++    expect(mapXMetrics("t", null)).toEqual([]);
++    expect(mapXMetrics("t", undefined)).toEqual([]);
++  });
++});
++
++describe("mapMetaPostMetrics (Facebook page post)", () => {
++  it("sums object-valued reactions into like; maps impression + click", () => {
++    const out = mapMetaPostMetrics("fb-1", {
++      data: [
++        { name: "post_impressions", values: [{ value: 800 }] },
++        { name: "post_clicks", values: [{ value: 12 }] },
++        { name: "post_reactions_by_type_total", values: [{ value: { like: 9, love: 3, wow: 1 } }] },
++      ],
++    });
++    const byMetric = Object.fromEntries(out.map((e) => [e.metric, e.value]));
++    expect(byMetric).toEqual({ like: 13, impression: 800, click: 12 });
++  });
++
++  it("returns [] for an empty data array (gated/no insights perm)", () => {
++    expect(mapMetaPostMetrics("fb-1", { data: [] })).toEqual([]);
++    expect(mapMetaPostMetrics("fb-1", null)).toEqual([]);
++  });
++});
++
++describe("mapIGMetrics (instagram media)", () => {
++  it("maps likes/comments/shares/impressions", () => {
++    const out = mapIGMetrics("ig-1", {
++      data: [
++        { name: "likes", values: [{ value: 40 }] },
++        { name: "comments", values: [{ value: 5 }] },
++        { name: "shares", values: [{ value: 2 }] },
++        { name: "impressions", values: [{ value: 1200 }] },
++      ],
++    });
++    expect(Object.fromEntries(out.map((e) => [e.metric, e.value]))).toEqual({
++      like: 40,
++      comment: 5,
++      share: 2,
++      impression: 1200,
++    });
++  });
++
++  it("falls back to views when impressions is absent", () => {
++    const out = mapIGMetrics("ig-2", { data: [{ name: "views", values: [{ value: 333 }] }] });
++    expect(out).toEqual([
++      { platform_post_id: "ig-2", metric: "impression", value: 333, source: "poll" },
++    ]);
++  });
++});
++
++describe("mapLinkedInMetrics", () => {
++  it("maps totalShareStatistics for the matching share URN", () => {
++    const out = mapLinkedInMetrics("urn:li:share:1000000", {
++      elements: [
++        {
++          share: "urn:li:share:1000000",
++          totalShareStatistics: {
++            clickCount: 78,
++            commentCount: 24,
++            impressionCount: 5287,
++            likeCount: 14,
++            shareCount: 5,
++            engagement: 0.02,
++            uniqueImpressionsCount: 4000,
++          },
++        },
++      ],
++    });
++    expect(Object.fromEntries(out.map((e) => [e.metric, e.value]))).toEqual({
++      like: 14,
++      comment: 24,
++      share: 5,
++      impression: 5287,
++      click: 78,
++    });
++  });
++
++  it("returns [] when no elements (URN absent = zero engagement, never invented)", () => {
++    expect(mapLinkedInMetrics("urn:li:share:x", { elements: [] })).toEqual([]);
++    expect(mapLinkedInMetrics("urn:li:share:x", null)).toEqual([]);
++  });
++});
++
++describe("mapGBPMetrics", () => {
++  it("always returns [] (no per-post insights API)", () => {
++    expect(mapGBPMetrics("gbp-post", {})).toEqual([]);
++    expect(mapGBPMetrics("gbp-post", { anything: 1 })).toEqual([]);
++  });
++});
++
++// ─────────────────────────────────────────────────────────────────────────────
++// fetchAndMapFor — per-platform dispatch is empty-tolerant
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** Seams that all return null — simulating a fully gated/silent platform read. */
++const nullSeams: FetchSeams = {
++  fetchX: async () => null,
++  fetchMetaPost: async () => null,
++  fetchIG: async () => null,
++  fetchLinkedIn: async () => null,
++  fetchGBP: async () => null,
++};
++
++function post(over: Partial<PollablePost> = {}): PollablePost {
++  return {
++    id: "sp-1",
++    user_id: "user-1",
++    platform: "x",
++    platform_post_id: "pid-1",
++    account_id: "acct-1",
++    org_urn: null,
++    ...over,
++  };
++}
++
++describe("fetchAndMapFor — empty-tolerant dispatch", () => {
++  it("a gated read on every platform yields zero events, no throw", async () => {
++    for (const platform of ["x", "facebook", "instagram", "linkedin", "google_business"] as const) {
++      const events = await fetchAndMapFor(post({ platform }), "tok", nullSeams);
++      expect(events).toEqual([]);
++    }
++  });
++
++  it("routes X through mapXMetrics on a real response", async () => {
++    const seams: FetchSeams = {
++      ...nullSeams,
++      fetchX: async () => ({ data: { public_metrics: { like_count: 9 } } }),
++    };
++    const events = await fetchAndMapFor(post({ platform: "x" }), "tok", seams);
++    expect(events).toEqual([
++      { platform_post_id: "pid-1", metric: "like", value: 9, source: "poll" },
++    ]);
++  });
++
++  it("passes the org URN through to the LinkedIn fetcher", async () => {
++    let seenOrg: string | null | undefined = "UNSET";
++    const seams: FetchSeams = {
++      ...nullSeams,
++      fetchLinkedIn: async (_id, _tok, org) => {
++        seenOrg = org;
++        return null;
++      },
++    };
++    await fetchAndMapFor(
++      post({ platform: "linkedin", org_urn: "urn:li:organization:42" }),
++      "tok",
++      seams,
++    );
++    expect(seenOrg).toBe("urn:li:organization:42");
++  });
++});
++
++// ─────────────────────────────────────────────────────────────────────────────
++// pollEngagement core — empty-tolerance + dry_run + dedup-via-upsert
++// ─────────────────────────────────────────────────────────────────────────────
++
++describe("pollEngagement — empty-platform tolerance", () => {
++  it("a gated platform produces zero events and never throws (counted as empty)", async () => {
++    const upserted: PollEvent[][] = [];
++    const summary = await pollEngagement([post(), post({ id: "sp-2" })], {
++      getToken: async () => "tok",
++      fetchAndMap: async () => [], // every platform gated/silent
++      upsert: async (events) => {
++        upserted.push(events);
++      },
++    });
++    expect(summary.empty).toBe(2);
++    expect(summary.polled).toBe(0);
++    expect(summary.events).toBe(0);
++    expect(summary.errors).toBe(0);
++    expect(upserted).toHaveLength(0); // nothing to write for a silent platform
++  });
++
++  it("isolates a per-post token failure without failing the batch", async () => {
++    const summary = await pollEngagement([post({ id: "ok" }), post({ id: "bad" })], {
++      getToken: async (p) => {
++        if (p.id === "bad") throw new Error("token revoked");
++        return "tok";
++      },
++      fetchAndMap: async () => [
++        { platform_post_id: "pid-1", metric: "like", value: 1, source: "poll" },
++      ],
++      upsert: async () => {},
++    });
++    expect(summary.errors).toBe(1);
++    expect(summary.polled).toBe(1); // the good post still polled
++  });
++});
++
++describe("pollEngagement — DRY_RUN skips writes", () => {
++  it("maps + counts but never calls upsert in dry mode", async () => {
++    let upsertCalls = 0;
++    const summary = await pollEngagement([post()], {
++      getToken: async () => "tok",
++      fetchAndMap: async () => [
++        { platform_post_id: "pid-1", metric: "like", value: 5, source: "poll" },
++      ],
++      upsert: async () => {
++        upsertCalls += 1;
++      },
++      dryRun: true,
++    });
++    expect(upsertCalls).toBe(0);
++    expect(summary.polled).toBe(1);
++    expect(summary.events).toBe(1);
++  });
++});
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Dedup: re-polling the same metric updates ONE row (never duplicates).
++// Simulate the (social_post_id, metric) ON CONFLICT upsert the DB enforces.
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** A tiny in-memory store keyed on (social_post_id, metric) — the dedup key. */
++function makeDedupStore() {
++  const rows = new Map<string, PollEvent>();
++  return {
++    rows,
++    upsert: async (events: PollEvent[]) => {
++      for (const e of events) rows.set(`${e.social_post_id}|${e.metric}`, e); // last write wins
++    },
++    count: () => rows.size,
++    valueOf: (postId: string, metric: string) => rows.get(`${postId}|${metric}`)?.value,
++  };
++}
++
++describe("dedup on (social_post_id, metric)", () => {
++  it("polling the same post twice updates the row in place — one effective row per metric", async () => {
++    const store = makeDedupStore();
++    const p = post();
++
++    // First poll: like=10, impression=100.
++    let response: MappedEvent[] = [
++      { platform_post_id: "pid-1", metric: "like", value: 10, source: "poll" },
++      { platform_post_id: "pid-1", metric: "impression", value: 100, source: "poll" },
++    ];
++    const deps = {
++      getToken: async () => "tok",
++      fetchAndMap: async () => response,
++      upsert: store.upsert,
++    };
++    await pollEngagement([p], deps);
++    expect(store.count()).toBe(2);
++    expect(store.valueOf("sp-1", "like")).toBe(10);
++
++    // Second poll (engagement grew): like=25, impression=300.
++    response = [
++      { platform_post_id: "pid-1", metric: "like", value: 25, source: "poll" },
++      { platform_post_id: "pid-1", metric: "impression", value: 300, source: "poll" },
++    ];
++    await pollEngagement([p], deps);
++
++    // Still exactly two rows — re-poll updated values in place, did NOT duplicate.
++    expect(store.count()).toBe(2);
++    expect(store.valueOf("sp-1", "like")).toBe(25);
++    expect(store.valueOf("sp-1", "impression")).toBe(300);
++  });
++
++  it("two different posts keep separate rows for the same metric", async () => {
++    const store = makeDedupStore();
++    await pollEngagement([post({ id: "A" }), post({ id: "B" })], {
++      getToken: async () => "tok",
++      fetchAndMap: async () => [
++        { platform_post_id: "pid", metric: "like", value: 1, source: "poll" },
++      ],
++      upsert: store.upsert,
++    });
++    expect(store.count()).toBe(2); // (A,like) and (B,like) are distinct keys
++  });
++});
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Poller skips dry_run rows: a row with no platform_post_id is never pollable.
++// (The adapter's candidate query filters `platform_post_id IS NOT NULL`; this
++//  asserts the contract that PollablePost always carries a non-null id, so a
++//  dry_run / queued post can never enter the poll set.)
++// ─────────────────────────────────────────────────────────────────────────────
++
++describe("poller skips dry_run / unpublished rows", () => {
++  it("simulates the candidate filter: rows without platform_post_id are excluded", async () => {
++    // Mirror the adapter's filter (status='published' AND platform_post_id NOT NULL).
++    const raw = [
++      { id: "live", status: "published", platform_post_id: "pid-live" },
++      { id: "dry", status: "dry_run", platform_post_id: null },
++      { id: "queued", status: "queued", platform_post_id: null },
++    ];
++    const pollable: PollablePost[] = raw
++      .filter((r) => r.status === "published" && r.platform_post_id != null)
++      .map((r) => post({ id: r.id, platform_post_id: r.platform_post_id! }));
++
++    expect(pollable.map((p) => p.id)).toEqual(["live"]);
++
++    const polledIds: string[] = [];
++    await pollEngagement(pollable, {
++      getToken: async () => "tok",
++      fetchAndMap: async (p) => {
++        polledIds.push(p.id);
++        return [{ platform_post_id: p.platform_post_id, metric: "like", value: 1, source: "poll" }];
++      },
++      upsert: async () => {},
++    });
++    // Only the published row with a platform_post_id was ever polled.
++    expect(polledIds).toEqual(["live"]);
++  });
++});
+diff --git a/lib/social/engagement.ts b/lib/social/engagement.ts
+new file mode 100644
+index 00000000..ffa2a6ad
+--- /dev/null
++++ b/lib/social/engagement.ts
+@@ -0,0 +1,289 @@
++/**
++ * lib/social/engagement.ts
++ *
++ * PURE mappers: each platform's metrics-API response → SocialEvent rows.
++ * No I/O. Fully unit-testable. The poll script (scripts/social/poll-engagement.mts)
++ * does the fetch + upsert; this file only translates a raw response into the
++ * normalized `metric|value` rows the social_events ledger holds.
++ *
++ * METRIC vocabulary (closed set, from social_events.metric + types.ts):
++ *   like | comment | share | impression | click
++ * Every emitted row carries source='poll' (the only source in v1).
++ *
++ * EMPTY-TOLERANT (Operation Dumbo Drop posture): a null/empty/gated response →
++ * an empty array. We never invent a number and never throw on a silent platform;
++ * a missing metric simply does not produce a row. A platform that exposes only
++ * SOME of the five metrics yields only those — we never zero-fill the rest
++ * (a zero-fill would blend "we polled and it was 0" with "the platform doesn't
++ * tell us", which the no-invention moat forbids).
++ *
++ * VENDOR-VERIFIED (2026-06-20) — response shapes confirmed live in-session:
++ *   X (Twitter):
++ *     GET https://api.x.com/2/tweets/:id?tweet.fields=public_metrics  (scope: tweet.read)
++ *     public_metrics = { retweet_count, reply_count, like_count, quote_count,
++ *                        impression_count, bookmark_count } — ALL public (any reader).
++ *     non_public_metrics (url_link_clicks, user_profile_clicks, engagements) is
++ *     author-only / OAuth-1.0a gated → we do NOT map "click" from X public reads.
++ *     Docs: https://docs.x.com/x-api/fundamentals/metrics
++ *   Meta — Facebook Page post:
++ *     GET /v19.0/{post-id}/insights?metric=...  (perms: pages_read_engagement, read_insights)
++ *     response: { data: [ { name, period, values: [ { value } ] } ] }
++ *     Docs: https://developers.facebook.com/docs/graph-api/reference/post/insights
++ *   Meta — Instagram media:
++ *     GET /v19.0/{ig-media-id}/insights?metric=likes,comments,shares,impressions,...
++ *     (perms: instagram_basic, instagram_manage_insights, pages_read_engagement)
++ *     response: { data: [ { name, period, values: [ { value } ] } ] }
++ *     Docs: https://developers.facebook.com/docs/instagram-api/reference/ig-media/insights
++ *   LinkedIn — organization share statistics (per share/ugcPost URN):
++ *     GET https://api.linkedin.com/rest/organizationalEntityShareStatistics
++ *         ?q=organizationalEntity&organizationalEntity={org}&shares=List({shareUrn})
++ *     (perm: rw_organization_admin; header LinkedIn-Version: YYYYMM)
++ *     response: { elements: [ { share|ugcPost, totalShareStatistics:
++ *                  { clickCount, commentCount, impressionCount, likeCount, shareCount } } ] }
++ *     Docs: https://learn.microsoft.com/en-us/linkedin/marketing/community-management/organizations/share-statistics
++ *   Google Business Profile:
++ *     NO per-post insights API. v4 accounts.locations.localPosts.reportInsights was
++ *     REMOVED; the Business Performance API (fetchMultiDailyMetricsTimeSeries) is
++ *     location-grain daily only — no per-localPost engagement. GBP is therefore a
++ *     permanently empty platform for per-post metrics (mapGBPMetrics → []).
++ *     Docs: https://developers.google.com/my-business/content/sunset-dates
++ */
++
++import type { SocialEvent } from "./types";
++
++/** The closed metric vocabulary (matches social_events.metric + SocialEvent). */
++export type EngagementMetric = SocialEvent["metric"]; // like|comment|share|impression|click
++
++/**
++ * A normalized, storage-ready engagement row WITHOUT the DB-assigned id /
++ * captured_at (those are stamped by the poll/upsert). This is the pure output of
++ * a mapper. `social_post_id` is null here — the caller binds it from the row it
++ * polled (the mappers are platform-response-only and don't know our PK).
++ */
++export interface MappedEvent {
++  platform_post_id: string;
++  metric: EngagementMetric;
++  value: number;
++  source: "poll";
++}
++
++/** Coerce an arbitrary metric value to a non-negative integer, or null if not numeric. */
++function toCount(v: unknown): number | null {
++  if (typeof v === "number" && Number.isFinite(v)) return Math.max(0, Math.trunc(v));
++  if (typeof v === "string" && v.trim() !== "" && Number.isFinite(Number(v))) {
++    return Math.max(0, Math.trunc(Number(v)));
++  }
++  return null;
++}
++
++/** Build one MappedEvent, or null when the value is absent/non-numeric (skip it). */
++function row(platformPostId: string, metric: EngagementMetric, value: unknown): MappedEvent | null {
++  const n = toCount(value);
++  if (n === null) return null;
++  return { platform_post_id: platformPostId, metric, value: n, source: "poll" };
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// X (Twitter)
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** Shape of GET /2/tweets/:id?tweet.fields=public_metrics (the parts we read). */
++export interface XPublicMetrics {
++  retweet_count?: number;
++  reply_count?: number;
++  like_count?: number;
++  quote_count?: number;
++  impression_count?: number;
++  bookmark_count?: number;
++}
++export interface XTweetMetricsResponse {
++  data?: { id?: string; public_metrics?: XPublicMetrics };
++}
++
++/**
++ * Map an X tweet-lookup response → SocialEvent rows.
++ *   like        ← public_metrics.like_count
++ *   comment     ← public_metrics.reply_count
++ *   share       ← public_metrics.retweet_count + quote_count (reposts + quote-posts)
++ *   impression  ← public_metrics.impression_count
++ * NO click: url_link_clicks lives in non_public_metrics (author/OAuth-1.0a gated),
++ * not in the public read. Absent fields → no row (empty-tolerant).
++ */
++export function mapXMetrics(
++  platformPostId: string,
++  resp: XTweetMetricsResponse | null | undefined,
++): MappedEvent[] {
++  const pm = resp?.data?.public_metrics;
++  if (!pm) return [];
++  const out: (MappedEvent | null)[] = [];
++  out.push(row(platformPostId, "like", pm.like_count));
++  out.push(row(platformPostId, "comment", pm.reply_count));
++  // X "share" = reposts + quote-posts. Sum only the parts that are present.
++  const reposts = toCount(pm.retweet_count);
++  const quotes = toCount(pm.quote_count);
++  if (reposts !== null || quotes !== null) {
++    out.push(row(platformPostId, "share", (reposts ?? 0) + (quotes ?? 0)));
++  }
++  out.push(row(platformPostId, "impression", pm.impression_count));
++  return out.filter((r): r is MappedEvent => r !== null);
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Meta — shared insights envelope (Facebook Page post + Instagram media)
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** Graph insights response: { data: [ { name, values: [ { value } ] } ] }. */
++export interface MetaInsightValue {
++  value?: number | Record<string, number>;
++}
++export interface MetaInsightNode {
++  name?: string;
++  period?: string;
++  values?: MetaInsightValue[];
++}
++export interface MetaInsightsResponse {
++  data?: MetaInsightNode[];
++}
++
++/** Pull the first scalar value for a metric name out of the insights data array. */
++function metaValue(resp: MetaInsightsResponse | null | undefined, name: string): unknown {
++  const node = resp?.data?.find((d) => d.name === name);
++  const v = node?.values?.[0]?.value;
++  // Only scalar values map to a count; object-valued metrics (e.g. reactions
++  // broken out by type) need a dedicated summing path (see post_reactions below).
++  return typeof v === "number" || typeof v === "string" ? v : undefined;
++}
++
++/** Sum an object-valued Meta metric (e.g. post_reactions_by_type_total → {like:N,love:M}). */
++function metaObjectSum(resp: MetaInsightsResponse | null | undefined, name: string): number | null {
++  const node = resp?.data?.find((d) => d.name === name);
++  const v = node?.values?.[0]?.value;
++  if (v && typeof v === "object") {
++    let sum = 0;
++    let any = false;
++    for (const n of Object.values(v)) {
++      const c = toCount(n);
++      if (c !== null) {
++        sum += c;
++        any = true;
++      }
++    }
++    return any ? sum : null;
++  }
++  return null;
++}
++
++/**
++ * Map a Facebook Page-post insights response → SocialEvent rows.
++ *   like        ← post_reactions_by_type_total (summed across reaction types)
++ *   impression  ← post_impressions
++ *   click       ← post_clicks
++ * comment/share have no first-party post-insights metric on the Page Insights
++ * endpoint, so they are not emitted here (empty-tolerant: a missing surface is
++ * simply absent, never zero-filled). Absent metrics → no row.
++ */
++export function mapMetaPostMetrics(
++  platformPostId: string,
++  resp: MetaInsightsResponse | null | undefined,
++): MappedEvent[] {
++  if (!resp?.data?.length) return [];
++  const out: (MappedEvent | null)[] = [];
++  const reactions = metaObjectSum(resp, "post_reactions_by_type_total");
++  if (reactions !== null) out.push(row(platformPostId, "like", reactions));
++  out.push(row(platformPostId, "impression", metaValue(resp, "post_impressions")));
++  out.push(row(platformPostId, "click", metaValue(resp, "post_clicks")));
++  return out.filter((r): r is MappedEvent => r !== null);
++}
++
++/**
++ * Map an Instagram media insights response → SocialEvent rows.
++ *   like        ← likes
++ *   comment     ← comments
++ *   share       ← shares
++ *   impression  ← impressions  (older media) — newer media use "views"; we map
++ *                 whichever is present, preferring impressions.
++ * IG has no post-level "click" metric, so none is emitted. Absent → no row.
++ */
++export function mapIGMetrics(
++  platformPostId: string,
++  resp: MetaInsightsResponse | null | undefined,
++): MappedEvent[] {
++  if (!resp?.data?.length) return [];
++  const out: (MappedEvent | null)[] = [];
++  out.push(row(platformPostId, "like", metaValue(resp, "likes")));
++  out.push(row(platformPostId, "comment", metaValue(resp, "comments")));
++  out.push(row(platformPostId, "share", metaValue(resp, "shares")));
++  // Prefer "impressions"; fall back to "views" (newer IG media surface impressions as views).
++  const impressions = metaValue(resp, "impressions") ?? metaValue(resp, "views");
++  out.push(row(platformPostId, "impression", impressions));
++  return out.filter((r): r is MappedEvent => r !== null);
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// LinkedIn — organizationalEntityShareStatistics (per share/ugcPost URN)
++// ─────────────────────────────────────────────────────────────────────────────
++
++export interface LinkedInTotalShareStatistics {
++  clickCount?: number;
++  commentCount?: number;
++  engagement?: number;
++  impressionCount?: number;
++  likeCount?: number;
++  shareCount?: number;
++  uniqueImpressionsCount?: number;
++}
++export interface LinkedInShareStatElement {
++  share?: string;
++  ugcPost?: string;
++  organizationalEntity?: string;
++  totalShareStatistics?: LinkedInTotalShareStatistics;
++}
++export interface LinkedInShareStatisticsResponse {
++  elements?: LinkedInShareStatElement[];
++}
++
++/**
++ * Map a LinkedIn share-statistics response → SocialEvent rows for ONE post URN.
++ * We poll one URN at a time, so we take the element matching `platformPostId`
++ * (the stored share/ugcPost URN), else the first element. A URN absent from
++ * `elements` means zero engagement (docs: "can be assumed to have counts of 0")
++ * — that legitimately yields zero rows (empty-tolerant), not invented zeros.
++ *   like        ← totalShareStatistics.likeCount
++ *   comment     ← totalShareStatistics.commentCount
++ *   share       ← totalShareStatistics.shareCount
++ *   impression  ← totalShareStatistics.impressionCount
++ *   click       ← totalShareStatistics.clickCount
++ */
++export function mapLinkedInMetrics(
++  platformPostId: string,
++  resp: LinkedInShareStatisticsResponse | null | undefined,
++): MappedEvent[] {
++  const els = resp?.elements;
++  if (!els?.length) return [];
++  const el = els.find((e) => e.share === platformPostId || e.ugcPost === platformPostId) ?? els[0];
++  const s = el?.totalShareStatistics;
++  if (!s) return [];
++  const out: (MappedEvent | null)[] = [
++    row(platformPostId, "like", s.likeCount),
++    row(platformPostId, "comment", s.commentCount),
++    row(platformPostId, "share", s.shareCount),
++    row(platformPostId, "impression", s.impressionCount),
++    row(platformPostId, "click", s.clickCount),
++  ];
++  return out.filter((r): r is MappedEvent => r !== null);
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Google Business Profile — no per-post insights API (permanently empty)
++// ─────────────────────────────────────────────────────────────────────────────
++
++/**
++ * Map a GBP response → SocialEvent rows.
++ * GBP has NO per-localPost engagement API (v4 reportInsights removed; the
++ * Business Performance API is location-grain only). This always returns [].
++ * Kept as a first-class mapper so the poller's per-platform switch is total and
++ * a future GBP per-post surface slots in here without touching the caller.
++ */
++export function mapGBPMetrics(_platformPostId: string, _resp: unknown): MappedEvent[] {
++  return [];
++}
+diff --git a/scripts/social/poll-engagement.mts b/scripts/social/poll-engagement.mts
+new file mode 100644
+index 00000000..efe140fc
+--- /dev/null
++++ b/scripts/social/poll-engagement.mts
+@@ -0,0 +1,306 @@
++// scripts/social/poll-engagement.mts
++//
++// SOCIAL ENGAGEMENT POLLER (build 06). A standalone Bun process the GHA cron
++// invokes — NOT a Next route. Social metrics are PULL, not push (no webhook for
++// likes/impressions), so we schedule a fetch: for every recently-published
++// social_posts row that HAS a platform_post_id, call the platform's read API,
++// map the response to SocialEvent rows, and UPSERT into social_events (deduped on
++// (social_post_id, metric) — re-polling updates the one row, never duplicates).
++//
++// SINGLE FAN-OUT (mirrors daily-rebuild, NOT one workflow per platform): one run
++// loops every due post across all platforms. A silent/gated platform yields zero
++// rows and is skipped — it NEVER fails the whole poll (Operation Dumbo Drop posture).
++//
++// ARCHITECTURE mirrors run-schedules.mts / outreach-drip-run.mts: the decision
++// logic is a pure DI core (`pollEngagement` below, unit-tested in
++// lib/social/engagement.test.ts with mocks); this file is the ADAPTER that wires
++// the real seams (service-role Supabase client, the per-platform fetchers, the
++// token resolver) and owns the exit code.
++//
++// DRY_RUN-aware: a dry run reads + maps + logs what it WOULD upsert, and never
++// writes. (Dry posts never get a platform_post_id, so they're naturally skipped
++// from the candidate set regardless.)
++//
++// EXIT: a clean run (incl. zero due) → 0. A top-level fatal (missing env, client
++// construction) → process.exit(1) so a GHA failure is visible. Per-post errors
++// are isolated and NEVER change the exit code.
++
++import path from "node:path";
++import { createServiceRoleClient } from "@/utils/supabase/service-role";
++import type { SupabaseClient } from "@supabase/supabase-js";
++import type { Platform } from "@/lib/social/types";
++import { getValidAccessToken } from "@/lib/social/oauth-tokens";
++import {
++  mapXMetrics,
++  mapMetaPostMetrics,
++  mapIGMetrics,
++  mapLinkedInMetrics,
++  mapGBPMetrics,
++  type MappedEvent,
++} from "@/lib/social/engagement";
++import {
++  fetchXMetrics,
++  fetchMetaPostMetrics,
++  fetchIGMetrics,
++  fetchLinkedInMetrics,
++  fetchGBPMetrics,
++} from "@/lib/social/channels/metrics";
++
++const DRY_RUN = process.env.DRY_RUN === "true";
++
++// How far back to poll. Engagement keeps accruing for a while after publish, so
++// we re-poll recent posts each run; older posts are left as last-captured.
++const LOOKBACK_DAYS = Number(process.env.SOCIAL_POLL_LOOKBACK_DAYS ?? "14");
++const BATCH_LIMIT = Number(process.env.SOCIAL_POLL_BATCH_LIMIT ?? "500");
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Pure DI core — unit-tested with mocks (no network, no DB)
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** A published post we can poll (only rows WITH a platform_post_id qualify). */
++export interface PollablePost {
++  id: string; // social_posts.id (PK; the social_events dedup key)
++  user_id: string; // owner (for token lookup); resolved by the adapter
++  platform: Platform;
++  platform_post_id: string;
++  /** social_accounts.platform_account_id — the connected account/page/org id. */
++  account_id: string;
++  /** LinkedIn org URN (urn:li:organization:{id}); null for non-LinkedIn. */
++  org_urn?: string | null;
++}
++
++/** One mapped event bound to its social_post_id, ready to upsert. */
++export interface PollEvent extends MappedEvent {
++  social_post_id: string;
++}
++
++export interface PollDeps {
++  /** Resolve a valid (refreshed-if-needed) access token for a post's account. */
++  getToken: (post: PollablePost) => Promise<string>;
++  /** Per-platform fetch → map. Returns mapped events (possibly empty). NEVER throws. */
++  fetchAndMap: (post: PollablePost, token: string) => Promise<MappedEvent[]>;
++  /**
++   * Upsert events for ONE post, deduped on (social_post_id, metric). Re-polling
++   * the same metric updates the existing row's value, never inserts a duplicate.
++   * Skipped entirely in dry mode (the core passes dryRun through).
++   */
++  upsert: (events: PollEvent[]) => Promise<void>;
++  log?: (line: string) => void;
++  dryRun?: boolean;
++}
++
++export interface PollSummary {
++  posts: number;
++  polled: number; // posts that returned ≥1 mapped event
++  empty: number; // posts a (gated/silent) platform returned nothing for
++  events: number; // total event rows mapped (would-upsert)
++  errors: number; // per-post failures (token/fetch) — never fatal
++}
++
++/**
++ * Poll engagement for a batch of pollable posts. PURE orchestration over the
++ * injected seams — fully deterministic and testable. A per-post failure (token
++ * resolve throws, etc.) is isolated: it bumps `errors` and the loop continues.
++ * A platform that returns zero events bumps `empty` and is skipped (no upsert).
++ */
++export async function pollEngagement(posts: PollablePost[], deps: PollDeps): Promise<PollSummary> {
++  const log = deps.log ?? (() => {});
++  const summary: PollSummary = { posts: posts.length, polled: 0, empty: 0, events: 0, errors: 0 };
++
++  for (const post of posts) {
++    try {
++      const token = await deps.getToken(post);
++      const mapped = await deps.fetchAndMap(post, token);
++      if (mapped.length === 0) {
++        // Gated / silent platform → treat as empty, never blend blind, never fail.
++        summary.empty += 1;
++        log(`[poll] ${post.platform} ${post.platform_post_id}: no metrics (gated/empty) — skip.`);
++        continue;
++      }
++      const events: PollEvent[] = mapped.map((m) => ({ ...m, social_post_id: post.id }));
++      summary.polled += 1;
++      summary.events += events.length;
++      if (deps.dryRun) {
++        log(
++          `[poll] DRY_RUN ${post.platform} ${post.platform_post_id}: would upsert ` +
++            events.map((e) => `${e.metric}=${e.value}`).join(" "),
++        );
++      } else {
++        await deps.upsert(events);
++        log(
++          `[poll] ${post.platform} ${post.platform_post_id}: upserted ${events.length} metric(s).`,
++        );
++      }
++    } catch (err) {
++      // Isolated per-post failure — never fatal, never stops the batch.
++      summary.errors += 1;
++      log(
++        `[poll] ${post.platform} ${post.platform_post_id}: ERROR ${
++          err instanceof Error ? err.message : String(err)
++        }`,
++      );
++    }
++  }
++  return summary;
++}
++
++/**
++ * Per-platform fetch+map dispatcher. PURE switch over the injected fetchers, so
++ * the adapter binds the real ones and tests bind mocks. Each branch is
++ * empty-tolerant (the fetchers return null on a gated/errored read → []).
++ */
++export interface FetchSeams {
++  fetchX: typeof fetchXMetrics;
++  fetchMetaPost: typeof fetchMetaPostMetrics;
++  fetchIG: typeof fetchIGMetrics;
++  fetchLinkedIn: typeof fetchLinkedInMetrics;
++  fetchGBP: typeof fetchGBPMetrics;
++}
++
++export async function fetchAndMapFor(
++  post: PollablePost,
++  token: string,
++  seams: FetchSeams,
++): Promise<MappedEvent[]> {
++  switch (post.platform) {
++    case "x": {
++      const r = await seams.fetchX(post.platform_post_id, token);
++      return mapXMetrics(post.platform_post_id, r);
++    }
++    case "facebook": {
++      const r = await seams.fetchMetaPost(post.platform_post_id, token);
++      return mapMetaPostMetrics(post.platform_post_id, r);
++    }
++    case "instagram": {
++      const r = await seams.fetchIG(post.platform_post_id, token);
++      return mapIGMetrics(post.platform_post_id, r);
++    }
++    case "linkedin": {
++      const r = await seams.fetchLinkedIn(post.platform_post_id, token, post.org_urn);
++      return mapLinkedInMetrics(post.platform_post_id, r);
++    }
++    case "google_business": {
++      const r = await seams.fetchGBP(post.platform_post_id, token);
++      return mapGBPMetrics(post.platform_post_id, r);
++    }
++    default: {
++      const _never: never = post.platform;
++      throw new Error(`Unknown platform: ${String(_never)}`);
++    }
++  }
++}
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Adapter — real seams (DB, tokens, fetchers) + exit code
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** Joined social_posts ⋈ social_accounts row the candidate query selects. */
++interface PostRow {
++  id: string;
++  platform: Platform;
++  platform_post_id: string | null;
++  social_accounts: {
++    user_id: string;
++    platform_account_id: string;
++  } | null;
++}
++
++/**
++ * Upsert mapped events for one post, deduped on (social_post_id, metric).
++ * The composite UNIQUE index social_events_dedup_post_metric_uidx makes
++ * onConflict update the existing row's value + captured_at rather than insert a
++ * duplicate — so re-polling the same metric never grows the ledger.
++ */
++async function upsertEvents(db: SupabaseClient, events: PollEvent[]): Promise<void> {
++  if (events.length === 0) return;
++  const nowIso = new Date().toISOString();
++  const rows = events.map((e) => ({
++    social_post_id: e.social_post_id,
++    platform_post_id: e.platform_post_id,
++    metric: e.metric,
++    value: e.value,
++    source: e.source,
++    captured_at: nowIso,
++  }));
++  const { error } = await db
++    .from("social_events")
++    .upsert(rows, { onConflict: "social_post_id,metric" });
++  if (error) throw new Error(`social_events upsert failed: ${error.message}`);
++}
++
++async function main(): Promise<void> {
++  const db = createServiceRoleClient(); // throws → fatal (caught below)
++  const now = new Date();
++  const sinceIso = new Date(now.getTime() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
++
++  // Candidate posts: published, WITH a platform_post_id (dry_run rows have none →
++  // naturally excluded), recent enough to still be accruing engagement. Join the
++  // owning account for the token lookup.
++  const { data, error } = await db
++    .from("social_posts")
++    .select(
++      "id, platform, platform_post_id, social_accounts:social_account_id ( user_id, platform_account_id )",
++    )
++    .eq("status", "published")
++    .not("platform_post_id", "is", null)
++    .gte("created_at", sinceIso)
++    .order("created_at", { ascending: false })
++    .limit(BATCH_LIMIT);
++  if (error) throw new Error(`select pollable posts failed: ${error.message}`);
++
++  const rows = (data ?? []) as unknown as PostRow[];
++  const posts: PollablePost[] = rows
++    .filter((r) => r.platform_post_id && r.social_accounts) // defensive: skip orphans
++    .map((r) => ({
++      id: r.id,
++      user_id: r.social_accounts!.user_id,
++      platform: r.platform,
++      platform_post_id: r.platform_post_id!,
++      account_id: r.social_accounts!.platform_account_id,
++      // LinkedIn org URN: the connected account id IS the org URN for org pages.
++      org_urn: r.platform === "linkedin" ? r.social_accounts!.platform_account_id : null,
++    }));
++
++  console.log(
++    `[poll-engagement] ${DRY_RUN ? "DRY_RUN " : ""}${posts.length} pollable post(s) ` +
++      `(published, with platform_post_id, since ${sinceIso}).`,
++  );
++  if (posts.length === 0) {
++    console.log("[poll-engagement] nothing to poll; exiting clean.");
++    return;
++  }
++
++  const seams: FetchSeams = {
++    fetchX: fetchXMetrics,
++    fetchMetaPost: fetchMetaPostMetrics,
++    fetchIG: fetchIGMetrics,
++    fetchLinkedIn: fetchLinkedInMetrics,
++    fetchGBP: fetchGBPMetrics,
++  };
++
++  const summary = await pollEngagement(posts, {
++    getToken: (post) => getValidAccessToken(db, post.user_id, post.platform, post.account_id),
++    fetchAndMap: (post, token) => fetchAndMapFor(post, token, seams),
++    upsert: (events) => upsertEvents(db, events),
++    log: (line) => console.log(line),
++    dryRun: DRY_RUN,
++  });
++
++  console.log(
++    `[poll-engagement] done — posts=${summary.posts} polled=${summary.polled} ` +
++      `empty=${summary.empty} events=${summary.events} errors=${summary.errors}.`,
++  );
++}
++
++// Only run as a script when invoked directly (e.g. `bun scripts/social/poll-engagement.mts`).
++// When imported (by the test, which exercises the pure core), DON'T run main() —
++// importing must not construct a DB client or perform any I/O. CLI-detect idiom is
++// the repo standard (works under both `bun` and `node`; see refinery/sources/*.mts).
++if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
++  main().catch((err) => {
++    // Top-level fatal ONLY (missing env, client construction). Per-post errors are
++    // isolated inside pollEngagement and never reach here.
++    console.error("[poll-engagement] FATAL", err);
++    process.exit(1);
++  });
++}
+-- 
+2.53.0.windows.3
+

@@ -1,0 +1,2460 @@
+From fee3bfa9b143eb056a9348077b63f94dee3e0b21 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 20 Jun 2026 04:16:32 +0000
+Subject: [PATCH 1/3] feat(contacts): phone + CSV/vCard contact import +
+ work-email filter
+
+Extend the existing email_contacts pipeline with phone import and a
+work-email filter. CSV upload already shipped; this adds:
+
+- Shared upsert core (lib/email/upsert-contacts.ts) every path funnels
+  through; fixes the 2026-06-13 audit MEDIUM (re-upload nulled a name).
+- Work-email filter (partitionContacts) applied to Google AND CSV.
+- Google sign-in import: read-only OAuth (no SDK, token never stored) +
+  pure People->ContactRow mapper + start/callback routes (CSRF state).
+- Android QR: signed import token (HMAC on SDG_COOKIE_SECRET, 10-min TTL)
+  -> desktop QR -> /m/contacts/[token] + Contact Picker API (feature
+  detected, iPhone fallback) -> token-authed phone route (service-role).
+- vCard (.vcf) parser wired into the upload route + file picker.
+- Extracted makeSupabaseAudienceStore (explicit user_id scoping) and
+  reused it in /sync.
+
+tsc 0, eslint clean, next build compiles + typechecks, 3055 tests pass.
+.env.example documents GOOGLE_OAUTH_CLIENT_ID/SECRET (sensitive scope ->
+needs People API enable + OAuth verification).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011W3SXdAff3nufkN8m5bXVC
+---
+ .env.example                                  |  10 +
+ SESSION_LOG.md                                |  10 +
+ .../email/contacts/google/callback/route.ts   |  74 +++++++
+ app/api/email/contacts/google/start/route.ts  |  50 +++++
+ app/api/email/contacts/phone/route.ts         |  87 ++++++++
+ app/api/email/contacts/sync/route.ts          |  53 +----
+ app/api/email/contacts/upload/route.ts        | 186 +++++-------------
+ app/contacts/upload/UploadForm.tsx            | 183 +++++++++++++++--
+ app/contacts/upload/page.tsx                  |  24 ++-
+ app/m/contacts/[token]/page.tsx               |  43 ++++
+ bun.lock                                      |  54 ++++-
+ components/contacts/PhoneContactPicker.tsx    | 131 ++++++++++++
+ .../__tests__/contact-import-token.test.ts    |  58 ++++++
+ lib/email/__tests__/google-people.test.ts     |  41 ++++
+ lib/email/__tests__/parse-vcard.test.ts       |  60 ++++++
+ lib/email/__tests__/upsert-contacts.test.ts   |  61 ++++++
+ lib/email/__tests__/work-email-filter.test.ts |  64 ++++++
+ lib/email/audience-sync.ts                    |  52 +++++
+ lib/email/contact-import-token.ts             | 102 ++++++++++
+ lib/email/google-oauth.ts                     | 132 +++++++++++++
+ lib/email/google-people.ts                    |  37 ++++
+ lib/email/parse-vcard.ts                      | 140 +++++++++++++
+ lib/email/upsert-contacts.ts                  | 157 +++++++++++++++
+ lib/email/work-email-filter.ts                |  94 +++++++++
+ package.json                                  |   2 +
+ 25 files changed, 1698 insertions(+), 207 deletions(-)
+ create mode 100644 app/api/email/contacts/google/callback/route.ts
+ create mode 100644 app/api/email/contacts/google/start/route.ts
+ create mode 100644 app/api/email/contacts/phone/route.ts
+ create mode 100644 app/m/contacts/[token]/page.tsx
+ create mode 100644 components/contacts/PhoneContactPicker.tsx
+ create mode 100644 lib/email/__tests__/contact-import-token.test.ts
+ create mode 100644 lib/email/__tests__/google-people.test.ts
+ create mode 100644 lib/email/__tests__/parse-vcard.test.ts
+ create mode 100644 lib/email/__tests__/upsert-contacts.test.ts
+ create mode 100644 lib/email/__tests__/work-email-filter.test.ts
+ create mode 100644 lib/email/contact-import-token.ts
+ create mode 100644 lib/email/google-oauth.ts
+ create mode 100644 lib/email/google-people.ts
+ create mode 100644 lib/email/parse-vcard.ts
+ create mode 100644 lib/email/upsert-contacts.ts
+ create mode 100644 lib/email/work-email-filter.ts
+
+diff --git a/.env.example b/.env.example
+index 91f5e320..dc1033f0 100644
+--- a/.env.example
++++ b/.env.example
+@@ -25,6 +25,16 @@ BRAIN_PLATFORM_URL=https://www.swfldatagulf.com
+ # Resend API key — transactional email for the /api/waitlist endpoint.
+ RESEND_API_KEY=re_xxx
+ 
++# --- Google Contacts import (read-only) ---
++# OAuth client for "Import from Google Contacts" (/api/email/contacts/google/*).
++# Cloud Console: enable the People API, add an OAuth 2.0 Web client, and register
++# the redirect URI `${NEXT_PUBLIC_SITE_URL}/api/email/contacts/google/callback`.
++# Scope `contacts.readonly` is SENSITIVE — submit the consent screen for Google
++# verification before serving >100 real users (test users work immediately).
++# Unset → the "Import from Google" button degrades to ?google_error=not_configured.
++GOOGLE_OAUTH_CLIENT_ID=xxx.apps.googleusercontent.com
++GOOGLE_OAUTH_CLIENT_SECRET=xxx
++
+ # --- LLM + embedding APIs ---
+ ANTHROPIC_API_KEY=sk-ant-xxx
+ FRED_API_KEY=xxx
+diff --git a/SESSION_LOG.md b/SESSION_LOG.md
+index 50571d47..5baf35fa 100644
+--- a/SESSION_LOG.md
++++ b/SESSION_LOG.md
+@@ -1,3 +1,13 @@
++## 2026-06-20 (main) — feat(contacts): phone + CSV/vCard contact import + work-email filter (Google sign-in first)
++
++- **Context:** "get contacts + emails onto the site, build for phone and csv." Probing remote `main` (this container was a stale shallow clone — fast-forwarded 621 commits to `02a9bac` first) showed the **CSV path already ships** (`email_contacts` + `/api/email/contacts/upload` + `/sync` + `/contacts/upload` UI). So this build is the **missing phone import + work-email filter**, extending the existing pipeline — operator chose **Google sign-in first**, then Android QR, then vCard-accept.
++- **Shared core (no parallel insert paths):** new `lib/email/upsert-contacts.ts` (`prepareContacts`/`mergeContact` pure + thin upsert) — every path funnels through it; **fixes the 2026-06-13 audit MEDIUM** (re-upload nulled an existing name). `lib/email/work-email-filter.ts` (`partitionContacts`, personal-domain blocklist) rides **both** Google + CSV. Extracted `makeSupabaseAudienceStore` into `audience-sync.ts` (explicit `user_id` scoping — safe under service-role) + refactored `/sync` to use it.
++- **Phase 1 — Google:** `lib/email/google-oauth.ts` (plain fetch, no SDK, token never stored) + pure `google-people.ts` mapper + `app/api/email/contacts/google/{start,callback}` (httpOnly CSRF state cookie, RLS-scoped). `contacts.readonly` is a Google **sensitive scope** → operator must enable People API + submit OAuth verification (`.env.example` documents `GOOGLE_OAUTH_CLIENT_ID/SECRET`; unset → button degrades to `?google_error=not_configured`).
++- **Phase 2 — Android QR:** signed `contact-import-token.ts` (HMAC on `SDG_COOKIE_SECRET`, 10-min TTL — phone has no session, token IS the authz) → desktop QR (server-minted, `qrcode` dep added) → `app/m/contacts/[token]` mobile page + `PhoneContactPicker` (Contact Picker API, feature-detected via `useSyncExternalStore`, iPhone fallback) → `app/api/email/contacts/phone` (service-role upsert from verified token + best-effort sync).
++- **Phase 3 — vCard:** pure `parse-vcard.ts` (multi-card, line-folding, grouped props, quoted-printable UTF-8) wired into the upload route + `/contacts/upload` file picker (`.vcf`).
++- **Gates:** `tsc` 0, eslint clean, `next build` **✓ Compiled + ✓ TypeScript** (only the pre-existing env-gated `/charts` prerender fails here — no Supabase secrets in container), **3055 tests pass / 0 fail** (incl. ~35 new). Lockfile staged with `package.json` (qrcode).
++- **Next / operator:** (1) Google Cloud OAuth client + People API + verification submission; (2) prod verify the `/contacts/upload` Google button + Android QR + a `.vcf` upload end-to-end.
++
+ ## 2026-06-20 (main) — audit + fix: full-project audit, real CITATION_URL crash fixed, security/lint/tracker reconciliation
+ 
+ - **Full project audit** (5 parallel read-only auditors + direct verification). Code is healthy: app `tsc --noEmit` **0 errors**, eslint **0/0** (was 10 warnings), refinery packs/validate/sources **597/0**, lockfile no-drift, 0 critical/high security.
+diff --git a/app/api/email/contacts/google/callback/route.ts b/app/api/email/contacts/google/callback/route.ts
+new file mode 100644
+index 00000000..a46c2252
+--- /dev/null
++++ b/app/api/email/contacts/google/callback/route.ts
+@@ -0,0 +1,74 @@
++/**
++ * GET /api/email/contacts/google/callback
++ *
++ * Google redirects here with `code` + `state`. We verify `state` against the
++ * httpOnly cookie set by /start, exchange the code for an access token
++ * (server-side), read the user's contacts via the People API, apply the
++ * work-email filter, and upsert into email_contacts through the shared core.
++ * The token is never stored. On every outcome we redirect back to
++ * /contacts/upload with a status query so the UI can render a banner.
++ */
++import { cookies } from "next/headers";
++import { NextResponse, type NextRequest } from "next/server";
++import { createClient } from "@/utils/supabase/server";
++import { exchangeCodeForToken, fetchAllConnections, googleRedirectUri } from "@/lib/email/google-oauth";
++import { peopleConnectionsToContactRows } from "@/lib/email/google-people";
++import { partitionContacts } from "@/lib/email/work-email-filter";
++import { upsertContacts } from "@/lib/email/upsert-contacts";
++import { OAUTH_STATE_COOKIE } from "../start/route";
++
++export const runtime = "nodejs";
++export const dynamic = "force-dynamic";
++
++export async function GET(req: NextRequest) {
++  const cookieStore = await cookies();
++  const supabase = createClient(cookieStore);
++  const {
++    data: { user },
++  } = await supabase.auth.getUser();
++  if (!user) {
++    return NextResponse.redirect(new URL("/login?next=/contacts/upload", req.url));
++  }
++
++  const fail = (reason: string) =>
++    NextResponse.redirect(new URL(`/contacts/upload?google_error=${reason}`, req.url));
++
++  const params = req.nextUrl.searchParams;
++  if (params.get("error")) return finish(fail("denied"));
++
++  const code = params.get("code");
++  const stateParam = params.get("state");
++  const [cookieState, workOnlyFlag] = (cookieStore.get(OAUTH_STATE_COOKIE)?.value ?? "").split(".");
++
++  // CSRF: the echoed state must match the one we stashed (constant work — fine here).
++  if (!code || !stateParam || !cookieState || stateParam !== cookieState) {
++    return finish(fail("state"));
++  }
++  const workOnly = workOnlyFlag === "1";
++
++  let rows;
++  try {
++    const token = await exchangeCodeForToken({ code, redirectUri: googleRedirectUri(req.url) });
++    const connections = await fetchAllConnections(token);
++    rows = peopleConnectionsToContactRows(connections, ["google"]);
++  } catch {
++    return finish(fail("fetch"));
++  }
++
++  const { kept, skippedPersonal } = partitionContacts(rows, { workOnly });
++  const result = await upsertContacts(supabase, user.id, kept);
++
++  const imported = result.inserted + result.updated;
++  const url = new URL("/contacts/upload", req.url);
++  url.searchParams.set("source", "google");
++  url.searchParams.set("imported", String(imported));
++  url.searchParams.set("skipped", String(result.skipped));
++  url.searchParams.set("personal", String(skippedPersonal));
++  return finish(NextResponse.redirect(url));
++}
++
++/** Drop the single-use state cookie on the way out, whatever the outcome. */
++function finish(res: NextResponse): NextResponse {
++  res.cookies.delete(OAUTH_STATE_COOKIE);
++  return res;
++}
+diff --git a/app/api/email/contacts/google/start/route.ts b/app/api/email/contacts/google/start/route.ts
+new file mode 100644
+index 00000000..af51a0a0
+--- /dev/null
++++ b/app/api/email/contacts/google/start/route.ts
+@@ -0,0 +1,50 @@
++/**
++ * GET /api/email/contacts/google/start
++ *
++ * Begins the read-only Google Contacts import. Requires a signed-in user (the
++ * import is RLS-scoped to them on the callback leg). Mints a CSRF `state`, stows
++ * it — together with the "work emails only" choice — in a short-lived httpOnly
++ * cookie, and redirects to Google's consent screen.
++ *
++ * Query: `work_only=1` to keep only company/professional domains on import.
++ */
++import { cookies } from "next/headers";
++import { NextResponse, type NextRequest } from "next/server";
++import { randomBytes } from "node:crypto";
++import { createClient } from "@/utils/supabase/server";
++import { buildGoogleAuthUrl, googleRedirectUri, googleOauthConfigured } from "@/lib/email/google-oauth";
++
++export const runtime = "nodejs";
++export const dynamic = "force-dynamic";
++
++export const OAUTH_STATE_COOKIE = "g_contacts_oauth";
++
++export async function GET(req: NextRequest) {
++  const supabase = createClient(await cookies());
++  const {
++    data: { user },
++  } = await supabase.auth.getUser();
++  if (!user) {
++    return NextResponse.redirect(new URL("/login?next=/contacts/upload", req.url));
++  }
++
++  if (!googleOauthConfigured()) {
++    return NextResponse.redirect(new URL("/contacts/upload?google_error=not_configured", req.url));
++  }
++
++  const workOnly = req.nextUrl.searchParams.get("work_only") === "1";
++  const state = randomBytes(16).toString("hex");
++  const redirectUri = googleRedirectUri(req.url);
++
++  const res = NextResponse.redirect(buildGoogleAuthUrl({ state, redirectUri }));
++  // `${state}.${workOnly}` — lax so the cookie rides the top-level redirect back
++  // from Google; httpOnly + 10-min TTL; single-use (callback deletes it).
++  res.cookies.set(OAUTH_STATE_COOKIE, `${state}.${workOnly ? "1" : "0"}`, {
++    httpOnly: true,
++    secure: process.env.NODE_ENV === "production",
++    sameSite: "lax",
++    path: "/",
++    maxAge: 600,
++  });
++  return res;
++}
+diff --git a/app/api/email/contacts/phone/route.ts b/app/api/email/contacts/phone/route.ts
+new file mode 100644
+index 00000000..a16ecd49
+--- /dev/null
++++ b/app/api/email/contacts/phone/route.ts
+@@ -0,0 +1,87 @@
++/**
++ * POST /api/email/contacts/phone
++ *
++ * Receives contacts picked on a phone via the Contact Picker API on the
++ * token-gated mobile page (/m/contacts/[token]). The phone is NOT in the user's
++ * Supabase session, so authorization comes from the signed import token (issued
++ * on the authenticated desktop page) — verified here, then the upsert runs under
++ * the service-role client with `user_id` taken from the token's verified claim.
++ *
++ * INPUT: JSON `{ token: string, contacts: { email: string, name?: string }[] }`
++ * RESPONSE: 200 { imported, skipped, skippedPersonal } | 400 | 401
++ */
++import { NextResponse, type NextRequest } from "next/server";
++import { createServiceRoleClient } from "@/utils/supabase/service-role";
++import { verifyContactImportToken } from "@/lib/email/contact-import-token";
++import { partitionContacts } from "@/lib/email/work-email-filter";
++import { upsertContacts } from "@/lib/email/upsert-contacts";
++import { syncUserAudiences, makeSupabaseAudienceStore } from "@/lib/email/audience-sync";
++import { getMarketingResend } from "@/lib/email/marketing-client";
++import type { ContactRow } from "@/lib/email/parse-contacts-csv";
++
++export const runtime = "nodejs";
++
++const MAX_PICKED = 10_000;
++
++export async function POST(req: NextRequest) {
++  const body = await req.json().catch(() => null);
++  if (!body || typeof body !== "object") {
++    return NextResponse.json({ error: "invalid body" }, { status: 400 });
++  }
++
++  const { token, contacts } = body as { token?: unknown; contacts?: unknown };
++  if (typeof token !== "string") {
++    return NextResponse.json({ error: "missing token" }, { status: 400 });
++  }
++
++  const verified = verifyContactImportToken(token);
++  if (!verified.ok) {
++    return NextResponse.json({ error: `token ${verified.reason}` }, { status: 401 });
++  }
++
++  if (!Array.isArray(contacts)) {
++    return NextResponse.json({ error: "contacts must be an array" }, { status: 400 });
++  }
++
++  // Map the picker payload → ContactRow[], tagged "phone" for provenance.
++  const rows: ContactRow[] = [];
++  for (const c of contacts.slice(0, MAX_PICKED)) {
++    if (!c || typeof c !== "object") continue;
++    const email = typeof (c as { email?: unknown }).email === "string" ? (c as { email: string }).email : "";
++    if (!email) continue;
++    const name = typeof (c as { name?: unknown }).name === "string" ? (c as { name: string }).name : null;
++    rows.push({ email, name, tags: ["phone"] });
++  }
++
++  const { kept, skippedPersonal } = partitionContacts(rows, { workOnly: verified.workOnly });
++
++  // Service-role: the phone has no session, so RLS auth.uid() is unavailable.
++  // The token IS the authorization — user_id comes from its verified claim.
++  const supabase = createServiceRoleClient();
++  const result = await upsertContacts(supabase, verified.uid, kept);
++
++  // Best-effort: materialize the "phone" tag into a pickable Resend audience now,
++  // since the phone can't reach the session-gated /sync route. Never fatal — the
++  // contacts are already saved; a sync failure just delays the audience appearing.
++  const imported = result.inserted + result.updated;
++  if (imported > 0) {
++    try {
++      await syncUserAudiences(
++        getMarketingResend(),
++        makeSupabaseAudienceStore(supabase, verified.uid),
++        verified.uid,
++      );
++    } catch {
++      /* swallow — audience can be re-synced from desktop */
++    }
++  }
++
++  return NextResponse.json(
++    {
++      imported,
++      skipped: result.skipped,
++      skippedPersonal,
++    },
++    { status: 200 },
++  );
++}
+diff --git a/app/api/email/contacts/sync/route.ts b/app/api/email/contacts/sync/route.ts
+index b24e9514..b7276462 100644
+--- a/app/api/email/contacts/sync/route.ts
++++ b/app/api/email/contacts/sync/route.ts
+@@ -32,57 +32,12 @@
+ 
+ import { cookies } from "next/headers";
+ import { NextResponse, type NextRequest } from "next/server";
+-import type { SupabaseClient } from "@supabase/supabase-js";
+ import { createClient } from "@/utils/supabase/server";
+ import { getMarketingResend } from "@/lib/email/marketing-client";
+-import {
+-  syncUserAudiences,
+-  type AudienceStore,
+-  type ContactRow,
+-  type AudienceRecord,
+-} from "@/lib/email/audience-sync";
++import { syncUserAudiences, makeSupabaseAudienceStore } from "@/lib/email/audience-sync";
+ 
+ export const runtime = "nodejs";
+ 
+-/**
+- * Adapt the cookie/RLS Supabase client to the `AudienceStore` seam, closing over
+- * `userId` for writes (RLS handles read scoping; writes carry the id explicitly).
+- */
+-function makeStore(supabase: SupabaseClient, userId: string): AudienceStore {
+-  return {
+-    async readContacts(): Promise<ContactRow[]> {
+-      const { data, error } = await supabase.from("email_contacts").select("email, tags");
+-      if (error) throw new Error(`read email_contacts: ${error.message}`);
+-      return (data ?? []) as ContactRow[];
+-    },
+-
+-    async readAudiences(): Promise<AudienceRecord[]> {
+-      const { data, error } = await supabase
+-        .from("email_audiences")
+-        .select("audience_slug, resend_audience_id");
+-      if (error) throw new Error(`read email_audiences: ${error.message}`);
+-      return (data ?? []).filter(
+-        (r): r is AudienceRecord =>
+-          typeof r.audience_slug === "string" && typeof r.resend_audience_id === "string",
+-      );
+-    },
+-
+-    async upsertAudience(row): Promise<void> {
+-      const { error } = await supabase.from("email_audiences").upsert(
+-        {
+-          user_id: userId,
+-          audience_slug: row.audience_slug,
+-          resend_audience_id: row.resend_audience_id,
+-          contact_count: row.contact_count,
+-          updated_at: new Date().toISOString(),
+-        },
+-        { onConflict: "user_id,audience_slug" },
+-      );
+-      if (error) throw new Error(error.message);
+-    },
+-  };
+-}
+-
+ export async function POST(_req: NextRequest) {
+   // --- Auth (cookie/RLS client; copy pattern from app/api/projects/route.ts) ---
+   const supabase = createClient(await cookies());
+@@ -104,7 +59,11 @@ export async function POST(_req: NextRequest) {
+ 
+   // --- Sync ---
+   try {
+-    const summary = await syncUserAudiences(resend, makeStore(supabase, user.id), user.id);
++    const summary = await syncUserAudiences(
++      resend,
++      makeSupabaseAudienceStore(supabase, user.id),
++      user.id,
++    );
+     return NextResponse.json({ ok: true, ...summary }, { status: 200 });
+   } catch (e) {
+     console.error("[email/contacts/sync] failed:", e);
+diff --git a/app/api/email/contacts/upload/route.ts b/app/api/email/contacts/upload/route.ts
+index ec7343f1..f3edc23e 100644
+--- a/app/api/email/contacts/upload/route.ts
++++ b/app/api/email/contacts/upload/route.ts
+@@ -1,14 +1,17 @@
+ /**
+  * POST /api/email/contacts/upload
+  *
+- * INPUT CONTRACT: JSON body `{ csv: string, tags?: string[] }`
+- *   - `csv`  — raw CSV text (header row required; columns: email, name, tags)
+- *   - `tags` — optional array of tags to apply to every row in this import
++ * INPUT CONTRACT: JSON body `{ csv: string, tags?: string[], workOnly?: boolean }`
++ *   - `csv`      — raw CSV text (header row required; columns: email, name, tags)
++ *   - `tags`     — optional array of tags applied to every row in this import
++ *   - `workOnly` — when true, drop personal-domain emails (keep company/professional)
+  *
+- * Parses the CSV, validates each email, and upserts into `public.email_contacts`
+- * scoped to the signed-in user. Conflict on (user_id, email) merges name + tags.
++ * Parses the CSV, optionally filters personal domains, then upserts into
++ * `public.email_contacts` via the shared `upsertContacts` core (idempotent on
++ * (user_id, email); tags unioned; names preserved). Same contact-handling path
++ * as the Google import — no parallel insert logic.
+  *
+- * RESPONSE: 200 { inserted, updated, skipped, errors }
++ * RESPONSE: 200 { inserted, updated, skipped, skippedPersonal, errors }
+  *           400 missing / invalid body
+  *           401 unauthenticated
+  *
+@@ -19,15 +22,14 @@
+ import { cookies } from "next/headers";
+ import { NextResponse, type NextRequest } from "next/server";
+ import { createClient } from "@/utils/supabase/server";
+-import { normalizeEmail, isValidEmail } from "@/lib/email/validation";
+ import { parseContactsCsv } from "@/lib/email/parse-contacts-csv";
++import { parseVcard } from "@/lib/email/parse-vcard";
++import { partitionContacts } from "@/lib/email/work-email-filter";
++import { upsertContacts } from "@/lib/email/upsert-contacts";
++import type { ContactRow } from "@/lib/email/parse-contacts-csv";
+ 
+ export const runtime = "nodejs";
+ 
+-// Maximum number of contacts accepted in a single upload to guard against
+-// runaway payloads.
+-const MAX_ROWS = 10_000;
+-
+ export async function POST(req: NextRequest) {
+   // --- Auth (copy pattern from app/api/projects/route.ts) ---
+   const supabase = createClient(await cookies());
+@@ -42,11 +44,18 @@ export async function POST(req: NextRequest) {
+     return NextResponse.json({ error: "invalid body: expected JSON object" }, { status: 400 });
+   }
+ 
+-  const { csv, tags: bodyTagsRaw } = body as { csv?: unknown; tags?: unknown };
++  const { csv, vcard, tags: bodyTagsRaw, workOnly: workOnlyRaw } = body as {
++    csv?: unknown;
++    vcard?: unknown;
++    tags?: unknown;
++    workOnly?: unknown;
++  };
+ 
+-  if (typeof csv !== "string" || csv.trim().length === 0) {
++  const hasCsv = typeof csv === "string" && csv.trim().length > 0;
++  const hasVcard = typeof vcard === "string" && vcard.trim().length > 0;
++  if (!hasCsv && !hasVcard) {
+     return NextResponse.json(
+-      { error: "invalid body: 'csv' must be a non-empty string" },
++      { error: "invalid body: provide a non-empty 'csv' or 'vcard' string" },
+       { status: 400 },
+     );
+   }
+@@ -59,133 +68,38 @@ export async function POST(req: NextRequest) {
+         .filter((t) => t.length > 0)
+     : [];
+ 
+-  // --- Parse CSV ---
+-  const { rows, skippedCount } = parseContactsCsv(csv, bodyTags);
+-
+-  if (rows.length === 0) {
+-    return NextResponse.json(
+-      { inserted: 0, updated: 0, skipped: skippedCount, errors: [] },
+-      { status: 200 },
+-    );
+-  }
+-
+-  // --- Validate emails + enforce row cap ---
+-  const validRows: { user_id: string; email: string; name: string | null; tags: string[] }[] = [];
+-  let extraSkipped = 0;
+-  const errors: string[] = [];
+-
+-  for (const row of rows) {
+-    const email = normalizeEmail(row.email);
+-    if (!isValidEmail(email)) {
+-      extraSkipped++;
+-      errors.push(`skipped invalid email: ${row.email}`);
+-      continue;
+-    }
+-    if (validRows.length >= MAX_ROWS) {
+-      extraSkipped++;
+-      continue;
+-    }
+-    validRows.push({
+-      user_id: user.id,
+-      email,
+-      name: row.name,
+-      tags: row.tags,
+-    });
+-  }
+-
+-  const totalSkipped = skippedCount + extraSkipped;
+-
+-  if (validRows.length === 0) {
+-    return NextResponse.json(
+-      { inserted: 0, updated: 0, skipped: totalSkipped, errors },
+-      { status: 200 },
+-    );
++  const workOnly = workOnlyRaw === true;
++
++  // --- Parse (CSV or vCard) → optional work-email filter → shared upsert ---
++  let rows: ContactRow[];
++  let skippedFormat: number;
++  if (hasVcard) {
++    const parsed = parseVcard(vcard as string);
++    // vCard rows carry no tags of their own — apply the list-name tags here so a
++    // vCard import lands in the same audience a CSV would.
++    rows = parsed.rows.map((r) => ({
++      ...r,
++      tags: Array.from(new Set([...bodyTags, ...r.tags])),
++    }));
++    skippedFormat = parsed.skippedCards;
++  } else {
++    const parsed = parseContactsCsv(csv as string, bodyTags);
++    rows = parsed.rows;
++    skippedFormat = parsed.skippedCount;
+   }
+ 
+-  // --- Upsert into email_contacts ---
+-  // onConflict: "user_id,email" — merge name (if non-null) and union tags.
+-  // Supabase upsert with ignoreDuplicates:false will update on conflict.
+-  // We use a merge strategy: updated_at always advances; name is replaced if
+-  // the incoming value is non-null; tags are unioned via a raw SQL expression
+-  // (not available in the JS client), so we fall back to a two-pass approach:
+-  //   1. Insert new rows (ignoreDuplicates: true) → counts as "inserted"
+-  //   2. Update existing rows with merged tags  → counts as "updated"
+-  //
+-  // This keeps the route logic in the JS client without requiring a DB function.
+-
+-  // Step 1: attempt insert-only; conflicts are silently ignored here
+-  const { data: inserted, error: insertError } = await supabase
+-    .from("email_contacts")
+-    .upsert(validRows, {
+-      onConflict: "user_id,email",
+-      ignoreDuplicates: true,
+-    })
+-    .select("id");
+-
+-  if (insertError) {
+-    return NextResponse.json(
+-      { error: "database error on insert", detail: insertError.message },
+-      { status: 500 },
+-    );
+-  }
+-
+-  const insertedCount = inserted?.length ?? 0;
+-  const conflictCount = validRows.length - insertedCount;
+-
+-  // Step 2: for rows that conflicted (already existed), update name + union tags
+-  let updatedCount = 0;
+-  if (conflictCount > 0) {
+-    // Fetch existing rows to merge tags client-side
+-    const conflictEmails = validRows.slice(0, validRows.length).map((r) => r.email);
+-    const { data: existing, error: fetchError } = await supabase
+-      .from("email_contacts")
+-      .select("id, email, tags")
+-      .eq("user_id", user.id)
+-      .in("email", conflictEmails);
+-
+-    if (!fetchError && existing && existing.length > 0) {
+-      const incomingByEmail = new Map(validRows.map((r) => [r.email, r]));
+-
+-      const updates = existing
+-        .filter((ex) => {
+-          // Only rows that actually conflicted (not the freshly inserted ones)
+-          const incoming = incomingByEmail.get(ex.email);
+-          return incoming !== undefined;
+-        })
+-        .map((ex) => {
+-          const incoming = incomingByEmail.get(ex.email)!;
+-          const mergedTags = Array.from(
+-            new Set([...((ex.tags as string[]) ?? []), ...incoming.tags]),
+-          );
+-          return {
+-            id: ex.id as number,
+-            name: incoming.name,
+-            tags: mergedTags,
+-          };
+-        });
+-
+-      // Update each conflicted row — batch via individual updates (small N typical)
+-      for (const update of updates) {
+-        const { error: upErr } = await supabase
+-          .from("email_contacts")
+-          .update({
+-            name: update.name,
+-            tags: update.tags,
+-            updated_at: new Date().toISOString(),
+-          })
+-          .eq("id", update.id)
+-          .eq("user_id", user.id); // belt-and-suspenders RLS
+-        if (!upErr) updatedCount++;
+-      }
+-    }
+-  }
++  const { kept, skippedPersonal } = partitionContacts(rows, { workOnly });
++  const result = await upsertContacts(supabase, user.id, kept);
+ 
+   return NextResponse.json(
+     {
+-      inserted: insertedCount,
+-      updated: updatedCount,
+-      skipped: totalSkipped,
+-      errors,
++      inserted: result.inserted,
++      updated: result.updated,
++      // Format-level skips (blank/invalid CSV rows or email-less vCards) + per-row
++      // invalid-email skips from the shared core.
++      skipped: skippedFormat + result.skipped,
++      skippedPersonal,
++      errors: result.errors,
+     },
+     { status: 200 },
+   );
+diff --git a/app/contacts/upload/UploadForm.tsx b/app/contacts/upload/UploadForm.tsx
+index b57b0dfd..4fb76a7f 100644
+--- a/app/contacts/upload/UploadForm.tsx
++++ b/app/contacts/upload/UploadForm.tsx
+@@ -1,45 +1,99 @@
+ "use client";
+ 
+-import { useState } from "react";
++import { useCallback, useEffect, useState } from "react";
+ import Link from "next/link";
++import { useSearchParams } from "next/navigation";
+ 
+ /**
+- * Two-step upload: POST /api/email/contacts/upload (CSV → email_contacts, tagged
+- * with the list name) then POST /api/email/contacts/sync (materialize the Resend
+- * segment + email_audiences row) so the new list is immediately pickable in the
+- * "Send weekly" handle. The list name is lowercased to match the audience-slug
+- * contract (tags are normalized lowercase server-side).
++ * Contact import surface. Two entry points into the SAME email_contacts pipeline:
++ *
++ *  1. Google Contacts — a full-page redirect to /api/email/contacts/google/start
++ *     (OAuth), returning here with ?source=google&imported=…; we then run /sync.
++ *  2. CSV — POST /api/email/contacts/upload (tagged with the list name) then
++ *     POST /api/email/contacts/sync to materialize the Resend segment.
++ *
++ * The "Work emails only" toggle rides both paths: it's a query flag on the Google
++ * link and a body flag on the CSV upload.
+  */
+ 
+ interface UploadResult {
+   inserted: number;
+   updated: number;
+   skipped: number;
++  skippedPersonal?: number;
+   errors?: string[];
+ }
+ 
+ const SAMPLE = "email,name,tags\njane@example.com,Jane Buyer,\njohn@example.com,John Client,";
+ 
+-export function UploadForm({ backHref }: { backHref: string }) {
++const GOOGLE_ERRORS: Record<string, string> = {
++  not_configured: "Google import isn’t switched on yet — use CSV for now.",
++  denied: "Google sign-in was cancelled.",
++  state: "That sign-in link expired — please try Google again.",
++  fetch: "Couldn’t read your Google contacts — please try again.",
++};
++
++export function UploadForm({
++  backHref,
++  qrAll,
++  qrWork,
++}: {
++  backHref: string;
++  qrAll?: string | null;
++  qrWork?: string | null;
++}) {
++  const params = useSearchParams();
+   const [csv, setCsv] = useState("");
++  const [vcard, setVcard] = useState("");
++  const [fileLabel, setFileLabel] = useState<string | null>(null);
+   const [listName, setListName] = useState("");
++  const [workOnly, setWorkOnly] = useState(false);
+   const [busy, setBusy] = useState(false);
+   const [error, setError] = useState<string | null>(null);
+   const [result, setResult] = useState<UploadResult | null>(null);
+   const [synced, setSynced] = useState(false);
+ 
++  const qr = workOnly ? qrWork : qrAll;
++
++  // ---- Google import return (?source=google | ?google_error=…) -----------------
++  const googleError = params.get("google_error");
++  const fromGoogle = params.get("source") === "google";
++  const googleImported = Number(params.get("imported") ?? 0);
++  const googlePersonal = Number(params.get("personal") ?? 0);
++  const googleSkipped = Number(params.get("skipped") ?? 0);
++  const [googleSynced, setGoogleSynced] = useState(false);
++
++  useEffect(() => {
++    // Materialize the freshly-imported Google contacts into a pickable audience.
++    if (fromGoogle && googleImported > 0 && !googleSynced) {
++      void fetch("/api/email/contacts/sync", { method: "POST" }).finally(() =>
++        setGoogleSynced(true),
++      );
++    }
++  }, [fromGoogle, googleImported, googleSynced]);
++
+   async function onFile(file: File) {
+     setError(null);
+-    setCsv(await file.text());
++    const text = await file.text();
++    const isVcard = /\.vcf$/i.test(file.name) || /^\s*BEGIN:VCARD/i.test(text);
++    if (isVcard) {
++      setVcard(text);
++      setCsv("");
++      setFileLabel(`${file.name} (vCard ready)`);
++    } else {
++      setCsv(text);
++      setVcard("");
++      setFileLabel(`${file.name} (CSV ready)`);
++    }
+   }
+ 
+-  async function submit() {
++  const submit = useCallback(async () => {
+     setError(null);
+     setResult(null);
+     setSynced(false);
+     const tag = listName.trim().toLowerCase();
+-    if (!csv.trim()) {
+-      setError("Paste or choose a CSV first (header row: email, name, tags).");
++    if (!csv.trim() && !vcard.trim()) {
++      setError("Paste a CSV, or choose a .csv / .vcf file first.");
+       return;
+     }
+     if (!tag) {
+@@ -48,23 +102,24 @@ export function UploadForm({ backHref }: { backHref: string }) {
+     }
+     setBusy(true);
+     try {
++      const payload = vcard.trim()
++        ? { vcard, tags: [tag], workOnly }
++        : { csv, tags: [tag], workOnly };
+       const up = await fetch("/api/email/contacts/upload", {
+         method: "POST",
+         headers: { "content-type": "application/json" },
+-        body: JSON.stringify({ csv, tags: [tag] }),
++        body: JSON.stringify(payload),
+       });
+       const upJson = (await up.json().catch(() => ({}))) as UploadResult & { error?: string };
+       if (!up.ok) throw new Error(upJson.error || `upload failed (${up.status})`);
+       setResult(upJson);
+ 
+-      // Materialize the audience (Resend segment + email_audiences row). Non-fatal:
+-      // the contacts are saved regardless; a sync failure just delays the audience
+-      // appearing (re-runnable), so we surface it without throwing away the upload.
++      // Materialize the audience (Resend segment + email_audiences row). Non-fatal.
+       const sync = await fetch("/api/email/contacts/sync", { method: "POST" });
+       setSynced(sync.ok);
+       if (!sync.ok) {
+         setError(
+-          "Contacts saved, but the audience list didn't finish building — try again shortly.",
++          "Contacts saved, but the audience list didn’t finish building — try again shortly.",
+         );
+       }
+     } catch (e) {
+@@ -72,14 +127,41 @@ export function UploadForm({ backHref }: { backHref: string }) {
+     } finally {
+       setBusy(false);
+     }
++  }, [csv, vcard, listName, workOnly]);
++
++  // ---- Google success banner --------------------------------------------------
++  if (fromGoogle && googleImported > 0) {
++    return (
++      <div className="mt-6 rounded-xl border border-[#0a8078]/30 bg-[#0a8078]/10 p-4">
++        <p className="text-sm text-[#0a8078]">
++          ✓ Imported {googleImported} contact{googleImported === 1 ? "" : "s"} from Google
++          {googlePersonal > 0 ? `, skipped ${googlePersonal} personal` : ""}
++          {googleSkipped > 0 ? `, ${googleSkipped} skipped` : ""}.
++        </p>
++        <p className="mt-1 text-xs text-gray-400">
++          {googleSynced
++            ? "They’re now a pickable “google” audience on your reports’ Send weekly."
++            : "Building your audience list…"}
++        </p>
++        <Link
++          href={backHref}
++          className="mt-3 inline-block rounded-full bg-[#00d4aa] px-4 py-2 text-sm font-medium text-[#04121b]"
++        >
++          Back to your work
++        </Link>
++      </div>
++    );
+   }
+ 
++  // ---- CSV success banner -----------------------------------------------------
+   if (result && synced) {
+     const total = result.inserted + result.updated;
++    const personal = result.skippedPersonal ?? 0;
+     return (
+       <div className="mt-6 rounded-xl border border-[#0a8078]/30 bg-[#0a8078]/10 p-4">
+         <p className="text-sm text-[#0a8078]">
+           ✓ Added {total} contact{total === 1 ? "" : "s"} to “{listName.trim().toLowerCase()}”
++          {personal > 0 ? `, skipped ${personal} personal` : ""}
+           {result.skipped > 0 ? ` (${result.skipped} skipped)` : ""}.
+         </p>
+         <p className="mt-1 text-xs text-gray-400">
+@@ -97,6 +179,70 @@ export function UploadForm({ backHref }: { backHref: string }) {
+ 
+   return (
+     <div className="mt-6 flex flex-col gap-4">
++      {/* Work-emails-only toggle — applies to BOTH Google and CSV. */}
++      <label className="flex items-start gap-2 text-sm text-gray-300">
++        <input
++          type="checkbox"
++          checked={workOnly}
++          onChange={(e) => setWorkOnly(e.target.checked)}
++          className="mt-0.5 accent-[#00d4aa]"
++        />
++        <span>
++          Work emails only
++          <span className="block text-xs text-gray-500">
++            Skip personal addresses (gmail, icloud, yahoo…) and keep company/professional ones.
++          </span>
++        </span>
++      </label>
++
++      {/* Google Contacts — full-page OAuth redirect (carries the toggle as a query flag). */}
++      <div className="rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
++        <h2 className="text-sm font-semibold text-white">Import from Google Contacts</h2>
++        <p className="mt-1 text-xs text-gray-500">
++          One tap — works on your phone or computer if your contacts live in Google.
++        </p>
++        <a
++          href={`/api/email/contacts/google/start?work_only=${workOnly ? "1" : "0"}`}
++          className="mt-3 inline-block rounded-full bg-[#00d4aa] px-4 py-2 text-sm font-semibold text-[#04121b]"
++        >
++          Import from Google
++        </a>
++        {googleError && (
++          <p className="mt-2 text-xs text-red-400">
++            {GOOGLE_ERRORS[googleError] ?? "Google import didn’t complete — please try again."}
++          </p>
++        )}
++      </div>
++
++      {/* Grab from your phone — scan the QR; the token already carries the toggle. */}
++      {qr && (
++        <div className="rounded-xl border border-white/10 bg-[#0d1e2b]/50 p-4">
++          <h2 className="text-sm font-semibold text-white">Grab contacts from your phone</h2>
++          <p className="mt-1 text-xs text-gray-500">
++            Scan with an Android phone to pick contacts straight from your address book. (iPhone
++            can’t share contacts to the web — use Google above.)
++          </p>
++          <div className="mt-3 flex items-center gap-4">
++            {/* eslint-disable-next-line @next/next/no-img-element */}
++            <img
++              src={qr}
++              alt="QR code to import contacts from your phone"
++              width={132}
++              height={132}
++              className="rounded-lg bg-white p-2"
++            />
++            <p className="text-xs text-gray-400">
++              {workOnly
++                ? "This code imports work emails only."
++                : "This code imports all contacts you pick."}{" "}
++              The link expires in a few minutes.
++            </p>
++          </div>
++        </div>
++      )}
++
++      <div className="text-center text-xs uppercase tracking-wide text-gray-600">or paste a CSV</div>
++
+       <label className="flex flex-col gap-1 text-sm text-gray-400">
+         List name
+         <input
+@@ -121,10 +267,10 @@ export function UploadForm({ backHref }: { backHref: string }) {
+ 
+       <div className="flex flex-wrap items-center gap-3">
+         <label className="cursor-pointer text-xs text-[#00d4aa] underline underline-offset-2">
+-          Choose a .csv file
++          Choose a .csv or .vcf file
+           <input
+             type="file"
+-            accept=".csv,text/csv"
++            accept=".csv,text/csv,.vcf,text/vcard"
+             className="hidden"
+             onChange={(e) => {
+               const f = e.target.files?.[0];
+@@ -132,6 +278,7 @@ export function UploadForm({ backHref }: { backHref: string }) {
+             }}
+           />
+         </label>
++        {fileLabel && <span className="text-xs text-gray-400">{fileLabel}</span>}
+       </div>
+ 
+       {error && <p className="text-sm text-red-400">{error}</p>}
+diff --git a/app/contacts/upload/page.tsx b/app/contacts/upload/page.tsx
+index 75fb018d..2fb00a05 100644
+--- a/app/contacts/upload/page.tsx
++++ b/app/contacts/upload/page.tsx
+@@ -1,7 +1,11 @@
++import { Suspense } from "react";
+ import { cookies } from "next/headers";
+ import { redirect } from "next/navigation";
+ import type { Metadata } from "next";
++import QRCode from "qrcode";
+ import { createClient } from "@/utils/supabase/server";
++import { issueContactImportToken } from "@/lib/email/contact-import-token";
++import { siteBaseUrl } from "@/lib/email/google-oauth";
+ import { UploadForm } from "./UploadForm";
+ 
+ export const runtime = "nodejs";
+@@ -28,6 +32,18 @@ export default async function ContactsUploadPage({
+   if (!user) redirect("/login?next=/contacts/upload");
+ 
+   const { next } = await searchParams;
++
++  // Mint a short-lived signed token per work-only choice so the phone (no session)
++  // is authorized by the token alone; render each as a QR the user scans from their
++  // phone. Null when no signing secret is configured → the QR section is hidden.
++  const base = siteBaseUrl();
++  const toQr = async (workOnly: boolean): Promise<string | null> => {
++    const token = issueContactImportToken({ uid: user.id, workOnly });
++    if (!token) return null;
++    return QRCode.toDataURL(`${base}/m/contacts/${token}`, { width: 220, margin: 1 });
++  };
++  const [qrAll, qrWork] = await Promise.all([toQr(false), toQr(true)]);
++
+   return (
+     <main className="mx-auto max-w-2xl px-4 py-10">
+       <h1 className="text-xl font-semibold text-white">Upload contacts</h1>
+@@ -35,7 +51,13 @@ export default async function ContactsUploadPage({
+         Add a recipient list so you can send (and schedule) your reports to it. The list name
+         becomes a pickable audience.
+       </p>
+-      <UploadForm backHref={typeof next === "string" && next.startsWith("/") ? next : "/project"} />
++      <Suspense fallback={null}>
++        <UploadForm
++          backHref={typeof next === "string" && next.startsWith("/") ? next : "/project"}
++          qrAll={qrAll}
++          qrWork={qrWork}
++        />
++      </Suspense>
+     </main>
+   );
+ }
+diff --git a/app/m/contacts/[token]/page.tsx b/app/m/contacts/[token]/page.tsx
+new file mode 100644
+index 00000000..60863617
+--- /dev/null
++++ b/app/m/contacts/[token]/page.tsx
+@@ -0,0 +1,43 @@
++import type { Metadata } from "next";
++import { PhoneContactPicker } from "@/components/contacts/PhoneContactPicker";
++
++export const runtime = "nodejs";
++export const dynamic = "force-dynamic";
++
++export const metadata: Metadata = {
++  title: "Import your contacts — SWFL Data Gulf",
++  robots: { index: false, follow: false },
++};
++
++/**
++ * /m/contacts/[token] — the mobile landing page a desktop QR points to.
++ *
++ * Public (no login): the signed token in the path IS the authorization, verified
++ * server-side when the picked contacts POST to /api/email/contacts/phone. The
++ * page itself just hands the token to the client picker; an invalid/expired token
++ * fails closed at submit time, so we don't pre-verify here (keeps the page a
++ * static shell with no secret access).
++ */
++export default async function MobileContactsPage({
++  params,
++}: {
++  params: Promise<{ token: string }>;
++}) {
++  const { token } = await params;
++  return (
++    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-10">
++      <h1 className="text-lg font-semibold text-white">Add your contacts</h1>
++      <p className="mt-1 text-sm text-gray-400">
++        Pick the people you want to be able to email. We only read names and email addresses, and
++        only the ones you choose.
++      </p>
++      <div className="mt-6">
++        <PhoneContactPicker token={token} />
++      </div>
++      <p className="mt-8 text-xs text-gray-600">
++        This link is tied to your account and expires shortly. If it stops working, generate a new
++        QR code on your computer.
++      </p>
++    </main>
++  );
++}
+diff --git a/bun.lock b/bun.lock
+index 78ae873c..92e09e9d 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -21,6 +21,7 @@
+         "mcp-handler": "^1.1.0",
+         "motion": "^12.40.0",
+         "next": "16.2.6",
++        "qrcode": "^1.5.4",
+         "react": "19.2.4",
+         "react-dom": "19.2.4",
+         "react-markdown": "^10.1.0",
+@@ -34,6 +35,7 @@
+         "@tailwindcss/postcss": "^4",
+         "@tailwindcss/typography": "^0.5.19",
+         "@types/node": "^20",
++        "@types/qrcode": "^1.5.6",
+         "@types/react": "^19",
+         "@types/react-dom": "^19",
+         "eslint": "^9",
+@@ -492,6 +494,8 @@
+ 
+     "@types/node": ["@types/node@20.19.41", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-ECymXOukMnOoVkC2bb1Vc/w/836DXncOg5m8Xj1RH7xSHZJWNYY6Zh7EH477vcnD5egKNNfy2RpNOmuChhFPgQ=="],
+ 
++    "@types/qrcode": ["@types/qrcode@1.5.6", "", { "dependencies": { "@types/node": "*" } }, "sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw=="],
++
+     "@types/react": ["@types/react@19.2.14", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w=="],
+ 
+     "@types/react-dom": ["@types/react-dom@19.2.3", "", { "peerDependencies": { "@types/react": "^19.2.0" } }, "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ=="],
+@@ -638,6 +642,8 @@
+ 
+     "callsites": ["callsites@3.1.0", "", {}, "sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ=="],
+ 
++    "camelcase": ["camelcase@5.3.1", "", {}, "sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg=="],
++
+     "caniuse-lite": ["caniuse-lite@1.0.30001792", "", {}, "sha512-hVLMUZFgR4JJ6ACt1uEESvQN1/dBVqPAKY0hgrV70eN3391K6juAfTjKZLKvOMsx8PxA7gsY1/tLMMTcfFLLpw=="],
+ 
+     "ccount": ["ccount@2.0.1", "", {}, "sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg=="],
+@@ -660,7 +666,7 @@
+ 
+     "client-only": ["client-only@0.0.1", "", {}, "sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA=="],
+ 
+-    "cliui": ["cliui@8.0.1", "", { "dependencies": { "string-width": "^4.2.0", "strip-ansi": "^6.0.1", "wrap-ansi": "^7.0.0" } }, "sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ=="],
++    "cliui": ["cliui@6.0.0", "", { "dependencies": { "string-width": "^4.2.0", "strip-ansi": "^6.0.0", "wrap-ansi": "^6.2.0" } }, "sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ=="],
+ 
+     "clsx": ["clsx@2.1.1", "", {}, "sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA=="],
+ 
+@@ -734,6 +740,8 @@
+ 
+     "debug": ["debug@4.4.3", "", { "dependencies": { "ms": "^2.1.3" } }, "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA=="],
+ 
++    "decamelize": ["decamelize@1.2.0", "", {}, "sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA=="],
++
+     "decimal.js-light": ["decimal.js-light@2.5.1", "", {}, "sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg=="],
+ 
+     "decode-named-character-reference": ["decode-named-character-reference@1.3.0", "", { "dependencies": { "character-entities": "^2.0.0" } }, "sha512-GtpQYB283KrPp6nRw50q3U9/VfOutZOe103qlN7BPP6Ad27xYnOIWv4lPzo8HCAL+mMZofJ9KEy30fq6MfaK6Q=="],
+@@ -764,6 +772,8 @@
+ 
+     "diff": ["diff@4.0.4", "", {}, "sha512-X07nttJQkwkfKfvTPG/KSnE2OMdcUCao6+eXF3wmnIQRn2aPAHH3VxDbDOdegkd6JbPsXqShpvEOHfAT+nCNwQ=="],
+ 
++    "dijkstrajs": ["dijkstrajs@1.0.3", "", {}, "sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA=="],
++
+     "doctrine": ["doctrine@2.1.0", "", { "dependencies": { "esutils": "^2.0.2" } }, "sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw=="],
+ 
+     "dom-serializer": ["dom-serializer@2.0.0", "", { "dependencies": { "domelementtype": "^2.3.0", "domhandler": "^5.0.2", "entities": "^4.2.0" } }, "sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg=="],
+@@ -1336,6 +1346,8 @@
+ 
+     "p-locate": ["p-locate@5.0.0", "", { "dependencies": { "p-limit": "^3.0.2" } }, "sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw=="],
+ 
++    "p-try": ["p-try@2.2.0", "", {}, "sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ=="],
++
+     "parent-module": ["parent-module@1.0.1", "", { "dependencies": { "callsites": "^3.0.0" } }, "sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g=="],
+ 
+     "parse-entities": ["parse-entities@4.0.2", "", { "dependencies": { "@types/unist": "^2.0.0", "character-entities-legacy": "^3.0.0", "character-reference-invalid": "^2.0.0", "decode-named-character-reference": "^1.0.0", "is-alphanumerical": "^2.0.0", "is-decimal": "^2.0.0", "is-hexadecimal": "^2.0.0" } }, "sha512-GG2AQYWoLgL877gQIKeRPGO1xF9+eG1ujIb5soS5gPvLQ1y2o8FL90w2QWNdf9I361Mpp7726c+lj3U0qK1uGw=="],
+@@ -1364,6 +1376,8 @@
+ 
+     "pkce-challenge": ["pkce-challenge@5.0.1", "", {}, "sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ=="],
+ 
++    "pngjs": ["pngjs@5.0.0", "", {}, "sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw=="],
++
+     "possible-typed-array-names": ["possible-typed-array-names@1.1.0", "", {}, "sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg=="],
+ 
+     "postal-mime": ["postal-mime@2.7.4", "", {}, "sha512-0WdnFQYUrPGGTFu1uOqD2s7omwua8xaeYGdO6rb88oD5yJ/4pPHDA4sdWqfD8wQVfCny563n/HQS7zTFft+f/g=="],
+@@ -1386,6 +1400,8 @@
+ 
+     "punycode": ["punycode@2.3.1", "", {}, "sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg=="],
+ 
++    "qrcode": ["qrcode@1.5.4", "", { "dependencies": { "dijkstrajs": "^1.0.1", "pngjs": "^5.0.0", "yargs": "^15.3.1" }, "bin": { "qrcode": "bin/qrcode" } }, "sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg=="],
++
+     "qs": ["qs@6.15.2", "", { "dependencies": { "side-channel": "^1.1.0" } }, "sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw=="],
+ 
+     "queue-microtask": ["queue-microtask@1.2.3", "", {}, "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="],
+@@ -1438,6 +1454,8 @@
+ 
+     "require-from-string": ["require-from-string@2.0.2", "", {}, "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw=="],
+ 
++    "require-main-filename": ["require-main-filename@2.0.0", "", {}, "sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg=="],
++
+     "reselect": ["reselect@5.1.1", "", {}, "sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w=="],
+ 
+     "resend": ["resend@6.12.3", "", { "dependencies": { "postal-mime": "2.7.4", "svix": "1.92.2" }, "peerDependencies": { "@react-email/render": "*" }, "optionalPeers": ["@react-email/render"] }, "sha512-FkEi6YPnVL96/LvH8+QP7NaeaBy5brYXwlRqUCqZZeNL0/iyKij18IPmyPXYauT/2ODn1JG04qKz+qlJfzqzTw=="],
+@@ -1482,6 +1500,8 @@
+ 
+     "serve-static": ["serve-static@2.2.1", "", { "dependencies": { "encodeurl": "^2.0.0", "escape-html": "^1.0.3", "parseurl": "^1.3.3", "send": "^1.2.0" } }, "sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw=="],
+ 
++    "set-blocking": ["set-blocking@2.0.0", "", {}, "sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw=="],
++
+     "set-function-length": ["set-function-length@1.2.2", "", { "dependencies": { "define-data-property": "^1.1.4", "es-errors": "^1.3.0", "function-bind": "^1.1.2", "get-intrinsic": "^1.2.4", "gopd": "^1.0.1", "has-property-descriptors": "^1.0.2" } }, "sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg=="],
+ 
+     "set-function-name": ["set-function-name@2.0.2", "", { "dependencies": { "define-data-property": "^1.1.4", "es-errors": "^1.3.0", "functions-have-names": "^1.2.3", "has-property-descriptors": "^1.0.2" } }, "sha512-7PGFlmtwsEADb0WYyvCMa1t+yke6daIG4Wirafur5kcf+MhUnPms1UeR0CKQdTZD81yESwMHbtn+TR+dMviakQ=="],
+@@ -1664,6 +1684,8 @@
+ 
+     "which-collection": ["which-collection@1.0.2", "", { "dependencies": { "is-map": "^2.0.3", "is-set": "^2.0.3", "is-weakmap": "^2.0.2", "is-weakset": "^2.0.3" } }, "sha512-K4jVyjnBdgvc86Y6BkaLZEN933SwYOuBFkdmBu9ZfkcAbdVbpITnDmjvZ/aQjRXQrv5EPkTnD1s39GiiqbngCw=="],
+ 
++    "which-module": ["which-module@2.0.1", "", {}, "sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ=="],
++
+     "which-typed-array": ["which-typed-array@1.1.20", "", { "dependencies": { "available-typed-arrays": "^1.0.7", "call-bind": "^1.0.8", "call-bound": "^1.0.4", "for-each": "^0.3.5", "get-proto": "^1.0.1", "gopd": "^1.2.0", "has-tostringtag": "^1.0.2" } }, "sha512-LYfpUkmqwl0h9A2HL09Mms427Q1RZWuOHsukfVcKRq9q95iQxdw0ix1JQrqbcDR9PH1QDwf5Qo8OZb5lksZ8Xg=="],
+ 
+     "word-wrap": ["word-wrap@1.2.5", "", {}, "sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA=="],
+@@ -1676,15 +1698,15 @@
+ 
+     "wsl-utils": ["wsl-utils@0.1.0", "", { "dependencies": { "is-wsl": "^3.1.0" } }, "sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw=="],
+ 
+-    "y18n": ["y18n@5.0.8", "", {}, "sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA=="],
++    "y18n": ["y18n@4.0.3", "", {}, "sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ=="],
+ 
+     "yallist": ["yallist@4.0.0", "", {}, "sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A=="],
+ 
+     "yaml": ["yaml@2.9.0", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA=="],
+ 
+-    "yargs": ["yargs@17.7.2", "", { "dependencies": { "cliui": "^8.0.1", "escalade": "^3.1.1", "get-caller-file": "^2.0.5", "require-directory": "^2.1.1", "string-width": "^4.2.3", "y18n": "^5.0.5", "yargs-parser": "^21.1.1" } }, "sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w=="],
++    "yargs": ["yargs@15.4.1", "", { "dependencies": { "cliui": "^6.0.0", "decamelize": "^1.2.0", "find-up": "^4.1.0", "get-caller-file": "^2.0.1", "require-directory": "^2.1.1", "require-main-filename": "^2.0.0", "set-blocking": "^2.0.0", "string-width": "^4.2.0", "which-module": "^2.0.0", "y18n": "^4.0.0", "yargs-parser": "^18.1.2" } }, "sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A=="],
+ 
+-    "yargs-parser": ["yargs-parser@21.1.1", "", {}, "sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw=="],
++    "yargs-parser": ["yargs-parser@18.1.3", "", { "dependencies": { "camelcase": "^5.0.0", "decamelize": "^1.2.0" } }, "sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ=="],
+ 
+     "yn": ["yn@3.1.1", "", {}, "sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q=="],
+ 
+@@ -1788,12 +1810,14 @@
+ 
+     "cliui/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
+ 
+-    "cliui/wrap-ansi": ["wrap-ansi@7.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="],
++    "cliui/wrap-ansi": ["wrap-ansi@6.2.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA=="],
+ 
+     "cmdk/@radix-ui/react-primitive": ["@radix-ui/react-primitive@2.1.4", "", { "dependencies": { "@radix-ui/react-slot": "1.2.4" }, "peerDependencies": { "@types/react": "*", "@types/react-dom": "*", "react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react-dom": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-9hQc4+GNVtJAIEPEqlYqW5RiYdrr8ea5XQ0ZOnD6fgru+83kqT15mq2OCcbe8KnjRZl5vF3ks69AKz3kh1jrhg=="],
+ 
+     "concurrently/shell-quote": ["shell-quote@1.8.3", "", {}, "sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw=="],
+ 
++    "concurrently/yargs": ["yargs@17.7.2", "", { "dependencies": { "cliui": "^8.0.1", "escalade": "^3.1.1", "get-caller-file": "^2.0.5", "require-directory": "^2.1.1", "string-width": "^4.2.3", "y18n": "^5.0.5", "yargs-parser": "^21.1.1" } }, "sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w=="],
++
+     "eslint-import-resolver-node/debug": ["debug@3.2.7", "", { "dependencies": { "ms": "^2.1.1" } }, "sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ=="],
+ 
+     "eslint-module-utils/debug": ["debug@3.2.7", "", { "dependencies": { "ms": "^2.1.1" } }, "sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ=="],
+@@ -1866,6 +1890,8 @@
+ 
+     "wrap-ansi/string-width": ["string-width@8.2.1", "", { "dependencies": { "get-east-asian-width": "^1.5.0", "strip-ansi": "^7.1.2" } }, "sha512-IIaP0g3iy9Cyy18w3M9YcaDudujEAVHKt3a3QJg1+sr/oX96TbaGUubG0hJyCjCBThFH+tFpcIyoUHUn1ogaLA=="],
+ 
++    "yargs/find-up": ["find-up@4.1.0", "", { "dependencies": { "locate-path": "^5.0.0", "path-exists": "^4.0.0" } }, "sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw=="],
++
+     "@modelcontextprotocol/inspector-client/react-dom/scheduler": ["scheduler@0.23.2", "", { "dependencies": { "loose-envify": "^1.1.0" } }, "sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ=="],
+ 
+     "@modelcontextprotocol/sdk/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+@@ -1876,6 +1902,12 @@
+ 
+     "cliui/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
+ 
++    "concurrently/yargs/cliui": ["cliui@8.0.1", "", { "dependencies": { "string-width": "^4.2.0", "strip-ansi": "^6.0.1", "wrap-ansi": "^7.0.0" } }, "sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ=="],
++
++    "concurrently/yargs/y18n": ["y18n@5.0.8", "", {}, "sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA=="],
++
++    "concurrently/yargs/yargs-parser": ["yargs-parser@21.1.1", "", {}, "sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw=="],
++
+     "log-update/slice-ansi/ansi-styles": ["ansi-styles@6.2.3", "", {}, "sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg=="],
+ 
+     "log-update/slice-ansi/is-fullwidth-code-point": ["is-fullwidth-code-point@5.1.0", "", { "dependencies": { "get-east-asian-width": "^1.3.1" } }, "sha512-5XHYaSyiqADb4RnZ1Bdad6cPp8Toise4TzEjcOYDHZkTCbKgiUl7WTUCpNWHuxmDt91wnsZBc9xinNzopv3JMQ=="],
+@@ -1888,8 +1920,20 @@
+ 
+     "string-width/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
+ 
++    "yargs/find-up/locate-path": ["locate-path@5.0.0", "", { "dependencies": { "p-locate": "^4.1.0" } }, "sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g=="],
++
+     "@typescript-eslint/typescript-estree/minimatch/brace-expansion/balanced-match": ["balanced-match@4.0.4", "", {}, "sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA=="],
+ 
++    "concurrently/yargs/cliui/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
++
++    "concurrently/yargs/cliui/wrap-ansi": ["wrap-ansi@7.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="],
++
+     "log-update/wrap-ansi/string-width/emoji-regex": ["emoji-regex@10.6.0", "", {}, "sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A=="],
++
++    "yargs/find-up/locate-path/p-locate": ["p-locate@4.1.0", "", { "dependencies": { "p-limit": "^2.2.0" } }, "sha512-R79ZZ/0wAxKGu3oYMlz8jy/kbhsNrS7SKZ7PxEHBgJ5+F2mtFW2fK2cOtBh1cHYkQsbzFV7I+EoRKe6Yt0oK7A=="],
++
++    "concurrently/yargs/cliui/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
++
++    "yargs/find-up/locate-path/p-locate/p-limit": ["p-limit@2.3.0", "", { "dependencies": { "p-try": "^2.0.0" } }, "sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w=="],
+   }
+ }
+diff --git a/components/contacts/PhoneContactPicker.tsx b/components/contacts/PhoneContactPicker.tsx
+new file mode 100644
+index 00000000..bbe8a53b
+--- /dev/null
++++ b/components/contacts/PhoneContactPicker.tsx
+@@ -0,0 +1,131 @@
++"use client";
++
++import { useState, useSyncExternalStore } from "react";
++
++/**
++ * Phone-side contact import via the browser Contact Picker API
++ * (`navigator.contacts.select`). Available on Android Chrome and a few other
++ * Chromium mobile browsers; NOT on iOS (Apple exposes no web contacts API), so
++ * we feature-detect and show a guided fallback instead of a dead button.
++ *
++ * The selected contacts POST to /api/email/contacts/phone with the signed import
++ * `token` (the phone has no login session — the token is the authorization).
++ */
++
++// Minimal typing for the Contact Picker API (absent from the DOM lib).
++interface ContactInfo {
++  name?: string[];
++  email?: string[];
++  tel?: string[];
++}
++interface ContactsManager {
++  select(properties: string[], options?: { multiple?: boolean }): Promise<ContactInfo[]>;
++  getProperties?(): Promise<string[]>;
++}
++
++type Phase = "idle" | "picking" | "saving" | "done" | "error";
++
++/** Capability is static per browser, so read it via useSyncExternalStore (no
++ *  effect-setState; hydration-safe: server snapshot is always `false`). */
++const noopSubscribe = () => () => {};
++function getPickerSupported(): boolean {
++  const mgr = (navigator as Navigator & { contacts?: ContactsManager }).contacts;
++  return Boolean(mgr && typeof mgr.select === "function");
++}
++
++export function PhoneContactPicker({ token }: { token: string }) {
++  const supported = useSyncExternalStore(noopSubscribe, getPickerSupported, () => false);
++  const [phase, setPhase] = useState<Phase>("idle");
++  const [message, setMessage] = useState<string | null>(null);
++
++  async function pick() {
++    setMessage(null);
++    const mgr = (navigator as Navigator & { contacts?: ContactsManager }).contacts;
++    if (!mgr) return;
++    try {
++      setPhase("picking");
++      const picked = await mgr.select(["name", "email"], { multiple: true });
++      // One row per email address; the picker returns parallel name[]/email[] arrays.
++      const contacts: { email: string; name: string | null }[] = [];
++      for (const c of picked) {
++        const name = c.name?.find((n) => n.trim())?.trim() ?? null;
++        for (const email of c.email ?? []) {
++          if (email && email.trim()) contacts.push({ email: email.trim(), name });
++        }
++      }
++      if (contacts.length === 0) {
++        setPhase("idle");
++        setMessage("No email addresses found on the contacts you picked.");
++        return;
++      }
++
++      setPhase("saving");
++      const res = await fetch("/api/email/contacts/phone", {
++        method: "POST",
++        headers: { "content-type": "application/json" },
++        body: JSON.stringify({ token, contacts }),
++      });
++      const json = (await res.json().catch(() => ({}))) as {
++        imported?: number;
++        skippedPersonal?: number;
++        error?: string;
++      };
++      if (!res.ok) throw new Error(json.error || `import failed (${res.status})`);
++      setPhase("done");
++      setMessage(
++        `Imported ${json.imported ?? 0} contact${(json.imported ?? 0) === 1 ? "" : "s"}` +
++          (json.skippedPersonal ? `, skipped ${json.skippedPersonal} personal` : "") +
++          ". You can close this and finish on your computer.",
++      );
++    } catch (e) {
++      // AbortError = user dismissed the native sheet; treat as a benign cancel.
++      if (e instanceof DOMException && e.name === "AbortError") {
++        setPhase("idle");
++        return;
++      }
++      setPhase("error");
++      setMessage(e instanceof Error ? e.message : "Import failed — please try again.");
++    }
++  }
++
++  if (!supported) {
++    return (
++      <div className="rounded-xl border border-white/10 bg-[#0d1e2b]/60 p-4 text-sm text-gray-300">
++        <p className="font-medium text-white">This phone can’t share contacts to the web</p>
++        <p className="mt-1 text-gray-400">
++          iPhone (and some browsers) don’t let websites read contacts directly. The easy path:
++        </p>
++        <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-400">
++          <li>On your computer, use “Import from Google Contacts.”</li>
++          <li>Or if your contacts aren’t in Google, export a vCard and upload it.</li>
++        </ul>
++      </div>
++    );
++  }
++
++  if (phase === "done") {
++    return (
++      <div className="rounded-xl border border-[#0a8078]/30 bg-[#0a8078]/10 p-4 text-sm text-[#0a8078]">
++        ✓ {message}
++      </div>
++    );
++  }
++
++  return (
++    <div className="flex flex-col gap-3">
++      <button
++        type="button"
++        onClick={() => void pick()}
++        disabled={phase === "picking" || phase === "saving"}
++        className="rounded-full bg-[#00d4aa] px-5 py-3 text-base font-semibold text-[#04121b] disabled:opacity-40"
++      >
++        {phase === "saving" ? "Saving…" : phase === "picking" ? "Choosing…" : "Choose contacts"}
++      </button>
++      {message && (
++        <p className={phase === "error" ? "text-sm text-red-400" : "text-sm text-gray-400"}>
++          {message}
++        </p>
++      )}
++    </div>
++  );
++}
+diff --git a/lib/email/__tests__/contact-import-token.test.ts b/lib/email/__tests__/contact-import-token.test.ts
+new file mode 100644
+index 00000000..1a1b1764
+--- /dev/null
++++ b/lib/email/__tests__/contact-import-token.test.ts
+@@ -0,0 +1,58 @@
++import { describe, test, expect, beforeAll } from "bun:test";
++import {
++  issueContactImportToken,
++  verifyContactImportToken,
++} from "../contact-import-token";
++
++beforeAll(() => {
++  process.env.SDG_COOKIE_SECRET = "test-secret-for-contact-import-token";
++});
++
++describe("contact-import-token", () => {
++  test("round-trip recovers uid + workOnly", () => {
++    const token = issueContactImportToken({ uid: "user-9", workOnly: true })!;
++    expect(token).toBeTruthy();
++    const v = verifyContactImportToken(token);
++    expect(v).toEqual({ ok: true, uid: "user-9", workOnly: true });
++  });
++
++  test("workOnly false is preserved", () => {
++    const token = issueContactImportToken({ uid: "u", workOnly: false })!;
++    const v = verifyContactImportToken(token);
++    expect(v.ok && v.workOnly).toBe(false);
++  });
++
++  test("a tampered payload fails the signature check", () => {
++    const token = issueContactImportToken({ uid: "u", workOnly: false })!;
++    const [, sig] = token.split(".");
++    // Swap the payload for a forged one (different uid) but keep the old signature.
++    const forgedPayload = Buffer.from(
++      JSON.stringify({ v: 1, uid: "attacker", wo: 1, iat: Date.now() }),
++    ).toString("base64url");
++    const v = verifyContactImportToken(`${forgedPayload}.${sig}`);
++    expect(v).toEqual({ ok: false, reason: "bad_signature" });
++  });
++
++  test("an expired token is rejected", () => {
++    const old = Date.now() - 11 * 60 * 1000; // TTL is 10 min
++    const token = issueContactImportToken({ uid: "u", workOnly: false, nowMs: old })!;
++    const v = verifyContactImportToken(token);
++    expect(v).toEqual({ ok: false, reason: "expired" });
++  });
++
++  test("garbage is malformed, not a crash", () => {
++    expect(verifyContactImportToken("not-a-token").ok).toBe(false);
++    expect(verifyContactImportToken("").ok).toBe(false);
++  });
++
++  test("no signing secret → issue null, verify missing_secret", () => {
++    const saved = process.env.SDG_COOKIE_SECRET;
++    delete process.env.SDG_COOKIE_SECRET;
++    try {
++      expect(issueContactImportToken({ uid: "u", workOnly: false })).toBeNull();
++      expect(verifyContactImportToken("x.y")).toEqual({ ok: false, reason: "missing_secret" });
++    } finally {
++      process.env.SDG_COOKIE_SECRET = saved;
++    }
++  });
++});
+diff --git a/lib/email/__tests__/google-people.test.ts b/lib/email/__tests__/google-people.test.ts
+new file mode 100644
+index 00000000..f78a5427
+--- /dev/null
++++ b/lib/email/__tests__/google-people.test.ts
+@@ -0,0 +1,41 @@
++import { describe, test, expect } from "bun:test";
++import { peopleConnectionsToContactRows, type GooglePerson } from "../google-people";
++
++describe("peopleConnectionsToContactRows", () => {
++  test("one row per email; the display name + provenance tag ride along", () => {
++    const people: GooglePerson[] = [
++      { names: [{ displayName: "Jane Broker" }], emailAddresses: [{ value: "jane@acme.com" }] },
++    ];
++    expect(peopleConnectionsToContactRows(people, ["google"])).toEqual([
++      { email: "jane@acme.com", name: "Jane Broker", tags: ["google"] },
++    ]);
++  });
++
++  test("a person with several emails becomes several rows (same name)", () => {
++    const people: GooglePerson[] = [
++      {
++        names: [{ displayName: "Multi" }],
++        emailAddresses: [{ value: "work@acme.com" }, { value: "home@gmail.com" }],
++      },
++    ];
++    const rows = peopleConnectionsToContactRows(people);
++    expect(rows.map((r) => r.email)).toEqual(["work@acme.com", "home@gmail.com"]);
++    expect(rows.every((r) => r.name === "Multi")).toBe(true);
++  });
++
++  test("no email → person skipped; no name → name null; blank email values ignored", () => {
++    const people: GooglePerson[] = [
++      { names: [{ displayName: "No Email" }] },
++      { emailAddresses: [{ value: "anon@acme.com" }] },
++      { names: [{ displayName: "Has Blank" }], emailAddresses: [{ value: "" }, { value: "  " }] },
++    ];
++    expect(peopleConnectionsToContactRows(people)).toEqual([
++      { email: "anon@acme.com", name: null, tags: [] },
++    ]);
++  });
++
++  test("tolerates a missing/empty connections array", () => {
++    expect(peopleConnectionsToContactRows([])).toEqual([]);
++    expect(peopleConnectionsToContactRows(undefined as unknown as GooglePerson[])).toEqual([]);
++  });
++});
+diff --git a/lib/email/__tests__/parse-vcard.test.ts b/lib/email/__tests__/parse-vcard.test.ts
+new file mode 100644
+index 00000000..51b0143b
+--- /dev/null
++++ b/lib/email/__tests__/parse-vcard.test.ts
+@@ -0,0 +1,60 @@
++import { describe, test, expect } from "bun:test";
++import { parseVcard } from "../parse-vcard";
++
++const card = (body: string) => `BEGIN:VCARD\nVERSION:3.0\n${body}\nEND:VCARD\n`;
++
++describe("parseVcard", () => {
++  test("FN + EMAIL → one row", () => {
++    const { rows, skippedCards } = parseVcard(card("FN:Jane Broker\nEMAIL;TYPE=WORK:jane@acme.com"));
++    expect(rows).toEqual([{ email: "jane@acme.com", name: "Jane Broker", tags: [] }]);
++    expect(skippedCards).toBe(0);
++  });
++
++  test("multiple cards → multiple rows", () => {
++    const vcf =
++      card("FN:A\nEMAIL:a@x.com") + card("FN:B\nEMAIL:b@y.com");
++    expect(parseVcard(vcf).rows.map((r) => r.email)).toEqual(["a@x.com", "b@y.com"]);
++  });
++
++  test("several emails on one card → one row each, same name", () => {
++    const { rows } = parseVcard(
++      card("FN:Multi\nEMAIL;TYPE=WORK:work@acme.com\nEMAIL;TYPE=HOME:home@gmail.com"),
++    );
++    expect(rows.map((r) => r.email)).toEqual(["work@acme.com", "home@gmail.com"]);
++    expect(rows.every((r) => r.name === "Multi")).toBe(true);
++  });
++
++  test("falls back to structured N when FN is absent", () => {
++    const { rows } = parseVcard(card("N:Smith;John;;;\nEMAIL:js@acme.com"));
++    expect(rows[0].name).toBe("John Smith");
++  });
++
++  test("grouped property (item1.EMAIL) is recognized", () => {
++    const { rows } = parseVcard(card("FN:Grouped\nitem1.EMAIL;type=INTERNET:g@acme.com"));
++    expect(rows[0].email).toBe("g@acme.com");
++  });
++
++  test("quoted-printable name is decoded", () => {
++    const { rows } = parseVcard(
++      card("FN;ENCODING=QUOTED-PRINTABLE:Jos=C3=A9\nEMAIL:jose@acme.com"),
++    );
++    expect(rows[0].name).toBe("José");
++  });
++
++  test("a card with no email is skipped + counted", () => {
++    const { rows, skippedCards } = parseVcard(card("FN:No Email"));
++    expect(rows).toHaveLength(0);
++    expect(skippedCards).toBe(1);
++  });
++
++  test("tolerates a missing final END:VCARD", () => {
++    const { rows } = parseVcard("BEGIN:VCARD\nFN:Dangling\nEMAIL:d@acme.com");
++    expect(rows).toEqual([{ email: "d@acme.com", name: "Dangling", tags: [] }]);
++  });
++
++  test("line folding (continuation lines) is unfolded", () => {
++    // The email is split across two physical lines with a leading space.
++    const { rows } = parseVcard("BEGIN:VCARD\nFN:Fold\nEMAIL:fold@ac\n me.com\nEND:VCARD");
++    expect(rows[0].email).toBe("fold@acme.com");
++  });
++});
+diff --git a/lib/email/__tests__/upsert-contacts.test.ts b/lib/email/__tests__/upsert-contacts.test.ts
+new file mode 100644
+index 00000000..8df469e0
+--- /dev/null
++++ b/lib/email/__tests__/upsert-contacts.test.ts
+@@ -0,0 +1,61 @@
++import { describe, test, expect } from "bun:test";
++import type { ContactRow } from "../parse-contacts-csv";
++import { prepareContacts, mergeContact } from "../upsert-contacts";
++
++describe("mergeContact (pure)", () => {
++  test("incoming null name preserves the existing name (audit MEDIUM bugfix)", () => {
++    const merged = mergeContact(
++      { name: "Jane Buyer", tags: ["buyers"] },
++      { name: null, tags: ["vip"] },
++    );
++    expect(merged.name).toBe("Jane Buyer");
++    expect(merged.tags.sort()).toEqual(["buyers", "vip"]);
++  });
++
++  test("incoming non-null name wins; tags unioned + deduped", () => {
++    const merged = mergeContact(
++      { name: "Old", tags: ["a", "b"] },
++      { name: "New", tags: ["b", "c"] },
++    );
++    expect(merged.name).toBe("New");
++    expect(merged.tags.sort()).toEqual(["a", "b", "c"]);
++  });
++});
++
++describe("prepareContacts (pure)", () => {
++  const userId = "user-1";
++
++  test("normalizes email case + drops invalid, counting them as skipped", () => {
++    const rows: ContactRow[] = [
++      { email: "JANE@Example.com", name: "Jane", tags: ["x"] },
++      { email: "not-an-email", name: "Bad", tags: [] },
++      { email: "", name: "Blank", tags: [] },
++    ];
++    const { records, skipped, errors } = prepareContacts(userId, rows);
++    expect(records).toHaveLength(1);
++    expect(records[0]).toEqual({
++      user_id: userId,
++      email: "jane@example.com",
++      name: "Jane",
++      tags: ["x"],
++    });
++    expect(skipped).toBe(2);
++    expect(errors).toHaveLength(2);
++  });
++
++  test("de-dupes within the batch: tags union, a later name does not erase an earlier one", () => {
++    const rows: ContactRow[] = [
++      { email: "dup@acme.com", name: "Real Name", tags: ["buyers"] },
++      { email: "DUP@acme.com", name: null, tags: ["vip"] }, // tags-only re-list
++    ];
++    const { records } = prepareContacts(userId, rows);
++    expect(records).toHaveLength(1);
++    expect(records[0].name).toBe("Real Name");
++    expect(records[0].tags.sort()).toEqual(["buyers", "vip"]);
++  });
++
++  test("every record carries the passed user_id", () => {
++    const { records } = prepareContacts("abc", [{ email: "a@b.com", name: null, tags: [] }]);
++    expect(records[0].user_id).toBe("abc");
++  });
++});
+diff --git a/lib/email/__tests__/work-email-filter.test.ts b/lib/email/__tests__/work-email-filter.test.ts
+new file mode 100644
+index 00000000..d852e57d
+--- /dev/null
++++ b/lib/email/__tests__/work-email-filter.test.ts
+@@ -0,0 +1,64 @@
++import { describe, test, expect } from "bun:test";
++import type { ContactRow } from "../parse-contacts-csv";
++import {
++  isWorkEmail,
++  emailDomain,
++  partitionContacts,
++  PERSONAL_EMAIL_DOMAINS,
++} from "../work-email-filter";
++
++describe("emailDomain / isWorkEmail", () => {
++  test("personal consumer domains are not work", () => {
++    expect(isWorkEmail("jane@gmail.com")).toBe(false);
++    expect(isWorkEmail("Jane@ICLOUD.com")).toBe(false); // case-insensitive
++    expect(isWorkEmail("x@yahoo.com")).toBe(false);
++  });
++
++  test("company / professional domains are work", () => {
++    expect(isWorkEmail("jane@premiercre.com")).toBe(true);
++    expect(isWorkEmail("broker@swfldatagulf.com")).toBe(true);
++  });
++
++  test("malformed addresses (no domain) are not classified work", () => {
++    expect(isWorkEmail("not-an-email")).toBe(false);
++    expect(emailDomain("not-an-email")).toBe("");
++  });
++
++  test("the blocklist covers the operator's named personal domains", () => {
++    for (const d of ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "aol.com", "me.com", "live.com", "msn.com", "comcast.net", "att.net", "verizon.net"]) {
++      expect(PERSONAL_EMAIL_DOMAINS.has(d)).toBe(true);
++    }
++  });
++});
++
++describe("partitionContacts", () => {
++  const rows: ContactRow[] = [
++    { email: "ceo@acme.com", name: "Boss", tags: [] },
++    { email: "friend@gmail.com", name: "Pal", tags: [] },
++    { email: "broker@realty.com", name: "Agent", tags: [] },
++    { email: "mom@icloud.com", name: "Mom", tags: [] },
++  ];
++
++  test("workOnly off → pass-through, nothing flagged personal", () => {
++    const { kept, skippedPersonal } = partitionContacts(rows, { workOnly: false });
++    expect(kept).toHaveLength(4);
++    expect(skippedPersonal).toBe(0);
++  });
++
++  test("workOnly on → drops personal domains and counts them", () => {
++    const { kept, skippedPersonal } = partitionContacts(rows, { workOnly: true });
++    expect(kept.map((r) => r.email)).toEqual(["ceo@acme.com", "broker@realty.com"]);
++    expect(skippedPersonal).toBe(2);
++  });
++
++  test("one person, two emails: keep work, drop personal (independent rows)", () => {
++    // Mirrors the People-API shape: one contact emitted as two rows.
++    const twoEmails: ContactRow[] = [
++      { email: "j.smith@brokerage.com", name: "J Smith", tags: ["google"] },
++      { email: "jsmith@gmail.com", name: "J Smith", tags: ["google"] },
++    ];
++    const { kept, skippedPersonal } = partitionContacts(twoEmails, { workOnly: true });
++    expect(kept.map((r) => r.email)).toEqual(["j.smith@brokerage.com"]);
++    expect(skippedPersonal).toBe(1);
++  });
++});
+diff --git a/lib/email/audience-sync.ts b/lib/email/audience-sync.ts
+index 2c0a960c..0fcca379 100644
+--- a/lib/email/audience-sync.ts
++++ b/lib/email/audience-sync.ts
+@@ -32,6 +32,7 @@
+  */
+ 
+ import type { Resend } from "resend";
++import type { SupabaseClient } from "@supabase/supabase-js";
+ 
+ /** A contact row as read from `public.email_contacts` (only fields we use). */
+ export interface ContactRow {
+@@ -329,3 +330,54 @@ export async function syncUserAudiences(
+     skipped_untagged: skippedUntagged,
+   };
+ }
++
++/**
++ * Adapt a Supabase client to the `AudienceStore` seam, scoped to one user.
++ *
++ * Reads are filtered by `user_id` EXPLICITLY — not left to RLS — so this is safe
++ * with BOTH the cookie/RLS client (redundant filter) and the service-role client
++ * (RLS bypassed, so the filter is the only thing preventing a cross-tenant read).
++ * The phone-import path relies on the service-role variant; the /sync route uses
++ * the cookie client.
++ */
++export function makeSupabaseAudienceStore(
++  supabase: SupabaseClient,
++  userId: string,
++): AudienceStore {
++  return {
++    async readContacts(): Promise<ContactRow[]> {
++      const { data, error } = await supabase
++        .from("email_contacts")
++        .select("email, tags")
++        .eq("user_id", userId);
++      if (error) throw new Error(`read email_contacts: ${error.message}`);
++      return (data ?? []) as ContactRow[];
++    },
++
++    async readAudiences(): Promise<AudienceRecord[]> {
++      const { data, error } = await supabase
++        .from("email_audiences")
++        .select("audience_slug, resend_audience_id")
++        .eq("user_id", userId);
++      if (error) throw new Error(`read email_audiences: ${error.message}`);
++      return (data ?? []).filter(
++        (r): r is AudienceRecord =>
++          typeof r.audience_slug === "string" && typeof r.resend_audience_id === "string",
++      );
++    },
++
++    async upsertAudience(row): Promise<void> {
++      const { error } = await supabase.from("email_audiences").upsert(
++        {
++          user_id: userId,
++          audience_slug: row.audience_slug,
++          resend_audience_id: row.resend_audience_id,
++          contact_count: row.contact_count,
++          updated_at: new Date().toISOString(),
++        },
++        { onConflict: "user_id,audience_slug" },
++      );
++      if (error) throw new Error(error.message);
++    },
++  };
++}
+diff --git a/lib/email/contact-import-token.ts b/lib/email/contact-import-token.ts
+new file mode 100644
+index 00000000..c92e1950
+--- /dev/null
++++ b/lib/email/contact-import-token.ts
+@@ -0,0 +1,102 @@
++/**
++ * Signed, short-lived token for the cross-device QR contact import.
++ *
++ * The phone that scans the desktop QR is NOT logged into the user's Supabase
++ * session, so the token itself must carry the authorization. We mirror the
++ * `proposal-nonce.ts` seam: an HMAC-SHA256 token keyed on `SDG_COOKIE_SECRET`
++ * (already set in prod), domain-separated, binding the user id + the "work only"
++ * choice + an issued-at with a 10-minute TTL.
++ *
++ * Single-use is intentionally NOT enforced: the import is an idempotent upsert,
++ * so a replay inside the short window re-imports the same contacts as no-op
++ * updates — there is nothing to double. Integrity is verified with
++ * `crypto.timingSafeEqual` on the raw digests, before any payload field is read.
++ *
++ * No signing secret configured → `issueContactImportToken` returns null and the
++ * desktop QR section is hidden (env-gated, non-breaking).
++ */
++import crypto from "node:crypto";
++
++const TTL_MS = 10 * 60 * 1000;
++const CLOCK_SKEW_MS = 60 * 1000;
++const DOMAIN = "contact-import:v1"; // HMAC-key domain separation
++
++function getSecret(): string | null {
++  const s = process.env.SDG_COOKIE_SECRET;
++  return s && s.length > 0 ? s : null;
++}
++
++function hmac(payloadB64: string, secret: string): Buffer {
++  return crypto.createHmac("sha256", DOMAIN + secret).update(payloadB64).digest();
++}
++
++interface TokenPayload {
++  v: 1;
++  uid: string;
++  wo: 0 | 1; // work-only flag
++  iat: number; // epoch ms
++}
++
++/** Issue a token for the signed-in user, or null when no signing secret is set. */
++export function issueContactImportToken(args: {
++  uid: string;
++  workOnly: boolean;
++  nowMs?: number;
++}): string | null {
++  const secret = getSecret();
++  if (!secret) return null;
++  const payload: TokenPayload = {
++    v: 1,
++    uid: args.uid,
++    wo: args.workOnly ? 1 : 0,
++    iat: args.nowMs ?? Date.now(),
++  };
++  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
++  const sig = hmac(payloadB64, secret).toString("base64url");
++  return `${payloadB64}.${sig}`;
++}
++
++export type TokenVerifyResult =
++  | { ok: true; uid: string; workOnly: boolean }
++  | { ok: false; reason: "missing_secret" | "malformed" | "bad_signature" | "expired" };
++
++/** Verify a token: integrity (timing-safe) first, then TTL, then extract claims. */
++export function verifyContactImportToken(token: string, nowMs?: number): TokenVerifyResult {
++  const secret = getSecret();
++  if (!secret) return { ok: false, reason: "missing_secret" };
++  if (typeof token !== "string") return { ok: false, reason: "malformed" };
++
++  const dot = token.lastIndexOf(".");
++  if (dot <= 0 || dot >= token.length - 1) return { ok: false, reason: "malformed" };
++  const payloadB64 = token.slice(0, dot);
++  const sigB64 = token.slice(dot + 1);
++
++  // 1) Integrity FIRST — timing-safe digest comparison, never a string compare.
++  const expected = hmac(payloadB64, secret);
++  let provided: Buffer;
++  try {
++    provided = Buffer.from(sigB64, "base64url");
++  } catch {
++    return { ok: false, reason: "malformed" };
++  }
++  if (provided.length !== expected.length || !crypto.timingSafeEqual(provided, expected)) {
++    return { ok: false, reason: "bad_signature" };
++  }
++
++  // 2) Payload is now trustworthy enough to parse.
++  let payload: TokenPayload;
++  try {
++    payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8")) as TokenPayload;
++  } catch {
++    return { ok: false, reason: "malformed" };
++  }
++  if (payload?.v !== 1 || typeof payload.uid !== "string" || typeof payload.iat !== "number") {
++    return { ok: false, reason: "malformed" };
++  }
++
++  const now = nowMs ?? Date.now();
++  if (now - payload.iat > TTL_MS || payload.iat - now > CLOCK_SKEW_MS) {
++    return { ok: false, reason: "expired" };
++  }
++  return { ok: true, uid: payload.uid, workOnly: payload.wo === 1 };
++}
+diff --git a/lib/email/google-oauth.ts b/lib/email/google-oauth.ts
+new file mode 100644
+index 00000000..71efe1d6
+--- /dev/null
++++ b/lib/email/google-oauth.ts
+@@ -0,0 +1,132 @@
++/**
++ * Minimal Google OAuth + People API client for read-only contact import.
++ *
++ * No `googleapis` SDK — the flow is a single consent redirect, one token
++ * exchange, and a paginated REST read, so plain `fetch` keeps the dependency
++ * surface (and the lockfile) untouched. The access token is used in-memory in
++ * the callback and never persisted (online access, no refresh token).
++ *
++ * Scope `contacts.readonly` is a Google *sensitive* scope: an unverified app is
++ * capped at ~100 users and shows an "unverified app" screen until Google
++ * verifies the consent screen. Enable the People API + submit verification in
++ * the Cloud Console (see .env.example / the plan); test users work immediately.
++ */
++import type { GooglePerson } from "./google-people";
++
++const GOOGLE_AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
++const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
++const PEOPLE_CONNECTIONS_ENDPOINT = "https://people.googleapis.com/v1/people/me/connections";
++
++export const GOOGLE_CONTACTS_SCOPES = [
++  "https://www.googleapis.com/auth/contacts.readonly",
++  "https://www.googleapis.com/auth/userinfo.email",
++];
++
++const DEFAULT_SITE_URL = "https://www.swfldatagulf.com";
++
++/** Are the Google OAuth credentials configured? Routes degrade gracefully when not. */
++export function googleOauthConfigured(): boolean {
++  return Boolean(process.env.GOOGLE_OAUTH_CLIENT_ID && process.env.GOOGLE_OAUTH_CLIENT_SECRET);
++}
++
++function clientId(): string {
++  const v = process.env.GOOGLE_OAUTH_CLIENT_ID;
++  if (!v) throw new Error("GOOGLE_OAUTH_CLIENT_ID is not set");
++  return v;
++}
++
++function clientSecret(): string {
++  const v = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
++  if (!v) throw new Error("GOOGLE_OAUTH_CLIENT_SECRET is not set");
++  return v;
++}
++
++/** Public site origin (no trailing slash), preferring the configured URL. Mirrors app/api/webhooks/resend. */
++export function siteBaseUrl(reqUrl?: string): string {
++  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
++  if (fromEnv) return fromEnv;
++  if (reqUrl) {
++    try {
++      return new URL(reqUrl).origin;
++    } catch {
++      /* fall through */
++    }
++  }
++  return DEFAULT_SITE_URL;
++}
++
++/** The OAuth redirect target — MUST match an Authorized redirect URI in the Cloud Console. */
++export function googleRedirectUri(reqUrl?: string): string {
++  return `${siteBaseUrl(reqUrl)}/api/email/contacts/google/callback`;
++}
++
++/** Build the consent-screen URL. `state` is the CSRF nonce echoed back to the callback. */
++export function buildGoogleAuthUrl({
++  state,
++  redirectUri,
++}: {
++  state: string;
++  redirectUri: string;
++}): string {
++  const params = new URLSearchParams({
++    client_id: clientId(),
++    redirect_uri: redirectUri,
++    response_type: "code",
++    scope: GOOGLE_CONTACTS_SCOPES.join(" "),
++    access_type: "online", // read once; no refresh token to store
++    include_granted_scopes: "true",
++    prompt: "consent",
++    state,
++  });
++  return `${GOOGLE_AUTH_ENDPOINT}?${params.toString()}`;
++}
++
++/** Exchange an authorization code for an access token (server-side; secret stays here). */
++export async function exchangeCodeForToken({
++  code,
++  redirectUri,
++}: {
++  code: string;
++  redirectUri: string;
++}): Promise<string> {
++  const res = await fetch(GOOGLE_TOKEN_ENDPOINT, {
++    method: "POST",
++    headers: { "content-type": "application/x-www-form-urlencoded" },
++    body: new URLSearchParams({
++      code,
++      client_id: clientId(),
++      client_secret: clientSecret(),
++      redirect_uri: redirectUri,
++      grant_type: "authorization_code",
++    }).toString(),
++  });
++  if (!res.ok) {
++    throw new Error(`token exchange failed (${res.status})`);
++  }
++  const json = (await res.json()) as { access_token?: string };
++  if (!json.access_token) throw new Error("token exchange returned no access_token");
++  return json.access_token;
++}
++
++/** Read ALL of the user's connections, following People API pagination. */
++export async function fetchAllConnections(accessToken: string): Promise<GooglePerson[]> {
++  const out: GooglePerson[] = [];
++  let pageToken: string | undefined;
++  // Bound the loop so a pathological pagination response can't spin forever.
++  for (let page = 0; page < 100; page++) {
++    const params = new URLSearchParams({
++      personFields: "names,emailAddresses",
++      pageSize: "1000",
++    });
++    if (pageToken) params.set("pageToken", pageToken);
++    const res = await fetch(`${PEOPLE_CONNECTIONS_ENDPOINT}?${params.toString()}`, {
++      headers: { authorization: `Bearer ${accessToken}` },
++    });
++    if (!res.ok) throw new Error(`people.connections.list failed (${res.status})`);
++    const json = (await res.json()) as { connections?: GooglePerson[]; nextPageToken?: string };
++    if (json.connections?.length) out.push(...json.connections);
++    if (!json.nextPageToken) break;
++    pageToken = json.nextPageToken;
++  }
++  return out;
++}
+diff --git a/lib/email/google-people.ts b/lib/email/google-people.ts
+new file mode 100644
+index 00000000..c432fdc1
+--- /dev/null
++++ b/lib/email/google-people.ts
+@@ -0,0 +1,37 @@
++/**
++ * Pure Google People API → ContactRow mapper.
++ *
++ * Network-free so it unit-tests in isolation; the OAuth dance and the actual
++ * `people.connections.list` fetch live in `google-oauth.ts`. A person may carry
++ * several email addresses — we emit one row per address so the work-email filter
++ * can keep a work address and drop a personal one independently, and people with
++ * no email are skipped entirely.
++ */
++import type { ContactRow } from "./parse-contacts-csv";
++
++/** The slice of a People `person` resource we consume (`personFields=names,emailAddresses`). */
++export interface GooglePerson {
++  names?: { displayName?: string | null }[];
++  emailAddresses?: { value?: string | null }[];
++}
++
++/**
++ * Flatten People connections into contact rows, applying `tags` (e.g.
++ * `["google"]` for provenance) to every row. Email normalization/validation is
++ * left to `upsertContacts` so this stays a pure structural transform.
++ */
++export function peopleConnectionsToContactRows(
++  connections: GooglePerson[],
++  tags: string[] = [],
++): ContactRow[] {
++  const rows: ContactRow[] = [];
++  for (const person of connections ?? []) {
++    const name = person.names?.find((n) => n.displayName)?.displayName ?? null;
++    for (const e of person.emailAddresses ?? []) {
++      const email = (e?.value ?? "").trim();
++      if (!email) continue;
++      rows.push({ email, name: name ?? null, tags: [...tags] });
++    }
++  }
++  return rows;
++}
+diff --git a/lib/email/parse-vcard.ts b/lib/email/parse-vcard.ts
+new file mode 100644
+index 00000000..0023f779
+--- /dev/null
++++ b/lib/email/parse-vcard.ts
+@@ -0,0 +1,140 @@
++/**
++ * Pure vCard (.vcf) → ContactRow parser.
++ *
++ * vCard is plumbing we *accept*, never an instruction we give a user: iCloud's
++ * "Export vCard" and Android's contact share-sheet both emit it. Handles the
++ * shapes those exports actually produce — multiple cards per file, RFC line
++ * folding, grouped properties (`item1.EMAIL`), TYPE params, quoted-printable
++ * names, and several emails per card (one ContactRow each, so the work-email
++ * filter can keep a work address and drop a personal one independently).
++ *
++ * Not a full RFC-6350 implementation; normalization/validation of the email is
++ * left to `upsertContacts`. Cards with no usable email are skipped + counted.
++ */
++import type { ContactRow } from "./parse-contacts-csv";
++
++export interface VcardParseResult {
++  rows: ContactRow[];
++  /** vCards that carried no usable email address. */
++  skippedCards: number;
++}
++
++/** Unfold continuation lines (a line beginning with space/tab continues the prior one). */
++function unfoldLines(text: string): string[] {
++  const raw = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
++  const out: string[] = [];
++  for (const line of raw) {
++    if (out.length > 0 && (line.startsWith(" ") || line.startsWith("\t"))) {
++      out[out.length - 1] += line.slice(1);
++    } else {
++      out.push(line);
++    }
++  }
++  return out;
++}
++
++interface Property {
++  name: string;
++  params: string;
++  value: string;
++}
++
++/** Split `NAME;PARAM=x:VALUE` (incl. grouped `item1.EMAIL`) into parts. */
++function splitProperty(line: string): Property | null {
++  const colon = line.indexOf(":");
++  if (colon < 0) return null;
++  const head = line.slice(0, colon);
++  const value = line.slice(colon + 1);
++  const semi = head.indexOf(";");
++  const nameRaw = semi < 0 ? head : head.slice(0, semi);
++  const params = semi < 0 ? "" : head.slice(semi + 1);
++  const dot = nameRaw.lastIndexOf("."); // grouped property → keep the part after the dot
++  const name = (dot < 0 ? nameRaw : nameRaw.slice(dot + 1)).trim().toUpperCase();
++  return { name, params, value };
++}
++
++/**
++ * Decode a quoted-printable value when the params say so; otherwise pass through.
++ * `=XX` escapes are byte values — accumulated and decoded as UTF-8 so multi-byte
++ * characters (e.g. `=C3=A9` → "é") come back correctly rather than as mojibake.
++ */
++function decodeValue(value: string, params: string): string {
++  if (!/ENCODING=QUOTED-PRINTABLE/i.test(params)) return value;
++  const soft = value.replace(/=\r?\n/g, ""); // drop soft line breaks
++  const bytes: number[] = [];
++  for (let i = 0; i < soft.length; i++) {
++    if (soft[i] === "=" && /^[0-9A-Fa-f]{2}$/.test(soft.slice(i + 1, i + 3))) {
++      bytes.push(parseInt(soft.slice(i + 1, i + 3), 16));
++      i += 2;
++    } else {
++      bytes.push(...Buffer.from(soft[i], "utf8"));
++    }
++  }
++  return Buffer.from(bytes).toString("utf8");
++}
++
++/** Build a display name from a structured `N:Last;First;Middle;Prefix;Suffix`. */
++function nameFromStructured(value: string): string | null {
++  const [last = "", first = ""] = value.split(";");
++  const display = [first.trim(), last.trim()].filter(Boolean).join(" ").trim();
++  return display.length > 0 ? display : null;
++}
++
++export function parseVcard(text: string): VcardParseResult {
++  const rows: ContactRow[] = [];
++  let skippedCards = 0;
++
++  let inCard = false;
++  let fn: string | null = null;
++  let structured: string | null = null;
++  let emails: string[] = [];
++
++  const flush = () => {
++    if (!inCard) return;
++    const name = fn ?? structured ?? null;
++    if (emails.length === 0) {
++      skippedCards++;
++    } else {
++      for (const email of emails) rows.push({ email, name, tags: [] });
++    }
++    inCard = false;
++    fn = null;
++    structured = null;
++    emails = [];
++  };
++
++  for (const line of unfoldLines(text)) {
++    const trimmed = line.trim();
++    if (!trimmed) continue;
++    const prop = splitProperty(trimmed);
++    if (!prop) continue;
++
++    if (prop.name === "BEGIN" && prop.value.trim().toUpperCase() === "VCARD") {
++      flush(); // tolerate a missing END before the next BEGIN
++      inCard = true;
++      continue;
++    }
++    if (prop.name === "END" && prop.value.trim().toUpperCase() === "VCARD") {
++      flush();
++      continue;
++    }
++    if (!inCard) continue;
++
++    switch (prop.name) {
++      case "FN":
++        fn = decodeValue(prop.value, prop.params).trim() || fn;
++        break;
++      case "N":
++        structured = nameFromStructured(decodeValue(prop.value, prop.params));
++        break;
++      case "EMAIL": {
++        const email = prop.value.trim();
++        if (email) emails.push(email);
++        break;
++      }
++    }
++  }
++  flush(); // tolerate a missing final END:VCARD
++
++  return { rows, skippedCards };
++}
+diff --git a/lib/email/upsert-contacts.ts b/lib/email/upsert-contacts.ts
+new file mode 100644
+index 00000000..b740c342
+--- /dev/null
++++ b/lib/email/upsert-contacts.ts
+@@ -0,0 +1,157 @@
++/**
++ * Shared contact-upsert core — the ONE place contacts land in email_contacts.
++ *
++ * Every import path (CSV upload, Google People, vCard) funnels through
++ * `upsertContacts` so validation, de-dup, and the insert/update split live in a
++ * single tested module rather than being re-implemented per route (the pattern
++ * `lib/email/audience-sync.ts` already follows for sync).
++ *
++ * The pure pieces — `prepareContacts` (validate + normalize + de-dupe) and
++ * `mergeContact` (union tags, never null an existing name) — are exported and
++ * unit-tested in isolation; `upsertContacts` is the thin orchestration over an
++ * RLS-scoped Supabase client (the row's `user_id` is bound here and RLS
++ * WITH CHECK enforces `auth.uid() = userId`).
++ */
++import type { SupabaseClient } from "@supabase/supabase-js";
++import type { ContactRow } from "./parse-contacts-csv";
++import { normalizeEmail, isValidEmail } from "./validation";
++
++/** Hard cap on rows accepted in a single import (runaway-payload guard). */
++export const MAX_CONTACT_ROWS = 10_000;
++
++export interface ContactRecord {
++  user_id: string;
++  email: string;
++  name: string | null;
++  tags: string[];
++}
++
++export interface UpsertContactsResult {
++  inserted: number;
++  updated: number;
++  skipped: number;
++  errors: string[];
++}
++
++/**
++ * PURE: validate + normalize + de-dupe a batch of rows for one user.
++ *
++ * Invalid emails are dropped (counted in `skipped`, with a per-row `errors`
++ * note). Within the batch, a repeated address collapses to a single record —
++ * tags are unioned and a later non-null name wins (so a duplicate that adds a
++ * tag never erases the name carried by an earlier copy).
++ */
++export function prepareContacts(
++  userId: string,
++  rows: ContactRow[],
++): { records: ContactRecord[]; skipped: number; errors: string[] } {
++  const errors: string[] = [];
++  let skipped = 0;
++
++  const byEmail = new Map<string, { name: string | null; tags: string[] }>();
++  for (const row of rows) {
++    const email = normalizeEmail(row.email);
++    if (!isValidEmail(email)) {
++      skipped++;
++      errors.push(`skipped invalid email: ${row.email}`);
++      continue;
++    }
++    const incoming = { name: row.name ?? null, tags: row.tags ?? [] };
++    const prev = byEmail.get(email);
++    byEmail.set(email, prev ? mergeContact(prev, incoming) : incoming);
++  }
++
++  const records: ContactRecord[] = [];
++  for (const [email, v] of byEmail) {
++    if (records.length >= MAX_CONTACT_ROWS) {
++      skipped++;
++      continue;
++    }
++    records.push({ user_id: userId, email, name: v.name, tags: v.tags });
++  }
++
++  return { records, skipped, errors };
++}
++
++/**
++ * PURE: merge an incoming contact into a stored/earlier one.
++ *
++ * Tags are unioned. The name is preserved unless the incoming row supplies a
++ * non-null one — fixes the [MEDIUM] data-loss bug from the 2026-06-13 email
++ * audit, where a tags-only re-upload (`incoming.name === null`) destructively
++ * nulled an existing name.
++ */
++export function mergeContact(
++  existing: { name: string | null; tags: string[] },
++  incoming: { name: string | null; tags: string[] },
++): { name: string | null; tags: string[] } {
++  return {
++    name: incoming.name ?? existing.name,
++    tags: Array.from(new Set([...(existing.tags ?? []), ...(incoming.tags ?? [])])),
++  };
++}
++
++/**
++ * Idempotent upsert into public.email_contacts. Two-pass so `inserted` and
++ * `updated` are disjoint and accurate:
++ *   1. insert-only upsert (ON CONFLICT DO NOTHING) → the rows that were new
++ *   2. for the conflicts only, union tags + preserve name → updated
++ */
++export async function upsertContacts(
++  supabase: SupabaseClient,
++  userId: string,
++  rows: ContactRow[],
++): Promise<UpsertContactsResult> {
++  const { records, skipped, errors } = prepareContacts(userId, rows);
++  if (records.length === 0) return { inserted: 0, updated: 0, skipped, errors };
++
++  // Pass 1 — insert new rows only. With ignoreDuplicates the returned rows are
++  // exactly the freshly-inserted ones, so their emails identify what was NEW.
++  const { data: insertedRows, error: insertError } = await supabase
++    .from("email_contacts")
++    .upsert(records, { onConflict: "user_id,email", ignoreDuplicates: true })
++    .select("email");
++
++  if (insertError) {
++    errors.push(`insert error: ${insertError.message}`);
++    return { inserted: 0, updated: 0, skipped, errors };
++  }
++
++  const insertedEmails = new Set((insertedRows ?? []).map((r) => r.email as string));
++  const inserted = insertedEmails.size;
++  const conflicts = records.filter((r) => !insertedEmails.has(r.email));
++
++  let updated = 0;
++  if (conflicts.length > 0) {
++    const { data: existing, error: fetchError } = await supabase
++      .from("email_contacts")
++      .select("id, email, name, tags")
++      .eq("user_id", userId)
++      .in(
++        "email",
++        conflicts.map((r) => r.email),
++      );
++
++    if (fetchError) {
++      errors.push(`fetch error: ${fetchError.message}`);
++    } else {
++      const incomingByEmail = new Map(conflicts.map((r) => [r.email, r]));
++      for (const ex of existing ?? []) {
++        const incoming = incomingByEmail.get(ex.email as string);
++        if (!incoming) continue;
++        const merged = mergeContact(
++          { name: (ex.name as string | null) ?? null, tags: (ex.tags as string[]) ?? [] },
++          { name: incoming.name, tags: incoming.tags },
++        );
++        const { error: upErr } = await supabase
++          .from("email_contacts")
++          .update({ name: merged.name, tags: merged.tags, updated_at: new Date().toISOString() })
++          .eq("id", ex.id as number)
++          .eq("user_id", userId); // belt-and-suspenders alongside RLS
++        if (!upErr) updated++;
++      }
++    }
++  }
++
++  return { inserted, updated, skipped, errors };
++}
+diff --git a/lib/email/work-email-filter.ts b/lib/email/work-email-filter.ts
+new file mode 100644
+index 00000000..44ce1697
+--- /dev/null
++++ b/lib/email/work-email-filter.ts
+@@ -0,0 +1,94 @@
++/**
++ * Work-email filter — "Work emails only" toggle shared by every import path.
++ *
++ * Brokers importing a full phone book usually want their business network, not
++ * family and friends. When `workOnly` is on, contacts whose address sits on a
++ * known personal/consumer domain are dropped; everything else (company and
++ * professional domains) is kept. Blocklist approach: an unknown domain is
++ * treated as work — we exclude what we recognise as personal, never guess a
++ * domain is personal because it's unfamiliar.
++ *
++ * Pure module — no I/O, no env. The People API can return several emails for one
++ * person; the caller emits one `ContactRow` per email, so a person with both a
++ * work and a personal address keeps the work one and drops the personal one, and
++ * a person with only a personal address falls out entirely when `workOnly`.
++ */
++import type { ContactRow } from "./parse-contacts-csv";
++
++/**
++ * Known personal / consumer-ISP email domains. Not exhaustive by design — extend
++ * as real imports surface frequent personal domains (per the operator note).
++ */
++export const PERSONAL_EMAIL_DOMAINS: ReadonlySet<string> = new Set([
++  "gmail.com",
++  "googlemail.com",
++  "yahoo.com",
++  "ymail.com",
++  "hotmail.com",
++  "outlook.com",
++  "live.com",
++  "msn.com",
++  "icloud.com",
++  "me.com",
++  "mac.com",
++  "aol.com",
++  "comcast.net",
++  "att.net",
++  "verizon.net",
++  "sbcglobal.net",
++  "bellsouth.net",
++  "cox.net",
++  "charter.net",
++  "earthlink.net",
++  "protonmail.com",
++  "proton.me",
++  "gmx.com",
++]);
++
++/** The domain part of an email, lowercased; "" when there is no `@domain`. */
++export function emailDomain(email: string): string {
++  const at = email.lastIndexOf("@");
++  if (at < 0) return "";
++  return email.slice(at + 1).trim().toLowerCase();
++}
++
++/**
++ * True when the address is NOT on a recognised personal domain. A malformed
++ * address (no domain) is not classified as personal here — validation drops it
++ * downstream; the filter's only job is to exclude known consumer domains.
++ */
++export function isWorkEmail(email: string): boolean {
++  const domain = emailDomain(email);
++  return domain.length > 0 && !PERSONAL_EMAIL_DOMAINS.has(domain);
++}
++
++export interface PartitionResult {
++  /** Rows to keep (all rows when `workOnly` is off). */
++  kept: ContactRow[];
++  /** Count of rows dropped specifically because their domain is personal. */
++  skippedPersonal: number;
++}
++
++/**
++ * Split rows by the work-only toggle. With `workOnly` off this is a pass-through
++ * (`skippedPersonal` is 0); with it on, only personal-domain rows are removed
++ * and counted — invalid/garbage addresses are left for email validation to drop
++ * so they aren't mislabelled "personal".
++ */
++export function partitionContacts(
++  rows: ContactRow[],
++  opts: { workOnly: boolean },
++): PartitionResult {
++  if (!opts.workOnly) return { kept: rows, skippedPersonal: 0 };
++  const kept: ContactRow[] = [];
++  let skippedPersonal = 0;
++  for (const row of rows) {
++    const domain = emailDomain(String(row.email ?? ""));
++    if (domain.length > 0 && PERSONAL_EMAIL_DOMAINS.has(domain)) {
++      skippedPersonal++;
++      continue;
++    }
++    kept.push(row);
++  }
++  return { kept, skippedPersonal };
++}
+diff --git a/package.json b/package.json
+index 9ded0b75..b12d59b1 100644
+--- a/package.json
++++ b/package.json
+@@ -56,6 +56,7 @@
+     "mcp-handler": "^1.1.0",
+     "motion": "^12.40.0",
+     "next": "16.2.6",
++    "qrcode": "^1.5.4",
+     "react": "19.2.4",
+     "react-dom": "19.2.4",
+     "react-markdown": "^10.1.0",
+@@ -73,6 +74,7 @@
+     "@tailwindcss/postcss": "^4",
+     "@tailwindcss/typography": "^0.5.19",
+     "@types/node": "^20",
++    "@types/qrcode": "^1.5.6",
+     "@types/react": "^19",
+     "@types/react-dom": "^19",
+     "eslint": "^9",
+-- 
+2.53.0.windows.3
+

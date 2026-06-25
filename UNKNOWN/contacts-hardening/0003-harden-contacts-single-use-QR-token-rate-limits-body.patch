@@ -1,0 +1,356 @@
+From 369cc15d553edf767e3b7b9ba7595a34c55e0320 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 20 Jun 2026 05:17:38 +0000
+Subject: [PATCH 3/3] harden(contacts): single-use QR token + rate-limits +
+ body caps
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Single-use import token: payload carries a random nid; the phone route
+  claims contact-import:<nid> via claimOnce/email_send_ledger before the
+  upsert, so a captured/leaked token works at most once (409 on replay).
+  Reuses the proposal-nonce single-use seam; no new table; degrades to
+  TTL-only if the ledger migration is absent.
+- Per-IP rate limit (inline, house pattern) on /phone, /google/start,
+  /upload — these aren't in the middleware RATE_LIMITED_PREFIXES. Added
+  rateLimitHeaders() to lib/rate-limit.ts.
+- Pre-parse 5MB body cap on /phone + /upload (413) — was only post-parse
+  row caps.
+- fetchAllConnections bounded at 50k connections (upsert stores <=10k).
+
+tsc 0, eslint clean, next build compiles + typechecks, 3090 tests pass
+(+2 token nid tests).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011W3SXdAff3nufkN8m5bXVC
+---
+ SESSION_LOG.md                                |  9 ++++
+ app/api/email/contacts/google/start/route.ts  |  7 ++++
+ app/api/email/contacts/phone/route.ts         | 41 +++++++++++++++++--
+ app/api/email/contacts/upload/route.ts        | 14 +++++++
+ .../__tests__/contact-import-token.test.ts    | 17 +++++++-
+ lib/email/contact-import-token.ts             | 33 +++++++++------
+ lib/email/google-oauth.ts                     | 13 +++++-
+ lib/rate-limit.ts                             | 20 +++++++++
+ 8 files changed, 134 insertions(+), 20 deletions(-)
+
+diff --git a/SESSION_LOG.md b/SESSION_LOG.md
+index 7e5be989..9308e826 100644
+--- a/SESSION_LOG.md
++++ b/SESSION_LOG.md
+@@ -1,3 +1,12 @@
++## 2026-06-20 (claude/branch-status-check-84t7dh) — harden: single-use QR token + rate-limits + body caps on contact-import
++
++- **Single-use QR token (the deferred residual):** `contact-import-token.ts` now carries a random `nid`; `app/api/email/contacts/phone` claims `contact-import:<nid>` via `claimOnce` (`lib/email/idempotency.ts`) against `email_send_ledger` — atomic `INSERT…ON CONFLICT DO NOTHING`, the same single-use seam proposal-nonce uses. A captured/leaked token now works **at most once** → replay returns **409 token_already_used**. Degrades to TTL-only if the ledger migration isn't applied (claimOnce 42P01 → win), never worse than before. **No new table.**
++- **Rate-limits (inline, house pattern):** added `rateLimitHeaders()` to `lib/rate-limit.ts` and guarded the 3 abuse vectors not covered by the middleware prefix list — `/phone`, `/google/start`, `/upload` → **429** with `Retry-After`/`X-RateLimit-*`.
++- **Body-size caps:** `/phone` + `/upload` reject `content-length > 5 MB` **before** `req.json()` → **413** (was: only post-parse row caps; a 50 MB CSV/JSON would parse into memory first).
++- **Bounded Google fetch:** `fetchAllConnections` stops at 50k connections (upsert stores ≤10k anyway) — caps memory on a giant address book.
++- **Note:** single-use also bounds the phone best-effort `syncUserAudiences` amplification the audit flagged (≤1 sync per token), so that broad sync is left as-is.
++- **Gates:** tsc 0, eslint clean, `next build` ✓ Compiled + ✓ TypeScript (env-gated `/charts` only), **3090 tests / 0 fail** (+2 token nid tests). Pushed to `claude/branch-status-check-84t7dh`.
++
+ ## 2026-06-20 (claude/branch-status-check-84t7dh) — audit + fixes: 3 adversarial auditors over the contact-import diff
+ 
+ - **Audited the whole contact-import diff against code** (3 parallel adversarial reviewers: security, correctness, integration). Verdict: **no BLOCKER/HIGH.** Verified-solid: cross-tenant isolation (service-role phone path scopes every read/write by `user_id`; `makeSupabaseAudienceStore` reads `.eq("user_id")`), token integrity (timing-safe, integrity-before-parse), OAuth state/redirect_uri, and the `inserted`/`updated` disjointness (confirmed `ignoreDuplicates + .select()` → `ON CONFLICT DO NOTHING RETURNING` at postgrest-js 2.106.1).
+diff --git a/app/api/email/contacts/google/start/route.ts b/app/api/email/contacts/google/start/route.ts
+index af51a0a0..5ca93038 100644
+--- a/app/api/email/contacts/google/start/route.ts
++++ b/app/api/email/contacts/google/start/route.ts
+@@ -13,6 +13,7 @@ import { NextResponse, type NextRequest } from "next/server";
+ import { randomBytes } from "node:crypto";
+ import { createClient } from "@/utils/supabase/server";
+ import { buildGoogleAuthUrl, googleRedirectUri, googleOauthConfigured } from "@/lib/email/google-oauth";
++import { checkRateLimit, clientIpFromHeaders, rateLimitHeaders } from "@/lib/rate-limit";
+ 
+ export const runtime = "nodejs";
+ export const dynamic = "force-dynamic";
+@@ -20,6 +21,12 @@ export const dynamic = "force-dynamic";
+ export const OAUTH_STATE_COOKIE = "g_contacts_oauth";
+ 
+ export async function GET(req: NextRequest) {
++  // Per-IP rate limit — guards OAuth-mint spam (not in the middleware prefix list).
++  const rl = checkRateLimit(clientIpFromHeaders(req.headers));
++  if (rl.limited) {
++    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
++  }
++
+   const supabase = createClient(await cookies());
+   const {
+     data: { user },
+diff --git a/app/api/email/contacts/phone/route.ts b/app/api/email/contacts/phone/route.ts
+index a16ecd49..ae77f1f1 100644
+--- a/app/api/email/contacts/phone/route.ts
++++ b/app/api/email/contacts/phone/route.ts
+@@ -4,26 +4,47 @@
+  * Receives contacts picked on a phone via the Contact Picker API on the
+  * token-gated mobile page (/m/contacts/[token]). The phone is NOT in the user's
+  * Supabase session, so authorization comes from the signed import token (issued
+- * on the authenticated desktop page) — verified here, then the upsert runs under
+- * the service-role client with `user_id` taken from the token's verified claim.
++ * on the authenticated desktop page) — verified here, claimed SINGLE-USE, then
++ * the upsert runs under the service-role client with `user_id` taken from the
++ * token's verified claim.
++ *
++ * Hardening: per-IP rate limit (this route isn't in the middleware prefix list),
++ * a pre-parse body-size cap, and a single-use claim so a captured token can't be
++ * replayed within its TTL.
+  *
+  * INPUT: JSON `{ token: string, contacts: { email: string, name?: string }[] }`
+- * RESPONSE: 200 { imported, skipped, skippedPersonal } | 400 | 401
++ * RESPONSE: 200 { imported, skipped, skippedPersonal } | 400 | 401 | 409 | 413 | 429
+  */
+ import { NextResponse, type NextRequest } from "next/server";
+ import { createServiceRoleClient } from "@/utils/supabase/service-role";
+ import { verifyContactImportToken } from "@/lib/email/contact-import-token";
++import { claimOnce } from "@/lib/email/idempotency";
+ import { partitionContacts } from "@/lib/email/work-email-filter";
+ import { upsertContacts } from "@/lib/email/upsert-contacts";
+ import { syncUserAudiences, makeSupabaseAudienceStore } from "@/lib/email/audience-sync";
+ import { getMarketingResend } from "@/lib/email/marketing-client";
++import { checkRateLimit, clientIpFromHeaders, rateLimitHeaders } from "@/lib/rate-limit";
+ import type { ContactRow } from "@/lib/email/parse-contacts-csv";
+ 
+ export const runtime = "nodejs";
+ 
+ const MAX_PICKED = 10_000;
++const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB — mirrors app/api/contacts/import
+ 
+ export async function POST(req: NextRequest) {
++  // Per-IP rate limit — public/token-only endpoint, not covered by the middleware
++  // RATE_LIMITED_PREFIXES, so guard inline (house pattern: app/api/converse).
++  const rl = checkRateLimit(clientIpFromHeaders(req.headers));
++  if (rl.limited) {
++    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
++  }
++
++  // Body-size guard BEFORE parsing — never pull a multi-MB JSON into memory.
++  const contentLength = Number(req.headers.get("content-length") ?? "0");
++  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
++    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
++  }
++
+   const body = await req.json().catch(() => null);
+   if (!body || typeof body !== "object") {
+     return NextResponse.json({ error: "invalid body" }, { status: 400 });
+@@ -58,6 +79,20 @@ export async function POST(req: NextRequest) {
+   // Service-role: the phone has no session, so RLS auth.uid() is unavailable.
+   // The token IS the authorization — user_id comes from its verified claim.
+   const supabase = createServiceRoleClient();
++
++  // SINGLE-USE: claim the token's nid before writing. A replay (captured token,
++  // leaked URL) loses the atomic claim and is rejected. Reuses the email_send_ledger
++  // UNIQUE(idempotency_key) seam — exactly the proposal-nonce single-use pattern.
++  // (If the ledger migration isn't applied, claimOnce degrades to a win → falls
++  // back to TTL-only behavior; never worse than before.)
++  const won = await claimOnce(supabase, `contact-import:${verified.nid}`, {
++    userId: verified.uid,
++    kind: "contact-import",
++  });
++  if (!won) {
++    return NextResponse.json({ error: "token_already_used" }, { status: 409 });
++  }
++
+   const result = await upsertContacts(supabase, verified.uid, kept);
+ 
+   // Best-effort: materialize the "phone" tag into a pickable Resend audience now,
+diff --git a/app/api/email/contacts/upload/route.ts b/app/api/email/contacts/upload/route.ts
+index f3edc23e..0aaf28d8 100644
+--- a/app/api/email/contacts/upload/route.ts
++++ b/app/api/email/contacts/upload/route.ts
+@@ -26,11 +26,25 @@ import { parseContactsCsv } from "@/lib/email/parse-contacts-csv";
+ import { parseVcard } from "@/lib/email/parse-vcard";
+ import { partitionContacts } from "@/lib/email/work-email-filter";
+ import { upsertContacts } from "@/lib/email/upsert-contacts";
++import { checkRateLimit, clientIpFromHeaders, rateLimitHeaders } from "@/lib/rate-limit";
+ import type { ContactRow } from "@/lib/email/parse-contacts-csv";
+ 
+ export const runtime = "nodejs";
+ 
++const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB — bound the CSV/vCard text before parse
++
+ export async function POST(req: NextRequest) {
++  // Per-IP rate limit (not in the middleware RATE_LIMITED_PREFIXES) + a pre-parse
++  // body-size cap so a giant CSV/vCard can't be pulled into memory.
++  const rl = checkRateLimit(clientIpFromHeaders(req.headers));
++  if (rl.limited) {
++    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
++  }
++  const contentLength = Number(req.headers.get("content-length") ?? "0");
++  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
++    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
++  }
++
+   // --- Auth (copy pattern from app/api/projects/route.ts) ---
+   const supabase = createClient(await cookies());
+   const {
+diff --git a/lib/email/__tests__/contact-import-token.test.ts b/lib/email/__tests__/contact-import-token.test.ts
+index 1a1b1764..8164e7a0 100644
+--- a/lib/email/__tests__/contact-import-token.test.ts
++++ b/lib/email/__tests__/contact-import-token.test.ts
+@@ -9,11 +9,24 @@ beforeAll(() => {
+ });
+ 
+ describe("contact-import-token", () => {
+-  test("round-trip recovers uid + workOnly", () => {
++  test("round-trip recovers uid + workOnly + a nid", () => {
+     const token = issueContactImportToken({ uid: "user-9", workOnly: true })!;
+     expect(token).toBeTruthy();
+     const v = verifyContactImportToken(token);
+-    expect(v).toEqual({ ok: true, uid: "user-9", workOnly: true });
++    expect(v.ok).toBe(true);
++    if (v.ok) {
++      expect(v.uid).toBe("user-9");
++      expect(v.workOnly).toBe(true);
++      expect(typeof v.nid).toBe("string");
++      expect(v.nid.length).toBeGreaterThan(0);
++    }
++  });
++
++  test("each issue gets a distinct nid (the single-use claim key)", () => {
++    const a = verifyContactImportToken(issueContactImportToken({ uid: "u", workOnly: false })!);
++    const b = verifyContactImportToken(issueContactImportToken({ uid: "u", workOnly: false })!);
++    expect(a.ok && b.ok).toBe(true);
++    if (a.ok && b.ok) expect(a.nid).not.toBe(b.nid);
+   });
+ 
+   test("workOnly false is preserved", () => {
+diff --git a/lib/email/contact-import-token.ts b/lib/email/contact-import-token.ts
+index 591d22f6..3a509e22 100644
+--- a/lib/email/contact-import-token.ts
++++ b/lib/email/contact-import-token.ts
+@@ -5,17 +5,17 @@
+  * session, so the token itself must carry the authorization. We mirror the
+  * `proposal-nonce.ts` seam: an HMAC-SHA256 token keyed on `SDG_COOKIE_SECRET`
+  * (already set in prod), domain-separated, binding the user id + the "work only"
+- * choice + an issued-at with a 10-minute TTL.
++ * choice + a unique `nid` + an issued-at with a 5-minute TTL.
+  *
+- * RESIDUAL RISK (accepted for v1, documented): the token is NOT single-use. A
+- * captured token (the QR is photographed, or the `/m/contacts/<token>` URL leaks
+- * via history/referrer/proxy logs) lets the holder POST attacker-CHOSEN contacts
+- * into the victim's list until it expires — bounded by the short TTL and an
+- * additive-only blast radius (you can add contacts, never read them). The 5-min
+- * TTL keeps the window tight; a follow-up can make it single-use via a small
+- * claim table (mirroring proposal-nonce's email_send_ledger claim) if needed.
+- * Integrity is verified with `crypto.timingSafeEqual` on the raw digests before
+- * any payload field is read.
++ * SINGLE-USE: the payload carries a random `nid`; the consuming route (the phone
++ * import) claims `contact-import:<nid>` via `claimOnce` against `email_send_ledger`
++ * (the same single-use seam proposal-nonce uses), so a captured token — the QR is
++ * photographed, or the `/m/contacts/<token>` URL leaks via history/referrer/proxy
++ * logs — works AT MOST ONCE, and only within the 5-min TTL. Blast radius is
++ * additive-only (you can add contacts, never read them). If the ledger migration
++ * isn't applied (claimOnce 42P01-degrades to a win), single-use falls back to the
++ * TTL-bounded behavior — never worse than before. Integrity is verified with
++ * `crypto.timingSafeEqual` on the raw digests before any payload field is read.
+  *
+  * No signing secret configured → `issueContactImportToken` returns null and the
+  * desktop QR section is hidden (env-gated, non-breaking).
+@@ -40,6 +40,7 @@ interface TokenPayload {
+   uid: string;
+   wo: 0 | 1; // work-only flag
+   iat: number; // epoch ms
++  nid: string; // single-use id (the ledger claim key is `contact-import:<nid>`)
+ }
+ 
+ /** Issue a token for the signed-in user, or null when no signing secret is set. */
+@@ -55,6 +56,7 @@ export function issueContactImportToken(args: {
+     uid: args.uid,
+     wo: args.workOnly ? 1 : 0,
+     iat: args.nowMs ?? Date.now(),
++    nid: crypto.randomUUID(),
+   };
+   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
+   const sig = hmac(payloadB64, secret).toString("base64url");
+@@ -62,7 +64,7 @@ export function issueContactImportToken(args: {
+ }
+ 
+ export type TokenVerifyResult =
+-  | { ok: true; uid: string; workOnly: boolean }
++  | { ok: true; uid: string; workOnly: boolean; nid: string }
+   | { ok: false; reason: "missing_secret" | "malformed" | "bad_signature" | "expired" };
+ 
+ /** Verify a token: integrity (timing-safe) first, then TTL, then extract claims. */
+@@ -95,7 +97,12 @@ export function verifyContactImportToken(token: string, nowMs?: number): TokenVe
+   } catch {
+     return { ok: false, reason: "malformed" };
+   }
+-  if (payload?.v !== 1 || typeof payload.uid !== "string" || typeof payload.iat !== "number") {
++  if (
++    payload?.v !== 1 ||
++    typeof payload.uid !== "string" ||
++    typeof payload.iat !== "number" ||
++    typeof payload.nid !== "string"
++  ) {
+     return { ok: false, reason: "malformed" };
+   }
+ 
+@@ -103,5 +110,5 @@ export function verifyContactImportToken(token: string, nowMs?: number): TokenVe
+   if (now - payload.iat > TTL_MS || payload.iat - now > CLOCK_SKEW_MS) {
+     return { ok: false, reason: "expired" };
+   }
+-  return { ok: true, uid: payload.uid, workOnly: payload.wo === 1 };
++  return { ok: true, uid: payload.uid, workOnly: payload.wo === 1, nid: payload.nid };
+ }
+diff --git a/lib/email/google-oauth.ts b/lib/email/google-oauth.ts
+index 71efe1d6..23f57fa4 100644
+--- a/lib/email/google-oauth.ts
++++ b/lib/email/google-oauth.ts
+@@ -108,7 +108,16 @@ export async function exchangeCodeForToken({
+   return json.access_token;
+ }
+ 
+-/** Read ALL of the user's connections, following People API pagination. */
++/**
++ * Hard ceiling on connections held in memory. The upsert caps STORED contacts at
++ * MAX_CONTACT_ROWS (10k), so fetching beyond a generous multiple of that can never
++ * increase the result — it's pure memory waste. 50k leaves ample headroom for
++ * multi-email contacts the work-email filter may drop, while bounding a giant
++ * address book.
++ */
++const MAX_CONNECTIONS = 50_000;
++
++/** Read the user's connections, following People API pagination (memory-bounded). */
+ export async function fetchAllConnections(accessToken: string): Promise<GooglePerson[]> {
+   const out: GooglePerson[] = [];
+   let pageToken: string | undefined;
+@@ -125,7 +134,7 @@ export async function fetchAllConnections(accessToken: string): Promise<GooglePe
+     if (!res.ok) throw new Error(`people.connections.list failed (${res.status})`);
+     const json = (await res.json()) as { connections?: GooglePerson[]; nextPageToken?: string };
+     if (json.connections?.length) out.push(...json.connections);
+-    if (!json.nextPageToken) break;
++    if (!json.nextPageToken || out.length >= MAX_CONNECTIONS) break;
+     pageToken = json.nextPageToken;
+   }
+   return out;
+diff --git a/lib/rate-limit.ts b/lib/rate-limit.ts
+index 3bedd70e..7ac8f7a3 100644
+--- a/lib/rate-limit.ts
++++ b/lib/rate-limit.ts
+@@ -104,3 +104,23 @@ export function clientIpFromHeaders(headers: Headers): string {
+ export function __resetRateLimitState(): void {
+   buckets.clear();
+ }
++
++/**
++ * Build the standard 429 response headers for a limited result — Retry-After +
++ * X-RateLimit-* — matching what the middleware emits, so per-route inline limits
++ * (e.g. the contact-import endpoints, which aren't in the middleware prefix list)
++ * speak the same protocol. Returns a plain header bag (keeps this module
++ * Next-free for the Edge middleware import).
++ */
++export function rateLimitHeaders(
++  result: RateLimitResult,
++  now: number = Date.now(),
++): Record<string, string> {
++  return {
++    "Cache-Control": "no-store",
++    "Retry-After": String(Math.max(1, Math.ceil((result.resetAt - now) / 1000))),
++    "X-RateLimit-Limit": String(result.limit),
++    "X-RateLimit-Remaining": String(result.remaining),
++    "X-RateLimit-Reset": String(Math.ceil(result.resetAt / 1000)),
++  };
++}
+-- 
+2.53.0.windows.3
+
