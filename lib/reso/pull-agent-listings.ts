@@ -17,12 +17,17 @@ interface ResoProperty {
   PropertyType?: string;
 }
 
+const MEMBER_MLS_ID_RE = /^[A-Za-z0-9\-\.]{1,64}$/;
+
 export async function pullAgentListings(
   supabase: SupabaseClient,
   slug: BoardSlug,
   memberMlsId: string,
   userId: string,
 ): Promise<{ count: number; zips: string[] }> {
+  if (!MEMBER_MLS_ID_RE.test(memberMlsId)) {
+    throw new Error(`Invalid MemberMlsId: ${memberMlsId}`);
+  }
   const client = new ResoClient(slug);
 
   // Note: some boards don't support OData `in()` for enum fields.

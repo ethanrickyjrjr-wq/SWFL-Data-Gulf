@@ -37,7 +37,8 @@ export async function POST(req: Request) {
 
 // Vercel cron fan-out
 export async function GET(req: Request) {
-  if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

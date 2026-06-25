@@ -35,11 +35,16 @@ interface ResoProperty {
   PropertyType?: string;
 }
 
+const MEMBER_MLS_ID_RE = /^[A-Za-z0-9\-\.]{1,64}$/;
+
 export async function syncConnection(
   supabase: SupabaseClient,
   conn: Connection,
 ): Promise<{ listings: number; zips: string[] }> {
   const { id, user_id, board_slug, member_mls_id, last_entity_event_sequence } = conn;
+  if (!MEMBER_MLS_ID_RE.test(member_mls_id)) {
+    throw new Error(`Invalid MemberMlsId: ${member_mls_id}`);
+  }
 
   // ── First sync: full pull ────────────────────────────────────────────────
   if (last_entity_event_sequence === null) {
