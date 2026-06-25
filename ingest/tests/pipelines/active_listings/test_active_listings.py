@@ -1,8 +1,8 @@
-"""Deterministic tests for the JRW listings normalizer + card parser (no network)."""
+"""Deterministic tests for the active listings normalizer + card parser (no network)."""
 from __future__ import annotations
 
-from ingest.pipelines.jrw_listings.distill import normalize
-from ingest.pipelines.jrw_listings.extract import _parse_cards
+from ingest.pipelines.active_listings.distill import normalize
+from ingest.pipelines.active_listings.extract import _parse_cards
 
 _RAW_HOME = {
     "mls_id": "225073939",

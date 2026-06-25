@@ -1,4 +1,4 @@
-"""Normalize and upsert JRW listing rows into data_lake.active_listings_residential.
+"""Normalize and upsert active residential listing rows into data_lake.active_listings_residential.
 
 PK (source_name, mls_id) → idempotent merge. The per-field detail comes from the
 .listing__property-details aggregate string ("5 Beds 8 Baths 0.34 Acres 6,822 SqFt 244 Days on
@@ -87,7 +87,7 @@ def _float_from(rx: re.Pattern, text: str) -> float | None:
 
 
 def current_row_count() -> int:
-    """Live count of john_r_wood rows — the baseline for assert_vs_baseline (0 on bootstrap)."""
+    """Live count of listing rows — the baseline for assert_vs_baseline (0 on bootstrap)."""
     try:
         with _get_conn() as conn, conn.cursor() as cur:
             cur.execute(
@@ -99,7 +99,7 @@ def current_row_count() -> int:
 
 
 def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Validate + type-cast raw JRW rows. Drops rows missing mls_id or zip_code (can't place / key)."""
+    """Validate + type-cast raw active residential listing rows. Drops rows missing mls_id or zip_code (can't place / key)."""
     out = []
     for raw in rows:
         mls_id = (raw.get("mls_id") or "").strip()

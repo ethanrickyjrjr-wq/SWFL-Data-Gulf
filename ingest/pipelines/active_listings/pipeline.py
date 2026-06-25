@@ -1,13 +1,13 @@
-"""John R. Wood active residential listings pipeline — region-wide SWFL seed.
+"""Active residential listings pipeline — region-wide SWFL seed.
 
 Usage:
-  python -m ingest.pipelines.jrw_listings.pipeline
-  python -m ingest.pipelines.jrw_listings.pipeline --dry-run
-  python -m ingest.pipelines.jrw_listings.pipeline --county Collier
+  python -m ingest.pipelines.active_listings.pipeline
+  python -m ingest.pipelines.active_listings.pipeline --dry-run
+  python -m ingest.pipelines.active_listings.pipeline --county Collier
 
 Lands data_lake.active_listings_residential (source_name='john_r_wood'). The licensed RESO feed
 (swfl_mls/nabor) drops into the same table later — this scrape is the "for now."
-Design: docs/superpowers/specs/2026-06-25-jrw-active-listings-residential-design.md
+Design: docs/superpowers/specs/2026-06-25-active-listings-residential-design.md
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from .distill import current_row_count, normalize, upsert_rows
 from .extract import SWFL_COUNTIES, fetch_listings_for_county
 
 # Bootstrap-safe floor (raise toward 0.9 * observed in cadence_registry after the first seed).
-_MIN_ROWS = int(os.environ.get("JRW_MIN_ROWS", "1"))
+_MIN_ROWS = int(os.environ.get("LISTINGS_MIN_ROWS", "1"))
 
 
 def run(args: argparse.Namespace) -> None:
@@ -58,7 +58,7 @@ def run(args: argparse.Namespace) -> None:
     # exit 1 so heal-cron-failure triages it. A partial result (some counties landed) is success.
     if total_raw == 0:
         print(
-            "ERROR: 0 listings from all SWFL counties — JRW scrape failed for every county "
+            "ERROR: 0 listings from all SWFL counties — scraped listing data failed for every county "
             "(WAF block on the runner IP, or .listing__link markup changed). See warnings above.",
             file=sys.stderr,
             flush=True,
@@ -67,8 +67,8 @@ def run(args: argparse.Namespace) -> None:
 
     # Volume guards as end-of-run ALERTS (the per-county upsert already landed; merge = no wipe):
     # a sudden collapse vs the prior load is the tell of a partial block degrading the result set.
-    assert_min_rows(total_raw, _MIN_ROWS, label="jrw_listings")
-    assert_vs_baseline(total_raw, prior, label="jrw_listings")
+    assert_min_rows(total_raw, _MIN_ROWS, label="active_listings")
+    assert_vs_baseline(total_raw, prior, label="active_listings")
 
     print(
         f"\nDone. {total_written} rows {'would be ' if args.dry_run else ''}upserted "
@@ -84,7 +84,7 @@ def main() -> None:
         reconfig = getattr(stream, "reconfigure", None)
         if reconfig:
             reconfig(encoding="utf-8", errors="replace")
-    parser = argparse.ArgumentParser(description="JRW active residential listings pipeline")
+    parser = argparse.ArgumentParser(description="Active residential listings pipeline")
     parser.add_argument("--dry-run", action="store_true", help="Extract only, no DB write")
     parser.add_argument("--county", metavar="NAME", help="Limit to one SWFL county, e.g. 'Collier'")
     run(parser.parse_args())

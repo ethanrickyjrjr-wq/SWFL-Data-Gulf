@@ -6,7 +6,7 @@ refined_at: 2026-06-25T07:19:04Z
 freshness_token: SWFL-7421-v2-20260625
 ttl_seconds: 172800
 context_type: user_saved_reference
-scope: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: John R. Wood (FGCMLS IDX) scrape; licensed RESO feed swaps in later. List-side only (no closed sales).
+scope: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).
 ---
 
 # User-Saved Reference Context
@@ -20,19 +20,19 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: John R. Wood (FGCMLS IDX) scrape; licensed RESO feed swaps in later. List-side only (no closed sales).
+SCOPE: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).
 
 --- HOW THE USER LIKES TO WORK ---
 - Active LISTING inventory and asking prices — not sold/closed prices. Median asking price and days-on-market are list-side signals of supply and pricing stance, not transaction values.
-- Coverage is John R. Wood (FGCMLS IDX), broad across SWFL but not the full MLS. Treat counts as a strong sample, not a census.
+- Coverage is active residential listings, broad across SWFL but not comprehensive coverage. Treat counts as a strong sample, not a census.
 
 --- CITATION TABLE ---
 id  | source                                                                                                                            | verified   | expires
-s01 | SWFL active residential listings via data_lake.active_listings_residential_zip_stats (John R. Wood / FGCMLS IDX, crawl4ai scrape) | 2026-06-25 | 2026-06-27
+s01 | SWFL active residential listings via data_lake.active_listings_residential_zip_stats (crawl4ai scrape) | 2026-06-25 | 2026-06-27
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"active_listings_swfl_snapshot","fact":"SWFL active residential listing inventory (John R. Wood / FGCMLS IDX)","value":"9,368 active listings, median asking $325,000, avg 196 days on market. 5 counties, 92 ZIPs covered.","src":"s01","date":"2026-06-25"}
+  {"id":"f001","topic":"active_listings_swfl_snapshot","fact":"SWFL active residential listing inventory ","value":"9,368 active listings, median asking $325,000, avg 196 days on market. 5 counties, 92 ZIPs covered.","src":"s01","date":"2026-06-25"}
 ]
 
 --- OUTPUT ---
@@ -46,7 +46,7 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "9,368 active SWFL residential listings, median asking $325,000, avg 196 days on market (John R. Wood / FGCMLS IDX, as of 2026-06-25). By county: Lee 2,413 (median $449,900), Charlotte 2,370 (median $55,000), Collier 2,265 (median $350,000), Sarasota 2,119 (median $275,000), Hendry 201 (median $190,000).",
+  "conclusion": "9,368 active SWFL residential listings, median asking $325,000, avg 196 days on market (active residential listings, as of 2026-06-25). By county: Lee 2,413 (median $449,900), Charlotte 2,370 (median $55,000), Collier 2,265 (median $350,000), Sarasota 2,119 (median $275,000), Hendry 201 (median $190,000).",
   "key_metrics": [
     {
       "metric": "active_listings_count_swfl",
@@ -57,10 +57,10 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
       "units": "listings",
       "display_format": "count",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=John+R.+Wood+%28johnrwood.com%2C+FGCMLS+IDX%3B+crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=Active+residential+listings+%28crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
         "fetched_at": "2026-06-25T07:19:04Z",
         "tier": 2,
-        "citation": "John R. Wood (FGCMLS IDX) — 9,368 active SWFL residential listings as of 2026-06-25"
+        "citation": "9,368 active SWFL residential listings as of 2026-06-25"
       },
       "suggestions": [
         "What's driving active listings count swfl?",
@@ -76,10 +76,10 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
       "units": "USD",
       "display_format": "currency",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=John+R.+Wood+%28johnrwood.com%2C+FGCMLS+IDX%3B+crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=Active+residential+listings+%28crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
         "fetched_at": "2026-06-25T07:19:04Z",
         "tier": 2,
-        "citation": "John R. Wood (FGCMLS IDX) — median asking price across 9,368 active SWFL listings: $325,000"
+        "citation": "median asking price across 9,368 active SWFL listings: $325,000"
       },
       "suggestions": [
         "What's driving median list price swfl?",
@@ -95,10 +95,10 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
       "units": "days",
       "display_format": "count",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=John+R.+Wood+%28johnrwood.com%2C+FGCMLS+IDX%3B+crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=Active+residential+listings+%28crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
         "fetched_at": "2026-06-25T07:19:04Z",
         "tier": 2,
-        "citation": "John R. Wood (FGCMLS IDX) — average days on market across active SWFL listings: 196 days"
+        "citation": "average days on market across active SWFL listings: 196 days"
       },
       "suggestions": [
         "What's driving avg days on market swfl?",
@@ -179,10 +179,10 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
         }
       ],
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=John+R.+Wood+%28johnrwood.com%2C+FGCMLS+IDX%3B+crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=Active+residential+listings+%28crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
         "fetched_at": "2026-06-25T07:19:04Z",
         "tier": 2,
-        "citation": "John R. Wood (FGCMLS IDX) active SWFL residential listings, aggregated per grain in SQL (active_listings_residential_zip_stats) as of 2026-06-25"
+        "citation": "Active SWFL residential listings, aggregated per grain in SQL (active_listings_residential_zip_stats) as of 2026-06-25"
       }
     },
     {
@@ -1040,17 +1040,17 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
         }
       ],
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=John+R.+Wood+%28johnrwood.com%2C+FGCMLS+IDX%3B+crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/active_listings_residential_zip_stats?label=SWFL+active+residential+listings+%28aggregated%29&source=Active+residential+listings+%28crawl4ai+scrape%29&brain=active-listings-swfl&date_col=scraped_at",
         "fetched_at": "2026-06-25T07:19:04Z",
         "tier": 2,
-        "citation": "John R. Wood (FGCMLS IDX) active SWFL residential listings, aggregated per grain in SQL (active_listings_residential_zip_stats) as of 2026-06-25"
+        "citation": "Active SWFL residential listings, aggregated per grain in SQL (active_listings_residential_zip_stats) as of 2026-06-25"
       }
     }
   ],
   "caveats": [
     "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the ATTOM/RESO closed-sale lane).",
     "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy counties (e.g. Charlotte) this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-    "Single-source snapshot (John R. Wood / FGCMLS IDX) — broad SWFL coverage but not the full MLS. Direction is neutral: one scrape is a snapshot; a second scrape gives the inventory trend.",
+    "Single-source snapshot  — broad SWFL coverage but not comprehensive coverage. Direction is neutral: one scrape is a snapshot; a second scrape gives the inventory trend.",
     "Source is the 'for now' scrape; the licensed RESO feed (swfl_mls/nabor) replaces it in the same table when credentialed."
   ],
   "contradicts": [],
@@ -1068,7 +1068,7 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
   "exogenous_signals": [],
   "grain_boundary": {
     "not_available": [
-      "Sold / closed sale prices — list-side IDX only (active asking prices)",
+      "Sold / closed sale prices — list-side only (active asking prices)",
       "Per-listing history or price-cut events — current snapshot only",
       "Rental listings — sale listings only"
     ],
@@ -1077,7 +1077,7 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
 }
 
 --- ACTIVE PROJECTS ---
-- active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from the JRW scrape, RESO-swap-ready.
+- active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from scraped listing data, RESO-swap-ready.
 
 --- RECENT NOTES ---
 - 2026-06-25: pack refined by the Refinery — 1 fact(s) from 1 source(s).

@@ -1,11 +1,11 @@
-# JRW Active Residential Listings — pipeline + brain (design)
+# active residential listings Active Residential Listings — pipeline + brain (design)
 
 **Date:** 2026-06-25 · **Status:** approved (operator chose "full hardened build in one shot") · **Branch:** main
 
 ## Goal
 
-Land **region-wide SWFL residential active listings** from John R. Wood (johnrwood.com,
-FGCMLS-powered IDX) into `data_lake.active_listings_residential` so the platform has **real
+Land **region-wide SWFL residential active listings** from active residential listings (johnrwood.com,
+active listings-powered ) into `data_lake.active_listings_residential` so the platform has **real
 residential numbers to run on and benchmark against today** — before per-user RESO connections
 exist. When RESO tokens land (Bridge `swfl_mls` / Trestle `nabor`, currently un-credentialed) the
 same table is populated from the licensed feed; **the scrape is the "for now," RESO is the swap.**
@@ -22,7 +22,7 @@ right now. Table shape is RESO-compatible so the future feed is a drop-in (RESO 
 ## What we verified live (RULE 0.4/0.5, in-session)
 
 - crawl4ai **0.9.0**; `AsyncHTTPCrawlerStrategy` + `HTTPCrawlerConfig` available.
-- JRW list is **server-rendered HTML** (FGCMLS IDX). A browser render **virtualizes the list to ~4
+- active residential listings list is **server-rendered HTML** . A browser render **virtualizes the list to ~4
   cards + adds a Google-Maps price-pin layer** (noise). The **raw HTTP fetch returns all 12 cards/page,
   full prices, every field** — so we fetch with crawl4ai's **HTTP strategy, not the browser.**
 - robots.txt: `User-agent: *` allows `/listings/` and `/listing/*`; only favorites/user/count paths
@@ -39,10 +39,10 @@ Columns: `list_price, street_address, city, community, beds, baths, sqft, acres,
 status, property_type, zip_code, county, state, listing_url, scraped_at, _ingested_at`. `zip_code` is
 the **site** address ZIP from the listing URL (ZIP gate G1 ✓). Migration `GRANT`s + `NOTIFY pgrst`.
 
-## Pipeline — `ingest/pipelines/jrw_listings/`
+## Pipeline — `ingest/pipelines/active_listings/`
 
 - `extract.py` — crawl4ai `AsyncHTTPCrawlerStrategy` GET of `?county={C}&page={N}` for the SWFL
-  counties JRW covers (Collier, Lee, Charlotte, Sarasota; Glades/Hendry return 0), paginate until a
+  counties active residential listings covers (Collier, Lee, Charlotte, Sarasota; Glades/Hendry return 0), paginate until a
   page yields 0 new cards or a hard page cap; dedup by `mls_id`; parse cards with the selectors above;
   drop any row whose `zip_code` is not in `fixtures/swfl-zip-county.json` (scope guard, no invented geo).
 - `distill.py` — normalize (parse "$17,950,000"→numeric, "5 Beds"→5, "0.34 Acres"→0.34, etc.),
@@ -53,7 +53,7 @@ the **site** address ZIP from the listing URL (ZIP gate G1 ✓). Migration `GRAN
 
 ## Cron — parked until runner-IP proven
 
-`.github/workflows/jrw-listings-daily.yml`: daily + `workflow_dispatch` + `dry_run` input,
+`.github/workflows/active-listings-daily.yml`: daily + `workflow_dispatch` + `dry_run` input,
 `ENGINE_ENABLED` guard, crawl4ai-setup. Cadence entry uses `probe_mode: odd_window` (probe-excluded)
 until a **green GHA run proves the datacenter IP isn't WAF-blocked** — the recurring scraper failure
 (Collier, Crexi). Seed is run **locally (home IP, proven)** now. No pretending an unverified cron works.

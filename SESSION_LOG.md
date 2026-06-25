@@ -1,3 +1,9 @@
+## 2026-06-25 (main) — chore(active-listings): strip company name + industry jargon from all citations; rename pipeline jrw_listings → active_listings
+
+Citations in pack/source/vocab/catalog/brain now describe the data (active residential listings, listing count, median asking price, avg days on market) — no company name, no MLS/IDX. Pipeline folder `jrw_listings` → `active_listings`, GHA workflow `jrw-listings-daily.yml` → `active-listings-daily.yml`, env var `JRW_MIN_ROWS` → `LISTINGS_MIN_ROWS`. DB `source_name='john_r_wood'` column unchanged (pending neutral-identifier migration). Zip-report layout fix (stats bar inner-centering to 1120, breakdown-header spans full grid) ships in same commit.
+
+---
+
 ## 2026-06-25 (main) — gate(prepush): add Gate 6 — BRAIN_GEO coverage, so a catalog brain without a geo entry can never ship a located-answer prod 500 again
 
 The BRAIN_GEO prod-500 (active-listings-swfl + market-heat-swfl, both this session) shipped because the G2 reproduction test (`lib/zip-dossier.test.ts`) was red locally but was NOT a pre-push gate. Added Gate 6 to `.claude/hooks/check-prepush-gate.mjs`: when a push touches `refinery/packs/catalog.mts`, `refinery/packs/index.mts`, or `lib/zip-dossier.ts`, it runs `bun test lib/zip-dossier.test.ts -t "BRAIN_GEO"` (env-safe — fixtures only) and BLOCKS (exit 2) if any catalog brain lacks a geo entry, naming the brain.

@@ -19,7 +19,7 @@
         "for-sale inventory",
         "listing count"
       ],
-      "scope_note": "Count of active residential listings across SWFL (John R. Wood / FGCMLS IDX). List-side inventory; rising inventory signals a softening, buyer-favorable market.",
+      "scope_note": "Count of active residential listings across SWFL . List-side inventory; rising inventory signals a softening, buyer-favorable market.",
       "raw_slugs": [
         "active_listings_count_swfl"
       ]
@@ -34,7 +34,7 @@
         "median list price",
         "median asking price"
       ],
-      "scope_note": "Median asking (list) price across active SWFL residential listings (John R. Wood / FGCMLS IDX). List-side, not closed sale price.",
+      "scope_note": "Median asking (list) price across active SWFL residential listings . List-side, not closed sale price.",
       "raw_slugs": [
         "median_list_price_swfl"
       ]
@@ -50,7 +50,7 @@
         "avg DOM",
         "average days on market"
       ],
-      "scope_note": "Average days on market across active SWFL residential listings (John R. Wood / FGCMLS IDX). Higher = slower market.",
+      "scope_note": "Average days on market across active SWFL residential listings . Higher = slower market.",
       "raw_slugs": [
         "avg_days_on_market_swfl"
       ]

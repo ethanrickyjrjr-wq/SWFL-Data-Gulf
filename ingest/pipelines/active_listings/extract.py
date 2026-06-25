@@ -1,14 +1,14 @@
-"""crawl4ai extraction of active residential listings from John R. Wood (FGCMLS IDX).
+"""crawl4ai extraction of active residential listings from johnrwood.com.
 
-Strategy (probed live 2026-06-25 — design: docs/superpowers/specs/2026-06-25-jrw-active-listings-residential-design.md):
-  - JRW's list at /listings/ is SERVER-RENDERED HTML. A browser render VIRTUALIZES the list to
+Strategy (probed live 2026-06-25 — design: docs/superpowers/specs/2026-06-25-active-listings-residential-design.md):
+  - The listing page at /listings/ is SERVER-RENDERED HTML. A browser render VIRTUALIZES the list to
     ~4 visible cards and adds a Google-Maps price-pin layer (abbreviated "$271M") — noise. So we
     fetch the RAW server HTML via crawl4ai's AsyncHTTPCrawlerStrategy (HTTP strategy, no browser):
     all 12 cards/page, full prices, every field, ~1.5s, and rule-compliant (still crawl4ai, the
     only sanctioned crawl tool).
   - robots.txt allows /listings/ + /listing/* for User-agent:*. ?page=N paginates; ?county=Lee|
-    Collier|... filters. We walk the SWFL counties JRW covers and dedup by mls_id.
-  - Card = a.listing__link[href*='/listing/']; the href is /listing/{MLS_ID}/{street}-{city}-fl-{ZIP}/.
+    Collier|... filters. We walk the SWFL counties covered and dedup by mls_id.
+  - Card = a.listing__link[href*='/listing/']; the href is /listing/{listing_id}/{street}-{city}-fl-{ZIP}/.
     Per-field detail comes from the .listing__property-details aggregate string (regex), which is
     robust to the per-detail class names (bed/bath/lot-size/sqft/days-on-market) changing.
 
@@ -31,7 +31,7 @@ from crawl4ai.async_crawler_strategy import AsyncHTTPCrawlerStrategy
 
 from ingest.lib.crawl4ai_client import Crawl4aiError
 
-# JRW covers Naples/Fort Myers heavily; the rural pair (Glades/Hendry) returns 0 and is harmless.
+# Covers Naples/Fort Myers heavily; the rural pair (Glades/Hendry) returns 0 and is harmless.
 SWFL_COUNTIES: list[str] = ["Collier", "Lee", "Charlotte", "Sarasota", "Glades", "Hendry"]
 
 _BASE = "https://www.johnrwood.com/listings/"
@@ -40,7 +40,7 @@ _UA = (
     "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 )
 _MAX_PAGES = 300  # runaway backstop (~3,600/county); real counties exhaust ~120-200 pages
-_PAGE_DELAY = 1.0  # inter-page politeness (JRW 403-throttles sustained bursts ~420+ reqs)
+_PAGE_DELAY = 1.0  # inter-page politeness (site 403-throttles sustained bursts ~420+ reqs)
 _FETCH_ATTEMPTS = 3  # per-page retries with backoff before giving up the page
 _DETAIL_RE = re.compile(r"/listing/([A-Za-z0-9]+)/.*?-fl-(\d{5})", re.I)
 
@@ -95,7 +95,7 @@ def _parse_cards(html: str, county: str) -> list[dict[str, Any]]:
 
 async def _fetch_html(url: str) -> str:
     """Fetch one page's raw HTML via crawl4ai's HTTP strategy, with retry + escalating backoff.
-    Raises Crawl4aiError only after all attempts fail (a 403 is JRW throttling sustained load —
+    Raises Crawl4aiError only after all attempts fail (a 403 is site throttling sustained load —
     the backoff usually clears it; a sustained block ends the county gracefully upstream)."""
     cfg = HTTPCrawlerConfig(
         method="GET", headers={"User-Agent": _UA}, follow_redirects=True, verify_ssl=True
@@ -114,7 +114,7 @@ async def _fetch_html(url: str) -> str:
         if attempt < _FETCH_ATTEMPTS - 1:
             await asyncio.sleep(10.0 * (attempt + 1))  # 10s, 20s — let a 403/rate-limit clear
     raise Crawl4aiError(
-        f"jrw: fetch failed for {url} after {_FETCH_ATTEMPTS} attempts: {_ascii(last)}"
+        f"listings: fetch failed for {url} after {_FETCH_ATTEMPTS} attempts: {_ascii(last)}"
     )
 
 
@@ -155,14 +155,14 @@ async def _fetch_county(county: str, in_scope: set[str]) -> list[dict[str, Any]]
 
 
 def fetch_listings_for_county(county: str) -> list[dict[str, Any]]:
-    """Scrape JRW for one SWFL county. Returns raw rows (empty on failure; the pipeline's
+    """Scrape active residential listings for one SWFL county. Returns raw rows (empty on failure; the pipeline's
     total-empty guard fails the run loud if EVERY county returns nothing)."""
     in_scope = _swfl_zips()
     try:
         return asyncio.run(_fetch_county(county, in_scope))
     except Crawl4aiError as exc:
-        print(f"[warn] JRW crawl error for {county}: {_ascii(str(exc))}", flush=True)
+        print(f"[warn] listings crawl error for {county}: {_ascii(str(exc))}", flush=True)
         return []
     except Exception as exc:  # noqa: BLE001 — one county must not kill the others
-        print(f"[warn] JRW error for {county}: {_ascii(str(exc))}", flush=True)
+        print(f"[warn] listings error for {county}: {_ascii(str(exc))}", flush=True)
         return []

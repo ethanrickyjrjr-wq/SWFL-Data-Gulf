@@ -1,7 +1,7 @@
 {
   "__meta": {
     "note": "Sample of data_lake.active_listings_residential_zip_stats (GROUPING SETS rows: region / county / ZIP). Fixture-mode input for active-listings-swfl tests. Not live data.",
-    "source": "John R. Wood (FGCMLS IDX) — shape only"
+    "source": "shape only"
   },
   "rows": [
     {

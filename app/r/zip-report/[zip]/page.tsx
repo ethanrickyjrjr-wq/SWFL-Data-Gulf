@@ -320,48 +320,52 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         </div>
       </section>
 
-      {/* ── STATS BAR — 3 cells ──────────────────────────────────────────── */}
+      {/* ── STATS BAR — 3 cells, centered to 1120 under the hero ─────────── */}
       <div className="zp-stats-bar">
-        <div className="zp-stat-cell">
-          <div className="zp-stat-label">Annual Flood Loss</div>
-          <div className="zp-stat-value">{hasFlood ? fmtCurrency(aal) : "—"}</div>
-          <div className="zp-stat-sub">FEMA NFIP avg/property</div>
-          {floodRankPos !== null && (
-            <div className="zp-stat-tag">
-              #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs
-            </div>
-          )}
-        </div>
-        <div className="zp-stat-cell">
-          <div className="zp-stat-label">Median Home Value</div>
-          <div className="zp-stat-value">{price !== undefined ? fmtCurrency(price) : "—"}</div>
-          <div className="zp-stat-sub">90-day median sale price</div>
-          {valueRankPos !== null && (
-            <div className="zp-stat-tag">
-              #{valueRankPos} of {totalValueZips} ZIPs
-            </div>
-          )}
-        </div>
-        <div className="zp-stat-cell">
-          <div className="zp-stat-label">New Permits (90d)</div>
-          <div className="zp-stat-value">{hasPermits ? permitsCount.toLocaleString() : "—"}</div>
-          <div className="zp-stat-sub">Lee County building permits</div>
-          {permitsRankPos !== null && (
-            <div className="zp-stat-tag">
-              #{permitsRankPos} of {totalPermitsZips} ZIPs
-            </div>
-          )}
+        <div className="zp-stats-inner">
+          <div className="zp-stat-cell">
+            <div className="zp-stat-label">Annual Flood Loss</div>
+            <div className="zp-stat-value">{hasFlood ? fmtCurrency(aal) : "—"}</div>
+            <div className="zp-stat-sub">FEMA NFIP avg/property</div>
+            {floodRankPos !== null && (
+              <div className="zp-stat-tag">
+                #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs
+              </div>
+            )}
+          </div>
+          <div className="zp-stat-cell">
+            <div className="zp-stat-label">Median Home Value</div>
+            <div className="zp-stat-value">{price !== undefined ? fmtCurrency(price) : "—"}</div>
+            <div className="zp-stat-sub">90-day median sale price</div>
+            {valueRankPos !== null && (
+              <div className="zp-stat-tag">
+                #{valueRankPos} of {totalValueZips} ZIPs
+              </div>
+            )}
+          </div>
+          <div className="zp-stat-cell">
+            <div className="zp-stat-label">New Permits (90d)</div>
+            <div className="zp-stat-value">{hasPermits ? permitsCount.toLocaleString() : "—"}</div>
+            <div className="zp-stat-sub">Lee County building permits</div>
+            {permitsRankPos !== null && (
+              <div className="zp-stat-tag">
+                #{permitsRankPos} of {totalPermitsZips} ZIPs
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ── BODY: breakdown (left) + rail (right) ────────────────────────── */}
       <div className="zp-body">
+        {/* Full-width title — its faint underline is the baseline the rail aligns to */}
+        <div className="zp-breakdown-header">
+          <h1 className="zp-breakdown-title">{zip} at a glance</h1>
+        </div>
+
         {/* LEFT — at a glance metric blocks */}
         <div className="zp-breakdown">
           {didYouMean && <DidYouMeanBanner message={didYouMean} />}
-          <div className="zp-breakdown-header">
-            <h1 className="zp-breakdown-title">{zip} at a glance</h1>
-          </div>
 
           {hasFlood && (
             <div className="zp-metric-block">

@@ -17,7 +17,7 @@ const SOURCE_ID = "active_listings_residential";
 /**
  * active-listings-swfl — region-wide SWFL residential active-listing inventory.
  *
- * Source: data_lake.active_listings_residential (John R. Wood / FGCMLS IDX scrape "for now"; the
+ * Source: data_lake.active_listings_residential (scraped listing data "for now"; the
  * licensed RESO feed lands in the same table later — no rebuild on swap). Reads the
  * aggregate-at-source view active_listings_residential_zip_stats (region / county / ZIP grains).
  *
@@ -48,7 +48,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     return {
       conclusion:
         "active-listings-swfl: no active residential listings in data_lake.active_listings_residential. " +
-        "Seed the JRW pipeline (python -m ingest.pipelines.jrw_listings.pipeline).",
+        "Seed the active listings pipeline (python -m ingest.pipelines.active_listings.pipeline).",
       key_metrics: [],
       caveats: [
         "data_lake.active_listings_residential returned 0 active rows for source_name='john_r_wood'.",
@@ -76,7 +76,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     units: "listings",
     display_format: "count",
     source: makeSource(
-      `John R. Wood (FGCMLS IDX) — ${fmtK(region.listing_count)} active SWFL residential listings as of ${asOf.slice(0, 10)}`,
+      `${fmtK(region.listing_count)} active SWFL residential listings as of ${asOf.slice(0, 10)}`,
       fetchedAt,
       url,
     ),
@@ -92,7 +92,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
       units: "USD",
       display_format: "currency",
       source: makeSource(
-        `John R. Wood (FGCMLS IDX) — median asking price across ${fmtK(region.listing_count)} active SWFL listings: ${fmtUsd(region.median_list_price)}`,
+        `median asking price across ${fmtK(region.listing_count)} active SWFL listings: ${fmtUsd(region.median_list_price)}`,
         fetchedAt,
         url,
       ),
@@ -109,7 +109,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
       units: "days",
       display_format: "count",
       source: makeSource(
-        `John R. Wood (FGCMLS IDX) — average days on market across active SWFL listings: ${region.avg_days_on_market} days`,
+        `average days on market across active SWFL listings: ${region.avg_days_on_market} days`,
         fetchedAt,
         url,
       ),
@@ -118,7 +118,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
 
   // Per-county + per-ZIP breakouts as detail_tables (lookup rows — no per-place slug needed).
   const tableSource = makeSource(
-    `John R. Wood (FGCMLS IDX) active SWFL residential listings, aggregated per grain in SQL (active_listings_residential_zip_stats) as of ${asOf.slice(0, 10)}`,
+    `Active SWFL residential listings, aggregated per grain in SQL (active_listings_residential_zip_stats) as of ${asOf.slice(0, 10)}`,
     fetchedAt,
     url,
   );
@@ -187,7 +187,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     `${fmtK(region.listing_count)} active SWFL residential listings` +
     `${region.median_list_price != null ? `, median asking ${fmtUsd(region.median_list_price)}` : ""}` +
     `${region.avg_days_on_market != null ? `, avg ${region.avg_days_on_market} days on market` : ""}` +
-    ` (John R. Wood / FGCMLS IDX, as of ${asOf.slice(0, 10)}). By county: ${countyParts}.`;
+    ` (active residential listings, as of ${asOf.slice(0, 10)}). By county: ${countyParts}.`;
 
   return {
     conclusion,
@@ -196,7 +196,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     caveats: [
       "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the ATTOM/RESO closed-sale lane).",
       "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy counties (e.g. Charlotte) this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-      "Single-source snapshot (John R. Wood / FGCMLS IDX) — broad SWFL coverage but not the full MLS. Direction is neutral: one scrape is a snapshot; a second scrape gives the inventory trend.",
+      "Single-source snapshot  — broad SWFL coverage but not comprehensive coverage. Direction is neutral: one scrape is a snapshot; a second scrape gives the inventory trend.",
       "Source is the 'for now' scrape; the licensed RESO feed (swfl_mls/nabor) replaces it in the same table when credentialed.",
     ],
     direction: "neutral",
@@ -207,7 +207,7 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     exogenous_signals: [],
     grain_boundary: {
       not_available: [
-        "Sold / closed sale prices — list-side IDX only (active asking prices)",
+        "Sold / closed sale prices — active asking prices only, not closed transactions",
         "Per-listing history or price-cut events — current snapshot only",
         "Rental listings — sale listings only",
       ],
@@ -222,7 +222,7 @@ export const activeListingsSwfl: PackDefinition = {
   public_label: "Active Listings",
   domain: "real-estate",
   scope:
-    "Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: John R. Wood (FGCMLS IDX) scrape; licensed RESO feed swaps in later. List-side only (no closed sales).",
+    "Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).",
   ttl_seconds: 2 * 24 * 60 * 60, // 2 days — listings change daily; cron parked until runner-IP WAF proof
 
   sources: [activeListingsResidentialSource],
@@ -247,7 +247,7 @@ export const activeListingsSwfl: PackDefinition = {
     return [
       {
         topic: "active_listings_swfl_snapshot",
-        fact: "SWFL active residential listing inventory (John R. Wood / FGCMLS IDX)",
+        fact: "SWFL active residential listing inventory ",
         value:
           `${fmtK(r.listing_count)} active listings` +
           `${r.median_list_price != null ? `, median asking ${fmtUsd(r.median_list_price)}` : ""}` +
@@ -262,10 +262,10 @@ export const activeListingsSwfl: PackDefinition = {
 
   preferences: [
     "Active LISTING inventory and asking prices — not sold/closed prices. Median asking price and days-on-market are list-side signals of supply and pricing stance, not transaction values.",
-    "Coverage is John R. Wood (FGCMLS IDX), broad across SWFL but not the full MLS. Treat counts as a strong sample, not a census.",
+    "Coverage is broad across SWFL but not comprehensive coverage. Treat counts as a strong sample, not a census.",
   ],
   activeProject:
-    "active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from the JRW scrape, RESO-swap-ready.",
+    "active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from scraped listing data, RESO-swap-ready.",
   prompts: {
     triageContext:
       "Fragment is an active-listings-residential-summary with region/county/ZIP inventory counts, median asking price, and avg days-on-market. Decision-relevant by construction; pack is pure deterministic aggregation.",

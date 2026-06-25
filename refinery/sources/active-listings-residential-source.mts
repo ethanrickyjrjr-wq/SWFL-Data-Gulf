@@ -10,7 +10,7 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
 
 /**
  * Active residential listings source — region-wide SWFL inventory from
- * data_lake.active_listings_residential (John R. Wood scrape "for now"; the licensed RESO feed
+ * data_lake.active_listings_residential (scraped listing data "for now"; the licensed RESO feed
  * lands in the same table later). Reads the AGGREGATE-AT-SOURCE view
  * data_lake.active_listings_residential_zip_stats (GROUPING SETS: region / county / ZIP), so this
  * connector pulls ~110 pre-aggregated rows, not ~5,000 listings (operator decree). Median is
@@ -111,7 +111,7 @@ export const activeListingsResidentialSource: SourceConnector = {
         ? `fixture://refinery/__fixtures__/active-listings-residential.sample.json`
         : buildSourceCitationUrl(VIEW, {
             label: "SWFL active residential listings (aggregated)",
-            source: "John R. Wood (johnrwood.com, FGCMLS IDX; crawl4ai scrape)",
+            source: "active residential listings (crawl4ai scrape)",
             brain: "active-listings-swfl",
             date_col: "scraped_at",
           });
@@ -131,7 +131,7 @@ export const activeListingsResidentialSource: SourceConnector = {
       source:
         env.source === "fixture"
           ? `SWFL active residential listings (fixture; ${SCHEMA}.${VIEW})`
-          : `SWFL active residential listings via ${SCHEMA}.${VIEW} (John R. Wood / FGCMLS IDX, crawl4ai scrape)`,
+          : `SWFL active residential listings via ${SCHEMA}.${VIEW} (crawl4ai scrape)`,
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

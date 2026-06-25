@@ -100,7 +100,7 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // (Added 2026-06-14 to fix a red main: the brain shipped in 581d707 without this entry —
   // owner should confirm the 3 stress datasets' live ZIP coverage matches METRO_4.)
   "seller-stress-swfl": { grains: ["zip"], covers: METRO_4 },
-  // John R. Wood (FGCMLS IDX) active residential listings — count / median asking / avg
+  // Active residential listings — count / median asking / avg
   // days-on-market at region, county, AND per-ZIP grain. Covers the 5 SWFL counties with
   // live listings (Lee/Collier/Charlotte/Sarasota/Hendry; Glades currently has 0 rows). A
   // licensed RESO feed swaps into the same table later. (Added 2026-06-25 to fix a prod

@@ -8,7 +8,7 @@
 > file and an older doc disagree, **this file wins** and the older doc gets a
 > correcting note. Verified against the live lake on 2026-06-02; the reader
 > signatures and view rules below are not from memory — they were probed.
-> **§0.3 (web-scraping hardening) added 2026-06-25** from the JRW residential build —
+> **§0.3 (web-scraping hardening) added 2026-06-25** from the active residential listings residential build —
 > every rule there was re-proven live (crawl4ai HTTP strategy vs browser virtualization).
 
 ---
@@ -118,7 +118,7 @@ makes you probe. The lever is this section being read first.
 
 §0.1–§0.2 cover **API** ingest. Scrapes fail differently, and they fail *the most* (Collier
 permits, Crexi, the recurring `daily-rebuild` neighbors). These are the durable rules, learned the
-hard way and re-proven on the JRW residential pipeline (2026-06-25). All `[policy-only]` unless tagged.
+hard way and re-proven on the active residential listings residential pipeline (2026-06-25). All `[policy-only]` unless tagged.
 
 1. **crawl4ai is the ONLY crawl tool.** Firecrawl and Spider are removed (operator decree
    2026-06-16). Everything goes through `ingest/lib/crawl4ai_client.py`. Its surfaces:
@@ -129,7 +129,7 @@ hard way and re-proven on the JRW residential pipeline (2026-06-25). All `[polic
    `requests`/`bs4` as the fetch layer for a scrape target, and do **not** re-introduce
    `extract_client.scrape_with_fallback()` (the dormant Firecrawl path).
 2. **Server-rendered list → use the HTTP strategy, NOT the browser.** A JS browser render can
-   **virtualize** a long list (drop off-screen DOM rows) and inject map/widget noise. JRW proved it:
+   **virtualize** a long list (drop off-screen DOM rows) and inject map/widget noise. active residential listings proved it:
    the browser kept ~4 of 12 cards + a Google-Maps price-pin layer; `AsyncHTTPCrawlerStrategy`
    returned all 12 cards/page, full values, in ~1.5 s. Reserve the browser for pages that genuinely
    require JS or anti-bot clearance.
@@ -148,7 +148,7 @@ hard way and re-proven on the JRW residential pipeline (2026-06-25). All `[polic
    `ON CONFLICT` on a stable natural key (e.g. `(source_name, mls_id)`). This also makes the
    guards alert-only rather than data-loss-preventing, which is the safer failure mode.
 6. **No silent caps.** A pagination safety cap that truncates the result set must `print` a loud
-   warning (it is biased data otherwise — JRW's default sort is price-desc, so a low cap keeps only
+   warning (it is biased data otherwise — active residential listings's default sort is price-desc, so a low cap keeps only
    luxury and wrecks any median). Page to natural exhaustion (stop when a page yields no new key).
 7. **robots.txt + politeness.** Honor `Disallow` paths and any `Crawl-delay`; add a small inter-page
    delay even when none is set. Check the page for a **backing JSON/XHR API** first (the Crexi
