@@ -46,6 +46,20 @@ export interface WelcomeMetricSource {
   provenance_url?: string;
 }
 
+/** A lane-3 web-verified source backing one figure that is NOT in our lake — fetched
+ *  live and verified against a cited span (lib/assistant/web-fallback.ts). Rendered in
+ *  the collapsed citation accordion at the bottom of an answer, never inline. */
+export interface WelcomeSource {
+  /** The figure this source backs, e.g. "Cape Coral median days on market". */
+  label: string;
+  /** The verified value (the digits appeared verbatim in the cited span). */
+  value: number;
+  /** Publisher URL the value was verified against (cleaned before render). */
+  url: string;
+  /** Display host, e.g. "redfin.com". */
+  domain: string;
+}
+
 export interface WelcomeMetric {
   /** Stable key: "home_value" | "rent" | "flood_aal" | "permits" | … */
   key: string;
@@ -86,6 +100,10 @@ export type WelcomeFrame =
   // on the conversation path. The LLM never touches its figures (the moat). A
   // consumer that doesn't paint charts ignores it (reduceWelcome's default case).
   | { type: "chart"; chart: ChartSpec }
+  // Lane-3 web-verified citations for a figure NOT in our lake (web-fallback.ts) —
+  // painted as a collapsed, click-to-open sources accordion under the answer, never
+  // inline. A reader that doesn't render sources ignores it (reduceWelcome stores it).
+  | { type: "sources"; sources: WelcomeSource[] }
   | { type: "text"; text: string }
   | { type: "done" }
   | { type: "error"; error: string };
@@ -101,6 +119,8 @@ export interface WelcomeState {
   place: PlaceEcho | null;
   answer: WelcomeAnswer | null;
   prose: string;
+  /** Lane-3 web-verified sources for the collapsed accordion (empty when none). */
+  sources: WelcomeSource[];
   error: string | null;
 }
 
@@ -110,6 +130,7 @@ export const initialWelcomeState: WelcomeState = {
   place: null,
   answer: null,
   prose: "",
+  sources: [],
   error: null,
 };
 
@@ -162,6 +183,9 @@ export function reduceWelcome(state: WelcomeState, action: WelcomeAction): Welco
             place: f.place,
             status: state.status === "idle" ? "awaiting" : state.status,
           };
+        case "sources":
+          // Order-tolerant: sources may arrive before/after prose; never change status.
+          return { ...state, sources: f.sources };
         default:
           return state;
       }
@@ -214,6 +238,10 @@ export function parseSseFrame(raw: string): WelcomeFrame | null {
       return obj.answer ? { type: "data", answer: obj.answer as WelcomeAnswer } : null;
     case "chart":
       return obj.chart ? { type: "chart", chart: obj.chart as ChartSpec } : null;
+    case "sources":
+      return Array.isArray(obj.sources)
+        ? { type: "sources", sources: obj.sources as WelcomeSource[] }
+        : null;
     case "done":
       return { type: "done" };
     case "error":

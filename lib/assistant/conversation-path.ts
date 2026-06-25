@@ -29,7 +29,7 @@ import { routeChart } from "@/lib/route-chart";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { buildWelcomeAnswer } from "@/lib/welcome/answer";
 import { identityForLocation } from "@/lib/location-surface";
-import type { WelcomeFrame, PlaceEcho } from "@/lib/welcome/frames";
+import type { WelcomeFrame, PlaceEcho, WelcomeSource } from "@/lib/welcome/frames";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { buildOtherProjectsContext, type OtherProjectRow } from "@/lib/project/other-projects";
@@ -41,6 +41,12 @@ import { isOffTopicQuestion } from "@/lib/assistant/off-topic";
 import { asOfFromToken } from "@/lib/project/as-of";
 import { buildChartForQuestion, type ChartForQuestion } from "@/lib/assistant/chart-for-question";
 import { composeChartFromRequest } from "@/lib/assistant/compose-chart";
+import {
+  looksLikeFigureAsk,
+  webFallback,
+  renderWebFallbackBlock,
+  hostOf,
+} from "@/lib/assistant/web-fallback";
 
 /**
  * Pick the chart for a conversation answer. An explicit "chart X / plot Y" request
@@ -56,6 +62,33 @@ async function chartForConversation(
 ): Promise<ChartForQuestion | null> {
   const composed = await composeChartFromRequest(question, origin, { uploadsText });
   return composed ?? (await buildChartForQuestion(question, origin));
+}
+
+/**
+ * The conversational four-lane web-fallback (rung 3 named web source + rung 4 ask the
+ * user) for a TEXT answer. When the question asks for a specific figure (cheap gate) the
+ * grounded dossier may not carry, fetch it live + verified (lib/assistant/web-fallback)
+ * and return BOTH the grounding block to append to the system AND the verified sources
+ * for the collapsed citation frame. No-op ("" + []) when it's not a figure ask or
+ * nothing was missing/verifiable — so a normal answer pays zero extra latency.
+ *
+ * `heldSystem` is the already-built grounded prompt (it contains the live dossier), so
+ * the probe's notion of "what we hold" is exactly what the answer is grounded on — no
+ * second egress, one source of truth.
+ */
+async function webFallbackForConversation(
+  question: string,
+  heldSystem: string,
+): Promise<{ block: string; sources: WelcomeSource[] }> {
+  if (!looksLikeFigureAsk(question)) return { block: "", sources: [] };
+  const result = await webFallback(question, heldSystem);
+  const sources = result.verified.map((v) => ({
+    label: v.label,
+    value: v.value,
+    url: v.url,
+    domain: hostOf(v.url),
+  }));
+  return { block: renderWebFallbackBlock(result), sources };
 }
 
 const MAX_TOKENS = 500; // un-grounded explainer
@@ -135,11 +168,14 @@ export const OUTSIDE_SYSTEM =
   "place, and offer that as a next step AFTER you have answered — never as a precondition " +
   "for answering, and never guess a place they did not name.\n\n" +
   "NEVER invent a Southwest Florida number — no flood loss, sale price, rate, or count " +
-  "from memory or a guess; every figure must come from the cited data. If a specific " +
-  "figure genuinely is not in the data at ANY grain, say what you DO hold and offer to " +
-  "pull the specific one — never fabricate. But never refuse a region-wide question the " +
-  "region-wide data below can answer, and never make the user name a place before you " +
-  "answer.\n\n" +
+  "from memory or a guess; every figure must come from a real source. A figure not in " +
+  "our data is fetched live from a named public source and verified before it reaches " +
+  "you: when a WEB-VERIFIED FIGURES block appears below, those numbers are real and " +
+  "cited — use them and name their source. If a figure is in neither our data nor a " +
+  "verified web source, do not fabricate it and do not stall — answer everything else " +
+  "you can, then ask the user to provide that one number so you can use it. Never refuse " +
+  "a region-wide question the region-wide data below can answer, and never make the user " +
+  "name a place before you answer.\n\n" +
   "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
   '(no "master", "brain", "payload", "grain", "dossier"). ' +
   "When the project context shows significant metric changes, lead with what changed " +
@@ -171,10 +207,13 @@ export const PUBLIC_GROUNDED_SYSTEM =
   "ZIP. Only offer a specific ZIP or town as a next step AFTER you have answered — never as a " +
   "precondition for answering, and never guess a place they did not name.\n\n" +
   "NEVER invent a Southwest Florida number — no flood loss, sale price, rate, or count from " +
-  "memory or a guess; every figure must come from the cited data. If a specific figure " +
-  "genuinely is not in the data at ANY grain, say what you DO hold and offer to pull the " +
-  "specific one — never fabricate. But never refuse a region-wide question the region-wide " +
-  "data below can answer, and never make the user name a place before you answer.\n\n" +
+  "memory or a guess; every figure must come from a real source. A figure not in our data " +
+  "is fetched live from a named public source and verified before it reaches you: when a " +
+  "WEB-VERIFIED FIGURES block appears below, those numbers are real and cited — use them " +
+  "and name their source. If a figure is in neither our data nor a verified web source, do " +
+  "not fabricate it and do not stall — answer everything else you can, then ask the user to " +
+  "provide that one number. Never refuse a region-wide question the region-wide data below " +
+  "can answer, and never make the user name a place before you answer.\n\n" +
   "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
   '(no "master", "brain", "payload", "grain", "dossier"). Do not mention projects, briefcases, ' +
   'or "filing" an answer — those are in-app features this visitor does not have yet.';
@@ -574,10 +613,21 @@ export async function runConversationPath(
     // The chart frame rides in the prelude (emitted before the text stream), mirroring
     // the report path's chart-before-text order. Clients that don't paint charts ignore it.
     if (chartResult) prelude.push({ type: "chart", chart: chartResult.chart });
+    // RUNG 3/4 — a figure the region dossier doesn't hold is fetched live + verified
+    // (web) or handed to the user to supply (never invented). The verified sources ride
+    // in a collapsed citation frame; the grounding block tells the model to state ONLY
+    // those cited numbers. No-op for a non-figure ask (zero extra latency).
+    const web = await webFallbackForConversation(lastUser, system);
+    if (web.sources.length) prelude.push({ type: "sources", sources: web.sources });
     // otherProjectsBlock is "" for public (no auth, no session) and for analyst without an
     // open project — so the public posture (no project context) is preserved structurally.
     return streamAnswer(
-      system + chartBlock + buildUploadsBlock(uploadsText) + clientContext + otherProjectsBlock,
+      system +
+        chartBlock +
+        web.block +
+        buildUploadsBlock(uploadsText) +
+        clientContext +
+        otherProjectsBlock,
       messages,
       GROUNDED_MAX_TOKENS,
       prelude,
@@ -646,11 +696,17 @@ export async function runConversationPath(
     tier: 2,
     voice: analyst ? "analyst" : "welcome",
   });
+  // RUNG 3/4 — same web-fallback for a located figure ask the per-place dossier may not
+  // hold (e.g. active listings / days on market before market-heat-swfl is live): fetch
+  // it cited from a named source, or hand it to the user, never invent.
+  const web = await webFallbackForConversation(lastUser, system);
+  if (web.sources.length) prelude.push({ type: "sources", sources: web.sources });
   // otherProjectsBlock is "" unless PROJECT AI with an open project, so public/located
   // answers are unchanged.
   return streamAnswer(
     system +
       locatedChartBlock +
+      web.block +
       buildUploadsBlock(uploadsText) +
       clientContext +
       otherProjectsBlock,

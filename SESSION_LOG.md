@@ -1,3 +1,15 @@
+## 2026-06-25 (main) — fix(assistant): wire the four-lane web-fallback into the conversational TEXT answer (rung 3 web + rung 4 ask-user) — kills the Days-on-Market deflection
+
+ROOT CAUSE (proven in code, not memory): the chart path web-fetches a figure we don't hold (`compose-chart.ts` → `fillExternalPoint`), but the plain TEXT answer (`stream.ts streamAnswer`) is a bare `messages.stream` with **NO tools** — and the only web search was locked behind `wantsCustomChart` (`compose-chart.ts:496`). So a plain "active listings / days on market" ask never reached any web lookup. Meanwhile `RULES_OF_ENGAGEMENT` promised lane 3 ("a named web source… never refuse") and `OUTSIDE_SYSTEM`/`PUBLIC_GROUNDED_SYSTEM` said "offer to pull" — a contradiction with no executable path, so the model deflected or invented.
+
+- **New** `lib/assistant/web-fallback.ts` — `webFallback(question, heldSystem)`: a forced-tool gap probe (Haiku reads the question + the already-built dossier, lists ONLY figures we don't hold) → `fillExternalPoint` each (SAME moat: a value is kept only if its digits appear VERBATIM in a returned cited span). Partitions into **lane 3** web-verified vs **lane 4** unfound (ask the user; recurring-email caveat). Gated by `looksLikeFigureAsk` so a normal answer pays zero extra latency. 11 unit tests (injected probe/fill, no network).
+- **Wired** into both grounded branches of `conversation-path.ts` (no-location region + located): append the WEB-VERIFIED FIGURES grounding block ("state ONLY these, cite the host, never invent") + emit a `sources` frame for the collapsed citation accordion. **Killed the contradiction** — `OUTSIDE_SYSTEM` + `PUBLIC_GROUNDED_SYSTEM` no longer say "offer to pull"; they say the figure is fetched+verified, else ask the user, never fabricate.
+- **Contract** `lib/welcome/frames.ts` — new `sources` frame + `WelcomeSource` + reducer/parse (collapsed, click-to-open accordion; client render is the immediate follow-up).
+- **PROVEN LIVE** (`scripts/prove-web-fallback.mts`, the exact ask Sonnet deflected on): "active listings + median DOM in Cape Coral" → 5,814 (Zillow, verbatim "5814 homes for sale") + 60 days (Redfin, verbatim "60 days on the market"). **5/5 rolls clean** — no deflection, no leak. Proof appended to `verification/answer-proofs.jsonl`.
+- Gates: `bun test` web-fallback+conversation-path+frames **68/0**, `bunx tsc` 0 project-wide, `bunx next build` ✓. Scope: server cascade + live proof; visible accordion UI is next.
+
+---
+
 ## 2026-06-25 (main) — docs(audit): spec/plan cleanup + AUDIT-GAPS-2026-06-24.md
 
 Cross-checked all active specs + plans against git log + code. Moved finished work to `_FINISHED`: Task-02 scoped email content (shipped `689bbcb1`→`34af5789`), both highlighter specs (GlobalHighlighter live app-root, flag default ON). Created `docs/superpowers/AUDIT-GAPS-2026-06-24.md` — 35 open gaps catalogued (critical: One Assistant client flip, market-sentiment-swfl brain, Ian storm rows, crawl4ai permit ports). Corrected two false audit findings (highlighter dark + scoped email not started — both wrong).
