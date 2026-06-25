@@ -44,7 +44,7 @@ export type KnownPlatform =
   | "threads";
 
 /** A platform in a `social-icons` block: a known platform, or "custom" with a
- *  user-supplied label + resolved logo URL (Logo.dev / favicon / globe). */
+ *  user-supplied label + resolved logo URL (favicon, else globe glyph). */
 export type SocialPlatformType = KnownPlatform | "custom";
 export type SocialDisplayMode = "icon" | "text" | "icon+text";
 export type SocialLayout = "row" | "column";
@@ -127,7 +127,7 @@ export interface SocialPlatformEntry {
   url: string;
   /** Custom platforms: the display name. Known platforms auto-label from the registry. */
   label?: string;
-  /** Custom platforms only: Logo.dev / favicon resolved icon URL. */
+  /** Custom platforms only: favicon-resolved icon URL. */
   logoUrl?: string;
 }
 

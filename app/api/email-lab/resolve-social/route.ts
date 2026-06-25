@@ -12,9 +12,9 @@ export const runtime = "nodejs";
  * social URL and log the unknown domain.
  *
  * Body: { url: string }. Returns { domain, logoUrl }. Always 200 with a logoUrl
- * (Logo.dev when LOGODEV_API_KEY is set, else the keyless Google favicon); 400
- * only when the URL has no parseable host. Logging to brand_custom_socials is
- * best-effort (service-role write) and never blocks the response.
+ * (keyless Google favicon — no paid logo vendor); 400 only when the URL has no
+ * parseable host. Logging to brand_custom_socials is best-effort (service-role
+ * write) and never blocks the response.
  */
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   const domain = domainFromUrl(url);
   if (!domain) return NextResponse.json({ error: "unparseable url" }, { status: 400 });
 
-  const logoUrl = logoUrlForDomain(domain, process.env.LOGODEV_API_KEY);
+  const logoUrl = logoUrlForDomain(domain);
 
   // Who pasted it (optional — the email lab is authed, but don't hard-require it).
   let userId: string | null = null;

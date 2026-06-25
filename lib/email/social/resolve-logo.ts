@@ -1,24 +1,16 @@
 // lib/email/social/resolve-logo.ts
 //
 // Resolve a brand logo URL for a "custom" social platform from its domain.
-// Verified IN-SESSION (RULE 0.4, 2026-06-25) against the live endpoint:
-//   https://img.logo.dev/{domain}?token={pk_...}&size=64&format=png
-//   → 200 with a real publishable token; 401 {"msg":"invalid api token"} without.
-// So Logo.dev needs a real `LOGODEV_API_KEY` (a pk_ publishable token). Until one
-// is set, the keyless Google favicon service is the live fallback (no account,
-// returns a generic globe for unknown domains). The render layer (SocialIcon)
-// shows our own globe glyph when no logoUrl resolves at all.
+// KEYLESS BY DESIGN: Google's favicon service — no account, no API key, no bill.
+// We deliberately do NOT use a paid logo API (e.g. Logo.dev); a favicon, falling
+// back to our own globe glyph (rendered by SocialIcon when nothing resolves), is
+// plenty for the rarely-used "add your own" custom-platform path.
 //
-// PURE: the token is passed in, not read here — the API route reads the env.
+// PURE.
 
 const SIZE = 64;
 
-/** Best logo URL for a domain. Logo.dev when a publishable token is given, else
- *  the keyless Google favicon service. */
-export function logoUrlForDomain(domain: string, logoDevToken?: string | null): string {
-  const d = encodeURIComponent(domain);
-  if (logoDevToken) {
-    return `https://img.logo.dev/${d}?token=${encodeURIComponent(logoDevToken)}&size=${SIZE}&format=png`;
-  }
-  return `https://www.google.com/s2/favicons?domain=${d}&sz=${SIZE}`;
+/** Best free logo URL for a domain — the keyless Google favicon service. */
+export function logoUrlForDomain(domain: string): string {
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${SIZE}`;
 }

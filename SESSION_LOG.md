@@ -1,3 +1,9 @@
+## 2026-06-25 (main) — chore(email-socials): rip out Logo.dev — keyless favicon → globe is the only custom-icon path (operator: "why pay for a logo")
+
+Removed the dormant paid-vendor branch shipped in `82f236ac`. `lib/email/social/resolve-logo.ts` now returns ONLY the keyless Google favicon URL (no token param, no `process.env.LOGODEV_API_KEY` read in the resolve-social route); custom-platform icons resolve favicon → our own globe glyph. No signup, no key, no bill. Dropped the stale Logo.dev mentions in type/inspector comments. Gates: tsc 0 · eslint 0/0. (Migration's `brand_custom_socials.logo_url` column stays — it just holds the favicon URL now.)
+
+---
+
 ## 2026-06-25 (main) — design(snicklefritz): branded-email system spec (Approach A) + lock crawl4ai-on-brainstorm rule
 
 Brainstormed the SNICKLEFRITZ branded-email system with a **crawl4ai research pass first** (RULE 0.4): Anthropic structured-outputs (GA) + forced-tool for the template pick, model IDs confirmed verbatim (`claude-haiku-4-5` / `claude-sonnet-4-6` / `claude-opus-4-8`), Resend batch ≤100 / `Idempotency-Key` / `List-Unsubscribe` one-click / NO native cron, React-email `pixelBasedPreset` + dark-mode, `enrichBrand` reuse. **Approach A approved:** pure core (`lib/email/snicklefritz/*`) + thin CLIs; the "builder" = exactly 2 AI calls (forced-tool template pick + structured-output **no-invention** fill, every number paired with a source). Spec: `docs/superpowers/specs/2026-06-25-snicklefritz-email-system-design.md` — phases (discovery → prep/gated-preview → send → true-landing → 3-day cron), per-target "folders", the structural no-invention gate, and what must be found upfront. Build-time flags: verify Haiku-4.5 structured-output support (else Sonnet); web_search type drift (`web_search_20260209`).

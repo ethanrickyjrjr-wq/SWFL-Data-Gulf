@@ -562,7 +562,7 @@ function SocialIconsEditor({
     setPlatforms(platforms.map((p, k) => (k === i ? { ...p, ...patch } : p)));
   const remove = (i: number) => setPlatforms(platforms.filter((_, k) => k !== i));
 
-  // Custom platforms: resolve a brand logo (Logo.dev / favicon) from the pasted
+  // Custom platforms: resolve a brand icon (favicon) from the pasted
   // URL on blur. Best-effort — the render falls back to a globe glyph if unset.
   const resolveCustomLogo = async (i: number, url: string) => {
     if (!url.trim()) return;
