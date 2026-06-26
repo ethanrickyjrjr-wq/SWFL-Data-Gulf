@@ -34,7 +34,7 @@ from typing import Any, Iterable, Optional
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl4ai_client import Crawl4aiError, fetch_many, fetch_page_markdown
+from ingest.lib.crawl_client import Crawl4aiError, fetch_many, fetch_page_markdown
 from ingest.lib.firecrawl_client import FirecrawlError, scrape as firecrawl_scrape
 from ingest.lib.spider_client import SpiderError, scrape as spider_scrape
 

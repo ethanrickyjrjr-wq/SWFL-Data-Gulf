@@ -34,7 +34,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl4ai_client import Crawl4aiSession, Crawl4aiError
+from ingest.lib.crawl_client import Crawl4aiSession, Crawl4aiError
 
 # group="practice" -> cadence/format/timing guides. group="devdoc" -> platform API contracts.
 # Confirm/replace URLs as needed; if a host blocks, point at an archive/mirror.

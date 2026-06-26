@@ -24,7 +24,7 @@ import pdfplumber
 import psycopg
 import requests as _requests
 
-from ingest.lib.crawl4ai_client import fetch_page_markdown
+from ingest.lib.crawl_client import fetch_page_markdown
 
 from .parse import parse_index_markdown, parse_pdf_markdown
 from .summarize import summarize_notice

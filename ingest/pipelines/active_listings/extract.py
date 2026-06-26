@@ -35,7 +35,7 @@ from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig, HTTPCrawlerConfig
 from crawl4ai.async_crawler_strategy import AsyncHTTPCrawlerStrategy
 
-from ingest.lib.crawl4ai_client import Crawl4aiError
+from ingest.lib.crawl_client import Crawl4aiError
 
 # Covers Naples/Fort Myers heavily; the rural pair (Glades/Hendry) returns 0 and is harmless.
 SWFL_COUNTIES: list[str] = ["Collier", "Lee", "Charlotte", "Sarasota", "Glades", "Hendry"]

@@ -33,7 +33,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl4ai_client import Crawl4aiSession, Crawl4aiError
+from ingest.lib.crawl_client import Crawl4aiSession, Crawl4aiError
 
 # Best-in-class "one chart + explainer" / market-report references (the design agent's
 # shortlist). Layout study only — confirm/replace URLs as needed. If a live sender host

@@ -32,7 +32,7 @@ import json
 import re
 from typing import Any
 
-from ingest.lib.crawl4ai_client import Crawl4aiSession, Crawl4aiError
+from ingest.lib.crawl_client import Crawl4aiSession, Crawl4aiError
 
 SEARCH_TARGETS: list[dict[str, str]] = [
     {"city": "Estero", "label": "Estero FL"},

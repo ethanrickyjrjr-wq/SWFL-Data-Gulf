@@ -31,7 +31,7 @@ from typing import Any
 
 import psycopg
 
-from ingest.lib.crawl4ai_client import fetch_page_markdown
+from ingest.lib.crawl_client import fetch_page_markdown
 from ingest.lib.storage_uploader import _upload_bytes  # type: ignore[attr-defined]
 from ingest.lib.tier1_inventory import upsert_inventory_row
 

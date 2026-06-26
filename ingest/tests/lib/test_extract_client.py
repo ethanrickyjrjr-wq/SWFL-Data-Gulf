@@ -15,7 +15,7 @@ import json
 import pytest
 
 from ingest.lib import extract_client
-from ingest.lib.crawl4ai_client import Crawl4aiError
+from ingest.lib.crawl_client import Crawl4aiError
 from ingest.lib.firecrawl_client import FirecrawlError
 from ingest.lib.spider_client import SpiderError
 

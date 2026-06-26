@@ -171,7 +171,7 @@ def _scrape_reports_page() -> str:
 
     Returns empty string on failure (callers will use fallback URLs).
     """
-    from ingest.lib.crawl4ai_client import fetch_page_markdown
+    from ingest.lib.crawl_client import fetch_page_markdown
 
     try:
         markdown = fetch_page_markdown(REPORTS_PAGE_URL)

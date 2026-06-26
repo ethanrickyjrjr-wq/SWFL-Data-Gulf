@@ -30,7 +30,7 @@ from typing import Iterator
 
 import psycopg
 
-from ingest.lib.crawl4ai_client import fetch_page_markdown
+from ingest.lib.crawl_client import fetch_page_markdown
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 

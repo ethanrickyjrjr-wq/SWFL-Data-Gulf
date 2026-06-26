@@ -68,7 +68,7 @@ def _curl_download(url: str, dest: Path, referer: str = "") -> bool:
 def _scrape_html(url: str) -> str:
     """Scrape a URL and return raw HTML for PDF link extraction."""
     try:
-        from ingest.lib.crawl4ai_client import fetch_page_html
+        from ingest.lib.crawl_client import fetch_page_html
         return fetch_page_html(url)
     except Exception:
         return ""

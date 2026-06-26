@@ -52,7 +52,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl4ai_client import Crawl4aiError, Crawl4aiSession, fetch_many
+from ingest.lib.crawl_client import Crawl4aiError, Crawl4aiSession, fetch_many
 
 log = logging.getLogger(__name__)
 

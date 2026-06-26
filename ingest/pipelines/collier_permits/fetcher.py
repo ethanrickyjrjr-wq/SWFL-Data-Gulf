@@ -24,7 +24,7 @@ from typing import NamedTuple
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl4ai_client import Crawl4aiSession
+from ingest.lib.crawl_client import Crawl4aiSession
 
 from .constants import BASE_URL, LISTING_PAGE_URL, SERIES
 
