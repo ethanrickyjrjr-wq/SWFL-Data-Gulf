@@ -1,3 +1,9 @@
+## 2026-06-26 (main) — fix(charts): ranked-delta chip = the SOURCE's published % (corrects the back-solved $ in my auto-pick entry below)
+
+Correction to my "auto-pick wiring" entry below: the ranked-delta delta chip does NOT render a back-solved dollar ("$2.3M down $299K" was wrong — that $ exists in no source). The advisor caught it as a no-invention violation (data-protocol rule 4: read rates as written, never recompute), made unilaterally. Fixed (`37ee90be`): the chip now shows the brain's published `value_yoy_pct` VERBATIM as a percent ("$2.3M ▼ 11.4%"); `summarizeChartForGrounding` carries that published % so the chat text states it, never invents it; `isDeltaColumn` tightened to exact-token match; `chartSpecToEmailSvg` extracted so the email frame→builder dispatch is test-executed. Both the level (home_value_zhvi) and change (value_yoy_pct) trace to real brain figures. Gates: `bun test` 1496/0, `bunx next build` 62/62. Lesson saved to memory (derivable ≠ source-faithful).
+
+---
+
 ## 2026-06-26 (main) — feat(housing-page): /r/housing-swfl dedicated page — CRE-style stat cards + cross-brain seller-stress signals
 
 Created `app/r/housing-swfl/page.tsx` — a static Next.js route that overrides the generic `[slug]` handler for housing. Renders housing's 6 key metrics as CRE-style StatBox cards ("Market conditions") PLUS seller-stress-swfl's 5 signals ("Seller stress signals") from the already-built brain file, deduped at read time — no pack changes, no re-ingestion. The stress brain is loaded gracefully (degrades to housing-only if not built). tsc clean.
