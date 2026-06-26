@@ -38,7 +38,8 @@
     "ingest:zori-swfl": "npm run ingest:zori-swfl:tier1 && npm run ingest:zori-swfl:tier2",
     "ingest:zhvi-swfl:tier1": "python -m ingest.duckdb_pipelines.zhvi_swfl.pipeline",
     "ingest:zhvi-swfl:tier2": "python -m ingest.pipelines.zhvi_swfl.pipeline",
-    "ingest:zhvi-swfl": "npm run ingest:zhvi-swfl:tier1 && npm run ingest:zhvi-swfl:tier2"
+    "ingest:zhvi-swfl": "npm run ingest:zhvi-swfl:tier1 && npm run ingest:zhvi-swfl:tier2",
+    "gen:types": "bun scripts/gen-supabase-types.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.69.0",
@@ -72,6 +73,7 @@
     "remark-gfm": "^4.0.1",
     "resend": "^6.12.3",
     "sonner": "^2.0.7",
+    "type-fest": "^5.7.0",
     "zod": "^4.4.3"
   },
   "lint-staged": {
