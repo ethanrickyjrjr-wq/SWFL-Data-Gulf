@@ -32,6 +32,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # Push brains to main as the repo owner — the ONLY bypass actor on the 'main
+          # protection' ruleset. The default GITHUB_TOKEN (github-actions[bot]) is structurally
+          # blocked (GH013: ruleset requires PR + "CI / build", no bot bypass; and a user-owned
+          # repo cannot add the Actions integration to the bypass list — GitHub 422s it).
+          # persist-credentials keeps this token wired for the later `git push` in the rebuild step.
+          token: ${{ secrets.REBUILD_PAT }}
+          persist-credentials: true
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
