@@ -371,11 +371,47 @@ describe("sanitizeProse", () => {
     assert.ok(out.includes("env-swfl brain"));
   });
 
-  test("swaps corridor → area in user-facing prose", () => {
+  test("swaps corridor → area AND strips the coverage count (operator: never list how many)", () => {
     const out = sanitizeProse("Median across 12 of 25 corridors; one corridor leads.");
-    assert.ok(!/corridor/i.test(out));
-    assert.ok(out.includes("12 of 25 areas"));
-    assert.ok(out.includes("one area leads"));
+    // NEW contract: no "corridor", and the coverage count is gone entirely —
+    // "25 of 27 corridors" no longer becomes "25 of 27 areas" (operator decree:
+    // "NO LISTING HOW MANY CORRIDORS"). The standalone swap still holds.
+    assert.ok(!/corridor/i.test(out), "no 'corridor' word survives");
+    assert.ok(!/\d/.test(out), `no digit-count of areas survives: ${out}`);
+    assert.ok(out.includes("one area leads"), "the bare corridor → area swap still applies");
+  });
+
+  test("strips corridor coverage counts in every phrasing the decree names", () => {
+    // "(N of M corridors)" parenthetical → gone, parens and all
+    assert.equal(
+      sanitizeProse("Asking rent NNN (27 of 27 corridors) firmed."),
+      "Asking rent NNN firmed.",
+    );
+    // "N of M corridors" bare → keep the noun, drop the count
+    {
+      const out = sanitizeProse("Vacancy rose in 12 of 25 corridors.");
+      assert.ok(!/\d/.test(out), `count gone: ${out}`);
+      assert.ok(!/corridor/i.test(out));
+      assert.ok(out.includes("areas"));
+    }
+    // "across N corridors" → "across areas"
+    {
+      const out = sanitizeProse("Demand softened across 14 corridors.");
+      assert.ok(!/\d/.test(out), `count gone: ${out}`);
+      assert.ok(out.includes("across areas"));
+    }
+    // "N corridors reporting" → "areas reporting"
+    {
+      const out = sanitizeProse("With 9 corridors reporting, the read holds.");
+      assert.ok(!/\d/.test(out), `count gone: ${out}`);
+      assert.ok(out.includes("areas reporting"));
+    }
+    // Already-swapped "areas" form is stripped too (deCorridor runs first).
+    {
+      const out = sanitizeProse("Median across 12 of 25 areas; one area leads.");
+      assert.ok(!/\d/.test(out), `count gone: ${out}`);
+      assert.ok(out.includes("one area leads"));
+    }
   });
 });
 

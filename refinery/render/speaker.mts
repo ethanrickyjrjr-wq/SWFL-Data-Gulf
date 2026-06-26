@@ -203,11 +203,42 @@ export function deCorridor(text: string): string {
 }
 
 /**
+ * Strip corridor/area COVERAGE COUNTS from prose. Operator decree (repeated):
+ * "NO LISTING HOW MANY CORRIDORS." Today's deCorridor swap kept the count —
+ * "25 of 27 corridors" → "25 of 27 areas" — which still leaks the tally. This
+ * drops the count in every phrasing the decree names, keeping readable prose.
+ * `deCorridor` runs FIRST in `sanitizeProse`, so by here "corridors" is already
+ * "areas"; we match BOTH for defense in depth. Precedent: the cre-swfl report
+ * page's `shortenSummaryLabel` drops the "(27 of 27 corridors)" tail the same
+ * way.
+ *
+ *   "(12 of 25 areas)"     → ""                (whole parenthetical, parens too)
+ *   "12 of 25 areas"       → "areas"           (keep the noun, drop the count)
+ *   "across 14 areas"      → "across areas"
+ *   "9 areas reporting"    → "areas reporting"
+ */
+export function stripCorridorCount(text: string): string {
+  const noun = "(?:corridors?|areas?)";
+  return (
+    text
+      // Parenthetical coverage tail (incl. the leading space): " (12 of 25 areas)".
+      .replace(new RegExp(`\\s*\\(\\s*\\d[\\d,]*\\s+of\\s+\\d[\\d,]*\\s+${noun}\\s*\\)`, "gi"), "")
+      // "N of M corridors|areas" → keep the noun, drop the count.
+      .replace(new RegExp(`\\b\\d[\\d,]*\\s+of\\s+\\d[\\d,]*\\s+(${noun})\\b`, "gi"), "$1")
+      // "across N corridors|areas" → "across areas".
+      .replace(new RegExp(`\\bacross\\s+\\d[\\d,]*\\s+(${noun})\\b`, "gi"), "across $1")
+      // "N corridors|areas reporting" → "areas reporting".
+      .replace(new RegExp(`\\b\\d[\\d,]*\\s+(${noun}\\s+reporting)\\b`, "gi"), "$1")
+  );
+}
+
+/**
  * Tier 1 / 2 prose sanitization: pack-id → label swap, banned-phrase strip,
- * corridor → area swap, `§` strip, whitespace normalization.
+ * corridor → area swap, corridor coverage-count strip, `§` strip, whitespace
+ * normalization.
  */
 export function sanitizeProse(text: string): string {
-  let out = deCorridor(stripSectionMarker(text));
+  let out = stripCorridorCount(deCorridor(stripSectionMarker(text)));
   for (const [pat, replacement] of BANNED_PROSE) {
     out = out.replace(pat, replacement);
   }
