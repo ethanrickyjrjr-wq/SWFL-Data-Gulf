@@ -92,6 +92,7 @@ export function SendWeeklyHandle({
 
   useEffect(() => {
     const params = new URLSearchParams({ projectId });
+    if (deliverableId) params.set("deliverableId", deliverableId);
     if (scopeKind) params.set("scopeKind", scopeKind);
     if (scopeValue) params.set("scopeValue", scopeValue);
     fetch(`/api/email/send-status?${params}`)

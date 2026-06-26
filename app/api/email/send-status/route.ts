@@ -19,9 +19,11 @@ export const runtime = "nodejs";
  * RLS-scoped to auth.uid(), so service-role is never needed here.
  *
  * Query params:
- *   projectId  (required) — the project the deliverable belongs to
- *   scopeKind  (optional) — scope_kind on the deliverable row ("zip" etc.)
- *   scopeValue (optional) — scope_value on the deliverable row (the ZIP etc.)
+ *   projectId    (required) — the project the deliverable belongs to
+ *   deliverableId (optional) — when present, also checks for a block-canvas schedule
+ *                              tied to this specific deliverable (N6 EmailDoc lane)
+ *   scopeKind    (optional) — scope_kind on the deliverable row ("zip" etc.)
+ *   scopeValue   (optional) — scope_value on the deliverable row (the ZIP etc.)
  */
 
 const SCHEDULE_COLS = "id,status,cadence,day_of_week,day_of_month,send_hour_et,audience_slug";
@@ -38,6 +40,7 @@ export async function GET(req: NextRequest) {
   if (!projectId) {
     return NextResponse.json({ error: "projectId required" }, { status: 400 });
   }
+  const deliverableId = searchParams.get("deliverableId") ?? null;
   const scopeKind = searchParams.get("scopeKind") ?? null;
   const scopeValue = searchParams.get("scopeValue") ?? null;
 
@@ -52,11 +55,37 @@ export async function GET(req: NextRequest) {
     contact_count: (r.contact_count as number) ?? 0,
   }));
 
-  // Schedule — find the active/paused recurring schedule matching this deliverable's
-  // recipe shape (template_id="report" + scope). Use IS NOT DISTINCT FROM for the
-  // nullable scope columns so NULLs compare correctly (the same guard as Task 7's
-  // createOrTouchSchedule). Stopped schedules are excluded — they're terminal.
+  // Schedule — two lanes:
+  //   block-canvas: matched by deliverable_id (N6 EmailDoc schedules); checked first.
+  //   report:       matched by template_id="report" + scope (legacy; existing behavior).
+  // Stopped schedules excluded — they're terminal.
   let schedule = null;
+
+  // Lane 1 — block-canvas (only when caller provides deliverableId).
+  if (deliverableId) {
+    const { data: bcRow } = await supabase
+      .from("email_schedules")
+      .select(SCHEDULE_COLS)
+      .eq("project_id", projectId)
+      .eq("template_id", "block-canvas")
+      .eq("deliverable_id", deliverableId)
+      .in("status", ["active", "paused"])
+      .limit(1)
+      .maybeSingle();
+    if (bcRow) {
+      schedule = {
+        id: bcRow.id as number,
+        status: bcRow.status as string,
+        cadence: bcRow.cadence as string,
+        day_of_week: (bcRow.day_of_week as number | null) ?? null,
+        day_of_month: (bcRow.day_of_month as number | null) ?? null,
+        send_hour_et: bcRow.send_hour_et as number,
+        audience_slug: (bcRow.audience_slug as string | null) ?? null,
+      };
+    }
+  }
+
+  // Lane 2 — report schedule (skip if block-canvas already matched).
   const scheduleQuery = supabase
     .from("email_schedules")
     .select(SCHEDULE_COLS)
@@ -76,7 +105,9 @@ export async function GET(req: NextRequest) {
     scheduleQuery.eq("scope_value", scopeValue);
   }
 
-  const { data: scheduleRows } = await scheduleQuery.limit(1).maybeSingle();
+  const { data: scheduleRows } = schedule
+    ? { data: null }
+    : await scheduleQuery.limit(1).maybeSingle();
   if (scheduleRows) {
     schedule = {
       id: scheduleRows.id as number,
