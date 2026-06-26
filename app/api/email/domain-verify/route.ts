@@ -203,6 +203,7 @@ export async function POST(req: NextRequest) {
       from_email: fromEmail,
       reply_to: replyTo,
       domain_verified: verified,
+      // Known-valid-JSON array from Resend SDK; dns_records is a jsonb column, Supabase codegen types it as Json.
       dns_records: records as Json,
       updated_at: new Date().toISOString(),
     },
@@ -281,6 +282,7 @@ async function handlePoll(
     .from("email_sender_config")
     .update({
       domain_verified: verified,
+      // Known-valid-JSON array from Resend SDK; dns_records is a jsonb column, Supabase codegen types it as Json. Double cast needed: SDK types records as DomainRecord[] (not Json).
       dns_records: data.records as unknown as Json,
       updated_at: new Date().toISOString(),
     })
