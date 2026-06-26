@@ -35,8 +35,10 @@ def run(args: argparse.Namespace) -> None:
             )
             sys.exit(1)
 
-    # Baseline BEFORE this run (for the collapse alert). 0 in dry-run / on bootstrap.
-    prior = 0 if args.dry_run else current_row_count()
+    # Baseline BEFORE this run (for the collapse alert). Skip (0) for dry-run and single-county
+    # runs — the guard compares total_raw against the full-table count; a single county's ~2k rows
+    # will always look like a "collapse" against the 9k+ table total.
+    prior = 0 if (args.dry_run or args.county) else current_row_count()
 
     # Upsert PER COUNTY (idempotent merge), not once at the end: a later county's 403/throttle must
     # never discard the counties already gathered — the bug that lost the first 4,691-row seed.

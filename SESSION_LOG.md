@@ -1,3 +1,15 @@
+## 2026-06-26 (main) — fix(active-listings): stagger 4 county crons + plumb CRAWL4AI_PROXY into HTTP path
+
+All-county sweep 403d under sustained load from repeated test runs; structural fix: 4 schedule
+triggers (09/12/15/18 UTC, one county each), so no single run accumulates enough requests to trip
+the source throttle (~420+ req threshold). County resolved from `github.event.schedule` in a new
+"Resolve county" step; `workflow_dispatch` still supports blank=all or single-county. Fixed false
+`assert_vs_baseline` alarm for single-county runs (compared one county's ~2k rows against the full
+9k table — now skips baseline check when `--county` is given). Also plumbed `CRAWL4AI_PROXY` into
+the HTTP fetch path (`_fetch_html` now mirrors `crawl_client` proxy-kwarg pattern) and wired the
+secret into the workflow env (dormant until `gh secret set CRAWL4AI_PROXY`). Commits: `1a4ad490`
+(proxy plumbing) + this one (stagger + guard fix). Next: watch the 09:00 UTC Collier run confirm green.
+
 ## 2026-06-26 (main) — docs: housing daily-layer design spec + 2 handoffs (active-listings WAF, housing impl)
 
 Capstone of the "what's actually updating daily" session. Three fixes already landed earlier today (crawl_client rename `8fb76c9a`, active-listings un-park `e3aaa08f`, daily-rebuild PAT fix — proven by run `28259145510`/`0ad59f1`). This commit adds the design layer for the real goal — housing commentary that moves daily: `docs/superpowers/specs/2026-06-26-housing-daily-layer-design.md` (operator-approved): monthly Redfin stays the backbone; a daily layer is added from `active_listings_residential` (ZIP-grain — every listing carries its `zip_code`, so no "3-city garnish") + a 3-city `daily_truth` web sold-median in a swappable "daily sold" slot for a future MLS feed. Hard rule: never blend the web median with the 125-ZIP Redfin median (no-invention); list-side ≠ sold-side, always labeled. Plus two handoffs: `2026-06-26-active-listings-waf-proxy.md` (the all-county 403 needs CRAWL4AI_PROXY, and that proxy is wired only in the browser strategy, NOT active-listings' HTTP path) and `2026-06-26-housing-daily-layer-implementation.md` (pick-up steps + landmines). No pack code yet — RULE 1 ask-first on `key_metrics` is satisfied (approved), implementation is the next session.

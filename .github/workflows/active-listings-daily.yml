@@ -2,16 +2,25 @@ name: ingest-active-listings
 
 # Active residential listings -> data_lake.active_listings_residential.
 #
-# CRON LIVE (un-parked 2026-06-26): the runner IP was proven WAF-clear by a workflow_dispatch from
-# the GitHub datacenter IP — crawl4ai's HTTP strategy walked 116+ Collier pages with zero 403s and
-# extracted 2,292 in-scope listings (run 28254764976). The earlier ModuleNotFoundError was the
-# *crawl4ai* gitignore swallowing the wrapper module, NOT a WAF block — fixed by the crawl_client
-# rename (8fb76c9a). Tracking check listings_runner_ip_waf_proof: CLOSED.
-# Source URL is NOT in the repo: the pipeline reads it from the LISTINGS_SOURCE_BASE_URL secret.
+# STAGGERED (4 county crons, 3 h apart) — avoids tripping the source's sustained-burst 403
+# throttle (~420+ requests). Each county is ~150 pages; staggered runs never accumulate.
+#   09:00 UTC  Collier   (~2,292 listings)
+#   12:00 UTC  Lee
+#   15:00 UTC  Charlotte
+#   18:00 UTC  Sarasota
+# Glades/Hendry return ~0 and are not scheduled (harmless to skip; all-county workflow_dispatch
+# still covers them).
+#
+# Runner IP proven WAF-clear for single-county (Collier, 116+ pages, 0×403, run 28254764976).
+# Source URL is NOT in the repo: read from LISTINGS_SOURCE_BASE_URL secret.
+# CRAWL4AI_PROXY wired (dormant until secret is set — activates for WAF escalation fallback).
 
 on:
   schedule:
-    - cron: "0 9 * * *"   # daily 09:00 UTC — runner-IP WAF-proven 2026-06-26 (run 28254764976)
+    - cron: "0 9 * * *"    # Collier
+    - cron: "0 12 * * *"   # Lee
+    - cron: "0 15 * * *"   # Charlotte
+    - cron: "0 18 * * *"   # Sarasota
   workflow_dispatch:
     inputs:
       county:
@@ -27,14 +36,11 @@ jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 55  # all-county scrape ran ~23min in the proof; headroom over the 30 default
+    timeout-minutes: 30  # single-county runs take ~6-8 min; all-county workflow_dispatch ~25 min
     env:
       DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
-      # Listings source base URL — kept out of this public repo; injected from the secret.
       LISTINGS_SOURCE_BASE_URL: ${{ secrets.LISTINGS_SOURCE_BASE_URL }}
-      # Residential proxy for WAF bypass (rotating IP). No-op when unset (single-county runner-IP
-      # path is WAF-clear without it; needed for sustained all-county load). Gate 3: set the secret
-      # first, then wire here — both steps must land in the same push.
+      # Residential proxy for WAF bypass. No-op when unset (runner-IP clear for single-county load).
       CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
 
     steps:
@@ -52,11 +58,20 @@ jobs:
         continue-on-error: true
         run: crawl4ai-doctor
 
+      - name: Resolve county
+        id: resolve
+        run: |
+          case "${{ github.event.schedule }}" in
+            "0 9 * * *")  echo "county=Collier"   >> "$GITHUB_OUTPUT" ;;
+            "0 12 * * *") echo "county=Lee"        >> "$GITHUB_OUTPUT" ;;
+            "0 15 * * *") echo "county=Charlotte"  >> "$GITHUB_OUTPUT" ;;
+            "0 18 * * *") echo "county=Sarasota"   >> "$GITHUB_OUTPUT" ;;
+            *)             echo "county=${{ inputs.county }}" >> "$GITHUB_OUTPUT" ;;
+          esac
+
       - name: Run active listings pipeline
         env:
-          # Pass inputs via env (not ${{ }} inside the script) and build argv with a bash array so a
-          # county value is quoted correctly — the old `--county '$X'` leaked literal quotes into argv.
-          COUNTY_INPUT: ${{ inputs.county }}
+          COUNTY_INPUT: ${{ steps.resolve.outputs.county }}
           DRY_INPUT: ${{ inputs.dry_run }}
         run: |
           ARGS=()
