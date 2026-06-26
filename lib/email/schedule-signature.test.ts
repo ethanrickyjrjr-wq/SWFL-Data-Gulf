@@ -29,6 +29,7 @@ describe("recipeSignature", () => {
       day_of_week: 2,
       day_of_month: null,
       send_hour_et: 7,
+      deliverable_id: null,
     });
   });
 
@@ -58,7 +59,7 @@ describe("signatureFilters — IS NOT DISTINCT FROM expressed for PostgREST", ()
     expect(filters).toContainEqual({ col: "send_hour_et", op: "eq", value: 7 });
   });
 
-  test("covers all nine signature columns exactly once", () => {
+  test("covers all ten signature columns exactly once", () => {
     const filters = signatureFilters(recipeSignature(cmd()));
     const cols = filters.map((f) => f.col).sort();
     expect(cols).toEqual(
@@ -67,6 +68,7 @@ describe("signatureFilters — IS NOT DISTINCT FROM expressed for PostgREST", ()
         "cadence",
         "day_of_month",
         "day_of_week",
+        "deliverable_id",
         "scope_kind",
         "scope_value",
         "send_hour_et",
@@ -74,6 +76,17 @@ describe("signatureFilters — IS NOT DISTINCT FROM expressed for PostgREST", ()
         "topic",
       ].sort(),
     );
+  });
+
+  test("deliverable_id distinguishes two saved EmailDoc designs on the same cadence", () => {
+    // Two block-canvas schedules with an identical cadence/scope but DIFFERENT saved
+    // designs must be distinct recipes — else createOrTouchSchedule would reactivate the
+    // first row for the second design, silently sending the wrong email.
+    const a = recipeSignature(cmd({ template_id: "block-canvas", deliverable_id: "deliv-A" }));
+    const b = recipeSignature(cmd({ template_id: "block-canvas", deliverable_id: "deliv-B" }));
+    expect(signaturesEqual(a, b)).toBe(false);
+    const aFilter = signatureFilters(a).find((f) => f.col === "deliverable_id");
+    expect(aFilter).toEqual({ col: "deliverable_id", op: "eq", value: "deliv-A" });
   });
 });
 

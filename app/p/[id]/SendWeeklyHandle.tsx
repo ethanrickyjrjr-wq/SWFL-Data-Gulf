@@ -27,6 +27,10 @@ interface Props {
   projectId: string;
   scopeKind: string | null;
   scopeValue: string | null;
+  /** Where "Upload contacts" should return to after adding a list. When set, it's
+   *  passed as `?next=` so the upload page's "Back to your work" lands back HERE
+   *  (e.g. the Email Lab with the schedule modal reopened) instead of /project. */
+  returnTo?: string;
 }
 
 type Step =
@@ -69,11 +73,22 @@ const BTN_CONFIRM =
 const BTN_GHOST =
   "rounded-full border border-white/10 px-3 py-1.5 text-xs text-gray-400 transition-colors hover:text-white";
 
-export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeValue }: Props) {
+export function SendWeeklyHandle({
+  deliverableId,
+  projectId,
+  scopeKind,
+  scopeValue,
+  returnTo,
+}: Props) {
   const [status, setStatus] = useState<SendStatus | null>(null);
   const [step, setStep] = useState<Step>({ name: "loading" });
   const [dayOfWeek, setDayOfWeek] = useState(1); // Monday default
   const [sendHour, setSendHour] = useState(7);
+  // Carry a return path into the upload page so "Back to your work" comes back to the
+  // caller (the Lab schedule modal) instead of the generic /project fallback.
+  const uploadHref = returnTo
+    ? `/contacts/upload?next=${encodeURIComponent(returnTo)}`
+    : "/contacts/upload";
 
   useEffect(() => {
     const params = new URLSearchParams({ projectId });
@@ -267,7 +282,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
         <div className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
           <p className="mb-2 text-xs text-gray-300">No contact lists yet. Upload contacts first.</p>
           <div className="flex gap-2">
-            <a href="/contacts/upload" className={BTN}>
+            <a href={uploadHref} className={BTN}>
               Upload contacts
             </a>
             <button type="button" className={BTN_GHOST} onClick={() => setStep({ name: "idle" })}>
@@ -295,7 +310,7 @@ export function SendWeeklyHandle({ deliverableId, projectId, scopeKind, scopeVal
             </button>
           ))}
           <a
-            href="/contacts/upload"
+            href={uploadHref}
             className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-gray-500 transition-colors hover:text-gray-300"
           >
             + Upload contacts

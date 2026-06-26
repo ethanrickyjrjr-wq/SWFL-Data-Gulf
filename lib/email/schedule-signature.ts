@@ -28,6 +28,11 @@ export interface RecipeSignature {
   day_of_month: number | null;
   /** NOT NULL on the table. */
   send_hour_et: number;
+  /** Block-canvas EmailDoc link. NULL for every non-EmailDoc recipe (the digest /
+   *  report / scoped lanes), so adding it to the signature does NOT change matching for
+   *  existing rows. Two saved designs on the same cadence are DISTINCT recipes — without
+   *  this column they'd collide and the second would reactivate the first's row. */
+  deliverable_id: string | null;
 }
 
 /** The columns, in stable order, that the signature spans. */
@@ -41,6 +46,7 @@ const SIGNATURE_COLUMNS = [
   "day_of_week",
   "day_of_month",
   "send_hour_et",
+  "deliverable_id",
 ] as const satisfies ReadonlyArray<keyof RecipeSignature>;
 
 /** Project a parsed command onto the canonical signature tuple (undefined → null). */
@@ -55,6 +61,7 @@ export function recipeSignature(command: ParsedCommand): RecipeSignature {
     day_of_week: command.day_of_week ?? null,
     day_of_month: command.day_of_month ?? null,
     send_hour_et: command.send_hour_et as number,
+    deliverable_id: command.deliverable_id ?? null,
   };
 }
 

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DeliverableRow } from "@/app/project/[id]/workspace/types";
+import type { EmailBlock } from "@/lib/email/doc/types";
 import { getMaterialStatus, getFormatBadge } from "@/lib/deliverable/material-status";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 
@@ -36,6 +37,11 @@ function rowHref(d: { template: string; id: string }, projectId: string): string
     : `/p/${d.id}`;
 }
 
+const header = (blocks: EmailBlock[]) =>
+  blocks.find((b): b is Extract<EmailBlock, { type: "header" }> => b.type === "header");
+const hero = (blocks: EmailBlock[]) =>
+  blocks.find((b): b is Extract<EmailBlock, { type: "hero" }> => b.type === "hero");
+
 interface Props {
   d: DeliverableRow & { versions: DeliverableRow[] };
   projectId: string;
@@ -65,113 +71,196 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
     }
   }
 
+  // A saved Email Lab design renders as a VISUAL PREVIEW CARD of the actual email —
+  // brand header + hero headline in the doc's own colors — not a one-line text row.
+  const isBlockCanvas = d.template === "block-canvas" && !!d.doc;
+  const blocks = d.doc?.blocks ?? [];
+  const primaryColor = d.doc?.globalStyle?.primaryColor ?? "#0f1d24";
+  const accentColor = d.doc?.globalStyle?.accentColor ?? badge.color;
+  const h = header(blocks);
+  const he = hero(blocks);
+  const company = h?.props.companyName;
+  const tagline = h?.props.tagline;
+  const kicker = he?.props.kicker;
+  const heroValue = he?.props.value;
+  const heroLabel = he?.props.label;
+
   return (
     <div className="group relative">
-      {/* Main row */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => router.push(href)}
-        onKeyDown={(e) => {
-          // Only the row itself activates on Enter/Space — not keydowns bubbling up
-          // from the inner buttons (accordion toggle, Update), whose click-time
-          // stopPropagation does NOT stop keydown. Without this guard, pressing Enter
-          // on those controls would navigate the row instead of acting on them.
-          if (e.target !== e.currentTarget) return;
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            router.push(href);
-          }
-        }}
-        className="flex cursor-pointer items-center gap-3 border-b border-white/[0.08] py-3 pl-4 pr-3 hover:bg-white/[0.03] focus:outline-none focus:ring-inset focus:ring-1 focus:ring-gulf-teal/40"
-      >
-        {/* 4px brand swatch bar */}
+      {isBlockCanvas ? (
+        // ── Visual preview card ──
         <div
-          className="absolute left-0 top-0 h-full w-1 rounded-l"
-          style={{ backgroundColor: swatchColor }}
-          aria-hidden="true"
-        />
-
-        {/* Title */}
-        <span className="flex-1 truncate text-sm text-white/85">{title}</span>
-
-        {/* Format badge */}
-        <span
-          className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${badge.bg}`}
-          style={{ color: badge.color }}
-        >
-          {badge.label}
-        </span>
-
-        {/* Status: amber update affordance */}
-        {status === "needs_update" && (
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors disabled:opacity-50"
-          >
-            {refreshing ? "Updating…" : "Update ↻"}
-          </button>
-        )}
-
-        {/* Send to contacts */}
-        <button
-          title="Send to contacts"
-          onClick={(e) => {
-            e.stopPropagation();
-            setSendOpen(true);
+          role="button"
+          tabIndex={0}
+          onClick={() => router.push(href)}
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              router.push(href);
+            }
           }}
-          className="shrink-0 text-xs text-white/40 hover:text-white/70 transition-colors"
+          className="cursor-pointer overflow-hidden rounded-xl border border-white/10 transition-shadow hover:shadow-lg hover:shadow-black/30 focus:outline-none focus:ring-1 focus:ring-gulf-teal/40"
         >
-          Send
-        </button>
+          {/* Brand masthead — the email's own primary color */}
+          <div className="px-4 py-3" style={{ backgroundColor: primaryColor }}>
+            <div className="truncate text-sm font-bold text-white">{company || "Your email"}</div>
+            {tagline && (
+              <div className="truncate text-[10px]" style={{ color: accentColor }}>
+                {tagline}
+              </div>
+            )}
+          </div>
 
-        {/* Version accordion toggle */}
-        {d.versions.length > 0 && (
+          {/* Hero headline on a light "paper" body — reads like the real email */}
+          <div className="bg-white px-4 py-4">
+            {kicker && (
+              <div
+                className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: accentColor }}
+              >
+                {kicker}
+              </div>
+            )}
+            <div className="text-2xl font-extrabold leading-tight" style={{ color: primaryColor }}>
+              {heroValue || title}
+            </div>
+            {heroLabel && <div className="mt-0.5 text-xs text-gray-500">{heroLabel}</div>}
+          </div>
+
+          {/* Action bar */}
+          <div className="flex items-center gap-4 border-t border-black/10 bg-gray-50 px-4 py-2">
+            <span className="text-xs font-semibold text-gray-700">Open in Lab →</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSendOpen(true);
+              }}
+              className="text-xs text-gray-500 transition-colors hover:text-black"
+            >
+              Send
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/project/${projectId}/email-lab?did=${d.id}&schedule=1`);
+              }}
+              className="text-xs text-gray-500 transition-colors hover:text-black"
+            >
+              Schedule
+            </button>
+            {status === "needs_update" && (
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="text-xs font-medium text-amber-600 transition-colors hover:text-amber-700 disabled:opacity-50"
+              >
+                {refreshing ? "Updating…" : "Update ↻"}
+              </button>
+            )}
+            <span
+              className="ml-auto rounded px-1.5 py-0.5 text-[10px] font-medium"
+              style={{ backgroundColor: `${accentColor}22`, color: accentColor }}
+            >
+              email
+            </span>
+          </div>
+        </div>
+      ) : (
+        // ── Compact text row (reports / non-EmailDoc materials) ──
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => router.push(href)}
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              router.push(href);
+            }
+          }}
+          className="flex cursor-pointer items-center gap-3 border-b border-white/[0.08] py-3 pl-4 pr-3 hover:bg-white/[0.03] focus:outline-none focus:ring-inset focus:ring-1 focus:ring-gulf-teal/40"
+        >
+          {/* 4px brand swatch bar */}
+          <div
+            className="absolute left-0 top-0 h-full w-1 rounded-l"
+            style={{ backgroundColor: swatchColor }}
+            aria-hidden="true"
+          />
+
+          {/* Title */}
+          <span className="flex-1 truncate text-sm text-white/85">{title}</span>
+
+          {/* Format badge */}
+          <span
+            className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${badge.bg}`}
+            style={{ color: badge.color }}
+          >
+            {badge.label}
+          </span>
+
+          {/* Status: amber update affordance */}
+          {status === "needs_update" && (
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors disabled:opacity-50"
+            >
+              {refreshing ? "Updating…" : "Update ↻"}
+            </button>
+          )}
+
+          {/* Send to contacts */}
           <button
-            aria-expanded={open}
+            title="Send to contacts"
             onClick={(e) => {
               e.stopPropagation();
-              setOpen((v) => !v);
+              setSendOpen(true);
             }}
             className="shrink-0 text-xs text-white/40 hover:text-white/70 transition-colors"
           >
-            Updated {d.versions.length}× {open ? "⌃" : "⌄"}
+            Send
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Version accordion sub-rows */}
-      {open && d.versions.length > 0 && (
-        <div className="border-b border-white/[0.08]">
-          {d.versions.map((v) => {
-            const vHref = rowHref(v, projectId);
-            return (
-              <div
-                key={v.id}
-                className="ml-6 flex items-center gap-3 border-l border-white/10 py-1.5 pl-3 pr-3"
-              >
-                <span className="text-xs text-white/40">{formatDate(v.created_at)}</span>
-                <button
-                  onClick={() => router.push(vHref)}
-                  className="text-xs text-white/50 hover:text-white/80 transition-colors"
-                >
-                  Open
-                </button>
-                {onTrash && (
+      {/* Version accordion sub-rows (shared by both layouts) */}
+      {d.versions.length > 0 && (
+        <div className="mt-1 flex flex-wrap items-center gap-3 pl-1">
+          <button
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="text-[11px] text-white/40 transition-colors hover:text-white/70"
+          >
+            {d.versions.length} earlier {d.versions.length === 1 ? "version" : "versions"}{" "}
+            {open ? "⌃" : "⌄"}
+          </button>
+          {open &&
+            d.versions.map((v) => {
+              const vHref = rowHref(v, projectId);
+              return (
+                <span key={v.id} className="flex items-center gap-2">
+                  <span className="text-[11px] text-white/35">{formatDate(v.created_at)}</span>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTrash(v.id);
-                    }}
-                    className="text-xs text-white/30 hover:text-red-400 transition-colors"
+                    onClick={() => router.push(vHref)}
+                    className="text-[11px] text-white/50 transition-colors hover:text-white/80"
                   >
-                    Trash
+                    Open
                   </button>
-                )}
-              </div>
-            );
-          })}
+                  {onTrash && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTrash(v.id);
+                      }}
+                      className="text-[11px] text-white/30 transition-colors hover:text-red-400"
+                    >
+                      Trash
+                    </button>
+                  )}
+                </span>
+              );
+            })}
         </div>
       )}
 

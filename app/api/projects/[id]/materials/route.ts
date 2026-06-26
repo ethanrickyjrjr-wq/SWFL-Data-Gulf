@@ -44,6 +44,10 @@ export async function POST(
   }
 
   const newId = crypto.randomUUID();
+  // The AI build prompt is stored in `instruction` so a SCHEDULED re-render reproduces
+  // this email — chart included — with fresh data (run-schedules.mts reads it). Optional.
+  const aiPrompt =
+    typeof body?.ai_prompt === "string" && body.ai_prompt.trim() ? body.ai_prompt.trim() : null;
   const admin = createServiceRoleClient(); // deliverables has no owner INSERT policy — write via service-role
   const { error } = await admin.from("deliverables").insert({
     id: newId,
@@ -51,6 +55,7 @@ export async function POST(
     user_id: user.id,
     template: "block-canvas",
     doc: parsed.data,
+    instruction: aiPrompt,
     data_as_of: body?.data_as_of ?? new Date().toISOString(),
     narrative: EMPTY_NARRATIVE,
     items_snapshot: [],
@@ -93,11 +98,17 @@ export async function PATCH(
     .single();
   if (!owned) return NextResponse.json({ error: "not found" }, { status: 404 });
 
+  // Keep the saved build prompt fresh too (only overwrite when one is supplied, so a
+  // doc-only PATCH never wipes it). Powers the scheduled re-render's chart fidelity.
+  const patch: Record<string, unknown> = {
+    doc: parsed.data,
+    data_as_of: new Date().toISOString(),
+  };
+  if (typeof body?.ai_prompt === "string" && body.ai_prompt.trim()) {
+    patch.instruction = body.ai_prompt.trim();
+  }
   const admin = createServiceRoleClient();
-  const { error } = await admin
-    .from("deliverables")
-    .update({ doc: parsed.data, data_as_of: new Date().toISOString() })
-    .eq("id", body.deliverable_id);
+  const { error } = await admin.from("deliverables").update(patch).eq("id", body.deliverable_id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

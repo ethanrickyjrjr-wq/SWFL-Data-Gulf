@@ -104,3 +104,65 @@ describe("deliverableToScheduleRecipe", () => {
     expect(a).toEqual(b);
   });
 });
+
+describe("deliverableToScheduleRecipe — block-canvas (Email Lab EmailDoc) lane", () => {
+  test("a block-canvas deliverable yields a `block-canvas` recipe carrying deliverable_id, NOT a report", () => {
+    const r = deliverableToScheduleRecipe(
+      { id: "deliv-xyz", template: "block-canvas", scope_kind: "zip", scope_value: "33901" },
+      weekly(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.command.template_id).toBe("block-canvas");
+    expect(r.command.deliverable_id).toBe("deliv-xyz");
+    expect(r.command.cadence).toBe("weekly");
+    expect(r.command.day_of_week).toBe(1);
+    expect(r.command.send_hour_et).toBe(8);
+    expect(r.command.audience_slug).toBe("buyers");
+  });
+
+  test("a WHOLE-REGION block-canvas (null scope) is allowed — no ZIP forced, scope omitted", () => {
+    const r = deliverableToScheduleRecipe(
+      { id: "deliv-region", template: "block-canvas", scope_kind: null, scope_value: null },
+      weekly(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.command.deliverable_id).toBe("deliv-region");
+    expect(r.command.scope_kind).toBeUndefined();
+    expect(r.command.scope_value).toBeUndefined();
+  });
+
+  test("a PLACE-scoped block-canvas is allowed (the report path would have rejected it)", () => {
+    const r = deliverableToScheduleRecipe(
+      {
+        id: "deliv-place",
+        template: "block-canvas",
+        scope_kind: "place",
+        scope_value: "Cape Coral",
+      },
+      weekly(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.command.scope_kind).toBe("place");
+    // validateToolInput normalizes scope_value to the canonical lowercase+trimmed form.
+    expect(r.command.scope_value).toBe("cape coral");
+  });
+
+  test("a block-canvas deliverable with no id is rejected (cannot link the schedule)", () => {
+    const r = deliverableToScheduleRecipe(
+      { template: "block-canvas", scope_kind: "zip", scope_value: "33901" },
+      weekly(),
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  test("invalid cadence is still rejected on the block-canvas path (weekly without day_of_week)", () => {
+    const r = deliverableToScheduleRecipe(
+      { id: "deliv-x", template: "block-canvas", scope_kind: null, scope_value: null },
+      { cadence: "weekly", send_hour_et: 8 } as ScheduleChoices,
+    );
+    expect(r.ok).toBe(false);
+  });
+});

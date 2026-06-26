@@ -16,6 +16,8 @@ interface Props {
   scope?: { kind: string; value: string } | null;
   initialDoc?: EmailDoc | null;
   deliverableId?: string | null;
+  /** Re-open the Schedule modal on mount (set when returning from contacts-upload). */
+  autoOpenSchedule?: boolean;
   projectPhotos?: { storage_path: string; signedUrl: string; caption?: string }[];
 }
 
@@ -28,6 +30,7 @@ export function ProjectEmailLabClient({
   scope,
   initialDoc,
   deliverableId,
+  autoOpenSchedule,
   projectPhotos,
 }: Props) {
   const [savedId, setSavedId] = useState<string | null>(deliverableId ?? null);
@@ -40,21 +43,24 @@ export function ProjectEmailLabClient({
   const effectiveScope = scope ?? { kind: "region", value: "swfl" };
   const aiPrompt = `Market spotlight email for ${scopeLabel} — fill in realistic market context and agent copy`;
 
-  async function handleSave(doc: EmailDoc): Promise<string | void> {
+  // `ai_prompt` is persisted as the deliverable's build prompt so a SCHEDULED re-render
+  // reproduces this exact email — chart included — with fresh data each occurrence (the
+  // chart selector keys off the prompt; without it a scheduled send loses the chart).
+  async function handleSave(doc: EmailDoc, aiPrompt: string): Promise<string | void> {
     setSaving(true);
     try {
       if (savedId) {
         await fetch(`/api/projects/${projectId}/materials`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deliverable_id: savedId, doc }),
+          body: JSON.stringify({ deliverable_id: savedId, doc, ai_prompt: aiPrompt }),
         });
         return savedId;
       }
       const res = await fetch(`/api/projects/${projectId}/materials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ doc }),
+        body: JSON.stringify({ doc, ai_prompt: aiPrompt }),
       });
       if (res.ok) {
         const { id } = await res.json();
@@ -77,6 +83,7 @@ export function ProjectEmailLabClient({
       aiPlaceholder={`e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`}
       onSave={handleSave}
       saving={saving}
+      autoOpenSchedule={autoOpenSchedule}
       deliverableId={savedId}
       projectId={projectId}
       projectPhotos={projectPhotos}

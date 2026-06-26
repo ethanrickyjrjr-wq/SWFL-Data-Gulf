@@ -234,4 +234,58 @@ describe("createOrTouchSchedule", () => {
     expect(r.created).toBe(true);
     expect(store.inserts).toHaveLength(1);
   });
+
+  test("a block-canvas command persists deliverable_id on the inserted row", async () => {
+    const { db, store } = makeDb([]);
+    const r = await createOrTouchSchedule(db, {
+      userId: "u1",
+      projectId: "p1",
+      command: cmd({
+        template_id: "block-canvas",
+        deliverable_id: "deliv-A",
+        scope_kind: undefined,
+        scope_value: undefined,
+      }),
+      nowIso: NOW,
+      nextRunAtIso: NEXT,
+    });
+    expect(r.created).toBe(true);
+    expect(store.inserts[0]).toMatchObject({
+      template_id: "block-canvas",
+      deliverable_id: "deliv-A",
+    });
+  });
+
+  test("two block-canvas schedules with DIFFERENT deliverable_ids don't collide → both insert", async () => {
+    // Seed an existing block-canvas schedule for design A; a create for design B (same
+    // cadence/scope) must NOT reactivate A's row — deliverable_id is part of the recipe
+    // signature, so they're distinct. Without it B would silently send A's email.
+    const { db, store } = makeDb([
+      baseRow({
+        id: 11,
+        template_id: "block-canvas",
+        scope_kind: null,
+        scope_value: null,
+        audience_slug: null,
+        // @ts-expect-error — SeedRow predates the column; the fake matches on row[col] ?? null.
+        deliverable_id: "deliv-A",
+      }),
+    ]);
+    const r = await createOrTouchSchedule(db, {
+      userId: "u1",
+      projectId: "p1",
+      command: cmd({
+        template_id: "block-canvas",
+        deliverable_id: "deliv-B",
+        scope_kind: undefined,
+        scope_value: undefined,
+        audience_slug: undefined,
+      }),
+      nowIso: NOW,
+      nextRunAtIso: NEXT,
+    });
+    expect(r.created).toBe(true);
+    expect(store.inserts).toHaveLength(1);
+    expect(store.inserts[0]).toMatchObject({ deliverable_id: "deliv-B" });
+  });
 });

@@ -53,11 +53,28 @@ import type { BrandTheme } from "@/lib/deliverable/brand-theme";
 import { fetchDigestData } from "./fetch-digest-data.mts";
 import { buildSubjectLine } from "./build-digest.mts";
 import { buildHeroTokens } from "./hero-tokens.mts";
+// ── Block-canvas EmailDoc lane (N6) ──
+// A schedule linked to a saved Email Lab design re-RENDERS that exact doc with fresh
+// lake data + fresh AI commentary + a fresh chart each occurrence. buildContentDoc is
+// the ONE Email Lab build root (the route is a thin wrapper over it); EmailDocEmail is
+// the ONE renderer the Lab preview + the blast route use. Both import cleanly under Bun
+// (smoke-verified). No re-fork.
+import { buildContentDoc } from "@/lib/email/build-doc";
+import { EmailDocEmail } from "@/lib/email/blocks/EmailDocRenderer";
+import type { EmailDoc } from "@/lib/email/doc/types";
+import { buildEmailDocOccurrence, type EmailDocDeliverable } from "@/lib/email/emaildoc-occurrence";
+import { render } from "@react-email/render";
 
 const DRY_RUN = process.env.DRY_RUN === "true";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 const CLAIM_LIMIT = 50;
 const DEFAULT_TEMPLATE: TemplateSlug = "hero";
+
+// Model tier for a scheduled EmailDoc re-render. "quality" → Sonnet (the tier the
+// end-to-end build was proven on): a recurring customer-facing email warrants the better
+// content fill. One Anthropic call + chart build + lake fetch per occurrence per tenant —
+// fine for v1 volume (CLAIM_LIMIT=50 / 15-min cron). Tune here if cost dictates.
+const SCHEDULE_BUILD_MODE = "quality";
 
 // Per-broadcast-POST timeout. The batch is processed sequentially, so ONE hung
 // request would stall the entire 15-min cron — we cap each POST and surface a
@@ -272,6 +289,46 @@ async function main(): Promise<void> {
     return brand;
   }
 
+  // ── Block-canvas EmailDoc occurrence (N6) ──
+  // The decision core lives in `lib/email/emaildoc-occurrence.ts` (load → re-build with
+  // fresh data → render → subject; injected + unit-tested). Here we build the REAL seams:
+  // the DB read, the ONE Email Lab build root (buildContentDoc), and the ONE EmailDoc
+  // renderer (EmailDocEmail). buildContentDoc fills content only — never restyles — so the
+  // doc's own brand (globalStyle + header/footer) is preserved; the AI-fill falling
+  // through (applied:false) ships the saved doc unchanged rather than a blank send.
+  async function emailDocOccurrence(deliverableId: string) {
+    return buildEmailDocOccurrence(deliverableId, {
+      async loadDeliverable(id): Promise<EmailDocDeliverable | null> {
+        const { data, error } = await db
+          .from("deliverables")
+          .select("doc, instruction, scope_kind, scope_value, template")
+          .eq("id", id)
+          .maybeSingle();
+        if (error) {
+          console.error(
+            `[run-schedules] EmailDoc load failed (deliverable=${id}): ${error.message}`,
+          );
+          return null;
+        }
+        if (!data) return null;
+        return {
+          doc: data.doc,
+          instruction: (data.instruction as string | null) ?? null,
+          scope_kind: (data.scope_kind as string | null) ?? null,
+          scope_value: (data.scope_value as string | null) ?? null,
+          template: data.template as string,
+        };
+      },
+      async buildDoc({ prompt, rawDoc, scope }) {
+        const result = await buildContentDoc({ prompt, rawDoc, scope, mode: SCHEDULE_BUILD_MODE });
+        // The re-filled doc on success, else the ORIGINAL valid doc (applied:false).
+        return (result.payload?.doc as EmailDoc | undefined) ?? rawDoc;
+      },
+      renderDoc: (doc) => render(EmailDocEmail({ doc })),
+      log: (line) => console.log(line),
+    });
+  }
+
   const deps: ProcessDeps = {
     dryRun: DRY_RUN,
     platform: PLATFORM,
@@ -300,6 +357,15 @@ async function main(): Promise<void> {
     },
 
     async buildContent(row: ScheduleRow) {
+      // Block-canvas EmailDoc lane (N6) — checked FIRST: a row carrying a deliverable_id
+      // + template_id="block-canvas" re-renders the user's saved Email Lab design with
+      // fresh data this occurrence. Returns finished HTML (emailDocHtml) the core sends
+      // verbatim. A null fall-through (deliverable gone / invalid) drops to the digest.
+      if (row.template_id === "block-canvas" && row.deliverable_id) {
+        const built = await emailDocOccurrence(row.deliverable_id);
+        if (built) return built;
+        return digestContent();
+      }
       // Grounded "report" lane (Task 3) — checked FIRST: a report row IS scoped
       // (scope_kind="zip"), so this must precede the scoped path below. Fresh ZIP
       // report via the spine; the model rides to renderHtml. Unassemblable (non-ZIP /

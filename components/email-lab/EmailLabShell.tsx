@@ -30,6 +30,7 @@ import { BlockCanvas } from "./BlockCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { EmailPreviewFrame } from "@/app/p/[id]/EmailPreviewFrame";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
+import { ScheduleSendModal } from "./ScheduleSendModal";
 
 // Legacy templates kept on the preview-only "classic" rail.
 const CLASSIC_TEMPLATES = [
@@ -147,8 +148,13 @@ export interface EmailLabShellProps {
   /** When provided, renders a Save button that calls back with the current doc.
    *  Returns the saved deliverable id (so "Send to contacts" can blast the row
    *  that was just persisted); legacy callers may still return void. */
-  onSave?: (doc: EmailDoc) => Promise<string | void>;
+  /** Persist the doc. `aiPrompt` is the live AI instruction (stored as the deliverable's
+   *  build prompt so a SCHEDULED re-render reproduces this email — including its chart —
+   *  with fresh data). Returns the saved deliverable id on first save. */
+  onSave?: (doc: EmailDoc, aiPrompt: string) => Promise<string | void>;
   saving?: boolean;
+  /** Re-open the Schedule modal on mount (returning from the contacts-upload detour). */
+  autoOpenSchedule?: boolean;
   /** The saved block-canvas deliverable id (the `?did`), when this lab is editing
    *  a persisted material — enables "Send to contacts". */
   deliverableId?: string | null;
@@ -168,6 +174,7 @@ export function EmailLabShell({
   aiPlaceholder = "Describe the email — the AI fills real SWFL numbers into the layout…",
   onSave,
   saving,
+  autoOpenSchedule,
   deliverableId,
   projectId,
   projectPhotos,
@@ -184,6 +191,11 @@ export function EmailLabShell({
   const [exporting, setExporting] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [sendId, setSendId] = useState<string | null>(null);
+  // Auto-open the Schedule modal when returning from the contacts-upload detour
+  // (?schedule=1 → autoOpenSchedule) and a saved deliverable is loaded. Set during
+  // render from props — no effect, so no set-state-in-effect.
+  const [scheduleOpen, setScheduleOpen] = useState(Boolean(autoOpenSchedule && deliverableId));
+  const [scheduleId, setScheduleId] = useState<string | null>(deliverableId ?? null);
   const [mode, setMode] = useState<"canvas" | "classic">("canvas");
   const [classicHtml, setClassicHtml] = useState("");
   const [classicId, setClassicId] = useState<string | null>(null);
@@ -433,12 +445,27 @@ export function EmailLabShell({
   async function openSend() {
     let id = deliverableId ?? null;
     if (onSave) {
-      const saved = await onSave(doc);
+      const saved = await onSave(doc, aiPrompt);
       if (typeof saved === "string") id = saved;
     }
     if (id) {
       setSendId(id);
       setSendOpen(true);
+    }
+  }
+
+  // Schedule a recurring send: persist the live doc first (the schedule links to the
+  // saved block-canvas deliverable by id, so the worker re-renders THIS design fresh
+  // each occurrence), then open the cadence/audience flow.
+  async function openSchedule() {
+    let id = deliverableId ?? null;
+    if (onSave) {
+      const saved = await onSave(doc, aiPrompt);
+      if (typeof saved === "string") id = saved;
+    }
+    if (id) {
+      setScheduleId(id);
+      setScheduleOpen(true);
     }
   }
 
@@ -738,10 +765,20 @@ export function EmailLabShell({
                 Send to contacts
               </button>
             )}
+            {onSave && projectId && (
+              <button
+                type="button"
+                onClick={openSchedule}
+                disabled={busy || saving}
+                className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/20 disabled:opacity-40"
+              >
+                Schedule
+              </button>
+            )}
             {onSave && (
               <button
                 type="button"
-                onClick={() => onSave(doc)}
+                onClick={() => onSave(doc, aiPrompt)}
                 disabled={saving}
                 className="px-3 py-1.5 text-sm rounded-lg bg-gulf-teal/20 text-gulf-teal border border-gulf-teal/30 hover:bg-gulf-teal/30 disabled:opacity-40 transition-colors focus-visible:ring-2 focus-visible:ring-gulf-teal/40"
               >
@@ -780,6 +817,16 @@ export function EmailLabShell({
           deliverableId={sendId}
           isBlockCanvas
           onClose={() => setSendOpen(false)}
+        />
+      )}
+
+      {scheduleOpen && scheduleId && projectId && (
+        <ScheduleSendModal
+          deliverableId={scheduleId}
+          projectId={projectId}
+          scopeKind={scope?.kind ?? null}
+          scopeValue={scope?.value ?? null}
+          onClose={() => setScheduleOpen(false)}
         />
       )}
     </div>

@@ -44,6 +44,8 @@ export default async function ProjectEmailLabPage({
   const sp = await searchParams;
   const did = sp.did ?? null;
   const seedId = sp.seed ?? null;
+  // Returning from the contacts-upload detour re-opens the schedule modal (?schedule=1).
+  const autoOpenSchedule = sp.schedule === "1";
 
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -154,6 +156,7 @@ export default async function ProjectEmailLabPage({
       }
       initialDoc={initialDoc}
       deliverableId={did}
+      autoOpenSchedule={autoOpenSchedule}
       projectPhotos={projectPhotos}
     />
   );

@@ -113,6 +113,12 @@ export interface ParsedCommand {
   scope_kind?: "zip" | "place" | "county";
   scope_value?: string;
   topic?: string;
+  // ── Block-canvas EmailDoc link (optional, additive). ──
+  // Set ONLY by the build→schedule bridge for a "block-canvas" deliverable; the NL
+  // parser never emits it (it's absent from SCHEDULE_COMMAND_TOOL). When present, the
+  // cron worker RE-RENDERS this saved Email Lab design with fresh data each occurrence
+  // (template_id is "block-canvas") instead of running the grounded-report lane.
+  deliverable_id?: string;
 }
 
 /** System prompt: the 6 intents, the ET-hour rule, and the tenant's existing rows
@@ -157,6 +163,10 @@ const rawSchema = z.object({
   scope_kind: z.enum(["zip", "place", "county"]).optional(),
   scope_value: z.string().trim().min(1).toLowerCase().optional(),
   topic: z.string().trim().min(1).toLowerCase().optional(),
+  // Block-canvas EmailDoc link — set only by the build→schedule bridge, never the NL
+  // parser. Without it here, zod's strip mode would DROP it before validate, severing
+  // the schedule from its saved design (and from the nonce, which signs the command).
+  deliverable_id: z.string().trim().min(1).optional(),
 });
 
 export type ValidationResult =
@@ -286,7 +296,13 @@ export function summarizeCommand(c: ParsedCommand, opts?: { scopeConsumerLive?: 
     return "";
   };
   const to = c.audience_slug ? ` to "${c.audience_slug}"` : "";
-  const tmpl = c.template_id ? ` using template "${c.template_id}"` : "";
+  // A block-canvas schedule re-renders the user's saved Email Lab design — say that,
+  // never leak the internal "block-canvas" template id into the confirmation copy.
+  const tmpl = c.deliverable_id
+    ? " from your saved email design"
+    : c.template_id
+      ? ` using template "${c.template_id}"`
+      : "";
   // Active scope clause ONLY when the consumer is live — e.g. ` about flood for "cape coral"`.
   const about = scopeLive && c.topic ? ` about ${c.topic}` : "";
   const forPlace = scopeLive && c.scope_value ? ` for "${c.scope_value}"` : "";

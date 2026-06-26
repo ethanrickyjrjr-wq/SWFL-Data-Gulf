@@ -17,6 +17,9 @@ import {
   type AudienceLookup,
 } from "../scheduler.ts";
 import type { GroundedReportModel } from "../grounded-report.ts";
+import { buildEmailDocOccurrence } from "../emaildoc-occurrence.ts";
+import { defaultDoc } from "../doc/default-docs.ts";
+import type { EmailDoc } from "../doc/types.ts";
 
 // ---------------------------------------------------------------------------
 // Fixtures + a recording-mock dep factory
@@ -47,6 +50,7 @@ interface Recorded {
   recordSent: { userId: string; n: number }[];
   rearms: { id: number; next: string | null }[];
   logs: string[];
+  renderHtmlCalls: number;
 }
 
 function makeDeps(opts: {
@@ -61,8 +65,10 @@ function makeDeps(opts: {
   computeNext?: (spec: CadenceSpec, fromUtc: Date) => Date | null;
   // optional idempotency claim; absent → no claim (back-compat default)
   claimSend?: (row: ScheduleRow, fromUtc: Date) => Promise<{ proceed: boolean }>;
+  // block-canvas EmailDoc lane: buildContent returns finished HTML, renderHtml is skipped
+  emailDocHtml?: string;
 }): { deps: ProcessDeps; rec: Recorded } {
-  const rec: Recorded = { posts: [], recordSent: [], rearms: [], logs: [] };
+  const rec: Recorded = { posts: [], recordSent: [], rearms: [], logs: [], renderHtmlCalls: 0 };
 
   const deps: ProcessDeps = {
     dryRun: opts.dryRun ?? false,
@@ -90,9 +96,12 @@ function makeDeps(opts: {
     },
     async buildContent() {
       if (opts.throwIn === "buildContent") throw new Error("boom-content");
-      return { subject: "Test Subject", body: "Hello body" };
+      return opts.emailDocHtml !== undefined
+        ? { subject: "Test Subject", body: "", emailDocHtml: opts.emailDocHtml }
+        : { subject: "Test Subject", body: "Hello body" };
     },
     async renderHtml() {
+      rec.renderHtmlCalls += 1;
       if (opts.throwIn === "renderHtml") throw new Error("boom-render");
       // render-template lane produces HTML WITHOUT the unsubscribe token
       return "<html><body><p>Hello body</p></body></html>";
@@ -112,6 +121,83 @@ function makeDeps(opts: {
 
   return { deps, rec };
 }
+
+// ---------------------------------------------------------------------------
+// Block-canvas EmailDoc lane: pre-rendered HTML short-circuits renderHtml
+// ---------------------------------------------------------------------------
+
+describe("processSchedule — block-canvas EmailDoc lane", () => {
+  test("uses buildContent's emailDocHtml verbatim, SKIPS renderHtml, still injects the unsubscribe token", async () => {
+    const designHtml = "<html><body><h1>My saved design</h1><p>Fresh data here</p></body></html>";
+    const { deps, rec } = makeDeps({ emailDocHtml: designHtml });
+    const row = makeRow({ template_id: "block-canvas", deliverable_id: "deliv-A" });
+
+    const outcome = await processSchedule(row, deps, FIXED_NOW);
+
+    assert.equal(outcome.kind, "sent");
+    // renderHtml (the template lane) must NOT have run — the EmailDoc owns its HTML.
+    assert.equal(rec.renderHtmlCalls, 0, "renderHtml skipped for the EmailDoc lane");
+    assert.equal(rec.posts.length, 1);
+    const sentHtml = rec.posts[0].html;
+    assert.ok(sentHtml.includes("My saved design"), "the saved design HTML is sent");
+    // CAN-SPAM floor still enforced: the broadcast-required token is injected.
+    assert.ok(sentHtml.includes(UNSUBSCRIBE_TOKEN), "unsubscribe token injected onto the design");
+  });
+
+  test("FULL SEAM: dispatch → real buildEmailDocOccurrence → short-circuit → postBroadcast carries the re-rendered design", async () => {
+    // Wires deps.buildContent EXACTLY as the runner does: a block-canvas row delegates to
+    // the REAL buildEmailDocOccurrence with only the three leaf I/O ops mocked (DB load,
+    // build, render). Proves the live path end-to-end short of prod: the dispatch branch,
+    // the lane, the emailDocHtml short-circuit, and the segment send — all real code.
+    const { deps, rec } = makeDeps({});
+    const fresh: EmailDoc = {
+      globalStyle: {
+        primaryColor: "#101820",
+        accentColor: "#ABCDEF", // a marker color only the EmailDoc render would emit
+        fontFamily: "MODERN_SANS",
+        textColor: "#222222",
+        backdropColor: "#F8F8F8",
+      },
+      blocks: [{ id: "s", type: "signal", props: { title: "Seam headline this run" } }],
+    };
+    deps.buildContent = async (row) => {
+      if (row.template_id === "block-canvas" && row.deliverable_id) {
+        const built = await buildEmailDocOccurrence(row.deliverable_id, {
+          loadDeliverable: async () => ({
+            doc: defaultDoc(), // schema-valid input
+            instruction: "Lee County price trend, with a chart.",
+            scope_kind: "county",
+            scope_value: "lee",
+            template: "block-canvas",
+          }),
+          buildDoc: async () => fresh, // stand-in for buildContentDoc's fresh fill
+          renderDoc: async (d) =>
+            `<html><body><div style="color:${d.globalStyle.accentColor}">${(d.blocks[0].props as { title?: string }).title}</div></body></html>`,
+        });
+        if (built) return built;
+      }
+      return { subject: "fallback", body: "should-not-be-used" };
+    };
+
+    const row = makeRow({ template_id: "block-canvas", deliverable_id: "deliv-seam" });
+    const outcome = await processSchedule(row, deps, FIXED_NOW);
+
+    assert.equal(outcome.kind, "sent");
+    assert.equal(rec.renderHtmlCalls, 0, "template renderHtml skipped — the lane owns the HTML");
+    const html = rec.posts[0].html;
+    assert.ok(html.includes("Seam headline this run"), "the re-rendered design's content is sent");
+    assert.ok(
+      html.includes("#ABCDEF"),
+      "the doc's OWN brand accent is present → an EmailDoc render, not a digest",
+    );
+    assert.ok(html.includes(UNSUBSCRIBE_TOKEN), "unsubscribe token injected");
+    assert.equal(
+      rec.posts[0].subject,
+      "Seam headline this run",
+      "subject derived from the fresh doc",
+    );
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Pure helpers

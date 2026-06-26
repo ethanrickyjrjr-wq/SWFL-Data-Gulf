@@ -65,6 +65,10 @@ export interface ScheduleRow {
   scope_kind?: string | null;
   scope_value?: string | null;
   topic?: string | null;
+  // Block-canvas EmailDoc link (optional + nullable). When set (with
+  // template_id="block-canvas"), the runner re-renders the saved Email Lab design with
+  // fresh data this occurrence instead of a template. NULL for every other lane.
+  deliverable_id?: string | null;
 }
 
 /** The minimal audience lookup the worker needs (subset of `email_audiences`). */
@@ -142,6 +146,11 @@ export interface ProcessDeps {
     /** Single-value template tokens (the data-driven digest hero fills these from
      *  the lake; absent → the template's neutral defaults). */
     tokens?: Record<string, string | number>;
+    /** Block-canvas EmailDoc lane ONLY: fully-rendered email HTML (the saved design
+     *  re-built with fresh data this occurrence). When present, the core uses it
+     *  verbatim and SKIPS renderHtml — there is no template to fill. Absent for every
+     *  template/digest/report lane. */
+    emailDocHtml?: string;
   }>;
 
   /**
@@ -338,8 +347,10 @@ export async function processSchedule(
     // 4. CONTENT + RENDER + token injection. `model` (Task 3) is the grounded report
     //    assembled for a "report" schedule; `tokens` are the data-driven digest-hero
     //    values. The core just threads both to renderHtml.
-    const { subject, body, chart, model, tokens } = await deps.buildContent(row);
-    const rendered = await deps.renderHtml(row, body, chart, model, tokens);
+    const { subject, body, chart, model, tokens, emailDocHtml } = await deps.buildContent(row);
+    // Block-canvas EmailDoc lane returns finished HTML (its saved design re-rendered with
+    // fresh data) — use it verbatim. Every other lane fills a template via renderHtml.
+    const rendered = emailDocHtml ?? (await deps.renderHtml(row, body, chart, model, tokens));
     const html = ensureUnsubscribeToken(rendered);
 
     // 5. PAYLOAD.

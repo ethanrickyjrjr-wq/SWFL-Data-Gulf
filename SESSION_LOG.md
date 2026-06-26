@@ -1,3 +1,19 @@
+## 2026-06-26 (main) — feat(email-schedule): N6 SHIPPED end-to-end through the real UI — build an email → schedule it → it re-renders fresh (PROVEN live in the browser + DB)
+
+Took the N6 backend wire (logged earlier this session) all the way to a working user flow, driven + proven in a real browser on the live dev app. CORRECTS the earlier N6 entry's stale numbers: final gates are **`bun test lib/email` 583/0**, `tsc` 0 errors, `eslint` clean, **`next build` GREEN**.
+
+NEW this entry (UI + flow on top of the wire):
+- **"Schedule" button in the Email Lab** (`components/email-lab/EmailLabShell.tsx` + new `ScheduleSendModal.tsx`): saves the doc, opens a modal that reuses the SAME `SendWeeklyHandle` propose→confirm flow as /p. Because the saved doc is `block-canvas`, `fromDeliverable` links the schedule to THIS design (deliverable_id).
+- **Return-nav fix** (`app/p/[id]/SendWeeklyHandle.tsx` `returnTo` prop → `?next=`; `page.tsx`/`ProjectEmailLabClient`/`EmailLabShell` read `?schedule=1` → auto-reopen the modal): "Upload contacts → Back to your work" used to dump the user on `/project`; now it returns to the Lab with the schedule modal reopened. Bug the operator hit live.
+- **Project page now leads with the design** (`components/project/MaterialsHub.tsx` reorder: materials ABOVE the create rail when any exist; `MaterialRow.tsx` renders a `block-canvas` material as a BRANDED PREVIEW CARD — masthead + hero headline in the doc's own colors + Open/Send/Schedule actions — instead of a one-line text row). Operator: "design should be at the TOP, not tiny at the bottom."
+- **Prompt persisted** to `deliverables.instruction` (materials route + shell→client thread) so the scheduled re-render reproduces the chart.
+
+LIVE PROOF (operator's account, in-browser): built the SWFL Prices email → Schedule → picked the "me" audience (added via the real contacts upload+sync API: 1 contact, Resend segment `3e99…`) → weekly Mon 7am → Confirm. The confirm card read "…from your saved email design" (the block-canvas recipe). DB now holds `email_schedules` id=6: status active, weekly, day_of_week=1, send_hour_et=7, audience_slug="me", **template_id="block-canvas", deliverable_id=51405c9f-…**, next_run_at=2026-06-29 11:00Z. The cron worker will re-render that design fresh next Monday.
+
+KNOWN GAPS (handoff): (1) `/api/email/send-status` doesn't surface block-canvas schedules (returns `schedule:null`) — the project/Lab won't show a "you have a schedule" banner for them yet (schedule IS active + will fire). (2) The preview card is a lightweight brand+headline render, not a pixel thumbnail of the whole email. Handoff: `docs/handoff/2026-06-26-emaildoc-scheduler-SHIPPED.md`. Staged EXPLICIT paths only (the `app/r/*`, `refinery/*`, `fixtures/real-estate-brands` files in the tree belong to a parallel chart/housing session — never `-A`).
+
+---
+
 ## 2026-06-26 (main) — feat(charts): route ranked-delta into chat + email (the producer couldn't reach it before)
 
 Closed the gap from the auto-pick push: ranked-delta was LIVE on /p but never reached chat/email, because the chart producer (`buildChartForQuestion`, used by chat AND the email builder) routes via `resolveReachTargets` (only 6 brains, none with a value+delta column) and `routeChart` sends "home value" to the zhvi TREND. New `routeRankedDelta()` Layer-0 in `lib/route-chart.ts`: a value+delta TOPIC (home value / investor yield / market heat) + a RANKING intent (by zip / which / rank / highest / compare) routes to that brain → `bindRankedDeltaSpec`. Trend questions still get zhvi-area (verified: "home values trending" → zhvi; "rank ZIPs by home value" → ranked-delta). So a scheduled email prompt like "rank SWFL ZIPs by home value with YoY" now renders ranked bars + published-% chips.

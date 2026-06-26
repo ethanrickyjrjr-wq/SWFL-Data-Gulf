@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
 
     const recipe = deliverableToScheduleRecipe(
       {
+        id: deliverableId, // block-canvas EmailDoc lane links the schedule to THIS doc
         template: deliv.template as string,
         scope_kind: (deliv.scope_kind as string | null) ?? null,
         scope_value: (deliv.scope_value as string | null) ?? null,

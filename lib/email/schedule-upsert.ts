@@ -96,6 +96,7 @@ export async function createOrTouchSchedule(
       scope_kind: command.scope_kind ?? null,
       scope_value: command.scope_value ?? null,
       topic: command.topic ?? null,
+      deliverable_id: command.deliverable_id ?? null,
       next_run_at: nextRunAtIso,
       updated_at: nowIso,
     })
