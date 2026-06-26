@@ -19,6 +19,11 @@ import {
   hostEmailPng,
   type TrendPoint,
 } from "@/lib/email/chart-image";
+import { rankedDeltaSvg } from "@/lib/charts/svg/ranked-delta";
+import { donutShareSvg } from "@/lib/charts/svg/donut-share";
+import { dotPlotSvg } from "@/lib/charts/svg/dot-plot";
+import { sparkGridSvg } from "@/lib/charts/svg/spark-grid";
+import { lineBandSvg } from "@/lib/charts/svg/line-band";
 
 /** Map a ChartBlock value_format to the chart-image value root's ValueFormat. */
 function mapValueFormat(vf?: string): ValueFormat {
@@ -78,30 +83,55 @@ export async function chartSpecToEmailImage(
   try {
     const title = spec.title || "Market data";
     const vf = mapValueFormat(spec.value_format);
+    const baseOpts = {
+      title,
+      accent,
+      valueFormat: vf,
+      source: spec.source?.citation ?? undefined,
+      asOf: spec.asOf ?? undefined,
+    };
+    const o = (spec.options ?? {}) as Record<string, unknown>;
     let svg: string | null = null;
 
-    const timeSeries = spec.frameId === "zhvi-area" || spec.chart_type === "area";
-    if (timeSeries) {
+    // Registry frames → their shared SVG builder (ONE renderer, web frame + email PNG).
+    switch (spec.frameId) {
+      case "ranked-delta":
+        if (Array.isArray(o.items) && o.items.length)
+          svg = rankedDeltaSvg(o.items as Parameters<typeof rankedDeltaSvg>[0], baseOpts);
+        break;
+      case "donut-share":
+        if (Array.isArray(o.segments) && o.segments.length)
+          svg = donutShareSvg(o.segments as Parameters<typeof donutShareSvg>[0], {
+            ...baseOpts,
+            total: typeof o.total === "number" ? o.total : undefined,
+            unit: typeof o.unit === "string" ? o.unit : undefined,
+          });
+        break;
+      case "dot-plot":
+        if (Array.isArray(o.data) && o.data.length)
+          svg = dotPlotSvg(o.data as Parameters<typeof dotPlotSvg>[0], {
+            ...baseOpts,
+            referenceLabel: typeof o.referenceLabel === "string" ? o.referenceLabel : undefined,
+          });
+        break;
+      case "spark-grid":
+        if (Array.isArray(o.cards) && o.cards.length)
+          svg = sparkGridSvg(o.cards as Parameters<typeof sparkGridSvg>[0], baseOpts);
+        break;
+      case "line-band":
+        if (Array.isArray(o.data) && o.data.length)
+          svg = lineBandSvg(o.data as Parameters<typeof lineBandSvg>[0], baseOpts);
+        break;
+    }
+
+    // Fallbacks: zhvi-area / any options.data time series, then bar-table.
+    if (!svg && (spec.frameId === "zhvi-area" || spec.chart_type === "area")) {
       const pts = specToTrendPoints(spec);
-      if (pts)
-        svg = trendChartSvg(pts.slice(-18), {
-          title,
-          accent,
-          valueFormat: vf,
-          source: spec.source?.citation ?? undefined,
-          asOf: spec.asOf ?? undefined,
-        });
+      if (pts) svg = trendChartSvg(pts.slice(-18), baseOpts);
     }
     if (!svg) {
       const bars = specToBars(spec);
-      if (bars)
-        svg = barChartSvg(bars, {
-          title,
-          accent,
-          valueFormat: vf,
-          source: spec.source?.citation ?? undefined,
-          asOf: spec.asOf ?? undefined,
-        });
+      if (bars) svg = barChartSvg(bars, baseOpts);
     }
     if (!svg) return null;
 

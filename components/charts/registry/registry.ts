@@ -8,6 +8,11 @@ import { CompositionFrame } from "./frames/CompositionFrame";
 import { ZGaugeFrame } from "./frames/ZGaugeFrame";
 import { SeasonalRadialFrame } from "./frames/SeasonalRadialFrame";
 import { TimelineFrame } from "./frames/TimelineFrame";
+import { RankedDeltaFrame } from "./frames/RankedDeltaFrame";
+import { DonutShareFrame } from "./frames/DonutShareFrame";
+import { DotPlotFrame } from "./frames/DotPlotFrame";
+import { SparkGridFrame } from "./frames/SparkGridFrame";
+import { LineBandFrame } from "./frames/LineBandFrame";
 
 export interface FrameDef {
   /** Renders a `ChartSpec`. Every registry component takes exactly `{ spec }`. */
@@ -75,6 +80,32 @@ export const CHART_REGISTRY: Record<string, FrameDef> = {
     component: TimelineFrame,
     accepts: ["timeline"],
     label: "Storm Claims Timeline",
+  },
+  // ── Batch 2026-06-26: pure-SVG frames (one builder shared by web + email PNG) ──
+  "ranked-delta": {
+    component: RankedDeltaFrame,
+    accepts: ["ranked-categories"],
+    label: "Ranked with Delta",
+  },
+  "donut-share": {
+    component: DonutShareFrame,
+    accepts: ["composition"],
+    label: "Donut / Share",
+  },
+  "dot-plot": {
+    component: DotPlotFrame,
+    accepts: ["ranked-categories"],
+    label: "Dot Plot / Comparison",
+  },
+  "spark-grid": {
+    component: SparkGridFrame,
+    accepts: ["single-vs-target"],
+    label: "Sparkline KPI Grid",
+  },
+  "line-band": {
+    component: LineBandFrame,
+    accepts: ["time-series"],
+    label: "Line with Confidence Band",
   },
 };
 
