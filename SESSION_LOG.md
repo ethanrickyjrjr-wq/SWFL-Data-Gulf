@@ -1,3 +1,9 @@
+## 2026-06-26 (main) — chore: four-lane system prompt + corridor timestamps + MCP mini-site idea
+
+`route.ts` system prompt updated to four-lane sourcing rule in both `contentPatchSystem` and `legacyTokenSystem` (cascade lake→upload→web→user, never refuse the build). `fixtures/corridor-permits.json` timestamps bumped from 2026-06-09 to 2026-06-25 (corridor rebuild). `TODO/05-mcp-mini-site-idea.md` parked — MCP landing page idea, do not build without go-ahead. Working tree now clean. Next: execute the 35-item plan in `CLAUDE IS STUPID AS FUCK PROBLEMS.md`.
+
+---
+
 ## 2026-06-26 (main) — docs(plan): CLAUDE IS STUPID AS FUCK PROBLEMS.md — 35-item sourced fix plan
 
 Code-verified plan covering every failure from the ~14-hour SNICKLEFRITZ run across 6 sessions. Each item has: the problem, a sourced answer (crawl4ai or live code audit), and a concrete plan task. Key items: A1/A6 PreToolUse blocking hooks (not advisory prints); A3 brand-color fabrication as the canonical A3 failure; C15 seed IDs ≠ template slugs (new `pick-template.ts`); D17 chart renderer reverted (needs rewrite); F27 `blast/route.ts:140` missing `brand` arg (9-hour root cause, verified); G28 chart not wired into email builder (builder explicitly refuses to render one — confirmed in route.ts:96); G29/G30 pre-send brand-color + logo-URL gates + rendered HTML preview; H32 `z.strictObject` on `BlockContentPatchSchema` causing false parse rejections → fix = `z.object` strip mode; H33 ZIP scope extraction from prompt text; H35 model routing (Haiku UI / Sonnet SNICKLEFRITZ). System prompt four-lane fixes already shipped (`1c92328d`). Fan-out blocked until operator approves.
