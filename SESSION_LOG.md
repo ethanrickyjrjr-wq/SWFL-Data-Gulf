@@ -1,3 +1,9 @@
+## 2026-06-26 (main) — docs(plan): H36 date-format violation — 9th time, added to plan
+
+MM/DD/YYYY rule (Rule 5, 4 canonical docs, FMT-1) violated again in Claude's own response text. Code display layer is fixed in 10+ places. Remaining gaps: chart-image.ts (D18, reverted, not shipped) + Claude's prose output (no mechanical hook can catch it). Added H36 to CLAUDE IS STUPID AS FUCK PROBLEMS.md. Total plan items now 36.
+
+---
+
 ## 2026-06-26 (main) — chore: four-lane system prompt + corridor timestamps + MCP mini-site idea
 
 `route.ts` system prompt updated to four-lane sourcing rule in both `contentPatchSystem` and `legacyTokenSystem` (cascade lake→upload→web→user, never refuse the build). `fixtures/corridor-permits.json` timestamps bumped from 2026-06-09 to 2026-06-25 (corridor rebuild). `TODO/05-mcp-mini-site-idea.md` parked — MCP landing page idea, do not build without go-ahead. Working tree now clean. Next: execute the 35-item plan in `CLAUDE IS STUPID AS FUCK PROBLEMS.md`.

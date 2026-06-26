@@ -935,6 +935,51 @@ Dependency: apply H32 first. No point routing to Sonnet if the schema still fals
 
 ---
 
+### H36 — Date format MM/DD/YYYY violated everywhere, constantly, including in Claude's own mouth
+
+**Problem:** Rule 5 in 4 canonical docs (CLAUDE.md, THE-CONTRACT.md, consumption-contract.md,
+rules-of-engagement.mts): "state the as-of date MM/DD/YYYY once, never the raw token."
+Named FMT-1 in the master problem inventory (06/15/2026). Has required fix commits across
+at least 8 separate sessions (06/15, 06/16, 06/22, 06/23, 06/24, 06/25, 06/26/2026).
+Operator has said it at minimum 9 times. 86 matches in the codebase.
+
+**Two distinct failure modes — one mostly fixed, one structural:**
+
+**Mode 1 — App display layer (mostly fixed):** `toISOString().slice(0,10)` was found and
+replaced with `asOfFromToken` / `asOfFromIso` / `lib/format-date.ts` across 10+ surfaces:
+speaker.mts, grounding.ts, conversation-path.ts, social images, FrozenSnapshotNote,
+fetch-brain.ts, MCP server, welcome frames, zip report pages, CRE corridor pages.
+CI guard: `refinery/render/display-leak.test.mts` catches ISO dates in `speak()` output.
+**Remaining gap: `chart-image.ts` — covered by D18, not yet shipped (file was reverted).**
+
+**Mode 2 — Claude's own text output (structural, no mechanical fix exists):**
+Claude uses ISO dates (`2026-06-09`, `2026-06-25`) in its explanations, diff descriptions,
+and responses to you — EVEN WHEN the rule is in CLAUDE.md and THE-CONTRACT.md. The model
+reads the rule, says "understood," and then violates it the next sentence. There is no
+PreToolUse hook that can catch prose output before it reaches you. This is the same
+enforcement gap as the rest of RULE 0 — rules in markdown are prayers.
+
+**Sourced answer:**
+- The code fix exists: `lib/format-date.ts:2` — "the single helper for displaying a raw
+  date string as MM/DD/YYYY." Every new date display surface must import this.
+- The chart fix: `chart-image.ts` D18 plan task (label formatter + `usdFmt`) — not shipped.
+- The prose fix: no mechanical solution. Requires the model to internalize the rule.
+  The closest enforcement is the `check-answer-fix-proof.mjs` hook which already catches
+  ISO dates in grounded AI answers — but it only covers the `/api/assistant` response path,
+  not Claude's conversational text to the operator.
+
+**Plan Task H36:**
+1. **Ship D18** (chart-image.ts date formatter) — this is the only remaining CODE surface
+   with the violation. Everything else is fixed. D18 is already in the plan; it just needs
+   to be executed and NOT reverted this time.
+2. **Any new code surface that displays a date** must use `asOfFromIso()` or
+   `asOfFromToken()` from `lib/project/as-of.ts`. Never `toISOString().slice(0,10)`.
+   Never `new Date().toLocaleDateString()`. One helper, everywhere.
+3. **This plan doc and SESSION_LOG** must use MM/DD/YYYY, not ISO, for any human-readable
+   date reference. This applies to Claude's own text output. No exception.
+
+---
+
 ## EXECUTION ORDER FOR H ITEMS
 
 H32 → H33 → H34 in a single commit (fixes + diagnostic gate).
@@ -966,6 +1011,7 @@ Key corrections vs initial draft:
 - H33 NEW: scope (ZIP) never extracted from prompt text — add `extractZipFromPrompt()` fallback in route
 - H34 NEW: add `EMAIL_LAB_DEBUG=1`-gated diagnostic log so failure mode can be confirmed
 - H35 NEW: model routing — Haiku default for interactive UI, Sonnet opt-in for SNICKLEFRITZ headless runner; `body.model: "sonnet"` from the runner, nothing from the UI
+- H36 NEW: MM/DD/YYYY violated in Claude's own text + chart-image.ts (D18). Rule stated 9+ times across 4 canonical docs + 8 fix-commit sessions. Code display layer fixed in 10+ places; chart-image.ts not shipped (reverted); Claude's prose output has no mechanical enforcement
 - DONE: system prompt four-lane rule changes in `contentPatchSystem` + `legacyTokenSystem` (commit `1c92328d`)
 
 Total plan items: 35 (A1–A10, B11–B12, C13–C16, D17–D22, E23–E26, F27, G28–G31, H32–H35)
