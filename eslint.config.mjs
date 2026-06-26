@@ -20,29 +20,29 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
-    // Claude Code worktrees — each contains its own .next/ build artifacts and
+    // Claude Code worktrees â€” each contains its own .next/ build artifacts and
     // hook scripts that are not authored code; never lint them.
     ".claude/**",
-    // Third-party toolkit — CJS Node scripts; not app code.
+    // Third-party toolkit â€” CJS Node scripts; not app code.
     "awesome-claude-code-toolkit/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Design reference / vendor anime.js examples / beautified bundles —
+    // Design reference / vendor anime.js examples / beautified bundles â€”
     // not shipped code, not authored here, intentionally outside lint scope.
     "app/_design/**",
     "docs/design-reference/**",
-    // /ops is a separate Vercel project with its own toolchain — isolated from
+    // /ops is a separate Vercel project with its own toolchain â€” isolated from
     // the main app's lint/build (see _AUDIT_AND_ROADMAP/ops-build-spec.md).
     "ops/**",
-    // Archived plan docs — historical code snippets, not shipped.
+    // Archived plan docs â€” historical code snippets, not shipped.
     "docs/**/_FINISHED/**",
     "docs/_FINISHED/**",
   ]),
   // Fiverr-delivered viz components use Recharts tooltip prop typing
   // (`any` is the library default) and a setState-in-effect default-select
   // pattern. Both are functional; not worth blocking CI on. Relax these two
-  // rules for the viz folder only — refactor backlog.
+  // rules for the viz folder only â€” refactor backlog.
   {
     files: ["components/viz/**/*.{ts,tsx}"],
     rules: {
@@ -76,7 +76,7 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  // Allowlist: files that still use a hatch (shrinking — KNOWN-DEBT). Overrides the ban above.
+  // Allowlist: files that still use a hatch (shrinking â€” KNOWN-DEBT). Overrides the ban above.
   // Escape glob special characters ([ ]) that appear in Next.js dynamic-route directory names.
   {
     files: allow.map((p) => p.replace(/\[/g, "\\[").replace(/\]/g, "\\]")),

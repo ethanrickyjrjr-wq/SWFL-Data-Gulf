@@ -1,7 +1,7 @@
 // scripts/check-schema-drift.ts
 // Fails if database-generated.types.ts is stale vs the live prod DB.
 // Run:  bun run check:schema-drift
-// CI only � requires DB creds; NOT wired into local pre-push hook.
+// CI only — requires DB creds; NOT wired into local pre-push hook.
 import { readFileSync } from "fs";
 import { execSync } from "child_process";
 
@@ -78,7 +78,7 @@ const freshNorm = prettify(fresh);
 const currentNorm = prettify(current);
 
 if (freshNorm !== currentNorm) {
-  console.error("database-generated.types.ts is STALE vs live prod � run: bun run gen:types");
+  console.error("database-generated.types.ts is STALE vs live prod — run: bun run gen:types");
   process.exit(1);
 } else {
   console.log(
