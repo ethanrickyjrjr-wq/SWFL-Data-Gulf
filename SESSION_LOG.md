@@ -29,6 +29,24 @@ Capstone of the "what's actually updating daily" session. Three fixes already la
 ## 2026-06-26 (main) — fix(daily-rebuild): push brains as the repo owner (PAT) — bot was STRUCTURALLY locked out of main
 
 daily-rebuild has been red for days because the rebuild SUCCEEDS but the "Commit updated brains" push to main is rejected `GH013`: the `main protection` ruleset requires PR + "CI / build" green, and the bot (github-actions[bot] / default GITHUB_TOKEN) is on NOBODY's bypass list — only operator user 276135550 is. First tried adding the GitHub Actions integration (app 15368) to the ruleset bypass; GitHub **422'd** it ("Actor GitHub Actions integration must be part of the ruleset source or owner organization" — impossible on a USER-owned repo). Working fix: `checkout@v6` now uses `token: ${{ secrets.REBUILD_PAT }}` (a fine-grained PAT owned by the operator, Contents:write, repo-scoped) so the push authenticates AS the operator → inherits the existing user bypass (proven: my safe-push as the operator prints "Bypassed rule violations"). `REBUILD_PAT` set in gh secrets from `.env.local` (never printed). Next: dispatch daily-rebuild to PROVE brains land on main. Caveat: PAT expires (≤1yr) → a calendar rotation, not a daily surprise; a GitHub App (auto-minted tokens, no rotation, App *is* a valid bypass actor) is the zero-rotation alternative if wanted.
+## 2026-06-26 (main) — feat(types): typed Supabase client — "real column, wrong table" is now a COMPILE error, not a silent 404
+
+Root cause of the ai-material 404 (and a class of others): the Supabase client was untyped, so `.select("scope_kind")` on a table without that column shipped as a silent runtime failure. Threaded a live-DB-generated `Database` type through all four client factories so it's now a `tsc` error.
+
+WHAT LANDED (6 commits, built in worktree wt/typed-client):
+- `gen-supabase-types.ts` generates `database-generated.types.ts` from the LIVE prod DB via information_schema (Docker-free generator; `bun run gen:types`). Repo `.sql` files are stale/unapplied — live DB is the only truth.
+- `database.types.ts` = MergeDeep override (jsonb -> concrete: projects.items -> ProjectItem[], deliverables.doc -> EmailDoc, etc.).
+- `<Database>` threaded through utils/supabase/{server,service-role,client,middleware}.ts.
+- 84 tsc errors -> 0: ~60 routed to TWO documented untyped hatches (createClientUntyped / createServiceRoleClientUntyped) for the data_lake/RPC surface scoped OUT (public-only), each with a KNOWN-DEBT comment; 13 principled jsonb casts; 5 typed PATCH accumulators; real bug fixes. ZERO blanket `as any`.
+- ESLint bans BOTH hatches (import-level; JSON allowlist of the 13 grandfathered files); live-schema drift guard (`bun run check:schema-drift`, prettier-normalized).
+
+PROVEN: `bun run build` GREEN, tsc 0, `bun test` at baseline (3906 pass / 3 pre-existing unrelated fails), lint clean. Reviewed per-task + final whole-branch (READY-WITH-FOLLOWUPS, no Critical).
+
+BUGS SURFACED & DEFERRED (hatched, KNOWN-DEBT): news-crawl projects.lat/lng; buildCollisionRow writes surface/user_action/gate_reason absent on data_readiness_alerts (PGRST204 — also in untyped lib/signals/log-collision.ts); pre-existing int8->uuid String() in data-readiness/route.ts.
+
+NEXT: wire check:schema-drift into CI (DB secret); fix generator (IDENTITY id wrongly Insert-required + empty Functions block .rpc()) then re-gen to retire id? overrides + RPC hatches; extend drift guard to cover database.types.ts overrides; data_lake schema typing (retire hatches incl. lib/reso bare-injected client).
+
+Plan: docs/superpowers/plans/2026-06-26-typed-supabase-client-migration.md
 
 ---
 
