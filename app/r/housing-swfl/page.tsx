@@ -188,18 +188,6 @@ export default async function HousingPage() {
         </section>
       )}
 
-      {/* ── Caveats ── */}
-      {housing.summaryCaveats.length > 0 && (
-        <section className="mt-10">
-          <SectionTitle>Worth knowing</SectionTitle>
-          <ul className="mt-3 list-disc space-y-2 pl-6 text-gray-300">
-            {housing.summaryCaveats.map((c, i) => (
-              <li key={i}>{c}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       <ColorLegend />
 
       <div className="mt-12">

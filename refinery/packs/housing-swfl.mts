@@ -9,10 +9,7 @@ import type {
   BrainOutputDetailRow,
   BrainOutputDetailTable,
 } from "../types/brain-output.mts";
-import {
-  housingSource,
-  type HousingZipRow,
-} from "../sources/housing-source.mts";
+import { housingSource, type HousingZipRow } from "../sources/housing-source.mts";
 
 const BRAIN_ID = "housing-swfl";
 const TOP_N = 3;
@@ -60,21 +57,15 @@ interface DirectionVerdict {
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 
 function median(values: readonly (number | null)[]): number | null {
-  const nums = values.filter(
-    (v): v is number => v !== null && Number.isFinite(v),
-  );
+  const nums = values.filter((v): v is number => v !== null && Number.isFinite(v));
   if (nums.length === 0) return null;
   const sorted = [...nums].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1] + sorted[mid]) / 2
-    : sorted[mid];
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
 // Directional label for a change in the same sign as the metric (rising = good).
-function metricDirection(
-  delta: number | null,
-): "rising" | "falling" | "stable" {
+function metricDirection(delta: number | null): "rising" | "falling" | "stable" {
   if (delta === null) return "stable";
   if (delta > 0.005) return "rising";
   if (delta < -0.005) return "falling";
@@ -82,9 +73,7 @@ function metricDirection(
 }
 
 // DOM moves inversely to market heat: falling DOM = homes selling faster.
-function domTrendDirection(
-  domYoy: number | null,
-): "rising" | "falling" | "stable" {
+function domTrendDirection(domYoy: number | null): "rising" | "falling" | "stable" {
   return metricDirection(domYoy);
 }
 
@@ -103,11 +92,7 @@ export function monthsOfSupply(r: HousingZipRow): number | null {
   if (r.months_of_supply != null && Number.isFinite(r.months_of_supply)) {
     return r.months_of_supply;
   }
-  if (
-    r.inventory == null ||
-    r.homes_sold == null ||
-    r.homes_sold < LOW_SAMPLE_FLOOR
-  ) {
+  if (r.inventory == null || r.homes_sold == null || r.homes_sold < LOW_SAMPLE_FLOOR) {
     return null;
   }
   return (r.inventory * 3) / r.homes_sold;
@@ -118,9 +103,7 @@ export function monthsOfSupply(r: HousingZipRow): number | null {
 // which thin-sample ZIPs distort badly (a 2-sale ZIP reads 30+ months and drags
 // the median). The aggregate is dominated by high-volume ZIPs and is robust to
 // the long tail. All rows with a real sales count contribute to the denominator.
-export function aggregateMonthsOfSupply(
-  rows: readonly HousingZipRow[],
-): number | null {
+export function aggregateMonthsOfSupply(rows: readonly HousingZipRow[]): number | null {
   let inv = 0;
   let sold = 0;
   for (const r of rows) {
@@ -264,9 +247,7 @@ function classifyDirection(snap: HousingSnapshot): DirectionVerdict {
   }
 
   if (snap.zip_count < 10) {
-    caveats.push(
-      `Only ${snap.zip_count} SWFL ZIPs in corpus — regional read is thin.`,
-    );
+    caveats.push(`Only ${snap.zip_count} SWFL ZIPs in corpus — regional read is thin.`);
   }
   if (snap.median_sale_price_yoy === null) {
     caveats.push("Price YoY unavailable for this build period.");
@@ -382,11 +363,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   // 3. Months of supply
   if (snap.months_of_supply !== null) {
     const supplyDir: "rising" | "falling" | "stable" =
-      snap.months_of_supply < 3
-        ? "falling"
-        : snap.months_of_supply > 6
-          ? "rising"
-          : "stable";
+      snap.months_of_supply < 3 ? "falling" : snap.months_of_supply > 6 ? "rising" : "stable";
     key_metrics.push({
       metric: "housing_months_of_supply_swfl",
       value: Number(snap.months_of_supply.toFixed(1)),
@@ -406,8 +383,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: "housing_avg_sale_to_list_swfl",
       value: Number((snap.avg_sale_to_list * 100).toFixed(1)),
       direction: snap.avg_sale_to_list >= 1.0 ? "rising" : "falling",
-      label:
-        "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
+      label: "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
       variable_type: "intensive",
       units: "percent",
       display_format: "percent",
@@ -445,9 +421,6 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
 
   // ── Caveats ──
   const caveats = [...verdict.caveats];
-  caveats.push(
-    "Months of supply is derived (inventory over the trailing 90-day sales pace); Redfin does not publish it at ZIP grain.",
-  );
 
   // ── Conclusion ──
   const priceDisplay = `$${snap.median_sale_price.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
@@ -455,27 +428,17 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     snap.median_sale_price_yoy !== null
       ? ` (${(snap.median_sale_price_yoy * 100).toFixed(1)}% YoY)`
       : "";
-  const domDisplay =
-    snap.median_dom !== null ? `${snap.median_dom.toFixed(0)} days` : "n/a";
+  const domDisplay = snap.median_dom !== null ? `${snap.median_dom.toFixed(0)} days` : "n/a";
   const mosDisplay =
-    snap.months_of_supply !== null
-      ? `${snap.months_of_supply.toFixed(1)} months`
-      : "n/a";
+    snap.months_of_supply !== null ? `${snap.months_of_supply.toFixed(1)} months` : "n/a";
   const stlDisplay =
-    snap.avg_sale_to_list !== null
-      ? `${(snap.avg_sale_to_list * 100).toFixed(1)}%`
-      : "n/a";
+    snap.avg_sale_to_list !== null ? `${(snap.avg_sale_to_list * 100).toFixed(1)}%` : "n/a";
 
   const hottestList =
-    snap.hottest_zips
-      .map((z) => `${z.zip} (${z.dom.toFixed(0)} days)`)
-      .join(", ") || "none";
+    snap.hottest_zips.map((z) => `${z.zip} (${z.dom.toFixed(0)} days)`).join(", ") || "none";
   const priciestList =
     snap.priciest_zips
-      .map(
-        (z) =>
-          `${z.zip} ($${z.price.toLocaleString("en-US", { maximumFractionDigits: 0 })})`,
-      )
+      .map((z) => `${z.zip} ($${z.price.toLocaleString("en-US", { maximumFractionDigits: 0 })})`)
       .join(", ") || "none";
 
   const conclusion = [
@@ -507,13 +470,9 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
               : Number((r.median_sale_price_yoy * 100).toFixed(1)),
           median_dom: r.median_dom,
           median_dom_yoy_days:
-            r.median_dom_yoy === null
-              ? null
-              : Number(r.median_dom_yoy.toFixed(1)),
+            r.median_dom_yoy === null ? null : Number(r.median_dom_yoy.toFixed(1)),
           avg_sale_to_list_pct:
-            r.avg_sale_to_list === null
-              ? null
-              : Number((r.avg_sale_to_list * 100).toFixed(1)),
+            r.avg_sale_to_list === null ? null : Number((r.avg_sale_to_list * 100).toFixed(1)),
           months_of_supply: mos === null ? null : Number(mos.toFixed(1)),
           homes_sold: r.homes_sold,
           inventory: r.inventory,

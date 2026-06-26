@@ -263,6 +263,9 @@ export function sanitizeProse(text: string): string {
   // report page links the phrase / cites the source) — here we just delete the
   // bracket so the chat answer reads clean if/when that voice is wired in.
   out = out.replace(/\s*\[(?:internal|web)-\d+\]/gi, "");
+  // Convert raw ISO dates (YYYY-MM-DD) to MM/DD/YYYY — Rule 5: state the
+  // as-of date in MM/DD/YYYY form, never the raw ISO token.
+  out = out.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, "$2/$3/$1");
   return out
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\s+([.,;:])/g, "$1")

@@ -63,6 +63,16 @@
       "file": "coldwell-banker.json"
     },
     {
+      "slug": "berkshire-hathaway-hs",
+      "company_name": "Berkshire Hathaway HomeServices Florida Realty",
+      "type": "national_franchise",
+      "counties": ["Lee", "Collier"],
+      "primary": "#670038",
+      "accent": "#FFFFFF",
+      "confidence": 0.95,
+      "file": "berkshire-hathaway-hs.json"
+    },
+    {
       "slug": "remax",
       "company_name": "RE/MAX",
       "type": "national_franchise",

@@ -239,17 +239,6 @@ export default async function ReportPage({ params }: PageProps) {
         )
       )}
 
-      {display.summaryCaveats.length > 0 && (
-        <section className="mt-10">
-          <SectionTitle>Worth knowing</SectionTitle>
-          <ul className="mt-3 list-disc space-y-2 pl-6 text-gray-300">
-            {display.summaryCaveats.map((c, i) => (
-              <li key={i}>{c}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {hasDetail && <SourcesGate sourceCount={display.metrics.length} />}
 
       <ColorLegend />

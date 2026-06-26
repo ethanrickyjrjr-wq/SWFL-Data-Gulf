@@ -25,3 +25,12 @@ test("sanitizeProse leaves clean prose untouched", () => {
   const clean = "Median home value rose across Naples and Bonita Springs.";
   expect(sanitizeProse(clean)).toBe(clean);
 });
+
+test("sanitizeProse converts ISO dates to MM/DD/YYYY", () => {
+  expect(sanitizeProse("reads mixed at 2026-01-01 across 125 ZIPs")).toBe(
+    "reads mixed at 01/01/2026 across 125 ZIPs",
+  );
+  expect(sanitizeProse("latest period = 2026-03-01.")).toBe("latest period = 03/01/2026.");
+  // Freshness tokens (SWFL-YYYYMMDD format) must NOT be converted — no hyphens.
+  expect(sanitizeProse("token SWFL-20260603")).toBe("token SWFL-20260603");
+});
