@@ -38,6 +38,10 @@ export interface RankedDeltaOpts {
   title: string;
   accent: string; // brand accent hex — the ranked bar fill
   valueFormat?: ValueFormat;
+  /** Format for the delta chip — defaults to `valueFormat`. A YoY % change on a USD
+   *  bar passes "pct" so the SOURCE's published rate renders verbatim ("▼ 9.6%"),
+   *  never a back-solved dollar amount that exists in no source. */
+  deltaFormat?: ValueFormat;
   source?: string;
   asOf?: string;
   width?: number;
@@ -96,7 +100,9 @@ export function rankedDeltaSvg(items: RankedDeltaItem[], opts: RankedDeltaOpts):
       const arrow = d > 0 ? "▲" : d < 0 ? "▼" : "→";
       const txt = d > 0 ? UP_TEXT : d < 0 ? DOWN_TEXT : FLAT_TEXT;
       const bg = d > 0 ? UP_BG : d < 0 ? DOWN_BG : FLAT_BG;
-      const chipLabel = `${arrow} ${formatAxisTick(fmt, Math.abs(d))}`;
+      // The arrow carries the sign, so strip the formatter's leading "+" (pct).
+      const dfmt = opts.deltaFormat ?? fmt;
+      const chipLabel = `${arrow} ${formatAxisTick(dfmt, Math.abs(d)).replace(/^\+/, "")}`;
       parts.push(
         `<rect x="${chipX}" y="${cy + 4}" width="${chipW}" height="18" rx="9" fill="${bg}"/>`,
         `<text x="${chipX + chipW / 2}" y="${cy + 17}" text-anchor="middle" font-family="Arial" font-size="10" font-weight="bold" fill="${txt}">${esc(chipLabel)}</text>`,

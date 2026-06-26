@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { bindRankedDeltaSpec } from "./ranked-delta-bind";
+import { chartSpecToEmailSvg } from "../email/spec-to-png";
 import {
   findRankedDeltaPair,
   isTimeSeriesTable,
@@ -171,24 +172,23 @@ describe("findRankedDeltaPair", () => {
 });
 
 describe("bindRankedDeltaSpec", () => {
-  test("binds a ranked-delta spec: USD value, YoY% delta → absolute $ change, ranked desc", () => {
+  test("binds a USD value + the source's PUBLISHED YoY % verbatim (NOT a back-solved $)", () => {
     const spec = bindRankedDeltaSpec(output([zhviTable]));
     expect(spec).not.toBeNull();
     expect(spec!.frameId).toBe("ranked-delta");
     expect(spec!.asOf).toBe("2026-04-30");
     expect(spec!.value_format).toBe("usd");
-    expect(spec!.options!.value_format).toBe("usd"); // web frame == email PNG scale
+    expect(spec!.options!.value_format).toBe("usd"); // bar/value scale (web == email PNG)
+    expect(spec!.options!.delta_format).toBe("pct"); // chip = published %, no $ recompute
     expect(spec!.source?.citation).toBe("Example provenance citation");
 
     const items = spec!.options!.items as { label: string; value: number; delta?: number }[];
     // ranked descending by value
     expect(items.map((i) => i.label)).toEqual(["33907", "33903", "33901"]);
-    // the -9.61% YoY on $264,506 → implied prior 264506/0.9039 ≈ 292,627 → ≈ -28,121
-    const z01 = items.find((i) => i.label === "33901")!;
-    expect(z01.delta).toBeLessThan(0);
-    expect(z01.delta!).toBeCloseTo(264506 - 264506 / (1 - 9.61 / 100), 0);
-    // a positive YoY → a positive (gain) delta
-    expect(items.find((i) => i.label === "33907")!.delta!).toBeGreaterThan(0);
+    // the delta is the source's value_yoy_pct VERBATIM — a figure that exists in the
+    // brain — never a dollar amount that exists in no source.
+    expect(items.find((i) => i.label === "33901")!.delta).toBe(-9.61);
+    expect(items.find((i) => i.label === "33907")!.delta).toBe(2.5);
   });
 
   test("a percent VALUE keeps its delta as points (no $ conversion)", () => {
@@ -208,8 +208,9 @@ describe("bindRankedDeltaSpec", () => {
     expect(spec).not.toBeNull();
     expect(spec!.value_format).toBe("percent");
     expect(spec!.options!.value_format).toBe("pct");
+    expect(spec!.options!.delta_format).toBe("pct");
     const items = spec!.options!.items as { label: string; delta?: number }[];
-    // -2 stays -2 (points), not converted through the percent-of-percent formula
+    // -2 stays -2 (the published point change), verbatim
     expect(items.find((i) => i.label === "A")!.delta).toBe(-2);
   });
 
@@ -246,5 +247,21 @@ describe("bindRankedDeltaSpec", () => {
 
   test("no refined_at → null (cannot stamp an as-of)", () => {
     expect(bindRankedDeltaSpec(output([zhviTable], ""))).toBeNull();
+  });
+});
+
+describe("email dispatch — chartSpecToEmailSvg executes the frame→builder routing", () => {
+  test("a bound ranked-delta spec rasterizes with the PUBLISHED % chip, not a $ delta", () => {
+    const spec = bindRankedDeltaSpec(output([zhviTable]))!;
+    const svg = chartSpecToEmailSvg(spec, "#1BB8C9");
+    expect(svg).not.toBeNull();
+    // The chip carries the source's published YoY % (─9.6% / +2.5%), formatted as a
+    // percent — NEVER a dollar amount the source never published.
+    expect(svg!).toContain("9.6%");
+    expect(svg!).toContain("2.5%");
+    // The bar/value column stays in the value's own unit (USD).
+    expect(svg!).toContain("$265k");
+    // and the chip text is not a dollar-formatted delta
+    expect(svg!).not.toContain("▼ $");
   });
 });

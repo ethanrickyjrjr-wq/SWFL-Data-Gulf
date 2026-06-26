@@ -73,13 +73,10 @@ export interface EmailChartImage {
   caption: string;
 }
 
-/** ChartSpec → hosted PNG image spec for an EmailDoc image block. Returns null for
- *  unsupported frames or on any error — never throws (the build is never blocked). */
-export async function chartSpecToEmailImage(
-  spec: ChartSpec,
-  accent: string,
-  key: string,
-): Promise<EmailChartImage | null> {
+/** ChartSpec → the email-safe SVG STRING (the dispatch only — no I/O). PURE and
+ *  exported so the frame→builder routing is unit-testable without Supabase. Returns
+ *  null for an unsupported frame or on any error (never throws). */
+export function chartSpecToEmailSvg(spec: ChartSpec, accent: string): string | null {
   try {
     const title = spec.title || "Market data";
     const vf = mapValueFormat(spec.value_format);
@@ -97,7 +94,13 @@ export async function chartSpecToEmailImage(
     switch (spec.frameId) {
       case "ranked-delta":
         if (Array.isArray(o.items) && o.items.length)
-          svg = rankedDeltaSvg(o.items as Parameters<typeof rankedDeltaSvg>[0], baseOpts);
+          svg = rankedDeltaSvg(o.items as Parameters<typeof rankedDeltaSvg>[0], {
+            ...baseOpts,
+            // The chip renders the SOURCE's published change verbatim (a YoY % stays
+            // a %), never a value re-derived into a different unit.
+            deltaFormat:
+              typeof o.delta_format === "string" ? (o.delta_format as ValueFormat) : undefined,
+          });
         break;
       case "donut-share":
         if (Array.isArray(o.segments) && o.segments.length)
@@ -133,8 +136,23 @@ export async function chartSpecToEmailImage(
       const bars = specToBars(spec);
       if (bars) svg = barChartSvg(bars, baseOpts);
     }
-    if (!svg) return null;
+    return svg;
+  } catch {
+    return null;
+  }
+}
 
+/** ChartSpec → hosted PNG image spec for an EmailDoc image block. Returns null for
+ *  unsupported frames or on any error — never throws (the build is never blocked). */
+export async function chartSpecToEmailImage(
+  spec: ChartSpec,
+  accent: string,
+  key: string,
+): Promise<EmailChartImage | null> {
+  const svg = chartSpecToEmailSvg(spec, accent);
+  if (!svg) return null;
+  try {
+    const title = spec.title || "Market data";
     const png = svgToPng(svg);
     const url = await hostEmailPng(key, png);
     const asOfPart = spec.asOf ? ` · as of ${spec.asOf}` : "";

@@ -23,6 +23,7 @@ const VALUE_FORMATS: ReadonlySet<string> = new Set(["usd", "rent", "count", "pct
 export interface RankedDeltaData {
   items: RankedDeltaItem[];
   valueFormat: ValueFormat | undefined;
+  deltaFormat: ValueFormat | undefined;
   accent: string | undefined;
 }
 
@@ -50,14 +51,19 @@ export function extractRankedDeltaData(spec: ChartSpec): RankedDeltaData {
   const valueFormat =
     vfCandidate && VALUE_FORMATS.has(vfCandidate) ? (vfCandidate as ValueFormat) : undefined;
 
+  const deltaFormat =
+    typeof options.delta_format === "string" && VALUE_FORMATS.has(options.delta_format)
+      ? (options.delta_format as ValueFormat)
+      : undefined;
+
   const accent =
     typeof options.accent === "string" ? options.accent : (spec.theme?.accent ?? undefined);
 
-  return { items, valueFormat, accent };
+  return { items, valueFormat, deltaFormat, accent };
 }
 
 export function RankedDeltaFrame({ spec }: { spec: ChartSpec }) {
-  const { items, valueFormat, accent } = extractRankedDeltaData(spec);
+  const { items, valueFormat, deltaFormat, accent } = extractRankedDeltaData(spec);
 
   if (items.length === 0) {
     return (
@@ -71,6 +77,7 @@ export function RankedDeltaFrame({ spec }: { spec: ChartSpec }) {
     title: spec.title ?? "",
     accent: accent ?? "#e05c2e",
     valueFormat,
+    deltaFormat,
     source: spec.source?.citation ?? undefined,
     asOf: spec.asOf ?? undefined,
   });
@@ -78,11 +85,5 @@ export function RankedDeltaFrame({ spec }: { spec: ChartSpec }) {
   // The builder emits a self-contained, sanitized SVG string (every data label
   // escaped via esc(); no <script>/<style>). Rendering it inline keeps the web
   // frame pixel-identical to the rasterized email PNG — one renderer, two surfaces.
-  return (
-    <div
-      style={{ width: "100%", maxWidth: 600 }}
-       
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
-  );
+  return <div style={{ width: "100%", maxWidth: 600 }} dangerouslySetInnerHTML={{ __html: svg }} />;
 }

@@ -59,13 +59,16 @@ export function numericQualifyingColumns(
     .filter(({ numericRowCount }) => numericRowCount >= MIN_POINTS);
 }
 
-/** Column id/label signals a period-over-period CHANGE (a delta), not a level —
- *  YoY / Y/Y / MoM / M/M / change / delta / growth / chg. The signal that a column
- *  can pair with a value column as the ranked-delta chip. */
-const DELTA_COLUMN_RE = /(yoy|y[_/ ]?y|mom|m[_/ ]?m|change|delta|growth|\bchg\b|_yy\b|_mm\b)/i;
+/** Whole tokens (after splitting on non-alphanumerics) that mark a column as a
+ *  period-over-period CHANGE — a delta, not a level. EXACT-token match, so a stray
+ *  substring ("momentum" ⊃ "mom", "exchange" ⊃ "change") never misfires. */
+const DELTA_TOKENS = new Set(["yoy", "yy", "mom", "mm", "chg", "change", "delta", "growth"]);
 
 export function isDeltaColumn(col: { id: string; label?: string }): boolean {
-  return DELTA_COLUMN_RE.test(col.id) || (col.label ? DELTA_COLUMN_RE.test(col.label) : false);
+  return `${col.id} ${col.label ?? ""}`
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .some((t) => DELTA_TOKENS.has(t));
 }
 
 /** Stem tokens (>= 4 chars) of a column id/label — the join key that pairs a value

@@ -18,10 +18,7 @@
 //
 // PURE: no I/O, no Date.now, no randomness. `asOf` is the brain's own refined_at.
 
-import {
-  findRankedDeltaPair,
-  type RankedDeltaPair,
-} from "../../refinery/lib/chart-from-metrics.mts";
+import { findRankedDeltaPair } from "../../refinery/lib/chart-from-metrics.mts";
 import type {
   BrainOutput,
   BrainOutputMetricDisplayFormat,
@@ -63,10 +60,6 @@ function cellNum(v: number | string | boolean | null | undefined): number | null
   return Number.isFinite(n) ? n : null;
 }
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
 /** Human header for a detail_table grain, e.g. "zip" → "ZIP", "county" → "County". */
 function titleizeGrain(grain: string): string {
   const g = (grain ?? "").trim();
@@ -83,23 +76,6 @@ function sourceOf(src: BrainOutputMetricSource | undefined): ChartSpec["source"]
 
 const MIN_ROWS = 3; // a ranked chart needs >= 3 bars to be worth drawing
 const MAX_ROWS = 8; // the ranked-delta SVG builder caps at 8
-
-/** Convert a per-row delta to the value's OWN unit. A percent delta on a
- *  non-percent value → the implied absolute change (deterministic algebra on two
- *  audited numbers — `value - value/(1+pct/100)` — NOT an inference). Same-unit and
- *  percent-on-percent deltas pass through verbatim. */
-function deltaInValueUnit(
-  value: number,
-  dRaw: number,
-  pair: RankedDeltaPair,
-  blockIsPercent: boolean,
-): number {
-  if (pair.deltaIsPercent && !blockIsPercent) {
-    const prior = value / (1 + dRaw / 100);
-    return Number.isFinite(prior) ? round2(value - prior) : dRaw;
-  }
-  return dRaw;
-}
 
 /**
  * Bind a BrainOutput to a ranked-delta ChartSpec, or null when no detail_table
@@ -119,14 +95,17 @@ export function bindRankedDeltaSpec(
     if (!valCol) continue;
     const vf = vfOf(valCol.display_format);
 
+    // The chip shows the SOURCE's published change VERBATIM — a YoY % stays a % (its
+    // own format), never a value back-solved into another unit (that $ exists in no
+    // source; data-protocol rule 4: read rates as written, never recompute).
+    const deltaFrame: "usd" | "pct" | "count" | "index" = pair.deltaIsPercent ? "pct" : vf.frame;
+
     const items: RankedDeltaItem[] = [];
     for (const r of t.rows) {
       const value = cellNum(r.cells[pair.valueColId]);
       if (value === null) continue;
       const dRaw = cellNum(r.cells[pair.deltaColId]);
-      const delta =
-        dRaw === null ? undefined : deltaInValueUnit(value, dRaw, pair, vf.block === "percent");
-      items.push({ label: r.label || r.key, value, delta });
+      items.push({ label: r.label || r.key, value, delta: dRaw ?? undefined });
     }
     if (items.length < MIN_ROWS) continue;
 
@@ -145,9 +124,10 @@ export function bindRankedDeltaSpec(
       asOf,
       source: sourceOf(t.source),
       frameId: "ranked-delta",
-      // ranked-delta frame reads options.value_format (snake); the email bridge
-      // derives its format from spec.value_format → both land on the same scale.
-      options: { items: top, value_format: vf.frame },
+      // value_format (snake) → the bar/value scale; delta_format → the chip scale,
+      // so a USD bar can carry a verbatim "% YoY" chip. Both surfaces (web frame +
+      // email bridge) read these same keys → web == PNG.
+      options: { items: top, value_format: vf.frame, delta_format: deltaFrame },
     };
   }
   return null;

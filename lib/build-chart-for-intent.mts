@@ -190,6 +190,33 @@ export function summarizeChartForGrounding(chart: ChartSpec): string {
       `\nThese are the ONLY home-value figures you may state; for any in-between month, say "see the chart" rather than name a number. Never invent a home-value figure.`
     );
   }
+  // ranked-delta carries a per-row CHANGE (the source's published delta) in
+  // options.items that the flat rows don't — ground the model on BOTH the level and
+  // that change so a "describe this chart" follow-up states the verbatim figure
+  // instead of omitting or inventing it. A "pct" delta_format prints the published %.
+  if (chart.frameId === "ranked-delta") {
+    const items = (chart.options?.items ?? []) as Array<{
+      label: string;
+      value: number;
+      delta?: number;
+    }>;
+    if (items.length > 0) {
+      const isPct = chart.options?.delta_format === "pct";
+      const lines = items.slice(0, 12).map((i) => {
+        const d =
+          typeof i.delta === "number"
+            ? `, ${i.delta >= 0 ? "+" : ""}${i.delta}${isPct ? "%" : ""} change`
+            : "";
+        return `- ${i.label}: ${i.value}${d}`;
+      });
+      const through = chart.asOf ? ` Data through ${chart.asOf}.` : "";
+      return (
+        `${chart.title} — the chart now on screen.${through}${src}\n` +
+        lines.join("\n") +
+        `\nState ONLY these figures (each level and its change); never invent one not listed here.`
+      );
+    }
+  }
   if (Array.isArray(chart.rows) && chart.rows.length > 0) {
     const lines = chart.rows.slice(0, 12).map((r) => `- ${r[0]}: ${r[1]}`);
     const through = chart.asOf ? ` Data through ${chart.asOf}.` : "";
