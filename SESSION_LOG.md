@@ -1,3 +1,15 @@
+## 2026-06-26 (main) — fan-out: 6 isolated test-first fixes + adversarial review (5 shipped local, 3 modules ready to wire; NOT pushed)
+
+Structure + fan-out + review, per operator. STRUCTURE: `DELIVERABLES.md` (`2f8ce3ed`) — findable index of the whole deliverable system (the TWO render systems, every surface→file, the single roots; resolves "how is this not listed / in the same files"). FAN-OUT: 6 fixes built in isolated worktrees, each TDD (red→green), then a 7th adversarial agent reviewed all six (verdict: all REAL, none touched the live route). I pulled files from worktrees, re-ran ALL affected suites together on main (126 pass / 0 fail across 10 files incl. full `refinery/render`), committed only green:
+- `f5a0adc4` THREE new tested builder modules (pure, no I/O, NOT yet wired): `lib/email/inject-chart.ts` (chart→EmailDoc block), `model-router.ts` (Haiku/Sonnet/Opus by mode), `gap-fill-pass.ts` (blank → cited fill or `[Need:]`, never invented). 22 tests.
+- `35c2ed19` corridor COUNT stripped from prose — `stripCorridorCount` in the one scrub root `sanitizeProse` (operator decree: never list how many corridors; the old swap kept the tally).
+- `af8df073` social watermark as-of → MM/DD/YYYY via the date root (second backwards-ISO surface, the one the plan wrongly called fixed).
+- `a2aabb58` ZIP-only framing killed — homepage metadata + email README to any-level.
+
+9 commits now ahead of origin/main, NONE pushed (`git push origin HEAD:main` when ready). Still needs operator/supervision: wiring the 3 modules into `app/api/email-lab/ai/route.ts` (can't runtime-prove without a server); the EmailDoc→scheduler connection (N6); F27 brand-required (frozen-vs-live brand decision).
+
+---
+
 ## 2026-06-26 (main) — fix: kill "try rephrasing" + rebuild the email chart to pro (TDD, proven, NOT pushed)
 
 Autonomous session while operator slept — real fixes, test-first, no fake done. Three local commits on `main` (NOT pushed — operator pushes on his word):
