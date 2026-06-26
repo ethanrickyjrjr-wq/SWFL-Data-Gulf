@@ -79,8 +79,13 @@ export async function buildChartForQuestion(
 
   // Layer 2 — generic any-brain bar from the deterministic producer. Walk the
   // routed brains in priority order; the first one with a chartable shape wins.
+  // When no topic keyword matched, fall back to the most universally chartable
+  // brains so "Add a chart" always produces something if data exists for the scope.
+  const CHART_FALLBACKS = ["housing-swfl", "active-listings-swfl", "market-heat-swfl"];
   try {
-    for (const slug of resolveReachTargets(question, "master")) {
+    const topicSlugs = resolveReachTargets(question, "master");
+    const slugs = topicSlugs.length ? topicSlugs : CHART_FALLBACKS;
+    for (const slug of slugs) {
       const { output } = await fetchBrain(slug, { tier: 2, origin });
 
       // Auto-pick upgrade: when this brain's table carries a value column paired
