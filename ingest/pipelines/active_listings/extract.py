@@ -35,7 +35,7 @@ from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig, HTTPCrawlerConfig
 from crawl4ai.async_crawler_strategy import AsyncHTTPCrawlerStrategy
 
-from ingest.lib.crawl_client import Crawl4aiError
+from ingest.lib.crawl_client import Crawl4aiError, _proxy_from_env
 
 # Covers Naples/Fort Myers heavily; the rural pair (Glades/Hendry) returns 0 and is harmless.
 SWFL_COUNTIES: list[str] = ["Collier", "Lee", "Charlotte", "Sarasota", "Glades", "Hendry"]
@@ -122,12 +122,16 @@ async def _fetch_html(url: str) -> str:
     cfg = HTTPCrawlerConfig(
         method="GET", headers={"User-Agent": _UA}, follow_redirects=True, verify_ssl=True
     )
+    run_kwargs: dict = {"cache_mode": CacheMode.BYPASS}
+    _pc = _proxy_from_env()
+    if _pc is not None:
+        run_kwargs["proxy_config"] = _pc
     last = "?"
     for attempt in range(_FETCH_ATTEMPTS):
         try:
             strategy = AsyncHTTPCrawlerStrategy(browser_config=cfg)
             async with AsyncWebCrawler(crawler_strategy=strategy) as crawler:
-                r = await crawler.arun(url=url, config=CrawlerRunConfig(cache_mode=CacheMode.BYPASS))
+                r = await crawler.arun(url=url, config=CrawlerRunConfig(**run_kwargs))
             if getattr(r, "success", False):
                 return r.html or ""
             last = str(getattr(r, "error_message", "?"))

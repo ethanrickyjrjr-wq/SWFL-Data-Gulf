@@ -32,6 +32,10 @@ jobs:
       DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
       # Listings source base URL — kept out of this public repo; injected from the secret.
       LISTINGS_SOURCE_BASE_URL: ${{ secrets.LISTINGS_SOURCE_BASE_URL }}
+      # Residential proxy for WAF bypass (rotating IP). No-op when unset (single-county runner-IP
+      # path is WAF-clear without it; needed for sustained all-county load). Gate 3: set the secret
+      # first, then wire here — both steps must land in the same push.
+      CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
 
     steps:
       - uses: actions/checkout@v6
