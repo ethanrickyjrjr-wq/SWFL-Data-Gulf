@@ -165,6 +165,60 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
   ].join("");
 }
 
+/** Email-safe HORIZONTAL bar chart as a self-contained SVG (resvg-rasterizable) —
+ *  the static-image render of the registry's `bar-table` frame (the shape
+ *  `computeMetricChart` emits for ANY chartable brain). Values formatted through the
+ *  one currency/value root; capped to keep the email height sane. */
+export function barChartSvg(
+  bars: { label: string; value: number }[],
+  opts: {
+    title: string;
+    accent: string;
+    valueFormat?: ValueFormat;
+    source?: string;
+    asOf?: string;
+    width?: number;
+  },
+): string {
+  const W = opts.width ?? 600;
+  const rows = bars.slice(0, 8);
+  const n = rows.length;
+  const padL = 156,
+    padR = 80,
+    padT = 46,
+    padB = 44;
+  const rowH = 28;
+  const H = padT + n * rowH + padB;
+  const fmt: ValueFormat = opts.valueFormat ?? "usd";
+  const trackW = W - padL - padR;
+  const maxV = Math.max(...rows.map((b) => Math.abs(b.value)), 1);
+  const parts: string[] = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
+    `<rect width="${W}" height="${H}" fill="#ffffff"/>`,
+    `<text x="${padL}" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${esc(opts.title)}</text>`,
+  ];
+  rows.forEach((b, i) => {
+    const cy = padT + i * rowH;
+    const w = Math.max(2, Math.round((Math.abs(b.value) / maxV) * trackW));
+    const label = b.label.length > 26 ? `${b.label.slice(0, 25)}…` : b.label;
+    parts.push(
+      `<text x="${padL - 8}" y="${cy + 15}" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">${esc(label)}</text>`,
+      `<rect x="${padL}" y="${cy + 4}" width="${trackW}" height="16" rx="3" fill="${GRID}"/>`,
+      `<rect x="${padL}" y="${cy + 4}" width="${w}" height="16" rx="3" fill="${esc(opts.accent)}"/>`,
+      `<text x="${padL + trackW + 8}" y="${cy + 16}" font-family="Arial" font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, b.value))}</text>`,
+    );
+  });
+  const captionParts: string[] = [];
+  if (opts.source) captionParts.push(opts.source);
+  if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
+  if (captionParts.length)
+    parts.push(
+      `<text x="${padL}" y="${H - 12}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${esc(captionParts.join(" · "))}</text>`,
+    );
+  parts.push(`</svg>`);
+  return parts.join("");
+}
+
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")

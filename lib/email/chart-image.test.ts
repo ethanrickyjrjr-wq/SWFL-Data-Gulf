@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { trendChartSvg } from "./chart-image";
+import { trendChartSvg, barChartSvg } from "./chart-image";
 
 // QUALITY-BAR conformance for the email chart (docs/email-marketing/QUALITY-BAR-data-deliverables.md).
 // These assert the chart reads "pro, not pencil-drawn": gridlines, area fill, multiple
@@ -59,4 +59,26 @@ test("renders a source · as-of caption with MM/DD/YYYY", () => {
   });
   expect(svg).toContain("Redfin");
   expect(svg).toContain("06/26/2026");
+});
+
+test("barChartSvg draws labeled bars with values via the one currency root", () => {
+  const svg = barChartSvg(
+    [
+      { label: "Median sale price", value: 485000 },
+      { label: "Active inventory", value: 1820 },
+    ],
+    {
+      title: "Lee County key metrics",
+      accent: "#1BB8C9",
+      valueFormat: "usd",
+      source: "cre-swfl",
+      asOf: "2026-05-31",
+    },
+  );
+  expect(svg).toContain("Lee County key metrics");
+  expect(svg).toContain("Median sale price");
+  expect(svg).toContain("$485k"); // millions/k branch, not $485000
+  const rects = (svg.match(/<rect /g) || []).length;
+  expect(rects).toBeGreaterThanOrEqual(4); // bg + (track+fill) per bar
+  expect(svg).toContain("05/31/2026"); // caption MM/DD/YYYY
 });

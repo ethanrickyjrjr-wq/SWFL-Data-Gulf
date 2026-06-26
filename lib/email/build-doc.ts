@@ -13,8 +13,8 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import { loadMarketFigures, figuresToPromptBlock } from "@/lib/email/market-context";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
-import { buildTrendChartUrl, type TrendPoint } from "@/lib/email/chart-image";
-import { loadMetroTrend } from "@/lib/charts/load-metro-trend";
+import { chartSpecToEmailImage, type EmailChartImage } from "@/lib/email/spec-to-png";
+import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
@@ -54,51 +54,25 @@ export async function fetchLakeContext(scope?: BuildScope): Promise<string> {
   return parts.join("\n\n");
 }
 
-// ── Best-effort market chart (never blocks the build) ────────────────────────
-function cityForScope(scope?: BuildScope): "cape_coral" | "fort_myers" | "naples" {
-  const v = (scope?.value ?? "").toLowerCase();
-  if (v.includes("naples") || v.includes("collier") || v.startsWith("341")) return "naples";
-  if (v.includes("cape")) return "cape_coral";
-  return "fort_myers";
-}
-
-const CITY_LABEL: Record<string, string> = {
-  cape_coral: "Cape Coral",
-  fort_myers: "Fort Myers",
-  naples: "Naples",
-};
-
-/** Render a real ZHVI home-value trend for the scope, host it, and return an image
- *  spec — or null on any miss (no creds / no data / too few points). NEVER throws:
- *  a chart is a bonus, the build is never blocked on it (RULE 0.7). */
-async function buildScopeChart(
+// ── Chart selection — the SHARED root (the same producer chat uses) ──────────
+// buildChartForQuestion picks the chart for the PROMPT — any chartable brain, not a
+// hardcoded ZHVI scope — moat-safe (the LLM never touches a figure). It returns a
+// ChartSpec + the chart's real figures (groundingNote). spec-to-png rasterizes that
+// spec to a hosted PNG for email (the registry's React frames can't run in email).
+// This replaces the old one-city ZHVI fork. NEVER throws — a chart is a bonus.
+async function buildPromptChart(
+  prompt: string,
   doc: EmailDoc,
   scope?: BuildScope,
-): Promise<{ url: string; alt: string; caption: string } | null> {
+): Promise<{ image: EmailChartImage; groundingNote: string } | null> {
   try {
-    const panel = await loadMetroTrend("zhvi_pivoted");
-    if (panel.error || panel.data.length < 3) return null;
-    const city = cityForScope(scope);
-    const points: TrendPoint[] = panel.data
-      .map((r) => ({ label: String(r.month), value: Number((r as Record<string, unknown>)[city]) }))
-      .filter((p) => Number.isFinite(p.value));
-    if (points.length < 3) return null;
-    const trimmed = points.slice(-18); // last ~18 months reads cleanly at 600px
-    const label = CITY_LABEL[city] ?? "Southwest Florida";
-    const asOfPart = panel.asOf ? ` · as of ${panel.asOf}` : "";
-    const url = await buildTrendChartUrl(trimmed, {
-      title: `${label} home value trend`,
-      accent: doc.globalStyle.accentColor || "#3DC9C0",
-      valueFormat: "usd",
-      source: "Zillow ZHVI · SWFL Data Gulf",
-      asOf: panel.asOf,
-      key: `email-charts/zhvi-${city}-${panel.asOf ?? "latest"}.png`,
-    });
-    return {
-      url,
-      alt: `${label} home value trend (monthly, Zillow ZHVI)`,
-      caption: `${label} home value trend — Zillow ZHVI${asOfPart}`,
-    };
+    const question = scope?.value ? `${prompt} (${scope.kind ?? "scope"}: ${scope.value})` : prompt;
+    const cfq = await buildChartForQuestion(question, BASE_URL);
+    if (!cfq?.chart) return null;
+    const accent = doc.globalStyle.accentColor || "#3DC9C0";
+    const key = `email-charts/${cfq.chart.frameId}-${scope?.value ?? "swfl"}-${cfq.chart.asOf ?? "x"}.png`;
+    const image = await chartSpecToEmailImage(cfq.chart, accent, key);
+    return image ? { image, groundingNote: cfq.groundingNote } : null;
   } catch {
     return null;
   }
@@ -215,18 +189,22 @@ export async function buildContentDoc({
   let doc = docParsed.data;
   const model = resolveEmailModel(mode);
 
-  // Lake context + chart in parallel; the chart is best-effort and pre-injected so
-  // the AI captions an already-present chart instead of refusing to make one.
-  const [lakeContext, chart] = await Promise.all([
+  // Lake context + chart in parallel; the chart comes from the SHARED producer
+  // (buildChartForQuestion) and is pre-injected so the AI captions an already-present
+  // chart from its real figures instead of refusing to make one (G28).
+  const [lakeContext, chartRes] = await Promise.all([
     fetchLakeContext(scope),
-    buildScopeChart(doc, scope),
+    buildPromptChart(prompt, doc, scope),
   ]);
-  if (chart) doc = upsertChartBlock(doc, chartImageBlock(chart));
+  if (chartRes) doc = upsertChartBlock(doc, chartImageBlock(chartRes.image));
+  const fullContext = chartRes?.groundingNote
+    ? `${lakeContext}\n\nCHART ON SCREEN (caption it from THESE real figures, never invent):\n${chartRes.groundingNote}`
+    : lakeContext;
 
   const msg = await client.messages.create({
     model,
     max_tokens: MAX_TOKENS,
-    system: contentPatchSystem(lakeContext, !!chart),
+    system: contentPatchSystem(fullContext, !!chartRes),
     messages: [
       {
         role: "user",
@@ -262,5 +240,5 @@ export async function buildContentDoc({
     };
   }
 
-  return { payload: { doc: reparsed.data, applied: true, patch, chart: Boolean(chart) } };
+  return { payload: { doc: reparsed.data, applied: true, patch, chart: Boolean(chartRes) } };
 }
