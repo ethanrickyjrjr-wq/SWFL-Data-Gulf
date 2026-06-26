@@ -201,18 +201,21 @@ export const EmailDocSchema = z.object({
 });
 
 // ── AI content patch ────────────────────────────────────────────────────────
-// Text props ONLY, keyed by block id. `z.strictObject` REJECTS any non-text key
-// (bgColor / color / *Url / logoUrl / photoUrl / companyName / name / globalStyle …)
-// — enforcing "the AI fills content, never restyles, relinks, or restructures"
-// at the schema layer (spec → AI + data contract). The route re-validates the
-// whole doc with EmailDocSchema after applying the patch.
+// Text props ONLY, keyed by block id. `z.object` (strip mode) keeps ONLY the declared
+// content keys; any non-text key (bgColor / color / *Url / logoUrl / photoUrl /
+// companyName / name / globalStyle …) is STRIPPED, not rejected — so the AI still
+// "fills content, never restyles, relinks, or restructures" (style/link/identity keys
+// never survive the parse, proven in schema.test.ts), while an unexpected extra key
+// the model invents (chart_data, items) no longer rejects the WHOLE patch and trips
+// "try rephrasing". The route also re-validates the whole doc with EmailDocSchema after
+// applying the stripped patch.
 
-const StatPatchSchema = z.strictObject({
+const StatPatchSchema = z.object({
   value: z.string().max(24),
   label: z.string().max(60),
 });
 
-export const BlockContentPatchSchema = z.strictObject({
+export const BlockContentPatchSchema = z.object({
   kicker: z.string().max(60).optional(),
   value: z.string().max(24).optional(),
   label: z.string().max(80).optional(),

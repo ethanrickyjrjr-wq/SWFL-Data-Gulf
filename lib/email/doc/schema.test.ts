@@ -210,14 +210,34 @@ test("accepts a text-only content patch keyed by block id", () => {
   expect(r.success).toBe(true);
 });
 
-test("REJECTS a patch that tries to set a color/style key (strictObject)", () => {
-  expect(BlockContentPatchSchema.safeParse({ value: "$1", bgColor: "#000" }).success).toBe(false);
-  expect(BlockContentPatchSchema.safeParse({ prose: "ok", color: "#fff" }).success).toBe(false);
+test("strips an unknown (non-content) key instead of rejecting the whole patch", () => {
+  // Haiku sometimes returns extra keys (chart_data, items, designation). z.strictObject
+  // rejected the WHOLE patch → the route returned "try rephrasing". Strip-mode keeps the
+  // valid content and drops the unknown key. The no-restyle guard still holds because
+  // style/link/identity keys are also stripped here (they are not declared keys), before
+  // applyPatch can ever merge them — proven by the two tests below.
+  const r = BlockContentPatchSchema.safeParse({
+    prose: "Up from last month.",
+    chart_data: [1, 2, 3],
+  });
+  expect(r.success).toBe(true);
+  if (r.success) expect("chart_data" in r.data).toBe(false);
 });
 
-test("REJECTS a patch that tries to set a link/asset/identity key", () => {
-  // url / logoUrl / photoUrl / ctaUrl / companyName / name are user-owned — not AI-writable
+test("STRIPS a color/style key from a patch (no-restyle held by stripping, not rejecting)", () => {
+  const a = BlockContentPatchSchema.safeParse({ value: "$1", bgColor: "#000" });
+  expect(a.success).toBe(true);
+  if (a.success) expect("bgColor" in a.data).toBe(false);
+  const b = BlockContentPatchSchema.safeParse({ prose: "ok", color: "#fff" });
+  expect(b.success).toBe(true);
+  if (b.success) expect("color" in b.data).toBe(false);
+});
+
+test("STRIPS a link/asset/identity key from a patch (user-owned — not AI-writable)", () => {
+  // url / logoUrl / photoUrl / ctaUrl / companyName / name are user-owned — stripped, never applied
   for (const key of ["url", "logoUrl", "photoUrl", "ctaUrl", "companyName", "name"]) {
-    expect(BlockContentPatchSchema.safeParse({ body: "x", [key]: "y" }).success).toBe(false);
+    const r = BlockContentPatchSchema.safeParse({ body: "x", [key]: "y" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(key in r.data).toBe(false);
   }
 });
