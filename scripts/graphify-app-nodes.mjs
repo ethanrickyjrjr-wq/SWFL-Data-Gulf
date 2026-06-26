@@ -242,6 +242,7 @@ function extractLibModules() {
 //   fetches  — any file → api_route   (fetch('/api/…') call)
 //   queries  — api_route/hook/lib_module → table  (.from('tableName'))
 //   writes   — pipeline → table       (cadence_registry dlt_schema_name)
+//   feeds    — pipeline → brain       (PACK_ID in duckdb_pipelines/*/constants.py)
 
 function extractEdges(allNodes) {
   const nodeIds = new Set(allNodes.map((n) => n.id));
@@ -353,6 +354,29 @@ function extractEdges(allNodes) {
       }
     } catch (e) {
       console.warn("  warn: could not parse cadence_registry.yaml:", e.message);
+    }
+  }
+
+  // feeds: pipeline → consuming brain, from PACK_ID in each DuckDB pipeline's
+  // constants.py. Without this, every pipeline node floats unconnected on the
+  // graph even though the brain genuinely consumes it (the data-plane edge layer
+  // previously only had ~2 pipeline→table `writes` edges; parquet pipelines have
+  // no SQL table node to write to). The pipeline NODE name can carry a lane
+  // suffix (zhvi_swfl_duckdb) the code dir (zhvi_swfl) lacks, so resolve by
+  // stripping known suffixes. PACK_ID may be annotated (`PACK_ID: str | None =`).
+  const duckdbDir = join(ROOT, "ingest", "duckdb_pipelines");
+  for (const n of allNodes) {
+    if (n.type !== "pipeline") continue;
+    const base = n.id.replace(/^pipeline:/, "");
+    const candidates = [base, base.replace(/_duckdb$/, ""), base.replace(/_tier2$/, "")];
+    for (const cand of candidates) {
+      const constPath = join(duckdbDir, cand, "constants.py");
+      if (!existsSync(constPath)) continue;
+      const m = readFileSync(constPath, "utf8").match(
+        /^PACK_ID(?:\s*:\s*[^=\n]+)?\s*=\s*["']([^"']+)["']/m,
+      );
+      if (m) addEdge(n.id, `brain:${m[1]}`, "feeds");
+      break; // first matching code dir wins
     }
   }
 
