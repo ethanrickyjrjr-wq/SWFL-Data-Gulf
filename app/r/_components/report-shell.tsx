@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { asOfFromToken } from "@/lib/project/as-of";
 
 /**
  * Shared chrome for every /r/ report read, so all pages render identical
@@ -54,10 +53,10 @@ export function ReportHeader({ title, children }: { title: ReactNode; children?:
   );
 }
 
-/** Logo + brand + freshness token. `children` for extra footer links, `note`
+/** Logo + brand footer. `children` for extra footer links, `note`
  *  for a small disclaimer line (the provenance page uses it). */
 export function ReportFooter({
-  freshnessToken,
+  freshnessToken: _freshnessToken,
   note,
   children,
 }: {
@@ -69,17 +68,7 @@ export function ReportFooter({
     <footer className="mt-12 border-t border-white/10 pt-6 text-sm text-gray-500">
       <div className="flex items-center gap-2">
         <Image src="/logo.png" alt="" width={16} height={16} className="h-4 w-4 rounded" />
-        <span>
-          SWFL Data Gulf
-          {freshnessToken && (
-            <>
-              {" · "}
-              <code className="freshness-token text-xs text-gulf-teal">
-                {asOfFromToken(freshnessToken) ?? freshnessToken}
-              </code>
-            </>
-          )}
-        </span>
+        <span>SWFL Data Gulf</span>
       </div>
       {children && <div className="mt-2">{children}</div>}
       {note && <p className="mt-2 text-xs">{note}</p>}
