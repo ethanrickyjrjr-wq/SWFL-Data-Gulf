@@ -7,6 +7,26 @@
 
 ---
 
+## ✅ FIXED — session 2026-06-26 (committed local, NOT pushed; all test-proven)
+
+The Email Lab builder now produces a **branded, charted email with cited data, end to end** — PROVEN by a real Sonnet build (`tmp/run-build.ts`): *"Lee County median sale price $360,000, down 2.1% YoY"* (cited Redfin 05/31/2026) + a hosted Fort Myers ZHVI chart → rendered HTML + PDF, `applied:true, chart:true`.
+
+- **H32 + parse resilience** — `z.strictObject`→`z.object` strip mode, AND `tryParsePatch` now parses PER BLOCK (clamps `stats` to 3, drops only the unsalvageable block). One over-limit field no longer nukes the whole fill → "try rephrasing" killed. `6bdeaf41` + `471da52c`. *(was the live failure: Sonnet returned 4 stats → whole patch rejected.)*
+- **D17 / D18 / D19 / H36-chart** — chart renderer rebuilt to the QUALITY-BAR (gridlines, area fill, projection band, millions $, MM/YYYY, grain title) via the one currency + date roots. `13bbe3c8`.
+- **G28** — chart WIRED into the builder: a real ZHVI chart is hosted + injected before the AI fill; the "can't render a chart" self-refusal is gone. `471da52c`.
+- **H35** — model routing (Haiku interactive / Sonnet quality / Opus max) via `lib/email/model-router.ts`, wired. `471da52c` + `f5a0adc4`.
+- **H34** — `EMAIL_LAB_DEBUG` raw-response log added (it's what diagnosed the stats bug live). `471da52c`.
+- **Corridor COUNT strip** (operator decree) — `stripCorridorCount` in the one scrub root. `35c2ed19`.
+- **H36 Mode-1 social watermark** — share-image as-of now MM/DD/YYYY (the second backwards-ISO surface the plan wrongly called fixed). `af8df073`.
+- **ZIP-only framing** — homepage metadata + email README to any-level. `a2aabb58`.
+- **Structure** — `DELIVERABLES.md` (findable index) + `lib/email/build-doc.ts` (the ONE build root the route + a script share). `2f8ce3ed` + `471da52c`.
+
+**Built + tested, NOT yet wired:** B11 `lib/email/gap-fill-pass.ts` (needs the `fillExternalPoint` adapter + a call site). `f5a0adc4`.
+
+**Still open (need operator / supervision):** N1 full one-engine (build-doc still uses its own HTTP master fetch, not the shared `lib/fetch-brain`); **N6 EmailDoc → scheduler** (the missing send wire); **F27** brand-everywhere (frozen-vs-live decision); H33 scope-from-prompt; C13/C14/C16 data (history table / daily series).
+
+---
+
 ## VERDICT TALLY
 
 - CONFIRMED (problem real, plan fix sound): A1, A2, A6, A7, A5, A8, A9, A10, C14, C15, D20, D17, D18, D19, H36-chart, G28, H32, H33, H34, H35, F27, E23, E24, E26, G29, G30, B12-keep

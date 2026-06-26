@@ -3,7 +3,8 @@
 > Written 2026-06-26 after crawl4ai research on every item in PROBLEMS.md.
 > Code-verified 2026-06-26 against actual file contents (not memory).
 > Pattern analysis added 2026-06-26 from `SNICKLEFRITZ-DO-THIS.md` (6 sessions, ~14 hours).
-> DO NOT FAN OUT until operator approves.
+>
+> **STATUS 2026-06-26: fanned out + executed.** H32, H34, H35, G28, D17/D18/D19, the corridor-count + social-date + ZIP-copy fixes are SHIPPED (local, not pushed) and the builder now produces a charted, branded, cited email end to end. See the `✅ FIXED` section at the top of `PROBLEMS-SCOPED-AGAINST-CODE.md` for commits + what remains (N1/N6/F27/B11-wire).
 
 ---
 
