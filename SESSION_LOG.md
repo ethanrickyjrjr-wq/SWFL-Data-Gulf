@@ -1,3 +1,9 @@
+## 2026-06-26 (main) — fix(charts): expand fallback to all chartable brains — housing, CRE, rentals, permits, labor, env, tourism, macro
+
+"Add a chart" now walks every brain we hold, not just the 3-slug stub. `CHART_FALLBACKS` in `chart-for-question.ts` expanded to 10 brains so any email topic produces a chart from real data.
+
+---
+
 ## 2026-06-26 (main) — fix(send-status): surface block-canvas schedules (N6 banner gap) + commit all pending working-tree changes
 
 `send-status` route now has a lane-1 block-canvas query: when `deliverableId` is passed, it first looks for a `template_id="block-canvas"` schedule tied to that deliverable (the N6 EmailDoc schedules were invisible — route hardcoded `.eq("template_id","report")`). Falls through to the report lane if none found. `SendWeeklyHandle` updated to pass `deliverableId` in the fetch params (it had the prop but wasn't forwarding it). Also committed all pending working-tree changes from parallel sessions: caveat section removal, ISO date fix in sanitizeProse + test, BHHS brand entry, daily-rebuild REBUILD_PAT fix, Email Lab add-blocks panel + chart-miss logging. tsc 0 errors.

@@ -81,7 +81,18 @@ export async function buildChartForQuestion(
   // routed brains in priority order; the first one with a chartable shape wins.
   // When no topic keyword matched, fall back to the most universally chartable
   // brains so "Add a chart" always produces something if data exists for the scope.
-  const CHART_FALLBACKS = ["housing-swfl", "active-listings-swfl", "market-heat-swfl"];
+  const CHART_FALLBACKS = [
+    "housing-swfl",
+    "active-listings-swfl",
+    "market-heat-swfl",
+    "cre-swfl",
+    "rentals-swfl",
+    "permits-swfl",
+    "labor-demand-swfl",
+    "env-swfl",
+    "tourism-tdt",
+    "macro-swfl",
+  ];
   try {
     const topicSlugs = resolveReachTargets(question, "master");
     const slugs = topicSlugs.length ? topicSlugs : CHART_FALLBACKS;
