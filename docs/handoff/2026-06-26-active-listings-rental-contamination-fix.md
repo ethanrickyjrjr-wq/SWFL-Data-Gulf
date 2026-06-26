@@ -1,5 +1,15 @@
 # Handoff — fix rental contamination in active_listings_residential (tag listing_type)
 
+> **✅ IMPLEMENTED 2026-06-26 — DO NOT re-do this in the active-listings session.** The fix landed
+> (extract.py + distill.py + tests + `migrations/20260626_active_listings_listing_type.sql`) and a
+> full local scrape re-tagged every live listing. **One correction to the plan below:** the
+> `.listing__price-suffix` signal exists ONLY on Stellar-MLS (Sarasota) cards; Naples-MLS (Collier)
+> rental cards omit it entirely, so a **price-floor backstop** (residential < $50k ⇒ rent; land never
+> reclassified) was added alongside the suffix. Result: fresh for-sale homes = 6,502, median asking
+> **$475k** (was a contaminated $315k), DOM 101, min $50k. Open follow-up (separate concern): the
+> shared view `active_listings_residential_zip_stats` still filters neither `listing_type` nor
+> `scraped_at`, so consumers (incl. the live active-listings-swfl brain) need that to read clean.
+
 **Date:** 2026-06-26
 **For:** the session that owns active-listings ingest (`ingest/pipelines/active_listings/`)
 **Owner of this finding:** housing-daily-layer session (consumer side; blocked on this)

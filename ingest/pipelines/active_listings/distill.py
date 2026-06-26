@@ -24,6 +24,12 @@ _RE_BATHS = re.compile(r"([\d.]+)\s*Baths?", re.I)
 _RE_ACRES = re.compile(r"([\d.,]+)\s*Acres?", re.I)
 _RE_SQFT = re.compile(r"([\d,]+)\s*SqFt", re.I)
 _RE_DOM = re.compile(r"([\d,]+)\s*Days?\s+on\s+Market", re.I)
+# A per-period token in the card's price-suffix span marks a RENTAL (lease) listing.
+_RE_RENT_SUFFIX = re.compile(r"\bmo\b|month|week|day|season|year|annual", re.I)
+# Backstop floor for no-suffix rentals (Naples-MLS cards omit the suffix span). Below this, a
+# residential listing in this feed is a lease, not a sale — confirmed live: every sub-$50k
+# residential card sampled was a monthly/seasonal rental; the cheapest real for-sale home is $50k+.
+_RENT_PRICE_FLOOR = 50000
 
 
 @lru_cache(maxsize=1)
@@ -99,7 +105,10 @@ def current_row_count() -> int:
 
 
 def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Validate + type-cast raw active residential listing rows. Drops rows missing mls_id or zip_code (can't place / key)."""
+    """Validate + type-cast raw active residential listing rows. Drops rows missing mls_id or
+    zip_code (can't place / key) and broken placeholder cards. Classifies listing_type (sale vs
+    rent) from the card's price-suffix span so MONTHLY RENTALS never contaminate the for-sale
+    list_price column — the recurring bug where a $1,200/mo lease read as a $1,200 "home"."""
     out = []
     for raw in rows:
         mls_id = (raw.get("mls_id") or "").strip()
@@ -108,11 +117,35 @@ def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         details = raw.get("details") or ""
         beds = _int_from(_RE_BEDS, details)
+        list_price = _num(raw.get("list_price"))
+        # Broken placeholder cards ("$18"/"$19" with no detail string) are not real listings — they
+        # shipped the absurd min(list_price)=$18 in the contaminated feed. Drop before classifying.
+        if not details and (list_price is None or list_price < 1000):
+            continue
+        property_type = "land" if (beds is None and "land" in details.lower()) else "residential"
+        # PRIMARY rent/sale signal: the site renders <span class="listing__price-suffix"> ("/ month",
+        # "/ week", ...) ONLY on lease listings; for-sale cards have no suffix. Confirmed live on the
+        # cards 2026-06-26 — but ONLY Stellar-MLS (Sarasota) rental cards carry it.
+        suffix = (raw.get("price_suffix") or "").strip()
+        listing_type = "rent" if (suffix and _RE_RENT_SUFFIX.search(suffix)) else "sale"
+        # BACKSTOP: Naples-MLS (Collier) rental cards omit the suffix span — byte-identical to a sale
+        # card, so price is the only card-visible signal left. A residential listing below the sale
+        # floor is a lease. Land is never reclassified (a cheap lot is a real for-sale parcel). A
+        # small residual of $50k+/season luxury rentals stays mislabeled — immaterial to the for-sale
+        # median, and the authoritative fix (detail-page "Rental Price:" label) is skipped to keep the
+        # index scrape light (no per-listing detail fetch).
+        if (
+            listing_type == "sale"
+            and property_type == "residential"
+            and list_price is not None
+            and list_price < _RENT_PRICE_FLOOR
+        ):
+            listing_type = "rent"
         out.append(
             {
                 "source_name": _SOURCE_NAME,
                 "mls_id": mls_id,
-                "list_price": _num(raw.get("list_price")),
+                "list_price": list_price,
                 "street_address": (raw.get("street_address") or "").strip() or None,
                 "city": (raw.get("city") or "").strip().rstrip(",").strip() or None,
                 "community": (raw.get("community") or "").strip() or None,
@@ -122,7 +155,8 @@ def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "acres": _float_from(_RE_ACRES, details),
                 "days_on_market": _int_from(_RE_DOM, details),
                 "status": "active",
-                "property_type": "land" if (beds is None and "land" in details.lower()) else "residential",
+                "property_type": property_type,
+                "listing_type": listing_type,
                 "zip_code": zip_code,
                 "county": _zip_to_county().get(zip_code) or (raw.get("county") or "").strip() or None,
                 "state": (raw.get("state") or "FL").strip() or "FL",
@@ -141,7 +175,7 @@ def upsert_rows(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
         for r in rows[:5]:
             print(
                 f"  {r['county']} {r['zip_code']} | {(r.get('street_address') or '')[:32]} | "
-                f"${r.get('list_price')} {r.get('beds')}bd/{r.get('baths')}ba "
+                f"[{r.get('listing_type')}] ${r.get('list_price')} {r.get('beds')}bd/{r.get('baths')}ba "
                 f"{r.get('sqft')}sf dom={r.get('days_on_market')}"
             )
         if len(rows) > 5:
@@ -151,11 +185,11 @@ def upsert_rows(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
     sql = f"""
         INSERT INTO {_TABLE}
           (source_name, mls_id, list_price, street_address, city, community,
-           beds, baths, sqft, acres, days_on_market, status, property_type,
+           beds, baths, sqft, acres, days_on_market, status, property_type, listing_type,
            zip_code, county, state, listing_url, scraped_at, _ingested_at)
         VALUES
           (%(source_name)s, %(mls_id)s, %(list_price)s, %(street_address)s, %(city)s, %(community)s,
-           %(beds)s, %(baths)s, %(sqft)s, %(acres)s, %(days_on_market)s, %(status)s, %(property_type)s,
+           %(beds)s, %(baths)s, %(sqft)s, %(acres)s, %(days_on_market)s, %(status)s, %(property_type)s, %(listing_type)s,
            %(zip_code)s, %(county)s, %(state)s, %(listing_url)s, %(now)s, %(now)s)
         ON CONFLICT (source_name, mls_id) DO UPDATE SET
           list_price     = EXCLUDED.list_price,
@@ -169,6 +203,7 @@ def upsert_rows(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
           days_on_market = EXCLUDED.days_on_market,
           status         = EXCLUDED.status,
           property_type  = EXCLUDED.property_type,
+          listing_type   = EXCLUDED.listing_type,
           zip_code       = EXCLUDED.zip_code,
           county         = EXCLUDED.county,
           state          = EXCLUDED.state,

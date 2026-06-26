@@ -103,6 +103,9 @@ def _parse_cards(html: str, county: str, origin: str = "") -> list[dict[str, Any
                 "zip_code": m.group(2),
                 "county": county,
                 "list_price": _text(a, ".listing__price-value"),
+                # Sibling of price-value, rendered ONLY on lease listings ("/ month", "/ week").
+                # The load-bearing rent-vs-sale signal — sale cards have no suffix span.
+                "price_suffix": _text(a, ".listing__price-suffix"),
                 "street_address": _text(a, ".listing__address-display")
                 or _text(a, ".listing__address-l2"),
                 "city": _text(a, ".listing__city"),
