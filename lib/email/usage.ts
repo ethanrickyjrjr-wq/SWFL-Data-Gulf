@@ -33,7 +33,10 @@
  *    custom RPC; acceptable for v1.
  */
 
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import {
+  createServiceRoleClient,
+  createServiceRoleClientUntyped,
+} from "@/utils/supabase/service-role";
 
 // ---------------------------------------------------------------------------
 // Pure helpers (exported for unit tests — no DB dependency)
@@ -83,7 +86,10 @@ export function tierLimit(tier: string): number {
 export async function recordEmailSent(userId: string, n: number): Promise<void> {
   // SKIP-NOT-THROW: any DB failure is silently ignored.
   try {
-    const db = createServiceRoleClient();
+    // KNOWN-DEBT(rpc-not-in-generated-types): increment_email_sent_count exists in public,
+    // but the generator hardcodes Functions: Record<string, never>, so .rpc(...) types its
+    // args as `undefined`. Untyped hatch until the generator captures functions.
+    const db = createServiceRoleClientUntyped();
     const period = billingPeriod(new Date());
 
     // Ensure the row exists for this period (no-op if it already does).

@@ -1,3 +1,4 @@
+import type { Json } from "@/database.types";
 /**
  * /api/email/domain-verify — per-tenant sending-domain registration + verification.
  *
@@ -202,7 +203,7 @@ export async function POST(req: NextRequest) {
       from_email: fromEmail,
       reply_to: replyTo,
       domain_verified: verified,
-      dns_records: records,
+      dns_records: records as Json,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },
@@ -280,7 +281,7 @@ async function handlePoll(
     .from("email_sender_config")
     .update({
       domain_verified: verified,
-      dns_records: data.records,
+      dns_records: data.records as unknown as Json,
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", userId);

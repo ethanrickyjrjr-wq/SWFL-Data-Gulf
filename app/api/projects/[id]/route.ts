@@ -1,3 +1,4 @@
+import type { Database } from "@/database.types";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
@@ -53,7 +54,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const prevTitle: string | null = before?.title ?? null;
   const prevItemCount: number = Array.isArray(before?.items) ? before.items.length : 0;
 
-  const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const update: Database["public"]["Tables"]["projects"]["Update"] = {
+    updated_at: new Date().toISOString(),
+  };
   if ("items" in body) {
     const items = projectItemsSchema.safeParse(body.items);
     if (!items.success) {

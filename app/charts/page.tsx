@@ -16,13 +16,14 @@ import {
 } from "@/lib/charts/series";
 import type { ChartRow, ChartSeriesDef, PivotedCityMonth } from "@/types/viz";
 import type { ValueFormat } from "@/lib/charts/format";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(data_lake: reads chart aggregates from the data_lake schema (typed public only))
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 
 // 5 min: reduces post-migration stale window from 60 min to 5 min.
 // Data is purely Supabase PostgreSQL — no external API cost amplification.
 export const revalidate = 300;
 
-type Supabase = ReturnType<typeof createServiceRoleClient>;
+type Supabase = ReturnType<typeof createServiceRoleClientUntyped>;
 
 interface LoadedPanel {
   data: ChartRow[];
@@ -146,7 +147,7 @@ interface RenderedPanel extends LoadedPanel {
 }
 
 export default async function ChartsPage() {
-  const supabase = createServiceRoleClient();
+  const supabase = createServiceRoleClientUntyped();
   const [homeValues, rents, passengers, homeValueMomentum, tierIndexed, tierYoY] =
     await Promise.all([
       loadMetros(supabase, "zhvi_pivoted"),

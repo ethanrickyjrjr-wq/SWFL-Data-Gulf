@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(data_lake: deletes user_mls_listings / user_mls_stats in the data_lake schema)
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { NextResponse } from "next/server";
 
 export async function DELETE(req: Request) {
@@ -11,7 +12,7 @@ export async function DELETE(req: Request) {
   } = await supabase.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const serviceSupabase = createServiceRoleClient();
+  const serviceSupabase = createServiceRoleClientUntyped();
   const { connection_id } = (await req.json()) as { connection_id: string };
   const { data: conn, error } = await serviceSupabase
     .from("user_mls_connections")

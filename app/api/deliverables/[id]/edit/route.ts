@@ -1,3 +1,4 @@
+import type { Database } from "@/database.types";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
@@ -76,7 +77,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         { error: "cannot change an email deliverable's template" },
         { status: 400 },
       );
-    const { error } = await svc.from("deliverables").update(plan.patch).eq("id", id);
+    const { error } = await svc
+      .from("deliverables")
+      // plan.patch carries branding: Branding (jsonb) — valid JSON at runtime.
+      .update(plan.patch as Database["public"]["Tables"]["deliverables"]["Update"])
+      .eq("id", id);
     if (error) return NextResponse.json({ error: "update failed" }, { status: 500 });
     return NextResponse.json({ ok: true, id, inPlace: true });
   }

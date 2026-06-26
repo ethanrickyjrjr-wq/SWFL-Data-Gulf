@@ -72,6 +72,7 @@ function makeDb() {
 import { mock } from "bun:test";
 mock.module("@/utils/supabase/service-role", () => ({
   createServiceRoleClient: () => makeDb(),
+  createServiceRoleClientUntyped: () => makeDb(),
 }));
 
 const { mintClaimToken, consumeClaimToken, peekClaimToken, deterministicProjectId } =

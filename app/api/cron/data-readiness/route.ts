@@ -56,6 +56,9 @@ export async function GET(request: Request) {
   let substitutions = 0;
 
   for (const schedule of schedules) {
+    // next_run_at + project_id are nullable in the schema but the query filters on
+    // next_run_at; skip any row missing either so the downstream non-null contracts hold.
+    if (!schedule.project_id || !schedule.next_run_at) continue;
     const { data: project } = await supabase
       .from("projects")
       .select("items")
@@ -74,7 +77,7 @@ export async function GET(request: Request) {
         await logVerificationResult(
           supabase,
           schedule.project_id,
-          schedule.id,
+          String(schedule.id),
           result,
           schedule.next_run_at,
         );

@@ -1,3 +1,4 @@
+import type { Database } from "@/database.types";
 // app/api/projects/[id]/materials/route.ts
 //
 // Materials API for the project Marketing Hub (v2, Task 2).
@@ -100,7 +101,7 @@ export async function PATCH(
 
   // Keep the saved build prompt fresh too (only overwrite when one is supplied, so a
   // doc-only PATCH never wipes it). Powers the scheduled re-render's chart fidelity.
-  const patch: Record<string, unknown> = {
+  const patch: Database["public"]["Tables"]["deliverables"]["Update"] = {
     doc: parsed.data,
     data_as_of: new Date().toISOString(),
   };

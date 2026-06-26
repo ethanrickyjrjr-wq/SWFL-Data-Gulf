@@ -11,7 +11,8 @@
 // error → fewer/zero figures, NEVER a thrown error and NEVER an invented number.
 // data_lake views carry `service_role` SELECT (verified 2026-06-25).
 
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(data_lake: market views (zhvi/zori/active listings/acs/redfin) live in the data_lake schema)
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 
 export interface MarketFigure {
   key: string;
@@ -39,7 +40,7 @@ const REDFIN_TABLE: Record<string, string> = {
   collier: "redfin_collier_market",
 };
 
-type Db = ReturnType<typeof createServiceRoleClient>;
+type Db = ReturnType<typeof createServiceRoleClientUntyped>;
 
 async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<string | null> {
   let county: string | null = null;
@@ -274,7 +275,7 @@ export async function loadMarketFigures(scope?: {
   if (!scope?.value) return [];
   let db: Db;
   try {
-    db = createServiceRoleClient();
+    db = createServiceRoleClientUntyped();
   } catch {
     return []; // no lake creds in this env — degrade, never throw
   }

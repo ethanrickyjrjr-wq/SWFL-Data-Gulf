@@ -44,7 +44,7 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
     .select(
       "id, contact_email, contact_name, contact_tags, parsed_zip, parsed_place, parsed_topic, raw_reply, answer_sent, created_at, read_at",
     )
-    .eq("id", id)
+    .eq("id", Number(id))
     .maybeSingle();
   const alert = data as AlertDetail | null;
   if (!alert) notFound();

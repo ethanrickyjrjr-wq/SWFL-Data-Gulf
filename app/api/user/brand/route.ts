@@ -1,3 +1,4 @@
+import type { Json } from "@/database.types";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
@@ -127,7 +128,8 @@ export async function PATCH(req: NextRequest) {
     const palettes = sanitizePalettes(body.color_palettes);
     const { error: palErr } = await supabase
       .from("user_brand_profiles")
-      .update({ color_palettes: palettes })
+      // jsonb write: palettes is a validated BrandPalette[], valid JSON at runtime.
+      .update({ color_palettes: palettes as unknown as Json })
       .eq("user_id", user.id);
     if (palErr) {
       console.warn("[user/brand] color_palettes write skipped:", palErr.message);

@@ -1,3 +1,4 @@
+import type { Json } from "@/database.types";
 import { NextResponse, type NextRequest } from "next/server";
 import { lintChartBlock, type ChartValueFormat } from "@/refinery/validate/chart-block-lint.mts";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
@@ -74,7 +75,8 @@ export async function POST(req: NextRequest) {
   const { error } = await supabase.from("saved_charts").insert({
     id,
     chart_block: block,
-    source_meta,
+    // jsonb write: source_meta is a concrete panel object, valid JSON at runtime.
+    source_meta: source_meta as unknown as Json,
     freshness_token: panel.asOf ?? null,
   });
   if (error) return NextResponse.json({ error: "save failed" }, { status: 500 });

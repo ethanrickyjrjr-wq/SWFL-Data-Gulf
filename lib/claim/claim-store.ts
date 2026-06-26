@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(rpc+jsonb: consume_claim_token exists in public but the generator hardcodes Functions:never; brand/seed jsonb writes also need the untyped surface)
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import type { ProjectItem } from "@/lib/project/items";
 
 /**
@@ -78,7 +79,7 @@ export async function mintClaimToken(
 ): Promise<string> {
   const token = crypto.randomBytes(24).toString("base64url"); // URL-safe; survives redirects
   const now = Date.now();
-  const db = createServiceRoleClient();
+  const db = createServiceRoleClientUntyped();
   const { error } = await db.from("claim_tokens").insert({
     token,
     items,
@@ -100,7 +101,7 @@ export async function mintClaimToken(
  * non-winner gets zero rows back; we then classify it with one non-consuming peek.
  */
 export async function consumeClaimToken(token: string): Promise<ConsumeResult> {
-  const db = createServiceRoleClient();
+  const db = createServiceRoleClientUntyped();
   const { data, error } = await db.rpc("consume_claim_token", { p_token: token });
   if (error) throw new Error(`consumeClaimToken: ${error.message}`);
 
@@ -136,7 +137,7 @@ export async function consumeClaimToken(token: string): Promise<ConsumeResult> {
  * summary — never the raw item bodies — and never touches `consumed_at`.
  */
 export async function peekClaimToken(token: string): Promise<ClaimPreview | null> {
-  const db = createServiceRoleClient();
+  const db = createServiceRoleClientUntyped();
   const { data } = await db
     .from("claim_tokens")
     .select("title, items, expires_at, consumed_at")
@@ -162,7 +163,7 @@ export async function peekClaimToken(token: string): Promise<ClaimPreview | null
  */
 export async function attachProjectId(token: string, id: string): Promise<void> {
   try {
-    const db = createServiceRoleClient();
+    const db = createServiceRoleClientUntyped();
     await db.from("claim_tokens").update({ project_id: id }).eq("token", token);
   } catch (e) {
     console.error("attachProjectId failed", e); // observability only — never block the claim
@@ -176,7 +177,7 @@ export async function attachProjectId(token: string, id: string): Promise<void> 
  * confirms the state authoritatively via the atomic UPDATE).
  */
 export async function fetchRawClaimItems(token: string): Promise<ProjectItem[] | null> {
-  const db = createServiceRoleClient();
+  const db = createServiceRoleClientUntyped();
   const { data } = await db
     .from("claim_tokens")
     .select("items, consumed_at, expires_at")

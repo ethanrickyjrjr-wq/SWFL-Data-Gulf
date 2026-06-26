@@ -10,7 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createClientUntyped } from "@/utils/supabase/server";
 import { loadBrandRegistry, loadRadiusConfig, scoreEvent } from "@/lib/signals/event-evaluator";
 import { insertProjectEvent } from "@/lib/project/event-insert";
 import { extractEventFromArticle } from "@/lib/signals/news-event-extractor";
@@ -37,7 +37,11 @@ export async function GET(request: Request) {
     }
   }
 
-  const supabase = createClient(await cookies());
+  // KNOWN-DEBT(news-crawl): selects projects.lat/lng which do NOT exist on the live table
+  // (proven: `column "lat" does not exist`); the cron 500s at the projects step every run.
+  // Real fix (deferred per operator 2026-06-26): derive coords from the items jsonb, drop the
+  // phantom lat/lng select, and stop reaching data_lake untyped. Until then: untyped client.
+  const supabase = createClientUntyped(await cookies());
 
   // Load scoring config (module-level cache; first call hits disk)
   const brands = loadBrandRegistry();

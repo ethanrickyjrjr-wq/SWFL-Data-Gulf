@@ -6,7 +6,8 @@
 // rendered in an env without SUPABASE_SERVICE_KEY) degrades to an empty chart rather
 // than throwing — the report page must never regress to a 500 just for adding a chart.
 
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(data_lake: metro-trend view lives in the data_lake schema (typed public only))
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { mapPivotedCityRows } from "@/lib/charts/pivoted-series";
 import type { ChartRow, PivotedCityMonth } from "@/types/viz";
 
@@ -18,9 +19,9 @@ export interface MetroTrendPanel {
 
 /** view: "zhvi_pivoted" (home values) | "zori_pivoted" (rents). */
 export async function loadMetroTrend(view = "zhvi_pivoted"): Promise<MetroTrendPanel> {
-  let supabase: ReturnType<typeof createServiceRoleClient>;
+  let supabase: ReturnType<typeof createServiceRoleClientUntyped>;
   try {
-    supabase = createServiceRoleClient();
+    supabase = createServiceRoleClientUntyped();
   } catch (err) {
     // No lake creds in this env — degrade to empty, never throw.
     return { data: [], error: err instanceof Error ? err.message : String(err) };

@@ -73,6 +73,7 @@ function fakeDb() {
 
 mock.module("@/utils/supabase/service-role", () => ({
   createServiceRoleClient: () => fakeDb(),
+  createServiceRoleClientUntyped: () => fakeDb(),
 }));
 
 // Stub the LLM assembly so build is deterministic + offline (no model call,

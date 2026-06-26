@@ -1,3 +1,4 @@
+import type { EmailDeliverableRow } from "@/lib/deliverable/email-deliverable";
 // POST /api/deliverables/[id]/blast — send a frozen email deliverable to selected
 // contacts via Resend.
 //
@@ -135,7 +136,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       pdfBuffer = await renderEmailDocToBuffer(parsedDoc.data);
     }
   } else {
-    const model = buildEmailDeliverableModel(deliverable, { siteOrigin: BASE_URL });
+    // jsonb read: the typed row carries items_snapshot/narrative as Json; the builder
+    // reads the concrete EmailDeliverableRow shape (same columns, concrete jsonb).
+    const model = buildEmailDeliverableModel(deliverable as unknown as EmailDeliverableRow, {
+      siteOrigin: BASE_URL,
+    });
     if (model) {
       baseHtml = await renderGroundedReport(model, { skin: "email" });
     } else {
@@ -161,7 +166,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const subject =
     typeof body?.subject === "string" && body.subject.trim()
       ? body.subject.trim()
-      : deriveSubject(deliverable.narrative);
+      : deriveSubject(deliverable.narrative as { exec_summary?: string } | null);
 
   // Audit row.
   const { data: blast } = await supabase

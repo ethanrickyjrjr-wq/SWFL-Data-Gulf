@@ -1,3 +1,4 @@
+import type { Database } from "@/database.types";
 // PATCH  /api/contacts/[id] — edit name/phone/tags
 // DELETE /api/contacts/[id] — remove a contact
 // RLS (auth.uid()) gates ownership; the explicit user_id eq is belt-and-suspenders.
@@ -23,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "invalid body" }, { status: 400 });
 
-  const update: Record<string, unknown> = {};
+  const update: Database["public"]["Tables"]["contacts"]["Update"] = {};
   if ("name" in body) update.name = typeof body.name === "string" ? body.name.trim() || null : null;
   if ("phone" in body)
     update.phone = typeof body.phone === "string" ? body.phone.trim() || null : null;

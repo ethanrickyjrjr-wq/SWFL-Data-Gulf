@@ -1,4 +1,5 @@
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(data_lake: gallery aggregates live in the data_lake schema (typed public only))
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
 import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
 import {
@@ -14,7 +15,7 @@ import {
 import type { ChartRow, ChartSeriesDef, PivotedCityMonth } from "@/types/viz";
 import type { ValueFormat } from "@/lib/charts/format";
 
-type Supabase = ReturnType<typeof createServiceRoleClient>;
+type Supabase = ReturnType<typeof createServiceRoleClientUntyped>;
 
 export interface LoadedPanel {
   data: ChartRow[];

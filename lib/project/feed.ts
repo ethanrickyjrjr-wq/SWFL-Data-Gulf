@@ -1,3 +1,4 @@
+import type { Database } from "@/database.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
@@ -75,7 +76,11 @@ export async function writeFeed(
     }));
     const { data } = await db
       .from("project_feed")
-      .upsert(normalized, { onConflict: "dedup_key", ignoreDuplicates: true })
+      // jsonb write: payload is an arbitrary JSON bag (Record<string,unknown>).
+      .upsert(normalized as Database["public"]["Tables"]["project_feed"]["Insert"][], {
+        onConflict: "dedup_key",
+        ignoreDuplicates: true,
+      })
       .select("id");
     return data?.length ?? 0;
   } catch {

@@ -63,7 +63,7 @@ export default async function ProjectEmailLabPage({
 
   if (!project) notFound();
 
-  const branding: Branding = project.branding ?? {};
+  const branding: Branding = (project.branding ?? {}) as Branding;
   const items: ProjectItem[] = Array.isArray(project.items) ? project.items : [];
   const scope = inferScopeFromItems(items);
 

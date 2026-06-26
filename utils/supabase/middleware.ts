@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import type { Database } from "@/database.types";
 import { type NextRequest, NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
 
@@ -32,7 +33,7 @@ export const updateSession = async (
     return { response: supabaseResponse, user: null };
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+  const supabase = createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

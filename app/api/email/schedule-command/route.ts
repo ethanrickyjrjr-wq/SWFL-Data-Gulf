@@ -1,3 +1,4 @@
+import type { Database } from "@/database.types";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
@@ -388,7 +389,7 @@ async function writeAction(
     return NextResponse.json({ error: "schedule_id required" }, { status: 422 });
   }
 
-  let patch: Record<string, unknown>;
+  let patch: Database["public"]["Tables"]["email_schedules"]["Update"];
   switch (command.action) {
     case "pause":
       patch = { status: "paused", updated_at: now };

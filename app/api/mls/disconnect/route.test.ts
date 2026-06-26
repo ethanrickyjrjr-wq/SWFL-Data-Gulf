@@ -15,6 +15,7 @@ const mockSupabase = {
 mock.module("@/utils/supabase/server", () => ({ createClient: () => mockSupabase }));
 mock.module("@/utils/supabase/service-role", () => ({
   createServiceRoleClient: () => mockSupabase,
+  createServiceRoleClientUntyped: () => mockSupabase,
 }));
 mock.module("next/headers", () => ({ cookies: async () => ({}) }));
 

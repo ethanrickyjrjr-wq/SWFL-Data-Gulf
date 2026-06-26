@@ -1,5 +1,6 @@
 import type { ZipQuickSummary, ZipSummaryFigure } from "./types";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+// KNOWN-DEBT(data_lake: ZIP ACS summary lives in the data_lake schema (typed public only))
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 
 /**
  * Per-ZIP Quick Summary loader — the seam the ZIP report page renders from.
@@ -33,9 +34,9 @@ interface AcsRow {
 }
 
 export async function loadZipQuickSummary(zip: string): Promise<ZipQuickSummary> {
-  let supabase: ReturnType<typeof createServiceRoleClient>;
+  let supabase: ReturnType<typeof createServiceRoleClientUntyped>;
   try {
-    supabase = createServiceRoleClient();
+    supabase = createServiceRoleClientUntyped();
   } catch {
     return { zip, figures: [] }; // no lake creds in this env — degrade, never throw
   }
