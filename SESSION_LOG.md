@@ -1,3 +1,9 @@
+## 2026-06-26 (main) — fix(graphify): brain→table reads edges + edge transitivization through dropped intermediate nodes
+
+`graphify-app-nodes.mjs`: added `reads` edge generator — scans `refinery/sources/*.mts` for `const TABLE/VIEW = "name"` and `.from('name')` calls, traces to importing pack BRAIN_ID, emits `brain:X → reads → table:Y`. Also fixed `extractTables()` to strip SQL single-line comments before matching (was producing false-positive `table:IF`, `table:for`, `table:when` from comment text). `graphify-publish.mjs`: added 2-pass edge transitivization before RENDERABLE_TYPES filter — re-wires A→dropped_node→B as direct A→B so `component:` nodes reachable only through `app_component:`/`lib_module:` intermediaries keep their edges after those non-renderable types are dropped from the ops graph.
+
+---
+
 ## 2026-06-26 (main) — feat(ingest): un-park active-listings daily cron — runner IP WAF-proven + workflow quoting fix
 
 The `crawl_client` rename (8fb76c9a) unblocked the first real runner test. A `workflow_dispatch` from the GitHub datacenter IP scraped Collier via crawl4ai's HTTP strategy with ZERO 403s — 116+ pages, **2,292 in-scope listings** (run 28254764976; I cancelled its redundant all-county tail). The WAF fear for this source was unfounded. Un-parked: uncommented `schedule: 0 9 * * *` in `active-listings-daily.yml`, bumped `timeout-minutes` 30→55 (the 4-county walk ran ~23min), removed `probe_mode: odd_window` + raised `expected_rows_min` 1→2000 in the cadence registry. Also fixed a real workflow bug my `-f county=Collier` test surfaced: `--county '$X'` leaked literal quote chars into argv ("No SWFL county matches '…'") — argv now built with a bash array + env-passed inputs. Next: re-dispatch a Collier real run to confirm the DB upsert lands, then close `listings_runner_ip_waf_proof` on that prod evidence (closing on rows-landed, NOT code-looks-right).

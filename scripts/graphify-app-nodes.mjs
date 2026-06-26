@@ -179,7 +179,9 @@ function extractTables() {
   const migDir = join(ROOT, "docs", "sql");
   const seen = new Map();
   for (const f of walk(migDir, (n) => n.endsWith(".sql"))) {
-    const content = readFileSync(f, "utf8");
+    // Strip single-line SQL comments before matching — avoids catching table names
+    // from comments like "-- shipped a CREATE TABLE for them" or "CREATE TABLE when".
+    const content = readFileSync(f, "utf8").replace(/--[^\n]*/g, "");
     for (const [, name] of content.matchAll(
       /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:\w+\.)?(\w+)/gi,
     )) {
@@ -377,6 +379,44 @@ function extractEdges(allNodes) {
       );
       if (m) addEdge(n.id, `brain:${m[1]}`, "feeds");
       break; // first matching code dir wins
+    }
+  }
+
+  // reads: brain → table  (via refinery/sources → data_lake.*)
+  // Source files use variable-based .from(TABLE) calls — `const TABLE = "bls_laus"` —
+  // that the literal-string regex above can't catch, and refinery/ isn't in scanRoots.
+  // Walk refinery/sources for TABLE/VIEW consts (require data_lake guard), then trace
+  // pack imports to emit brain→table edges. addEdge silently drops edges whose table
+  // node doesn't exist (parquet-only sources have no CREATE TABLE in docs/sql/).
+  const refSrcDir = join(ROOT, "refinery", "sources");
+  const refPacksDir = join(ROOT, "refinery", "packs");
+  const sourceTableMap = new Map(); // source basename → tableName[]
+  if (existsSync(refSrcDir)) {
+    for (const f of walk(refSrcDir, (n) => n.endsWith(".mts") && !n.includes(".test."))) {
+      const content = readFileSync(f, "utf8");
+      const tables = new Set();
+      for (const [, tbl] of content.matchAll(/const\s+\w*(?:TABLE|VIEW)\w*\s*=\s*['"](\w+)['"]/g)) {
+        tables.add(tbl);
+      }
+      for (const [, tbl] of content.matchAll(/\.from\(\s*['"](\w+)['"]\s*\)/g)) {
+        tables.add(tbl);
+      }
+      if (tables.size) sourceTableMap.set(basename(f), [...tables]);
+    }
+  }
+  if (existsSync(refPacksDir)) {
+    for (const f of walk(refPacksDir, (n) => n.endsWith(".mts") && !n.includes(".test."))) {
+      const content = readFileSync(f, "utf8");
+      const brainMatch = content.match(/const\s+BRAIN_ID\s*=\s*['"]([^'"]+)['"]/);
+      if (!brainMatch) continue;
+      const brainNodeId = `brain:${brainMatch[1]}`;
+      if (!nodeIds.has(brainNodeId)) continue;
+      for (const [, srcPath] of content.matchAll(/from\s+['"]\.\.\/sources\/([^'"]+)['"]/g)) {
+        const fname = basename(srcPath).replace(/\.mts$/, "") + ".mts";
+        for (const tbl of sourceTableMap.get(fname) ?? []) {
+          addEdge(brainNodeId, `table:${tbl}`, "reads");
+        }
+      }
     }
   }
 
