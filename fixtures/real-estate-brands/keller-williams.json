@@ -1,0 +1,25 @@
+{
+  "slug": "keller-williams",
+  "company_name": "Keller Williams Realty",
+  "type": "national_franchise",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Fort Myers, Naples, Cape Coral, Bonita Springs"
+  },
+  "domain": "kw.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#0D3592",
+      "accentColor": "#EE9B2C",
+      "textColor": "#1a1b24",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.8,
+    "logo_url": "https://www.kw.com/images/kw-logo.png",
+    "source_url": "https://www.kw.com",
+    "notes": "#0D3592 (navy) and #EE9B2C (amber/gold) from kw.com CSS custom properties — this is KW's current corporate/tech brand. Field/agent offices often use the legacy red #B40101 + black, especially on signage. Corporate site has completed a tech-forward rebrand to navy+amber. SWFL agents may display either palette."
+  },
+  "discovered_at": "2026-06-26"
+}

@@ -1,0 +1,25 @@
+{
+  "slug": "remax",
+  "company_name": "RE/MAX",
+  "type": "national_franchise",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Fort Myers, Cape Coral, Naples, Bonita Springs"
+  },
+  "domain": "remax.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#D32F2F",
+      "accentColor": "#1565C0",
+      "textColor": "#000000",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.85,
+    "logo_url": "https://www.remax.com/images/remax-logo.png",
+    "source_url": "https://www.remax.com",
+    "notes": "#D32F2F (red) and #1565C0 (blue) from remax.com CSS custom properties. RE/MAX is the classic red/white/blue 'above the competition' balloon brand. Red is the dominant mark color. Specific Lee/Collier offices trade as RE/MAX Realty Group, RE/MAX Quality Service, etc. — all use the parent brand system."
+  },
+  "discovered_at": "2026-06-26"
+}

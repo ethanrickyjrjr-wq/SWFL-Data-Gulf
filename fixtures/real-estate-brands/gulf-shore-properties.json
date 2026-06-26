@@ -1,0 +1,25 @@
+{
+  "slug": "gulf-shore-properties",
+  "company_name": "Gulf Shore Properties",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee"],
+    "primary_market": "Fort Myers Beach, Bonita Beach, Estero, Lee County coast"
+  },
+  "domain": "gulfshoreproperties.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#2F5496",
+      "accentColor": "#000000",
+      "textColor": "#000000",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.8,
+    "logo_url": "https://dtzulyujzhqiu.cloudfront.net/gulfshoreproperties13810/profiles/1761756278.png",
+    "source_url": "https://www.gulfshoreproperties.com",
+    "notes": "#2F5496 (medium navy blue) appears as the primary CSS foreground color. The boutique focuses on Lee County coastal communities. Logo served from CloudFront — URL may change."
+  },
+  "discovered_at": "2026-06-26"
+}

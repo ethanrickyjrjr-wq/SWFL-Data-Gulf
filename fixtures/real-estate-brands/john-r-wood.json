@@ -1,0 +1,25 @@
+{
+  "slug": "john-r-wood",
+  "company_name": "John R. Wood Properties",
+  "type": "local_independent",
+  "affiliation": "Christie's International Real Estate / Leading Real Estate Companies of the World",
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Naples, Fort Myers, Cape Coral, Bonita Springs, Sanibel / SWFL"
+  },
+  "domain": "johnrwood.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#219653",
+      "accentColor": "#ffca00",
+      "textColor": "#222222",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.85,
+    "logo_url": "https://d3w216np43fnr4.cloudfront.net/9831/327037/1.png",
+    "source_url": "https://www.johnrwood.com",
+    "notes": "Green #219653 from CSS custom properties (--color-primary tier). Gold #ffca00 from foreground accent usage. Both appear intentional — JRW's woodsy-green + gold matches their physical signage. CDN logo URL may rotate; direct crawl confirmed 2026-06-26."
+  },
+  "discovered_at": "2026-06-26"
+}

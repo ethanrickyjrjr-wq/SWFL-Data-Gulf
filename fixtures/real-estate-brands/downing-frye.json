@@ -1,0 +1,25 @@
+{
+  "slug": "downing-frye",
+  "company_name": "Downing-Frye Realty",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Naples, Marco Island, Bonita Springs, Estero"
+  },
+  "domain": "downingfrye.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#006ba1",
+      "accentColor": "#005a87",
+      "textColor": "#333333",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.75,
+    "logo_url": "https://www.downingfrye.com/wp-content/uploads/2024/09/Downing-Frye-Real-Estate-Header-logo.png",
+    "source_url": "https://www.downingfrye.com",
+    "notes": "#006ba1 and #005a87 appear as non-WordPress-default CSS colors in the theme stylesheet. Site uses WordPress; WP editor palette colors excluded. Logo is a self-hosted PNG."
+  },
+  "discovered_at": "2026-06-26"
+}

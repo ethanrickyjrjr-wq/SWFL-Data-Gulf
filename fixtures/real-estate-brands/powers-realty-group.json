@@ -1,0 +1,29 @@
+{
+  "slug": "powers-realty-group",
+  "company_name": "Powers Realty Group, Inc.",
+  "type": "local_independent",
+  "affiliation": "Florida's Boutique Broker®",
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Naples, Marco Island"
+  },
+  "domain": "powersrealtyfl.com",
+  "brand": {
+    "status": "curated",
+    "palette": {
+      "primaryColor": "#002D62",
+      "accentColor": "#8B8BBC",
+      "fontFamily": "BOOK_SERIF",
+      "textColor": "#2A2A2A",
+      "backdropColor": "#FBFAF7"
+    },
+    "confidence": 1.0,
+    "logo_url": "https://www.swfldatagulf.com/email-assets/snicklefritz/powers-realty-group.png",
+    "logo_svg_source": "https://www.powersrealtyfl.com/assets/files/images/icons-logos/powers-logos/pw-logo-florida-powers-boutique-broker-256x70.svg",
+    "source_url": "https://www.powersrealtyfl.com",
+    "notes": "Navy #002D62 + periwinkle #8B8BBC sampled directly from logo pixels (pw-logo SVG rasterized). Ivory backdrop #FBFAF7 for boutique look. Serif wordmark → BOOK_SERIF. Shield + 'Florida's Boutique Broker' lockup. Curated 2026-06-25 for Suzanne Powers prospect email."
+  },
+  "dbpr_name": "POWERS AND PRICE LLC",
+  "dbpr_city": "NAPLES",
+  "discovered_at": "2026-06-25"
+}

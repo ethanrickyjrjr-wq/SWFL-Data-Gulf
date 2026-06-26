@@ -1,0 +1,25 @@
+{
+  "slug": "coldwell-banker",
+  "company_name": "Coldwell Banker",
+  "type": "national_franchise",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Naples, Fort Myers, Cape Coral, Bonita Springs"
+  },
+  "domain": "coldwellbanker.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#00003E",
+      "accentColor": "#D50000",
+      "textColor": "#000000",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.9,
+    "logo_url": "https://www.coldwellbanker.com/images/logo-cb.png",
+    "source_url": "https://www.coldwellbanker.com",
+    "notes": "#00003E (near-black deep navy) is CB's primary CSS color — appears as background on hero and nav. #D50000 (bright red) used as CTA/accent color. Classic CB brand: deep navy + white + red. The SWFL CB entity is Coldwell Banker Realty — same brand system."
+  },
+  "discovered_at": "2026-06-26"
+}

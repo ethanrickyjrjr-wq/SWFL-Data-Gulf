@@ -1,0 +1,38 @@
+{
+  "slug": "century-21",
+  "company_name": "CENTURY 21",
+  "type": "national_franchise",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Cape Coral, Fort Myers, Naples, Bonita Springs"
+  },
+  "domain": "century21.com",
+  "brand": {
+    "status": "official_guide",
+    "fonts": ["Barlow Semi Condensed", "Oakes", "Typold"],
+    "palette": {
+      "primaryColor": "#FFC72C",
+      "accentColor": "#BEAF87",
+      "textColor": "#252526",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "legacy_gold": "#FFC72C",
+      "relentless_gold": "#BEAF87",
+      "dark_gold": "#A19276",
+      "white": "#FFFFFF",
+      "light_grey": "#E6E7E8",
+      "medium_grey": "#808285",
+      "obsessed_grey": "#252526",
+      "digital_black": "#121212",
+      "black": "#000000"
+    },
+    "confidence": 1.0,
+    "logo_url": "https://cdn.bfldr.com/XA0T0G7T/at/pcgwmnpq2m2z46mnj8hfggvc/wordmark.jpg",
+    "logo_url_mark": "https://cdn.bfldr.com/XA0T0G7T/at/jwbc29vpgmstgjmq56fr39r/logo-mark.jpg",
+    "source_url": "https://brandguides.brandfolder.com/c21marketing/branding",
+    "notes": "Verbatim from official C21 brand guide on Brandfolder (c21marketing). Primary = Legacy Gold #FFC72C. Secondary = Relentless Gold #BEAF87. Previous fixture had wrong primary (#BEAF88 instead of #FFC72C as primary, and #BEAF87 misspelled as #BEAF88)."
+  },
+  "discovered_at": "2026-06-26"
+}

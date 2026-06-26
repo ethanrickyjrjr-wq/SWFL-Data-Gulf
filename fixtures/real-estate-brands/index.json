@@ -1,0 +1,116 @@
+{
+  "description": "Real estate brokerage brand colors and logo URLs for Lee and Collier counties, FL. All hex values sourced from crawl4ai passes against the actual company sites or their official brand asset files. Confidence score reflects how directly the color was stated vs. inferred from CSS frequency.",
+  "last_updated": "2026-06-26",
+  "brokerages": [
+    {
+      "slug": "john-r-wood",
+      "company_name": "John R. Wood Properties",
+      "type": "local_independent",
+      "counties": ["Lee", "Collier"],
+      "primary": "#219653",
+      "accent": "#ffca00",
+      "confidence": 0.85,
+      "file": "john-r-wood.json"
+    },
+    {
+      "slug": "downing-frye",
+      "company_name": "Downing-Frye Realty",
+      "type": "local_independent",
+      "counties": ["Collier"],
+      "primary": "#006BA1",
+      "accent": "#005A87",
+      "confidence": 0.75,
+      "file": "downing-frye.json"
+    },
+    {
+      "slug": "premier-sothebys",
+      "company_name": "Premier Sotheby's International Realty",
+      "type": "national_franchise",
+      "counties": ["Collier", "Lee"],
+      "primary": "#0061A7",
+      "accent": "#007DC1",
+      "confidence": 0.85,
+      "file": "premier-sothebys.json"
+    },
+    {
+      "slug": "compass",
+      "company_name": "Compass",
+      "type": "national_franchise",
+      "counties": ["Lee", "Collier"],
+      "primary": "#000000",
+      "accent": "#FFFFFF",
+      "confidence": 0.95,
+      "file": "compass.json"
+    },
+    {
+      "slug": "keller-williams",
+      "company_name": "Keller Williams Realty",
+      "type": "national_franchise",
+      "counties": ["Lee", "Collier"],
+      "primary": "#0D3592",
+      "accent": "#EE9B2C",
+      "confidence": 0.8,
+      "file": "keller-williams.json"
+    },
+    {
+      "slug": "coldwell-banker",
+      "company_name": "Coldwell Banker",
+      "type": "national_franchise",
+      "counties": ["Lee", "Collier"],
+      "primary": "#00003E",
+      "accent": "#D50000",
+      "confidence": 0.9,
+      "file": "coldwell-banker.json"
+    },
+    {
+      "slug": "remax",
+      "company_name": "RE/MAX",
+      "type": "national_franchise",
+      "counties": ["Lee", "Collier"],
+      "primary": "#D32F2F",
+      "accent": "#1565C0",
+      "confidence": 0.85,
+      "file": "remax.json"
+    },
+    {
+      "slug": "century-21",
+      "company_name": "CENTURY 21",
+      "type": "national_franchise",
+      "counties": ["Lee", "Collier"],
+      "primary": "#FFC72C",
+      "accent": "#BEAF87",
+      "confidence": 1.0,
+      "file": "century-21.json"
+    },
+    {
+      "slug": "gulf-shore-properties",
+      "company_name": "Gulf Shore Properties",
+      "type": "local_independent",
+      "counties": ["Lee"],
+      "primary": "#2F5496",
+      "accent": "#000000",
+      "confidence": 0.8,
+      "file": "gulf-shore-properties.json"
+    },
+    {
+      "slug": "premiere-plus-realty",
+      "company_name": "Premiere Plus Realty",
+      "type": "local_independent",
+      "counties": ["Lee"],
+      "primary": "#0A0F3D",
+      "accent": "#FFFFFF",
+      "confidence": 0.75,
+      "file": "premiere-plus-realty.json"
+    },
+    {
+      "slug": "powers-realty-group",
+      "company_name": "Powers Realty Group, Inc.",
+      "type": "local_independent",
+      "counties": ["Collier"],
+      "primary": "#002D62",
+      "accent": "#8B8BBC",
+      "confidence": 1.0,
+      "file": "powers-realty-group.json"
+    }
+  ]
+}

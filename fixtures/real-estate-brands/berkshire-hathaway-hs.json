@@ -1,0 +1,25 @@
+{
+  "slug": "berkshire-hathaway-hs",
+  "company_name": "Berkshire Hathaway HomeServices Florida Realty",
+  "type": "national_franchise",
+  "affiliation": "Berkshire Hathaway HomeServices",
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Naples, Fort Myers, Bonita Springs, Cape Coral"
+  },
+  "domain": "bhhs.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#670038",
+      "accentColor": "#FFFFFF",
+      "textColor": "#000000",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.95,
+    "logo_url": "https://www.bhhs.com/content/dam/bhhs/brand_identity/logos/franchisor/BHHS_FL-Realty_Primary_Lockup_Color_RGB.png",
+    "source_url": "https://www.bhhs.com/content/dam/bhhs/brand_identity/logos/franchisor/primary_cab.svg",
+    "notes": "#670038 sourced verbatim from fill attribute in primary_cab.svg: fill=\"#670038\". This is the burgundy/wine color that defines the BHHS brand identity globally."
+  },
+  "discovered_at": "2026-06-26"
+}

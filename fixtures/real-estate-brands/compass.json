@@ -1,0 +1,25 @@
+{
+  "slug": "compass",
+  "company_name": "Compass",
+  "type": "national_franchise",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee", "Collier"],
+    "primary_market": "Fort Myers, Naples, Cape Coral"
+  },
+  "domain": "compass.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#000000",
+      "accentColor": "#171717",
+      "textColor": "#333333",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.95,
+    "logo_url": "https://www.compass.com/favicon-32x32.png",
+    "source_url": "https://www.compass.com",
+    "notes": "Compass is an intentionally minimalist black-and-white brand. #000000 is the sole brand color used across all elements. The compass rose icon is black. No accent color beyond near-blacks and grays."
+  },
+  "discovered_at": "2026-06-26"
+}

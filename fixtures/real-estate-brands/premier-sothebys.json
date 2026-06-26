@@ -1,0 +1,26 @@
+{
+  "slug": "premier-sothebys",
+  "company_name": "Premier Sotheby's International Realty",
+  "type": "national_franchise",
+  "affiliation": "Sotheby's International Realty",
+  "markets": {
+    "counties": ["Collier", "Lee"],
+    "primary_market": "Naples, Bonita Springs, Estero, Sarasota"
+  },
+  "domain": "premiersothebysrealty.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#0061a7",
+      "accentColor": "#007dc1",
+      "textColor": "#222222",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.85,
+    "logo_url": "https://cdn-cws.datafloat.com/PSB/images/company/PSB/logo.png",
+    "logo_url_white": "https://cdn-cws.datafloat.com/PSB/images/company/PSB/logo-white.png",
+    "source_url": "https://www.premiersothebysrealty.com",
+    "notes": "#0061a7 is the dominant action/link color throughout the site. Sotheby's global brand is navy-blue and black; this Premier Sotheby's franchisee matches. Three logo variants served: standard, white, print."
+  },
+  "discovered_at": "2026-06-26"
+}

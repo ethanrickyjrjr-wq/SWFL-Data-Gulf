@@ -1,0 +1,25 @@
+{
+  "slug": "premiere-plus-realty",
+  "company_name": "Premiere Plus Realty",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee"],
+    "primary_market": "Fort Myers, Cape Coral, Bonita Springs, Lee County"
+  },
+  "domain": "premierplusrealty.com",
+  "brand": {
+    "status": "crawled",
+    "palette": {
+      "primaryColor": "#0A0F3D",
+      "accentColor": "#FFFFFF",
+      "textColor": "#0A0F3D",
+      "backdropColor": "#FFFFFF"
+    },
+    "confidence": 0.75,
+    "logo_url": "https://img1.wsimg.com/isteam/ip/1e802804-c389-43dc-861e-cfb562240e8e/32134612-e0d7-4385-bf27-54d4e7eaca0c.jpg",
+    "source_url": "https://premierplusrealty.com",
+    "notes": "#0A0F3D (very dark navy) is the sole brand color extracted from their CSS. Logo served via GoDaddy Website Builder CDN. One of the larger Lee County independent brokerages."
+  },
+  "discovered_at": "2026-06-26"
+}
