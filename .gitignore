@@ -108,6 +108,9 @@ __pycache__/
 # with a README; the rest stays out of the tree.
 .tmp_lb_review/
 
+# Local preview / proof artifacts (rendered emails, chart PNGs, scratch scripts)
+tmp/
+
 # Ingest runtime logs (LeePA + future ingest pipelines)
 ingest/*.log
 

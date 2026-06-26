@@ -16,3 +16,16 @@ export function formatDisplayDate(dateStr: string | null | undefined): string {
   if (!m) return dateStr;
   return `${m[2]}/${m[3]}/${m[1]}`;
 }
+
+/**
+ * Axis / caption date label — same one-root home so a chart never grows its own
+ * date parser (Rule 5). Month-grain `2024-03` → `03/2024` (MM/YYYY); a full ISO
+ * date `2024-03-15` → `03/15/2024` via {@link formatDisplayDate}; anything else
+ * passes through unchanged.
+ */
+export function formatAxisDateLabel(s: string | null | undefined): string {
+  if (!s) return "";
+  const mo = s.match(/^(\d{4})-(\d{2})$/);
+  if (mo) return `${mo[2]}/${mo[1]}`;
+  return formatDisplayDate(s);
+}
