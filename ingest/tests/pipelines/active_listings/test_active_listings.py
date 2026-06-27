@@ -91,7 +91,7 @@ def test_normalize_drops_broken_placeholder_card():
 
 
 def test_normalize_price_floor_backstops_no_suffix_rental():
-    # Naples-MLS rental card carries NO suffix span — a 4bd/3056sqft Naples 34102 "$35,000" is a
+    # A Collier-region rental card carries NO suffix span — a 4bd/3056sqft Naples 34102 "$35,000" is a
     # seasonal rental, not a $35k home. The sub-$50k residential floor catches it.
     naples_seasonal = {
         "mls_id": "226018217",

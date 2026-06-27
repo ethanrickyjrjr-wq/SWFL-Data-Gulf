@@ -6,7 +6,7 @@ refined_at: 2026-06-25T07:19:04Z
 freshness_token: SWFL-7421-v2-20260625
 ttl_seconds: 172800
 context_type: user_saved_reference
-scope: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).
+scope: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; a licensed feed swaps in later. List-side only (no closed sales).
 ---
 
 # User-Saved Reference Context
@@ -20,7 +20,7 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).
+SCOPE: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; a licensed feed swaps in later. List-side only (no closed sales).
 
 --- HOW THE USER LIKES TO WORK ---
 - Active LISTING inventory and asking prices — not sold/closed prices. Median asking price and days-on-market are list-side signals of supply and pricing stance, not transaction values.
@@ -1048,10 +1048,10 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
     }
   ],
   "caveats": [
-    "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the ATTOM/RESO closed-sale lane).",
+    "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
     "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy counties (e.g. Charlotte) this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
     "Single-source snapshot  — broad SWFL coverage but not comprehensive coverage. Direction is neutral: one scrape is a snapshot; a second scrape gives the inventory trend.",
-    "Source is the 'for now' scrape; the licensed RESO feed (swfl_mls/nabor) replaces it in the same table when credentialed."
+    "Source is the 'for now' scrape; a licensed feed replaces it in the same table when credentialed."
   ],
   "contradicts": [],
   "confidence": 0.8,
@@ -1077,7 +1077,7 @@ s01 | SWFL active residential listings via data_lake.active_listings_residential
 }
 
 --- ACTIVE PROJECTS ---
-- active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from scraped listing data, RESO-swap-ready.
+- active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from scraped listing data, licensed-feed-swap-ready.
 
 --- RECENT NOTES ---
 - 2026-06-25: pack refined by the Refinery — 1 fact(s) from 1 source(s).

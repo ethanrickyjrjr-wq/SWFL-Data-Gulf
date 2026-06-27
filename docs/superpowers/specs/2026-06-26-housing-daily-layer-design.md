@@ -28,7 +28,7 @@ Monthly Redfin stays the **structural backbone** (existing 6 metrics + 125-ZIP s
    One **aggregated SQL query** against `data_lake.active_listings_residential` (aggregate at source — never haul rows):
    - Per ZIP: `count(*)` active inventory, `median(list_price)`, `median(days_on_market)`, `max(scraped_at)` as the as-of.
    - One region rollup row (all in-scope ZIPs).
-   - Filter `source_name='active_listings_seed'` (RESO feed swaps the same table later).
+   - Filter `source_name='active_listings_seed'` (licensed feed swaps the same table later).
    Feeds: a NEW daily ZIP `detail_table` + region-level daily `key_metrics`.
 
 2. **`daily-median-source.mts` (NEW) — daily, 3-city.**
@@ -53,7 +53,7 @@ Monthly layer — emit the 5 already-queried-but-dropped Redfin fields:
 
 ## Forward-compatibility (the "daily sales" slot)
 
-`housing_daily_sold_median_web_swfl` is a **named slot**, not a hard dependency on the web. When a licensed daily-sold feed (MLS/RESO sold) lands, it replaces the source behind this slot — the metric id, page section, and prose framing stay; only the connector + label ("web, 3 cities" → "MLS sold, ZIP") change. Same pattern as `active_listings`' `source_name` swap.
+`housing_daily_sold_median_web_swfl` is a **named slot**, not a hard dependency on the web. When a licensed daily-sold feed lands, it replaces the source behind this slot — the metric id, page section, and prose framing stay; only the connector + label ("web, 3 cities" → "licensed sold, ZIP") change. Same pattern as `active_listings`' `source_name` swap.
 
 ## Out of scope (already handled elsewhere)
 

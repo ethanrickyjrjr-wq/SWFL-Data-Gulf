@@ -48,7 +48,7 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     id: "active-listings-swfl",
     domain: "real-estate",
     scope:
-      "Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).",
+      "Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; a licensed feed swaps in later. List-side only (no closed sales).",
     ttl_seconds: 2 * 24 * 60 * 60,
   },
   {

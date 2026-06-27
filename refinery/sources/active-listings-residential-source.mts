@@ -10,7 +10,7 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
 
 /**
  * Active residential listings source — region-wide SWFL inventory from
- * data_lake.active_listings_residential (scraped listing data "for now"; the licensed RESO feed
+ * data_lake.active_listings_residential (scraped listing data "for now"; a licensed feed
  * lands in the same table later). Reads the AGGREGATE-AT-SOURCE view
  * data_lake.active_listings_residential_zip_stats (GROUPING SETS: region / county / ZIP), so this
  * connector pulls ~110 pre-aggregated rows, not ~5,000 listings (operator decree). Median is

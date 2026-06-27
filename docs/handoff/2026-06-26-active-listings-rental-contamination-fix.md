@@ -3,7 +3,7 @@
 > **✅ IMPLEMENTED 2026-06-26 — DO NOT re-do this in the active-listings session.** The fix landed
 > (extract.py + distill.py + tests + `migrations/20260626_active_listings_listing_type.sql`) and a
 > full local scrape re-tagged every live listing. **One correction to the plan below:** the
-> `.listing__price-suffix` signal exists ONLY on Stellar-MLS (Sarasota) cards; Naples-MLS (Collier)
+> `.listing__price-suffix` signal exists ONLY on Sarasota-region cards; Collier-region
 > rental cards omit it entirely, so a **price-floor backstop** (residential < $50k ⇒ rent; land never
 > reclassified) was added alongside the suffix. Result: fresh for-sale homes = 6,502, median asking
 > **$475k** (was a contaminated $315k), DOM 101, min $50k. Open follow-up (separate concern): the
@@ -28,7 +28,7 @@
 - ~1,971 `property_type='residential'` rows under $50k are **monthly rentals** ($1,100–$5,500/mo, e.g. "3006 Caring Way Unit 301" @ $1,100) scraped into the for-sale table.
 - A handful of `$18`/`$19` junk cards (empty details — broken placeholders).
 
-Effect: region "median list price" reads **$315k**, which is *below* Redfin's sold median (~$400k+) — backwards (asking should sit above sold). With rentals/land/junk excluded (`property_type='residential' AND list_price>=50000`): **5,929 listings, median list $485k, median DOM 98 days** — and the median is stable across $25k/$50k/$75k floors ($479.9k/$485k/$489k), so the contamination is entirely the sub-$50k rentals.
+Effect: region "median list price" reads **$315k**, which is *below* the regional benchmark sold median (~$400k+) — backwards (asking should sit above sold). With rentals/land/junk excluded (`property_type='residential' AND list_price>=50000`): **5,929 listings, median list $485k, median DOM 98 days** — and the median is stable across $25k/$50k/$75k floors ($479.9k/$485k/$489k), so the contamination is entirely the sub-$50k rentals.
 
 **Live-brain bug this also fixes:** `refinery/packs/active-listings-swfl.mts` is RIGHT NOW emitting the contaminated $315k as "SWFL median asking price," and its `grain_boundary.not_available` literally claims `"Rental listings — sale listings only"` — which is false. After this fix that claim becomes true.
 

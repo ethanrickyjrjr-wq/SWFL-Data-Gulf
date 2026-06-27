@@ -26,7 +26,7 @@ _RE_SQFT = re.compile(r"([\d,]+)\s*SqFt", re.I)
 _RE_DOM = re.compile(r"([\d,]+)\s*Days?\s+on\s+Market", re.I)
 # A per-period token in the card's price-suffix span marks a RENTAL (lease) listing.
 _RE_RENT_SUFFIX = re.compile(r"\bmo\b|month|week|day|season|year|annual", re.I)
-# Backstop floor for no-suffix rentals (Naples-MLS cards omit the suffix span). Below this, a
+# Backstop floor for no-suffix rentals (Collier-region cards omit the suffix span). Below this, a
 # residential listing in this feed is a lease, not a sale — confirmed live: every sub-$50k
 # residential card sampled was a monthly/seasonal rental; the cheapest real for-sale home is $50k+.
 _RENT_PRICE_FLOOR = 50000
@@ -125,10 +125,10 @@ def normalize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         property_type = "land" if (beds is None and "land" in details.lower()) else "residential"
         # PRIMARY rent/sale signal: the site renders <span class="listing__price-suffix"> ("/ month",
         # "/ week", ...) ONLY on lease listings; for-sale cards have no suffix. Confirmed live on the
-        # cards 2026-06-26 — but ONLY Stellar-MLS (Sarasota) rental cards carry it.
+        # cards 2026-06-26 — but ONLY Sarasota-region rental cards carry it.
         suffix = (raw.get("price_suffix") or "").strip()
         listing_type = "rent" if (suffix and _RE_RENT_SUFFIX.search(suffix)) else "sale"
-        # BACKSTOP: Naples-MLS (Collier) rental cards omit the suffix span — byte-identical to a sale
+        # BACKSTOP: Collier-region rental cards omit the suffix span — byte-identical to a sale
         # card, so price is the only card-visible signal left. A residential listing below the sale
         # floor is a lease. Land is never reclassified (a cheap lot is a real for-sale parcel). A
         # small residual of $50k+/season luxury rentals stays mislabeled — immaterial to the for-sale

@@ -1,7 +1,7 @@
 -- data_lake.active_listings_residential — region-wide SWFL residential active listings.
 --
--- "For now" source = the seed listings scrape (source_name='active_listings_seed'); the licensed RESO feed
--- (swfl_mls/nabor) drops into the SAME table later (RESO ListingKey -> mls_id, StandardStatus ->
+-- "For now" source = the seed listings scrape (source_name='active_listings_seed'); a licensed feed
+-- drops into the SAME table later (ListingKey -> mls_id, StandardStatus ->
 -- status, PostalCode -> zip_code), so the consuming brain never rebuilds when the source swaps.
 --
 -- PK (source_name, mls_id): idempotent upsert, multi-source by construction. zip_code is the SITE

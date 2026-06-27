@@ -4,19 +4,19 @@
 
 ## Goal
 
-Land **region-wide SWFL residential active listings** from active residential listings (johnrwood.com,
-active listings-powered ) into `data_lake.active_listings_residential` so the platform has **real
-residential numbers to run on and benchmark against today** — before per-user RESO connections
-exist. When RESO tokens land (Bridge `swfl_mls` / Trestle `nabor`, currently un-credentialed) the
-same table is populated from the licensed feed; **the scrape is the "for now," RESO is the swap.**
+Land **region-wide SWFL residential active listings** from active residential listings (the incumbent
+listings source) into `data_lake.active_listings_residential` so the platform has **real
+residential numbers to run on and benchmark against today** — before per-user licensed-feed connections
+exist. When licensed-feed credentials land (vendors currently un-credentialed) the
+same table is populated from the licensed feed; **the scrape is the "for now," the licensed feed is the swap.**
 
-## Why scrape and not RESO (decided this session)
+## Why scrape and not the licensed feed (decided this session)
 
 `lib/reso/` (committed `f64f1bc1`) is the licensed channel and returns the same fields, but it is
 **scaffolded only — no tokens exist** (`gh secret list` / `gh variable list` / `.dlt/secrets.toml`
-all clean; only `client.test.ts` mock values). It cannot pull one live row. RESO is also currently
+all clean; only `client.test.ts` mock values). It cannot pull one live row. The licensed channel is also currently
 **per-user** (`member_mls_id` filter). So the scrape is the only source of real region-wide numbers
-right now. Table shape is RESO-compatible so the future feed is a drop-in (RESO `ListingKey`→`mls_id`,
+right now. Table shape is licensed-feed-compatible so the future feed is a drop-in (`ListingKey`→`mls_id`,
 `StandardStatus`→`status`, `PostalCode`→`zip_code`, etc.).
 
 ## What we verified live (RULE 0.4/0.5, in-session)

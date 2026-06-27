@@ -2,12 +2,12 @@
 --
 -- Problem: the scrape mixed monthly/seasonal RENTALS into the for-sale list_price column
 -- (a $1,200/mo lease read as a $1,200 "home"), dragging the region median to a backwards
--- $315k (below Redfin's sold median). Root cause: distill.py only split land-vs-residential,
+-- $315k (below the regional benchmark sold median). Root cause: distill.py only split land-vs-residential,
 -- never rent-vs-sale.
 --
 -- Fix (ingest/pipelines/active_listings/distill.py): classify listing_type from the card's
---   .listing__price-suffix span ("/ month" => rent; Stellar-MLS cards), with a price-floor
---   backstop for Naples-MLS cards that omit the suffix (a residential listing < $50k is a lease;
+--   .listing__price-suffix span ("/ month" => rent; Sarasota-region cards), with a price-floor
+--   backstop for Collier-region cards that omit the suffix (a residential listing < $50k is a lease;
 --   land is never reclassified). Confirmed live via crawl4ai 2026-06-26.
 --
 -- Idempotent. Run from repo root.
@@ -16,7 +16,7 @@ ALTER TABLE data_lake.active_listings_residential
   ADD COLUMN IF NOT EXISTS listing_type text;
 
 -- Backstop on already-stored rows the scraper tagged 'sale' but are sub-floor residential
--- (the no-suffix Naples-MLS rentals).
+-- (the no-suffix Collier-region rentals).
 UPDATE data_lake.active_listings_residential
    SET listing_type = 'rent'
  WHERE property_type = 'residential' AND listing_type = 'sale' AND list_price < 50000;

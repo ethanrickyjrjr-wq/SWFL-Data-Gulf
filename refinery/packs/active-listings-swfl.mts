@@ -18,7 +18,7 @@ const SOURCE_ID = "active_listings_residential";
  * active-listings-swfl — region-wide SWFL residential active-listing inventory.
  *
  * Source: data_lake.active_listings_residential (scraped listing data "for now"; the
- * licensed RESO feed lands in the same table later — no rebuild on swap). Reads the
+ * licensed feed lands in the same table later — no rebuild on swap). Reads the
  * aggregate-at-source view active_listings_residential_zip_stats (region / county / ZIP grains).
  *
  * Tier-1 Reporter — pure deterministic aggregation, no LLM (skipSynthesisAgent/skipTriageAgent),
@@ -194,10 +194,10 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     key_metrics,
     detail_tables,
     caveats: [
-      "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the ATTOM/RESO closed-sale lane).",
+      "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
       "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy counties (e.g. Charlotte) this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
       "Single-source snapshot  — broad SWFL coverage but not comprehensive coverage. Direction is neutral: one scrape is a snapshot; a second scrape gives the inventory trend.",
-      "Source is the 'for now' scrape; the licensed RESO feed (swfl_mls/nabor) replaces it in the same table when credentialed.",
+      "Source is the 'for now' scrape; a licensed feed replaces it in the same table when credentialed.",
     ],
     direction: "neutral",
     magnitude: 0,
@@ -222,7 +222,7 @@ export const activeListingsSwfl: PackDefinition = {
   public_label: "Active Listings",
   domain: "real-estate",
   scope:
-    "Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; licensed RESO feed swaps in later. List-side only (no closed sales).",
+    "Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: scraped listing data; a licensed feed swaps in later. List-side only (no closed sales).",
   ttl_seconds: 2 * 24 * 60 * 60, // 2 days — listings change daily; cron parked until runner-IP WAF proof
 
   sources: [activeListingsResidentialSource],
@@ -265,7 +265,7 @@ export const activeListingsSwfl: PackDefinition = {
     "Coverage is broad across SWFL but not comprehensive coverage. Treat counts as a strong sample, not a census.",
   ],
   activeProject:
-    "active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from scraped listing data, RESO-swap-ready.",
+    "active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from scraped listing data, licensed-feed-swap-ready.",
   prompts: {
     triageContext:
       "Fragment is an active-listings-residential-summary with region/county/ZIP inventory counts, median asking price, and avg days-on-market. Decision-relevant by construction; pack is pure deterministic aggregation.",

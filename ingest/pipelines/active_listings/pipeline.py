@@ -5,8 +5,8 @@ Usage:
   python -m ingest.pipelines.active_listings.pipeline --dry-run
   python -m ingest.pipelines.active_listings.pipeline --county Collier
 
-Lands data_lake.active_listings_residential (source_name='active_listings_seed'). The licensed RESO feed
-(swfl_mls/nabor) drops into the same table later — this scrape is the "for now."
+Lands data_lake.active_listings_residential (source_name='active_listings_seed'). The licensed feed
+drops into the same table later — this scrape is the "for now."
 Design: docs/superpowers/specs/2026-06-25-active-listings-residential-design.md
 """
 from __future__ import annotations

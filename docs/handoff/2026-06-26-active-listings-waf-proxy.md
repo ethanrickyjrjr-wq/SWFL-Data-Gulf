@@ -42,10 +42,10 @@ The documented remedy is `CRAWL4AI_PROXY`. **The trap:** that env var is only ho
 
 ## Key facts / pointers
 
-- **Source:** `johnrwood.com/listings/` — base URL is the `LISTINGS_SOURCE_BASE_URL` secret (kept out of the repo). robots allows `/listings/` + `/listing/*`.
+- **Source:** the incumbent listings source — base URL lives in the `LISTINGS_SOURCE_BASE_URL` secret (kept out of the repo). robots allows the `/listings/` index + `/listing/*` detail paths.
 - **Counties:** Collier, Lee, Charlotte, Sarasota (Glades/Hendry return ~0, harmless). ~2,292 listings in Collier alone; a clean full seed previously held **9,368 rows** (the volume guard's prior baseline — that's why a Collier-only real run trips `assert_vs_baseline` as a false "collapse"; not a bug).
 - **Pipeline:** `ingest/pipelines/active_listings/{pipeline,extract,distill}.py`. Per-county idempotent upsert (a late-county 403 keeps earlier counties' rows). Fails loud only on total-empty.
-- **Table:** `data_lake.active_listings_residential` (`source_name='active_listings_seed'`; the licensed RESO feed swaps `source_name` into the same table later).
+- **Table:** `data_lake.active_listings_residential` (`source_name='active_listings_seed'`; the licensed feed swaps `source_name` into the same table later).
 - **Consumer brain:** `refinery/packs/active-listings-swfl.mts`.
 - **Proxy precedent in-repo:** `crawl_client.py:51 _proxy_from_env()` reads `CRAWL4AI_PROXY` → `ProxyConfig`, applied at lines 139/355 (browser strategy only).
 - **Evidence runs:** clean single-county = `28254764976` (Collier, 2,292, 0×403); failed all-county = `28256971415` (0 listings, Hendry 403); the volume-guard false-collapse = `28256392474` (2,292 upserted then guard exit 1).
