@@ -1,3 +1,14 @@
+## 2026-06-27 (main) — research: Realtor.com data library — FGCU RERI source confirmed, website page + spec
+
+FGCU RERI dashboard footer reveals their source: Realtor.com public S3 CSV (attribution-only,
+no API key, monthly grain, all US ZIPs). Same data we can pull directly. Columns confirmed:
+active_listing_count, median_listing_price, median_days_on_market (the DOM we've been missing),
+price_reduced_share, pending_ratio — all with _yy YoY variants.
+Created `/r/realtor-data` website page documenting findings + ingest plan.
+Spec: `docs/superpowers/specs/2026-06-27-realtor-data-library-ingest-design.md`.
+Homepage visual changes NOT pushed — need proper research pass before touching the map defaults.
+Next: build ingest pipeline (stream-filter → data_lake.realtor_zip_metrics → realtor-market-swfl pack).
+
 ## 2026-06-27 (main) — docs: _ASSISTANT/ spec + plan — session brief + spec cleanup system
 
 Designed and planned the `_ASSISTANT/` folder system. Spec at
