@@ -1,3 +1,14 @@
+## 2026-06-27 (main) — docs: _ASSISTANT/ spec + plan — session brief + spec cleanup system
+
+Designed and planned the `_ASSISTANT/` folder system. Spec at
+`docs/superpowers/specs/2026-06-27-assistant-folder-design.md`, plan at
+`docs/superpowers/plans/2026-06-27-assistant-folder.md`.
+6-task build: scaffolding → `assistant-lib.mjs` + tests → `assistant-first-run.mjs` →
+`assistant-weekly.mjs` (writes `TODAY.md`) → `new-build.mjs` (spec stub + check opener) →
+extend `session-kickoff.mjs` (spec clutter line + TODAY.md block in KICKOFF).
+Nothing coded yet — handoff at `docs/handoff/2026-06-27-assistant-folder-handoff.md`.
+Next: open fresh session, say "Execute the plan at docs/superpowers/plans/2026-06-27-assistant-folder.md using superpowers:subagent-driven-development".
+
 ## 2026-06-27 (main) — fix: rename brain-platform → SWFL-Data-Gulf in all runtime refs
 
 GitHub repo renamed from `ethanrickyjrjr-wq/brain-platform` to `ethanrickyjrjr-wq/SWFL-Data-Gulf`.
