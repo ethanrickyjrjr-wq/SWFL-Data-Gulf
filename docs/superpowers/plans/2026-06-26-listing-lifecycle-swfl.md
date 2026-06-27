@@ -8,11 +8,22 @@
 
 **Tech Stack:** Python 3.12 (crawl4ai HTTP strategy, BeautifulSoup), Postgres `data_lake.*` (idempotent SQL via `Bun.SQL`), TypeScript/Bun refinery (`PackDefinition` / `SourceConnector`), GitHub Actions cron (parked until runner-IP WAF-proven).
 
+## Plan corrections (2026-06-27 — operator + advisor review; these OVERRIDE any conflicting task text below)
+
+1. **PULL-ALL, not "moving categories only."** Per county, daily: pull the FULL feed (all statuses), merge `listing_state`, append `listing_transitions` — mirror the proven `active_listings` per-county pull, **staggered** across the day vs the 403 throttle. A complete pull always holds the active set, so pulled-by-elimination + price-cut detection are valid with no special-casing. "Scan only moving categories" is a back-pocket cost optimization, adopted later only if Source-B volume trips runner WAF. (Operator: *"we are pulling all and then updating. very simple."*)
+2. **`sale_or_rent` is part of BOTH keys.** One address can be live for sale AND for rent at once (27196 Belle Rio). `listing_state` PK = `(source_name, address_key, sale_or_rent)`; `listing_transitions` natural key = `(source_name, address_key, sale_or_rent, to_state, at)`. We already classify rent/sale (the shipped rental-fix), so it's near-free now and expensive to backfill later — the capture-wide-slice-late call.
+3. **`listing_transitions` uniqueness guard.** `CONSTRAINT uq_listing_transition UNIQUE (source_name, address_key, sale_or_rent, to_state, at)` + append `ON CONFLICT … DO NOTHING`. Without it a cron double-fire / overlapping manual run / mid-run crash double-appends and silently inflates every headline (deal-collapses, absorptions, withdrawals).
+4. **`diff_states(prior, scanned, today, scan_complete, is_seed)`** (replaces `pulled_visible`). `scan_complete` (from `coverage_guard`) gates pulled-by-elimination + price-cut: absence on an incomplete pull = scrape gap, NOT a withdrawal (the truncated-Lee-looked-like-1,683-came-off trap). `is_seed` (prior empty for this scope = first-ever run) stamps every emitted transition `seed=True`; the brain's flow metrics filter `seed=false` so day-1 doesn't read the whole inventory as "new this period." Key the `prior`/`scanned` dicts on `(address_key, sale_or_rent)`.
+5. **Go-live is LOCAL-FIRST.** Bank the first days by running the pipeline locally from the operator's machine; the GHA-runner cron stays **parked** until the residential proxy is wired (the HTTP-strategy `extract.py` must be plumbed to read `CRAWL4AI_PROXY` — see the WAF-proxy handoff; Source B is ~2× volume so it trips the runner WAF *harder*, not softer). Task 1.7's "rows land from the runner with no 403" is the eventual graduation, not the near-term step.
+6. **Phase 0 is near-nothing — but confirm ONE thing.** Under pull-all v1 we don't need the per-status category-query params (those are only for the later moving-categories optimization); we pull the full per-county feed (proven shape) and read the **status badge** off each card. The ONE Phase-0 check that gates this: does Source B's default per-county feed actually RETURN non-active listings (pending / sold / temporarily-off-market), or only active? If only active, v1 needs the status queries after all. Everything else (reachability, taxonomy, coverage, address-key) is already proven.
+
+> The actual test files written during execution are the source of truth; the illustrative test snippets in Tasks 1.4–1.6 predate these corrections (they still say `pulled_visible`).
+
 ## Global Constraints
 
 Every task's requirements implicitly include this section. Values are verbatim, non-negotiable.
 
-- **NO company / portal / feed-provider names, no "MLS" / "IDX" / "RESO" / board names (`swfl_mls`/`nabor`) anywhere in the repo.** Sources are **Source A** (incumbent, capped) and **Source B** (candidate, full-coverage), generically. Real identities + URLs live ONLY in `*_BASE_URL` secrets (e.g. `LISTING_LIFECYCLE_BASE_URL`), never committed. (Operator decree 2026-06-26: "keep any company names out or mls or idx reference until we get our own when we get users.")
+- **NO company / portal / feed-provider names, no "MLS" / "IDX" / "RESO" / board names anywhere in the repo.** Sources are **Source A** (incumbent, capped) and **Source B** (candidate, full-coverage), generically. Real identities + URLs live ONLY in `*_BASE_URL` secrets (e.g. `LISTING_LIFECYCLE_BASE_URL`), never committed. (Operator decree 2026-06-26: "keep any company names out or mls or idx reference until we get our own when we get users.")
 - **Don't re-ingest the full market daily.** Scan only the small, *moving* status categories (New / Pending / Sold / recently-changed); the bulk active feed is pulled only on the coverage-guard cadence, not daily. (Operator: "we are pulling all and then updating. very simple.")
 - **Capture wide, slice late.** ONE pipeline, ONE wide `listing_state` table, ONE transition engine. Price range / sqft / ZIP / property type / beds are **columns**, sliced in each brain's SQL at query time — **never a lane per dimension** (a new cut is a new query, never a new pipeline). (Operator: "dont want to do too much because every brain falls along with the pipelines.")
 - **No-invention (four-lane moat).** Every number is a real scraped value (lane 1). The *state* is the source's own label; seller *motivation* is `[INFERENCE]` only, with the cited base fact + one falsifier. Never assert *why* beyond the labeled transition.
@@ -147,16 +158,18 @@ git commit -F <msg-file>   # "docs(lifecycle): Phase-0 source contract — categ
 - [ ] **Step 1: Write the DDL (idempotent, wide columns, ODD-empty-tolerant).**
 
 ```sql
--- migrations/2026XXXX_listing_lifecycle.sql — listing lifecycle state machine.
--- Identity is the ADDRESS (address_key), never the rotating listing id. Capture wide, slice late.
+-- migrations/20260627_listing_lifecycle.sql — listing lifecycle state machine.
+-- Identity is the ADDRESS (address_key) + sale_or_rent, never the rotating listing id. One address
+-- can be live for sale AND for rent at once (27196 Belle Rio) => sale_or_rent is in the key.
+-- Capture wide, slice late.
 CREATE TABLE IF NOT EXISTS data_lake.listing_state (
   source_name     text NOT NULL DEFAULT 'lifecycle_seed',  -- neutral; never a vendor/board name
   address_key     text NOT NULL,                           -- normalized street + zip (Task 1.2)
+  sale_or_rent    text NOT NULL DEFAULT 'sale',            -- part of the key: a sale + a rent listing coexist
   state           text NOT NULL,                           -- new|active|pending|under_contract|contingent|coming_soon|sold|pulled|back_on_market
   listing_id      text,                                    -- current source listing id (may rotate on relist)
   list_price      bigint,
-  list_suffix     text,                                    -- per-period token => this is a lease, not a sale
-  sale_or_rent    text NOT NULL DEFAULT 'sale',            -- 'sale' | 'rent' (suffix/price-floor derived)
+  list_suffix     text,                                    -- raw per-period token (rent marker), kept for audit
   beds            numeric,
   baths           numeric,
   sqft            integer,
@@ -173,13 +186,14 @@ CREATE TABLE IF NOT EXISTS data_lake.listing_state (
   first_seen      timestamptz NOT NULL DEFAULT now(),
   last_seen       timestamptz NOT NULL DEFAULT now(),
   scraped_at      timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (source_name, address_key)
+  PRIMARY KEY (source_name, address_key, sale_or_rent)
 );
 
 CREATE TABLE IF NOT EXISTS data_lake.listing_transitions (
   id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   source_name         text NOT NULL DEFAULT 'lifecycle_seed',
   address_key         text NOT NULL,
+  sale_or_rent        text NOT NULL DEFAULT 'sale',
   from_state          text,                                -- null on first appearance (=> 'new')
   to_state            text NOT NULL,
   at                  date NOT NULL,
@@ -187,12 +201,18 @@ CREATE TABLE IF NOT EXISTS data_lake.listing_transitions (
   price               bigint,
   price_delta         bigint,                              -- vs prior state's price (cut/raise)
   days_in_prev_state  integer,
-  scraped_at          timestamptz NOT NULL DEFAULT now()
+  seed                boolean NOT NULL DEFAULT false,      -- true on the first-ever scan: baseline, NOT real flow
+  scraped_at          timestamptz NOT NULL DEFAULT now(),
+  -- one transition into a given state, per property+sale/rent, per day (daily grain) =>
+  -- a cron double-fire / overlapping manual run / mid-run crash can't double-count headlines.
+  CONSTRAINT uq_listing_transition UNIQUE (source_name, address_key, sale_or_rent, to_state, at)
 );
 CREATE INDEX IF NOT EXISTS ix_listing_transitions_addr ON data_lake.listing_transitions (address_key, at);
+CREATE INDEX IF NOT EXISTS ix_listing_transitions_flow ON data_lake.listing_transitions (to_state, at) WHERE seed = false;
 CREATE INDEX IF NOT EXISTS ix_listing_state_zip ON data_lake.listing_state (zip_code, state);
 
-GRANT SELECT ON ALL TABLES IN SCHEMA data_lake TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON data_lake.listing_state TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON data_lake.listing_transitions TO service_role;
 NOTIFY pgrst, 'reload schema';
 ```
 
@@ -314,7 +334,7 @@ def test_parse_cards_extracts_wide_fields(pending_html):
 
 **Interfaces:**
 - Consumes: `prior: dict[address_key, StateRow]` (current `listing_state`) + `scanned: dict[address_key, ScanRow]` (today's category scan) + `pulled_resolution` (the Task 0.2 verdict).
-- Produces: `diff_states(prior, scanned, today, pulled_visible) -> tuple[list[StateUpsert], list[TransitionRow]]` — pure, no DB, no I/O. The upserts MERGE (never delete); transitions are the durable history.
+- Produces: `diff_states(prior, scanned, today, scan_complete, is_seed) -> tuple[list[StateUpsert], list[TransitionRow]]` — pure, no DB, no I/O. The upserts MERGE (never delete); transitions are the durable history. **`scan_complete`** (from `coverage_guard`) gates by-elimination signals: emit `→ pulled` (prior-active absent today) and price-cut-within-active ONLY when `True`. **`is_seed`** (prior empty for the scope) stamps emitted transitions `seed=True` (day-1 baseline, excluded from flow). `prior`/`scanned` are keyed on `(address_key, sale_or_rent)`. (See **Plan corrections** §2–4 — supersedes the `pulled_visible` snippets below.)
 
 - [ ] **Step 1: Write the failing tests — every signal-bearing transition.**
 

@@ -1,3 +1,25 @@
+## 2026-06-27 (main) — feat(listing-lifecycle): land the Source-B pipeline + open-DOM view (foundation; brain-wire handoff)
+
+Pushed the listing-lifecycle foundation (state machine that beats Source B's ~3,000 deep-pagination
+cap via price-band partitioning). Seeded live: Lee 7,412 / Collier 2,749 / Hendry 298 = 10,459 active
+(Source A was undercounting Lee at 2,395 — same cap; this fixes it). 31 pytest green.
+- `migrations/20260627_listing_lifecycle.sql` — `data_lake.listing_state` + `listing_transitions`
+  (idempotent `uq_listing_transition`).
+- `ingest/pipelines/listing_lifecycle/` (address_key, extract band-partition, transitions diff,
+  coverage_guard, distill, pipeline) + `ingest/tests/pipelines/listing_lifecycle/` (31 tests).
+- `docs/sql/20260627_listing_active_stats.sql` — region/county/ZIP GROUPING SETS view, same column
+  shape as the old Source-A view. **DOM column hardcoded NULL (open slot) per operator decree** — the
+  days_in_state tick is not true DOM for mid-life inventory; fill from a real source later (detail-page
+  list date / bridge MLS DOM), never fake it.
+- Name-clean sweep: scrubbed the platform-vendor / board / brokerage identity strings from extract.py
+  / test_extract.py / the fixture / plan / seed handoff (generic Source A/B only). Functional CSS
+  selectors + the `mls` field kept. Host stays in `LISTING_LIFECYCLE_BASE_URL` only.
+- Live `active-listings-swfl` brain UNCHANGED (still reads Source A) — the connector swap is a live
+  key_metrics change → awaits operator's a/b/c flip pick.
+Next: per `docs/handoff/2026-06-27-listing-lifecycle-brain-wire-and-automate.md` — wire the brain
+(decision a/b/c, b recommended = no county goes dark) + build the parked daily cron (local-first;
+runner WAF unproven). Sarasota/Charlotte seeding parked.
+
 ## 2026-06-27 (main) — fix(ci): restore 3910/0 — plugged 3 CI failures + mock.module flapper
 
 Fixed all CI failures that had been red since chore(scrub) (d3d3209f):
