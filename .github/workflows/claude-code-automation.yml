@@ -1,0 +1,27 @@
+name: Claude Code Automation
+on:
+  issues:
+    types: [assigned, opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-task:
+    if: |
+      (github.event_name == 'issues') ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_args: --issue ${{ github.event.issue.number }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
