@@ -1,4 +1,10 @@
-import { test, expect, mock } from "bun:test";
+import { test, expect, mock, afterAll } from "bun:test";
+import * as realClient from "./client";
+// Snapshot the real module before mock.module replaces it (process-global, no per-file isolation).
+const clientOrig = { ...realClient };
+afterAll(() => {
+  mock.module("./client", () => clientOrig);
+});
 
 // Mock the ResoClient module so network never fires.
 const mockGet = mock(async () => [

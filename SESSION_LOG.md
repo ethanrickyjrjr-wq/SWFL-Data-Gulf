@@ -1,3 +1,15 @@
+## 2026-06-27 (main) — fix(test): RESO mock.module leakage — restore ./client in afterAll (3 files)
+
+CI red since `0583da9c` — `client.test.ts` was receiving a mocked `ResoClient` (constructor no-throw,
+`get: [class Mock]`) from `pull-zip-stats.test.ts`, `pull-agent-listings.test.ts`, and `sync.test.ts`.
+All three called `mock.module("./client", ...)` at top-level without any afterAll restore.
+Root cause: `mock.module` is process-global under `bun test` (no per-file isolation); the last file
+that ran with `mockGet.mockImplementation(async () => [])` cleared the mock, so `client.test.ts`
+saw `results.length = 0`, resolved promise instead of rejection, and constructor never threw.
+Fix: added `import * as realClient` + snapshot + `afterAll(() => mock.module("./client", () => clientOrig))`
+to all three leaking files — same pattern as `brain-snapshot.test.ts` / `report-path.test.ts`.
+3911/0 locally. CI should go green.
+
 ## 2026-06-27 (main) — chore(deps): update 23 packages — patches/minors + SDK 0.106 + TS 6
 
 Weekly dep scan (new cloud routine) surfaced 24 outdated packages. Updated 23:
