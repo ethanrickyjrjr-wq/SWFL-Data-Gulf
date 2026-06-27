@@ -25,6 +25,7 @@ import {
 import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
 import { asOfFromToken } from "../../../../lib/project/as-of";
+import { getZipMapColor } from "../../../../lib/landing/home-map-data";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 import { MetroAreaChart } from "../../../../components/charts";
 import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
@@ -48,27 +49,6 @@ function grainBucket(grain: Grain): SectionBucket {
   if (grain === "city" || grain === "corridor") return "city";
   if (grain === "county") return "county";
   return "swfl";
-}
-
-// ── Color helpers — exact copy from original /z/[zip]/page.tsx ────────────
-function hexToRgb(h: string): [number, number, number] {
-  return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-}
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * Math.max(0, Math.min(1, t));
-}
-function lerpColor(c1: string, c2: string, t: number): string {
-  const [r1, g1, b1] = hexToRgb(c1);
-  const [r2, g2, b2] = hexToRgb(c2);
-  return `rgb(${Math.round(lerp(r1, r2, t))},${Math.round(lerp(g1, g2, t))},${Math.round(lerp(b1, b2, t))})`;
-}
-// Flood gradient: low=#1c5c4a → mid=#d4b370 → high=#e08158
-// Returns rgb(...) string so the glow replacement trick works
-function floodFillColor(pct: number): string {
-  const t = Math.max(0, Math.min(1, pct / 100));
-  return t < 0.5
-    ? lerpColor("#1c5c4a", "#d4b370", t * 2)
-    : lerpColor("#d4b370", "#e08158", (t - 0.5) * 2);
 }
 
 function fmtCurrency(val: number): string {
@@ -192,8 +172,8 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const permitsRankPos = permitsIdx >= 0 ? allPermitEntries.length - permitsIdx : null;
   const totalPermitsZips = allPermitEntries.length;
 
-  // ── Fill color — rgb() string so glow replace() works ────────────────────
-  const fillColor = hasFlood ? floodFillColor(floodPct) : "#3DC9C0";
+  // ── Fill color — same formula as homepage MapCanvas (flood metric = default) ─
+  const fillColor = getZipMapColor(zip);
 
   // ── Identity ──────────────────────────────────────────────────────────────
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);
@@ -252,7 +232,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     );
     if (saleToList != null) metricSuggestions.push(hm("Sale-to-list ratio", `${saleToList}%`));
     if (mos != null) metricSuggestions.push(hm("Months of supply", String(mos)));
-    if (homesSold != null) metricSuggestions.push(hm("Homes sold (90d)", String(homesSold)));
+    if (homesSold != null) metricSuggestions.push(hm("Homes sold (90 days)", String(homesSold)));
     if (inventory != null) metricSuggestions.push(hm("Active inventory", String(inventory)));
   }
   if (hasFlood) {
@@ -293,12 +273,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           {shapeFound ? (
             <div
               className="zp-shape-wrap"
-              style={
-                {
-                  "--zip-fill": fillColor,
-                  "--zip-glow": fillColor.replace("rgb(", "rgba(").replace(")", ",0.45)"),
-                } as React.CSSProperties
-              }
+              style={{ "--zip-fill": fillColor } as React.CSSProperties}
               dangerouslySetInnerHTML={{ __html: svgMarkup }}
             />
           ) : (
@@ -326,7 +301,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           <div className="zp-stat-cell">
             <div className="zp-stat-label">Annual Flood Loss</div>
             <div className="zp-stat-value">{hasFlood ? fmtCurrency(aal) : "—"}</div>
-            <div className="zp-stat-sub">FEMA NFIP avg/property</div>
+            <div className="zp-stat-sub">Flood insurance avg/home</div>
             {floodRankPos !== null && (
               <div className="zp-stat-tag">
                 #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs
@@ -344,7 +319,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
             )}
           </div>
           <div className="zp-stat-cell">
-            <div className="zp-stat-label">New Permits (90d)</div>
+            <div className="zp-stat-label">New Permits (90 Days)</div>
             <div className="zp-stat-value">{hasPermits ? permitsCount.toLocaleString() : "—"}</div>
             <div className="zp-stat-sub">Lee County building permits</div>
             {permitsRankPos !== null && (
@@ -378,7 +353,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                 )}
               </div>
               <div className="zp-metric-value">{fmtCurrency(aal)}</div>
-              <div className="zp-metric-sublabel">FEMA NFIP avg annual loss per property</div>
+              <div className="zp-metric-sublabel">Avg annual flood loss per home</div>
               <div className="zp-bar-track">
                 <div className="zp-bar-fill zp-bar-fill--flood" style={{ width: `${floodPct}%` }} />
               </div>
@@ -415,7 +390,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           {hasPermits && (
             <div className="zp-metric-block">
               <div className="zp-metric-header">
-                <div className="zp-metric-label">New Permits (90d)</div>
+                <div className="zp-metric-label">New Permits (90 Days)</div>
                 {permitsRankPos !== null && (
                   <div className="zp-metric-rank">
                     #{permitsRankPos} of {totalPermitsZips} ZIPs
@@ -443,7 +418,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         <aside className="zp-rail">
           <div className="zp-rail-header">
             <div className="zp-rail-metric-name">Data Summary</div>
-            <div className="zp-rail-sublabel">All three tracked metrics</div>
+            <div className="zp-rail-sublabel">Key data points</div>
           </div>
           <div className="zp-rail-zip-header">
             <div className="zp-rail-zip-code">{zip}</div>
@@ -491,7 +466,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
           {hasPermits && (
             <div className="zp-rail-metric-row">
-              <div className="zp-rail-row-label">New Permits (90d)</div>
+              <div className="zp-rail-row-label">New Permits (90 Days)</div>
               <div className="zp-rail-row-value">{permitsCount.toLocaleString()}</div>
               {permitsRankPos !== null && (
                 <div className="zp-rail-row-rank">
@@ -508,7 +483,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           )}
 
           <div className="zp-rail-footer">
-            Sources: FEMA NFIP · housing-swfl brain · Lee County permits
+            Sources: FEMA flood insurance · home sales data · Lee County permits
           </div>
         </aside>
       </div>
@@ -576,7 +551,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                   {homesSold != null && (
                     <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Homes Sold (90d)
+                        Homes Sold (90 Days)
                       </p>
                       <p className="mt-1 font-mono text-lg font-semibold text-white">{homesSold}</p>
                     </div>
@@ -601,7 +576,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                     <p className="mt-1 font-mono text-lg font-semibold text-white">
                       ${aal.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-500">FEMA NFIP per insured property</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Flood insurance, per insured home
+                    </p>
                   </div>
                   <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
@@ -609,7 +586,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                     </p>
                     <p className="mt-1 font-mono text-lg font-semibold text-white">{floodPct}th</p>
                     <p className="mt-0.5 text-xs text-gray-500">
-                      #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs in SWFL
+                      #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs in the area
                     </p>
                   </div>
                 </>

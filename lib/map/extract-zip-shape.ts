@@ -174,6 +174,18 @@ export function parseBounds(content: string): Bounds {
     }
   }
 
+  // Also parse <polygon points="x1 y1 x2 y2 ..."> — four ZIPs (33972,33973,33975,33965)
+  // use polygon-only geometry; without this they fall through to the full-map fallback.
+  const pointsRe = /\spoints="([^"]*)"/g;
+  let pm: RegExpExecArray | null;
+  while ((pm = pointsRe.exec(content)) !== null) {
+    const nums = pm[1]
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number);
+    for (let i = 0; i + 1 < nums.length; i += 2) upd(nums[i], nums[i + 1]);
+  }
+
   if (!Number.isFinite(b.minX)) return { minX: 0, minY: 0, maxX: 1190, maxY: 1237 };
   return b;
 }

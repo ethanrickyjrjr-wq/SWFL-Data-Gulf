@@ -1,3 +1,19 @@
+## 2026-06-27 (main) — fix(zip-report): cutout colors match homepage, no glow, fix tiny polygon ZIPs, jargon cleanup
+
+Four fixes to the ZIP report hero:
+1. **Color** — cutout now uses `getZipMapColor(zip)` (exported from `home-map-data.ts`), the exact
+   same flood-gradient formula as MapCanvas. Previously fell back to `#3DC9C0` (bright teal) for any
+   ZIP with no live flood brain data, causing color mismatch vs homepage. All 57 ZIPs now consistent.
+2. **No glow** — removed `filter: drop-shadow(...)` from `zip-report.css` and `--zip-glow` CSS var
+   from the page style prop.
+3. **Tiny shapes fixed** — `parseBounds()` in `extract-zip-shape.ts` now also reads `<polygon
+   points="...">` geometry. Four ZIPs (33972, 33973, 33976, 33965/FGCU) use polygon-only SVG
+   elements; without this they fell back to the full-map bounds (1190×1237) and rendered as dots.
+4. **Jargon** — removed 8 user-facing jargon strings: "FEMA NFIP avg/property" → "Flood insurance
+   avg/home"; "housing-swfl brain" → "home sales data"; "(90d)" → "(90 Days)" throughout; "ZIPs in
+   SWFL" → "ZIPs in the area"; "All three tracked metrics" → "Key data points".
+Next: live-verify on Vercel after deploy.
+
 ## 2026-06-27 (main) — docs/config: ezhomesearch MCP + incremental state-machine handoff + map failure log
 
 - `.mcp.json`: added ezhomesearch MCP server (HTTP, OAuth clientId)

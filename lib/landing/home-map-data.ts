@@ -287,3 +287,24 @@ export const HOME_MAP_DATA: HomeMapData = {
   },
 };
 export const METRIC_ORDER: MetricKey[] = ["flood", "value", "permits"];
+
+function _hexToRgb(h: string): [number, number, number] {
+  return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+}
+function _lerp(a: number, b: number, t: number) {
+  return a + (b - a) * Math.max(0, Math.min(1, t));
+}
+function _lerpColor(c1: string, c2: string, t: number) {
+  const [r1, g1, b1] = _hexToRgb(c1);
+  const [r2, g2, b2] = _hexToRgb(c2);
+  return `rgb(${Math.round(_lerp(r1, r2, t))},${Math.round(_lerp(g1, g2, t))},${Math.round(_lerp(b1, b2, t))})`;
+}
+
+/** Same color formula used by MapCanvas — call this server-side to match homepage colors exactly. */
+export function getZipMapColor(zip: string, metric: MetricKey = "flood"): string {
+  const md = HOME_MAP_DATA.metrics[metric];
+  const val = md.data[zip];
+  if (val === undefined) return "#2a3942";
+  const t = Math.max(0, Math.min(1, (val - md.low) / (md.high - md.low)));
+  return t < 0.5 ? _lerpColor(md.c0, md.c1, t * 2) : _lerpColor(md.c1, md.c2, (t - 0.5) * 2);
+}

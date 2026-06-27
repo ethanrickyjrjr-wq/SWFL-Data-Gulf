@@ -34,7 +34,6 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 0 32px var(--zip-glow, rgba(10,128,120,0.55)));
 }
 .zp-shape-wrap svg path,
 .zp-shape-wrap svg polygon {
