@@ -1,114 +1,105 @@
-# Design — delisting-events-swfl (listing-level withdrawn/relisted seller-motivation signal)
+# Design — listing-lifecycle-swfl (property lifecycle state machine: new → active → pending → sold / pulled / back-on-market)
 
 **Date:** 2026-06-26
-**Status:** Design — brainstormed + research-grounded (crawl4ai, live). Approved; pending spec review → implementation plan.
-**Brain:** `delisting-events-swfl` (NEW)
+**Status:** Design — brainstormed + research-grounded (crawl4ai, live). Pending spec review → implementation plan.
+**Brain:** `listing-lifecycle-swfl` (NEW)
 **Complements (does NOT duplicate):** `seller-stress-swfl` (monthly ZIP-aggregate delisting RATE).
 
 > **Source naming convention (this repo is public).** Listing sources are referenced
-> GENERICALLY here — **Source A** (the incumbent, capped) and **Source B** (the candidate,
-> full-coverage). No company / portal / feed-provider names, and no "MLS"/"IDX" terms, live in
-> the repo. Real identities + URLs live in secrets (the existing incognito-source convention:
-> `LISTINGS_SOURCE_BASE_URL`-style env vars), until we have our own licensed listing access.
+> GENERICALLY — **Source A** (incumbent, capped) and **Source B** (candidate, full-coverage). No
+> company / portal / feed-provider names, no "MLS"/"IDX" terms, live in the repo. Real identities +
+> URLs live in `*_BASE_URL` secrets (the existing incognito-source convention), until we have our
+> own licensed listing access.
 
 ---
 
 ## Problem
 
-When a home leaves the active market, *why* it left is a strong signal — and we throw it away. A seller who **withdraws** in frustration, **relists** repeatedly without dropping price, or **flips from sale to rent** is motivated; a home that goes **pending/sold** is the opposite. Today:
-- `seller-stress-swfl` has the **macro** view: a monthly *share-delisted %* per ZIP. It can't name a single property.
-- Our active-listings scrape sees only the **active** feed; a listing that leaves just vanishes, and the per-county recency view (shipped 2026-06-26) *filters those stale rows out*. The signal is in the discard pile.
+The market moves continuously, and we were only photographing one frame of it — the **active** for-sale feed — and *discarding* everything that left. But a listing leaving "active" isn't noise to delete; it **moves to another state** (pending, sold, withdrawn, back-on-market), and **the move itself is the signal**. We were throwing away the most valuable data.
 
-Goal: a **listing-level** brain that names which homes withdrew / relisted / flipped, with last price, days-on-market, and price-cut-before-delist — cited facts, motivation tagged `[INFERENCE]`. Phase 1 is a market-intelligence signal; owner-contact lead-gen is **Phase 3, deferred** (needs a skip-trace data lane we don't have).
+`seller-stress-swfl` has the **macro** view (a monthly ZIP-aggregate delisting %). What's missing is the **live, listing-level lifecycle**: which specific homes just went pending, which deal just collapsed (pending→back-active), which seller just withdrew, which relisted. Tracked by address, this reads the market *as it moves* and hands master continuously-updated absorption / withdrawal / deal-collapse signal. Phase 1 is the intelligence layer; owner-contact lead-gen is **Phase 3, deferred**.
 
-## Research findings (all live via crawl4ai, 2026-06-26 — the design rests on these, not memory)
+## Research findings (all live via crawl4ai, 2026-06-26 — design rests on these, not memory)
 
-1. **A vanished listing's reason is NOT knowable from the active feed alone.** The first "delisted" home we checked ($1.25M) was labeled **Pending** — a sale in progress, not a withdrawal. Naively counting disappearances as "delistings" is mostly counting *successful sales*.
-2. **Source A (incumbent) is unusable for this**, two ways: (a) it caps each per-county query at ~2,400 results, sorted price-descending, so we hold only the most expensive slice (every Lee ZIP floored at ~$255k while the market has sub-$200k homes — confirmed by sorting ascending: Source A *does* have $110k homes, our walk just never reaches them); (b) its cards carry **no status label** — reason resolution would require a per-listing detail fetch.
-3. **Source B (candidate) is the right source.** Full listing feed (a card was listed by a brokerage *other than the source operator* — so it's the whole regional feed, not their own listings), server-rendered, crawl4ai HTTP-strategy scrapable via per-county listing pages with a simple page param, paging to natural exhaustion (20/page). Coverage ~2x Source A: **Lee 7,447 · Sarasota 5,272 · Charlotte 3,337 · Collier 2,758**, including the affordable inventory (page 2 of Lee led with a $264,999 Lehigh Acres home). It **prints the total count** per county page (the coverage-guard target).
-4. **The killer feature: status is on the card, full taxonomy.** Each card is labeled `active · pending · under-contract · contingent · sold · coming-soon · temporarily-off-market · back-on-market`. This **eliminates the detail-fetch reason-resolver**: *temporarily-off-market* ≈ withdrawn, *back-on-market* ≈ relisted (labeled explicitly), *pending*/*sold* = the sale path. We read the reason straight off the daily snapshot.
-5. **The property identity is the ADDRESS, not the listing id.** A relisting usually gets a *new* listing id; keying on the listing id reads a relist as two unrelated events. Confirmed in our own data: 11145 2nd Ave appeared under two different listing ids, same $294,900, 344 vs 599 days-on-market (unrealistic seller); 14150 Ostrom Ave `$1,290,000`→`$895,000` across a relist; 27196 Belle Rio listed **for sale at $1.05M AND for rent at $5,000/mo** simultaneously (a motivated/flexible seller — so the key must span sale and rent).
+1. **Status is on the card, full taxonomy.** Every Source-B card is labeled: `active · new · pending · under-contract · contingent · coming-soon · back-on-market · sold · temporarily-off-market`. We read each listing's *current category* directly — no inference from disappearance, no detail fetch.
+2. **Categories are queryable.** Source B's search supports status filtering (status inputs in the search form). So each category can be pulled as its own (small) query — the basis for a cheap daily category scan rather than a full-market re-pull. (Pretty category URLs like `/sold/` 404; the queries route through the search/results endpoint with status params — to nail at implementation.)
+3. **The property identity is the ADDRESS, not the listing id.** A relisting gets a *new* listing id; keying on the id reads a relist as two unrelated events. Proven in our own data: 11145 2nd Ave under two listing ids, same $294,900, 344 vs 599 days-on-market (won't drop price); 14150 Ostrom Ave `$1,290,000`→`$895,000` across a relist; 27196 Belle Rio listed for sale at $1.05M AND for rent at $5,000/mo (so the key spans sale and rent).
+4. **Source B is the right feed** (full regional coverage, ~2x Source A: Lee 7,447 · Sarasota 5,272 · Charlotte 3,337 · Collier 2,758, incl. affordable inventory; prints the county total; server-rendered, crawl4ai HTTP-scrapable). **Source A is unusable** — caps each county query at ~2,400 sorted price-desc (we hold only the luxury slice; sub-$200k homes exist but our walk never reaches them) and carries no card status.
 
-## Source connector — Source B
+## The lifecycle state machine (the core model)
 
-`ingest/pipelines/listings_b/` (new), crawl4ai per Bible §0.3. Real base URL in a `*_BASE_URL` secret (incognito-source convention) — never committed.
+Every property (by `address_key`) is in exactly one **state** at a time; the engine records every **transition**. States and their meaning:
 
-- **Backing-JSON-first (Bible §0.3.7, the prior-scrape lesson).** Source B's search is backed by a JSON results endpoint that accepts a page-size param (a 140 page-size was seen in the page config; ~54 requests/county vs ~373 at 20/page). Investigate + prefer the typed JSON first. **Proven fallback:** the server-rendered per-county listing pages (HTTP strategy, 20/page) — already confirmed scrapable end-to-end, so the build is never blocked on cracking the JSON.
-- **HTTP strategy, not browser** (§0.3.2) — the listing pages are server-rendered; the browser would virtualize.
-- **Page to natural exhaustion, no silent cap** (§0.3.6) — walk the page param until a page yields no new key. Source B's default sort is newest-first, not price — a cap wouldn't price-bias, but exhaustion is still the rule.
-- **Per-listing fields** off the card: address, city, ZIP, list_price, beds, baths, sqft, **status label**, listing brokerage, detail URL (carries the listing id + address slug), and sale-vs-rent (likely sale-only; **confirm at implementation**).
-- **Coverage gate input:** capture the page-printed county total (e.g. "7,447 Properties") for the guard below.
-- **Cron PARKED until runner-IP WAF-proven** (§0.3.3): ship `schedule:` commented + `probe_mode: odd_window` in the cadence registry, seed locally from the home IP (proven clear this session), open a tracking `check`, `CRAWL4AI_PROXY` already wired for escalation. **Fail loud on total-empty (exit 1)** (§0.3.4). **MERGE, never replace** on `(source_name, listing_id)` (§0.3.5).
+| State | Meaning | Typical dwell |
+|---|---|---|
+| **New** | freshly listed | first ~10–20 days, then → Active |
+| **Active** | on market, for sale | until it moves |
+| **Pending / Under-contract / Contingent** | under contract | until Sold / Back-on-market / Pulled |
+| **Coming-soon** | pre-market | until Active |
+| **Sold** | closed | terminal |
+| **Pulled (temporarily-off-market)** | withdrawn / expired | until relisted (→ Active) or gone |
+| **Back-on-market** | returned after pending/pulled | transient → Active |
 
-## Data model — snapshot + address-keyed event log
+**The transitions ARE the signal** (each feeds master):
+- `new → pending` fast = hot submarket · `new → pulled` = mispriced from day one
+- `active → pending` = absorbing · `pending → sold` = closed absorption
+- **`pending → active` / `back-on-market` = a DEAL COLLAPSED** (strong, time-sensitive) · `active → pulled` = withdrawal (seller stress) · `pulled → active` = relisting (frustration) · price-cut within Active.
 
-1. **`data_lake.listings_snapshot_b` (snapshot, MERGE).** One row per (source_name, listing_id), every daily field incl. `status`, `list_price`, `days_on_market`, `scraped_at`, `zip_code`, `county`, normalized `address_key`. PK `(source_name, listing_id)`; **verify listing_id stability** across two pulls before relying on the merge (Bible §0.2.3).
-2. **`data_lake.listing_events` (the durable history — ODD-ready, empty-tolerant).** One row per *transition*, keyed on **`address_key`** (zip + canonical street+unit), NOT the listing id and NOT sale-vs-rent:
-   - `came_on` (with listing_id, sale/rent, price), `came_off` (last price, DOM, status-at-disappearance), `status_change` (active→pending/withdrawn/etc., read off the card), `relisted` (address reappears after a came_off, or a back-on-market label), `price_change`, `sale_to_rent_flip`.
-   - The snapshot table overwrites `scraped_at`, so it can't see a relisting gap — the event log is what makes relisting, stuck-price-across-relists, and flips detectable.
-   - **Address normalization:** within Source B the rendering is internally consistent, so exact `(zip, street_address)` works today; canonicalize (ordinals, abbreviations, unit) when a second source mixes in. Note, don't over-build now.
+## Daily flow — scan the categories, move the listing, never discard
 
-## Daily data flow (pull all → merge-update → delta — "very simple")
+For each county, daily:
+1. **Scan each category** via the source's status-filtered queries (each a fraction of the ~7k total — the small dynamic ones, New / Pending / Sold / recently-changed, are what move). Every card carries its status, so a scan returns each address's *current* state.
+2. **Compare to our stored state** per `address_key`. Unchanged → touch `last_seen`. Changed → **record the transition** and move the property to its new state. Appeared → `New`. In our Active set but in *no* returned category → resolve (see below).
+3. **Append the transition to `listing_transitions`.** Nothing is deleted; a change is a move, not a discard.
 
-Each day, per county:
-1. **Pull the full current set** (the scrape). This is necessary because a scraped source has **no "what changed" feed** — the only way to know a home *came off* is to see it is no longer present. It is the same ~24-min staggered run we already do for active-listings, not a heavier job.
-2. **MERGE into the snapshot table** — matched listing ids get their *changed* fields updated, new ones inserted. **Nothing is re-stored or re-derived; only changes are written** (Bible §0.3.5, merge-not-replace). We are not re-ingesting all the data daily — we pull it to compare, then write only what moved.
-3. **Diff vs the prior snapshot** — a row we held that is absent from today's pull = `came_off`; a status label that changed = `status_change`; an address that reappears = `relisted`.
-4. **Append only the deltas to `listing_events`.**
+This is the "scan in ~2 minutes, notice changes, update automatically" model — we watch the *small, moving* categories, not re-pull the whole market.
 
-So: "pull all, then update." The **pull** is the daily necessity (no change-feed exists); the **update + event log touch only what moved**. (Lean-fetch alternative, if the daily pull ever needs trimming: pull only newest-first pages for `came_on` + a *periodic* full reconciliation for `came_off` — cheaper fetch, but withdrawals would lag. Not recommended while the full pull is this cheap.)
+**The one dependency (open question, resolved at implementation):** does a **Pulled** listing stay visible as a queryable `temporarily-off-market` category, or fully drop off the portal?
+- If it stays queryable → we scan it as a category and never need a full pull. Full state machine on small scans.
+- If it fully drops → a property in our Active set that appears in *no* category today = Pulled by elimination; to be sure it isn't just a scrape miss, re-confirm against the Active feed (the bulk pull) on the **coverage-guard** schedule (below), not necessarily daily. Either way the model holds; only the daily fetch cost changes.
+
+## Data model
+
+1. **`data_lake.listing_state` (current state, MERGE on `(source_name, address_key)`).** One row per property: current `state`, `listing_id`, `list_price`, `days_on_market`, `days_in_state`, `zip_code`, `county`, `first_seen`, `last_seen`, `sale_or_rent`. **Verify `listing_id` / `address_key` stability** across two pulls before trusting the key (Bible §0.2.3).
+2. **`data_lake.listing_transitions` (the durable history — ODD-ready, empty-tolerant).** One row per state change, keyed on `address_key`: `from_state`, `to_state`, `at` (date), `listing_id`, `price`, `price_delta`, `days_in_prev_state`. This is what makes relisting, deal-collapse, stuck-price-across-relists, and sale↔rent flips queryable — the current-state table alone would overwrite the history.
 
 ## Coverage guard (the precondition — Bible §0.3.4/§0.3.6)
 
-A county's daily diff is **trustworthy only when the snapshot is complete**, else a WAF-truncated scrape reads as a mass delisting (we proved this: a partial pull made Lee look like 1,683 homes "came off"). Gate the diff on:
-1. **Natural exhaustion** — the page-param walk ended on an empty/no-new page, not an early 403 (the pipeline already distinguishes these).
-2. **Self-referential stability** — today's county count is within a few percent of our own last *trusted* pull (real daily churn is small; our pulls match tightly, external sites do not — two public estimates for Lee disagreed 21,032 vs 27,538, so external counts are a ±10% baseline sanity check ONLY, never the ±-few gate).
-3. **Baseline seed** — the page-printed county total sanity-checks the very first complete pull.
+A category scan is **trustworthy only when complete**, else a WAF-truncated pull reads as mass movement (we proved this: a partial pull made Lee look like 1,683 homes "came off"). Gate each category's diff on: (1) **natural exhaustion** (the page-param walk ended on a no-new page, not an early 403); (2) **self-referential stability** (today's category count within a few percent of our last *trusted* scan — our pulls match tightly; external estimates disagree 21,032 vs 27,538, so they're a ±10% baseline sanity check only); (3) **baseline seed** from the page-printed county total. A category that fails the gate is **skipped for the day** (no transitions emitted from an incomplete scan), logged loud.
 
-If a county fails the gate, **skip its diff for the day** (emit no events for it) and log it — never publish events from an incomplete snapshot.
+## The brain — `listing-lifecycle-swfl`
 
-## Reason resolver (status-on-card — no detail fetch)
+Tier-1 reporter (deterministic, `skipSynthesisAgent`/`skipTriageAgent`), reads `listing_state` + `listing_transitions`. Master forms the direction call.
+- **`key_metrics` (region/county/ZIP):** current count per state (new/active/pending/sold/pulled) + period transition counts (withdrawals, relistings, **deal-collapses (pending→active)**, absorptions (active→pending), price-cuts) + medians (DOM-at-pending, price-cut-before-pull). Each cited, each with its as-of (MM/DD/YYYY), aggregated **in code / at source** (Bible §6).
+- **`detail_tables` (grain "address"):** properties currently in each state + recent movers — address, state, price, DOM, days-in-state, # relistings, price-cut-on-relist, sale↔rent flag. Scrub-exempt lookup (the `housing_by_zip` exemplar) so a downstream Claude answers a specific property.
+- **No-invention:** every number is a real scraped value (lane 1, our data). The *state* is the source's own label; seller *motivation* is `[INFERENCE]` with the cited base fact + a falsifier. Never assert *why* beyond the labeled transition.
+- **Scope honesty:** "within our tracked Source-B feed" (now ~full regional coverage). Complements `seller-stress-swfl`; the master dossier carries both (macro rate + live named transitions).
 
-Map the card status label → event reason at snapshot time:
-- *temporarily-off-market* (and a disappearance with no pending/sold/contract status) → **withdrawn / expired** (the signal).
-- *back-on-market* → **relisted** (frustration tell).
-- *pending* / *under-contract* / *contingent* → **sale in progress** (filtered out of the stress signal; optionally tracked as absorption).
-- *sold* → **sold** (filtered out).
-- *coming-soon* → pre-market (not a delisting).
+## Bible / standards compliance
 
-## The brain — `delisting-events-swfl`
-
-A Tier-1 reporter (deterministic, `skipSynthesisAgent`/`skipTriageAgent`), reads `listing_events`. Master forms any direction call.
-- **`key_metrics` (region/county/ZIP):** count of withdrawn/expired this period, relisting count, sale→rent flips, median DOM-at-withdrawal, median price-cut-before-withdrawal — each cited, each with its as-of (MM/DD/YYYY), aggregated **at source / in code** (Bible §6, the aggregate-at-source decree).
-- **`detail_tables` (grain "address"):** the individual events — address, last price, DOM, status, # of relistings, price-cut-on-relist, sale↔rent flag — scrub-exempt lookup rows (the `housing_by_zip` exemplar) so a downstream Claude answers a specific property.
-- **No-invention:** every number is a real scraped value (lane 1, our data). Seller *motivation* is `[INFERENCE]` with the cited base fact + a falsifier ("superseded if it returns active / goes pending"). Never assert *why* beyond the labeled status.
-- **Scope honesty:** "within our tracked Source-B set" (now ~full regional feed, far better than Source A's slice) — stated, not implied. Complements `seller-stress-swfl`; the master dossier can carry both (macro rate + named micro events).
-
-## Bible / standards compliance checklist
-
-- crawl4ai-only via `crawl_client`, HTTP strategy, parked cron + tracking check, merge-not-replace, fail-loud-empty, natural-exhaustion, backing-JSON-first (§0.3). ✓
-- **Brain-first gate** (§1): `delisting-events-swfl` `PackDefinition` + every vocab slug (incl. conditionals) in `brain-vocabulary.json` ship in the **same PR** as the ingest; ODD-ready empty-tolerant connector so it renders before data accumulates. ✓
-- Pipeline-freshness: `--dry-run` + GHA cron wrapper + cadence registry entry (daily — listings change daily), `ttl_seconds` = 1 day. ✓
-- Deterministic math; thin pipe; validators gate writes; freshness token quoted (§6). ✓
-- ZIP gate G1: `zip_code` from the listing's own address, never mailing. ✓
+- crawl4ai-only via `crawl_client`, HTTP strategy, parked cron + tracking check, **merge-not-replace**, fail-loud-on-empty, natural-exhaustion, **backing-JSON-first** for the category queries (§0.3). Real base URL in a `*_BASE_URL` secret.
+- **Brain-first gate** (§1): `listing-lifecycle-swfl` `PackDefinition` + every vocab slug (incl. conditionals) in `brain-vocabulary.json`, **same PR** as the ingest; ODD-ready empty-tolerant connector.
+- Pipeline-freshness: `--dry-run` + GHA cron wrapper + cadence registry (daily; `ttl_seconds` = 1 day).
+- Deterministic math; thin pipe; validators gate writes; freshness token quoted; ZIP gate G1 (zip from the listing's own address). ✓
 
 ## Phasing
 
-- **Phase 0 — source.** Source-B connector → `listings_snapshot_b` (backing-JSON-first, listing-page fallback). Also unblocks re-sourcing `active-listings-swfl` off the capped Source A (recommended follow-up; deprecate Source A once Source B proves out — not ripped out mid-flight).
-- **Phase 1 — diff + event log + coverage guard.** Daily snapshot → `listing_events`; the guard voids incomplete-county diffs.
-- **Phase 2 — the brain.** `delisting-events-swfl` over `listing_events`.
+- **Phase 0 — source + category access.** Source-B connector; crack the status-filtered category queries (backing-JSON-first, server-rendered listing-page fallback); confirm the Pulled-visibility question. Also unblocks re-sourcing `active-listings-swfl` off capped Source A (recommended follow-up).
+- **Phase 1 — state engine.** `listing_state` + `listing_transitions`; the daily category scan → transition recorder; coverage guard.
+- **Phase 2 — the brain.** `listing-lifecycle-swfl` over the two tables.
 - **Phase 3 — deferred.** Owner-contact lead-gen (needs a skip-trace/owner data lane).
 
 ## Open questions (resolve at implementation, not blocking)
 
-- Confirm Source B is sale-only (it's a "homes for sale" search) — if so, the rental-contamination class of bug doesn't exist here.
-- Backing JSON (page-size 140) vs server-rendered listing pages (20/page) — prefer JSON if it's clean; HTML is the proven fallback.
-- Exact card-status → reason mapping (confirm the full label set live, e.g. is *temporarily-off-market* distinct from a plain disappearance?).
-- listing_id stability across two consecutive pulls (Bible §0.2.3) before trusting the merge key.
+- **Pulled-visibility:** does `temporarily-off-market` stay a queryable category, or fully drop? (Decides whether any full pull is ever needed.)
+- Exact status-filter params on the search/results endpoint (and whether the backing JSON honors a large page size — a 140 was seen).
+- Confirm Source B is sale-only vs sale+rent (the 27196 Belle Rio dual-listing suggests both appear).
+- `listing_id` / `address_key` stability across two consecutive pulls (Bible §0.2.3).
+- New-state window (10–20 days) — source-of-truth (the source's own "new" flag vs days-on-market threshold).
 
 ## Non-goals
 
 - No owner contact / skip-tracing (Phase 3).
-- No motivation asserted beyond the labeled status (`[INFERENCE]` only, cited base fact + falsifier).
-- Not a replacement for `seller-stress-swfl` — the macro rate stays; this is the named-property micro layer.
+- No motivation asserted beyond the labeled state/transition (`[INFERENCE]` only, cited base fact + falsifier).
+- Not a replacement for `seller-stress-swfl` — the macro rate stays; this is the live named-transition layer.
 - No ripping out Source A in this work — Source B is added; the active-listings migration is a separate, sequenced decision.
