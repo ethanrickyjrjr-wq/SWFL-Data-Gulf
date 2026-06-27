@@ -1,3 +1,12 @@
+## 2026-06-27 (main) — fix(ci): restore 3910/0 — plugged 3 CI failures + mock.module flapper
+
+Fixed all CI failures that had been red since chore(scrub) (d3d3209f):
+1. housing-swfl/page.tsx: bare string literal on ReportHighlightBridge → buildReportId("brain","housing-swfl")
+2. page-mount-coverage.test.ts: /for-agents not in clean sets → import isAiChromeFree, fold into expected
+3. synthesis-agent.test.mts: mock.module leakage from assistant tests (missing SYNTHESIS_MODEL export)
+   — 3 assistant mocks patched + mock-mode test now owns its module state
+Next: push and watch CI green.
+
 ## 2026-06-27 (main) — feat(brands): +5 brands, full palettes, agents.json (71 agent emails)
 
 Added 5 more brokerage profiles: royal-shell, alfred-robbins, clausen-properties,
