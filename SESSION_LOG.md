@@ -1,3 +1,12 @@
+## 2026-06-27 (main) — docs/config: ezhomesearch MCP + incremental state-machine handoff + map failure log
+
+- `.mcp.json`: added ezhomesearch MCP server (HTTP, OAuth clientId)
+- `docs/handoff/2026-06-27-incremental-state-machine-standard.md`: generalizes the listing-lifecycle
+  seed-once/delta-maintain pattern as the reusable standard for all future ingest pipelines; includes
+  §7 first-cron crash notes and graduation checklist
+- `docs/map-failure-log.md`: running ledger of every Lee/Collier choropleth fix attempt — prevents
+  re-trying approaches that already failed
+
 ## 2026-06-27 (main) — fix(test): RESO mock.module leakage — restore ./client in afterAll (3 files)
 
 CI red since `0583da9c` — `client.test.ts` was receiving a mocked `ResoClient` (constructor no-throw,

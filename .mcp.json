@@ -11,6 +11,13 @@
     "swfl": {
       "type": "http",
       "url": "https://www.swfldatagulf.com/api/mcp"
+    },
+    "ezhomesearch": {
+      "type": "http",
+      "url": "https://www.ezhomesearch.com/mcp",
+      "oauth": {
+        "clientId": "aNx3H5VIPeDIfUgY4wA4yRlqY1_UK1q0JPaO2cyqhzY"
+      }
     }
   }
 }
