@@ -1,3 +1,11 @@
+## 2026-06-27 (main) — fix(ci): dbpr-sirs-monthly actions/checkout@v6 → @v4
+
+Same pattern as redfin-monthly 2026-05-26 (83a571f). `checkout@v6` doesn't exist;
+the Windows self-hosted runner hit an EACCES on the app-execution-alias pwsh stub
+while trying to resolve the bad action version. TimeoutErrors were separate transient
+DBPR scraping failures (residential IP, FLAKE). Failure log updated. Issue #102 resolved.
+Next scheduled run (1st of month) should succeed.
+
 ## 2026-06-27 (main) — research: Realtor.com data library — FGCU RERI source confirmed, website page + spec
 
 FGCU RERI dashboard footer reveals their source: Realtor.com public S3 CSV (attribution-only,

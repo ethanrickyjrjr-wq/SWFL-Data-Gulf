@@ -36,7 +36,7 @@ jobs:
         shell: pwsh
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Run ingest
         env:
