@@ -1,3 +1,11 @@
+## 2026-06-27 (main) — fix(ci): zip-report off mock data — grounding-coverage test green
+
+grounding-coverage.test.ts Check 1 was failing: zip-report/[zip]/page.tsx imported
+`getZipMapColor` from `lib/landing/home-map-data` (mock data, not allowlisted).
+Fix: extracted pure gradient helpers + FLOOD_GRADIENT constants into `lib/map/zip-color.ts`.
+zip-report now uses the live `aal` value from env-swfl brain with `computeZipGradient`.
+Same visual result, real data, no mock import. 3/0.
+
 ## 2026-06-27 (main) — fix(ci): dbpr-sirs-monthly actions/checkout@v6 → @v4
 
 Same pattern as redfin-monthly 2026-05-26 (83a571f). `checkout@v6` doesn't exist;

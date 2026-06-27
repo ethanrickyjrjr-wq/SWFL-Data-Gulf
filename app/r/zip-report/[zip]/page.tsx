@@ -25,7 +25,7 @@ import {
 import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
 import { asOfFromToken } from "../../../../lib/project/as-of";
-import { getZipMapColor } from "../../../../lib/landing/home-map-data";
+import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 import { MetroAreaChart } from "../../../../components/charts";
 import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
@@ -172,8 +172,15 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const permitsRankPos = permitsIdx >= 0 ? allPermitEntries.length - permitsIdx : null;
   const totalPermitsZips = allPermitEntries.length;
 
-  // ── Fill color — same formula as homepage MapCanvas (flood metric = default) ─
-  const fillColor = getZipMapColor(zip);
+  // ── Fill color — same gradient as homepage MapCanvas, using live AAL from env-swfl ─
+  const fillColor = computeZipGradient(
+    hasFlood ? aal : undefined,
+    FLOOD_GRADIENT.low,
+    FLOOD_GRADIENT.high,
+    FLOOD_GRADIENT.c0,
+    FLOOD_GRADIENT.c1,
+    FLOOD_GRADIENT.c2,
+  );
 
   // ── Identity ──────────────────────────────────────────────────────────────
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);
