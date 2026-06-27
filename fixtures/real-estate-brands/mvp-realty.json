@@ -1,0 +1,31 @@
+{
+  "slug": "mvp-realty",
+  "company_name": "MVP Realty Associates",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Naples, Bonita Springs"
+  },
+  "domain": "mvprealty.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#AD8C4B",
+      "accentColor": "#000000",
+      "textColor": "#000000",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "mvp_gold": "#AD8C4B"
+    },
+    "confidence": 0.75,
+    "logo_url": null,
+    "source_url": "https://www.mvprealty.com",
+    "notes": "#AD8C4B (warm gold/bronze) found 2× in homepage CSS — the only non-neutral color. Most styles in external JS bundles not captured by static crawl. Gold-on-black aesthetic consistent with DBPR-registered brokerage in Naples."
+  },
+  "dbpr_name": "MVP REALTY ASSOCIATES LLC",
+  "dbpr_city": "NAPLES",
+  "discovered_at": "2026-06-27"
+}

@@ -1,0 +1,31 @@
+{
+  "slug": "engel-volkers-marco-island",
+  "company_name": "Engel & Völkers Marco Island",
+  "type": "national_franchise",
+  "affiliation": "Engel & Völkers",
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Marco Island, Naples, Goodland"
+  },
+  "domain": "engelvoelkers.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#EB0A0A",
+      "accentColor": "#000000",
+      "textColor": "#333333",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "ev_red": "#EB0A0A"
+    },
+    "confidence": 0.85,
+    "logo_url": null,
+    "source_url": "https://www.engelvoelkers.com/en-us/marco-island-fl/",
+    "notes": "Local franchise office page on E&V corporate site. Same brand colors as engel-voelkers-cape-coral.json — both pages on engelvoelkers.com return identical CSS. #EB0A0A (E&V red, 3 hits). DBPR licensee: LUXURY PROPERTIES OF MARCO ISLAND, LLC dba ENGEL & VOLKERS MARCO ISLAND REALTY."
+  },
+  "dbpr_name": "ENGEL & VOLKERS MARCO ISLAND REALTY",
+  "dbpr_city": "MARCO ISLAND",
+  "discovered_at": "2026-06-27"
+}

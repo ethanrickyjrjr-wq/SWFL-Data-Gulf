@@ -1,0 +1,33 @@
+{
+  "slug": "domain-realty",
+  "company_name": "DomainRealty.com",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee"],
+    "primary_market": "Bonita Springs, Fort Myers, Naples, Cape Coral"
+  },
+  "domain": "domainrealty.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#550011",
+      "accentColor": "#3073A8",
+      "textColor": "#FFFFFF",
+      "backdropColor": "#191919"
+    },
+    "full_palette": {
+      "crimson_primary": "#550011",
+      "accent_blue": "#3073A8",
+      "dark_background": "#191919"
+    },
+    "confidence": 0.85,
+    "logo_url": null,
+    "source_url": "https://www.domainrealty.com",
+    "notes": "#550011 (deep crimson/garnet) is the dominant brand color with 9 hits in homepage CSS. CSS var g-bg-color: #191919 confirms dark background theme. Secondary blue #3073A8 (2 hits) is an accent. Site runs a dark-background design with crimson primary."
+  },
+  "dbpr_name": "DOMAINREALTY.COM LLC",
+  "dbpr_city": "BONITA SPRINGS",
+  "discovered_at": "2026-06-27"
+}

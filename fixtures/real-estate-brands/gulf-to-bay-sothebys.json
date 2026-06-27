@@ -1,0 +1,32 @@
+{
+  "slug": "gulf-to-bay-sothebys",
+  "company_name": "Gulf to Bay Sotheby's International Realty",
+  "type": "national_franchise",
+  "affiliation": "Sotheby's International Realty",
+  "markets": {
+    "counties": ["Lee"],
+    "primary_market": "Boca Grande, Cape Haze, Englewood, Placida"
+  },
+  "domain": "gulftobaysir.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#002349",
+      "accentColor": "#BEAF87",
+      "textColor": "#002349",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "sir_navy": "#002349",
+      "sir_gold": "#BEAF87"
+    },
+    "confidence": 0.65,
+    "logo_url": null,
+    "source_url": "https://www.gulftobaysir.com",
+    "notes": "Direct site crawl returned HTTP 403 (anti-bot block). Colors attributed from parent brand Sotheby's International Realty corporate identity — same palette as Premier Sotheby's (premier-sothebys.json), a sibling SIR affiliate operating in Lee/Collier. All SIR affiliates use the SIR brand standards. Confidence 0.65 pending direct site verification. DBPR licensee: GULF TO BAY PROPERTIES LLC dba GULF TO BAY SOTHEBYS INTERNATIONAL REALTY."
+  },
+  "dbpr_name": "GULF TO BAY SOTHEBYS INTERNATIONAL REALTY",
+  "dbpr_city": "BOCA GRANDE",
+  "discovered_at": "2026-06-27"
+}

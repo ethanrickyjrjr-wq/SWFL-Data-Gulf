@@ -1,0 +1,33 @@
+{
+  "slug": "realty-one-group-mvp",
+  "company_name": "Realty One Group MVP",
+  "type": "national_franchise",
+  "affiliation": "Realty One Group",
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Naples, Bonita Springs, Marco Island"
+  },
+  "domain": "realtyonegroup.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#B1954A",
+      "accentColor": "#C5A95E",
+      "textColor": "#FFFFFF",
+      "backdropColor": "#141414"
+    },
+    "full_palette": {
+      "rog_gold_dark": "#B1954A",
+      "rog_gold_light": "#C5A95E",
+      "dark_background": "#141414"
+    },
+    "confidence": 0.85,
+    "logo_url": null,
+    "source_url": "https://www.realtyonegroup.com",
+    "notes": "#B1954A (dark gold/bronze, 12 hits) is the dominant brand color. #C5A95E (lighter gold, 7 hits) is a secondary variant. Both confirmed as brand accent via Osano consent-dialog CSS vars which use brand colors. Dark background #141414 (16 hits). ROG uses gold on black as their national brand identity; this franchise affiliate uses same palette. DBPR licensee: ROG MVP COLLIER COUNTY LLC."
+  },
+  "dbpr_name": "REALTY ONE GROUP MVP",
+  "dbpr_city": "NAPLES",
+  "discovered_at": "2026-06-27"
+}

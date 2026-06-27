@@ -1,3 +1,17 @@
+## 2026-06-27 (main) — feat(brands): add 9 real estate brand profiles via crawl4ai
+
+9 new DBPR-verified brokerage profiles added to fixtures/real-estate-brands/:
+mvp-realty, vip-realty-group, gulf-coast-intl-properties, william-raveis,
+domain-realty, engel-voelkers-cape-coral, engel-volkers-marco-island,
+gulf-to-bay-sothebys, realty-one-group-mvp. All DBPR names confirmed in
+dbpr-all-corps-lee-collier.json. Colors from 4 crawl4ai passes (brandcolorcode.com
+aggregator confirmed live; site lists European RE only — not useful for SWFL).
+VIP Realty confidence 0.50 — bkat.io platform blocks CSS extraction. Gulf to Bay
+SIR blocked 403 — parent SIR brand colors applied. index.json updated; 21 total
+brands now profiled.
+Next: re-crawl VIP Realty or obtain brand guide directly; verify Gulf to Bay SIR
+colors once anti-bot block resolves.
+
 ## 2026-06-27 (main) — fix(map): Lee top-cut only — restore full right edge (Lehigh visible)
 
 Removed x=575 right cut from Lee single-county map; Lehigh Acres now shows in full.

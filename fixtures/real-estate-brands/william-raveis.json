@@ -1,0 +1,31 @@
+{
+  "slug": "william-raveis",
+  "company_name": "William Raveis Real Estate",
+  "type": "national_franchise",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Naples, Bonita Springs, Marco Island"
+  },
+  "domain": "raveis.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#5D89B4",
+      "accentColor": "#000000",
+      "textColor": "#000000",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "raveis_blue": "#5D89B4"
+    },
+    "confidence": 0.8,
+    "logo_url": "https://www.raveis.com/Content/Images/logo-raveis.svg",
+    "source_url": "https://www.raveis.com",
+    "notes": "Site uses JS-bundled CSS; no colors extractable from HTML pages. Color #5D89B4 (medium steel blue) found 5× as fill in SVG logo file at /Content/Images/logo-raveis.svg — this is the logo's primary fill color. DBPR entity is William Raveis Florida LLC operating as William Raveis Real Estate in Collier County (Naples office)."
+  },
+  "dbpr_name": "WILLIAM RAVEIS REAL ESTATE",
+  "dbpr_city": "NAPLES",
+  "discovered_at": "2026-06-27"
+}

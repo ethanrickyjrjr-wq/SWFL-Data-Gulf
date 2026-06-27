@@ -1,6 +1,6 @@
 {
   "description": "Real estate brokerage brand colors and logo URLs for Lee and Collier counties, FL. All hex values sourced from crawl4ai passes against the actual company sites or their official brand asset files. Confidence score reflects how directly the color was stated vs. inferred from CSS frequency.",
-  "last_updated": "2026-06-26",
+  "last_updated": "2026-06-27",
   "brokerages": [
     {
       "slug": "john-r-wood",
@@ -121,6 +121,96 @@
       "accent": "#8B8BBC",
       "confidence": 1.0,
       "file": "powers-realty-group.json"
+    },
+    {
+      "slug": "mvp-realty",
+      "company_name": "MVP Realty Associates",
+      "type": "local_independent",
+      "counties": ["Collier"],
+      "primary": "#AD8C4B",
+      "accent": "#000000",
+      "confidence": 0.75,
+      "file": "mvp-realty.json"
+    },
+    {
+      "slug": "vip-realty-group",
+      "company_name": "VIP Realty Group",
+      "type": "local_independent",
+      "counties": ["Lee"],
+      "primary": "#1A1A1A",
+      "accent": "#999999",
+      "confidence": 0.5,
+      "file": "vip-realty-group.json"
+    },
+    {
+      "slug": "gulf-coast-intl-properties",
+      "company_name": "Gulf Coast International Properties",
+      "type": "local_independent",
+      "counties": ["Collier"],
+      "primary": "#66CC99",
+      "accent": "#222222",
+      "confidence": 0.75,
+      "file": "gulf-coast-intl-properties.json"
+    },
+    {
+      "slug": "william-raveis",
+      "company_name": "William Raveis Real Estate",
+      "type": "national_franchise",
+      "counties": ["Collier"],
+      "primary": "#5D89B4",
+      "accent": "#000000",
+      "confidence": 0.8,
+      "file": "william-raveis.json"
+    },
+    {
+      "slug": "domain-realty",
+      "company_name": "DomainRealty.com",
+      "type": "local_independent",
+      "counties": ["Lee"],
+      "primary": "#550011",
+      "accent": "#3073A8",
+      "confidence": 0.85,
+      "file": "domain-realty.json"
+    },
+    {
+      "slug": "engel-voelkers-cape-coral",
+      "company_name": "Engel & Völkers Cape Coral",
+      "type": "national_franchise",
+      "counties": ["Lee"],
+      "primary": "#EB0A0A",
+      "accent": "#000000",
+      "confidence": 0.85,
+      "file": "engel-voelkers-cape-coral.json"
+    },
+    {
+      "slug": "engel-volkers-marco-island",
+      "company_name": "Engel & Völkers Marco Island",
+      "type": "national_franchise",
+      "counties": ["Collier"],
+      "primary": "#EB0A0A",
+      "accent": "#000000",
+      "confidence": 0.85,
+      "file": "engel-volkers-marco-island.json"
+    },
+    {
+      "slug": "gulf-to-bay-sothebys",
+      "company_name": "Gulf to Bay Sotheby's International Realty",
+      "type": "national_franchise",
+      "counties": ["Lee"],
+      "primary": "#002349",
+      "accent": "#BEAF87",
+      "confidence": 0.65,
+      "file": "gulf-to-bay-sothebys.json"
+    },
+    {
+      "slug": "realty-one-group-mvp",
+      "company_name": "Realty One Group MVP",
+      "type": "national_franchise",
+      "counties": ["Collier"],
+      "primary": "#B1954A",
+      "accent": "#C5A95E",
+      "confidence": 0.85,
+      "file": "realty-one-group-mvp.json"
     }
   ]
 }

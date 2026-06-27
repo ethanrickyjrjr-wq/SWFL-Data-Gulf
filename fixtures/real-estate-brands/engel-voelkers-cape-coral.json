@@ -1,0 +1,31 @@
+{
+  "slug": "engel-voelkers-cape-coral",
+  "company_name": "Engel & Völkers Cape Coral",
+  "type": "national_franchise",
+  "affiliation": "Engel & Völkers",
+  "markets": {
+    "counties": ["Lee"],
+    "primary_market": "Cape Coral, Fort Myers, Pine Island"
+  },
+  "domain": "engelvoelkers.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#EB0A0A",
+      "accentColor": "#000000",
+      "textColor": "#333333",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "ev_red": "#EB0A0A"
+    },
+    "confidence": 0.85,
+    "logo_url": null,
+    "source_url": "https://www.engelvoelkers.com/en-us/cape-coral-fl/",
+    "notes": "Local franchise office page on E&V corporate site. #EB0A0A (E&V red, 3 hits) extracted from official engelvoelkers.com page. E&V global brand standard cites #E2001A; crawled value is a slight variant. #3F8964 teal (9 hits) and other greens excluded — they originate from site UI components (map/filter), not brand identity. DBPR licensee: INT FLORIDA REALTY, LLC dba ENGEL & VOELKERS CAPE CORAL."
+  },
+  "dbpr_name": "ENGEL & VOELKERS CAPE CORAL",
+  "dbpr_city": "CAPE CORAL",
+  "discovered_at": "2026-06-27"
+}

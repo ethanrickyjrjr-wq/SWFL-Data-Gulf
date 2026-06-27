@@ -1,0 +1,29 @@
+{
+  "slug": "vip-realty-group",
+  "company_name": "VIP Realty Group",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Lee"],
+    "primary_market": "Fort Myers, Cape Coral, Sanibel, Captiva"
+  },
+  "domain": "viprealty.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#1A1A1A",
+      "accentColor": "#999999",
+      "textColor": "#1A1A1A",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {},
+    "confidence": 0.5,
+    "logo_url": "https://bay.cdn.bkat.io/cust/bay_vip/images/logos/01.20241217112733811.dark.jpg",
+    "source_url": "https://www.viprealty.com",
+    "notes": "Site served via bkat.io third-party real estate platform; only generic dark text (#1A1A1A) and secondary gray (#999999) extractable from static HTML across all pages tested. Brand accent color not resolvable without JS execution or direct brand guide access. Logo dark variant at bay.cdn.bkat.io — color requires image analysis."
+  },
+  "dbpr_name": "VIP REALTY GROUP INC",
+  "dbpr_city": "FORT MYERS",
+  "discovered_at": "2026-06-27"
+}

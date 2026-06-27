@@ -1,0 +1,32 @@
+{
+  "slug": "gulf-coast-intl-properties",
+  "company_name": "Gulf Coast International Properties",
+  "type": "local_independent",
+  "affiliation": null,
+  "markets": {
+    "counties": ["Collier"],
+    "primary_market": "Naples, Marco Island, Pelican Bay"
+  },
+  "domain": "gcipnaples.com",
+  "brand": {
+    "status": "crawled",
+    "fonts": [],
+    "palette": {
+      "primaryColor": "#66CC99",
+      "accentColor": "#222222",
+      "textColor": "#222222",
+      "backdropColor": "#FFFFFF"
+    },
+    "full_palette": {
+      "seafoam_mint": "#66CC99",
+      "charcoal_text": "#222222"
+    },
+    "confidence": 0.75,
+    "logo_url": "https://www.gcipnaples.com/uploads/logo_homepage.73.png",
+    "source_url": "https://gcipnaples.com",
+    "notes": "gulfcoastinternationalproperties.com redirects to gcipnaples.com. #66CC99 (seafoam/mint green, 6 hits) is the only non-neutral color in CSS — signals brand accent. #3B5998 (10 hits) excluded as Facebook icon blue. Site palette is predominantly neutral grays with mint accent."
+  },
+  "dbpr_name": "GULF COAST INTERNATIONAL PROPERTIES LLC",
+  "dbpr_city": "NAPLES",
+  "discovered_at": "2026-06-27"
+}
