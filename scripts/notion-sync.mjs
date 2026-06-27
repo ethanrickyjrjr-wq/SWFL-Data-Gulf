@@ -31,7 +31,7 @@ const H = {
 };
 
 const SITE = "https://www.swfldatagulf.com";
-const REPO = "https://github.com/ethanrickyjrjr-wq/brain-platform";
+const REPO = "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf";
 // Notion needs a renderable image URL (PNG/JPEG/WEBP). The 512×512 wave PNG
 // lives in public/ and is served by Vercel at the SITE-rooted path below.
 // (GitHub raw 404s because the repo is private — Vercel is the public CDN.)
@@ -1571,12 +1571,7 @@ async function createChild(parentId, title, icon, blocks) {
   console.log("[ok] audit:", audit.url);
   const roadmap = await createChild(LB_PAGE, "Roadmap — NEXT / NEAR / LONG", "🗺️", roadmapBlocks());
   console.log("[ok] roadmap:", roadmap.url);
-  const premise = await createChild(
-    LB_PAGE,
-    "Premise Data Replacement Plan",
-    "🛠",
-    premiseBlocks(),
-  );
+  const premise = await createChild(LB_PAGE, "Premise Data Replacement Plan", "🛠", premiseBlocks());
   console.log("[ok] premise:", premise.url);
   const inv = await createChild(LB_PAGE, "Data Sources Inventory", "📊", inventoryBlocks());
   console.log("[ok] inventory:", inv.url);

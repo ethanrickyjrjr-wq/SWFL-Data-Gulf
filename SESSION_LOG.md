@@ -1,3 +1,10 @@
+## 2026-06-27 (main) — fix: rename brain-platform → SWFL-Data-Gulf in all runtime refs
+
+GitHub repo renamed from `ethanrickyjrjr-wq/brain-platform` to `ethanrickyjrjr-wq/SWFL-Data-Gulf`.
+Updated all functional references: `scripts/engine.mjs`, `scripts/social.mjs`, `scripts/notion-sync.mjs`,
+`.env.example`. Also fixed `claude-code-automation.yml` — removed invalid `claude_args: --issue N`
+flag that was causing Claude Code action to exit code 1 immediately on every trigger.
+
 ## 2026-06-27 (main) — fix(ci): pass GITHUB_TOKEN to claude-code-action in both repos
 
 claude-code-automation.yml was missing GITHUB_TOKEN in the action env. Without it the

@@ -25,7 +25,7 @@ import { execSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-const REPO = "ethanrickyjrjr-wq/brain-platform";
+const REPO = "ethanrickyjrjr-wq/SWFL-Data-Gulf";
 const WF_DIR = path.join(process.cwd(), ".github", "workflows");
 const GUARD_MARK = "vars.ENGINE_ENABLED";
 

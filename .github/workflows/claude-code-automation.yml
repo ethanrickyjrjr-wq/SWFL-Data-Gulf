@@ -22,8 +22,6 @@ jobs:
 
       - name: Run Claude Code Action
         uses: anthropics/claude-code-action@v1
-        with:
-          claude_args: --issue ${{ github.event.issue.number }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
