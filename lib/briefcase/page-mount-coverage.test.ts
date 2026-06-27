@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { Glob } from "bun";
-import { shouldMountHighlighter, shouldRenderStandalone } from "./pill-mount";
+import { shouldMountHighlighter, shouldRenderStandalone, isAiChromeFree } from "./pill-mount";
 
 const REPO_ROOT = path.join(import.meta.dir, "..", "..");
 
@@ -72,7 +72,7 @@ test("EVERY page mounts exactly one highlighter, or zero on the clean set — ne
   const wrong: string[] = [];
   for (const pg of PAGES) {
     const mounts = shouldMountHighlighter(pg.path);
-    const expected = !matchesAny(pg.path, HIGHLIGHTER_CLEAN);
+    const expected = !matchesAny(pg.path, HIGHLIGHTER_CLEAN) && !isAiChromeFree(pg.path);
     // `mounts` is boolean → structurally 0 or 1 (one root GlobalHighlighter). The only thing
     // that can drift is WHICH pages it suppresses — pin it to the declared clean set.
     if (mounts !== expected) {
@@ -89,7 +89,7 @@ test("EVERY page mounts exactly one pill, or zero on the white-label set — nev
     const bridged = pg.hasReportContext ? 1 : 0;
     const standalone = !pg.hasReportContext && shouldRenderStandalone(pg.path, false) ? 1 : 0;
     const pillCount = bridged + standalone;
-    const expected = matchesAny(pg.path, PILL_CLEAN) ? 0 : 1;
+    const expected = matchesAny(pg.path, PILL_CLEAN) || isAiChromeFree(pg.path) ? 0 : 1;
     if (pillCount !== expected) {
       wrong.push(`${pg.rel} (${pg.path}): pillCount=${pillCount}, expected=${expected}`);
     }

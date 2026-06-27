@@ -23,6 +23,7 @@ import DigestSubscribe from "../../../components/email/DigestSubscribe";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 import { PrintButton } from "../../../components/PrintButton";
 import { ReportHighlightBridge } from "../../../components/highlighter/ReportHighlightBridge";
+import { buildReportId } from "../../../lib/highlighter/report-surface";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
 
 export const runtime = "nodejs";
@@ -198,7 +199,7 @@ export default async function HousingPage() {
 
       {highlighterEnabled && (
         <ReportHighlightBridge
-          reportId="housing-swfl"
+          reportId={buildReportId("brain", "housing-swfl")}
           conclusion={housing.conclusion}
           freshnessToken={housing.freshnessToken}
           metricSuggestions={housing.metrics
