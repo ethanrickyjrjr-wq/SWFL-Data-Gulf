@@ -4,15 +4,37 @@
 // first message for a new Claude session. All data fetches are best-effort;
 // any failure degrades gracefully rather than blocking session start.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { chronicFlappers } from "../.github/scripts/lib/ledger-flap.mjs";
 
 const ROOT = process.cwd();
+const SPECS_DIR = resolve(ROOT, "docs/superpowers/specs");
+const TODAY_PATH = resolve(ROOT, "_ASSISTANT/TODAY.md");
 const QUEUE_PATH = resolve(ROOT, "_AUDIT_AND_ROADMAP/build-queue.md");
 const SECRETS_PATH = resolve(ROOT, ".dlt/secrets.toml");
 const LOG_PATH = resolve(ROOT, "SESSION_LOG.md");
 const LEDGER_PATH = resolve(ROOT, "docs/cron-rebuild-failures.md");
+
+function specClutterLine() {
+  try {
+    const all = readdirSync(SPECS_DIR).filter((f) => f.endsWith(".md") && !f.startsWith("_"));
+    return `Spec clutter : ${all.length} specs · run \`node scripts/assistant-weekly.mjs\` to clean\n`;
+  } catch {
+    return "";
+  }
+}
+
+function todayMdBlock(today) {
+  try {
+    if (!existsSync(TODAY_PATH)) return "";
+    const content = readFileSync(TODAY_PATH, "utf8");
+    if (!content.startsWith(`# ${today}`)) return ""; // stale
+    return `\n--- TODAY.md ---\n${content}\n`;
+  } catch {
+    return "";
+  }
+}
 
 function parseTomlStr(toml, key) {
   const m = toml.match(new RegExp(`^${key}\\s*=\\s*"([^"]+)"`, "m"));
@@ -131,6 +153,9 @@ async function main() {
     /* skip */
   }
 
+  const clutterLine = specClutterLine();
+  const todayBlock = todayMdBlock(today);
+
   process.stdout.write(
     `\n${banner}\n` +
       `KICKOFF — ${today} · brain-platform · main\n` +
@@ -139,7 +164,9 @@ async function main() {
       `Last shipped : ${lastShip}\n` +
       `Open checks  : ${checksLine}\n` +
       `Build queue  : ${queueLine}\n` +
+      clutterLine +
       flappersLine +
+      todayBlock +
       `\nWhat should we work on?\n` +
       `${banner}\n`,
   );
