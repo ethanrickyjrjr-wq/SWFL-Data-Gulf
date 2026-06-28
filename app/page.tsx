@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  // Approved HOMEPAGE/ demo, integrated. Nav + footer are the global
+  // Approved docs/_archive/superseded/homepage/ demo, integrated. Nav + footer are the global
   // SiteShell/SiteFooter from app/layout.tsx; this page is the hero+map explorer,
   // the capabilities/comparison section, then the waitlist (the CTA's #waitlist
   // target). `.home-explorer` scopes home-explorer.css.

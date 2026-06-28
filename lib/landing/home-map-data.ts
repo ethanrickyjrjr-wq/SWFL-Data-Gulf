@@ -1,4 +1,4 @@
-// AUTO-PORTED from HOMEPAGE/build_demo4.py — mock data; swap for live lake later.
+// AUTO-PORTED from docs/_archive/superseded/homepage/build_demo4.py — mock data; swap for live lake later.
 // 57 ZIPs (33 Lee + 24 Collier). Regenerate from build_demo4.py — do not hand-edit.
 export type MetricKey = "flood" | "value" | "permits";
 export interface MetricDef {

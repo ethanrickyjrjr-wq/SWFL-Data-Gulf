@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { HOME_MAP_DATA as DATA, METRIC_ORDER, type MetricKey } from "@/lib/landing/home-map-data";
 
 /**
- * Homepage hero = the approved HOMEPAGE/ demo, integrated.
+ * Homepage hero = the approved docs/_archive/superseded/homepage/ demo, integrated.
  * Centered headline + search + metric filter pills, then the live Lee/Collier
  * choropleth (data rail · clickable ZIP map · stats bar). The contractor SVG is
  * served from public/map/lee-collier.svg and injected client-side; the demo's

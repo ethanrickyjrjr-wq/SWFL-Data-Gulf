@@ -1,3 +1,11 @@
+## 2026-06-28 (main) - fix(archive-refs): repoint orphaned comments to docs/_archive paths
+
+Closed the deferred non-functional citation comments after the archive moves:
+- scripts/check-orphans.mjs: SITE FLOW BUILD/README.md -> docs/_archive/parked/site-flow-build/README.md
+- app/page.tsx, components/landing/Hero.tsx, lib/landing/home-map-data.ts, components/landing/home-explorer.css:
+  HOMEPAGE/build_demo4.py -> docs/_archive/superseded/homepage/build_demo4.py
+Comment-only edits (no logic). bun install'd the worktree so lint-staged ran for real (no --no-verify).
+
 ## 2026-06-28 (main) - chore(archive): HOMEPAGE demo kit -> docs/_archive/superseded/homepage
 
 Homepage work paused (operator) -> archived the HOMEPAGE/ demo-builder kit (build_demo4.py + html + HANDOFF).

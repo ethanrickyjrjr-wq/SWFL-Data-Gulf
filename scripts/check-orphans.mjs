@@ -45,7 +45,7 @@ const CHROME_FILES = new Set([
 // because they are entered via direct URL (email links, iframes, auth, etc.).
 // Treat dynamic provenance links (/r/method/[metric] via methodHref helper)
 // as reachable too — they are linked at runtime from /r/[slug] metrics tables.
-// Source: SITE FLOW BUILD/README.md "By-design URL-entry routes"
+// Source: docs/_archive/parked/site-flow-build/README.md "By-design URL-entry routes"
 const ALLOWLIST = new Set([
   "/embed/cards/asking-rent", // iframe fragment
   "/embed/charts", // iframe fragment
