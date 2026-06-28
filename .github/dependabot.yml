@@ -1,0 +1,35 @@
+# Dependabot version-update policy. Security updates (vulnerable-dep PRs) are the
+# separate repo toggle (Settings → Code security → Dependabot security updates),
+# enabled out-of-band; this file governs scheduled VERSION updates.
+#
+# `bun` (not `npm`) is correct for this repo: Dependabot's bun updater updates the
+# text-based bun.lock too (v1.1.39+), so version PRs never drift the frozen lockfile
+# the way an npm-ecosystem PR against a bun repo would (CI runs `bun install --frozen-lockfile`).
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "pip"
+    directory: "/ingest"
+    schedule:
+      interval: "weekly"
+    groups:
+      pip:
+        patterns: ["*"]
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      bun:
+        patterns: ["*"]
+    open-pull-requests-limit: 3
