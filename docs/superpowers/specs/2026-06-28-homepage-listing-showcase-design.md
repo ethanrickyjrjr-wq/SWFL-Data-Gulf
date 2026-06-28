@@ -1,5 +1,21 @@
 # Homepage — Data Intelligence Showcase
 
+---
+
+## THE VISION (operator decree, 2026-06-28)
+
+We are NOT a listings company. We take ALL data — real data. If we don't have it, we find it. AI paints the actual picture of what is going on.
+
+**BUYER:** Is this a good buy? AI answers with current data, past history, and possible future scenarios — every number cited.
+
+**SELLER:** What should I pay for this property based on current and past and possible future scenarios? AI prices it from real comps, DOM, price cut trends, YoY direction, and active supply.
+
+**BROKER:** Build me a deliverable that updates daily with information, charts, graphs, AI salesman or AI commentary and analysis based on real data. Sent automatically. No workflow to build.
+
+The homepage shows numbers that attract interest from ALL people doing research — not too much about listings, not listings-portal framing. We have the entire picture of SWFL across ALL data types. That is the product.
+
+---
+
 **Status:** Ready to build  
 **Date:** 2026-06-28 (v2 — vision corrected after operator decree)  
 **Check:** `homepage_listing_showcase_live_verify`
