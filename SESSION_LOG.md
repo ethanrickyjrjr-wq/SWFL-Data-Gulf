@@ -1,3 +1,13 @@
+## 2026-06-28 (main) — spec: homepage listing showcase — full research + change spec
+
+Wrote complete spec for homepage daily listing showcase at
+`docs/superpowers/specs/2026-06-28-homepage-listing-showcase-design.md`.
+Covers: crawl4ai research findings (Redfin/Zillow/CoStar lead with inventory+price, never flood),
+live data (10,459 listings, $496,470 median, Lee 7,412, Collier 2,749, Hendry 298), all 4 file
+changes (map pills + hero + capabilities + chip CSS), per-ZIP data, stats bar cells, chip copy.
+Operator decree: flood risk LAST, listings DEFAULT. Phase 2 wired to Realtor.com ingest spec.
+Homepage code changes exist locally (unstaged) — push after this spec review.
+
 ## 2026-06-28 (main) — analysis: fold operator corrections into 4-issue breakdown
 
 Folded 5 operator corrections into the focus-restructure breakdown (no pushback — 3 were real errors).
