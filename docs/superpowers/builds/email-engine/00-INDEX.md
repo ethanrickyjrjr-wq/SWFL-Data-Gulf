@@ -39,7 +39,7 @@
 
 ## Status
 - [x] 01 doc-contract — **DONE**, `bunx next build` green (branch `email-lab-engine`)
-- [ ] 02 compile-grid — in progress (Opus)
+- [x] 02 compile-grid — **DONE**, `bunx next build` green (branch `email-lab-engine`)
 - [ ] 03 author-engine
 - [ ] 04 save-photo
 - [ ] 05 listing+multicol blocks

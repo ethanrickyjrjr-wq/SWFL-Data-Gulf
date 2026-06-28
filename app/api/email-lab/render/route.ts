@@ -4,6 +4,8 @@ import { renderHtmlTemplate } from "@/lib/templates/render-html-template";
 import { SWFL_TOKEN_DEFAULTS } from "@/lib/email/templates/token-defaults";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { EmailDocEmail } from "@/lib/email/blocks/EmailDocRenderer";
+import { isGridDoc } from "@/lib/email/grid-schema";
+import { compileGrid } from "@/lib/email/compile-grid";
 
 // Two render paths share this URL during (and after) the block-canvas
 // transition (spec → Modified files):
@@ -12,8 +14,7 @@ import { EmailDocEmail } from "@/lib/email/blocks/EmailDocRenderer";
 //                                templates (shell-two-col, compare, hbar, …).
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as
-    | { doc?: unknown }
-    | { template?: string; tokens?: Record<string, string> };
+    { doc?: unknown } | { template?: string; tokens?: Record<string, string> };
 
   // ── Block-canvas path ─────────────────────────────────────────────────────
   if (body && typeof body === "object" && "doc" in body && body.doc !== undefined) {
@@ -24,9 +25,14 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+    // PAID grid path: any block carries a `layout` → compile the positioned doc
+    // (Cerberus hybrid columns + Outlook ghost tables). Free tier (no `layout`)
+    // stays on the exact `render(EmailDocEmail(...))` line below — byte-identical.
     // Call the component as a function (no JSX in a route handler) — same proven
     // pattern as scripts/email/build-digest.mts.
-    const html = await render(EmailDocEmail({ doc: parsed.data }));
+    const html = isGridDoc(parsed.data.blocks)
+      ? await compileGrid(parsed.data)
+      : await render(EmailDocEmail({ doc: parsed.data }));
     return NextResponse.json({ html });
   }
 
