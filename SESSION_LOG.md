@@ -1,3 +1,17 @@
+## 2026-06-28 (main) — REVERTED homepage Phase A in full (operator call); page back to pre-1f30bb56
+
+Operator reviewed the live Phase A homepage and rejected it. The map default flip Flood→Home Value left the
+choropleth a flat sea of near-identical teals on the dark canvas (the value fixture's low end ~#1f4f4a sits too
+close to the #0f1d24 canvas) — washed-out/dim vs the vivid Flood map it replaced. Per operator instruction
+("revert ALL homepage work, not just the local change"), reverted my entire Phase A commit `1f30bb56`:
+`components/landing/Hero.tsx`, `app/globals.css`, `app/layout.tsx` restored to `8ab52d38` (map default back to
+Flood; nautical tokens + Bricolage/IBM-Plex fonts removed), and the restored design spec
+`docs/superpowers/specs/2026-06-28-homepage-chart-experience-design.md` removed again (recoverable from history:
+`27f8212e` / `1f30bb56`). Parallel-session commits `171adb1d` + `8eb3cdfb` preserved (not mine). crawl4ai work
+(outside this repo: `crawl4ai-venv\crawl.py`/`.cmd`, `.local\bin\crawl.cmd`) untouched per operator. Net homepage
+diff vs pre-Phase-A: zero. Lesson: do not ship a visible homepage default flip as a "win" before the redesign
+that justifies it is built and eyeballed.
+
 ## 2026-06-28 (main) — daily-email-digest swallowed-push FIX (REBUILD_PAT, loud) + diagnosed #103 breach = city_pulse (paused cron); HELD for push
 
 Two issues run down. **(1) Fix — daily-email-digest.yml `git push || true`:** prod evidence showed the bug live — runs went GREEN on 06-24/25/26 while tracked email-logs stop at `2026-06-22.json` (push silently failing since the ~06-23 main-ruleset cutover that stripped the bot's bypass; `|| true` hid it). Broke issue-numbering + the idempotency guard (both read the most-recent *persisted* log). Same fix as daily-rebuild: checkout with `token: REBUILD_PAT` + `persist-credentials: true` (owner = only bypass actor on the main ruleset), and replaced `git push || true` with a fetch→`rebase --autostash`→retry-3 push that `exit 1`s on final failure. YAML validated. **(2) Diagnosed #103 / red freshness-probe (report-only, NOT fixed):** sole SLA breach = **city_pulse** — last refresh 06/15/2026, age 13d > its 7d `error_after_days`. leepa (41/730) fine; live_search resolves MISSING→skipped. Root cause: `city-pulse-daily.yml` schedule is commented out (PAUSED 06-18 for the ANTHROPIC/FIRECRAWL credit freeze) → no scheduled runs → stale. #103 auto-closes once city_pulse refreshes AND one *scheduled* freshness-probe run succeeds. Re-arming the cron spends credits + is the operator's launch call — left for the operator. Latent finding flagged: live_search SLA is a silent no-op (probe filters `source_name` on `daily_truth`, which only has `source_tag`). HELD for operator confirmation before push.
