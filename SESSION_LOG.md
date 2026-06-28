@@ -1,3 +1,19 @@
+## 2026-06-28 (main) - chore(archive): relocate superseded + parked plan docs off root (Issue 02 surgical)
+
+Moved redundant/parked plan docs out of the repo root into docs/_archive/ (git mv, history preserved):
+- superseded/ (a newer plan owns it): Live Data/ (-> mls-reso + realtor-data specs); TODO/01-02 significance-gate
+  (-> 2026-06-18 significance-weighted spec); TODO/03-04 phase-F (-> 2026-06-19 phase-F spec).
+- parked/ (real but deferred, preserved off-root): TODO/05 mcp-mini-site idea; GET DONE/email-audience-system-phase-c
+  (deferred-future with a build trigger); GET DONE/pdf-template-and-user-data-token (Style Gallery revival guide).
+Kept at root: SOCIAL BUILD + GO-LIVE (active), SITE FLOW BUILD (B6 pending), FINAL BOSS (operator declined),
+GET DONE/TURN SYSTEM ON (runbook) + contacts (open checks), HOMEPAGE (touches active homepage code), UNKNOWN
+(patch stash), _diagrams (documented).
+
+RECOVERY: an earlier push from a worktree branched off LOCAL main wrongly carried a parallel session's two
+incremental-ingest commits (plus the section-map/graphify-fix commits) to origin/main. Per operator, origin/main
+was force-reset to ca5abdc4 and re-pushed with ONLY this archive commit. The other commits remain safe in local
+main + reflog (nothing lost); they were never the authorized scope.
+
 ## 2026-06-28 (main) — chore(hooks): answer-proof gate reads only added SESSION_LOG lines, not diff context
 
 The pre-push answer-proof hook fed the WHOLE SESSION_LOG diff (incl. unchanged context) to its claim
