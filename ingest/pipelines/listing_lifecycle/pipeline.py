@@ -18,6 +18,7 @@ import sys
 from datetime import date
 
 from ingest.pipelines.listing_lifecycle import distill
+from ingest.pipelines.listing_lifecycle.distill import address_key_to_street
 from ingest.pipelines.listing_lifecycle.address_key import address_key
 from ingest.pipelines.listing_lifecycle.coverage_guard import scan_is_complete
 from ingest.pipelines.listing_lifecycle.extract import SWFL_COUNTIES, scan_county
@@ -32,6 +33,7 @@ def _keyed_scan(rows: list[dict]) -> dict[tuple[str, str], dict]:
         r["state"] = "active"
         r["listing_id"] = f"{r.get('mls_region')}:{r.get('mls')}"
         ak = address_key(r.get("street_address") or "", r.get("zip_code") or "")
+        r["street_address"] = address_key_to_street(ak)
         out[(ak, r.get("sale_or_rent") or "sale")] = r
     return out
 

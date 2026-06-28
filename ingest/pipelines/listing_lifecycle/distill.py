@@ -11,9 +11,57 @@ Mirrors ingest/pipelines/active_listings/distill.py for the connection + execute
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+_SUFFIXES = ["BLVD","PKWY","TRAIL","HWY","CIR","TER","PL","CT","LN","RD","DR","AVE","ST","WAY","TRL","CV","PT","LOOP"]
+_DIR_RE = re.compile(r"^(SW|NW|SE|NE|[NSEW])(?=\d)")
+_ORD_RE = re.compile(r"^(\d+)(TH|ST|ND|RD)$", re.I)
+
+
+def _ord_suffix(n: int) -> str:
+    if 11 <= n % 100 <= 13:
+        return "th"
+    return {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+
+
+def _humanize_street(raw: str) -> str:
+    dm = _DIR_RE.match(raw)
+    if dm:
+        d = dm.group(1)
+        rest = raw[len(d):]
+        om = _ORD_RE.match(rest)
+        if om:
+            n = int(om.group(1))
+            return d + " " + str(n) + _ord_suffix(n)
+        return d + " " + rest.title()
+    om = _ORD_RE.match(raw)
+    if om:
+        n = int(om.group(1))
+        return str(n) + _ord_suffix(n)
+    return raw.title()
+
+
+def address_key_to_street(address_key: str) -> str:
+    """Reconstruct a display street address from a normalized address_key."""
+    addr = address_key.split(":")[0]
+    unit = ""
+    um = re.search(r"(UNIT[A-Z0-9-]+)$", addr)
+    if um:
+        unit = " #" + um.group(1)[4:]
+        addr = addr[:um.start()]
+    nm = re.match(r"^(\d+)", addr)
+    num = nm.group(1) if nm else ""
+    street = addr[len(num):]
+    suffix = ""
+    for sfx in sorted(_SUFFIXES, key=len, reverse=True):
+        if street.endswith(sfx):
+            suffix = " " + sfx.title()
+            street = street[:-len(sfx)]
+            break
+    return (num + " " + _humanize_street(street) + suffix + unit).strip()
 
 # psycopg is imported LAZILY inside _get_conn so the pure callers (and dry-runs) don't require the
 # DB driver to be installed in the running interpreter (e.g. a crawl4ai-venv dry-run with no psycopg).
@@ -28,6 +76,7 @@ _STATE_COLS = [
     "address_key", "sale_or_rent", "state", "listing_id", "list_price", "list_suffix",
     "beds", "baths", "sqft", "lot_acres", "property_type", "zip_code", "county", "city",
     "subdivision", "brokerage", "listed_date", "days_on_market", "days_in_state",
+    "street_address",
 ]
 _TRANS_COLS = [
     "address_key", "sale_or_rent", "from_state", "to_state", "at", "listing_id",

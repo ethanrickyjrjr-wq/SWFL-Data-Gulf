@@ -1,3 +1,11 @@
+## 2026-06-28 (main) — feat(listings): street_address column + parser for Lee+Collier
+
+Added `street_address` column to `data_lake.listing_state` (ALTER TABLE IF NOT EXISTS).
+`address_key_to_street()` in `distill.py` decodes the normalized key back to a display address:
+handles SW/NW/SE/NE grid streets (Cape Coral/Lehigh), ordinals (8th/17th/40th), units.
+All 10,161 Lee+Collier rows populated in-place — no re-scrape. Future pipeline runs auto-populate.
+Next: build /listings page.
+
 ## 2026-06-28 (main) — analysis: repo focus/restructure — 4-issue breakdown folder
 
 Combed code + graphify + Claude Code docs + 2 crawl4ai research passes to evaluate the proposed
