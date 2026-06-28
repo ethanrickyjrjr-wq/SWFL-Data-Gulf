@@ -20,6 +20,32 @@ held line is never read as "now". Pure, TDD, 17 chart-image tests green; no-nowP
 
 Pushed isolated onto origin/main (cherry-picked Task 2 + this Task 1) — a parallel session's 9 self-healing-
 cron commits stay LOCAL/held (operator HC setup pending), never pushed by me.
+## 2026-06-28 (main) — self-healing cron (Issue 04, audit-rescoped): unblind the incident logger + Healthchecks.io dead-man's-switch + Dependabot — CODE LANDED LOCAL, HELD for operator HC setup + push
+
+Probe-first audit (RULE 0.5) collapsed Issue 04: daily-rebuild's bypass is already fixed (REBUILD_PAT; 06-27
+scheduled run green), retry+LLM diagnosis already exist and run (heal-cron-failure.yml), and the
+freshness-probe red is a WORKING SLA alarm (exit-1 only on error_after_days breach — never retry it). The real
+gap the audit found: `log-cron-incident.yml` is itself silently DOWN — its `record_failure` commits the ledger
+to `main` as github-actions[bot], GH013-rejected (`Required status check "CI / build" … PR required`), and
+because `gitCommitAndPush` runs BEFORE the issue/Project feed and re-throws, NOTHING was captured (no ledger,
+no sticky comment, no discrete issue) since ~06-22 — 5 freshness-probe SLA failures went unrecorded. Fix
+(operator chose "stop committing to main"): logger now records via `public.checks` (`cron_incident_<slug>`,
+idempotent open/close) + the existing GitHub issue/Project-#3 feed; markdown ledger is human-curated only
+(session-kickoff still greps it for chronicFlappers). `check.mjs` creds() gained an env fallback so it runs in
+CI (new pure `scripts/lib/supabase-creds.mjs`, 4 unit tests). Logger dry-run subprocess tests assert no git
+push (2). Added Healthchecks.io heartbeats (one `HEALTHCHECKS_PING_KEY` secret, `?create=1` auto-provision) to
+8 active dailies — `if: always()` (NOT success: freshness-probe exits 1 on a real SLA alarm, must still confirm
+the schedule fired). Paused (city-pulse, listing-lifecycle, email-scheduler) + hourly (data-readiness) excluded
+with reason. Dependabot version-update policy added (`bun` ecosystem, NOT npm — verified live it updates
+bun.lock, avoiding the frozen-lockfile CI drift class) for github-actions+pip+bun. Spec
+`docs/superpowers/specs/2026-06-28-self-healing-automation-design.md`; plan
+`docs/superpowers/plans/2026-06-28-self-healing-automation.md`; check `self_healing_automation_live_verify`.
+Tests green: 4+2+29. NOT PUSHED — needs operator: (1) create Healthchecks.io Hobbyist + `gh secret set
+HEALTHCHECKS_PING_KEY` (Gate 3 blocks push until set, since 8 workflows now reference it), (2) confirm/run the
+two Dependabot toggles (`gh api -X PUT .../vulnerability-alerts` + `.../automated-security-fixes`). Surfaced,
+out of scope: a real SLA source is stale NOW (why the probe's red); `daily-email-digest.yml` also `git push ||
+true`s to main (same bot-can't-push class, but swallowed — log silently not persisting). Item 4 (minute-0 sweep,
+75 crons) split to its own spec.
 
 ## 2026-06-28 (main) — prochart Task 2: Vercel font bundle + PDF chart block (data-URI) — the preview-deploy make-or-break
 
