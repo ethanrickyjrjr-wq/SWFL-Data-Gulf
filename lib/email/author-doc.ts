@@ -272,15 +272,31 @@ export interface AssembleArgs {
   authored: AuthoredDoc;
   figuresById: Map<string, MarketFigure>;
   globalStyle: EmailGlobalStyle;
+  /** The same anchor strings the prose lint uses (menu values+labels + chart figures).
+   *  A literal stat value carrying an UNanchored number is blanked here — closing the
+   *  one number-field the prose lint can't see (stats is not a string field). */
+  anchorNumbers: ReadonlyArray<string | number>;
   /** Resolved market chart image (alt is the auto alt; caption comes from the model). */
   chart?: AssetSlot | null;
   /** Resolved hero photo image. */
   photo?: AssetSlot | null;
 }
 
+/** A literal (non-figure) stat value is allowed ONLY if it invents no number: a
+ *  value with no digits (e.g. "Buyer's market") passes; a value whose every numeric
+ *  token anchors verbatim passes; anything else is blanked. This is the structural
+ *  guard behind the schema's "a number here cannot be invented" promise — the prose
+ *  lint never walks `stats`, so the check lives at assembly. */
+function anchoredStatValue(raw: string, anchors: ReadonlySet<string>): string {
+  const nums = extractNumbers(raw).filter((t) => !isBareYear(t));
+  if (nums.length === 0) return raw; // qualitative — no figure to invent
+  return nums.every((t) => anchorsExactly(t, anchors)) ? raw : "";
+}
+
 function buildEntry(
   a: AuthoredBlock,
   figuresById: Map<string, MarketFigure>,
+  anchors: ReadonlySet<string>,
   chart: AssetSlot | null | undefined,
   photo: AssetSlot | null | undefined,
 ): { entry: Entry; placedChart: boolean; placedPhoto: boolean } | null {
@@ -321,7 +337,12 @@ function buildEntry(
     }
   } else if (type === "stats") {
     const cells = (a.stats ?? [])
-      .map((s) => ({ value: num(s.value_figure) ?? s.value ?? "", label: s.label ?? "" }))
+      .map((s) => ({
+        // id-selected figure value (always anchored) OR a literal that invents no
+        // number (anchoredStatValue blanks an unanchored figure) — never raw model digits.
+        value: num(s.value_figure) ?? anchoredStatValue(s.value ?? "", anchors),
+        label: s.label ?? "",
+      }))
       .filter((c) => c.value !== "" || c.label !== "")
       .slice(0, 3);
     if (cells.length === 0) return null; // no resolvable cells — skip (never ship placeholder stats)
@@ -418,13 +439,14 @@ function capBlocks(entries: Entry[]): Entry[] {
 /** Assemble a positioned EmailDoc from the model's authored output. PURE. Brand is
  *  never authored — globalStyle is the incoming (branded) style, untouched. */
 export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
-  const { authored, figuresById, globalStyle, chart, photo } = args;
+  const { authored, figuresById, globalStyle, anchorNumbers, chart, photo } = args;
+  const anchors = buildAnchorSet(anchorNumbers); // for the stat-literal number guard
   const entries: Entry[] = [];
   let chartPlaced = false;
   let photoPlaced = false;
 
   for (const a of authored.blocks) {
-    const r = buildEntry(a, figuresById, chart, photo);
+    const r = buildEntry(a, figuresById, anchors, chart, photo);
     if (!r) continue;
     entries.push(r.entry);
     if (r.placedChart) chartPlaced = true;

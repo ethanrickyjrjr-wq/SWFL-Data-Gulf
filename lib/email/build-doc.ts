@@ -480,6 +480,11 @@ function resolveAuthorModel(mode?: string): string {
 }
 
 /** One forced-tool author call → a validated AuthoredDoc, or null on a miss. */
+// Authoring a full multi-block doc (tool call) needs more headroom than a content
+// patch — too small truncates the tool_use and the safeParse misses. 8192 covers a
+// ~20-block email comfortably.
+const AUTHOR_MAX_TOKENS = 8192;
+
 async function callAuthor(
   model: string,
   system: string,
@@ -487,7 +492,7 @@ async function callAuthor(
 ): Promise<AuthoredDoc | null> {
   const msg = await client.messages.create({
     model,
-    max_tokens: MAX_TOKENS,
+    max_tokens: AUTHOR_MAX_TOKENS,
     system,
     tools: [AUTHOR_TOOL as unknown as Anthropic.Tool],
     tool_choice: { type: "tool", name: AUTHOR_TOOL.name },
@@ -566,6 +571,7 @@ export async function authorDoc({
       authored: a,
       figuresById,
       globalStyle,
+      anchorNumbers: anchorStrings,
       chart: chartSlot,
       photo: photoSlot,
     });

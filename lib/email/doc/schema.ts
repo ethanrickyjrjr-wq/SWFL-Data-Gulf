@@ -300,8 +300,9 @@ export type BlockContentPatch = z.infer<typeof BlockContentPatchSchema>;
 const AuthoredStatSchema = z.object({
   /** Menu id whose verbatim value fills this cell (id-selection moat). */
   value_figure: z.string().max(40).optional(),
-  /** A non-figure cell value (e.g. "Buyer's market"); any DIGITS in it are still
-   *  lint-anchored downstream, so a number here cannot be invented either. */
+  /** A non-figure cell value (e.g. "Buyer's market"). The engine anchor-checks it at
+   *  assembly (author-doc.ts `anchoredStatValue`): a value carrying an UNanchored
+   *  number is blanked — so a number here cannot be invented either. */
   value: z.string().max(24).optional(),
   label: z.string().max(60).optional(),
 });
