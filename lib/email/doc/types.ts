@@ -205,12 +205,32 @@ export interface BlockPropsMap {
 }
 
 /**
+ * Optional grid position (react-grid-layout v2 item shape; the block `id` is the
+ * RGL item `i`). PAID-tier only: a block with NO `layout` renders stacked exactly
+ * like the free tier today; a block WITH `layout` lives on the resizable grid.
+ * Backward-compatible — never required.
+ */
+export interface BlockLayout {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  minW?: number;
+  maxW?: number;
+  minH?: number;
+  maxH?: number;
+  /** Locked block (e.g. footer/unsubscribe) — not draggable/resizable. */
+  static?: boolean;
+}
+
+/**
  * A single block. Discriminated on `type`; `id` is always present post-parse
  * (the schema's transform mints one when absent — ids never come from the model).
  * Built from `BlockPropsMap` so each variant carries its precise props type.
+ * `layout` is optional grid positioning (paid tier); absent = stacked (free tier).
  */
 export type EmailBlock = {
-  [K in BlockType]: { id: string; type: K; props: BlockPropsMap[K] };
+  [K in BlockType]: { id: string; type: K; props: BlockPropsMap[K]; layout?: BlockLayout };
 }[BlockType];
 
 /** Narrow `EmailBlock` to a single type's variant (used by block components). */

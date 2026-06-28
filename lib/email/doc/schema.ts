@@ -17,6 +17,7 @@ import { z } from "zod";
 import type {
   AgentCardProps,
   AgentHeroProps,
+  BlockLayout,
   ButtonProps,
   DividerProps,
   EmailGlobalStyle,
@@ -195,6 +196,21 @@ export const GlobalStyleSchema = z.object({
 // minted by the transform when absent — so every parsed block has a string id.
 const idIn = z.string().optional();
 
+// Optional grid position (paid tier). A strip-mode object merged onto the union via
+// `.and()` so a no-`layout` (free-tier) block parses unchanged — `layout` is simply
+// absent. The block `id` is the react-grid-layout item `i`.
+const LayoutSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  w: z.number(),
+  h: z.number(),
+  minW: z.number().optional(),
+  maxW: z.number().optional(),
+  minH: z.number().optional(),
+  maxH: z.number().optional(),
+  static: z.boolean().optional(),
+}) satisfies z.ZodType<BlockLayout>;
+
 const BlockSchema = z
   .discriminatedUnion("type", [
     z.object({ id: idIn, type: z.literal("header"), props: HeaderPropsSchema }),
@@ -210,6 +226,7 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("divider"), props: DividerPropsSchema }),
     z.object({ id: idIn, type: z.literal("footer"), props: FooterPropsSchema }),
   ])
+  .and(z.object({ layout: LayoutSchema.optional() }))
   .transform((b) => ({ ...b, id: b.id ?? mintBlockId() }));
 
 export const EmailDocSchema = z.object({
