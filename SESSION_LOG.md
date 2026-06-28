@@ -1,3 +1,29 @@
+## 2026-06-28 (main) — prochart Task 2: Vercel font bundle + PDF chart block (data-URI) — the preview-deploy make-or-break
+
+The font bundle is the silent-prod bug behind blank chart text: resvg with loadSystemFonts:true +
+defaultFontFamily:"Arial" finds NO Arial on Vercel's Linux runtime and renders chart LABELS as nothing,
+no error (a 2,832-byte vs 23,500-byte PNG in the local probe). Fix: vendor Liberation Sans Regular+Bold
+(SIL OFL, copied from pdfjs-dist — Arial-metric-compatible so every hand-rolled SVG layout stays
+pixel-identical) into assets/fonts/, and point resvg at the TTF paths. New lib/charts/chart-fonts.ts is
+the ONE root (CHART_FONT_FILES + CHART_FONT_FAMILY); svgToPng (lib/email/chart-image.ts) now uses
+{ fontFiles, loadSystemFonts:false, defaultFontFamily:"Liberation Sans" } — deterministic local===Vercel.
+next.config.ts traces ./assets/fonts/*.ttf into /api/email-lab/ai (the ONLY route that rasterizes a
+chart; any new svgToPng caller-route must add its own trace). PDF chart block (Option B, the proportionate
+path — NO new doc block type, zero risk to the green email path): lib/pdf/inline-chart-images.ts replaces
+our hosted chart PNG URLs (/email-charts/ key) with base64 data-URIs before @react-pdf renders, so a
+deliverable PDF is self-contained and never depends on a flaky render-time remote fetch (the anti-pattern:
+"PDF <Image> = data-URI, not a Supabase URL"). Wired into renderEmailDocToBuffer (the single PDF root →
+both download + blast attachment). Email keeps the hosted URL (Gmail strips data-URIs). TDD throughout;
+688 lib tests green (font-bundle render-without-system-fonts proof + inline-chart-images + PDF fidelity
+audit). LOCAL PROOF (in lieu of the deploy I can't run): rendered the real branded non-bar (area) chart
+through svgToPng → crisp text at 2x, AND the full deliverable PDF through the production path
+(renderEmailDocToBuffer) → rasterized page 1 shows header+hero+chart+footer, chart visible + crisp.
+Vendor surfaces verified in-session: resvg 2.6.2 fontFiles (installed .d.ts + live README), @react-pdf
+data-URI <Image> (real render). render-social-image.ts has the SAME latent font bug but is a separate
+working surface — left for its own verified change (advisor). Check prochart_rendering_live_verify STAYS
+OPEN: its DoD is a preview-deploy render, which only the operator can produce. Next: Task 1 (live "now"
+dot), Task 3 (ECharts SSR long-tail + lintEChartsOption).
+
 ## 2026-06-28 (main) — email charts: high-res any-color + lab chart-type control + FRESHNESS web lane (we don't ship old data)
 
 Operator decree (escalating): "we don't ship old data — AI FINDS the current figure online or from

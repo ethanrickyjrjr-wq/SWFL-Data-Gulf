@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
     // runtime — bundle it so loadTolerances finds the real config rather than
     // falling back to built-in defaults (the read is via process.cwd()).
     "/api/cron/data-readiness": ["./ingest/data-verification-tolerances.yaml"],
+    // svgToPng (lib/charts/chart-fonts) loads a bundled Liberation TTF by path at
+    // runtime — Vercel's Linux runtime has no system Arial, so without these the
+    // chart route renders blank-text PNGs (silently). The Email Lab AI build is the
+    // ONLY route that rasterizes a chart; any NEW svgToPng caller-route must add this.
+    "/api/email-lab/ai": ["./assets/fonts/*.ttf"],
   },
   async redirects() {
     return [

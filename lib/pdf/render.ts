@@ -11,14 +11,20 @@ import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { EmailDocPdf } from "./email-doc-pdf";
+import { inlineChartImages } from "./inline-chart-images";
 
-/** EmailDoc → a real PDF Buffer (Resend-attachable, downloadable). */
+/** EmailDoc → a real PDF Buffer (Resend-attachable, downloadable). Our hosted chart PNGs
+ *  are inlined as base64 data-URIs first so the PDF is self-contained and never depends on a
+ *  flaky render-time fetch of a remote chart (prochart-rendering; the SVG was already
+ *  rasterized crisp with the bundled font on the build route). Best-effort: a chart whose
+ *  fetch fails simply keeps its remote URL. */
 export async function renderEmailDocToBuffer(
   doc: EmailDoc,
   opts?: { asOf?: string },
 ): Promise<Buffer> {
+  const inlined = await inlineChartImages(doc);
   return renderToBuffer(
-    createElement(EmailDocPdf, { doc, asOf: opts?.asOf }) as ReactElement<DocumentProps>,
+    createElement(EmailDocPdf, { doc: inlined, asOf: opts?.asOf }) as ReactElement<DocumentProps>,
   );
 }
 

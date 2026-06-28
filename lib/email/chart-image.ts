@@ -15,6 +15,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
 import { formatAxisDateLabel, formatDisplayDate } from "@/lib/format-date";
+import { CHART_FONT_FILES, CHART_FONT_FAMILY } from "@/lib/charts/chart-fonts";
 
 const PUBLIC_BUCKET = "email-media";
 
@@ -241,16 +242,24 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/** Rasterize an email-safe SVG to PNG (resvg, system fonts + Arial fallback).
- *  `scale` rasterizes ABOVE the SVG's intrinsic size via resvg `fitTo` zoom — the
- *  display width stays logical (ImageBlock caps at 600px), so the default 2x = retina
- *  without any layout change. Pass `scale: 1` for an exact intrinsic-size raster. */
+/** Rasterize an email-safe SVG to PNG (resvg). Fonts come from a BUNDLED TTF
+ *  (lib/charts/chart-fonts) — NOT loadSystemFonts:"Arial", which is absent on Vercel's
+ *  Linux runtime and silently renders every chart label blank. loadSystemFonts:false makes
+ *  the render deterministic (local === Vercel) and faster; the SVGs' `font-family="Arial"`
+ *  falls back to the bundled Liberation (Arial-metric-compatible, so layout is unchanged).
+ *  `scale` rasterizes ABOVE the SVG's intrinsic size via resvg `fitTo` zoom — the display
+ *  width stays logical (ImageBlock caps at 600px), so the default 2x = retina without any
+ *  layout change. Pass `scale: 1` for an exact intrinsic-size raster. */
 export function svgToPng(svg: string, opts?: { scale?: number; background?: string }): Buffer {
   const scale = opts?.scale ?? 2;
   return new Resvg(svg, {
     background: opts?.background ?? "rgba(255,255,255,1)",
     fitTo: { mode: "zoom", value: scale },
-    font: { loadSystemFonts: true, defaultFontFamily: "Arial" },
+    font: {
+      fontFiles: CHART_FONT_FILES,
+      loadSystemFonts: false,
+      defaultFontFamily: CHART_FONT_FAMILY,
+    },
   })
     .render()
     .asPng();
