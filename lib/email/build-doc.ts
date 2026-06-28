@@ -8,14 +8,26 @@
 // ContentPatch schema strips style/link/identity keys) are preserved.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { EmailDocSchema, BlockContentPatchSchema, type ContentPatch } from "@/lib/email/doc/schema";
+import {
+  EmailDocSchema,
+  BlockContentPatchSchema,
+  AuthorDocSchema,
+  type ContentPatch,
+  type AuthoredDoc,
+} from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
+import { DEFAULT_BLOCK_PROPS } from "@/lib/email/doc/default-docs";
 import {
   loadMarketFigures,
   figuresToPromptBlock,
   type MarketFigure,
 } from "@/lib/email/market-context";
-import { resolveEmailModel } from "@/lib/email/model-router";
+import {
+  resolveEmailModel,
+  EMAIL_MODEL_OPUS,
+  EMAIL_MODEL_SONNET,
+  EMAIL_MODEL_HAIKU,
+} from "@/lib/email/model-router";
 import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
 import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-image";
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
@@ -30,6 +42,16 @@ import {
   looksLikeFigureAsk,
   type WebFallbackResult,
 } from "@/lib/assistant/web-fallback";
+import {
+  AUTHOR_TOOL,
+  authorSystem,
+  assembleAuthoredDoc,
+  buildFigureMenu,
+  figureMenuById,
+  collectAnchorNumbers,
+  lintAuthoredProse,
+} from "@/lib/email/author-doc";
+import { extractNumbers } from "@/lib/deliverable/narrative-lint";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
@@ -426,6 +448,182 @@ export async function buildContentDoc({
       // and the sources it cited — so the UI can show "found fresher data" + the citations.
       webRefreshed: refreshedLabels,
       webSources: web.verified.map((v) => ({ label: v.label, value: v.value, url: v.url })),
+    },
+  };
+}
+
+// ── The AUTHOR path (paid tier — build 03) ───────────────────────────────────
+// Beside buildContentDoc (which only re-fills a FIXED skeleton), authorDoc lets the
+// model compose the WHOLE document — which blocks, in what order, grouped into rows,
+// with content — from the data MENU. The engine then derives the grid layout, gates
+// the prose against invention, and returns a positioned EmailDoc. Brand is never
+// authored (the incoming globalStyle carries through; applyBrand still overlays
+// after); the content-patch + per-block fill paths above are untouched.
+//
+// MENU vs DOSSIER: the figures menu is the ONLY number source (id-selection); the
+// master dossier rides along as QUALITATIVE context ("what's worth saying"), and
+// the prose lint anchors on menu + chart figures — so a number lifted out of the
+// dossier text is stripped, never silently shipped.
+//
+// FOLLOW-UPS (documented, not regressions — the free content-patch path keeps all
+// of these): the author does not yet run the stale-figure web refresh or the
+// model-driven external/upload/user gap-fill lanes; those join the menu + anchor
+// set in a later increment.
+
+/** Author quality defaults to Sonnet (the "connect it better" baseline); `max`/
+ *  `opus` lifts to Opus, `interactive`/`haiku` drops to Haiku. Reuses the router ids. */
+function resolveAuthorModel(mode?: string): string {
+  const m = (mode ?? "").trim().toLowerCase();
+  if (m === "max" || m === "opus") return EMAIL_MODEL_OPUS;
+  if (m === "interactive" || m === "haiku") return EMAIL_MODEL_HAIKU;
+  return EMAIL_MODEL_SONNET;
+}
+
+/** One forced-tool author call → a validated AuthoredDoc, or null on a miss. */
+async function callAuthor(
+  model: string,
+  system: string,
+  user: string,
+): Promise<AuthoredDoc | null> {
+  const msg = await client.messages.create({
+    model,
+    max_tokens: MAX_TOKENS,
+    system,
+    tools: [AUTHOR_TOOL as unknown as Anthropic.Tool],
+    tool_choice: { type: "tool", name: AUTHOR_TOOL.name },
+    messages: [{ role: "user", content: user }],
+  });
+  const tool = msg.content.find((b) => b.type === "tool_use") as Anthropic.ToolUseBlock | undefined;
+  if (!tool) return null;
+  const parsed = AuthorDocSchema.safeParse(tool.input);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Run the full Email Lab AUTHOR build. Returns a positioned (chart/photo-filled,
+ *  brand-overlaid-later) EmailDoc, or the current doc + a message on a miss. */
+export async function authorDoc({
+  prompt,
+  rawDoc,
+  scope,
+  mode,
+  chartType,
+}: BuildArgs): Promise<BuildResult> {
+  const docParsed = EmailDocSchema.safeParse(rawDoc);
+  if (!docParsed.success) {
+    return { httpStatus: 400, payload: { error: "Invalid email document." } };
+  }
+  const currentDoc = docParsed.data;
+  const globalStyle = currentDoc.globalStyle; // brand is canonical — never authored
+  const model = resolveAuthorModel(mode);
+
+  // Data feed + best-effort chart/photo, in parallel — the SAME producers the
+  // content-patch path uses (each never throws; a chart/photo is a bonus).
+  const [lakeParts, chartRes, photoRes] = await Promise.all([
+    fetchLakeParts(scope),
+    buildPromptChart(prompt, currentDoc, scope, chartType),
+    resolveHeroPhoto(prompt, currentDoc),
+  ]);
+
+  const menu = buildFigureMenu(lakeParts.figures);
+  const figuresById = figureMenuById(menu);
+  const chartGroundingNumbers = chartRes?.groundingNote
+    ? extractNumbers(chartRes.groundingNote)
+    : [];
+  const anchorStrings = collectAnchorNumbers(lakeParts.figures, chartGroundingNumbers);
+
+  const chartSlot = chartRes
+    ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
+    : null;
+  const photoSlot = photoRes
+    ? { url: photoRes.image, alt: photoRes.title ?? "Featured property", linkUrl: photoRes.source }
+    : null;
+
+  const system = authorSystem({
+    menu,
+    dossier: lakeParts.dossier,
+    vocabulary: Object.keys(DEFAULT_BLOCK_PROPS),
+    hasChart: !!chartRes,
+    chartGrounding: chartRes?.groundingNote,
+    hasPhoto: !!photoRes,
+  });
+  const baseUser = scope?.value
+    ? `User request: ${prompt}\nScope: ${scope.kind ?? "area"} ${scope.value}`
+    : `User request: ${prompt}`;
+
+  const authored = await callAuthor(model, system, baseUser);
+  if (!authored) {
+    return {
+      payload: {
+        doc: currentDoc,
+        applied: false,
+        message: "The AI couldn't author this — try rephrasing.",
+      },
+    };
+  }
+
+  const assemble = (a: AuthoredDoc): EmailDoc =>
+    assembleAuthoredDoc({
+      authored: a,
+      figuresById,
+      globalStyle,
+      chart: chartSlot,
+      photo: photoSlot,
+    });
+
+  const firstParse = EmailDocSchema.safeParse(assemble(authored));
+  if (!firstParse.success) {
+    return {
+      payload: {
+        doc: currentDoc,
+        applied: false,
+        message: "The authored layout didn't validate — try rephrasing.",
+      },
+    };
+  }
+  let doc: EmailDoc = firstParse.data;
+
+  // No-invention gate (gateNarrative philosophy): lint prose → on a violation,
+  // regenerate ONCE naming the offending sentences → still bad ⇒ hard-strip them.
+  const lint = lintAuthoredProse(doc, anchorStrings);
+  let regenerations = 0;
+  let stripped = false;
+  if (!lint.ok) {
+    regenerations = 1;
+    const retryUser =
+      `${baseUser}\n\nYour previous draft used numbers that are NOT in the DATA MENU. ` +
+      `Re-author so every number in prose is quoted verbatim from a [fN] figure, or removed:\n` +
+      lint.offending.map((s) => `- "${s}"`).join("\n");
+    const authored2 = await callAuthor(model, system, retryUser);
+    const reparse2 = authored2 ? EmailDocSchema.safeParse(assemble(authored2)) : null;
+    if (reparse2?.success) {
+      const lint2 = lintAuthoredProse(reparse2.data, anchorStrings);
+      if (lint2.ok) {
+        doc = reparse2.data;
+      } else {
+        doc = lint2.stripped; // hard-strip the second draft's offenders
+        stripped = true;
+      }
+    } else {
+      doc = lint.stripped; // no usable second draft — strip the first
+      stripped = true;
+    }
+  }
+
+  // Stripping only shortens strings, so the doc still validates; parse once more
+  // defensively and fall back to the current doc on the (unexpected) miss.
+  const finalParse = EmailDocSchema.safeParse(doc);
+  const finalDoc = finalParse.success ? finalParse.data : currentDoc;
+
+  return {
+    payload: {
+      doc: finalDoc,
+      applied: true,
+      authored: true,
+      chart: Boolean(chartRes),
+      chartNote: chartRes?.note,
+      photo: Boolean(photoRes),
+      regenerations,
+      stripped,
     },
   };
 }

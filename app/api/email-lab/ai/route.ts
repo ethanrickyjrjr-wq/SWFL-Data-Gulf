@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { buildContentDoc, fetchLakeContext } from "@/lib/email/build-doc";
+import { buildContentDoc, authorDoc, fetchLakeContext } from "@/lib/email/build-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import type { ChartType } from "@/lib/email/reshape-chart-type";
 
@@ -37,18 +37,32 @@ export async function POST(req: NextRequest) {
     mode?: string;
     // Optional chart shape chosen in the lab control: bar | ranked | donut | dotplot.
     chartType?: string;
+    // PAID author (build 03): compose the WHOLE doc (blocks + layout) from the data
+    // menu, not just re-fill the current skeleton. `build:true` (or mode "author").
+    build?: boolean;
   };
   const prompt = body.prompt ?? "";
 
   // New block-canvas mode wins when a doc is present.
   if (body.doc !== undefined) {
-    const { httpStatus, payload } = await buildContentDoc({
-      prompt,
-      rawDoc: body.doc,
-      scope: body.scope,
-      mode: body.mode,
-      chartType: body.chartType as ChartType | undefined,
-    });
+    // "Build with AI" → the author engine composes the whole document; the default
+    // (re-fill the existing skeleton) stays buildContentDoc. Both validate the doc.
+    const isAuthor = body.build === true || body.mode === "author";
+    const { httpStatus, payload } = isAuthor
+      ? await authorDoc({
+          prompt,
+          rawDoc: body.doc,
+          scope: body.scope,
+          mode: body.mode,
+          chartType: body.chartType as ChartType | undefined,
+        })
+      : await buildContentDoc({
+          prompt,
+          rawDoc: body.doc,
+          scope: body.scope,
+          mode: body.mode,
+          chartType: body.chartType as ChartType | undefined,
+        });
     return httpStatus
       ? NextResponse.json(payload, { status: httpStatus })
       : NextResponse.json(payload);

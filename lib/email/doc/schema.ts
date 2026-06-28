@@ -266,3 +266,76 @@ export const ContentPatchSchema = z.record(z.string(), BlockContentPatchSchema);
 
 export type ContentPatch = z.infer<typeof ContentPatchSchema>;
 export type BlockContentPatch = z.infer<typeof BlockContentPatchSchema>;
+
+// ── AI AUTHOR output (paid tier — build 03) ──────────────────────────────────
+// What the AUTHOR model emits. Unlike ContentPatch (which only re-fills text into
+// a FIXED skeleton), the author chooses WHICH blocks, in WHAT order, and how they
+// group into rows — it composes the whole document.
+//
+// THE MOAT — the platform's two existing guarantees, composed (no third mechanism):
+//   1. Numbers are SELECTED, never written. A number-bearing field carries a
+//      `value_figure` (an id into the data MENU); the engine writes that figure's
+//      verbatim value. The author literally cannot type a headline/stat number —
+//      mirrors lib/assistant/compose-chart.ts ("select rows, never emit cells").
+//      Free prose is gated post-hoc by the no-invention lint (gateNarrative
+//      philosophy, lib/deliverable/narrative-lint.ts).
+//   2. Brand/identity/links are NOT authored. Strip mode (z.object) keeps ONLY the
+//      content + semantic-layout keys below; any color / *Url / logoUrl /
+//      companyName / name / globalStyle the model emits is DROPPED, never applied
+//      (applyBrand overlays brand AFTER — brand stays canonical, ONE root).
+//
+// LAYOUT IS SEMANTIC, NOT ABSOLUTE. The model emits a column `span` (1–12) and a
+// `new_row` flag — it does NOT emit {x,y,w,h}. The engine derives exact, bounds-
+// correct grid coordinates from the row grouping (LLMs are unreliable at absolute
+// coordinates; deterministic derivation cannot overlap or overflow 12 cols and
+// needs no compaction pass — so the engine takes NO react-grid-layout dependency,
+// while the canvas (G1) still uses RGL v2: feeding RGL already-tight rows is a
+// no-op, so both halves agree).
+//
+// `type` is a free string (validated at assembly time against the live block
+// vocabulary — default-docs' DEFAULT_BLOCK_PROPS, the ONE root, which auto-grows
+// when build 05 adds listing/multi-column) to avoid a schema↔default import cycle
+// and stay forward-compatible without editing an enum here.
+
+const AuthoredStatSchema = z.object({
+  /** Menu id whose verbatim value fills this cell (id-selection moat). */
+  value_figure: z.string().max(40).optional(),
+  /** A non-figure cell value (e.g. "Buyer's market"); any DIGITS in it are still
+   *  lint-anchored downstream, so a number here cannot be invented either. */
+  value: z.string().max(24).optional(),
+  label: z.string().max(60).optional(),
+});
+
+export const AuthoredBlockSchema = z.object({
+  type: z.string().max(40),
+  /** Column span 1–12 (12 = full-bleed row). Engine clamps + derives x/w. */
+  span: z.number().int().min(1).max(12).optional(),
+  /** Start a new visual row (else sit beside the previous block in its row). */
+  new_row: z.boolean().optional(),
+  // ── content (text only — strip mode drops any key not listed here) ──
+  kicker: z.string().max(60).optional(),
+  /** Menu id → the engine writes this figure's verbatim value as the headline. */
+  value_figure: z.string().max(40).optional(),
+  label: z.string().max(80).optional(),
+  prose: z.string().max(500).optional(),
+  title: z.string().max(120).optional(),
+  body: z.string().max(2000).optional(),
+  caption: z.string().max(200).optional(),
+  alt: z.string().max(160).optional(),
+  tagline: z.string().max(300).optional(),
+  designation: z.string().max(120).optional(),
+  bio: z.string().max(400).optional(),
+  button_label: z.string().max(40).optional(),
+  align: z.enum(["left", "center", "right"]).optional(),
+  /** For an image block: which auto-resolved asset the engine drops in. */
+  image_role: z.enum(["chart", "photo"]).optional(),
+  stats: z.array(AuthoredStatSchema).max(3).optional(),
+});
+
+export const AuthorDocSchema = z.object({
+  blocks: z.array(AuthoredBlockSchema).min(1).max(20),
+});
+
+export type AuthoredStat = z.infer<typeof AuthoredStatSchema>;
+export type AuthoredBlock = z.infer<typeof AuthoredBlockSchema>;
+export type AuthoredDoc = z.infer<typeof AuthorDocSchema>;

@@ -40,7 +40,12 @@
 ## Status
 - [x] 01 doc-contract — **DONE**, `bunx next build` green (branch `email-lab-engine`)
 - [x] 02 compile-grid — **DONE**, `bunx next build` green (branch `email-lab-engine`)
-- [ ] 03 author-engine
+- [x] 03 author-engine — **DONE**, `bunx next build` green (worktree `bp-author-engine` on `email-lab-engine`)
+  - Files: `doc/schema.ts` (+`AuthorDocSchema`), NEW `lib/email/author-doc.ts` (pure engine), `build-doc.ts` (+`authorDoc`), `api/email-lab/ai/route.ts` (`build:true`/`mode:"author"` → author path; content-patch + per-block + legacy untouched).
+  - **Reframe vs plan §Grid-contract 5:** model emits SEMANTIC structure (`span` + `new_row`), engine derives bounds-correct `{x,y,w,h}` — so NO `react-grid-layout` dependency server-side (verified: `react-grid-layout@2.2.3` `/core` is real but exports `compact`/`compactItemVertical`, NOT `verticalCompactor`; deterministic row-derivation is tighter for email and avoids hauling a client lib into the server bundle). Canvas (G1) still uses RGL v2; feeding it already-tight rows is a no-op, so both halves agree.
+  - **Moat:** id-selection for numeric fields (mirrors compose-chart) + no-invention prose lint (mirrors gateNarrative, reuses `narrative-lint` primitives). Chart/photo fill RESERVED slots (never bottom-dumped). Footer code-guaranteed (CAN-SPAM). Ids minted server-side. Repair bounded to one regeneration → strip.
+  - **Blocked-by-05:** the acceptance line's *listing card* needs build 05's `listing` block; the author drives its vocabulary from `DEFAULT_BLOCK_PROPS` (ONE root), so it picks up `listing`/`multi-column` automatically once 05 lands — no author-code change.
+  - **Follow-ups (NOT regressions — free content-patch path keeps all):** author v1 omits the stale-figure web refresh + model-driven external/upload/user gap-fill lanes; they join the menu + anchor set in a later increment.
 - [ ] 04 save-photo
 - [ ] 05 listing+multicol blocks
 - [ ] 06 templates
