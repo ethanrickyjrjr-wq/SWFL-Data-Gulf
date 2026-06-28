@@ -1,3 +1,13 @@
+## 2026-06-28 (main) — feat(assistant): _ASSISTANT/ folder + auto spec cleanup system
+
+Built the full session brief + spec cleanup system in 6 tasks.
+`assistant-lib.mjs` (23 tests, 0 fail) — pure helpers for dead-spec detection, archive, TODAY.md.
+`assistant-first-run.mjs` — one-time cleanup (archived 8 dead specs on first run).
+`assistant-weekly.mjs` — incremental archive + writes `_ASSISTANT/TODAY.md` with in-flight, overdue checks, last ship, spec health.
+`new-build.mjs` — creates spec stub + opens check in one command (`node scripts/new-build.mjs <slug> "<label>"`).
+`session-kickoff.mjs` extended — adds `Spec clutter : N specs` line + TODAY.md block to every KICKOFF.
+Next: run `node scripts/assistant-weekly.mjs` weekly (or wire to existing Monday GHA).
+
 ## 2026-06-27 (main) — fix(ci): zip-report off mock data — grounding-coverage test green
 
 grounding-coverage.test.ts Check 1 was failing: zip-report/[zip]/page.tsx imported
