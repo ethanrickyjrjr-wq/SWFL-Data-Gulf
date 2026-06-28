@@ -1,7 +1,7 @@
 // lib/email/blocks/SignalBlock.tsx — PURE. Callout box with kicker + body.
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, SignalProps } from "../doc/types";
-import { fontStack, SECTION_PAD, CARD_BG, BORDER } from "./styles";
+import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 
 export function SignalBlock({
   props,
@@ -15,8 +15,8 @@ export function SignalBlock({
   const inner = (
     <Section
       style={{
-        backgroundColor: CARD_BG,
-        padding: SECTION_PAD,
+        backgroundColor: props.sectionBg ?? CARD_BG,
+        padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
@@ -24,7 +24,7 @@ export function SignalBlock({
         style={{
           backgroundColor: boxBg,
           borderLeft: `4px solid ${globalStyle.accentColor}`,
-          borderRadius: "4px",
+          borderRadius: "6px",
           padding: "16px 18px",
         }}
       >
@@ -47,7 +47,7 @@ export function SignalBlock({
           <Text
             style={{
               fontFamily: font,
-              fontSize: "16px",
+              fontSize: "18px",
               fontWeight: 700,
               color: globalStyle.primaryColor,
               margin: "0 0 6px",
@@ -61,7 +61,7 @@ export function SignalBlock({
             style={{
               fontFamily: font,
               fontSize: "14px",
-              lineHeight: "1.6",
+              lineHeight: "1.65",
               color: globalStyle.textColor,
               margin: 0,
             }}

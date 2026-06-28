@@ -1,7 +1,7 @@
 // lib/email/blocks/TextBlock.tsx — PURE. A paragraph of prose.
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, TextProps } from "../doc/types";
-import { fontStack, SECTION_PAD, CARD_BG, BORDER } from "./styles";
+import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 
 export function TextBlock({
   props,
@@ -14,8 +14,8 @@ export function TextBlock({
   const inner = (
     <Section
       style={{
-        backgroundColor: CARD_BG,
-        padding: SECTION_PAD,
+        backgroundColor: props.sectionBg ?? CARD_BG,
+        padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
@@ -23,8 +23,8 @@ export function TextBlock({
         <Text
           style={{
             fontFamily: font,
-            fontSize: "15px",
-            lineHeight: "1.7",
+            fontSize: "16px",
+            lineHeight: "1.75",
             color: globalStyle.textColor,
             textAlign: props.align ?? "left",
             margin: 0,

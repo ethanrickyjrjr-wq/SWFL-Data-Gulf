@@ -44,6 +44,8 @@ export function mintBlockId(): string {
 // Colors are free-form CSS strings (hex / rgb / named) — validated as strings,
 // not regex-locked, so brand pickers can pass anything CSS accepts.
 const color = () => z.string();
+const paddingY = () => z.enum(["none", "sm", "md", "lg"]).optional();
+const sectionBg = () => z.string().optional();
 
 // ── Per-block prop schemas ──────────────────────────────────────────────────
 // `satisfies z.ZodType<…>` ties each schema to its interface in ./types.ts so a
@@ -64,6 +66,8 @@ const HeroPropsSchema = z.object({
   label: z.string().max(80).optional(),
   prose: z.string().max(500).optional(),
   linkUrl: z.string().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
 }) satisfies z.ZodType<HeroProps>;
 
 const StatItemSchema = z.object({
@@ -73,6 +77,8 @@ const StatItemSchema = z.object({
 
 const StatsPropsSchema = z.object({
   stats: z.array(StatItemSchema).min(1).max(3),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
 }) satisfies z.ZodType<StatsProps>;
 
 const SignalPropsSchema = z.object({
@@ -81,12 +87,16 @@ const SignalPropsSchema = z.object({
   body: z.string().max(500).optional(),
   bgColor: color().optional(),
   linkUrl: z.string().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
 }) satisfies z.ZodType<SignalProps>;
 
 const TextPropsSchema = z.object({
   body: z.string().max(2000).optional(),
   align: z.enum(["left", "center", "right"]).optional(),
   linkUrl: z.string().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
 }) satisfies z.ZodType<TextProps>;
 
 const ImagePropsSchema = z.object({
@@ -95,6 +105,8 @@ const ImagePropsSchema = z.object({
   caption: z.string().max(200).optional(),
   kind: z.enum(["chart", "photo"]).optional(),
   linkUrl: z.string().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
 }) satisfies z.ZodType<ImageProps>;
 
 const AgentCardPropsSchema = z.object({

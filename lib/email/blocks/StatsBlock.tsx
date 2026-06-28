@@ -1,7 +1,7 @@
 // lib/email/blocks/StatsBlock.tsx — PURE. 2–3 KPI cells side by side.
 import { Section, Row, Column, Text } from "@react-email/components";
 import type { EmailGlobalStyle, StatsProps } from "../doc/types";
-import { fontStack, SECTION_PAD, MUTED, BORDER, CARD_BG } from "./styles";
+import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 
 export function StatsBlock({
   props,
@@ -15,8 +15,8 @@ export function StatsBlock({
   return (
     <Section
       style={{
-        backgroundColor: CARD_BG,
-        padding: SECTION_PAD,
+        backgroundColor: props.sectionBg ?? CARD_BG,
+        padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
@@ -26,8 +26,9 @@ export function StatsBlock({
             <Text
               style={{
                 fontFamily: font,
-                fontSize: "26px",
+                fontSize: "32px",
                 fontWeight: 700,
+                letterSpacing: "0.01em",
                 color: globalStyle.primaryColor,
                 margin: 0,
               }}

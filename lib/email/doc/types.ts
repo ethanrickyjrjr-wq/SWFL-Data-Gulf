@@ -26,6 +26,8 @@ export type BlockType =
 
 export type TextAlign = "left" | "center" | "right";
 
+export type PaddingSize = "none" | "sm" | "md" | "lg";
+
 export type FontFamily = "MODERN_SANS" | "BOOK_SERIF" | "GEOMETRIC_SANS";
 
 // ── Social platforms ────────────────────────────────────────────────────────
@@ -44,6 +46,18 @@ export type SocialLayout = "row" | "column";
 export type SocialIconSize = "sm" | "md" | "lg";
 export type SocialIconColor = "original" | "brand" | "custom";
 
+// ── Per-block layout controls ───────────────────────────────────────────────
+// USER-OWNED, AI-safe: ContentPatchSchema strip mode silently drops these even
+// if the model tries to write them.
+
+/** Per-block padding + background overrides. */
+export interface BlockBase {
+  /** Vertical padding: none=0 sm=12px md=24px(default) lg=36px; horizontal always 28px. */
+  paddingY?: PaddingSize;
+  /** Hex — overrides CARD_BG (#ffffff) for this block's outer Section only. */
+  sectionBg?: string;
+}
+
 // ── Per-block prop interfaces ───────────────────────────────────────────────
 // Styling/link/identity fields (bgColor, *Url, companyName, name…) are
 // USER-OWNED and sticky — the AI content-patch can never write them
@@ -57,7 +71,7 @@ export interface HeaderProps {
   bgColor?: string;
 }
 
-export interface HeroProps {
+export interface HeroProps extends BlockBase {
   kicker?: string;
   value?: string;
   label?: string;
@@ -70,11 +84,11 @@ export interface StatItem {
   label: string;
 }
 
-export interface StatsProps {
+export interface StatsProps extends BlockBase {
   stats: StatItem[]; // 2–3 KPI cells
 }
 
-export interface SignalProps {
+export interface SignalProps extends BlockBase {
   kicker?: string;
   title?: string;
   body?: string;
@@ -82,13 +96,13 @@ export interface SignalProps {
   linkUrl?: string;
 }
 
-export interface TextProps {
+export interface TextProps extends BlockBase {
   body?: string;
   align?: TextAlign;
   linkUrl?: string;
 }
 
-export interface ImageProps {
+export interface ImageProps extends BlockBase {
   url?: string;
   alt?: string;
   caption?: string;

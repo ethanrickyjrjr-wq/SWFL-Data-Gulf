@@ -30,7 +30,9 @@ export function ImageBlock({
     </Section>
   );
   return (
-    <Section style={{ backgroundColor: CARD_BG, borderBottom: `1px solid ${BORDER}` }}>
+    <Section
+      style={{ backgroundColor: props.sectionBg ?? CARD_BG, borderBottom: `1px solid ${BORDER}` }}
+    >
       {props.linkUrl ? (
         <Link href={props.linkUrl} style={{ display: "block" }}>
           {imgEl}

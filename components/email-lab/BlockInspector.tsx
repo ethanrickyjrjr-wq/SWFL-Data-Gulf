@@ -9,6 +9,7 @@ import type {
   EmailBlock,
   FooterProps,
   KnownPlatform,
+  PaddingSize,
   SocialIconsProps,
   SocialPlatformEntry,
   StatItem,
@@ -125,14 +126,28 @@ export function BlockInspector({
               onChange={(v) => set("linkUrl", v)}
               placeholder="https://… (makes block clickable)"
             />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
           </>
         )}
 
         {block.type === "stats" && (
-          <StatsEditor
-            stats={(props.stats as StatItem[]) ?? []}
-            onChange={(s) => set("stats", s)}
-          />
+          <>
+            <StatsEditor
+              stats={(props.stats as StatItem[]) ?? []}
+              onChange={(s) => set("stats", s)}
+            />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
+          </>
         )}
 
         {block.type === "signal" && (
@@ -156,6 +171,12 @@ export function BlockInspector({
               onChange={(v) => set("linkUrl", v)}
               placeholder="https://… (makes block clickable)"
             />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
           </>
         )}
 
@@ -167,6 +188,10 @@ export function BlockInspector({
               onChange={(v) => set("body", v)}
               rows={6}
             />
+            <p className="text-[10px] text-gray-400">
+              Merge tags: <code>{"{{first_name}}"}</code> <code>{"{{full_name}}"}</code>{" "}
+              <code>{"{{email}}"}</code>
+            </p>
             <SelectField
               label="Align"
               value={(props.align as TextAlign) ?? "left"}
@@ -178,6 +203,12 @@ export function BlockInspector({
               value={str("linkUrl")}
               onChange={(v) => set("linkUrl", v)}
               placeholder="https://… (makes block clickable)"
+            />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
             />
           </>
         )}
@@ -197,6 +228,12 @@ export function BlockInspector({
               value={str("linkUrl")}
               onChange={(v) => set("linkUrl", v)}
               placeholder="https://… (makes image clickable)"
+            />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
             />
           </>
         )}
@@ -392,6 +429,53 @@ export function BlockInspector({
         Delete block
       </button>
     </div>
+  );
+}
+
+// ── Block-level layout controls (BlockBase) ─────────────────────────────────
+
+const PADDING_OPTIONS: { value: PaddingSize; label: string }[] = [
+  { value: "none", label: "None" },
+  { value: "sm", label: "S" },
+  { value: "md", label: "M" },
+  { value: "lg", label: "L" },
+];
+
+function BlockBaseControls({
+  paddingY,
+  sectionBg,
+  onPaddingY,
+  onSectionBg,
+}: {
+  paddingY?: PaddingSize;
+  sectionBg?: string;
+  onPaddingY: (v: PaddingSize | undefined) => void;
+  onSectionBg: (v: string) => void;
+}) {
+  const current = paddingY ?? "md";
+  return (
+    <>
+      <div>
+        <span className="mb-1 block text-xs font-medium text-gray-500">Spacing</span>
+        <div className="flex gap-1">
+          {PADDING_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => onPaddingY(o.value === "md" ? undefined : o.value)}
+              className={`flex-1 rounded border px-2 py-1 text-xs font-medium ${
+                current === o.value
+                  ? "border-gulf-teal bg-gulf-teal/10 text-gulf-teal"
+                  : "border-gray-200 text-gray-500 hover:border-gray-300"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <ColorField label="Section background" value={sectionBg ?? ""} onChange={onSectionBg} />
+    </>
   );
 }
 

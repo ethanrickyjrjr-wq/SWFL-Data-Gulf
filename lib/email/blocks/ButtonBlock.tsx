@@ -16,10 +16,10 @@ export function ButtonBlock({
   const sharedStyle = {
     backgroundColor: bg,
     color: "#ffffff",
-    padding: "12px 28px",
-    borderRadius: "6px",
+    padding: "14px 32px",
+    borderRadius: "8px",
     fontFamily: font,
-    fontSize: "14px",
+    fontSize: "15px",
     fontWeight: 600,
     textDecoration: "none",
     display: "inline-block",

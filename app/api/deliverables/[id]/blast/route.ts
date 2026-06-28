@@ -35,6 +35,16 @@ function escAttr(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
+/** Replace {{merge_tags}} with per-recipient values. Case-insensitive. */
+function withMergeTags(html: string, c: { name: string | null; email: string }): string {
+  const firstName = (c.name ?? "").split(/\s+/)[0] || "there";
+  const fullName = c.name ?? c.email;
+  return html
+    .replace(/\{\{first_name\}\}/gi, firstName)
+    .replace(/\{\{full_name\}\}/gi, fullName)
+    .replace(/\{\{email\}\}/gi, c.email);
+}
+
 /** Per-recipient unsubscribe + view-online footer, injected before </body>. */
 function withFooter(html: string, webUrl: string, unsubUrl: string): string {
   const footer =
@@ -184,13 +194,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let sent = 0;
   let failed = 0;
 
-  const messageFor = (c: { id: string; email: string }) => {
+  const messageFor = (c: { id: string; email: string; name: string | null }) => {
     const unsubUrl = `${BASE_URL}/api/unsubscribe?id=${c.id}`;
+    const html = withMergeTags(withFooter(baseHtml, webUrl, unsubUrl), c);
     return {
       from,
       to: [c.email],
       subject,
-      html: withFooter(baseHtml, webUrl, unsubUrl),
+      html,
       ...(replyTo ? { replyTo } : {}),
       headers: {
         "List-Unsubscribe": `<${unsubUrl}>`,
