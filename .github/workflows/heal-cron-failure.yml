@@ -131,6 +131,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           RUN_ID: ${{ github.event.inputs.run_id }}
         run: node .github/scripts/heal-cron-failure.mjs --mode=diagnose

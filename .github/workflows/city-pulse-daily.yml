@@ -1,7 +1,7 @@
 name: City pulse daily
 
 on:
-  # PAUSED 2026-06-18 — credit freeze (ANTHROPIC_API_KEY + FIRECRAWL_API_KEY); re-enable at launch
+  # PAUSED 2026-06-18 — credit freeze (ANTHROPIC_API_KEY only; pipeline uses Anthropic web_search, NOT Firecrawl); re-enable at launch
   # schedule:
   #   - cron: "0 9 * * *"
   workflow_dispatch:
@@ -41,7 +41,6 @@ jobs:
       - name: Run city_pulse pipeline
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}

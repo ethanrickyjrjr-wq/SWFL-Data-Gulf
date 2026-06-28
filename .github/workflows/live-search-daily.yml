@@ -44,7 +44,6 @@ jobs:
       - name: Run live-search engine
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           SPIDER_API_KEY: ${{ secrets.SPIDER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
