@@ -211,6 +211,8 @@ _AUDIT_AND_ROADMAP/   Build queue, roadmap, audit snapshots
 .claude/              Agent hooks + shared settings
 ```
 
+See `docs/section-map.md` for the full section map - the 5 sections, import-coupling, and what's separable vs one organism.
+
 ---
 
 ## Contact

@@ -1,3 +1,11 @@
+## 2026-06-28 (main) - docs(section-map): restore + correct the section map on origin
+
+section-map.md (the 'where everything lives' doc) was dropped from origin in the force-reset recovery;
+this restores it - corrected for the archive moves (root now lists only SOCIAL BUILD/GO-LIVE/GET DONE;
+moved dirs point to docs/_archive/) + the verified graphify invocation (bun run graphify:update, not the
+bare CLI). README points at it. All my archive/cleanup work is now on origin, isolated from the parallel
+session (whose commits remain only in local main).
+
 ## 2026-06-28 (main) - fix(archive-refs): repoint orphaned comments to docs/_archive paths
 
 Closed the deferred non-functional citation comments after the archive moves:
