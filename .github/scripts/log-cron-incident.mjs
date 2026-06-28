@@ -125,15 +125,16 @@ function maybeResolve() {
 // ---------- public.checks (off-main incident state) ----------
 
 function openIncidentCheck(detail) {
-  // Idempotent: a flapper failing repeatedly keeps ONE open check. check.mjs
-  // `open` exits non-zero if the key already exists — swallow that case.
+  // `reopen` (NOT `open`): a recurring flapper must re-open its incident check
+  // after a prior success closed it. `open` is create-only and would fail on the
+  // existing `done` row — silently leaving the recurrence uncaptured.
   try {
     sh(
-      `node scripts/check.mjs open ${CHECK_PROJECT} ${checkKey} "cron failure: ${workflowName}" --detail "${detail.replace(/"/g, "'")}"`,
+      `node scripts/check.mjs reopen ${CHECK_PROJECT} ${checkKey} "cron failure: ${workflowName}" --detail "${detail.replace(/"/g, "'")}"`,
     );
-    log(`opened check ${checkKey}`);
-  } catch {
-    log(`check ${checkKey} already open (ok)`);
+    log(`opened/reopened check ${checkKey}`);
+  } catch (e) {
+    log(`could not open check ${checkKey} (non-fatal): ${e.message}`);
   }
 }
 
@@ -186,6 +187,20 @@ function postComment(body) {
 // ---------- discrete incident issues (GitHub Projects) ----------
 
 function openIncidentIssue(logTail, cls, suggestedAction) {
+  // Idempotent: one OPEN incident issue per workflow. A flapper failing repeatedly
+  // refreshes the check + sticky comment; it must not stack duplicate issues
+  // (this path now runs on every failure — it was dead code while the push threw).
+  try {
+    const found = execSync(
+      `gh issue list --label "cron-failure" --state open --search "${INCIDENT_TAG} in:title" --json number --limit 1`,
+      { encoding: "utf8", env: process.env },
+    );
+    if (JSON.parse(found.trim() || "[]").length) {
+      return log(`incident issue already open for ${workflowName}; not duplicating`);
+    }
+  } catch (e) {
+    log(`incident-issue dedup check failed (proceeding to create): ${e.message}`);
+  }
   const title = `${INCIDENT_TAG} ${cls.klass} · ${workflowDisplayName} — ${today}`;
   const body = [
     `**${workflowDisplayName}** failed on \`${today}\`.`,

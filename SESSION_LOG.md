@@ -40,7 +40,12 @@ with reason. Dependabot version-update policy added (`bun` ecosystem, NOT npm �
 bun.lock, avoiding the frozen-lockfile CI drift class) for github-actions+pip+bun. Spec
 `docs/superpowers/specs/2026-06-28-self-healing-automation-design.md`; plan
 `docs/superpowers/plans/2026-06-28-self-healing-automation.md`; check `self_healing_automation_live_verify`.
-Tests green: 4+2+29. NOT PUSHED — needs operator: (1) create Healthchecks.io Hobbyist + `gh secret set
+Advisor caught a blocker: `check.mjs open` is create-only (fails on a prior `done` row), so a recurring
+flapper's check would never re-open → silent partial blindness on the exact motivating case. Fixed with a new
+`reopen` verb (upsert-to-open) the logger now uses; proven LIVE (open-on-existing fails exit 1, reopen-after-
+close succeeds). Also made the discrete-issue create idempotent (the unblinded path now runs every failure —
+would otherwise stack issues on a flapper) and wired `scripts/lib/*.test.mjs` into CI (bun test ignores
+node:test). Tests green: 38. NOT PUSHED — needs operator: (1) create Healthchecks.io Hobbyist + `gh secret set
 HEALTHCHECKS_PING_KEY` (Gate 3 blocks push until set, since 8 workflows now reference it), (2) confirm/run the
 two Dependabot toggles (`gh api -X PUT .../vulnerability-alerts` + `.../automated-security-fixes`). Surfaced,
 out of scope: a real SLA source is stale NOW (why the probe's red); `daily-email-digest.yml` also `git push ||

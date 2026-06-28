@@ -143,6 +143,47 @@ async function open(args) {
   console.log(`opened: ${checkKey} — ${label}`);
 }
 
+// Upsert-to-open. Unlike `open` (create-only — fails if the key exists in ANY
+// state), `reopen` is idempotent across a close/re-fail cycle: a recurring cron
+// flapper MUST be able to re-open its `done` incident check. Re-opens a closed
+// row (clearing resolved_at/by) or creates a fresh one.
+async function reopen(args) {
+  const { positionals, flags } = parseArgs(args);
+  const [project, checkKey, label] = positionals;
+  if (!project || !checkKey || !label)
+    fail('reopen: need <project> <check_key> "<label>" — re-opens a closed check (or creates it)');
+  const existing = await rest(
+    `checks?check_key=eq.${encodeURIComponent(checkKey)}&select=check_key,state`,
+  );
+  if (existing.length) {
+    const patch = { state: "open", resolved_at: null, resolved_by: null };
+    if (flags.detail) patch.detail = flags.detail;
+    await rest(`checks?check_key=eq.${encodeURIComponent(checkKey)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify(patch),
+    });
+    console.log(`reopened: ${checkKey} (was ${existing[0].state})`);
+    return;
+  }
+  const row = {
+    project,
+    check_key: checkKey,
+    label,
+    state: "open",
+    resolution: flags.resolution ?? "manual",
+    priority: flags.priority ? Number(flags.priority) : 0,
+  };
+  if (flags.detail) row.detail = flags.detail;
+  if (flags.due) row.due_at = flags.due;
+  await rest("checks", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify(row),
+  });
+  console.log(`opened: ${checkKey} — ${label}`);
+}
+
 async function close(args) {
   const { positionals, flags } = parseArgs(args);
   const [handle, ...noteParts] = positionals;
@@ -206,6 +247,9 @@ try {
     case "open":
       await open(args);
       break;
+    case "reopen":
+      await reopen(args);
+      break;
     case "close":
       await close(args);
       break;
@@ -214,7 +258,7 @@ try {
       break;
     default:
       console.log(
-        'usage:\n  check.mjs list\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N]\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."]\n  check.mjs close <check_key|id> [note] [--drop]',
+        'usage:\n  check.mjs list\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N]\n  check.mjs reopen <project> <check_key> "<label>" [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."]\n  check.mjs close <check_key|id> [note] [--drop]',
       );
       process.exitCode = cmd ? 1 : 0;
   }
