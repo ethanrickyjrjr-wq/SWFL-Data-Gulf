@@ -19,18 +19,10 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { resolveSupabaseCreds } from "./lib/supabase-creds.mjs";
 
 const ROOT = process.cwd();
 const SECRETS_PATH = resolve(ROOT, ".dlt/secrets.toml");
-
-/** Parse a double-quoted TOML scalar by key, line-by-line (tolerant of CRLF). */
-function tomlStr(toml, key) {
-  for (const line of toml.split(/\r?\n/)) {
-    const m = line.match(new RegExp(`^\\s*${key}\\s*=\\s*"([^"]+)"`));
-    if (m) return m[1];
-  }
-  return null;
-}
 
 // Sentinel so fail() can halt execution like a throw (callers rely on it never
 // returning) while letting the top-level catch print nothing extra.
@@ -47,20 +39,15 @@ function fail(msg) {
 }
 
 function creds() {
-  let toml;
+  let tomlText = "";
   try {
-    toml = readFileSync(SECRETS_PATH, "utf8");
+    tomlText = readFileSync(SECRETS_PATH, "utf8");
   } catch {
-    fail(`could not read ${SECRETS_PATH}`);
+    // No local secrets file (e.g. CI) — fall through to env vars.
   }
-  const url =
-    tomlStr(toml, "SUPABASE_URL") ?? tomlStr(toml, "BRAINS_SUPABASE_URL");
-  const key =
-    tomlStr(toml, "SUPABASE_SERVICE_KEY") ??
-    tomlStr(toml, "BRAINS_SUPABASE_SERVICE_KEY");
-  if (!url || !key)
-    fail("SUPABASE_URL / SUPABASE_SERVICE_KEY not found in secrets");
-  return { url: url.replace(/\/$/, ""), key };
+  const c = resolveSupabaseCreds({ tomlText, env: process.env });
+  if (!c) fail("SUPABASE_URL / SUPABASE_SERVICE_KEY not found in secrets or env");
+  return c;
 }
 
 async function rest(path, init = {}) {
@@ -107,9 +94,7 @@ function parseArgs(args) {
 }
 
 async function list() {
-  const rows = await rest(
-    "checks?state=eq.open&order=due_at.asc.nullslast&select=*",
-  );
+  const rows = await rest("checks?state=eq.open&order=due_at.asc.nullslast&select=*");
   if (!rows.length) {
     console.log("none open ✓");
     return;
@@ -161,15 +146,9 @@ async function open(args) {
 async function close(args) {
   const { positionals, flags } = parseArgs(args);
   const [handle, ...noteParts] = positionals;
-  if (!handle)
-    fail(
-      "close: need a check_key or id — close <check_key|id> [note] [--drop]",
-    );
+  if (!handle) fail("close: need a check_key or id — close <check_key|id> [note] [--drop]");
   const note = noteParts.join(" ") || null;
-  const isUuid =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      handle,
-    );
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
   const col = isUuid ? "id" : "check_key";
   // state IN ('open','done','dropped'). --drop = abandoned (note → drop_reason);
   // otherwise the obligation was met (note → resolved_by, defaults to 'session').
@@ -205,13 +184,8 @@ async function update(args) {
   if (flags.priority != null) patch.priority = Number(flags.priority);
   if (flags.label != null) patch.label = flags.label;
   if (!Object.keys(patch).length)
-    fail(
-      "update: nothing to change — pass --detail / --due / --priority / --label",
-    );
-  const isUuid =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      handle,
-    );
+    fail("update: nothing to change — pass --detail / --due / --priority / --label");
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
   const col = isUuid ? "id" : "check_key";
   const updated = await rest(`checks?${col}=eq.${encodeURIComponent(handle)}`, {
     method: "PATCH",
@@ -220,9 +194,7 @@ async function update(args) {
   });
   const arr = Array.isArray(updated) ? updated : [updated];
   if (!arr.length) fail(`no check matched ${col}=${handle}`);
-  console.log(
-    `updated: ${handle} — ${Object.keys(patch).join(", ")} [${arr[0]?.state}]`,
-  );
+  console.log(`updated: ${handle} — ${Object.keys(patch).join(", ")} [${arr[0]?.state}]`);
 }
 
 const [cmd, ...args] = process.argv.slice(2);
