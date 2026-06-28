@@ -1,256 +1,186 @@
-# Homepage — Daily Listing Data Showcase
+# Homepage — Data Intelligence Showcase
 
-**Status:** Ready to build (code partially written, not pushed)
-**Date:** 2026-06-28
+**Status:** Ready to build  
+**Date:** 2026-06-28 (v2 — vision corrected after operator decree)  
 **Check:** `homepage_listing_showcase_live_verify`
 
 ---
 
-## Why This Exists
+## What We Are
 
-We have 10,459 live residential listings (Lee 7,412 · Collier 2,749 · Hendry 298, median $496,470) updating every day. The homepage shows none of it. It opens on a flood risk map by default.
+A DATA INTELLIGENCE platform for SWFL. Not a listings site. Not a portal. Not a dashboard.
 
-**The operator said it directly:** "EVERYONE KNOWS ABOUT FUCKING FLOOD RISK. WE LIVE BY A GOD DAMN OCEAN. NO ONE CARES ABOUT FLOOD RISK UNLESS YOU HAVE PRICES TO BACK UP WHERE YOU MIGHT BE BUYING PROPERTY."
+The product: AI that reads ALL of SWFL's real data and answers the real question each audience brings.
 
-Flood risk only means something when someone has already found a price they like. Lead with inventory and price. Flood is a context layer — show it last.
+**Buyer:** "Is this a good buy in Cape Coral right now?"  
+**Seller:** "What should I price my Fort Myers Beach home?"  
+**Broker:** "Build me a market brief that sends to my clients every Monday."  
+**Investor:** "Where in SWFL is growth actually happening?"
 
----
-
-## Research (crawl4ai — Redfin, Zillow, CoStar, NNGroup)
-
-Every major real estate platform leads with the same three metrics in the same order:
-
-1. **Homes for Sale count** — how many choices do I have?
-2. **Median Sale/List Price** — what does it cost?
-3. **Days on Market** — how fast is it moving?
-
-Risk metrics (flood, school ratings, crime) appear only as filters or secondary layers — never as the default view. Nobody opens Redfin to check flood risk. They check what's available and what it costs.
-
-**Page narrative pattern (Redfin/Zillow):**
-- Hero: inventory count + price headline
-- Map: choropleth defaulting to price or listing density, not risk
-- Stats bar: region-wide numbers (total homes, median price, by-county breakdown)
-- Feature cards: data-forward (real numbers, not generic claims)
-- Single CTA: one destination, repeated
-
-**What makes hero cards work (NNGroup + real platform research):**
-- Lead with a real number, not a feature name
-- Chips that add context without walls of text (county breakdowns, update cadence, data grain)
-- YoY direction when available
-- Buyer/seller/broker framing — not "platform features"
+The map is the front door. Click a ZIP, get the full picture. The AI builds anything you ask for from the data.
 
 ---
 
-## Live Data (source: `data_lake.listing_active_stats`, as of 2026-06-27)
+## Research Findings (crawl4ai, June 28 2026)
 
-| Metric | Value |
-|--------|-------|
-| Total active listings (SWFL) | 10,459 |
-| Median asking price | $496,470 |
-| Lee County listings | 7,412 |
-| Lee County median | $414,900 |
-| Collier County listings | 2,749 |
-| Collier County median | $912,000 |
-| Hendry County listings | 298 |
-| ZIP codes covered | 61 |
-| Highest ZIP (33993 Cape Coral NW) | 722 listings |
-| Days on market | NULL — coming via Realtor.com ingest |
+**ATTOM Data:** "Property Data & Intelligence Built for AI." They don't lead with listings — they lead with DATA CATEGORIES. Breadth is the product. The broker pitch: "data your competitors don't have."
+
+**CoreLogic/Cotality:** "Intelligence beyond bounds." "1 million+ data points refreshed monthly." "Navigate complexity with conviction." Five data categories shown simultaneously — property, climate/risk, market, customer. Never a single metric.
+
+**What this means for us:**
+- Listings count is ONE signal in the stats bar. Not the page narrative.
+- Map pills should span the data breadth — every audience finds their signal
+- Capabilities cards should voice the QUESTION the audience brings, then show we answer it
 
 ---
 
-## Page Narrative — One Story Top to Bottom
+## Current State
 
-```
-[Hero map]   -> This is your market. Here's what's for sale, by ZIP.
-[Stats bar]  -> 10,459 homes / $496,470 median / Lee 7,412 / Collier 2,749
-[Cap cards]  -> Here's what the data means for you (buyer / seller / broker)
-[Comp strip] -> Here's what everyone else charges for this (unchanged — best copy on site)
-[CTA]        -> Build Your First Report
-```
-
-Every section feeds the next. No island sections.
+Pills that exist: Flood Risk | Home Value | New Permits — all 3 working.
+Map default: `flood` — should be `value` (flood alarming to new arrivals; value is universal).
+Stats bar: 4 cells, all flood/value/permit/zip-count — need one signal per audience type.
 
 ---
 
-## Changes
+## The Changes
 
-### 1. Map pills — `lib/landing/home-map-data.ts`
+### 1. Map default — `Hero.tsx` line 286
 
-Add `listings` MetricKey (first = default):
-```ts
-export type MetricKey = "listings" | "flood" | "value" | "permits";
+Change `applyMetric("flood")` to `applyMetric("value")`
+
+Home Value is the right default. Everyone cares about home value. Flood is a signal you toggle to, not what you lead with.
+
+### 2. Add "Active Listings" pill — `Hero.tsx` + `home-map-data.ts`
+
+Add a 4th pill: `Active Listings`. Shows listing count per ZIP as a choropleth (amber gradient — more listings = warmer). Buyers read it as supply. Investors read it as market depth.
+
+METRIC_ORDER: `["value", "listings", "permits", "flood"]`
+
+Default pill order: Home Value | Active Listings | New Construction | Flood Risk
+
+Data: query `data_lake.listing_state` for count per ZIP, bake into `home-map-data.ts` as the `listings` metric.
+
+### 3. Stats bar — 4 cells, 4 audiences
+
+Each cell answers a different audience's question. Label from the audience's perspective, not ours.
+
+```
+[Active Listings]  [Median Value]   [Fastest Growing]  [Highest Risk]
+10,161             $496K            34120              33931
+Lee + Collier      Lee County       423 permits        $30K/yr flood
 ```
 
-Add `listings` MetricDef — per-ZIP counts from `brains/active-listings-swfl.md`, 57 map ZIPs (Lee + Collier only; Hendry ZIPs not on the SVG map). Color: warm amber `#3d2200 → #b86a1a → #f5c518`.
+Labels are conversational, not technical:
+- Cell 1: "Active Listings" — answers "how much is out there?"
+- Cell 2: "Median Home Value — Lee" — answers "what are homes going for?"
+- Cell 3: "Most Building Activity" — answers "where is growth happening?"
+- Cell 4: "Highest Flood Exposure" — answers "what's the risk here?"
 
-Per-ZIP data (baked from brain as of 2026-06-27):
-```
-33901:78  33903:182 33904:312 33905:278 33907:37  33908:370 33909:418 33912:93
-33913:276 33914:469 33916:56  33917:358 33919:141 33920:159 33921:0   33922:62
-33924:67  33928:251 33931:182 33936:208 33956:117 33957:182 33965:0   33966:50
-33967:98  33971:369 33972:288 33973:18  33974:409 33976:294 33990:173 33991:284
-33993:722 34101:0   34102:188 34103:104 34104:109 34105:56  34108:182 34109:124
-34110:131 34112:166 34113:156 34114:262 34116:45  34117:141 34119:219 34120:464
-34134:108 34135:282 34137:2   34138:3   34139:8   34140:11  34141:2   34142:175
-34145:152
-```
-low: 0, high: 722
+### 4. Capabilities cards — `Capabilities.tsx`
 
-METRIC_ORDER (first = default pill on load):
-```ts
-export const METRIC_ORDER: MetricKey[] = ["listings", "value", "permits", "flood"];
-```
+Replace generic feature cards with audience-voiced question cards. The card IS the question the user brings.
 
-De-jargon flood:
-- label: `"Flood Insurance Risk"` (was "Annual Flood Loss")
-- sublabel: `"Average annual insurance loss per home"` (was "FEMA NFIP avg annual loss per property")
+**Card 1 — Buyer**
+- Title: `"Is this a good time to buy in Cape Coral?"`
+- Body: `"Compare asking prices to historical values, see how long homes are sitting, check permit activity and flood exposure — all in one answer, with every number sourced."`
+- Chips: `[Buyers]` `[ZIP Analysis]` `[Cited Data]`
+
+**Card 2 — Seller**
+- Title: `"What should I price my Fort Myers Beach home?"`
+- Body: `"We pull comps, DOM per ZIP, price-cut trends, and YoY value direction. The answer tells you what the market will pay — not what you hope it will."`
+- Chips: `[Sellers]` `[Pricing]` `[No Guessing]`
+
+**Card 3 — Broker**
+- Title: `"Build me a daily market brief for my clients."`
+- Body: `"Describe the report. AI writes it from live data, adds charts and commentary, and sends it on schedule — to every client, automatically."`
+- Chips: `[Brokers]` `[Auto-Send]` `[Daily Updates]`
+
+**Card 4 — Investor**
+- Title: `"Where in SWFL is growth actually happening?"`
+- Body: `"Permit activity, inventory shifts, price direction — we track every signal across 57 ZIPs. The map shows you where the momentum is before anyone else does."`
+- Chips: `[Investors]` `[Market Trends]` `[57 ZIPs]`
+
+### 5. Hero badge + pill labels
+
+Badge: `"Lee · Collier Counties · Updated Daily"` (remove "Sample data" when live)
+
+Pill labels:
+- `value` → "Home Value"
+- `listings` → "Active Listings"
+- `permits` → "New Construction"
+- `flood` → "Flood Risk"
+
+Rail sublabel for flood: `"Avg annual insurance loss per property"` (plain English, not "FEMA NFIP AAL")
 
 ---
 
-### 2. Hero.tsx — `components/landing/Hero.tsx`
+## The /listings Page — a Data Tool, Not a Portal
 
-Initial active metric:
-```ts
-let activeMetric: MetricKey = "listings";  // was "flood"
-```
+The `/listings` page exists because 10,161 listings with addresses is a DATA ASSET — buyers and investors care about supply depth, DOM, and price distribution by ZIP. It is NOT the product. It is reached from the "Active Listings" stat cell.
 
-Hero badge:
-```
-"Lee · Collier · Hendry Counties · Updated Daily"
-```
+**Page purpose:** Show the data dimension of listing inventory — count, price distribution, DOM.
 
-Filter pills (reordered, flood last):
-```tsx
-<button className="filter-pill active" data-metric="listings">Homes for Sale</button>
-<button className="filter-pill" data-metric="value">Home Value</button>
-<button className="filter-pill" data-metric="permits">New Construction</button>
-<button className="filter-pill" data-metric="flood">Flood Risk</button>
-```
+**Implementation:**
+- Filter: county / price range / beds
+- Card: price · beds/baths/sqft · street address · city/ZIP · days on market
+- No photos (IDX-gated; we don't need them for data utility)
+- AI summary line per filtered result: "847 Lee County homes under $400K — median $328K, 23% have cut their price"
 
-Rail header defaults (before a ZIP is clicked):
-- metric name: "Homes for Sale"
-- sublabel: "Active residential listings"
+**Entry points:**
+- Clicking the "Active Listings" stat cell on the homepage
+- "See all X listings in [ZIP]" link on /z/[zip] pages
+- Direct URL `/listings`
 
-Add listings metric-row in rail-detail:
-```tsx
-<div className="metric-row" id="mrow-listings" data-metric="listings">
-  <div className="metric-row-label">Homes for Sale</div>
-  <div className="metric-row-value" id="mval-listings">—</div>
-  <div className="metric-row-rank" id="mrank-listings"></div>
-  <div className="mini-bar">
-    <div className="mini-bar-fill" id="mbar-listings" style={{ background: "#b86a1a" }} />
-  </div>
-</div>
-```
-
-Label fixes:
-- "Annual Flood Loss" → "Flood Insurance Risk"
-- "New Permits 2024" → "New Construction 2024"
-
-Stats bar — 4 cells with live data:
-
-| Cell | Label | Number | Sublabel | Chip |
-|------|-------|--------|----------|------|
-| 1 | Homes for Sale | 10,459 | Across SWFL | Updated Daily |
-| 2 | Median Asking | $496,470 | Active listings | List Price |
-| 3 | Lee County | 7,412 | Median $414,900 | Most Active |
-| 4 | Collier County | 2,749 | Median $912,000 | Luxury Market |
-
-Sources footer: add `"Active Listings (SWFL Data Gulf)"`.
-
----
-
-### 3. Capabilities.tsx — `components/landing/Capabilities.tsx`
-
-Replace 4 generic cards with data-forward cards + chips.
-
-**Card 1 — Inventory:**
-- Icon: `BarChart2`
-- Title: `"10,459 Homes for Sale"`
-- Body: `"Active listings across Lee, Collier, and Hendry counties — updated every day."`
-- Chips: `[Lee · 7,412]` `[Collier · 2,749]` `[Hendry · 298]` `[Updated Daily]`
-
-**Card 2 — Price:**
-- Icon: `TrendingUp`
-- Title: `"$496,470 Median Asking"`
-- Body: `"Asking prices across 61 ZIP codes. Lee runs $414K. Collier runs $912K. Click any ZIP to see it."`
-- Chips: `[List Price]` `[61 ZIPs]` `[As of Today]`
-
-**Card 3 — Ask anything:**
-- Icon: `Zap`
-- Title: `"Any question. Any ZIP. Real answer."`
-- Body: `"Flood insurance, active inventory, price trend — cited answer in seconds."`
-- Chips: `[Buyers]` `[Sellers]` `[Brokers]`
-
-**Card 4 — Build deliverable:**
-- Icon: `CalendarClock`
-- Title: `"Say what you need. It builds it."`
-- Body: `"Market report. Flood analysis. Investment memo. AI writes it from live data and sends on schedule — no workflow to build."`
-- Chips: `[Market Reports]` `[Auto-Send]` `[Any Client]`
-
-CTA button: `"Build Your First Report"` (was "Get Access")
-
-CTA deck: `"Built for brokers, buyers, and investors working SWFL."`
-
----
-
-### 4. Chip CSS — `components/landing/home-explorer.css`
-
-Add before `.cap-cta-row`:
-```css
-.home-explorer .cap-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.home-explorer .cap-chip {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.07);
-  color: var(--text-secondary);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-```
+NOT linked from main nav. NOT in capabilities cards. Deep-dive data tool.
 
 ---
 
 ## What Does NOT Change
 
-- Map SVG and useEffect interaction logic
-- Competitor comparison strip — best copy on the page
+- Map SVG, ZIP interaction, tooltip logic
+- Competitor comparison strip ("What everyone else charges")
 - Waitlist section
-- ZIP report pages (separate initiative)
+- ZIP report pages
 
 ---
 
-## Files Changed
+## Files
 
 | File | Change |
-|------|--------|
-| `lib/landing/home-map-data.ts` | Add `listings` MetricKey + MetricDef + METRIC_ORDER fix |
-| `components/landing/Hero.tsx` | Default pill, rail labels, stats bar, badge, metric-row |
-| `components/landing/Capabilities.tsx` | Data cards with real numbers + chips, CTA copy |
-| `components/landing/home-explorer.css` | `.cap-chips` + `.cap-chip` styles |
+|---|---|
+| `lib/landing/home-map-data.ts` | Add `listings` MetricDef · METRIC_ORDER `["value","listings","permits","flood"]` |
+| `components/landing/Hero.tsx` | Default `value` · 4th pill "Active Listings" · badge · flood sublabel |
+| `components/landing/Capabilities.tsx` | 4 audience-voiced question cards |
+| `app/listings/page.tsx` | New — data tool page |
+| `app/api/listings/route.ts` | New — filtered query endpoint |
+| `components/listings/ListingCard.tsx` | New — compact data card |
+| `components/listings/ListingFilters.tsx` | New — county/price/beds filter |
 
 ---
 
 ## Verification
 
-1. Homepage opens with "Homes for Sale" pill active (amber choropleth)
-2. Click any ZIP → rail shows listing count, rank, mini bar in amber
-3. Flood Risk pill is last; clicking shows "Flood Insurance Risk" (no jargon)
-4. Stats bar: 10,459 / $496,470 / Lee 7,412 / Collier 2,749
-5. Capabilities cards show real numbers with chips
-6. CTA reads "Build Your First Report"
-7. `bun test` 3911/0
-8. `bunx next build` clean
+**Homepage:**
+1. Opens with Home Value choropleth (teal gradient, not flood orange)
+2. Pills: Home Value (active) | Active Listings | New Construction | Flood Risk
+3. Stats bar: 4 cells, one per audience type
+4. Capabilities cards show buyer/seller/broker/investor questions
+5. Search still routes ZIP → /z/[zip], text → /ask
+
+**Listings page:**
+1. `/listings` loads — cards with address, price, beds/baths/sqft, DOM
+2. County filter works
+3. AI summary line present
+4. `bunx next build` clean
 
 ---
 
 ## Phase 2 — After Realtor.com Ingest
 
-Once `data_lake.realtor_zip_metrics` is populated (see `2026-06-27-realtor-data-library-ingest-design.md`):
-- Hero card 1: add `active_listing_count_yy` chip ("↑8% YoY")
-- Hero card 2: add `median_listing_price_yy` chip
-- New hero card: "X% of SWFL homes cut their price this month"
-- New map pill: Days on Market (`median_days_on_market` per ZIP)
-- Stats bar: add median DOM + pending ratio
+Once `data_lake.realtor_zip_metrics` is live:
+- Stats bar can show median DOM per county: "87 days on market in Lee"
+- Stats bar can show price_reduced_share: "22% of Lee sellers cut their price"
+- Listings page cards gain DOM-per-ZIP context
+- Map gets 5th pill: "Days on Market" (blue = slower, amber = fast)
+
+No structural homepage changes — just data populating existing slots.

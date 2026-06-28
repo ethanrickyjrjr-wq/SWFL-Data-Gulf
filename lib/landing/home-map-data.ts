@@ -78,8 +78,8 @@ export const HOME_MAP_DATA: HomeMapData = {
   },
   metrics: {
     flood: {
-      label: "Annual Flood Loss",
-      sublabel: "FEMA NFIP avg annual loss per property",
+      label: "Flood Risk",
+      sublabel: "Avg annual insurance loss per property (FEMA NFIP)",
       format: "currency",
       data: {
         "33901": 2900,
@@ -216,8 +216,8 @@ export const HOME_MAP_DATA: HomeMapData = {
       c2: "#5bc97a",
     },
     permits: {
-      label: "New Permits 2024",
-      sublabel: "Lee + Collier county building permits",
+      label: "New Construction",
+      sublabel: "Building permits issued 2024 (Lee + Collier)",
       format: "number",
       data: {
         "33901": 28,
@@ -286,7 +286,7 @@ export const HOME_MAP_DATA: HomeMapData = {
     },
   },
 };
-export const METRIC_ORDER: MetricKey[] = ["flood", "value", "permits"];
+export const METRIC_ORDER: MetricKey[] = ["value", "permits", "flood"];
 
 function _hexToRgb(h: string): [number, number, number] {
   return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];

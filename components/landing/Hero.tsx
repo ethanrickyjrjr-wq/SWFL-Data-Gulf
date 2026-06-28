@@ -42,7 +42,7 @@ export default function Hero() {
     const byId = (id: string) => root.querySelector<HTMLElement>(`[id="${id}"]`);
     const zipEl = (zip: string) => host.querySelector<SVGGElement>(`.zip-group[id="${zip}"]`);
 
-    let activeMetric: MetricKey = "flood";
+    let activeMetric: MetricKey = "value";
     let selectedZip: string | null = null;
 
     const clamp = (t: number) => Math.max(0, Math.min(1, t));
@@ -215,7 +215,7 @@ export default function Hero() {
             }
           });
         });
-        applyMetric("flood");
+        applyMetric("value");
 
         // Apply clean edge cuts: Lee top cut (y=153, removes NFM) + Collier staircase right
         const svg = host.querySelector("svg");
@@ -283,7 +283,7 @@ export default function Hero() {
       });
 
     // Initial pill/legend state before the SVG lands.
-    applyMetric("flood");
+    applyMetric("value");
 
     return () => {
       cancelled = true;
@@ -335,14 +335,14 @@ export default function Hero() {
           </div>
         </div>
         <div className="filter-row">
-          <button className="filter-pill active" type="button" data-metric="flood">
-            Flood Risk
-          </button>
-          <button className="filter-pill" type="button" data-metric="value">
+          <button className="filter-pill active" type="button" data-metric="value">
             Home Value
           </button>
           <button className="filter-pill" type="button" data-metric="permits">
-            New Permits
+            New Construction
+          </button>
+          <button className="filter-pill" type="button" data-metric="flood">
+            Flood Risk
           </button>
         </div>
       </div>
@@ -352,10 +352,10 @@ export default function Hero() {
           <div className="data-rail">
             <div className="rail-header">
               <div className="rail-metric-name" id="rail-metric-name">
-                Annual Flood Loss
+                Median Home Value
               </div>
               <div className="rail-sublabel" id="rail-sublabel">
-                FEMA NFIP avg annual loss per property
+                Zillow ZHVI, April 2026
               </div>
             </div>
             <div className="rail-empty" id="rail-empty">
@@ -368,20 +368,6 @@ export default function Hero() {
                 <div className="zip-code-label" id="rd-zipcode"></div>
                 <div className="zip-place" id="rd-place"></div>
                 <div className="zip-county" id="rd-county"></div>
-              </div>
-              <div className="metric-row" id="mrow-flood" data-metric="flood">
-                <div className="metric-row-label">Annual Flood Loss</div>
-                <div className="metric-row-value" id="mval-flood">
-                  —
-                </div>
-                <div className="metric-row-rank" id="mrank-flood"></div>
-                <div className="mini-bar">
-                  <div
-                    className="mini-bar-fill"
-                    id="mbar-flood"
-                    style={{ background: "var(--sunset-coral)" }}
-                  ></div>
-                </div>
               </div>
               <div className="metric-row" id="mrow-value" data-metric="value">
                 <div className="metric-row-label">Median Home Value</div>
@@ -398,7 +384,7 @@ export default function Hero() {
                 </div>
               </div>
               <div className="metric-row" id="mrow-permits" data-metric="permits">
-                <div className="metric-row-label">New Permits 2024</div>
+                <div className="metric-row-label">New Construction 2024</div>
                 <div className="metric-row-value" id="mval-permits">
                   —
                 </div>
@@ -408,6 +394,20 @@ export default function Hero() {
                     className="mini-bar-fill"
                     id="mbar-permits"
                     style={{ background: "#4a6fa8" }}
+                  ></div>
+                </div>
+              </div>
+              <div className="metric-row" id="mrow-flood" data-metric="flood">
+                <div className="metric-row-label">Flood Risk</div>
+                <div className="metric-row-value" id="mval-flood">
+                  —
+                </div>
+                <div className="metric-row-rank" id="mrank-flood"></div>
+                <div className="mini-bar">
+                  <div
+                    className="mini-bar-fill"
+                    id="mbar-flood"
+                    style={{ background: "var(--sunset-coral)" }}
                   ></div>
                 </div>
               </div>
@@ -421,7 +421,7 @@ export default function Hero() {
             <div className="svg-host" ref={svgHostRef} aria-hidden="false" />
             <div className="map-legend">
               <div className="legend-title" id="legend-title">
-                Annual Flood Loss
+                Median Home Value
               </div>
               <div className="legend-bar" id="legend-bar"></div>
               <div className="legend-labels">
@@ -439,28 +439,28 @@ export default function Hero() {
 
         <div className="stats-bar">
           <div className="stat-cell">
-            <div className="stat-label">Highest Flood Risk</div>
-            <div className="stat-value">33931</div>
-            <div className="stat-sub">Fort Myers Beach</div>
-            <div className="stat-tag">$30,074 AAL</div>
+            <div className="stat-label">Active Listings</div>
+            <div className="stat-value">10,161</div>
+            <div className="stat-sub">Lee &amp; Collier Counties</div>
+            <div className="stat-tag">Updated daily</div>
           </div>
           <div className="stat-cell">
-            <div className="stat-label">Highest Home Value</div>
-            <div className="stat-value">34108</div>
-            <div className="stat-sub">Pelican Bay, Naples</div>
-            <div className="stat-tag">$1.25M median</div>
+            <div className="stat-label">Median Home Value</div>
+            <div className="stat-value">$496K</div>
+            <div className="stat-sub">Lee County</div>
+            <div className="stat-tag">Zillow ZHVI · Apr 2026</div>
           </div>
           <div className="stat-cell">
-            <div className="stat-label">Most Active Permits</div>
+            <div className="stat-label">Most New Construction</div>
             <div className="stat-value">34120</div>
             <div className="stat-sub">Golden Gate Estates E</div>
-            <div className="stat-tag">423 permits</div>
+            <div className="stat-tag">423 permits in 2024</div>
           </div>
           <div className="stat-cell">
-            <div className="stat-label">ZIPs Covered</div>
-            <div className="stat-value">57</div>
-            <div className="stat-sub">Lee + Collier Counties</div>
-            <div className="stat-tag">Updated daily</div>
+            <div className="stat-label">Highest Flood Exposure</div>
+            <div className="stat-value">33931</div>
+            <div className="stat-sub">Fort Myers Beach</div>
+            <div className="stat-tag">$30K avg annual loss</div>
           </div>
         </div>
       </div>

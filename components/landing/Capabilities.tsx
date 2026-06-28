@@ -1,64 +1,87 @@
-/**
- * Capabilities section from the approved HOMEPAGE/ demo — 4 capability cards,
- * a real-price competitor comparison strip (crawl4ai-sourced), and the CTA.
- * Static; styles live in home-explorer.css (namespaced under .home-explorer).
- */
-import { Zap, FileText, Users, CalendarClock } from "lucide-react";
+import { TrendingUp, DollarSign, BarChart3, MapPin } from "lucide-react";
 
 export default function Capabilities() {
   return (
-    // id="comparison" is the nav "How It Works" anchor target (this section carries the
-    // capability cards + the competitor comparison strip).
     <section className="capabilities" id="comparison">
-      <div className="cap-eyebrow">What you can do</div>
+      <div className="cap-eyebrow">Real questions. Real data. Real answers.</div>
       <h2 className="cap-headline">
-        Tell it what you want. <span>It happens.</span>
+        Whatever you need to know about SWFL&mdash; <span>we have the data.</span>
       </h2>
       <p className="cap-deck">
-        No workflow builders. No drip sequence setup. No $499/mo CRM. Just say what you need.
+        Flood risk, home values, permit activity, listing inventory. AI reads it all and answers the
+        question you actually came to ask.
       </p>
 
       <div className="cap-grid">
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            <Zap size={22} />
+            <TrendingUp size={22} />
           </span>
-          <div className="cap-card-title">Ask anything. Get the answer.</div>
+          <div className="cap-card-title">
+            &ldquo;Is this a good time to buy in Cape Coral?&rdquo;
+          </div>
           <div className="cap-card-desc">
-            Any market question, any ZIP. Real numbers, right now.
+            Compare asking prices to historical values, check how long homes are sitting, see permit
+            activity and flood exposure&mdash;one cited answer.
+          </div>
+          <div className="cap-chips">
+            <span className="cap-chip">Buyers</span>
+            <span className="cap-chip">ZIP Analysis</span>
+            <span className="cap-chip">Cited Data</span>
           </div>
         </div>
 
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            <FileText size={22} />
+            <DollarSign size={22} />
           </span>
-          <div className="cap-card-title">Describe it. AI builds it.</div>
+          <div className="cap-card-title">
+            &ldquo;What should I price my Fort Myers Beach home?&rdquo;
+          </div>
           <div className="cap-card-desc">
-            Market summary, flood analysis, investment memo. Say what you need&mdash;it&rsquo;s
-            ready.
+            DOM per ZIP, price-cut trends, YoY value direction, active supply. The answer is what
+            the market will pay&mdash;not what you hope.
+          </div>
+          <div className="cap-chips">
+            <span className="cap-chip">Sellers</span>
+            <span className="cap-chip">Pricing</span>
+            <span className="cap-chip">No Guessing</span>
           </div>
         </div>
 
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            <Users size={22} />
+            <BarChart3 size={22} />
           </span>
-          <div className="cap-card-title">Add clients. AI tracks everything.</div>
+          <div className="cap-card-title">
+            &ldquo;Build me a daily market brief for my clients.&rdquo;
+          </div>
           <div className="cap-card-desc">
-            Drop in properties or clients. AI monitors what changes and tells you first.
+            Describe the report. AI writes it from live data, adds charts and commentary, and sends
+            it on schedule&mdash;to every client, automatically.
+          </div>
+          <div className="cap-chips">
+            <span className="cap-chip">Brokers</span>
+            <span className="cap-chip">Auto-Send</span>
+            <span className="cap-chip">Daily Updates</span>
           </div>
         </div>
 
         <div className="cap-card">
           <span className="cap-icon" aria-hidden="true">
-            <CalendarClock size={22} />
+            <MapPin size={22} />
           </span>
-          <div className="cap-card-title">Scheduled. Automatic. Just say when.</div>
+          <div className="cap-card-title">
+            &ldquo;Where in SWFL is growth actually happening?&rdquo;
+          </div>
           <div className="cap-card-desc">
-            &ldquo;Email my clients every month.&rdquo; Done. AI writes it from live data,
-            personalizes it for each client, and sends on schedule&mdash;forever. No workflow to
-            build.
+            Permit activity, inventory shifts, price direction across 57 ZIPs. The map shows where
+            the momentum is before anyone else does.
+          </div>
+          <div className="cap-chips">
+            <span className="cap-chip">Investors</span>
+            <span className="cap-chip">Market Trends</span>
+            <span className="cap-chip">57 ZIPs</span>
           </div>
         </div>
       </div>

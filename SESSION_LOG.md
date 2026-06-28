@@ -1,3 +1,13 @@
+## 2026-06-28 (main) — feat(homepage): data intelligence vision — map default, pills, cards, stats bar
+
+crawl4ai research on ATTOM/CoreLogic/Cotality confirmed: data intelligence platforms lead with
+breadth, not single metrics. Corrected homepage away from listings-portal framing.
+Changes: map default = Home Value (was Flood); pill order = Home Value → New Construction → Flood Risk;
+stats bar = 4 audience cells (buyers/sellers/investors/risk); Capabilities cards = 4 audience-voiced
+questions (buyer/seller/broker/investor). CSS: cap-chip styles added. Spec rewritten.
+Memory updated: SWFL Data Gulf = data intelligence platform, NOT a listings site.
+Next: add Active Listings metric to map-data.ts + build /listings data page.
+
 ## 2026-06-28 (main) — spec: homepage listing showcase — full research + change spec
 
 Wrote complete spec for homepage daily listing showcase at
