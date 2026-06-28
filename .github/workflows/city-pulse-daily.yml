@@ -22,7 +22,10 @@ jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # 13 cities × sequential Anthropic web_search calls run ~24 min (06-15: 24m15s,
+    # 06-28: 24m11s) — a 25-min cap guillotines a normal run. 45 gives ~1.85× headroom
+    # for a busy news day (more cited spans → longer distill, more searches).
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v6
