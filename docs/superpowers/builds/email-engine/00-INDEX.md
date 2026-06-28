@@ -51,7 +51,7 @@
 - [ ] 05 listing+multicol blocks
 - [ ] 06 templates
 - [ ] 07 asset-factory
-- [ ] G1 GridCanvas (operator)
+- [x] G1 GridCanvas (operator) — code-complete; `react-grid-layout@2.2.3`; `bunx next build` green (compile+TS), eslint clean; live drag/resize test deferred to G4 (nothing mounts it yet)
 - [ ] G2 block-toolbar (operator)
 - [ ] G3 photopea-modal (operator)
 - [ ] G4 wire-shell (operator)
