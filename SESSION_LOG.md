@@ -1,3 +1,16 @@
+## 2026-06-28 (main) — analysis: repo focus/restructure — 4-issue breakdown folder
+
+Combed code + graphify + Claude Code docs + 2 crawl4ai research passes to evaluate the proposed
+monorepo + scoped-CLAUDE + auto-routing-hook idea. VERDICT: monorepo is a red herring (TS core is
+one organism — app→lib 339 edges, lib↔refinery 90, refinery internal 728; only ingest/brains/mcp-widget
+are separable). Nested CLAUDE.md is location-based not topic-based; no native topic session-routing;
+the real fix is a UserPromptSubmit injection hook + output lints (Class A repeats) + scoped CLAUDE.md
+(Class B) + area subagents. Ingest: 0 incremental, 17 merge, 8 replace — re-fetch-everything confirmed.
+Wrote parent analysis `docs/superpowers/specs/2026-06-28-repo-focus-restructure-analysis.md` + a
+4-file breakdown folder `docs/superpowers/specs/2026-06-28-focus-restructure/` (01 focus-system,
+02 root-cleanup, 03 incremental-ingest, 04 self-healing-automation), each self-contained with
+findings + execution protocol. Docs-only; no code touched. Next: brainstorm Issue 01 into a spec.
+
 ## 2026-06-28 (main) — docs: CLAUDE.md RULE 3.5 — new-build.mjs required at build start
 
 Added "REGISTER EVERY NEW BUILD" to RULE 3.5: every new build must run
