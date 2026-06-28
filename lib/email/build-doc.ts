@@ -28,6 +28,7 @@ import {
   staleFiguresToRequests,
   renderWebFallbackBlock,
   looksLikeFigureAsk,
+  type WebFallbackResult,
 } from "@/lib/assistant/web-fallback";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -90,6 +91,48 @@ export async function fetchLakeContext(scope?: BuildScope): Promise<string> {
 export function dropSuperseded(figures: MarketFigure[], refreshedLabels: string[]): MarketFigure[] {
   const drop = new Set(refreshedLabels);
   return figures.filter((f) => !drop.has(f.label));
+}
+
+export interface FreshLakeContext {
+  lakeContext: string;
+  web: WebFallbackResult;
+  webRefreshed: string[];
+}
+
+/** THE freshness root (shared by the email build AND the social calendar): refresh any
+ *  stale held figure to its current web-cited value, drop the superseded held copy, and
+ *  compose the clean context the AI reads. `includeGapProbe` true reproduces buildContentDoc's
+ *  figure-ask gap probe; false (calendar) does forced stale-refresh only. Best-effort: any
+ *  web failure → held data. */
+export async function refreshStaleLakeContext(opts: {
+  scope?: BuildScope;
+  figures: MarketFigure[];
+  dossier: string;
+  prompt: string;
+  today: Date;
+  includeGapProbe: boolean;
+}): Promise<FreshLakeContext> {
+  const { scope, figures, dossier, prompt, today, includeGapProbe } = opts;
+  const stale = staleFigures(figures, today);
+  const placeHint = scope?.value
+    ? scope.kind === "county"
+      ? `${scope.value} County Florida`
+      : `${scope.value} Florida`
+    : "";
+  const forced = staleFiguresToRequests(stale, placeHint);
+  const isFigureAsk = includeGapProbe && looksLikeFigureAsk(prompt);
+  const heldSummary = composeLakeContext(figures, dossier);
+  const web =
+    forced.length > 0 || isFigureAsk
+      ? await webFallback(prompt, heldSummary, {
+          forced,
+          probe: isFigureAsk ? undefined : async () => [],
+        }).catch(() => ({ verified: [], unfound: [] }))
+      : { verified: [], unfound: [] };
+  const webRefreshed = web.verified.map((v) => v.label);
+  const survivingFigures = dropSuperseded(figures, webRefreshed);
+  const lakeContext = composeLakeContext(survivingFigures, dossier);
+  return { lakeContext, web, webRefreshed };
 }
 
 // ── Chart selection — the SHARED root (the same producer chat uses) ──────────
@@ -165,7 +208,7 @@ async function resolveHeroPhoto(
 // ── Content patch (the AI fills CONTENT into the fixed skeleton) ─────────────
 const TEXT_KEYS = ["kicker", "value", "label", "prose", "title", "body", "caption", "alt"] as const;
 
-function docSkeleton(doc: EmailDoc): string {
+export function docSkeleton(doc: EmailDoc): string {
   const lines = doc.blocks.map((b) => {
     const props = b.props as Record<string, unknown>;
     const text: Record<string, unknown> = {};
@@ -205,7 +248,7 @@ Block rules:
 - Tight prose, no jargon, no internal ids in the copy.${chartLine}`;
 }
 
-function applyPatch(doc: EmailDoc, patch: ContentPatch): unknown {
+export function applyPatch(doc: EmailDoc, patch: ContentPatch): unknown {
   return {
     globalStyle: doc.globalStyle,
     blocks: doc.blocks.map((b) => {
@@ -284,34 +327,22 @@ export async function buildContentDoc({
     resolveHeroPhoto(prompt, doc),
   ]);
 
-  // FRESHNESS — "we don't ship old data." Any held figure older than its source's publish
-  // cadence is refreshed to the CURRENT cited value via the web lane (the SAME verbatim-
-  // citation moat chat uses — gap-fill.ts). The stale held number is then dropped so the
-  // AI writes from the fresh, cited one — never our month-old copy. Genuinely-missing
-  // figure asks are fetched by the probe too. Best-effort: any web failure → held data.
+  // FRESHNESS — delegated to the shared root so the email path and the social calendar
+  // run exactly ONE freshness implementation. includeGapProbe=true preserves the
+  // figure-ask gap probe that was previously inline here.
   const today = new Date();
-  const stale = staleFigures(lakeParts.figures, today);
-  // Anchor every forced web query to the scope's place so a place-less figure label can't
-  // drift to the wrong geography (a ZIP figure must not be refreshed with a metro number).
-  const placeHint = scope?.value
-    ? scope.kind === "county"
-      ? `${scope.value} County Florida`
-      : `${scope.value} Florida`
-    : "";
-  const forced = staleFiguresToRequests(stale, placeHint);
-  const isFigureAsk = looksLikeFigureAsk(prompt);
-  const heldSummary = composeLakeContext(lakeParts.figures, lakeParts.dossier);
-  const web =
-    forced.length > 0 || isFigureAsk
-      ? await webFallback(prompt, heldSummary, {
-          forced,
-          // Skip the (LLM) gap probe when we're here only to refresh stale figures.
-          probe: isFigureAsk ? undefined : async () => [],
-        }).catch(() => ({ verified: [], unfound: [] }))
-      : { verified: [], unfound: [] };
-  const refreshedLabels = web.verified.map((v) => v.label);
-  const survivingFigures = dropSuperseded(lakeParts.figures, refreshedLabels);
-  const lakeContext = composeLakeContext(survivingFigures, lakeParts.dossier);
+  const {
+    lakeContext,
+    web,
+    webRefreshed: refreshedLabels,
+  } = await refreshStaleLakeContext({
+    scope,
+    figures: lakeParts.figures,
+    dossier: lakeParts.dossier,
+    prompt,
+    today,
+    includeGapProbe: true,
+  });
   const webBlock = renderWebFallbackBlock(web); // "" when no gap; starts with \n\n otherwise
 
   // Chart owns the kind:"chart" slot; a brand website (if set) makes it clickable
