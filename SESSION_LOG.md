@@ -1,3 +1,16 @@
+## 2026-06-28 (main) — self-healing cron: LIVE-VERIFIED + pushed (logger unblinded · 8 HC heartbeats · Dependabot); reverted an accidentally-swept parallel spec
+
+Live-verify PASSED end-to-end: dispatched `freshness-probe` failed on its real SLA breach → `log-cron-incident`
+ran GREEN (no GH013, listener run 10:08:49Z) → opened check `cron_incident_freshness_probe_daily` + issue #103.
+The blind logger (down since ~06-22) sees again. `self_healing_automation_live_verify` CLOSED on prod evidence.
+Dependabot security updates enabled (verified `enabled:true`); `HEALTHCHECKS_PING_KEY` set + validated against the
+live ping API (`?create=1` → `Created`). My 9 commits were isolated from the parallel prochart Task-2 commit
+(`5ceea054`, left for that session) via `rebase --onto origin/main` and pushed to main (CI green). `safe-push`
+swept one untracked parallel-session file into `27f8212e` (homepage-chart spec) — reverted here (`2ea34ce0`);
+content recoverable from `27f8212e` if that session wants it. Open follow-ups (not this build): a real source is
+breaching freshness SLA (the probe's red — #103 auto-closes when it's refreshed + a scheduled run succeeds);
+delete the throwaway `secret-validation-probe` HC check; set ~3h grace on the 8 HC checks once they auto-provision.
+
 ## 2026-06-28 (main) — home values caught up to MAY (live ingest, no code) + Task 1 live "now"-dot renderer
 
 Operator caught a real freshness failure: the Email Lab build showed home values dated Apr 2026 as
