@@ -1,3 +1,17 @@
+## 2026-06-28 (main) — self-healing cron: HC housekeeping done — 6/8 heartbeats auto-provisioned LIVE, junk checks deleted; grace tuning handed to operator
+
+Post-push verification of Issue-04's dead-man's-switch: 6 of 8 Healthchecks heartbeats already auto-provisioned
+from real workflow runs (freshness-probe, project-feed, active-listings, deliverables-retention, live-search,
+data-targets — all green) — the plumbing works fleet-wide; daily-rebuild + daily-email-digest provision on their
+next runs. Deleted two junk checks (the `secret-validation-probe` key-validation ping + HC's default
+`My First Check`) via the logged-in dashboard (form submit; the off-viewport confirm modal needed JS). NOT
+automated: grace-time tuning — each check defaults to 1-day period / 1-hour grace, which would intermittently
+false-alert since GitHub delays our scheduled runs 1–2.5h. Left to the operator in the HC UI (per check: Change
+Schedule → grace ~3h, or switch to Cron mode matching the workflow's cron) because the clean programmatic path
+needs a Management API key I won't auto-create (credential/security change) and the schedule form can't be safely
+scripted. Build otherwise complete + live-verified (issue #103 + check `cron_incident_freshness_probe_daily`
+proved capture end-to-end). `HEALTHCHECKS_PING_KEY` set; Dependabot security updates on.
+
 ## 2026-06-28 (main) — homepage Phase A: nautical-chart token+font ROOT (additive) + map default flip flood→Home Value; brand teal corrected; spec restored
 
 Phase A of the homepage-chart-experience build. Built the design ROOT so every page can follow ONE source of
