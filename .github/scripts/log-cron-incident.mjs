@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-// Auto-captures GHA workflow_run events into docs/cron-rebuild-failures.md
-// and an optional sticky-issue feed. See plan:
-// C:\Users\ethan\.claude\plans\just-set-up-cron-rebuild-failures-md-luminous-yeti.md
+// Auto-captures GHA workflow_run events into GitHub issues + a public.checks row.
+// Incident state lives OFF `main`: the old auto-commit to
+// docs/cron-rebuild-failures.md was GH013-rejected by the main ruleset (the bot
+// has no bypass), which silently killed the whole handler. See:
+// docs/superpowers/specs/2026-06-28-self-healing-automation-design.md
 //
 // Modes:
 //   --mode=record-failure   On workflow_run.conclusion === 'failure'
@@ -9,18 +11,13 @@
 //                           AND workflow_run.event === 'schedule'
 //
 // Flags:
-//   --dry-run               Print actions; mutate no files, no git, no issue.
+//   --dry-run               Print intended actions; open no issue, no check, no side effects.
 
 import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import { classify, isLocalModule } from "./classify-cron-failure.mjs";
 import { deriveWorkflowName, fetchLogTail } from "./lib/cron-run.mjs";
-import { flipMostRecentOpenRow, START } from "./lib/ledger-flap.mjs";
-
-const LEDGER_PATH = resolve(process.cwd(), "docs/cron-rebuild-failures.md");
-const SYMPTOM_RX =
-  /\b(?:Error|FAILED|Traceback|exit code|KeyError|ModuleNotFoundError|TimeoutError|ReadTimeout|SSLError|relation [^ ]+ does not exist)[^\n]*/;
 
 const argv = process.argv.slice(2);
 const dryRun = argv.includes("--dry-run");
@@ -41,7 +38,7 @@ if (!run) {
   process.exit(2);
 }
 
-// Canonical ledger key: kebab-case filename (matches existing hand-typed convention).
+// Canonical slug: kebab-case workflow filename (matches existing convention).
 // Human-readable name (run.name) is kept for issue-comment display.
 const { workflowName, workflowDisplayName } = deriveWorkflowName(run);
 const runId = run.id;
@@ -54,6 +51,12 @@ const issueNumber = process.env.CRON_INCIDENT_ISSUE_NUMBER || "";
 // Machine-readable tag embedded in every discrete incident issue title so
 // closeIncidentIssue() can find it without ambiguity.
 const INCIDENT_TAG = `[cron-failure:${workflowName}]`;
+// Off-main incident state: one public.checks row per failing workflow.
+const CHECK_PROJECT = "brain-platform";
+const checkKey = cronIncidentCheckKey(workflowName);
+function cronIncidentCheckKey(name) {
+  return `cron_incident_${name.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
+}
 
 if (mode === "record-failure") recordFailure();
 else maybeResolve();
@@ -66,44 +69,31 @@ function recordFailure() {
     return log(`skip: head_branch is ${headBranch}, not main`);
 
   const logTail = fetchLogTail(runId);
-  const symptom = escapeCell(extractSymptom(logTail));
-
-  // Deterministic classification (shared with heal-cron-failure.mjs): fills the
-  // ledger Root Cause + the issue, turning the ledger into a triage history.
   const cls = classify(logTail);
   let suggestedAction = cls.suggestedAction;
   if (cls.klass === "MISSING_DEP" && isLocalModule(cls.signal)) {
     suggestedAction = `\`${cls.signal}\` matches a local module in this repo — this is an import-path bug, NOT a missing PyPI package. Do not add it to requirements.txt; fix the import.`;
   }
-  const rootCause =
-    cls.klass === "UNKNOWN"
-      ? "_auto-captured; pending triage_"
-      : `${cls.klass}${cls.signal ? ` — ${escapeCell(cls.signal)}` : ""}`;
-
-  const row = `| ${today} | \`${workflowName}\` | ${symptom} | ${rootCause} | OPEN | [run](${runUrl}) |`;
+  const detail = `${cls.klass}${cls.signal ? ` — ${cls.signal}` : ""} · ${runUrl}`;
 
   if (dryRun) {
-    log("DRY-RUN: would insert row:\n" + row);
+    log(`DRY-RUN: would open check ${checkKey} (detail: ${detail})`);
     if (issueNumber) log(`DRY-RUN: would comment on issue #${issueNumber}`);
     log(
-      `DRY-RUN: would open discrete issue titled "${INCIDENT_TAG} ${cls.klass} · ${workflowDisplayName} — ${today}"`,
+      `DRY-RUN: would open discrete issue "${INCIDENT_TAG} ${cls.klass} · ${workflowDisplayName} — ${today}"`,
     );
     return;
   }
 
-  insertRow(row);
-  gitCommitAndPush(`docs(cron-failures): log ${workflowName} failure [skip ci]`, () =>
-    insertRow(row),
-  );
-  // The ledger row (the durable record) is already committed above. The issue
-  // feed below is cosmetic relative to that — a transient GitHub API 5xx on the
-  // comment/issue calls must NOT redden the logger or abort before
-  // openIncidentIssue. (A 504 on `gh issue comment` did exactly that 2026-06-14.)
+  // The check is the durable, off-main record. The issue feed is cosmetic
+  // relative to it — a GitHub API 5xx on the comment/issue calls must NOT abort
+  // before the check is opened.
+  openIncidentCheck(detail);
   if (issueNumber) {
     try {
       postComment(buildFailureBody(logTail));
     } catch (e) {
-      log(`WARN: postComment failed (non-fatal; ledger row already committed): ${e.message}`);
+      log(`WARN: postComment failed (non-fatal): ${e.message}`);
     }
   }
   try {
@@ -117,25 +107,14 @@ function maybeResolve() {
   if (conclusion !== "success") return log(`skip: conclusion is ${conclusion}`);
   if (triggerEvent !== "schedule") return log(`skip: trigger is ${triggerEvent}, not schedule`);
 
-  const before = readFileSync(LEDGER_PATH, "utf8");
-  const after = flipMostRecentOpenRow(before, workflowName);
-  if (!after) return log(`no OPEN row for ${workflowName}; nothing to resolve`);
-
   if (dryRun) {
-    log(
-      `DRY-RUN: would flip OPEN → RESOLVED (auto — self-healed if still 'pending triage') for most-recent ${workflowName} row`,
-    );
+    log(`DRY-RUN: would close check ${checkKey}`);
     if (issueNumber) log(`DRY-RUN: would comment ✅ on issue #${issueNumber}`);
     log(`DRY-RUN: would close open incident issue tagged ${INCIDENT_TAG}`);
     return;
   }
 
-  writeFileSync(LEDGER_PATH, after, "utf8");
-  gitCommitAndPush(`docs(cron-failures): auto-resolve ${workflowName} [skip ci]`, () => {
-    const fresh = readFileSync(LEDGER_PATH, "utf8");
-    const reflipped = flipMostRecentOpenRow(fresh, workflowName);
-    if (reflipped) writeFileSync(LEDGER_PATH, reflipped, "utf8");
-  });
+  closeIncidentCheck();
   if (issueNumber)
     postComment(
       `✅ **${workflowName}** auto-resolved — ${today}\n\nNext scheduled run succeeded: ${runUrl}`,
@@ -143,63 +122,29 @@ function maybeResolve() {
   closeIncidentIssue();
 }
 
-// ---------- log + symptom ----------
+// ---------- public.checks (off-main incident state) ----------
 
-// fetchLogTail now imported from ./lib/cron-run.mjs (shared with heal-cron-failure.mjs).
-
-function extractSymptom(text) {
-  const m = text.match(SYMPTOM_RX);
-  if (m) return m[0].slice(0, 160).trim();
-  const lines = text
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return (lines.at(-1) || "(no log content)").slice(0, 160);
-}
-
-function escapeCell(s) {
-  return s.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
-}
-
-// ---------- ledger mutation ----------
-
-function insertRow(row) {
-  const text = readFileSync(LEDGER_PATH, "utf8");
-  const startIdx = text.indexOf(START);
-  if (startIdx < 0) throw new Error(`Sentinel ${START} not found in ledger`);
-  const after = text.slice(startIdx);
-  const sep = after.match(/^\| -+ \|.*$/m);
-  if (!sep) throw new Error("Header separator row not found after START sentinel");
-  const insertAt = startIdx + sep.index + sep[0].length;
-  const updated = text.slice(0, insertAt) + "\n" + row + text.slice(insertAt);
-  writeFileSync(LEDGER_PATH, updated, "utf8");
-}
-
-// flipMostRecentOpenRow moved to ./lib/ledger-flap.mjs (now relabel-aware +
-// unit-tested; imported above).
-
-// ---------- git ----------
-
-function gitCommitAndPush(message, reapplyOnConflict) {
-  sh(`git config user.name "github-actions[bot]"`);
-  sh(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
-  sh(`git add docs/cron-rebuild-failures.md`);
+function openIncidentCheck(detail) {
+  // Idempotent: a flapper failing repeatedly keeps ONE open check. check.mjs
+  // `open` exits non-zero if the key already exists — swallow that case.
   try {
-    sh(`git commit -m "${message.replace(/"/g, '\\"')}"`);
+    sh(
+      `node scripts/check.mjs open ${CHECK_PROJECT} ${checkKey} "cron failure: ${workflowName}" --detail "${detail.replace(/"/g, "'")}"`,
+    );
+    log(`opened check ${checkKey}`);
   } catch {
-    log("nothing to commit; skipping push");
-    return;
+    log(`check ${checkKey} already open (ok)`);
   }
+}
+
+function closeIncidentCheck() {
+  // close patches 0 rows when the key is absent/already closed; sh throws only on
+  // a real error — swallow either way so a resolve never reddens the listener.
   try {
-    sh(`git push origin HEAD:main`);
-  } catch {
-    log("push rejected; rebasing and re-applying mutation");
-    sh(`git fetch origin main`);
-    sh(`git reset --hard origin/main`);
-    reapplyOnConflict();
-    sh(`git add docs/cron-rebuild-failures.md`);
-    sh(`git commit -m "${message.replace(/"/g, '\\"')}"`);
-    sh(`git push origin HEAD:main`);
+    sh(`node scripts/check.mjs close ${checkKey} "next scheduled run succeeded ${runUrl}"`);
+    log(`closed check ${checkKey}`);
+  } catch (e) {
+    log(`could not close check ${checkKey} (non-fatal): ${e.message}`);
   }
 }
 
@@ -214,8 +159,8 @@ function buildFailureBody(logTail) {
     `**${workflowDisplayName}** (\`${workflowName}\`) failed — ${today}`,
     ``,
     `- Run: ${runUrl}`,
-    `- Status: \`OPEN\` (auto-captured)`,
-    `- Ledger: ${ledgerUrl}`,
+    `- Status: \`OPEN\` (auto-captured; check \`${checkKey}\`)`,
+    `- Ledger (historical): ${ledgerUrl}`,
     ``,
     `<details><summary>log tail (last 200 lines)</summary>`,
     ``,
@@ -248,6 +193,7 @@ function openIncidentIssue(logTail, cls, suggestedAction) {
     `- Run: ${runUrl}`,
     `- Workflow: \`${workflowName}\``,
     `- Class: \`${cls.klass}\`${cls.signal ? ` (${cls.signal})` : ""}`,
+    `- Check: \`${checkKey}\` (open in public.checks)`,
     ``,
     `**Suggested action:** ${suggestedAction}`,
     ``,
