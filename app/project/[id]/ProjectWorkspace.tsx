@@ -20,7 +20,7 @@ import { UploadDrop } from "@/components/project/UploadDrop";
 import { MaterialsHub } from "@/components/project/MaterialsHub";
 import { ProjectTitle } from "./workspace/ProjectTitle";
 import { ItemsBoard } from "./workspace/ItemsBoard";
-import { BrandingBlock } from "./workspace/BrandingBlock";
+import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import {
   type BrandPalette,
   PALETTE_SLOT_KEYS,

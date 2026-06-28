@@ -1,25 +1,33 @@
 /**
  * Brand color palettes — account-level "schemes" a user builds over time.
  *
- * A palette is three colors mapped to the three BrandingBlock save slots:
- *   colors[0] = primary  (→ branding.primary_color, read by brand-theme.ts)
- *   colors[1] = accent   (→ branding.accent_color)
- *   colors[2] = extra    (→ branding.saved_color_3)
+ * A palette is the four brand colors mapped to the four BrandingBlock save
+ * slots — the same four `EmailGlobalStyle` colors deliverables render:
+ *   colors[0] = primary    (→ branding.primary_color, read by brand-theme.ts)
+ *   colors[1] = accent     (→ branding.accent_color)
+ *   colors[2] = text       (→ branding.text_color → globalStyle.textColor)
+ *   colors[3] = background (→ branding.backdrop_color → globalStyle.backdropColor)
  *
  * Palettes live on `user_brand_profiles.color_palettes` (jsonb) so they carry
  * to NEW projects (pre-fill) without rewriting branding already saved on past
  * projects. This module is the single place that defines the shape + validates
- * it, so the API route, the workspace, and the picker all agree.
+ * it, so the API route, the workspace, and the picker all agree. (Legacy
+ * 3-color palettes read colors[3]="" — backward-compatible.)
  */
 
 export interface BrandPalette {
   id: string;
   name: string;
-  colors: [string, string, string]; // [primary, accent, extra]
+  colors: [string, string, string, string]; // [primary, accent, text, background]
 }
 
-/** The three branding-blob keys the three palette colors map onto, in order. */
-export const PALETTE_SLOT_KEYS = ["primary_color", "accent_color", "saved_color_3"] as const;
+/** The four branding-blob keys the four palette colors map onto, in order. */
+export const PALETTE_SLOT_KEYS = [
+  "primary_color",
+  "accent_color",
+  "text_color",
+  "backdrop_color",
+] as const;
 
 const MAX_PALETTES = 24;
 const MAX_NAME = 40;
@@ -37,37 +45,39 @@ export function normalizeHex(raw: unknown): string | null {
   return null;
 }
 
-/** The three slot colors currently set on a branding blob (empty string if unset). */
+/** The four slot colors currently set on a branding blob (empty string if unset). */
 export function schemeFromBranding(
   branding: Record<string, string> | null | undefined,
-): [string, string, string] {
+): [string, string, string, string] {
   const b = branding ?? {};
-  return PALETTE_SLOT_KEYS.map((k) => normalizeHex(b[k]) ?? "") as [string, string, string];
+  return PALETTE_SLOT_KEYS.map((k) => normalizeHex(b[k]) ?? "") as [string, string, string, string];
 }
 
 /** True when a scheme has at least one real color. */
-export function schemeHasColor(scheme: [string, string, string]): boolean {
+export function schemeHasColor(scheme: [string, string, string, string]): boolean {
   return scheme.some((c) => !!c);
 }
 
-/** Two schemes are the same palette when all three slots match (case-insensitive). */
+/** Two schemes are the same palette when all four slots match (case-insensitive). */
 export function schemesEqual(a: string[], b: string[]): boolean {
-  return [0, 1, 2].every((i) => (a[i] ?? "").toLowerCase() === (b[i] ?? "").toLowerCase());
+  return [0, 1, 2, 3].every((i) => (a[i] ?? "").toLowerCase() === (b[i] ?? "").toLowerCase());
 }
 
 /**
  * The default scheme to seed a NEW project's colors with: the first saved
- * palette if any, else the legacy single primary/accent columns. Empty extra
- * when only the legacy columns exist.
+ * palette if any, else the primary/accent/text/backdrop columns. Empty slots
+ * stay "" when a column is unset.
  */
 export function defaultScheme(
   profile: Record<string, unknown> | null | undefined,
-): [string, string, string] {
+): [string, string, string, string] {
   const pals = sanitizePalettes(profile?.color_palettes);
   if (pals.length) return pals[0].colors;
   const p = normalizeHex(profile?.primary_color) ?? "";
   const a = normalizeHex(profile?.accent_color) ?? "";
-  return [p, a, ""];
+  const t = normalizeHex(profile?.text_color) ?? "";
+  const bg = normalizeHex(profile?.backdrop_color) ?? "";
+  return [p, a, t, bg];
 }
 
 /** Stable id for a new palette (browser/runtime crypto, falls back to time+rand). */
@@ -93,7 +103,8 @@ export function sanitizePalettes(input: unknown): BrandPalette[] {
     if (!raw || typeof raw !== "object") continue;
     const r = raw as Record<string, unknown>;
     const rawColors = Array.isArray(r.colors) ? r.colors : [];
-    const colors = [0, 1, 2].map((i) => normalizeHex(rawColors[i]) ?? "") as [
+    const colors = [0, 1, 2, 3].map((i) => normalizeHex(rawColors[i]) ?? "") as [
+      string,
       string,
       string,
       string,

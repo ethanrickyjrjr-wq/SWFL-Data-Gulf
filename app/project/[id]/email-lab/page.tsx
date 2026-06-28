@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import type { ProjectItem } from "@/lib/project/items";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
+import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { ProjectEmailLabClient } from "./ProjectEmailLabClient";
 
 export const runtime = "nodejs";
@@ -13,10 +14,16 @@ export const metadata = { title: "Email Lab" };
 interface Branding {
   primary_color?: string;
   accent_color?: string;
+  text_color?: string;
+  backdrop_color?: string;
   agent_name?: string;
   agent_title?: string;
   agent_bio?: string;
   brokerage?: string;
+  license?: string;
+  nickname?: string;
+  quote?: string;
+  business_address?: string;
   logo_url?: string;
   photo_url?: string;
   contact_email?: string;
@@ -87,40 +94,12 @@ export default async function ProjectEmailLabPage({
       caption: i.caption,
     }));
 
-  // Map project branding → email token overrides
-  const initialTokens: Record<string, string> = {};
-  // visual identity
-  if (branding.primary_color) initialTokens.PRIMARY = branding.primary_color;
-  if (branding.accent_color) initialTokens.ACCENT = branding.accent_color;
-  if (branding.logo_url) initialTokens.LOGO_URL = branding.logo_url;
-  // agent identity — feeds COMPANY_NAME (masthead) AND the agent card tokens
-  if (branding.agent_name) {
-    initialTokens.COMPANY_NAME = branding.agent_name;
-    initialTokens.AGENT_NAME = branding.agent_name;
-  }
-  if (branding.agent_title) initialTokens.AGENT_TITLE = branding.agent_title;
-  if (branding.agent_bio) initialTokens.AGENT_BIO = branding.agent_bio;
-  if (branding.photo_url) initialTokens.AGENT_PHOTO_URL = branding.photo_url;
-  if (branding.brokerage) initialTokens.TAGLINE = branding.brokerage;
-  // contact
-  if (branding.contact_email) initialTokens.CONTACT_EMAIL = branding.contact_email;
-  if (branding.contact_phone) initialTokens.CONTACT_PHONE = branding.contact_phone;
-  // socials (branding fields added when available)
-  if (branding.instagram_url) initialTokens.INSTAGRAM_URL = branding.instagram_url;
-  if (branding.facebook_url) initialTokens.FACEBOOK_URL = branding.facebook_url;
-  if (branding.linkedin_url) initialTokens.LINKEDIN_URL = branding.linkedin_url;
-  if (branding.x_url) initialTokens.X_URL = branding.x_url;
-  if (branding.tiktok_url) initialTokens.TIKTOK_URL = branding.tiktok_url;
-  if (branding.youtube_url) initialTokens.YOUTUBE_URL = branding.youtube_url;
-  if (branding.pinterest_url) initialTokens.PINTEREST_URL = branding.pinterest_url;
-  if (branding.threads_url) initialTokens.THREADS_URL = branding.threads_url;
-  if (branding.unsubscribe_url) initialTokens.UNSUBSCRIBE_URL = branding.unsubscribe_url;
-  // website doubles as CTA destination
-  if (branding.website_url) {
-    initialTokens.WEBSITE_URL = branding.website_url;
-    initialTokens.CTA_URL = branding.website_url;
-  }
-  // Location label from scope
+  // Map project branding → email token overrides via the ONE shared brand bridge
+  // (same mapping the lab's live brand panel uses → editing brand in either place
+  // produces the same email). Scope-derived HERO_LABEL is not brand, added here.
+  const initialTokens: Record<string, string> = brandingToTokens(
+    branding as Record<string, string>,
+  );
   if (scope.place) {
     initialTokens.HERO_LABEL = `${scope.place}${scope.zip ? ` ${scope.zip}` : ""}`;
   } else if (scope.zip) {
@@ -147,6 +126,7 @@ export default async function ProjectEmailLabPage({
       projectId={id}
       projectTitle={project.title ?? "Project"}
       initialTokens={initialTokens}
+      initialBranding={branding as Record<string, string>}
       scope={
         scope.zip
           ? { kind: "zip", value: scope.zip }

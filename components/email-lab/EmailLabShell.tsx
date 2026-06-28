@@ -40,6 +40,18 @@ import { EmailPreviewFrame } from "@/app/p/[id]/EmailPreviewFrame";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
 import { createBlock } from "@/lib/email/doc/default-docs";
+import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
+import {
+  type BrandPalette,
+  PALETTE_SLOT_KEYS,
+  defaultScheme,
+  newPaletteId,
+  sanitizePalettes,
+  schemeFromBranding,
+  schemeHasColor,
+  schemesEqual,
+} from "@/lib/brand/palette";
 
 // Legacy templates kept on the preview-only "classic" rail.
 const CLASSIC_TEMPLATES = [
@@ -74,6 +86,8 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
     ...doc.globalStyle,
     primaryColor: t.PRIMARY || doc.globalStyle.primaryColor,
     accentColor: t.ACCENT || doc.globalStyle.accentColor,
+    textColor: t.TEXT || doc.globalStyle.textColor,
+    backdropColor: t.BACKDROP || doc.globalStyle.backdropColor,
   };
   const cta = t.CTA_URL || t.WEBSITE_URL;
   const blocks = doc.blocks.map((b) => {
@@ -171,6 +185,10 @@ export interface EmailLabShellProps {
   projectId?: string;
   /** Filed image items from the project. When provided, a Photos panel is shown. */
   projectPhotos?: { storage_path: string; signedUrl: string; caption?: string }[];
+  /** The raw project/account branding blob (snake_case) seeding the live Brand
+   *  panel — the SAME `branding` shape the project workspace edits and saves to
+   *  projects.branding. Editing brand here writes back to that one root. */
+  initialBranding?: Record<string, string>;
 }
 
 export function EmailLabShell({
@@ -187,6 +205,7 @@ export function EmailLabShell({
   deliverableId,
   projectId,
   projectPhotos,
+  initialBranding,
 }: EmailLabShellProps) {
   const [history, setHistory] = useState<DocHistory>(() =>
     initHistory(applyBrand(initialDoc, brandTokens)),
@@ -213,6 +232,21 @@ export function EmailLabShell({
   const [showBlocks, setShowBlocks] = useState(false);
   const [promotingPath, setPromotingPath] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Brand panel state (ONE ROOT: the same `branding` blob the project
+  //    workspace edits + saves to projects.branding / user_brand_profiles). ────
+  const [branding, setBranding] = useState<Record<string, string>>(initialBranding ?? {});
+  const [palettes, setPalettes] = useState<BrandPalette[]>([]);
+  const [brandSaving, setBrandSaving] = useState(false);
+  const [brandSavedMsg, setBrandSavedMsg] = useState<string | null>(null);
+  const brandPrefillAttempted = useRef(false);
+
+  // Left-panel accordions (the user asked for everything collapsible so the panel
+  // tightens up once real content is in). Brand opens by default so its depth is
+  // visible; the rest start collapsed.
+  const [showBrand, setShowBrand] = useState(true);
+  const [showSeeds, setShowSeeds] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(false);
 
   // ── history helpers (coalesced field edits → meaningful undo frames) ────────
   const editingRef = useRef(false);
@@ -326,6 +360,34 @@ export function EmailLabShell({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // On first Brand-accordion open, load the account brand profile: seed agent
+  // fields + empty color slots from the saved default + the palette library
+  // (exactly the project workspace's prefill). 401 in the signed-out standalone
+  // lab → {} → no-op. setState lands in the promise .then (not the effect body),
+  // so it stays clear of react-hooks/set-state-in-effect.
+  useEffect(() => {
+    if (!showBrand || brandPrefillAttempted.current) return;
+    brandPrefillAttempted.current = true;
+    fetch("/api/user/brand")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((data: Record<string, unknown>) => {
+        setPalettes(sanitizePalettes(data.color_palettes));
+        setBranding((prev) => {
+          const next = { ...prev };
+          for (const k of ["agent_name", "photo_url", "license", "brokerage"]) {
+            if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
+          }
+          const scheme = defaultScheme(data);
+          PALETTE_SLOT_KEYS.forEach((k, i) => {
+            if (!prev[k] && scheme[i]) next[k] = scheme[i];
+          });
+          return next;
+        });
+      })
+      .catch(() => {});
+     
+  }, [showBrand]);
+
   // ── per-block AI ─────────────────────────────────────────────────────────────
   async function runBlockAi(block: EmailBlock, prompt: string): Promise<EmailBlock | null> {
     const miniDoc = { globalStyle: doc.globalStyle, blocks: [block] };
@@ -366,6 +428,76 @@ export function EmailLabShell({
 
   function setGlobalStyle(patch: Partial<EmailDoc["globalStyle"]>) {
     liveEdit({ ...doc, globalStyle: { ...doc.globalStyle, ...patch } });
+  }
+
+  // ── Brand panel (one root) ──────────────────────────────────────────────────
+  // Editing brand re-applies onto the live doc — brand props + the 4 globalStyle
+  // colors only; AI-filled body numbers are untouched (brand is canonical, the
+  // AI fills content). Saves hit the SAME targets the project workspace uses, so
+  // brand edited here and brand edited in the project are the one same brand.
+  function applyBranding(next: Record<string, string>) {
+    setBranding(next);
+    liveEdit(applyBrand(doc, brandingToTokens(next)));
+  }
+
+  function persistPalettes(next: BrandPalette[]) {
+    setPalettes(next);
+    void fetch("/api/user/brand", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ color_palettes: next }),
+    });
+  }
+
+  async function saveBrandToProject(): Promise<boolean> {
+    if (!projectId) return false;
+    const res = await fetch(`/api/projects/${projectId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ branding }),
+    });
+    return res.ok;
+  }
+
+  // "Save" — account default (best-effort; only the column-backed fields + the
+  // palette library persist at the account level) AND the per-project blob when
+  // in a project (that blob carries EVERY field, incl. nickname/quote/address).
+  async function saveBrandGlobal(): Promise<boolean> {
+    setBrandSaving(true);
+    setBrandSavedMsg(null);
+    try {
+      const scheme = schemeFromBranding(branding);
+      let nextPalettes = palettes;
+      if (schemeHasColor(scheme) && !palettes.some((p) => schemesEqual(p.colors, scheme))) {
+        nextPalettes = [
+          ...palettes,
+          { id: newPaletteId(), name: `Palette ${palettes.length + 1}`, colors: scheme },
+        ];
+        setPalettes(nextPalettes);
+      }
+      void fetch("/api/user/brand", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
+      });
+      const ok = projectId ? await saveBrandToProject() : true;
+      setBrandSavedMsg(ok ? "Brand saved" : "Save failed");
+      return ok;
+    } finally {
+      setBrandSaving(false);
+    }
+  }
+
+  async function saveBrandProjectOnly(): Promise<boolean> {
+    setBrandSaving(true);
+    setBrandSavedMsg(null);
+    try {
+      const ok = await saveBrandToProject();
+      setBrandSavedMsg(ok ? "Saved to this project" : "Save failed");
+      return ok;
+    } finally {
+      setBrandSaving(false);
+    }
   }
 
   function pickSeed(seedId: string) {
@@ -603,56 +735,74 @@ export function EmailLabShell({
                 )}
               </div>
 
-              {/* ── Brand ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-4">
-                <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-white/35">Brand</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <ColorControl
-                    label="Primary"
-                    value={doc.globalStyle.primaryColor}
-                    onChange={(v) => setGlobalStyle({ primaryColor: v })}
-                  />
-                  <ColorControl
-                    label="Accent"
-                    value={doc.globalStyle.accentColor}
-                    onChange={(v) => setGlobalStyle({ accentColor: v })}
-                  />
-                </div>
-                <label className="mt-2 block">
-                  <span className="mb-1 block text-[10px] text-white/40">Font</span>
-                  <select
-                    value={doc.globalStyle.fontFamily}
-                    onChange={(e) => setGlobalStyle({ fontFamily: e.target.value as FontFamily })}
-                    className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
-                  >
-                    {FONT_OPTIONS.map((f) => (
-                      <option key={f.value} value={f.value} className="text-black">
-                        {f.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              {/* ── Brand — the SAME form (and save targets) as the project
+                     workspace, surfaced in the lab: all fields + 4 colors. ── */}
+              <div className="border-b border-white/8 px-4 pb-4 pt-3">
+                <button
+                  onClick={() => setShowBrand((v) => !v)}
+                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+                >
+                  <span>Brand</span>
+                  <span className={`transition-transform ${showBrand ? "rotate-180" : ""}`}>▾</span>
+                </button>
+                {showBrand && (
+                  <div className="mt-3">
+                    <BrandingBlock
+                      branding={branding}
+                      onChange={applyBranding}
+                      palettes={palettes}
+                      onPalettesChange={persistPalettes}
+                      onSaveGlobal={saveBrandGlobal}
+                      onSaveProjectOnly={projectId ? saveBrandProjectOnly : undefined}
+                      saving={brandSaving}
+                      savedMsg={brandSavedMsg}
+                      onClose={() => setShowBrand(false)}
+                    />
+                    <label className="mt-3 block border-t border-white/10 pt-3">
+                      <span className="mb-1 block text-[10px] text-white/40">Font</span>
+                      <select
+                        value={doc.globalStyle.fontFamily}
+                        onChange={(e) =>
+                          setGlobalStyle({ fontFamily: e.target.value as FontFamily })
+                        }
+                        className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+                      >
+                        {FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value} className="text-black">
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* ── Start from (block-canvas seeds) ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-4">
-                <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-white/35">
-                  Start from
-                </p>
-                <div className="space-y-1.5">
-                  {SEED_DOCS.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => pickSeed(s.id)}
-                      className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
-                    >
-                      <span className="block text-xs font-medium text-white/75">{s.name}</span>
-                      <span className="block text-[10px] leading-tight text-white/35">
-                        {s.description}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+              <div className="border-b border-white/8 px-4 pb-4 pt-3">
+                <button
+                  onClick={() => setShowSeeds((v) => !v)}
+                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+                >
+                  <span>Start from</span>
+                  <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
+                </button>
+                {showSeeds && (
+                  <div className="mt-2 space-y-1.5">
+                    {SEED_DOCS.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => pickSeed(s.id)}
+                        className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
+                      >
+                        <span className="block text-xs font-medium text-white/75">{s.name}</span>
+                        <span className="block text-[10px] leading-tight text-white/35">
+                          {s.description}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* ── Add Blocks ── */}
@@ -685,53 +835,63 @@ export function EmailLabShell({
                 )}
               </div>
 
-              {/* ── Photos — upload tile always visible; filed thumbnails when project provides them ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-4">
-                <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-white/35">Photos</p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {/* Upload tile — always first */}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={promotingPath !== null}
-                    className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal/70 disabled:opacity-40"
-                    title="Upload a photo"
-                  >
-                    {promotingPath === "__upload__" ? (
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
-                    ) : (
-                      <span className="text-lg leading-none">＋</span>
-                    )}
-                  </button>
-
-                  {/* Filed photo thumbnails (project context only) */}
-                  {(projectPhotos ?? []).map((photo) => (
+              {/* ── Photos — upload tile + filed thumbnails when a project provides them ── */}
+              <div className="border-b border-white/8 px-4 pb-4 pt-3">
+                <button
+                  onClick={() => setShowPhotos((v) => !v)}
+                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+                >
+                  <span>Photos</span>
+                  <span className={`transition-transform ${showPhotos ? "rotate-180" : ""}`}>
+                    ▾
+                  </span>
+                </button>
+                {showPhotos && (
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    {/* Upload tile — always first */}
                     <button
-                      key={photo.storage_path}
                       type="button"
-                      onClick={() => pickFiledPhoto(photo.storage_path)}
+                      onClick={() => fileInputRef.current?.click()}
                       disabled={promotingPath !== null}
-                      title={photo.caption ?? photo.storage_path.split("/").pop()}
-                      className={`relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
-                        promotingPath === photo.storage_path
-                          ? "border-gulf-teal"
-                          : "border-transparent hover:border-gulf-teal disabled:opacity-60"
-                      }`}
+                      className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal/70 disabled:opacity-40"
+                      title="Upload a photo"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={photo.signedUrl}
-                        alt={photo.caption ?? ""}
-                        className="h-full w-full object-cover"
-                      />
-                      {promotingPath === photo.storage_path && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
-                        </div>
+                      {promotingPath === "__upload__" ? (
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
+                      ) : (
+                        <span className="text-lg leading-none">＋</span>
                       )}
                     </button>
-                  ))}
-                </div>
+
+                    {/* Filed photo thumbnails (project context only) */}
+                    {(projectPhotos ?? []).map((photo) => (
+                      <button
+                        key={photo.storage_path}
+                        type="button"
+                        onClick={() => pickFiledPhoto(photo.storage_path)}
+                        disabled={promotingPath !== null}
+                        title={photo.caption ?? photo.storage_path.split("/").pop()}
+                        className={`relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
+                          promotingPath === photo.storage_path
+                            ? "border-gulf-teal"
+                            : "border-transparent hover:border-gulf-teal disabled:opacity-60"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photo.signedUrl}
+                          alt={photo.caption ?? ""}
+                          className="h-full w-full object-cover"
+                        />
+                        {promotingPath === photo.storage_path && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Hidden file input for new-upload flow */}
                 <input
@@ -922,36 +1082,5 @@ export function EmailLabShell({
         />
       )}
     </div>
-  );
-}
-
-function ColorControl({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const picker = /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000";
-  return (
-    <label className="block">
-      <span className="mb-1 block text-[10px] text-white/40">{label}</span>
-      <div className="flex items-center gap-1.5">
-        <input
-          type="color"
-          value={picker}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-7 w-7 cursor-pointer rounded border-0 bg-transparent p-0"
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
-        />
-      </div>
-    </label>
   );
 }

@@ -13,6 +13,9 @@ interface Props {
    *  COMPANY_NAME, AGENT_*, CTA_URL, …). The shell applies these onto the doc's
    *  globalStyle + brand-bearing blocks. */
   initialTokens: Record<string, string>;
+  /** The raw project branding blob (snake_case) — seeds the lab's live Brand
+   *  panel so editing brand here writes back to the SAME projects.branding. */
+  initialBranding?: Record<string, string>;
   scope?: { kind: string; value: string } | null;
   initialDoc?: EmailDoc | null;
   deliverableId?: string | null;
@@ -27,6 +30,7 @@ export function ProjectEmailLabClient({
   projectId,
   projectTitle,
   initialTokens,
+  initialBranding,
   scope,
   initialDoc,
   deliverableId,
@@ -77,6 +81,7 @@ export function ProjectEmailLabClient({
     <EmailLabShell
       initialDoc={doc0}
       brandTokens={initialTokens}
+      initialBranding={initialBranding}
       scope={effectiveScope}
       initialAiPrompt={aiPrompt}
       autoGenerate={!deliverableId}

@@ -14,6 +14,7 @@ import {
 
 const AGENT_FIELDS: { key: string; label: string; span?: "full" }[] = [
   { key: "agent_name", label: "Name" },
+  { key: "nickname", label: "Nickname" },
   { key: "agent_title", label: "Title / Role" },
   { key: "brokerage", label: "Brokerage" },
   { key: "license", label: "License #" },
@@ -23,6 +24,7 @@ const CONTACT_FIELDS: { key: string; label: string }[] = [
   { key: "contact_email", label: "Email" },
   { key: "contact_phone", label: "Phone" },
   { key: "website_url", label: "Website" },
+  { key: "business_address", label: "Business Address" },
 ];
 
 const MEDIA_FIELDS: { key: string; label: string }[] = [
@@ -30,14 +32,16 @@ const MEDIA_FIELDS: { key: string; label: string }[] = [
   { key: "logo_url", label: "Logo URL" },
 ];
 
-// The three saved-color slots. The first two map onto the canonical theme
-// fields (`primary_color` / `accent_color`) read by brand-theme.ts, so saving
-// them actually themes deliverables; the third is a free extra swatch. Keys
-// come from PALETTE_SLOT_KEYS so the slots and the palette colors stay aligned.
+// The four saved-color slots — the same four colors a deliverable renders
+// (EmailGlobalStyle: primary / accent / text / background). All four map onto
+// canonical theme fields read by brandingToTokens → applyBrand, so saving them
+// actually themes deliverables. Keys come from PALETTE_SLOT_KEYS so the slots
+// and the saved-palette colors stay aligned.
 const COLOR_SLOTS: { key: string; label: string }[] = [
   { key: PALETTE_SLOT_KEYS[0], label: "Primary" },
   { key: PALETTE_SLOT_KEYS[1], label: "Accent" },
-  { key: PALETTE_SLOT_KEYS[2], label: "Extra" },
+  { key: PALETTE_SLOT_KEYS[2], label: "Text" },
+  { key: PALETTE_SLOT_KEYS[3], label: "Background" },
 ];
 
 // The color chart — a fixed palette you can pick from instead of typing a hex.
@@ -96,7 +100,8 @@ export function BrandingBlock({
   palettes: BrandPalette[];
   onPalettesChange: (next: BrandPalette[]) => void;
   onSaveGlobal: () => Promise<boolean>;
-  onSaveProjectOnly: () => Promise<boolean>;
+  /** Optional — omitted in the standalone Email Lab (no project to save into). */
+  onSaveProjectOnly?: () => Promise<boolean>;
   saving: boolean;
   savedMsg: string | null;
   onClose: () => void;
@@ -183,12 +188,23 @@ export function BrandingBlock({
         />
       </label>
 
+      {/* ── Quote / tagline ── */}
+      <label className="mt-3 flex flex-col gap-1 text-xs text-gray-400">
+        Quote / tagline
+        <input
+          value={branding.quote ?? ""}
+          onChange={(e) => onChange({ ...branding, quote: e.target.value })}
+          placeholder="e.g. Your coast. Your home. Your guide."
+          className={INPUT_CLS}
+        />
+      </label>
+
       {/* ── Contact ── */}
       <div className="mt-3 grid grid-cols-2 gap-3">
         {CONTACT_FIELDS.map((f) => (
           <label
             key={f.key}
-            className={`flex flex-col gap-1 text-xs text-gray-400 ${f.key === "website_url" ? "col-span-2" : ""}`}
+            className={`flex flex-col gap-1 text-xs text-gray-400 ${f.key === "website_url" || f.key === "business_address" ? "col-span-2" : ""}`}
           >
             {f.label}
             <input
@@ -293,8 +309,8 @@ export function BrandingBlock({
           ))}
         </div>
 
-        {/* Three save slots */}
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        {/* Four save slots — primary / accent / text / background */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
           {COLOR_SLOTS.map((slot) => {
             const saved = branding[slot.key] ?? "";
             return (
@@ -416,17 +432,19 @@ export function BrandingBlock({
           >
             {saving ? "Saving…" : "Save"}
           </button>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={async () => {
-              const ok = await onSaveProjectOnly();
-              if (ok) onClose();
-            }}
-            className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-medium text-gray-300 hover:border-white/40 disabled:opacity-40"
-          >
-            Save To This Project
-          </button>
+          {onSaveProjectOnly && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={async () => {
+                const ok = await onSaveProjectOnly();
+                if (ok) onClose();
+              }}
+              className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-medium text-gray-300 hover:border-white/40 disabled:opacity-40"
+            >
+              Save To This Project
+            </button>
+          )}
           {savedMsg && <span className="text-xs text-gray-500">{savedMsg}</span>}
         </div>
         <p className="text-[10px] text-gray-600">
