@@ -18,6 +18,14 @@ archived automatically. New builds wire a check from day one so the cleanup loop
 
 ## What we're building
 
+### 0. `scripts/assistant-lib.mjs` — shared pure helpers
+
+All dead-spec/dead-handoff detection, archive logic, and TODAY.md writing lives here.
+Consumed by first-run, weekly, and (read-only) session-kickoff. Covered by `scripts/assistant-lib.test.mjs`.
+
+Exports: `specAgeInDays`, `specSlug`, `gitDaysAgo`, `queueStatus`, `isReferencedByCheck`,
+`isDeadSpec`, `isDeadHandoff`, `archiveFile`, `appendCleaned`, `writeTodayMd`.
+
 ### 1. Session brief extension (session-kickoff.mjs)
 
 Extend the existing `scripts/session-kickoff.mjs` with a new section that appears in the KICKOFF
@@ -26,8 +34,11 @@ block already surfaced at session start. No new hook needed — this script alre
 Adds to the KICKOFF output:
 
 ```
-Spec clutter : 83 specs total · 61 candidates for archive · run `node scripts/assistant-weekly.mjs` to clean
+Spec clutter : 82 specs · run `node scripts/assistant-weekly.mjs` to clean
 ```
+
+(Candidate count requires a Supabase round-trip — too slow for session-kickoff. Full candidate
+list appears in `_ASSISTANT/TODAY.md` after running `assistant-weekly.mjs`.)
 
 If `_ASSISTANT/TODAY.md` exists (written by the weekly script), also prints its content so every
 session sees the same daily brief without re-running the Supabase query.
@@ -109,6 +120,8 @@ docs/handoff/
 
 scripts/
   session-kickoff.mjs      ← extended (existing)
+  assistant-lib.mjs        ← new, pure helpers (shared)
+  assistant-lib.test.mjs   ← tests for assistant-lib.mjs
   assistant-first-run.mjs  ← new, one-time
   assistant-weekly.mjs     ← new, re-runnable
   new-build.mjs            ← new, per-build helper

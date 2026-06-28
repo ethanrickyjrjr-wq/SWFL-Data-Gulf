@@ -184,6 +184,9 @@ public/maps/fl_zips.geojson
 # graphify generated output
 graphify-out/
 
+# _ASSISTANT/ local brief — generated per-session, not committed
+_ASSISTANT/TODAY.md
+
 # crawl4ai — local-only research tool; all outputs, audits, scraped docs,
 # specs, plans, and source stay off GitHub. The venv lives at
 # C:\Users\ethan\crawl4ai-venv\ (outside repo). Pattern catches any file or
