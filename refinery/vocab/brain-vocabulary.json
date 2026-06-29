@@ -537,6 +537,7 @@
     },
     "cre_cap_rate": {
       "id": "cre_cap_rate",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Cap Rate (per corridor)",
       "altLabels": [
         "capitalization rate",
@@ -564,6 +565,7 @@
     },
     "cre_cap_rate_median": {
       "id": "cre_cap_rate_median",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Median Cap Rate (corpus)",
       "altLabels": [
         "median cap rate",
@@ -592,6 +594,7 @@
     },
     "cre_vacancy_rate": {
       "id": "cre_vacancy_rate",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Vacancy Rate (per corridor)",
       "altLabels": [
         "vacancy rate"
@@ -617,6 +620,7 @@
     },
     "cre_vacancy_rate_median": {
       "id": "cre_vacancy_rate_median",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Median Vacancy Rate (corpus)",
       "altLabels": [
         "median vacancy rate",
@@ -644,6 +648,7 @@
     },
     "cre_absorption_sqft": {
       "id": "cre_absorption_sqft",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Net Absorption (per corridor)",
       "altLabels": [
         "absorption",
@@ -667,6 +672,7 @@
     },
     "cre_absorption_sqft_median": {
       "id": "cre_absorption_sqft_median",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Median Net Absorption (corpus)",
       "altLabels": [
         "median absorption",
@@ -690,6 +696,7 @@
     },
     "cre_asking_rent_psf": {
       "id": "cre_asking_rent_psf",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Asking Rent PSF NNN (per corridor)",
       "altLabels": [
         "asking rent",
@@ -713,6 +720,7 @@
     },
     "cre_asking_rent_psf_median": {
       "id": "cre_asking_rent_psf_median",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Median Asking Rent PSF NNN (corpus)",
       "altLabels": [
         "median asking rent",
@@ -736,6 +744,7 @@
     },
     "cre_cap_rate_median_county": {
       "id": "cre_cap_rate_median_county",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Median Cap Rate — per county (Lee / Collier)",
       "altLabels": [
         "lee county cap rate median",
@@ -764,6 +773,7 @@
     },
     "cre_vacancy_rate_median_county": {
       "id": "cre_vacancy_rate_median_county",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "Median Vacancy Rate — per county (Lee / Collier)",
       "altLabels": [
         "lee county vacancy median",
@@ -792,6 +802,7 @@
     },
     "cre_absorption_sqft_median_county": {
       "id": "cre_absorption_sqft_median_county",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Median Net Absorption — per county (Lee / Collier)",
       "altLabels": [
         "lee county absorption median",
@@ -816,6 +827,7 @@
     },
     "cre_asking_rent_psf_median_county": {
       "id": "cre_asking_rent_psf_median_county",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Median Asking Rent PSF NNN — per county (Lee / Collier)",
       "altLabels": [
         "lee county rent median",
@@ -896,6 +908,7 @@
     },
     "marketbeat_asking_rent_nnn_industrial": {
       "id": "marketbeat_asking_rent_nnn_industrial",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Asking Rent NNN — Industrial (MarketBeat/MHS, per place)",
       "altLabels": [
         "industrial asking rent",
@@ -920,6 +933,7 @@
     },
     "marketbeat_asking_rent_nnn_office": {
       "id": "marketbeat_asking_rent_nnn_office",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Asking Rent NNN — Office (MarketBeat/MHS, per place)",
       "altLabels": [
         "office asking rent",
@@ -944,6 +958,7 @@
     },
     "marketbeat_absorption_sqft_industrial": {
       "id": "marketbeat_absorption_sqft_industrial",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Net Absorption — Industrial (MarketBeat/MHS, per place)",
       "altLabels": [
         "industrial absorption",
@@ -968,6 +983,7 @@
     },
     "marketbeat_absorption_sqft_office": {
       "id": "marketbeat_absorption_sqft_office",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Net Absorption — Office (MarketBeat/MHS, per place)",
       "altLabels": [
         "office absorption",
@@ -1022,6 +1038,7 @@
     },
     "marketbeat_asking_rent_nnn": {
       "id": "marketbeat_asking_rent_nnn",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Asking Rent NNN (MarketBeat/MHS, per place)",
       "altLabels": [
         "marketbeat asking rent",
@@ -1046,6 +1063,7 @@
     },
     "marketbeat_absorption_sqft": {
       "id": "marketbeat_absorption_sqft",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "Net Absorption (MarketBeat/MHS, per place)",
       "altLabels": [
         "marketbeat absorption",
@@ -1070,6 +1088,7 @@
     },
     "cre_seasonal_index": {
       "id": "cre_seasonal_index",
+      "grade": { "reviewed_non_directional": true },
       "prefLabel": "Seasonal Index",
       "altLabels": [
         "seasonality index",
@@ -1128,6 +1147,7 @@
     },
     "cre_corridor_pulse_signals": {
       "id": "cre_corridor_pulse_signals",
+      "grade": { "reviewed_non_directional": true },
       "prefLabel": "Live Corridor-Pulse Signals",
       "altLabels": [
         "corridor pulse signals",
@@ -4432,6 +4452,7 @@
     },
     "home_value_zhvi_regional_median": {
       "id": "home_value_zhvi_regional_median",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "ZHVI Home Value - SWFL Regional Median",
       "altLabels": [
         "SWFL median home value (ZHVI)"
@@ -4692,6 +4713,7 @@
     },
     "home_values_zips_covered": {
       "id": "home_values_zips_covered",
+      "grade": { "reviewed_non_directional": true },
       "prefLabel": "Count of SWFL ZIPs with ZHVI Coverage",
       "altLabels": [
         "ZHVI coverage count",
@@ -4847,6 +4869,7 @@
     },
     "investor_zip_cards_covered": {
       "id": "investor_zip_cards_covered",
+      "grade": { "reviewed_non_directional": true },
       "prefLabel": "Count of SWFL Investor ZIP Cards",
       "altLabels": [
         "investor card coverage count"
@@ -4873,6 +4896,7 @@
     },
     "investor_zip_cards_with_flood_overlay": {
       "id": "investor_zip_cards_with_flood_overlay",
+      "grade": { "reviewed_non_directional": true },
       "prefLabel": "Count of Investor Cards with Flood Overlay",
       "altLabels": [
         "flood-overlay card count"
@@ -5162,6 +5186,7 @@
     },
     "housing_median_sale_price_swfl": {
       "id": "housing_median_sale_price_swfl",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "SWFL Regional Median Sale Price",
       "altLabels": [
         "SWFL median sale price",
@@ -5187,6 +5212,7 @@
     },
     "housing_median_dom_swfl": {
       "id": "housing_median_dom_swfl",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "SWFL Regional Median Days on Market",
       "altLabels": [
         "SWFL median DOM",
@@ -5212,6 +5238,7 @@
     },
     "housing_avg_sale_to_list_swfl": {
       "id": "housing_avg_sale_to_list_swfl",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "SWFL Regional Median Sale-to-List Ratio",
       "altLabels": [
         "SWFL sale-to-list ratio",
@@ -5261,6 +5288,7 @@
     },
     "housing_sold_above_list_pct_swfl": {
       "id": "housing_sold_above_list_pct_swfl",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "SWFL % of Homes Sold Above List Price",
       "altLabels": [
         "SWFL sold above list",
@@ -5286,6 +5314,7 @@
     },
     "housing_off_market_in_two_weeks_pct_swfl": {
       "id": "housing_off_market_in_two_weeks_pct_swfl",
+      "grade": { "direction_polarity": "higher_is_bullish" },
       "prefLabel": "SWFL % of Homes Off-Market Within 2 Weeks",
       "altLabels": [
         "SWFL off-market speed",
@@ -7637,6 +7666,7 @@
     },
     "freshness_mortgage_30yr_fixed_pct": {
       "id": "freshness_mortgage_30yr_fixed_pct",
+      "grade": { "direction_polarity": "lower_is_bullish" },
       "prefLabel": "30-Year Fixed Mortgage Rate — Today's Sourced Value",
       "altLabels": [
         "current 30-year fixed mortgage rate",
