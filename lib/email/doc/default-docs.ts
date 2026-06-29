@@ -626,6 +626,674 @@ export const SEED_DOCS: SeedDoc[] = [
       ],
     }),
   },
+
+  // ── 10 AI-fillable grid templates (react-grid-layout canvas) ─────────────
+  // Each block carries a `layout` (x, y, w, h) so the 2D canvas can place and
+  // resize them freely. Free-tier canvas ignores `layout` and stacks them.
+  // AI fills: kicker/value/label/prose/body/stats[] — styling fields are sticky.
+
+  {
+    id: "open-house",
+    name: "Open House Invite",
+    description:
+      "Full-width exterior photo, date/time hero, specs, description + RSVP side-by-side, agent card.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F8F4EE",
+        primaryColor: "#1C2B1A",
+        accentColor: "#4A7C59",
+        textColor: "#2A3828",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 2, w: 12, h: 6 },
+          { alt: "Property exterior", kind: "photo" },
+        ),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 8, w: 12, h: 4 },
+          {
+            kicker: "You're Invited · Open House",
+            value: "Sunday, July 13",
+            label: "2:00 PM – 4:00 PM · 4521 Surfside Blvd, Cape Coral",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 12, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "$549,000", label: "Asking Price" },
+              { value: "3 / 2", label: "Beds / Baths" },
+              { value: "1,840", label: "Sq Ft" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 15, w: 7, h: 4 },
+          {
+            body: "Step inside and see why this home stands out — great light, updated kitchen, and a backyard made for entertaining.",
+          },
+        ),
+        seedBlockGrid("button", { x: 7, y: 15, w: 5, h: 4 }, { label: "Get Directions" }),
+        seedBlockGrid("agent-card", { x: 0, y: 19, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 23, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "price-reduced",
+    name: "Price Reduced",
+    description:
+      "Reduced price hero left, before/after stats right, property photo, urgency text, CTA.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#FFF8F0",
+        primaryColor: "#7B2D00",
+        accentColor: "#E05A00",
+        textColor: "#3D1800",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 2, w: 6, h: 4 },
+          {
+            kicker: "Price Reduced",
+            value: "$489,000",
+            label: "New Asking Price",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 6, y: 2, w: 6, h: 4 },
+          {
+            stats: [
+              { value: "$525,000", label: "Original Price" },
+              { value: "$36,000", label: "Price Drop" },
+              { value: "47", label: "Days on Market" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 6, w: 12, h: 5 },
+          { alt: "Property photo", kind: "photo" },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 11, w: 12, h: 3 },
+          {
+            body: "This price reduction makes it one of the best values in the neighborhood right now — and motivated sellers are ready to move.",
+          },
+        ),
+        seedBlockGrid("button", { x: 0, y: 14, w: 12, h: 2 }, { label: "See the New Price" }),
+        seedBlockGrid("footer", { x: 0, y: 16, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "just-sold-grid",
+    name: "Just Sold",
+    description:
+      "Property photo left + sold hero right, full-width sale stats, story, agent card, home value CTA.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F0F4F8",
+        primaryColor: "#0D2340",
+        accentColor: "#1D6FA4",
+        textColor: "#1A2E40",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid("image", { x: 0, y: 2, w: 7, h: 5 }, { alt: "Sold property", kind: "photo" }),
+        seedBlockGrid(
+          "hero",
+          { x: 7, y: 2, w: 5, h: 5 },
+          {
+            kicker: "Just Sold",
+            value: "$512,000",
+            label: "Cape Coral · Closed July 2026",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 7, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "$512,000", label: "Sale Price" },
+              { value: "11", label: "Days on Market" },
+              { value: "102%", label: "List-to-Sale" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 10, w: 12, h: 3 },
+          {
+            body: "Another happy family in their new home — and another data point that proves the right pricing strategy still wins fast.",
+          },
+        ),
+        seedBlockGrid("agent-card", { x: 0, y: 13, w: 12, h: 4 }),
+        seedBlockGrid("button", { x: 0, y: 17, w: 12, h: 2 }, { label: "What's Your Home Worth?" }),
+        seedBlockGrid("footer", { x: 0, y: 19, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "neighborhood-report",
+    name: "Neighborhood Report",
+    description:
+      "Area headline + KPIs, market chart left + key insight right, agent commentary, search CTA.",
+    build: () => ({
+      globalStyle: { ...style() },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 2, w: 12, h: 4 },
+          {
+            kicker: "Cape Coral · 33914 Market Update",
+            value: "$432,000",
+            label: "Median Sale Price · June 2026",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 6, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "$432K", label: "Median Price" },
+              { value: "28", label: "Avg Days on Market" },
+              { value: "14", label: "Homes Sold" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 9, w: 7, h: 5 },
+          {
+            alt: "6-month price trend chart",
+            caption: "6-Month Median Sale Price",
+          },
+        ),
+        seedBlockGrid(
+          "signal",
+          { x: 7, y: 9, w: 5, h: 5 },
+          {
+            kicker: "Signal",
+            title: "Inventory tightening fast",
+            body: "Active listings dropped 18% month-over-month — homes priced right are moving in under two weeks.",
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 14, w: 12, h: 3 },
+          {
+            body: "If you've been watching this area, the window to buy before prices reset is narrowing. Here's what I'm seeing on the ground.",
+          },
+        ),
+        seedBlockGrid(
+          "button",
+          { x: 0, y: 17, w: 12, h: 2 },
+          { label: "Search Homes in This Area" },
+        ),
+        seedBlockGrid("footer", { x: 0, y: 19, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "investment-brief",
+    name: "Investment Brief",
+    description:
+      "Property photo + cap rate hero side-by-side, investment KPIs, market chart, analysis CTA.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F0F8F0",
+        primaryColor: "#0D2B0D",
+        accentColor: "#2E7D32",
+        textColor: "#1A3A1A",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 2, w: 6, h: 5 },
+          { alt: "Investment property", kind: "photo" },
+        ),
+        seedBlockGrid(
+          "hero",
+          { x: 6, y: 2, w: 6, h: 5 },
+          {
+            kicker: "Investment Opportunity",
+            value: "6.2% Cap Rate",
+            label: "4-Unit · Fort Myers · $620,000",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 7, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "$3,800/mo", label: "Gross Monthly Rent" },
+              { value: "6.2%", label: "Cap Rate" },
+              { value: "14.5×", label: "Gross Rent Multiplier" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "signal",
+          { x: 0, y: 10, w: 12, h: 3 },
+          {
+            kicker: "Why Now",
+            title: "Rents up 9% YoY, inventory down",
+            body: "The combination of rising rents and low supply is compressing cap rates across SWFL — this one is priced ahead of the correction.",
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 13, w: 12, h: 5 },
+          {
+            alt: "Rental rate trend chart",
+            caption: "12-Month Rental Rate Trend · Fort Myers",
+          },
+        ),
+        seedBlockGrid(
+          "button",
+          { x: 0, y: 18, w: 12, h: 2 },
+          { label: "Request Full Investment Analysis" },
+        ),
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 24, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "rate-watch",
+    name: "Rate Watch",
+    description:
+      "Current rate + affordability stats, market chart, buyer insight, consultation CTA.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F0F2FF",
+        primaryColor: "#1A1A4E",
+        accentColor: "#3F51B5",
+        textColor: "#1A1A3A",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 2, w: 7, h: 4 },
+          {
+            kicker: "Rate Watch · July 2026",
+            value: "6.75%",
+            label: "30-Year Fixed · National Average",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 7, y: 2, w: 5, h: 4 },
+          {
+            stats: [
+              { value: "$2,590/mo", label: "Payment on $400K" },
+              { value: "↑ 4.2%", label: "Price YoY" },
+              { value: "3.1 mo", label: "Months of Supply" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 6, w: 12, h: 5 },
+          {
+            alt: "Affordability trend chart",
+            caption: "Monthly Payment on Median SWFL Home · 12 Months",
+          },
+        ),
+        seedBlockGrid(
+          "signal",
+          { x: 0, y: 11, w: 12, h: 3 },
+          {
+            kicker: "What This Means for Buyers",
+            title: "Less competition, more room to negotiate",
+            body: "Higher rates pushed 22% of buyers to the sidelines — but qualified buyers who act now face less competition and more willing sellers.",
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 14, w: 12, h: 3 },
+          {
+            body: "Three things every buyer should know right now: how to use rate buydowns, why seller concessions are up, and when to lock.",
+          },
+        ),
+        seedBlockGrid(
+          "button",
+          { x: 0, y: 17, w: 12, h: 2 },
+          { label: "Schedule a Buyer Consultation" },
+        ),
+        seedBlockGrid("agent-card", { x: 0, y: 19, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 23, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "monthly-digest",
+    name: "Monthly Digest",
+    description: "Monthly KPIs, 12-month chart, insight + commentary side-by-side, agent sign-off.",
+    build: () => ({
+      globalStyle: { ...style() },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 2, w: 12, h: 3 },
+          {
+            kicker: "July 2026 · SWFL Market Digest",
+            value: "$475,000",
+            label: "Median Sale Price · Lee & Collier Counties",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 5, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "$475K", label: "Median Price" },
+              { value: "31", label: "Median DOM" },
+              { value: "3.4 mo", label: "Months of Supply" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 8, w: 12, h: 5 },
+          {
+            alt: "12-month price trend",
+            caption: "12-Month Median Sale Price · SWFL",
+          },
+        ),
+        seedBlockGrid(
+          "signal",
+          { x: 0, y: 13, w: 6, h: 4 },
+          {
+            kicker: "Key Signal",
+            title: "Supply stabilizing",
+            body: "Months of supply held flat for the third consecutive month — the first sign the correction may be leveling.",
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 6, y: 13, w: 6, h: 4 },
+          {
+            body: "My take: we're at an inflection point. Buyers still have leverage but the window is narrowing. Sellers who priced right closed fast; those who didn't are still sitting.",
+          },
+        ),
+        seedBlockGrid("divider", { x: 0, y: 17, w: 12, h: 1 }),
+        seedBlockGrid("agent-card", { x: 0, y: 18, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 22, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "year-in-review",
+    name: "Year in Review",
+    description:
+      "Annual headline stats, full-year price chart, 3-column highlights, commentary, CTA.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F8F0FF",
+        primaryColor: "#2D0D5E",
+        accentColor: "#7B3FC7",
+        textColor: "#2A0D4A",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 2, w: 12, h: 3 },
+          {
+            kicker: "2026 Year in Review",
+            value: "SWFL Market",
+            label: "A Full-Year Look at What Moved, What Stalled, and What's Next",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 5, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "$481K", label: "Median Price · Full Year" },
+              { value: "↑ 3.8%", label: "Annual Price Growth" },
+              { value: "4,217", label: "Homes Sold" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 8, w: 12, h: 5 },
+          {
+            alt: "Full-year price trend",
+            caption: "2026 Median Sale Price · Month by Month",
+          },
+        ),
+        seedBlockGrid(
+          "multi-column",
+          { x: 0, y: 13, w: 12, h: 5 },
+          {
+            columns: [
+              {
+                heading: "What Moved",
+                body: "Waterfront and luxury led the year — sub-$500K sat longest as affordability pressured first-time buyers.",
+              },
+              {
+                heading: "What Stalled",
+                body: "New construction deliveries outpaced absorption in Lee County, softening prices in newer communities.",
+              },
+              {
+                heading: "What's Next",
+                body: "Rate relief in H2 2026 should unlock pent-up demand — expect a faster spring market than 2025.",
+              },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 18, w: 12, h: 3 },
+          {
+            body: "It's been a year of recalibration. The excess of 2021–2022 has fully unwound, and we're building on a more honest foundation heading into 2027.",
+          },
+        ),
+        seedBlockGrid(
+          "button",
+          { x: 0, y: 21, w: 12, h: 2 },
+          { label: "See the Full Year Report" },
+        ),
+        seedBlockGrid("footer", { x: 0, y: 23, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "listing-digest",
+    name: "Listing Digest",
+    description:
+      "4 property cards in a 2×2 grid — new listings or curated picks for a buyer segment.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F5F5F5",
+        primaryColor: "#111827",
+        accentColor: "#3DC9C0",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 2, w: 12, h: 3 },
+          {
+            kicker: "New to Market",
+            value: "4 Homes",
+            label: "Just Listed This Week · Lee & Collier Counties",
+            prose: "",
+          },
+        ),
+        seedBlockGrid(
+          "listing",
+          { x: 0, y: 5, w: 6, h: 7 },
+          {
+            photoUrl: "",
+            price: "$489,000",
+            beds: "3",
+            baths: "2",
+            sqft: "1,840",
+            address: "4521 Surfside Blvd, Cape Coral",
+            badge: "New",
+          },
+        ),
+        seedBlockGrid(
+          "listing",
+          { x: 6, y: 5, w: 6, h: 7 },
+          {
+            photoUrl: "",
+            price: "$625,000",
+            beds: "4",
+            baths: "3",
+            sqft: "2,400",
+            address: "1205 Estero Blvd, Fort Myers Beach",
+            badge: "Waterfront",
+          },
+        ),
+        seedBlockGrid(
+          "listing",
+          { x: 0, y: 12, w: 6, h: 7 },
+          {
+            photoUrl: "",
+            price: "$319,000",
+            beds: "2",
+            baths: "2",
+            sqft: "1,200",
+            address: "8800 Merano Dr, Naples",
+            badge: "Pool",
+          },
+        ),
+        seedBlockGrid(
+          "listing",
+          { x: 6, y: 12, w: 6, h: 7 },
+          {
+            photoUrl: "",
+            price: "$1,195,000",
+            beds: "5",
+            baths: "4",
+            sqft: "3,800",
+            address: "200 Gulf Shore Blvd, Naples",
+            badge: "Luxury",
+          },
+        ),
+        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "View All Listings" }),
+        seedBlockGrid("agent-card", { x: 0, y: 21, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 25, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
+  {
+    id: "stay-in-touch",
+    name: "Stay in Touch",
+    description:
+      "Agent hero banner, personal note left + market fact right, social links, referral CTA.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        backdropColor: "#FAFAFA",
+        primaryColor: "#1C1C1C",
+        accentColor: "#3DC9C0",
+        textColor: "#2A2A2A",
+      },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "agent-hero",
+          { x: 0, y: 2, w: 12, h: 5 },
+          {
+            photoUrl: "",
+            name: "",
+            designation: "Realtor® · Southwest Florida",
+            tagline: "Here when you need me — and sending useful market info in between.",
+            ctaLabel: "Schedule a call",
+            ctaUrl: "",
+          },
+        ),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 7, w: 12, h: 3 },
+          {
+            kicker: "Checking In",
+            value: "",
+            label: "",
+            prose:
+              "Halfway through the year — thought you'd appreciate a quick look at where things stand in your market.",
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 10, w: 7, h: 4 },
+          {
+            body: "Real estate is rarely an emergency — but when the moment arrives, you want someone who's been watching the numbers all year. That's me. If you're thinking about anything at all, I'm happy to talk it through.",
+          },
+        ),
+        seedBlockGrid(
+          "signal",
+          { x: 7, y: 10, w: 5, h: 4 },
+          {
+            kicker: "Market Snapshot",
+            title: "Prices up 4% in your ZIP",
+            body: "Your neighborhood appreciated above the county average this year — your equity is working.",
+          },
+        ),
+        seedBlockGrid(
+          "social-icons",
+          { x: 0, y: 14, w: 12, h: 2 },
+          {
+            platforms: [],
+            displayMode: "icon+text",
+            layout: "row",
+            iconSize: "md",
+            iconColor: "original",
+          },
+        ),
+        seedBlockGrid(
+          "button",
+          { x: 0, y: 16, w: 12, h: 2 },
+          { label: "Know Someone Buying or Selling?" },
+        ),
+        seedBlockGrid("footer", { x: 0, y: 18, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
 ];
 
 /** Look up a seed by id (used by the "Start from" picker). */
