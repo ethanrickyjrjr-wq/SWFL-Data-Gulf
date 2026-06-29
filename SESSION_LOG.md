@@ -1,3 +1,7 @@
+## 2026-06-29 (main) — feat(email): comps chart for listing flyer — area page scrape → bar chart
+
+New `lib/email/listing-comps.ts`: `deriveAreaUrl` strips last path segment to get the area search page; `fetchAreaComps` fetches it + Haiku-extracts up to 6 active list prices; `buildCompsSpec` builds a bar ChartSpec with subject labeled "(Subject)". Wired into `buildContentDoc`: comps fetched after `buildListingFlyer`, rasterized via `chartSpecToEmailImage`, inserted via `upsertChartBlock`. Best-effort — flyer ships without chart on failure; never fabricates. 10 new tests; 32 total green; build clean. crawl4ai confirmed beach-homes.com area page has clean extractable data.
+
 ## 2026-06-29 (main) — feat(email-lab): web fonts + text overlay on images
 
 Two new capabilities in the email lab grid canvas:

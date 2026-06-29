@@ -34,6 +34,7 @@ import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/in
 import { isListingIntent } from "@/lib/email/listing-intent";
 import { fetchListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
+import { fetchAreaComps, buildCompsSpec, deriveAreaUrl } from "@/lib/email/listing-comps";
 import { chartSpecToEmailImage, type EmailChartImage } from "@/lib/email/spec-to-png";
 import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
 import { reshapeChartToType, chartTypeFits, type ChartType } from "@/lib/email/reshape-chart-type";
@@ -354,7 +355,31 @@ export async function buildContentDoc({
     const url = extractUrls(prompt)[0];
     const facts = url ? await fetchListingFacts(url).catch(() => null) : null;
     if (facts) {
-      const flyer = buildListingFlyer(facts, doc);
+      let flyer = buildListingFlyer(facts, doc);
+
+      // Comps chart — fetch active listings from the same area page and build a
+      // bar chart with the subject highlighted. Best-effort: ships without chart
+      // on any failure. Never fabricates a price; falls back to no chart, not
+      // to a macro index.
+      if (url) {
+        const comps = await fetchAreaComps(url, facts).catch(() => []);
+        const areaUrl = deriveAreaUrl(url);
+        if (comps.length >= 2 && areaUrl) {
+          const accent = doc.globalStyle?.accentColor ?? "#2563eb";
+          const spec = buildCompsSpec(comps, facts, areaUrl);
+          if (spec) {
+            const chartImg = await chartSpecToEmailImage(
+              spec,
+              accent,
+              `comps-${facts.zip ?? "swfl"}-${Date.now()}`,
+            ).catch(() => null);
+            if (chartImg) {
+              flyer = upsertChartBlock(flyer, chartImageBlock(chartImg));
+            }
+          }
+        }
+      }
+
       const reparsed = EmailDocSchema.safeParse(flyer);
       if (reparsed.success) {
         return {
