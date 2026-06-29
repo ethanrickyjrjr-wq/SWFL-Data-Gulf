@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260603 -->
+<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260629 -->
 ---
 brain_id: housing-swfl
-version: 6
-refined_at: 2026-06-03T15:11:30Z
-freshness_token: SWFL-7421-v6-20260603
+version: 7
+refined_at: 2026-06-29T07:56:00Z
+freshness_token: SWFL-7421-v7-20260629
 ttl_seconds: 3024000
 context_type: user_saved_reference
 scope: SWFL ZIP-level residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.
@@ -29,57 +29,69 @@ SCOPE: SWFL ZIP-level residential buy-side housing market (Redfin), monthly — 
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                           | verified   | expires
-s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (All Residential). Updated ~3rd Friday each month. https://www.redfin.com/news/data-center/ | 2026-06-03 | 2026-07-08
+s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (All Residential). Updated ~3rd Friday each month. https://www.redfin.com/news/data-center/ | 2026-06-29 | 2026-08-03
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Redfin SWFL housing market corpus","value":"125 ZIP snapshots at 2026-01-01. Regional median sale price = $400,000, YoY = -3.5%. Median DOM = 72 days. Months of supply = 6.0.","src":"s01","date":"2026-06-03"}
+  {"id":"f001","topic":"corpus_overview","fact":"Redfin SWFL housing market corpus","value":"124 ZIP snapshots at 2026-03-01. Regional median sale price = $400,000, YoY = -0.2%. Median DOM = 68 days. Months of supply = 4.2.","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "housing-swfl",
-  "version": 6,
-  "refined_at": "2026-06-03T15:11:30Z",
+  "version": 7,
+  "refined_at": "2026-06-29T07:56:00Z",
+  "expires": "2026-08-03T07:56:00Z",
+  "ttl_seconds": 3024000,
   "direction": "mixed",
   "magnitude": 0.25,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL housing reads mixed at 2026-01-01 across 125 ZIPs — regional median sale price $400,000 (-3.5% YoY), DOM 72 days, 6.0 months of supply, 95.2% sale-to-list. Fastest-moving ZIPs: 34270 (2 days), 34139 (20 days), 34280 (22 days). Priciest ZIPs: 33921 ($2,975,000), 34102 ($2,050,000), 34215 ($1,510,000).",
+  "conclusion": "SWFL housing reads mixed at 2026-03-01 across 124 ZIPs — regional median sale price $400,000 (-0.2% YoY), DOM 68 days, 4.2 months of supply, 95.5% sale-to-list. Fastest-moving ZIPs: 34270 (2 days), 34282 (7 days), 34139 (20 days). Priciest ZIPs: 33921 ($2,840,000), 34102 ($1,800,000), 34216 ($1,791,250).",
   "key_metrics": [
     {
       "metric": "housing_median_sale_price_swfl",
       "value": 400000,
-      "direction": "falling",
-      "label": "SWFL regional median sale price (All Residential) at 2026-01-01 (-3.5% YoY)",
+      "direction": "stable",
+      "label": "SWFL regional median sale price (All Residential) at 2026-03-01 (-0.2% YoY)",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
-      }
+      },
+      "suggestions": [
+        "What's driving housing median sale price swfl?",
+        "How does housing median sale price swfl here compare to other SWFL areas?",
+        "How does flood risk affect housing median sale price swfl in this ZIP?"
+      ]
     },
     {
       "metric": "housing_median_dom_swfl",
-      "value": 72,
+      "value": 68,
       "direction": "rising",
-      "label": "SWFL regional median days on market — falling = faster sales (YoY: +6.5 days)",
+      "label": "SWFL regional median days on market — falling = faster sales (YoY: +1.8 days)",
       "variable_type": "extensive",
       "units": "days",
       "display_format": "count",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
-      }
+      },
+      "suggestions": [
+        "What's driving housing median dom swfl?",
+        "How does housing median dom swfl here compare to other SWFL areas?",
+        "How does flood risk affect housing median dom swfl in this ZIP?"
+      ]
     },
     {
       "metric": "housing_months_of_supply_swfl",
-      "value": 6,
+      "value": 4.2,
       "direction": "stable",
       "label": "SWFL regional median months of supply — derived from inventory over the 90-day sales pace (< 3 = seller's market, > 6 = buyer's market)",
       "variable_type": "intensive",
@@ -87,14 +99,19 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
       "display_format": "raw",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
-      }
+      },
+      "suggestions": [
+        "What's driving housing months of supply swfl?",
+        "How does housing months of supply swfl here compare to other SWFL areas?",
+        "How does flood risk affect housing months of supply swfl in this ZIP?"
+      ]
     },
     {
       "metric": "housing_avg_sale_to_list_swfl",
-      "value": 95.2,
+      "value": 95.5,
       "direction": "falling",
       "label": "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
       "variable_type": "intensive",
@@ -102,14 +119,19 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
-      }
+      },
+      "suggestions": [
+        "What's driving housing avg sale to list swfl?",
+        "How does housing avg sale to list swfl here compare to other SWFL areas?",
+        "How does flood risk affect housing avg sale to list swfl in this ZIP?"
+      ]
     },
     {
       "metric": "housing_sold_above_list_pct_swfl",
-      "value": 4.4,
+      "value": 5.9,
       "direction": "stable",
       "label": "SWFL regional median % of homes sold above list price",
       "variable_type": "intensive",
@@ -117,14 +139,19 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
-      }
+      },
+      "suggestions": [
+        "What's driving housing sold above list pct swfl?",
+        "How does housing sold above list pct swfl here compare to other SWFL areas?",
+        "How does flood risk affect housing sold above list pct swfl in this ZIP?"
+      ]
     },
     {
       "metric": "housing_off_market_in_two_weeks_pct_swfl",
-      "value": 20.8,
+      "value": 18.4,
       "direction": "stable",
       "label": "SWFL regional median % of homes going off-market within 2 weeks",
       "variable_type": "intensive",
@@ -132,16 +159,21 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
-      }
+      },
+      "suggestions": [
+        "What's driving housing off market in two weeks pct swfl?",
+        "How does housing off market in two weeks pct swfl here compare to other SWFL areas?",
+        "How does flood risk affect housing off market in two weeks pct swfl in this ZIP?"
+      ]
     }
   ],
   "detail_tables": [
     {
       "id": "housing_by_zip",
-      "title": "SWFL housing by ZIP — latest 90-day window (2026-01-01)",
+      "title": "SWFL housing by ZIP — latest 90-day window (2026-03-01)",
       "grain": "zip",
       "columns": [
         {
@@ -207,14 +239,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33901",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 270000,
-            "median_sale_price_yoy_pct": -5.5,
-            "median_dom": 126,
-            "median_dom_yoy_days": 43,
-            "avg_sale_to_list_pct": 94,
-            "months_of_supply": 9.1,
-            "homes_sold": 59,
-            "inventory": 179,
+            "median_sale_price": 313000,
+            "median_sale_price_yoy_pct": 13.2,
+            "median_dom": 94.5,
+            "median_dom_yoy_days": 12,
+            "avg_sale_to_list_pct": 94.7,
+            "months_of_supply": 6.7,
+            "homes_sold": 72,
+            "inventory": 160,
             "low_sample": false
           }
         },
@@ -223,14 +255,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33903",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 299000,
-            "median_sale_price_yoy_pct": -3.4,
-            "median_dom": 67.5,
-            "median_dom_yoy_days": 3.5,
-            "avg_sale_to_list_pct": 94.7,
-            "months_of_supply": 6.5,
-            "homes_sold": 91,
-            "inventory": 196,
+            "median_sale_price": 297000,
+            "median_sale_price_yoy_pct": 3.5,
+            "median_dom": 65,
+            "median_dom_yoy_days": 7,
+            "avg_sale_to_list_pct": 94.4,
+            "months_of_supply": 5.4,
+            "homes_sold": 106,
+            "inventory": 190,
             "low_sample": false
           }
         },
@@ -239,14 +271,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33904",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 345000,
-            "median_sale_price_yoy_pct": -14.6,
-            "median_dom": 62,
-            "median_dom_yoy_days": 7.5,
-            "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 6.1,
-            "homes_sold": 227,
-            "inventory": 460,
+            "median_sale_price": 336000,
+            "median_sale_price_yoy_pct": -10.4,
+            "median_dom": 61,
+            "median_dom_yoy_days": -22,
+            "avg_sale_to_list_pct": 95.3,
+            "months_of_supply": 4.9,
+            "homes_sold": 282,
+            "inventory": 459,
             "low_sample": false
           }
         },
@@ -255,14 +287,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33905",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 326069,
-            "median_sale_price_yoy_pct": -9.4,
-            "median_dom": 70,
-            "median_dom_yoy_days": 22,
-            "avg_sale_to_list_pct": 94.8,
-            "months_of_supply": 5.5,
-            "homes_sold": 188,
-            "inventory": 344,
+            "median_sale_price": 340000,
+            "median_sale_price_yoy_pct": -5.6,
+            "median_dom": 72,
+            "median_dom_yoy_days": 10.5,
+            "avg_sale_to_list_pct": 96.7,
+            "months_of_supply": 4.2,
+            "homes_sold": 221,
+            "inventory": 311,
             "low_sample": false
           }
         },
@@ -271,14 +303,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33907",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 222500,
-            "median_sale_price_yoy_pct": -18.7,
-            "median_dom": 61,
-            "median_dom_yoy_days": -2.5,
-            "avg_sale_to_list_pct": 93.5,
-            "months_of_supply": 9.3,
-            "homes_sold": 78,
-            "inventory": 242,
+            "median_sale_price": 199900,
+            "median_sale_price_yoy_pct": -26.3,
+            "median_dom": 59,
+            "median_dom_yoy_days": -11,
+            "avg_sale_to_list_pct": 94.1,
+            "months_of_supply": 6.6,
+            "homes_sold": 92,
+            "inventory": 202,
             "low_sample": false
           }
         },
@@ -287,14 +319,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33908",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 330000,
-            "median_sale_price_yoy_pct": -19.5,
-            "median_dom": 87,
-            "median_dom_yoy_days": 13,
-            "avg_sale_to_list_pct": 94.5,
-            "months_of_supply": 7.2,
-            "homes_sold": 324,
-            "inventory": 778,
+            "median_sale_price": 302500,
+            "median_sale_price_yoy_pct": -20.4,
+            "median_dom": 86,
+            "median_dom_yoy_days": 6.5,
+            "avg_sale_to_list_pct": 94.6,
+            "months_of_supply": 5,
+            "homes_sold": 401,
+            "inventory": 665,
             "low_sample": false
           }
         },
@@ -303,14 +335,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33909",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 307990,
-            "median_sale_price_yoy_pct": -6.2,
-            "median_dom": 60.5,
-            "median_dom_yoy_days": -15,
-            "avg_sale_to_list_pct": 96.6,
-            "months_of_supply": 6.1,
-            "homes_sold": 233,
-            "inventory": 475,
+            "median_sale_price": 329900,
+            "median_sale_price_yoy_pct": 1.5,
+            "median_dom": 55,
+            "median_dom_yoy_days": -12,
+            "avg_sale_to_list_pct": 97.6,
+            "months_of_supply": 4.6,
+            "homes_sold": 305,
+            "inventory": 467,
             "low_sample": false
           }
         },
@@ -319,14 +351,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33912",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 410000,
-            "median_sale_price_yoy_pct": 8.6,
-            "median_dom": 73.5,
-            "median_dom_yoy_days": -3,
-            "avg_sale_to_list_pct": 94.8,
-            "months_of_supply": 5.9,
-            "homes_sold": 124,
-            "inventory": 243,
+            "median_sale_price": 392500,
+            "median_sale_price_yoy_pct": 6.8,
+            "median_dom": 71,
+            "median_dom_yoy_days": 14,
+            "avg_sale_to_list_pct": 95.1,
+            "months_of_supply": 3.3,
+            "homes_sold": 165,
+            "inventory": 182,
             "low_sample": false
           }
         },
@@ -335,14 +367,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33913",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 500000,
-            "median_sale_price_yoy_pct": -2.9,
-            "median_dom": 66,
-            "median_dom_yoy_days": -11,
-            "avg_sale_to_list_pct": 95.7,
-            "months_of_supply": 5.1,
-            "homes_sold": 297,
-            "inventory": 503,
+            "median_sale_price": 490000,
+            "median_sale_price_yoy_pct": -2,
+            "median_dom": 60,
+            "median_dom_yoy_days": -6.5,
+            "avg_sale_to_list_pct": 95.9,
+            "months_of_supply": 3.4,
+            "homes_sold": 372,
+            "inventory": 422,
             "low_sample": false
           }
         },
@@ -351,14 +383,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33914",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 520000,
-            "median_sale_price_yoy_pct": 6.3,
-            "median_dom": 77,
-            "median_dom_yoy_days": 3,
-            "avg_sale_to_list_pct": 95,
-            "months_of_supply": 6,
-            "homes_sold": 337,
-            "inventory": 669,
+            "median_sale_price": 485000,
+            "median_sale_price_yoy_pct": -3,
+            "median_dom": 65,
+            "median_dom_yoy_days": -17.5,
+            "avg_sale_to_list_pct": 95.7,
+            "months_of_supply": 4,
+            "homes_sold": 425,
+            "inventory": 560,
             "low_sample": false
           }
         },
@@ -367,14 +399,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33916",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 279900,
-            "median_sale_price_yoy_pct": 12,
-            "median_dom": 101,
-            "median_dom_yoy_days": 45.5,
-            "avg_sale_to_list_pct": 95.1,
-            "months_of_supply": 9.6,
-            "homes_sold": 51,
-            "inventory": 163,
+            "median_sale_price": 275000,
+            "median_sale_price_yoy_pct": 7.8,
+            "median_dom": 128.5,
+            "median_dom_yoy_days": 58.5,
+            "avg_sale_to_list_pct": 93.1,
+            "months_of_supply": 6.8,
+            "homes_sold": 69,
+            "inventory": 156,
             "low_sample": false
           }
         },
@@ -383,14 +415,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33917",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 320000,
-            "median_sale_price_yoy_pct": 0.3,
-            "median_dom": 73,
-            "median_dom_yoy_days": 12,
-            "avg_sale_to_list_pct": 95.2,
-            "months_of_supply": 5,
-            "homes_sold": 175,
-            "inventory": 291,
+            "median_sale_price": 323000,
+            "median_sale_price_yoy_pct": 1.3,
+            "median_dom": 65.5,
+            "median_dom_yoy_days": 0.5,
+            "avg_sale_to_list_pct": 95.6,
+            "months_of_supply": 3.9,
+            "homes_sold": 212,
+            "inventory": 275,
             "low_sample": false
           }
         },
@@ -415,14 +447,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33919",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 250000,
-            "median_sale_price_yoy_pct": -13.8,
-            "median_dom": 73,
-            "median_dom_yoy_days": -8,
-            "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 6.9,
-            "homes_sold": 185,
-            "inventory": 427,
+            "median_sale_price": 259000,
+            "median_sale_price_yoy_pct": -9.1,
+            "median_dom": 59.5,
+            "median_dom_yoy_days": -17.5,
+            "avg_sale_to_list_pct": 94.5,
+            "months_of_supply": 4.6,
+            "homes_sold": 238,
+            "inventory": 367,
             "low_sample": false
           }
         },
@@ -431,14 +463,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33920",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 405000,
-            "median_sale_price_yoy_pct": -1.8,
-            "median_dom": 68,
-            "median_dom_yoy_days": -47.5,
-            "avg_sale_to_list_pct": 94.6,
-            "months_of_supply": 4.4,
-            "homes_sold": 58,
-            "inventory": 86,
+            "median_sale_price": 437000,
+            "median_sale_price_yoy_pct": -4,
+            "median_dom": 85,
+            "median_dom_yoy_days": -56.5,
+            "avg_sale_to_list_pct": 96.1,
+            "months_of_supply": 5.6,
+            "homes_sold": 52,
+            "inventory": 97,
             "low_sample": false
           }
         },
@@ -447,14 +479,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33921",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 2975000,
-            "median_sale_price_yoy_pct": -25.6,
-            "median_dom": 57,
-            "median_dom_yoy_days": -29.5,
-            "avg_sale_to_list_pct": 93.6,
-            "months_of_supply": 13.8,
-            "homes_sold": 12,
-            "inventory": 55,
+            "median_sale_price": 2840000,
+            "median_sale_price_yoy_pct": -26.2,
+            "median_dom": 115,
+            "median_dom_yoy_days": 49.5,
+            "avg_sale_to_list_pct": 94.1,
+            "months_of_supply": 8.3,
+            "homes_sold": 16,
+            "inventory": 44,
             "low_sample": false
           }
         },
@@ -463,14 +495,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33922",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 445000,
-            "median_sale_price_yoy_pct": 20.3,
-            "median_dom": 110,
-            "median_dom_yoy_days": 36.5,
-            "avg_sale_to_list_pct": 92.1,
-            "months_of_supply": 9,
-            "homes_sold": 31,
-            "inventory": 93,
+            "median_sale_price": 439300,
+            "median_sale_price_yoy_pct": 16.4,
+            "median_dom": 109,
+            "median_dom_yoy_days": -24,
+            "avg_sale_to_list_pct": 92.4,
+            "months_of_supply": 7.4,
+            "homes_sold": 35,
+            "inventory": 86,
             "low_sample": false
           }
         },
@@ -479,14 +511,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33924",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 797000,
-            "median_sale_price_yoy_pct": -29.1,
-            "median_dom": 160.5,
-            "median_dom_yoy_days": 148.5,
-            "avg_sale_to_list_pct": 91,
-            "months_of_supply": 13.9,
-            "homes_sold": 14,
-            "inventory": 65,
+            "median_sale_price": 1012500,
+            "median_sale_price_yoy_pct": 8,
+            "median_dom": 83.5,
+            "median_dom_yoy_days": -76,
+            "avg_sale_to_list_pct": 91.5,
+            "months_of_supply": 10.2,
+            "homes_sold": 18,
+            "inventory": 61,
             "low_sample": false
           }
         },
@@ -495,14 +527,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33928",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 499500,
-            "median_sale_price_yoy_pct": -6.6,
+            "median_sale_price": 520000,
+            "median_sale_price_yoy_pct": 6.1,
             "median_dom": 77,
-            "median_dom_yoy_days": 12,
-            "avg_sale_to_list_pct": 96,
-            "months_of_supply": 4.4,
-            "homes_sold": 306,
-            "inventory": 444,
+            "median_dom_yoy_days": 8.5,
+            "avg_sale_to_list_pct": 95.8,
+            "months_of_supply": 2.6,
+            "homes_sold": 402,
+            "inventory": 351,
             "low_sample": false
           }
         },
@@ -511,14 +543,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33931",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 590000,
-            "median_sale_price_yoy_pct": -15.8,
-            "median_dom": 114,
-            "median_dom_yoy_days": 41,
-            "avg_sale_to_list_pct": 93,
-            "months_of_supply": 11.7,
-            "homes_sold": 115,
-            "inventory": 447,
+            "median_sale_price": 545000,
+            "median_sale_price_yoy_pct": -13.8,
+            "median_dom": 107.5,
+            "median_dom_yoy_days": 3.5,
+            "avg_sale_to_list_pct": 92.9,
+            "months_of_supply": 9.8,
+            "homes_sold": 119,
+            "inventory": 387,
             "low_sample": false
           }
         },
@@ -543,14 +575,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33936",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 250000,
-            "median_sale_price_yoy_pct": 4.2,
-            "median_dom": 85.5,
-            "median_dom_yoy_days": 44.5,
-            "avg_sale_to_list_pct": 94.8,
-            "months_of_supply": 8,
-            "homes_sold": 85,
-            "inventory": 228,
+            "median_sale_price": 235000,
+            "median_sale_price_yoy_pct": -5.6,
+            "median_dom": 95,
+            "median_dom_yoy_days": 32,
+            "avg_sale_to_list_pct": 96.4,
+            "months_of_supply": 5,
+            "homes_sold": 136,
+            "inventory": 225,
             "low_sample": false
           }
         },
@@ -559,15 +591,15 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33945",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 1187500,
-            "median_sale_price_yoy_pct": 80.7,
-            "median_dom": 433,
-            "median_dom_yoy_days": 422,
-            "avg_sale_to_list_pct": 90.8,
-            "months_of_supply": null,
-            "homes_sold": 2,
-            "inventory": 12,
-            "low_sample": true
+            "median_sale_price": 945000,
+            "median_sale_price_yoy_pct": 11.2,
+            "median_dom": 41,
+            "median_dom_yoy_days": -21,
+            "avg_sale_to_list_pct": 92.1,
+            "months_of_supply": 6.6,
+            "homes_sold": 5,
+            "inventory": 11,
+            "low_sample": false
           }
         },
         {
@@ -575,14 +607,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33946",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 532000,
-            "median_sale_price_yoy_pct": -17.8,
-            "median_dom": 105.5,
-            "median_dom_yoy_days": 19.5,
-            "avg_sale_to_list_pct": 94.7,
-            "months_of_supply": 10.1,
-            "homes_sold": 38,
-            "inventory": 128,
+            "median_sale_price": 515000,
+            "median_sale_price_yoy_pct": -18.3,
+            "median_dom": 111,
+            "median_dom_yoy_days": 32,
+            "avg_sale_to_list_pct": 93.5,
+            "months_of_supply": 7,
+            "homes_sold": 43,
+            "inventory": 100,
             "low_sample": false
           }
         },
@@ -591,14 +623,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33947",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 354500,
-            "median_sale_price_yoy_pct": -8.2,
-            "median_dom": 65,
-            "median_dom_yoy_days": -9,
-            "avg_sale_to_list_pct": 96.3,
-            "months_of_supply": 5.1,
-            "homes_sold": 134,
-            "inventory": 226,
+            "median_sale_price": 370000,
+            "median_sale_price_yoy_pct": -2.1,
+            "median_dom": 59,
+            "median_dom_yoy_days": -35.5,
+            "avg_sale_to_list_pct": 96.1,
+            "months_of_supply": 3.8,
+            "homes_sold": 166,
+            "inventory": 210,
             "low_sample": false
           }
         },
@@ -607,14 +639,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33948",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 297000,
-            "median_sale_price_yoy_pct": -1.2,
-            "median_dom": 79.5,
-            "median_dom_yoy_days": 5.5,
-            "avg_sale_to_list_pct": 96.5,
-            "months_of_supply": 5,
-            "homes_sold": 127,
-            "inventory": 211,
+            "median_sale_price": 300000,
+            "median_sale_price_yoy_pct": 5.3,
+            "median_dom": 64.5,
+            "median_dom_yoy_days": -8.5,
+            "avg_sale_to_list_pct": 96.3,
+            "months_of_supply": 3.6,
+            "homes_sold": 160,
+            "inventory": 190,
             "low_sample": false
           }
         },
@@ -623,14 +655,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33950",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 417500,
-            "median_sale_price_yoy_pct": 11.3,
-            "median_dom": 95,
-            "median_dom_yoy_days": 39,
-            "avg_sale_to_list_pct": 94.6,
-            "months_of_supply": 5.7,
-            "homes_sold": 246,
-            "inventory": 467,
+            "median_sale_price": 429000,
+            "median_sale_price_yoy_pct": -0.2,
+            "median_dom": 92,
+            "median_dom_yoy_days": 18,
+            "avg_sale_to_list_pct": 94.4,
+            "months_of_supply": 3.6,
+            "homes_sold": 319,
+            "inventory": 379,
             "low_sample": false
           }
         },
@@ -639,14 +671,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33952",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 229900,
-            "median_sale_price_yoy_pct": 0,
-            "median_dom": 58,
-            "median_dom_yoy_days": -18,
-            "avg_sale_to_list_pct": 96.4,
-            "months_of_supply": 5.9,
-            "homes_sold": 177,
-            "inventory": 350,
+            "median_sale_price": 240000,
+            "median_sale_price_yoy_pct": 2.1,
+            "median_dom": 49.5,
+            "median_dom_yoy_days": -17.5,
+            "avg_sale_to_list_pct": 96.5,
+            "months_of_supply": 4.4,
+            "homes_sold": 211,
+            "inventory": 312,
             "low_sample": false
           }
         },
@@ -655,14 +687,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33953",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 285000,
-            "median_sale_price_yoy_pct": -16.2,
-            "median_dom": 83,
-            "median_dom_yoy_days": -12,
-            "avg_sale_to_list_pct": 95.3,
-            "months_of_supply": 6.7,
-            "homes_sold": 110,
-            "inventory": 246,
+            "median_sale_price": 319950,
+            "median_sale_price_yoy_pct": -2,
+            "median_dom": 94.5,
+            "median_dom_yoy_days": -5.5,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 4.2,
+            "homes_sold": 136,
+            "inventory": 192,
             "low_sample": false
           }
         },
@@ -671,14 +703,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33954",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 298950,
-            "median_sale_price_yoy_pct": -13.1,
-            "median_dom": 55.5,
-            "median_dom_yoy_days": -32,
-            "avg_sale_to_list_pct": 97.6,
-            "months_of_supply": 4.5,
-            "homes_sold": 82,
-            "inventory": 123,
+            "median_sale_price": 322000,
+            "median_sale_price_yoy_pct": 1.3,
+            "median_dom": 48,
+            "median_dom_yoy_days": -27,
+            "avg_sale_to_list_pct": 98.3,
+            "months_of_supply": 3.9,
+            "homes_sold": 83,
+            "inventory": 107,
             "low_sample": false
           }
         },
@@ -687,14 +719,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33955",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 350000,
-            "median_sale_price_yoy_pct": -0.7,
-            "median_dom": 90.5,
-            "median_dom_yoy_days": -14.5,
-            "avg_sale_to_list_pct": 96.8,
-            "months_of_supply": 7.2,
-            "homes_sold": 146,
-            "inventory": 349,
+            "median_sale_price": 345000,
+            "median_sale_price_yoy_pct": 3,
+            "median_dom": 79,
+            "median_dom_yoy_days": -15,
+            "avg_sale_to_list_pct": 96.2,
+            "months_of_supply": 4.3,
+            "homes_sold": 207,
+            "inventory": 298,
             "low_sample": false
           }
         },
@@ -703,14 +735,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33956",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 545000,
-            "median_sale_price_yoy_pct": -12.4,
-            "median_dom": 88,
-            "median_dom_yoy_days": 18.5,
-            "avg_sale_to_list_pct": 94.9,
-            "months_of_supply": 8,
+            "median_sale_price": 536250,
+            "median_sale_price_yoy_pct": -7.5,
+            "median_dom": 102,
+            "median_dom_yoy_days": 40,
+            "avg_sale_to_list_pct": 94.7,
+            "months_of_supply": 6.1,
             "homes_sold": 34,
-            "inventory": 91,
+            "inventory": 69,
             "low_sample": false
           }
         },
@@ -719,14 +751,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33957",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 900000,
-            "median_sale_price_yoy_pct": -1.1,
-            "median_dom": 99,
-            "median_dom_yoy_days": 51.5,
-            "avg_sale_to_list_pct": 91.9,
-            "months_of_supply": 10.6,
-            "homes_sold": 101,
-            "inventory": 358,
+            "median_sale_price": 1032500,
+            "median_sale_price_yoy_pct": 17.3,
+            "median_dom": 116,
+            "median_dom_yoy_days": 29,
+            "avg_sale_to_list_pct": 91.8,
+            "months_of_supply": 6.1,
+            "homes_sold": 140,
+            "inventory": 284,
             "low_sample": false
           }
         },
@@ -735,14 +767,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33966",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 316000,
-            "median_sale_price_yoy_pct": -22,
-            "median_dom": 76.5,
-            "median_dom_yoy_days": 10.5,
-            "avg_sale_to_list_pct": 95.3,
-            "months_of_supply": 6.4,
-            "homes_sold": 64,
-            "inventory": 137,
+            "median_sale_price": 339500,
+            "median_sale_price_yoy_pct": -10.4,
+            "median_dom": 68,
+            "median_dom_yoy_days": 16,
+            "avg_sale_to_list_pct": 95.8,
+            "months_of_supply": 3.8,
+            "homes_sold": 96,
+            "inventory": 121,
             "low_sample": false
           }
         },
@@ -751,14 +783,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33967",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 366000,
-            "median_sale_price_yoy_pct": -4,
-            "median_dom": 43.5,
-            "median_dom_yoy_days": -0.5,
-            "avg_sale_to_list_pct": 95.5,
-            "months_of_supply": 4.9,
-            "homes_sold": 92,
-            "inventory": 150,
+            "median_sale_price": 370000,
+            "median_sale_price_yoy_pct": -5.1,
+            "median_dom": 50,
+            "median_dom_yoy_days": 2.5,
+            "avg_sale_to_list_pct": 96.3,
+            "months_of_supply": 3.9,
+            "homes_sold": 105,
+            "inventory": 138,
             "low_sample": false
           }
         },
@@ -767,14 +799,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33971",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 301500,
-            "median_sale_price_yoy_pct": -7.2,
-            "median_dom": 89,
-            "median_dom_yoy_days": 12.5,
-            "avg_sale_to_list_pct": 97.9,
-            "months_of_supply": 8.4,
-            "homes_sold": 154,
-            "inventory": 432,
+            "median_sale_price": 309899,
+            "median_sale_price_yoy_pct": -6.1,
+            "median_dom": 76,
+            "median_dom_yoy_days": 13,
+            "avg_sale_to_list_pct": 98.3,
+            "months_of_supply": 4.7,
+            "homes_sold": 241,
+            "inventory": 377,
             "low_sample": false
           }
         },
@@ -783,14 +815,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33972",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 369000,
-            "median_sale_price_yoy_pct": 2.2,
-            "median_dom": 70,
-            "median_dom_yoy_days": 1,
-            "avg_sale_to_list_pct": 97.9,
-            "months_of_supply": 7.8,
-            "homes_sold": 119,
-            "inventory": 308,
+            "median_sale_price": 339890,
+            "median_sale_price_yoy_pct": -5.6,
+            "median_dom": 54,
+            "median_dom_yoy_days": -16.5,
+            "avg_sale_to_list_pct": 98.5,
+            "months_of_supply": 6.5,
+            "homes_sold": 133,
+            "inventory": 286,
             "low_sample": false
           }
         },
@@ -799,14 +831,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33973",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 399950,
-            "median_sale_price_yoy_pct": -21.6,
-            "median_dom": 66,
-            "median_dom_yoy_days": 11,
-            "avg_sale_to_list_pct": 96.2,
-            "months_of_supply": 11.3,
-            "homes_sold": 36,
-            "inventory": 136,
+            "median_sale_price": 459950,
+            "median_sale_price_yoy_pct": 0.8,
+            "median_dom": 105.5,
+            "median_dom_yoy_days": 53.5,
+            "avg_sale_to_list_pct": 97.9,
+            "months_of_supply": 8.2,
+            "homes_sold": 44,
+            "inventory": 120,
             "low_sample": false
           }
         },
@@ -815,14 +847,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33974",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 304500,
-            "median_sale_price_yoy_pct": -4.8,
-            "median_dom": 95,
-            "median_dom_yoy_days": 15.5,
-            "avg_sale_to_list_pct": 98.5,
-            "months_of_supply": 6.7,
-            "homes_sold": 234,
-            "inventory": 525,
+            "median_sale_price": 303000,
+            "median_sale_price_yoy_pct": -5.3,
+            "median_dom": 92,
+            "median_dom_yoy_days": 12,
+            "avg_sale_to_list_pct": 98.7,
+            "months_of_supply": 5.4,
+            "homes_sold": 282,
+            "inventory": 506,
             "low_sample": false
           }
         },
@@ -831,14 +863,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33976",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 305000,
-            "median_sale_price_yoy_pct": -9,
-            "median_dom": 67,
-            "median_dom_yoy_days": -5,
-            "avg_sale_to_list_pct": 98.1,
-            "months_of_supply": 7,
-            "homes_sold": 113,
-            "inventory": 264,
+            "median_sale_price": 315000,
+            "median_sale_price_yoy_pct": -5.7,
+            "median_dom": 70,
+            "median_dom_yoy_days": 12,
+            "avg_sale_to_list_pct": 98.5,
+            "months_of_supply": 4,
+            "homes_sold": 183,
+            "inventory": 242,
             "low_sample": false
           }
         },
@@ -847,14 +879,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33980",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 278495,
-            "median_sale_price_yoy_pct": 11,
-            "median_dom": 104.5,
-            "median_dom_yoy_days": 36.5,
-            "avg_sale_to_list_pct": 94.4,
-            "months_of_supply": 5.6,
-            "homes_sold": 92,
-            "inventory": 173,
+            "median_sale_price": 276745,
+            "median_sale_price_yoy_pct": 8.3,
+            "median_dom": 82,
+            "median_dom_yoy_days": -24,
+            "avg_sale_to_list_pct": 95.1,
+            "months_of_supply": 4.5,
+            "homes_sold": 96,
+            "inventory": 145,
             "low_sample": false
           }
         },
@@ -863,14 +895,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33981",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 355000,
-            "median_sale_price_yoy_pct": -4.3,
-            "median_dom": 82,
-            "median_dom_yoy_days": -48,
-            "avg_sale_to_list_pct": 95.9,
-            "months_of_supply": 6.3,
-            "homes_sold": 187,
-            "inventory": 394,
+            "median_sale_price": 375000,
+            "median_sale_price_yoy_pct": 1.8,
+            "median_dom": 71.5,
+            "median_dom_yoy_days": -14.5,
+            "avg_sale_to_list_pct": 96.4,
+            "months_of_supply": 5.9,
+            "homes_sold": 199,
+            "inventory": 391,
             "low_sample": false
           }
         },
@@ -879,14 +911,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33982",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 370000,
-            "median_sale_price_yoy_pct": 1.1,
-            "median_dom": 96.5,
-            "median_dom_yoy_days": 2.5,
-            "avg_sale_to_list_pct": 95.6,
-            "months_of_supply": 4.2,
-            "homes_sold": 166,
-            "inventory": 234,
+            "median_sale_price": 399990,
+            "median_sale_price_yoy_pct": 9.9,
+            "median_dom": 90,
+            "median_dom_yoy_days": -1,
+            "avg_sale_to_list_pct": 95.9,
+            "months_of_supply": 4,
+            "homes_sold": 175,
+            "inventory": 235,
             "low_sample": false
           }
         },
@@ -895,14 +927,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33983",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 290000,
-            "median_sale_price_yoy_pct": -13.3,
-            "median_dom": 64,
-            "median_dom_yoy_days": -23.5,
+            "median_sale_price": 312500,
+            "median_sale_price_yoy_pct": -8.1,
+            "median_dom": 71,
+            "median_dom_yoy_days": -11,
             "avg_sale_to_list_pct": 95.4,
-            "months_of_supply": 5.5,
-            "homes_sold": 119,
-            "inventory": 218,
+            "months_of_supply": 3.1,
+            "homes_sold": 158,
+            "inventory": 164,
             "low_sample": false
           }
         },
@@ -912,13 +944,13 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "cells": {
             "metro": "Cape Coral, FL",
             "median_sale_price": 350000,
-            "median_sale_price_yoy_pct": -4.8,
-            "median_dom": 47,
-            "median_dom_yoy_days": 4,
-            "avg_sale_to_list_pct": 96.4,
-            "months_of_supply": 4.3,
-            "homes_sold": 151,
-            "inventory": 214,
+            "median_sale_price_yoy_pct": -4.1,
+            "median_dom": 46,
+            "median_dom_yoy_days": -11,
+            "avg_sale_to_list_pct": 97.1,
+            "months_of_supply": 3.4,
+            "homes_sold": 175,
+            "inventory": 196,
             "low_sample": false
           }
         },
@@ -927,14 +959,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33991",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 410000,
-            "median_sale_price_yoy_pct": -4.4,
-            "median_dom": 68,
-            "median_dom_yoy_days": -15,
-            "avg_sale_to_list_pct": 96.4,
-            "months_of_supply": 5.3,
-            "homes_sold": 173,
-            "inventory": 304,
+            "median_sale_price": 399000,
+            "median_sale_price_yoy_pct": 2.3,
+            "median_dom": 67,
+            "median_dom_yoy_days": -3,
+            "avg_sale_to_list_pct": 96.8,
+            "months_of_supply": 3.8,
+            "homes_sold": 227,
+            "inventory": 287,
             "low_sample": false
           }
         },
@@ -943,14 +975,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "33993",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 348000,
-            "median_sale_price_yoy_pct": -3.1,
-            "median_dom": 80,
-            "median_dom_yoy_days": -1,
-            "avg_sale_to_list_pct": 96.9,
-            "months_of_supply": 5.9,
-            "homes_sold": 361,
-            "inventory": 715,
+            "median_sale_price": 354250,
+            "median_sale_price_yoy_pct": 1.2,
+            "median_dom": 73,
+            "median_dom_yoy_days": -10,
+            "avg_sale_to_list_pct": 97.6,
+            "months_of_supply": 4.7,
+            "homes_sold": 416,
+            "inventory": 645,
             "low_sample": false
           }
         },
@@ -959,14 +991,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34102",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 2050000,
-            "median_sale_price_yoy_pct": -27.8,
-            "median_dom": 76,
-            "median_dom_yoy_days": 8,
-            "avg_sale_to_list_pct": 92.7,
-            "months_of_supply": 10.9,
-            "homes_sold": 128,
-            "inventory": 463,
+            "median_sale_price": 1800000,
+            "median_sale_price_yoy_pct": -15.3,
+            "median_dom": 82,
+            "median_dom_yoy_days": -18,
+            "avg_sale_to_list_pct": 93.3,
+            "months_of_supply": 7.2,
+            "homes_sold": 159,
+            "inventory": 379,
             "low_sample": false
           }
         },
@@ -975,14 +1007,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34103",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 1400000,
-            "median_sale_price_yoy_pct": 17.2,
-            "median_dom": 95,
-            "median_dom_yoy_days": 21,
-            "avg_sale_to_list_pct": 93.3,
-            "months_of_supply": 7.9,
-            "homes_sold": 149,
-            "inventory": 391,
+            "median_sale_price": 1600000,
+            "median_sale_price_yoy_pct": 0,
+            "median_dom": 98.5,
+            "median_dom_yoy_days": 8.5,
+            "avg_sale_to_list_pct": 92.2,
+            "months_of_supply": 4.3,
+            "homes_sold": 212,
+            "inventory": 303,
             "low_sample": false
           }
         },
@@ -991,14 +1023,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34104",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 377500,
-            "median_sale_price_yoy_pct": -8.5,
-            "median_dom": 56,
-            "median_dom_yoy_days": -5,
-            "avg_sale_to_list_pct": 95.6,
-            "months_of_supply": 6,
-            "homes_sold": 136,
-            "inventory": 273,
+            "median_sale_price": 402000,
+            "median_sale_price_yoy_pct": 1.8,
+            "median_dom": 50,
+            "median_dom_yoy_days": -7,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 4.4,
+            "homes_sold": 163,
+            "inventory": 238,
             "low_sample": false
           }
         },
@@ -1007,14 +1039,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34105",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 679950,
-            "median_sale_price_yoy_pct": 0.7,
-            "median_dom": 68.5,
-            "median_dom_yoy_days": 6.5,
-            "avg_sale_to_list_pct": 94.5,
-            "months_of_supply": 5.8,
-            "homes_sold": 116,
-            "inventory": 223,
+            "median_sale_price": 698000,
+            "median_sale_price_yoy_pct": 16.3,
+            "median_dom": 60,
+            "median_dom_yoy_days": 5,
+            "avg_sale_to_list_pct": 94,
+            "months_of_supply": 3.7,
+            "homes_sold": 139,
+            "inventory": 173,
             "low_sample": false
           }
         },
@@ -1023,14 +1055,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34108",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 1362000,
-            "median_sale_price_yoy_pct": 2.8,
-            "median_dom": 64,
-            "median_dom_yoy_days": 0,
-            "avg_sale_to_list_pct": 93.5,
-            "months_of_supply": 7.7,
-            "homes_sold": 186,
-            "inventory": 475,
+            "median_sale_price": 1250000,
+            "median_sale_price_yoy_pct": 1.2,
+            "median_dom": 85.5,
+            "median_dom_yoy_days": 21,
+            "avg_sale_to_list_pct": 93.6,
+            "months_of_supply": 5.8,
+            "homes_sold": 213,
+            "inventory": 409,
             "low_sample": false
           }
         },
@@ -1039,14 +1071,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34109",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 650000,
-            "median_sale_price_yoy_pct": 0,
-            "median_dom": 69,
-            "median_dom_yoy_days": 18,
-            "avg_sale_to_list_pct": 94.7,
-            "months_of_supply": 7.1,
-            "homes_sold": 137,
-            "inventory": 323,
+            "median_sale_price": 647500,
+            "median_sale_price_yoy_pct": 4.4,
+            "median_dom": 64.5,
+            "median_dom_yoy_days": 4.5,
+            "avg_sale_to_list_pct": 94.2,
+            "months_of_supply": 4.4,
+            "homes_sold": 180,
+            "inventory": 264,
             "low_sample": false
           }
         },
@@ -1055,14 +1087,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34110",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 620000,
-            "median_sale_price_yoy_pct": -8.8,
-            "median_dom": 95,
-            "median_dom_yoy_days": 11,
-            "avg_sale_to_list_pct": 93.7,
-            "months_of_supply": 7.2,
-            "homes_sold": 187,
-            "inventory": 446,
+            "median_sale_price": 650000,
+            "median_sale_price_yoy_pct": 0.4,
+            "median_dom": 88.5,
+            "median_dom_yoy_days": 7,
+            "avg_sale_to_list_pct": 93.6,
+            "months_of_supply": 4.6,
+            "homes_sold": 232,
+            "inventory": 356,
             "low_sample": false
           }
         },
@@ -1071,14 +1103,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34112",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 325000,
-            "median_sale_price_yoy_pct": -22.3,
-            "median_dom": 60.5,
-            "median_dom_yoy_days": -12.5,
-            "avg_sale_to_list_pct": 93.9,
-            "months_of_supply": 6.7,
-            "homes_sold": 216,
-            "inventory": 483,
+            "median_sale_price": 330000,
+            "median_sale_price_yoy_pct": -23.1,
+            "median_dom": 74,
+            "median_dom_yoy_days": 15,
+            "avg_sale_to_list_pct": 94.5,
+            "months_of_supply": 4.2,
+            "homes_sold": 263,
+            "inventory": 372,
             "low_sample": false
           }
         },
@@ -1087,14 +1119,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34113",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 595000,
-            "median_sale_price_yoy_pct": -9.8,
-            "median_dom": 75,
-            "median_dom_yoy_days": 3.5,
-            "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 8.7,
-            "homes_sold": 161,
-            "inventory": 468,
+            "median_sale_price": 627500,
+            "median_sale_price_yoy_pct": -1.6,
+            "median_dom": 68,
+            "median_dom_yoy_days": -19,
+            "avg_sale_to_list_pct": 94.1,
+            "months_of_supply": 4.6,
+            "homes_sold": 244,
+            "inventory": 376,
             "low_sample": false
           }
         },
@@ -1103,14 +1135,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34114",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 619000,
-            "median_sale_price_yoy_pct": -1,
-            "median_dom": 85.5,
-            "median_dom_yoy_days": 7.5,
-            "avg_sale_to_list_pct": 95.2,
-            "months_of_supply": 6.2,
-            "homes_sold": 224,
-            "inventory": 460,
+            "median_sale_price": 605000,
+            "median_sale_price_yoy_pct": -4.3,
+            "median_dom": 85,
+            "median_dom_yoy_days": -3.5,
+            "avg_sale_to_list_pct": 95.1,
+            "months_of_supply": 4,
+            "homes_sold": 295,
+            "inventory": 392,
             "low_sample": false
           }
         },
@@ -1119,14 +1151,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34116",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 460000,
-            "median_sale_price_yoy_pct": -8,
-            "median_dom": 61.5,
-            "median_dom_yoy_days": -6.5,
-            "avg_sale_to_list_pct": 95.4,
-            "months_of_supply": 4.6,
-            "homes_sold": 46,
-            "inventory": 71,
+            "median_sale_price": 450000,
+            "median_sale_price_yoy_pct": -3.7,
+            "median_dom": 43,
+            "median_dom_yoy_days": -15,
+            "avg_sale_to_list_pct": 95.9,
+            "months_of_supply": 3.5,
+            "homes_sold": 61,
+            "inventory": 72,
             "low_sample": false
           }
         },
@@ -1135,14 +1167,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34117",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 562500,
-            "median_sale_price_yoy_pct": -2.8,
-            "median_dom": 83.5,
-            "median_dom_yoy_days": 10,
-            "avg_sale_to_list_pct": 95.4,
-            "months_of_supply": 5,
-            "homes_sold": 74,
-            "inventory": 124,
+            "median_sale_price": 550000,
+            "median_sale_price_yoy_pct": -4.3,
+            "median_dom": 75.5,
+            "median_dom_yoy_days": 29.5,
+            "avg_sale_to_list_pct": 96.2,
+            "months_of_supply": 4.9,
+            "homes_sold": 80,
+            "inventory": 131,
             "low_sample": false
           }
         },
@@ -1151,14 +1183,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34119",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 713250,
-            "median_sale_price_yoy_pct": -11.7,
-            "median_dom": 59.5,
-            "median_dom_yoy_days": -4,
-            "avg_sale_to_list_pct": 95.4,
-            "months_of_supply": 5.9,
-            "homes_sold": 234,
-            "inventory": 464,
+            "median_sale_price": 675000,
+            "median_sale_price_yoy_pct": -11.5,
+            "median_dom": 58.5,
+            "median_dom_yoy_days": -3.5,
+            "avg_sale_to_list_pct": 94.8,
+            "months_of_supply": 3.8,
+            "homes_sold": 292,
+            "inventory": 368,
             "low_sample": false
           }
         },
@@ -1167,14 +1199,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34120",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 557000,
-            "median_sale_price_yoy_pct": -10.5,
-            "median_dom": 86,
-            "median_dom_yoy_days": 2,
-            "avg_sale_to_list_pct": 96,
-            "months_of_supply": 7.3,
-            "homes_sold": 244,
-            "inventory": 591,
+            "median_sale_price": 580000,
+            "median_sale_price_yoy_pct": 1.6,
+            "median_dom": 75,
+            "median_dom_yoy_days": -13.5,
+            "avg_sale_to_list_pct": 95.8,
+            "months_of_supply": 4.8,
+            "homes_sold": 328,
+            "inventory": 522,
             "low_sample": false
           }
         },
@@ -1183,15 +1215,15 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34133",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 558750,
-            "median_sale_price_yoy_pct": 14,
-            "median_dom": 122,
-            "median_dom_yoy_days": 67,
-            "avg_sale_to_list_pct": 94.9,
-            "months_of_supply": null,
-            "homes_sold": 2,
+            "median_sale_price": 365000,
+            "median_sale_price_yoy_pct": -25.5,
+            "median_dom": 39,
+            "median_dom_yoy_days": -16,
+            "avg_sale_to_list_pct": 95.2,
+            "months_of_supply": 3,
+            "homes_sold": 5,
             "inventory": 5,
-            "low_sample": true
+            "low_sample": false
           }
         },
         {
@@ -1199,14 +1231,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34134",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 750000,
-            "median_sale_price_yoy_pct": 0,
-            "median_dom": 72,
-            "median_dom_yoy_days": 1,
-            "avg_sale_to_list_pct": 94.3,
-            "months_of_supply": 7.1,
-            "homes_sold": 221,
-            "inventory": 523,
+            "median_sale_price": 745000,
+            "median_sale_price_yoy_pct": -4.2,
+            "median_dom": 88,
+            "median_dom_yoy_days": 13,
+            "avg_sale_to_list_pct": 94.2,
+            "months_of_supply": 4,
+            "homes_sold": 301,
+            "inventory": 398,
             "low_sample": false
           }
         },
@@ -1215,14 +1247,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34135",
           "cells": {
             "metro": "Cape Coral, FL",
-            "median_sale_price": 510000,
-            "median_sale_price_yoy_pct": -2.9,
-            "median_dom": 66.5,
-            "median_dom_yoy_days": 4.5,
-            "avg_sale_to_list_pct": 95.5,
-            "months_of_supply": 5.6,
-            "homes_sold": 334,
-            "inventory": 626,
+            "median_sale_price": 495000,
+            "median_sale_price_yoy_pct": -7.9,
+            "median_dom": 65,
+            "median_dom_yoy_days": 3,
+            "avg_sale_to_list_pct": 95.6,
+            "months_of_supply": 3.2,
+            "homes_sold": 443,
+            "inventory": 478,
             "low_sample": false
           }
         },
@@ -1279,15 +1311,15 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34140",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 465000,
-            "median_sale_price_yoy_pct": -46.9,
-            "median_dom": 346.5,
-            "median_dom_yoy_days": 255,
-            "avg_sale_to_list_pct": 87.3,
-            "months_of_supply": null,
-            "homes_sold": 2,
+            "median_sale_price": 865000,
+            "median_sale_price_yoy_pct": 39.5,
+            "median_dom": 267,
+            "median_dom_yoy_days": 167,
+            "avg_sale_to_list_pct": 86.6,
+            "months_of_supply": 4.3,
+            "homes_sold": 7,
             "inventory": 10,
-            "low_sample": true
+            "low_sample": false
           }
         },
         {
@@ -1311,14 +1343,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34142",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 355000,
-            "median_sale_price_yoy_pct": -14.5,
-            "median_dom": 96,
-            "median_dom_yoy_days": 6.5,
-            "avg_sale_to_list_pct": 95.6,
-            "months_of_supply": 10.6,
-            "homes_sold": 71,
-            "inventory": 252,
+            "median_sale_price": 359154,
+            "median_sale_price_yoy_pct": -9.1,
+            "median_dom": 105,
+            "median_dom_yoy_days": 14.5,
+            "avg_sale_to_list_pct": 95.7,
+            "months_of_supply": 7.3,
+            "homes_sold": 102,
+            "inventory": 249,
             "low_sample": false
           }
         },
@@ -1327,31 +1359,15 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34145",
           "cells": {
             "metro": "Naples, FL",
-            "median_sale_price": 1110000,
-            "median_sale_price_yoy_pct": -3.5,
-            "median_dom": 81.5,
-            "median_dom_yoy_days": -10.5,
-            "avg_sale_to_list_pct": 93.8,
-            "months_of_supply": 6.5,
-            "homes_sold": 241,
-            "inventory": 519,
+            "median_sale_price": 1026562.5,
+            "median_sale_price_yoy_pct": 3.7,
+            "median_dom": 100.5,
+            "median_dom_yoy_days": 12.5,
+            "avg_sale_to_list_pct": 94,
+            "months_of_supply": 4.1,
+            "homes_sold": 304,
+            "inventory": 418,
             "low_sample": false
-          }
-        },
-        {
-          "key": "34146",
-          "label": "34146",
-          "cells": {
-            "metro": "Naples, FL",
-            "median_sale_price": 788000,
-            "median_sale_price_yoy_pct": null,
-            "median_dom": 79,
-            "median_dom_yoy_days": null,
-            "avg_sale_to_list_pct": 98.5,
-            "months_of_supply": null,
-            "homes_sold": 1,
-            "inventory": null,
-            "low_sample": true
           }
         },
         {
@@ -1359,14 +1375,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34201",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 682500,
-            "median_sale_price_yoy_pct": 3.1,
-            "median_dom": 45.5,
-            "median_dom_yoy_days": -11.5,
-            "avg_sale_to_list_pct": 96.7,
-            "months_of_supply": 5.9,
-            "homes_sold": 34,
-            "inventory": 67,
+            "median_sale_price": 675000,
+            "median_sale_price_yoy_pct": -4.9,
+            "median_dom": 52.5,
+            "median_dom_yoy_days": 1,
+            "avg_sale_to_list_pct": 96.2,
+            "months_of_supply": 4.4,
+            "homes_sold": 40,
+            "inventory": 59,
             "low_sample": false
           }
         },
@@ -1375,14 +1391,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34202",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 760000,
-            "median_sale_price_yoy_pct": -1.9,
-            "median_dom": 62.5,
-            "median_dom_yoy_days": -8,
-            "avg_sale_to_list_pct": 95.3,
-            "months_of_supply": 4.5,
-            "homes_sold": 171,
-            "inventory": 255,
+            "median_sale_price": 775000,
+            "median_sale_price_yoy_pct": 6.5,
+            "median_dom": 55,
+            "median_dom_yoy_days": -14,
+            "avg_sale_to_list_pct": 95.9,
+            "months_of_supply": 2.8,
+            "homes_sold": 235,
+            "inventory": 221,
             "low_sample": false
           }
         },
@@ -1392,13 +1408,13 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "cells": {
             "metro": "North Port, FL",
             "median_sale_price": 380000,
-            "median_sale_price_yoy_pct": 0,
-            "median_dom": 57,
-            "median_dom_yoy_days": -4,
+            "median_sale_price_yoy_pct": -6.7,
+            "median_dom": 53,
+            "median_dom_yoy_days": -12,
             "avg_sale_to_list_pct": 96.6,
-            "months_of_supply": 4.5,
-            "homes_sold": 127,
-            "inventory": 190,
+            "months_of_supply": 3,
+            "homes_sold": 151,
+            "inventory": 152,
             "low_sample": false
           }
         },
@@ -1407,14 +1423,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34204",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 498000,
-            "median_sale_price_yoy_pct": 8.7,
-            "median_dom": null,
-            "median_dom_yoy_days": null,
-            "avg_sale_to_list_pct": 101.8,
+            "median_sale_price": 460000,
+            "median_sale_price_yoy_pct": -1.6,
+            "median_dom": 44,
+            "median_dom_yoy_days": -48.5,
+            "avg_sale_to_list_pct": 99.5,
             "months_of_supply": null,
-            "homes_sold": 1,
-            "inventory": 5,
+            "homes_sold": 3,
+            "inventory": 4,
             "low_sample": true
           }
         },
@@ -1423,14 +1439,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34205",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 253750,
-            "median_sale_price_yoy_pct": -18.1,
-            "median_dom": 53.5,
-            "median_dom_yoy_days": -6,
-            "avg_sale_to_list_pct": 95.1,
-            "months_of_supply": 6.4,
-            "homes_sold": 98,
-            "inventory": 208,
+            "median_sale_price": 280000,
+            "median_sale_price_yoy_pct": -12.5,
+            "median_dom": 46.5,
+            "median_dom_yoy_days": 1,
+            "avg_sale_to_list_pct": 95.6,
+            "months_of_supply": 3,
+            "homes_sold": 157,
+            "inventory": 158,
             "low_sample": false
           }
         },
@@ -1439,14 +1455,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34207",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 245000,
-            "median_sale_price_yoy_pct": 34.8,
-            "median_dom": 45,
-            "median_dom_yoy_days": 8,
-            "avg_sale_to_list_pct": 95.8,
-            "months_of_supply": 5.7,
-            "homes_sold": 77,
-            "inventory": 147,
+            "median_sale_price": 240000,
+            "median_sale_price_yoy_pct": -7.7,
+            "median_dom": 65.5,
+            "median_dom_yoy_days": 28,
+            "avg_sale_to_list_pct": 94,
+            "months_of_supply": 5.1,
+            "homes_sold": 89,
+            "inventory": 152,
             "low_sample": false
           }
         },
@@ -1455,14 +1471,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34208",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 342750,
-            "median_sale_price_yoy_pct": -8.4,
-            "median_dom": 93,
-            "median_dom_yoy_days": 24,
-            "avg_sale_to_list_pct": 95.3,
-            "months_of_supply": 5.3,
-            "homes_sold": 102,
-            "inventory": 179,
+            "median_sale_price": 375000,
+            "median_sale_price_yoy_pct": 8.8,
+            "median_dom": 62,
+            "median_dom_yoy_days": -9,
+            "avg_sale_to_list_pct": 96.2,
+            "months_of_supply": 4,
+            "homes_sold": 126,
+            "inventory": 166,
             "low_sample": false
           }
         },
@@ -1471,14 +1487,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34209",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 378500,
-            "median_sale_price_yoy_pct": -6.5,
-            "median_dom": 52,
-            "median_dom_yoy_days": 10,
-            "avg_sale_to_list_pct": 95.3,
-            "months_of_supply": 4.4,
-            "homes_sold": 209,
-            "inventory": 309,
+            "median_sale_price": 372450,
+            "median_sale_price_yoy_pct": -11.4,
+            "median_dom": 49.5,
+            "median_dom_yoy_days": 7.5,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 3.5,
+            "homes_sold": 256,
+            "inventory": 296,
             "low_sample": false
           }
         },
@@ -1487,14 +1503,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34210",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 287000,
-            "median_sale_price_yoy_pct": -3.6,
+            "median_sale_price": 353000,
+            "median_sale_price_yoy_pct": 8.6,
             "median_dom": 88,
-            "median_dom_yoy_days": 35,
-            "avg_sale_to_list_pct": 95.2,
-            "months_of_supply": 8.2,
-            "homes_sold": 111,
-            "inventory": 304,
+            "median_dom_yoy_days": 33,
+            "avg_sale_to_list_pct": 95.1,
+            "months_of_supply": 5,
+            "homes_sold": 154,
+            "inventory": 255,
             "low_sample": false
           }
         },
@@ -1503,14 +1519,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34211",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 525000,
-            "median_sale_price_yoy_pct": -3,
-            "median_dom": 77,
-            "median_dom_yoy_days": -33,
-            "avg_sale_to_list_pct": 96.8,
-            "months_of_supply": 3.1,
-            "homes_sold": 452,
-            "inventory": 465,
+            "median_sale_price": 515000,
+            "median_sale_price_yoy_pct": -3.7,
+            "median_dom": 63,
+            "median_dom_yoy_days": -36,
+            "avg_sale_to_list_pct": 97.1,
+            "months_of_supply": 2.4,
+            "homes_sold": 549,
+            "inventory": 445,
             "low_sample": false
           }
         },
@@ -1519,14 +1535,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34212",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 499500,
-            "median_sale_price_yoy_pct": -0.1,
-            "median_dom": 72,
-            "median_dom_yoy_days": -12,
-            "avg_sale_to_list_pct": 96.1,
-            "months_of_supply": 4,
-            "homes_sold": 165,
-            "inventory": 222,
+            "median_sale_price": 465000,
+            "median_sale_price_yoy_pct": -5.1,
+            "median_dom": 57,
+            "median_dom_yoy_days": -16,
+            "avg_sale_to_list_pct": 96.3,
+            "months_of_supply": 3,
+            "homes_sold": 205,
+            "inventory": 202,
             "low_sample": false
           }
         },
@@ -1535,15 +1551,15 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34215",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 1510000,
-            "median_sale_price_yoy_pct": 149.6,
-            "median_dom": 33,
-            "median_dom_yoy_days": -7,
-            "avg_sale_to_list_pct": 95.7,
-            "months_of_supply": null,
-            "homes_sold": 2,
-            "inventory": 23,
-            "low_sample": true
+            "median_sale_price": 1455000,
+            "median_sale_price_yoy_pct": 59,
+            "median_dom": 68.5,
+            "median_dom_yoy_days": 17.5,
+            "avg_sale_to_list_pct": 92.7,
+            "months_of_supply": 7.5,
+            "homes_sold": 6,
+            "inventory": 15,
+            "low_sample": false
           }
         },
         {
@@ -1551,14 +1567,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34216",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 1375000,
-            "median_sale_price_yoy_pct": 8.9,
-            "median_dom": 76,
-            "median_dom_yoy_days": 66,
-            "avg_sale_to_list_pct": 92.9,
-            "months_of_supply": 8.6,
-            "homes_sold": 17,
-            "inventory": 49,
+            "median_sale_price": 1791250,
+            "median_sale_price_yoy_pct": 10.4,
+            "median_dom": 75.5,
+            "median_dom_yoy_days": 49,
+            "avg_sale_to_list_pct": 94,
+            "months_of_supply": 6.9,
+            "homes_sold": 20,
+            "inventory": 46,
             "low_sample": false
           }
         },
@@ -1567,14 +1583,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34217",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 972500,
-            "median_sale_price_yoy_pct": 8.7,
-            "median_dom": 49,
-            "median_dom_yoy_days": 12,
-            "avg_sale_to_list_pct": 93.6,
-            "months_of_supply": 9.8,
-            "homes_sold": 72,
-            "inventory": 235,
+            "median_sale_price": 1140000,
+            "median_sale_price_yoy_pct": 30.3,
+            "median_dom": 72,
+            "median_dom_yoy_days": 40,
+            "avg_sale_to_list_pct": 94.7,
+            "months_of_supply": 8,
+            "homes_sold": 87,
+            "inventory": 233,
             "low_sample": false
           }
         },
@@ -1583,14 +1599,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34219",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 400000,
-            "median_sale_price_yoy_pct": 3.9,
-            "median_dom": 95,
-            "median_dom_yoy_days": 23,
-            "avg_sale_to_list_pct": 97.6,
-            "months_of_supply": 4.9,
-            "homes_sold": 471,
-            "inventory": 775,
+            "median_sale_price": 395000,
+            "median_sale_price_yoy_pct": 0.6,
+            "median_dom": 88,
+            "median_dom_yoy_days": 11,
+            "avg_sale_to_list_pct": 97.8,
+            "months_of_supply": 3.6,
+            "homes_sold": 608,
+            "inventory": 725,
             "low_sample": false
           }
         },
@@ -1599,14 +1615,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34221",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 362000,
-            "median_sale_price_yoy_pct": 2,
-            "median_dom": 70,
-            "median_dom_yoy_days": -9,
-            "avg_sale_to_list_pct": 96,
-            "months_of_supply": 5.3,
-            "homes_sold": 229,
-            "inventory": 403,
+            "median_sale_price": 375000,
+            "median_sale_price_yoy_pct": 4.2,
+            "median_dom": 67,
+            "median_dom_yoy_days": -5,
+            "avg_sale_to_list_pct": 97.2,
+            "months_of_supply": 3.7,
+            "homes_sold": 320,
+            "inventory": 394,
             "low_sample": false
           }
         },
@@ -1615,14 +1631,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34222",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 367500,
-            "median_sale_price_yoy_pct": 33.5,
-            "median_dom": 118,
-            "median_dom_yoy_days": 57,
-            "avg_sale_to_list_pct": 94.5,
-            "months_of_supply": 6.3,
-            "homes_sold": 20,
-            "inventory": 42,
+            "median_sale_price": 363600,
+            "median_sale_price_yoy_pct": 1,
+            "median_dom": 38,
+            "median_dom_yoy_days": -2,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 5.2,
+            "homes_sold": 29,
+            "inventory": 50,
             "low_sample": false
           }
         },
@@ -1631,14 +1647,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34223",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 377500,
-            "median_sale_price_yoy_pct": -1.9,
-            "median_dom": 76,
-            "median_dom_yoy_days": 30,
-            "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 4.5,
-            "homes_sold": 216,
-            "inventory": 323,
+            "median_sale_price": 400000,
+            "median_sale_price_yoy_pct": 11.9,
+            "median_dom": 72.5,
+            "median_dom_yoy_days": 16.5,
+            "avg_sale_to_list_pct": 94.4,
+            "months_of_supply": 3.4,
+            "homes_sold": 251,
+            "inventory": 282,
             "low_sample": false
           }
         },
@@ -1647,14 +1663,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34224",
           "cells": {
             "metro": "Punta Gorda, FL",
-            "median_sale_price": 315000,
-            "median_sale_price_yoy_pct": 0,
-            "median_dom": 61,
-            "median_dom_yoy_days": -3,
-            "avg_sale_to_list_pct": 95.5,
-            "months_of_supply": 5.1,
-            "homes_sold": 123,
-            "inventory": 208,
+            "median_sale_price": 309000,
+            "median_sale_price_yoy_pct": 3,
+            "median_dom": 54,
+            "median_dom_yoy_days": 8,
+            "avg_sale_to_list_pct": 95.6,
+            "months_of_supply": 3.5,
+            "homes_sold": 142,
+            "inventory": 168,
             "low_sample": false
           }
         },
@@ -1663,14 +1679,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34228",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 1132500,
-            "median_sale_price_yoy_pct": 13.3,
-            "median_dom": 75,
-            "median_dom_yoy_days": 38,
-            "avg_sale_to_list_pct": 92.6,
-            "months_of_supply": 9,
-            "homes_sold": 122,
-            "inventory": 364,
+            "median_sale_price": 1107500,
+            "median_sale_price_yoy_pct": 13.6,
+            "median_dom": 93,
+            "median_dom_yoy_days": 39,
+            "avg_sale_to_list_pct": 92.8,
+            "months_of_supply": 5.7,
+            "homes_sold": 158,
+            "inventory": 299,
             "low_sample": false
           }
         },
@@ -1679,14 +1695,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34229",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 637500,
-            "median_sale_price_yoy_pct": -28,
-            "median_dom": 61.5,
-            "median_dom_yoy_days": 22.5,
-            "avg_sale_to_list_pct": 93.1,
-            "months_of_supply": 5.9,
-            "homes_sold": 59,
-            "inventory": 116,
+            "median_sale_price": 592500,
+            "median_sale_price_yoy_pct": -23.3,
+            "median_dom": 44.5,
+            "median_dom_yoy_days": -20.5,
+            "avg_sale_to_list_pct": 95.3,
+            "months_of_supply": 4.6,
+            "homes_sold": 64,
+            "inventory": 99,
             "low_sample": false
           }
         },
@@ -1695,14 +1711,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34231",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 380000,
-            "median_sale_price_yoy_pct": -9.8,
-            "median_dom": 60,
-            "median_dom_yoy_days": 10,
-            "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 6.3,
-            "homes_sold": 146,
-            "inventory": 308,
+            "median_sale_price": 435000,
+            "median_sale_price_yoy_pct": 3.8,
+            "median_dom": 55,
+            "median_dom_yoy_days": 8.5,
+            "avg_sale_to_list_pct": 95.8,
+            "months_of_supply": 4.6,
+            "homes_sold": 193,
+            "inventory": 298,
             "low_sample": false
           }
         },
@@ -1711,14 +1727,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34232",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 349750,
-            "median_sale_price_yoy_pct": -2.8,
-            "median_dom": 39,
-            "median_dom_yoy_days": -5.5,
-            "avg_sale_to_list_pct": 95.8,
-            "months_of_supply": 4,
-            "homes_sold": 118,
-            "inventory": 158,
+            "median_sale_price": 340000,
+            "median_sale_price_yoy_pct": -8.7,
+            "median_dom": 41.5,
+            "median_dom_yoy_days": 7.5,
+            "avg_sale_to_list_pct": 95.9,
+            "months_of_supply": 2.8,
+            "homes_sold": 145,
+            "inventory": 134,
             "low_sample": false
           }
         },
@@ -1727,14 +1743,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34233",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 323750,
-            "median_sale_price_yoy_pct": -11.8,
-            "median_dom": 60,
-            "median_dom_yoy_days": 12,
-            "avg_sale_to_list_pct": 95.8,
-            "months_of_supply": 3.6,
-            "homes_sold": 92,
-            "inventory": 110,
+            "median_sale_price": 330000,
+            "median_sale_price_yoy_pct": -17.3,
+            "median_dom": 60.5,
+            "median_dom_yoy_days": 25,
+            "avg_sale_to_list_pct": 95.3,
+            "months_of_supply": 2.2,
+            "homes_sold": 118,
+            "inventory": 86,
             "low_sample": false
           }
         },
@@ -1743,14 +1759,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34234",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 399900,
-            "median_sale_price_yoy_pct": 21.2,
+            "median_sale_price": 310000,
+            "median_sale_price_yoy_pct": -6.1,
             "median_dom": 60,
-            "median_dom_yoy_days": 3.5,
-            "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 5.3,
-            "homes_sold": 65,
-            "inventory": 114,
+            "median_dom_yoy_days": -6,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 4.3,
+            "homes_sold": 77,
+            "inventory": 110,
             "low_sample": false
           }
         },
@@ -1759,14 +1775,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34235",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 320000,
-            "median_sale_price_yoy_pct": -11.1,
-            "median_dom": 62.5,
-            "median_dom_yoy_days": 7.5,
-            "avg_sale_to_list_pct": 95.1,
-            "months_of_supply": 5,
-            "homes_sold": 87,
-            "inventory": 146,
+            "median_sale_price": 347000,
+            "median_sale_price_yoy_pct": -0.9,
+            "median_dom": 36,
+            "median_dom_yoy_days": -1,
+            "avg_sale_to_list_pct": 94.8,
+            "months_of_supply": 4.3,
+            "homes_sold": 100,
+            "inventory": 144,
             "low_sample": false
           }
         },
@@ -1775,14 +1791,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34236",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 1170000,
-            "median_sale_price_yoy_pct": -16.3,
-            "median_dom": 88,
-            "median_dom_yoy_days": 45.5,
-            "avg_sale_to_list_pct": 93.4,
-            "months_of_supply": 10.3,
-            "homes_sold": 129,
-            "inventory": 444,
+            "median_sale_price": 1115000,
+            "median_sale_price_yoy_pct": -15.5,
+            "median_dom": 91,
+            "median_dom_yoy_days": 54,
+            "avg_sale_to_list_pct": 93.7,
+            "months_of_supply": 7.5,
+            "homes_sold": 144,
+            "inventory": 361,
             "low_sample": false
           }
         },
@@ -1791,14 +1807,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34237",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 266000,
-            "median_sale_price_yoy_pct": -15.6,
-            "median_dom": 55.5,
-            "median_dom_yoy_days": 12.5,
-            "avg_sale_to_list_pct": 94.6,
-            "months_of_supply": 6.2,
-            "homes_sold": 50,
-            "inventory": 104,
+            "median_sale_price": 362500,
+            "median_sale_price_yoy_pct": 2.1,
+            "median_dom": 46.5,
+            "median_dom_yoy_days": 5.5,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 4.6,
+            "homes_sold": 56,
+            "inventory": 85,
             "low_sample": false
           }
         },
@@ -1807,14 +1823,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34238",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 499000,
-            "median_sale_price_yoy_pct": -6.3,
+            "median_sale_price": 475000,
+            "median_sale_price_yoy_pct": -10.4,
             "median_dom": 51,
-            "median_dom_yoy_days": 13,
-            "avg_sale_to_list_pct": 95.8,
-            "months_of_supply": 4.9,
-            "homes_sold": 165,
-            "inventory": 271,
+            "median_dom_yoy_days": 6,
+            "avg_sale_to_list_pct": 96.3,
+            "months_of_supply": 3.6,
+            "homes_sold": 210,
+            "inventory": 254,
             "low_sample": false
           }
         },
@@ -1823,14 +1839,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34239",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 680000,
-            "median_sale_price_yoy_pct": 2.3,
-            "median_dom": 50,
-            "median_dom_yoy_days": 8,
+            "median_sale_price": 705000,
+            "median_sale_price_yoy_pct": 14.1,
+            "median_dom": 54,
+            "median_dom_yoy_days": -2,
             "avg_sale_to_list_pct": 94.2,
-            "months_of_supply": 6,
-            "homes_sold": 94,
-            "inventory": 188,
+            "months_of_supply": 4.5,
+            "homes_sold": 105,
+            "inventory": 159,
             "low_sample": false
           }
         },
@@ -1839,14 +1855,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34240",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 910000,
-            "median_sale_price_yoy_pct": 5.9,
-            "median_dom": 87,
-            "median_dom_yoy_days": -6,
-            "avg_sale_to_list_pct": 95.9,
-            "months_of_supply": 3.5,
-            "homes_sold": 148,
-            "inventory": 173,
+            "median_sale_price": 897500,
+            "median_sale_price_yoy_pct": 10.1,
+            "median_dom": 67,
+            "median_dom_yoy_days": -3,
+            "avg_sale_to_list_pct": 96.3,
+            "months_of_supply": 2,
+            "homes_sold": 194,
+            "inventory": 128,
             "low_sample": false
           }
         },
@@ -1855,14 +1871,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34241",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 526350,
-            "median_sale_price_yoy_pct": -8,
-            "median_dom": 91,
-            "median_dom_yoy_days": 40,
-            "avg_sale_to_list_pct": 96.7,
-            "months_of_supply": 5.5,
-            "homes_sold": 120,
-            "inventory": 221,
+            "median_sale_price": 549900,
+            "median_sale_price_yoy_pct": -8.9,
+            "median_dom": 80,
+            "median_dom_yoy_days": 25,
+            "avg_sale_to_list_pct": 96.1,
+            "months_of_supply": 4.9,
+            "homes_sold": 155,
+            "inventory": 252,
             "low_sample": false
           }
         },
@@ -1871,14 +1887,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34242",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 965000,
-            "median_sale_price_yoy_pct": -15.2,
-            "median_dom": 55,
-            "median_dom_yoy_days": 22,
-            "avg_sale_to_list_pct": 93.3,
-            "months_of_supply": 9.4,
-            "homes_sold": 123,
-            "inventory": 385,
+            "median_sale_price": 887500,
+            "median_sale_price_yoy_pct": -14.3,
+            "median_dom": 68,
+            "median_dom_yoy_days": 8,
+            "avg_sale_to_list_pct": 92.9,
+            "months_of_supply": 6.3,
+            "homes_sold": 158,
+            "inventory": 332,
             "low_sample": false
           }
         },
@@ -1887,14 +1903,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34243",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 395000,
-            "median_sale_price_yoy_pct": -4.7,
-            "median_dom": 72.5,
-            "median_dom_yoy_days": -13.5,
-            "avg_sale_to_list_pct": 96.2,
-            "months_of_supply": 5,
-            "homes_sold": 149,
-            "inventory": 247,
+            "median_sale_price": 410000,
+            "median_sale_price_yoy_pct": -0.2,
+            "median_dom": 62,
+            "median_dom_yoy_days": 0,
+            "avg_sale_to_list_pct": 96,
+            "months_of_supply": 3.5,
+            "homes_sold": 180,
+            "inventory": 211,
             "low_sample": false
           }
         },
@@ -1919,14 +1935,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34251",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 656562.5,
-            "median_sale_price_yoy_pct": 9.4,
-            "median_dom": 46.5,
-            "median_dom_yoy_days": -71.5,
-            "avg_sale_to_list_pct": 93.4,
-            "months_of_supply": 6,
-            "homes_sold": 18,
-            "inventory": 36,
+            "median_sale_price": 830000,
+            "median_sale_price_yoy_pct": 30.7,
+            "median_dom": 45,
+            "median_dom_yoy_days": 21,
+            "avg_sale_to_list_pct": 94.8,
+            "months_of_supply": 5.6,
+            "homes_sold": 17,
+            "inventory": 32,
             "low_sample": false
           }
         },
@@ -1967,13 +1983,13 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34274",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 665000,
-            "median_sale_price_yoy_pct": 20.5,
-            "median_dom": 24,
-            "median_dom_yoy_days": -185,
-            "avg_sale_to_list_pct": 93.7,
+            "median_sale_price": 937500,
+            "median_sale_price_yoy_pct": 42,
+            "median_dom": 109.5,
+            "median_dom_yoy_days": -40.5,
+            "avg_sale_to_list_pct": 91.5,
             "months_of_supply": null,
-            "homes_sold": 3,
+            "homes_sold": 2,
             "inventory": null,
             "low_sample": true
           }
@@ -1983,14 +1999,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34275",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 475000,
-            "median_sale_price_yoy_pct": -5.1,
-            "median_dom": 83.5,
-            "median_dom_yoy_days": 0.5,
-            "avg_sale_to_list_pct": 95.7,
-            "months_of_supply": 4.6,
-            "homes_sold": 229,
-            "inventory": 353,
+            "median_sale_price": 480000,
+            "median_sale_price_yoy_pct": -8.1,
+            "median_dom": 86,
+            "median_dom_yoy_days": 5,
+            "avg_sale_to_list_pct": 95.5,
+            "months_of_supply": 2.9,
+            "homes_sold": 296,
+            "inventory": 291,
             "low_sample": false
           }
         },
@@ -1999,14 +2015,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34276",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 715000,
-            "median_sale_price_yoy_pct": null,
-            "median_dom": 151,
-            "median_dom_yoy_days": null,
-            "avg_sale_to_list_pct": 91.7,
+            "median_sale_price": 455000,
+            "median_sale_price_yoy_pct": 37.9,
+            "median_dom": 55,
+            "median_dom_yoy_days": 34,
+            "avg_sale_to_list_pct": 91.9,
             "months_of_supply": null,
-            "homes_sold": 4,
-            "inventory": 7,
+            "homes_sold": 1,
+            "inventory": 8,
             "low_sample": true
           }
         },
@@ -2015,14 +2031,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34277",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 500000,
-            "median_sale_price_yoy_pct": 8.7,
-            "median_dom": 140,
-            "median_dom_yoy_days": 120,
-            "avg_sale_to_list_pct": 89.4,
+            "median_sale_price": 710000,
+            "median_sale_price_yoy_pct": null,
+            "median_dom": 160,
+            "median_dom_yoy_days": null,
+            "avg_sale_to_list_pct": 101.4,
             "months_of_supply": null,
             "homes_sold": 1,
-            "inventory": 3,
+            "inventory": 2,
             "low_sample": true
           }
         },
@@ -2047,13 +2063,13 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34282",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 675000,
-            "median_sale_price_yoy_pct": 0,
-            "median_dom": 43,
-            "median_dom_yoy_days": 33,
-            "avg_sale_to_list_pct": 97.8,
+            "median_sale_price": 522500,
+            "median_sale_price_yoy_pct": 2,
+            "median_dom": 7,
+            "median_dom_yoy_days": -144.5,
+            "avg_sale_to_list_pct": 100.5,
             "months_of_supply": null,
-            "homes_sold": 1,
+            "homes_sold": 2,
             "inventory": null,
             "low_sample": true
           }
@@ -2064,13 +2080,13 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "cells": {
             "metro": "North Port, FL",
             "median_sale_price": 370000,
-            "median_sale_price_yoy_pct": 7.2,
-            "median_dom": 53.5,
-            "median_dom_yoy_days": -8.5,
-            "avg_sale_to_list_pct": 94.5,
-            "months_of_supply": 4.3,
-            "homes_sold": 158,
-            "inventory": 226,
+            "median_sale_price_yoy_pct": 2.8,
+            "median_dom": 58,
+            "median_dom_yoy_days": 6,
+            "avg_sale_to_list_pct": 94.7,
+            "months_of_supply": 3.8,
+            "homes_sold": 167,
+            "inventory": 211,
             "low_sample": false
           }
         },
@@ -2079,14 +2095,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34286",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 319250,
-            "median_sale_price_yoy_pct": -6.1,
-            "median_dom": 50,
-            "median_dom_yoy_days": -1.5,
-            "avg_sale_to_list_pct": 96.8,
-            "months_of_supply": 5.6,
-            "homes_sold": 112,
-            "inventory": 209,
+            "median_sale_price": 325000,
+            "median_sale_price_yoy_pct": 1.6,
+            "median_dom": 45,
+            "median_dom_yoy_days": -10.5,
+            "avg_sale_to_list_pct": 97.6,
+            "months_of_supply": 3.7,
+            "homes_sold": 156,
+            "inventory": 192,
             "low_sample": false
           }
         },
@@ -2095,14 +2111,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34287",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 286324.5,
-            "median_sale_price_yoy_pct": 8.9,
-            "median_dom": 80,
-            "median_dom_yoy_days": 6,
-            "avg_sale_to_list_pct": 95.7,
-            "months_of_supply": 4.4,
-            "homes_sold": 142,
-            "inventory": 208,
+            "median_sale_price": 289900,
+            "median_sale_price_yoy_pct": 6,
+            "median_dom": 69,
+            "median_dom_yoy_days": -14,
+            "avg_sale_to_list_pct": 96.1,
+            "months_of_supply": 4.3,
+            "homes_sold": 141,
+            "inventory": 202,
             "low_sample": false
           }
         },
@@ -2111,14 +2127,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34288",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 338750,
-            "median_sale_price_yoy_pct": -1.8,
-            "median_dom": 81,
-            "median_dom_yoy_days": -25,
-            "avg_sale_to_list_pct": 97.5,
-            "months_of_supply": 5.9,
-            "homes_sold": 86,
-            "inventory": 170,
+            "median_sale_price": 329000,
+            "median_sale_price_yoy_pct": -0.1,
+            "median_dom": 79,
+            "median_dom_yoy_days": -8,
+            "avg_sale_to_list_pct": 97.9,
+            "months_of_supply": 4.4,
+            "homes_sold": 131,
+            "inventory": 190,
             "low_sample": false
           }
         },
@@ -2127,14 +2143,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34289",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 322250,
-            "median_sale_price_yoy_pct": -8.6,
-            "median_dom": 100.5,
-            "median_dom_yoy_days": 10,
-            "avg_sale_to_list_pct": 95.5,
-            "months_of_supply": 4.3,
-            "homes_sold": 38,
-            "inventory": 54,
+            "median_sale_price": 320000,
+            "median_sale_price_yoy_pct": -14.4,
+            "median_dom": 72,
+            "median_dom_yoy_days": -12,
+            "avg_sale_to_list_pct": 96.8,
+            "months_of_supply": 2.4,
+            "homes_sold": 47,
+            "inventory": 38,
             "low_sample": false
           }
         },
@@ -2143,14 +2159,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34291",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 320000,
-            "median_sale_price_yoy_pct": -9.3,
-            "median_dom": 103.5,
-            "median_dom_yoy_days": 46.5,
-            "avg_sale_to_list_pct": 97,
-            "months_of_supply": 4.6,
-            "homes_sold": 51,
-            "inventory": 78,
+            "median_sale_price": 325000,
+            "median_sale_price_yoy_pct": -2.1,
+            "median_dom": 83.5,
+            "median_dom_yoy_days": 37.5,
+            "avg_sale_to_list_pct": 98.3,
+            "months_of_supply": 3.8,
+            "homes_sold": 68,
+            "inventory": 87,
             "low_sample": false
           }
         },
@@ -2159,14 +2175,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "label": "34292",
           "cells": {
             "metro": "North Port, FL",
-            "median_sale_price": 380000,
-            "median_sale_price_yoy_pct": -9.5,
-            "median_dom": 50,
-            "median_dom_yoy_days": -21,
+            "median_sale_price": 399000,
+            "median_sale_price_yoy_pct": 0.5,
+            "median_dom": 53,
+            "median_dom_yoy_days": -15,
             "avg_sale_to_list_pct": 96,
-            "months_of_supply": 3.4,
-            "homes_sold": 141,
-            "inventory": 161,
+            "months_of_supply": 2.2,
+            "homes_sold": 167,
+            "inventory": 125,
             "low_sample": false
           }
         },
@@ -2176,13 +2192,13 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
           "cells": {
             "metro": "North Port, FL",
             "median_sale_price": 400000,
-            "median_sale_price_yoy_pct": -5.9,
-            "median_dom": 58,
-            "median_dom_yoy_days": -13.5,
+            "median_sale_price_yoy_pct": 1.3,
+            "median_dom": 56,
+            "median_dom_yoy_days": -18,
             "avg_sale_to_list_pct": 96.1,
-            "months_of_supply": 3.8,
-            "homes_sold": 498,
-            "inventory": 625,
+            "months_of_supply": 2.4,
+            "homes_sold": 645,
+            "inventory": 526,
             "low_sample": false
           }
         },
@@ -2205,16 +2221,14 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
       ],
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-03T15:11:30Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
       },
       "note": "One row per SWFL ZIP, each its latest Redfin 90-day window. Months of supply is derived (inventory over the 90-day sales pace); Redfin does not publish it at ZIP grain. When low_sample is true the row rests on fewer than 5 sales — quote its median as a thin, indicative read rather than a stable one, and its months of supply is omitted."
     }
   ],
-  "caveats": [
-    "Months of supply is derived (inventory over the trailing 90-day sales pace); Redfin does not publish it at ZIP grain."
-  ],
+  "caveats": [],
   "contradicts": [],
   "confidence": 0.6,
   "joint_integrity": 1,
@@ -2225,7 +2239,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-03T15:11:30Z"
+    "computed_at": "2026-06-29T07:56:00Z"
   },
   "exogenous_signals": []
 }
@@ -2234,5 +2248,5 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (Al
 - housing-swfl: track SWFL ZIP-level residential buy-side market direction via Redfin monthly data.
 
 --- RECENT NOTES ---
-- 2026-06-03: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260612 -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260629 -->
 ---
 brain_id: rentals-swfl
-version: 5
-refined_at: 2026-06-12T02:22:42Z
-freshness_token: SWFL-7421-v5-20260612
+version: 6
+refined_at: 2026-06-29T07:55:56Z
+freshness_token: SWFL-7421-v6-20260629
 ttl_seconds: 3024000
 context_type: user_saved_reference
 scope: SWFL ZIP-level residential rent index (Zillow ZORI), monthly — regional median direction, heating/cooling ZIPs, and per-ZIP YoY/MoM.
@@ -28,28 +28,30 @@ SCOPE: SWFL ZIP-level residential rent index (Zillow ZORI), monthly — regional
 - Top-heating and top-cooling ZIPs are the operational cuts the user wants in the conclusion prose.
 
 --- CITATION TABLE ---
-id  | source                                                                                                                                                                                                                                    | verified   | expires
-s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes (SFR + Condo + Multifamily), monthly, from data_lake.zori_swfl. Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-06-12 | 2026-07-17
+id  | source                                                                                                                                                                                                                                                                                                                                                                                     | verified   | expires
+s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes (SFR + Condo + Multifamily), latest per-ZIP snapshot from data_lake.zori_zip_latest (brain-input pivot view; MAX-within-±7d YoY/MoM; rent_index cast float8 — byte-identical to the PostgREST-served JS double). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-06-29 | 2026-08-03
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZORI SWFL rent-index corpus","value":"1,937 rows across 94 ZIPs through 2026-04-30. Regional median rent index = $2169, regional median YoY = -1.92%.","src":"s01","date":"2026-06-12"}
+  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZORI SWFL rent-index corpus","value":"94 rows across 94 ZIPs through 2026-05-31. Regional median rent index = $2114, regional median YoY = -1.41%.","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "rentals-swfl",
-  "version": 5,
-  "refined_at": "2026-06-12T02:22:42Z",
+  "version": 6,
+  "refined_at": "2026-06-29T07:55:56Z",
+  "expires": "2026-08-03T07:55:56Z",
+  "ttl_seconds": 3024000,
   "direction": "bearish",
-  "magnitude": 0.19185653848623863,
+  "magnitude": 0.14091332163103498,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL ZORI rents read bearish at 2026-04-30 — regional median YoY -1.92% on a median rent of $2169/month across 94 ZIPs. Hottest: 34103 (9.1%), 33981 (9.0%), 34235 (7.7%). Coolest: 33953 (-8.7%), 34222 (-8.5%), 34292 (-8.4%).",
+  "conclusion": "SWFL ZORI rents read bearish at 2026-05-31 — regional median YoY -1.41% on a median rent of $2114/month across 94 ZIPs. Hottest: 34145 (11.9%), 33950 (8.9%), 34103 (8.6%). Coolest: 33973 (-8.2%), 33953 (-7.7%), 33954 (-7.4%).",
   "key_metrics": [
     {
       "metric": "rental_rent_yoy_pct_regional_median",
-      "value": -1.92,
+      "value": -1.41,
       "direction": "falling",
       "label": "SWFL regional median ZORI rent YoY % (latest period across all covered ZIPs)",
       "variable_type": "intensive",
@@ -57,9 +59,9 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent yoy pct regional median?",
@@ -68,17 +70,17 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
     },
     {
       "metric": "rental_rent_index_zori_regional_median",
-      "value": 2169,
+      "value": 2114,
       "direction": "stable",
-      "label": "SWFL regional median ZORI rent index (USD/month) at 2026-04-30",
+      "label": "SWFL regional median ZORI rent index (USD/month) at 2026-05-31",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent index zori regional median?",
@@ -95,9 +97,9 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
       "display_format": "count",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rentals swfl zips covered?",
@@ -106,15 +108,15 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
     },
     {
       "metric": "rental_rent_yoy_pct_top_heating_zips",
-      "value": "34103:9.15%,33981:9.01%,34235:7.68%",
+      "value": "34145:11.93%,33950:8.92%,34103:8.59%",
       "direction": "stable",
       "label": "Top-3 SWFL ZIPs by ZORI rent YoY % (rank-ordered, heating)",
       "variable_type": "categorical",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent yoy pct top heating zips?",
@@ -122,18 +124,94 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
       ]
     },
     {
-      "metric": "rental_rent_yoy_pct_zip_34103",
-      "value": 9.15,
+      "metric": "rental_rent_yoy_pct_zip_34145",
+      "value": 11.93,
       "direction": "rising",
-      "label": "ZORI rent YoY % - ZIP 34103 (Naples), 2026-04-30",
+      "label": "ZORI rent YoY % - ZIP 34145 (Marco Island), 2026-05-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
+      },
+      "suggestions": [
+        "What's driving rental rent yoy pct zip 34145?",
+        "How does rental rent yoy pct zip 34145 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "rental_rent_index_zori_zip_34145",
+      "value": 5267,
+      "direction": "stable",
+      "label": "ZORI rent index (USD/month) - ZIP 34145 (Marco Island), 2026-05-31",
+      "variable_type": "extensive",
+      "units": "USD/month",
+      "display_format": "currency",
+      "source": {
+        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
+        "fetched_at": "2026-06-29T07:55:56Z",
+        "tier": 3,
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
+      },
+      "suggestions": [
+        "What's driving rental rent index zori zip 34145?",
+        "How does rental rent index zori zip 34145 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "rental_rent_yoy_pct_zip_33950",
+      "value": 8.92,
+      "direction": "rising",
+      "label": "ZORI rent YoY % - ZIP 33950 (Punta Gorda), 2026-05-31",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
+        "fetched_at": "2026-06-29T07:55:56Z",
+        "tier": 3,
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
+      },
+      "suggestions": [
+        "What's driving rental rent yoy pct zip 33950?",
+        "How does rental rent yoy pct zip 33950 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "rental_rent_index_zori_zip_33950",
+      "value": 2267,
+      "direction": "stable",
+      "label": "ZORI rent index (USD/month) - ZIP 33950 (Punta Gorda), 2026-05-31",
+      "variable_type": "extensive",
+      "units": "USD/month",
+      "display_format": "currency",
+      "source": {
+        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
+        "fetched_at": "2026-06-29T07:55:56Z",
+        "tier": 3,
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
+      },
+      "suggestions": [
+        "What's driving rental rent index zori zip 33950?",
+        "How does rental rent index zori zip 33950 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "rental_rent_yoy_pct_zip_34103",
+      "value": 8.59,
+      "direction": "rising",
+      "label": "ZORI rent YoY % - ZIP 34103 (Naples), 2026-05-31",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
+        "fetched_at": "2026-06-29T07:55:56Z",
+        "tier": 3,
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent yoy pct zip 34103?",
@@ -142,17 +220,17 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
     },
     {
       "metric": "rental_rent_index_zori_zip_34103",
-      "value": 6326,
+      "value": 4817,
       "direction": "stable",
-      "label": "ZORI rent index (USD/month) - ZIP 34103 (Naples), 2026-04-30",
+      "label": "ZORI rent index (USD/month) - ZIP 34103 (Naples), 2026-05-31",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent index zori zip 34103?",
@@ -160,94 +238,56 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
       ]
     },
     {
-      "metric": "rental_rent_yoy_pct_zip_33981",
-      "value": 9.01,
-      "direction": "rising",
-      "label": "ZORI rent YoY % - ZIP 33981 (Port Charlotte), 2026-04-30",
+      "metric": "rental_rent_yoy_pct_zip_33973",
+      "value": -8.19,
+      "direction": "falling",
+      "label": "ZORI rent YoY % - ZIP 33973 (Lehigh Acres), 2026-05-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
-        "What's driving rental rent yoy pct zip 33981?",
-        "How does rental rent yoy pct zip 33981 here compare to other SWFL areas?"
+        "What's driving rental rent yoy pct zip 33973?",
+        "How does rental rent yoy pct zip 33973 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "rental_rent_index_zori_zip_33981",
-      "value": 2259,
+      "metric": "rental_rent_index_zori_zip_33973",
+      "value": 1675,
       "direction": "stable",
-      "label": "ZORI rent index (USD/month) - ZIP 33981 (Port Charlotte), 2026-04-30",
+      "label": "ZORI rent index (USD/month) - ZIP 33973 (Lehigh Acres), 2026-05-31",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
-        "What's driving rental rent index zori zip 33981?",
-        "How does rental rent index zori zip 33981 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "rental_rent_yoy_pct_zip_34235",
-      "value": 7.68,
-      "direction": "rising",
-      "label": "ZORI rent YoY % - ZIP 34235 (Sarasota), 2026-04-30",
-      "variable_type": "intensive",
-      "units": "percent",
-      "display_format": "percent",
-      "source": {
-        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
-        "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
-      },
-      "suggestions": [
-        "What's driving rental rent yoy pct zip 34235?",
-        "How does rental rent yoy pct zip 34235 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "rental_rent_index_zori_zip_34235",
-      "value": 2282,
-      "direction": "stable",
-      "label": "ZORI rent index (USD/month) - ZIP 34235 (Sarasota), 2026-04-30",
-      "variable_type": "extensive",
-      "units": "USD/month",
-      "display_format": "currency",
-      "source": {
-        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
-        "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
-      },
-      "suggestions": [
-        "What's driving rental rent index zori zip 34235?",
-        "How does rental rent index zori zip 34235 here compare to other SWFL areas?"
+        "What's driving rental rent index zori zip 33973?",
+        "How does rental rent index zori zip 33973 here compare to other SWFL areas?"
       ]
     },
     {
       "metric": "rental_rent_yoy_pct_zip_33953",
-      "value": -8.71,
+      "value": -7.65,
       "direction": "falling",
-      "label": "ZORI rent YoY % - ZIP 33953 (Port Charlotte), 2026-04-30",
+      "label": "ZORI rent YoY % - ZIP 33953 (Port Charlotte), 2026-05-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent yoy pct zip 33953?",
@@ -256,17 +296,17 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
     },
     {
       "metric": "rental_rent_index_zori_zip_33953",
-      "value": 1584,
+      "value": 1616,
       "direction": "stable",
-      "label": "ZORI rent index (USD/month) - ZIP 33953 (Port Charlotte), 2026-04-30",
+      "label": "ZORI rent index (USD/month) - ZIP 33953 (Port Charlotte), 2026-05-31",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "What's driving rental rent index zori zip 33953?",
@@ -274,86 +314,48 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
       ]
     },
     {
-      "metric": "rental_rent_yoy_pct_zip_34222",
-      "value": -8.55,
+      "metric": "rental_rent_yoy_pct_zip_33954",
+      "value": -7.39,
       "direction": "falling",
-      "label": "ZORI rent YoY % - ZIP 34222 (Ellenton), 2026-04-30",
+      "label": "ZORI rent YoY % - ZIP 33954 (Port Charlotte), 2026-05-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
-        "What's driving rental rent yoy pct zip 34222?",
-        "How does rental rent yoy pct zip 34222 here compare to other SWFL areas?"
+        "What's driving rental rent yoy pct zip 33954?",
+        "How does rental rent yoy pct zip 33954 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "rental_rent_index_zori_zip_34222",
-      "value": 2048,
+      "metric": "rental_rent_index_zori_zip_33954",
+      "value": 1711,
       "direction": "stable",
-      "label": "ZORI rent index (USD/month) - ZIP 34222 (Ellenton), 2026-04-30",
+      "label": "ZORI rent index (USD/month) - ZIP 33954 (Port Charlotte), 2026-05-31",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
-        "What's driving rental rent index zori zip 34222?",
-        "How does rental rent index zori zip 34222 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "rental_rent_yoy_pct_zip_34292",
-      "value": -8.44,
-      "direction": "falling",
-      "label": "ZORI rent YoY % - ZIP 34292 (Venice), 2026-04-30",
-      "variable_type": "intensive",
-      "units": "percent",
-      "display_format": "percent",
-      "source": {
-        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
-        "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
-      },
-      "suggestions": [
-        "What's driving rental rent yoy pct zip 34292?",
-        "How does rental rent yoy pct zip 34292 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "rental_rent_index_zori_zip_34292",
-      "value": 2038,
-      "direction": "stable",
-      "label": "ZORI rent index (USD/month) - ZIP 34292 (Venice), 2026-04-30",
-      "variable_type": "extensive",
-      "units": "USD/month",
-      "display_format": "currency",
-      "source": {
-        "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
-        "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
-      },
-      "suggestions": [
-        "What's driving rental rent index zori zip 34292?",
-        "How does rental rent index zori zip 34292 here compare to other SWFL areas?"
+        "What's driving rental rent index zori zip 33954?",
+        "How does rental rent index zori zip 33954 here compare to other SWFL areas?"
       ]
     }
   ],
   "detail_tables": [
     {
       "id": "rentals_by_zip",
-      "title": "SWFL ZORI rent index by ZIP — latest period 2026-04-30",
+      "title": "SWFL ZORI rent index by ZIP — latest period 2026-05-31",
       "grain": "zip",
       "columns": [
         {
@@ -399,10 +401,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1589,
-            "rent_yoy_pct": -3.49,
-            "rent_mom_pct": 0.26
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1558,
+            "rent_yoy_pct": -3.16,
+            "rent_mom_pct": 0.66
           }
         },
         {
@@ -412,10 +414,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "North Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1609,
-            "rent_yoy_pct": -4.04,
-            "rent_mom_pct": -0.11
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1643,
+            "rent_yoy_pct": -2.33,
+            "rent_mom_pct": -0.84
           }
         },
         {
@@ -425,10 +427,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1816,
-            "rent_yoy_pct": -2.14,
-            "rent_mom_pct": 1.82
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1846,
+            "rent_yoy_pct": -1.36,
+            "rent_mom_pct": 2
           }
         },
         {
@@ -438,10 +440,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1883,
-            "rent_yoy_pct": -4.45,
-            "rent_mom_pct": 0.39
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1857,
+            "rent_yoy_pct": -3.89,
+            "rent_mom_pct": 0.14
           }
         },
         {
@@ -451,10 +453,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1372,
-            "rent_yoy_pct": -7.64,
-            "rent_mom_pct": 2.01
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1399,
+            "rent_yoy_pct": -4.97,
+            "rent_mom_pct": 2.43
           }
         },
         {
@@ -464,10 +466,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1781,
-            "rent_yoy_pct": -0.91,
-            "rent_mom_pct": -0.41
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1820,
+            "rent_yoy_pct": -2.15,
+            "rent_mom_pct": -2.3
           }
         },
         {
@@ -477,10 +479,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1874,
-            "rent_yoy_pct": -4.92,
-            "rent_mom_pct": 0.97
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1805,
+            "rent_yoy_pct": -5.18,
+            "rent_mom_pct": -0.13
           }
         },
         {
@@ -490,10 +492,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1993,
-            "rent_yoy_pct": 3.85,
-            "rent_mom_pct": 1.96
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2008,
+            "rent_yoy_pct": 3.03,
+            "rent_mom_pct": 1.68
           }
         },
         {
@@ -503,10 +505,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2075,
-            "rent_yoy_pct": 2.26,
-            "rent_mom_pct": 0.88
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2068,
+            "rent_yoy_pct": 2.95,
+            "rent_mom_pct": 0.69
           }
         },
         {
@@ -516,10 +518,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1907,
-            "rent_yoy_pct": -2.44,
-            "rent_mom_pct": 1.42
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1931,
+            "rent_yoy_pct": -1.77,
+            "rent_mom_pct": -0.45
           }
         },
         {
@@ -529,10 +531,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1610,
-            "rent_yoy_pct": -2.91,
-            "rent_mom_pct": 0.32
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1664,
+            "rent_yoy_pct": -2.32,
+            "rent_mom_pct": 0.21
           }
         },
         {
@@ -542,10 +544,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "North Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1973,
-            "rent_yoy_pct": -3.72,
-            "rent_mom_pct": -5.14
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1923,
+            "rent_yoy_pct": -0.3,
+            "rent_mom_pct": 1.71
           }
         },
         {
@@ -555,10 +557,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1663,
-            "rent_yoy_pct": -5.81,
-            "rent_mom_pct": 1
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1680,
+            "rent_yoy_pct": -4.76,
+            "rent_mom_pct": 0.26
           }
         },
         {
@@ -568,10 +570,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Estero",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2416,
-            "rent_yoy_pct": -4.34,
-            "rent_mom_pct": -3
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2482,
+            "rent_yoy_pct": -2.71,
+            "rent_mom_pct": 1.08
           }
         },
         {
@@ -581,10 +583,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": null,
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 14703,
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 8421,
             "rent_yoy_pct": null,
-            "rent_mom_pct": null
+            "rent_mom_pct": 22.22
           }
         },
         {
@@ -594,10 +596,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1716,
-            "rent_yoy_pct": -0.54,
-            "rent_mom_pct": 1.15
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1722,
+            "rent_yoy_pct": -1.1,
+            "rent_mom_pct": 0.18
           }
         },
         {
@@ -607,10 +609,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Rotonda West",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2321,
-            "rent_yoy_pct": 1.74,
-            "rent_mom_pct": 1.5
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2011,
+            "rent_yoy_pct": -3.13,
+            "rent_mom_pct": -0.47
           }
         },
         {
@@ -620,10 +622,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Port Charlotte",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1956,
-            "rent_yoy_pct": 0.04,
-            "rent_mom_pct": 0.12
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1979,
+            "rent_yoy_pct": 1.48,
+            "rent_mom_pct": 2.3
           }
         },
         {
@@ -633,10 +635,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Punta Gorda",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2294,
-            "rent_yoy_pct": 5.5,
-            "rent_mom_pct": 7.46
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2267,
+            "rent_yoy_pct": 8.92,
+            "rent_mom_pct": 2.63
           }
         },
         {
@@ -646,10 +648,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Port Charlotte",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1676,
-            "rent_yoy_pct": -0.85,
-            "rent_mom_pct": 0.61
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1637,
+            "rent_yoy_pct": -2.21,
+            "rent_mom_pct": -0.24
           }
         },
         {
@@ -659,10 +661,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Port Charlotte",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1584,
-            "rent_yoy_pct": -8.71,
-            "rent_mom_pct": -0.59
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1616,
+            "rent_yoy_pct": -7.65,
+            "rent_mom_pct": 1.71
           }
         },
         {
@@ -672,10 +674,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Port Charlotte",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1786,
-            "rent_yoy_pct": -4.31,
-            "rent_mom_pct": 0.34
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1711,
+            "rent_yoy_pct": -7.39,
+            "rent_mom_pct": -1.51
           }
         },
         {
@@ -685,10 +687,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Punta Gorda",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 3451,
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2739,
             "rent_yoy_pct": null,
-            "rent_mom_pct": 7.63
+            "rent_mom_pct": 2.19
           }
         },
         {
@@ -711,10 +713,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1754,
-            "rent_yoy_pct": -6.39,
-            "rent_mom_pct": -0.72
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1797,
+            "rent_yoy_pct": -5.92,
+            "rent_mom_pct": -0.63
           }
         },
         {
@@ -724,10 +726,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2151,
-            "rent_yoy_pct": -3.13,
-            "rent_mom_pct": 1.29
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2215,
+            "rent_yoy_pct": -0.33,
+            "rent_mom_pct": 1.61
           }
         },
         {
@@ -737,10 +739,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1978,
-            "rent_yoy_pct": -3.69,
-            "rent_mom_pct": 1.48
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1970,
+            "rent_yoy_pct": -4.19,
+            "rent_mom_pct": -0.07
           }
         },
         {
@@ -750,10 +752,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1972,
-            "rent_yoy_pct": 3.53,
-            "rent_mom_pct": -0.77
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1965,
+            "rent_yoy_pct": -1.29,
+            "rent_mom_pct": -2.91
           }
         },
         {
@@ -763,10 +765,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-04-30",
+            "latest_period": "2026-05-31",
             "rent_index_latest": 1675,
-            "rent_yoy_pct": -7.19,
-            "rent_mom_pct": -0.91
+            "rent_yoy_pct": -8.19,
+            "rent_mom_pct": -0.89
           }
         },
         {
@@ -776,10 +778,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1982,
-            "rent_yoy_pct": -3.88,
-            "rent_mom_pct": 0.77
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1996,
+            "rent_yoy_pct": -2.52,
+            "rent_mom_pct": 1.16
           }
         },
         {
@@ -789,10 +791,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2044,
-            "rent_yoy_pct": -2.3,
-            "rent_mom_pct": -0.06
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2032,
+            "rent_yoy_pct": -1.76,
+            "rent_mom_pct": 1.46
           }
         },
         {
@@ -802,10 +804,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Port Charlotte",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2163,
-            "rent_yoy_pct": -2.85,
-            "rent_mom_pct": 2.72
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2057,
+            "rent_yoy_pct": -3.88,
+            "rent_mom_pct": -3.25
           }
         },
         {
@@ -815,10 +817,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Port Charlotte",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2259,
-            "rent_yoy_pct": 9.01,
-            "rent_mom_pct": 6.47
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2364,
+            "rent_yoy_pct": 6.66,
+            "rent_mom_pct": -1.27
           }
         },
         {
@@ -828,10 +830,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Punta Gorda",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2509,
-            "rent_yoy_pct": 0.39,
-            "rent_mom_pct": -1.79
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2436,
+            "rent_yoy_pct": -2.09,
+            "rent_mom_pct": -1.81
           }
         },
         {
@@ -841,10 +843,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Punta Gorda",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1848,
-            "rent_yoy_pct": -0.34,
-            "rent_mom_pct": 0.26
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1751,
+            "rent_yoy_pct": -2.6,
+            "rent_mom_pct": -2.63
           }
         },
         {
@@ -854,10 +856,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1746,
-            "rent_yoy_pct": -5.49,
-            "rent_mom_pct": 2.43
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1817,
+            "rent_yoy_pct": -4.32,
+            "rent_mom_pct": 1.2
           }
         },
         {
@@ -867,10 +869,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1815,
-            "rent_yoy_pct": -7.18,
-            "rent_mom_pct": 1.38
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1807,
+            "rent_yoy_pct": -5.88,
+            "rent_mom_pct": 1.4
           }
         },
         {
@@ -880,10 +882,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2198,
-            "rent_yoy_pct": -4.76,
-            "rent_mom_pct": 1.19
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2127,
+            "rent_yoy_pct": -1.67,
+            "rent_mom_pct": 1.63
           }
         },
         {
@@ -893,10 +895,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 7907,
-            "rent_yoy_pct": 5.66,
-            "rent_mom_pct": -2.52
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 7848,
+            "rent_yoy_pct": 4.8,
+            "rent_mom_pct": -1.63
           }
         },
         {
@@ -906,10 +908,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 6326,
-            "rent_yoy_pct": 9.15,
-            "rent_mom_pct": -3.33
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 4817,
+            "rent_yoy_pct": 8.59,
+            "rent_mom_pct": 0.98
           }
         },
         {
@@ -919,10 +921,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2252,
-            "rent_yoy_pct": -1.92,
-            "rent_mom_pct": -0.34
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2265,
+            "rent_yoy_pct": -1.55,
+            "rent_mom_pct": -1.3
           }
         },
         {
@@ -932,10 +934,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2176,
-            "rent_yoy_pct": -2.22,
-            "rent_mom_pct": -3.57
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2119,
+            "rent_yoy_pct": -1.13,
+            "rent_mom_pct": -0.09
           }
         },
         {
@@ -945,10 +947,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 6662,
-            "rent_yoy_pct": 6.89,
-            "rent_mom_pct": 1.36
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 6667,
+            "rent_yoy_pct": 4.94,
+            "rent_mom_pct": 0.8
           }
         },
         {
@@ -958,10 +960,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2748,
-            "rent_yoy_pct": 0.42,
-            "rent_mom_pct": -1.65
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2765,
+            "rent_yoy_pct": 2.43,
+            "rent_mom_pct": -0.96
           }
         },
         {
@@ -971,10 +973,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2844,
-            "rent_yoy_pct": -1.24,
-            "rent_mom_pct": -0.4
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2637,
+            "rent_yoy_pct": 0.4,
+            "rent_mom_pct": -0.87
           }
         },
         {
@@ -984,10 +986,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2411,
-            "rent_yoy_pct": -1.65,
-            "rent_mom_pct": -0.33
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2410,
+            "rent_yoy_pct": -0.94,
+            "rent_mom_pct": -0.6
           }
         },
         {
@@ -997,10 +999,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 3901,
-            "rent_yoy_pct": 1.85,
-            "rent_mom_pct": -1.99
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2683,
+            "rent_yoy_pct": 0.16,
+            "rent_mom_pct": -2.43
           }
         },
         {
@@ -1010,10 +1012,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 3049,
-            "rent_yoy_pct": 0.77,
-            "rent_mom_pct": -3.83
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 3124,
+            "rent_yoy_pct": -1.07,
+            "rent_mom_pct": -1.57
           }
         },
         {
@@ -1023,10 +1025,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2236,
-            "rent_yoy_pct": -4.97,
-            "rent_mom_pct": 1.34
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2191,
+            "rent_yoy_pct": -5.78,
+            "rent_mom_pct": -0.15
           }
         },
         {
@@ -1036,10 +1038,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2730,
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2871,
             "rent_yoy_pct": null,
-            "rent_mom_pct": 1.07
+            "rent_mom_pct": 1.47
           }
         },
         {
@@ -1049,10 +1051,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2811,
-            "rent_yoy_pct": -1.92,
-            "rent_mom_pct": -1.53
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2848,
+            "rent_yoy_pct": 1.16,
+            "rent_mom_pct": 1.63
           }
         },
         {
@@ -1062,10 +1064,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 3008,
-            "rent_yoy_pct": 1.36,
-            "rent_mom_pct": 1.04
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 3070,
+            "rent_yoy_pct": 3.61,
+            "rent_mom_pct": 2.75
           }
         },
         {
@@ -1075,10 +1077,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Bonita Springs",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 3443,
-            "rent_yoy_pct": 4.69,
-            "rent_mom_pct": -1.18
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 3309,
+            "rent_yoy_pct": 7.36,
+            "rent_mom_pct": 1.4
           }
         },
         {
@@ -1088,10 +1090,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Bonita Springs",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2438,
-            "rent_yoy_pct": 0.73,
-            "rent_mom_pct": -0.12
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2389,
+            "rent_yoy_pct": 0.83,
+            "rent_mom_pct": 0.28
           }
         },
         {
@@ -1101,10 +1103,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Immokalee",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2515,
-            "rent_yoy_pct": -1.16,
-            "rent_mom_pct": -3.43
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2620,
+            "rent_yoy_pct": 0.75,
+            "rent_mom_pct": 0.99
           }
         },
         {
@@ -1114,10 +1116,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Marco Island",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 5200,
-            "rent_yoy_pct": 6.67,
-            "rent_mom_pct": 2.23
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 5267,
+            "rent_yoy_pct": 11.93,
+            "rent_mom_pct": 0.56
           }
         },
         {
@@ -1140,10 +1142,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Lakewood Ranch",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2205,
-            "rent_yoy_pct": -1.58,
-            "rent_mom_pct": -1.48
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2317,
+            "rent_yoy_pct": -1.37,
+            "rent_mom_pct": 0.82
           }
         },
         {
@@ -1153,10 +1155,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2573,
-            "rent_yoy_pct": -0.5,
-            "rent_mom_pct": 1.25
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2527,
+            "rent_yoy_pct": -1.82,
+            "rent_mom_pct": -0.04
           }
         },
         {
@@ -1166,10 +1168,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1591,
-            "rent_yoy_pct": -3.36,
-            "rent_mom_pct": -1.07
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1690,
+            "rent_yoy_pct": -4.77,
+            "rent_mom_pct": -0.77
           }
         },
         {
@@ -1179,10 +1181,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1566,
-            "rent_yoy_pct": -4.6,
-            "rent_mom_pct": -0.2
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1541,
+            "rent_yoy_pct": -6.29,
+            "rent_mom_pct": -0.97
           }
         },
         {
@@ -1192,10 +1194,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1889,
-            "rent_yoy_pct": -4.06,
-            "rent_mom_pct": 2.05
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1924,
+            "rent_yoy_pct": -3.88,
+            "rent_mom_pct": 0.34
           }
         },
         {
@@ -1205,10 +1207,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2220,
-            "rent_yoy_pct": -1.65,
-            "rent_mom_pct": -0.85
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2236,
+            "rent_yoy_pct": 0.21,
+            "rent_mom_pct": 1.05
           }
         },
         {
@@ -1218,10 +1220,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1723,
-            "rent_yoy_pct": -5.96,
-            "rent_mom_pct": 0.38
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1740,
+            "rent_yoy_pct": -6.44,
+            "rent_mom_pct": -0.55
           }
         },
         {
@@ -1231,10 +1233,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Lakewood Ranch",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2575,
-            "rent_yoy_pct": -1.14,
-            "rent_mom_pct": 0.42
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2491,
+            "rent_yoy_pct": -2.43,
+            "rent_mom_pct": -1.22
           }
         },
         {
@@ -1244,10 +1246,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Bradenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2147,
-            "rent_yoy_pct": -3.55,
-            "rent_mom_pct": -1.17
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2095,
+            "rent_yoy_pct": -1.68,
+            "rent_mom_pct": 2.48
           }
         },
         {
@@ -1257,10 +1259,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Parrish",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2663,
-            "rent_yoy_pct": 0.02,
-            "rent_mom_pct": 0.37
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2667,
+            "rent_yoy_pct": 1.17,
+            "rent_mom_pct": 0.86
           }
         },
         {
@@ -1270,10 +1272,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Palmetto",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2269,
-            "rent_yoy_pct": -1.72,
-            "rent_mom_pct": 1.49
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2247,
+            "rent_yoy_pct": -0.94,
+            "rent_mom_pct": -0.01
           }
         },
         {
@@ -1283,10 +1285,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Ellenton",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2048,
-            "rent_yoy_pct": -8.55,
-            "rent_mom_pct": -0.76
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2010,
+            "rent_yoy_pct": -2.12,
+            "rent_mom_pct": 2.74
           }
         },
         {
@@ -1296,10 +1298,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Englewood",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1889,
-            "rent_yoy_pct": 6.01,
-            "rent_mom_pct": -3
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1891,
+            "rent_yoy_pct": 3.78,
+            "rent_mom_pct": -2.05
           }
         },
         {
@@ -1309,10 +1311,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "Punta Gorda, FL",
             "county_name": "Charlotte County",
             "city": "Englewood",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1883,
-            "rent_yoy_pct": 7.2,
-            "rent_mom_pct": 3.93
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1790,
+            "rent_yoy_pct": 6.58,
+            "rent_mom_pct": -0.42
           }
         },
         {
@@ -1322,10 +1324,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Longboat Key",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 7209,
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 8209,
             "rent_yoy_pct": null,
-            "rent_mom_pct": 8.23
+            "rent_mom_pct": 2.92
           }
         },
         {
@@ -1335,10 +1337,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Osprey",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2875,
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2433,
             "rent_yoy_pct": null,
-            "rent_mom_pct": 15.78
+            "rent_mom_pct": 1.26
           }
         },
         {
@@ -1348,10 +1350,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2248,
-            "rent_yoy_pct": -2.01,
-            "rent_mom_pct": -0.42
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2308,
+            "rent_yoy_pct": -0.25,
+            "rent_mom_pct": -0.48
           }
         },
         {
@@ -1361,10 +1363,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2214,
-            "rent_yoy_pct": -5.19,
-            "rent_mom_pct": -1.4
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2245,
+            "rent_yoy_pct": -4.09,
+            "rent_mom_pct": -0.4
           }
         },
         {
@@ -1374,10 +1376,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2369,
-            "rent_yoy_pct": -1.94,
-            "rent_mom_pct": -0.05
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2423,
+            "rent_yoy_pct": -1.52,
+            "rent_mom_pct": 0.38
           }
         },
         {
@@ -1387,10 +1389,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1918,
-            "rent_yoy_pct": 1.12,
-            "rent_mom_pct": 1.25
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1969,
+            "rent_yoy_pct": 5.74,
+            "rent_mom_pct": 3.62
           }
         },
         {
@@ -1400,10 +1402,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2282,
-            "rent_yoy_pct": 7.68,
-            "rent_mom_pct": 0.34
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2235,
+            "rent_yoy_pct": 2.25,
+            "rent_mom_pct": -2.94
           }
         },
         {
@@ -1413,10 +1415,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2774,
-            "rent_yoy_pct": -3.38,
-            "rent_mom_pct": 0.64
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2809,
+            "rent_yoy_pct": -0.19,
+            "rent_mom_pct": 1.84
           }
         },
         {
@@ -1426,10 +1428,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1825,
-            "rent_yoy_pct": -1.93,
-            "rent_mom_pct": 1.3
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1891,
+            "rent_yoy_pct": -0.44,
+            "rent_mom_pct": 0.29
           }
         },
         {
@@ -1439,10 +1441,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2087,
-            "rent_yoy_pct": -7.29,
-            "rent_mom_pct": 0.13
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2047,
+            "rent_yoy_pct": -6.5,
+            "rent_mom_pct": -1.02
           }
         },
         {
@@ -1452,10 +1454,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2595,
-            "rent_yoy_pct": 4.66,
-            "rent_mom_pct": 0.62
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2366,
+            "rent_yoy_pct": 1.73,
+            "rent_mom_pct": -2.01
           }
         },
         {
@@ -1465,10 +1467,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2298,
-            "rent_yoy_pct": -5.02,
-            "rent_mom_pct": -0.34
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2329,
+            "rent_yoy_pct": -3.71,
+            "rent_mom_pct": -1.02
           }
         },
         {
@@ -1478,10 +1480,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 3137,
-            "rent_yoy_pct": 1.3,
-            "rent_mom_pct": 4.94
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 3096,
+            "rent_yoy_pct": 6.14,
+            "rent_mom_pct": 5.06
           }
         },
         {
@@ -1491,10 +1493,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Siesta Key",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 7291,
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 7052,
             "rent_yoy_pct": null,
-            "rent_mom_pct": 1.81
+            "rent_mom_pct": -3.39
           }
         },
         {
@@ -1504,10 +1506,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Manatee County",
             "city": "Sarasota",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2094,
-            "rent_yoy_pct": -3.07,
-            "rent_mom_pct": 0.57
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2103,
+            "rent_yoy_pct": -1.53,
+            "rent_mom_pct": 0.84
           }
         },
         {
@@ -1517,10 +1519,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Nokomis",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2003,
-            "rent_yoy_pct": -3.42,
-            "rent_mom_pct": -0.96
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2037,
+            "rent_yoy_pct": -1.19,
+            "rent_mom_pct": 1.74
           }
         },
         {
@@ -1530,10 +1532,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Venice",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2139,
-            "rent_yoy_pct": 5.6,
-            "rent_mom_pct": -2.93
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2193,
+            "rent_yoy_pct": 3.38,
+            "rent_mom_pct": 1.01
           }
         },
         {
@@ -1543,10 +1545,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "North Port",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2188,
-            "rent_yoy_pct": 1.17,
-            "rent_mom_pct": 2.16
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2109,
+            "rent_yoy_pct": -0.8,
+            "rent_mom_pct": -1.75
           }
         },
         {
@@ -1556,10 +1558,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "North Port",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1767,
-            "rent_yoy_pct": -0.02,
-            "rent_mom_pct": 0.49
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1803,
+            "rent_yoy_pct": -1.45,
+            "rent_mom_pct": -0.43
           }
         },
         {
@@ -1569,10 +1571,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "North Port",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 1590,
-            "rent_yoy_pct": -7.68,
-            "rent_mom_pct": -2.1
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 1671,
+            "rent_yoy_pct": -6.36,
+            "rent_mom_pct": 1.22
           }
         },
         {
@@ -1582,10 +1584,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "North Port",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2074,
-            "rent_yoy_pct": -0.92,
-            "rent_mom_pct": 5.49
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2084,
+            "rent_yoy_pct": 3.17,
+            "rent_mom_pct": 2.17
           }
         },
         {
@@ -1595,10 +1597,10 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Venice",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2038,
-            "rent_yoy_pct": -8.44,
-            "rent_mom_pct": -4.59
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2099,
+            "rent_yoy_pct": -5.48,
+            "rent_mom_pct": 3
           }
         },
         {
@@ -1608,18 +1610,18 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
             "metro": "North Port-Sarasota-Bradenton, FL",
             "county_name": "Sarasota County",
             "city": "Venice",
-            "latest_period": "2026-04-30",
-            "rent_index_latest": 2530,
-            "rent_yoy_pct": -0.64,
-            "rent_mom_pct": -1.81
+            "latest_period": "2026-05-31",
+            "rent_index_latest": 2579,
+            "rent_yoy_pct": 1.39,
+            "rent_mom_pct": 1.14
           }
         }
       ],
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-06-12T02:22:41Z",
+        "fetched_at": "2026-06-29T07:55:56Z",
         "tier": 3,
-        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_swfl."
+        "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
       "note": "One row per SWFL ZIP with at least one ZORI observation. Rent index is Zillow's repeat-rent measure (USD/month). YoY and MoM are null when a 12-month or 1-month look-back observation is unavailable."
     }
@@ -1637,7 +1639,7 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-12T02:22:42Z"
+    "computed_at": "2026-06-29T07:55:56Z"
   },
   "exogenous_signals": []
 }
@@ -1646,5 +1648,5 @@ s01 | Zillow Observed Rent Index (ZORI), ZIP-level monthly composite, all-homes 
 - rentals-swfl: track SWFL ZIP-level rent direction via Zillow ZORI as a leading multifamily/SFR demand signal.
 
 --- RECENT NOTES ---
-- 2026-06-12: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

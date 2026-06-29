@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260622 -->
+<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260629 -->
 ---
 brain_id: econ-dev-swfl
-version: 4
-refined_at: 2026-06-22T11:30:16Z
-freshness_token: SWFL-7421-v4-20260622
+version: 5
+refined_at: 2026-06-29T07:56:00Z
+freshness_token: SWFL-7421-v5-20260629
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: Southwest Florida economic development project announcements — weekly scrape of SWFL Inc. (Lee County EDO) news feed. Tracks project count, disclosed investment, and announced job creation for Lee + Collier + Charlotte counties.
@@ -29,19 +29,19 @@ SCOPE: Southwest Florida economic development project announcements — weekly s
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                             | verified   | expires
-s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase swfl_inc_announcements: title, announced_date, county, category, investment_usd, jobs; weekly scrape of swflinc.com/blog/) | 2026-06-22 | 2026-06-29
+s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase swfl_inc_announcements: title, announced_date, county, category, investment_usd, jobs; weekly scrape of swflinc.com/blog/) | 2026-06-29 | 2026-07-06
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"econ_dev_snapshot","fact":"SWFL economic development pulse — latest 90 days","value":"SWFL Inc. announcements (last 90 days): 1 projects. Prior window (90–180 days): 0 projects. ","src":"s01","date":"2026-06-22"}
+  {"id":"f001","topic":"econ_dev_snapshot","fact":"SWFL economic development pulse — latest 90 days","value":"SWFL Inc. announcements (last 90 days): 1 projects. Prior window (90–180 days): 0 projects. ","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "econ-dev-swfl",
-  "version": 4,
-  "refined_at": "2026-06-22T11:30:16Z",
-  "expires": "2026-06-29T11:30:16Z",
+  "version": 5,
+  "refined_at": "2026-06-29T07:56:00Z",
+  "expires": "2026-07-06T07:56:00Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0.3,
@@ -59,7 +59,7 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
       "display_format": "raw",
       "source": {
         "url": "https://www.swflinc.com/blog/florida-policy-updates-housing-property-taxes-and-the-state-budget--what-southwest-florida-busin",
-        "fetched_at": "2026-06-22T11:30:16Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 2,
         "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (1 announcements in last 90 days via swfl_inc_announcements)"
       },
@@ -78,7 +78,7 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
       "display_format": "raw",
       "source": {
         "url": "https://www.swflinc.com/blog/florida-policy-updates-housing-property-taxes-and-the-state-budget--what-southwest-florida-busin",
-        "fetched_at": "2026-06-22T11:30:16Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 2,
         "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (0 announcements in 90–180 days prior window)"
       },
@@ -103,7 +103,7 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-22T11:30:16Z"
+    "computed_at": "2026-06-29T07:56:00Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -120,5 +120,5 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
 - econ-dev-swfl: weekly SWFL economic development pulse from SWFL Inc. (swflinc.com/blog/) — announcement count, investment totals, job counts, and 90-day momentum for Lee + Collier counties.
 
 --- RECENT NOTES ---
-- 2026-06-22: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

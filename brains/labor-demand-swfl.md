@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260531 -->
+<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260629 -->
 ---
 brain_id: labor-demand-swfl
-version: 3
-refined_at: 2026-05-31T04:54:12Z
-freshness_token: SWFL-7421-v3-20260531
+version: 4
+refined_at: 2026-06-29T07:56:00Z
+freshness_token: SWFL-7421-v4-20260629
 ttl_seconds: 7776000
 context_type: user_saved_reference
 scope: Southwest Florida workforce composition and wage benchmarks — BLS OEWS major occupation groups for Cape Coral-Fort Myers MSA (Lee Co.) and Naples-Marco Island MSA (Collier Co.). Annual May survey data.
@@ -29,23 +29,25 @@ SCOPE: Southwest Florida workforce composition and wage benchmarks — BLS OEWS 
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                      | verified   | expires
-s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cape Coral-Fort Myers MSA (Lee Co.) + Naples-Marco Island MSA (Collier Co.) via data_lake.bls_oews_swfl (https://www.bls.gov/oes/tables.htm; major SOC groups; annual) | 2026-05-31 | 2026-08-29
+s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cape Coral-Fort Myers MSA (Lee Co.) + Naples-Marco Island MSA (Collier Co.) via data_lake.bls_oews_swfl (https://www.bls.gov/oes/tables.htm; major SOC groups; annual) | 2026-06-29 | 2026-09-27
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"bls_oews_swfl_snapshot","fact":"BLS OEWS May 2025 — SWFL workforce composition","value":"Lee (Cape Coral-Fort Myers): top sector Office and Administrative Support Occupations (37,050 workers), Construction 2.17× national LOC_Q. Collier (Naples): top sector Food Preparation and Serving Related Occupations (25,250 workers), Construction 1.88× national LOC_Q. Source: BLS OEWS (https://www.bls.gov/oes/tables.htm).","src":"s01","date":"2026-05-31"}
+  {"id":"f001","topic":"bls_oews_swfl_snapshot","fact":"BLS OEWS May 2025 — SWFL workforce composition","value":"Lee (Cape Coral-Fort Myers): top sector Office and Administrative Support Occupations (37,050 workers), Construction 2.17× national LOC_Q. Collier (Naples): top sector Food Preparation and Serving Related Occupations (25,250 workers), Construction 1.88× national LOC_Q. Source: BLS OEWS.","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "labor-demand-swfl",
-  "version": 3,
-  "refined_at": "2026-05-31T04:54:12Z",
+  "version": 4,
+  "refined_at": "2026-06-29T07:56:00Z",
+  "expires": "2026-09-27T07:56:00Z",
+  "ttl_seconds": 7776000,
   "direction": "bullish",
   "magnitude": 0.7799999999999999,
   "drivers": [],
   "overrides": [],
-  "conclusion": "BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics (https://www.bls.gov/oes/tables.htm).",
+  "conclusion": "BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.",
   "key_metrics": [
     {
       "metric": "lee_top_occupation_employment",
@@ -57,10 +59,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Office and Administrative Support Occupations: 37,050 workers"
-      }
+      },
+      "suggestions": [
+        "What's driving lee top occupation employment?",
+        "How does lee top occupation employment here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "lee_construction_loc_quotient",
@@ -72,10 +78,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "raw",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) Construction & Extraction — 2.17× national avg"
-      }
+      },
+      "suggestions": [
+        "What's driving lee construction loc quotient?",
+        "How does lee construction loc quotient here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "lee_healthcare_employment",
@@ -87,10 +97,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Healthcare Practitioners + Support: 35,380 workers"
-      }
+      },
+      "suggestions": [
+        "What's driving lee healthcare employment?",
+        "How does lee healthcare employment here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "lee_construction_median_hourly_wage",
@@ -102,10 +116,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "currency",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) Construction & Extraction — median $23.35/hr"
-      }
+      },
+      "suggestions": [
+        "What's driving lee construction median hourly wage?",
+        "How does lee construction median hourly wage here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "lee_total_employment_yoy_pct",
@@ -117,10 +135,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "percent",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) total employment YoY: +1.5%"
-      }
+      },
+      "suggestions": [
+        "What's driving lee total employment yoy pct?",
+        "How does lee total employment yoy pct here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "collier_top_occupation_employment",
@@ -132,10 +154,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) — Food Preparation and Serving Related Occupations: 25,250 workers"
-      }
+      },
+      "suggestions": [
+        "What's driving collier top occupation employment?",
+        "How does collier top occupation employment here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "collier_construction_loc_quotient",
@@ -147,10 +173,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "raw",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) Construction & Extraction — 1.88× national avg"
-      }
+      },
+      "suggestions": [
+        "What's driving collier construction loc quotient?",
+        "How does collier construction loc quotient here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "collier_healthcare_employment",
@@ -162,10 +192,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "count",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) — Healthcare Practitioners + Support: 15,630 workers"
-      }
+      },
+      "suggestions": [
+        "What's driving collier healthcare employment?",
+        "How does collier healthcare employment here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "collier_construction_median_hourly_wage",
@@ -177,10 +211,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "currency",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) Construction & Extraction — median $24.37/hr"
-      }
+      },
+      "suggestions": [
+        "What's driving collier construction median hourly wage?",
+        "How does collier construction median hourly wage here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "collier_total_employment_yoy_pct",
@@ -192,10 +230,14 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
       "display_format": "percent",
       "source": {
         "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-05-31T04:54:12Z",
+        "fetched_at": "2026-06-29T07:56:00Z",
         "tier": 1,
         "citation": "BLS OEWS May 2025 — Collier (Naples) total employment YoY: +1.6%"
-      }
+      },
+      "suggestions": [
+        "What's driving collier total employment yoy pct?",
+        "How does collier total employment yoy pct here compare to other SWFL areas?"
+      ]
     }
   ],
   "caveats": [
@@ -212,7 +254,7 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-05-31T04:54:12Z"
+    "computed_at": "2026-06-29T07:56:00Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -229,5 +271,5 @@ s01 | BLS Occupational Employment and Wage Statistics (OEWS), May survey — Cap
 - labor-demand-swfl: BLS OEWS annual workforce composition for Lee + Collier counties — Cape Coral-Fort Myers and Naples MSAs.
 
 --- RECENT NOTES ---
-- 2026-05-31: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

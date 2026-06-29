@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260614 -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260629 -->
 ---
 brain_id: rsw-airport
-version: 5
-refined_at: 2026-06-14T03:02:54Z
-freshness_token: SWFL-7421-v5-20260614
+version: 6
+refined_at: 2026-06-29T07:56:01Z
+freshness_token: SWFL-7421-v6-20260629
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Southwest Florida airport throughput — RSW (Southwest Florida International, Fort Myers / Cape Coral) monthly total passengers, arrivals (deplanements), departures (enplanements), aircraft operations, and air freight from the Lee County Port Authority. Direction tracks the trailing-12-month total-passengers YoY.
@@ -30,18 +30,20 @@ SCOPE: Southwest Florida airport throughput — RSW (Southwest Florida Internati
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                            | verified   | expires
-s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida International) monthly enplanements, deplanements, total passengers, aircraft operations, and freight (Supabase rsw_airport_monthly: airport_code, metric, value, yoy_pct_change, report_month; 5 PDFs scraped monthly via flylcpa.com/about-lcpa/reports-and-statistics/) | 2026-06-14 | 2026-07-14
+s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida International) monthly enplanements, deplanements, total passengers, aircraft operations, and freight (Supabase rsw_airport_monthly: airport_code, metric, value, yoy_pct_change, report_month; 5 PDFs scraped monthly via flylcpa.com/about-lcpa/reports-and-statistics/) | 2026-06-29 | 2026-07-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"rsw_airport_total_passengers","fact":"RSW monthly total passengers — 140 rows loaded (2024-01 to 2026-04)","value":"Latest: April 2026 — 1,152,669 total passengers (-2.2% YoY, single month)","src":"s01","date":"2026-06-14"}
+  {"id":"f001","topic":"rsw_airport_total_passengers","fact":"RSW monthly total passengers — 140 rows loaded (2024-01 to 2026-04)","value":"Latest: April 2026 — 1,152,669 total passengers (-2.2% YoY, single month)","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "rsw-airport",
-  "version": 5,
-  "refined_at": "2026-06-14T03:02:54Z",
+  "version": 6,
+  "refined_at": "2026-06-29T07:56:01Z",
+  "expires": "2026-07-29T07:56:01Z",
+  "ttl_seconds": 2592000,
   "direction": "bullish",
   "magnitude": 0.15891458763781738,
   "drivers": [],
@@ -58,7 +60,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "raw",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
       },
@@ -77,7 +79,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW trailing 12-month total passengers ending 2026-04"
       },
@@ -96,7 +98,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 1,152,669 total passengers (-2.2% YoY, single month)"
       },
@@ -115,7 +117,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 arrivals — 512,534 deplanements"
       },
@@ -134,7 +136,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 departures — 640,135 enplanements"
       },
@@ -153,7 +155,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 10,797 aircraft operations (movements)"
       },
@@ -172,7 +174,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "count",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 3,463,896 lbs air freight"
       },
@@ -191,7 +193,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "raw",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 107 passengers per aircraft operation (proxy)"
       },
@@ -210,7 +212,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
       "display_format": "raw",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-06-14T03:02:54Z",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12 total passengers: peak month ÷ median month = 1.71"
       },
@@ -231,7 +233,7 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-14T03:02:54Z"
+    "computed_at": "2026-06-29T07:56:01Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -251,5 +253,5 @@ s01 | Lee County Port Authority Aviation Statistics — RSW (Southwest Florida I
 - rsw-airport: SWFL aviation throughput pulse — monthly RSW total passengers, arrivals/departures split, aircraft operations, and air freight from LCPA PDFs; direction = trailing-12-month total-passengers YoY.
 
 --- RECENT NOTES ---
-- 2026-06-14: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

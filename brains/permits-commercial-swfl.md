@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260610 -->
+<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260629 -->
 ---
 brain_id: permits-commercial-swfl
-version: 7
-refined_at: 2026-06-10T06:29:29Z
-freshness_token: SWFL-7421-v7-20260610
+version: 8
+refined_at: 2026-06-29T07:56:07Z
+freshness_token: SWFL-7421-v8-20260629
 ttl_seconds: 31536000
 context_type: user_saved_reference
 scope: SWFL commercial building permits — annual issued-permit dataset from the Maxwell, Hendry & Simmons Data Book (calendar year 2025), aggregated by submarket and site ZIP into permit count, declared value, and building square footage for commercial-real-estate operators.
@@ -29,21 +29,23 @@ SCOPE: SWFL commercial building permits — annual issued-permit dataset from th
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                          | verified   | expires
-s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, calendar year 2025 (Supabase data_lake.mhs_permits_swfl; source_name='mhs_databook'). PDF: https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf | 2026-06-10 | 2027-06-10
+s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, calendar year 2025 (Supabase data_lake.mhs_permits_swfl; source_name='mhs_databook'). PDF: https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf | 2026-06-29 | 2027-06-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"mhs_commercial_snapshot","fact":"SWFL commercial permits — 2025 (MHS Data Book)","value":"SWFL issued commercial building permits, calendar year 2025 (Maxwell, Hendry & Simmons Data Book): 281 permits totaling $2.31B and 10.06M sf of building area across 12 submarkets; fort-myers leads on permit value ($876.5M across 38 permits).","src":"s01","date":"2026-06-10"},
-  {"id":"f002","topic":"metric:commercial_permits_count","fact":"SWFL commercial permit count (2025)","value":"281 commercial building permits issued across SWFL in 2025.","src":"s01","date":"2026-06-10"},
-  {"id":"f003","topic":"metric:commercial_permits_value_usd","fact":"SWFL commercial permit value (2025)","value":"SWFL commercial permits carry $2.31B in declared permit value for 2025.","src":"s01","date":"2026-06-10"},
-  {"id":"f004","topic":"metric:commercial_permits_sf","fact":"SWFL commercial permit building area (2025)","value":"SWFL commercial permits total 10.06M sf of building area for 2025.","src":"s01","date":"2026-06-10"}
+  {"id":"f001","topic":"mhs_commercial_snapshot","fact":"SWFL commercial permits — 2025 (MHS Data Book)","value":"SWFL issued commercial building permits, calendar year 2025 (Maxwell, Hendry & Simmons Data Book): 281 permits totaling $2.31B and 10.06M sf of building area across 12 submarkets; fort-myers leads on permit value ($876.5M across 38 permits).","src":"s01","date":"2026-06-29"},
+  {"id":"f002","topic":"metric:commercial_permits_count","fact":"SWFL commercial permit count (2025)","value":"281 commercial building permits issued across SWFL in 2025.","src":"s01","date":"2026-06-29"},
+  {"id":"f003","topic":"metric:commercial_permits_value_usd","fact":"SWFL commercial permit value (2025)","value":"SWFL commercial permits carry $2.31B in declared permit value for 2025.","src":"s01","date":"2026-06-29"},
+  {"id":"f004","topic":"metric:commercial_permits_sf","fact":"SWFL commercial permit building area (2025)","value":"SWFL commercial permits total 10.06M sf of building area for 2025.","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "permits-commercial-swfl",
-  "version": 7,
-  "refined_at": "2026-06-10T06:29:29Z",
+  "version": 8,
+  "refined_at": "2026-06-29T07:56:07Z",
+  "expires": "2027-06-29T07:56:07Z",
+  "ttl_seconds": 31536000,
   "direction": "neutral",
   "magnitude": 0.3,
   "drivers": [],
@@ -60,7 +62,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       "display_format": "count",
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-06-10T06:29:29Z",
+        "fetched_at": "2026-06-29T07:56:07Z",
         "tier": 1,
         "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (281 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — count of all rows."
       },
@@ -79,7 +81,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       "display_format": "currency",
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-06-10T06:29:29Z",
+        "fetched_at": "2026-06-29T07:56:07Z",
         "tier": 1,
         "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (281 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — sum(permit_value_usd)."
       },
@@ -98,7 +100,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       "display_format": "count",
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-06-10T06:29:29Z",
+        "fetched_at": "2026-06-29T07:56:07Z",
         "tier": 1,
         "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (281 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — sum(building_sf)."
       },
@@ -245,7 +247,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       ],
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-06-10T06:29:29Z",
+        "fetched_at": "2026-06-29T07:56:07Z",
         "tier": 1,
         "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (281 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — grouped by submarket_slug."
       },
@@ -630,7 +632,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       ],
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-06-10T06:29:29Z",
+        "fetched_at": "2026-06-29T07:56:07Z",
         "tier": 1,
         "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (281 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — site ZIP from project_address, scope-gated to the 6-county footprint."
       },
@@ -653,7 +655,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-10T06:29:29Z"
+    "computed_at": "2026-06-29T07:56:07Z"
   },
   "exogenous_signals": []
 }
@@ -662,5 +664,5 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
 - permits-commercial-swfl: SWFL commercial building-permit pipeline (MHS Data Book, annual) — count / value / building-SF by submarket and site ZIP, with master synthesizing the CRE context downstream.
 
 --- RECENT NOTES ---
-- 2026-06-10: pack refined by the Refinery — 4 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 4 fact(s) from 1 source(s).
 ```

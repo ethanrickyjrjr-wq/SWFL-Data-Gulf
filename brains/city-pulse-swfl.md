@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v20 | Token: SWFL-7421-v20-20260628 -->
+<!-- FRESHNESS: v21 | Token: SWFL-7421-v21-20260629 -->
 ---
 brain_id: city-pulse-swfl
-version: 20
-refined_at: 2026-06-28T09:00:50Z
-freshness_token: SWFL-7421-v20-20260628
+version: 21
+refined_at: 2026-06-29T07:56:01Z
+freshness_token: SWFL-7421-v21-20260629
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) daily current-events pulse — dated business openings/closings, transactions, construction, and disaster signals for 7 cities, each cited to a primary source.
@@ -29,173 +29,173 @@ SCOPE: SWFL (Lee + Collier) daily current-events pulse — dated business openin
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                       | verified   | expires
-s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-06-28 | 2026-06-29
+s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-06-29 | 2026-06-30
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"95 non-expired signals across 13 cities (Lehigh Acres: 5, Cape Coral: 7, Fort Myers: 10, Naples: 10, Estero: 10, Bonita Springs: 6, Fort Myers Beach: 10, Sanibel: 6, North Fort Myers: 1, Marco Island: 4, East Naples: 8, North Naples: 12, Golden Gate: 6).","src":"s01","date":"2026-06-28"},
-  {"id":"f002","topic":"city-pulse:development","fact":"Lehigh Acres — development","value":"Stonewood Crossing has 14 developable lots, some of which could be consolidated to account for a future grocery store, according to Ty Hensley, senior advisor with Trinity Commercial Group (TCG). (source: https://www.gulfshorebusiness.com/stonewood-shopping-center-lehigh-acres/)","src":"s01","date":"2026-06-28"},
-  {"id":"f003","topic":"city-pulse:development","fact":"Lehigh Acres — development","value":"Maronda Homes LLC submitted a building permit application received during May 1–31, 2026 for a new residential project in Lehigh Acres, with a stated value of $285,000.00. (source: https://www.leegov.com/dcd/rpts/Documents/PlanningCommunities/BldPrmtRES_RECpc_Lehigh.pdf)","src":"s01","date":"2026-06-28"},
-  {"id":"f004","topic":"city-pulse:development","fact":"Lehigh Acres — development","value":"Lee County leaders approved a traffic relief project for Lehigh Acres; Phase 3 includes a new intersection at Sunshine Boulevard and State Road 82, followed by widening Sunshine Boulevard from two to four lanes with added sidewalks and bike lanes. (source: https://www.winknews.com/news/lee/lehigh-acres-traffic-relief-project-gets-green-light-from-county-leaders/article_acebd6ea-937f-470f-a8c1-185eb74e2d35.html)","src":"s01","date":"2026-06-28"},
-  {"id":"f005","topic":"city-pulse:development","fact":"Lehigh Acres — development","value":"Lehigh Acres Capital Improvement Projects include a Surface Water Management Program — maintenance of outfall drainage and flow-ways (Bedman Creek, Orange River, and Hickey Creek) — budgeted at $1,973,000+. (source: https://www.leegov.com/residents/lehighacres)","src":"s01","date":"2026-06-28"},
-  {"id":"f006","topic":"city-pulse:development","fact":"Cape Coral — development","value":"Cape Coral approved the Seven Islands mixed-use development, with construction set to begin on the residential, hospitality and entertainment hub. (source: https://www.gulfshorebusiness.com/lee/seven-islands-mixed-use-development-approved-in-cape-coral/article_b2195be6-fa89-474c-9442-536874bf8abc.html)","src":"s01","date":"2026-06-28"},
-  {"id":"f007","topic":"city-pulse:development","fact":"Cape Coral — development","value":"Cape Coral Grove is a 131-acre mixed-use project promising more than 1,000 apartments along with restaurants and retail space. (source: https://www.winknews.com/news/lee/cape-coral-grove-development-sparks-debate-over-growth-and-wildlife-impact/article_ea175452-a849-4b1b-9884-2b3029e1a054.html)","src":"s01","date":"2026-06-28"},
-  {"id":"f008","topic":"city-pulse:development","fact":"Cape Coral — development","value":"Developer Larry Nygard cut the ribbon on Bimini Square on Feb. 5, a $125 million mixed-use project in Cape Coral, after more than two years of construction. (source: https://www.gulfshorebusiness.com/development/cape-corals-bimini-square-officially-opens-after-years/article_25a78bb5-022f-4e4f-ada4-4cb009cad731.html)","src":"s01","date":"2026-06-28"},
-  {"id":"f009","topic":"city-pulse:development","fact":"Fort Myers — development","value":"Fort Myers City Council on March 16 authorized moving forward with the first phase of its long-awaited Midtown Streetscape and Utility Replacement Project. (source: https://www.gulfshorebusiness.com/lee/fort-myers-greenlights-295m-infrastructure-project/article_61590c19-570e-4d18-9ca9-79106b5dca54.html)","src":"s01","date":"2026-06-28"}
+  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"134 non-expired signals across 13 cities (Cape Coral: 12, Fort Myers: 14, Naples: 13, Estero: 11, Fort Myers Beach: 12, Sanibel: 8, North Fort Myers: 5, Marco Island: 11, East Naples: 12, Lehigh Acres: 6, Bonita Springs: 9, North Naples: 14, Golden Gate: 7).","src":"s01","date":"2026-06-29"},
+  {"id":"f002","topic":"city-pulse:breaking","fact":"Cape Coral — breaking","value":"FEMA proposed flood map revisions for Lee County have an expected effective date of Summer 2026; on December 8, 2025, Lee County received a status letter regarding appeals and comments submitted. (source: https://www.leegov.com/dcd/flood/floodways/femamapchanges2026)","src":"s01","date":"2026-06-29"},
+  {"id":"f003","topic":"city-pulse:breaking","fact":"Cape Coral — breaking","value":"A quick but powerful storm left a Cape Coral neighborhood off Del Prado Boulevard south of Veterans underwater, with cars driving through localized flooding. (source: https://www.winknews.com/news/lee/cape-coral-neighborhood-underwater-after-quick-but-powerful-storm/article_8d197e2c-91c7-4f45-9426-1edd6d667989.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f004","topic":"city-pulse:breaking","fact":"Fort Myers — breaking","value":"The 185-foot water tower behind the IMAG History and Science Center in Fort Myers faces demolition; the Fort Myers City Council could vote on the matter. (source: https://www.gulfshorebusiness.com/lee/fort-myers-council-could-vote-to-demolish-imag-tower/article_27a52d4d-3cf5-4926-a60c-a05ce2f07c1c.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f005","topic":"city-pulse:breaking","fact":"Naples — breaking","value":"Collier County's flood map update is underway; new maps are expected to become effective in fall 2026, with a 90-day appeal period after their publication. (source: https://www.winknews.com/news/collier/collier-countys-flood-map-update-helps-residents-assess-storm-risks/article_33b17914-14a7-49aa-acdb-7c5b41c43169.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f006","topic":"city-pulse:breaking","fact":"Estero — breaking","value":"The Florida Everblades defeated the Kansas City Mavericks 5-4 in double overtime of Game 6 of the Kelly Cup Finals. (source: https://www.winknews.com/sports/florida_everblades/)","src":"s01","date":"2026-06-29"},
+  {"id":"f007","topic":"city-pulse:breaking","fact":"Estero — breaking","value":"A brush fire off Alico Road in Estero grew to 20 acres, bringing smoke and concerns for drivers before crews contained it. (source: https://www.winknews.com/news/lee/crews-contain-estero-brush-fire/article_d09d76c5-0888-52e3-b835-08607b324865.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f008","topic":"city-pulse:breaking","fact":"Fort Myers Beach — breaking","value":"A Fort Myers Beach restaurant faces closure amid the town's new eviction notice; the owner lost her original shop during Hurricane Ian. (source: https://www.winknews.com/news/lee/fort-myers-beach-restaurant-faces-closure-amid-towns-new-eviction-notice/article_358bd979-8589-43cb-bd82-1ba131f9c4f7.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f009","topic":"city-pulse:breaking","fact":"Sanibel — breaking","value":"Further expansion at South Seas resort is tied up in litigation brought by local groups opposed to the plans, causing delays. (source: https://www.businessobserverfl.com/news/2026/mar/31/south-seas-buys-22-acre-artist-retreat-on-captiva/)","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "city-pulse-swfl",
-  "version": 20,
-  "refined_at": "2026-06-28T09:00:50Z",
-  "expires": "2026-06-29T09:00:50Z",
+  "version": 21,
+  "refined_at": "2026-06-29T07:56:01Z",
+  "expires": "2026-06-30T07:56:01Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL city pulse as of 2026-06-28: 95 live current-events signals across 13 cities — Lehigh Acres (5), Cape Coral (7), Fort Myers (10), Naples (10), Estero (10), Bonita Springs (6), Fort Myers Beach (10), Sanibel (6), North Fort Myers (1), Marco Island (4), East Naples (8), North Naples (12), Golden Gate (6). Most current: Lehigh Acres — Stonewood Crossing has 14 developable lots, some of which could be consolidated to account for a future grocery store, according to Ty Hensley, senior advisor with Trinity Commercial Group (TCG). These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+  "conclusion": "SWFL city pulse as of 2026-06-29: 134 live current-events signals across 13 cities — Cape Coral (12), Fort Myers (14), Naples (13), Estero (11), Fort Myers Beach (12), Sanibel (8), North Fort Myers (5), Marco Island (11), East Naples (12), Lehigh Acres (6), Bonita Springs (9), North Naples (14), Golden Gate (7). Most current: Cape Coral — FEMA proposed flood map revisions for Lee County have an expected effective date of Summer 2026; on December 8, 2025, Lee County received a status letter regarding appeals and comments submitted. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
   "key_metrics": [
     {
-      "metric": "signal_development_1",
-      "value": "Lehigh Acres: Stonewood Crossing has 14 developable lots, some of which could be consolidated to account for a future grocery store, according to Ty Hensley, senior advisor with Trinity Commercial Group (TCG).",
+      "metric": "signal_breaking_1",
+      "value": "Cape Coral: FEMA proposed flood map revisions for Lee County have an expected effective date of Summer 2026; on December 8, 2025, Lee County received a status letter regarding appeals and comments submitted.",
       "direction": "stable",
-      "label": "Lehigh Acres — development",
+      "label": "Cape Coral — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/stonewood-shopping-center-lehigh-acres/",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.leegov.com/dcd/flood/floodways/femamapchanges2026",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Stonewood project by Guy Paparella fuels growth in Lehigh | Development | gulfshorebusiness.com: \"There are 14 developable lots. Some of those could be consolidated to account for a future grocery store, said Ty Hensley, senior advisor with TCG.\""
+        "citation": "2026 FEMA Proposed Flood Map Revisions: \"Update: On December 8, 2025, Lee County received a status letter regarding the appeals and comments submitted.\""
       },
       "suggestions": [
-        "What's driving signal development 1?",
-        "How does signal development 1 here compare to other SWFL areas?"
+        "What's driving signal breaking 1?",
+        "How does signal breaking 1 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_2",
-      "value": "Lehigh Acres: Maronda Homes LLC submitted a building permit application received during May 1–31, 2026 for a new residential project in Lehigh Acres, with a stated value of $285,000.00.",
+      "metric": "signal_breaking_2",
+      "value": "Cape Coral: A quick but powerful storm left a Cape Coral neighborhood off Del Prado Boulevard south of Veterans underwater, with cars driving through localized flooding.",
       "direction": "stable",
-      "label": "Lehigh Acres — development",
+      "label": "Cape Coral — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.leegov.com/dcd/rpts/Documents/PlanningCommunities/BldPrmtRES_RECpc_Lehigh.pdf",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.winknews.com/news/lee/cape-coral-neighborhood-underwater-after-quick-but-powerful-storm/article_8d197e2c-91c7-4f45-9426-1edd6d667989.html",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Building Permits Received From:5/1/2026 To: 5/31/2026 Residential: \"Description · Project Name · Rec&#x27;d Date · 13-45-26-L1-01006.0080 · 285,000.00 · 0 · 0 · ROBERT INTILLE · MARONDA HOMES LLC · 4005 MARONDA WAY · S...\""
+        "citation": "Cape Coral neighborhood underwater after quick but powerful storm | Lee County | winknews.com: \"In Cape Coral off Del Prado Boulevard south of Veterans, cars drove through localized flooding. WINK Weather Watcher Brandon Griggs lives just off Del...\""
       },
       "suggestions": [
-        "What's driving signal development 2?",
-        "How does signal development 2 here compare to other SWFL areas?"
+        "What's driving signal breaking 2?",
+        "How does signal breaking 2 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_3",
-      "value": "Lehigh Acres: Lee County leaders approved a traffic relief project for Lehigh Acres; Phase 3 includes a new intersection at Sunshine Boulevard and State Road 82, followed by widening Sunshine Boulevard from two to four lanes with added sidewalks and bike lanes.",
+      "metric": "signal_breaking_3",
+      "value": "Fort Myers: The 185-foot water tower behind the IMAG History and Science Center in Fort Myers faces demolition; the Fort Myers City Council could vote on the matter.",
       "direction": "stable",
-      "label": "Lehigh Acres — development",
+      "label": "Fort Myers — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.winknews.com/news/lee/lehigh-acres-traffic-relief-project-gets-green-light-from-county-leaders/article_acebd6ea-937f-470f-a8c1-185eb74e2d35.html",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.gulfshorebusiness.com/lee/fort-myers-council-could-vote-to-demolish-imag-tower/article_27a52d4d-3cf5-4926-a60c-a05ce2f07c1c.html",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Lehigh Acres traffic relief project gets green light from county leaders | Lee County | winknews.com: \"Phase three starts with a new intersection at Sunshine and State Road 82, designed to handle heavier traffic flow. The project then moves to widening ...\""
+        "citation": "Historic IMAG water tower in Fort Myers faces demolition | Lee County | gulfshorebusiness.com: \"Friday, June 26, 2026 · Subscribe ... Email · Close · The 185-foot water tower behind the IMAG History and Science Center in Fort Myers could be demol...\""
       },
       "suggestions": [
-        "What's driving signal development 3?",
-        "How does signal development 3 here compare to other SWFL areas?"
+        "What's driving signal breaking 3?",
+        "How does signal breaking 3 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_4",
-      "value": "Lehigh Acres: Lehigh Acres Capital Improvement Projects include a Surface Water Management Program — maintenance of outfall drainage and flow-ways (Bedman Creek, Orange River, and Hickey Creek) — budgeted at $1,973,000+.",
+      "metric": "signal_breaking_4",
+      "value": "Naples: Collier County's flood map update is underway; new maps are expected to become effective in fall 2026, with a 90-day appeal period after their publication.",
       "direction": "stable",
-      "label": "Lehigh Acres — development",
+      "label": "Naples — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.leegov.com/residents/lehighacres",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.winknews.com/news/collier/collier-countys-flood-map-update-helps-residents-assess-storm-risks/article_33b17914-14a7-49aa-acdb-7c5b41c43169.html",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Lehigh Acres Capital Improvement Projects: \"Surface Water Management Program - Maintenance of outfall drainage and flow-ways to Lehigh Acres (Bedman Creek, Orange River and Hickey Creek) $1,973,...\""
+        "citation": "Collier County's flood map update helps residents assess storm risks | Collier County | winknews.com: \"For example, an elevation certificate.&quot; The new maps are expected to become effective in fall 2026. There will be a 90-day appeal period after th...\""
       },
       "suggestions": [
-        "What's driving signal development 4?",
-        "How does signal development 4 here compare to other SWFL areas?"
+        "What's driving signal breaking 4?",
+        "How does signal breaking 4 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_5",
-      "value": "Cape Coral: Cape Coral approved the Seven Islands mixed-use development, with construction set to begin on the residential, hospitality and entertainment hub.",
+      "metric": "signal_breaking_5",
+      "value": "Estero: The Florida Everblades defeated the Kansas City Mavericks 5-4 in double overtime of Game 6 of the Kelly Cup Finals.",
       "direction": "stable",
-      "label": "Cape Coral — development",
+      "label": "Estero — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/lee/seven-islands-mixed-use-development-approved-in-cape-coral/article_b2195be6-fa89-474c-9442-536874bf8abc.html",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.winknews.com/sports/florida_everblades/",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Cape Coral approves Seven Islands mixed-use development: \"Construction is set to begin on Seven Islands, a residential, hospitality and entertainment hub in Cape Coral, with plans for up to 995 residential un...\""
+        "citation": "Florida Everblades | winknews.com: \"The Florida Everblades defeated the Kansas City Mavericks 5-4 in double overtime of Game 6 of the Kelly Cup Finals early Tuesday Morning.\""
       },
       "suggestions": [
-        "What's driving signal development 5?",
-        "How does signal development 5 here compare to other SWFL areas?"
+        "What's driving signal breaking 5?",
+        "How does signal breaking 5 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_6",
-      "value": "Cape Coral: Cape Coral Grove is a 131-acre mixed-use project promising more than 1,000 apartments along with restaurants and retail space.",
+      "metric": "signal_breaking_6",
+      "value": "Estero: A brush fire off Alico Road in Estero grew to 20 acres, bringing smoke and concerns for drivers before crews contained it.",
       "direction": "stable",
-      "label": "Cape Coral — development",
+      "label": "Estero — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.winknews.com/news/lee/cape-coral-grove-development-sparks-debate-over-growth-and-wildlife-impact/article_ea175452-a849-4b1b-9884-2b3029e1a054.html",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.winknews.com/news/lee/crews-contain-estero-brush-fire/article_d09d76c5-0888-52e3-b835-08607b324865.html",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Cape Coral Grove development sparks debate over growth and wildlife impact | Lee County | winknews.com: \"This ambitious 131-acre mixed-use project promises to bring more than 1,000 apartments, along with restaurants and retail space. However, it also rais...\""
+        "citation": "Crews contain Estero brush fire | Lee County: \"LEE COUNTY, Fla. (WINK)— A brush fire off Alico Road grew to 20 acres Tuesday, bringing smoke and concerns for drivers.\""
       },
       "suggestions": [
-        "What's driving signal development 6?",
-        "How does signal development 6 here compare to other SWFL areas?"
+        "What's driving signal breaking 6?",
+        "How does signal breaking 6 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_7",
-      "value": "Cape Coral: Developer Larry Nygard cut the ribbon on Bimini Square on Feb. 5, a $125 million mixed-use project in Cape Coral, after more than two years of construction.",
+      "metric": "signal_breaking_7",
+      "value": "Fort Myers Beach: A Fort Myers Beach restaurant faces closure amid the town's new eviction notice; the owner lost her original shop during Hurricane Ian.",
       "direction": "stable",
-      "label": "Cape Coral — development",
+      "label": "Fort Myers Beach — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/development/cape-corals-bimini-square-officially-opens-after-years/article_25a78bb5-022f-4e4f-ada4-4cb009cad731.html",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.winknews.com/news/lee/fort-myers-beach-restaurant-faces-closure-amid-towns-new-eviction-notice/article_358bd979-8589-43cb-bd82-1ba131f9c4f7.html",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Unveiling of Bimini Square marks new era for Cape Coral | Development | gulfshorebusiness.com: \"After more than two years of construction, developer Larry Nygard on Feb. 5 cut the ribbon on Bimini Square, a $125 million mixed-use project develope...\""
+        "citation": "Fort Myers Beach restaurant faces closure amid town's new eviction notice | Lee County | winknews.com: \"&quot;If you just go down the boulevard, every trailer you see will have a problem.&quot; Haywood lost her original shop during Hurricane Ian and has ...\""
       },
       "suggestions": [
-        "What's driving signal development 7?",
-        "How does signal development 7 here compare to other SWFL areas?"
+        "What's driving signal breaking 7?",
+        "How does signal breaking 7 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_8",
-      "value": "Fort Myers: Fort Myers City Council on March 16 authorized moving forward with the first phase of its long-awaited Midtown Streetscape and Utility Replacement Project.",
+      "metric": "signal_breaking_8",
+      "value": "Sanibel: Further expansion at South Seas resort is tied up in litigation brought by local groups opposed to the plans, causing delays.",
       "direction": "stable",
-      "label": "Fort Myers — development",
+      "label": "Sanibel — breaking",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/lee/fort-myers-greenlights-295m-infrastructure-project/article_61590c19-570e-4d18-9ca9-79106b5dca54.html",
-        "fetched_at": "2026-06-28T09:00:50Z",
+        "url": "https://www.businessobserverfl.com/news/2026/mar/31/south-seas-buys-22-acre-artist-retreat-on-captiva/",
+        "fetched_at": "2026-06-29T07:56:01Z",
         "tier": 2,
-        "citation": "Midtown project to enhance Fort Myers neighborhood | Lee County | gulfshorebusiness.com: \"Fort Myers is moving forward with the first phase of its long-awaited Midtown Streetscape and Utility Replacement Project. City Council on March 16 au...\""
+        "citation": "South Seas buys 22-acre artist retreat on Captiva | Business Observer: \"But there are delays because of pending litigation brought by local groups opposed to the plans.\""
       },
       "suggestions": [
-        "What's driving signal development 8?",
-        "How does signal development 8 here compare to other SWFL areas?"
+        "What's driving signal breaking 8?",
+        "How does signal breaking 8 here compare to other SWFL areas?"
       ]
     }
   ],
   "caveats": [
-    "87 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "126 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -208,7 +208,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-28T09:00:50Z"
+    "computed_at": "2026-06-29T07:56:01Z"
   },
   "exogenous_signals": []
 }
@@ -217,5 +217,5 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 - city-pulse-swfl: daily SWFL city-grain current-events reporter over data_lake.city_pulse (TTL'd, citation-backed).
 
 --- RECENT NOTES ---
-- 2026-06-28: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```

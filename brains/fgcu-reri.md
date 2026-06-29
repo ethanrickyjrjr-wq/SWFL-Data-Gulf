@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260620 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260629 -->
 ---
 brain_id: fgcu-reri
-version: 1
-refined_at: 2026-06-20T17:29:37Z
-freshness_token: SWFL-7421-v1-20260620
+version: 2
+refined_at: 2026-06-29T07:56:06Z
+freshness_token: SWFL-7421-v2-20260629
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Southwest Florida — FGCU RERI monthly regional economic indicators
@@ -29,28 +29,28 @@ SCOPE: Southwest Florida — FGCU RERI monthly regional economic indicators
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                             | verified   | expires
-s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supabase fgcu_reri_indicators: indicator, county, pct_change, pct_change_unit, report_month; SWFL: Lee + Collier + Charlotte; ~2-month data lag) | 2026-06-20 | 2026-07-20
+s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supabase fgcu_reri_indicators: indicator, county, pct_change, pct_change_unit, report_month; SWFL: Lee + Collier + Charlotte; ~2-month data lag) | 2026-06-29 | 2026-07-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"reri:airport_activity:swfl","fact":"FGCU RERI airport activity (swfl) YoY, 2026-05","value":"+1.8%","src":"s01","date":"2026-06-20"},
-  {"id":"f002","topic":"reri:tourist_tax_revenues:swfl","fact":"FGCU RERI tourist tax revenues (swfl) YoY, 2026-05","value":"+12.3%","src":"s01","date":"2026-06-20"},
-  {"id":"f003","topic":"reri:taxable_sales:swfl","fact":"FGCU RERI taxable sales (swfl) YoY, 2026-05","value":"-14.7%","src":"s01","date":"2026-06-20"},
-  {"id":"f004","topic":"reri:unemployment_rate:swfl","fact":"FGCU RERI unemployment rate (swfl) YoY, 2026-05","value":"+1.7pp","src":"s01","date":"2026-06-20"},
-  {"id":"f005","topic":"reri:permits_single_family:swfl","fact":"FGCU RERI permits single family (swfl) YoY, 2026-05","value":"-32.6%","src":"s01","date":"2026-06-20"},
-  {"id":"f006","topic":"reri:home_sales_single_family:swfl","fact":"FGCU RERI home sales single family (swfl) YoY, 2026-05","value":"+15.1%","src":"s01","date":"2026-06-20"},
-  {"id":"f007","topic":"reri:home_prices_single_family:collier","fact":"FGCU RERI home prices single family (collier) YoY, 2026-05","value":"+5.6%","src":"s01","date":"2026-06-20"},
-  {"id":"f008","topic":"reri:home_prices_single_family:charlotte","fact":"FGCU RERI home prices single family (charlotte) YoY, 2026-05","value":"-1.1%","src":"s01","date":"2026-06-20"},
-  {"id":"f009","topic":"reri:home_prices_single_family:lee","fact":"FGCU RERI home prices single family (lee) YoY, 2026-05","value":"-4.6%","src":"s01","date":"2026-06-20"},
-  {"id":"f010","topic":"reri:active_listings_residential:swfl","fact":"FGCU RERI active listings residential (swfl) YoY, 2026-05","value":"-15.3%","src":"s01","date":"2026-06-20"}
+  {"id":"f001","topic":"reri:airport_activity:swfl","fact":"FGCU RERI airport activity (swfl) YoY, 2026-05","value":"+1.8%","src":"s01","date":"2026-06-29"},
+  {"id":"f002","topic":"reri:tourist_tax_revenues:swfl","fact":"FGCU RERI tourist tax revenues (swfl) YoY, 2026-05","value":"+12.3%","src":"s01","date":"2026-06-29"},
+  {"id":"f003","topic":"reri:taxable_sales:swfl","fact":"FGCU RERI taxable sales (swfl) YoY, 2026-05","value":"-14.7%","src":"s01","date":"2026-06-29"},
+  {"id":"f004","topic":"reri:unemployment_rate:swfl","fact":"FGCU RERI unemployment rate (swfl) YoY, 2026-05","value":"+1.7pp","src":"s01","date":"2026-06-29"},
+  {"id":"f005","topic":"reri:permits_single_family:swfl","fact":"FGCU RERI permits single family (swfl) YoY, 2026-05","value":"-32.6%","src":"s01","date":"2026-06-29"},
+  {"id":"f006","topic":"reri:home_sales_single_family:swfl","fact":"FGCU RERI home sales single family (swfl) YoY, 2026-05","value":"+15.1%","src":"s01","date":"2026-06-29"},
+  {"id":"f007","topic":"reri:home_prices_single_family:collier","fact":"FGCU RERI home prices single family (collier) YoY, 2026-05","value":"+5.6%","src":"s01","date":"2026-06-29"},
+  {"id":"f008","topic":"reri:home_prices_single_family:charlotte","fact":"FGCU RERI home prices single family (charlotte) YoY, 2026-05","value":"-1.1%","src":"s01","date":"2026-06-29"},
+  {"id":"f009","topic":"reri:home_prices_single_family:lee","fact":"FGCU RERI home prices single family (lee) YoY, 2026-05","value":"-4.6%","src":"s01","date":"2026-06-29"},
+  {"id":"f010","topic":"reri:active_listings_residential:swfl","fact":"FGCU RERI active listings residential (swfl) YoY, 2026-05","value":"-15.3%","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "fgcu-reri",
-  "version": 1,
-  "refined_at": "2026-06-20T17:29:37Z",
-  "expires": "2026-07-20T17:29:37Z",
+  "version": 2,
+  "refined_at": "2026-06-29T07:56:06Z",
+  "expires": "2026-07-29T07:56:06Z",
   "ttl_seconds": 2592000,
   "direction": "mixed",
   "magnitude": 0.6,
@@ -68,7 +68,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (airport_activity 2026-05 +1.8% YoY)"
       },
@@ -87,7 +87,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (tourist_tax_revenues 2026-05 +12.3% YoY)"
       },
@@ -106,7 +106,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (taxable_sales 2026-05 -14.7% YoY)"
       },
@@ -125,7 +125,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (unemployment_rate 2026-05 +1.7pp YoY)"
       },
@@ -144,7 +144,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (permits_single_family 2026-05 -32.6% YoY)"
       },
@@ -163,7 +163,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (home_sales_single_family 2026-05 +15.1% YoY)"
       },
@@ -182,7 +182,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (home_prices_single_family 2026-05 -4.6% YoY)"
       },
@@ -201,7 +201,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (home_prices_single_family 2026-05 +5.6% YoY)"
       },
@@ -220,7 +220,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (home_prices_single_family 2026-05 -1.1% YoY)"
       },
@@ -239,7 +239,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
       "display_format": "raw",
       "source": {
         "url": "https://www.fgcu.edu/cob/reri/",
-        "fetched_at": "2026-06-20T17:29:37Z",
+        "fetched_at": "2026-06-29T07:56:06Z",
         "tier": 1,
         "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (active_listings_residential 2026-05 -15.3% YoY)"
       },
@@ -262,7 +262,7 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-20T17:29:37Z"
+    "computed_at": "2026-06-29T07:56:06Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -279,5 +279,5 @@ s01 | FGCU RERI Monthly Economic Outlook — Lutgert College of Business (Supaba
 - fgcu-reri: monthly SWFL regional economic indicators (8 series across Lee + Collier + Charlotte) from FGCU's Regional Economic Research Institute, ~2-month data lag.
 
 --- RECENT NOTES ---
-- 2026-06-20: pack refined by the Refinery — 10 fact(s) from 1 source(s).
+- 2026-06-29: pack refined by the Refinery — 10 fact(s) from 1 source(s).
 ```
