@@ -328,14 +328,26 @@ export type BlockContentPatch = z.infer<typeof BlockContentPatchSchema>;
 // when build 05 adds listing/multi-column) to avoid a schema↔default import cycle
 // and stay forward-compatible without editing an enum here.
 
+// Authored free-text is TRUNCATED to its cap, never REJECTED. A model that writes
+// one paragraph slightly over a limit must NOT discard the whole authored doc —
+// that made `callAuthor` return null and the UI report "couldn't author this".
+// Caps mirror the final per-field EmailDoc maxima (assembly clamps the few that
+// differ, e.g. signal.body 2000→500); this realizes the clamp the author engine
+// already intended (author-doc.ts applyContent comment).
+const authoredText = (n: number) =>
+  z
+    .string()
+    .transform((s) => s.slice(0, n))
+    .optional();
+
 const AuthoredStatSchema = z.object({
   /** Menu id whose verbatim value fills this cell (id-selection moat). */
-  value_figure: z.string().max(40).optional(),
+  value_figure: authoredText(40),
   /** A non-figure cell value (e.g. "Buyer's market"). The engine anchor-checks it at
    *  assembly (author-doc.ts `anchoredStatValue`): a value carrying an UNanchored
    *  number is blanked — so a number here cannot be invented either. */
-  value: z.string().max(24).optional(),
-  label: z.string().max(60).optional(),
+  value: authoredText(24),
+  label: authoredText(60),
 });
 
 export const AuthoredBlockSchema = z.object({
@@ -345,19 +357,19 @@ export const AuthoredBlockSchema = z.object({
   /** Start a new visual row (else sit beside the previous block in its row). */
   new_row: z.boolean().optional(),
   // ── content (text only — strip mode drops any key not listed here) ──
-  kicker: z.string().max(60).optional(),
+  kicker: authoredText(60),
   /** Menu id → the engine writes this figure's verbatim value as the headline. */
-  value_figure: z.string().max(40).optional(),
-  label: z.string().max(80).optional(),
-  prose: z.string().max(500).optional(),
-  title: z.string().max(120).optional(),
-  body: z.string().max(2000).optional(),
-  caption: z.string().max(200).optional(),
-  alt: z.string().max(160).optional(),
-  tagline: z.string().max(300).optional(),
-  designation: z.string().max(120).optional(),
-  bio: z.string().max(400).optional(),
-  button_label: z.string().max(40).optional(),
+  value_figure: authoredText(40),
+  label: authoredText(80),
+  prose: authoredText(500),
+  title: authoredText(120),
+  body: authoredText(2000),
+  caption: authoredText(200),
+  alt: authoredText(160),
+  tagline: authoredText(300),
+  designation: authoredText(120),
+  bio: authoredText(400),
+  button_label: authoredText(40),
   align: z.enum(["left", "center", "right"]).optional(),
   /** For an image block: which auto-resolved asset the engine drops in. */
   image_role: z.enum(["chart", "photo"]).optional(),

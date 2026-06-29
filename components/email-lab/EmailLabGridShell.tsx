@@ -189,8 +189,9 @@ export function EmailLabGridShell({
   const [brandSavedMsg, setBrandSavedMsg] = useState<string | null>(null);
   const brandPrefillAttempted = useRef(false);
 
-  // Right-panel accordions.
-  const [showBrand, setShowBrand] = useState(false);
+  // Right-panel accordions. Brand opens by default so the 4 brand colors
+  // (primary / accent / text / background) are visible without a click.
+  const [showBrand, setShowBrand] = useState(true);
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
@@ -238,7 +239,13 @@ export function EmailLabGridShell({
         }),
       });
       const data = (await res.json()) as { doc?: unknown; applied?: boolean; message?: string };
-      if (data.doc) {
+      // Only treat it as a real build when the engine actually authored — the
+      // author path echoes the INPUT doc with applied:false on a miss, so guarding
+      // on `data.doc` alone would falsely report "built" and re-commit the seed.
+      if (data.applied === false) {
+        setAiStatus(null);
+        setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
+      } else if (data.doc) {
         const parsed = EmailDocSchema.safeParse(data.doc);
         if (parsed.success) {
           const normalized = normalizeAuthorHeights(applyBrand(parsed.data, brandTokens));
@@ -249,7 +256,6 @@ export function EmailLabGridShell({
           );
         }
       }
-      if (data.applied === false && data.message) setAiMessage(data.message);
     } catch {
       setAiMessage("Something went wrong — try again.");
     } finally {

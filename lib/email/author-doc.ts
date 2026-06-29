@@ -232,19 +232,22 @@ function applyContent(
   // already match for most fields; the exception is `signal.body` (author allows
   // 2000, SignalPropsSchema caps 500).
   switch (type) {
+    // The model labels text fields loosely (it often puts a hero's headline in
+    // `title` and its paragraph in `body`), so each field falls back across the
+    // likely aliases before clamping to the TARGET prop maximum.
     case "hero":
       props.value = (num(a.value_figure) ?? "").slice(0, 24);
-      props.kicker = a.kicker ?? "";
-      props.label = a.label ?? "";
-      props.prose = a.prose ?? "";
+      props.kicker = (a.kicker ?? "").slice(0, 60);
+      props.label = (a.label ?? a.title ?? "").slice(0, 80);
+      props.prose = (a.prose ?? a.body ?? "").slice(0, 500);
       break;
     case "signal":
-      props.kicker = a.kicker ?? "";
-      props.title = a.title ?? "";
-      props.body = (a.body ?? "").slice(0, 500);
+      props.kicker = (a.kicker ?? "").slice(0, 60);
+      props.title = (a.title ?? a.label ?? "").slice(0, 120);
+      props.body = (a.body ?? a.prose ?? "").slice(0, 500);
       break;
     case "text":
-      props.body = a.body ?? "";
+      props.body = (a.body ?? a.prose ?? "").slice(0, 2000);
       if (a.align) props.align = a.align;
       break;
     case "agent-card":
