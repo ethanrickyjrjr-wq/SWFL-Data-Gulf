@@ -14,7 +14,9 @@
 //   2. Visible text fallback for fields the island leaves null (street/zip).
 // A field that appears nowhere is left undefined — we never guess a number.
 
+import Anthropic from "@anthropic-ai/sdk";
 import { fetchOgImage } from "./og-image";
+import { resolveEmailModel } from "./model-router";
 
 export interface ListingFacts {
   address?: string;
@@ -122,6 +124,240 @@ export function parseListingFacts(html: string, url: string): ListingFacts {
   };
 }
 
+// ── Tier 2: standard schema.org JSON-LD ──────────────────────────────────────
+// Many IDX/brokerage sites (John R. Wood, Sotheby's, etc.) don't use the island —
+// they embed schema.org JSON-LD (Product + SingleFamilyResidence + Offer). Field
+// names verified IN-SESSION against schema.org (RULE 0.4): numberOfBedrooms /
+// numberOfRooms(+unitText) / numberOfBathroomsTotal / floorSize / yearBuilt /
+// PostalAddress{streetAddress,addressLocality,addressRegion,postalCode} / offers.
+// price / description / image. Real pages are quirky (beds as numberOfRooms with
+// unitText "Bedrooms", price as a bare number) — this reads the actual shapes.
+
+type JsonObj = Record<string, unknown>;
+
+/** Every object node across all <script type=ld+json> blocks (recursively). */
+function collectJsonLdNodes(html: string): JsonObj[] {
+  const nodes: JsonObj[] = [];
+  const re = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  for (const m of html.matchAll(re)) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(m[1].trim());
+    } catch {
+      continue;
+    }
+    const walk = (x: unknown): void => {
+      if (Array.isArray(x)) x.forEach(walk);
+      else if (x && typeof x === "object") {
+        nodes.push(x as JsonObj);
+        for (const v of Object.values(x as JsonObj)) walk(v);
+      }
+    };
+    walk(parsed);
+  }
+  return nodes;
+}
+
+function toNum(v: unknown): number | undefined {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && /^\d[\d,]*\.?\d*$/.test(v.trim()))
+    return Number(v.replace(/,/g, ""));
+  return undefined;
+}
+
+function formatPrice(v: unknown): string | undefined {
+  if (typeof v === "string" && v.includes("$")) return v.trim();
+  const n = toNum(v);
+  return n === undefined ? undefined : "$" + Math.round(n).toLocaleString("en-US");
+}
+
+/** A QuantitativeValue { value, unitText } or a bare number → its value as string. */
+function qvValue(v: unknown): string | undefined {
+  if (v && typeof v === "object" && "value" in (v as JsonObj)) {
+    const n = toNum((v as JsonObj).value);
+    return n === undefined ? undefined : String(n);
+  }
+  const n = toNum(v);
+  return n === undefined ? undefined : String(n);
+}
+
+/** "SingleFamilyResidence" → "Single Family Residence". */
+function spaceType(t: unknown): string | undefined {
+  if (typeof t !== "string") return undefined;
+  return t.replace(/([a-z])([A-Z])/g, "$1 $2").trim() || undefined;
+}
+
+/** PURE: extract listing facts from schema.org JSON-LD. Empty fields when absent. */
+export function parseJsonLdFacts(html: string, url: string): ListingFacts {
+  const out: ListingFacts = { photos: [], sourceUrl: url };
+  const pushImg = (img: unknown): void => {
+    if (typeof img === "string") out.photos.push(img);
+    else if (Array.isArray(img)) for (const i of img) if (typeof i === "string") out.photos.push(i);
+  };
+
+  for (const node of collectJsonLdNodes(html)) {
+    const type = String(node["@type"] ?? "").toLowerCase();
+
+    if (type.includes("postaladdress")) {
+      const street = typeof node.streetAddress === "string" ? node.streetAddress : undefined;
+      const loc = typeof node.addressLocality === "string" ? node.addressLocality : undefined;
+      const region = typeof node.addressRegion === "string" ? node.addressRegion : undefined;
+      const zip = typeof node.postalCode === "string" ? node.postalCode : undefined;
+      out.city ??= loc;
+      out.state ??= region;
+      out.zip ??= zip;
+      if (out.address === undefined && street) {
+        out.address = [street, [loc, region].filter(Boolean).join(", "), zip]
+          .filter(Boolean)
+          .join(", ");
+      }
+    }
+
+    // Offer (standalone or nested under a product) → price.
+    if (out.price === undefined && type.includes("offer") && "price" in node) {
+      out.price = formatPrice(node.price);
+    }
+    if (out.price === undefined && node.offers && typeof node.offers === "object") {
+      const off = node.offers as JsonObj;
+      if ("price" in off) out.price = formatPrice(off.price);
+    }
+
+    const placeish = /residence|house|apartment|product|place|singlefamily/.test(type);
+    if (placeish || "floorSize" in node || "numberOfRooms" in node || "numberOfBedrooms" in node) {
+      if (out.beds === undefined) {
+        if ("numberOfBedrooms" in node) out.beds = qvValue(node.numberOfBedrooms);
+        else if ("numberOfRooms" in node) {
+          const nr = node.numberOfRooms as JsonObj;
+          const unit = String(nr?.unitText ?? "").toLowerCase();
+          if (unit.includes("bed") || unit === "") out.beds = qvValue(nr);
+        }
+      }
+      if (out.baths === undefined) {
+        out.baths = qvValue(node.numberOfBathroomsTotal) ?? qvValue(node.numberOfFullBathrooms);
+      }
+      if (out.sqft === undefined && "floorSize" in node) out.sqft = qvValue(node.floorSize);
+      if (out.yearBuilt === undefined) {
+        const y = toNum(node.yearBuilt);
+        if (y) out.yearBuilt = String(y);
+      }
+      if (out.propertyType === undefined && /residence|house|apartment|singlefamily/.test(type)) {
+        out.propertyType = spaceType(node["@type"]);
+      }
+    }
+
+    if (
+      out.remarks === undefined &&
+      typeof node.description === "string" &&
+      node.description.trim().length > 80
+    ) {
+      out.remarks = node.description.trim();
+    }
+    if (out.photos.length === 0) pushImg(node.image);
+  }
+
+  out.photos = [...new Set(out.photos)].slice(0, 12);
+  return out;
+}
+
+// ── Cascade merge + Tier 3 (text + LLM) ──────────────────────────────────────
+
+/** Merge two fact sets: PRIMARY wins per field (deterministic tiers beat the LLM),
+ *  SECONDARY fills gaps; photos are unioned (primary first). Primary's citation. */
+export function mergeFacts(primary: ListingFacts, secondary: ListingFacts): ListingFacts {
+  return {
+    address: primary.address ?? secondary.address,
+    city: primary.city ?? secondary.city,
+    state: primary.state ?? secondary.state,
+    zip: primary.zip ?? secondary.zip,
+    price: primary.price ?? secondary.price,
+    beds: primary.beds ?? secondary.beds,
+    baths: primary.baths ?? secondary.baths,
+    sqft: primary.sqft ?? secondary.sqft,
+    lotSize: primary.lotSize ?? secondary.lotSize,
+    yearBuilt: primary.yearBuilt ?? secondary.yearBuilt,
+    propertyType: primary.propertyType ?? secondary.propertyType,
+    remarks: primary.remarks ?? secondary.remarks,
+    photos: [...new Set([...(primary.photos ?? []), ...(secondary.photos ?? [])])].slice(0, 12),
+    sourceUrl: primary.sourceUrl,
+  };
+}
+
+/** PURE: strip a page to visible text (drop scripts/styles/tags, collapse space). */
+export function htmlToText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&#x2f;/gi, "/")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const LLM_STRING_FIELDS = [
+  "address",
+  "city",
+  "state",
+  "zip",
+  "price",
+  "beds",
+  "baths",
+  "sqft",
+  "lotSize",
+  "yearBuilt",
+  "propertyType",
+  "remarks",
+] as const;
+
+/** PURE: parse the model's JSON output into ListingFacts. Whitelist of known keys,
+ *  coerce numbers to strings, ignore anything else. Never throws — empty on garbage. */
+export function parseLlmFacts(text: string, url: string): ListingFacts {
+  const out: ListingFacts = { photos: [], sourceUrl: url };
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) return out;
+  let obj: Record<string, unknown>;
+  try {
+    obj = JSON.parse(m[0]) as Record<string, unknown>;
+  } catch {
+    return out;
+  }
+  if (!obj || typeof obj !== "object") return out;
+  const sink = out as unknown as Record<string, unknown>;
+  for (const k of LLM_STRING_FIELDS) {
+    const v = obj[k];
+    if (typeof v === "string" && v.trim()) sink[k] = v.trim();
+    else if (typeof v === "number") sink[k] = String(v);
+  }
+  if (Array.isArray(obj.photos)) {
+    out.photos = obj.photos.filter((p): p is string => typeof p === "string").slice(0, 12);
+  }
+  return out;
+}
+
+const listingLlm = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const LISTING_EXTRACT_SYSTEM = `You extract real-estate listing facts from page text. Return ONLY a JSON object containing any of these keys you can find ON THE PAGE: address, city, state, zip, price, beds, baths, sqft, lotSize, yearBuilt, propertyType, remarks. Use the page's EXACT numbers verbatim — never invent, estimate, or round. Omit any field the page does not state. "remarks" = the listing's marketing description, copied from the page. Output the JSON object only, no other text.`;
+
+/** Tier 3: best-effort LLM extraction over the page text. Reads facts off the page;
+ *  the strict prompt + the whitelist parser keep it to real, on-page values. NEVER
+ *  throws — empty facts on any failure. */
+export async function llmExtractFacts(html: string, url: string): Promise<ListingFacts> {
+  try {
+    const text = htmlToText(html).slice(0, 9000);
+    const msg = await listingLlm.messages.create({
+      model: resolveEmailModel("interactive"),
+      max_tokens: 800,
+      system: LISTING_EXTRACT_SYSTEM,
+      messages: [{ role: "user", content: text }],
+    });
+    const raw = msg.content[0]?.type === "text" ? msg.content[0].text : "";
+    return parseLlmFacts(raw, url);
+  } catch {
+    return { photos: [], sourceUrl: url };
+  }
+}
+
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 const FETCH_TIMEOUT_MS = 9000;
@@ -142,7 +378,20 @@ export async function fetchListingFacts(url: string): Promise<ListingFacts | nul
     if (!res.ok) return null;
     if (!(res.headers.get("content-type") ?? "").includes("html")) return null;
     const html = (await res.text()).slice(0, MAX_HTML_BYTES);
-    const facts = parseListingFacts(html, url);
+
+    // CASCADE — deterministic tiers first (numbers from code, never invented):
+    //   Tier 1 island → Tier 2 schema.org JSON-LD (merged, island wins on conflict).
+    let facts = mergeFacts(parseListingFacts(html, url), parseJsonLdFacts(html, url));
+
+    // Tier 3 (text + LLM) — ONLY when a core spec is still missing, so structured
+    // pages cost nothing. The LLM reads the page text; it fills gaps and can never
+    // override a deterministic value (mergeFacts: existing facts win).
+    const coreMissing = !facts.price || !facts.beds || !facts.baths || !facts.sqft;
+    if (coreMissing && process.env.ANTHROPIC_API_KEY) {
+      const llm = await llmExtractFacts(html, url).catch(() => null);
+      if (llm) facts = mergeFacts(facts, llm);
+    }
+
     if (facts.photos.length === 0) {
       const og = await fetchOgImage(url).catch(() => null);
       if (og?.image) facts.photos.push(og.image);
