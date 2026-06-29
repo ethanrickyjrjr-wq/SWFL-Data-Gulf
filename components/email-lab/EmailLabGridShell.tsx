@@ -197,6 +197,7 @@ export function EmailLabGridShell({
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState("");
 
   // history helpers (coalesced field edits → meaningful undo frames)
   const editingRef = useRef(false);
@@ -736,7 +737,7 @@ export function EmailLabGridShell({
 
         {/* width-preset bar (selected block) */}
         <div className="flex shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs">
-          <span className="text-[#0a1419]">Selected block width</span>
+          <span className="text-xs font-semibold text-[#0a1419]">Selected block width</span>
           <div className="flex items-center gap-1">
             {WIDTH_PRESETS.map((p) => (
               <button
@@ -744,17 +745,17 @@ export function EmailLabGridShell({
                 type="button"
                 disabled={!selectedBlock}
                 onClick={() => setSelectedWidth(p.w)}
-                className={`min-w-[42px] rounded-md border px-2 py-1 text-[11px] transition-colors ${
+                className={`min-w-[46px] rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
                   selectedWidth === p.w
                     ? "border-gulf-teal bg-gulf-teal text-[#06231f]"
-                    : "border-gray-300 bg-white text-[#0a1419] hover:border-gray-400 disabled:opacity-40 disabled:hover:text-[#0a1419]"
+                    : "border-gray-400 bg-white text-[#0a1419] hover:border-gray-600 disabled:opacity-40"
                 }`}
               >
                 {p.label}
               </button>
             ))}
           </div>
-          <span className="text-[10px] text-[#0a1419]/50">
+          <span className="text-xs font-medium text-[#0a1419]/60">
             {selectedBlock
               ? "a fine grid underneath snaps it — you never count columns"
               : "click a block to set its width"}
@@ -1005,7 +1006,37 @@ export function EmailLabGridShell({
               <span className={`transition-transform ${showPhotos ? "rotate-180" : ""}`}>▾</span>
             </button>
             {showPhotos && (
-              <div className="mt-2 grid grid-cols-2 gap-1.5">
+              <div className="mt-2 mb-2 flex gap-1.5">
+                <input
+                  type="text"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && imageUrlInput.trim()) {
+                      applyPhotoUrl(imageUrlInput.trim());
+                      setImageUrlInput("");
+                    }
+                  }}
+                  placeholder="Paste image URL…"
+                  className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (imageUrlInput.trim()) {
+                      applyPhotoUrl(imageUrlInput.trim());
+                      setImageUrlInput("");
+                    }
+                  }}
+                  disabled={!imageUrlInput.trim()}
+                  className="shrink-0 rounded-md bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-[#070f14] disabled:opacity-40"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+            {showPhotos && (
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
