@@ -4,9 +4,9 @@
   "note": "Regenerable artifact — never hand-edit. Regenerate: bun refinery/tools/grade-config-sweep.mts. Adjudications live in the `checks` ledger, not here.",
   "summary": {
     "unregistered": 0,
-    "invalid-polarity": 2,
+    "invalid-polarity": 0,
     "row-candidate": 32,
-    "gradeable": 66,
+    "gradeable": 68,
     "moat-fuel": 167,
     "needs-window": 23,
     "backtest_clean": 11
@@ -15,22 +15,22 @@
     {
       "slug": "active_listings_count_swfl",
       "concept_id": "active_listings_count_swfl",
-      "bucket": "invalid-polarity",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "active_listings_count_swfl",
         "concept_id": "active_listings_count_swfl",
         "registered": true,
-        "polarity_state": "invalid",
-        "window_ok": false,
-        "numeric_ok": false,
-        "raw_polarity": "higher_is_bearish",
-        "category": null,
-        "value_type": null,
-        "window_days": null
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "lower_is_bullish",
+        "category": "real-estate",
+        "value_type": "count",
+        "window_days": 180
       },
-      "gradeable": false,
-      "reason": "invalid direction_polarity 'higher_is_bearish' (not in enum)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "aircraft_operations",
@@ -55,22 +55,22 @@
     {
       "slug": "avg_days_on_market_swfl",
       "concept_id": "avg_days_on_market_swfl",
-      "bucket": "invalid-polarity",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "avg_days_on_market_swfl",
         "concept_id": "avg_days_on_market_swfl",
         "registered": true,
-        "polarity_state": "invalid",
-        "window_ok": false,
-        "numeric_ok": false,
-        "raw_polarity": "higher_is_bearish",
-        "category": null,
-        "value_type": null,
-        "window_days": null
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "lower_is_bullish",
+        "category": "real-estate",
+        "value_type": "days",
+        "window_days": 180
       },
-      "gradeable": false,
-      "reason": "invalid direction_polarity 'higher_is_bearish' (not in enum)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "city_pulse_signal",

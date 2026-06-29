@@ -10,8 +10,10 @@
   "concepts": {
     "active_listings_count_swfl": {
       "id": "active_listings_count_swfl",
+      "category": "real-estate",
+      "value_type": "count",
       "grade": {
-        "direction_polarity": "higher_is_bearish"
+        "direction_polarity": "lower_is_bullish"
       },
       "prefLabel": "SWFL Active Residential Listings (Count)",
       "altLabels": [
@@ -41,8 +43,10 @@
     },
     "avg_days_on_market_swfl": {
       "id": "avg_days_on_market_swfl",
+      "category": "real-estate",
+      "value_type": "days",
       "grade": {
-        "direction_polarity": "higher_is_bearish"
+        "direction_polarity": "lower_is_bullish"
       },
       "prefLabel": "SWFL Average Days on Market (Active Residential)",
       "altLabels": [
