@@ -13,13 +13,13 @@
   body{margin:0;background:var(--backdrop);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   .topbar{height:46px;background:#fff;border-bottom:1px solid #dde3e8;display:flex;align-items:center;
-    justify-content:space-between;padding:0 18px}
+    justify-content:space-between;padding:0 18px;margin-right:380px}
   .topbar .brand{font-weight:800;color:var(--primary);font-size:15px}
   .topbar .brand span{color:var(--accent)}
   .topbar .t{font-size:11px;color:var(--muted)}
   .topbar .t b{color:var(--primary)}
 
-  .app{display:flex;height:calc(100vh - 46px);min-height:820px}
+  .app{display:flex;height:calc(100vh - 46px);min-height:820px;margin-right:380px}
   .stage{flex:1;overflow:auto;padding:22px 22px 40px;display:flex;justify-content:center;align-items:flex-start}
 
   /* email canvas as a 12-col GRID */
@@ -84,7 +84,7 @@
   .socials{display:flex;gap:5px;margin-bottom:5px}.socials i{width:18px;height:18px;border-radius:4px;background:var(--primary);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;font-style:normal}
 
   /* AI panel */
-  .ai{width:344px;flex:0 0 344px;background:var(--panel);color:#e8eef0;padding:16px 16px 24px;display:flex;flex-direction:column;gap:13px;overflow:auto}
+  .ai{position:fixed;top:0;right:0;height:100vh;width:380px;background:var(--panel);color:#e8eef0;padding:20px 18px 24px;display:flex;flex-direction:column;gap:13px;overflow:auto;z-index:20}
   .ai .h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px}.ai .h .sp{color:var(--accent);font-size:16px}
   .built{background:rgba(61,201,192,.10);border:1px solid rgba(61,201,192,.32);border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.5}
   .built .ck{color:var(--accent);font-weight:800}
