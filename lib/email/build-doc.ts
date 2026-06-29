@@ -31,6 +31,9 @@ import {
 import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
 import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-image";
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
+import { isListingIntent } from "@/lib/email/listing-intent";
+import { fetchListingFacts } from "@/lib/email/listing-scrape";
+import { buildListingFlyer } from "@/lib/email/listing-flyer";
 import { chartSpecToEmailImage, type EmailChartImage } from "@/lib/email/spec-to-png";
 import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
 import { reshapeChartToType, chartTypeFits, type ChartType } from "@/lib/email/reshape-chart-type";
@@ -339,6 +342,33 @@ export async function buildContentDoc({
     return { httpStatus: 400, payload: { error: "Invalid email document." } };
   }
   let doc = docParsed.data;
+
+  // ── Listing flyer branch ───────────────────────────────────────────────────
+  // A "describe THIS house" ask carrying a pasted listing URL: scrape the page
+  // for REAL facts and rebuild the canvas as a property flyer (photo · price ·
+  // beds/baths/sqft · the real remarks), preserving the user's brand + identity.
+  // This is the layout transform the newsletter path can't do (it is forbidden to
+  // restructure blocks). A scrape miss falls through to the newsletter path below,
+  // so the build is never blocked — and a flyer is never built from invented data.
+  if (isListingIntent(prompt)) {
+    const url = extractUrls(prompt)[0];
+    const facts = url ? await fetchListingFacts(url).catch(() => null) : null;
+    if (facts) {
+      const flyer = buildListingFlyer(facts, doc);
+      const reparsed = EmailDocSchema.safeParse(flyer);
+      if (reparsed.success) {
+        return {
+          payload: {
+            doc: reparsed.data,
+            applied: true,
+            replacedLayout: true,
+            listing: { sourceUrl: facts.sourceUrl },
+          },
+        };
+      }
+    }
+  }
+
   const model = resolveEmailModel(mode);
 
   // Lake parts + chart in parallel. We pull the raw figures (each with its as-of) so a

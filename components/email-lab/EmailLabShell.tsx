@@ -302,6 +302,7 @@ export function EmailLabShell({
         message?: string;
         chart?: boolean;
         chartNote?: string;
+        replacedLayout?: boolean;
       };
       if (data.doc) {
         const parsed = EmailDocSchema.safeParse(data.doc);
@@ -309,6 +310,10 @@ export function EmailLabShell({
       }
       if (data.applied === false && data.message) {
         setAiMessage(data.message);
+      } else if (data.replacedLayout) {
+        setAiMessage(
+          "Built a property flyer from your listing — real photo, price, beds/baths/sqft, and the listing's own description. Hit undo to restore your previous email.",
+        );
       } else if (data.chartNote) {
         setAiMessage(data.chartNote);
       } else if (data.chart === false && /chart/i.test(trimmed)) {
