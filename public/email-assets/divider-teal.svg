@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="24" viewBox="0 0 600 24">
+  <!-- Dashed rule left of center diamond -->
+  <line x1="0" y1="12" x2="264" y2="12" stroke="#3DC9C0" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <!-- Flanking dots -->
+  <circle cx="280" cy="12" r="4" fill="#3DC9C0" opacity="0.45"/>
+  <!-- Center diamond -->
+  <polygon points="300,5 307,12 300,19 293,12" fill="#3DC9C0"/>
+  <!-- Flanking dots -->
+  <circle cx="320" cy="12" r="4" fill="#3DC9C0" opacity="0.45"/>
+  <!-- Dashed rule right of center diamond -->
+  <line x1="336" y1="12" x2="600" y2="12" stroke="#3DC9C0" stroke-width="1.5" stroke-dasharray="4 3"/>
+</svg>

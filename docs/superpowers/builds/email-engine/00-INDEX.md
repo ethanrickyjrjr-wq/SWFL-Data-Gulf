@@ -49,9 +49,9 @@
   - **Follow-ups (NOT regressions — free content-patch path keeps all):** author v1 omits the stale-figure web refresh + model-driven external/upload/user gap-fill lanes; they join the menu + anchor set in a later increment.
 - [x] 04 save-photo — **DONE + PUSHED** `bc4b6880`
 - [x] 05 listing+multicol blocks — **DONE**, `bunx next build` green, 629/629 email tests; listing card + multi-column (Cerberus hybrid) blocks; author vocab auto-picks them up (ONE root). **PUSHED** `3424f16b`
-- [ ] 06 templates
-- [ ] 07 asset-factory
+- [x] 06 templates — **DONE**, `bunx next build` green; 3 pre-positioned SEED_DOCS (luxury-market-report, new-listing, weekly-pulse) with `BlockLayout` on every block; `seedBlockGrid` helper added.
+- [x] 07 asset-factory — **DONE**; `public/email-assets/{header-swfl,divider-teal}.svg`; `scripts/render-email-assets.mts` (Inkscape file-in/file-out → `hostEmailPng` → `email-media/email-assets/`); `.github/workflows/email-assets.yml` (triggers on push to `public/email-assets/**`); `email-assets-live_verify` check open (requires live GHA run to close).
 - [x] G1 GridCanvas (operator) — **DONE + PUSHED** `efdc1c2b`; `react-grid-layout@2.2.3`; `bunx next build` green (compile+TS), eslint clean
-- [ ] G2 block-toolbar (operator)
-- [ ] G3 photopea-modal (operator)
-- [ ] G4 wire-shell (operator) — **next: `GridEmailLabShell.tsx`** (separate file, no collision with free EmailLabShell)
+- [x] G2 block-toolbar (operator) — **DONE** (built inside GridCanvas as part of "NORTH STAR made real" `0c22af89`): drag handle, duplicate, delete toolbar on hover/selection; "✦ Selected · ⅔ width" tag; "click to add" tile on empty cells. Per-block AI lives in the shell's right panel (inspector re-targets on click).
+- [x] G3 photopea-modal (operator) — **DONE**
+- [x] G4 wire-shell (operator) — **DONE**

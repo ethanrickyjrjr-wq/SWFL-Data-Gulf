@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="96" viewBox="0 0 600 96">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#0f1d24"/>
+      <stop offset="100%" stop-color="#152d38"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="600" height="96" fill="url(#bg)"/>
+  <!-- Teal left accent bar -->
+  <rect x="0" y="0" width="6" height="96" fill="#3DC9C0"/>
+  <!-- Bottom teal rule -->
+  <rect x="0" y="90" width="600" height="6" fill="#3DC9C0"/>
+  <!-- Brand wordmark -->
+  <text x="26" y="50" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#ffffff">SWFL Data Gulf</text>
+  <!-- Subheading -->
+  <text x="26" y="76" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#3DC9C0" letter-spacing="3">MARKET INTELLIGENCE</text>
+</svg>

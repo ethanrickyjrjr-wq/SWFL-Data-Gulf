@@ -1,0 +1,46 @@
+name: Render Email Assets
+
+# Triggered whenever a new or updated SVG lands in public/email-assets/ on either
+# the long-running design branch or main, or manually via workflow_dispatch.
+on:
+  push:
+    branches:
+      - main
+      - email-lab-grid
+    paths:
+      - "public/email-assets/**"
+  workflow_dispatch:
+
+# One run at a time — upserts are idempotent but there is no reason to race.
+concurrency:
+  group: email-assets
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Inkscape
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends inkscape
+          inkscape --version
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Render SVG → PNG → email-media
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: bun run scripts/render-email-assets.mts
