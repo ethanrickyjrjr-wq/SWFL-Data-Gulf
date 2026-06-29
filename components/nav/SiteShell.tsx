@@ -15,6 +15,7 @@ import {
   isItemActive,
   activeChildHref,
   isHiddenPath,
+  isChromeFree,
 } from "./nav-config";
 
 /**
@@ -65,7 +66,10 @@ function useShellUser(active: boolean): User | null {
 
 export function SiteShell() {
   const pathname = usePathname();
-  const hidden = isHiddenPath(pathname);
+  // Hidden on white-label/auth prefixes AND on full-screen editor surfaces
+  // (the paid email-lab grid owns the whole viewport). isChromeFree is separate
+  // from SHELL_HIDDEN_PREFIXES so the highlighter/pill still mount there.
+  const hidden = isHiddenPath(pathname) || isChromeFree(pathname);
   const user = useShellUser(!hidden);
   const [loginOpen, setLoginOpen] = useState(false);
 

@@ -73,6 +73,20 @@ export function isHiddenPath(pathname: string | null): boolean {
 }
 
 /**
+ * Full-screen editor surfaces that render NO global chrome (the site nav + the
+ * footer) so the canvas owns the whole viewport — but KEEP the normal AI
+ * highlighter/pill behavior of any other page. This is DELIBERATELY separate from
+ * SHELL_HIDDEN_PREFIXES: that set also gates the highlighter (page-mount-coverage
+ * pins it), so folding the email-lab editor in there would wrongly suppress the
+ * highlighter. Only SiteShell + SiteFooter read this.
+ */
+export const CHROME_FREE_PREFIXES = ["/email-lab/grid"] as const;
+
+export function isChromeFree(pathname: string | null): boolean {
+  return !!pathname && CHROME_FREE_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+/**
  * Home target for the logo. Logged-OUT → `/` (the marketing funnel, untouched).
  * Signed-IN → `/project`, the de-facto home base — its header carries quick links to
  * Charts / Search / Alerts / Contacts (B4), so a logged-in user's logo lands them on

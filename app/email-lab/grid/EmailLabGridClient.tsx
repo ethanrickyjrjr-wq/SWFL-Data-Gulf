@@ -16,9 +16,9 @@ export function EmailLabGridClient() {
       initialDoc={initialDoc}
       headerSlot={
         <span className="flex items-center gap-2 text-sm font-semibold">
-          <span className="text-white/85">Email</span>
-          <span className="text-gulf-teal">Lab</span>
-          <span className="rounded bg-gulf-teal/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gulf-teal">
+          <span className="text-[#fbbf24]">Email</span>
+          <span className="text-[#f59e0b]">Lab</span>
+          <span className="rounded bg-[#f59e0b] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-black">
             Grid · paid
           </span>
         </span>

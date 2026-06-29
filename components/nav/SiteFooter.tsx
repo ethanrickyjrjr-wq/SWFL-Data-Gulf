@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import DigestSubscribe from "@/components/email/DigestSubscribe";
-import { isHiddenPath } from "./nav-config";
+import { isHiddenPath, isChromeFree } from "./nav-config";
 
 /**
  * The ONE global footer — a real sitemap ("doormat navigation"), mounted once in the
@@ -51,7 +51,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
 
 export function SiteFooter() {
   const pathname = usePathname();
-  if (isHiddenPath(pathname)) return null;
+  if (isHiddenPath(pathname) || isChromeFree(pathname)) return null;
 
   return (
     <footer className="relative z-10 border-t border-white/5 bg-navy-dark">

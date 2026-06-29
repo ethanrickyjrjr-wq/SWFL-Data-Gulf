@@ -94,6 +94,7 @@ export function BrandingBlock({
   saving,
   savedMsg,
   onClose,
+  headerColorClass = "text-white",
 }: {
   branding: Record<string, string>;
   onChange: (next: Record<string, string>) => void;
@@ -105,6 +106,9 @@ export function BrandingBlock({
   saving: boolean;
   savedMsg: string | null;
   onClose: () => void;
+  /** Color class for the section headers (Branding / Connect Socials / Brand
+   *  colors). Defaults to white; the paid grid shell passes the brand orange. */
+  headerColorClass?: string;
 }) {
   // The color currently held in the picker — typed as hex or picked from the
   // chart, then dropped into one of the three save slots.
@@ -149,7 +153,7 @@ export function BrandingBlock({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <span className="text-sm font-semibold text-white">Branding</span>
+          <span className={`text-sm font-semibold ${headerColorClass}`}>Branding</span>
           <span className="ml-2 text-xs text-gray-500">Auto-fills Email Lab + deliverables.</span>
         </div>
         <button
@@ -233,7 +237,7 @@ export function BrandingBlock({
       {/* ── Connect Socials ── */}
       <div className="mt-4 border-t border-white/10 pt-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-semibold text-white">Connect Socials</span>
+          <span className={`text-xs font-semibold ${headerColorClass}`}>Connect Socials</span>
           <span className="text-[10px] text-gray-500">Auto-fill the footer + social block.</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -262,7 +266,7 @@ export function BrandingBlock({
       {/* Brand colors — type a hex or pick from the chart, then save to a slot. */}
       <div className="mt-4 border-t border-white/10 pt-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-semibold text-white">Brand colors</span>
+          <span className={`text-xs font-semibold ${headerColorClass}`}>Brand colors</span>
           <span className="text-[10px] text-gray-500">Type a hex or pick from the chart.</span>
         </div>
 

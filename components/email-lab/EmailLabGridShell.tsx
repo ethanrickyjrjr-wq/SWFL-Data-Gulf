@@ -640,16 +640,20 @@ export function EmailLabGridShell({
   const selectedWidth = selectedBlock ? (selectedBlock.layout?.w ?? GRID_COLS) : null;
 
   return (
-    <div className="grid h-dvh grid-cols-[1fr_380px] overflow-hidden bg-[#070f14] text-white">
+    <div className="grid h-dvh grid-cols-[1fr_380px] overflow-hidden bg-[#e9edf0] text-[#242424]">
       {/* ══════════ CENTER: top bar + grid canvas ══════════ */}
       <main className="flex min-w-0 flex-col overflow-hidden">
         {/* top bar */}
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/8 bg-[#0b141a] px-5 py-2.5">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black bg-[#111418] px-5 py-2.5">
           <div className="flex items-center gap-4">
             {headerSlot}
-            <span className="hidden text-[11px] text-white/30 lg:inline">
-              <span className="text-gulf-teal/70">Auto-reflow on</span> · widths snap to Full/½/⅓/⅔
-              · click to edit · click empty to add · drag a corner to resize
+            <span className="hidden items-center gap-2 text-[11px] lg:inline-flex">
+              <span className="rounded bg-[#f59e0b]/15 px-1.5 py-0.5 font-semibold text-[#fbbf24]">
+                Auto-reflow on
+              </span>
+              <span className="text-[#c2902f]">
+                click to edit · click an empty cell to add · drag a corner to resize
+              </span>
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -661,7 +665,7 @@ export function EmailLabGridShell({
                   setSelectedId(null);
                 }}
                 disabled={!canUndo(history)}
-                className="rounded border border-white/10 px-2 py-0.5 text-xs text-white/40 hover:text-white/70 disabled:opacity-25"
+                className="rounded border border-[#f59e0b]/40 px-2 py-0.5 text-xs text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-25"
                 title="Undo (⌘Z)"
               >
                 ↶
@@ -672,7 +676,7 @@ export function EmailLabGridShell({
                   setHistory((h) => redoHistory(h));
                 }}
                 disabled={!canRedo(history)}
-                className="rounded border border-white/10 px-2 py-0.5 text-xs text-white/40 hover:text-white/70 disabled:opacity-25"
+                className="rounded border border-[#f59e0b]/40 px-2 py-0.5 text-xs text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-25"
                 title="Redo (⌘⇧Z)"
               >
                 ↷
@@ -681,14 +685,14 @@ export function EmailLabGridShell({
             <button
               onClick={downloadPdf}
               disabled={exporting}
-              className="rounded border border-white/10 px-2.5 py-1 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white/70 disabled:opacity-30"
+              className="rounded border border-[#f59e0b]/40 px-2.5 py-1 text-xs text-[#f59e0b] transition-colors hover:border-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-30"
             >
               Download PDF
             </button>
             <button
               onClick={copyHtml}
               disabled={exporting}
-              className="rounded border border-white/10 px-2.5 py-1 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white/70 disabled:opacity-30"
+              className="rounded border border-[#f59e0b]/40 px-2.5 py-1 text-xs text-[#f59e0b] transition-colors hover:border-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-30"
             >
               {copied ? "Copied ✓" : "Copy HTML"}
             </button>
@@ -726,8 +730,8 @@ export function EmailLabGridShell({
         </div>
 
         {/* width-preset bar (selected block) */}
-        <div className="flex shrink-0 items-center gap-3 border-b border-white/8 bg-[#0d1920] px-5 py-2 text-xs">
-          <span className="text-white/40">Selected block width</span>
+        <div className="flex shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs">
+          <span className="text-gray-500">Selected block width</span>
           <div className="flex items-center gap-1">
             {WIDTH_PRESETS.map((p) => (
               <button
@@ -737,15 +741,15 @@ export function EmailLabGridShell({
                 onClick={() => setSelectedWidth(p.w)}
                 className={`min-w-[42px] rounded-md border px-2 py-1 text-[11px] transition-colors ${
                   selectedWidth === p.w
-                    ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
-                    : "border-white/10 bg-white/5 text-white/50 hover:text-white/80 disabled:opacity-30 disabled:hover:text-white/50"
+                    ? "border-gulf-teal bg-gulf-teal text-[#06231f]"
+                    : "border-gray-300 bg-white text-gray-600 hover:text-gray-900 disabled:opacity-40 disabled:hover:text-gray-600"
                 }`}
               >
                 {p.label}
               </button>
             ))}
           </div>
-          <span className="text-[10px] text-white/25">
+          <span className="text-[10px] text-gray-400">
             {selectedBlock
               ? "a fine grid underneath snaps it — you never count columns"
               : "click a block to set its width"}
@@ -766,7 +770,7 @@ export function EmailLabGridShell({
       </main>
 
       {/* ══════════ RIGHT: AI assistant (full height) ══════════ */}
-      <aside className="flex flex-col overflow-hidden border-l border-white/8 bg-[#0b141a]">
+      <aside className="flex flex-col overflow-hidden border-l border-[#0a141a] bg-[#0f1d24]">
         <div className="flex shrink-0 items-center gap-2 border-b border-white/8 px-4 py-3">
           <span className="text-gulf-teal">✦</span>
           <span className="text-sm font-semibold text-white/85">AI assistant</span>
@@ -840,7 +844,7 @@ export function EmailLabGridShell({
           {/* ── NOW EDITING (re-targets to the selected block) ── */}
           {selectedBlock ? (
             <div className="border-b border-white/8 px-4 pb-4 pt-4">
-              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-white/35">
+              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[#f59e0b]">
                 Now editing
               </p>
               <p className="mt-1 text-sm font-semibold text-white/85">
@@ -906,6 +910,7 @@ export function EmailLabGridShell({
                   saving={brandSaving}
                   savedMsg={brandSavedMsg}
                   onClose={() => setShowBrand(false)}
+                  headerColorClass="text-[#f59e0b]"
                 />
                 <label className="mt-3 block border-t border-white/10 pt-3">
                   <span className="mb-1 block text-[10px] text-white/40">Font</span>
