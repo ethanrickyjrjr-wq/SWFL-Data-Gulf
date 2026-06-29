@@ -64,7 +64,10 @@ export function isTransientError(err: unknown): boolean {
     msg.includes("socket hang up") ||
     msg.includes("econnreset") ||
     msg.includes("etimedout") ||
-    msg.includes("fetch failed")
+    msg.includes("fetch failed") ||
+    // Bun fetch: TCP connection dropped mid-response (external API or Supabase blip)
+    msg.includes("socket connection was closed unexpectedly") ||
+    msg.includes("socket closed")
   );
 }
 

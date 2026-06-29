@@ -1,3 +1,7 @@
+## 2026-06-29 (main) — fix(refinery): add Bun socket error patterns to isTransientError
+
+env-swfl failed with "The socket connection was closed unexpectedly" — Bun's TCP drop message — which wasn't in isTransientError patterns, so it was classified as deterministic → HOLD on master. Added `msg.includes("socket connection was closed unexpectedly")` and `msg.includes("socket closed")` to the transient list. Next: GHA rebuild to let env-swfl retry as transient (if socket is intermittent) or build locally.
+
 ## 2026-06-29 (main) — ci(smoke): VERCEL_TOKEN added — first real smoke run trigger
 
 All prior smoke runs timed out because VERCEL_TOKEN was missing; curl -sf fell back to empty list silently. Token now in GHA secrets. This push is the first genuine test — poller should find the READY deployment and proceed to HTTP assertions.
