@@ -41,7 +41,10 @@ import { BLOCK_MENU } from "./AddBlockPanel";
 import { applyBrand } from "./EmailLabShell";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
-import { PhotopeaModal } from "./PhotopeaModal";
+import dynamic from "next/dynamic";
+const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.FilerobotModal), {
+  ssr: false,
+});
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import {
@@ -1107,7 +1110,7 @@ export function EmailLabGridShell({
       )}
 
       {photopeaBlock && (
-        <PhotopeaModal
+        <FilerobotModal
           block={photopeaBlock}
           onSave={(blockId, url) => {
             commit({

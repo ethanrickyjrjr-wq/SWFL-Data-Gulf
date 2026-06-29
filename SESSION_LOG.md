@@ -1,3 +1,7 @@
+## 2026-06-29 (email-lab-grid) — Swap Photopea → Filerobot Image Editor (MIT, no ads)
+
+Replaced PhotopeaModal iframe with FilerobotModal using react-filerobot-image-editor@5.0.0-beta.159 (MIT). No ads, React 19 compatible. onSave → base64 → /api/email-lab/media PUT → URL written into block. Dynamic import (ssr:false) avoids konva node-canvas SSR error. Build clean.
+
 ## 2026-06-29 (email-lab-grid) — Photos panel: add image-by-URL
 
 Added URL input + Add button to the Photos accordion in EmailLabGridShell. Paste any image URL and hit Add (or Enter) — wires into the existing `applyPhotoUrl` logic (updates selected image/listing block, or creates a new image block at the bottom). Also minor width-preset bar style cleanup.
