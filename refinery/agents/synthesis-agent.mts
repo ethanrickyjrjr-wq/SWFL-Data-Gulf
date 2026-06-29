@@ -105,7 +105,11 @@ export async function synthesize(
     data: f.normalized,
   }));
 
-  const response = await client.messages.create(
+  // Use streaming so SSE keep-alive events prevent server-side connection drops
+  // on long generations (cre-swfl: 93 fragments, ~14 min, consistently dropped
+  // non-streaming connections even with the 25-min SDK timeout raised).
+  console.log(`[stage 3] synthesis: streaming ${input.length} fragment(s) via ${SYNTHESIS_MODEL}`);
+  const stream = client.messages.stream(
     {
       model: SYNTHESIS_MODEL,
       max_tokens: 16000,
@@ -131,11 +135,10 @@ export async function synthesize(
           content: `Synthesize reference facts from these ${input.length} triaged fragments:\n\n${JSON.stringify(input, null, 2)}`,
         },
       ],
-      // 25-min ceiling: cre-swfl (92 fragments, 539 concept tags) consistently hits
-      // the SDK 10-min default and returns "Connection error" from GHA runners.
     },
     { timeout: 25 * 60 * 1000 },
   );
+  const response = await stream.finalMessage();
 
   const toolUse = response.content.find((b) => b.type === "tool_use");
   if (!toolUse || toolUse.type !== "tool_use") {
