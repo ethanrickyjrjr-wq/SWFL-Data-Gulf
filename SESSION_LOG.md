@@ -1,3 +1,9 @@
+## 2026-06-29 (main) — Prod smoke runner: GHA workflow shipped (Task 2)
+
+Created `.github/workflows/smoke-prod.yml` — fires on push to `main` (+ `workflow_dispatch`), polls the Vercel API until the deployment for the triggering SHA is READY (max 40×15s = 10 min), then runs `bun scripts/smoke-prod.mts --base https://www.swfldatagulf.com`.
+VERCEL_TOKEN secret required — operator action: vercel.com/account/tokens → create token "GHA smoke runner", then add as GHA secret `VERCEL_TOKEN` at github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/settings/secrets/actions.
+Next: close `smoke_prod_runner_live_verify` after first green GHA run.
+
 ## 2026-06-29 (email-lab-grid) — Fix "Something went wrong" on Build with AI + kill highlighter popup in grid lab
 
 Two bugs fixed:
