@@ -6,9 +6,9 @@
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 32,
-    "gradeable": 132,
-    "reviewed-display": 24,
-    "moat-fuel": 79,
+    "gradeable": 155,
+    "reviewed-display": 28,
+    "moat-fuel": 52,
     "needs-window": 23,
     "backtest_clean": 11
   },
@@ -898,212 +898,212 @@
     {
       "slug": "env_collier_sfha_coverage_pct",
       "concept_id": "env_collier_sfha_coverage_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_collier_sfha_coverage_pct",
         "concept_id": "env_collier_sfha_coverage_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_collier_ve_zone_coverage_pct",
       "concept_id": "env_collier_ve_zone_coverage_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_collier_ve_zone_coverage_pct",
         "concept_id": "env_collier_ve_zone_coverage_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_flood_losses_swfl_baseline_annual_usd",
       "concept_id": "env_flood_losses_swfl_baseline_annual_usd",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_flood_losses_swfl_baseline_annual_usd",
         "concept_id": "env_flood_losses_swfl_baseline_annual_usd",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "currency",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_flood_losses_swfl_post_ian_ratio",
       "concept_id": "env_flood_losses_swfl_post_ian_ratio",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_flood_losses_swfl_post_ian_ratio",
         "concept_id": "env_flood_losses_swfl_post_ian_ratio",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_flood_losses_swfl_storm_year_count_since_2000",
       "concept_id": "env_flood_losses_swfl_storm_year_count_since_2000",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_flood_losses_swfl_storm_year_count_since_2000",
         "concept_id": "env_flood_losses_swfl_storm_year_count_since_2000",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_flood_losses_swfl_storm_year_total_usd",
       "concept_id": "env_flood_losses_swfl_storm_year_total_usd",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_flood_losses_swfl_storm_year_total_usd",
         "concept_id": "env_flood_losses_swfl_storm_year_total_usd",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "currency",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_flood_risk_pct",
       "concept_id": "env_flood_risk_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_flood_risk_pct",
         "concept_id": "env_flood_risk_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "percentage",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
       "concept_id": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
         "concept_id": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_hurricane_closest_pass_5yr_min_mi_swfl",
       "concept_id": "env_hurricane_closest_pass_5yr_min_mi_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_hurricane_closest_pass_5yr_min_mi_swfl",
         "concept_id": "env_hurricane_closest_pass_5yr_min_mi_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "environmental",
         "value_type": "distance_mi",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_hurricane_landfalls_swfl_30yr",
       "concept_id": "env_hurricane_landfalls_swfl_30yr",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_hurricane_landfalls_swfl_30yr",
         "concept_id": "env_hurricane_landfalls_swfl_30yr",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_hurricane_most_recent_landfall_swfl",
@@ -1129,91 +1129,91 @@
     {
       "slug": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
       "concept_id": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
         "concept_id": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "currency_usd",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
       "concept_id": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
         "concept_id": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "currency_usd",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_lee_sfha_coverage_pct",
       "concept_id": "env_lee_sfha_coverage_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_lee_sfha_coverage_pct",
         "concept_id": "env_lee_sfha_coverage_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_lee_ve_zone_coverage_pct",
       "concept_id": "env_lee_ve_zone_coverage_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_lee_ve_zone_coverage_pct",
         "concept_id": "env_lee_ve_zone_coverage_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_rainfall_swfl_annual_in",
       "concept_id": "env_rainfall_swfl_annual_in",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "env_rainfall_swfl_annual_in",
         "concept_id": "env_rainfall_swfl_annual_in",
@@ -1225,7 +1225,7 @@
         "category": "environmental",
         "value_type": "depth_in",
         "window_days": 180,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -1339,49 +1339,49 @@
     {
       "slug": "env_storm_major_storm_count_30yr_swfl",
       "concept_id": "env_storm_major_storm_count_30yr_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_storm_major_storm_count_30yr_swfl",
         "concept_id": "env_storm_major_storm_count_30yr_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_storm_property_damage_events_10yr_swfl",
       "concept_id": "env_storm_property_damage_events_10yr_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_storm_property_damage_events_10yr_swfl",
         "concept_id": "env_storm_property_damage_events_10yr_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_storm_total_storm_count_30yr_swfl",
       "concept_id": "env_storm_total_storm_count_30yr_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "env_storm_total_storm_count_30yr_swfl",
         "concept_id": "env_storm_total_storm_count_30yr_swfl",
@@ -1393,7 +1393,7 @@
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -1402,28 +1402,28 @@
     {
       "slug": "env_storm_tropical_cyclones_10yr_swfl",
       "concept_id": "env_storm_tropical_cyclones_10yr_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_storm_tropical_cyclones_10yr_swfl",
         "concept_id": "env_storm_tropical_cyclones_10yr_swfl",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_sw_stage_caloosahatchee_ft",
       "concept_id": "env_sw_stage_caloosahatchee_ft",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "env_sw_stage_caloosahatchee_ft",
         "concept_id": "env_sw_stage_caloosahatchee_ft",
@@ -1435,7 +1435,7 @@
         "category": "environmental",
         "value_type": "elevation_ft",
         "window_days": 180,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -1444,49 +1444,49 @@
     {
       "slug": "env_swfl_sfha_coverage_pct",
       "concept_id": "env_swfl_sfha_coverage_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_swfl_sfha_coverage_pct",
         "concept_id": "env_swfl_sfha_coverage_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_swfl_ve_zone_coverage_pct",
       "concept_id": "env_swfl_ve_zone_coverage_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_swfl_ve_zone_coverage_pct",
         "concept_id": "env_swfl_ve_zone_coverage_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_swfl_ve_zone_polygon_count",
       "concept_id": "env_swfl_ve_zone_polygon_count",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "env_swfl_ve_zone_polygon_count",
         "concept_id": "env_swfl_ve_zone_polygon_count",
@@ -1498,7 +1498,7 @@
         "category": "environmental",
         "value_type": "integer",
         "window_days": 180,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -1528,86 +1528,86 @@
     {
       "slug": "env_zip_flood_aal_pct_swfl_rank",
       "concept_id": "env_zip_flood_aal_pct_swfl_rank",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_zip_flood_aal_pct_swfl_rank",
         "concept_id": "env_zip_flood_aal_pct_swfl_rank",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "percentile",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_zip_flood_aal_usd_per_insured_property",
       "concept_id": "env_zip_flood_aal_usd_per_insured_property",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_zip_flood_aal_usd_per_insured_property",
         "concept_id": "env_zip_flood_aal_usd_per_insured_property",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "currency",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_zip_flood_cap_rate_adj_bps",
       "concept_id": "env_zip_flood_cap_rate_adj_bps",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_zip_flood_cap_rate_adj_bps",
         "concept_id": "env_zip_flood_cap_rate_adj_bps",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "bps",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_zip_insurance_pct_typical_noi",
       "concept_id": "env_zip_insurance_pct_typical_noi",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "env_zip_insurance_pct_typical_noi",
         "concept_id": "env_zip_insurance_pct_typical_noi",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "fgcu_reri_active_listings_pct_change",

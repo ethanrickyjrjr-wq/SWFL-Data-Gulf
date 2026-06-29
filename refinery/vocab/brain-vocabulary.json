@@ -1487,6 +1487,9 @@
     },
     "env_flood_risk_pct": {
       "id": "env_flood_risk_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Flood Risk Percentage",
       "altLabels": [
         "flood risk",
@@ -1513,6 +1516,9 @@
     },
     "env_swfl_sfha_coverage_pct": {
       "id": "env_swfl_sfha_coverage_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Area-Weighted SFHA Coverage",
       "altLabels": [
         "SWFL SFHA %",
@@ -1541,6 +1547,9 @@
     },
     "env_swfl_ve_zone_coverage_pct": {
       "id": "env_swfl_ve_zone_coverage_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Area-Weighted Coastal V/VE Coverage",
       "altLabels": [
         "SWFL V/VE %",
@@ -1569,6 +1578,9 @@
     },
     "env_swfl_ve_zone_polygon_count": {
       "id": "env_swfl_ve_zone_polygon_count",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "SWFL Coastal V/VE Polygon Count",
       "altLabels": [
         "SWFL VE polygons",
@@ -1593,6 +1605,9 @@
     },
     "env_lee_sfha_coverage_pct": {
       "id": "env_lee_sfha_coverage_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Lee County Area-Weighted SFHA Coverage",
       "altLabels": [
         "Lee SFHA %",
@@ -1622,6 +1637,9 @@
     },
     "env_lee_ve_zone_coverage_pct": {
       "id": "env_lee_ve_zone_coverage_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Lee County Area-Weighted Coastal V/VE Coverage",
       "altLabels": [
         "Lee V/VE %",
@@ -1651,6 +1669,9 @@
     },
     "env_collier_sfha_coverage_pct": {
       "id": "env_collier_sfha_coverage_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Collier County Area-Weighted SFHA Coverage",
       "altLabels": [
         "Collier SFHA %",
@@ -1680,6 +1701,9 @@
     },
     "env_collier_ve_zone_coverage_pct": {
       "id": "env_collier_ve_zone_coverage_pct",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Collier County Area-Weighted Coastal V/VE Coverage",
       "altLabels": [
         "Collier V/VE %",
@@ -1709,6 +1733,9 @@
     },
     "env_flood_losses_swfl_storm_year_total_usd": {
       "id": "env_flood_losses_swfl_storm_year_total_usd",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Storm-Year NFIP Paid Claims (Cumulative)",
       "altLabels": [
         "SWFL storm-year claims USD",
@@ -1740,6 +1767,9 @@
     },
     "env_flood_losses_swfl_baseline_annual_usd": {
       "id": "env_flood_losses_swfl_baseline_annual_usd",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Non-Storm-Year Annual NFIP Paid Claims (Median)",
       "altLabels": [
         "SWFL baseline annual flood losses",
@@ -1771,6 +1801,9 @@
     },
     "env_flood_losses_swfl_storm_year_count_since_2000": {
       "id": "env_flood_losses_swfl_storm_year_count_since_2000",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Named-Storm-Year Count Since 2000",
       "altLabels": [
         "SWFL storm frequency",
@@ -1801,6 +1834,9 @@
     },
     "env_flood_losses_swfl_post_ian_ratio": {
       "id": "env_flood_losses_swfl_post_ian_ratio",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Post-Ian Flood Recovery Ratio (Latest Year Ã· Baseline)",
       "altLabels": [
         "post-Ian claims ratio",
@@ -1833,6 +1869,9 @@
     },
     "env_zip_flood_aal_usd_per_insured_property": {
       "id": "env_zip_flood_aal_usd_per_insured_property",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Per-ZIP NFIP Average Annual Loss per Insured Property (USD/yr)",
       "altLabels": [
         "ZIP-level flood AAL",
@@ -1866,6 +1905,9 @@
     },
     "env_zip_flood_aal_pct_swfl_rank": {
       "id": "env_zip_flood_aal_pct_swfl_rank",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Per-ZIP NFIP AAL Percentile Rank Across SWFL ZIPs",
       "altLabels": [
         "ZIP AAL percentile rank SWFL",
@@ -1932,6 +1974,9 @@
     },
     "env_zip_flood_cap_rate_adj_bps": {
       "id": "env_zip_flood_cap_rate_adj_bps",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Per-ZIP SWFL Flood Cap-Rate Adjustment (bps)",
       "altLabels": [
         "ZIP flood cap-rate premium",
@@ -1965,6 +2010,9 @@
     },
     "env_zip_insurance_pct_typical_noi": {
       "id": "env_zip_insurance_pct_typical_noi",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Per-ZIP SWFL Imputed Flood Insurance as Share of NOI",
       "altLabels": [
         "ZIP flood insurance burden",
@@ -1998,6 +2046,9 @@
     },
     "env_storm_property_damage_events_10yr_swfl": {
       "id": "env_storm_property_damage_events_10yr_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Property-Damage Events (10-Year Window)",
       "altLabels": [
         "SWFL property-damage event count",
@@ -2026,6 +2077,9 @@
     },
     "env_storm_tropical_cyclones_10yr_swfl": {
       "id": "env_storm_tropical_cyclones_10yr_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Tropical Cyclones Affecting the Footprint (10-Year Window)",
       "altLabels": [
         "SWFL hurricanes 10yr",
@@ -2054,6 +2108,9 @@
     },
     "env_storm_major_storm_count_30yr_swfl": {
       "id": "env_storm_major_storm_count_30yr_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Major Storm Count (Full Vintage)",
       "altLabels": [
         "SWFL major storms 30yr",
@@ -2082,6 +2139,9 @@
     },
     "env_storm_total_storm_count_30yr_swfl": {
       "id": "env_storm_total_storm_count_30yr_swfl",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "SWFL Total Storm Event Count (Full Vintage)",
       "altLabels": [
         "SWFL total storms",
@@ -2231,6 +2291,9 @@
     },
     "env_hurricane_landfalls_swfl_30yr": {
       "id": "env_hurricane_landfalls_swfl_30yr",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Hurricane Landfalls (Trailing 30-Year Window)",
       "altLabels": [
         "SWFL landfall count",
@@ -2259,6 +2322,9 @@
     },
     "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl": {
       "id": "env_hurricane_cat3plus_passes_within_50mi_30yr_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Cat-3+ Hurricane Passes Within 50mi (30-Year Window)",
       "altLabels": [
         "Cat3+ passes SWFL",
@@ -2287,6 +2353,9 @@
     },
     "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl": {
       "id": "env_hurricane_nfip_paid_per_landfall_storm_avg_usd_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Average NFIP Paid per Landfall Storm (USD)",
       "altLabels": [
         "NFIP per-landfall avg SWFL",
@@ -2316,6 +2385,9 @@
     },
     "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl": {
       "id": "env_hurricane_worst_storm_county_year_nfip_paid_usd_swfl",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SWFL Worst Storm-County-Year NFIP Paid (USD)",
       "altLabels": [
         "worst NFIP storm-county-year SWFL"
@@ -2367,6 +2439,9 @@
     },
     "env_hurricane_closest_pass_5yr_min_mi_swfl": {
       "id": "env_hurricane_closest_pass_5yr_min_mi_swfl",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Closest Hurricane Pass (Trailing 5-Year Window, miles)",
       "altLabels": [
         "closest pass 5yr SWFL",
@@ -2395,6 +2470,9 @@
     },
     "env_sw_stage_caloosahatchee_ft": {
       "id": "env_sw_stage_caloosahatchee_ft",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Caloosahatchee River Stage (S-79 / Olga)",
       "altLabels": [
         "Caloosahatchee stage ft",
@@ -2425,6 +2503,9 @@
     },
     "env_rainfall_swfl_annual_in": {
       "id": "env_rainfall_swfl_annual_in",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "SWFL Annual Rainfall (Latest Complete Year)",
       "altLabels": [
         "SWFL annual rainfall inches",
