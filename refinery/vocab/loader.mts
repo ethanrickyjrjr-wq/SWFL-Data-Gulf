@@ -20,12 +20,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Vocabulary, VocabConcept } from "../stages/2.5-normalize.mts";
 
-const VOCAB_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "vocab",
-  "brain-vocabulary.json",
-);
+const VOCAB_PATH = path.join(process.cwd(), "refinery", "vocab", "brain-vocabulary.json");
 
 let cached: Vocabulary | null = null;
 
@@ -47,9 +42,7 @@ export function resetVocabularyCacheSync(): void {
  * typo in a constitution rule should fail loud at module-init time, not
  * silently fall through to "the rule never fires."
  */
-export function resolveConceptSlugs(
-  conceptIds: readonly string[],
-): Set<string> {
+export function resolveConceptSlugs(conceptIds: readonly string[]): Set<string> {
   const vocab = loadVocabularySync();
   const slugs = new Set<string>();
   const missing: string[] = [];
@@ -87,10 +80,7 @@ export function resolveConceptSlugs(
 // Never throws — returns gradeable:false with a `reason` for any non-gradeable slug.
 // ---------------------------------------------------------------------------
 
-export type DirectionPolarity =
-  | "higher_is_bullish"
-  | "lower_is_bullish"
-  | "none";
+export type DirectionPolarity = "higher_is_bullish" | "lower_is_bullish" | "none";
 export type GradeBasis = "delta" | "sign";
 export type EpsilonMode = "absolute" | "relative";
 
@@ -115,9 +105,7 @@ const VALID_DIRECTION_POLARITY: ReadonlySet<string> = new Set([
  * absent / "none" is the declared-but-non-directional case; anything else is
  * out-of-enum and names the raw token (COND 1/2).
  */
-export function polarityFailureReason(
-  rawPolarity: string | null | undefined,
-): string {
+export function polarityFailureReason(rawPolarity: string | null | undefined): string {
   return rawPolarity == null || rawPolarity === "none"
     ? "no direction_polarity declared (slug-only, never inherited)"
     : `invalid direction_polarity '${rawPolarity}' (not in enum)`;
@@ -221,11 +209,7 @@ function conceptForSlug(vocab: Vocabulary, slug: string): VocabConcept | null {
   return vocab.concepts[slug] ?? null; // slug may already be a canonical concept id
 }
 
-function ungradeable(
-  slug: string,
-  concept_id: string | null,
-  reason: string,
-): ResolvedGradeConfig {
+function ungradeable(slug: string, concept_id: string | null, reason: string): ResolvedGradeConfig {
   return {
     slug,
     concept_id,
@@ -250,11 +234,7 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
   const vocab = loadVocabularySync();
   const concept = conceptForSlug(vocab, slug);
   if (!concept) {
-    return ungradeable(
-      slug,
-      null,
-      `slug "${slug}" is not registered in the vocabulary`,
-    );
+    return ungradeable(slug, null, `slug "${slug}" is not registered in the vocabulary`);
   }
 
   const g = concept.grade;
@@ -265,22 +245,16 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
   // normalizes to "none" for the resolved config, but the raw token is kept
   // (for source.polarity provenance and the gate's reason string).
   const rawPolarity = g?.direction_polarity;
-  const polarityValid =
-    rawPolarity != null && VALID_DIRECTION_POLARITY.has(rawPolarity);
-  const direction_polarity: DirectionPolarity = polarityValid
-    ? rawPolarity
-    : "none";
+  const polarityValid = rawPolarity != null && VALID_DIRECTION_POLARITY.has(rawPolarity);
+  const direction_polarity: DirectionPolarity = polarityValid ? rawPolarity : "none";
 
   // Window — slug override, else category default.
-  const window_days =
-    g?.window_days ?? CATEGORY_WINDOW_DAYS[concept.category] ?? null;
+  const window_days = g?.window_days ?? CATEGORY_WINDOW_DAYS[concept.category] ?? null;
   const windowSource: "slug" | "category" | null =
     g?.window_days != null ? "slug" : window_days != null ? "category" : null;
 
   // Epsilon / basis — slug override, else value_type bucket.
-  const bucket = concept.value_type
-    ? VALUE_TYPE_BUCKET[concept.value_type]
-    : undefined;
+  const bucket = concept.value_type ? VALUE_TYPE_BUCKET[concept.value_type] : undefined;
   const epsilon = g?.epsilon ?? bucket?.epsilon ?? null;
   const epsilon_mode = g?.epsilon_mode ?? bucket?.epsilon_mode ?? null;
   const grade_basis = g?.grade_basis ?? bucket?.grade_basis ?? null;
@@ -340,9 +314,7 @@ export function resolveGradeConfig(slug: string): ResolvedGradeConfig {
 export type PolarityState = "valid_directional" | "none" | "invalid";
 
 /** Three-state classification of a raw direction_polarity token. */
-export function classifyPolarity(
-  raw: string | null | undefined,
-): PolarityState {
+export function classifyPolarity(raw: string | null | undefined): PolarityState {
   if (raw == null || raw === "none") return "none";
   return VALID_DIRECTION_POLARITY.has(raw) ? "valid_directional" : "invalid";
 }
@@ -368,6 +340,8 @@ export interface GateVector {
   category: string | null;
   value_type: string | null;
   window_days: number | null;
+  /** grade.reviewed_non_directional === true — deliberately non-directional. */
+  reviewed_non_directional: boolean;
 }
 
 /**
@@ -390,6 +364,7 @@ export function gateVector(slug: string): GateVector {
       category: null,
       value_type: null,
       window_days: null,
+      reviewed_non_directional: false,
     };
   }
 
@@ -403,12 +378,9 @@ export function gateVector(slug: string): GateVector {
         ? "valid_directional"
         : "invalid";
 
-  const window_days =
-    g?.window_days ?? CATEGORY_WINDOW_DAYS[concept.category] ?? null;
+  const window_days = g?.window_days ?? CATEGORY_WINDOW_DAYS[concept.category] ?? null;
 
-  const bucket = concept.value_type
-    ? VALUE_TYPE_BUCKET[concept.value_type]
-    : undefined;
+  const bucket = concept.value_type ? VALUE_TYPE_BUCKET[concept.value_type] : undefined;
   const epsilon = g?.epsilon ?? bucket?.epsilon ?? null;
   const grade_basis = g?.grade_basis ?? bucket?.grade_basis ?? null;
 
@@ -423,5 +395,6 @@ export function gateVector(slug: string): GateVector {
     category: concept.category ?? null,
     value_type: concept.value_type ?? null,
     window_days,
+    reviewed_non_directional: g?.reviewed_non_directional === true,
   };
 }

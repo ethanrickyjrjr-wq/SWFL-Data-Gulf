@@ -81,6 +81,13 @@ export interface VocabConcept {
     epsilon_mode?: "absolute" | "relative";
     /** Override the value_type grade basis. */
     grade_basis?: "delta" | "sign";
+    /**
+     * Marks a numeric, polarity-`none` concept as deliberately non-directional
+     * (a level/identifier that shouldn't be directionally graded). Buckets it
+     * `reviewed-display` instead of `moat-fuel` so the backlog has a true floor.
+     * Does NOT make the concept gradeable.
+     */
+    reviewed_non_directional?: boolean;
   };
 }
 
@@ -158,20 +165,13 @@ export interface NormalizeOptions {
 // Vocab loading (cached)
 // ---------------------------------------------------------------------------
 
-const VOCAB_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "vocab",
-  "brain-vocabulary.json",
-);
+const VOCAB_PATH = path.join(process.cwd(), "refinery", "vocab", "brain-vocabulary.json");
 
 let vocabPromise: Promise<Vocabulary> | null = null;
 
 export async function loadVocabulary(): Promise<Vocabulary> {
   if (!vocabPromise) {
-    vocabPromise = readFile(VOCAB_PATH, "utf-8").then(
-      (raw) => JSON.parse(raw) as Vocabulary,
-    );
+    vocabPromise = readFile(VOCAB_PATH, "utf-8").then((raw) => JSON.parse(raw) as Vocabulary);
   }
   return vocabPromise;
 }
@@ -228,12 +228,8 @@ export function resolveSlug(
       fieldPath.includes("key_metrics") ||
       fieldPath.includes("metric") ||
       // any path that isn't a single segment is "nested"
-      /[.\[]/.test(
-        fieldPath.split(/^(?:normalized|classification)\./).pop() ?? fieldPath,
-      );
-    const targetId = isNestedMetric
-      ? "qual_metric_trajectory"
-      : "qual_sentiment_direction";
+      /[.\[]/.test(fieldPath.split(/^(?:normalized|classification)\./).pop() ?? fieldPath);
+    const targetId = isNestedMetric ? "qual_metric_trajectory" : "qual_sentiment_direction";
     const concept = vocab.concepts[targetId];
     if (!concept) return null;
     return {
@@ -350,12 +346,7 @@ function collectClaims(
   return { claims };
 }
 
-type VisitFn = (
-  path: string,
-  key: string,
-  value: unknown,
-  siblings: Set<string>,
-) => void;
+type VisitFn = (path: string, key: string, value: unknown, siblings: Set<string>) => void;
 
 function walk(node: unknown, path: string, visit: VisitFn): void {
   if (Array.isArray(node)) {
@@ -448,8 +439,7 @@ export async function normalizeStage(
       .slice(0, 5)
       .map((o) => `  - ${o.fragment_id} :: ${o.path} :: "${o.raw_slug}"`)
       .join("\n");
-    const more =
-      orphans.length > 5 ? `\n  ... and ${orphans.length - 5} more` : "";
+    const more = orphans.length > 5 ? `\n  ... and ${orphans.length - 5} more` : "";
     throw new Error(
       `[normalize] Orphan Concept error: ${orphans.length} slug claim(s) in pack "${pack.id}" ` +
         `are not registered in refinery/vocab/brain-vocabulary.json:\n${sample}${more}\n` +

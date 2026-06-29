@@ -59,6 +59,7 @@ export type Bucket =
   | "invalid-polarity"
   | "row-candidate"
   | "gradeable"
+  | "reviewed-display"
   | "moat-fuel"
   | "needs-window";
 
@@ -81,6 +82,7 @@ export function assignBucket(gv: GateVector): Bucket {
     return "gradeable"; // passes all gates
   }
   if (gv.polarity_state === "none" && gv.window_ok) {
+    if (gv.reviewed_non_directional) return "reviewed-display"; // looked at, deliberately not graded
     return "moat-fuel"; // polarity is the SOLE blocker — cheapest unlock
   }
   return "needs-window"; // numeric, !window_ok (valid or none polarity)
@@ -114,6 +116,7 @@ function runSweep(): { output: SweepOutput; pinFailures: string[] } {
     "invalid-polarity": 0,
     "row-candidate": 0,
     gradeable: 0,
+    "reviewed-display": 0,
     "moat-fuel": 0,
     "needs-window": 0,
     backtest_clean: 0,
@@ -181,6 +184,7 @@ function main(): void {
     "invalid-polarity",
     "row-candidate",
     "gradeable",
+    "reviewed-display",
     "moat-fuel",
     "needs-window",
   ] as const) {
@@ -234,4 +238,4 @@ function main(): void {
   );
 }
 
-main();
+if (import.meta.main) main();
