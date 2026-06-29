@@ -54,6 +54,8 @@ const DEFAULT_H: Record<BlockType, number> = {
   signal: 5,
   text: 5,
   image: 8,
+  listing: 9,
+  "multi-column": 5,
   "agent-card": 6,
   "agent-hero": 8,
   "social-icons": 2,

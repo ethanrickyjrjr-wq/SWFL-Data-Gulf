@@ -7,6 +7,8 @@ import { StatsBlock } from "./StatsBlock";
 import { SignalBlock } from "./SignalBlock";
 import { TextBlock } from "./TextBlock";
 import { ImageBlock } from "./ImageBlock";
+import { ListingBlock } from "./ListingBlock";
+import { MultiColumnBlock } from "./MultiColumnBlock";
 import { AgentCardBlock } from "./AgentCardBlock";
 import { AgentHeroBlock } from "./AgentHeroBlock";
 import { SocialIconsBlock } from "./SocialIconsBlock";
@@ -34,6 +36,10 @@ export function BlockRenderer({
       return <TextBlock props={block.props} globalStyle={globalStyle} />;
     case "image":
       return <ImageBlock props={block.props} globalStyle={globalStyle} />;
+    case "listing":
+      return <ListingBlock props={block.props} globalStyle={globalStyle} />;
+    case "multi-column":
+      return <MultiColumnBlock props={block.props} globalStyle={globalStyle} />;
     case "agent-card":
       return <AgentCardBlock props={block.props} globalStyle={globalStyle} />;
     case "agent-hero":

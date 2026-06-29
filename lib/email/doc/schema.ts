@@ -25,6 +25,8 @@ import type {
   HeaderProps,
   HeroProps,
   ImageProps,
+  ListingProps,
+  MultiColumnProps,
   SignalProps,
   SocialIconsProps,
   StatsProps,
@@ -109,6 +111,33 @@ const ImagePropsSchema = z.object({
   paddingY: paddingY(),
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<ImageProps>;
+
+const ListingPropsSchema = z.object({
+  photoUrl: z.string().optional(),
+  price: z.string().max(40).optional(),
+  beds: z.string().max(20).optional(),
+  baths: z.string().max(20).optional(),
+  sqft: z.string().max(24).optional(),
+  address: z.string().max(160).optional(),
+  badge: z.string().max(40).optional(),
+  linkUrl: z.string().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
+}) satisfies z.ZodType<ListingProps>;
+
+const MultiColumnColumnSchema = z.object({
+  imageUrl: z.string().optional(),
+  heading: z.string().max(120).optional(),
+  body: z.string().max(500).optional(),
+  linkUrl: z.string().optional(),
+  linkLabel: z.string().max(40).optional(),
+});
+
+const MultiColumnPropsSchema = z.object({
+  columns: z.array(MultiColumnColumnSchema).min(2).max(3),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
+}) satisfies z.ZodType<MultiColumnProps>;
 
 const AgentCardPropsSchema = z.object({
   photoUrl: z.string().optional(),
@@ -219,6 +248,8 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("signal"), props: SignalPropsSchema }),
     z.object({ id: idIn, type: z.literal("text"), props: TextPropsSchema }),
     z.object({ id: idIn, type: z.literal("image"), props: ImagePropsSchema }),
+    z.object({ id: idIn, type: z.literal("listing"), props: ListingPropsSchema }),
+    z.object({ id: idIn, type: z.literal("multi-column"), props: MultiColumnPropsSchema }),
     z.object({ id: idIn, type: z.literal("agent-card"), props: AgentCardPropsSchema }),
     z.object({ id: idIn, type: z.literal("agent-hero"), props: AgentHeroPropsSchema }),
     z.object({ id: idIn, type: z.literal("social-icons"), props: SocialIconsPropsSchema }),

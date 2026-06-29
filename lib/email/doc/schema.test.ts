@@ -48,6 +48,46 @@ const fullDoc: EmailDoc = {
       props: { url: "https://x/i.jpg", alt: "a", caption: "c" },
     },
     {
+      id: "block_listing1",
+      type: "listing",
+      props: {
+        photoUrl: "https://x/p.jpg",
+        price: "$489,000",
+        beds: "3",
+        baths: "2",
+        sqft: "1,840",
+        address: "4521 Surfside Blvd, Cape Coral",
+        badge: "Virtual Tour",
+        linkUrl: "https://x/listing",
+        paddingY: "sm",
+        sectionBg: "#fff",
+      },
+    },
+    {
+      id: "block_multicol1",
+      type: "multi-column",
+      props: {
+        columns: [
+          {
+            imageUrl: "https://x/a.jpg",
+            heading: "A",
+            body: "b",
+            linkUrl: "https://x/a",
+            linkLabel: "Go",
+          },
+          {
+            imageUrl: "https://x/b.jpg",
+            heading: "B",
+            body: "c",
+            linkUrl: "https://x/b",
+            linkLabel: "Go",
+          },
+        ],
+        paddingY: "lg",
+        sectionBg: "#eee",
+      },
+    },
+    {
       id: "block_aaaa7777",
       type: "agent-card",
       props: {

@@ -42,6 +42,21 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
   },
   text: { body: "Write your message here.", align: "left" },
   image: { url: "", alt: "", caption: "" },
+  listing: {
+    photoUrl: "",
+    price: "$489,000",
+    beds: "3",
+    baths: "2",
+    sqft: "1,840",
+    address: "4521 Surfside Blvd, Cape Coral",
+    badge: "",
+  },
+  "multi-column": {
+    columns: [
+      { heading: "Column one", body: "A short description for the first column." },
+      { heading: "Column two", body: "A short description for the second column." },
+    ],
+  },
   "agent-card": {
     name: "Your Name",
     title: "Realtor®",

@@ -17,6 +17,8 @@ export type BlockType =
   | "signal"
   | "text"
   | "image"
+  | "listing"
+  | "multi-column"
   | "agent-card"
   | "agent-hero"
   | "social-icons"
@@ -115,6 +117,41 @@ export interface ImageProps extends BlockBase {
   linkUrl?: string;
 }
 
+/** A single property card: photo on top, price, beds/baths/sqft, address. All
+ *  fields are USER-OWNED / listing-sourced (a price is a real number — the AI
+ *  content-patch can never write them; they come from the inspector or a listing
+ *  URL pull). `badge` is a small tag ("Virtual Tour", "Just Sold"). */
+export interface ListingProps extends BlockBase {
+  photoUrl?: string;
+  price?: string;
+  beds?: string;
+  baths?: string;
+  sqft?: string;
+  address?: string;
+  badge?: string;
+  /** Click-through to the listing — wraps the card photo in an <a> tag. */
+  linkUrl?: string;
+}
+
+/** One column in a `multi-column` row — a flat "feature card": image + heading +
+ *  body + optional link. Intentionally NOT nested blocks (the doc model stays a
+ *  flat array; the paid grid is the path to richer side-by-side layouts). */
+export interface MultiColumnColumn {
+  imageUrl?: string;
+  heading?: string;
+  body?: string;
+  linkUrl?: string;
+  linkLabel?: string;
+}
+
+/** A 2–3 column row. Side by side on desktop, stacks to one column on mobile
+ *  (fluid inline-block — the Cerberus pattern; degrades to stacked in Outlook).
+ *  `columns[]` is the structural exception (ordered by array position, like
+ *  `stats`). */
+export interface MultiColumnProps extends BlockBase {
+  columns: MultiColumnColumn[];
+}
+
 export interface AgentCardProps {
   photoUrl?: string;
   name?: string;
@@ -196,6 +233,8 @@ export interface BlockPropsMap {
   signal: SignalProps;
   text: TextProps;
   image: ImageProps;
+  listing: ListingProps;
+  "multi-column": MultiColumnProps;
   "agent-card": AgentCardProps;
   "agent-hero": AgentHeroProps;
   "social-icons": SocialIconsProps;

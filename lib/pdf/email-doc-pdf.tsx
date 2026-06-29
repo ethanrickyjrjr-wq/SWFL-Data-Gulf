@@ -527,6 +527,122 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       );
     }
 
+    case "listing": {
+      const p = block.props;
+      const specs = [
+        p.beds ? `${p.beds} bd` : null,
+        p.baths ? `${p.baths} ba` : null,
+        p.sqft ? `${p.sqft} sqft` : null,
+      ]
+        .filter(Boolean)
+        .join("   ·   ");
+      return (
+        <View style={s.section}>
+          {p.photoUrl ? (
+            <Image src={p.photoUrl} style={{ width: "100%", borderRadius: 8, marginBottom: 10 }} />
+          ) : null}
+          {p.badge ? (
+            <Text
+              style={{
+                fontFamily: font,
+                fontSize: 9,
+                fontWeight: "bold",
+                color: gs.primaryColor,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+                marginBottom: 6,
+              }}
+            >
+              {p.badge}
+            </Text>
+          ) : null}
+          {p.price ? (
+            <Text
+              style={{ fontFamily: font, fontSize: 20, fontWeight: "bold", color: gs.primaryColor }}
+            >
+              {p.price}
+            </Text>
+          ) : null}
+          {specs ? (
+            <Text style={{ fontFamily: font, fontSize: 12, color: MUTED, marginTop: 4 }}>
+              {specs}
+            </Text>
+          ) : null}
+          {p.address ? (
+            <Text style={{ fontFamily: font, fontSize: 12, color: gs.textColor, marginTop: 4 }}>
+              {p.address}
+            </Text>
+          ) : null}
+          {p.linkUrl ? (
+            <Link
+              src={p.linkUrl}
+              style={{
+                fontFamily: font,
+                fontSize: 12,
+                fontWeight: "bold",
+                color: gs.accentColor,
+                marginTop: 8,
+              }}
+            >
+              View listing →
+            </Link>
+          ) : null}
+        </View>
+      );
+    }
+
+    case "multi-column": {
+      const cols = block.props.columns ?? [];
+      return (
+        <View style={[s.section, { flexDirection: "row" }]}>
+          {cols.map((c, i) => (
+            <View key={i} style={{ flex: 1, paddingHorizontal: 6 }}>
+              {c.imageUrl ? (
+                <Image
+                  src={c.imageUrl}
+                  style={{ width: "100%", borderRadius: 6, marginBottom: 6 }}
+                />
+              ) : null}
+              {c.heading ? (
+                <Text
+                  style={{
+                    fontFamily: font,
+                    fontSize: 13,
+                    fontWeight: "bold",
+                    color: gs.primaryColor,
+                    marginBottom: 4,
+                  }}
+                >
+                  {c.heading}
+                </Text>
+              ) : null}
+              {c.body ? (
+                <Text
+                  style={{ fontFamily: font, fontSize: 11, lineHeight: 1.6, color: gs.textColor }}
+                >
+                  {c.body}
+                </Text>
+              ) : null}
+              {c.linkUrl ? (
+                <Link
+                  src={c.linkUrl}
+                  style={{
+                    fontFamily: font,
+                    fontSize: 11,
+                    fontWeight: "bold",
+                    color: gs.accentColor,
+                    marginTop: 6,
+                  }}
+                >
+                  {c.linkLabel || "Learn more"} →
+                </Link>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      );
+    }
+
     default: {
       // Exhaustiveness guard: a new BlockType must add a case above, or the build
       // fails here — so the PDF can never silently drop a block kind.

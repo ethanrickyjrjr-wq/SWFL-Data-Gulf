@@ -9,6 +9,7 @@ import type {
   EmailBlock,
   FooterProps,
   KnownPlatform,
+  MultiColumnColumn,
   PaddingSize,
   SocialIconsProps,
   SocialPlatformEntry,
@@ -24,6 +25,8 @@ const LABELS: Record<EmailBlock["type"], string> = {
   signal: "Callout",
   text: "Text",
   image: "Image",
+  listing: "Listing",
+  "multi-column": "Columns",
   "agent-card": "Agent Card",
   "agent-hero": "Agent Feature",
   "social-icons": "Social Icons",
@@ -228,6 +231,67 @@ export function BlockInspector({
               value={str("linkUrl")}
               onChange={(v) => set("linkUrl", v)}
               placeholder="https://… (makes image clickable)"
+            />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
+          </>
+        )}
+
+        {block.type === "listing" && (
+          <>
+            <TextField
+              label="Photo URL"
+              value={str("photoUrl")}
+              onChange={(v) => set("photoUrl", v)}
+              placeholder="https://… (or pull from a listing URL)"
+            />
+            <TextField
+              label="Price"
+              value={str("price")}
+              onChange={(v) => set("price", v)}
+              placeholder="$489,000"
+            />
+            <div className="grid grid-cols-3 gap-2">
+              <TextField label="Beds" value={str("beds")} onChange={(v) => set("beds", v)} />
+              <TextField label="Baths" value={str("baths")} onChange={(v) => set("baths", v)} />
+              <TextField label="Sq ft" value={str("sqft")} onChange={(v) => set("sqft", v)} />
+            </div>
+            <TextField
+              label="Address"
+              value={str("address")}
+              onChange={(v) => set("address", v)}
+              placeholder="4521 Surfside Blvd, Cape Coral"
+            />
+            <TextField
+              label="Badge"
+              value={str("badge")}
+              onChange={(v) => set("badge", v)}
+              placeholder="Virtual Tour"
+            />
+            <TextField
+              label="Link URL"
+              value={str("linkUrl")}
+              onChange={(v) => set("linkUrl", v)}
+              placeholder="https://… (makes card clickable)"
+            />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
+          </>
+        )}
+
+        {block.type === "multi-column" && (
+          <>
+            <MultiColumnEditor
+              columns={(props.columns as MultiColumnColumn[]) ?? []}
+              onChange={(c) => set("columns", c)}
             />
             <BlockBaseControls
               paddingY={props.paddingY as PaddingSize | undefined}
@@ -645,6 +709,85 @@ function StatsEditor({
           className="w-full rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50"
         >
           + Add stat
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+// ── Multi-column editor ──────────────────────────────────────────────────────
+
+function MultiColumnEditor({
+  columns,
+  onChange,
+}: {
+  columns: MultiColumnColumn[];
+  onChange: (c: MultiColumnColumn[]) => void;
+}) {
+  const update = (i: number, key: keyof MultiColumnColumn, v: string) =>
+    onChange(columns.map((c, j) => (j === i ? { ...c, [key]: v } : c)));
+  return (
+    <div className="space-y-3">
+      {columns.map((c, i) => (
+        <div key={i} className="space-y-1.5 rounded-md border border-gray-200 p-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-500">Column {i + 1}</span>
+            {columns.length > 2 ? (
+              <button
+                type="button"
+                onClick={() => onChange(columns.filter((_, j) => j !== i))}
+                className="text-xs text-red-400 hover:text-red-600"
+              >
+                Remove
+              </button>
+            ) : null}
+          </div>
+          <input
+            type="text"
+            className={inputCls}
+            value={c.heading ?? ""}
+            placeholder="Heading"
+            onChange={(e) => update(i, "heading", e.target.value)}
+          />
+          <textarea
+            className={`${inputCls} resize-y`}
+            rows={3}
+            value={c.body ?? ""}
+            placeholder="Body text"
+            onChange={(e) => update(i, "body", e.target.value)}
+          />
+          <input
+            type="text"
+            className={inputCls}
+            value={c.imageUrl ?? ""}
+            placeholder="Image URL (optional)"
+            onChange={(e) => update(i, "imageUrl", e.target.value)}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="text"
+              className={inputCls}
+              value={c.linkUrl ?? ""}
+              placeholder="Link URL"
+              onChange={(e) => update(i, "linkUrl", e.target.value)}
+            />
+            <input
+              type="text"
+              className={inputCls}
+              value={c.linkLabel ?? ""}
+              placeholder="Link label"
+              onChange={(e) => update(i, "linkLabel", e.target.value)}
+            />
+          </div>
+        </div>
+      ))}
+      {columns.length < 3 ? (
+        <button
+          type="button"
+          onClick={() => onChange([...columns, { heading: "", body: "" }])}
+          className="w-full rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50"
+        >
+          + Add column
         </button>
       ) : null}
     </div>
