@@ -2577,6 +2577,9 @@
     },
     "hosp_tdt_yoy_delta": {
       "id": "hosp_tdt_yoy_delta",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "TDT Year-over-Year Delta",
       "altLabels": [
         "TDT YoY",
@@ -2666,6 +2669,9 @@
     },
     "hosp_tdt_seasonal_position": {
       "id": "hosp_tdt_seasonal_position",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "TDT Seasonal Position vs Historical Mean",
       "altLabels": [
         "seasonal position",
@@ -5523,6 +5529,9 @@
     },
     "fl_dor_taxable_sales_latest_usd": {
       "id": "fl_dor_taxable_sales_latest_usd",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Monthly Taxable Sales (Latest)",
       "altLabels": [
         "SWFL taxable sales latest month"
@@ -5545,6 +5554,9 @@
     },
     "fl_dor_taxable_sales_yoy_pct": {
       "id": "fl_dor_taxable_sales_yoy_pct",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Taxable Sales YoY Change",
       "altLabels": [
         "taxable sales year-over-year"
@@ -5571,6 +5583,9 @@
     },
     "fl_dor_taxable_sales_trailing_12mo_usd": {
       "id": "fl_dor_taxable_sales_trailing_12mo_usd",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Taxable Sales Trailing 12 Months",
       "altLabels": [
         "taxable sales trailing 12mo"
@@ -5891,6 +5906,9 @@
     },
     "enplanements": {
       "id": "enplanements",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Monthly Enplanements",
       "altLabels": [
         "enplaned passengers",
@@ -5915,6 +5933,9 @@
     },
     "deplanements": {
       "id": "deplanements",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Monthly Deplanements",
       "altLabels": [
         "deplaned passengers",
@@ -5939,6 +5960,9 @@
     },
     "total_passengers": {
       "id": "total_passengers",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Monthly Total Passengers",
       "altLabels": [
         "total throughput",
@@ -5962,6 +5986,9 @@
     },
     "aircraft_operations": {
       "id": "aircraft_operations",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Monthly Aircraft Operations",
       "altLabels": [
         "aircraft movements",
@@ -5985,6 +6012,9 @@
     },
     "total_freight_lbs": {
       "id": "total_freight_lbs",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Monthly Air Freight (lbs)",
       "altLabels": [
         "air cargo",
@@ -6008,6 +6038,9 @@
     },
     "rsw_monthly_enplanements": {
       "id": "rsw_monthly_enplanements",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "RSW Monthly Enplanements (Departures)",
       "altLabels": [
         "RSW boardings",
@@ -6058,6 +6091,9 @@
     },
     "rsw_total_passengers": {
       "id": "rsw_total_passengers",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "RSW Monthly Total Passengers",
       "altLabels": [
         "RSW throughput",
@@ -6081,6 +6117,9 @@
     },
     "rsw_trailing_12mo_total_passengers": {
       "id": "rsw_trailing_12mo_total_passengers",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "RSW Trailing 12-Mo Total Passengers",
       "altLabels": [
         "RSW annual run rate",
@@ -6130,6 +6169,9 @@
     },
     "rsw_deplanements": {
       "id": "rsw_deplanements",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "RSW Monthly Deplanements (Arrivals)",
       "altLabels": [
         "RSW arrivals",
@@ -6154,6 +6196,9 @@
     },
     "rsw_aircraft_operations": {
       "id": "rsw_aircraft_operations",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "RSW Monthly Aircraft Operations",
       "altLabels": [
         "RSW movements",
@@ -6177,6 +6222,9 @@
     },
     "rsw_freight_lbs": {
       "id": "rsw_freight_lbs",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "RSW Monthly Air Freight",
       "altLabels": [
         "RSW air cargo",
@@ -6200,6 +6248,9 @@
     },
     "rsw_pax_per_operation": {
       "id": "rsw_pax_per_operation",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "RSW Passengers per Aircraft Operation",
       "altLabels": [
         "RSW utilization proxy",
@@ -6223,6 +6274,9 @@
     },
     "rsw_seasonality_ratio": {
       "id": "rsw_seasonality_ratio",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "RSW Seasonality Ratio",
       "altLabels": [
         "RSW peak-to-median ratio",
@@ -6641,7 +6695,8 @@
     "licenses_cbc_share_swfl": {
       "id": "licenses_cbc_share_swfl",
       "grade": {
-        "direction_polarity": "none"
+        "direction_polarity": "none",
+        "reviewed_non_directional": true
       },
       "prefLabel": "FL DBPR CBC Share of Active Licenses — SWFL",
       "altLabels": [
@@ -7453,6 +7508,9 @@
     },
     "econ_dev_announcements_90d": {
       "id": "econ_dev_announcements_90d",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Economic Development Announcements (Last 90 Days)",
       "altLabels": [
         "econ dev announcements 90d",
@@ -7481,6 +7539,9 @@
     },
     "econ_dev_announcements_prior_90d": {
       "id": "econ_dev_announcements_prior_90d",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "SWFL Economic Development Announcements (Prior 90-Day Window)",
       "altLabels": [
         "econ dev announcements prior 90d"
@@ -7508,6 +7569,9 @@
     },
     "econ_dev_investment_usd_90d": {
       "id": "econ_dev_investment_usd_90d",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Disclosed Economic-Development Investment (Last 90 Days)",
       "altLabels": [
         "econ dev investment 90d"
@@ -7535,6 +7599,9 @@
     },
     "econ_dev_jobs_90d": {
       "id": "econ_dev_jobs_90d",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "SWFL Disclosed Economic-Development Jobs (Last 90 Days)",
       "altLabels": [
         "econ dev jobs 90d"

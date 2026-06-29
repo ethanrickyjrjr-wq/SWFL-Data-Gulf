@@ -6,9 +6,9 @@
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 32,
-    "gradeable": 177,
-    "reviewed-display": 35,
-    "moat-fuel": 23,
+    "gradeable": 195,
+    "reviewed-display": 40,
+    "moat-fuel": 0,
     "needs-window": 23,
     "backtest_clean": 11
   },
@@ -37,23 +37,23 @@
     {
       "slug": "aircraft_operations",
       "concept_id": "aircraft_operations",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "aircraft_operations",
         "concept_id": "aircraft_operations",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "avg_days_on_market_swfl",
@@ -772,49 +772,49 @@
     {
       "slug": "deplanements",
       "concept_id": "deplanements",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "deplanements",
         "concept_id": "deplanements",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "econ_dev_announcements_90d",
       "concept_id": "econ_dev_announcements_90d",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "econ_dev_announcements_90d",
         "concept_id": "econ_dev_announcements_90d",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "economic-activity",
         "value_type": "count",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "econ_dev_announcements_prior_90d",
       "concept_id": "econ_dev_announcements_prior_90d",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "econ_dev_announcements_prior_90d",
         "concept_id": "econ_dev_announcements_prior_90d",
@@ -826,7 +826,7 @@
         "category": "economic-activity",
         "value_type": "count",
         "window_days": 120,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -835,65 +835,65 @@
     {
       "slug": "econ_dev_investment_usd_90d",
       "concept_id": "econ_dev_investment_usd_90d",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "econ_dev_investment_usd_90d",
         "concept_id": "econ_dev_investment_usd_90d",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "economic-activity",
         "value_type": "currency",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "econ_dev_jobs_90d",
       "concept_id": "econ_dev_jobs_90d",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "econ_dev_jobs_90d",
         "concept_id": "econ_dev_jobs_90d",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "economic-activity",
         "value_type": "count",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "enplanements",
       "concept_id": "enplanements",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "enplanements",
         "concept_id": "enplanements",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "env_collier_sfha_coverage_pct",
@@ -1885,65 +1885,65 @@
     {
       "slug": "fl_dor_taxable_sales_latest_usd",
       "concept_id": "fl_dor_taxable_sales_latest_usd",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "fl_dor_taxable_sales_latest_usd",
         "concept_id": "fl_dor_taxable_sales_latest_usd",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "economic-activity",
         "value_type": "currency_usd",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "fl_dor_taxable_sales_trailing_12mo_usd",
       "concept_id": "fl_dor_taxable_sales_trailing_12mo_usd",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "fl_dor_taxable_sales_trailing_12mo_usd",
         "concept_id": "fl_dor_taxable_sales_trailing_12mo_usd",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "economic-activity",
         "value_type": "currency_usd",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "fl_dor_taxable_sales_yoy_pct",
       "concept_id": "fl_dor_taxable_sales_yoy_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "fl_dor_taxable_sales_yoy_pct",
         "concept_id": "fl_dor_taxable_sales_yoy_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "economic-activity",
         "value_type": "percentage",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "freshness_mortgage_30yr_fixed_pct",
@@ -2221,7 +2221,7 @@
     {
       "slug": "hosp_tdt_seasonal_position",
       "concept_id": "hosp_tdt_seasonal_position",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "hosp_tdt_seasonal_position",
         "concept_id": "hosp_tdt_seasonal_position",
@@ -2233,7 +2233,7 @@
         "category": "hospitality",
         "value_type": "ratio",
         "window_days": 120,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -2263,23 +2263,23 @@
     {
       "slug": "hosp_tdt_yoy_delta",
       "concept_id": "hosp_tdt_yoy_delta",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "hosp_tdt_yoy_delta",
         "concept_id": "hosp_tdt_yoy_delta",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "hospitality",
         "value_type": "percentage",
         "window_days": 120,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "housing_avg_sale_to_list_swfl",
@@ -2809,7 +2809,7 @@
     {
       "slug": "licenses_cbc_share_swfl",
       "concept_id": "licenses_cbc_share_swfl",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "licenses_cbc_share_swfl",
         "concept_id": "licenses_cbc_share_swfl",
@@ -2821,7 +2821,7 @@
         "category": "labor",
         "value_type": "percentage",
         "window_days": 395,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -4888,91 +4888,91 @@
     {
       "slug": "rsw_aircraft_operations",
       "concept_id": "rsw_aircraft_operations",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "rsw_aircraft_operations",
         "concept_id": "rsw_aircraft_operations",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rsw_deplanements",
       "concept_id": "rsw_deplanements",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "rsw_deplanements",
         "concept_id": "rsw_deplanements",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rsw_freight_lbs",
       "concept_id": "rsw_freight_lbs",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "rsw_freight_lbs",
         "concept_id": "rsw_freight_lbs",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rsw_monthly_enplanements",
       "concept_id": "rsw_monthly_enplanements",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "rsw_monthly_enplanements",
         "concept_id": "rsw_monthly_enplanements",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rsw_pax_per_operation",
       "concept_id": "rsw_pax_per_operation",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "rsw_pax_per_operation",
         "concept_id": "rsw_pax_per_operation",
@@ -4984,7 +4984,7 @@
         "category": "demand-signal",
         "value_type": "ratio",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -4993,7 +4993,7 @@
     {
       "slug": "rsw_seasonality_ratio",
       "concept_id": "rsw_seasonality_ratio",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "rsw_seasonality_ratio",
         "concept_id": "rsw_seasonality_ratio",
@@ -5005,7 +5005,7 @@
         "category": "demand-signal",
         "value_type": "ratio",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -5014,44 +5014,44 @@
     {
       "slug": "rsw_total_passengers",
       "concept_id": "rsw_total_passengers",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "rsw_total_passengers",
         "concept_id": "rsw_total_passengers",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rsw_trailing_12mo_total_passengers",
       "concept_id": "rsw_trailing_12mo_total_passengers",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "rsw_trailing_12mo_total_passengers",
         "concept_id": "rsw_trailing_12mo_total_passengers",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rsw_trailing_12mo_total_passengers_yoy",
@@ -5959,44 +5959,44 @@
     {
       "slug": "total_freight_lbs",
       "concept_id": "total_freight_lbs",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "total_freight_lbs",
         "concept_id": "total_freight_lbs",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "total_passengers",
       "concept_id": "total_passengers",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "total_passengers",
         "concept_id": "total_passengers",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "demand-signal",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "traffic_aadt_swfl_5yr_cagr_pct",
