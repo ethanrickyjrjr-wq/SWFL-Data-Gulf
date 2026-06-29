@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v56 | Token: SWFL-7421-v56-20260629 -->
+<!-- FRESHNESS: v57 | Token: SWFL-7421-v57-20260629 -->
 ---
 brain_id: cre-swfl
-version: 56
-refined_at: 2026-06-29T16:00:47Z
-freshness_token: SWFL-7421-v56-20260629
+version: 57
+refined_at: 2026-06-29T16:30:05Z
+freshness_token: SWFL-7421-v57-20260629
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL commercial real estate corridors — verified corridor intelligence (profiles, character, active flags)
@@ -47,20 +47,54 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
   {"id":"f007","topic":"metric:vacancy_rate_median","fact":"Median vacancy rate across SWFL CRE corridors with reported metrics","value":"Median vacancy rate is 3.2% across 27 of 27 corridors that have reported metrics this period.","src":"s01","date":"2026-06-29"},
   {"id":"f008","topic":"metric:absorption_sqft_median","fact":"Median net absorption across SWFL CRE corridors with reported metrics","value":"Median net absorption is 6,397 sqft across 23 of 27 corridors that have reported metrics this period.","src":"s01","date":"2026-06-29"},
   {"id":"f009","topic":"metric:asking_rent_psf_median","fact":"Median asking rent (PSF, NNN) across SWFL CRE corridors with reported metrics","value":"Median asking rent is $30.88/sqft across 27 of 27 corridors that have reported metrics this period.","src":"s01","date":"2026-06-29"},
-  {"id":"f010","topic":"corridor-pulse:recent","fact":"East Naples — breaking","value":"East Naples: Federal agents raided Oakes Farms' packing plant and Alfie Oakes' North Naples home; a related lawsuit lists Synovus Bank as a defendant due to a loan Oakes obtained for Oakes Farms on Davis Boulevard, which was flooded by storm surge. (source: https://www.gulfshorebusiness.com/feds-raid-oakes-farms-packing-plant-alfie-oakes-north-naples-home/)","src":"s01","date":"2026-06-29"},
-  {"id":"f011","topic":"corridor-pulse:recent","fact":"Bonita Trail — transactions","value":"Bonita Trail: A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million; the 4,665-square-foot retail property sits on 1.18 acres just off South Tamiami Trail. (source: https://www.businessobserverfl.com/news/2026/may/03/lee-hillsborough-charlotte-shopping-centers/)","src":"s01","date":"2026-06-29"},
-  {"id":"f012","topic":"corridor-pulse:recent","fact":"Bonita Trail — transactions","value":"Bonita Trail: Collier County is finalizing an $11.64 million contract to purchase a 1½-mile portion of Seminole Gulf Railway property that would link to the Bonita Estero Rail Trail. (source: https://www.gulfshorebusiness.com/collier/collier-rail-trail-plan-faces-environmental-challenges/article_7ad8e797-7396-4660-8cdf-b15d3cc5c23b.html)","src":"s01","date":"2026-06-29"},
-  {"id":"f013","topic":"corridor-pulse:recent","fact":"Coral Pointe (Cape Coral) — transactions","value":"Coral Pointe (Cape Coral): A retail store at 1499 S.W. Pine Island Road, Cape Coral was sold; buyer is EKS Investments LLC, seller is Piedmont GFIM Ft Myers Tamiami GW LLC. (source: https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/)","src":"s01","date":"2026-06-29"},
-  {"id":"f014","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — transactions","value":"Ben Hill Griffin: On March 27, 2026, LSI Companies, Inc. brokered a 61.3± acre mixed-use property in Fort Myers, FL for $20,451,050.56. (source: https://lsicompanies.com/lsi-companies-brokersa-61-3%C2%B1-acre-mixed-use-property-in-fort-myers-fl/)","src":"s01","date":"2026-06-29"},
-  {"id":"f015","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — transactions","value":"Ben Hill Griffin: Ryan Companies, a Minneapolis-based apartment developer, purchased the 61.3-acre parcel divided by Alico Road for $20.45 million; the 47-acre rectangular tract is north of Alico Road. (source: https://www.gulfshorebusiness.com/real_estate/alico-road-development-site-acquired-by-ryan-companies/article_fee689af-61c5-4db1-9d8a-2530c5a16b04.html)","src":"s01","date":"2026-06-29"}
+  {"id":"f010","topic":"corridor-pulse:recent","fact":"Bonita Trail — transactions","value":"Bonita Trail: A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million; the 4,665-square-foot retail property sits on 1.18 acres just off South Tamiami Trail. (source: https://www.businessobserverfl.com/news/2026/may/03/lee-hillsborough-charlotte-shopping-centers/)","src":"s01","date":"2026-06-29"},
+  {"id":"f011","topic":"corridor-pulse:recent","fact":"Bonita Trail — transactions","value":"Bonita Trail: Collier County is finalizing an $11.64 million contract to purchase a 1½-mile portion of Seminole Gulf Railway property that would link to the Bonita Estero Rail Trail. (source: https://www.gulfshorebusiness.com/collier/collier-rail-trail-plan-faces-environmental-challenges/article_7ad8e797-7396-4660-8cdf-b15d3cc5c23b.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f012","topic":"corridor-pulse:recent","fact":"Coral Pointe (Cape Coral) — transactions","value":"Coral Pointe (Cape Coral): A retail store at 1499 S.W. Pine Island Road, Cape Coral was sold; buyer is EKS Investments LLC, seller is Piedmont GFIM Ft Myers Tamiami GW LLC. (source: https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/)","src":"s01","date":"2026-06-29"},
+  {"id":"f013","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — transactions","value":"Ben Hill Griffin: On March 27, 2026, LSI Companies, Inc. brokered a 61.3± acre mixed-use property in Fort Myers, FL for $20,451,050.56. (source: https://lsicompanies.com/lsi-companies-brokersa-61-3%C2%B1-acre-mixed-use-property-in-fort-myers-fl/)","src":"s01","date":"2026-06-29"},
+  {"id":"f014","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — transactions","value":"Ben Hill Griffin: Ryan Companies, a Minneapolis-based apartment developer, purchased the 61.3-acre parcel divided by Alico Road for $20.45 million; the 47-acre rectangular tract is north of Alico Road. (source: https://www.gulfshorebusiness.com/real_estate/alico-road-development-site-acquired-by-ryan-companies/article_fee689af-61c5-4db1-9d8a-2530c5a16b04.html)","src":"s01","date":"2026-06-29"},
+  {"id":"f015","topic":"corridor-pulse:recent","fact":"Estero / Bonita line — transactions","value":"Estero / Bonita line: Woodfield Development (South Carolina) and ELV Associates (Boston) paid $32.6 million for the Estero property at U.S. 41 and Coconut Road; the property was originally owned by Lee Health, which assembled the parcels over three years for $18.5 million. (source: https://www.businessobserverfl.com/article/apartment-developers-pay-dollar32-6-million-for-estero-property)","src":"s01","date":"2026-06-29"},
+  {"id":"f016","topic":"corridor_profile","fact":"5th Ave South / 3rd Street South (Downtown Naples) — mixed-use-downtown, Collier County, seasonal_index 0.60 — 2026-Q1 key metrics","value":"Vacancy 1.8% (stable); asking rent $60.84/sqft triple-net (rising); net absorption 1,500 sqft (stable); cap rate 6.7% (rising). Collier County unemployment 4.5% in March 2026, up 1.2 pp year-over-year. The corridor functions as an ultra-luxury global retail destination operating at effective capacity — redevelopment and lease turnover are the only entry plays. 4th Ave S is emerging as a dining expansion zone catalyzed by the Gulfshore Playhouse Baker Theatre ($72M, opened Oct/Nov 2025), with three boutique concepts targeting the pre/post-theater crowd and a full dining row projected mid-2027. Active flags: (1) 4th Ave S dining wave — 3 concepts open, full row mid-2027 (permitting backlog); (2) RH Gallery + Rooftop Restaurant opened Nov 2025, anchoring the west end. Pipeline: The Avenue, a 4.3-acre mixed-use project by APREA Developments, has broken ground and will deliver 75,000 sqft of retail, dining, and wellness space topped by 50 luxury residences; Olde Naples Hotel (109-room luxury boutique) has opened on Third Street South. Institutional conviction is visible in the Hoffmann family's resumed acquisitions along Fifth Avenue South and M Development's $40.25M consolidation of the Fifth-and-Eighth block.","src":"s01","date":"2026-06-29"},
+  {"id":"f017","topic":"qualitative_cross_corridor_patterns","fact":"SWFL cross-corridor macro patterns — 2026-Q1","value":"Three structural themes run across the 93 fragments: (1) Collier County corridors are bifurcated by the Pine Ridge Road jurisdictional line — City of Naples (south) imposes high-regulation low-density rules while Collier County (north) permits high-rise mixed-use; every site evaluation must confirm which side of Pine Ridge applies before any other analysis. (2) Labor-market softening is a consistent headwind across both counties — Collier unemployment rose 1.2 pp year-over-year to 4.5% and Lee County rose 1.3 pp to 4.9% as of March 2026 — yet corridor-level vacancy remains historically tight at the premium Naples nodes (1.8% for Downtown Naples and Waterside Shops) while Lee County anchor-dependent centers (Gulf Coast Town Center, Coconut Point, Ben Hill Griffin) carry vacancy in the 7–8% range. (3) The supply pipeline is asymmetrically loaded toward the east: Midtown at Bonita (200,000 sqft, Q2 2027), Revana Lakes (80,000 sqft), Tree Farm Plaza (27,000+ sqft), Stonewood Lehigh Acres (36 acres, 14 lots), and approved large-tract projects in Cape Coral (Seven Islands, Hudson Creek) together constitute meaningful new commercial square footage that will test absorption capacity if unemployment softening persists into 2026-H2. Fort Myers Beach is the one corridor with government-backed recovery capital at scale ($1.107B CDBG-DR), with the Times Square Pier ($11.7M contract, April 2026) as the anchor catalyst for commercial district recovery.","src":"s01","date":"2026-06-29"},
+  {"id":"f018","topic":"corridor_profile","fact":"Tamiami Trail Naples / East Trail (Naples) — highway-strip-mall, Collier County, seasonal_index 0.50 — 2026-Q1 key metrics","value":"Vacancy 1.8% (stable); asking rent $60.84/sqft triple-net (rising); net absorption 6,200 sqft (stable); cap rate 6.7% (rising). The corridor spans the spine of Collier County commercial activity: the Old Naples segment operates at effectively 0% vacancy with bidding wars for expiring leases; the East Naples segment is gentrifying past Bayshore Drive. Active flags: (1) 5th Ave South near-zero vacancy — lease bidding wars (structural); (2) Metropolitan Naples 'Aura' (15 stories, 53 luxury residences, 10,000 SF boutique retail) — residents moved in April 2026, retail shells handed to tenants May 2026, retail opening Q4 2026; (3) Baker Theatre ($72M) opened Oct/Nov 2025, pulling luxury gravity north of 5th Ave. Pipeline additions include Sharon's Corner, an eight-unit retail center on US-41 East (salon anchor, coffee drive-thru, high-turnover restaurant), and Cassia Naples, a 328-unit luxury apartment community breaking ground at US-41 East and Greenway Road. A condo conversion is proposed at the former Burger King site across US-41 from Mercato, signaling ground-floor retail attrition toward residential density.","src":"s01","date":"2026-06-29"},
+  {"id":"f019","topic":"corridor_profile","fact":"Davis Blvd East Naples — highway-strip-mall, Collier County, seasonal_index 0.30 — 2026-Q1 key metrics","value":"Vacancy 3.3% (falling); asking rent $26.79/sqft triple-net (rising); net absorption 9,500 sqft (rising); cap rate 6.7% (rising). The Bayshore Gateway Triangle is the most active redevelopment zone in Collier County. Active flags: (1) Metropolitan Naples Aura — residents April 2026, retail shells to tenants May 2026, boutique retail opening Q4 2026; (2) Gulf Gateway Commons at US-41 & Rattlesnake Hammock Rd — B-to-A class professional office conversion absorbing services priced out of the City of Naples core (2026–2027); (3) luxury residential line has officially crossed Bayshore Drive, marking structural gentrification eastward. The $350M Halcyon Marina mixed-use project on Davis Boulevard is penciled for 2027 groundbreaking and late 2029 completion — too distant to buffer near-term softening. FDOT flyover construction at Collier Blvd and Davis Blvd is expected to complete summer 2026, with an accessibility dividend anticipated post-opening. The former Oakes Farms Market parcels remain in planning more than three years post-Hurricane Ian.","src":"s01","date":"2026-06-29"},
+  {"id":"f020","topic":"corridor_profile","fact":"Pine Ridge Rd Naples — highway-strip-mall, Collier County, seasonal_index 0.35 — 2026-Q1 key metrics and jurisdictional boundary intelligence","value":"Vacancy 3.2% (falling); asking rent $39.20/sqft triple-net (rising); net absorption 21,736 sqft (rising); cap rate 8.3% (falling). Pine Ridge Road is THE regulatory dividing line in Collier County: south of Pine Ridge = City of Naples jurisdiction (high-regulation, slow-growth, low-density mandate, no high-rise mixed-use); north of Pine Ridge = Collier County jurisdiction (high-rise mixed-use density allowed). Any site evaluation in Collier must establish which side of Pine Ridge the subject parcel sits on before any other analysis. Active flag: Airport-Pulling Rd congestion between Pine Ridge and Golden Gate Pkwy creates a logistics bottleneck with a rental-rate discount versus the Immokalee Rd node (infrastructure, structural). Key infrastructure catalyst: FDOT diverging diamond interchange under active construction at Pine Ridge Road and I-75, estimated completion mid-2027. Nearby demand generators include a Genesis of Naples luxury dealership under construction on a 12-acre campus exceeding 30,000 sqft and Sprouts Farmers Market building out the former Bed Bath & Beyond anchor space at Ridgeport Plaza.","src":"s01","date":"2026-06-29"},
+  {"id":"f021","topic":"corridor_profile","fact":"Immokalee Rd North Naples — highway-strip-mall, Collier County, seasonal_index 0.30 — 2026-Q1 key metrics","value":"Vacancy 3.3% (stable); asking rent $30.91/sqft triple-net (rising); net absorption 15,000 sqft (stable); cap rate 6.7% (rising). Referred to locally as the 'Suburban 5th Avenue' and the true commercial gravity center of Collier County. The Arthrex HQ campus on Creekside Blvd anchors a non-seasonal Med-Tech and professional services cluster that operates year-round; Oakes Farms Seed to Table (Immokalee & Livingston) functions as the de facto Arthrex campus cafeteria, and Logans Landing (Logan Blvd) provides the service-retail layer. Pointe at Founders Square is 100% leased with Capital Grille as the anchor. Active flags: (1) Arthrex Effect — non-seasonal daytime economy providing year-round captive workforce (structural); (2) Logan Blvd Extension fully operational, traffic relief delivered. Pipeline supply risk: Tree Farm Plaza at Immokalee Rd and Collier Blvd (27,000+ sqft, pre-committed tenants including Chipotle and Cava); county-approved 125,000 sqft commercial project proposed on Immokalee Rd; NC Square mixed-use approval (44,000+ sqft) at Immokalee Rd and Catawba Street.","src":"s01","date":"2026-06-29"},
+  {"id":"f022","topic":"corridor_profile","fact":"Bonita Beach Rd / Bonita Beach — beachfront-tourism, Lee County, seasonal_index 0.50 — 2026-Q1 key metrics","value":"Vacancy 2.3% (falling); asking rent $27.51/sqft triple-net (rising); net absorption 18,000 sqft (rising); cap rate 6.7% (rising). The corridor has a split personality: east of I-75, the 68-acre Midtown at Bonita development (Zuckerman Group) is under construction with 200,000 sqft of planned commercial space and confirmed leases for TJ Maxx and Ulta Beauty, targeting Q2 2027 retail delivery with 'Coming Soon' signage expected Fall 2026; it is actively competing with North Naples for weekend errand traffic. West of I-75 is a pure tourism economy — boat rentals, beach supply, casual dining — with post-Ian recovery now complete. Active flags: (1) Midtown at Bonita — TJ Maxx + Ulta confirmed leases, Q2 2027 delivery (new_project, active); (2) Coming Soon signage expected Fall 2026 (construction, active). Additional pipeline: Seagate Development Group's Revana Lakes project approved for 80,000 sqft of retail and commercial space alongside 299 homes on 114 acres. Bonita Springs city planning envisions a 'majestic parkway' densification strategy for the corridor long term. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f023","topic":"corridor_profile","fact":"Waterside Shops (Naples) — beachfront-tourism, Collier County, seasonal_index 1.00 — 2026-Q1 key metrics and $100M repositioning status","value":"Vacancy 1.8% (stable); asking rent $60.84/sqft triple-net (rising); cap rate 6.7% (rising); net absorption not publicly available at center level. The Forbes Company / Simon-managed open-air center (280,000 SF GLA) is undergoing a deliberate trade from mid-market to ultra-luxury tenancy. RH Naples — a 29,382-sqft one-story gallery with courtyards, skylights, wine bar, and rooftop restaurant — is under construction on the former Nordstrom footprint (Nordstrom closed May 2020, demolished Sept–Dec 2024), targeted for late 2026 opening. Named additions: Christian Dior 5,888-sqft flagship (merged former Williams Sonoma space and three adjacent storefronts); Brunello Cucinelli (~4,000 sqft) already open; Lafayette 148 (3,020 sqft); Pottery Barn and Williams Sonoma relocated to the former Barnes & Noble outparcel (B&N closed July 2024). Anthropologie plans to relocate this fall. The Carnelian — a 70-room boutique hotel — has broken ground across US-41. No active flags. Net absorption requires direct CoStar or broker contact for confirmation.","src":"s01","date":"2026-06-29"},
+  {"id":"f024","topic":"corridor_profile","fact":"Vanderbilt Beach Rd / Mercato — beachfront-tourism, Collier County, seasonal_index 0.45 — 2026-Q1 key metrics","value":"Vacancy 3.3% (stable); asking rent $30.91/sqft triple-net (rising); net absorption 8,500 sqft (stable); cap rate 6.7% (rising). The corridor is emerging as 'North Naples 5th Avenue.' Active flags: (1) One Naples (Vanderbilt Beach Rd & Gulf Shore Dr) Phase 1 retail in fit-out stage — marina operational, residential closings underway, 28,000 SF retail targeting Grand Opening late 2026; (2) Vanderbilt Beach Rd Extension driving land values near Founders Square toward coastal Naples parity (2026–2027); (3) Mercato nightlife pivot completed — Burn by Rocky Patel, The Vine Room speakeasy, AZN late-night lounge, and Old Vines Supper Club anchoring an entertainment district. The Cavo Lounge (6,580 sqft) closed permanently April 2026 after 11 years, citing high operational costs. Mercato's Piazza was expanded in 2025 with a permanent entertainment stage. Darden Restaurants is building Eddie V's Prime Seafood at a former bank office; Williams Sonoma and Pottery Barn are relocating. CCF Olympia Park LLC purchased 24,000 sqft of office space on Vanderbilt Beach Road for $12.5M. A 150-unit apartment complex with nearly half income-restricted affordable units is proposed at 3333–3375 Vanderbilt Beach Road (land sold for $7.65M).","src":"s01","date":"2026-06-29"},
+  {"id":"f025","topic":"corridor_profile","fact":"Bonita Trail (US-41 Bonita Springs) — highway-strip-mall, Lee County, seasonal_index 0.45 — 2026-Q1 key metrics","value":"Vacancy 2.3% (falling); asking rent $27.51/sqft triple-net (rising); net absorption 12,500 sqft (rising); cap rate 6.7% (rising). The corridor is healthy at the ends and struggling in the middle: the north end (Coconut Point border) and south end (Naples/Vanderbilt border) see strong retail gravity, while the central portion near West Terry St is aging — plazas are converting to residential infill and the 'dead stretch' characterizes mid-corridor. The corridor is an increasingly specialized medical node capturing services priced out of Naples. Active flags: (1) Terry Apartments (200+ units) site prep — residential infill (2027); (2) medical node growth capturing Naples specialty service spillover (ongoing). A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82M (4,665 SF on 1.18 acres). Collier County is finalizing an $11.64M contract to purchase a 1.5-mile portion of Seminole Gulf Railway property linking to the Bonita Estero Rail Trail. Supply pressure: Midtown at Bonita (200,000 sqft retail/office) and Imperial 41 mixed-use (120 apartments plus ground-floor retail) both advancing toward 2027 completions.","src":"s01","date":"2026-06-29"},
+  {"id":"f026","topic":"corridor_profile","fact":"Colonial East (Fort Myers) — highway-strip-mall, Lee County, seasonal_index 0.20 — 2026-Q1 key metrics","value":"Vacancy 3.2% (falling); asking rent $23.27/sqft triple-net (rising); net absorption 5,500 sqft (rising); cap rate 6.7% (rising). The corridor is healthcare-anchored: Lee Health's $820M Colonial campus topped out March 2026, cementing it as the definitive healthcare anchor for the next decade. A hotel cluster near the I-75 interchange serves medical visitors and corporate travelers. The Challenger Boulevard extension ties directly into the Colonial corridor near the new Lee Health hospital. Transaction intelligence: Costco paid $55M for a 55-acre parcel in Fort Myers on May 12, 2026 ($1M per acre), an institutional land signal for the broader corridor node. Residential pipeline: Wave at Colonial (358-unit affordable project, $112M funded) and Colonial Gardens (in planning) are advancing at the Colonial–Winkler intersection. Two drive-thru-only concepts (including a Chick-fil-A) opened near Colonial Blvd just west of I-75. Healthcare employment has added 2,300 education and health services jobs across Southwest Florida. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f027","topic":"corridor_profile","fact":"Cleveland Ave Fort Myers — mixed-use-downtown, Lee County, seasonal_index 0.15 — 2026-Q1 key metrics","value":"Vacancy 2.9% (rising); asking rent $16.04/sqft triple-net (falling); net absorption -8,679 sqft (falling); cap rate 6.7% (rising). The legacy commercial spine is in structural decline: auto-row dealerships are thinning, Edison Mall is losing medical office tenants to newer corridors, and northern segment remains low-rent service retail. Active flag: Edison Mall medical office outmigration (ongoing). The Fort Myers CRA approved six Commercial Property Improvement Matching Grants along Cleveland Avenue (awards including up to $200,000 for individual properties). A pending $6B downtown revitalization plan is in development. Classical Christian Academy purchased 7.07 acres of commercial land at 16220 N. Cleveland Ave. for $1.4M. The Lee Memorial Hospital site on Cleveland Avenue near downtown remains unresolved — Lee Health has made no decision on its future. An active rezoning dispute at 4400 Cleveland Ave. (City Council denied, then agreed to revisit) introduces land-use uncertainty. The Mast residential building at 13370 N. Cleveland Ave. (former shopping center site north of the Caloosahatchee Bridge) has topped out. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f028","topic":"corridor_profile","fact":"Pine Island Rd Cape Coral — suburban-residential, Lee County, seasonal_index 0.20 — 2026-Q1 key metrics","value":"Vacancy 2.5% (falling); asking rent $23.09/sqft triple-net (rising); net absorption 6,200 sqft (rising); cap rate 6.7% (rising). The primary commercial spine of Cape Coral and the only corridor with meaningful national retail anchors in the city; commercial zoning is severely constrained relative to the residential population explosion, creating a structural supply-demand imbalance. Tenant mix: Publix-anchored centers, Walmart, Home Depot, Aldi, national fast-casual chains, urgent care, auto services. Active flag: structural commercial zoning shortage — demand outpacing zoned supply (regulatory, ongoing). Cape Coral City Council approved removal of all development caps in the Pine Island Road District. Cape Coral Commons (Pine Island Rd and Del Prado Blvd) is 97% leased (First Watch, Mission BBQ, Tire Kingdom, Firehouse Subs). Pipeline: 30,000 sqft retail project groundbreaking planned this summer; Floor & Decor new build at 2800 NE Pine Island Road approved; Seven Islands mixed-use project (up to 995 residential units plus commercial space, 10-story hotel) approved. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f029","topic":"corridor_profile","fact":"Cape Coral Pkwy E — suburban-residential, Lee County, seasonal_index 0.20 — 2026-Q1 key metrics","value":"Vacancy 2.5% (stable); asking rent $23.09/sqft triple-net (rising); net absorption 3,500 sqft (stable); cap rate 6.7% (rising). A government and professional corridor centered on Cape Coral City Hall, currently underserved relative to population. Active flags: (1) bridge projects 2027 — connectivity to Fort Myers (infrastructure); (2) BURST regulatory retreat — CRA incentives recalibrated (regulatory, completed). Active investment at the western anchor: the $103M 'The Cove at 47th' mixed-use development has broken ground; Aqua seafood restaurant with rooftop bar opened at 4720 SE Ninth Place. City of Cape Coral approved purchase of 19 acres east of Bimini Basin for $40.09M for redevelopment. Bimini Square ($100M mixed-use) groundbreaking has occurred. CRA is discussing a six-lane reconfiguration of Cape Coral Pkwy and structured-parking initiatives. The $300M Cape Coral Bridge project is in design phase and likely to remain there for two more years before permitting. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f030","topic":"corridor_profile","fact":"Estero Blvd Fort Myers Beach — beachfront-tourism, Lee County, seasonal_index 0.85 — 2026-Q1 key metrics","value":"Vacancy 2.9% (rising); asking rent $26.13/sqft triple-net (stable); net absorption -13,220 sqft (falling); cap rate 6.7% (rising). A post-Hurricane Ian reconstruction zone operating as a tourism-only economy. Recovery is largely complete in 2026, but elevated insurance costs are permanently reshaping the commercial tenant mix — lower-margin operators are being priced out by insurance costs rather than rent. Fort Myers Beach property values jumped 36% year-over-year against a Lee County-wide gain of 1.5%. Active flag: post-Ian insurance costs reshaping tenant mix (permanent structural change). Infrastructure recovery context: $1.107B CDBG-DR (HUD via State of Florida) is the largest post-Ian recovery funding package for any single municipality in SWFL; Times Square Pier reconstruction contract of $11.7M was awarded April 8, 2026, the anchor catalyst for the Times Square commercial district; Times Square three-story mixed-use rebuild construction could begin summer 2026, opening anticipated early 2027; Bahama Beach Club redevelopment is advancing at 5370 Estero Blvd; Big Carlos Pass Bridge (south end) replacement is underway in 2026; Matanzas Pass Bridge improvements underway in 2026; Bay Oaks Recreation Center and Park reconstruction completed August 2025; Newton Beach Park in design phase 2026; beach renourishment placed 41,655 cubic yards of sand beginning mid-May 2026. Red Coconut RV Park site remains in flux (Seagate seeking a partner). Active CREXi listing at Santini Marina Plaza: 1 listing, 2,225 sqft, asking rent $45/sqft. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f031","topic":"corridor_profile","fact":"Ben Hill Griffin Pkwy (Estero) — anchor-dependent, Lee County, seasonal_index 0.55 — 2026-Q1 key metrics","value":"Vacancy 7.7% (stable); asking rent $34.24/sqft triple-net (rising); net absorption 4,200 sqft (stable); cap rate 6.7% (rising). The corridor is a regional lifestyle and entertainment hub anchored by Coconut Point and Miromar Outlets; FGCU campus provides non-seasonal university traffic and creates a bimodal seasonal economy (peak Jan–Apr). Active flags: (1) Coconut Point Muvico site — residential rescue of aging retail anchor, 2027–2028; (2) Ritz-Carlton Estero Bay opening 2026. A 20,000-sqft Rivian service and demo center opened along Ben Hill Griffin Pkwy north of Gulf Coast Town Center. Ryan Companies (Minneapolis) purchased a 61.3-acre parcel divided by Alico Road for $20.45M. The eastern Corkscrew Road corridor is projected to house more than 12,000 homes and 25,000 residents; Lee County DOT Corkscrew Road infrastructure project is estimated for completion Fall 2026 at $23M. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f032","topic":"corridor_profile","fact":"Three Oaks Pkwy / Coconut Rd (Estero/Bonita line) — highway-strip-mall, Lee County, seasonal_index 0.35 — 2026-Q1 key metrics","value":"Vacancy 5% (stable); asking rent $30.88/sqft triple-net (rising); net absorption 7,500 sqft (stable); cap rate 6.7% (rising). The corridor is a transitional strip at the Estero-Bonita border where residential growth is outpacing commercial supply, creating demand for neighborhood services. Active flag: Corkscrew Road Phase II widening (primary 2026 commercial unlock, 2026–2027 resolution). Dense residential pipeline directly on the corridor: Woodfield mixed-use development (46-acre project at US-41 and Coconut Road, 596 units under construction); 154-unit Coconut Pointe Residences at Coconut Road and Three Oaks Parkway underway; Lumio Estero (330 luxury units on 20 acres, broke ground December 2025); 137-unit Residences at The Brooks. Woodfield Development and ELV Associates paid $32.6M for the Estero property at US-41 and Coconut Road, which Lee Health had assembled over three years for $18.5M. Simon Property Group is pursuing a two-year refresh of Coconut Point. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f033","topic":"corridor_profile","fact":"Midpoint Bridge Corridor (Fort Myers) — highway-strip-mall, Lee County, seasonal_index 0.30 — 2026-Q1 key metrics","value":"Vacancy 3.2% (rising); asking rent $23.27/sqft triple-net (stable); net absorption -5,500 sqft (falling); cap rate 6.7% (rising). Bell Tower Shops is pivoting from traditional mall format to an entertainment-driven destination. Active flags: (1) DDI interchange construction at I-75 (infrastructure, resolution 2028); (2) Bell Tower entertainment pivot (ongoing). The Midpoint Memorial Bridge processes 20,000 average daily toll-paying vehicles in the westbound direction, validating the drive-thru outparcel thesis. Cape Coral Commons nearby at Pine Island Road and Del Prado Boulevard is 97% leased, demonstrating the format absorbs quickly when rooftop density supports it. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f034","topic":"corridor_profile","fact":"Cape Coral – Coral Pointe — power-node retail, Lee County, seasonal_index 0.15 — 2026-Q1 key metrics","value":"Vacancy 2.5% (falling); asking rent $23.09/sqft triple-net (rising); net absorption 4,500 sqft (rising); cap rate 6.7% (rising). A dense national-retail power node at Del Prado Blvd and Midpoint Blvd — Cape Coral's densest national-retail concentration east of Pine Island Rd. Dual anchor (Walmart Supercenter and Publix) with value-retail shadow (Ross, TJ Maxx, Dollar Tree, Staples); sit-down dining cluster forming (Perkins, Ariani Ristorante, Hart & Soul); Bowlero entertainment anchor differentiates the node. Serves 33905/33916 ZIPs which are structurally underzoned for commercial relative to population. No seasonal tourism component; traffic is resident-driven year-round. Active flags: (1) structural commercial undersupply east of Pine Island Rd (regulatory, ongoing); (2) Bowlero Midpoint entertainment anchor (completed); (3) sit-down dining cluster forming at Ariani and Hart & Soul (ongoing). A retail store at 1499 SW Pine Island Road was sold (buyer: EKS Investments LLC). The 1,745-acre Hudson Creek tract sold for $100M in December 2024. Seven Islands project (up to 995 residential units plus commercial) approved. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f035","topic":"submarket_metrics","fact":"MHS Databook 2026-Q1 retail submarket metrics — Naples, East Naples, Fort Myers, North Fort Myers, The Islands, Marco Island, sfm-san-carlos, Outlying Collier County, Lehigh, Golden Gate, Charlotte County","value":"Naples retail: vacancy 0.4%, asking rent $40.05/sqft triple-net, net absorption -32,914 sqft. East Naples retail: vacancy 2.3%, asking rent $22.45/sqft triple-net, net absorption -42,791 sqft. Fort Myers retail: vacancy 1.9%, asking rent $19.71/sqft triple-net, net absorption -84,926 sqft. North Fort Myers retail: vacancy 2.6%, asking rent $15.91/sqft triple-net, net absorption -438 sqft. The Islands retail: vacancy 1.4%, asking rent $30.42/sqft triple-net, net absorption -32,427 sqft. Marco Island retail: vacancy 1.5%, asking rent $27.90/sqft triple-net, net absorption -3,444 sqft. sfm-san-carlos retail: vacancy 1.6%, asking rent $23.45/sqft triple-net, net absorption -145,512 sqft. Outlying Collier County retail: vacancy 2.3%, asking rent $25.60/sqft triple-net, net absorption +182,512 sqft. Lehigh retail: vacancy 2.3%, asking rent $20.36/sqft triple-net, net absorption +26,189 sqft. Golden Gate retail: vacancy 2.1%, asking rent $24.72/sqft triple-net, net absorption -8,248 sqft. Charlotte County retail: vacancy 2.5%, asking rent $20.04/sqft triple-net, net absorption -61,132 sqft. Source: MHS Appraisal databook, Q1 2026.","src":"s02","date":"2026-06-29"},
+  {"id":"f036","topic":"corridor_profile","fact":"Coconut Point Mall (Estero) — anchor-dependent, Lee County, seasonal_index 1.00 — 2026-Q1 key metrics","value":"Vacancy 7.7% (stable); asking rent $34.24/sqft triple-net (stable); cap rate 6.7% (rising); net absorption not publicly available at center level. The 1.2M SF GLA open-air Simon Property Group center is undergoing a two-year refresh. Nordstrom Rack opened in a 35,000-sqft former Christmas Tree Shops / Bed Bath & Beyond space (grand opening Oct 2). Simon has proposed replacing the former Regal Cinema (closed November 2022) with 365 rental units — a plan that drew sharp criticism from the Estero Planning, Zoning & Design Board. Recent dining additions: SB Bar, Casa Blu, Alba Breakfast & Brunch. The adjacent Woodfield Estero project (596 multifamily units, 82,000 sqft retail and dining, 42,000 sqft office, 260-room hotel) is under construction on US-41 at Coconut Road. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f037","topic":"corridor_profile","fact":"Daniels Pkwy (Fort Myers) — anchor-dependent, Lee County, seasonal_index 0.25 — 2026-Q1 key metrics","value":"Vacancy 3.2% (stable); asking rent $23.27/sqft triple-net (rising); net absorption 4,200 sqft (stable); cap rate 6.7% (rising). The corridor serves the I-75/airport corporate-logistics node with FGCU-adjacent professional services growing; daytime population is driven by airport and university employment. Anchor tenants include Bass Pro Shops, Costco, and Target. Daniels Marketplace (Whole Foods-anchored) sold for $72.5M in an institutional transaction in 2025, having expanded from its original 106,729 sqft since AEW's $49M 2019 purchase; additional 2026 tenant openings include Erik's (bicycle retailer) and Keep Boutique. An Arby's closed at 9290 Daniels Pkwy. Fort Myers City Council approved up to 2.8M sqft of commercial density at the Daniels Pkwy–Treeline Avenue intersection (triple the previously permitted density). FDOT is reconstructing the I-75/Daniels Pkwy interchange into a diverging diamond interchange. No active flags on record. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f038","topic":"submarket_metrics","fact":"MHS Databook 2026-Q1 retail submarket metrics — North Naples, Bonita Springs, Cape Coral, Estero, and Lely","value":"North Naples retail: vacancy 1.7%, asking rent $31.26/sqft triple-net, net absorption +62,588 sqft. Bonita Springs retail: vacancy 1.8%, asking rent $22.29/sqft triple-net, net absorption +86,857 sqft. Cape Coral retail: vacancy 2.2%, asking rent $22.60/sqft triple-net, net absorption -33,845 sqft. Estero retail: vacancy 0.4%, asking rent $30.53/sqft triple-net, net absorption +46,080 sqft. Lely retail: vacancy 2.0%, asking rent $29.32/sqft triple-net, net absorption +48,036 sqft. Source: MHS Appraisal databook, Q1 2026.","src":"s02","date":"2026-06-29"},
+  {"id":"f039","topic":"submarket_metrics","fact":"MHS Databook 2026-Q1 office submarket metrics — North Naples, Naples, East Naples, Bonita Springs, Cape Coral, Estero, Fort Myers, North Fort Myers, Lely, Marco Island, Lehigh, The Islands, sfm-san-carlos, Outlying Collier County, Golden Gate, Charlotte County","value":"North Naples office: vacancy 3.8%, asking rent $39.86/sqft triple-net, net absorption +34,315 sqft. Naples office: vacancy 3.8%, asking rent $39.72/sqft triple-net, net absorption -3,226 sqft. East Naples office: vacancy 3.4%, asking rent $33.07/sqft triple-net, net absorption +4,770 sqft. Bonita Springs office: vacancy 2.5%, asking rent $29.17/sqft triple-net, net absorption -60,296 sqft. Cape Coral office: vacancy 3.2%, asking rent $26.99/sqft triple-net, net absorption -16,487 sqft. Estero office: vacancy 2.6%, asking rent $29.06/sqft triple-net, net absorption +10,072 sqft. Fort Myers office: vacancy 3.1%, asking rent $26.42/sqft triple-net, net absorption -142,622 sqft. North Fort Myers office: vacancy 4.5%, asking rent $25.89/sqft triple-net, net absorption -6,718 sqft. Lely office: vacancy 3.2%, asking rent $35.66/sqft triple-net, net absorption -8,736 sqft. Marco Island office: vacancy 3.7%, asking rent $34.30/sqft triple-net, net absorption +4,236 sqft. Lehigh office: vacancy 2.8%, asking rent $27.89/sqft triple-net, net absorption -2,729 sqft. The Islands office: vacancy 4.0%, asking rent $27.49/sqft triple-net, net absorption +2,014 sqft. sfm-san-carlos office: vacancy 2.9%, asking rent $27.57/sqft triple-net, net absorption -26,830 sqft. Outlying Collier County office: vacancy 3.3%, asking rent $33.70/sqft triple-net, net absorption +7,558 sqft. Golden Gate office: vacancy 2.6%, asking rent $36.32/sqft triple-net, net absorption +4,013 sqft. Charlotte County office: vacancy 2.1%, asking rent $24.56/sqft triple-net, net absorption +16,420 sqft. Source: MHS Appraisal databook, Q1 2026.","src":"s02","date":"2026-06-29"},
+  {"id":"f040","topic":"submarket_metrics","fact":"MHS Databook 2026-Q1 industrial submarket metrics — North Fort Myers, sfm-san-carlos, North Naples, Bonita Springs, Cape Coral, Fort Myers, East Naples, Estero, Lely, Marco Island, Naples, Lehigh, The Islands, Outlying Collier County, Golden Gate, Charlotte County","value":"North Fort Myers industrial: vacancy 2.8%, asking rent $12.87/sqft triple-net, net absorption +240,702 sqft. sfm-san-carlos industrial: vacancy 2.2%, asking rent $13.71/sqft triple-net, net absorption +270,089 sqft. North Naples industrial: vacancy 2.4%, asking rent $19.13/sqft triple-net, net absorption -107,133 sqft. Bonita Springs industrial: vacancy 2.3%, asking rent $17.29/sqft triple-net, net absorption +11,510 sqft. Cape Coral industrial: vacancy 2.1%, asking rent $14.53/sqft triple-net, net absorption +45,339 sqft. Fort Myers industrial: vacancy 2.3%, asking rent $12.02/sqft triple-net, net absorption -202,228 sqft. East Naples industrial: vacancy 2.2%, asking rent $18.44/sqft triple-net, net absorption -139,592 sqft. Estero industrial: vacancy 2.5%, asking rent $13.67/sqft triple-net, net absorption 0 sqft. Lely industrial: vacancy 3.3%, asking rent $20.20/sqft triple-net, net absorption 0 sqft. Marco Island industrial: vacancy 2.2%, asking rent $32.58/sqft triple-net, net absorption -1,406 sqft. Naples industrial: vacancy 2.7%, asking rent $21.67/sqft triple-net, net absorption 0 sqft. Lehigh industrial: vacancy 2.3%, asking rent $13.24/sqft triple-net, net absorption +53,186 sqft. The Islands industrial: vacancy 2.6%, asking rent $14.14/sqft triple-net, net absorption -750 sqft. Outlying Collier County industrial: vacancy 3.1%, asking rent $15.75/sqft triple-net, net absorption +5,612 sqft. Golden Gate industrial: vacancy 2.4%, asking rent $20.46/sqft triple-net, net absorption +1,800 sqft. Charlotte County industrial: vacancy 2.4%, asking rent $12.78/sqft triple-net, net absorption +211,532 sqft. Source: MHS Appraisal databook, Q1 2026.","src":"s02","date":"2026-06-29"},
+  {"id":"f041","topic":"corridor_profile","fact":"Collier Blvd / CR-951 — highway-strip-mall, Collier County, seasonal_index 0.45 — 2026-Q1 key metrics","value":"Vacancy 3.3% (falling); asking rent $26.79/sqft triple-net (rising); net absorption 8,500 sqft (rising); cap rate 6.7% (rising). The corridor runs north-south from I-75 south to Marco Island, serving as the eastern boundary of developable Naples. Growth is constrained by the Everglades to the east, pushing expansion pressure north toward the Immokalee Rd interchange. No active flags on record. Infrastructure: FDOT began construction in 2025 on a flyover at CR-951 and Davis Blvd; a separate project is widening CR-951 from four to six lanes across 2.1 miles (final project in the sequence). The CR-951/I-75 Innovation Zone Overlay is under planning. Pipeline supply includes the 22,000 sqft City Gate Retail Center and the new Publix-anchored Shoppes at Orange Blossom in Golden Gate Estates. Collier County unemployment 4.5% in March 2026, up 1.2 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f042","topic":"corridor_profile","fact":"Gulf Coast Town Center (Fort Myers) — anchor-dependent, Lee County, seasonal_index 1.00 — 2026-Q1 key metrics","value":"Vacancy 7.7% (stable); asking rent $34.24/sqft triple-net (stable); cap rate 6.7% (rising); net absorption not publicly available (NADG is privately held). The 1.3M SF retail GLA super-regional open-air power center on Alico Rd / I-75 is owned by NADG (North American Development Group). Anchors include Target, Costco, Bass Pro Shops, Regal Cinemas, Dick's Sporting Goods, HomeGoods, HomeSense, Marshalls, Ross, and Burlington. A 350-unit apartment complex (Ilumina GCTC) has been developed within the center. Chuck Lager Legendary Kitchen opened Jan. 26 and Slick City Action Park opened Feb. 12 in the corridor. Permit intelligence: the Gulf Coast Town Center corridor carries a permit z-score of 5.549 (other bucket, 90d vs trailing-365d, n=5), the highest permit heat signal among all Lee County corridors in the current pipeline. Fort Myers City Council has approved up to 2.8 million sqft of commercial density at Daniels Pkwy–Treeline Avenue, representing a potential competitive supply threat. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f043","topic":"corridor_profile","fact":"Six Mile Cypress Pkwy (Fort Myers) — medical-anchored, Lee County, seasonal_index 0.10 — 2026-Q1 key metrics","value":"Vacancy 4% (falling); asking rent $26.03/sqft triple-net (rising); net absorption 14,000 sqft (rising); cap rate 8.3% (falling). An industrial-flex connector corridor linking I-75 to south Fort Myers with a growing medical office presence; businesses prioritize function over foot traffic. Permit intelligence: Six Mile Cypress carries a permit z-score of 3.214 (other bucket, 90d vs trailing-365d, n=3), a notable positive signal. The US-41 and Six Mile Cypress Pkwy/Gladiolus Drive intersection is one of the area's busiest commercial nodes with three relief options under study, including an overpass estimated at $114.2M; the design phase remains unfunded and resolution is likely several years out. A new project at 9345 Six Mile Cypress Pkwy was anticipated for completion in 2026-Q2. A Singletary CPD rezoning application for ±19.48 acres near the corridor is under review, a potential mixed-use conversion that would shift the medical office supply-demand balance. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f044","topic":"corridor_profile","fact":"Summerlin Rd Fort Myers — medical-anchored, Lee County, seasonal_index 0.40 — 2026-Q1 key metrics","value":"Vacancy 7.2% (falling); asking rent $32.73/sqft triple-net (rising); net absorption 8,500 sqft (rising); cap rate 8.3% (falling). A high-income residential gateway corridor with limited commercial zoning; professional services (insurance, wealth management, law) dominate the sparse retail nodes, serving as the gateway to Sanibel/Fort Myers Beach. Healthcare employment supports demand. The Arwyn (230-unit affordable housing project) launched on Summerlin Rd in February 2026. Lee County-funded intersection improvements at Colonial Blvd and Summerlin Rd are underway. Entech Computer Services leased 5,892 sqft at 5276 Summerlin Commons Blvd. Permit intelligence: Summerlin carries a permit z-score of 1.268 (other bucket, 90d vs trailing-365d, n=4), a modestly rising signal. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f045","topic":"corridor_profile","fact":"Airport-Pulling Naples — industrial-flex, Collier County, seasonal_index 1.00 — 2026-Q1 key metrics","value":"Vacancy 3.3% (stable); asking rent $30.91/sqft triple-net (stable); cap rate 6.7% (rising); net absorption not tracked at corridor level (multi-owner strip format). Corridor serves primarily as a strip/neighborhood retail node in the North Naples submarket, north of Pine Ridge Rd, anchored by grocery-anchored centers and neighborhood services. Benderson Development acquired Carillon Place, a 250,000-sqft retail center at the southeast corner of Airport-Pulling and Pine Ridge roads, which was 92% leased at time of sale. Active leasing at the new Poinciana Plaza on Airport-Pulling at Golden Gate Pkwy (Starbucks drive-thru targeted this summer). Luxury auto storage suites are under construction in Naples and North Naples. Airport-Pulling Rd widening project active (design completion targeted end 2025). Collier County unemployment 4.5% in March 2026, up 1.2 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f046","topic":"corridor_profile","fact":"Lee Blvd Lehigh Acres — highway-strip-mall, Lee County, seasonal_index 0.10 — metrics period Q4 2025","value":"Vacancy rate 0.2% (falling); asking rent $35.08/sqft triple-net (rising); net absorption 6,397 sqft (rising); cap rate not available. Lee Blvd serves as the primary commercial thoroughfare of Lehigh Acres, a community of 140,000 residents where population growth has outpaced commercial real estate development. Lehigh Acres currently has 38 active developments representing more than 2.6 million sqft of commercial space, 438,400 sqft of industrial space, and more than 8,000 residential units in the pipeline. The anchor supply event is Stonewood — a 36-acre shopping center assembled by Guy Paparella through three land purchases ($3.2M for the western third in 2024, $1.4M for the eastern third, $2.6M for the middle third) — with 14 developable lots being leased by Trinity Commercial Group; confirmed tenants include Suncoast Credit Union, Culver's, and a 20,000 sqft Goodwill. An Ace Hardware is under consideration. Permit intelligence: Lee Blvd residential z-score 0.879 (rising, n=1); other-bucket z-score stable at 0. Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f047","topic":"corridor_profile","fact":"Joel Blvd Lehigh Acres — highway-strip-mall, Lee County, seasonal_index 0.10 — metrics period Q4 2025","value":"Vacancy rate 0.2% (falling); asking rent $35.08/sqft triple-net (rising); net absorption 6,397 sqft (rising); cap rate not available. Joel Blvd is a secondary north-south commercial spine on the east side of Lehigh Acres, anchored by Jack's Market (neighborhood grocery, 510 Joel Blvd) and strip retail serving the surrounding residential blocks. Lehigh Acres office submarket registered a vacancy rate of 1.1% as of Q4 2025, the tightest in Southwest Florida. Pipeline: Savannah Lakes Expansion (1,468 single-family units approved); Sunniland Town Center mixed-use also advancing. A new Ellianos drive-thru coffee was permitted in June 2025 (820 SF new construction), a bellwether of credit-tenant confidence. Permit intelligence: Joel Blvd residential z-score 0.879 (rising, n=1); other-bucket z-score -0.289 (stable, n=0). Lee County unemployment 4.9% in March 2026, up 1.3 pp year-over-year.","src":"s01","date":"2026-06-29"},
+  {"id":"f048","topic":"permit_intelligence","fact":"SWFL permit pipeline heat signals — Lee County corridor z-scores as of 2026-06-29 (90d vs trailing-365d)","value":"Lee County permit flow reads modestly heating overall (county-weighted corridor z = 0.117). Collier County z-score is 0 (stable; based on only 1 month of data — directional only). SWFL combined corridor-weighted z = 0.003. No SWFL corridors reached the z ≥ +2 commercial-alteration saturation threshold. Highest-heat Lee corridors by bucket: Gulf Coast Town Center 'other' bucket z = 5.549 (n=5); ZIP 33908 'other' bucket z = 15.473 (n=27); ZIP 33917 'other' bucket z = 7.706 (n=15); ZIP 33905 residential z = 7.884 (n=7); Six Mile Cypress 'other' bucket z = 3.214 (n=3); ZIP 33908 commercial_alteration z = 2.842 (n=6); Summerlin 'other' bucket z = 1.268 (n=4); Joel Blvd residential z = 0.879 (rising). Collier corridors are uniformly at z = 0 across all buckets (data baseline only 1 month old — treat as directional). Caveats: Accela backfill window is 124 days (< 365 days); 33 of 42 corridor × bucket cells have n < 10 in the current 90-day window; z-scores are indicative, not robust. Source: Lee County Accela Citizen Access (daily scrape); Collier County monthly XLSX permit reports.","src":"s05","date":"2026-06-29"},
+  {"id":"f049","topic":"corridor_profile","fact":"Estero / Bonita line — infrastructure and commercial development context","value":"Corkscrew Road Widening Phase 2 ( $27M) is estimated for completion end-2026, expanding capacity on the primary east-west commercial spine through Estero. An Aldi grocery is opening at 11906 Newbridge Court. High 5 Entertainment (40,000 SF venue at 9000 Williams Rd, permit value $1.1M) was approved in 2025. A Corkscrew Village mini-warehouse (75,910 SF) is under development along Corkscrew Rd, reflecting growing demand for last-mile industrial in the Estero-Bonita Springs submarket. A Walmart Supercenter expansion permit has been issued in Estero. A Home2 Suites by Hilton extended-stay hotel was approved in 2025, adding extended-stay inventory to the US-41/Miromar/Coconut Point hospitality cluster. Active CREXi listings in Estero: 16 listings totaling 86,385 sqft available, median asking rent $22/sqft.","src":"s04","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "cre-swfl",
-  "version": 56,
-  "refined_at": "2026-06-29T16:00:47Z",
-  "expires": "2026-07-06T16:00:47Z",
+  "version": 57,
+  "refined_at": "2026-06-29T16:30:05Z",
+  "expires": "2026-07-06T16:30:05Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
   "magnitude": 0.2222222222222222,
@@ -78,7 +112,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 25 corridors reporting cap_rate_pct: Downtown Naples (Naples, Collier); Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); and 22 more."
       },
@@ -97,7 +131,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 27 corridors reporting vacancy_rate_pct: Downtown Naples (Naples, Collier); Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); and 24 more."
       },
@@ -116,7 +150,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 23 corridors reporting absorption_sqft: Downtown Naples (Naples, Collier); Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); and 20 more."
       },
@@ -135,7 +169,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&asking_rent_psf=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 27 corridors reporting asking_rent_psf: Downtown Naples (Naples, Collier); Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); and 24 more."
       },
@@ -154,7 +188,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat SWFL CRE quarterly — median across 16 submarkets reporting vacancy_rate: Bonita Springs 2026-Q1; Cape Coral 2026-Q1; Charlotte County 2026-Q1; and 13 more."
       },
@@ -173,7 +207,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat SWFL CRE quarterly — median across 16 submarkets reporting asking_rent_nnn: Bonita Springs 2026-Q1; Cape Coral 2026-Q1; Charlotte County 2026-Q1; and 13 more."
       },
@@ -192,7 +226,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -211,7 +245,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Bonita%20Springs&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs 2026-Q1 — asking_rent_nnn across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -230,7 +264,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -249,7 +283,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -268,7 +302,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Cape%20Coral&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral 2026-Q1 — asking_rent_nnn across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -287,7 +321,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -306,7 +340,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -325,7 +359,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Charlotte%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County 2026-Q1 — asking_rent_nnn across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -344,7 +378,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -363,7 +397,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -382,7 +416,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.East%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples 2026-Q1 — asking_rent_nnn across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -401,7 +435,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -420,7 +454,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -439,7 +473,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Estero&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero 2026-Q1 — asking_rent_nnn across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -458,7 +492,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -477,7 +511,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -496,7 +530,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -515,7 +549,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -534,7 +568,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -553,7 +587,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Golden%20Gate&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate 2026-Q1 — asking_rent_nnn across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -572,7 +606,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Golden%20Gate&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate 2026-Q1 — absorption_sqft across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -591,7 +625,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lehigh&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -610,7 +644,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lehigh&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -629,7 +663,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -648,7 +682,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -667,7 +701,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lely&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely 2026-Q1 — asking_rent_nnn across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -686,7 +720,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -705,7 +739,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -724,7 +758,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Marco%20Island&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island 2026-Q1 — asking_rent_nnn across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -743,7 +777,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -762,7 +796,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples 2026-Q1 — vacancy_rate across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -781,7 +815,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples 2026-Q1 — asking_rent_nnn across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -800,7 +834,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples 2026-Q1 — absorption_sqft across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -819,7 +853,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers 2026-Q1 — vacancy_rate across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -838,7 +872,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers 2026-Q1 — asking_rent_nnn across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -857,7 +891,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers 2026-Q1 — absorption_sqft across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -876,7 +910,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -895,7 +929,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples 2026-Q1 — asking_rent_nnn across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -914,7 +948,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -933,7 +967,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Outlying%20Collier%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County 2026-Q1 — vacancy_rate across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -952,7 +986,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Outlying%20Collier%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County 2026-Q1 — asking_rent_nnn across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -971,7 +1005,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Outlying%20Collier%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County 2026-Q1 — absorption_sqft across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -990,7 +1024,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.sfm-san-carlos&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park 2026-Q1 — vacancy_rate across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1009,7 +1043,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.sfm-san-carlos&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park 2026-Q1 — asking_rent_nnn across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1028,7 +1062,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.sfm-san-carlos&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park 2026-Q1 — absorption_sqft across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1047,7 +1081,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1066,7 +1100,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.The%20Islands&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands 2026-Q1 — asking_rent_nnn across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1085,7 +1119,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1104,7 +1138,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1123,7 +1157,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area asking_rent_nnn — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1142,7 +1176,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area absorption_sqft — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1161,7 +1195,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area vacancy_rate — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1180,7 +1214,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area asking_rent_nnn — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1199,7 +1233,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area absorption_sqft — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1218,7 +1252,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (industrial) 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1237,7 +1271,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Bonita%20Springs&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (industrial) 2026-Q1 — asking_rent_nnn across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1256,7 +1290,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (industrial) 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1275,7 +1309,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (industrial) 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1294,7 +1328,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Cape%20Coral&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (industrial) 2026-Q1 — asking_rent_nnn across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1313,7 +1347,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (industrial) 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1332,7 +1366,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (industrial) 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1351,7 +1385,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Charlotte%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (industrial) 2026-Q1 — asking_rent_nnn across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1370,7 +1404,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (industrial) 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1389,7 +1423,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (industrial) 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1408,7 +1442,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.East%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (industrial) 2026-Q1 — asking_rent_nnn across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1427,7 +1461,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (industrial) 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1446,7 +1480,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero (industrial) 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1465,7 +1499,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Estero&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero (industrial) 2026-Q1 — asking_rent_nnn across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1484,7 +1518,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero (industrial) 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1503,7 +1537,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (industrial) 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1522,7 +1556,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (industrial) 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1541,7 +1575,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (industrial) 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1560,7 +1594,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (industrial) 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1579,7 +1613,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Golden%20Gate&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (industrial) 2026-Q1 — asking_rent_nnn across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1598,7 +1632,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Golden%20Gate&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (industrial) 2026-Q1 — absorption_sqft across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1617,7 +1651,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (industrial) 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1636,7 +1670,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (industrial) 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1655,7 +1689,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (industrial) 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1674,7 +1708,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely (industrial) 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1693,7 +1727,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lely&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely (industrial) 2026-Q1 — asking_rent_nnn across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1712,7 +1746,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely (industrial) 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1731,7 +1765,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (industrial) 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1750,7 +1784,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Marco%20Island&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (industrial) 2026-Q1 — asking_rent_nnn across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1769,7 +1803,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (industrial) 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1788,7 +1822,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples (industrial) 2026-Q1 — vacancy_rate across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1807,7 +1841,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples (industrial) 2026-Q1 — asking_rent_nnn across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1826,7 +1860,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples (industrial) 2026-Q1 — absorption_sqft across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1845,7 +1879,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (industrial) 2026-Q1 — vacancy_rate across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1864,7 +1898,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (industrial) 2026-Q1 — asking_rent_nnn across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1883,7 +1917,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (industrial) 2026-Q1 — absorption_sqft across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1902,7 +1936,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (industrial) 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1921,7 +1955,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (industrial) 2026-Q1 — asking_rent_nnn across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1940,7 +1974,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (industrial) 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1959,7 +1993,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Outlying%20Collier%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (industrial) 2026-Q1 — vacancy_rate across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1978,7 +2012,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Outlying%20Collier%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (industrial) 2026-Q1 — asking_rent_nnn across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1997,7 +2031,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Outlying%20Collier%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (industrial) 2026-Q1 — absorption_sqft across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2016,7 +2050,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.sfm-san-carlos&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (industrial) 2026-Q1 — vacancy_rate across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2035,7 +2069,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.sfm-san-carlos&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (industrial) 2026-Q1 — asking_rent_nnn across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2054,7 +2088,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.sfm-san-carlos&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (industrial) 2026-Q1 — absorption_sqft across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2073,7 +2107,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (industrial) 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2092,7 +2126,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.The%20Islands&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (industrial) 2026-Q1 — asking_rent_nnn across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2111,7 +2145,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (industrial) 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2130,7 +2164,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area industrial vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2149,7 +2183,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area industrial asking_rent_nnn — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2168,7 +2202,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area industrial absorption_sqft — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2187,7 +2221,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area industrial vacancy_rate — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2206,7 +2240,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area industrial asking_rent_nnn — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2225,7 +2259,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area industrial absorption_sqft — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2244,7 +2278,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (office) 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2263,7 +2297,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Bonita%20Springs&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (office) 2026-Q1 — asking_rent_nnn across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2282,7 +2316,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (office) 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2301,7 +2335,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (office) 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2320,7 +2354,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Cape%20Coral&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (office) 2026-Q1 — asking_rent_nnn across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2339,7 +2373,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (office) 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2358,7 +2392,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (office) 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2377,7 +2411,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Charlotte%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (office) 2026-Q1 — asking_rent_nnn across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2396,7 +2430,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (office) 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2415,7 +2449,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (office) 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2434,7 +2468,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.East%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (office) 2026-Q1 — asking_rent_nnn across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2453,7 +2487,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (office) 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2472,7 +2506,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero (office) 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2491,7 +2525,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Estero&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero (office) 2026-Q1 — asking_rent_nnn across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2510,7 +2544,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Estero (office) 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2529,7 +2563,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (office) 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2548,7 +2582,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (office) 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2567,7 +2601,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (office) 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Six Mile Cypress, Gulf Coast Town Center, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2586,7 +2620,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (office) 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2605,7 +2639,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Golden%20Gate&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (office) 2026-Q1 — asking_rent_nnn across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2624,7 +2658,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Golden%20Gate&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (office) 2026-Q1 — absorption_sqft across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2643,7 +2677,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lehigh&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (office) 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2662,7 +2696,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lehigh&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (office) 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2681,7 +2715,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (office) 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2700,7 +2734,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely (office) 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2719,7 +2753,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lely&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely (office) 2026-Q1 — asking_rent_nnn across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2738,7 +2772,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Lely (office) 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2757,7 +2791,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (office) 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2776,7 +2810,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Marco%20Island&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (office) 2026-Q1 — asking_rent_nnn across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2795,7 +2829,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (office) 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2814,7 +2848,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples (office) 2026-Q1 — vacancy_rate across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2833,7 +2867,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples (office) 2026-Q1 — asking_rent_nnn across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2852,7 +2886,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Naples (office) 2026-Q1 — absorption_sqft across the Naples submarket; covers Downtown Naples, East Trail (Naples), Vanderbilt, East Naples, Waterside, Pine Ridge, North Naples (Immokalee Rd), Collier Blvd, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2871,7 +2905,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (office) 2026-Q1 — vacancy_rate across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2890,7 +2924,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (office) 2026-Q1 — asking_rent_nnn across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2909,7 +2943,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (office) 2026-Q1 — absorption_sqft across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2928,7 +2962,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (office) 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2947,7 +2981,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (office) 2026-Q1 — asking_rent_nnn across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2966,7 +3000,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (office) 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2985,7 +3019,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Outlying%20Collier%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (office) 2026-Q1 — vacancy_rate across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3004,7 +3038,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Outlying%20Collier%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (office) 2026-Q1 — asking_rent_nnn across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3023,7 +3057,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Outlying%20Collier%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (office) 2026-Q1 — absorption_sqft across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3042,7 +3076,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.sfm-san-carlos&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (office) 2026-Q1 — vacancy_rate across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3061,7 +3095,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.sfm-san-carlos&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (office) 2026-Q1 — asking_rent_nnn across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3080,7 +3114,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.sfm-san-carlos&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (office) 2026-Q1 — absorption_sqft across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3099,7 +3133,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (office) 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3118,7 +3152,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.The%20Islands&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (office) 2026-Q1 — asking_rent_nnn across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3137,7 +3171,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (office) 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3156,7 +3190,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area office vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3175,7 +3209,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area office asking_rent_nnn — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3194,7 +3228,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Naples area office absorption_sqft — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3213,7 +3247,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&vacancy_rate=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area office vacancy_rate — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3232,7 +3266,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area office asking_rent_nnn — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3251,7 +3285,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area office absorption_sqft — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3269,10 +3303,10 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "units": "count",
       "display_format": "count",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/feds-raid-oakes-farms-packing-plant-alfie-oakes-north-naples-home/",
-        "fetched_at": "2026-06-29T08:12:13Z",
+        "url": "https://www.businessobserverfl.com/news/2026/may/03/lee-hillsborough-charlotte-shopping-centers/",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
-        "citation": "Feds raid Oakes Farms packing plant, Alfie Oakes’ North Naples home | Featured | gulfshorebusiness.com: \"The lawsuit also lists Synovus Bank as a defendant due to another loan Oakes obtained for Oakes Farms on Davis Boul…"
+        "citation": "Lee, Hillsborough, Charlotte county shopping centers sell, land tenants | Business Observer: \"A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million. Image courtesy of Marcus &amp;…"
       },
       "suggestions": [
         "What's driving corridor pulse signals live?",
@@ -3289,7 +3323,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "raw",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — Corridor Factor composite: percentile-rank of cap_rate_pct (lower_is_better), vacancy_rate_pct (lower_is_better), absorption_sqft (higher_is_better), asking_rent_psf (higher_is_better); equal weights; corridor-health/landlord lens. Scored 27 of 27 corridors."
       },
@@ -3308,7 +3342,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 16 corridors reporting cap_rate_pct: Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); Daniels (Fort Myers, Lee); and 13 more."
       },
@@ -3327,7 +3361,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 18 corridors reporting vacancy_rate_pct: Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); Daniels (Fort Myers, Lee); and 15 more."
       },
@@ -3346,7 +3380,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 16 corridors reporting absorption_sqft: Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); Daniels (Fort Myers, Lee); and 13 more."
       },
@@ -3365,7 +3399,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&asking_rent_psf=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 18 corridors reporting asking_rent_psf: Bonita Beach (Bonita Springs, Lee); Cape Coral Pkwy (Cape Coral, Lee); Daniels (Fort Myers, Lee); and 15 more."
       },
@@ -3384,7 +3418,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 9 corridors reporting cap_rate_pct: Downtown Naples (Naples, Collier); East Trail (Naples) (Naples, Collier); Vanderbilt (Naples, Collier); and 6 more."
       },
@@ -3403,7 +3437,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 9 corridors reporting vacancy_rate_pct: Downtown Naples (Naples, Collier); East Trail (Naples) (Naples, Collier); Vanderbilt (Naples, Collier); and 6 more."
       },
@@ -3422,7 +3456,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&absorption_sqft=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 7 corridors reporting absorption_sqft: Downtown Naples (Naples, Collier); East Trail (Naples) (Naples, Collier); Vanderbilt (Naples, Collier); and 4 more."
       },
@@ -3441,7 +3475,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&asking_rent_psf=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 9 corridors reporting asking_rent_psf: Downtown Naples (Naples, Collier); East Trail (Naples) (Naples, Collier); Vanderbilt (Naples, Collier); and 6 more."
       },
@@ -3460,7 +3494,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "ratio",
       "source": {
         "url": "brain://permits-swfl",
-        "fetched_at": "2026-06-29T08:12:13Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "permits-swfl distilled OUTPUT — Lee County building permit saturation index and corridor-weighted z (thin-pipe read)."
       },
@@ -3479,7 +3513,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://www.crexi.com/lease/properties/1153991/florida-23400-23498-lyden-dr",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Estero, FL (available-only; 16 listings as of 2026-06-28)"
       },
@@ -3498,7 +3532,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://www.crexi.com/lease/properties/1153991/florida-23400-23498-lyden-dr",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Estero, FL (available-only; 16 listings as of 2026-06-28)"
       },
@@ -3517,7 +3551,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "currency",
       "source": {
         "url": "https://www.crexi.com/lease/properties/774462/florida-santini-marina-plaza",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Fort Myers Beach, FL (available-only; 1 listing as of 2026-06-28)"
       },
@@ -3536,7 +3570,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       "display_format": "count",
       "source": {
         "url": "https://www.crexi.com/lease/properties/774462/florida-santini-marina-plaza",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Fort Myers Beach, FL (available-only; 1 listing as of 2026-06-28)"
       },
@@ -3752,7 +3786,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       ],
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=name,seasonal_index&verification_status=eq.verified&deleted_at=is.null&seasonal_index=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — seasonal_index per corridor (0 = no seasonality, 1 = extreme). 27 of 27 corridors reporting."
       }
@@ -3964,7 +3998,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
       ],
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=corridor_name,vacancy_rate_pct,vacancy_rate_source_url&verification_status=eq.verified&deleted_at=is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-06-29T15:53:31Z",
+        "fetched_at": "2026-06-29T16:23:00Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — vacancy_rate_pct per corridor. 27 of 27 corridors reporting. 2 flagged coverage_note draw on the incomplete MarketBeat submarket survey."
       }
@@ -4018,7 +4052,7 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-29T16:00:47Z"
+    "computed_at": "2026-06-29T16:30:05Z"
   },
   "exogenous_signals": []
 }
@@ -4027,5 +4061,5 @@ s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-
 - cre-swfl: standing reference on verified SWFL commercial real estate corridors.
 
 --- RECENT NOTES ---
-- 2026-06-29: pack refined by the Refinery — 15 fact(s) from 6 source(s).
+- 2026-06-29: pack refined by the Refinery — 49 fact(s) from 6 source(s).
 ```

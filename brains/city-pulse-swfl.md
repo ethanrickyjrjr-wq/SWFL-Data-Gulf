@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v22 | Token: SWFL-7421-v22-20260629 -->
+<!-- FRESHNESS: v23 | Token: SWFL-7421-v23-20260629 -->
 ---
 brain_id: city-pulse-swfl
-version: 22
-refined_at: 2026-06-29T08:29:09Z
-freshness_token: SWFL-7421-v22-20260629
+version: 23
+refined_at: 2026-06-29T16:30:59Z
+freshness_token: SWFL-7421-v23-20260629
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) daily current-events pulse — dated business openings/closings, transactions, construction, and disaster signals for 7 cities, each cited to a primary source.
@@ -33,7 +33,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"134 non-expired signals across 13 cities (Cape Coral: 12, Fort Myers: 14, Naples: 13, Estero: 11, Fort Myers Beach: 12, Sanibel: 8, North Fort Myers: 5, Marco Island: 11, East Naples: 12, Lehigh Acres: 6, Bonita Springs: 9, North Naples: 14, Golden Gate: 7).","src":"s01","date":"2026-06-29"},
+  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"81 non-expired signals across 13 cities (Cape Coral: 9, Fort Myers: 10, Naples: 8, Estero: 6, Fort Myers Beach: 8, Sanibel: 3, North Fort Myers: 4, Marco Island: 9, East Naples: 6, Lehigh Acres: 3, Bonita Springs: 6, North Naples: 7, Golden Gate: 2).","src":"s01","date":"2026-06-29"},
   {"id":"f002","topic":"city-pulse:breaking","fact":"Cape Coral — breaking","value":"FEMA proposed flood map revisions for Lee County have an expected effective date of Summer 2026; on December 8, 2025, Lee County received a status letter regarding appeals and comments submitted. (source: https://www.leegov.com/dcd/flood/floodways/femamapchanges2026)","src":"s01","date":"2026-06-29"},
   {"id":"f003","topic":"city-pulse:breaking","fact":"Cape Coral — breaking","value":"A quick but powerful storm left a Cape Coral neighborhood off Del Prado Boulevard south of Veterans underwater, with cars driving through localized flooding. (source: https://www.winknews.com/news/lee/cape-coral-neighborhood-underwater-after-quick-but-powerful-storm/article_8d197e2c-91c7-4f45-9426-1edd6d667989.html)","src":"s01","date":"2026-06-29"},
   {"id":"f004","topic":"city-pulse:breaking","fact":"Fort Myers — breaking","value":"The 185-foot water tower behind the IMAG History and Science Center in Fort Myers faces demolition; the Fort Myers City Council could vote on the matter. (source: https://www.gulfshorebusiness.com/lee/fort-myers-council-could-vote-to-demolish-imag-tower/article_27a52d4d-3cf5-4926-a60c-a05ce2f07c1c.html)","src":"s01","date":"2026-06-29"},
@@ -47,15 +47,15 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 --- OUTPUT ---
 {
   "brain_id": "city-pulse-swfl",
-  "version": 22,
-  "refined_at": "2026-06-29T08:29:09Z",
-  "expires": "2026-06-30T08:29:09Z",
+  "version": 23,
+  "refined_at": "2026-06-29T16:30:59Z",
+  "expires": "2026-06-30T16:30:59Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL city pulse as of 2026-06-29: 134 live current-events signals across 13 cities — Cape Coral (12), Fort Myers (14), Naples (13), Estero (11), Fort Myers Beach (12), Sanibel (8), North Fort Myers (5), Marco Island (11), East Naples (12), Lehigh Acres (6), Bonita Springs (9), North Naples (14), Golden Gate (7). Most current: Cape Coral — FEMA proposed flood map revisions for Lee County have an expected effective date of Summer 2026; on December 8, 2025, Lee County received a status letter regarding appeals and comments submitted. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+  "conclusion": "SWFL city pulse as of 2026-06-29: 81 live current-events signals across 13 cities — Cape Coral (9), Fort Myers (10), Naples (8), Estero (6), Fort Myers Beach (8), Sanibel (3), North Fort Myers (4), Marco Island (9), East Naples (6), Lehigh Acres (3), Bonita Springs (6), North Naples (7), Golden Gate (2). Most current: Cape Coral — FEMA proposed flood map revisions for Lee County have an expected effective date of Summer 2026; on December 8, 2025, Lee County received a status letter regarding appeals and comments submitted. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
   "key_metrics": [
     {
       "metric": "signal_breaking_1",
@@ -65,7 +65,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.leegov.com/dcd/flood/floodways/femamapchanges2026",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "2026 FEMA Proposed Flood Map Revisions: \"Update: On December 8, 2025, Lee County received a status letter regarding the appeals and comments submitted.\""
       },
@@ -82,7 +82,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.winknews.com/news/lee/cape-coral-neighborhood-underwater-after-quick-but-powerful-storm/article_8d197e2c-91c7-4f45-9426-1edd6d667989.html",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "Cape Coral neighborhood underwater after quick but powerful storm | Lee County | winknews.com: \"In Cape Coral off Del Prado Boulevard south of Veterans, cars drove through localized flooding. WINK Weather Watcher Brandon Griggs lives just off Del...\""
       },
@@ -99,7 +99,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/lee/fort-myers-council-could-vote-to-demolish-imag-tower/article_27a52d4d-3cf5-4926-a60c-a05ce2f07c1c.html",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "Historic IMAG water tower in Fort Myers faces demolition | Lee County | gulfshorebusiness.com: \"Friday, June 26, 2026 · Subscribe ... Email · Close · The 185-foot water tower behind the IMAG History and Science Center in Fort Myers could be demol...\""
       },
@@ -116,7 +116,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.winknews.com/news/collier/collier-countys-flood-map-update-helps-residents-assess-storm-risks/article_33b17914-14a7-49aa-acdb-7c5b41c43169.html",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "Collier County's flood map update helps residents assess storm risks | Collier County | winknews.com: \"For example, an elevation certificate.&quot; The new maps are expected to become effective in fall 2026. There will be a 90-day appeal period after th...\""
       },
@@ -133,7 +133,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.winknews.com/sports/florida_everblades/",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "Florida Everblades | winknews.com: \"The Florida Everblades defeated the Kansas City Mavericks 5-4 in double overtime of Game 6 of the Kelly Cup Finals early Tuesday Morning.\""
       },
@@ -150,7 +150,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.winknews.com/news/lee/crews-contain-estero-brush-fire/article_d09d76c5-0888-52e3-b835-08607b324865.html",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "Crews contain Estero brush fire | Lee County: \"LEE COUNTY, Fla. (WINK)— A brush fire off Alico Road grew to 20 acres Tuesday, bringing smoke and concerns for drivers.\""
       },
@@ -167,7 +167,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.winknews.com/news/lee/fort-myers-beach-restaurant-faces-closure-amid-towns-new-eviction-notice/article_358bd979-8589-43cb-bd82-1ba131f9c4f7.html",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "Fort Myers Beach restaurant faces closure amid town's new eviction notice | Lee County | winknews.com: \"&quot;If you just go down the boulevard, every trailer you see will have a problem.&quot; Haywood lost her original shop during Hurricane Ian and has ...\""
       },
@@ -184,7 +184,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.businessobserverfl.com/news/2026/mar/31/south-seas-buys-22-acre-artist-retreat-on-captiva/",
-        "fetched_at": "2026-06-29T08:29:09Z",
+        "fetched_at": "2026-06-29T16:30:59Z",
         "tier": 2,
         "citation": "South Seas buys 22-acre artist retreat on Captiva | Business Observer: \"But there are delays because of pending litigation brought by local groups opposed to the plans.\""
       },
@@ -195,7 +195,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     }
   ],
   "caveats": [
-    "126 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "73 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -208,7 +208,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-29T08:29:09Z"
+    "computed_at": "2026-06-29T16:30:59Z"
   },
   "exogenous_signals": []
 }

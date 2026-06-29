@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v11 | Token: SWFL-7421-v11-20260629 -->
+<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20260629 -->
 ---
 brain_id: freshness-pulse
-version: 11
-refined_at: 2026-06-29T08:29:10Z
-freshness_token: SWFL-7421-v11-20260629
+version: 12
+refined_at: 2026-06-29T16:31:00Z
+freshness_token: SWFL-7421-v12-20260629
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: SWFL daily sourced freshness snapshot — today's cited median sale price (Cape Coral / Fort Myers / Naples) and 30-year fixed mortgage rate, each provenance-gated to a real source URL, with ZIP-grain Baseline-Delta projections ([INFERENCE]).
@@ -39,9 +39,9 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
 --- OUTPUT ---
 {
   "brain_id": "freshness-pulse",
-  "version": 11,
-  "refined_at": "2026-06-29T08:29:10Z",
-  "expires": "2026-06-30T08:29:10Z",
+  "version": 12,
+  "refined_at": "2026-06-29T16:31:00Z",
+  "expires": "2026-06-30T16:31:00Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
       "display_format": "percent",
       "source": {
         "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-        "fetched_at": "2026-06-28T13:20:08.653914+00:00",
+        "fetched_at": "2026-06-29T15:33:44.639854+00:00",
         "tier": 2,
         "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-06-25"
       },
@@ -83,7 +83,7 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-29T08:29:10Z"
+    "computed_at": "2026-06-29T16:31:00Z"
   },
   "exogenous_signals": []
 }

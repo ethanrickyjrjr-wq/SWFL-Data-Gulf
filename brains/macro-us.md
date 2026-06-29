@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v18 | Token: SWFL-7421-v18-20260629 -->
+<!-- FRESHNESS: v19 | Token: SWFL-7421-v19-20260629 -->
 ---
 brain_id: macro-us
-version: 18
-refined_at: 2026-06-29T08:28:16Z
-freshness_token: SWFL-7421-v18-20260629
+version: 19
+refined_at: 2026-06-29T16:30:11Z
+freshness_token: SWFL-7421-v19-20260629
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: National macro context — SOFR funding rate and US CPI YoY. Root of the three-tier macro denominator chain (macro-us → macro-florida → macro-swfl).
@@ -33,17 +33,17 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, CPIAUCSL YoY) | 20
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"macro_snapshot","fact":"Current national macro context — funding rates and headline inflation","value":"National macro snapshot: Secured Overnight Financing Rate is 3.6% (stable) as of 2026-06-25; US CPI (All Items) Year-over-Year is 4.2% (rising) as of 2026-05-01. These two series anchor the funding-cost and inflation backdrop every state and regional brain reads through the macro chain.","src":"s01","date":"2026-06-29"},
-  {"id":"f002","topic":"metric:sofr_rate","fact":"SOFR (Secured Overnight Financing Rate)","value":"SOFR (Secured Overnight Financing Rate) is 3.6% (period 2026-06-25, direction stable). SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.","src":"s01","date":"2026-06-29"},
+  {"id":"f001","topic":"macro_snapshot","fact":"Current national macro context — funding rates and headline inflation","value":"National macro snapshot: Secured Overnight Financing Rate is 3.6% (stable) as of 2026-06-26; US CPI (All Items) Year-over-Year is 4.2% (rising) as of 2026-05-01. These two series anchor the funding-cost and inflation backdrop every state and regional brain reads through the macro chain.","src":"s01","date":"2026-06-29"},
+  {"id":"f002","topic":"metric:sofr_rate","fact":"SOFR (Secured Overnight Financing Rate)","value":"SOFR (Secured Overnight Financing Rate) is 3.6% (period 2026-06-26, direction stable). SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios.","src":"s01","date":"2026-06-29"},
   {"id":"f003","topic":"metric:cpi_yoy","fact":"US CPI YoY","value":"US CPI YoY is 4.2% (period 2026-05-01, direction rising). Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026.","src":"s01","date":"2026-06-29"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-us",
-  "version": 18,
-  "refined_at": "2026-06-29T08:28:16Z",
-  "expires": "2026-07-29T08:28:16Z",
+  "version": 19,
+  "refined_at": "2026-06-29T16:30:11Z",
+  "expires": "2026-07-29T16:30:11Z",
   "ttl_seconds": 2592000,
   "direction": "bearish",
   "magnitude": 0.5,
@@ -53,7 +53,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, CPIAUCSL YoY) | 20
   "key_metrics": [
     {
       "metric": "sofr_rate",
-      "value": 3.64,
+      "value": 3.62,
       "direction": "stable",
       "label": "SOFR (Secured Overnight Financing Rate)",
       "variable_type": "intensive",
@@ -61,9 +61,9 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, CPIAUCSL YoY) | 20
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-06-29T08:28:13Z",
+        "fetched_at": "2026-06-29T16:30:08Z",
         "tier": 1,
-        "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.64 percent_annualized for period 2026-06-25, stable vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
+        "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.62 percent_annualized for period 2026-06-26, stable vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
       },
       "suggestions": [
         "What's driving sofr rate?",
@@ -80,7 +80,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, CPIAUCSL YoY) | 20
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&units=pc1&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-06-29T08:28:13Z",
+        "fetched_at": "2026-06-29T16:30:08Z",
         "tier": 1,
         "citation": "FRED US CPI (All Items) Year-over-Year (series_id CPIAUCSL_YOY) — latest observation 4.17 percent for period 2026-05-01, rising vs prior 6 periods. Headline CPI YoY is the inflation reading the Fed targets at 2% — shelter is the remaining sticky component most of 2026."
       },
@@ -103,7 +103,7 @@ s01 | FRED — Federal Reserve Economic Data (live API; SOFR, CPIAUCSL YoY) | 20
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-29T08:28:16Z"
+    "computed_at": "2026-06-29T16:30:11Z"
   },
   "exogenous_signals": []
 }
