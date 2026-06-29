@@ -6,8 +6,8 @@
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 32,
-    "gradeable": 114,
-    "reviewed-display": 14,
+    "gradeable": 116,
+    "reviewed-display": 12,
     "moat-fuel": 107,
     "needs-window": 23,
     "backtest_clean": 11
@@ -3964,23 +3964,23 @@
     {
       "slug": "permits_collier_saturation_index",
       "concept_id": "permits_collier_saturation_index",
-      "bucket": "reviewed-display",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "permits_collier_saturation_index",
         "concept_id": "permits_collier_saturation_index",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "real-estate",
         "value_type": "percentage",
         "window_days": 180,
-        "reviewed_non_directional": true
+        "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "permits_collier_zip_z",
@@ -4174,23 +4174,23 @@
     {
       "slug": "permits_swfl_saturation_index",
       "concept_id": "permits_swfl_saturation_index",
-      "bucket": "reviewed-display",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "permits_swfl_saturation_index",
         "concept_id": "permits_swfl_saturation_index",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "real-estate",
         "value_type": "percentage",
         "window_days": 180,
-        "reviewed_non_directional": true
+        "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "permits_swfl_top_heating_cooling",
