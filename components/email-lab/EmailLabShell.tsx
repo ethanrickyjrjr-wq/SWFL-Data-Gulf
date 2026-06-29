@@ -79,6 +79,9 @@ const FONT_OPTIONS: { value: FontFamily; label: string }[] = [
   { value: "MODERN_SANS", label: "Modern Sans" },
   { value: "BOOK_SERIF", label: "Book Serif" },
   { value: "GEOMETRIC_SANS", label: "Geometric Sans" },
+  { value: "PLAYFAIR_SERIF", label: "Playfair Display" },
+  { value: "LATO_SANS", label: "Lato" },
+  { value: "MONTSERRAT_SANS", label: "Montserrat" },
 ];
 
 /** Map project brand tokens onto a doc's globalStyle + brand-bearing blocks.

@@ -238,6 +238,40 @@ export function BlockInspector({
               onPaddingY={(v) => set("paddingY", v)}
               onSectionBg={(v) => set("sectionBg", v)}
             />
+            <div className="border-t border-gray-100 pt-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                Text Overlay
+              </p>
+              <TextField
+                label="Overlay title"
+                value={str("overlayTitle")}
+                onChange={(v) => set("overlayTitle", v)}
+                placeholder="Bold headline over the photo"
+              />
+              <TextAreaField
+                label="Overlay body"
+                value={str("overlayBody")}
+                onChange={(v) => set("overlayBody", v)}
+                rows={3}
+              />
+              <ColorField
+                label="Text color"
+                value={str("overlayTextColor") || "#ffffff"}
+                onChange={(v) => set("overlayTextColor", v)}
+              />
+              <TextField
+                label="Scrim (background)"
+                value={str("overlayBg")}
+                onChange={(v) => set("overlayBg", v)}
+                placeholder="rgba(0,0,0,0.45)"
+              />
+              <SelectField
+                label="Text align"
+                value={(props.overlayAlign as string) ?? "center"}
+                options={["left", "center", "right"]}
+                onChange={(v) => set("overlayAlign", v)}
+              />
+            </div>
           </>
         )}
 

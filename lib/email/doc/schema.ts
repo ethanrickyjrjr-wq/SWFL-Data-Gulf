@@ -110,6 +110,11 @@ const ImagePropsSchema = z.object({
   linkUrl: z.string().optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),
+  overlayTitle: z.string().max(120).optional(),
+  overlayBody: z.string().max(300).optional(),
+  overlayTextColor: z.string().optional(),
+  overlayBg: z.string().optional(),
+  overlayAlign: z.enum(["left", "center", "right"]).optional(),
 }) satisfies z.ZodType<ImageProps>;
 
 const ListingPropsSchema = z.object({
@@ -216,7 +221,14 @@ const FooterPropsSchema = z.object({
 export const GlobalStyleSchema = z.object({
   primaryColor: z.string(),
   accentColor: z.string(),
-  fontFamily: z.enum(["MODERN_SANS", "BOOK_SERIF", "GEOMETRIC_SANS"]),
+  fontFamily: z.enum([
+    "MODERN_SANS",
+    "BOOK_SERIF",
+    "GEOMETRIC_SANS",
+    "PLAYFAIR_SERIF",
+    "LATO_SANS",
+    "MONTSERRAT_SANS",
+  ]),
   textColor: z.string(),
   backdropColor: z.string(),
 }) satisfies z.ZodType<EmailGlobalStyle>;
@@ -291,6 +303,8 @@ export const BlockContentPatchSchema = z.object({
   alt: z.string().max(160).optional(),
   tagline: z.string().max(300).optional(),
   stats: z.array(StatPatchSchema).min(1).max(3).optional(),
+  overlayTitle: z.string().max(120).optional(),
+  overlayBody: z.string().max(300).optional(),
 });
 
 export const ContentPatchSchema = z.record(z.string(), BlockContentPatchSchema);

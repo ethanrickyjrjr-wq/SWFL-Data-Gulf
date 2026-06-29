@@ -1,3 +1,9 @@
+## 2026-06-29 (main) — feat(email-lab): web fonts + text overlay on images
+
+Two new capabilities in the email lab grid canvas:
+1. **Web fonts**: Added Playfair Display, Lato, Montserrat to the Font picker. New `FontFamily` values (`PLAYFAIR_SERIF`, `LATO_SANS`, `MONTSERRAT_SANS`) wire through types → schema → `FONT_STACKS` → `WEB_FONT_URLS` (Google Fonts CSS2 `<link>` injected in `<Head>` for web-font families; system-stack fonts unchanged). Both email export and canvas DOM preview use the same font stack via `fontStack()`.
+2. **Text overlay on images**: New `ImageProps` fields — `overlayTitle`, `overlayBody` (AI-fillable via `BlockContentPatchSchema`), and `overlayTextColor`, `overlayBg`, `overlayAlign` (user-owned). When any overlay field is set, `ImageBlock` renders a `background-image` Section with a scrim + heading/body on top (CSS background-image works in Apple Mail, iOS, Gmail web, Yahoo Mail; Outlook falls back to colored panel — V1 intentionally no VML). `BlockInspector` has a new "Text Overlay" section for image blocks. 0 TS errors. Next: live-verify at /email-lab/grid.
+
 ## 2026-06-29 (main) — fix(email): listing-scrape cascade — ImageObject photos, geo lat/lon, offers array
 
 Three bugs fixed in `lib/email/listing-scrape.ts` after crawl4ai research pass on schema.org JSON-LD:

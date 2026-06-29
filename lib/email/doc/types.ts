@@ -30,7 +30,13 @@ export type TextAlign = "left" | "center" | "right";
 
 export type PaddingSize = "none" | "sm" | "md" | "lg";
 
-export type FontFamily = "MODERN_SANS" | "BOOK_SERIF" | "GEOMETRIC_SANS";
+export type FontFamily =
+  | "MODERN_SANS"
+  | "BOOK_SERIF"
+  | "GEOMETRIC_SANS"
+  | "PLAYFAIR_SERIF"
+  | "LATO_SANS"
+  | "MONTSERRAT_SANS";
 
 // ── Social platforms ────────────────────────────────────────────────────────
 // The eight pre-baked platforms. The runtime registry (label, brand color, URL
@@ -115,6 +121,20 @@ export interface ImageProps extends BlockBase {
   kind?: "chart" | "photo";
   /** Optional click-through URL — wraps the image in an <a> tag. */
   linkUrl?: string;
+  // ── Text overlay ────────────────────────────────────────────────────────────
+  // When overlayTitle or overlayBody is set, the image renders as a CSS
+  // background-image (table cell) with text on top. Supported in Apple Mail,
+  // iOS, Gmail web, Yahoo Mail. Outlook desktop falls back to a colored panel.
+  /** AI-fillable headline on top of the image. */
+  overlayTitle?: string;
+  /** AI-fillable supporting text on top of the image. */
+  overlayBody?: string;
+  /** User-owned: hex text color. Defaults to #ffffff. */
+  overlayTextColor?: string;
+  /** User-owned: CSS color/rgba for the darkening scrim. Defaults to rgba(0,0,0,0.45). */
+  overlayBg?: string;
+  /** User-owned: horizontal text alignment inside the overlay. */
+  overlayAlign?: TextAlign;
 }
 
 /** A single property card: photo on top, price, beds/baths/sqft, address. All
