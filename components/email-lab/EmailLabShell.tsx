@@ -5,11 +5,14 @@
 // (→ globalStyle), export, and the "Start from" seed picker. The two route
 // clients are thin wrappers that pass brand/scope/header config.
 //
-// • Click a block → left panel switches to the Block Inspector.
+// Layout mirrors EmailLabGridShell: canvas left (1fr), dark AI panel right (380px).
+// Shared accordions (Brand, Seeds, Blocks, Photos) live in SharedEmailPanel so a
+// single fix reaches both shells — import it there, not here.
+//
+// • Click a block → right panel switches to "Now editing" + Block Inspector.
 // • "Fill with AI" → content-patch (words/numbers only; never restyles).
 // • Brand colors here own globalStyle (sticky; the AI can't touch them).
-// • Classic templates stay reachable as a preview-only legacy rail (no silent
-//   capability loss — spec → Template regression).
+// • Classic templates stay reachable as a preview-only legacy rail.
 import { useEffect, useRef, useState } from "react";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
 import type { ChangeEvent, ReactNode } from "react";
@@ -124,8 +127,6 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
       if (t.AGENT_TITLE) props.designation = t.AGENT_TITLE;
       if (cta) props.ctaUrl = cta;
     } else if (b.type === "social-icons") {
-      // Fill known-platform URLs from brand tokens; preserve manual custom
-      // entries + order; append connected platforms not yet in the block.
       const existing = (props.platforms as SocialPlatformEntry[] | undefined) ?? [];
       const present = new Set(existing.map((e) => e.type));
       const next: SocialPlatformEntry[] = existing.map((e) => {
@@ -174,26 +175,12 @@ export interface EmailLabShellProps {
   autoGenerate?: boolean;
   headerSlot: ReactNode;
   aiPlaceholder?: string;
-  /** When provided, renders a Save button that calls back with the current doc.
-   *  Returns the saved deliverable id (so "Send to contacts" can blast the row
-   *  that was just persisted); legacy callers may still return void. */
-  /** Persist the doc. `aiPrompt` is the live AI instruction (stored as the deliverable's
-   *  build prompt so a SCHEDULED re-render reproduces this email — including its chart —
-   *  with fresh data). Returns the saved deliverable id on first save. */
   onSave?: (doc: EmailDoc, aiPrompt: string) => Promise<string | void>;
   saving?: boolean;
-  /** Re-open the Schedule modal on mount (returning from the contacts-upload detour). */
   autoOpenSchedule?: boolean;
-  /** The saved block-canvas deliverable id (the `?did`), when this lab is editing
-   *  a persisted material — enables "Send to contacts". */
   deliverableId?: string | null;
-  /** Project id — required when projectPhotos is provided; used to call /api/projects/[id]/email-media. */
   projectId?: string;
-  /** Filed image items from the project. When provided, a Photos panel is shown. */
   projectPhotos?: { storage_path: string; signedUrl: string; caption?: string }[];
-  /** The raw project/account branding blob (snake_case) seeding the live Brand
-   *  panel — the SAME `branding` shape the project workspace edits and saves to
-   *  projects.branding. Editing brand here writes back to that one root. */
   initialBranding?: Record<string, string>;
 }
 
@@ -226,9 +213,6 @@ export function EmailLabShell({
   const [exporting, setExporting] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [sendId, setSendId] = useState<string | null>(null);
-  // Auto-open the Schedule modal when returning from the contacts-upload detour
-  // (?schedule=1 → autoOpenSchedule) and a saved deliverable is loaded. Set during
-  // render from props — no effect, so no set-state-in-effect.
   const [scheduleOpen, setScheduleOpen] = useState(Boolean(autoOpenSchedule && deliverableId));
   const [scheduleId, setScheduleId] = useState<string | null>(deliverableId ?? null);
   const [mode, setMode] = useState<"canvas" | "classic">("canvas");
@@ -237,19 +221,15 @@ export function EmailLabShell({
   const [showClassic, setShowClassic] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
   const [promotingPath, setPromotingPath] = useState<string | null>(null);
+  const [imageUrlInput, setImageUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Brand panel state (ONE ROOT: the same `branding` blob the project
-  //    workspace edits + saves to projects.branding / user_brand_profiles). ────
   const [branding, setBranding] = useState<Record<string, string>>(initialBranding ?? {});
   const [palettes, setPalettes] = useState<BrandPalette[]>([]);
   const [brandSaving, setBrandSaving] = useState(false);
   const [brandSavedMsg, setBrandSavedMsg] = useState<string | null>(null);
   const brandPrefillAttempted = useRef(false);
 
-  // Left-panel accordions (the user asked for everything collapsible so the panel
-  // tightens up once real content is in). Brand opens by default so its depth is
-  // visible; the rest start collapsed.
   const [showBrand, setShowBrand] = useState(true);
   const [showSeeds, setShowSeeds] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
@@ -258,7 +238,6 @@ export function EmailLabShell({
   const [calendar, setCalendar] = useState<WeeklyCalendar | null>(null);
   const [expandedDay, setExpandedDay] = useState<CalendarDay | null>(null);
 
-  // ── history helpers (coalesced field edits → meaningful undo frames) ────────
   const editingRef = useRef(false);
   const idleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -282,7 +261,6 @@ export function EmailLabShell({
     }, 500);
   }
 
-  // ── AI content-fill ─────────────────────────────────────────────────────────
   async function runAi(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -331,10 +309,6 @@ export function EmailLabShell({
     }
   }
 
-  // Auto-fill on mount (project route lands on a real, brand-applied email).
-  // Promise-chain form so no setState runs synchronously in the effect body
-  // (keeps clear of react-hooks/set-state-in-effect) — aiLoading already inits
-  // true when autoGenerate, mirroring the prior project client's mount pattern.
   useEffect(() => {
     if (!autoGenerate) return;
     fetch("/api/email-lab/ai", {
@@ -355,7 +329,6 @@ export function EmailLabShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keyboard: ⌘Z / ⌘⇧Z undo-redo, Escape deselects.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
@@ -375,11 +348,6 @@ export function EmailLabShell({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // On first Brand-accordion open, load the account brand profile: seed agent
-  // fields + empty color slots from the saved default + the palette library
-  // (exactly the project workspace's prefill). 401 in the signed-out standalone
-  // lab → {} → no-op. setState lands in the promise .then (not the effect body),
-  // so it stays clear of react-hooks/set-state-in-effect.
   useEffect(() => {
     if (!showBrand || brandPrefillAttempted.current) return;
     brandPrefillAttempted.current = true;
@@ -402,7 +370,6 @@ export function EmailLabShell({
       .catch(() => {});
   }, [showBrand]);
 
-  // ── per-block AI ─────────────────────────────────────────────────────────────
   async function runBlockAi(block: EmailBlock, prompt: string): Promise<EmailBlock | null> {
     const miniDoc = { globalStyle: doc.globalStyle, blocks: [block] };
     try {
@@ -421,7 +388,6 @@ export function EmailLabShell({
     }
   }
 
-  // ── block ops ───────────────────────────────────────────────────────────────
   const selectedBlock = selectedId ? (doc.blocks.find((b) => b.id === selectedId) ?? null) : null;
 
   function updateBlock(next: EmailBlock) {
@@ -444,11 +410,6 @@ export function EmailLabShell({
     liveEdit({ ...doc, globalStyle: { ...doc.globalStyle, ...patch } });
   }
 
-  // ── Brand panel (one root) ──────────────────────────────────────────────────
-  // Editing brand re-applies onto the live doc — brand props + the 4 globalStyle
-  // colors only; AI-filled body numbers are untouched (brand is canonical, the
-  // AI fills content). Saves hit the SAME targets the project workspace uses, so
-  // brand edited here and brand edited in the project are the one same brand.
   function applyBranding(next: Record<string, string>) {
     setBranding(next);
     liveEdit(applyBrand(doc, brandingToTokens(next)));
@@ -473,9 +434,6 @@ export function EmailLabShell({
     return res.ok;
   }
 
-  // "Save" — account default (best-effort; only the column-backed fields + the
-  // palette library persist at the account level) AND the per-project blob when
-  // in a project (that blob carries EVERY field, incl. nickname/quote/address).
   async function saveBrandGlobal(): Promise<boolean> {
     setBrandSaving(true);
     setBrandSavedMsg(null);
@@ -529,7 +487,6 @@ export function EmailLabShell({
     setClassicHtml(await renderLegacyHtml(templateId, brandTokens ?? {}));
   }
 
-  // ── Social Calendar ───────────────────────────────────────────────────────
   async function generateWeek() {
     setCalState("loading");
     try {
@@ -560,7 +517,6 @@ export function EmailLabShell({
     commit(applyBrand(card, { ...(brandTokens ?? {}), ...brandingToTokens(branding) }));
   }
 
-  // ── Photos bridge ─────────────────────────────────────────────────────────
   function applyPhotoUrl(url: string) {
     const sel = selectedId ? doc.blocks.find((b) => b.id === selectedId) : null;
     if (sel?.type === "image") {
@@ -611,7 +567,6 @@ export function EmailLabShell({
     }
   }
 
-  // ── export ────────────────────────────────────────────────────────────────
   async function copyHtml() {
     setExporting(true);
     try {
@@ -624,21 +579,14 @@ export function EmailLabShell({
     }
   }
 
-  /** Print-to-PDF fallback (classic templates, or when the server route is
-   *  unavailable, e.g. the signed-out standalone lab). */
   function printToPdf(html: string) {
     const win = window.open("", "_blank");
     if (!win) return;
-    // onload must be set BEFORE write()/close() so it fires when the document and
-    // its resources finish loading — not after, when the event is already gone.
     win.onload = () => win.print();
     win.document.write(html);
     win.document.close();
   }
 
-  // Download a REAL .pdf (single PDF root) for the live block-canvas doc. POST so
-  // it reflects unsaved edits; the route ignores [id] for POST. Classic templates
-  // and any server failure fall back to browser print-to-PDF.
   async function downloadPdf() {
     setExporting(true);
     try {
@@ -671,8 +619,6 @@ export function EmailLabShell({
     }
   }
 
-  // Send to contacts: the blast reads `deliverables.doc` from the DB, so persist
-  // the live doc first (onSave returns the id), then open the contact picker.
   async function openSend() {
     let id = deliverableId ?? null;
     if (onSave) {
@@ -685,9 +631,6 @@ export function EmailLabShell({
     }
   }
 
-  // Schedule a recurring send: persist the live doc first (the schedule links to the
-  // saved block-canvas deliverable by id, so the worker re-renders THIS design fresh
-  // each occurrence), then open the cadence/audience flow.
   async function openSchedule() {
     let id = deliverableId ?? null;
     if (onSave) {
@@ -702,331 +645,18 @@ export function EmailLabShell({
 
   const busy = aiLoading || exporting;
 
+  // ── RENDER ──────────────────────────────────────────────────────────────────
+  // Layout: canvas (1fr) LEFT · dark AI panel (380px) RIGHT — mirrors /email-lab/grid.
   return (
-    <div className="grid h-dvh grid-cols-[340px_1fr] overflow-hidden bg-[#070f14] text-white">
-      {/* ══════════ LEFT PANEL ══════════ */}
-      <aside className="flex flex-col overflow-hidden border-r border-white/8">
-        <div className="shrink-0 border-b border-white/8 px-4 pb-3 pt-4">{headerSlot}</div>
-
-        <div className="flex-1 overflow-y-auto">
-          {selectedBlock ? (
-            <div className="px-4 py-4 text-gray-900">
-              <div className="rounded-lg bg-white p-3">
-                <BlockInspector
-                  block={selectedBlock}
-                  onChange={updateBlock}
-                  onDelete={deleteSelected}
-                  onClose={() => setSelectedId(null)}
-                  onBlockAi={runBlockAi}
-                />
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* ── AI Generate ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-4">
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
-                  Fill with AI
-                </p>
-                <textarea
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) runAi(aiPrompt);
-                  }}
-                  placeholder={aiPlaceholder}
-                  rows={4}
-                  className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
-                />
-                <p className="mb-1.5 mt-3 text-[10px] uppercase tracking-[0.15em] text-white/35">
-                  Chart type
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {([{ type: "auto", label: "Auto" }, ...CHART_TYPE_OPTIONS] as const).map((o) => (
-                    <button
-                      key={o.type}
-                      type="button"
-                      onClick={() => setChartType(o.type as ChartType | "auto")}
-                      className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                        chartType === o.type
-                          ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
-                          : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
-                      }`}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => runAi(aiPrompt)}
-                  disabled={aiLoading || !aiPrompt.trim()}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
-                >
-                  {aiLoading ? (
-                    <>
-                      <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#070f14]/30 border-t-[#070f14]" />
-                      Filling…
-                    </>
-                  ) : (
-                    "Fill with AI"
-                  )}
-                </button>
-                {aiMessage ? (
-                  <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>
-                ) : (
-                  <p className="mt-1.5 text-center text-[10px] text-white/20">
-                    ⌘↵ · fills words & numbers, keeps your colors
-                  </p>
-                )}
-              </div>
-
-              {/* ── Social Calendar ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-3">
-                <button
-                  onClick={() => setShowCalendar((v) => !v)}
-                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-                >
-                  <span>Social calendar</span>
-                  <span className={`transition-transform ${showCalendar ? "rotate-180" : ""}`}>
-                    ▾
-                  </span>
-                </button>
-                {showCalendar && (
-                  <SocialCalendarPanel
-                    state={calState}
-                    calendar={calendar}
-                    expandedDay={expandedDay}
-                    onGenerate={generateWeek}
-                    onToggleDay={(d) => setExpandedDay((cur) => (cur === d ? null : d))}
-                    onCopyCaption={copyCaption}
-                    onLoadCard={loadSocialCard}
-                  />
-                )}
-              </div>
-
-              {/* ── Brand — the SAME form (and save targets) as the project
-                     workspace, surfaced in the lab: all fields + 4 colors. ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-3">
-                <button
-                  onClick={() => setShowBrand((v) => !v)}
-                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-                >
-                  <span>Brand</span>
-                  <span className={`transition-transform ${showBrand ? "rotate-180" : ""}`}>▾</span>
-                </button>
-                {showBrand && (
-                  <div className="mt-3">
-                    <BrandingBlock
-                      branding={branding}
-                      onChange={applyBranding}
-                      palettes={palettes}
-                      onPalettesChange={persistPalettes}
-                      onSaveGlobal={saveBrandGlobal}
-                      onSaveProjectOnly={projectId ? saveBrandProjectOnly : undefined}
-                      saving={brandSaving}
-                      savedMsg={brandSavedMsg}
-                      onClose={() => setShowBrand(false)}
-                    />
-                    <label className="mt-3 block border-t border-white/10 pt-3">
-                      <span className="mb-1 block text-[10px] text-white/40">Font</span>
-                      <select
-                        value={doc.globalStyle.fontFamily}
-                        onChange={(e) =>
-                          setGlobalStyle({ fontFamily: e.target.value as FontFamily })
-                        }
-                        className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
-                      >
-                        {FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value} className="text-black">
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Start from (block-canvas seeds) ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-3">
-                <button
-                  onClick={() => setShowSeeds((v) => !v)}
-                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-                >
-                  <span>Start from</span>
-                  <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
-                </button>
-                {showSeeds && (
-                  <div className="mt-2 space-y-1.5">
-                    {SEED_DOCS.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => pickSeed(s.id)}
-                        className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
-                      >
-                        <span className="block text-xs font-medium text-white/75">{s.name}</span>
-                        <span className="block text-[10px] leading-tight text-white/35">
-                          {s.description}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* ── Add Blocks ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-3">
-                <button
-                  onClick={() => setShowBlocks((v) => !v)}
-                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-                >
-                  <span>Blocks</span>
-                  <span className={`transition-transform ${showBlocks ? "rotate-180" : ""}`}>
-                    ▾
-                  </span>
-                </button>
-                {showBlocks && (
-                  <div className="mt-2 grid grid-cols-2 gap-1">
-                    {BLOCK_MENU.map((b) => (
-                      <button
-                        key={b.type}
-                        type="button"
-                        onClick={() => addBlockToEnd(b.type)}
-                        className="flex items-center gap-2 rounded-md border border-white/8 bg-white/4 px-2.5 py-2 text-left transition-colors hover:bg-white/8"
-                      >
-                        <span className="w-4 text-center text-sm leading-none text-white/40">
-                          {b.icon}
-                        </span>
-                        <span className="text-[11px] font-medium text-white/55">{b.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* ── Photos — upload tile + filed thumbnails when a project provides them ── */}
-              <div className="border-b border-white/8 px-4 pb-4 pt-3">
-                <button
-                  onClick={() => setShowPhotos((v) => !v)}
-                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-                >
-                  <span>Photos</span>
-                  <span className={`transition-transform ${showPhotos ? "rotate-180" : ""}`}>
-                    ▾
-                  </span>
-                </button>
-                {showPhotos && (
-                  <div className="mt-2 grid grid-cols-2 gap-1.5">
-                    {/* Upload tile — always first */}
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={promotingPath !== null}
-                      className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal/70 disabled:opacity-40"
-                      title="Upload a photo"
-                    >
-                      {promotingPath === "__upload__" ? (
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
-                      ) : (
-                        <span className="text-lg leading-none">＋</span>
-                      )}
-                    </button>
-
-                    {/* Filed photo thumbnails (project context only) */}
-                    {(projectPhotos ?? []).map((photo) => (
-                      <button
-                        key={photo.storage_path}
-                        type="button"
-                        onClick={() => pickFiledPhoto(photo.storage_path)}
-                        disabled={promotingPath !== null}
-                        title={photo.caption ?? photo.storage_path.split("/").pop()}
-                        className={`relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
-                          promotingPath === photo.storage_path
-                            ? "border-gulf-teal"
-                            : "border-transparent hover:border-gulf-teal disabled:opacity-60"
-                        }`}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={photo.signedUrl}
-                          alt={photo.caption ?? ""}
-                          className="h-full w-full object-cover"
-                        />
-                        {promotingPath === photo.storage_path && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Hidden file input for new-upload flow */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    const f = e.target.files?.[0];
-                    if (f) void uploadNewPhoto(f);
-                    e.target.value = "";
-                  }}
-                />
-              </div>
-
-              {/* ── Classic templates (preview only) ── */}
-              <div className="px-4 pb-6 pt-3">
-                <button
-                  onClick={() => setShowClassic((v) => !v)}
-                  className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-                >
-                  <span>Classic templates (preview)</span>
-                  <span className={`transition-transform ${showClassic ? "rotate-180" : ""}`}>
-                    ▾
-                  </span>
-                </button>
-                {showClassic && (
-                  <div className="mt-2 grid grid-cols-2 gap-1.5">
-                    {CLASSIC_TEMPLATES.map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => pickClassic(t.id)}
-                        className={`flex items-center gap-2 rounded-md border px-2.5 py-2 text-left transition-colors ${
-                          mode === "classic" && classicId === t.id
-                            ? "border-gulf-teal/40 bg-gulf-teal/15 text-gulf-teal"
-                            : "border-white/8 bg-white/4 text-white/55 hover:bg-white/8"
-                        }`}
-                      >
-                        <span className="text-sm leading-none">{t.icon}</span>
-                        <span className="text-[11px] font-medium leading-tight">{t.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </aside>
-
-      {/* ══════════ CANVAS ══════════ */}
-      <main className="flex flex-col overflow-hidden bg-[#0d1920]">
-        <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-6 py-3">
-          <div className="flex items-center gap-3">
-            <div
-              className={`h-2 w-2 rounded-full ${busy ? "animate-pulse bg-gulf-teal" : "bg-white/20"}`}
-            />
-            <span className="text-xs text-white/35">
-              {aiLoading
-                ? "AI filling…"
-                : mode === "classic"
-                  ? "Classic template · preview only"
-                  : "600px email canvas"}
-            </span>
+    <div className="grid h-dvh grid-cols-[1fr_380px] overflow-hidden bg-[#e9edf0] text-[#242424]">
+      {/* ══════════ CENTER: top bar + canvas ══════════ */}
+      <main className="flex min-w-0 flex-col overflow-hidden">
+        {/* top bar — dark, matches /grid */}
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black bg-[#111418] px-5 py-2.5">
+          <div className="flex items-center gap-4">
+            {headerSlot}
             {mode === "canvas" && (
-              <div className="ml-2 flex items-center gap-1">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => {
                     editingRef.current = false;
@@ -1034,7 +664,7 @@ export function EmailLabShell({
                     setSelectedId(null);
                   }}
                   disabled={!canUndo(history)}
-                  className="rounded border border-white/10 px-2 py-0.5 text-xs text-white/40 hover:text-white/70 disabled:opacity-25"
+                  className="rounded border border-[#f59e0b]/40 px-2 py-0.5 text-xs text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-25"
                   title="Undo (⌘Z)"
                 >
                   ↶
@@ -1045,15 +675,13 @@ export function EmailLabShell({
                     setHistory((h) => redoHistory(h));
                   }}
                   disabled={!canRedo(history)}
-                  className="rounded border border-white/10 px-2 py-0.5 text-xs text-white/40 hover:text-white/70 disabled:opacity-25"
+                  className="rounded border border-[#f59e0b]/40 px-2 py-0.5 text-xs text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-25"
                   title="Redo (⌘⇧Z)"
                 >
                   ↷
                 </button>
               </div>
             )}
-          </div>
-          <div className="flex items-center gap-2">
             {mode === "classic" && (
               <button
                 onClick={() => setMode("canvas")}
@@ -1062,17 +690,19 @@ export function EmailLabShell({
                 ← Back to editor
               </button>
             )}
+          </div>
+          <div className="flex items-center gap-2">
             <button
               onClick={downloadPdf}
               disabled={exporting}
-              className="rounded border border-white/10 px-2.5 py-1 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white/70 disabled:opacity-30"
+              className="rounded border border-[#f59e0b]/40 px-2.5 py-1 text-xs text-[#f59e0b] transition-colors hover:border-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-30"
             >
               Download PDF
             </button>
             <button
               onClick={copyHtml}
               disabled={exporting}
-              className="rounded border border-white/10 px-2.5 py-1 text-xs text-white/40 transition-colors hover:border-white/25 hover:text-white/70 disabled:opacity-30"
+              className="rounded border border-[#f59e0b]/40 px-2.5 py-1 text-xs text-[#f59e0b] transition-colors hover:border-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-30"
             >
               {copied ? "Copied ✓" : "Copy HTML"}
             </button>
@@ -1101,7 +731,7 @@ export function EmailLabShell({
                 type="button"
                 onClick={() => onSave(doc, aiPrompt)}
                 disabled={saving}
-                className="px-3 py-1.5 text-sm rounded-lg bg-gulf-teal/20 text-gulf-teal border border-gulf-teal/30 hover:bg-gulf-teal/30 disabled:opacity-40 transition-colors focus-visible:ring-2 focus-visible:ring-gulf-teal/40"
+                className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/20 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/30 disabled:opacity-40"
               >
                 {saving ? "Saving…" : "Save"}
               </button>
@@ -1109,14 +739,15 @@ export function EmailLabShell({
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden">
+        {/* canvas */}
+        <div className="min-h-0 flex-1 overflow-hidden">
           {mode === "classic" ? (
             <div className="h-full overflow-y-auto px-8 py-8">
               <div className="mx-auto max-w-[660px]">
                 {classicHtml ? (
                   <EmailPreviewFrame srcDoc={classicHtml} />
                 ) : (
-                  <div className="flex h-96 items-center justify-center text-sm text-white/25">
+                  <div className="flex h-96 items-center justify-center text-sm text-gray-400">
                     Loading…
                   </div>
                 )}
@@ -1132,6 +763,354 @@ export function EmailLabShell({
           )}
         </div>
       </main>
+
+      {/* ══════════ RIGHT: AI assistant (full height) — mirrors /grid panel ══════════ */}
+      <aside className="flex flex-col overflow-hidden border-l border-[#0a141a] bg-[#0f1d24]">
+        <div className="flex shrink-0 items-center gap-2 border-b border-white/8 px-4 py-3">
+          <span className="text-gulf-teal">✦</span>
+          <span className="text-sm font-semibold text-white/85">AI assistant</span>
+          {busy && (
+            <span className="ml-auto inline-block h-3 w-3 animate-spin rounded-full border-2 border-gulf-teal/30 border-t-gulf-teal" />
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {/* ── Fill with AI ── */}
+          <div className="border-b border-white/8 px-4 pb-4 pt-4">
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
+              Fill with AI
+            </p>
+            <textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) runAi(aiPrompt);
+              }}
+              placeholder={aiPlaceholder}
+              rows={3}
+              className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+            />
+            <div className="mb-1.5 mt-2.5">
+              <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">
+                Chart type
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {([{ type: "auto", label: "Auto" }, ...CHART_TYPE_OPTIONS] as const).map((o) => (
+                <button
+                  key={o.type}
+                  type="button"
+                  onClick={() => setChartType(o.type as ChartType | "auto")}
+                  className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                    chartType === o.type
+                      ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
+                      : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
+                  }`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => runAi(aiPrompt)}
+              disabled={aiLoading || !aiPrompt.trim()}
+              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
+            >
+              {aiLoading ? (
+                <>
+                  <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#070f14]/30 border-t-[#070f14]" />
+                  Filling…
+                </>
+              ) : (
+                "Fill with AI"
+              )}
+            </button>
+            {aiMessage ? (
+              <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>
+            ) : (
+              <p className="mt-1.5 text-center text-[10px] text-white/20">
+                ⌘↵ · fills words & numbers, keeps your colors
+              </p>
+            )}
+          </div>
+
+          {/* ── NOW EDITING (re-targets to the selected block) ── */}
+          {selectedBlock ? (
+            <div className="border-b border-white/8 px-4 pb-4 pt-4">
+              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[#f59e0b]">
+                Now editing
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white/85">{selectedBlock.type}</p>
+              <div className="mt-3 rounded-lg bg-white p-3 text-gray-900">
+                <BlockInspector
+                  block={selectedBlock}
+                  onChange={updateBlock}
+                  onDelete={deleteSelected}
+                  onClose={() => setSelectedId(null)}
+                  onBlockAi={runBlockAi}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="border-b border-white/8 px-4 pb-4 pt-4">
+              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-white/35">
+                Click any block to edit it
+              </p>
+              <ul className="mt-2 space-y-1.5 text-[11px] text-white/45">
+                <li>
+                  <span className="text-gulf-teal">Any block</span> — click it to open the inspector
+                  here, or ask the AI to rewrite it.
+                </li>
+                <li>
+                  <span className="text-gulf-teal">Drag</span> — reorder blocks on the canvas.
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* ── Social Calendar ── */}
+          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+            <button
+              onClick={() => setShowCalendar((v) => !v)}
+              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+            >
+              <span>Social calendar</span>
+              <span className={`transition-transform ${showCalendar ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {showCalendar && (
+              <SocialCalendarPanel
+                state={calState}
+                calendar={calendar}
+                expandedDay={expandedDay}
+                onGenerate={generateWeek}
+                onToggleDay={(d) => setExpandedDay((cur) => (cur === d ? null : d))}
+                onCopyCaption={copyCaption}
+                onLoadCard={loadSocialCard}
+              />
+            )}
+          </div>
+
+          {/* ── Brand ── */}
+          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+            <button
+              onClick={() => setShowBrand((v) => !v)}
+              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+            >
+              <span>Brand</span>
+              <span className={`transition-transform ${showBrand ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {showBrand && (
+              <div className="mt-3">
+                <BrandingBlock
+                  branding={branding}
+                  onChange={applyBranding}
+                  palettes={palettes}
+                  onPalettesChange={persistPalettes}
+                  onSaveGlobal={saveBrandGlobal}
+                  onSaveProjectOnly={projectId ? saveBrandProjectOnly : undefined}
+                  saving={brandSaving}
+                  savedMsg={brandSavedMsg}
+                  onClose={() => setShowBrand(false)}
+                  headerColorClass="text-[#f59e0b]"
+                />
+                <label className="mt-3 block border-t border-white/10 pt-3">
+                  <span className="mb-1 block text-[10px] text-white/40">Font</span>
+                  <select
+                    value={doc.globalStyle.fontFamily}
+                    onChange={(e) => setGlobalStyle({ fontFamily: e.target.value as FontFamily })}
+                    className="w-full rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/75 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+                  >
+                    {FONT_OPTIONS.map((f) => (
+                      <option key={f.value} value={f.value} className="text-black">
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* ── Start from a layout ── */}
+          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+            <button
+              onClick={() => setShowSeeds((v) => !v)}
+              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+            >
+              <span>Start from a layout</span>
+              <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {showSeeds && (
+              <div className="mt-2 space-y-1.5">
+                {SEED_DOCS.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => pickSeed(s.id)}
+                    className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
+                  >
+                    <span className="block text-xs font-medium text-white/75">{s.name}</span>
+                    <span className="block text-[10px] leading-tight text-white/35">
+                      {s.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Add a block ── */}
+          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+            <button
+              onClick={() => setShowBlocks((v) => !v)}
+              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+            >
+              <span>Add a block</span>
+              <span className={`transition-transform ${showBlocks ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {showBlocks && (
+              <div className="mt-2 grid grid-cols-2 gap-1">
+                {BLOCK_MENU.map((b) => (
+                  <button
+                    key={b.type}
+                    type="button"
+                    onClick={() => addBlockToEnd(b.type)}
+                    className="flex items-center gap-2 rounded-md border border-white/8 bg-white/4 px-2.5 py-2 text-left transition-colors hover:bg-white/8"
+                  >
+                    <span className="w-4 text-center text-sm leading-none text-white/40">
+                      {b.icon}
+                    </span>
+                    <span className="text-[11px] font-medium text-white/55">{b.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Photos ── */}
+          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+            <button
+              onClick={() => setShowPhotos((v) => !v)}
+              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+            >
+              <span>Photos</span>
+              <span className={`transition-transform ${showPhotos ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {showPhotos && (
+              <div className="mt-2 mb-2 flex gap-1.5">
+                <input
+                  type="text"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && imageUrlInput.trim()) {
+                      applyPhotoUrl(imageUrlInput.trim());
+                      setImageUrlInput("");
+                    }
+                  }}
+                  placeholder="Paste image URL…"
+                  className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (imageUrlInput.trim()) {
+                      applyPhotoUrl(imageUrlInput.trim());
+                      setImageUrlInput("");
+                    }
+                  }}
+                  disabled={!imageUrlInput.trim()}
+                  className="shrink-0 rounded-md bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-[#070f14] disabled:opacity-40"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+            {showPhotos && (
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={promotingPath !== null}
+                  className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal/70 disabled:opacity-40"
+                  title="Upload a photo"
+                >
+                  {promotingPath === "__upload__" ? (
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
+                  ) : (
+                    <span className="text-lg leading-none">＋</span>
+                  )}
+                </button>
+                {(projectPhotos ?? []).map((photo) => (
+                  <button
+                    key={photo.storage_path}
+                    type="button"
+                    onClick={() => pickFiledPhoto(photo.storage_path)}
+                    disabled={promotingPath !== null}
+                    title={photo.caption ?? photo.storage_path.split("/").pop()}
+                    className={`relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
+                      promotingPath === photo.storage_path
+                        ? "border-gulf-teal"
+                        : "border-transparent hover:border-gulf-teal disabled:opacity-60"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photo.signedUrl}
+                      alt={photo.caption ?? ""}
+                      className="h-full w-full object-cover"
+                    />
+                    {promotingPath === photo.storage_path && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const f = e.target.files?.[0];
+                if (f) void uploadNewPhoto(f);
+                e.target.value = "";
+              }}
+            />
+          </div>
+
+          {/* ── Classic templates (preview only) ── */}
+          <div className="px-4 pb-6 pt-3">
+            <button
+              onClick={() => setShowClassic((v) => !v)}
+              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+            >
+              <span>Classic templates (preview)</span>
+              <span className={`transition-transform ${showClassic ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {showClassic && (
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                {CLASSIC_TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => pickClassic(t.id)}
+                    className={`flex items-center gap-2 rounded-md border px-2.5 py-2 text-left transition-colors ${
+                      mode === "classic" && classicId === t.id
+                        ? "border-gulf-teal/40 bg-gulf-teal/15 text-gulf-teal"
+                        : "border-white/8 bg-white/4 text-white/55 hover:bg-white/8"
+                    }`}
+                  >
+                    <span className="text-sm leading-none">{t.icon}</span>
+                    <span className="text-[11px] font-medium leading-tight">{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>
 
       {sendOpen && sendId && (
         <ContactPickerModal

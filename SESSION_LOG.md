@@ -1,3 +1,7 @@
+## 2026-06-29 (main) — feat(email-lab): EmailLabShell panel moved to right side, matching /grid layout
+
+Rewrote EmailLabShell.tsx layout: canvas left (1fr), dark AI panel right (380px) — mirrors EmailLabGridShell exactly. Top bar: dark bg-[#111418] with amber action buttons. Right panel: bg-[#0f1d24] border-l with ✦ AI assistant header, "Now editing" block inspector, and all accordions (Fill with AI, Brand, Seeds, Blocks, Photos). Web fonts from 75ccfff3 (Playfair, Lato, Montserrat) preserved. 0 TS errors, build clean.
+
 ## 2026-06-29 (main) — fix(refinery): add Bun socket error patterns to isTransientError
 
 env-swfl failed with "The socket connection was closed unexpectedly" — Bun's TCP drop message — which wasn't in isTransientError patterns, so it was classified as deterministic → HOLD on master. Added `msg.includes("socket connection was closed unexpectedly")` and `msg.includes("socket closed")` to the transient list. Next: GHA rebuild to let env-swfl retry as transient (if socket is intermittent) or build locally.
