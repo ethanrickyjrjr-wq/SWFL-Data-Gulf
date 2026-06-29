@@ -54,8 +54,22 @@ jobs:
              and d.get('state') == 'READY'),
             None
           )
-          print('READY' if match else 'WAITING')
+          error_dep = next(
+            (d for d in deps
+             if d.get('meta', {}).get('githubCommitSha') == sha
+             and d.get('state') in ('ERROR', 'CANCELED')),
+            None
+          )
+          if error_dep:
+              print('ERROR')
+          else:
+              print('READY' if match else 'WAITING')
           ")
+
+            if [ "$STATE" = "ERROR" ]; then
+              echo "Vercel deployment ERROR or CANCELED — aborting smoke run"
+              exit 1
+            fi
 
             if [ "$STATE" = "READY" ]; then
               echo "Deployment READY — proceeding to smoke tests"
