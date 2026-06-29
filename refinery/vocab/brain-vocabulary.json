@@ -1210,6 +1210,9 @@
     },
     "macro_sofr_rate": {
       "id": "macro_sofr_rate",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "SOFR (Secured Overnight Financing Rate)",
       "altLabels": [
         "SOFR rate",
@@ -1240,6 +1243,9 @@
     },
     "macro_fl_unemployment": {
       "id": "macro_fl_unemployment",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Florida Unemployment Rate",
       "altLabels": [
         "FL unemployment",
@@ -1270,6 +1276,9 @@
     },
     "macro_cpi_yoy": {
       "id": "macro_cpi_yoy",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "US CPI Year-over-Year",
       "altLabels": [
         "CPI YoY",
@@ -1299,6 +1308,9 @@
     },
     "macro_fl_labor_participation": {
       "id": "macro_fl_labor_participation",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Florida Labor Force Participation Rate",
       "altLabels": [
         "FL LFPR",
@@ -3745,6 +3757,9 @@
     },
     "macro_fl_estab_count_retail": {
       "id": "macro_fl_estab_count_retail",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Florida Retail Establishments (NAICS 44-45, Census CBP)",
       "altLabels": [
         "FL retail estab count"
@@ -3774,6 +3789,9 @@
     },
     "macro_fl_estab_count_food_service": {
       "id": "macro_fl_estab_count_food_service",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Florida Food Service & Accommodation Establishments (NAICS 72, Census CBP)",
       "altLabels": [
         "FL food service estab count"
@@ -3803,6 +3821,9 @@
     },
     "macro_fl_estab_count_construction": {
       "id": "macro_fl_estab_count_construction",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Florida Construction Establishments (NAICS 23, Census CBP)",
       "altLabels": [
         "FL construction estab count"
@@ -3832,6 +3853,9 @@
     },
     "macro_fl_estab_count_healthcare": {
       "id": "macro_fl_estab_count_healthcare",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Florida Healthcare Establishments (NAICS 62, Census CBP)",
       "altLabels": [
         "FL healthcare estab count"
@@ -3861,6 +3885,9 @@
     },
     "macro_fl_estab_count_professional": {
       "id": "macro_fl_estab_count_professional",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Florida Professional Services Establishments (NAICS 54, Census CBP)",
       "altLabels": [
         "FL professional services estab count"
@@ -5036,6 +5063,9 @@
     },
     "laus_lee_unemployment_rate_yoy_delta": {
       "id": "laus_lee_unemployment_rate_yoy_delta",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
       "prefLabel": "Lee County Unemployment Rate YoY Delta",
       "altLabels": [
         "Lee LAUS YoY change",
@@ -5061,6 +5091,9 @@
     },
     "qcew_lee_private_avg_wkly_wage": {
       "id": "qcew_lee_private_avg_wkly_wage",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Private-Sector Average Weekly Wage",
       "altLabels": [
         "Lee County avg weekly wage",
@@ -5086,6 +5119,9 @@
     },
     "qcew_lee_private_avg_wkly_wage_yoy_pct": {
       "id": "qcew_lee_private_avg_wkly_wage_yoy_pct",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Private-Sector Average Weekly Wage YoY %",
       "altLabels": [
         "Lee wage growth",
@@ -5111,6 +5147,9 @@
     },
     "qcew_collier_private_avg_wkly_wage": {
       "id": "qcew_collier_private_avg_wkly_wage",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Collier County Private-Sector Average Weekly Wage",
       "altLabels": [
         "Collier County avg weekly wage",
@@ -5136,6 +5175,9 @@
     },
     "qcew_collier_private_avg_wkly_wage_yoy_pct": {
       "id": "qcew_collier_private_avg_wkly_wage_yoy_pct",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Collier County Private-Sector Average Weekly Wage YoY %",
       "altLabels": [
         "Collier wage growth",
@@ -5161,6 +5203,9 @@
     },
     "qcew_lee_private_employment": {
       "id": "qcew_lee_private_employment",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Private-Sector Employment",
       "altLabels": [
         "Lee County private employment",
@@ -5186,6 +5231,9 @@
     },
     "qcew_collier_private_employment": {
       "id": "qcew_collier_private_employment",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Collier County Private-Sector Employment",
       "altLabels": [
         "Collier County private employment",
@@ -6088,6 +6136,9 @@
     },
     "oews_lee_top_occupation_employment": {
       "id": "oews_lee_top_occupation_employment",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Largest Occupation Group Employment (OEWS)",
       "altLabels": [
         "Lee County largest workforce sector",
@@ -6112,6 +6163,9 @@
     },
     "oews_lee_construction_loc_quotient": {
       "id": "oews_lee_construction_loc_quotient",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Lee County Construction Location Quotient (OEWS)",
       "altLabels": [
         "Lee County Construction LOC_Q",
@@ -6136,6 +6190,9 @@
     },
     "oews_lee_healthcare_employment": {
       "id": "oews_lee_healthcare_employment",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Healthcare Workforce (OEWS)",
       "altLabels": [
         "Lee County healthcare employment",
@@ -6160,6 +6217,9 @@
     },
     "oews_lee_construction_median_hourly_wage": {
       "id": "oews_lee_construction_median_hourly_wage",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Lee County Construction Median Hourly Wage (OEWS)",
       "altLabels": [
         "Lee construction median wage",
@@ -6211,6 +6271,9 @@
     },
     "oews_collier_top_occupation_employment": {
       "id": "oews_collier_top_occupation_employment",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Collier County Largest Occupation Group Employment (OEWS)",
       "altLabels": [
         "Collier County largest workforce sector",
@@ -6235,6 +6298,9 @@
     },
     "oews_collier_construction_loc_quotient": {
       "id": "oews_collier_construction_loc_quotient",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Collier County Construction Location Quotient (OEWS)",
       "altLabels": [
         "Collier County Construction LOC_Q",
@@ -6259,6 +6325,9 @@
     },
     "oews_collier_healthcare_employment": {
       "id": "oews_collier_healthcare_employment",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Collier County Healthcare Workforce (OEWS)",
       "altLabels": [
         "Collier County healthcare employment",
@@ -6283,6 +6352,9 @@
     },
     "oews_collier_construction_median_hourly_wage": {
       "id": "oews_collier_construction_median_hourly_wage",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
       "prefLabel": "Collier County Construction Median Hourly Wage (OEWS)",
       "altLabels": [
         "Collier construction median wage",
@@ -6953,6 +7025,9 @@
     },
     "laus_lee_unemployment_rate_revision_delta": {
       "id": "laus_lee_unemployment_rate_revision_delta",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Lee County LAUS Unemployment Rate BLS Revision Delta",
       "altLabels": [
         "Lee LAUS revision magnitude",
@@ -6978,6 +7053,9 @@
     },
     "laus_collier_unemployment_rate_revision_delta": {
       "id": "laus_collier_unemployment_rate_revision_delta",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Collier County LAUS Unemployment Rate BLS Revision Delta",
       "altLabels": [
         "Collier LAUS revision magnitude",
@@ -7003,6 +7081,9 @@
     },
     "laus_lee_unemployment_vintage_count": {
       "id": "laus_lee_unemployment_vintage_count",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Lee County LAUS Unemployment — BLS Vintage Count",
       "altLabels": [
         "Lee LAUS vintage depth",
@@ -7028,6 +7109,9 @@
     },
     "laus_collier_unemployment_vintage_count": {
       "id": "laus_collier_unemployment_vintage_count",
+      "grade": {
+        "reviewed_non_directional": true
+      },
       "prefLabel": "Collier County LAUS Unemployment — BLS Vintage Count",
       "altLabels": [
         "Collier LAUS vintage depth",

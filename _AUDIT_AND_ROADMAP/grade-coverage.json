@@ -6,9 +6,9 @@
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 32,
-    "gradeable": 116,
-    "reviewed-display": 12,
-    "moat-fuel": 107,
+    "gradeable": 132,
+    "reviewed-display": 24,
+    "moat-fuel": 79,
     "needs-window": 23,
     "backtest_clean": 11
   },
@@ -2578,7 +2578,7 @@
     {
       "slug": "laus_collier_unemployment_rate_revision_delta",
       "concept_id": "laus_collier_unemployment_rate_revision_delta",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "laus_collier_unemployment_rate_revision_delta",
         "concept_id": "laus_collier_unemployment_rate_revision_delta",
@@ -2590,7 +2590,7 @@
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -2599,7 +2599,7 @@
     {
       "slug": "laus_collier_unemployment_vintage_count",
       "concept_id": "laus_collier_unemployment_vintage_count",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "laus_collier_unemployment_vintage_count",
         "concept_id": "laus_collier_unemployment_vintage_count",
@@ -2611,7 +2611,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -2683,7 +2683,7 @@
     {
       "slug": "laus_lee_unemployment_rate_revision_delta",
       "concept_id": "laus_lee_unemployment_rate_revision_delta",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "laus_lee_unemployment_rate_revision_delta",
         "concept_id": "laus_lee_unemployment_rate_revision_delta",
@@ -2695,7 +2695,7 @@
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -2704,28 +2704,28 @@
     {
       "slug": "laus_lee_unemployment_rate_yoy_delta",
       "concept_id": "laus_lee_unemployment_rate_yoy_delta",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "laus_lee_unemployment_rate_yoy_delta",
         "concept_id": "laus_lee_unemployment_rate_yoy_delta",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "laus_lee_unemployment_vintage_count",
       "concept_id": "laus_lee_unemployment_vintage_count",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "laus_lee_unemployment_vintage_count",
         "concept_id": "laus_lee_unemployment_vintage_count",
@@ -2737,7 +2737,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3166,7 +3166,7 @@
     {
       "slug": "macro_cpi_yoy",
       "concept_id": "macro_cpi_yoy",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "macro_cpi_yoy",
         "concept_id": "macro_cpi_yoy",
@@ -3178,7 +3178,7 @@
         "category": "macro",
         "value_type": "percentage",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3187,7 +3187,7 @@
     {
       "slug": "macro_fl_estab_count_construction",
       "concept_id": "macro_fl_estab_count_construction",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "macro_fl_estab_count_construction",
         "concept_id": "macro_fl_estab_count_construction",
@@ -3199,7 +3199,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3208,7 +3208,7 @@
     {
       "slug": "macro_fl_estab_count_food_service",
       "concept_id": "macro_fl_estab_count_food_service",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "macro_fl_estab_count_food_service",
         "concept_id": "macro_fl_estab_count_food_service",
@@ -3220,7 +3220,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3229,7 +3229,7 @@
     {
       "slug": "macro_fl_estab_count_healthcare",
       "concept_id": "macro_fl_estab_count_healthcare",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "macro_fl_estab_count_healthcare",
         "concept_id": "macro_fl_estab_count_healthcare",
@@ -3241,7 +3241,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3250,7 +3250,7 @@
     {
       "slug": "macro_fl_estab_count_professional",
       "concept_id": "macro_fl_estab_count_professional",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "macro_fl_estab_count_professional",
         "concept_id": "macro_fl_estab_count_professional",
@@ -3262,7 +3262,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3271,7 +3271,7 @@
     {
       "slug": "macro_fl_estab_count_retail",
       "concept_id": "macro_fl_estab_count_retail",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "macro_fl_estab_count_retail",
         "concept_id": "macro_fl_estab_count_retail",
@@ -3283,7 +3283,7 @@
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3292,65 +3292,65 @@
     {
       "slug": "macro_fl_labor_participation",
       "concept_id": "macro_fl_labor_participation",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "macro_fl_labor_participation",
         "concept_id": "macro_fl_labor_participation",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "percentage",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "macro_fl_unemployment",
       "concept_id": "macro_fl_unemployment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "macro_fl_unemployment",
         "concept_id": "macro_fl_unemployment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "macro",
         "value_type": "percentage",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "macro_sofr_rate",
       "concept_id": "macro_sofr_rate",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "macro_sofr_rate",
         "concept_id": "macro_sofr_rate",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "lower_is_bullish",
         "category": "macro",
         "value_type": "percentage",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "market_heat_dom_yy_swfl",
@@ -3712,7 +3712,7 @@
     {
       "slug": "oews_collier_construction_loc_quotient",
       "concept_id": "oews_collier_construction_loc_quotient",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "oews_collier_construction_loc_quotient",
         "concept_id": "oews_collier_construction_loc_quotient",
@@ -3724,7 +3724,7 @@
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3733,65 +3733,65 @@
     {
       "slug": "oews_collier_construction_median_hourly_wage",
       "concept_id": "oews_collier_construction_median_hourly_wage",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "oews_collier_construction_median_hourly_wage",
         "concept_id": "oews_collier_construction_median_hourly_wage",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "currency",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "oews_collier_healthcare_employment",
       "concept_id": "oews_collier_healthcare_employment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "oews_collier_healthcare_employment",
         "concept_id": "oews_collier_healthcare_employment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "oews_collier_top_occupation_employment",
       "concept_id": "oews_collier_top_occupation_employment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "oews_collier_top_occupation_employment",
         "concept_id": "oews_collier_top_occupation_employment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "oews_collier_total_employment_yoy_pct",
@@ -3817,7 +3817,7 @@
     {
       "slug": "oews_lee_construction_loc_quotient",
       "concept_id": "oews_lee_construction_loc_quotient",
-      "bucket": "moat-fuel",
+      "bucket": "reviewed-display",
       "gateVector": {
         "slug": "oews_lee_construction_loc_quotient",
         "concept_id": "oews_lee_construction_loc_quotient",
@@ -3829,7 +3829,7 @@
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
-        "reviewed_non_directional": false
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3838,65 +3838,65 @@
     {
       "slug": "oews_lee_construction_median_hourly_wage",
       "concept_id": "oews_lee_construction_median_hourly_wage",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "oews_lee_construction_median_hourly_wage",
         "concept_id": "oews_lee_construction_median_hourly_wage",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "currency",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "oews_lee_healthcare_employment",
       "concept_id": "oews_lee_healthcare_employment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "oews_lee_healthcare_employment",
         "concept_id": "oews_lee_healthcare_employment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "oews_lee_top_occupation_employment",
       "concept_id": "oews_lee_top_occupation_employment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "oews_lee_top_occupation_employment",
         "concept_id": "oews_lee_top_occupation_employment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "oews_lee_total_employment_yoy_pct",
@@ -4510,128 +4510,128 @@
     {
       "slug": "qcew_collier_private_avg_wkly_wage",
       "concept_id": "qcew_collier_private_avg_wkly_wage",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "qcew_collier_private_avg_wkly_wage",
         "concept_id": "qcew_collier_private_avg_wkly_wage",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "currency",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "qcew_collier_private_avg_wkly_wage_yoy_pct",
       "concept_id": "qcew_collier_private_avg_wkly_wage_yoy_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "qcew_collier_private_avg_wkly_wage_yoy_pct",
         "concept_id": "qcew_collier_private_avg_wkly_wage_yoy_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "qcew_collier_private_employment",
       "concept_id": "qcew_collier_private_employment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "qcew_collier_private_employment",
         "concept_id": "qcew_collier_private_employment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "qcew_lee_private_avg_wkly_wage",
       "concept_id": "qcew_lee_private_avg_wkly_wage",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "qcew_lee_private_avg_wkly_wage",
         "concept_id": "qcew_lee_private_avg_wkly_wage",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "currency",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "qcew_lee_private_avg_wkly_wage_yoy_pct",
       "concept_id": "qcew_lee_private_avg_wkly_wage_yoy_pct",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "qcew_lee_private_avg_wkly_wage_yoy_pct",
         "concept_id": "qcew_lee_private_avg_wkly_wage_yoy_pct",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "ratio",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "qcew_lee_private_employment",
       "concept_id": "qcew_lee_private_employment",
-      "bucket": "moat-fuel",
+      "bucket": "gradeable",
       "gateVector": {
         "slug": "qcew_lee_private_employment",
         "concept_id": "qcew_lee_private_employment",
         "registered": true,
-        "polarity_state": "none",
+        "polarity_state": "valid_directional",
         "window_ok": true,
         "numeric_ok": true,
-        "raw_polarity": null,
+        "raw_polarity": "higher_is_bullish",
         "category": "macro",
         "value_type": "count",
         "window_days": 90,
         "reviewed_non_directional": false
       },
-      "gradeable": false,
-      "reason": "no direction_polarity declared (slug-only, never inherited)",
-      "backtest_clean": null
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "qual_confidence",
