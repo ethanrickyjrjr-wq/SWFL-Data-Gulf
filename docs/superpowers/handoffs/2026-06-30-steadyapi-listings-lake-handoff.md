@@ -1,5 +1,7 @@
 # Handoff — SteadyAPI listings lake (execution evidence)
 
+> **⚠️ CORRECTION 2026-06-30 (same day).** The "What this replaces / corrects" claim below — that `listing_lifecycle` does NOT exist and the lake is greenfield — is **FALSE**. Re-verified against live code + the live DB this session: `ingest/pipelines/listing_lifecycle/` exists on main (7 modules), `migrations/20260627_listing_lifecycle.sql` is applied, and `data_lake.listing_state` holds 10,459 rows under `source_name='lifecycle_seed'`. The earlier RentCast handoff was right that the machine exists. Build via `docs/superpowers/plans/2026-06-30-api-fed-listing-lifecycle.md` (extend `listing_state` with an API feed under `source_name='api_feed'`, RentCast spine + SteadyAPI photos), **not** a standalone `steadyapi_listings` table. The verified SteadyAPI record contract here is still good.
+
 **Date:** 2026-06-30
 **Status:** SPEC complete, NOT started. Design + live evidence captured this session.
 **Spec:** `docs/superpowers/specs/2026-06-30-steadyapi-listings-lake-design.md`
@@ -13,7 +15,7 @@ This is the durable "our data" lane. The next session executes the build order i
 ## What this replaces / corrects
 
 - **RentCast is OUT as the listings source.** The parked RentCast lake handoff (`2026-06-30-rentcast-lake-source-handoff.md`) is superseded. RentCast returns no photos; SteadyAPI does. RentCast stays a build-time MLS-detail enrichment in `select.ts` only.
-- **The `listing_lifecycle` state machine the RentCast handoff said is "LIVE on main" does NOT exist.** Verified 06/30/2026: there is no `ingest/pipelines/listing_lifecycle/` directory. That handoff was written as if it shipped; it didn't. The lake is greenfield — build to the spec's `steadyapi_listings` schema, not to a machine that isn't there.
+- **The `listing_lifecycle` state machine the RentCast handoff said is "LIVE on main" does NOT exist.** Verified 06/30/2026: there is no `ingest/pipelines/listing_lifecycle/` directory. That handoff was written as if it shipped; it didn't. The lake is greenfield — build to the spec's `steadyapi_listings` schema, not to a machine that isn't there. — **❌ RETRACTED 2026-06-30 (see banner up top): this verification was wrong. The directory DOES exist on main (7 modules), the migration is applied, and `listing_state` holds 10,459 rows. The RentCast handoff was right.**
 
 ## Live probe evidence (06/30/2026 — RULE 0.4, key from `.env.local` `PHOTOS_API`)
 

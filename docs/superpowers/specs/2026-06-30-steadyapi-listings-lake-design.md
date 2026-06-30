@@ -1,5 +1,13 @@
 # SteadyAPI listings lake + for-sale-market brain
 
+> **⚠️ SUPERSEDED 2026-06-30 — false-premise correction.** This spec assumes `listing_lifecycle` does not exist and proposes a standalone `steadyapi_listings` table keyed on the rotating `property_id`. Both premises are wrong — verified against live code + the live DB this session:
+> - `ingest/pipelines/listing_lifecycle/` **exists on main** (7 modules: extract/distill/transitions/coverage_guard/address_key/pipeline), `migrations/20260627_listing_lifecycle.sql` is applied, and `data_lake.listing_state` holds **10,459** seeded rows. **Not greenfield.**
+> - Keying on `property_id` is the exact relist bug `20260627_listing_lifecycle.sql` was built to avoid (a relist gets a new id). The machine keys on **`address_key`**.
+> - `property_type` is a **column** in `listing_state` (capture wide, slice late) — the proposed per-`property_type` sweep is rejected. RentCast returns `propertyType` directly, so no per-type sweep is even needed.
+> - **RentCast is back IN as the data spine** (real price / DOM / list-date / MLS#); SteadyAPI supplies **photos** + a second active-set enumeration, grafted by proximity. RentCast was wrongly dropped here for "no photos" — photos come from SteadyAPI in the merge.
+>
+> **Build from instead:** `docs/superpowers/plans/2026-06-30-api-fed-listing-lifecycle.md` — it extends `listing_state` with an API feed under `source_name='api_feed'`. This spec is retained only for its verified SteadyAPI record contract (below).
+
 **Date:** 2026-06-30
 **Build slug:** `steadyapi-listings-lake` · check `steadyapi_listings_lake_live_verify`
 **Scope:** Lee (FIPS 12071) + Collier (FIPS 12021) only.
