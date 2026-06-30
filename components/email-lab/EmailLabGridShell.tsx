@@ -41,6 +41,7 @@ import { BLOCK_MENU } from "./AddBlockPanel";
 import { applyBrand } from "./EmailLabShell";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
+import { ScheduleSocialModal } from "./ScheduleSocialModal";
 import { SocialCalendarPanel } from "./SocialCalendarPanel";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
@@ -199,6 +200,8 @@ export function EmailLabGridShell({
   const [calState, setCalState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [calendar, setCalendar] = useState<WeeklyCalendar | null>(null);
   const [expandedDay, setExpandedDay] = useState<CalendarDay | null>(null);
+  // "Schedule this post" → ScheduleSocialModal (writes a social_schedules recipe).
+  const [scheduleDraft, setScheduleDraft] = useState<SocialDraft | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Brand panel (ONE ROOT — same blob the project workspace edits).
@@ -982,6 +985,7 @@ export function EmailLabGridShell({
                   onToggleDay={(d) => setExpandedDay((cur) => (cur === d ? null : d))}
                   onCopyCaption={copyCaption}
                   onLoadCard={loadSocialCard}
+                  onSchedule={setScheduleDraft}
                 />
               )}
             </div>
@@ -1190,6 +1194,16 @@ export function EmailLabGridShell({
           scopeKind={scope?.kind ?? null}
           scopeValue={scope?.value ?? null}
           onClose={() => setScheduleOpen(false)}
+        />
+      )}
+
+      {caps.socialCalendar && scheduleDraft && (
+        <ScheduleSocialModal
+          draft={scheduleDraft}
+          projectId={projectId}
+          scopeKind={scope?.kind ?? null}
+          scopeValue={scope?.value ?? null}
+          onClose={() => setScheduleDraft(null)}
         />
       )}
 

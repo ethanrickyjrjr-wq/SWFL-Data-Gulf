@@ -1,3 +1,46 @@
+## 2026-06-30 (main) — feat(grid-lab-socials): Task 1 UI chain — route + modal + panel + shell wiring
+
+Finished Task 1's write-path (the prior session shipped only the pure core `persist-schedule.ts`).
+The U2 "confirm → INSERT social_schedules" flow was a spec, never shipped — nothing in the product
+wrote the rows the cron worker reads. Now it does, driven from the paid grid lab.
+
+New `app/api/social/schedule/route.ts`: GET → the caller's connected publishable accounts (gates the
+modal); POST → confirm-only, computes `next_run_at`, INSERTs one `social_schedules` row per platform with
+a `frozen_post` snapshot. Cookie/RLS client (`auth.uid()=user_id`), never service-role. DRY invariant
+holds — this writes a recipe + frozen_post ONLY, never calls `postToChannel`. Honest scope: the worker
+(`scripts/social/run-schedules.mts`) re-composes fresh each fire via `buildSocialContent` and does NOT yet
+read `row.frozen_post` — so frozen_post is write-only today (consuming it is a separate later gap; not
+fixed here per RULE 0.6).
+
+`components/email-lab/ScheduleSocialModal.tsx` (new): platform multi-select (5 PUBLISHABLE, connected-only)
++ cadence/day/ET-hour, POST then show `formatScheduleSendTime(next_run_at)`. Local platform-label map —
+importing `platformLabel` from `lib/social/channels/index.ts` would drag the server-only OAuth/adapter code
+into the client bundle. Panel gains an amber "Schedule" button; grid shell gains `scheduleDraft` state +
+renders the modal gated on `caps.socialCalendar` (the existing tier dial, no new check).
+
+Two advisor-endorsed deviations from the written plan: (1) resolve the connected `social_accounts` row PER
+platform server-side — the plan's single client `accountId` across all platforms would point e.g. a LinkedIn
+row at an Instagram account (the unique index is per (user,platform,account)); the route also skips+reports
+platforms with no connected account instead of silently dropping under ok:true. (2) GUARD the silent-dead-row
+trap the plan carried: `computeNextRunAt` returns null for weekly-without-day / monthly-without-day, and a row
+written with `next_run_at=NULL` is NEVER claimed (claim RPC requires next_run_at IS NOT NULL) and NEVER reaped
+(reaper needs a stale last_run_at) — it looks scheduled but never fires. The route now 400s an invalid cadence
+and the modal defaults `day_of_week=1`/`day_of_month=1`.
+
+`database.types.ts`: added a MergeDeep override `social_schedules.frozen_post → FrozenPost | null` (mirrors the
+`deliverables.doc → EmailDoc` precedent) — the `FrozenPost` interface has no implicit index signature so the
+raw `Json` union rejected the INSERT. Made the panel's `onSchedule` prop optional + conditional so the free
+`EmailLabShell` (which also renders the panel) compiles — this is the fix for the 2 tsc errors the parallel
+Task-3 session flagged (`route.ts` + `EmailLabShell.tsx`).
+
+Verify: `bunx next build` ✓ Compiled + TS clean (route tree printed → typecheck passed); `bun test lib/social`
+215 pass / 0 fail. Did NOT touch the parallel Task-2/3 sessions' files (`lib/social/lab-status.ts`,
+`lib/email/social-calendar/*`). Check `grid_lab_socials_live_verify` stays open — live-verify = a real lab
+schedule writes one `social_schedules` row per selected platform with `frozen_post` populated, `status=active`,
+`next_run_at` set, and no live post fires (`SOCIAL_PUBLISH_ENABLED` unchanged). Next: live-verify against
+`public.social_schedules`; Task 2 Steps 5–6 (status chip) can now build on these files; C1 composition seam
+still the operator's call.
+
 ## 2026-06-30 (main) — feat(grid-lab-socials): Task 3 per-platform caption variants + goal/tone knobs
 
 Built Task 3 (`docs/superpowers/plans/2026-06-29-grid-lab-socials/task-3-per-platform-captions.md`) TDD,

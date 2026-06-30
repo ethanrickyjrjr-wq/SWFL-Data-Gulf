@@ -18,6 +18,7 @@ import type { MergeDeep } from "type-fest";
 import type { Database as DatabaseGenerated } from "./database-generated.types";
 import type { ProjectItem } from "@/lib/project/items";
 import type { EmailDoc } from "@/lib/email/doc/types";
+import type { FrozenPost } from "@/lib/social/types";
 export type { Json } from "./database-generated.types";
 
 export type Database = MergeDeep<
@@ -38,6 +39,15 @@ export type Database = MergeDeep<
           Row: { doc: EmailDoc | null };
           Insert: { doc?: EmailDoc | null };
           Update: { doc?: EmailDoc | null };
+        };
+        // social_schedules.frozen_post is the freeze-on-confirm artifact (lib/social/types
+        // FrozenPost). Same rationale as deliverables.doc: the FrozenPost interface has no
+        // implicit index signature, so the raw `Json` union rejects the INSERT written by
+        // app/api/social/schedule. Concrete here so the lab schedule write typechecks.
+        social_schedules: {
+          Row: { frozen_post: FrozenPost | null };
+          Insert: { frozen_post?: FrozenPost | null };
+          Update: { frozen_post?: FrozenPost | null };
         };
         // IDENTITY-id Insert fix (defect #1 above): re-mark the auto-generated id optional.
         buyer_intent_events: { Insert: { id?: number } };

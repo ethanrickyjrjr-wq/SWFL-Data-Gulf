@@ -10,6 +10,9 @@ export interface SocialCalendarPanelProps {
   onToggleDay: (d: CalendarDay) => void;
   onCopyCaption: (draft: SocialDraft) => void;
   onLoadCard: (card: EmailDoc) => void;
+  /** Optional — the "Schedule" action only appears where a consumer wires it (the paid
+   *  grid shell). The free shell renders the panel without scheduling. */
+  onSchedule?: (draft: SocialDraft) => void;
 }
 
 export function SocialCalendarPanel({
@@ -20,6 +23,7 @@ export function SocialCalendarPanel({
   onToggleDay,
   onCopyCaption,
   onLoadCard,
+  onSchedule,
 }: SocialCalendarPanelProps) {
   return (
     <div className="mt-2 space-y-2">
@@ -98,6 +102,15 @@ export function SocialCalendarPanel({
                     >
                       Load Card
                     </button>
+                    {onSchedule && (
+                      <button
+                        type="button"
+                        onClick={() => onSchedule(p)}
+                        className="flex-1 rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[11px] text-amber-300 hover:bg-amber-400/20"
+                      >
+                        Schedule
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
