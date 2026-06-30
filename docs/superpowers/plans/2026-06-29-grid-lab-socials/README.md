@@ -28,6 +28,8 @@ Every task implicitly includes these — copied verbatim from project rules + th
 
 ## ⛔ DECISION GATE (C1) — operator's call, blocks Tasks 5 & 6 only
 
+> **RESOLVED 2026-06-30 → NEITHER (a) NOR (b). A canvas-native composer.** After brainstorming + an in-session crawl4ai pass, both branches were rejected: Satori/`@vercel/og` is flexbox-only (can't ingest `compile-grid` HTML, adds a 4th render engine), and headless chromium is heavy infra while the email grid HTML is the wrong shape for a fixed-size image anyway. A social post IS a fixed-size image, so it composes on a Canva-style canvas (Konva/Fabric) where preview == export via `toDataURL` — no chromium, no Satori; the pros (Polotno/Predis) build on this. **Tasks 5 & 6 are superseded by** `docs/superpowers/specs/2026-06-30-social-canvas-composer-design.md` (build check `social_canvas_composer_live_verify`). The historical fork below is kept for context.
+
 **The composition seam is a genuine fork, not a freebie.** A social card is composed two incompatible ways in the tree today:
 
 - **Engine** composes a `SocialModel` — ONE headline + ONE stat + optional chart → one SVG → PNG, at 4 platform sizes (`lib/social/render-social-image.ts`). This is a **bespoke single-template** composer; it cannot rasterize an arbitrary EmailDoc grid.
@@ -53,7 +55,7 @@ Every task implicitly includes these — copied verbatim from project rules + th
 | 5 | Native grid composition of social cards | `task-5-composition-seam.md` | **YES (C1)** | 🔴 yes |
 | 6 | Platform-correct image export wiring | `task-6-image-export-wiring.md` | **YES (C1)** | 🔴 yes |
 
-**Recommended order:** 1 → 2 → 3 → 4, then resolve C1, then 5 → 6.
+**Recommended order:** 1 → 2 → 3 → 4 (shipped). C1 **resolved 2026-06-30 → canvas composer**; Tasks 5 & 6 are superseded by `docs/superpowers/specs/2026-06-30-social-canvas-composer-design.md`.
 
 ### Parallel Safety (hand-authored — cross-task)
 

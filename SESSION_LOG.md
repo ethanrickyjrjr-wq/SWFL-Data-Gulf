@@ -1,3 +1,17 @@
+## 2026-06-30 (main) — docs(social-canvas-composer): C1 resolved → canvas composer + spec
+
+Brainstormed grid-lab-socials Task 5/6 (the C1 composition seam) with an in-session crawl4ai pass
+(Satori, Vercel OG, Sparticuz chromium, Konva, Fabric, Polotno + a GitHub topic sweep). Rejected BOTH
+original branches: Satori/@vercel/og is flexbox-only (can't ingest compile-grid HTML, adds a 4th render
+engine); headless chromium is heavy infra and the email grid HTML is the wrong shape for a fixed image
+anyway. Resolution: NEITHER (a) nor (b) — a canvas-native composer (Konva/Fabric) where preview ==
+export via toDataURL (no chromium, no Satori; the pros — Polotno/Predis — build on this stack). Wrote
+spec docs/superpowers/specs/2026-06-30-social-canvas-composer-design.md; registered build check
+social_canvas_composer_live_verify. v1 = single-image Canva-style composer (Email|Social tab, mode-aware
+panels, AI Generate, native PNG export, schedule) in the PAID grid shell only; stores design JSON +
+bindings so carousel (fast-follow) and auto-refresh (Phase-2) are unlocks, not rebuilds. Flipped the plan
+README C1 gate + task-5/task-6 to RESOLVED/superseded. Reuses shipped Tasks 1-4. Next: writing-plans.
+
 ## 2026-06-30 (main) — docs(rentcast): vendor reference folder
 
 Added `docs/superpowers/sources/rentcast/` with 4 files: full vendor Apps Script (Code.gs, 595 lines),

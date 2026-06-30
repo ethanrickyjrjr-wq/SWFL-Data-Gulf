@@ -1,3 +1,5 @@
+> **RESOLVED / SUPERSEDED 2026-06-30.** C1 resolved to a **canvas-native composer**; native PNG export comes for free via the canvas (`toDataURL`), so this task is superseded by `docs/superpowers/specs/2026-06-30-social-canvas-composer-design.md` (build check `social_canvas_composer_live_verify`). The original gated text is kept below for context only.
+
 ## Task 6: Platform-correct image export wiring — ⛔ GATED on C1
 
 > **BLOCKED until the C1 decision gate (see README) is made.** This task's shape is determined by the Task 5 branch. Under (a) it is mostly wiring an endpoint that already exists; under (b) it depends on Task 5's net-new rasterizer.

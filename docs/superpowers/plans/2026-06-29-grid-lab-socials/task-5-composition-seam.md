@@ -1,3 +1,5 @@
+> **RESOLVED / SUPERSEDED 2026-06-30.** C1 resolved to a **canvas-native composer** — neither (a) nor (b). This task is superseded by `docs/superpowers/specs/2026-06-30-social-canvas-composer-design.md` (build check `social_canvas_composer_live_verify`). The original gated text is kept below for context only.
+
 ## Task 5: Native grid composition of social cards — ⛔ GATED on C1
 
 > **BLOCKED until the C1 decision gate (see README) is made by the operator.** This task IS the (a)/(b) fork — do not expand it into executable steps until Ricky picks a branch. Writing detailed steps now would fabricate a design that the decision hasn't chosen yet.
