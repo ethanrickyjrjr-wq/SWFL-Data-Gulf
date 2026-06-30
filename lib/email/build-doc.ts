@@ -31,6 +31,12 @@ import {
 import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
 import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-image";
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
+import {
+  loadListingContext,
+  renderListingsBlock,
+  attachFeaturedAerial,
+  pickFeatured,
+} from "@/lib/listings/select";
 import { isListingIntent } from "@/lib/email/listing-intent";
 import { fetchListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
@@ -398,10 +404,11 @@ export async function buildContentDoc({
 
   // Lake parts + chart in parallel. We pull the raw figures (each with its as-of) so a
   // STALE one can be refreshed from the web BEFORE the AI ever sees it (G28 + freshness).
-  const [lakeParts, chartRes, photoRes] = await Promise.all([
+  const [lakeParts, chartRes, photoRes, listingCtx] = await Promise.all([
     fetchLakeParts(scope),
     buildPromptChart(prompt, doc, scope, chartType),
     resolveHeroPhoto(prompt, doc),
+    loadListingContext(scope, new Date()),
   ]);
 
   // FRESHNESS — delegated to the shared root so the email path and the social calendar
@@ -431,6 +438,7 @@ export async function buildContentDoc({
     );
   // Hero photo links back to the listing/site it was pulled from — the email
   // behaves like a webpage, and the click is tracked.
+  let heroPhotoSet = Boolean(photoRes);
   if (photoRes)
     doc = upsertHeroPhoto(
       doc,
@@ -440,6 +448,17 @@ export async function buildContentDoc({
         linkUrl: photoRes.source,
       }),
     );
+  // No og:image photo but a scoped market email → lead with a real local listing's
+  // satellite aerial (code-set; the model still never sets photos). The cited listing
+  // facts ride in the context block below so the copy can speak to it.
+  else if (scope?.value) {
+    const featured = pickFeatured(listingCtx.ranked);
+    if (featured) {
+      const withAerial = attachFeaturedAerial(doc, featured);
+      heroPhotoSet = withAerial !== doc;
+      doc = withAerial;
+    }
+  }
   const chartGroundingPart = chartRes?.groundingNote
     ? `\n\nCHART ON SCREEN (caption it from THESE real figures, never invent):\n${chartRes.groundingNote}`
     : "";
@@ -450,7 +469,11 @@ export async function buildContentDoc({
     web.verified.length > 0
       ? `\n\nFRESHNESS — the WEB-VERIFIED figures are CURRENT (fetched live just now). For any metric they cover, state THAT value as the current/"now" figure and attribute it to its named source. If a chart on screen shows the same metric, describe the chart as the historical trajectory THROUGH its labeled date — never call the chart's last (past) point "now".`
       : "";
-  const fullContext = lakeContext + chartGroundingPart + webBlock + freshnessDirective;
+  // Real current inventory rides into the prompt as cited figures (four-lane safe).
+  const listingsBlock = renderListingsBlock(listingCtx.figures);
+  const listingsPart = listingsBlock ? `\n\n${listingsBlock}` : "";
+  const fullContext =
+    lakeContext + listingsPart + chartGroundingPart + webBlock + freshnessDirective;
 
   let msg: Anthropic.Message;
   try {
@@ -509,7 +532,7 @@ export async function buildContentDoc({
       patch,
       chart: Boolean(chartRes),
       chartNote: chartRes?.note,
-      photo: Boolean(photoRes),
+      photo: heroPhotoSet,
       // Freshness: which stale held figures the AI replaced with a current web-cited value,
       // and the sources it cited — so the UI can show "found fresher data" + the citations.
       webRefreshed: refreshedLabels,

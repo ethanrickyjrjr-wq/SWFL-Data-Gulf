@@ -1,3 +1,21 @@
+## 2026-06-30 (main) — feat(listings): RentCast live into email + social grid lab (build-time, four-lane)
+
+New `lib/listings/` module wires RentCast for-sale inventory into BOTH labs at build time (no lake, no
+daily ingest): `rentcast.ts` (fetch+normalize, drops agent PII, never-throws → [] on no-key/429),
+`aerial.ts` (Mapbox Static Images satellite URL — format pinned vs docs.mapbox.com this session),
+`select.ts` (scopeCity via Census zip→county fixture, rank/pickFeatured, listings→cited MarketFigures,
+code-set `attachFeaturedAerial`). Listings ride into the SHARED lakeContext as cited figures (source
+`RentCast (MLS …)`, as-of=lastSeenDate) — four-lane moat untouched, AI never sets photos. Wired
+`social-calendar/build-week.ts` (rotates a featured aerial across weekday cards) + `email/build-doc.ts`
+(listings block + aerial hero fallback for scoped market emails). PHOTOS VERDICT recorded: RentCast +
+realtor.com RapidAPI scrapers + Street View all give NO licensed photos — aerial now, BYO MLS/IDX feed =
+the upgrade (`/settings/mls` already scaffolded). 15 new unit tests (33 total green), next build clean,
+lint clean. LIVE smoke: 100 Cape Coral listings → 5 cited figures + real pinned aerial. Spec
+`docs/superpowers/specs/2026-06-30-rentcast-grid-lab-design.md`; lake handoff parked. `rentcast_grid_lab_live_verify`
+stays OPEN (prod-verify only). SECURITY: vendor-shared RENTCAST_API_KEY in .env.local only — rotate +
+gh-secret before any CI/cron; raw key dir `sources/rentcast/` stays untracked. Next: writing-plans /
+authorDoc (paid path) + precise zip→city fast-follow.
+
 ## 2026-06-30 (main) — docs(social-canvas-composer): C1 resolved → canvas composer + spec
 
 Brainstormed grid-lab-socials Task 5/6 (the C1 composition seam) with an in-session crawl4ai pass

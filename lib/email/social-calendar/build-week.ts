@@ -27,6 +27,13 @@ import type {
 } from "./types";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { Platform } from "@/lib/social/types";
+import {
+  loadListingContext,
+  renderListingsBlock,
+  featuredContextLine,
+  attachFeaturedAerial,
+} from "@/lib/listings/select";
+import type { Listing } from "@/lib/listings/rentcast";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -216,9 +223,15 @@ export function assembleDraft(
 export async function buildSocialPost(
   theme: DayTheme,
   lakeContext: string,
-  opts?: { platforms?: Platform[]; goalTone?: GoalTone },
+  opts?: { platforms?: Platform[]; goalTone?: GoalTone; featured?: Listing },
 ): Promise<SocialDraft | null> {
   const card = seedSocialCard(theme);
+  // A featured RentCast listing lets the post write about a SPECIFIC current home (still
+  // cited, never invented); its lot aerial is code-set onto the card AFTER the fill (the
+  // social prompt forbids the model from setting photos — same rule as the email path).
+  const addendum = opts?.featured
+    ? `${theme.systemAddendum}\n\n${featuredContextLine(opts.featured)}`
+    : theme.systemAddendum;
   try {
     const msg = await client.messages.create({
       model: resolveEmailModel("interactive"), // Haiku
@@ -226,7 +239,7 @@ export async function buildSocialPost(
       // 5-platform request doesn't truncate the JSON (which would null the parse and silently
       // drop the day). Caption+hashtags+patch ~= the 512 base; ~320 tok per extra variant; capped.
       max_tokens: opts?.platforms?.length ? Math.min(512 + opts.platforms.length * 320, 2048) : 512,
-      system: socialPostSystem(lakeContext, theme.systemAddendum, opts),
+      system: socialPostSystem(lakeContext, addendum, opts),
       messages: [
         { role: "user", content: `CARD (block id -> current text):\n${docSkeleton(card)}` },
       ],
@@ -234,7 +247,9 @@ export async function buildSocialPost(
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
     const parsed = tryParseSocial(text);
     if (!parsed) return null;
-    return assembleDraft(theme, card, parsed, opts?.platforms);
+    const draft = assembleDraft(theme, card, parsed, opts?.platforms);
+    if (draft && opts?.featured) draft.card = attachFeaturedAerial(draft.card, opts.featured);
+    return draft;
   } catch {
     return null;
   }
@@ -246,18 +261,35 @@ export async function buildWeek(
   opts?: { platforms?: Platform[]; goalTone?: GoalTone },
 ): Promise<WeeklyCalendar> {
   const { figures, dossier } = await fetchLakeParts(scope);
-  const fresh = await refreshStaleLakeContext({
-    scope,
-    figures,
-    dossier,
-    prompt: scope?.value
-      ? `${scope.value} Southwest Florida real estate market`
-      : "Southwest Florida real estate market",
-    today: new Date(),
-    includeGapProbe: false, // forced stale-refresh only — no per-post gap probe
-  });
+  const today = new Date();
+  // Lake freshness + the one RentCast call run in parallel; both degrade gracefully.
+  const [fresh, listingCtx] = await Promise.all([
+    refreshStaleLakeContext({
+      scope,
+      figures,
+      dossier,
+      prompt: scope?.value
+        ? `${scope.value} Southwest Florida real estate market`
+        : "Southwest Florida real estate market",
+      today,
+      includeGapProbe: false, // forced stale-refresh only — no per-post gap probe
+    }),
+    loadListingContext(scope, today),
+  ]);
+  // Real current inventory rides into the shared context as cited figures (four-lane safe).
+  const listingsBlock = renderListingsBlock(listingCtx.figures);
+  const lakeContext = listingsBlock
+    ? `${fresh.lakeContext}\n\n${listingsBlock}`
+    : fresh.lakeContext;
+  // Rotate a featured (aerial-able) listing across the weekday posts — each card gets a
+  // real local lot's satellite view; days repeat only if fewer listings than days.
+  const featurable = listingCtx.ranked.filter((l) => l.latitude != null && l.longitude != null);
   const results = await Promise.all(
-    DAY_THEMES.map((t) => buildSocialPost(t, fresh.lakeContext, opts)),
+    DAY_THEMES.map((t, i) => {
+      const featured = featurable.length ? featurable[i % featurable.length] : undefined;
+      const postOpts = opts || featured ? { ...opts, featured } : undefined;
+      return buildSocialPost(t, lakeContext, postOpts);
+    }),
   );
   const posts = results.filter((p): p is SocialDraft => p !== null);
   return {
