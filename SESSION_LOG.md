@@ -1,3 +1,26 @@
+## 2026-06-30 (main) — audit: steadyapi-sole-spine plan vs code; budget-bomb gate; doc cleanup
+
+Audited `docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/` against the uncommitted `extract_api.py`
+rewrite. Confirmed RentCast dead (no key in any runtime; `lib/listings/select.ts:121,143` still mislabels
+live SteadyAPI figures as "RentCast" — live four-lane provenance bug, folded into check
+`email_social_steadyapi_rewire`). Found + the plan now documents a real budget bomb: `enrich_new`
+(`extract_api.py:165`/`:188`) does 2 calls/new-listing via the wrong endpoints instead of batched
+`/nearby-home-values`, and `pipeline.py:59` never threads `known_ids` — one sweep would cost ~42,000 calls
+(4× the 10k/mo cap) instead of the targeted ~3–4.7k/mo. Hard-gated in `phase-1-inventory-cutover.md`: no
+run until both are fixed and `--dry-run` proves the target. crawl4ai pass on docs.steadyapi.com added to
+`00-foundation-endpoint-catalog.md`: 15 req/sec rate limit, all real-estate endpoints weight-1, no
+webhooks/delta — and a new lever, `sort_type=newest` on `/search` (early-stop on known property_id could
+drop the full sweep to weekly), marked unproven pending a live ordering-stability probe.
+
+Deleted 9 superseded/dead docs (git history preserves them): the dual-path RentCast+SteadyAPI plan
+(`2026-06-30-api-fed-listing-lifecycle.md`), its false-premise spec + handoff (`steadyapi-listings-lake-*`),
+the dead-vendor RentCast grid-lab spec + handoff + 4 source files (`sources/rentcast/`), and the empty
+steadyapi-sole-spine spec stub. Closed checks `rentcast_grid_lab_live_verify` +
+`steadyapi_listings_lake_live_verify` as superseded by `steadyapi_sole_spine_live_verify`. Next: live probe
+of `sort_type=newest` ordering stability (operator running it — `PHOTOS_API` Bearer-auth blocked by the
+auto-mode classifier as a credential-purpose mismatch even though it's the correct, already-used SteadyAPI
+key); then fix the budget bomb per the phase-1 gate before any catch-up run.
+
 ## 2026-06-30 (main) — spec: live Anthropic API usage logging → /spend
 
 Designed and specced `api_usage_logging_live_verify` build. Proxy wrapper at `getAnthropic()` intercepts all `messages.create`/`messages.stream` calls, logs token usage + cost_usd to new `public.api_usage_log` table in Supabase (append-only), surfaced on /spend ops page as live daily/monthly actuals. Spec: `docs/superpowers/specs/2026-06-30-api-usage-logging-design.md`. Check opened. Next: writing-plans → implement.
