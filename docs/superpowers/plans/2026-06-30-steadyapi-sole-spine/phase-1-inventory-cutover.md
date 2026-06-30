@@ -88,6 +88,10 @@ SteadyAPI-sole and fixed the budget defects found in that scaffold.
    enrichment on legacy. ⚠️ **MUST handle the re-key:** the seed's stored `address_key` is OLD-format and
    `upsert_state` MERGEs on `(source_name, address_key, sale_or_rent)` — re-key the seed rows (`UPDATE`)
    or match on lat/lon first, else the catch-up INSERTs duplicates instead of stamping. See step 1.
+   📏 **Measure the deferred unit-smush here:** the first catch-up dry-run must bucket the *unmatched*
+   seed rows by has-unit/condo. The sweep emits marker units, but the SEED's unit format is unseen — if
+   condos/units dominate the misses, that is the signal to build the smush (excluding numbered-road
+   patterns like CR/SR/US 951). This converts the step-1 deferral into "defer until one measurement."
 
 5. ⬜ **Scheduled `pipeline.py` run (every 2–3 days):** code path exists (`known_ids` threaded, budget
    logged) but has never executed against live data — snapshot-diff → upsert `listing_state` + append
