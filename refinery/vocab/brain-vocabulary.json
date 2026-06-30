@@ -3657,7 +3657,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of Redfin-recorded 'All Residential' closed sales in Lee County for the most recent complete calendar year (year-1 relative to today), summed from monthly HOMES_SOLD. Recent years are revised upward as late-recorded sales land; treat the latest year as a soft floor. Level metric — no grade block."
+      "scope_note": "Count of Redfin-recorded 'All Residential' closed sales in Lee County for the most recent complete calendar year (year-1 relative to today), summed from monthly HOMES_SOLD. Recent years are revised upward as late-recorded sales land; treat the latest year as a soft floor. Higher = more closings = a stronger market."
     },
     "properties_lee_median_sale_price_yoy": {
       "id": "properties_lee_median_sale_price_yoy",

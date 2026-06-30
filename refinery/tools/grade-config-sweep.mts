@@ -68,7 +68,7 @@ export type Bucket =
  * sweep-spec.md §2. Precedence makes the function total and disjoint by
  * construction:
  *   unregistered ▸ invalid-polarity ▸ row-candidate (!numeric) ▸ gradeable
- *     ▸ moat-fuel ▸ needs-window
+ *     ▸ reviewed-display ▸ moat-fuel ▸ needs-window
  * The `!numeric → row-candidate` step (before gradeable/moat-fuel/needs-window)
  * is what kills the first-failing-gate double-count: a non-numeric metric can
  * never be a prediction target regardless of polarity/window.
