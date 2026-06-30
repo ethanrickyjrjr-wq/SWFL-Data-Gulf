@@ -1,3 +1,19 @@
+## 2026-06-30 (main) — test(grid-lab-socials): Task 4 — caption provenance VERIFIED + regression guard
+
+Task 4 is an AUDIT, not a build. Traced one path: route → buildWeek → buildSocialPost → socialPostSystem
+(system prompt) → Haiku → tryParseSocial → assembleDraft. The model's captionText is passed through
+VERBATIM — tryParseSocial/assembleDraft/buildVariants never inject, strip, or validate a figure. So the
+no-invention moat for CAPTIONS is PROMPT-enforced (the four-lane block + the lane-4 `[Need: …]` gate in
+socialPostSystem), NOT a post-parse code scrub — weaker than renderSocialImage's structural omission, but
+by design (README line 21). Corrected the plan's Step 2 against actual code (RULE 0.5): there is no
+Anthropic mock to mirror and no code-level scrub to test; the deterministic guard belongs on the prompt
+contract itself. New `lib/email/social-calendar/__tests__/provenance.test.ts` (3 pass / 22 assertions):
+empty `lakeContext` (= "the lake holds no value for this metric") still carries the four-lane ladder, the
+hard "invented number" block, and `[Need:` — proven across the Task-3 opts layering and every day theme.
+Full social-calendar suite 18 pass / 0 fail. VERIFIED — no leak, no escalation. Committed only the test +
+Findings note (explicit paths); left the parallel sessions' untracked `docs/superpowers/sources/` untouched.
+Next: Task 4 done; remaining grid-lab-socials = the C1 composition decision, then Tasks 5–6.
+
 ## 2026-06-30 (main) — feat(grid-lab-socials): Task 1 UI chain — route + modal + panel + shell wiring
 
 Finished Task 1's write-path (the prior session shipped only the pure core `persist-schedule.ts`).
