@@ -1,3 +1,15 @@
+## 2026-06-30 (main) — refactor(listings): drop incoherent email auto-aerial (correction)
+
+Advisor catch on `4490ec5b`: the email-lab aerial fallback bolted a satellite shot of one arbitrary lot
+onto county-median prose (caption ≠ photo) — incoherent vs the social path, where the featured listing is
+threaded into the prompt so caption + photo are the SAME home. Dropped the email auto-aerial in
+`build-doc.ts`; KEPT the cited-listings context block (the real "connect to email" win). Aerial-in-email
+paired properly = fast-follow (spec out-of-scope). SECURITY HEADLINE (carry forward): the live RENTCAST
+key was committed in `a2c92a9f` and pushed to origin/main, then redacted in `79ab899a` — redaction does
+NOT un-expose pushed history. ROTATE at app.rentcast.io and put the new key in BOTH `.env.local` AND
+Vercel env (deployed listings read it at runtime, else degrade to []); that is also the gate on
+`rentcast_grid_lab_live_verify`.
+
 ## 2026-06-30 (main) — docs(social-canvas-composer): writing-plans pass → 9-task implementation plan
 
 Wrote `docs/superpowers/plans/2026-06-30-social-canvas-composer.md` (writing-plans skill) from the C1-resolved

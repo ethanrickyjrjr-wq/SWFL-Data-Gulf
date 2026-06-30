@@ -45,8 +45,10 @@ degrade to today's behavior when the key is missing or the monthly quota (free t
 - `lib/email/social-calendar/build-week.ts` — `buildWeek` loads listing context once, appends the listings
   block to the shared `lakeContext`, and rotates a featured listing across the weekday posts; each post's
   caption may feature its listing and its card gets that lot's aerial (code-set).
-- `lib/email/build-doc.ts` — `buildContentDoc` appends the same listings block to its context, and (only
-  when no og:image photo resolved and the build is scoped) sets a featured aerial as the hero.
+- `lib/email/build-doc.ts` — `buildContentDoc` appends the same listings block to its context (cited
+  figures only). An aerial-in-email is **deliberately deferred**: to stay coherent it needs the featured
+  listing threaded into the email prompt so the caption and the photo are the SAME home — not a satellite
+  shot of one arbitrary lot bolted onto county-median prose. That pairing is a fast-follow.
 
 ## Moat / honesty invariants
 
@@ -66,6 +68,11 @@ degrade to today's behavior when the key is missing or the monthly quota (free t
 
 ## Out of scope (fast-follows)
 
+- **Aerial in the email lab** — thread the featured listing into the email prompt (like the social path)
+  so caption + photo agree, then attach its aerial. Deferred so a market email doesn't lead with a
+  mismatched lot shot.
+- **The paid `authorDoc` path** — only the default content-patch path is wired today; the author path
+  builds from a figure menu, so listing figures join that menu separately.
 - Precise zip→city (v1 broadens a zip scope to its county's anchor city; listings are still labeled by
   their true address/city, so citations stay truthful).
 - The "our data" lake lane (parked handoff) and the BYO MLS/IDX feed = the real-photos upgrade.

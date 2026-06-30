@@ -31,12 +31,7 @@ import {
 import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
 import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-image";
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
-import {
-  loadListingContext,
-  renderListingsBlock,
-  attachFeaturedAerial,
-  pickFeatured,
-} from "@/lib/listings/select";
+import { loadListingContext, renderListingsBlock } from "@/lib/listings/select";
 import { isListingIntent } from "@/lib/email/listing-intent";
 import { fetchListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
@@ -438,7 +433,6 @@ export async function buildContentDoc({
     );
   // Hero photo links back to the listing/site it was pulled from — the email
   // behaves like a webpage, and the click is tracked.
-  let heroPhotoSet = Boolean(photoRes);
   if (photoRes)
     doc = upsertHeroPhoto(
       doc,
@@ -448,17 +442,6 @@ export async function buildContentDoc({
         linkUrl: photoRes.source,
       }),
     );
-  // No og:image photo but a scoped market email → lead with a real local listing's
-  // satellite aerial (code-set; the model still never sets photos). The cited listing
-  // facts ride in the context block below so the copy can speak to it.
-  else if (scope?.value) {
-    const featured = pickFeatured(listingCtx.ranked);
-    if (featured) {
-      const withAerial = attachFeaturedAerial(doc, featured);
-      heroPhotoSet = withAerial !== doc;
-      doc = withAerial;
-    }
-  }
   const chartGroundingPart = chartRes?.groundingNote
     ? `\n\nCHART ON SCREEN (caption it from THESE real figures, never invent):\n${chartRes.groundingNote}`
     : "";
@@ -532,7 +515,7 @@ export async function buildContentDoc({
       patch,
       chart: Boolean(chartRes),
       chartNote: chartRes?.note,
-      photo: heroPhotoSet,
+      photo: Boolean(photoRes),
       // Freshness: which stale held figures the AI replaced with a current web-cited value,
       // and the sources it cited — so the UI can show "found fresher data" + the citations.
       webRefreshed: refreshedLabels,
