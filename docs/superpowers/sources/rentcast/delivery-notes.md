@@ -66,8 +66,7 @@ These are available in every response object — the vendor just didn't write th
 
 ## API key situation
 
-Vendor's key was stored in `.env.local` line 132: `RENTCAST_API_KEY=79e7d49dd9e542bab4390be9625604a2`
-This key was shared by the vendor in the delivery and may be known to them.
+Vendor's original key was shared in the delivery and stored in `.env.local` (gitignored).
 Action: rotate at app.rentcast.io/app/api — user action required.
 
 ---
