@@ -1,3 +1,35 @@
+## 2026-06-30 (main) — feat(listing-lake): API-fed listing-lifecycle — Tasks 1-5 + 8 built (cutover deferred)
+
+Executed `docs/superpowers/plans/2026-06-30-api-fed-listing-lifecycle.md` (swap the parked Source-B
+crawl4ai scrape for a RentCast-spine + SteadyAPI-photos API feed into the EXISTING listing_state
+machine, under neutral `source_name='api_feed'`). **CORRECTION (append-only, retracts my own 06/30
+"lake is greenfield" entry below):** that entry was WRONG. Probed live code + DB this session —
+`ingest/pipelines/listing_lifecycle/` exists on main (7 modules), `migrations/20260627_listing_lifecycle.sql`
+is applied, and `data_lake.listing_state` holds 10,459 rows under `source_name='lifecycle_seed'`. The
+plan's "not greenfield, reuse don't rebuild" premise verified TRUE; the earlier RentCast handoff was right.
+
+Built + committed locally (6 commits `df5ef17f..e5d7d37f`, all listing-lake files, disjoint from the
+parallel social-composer work; NOT pushed): T1 additive API columns on listing_state (+ extended
+`distill._STATE_COLS` so they actually persist); T2 pure parsers (RentCast countyFips 3-digit "071"→"12071",
+SteadyAPI 5-digit, live-probed RULE 0.4); T3 paginated fetchers returning (rows, ok) completeness signal;
+T4 pipeline `--source api` threading `api_feed` + the DOM fix; T5 view re-point to api_feed surfacing REAL
+RentCast DOM + connector citation fixed to "realtor.com via RentCast + SteadyAPI" (was falsely "crawl4ai
+scrape"); T8 corrected the steadyapi spec/handoff greenfield premise. 52 python + 8 pack/catalog tests green;
+vocab clean (`avg_days_on_market_swfl` already registered).
+
+**5 plan defects found by probing/advisor + fixed (not in the plan as written):** (1) DOM fallback to
+days_in_state=0 would fake every photo-only listing's DOM and drag `avg_days_on_market_swfl` — API path now
+leaves unsourced DOM NULL; (2) `_STATE_COLS` omitted the new columns → photos/MLS# silently dropped on upsert;
+(3) connector hardcoded "crawl4ai scrape" citation = false provenance; (4) merge could clobber/double-count a
+same-address row on geocode variance → dedup by address_key, RentCast wins; (5) plan marked a whole county
+incomplete if any city was empty → a tiny SWFL town would poison the seed; now truncation vs clean-empty.
+
+**CUTOVER DEFERRED — needs operator decision (all real-quota / prod-write / secrets):** RentCast key is
+documented free-tier 50/mo (prod client comment); a daily full-sweep of 13 Lee+Collier cities (Cape Coral
+alone >500 → paginates) needs a PAID tier or it 429s mid-seed. Then: rotate the RentCast key (exposed in
+`a2c92a9f`) + set GH secrets RENTCAST_API_KEY/PHOTOS_API → seed api_feed → apply the new view → rebuild the
+brain → live-verify → Task 6 unpark the daily cron. Push of the 6 built commits also pending confirmation.
+
 ## 2026-06-30 (main) — feat(social): Social Canvas Composer — Canva-style composer in the paid grid lab
 
 Re-landed + finished the social-canvas-composer build (the work the parallel steadyapi-lake session rebased
