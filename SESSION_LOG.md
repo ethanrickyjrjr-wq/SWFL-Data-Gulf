@@ -1,3 +1,10 @@
+## 2026-06-30 (main) — fix(predictions-log): swap sofr_rate → cpi_yoy in FORWARD-GUARD test
+
+sofr_rate gained direction_polarity (lower_is_bullish) in the 2026-06-29 polarity backfill,
+making the FORWARD-GUARD test fail (expected ungradeable, got gradeable). Replaced with
+cpi_yoy (reviewed_non_directional, no polarity) — still registered, still numeric. 18/18 green.
+Next: monitor CI green.
+
 ## 2026-06-30 (main) — feat(grid-lab-socials): Task 1 schedule-wiring core GREEN + full plan folder
 
 Decomposed the verified grid-lab-socials handoff (REVIEW + RESEARCH) into a build folder `docs/superpowers/plans/2026-06-29-grid-lab-socials/` — README (overview + the C1 composition decision gate + hand-authored parallel safety) + `task-1`…`task-6` as separated files. Registered the build via `new-build.mjs` (check `grid_lab_socials_live_verify` open; spec stub → pointer at the folder). Verified the handoff's load-bearing claims against ACTUAL code first (RULE 0.5): the `lib/social` engine + cron are complete; the real gap is there is NO product write-path — the U2 confirm→INSERT is a spec, not shipped code, so nothing writes the `social_schedules` rows the cron reads. Started Task 1 (schedule wiring — seam-independent, highest value): shipped the tested pure core `lib/social/persist-schedule.ts` (`freezePost` + `buildSocialScheduleInsert` → exact `social_schedules` INSERT shape, status active, freshness_gate true, no-invention media → null) with `persist-schedule.test.ts` (3 pass / 15 assertions GREEN). Remaining on Task 1 (route `/api/social/schedule` + `ScheduleSocialModal` + panel/shell wiring) and the C1 seam decision are captured in resume handoff `docs/superpowers/handoffs/2026-06-30-grid-lab-socials-task1-resume.md`. Did NOT touch the parallel grading session's `.superpowers/sdd/*` files. Next: build the route + modal; operator to call C1 (SocialModel-on-grid vs EmailDoc→PNG) before Tasks 5/6.

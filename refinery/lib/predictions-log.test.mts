@@ -267,15 +267,17 @@ test("deriveGradeFields: real producer shape [brain_id, metric] → metric wins,
 test("deriveGradeFields: FORWARD-GUARD — first numeric driver decides, no jump to gradeable secondary", () => {
   // The current producer emits AT MOST ONE numeric metric ref, so this two-numeric
   // case cannot occur live today — it guards a future multi-claim/corridor producer.
-  // sofr_rate is registered-but-ungradeable (no polarity); sba_overall_survival_rate is gradeable.
+  // cpi_yoy is registered-but-ungradeable (reviewed_non_directional, no polarity);
+  // sba_overall_survival_rate is gradeable. sofr_rate gained polarity in the
+  // 2026-06-29 backfill and is no longer a valid stand-in for this test.
   const out = makeOutput({
-    conditional_claims: [claim("bullish", ["sofr_rate", "sba_overall_survival_rate"])],
-    key_metrics: [metric("sofr_rate", 5.3), metric("sba_overall_survival_rate", 0.82)],
+    conditional_claims: [claim("bullish", ["cpi_yoy", "sba_overall_survival_rate"])],
+    key_metrics: [metric("cpi_yoy", 3.4), metric("sba_overall_survival_rate", 0.82)],
   });
   const g = deriveGradeFields(out);
-  assert.equal(g.gradeable_slug, "sofr_rate"); // first numeric ref, NOT the gradeable second
-  assert.equal(g.baseline_value, 5.3);
-  assert.equal(g.grade_status, "ungradeable"); // no polarity on sofr_rate → no jump
+  assert.equal(g.gradeable_slug, "cpi_yoy"); // first numeric ref, NOT the gradeable second
+  assert.equal(g.baseline_value, 3.4);
+  assert.equal(g.grade_status, "ungradeable"); // no polarity on cpi_yoy → no jump
 });
 
 test("deriveGradeFields: window_end_date uses UTC date math (no local/DST off-by-one)", () => {
