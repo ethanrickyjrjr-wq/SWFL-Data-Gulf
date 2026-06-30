@@ -51,7 +51,17 @@ const PUBLISHABLE_SET: Record<Platform, true> = {
   linkedin: true,
   google_business: true,
 };
-const PUBLISHABLE_PLATFORMS = Object.keys(PUBLISHABLE_SET) as Platform[];
+export const PUBLISHABLE_PLATFORMS = Object.keys(PUBLISHABLE_SET) as Platform[];
+
+// The four-lane no-invention sourcing rules — ONE source of truth, shared by the
+// social-card builder (socialPostSystem) and the canvas author (authorSocialSystem).
+// Keep verbatim; the moat lives here.
+export const SOCIAL_SOURCING_RULES = `DATA SOURCING — four lanes, in order. NEVER leave a requested field empty because you "don't have the number":
+1. LAKE DATA above — use verbatim (value · source · as-of).
+2. User's uploaded doc or figure — if the user pasted a number, use it exactly.
+3. Internet / publicly known figure — use it; note the source inline (e.g. "per Realtor.com").
+4. Can't source it at all — write [Need: brief description of the exact figure] so the user can supply it.
+ONLY block: an invented number with no real source. Build is NEVER blocked.`;
 
 // Per-network caption SHAPE rules (the Buffer "content tailoring" pattern). These change
 // only the shape; figures + citations are reused verbatim — the four-lane moat is untouched.
@@ -115,12 +125,7 @@ Return ONLY valid JSON with exactly these keys (no markdown fences, no prose out
 ${dataBlock}
 Allowed text fields per block: kicker, value, label, prose, title, body, caption, alt, stats (array of AT MOST 3 {value, label}; keep each value short).
 
-DATA SOURCING — four lanes, in order. NEVER leave a requested field empty because you "don't have the number":
-1. LAKE DATA above — use verbatim (value · source · as-of).
-2. User's uploaded doc or figure — if the user pasted a number, use it exactly.
-3. Internet / publicly known figure — use it; note the source inline (e.g. "per Realtor.com").
-4. Can't source it at all — write [Need: brief description of the exact figure] so the user can supply it.
-ONLY block: an invented number with no real source. Build is NEVER blocked.
+${SOCIAL_SOURCING_RULES}
 
 Block rules:
 - Only the allowed text fields — no colors, urls, logos, photos, company name, agent names, or brand settings.

@@ -13,7 +13,7 @@
 // undo-redo — and ADDS the grid + author + width presets on top. The free shell
 // is left untouched; it copies what it needs from here later.
 import { useEffect, useRef, useState } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
 import type {
   BlockLayout,
@@ -44,6 +44,11 @@ import { ScheduleSendModal } from "./ScheduleSendModal";
 import { ScheduleSocialModal } from "./ScheduleSocialModal";
 import { SocialCalendarPanel } from "./SocialCalendarPanel";
 import { SocialComposer } from "./social/SocialComposer";
+import { useSocialComposer } from "./social/useSocialComposer";
+import { SocialElementInspector } from "./social/SocialElementInspector";
+import { PhotosPanel } from "./PhotosPanel";
+import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
+import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
 import { capabilitiesFor } from "@/lib/email/lab/capabilities";
@@ -72,6 +77,21 @@ const FONT_OPTIONS: { value: FontFamily; label: string }[] = [
   { value: "LATO_SANS", label: "Lato" },
   { value: "MONTSERRAT_SANS", label: "Montserrat" },
 ];
+
+// Social composer palette + format labels (relocated from SocialComposer's left rail).
+const SOCIAL_PALETTE: { type: SocialElement["type"]; label: string }[] = [
+  { type: "text", label: "Text" },
+  { type: "stat", label: "Stat" },
+  { type: "cta", label: "Button + link" },
+  { type: "image", label: "Image" },
+  { type: "logo", label: "Logo" },
+];
+const SOCIAL_FORMAT_LABEL: Record<SocialFormat, string> = {
+  square: "Square 1:1",
+  portrait: "Portrait 4:5",
+  landscape: "Landscape 1.91:1",
+  story: "Story 9:16",
+};
 
 // Friendly block-type labels for the "Now editing" header.
 const LABELS: Partial<Record<BlockType, string>> = {
@@ -205,7 +225,6 @@ export function EmailLabGridShell({
   const [expandedDay, setExpandedDay] = useState<CalendarDay | null>(null);
   // "Schedule this post" → ScheduleSocialModal (writes a social_schedules recipe).
   const [scheduleDraft, setScheduleDraft] = useState<SocialDraft | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Brand panel (ONE ROOT — same blob the project workspace edits).
   const [branding, setBranding] = useState<Record<string, string>>(initialBranding ?? {});
@@ -214,13 +233,16 @@ export function EmailLabGridShell({
   const [brandSavedMsg, setBrandSavedMsg] = useState<string | null>(null);
   const brandPrefillAttempted = useRef(false);
 
+  // Social composer — ALL social state + actions lifted here so the right "AI assistant"
+  // aside drives the center canvas (mode === "social"). Effect-free until an action fires,
+  // so it's idle/free in email mode. (Photos-accordion state now lives in PhotosPanel.)
+  const social = useSocialComposer({ scope, projectId, branding });
+
   // Right-panel accordions. Brand opens by default so the 4 brand colors
   // (primary / accent / text / background) are visible without a click.
   const [showBrand, setShowBrand] = useState(true);
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
-  const [showPhotos, setShowPhotos] = useState(false);
-  const [imageUrlInput, setImageUrlInput] = useState("");
 
   // history helpers (coalesced field edits → meaningful undo frames)
   const editingRef = useRef(false);
@@ -787,6 +809,15 @@ export function EmailLabGridShell({
             >
               {copied ? "Copied ✓" : "Copy HTML"}
             </button>
+            {mode === "social" && (
+              <button
+                onClick={() => void social.exportPng()}
+                disabled={social.exporting || !social.hasElements}
+                className="rounded border border-[#f59e0b]/40 px-2.5 py-1 text-xs text-[#f59e0b] transition-colors hover:border-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-30"
+              >
+                {social.exporting ? "Exporting…" : "Export PNG"}
+              </button>
+            )}
             {onSave && (
               <button
                 type="button"
@@ -797,15 +828,27 @@ export function EmailLabGridShell({
                 Send to contacts
               </button>
             )}
-            {onSave && projectId && (
+            {mode === "social" ? (
               <button
                 type="button"
-                onClick={openSchedule}
-                disabled={busy || saving}
+                onClick={() => void social.openSchedule()}
+                disabled={busy || social.exporting || !social.hasElements}
                 className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/20 disabled:opacity-40"
               >
-                Schedule
+                Schedule post
               </button>
+            ) : (
+              onSave &&
+              projectId && (
+                <button
+                  type="button"
+                  onClick={openSchedule}
+                  disabled={busy || saving}
+                  className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/20 disabled:opacity-40"
+                >
+                  Schedule
+                </button>
+              )
             )}
             {onSave && (
               <button
@@ -866,7 +909,7 @@ export function EmailLabGridShell({
               }}
             />
           ) : (
-            <SocialComposer scope={scope} projectId={projectId} branding={branding} />
+            <SocialComposer composer={social} />
           )}
         </div>
       </main>
@@ -942,6 +985,130 @@ export function EmailLabGridShell({
                 </p>
               )}
               {aiMessage && <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>}
+            </div>
+          )}
+
+          {/* ── SOCIAL: Build the post (author) / Fill ── */}
+          {mode === "social" && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-4">
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
+                Build with AI
+              </p>
+              <textarea
+                value={social.prompt}
+                onChange={(e) => social.setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void social.author();
+                }}
+                placeholder="Describe the post — the AI picks a layout, writes cited copy, and drops in a photo…"
+                rows={3}
+                className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+              />
+              <p className="mb-1.5 mt-2.5 text-[10px] uppercase tracking-[0.15em] text-white/35">
+                Format
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {(Object.keys(SOCIAL_FORMATS) as SocialFormat[]).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => social.setFormat(f)}
+                    className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                      social.design.format === f
+                        ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
+                        : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    {SOCIAL_FORMAT_LABEL[f]}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2.5 flex gap-2">
+                <button
+                  onClick={() => void social.author()}
+                  disabled={social.aiBusy || !social.prompt.trim()}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
+                >
+                  {social.aiBusy ? "Working…" : "Build the post"}
+                </button>
+                <button
+                  onClick={() => void social.fill()}
+                  disabled={social.aiBusy}
+                  title="Fill cited copy into the current canvas (keeps your elements)"
+                  className="rounded-lg border border-white/10 px-3 py-2 text-sm text-white/60 transition-colors hover:text-white/90 disabled:opacity-40"
+                >
+                  Fill
+                </button>
+              </div>
+              {social.aiStatus && (
+                <p className="mt-2.5 rounded-md border border-gulf-teal/20 bg-gulf-teal/10 px-2.5 py-2 text-[11px] text-gulf-teal/90">
+                  ✓ {social.aiStatus}
+                </p>
+              )}
+              {social.aiError && (
+                <p className="mt-2 text-[11px] text-amber-300/80">{social.aiError}</p>
+              )}
+              {social.exportError && (
+                <p className="mt-2 text-[11px] text-amber-300/80">{social.exportError}</p>
+              )}
+              {social.mediaUrl && (
+                <p className="mt-1 text-[10px] text-gulf-teal/80">Image saved ✓</p>
+              )}
+            </div>
+          )}
+
+          {/* ── SOCIAL: Now editing (the selected canvas element) ── */}
+          {mode === "social" && social.selectedElement && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-4">
+              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[#f59e0b]">
+                Now editing
+              </p>
+              <div className="mt-3 rounded-lg bg-white p-3 text-gray-900">
+                <SocialElementInspector
+                  element={social.selectedElement}
+                  onChange={social.updateElement}
+                  onDelete={social.deleteSelected}
+                  onClose={() => social.setSelectedId(null)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ── SOCIAL: Add / size ── */}
+          {mode === "social" && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-3">
+              <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-white/35">Add</p>
+              <div className="grid grid-cols-2 gap-1">
+                {SOCIAL_PALETTE.map((p) => (
+                  <button
+                    key={p.type}
+                    type="button"
+                    onClick={() => social.addElement(p.type)}
+                    className="rounded border border-white/10 px-2 py-1.5 text-[11px] text-white/60 hover:text-white/90"
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mb-1.5 mt-3 text-[10px] uppercase tracking-[0.15em] text-white/35">
+                Size
+              </p>
+              <div className="grid grid-cols-2 gap-1">
+                {(Object.keys(SOCIAL_FORMATS) as SocialFormat[]).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => social.setFormat(f)}
+                    className={`rounded border px-2 py-1 text-left text-[11px] ${
+                      social.design.format === f
+                        ? "border-gulf-teal text-gulf-teal"
+                        : "border-white/10 text-white/55"
+                    }`}
+                  >
+                    {SOCIAL_FORMAT_LABEL[f]}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -1121,95 +1288,14 @@ export function EmailLabGridShell({
             </div>
           )}
 
-          {/* ── Photos ── */}
-          <div className="px-4 pb-6 pt-3">
-            <button
-              onClick={() => setShowPhotos((v) => !v)}
-              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-            >
-              <span>Photos</span>
-              <span className={`transition-transform ${showPhotos ? "rotate-180" : ""}`}>▾</span>
-            </button>
-            {showPhotos && (
-              <div className="mt-2 mb-2 flex gap-1.5">
-                <input
-                  type="text"
-                  value={imageUrlInput}
-                  onChange={(e) => setImageUrlInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && imageUrlInput.trim()) {
-                      applyPhotoUrl(imageUrlInput.trim());
-                      setImageUrlInput("");
-                    }
-                  }}
-                  placeholder="Paste image URL…"
-                  className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (imageUrlInput.trim()) {
-                      applyPhotoUrl(imageUrlInput.trim());
-                      setImageUrlInput("");
-                    }
-                  }}
-                  disabled={!imageUrlInput.trim()}
-                  className="shrink-0 rounded-md bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-[#070f14] disabled:opacity-40"
-                >
-                  Add
-                </button>
-              </div>
-            )}
-            {showPhotos && (
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={promotingPath !== null}
-                  className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/20 bg-white/3 text-white/30 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal/70 disabled:opacity-40"
-                  title="Upload a photo"
-                >
-                  {promotingPath === "__upload__" ? (
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-gulf-teal" />
-                  ) : (
-                    <span className="text-lg leading-none">＋</span>
-                  )}
-                </button>
-                {(projectPhotos ?? []).map((photo) => (
-                  <button
-                    key={photo.storage_path}
-                    type="button"
-                    onClick={() => pickFiledPhoto(photo.storage_path)}
-                    disabled={promotingPath !== null}
-                    title={photo.caption ?? photo.storage_path.split("/").pop()}
-                    className={`relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
-                      promotingPath === photo.storage_path
-                        ? "border-gulf-teal"
-                        : "border-transparent hover:border-gulf-teal disabled:opacity-60"
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photo.signedUrl}
-                      alt={photo.caption ?? ""}
-                      className="h-full w-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const f = e.target.files?.[0];
-                if (f) void uploadNewPhoto(f);
-                e.target.value = "";
-              }}
-            />
-          </div>
+          {/* ── Photos (shared component; the target is mode-aware) ── */}
+          <PhotosPanel
+            projectPhotos={projectPhotos}
+            promotingPath={mode === "social" ? social.promotingPath : promotingPath}
+            onApplyUrl={mode === "social" ? social.applyPhotoUrl : applyPhotoUrl}
+            onPickFiled={mode === "social" ? social.pickFiledPhoto : pickFiledPhoto}
+            onUploadFile={mode === "social" ? social.uploadNewPhoto : uploadNewPhoto}
+          />
         </div>
       </aside>
 
@@ -1238,6 +1324,27 @@ export function EmailLabGridShell({
           scopeKind={scope?.kind ?? null}
           scopeValue={scope?.value ?? null}
           onClose={() => setScheduleDraft(null)}
+        />
+      )}
+
+      {social.scheduleOpen && (
+        <ScheduleSocialModal
+          draft={
+            {
+              day: "mon",
+              theme: "composed",
+              caption: social.caption,
+              hashtags: social.hashtags,
+              card: { globalStyle: {}, blocks: [] },
+              variants: social.variants,
+            } as unknown as SocialDraft
+          }
+          projectId={projectId}
+          scopeKind={scope?.kind ?? null}
+          scopeValue={scope?.value ?? null}
+          mediaUrl={social.mediaUrl}
+          design={social.design}
+          onClose={() => social.setScheduleOpen(false)}
         />
       )}
 

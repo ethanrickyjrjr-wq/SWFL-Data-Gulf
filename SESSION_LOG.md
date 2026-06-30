@@ -66,6 +66,31 @@ Pushed **only this session's docs** (detached onto origin/main so the parallel s
 `c4fb2495`/`cc9f2e80`/`bc159311` — some HELD-for-review — were NOT dragged along).
 
 ---
+## 2026-06-30 (main) — social-ai-author: template-backed AI author + right-column composer (built, NOT pushed; live-verify pending)
+
+Built `docs/superpowers/specs/2026-06-30-social-ai-author-design.md` end-to-end after a full RULE 0.5
+code-probe. The Social tab now mirrors the email page: type one sentence → the AI picks a pre-positioned
+layout template + format, writes cited copy/numbers, and (for a listing) drops in a real photo; the whole
+control surface moved to the right "AI assistant" aside; you can edit text/photos/layout.
+
+**Advisor caught the load-bearing bug before I wrote it:** template element ids MUST be deterministic
+constants (`"headline"`, `"stat"`, `"cta"`) — the author shows the model the skeleton ids, gets a patch
+keyed by them, then re-instantiates the template, so minted ids would make every patch silently miss
+(placeholder text, no error). Baked in + proved by a patch-roundtrip test.
+
+New: `lib/social/design/templates.ts` (4 brand-aware templates, deterministic ids, always-in-bounds),
+`lib/social/design/author.ts` (`authorSocialPost` — one Haiku call, text-only `applyDesignPatch`, no-invention
+structural), `lib/project/uploads-text.ts` (project file `extracted_text` as an EQUAL source),
+`components/email-lab/PhotosPanel.tsx` (extracted, shared by both shells),
+`components/email-lab/social/SocialElementInspector.tsx`, `.../useSocialComposer.ts` (state lifted so the
+aside drives the canvas). Changed: the `/api/email-lab/social/generate` route (`author:true` branch),
+`SocialComposer` (→ canvas-only), `EmailLabGridShell` (social aside stack + Export PNG/Schedule in the top
+bar + shared PhotosPanel). Factored the four-lane sourcing block into one exported const (`SOCIAL_SOURCING_RULES`).
+
+Green: 0 tsc errors repo-wide, `next build` clean, 263 social/calendar tests pass (20 new). NOT pushed
+(>5-file refactor → RULE 1 ask-first). **Live-verify still open** (`social_ai_author_live_verify`): needs a
+real authored post on `/email-lab` + proof into `verification/answer-proofs.jsonl` — a runtime Anthropic
+call, not closeable on "code looks right."
 
 ## 2026-06-30 (main) — listing-lake: address_key hardened (zero API), CI dry-run wrapper wired, SteadyAPI surface re-verified
 
