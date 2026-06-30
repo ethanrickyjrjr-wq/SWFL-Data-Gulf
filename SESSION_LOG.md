@@ -1,3 +1,29 @@
+## 2026-06-30 (main) — fix(history): strip parallel social-composer commits from origin/main push
+
+Correction: the steadyapi-lake docs push (`5de962c8`) silently carried 5 unpushed social-composer commits
+(`168deddc..74ea56af`) from a parallel session — they were ancestors of my commit, so a plain push
+published them. Operator: "only push your files." Preserved the parallel work in tag `social-composer-wip`
+(→ `74ea56af`, recoverable), rebased ONLY the docs commit onto `e1e30aaa`, force-pushed (--force-with-lease)
+so origin/main again holds just the SteadyAPI-lake spec + handoff + this log. The social-composer session
+must re-push from the tag with its own SESSION_LOG entries. Lesson banked: `git rev-list origin/main..HEAD`
+before every push; isolate with `rebase --onto origin/main` when commits aren't mine.
+
+## 2026-06-30 (main) — docs(steadyapi-lake): spec + handoff — SteadyAPI listings lake → for-sale brain
+
+Brainstormed (RULE 3.5) the durable "our data" lane for SWFL for-sale inventory. In-session crawl4ai +
+live-probe pass (RULE 0.4): SteadyAPI `/v1/real-estate/search` has `meta.total` (exact pagination,
+disjoint 200-pages confirmed), `county_fips` per record (scope Lee 12071 / Collier 12021), rich `flags`
+(is_price_reduced / is_new_listing / is_pending) — but NO `property_type` in the record (per-type sweep
+required) and NO recency filter (daily tick = full sweep, "incremental" via upsert-diff on `property_id`).
+Corrected the parked RentCast handoff: it claimed a `listing_lifecycle` machine is LIVE on main — it does
+NOT exist; lake is greenfield. Locked freshness model (operator): unchanged = still fresh, one as-of =
+today's sweep date, DOM = today − first_seen (derived, +1/day); removed listings preserved in place
+(`removed_date`) as the pending/sold/relist seed; relist auto via stable id. Wrote spec
+`docs/superpowers/specs/2026-06-30-steadyapi-listings-lake-design.md` + handoff
+`docs/superpowers/handoffs/2026-06-30-steadyapi-listings-lake-handoff.md`; registered check
+`steadyapi_listings_lake_live_verify`. RentCast superseded as listings source (no photos). No code yet —
+next: writing-plans → migration → pipeline (TDD) → brain+vocab → cron/cadence → trial seed → live-verify.
+
 ## 2026-06-30 (main) — feat(listings): SteadyAPI photo source — real MLS listing photos in email + social labs
 
 `lib/listings/steadyapi.ts`: new client hitting `GET /v1/real-estate/search` (SteadyAPI, realtor.com reseller).
