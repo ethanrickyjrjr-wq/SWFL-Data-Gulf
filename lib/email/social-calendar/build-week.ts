@@ -17,10 +17,57 @@ import {
 } from "@/lib/email/build-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import { DAY_THEMES } from "./themes";
-import type { DayTheme, SocialDraft, WeeklyCalendar } from "./types";
+import type {
+  DayTheme,
+  GoalTone,
+  SocialDraft,
+  SocialGoal,
+  SocialTone,
+  WeeklyCalendar,
+} from "./types";
 import type { EmailDoc } from "@/lib/email/doc/types";
+import type { Platform } from "@/lib/social/types";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// X (Twitter) hard limit — verified in-session 06/30/2026 against
+// docs.x.com/fundamentals/counting-characters ("Posts on X can contain up to 280 characters").
+const X_CHAR_LIMIT = 280;
+
+// The 5 PUBLISHABLE platforms (schedule targets) = the `Platform` union, NOT the 8
+// display platforms in lib/email/social/platforms.ts. Built off a full Record so a
+// new Platform member is a compile error here until it is listed.
+const PUBLISHABLE_SET: Record<Platform, true> = {
+  x: true,
+  facebook: true,
+  instagram: true,
+  linkedin: true,
+  google_business: true,
+};
+const PUBLISHABLE_PLATFORMS = Object.keys(PUBLISHABLE_SET) as Platform[];
+
+// Per-network caption SHAPE rules (the Buffer "content tailoring" pattern). These change
+// only the shape; figures + citations are reused verbatim — the four-lane moat is untouched.
+const PLATFORM_RULES: Record<Platform, string> = {
+  x: `<=${X_CHAR_LIMIT} CHARACTERS total (hard limit), one punchy hook, at most 1-2 hashtags`,
+  linkedin: "longer-form and professional, 2-3 short paragraphs, insight-led, few or no hashtags",
+  instagram: "caption first, then a block of 5-8 hashtags on their own line at the end",
+  facebook: "conversational and community-oriented, invite a reply or comment",
+  google_business:
+    "local and action-first, lead with the place, end with one clear CTA, no hashtags",
+};
+
+const GOAL_RULES: Record<SocialGoal, string> = {
+  awareness: "Goal is awareness: broad, shareable framing.",
+  leads: "Goal is leads: end with a clear next step (DM, link, or call).",
+  engagement: "Goal is engagement: ask a question that invites replies.",
+};
+
+const TONE_RULES: Record<SocialTone, string> = {
+  professional: "Tone is professional: credible and precise.",
+  casual: "Tone is casual: warm and plain-spoken.",
+  bold: "Tone is bold: confident and punchy.",
+};
 
 export function seedSocialCard(theme: DayTheme): EmailDoc {
   return {
@@ -29,16 +76,35 @@ export function seedSocialCard(theme: DayTheme): EmailDoc {
   };
 }
 
-export function socialPostSystem(lakeContext: string, addendum: string): string {
+export function socialPostSystem(
+  lakeContext: string,
+  addendum: string,
+  opts?: { platforms?: Platform[]; goalTone?: GoalTone },
+): string {
   const dataBlock = lakeContext
     ? `\n\nREAL LAKE DATA (cite verbatim — value · source · as-of):\n${lakeContext}\n`
     : "";
+
+  const platforms = opts?.platforms ?? [];
+  // Variants key requested ONLY for the chosen platforms (keeps the prompt tight).
+  const variantsKeyLine = platforms.length
+    ? `\n  variants: object      (keys EXACTLY: ${platforms.join(", ")} — the SAME post reshaped per network; reuse the SAME figures + citations as captionText, never invent)`
+    : "";
+  const networkBlock = platforms.length
+    ? `\n\nPER-NETWORK VARIANTS — also return "variants" reshaping captionText for each requested network. Change only the SHAPE; keep the exact same figures and citations:\n${platforms
+        .map((p) => `- ${p}: ${PLATFORM_RULES[p]}`)
+        .join("\n")}`
+    : "";
+  const voiceBlock = opts?.goalTone
+    ? `\n\nVOICE: ${GOAL_RULES[opts.goalTone.goal]} ${TONE_RULES[opts.goalTone.tone]}`
+    : "";
+
   return `You are a social media copywriter for a Southwest Florida real estate agent.
 
 Return ONLY valid JSON with exactly these keys (no markdown fences, no prose outside the object):
   captionText: string   (<=280 words, hook-first, ONE CTA at the end, NO hashtags inline, NO em-dashes)
   hashtags: string[]    (5-8 items, NO "#" prefix; mix: 2 local, 2 topical, 1 brand "SWFLDataGulf")
-  patch: object         (block id -> updated text fields ONLY, same shape as the email content patch)
+  patch: object         (block id -> updated text fields ONLY, same shape as the email content patch)${variantsKeyLine}
 ${dataBlock}
 Allowed text fields per block: kicker, value, label, prose, title, body, caption, alt, stats (array of AT MOST 3 {value, label}; keep each value short).
 
@@ -51,14 +117,17 @@ ONLY block: an invented number with no real source. Build is NEVER blocked.
 
 Block rules:
 - Only the allowed text fields — no colors, urls, logos, photos, company name, agent names, or brand settings.
-- Only include block ids and fields you are actually changing.
+- Only include block ids and fields you are actually changing.${networkBlock}${voiceBlock}
 
 DAY-SPECIFIC: ${addendum}`;
 }
 
-export function tryParseSocial(
-  text: string,
-): { caption: string; hashtags: string[]; patch: unknown } | null {
+export function tryParseSocial(text: string): {
+  caption: string;
+  hashtags: string[];
+  patch: unknown;
+  variants: Partial<Record<Platform, string>>;
+} | null {
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) return null;
   let o: Record<string, unknown>;
@@ -72,37 +141,90 @@ export function tryParseSocial(
   const hashtags = Array.isArray(o.hashtags)
     ? o.hashtags.filter((h): h is string => typeof h === "string").slice(0, 8)
     : [];
-  return { caption, hashtags, patch: o.patch ?? {} };
+  // Only keep variants for the 5 publishable platforms — unknown keys (e.g. tiktok) are dropped.
+  const variants: Partial<Record<Platform, string>> = {};
+  if (o.variants && typeof o.variants === "object") {
+    const raw = o.variants as Record<string, unknown>;
+    for (const p of PUBLISHABLE_PLATFORMS) {
+      const v = raw[p];
+      if (typeof v === "string" && v.trim()) variants[p] = v.trim();
+    }
+  }
+  return { caption, hashtags, patch: o.patch ?? {}, variants };
+}
+
+/**
+ * Trim `text` to at most `max` characters at a word boundary, so an inline citation
+ * (e.g. "per Realtor.com") is never severed mid-token — a mid-string cut could orphan
+ * a number from its source, which is the one thing the no-invention moat guards.
+ */
+export function clampToChars(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd();
+}
+
+/**
+ * Build per-network caption variants for the requested platforms. The prompt asks the
+ * model to write each variant; this layer (a) falls back to the generic caption for any
+ * requested platform the model did not tailor — including google_business, which has no
+ * registry entry in platforms.ts — and (b) enforces the X 280-char limit as a safety net.
+ * SHAPE only; figures + citations are carried verbatim from what the model produced.
+ */
+export function buildVariants(
+  caption: string,
+  aiVariants: Partial<Record<Platform, string>>,
+  platforms: readonly Platform[],
+): Partial<Record<Platform, string>> {
+  const out: Partial<Record<Platform, string>> = {};
+  for (const p of platforms) {
+    const text = aiVariants[p]?.trim() || caption;
+    out[p] = p === "x" ? clampToChars(text, X_CHAR_LIMIT) : text;
+  }
+  return out;
 }
 
 export function assembleDraft(
   theme: DayTheme,
   card: EmailDoc,
-  parsed: { caption: string; hashtags: string[]; patch: unknown },
+  parsed: {
+    caption: string;
+    hashtags: string[];
+    patch: unknown;
+    variants?: Partial<Record<Platform, string>>;
+  },
+  platforms?: readonly Platform[],
 ): SocialDraft | null {
   const patch = ContentPatchSchema.safeParse(parsed.patch);
   const filledRaw = patch.success ? applyPatch(card, patch.data) : card;
   const filled = EmailDocSchema.safeParse(filledRaw);
   if (!filled.success) return null;
-  return {
+  const draft: SocialDraft = {
     day: theme.day,
     theme: theme.label,
     caption: parsed.caption,
     hashtags: parsed.hashtags,
     card: filled.data,
   };
+  if (platforms && platforms.length) {
+    draft.variants = buildVariants(parsed.caption, parsed.variants ?? {}, platforms);
+  }
+  return draft;
 }
 
 export async function buildSocialPost(
   theme: DayTheme,
   lakeContext: string,
+  opts?: { platforms?: Platform[]; goalTone?: GoalTone },
 ): Promise<SocialDraft | null> {
   const card = seedSocialCard(theme);
   try {
     const msg = await client.messages.create({
       model: resolveEmailModel("interactive"), // Haiku
-      max_tokens: 512,
-      system: socialPostSystem(lakeContext, theme.systemAddendum),
+      // Per-network variants emit several captions, so they need more room than the single-caption default.
+      max_tokens: opts?.platforms?.length ? 1024 : 512,
+      system: socialPostSystem(lakeContext, theme.systemAddendum, opts),
       messages: [
         { role: "user", content: `CARD (block id -> current text):\n${docSkeleton(card)}` },
       ],
@@ -110,7 +232,7 @@ export async function buildSocialPost(
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
     const parsed = tryParseSocial(text);
     if (!parsed) return null;
-    return assembleDraft(theme, card, parsed);
+    return assembleDraft(theme, card, parsed, opts?.platforms);
   } catch {
     return null;
   }
@@ -119,6 +241,7 @@ export async function buildSocialPost(
 export async function buildWeek(
   scope: BuildScope | undefined,
   weekOf: string,
+  opts?: { platforms?: Platform[]; goalTone?: GoalTone },
 ): Promise<WeeklyCalendar> {
   const { figures, dossier } = await fetchLakeParts(scope);
   const fresh = await refreshStaleLakeContext({
@@ -131,7 +254,9 @@ export async function buildWeek(
     today: new Date(),
     includeGapProbe: false, // forced stale-refresh only — no per-post gap probe
   });
-  const results = await Promise.all(DAY_THEMES.map((t) => buildSocialPost(t, fresh.lakeContext)));
+  const results = await Promise.all(
+    DAY_THEMES.map((t) => buildSocialPost(t, fresh.lakeContext, opts)),
+  );
   const posts = results.filter((p): p is SocialDraft => p !== null);
   return {
     scope,

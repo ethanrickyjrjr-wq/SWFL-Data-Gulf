@@ -1,3 +1,25 @@
+## 2026-06-30 (main) — feat(grid-lab-socials): Task 3 per-platform caption variants + goal/tone knobs
+
+Built Task 3 (`docs/superpowers/plans/2026-06-29-grid-lab-socials/task-3-per-platform-captions.md`) TDD,
+RED→GREEN, parallel-safe (touched ONLY `lib/email/social-calendar/*` + its own route — zero overlap with the
+live Task 1/2 session's files). One generated post now yields per-network caption variants keyed by the 5
+PUBLISHABLE platforms (`Platform` union, NOT the 8 display platforms). `socialPostSystem` gains an optional
+`{platforms, goalTone}` arg that LAYERS per-network shape rules (X ≤280 chars + 1-2 tags, LinkedIn long-form,
+IG hashtag block, FB conversational, GBP local-CTA) and a goal/tone voice block ON the four-lane block — never
+replaces it; the 2-arg call is byte-identical (back-compat test). `tryParseSocial` parses a `variants` object
+(unknown keys like tiktok dropped); new pure `buildVariants` falls back to the generic caption for any requested
+platform the model didn't tailor (covers the `google_business` gap — it has NO `platforms.ts` registry entry, so
+never look it up there) and clamps X to 280 via `clampToChars` at a WORD boundary so an inline citation is never
+cut mid-token. `SocialDraft.variants?: Partial<Record<Platform,string>>`; new `GoalTone` type. Route
+`/api/email-lab/social-calendar` whitelists `{platforms, goal, tone}` against the union so a malformed body can't
+key variants off junk. X 280 limit vendor-verified in-session via crawl4ai (docs.x.com/fundamentals/counting-characters).
+DECISION (advisor): dropped the title's "audience" knob — never specified in the interfaces (only `GoalTone`+platforms);
+not inventing an enum the spec didn't define. Tests: 10 new (40 assertions); full social-calendar dir 15 pass / 0 fail;
+tsc clean on all 4 Task-3 files; `next build` compiled OK. The 2 `tsc` errors in the tree
+(`app/api/social/schedule/route.ts`, `EmailLabShell.tsx`) are the parallel session's uncommitted Task-1 wiring, NOT
+this commit — staged explicit paths only, so the pushed tree excludes them. Next: operator to wire the panel
+platform-picker to default the displayed caption to `variants[selected]` (Step 4 client side), and the C1 seam call.
+
 ## 2026-06-30 (main) — feat(grid-lab-socials): Task 2 lab status model pure core GREEN
 
 Built Task 2's seam-independent pure core (`lib/social/lab-status.ts` + `__tests__/lab-status.test.ts`,
