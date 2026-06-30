@@ -1,3 +1,7 @@
+## 2026-06-30 (main) — spec: live Anthropic API usage logging → /spend
+
+Designed and specced `api_usage_logging_live_verify` build. Proxy wrapper at `getAnthropic()` intercepts all `messages.create`/`messages.stream` calls, logs token usage + cost_usd to new `public.api_usage_log` table in Supabase (append-only), surfaced on /spend ops page as live daily/monthly actuals. Spec: `docs/superpowers/specs/2026-06-30-api-usage-logging-design.md`. Check opened. Next: writing-plans → implement.
+
 ## 2026-06-30 (main) — feat(listing-lake): API-fed listing-lifecycle — Tasks 1-5 + 8 built (cutover deferred)
 
 Executed `docs/superpowers/plans/2026-06-30-api-fed-listing-lifecycle.md` (swap the parked Source-B
