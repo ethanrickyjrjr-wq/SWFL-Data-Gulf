@@ -135,3 +135,80 @@ def test_merge_dedups_same_address_rentcast_wins_even_when_coords_diverge():
     assert len(merged) == 1                        # the duplicate address is deduped, not double-counted
     assert merged[0]["mls_number"] == "2026027839" # RentCast spine survived (SteadyAPI has no MLS#)
     assert merged[0]["days_on_market"] == 5
+
+
+# ---------------------------------------------------------- fetch + scan (mocked HTTP, no network)
+from unittest.mock import MagicMock, patch  # noqa: E402
+
+from ingest.pipelines.listing_lifecycle import extract_api  # noqa: E402
+
+
+def _resp(status, body):
+    m = MagicMock()
+    m.status_code = status
+    m.json.return_value = body
+    return m
+
+
+def test_fetch_rentcast_paginates_then_exhausts_on_short_page():
+    page1 = [_RENTCAST_ROW] * 500   # full page -> keep walking
+    page2 = [_RENTCAST_ROW] * 17    # short page -> natural exhaustion
+    with patch.object(extract_api.requests, "get", side_effect=[_resp(200, page1), _resp(200, page2)]):
+        rows, ok = extract_api.fetch_rentcast_city("Cape Coral", key="k")
+    assert len(rows) == 517 and ok is True
+
+
+def test_fetch_rentcast_clean_empty_first_page_is_complete():
+    with patch.object(extract_api.requests, "get", return_value=_resp(200, [])):
+        rows, ok = extract_api.fetch_rentcast_city("Sanibel", key="k")
+    assert rows == [] and ok is True            # legitimately 0 listings is COMPLETE, not a gap
+
+
+def test_fetch_rentcast_non_200_is_a_gap():
+    with patch.object(extract_api.requests, "get", return_value=_resp(429, {})):
+        rows, ok = extract_api.fetch_rentcast_city("Cape Coral", key="k")
+    assert rows == [] and ok is False           # 429 truncation -> NOT complete
+
+
+def test_fetch_rentcast_no_key_is_a_gap():
+    rows, ok = extract_api.fetch_rentcast_city("Cape Coral", key=None)
+    assert rows == [] and ok is False
+
+
+def test_fetch_steadyapi_paginates_to_meta_total():
+    body1 = {"meta": {"total": 250}, "body": [_STEADYAPI_ROW] * 200}
+    body2 = {"meta": {"total": 250}, "body": [_STEADYAPI_ROW] * 50}
+    with patch.object(extract_api.requests, "get", side_effect=[_resp(200, body1), _resp(200, body2)]):
+        rows, ok = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert len(rows) == 250 and ok is True
+
+
+def test_scan_county_api_labels_and_counts(monkeypatch):
+    monkeypatch.setenv("RENTCAST_API_KEY", "k")
+    monkeypatch.setenv("PHOTOS_API", "p")
+    with patch.object(extract_api, "fetch_rentcast_city", return_value=([_RENTCAST_ROW], True)), \
+         patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True)):
+        out = extract_api.scan_county_api("Lee")
+    assert out["count"] >= 1
+    assert out["exhausted"] is True
+    assert out["last_status"] == 200
+    assert all(r["county"] == "Lee" for r in out["rows"])
+
+
+def test_scan_county_api_clean_empty_city_stays_complete(monkeypatch):
+    # A cleanly-empty city must NOT poison the whole county's completeness (robustness fix).
+    monkeypatch.setenv("RENTCAST_API_KEY", "k")
+    monkeypatch.setenv("PHOTOS_API", "p")
+    with patch.object(extract_api, "fetch_rentcast_city", return_value=([], True)), \
+         patch.object(extract_api, "fetch_steadyapi_city", return_value=([], True)):
+        out = extract_api.scan_county_api("Lee")
+    assert out["exhausted"] is True and out["count"] == 0
+
+
+def test_scan_county_api_truncated_city_marks_incomplete(monkeypatch):
+    monkeypatch.setenv("RENTCAST_API_KEY", "k")
+    monkeypatch.setenv("PHOTOS_API", "p")
+    with patch.object(extract_api, "fetch_rentcast_city", return_value=([_RENTCAST_ROW], False)), \
+         patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True)):
+        out = extract_api.scan_county_api("Lee")
+    assert out["exhausted"] is False and out["last_status"] != 200

@@ -176,3 +176,90 @@ def merge_by_proximity(rentcast_rows: list[dict], steadyapi_rows: list[dict],
     rc_keys = {_row_key(rc) for rc in rentcast_rows}
     extras = [s for s in steadyapi_rows if id(s) not in grafted and _row_key(s) not in rc_keys]
     return rentcast_rows + extras
+
+
+# ----------------------------------------------------------------------------- fetchers (network)
+# Each fetcher returns (raw_rows, ok). `ok` is the completeness signal the coverage guard needs:
+# True  = paginated to NATURAL exhaustion (a short/empty page, or reached meta.total) — trustworthy,
+#         INCLUDING a city that legitimately holds 0 listings.
+# False = a GAP: no key, a non-200 (e.g. 429 quota), a bad body, a network error, or the _MAX_PAGES
+#         backstop — i.e. the pull may be TRUNCATED, so a disappearance must not be inferred from it.
+
+def fetch_rentcast_city(city: str, state: str = "FL", key: str | None = None) -> tuple[list[dict], bool]:
+    """Enumerate one city's active for-sale listings via offset pagination. Never throws."""
+    key = key or os.environ.get("RENTCAST_API_KEY")
+    if not key or not city:
+        return [], False
+    out: list[dict] = []
+    for page in range(_MAX_PAGES):
+        params = {"city": city, "state": state, "status": "Active",
+                  "limit": _RC_PAGE, "offset": page * _RC_PAGE}
+        try:
+            r = requests.get(f"{RENTCAST_BASE}/listings/sale", params=params,
+                             headers={"X-Api-Key": key, "Accept": "application/json"}, timeout=30)
+            if r.status_code != 200:
+                return out, False
+            batch = r.json()
+            if not isinstance(batch, list):
+                return out, False
+            if not batch:
+                return out, True            # clean empty page = natural exhaustion
+            out.extend(batch)
+            if len(batch) < _RC_PAGE:
+                return out, True            # short page = last page
+        except Exception:
+            return out, False
+    return out, False                       # hit the backstop without exhausting = possibly truncated
+
+
+def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -> tuple[list[dict], bool]:
+    """Enumerate one city via SteadyAPI (location slug 'City-Name_FL', offset += 200 until meta.total)."""
+    key = key or os.environ.get("PHOTOS_API")
+    if not key or not city:
+        return [], False
+    slug = f"{city.strip().replace(' ', '-')}_{state}"
+    out: list[dict] = []
+    total: int | None = None
+    for page in range(_MAX_PAGES):
+        params = {"location": slug, "offset": page * _SA_PAGE}
+        try:
+            r = requests.get(f"{STEADYAPI_BASE}/search", params=params,
+                             headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"}, timeout=30)
+            if r.status_code != 200:
+                return out, False
+            data = r.json()
+            body = data.get("body") if isinstance(data, dict) else None
+            if not isinstance(body, list):
+                return out, False
+            if not body:
+                return out, True
+            out.extend(body)
+            total = (data.get("meta") or {}).get("total", total)
+            if total is not None and (page + 1) * _SA_PAGE >= total:
+                return out, True            # reached the printed total
+            if len(body) < _SA_PAGE:
+                return out, True            # short page = last
+        except Exception:
+            return out, False
+    return out, False
+
+
+def scan_county_api(county: str) -> dict[str, Any]:
+    """Enumerate every seed city for one county via both APIs, parse + scope-filter + merge, and
+    return the coverage-guard payload pipeline.py already consumes:
+    {rows, exhausted, count, last_status, county_total}. The county is COMPLETE only if every city's
+    pull reached natural exhaustion (a cleanly-empty city stays complete; a truncated/blocked one
+    does not — so an incomplete pull never manufactures fake withdrawals)."""
+    cities = SWFL_CITY_SEED.get(county, [])
+    rc_rows: list[dict] = []
+    sa_rows: list[dict] = []
+    all_ok = True
+    for city in cities:
+        rc_raw, rc_ok = fetch_rentcast_city(city)
+        sa_raw, sa_ok = fetch_steadyapi_city(city)
+        all_ok = all_ok and rc_ok and sa_ok
+        rc_rows.extend(p for p in (parse_rentcast(x, county) for x in rc_raw) if p)
+        sa_rows.extend(p for p in (parse_steadyapi(x, city, "FL") for x in sa_raw) if p)
+    rows = [r for r in merge_by_proximity(rc_rows, sa_rows) if r.get("county") == county]
+    return {"rows": rows, "exhausted": all_ok, "count": len(rows),
+            "last_status": 200 if all_ok else 429, "county_total": len(rows)}
