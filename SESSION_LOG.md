@@ -1,3 +1,7 @@
+## 2026-06-29 (main) — rule(ops): lock GHA rebuild targeting in CLAUDE.md — never force full cascade to debug one brain
+
+`pack_id=master --force` rebuilds all 32 brains (32 Sonnet calls). 6 forced full cascades today debugging cre-swfl/env-swfl drained Anthropic credits. Rule in CLAUDE.md RULE 1 + memory: use `pack_id=<brain-id>` to target one brain.
+
 ## 2026-06-30 (main) — fix(predictions-log): swap sofr_rate → cpi_yoy in FORWARD-GUARD test
 
 sofr_rate gained direction_polarity (lower_is_bullish) in the 2026-06-29 polarity backfill,

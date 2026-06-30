@@ -83,6 +83,12 @@ A gap fills from the next lane. The ONLY block is an **invented number** (no rea
 
 **Always:** SESSION_LOG entry on every push · sync `_AUDIT_AND_ROADMAP/build-queue.md` · use `node scripts/safe-push.mjs` · stage explicit paths only · never `--no-verify` or force-push `main`.
 
+**GHA rebuild targeting — LOCKED 2026-06-29. `pack_id=master --force` rebuilds all 32 brains (32 Sonnet calls). Never do this to debug one brain. Target the specific brain:**
+```
+gh workflow run daily-rebuild.yml --repo ethanrickyjrjr-wq/SWFL-Data-Gulf -f pack_id=env-swfl -f force=true
+```
+`pack_id=master` (default) = full cascade. `pack_id=<brain-id>` = that brain + master only. Use the targeted form when debugging. The daily cron without `--force` is fine — it skips TTL-fresh brains automatically.
+
 ---
 
 # RULE 1.5 — PARALLEL-SESSION ISOLATION (EXPERIMENTAL)
