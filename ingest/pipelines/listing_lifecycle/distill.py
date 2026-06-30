@@ -71,12 +71,15 @@ _TRANS_TABLE = "data_lake.listing_transitions"
 SOURCE_NAME = "lifecycle_seed"  # neutral; never a vendor/board name (real origin lives in the secret)
 
 # Wide state columns the diff engine fills (everything except the SQL-managed first_seen/last_seen/
-# scraped_at and the source_name stamped here). Capture wide, slice late.
+# scraped_at and the source_name stamped here). Capture wide, slice late. The trailing block is the
+# API-feed superset (RentCast spine + SteadyAPI photos, source_name='api_feed') — NULL for the
+# Source-B scrape rows that predate them, real for the API feed.
 _STATE_COLS = [
     "address_key", "sale_or_rent", "state", "listing_id", "list_price", "list_suffix",
     "beds", "baths", "sqft", "lot_acres", "property_type", "zip_code", "county", "city",
     "subdivision", "brokerage", "listed_date", "days_on_market", "days_in_state",
     "street_address",
+    "photo_url", "lat", "lon", "county_fips", "mls_number", "mls_name", "listing_type",
 ]
 _TRANS_COLS = [
     "address_key", "sale_or_rent", "from_state", "to_state", "at", "listing_id",
