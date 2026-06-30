@@ -43,6 +43,7 @@ import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
 import { ScheduleSocialModal } from "./ScheduleSocialModal";
 import { SocialCalendarPanel } from "./SocialCalendarPanel";
+import { SocialComposer } from "./social/SocialComposer";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
 import { capabilitiesFor } from "@/lib/email/lab/capabilities";
@@ -176,6 +177,8 @@ export function EmailLabGridShell({
 }: EmailLabGridShellProps) {
   // Tier dial (lib/email/lab/capabilities.ts) — socials etc. are gated on this, never hardcoded.
   const caps = capabilitiesFor("paid");
+  // Top-level mode: Email grid ↔ Social composer. The tab itself is gated on the dial.
+  const [mode, setMode] = useState<"email" | "social">("email");
   const [history, setHistory] = useState<DocHistory>(() =>
     initHistory(applyBrand(initialDoc, brandTokens)),
   );
@@ -717,6 +720,24 @@ export function EmailLabGridShell({
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black bg-[#111418] px-5 py-2.5">
           <div className="flex items-center gap-4">
             {headerSlot}
+            {caps.socialCalendar && (
+              <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5">
+                {(["email", "social"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={`rounded-md px-3 py-1 text-xs font-semibold capitalize transition-colors ${
+                      mode === m
+                        ? "bg-gulf-teal text-[#06231f]"
+                        : "text-white/55 hover:text-white/85"
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            )}
             <span className="hidden items-center gap-2 text-[11px] lg:inline-flex">
               <span className="rounded bg-gulf-teal px-1.5 py-0.5 font-semibold text-[#0a1419]">
                 Auto-reflow on
@@ -799,48 +820,54 @@ export function EmailLabGridShell({
           </div>
         </div>
 
-        {/* width-preset bar (selected block) */}
-        <div className="flex shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs">
-          <span className="text-xs font-semibold text-[#0a1419]">Selected block width</span>
-          <div className="flex items-center gap-1">
-            {WIDTH_PRESETS.map((p) => (
-              <button
-                key={p.w}
-                type="button"
-                disabled={!selectedBlock}
-                onClick={() => setSelectedWidth(p.w)}
-                className={`min-w-[46px] rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                  selectedWidth === p.w
-                    ? "border-gulf-teal bg-gulf-teal text-[#06231f]"
-                    : "border-gray-400 bg-white text-[#0a1419] hover:border-gray-600 disabled:opacity-40"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
+        {/* width-preset bar (selected block) — email-only (operates on selectedBlock) */}
+        {mode === "email" && (
+          <div className="flex shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs">
+            <span className="text-xs font-semibold text-[#0a1419]">Selected block width</span>
+            <div className="flex items-center gap-1">
+              {WIDTH_PRESETS.map((p) => (
+                <button
+                  key={p.w}
+                  type="button"
+                  disabled={!selectedBlock}
+                  onClick={() => setSelectedWidth(p.w)}
+                  className={`min-w-[46px] rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                    selectedWidth === p.w
+                      ? "border-gulf-teal bg-gulf-teal text-[#06231f]"
+                      : "border-gray-400 bg-white text-[#0a1419] hover:border-gray-600 disabled:opacity-40"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs font-medium text-[#0a1419]/60">
+              {selectedBlock
+                ? "a fine grid underneath snaps it — you never count columns"
+                : "click a block to set its width"}
+            </span>
           </div>
-          <span className="text-xs font-medium text-[#0a1419]/60">
-            {selectedBlock
-              ? "a fine grid underneath snaps it — you never count columns"
-              : "click a block to set its width"}
-          </span>
-        </div>
+        )}
 
-        {/* the real grid */}
+        {/* the real grid (email) ↔ the social composer */}
         <div className="min-h-0 flex-1">
-          <GridCanvas
-            doc={doc}
-            selectedId={selectedId}
-            onSelectBlock={setSelectedId}
-            onChangeDoc={commit}
-            onDuplicate={duplicateBlock}
-            onAddBlock={() => setShowBlocks(true)}
-            onBlockAi={setSelectedId}
-            onEditPhoto={(id) => {
-              setSelectedId(id);
-              setPhotopeaBlockId(id);
-            }}
-          />
+          {mode === "email" ? (
+            <GridCanvas
+              doc={doc}
+              selectedId={selectedId}
+              onSelectBlock={setSelectedId}
+              onChangeDoc={commit}
+              onDuplicate={duplicateBlock}
+              onAddBlock={() => setShowBlocks(true)}
+              onBlockAi={setSelectedId}
+              onEditPhoto={(id) => {
+                setSelectedId(id);
+                setPhotopeaBlockId(id);
+              }}
+            />
+          ) : (
+            <SocialComposer scope={scope} projectId={projectId} branding={branding} />
+          )}
         </div>
       </main>
 
@@ -856,116 +883,119 @@ export function EmailLabGridShell({
 
         <div className="flex-1 overflow-y-auto">
           {/* ── Build the whole email ── */}
-          <div className="border-b border-white/8 px-4 pb-4 pt-4">
-            <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
-              Build with AI
-            </p>
-            <textarea
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) runAuthor(aiPrompt);
-              }}
-              placeholder={aiPlaceholder}
-              rows={3}
-              className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
-            />
-            <div className="mb-1.5 mt-2.5 flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">
-                Chart type
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {([{ type: "auto", label: "Auto" }, ...CHART_TYPE_OPTIONS] as const).map((o) => (
-                <button
-                  key={o.type}
-                  type="button"
-                  onClick={() => setChartType(o.type as ChartType | "auto")}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                    chartType === o.type
-                      ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
-                      : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
-                  }`}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-2.5 flex gap-2">
-              <button
-                onClick={() => runAuthor(aiPrompt)}
-                disabled={aiLoading || !aiPrompt.trim()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
-              >
-                {aiLoading ? "Working…" : "Build the email"}
-              </button>
-              <button
-                onClick={() => runFill(aiPrompt)}
-                disabled={aiLoading || !aiPrompt.trim()}
-                title="Fill content into the current layout (keeps your blocks)"
-                className="rounded-lg border border-white/10 px-3 py-2 text-sm text-white/60 transition-colors hover:text-white/90 disabled:opacity-40"
-              >
-                Fill
-              </button>
-            </div>
-            {aiStatus && (
-              <p className="mt-2.5 rounded-md border border-gulf-teal/20 bg-gulf-teal/10 px-2.5 py-2 text-[11px] text-gulf-teal/90">
-                ✓ {aiStatus}
-              </p>
-            )}
-            {aiMessage && <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>}
-          </div>
-
-          {/* ── NOW EDITING (re-targets to the selected block) ── */}
-          {selectedBlock ? (
+          {mode === "email" && (
             <div className="border-b border-white/8 px-4 pb-4 pt-4">
-              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[#f59e0b]">
-                Now editing
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
+                Build with AI
               </p>
-              <p className="mt-1 text-sm font-semibold text-white/85">
-                {LABELS[selectedBlock.type] ?? selectedBlock.type} ·{" "}
-                <span className="text-gulf-teal">
-                  {widthPresetLabel(selectedWidth ?? GRID_COLS)} width
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) runAuthor(aiPrompt);
+                }}
+                placeholder={aiPlaceholder}
+                rows={3}
+                className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
+              />
+              <div className="mb-1.5 mt-2.5 flex items-center justify-between">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">
+                  Chart type
                 </span>
-              </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-white/40">
-                The AI sees the whole layout — every block and where it sits — so it changes this
-                one and reflows the neighbors.
-              </p>
-              <div className="mt-3 rounded-lg bg-white p-3 text-gray-900">
-                <BlockInspector
-                  block={selectedBlock}
-                  onChange={updateBlock}
-                  onDelete={deleteSelected}
-                  onClose={() => setSelectedId(null)}
-                  onBlockAi={runBlockAi}
-                />
               </div>
-            </div>
-          ) : (
-            <div className="border-b border-white/8 px-4 pb-4 pt-4">
-              <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-white/35">
-                It re-targets to whatever you click
-              </p>
-              <ul className="mt-2 space-y-1.5 text-[11px] text-white/45">
-                <li>
-                  <span className="text-gulf-teal">Any block</span> — click it, then tweak it here
-                  or ask the AI to rewrite it.
-                </li>
-                <li>
-                  <span className="text-gulf-teal">Width</span> — Full / ⅔ / ½ / ⅓ snaps the
-                  selected block; neighbors reflow.
-                </li>
-                <li>
-                  <span className="text-gulf-teal">Add</span> — the “add” tile on the canvas drops a
-                  new block on the grid.
-                </li>
-              </ul>
+              <div className="flex flex-wrap gap-1.5">
+                {([{ type: "auto", label: "Auto" }, ...CHART_TYPE_OPTIONS] as const).map((o) => (
+                  <button
+                    key={o.type}
+                    type="button"
+                    onClick={() => setChartType(o.type as ChartType | "auto")}
+                    className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                      chartType === o.type
+                        ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
+                        : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2.5 flex gap-2">
+                <button
+                  onClick={() => runAuthor(aiPrompt)}
+                  disabled={aiLoading || !aiPrompt.trim()}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
+                >
+                  {aiLoading ? "Working…" : "Build the email"}
+                </button>
+                <button
+                  onClick={() => runFill(aiPrompt)}
+                  disabled={aiLoading || !aiPrompt.trim()}
+                  title="Fill content into the current layout (keeps your blocks)"
+                  className="rounded-lg border border-white/10 px-3 py-2 text-sm text-white/60 transition-colors hover:text-white/90 disabled:opacity-40"
+                >
+                  Fill
+                </button>
+              </div>
+              {aiStatus && (
+                <p className="mt-2.5 rounded-md border border-gulf-teal/20 bg-gulf-teal/10 px-2.5 py-2 text-[11px] text-gulf-teal/90">
+                  ✓ {aiStatus}
+                </p>
+              )}
+              {aiMessage && <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>}
             </div>
           )}
 
+          {/* ── NOW EDITING (re-targets to the selected block) ── */}
+          {mode === "email" &&
+            (selectedBlock ? (
+              <div className="border-b border-white/8 px-4 pb-4 pt-4">
+                <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[#f59e0b]">
+                  Now editing
+                </p>
+                <p className="mt-1 text-sm font-semibold text-white/85">
+                  {LABELS[selectedBlock.type] ?? selectedBlock.type} ·{" "}
+                  <span className="text-gulf-teal">
+                    {widthPresetLabel(selectedWidth ?? GRID_COLS)} width
+                  </span>
+                </p>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/40">
+                  The AI sees the whole layout — every block and where it sits — so it changes this
+                  one and reflows the neighbors.
+                </p>
+                <div className="mt-3 rounded-lg bg-white p-3 text-gray-900">
+                  <BlockInspector
+                    block={selectedBlock}
+                    onChange={updateBlock}
+                    onDelete={deleteSelected}
+                    onClose={() => setSelectedId(null)}
+                    onBlockAi={runBlockAi}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="border-b border-white/8 px-4 pb-4 pt-4">
+                <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-white/35">
+                  It re-targets to whatever you click
+                </p>
+                <ul className="mt-2 space-y-1.5 text-[11px] text-white/45">
+                  <li>
+                    <span className="text-gulf-teal">Any block</span> — click it, then tweak it here
+                    or ask the AI to rewrite it.
+                  </li>
+                  <li>
+                    <span className="text-gulf-teal">Width</span> — Full / ⅔ / ½ / ⅓ snaps the
+                    selected block; neighbors reflow.
+                  </li>
+                  <li>
+                    <span className="text-gulf-teal">Add</span> — the “add” tile on the canvas drops
+                    a new block on the grid.
+                  </li>
+                </ul>
+              </div>
+            ))}
+
           {/* ── Social Calendar — PAID-ONLY via the capabilities dial ── */}
-          {caps.socialCalendar && (
+          {caps.socialCalendar && mode === "social" && (
             <div className="border-b border-white/8 px-4 pb-4 pt-3">
               <button
                 onClick={() => setShowCalendar((v) => !v)}
@@ -1033,59 +1063,63 @@ export function EmailLabGridShell({
           </div>
 
           {/* ── Start from (grid seeds) ── */}
-          <div className="border-b border-white/8 px-4 pb-4 pt-3">
-            <button
-              onClick={() => setShowSeeds((v) => !v)}
-              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-            >
-              <span>Start from a layout</span>
-              <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
-            </button>
-            {showSeeds && (
-              <div className="mt-2 space-y-1.5">
-                {GRID_SEEDS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => pickSeed(s.id)}
-                    className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
-                  >
-                    <span className="block text-xs font-medium text-white/75">{s.name}</span>
-                    <span className="block text-[10px] leading-tight text-white/35">
-                      {s.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {mode === "email" && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-3">
+              <button
+                onClick={() => setShowSeeds((v) => !v)}
+                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+              >
+                <span>Start from a layout</span>
+                <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
+              </button>
+              {showSeeds && (
+                <div className="mt-2 space-y-1.5">
+                  {GRID_SEEDS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => pickSeed(s.id)}
+                      className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
+                    >
+                      <span className="block text-xs font-medium text-white/75">{s.name}</span>
+                      <span className="block text-[10px] leading-tight text-white/35">
+                        {s.description}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Add Blocks ── */}
-          <div className="border-b border-white/8 px-4 pb-4 pt-3">
-            <button
-              onClick={() => setShowBlocks((v) => !v)}
-              className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-            >
-              <span>Add a block</span>
-              <span className={`transition-transform ${showBlocks ? "rotate-180" : ""}`}>▾</span>
-            </button>
-            {showBlocks && (
-              <div className="mt-2 grid grid-cols-2 gap-1">
-                {BLOCK_MENU.map((b) => (
-                  <button
-                    key={b.type}
-                    type="button"
-                    onClick={() => addBlockToGrid(b.type)}
-                    className="flex items-center gap-2 rounded-md border border-white/8 bg-white/4 px-2.5 py-2 text-left transition-colors hover:bg-white/8"
-                  >
-                    <span className="w-4 text-center text-sm leading-none text-white/40">
-                      {b.icon}
-                    </span>
-                    <span className="text-[11px] font-medium text-white/55">{b.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {mode === "email" && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-3">
+              <button
+                onClick={() => setShowBlocks((v) => !v)}
+                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+              >
+                <span>Add a block</span>
+                <span className={`transition-transform ${showBlocks ? "rotate-180" : ""}`}>▾</span>
+              </button>
+              {showBlocks && (
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  {BLOCK_MENU.map((b) => (
+                    <button
+                      key={b.type}
+                      type="button"
+                      onClick={() => addBlockToGrid(b.type)}
+                      className="flex items-center gap-2 rounded-md border border-white/8 bg-white/4 px-2.5 py-2 text-left transition-colors hover:bg-white/8"
+                    >
+                      <span className="w-4 text-center text-sm leading-none text-white/40">
+                        {b.icon}
+                      </span>
+                      <span className="text-[11px] font-medium text-white/55">{b.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Photos ── */}
           <div className="px-4 pb-6 pt-3">
