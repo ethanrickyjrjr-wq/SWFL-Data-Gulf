@@ -14,6 +14,7 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import type { BuildScope } from "@/lib/email/build-doc";
 import { aerialUrl } from "./aerial";
 import { fetchSaleListings, type Listing } from "./rentcast";
+import { fetchPhotoListings } from "./steadyapi";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
 
 // ── Scope → the one city we query (RentCast has no county/ZIP filter) ─────────
@@ -157,14 +158,24 @@ export function featuredContextLine(l: Listing): string {
   return `FEATURED LISTING (you MAY write this post about this specific home; cite its facts verbatim, never invent): ${f.label} — ${f.value} (${f.source}${f.as_of ? `, ${f.as_of}` : ""}).`;
 }
 
-/** Pure: drop a code-set satellite aerial of the listing's lot at the top of the card.
- *  Captioned "Aerial view · {address}" — honest about what the image is. No coords or
- *  no Mapbox token → the card is returned unchanged. */
+/** Pure: attach the best available photo to the top of the card.
+ *  Prefers a real MLS listing photo (photoUrl) over the satellite aerial fallback.
+ *  No usable photo and no coords → card unchanged. */
 export function attachFeaturedAerial(card: EmailDoc, listing: Listing): EmailDoc {
+  const where = [listing.addressLine1, listing.city].filter(Boolean).join(", ") || "this property";
+  if (listing.photoUrl) {
+    return upsertHeroPhoto(
+      card,
+      heroPhotoBlock({
+        url: listing.photoUrl,
+        alt: `Listing photo of ${where}`,
+        caption: `${where}`,
+      }),
+    );
+  }
   if (listing.latitude == null || listing.longitude == null) return card;
   const url = aerialUrl({ lat: listing.latitude, lon: listing.longitude });
   if (!url) return card;
-  const where = [listing.addressLine1, listing.city].filter(Boolean).join(", ") || "this property";
   return upsertHeroPhoto(
     card,
     heroPhotoBlock({
@@ -190,7 +201,39 @@ export async function loadListingContext(
   today: Date,
 ): Promise<ListingContext> {
   const city = scopeCity(scope);
-  const listings = await fetchSaleListings({ city });
+
+  // Run both sources in parallel — SteadyAPI for photos, RentCast for MLS detail.
+  // Both are empty-tolerant; failures just degrade to the other source's data.
+  const [photoListings, rentcastListings] = await Promise.all([
+    fetchPhotoListings({ city }),
+    fetchSaleListings({ city }),
+  ]);
+
+  // If SteadyAPI returned listings with photos, use them as the primary set.
+  // They have price + beds + lat/lon which is enough for figures + aerial fallback.
+  let listings: Listing[] = photoListings.length > 0 ? photoListings : rentcastListings;
+
+  // When both sources returned data, enrich RentCast listings with SteadyAPI photos
+  // by lat/lon proximity (nearest match within ~200m). This keeps MLS detail (DOM,
+  // MLS number) while adding the real photo.
+  if (photoListings.length > 0 && rentcastListings.length > 0) {
+    const photoByCoord = photoListings.filter((l) => l.latitude != null && l.longitude != null);
+    listings = rentcastListings.map((rc) => {
+      if (rc.latitude == null || rc.longitude == null) return rc;
+      // Find closest SteadyAPI listing (Euclidean in degrees — ~200m at 27°N ≈ 0.002°)
+      let best: Listing | null = null;
+      let bestDist = 0.002;
+      for (const sa of photoByCoord) {
+        const d = Math.hypot(rc.latitude - sa.latitude!, rc.longitude - sa.longitude!);
+        if (d < bestDist) {
+          bestDist = d;
+          best = sa;
+        }
+      }
+      return best ? { ...rc, photoUrl: best.photoUrl } : rc;
+    });
+  }
+
   return {
     figures: listingsToFigures(listings, today, city),
     ranked: rankListings(listings),

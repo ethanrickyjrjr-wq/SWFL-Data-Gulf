@@ -1,3 +1,14 @@
+## 2026-06-30 (main) — feat(listings): SteadyAPI photo source — real MLS listing photos in email + social labs
+
+`lib/listings/steadyapi.ts`: new client hitting `GET /v1/real-estate/search` (SteadyAPI, realtor.com reseller).
+Returns 200 listings per call with `photo_url` (rdcpix.com CDN), full street address + ZIP parsed from
+permalink slug, lat/lon, price, beds, sqft. VERIFIED LIVE: 6,259 Cape Coral active listings, all with photos.
+`Listing` interface gains optional `photoUrl`. `loadListingContext` runs SteadyAPI + RentCast in parallel —
+SteadyAPI primary for photos, lat/lon proximity merges onto RentCast for MLS detail (DOM, MLS#).
+`attachFeaturedAerial` prefers real listing photo over Mapbox aerial fallback. 15 tests green, types clean.
+Auth: `PHOTOS_API` Bearer token (SteadyAPI Starter $14.95/mo, 10k req/month).
+Next: nightly lake ingest (`data_lake.steadyapi_listings`) for price-cut history + DOM trends.
+
 ## 2026-06-30 (main) — refactor(listings): drop incoherent email auto-aerial (correction)
 
 Advisor catch on `4490ec5b`: the email-lab aerial fallback bolted a satellite shot of one arbitrary lot

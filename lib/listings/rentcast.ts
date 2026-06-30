@@ -42,6 +42,8 @@ export interface Listing {
   daysOnMarket: number | null;
   mlsName: string | null;
   mlsNumber: string | null;
+  /** MLS listing photo from SteadyAPI (realtor.com CDN). Undefined when not enriched. */
+  photoUrl?: string;
 }
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
