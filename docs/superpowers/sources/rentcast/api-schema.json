@@ -1,0 +1,83 @@
+{
+  "_note": "Fields observed from live probe of GET https://api.rentcast.io/v1/listings/sale?city=Naples&state=FL&status=Active&limit=500 — 2026-06-29. Response is a flat JSON array of listing objects.",
+  "listing_object": {
+    "id": "string — RentCast internal listing ID",
+    "formattedAddress": "string — full address e.g. '123 Main St, Naples, FL 34102'",
+    "addressLine1": "string — street address",
+    "addressLine2": "string | null — unit/apt",
+    "city": "string",
+    "state": "string — two-letter code",
+    "zipCode": "string — 5-digit ZIP",
+    "county": "string — county name",
+    "latitude": "number",
+    "longitude": "number",
+    "propertyType": "string — e.g. 'Single Family', 'Condo', 'Townhouse', 'Multi Family', 'Land', 'Mobile'",
+    "bedrooms": "number | null",
+    "bathrooms": "number | null",
+    "squareFootage": "number | null",
+    "lotSize": "number | null — square feet",
+    "yearBuilt": "number | null",
+    "price": "number — list price",
+    "listingType": "string — e.g. 'Standard', 'New Construction'",
+    "listedDate": "string — ISO 8601 date e.g. '2025-03-15T00:00:00.000Z'",
+    "removedDate": "string | null — ISO 8601, present when status=Inactive",
+    "daysOnMarket": "number | null — days since listing date",
+    "status": "string — 'Active' or 'Inactive'",
+    "mlsNumber": "string | null — MLS listing ID",
+    "mlsName": "string | null — MLS board name",
+    "listingAgent": {
+      "name": "string | null",
+      "phone": "string | null",
+      "email": "string | null"
+    },
+    "listingOffice": {
+      "name": "string | null",
+      "phone": "string | null"
+    },
+    "photoCount": "number | null",
+    "photos": "string[] | null — array of photo URLs",
+    "hoa": {
+      "fee": "number | null — monthly HOA fee"
+    },
+    "garage": "number | null — garage spaces",
+    "pool": "boolean | null",
+    "propertyTaxes": "number | null — annual taxes",
+    "lastSaleDate": "string | null — ISO 8601",
+    "lastSalePrice": "number | null",
+    "priceHistory": [
+      {
+        "date": "string — ISO 8601",
+        "price": "number",
+        "event": "string — e.g. 'Listed', 'Price Change', 'Relisted'"
+      }
+    ]
+  },
+  "api_notes": {
+    "response_format": "flat array — no wrapper object, no pagination envelope",
+    "no_total_count_header": true,
+    "no_cursor_or_since_param": true,
+    "no_native_zip_filter": true,
+    "max_limit_observed": 500,
+    "auth_header": "X-Api-Key",
+    "rent_estimate_endpoint": "GET https://api.rentcast.io/v1/avm/rent/long-term?address=<encoded>",
+    "rent_estimate_response": {
+      "rent": "number — estimated monthly rent",
+      "rentRangeLow": "number",
+      "rentRangeHigh": "number",
+      "comparables": [
+        {
+          "formattedAddress": "string",
+          "price": "number — listed rent",
+          "listedDate": "string | null",
+          "lastSeenDate": "string | null",
+          "correlation": "number — 0-1 similarity score",
+          "distance": "number — miles",
+          "bedrooms": "number | null",
+          "bathrooms": "number | null",
+          "squareFootage": "number | null",
+          "propertyType": "string"
+        }
+      ]
+    }
+  }
+}

@@ -1,3 +1,11 @@
+## 2026-06-30 (main) — docs(rentcast): vendor reference folder
+
+Added `docs/superpowers/sources/rentcast/` with 4 files: full vendor Apps Script (Code.gs, 595 lines),
+field-map (sheet columns, API params, color logic, 22-city coverage), api-schema.json (full response shape
+including fields vendor ignored — ZIP, county, lat/lon, property type, beds/baths, price history), and
+delivery-notes (what was delivered, API volume per run, what to bring into our pipeline vs skip).
+Next: build spec for RentCast ingest pipeline.
+
 ## 2026-06-30 (main) — test(grid-lab-socials): Task 4 — caption provenance VERIFIED + regression guard
 
 Task 4 is an AUDIT, not a build. Traced one path: route → buildWeek → buildSocialPost → socialPostSystem
