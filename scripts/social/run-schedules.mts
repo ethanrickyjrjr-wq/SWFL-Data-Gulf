@@ -37,6 +37,7 @@ import { renderSocialImage } from "@/lib/social/render-social-image";
 import { composedPostToSocialModel } from "@/lib/social/render-model";
 import { uploadSocialImage } from "@/lib/social/media-upload";
 import { postToChannel } from "@/lib/social/channels/index";
+import { frozenPublishPayload } from "@/lib/social/frozen-post";
 import type { SocialSchedule, SocialTarget, SocialContent } from "@/lib/social/types";
 import type { BuildSocialContentDeps } from "@/lib/social/build-content";
 
@@ -239,6 +240,90 @@ async function processSchedule(
 ): Promise<RowOutcome> {
   const scheduleId = row.id;
   const log = (msg: string) => console.log(`[social:${scheduleId}] ${msg}`);
+
+  // ── FROZEN CANVAS IMAGE — post verbatim. Skip content build + the freshness gate
+  //    (a v1 frozen image is static; the gate would suppress every repeat fire). Keep
+  //    the at-most-once idempotency claim and the publish gate. ──
+  const frozen = frozenPublishPayload(row);
+  if (frozen) {
+    const nowIso = now.toISOString();
+    const idempotencyKey = buildIdempotencyKey(scheduleId, now);
+    if (!DRY_RUN) {
+      const won = await claimSocialOnce(db, idempotencyKey, {
+        userId: target.userId,
+        kind: "post",
+        scheduleId,
+      });
+      if (!won) {
+        log(`frozen: already claimed for ${idempotencyKey} — skip duplicate`);
+        return "skipped";
+      }
+    }
+    const frozenToken = row.frozen_post?.freshness_token ?? null;
+    if (DRY_RUN || !PUBLISH_ENABLED) {
+      log(
+        DRY_RUN
+          ? "DRY_RUN — frozen post (no write)"
+          : "publish gate closed — frozen dry_run record",
+      );
+      if (!DRY_RUN) {
+        const { error } = await db.from("social_posts").upsert(
+          {
+            post_schedule_id: scheduleId,
+            social_account_id: target.accountId,
+            platform: target.platform,
+            platform_post_id: null,
+            freshness_token: frozenToken,
+            caption: frozen.caption,
+            media_url: frozen.media[0]?.url ?? null,
+            status: "dry_run",
+            error: null,
+            idempotency_key: idempotencyKey,
+            published_at: null,
+            created_at: nowIso,
+            updated_at: nowIso,
+          },
+          { onConflict: "idempotency_key", ignoreDuplicates: true },
+        );
+        if (error) {
+          log(`frozen social_posts upsert (dry_run) failed: ${error.message}`);
+          return "error";
+        }
+      }
+      return "dry_run";
+    }
+    const result = await postToChannel(db, target.userId, {
+      platform: target.platform,
+      accountId: target.accountId,
+      caption: frozen.caption,
+      media: frozen.media,
+    });
+    const { error: insErr } = await db.from("social_posts").upsert(
+      {
+        post_schedule_id: scheduleId,
+        social_account_id: target.accountId,
+        platform: target.platform,
+        platform_post_id: result.ok ? (result.platform_post_id ?? null) : null,
+        freshness_token: frozenToken,
+        caption: frozen.caption,
+        media_url: frozen.media[0]?.url ?? null,
+        status: result.ok ? "published" : "failed",
+        error: result.ok ? null : (result.error ?? "unknown error"),
+        idempotency_key: idempotencyKey,
+        published_at: result.ok ? nowIso : null,
+        created_at: nowIso,
+        updated_at: nowIso,
+      },
+      { onConflict: "idempotency_key", ignoreDuplicates: true },
+    );
+    if (insErr) log(`frozen social_posts upsert failed: ${insErr.message}`);
+    if (result.ok) {
+      log(`frozen: published to ${target.platform} — post_id=${result.platform_post_id ?? "?"}`);
+      return "published";
+    }
+    log(`frozen: publish failed on ${target.platform}: ${result.error ?? "unknown"}`);
+    return "error";
+  }
 
   // 1. Build content first — we need the freshness_token for the gate check.
   const content: SocialContent | null = await buildSocialContent(target, contentDeps);
