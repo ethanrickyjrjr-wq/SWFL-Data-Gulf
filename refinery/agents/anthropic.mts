@@ -37,6 +37,9 @@ export interface UsageLike {
 const RATES: Record<string, { in: number; out: number }> = {
   "claude-sonnet-4-6": { in: 3.0, out: 15.0 },
   "claude-haiku-4-5": { in: 1.0, out: 5.0 },
+  // Reachable via EMAIL_MODEL_OPUS (lib/email/model-router.ts, "max"/"opus" mode
+  // -> email_build call type). Missing this silently priced every Opus call at $0.
+  "claude-opus-4-8": { in: 5.0, out: 25.0 },
 };
 const CACHE_READ_FRACTION = 0.1; // 10% of base input rate
 const CACHE_WRITE_PREMIUM = 1.25; // 25% premium on input rate

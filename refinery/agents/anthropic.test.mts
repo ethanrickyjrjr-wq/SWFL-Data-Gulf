@@ -31,6 +31,14 @@ describe("computeCostUsd()", () => {
     assert.equal(cost, 3.0 + 15.0);
   });
 
+  test("Opus 4.8 (EMAIL_MODEL_OPUS, reachable via email_build max/opus mode) — exact MTok math", () => {
+    const cost = computeCostUsd("claude-opus-4-8", {
+      input_tokens: 1_000_000,
+      output_tokens: 1_000_000,
+    });
+    assert.equal(cost, 5.0 + 25.0);
+  });
+
   test("Haiku 4.5, no cache — exact MTok math", () => {
     const cost = computeCostUsd("claude-haiku-4-5", {
       input_tokens: 500_000,
