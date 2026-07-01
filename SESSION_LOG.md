@@ -1,3 +1,19 @@
+## 2026-07-01 (main) — master-wiring gap: spec + plan for investor-zip-swfl + active-listings-swfl (handoff, docs only)
+
+Follow-up to the graphify orphan audit earlier this session: of the 6 Tier-1 brains master never
+consumed, a parallel session already wired 3 (`c1afc357`). Brainstormed + specced the remaining 2 that
+are ready now — `investor-zip-swfl` (ZIP-grain investor composite) and `active-listings-swfl` (for-sale
+inventory reporter) — both fully built/registered/publishing, pure wiring gap. Verified in code (not
+assumed) that both always emit `direction: "neutral", magnitude: 0`/`"stable"` (`skipSynthesisAgent`
+deterministic reporters), so plain `edge_type: "input"` cannot skew master's direction vote even though
+`investor-zip-swfl` internally consumes `rentals-swfl`/`env-swfl`, which are already master inputs.
+`active-rentals-swfl` (the 3rd remaining brain) deliberately excluded — held on its own open
+`active_rentals_swfl_live_verify` check, same gate the market-cadence three sat behind before `c1afc357`.
+Files: spec `docs/superpowers/specs/2026-07-01-wire-listings-investor-master-design.md`, plan
+`docs/superpowers/plans/2026-07-01-wire-listings-investor-master.md` (3 tasks: edit master.mts,
+target-rebuild + verify, Gate 5 + push + close check). Check `wire_listings_investor_master_live_verify`
+open. Handoff only — the actual `master.mts` edit is not made in this session.
+
 ## 2026-07-01 (main) — Build 1 spec: New Listing project + saved address (handoff, docs only)
 
 Registered Build 1 of the New Listing lifecycle epic (`node scripts/new-build.mjs listing-project-address`) —
