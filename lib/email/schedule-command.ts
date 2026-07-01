@@ -34,6 +34,27 @@ export const SCHEDULE_COMMAND_TOOL = {
   name: "propose_email_schedule_action",
   description:
     "Translate the user's natural-language email-schedule command into exactly ONE structured action. Fill only the parameters relevant to the chosen action.",
+  // Strict tool use: grammar-constrained sampling guarantees the input matches input_schema
+  // BEFORE our zod defense-in-depth runs (zod then only ever catches a genuinely malformed
+  // request, not a model type-slip). Verified strict-safe (2026-07-01): flat schema, enum +
+  // additionalProperties:false, NO minimum/maximum in-schema (those bounds live in zod at the
+  // hourSchema/dowSchema/domSchema level). claude-haiku-4-5 is on the GA strict list; no beta
+  // header; SDK 0.106 types `strict`/`input_examples` on the main Tool interface.
+  strict: true,
+  // 1-5 realistic example payloads teach format conventions JSON Schema cannot express
+  // (e.g. "8am" -> 8, "5pm" -> 17). The last one shows the bare-hour ambiguity -> clarify path.
+  input_examples: [
+    { action: "create", cadence: "weekly", day_of_week: 1, send_hour_et: 8 },
+    { action: "create", cadence: "monthly", day_of_month: 1, send_hour_et: 9 },
+    {
+      action: "change-cadence",
+      schedule_id: 1,
+      cadence: "weekly",
+      day_of_week: 4,
+      send_hour_et: 17,
+    },
+    { action: "clarify", ambiguous_hour: 6 },
+  ],
   input_schema: {
     type: "object" as const,
     additionalProperties: false,
@@ -170,8 +191,7 @@ const rawSchema = z.object({
 });
 
 export type ValidationResult =
-  | { ok: true; command: ParsedCommand }
-  | { ok: false; errors: string[] };
+  { ok: true; command: ParsedCommand } | { ok: false; errors: string[] };
 
 /**
  * Defense-in-depth validation of a tool-call input (or a confirm-step proposal).

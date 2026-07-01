@@ -1,3 +1,19 @@
+## 2026-07-01 (main) — WI-2: strict tool use + input examples on the email-schedule parser
+
+Executed Task 2 of `docs/superpowers/plans/2026-07-01-ai-authoring-upgrades.md`. Added `strict: true` + 4
+`input_examples` to `SCHEDULE_COMMAND_TOOL` (`lib/email/schedule-command.ts`). Grammar-constrained sampling
+now guarantees schema conformance before the zod defense-in-depth runs; zod retained. Verified strict-safe
+live (crawl4ai, 07/01/2026): flat schema, enum + additionalProperties:false, no minimum/maximum in-schema
+(bounds live in zod), claude-haiku-4-5 on the GA strict list, no beta header, SDK 0.106 types it. 16
+schedule-command tests + 49 across the schedule suite green; `bunx next build` clean. Offline-only — no live
+model call.
+
+**Task 1 (WI-1 listing photos) HALTED — re-flip caught.** Commit `52fb35d8` (06/30) deliberately removed the
+email auto-aerial on an advisor catch ("bolted a satellite shot of one arbitrary lot onto county-median
+prose; caption != photo"). WI-1 as planned re-introduces exactly that. Coherent form requires threading the
+featured listing into the content prompt (the "paired properly" fast-follow the prior session scoped out) —
+needs operator direction before building. Next: also new docs — the handoff + plan committed separately.
+
 ## 2026-07-01 (main) — email-lab/social-AI pipeline+photo wiring audit report (docs only)
 
 Operator asked how Email Lab AI and Social AI connect to the new pipeline data (listing-lifecycle) and

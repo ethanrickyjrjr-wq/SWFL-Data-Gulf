@@ -16,6 +16,7 @@ import {
   validateToolInput,
   summarizeCommand,
   hourClarifyCandidates,
+  SCHEDULE_COMMAND_TOOL,
   type ParsedCommand,
 } from "./schedule-command";
 
@@ -153,5 +154,36 @@ describe("hourClarifyCandidates (bare-hour disambiguation)", () => {
     expect(hourClarifyCandidates(13)).toBeNull();
     expect(hourClarifyCandidates(6.5)).toBeNull();
     expect(hourClarifyCandidates(undefined)).toBeNull();
+  });
+});
+
+describe("SCHEDULE_COMMAND_TOOL hardening (strict + input_examples)", () => {
+  test("declares strict tool use", () => {
+    expect((SCHEDULE_COMMAND_TOOL as { strict?: boolean }).strict).toBe(true);
+  });
+
+  test("ships 3-4 input examples", () => {
+    const ex = (SCHEDULE_COMMAND_TOOL as { input_examples?: unknown[] }).input_examples ?? [];
+    expect(ex.length).toBeGreaterThanOrEqual(3);
+    expect(ex.length).toBeLessThanOrEqual(4);
+  });
+
+  test("every non-clarify example is itself a valid command (we never teach the model an invalid payload)", () => {
+    const ex = (
+      (SCHEDULE_COMMAND_TOOL as { input_examples?: Record<string, unknown>[] }).input_examples ?? []
+    ).filter((e) => e.action !== "clarify");
+    expect(ex.length).toBeGreaterThan(0);
+    for (const e of ex) {
+      expect(validateToolInput(e).ok).toBe(true);
+    }
+  });
+
+  test("includes the bare-hour clarify example", () => {
+    const ex =
+      (SCHEDULE_COMMAND_TOOL as { input_examples?: Record<string, unknown>[] }).input_examples ??
+      [];
+    const clarify = ex.find((e) => e.action === "clarify");
+    expect(clarify).toBeDefined();
+    expect(typeof clarify!.ambiguous_hour).toBe("number");
   });
 });
