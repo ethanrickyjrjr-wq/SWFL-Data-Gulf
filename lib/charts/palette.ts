@@ -206,3 +206,17 @@ export function extendPalette(
   }
   return out.slice(0, count);
 }
+
+// ─── (5) readableLabel — real WCAG text-on-fill pick ───────────────────────
+
+/**
+ * Legible text color on `fill` — the WCAG-2 pick of dark ink vs white, whichever
+ * has higher contrast (prefers the one clearing 4.5:1 when both do).
+ * WCAG 2, not APCA: APCA is the WCAG-3 candidate but still in development; for a
+ * binary ink-vs-white pick the two agree on the winner. Revisit when WCAG 3 ratifies.
+ */
+export function readableLabel(fill: string, opts?: { light?: string; dark?: string }): string {
+  const light = opts?.light ?? "#ffffff";
+  const dark = opts?.dark ?? BRAND_INK;
+  return contrastRatio(dark, fill) >= contrastRatio(light, fill) ? dark : light;
+}

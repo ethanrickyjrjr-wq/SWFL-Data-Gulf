@@ -9,6 +9,7 @@ import {
   oklabDistance,
   extendPalette,
   MIN_LIGHTNESS_DELTA,
+  readableLabel,
 } from "./palette";
 
 const WHITE = "#ffffff";
@@ -112,4 +113,23 @@ test("degenerate anchor (near-black) still returns count without throwing", () =
 
 test("empty anchors falls back to a default and still returns count", () => {
   expect(extendPalette([], 4, { background: WHITE })).toHaveLength(4);
+});
+
+test("readableLabel picks the higher-contrast of dark/light", () => {
+  // gulf fills are light → dark ink wins (ink ~7.5:1 vs white ~2:1)
+  for (const fill of ["#3dc9c0", "#5bc97a", "#d4b370"]) {
+    const label = readableLabel(fill);
+    expect(contrastRatio(label, fill)).toBeGreaterThan(
+      contrastRatio(label === "#0a2540" ? "#ffffff" : "#0a2540", fill) - 1e-9,
+    );
+  }
+});
+
+test("dark fill → light label", () => {
+  expect(readableLabel("#0a2540")).toBe("#ffffff");
+});
+
+test("custom light/dark honored", () => {
+  const label = readableLabel("#111111", { light: "#eeeeee", dark: "#222222" });
+  expect(label).toBe("#eeeeee");
 });
