@@ -1,3 +1,34 @@
+## 2026-06-30 (main) — spec: SteadyAPI Phase 2B on-demand comp helper (design approved, handoff written, zero live calls)
+
+Brainstormed + specced the answer-engine comp path (SteadyAPI sole-spine Phase 2B, Part B). **Probe-first (RULE 0.5)**
+found the prior art: `lib/assistant/web-fallback.ts` is the exact pattern to mirror (gate → fetch live → grounding block
++ lane-4 ask, wired at two `conversation-path.ts` hook points), `lib/listings/steadyapi.ts` already carries the
+`PHOTOS_API`/Cloudflare/hour-cache client, `MAPBOX_TOKEN` is live server-side (`aerial.ts`), and the assistant has **no
+street-address grain today** (`zip-dossier.ts` → `address-unsupported`, the "pre-geocoder" gap this fills).
+
+**Research (RULE 0.4, crawl4ai on docs.steadyapi.com + Mapbox docs MCP — zero metered calls):** `/nearby-home-values`
+returns last list price + realtor.com AVM + status (for_sale/off_market/sold) + beds/baths/sqft/address in 1 call, but
+**NOT the sold price** — so the +1 `/property-tax-history` (`property_history[]` latest "Sold" event) is genuinely
+required, not padding. `/similar-homes` rejected (needs a prior propertyId, also no sold price). Mapbox forward-geocode
+= **temporary** geocoding (free at our volume; never `permanent=true`, never persist the coord).
+
+**Operator decisions locked:** Lee (12071) + Collier (12021) only · geocode the typed address (Mapbox) · **never say
+"SteadyAPI" anywhere**; prose = comps + MM/DD/YYYY only (no source named in prose); sources in the collapsed accordion =
+SWFL Data Gulf + realtor.com **homepage** only · never surface an MLS# (structural scrub of property_id/listing_id/
+permalink/source.id) · ≤3 Steady calls/request · can't-finish → lane-4 "what I need" ask, never a silent no-op · user can
+fill the gap (reply an address, or type comps relayed as "figures you provided") · user-pasted-link lane (SSRF-safe scrape,
+homepage citation) = Increment 3.
+
+Wrote: `docs/superpowers/specs/2026-06-30-steadyapi-comp-helper-design.md` (design, with verbatim verified vendor
+contracts) + `docs/superpowers/plans/2026-06-30-steadyapi-comp-helper-handoff.md` (planning brief for a fresh Claude →
+writing-plans → build v1 core TDD). No code. Opened check `steadyapi_comp_helper_live_verify`. **Next:** a fresh Claude
+plans + builds v1 core (offline against doc-JSON fixtures); live-verify gated on operator `PHOTOS_API` key authorization.
+
+Pushed **only this session's docs** (detached onto origin/main so the parallel session's unpushed social commits
+`c4fb2495`/`cc9f2e80`/`bc159311` — some HELD-for-review — were NOT dragged along).
+
+---
+
 ## 2026-06-30 (main) — listing-lake: address_key hardened (zero API), CI dry-run wrapper wired, SteadyAPI surface re-verified
 
 Took the steadyapi-sole-spine open items as far as they go WITHOUT spending a single SteadyAPI call
