@@ -5,7 +5,9 @@ import {
   compHelper,
   renderCompBlock,
   compSources,
+  buildCompsChartSpec,
   type CompDeps,
+  type CompResult,
 } from "./comp-helper";
 import type { NearbyComp } from "@/lib/listings/steadyapi";
 
@@ -231,5 +233,91 @@ describe("compSources — the collapsed accordion (homepage only, never SteadyAP
 
   it("returns no sources when nothing was surfaced", () => {
     expect(compSources({ comps: [], asOf: "06/30/2026", needs: ["x"] })).toEqual([]);
+  });
+});
+
+describe("buildCompsChartSpec — the comps bar chart (comps-only, no subject bar)", () => {
+  const baseResult: CompResult = {
+    asOf: "06/30/2026",
+    matchedAddress: "Cape Coral",
+    needs: [],
+    comps: [
+      {
+        addressLine: "100 A St",
+        city: "Cape Coral",
+        beds: 3,
+        baths: 2,
+        sqft: 1500,
+        status: "sold",
+        price: 400000,
+        priceKind: "sold",
+        priceDate: "2026-05-12",
+      },
+      {
+        addressLine: "200 B St",
+        city: "Cape Coral",
+        beds: 3,
+        baths: 2,
+        sqft: 1600,
+        status: "active",
+        price: 450000,
+        priceKind: "last_list",
+        priceDate: null,
+      },
+      {
+        addressLine: "300 C St",
+        city: "Cape Coral",
+        beds: 3,
+        baths: 2,
+        sqft: 1550,
+        status: "off_market",
+        price: 420000,
+        priceKind: "estimate",
+        priceDate: "2026-04-01",
+      },
+    ],
+  };
+
+  it("returns null when fewer than 2 comps carry a price", () => {
+    expect(buildCompsChartSpec({ ...baseResult, comps: [baseResult.comps[0]] })).toBeNull();
+    expect(
+      buildCompsChartSpec({
+        ...baseResult,
+        comps: [
+          { ...baseResult.comps[0], price: null },
+          { ...baseResult.comps[1], price: null },
+        ],
+      }),
+    ).toBeNull();
+  });
+
+  it("sorts price-desc and suffixes labels honestly by priceKind", () => {
+    const spec = buildCompsChartSpec(baseResult)!;
+    expect(spec).not.toBeNull();
+    expect(spec.rows.map((r) => r[0])).toEqual([
+      "200 B St (list)", // 450000 — highest
+      "300 C St (est.)", // 420000
+      "100 A St", // 400000 — sold, no suffix
+    ]);
+    expect(spec.rows.map((r) => r[1])).toEqual([450000, 420000, 400000]);
+  });
+
+  it("carries the correct title/columns/source/asOf conversion", () => {
+    const spec = buildCompsChartSpec(baseResult)!;
+    expect(spec.title).toBe("Nearby comparable prices near Cape Coral");
+    expect(spec.columns).toEqual(["Property", "Price"]);
+    expect(spec.value_format).toBe("usd");
+    expect(spec.chart_type).toBe("bar");
+    expect(spec.frameId).toBe("bar-table");
+    expect(spec.asOf).toBe("2026-06-30"); // MM/DD/YYYY -> ISO
+    expect(spec.source).toEqual({
+      citation: "Nearby comps, SWFL Data Gulf + realtor.com",
+      url: "https://www.realtor.com",
+    });
+  });
+
+  it("falls back to a plain title when matchedAddress is absent", () => {
+    const spec = buildCompsChartSpec({ ...baseResult, matchedAddress: undefined })!;
+    expect(spec.title).toBe("Nearby comparable prices");
   });
 });

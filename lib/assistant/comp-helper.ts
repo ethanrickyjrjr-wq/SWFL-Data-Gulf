@@ -21,6 +21,7 @@ import {
   type SoldEvent,
 } from "@/lib/listings/steadyapi";
 import type { WelcomeSource } from "@/lib/welcome/frames";
+import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
 /** Whether a surfaced price is a recorded sale, an AVM estimate, or a last list. */
 export type PriceKind = "sold" | "estimate" | "last_list";
@@ -113,7 +114,7 @@ export function extractAddress(question: string): string | null {
 
 // ── date + money formatting ───────────────────────────────────────────────────
 
-function fmtMDY(d: Date): string {
+export function fmtMDY(d: Date): string {
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${mm}/${dd}/${d.getFullYear()}`;
@@ -124,6 +125,13 @@ function isoToMDY(iso: string | null): string | null {
   if (!iso) return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[2]}/${m[3]}/${m[1]}` : null;
+}
+
+/** "06/30/2026" -> "2026-06-30". Input is always CompResult.asOf, which is always
+ *  well-formed MM/DD/YYYY (produced by fmtMDY) — no defensive validation needed. */
+function mdyToIso(mdy: string): string {
+  const [mm, dd, yyyy] = mdy.split("/");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 function usd(n: number): string {
@@ -313,4 +321,48 @@ export function compSources(result: CompResult): WelcomeSource[] {
     { label: "SWFL Data Gulf", domain: "swfldatagulf.com", url: "https://www.swfldatagulf.com" },
     { label: "realtor.com", domain: "realtor.com", url: "https://www.realtor.com" },
   ];
+}
+
+/** The honesty suffix so an estimate/last-list price can never look like a sale on the
+ *  chart — bar-mode rendering (adaptToHBar) reads only columns[0]/columns[1], so the
+ *  label suffix is the only place this distinction survives into the bar view. */
+function priceKindSuffix(k: PriceKind): string {
+  if (k === "estimate") return " (est.)";
+  if (k === "last_list") return " (list)";
+  return "";
+}
+
+/**
+ * Comps-only bar chart (no subject/median bar — buildCompsSpec's subject-bar shape
+ * doesn't apply here: the geocoded comp-helper subject has no price to anchor it, and
+ * labeling an area median "(Subject)" would misrepresent an aggregate as this
+ * property's valuation). Filters to priced comps; null under the 2-bar minimum.
+ */
+export function buildCompsChartSpec(result: CompResult): ChartSpec | null {
+  const priced = result.comps.filter((c) => c.price != null);
+  if (priced.length < 2) return null;
+
+  const sorted = [...priced].sort((a, b) => (b.price as number) - (a.price as number));
+  const rows: (string | number | null)[][] = sorted.map((c) => [
+    `${c.addressLine}${priceKindSuffix(c.priceKind)}`,
+    c.price as number,
+  ]);
+
+  const title = result.matchedAddress
+    ? `Nearby comparable prices near ${result.matchedAddress}`
+    : "Nearby comparable prices";
+
+  return {
+    frameId: "bar-table",
+    title,
+    columns: ["Property", "Price"],
+    rows,
+    value_format: "usd",
+    chart_type: "bar",
+    asOf: mdyToIso(result.asOf),
+    source: {
+      citation: "Nearby comps, SWFL Data Gulf + realtor.com",
+      url: "https://www.realtor.com",
+    },
+  };
 }
