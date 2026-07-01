@@ -12,7 +12,7 @@ import {
   type EmailChartTheme,
   type ResolvedChartTheme,
 } from "./chart-defaults";
-import { extendPalette } from "@/lib/charts/palette";
+import { extendPalette, readableLabel } from "@/lib/charts/palette";
 
 // Section 2 (S2) — email-safe chart renderer.
 //
@@ -95,11 +95,9 @@ function blendHex(a: string, b: string, t: number): string {
   return `#${toHex(ar + (br - ar) * u)}${toHex(ag + (bg - ag) * u)}${toHex(ab + (bb - ab) * u)}`;
 }
 
-/** Black or white text, whichever has more contrast on `bg` (rec601 luma). */
+/** Dark ink or white text — real WCAG-2 pick on `bg` (was rec601 luma). */
 function readableText(bg: string): string {
-  const [r, g, b] = parseHex(bg);
-  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luma > 0.6 ? "#111827" : "#ffffff";
+  return readableLabel(bg, { dark: "#111827", light: "#ffffff" });
 }
 
 // ── per-type renderers ────────────────────────────────────────────────────────
