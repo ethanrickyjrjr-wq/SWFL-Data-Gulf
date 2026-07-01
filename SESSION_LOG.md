@@ -1,3 +1,20 @@
+## 2026-07-01 (main) — second live listing-lifecycle dispatch: Lee (heaviest county) proven, same-shape success as Collier
+
+Operator authorized a second live (`dry_run=false`) dispatch, this time Lee — the heaviest county (~7.4k+
+listings). Run `28496497637`, watched to completion (5m0s):
+```
+[ok] Lee: scanned=21889 seed=False upserts=22890 transitions=17571 (complete (21889 rows vs last-trusted 7412))
+[budget] this run = 173 SteadyAPI calls (10,000/mo Starter cap; ~4,700/mo steady-state target)
+[done] {'scanned': 21889, 'upserts': 22890, 'transitions': 17571} dry_run=False source=api
+```
+Same shape as the Collier run above: real DB writes, no WAF block, `crawl4ai preflight (advisory)` step
+failed the same harmless way (no browser binary on this runner, `continue-on-error: true`, job still green).
+Two of three SWFL counties (Collier + Lee) now have live-proven single-county runs; Hendry is the only county
+not yet dispatched live. Combined this session: 278 SteadyAPI calls, 31,709 upserts, 24,600 transitions
+across the two counties — well inside the 10,000/mo Starter cap.
+
+---
+
 ## 2026-07-01 (main) — first live listing-lifecycle dispatch since SteadyAPI cutover: operator-authorized, Collier proven, `steadyapi_sole_spine_live_verify` closed
 
 Operator authorized the first live (`dry_run=false`) dispatch of `listing-lifecycle-daily.yml` since the
