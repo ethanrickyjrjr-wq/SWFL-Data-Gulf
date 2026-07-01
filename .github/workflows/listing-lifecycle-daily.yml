@@ -5,9 +5,9 @@ name: ingest-listing-lifecycle
 # SPINE CUTOVER 2026-06-30: pipeline.py now defaults to --source api (SteadyAPI sole spine; RentCast
 # retired). The api path reads the PHOTOS_API key (added to env below) and writes under
 # source_name='api_feed'. The Source-B scrape prose below is RETAINED for history but the daily path is
-# SteadyAPI. PREREQUISITE for any live run: the PHOTOS_API secret does NOT exist in this repo yet —
-#   gh secret set PHOTOS_API -R ethanrickyjrjr-wq/SWFL-Data-Gulf
-# Until it is set, a dispatch fetches 0 rows and exits 1 (loud, by design — never a silent fake-green).
+# SteadyAPI. PHOTOS_API secret IS set (confirmed via `gh secret list` 2026-06-30/2026-07-01) — the
+# code-level prerequisite for a live run is met. What still gates a live dispatch is operator
+# authorization (paid SteadyAPI calls), not a missing secret.
 # Plan: docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/phase-1-inventory-cutover.md
 #
 # PARKED — NO `schedule:` YET. This is the cron WRAPPER (pipeline-freshness standard: ship the GHA

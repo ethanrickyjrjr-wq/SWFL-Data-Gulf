@@ -1,3 +1,73 @@
+## 2026-07-01 (main) — sold-resolution fallback lane: research pass corrects Lane 1 premise — docs-only, NOTHING built
+
+Picked up `phase-2-sold-resolution-fallback-lane-HANDOFF.md` action 1 (RULE 0.4 research pass, free/no paid
+calls). First resolved the standing question of **when the 10,161 no-`property_id` survivors get tagged**:
+never has, and won't automatically — `listing-lifecycle-daily.yml` has NO live `schedule:` (dispatch-only),
+`gh run list` shows exactly one historical run (2026-06-27, failed, pre-cutover Source-B path). Correction to
+the workflow header's own comment: `PHOTOS_API` does **not** "not exist" anymore — `gh secret list` confirms
+it was set today (2026-06-30). Tagging only happens on the first live (`dry_run=false`) dispatch — an
+operator-authorized paid action per standing rule, not run this session.
+
+**Load-bearing correction to the handoff's Lane 1** (lake probe via `mcp__lake__query_lake` against
+`pg.data_lake.*`): "parcel-match the departed address to an appraiser sale we already hold" is not viable as
+scoped, for two independent reasons —
+1. **No join key.** Neither `leepa_parcels` nor `collier_parcels` has an address column — only
+   `parcel_id`/`folioid` + zip + use codes + values + sale year/month. `listing_state` has `street_address`
+   but no `parcel_id`. An address→parcel crosswalk doesn't exist; it would be its own build.
+2. **Annual cadence, not fresh.** Both tables are `cadence_days: 365` (`cadence_registry.yaml:365-403`).
+   Lee's snapshot (confirmed 2026-05-18) already shows May 2026 sales — reasonably fresh. Collier's snapshot
+   (confirmed 2026-06-06) caps at **sale month 2025-06** — a full year stale, because Collier's actual source
+   (FDOR Statewide Cadastral) is an annual roll (~Aug) per the registry's own note. Either way, bulk-Lane-1
+   can't resolve a sale that happens THIS month; it won't appear in our copy until the next annual pull.
+
+**crawl4ai reachability check** (`leepa.org`, `collierappraiser.com` — both public FL government record
+sites, ToS-clean): both return 200, no WAF block on a plain fetch. Collier's root is an old frameset (needs
+the frame-target URL, not the homepage). LeePA's live parcel-detail page (`Display/DisplayParcel.aspx`)
+loaded but did NOT render owner/sale data on a static crawl — it's ASP.NET postback/AJAX-driven, so real
+extraction needs Playwright interaction (`wait_for` on the panel, not a bare GET) — confirms the handoff's
+own WAF/technical-risk caution, just for a different reason (dynamic rendering, not blocking).
+
+**The actual fix (from advisor, not the handoff's framing):** crawling the LIVE appraiser site by street
+address collapses the handoff's separate Lane 1 (our data) and Lane 3 (named web) into ONE lane — same
+authoritative source, no crosswalk needed (search is address-keyed, which `listing_state.street_address`
+already has), and far fresher than our annual bulk copy. That live-crawl lane should be PRIMARY, not a
+fallback tried after a non-viable bulk match. Recording lag itself (deed-closing → public-postable) has no
+authoritative published figure found this pass; the only cited data point is our own LeePA field turning
+around within the same month it posts to the roll (weak signal, not a verified lag).
+
+**Sequencing point surfaced to operator:** the permanently-lost cohort (departs before sweep 1 ever runs)
+grows every day the sweep stays parked — authorizing sweep 1 is the single highest-leverage move (shrinks
+the exact problem this lane is for + reveals real `dep=/available` volume to size against) but it's the
+paid/operator action from the handoff's action 3. Not fired this session (memory: no live paid API calls
+without approval) — surfaced as a decision, awaiting operator call.
+
+**Operator asked to just try scraping both live sites now (free, crawl4ai, no paid calls) — done, and the
+honest result is "not trivial yet":**
+- **LeePA (`leepa.org/Display/DisplayParcel.aspx?FolioID=`):** page loads fine (no WAF block), but Owner /
+  Address / Sales-Transactions are collapsed `showHideLink` panels whose content `div.overFlowDiv` is
+  **empty in the raw HTML** even after a 5s post-load delay — the grid loads only on click, client-side.
+  A raw DOM `.click()` on `#SalesHyperLink` (no real Playwright pointer event) triggered an ASP.NET
+  postback that landed on an **"Invalid Request" error page**, not the sales grid — this specific approach
+  doesn't work. Network-request capture on page load showed no background XHR/`.ashx`/`.asmx` data
+  endpoint to hit directly either. Real extraction needs either a proper Playwright pointer-event click
+  (scroll-into-view + real mouse event, not a bare DOM click) or reverse-engineering the true postback
+  target — both are real engineering, not a 10-minute script.
+- **Collier (`collierappraiser.com`):** ~30s page load (slow — matches the handoff's WAF-sensitive
+  caution). Root is a legitimate modern site using an old multi-`<frame>` layout (`sidepanel.html`,
+  `nav.html`, `Header.html`, `greeting.html`) — the actual parcel-search frame wasn't located this pass;
+  more discovery needed before any extraction attempt.
+
+**Net: reachability confirmed on both, but "just scrape it now" isn't a same-session win — live extraction
+of real sale/owner data is its own build task with real technical risk (ASP.NET postback fragility on
+LeePA, frame discovery + WAF latency on Collier), which is exactly what the handoff's original "WAF-sensitive"
+caution was pointing at.**
+
+**Nothing built, nothing registered via `new-build.mjs`** — holding per advisor: don't spec a build until the
+operator picks the lane design the spec would commit to. HANDOFF doc amended with the Lane-1/recording-lag
+corrections; this scrape-attempt evidence logged here for the next session to pick up without re-deriving it.
+
+---
+
 ## 2026-07-01 (main) — comp helper Increments 2 & 3: design spec — brainstormed, 2 advisor(Opus) passes, docs-only
 
 Brainstormed the two remaining comp-helper items from `2026-07-01-steadyapi-comp-helper-remaining-handoff.md`
