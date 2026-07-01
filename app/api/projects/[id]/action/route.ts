@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { issueProposalNonce, verifyProposalNonce } from "@/lib/email/proposal-nonce";
@@ -31,15 +32,6 @@ export const runtime = "nodejs";
  */
 
 const ACTION_MODEL = "claude-haiku-4-5";
-
-let _anthropic: Anthropic | null = null;
-function getAnthropic(): Anthropic {
-  if (_anthropic) return _anthropic;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
-  _anthropic = new Anthropic({ apiKey });
-  return _anthropic;
-}
 
 const CLASSIFY_ACTION_TOOL: Anthropic.Tool = {
   name: "classify_action",

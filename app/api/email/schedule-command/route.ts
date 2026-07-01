@@ -1,7 +1,8 @@
 import type { Database } from "@/database.types";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { createClient } from "@/utils/supabase/server";
 import { computeNextRunAt } from "@/lib/email/schedule-cadence";
 import {
@@ -34,25 +35,16 @@ export const runtime = "nodejs";
  *
  * Auth: cookie/RLS client (auth.uid() = user_id is the authorization), never
  * service-role — same pattern as app/api/projects/route.ts and the sibling email
- * routes. The Anthropic client is instantiated locally (the refinery agents live in
- * a Bun module tree we don't pull into the Next runtime); the forced-tool_use +
- * tool_use-extraction pattern mirrors refinery/agents/synthesis-agent.mts. Haiku 4.5
- * verified (live, in-session) to support forced tool_choice + the standard tool_use
- * block shape { type, id, name, input }.
+ * routes. Uses the shared, logged refinery/agents/anthropic.mts client — the
+ * forced-tool_use + tool_use-extraction pattern mirrors
+ * refinery/agents/synthesis-agent.mts. Haiku 4.5 verified (live, in-session) to
+ * support forced tool_choice + the standard tool_use block shape
+ * { type, id, name, input }.
  */
 
 const COMMAND_MODEL = "claude-haiku-4-5";
 
 type Db = ReturnType<typeof createClient>;
-
-let _anthropic: Anthropic | null = null;
-function getAnthropic(): Anthropic {
-  if (_anthropic) return _anthropic;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
-  _anthropic = new Anthropic({ apiKey });
-  return _anthropic;
-}
 
 const SCHEDULE_COLUMNS =
   "id,status,cadence,day_of_week,day_of_month,send_hour_et,audience_slug,template_id";
