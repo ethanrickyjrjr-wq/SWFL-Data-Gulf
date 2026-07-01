@@ -1,3 +1,42 @@
+## 2026-07-01 (main) — market_cadence_three_tier_live_verify: render-confirmed all 3 brains, fixed 2 real bugs in listing_momentum_stats + a yield-outlier defect in market-temperature-swfl
+
+Ran the remaining bar for `market_cadence_three_tier_live_verify` (SQL migration + histogram/details dispatch
+were already live from earlier today). Built all 3 brains locally with `--target-only` (deterministic packs,
+`skipSynthesisAgent: true` — no LLM/paid calls) and read the rendered output directly instead of trusting the
+citation strings alone. Found and fixed two real defects surfaced by that check, both in
+`docs/sql/20260630_market_aggregates_tables.sql`'s `listing_momentum_stats` view (re-applied live via
+`bun scripts/run-migration.ts`, idempotent `CREATE OR REPLACE`):
+
+1. **Region/county blend bug**: `avg(flag_price_reduced)` silently drops NULL-flag rows (a county mid-reseed,
+   one sweep old) while `count(*)` doesn't — so before Lee's second sweep landed, the region row reported
+   Collier's 14.2% rate pinned to the full 15,331-listing count (implying ~2,177 cut listings; the real number
+   was 1,123). Fixed with a `CASE WHEN` guard: a grain's share is only computed when every row in it has flag
+   data; `active_listing_count` always stays the true population so per-ZIP counts never read "0 listings" for
+   an unswept ZIP.
+2. **Phantom row from a NULL zip_code**: one real Lee listing (3511 27th St SW, Lehigh Acres — genuinely
+   missing a ZIP in the source data) collided with the GROUPING SETS synthesized NULL for the county grain,
+   producing an indistinguishable second "Lee" row (1 listing, 100% price-cut) alongside the real 21,080-listing
+   county aggregate. Fixed by excluding `zip_code IS NULL` rows from the view's base CTE.
+
+Also added a sanity floor to `market-temperature-swfl` (`refinery/packs/market-temperature-swfl.mts`): the
+"Highest-yield ZIPs" ranking was headlining ZIP 33972 at a 78% gross yield — impossible for real estate, and
+traced to a land/mobile-home-lot sale dragging the ZIP's median sold price to $30k ($216/sqft implies ~139
+sqft) divided against a normal-market rent. Added a `MIN_IMPLIED_SQFT` (500) floor that excludes ZIPs whose
+implied sold-unit size is non-representative from the ranking (still visible in the full per-ZIP table), with
+a caveat disclosing the exclusion. Post-fix top-3: 33903 (14.04%), 34113 (13.55%), 34135 (11.92%) — all sane.
+
+Operator dispatched the Lee-county listing sweep live in parallel (run `28496497637`, 173 SteadyAPI calls,
+21,889 listings) — asked first per the paid-API rule rather than dispatching it myself. Post-fix,
+post-Lee-sweep momentum brain now reads cleanly: "16.3% of 28,999 active listings carry a price cut... By
+county: Lee 17.1% cut / 8.1% new, Collier 14.2% cut / 6.8% new." All 3 brains grep-clean for any "SteadyAPI"
+string leak. Green: 15/15 pack + catalog-parity tests, `bunx next build` clean.
+
+Left `brains/{price-distribution,listing-momentum,market-temperature}-swfl.md` uncommitted (regenerable
+local verification artifacts, not from a scheduled build). Check stays OPEN — per `checks` ledger convention,
+closure is operator-run, not a dev "code looks right" self-close.
+
+---
+
 ## 2026-07-01 (main) — feat(spend): live Anthropic API usage logging, end to end (`ed6a4c6a`..`a6a0addd`)
 
 Executed the staged plan (`docs/superpowers/plans/2026-06-30-api-usage-logging-implementation.md`):

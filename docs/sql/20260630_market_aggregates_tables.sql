@@ -54,18 +54,30 @@ CREATE TABLE IF NOT EXISTS data_lake.market_details_swfl (
 -- region / county / ZIP grains in one read (mirrors listing_active_stats).
 CREATE OR REPLACE VIEW data_lake.listing_momentum_stats AS
 WITH active AS (
+  -- zip_code IS NOT NULL: a raw NULL zip_code is indistinguishable from the NULL GROUPING SETS
+  -- synthesizes for the (county) and () grains — without this filter, one ZIP-less listing produces a
+  -- phantom "1 listing" row that collides with (and gets read alongside) the real county aggregate.
   SELECT county, zip_code, flag_price_reduced, flag_new_listing, scraped_at
   FROM data_lake.listing_state
   WHERE source_name = 'api_feed'
     AND state = 'active'
     AND sale_or_rent = 'sale'
+    AND zip_code IS NOT NULL
 )
+-- avg(flag_*) silently drops NULL-flag rows (a county/ZIP mid-reseed, one sweep old, no diff yet) while
+-- count(*) does not — a grain spanning a swept county (real flags) and an unswept one (all-NULL flags)
+-- would otherwise report the swept subset's rate pinned to the full grain's listing count. The CASE
+-- guards report a share ONLY when every row in that grain has flag data; active_listing_count always
+-- stays the true population so per-ZIP/per-county inventory counts never read as "0 listings" for a
+-- ZIP that simply lacks a second sweep yet.
 SELECT
   county,
   zip_code,
   count(*)::int                                                       AS active_listing_count,
-  round(100.0 * avg((flag_price_reduced)::int), 1)                    AS price_reduced_share,
-  round(100.0 * avg((flag_new_listing)::int), 1)                      AS new_listing_share,
+  CASE WHEN count(*) FILTER (WHERE flag_price_reduced IS NULL) = 0
+       THEN round(100.0 * avg((flag_price_reduced)::int), 1) END      AS price_reduced_share,
+  CASE WHEN count(*) FILTER (WHERE flag_new_listing IS NULL) = 0
+       THEN round(100.0 * avg((flag_new_listing)::int), 1) END        AS new_listing_share,
   max(scraped_at)                                                     AS latest_scraped_at
 FROM active
 GROUP BY GROUPING SETS ((county, zip_code), (county), ());

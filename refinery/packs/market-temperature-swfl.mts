@@ -159,9 +159,21 @@ function marketTemperatureOutputProducer(_out: PackOutput): BrainOutputProducerR
     },
   ];
 
-  // Best-yield ZIPs (lowest price-to-rent multiple = highest gross yield).
+  // Best-yield ZIPs (lowest price-to-rent multiple = highest gross yield). Excludes ZIPs whose
+  // median sold price implies a non-representative sale (land/mobile-home lot, not a home) — the
+  // implied-sqft floor (median sold price ÷ price-per-sqft) catches a $30k "sale" at $216/sqft
+  // implying ~139 sqft, which produces an impossible 78%+ headline yield rather than a real opportunity.
+  const MIN_IMPLIED_SQFT = 500;
+  const outlierZips: string[] = [];
   const ranked = [...summary.rows]
     .filter((r) => r.sold_to_rent_ratio != null && r.sold_to_rent_ratio > 0)
+    .filter((r) => {
+      if (r.median_sold_price == null || !r.median_price_per_sqft) return true;
+      const impliedSqft = r.median_sold_price / r.median_price_per_sqft;
+      const isOutlier = impliedSqft < MIN_IMPLIED_SQFT;
+      if (isOutlier) outlierZips.push(r.zip_code);
+      return !isOutlier;
+    })
     .sort((a, b) => a.sold_to_rent_ratio! - b.sold_to_rent_ratio!);
   const topYield = ranked
     .slice(0, 3)
@@ -174,16 +186,25 @@ function marketTemperatureOutputProducer(_out: PackOutput): BrainOutputProducerR
         `Highest-yield ZIPs: ${topYield}. The full per-ZIP sold/list/rent/DOM snapshot is in the table below.`
       : `Per-ZIP market snapshot for ${summary.rows.length} SWFL ZIPs as of ${asOf} — see the table below.`;
 
+  const caveats = [
+    "The headline is a gross yield (sold price ÷ annual rent) — before taxes, insurance, HOA, vacancy, and maintenance; a net yield is materially lower, especially given SWFL insurance costs.",
+    "The median sold/DOM/hotness/list-to-sold figures in the table are CONTEXT — the same signals are tracked at monthly cadence elsewhere; this brain's own read is the sold-to-rent yield.",
+    "Monthly cadence: realtor.com's ZIP-grain aggregates refresh monthly, so these numbers move month to month, not week to week.",
+    "Source is realtor.com per-ZIP market aggregates.",
+  ];
+  if (outlierZips.length > 0) {
+    caveats.push(
+      `Excluded ${outlierZips.length} ZIP(s) from the "Highest-yield" ranking (${outlierZips.join(", ")}) — ` +
+        `their median sold price implies under ${MIN_IMPLIED_SQFT} sqft at the ZIP's own price/sqft, meaning the sale mix ` +
+        "is dominated by land/mobile-home lots rather than homes, which would inflate the implied yield past any realistic reading. Still in the full table below.",
+    );
+  }
+
   return {
     conclusion,
     key_metrics,
     detail_tables,
-    caveats: [
-      "The headline is a gross yield (sold price ÷ annual rent) — before taxes, insurance, HOA, vacancy, and maintenance; a net yield is materially lower, especially given SWFL insurance costs.",
-      "The median sold/DOM/hotness/list-to-sold figures in the table are CONTEXT — the same signals are tracked at monthly cadence elsewhere; this brain's own read is the sold-to-rent yield.",
-      "Monthly cadence: realtor.com's ZIP-grain aggregates refresh monthly, so these numbers move month to month, not week to week.",
-      "Source is realtor.com per-ZIP market aggregates.",
-    ],
+    caveats,
     direction: "neutral",
     magnitude: 0,
     drivers: [],
