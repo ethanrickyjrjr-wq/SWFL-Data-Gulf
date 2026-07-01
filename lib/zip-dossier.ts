@@ -117,6 +117,15 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // (Added 2026-06-25 alongside active-listings-swfl — same missing-entry prod-500 fix;
   // shipped without an entry in ffdd28d9.)
   "market-heat-swfl": { grains: ["zip"], covers: SIX_COUNTY },
+  // SteadyAPI Layer-B market brains (realtor.com origin), Lee + Collier. Added 2026-06-30 with their
+  // catalog entries (brain-first) — a BRAIN_GEO entry is MANDATORY or the per-location fanout 500s on
+  // every named place (the 2026-06-25 active-listings / market-heat incident).
+  // price-distribution: county-grain price bands + region rollup (no per-ZIP bands).
+  "price-distribution-swfl": { grains: ["county", "region"], covers: LEE_COLLIER },
+  // listing-momentum: GROUPING SETS region/county/ZIP off our own active sweep (price-cut + new-listing shares).
+  "listing-momentum-swfl": { grains: ["zip", "county", "region"], covers: LEE_COLLIER },
+  // market-temperature: per-ZIP realtor.com aggregates + region-median sold-to-rent yield.
+  "market-temperature-swfl": { grains: ["zip", "region"], covers: LEE_COLLIER },
   // NOAA HURDAT2 best-track × OpenFEMA NFIP across the 6-county footprint.
   // Region-first: hurricane metrics are SWFL-wide aggregates, not per-county rows.
   "hurricane-tracks-fl": { grains: ["region", "county"], covers: SIX_COUNTY },
