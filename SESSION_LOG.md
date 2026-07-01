@@ -1,3 +1,25 @@
+## 2026-07-01 (main) — fix(spend): CI red on getAnthropic() wrapper — Proxy fix, root-caused and verified (`9b1e012b`)
+
+CI failed 3 `getAnthropic()` unit tests right after the api-usage-logging push landed (same commit
+range as the earlier entry below) — `client.messages.create` came back `undefined` and cached-client
+identity checks failed, on Ubuntu/bun 1.3.14, while passing 100% of local runs on the same bun version.
+Root-caused rather than dismissed as flaky (per advisor pushback: "local passing isn't evidence it's
+flaky — it's evidence local and CI differ"). Confirmed zero dependency drift (`bun install
+--frozen-lockfile` — no changes) and then inspected the installed SDK directly: `raw.messages`'s
+own-enumerable keys are only `_client`/`batches` — `create`/`stream` live on the `Messages` class
+prototype. My original wrapper used a plain-object spread (`{...raw.messages, create, stream}`)
+instead of the original plan's `Proxy` design — a "simpler" deviation that was fighting a
+getter/prototype-based SDK shape. Reverted to a `Proxy` `get` trap forwarding via
+`Reflect.get(target, prop, target)` (passing `target`, not the proxy, as receiver, so no
+private-class-field `this`-binding surprise). Verified: full `bun test` (4266 pass) + `bunx next build`
+green, plus a direct runtime check that `.create`/`.stream`/`.batches`/`.apiKey`/`.models` all forward
+correctly through the new Proxy and that cached-client identity still holds.
+
+**What's next:** watch the next CI run on this push to confirm green (I can't poll it from here).
+`api_usage_logging_live_verify` still needs the operator-run live call per the entry below.
+
+---
+
 ## 2026-07-01 (main) — market_cadence_three_tier_live_verify: render-confirmed all 3 brains, fixed 2 real bugs in listing_momentum_stats + a yield-outlier defect in market-temperature-swfl
 
 Ran the remaining bar for `market_cadence_three_tier_live_verify` (SQL migration + histogram/details dispatch
