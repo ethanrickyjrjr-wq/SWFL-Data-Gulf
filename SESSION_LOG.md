@@ -1,3 +1,53 @@
+## 2026-07-01 (main) — feat(spend): live Anthropic API usage logging, end to end (`ed6a4c6a`..`a6a0addd`)
+
+Executed the staged plan (`docs/superpowers/plans/2026-06-30-api-usage-logging-implementation.md`):
+`getAnthropic(callType?)` in `refinery/agents/anthropic.mts` now wraps every real `.messages.create`/
+`.stream()` call and fire-and-forgets a row into `public.api_usage_log` (model/tokens/cost, never
+throws, skips under `agentsAreMocked()`/`SKIP_USAGE_LOG=1`). Migrated all 21 production call sites
+onto it, including several that bypassed the shared client entirely (`build-doc.ts`'s own module-level
+client, 2 duplicate local `getAnthropic()` shadows, 7 more direct `new Anthropic()` instantiations,
+plus `lib/social/design/author.ts` — a same-shaped site added after the plan's original audit, found
+via a fresh grep). swfldatagulf-ops `/spend` (separate repo, commits `f4baf32`/`1bb8894`) now shows a
+live panel when `api_usage_log` has rows, falling back to the static pre-logging estimate otherwise —
+verified via build with the table still empty (pixel-identical, per the plan's own success criterion).
+
+**Three real bugs caught + fixed beyond the plan, each verified against live vendor docs (RULE 0.4),
+not memory:**
+1. `claude-haiku-4-5` is a pre-4.6-generation alias the API resolves to a dated snapshot for serving
+   (verified live via crawl4ai against `platform.claude.com/docs/en/about-claude/models/model-ids-and-
+   versions`) — the response `.model` field echoes that snapshot, not the alias sent. A naive exact-
+   string `RATES` lookup would have silently priced every Haiku call at $0. Fixed with a
+   `baseModelId()` date-strip fallback in `computeCostUsd`.
+2. `claude-opus-4-8` (reachable via `EMAIL_MODEL_OPUS`, `email_build`'s "max"/"opus" mode) was missing
+   from `RATES` entirely — same $0-fallback bug on the highest-cost tier. Added ($5/$25 per MTok,
+   verified live against `platform.claude.com/docs/en/about-claude/pricing` — same fetch that confirmed
+   Sonnet 4.6 $3/$15 and Haiku 4.5 $1/$5 already match the plan's numbers).
+3. My own first pass left `getAnthropic()` calls at MODULE SCOPE in 7 files (mirroring the plan's own
+   spec). Unlike the original `new Anthropic({apiKey: process.env.ANTHROPIC_API_KEY})` (never throws on
+   a missing key), `getAnthropic()` → `getRawClient()` → `requireEnv()` DOES throw — so merely
+   *importing* these files without `ANTHROPIC_API_KEY` set now threw before any code ran. Masked in the
+   full `bun test` run because `anthropic.test.mts` happens to run early enough to seed the module-level
+   client cache first; caught by running a narrower `bun test lib/social/` in isolation. Fixed by moving
+   the call inside each function's existing try/catch (matching `synthesis-agent.mts`/`triage-agent.mts`'s
+   already-correct lazy pattern).
+
+Full `bun test` (4266 pass) + `bunx next build` (brain-platform) and `npx tsc --noEmit` + `npm run build`
+(swfldatagulf-ops) all green. Discovered mid-session that a second session was concurrently exercising
+the exact same plan in a `_collision-lab` worktree — confirmed by operator as an intentional test
+scenario, not real conflicting work; proceeded on main per operator instruction.
+
+**Deliberately NOT done — operator-gated, per standing rules (no paid API calls / no closing checks on
+code-looks-right / no autonomous push without confirmation, all now satisfied by this push):** the
+`api_usage_logging_live_verify` check stays open. Closing it needs one real synthesis call (paid,
+`gh workflow run daily-rebuild.yml -f pack_id=<brain> -f force=true`) confirmed to land a row with
+`cost_usd > 0`. One honest caveat for whoever runs that verify: the insert is fire-and-forget with no
+`waitUntil`, so serverless answer-path calls (`assistant_stream`/`assistant_chart`/`email_build`) could
+drop a row on a cold container shutdown — the dominant cost (brain rebuilds, `synthesis`/`triage`) runs
+in the long-lived `bun refinery` process and is unaffected, but don't read early answer-path numbers as
+complete.
+
+---
+
 ## 2026-07-01 (main) — second live listing-lifecycle dispatch: Lee (heaviest county) proven, same-shape success as Collier
 
 Operator authorized a second live (`dry_run=false`) dispatch, this time Lee — the heaviest county (~7.4k+
