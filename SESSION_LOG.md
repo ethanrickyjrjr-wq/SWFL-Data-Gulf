@@ -1,3 +1,16 @@
+## 2026-06-30 (main) — market data: PUSHED (3 brains live in registry) + grade-coverage artifact re-sync
+
+Committed + pushed the 3-tier market build (commits `68dcb23a` brains + `601149f1` BRAIN_GEO). Two pre-push
+gates fired and were fixed in-push: **BRAIN_GEO** (all 3 catalog brains needed `lib/zip-dossier.ts` entries or
+located answers 500 — the 2026-06-25 incident class) and **grade-coverage** (7 new market-signal slugs shifted
+row-candidate 32→39). Correcting note: lint-staged **silently dropped** the regenerated
+`_AUDIT_AND_ROADMAP/grade-coverage.json` from `68dcb23a` (the known landmine), so main briefly held vocab-with-7-slugs
+but a stale 32-count artifact; this commit re-commits the correct 39-count artifact (verified `git show HEAD:` = 39
+before push). Next: live-verify (`market_cadence_three_tier_live_verify`) — apply the migration + dispatch the two
+parked `market_aggregates` workflows `dry_run=false`.
+
+---
+
 ## 2026-06-30 (main) — market data: 3-tier cadence build (price-distribution + listing-momentum + market-temperature) — BUILT, offline-green, HELD for push
 
 Phase-3 market brains, reshaped after a crawl4ai research pass (RULE 0.4) + code probe (RULE 0.5) showed the
