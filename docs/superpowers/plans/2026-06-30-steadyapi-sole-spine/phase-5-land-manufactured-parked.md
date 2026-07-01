@@ -13,7 +13,7 @@ Drop scaffold now so the graduation later is zero-code.
 2. **Parked cadence entry** under `not_yet_running:` in `ingest/cadence_registry.yaml` (probe-excluded).
 3. **Tier-1 cold target** — the `data_lake.listing_state` table already holds the shape; `property_type`
    distinguishes them.
-4. **`source_tag` provenance** — `realtor.com via SteadyAPI`, same as residential.
+4. **`source_tag` provenance** — `realtor.com`, same as residential (never surface "SteadyAPI", the access layer, in any citation/source_tag).
 5. **Idempotent merge** — same address-keyed upsert; no duplicate rows on re-run.
 
 ## Graduation (later, zero-code)

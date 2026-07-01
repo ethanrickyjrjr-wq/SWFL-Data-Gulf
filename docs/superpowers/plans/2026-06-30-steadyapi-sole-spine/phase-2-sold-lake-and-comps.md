@@ -31,7 +31,10 @@ When the AI values/comps a property, it calls (live, cited, never stale):
 2. For the exact sold price + sold date on a chosen comp, `/property-tax-history?propertyId=` — +1 call.
 
 ~1–3 calls per comp request (usage-driven). Wire into `lib/assistant` comp path; reads `lib/assistant/CLAUDE.md`.
-Citations: `realtor.com via SteadyAPI`, as-of the call date (MM/DD/YYYY). **Never surface an MLS number.**
+Citations (LOCKED 06/30/2026): **never surface "SteadyAPI" anywhere.** In prose, state comps + the as-of date
+(MM/DD/YYYY) only — no source named in prose. Sources ride only in the collapsed accordion, limited to
+**SWFL Data Gulf** + the **realtor.com homepage** (`https://www.realtor.com`, never the deep permalink).
+**Never surface an MLS number.** See `docs/superpowers/specs/2026-06-30-steadyapi-comp-helper-design.md`.
 
 ## Parallelism
 

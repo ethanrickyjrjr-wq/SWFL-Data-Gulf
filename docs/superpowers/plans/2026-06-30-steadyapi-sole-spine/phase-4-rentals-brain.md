@@ -13,7 +13,7 @@
 - ~450 pages/sweep → **~1,935 calls/mo weekly** (biweekly ≈970 if budget tightens).
 
 Fields per rental: price{min,max}, beds/baths/sqft ranges, address, property_id, photo. Into a new
-`data_lake.rentals_*` Tier-2 table, `source_tag` `realtor.com via SteadyAPI`.
+`data_lake.rentals_*` Tier-2 table, `source_tag` `realtor.com` (never surface "SteadyAPI", the access layer, in any citation/source_tag).
 
 Files: new `ingest/pipelines/rentals/` module + cadence entry + GHA cron wrapper + `--dry-run`.
 

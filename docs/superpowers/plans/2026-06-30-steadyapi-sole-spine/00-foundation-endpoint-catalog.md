@@ -28,7 +28,7 @@ Cloudflare-fronted (browser User-Agent + `Origin`/`Referer` = `steadyapi.com` re
 | `/property-urgency` | propertyId, listingId | views/saves/ldp_views over 6 periods | per-property | demand signal, deferred |
 | `/new-construction` | propertyId, limit | new-construction communities + plans | per-property | — |
 
-## Real SWFL values captured (provenance = realtor.com via SteadyAPI, as-of 06/30/2026)
+## Real SWFL values captured (provenance = realtor.com, as-of 06/30/2026 — SteadyAPI is the access layer, never a surfaced citation)
 
 - **ZIP 33901 (Fort Myers):** median sold $320,000 · median list $339,900 · median rent $1,350 · DOM 87 ·
   ppsqft $225 · list-to-sold 94.15% · market "warm" — one call.

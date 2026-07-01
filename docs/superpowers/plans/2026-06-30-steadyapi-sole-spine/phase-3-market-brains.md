@@ -17,7 +17,7 @@ Pull, weekly, into Tier-2 tables:
 
 ~320 calls/week total. Files: new `ingest/pipelines/market_aggregates/` module + cadence entry + GHA cron
 wrapper + `--dry-run`. New `data_lake.*` tables (one per shape), `source_tag` provenance
-`realtor.com via SteadyAPI`.
+`realtor.com` (the data origin — never surface "SteadyAPI", the access layer, in any citation/source_tag).
 
 ## Two brains (brain-first gate — table + PackDefinition in the same PR)
 

@@ -1,3 +1,14 @@
+## 2026-06-30 (main) — scrub "via SteadyAPI" from Phase 2-5 plan docs (isolated push)
+
+Operator decree: never surface "SteadyAPI" (the access layer) anywhere user-facing. Replaced all 5
+`realtor.com via SteadyAPI` provenance/citation strings across `docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/`
+(`00-foundation` provenance header, `phase-2` citation line rewritten to the locked rule, `phase-3`/`phase-4`/`phase-5`
+`source_tag`) with `realtor.com` (the data origin) + a "SteadyAPI is the access layer, never a surfaced citation" note.
+Engineering references to the API (endpoints, tiers, rate limits) unchanged. Pushed **isolated** (detached onto
+origin/main, only these 5 docs + this entry) so the parallel session's unpushed/HELD social commits were NOT dragged.
+
+---
+
 ## 2026-06-30 (main) — listing-lake: catch-up bridge BUILT + address-match proven live (4 calls), is_seed baseline fix
 
 Wrote the one-time catch-up that un-orphans the 10,459 seed rows onto the SteadyAPI feed — the last
