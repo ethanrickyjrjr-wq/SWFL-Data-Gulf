@@ -46,7 +46,14 @@ def _keyed_scan(rows: list[dict]) -> dict[tuple[str, str], dict]:
 
 
 def run(*, dry_run: bool = False, only_county: str | None = None,
-        today: str | None = None, source: str = "api") -> dict:
+        today: str | None = None, source: str = "api", catchup: bool = False) -> dict:
+    """`catchup=True` is the ONE-TIME bridge run after catchup.migrate flips the seed into api_feed:
+    it FORCES is_seed=True so the first diff against the freshly-migrated seed stamps every emitted
+    transition seed=True. Without it, prior is non-empty (10k migrated rows) → is_seed=False → every
+    seed listing gone from the live sweep flips to holding with seed=False, and every price that
+    differs from the sweep emits a real price-delta — a fabricated churn spike dated catch-up day, in
+    exactly the flow metrics this platform refuses to fake. The catch-up IS the api_feed baseline;
+    real flow starts from the NEXT steady-state run."""
     today = today or str(date.today())
     # The ONLY swapped part is the extractor + the source identity it lands under; the diff engine,
     # DB layer, coverage guard and state shape are reused unchanged (capture wide, slice late).
@@ -71,7 +78,9 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         rows = result["rows"]
         totals["scanned"] += len(rows)
         prior = {k: v for k, v in prior_all.items() if v.get("county") == county}
-        is_seed = len(prior) == 0
+        # catchup forces the baseline stamp: the migrated seed makes prior non-empty, but this run IS
+        # the api_feed baseline, so its transitions must be seed=True (no fabricated catch-up-day churn).
+        is_seed = catchup or len(prior) == 0
         complete, why = scan_is_complete(
             {"exhausted": result["exhausted"], "count": len(rows), "last_status": result["last_status"]},
             last_trusted_count=(len(prior) or None),
@@ -115,8 +124,10 @@ def main() -> None:
     ap.add_argument("--county", help="scan one county only (e.g. Lee)")
     ap.add_argument("--source", choices=["api", "scrape"], default="api",
                     help="api = SteadyAPI sole spine (default); scrape = legacy Source-B crawl4ai")
+    ap.add_argument("--catchup", action="store_true",
+                    help="ONE-TIME first sweep after catchup.migrate: force is_seed=True (baseline stamp)")
     args = ap.parse_args()
-    run(dry_run=args.dry_run, only_county=args.county, source=args.source)
+    run(dry_run=args.dry_run, only_county=args.county, source=args.source, catchup=args.catchup)
 
 
 if __name__ == "__main__":

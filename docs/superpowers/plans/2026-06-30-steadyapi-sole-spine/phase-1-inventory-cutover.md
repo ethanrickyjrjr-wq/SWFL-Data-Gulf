@@ -7,9 +7,11 @@
 
 Audited 06/30: the uncommitted rewrite would have blown ~4× the monthly cap in a single run. Fixed the
 same day, same session. All three defects below are now resolved in `extract_api.py`/`pipeline.py` and
-covered by passing tests (`pytest ingest/tests/pipelines/listing_lifecycle/` — **54/54 green**, mocked,
-zero network). What's **NOT** yet done: a real live `--dry-run` call-count proof (operator has not yet
-authorized the first live call this session), the one-time catch-up run, and `address_key.py` hardening.
+covered by passing tests (`pytest ingest/tests/pipelines/listing_lifecycle/` — **66/66 green**, mocked,
+zero network). DONE since: `address_key.py` hardening, the catch-up bridge script (`catchup.py`, step 4),
+and the `PHOTOS_API` secret (operator set it in GitHub Actions + Vercel 06/30). What's **NOT** yet done:
+the one-time catch-up RUN itself (script built + validated on a 4-call sample, awaits operator go for the
+full live sweep) and the scheduled cron graduation.
 
 1. ~~`enrich_new` does 2 calls per new listing~~ **FIXED:** replaced with `enrich_baths_batched`
    (clustered by lat/lon, one `/nearby-home-values` call covers every new listing in a ~2km cell, up to
@@ -80,18 +82,27 @@ SteadyAPI-sole and fixed the budget defects found in that scaffold.
    - `property_id` persisted as a real column (not stripped). Every RentCast remnant removed from
      `constants_api.py`.
 
-4. ⬜ **One-time catch-up run:** NOT run yet — blocked on the live-call prerequisite (the `PHOTOS_API`
-   secret does not exist in the repo; see step 6). Step 1 (hardening) is now DONE. full sweep →
-   address-match the 10,459 (by hardened `address_key`, lat/lon tiebreak) → stamp `property_id` + fill
-   `photo_url` on matches. Seed rows **not** in the sweep = stale → transition to holding. Sweep rows
-   **not** in the seed = new → insert. The 10,459 already have baths (10,449/10,459), so no baths
-   enrichment on legacy. ⚠️ **MUST handle the re-key:** the seed's stored `address_key` is OLD-format and
-   `upsert_state` MERGEs on `(source_name, address_key, sale_or_rent)` — re-key the seed rows (`UPDATE`)
-   or match on lat/lon first, else the catch-up INSERTs duplicates instead of stamping. See step 1.
-   📏 **Measure the deferred unit-smush here:** the first catch-up dry-run must bucket the *unmatched*
-   seed rows by has-unit/condo. The sweep emits marker units, but the SEED's unit format is unseen — if
-   condos/units dominate the misses, that is the signal to build the smush (excluding numbered-road
-   patterns like CR/SR/US 951). This converts the step-1 deferral into "defer until one measurement."
+4. ◧ **One-time catch-up — SCRIPT BUILT (`catchup.py`), not yet RUN (operator authorizes the live sweep).**
+   The bridge is now TWO commands, not one:
+   - `python -m ...catchup [--dry-run]` — **pure DB, 0 SteadyAPI calls.** Flips the 10,459 seed rows
+     from `source_name='lifecycle_seed'` to `'api_feed'` (Lee+Collier only) via an `UPDATE` — so
+     `first_seen`/DOM/baths ride along untouched and the live brain (which reads `api_feed`) un-orphans
+     them. Guards: aborts loud if `api_feed` is already populated (collision safety) or 0 in-scope.
+   - `python -m ...pipeline --source api --catchup` — the first live sweep. `--catchup` **forces
+     `is_seed=True`** so every gone/repriced seed row stamps `seed=True` (baseline), NOT a fabricated
+     catch-up-day churn spike in the flow metrics (advisor's hard fix). Matched rows stamp
+     `property_id`/`photo`; seed rows absent from the sweep → holding; sweep rows absent from the seed →
+     insert. **This run spends the calls** (~106 search + ≤60 enrich per county; ~330 total for Lee+Collier).
+   - ✅ **RE-KEY IS A NO-OP (evidence supersedes the step-1 warning).** Verified against 10,161 live
+     Lee+Collier seed rows: directionals are already SHORT (`long_quad=0`), `address_key_to_street`
+     round-trips them, so recomputing the hardened key reproduces the SAME key. So the catch-up does NOT
+     re-key — a plain source flip is collision-free and correct. The old "MUST re-key or INSERT dupes"
+     fear assumed long-form seed keys that don't exist.
+   - 📏 **Unit-smush measured live (4-call Marco sweep) → CONFIRM DEFER.** Non-unit/standard addresses
+     bridge at **145/163 = 89%** of seed keys (rest is genuine turnover); condo **units match 0/360**
+     (Marco is condo-heavy + the Source-B seed under-captured condos). Unmatched units insert as fresh
+     baseline (`is_seed=True`, harmless); the smush wouldn't recover them (seed lacks the condos) and
+     still risks misreading CR/SR/US numbered roads. Deferral stands, now on measurement not intuition.
 
 5. ⬜ **Scheduled `pipeline.py` run (every 2–3 days):** code path exists (`known_ids` threaded, budget
    logged) but has never executed against live data — snapshot-diff → upsert `listing_state` + append
@@ -100,19 +111,21 @@ SteadyAPI-sole and fixed the budget defects found in that scaffold.
 6. ◧ **Cadence entry + GHA cron wrapper + `--dry-run`** (pipeline-freshness rule) — wrapper + cadence
    entry EXIST (`.github/workflows/listing-lifecycle-daily.yml`, `cadence_registry.yaml`); cron schedule
    stays parked. The wrapper is now SteadyAPI-wired (06/30): `PHOTOS_API` added to env, `dry_run` input
-   defaults **true** (an accidental dispatch can't write the DB or fire enrich). **LIVE-CALL PREREQUISITE
-   the operator must do first:** `gh secret set PHOTOS_API -R ethanrickyjrjr-wq/SWFL-Data-Gulf` — the
-   secret does NOT exist yet, so until it's set a dispatch fetches 0 rows and exits 1. First low-call
-   validation: dispatch `dry_run=true, county=Collier` (~35 calls) — reads the real `[budget]` line and
-   proves the GitHub-runner IP clears SteadyAPI's Cloudflare/WAF.
+   defaults **true** (an accidental dispatch can't write the DB or fire enrich). ✅ **`PHOTOS_API` secret
+   SET** by the operator (GitHub Actions + Vercel, 06/30) — the GHA dispatch path is now unblocked. First
+   low-call validation: dispatch `dry_run=true, county=Collier` (~35 calls) — reads the real `[budget]`
+   line and proves the GitHub-runner IP clears SteadyAPI's Cloudflare/WAF. (Locally, a 4-call Marco sweep
+   already proved the key + parser + address-match bridge from the home IP; the GHA dispatch additionally
+   proves the runner IP.)
 
 ## Verification
 
-- ✅ `pytest ingest/tests/pipelines/listing_lifecycle/` green — **58/58 passed**, mocked/network-free
-  (batched-enrichment + dry-run-safety + the new `test_address_key` hardening cases: directional
-  long/short collapse, quadrant-never-merge, Cove/Point suffix, 4th-street spacing).
-- ⬜ `--dry-run` prints expected page count without writing — code supports it, **not yet run live**
-  (blocked on the `PHOTOS_API` secret prerequisite above).
+- ✅ `pytest ingest/tests/pipelines/listing_lifecycle/` green — **66/66 passed**, mocked/network-free
+  (batched-enrichment + dry-run-safety + `test_address_key` hardening + `test_catchup`: summary scoping,
+  api_feed collision guard, and `--catchup` forcing `seed=True` on a non-empty prior).
+- ✅ Address-match bridge proven on a 4-call live Marco sweep: non-unit standard addresses match 89% of
+  seed keys (145/163); condo units 0/360 (insert as fresh baseline, harmless) — re-key confirmed a no-op.
+- ⬜ Full live `--catchup` sweep + `[budget]` line — code + migration ready, **awaits operator go**.
 - ⬜ Row-count guard after the `data_lake.listing_state` write (Gate 4) — no write has happened yet.
 - ⬜ Catch-up asserts (10,459 retained, `property_id` non-null on matches, stale count plausible) —
   blocked on step 4.

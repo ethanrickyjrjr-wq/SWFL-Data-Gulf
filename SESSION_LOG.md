@@ -1,3 +1,30 @@
+## 2026-06-30 (main) — listing-lake: catch-up bridge BUILT + address-match proven live (4 calls), is_seed baseline fix
+
+Wrote the one-time catch-up that un-orphans the 10,459 seed rows onto the SteadyAPI feed — the last
+unbuilt piece of Phase 1 and the gate for Phase 2A. Operator set the `PHOTOS_API` secret (GitHub +
+Vercel) and authorized "some api calls to get right."
+
+- `ingest/pipelines/listing_lifecycle/catchup.py` (NEW) — the bridge is now a **source flip**, not a
+  re-key. `migrate()` UPDATEs `source_name` `lifecycle_seed → api_feed` for Lee+Collier (pure DB, **0
+  SteadyAPI calls**; `first_seen`/DOM/baths ride along). Pure `summarize_seed`/`decide` cores; guards
+  abort loud on a populated `api_feed` (collision) or 0-in-scope.
+- `pipeline.py` — added `--catchup`/`catchup=True` → **forces `is_seed=True`** on the first sweep so
+  gone/repriced seed rows stamp `seed=True` (baseline), not a fabricated catch-up-day churn spike in the
+  flow metrics (advisor's hard fix — without it, prior is non-empty → `is_seed=False`).
+- **RE-KEY IS A NO-OP (evidence).** Probed 10,161 live Lee+Collier seed rows: directionals already SHORT
+  (`long_quad=0`), `address_key_to_street` round-trips them, so the hardened key reproduces the SAME key.
+  Supersedes the earlier "MUST re-key or INSERT dupes" warning — it assumed long forms that don't exist.
+- **Address-match proven on a 4-call Marco sweep:** non-unit standard addresses match **145/163 = 89%**
+  of seed keys (rest = genuine turnover, clean keys); condo **units 0/360** (Marco condo-heavy + seed
+  under-captured condos) → insert as fresh baseline, harmless. **Unit-smush CONFIRM-DEFER** (wouldn't
+  recover them; CR/SR numbered-road risk stands). No geocoding needed.
+- Tests: `test_catchup.py` (8 new) — summary scoping, api_feed collision guard, `--catchup` seed flag.
+  `pytest ingest/tests/pipelines/listing_lifecycle/` = **66/66 green**, mocked/network-free.
+
+NOT run: the full live `--catchup` sweep (~330 calls Lee+Collier) awaits operator go. Then apply
+`docs/sql/20260630_listing_active_stats_api.sql` (view already reads `api_feed`). Unblocks Phase 2A
+(sold capture keys on `property_id`, which the catch-up stamps).
+
 ## 2026-06-30 (main) — spec: SteadyAPI Phase 2B on-demand comp helper (design approved, handoff written, zero live calls)
 
 Brainstormed + specced the answer-engine comp path (SteadyAPI sole-spine Phase 2B, Part B). **Probe-first (RULE 0.5)**
