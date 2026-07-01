@@ -15,6 +15,17 @@ Verified offline: touched-area suites 1450/0, `bunx next build` ✓. The 8 code 
 were carried to origin/main by a concurrent rebase-push; this entry pushed in isolation via a detached
 worktree off origin/main (foreign listing answer-path commits left behind for their own proof+push). Check
 `chart_palette_extension_live_verify` stays open (operator/prod). Next: Task C per the BCD handoff.
+## 2026-07-01 (main) — Build 2 spec: grounded Just-Sold email builder (handoff, docs only)
+
+Registered Build 2 of the New Listing lifecycle epic (`node scripts/new-build.mjs sold-email-builder`) —
+check `sold_email_builder_live_verify` open — and wrote the complete handoff spec at
+`docs/superpowers/specs/2026-07-01-sold-email-builder-design.md`. Closes the sold-email gap: today "just
+sold" routes to the generic flyer and the only sold layouts are `$512K` placeholder presets, while the sold
+DATA (`fetchSoldEvent`/`SoldEvent`, `steadyapi.ts:321`) is unwired to any builder. Spec: `buildSoldEmail`
+mirroring `buildListingFlyer`, grounded in the county-recorded sale price+date; a `fetchSubjectProperty`
+subject-lookup to resolve propertyId (the data risk); an `isSoldIntent` route fork; four-lane/no-invention
+(no recorded sale → cited lane-4 need, never a relabeled list price); offline-verify only. Depends on Build 1
+for the saved-address→property resolution. NOT built — handed off.
 
 ## 2026-07-01 (main) — master-wiring gap: spec + plan for investor-zip-swfl + active-listings-swfl (handoff, docs only)
 
