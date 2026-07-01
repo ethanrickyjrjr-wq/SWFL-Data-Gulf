@@ -5,7 +5,7 @@
   "summary": {
     "unregistered": 0,
     "invalid-polarity": 0,
-    "row-candidate": 39,
+    "row-candidate": 40,
     "gradeable": 195,
     "reviewed-display": 40,
     "moat-fuel": 0,
@@ -33,6 +33,27 @@
       "gradeable": true,
       "reason": null,
       "backtest_clean": false
+    },
+    {
+      "slug": "active_rental_listings_count_swfl",
+      "concept_id": "active_rental_listings_count_swfl",
+      "bucket": "row-candidate",
+      "gateVector": {
+        "slug": "active_rental_listings_count_swfl",
+        "concept_id": "active_rental_listings_count_swfl",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": false,
+        "numeric_ok": false,
+        "raw_polarity": null,
+        "category": "market-signal",
+        "value_type": "extensive",
+        "window_days": null,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
     },
     {
       "slug": "aircraft_operations",
