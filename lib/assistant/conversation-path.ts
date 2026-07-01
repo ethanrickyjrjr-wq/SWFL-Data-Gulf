@@ -612,7 +612,12 @@ export async function runConversationPath(
   // gets the in-app premise. An off-topic ask (or master unavailable) falls back to the
   // un-grounded premise: analyst → OUTSIDE_SYSTEM, public → PUBLIC_SYSTEM funnel explainer.
   // If located, ground Haiku on the real per-location dossier — the converse pattern.
-  const detected = offTopic ? null : detectWelcomeLocation(messages);
+  // Build 1 — a confirm-turn re-entry is forced through the region branch (NOT the located
+  // branch): a bare-address reply would otherwise route to the located branch, whose
+  // early gaps (out-of-scope / busy / no-coverage) could swallow the reply before the comp
+  // call runs — the dead-end this loop exists to prevent. The region branch reaches the
+  // comp call reliably (offTopic is already false on a re-entry).
+  const detected = offTopic || compReentryAddress ? null : detectWelcomeLocation(messages);
 
   // Prepend the highlighted fact to the final user turn — same pattern as report-path.ts
   // line 147. Without this, the conversation path receives the question but never sees

@@ -15,6 +15,21 @@ Verified offline: touched-area suites 1450/0, `bunx next build` ✓. The 8 code 
 were carried to origin/main by a concurrent rebase-push; this entry pushed in isolation via a detached
 worktree off origin/main (foreign listing answer-path commits left behind for their own proof+push). Check
 `chart_palette_extension_live_verify` stays open (operator/prod). Next: Task C per the BCD handoff.
+## 2026-07-01 (main) — Build 1 hardening: close the confirm loop (routing fix + end-to-end test)
+
+Advisor review after the Parts A–C commit (`e6854235`) flagged the one thing the unit tests didn't cover:
+whether a confirm reply actually REACHES the comp path through `runConversationPath`'s branch routing, or
+dead-ends in a gap. Verified `detectWelcomeLocation` scans ONLY user-role messages (`grounded.ts:101`), so a
+"yes" never mis-routes off the assistant confirm text. Added a one-line robustness fix — a confirm re-entry
+(`compReentryAddress` set) forces `detected = null` so it takes the region branch (reaches the comp call
+reliably), never the located branch whose out-of-scope/busy/no-coverage gaps could swallow a bare-address
+reply. Added two end-to-end integration tests in `conversation-path.test.ts` driving the real two-turn
+sequence [comp-ask-no-address → confirm → "yes"]: turn-1 asserts the CONFIRM (not a cold-ask) reaches the
+system prompt with ZERO geocode; turn-2 asserts "yes" re-enters and geocodes the SAVED address (loop closed,
+no dead-end). New test mocks (supabase/server, geocode-address, next/headers cookies) added to the ORIG
+leak-restore set; assistant sweep 173/173 green, `bunx next build` clean. Files: `conversation-path.ts`
+(+`.test.ts`). Still nothing pushed.
+
 ## 2026-07-01 (main) — Build 1 BUILT: New Listing project + saved address (Parts A–C; D deferred)
 
 Executed the Build 1 spec (`docs/superpowers/specs/2026-07-01-listing-project-address-design.md`), check

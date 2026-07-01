@@ -13,6 +13,11 @@ import * as meterModule from "@/lib/highlighter/meter";
 import * as chatUsageModule from "@/lib/welcome/chat-usage";
 import * as dossierCacheModule from "@/lib/welcome/dossier-cache";
 import * as anthropicModule from "@/refinery/agents/anthropic.mts";
+// Named import (not `* as`): the star form pulls in the restricted createClientUntyped
+// hatch and trips no-restricted-imports. We only stub/restore the typed createClient.
+import { createClient as realCreateClient } from "@/utils/supabase/server";
+import * as geocodeModule from "@/lib/geo/geocode-address";
+import * as nextHeadersModule from "next/headers";
 import { parseSseFrame, type WelcomeFrame } from "@/lib/welcome/frames";
 import type { AssistantRequest } from "@/lib/assistant/contract";
 
@@ -33,6 +38,9 @@ const ORIG = {
   "@/lib/welcome/chat-usage": { ...chatUsageModule },
   "@/lib/welcome/dossier-cache": { ...dossierCacheModule },
   "@/refinery/agents/anthropic.mts": { ...anthropicModule },
+  "@/utils/supabase/server": { createClient: realCreateClient },
+  "@/lib/geo/geocode-address": { ...geocodeModule },
+  "next/headers": { ...nextHeadersModule },
 };
 afterAll(() => {
   for (const [path, orig] of Object.entries(ORIG)) mock.module(path, () => orig);
@@ -131,6 +139,44 @@ function dossierWith(lines: LocationDossier["lines"]): LocationDossier {
     coverage_caveats: [],
   };
 }
+
+// Build 1 — PROJECT AI cookie reads (subject_address for the comp confirm; the
+// other-projects list). Inert for every existing test (they pass no project_id, so
+// runConversationPath skips both reads). maybeSingle serves currentProjectContext;
+// limit serves otherProjectsBlockFor (1 row → "" block, no extra context leak).
+const projectState = { subjectAddress: "" };
+// cookies() throws outside a request scope; the mocked createClient ignores its argument,
+// so an empty stub is enough to let the RLS reads run (they'd otherwise fail-open to "").
+mock.module("next/headers", () => ({ cookies: async () => ({}) }));
+mock.module("@/utils/supabase/server", () => ({
+  createClient: () => ({
+    auth: { getUser: async () => ({ data: { user: { id: "u" } } }) },
+    from: () => {
+      const chain: Record<string, unknown> = {
+        select: () => chain,
+        eq: () => chain,
+        order: () => chain,
+        limit: async () => ({
+          data: [{ id: "p1", title: "", items: [], updated_at: null, ui_state: null }],
+        }),
+        maybeSingle: async () => ({
+          data: { items: [], subject_address: projectState.subjectAddress },
+        }),
+      };
+      return chain;
+    },
+  }),
+}));
+// Deterministic geocode so a confirm re-entry never makes a live Mapbox/Steady call.
+// `lastArg` proves WHICH address reached compHelper (the loop's payload); null result →
+// compHelper returns a lane-4 need (a comp-path hit) without any SteadyAPI call.
+const geocodeState: { result: unknown; lastArg: string } = { result: null, lastArg: "" };
+mock.module("@/lib/geo/geocode-address", () => ({
+  geocodeAddress: async (text: string) => {
+    geocodeState.lastArg = text;
+    return geocodeState.result;
+  },
+}));
 
 const { runConversationPath, PUBLIC_SYSTEM, buildClientContextBlock } =
   await import("./conversation-path");
@@ -720,4 +766,53 @@ test("FACT INJECTION — selection_type absent: typeHint omitted from prefix", a
   expect(lastContent).toContain('About this fact: "82"');
   expect(lastContent).not.toContain("About this fact (");
   masterState.output = null;
+});
+
+// --- Build 1: listing-project saved-address confirm loop (the whole loop, end to end) ---
+// These drive runConversationPath (not compHelper in isolation) so they prove the confirm
+// reply actually REACHES the comp path through the branch routing — the dead-end the
+// operator chose "caller-level re-entry" to prevent.
+
+test("BUILD 1 — a comp ask with no typed address CONFIRMS the saved listing address (no geocode)", async () => {
+  captured.system = undefined;
+  geocodeState.lastArg = "";
+  masterState.output = MASTER_OUTPUT; // region branch grounds on master
+  projectState.subjectAddress = "500 5th Ave S, Naples";
+  const res = await run({
+    context: "outside",
+    project_id: "p1",
+    messages: [{ role: "user", content: "what are comps for my listing?" }],
+  });
+  const body = await res.text();
+  expect(body).toContain(MODEL_SENTINEL); // reached the model — not swallowed
+  expect(captured.system).toContain("Is this comp for 500 5th Ave S, Naples?"); // confirm, not a guess
+  expect(geocodeState.lastArg).toBe(""); // pure confirm — no geocode, no SteadyAPI call
+  masterState.output = null;
+  projectState.subjectAddress = "";
+});
+
+test('BUILD 1 — a "yes" reply re-enters the comp path with the saved address (no dead-end)', async () => {
+  captured.system = undefined;
+  geocodeState.lastArg = "";
+  geocodeState.result = null; // geocode miss → a lane-4 need (still a comp-path hit), no live Steady
+  masterState.output = MASTER_OUTPUT;
+  projectState.subjectAddress = "500 5th Ave S, Naples";
+  const res = await run({
+    context: "outside",
+    project_id: "p1",
+    messages: [
+      { role: "user", content: "what are comps for my listing?" },
+      {
+        role: "assistant",
+        content: 'Is this comp for 500 5th Ave S, Naples? Reply "yes" or send a different address.',
+      },
+      { role: "user", content: "yes" },
+    ],
+  });
+  const body = await res.text();
+  expect(body).toContain(MODEL_SENTINEL); // reached the model — NOT an out-of-scope / busy gap
+  // the loop's payload: "yes" resolved to the saved address and ran comps against it
+  expect(geocodeState.lastArg).toBe("500 5th Ave S, Naples");
+  masterState.output = null;
+  projectState.subjectAddress = "";
 });
