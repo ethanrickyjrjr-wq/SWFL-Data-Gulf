@@ -40,14 +40,11 @@ export interface HeatRowSpec extends BaseChartSpec {
 
 export interface StackedBarSpec extends BaseChartSpec {
   type: "stacked-bar";
-  segments: Array<{ label: string; value: number; color: string }>;
+  /** `color` optional — uncolored segments get an on-brand extendPalette fill. */
+  segments: Array<{ label: string; value: number; color?: string }>;
   /** When omitted, the segment values are summed. */
   total?: number;
 }
 
 export type EmailChartSpec =
-  | BarChartSpec
-  | SparklineSpec
-  | GaugeSpec
-  | HeatRowSpec
-  | StackedBarSpec;
+  BarChartSpec | SparklineSpec | GaugeSpec | HeatRowSpec | StackedBarSpec;

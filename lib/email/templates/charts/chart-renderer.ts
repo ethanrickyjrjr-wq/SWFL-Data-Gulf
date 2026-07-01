@@ -12,6 +12,7 @@ import {
   type EmailChartTheme,
   type ResolvedChartTheme,
 } from "./chart-defaults";
+import { extendPalette } from "@/lib/charts/palette";
 
 // Section 2 (S2) — email-safe chart renderer.
 //
@@ -203,6 +204,10 @@ function renderStackedBar(spec: StackedBarSpec, theme: ResolvedChartTheme, width
   const sum = spec.segments.reduce((s, x) => s + Math.max(0, x.value), 0);
   const total = spec.total && spec.total > 0 ? spec.total : sum || 1;
 
+  // On-brand fallback fills for any segment lacking an explicit color. Anchor
+  // (brand accent) is emitted first, verbatim; extras are grayscale-distinct.
+  const palette = extendPalette([theme.accent], spec.segments.length, { background: "#ffffff" });
+
   // Pixel widths that sum exactly to `width` (remainder to the last segment).
   let used = 0;
   const pieces = spec.segments.map((seg, i) => {
@@ -213,17 +218,17 @@ function renderStackedBar(spec: StackedBarSpec, theme: ResolvedChartTheme, width
     used += px;
     const first = i === 0;
     const radius = `${first ? "4px 0 0 4px" : isLast ? "0 4px 4px 0" : "0"}`;
-    return `<td style="width:${px}px;background:${esc(seg.color)};height:22px;border-radius:${radius};font-size:0;line-height:0;">&nbsp;</td>`;
+    return `<td style="width:${px}px;background:${esc(seg.color ?? palette[i])};height:22px;border-radius:${radius};font-size:0;line-height:0;">&nbsp;</td>`;
   });
 
   const bar = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:${width}px;table-layout:fixed;"><tr>${pieces.join("")}</tr></table>`;
 
   const legend = spec.segments
-    .map((seg) => {
+    .map((seg, i) => {
       const pct = Math.round((Math.max(0, seg.value) / total) * 100);
       return [
         `<span style="display:inline-block;margin:6px 14px 0 0;font-size:12px;color:${theme.primary};white-space:nowrap;">`,
-        `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${esc(seg.color)};margin-right:5px;"></span>`,
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${esc(seg.color ?? palette[i])};margin-right:5px;"></span>`,
         `${esc(seg.label)} <strong>${esc(seg.value)}</strong> (${pct}%)`,
         "</span>",
       ].join("");

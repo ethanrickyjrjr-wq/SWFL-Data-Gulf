@@ -2,6 +2,7 @@ import { describe, test } from "bun:test";
 import assert from "node:assert/strict";
 import { renderChart } from "../templates/charts/chart-renderer.ts";
 import type { EmailChartSpec } from "../templates/charts/chart-types.ts";
+import { extendPalette } from "@/lib/charts/palette";
 
 // Section 2 (S2) — email-safe chart renderer. These assert the HARD email
 // constraints (no <script>/<canvas>/<style>, inline-only, ≤600px, data escaped)
@@ -146,5 +147,33 @@ describe("renderChart — degenerate inputs don't throw", () => {
   });
   test("all-zero bar values don't divide by zero", () => {
     assert.doesNotThrow(() => renderChart({ type: "bar", data: [{ label: "a", value: 0 }] }));
+  });
+});
+
+describe("renderChart — stacked-bar palette fallback", () => {
+  test("uncolored segments get distinct on-brand fills from extendPalette", () => {
+    const svg = renderChart({
+      type: "stacked-bar",
+      title: "Share",
+      segments: [
+        { label: "A", value: 40 },
+        { label: "B", value: 35 },
+        { label: "C", value: 25 },
+      ],
+    });
+    const gen = extendPalette(["#3DC9C0"], 3, { background: "#ffffff" }).map((c) =>
+      c.toLowerCase(),
+    );
+    const lower = svg.toLowerCase();
+    for (const c of gen) assert.ok(lower.includes(c), `expected ${c} in stacked-bar svg`);
+  });
+
+  test("explicit segment color still wins", () => {
+    const svg = renderChart({
+      type: "stacked-bar",
+      title: "Share",
+      segments: [{ label: "A", value: 1, color: "#ff00ff" }],
+    });
+    assert.ok(svg.toLowerCase().includes("#ff00ff"));
   });
 });
