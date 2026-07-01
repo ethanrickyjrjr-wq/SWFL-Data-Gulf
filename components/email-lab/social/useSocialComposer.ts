@@ -36,8 +36,12 @@ export function useSocialComposer({ scope, projectId, branding }: UseSocialCompo
   const text = tokens.TEXT ?? "#ffffff";
   const logoUrl = tokens.LOGO_URL;
 
+  // Default to 4:5 portrait — Meta's current recommended feed ratio (first-party
+  // ads guide: "Ratio 4:5 · 1440×1800") and Sprout Social concur; square (1:1) is
+  // no longer the recommended feed default. Only affects NEW designs — a saved
+  // design carries its own `format`, so nothing existing re-renders.
   const [design, setDesign] = useState<SocialDesign>(() => ({
-    ...newDesign("square"),
+    ...newDesign("portrait"),
     background: primary,
   }));
   const [selectedId, setSelectedId] = useState<string | null>(null);

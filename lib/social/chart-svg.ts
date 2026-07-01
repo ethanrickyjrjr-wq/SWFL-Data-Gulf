@@ -98,7 +98,13 @@ export function nativeBarSvg(
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${totalH}" viewBox="0 0 ${width} ${totalH}">${parts.join("")}</svg>`;
 }
 
-/** Build the chart block as an SVG fragment placed at (x,y) with a target width. */
+/**
+ * Build the chart block as an SVG fragment placed at (x,y) with a target width.
+ * When `maxHeight` is given and the chart's natural height would exceed it, the
+ * chart is scaled DOWN uniformly to fit (width shrinks proportionally, staying
+ * left-anchored at x) — so it can't spill past a caller's boundary (e.g. a social
+ * safe zone / watermark line). The chart is fit, NEVER dropped.
+ */
 export function chartFragment(
   spec: EmailChartSpec,
   x: number,
@@ -106,12 +112,18 @@ export function chartFragment(
   targetW: number,
   accent: string,
   neutral: string,
+  maxHeight?: number,
 ): { svg: string; height: number } {
   // sparkline / gauge → pure SVG from the shared renderer (brand accent carried in).
   const html = renderChart(spec, { accent, neutral, primary: accent });
   const extracted = extractInnerSvg(html);
   if (extracted) {
-    const scale = targetW / extracted.width;
+    let scale = targetW / extracted.width;
+    // Clamp to the vertical budget: if fitting the width overshoots maxHeight, fit
+    // the height instead (uniform scale, so the aspect ratio is preserved).
+    if (maxHeight && maxHeight > 0 && extracted.height * scale > maxHeight) {
+      scale = maxHeight / extracted.height;
+    }
     const h = extracted.height * scale;
     return {
       svg: `<g transform="translate(${x},${y}) scale(${scale.toFixed(4)})">${extracted.inner}</g>`,
@@ -123,8 +135,12 @@ export function chartFragment(
   if (!bar) return { svg: "", height: 0 };
   const inner = extractInnerSvg(bar);
   if (!inner) return { svg: "", height: 0 };
+  const barScale =
+    maxHeight && maxHeight > 0 && inner.height > maxHeight ? maxHeight / inner.height : 1;
+  const transform =
+    barScale === 1 ? `translate(${x},${y})` : `translate(${x},${y}) scale(${barScale.toFixed(4)})`;
   return {
-    svg: `<g transform="translate(${x},${y})">${inner.inner}</g>`,
-    height: inner.height,
+    svg: `<g transform="${transform}">${inner.inner}</g>`,
+    height: inner.height * barScale,
   };
 }

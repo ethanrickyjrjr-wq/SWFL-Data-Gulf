@@ -15,6 +15,35 @@ spec `docs/superpowers/specs/2026-07-01-market-heat-region-trend-design.md`, pla
 (build) + `market_trend_sweep_followup` (the whole-sweep + charting-wire follow-up) open. Also this session:
 Task B (chart palette extension) spec+plan committed earlier (bff6598b/447345de), unpushed. Nothing pushed.
 
+## 2026-07-01 (main) — Social safe zones (Task A): key-element exclusion + 4:5 default + chart-fit
+
+Built Task A of the AI-deliverable-design-quality work (research: `_ASSISTANT/research/2026-07-01-ai-
+deliverable-design-quality-research.md`). Reframe established first: the research doc's "closed-tokens"
+centerpiece is ALREADY true here (the Email/Social AI can't emit color/font/position — strip-mode schemas
+drop them), so the real gap is deterministic engine work. Re-verified the load-bearing numbers via crawl4ai
+against Meta's OWN docs this session (RULE 0.4), not the third-party blog the research doc used:
+- Meta first-party (developers.facebook.com/.../reels-ads/): "Keep the bottom 35% of your 9:16 creative
+  free of text, logos, and other key elements" + lead with 9:16; IG-feed ads guide: "Ratio 4:5 · 1440×1800".
+- Sprout Social corroborates top 14% (250px); bottom is a RANGE (20% Story / 35% Reel). Nuance that
+  de-handcuffs: safe zones constrain KEY ELEMENTS only — background art is full-bleed. Evidence notes:
+  `_ASSISTANT/research/2026-07-01-social-safezone-meta-firstparty-verification.md`.
+
+Shipped (`docs/superpowers/specs/2026-07-01-social-safe-zones-design.md`, check `social_safe_zones_live_verify`):
+- `lib/social/safe-zones.ts` (new) — single source of truth; tunable, evidence-cited insets. Feed formats
+  stay width-based (renders unchanged at visible element positions); story reserves top 14% / bottom 35% /
+  sides 6% (height-based top/bottom).
+- `render-social-image.ts composeCardSvg` — key elements laid inside the band; watermark lifts from y≈1818
+  (inside the reserve) to y≈1222 (above it). Background stays full-bleed.
+- `chart-svg.ts chartFragment` + rasterizer — KNOWN-LIMITATION FIX: a tall chart now scales DOWN to fit the
+  band instead of spilling into the bottom reserve / colliding with the watermark (fit, never dropped).
+- `KonvaStage.tsx` — soft safe-zone guide as a DOM overlay (never captured by stage.toDataURL, never blocks
+  a drag). `useSocialComposer.ts` default square→portrait (4:5). `author.ts` one-line format hint.
+- Tests: `safe-zones.test.ts` + extended render tests, incl. feed-unchanged regression + chart-fit proof —
+  39 pass; tsc clean project-wide. Live PNG/browser render rides on the live-verify check (offline-only bar).
+Also handed off B/C/D: `_ASSISTANT/research/2026-07-01-design-quality-BCD-handoff.md` (same crawl4ai-first
+procedure). NOTE: this push carries 3 foreign commits from parallel sessions (listings-citation F1 + Task B
+docs) already ahead of origin — not mine, left untouched.
+
 ## 2026-07-01 (main) — listing citations off dead-RentCast → "SWFL Data Gulf" (naming decree + F1)
 
 Operator decree (LOCKED): user-facing listing/comp citations say "SWFL Data Gulf" or "lake" — never

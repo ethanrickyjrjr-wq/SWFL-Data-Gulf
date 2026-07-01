@@ -82,7 +82,7 @@ Pick ONE layout TEMPLATE that best fits the request, then WRITE its text. You ch
 
 Return ONLY valid JSON with these keys (no markdown fences, no prose outside the object):
   templateId: string    (EXACTLY one id from the list below)
-  format: string        (one of the chosen template's formats)
+  format: string        (one of the chosen template's formats; prefer 4:5 "portrait" for a feed post and 9:16 "story" for a vertical/story post — the platforms' current recommended sizes)
   captionText: string   (<=280 words, hook-first, ONE CTA at the end, NO hashtags inline, NO em-dashes)
   hashtags: string[]    (5-8 items, NO "#" prefix; mix: 2 local, 2 topical, 1 brand "SWFLDataGulf")
   patch: object         (element id -> updated text fields ONLY; key by the EXACT element ids shown for the chosen template)${variantsKeyLine}

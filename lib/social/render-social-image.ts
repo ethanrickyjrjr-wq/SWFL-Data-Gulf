@@ -37,6 +37,7 @@ import { resolveTheme, type BrandTheme } from "@/scripts/email/types";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 import { SOCIAL_FORMATS, isSocialFormat, type SocialFormat } from "@/lib/social/formats";
 export { SOCIAL_FORMATS, isSocialFormat, type SocialFormat };
+import { safeInsets } from "@/lib/social/safe-zones";
 import { esc, clip, chartFragment } from "@/lib/social/chart-svg";
 
 // ── Input model ────────────────────────────────────────────────────────────
@@ -194,28 +195,34 @@ export function composeCardSvg(args: {
   const accent = t.accent;
   const neutral = "#9CA3AF";
   const onDark = "#FFFFFF";
-  const pad = Math.round(width * 0.07);
-  const innerW = width - pad * 2;
+  // Safe zones — keep KEY ELEMENTS (accent rule, logo, headline, stat, chart,
+  // watermark) inside the band so they aren't obscured by platform UI chrome. The
+  // BACKGROUND stays full-bleed. Feed formats resolve to the historical 7% margin
+  // (byte-identical output); `story` reserves top 14% / bottom 35% / sides 6%.
+  const safe = safeInsets(args.format, width, height);
+  const pad = safe.left; // horizontal-left inset — all x positions anchor here.
+  const padR = safe.right; // horizontal-right inset.
+  const innerW = width - safe.left - safe.right;
 
   const layers: string[] = [];
 
-  // Background — brand primary.
+  // Background — brand primary. Full-bleed edge-to-edge (never safe-zone-constrained).
   layers.push(`<rect width="${width}" height="${height}" fill="${esc(primary)}"/>`);
-  // Accent rule at the top.
+  // Accent rule at the top of the safe band.
   layers.push(
-    `<rect x="${pad}" y="${pad}" width="${Math.round(innerW * 0.18)}" height="8" rx="4" fill="${esc(accent)}"/>`,
+    `<rect x="${pad}" y="${safe.top}" width="${Math.round(innerW * 0.18)}" height="8" rx="4" fill="${esc(accent)}"/>`,
   );
 
-  let cursorY = pad + 40;
+  let cursorY = safe.top + 40;
 
-  // Logo (top-right) — only if we actually have bytes. No bytes → nothing drawn.
+  // Logo (top-right, inside the safe band) — only if we actually have bytes.
   if (args.logoBuffer && args.logoBuffer.length > 0) {
     const logoH = Math.round(height * 0.06);
     const logoW = Math.round(logoH * 3); // bounded box; preserveAspectRatio fits.
     const mime = "image/png"; // fetchLogo only returns raster bytes.
     const b64 = args.logoBuffer.toString("base64");
     layers.push(
-      `<image x="${width - pad - logoW}" y="${pad}" width="${logoW}" height="${logoH}" ` +
+      `<image x="${width - padR - logoW}" y="${safe.top}" width="${logoW}" height="${logoH}" ` +
         `preserveAspectRatio="xMaxYMid meet" href="data:${mime};base64,${b64}"/>`,
     );
   }
@@ -260,13 +267,20 @@ export function composeCardSvg(args: {
     cursorY += Math.round(height * 0.03);
   }
 
-  // Chart — only if a spec was provided and it produces drawable SVG.
+  // Chart — only if a spec was provided and it produces drawable SVG. Bound its
+  // height to the safe band so a tall chart scales down to fit rather than spilling
+  // into the reserved bottom zone / colliding with the watermark (fit, never dropped).
   if (args.model.chart) {
     const targetW = Math.min(innerW, Math.round(width * 0.7));
-    const frag = chartFragment(args.model.chart, pad, cursorY, targetW, accent, onDark);
-    if (frag.svg) {
-      layers.push(frag.svg);
-      cursorY += frag.height + Math.round(height * 0.02);
+    const gap = Math.round(height * 0.02);
+    const contentBottom = height - safe.bottom; // top of the bottom reserve == watermark line
+    const avail = contentBottom - cursorY - gap;
+    if (avail > 40) {
+      const frag = chartFragment(args.model.chart, pad, cursorY, targetW, accent, onDark, avail);
+      if (frag.svg) {
+        layers.push(frag.svg);
+        cursorY += frag.height + gap;
+      }
     }
   }
 
@@ -279,13 +293,17 @@ export function composeCardSvg(args: {
   // it isn't a parseable ISO date (e.g. already MM/DD/YYYY passes through).
   const asOfDisplay = asOfFromIso(asOf) ?? asOf;
   const wmSize = Math.round(width * 0.024);
-  const wmY = height - pad;
+  // Bottom-anchor to the TOP of the bottom safe band — the provenance watermark is
+  // the element most in need of surviving a re-share, so it must clear the UI chrome
+  // (for `story` this lifts it above the reserved bottom 35%; for feed it's the old
+  // `height - pad`).
+  const wmY = height - safe.bottom;
   // Top line: brand • as of {date} [+ source brain].
   const sourcePart =
     args.model.source && args.model.source.trim() ? ` • ${args.model.source.trim()}` : "";
   const watermark = `${WATERMARK_BRAND} • as of ${asOfDisplay}${sourcePart}`;
   layers.push(
-    `<rect x="0" y="${height - pad * 1.4}" width="${width}" height="${pad * 1.4}" fill="${esc(primary)}" opacity="0.0"/>`,
+    `<rect x="0" y="${wmY - wmSize * 2}" width="${width}" height="${wmSize * 3}" fill="${esc(primary)}" opacity="0.0"/>`,
   );
   layers.push(
     `<text x="${pad}" y="${wmY - wmSize}" font-size="${wmSize}" fill="${esc(onDark)}" ` +

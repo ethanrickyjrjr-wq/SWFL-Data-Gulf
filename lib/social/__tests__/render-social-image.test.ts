@@ -10,6 +10,8 @@ import {
   type SocialFormat,
 } from "../render-social-image";
 import type { BrandTheme } from "@/scripts/email/types";
+import { chartFragment } from "../chart-svg";
+import type { EmailChartSpec } from "@/lib/email/templates/charts/chart-types";
 
 // PNG IHDR carries the image width/height as big-endian uint32 at byte offsets
 // 16 and 20 — decode them directly so dimension assertions need no image lib.
@@ -102,6 +104,74 @@ describe("watermark is burned in", () => {
     // PUBLIC share card → cleaned MM/DD/YYYY only; the internal token never leaks.
     expect(svg).toContain("06/19/2026");
     expect(svg).not.toContain("SWFL-7421-v5-20260619");
+  });
+});
+
+describe("safe zones — key elements clear the platform UI chrome", () => {
+  // The accent rule sits at the TOP of the safe band; the watermark bottom-anchors
+  // to the TOP of the bottom band. Extracting their y attributes proves placement.
+  const accentRuleY = (svg: string): number => {
+    const m = svg.match(/<rect x="\d+" y="(\d+)" width="\d+" height="8" rx="4"/);
+    if (!m) throw new Error("accent rule not found");
+    return Number(m[1]);
+  };
+  const watermarkY = (svg: string): number => {
+    const m = svg.match(/y="(\d+)"[^>]*>SWFL Data Gulf/);
+    if (!m) throw new Error("watermark text not found");
+    return Number(m[1]);
+  };
+
+  test("story: watermark lifts ABOVE the reserved bottom 35% (was inside it)", () => {
+    const svg = composeCardSvg({ model: BASE_MODEL, theme: BRAND, format: "story" });
+    const bottomBandTop = 1920 - Math.round(1920 * 0.35); // y = 1248
+    // New: watermark clears the danger band.
+    expect(watermarkY(svg)).toBeLessThanOrEqual(bottomBandTop);
+    // Regression proof: the OLD flat-7%-pad put it at ~1818 (deep in the band).
+    const legacyBadY = 1920 - Math.round(1080 * 0.07) - Math.round(1080 * 0.024);
+    expect(legacyBadY).toBeGreaterThan(bottomBandTop); // 1818 > 1248 (was wrong)
+    expect(watermarkY(svg)).toBeLessThan(legacyBadY); // now fixed
+  });
+
+  test("story: top content (accent rule) clears the reserved top 14%", () => {
+    const svg = composeCardSvg({ model: BASE_MODEL, theme: BRAND, format: "story" });
+    expect(accentRuleY(svg)).toBe(Math.round(1920 * 0.14)); // y = 269
+  });
+
+  test("feed formats are UNCHANGED — accent + watermark at the legacy 7%-pad positions", () => {
+    // square: pad = round(1080*0.07) = 76; watermark y = 1080 - 76 - round(1080*0.024).
+    const sq = composeCardSvg({ model: BASE_MODEL, theme: BRAND, format: "square" });
+    expect(accentRuleY(sq)).toBe(76);
+    expect(watermarkY(sq)).toBe(1080 - 76 - Math.round(1080 * 0.024));
+    // landscape: pad = round(1200*0.07) = 84 (width-based, exactly as before).
+    const ls = composeCardSvg({ model: BASE_MODEL, theme: BRAND, format: "landscape" });
+    expect(accentRuleY(ls)).toBe(84);
+    expect(watermarkY(ls)).toBe(630 - 84 - Math.round(1200 * 0.024));
+  });
+
+  test("background stays full-bleed (safe zone never shrinks the artwork)", () => {
+    const svg = composeCardSvg({ model: BASE_MODEL, theme: BRAND, format: "story" });
+    // The very first layer is the full-canvas background rect at exact dimensions.
+    expect(svg).toContain('<rect width="1080" height="1920" fill="#123456"/>');
+  });
+
+  test("a tall chart is SCALED to fit the band (fit, never dropped) — the known-limitation fix", () => {
+    // 5-row native bar ≈ 290px tall at width 700 — taller than an 80px budget.
+    const spec = {
+      type: "bar",
+      data: [
+        { label: "33901", value: 12 },
+        { label: "33908", value: 9 },
+        { label: "33912", value: 7 },
+        { label: "33913", value: 5 },
+        { label: "33919", value: 3 },
+      ],
+    } as EmailChartSpec;
+    const unbounded = chartFragment(spec, 0, 0, 700, "#abcdef", "#999999");
+    const bounded = chartFragment(spec, 0, 0, 700, "#abcdef", "#999999", 80);
+    expect(unbounded.height).toBeGreaterThan(80); // would have overflowed
+    expect(bounded.height).toBeLessThanOrEqual(80); // now fits the budget
+    expect(bounded.svg).toContain("<g transform="); // still drawn, not dropped
+    expect(bounded.svg).toContain(">12<"); // real values still present, none invented
   });
 });
 

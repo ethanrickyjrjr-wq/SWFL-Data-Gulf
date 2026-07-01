@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, type RefObject } from "react";
 import { Stage, Layer, Rect, Text, Image as KonvaImg, Group, Transformer } from "react-konva";
 import type Konva from "konva";
 import { SOCIAL_FORMATS } from "@/lib/social/formats";
+import { safeInsetPercents, hasChromeSafeZone } from "@/lib/social/safe-zones";
 import type { SocialDesign, SocialElement } from "@/lib/social/design/types";
 import { useKonvaImage } from "./use-konva-image";
 
@@ -146,6 +147,13 @@ export default function KonvaStage({
   // intrinsic design size — single source of truth (SOCIAL_FORMATS is resvg-free).
   const dims = SOCIAL_FORMATS[design.format];
   const scale = displayWidth / dims.width;
+  const stageW = dims.width * scale;
+  const stageH = dims.height * scale;
+  // Safe-zone guide geometry. Percentages map straight onto the safe fractions —
+  // no scale math needed (CSS resolves top/bottom against height, left/right against
+  // width, which is exactly the basis safeInsets uses).
+  const safe = safeInsetPercents(design.format);
+  const showChromeBands = hasChromeSafeZone(design.format);
 
   // Attach the Transformer to the selected node (resolved by id — the SAME node that
   // owns `draggable`). Re-runs when the design changes so a moved/added node re-binds.
@@ -164,40 +172,117 @@ export default function KonvaStage({
   }, [selectedId, design, stageRef]);
 
   return (
-    <Stage
-      ref={stageRef}
-      width={dims.width * scale}
-      height={dims.height * scale}
-      scaleX={scale}
-      scaleY={scale}
-      onMouseDown={(e) => {
-        if (e.target === e.target.getStage()) onSelect(null); // click empty → deselect
-      }}
-      onTouchStart={(e) => {
-        if (e.target === e.target.getStage()) onSelect(null);
-      }}
-    >
-      <Layer>
-        {/* background is non-interactive so a click on it reaches the Stage → deselect */}
-        <Rect
-          listening={false}
-          x={0}
-          y={0}
-          width={dims.width}
-          height={dims.height}
-          fill={design.background}
+    <div style={{ position: "relative", width: stageW, height: stageH }}>
+      <Stage
+        ref={stageRef}
+        width={stageW}
+        height={stageH}
+        scaleX={scale}
+        scaleY={scale}
+        onMouseDown={(e) => {
+          if (e.target === e.target.getStage()) onSelect(null); // click empty → deselect
+        }}
+        onTouchStart={(e) => {
+          if (e.target === e.target.getStage()) onSelect(null);
+        }}
+      >
+        <Layer>
+          {/* background is non-interactive so a click on it reaches the Stage → deselect */}
+          <Rect
+            listening={false}
+            x={0}
+            y={0}
+            width={dims.width}
+            height={dims.height}
+            fill={design.background}
+          />
+          {design.elements.map((el) => (
+            <Fragment key={el.id}>{renderElement(el, () => onSelect(el.id), onChange)}</Fragment>
+          ))}
+          <Transformer
+            ref={trRef}
+            rotateEnabled
+            boundBoxFunc={(oldBox, newBox) =>
+              newBox.width < 20 || newBox.height < 20 ? oldBox : newBox
+            }
+          />
+        </Layer>
+      </Stage>
+      {/* Safe-zone GUIDE — a DOM overlay, NOT Konva nodes. It sits above the canvas
+          but (a) is never captured by stage.toDataURL() on export (that reads only the
+          canvas) and (b) has pointer-events:none so it never blocks a drag. A soft aid,
+          never a clamp (RULE 0.7). For `story` it shades the platform UI-chrome bands;
+          feed formats show only the dashed margin box. */}
+      <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        {showChromeBands && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: safe.top,
+                background: "rgba(224,129,88,0.16)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: safe.bottom,
+                background: "rgba(224,129,88,0.16)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: safe.top,
+                bottom: safe.bottom,
+                left: 0,
+                width: safe.left,
+                background: "rgba(224,129,88,0.10)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: safe.top,
+                bottom: safe.bottom,
+                right: 0,
+                width: safe.right,
+                background: "rgba(224,129,88,0.10)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: safe.top,
+                left: 8,
+                fontSize: 10,
+                lineHeight: "12px",
+                color: "rgba(255,255,255,0.75)",
+                transform: "translateY(-14px)",
+              }}
+            >
+              keep text &amp; logo out of shaded areas
+            </div>
+          </>
+        )}
+        <div
+          style={{
+            position: "absolute",
+            top: safe.top,
+            bottom: safe.bottom,
+            left: safe.left,
+            right: safe.right,
+            border: "1px dashed rgba(255,255,255,0.45)",
+            boxSizing: "border-box",
+          }}
         />
-        {design.elements.map((el) => (
-          <Fragment key={el.id}>{renderElement(el, () => onSelect(el.id), onChange)}</Fragment>
-        ))}
-        <Transformer
-          ref={trRef}
-          rotateEnabled
-          boundBoxFunc={(oldBox, newBox) =>
-            newBox.width < 20 || newBox.height < 20 ? oldBox : newBox
-          }
-        />
-      </Layer>
-    </Stage>
+      </div>
+    </div>
   );
 }
