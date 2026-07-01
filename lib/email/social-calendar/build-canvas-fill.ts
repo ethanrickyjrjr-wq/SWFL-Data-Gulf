@@ -7,7 +7,7 @@
 //
 // Note: chart elements render a placeholder today (no v1 chart-from-brain flow exists);
 // full chart support in the canvas is a follow-up task.
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import {
   socialPostSystem,
   tryParseSocial,
@@ -18,7 +18,7 @@ import { resolveEmailModel } from "@/lib/email/model-router";
 import type { GoalTone } from "@/lib/email/social-calendar/types";
 import type { Platform } from "@/lib/social/types";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = getAnthropic("other");
 
 // ADDENDUM pins the exact field names the patch must use — load-bearing because
 // socialPostSystem's allowed-fields list (prose/body/title/caption/kicker/…) does NOT

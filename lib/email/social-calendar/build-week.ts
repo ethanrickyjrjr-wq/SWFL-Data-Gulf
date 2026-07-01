@@ -5,7 +5,7 @@
 // parallel Haiku fills. Pure helpers are unit-tested; the network functions
 // (buildSocialPost / buildWeek) are live-verified. No-invention holds (same
 // applyPatch, four-lane prompt); no-staleness holds (refreshStaleLakeContext).
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EmailDocSchema, ContentPatchSchema } from "@/lib/email/doc/schema";
 import { DEFAULT_GLOBAL_STYLE, createBlock } from "@/lib/email/doc/default-docs";
 import {
@@ -35,7 +35,7 @@ import {
 } from "@/lib/listings/select";
 import type { Listing } from "@/lib/listings/rentcast";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = getAnthropic("other");
 
 // X (Twitter) hard limit — verified in-session 06/30/2026 against
 // docs.x.com/fundamentals/counting-characters ("Posts on X can contain up to 280 characters").

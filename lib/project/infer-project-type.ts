@@ -12,7 +12,7 @@
  * config is used upstream.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const VALID_TYPES = [
@@ -75,7 +75,7 @@ export async function inferProjectType(
       .filter(Boolean)
       .join("\n");
 
-    const client = new Anthropic();
+    const client = getAnthropic("other");
     const msg = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 32,

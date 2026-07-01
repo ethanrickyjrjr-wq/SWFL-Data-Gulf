@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { buildContentDoc, authorDoc, fetchLakeContext } from "@/lib/email/build-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import type { ChartType } from "@/lib/email/reshape-chart-type";
@@ -8,7 +8,7 @@ import type { ChartType } from "@/lib/email/reshape-chart-type";
 // or test can run identically). This route is a thin HTTP wrapper: block-canvas
 // docs go through buildContentDoc; the legacy token path stays here.
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = getAnthropic("other");
 
 // ── Legacy token mode (kept for the transition / structural templates) ───────
 function legacyTokenSystem(lakeContext?: string): string {

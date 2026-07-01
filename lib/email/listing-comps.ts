@@ -6,7 +6,7 @@
 // (deriveAreaUrl, buildCompsSpec) are unit-tested; the async fetch is best-effort
 // and always returns [] on any failure — never throws, never blocks the build.
 
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { htmlToText } from "./listing-scrape";
 import { resolveEmailModel } from "./model-router";
 import type { ListingFacts } from "./listing-scrape";
@@ -79,7 +79,7 @@ export function buildCompsSpec(
 
 const COMPS_SYSTEM = `Extract real estate listing data from a search-results page. Return ONLY a JSON array (no other text). Each object: {"label":"short street address like '27804 Hickory Blvd'","price":number}. Price must be a plain integer — no $ or commas. Extract ONLY values visible on the page — never invent. Omit any listing where price is unclear. If fewer than 2 listings are visible, return [].`;
 
-const compsLlm = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const compsLlm = getAnthropic("other");
 
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";

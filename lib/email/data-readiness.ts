@@ -16,7 +16,8 @@
 //
 // Never cancels a blast — substitutes with an honest sourcing note on the result.
 
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -25,12 +26,7 @@ import type { ProjectItem } from "@/lib/project/items";
 import { verificationQuery, splitDomains, extractNumericValue } from "./verification-sources";
 
 export type VerificationTier =
-  | "brain_fresh"
-  | "web_consensus"
-  | "web_single"
-  | "model_only"
-  | "last_known"
-  | "omitted";
+  "brain_fresh" | "web_consensus" | "web_single" | "model_only" | "last_known" | "omitted";
 
 export interface VerificationResult {
   metric_slug: string;
@@ -111,7 +107,7 @@ function withinTolerance(a: number, b: number, tol: ToleranceEntry): boolean {
 
 // ── web_search grounding ──────────────────────────────────────────────────────
 
-const anthropic = new Anthropic();
+const anthropic = getAnthropic("other");
 
 /** Model used for both grounded and ungrounded verification calls. */
 const MODEL = "claude-sonnet-4-6";

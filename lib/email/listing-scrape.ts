@@ -14,7 +14,7 @@
 //   2. Visible text fallback for fields the island leaves null (street/zip).
 // A field that appears nowhere is left undefined — we never guess a number.
 
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { fetchOgImage } from "./og-image";
 import { safeFetchPublicUrl } from "./safe-fetch";
 import { resolveEmailModel } from "./model-router";
@@ -373,7 +373,7 @@ export function parseLlmFacts(text: string, url: string): ListingFacts {
   return out;
 }
 
-const listingLlm = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const listingLlm = getAnthropic("other");
 
 const LISTING_EXTRACT_SYSTEM = `You extract real-estate listing facts from page text. Return ONLY a JSON object containing any of these keys you can find ON THE PAGE: address, city, state, zip, price, beds, baths, sqft, lotSize, yearBuilt, propertyType, remarks. Use the page's EXACT numbers verbatim — never invent, estimate, or round. Omit any field the page does not state. "remarks" = the listing's marketing description, copied from the page. Output the JSON object only, no other text.`;
 
