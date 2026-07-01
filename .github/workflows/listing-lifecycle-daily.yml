@@ -12,11 +12,10 @@ name: ingest-listing-lifecycle
 #
 # GRADUATED 2026-07-01: runner-IP WAF proven clean on both heavyweight counties (Collier 8,120 rows,
 # Lee 21,889 rows, both dry_run=false, zero [skip]/[warn] 403 in either log — runs 28495956344 /
-# 28496497637). Hendry (298 listings, the lightest county) had no separate live dispatch before this
-# graduation; its first live proof is its first scheduled run below, not a blocker given the two much
-# heavier counties already cleared the same WAF from the same runner IP. Cadence entry moved from
-# `not_yet_running:` to `pipelines:` in ingest/cadence_registry.yaml in the same commit so this is now
-# freshness-probed, not just scheduled. Crons are STAGGERED per county (3 h apart) — never run all
+# 28496497637). SCOPE: Lee + Collier ONLY — operator decree 2026-07-01, Hendry is NOT scheduled (still
+# manually dispatchable via workflow_dispatch --county Hendry if that changes). Cadence entry moved
+# from `not_yet_running:` to `pipelines:` in ingest/cadence_registry.yaml in the same commit so this is
+# now freshness-probed, not just scheduled. Crons are STAGGERED per county (3 h apart) — never run all
 # counties in one pass (mirrors ingest-active-listings, which staggers for the same WAF reason).
 # _PAGE_DELAY stays >= 1.5s (currently 1.8s in extract.py); do not lower it.
 #
@@ -26,7 +25,6 @@ on:
   schedule:
     - cron: "0 9 * * *"    # Lee     (heaviest — ~7.4k listings)
     - cron: "0 12 * * *"   # Collier
-    - cron: "0 15 * * *"   # Hendry
   workflow_dispatch:
     inputs:
       county:
@@ -78,7 +76,6 @@ jobs:
           case "${{ github.event.schedule }}" in
             "0 9 * * *")  echo "county=Lee"      >> "$GITHUB_OUTPUT" ;;
             "0 12 * * *") echo "county=Collier"  >> "$GITHUB_OUTPUT" ;;
-            "0 15 * * *") echo "county=Hendry"   >> "$GITHUB_OUTPUT" ;;
             *)             echo "county=${{ inputs.county }}" >> "$GITHUB_OUTPUT" ;;
           esac
 

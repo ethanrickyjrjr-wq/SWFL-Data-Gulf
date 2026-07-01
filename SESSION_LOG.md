@@ -1,3 +1,17 @@
+## 2026-07-01 (main) — correction: listing-lifecycle schedule is Lee + Collier ONLY, Hendry dropped
+
+Operator correction right after the graduation commit below: Hendry is NOT in scope for this pipeline,
+period — not "graduate now, Hendry's first live proof is its first scheduled run" as logged below.
+Fixed in a new commit (never amended): removed the `"0 15 * * *"` Hendry cron + its case arm from
+`.github/workflows/listing-lifecycle-daily.yml`; reworded the header + `ingest/cadence_registry.yaml`
+comments off "Hendry joins on its first scheduled run" to "Hendry excluded by operator decree, not
+scheduled" (Hendry stays manually dispatchable via `workflow_dispatch --county Hendry` if that ever
+changes; its seed rows stay `lifecycle_seed` permanently, not a gap to close). Corrected the
+`listing_lifecycle_schedule_live_verify` check label/detail to drop the Hendry proof language. YAML
+re-validated, `pytest` 13/13 green again.
+
+---
+
 ## 2026-07-01 (main) — listing-lifecycle GRADUATED to schedule: + graphify picked up the parked pipeline it was missing
 
 Operator confirmed graduating `listing-lifecycle-daily.yml` now (option chosen: don't wait on a separate
