@@ -1,5 +1,18 @@
-import { describe, test, mock } from "bun:test";
+import { describe, test, mock, afterAll } from "bun:test";
 import assert from "node:assert/strict";
+import * as anthropicModule from "./anthropic.mts";
+
+// mock.module is process-global (Bun docs: mock.restore() does not undo it). The two
+// mock.module("./anthropic.mts", ...) calls below stub incomplete getAnthropic() shapes
+// (no `.create`, non-memoized) — harmless within this file (each test re-establishes
+// what it needs first, per the comment below), but on a low-core-count CI runner more
+// test files share one worker's module registry than on a high-core-count dev box, so an
+// un-restored stub here can leak forward into refinery/agents/anthropic.test.mts's real
+// wrapper unit tests. Restore the pristine module after this file's tests finish.
+const anthropicOrig = { ...anthropicModule };
+afterAll(() => {
+  mock.module("./anthropic.mts", () => anthropicOrig);
+});
 
 // Short-circuit paths (empty input + mock mode) run against the real
 // anthropic.mts. They rely on agentsAreMocked() === true, which is the case

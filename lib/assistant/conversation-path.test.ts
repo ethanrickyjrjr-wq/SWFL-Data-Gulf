@@ -12,6 +12,7 @@ import * as fetchBrain from "@/lib/fetch-brain";
 import * as meterModule from "@/lib/highlighter/meter";
 import * as chatUsageModule from "@/lib/welcome/chat-usage";
 import * as dossierCacheModule from "@/lib/welcome/dossier-cache";
+import * as anthropicModule from "@/refinery/agents/anthropic.mts";
 import { parseSseFrame, type WelcomeFrame } from "@/lib/welcome/frames";
 import type { AssistantRequest } from "@/lib/assistant/contract";
 
@@ -19,15 +20,19 @@ import type { AssistantRequest } from "@/lib/assistant/contract";
 // "does not reset the value of modules overridden with mock.module()"). So snapshot the
 // real modules these tests stub and re-install the originals in afterAll — otherwise the
 // stubs leak into every later test file that imports them for real (mcp, bind-frame,
-// fetch-reach, meter-userid, lib/welcome/dossier-cache, …). This file used to live under
-// app/api/** where file ordering hid the leak. (anthropic.mts is intentionally NOT
-// restored: a stub Anthropic client is harmless to leak — unit tests never call the real
-// one — and importing it here to snapshot would evaluate the real module.)
+// fetch-reach, meter-userid, lib/welcome/dossier-cache, refinery/agents/anthropic.test.mts,
+// …). This file used to live under app/api/** where file ordering hid the leak.
+// anthropic.mts IS now restored too: on a low-core-count CI runner, `bun test`'s default
+// `--parallel` (= CPU count, implies --isolate) packs many more files into each worker's
+// shared module registry than on a high-core-count dev box, so this file's incomplete
+// getAnthropic() stub (no `.create`, non-memoized) can leak into anthropic.test.mts's
+// wrapper unit tests and fail them there while passing 100% locally.
 const ORIG = {
   "@/lib/fetch-brain": { ...fetchBrain },
   "@/lib/highlighter/meter": { ...meterModule },
   "@/lib/welcome/chat-usage": { ...chatUsageModule },
   "@/lib/welcome/dossier-cache": { ...dossierCacheModule },
+  "@/refinery/agents/anthropic.mts": { ...anthropicModule },
 };
 afterAll(() => {
   for (const [path, orig] of Object.entries(ORIG)) mock.module(path, () => orig);
@@ -404,8 +409,7 @@ test("FLOOD GATE — an explicit ZIP whose env line is coarse emits cards but no
   const res = await ask("flood read for 33913?");
   const fs = frames(await res.text());
   const data = fs.find((f) => f.type === "data") as
-    | Extract<WelcomeFrame, { type: "data" }>
-    | undefined;
+    Extract<WelcomeFrame, { type: "data" }> | undefined;
   expect(data).toBeDefined();
   expect(data!.answer.metrics.some((m) => m.key === "home_value")).toBe(true);
   expect(data!.answer.metrics.some((m) => m.key === "flood_aal")).toBe(false);

@@ -9,13 +9,18 @@
  */
 import { test, expect, mock, afterAll } from "bun:test";
 import * as meterModule from "@/lib/highlighter/meter";
+import * as anthropicModule from "@/refinery/agents/anthropic.mts";
 
 // mock.module is process-global and mock.restore() does NOT undo it (Bun docs); snapshot
-// + re-install the real meter in afterAll so the stub below doesn't leak into later test
-// files (meter-userid, project-tools, …). See conversation-path.test.ts.
+// + re-install the real meter (and anthropic — its stub below is non-memoized and can
+// break refinery/agents/anthropic.test.mts's wrapper unit tests if a low-core-count CI
+// runner packs both files into the same worker) in afterAll so neither stub leaks into
+// later test files (meter-userid, project-tools, …). See conversation-path.test.ts.
 const meterOrig = { ...meterModule };
+const anthropicOrig = { ...anthropicModule };
 afterAll(() => {
   mock.module("@/lib/highlighter/meter", () => meterOrig);
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
 });
 
 // Mock the anthropic module BEFORE importing the path module.
