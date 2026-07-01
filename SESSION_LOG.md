@@ -1,3 +1,18 @@
+## 2026-07-01 (main) — New Listing lifecycle project: research + design decomposition (docs only)
+
+Operator expanded the listing/comp work into a "New Listing lifecycle project" vision: New Project = blank
+canvas; New Listing = project pre-anchored to a saved subject address + the stage gameplan (Just Listed →
+Comps → Open House → Price Update → Pending → Just Sold; Coming-Soon optional), each stage email/PDF
+generated ON DEMAND (never batched — a house can sell in a day), social per stage. Ran crawl4ai research
+(RULE 0.4 — theclose 79KB, evocalize 42KB, placester 46KB; web-search for discovery) confirming the standard
+trigger-based lifecycle, and a read-only code map. Findings: the project→deliverable→schedule chain,
+template→deliverable flywheel, listing flyer, comps (x2), per-section AI edit, and social generation are all
+ALREADY BUILT; the real gaps are listing-kind+saved-address, a stage sequence, a grounded just-sold email
+(sold data fetchable but unwired), social-per-stage, and a lake→product read path. Decomposed into 5 layered
+builds (Build 1 = listing project + saved address, also finishes F2). Docs:
+`_ASSISTANT/research/2026-07-01-listing-lifecycle-marketing-research.md`,
+`docs/superpowers/specs/2026-07-01-new-listing-lifecycle-project-design.md`. Next: register + spec Build 1.
+
 ## 2026-07-01 (main) — graphify: fixed 3 real edge-extraction bugs, orphan count 358→259
 
 Operator asked why so much of the `/graph` render was floating disconnected (screenshots of stray
