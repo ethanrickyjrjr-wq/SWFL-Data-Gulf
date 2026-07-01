@@ -1,3 +1,38 @@
+## 2026-07-01 (main) — fix: root-caused the actual CI-red — bun test worker-packing, not the Proxy wrapper (`1e13cdfd`)
+
+Operator asked why the last push was red after being told "everything's taken care of" — it wasn't.
+`gh run list` showed 4 CONSECUTIVE red pushes on `main` (`4a2a9991`, `0b39f278`, and two from a parallel
+session), every one failing the same 3 `getAnthropic()` wrapper unit tests added earlier today. The
+Proxy-fix entry logged a few entries below this one (`9b1e012b`) claimed "verified green" — that was a
+local-only check that never actually confirmed CI, and CI stayed red through it.
+
+Real root cause, found by actually pulling `gh run view --log-failed` instead of re-guessing: `client.messages.create`
+was `undefined` on CI. Traced to `lib/assistant/conversation-path.test.ts` (and, less directly,
+`refinery/agents/synthesis-agent.test.mts`) calling `mock.module("anthropic.mts", ...)` with an incomplete,
+non-memoized `getAnthropic()` stub (`.stream` only, no `.create`) and — per that file's own comment —
+*intentionally* never restoring the real module afterward ("a stub Anthropic client is harmless to leak —
+unit tests never call the real one"). That assumption predates today's real `anthropic.test.mts`, which now
+does call the real one. `bun test`'s `--parallel` flag defaults to CPU core count and implies `--isolate`; my
+dev box has 28 cores (near-total per-file isolation, leak never manifests), while the CI runner has far
+fewer, packing many more files into each worker's shared module registry — hence 100% local green, 100% CI
+red, four times in a row. Confirmed locally under `--parallel=2` (closer to CI's packing) that the fix holds.
+Fixed all 4 mock.module(anthropic) sites (`conversation-path.test.ts`, `synthesis-agent.test.mts`,
+`report-path.test.ts`, `report-path.event-stream.test.ts`) to snapshot + restore the real module in
+`afterAll`, matching the pattern those same files already use for `meter`/`fetchBrain`/`dossierCache`. This
+directly closes the already-open check `bun_mock_anthropic_subset_footgun`, which anticipated exactly this
+class of bug.
+
+Gates: full `bun test` 4266/0, `bunx next build` clean, `--parallel=2` run clean (its one unrelated failure
+is a pre-existing Windows-only Bun crash in `duckdb_postgres_smoke_test.mts`, nothing to do with this fix).
+
+Separately: the local uncommitted `.gitignore` `.repolith/` line the operator asked me to push turned out to
+already be committed by a parallel session (`09a0b73c`) before I got to it — nothing left to push there.
+
+**What's next:** watch the actual GitHub Actions run on this push to confirm green (can't poll it from here
+mid-response, but this is now verified against the real CI failure log, not a local-only guess).
+
+---
+
 ## 2026-07-01 (main) — correction: listing-lifecycle schedule is Lee + Collier ONLY, Hendry dropped
 
 Operator correction right after the graduation commit below: Hendry is NOT in scope for this pipeline,
