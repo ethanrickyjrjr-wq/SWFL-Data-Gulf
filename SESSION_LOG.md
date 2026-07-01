@@ -25,6 +25,19 @@ tables (schema owned by the Python pipeline, e.g. leepa_parcels) never get a `do
 migration, so they never become `table:` graph nodes regardless of edge-extraction correctness. Would
 need table nodes sourced from cadence_registry/dlt schemas instead of SQL migrations — next graphify
 follow-up if the operator wants it closed.
+## 2026-07-01 (main) — market-heat region monthly trend: BUILT (foundation, subagent-driven)
+
+Executed the market-heat trend plan via subagent-driven-development (2 tasks, fresh implementer + spec/quality
+reviewer per task, both Spec✅ Quality-Approved). `refinery/packs/market-heat-swfl.mts`: new exported pure
+`regionMonthlyTrend(coreByZip, cap=36)` (region median per month of active-listings/DOM/pending-ratio,
+null-safe via existing `median()`, ascending, 36-mo cap) + a `market_heat_region_trend` detail_table appended
+in `outputProducer` (date column `month` → picker-ready; empty-tolerant conditional spread; reuses the
+realtor.com `source`; existing `market_heat_by_zip` output untouched). Faithful — real medians only, null never
+fabricated. No chart-path touch, no vocab entry (detail_table ids aren't vocab-tracked). Commits: d9781f02
+(helper) + 248cf659 (emit). 35 pass/0 fail (pack + catalog), tsc clean. Local rebuild deferred — market-heat's
+source parquet 404s in S3 (that ingest pipeline's first cron is still pending; unrelated to this diff, the table
+is empty-tolerant). Trend carries no live rows until market-heat ingest first runs — operator-run
+`market_heat_region_trend_live_verify`. Whole-sweep + charting wire queued: `market_trend_sweep_followup`.
 
 ## 2026-07-01 (main) — market-heat region monthly trend: spec + plan (docs only, not pushed)
 
