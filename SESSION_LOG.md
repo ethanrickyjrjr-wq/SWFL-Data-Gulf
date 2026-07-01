@@ -1,3 +1,20 @@
+## 2026-07-01 (main) — market-heat region monthly trend: spec + plan (docs only, not pushed)
+
+Design session pivoted off "Task C chart-type wiring" after a data survey: the new market brains
+(active-listings/rentals, price-distribution, listing-momentum, market-temperature, market-heat) mostly emit
+LATEST-snapshot rankings (bar-table is already right), and the accumulating over-time history sits in the
+append tables (captured_date) behind `_latest` views the brains read. So chart-type wiring is low-leverage;
+the higher-leverage move (operator pick) is EXPOSING the history. Scoped foundation-first: market-heat emits a
+region-monthly-trend `detail_table` (region median per month of active-listings/DOM/pending-ratio), computed
+in-brain from the `coreByZip` history it already loads — aggregate-at-source, faithful (real medians, null
+never fabricated), 36-mo cap, `month` date column (picker-ready), no chart-path touch, no vocab entry
+(detail_table ids aren't tracked — confirmed market_heat_by_zip absent from brain-vocabulary.json). Files:
+spec `docs/superpowers/specs/2026-07-01-market-heat-region-trend-design.md`, plan
+`docs/superpowers/plans/2026-07-01-market-heat-region-trend.md`, survey
+`_ASSISTANT/research/2026-07-01-taskC-charttype-verification.md`. Checks: `market_heat_region_trend_live_verify`
+(build) + `market_trend_sweep_followup` (the whole-sweep + charting-wire follow-up) open. Also this session:
+Task B (chart palette extension) spec+plan committed earlier (bff6598b/447345de), unpushed. Nothing pushed.
+
 ## 2026-07-01 (main) — listing citations off dead-RentCast → "SWFL Data Gulf" (naming decree + F1)
 
 Operator decree (LOCKED): user-facing listing/comp citations say "SWFL Data Gulf" or "lake" — never
