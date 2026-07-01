@@ -1,3 +1,25 @@
+## 2026-07-01 (main) — graphify PATH fix (dead Python 3.12 install shadowing live 3.14) + graph refresh
+
+Confirmed `c1afc357` wired exactly 3 of the 6 previously-orphaned brains into master
+(`price-distribution-swfl`, `listing-momentum-swfl`, `market-temperature-swfl`); `investor-zip-swfl`,
+`active-listings-swfl`, `active-rentals-swfl` remain unwired (5 of 6 build fresh daily regardless — only
+`investor-zip-swfl` is genuinely stale, parked on an AirDNA-paywall ODD gap, unrelated to master wiring).
+
+`bun run graphify:update` was silently exiting 1 with zero output. Root cause: PATH resolved
+`graphify.exe` to an **already-uninstalled** Python 3.12 (`Python312\` — no entry in Windows'
+Add/Remove Programs, interpreter DLLs physically gone, only orphaned `Scripts`/`site-packages`
+leftovers) ahead of the live Python 3.14 install. Every exe stub under that dead `Scripts\` dir failed
+the same way, not just graphify. Deleted the 4 orphaned `graphifyy` 0.8.41 files from Python312 (operator
+confirmed via file last-access timestamps — no use before this session). `graphify` now resolves solely
+to the working 3.14 install (`graphifyy` 0.8.46, `update` needs no LLM). Ran `bun run graphify:update`:
+22,970 nodes / 37,270 edges, rebuilt at current HEAD — now reflects the master wiring above.
+
+No repo-tracked diff from this work (`graphify-out/` is gitignored by design; the Python cleanup was
+outside the repo entirely). 3 untracked research docs also sit in the tree from this session's other
+WI-2/design-quality thread (Task A/B WCAG + Meta safe-zone crawl4ai verifications + BCD handoff) — held
+back from this push: 2 other live sessions are actively claimed as editing those exact files right now,
+so committing them here risked freezing a mid-write draft. Left untracked for those sessions to land.
+
 ## 2026-07-01 (main) — WI-2: strict tool use + input examples on the email-schedule parser
 
 Executed Task 2 of `docs/superpowers/plans/2026-07-01-ai-authoring-upgrades.md`. Added `strict: true` + 4
