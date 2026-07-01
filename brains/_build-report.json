@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-06-30T09:26:17.936Z",
-    "finished": "2026-06-30T09:26:18.327Z"
+    "started": "2026-07-01T09:38:13.782Z",
+    "finished": "2026-07-01T09:38:14.331Z"
   },
   "source": "live",
   "outcomes": [
@@ -113,8 +113,176 @@
     },
     {
       "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 25,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "city-pulse-swfl",
+        "version": 25,
+        "refined_at": "2026-07-01T09:38:14Z",
+        "expires": "2026-07-02T09:38:14Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL city pulse as of 2026-07-01: 68 live current-events signals across 13 cities — Cape Coral (7), Fort Myers (9), Naples (7), Marco Island (6), East Naples (6), Lehigh Acres (3), Bonita Springs (6), Fort Myers Beach (7), North Fort Myers (2), North Naples (7), Golden Gate (2), Sanibel (2), Estero (4). Most current: Cape Coral — The Shops at Surfside, a Cape Coral shopping center at 2354 Surfside Blvd., sold to a Pinellas County real estate developer for $12 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "signal_transactions_1",
+            "value": "Cape Coral: The Shops at Surfside, a Cape Coral shopping center at 2354 Surfside Blvd., sold to a Pinellas County real estate developer for $12 million.",
+            "direction": "stable",
+            "label": "Cape Coral — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Pinellas investor buys Cape Coral shopping center for $12M | Business Observer: \"The Shops at Surfside, a Cape Coral shopping center, has been sold to a Pinellas County real estate developer. The center at 2354 Surfside Blvd. was b...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_2",
+            "value": "Cape Coral: Gulf Gateway Resort & Marina LLC purchased property from the City of Cape Coral at 106/200 Old Burnt Store Road N., Cape Coral (multifamily property type), in the week's top commercial real estate transactions published March 9, 2026.",
+            "direction": "stable",
+            "label": "Cape Coral — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/mar/09/commercial-real-estate-transactions/",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "The week's top commercial real estate transactions in Charlotte, Collier, Hillsborough, Lee, Manatee, Pasco, Pinellas, Polk, Sarasota | Business Observer: \"Buyer: Gulf Gateway Resort &amp; Marina LLC Seller: City of Cape Coral Address: 106/200 Old Burnt Store Road N., Cape Coral Property Type: Multifamily...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 2?",
+              "How does signal transactions 2 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_3",
+            "value": "Fort Myers: The final outparcel in a Fort Myers shopping center has sold to a Wisconsin Culver's hamburger franchisee, who plans to build a Culver's restaurant on the site.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee | Business Observer: \"The final outparcel in a Fort Myers shopping center has sold and the new owner is planning to build a Culver’s restaurant on the site. LQ Commercial R...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 3?",
+              "How does signal transactions 3 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_4",
+            "value": "Fort Myers: The Cobblestone on The Lake Apartments in Fort Myers sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale for $43 million.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/28/tampa-bay-investor-fort-myers-apartment/",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Tampa Bay investor pays $43 million for Fort Myers apartment | Business Observer: \"The Cobblestone on The Lake Apartments in Fort Myers have sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale. The 248-un...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 4?",
+              "How does signal transactions 4 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_5",
+            "value": "Fort Myers: Ben Mallah purchased a 60,305 sq ft building in Fort Myers for $17.25 million using a 1031 exchange.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/youtube-real-estate-investor-buys-nova-southeastern-building/article_dbed9a3b-ca90-4ee9-8e24-318815f60e51.html",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Ben Mallah adds Fort Myers property to portfolio: \"Ben Mallah, a YouTube real estate star with over 1 million followers, purchased a 60,305 sq ft building in Fort Myers for $17.25 million, using a 1031...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 5?",
+              "How does signal transactions 5 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_6",
+            "value": "Naples: The buyer of Collier Place in Naples is a group of local investors who bought it together and plan to retain it, according to senior broker associate Max Molloy of Fort Myers-based LSI Cos. The sale closed around June 20, 2026.",
+            "direction": "stable",
+            "label": "Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/20/naples-office-building-sells/",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Naples office complex sells for $23 million | Business Observer: \"Max Molloy, a senior broker associate with Fort Myers-based LSI Cos., says the buyer is a group of local investors who bought it together and plan to ...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_7",
+            "value": "Marco Island: The new owner of Island Plaza has local ties to Marco Island restaurateur Luigi Carvelli, whose family owns a local business.",
+            "direction": "stable",
+            "label": "Marco Island — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/marco-island-shopping-center-sells-for-26-6m/article_c490a0d8-d052-41ed-99d0-62208fdb24bb.html",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Marco Island shopping center sells for $26.6M | Real Estate | gulfshorebusiness.com: \"Instead of a local owner selling to a national one, the new owner has local ties to a Marco Island restaurateur. Luigi Carvelli, whose family owns Sno...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 7?",
+              "How does signal transactions 7 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_8",
+            "value": "East Naples: A two-building Naples office complex sold to a group of local investors for $23 million; the seller, Collier Place Holding, had paid $12.85 million for the property in 2019.",
+            "direction": "stable",
+            "label": "East Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/20/naples-office-building-sells/",
+              "fetched_at": "2026-07-01T09:38:14Z",
+              "tier": 2,
+              "citation": "Naples office complex sells for $23 million | Business Observer: \"The seller is Collier Place Holding, which Collier County property records show, paid $12.85 million in 2019.\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 8?",
+              "How does signal transactions 8 here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "60 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-01T09:38:14Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "rsw-airport",
@@ -128,8 +296,59 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 14,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 14,
+        "refined_at": "2026-07-01T09:38:14Z",
+        "expires": "2026-07-02T09:38:14Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-06-25) 6.49%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.49,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-06-25)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-06-30T13:59:53.781172+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-06-25"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-01T09:38:14Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -169,16 +388,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 88,
+      "version": 89,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 88,
-        "refined_at": "2026-06-30T09:26:18Z",
-        "expires": "2026-07-07T09:26:18Z",
+        "version": 89,
+        "refined_at": "2026-07-01T09:38:14Z",
+        "expires": "2026-07-08T09:38:14Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.46137999821358794,
+        "magnitude": 0.4613799982135879,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -889,8 +1108,8 @@
         "upstream_count": 31,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-06-30T09:26:18.000Z"
+          "half_life_hours": 720.0000000000001,
+          "computed_at": "2026-07-01T09:38:14.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
