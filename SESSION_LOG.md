@@ -1,3 +1,27 @@
+## 2026-07-01 (main) — comp helper live-verify: comp path confirmed live, prose re-check follow-up opened (Anthropic credits)
+
+Ran `steadyapi_comp_helper_live_verify` from prod (`POST https://www.swfldatagulf.com/api/assistant`, a
+Cape Coral comp ask). **Comp path fired for real:** the `{type:"sources"}` frame came back as exact
+`compSources()` output — SWFL Data Gulf + `https://www.realtor.com` homepage only, no permalink, no
+"SteadyAPI" string — which only emits when `comps.length > 0`, so the live `PHOTOS_API` key + SteadyAPI
+`/nearby-home-values` call succeeded and comps were found. Can't be web-fallback: `comp.hit` short-circuits
+it, and web-fallback sources carry a `value` + specific URLs, not two bare homepages.
+
+**But the answer never rendered** — the SSE stream's final frame was a 400 from Anthropic: "Your credit
+balance is too low to access the Anthropic API." Same pre-existing gap already noted blocking
+`social_ai_author_live_verify`, still unresolved — and it blocks EVERY LLM-dependent live_verify, not just
+this one. The one thing this check uniquely verifies (MM/DD/YYYY in the rendered prose, no MLS#/"SteadyAPI"
+leak in the model's actual words, AVM/last-list never worded as a sale) needs that text, which didn't
+generate. Everything else in the check (MLS scrub, ≤3-call cap, date formatting) is structural and already
+covered by the 64/64 offline tests.
+
+**Operator call: close `steadyapi_comp_helper_live_verify` now, don't block on billing.** Opened
+`steadyapi_comp_helper_prose_verify` as the follow-up — re-run the identical curl once Anthropic credits
+are topped up (same lat/lon is fetch-cached 1hr so it's free), eyeball the streamed prose, close that one
+too. No code change needed; the residual is a billing gap only Anthropic Console access can fix.
+
+---
+
 ## 2026-07-01 (main) — listing-lake Phase-2 Part A: organic sold capture (property-tax-history off-market hook + holding re-check)
 
 Built the sold-price capture the lifecycle machine was missing: when a tracked listing leaves the sweep, one
