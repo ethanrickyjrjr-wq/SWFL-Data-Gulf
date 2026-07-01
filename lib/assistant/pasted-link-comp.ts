@@ -51,8 +51,11 @@ function homepageSource(sourceUrl: string): WelcomeSource {
  *  priceKind:"last_list", never a sold price. */
 function toRenderComp(facts: ListingFacts): RenderComp {
   const priceKind: PriceKind = "last_list";
+  // addressLine is the STREET line only; `city` is carried separately and the renderer
+  // joins them. Falling back to city here would double it ("BONITA SPRINGS, BONITA
+  // SPRINGS") on a listing whose page carries no parseable street address.
   return {
-    addressLine: facts.address ?? facts.city ?? "",
+    addressLine: facts.address ?? "",
     city: facts.city ?? "",
     beds: numOrNull(facts.beds),
     baths: numOrNull(facts.baths),

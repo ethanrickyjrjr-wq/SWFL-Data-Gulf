@@ -108,4 +108,12 @@ describe("pastedLinkComp — gate order (fetch-free by construction)", () => {
       url: "https://www.beach-homes.com",
     });
   });
+
+  it("leaves addressLine empty (never doubles the city) when the page has no street address", async () => {
+    const out = await pastedLinkComp(`what are comps for ${LINK}`, true, {
+      fetchPastedFacts: async () => facts({ address: undefined }),
+    });
+    expect(out.comp?.addressLine).toBe(""); // street line only — city is carried separately
+    expect(out.comp?.city).toBe("Cape Coral");
+  });
 });
