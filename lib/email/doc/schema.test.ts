@@ -163,6 +163,36 @@ test("round-trips a fully-populated doc with no field stripped", () => {
   expect(parsed).toEqual(fullDoc);
 });
 
+test("globalStyle round-trips displayFontFamily + surface colors (strip-mode landmine)", () => {
+  const doc = {
+    globalStyle: {
+      primaryColor: "#0f1d24",
+      accentColor: "#3DC9C0",
+      fontFamily: "LATO_SANS",
+      displayFontFamily: "PLAYFAIR_SERIF",
+      textColor: "#242424",
+      backdropColor: "#F8F8F8",
+      surfaceColor: "#f0ede6",
+      surfaceDarkColor: "#0f1d24",
+    },
+    blocks: [{ id: "block_t3aaaaaa", type: "text", props: { body: "x" } }],
+  };
+  const parsed = EmailDocSchema.parse(doc);
+  expect(parsed.globalStyle.displayFontFamily).toBe("PLAYFAIR_SERIF");
+  expect(parsed.globalStyle.surfaceColor).toBe("#f0ede6");
+  expect(parsed.globalStyle.surfaceDarkColor).toBe("#0f1d24");
+});
+
+test("globalStyle without the new fields parses unchanged (back-compat)", () => {
+  const parsed = EmailDocSchema.parse({
+    globalStyle: DEFAULT_GLOBAL_STYLE,
+    blocks: [{ id: "block_t3bbbbbb", type: "text", props: { body: "x" } }],
+  });
+  expect(parsed.globalStyle.displayFontFamily).toBeUndefined();
+  expect(parsed.globalStyle.surfaceColor).toBeUndefined();
+  expect(parsed.globalStyle.surfaceDarkColor).toBeUndefined();
+});
+
 test("preserves a saved block id, mints one when absent", () => {
   const doc = {
     globalStyle: DEFAULT_GLOBAL_STYLE,

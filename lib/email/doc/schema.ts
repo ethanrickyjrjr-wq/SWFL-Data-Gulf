@@ -218,19 +218,24 @@ const FooterPropsSchema = z.object({
   unsubscribeUrl: z.string().optional(),
 }) satisfies z.ZodType<FooterProps>;
 
+const FONT_FAMILY_ENUM = z.enum([
+  "MODERN_SANS",
+  "BOOK_SERIF",
+  "GEOMETRIC_SANS",
+  "PLAYFAIR_SERIF",
+  "LATO_SANS",
+  "MONTSERRAT_SANS",
+]);
+
 export const GlobalStyleSchema = z.object({
   primaryColor: z.string(),
   accentColor: z.string(),
-  fontFamily: z.enum([
-    "MODERN_SANS",
-    "BOOK_SERIF",
-    "GEOMETRIC_SANS",
-    "PLAYFAIR_SERIF",
-    "LATO_SANS",
-    "MONTSERRAT_SANS",
-  ]),
+  fontFamily: FONT_FAMILY_ENUM,
+  displayFontFamily: FONT_FAMILY_ENUM.optional(),
   textColor: z.string(),
   backdropColor: z.string(),
+  surfaceColor: z.string().optional(),
+  surfaceDarkColor: z.string().optional(),
 }) satisfies z.ZodType<EmailGlobalStyle>;
 
 // `id` is optional ON THE WAY IN (saved docs carry one; new/AI blocks don't) and

@@ -299,8 +299,14 @@ export interface EmailGlobalStyle {
   primaryColor: string; // e.g. "#0f1d24"
   accentColor: string; // e.g. "#3DC9C0"
   fontFamily: FontFamily;
+  /** Headline font (header company name, hero value). Absent → fontFamily. */
+  displayFontFamily?: FontFamily;
   textColor: string; // e.g. "#242424"
   backdropColor: string; // e.g. "#F8F8F8"
+  /** Light card/stat surface. Absent → block CARD_BG default (#ffffff). */
+  surfaceColor?: string;
+  /** Dark surface (dark cards / canvas siblings). Absent → engine defaults. */
+  surfaceDarkColor?: string;
 }
 
 export interface EmailDoc {
