@@ -1,7 +1,8 @@
 // lib/email/blocks/HeroBlock.tsx — PURE. Big number / kicker / prose.
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, HeroProps } from "../doc/types";
-import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { displayFontStack, fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { DISPLAY_FONT_CLASS } from "./email-head";
 
 export function HeroBlock({
   props,
@@ -11,10 +12,11 @@ export function HeroBlock({
   globalStyle: EmailGlobalStyle;
 }) {
   const font = fontStack(globalStyle.fontFamily);
+  const displayFont = displayFontStack(globalStyle);
   const inner = (
     <Section
       style={{
-        backgroundColor: props.sectionBg ?? CARD_BG,
+        backgroundColor: props.sectionBg ?? globalStyle.surfaceColor ?? CARD_BG,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
@@ -36,8 +38,9 @@ export function HeroBlock({
       ) : null}
       {props.value ? (
         <Text
+          className={DISPLAY_FONT_CLASS}
           style={{
-            fontFamily: font,
+            fontFamily: displayFont,
             fontSize: "48px",
             lineHeight: "1.1",
             fontWeight: 700,

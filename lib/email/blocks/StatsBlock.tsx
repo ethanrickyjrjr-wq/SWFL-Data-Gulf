@@ -15,7 +15,7 @@ export function StatsBlock({
   return (
     <Section
       style={{
-        backgroundColor: props.sectionBg ?? CARD_BG,
+        backgroundColor: props.sectionBg ?? globalStyle.surfaceColor ?? CARD_BG,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}

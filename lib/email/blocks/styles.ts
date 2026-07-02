@@ -5,12 +5,17 @@
 // and the server render() export.
 
 import { BRAND_FONTS } from "@/lib/brand/fonts";
-import type { FontFamily, PaddingSize } from "../doc/types";
+import type { EmailGlobalStyle, FontFamily, PaddingSize } from "../doc/types";
 
 // Stacks + webfont URLs live in lib/brand/fonts.ts (the one font root, wave 2) —
 // this module keeps its export shape and derives from the registry.
 export function fontStack(family: FontFamily): string {
   return BRAND_FONTS[family].stack;
+}
+
+/** Headline stack: displayFontFamily when set, else the body family. */
+export function displayFontStack(gs: EmailGlobalStyle): string {
+  return fontStack(gs.displayFontFamily ?? gs.fontFamily);
 }
 
 /** Google Fonts CSS2 <link> URLs for web-font families — derived from the one font root. */

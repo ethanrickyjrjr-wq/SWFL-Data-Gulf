@@ -1,7 +1,8 @@
 // lib/email/blocks/HeaderBlock.tsx — PURE (no "use client"). Logo + company name.
 import { Section, Img, Text } from "@react-email/components";
 import type { EmailGlobalStyle, HeaderProps } from "../doc/types";
-import { fontStack, SECTION_PAD } from "./styles";
+import { displayFontStack, fontStack, SECTION_PAD } from "./styles";
+import { DISPLAY_FONT_CLASS } from "./email-head";
 
 export function HeaderBlock({
   props,
@@ -11,6 +12,7 @@ export function HeaderBlock({
   globalStyle: EmailGlobalStyle;
 }) {
   const font = fontStack(globalStyle.fontFamily);
+  const displayFont = displayFontStack(globalStyle);
   const bg = props.bgColor ?? globalStyle.primaryColor;
   return (
     <Section
@@ -29,8 +31,9 @@ export function HeaderBlock({
       ) : null}
       {props.companyName ? (
         <Text
+          className={DISPLAY_FONT_CLASS}
           style={{
-            fontFamily: font,
+            fontFamily: displayFont,
             fontSize: "18px",
             fontWeight: 700,
             color: "#ffffff",

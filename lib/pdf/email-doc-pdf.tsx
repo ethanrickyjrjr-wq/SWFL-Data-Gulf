@@ -51,6 +51,9 @@ const s = StyleSheet.create({
 /** One block → its PDF view. Exhaustive over EmailBlock["type"] (all 10). */
 function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
   const font = pdfFont(gs.fontFamily);
+  // Headline nodes (header companyName, hero value) mirror the email blocks'
+  // display-font treatment — same one-root registry resolution.
+  const displayFont = pdfFont(gs.displayFontFamily ?? gs.fontFamily);
 
   switch (block.type) {
     case "header": {
@@ -70,7 +73,14 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
             <Image src={p.logoUrl} style={{ maxHeight: 42, maxWidth: 180, marginBottom: 8 }} />
           ) : null}
           {p.companyName ? (
-            <Text style={{ fontFamily: font, fontSize: 18, fontWeight: "bold", color: "#ffffff" }}>
+            <Text
+              style={{
+                fontFamily: displayFont,
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#ffffff",
+              }}
+            >
               {p.companyName}
             </Text>
           ) : null}
@@ -104,7 +114,12 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
           ) : null}
           {p.value ? (
             <Text
-              style={{ fontFamily: font, fontSize: 34, fontWeight: "bold", color: gs.primaryColor }}
+              style={{
+                fontFamily: displayFont,
+                fontSize: 34,
+                fontWeight: "bold",
+                color: gs.primaryColor,
+              }}
             >
               {p.value}
             </Text>

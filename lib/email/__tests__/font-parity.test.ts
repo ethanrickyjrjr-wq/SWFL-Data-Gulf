@@ -67,4 +67,24 @@ describe("font parity — flow and grid emit the same head (the divergence kille
     const html = await renderEmailDocHtml(doc);
     expect(html).not.toContain("fonts.googleapis.com");
   });
+
+  test("hero value renders in the DISPLAY stack; prose stays in the body stack", async () => {
+    const html = await renderEmailDocHtml(flowDoc());
+    expect(html).toContain("Playfair Display"); // display stack on the value
+    expect(html).toContain("Lato"); // body stack on prose
+  });
+
+  test("brand surfaceColor paints the hero card bg; explicit sectionBg wins", async () => {
+    const doc = flowDoc();
+    doc.globalStyle.surfaceColor = "#f0ede6";
+    const html = await renderEmailDocHtml(doc);
+    expect(html).toContain("#f0ede6");
+
+    const authored = flowDoc();
+    authored.globalStyle.surfaceColor = "#f0ede6";
+    (authored.blocks[0].props as Record<string, unknown>).sectionBg = "#123456";
+    const html2 = await renderEmailDocHtml(authored);
+    expect(html2).toContain("#123456");
+    expect(html2).not.toContain("#f0ede6");
+  });
 });
