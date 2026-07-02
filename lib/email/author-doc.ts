@@ -29,7 +29,13 @@ import { GRID_COLS } from "./grid-schema";
 import type { MarketFigure } from "./market-context";
 import { chartImageBlock } from "./inject-chart";
 import { heroPhotoBlock } from "./inject-photo";
-import { extractNumbers, normalizeNumber, anchorsExactly } from "@/lib/deliverable/narrative-lint";
+import {
+  extractNumbers,
+  normalizeNumber,
+  anchorsExactly,
+  RECORDED_CLAIM_RE,
+  RECORDED_LABEL_RE,
+} from "@/lib/deliverable/narrative-lint";
 
 // ── The data MENU (the email's native cited figures, given selectable ids) ─────
 // MarketFigure already carries a formatted, cited value ("$485,000", "+4.2%",
@@ -572,6 +578,19 @@ function splitSentences(text: string): string[] {
   return (text.match(/[\s\S]+?(?:[.!?]+(?=\s|$)|$)/g) ?? []).map((s) => s.trim()).filter(Boolean);
 }
 
+/** Figures whose LABEL marks them recorded/sold — what "sold for $X" prose may cite
+ *  (invention-surface-guards §B, email-author side). */
+export function collectRecordedAnchors(figures: MarketFigure[]): string[] {
+  const out: string[] = [];
+  for (const f of figures) {
+    if (RECORDED_LABEL_RE.test(f.label)) {
+      out.push(f.value);
+      if (f.label) out.push(f.label);
+    }
+  }
+  return out;
+}
+
 /** A bare 4-digit year (1900–2099) with no $/%/bps is a calendar reference, not a
  *  data figure — exempt it (mirrors narrative-lint.isBareYear). */
 function isBareYear(token: string): boolean {
@@ -596,8 +615,10 @@ export interface ProseLintResult {
 export function lintAuthoredProse(
   doc: EmailDoc,
   anchorStrings: ReadonlyArray<string | number>,
+  recordedStrings: ReadonlyArray<string | number> = [],
 ): ProseLintResult {
   const anchors = buildAnchorSet(anchorStrings);
+  const recorded = buildAnchorSet(recordedStrings);
   const offending: string[] = [];
 
   const lintField = (text: string): string => {
@@ -607,6 +628,12 @@ export function lintAuthoredProse(
       for (const tok of extractNumbers(sentence)) {
         if (isBareYear(tok)) continue;
         if (!anchorsExactly(tok, anchors)) {
+          bad = true;
+          break;
+        }
+        // Anchored generally — but a recorded-sale CLAIM must anchor recorded
+        // (a list price dressed as "sold for" is the Latitude 26 failure mode).
+        if (RECORDED_CLAIM_RE.test(sentence) && !anchorsExactly(tok, recorded)) {
           bad = true;
           break;
         }

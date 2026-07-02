@@ -57,6 +57,7 @@ import {
   buildFigureMenu,
   figureMenuById,
   collectAnchorNumbers,
+  collectRecordedAnchors,
   lintAuthoredProse,
 } from "@/lib/email/author-doc";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
@@ -616,6 +617,7 @@ export async function authorDoc({
     ? extractNumbers(chartRes.groundingNote)
     : [];
   const anchorStrings = collectAnchorNumbers(lakeParts.figures, chartGroundingNumbers);
+  const recordedStrings = collectRecordedAnchors(lakeParts.figures);
 
   const chartSlot = chartRes
     ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
@@ -671,7 +673,7 @@ export async function authorDoc({
 
   // No-invention gate (gateNarrative philosophy): lint prose → on a violation,
   // regenerate ONCE naming the offending sentences → still bad ⇒ hard-strip them.
-  const lint = lintAuthoredProse(doc, anchorStrings);
+  const lint = lintAuthoredProse(doc, anchorStrings, recordedStrings);
   let regenerations = 0;
   let stripped = false;
   if (!lint.ok) {
@@ -683,7 +685,7 @@ export async function authorDoc({
     const authored2 = await callAuthor(model, system, retryUser);
     const reparse2 = authored2 ? EmailDocSchema.safeParse(assemble(authored2)) : null;
     if (reparse2?.success) {
-      const lint2 = lintAuthoredProse(reparse2.data, anchorStrings);
+      const lint2 = lintAuthoredProse(reparse2.data, anchorStrings, recordedStrings);
       if (lint2.ok) {
         doc = reparse2.data;
       } else {

@@ -237,3 +237,55 @@ describe("schedule_suggestion", () => {
     expect(AUTHOR_TOOL.input_schema.properties).toHaveProperty("schedule_suggestion");
   });
 });
+
+// ── author recorded-claim gate (invention-surface-guards §B) ──────────────────
+import { collectRecordedAnchors } from "./author-doc";
+import type { MarketFigure } from "./market-context";
+
+describe("author recorded-claim gate", () => {
+  const docWith = (body: string) =>
+    ({
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [{ id: "b1", type: "text", props: { body } }],
+    }) as unknown as EmailDoc;
+
+  test("collectRecordedAnchors keeps only recorded-labeled figures", () => {
+    const figures: MarketFigure[] = [
+      {
+        key: "median_list",
+        label: "Median list price",
+        value: "$650,000",
+        source: "SWFL Data Gulf",
+      },
+      {
+        key: "county_sale",
+        label: "Lee County median sale price",
+        value: "$389,000",
+        source: "Redfin",
+      },
+    ];
+    const out = collectRecordedAnchors(figures);
+    expect(out).toContain("$389,000");
+    expect(out).not.toContain("$650,000");
+  });
+
+  test("'sold for' a list-price figure is stripped", () => {
+    const r = lintAuthoredProse(docWith("This home sold for $650,000."), ["$650,000"], []);
+    expect(r.ok).toBe(false);
+    expect(r.offending).toContain("This home sold for $650,000.");
+  });
+
+  test("'median sale price' quoting the recorded-labeled figure passes", () => {
+    const r = lintAuthoredProse(
+      docWith("The median sale price is $389,000."),
+      ["$389,000"],
+      ["Lee County median sale price: $389,000"],
+    );
+    expect(r.ok).toBe(true);
+  });
+
+  test("two-arg calls keep working (backward compat)", () => {
+    const r = lintAuthoredProse(docWith("Rents hit $2,150."), ["$2,150"]);
+    expect(r.ok).toBe(true);
+  });
+});
