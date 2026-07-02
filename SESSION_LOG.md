@@ -1,3 +1,18 @@
+## 2026-07-01 (main) — feat(master): wire investor-zip-swfl + active-listings-swfl
+
+Implemented docs/superpowers/plans/2026-07-01-wire-listings-investor-master.md (spec:
+docs/superpowers/specs/2026-07-01-wire-listings-investor-master-design.md). Added both brains to
+master.mts sources[]/input_brains[] as plain `input`, non-critical - mirrors c1afc357's
+market-cadence pattern exactly. Both were fully built/registered/publishing already; pure wiring
+gap. active-rentals-swfl deliberately excluded, pending its own open active_rentals_swfl_live_verify
+check. Target-rebuilt master (--target-only): both new upstreams' facts confirmed in the corpus
+(SAVED FACTS f035/f036, sources list, conclusion driver list). Proved via voteDirection's weight
+formula (magnitude x confidence x factor) that magnitude-0 upstreams contribute exactly zero to the
+vote regardless of edge_type — the small magnitude drift observed (0.46138->0.45781) traces to the
+half-life decay factor recomputed at a later wall-clock timestamp against pre-existing upstreams, not
+to this wiring; direction (mixed) unchanged. Discarded local brains/master.md rebuild (ships from GHA
+cron). Gate 5 (catalog.test.mts) green — 4/4.
+
 ## 2026-07-01 (main) — Task B: on-brand chart palette extension (WCAG contrast + OKLab) — built, verified, live
 ## 2026-07-01 (main) — Task B: on-brand chart palette extension (WCAG contrast + OKLab) — built, verified offline
 
