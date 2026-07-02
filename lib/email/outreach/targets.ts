@@ -18,6 +18,15 @@ export interface OutreachTarget {
   name?: string;
   domain?: string;
   zip?: string;
+  // ── demo campaign columns (optional; absent on legacy drip CSVs) ──
+  /** Message track: agent | broker. */
+  track?: "agent" | "broker";
+  /** Operator-verified brand primary hex (overrides the scrape). */
+  primary?: string;
+  /** Operator-verified brand accent hex (overrides the scrape). */
+  accent?: string;
+  /** Operator-verified logo URL (overrides the scrape; .svg gets rasterized at enroll). */
+  logo?: string;
 }
 
 export interface ParsedTargets {
@@ -28,7 +37,17 @@ export interface ParsedTargets {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ZIP_RE = /^\d{5}$/;
-const KNOWN_COLS = new Set(["email", "name", "domain", "zip"]);
+const HEX_RE = /^#[0-9a-fA-F]{3,8}$/;
+const KNOWN_COLS = new Set([
+  "email",
+  "name",
+  "domain",
+  "zip",
+  "track",
+  "primary",
+  "accent",
+  "logo",
+]);
 
 /** Split one CSV line honoring double-quoted fields (commas + "" escapes inside). */
 function splitCsvLine(line: string): string[] {
@@ -120,6 +139,29 @@ export function parseTargetsCsv(text: string): ParsedTargets {
       continue;
     }
 
+    // Demo columns — validated BEFORE committing the row so a bad value is a
+    // per-line error, never a silently-dropped brand on a live prospect.
+    const track = (rec.track ?? "").trim().toLowerCase();
+    if (track && track !== "agent" && track !== "broker") {
+      errors.push({ line: i + 1, reason: `invalid track "${rec.track}" (agent|broker)`, raw });
+      continue;
+    }
+    const primary = (rec.primary ?? "").trim();
+    if (primary && !HEX_RE.test(primary)) {
+      errors.push({ line: i + 1, reason: `invalid primary hex "${primary}"`, raw });
+      continue;
+    }
+    const accent = (rec.accent ?? "").trim();
+    if (accent && !HEX_RE.test(accent)) {
+      errors.push({ line: i + 1, reason: `invalid accent hex "${accent}"`, raw });
+      continue;
+    }
+    const logo = (rec.logo ?? "").trim();
+    if (logo && !/^https?:\/\//i.test(logo)) {
+      errors.push({ line: i + 1, reason: `invalid logo url "${logo}" (must be http/https)`, raw });
+      continue;
+    }
+
     seen.add(email);
     const target: OutreachTarget = { email };
     const name = (rec.name ?? "").trim();
@@ -127,6 +169,10 @@ export function parseTargetsCsv(text: string): ParsedTargets {
     const domain = rec.domain ? normalizeDomain(rec.domain) : undefined;
     if (domain) target.domain = domain;
     if (zip) target.zip = zip;
+    if (track) target.track = track as "agent" | "broker";
+    if (primary) target.primary = primary;
+    if (accent) target.accent = accent;
+    if (logo) target.logo = logo;
     rows.push(target);
   }
 
