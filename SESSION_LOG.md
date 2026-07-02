@@ -1,3 +1,21 @@
+## 2026-07-02 (main) — project-cockpit spec rev 2: ready-for-you week + product research evidence
+
+Operator pushback on rev 1 ("navigation isn't a product") → reframed the cockpit spec around a
+ready-for-you queue: project opens with this week's email + posts already generated (D0), grid
+canvas promoted to default (per-section AI editing), Schedule-all as the paywall moment, listing
+lifecycle state machine pre-specced as Phase 1.5 (listing_transitions is live). RULE 0.4 research
+(crawl4ai, 07/02/2026): r/realtors threads — agents "spending hours every week in Canva," asking
+"any tool that automate this?"; top-voted advice is anti-canned/pro-hyper-local market snapshots
+(exactly the lake's output); coffeecontracts.com pricing $74/mo / $199/qtr / $740/yr for generic
+templates, 6,000+ agents, buyers already skeptical ("just nice looking templates?"). Also folded in
+a parallel review's 3 corrections: grid shell lacks initialAiPrompt/autoGenerate (now added since
+grid is default), auto-create pinned to POST /api/projects (not /api/claim), unsaved-edit toggle
+dialog. Named loudly: email/social scheduler crons are commented out platform-wide — scheduler
+go-live (or honest "queued until launch" copy) is a Phase 1 exit criterion. Two verdict metrics
+instrumented in Phase 1: week_schedule_all rate + 7-day return. Spec:
+`docs/superpowers/specs/2026-07-02-project-cockpit-design.md`. Check open: `project_cockpit_live_verify`.
+Committed locally, NOT pushed (operator confirms pushes).
+
 ## 2026-07-02 (main) — graphify full regen + republish to ops /graph
 
 Ran `bun run graphify:update` (AST re-extraction + app-plane nodes: 23,232 nodes / 37,976 edges,
