@@ -1,3 +1,19 @@
+## 2026-07-02 (main) — parked chat-chart build work (operator decree, docs-only)
+
+Operator: stop building new chart shapes/discovery-surface work inside the assistant chat surface.
+Surveyed all planned "chart in chat" work (distinct from the already-dead MCP chat-chart widget,
+which is parked for an unrelated reason — a confirmed claude.ai host bug, `mcp-widget/PARKED.md`).
+Moved the three chat-chart planning docs into `docs/_archive/parked/chat-charts/` with a README
+heading marking them not-in-progress: `charts-dynamic-capability.md` (stale backlog note),
+`2026-06-28-chart-ideas-and-dynamic-charts-handoff.md` (the live handoff — extend `compose-chart.ts`
+to line/scatter/composition/donut/radial + proactive Chart Ideas chips), `2026-06-10-chart-as-of-anchoring.md`
+(every `buildChartForIntent` builder should carry `asOf`). Checks `generic_chart_capability` and
+`chart_asof_anchoring` left OPEN in the ledger (the file move doesn't close them — they're paused,
+not done). Updated the load-bearing pointer in `lib/assistant/CLAUDE.md` to note the park instead of
+linking the handoff doc. Left `chart_palette_extension_live_verify` and `chart_lint_insert_split`
+alone — palette is code-complete (just needs live-verify), and the lint/insert split is a data-integrity
+bug fix (orphaned `saved_charts` rows), not new chart-feature building.
+
 ## 2026-07-01 (main) — market-heat ingest fired live, region trend proven, live-verify closed
 
 Operator asked why market-heat data wasn't in yet. Root cause via GH API (not memory): the

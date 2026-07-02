@@ -9,8 +9,9 @@ This is the LIVE answer engine. The single most important fact:
 - **Charts: two layers, model never writes a number.** `composeChartFromRequest` (user-directed: held +
   web-cited + upload + user figures) runs first; `buildChartForQuestion` (auto: ranked-delta → rich
   pre-wired → generic any-brain bar) is the fallback. `lintChartBlock` is the belt-and-suspenders. Web
-  search is wired via `external_points` → `fillExternalPoint` → `web_search_20250305`. To make more chart
-  shapes buildable see `docs/superpowers/specs/2026-06-28-chart-ideas-and-dynamic-charts-handoff.md`.
+  search is wired via `external_points` → `fillExternalPoint` → `web_search_20250305`. Bar/table is it for
+  now — the plan to add more chat chart shapes is PARKED (`docs/_archive/parked/chat-charts/`, not being
+  built), don't pick it up without an explicit operator go-ahead.
 - **Speaker hygiene:** no `§`, no internal pack IDs, no tier codes, no `master`/brain-id leakage. The
   `display-leak.test.mts` wall enforces it. Dates are MM/DD/YYYY (never the raw `SWFL-…-YYYYMMDD` token).
 - **Never frame the product as "ZIP-level"** — the moat is four-lane at ANY grain (`zip-level-framing-lint`).
