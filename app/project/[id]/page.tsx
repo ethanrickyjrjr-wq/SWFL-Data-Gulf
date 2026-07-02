@@ -13,6 +13,7 @@ import { readRecentActivity } from "@/lib/project/activity";
 import { projectScopeSet } from "@/lib/project/project-scope";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import { computeSignificantChanges, loadSignificanceRegistry } from "@/lib/signals/brain-snapshot";
+import { recordUseForClient } from "@/lib/highlighter/meter";
 import type { ScoredEventSummary } from "@/lib/signals/types";
 import { ProjectWorkspace } from "./ProjectWorkspace";
 import type {
@@ -50,8 +51,7 @@ interface RawDeliverable {
   // (chart_spec — a ChartBlock superset). Either renders the thumbnail mini-chart;
   // its `id` seeds the P4 edit panel's pre-checked item set.
   items_snapshot:
-    | { id?: string; kind: string; chart_block?: ChartBlock; chart_spec?: ChartBlock }[]
-    | null;
+    { id?: string; kind: string; chart_block?: ChartBlock; chart_spec?: ChartBlock }[] | null;
   // Materials Hub v2: block-canvas email doc + last-refresh stamp. Carried through to
   // DeliverableRow below — without these on the raw type, the .map() projection won't compile.
   doc: import("@/lib/email/doc/types").EmailDoc | null;
@@ -115,6 +115,15 @@ export default async function ProjectPage({
   const project = data as ProjectRow;
   const items = project.items ?? [];
 
+  // Cockpit verdict metric #2 anchor: every authenticated project open. The
+  // 7-day-return query pairs these with week_generated events. recordUse* never
+  // throws — metering must never break the page.
+  await recordUseForClient(
+    `uid:${user.id}`,
+    { report_id: "", reach: [`project:${id}`], action: "project_open" },
+    user.id,
+  );
+
   // Resolve chart refs → their frozen chart_block in saved_charts (public-select).
   const chartIds = items.filter((i) => i.kind === "chart").map((i) => i.chart_id);
   const charts: Record<string, SavedChart> = {};
@@ -124,8 +133,7 @@ export default async function ProjectPage({
       .select("id, chart_block, freshness_token")
       .in("id", chartIds);
     for (const r of (rows as
-      | { id: string; chart_block: ChartBlock; freshness_token: string | null }[]
-      | null) ?? []) {
+      { id: string; chart_block: ChartBlock; freshness_token: string | null }[] | null) ?? []) {
       charts[r.id] = { block: r.chart_block, freshness_token: r.freshness_token };
     }
   }
