@@ -1,3 +1,23 @@
+## 2026-07-02 (main) — active_rentals_swfl_live_verify closed: first live SteadyAPI rentals sweep
+
+The active-rentals-swfl pack/pipeline/migration/GHA workflow all shipped 2026-06-30 (d64e0873) but
+offline/cron-parked — v1 brain cited "(fixture; data_lake.rental_listing_stats)", never real data.
+Closed the gap: applied docs/sql/20260701_rentals_swfl_table.sql (table + views + grants + PostgREST
+reload — none existed yet), dispatched ingest-rentals.yml with dry_run=false (run 28559510045, 10m48s
+green). `[budget] rentals = 466 rentals-search calls (Lee 259, Collier 207)`, `rows=9308 dry_run=False`;
+7,185 distinct rows landed after PK dedupe (Lee 4,018 + Collier 3,167, captured 2026-07-02). Rebuilt
+active-rentals-swfl live (--target-only): v2 cites "realtor.com rental listings" (was "fixture"),
+7,185 listings $485-$17,000/mo across 57 ZIPs. Grepped the full brain file for MLS#/SteadyAPI leaks —
+clean in the citable OUTPUT (source/citation fields all say realtor.com); the only "SteadyAPI" strings
+are internal scope/ACTIVE PROJECTS metadata, never displayed to end users. Committed brains/active-rentals-swfl.md.
+steadyapi_sole_spine_live_verify was already closed (2026-07-01) so the vendor path itself carried no
+WAF risk — confirmed here too, clean run. Closed active_rentals_swfl_live_verify.
+Cadence registry has a pre-written GRADUATION note (move `rentals_swfl` to `pipelines:` + uncomment the
+cron schedule) now that the first green dry_run=false dispatch exists — NOT done yet, held for operator
+call (turns on an unattended weekly paid-API cron). Also NOT wired into master.mts yet — the earlier
+wire_listings_investor_master_live_verify plan explicitly deferred active-rentals-swfl to its own
+follow-up spec once this check closed, which it now has.
+
 ## 2026-07-01 (main) — fix(listing-lake): heal SteadyAPI cutover baseline mis-stamp + close the recurrence hole
 
 Diagnosed why listing-lifecycle 30d counts were absurd (e.g. one ZIP "1971 new listings/30d"): all
