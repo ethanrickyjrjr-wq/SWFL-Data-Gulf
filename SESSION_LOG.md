@@ -13,6 +13,30 @@ shares this tree — one commit briefly swept their staged sold-price files in v
 index; fixed by soft-reset + PATHSPEC commits (`git commit -- <paths>`), which all later
 commits used. Their work rode untouched (their 23122832 landed between my commits).
 `listing_link_photo_root_live_verify` stays OPEN — operator-run real-inbox render.
+## 2026-07-02 (wt/invention-guards) — wave 1 BUILT: invention-surface-guards (held for push)
+
+All guards from the approved plan (`docs/superpowers/plans/2026-07-02-invention-surface-guards.md`)
+built TDD in the `bp-invention-guards` worktree (isolated per RULE 1.5 — a parallel wave-1.5
+session was live on main; its commit churn swept my staged Task-1 files twice before isolation).
+Shipped: (A) `lib/listings/sold-price.ts` one-root chain (lake nonzero → `fetchSoldEvent`
+recorded event → last-list disclosed; 0/null NEVER binds a price); (B) recorded-claim gate —
+`RECORDED_CLAIM_RE`/`RECORDED_LABEL_RE` in `narrative-lint.ts`, threaded through `gateNarrative`
+(5th param) and `lintAuthoredProse` (3rd param) + both build-doc call sites; a "sold for $X"
+sentence must anchor to a recorded-labeled item, not merely any payload digit; (C) URL tripwire
+`lib/deliverable/url-lint.ts` (OWASP LLM05 allowlist validation) wired: blast route hard-fails 422
+`url_violation`, email-lab render strips+warns, social author strips minted caption/variant URLs;
+(D) sole-spine rewire: `market-context.ts` → `listing_active_stats` (dead scrape view retired;
+34108 was 92 stale vs 495 live), labels "MLS active-listings"→"SWFL Data Gulf", price figures
+guard `> 0`, `singleSourcePerMetric` tripwire + `sole-spine.test.ts` repo scan. (E) DISSOLVED:
+the 298 `lifecycle_seed` stragglers are NOT dupes — live queries prove all 298 are Hendry County
+(June 27 seed, null MLS#/lat-lon, zero twins by address/MLS/lat-lon/zip+street); the SteadyAPI
+sweep covered Lee+Collier only. NO deletion run; check `hendry_seed_orphans` opened for the
+operator decision (add Hendry sweep vs retire stale actives). Gates: 1,376 tests green across
+lib/{deliverable,email,listings,social}; `bunx next build` clean (worktree needed `.env*` copied +
+`bun install`). Also on record: main lost two cron commits (daily rebuild + email digest 07/02)
+during the parallel session's amend churn — both preserved on this branch, restored on land.
+NOT pushed; land + push are operator calls. Next: operator runs `invention_surface_guards_live_verify`,
+then wave 2 (`brand-tokens-one-root`) brainstorm at its turn.
 
 ## 2026-07-02 (main) — wave-1 spec: invention-surface-guards (brainstormed, registered, docs-only)
 
