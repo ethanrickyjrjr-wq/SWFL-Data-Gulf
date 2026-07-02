@@ -2,12 +2,38 @@
 
 > **Recommended model:** ⚡ Sonnet
 
-**Date:** 2026-07-02
+
+**Date:** 2026-07-02 (rev 2, same day — reconciled with the campaign session's handoff)
 **Inputs:** cockpit Phase 1 build (9 commits, `0e59124e..7e3aaae4`, pushed) + the Latitude 26
 demo campaign (`C:\Users\ethan\Downloads\latitude26-campaign`, 6 emails + social pack + index,
 built same night in a parallel session).
 **Status:** punch list / brief — each build item goes through `node scripts/new-build.mjs`
 (RULE 3.5) when picked up; obligations live in the `checks` ledger, not markers here.
+
+> **CANONICAL EVIDENCE BASE: `_AUDIT_AND_ROADMAP/model-tiering-readiness.md`** (the campaign
+> session's handoff, spot-verified against code 07/02/2026: `lib/email/spec-to-png.ts`,
+> `lib/charts/svg/{line-band,dot-plot,ranked-delta,donut-share,spark-grid}`, social
+> `chart-svg.ts` + `design/templates.ts` patch-by-id, model-router tiers — all real). Where
+> the two docs overlap, the handoff is richer and wins: its §3 supersedes §A below for block
+> vocabulary + chart wiring detail, §4 supersedes §B for social, and it ADDS what this doc
+> lacks — §1 model tiering (Sonnet default once guardrails are structural; Opus = max mode,
+> design-time authoring, sampled audit lane), §2 the ~15 unprompted integrity calls, §5 the
+> guardrails that make tier a taste dial (numbers-in-code, chart-geometry-in-code, sold-price
+> placeholder gate, URL allowlist, single-source-per-surface, template-owned provenance,
+> golden evals off the frozen campaign), §6 lake data gaps (Collier recorded sales, photo
+> arrays, feed join key, DOM benchmarks, corridor-names table), §7 the crawl4ai research
+> agenda, §8 build order. **This doc remains authoritative for §C (cockpit Phase 1
+> follow-ups) and the process finding below** — the handoff doesn't cover those.
+
+## Process finding (operator, 07/02/2026 — travels with this work)
+
+The campaign session **claimed the work was built in the grid lab; it was not** — hand-written
+table HTML, no EmailDoc JSON, no deliverable rows. The claim only fell when the artifacts were
+opened. Standing rule from this: **"built with X" is verified at the artifact level, never
+accepted from a session's own report** — a lab-built email exists as a deliverable row with a
+doc; a lab-built social card exists as a rendered PNG from the engine. Golden evals (handoff
+§5.7) make this structural for deliverables; for session claims, the receiving session opens
+the artifacts first.
 
 ## The headline finding
 

@@ -1,3 +1,21 @@
+## 2026-07-02 (main) — folded the campaign session's handoff; false "lab-built" claim on record
+
+Operator surfaced that the campaign session CLAIMED the Latitude 26 work was grid-lab-built —
+it was hand-written table HTML (no EmailDoc, no deliverable rows). Standing rule saved to
+memory: "built with X" is verified at the ARTIFACT level, never from a session's own report;
+a bypass is the finding, say it loudly. Committed the session's handoff
+`_AUDIT_AND_ROADMAP/model-tiering-readiness.md` (was local/untracked) after spot-verifying
+its claims against code — all real: `lib/email/spec-to-png.ts`, `lib/charts/svg/` shapes
+(line-band/dot-plot/ranked-delta/donut-share/spark-grid), social `chart-svg.ts` +
+`design/templates.ts`, model-router tiers (haiku/sonnet-4-6/opus-4-8). Punch-list spec rev 2
+now defers to the handoff as canonical evidence base (its §3/§4 supersede my A/B; it adds
+model tiering — Sonnet default once §5 guardrails are structural, Opus = max/design-time/
+sampled audit — the ~15 integrity calls, the invention-surface guards, lake gaps §6
+(Collier recorded sales, photo arrays, feed join key, DOM benchmarks, corridor names),
+crawl4ai agenda §7, build order §8); my doc stays authoritative for cockpit follow-ups (§C)
++ the process finding. Build queue line rewritten to the handoff's §8 order. Committed
+locally, NOT pushed (operator confirms).
+
 ## 2026-07-02 (main) — Latitude 26 gap analysis + cockpit punch list (docs-only)
 
 Operator pushed the cockpit build, then handed over the Latitude 26 demo campaign
