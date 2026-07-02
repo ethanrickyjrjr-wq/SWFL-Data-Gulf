@@ -33,6 +33,7 @@ import {
   type TemplateTokens,
 } from "@/lib/social/design/templates";
 import { designToSkeleton, applyDesignPatch } from "@/lib/social/design/serialize";
+import { lintTextUrls, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 import { isSocialFormat, type SocialFormat } from "@/lib/social/formats";
 import type { SocialDesign } from "@/lib/social/design/types";
 import type { GoalTone } from "@/lib/email/social-calendar/types";
@@ -247,6 +248,24 @@ export async function authorSocialPost(
     const template = getTemplate(parsed.templateId);
     if (!template) return null; // unknown / hallucinated template id → miss
 
+    // Fake-link tripwire (invention-surface-guards §C): the model may cite only
+    // URLs it was handed — verified web sources, the real listing, the brand
+    // record. Anything else (a minted realtor URL, an "improved" CDN path) is
+    // stripped before the caption ships.
+    const allowedUrls = collectAllowedUrls(
+      fresh.web.verified,
+      featured ?? {},
+      opts?.branding ?? {},
+    );
+    const captionGate = lintTextUrls(parsed.caption, allowedUrls);
+    const cleanVariants: typeof parsed.variants = {};
+    for (const [p, v] of Object.entries(parsed.variants)) {
+      cleanVariants[p as keyof typeof parsed.variants] = lintTextUrls(
+        v as string,
+        allowedUrls,
+      ).stripped;
+    }
+
     const format = pickFormat(template, parsed.format, opts?.format);
     let design = template.build(tokens, format);
     design = applyDesignPatch(design, parsed.patch);
@@ -255,12 +274,12 @@ export async function authorSocialPost(
     }
 
     const variants = opts?.platforms?.length
-      ? buildVariants(parsed.caption, parsed.variants, opts.platforms)
-      : parsed.variants;
+      ? buildVariants(captionGate.stripped, cleanVariants, opts.platforms)
+      : cleanVariants;
 
     return {
       design,
-      caption: parsed.caption,
+      caption: captionGate.stripped,
       hashtags: parsed.hashtags,
       variants,
       webSources: fresh.web.verified.map((v) => ({

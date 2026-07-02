@@ -6,6 +6,7 @@ import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { EmailDocEmail } from "@/lib/email/blocks/EmailDocRenderer";
 import { isGridDoc } from "@/lib/email/grid-schema";
 import { compileGrid } from "@/lib/email/compile-grid";
+import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 
 // Two render paths share this URL during (and after) the block-canvas
 // transition (spec → Modified files):
@@ -33,7 +34,13 @@ export async function POST(req: NextRequest) {
     const html = isGridDoc(parsed.data.blocks)
       ? await compileGrid(parsed.data)
       : await render(EmailDocEmail({ doc: parsed.data }));
-    return NextResponse.json({ html });
+    // Fake-link tripwire (invention-surface-guards §C, interactive = strip +
+    // warn, never block an edit).
+    const urlGate = lintCompiledHtml(html, collectAllowedUrls(parsed.data));
+    return NextResponse.json({
+      html: urlGate.stripped,
+      ...(urlGate.ok ? {} : { url_warnings: urlGate.violations }),
+    });
   }
 
   // ── Legacy token path ─────────────────────────────────────────────────────

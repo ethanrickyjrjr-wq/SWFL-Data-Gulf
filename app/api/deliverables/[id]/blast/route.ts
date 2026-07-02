@@ -21,6 +21,7 @@ import { EmailDocEmail } from "@/lib/email/blocks/EmailDocRenderer";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
+import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -161,6 +162,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         `padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">View Report</a></p>` +
         `</body></html>`;
     }
+  }
+
+  // Fake-link tripwire (invention-surface-guards §C, unattended send = hard
+  // fail): every href/src in the compiled email must be verbatim from the
+  // deliverable's own content (doc/snapshot/branding) or a platform link. A
+  // minted URL never ships.
+  const allowedUrls = collectAllowedUrls(
+    deliverable.doc,
+    deliverable.items_snapshot,
+    deliverable.narrative,
+    deliverable.branding,
+    webUrl,
+  );
+  const urlGate = lintCompiledHtml(baseHtml, allowedUrls);
+  if (!urlGate.ok) {
+    return NextResponse.json(
+      { error: "url_violation", violations: urlGate.violations },
+      { status: 422 },
+    );
   }
 
   // Deliverability-safe sender: verified platform address, agent's name shown,
