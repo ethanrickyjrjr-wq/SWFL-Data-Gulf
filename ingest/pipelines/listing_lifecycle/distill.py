@@ -155,6 +155,20 @@ def current_state_count(source_name: str = SOURCE_NAME) -> int:
         return 0
 
 
+def transition_count(source_name: str = SOURCE_NAME) -> int:
+    """Live transition-history count for a source. Zero => this source has never emitted a diff, so
+    the NEXT run IS its baseline (see pipeline.run is_seed): a state-only migrate populates listing_state
+    but leaves transitions empty, and without this the first automated sweep would stamp the whole
+    cutover as real flow (the 2026-07-01 SteadyAPI incident). Fails safe to 0 (treat as baseline) —
+    a transient read error stamping a run seed=True is harmless; the opposite fabricates churn."""
+    try:
+        with _get_conn() as conn, conn.cursor() as cur:
+            cur.execute(f"SELECT count(*) FROM {_TRANS_TABLE} WHERE source_name = %s", (source_name,))
+            return int(cur.fetchone()[0])
+    except Exception:
+        return 0
+
+
 def upsert_state(
     upserts: list[dict[str, Any]], *, source_name: str = SOURCE_NAME, dry_run: bool = False
 ) -> int:

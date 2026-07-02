@@ -299,6 +299,9 @@ def _wire(monkeypatch, calls):
         "county_total": 1, "search_calls": 1, "enrich_calls": 0})
     monkeypatch.setattr(P.distill, "load_current_state",
                         lambda *a, **k: {("Z", "sale"): {**_prior_holding("Z", "9", 500000, 40), "county": "Lee"}})
+    # Steady-state world: the source already holds transition history, so is_seed=False and the live
+    # sold hook is allowed to fire (the baseline guard only forces seed when transitions are empty).
+    monkeypatch.setattr(P.distill, "transition_count", lambda *a, **k: 1)
     monkeypatch.setattr(P.distill, "upsert_state", lambda ups, **k: len(ups))
     monkeypatch.setattr(P.distill, "append_transitions", lambda tr, **k: len(tr))
     monkeypatch.setattr(P.distill, "stamp_sold_checked", lambda keys, **k: len(keys))

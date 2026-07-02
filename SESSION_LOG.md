@@ -1,3 +1,23 @@
+## 2026-07-01 (main) — fix(listing-lake): heal SteadyAPI cutover baseline mis-stamp + close the recurrence hole
+
+Diagnosed why listing-lifecycle 30d counts were absurd (e.g. one ZIP "1971 new listings/30d"): all
+25,616 api_feed transitions are stamped a single date, 2026-07-01, and ALL were seed=false (0 seed=true
+in the transition table). Root cause: the intended cutover is migrate (flip lifecycle_seed->api_feed
+state) THEN `pipeline --source api --catchup` (forces is_seed=True). But the first live sweep was the
+graduated GHA dispatch (dry_run=false, runs 28495956344/28496497637) — and listing-lifecycle-daily.yml
+has NO --catchup input, so is_seed = catchup(False) or len(prior)==0(False, migrated seed) = False. The
+whole cutover baseline (21,887 phantom "new listings": Lee 15,803 / Collier 6,084, + holdings/moves)
+landed seed=false, and listing_transitions_recent_zip_stats filters seed=false so it read the cutover as
+30d flow. HEAL: migrations/20260701_listing_transitions_seed_baseline_heal.sql re-stamped all 07/01
+api_feed rows seed=true (safe: 07/01 is the ONLY date with api_feed transitions, so the whole set is
+baseline, nothing genuine buried). Verified live: 25,616 all seed_true / 0 seed_false; view returns no
+rows for the seed day. FORWARD GUARD: pipeline.run is_seed now also True when distill.transition_count(
+source)==0 — a state-only migrate leaves transitions empty, so the first automated sweep self-detects as
+baseline even though the cron can't pass --catchup. Added distill.transition_count (mirrors
+current_state_count, fail-safe 0=baseline). Fixed the recent-zip-stats view's inaccurate "10,459-row
+backfill" comment. Tests: 93/93 listing_lifecycle green (added transition_count stub to sold-capture
+_wire). Next: nothing blocking; next sweep accrues real flow.
+
 ## 2026-07-01 (main) — feat(master): wire investor-zip-swfl + active-listings-swfl
 
 Implemented docs/superpowers/plans/2026-07-01-wire-listings-investor-master.md (spec:

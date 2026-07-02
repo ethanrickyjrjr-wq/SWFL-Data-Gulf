@@ -85,7 +85,12 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         prior = {k: v for k, v in prior_all.items() if v.get("county") == county}
         # catchup forces the baseline stamp: the migrated seed makes prior non-empty, but this run IS
         # the api_feed baseline, so its transitions must be seed=True (no fabricated catch-up-day churn).
-        is_seed = catchup or len(prior) == 0
+        # The `--catchup` flag alone is a hole the daily cron can't fill (it has no such input), so also
+        # detect the baseline structurally: zero prior transitions for this source => this run IS the
+        # first diff, regardless of how listing_state got populated. This is what would have prevented
+        # the 2026-07-01 SteadyAPI cutover from stamping 25,616 rows as real flow. The instant any real
+        # transition exists, every later run is steady-state.
+        is_seed = catchup or len(prior) == 0 or distill.transition_count(source_name=src_name) == 0
         complete, why = scan_is_complete(
             {"exhausted": result["exhausted"], "count": len(rows), "last_status": result["last_status"]},
             last_trusted_count=(len(prior) or None),
