@@ -1,3 +1,26 @@
+## 2026-07-02 (main) — Latitude 26 gap analysis + cockpit punch list (docs-only)
+
+Operator pushed the cockpit build, then handed over the Latitude 26 demo campaign
+(`Downloads/latitude26-campaign` — 6 lifecycle emails + social pack for 465 Gordonia Rd,
+Naples, $14.8M, one invented brand, real lake numbers). Read all 8 files. Headline: the
+campaign was hand-authored table-HTML — the parallel session was told to use the grid lab and
+bypassed it, which IS the gap measurement. Also: its inline-SVG charts would be stripped by
+Gmail/Outlook; our `chart-image.ts` PNG path (already brand-aware, trend shape included) is
+the correct one — campaign is a design target, not a technical template. Wrote
+`docs/superpowers/specs/2026-07-02-latitude26-gap-and-cockpit-punch-list.md`: grid gaps
+(display+body font pairing — globalStyle has ONE fontFamily; palette tints beyond the 4
+slots; comp-card/stage-ribbon/fact-callout/spec-strip/hero-overlay blocks; NO preheader
+support anywhere in lib/email — grep clean; promote listing photos to email-media instead of
+rdcpix hotlinks; author-engine reach for brand-themed trend charts), social fixes (composer
+lacks background-cover photo/gradient/badge; chart element is a placeholder; engine⇆calendar
+still unwired), cockpit follow-ups (exit criteria, generic email queue card title, no
+onScheduled callback, ui_state whole-bag PATCH race, project_open fires per RSC render →
+7-day metric must count distinct days, queue-row refresh untested, place-scope falls to
+region dossier), and Phase 1.5 framing: the campaign is the reference deliverable for the
+listing-lifecycle queue (comp set / pending corroboration / sold wave / scarcity fact
+producers + campaign-as-unit grouping). Build queue synced (cockpit → [x] with live-verify
+open; punch list → [ ] next-up). Committed locally, NOT pushed (operator confirms).
+
 ## 2026-07-02 (main) — project cockpit Phase 1 BUILT (9 commits, tests+build green, live-verify pending)
 
 Executed the cockpit plan inline, one commit per task (0e59124e..7e3aaae4): (1) this-week
