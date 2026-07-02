@@ -88,3 +88,43 @@ test("loadListingContext degrades to empty context on zero rows — never throws
   expect(ctx.ranked).toEqual([]);
   expect(ctx.figures).toEqual([]);
 });
+
+// ── wave 1.5: photo enrichment (derived watermark-crop, one root) ────────────
+// DYNAMIC import, matching this file's existing pattern (line 51): a static
+// `import { enrichListingPhotos }` would hoist ABOVE the mock.module calls at
+// the top of the file and break the supabase mocking.
+const { enrichListingPhotos } = await import("./select");
+
+test("enrichListingPhotos swaps photoUrl for the derived URL on top-ranked listings", async () => {
+  const listings = [
+    { id: "L1", photoUrl: "https://cdn.example.com/1.jpg" },
+    { id: "L2", photoUrl: "https://cdn.example.com/2.jpg" },
+  ] as Parameters<typeof enrichListingPhotos>[0];
+  const out = await enrichListingPhotos(listings, async ({ listingId }) => {
+    return `https://media.example.com/listing-photos/${listingId}-v1.jpg`;
+  });
+  expect(out[0].photoUrl).toBe("https://media.example.com/listing-photos/L1-v1.jpg");
+  expect(out[1].photoUrl).toBe("https://media.example.com/listing-photos/L2-v1.jpg");
+});
+
+test("derive failure (null) keeps the ORIGINAL photo — degraded, never broken", async () => {
+  const listings = [{ id: "L1", photoUrl: "https://cdn.example.com/1.jpg" }] as Parameters<
+    typeof enrichListingPhotos
+  >[0];
+  const out = await enrichListingPhotos(listings, async () => null);
+  expect(out[0].photoUrl).toBe("https://cdn.example.com/1.jpg");
+});
+
+test("listings without a photo are untouched, and enrichment caps at the top 5", async () => {
+  const listings = Array.from({ length: 8 }, (_, i) => ({
+    id: `L${i}`,
+    photoUrl: i === 3 ? undefined : `https://cdn.example.com/${i}.jpg`,
+  })) as Parameters<typeof enrichListingPhotos>[0];
+  const derivedFor: string[] = [];
+  await enrichListingPhotos(listings, async ({ listingId }) => {
+    derivedFor.push(listingId);
+    return `https://media.example.com/${listingId}.jpg`;
+  });
+  // top 5 slots, minus the photo-less one = 4 derive calls, none past index 4
+  expect(derivedFor).toEqual(["L0", "L1", "L2", "L4"]);
+});

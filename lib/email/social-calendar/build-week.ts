@@ -34,6 +34,7 @@ import {
   attachFeaturedAerial,
 } from "@/lib/listings/select";
 import type { Listing } from "@/lib/listings/rentcast";
+import { deriveListingPhoto } from "@/lib/media/listing-photo";
 
 // X (Twitter) hard limit — verified in-session 06/30/2026 against
 // docs.x.com/fundamentals/counting-characters ("Posts on X can contain up to 280 characters").
@@ -277,7 +278,7 @@ export async function buildWeek(
       today,
       includeGapProbe: false, // forced stale-refresh only — no per-post gap probe
     }),
-    loadListingContext(scope, today),
+    loadListingContext(scope, today, { derivePhoto: deriveListingPhoto }),
   ]);
   // Real current inventory rides into the shared context as cited figures (four-lane safe).
   const listingsBlock = renderListingsBlock(listingCtx.figures);

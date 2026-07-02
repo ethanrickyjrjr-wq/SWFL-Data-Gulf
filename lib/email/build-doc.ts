@@ -34,6 +34,7 @@ import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
 import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-image";
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
 import { loadListingContext, renderListingsBlock } from "@/lib/listings/select";
+import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import { isListingIntent } from "@/lib/email/listing-intent";
 import { fetchListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
@@ -406,7 +407,7 @@ export async function buildContentDoc({
     fetchLakeParts(scope),
     buildPromptChart(prompt, doc, scope, chartType),
     resolveHeroPhoto(prompt, doc),
-    loadListingContext(scope, new Date()),
+    loadListingContext(scope, new Date(), { derivePhoto: deriveListingPhoto }),
   ]);
 
   // FRESHNESS — delegated to the shared root so the email path and the social calendar

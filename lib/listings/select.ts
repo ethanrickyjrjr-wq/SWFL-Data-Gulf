@@ -15,6 +15,10 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import type { BuildScope } from "@/lib/email/build-doc";
 import { aerialUrl } from "./aerial";
 import { type Listing } from "./rentcast";
+// TYPE-ONLY on purpose: lib/media/listing-photo imports sharp (native, server-only).
+// The derive function arrives via loadListingContext's opts so sharp never enters
+// this module's static graph (a client-bundle leak here once broke `next build`).
+import type { DeriveListingPhoto } from "@/lib/media/listing-photo";
 // KNOWN-DEBT(data_lake: listing_state lives in the data_lake schema, which the typed
 // Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -286,15 +290,39 @@ async function fetchLakeListings(city: string): Promise<Listing[]> {
   }
 }
 
+/** Wave 1.5: swap top-ranked listings' photoUrl for the watermark-cropped derivative
+ *  (lib/media/listing-photo — the one photo root). Capped so a request derives at
+ *  most PHOTO_ENRICH_LIMIT photos (fetch+sharp+upload each; upsert = rebuilds reuse).
+ *  A null derive keeps the ORIGINAL photo: degraded (watermark visible), never broken. */
+const PHOTO_ENRICH_LIMIT = 5;
+
+export async function enrichListingPhotos(
+  listings: Listing[],
+  derive: DeriveListingPhoto,
+): Promise<Listing[]> {
+  const out = [...listings];
+  await Promise.all(
+    out.slice(0, PHOTO_ENRICH_LIMIT).map(async (l, i) => {
+      if (!l.photoUrl) return;
+      const derived = await derive({ listingId: l.id, photoUrl: l.photoUrl });
+      if (derived) out[i] = { ...l, photoUrl: derived };
+    }),
+  );
+  return out;
+}
+
 export async function loadListingContext(
   scope: BuildScope | undefined,
   today: Date,
+  opts?: { derivePhoto?: DeriveListingPhoto },
 ): Promise<ListingContext> {
   const city = scopeCity(scope);
   const listings = await fetchLakeListings(city);
+  let ranked = rankListings(listings);
+  if (opts?.derivePhoto) ranked = await enrichListingPhotos(ranked, opts.derivePhoto);
   return {
     figures: listingsToFigures(listings, today, city),
-    ranked: rankListings(listings),
+    ranked,
     city,
   };
 }
