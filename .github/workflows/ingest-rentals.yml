@@ -4,15 +4,15 @@ name: ingest-rentals
 # ~471 calls/run (Lee + Collier, county-form only, paginated to completion). Provenance surfaced =
 # realtor.com; access layer never named.
 #
-# CRON PARKED until steadyapi_sole_spine live-verify (runner-IP WAF proof + operator go). Until then this
-# runs ONLY via workflow_dispatch, and dry_run defaults TRUE so an accidental dispatch makes zero network
-# calls and zero DB writes. First live validation: dispatch dry_run=false and read the [budget] line.
-#
-# on:
-#   schedule:
-#     - cron: "0 12 * * 1"   # Mondays 12:00 UTC — weekly (matches the sole-spine plan's rentals cadence)
+# GRADUATED 2026-07-02: 1 clean live dispatch so far (run 28559510045, dry_run=false, success, 466 calls,
+# 7,185 rows) — thin proof like market_aggregates above, so watch the first 1-2 scheduled fires before
+# trusting it fully unattended. Cadence entry moved from `not_yet_running:` to `pipelines:` in
+# ingest/cadence_registry.yaml in the same commit. Respects the engine on/off switch (vars.ENGINE_ENABLED)
+# like every other cron.
 
 on:
+  schedule:
+    - cron: "0 12 * * 1"   # Mondays 12:00 UTC — weekly (matches the sole-spine plan's rentals cadence)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -22,7 +22,7 @@ on:
 
 jobs:
   ingest:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

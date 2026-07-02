@@ -878,6 +878,25 @@ pipelines:
     # ~57 calls/run (one per in-scope Lee+Collier ZIP). Consumer: refinery/packs/market-temperature-swfl.mts
     # (via data_lake.market_details_swfl_latest). Workflow: ingest-market-aggregates-details.yml.
 
+  # ── Rentals (SteadyAPI /rentals-search, realtor.com origin) ─────────────────
+  # GRADUATED 2026-07-02: moved up from not_yet_running: — schedule uncommented in ingest-rentals.yml.
+  # First green live dispatch (dry_run=false, run 28559510045, 10m48s): 466 rentals-search calls
+  # (Lee 259 + Collier 207), 7,185 rows landed after PK dedupe (Lee 4,018 + Collier 3,167). Both
+  # counties via county-form only — a 07/01 live probe (23 calls) proved the per-Lee-city fallback in
+  # the original plan unnecessary: county-form paginates cleanly to completion and covers MORE than
+  # the proposed 7-city list (5,211 vs 4,895 summed). Migration: docs/sql/20260701_rentals_swfl_table.sql
+  # (applied 2026-07-02). steadyapi_sole_spine_live_verify was already closed (2026-07-01) so the
+  # vendor path carried no WAF risk — confirmed clean here too. Thin proof (1 run) like
+  # market_aggregates above — watch the first 1-2 scheduled fires for surprises.
+  - name: rentals_swfl
+    lane: tier-2
+    cadence_days: 7 # weekly — matches the SteadyAPI sole-spine plan's weekly rentals sweep
+    tolerance_multiplier: 3.0
+    freshness_table: data_lake.rental_listings_swfl
+    freshness_column: captured_at
+    # ~471 calls/run (Lee ~259 + Collier ~207 pages @ 20/page). Consumer:
+    # refinery/packs/active-rentals-swfl.mts (via data_lake.rental_listing_stats). Workflow: ingest-rentals.yml.
+
 # ── Pipelines that have never run — excluded from active probe ────────────────
 # (All former entries graduated to pipelines: above with probe_mode: odd_window.)
 # Add here only for pipelines with no known expected date that should be
@@ -923,23 +942,6 @@ not_yet_running:
     # Idempotent merge key when it graduates: (zip_code, period_end), source_tag provenance.
     # Pricing verified 2026-06-11: airdna.co/pricing — single market $19.95-99.95/mo by
     # listing count; FL state $179/mo. API/Enterprise is sales-negotiated (not needed).
-
-  # ── Rentals (SteadyAPI /rentals-search, realtor.com origin) — parked ─────────
-  # PARKED (probe-excluded) until steadyapi_sole_spine live-verify (runner-IP WAF proof + operator go):
-  # cron is commented in the wrapper and dry_run defaults true. Both counties via county-form only — a
-  # 07/01 live probe (23 calls) proved the per-Lee-city fallback in the original plan unnecessary:
-  # county-form paginates cleanly to completion and covers MORE than the proposed 7-city list (5,211 vs
-  # 4,895 summed). Migration: docs/sql/20260701_rentals_swfl_table.sql.
-  # GRADUATION: after the first green live dispatch (dry_run=false), move to `pipelines:` (so it is
-  # freshness-probed) + uncomment the schedule in the wrapper.
-  - name: rentals_swfl
-    lane: tier-2
-    cadence_days: 7 # weekly — matches the SteadyAPI sole-spine plan's weekly rentals sweep
-    tolerance_multiplier: 3.0
-    freshness_table: data_lake.rental_listings_swfl
-    freshness_column: captured_at
-    # ~471 calls/run at 07/01 measured totals (Lee ~261 + Collier ~210 pages @ 20/page). Consumer:
-    # refinery/packs/active-rentals-swfl.mts (via data_lake.rental_listing_stats). Workflow: ingest-rentals.yml.
 
   # ── Land + manufactured (SteadyAPI sole spine, realtor.com origin) — parked backfill ─────────
   # Excluded from the residential /search sweep (Ricky, 06/30) to save calls, not dropped permanently —
