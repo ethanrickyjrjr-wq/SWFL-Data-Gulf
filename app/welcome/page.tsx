@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SWFL_BRAND_PRIMARY, SWFL_BRAND_SECONDARY } from "@/lib/templates/manifest";
+import { logArrival } from "@/lib/prospects/arrival-event";
+import { ARRIVAL_PROMPT_MAX } from "@/lib/prospects/build-arrival-url";
 import { safeLogoUrl } from "@/lib/welcome/logo-allowlist";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 import WelcomeChat from "./WelcomeChat";
@@ -50,6 +52,17 @@ export default async function WelcomePage({
   const zip = zipRaw && /^\d{5}$/.test(zipRaw) ? zipRaw : undefined;
   const zipRes = zip ? resolveZip(zip) : null;
   const offerPlace = zipRes?.in_scope ? (zipRes.places[0]?.place ?? null) : null;
+
+  // Outreach demo deep-link: `?prompt=` seeds the chat (the assistant answers live
+  // on landing); `?ref=` logs the 'arrived' attribution event. Both validated —
+  // an invalid value is dropped, never partially honored.
+  const promptRaw = first(params.prompt);
+  const promptClean = promptRaw?.replace(/[\u0000-\u001f\u007f]/g, "").trim();
+  const prompt = promptClean && promptClean.length <= ARRIVAL_PROMPT_MAX ? promptClean : undefined;
+  const ref = first(params.ref);
+  // Awaited but error-swallowed inside — attribution never breaks the page, and a
+  // dangling promise could be cut off when the serverless render completes.
+  if (ref) await logArrival(ref);
 
   return (
     <main
@@ -106,7 +119,7 @@ export default async function WelcomePage({
         </>
       )}
 
-      <WelcomeChat demo={demo} />
+      <WelcomeChat demo={demo} initialPrompt={prompt} />
     </main>
   );
 }

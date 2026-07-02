@@ -12,7 +12,14 @@ import { GroundedAnswer } from "./_components/GroundedAnswer";
  * `demo` (from ?demo=1) replays a fixture through the real frame contract so the
  * card UI ships and browser-smokes before the grounding fan-out emits {answer}.
  */
-export default function WelcomeChat({ demo = false }: { demo?: boolean }) {
+export default function WelcomeChat({
+  demo = false,
+  initialPrompt,
+}: {
+  demo?: boolean;
+  /** Outreach deep-link seed (?prompt=) — auto-asked once by the conversational chat. */
+  initialPrompt?: string;
+}) {
   return (
     <div className="mt-8 space-y-8">
       <GroundedAnswer demo={demo} />
@@ -23,7 +30,7 @@ export default function WelcomeChat({ demo = false }: { demo?: boolean }) {
         <Separator className="flex-1" />
       </div>
 
-      <ConversationalChat />
+      <ConversationalChat initialPrompt={initialPrompt} />
     </div>
   );
 }

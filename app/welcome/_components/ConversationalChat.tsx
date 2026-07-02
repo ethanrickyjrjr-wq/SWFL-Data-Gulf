@@ -25,7 +25,12 @@ const PROMPTS = [
  * welcome page and the global Briefcase pill (A-6 DRY); behavior is unchanged.
  * The ZIP-first grounded answer lives in its sibling GroundedAnswer.
  */
-export function ConversationalChat() {
+export function ConversationalChat({
+  initialPrompt,
+}: {
+  /** Outreach deep-link seed (?prompt=) — asked ONCE on mount so the answer streams on landing. */
+  initialPrompt?: string;
+} = {}) {
   const pathname = usePathname();
   // The deterministic, cited chart for the current answer (prelude `chart` frame),
   // reset per question in `ask` so it never lingers from a prior turn.
@@ -53,6 +58,18 @@ export function ConversationalChat() {
   };
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // One-shot deep-link seed (ClaimOnLogin's ref-guard precedent). Calls `send`
+  // directly — chart/sources are already empty on a fresh mount, and `send` is an
+  // external hook function (no local setState in the effect body).
+  const seeded = useRef(false);
+  useEffect(() => {
+    const text = initialPrompt?.trim();
+    if (!text || seeded.current || busy) return;
+    seeded.current = true;
+    send(text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPrompt]);
 
   // Keep the latest message in view as it streams. DOM-only effect (no setState),
   // so it does not trip react-hooks/set-state-in-effect.
