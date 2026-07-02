@@ -32,6 +32,8 @@ import {
   schemesEqual,
 } from "@/lib/brand/palette";
 import { ConnectMcpBlock } from "./workspace/ConnectMcpBlock";
+import { ThisWeek } from "./workspace/ThisWeek";
+import type { ThisWeekState } from "@/lib/project/this-week";
 import { DeliverableLanes } from "./workspace/DeliverableLanes";
 import { BuildActions } from "./workspace/BuildActions";
 import { ProjectActionBar } from "./workspace/ProjectActionBar";
@@ -465,10 +467,22 @@ export function ProjectWorkspace({
     ],
   );
 
+  const emailScope = emailDeliverableScope(items);
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <ProjectAiContextBridge digest={digest} />
       <Breadcrumbs trail={projectTrail(title || deriveProjectName(items))} />
+
+      {/* Cockpit D0 — the ready-for-you queue is the TOP section */}
+      <ThisWeek
+        projectId={id}
+        week={(uiState.this_week as ThisWeekState | undefined) ?? null}
+        deliverables={deliverables}
+        scopeKind={emailScope?.scope_kind ?? null}
+        scopeValue={emailScope?.scope_value ?? null}
+        onWeekChange={(next) => patchUiState({ this_week: next })}
+      />
 
       {seed && (
         <div className="mb-6 rounded-xl border border-gulf-teal/40 bg-gulf-teal/10 p-4">
