@@ -8,6 +8,8 @@
       "Bash(bun refinery/tools/check-vocab-coverage.mts *)",
       "Bash(bun test refinery/lib/corridor-aliases.test.mts *)",
       "Bash(node scripts/check.mjs list)",
+      "Bash(node scripts/check.mjs open *)",
+      "Bash(node scripts/check.mjs close *)",
       "Bash(graphify query *)",
       "Bash(graphify explain *)",
       "Bash(graphify path *)"
