@@ -202,3 +202,68 @@ describe("clean narrative", () => {
     expect(r.violations).toHaveLength(0);
   });
 });
+
+// ── recorded-claim gate (invention-surface-guards §B) ─────────────────────────
+import { RECORDED_CLAIM_RE, RECORDED_LABEL_RE } from "./narrative-lint";
+
+describe("recorded-claim gate", () => {
+  const nar = (intro: string): Narrative => ({
+    exec_summary: intro,
+    sections: [],
+    inference_notes: [],
+  });
+
+  test("'sold for $X' where X anchors only to a LIST price is a violation", () => {
+    const r = lintDeliverableNarrative(
+      nar("The property sold for $14,800,000 last month."),
+      ["$14,800,000"], // list price IS in the snapshot…
+      [], // …but nothing recorded
+    );
+    expect(r.ok).toBe(false);
+    expect(r.violations.some((v) => v.gate === "recorded")).toBe(true);
+    expect(r.stripped.exec_summary).toBe("");
+  });
+
+  test("'sold for $X' anchored to a recorded item passes", () => {
+    const r = lintDeliverableNarrative(
+      nar("The property sold for $415,000."),
+      ["$415,000"],
+      ["Recorded sold price: $415,000"],
+    );
+    expect(r.violations.filter((v) => v.gate === "recorded")).toEqual([]);
+  });
+
+  test("aggregate 'median sale price' figures pass when the item label marks them", () => {
+    const r = lintDeliverableNarrative(
+      nar("The median sale price in Lee County is $389,000."),
+      ["$389,000"],
+      ["Lee County median sale price: $389,000"],
+    );
+    expect(r.violations.filter((v) => v.gate === "recorded")).toEqual([]);
+  });
+
+  test("a sold COUNT sentence is not a price claim", () => {
+    const r = lintDeliverableNarrative(nar("127 homes changed hands in June."), ["127"], []);
+    expect(r.violations.filter((v) => v.gate === "recorded")).toEqual([]);
+  });
+
+  test("omitting the third param changes nothing (backward compat)", () => {
+    const r = lintDeliverableNarrative(nar("Rents hit $2,150."), ["$2,150"]);
+    expect(r.ok).toBe(true);
+  });
+});
+
+describe("recorded regexes", () => {
+  test("claim patterns", () => {
+    expect(RECORDED_CLAIM_RE.test("it sold for $1")).toBe(true);
+    expect(RECORDED_CLAIM_RE.test("closed at $1")).toBe(true);
+    expect(RECORDED_CLAIM_RE.test("the sale price of")).toBe(true);
+    expect(RECORDED_CLAIM_RE.test("closing price was")).toBe(true);
+    expect(RECORDED_CLAIM_RE.test("listed at $1")).toBe(false);
+  });
+  test("label patterns", () => {
+    expect(RECORDED_LABEL_RE.test("Recorded sold price")).toBe(true);
+    expect(RECORDED_LABEL_RE.test("Lee County median sale price")).toBe(true);
+    expect(RECORDED_LABEL_RE.test("Median list price")).toBe(false);
+  });
+});

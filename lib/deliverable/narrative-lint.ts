@@ -135,6 +135,18 @@ function isForecast(sentence: string): boolean {
 const LEXICAL_NUMBER_RE =
   /\b(?:hundred|thousand|million|billion|trillion)\b|\b(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)-(?:one|two|three|four|five|six|seven|eight|nine)\b/i;
 
+// [SPEC invention-surface-guards §B] A recorded-sale PRICE claim in prose. The
+// number gate proves a digit exists in the payload; THIS gate proves the digit is
+// wearing the right label — "sold for $14.8M" must anchor to a recorded/sold item,
+// not to the list price. Count phrasing ("127 homes sold") carries no price verb
+// and does not match.
+export const RECORDED_CLAIM_RE =
+  /\b(?:sold\s+(?:for|at)|closed\s+(?:at|for)|closing\s+price|sales?\s+price|went\s+for|fetched)\b/i;
+
+// An item LABEL that marks its value as a recorded/sold figure. Aggregate stats
+// ("median sale price") qualify — their label carries the word.
+export const RECORDED_LABEL_RE = /\b(?:sold|sale|sales|closed|closing|recorded)\b/i;
+
 // A 4-digit year is exempt from the number gate ONLY in a temporal context
 // ("through 2027", "as of 2026"). A year-shaped integer used as a COUNT
 // ("2025 parcels") has no temporal cue → it must anchor like any other figure.
@@ -153,7 +165,7 @@ function yearHasTemporalContext(sentence: string, token: string): boolean {
 // Violations
 // ---------------------------------------------------------------------------
 
-export type Gate = "number" | "smoothing" | "grounded" | "jargon" | "ttl";
+export type Gate = "number" | "smoothing" | "grounded" | "jargon" | "ttl" | "recorded";
 
 export interface NarrativeViolation {
   gate: Gate;
@@ -182,6 +194,9 @@ function splitSentences(text: string): string[] {
 interface GateOpts {
   numbers: boolean; // apply the exact-number gate
   forecast: boolean; // apply the fact-prose forecast gate
+  /** Recorded-sale anchor set — when present, RECORDED_CLAIM_RE sentences must
+   *  anchor every number here, not merely in the general anchor set. */
+  recorded?: ReadonlySet<string>;
 }
 
 /**
@@ -213,6 +228,21 @@ function lintFactText(
             sentence,
             reason: `number ${token.trim()} is not present verbatim in any filed item`,
           });
+        }
+      }
+      if (opts.recorded && RECORDED_CLAIM_RE.test(sentence)) {
+        for (const token of extractNumbers(sentence)) {
+          if (isBareYear(token) && yearHasTemporalContext(sentence, token)) continue;
+          if (!anchorsExactly(token, opts.recorded)) {
+            sentenceViolations.push({
+              gate: "recorded",
+              location,
+              sectionIndex,
+              token: token.trim(),
+              sentence,
+              reason: `sentence claims a recorded sale, but ${token.trim()} does not come from a sold/closed/recorded item`,
+            });
+          }
         }
       }
       if (LEXICAL_NUMBER_RE.test(sentence)) {
@@ -281,14 +311,17 @@ function lintFactText(
 export function lintDeliverableNarrative(
   narrative: Narrative,
   snapshotNumbers: ReadonlyArray<string | number>,
+  recordedNumbers: ReadonlyArray<string | number> = [],
 ): NarrativeLintResult {
   const anchors = buildAnchorSet(snapshotNumbers);
+  const recorded = buildAnchorSet(recordedNumbers);
   const violations: NarrativeViolation[] = [];
 
   // exec_summary — full fact gates
   const exec = lintFactText(narrative.exec_summary, "exec_summary", anchors, {
     numbers: true,
     forecast: true,
+    recorded,
   });
   violations.push(...exec.violations);
 
@@ -299,14 +332,14 @@ export function lintDeliverableNarrative(
       section.title,
       "section_title",
       anchors,
-      { numbers: true, forecast: true },
+      { numbers: true, forecast: true, recorded },
       i,
     );
     const intro = lintFactText(
       section.intro,
       "section_intro",
       anchors,
-      { numbers: true, forecast: true },
+      { numbers: true, forecast: true, recorded },
       i,
     );
     violations.push(...title.violations, ...intro.violations);
