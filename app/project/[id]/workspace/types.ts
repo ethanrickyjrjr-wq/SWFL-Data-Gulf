@@ -1,5 +1,6 @@
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import type { ProjectItem } from "@/lib/project/items";
+import type { ThisWeekState } from "@/lib/project/this-week";
 
 /**
  * P4 guided-edit payload. The edit panel sends ONLY the fields the user changed:
@@ -91,6 +92,10 @@ export interface ProjectUiState {
   confirmed_values?: Record<string, string>;
   /** Materials Hub v2: whether the filed-data board is collapsed in the workspace. */
   materials_filed_collapsed?: boolean;
+  /** Cockpit D0: the ready-for-you week — pointers into `deliverables` + approval state. */
+  this_week?: ThisWeekState;
+  /** Cockpit D2: preferred email canvas for this project ("grid" default when absent). */
+  email_canvas?: "grid" | "block";
   [key: string]: unknown;
 }
 
