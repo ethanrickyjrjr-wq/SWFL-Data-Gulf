@@ -20,16 +20,22 @@ API_SOURCE_NAME = "api_feed"
 # Enumeration seed: query the APIs by city, then self-label every row by its API-returned county FIPS
 # (so a city that bleeds into a neighbor county lands under the right county). v1 = Lee + Collier;
 # widening is just adding cities here — no code change (capture wide).
+# Hendry added 2026-07-02 (operator call, reversing the 07/01 Lee+Collier-only decree): probe proved
+# field parity (LaBelle meta.total=817, Clewiston 349; property_id/price/lat-lon/county_fips/photo/
+# status/flags 100% filled; beds/sqft 42-81% = land-heavy rural mix the land heuristic already maps).
+# ~7 search calls/day for the whole county. LaBelle's page bleeds ~11% Glades (12043) rows — they
+# self-drop at the FIPS gate until Glades is deliberately added here.
 SWFL_CITY_SEED = {
     "Lee": [
         "Cape Coral", "Fort Myers", "North Fort Myers", "Lehigh Acres",
         "Bonita Springs", "Estero", "Fort Myers Beach", "Sanibel",
     ],
     "Collier": ["Naples", "Marco Island", "Golden Gate", "Immokalee", "Ave Maria"],
+    "Hendry": ["LaBelle", "Clewiston"],
 }
 
 # County FIPS we keep (the scope gate; everything else self-drops). 5-digit FL state+county.
-IN_SCOPE_FIPS = {"12071": "Lee", "12021": "Collier"}
+IN_SCOPE_FIPS = {"12071": "Lee", "12021": "Collier", "12051": "Hendry"}
 
 # RentCast countyFips is the 3-digit county code ("071"); prefix the FL state FIPS to get "12071".
 FL_STATE_FIPS = "12"

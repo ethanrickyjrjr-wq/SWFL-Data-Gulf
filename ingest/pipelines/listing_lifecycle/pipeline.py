@@ -30,8 +30,10 @@ from ingest.pipelines.listing_lifecycle.transitions import (
     plan_off_market_checks,
 )
 
-# Counties the API feed covers (RentCast/SteadyAPI scope gate = Lee + Collier FIPS).
-API_COUNTIES = ["Lee", "Collier"]
+# Counties the API feed covers (SteadyAPI scope gate = IN_SCOPE_FIPS). Hendry added 2026-07-02
+# (operator call): its first scan holds no prior api_feed state, so diff_states auto-baselines it
+# as is_seed — no catchup flip needed; the 298 stale lifecycle_seed Hendry rows stay inert history.
+API_COUNTIES = ["Lee", "Collier", "Hendry"]
 
 
 def _keyed_scan(rows: list[dict]) -> dict[tuple[str, str], dict]:

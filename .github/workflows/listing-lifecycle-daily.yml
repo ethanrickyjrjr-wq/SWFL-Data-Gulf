@@ -12,8 +12,9 @@ name: ingest-listing-lifecycle
 #
 # GRADUATED 2026-07-01: runner-IP WAF proven clean on both heavyweight counties (Collier 8,120 rows,
 # Lee 21,889 rows, both dry_run=false, zero [skip]/[warn] 403 in either log — runs 28495956344 /
-# 28496497637). SCOPE: Lee + Collier ONLY — operator decree 2026-07-01, Hendry is NOT scheduled (still
-# manually dispatchable via workflow_dispatch --county Hendry if that changes). Cadence entry moved
+# 28496497637). SCOPE: Lee + Collier + Hendry — the 07/01 Lee+Collier-only decree was reversed by the
+# operator 2026-07-02 (hendry_seed_orphans decision): SteadyAPI probe proved Hendry field parity
+# (LaBelle 817 + Clewiston 349 listings, ~7 search calls/day). Cadence entry moved
 # from `not_yet_running:` to `pipelines:` in ingest/cadence_registry.yaml in the same commit so this is
 # now freshness-probed, not just scheduled. Crons are STAGGERED per county (3 h apart) — never run all
 # counties in one pass (mirrors ingest-active-listings, which staggers for the same WAF reason).
@@ -25,6 +26,7 @@ on:
   schedule:
     - cron: "0 9 * * *"    # Lee     (heaviest — ~7.4k listings)
     - cron: "0 12 * * *"   # Collier
+    - cron: "0 15 * * *"   # Hendry  (lightest — ~1.2k listings, added 2026-07-02; staggered 3 h like the rest)
   workflow_dispatch:
     inputs:
       county:
@@ -76,6 +78,7 @@ jobs:
           case "${{ github.event.schedule }}" in
             "0 9 * * *")  echo "county=Lee"      >> "$GITHUB_OUTPUT" ;;
             "0 12 * * *") echo "county=Collier"  >> "$GITHUB_OUTPUT" ;;
+            "0 15 * * *") echo "county=Hendry"   >> "$GITHUB_OUTPUT" ;;
             *)             echo "county=${{ inputs.county }}" >> "$GITHUB_OUTPUT" ;;
           esac
 

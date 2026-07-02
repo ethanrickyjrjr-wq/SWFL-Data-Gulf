@@ -841,15 +841,15 @@ pipelines:
     source_name: api_feed # SteadyAPI sole-spine (constants_api.API_SOURCE_NAME). NOT lifecycle_seed —
       # catchup.py already flipped Collier+Lee's seed rows to api_feed (2026-06-30/07-01); leaving this
       # on lifecycle_seed would point the freshness probe at frozen seed-only rows and false-STALE forever.
-      # Hendry is NOT part of this pipeline's scope (operator decree 2026-07-01, not scheduled) — its
-      # seed rows stay lifecycle_seed permanently, not a gap to close.
+      # Hendry ADDED 2026-07-02 (operator call reversing the 07/01 decree; hendry_seed_orphans decision):
+      # daily cron 15:00 UTC, no catchup flip — the first scan auto-baselines as is_seed; the 298 old
+      # lifecycle_seed Hendry rows stay inert history under lifecycle_seed (excluded by this source_name).
     expected_rows_min: 9000 # PLACEHOLDER — live api_feed count already 31,709 (Collier 8,819 + Lee
-      # 22,890, runs 28495956344/28496497637), 3x this floor. Region scope is Lee+Collier only.
-      # Rebaseline to ~90% of live 2-county count once a few daily cycles are in.
+      # 22,890, runs 28495956344/28496497637), 3x this floor. Scope is Lee+Collier+Hendry (Hendry adds
+      # ~1.2k). Rebaseline to ~90% of live 3-county count once a few daily cycles are in.
     # GRADUATED 2026-07-01: moved up from not_yet_running: — schedule uncommented in
-    # .github/workflows/listing-lifecycle-daily.yml (Lee + Collier only — Hendry excluded by operator
-    # decree). WAF proven clean on both scheduled counties from the same GHA runner IP; no
-    # [skip]/[warn] 403 in either log.
+    # .github/workflows/listing-lifecycle-daily.yml. WAF proven clean on both heavyweight counties from
+    # the same GHA runner IP; no [skip]/[warn] 403 in either log. Hendry scheduled 2026-07-02.
     # Pipeline: ingest/pipelines/listing_lifecycle/pipeline.py. Workflow: .github/workflows/listing-lifecycle-daily.yml.
     # Consumer brain: refinery/packs/active-listings-swfl.mts (via data_lake.listing_active_stats).
     # Tables: data_lake.listing_state (MERGE) + data_lake.listing_transitions (log). Migration: migrations/20260627_listing_lifecycle.sql.
