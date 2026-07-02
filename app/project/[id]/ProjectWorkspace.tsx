@@ -21,6 +21,7 @@ import { MaterialsHub } from "@/components/project/MaterialsHub";
 import { ProjectTitle } from "./workspace/ProjectTitle";
 import { ItemsBoard } from "./workspace/ItemsBoard";
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { PropertyUrlBlock } from "./workspace/PropertyUrlBlock";
 import {
   type BrandPalette,
   PALETTE_SLOT_KEYS,
@@ -66,6 +67,8 @@ interface Props {
   uiState: ProjectUiState;
   fileUrls: Record<string, string>;
   mcpKey: string | null;
+  /** Wave 1.5: the user's own listing-page URL (head of the artifact link chain). */
+  propertyUrl: string | null;
   seed: Seed | null;
   /** Pre-computed from computeSignificantChanges() server-side. */
   significantChanges: SignificantChange[];
@@ -100,6 +103,7 @@ export function ProjectWorkspace({
   uiState: initialUiState,
   fileUrls,
   mcpKey,
+  propertyUrl: initialPropertyUrl,
   seed,
   significantChanges,
   activeEvents,
@@ -119,8 +123,9 @@ export function ProjectWorkspace({
   const [template, setTemplate] = useState<TemplateId>("market-overview");
   const [building, setBuilding] = useState(false);
   const [buildError, setBuildError] = useState<string | null>(null);
-  // Which pill popover is open (null = both closed).
-  const [activePill, setActivePill] = useState<"brand" | "mcp" | null>(null);
+  const [propertyUrl, setPropertyUrl] = useState<string | null>(initialPropertyUrl);
+  // Which pill popover is open (null = all closed).
+  const [activePill, setActivePill] = useState<"brand" | "mcp" | "link" | null>(null);
   // Tracks whether a per-project MCP key is active this session (stays in sync with
   // ConnectMcpBlock's internal key state via the onKeyChange callback).
   const [hasMcpKey, setHasMcpKey] = useState(!!mcpKey);
@@ -548,6 +553,17 @@ export function ProjectWorkspace({
           >
             {hasMcpKey ? "✓ AI" : "Connect AI"}
           </button>
+          <button
+            type="button"
+            onClick={() => setActivePill((p) => (p === "link" ? null : "link"))}
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+              activePill === "link"
+                ? "bg-gulf-teal text-[#04121b]"
+                : "border border-gulf-teal/40 bg-gulf-teal/10 text-gulf-teal hover:bg-gulf-teal/20"
+            }`}
+          >
+            {propertyUrl ? "✓ Listing link" : "Listing link"}
+          </button>
         </div>
 
         {/* Click-outside backdrop */}
@@ -566,6 +582,14 @@ export function ProjectWorkspace({
                 onSaveProjectOnly={saveBrandProjectOnly}
                 saving={saving}
                 savedMsg={savedMsg}
+                onClose={() => setActivePill(null)}
+              />
+            )}
+            {activePill === "link" && (
+              <PropertyUrlBlock
+                projectId={id}
+                initialUrl={propertyUrl}
+                onSaved={setPropertyUrl}
                 onClose={() => setActivePill(null)}
               />
             )}
