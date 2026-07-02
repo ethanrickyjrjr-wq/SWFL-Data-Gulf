@@ -57,7 +57,7 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
       const hv = num(data.home_value_latest);
       const yoy = num(data.value_yoy_pct);
       const asOf = mdY(data.latest_period);
-      if (hv != null)
+      if (hv != null && hv > 0)
         figs.push({
           key: "home_value",
           label: `Median home value — ${data.city ?? zip} (${zip})`,
@@ -89,7 +89,7 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
       const r = num(data.rent_index_latest);
       const yoy = num(data.rent_yoy_pct);
       const asOf = mdY(data.latest_period);
-      if (r != null)
+      if (r != null && r > 0)
         figs.push({
           key: "rent",
           label: "Typical asking rent",
@@ -113,7 +113,7 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
   try {
     const { data } = await db
       .schema("data_lake")
-      .from("active_listings_residential_zip_stats")
+      .from("listing_active_stats")
       .select("listing_count, median_list_price, avg_days_on_market, latest_scraped_at, county")
       .eq("zip_code", zip)
       .maybeSingle();
@@ -128,15 +128,15 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
           key: "active",
           label: `Active listings in ${zip}`,
           value: String(cnt),
-          source: "MLS active-listings",
+          source: "SWFL Data Gulf",
           as_of: asOf,
         });
-      if (ml != null)
+      if (ml != null && ml > 0)
         figs.push({
           key: "median_list",
           label: "Median list price",
           value: usd(ml),
-          source: "MLS active-listings",
+          source: "SWFL Data Gulf",
           as_of: asOf,
         });
       if (dom != null)
@@ -144,7 +144,7 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
           key: "dom",
           label: "Average days on market",
           value: String(dom),
-          source: "MLS active-listings",
+          source: "SWFL Data Gulf",
           as_of: asOf,
         });
     }
@@ -172,7 +172,7 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
           source: "U.S. Census ACS",
           as_of: asOf,
         });
-      if (inc != null)
+      if (inc != null && inc > 0)
         figs.push({
           key: "income",
           label: "Median household income",
@@ -217,7 +217,7 @@ async function countyFigures(db: Db, county: string, figs: MarketFigure[]): Prom
       const sold = num(row.homes_sold);
       const sup = num(row.months_of_supply);
       const dom = num(row.median_dom);
-      if (ms != null)
+      if (ms != null && ms > 0)
         figs.push({
           key: "county_sale",
           label: `${county} County median sale price`,
@@ -263,6 +263,39 @@ async function countyFigures(db: Db, county: string, figs: MarketFigure[]): Prom
   }
 }
 
+export interface SourceDiscrepancy {
+  key: string;
+  sources: string[];
+}
+
+/** One source tag per metric per artifact (invention-surface-guards §D).
+ *  The first source wins; a second source for the same key is dropped from the
+ *  customer artifact and returned as a discrepancy for the operator log. */
+export function singleSourcePerMetric(figs: MarketFigure[]): {
+  figures: MarketFigure[];
+  discrepancies: SourceDiscrepancy[];
+} {
+  const firstSource = new Map<string, string>();
+  const figures: MarketFigure[] = [];
+  const disc = new Map<string, Set<string>>();
+  for (const f of figs) {
+    const prior = firstSource.get(f.key);
+    if (prior === undefined) {
+      firstSource.set(f.key, f.source);
+      figures.push(f);
+    } else if (prior === f.source) {
+      figures.push(f);
+    } else {
+      if (!disc.has(f.key)) disc.set(f.key, new Set([prior]));
+      disc.get(f.key)!.add(f.source);
+    }
+  }
+  return {
+    figures,
+    discrepancies: [...disc.entries()].map(([key, s]) => ({ key, sources: [...s] })),
+  };
+}
+
 /**
  * Pull cited market figures for a scope. zip scope → per-ZIP value/rent/listings/
  * demographics + that ZIP's county sale figures; county scope → county sale figures.
@@ -290,7 +323,12 @@ export async function loadMarketFigures(scope?: {
   } catch {
     /* degrade — return whatever we gathered */
   }
-  return figs;
+  const { figures, discrepancies } = singleSourcePerMetric(figs);
+  if (discrepancies.length > 0) {
+    // Operator-facing record; never reaches the customer artifact.
+    console.warn("[market-context] one-source-per-metric tripwire:", JSON.stringify(discrepancies));
+  }
+  return figures;
 }
 
 interface LifecycleStatsRow {
