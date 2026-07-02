@@ -97,6 +97,7 @@ export default async function WelcomePage({
             primary={rawPrimary}
             secondary={rawSecondary}
             logo={logo ?? undefined}
+            refCode={ref}
           />
         </section>
       ) : (

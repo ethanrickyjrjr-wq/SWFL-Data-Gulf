@@ -50,6 +50,8 @@ export type ConsumeResult =
       title: string | null;
       brand: ClaimBrand | null;
       seed: ClaimSeed | null;
+      /** Outreach demo attribution (`<recipient uuid>-<touch>`), when the token carried one. */
+      ref: string | null;
     }
   | { status: "consumed" }
   | { status: "expired" }
@@ -75,7 +77,7 @@ export interface ClaimPreview {
 export async function mintClaimToken(
   items: ProjectItem[],
   title?: string | null,
-  opts?: { brand?: ClaimBrand | null; seed?: ClaimSeed | null },
+  opts?: { brand?: ClaimBrand | null; seed?: ClaimSeed | null; ref?: string | null },
 ): Promise<string> {
   const token = crypto.randomBytes(24).toString("base64url"); // URL-safe; survives redirects
   const now = Date.now();
@@ -86,6 +88,7 @@ export async function mintClaimToken(
     title: title ?? null,
     brand: opts?.brand ?? null,
     seed: opts?.seed ?? null,
+    ref: opts?.ref ?? null,
     created_at: new Date(now).toISOString(),
     expires_at: new Date(now + TTL_MS).toISOString(),
   });
@@ -107,12 +110,27 @@ export async function consumeClaimToken(token: string): Promise<ConsumeResult> {
 
   const row = Array.isArray(data) ? data[0] : null;
   if (row) {
+    // `ref` is read with a follow-up select rather than widening the locked
+    // consume_claim_token RPC's RETURNING set. Best-effort: attribution must
+    // never fail a claim, so a read error just yields ref=null.
+    let ref: string | null = null;
+    try {
+      const { data: refRow } = await db
+        .from("claim_tokens")
+        .select("ref")
+        .eq("token", token)
+        .maybeSingle();
+      ref = (refRow?.ref as string | null) ?? null;
+    } catch {
+      ref = null;
+    }
     return {
       status: "won",
       items: (Array.isArray(row.items) ? row.items : []) as ProjectItem[],
       title: (row.title as string | null) ?? null,
       brand: (row.brand as ClaimBrand | null) ?? null,
       seed: (row.seed as ClaimSeed | null) ?? null,
+      ref,
     };
   }
 

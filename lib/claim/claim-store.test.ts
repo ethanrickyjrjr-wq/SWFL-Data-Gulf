@@ -201,3 +201,19 @@ test("deterministicProjectId is stable, 12 hex chars", () => {
   expect(a).toMatch(/^[0-9a-f]{12}$/);
   expect(deterministicProjectId("different")).not.toBe(a);
 });
+
+test("ref round-trips mint → consume (funnel claim attribution)", async () => {
+  const token = await mintClaimToken([], "T", {
+    ref: "3f6c2a1e-9b4d-4e6f-8a2b-1c5d7e9f0a1b-t1",
+  });
+  const res = await consumeClaimToken(token);
+  expect(res.status).toBe("won");
+  if (res.status === "won") expect(res.ref).toBe("3f6c2a1e-9b4d-4e6f-8a2b-1c5d7e9f0a1b-t1");
+});
+
+test("no ref on mint → ref is null on consume", async () => {
+  const token = await mintClaimToken([item("a")], "T");
+  const res = await consumeClaimToken(token);
+  expect(res.status).toBe("won");
+  if (res.status === "won") expect(res.ref).toBeNull();
+});

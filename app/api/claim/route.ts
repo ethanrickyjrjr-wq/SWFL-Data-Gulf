@@ -11,6 +11,7 @@ import {
   attachProjectId,
   deterministicProjectId,
 } from "@/lib/claim/claim-store";
+import { logClaimed } from "@/lib/prospects/arrival-event";
 import { writeFeed } from "@/lib/project/feed";
 import { identityKeyForItem, titleForItem } from "@/lib/project/identity-key";
 
@@ -120,6 +121,9 @@ export async function POST(req: NextRequest) {
     recordUse(req, { report_id: id, reach: [], action: "claim" }, user.id),
     persistClaimBrandToProfile(supabase, user.id, res.brand),
     applyUserBrandToProject(supabase, user.id, id),
+    // Outreach demo attribution: 'claimed' event + cadence stage → 'converted'
+    // (winner only; logClaimed swallows its own errors and no-ops without a ref).
+    ...(res.ref ? [logClaimed(res.ref)] : []),
   ]);
 
   // P3 outside-action birth emit — one feed row per claimed item. The "consumed"

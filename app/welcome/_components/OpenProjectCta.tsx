@@ -17,12 +17,15 @@ export function OpenProjectCta({
   primary,
   secondary,
   logo,
+  refCode,
 }: {
   zip: string;
   name?: string;
   primary?: string;
   secondary?: string;
   logo?: string;
+  /** Outreach demo attribution (`<recipient uuid>-<touch>`), carried into the claim token. */
+  refCode?: string;
 }) {
   const [state, setState] = useState<"idle" | "working" | "error">("idle");
 
@@ -38,7 +41,7 @@ export function OpenProjectCta({
       const res = await fetch("/api/prospect/open-project", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ zip, brand }),
+        body: JSON.stringify({ zip, brand, ...(refCode ? { ref: refCode } : {}) }),
       });
       if (!res.ok) {
         setState("error");

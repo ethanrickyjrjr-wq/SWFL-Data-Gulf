@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { mintClaimToken, type ClaimBrand } from "@/lib/claim/claim-store";
+import { REF_RE } from "@/lib/prospects/build-arrival-url";
 import { planOpenProject } from "@/lib/prospects/open-project";
 
 export const runtime = "nodejs";
@@ -35,12 +36,15 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const zip = typeof body?.zip === "string" ? body.zip : "";
   const brand = sanitizeBrand(body?.brand);
+  // Outreach demo attribution — optional, shape-validated, silently dropped when
+  // malformed (a hand-crafted ref must never block a legitimate open).
+  const ref = typeof body?.ref === "string" && REF_RE.test(body.ref) ? body.ref : null;
 
   const plan = planOpenProject({ zip, brand });
   if (!plan.inScope) {
     return NextResponse.json({ error: "out_of_scope" }, { status: 422 });
   }
 
-  const token = await mintClaimToken([], plan.title, { brand: plan.brand, seed: plan.seed });
+  const token = await mintClaimToken([], plan.title, { brand: plan.brand, seed: plan.seed, ref });
   return NextResponse.json({ url: `/claim?t=${token}` });
 }

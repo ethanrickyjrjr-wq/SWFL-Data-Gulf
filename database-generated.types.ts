@@ -326,6 +326,7 @@ export interface Database {
           consumed_at: string | null;
           brand: Json | null;
           seed: Json | null;
+          ref: string | null;
         };
         Insert: {
           token: string;
@@ -337,6 +338,7 @@ export interface Database {
           consumed_at?: string | null;
           brand?: Json | null;
           seed?: Json | null;
+          ref?: string | null;
         };
         Update: {
           token?: string;
@@ -348,6 +350,7 @@ export interface Database {
           consumed_at?: string | null;
           brand?: Json | null;
           seed?: Json | null;
+          ref?: string | null;
         };
         Relationships: [];
       };
@@ -1703,6 +1706,11 @@ export interface Database {
           next_send_at: string | null;
           created_at: string;
           updated_at: string;
+          track: string | null;
+          stage: string | null;
+          subject_variant: string | null;
+          snapshot: Json | null;
+          trial_sends: number;
         };
         Insert: {
           id?: string;
@@ -1720,6 +1728,11 @@ export interface Database {
           next_send_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          track?: string | null;
+          stage?: string | null;
+          subject_variant?: string | null;
+          snapshot?: Json | null;
+          trial_sends?: number;
         };
         Update: {
           id?: string;
@@ -1737,6 +1750,11 @@ export interface Database {
           next_send_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          track?: string | null;
+          stage?: string | null;
+          subject_variant?: string | null;
+          snapshot?: Json | null;
+          trial_sends?: number;
         };
         Relationships: [];
       };

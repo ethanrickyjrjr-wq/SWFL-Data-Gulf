@@ -39,3 +39,31 @@ export async function logArrival(ref: string): Promise<void> {
     );
   }
 }
+
+/**
+ * Best-effort 'claimed' event + stage flip to 'converted' (the cadence's terminal
+ * success — all further demo sends stop). Called from /api/claim's winner path;
+ * never throws, never blocks a claim. Legacy rows (track NULL) only get the event.
+ */
+export async function logClaimed(ref: string): Promise<void> {
+  const parsed = parseArrivalRef(ref);
+  if (!parsed) return;
+  try {
+    const { createServiceRoleClient } = await import("@/utils/supabase/service-role");
+    const db = createServiceRoleClient();
+    await db.from("outreach_events").insert({
+      recipient_id: parsed.rid,
+      event: "claimed",
+      meta: { ref },
+    });
+    await db
+      .from("outreach_recipients")
+      .update({ stage: "converted", next_send_at: null, updated_at: new Date().toISOString() })
+      .eq("id", parsed.rid)
+      .not("track", "is", null);
+  } catch (err) {
+    console.error(
+      `[arrival] claimed log failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
