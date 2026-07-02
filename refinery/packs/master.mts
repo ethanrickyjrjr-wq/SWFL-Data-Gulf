@@ -259,6 +259,8 @@ export const master: PackDefinition = {
     makeBrainInputSource("price-distribution-swfl"),
     makeBrainInputSource("listing-momentum-swfl"),
     makeBrainInputSource("market-temperature-swfl"),
+    makeBrainInputSource("investor-zip-swfl"),
+    makeBrainInputSource("active-listings-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
   // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
@@ -331,6 +333,15 @@ export const master: PackDefinition = {
     { id: "price-distribution-swfl", edge_type: "input" },
     { id: "listing-momentum-swfl", edge_type: "input" },
     { id: "market-temperature-swfl", edge_type: "input" },
+    // 2026-07-01: investor-zip-swfl + active-listings-swfl — both fully built,
+    // registered, and publishing daily; this was a pure wiring gap (see
+    // docs/superpowers/specs/2026-07-01-wire-listings-investor-master-design.md).
+    // Plain `input`, non-critical — both always emit direction: "neutral",
+    // magnitude: 0 (skipSynthesisAgent, deterministic reporters), so this cannot
+    // skew master's direction vote regardless of edge_type. active-rentals-swfl
+    // deliberately NOT included — held on its own open live-verify check.
+    { id: "investor-zip-swfl", edge_type: "input" },
+    { id: "active-listings-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.
