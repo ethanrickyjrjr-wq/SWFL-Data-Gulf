@@ -1,4 +1,5 @@
 ## 2026-07-01 (main) — Task B: on-brand chart palette extension (WCAG contrast + OKLab) — built, verified, live
+## 2026-07-01 (main) — Task B: on-brand chart palette extension (WCAG contrast + OKLab) — built, verified offline
 
 Executed the on-main `chart-palette-extension` spec+plan (design-quality Task B). Fresh-verification was
 already complete this session (`_ASSISTANT/research/2026-07-01-taskB-wcag-contrast-verification.md` — first-
@@ -15,6 +16,9 @@ Verified offline: touched-area suites 1450/0, `bunx next build` ✓. The 8 code 
 were carried to origin/main by a concurrent rebase-push; this entry pushed in isolation via a detached
 worktree off origin/main (foreign listing answer-path commits left behind for their own proof+push). Check
 `chart_palette_extension_live_verify` stays open (operator/prod). Next: Task C per the BCD handoff.
+Verified offline: touched-area suites 1450/0, `bunx next build` ✓. Commits f56f2030..397b8b80 (8). Check
+`chart_palette_extension_live_verify` stays open (operator/prod). Next: Task C per the BCD handoff.
+
 ## 2026-07-01 (main) — Build 1 hardening: close the confirm loop (routing fix + end-to-end test)
 
 Advisor review after the Parts A–C commit (`e6854235`) flagged the one thing the unit tests didn't cover:
