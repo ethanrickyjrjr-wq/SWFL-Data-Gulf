@@ -1,4 +1,5 @@
 import { test, expect, describe, afterEach } from "bun:test";
+import { readFileSync } from "node:fs";
 import {
   renderSocialImage,
   composeCardSvg,
@@ -36,6 +37,26 @@ const BASE_MODEL: SocialModel = {
 };
 
 afterEach(() => _clearLogoCache());
+
+describe("bundled-font rendering (wave 2 — the blank-text-on-Vercel fix)", () => {
+  test("rasterizes with bundled fonts only — deterministic local === Vercel", async () => {
+    // The pre-wave-2 options ({loadSystemFonts:true, defaultFontFamily:"Arial"})
+    // silently render BLANK text on Vercel's Linux runtime (no Arial installed) —
+    // the exact landmine lib/charts/chart-fonts.ts documents. A non-trivially-sized
+    // PNG under loadSystemFonts:false proves glyphs came from the bundled TTFs.
+    const png = await renderSocialImage({ model: BASE_MODEL, theme: BRAND, format: "square" });
+    expect(png.length).toBeGreaterThan(20_000); // blank-text cards compress far smaller
+  });
+
+  test("no bare-Arial font-family literals and no loadSystemFonts:true remain", () => {
+    const src = readFileSync(
+      new URL("../render-social-image.ts", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"),
+      "utf8",
+    );
+    expect(src).not.toContain("loadSystemFonts: true");
+    expect(src).not.toContain('font-family="Arial');
+  });
+});
 
 describe("isSocialFormat", () => {
   test("accepts the four platform formats, rejects others", () => {

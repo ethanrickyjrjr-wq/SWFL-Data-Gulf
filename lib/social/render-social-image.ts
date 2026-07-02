@@ -32,6 +32,7 @@
  */
 
 import { Resvg } from "@resvg/resvg-js";
+import { CANVAS_FONT_FILES, CANVAS_DEFAULT_FAMILY } from "@/lib/brand/fonts";
 import type { EmailChartSpec } from "@/lib/email/templates/charts/chart-types";
 import { resolveTheme, type BrandTheme } from "@/scripts/email/types";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
@@ -90,6 +91,13 @@ export interface RenderSocialImageArgs {
 }
 
 const WATERMARK_BRAND = "SWFL Data Gulf";
+
+// The engine card's text family — the bundled Liberation face first (resvg loads
+// it from CANVAS_FONT_FILES; Vercel's runtime has NO system Arial — the old
+// {loadSystemFonts:true, defaultFontFamily:"Arial"} options silently rendered
+// blank text there). Arial/Helvetica stay in the stack for metric-identical
+// rendering anywhere the SVG is viewed as raw SVG (browser dev previews).
+const ENGINE_FONT = `${CANVAS_DEFAULT_FAMILY}, Arial, Helvetica, sans-serif`;
 
 // ── small SVG helpers ────────────────────────────────────────────────────────
 
@@ -236,7 +244,7 @@ export function composeCardSvg(args: {
   headlineLines.forEach((line, i) => {
     layers.push(
       `<text x="${pad}" y="${cursorY + headlineSize + i * lineGap}" font-size="${headlineSize}" font-weight="bold" ` +
-        `fill="${esc(onDark)}" font-family="Arial, Helvetica, sans-serif">${esc(line)}</text>`,
+        `fill="${esc(onDark)}" font-family="${ENGINE_FONT}">${esc(line)}</text>`,
     );
   });
   cursorY += headlineSize + (headlineLines.length - 1) * lineGap + Math.round(height * 0.05);
@@ -247,20 +255,20 @@ export function composeCardSvg(args: {
     const valueSize = Math.round(width * 0.12);
     layers.push(
       `<text x="${pad}" y="${cursorY + valueSize}" font-size="${valueSize}" font-weight="bold" ` +
-        `fill="${esc(accent)}" font-family="Arial, Helvetica, sans-serif">${esc(stat.value)}</text>`,
+        `fill="${esc(accent)}" font-family="${ENGINE_FONT}">${esc(stat.value)}</text>`,
     );
     cursorY += valueSize + 12;
     const labelSize = Math.round(width * 0.03);
     layers.push(
       `<text x="${pad}" y="${cursorY + labelSize}" font-size="${labelSize}" ` +
-        `fill="${esc(onDark)}" font-family="Arial, Helvetica, sans-serif">${esc(clip(stat.label ?? "", 48))}</text>`,
+        `fill="${esc(onDark)}" font-family="${ENGINE_FONT}">${esc(clip(stat.label ?? "", 48))}</text>`,
     );
     cursorY += labelSize + 8;
     if (stat.caption && stat.caption.trim()) {
       const capSize = Math.round(width * 0.022);
       layers.push(
         `<text x="${pad}" y="${cursorY + capSize}" font-size="${capSize}" ` +
-          `fill="${esc(neutral)}" font-family="Arial, Helvetica, sans-serif">${esc(clip(stat.caption, 56))}</text>`,
+          `fill="${esc(neutral)}" font-family="${ENGINE_FONT}">${esc(clip(stat.caption, 56))}</text>`,
       );
       cursorY += capSize + 10;
     }
@@ -307,7 +315,7 @@ export function composeCardSvg(args: {
   );
   layers.push(
     `<text x="${pad}" y="${wmY - wmSize}" font-size="${wmSize}" fill="${esc(onDark)}" ` +
-      `opacity="0.85" font-family="Arial, Helvetica, sans-serif">${esc(clip(watermark, 80))}</text>`,
+      `opacity="0.85" font-family="${ENGINE_FONT}">${esc(clip(watermark, 80))}</text>`,
   );
   // Optional freshness date, smaller, beneath. PUBLIC card → cleaned MM/DD/YYYY
   // only; the raw internal SWFL-… token must NEVER paint onto a share image.
@@ -316,7 +324,7 @@ export function composeCardSvg(args: {
     const ftSize = Math.round(width * 0.018);
     layers.push(
       `<text x="${pad}" y="${wmY}" font-size="${ftSize}" fill="${esc(neutral)}" ` +
-        `font-family="Arial, Helvetica, sans-serif">${esc(freshnessAsOf)}</text>`,
+        `font-family="${ENGINE_FONT}">${esc(freshnessAsOf)}</text>`,
     );
   }
 
@@ -357,10 +365,16 @@ export async function renderSocialImage(args: RenderSocialImageArgs): Promise<Bu
   });
 
   // Intrinsic SVG size already equals the target format → no fitTo needed; resvg
-  // renders at exactly width×height. System fonts + Arial fallback for <text>.
+  // renders at exactly width×height. Bundled Liberation faces (lib/brand/fonts) —
+  // loadSystemFonts:false makes the render deterministic local === Vercel; the
+  // pattern proven by lib/charts/chart-fonts (+ its real-resvg test).
   const resvg = new Resvg(svg, {
     background: "rgba(255,255,255,0)",
-    font: { loadSystemFonts: true, defaultFontFamily: "Arial" },
+    font: {
+      fontFiles: CANVAS_FONT_FILES,
+      loadSystemFonts: false,
+      defaultFontFamily: CANVAS_DEFAULT_FAMILY,
+    },
   });
   return resvg.render().asPng();
 }

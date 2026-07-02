@@ -28,6 +28,10 @@ const nextConfig: NextConfig = {
     // chart route renders blank-text PNGs (silently). The Email Lab AI build is the
     // ONLY route that rasterizes a chart; any NEW svgToPng caller-route must add this.
     "/api/email-lab/ai": ["./assets/fonts/*.ttf"],
+    // The social rasterizer now loads the same bundled Liberation TTFs by path at
+    // runtime (lib/brand/fonts CANVAS_FONT_FILES) — same blank-text landmine as
+    // the chart route above.
+    "/api/social/render/[format]": ["./assets/fonts/*.ttf"],
   },
   async redirects() {
     return [
