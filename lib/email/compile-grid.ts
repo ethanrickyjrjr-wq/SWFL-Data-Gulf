@@ -54,6 +54,7 @@ import { createElement } from "react";
 import type { ReactNode } from "react";
 import { render } from "@react-email/render";
 import { Html, Head, Body, Container } from "@react-email/components";
+import { emailHeadChildren, msoFontPin } from "./blocks/email-head";
 import { BlockRenderer } from "./blocks/BlockRenderer";
 import { colSpanToPx, GRID_COLS } from "./grid-schema";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
@@ -226,10 +227,11 @@ export async function compileGrid(doc: EmailDoc): Promise<string> {
   const tree = createElement(
     Html,
     { lang: "en" },
-    createElement(Head, null),
+    createElement(Head, null, ...emailHeadChildren(doc)),
     createElement(
       Body,
       { style: { backgroundColor: doc.globalStyle.backdropColor, margin: 0, padding: 0 } },
+      msoFontPin(doc),
       createElement(
         Container,
         { style: { maxWidth: "600px", margin: "0 auto", backgroundColor: "#ffffff" } },
