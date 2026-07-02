@@ -1,3 +1,12 @@
+## 2026-07-02 (main) — graduated rentals_swfl cron (weekly schedule live)
+
+Follow-up to the live-verify below, operator-approved. Moved `rentals_swfl` from `not_yet_running:` to
+`pipelines:` in ingest/cadence_registry.yaml (now freshness-probed) and uncommented the Monday 12:00 UTC
+schedule in ingest-rentals.yml — mirrors the market_aggregates graduation pattern exactly
+(c1afc357/a69c48c3), including the `vars.ENGINE_ENABLED` job condition so it respects the engine
+on/off switch. Thin proof (1 live run) — flagged in both files to watch the first 1-2 scheduled fires
+for WAF/budget surprises before trusting it fully unattended, same caveat market_aggregates carries.
+
 ## 2026-07-02 (main) — active_rentals_swfl_live_verify closed: first live SteadyAPI rentals sweep
 
 The active-rentals-swfl pack/pipeline/migration/GHA workflow all shipped 2026-06-30 (d64e0873) but
