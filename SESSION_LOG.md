@@ -1,3 +1,19 @@
+## 2026-07-02 (main) — wave 1.5 BUILT offline: listing-link-photo-root (7 commits)
+
+Executed `docs/superpowers/plans/2026-07-02-listing-link-photo-root.md` inline, all 9 tasks:
+migration `projects.property_url` applied to prod + types regenerated (452f00d8) ·
+`Listing.listingUrl` type field (36b8af78) · `lib/listings/artifact-link.ts` one-root resolver
+(20eb003b) · sharp dep + `lib/media/listing-photo.ts` derivative + `hostEmailMedia`
+generalization (461e13ea; crop verified visually on a Latitude 26 fixture photo — SWFLAMLS
+watermark gone at 8% bottom crop, v1) · `loadListingContext` opt-in photo enrichment wired into
+build-doc + build-week (61b37043) · `attachFeaturedAerial` links through `resolveArtifactLink`
+(d51c6eeb) · PATCH `property_url` (9b364afb) · "Listing link" workspace pill (b443eff8).
+Gates: full `bun test` 4407/0, `bunx next build` ✓. PROCESS NOTE: a parallel wave-1 session
+shares this tree — one commit briefly swept their staged sold-price files in via the shared
+index; fixed by soft-reset + PATHSPEC commits (`git commit -- <paths>`), which all later
+commits used. Their work rode untouched (their 23122832 landed between my commits).
+`listing_link_photo_root_live_verify` stays OPEN — operator-run real-inbox render.
+
 ## 2026-07-02 (main) — wave-1 spec: invention-surface-guards (brainstormed, registered, docs-only)
 
 Wave 1 brainstorm ran per RULE 3.5/0.4. Registered `invention-surface-guards`
