@@ -23,13 +23,26 @@ export type ChartIntent =
   | { chart_type: "bar"; scope: "vitals"; corridor_slug: string }
   | { chart_type: "bar"; scope: "flood-aal" };
 
+// "asking-rent" is the COMMERCIAL corridor NNN chart (cre-swfl) — "market rents across
+// corridors" per the type doc above, never residential. A bare "rent"/"rental"/"rents" mention
+// (no commercial signal) is a RESIDENTIAL rental-market question and must NOT match here; it
+// falls through to the generic router (resolveReachTargets in lib/highlighter/reach.ts), which
+// correctly routes rent/rental/lease/zori keywords to rentals-swfl. Bug found live 2026-07-02:
+// `q.includes("rent")` alone caught "rental market in 33901" and served the wrong (commercial)
+// chart + a downstream text-answer mismatch. Regression test: lib/route-chart.test.ts.
+const RENT_WORD = /\brent(s|al|als)?\b/i;
+const COMMERCIAL_CONTEXT =
+  /\b(corridor|commercial|office|retail|industrial|nnn|triple[- ]net|cap ?rate)\b/i;
+
 /**
  * Route a plain-English question to a chart intent.
  *
  * Heuristic keyword matching (case-insensitive):
  *
- * 1. **Market rents** — "rent" or "asking rent"
- *    → { chart_type: "bar", scope: "asking-rent" }
+ * 1. **Market rents (COMMERCIAL corridors only)** — "asking rent", or "rent"/"rental"/"rents"
+ *    together with a commercial signal (corridor/commercial/office/retail/industrial/NNN/
+ *    triple-net/cap rate) → { chart_type: "bar", scope: "asking-rent" }. A bare residential
+ *    rent mention returns null here and is handled by the generic router instead.
  *
  * 2. **Vacancy** — "vacanc" (matches vacancy/vacancies)
  *    → { chart_type: "bar", scope: "vacancy" }
@@ -56,8 +69,8 @@ export function routeChart(question: string): ChartIntent | null {
     return { chart_type: "bar", scope: "flood-aal" };
   }
 
-  // 2. Market rents
-  if (q.includes("rent") || q.includes("asking rent")) {
+  // 2. Market rents — commercial corridor asking-rent ONLY (see RENT_WORD/COMMERCIAL_CONTEXT above).
+  if (q.includes("asking rent") || (RENT_WORD.test(q) && COMMERCIAL_CONTEXT.test(q))) {
     return { chart_type: "bar", scope: "asking-rent" };
   }
 
@@ -153,10 +166,18 @@ export function routeRankedDelta(question: string): string | null {
 if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
   console.log("Testing routeChart...\n");
 
-  // Test 1: asking-rent match
-  const test1 = routeChart("what are rents doing");
+  // Test 1: commercial asking-rent match (needs a commercial signal)
+  const test1 = routeChart("what are commercial corridor asking rents doing");
   const test1Pass = test1?.chart_type === "bar" && test1?.scope === "asking-rent";
-  console.log(`✓ Test 1 (rents): ${test1Pass ? "PASS" : "FAIL"}`, JSON.stringify(test1));
+  console.log(`✓ Test 1 (commercial rents): ${test1Pass ? "PASS" : "FAIL"}`, JSON.stringify(test1));
+
+  // Test 1b: bare residential rent mention must NOT hit the commercial chart
+  const test1b = routeChart("what's the rental market like in 33901");
+  const test1bPass = test1b === null;
+  console.log(
+    `✓ Test 1b (residential rent): ${test1bPass ? "PASS" : "FAIL"}`,
+    JSON.stringify(test1b),
+  );
 
   // Test 2: place resolution (may or may not match depending on place-resolver state)
   const test2 = routeChart("how is Vanderbilt Beach looking");
@@ -168,7 +189,7 @@ if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1])))
   const test3Pass = test3 === null;
   console.log(`✓ Test 3 (weather): ${test3Pass ? "PASS" : "FAIL"}`, JSON.stringify(test3));
 
-  const allPass = test1Pass && test2Pass && test3Pass;
+  const allPass = test1Pass && test1bPass && test2Pass && test3Pass;
   console.log(`\n${allPass ? "All tests passed!" : "Some tests failed."}`);
   process.exit(allPass ? 0 : 1);
 }
