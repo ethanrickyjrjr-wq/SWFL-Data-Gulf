@@ -20,6 +20,7 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import { DEFAULT_BLOCK_PROPS } from "@/lib/email/doc/default-docs";
 import {
   loadMarketFigures,
+  loadLifecycleDigest,
   figuresToPromptBlock,
   type MarketFigure,
 } from "@/lib/email/market-context";
@@ -87,10 +88,12 @@ async function fetchMasterDossier(scope?: BuildScope): Promise<string> {
 export async function fetchLakeParts(
   scope?: BuildScope,
 ): Promise<{ figures: MarketFigure[]; dossier: string }> {
-  const [figures, dossier] = await Promise.all([
+  const [marketFigures, lifecycleFigure, dossier] = await Promise.all([
     loadMarketFigures(scope).catch(() => []),
+    loadLifecycleDigest(scope).catch(() => null),
     fetchMasterDossier(scope).catch(() => ""),
   ]);
+  const figures = lifecycleFigure ? [...marketFigures, lifecycleFigure] : marketFigures;
   return { figures, dossier };
 }
 

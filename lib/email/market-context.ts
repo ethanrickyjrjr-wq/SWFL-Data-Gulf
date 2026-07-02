@@ -293,6 +293,97 @@ export async function loadMarketFigures(scope?: {
   return figs;
 }
 
+interface LifecycleStatsRow {
+  price_cuts_30d: number | null;
+  price_raises_30d: number | null;
+  new_holdings_30d: number | null;
+  sales_30d: number | null;
+  new_listings_30d: number | null;
+  price_cuts_90d: number | null;
+  price_raises_90d: number | null;
+  new_holdings_90d: number | null;
+  sales_90d: number | null;
+  new_listings_90d: number | null;
+  latest_at: string | null;
+}
+
+function digestValue(
+  cuts: number,
+  raises: number,
+  holdings: number,
+  sales: number,
+  listings: number,
+): string | null {
+  const parts: string[] = [];
+  if (cuts) parts.push(`${cuts} price cut${cuts === 1 ? "" : "s"}`);
+  if (raises) parts.push(`${raises} price raise${raises === 1 ? "" : "s"}`);
+  if (holdings) parts.push(`${holdings} pulled to holding`);
+  if (sales) parts.push(`${sales} sale${sales === 1 ? "" : "s"}`);
+  if (listings) parts.push(`${listings} new listing${listings === 1 ? "" : "s"}`);
+  return parts.length ? parts.join(", ") : null;
+}
+
+/** Real-estate lifecycle activity (price cuts / holdings / sales / new listings), adaptive-window:
+ *  prefers the last 30 days, falls back to 90 if a slower-moving scope shows no 30-day signal, and
+ *  returns null (no figure) if BOTH windows are empty — never forces an empty-looking line. */
+export async function loadLifecycleDigest(scope?: {
+  kind?: string;
+  value?: string;
+}): Promise<MarketFigure | null> {
+  if (!scope?.value) return null;
+  let db: Db;
+  try {
+    db = createServiceRoleClientUntyped();
+  } catch {
+    return null;
+  }
+  try {
+    let q = db
+      .schema("data_lake")
+      .from("listing_transitions_recent_zip_stats")
+      .select(
+        "price_cuts_30d, price_raises_30d, new_holdings_30d, sales_30d, new_listings_30d, " +
+          "price_cuts_90d, price_raises_90d, new_holdings_90d, sales_90d, new_listings_90d, latest_at",
+      );
+    q =
+      scope.kind === "zip"
+        ? q.eq("zip_code", scope.value)
+        : q.eq("county", scope.value.replace(/\s*County$/i, "").trim()).is("zip_code", null);
+    const { data } = await q.maybeSingle();
+    const row = data as LifecycleStatsRow | null;
+    if (!row) return null;
+
+    const v30 = digestValue(
+      row.price_cuts_30d ?? 0,
+      row.price_raises_30d ?? 0,
+      row.new_holdings_30d ?? 0,
+      row.sales_30d ?? 0,
+      row.new_listings_30d ?? 0,
+    );
+    const v90 = digestValue(
+      row.price_cuts_90d ?? 0,
+      row.price_raises_90d ?? 0,
+      row.new_holdings_90d ?? 0,
+      row.sales_90d ?? 0,
+      row.new_listings_90d ?? 0,
+    );
+    const value = v30 ?? v90;
+    if (!value) return null;
+    const windowDays = v30 ? 30 : 90;
+    const asOf = mdY(row.latest_at) ?? mdY(new Date().toISOString());
+
+    return {
+      key: "lifecycle_digest",
+      label: `Lifecycle activity — ${scope.value} (last ${windowDays} days)`,
+      value,
+      source: "SWFL Data Gulf",
+      as_of: asOf,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Render figures as the labeled "REAL LAKE DATA" block the fill AI reads. */
 export function figuresToPromptBlock(figs: MarketFigure[]): string {
   if (!figs.length) return "";
