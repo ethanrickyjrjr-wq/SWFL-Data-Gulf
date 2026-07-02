@@ -86,6 +86,53 @@ describe("renderDripEmail", () => {
   });
 });
 
+describe("renderDripEmail — demo sections", () => {
+  const demoOver: Partial<DripEmailInput> = {
+    brand: {
+      primary: "#670038",
+      accent: "#ab8f40",
+      logoUrl: "https://cdn.example.com/logo.png",
+      companyName: "BHHS Florida Realty",
+    },
+    preheader: "This is what your clients could get from you every week.",
+    stats: [
+      { label: "Active listings", value: "214" },
+      { label: "Median list price", value: "$1,240,000" },
+      { label: "Days on market", value: "63" },
+    ],
+    promptButtons: [
+      {
+        label: "What changed in Park Shore this week?",
+        url: "https://www.swfldatagulf.com/welcome?zip=34103&prompt=x&ref=rid-t1",
+      },
+    ],
+    deltaLine: "Median sale price: $899,000 → $912,000",
+    ctaLabel: "See your whole week — already built",
+    sources: ["SWFL Data Gulf"],
+  };
+
+  it("renders preheader, stats, buttons, delta, sources, custom CTA label", async () => {
+    const { html } = await renderDripEmail(input(demoOver));
+    expect(html).toContain("This is what your clients could get from you every week.");
+    expect(html).toContain("$1,240,000");
+    expect(html).toContain("What changed in Park Shore this week?");
+    expect(html).toContain(
+      "https://www.swfldatagulf.com/welcome?zip=34103&amp;prompt=x&amp;ref=rid-t1",
+    );
+    expect(html).toContain("Median sale price: $899,000 → $912,000");
+    expect(html).toContain("See your whole week — already built");
+    expect(html).toContain("Sources: SWFL Data Gulf");
+    expect(html).toContain("#670038"); // brand primary present (pre-send gate relies on this)
+    expect(html).toContain("#ab8f40"); // accent styles the button borders
+  });
+
+  it("legacy input renders the legacy CTA label — the registry default never leaks", async () => {
+    const { html } = await renderDripEmail(input());
+    expect(html).toContain("Create your own report");
+    expect(html).not.toContain("View Listing");
+  });
+});
+
 describe("appendPostalAddress (CAN-SPAM footer)", () => {
   const ADDR = "SWFL Data Gulf, 123 Main St, Fort Myers, FL 33901";
 

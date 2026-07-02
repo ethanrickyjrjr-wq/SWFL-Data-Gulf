@@ -14,6 +14,7 @@ import { renderChart } from "@/lib/email/templates/charts/chart-renderer";
 import type { EmailChartSpec } from "@/lib/email/templates/charts/chart-types";
 import { ensureUnsubscribeToken } from "@/lib/email/scheduler";
 import type { ActivationBrand } from "@/lib/email/activation/types";
+import { SWFL_THEME } from "@/scripts/email/types";
 
 export interface DripEmailInput {
   /** The recipient's brand (scraped via enrichBrand, or the SWFL house brand on low confidence). */
@@ -34,6 +35,19 @@ export interface DripEmailInput {
   subject: string;
   /** CAN-SPAM physical postal address, appended to the footer. Required by the live-send adapters. */
   postalAddress?: string;
+  // ── demo-email sections (all optional; legacy drip callers unchanged) ──
+  /** Hidden inbox-preview line. */
+  preheader?: string;
+  /** Cited stat row (≤3 cells) rendered between explanation and buttons. */
+  stats?: Array<{ label: string; value: string }>;
+  /** Tappable AI questions — deep links to the branded arrival with a seeded prompt. */
+  promptButtons?: Array<{ label: string; url: string }>;
+  /** T2 computed "what moved" line (bold, above the stats). */
+  deltaLine?: string | null;
+  /** CTA button text; defaults to the legacy drip label. */
+  ctaLabel?: string;
+  /** Deduped source names rendered as a small muted footer line. */
+  sources?: string[];
 }
 
 export interface DripEmail {
@@ -69,12 +83,55 @@ export function appendPostalAddress(html: string, postalAddress: string): string
     : html + footer;
 }
 
+// Literal font stack for body-slot HTML — body is injected AFTER token replacement,
+// so a {{FONT_FAMILY}} inside it would trip the unfilled-token assert.
+const FONT = "Arial, Helvetica, sans-serif";
+
+function escapeAttr(s: string): string {
+  return escapeHtml(s).replace(/"/g, "&quot;");
+}
+
+function statsHtml(stats: NonNullable<DripEmailInput["stats"]>): string {
+  const width = Math.floor(100 / Math.max(stats.length, 1));
+  const cells = stats
+    .map(
+      (s) => `
+    <td align="center" width="${width}%" style="padding:10px 6px;">
+      <div style="font-family:${FONT}; font-size:20px; font-weight:bold; color:#111827;">${escapeHtml(s.value)}</div>
+      <div style="font-family:${FONT}; font-size:12px; color:#6b7280; margin-top:2px;">${escapeHtml(s.label)}</div>
+    </td>`,
+    )
+    .join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:12px 0 4px; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb;"><tr>${cells}</tr></table>`;
+}
+
+function promptButtonsHtml(
+  buttons: NonNullable<DripEmailInput["promptButtons"]>,
+  accent: string,
+): string {
+  const rows = buttons
+    .map(
+      (b) => `
+    <tr><td align="center" style="padding:4px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td align="center" style="border:2px solid ${accent}; border-radius:8px;">
+          <a href="${escapeAttr(b.url)}" style="display:block; padding:11px 16px; font-family:${FONT}; font-size:14px; font-weight:bold; color:${accent}; text-decoration:none;">${escapeHtml(b.label)}</a>
+        </td></tr></table>
+    </td></tr>`,
+    )
+    .join("");
+  return `<div style="font-family:${FONT}; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#6b7280; margin:16px 0 6px;">Ask the AI — it answers live</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${rows}</table>`;
+}
+
 /**
  * Render the branded drip email HTML + subject. The chart is themed with the
  * recipient's accent so the data series shows in THEIR color; the masthead/CTA use
  * brandThemeToTokens (PRIMARY/ACCENT/LOGO_URL). Absent brand fields fall back to the
  * shell's SWFL defaults — the caller decides whether a low-confidence scrape should
  * pass the SWFL house brand instead of guessed colors.
+ *
+ * The optional demo sections (preheader / stats / promptButtons / deltaLine /
+ * ctaLabel / sources) compose into the body slot; legacy callers render unchanged.
  */
 export async function renderDripEmail(input: DripEmailInput): Promise<DripEmail> {
   const brandTokens = brandThemeToTokens({
@@ -88,15 +145,33 @@ export async function renderDripEmail(input: DripEmailInput): Promise<DripEmail>
     KICKER: input.kicker,
     TITLE: input.title,
     CTA_URL: input.ctaUrl,
+    // The registry default is "View Listing" — the drip ALWAYS overrides it.
+    CTA_LABEL: input.ctaLabel ? escapeHtml(input.ctaLabel) : "Create your own report &rarr;",
+    PREHEADER: escapeHtml(input.preheader ?? ""),
     FRESHNESS: input.freshness,
     ...(input.brand.companyName ? { COMPANY_NAME: input.brand.companyName } : {}),
   };
 
   const chartHtml = renderChart(input.chart, chartThemeFromBrand(input.brand));
 
+  const accent = input.brand.accent ?? SWFL_THEME.accent;
+  const body = [
+    input.explanation,
+    input.deltaLine
+      ? `<p style="font-family:${FONT}; font-size:15px; line-height:1.55; color:#374151; margin:10px 0 0;"><strong>${escapeHtml(input.deltaLine)}</strong></p>`
+      : "",
+    input.stats?.length ? statsHtml(input.stats) : "",
+    input.promptButtons?.length ? promptButtonsHtml(input.promptButtons, accent) : "",
+    input.sources?.length
+      ? `<p style="font-family:${FONT}; font-size:11px; line-height:1.5; color:#9ca3af; margin:14px 0 0;">Sources: ${input.sources.map(escapeHtml).join(" &middot; ")}</p>`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("");
+
   const rendered = await renderEmailTemplate("outreach", tokens, {
     chart: chartHtml,
-    body: input.explanation,
+    body,
   });
 
   // CAN-SPAM footer: per-recipient unsubscribe link (idempotent) + the physical postal

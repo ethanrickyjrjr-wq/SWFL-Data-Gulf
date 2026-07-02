@@ -20,6 +20,7 @@ export type TokenKey =
   | "BORDER_RADIUS"
   | "COMPANY_NAME"
   | "LOGO_URL"
+  | "PREHEADER" // hidden inbox-preview line; empty default renders an invisible div
   | "TAGLINE"
   | "WEBSITE_URL"
   | "CONTACT_EMAIL" // reply-to / contact address shown in footer
@@ -85,6 +86,7 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   FONT_FAMILY: "'Inter', sans-serif",
   BORDER_RADIUS: "8px",
   COMPANY_NAME: "SWFL Data Gulf",
+  PREHEADER: "",
   TAGLINE: "Southwest Florida Intelligence",
   WEBSITE_URL: "https://www.swfldatagulf.com",
   CONTACT_EMAIL: "hello@swfldatagulf.com",
