@@ -1,3 +1,21 @@
+## 2026-07-01 (main) — Task B: on-brand chart palette extension (WCAG contrast + OKLab) — built, verified, live
+
+Executed the on-main `chart-palette-extension` spec+plan (design-quality Task B). Fresh-verification was
+already complete this session (`_ASSISTANT/research/2026-07-01-taskB-wcag-contrast-verification.md` — first-
+party W3C + Ottosson, crawl4ai), so built on it rather than re-crawling stable math. New pure zero-dep
+`lib/charts/palette.ts`: WCAG-2.2 relativeLuminance/contrastRatio (verbatim W3C TR/WCAG22 Appendix A),
+Ottosson OKLab/OKLCH conversion + oklabDistance, extendPalette (brand/chosen anchors emitted verbatim-first;
+extras on-brand + grayscale-distinct via lightness+neighbor-hue; never throws, always returns `count` — FOCUS
+rule 4), readableLabel (real WCAG ink-vs-white). Wired both surfaces at the categorical seams: donut
+(donut-share.ts — backs chat frame + email PNG), chat CompositionFrame, email renderStackedBar (made segment
+`color` optional — the "renders blank" gap), and swapped the two rec601 readableText heuristics → real WCAG
+readableLabel. Task-8 audit: rec601 vs WCAG label pick unchanged on the heat-row teal gradient + all gulf
+fills; one crossover (#1BB8C9) flips white→dark ink where WCAG is correct — strict improvement, no regression.
+Verified offline: touched-area suites 1450/0, `bunx next build` ✓. The 8 code commits (1444cb16..68c01a2e)
+were carried to origin/main by a concurrent rebase-push; this entry pushed in isolation via a detached
+worktree off origin/main (foreign listing answer-path commits left behind for their own proof+push). Check
+`chart_palette_extension_live_verify` stays open (operator/prod). Next: Task C per the BCD handoff.
+
 ## 2026-07-01 (main) — master-wiring gap: spec + plan for investor-zip-swfl + active-listings-swfl (handoff, docs only)
 
 Follow-up to the graphify orphan audit earlier this session: of the 6 Tier-1 brains master never
