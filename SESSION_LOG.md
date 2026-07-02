@@ -1,3 +1,19 @@
+## 2026-07-02 (main) — wave-1 spec: invention-surface-guards (brainstormed, registered, docs-only)
+
+Wave 1 brainstorm ran per RULE 3.5/0.4. Registered `invention-surface-guards`
+(check `invention_surface_guards_live_verify`); spec:
+`docs/superpowers/specs/2026-07-02-invention-surface-guards-design.md`. Operator corrections
+reshaped the wave: (1) SteadyAPI is the SOLE listings source — the campaign's "feeds disagree"
+was a stale WIRE, verified live 07/02: `listing_state` holds 28,396 active under `api_feed`,
+old scrape view frozen (34108: 92 vs spine 495); only remaining reader of the dead view is
+`lib/email/market-context.ts:116` (brain already reads `listing_active_stats`); 298
+`lifecycle_seed` stragglers = catch-up collision dupes awaiting resolve. (2) Sold price = a
+numbered chain (lake nonzero → `fetchSoldEvent` recorded event → last-list disclosed), never 0.
+(3) User-replaceable property/site URL is that user's link authority (resolver = wave 1.5).
+Research (crawl4ai): OWASP LLM05:2025 Improper Output Handling — allowlist-validate LLM output
+before downstream use; email templates a named example — anchors the post-compile href/src lint.
+Spec committed locally, NOT pushed. Next: operator spec review → writing-plans.
+
 ## 2026-07-02 (main) — wave-1.5 implementation plan written (docs-only)
 
 Implementation plan for the approved wave-1.5 spec:
