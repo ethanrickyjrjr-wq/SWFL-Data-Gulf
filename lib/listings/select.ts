@@ -14,8 +14,10 @@ import { heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { BuildScope } from "@/lib/email/build-doc";
 import { aerialUrl } from "./aerial";
-import { fetchSaleListings, type Listing } from "./rentcast";
-import { fetchPhotoListings } from "./steadyapi";
+import { type Listing } from "./rentcast";
+// KNOWN-DEBT(data_lake: listing_state lives in the data_lake schema, which the typed
+// Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
 
 // ── Scope → the one city we query (RentCast has no county/ZIP filter) ─────────
@@ -189,7 +191,7 @@ export function attachFeaturedAerial(card: EmailDoc, listing: Listing): EmailDoc
   );
 }
 
-// ── The one impure orchestrator (a single RentCast call, graceful) ───────────
+// ── The one impure orchestrator (a lake read, graceful) ───────────────────────
 export interface ListingContext {
   /** Aggregate + concrete cited figures for the scope (possibly empty). */
   figures: MarketFigure[];
@@ -199,44 +201,95 @@ export interface ListingContext {
   city: string;
 }
 
+interface LakeListingRow {
+  listing_id: string | null;
+  street_address: string | null;
+  city: string | null;
+  county: string | null;
+  zip_code: string | null;
+  lat: number | null;
+  lon: number | null;
+  property_type: string | null;
+  beds: number | null;
+  baths: number | null;
+  sqft: number | null;
+  lot_acres: number | null;
+  status: string | null;
+  list_price: number | null;
+  listed_date: string | null;
+  last_seen: string | null;
+  days_on_market: number | null;
+  mls_name: string | null;
+  mls_number: string | null;
+  photo_url: string | null;
+}
+
+/** Pure: coerce one data_lake.listing_state row into the shared `Listing` shape.
+ *  `yearBuilt`/`removedDate` have no lake column — left null rather than invented. */
+export function lakeRowToListing(row: LakeListingRow): Listing | null {
+  if (!row.listing_id || !row.street_address) return null;
+  return {
+    id: row.listing_id,
+    formattedAddress: row.street_address,
+    addressLine1: row.street_address,
+    city: row.city ?? "",
+    state: "FL",
+    zipCode: row.zip_code ?? "",
+    county: row.county ?? "",
+    latitude: row.lat,
+    longitude: row.lon,
+    propertyType: row.property_type ?? "",
+    bedrooms: row.beds,
+    bathrooms: row.baths,
+    squareFootage: row.sqft,
+    lotSize: row.lot_acres,
+    yearBuilt: null,
+    status: row.status ?? "Active",
+    price: row.list_price,
+    listedDate: row.listed_date,
+    removedDate: null,
+    lastSeenDate: row.last_seen,
+    daysOnMarket: row.days_on_market,
+    mlsName: row.mls_name,
+    mlsNumber: row.mls_number,
+    ...(row.photo_url ? { photoUrl: row.photo_url } : {}),
+  };
+}
+
+const LAKE_LISTING_COLUMNS =
+  "listing_id, street_address, city, county, zip_code, lat, lon, property_type, beds, baths, " +
+  "sqft, lot_acres, status, list_price, listed_date, last_seen, days_on_market, mls_name, " +
+  "mls_number, photo_url";
+
+/** Fetch active for-sale listings for one city straight from the lake (populated daily by
+ *  ingest/pipelines/listing_lifecycle — no live vendor call, no per-request cost). Empty-tolerant:
+ *  no creds, no rows, any query error → `[]`, never throws (four-lane/ODD contract). */
+async function fetchLakeListings(city: string): Promise<Listing[]> {
+  if (!city) return [];
+  try {
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("listing_state")
+      .select(LAKE_LISTING_COLUMNS)
+      .eq("city", city)
+      .eq("state", "active")
+      .eq("sale_or_rent", "sale")
+      .eq("source_name", "api_feed")
+      .limit(500);
+    if (!Array.isArray(data)) return [];
+    return (data as LakeListingRow[]).map(lakeRowToListing).filter((l): l is Listing => l !== null);
+  } catch {
+    return [];
+  }
+}
+
 export async function loadListingContext(
   scope: BuildScope | undefined,
   today: Date,
 ): Promise<ListingContext> {
   const city = scopeCity(scope);
-
-  // Run both sources in parallel — SteadyAPI for photos, RentCast for MLS detail.
-  // Both are empty-tolerant; failures just degrade to the other source's data.
-  const [photoListings, rentcastListings] = await Promise.all([
-    fetchPhotoListings({ city }),
-    fetchSaleListings({ city }),
-  ]);
-
-  // If SteadyAPI returned listings with photos, use them as the primary set.
-  // They have price + beds + lat/lon which is enough for figures + aerial fallback.
-  let listings: Listing[] = photoListings.length > 0 ? photoListings : rentcastListings;
-
-  // When both sources returned data, enrich RentCast listings with SteadyAPI photos
-  // by lat/lon proximity (nearest match within ~200m). This keeps MLS detail (DOM,
-  // MLS number) while adding the real photo.
-  if (photoListings.length > 0 && rentcastListings.length > 0) {
-    const photoByCoord = photoListings.filter((l) => l.latitude != null && l.longitude != null);
-    listings = rentcastListings.map((rc) => {
-      if (rc.latitude == null || rc.longitude == null) return rc;
-      // Find closest SteadyAPI listing (Euclidean in degrees — ~200m at 27°N ≈ 0.002°)
-      let best: Listing | null = null;
-      let bestDist = 0.002;
-      for (const sa of photoByCoord) {
-        const d = Math.hypot(rc.latitude - sa.latitude!, rc.longitude - sa.longitude!);
-        if (d < bestDist) {
-          bestDist = d;
-          best = sa;
-        }
-      }
-      return best ? { ...rc, photoUrl: best.photoUrl } : rc;
-    });
-  }
-
+  const listings = await fetchLakeListings(city);
   return {
     figures: listingsToFigures(listings, today, city),
     ranked: rankListings(listings),

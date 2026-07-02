@@ -1,20 +1,13 @@
 // lib/listings/rentcast.ts
 //
-// The RentCast for-sale listings client — the build-time "named source" lane for
-// real, current SWFL inventory (price, beds/baths, DOM, lat/lon, MLS number). Used
-// by the social grid lab + email lab today; the listing-lifecycle lake build inherits
-// this same client later (see the parked lake handoff).
+// RentCast is DEAD — no key configured, never call api.rentcast.io again (see
+// feedback_no-rentcast-dont-relitigate memory, LOCKED 2026-07-01). `select.ts` reads
+// listings from `data_lake.listing_state` (populated daily by
+// ingest/pipelines/listing_lifecycle) instead of any live vendor call.
 //
-// VERIFIED LIVE 2026-06-30 (RULE 0.4): /v1/listings/sale returns the fields below and
-// NO photos. Auth header is `X-Api-Key`. No since-cursor, no native ZIP filter (query
-// by city), limit caps at 500 with no total-count header.
-//
-// Empty-tolerant by contract (four-lane / ODD): no key, non-200, 429 quota, or a
-// malformed body → `[]`, NEVER a thrown error and NEVER an invented listing. The free
-// Developer tier is 50 requests/month, so callers make ONE call per build and the
-// fetch is hour-cached.
-
-const RENTCAST_BASE = "https://api.rentcast.io/v1";
+// What survives here: the `Listing` shape + `normalizeListing` coercion helper —
+// still the shared listing type used across select.ts/build-week.ts/social/design/
+// author.ts, and still exercised by listings.test.ts's fixtures.
 
 /** A normalized for-sale listing. Agent/office contact info (PII) is intentionally
  *  dropped — captions never need it and it should not ride into a deliverable. */
@@ -90,39 +83,4 @@ export function normalizeListing(raw: unknown): Listing | null {
     mlsName: strOrNull(r.mlsName),
     mlsNumber: strOrNull(r.mlsNumber),
   };
-}
-
-/**
- * Fetch for-sale listings for one city. Never throws — any failure (no key, non-200,
- * 429 quota, network, bad body) returns `[]` so the build degrades to its no-listings
- * path. Hour-cached to stay frugal on the 50/month free tier.
- */
-export async function fetchSaleListings(opts: {
-  city: string;
-  state?: string;
-  status?: string;
-  limit?: number;
-}): Promise<Listing[]> {
-  const key = process.env.RENTCAST_API_KEY;
-  if (!key || !opts.city) return [];
-  const params = new URLSearchParams({
-    city: opts.city,
-    state: opts.state ?? "FL",
-    status: opts.status ?? "Active",
-    limit: String(opts.limit ?? 100),
-  });
-  try {
-    const res = await fetch(`${RENTCAST_BASE}/listings/sale?${params}`, {
-      headers: { "X-Api-Key": key, Accept: "application/json" },
-      // Next.js fetch cache: repeat builds within the hour reuse the response instead
-      // of spending another of the 50 monthly free-tier requests.
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
-    const data: unknown = await res.json();
-    if (!Array.isArray(data)) return [];
-    return data.map(normalizeListing).filter((l): l is Listing => l !== null);
-  } catch {
-    return [];
-  }
 }
