@@ -320,19 +320,28 @@ export function svgToPng(svg: string, opts?: { scale?: number; background?: stri
 }
 
 /**
- * Upload a PNG to the public `email-media` bucket and return its durable URL —
- * the same bucket the email-media route serves photos from. Idempotent on key
- * (upsert). Throws on a real storage error (the caller decides whether a chart is
- * load-bearing; a SNICKLEFRITZ build wants it, a generic build can skip).
+ * Upload a media buffer to the public `email-media` bucket and return its durable
+ * URL. Idempotent on key (upsert). Throws on a real storage error (the caller
+ * decides whether the asset is load-bearing). Shared by chart PNGs and the
+ * listing-photo JPEG derivatives (lib/media/listing-photo.ts).
  */
-export async function hostEmailPng(pngKey: string, png: Buffer): Promise<string> {
+export async function hostEmailMedia(
+  key: string,
+  buf: Buffer,
+  contentType: string,
+): Promise<string> {
   const admin = createServiceRoleClient();
   const { error } = await admin.storage
     .from(PUBLIC_BUCKET)
-    .upload(pngKey, png, { contentType: "image/png", upsert: true });
-  if (error) throw new Error(`chart upload failed: ${error.message}`);
-  const { data } = admin.storage.from(PUBLIC_BUCKET).getPublicUrl(pngKey);
+    .upload(key, buf, { contentType, upsert: true });
+  if (error) throw new Error(`email-media upload failed: ${error.message}`);
+  const { data } = admin.storage.from(PUBLIC_BUCKET).getPublicUrl(key);
   return data.publicUrl;
+}
+
+/** Back-compat PNG path — every existing chart caller keeps this signature. */
+export async function hostEmailPng(pngKey: string, png: Buffer): Promise<string> {
+  return hostEmailMedia(pngKey, png, "image/png");
 }
 
 /** Full path: trend points → SVG → PNG → hosted public URL for an <Img src>. */
