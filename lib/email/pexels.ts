@@ -58,19 +58,32 @@ export function mapPexelsResponse(body: unknown): PexelsPhoto[] {
   return out;
 }
 
-/** Search Pexels. Empty-tolerant: no key / blank query / any failure → []. */
+/** Search Pexels. Empty-tolerant: no key / blank query / any failure → [].
+ *  Each failure lane logs a one-line warn so runtime logs name the cause —
+ *  the picker's "No results" is deliberately indistinguishable to the USER,
+ *  never to the operator. */
 export async function searchPexels(query: string, perPage = 24): Promise<PexelsPhoto[]> {
   const key = process.env.PEXELS_API_KEY;
   const q = query.trim();
-  if (!key || !q) return [];
+  if (!q) return [];
+  if (!key) {
+    console.warn("[pexels] PEXELS_API_KEY not set in this runtime — returning []");
+    return [];
+  }
   try {
     const res = await fetch(
       `${PEXELS_SEARCH}?query=${encodeURIComponent(q)}&per_page=${Math.min(Math.max(perPage, 1), 80)}`,
       { headers: { Authorization: key } },
     );
-    if (!res.ok) return [];
-    return mapPexelsResponse(await res.json());
-  } catch {
+    if (!res.ok) {
+      console.warn(`[pexels] upstream ${res.status} for query "${q}" — returning []`);
+      return [];
+    }
+    const photos = mapPexelsResponse(await res.json());
+    if (photos.length === 0) console.warn(`[pexels] upstream OK but zero photos for "${q}"`);
+    return photos;
+  } catch (e) {
+    console.warn(`[pexels] fetch failed: ${(e as Error).message} — returning []`);
     return [];
   }
 }
