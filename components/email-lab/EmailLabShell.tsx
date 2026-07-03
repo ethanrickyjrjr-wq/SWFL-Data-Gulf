@@ -39,6 +39,7 @@ import {
 import { BlockCanvas } from "./BlockCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { BLOCK_MENU } from "./AddBlockPanel";
+import { MediaPanel } from "./MediaPanel";
 import { EmailPreviewFrame } from "@/app/p/[id]/EmailPreviewFrame";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
@@ -520,17 +521,23 @@ export function EmailLabShell({
     commit(applyBrand(card, { ...(brandTokens ?? {}), ...brandingToTokens(branding) }));
   }
 
-  function applyPhotoUrl(url: string) {
+  function applyPhotoUrl(url: string, caption?: string) {
+    // caption rides along for attributed picks (Pexels "Photo by X" credit).
+    const extra = caption ? { caption } : {};
     const sel = selectedId ? doc.blocks.find((b) => b.id === selectedId) : null;
     if (sel?.type === "image") {
       commit({
         ...doc,
         blocks: doc.blocks.map((b) =>
-          b.id === sel.id ? { ...sel, props: { ...sel.props, url } } : b,
+          b.id === sel.id ? { ...sel, props: { ...sel.props, url, ...extra } } : b,
         ),
       });
     } else {
-      const newBlock: EmailBlock = { id: crypto.randomUUID(), type: "image", props: { url } };
+      const newBlock: EmailBlock = {
+        id: crypto.randomUUID(),
+        type: "image",
+        props: { url, ...extra },
+      };
       commit({ ...doc, blocks: [...doc.blocks, newBlock] });
       setSelectedId(newBlock.id);
     }
@@ -1086,6 +1093,11 @@ export function EmailLabShell({
                 e.target.value = "";
               }}
             />
+          </div>
+
+          {/* ── Media library (uploads + Pexels) ── */}
+          <div className="border-b border-white/8">
+            <MediaPanel onApply={applyPhotoUrl} />
           </div>
 
           {/* ── Classic templates (preview only) ── */}

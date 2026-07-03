@@ -47,6 +47,7 @@ import { SocialComposer } from "./social/SocialComposer";
 import { useSocialComposer } from "./social/useSocialComposer";
 import { SocialElementInspector } from "./social/SocialElementInspector";
 import { PhotosPanel } from "./PhotosPanel";
+import { MediaPanel } from "./MediaPanel";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
@@ -590,13 +591,15 @@ export function EmailLabGridShell({
   }
 
   // ── Photos bridge ─────────────────────────────────────────────────────────
-  function applyPhotoUrl(url: string) {
+  function applyPhotoUrl(url: string, caption?: string) {
+    // caption rides along for attributed picks (Pexels "Photo by X" credit).
+    const extra = caption ? { caption } : {};
     const sel = selectedId ? doc.blocks.find((b) => b.id === selectedId) : null;
     if (sel?.type === "image") {
       commit({
         ...doc,
         blocks: doc.blocks.map((b) =>
-          b.id === sel.id ? { ...sel, props: { ...sel.props, url } } : b,
+          b.id === sel.id ? { ...sel, props: { ...sel.props, url, ...extra } } : b,
         ),
       });
     } else if (sel?.type === "listing") {
@@ -613,7 +616,12 @@ export function EmailLabGridShell({
         w: GRID_COLS,
         h: DEFAULT_H.image,
       };
-      const newBlock = { id: mintBlockId(), type: "image", props: { url }, layout } as EmailBlock;
+      const newBlock = {
+        id: mintBlockId(),
+        type: "image",
+        props: { url, ...extra },
+        layout,
+      } as EmailBlock;
       commit({ ...doc, blocks: [...doc.blocks, newBlock] });
       setSelectedId(newBlock.id);
     }
@@ -1338,6 +1346,9 @@ export function EmailLabGridShell({
             onPickFiled={mode === "social" ? social.pickFiledPhoto : pickFiledPhoto}
             onUploadFile={mode === "social" ? social.uploadNewPhoto : uploadNewPhoto}
           />
+
+          {/* ── Media library (uploads + Pexels; email canvas target) ── */}
+          {mode === "email" && <MediaPanel onApply={applyPhotoUrl} />}
         </div>
       </aside>
 
