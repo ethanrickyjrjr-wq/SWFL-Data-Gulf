@@ -661,6 +661,56 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       );
     }
 
+    case "list": {
+      const p = block.props;
+      const items = p.items ?? [];
+      return (
+        <View style={s.section}>
+          {p.title ? (
+            <Text
+              style={{
+                fontFamily: font,
+                fontSize: 14,
+                fontWeight: "bold",
+                color: gs.primaryColor,
+                marginBottom: 8,
+              }}
+            >
+              {p.title}
+            </Text>
+          ) : null}
+          {items.map((item, i) => (
+            <View key={i} style={{ flexDirection: "row", marginBottom: 4 }}>
+              {item.lead ? (
+                <Text
+                  style={{
+                    fontFamily: font,
+                    fontSize: 10,
+                    fontWeight: "bold",
+                    color: gs.accentColor,
+                    marginRight: 8,
+                  }}
+                >
+                  {item.lead}
+                </Text>
+              ) : null}
+              <Text
+                style={{
+                  fontFamily: font,
+                  fontSize: 11,
+                  lineHeight: 1.6,
+                  color: gs.textColor,
+                  flex: 1,
+                }}
+              >
+                {item.text}
+              </Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+
     default: {
       // Exhaustiveness guard: a new BlockType must add a case above, or the build
       // fails here — so the PDF can never silently drop a block kind.

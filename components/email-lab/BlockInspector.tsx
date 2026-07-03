@@ -9,6 +9,7 @@ import type {
   EmailBlock,
   FooterProps,
   KnownPlatform,
+  ListItem,
   MultiColumnColumn,
   PaddingSize,
   SocialIconsProps,
@@ -27,6 +28,7 @@ const LABELS: Record<EmailBlock["type"], string> = {
   image: "Image",
   listing: "Listing",
   "multi-column": "Columns",
+  list: "List",
   "agent-card": "Agent Card",
   "agent-hero": "Agent Feature",
   "social-icons": "Social Icons",
@@ -326,6 +328,27 @@ export function BlockInspector({
             <MultiColumnEditor
               columns={(props.columns as MultiColumnColumn[]) ?? []}
               onChange={(c) => set("columns", c)}
+            />
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
+          </>
+        )}
+
+        {block.type === "list" && (
+          <>
+            <TextField
+              label="Title"
+              value={str("title")}
+              onChange={(v) => set("title", v)}
+              placeholder="Worth knowing"
+            />
+            <ListEditor
+              items={(props.items as ListItem[]) ?? []}
+              onChange={(items) => set("items", items)}
             />
             <BlockBaseControls
               paddingY={props.paddingY as PaddingSize | undefined}
@@ -822,6 +845,56 @@ function MultiColumnEditor({
           className="w-full rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50"
         >
           + Add column
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+// ── List editor ──────────────────────────────────────────────────────────────
+
+function ListEditor({ items, onChange }: { items: ListItem[]; onChange: (i: ListItem[]) => void }) {
+  const update = (i: number, key: keyof ListItem, v: string) =>
+    onChange(items.map((it, j) => (j === i ? { ...it, [key]: v } : it)));
+  return (
+    <div className="space-y-3">
+      {items.map((it, i) => (
+        <div key={i} className="space-y-1.5 rounded-md border border-gray-200 p-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-500">Item {i + 1}</span>
+            {items.length > 1 ? (
+              <button
+                type="button"
+                onClick={() => onChange(items.filter((_, j) => j !== i))}
+                className="text-xs text-red-400 hover:text-red-600"
+              >
+                Remove
+              </button>
+            ) : null}
+          </div>
+          <input
+            type="text"
+            className={inputCls}
+            value={it.lead ?? ""}
+            placeholder="Lead (e.g. JUL 12 ·)"
+            onChange={(e) => update(i, "lead", e.target.value)}
+          />
+          <input
+            type="text"
+            className={inputCls}
+            value={it.text}
+            placeholder="Row text"
+            onChange={(e) => update(i, "text", e.target.value)}
+          />
+        </div>
+      ))}
+      {items.length < 8 ? (
+        <button
+          type="button"
+          onClick={() => onChange([...items, { text: "" }])}
+          className="w-full rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50"
+        >
+          + Add item
         </button>
       ) : null}
     </div>

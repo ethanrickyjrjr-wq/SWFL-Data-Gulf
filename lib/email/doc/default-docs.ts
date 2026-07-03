@@ -64,6 +64,13 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
       { heading: "Column two", body: "A short description for the second column." },
     ],
   },
+  list: {
+    title: "Worth knowing",
+    items: [
+      { lead: "MON ·", text: "First item — a short line readers can scan." },
+      { lead: "TUE ·", text: "Second item — swap these for events, tips, or links." },
+    ],
+  },
   "agent-card": {
     name: "Your Name",
     title: "Realtor®",

@@ -103,6 +103,7 @@ const LABELS: Partial<Record<BlockType, string>> = {
   image: "Image",
   listing: "Listing card",
   "multi-column": "Columns",
+  list: "List",
   "agent-card": "Agent card",
   "agent-hero": "Agent banner",
   "social-icons": "Social icons",

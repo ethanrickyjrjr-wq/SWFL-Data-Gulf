@@ -62,6 +62,7 @@ export const DEFAULT_H: Record<BlockType, number> = {
   image: 8,
   listing: 9,
   "multi-column": 5,
+  list: 5,
   "agent-card": 6,
   "agent-hero": 8,
   "social-icons": 2,

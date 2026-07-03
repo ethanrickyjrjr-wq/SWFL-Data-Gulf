@@ -26,6 +26,7 @@ import type {
   HeroProps,
   ImageProps,
   ListingProps,
+  ListProps,
   MultiColumnProps,
   SignalProps,
   SocialIconsProps,
@@ -143,6 +144,18 @@ const MultiColumnPropsSchema = z.object({
   paddingY: paddingY(),
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<MultiColumnProps>;
+
+const ListItemSchema = z.object({
+  lead: z.string().max(24).optional(),
+  text: z.string().max(200),
+});
+
+const ListPropsSchema = z.object({
+  title: z.string().max(120).optional(),
+  items: z.array(ListItemSchema).min(1).max(8),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
+}) satisfies z.ZodType<ListProps>;
 
 const AgentCardPropsSchema = z.object({
   photoUrl: z.string().optional(),
@@ -267,6 +280,7 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("image"), props: ImagePropsSchema }),
     z.object({ id: idIn, type: z.literal("listing"), props: ListingPropsSchema }),
     z.object({ id: idIn, type: z.literal("multi-column"), props: MultiColumnPropsSchema }),
+    z.object({ id: idIn, type: z.literal("list"), props: ListPropsSchema }),
     z.object({ id: idIn, type: z.literal("agent-card"), props: AgentCardPropsSchema }),
     z.object({ id: idIn, type: z.literal("agent-hero"), props: AgentHeroPropsSchema }),
     z.object({ id: idIn, type: z.literal("social-icons"), props: SocialIconsPropsSchema }),

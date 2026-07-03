@@ -11,6 +11,7 @@ export const BLOCK_MENU: { type: BlockType; label: string; icon: string }[] = [
   { type: "image", label: "Image", icon: "▢" },
   { type: "listing", label: "Listing", icon: "⌂" },
   { type: "multi-column", label: "Columns", icon: "▥" },
+  { type: "list", label: "List", icon: "☰" },
   { type: "agent-card", label: "Agent Card", icon: "☻" },
   { type: "agent-hero", label: "Agent Feature", icon: "◧" },
   { type: "social-icons", label: "Social Icons", icon: "✦" },

@@ -19,6 +19,7 @@ export type BlockType =
   | "image"
   | "listing"
   | "multi-column"
+  | "list"
   | "agent-card"
   | "agent-hero"
   | "social-icons"
@@ -172,6 +173,21 @@ export interface MultiColumnProps extends BlockBase {
   columns: MultiColumnColumn[];
 }
 
+/** One row in a `list` block. `lead` is a short bold prefix (a date tag like
+ *  "JUL 12 ·", a rank, a category); `text` is the row's content. */
+export interface ListItem {
+  lead?: string;
+  text: string;
+}
+
+/** A titled row list — events, tips, links-as-text. Renders as email-safe table
+ *  rows (no <ul> bullets — spacing is uneven across clients). `items[]` is a
+ *  structural exception (ordered by array position, like `stats`). */
+export interface ListProps extends BlockBase {
+  title?: string;
+  items: ListItem[]; // 1–8 rows
+}
+
 export interface AgentCardProps {
   photoUrl?: string;
   name?: string;
@@ -255,6 +271,7 @@ export interface BlockPropsMap {
   image: ImageProps;
   listing: ListingProps;
   "multi-column": MultiColumnProps;
+  list: ListProps;
   "agent-card": AgentCardProps;
   "agent-hero": AgentHeroProps;
   "social-icons": SocialIconsProps;

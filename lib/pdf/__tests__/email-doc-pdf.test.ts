@@ -59,6 +59,17 @@ const FULL_DOC: EmailDoc = {
     { id: "b5", type: "text", props: { body: "Line one.\nLine two.", align: "left" } },
     { id: "b6", type: "image", props: { caption: "Subject property" } }, // no url → placeholder branch
     {
+      id: "b13",
+      type: "list",
+      props: {
+        title: "This month",
+        items: [
+          { lead: "JUL 12 ·", text: "Farmers market returns to the Cape" },
+          { text: "New flood-zone maps take effect" },
+        ],
+      },
+    },
+    {
       id: "b7",
       type: "agent-card",
       props: {

@@ -88,6 +88,19 @@ const fullDoc: EmailDoc = {
       },
     },
     {
+      id: "block_list0001",
+      type: "list",
+      props: {
+        title: "Upcoming events",
+        items: [
+          { lead: "JUL 12 ·", text: "Farmers market returns to the Cape" },
+          { text: "New flood-zone maps take effect" },
+        ],
+        paddingY: "sm",
+        sectionBg: "#fff",
+      },
+    },
+    {
       id: "block_aaaa7777",
       type: "agent-card",
       props: {
