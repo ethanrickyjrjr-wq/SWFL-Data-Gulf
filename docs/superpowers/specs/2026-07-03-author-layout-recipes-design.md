@@ -62,6 +62,12 @@ Layout rules the recipes encode, each with its source (homepage cited per proven
   "Photo by X on Pexels"); Pexels license explicitly allows newsletter use. Unsplash forbids
   compiling its images into an in-product collection — not used. (pexels.com, unsplash.com)
 - **Honest miss**: Nielsen Norman newsletter eyetracking findings are paywalled — not cited.
+- **CAN-SPAM, per Shopify's FTC-sourced guide** (shopify.com, fetched 07/02/2026): the real
+  requirement list is FOUR, not our stored three — accurate headers, honest subject, easy
+  opt-out, AND a valid physical postal address (business address, PO box, or mailbox service)
+  in every commercial email. Also: opt-outs honored within 10 business days, one click, no
+  login/fee/explanation demanded; and liability cannot be outsourced — senders stay liable for
+  their email vendor, which is US, so the auto-footer doing this right is a product feature.
 
 ## What we're building
 
@@ -138,6 +144,16 @@ any change to stats' 3-cell cap.
 Two new editorial SEED_DOCS ("editorial-letter", "magazine-issue") carrying editorial global
 style (PLAYFAIR_SERIF display, airy padding, restrained palette). Structure comes from recipes;
 style comes from seeds/brand — separation keeps brand canonical (applyBrand still runs last).
+
+### 5. CAN-SPAM notes for this build (no new gate — C2)
+
+- The footer's `address` field is the postal-address requirement's home. Populate it from the
+  brand profile; the lab shows a non-blocking nudge when a user's footer address is empty.
+  Recipes never suggest removing the footer (it is structural — assembly re-adds it anyway).
+- The editorial-letter recipe is text-only BY DESIGN but stays a commercial email: the footer
+  with unsubscribe + postal address always renders. The recipe prose says so.
+- No change to unsubscribe mechanics — the existing flow already matches the one-click,
+  no-login standard.
 
 ## What does NOT change
 
