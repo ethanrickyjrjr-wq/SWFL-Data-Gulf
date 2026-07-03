@@ -107,8 +107,18 @@ existing block-type pattern exactly:
 Two blocks share the same `y` band to sit side by side (the existing `compile-grid.ts` row-
 grouping mechanism, already used elsewhere — no compiler changes needed):
 
-- `image` block (the ZIP-shape PNG, `/api/zip-shape/[zip]`, already fixed to transparent/flat this
-  session) at `{x:0, y:0, w:4, h:4}`.
+- `image` block (the ZIP-shape PNG) at `{x:0, y:0, w:4, h:4}`. Fixed this session: the PNG is
+  transparent/flat (no card, no stroke), and the route's fill is now a caller-supplied `?fill=`
+  param instead of a hardcoded color (commit `ab40c4f7`). `zip-seed.ts` computes the URL's `fill`
+  with the *same* `computeZipGradient(aal, FLOOD_GRADIENT.low, .high, .c0, .c1, .c2)` call
+  (`lib/map/zip-color.ts`) the zip-report page and the homepage map both use, keyed off the same
+  flood AAL value — so a ZIP's shape is the identical color in the email, the webpage, and the
+  homepage map (operator 07/03: "the zip color stays the same color as clicked when on
+  homepage"). This means `zip-seed.ts` needs the ZIP's flood AAL, which isn't in its current
+  `loadMarketFigures`/`loadLifecycleDigest` pair — add the same flood-by-zip lookup
+  `app/r/zip-report/[zip]/page.tsx` already does (env-swfl `flood_by_zip`) as a third parallel
+  load. No AAL held for this ZIP → omit `?fill=` entirely → the route's own neutral fallback
+  (`#2a3942`, matches the map's no-data color) renders, never a fabricated gradient point.
 - A new small identity text region (ZIP code + place name — reuses the existing `hero` block,
   narrowed) at `{x:4, y:0, w:8, h:4}`.
 - `metric-card` blocks, two per row, `{w:6}` each, `y` incrementing per row — top 6 ranked signals
@@ -169,6 +179,8 @@ the doc in the Email Lab (existing AI-patch path, unchanged).
   (mirrors the webpage's own `shapeFound` guard) instead of shipping a broken-image icon.
 - Fewer than 6 covered signals → fewer metric-card rows (2-up grid just runs short; no placeholder
   cards, no invented rank).
+- No flood AAL held for this ZIP → `?fill=` omitted from the shape image URL → the route's own
+  neutral fallback color renders (never a fabricated gradient point for a value we don't have).
 
 ### 6. Testing
 
@@ -182,7 +194,12 @@ the doc in the Email Lab (existing AI-patch path, unchanged).
   `compileGrid` without throwing, and `isGridDoc()` returns true.
 - `zip-seed.test.ts`: seeded doc for a known ZIP includes a shape image block (when the shape is
   found), an identity block, up to 6 metric-card blocks matching `rankSignals` output order, and
-  no `DEFAULT_GLOBAL_STYLE` navy/teal literal in the resulting `globalStyle`.
+  no `DEFAULT_GLOBAL_STYLE` navy/teal literal in the resulting `globalStyle`. Also: the shape
+  image URL's `?fill=` matches `computeZipGradient` for a ZIP with held flood AAL, and omits
+  `?fill=` entirely for a ZIP with none.
+- `route.test.ts` (new, for `/api/zip-shape/[zip]` — it has none today): a valid `?fill=` renders
+  that color; an invalid/malicious `?fill=` (e.g. `<script>`, `url(...)`) falls back to the
+  neutral default rather than reaching the SVG string.
 
 ## Non-goals
 
