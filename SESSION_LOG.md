@@ -1,3 +1,22 @@
+## 2026-07-02 (main) — `report-bridge-seo` (commercial-spine Lane C) SPECCED
+
+Brainstormed per RULE 3.5, scoped to `app/r/zip-report/[zip]/*` only, no new vendor surface (RULE
+0.5 probe instead of RULE 0.4 crawl — everything reuses an existing internal mechanism). Design:
+(1) build-bridge CTA reuses the already-built `OpenProjectCta`/`planOpenProject` claim bridge
+(currently `app/welcome/_components/`, already seeded `template:"email", scopeKind:"zip"` —
+promoting it to a shared component since it gets a second route consumer); (2) `generateMetadata`
+(missing today) — title/description/canonical per ZIP from the existing `resolveZip` authority,
+minimal fallback (never a fabricated place) when out of scope; JSON-LD explicitly scoped OUT (the
+brief asks for metadata/titles, not structured data — that's a separate cross-`/r/*` design pass);
+(3) nearest-ZIP-by-distance internal links — new `lib/geo/nearest-zips.ts` off the existing
+`SWFL_ZIP_CENTROIDS` + promoting the currently-private `haversineMi` (`zip-resolver.mts`) to
+exported; cross-county allowed (small counties would get sparse same-county sets), no invented
+county-rollup link (no such route exists); (4) ZIP-aware relabel of the existing `DigestSubscribe`
+card via a new `presetZip` prop (D3 label "Subscribe to {zip}'s weekly read"), no new consent UI —
+existing footer disclosure already satisfies D3's CAN-SPAM-basics bar. Spec:
+`docs/superpowers/specs/2026-07-02-report-bridge-seo-design.md`; check
+`report_bridge_seo_live_verify` OPEN. Next: operator spec review → writing-plans → implementation.
+
 ## 2026-07-02 (main) — `sold-price-pending-backfill` BUILT: display split + leftover-budget price backfill (Approach B approved + containment)
 
 Operator approved Approach B with the 07/02 investigation folded in. Reconciliation findings first
