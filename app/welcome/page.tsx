@@ -6,7 +6,7 @@ import { ARRIVAL_PROMPT_MAX } from "@/lib/prospects/build-arrival-url";
 import { safeLogoUrl } from "@/lib/welcome/logo-allowlist";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 import WelcomeChat from "./WelcomeChat";
-import { OpenProjectCta } from "./_components/OpenProjectCta";
+import { OpenProjectCta } from "@/components/prospect/OpenProjectCta";
 
 export const metadata: Metadata = {
   title: "Welcome — SWFL Data Gulf",
