@@ -1,4 +1,22 @@
 ## 2026-07-03 (main) — Pexels picker live-debug: failure lanes now log a warn
+## 2026-07-03 (main) — Lane E conversion-furniture BUILT (5 commits, plan + spec executed)
+
+Operator green-lit the 07/03 spec ("PLAN AND BUILD"). Plan
+docs/superpowers/plans/2026-07-03-conversion-furniture.md written from live probes, then
+executed inline. Shipped: (1) lib/email/typo-suggest.ts pure Mailcheck-style helper (Damerau-
+Levenshtein, whole-domain + SLD/TLD passes, mail.com false-positive guarded; 10 bun tests
+green) wired into app/login/login-form.tsx — suggest-don't-block "Did you mean", covers /login
+AND LoginModal (same form); (2) GET /api/email/usage (checkUsageLimit verbatim, 401 unauth) +
+components/email/SendCeilingMeter.tsx fail-quiet rail/panel meter, mounted: ProjectsRail bottom
++ ScheduleSendModal + ContactPickerModal (those two modals ARE every send moment — ThisWeek and
+/p/[id] route through them); (3) first-run TemplateGallery (26 live scaled BlockRenderer
+previews, IntersectionObserver-lazy, featured 8 + all, Start blank) shown by
+ProjectEmailLabClient when no doc AND no block-canvas deliverable (head:true count in page.tsx).
+KEY probe find beyond spec: grid shell's autoGenerate author-build REPLACES the doc — gallery
+picks set galleryPicked to suppress it or the chosen template gets clobbered. bunx next build
+green. Next: operator live-verify (meter matches /billing, fresh-project gallery, gmail.cm
+suggestion) closes conversion_furniture_live_verify. NOT pushed — awaiting operator.
+
 ## 2026-07-03 (main) — Pexels picker live-debug: failure lanes now log a warn (23dcd3e8)
 
 Operator's live pass: Pexels tab → "FORT MYERS" → "No results". Route logs show 200, so the
