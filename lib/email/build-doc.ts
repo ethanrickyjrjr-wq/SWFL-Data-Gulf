@@ -18,6 +18,7 @@ import {
 } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { DEFAULT_BLOCK_PROPS } from "@/lib/email/doc/default-docs";
+import { detectRecipe, recipeSection } from "@/lib/email/author-recipes";
 import {
   loadMarketFigures,
   loadLifecycleDigest,
@@ -626,6 +627,9 @@ export async function authorDoc({
     ? { url: photoRes.image, alt: photoRes.title ?? "Featured property", linkUrl: photoRes.source }
     : null;
 
+  // Deliverable-type recipe: deterministic keyword routing; no match leaves the
+  // generic prompt byte-identical (advisory only — RULE C2, no new gate).
+  const recipeId = detectRecipe(prompt);
   const system = authorSystem({
     menu,
     dossier: lakeParts.dossier,
@@ -633,6 +637,7 @@ export async function authorDoc({
     hasChart: !!chartRes,
     chartGrounding: chartRes?.groundingNote,
     hasPhoto: !!photoRes,
+    recipe: recipeId ? recipeSection(recipeId) : undefined,
   });
   const baseUser = scope?.value
     ? `User request: ${prompt}\nScope: ${scope.kind ?? "area"} ${scope.value}`

@@ -251,6 +251,9 @@ export function authorSystem(opts: {
   hasChart: boolean;
   chartGrounding?: string;
   hasPhoto: boolean;
+  /** Advisory deliverable-type recipe (author-recipes.ts) — appended verbatim.
+   *  Absent → the generic prompt, byte-identical to before recipes existed. */
+  recipe?: string;
 }): string {
   const parts: string[] = [
     "You are the design+copy author for SWFL Data Gulf, a Southwest Florida real " +
@@ -277,6 +280,7 @@ export function authorSystem(opts: {
       `A property/agent PHOTO is available — place ONE image block with\nimage_role:"photo" as the lead visual and write its alt text.`,
     );
   }
+  if (opts.recipe) parts.push(opts.recipe);
   return parts.join("\n\n");
 }
 
