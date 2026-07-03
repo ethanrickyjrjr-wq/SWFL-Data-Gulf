@@ -1,4 +1,5 @@
 ## 2026-07-03 (main) — Pexels picker live-debug: failure lanes now log a warn
+## 2026-07-03 (main) — Pexels picker live-debug: failure lanes now log a warn (23dcd3e8)
 
 Operator's live pass: Pexels tab → "FORT MYERS" → "No results". Route logs show 200, so the
 empty came from inside searchPexels — which swallowed keyless/upstream-status/zero-hits
@@ -7,6 +8,9 @@ Prime suspect: the running deploy (05:37 UTC today) may predate the PEXELS_API_K
 env vars only land on the NEXT deploy; this push's deploy resolves that too. Verify after
 deploy: re-search, then read runtime logs for `[pexels]` if still empty. (Pushed via detached
 worktree to avoid bundling another session's unpushed display-fix commit.)
+env vars only land on the NEXT deploy; this fix's deploy resolves that too. Verify after
+deploy: re-search, then read runtime logs for `[pexels]` if still empty.
+
 ## 2026-07-03 (main) — Answer-text number formatting consistency + teal number highlighting
 
 Operator escalation (verbatim frustration): narrative numbers render inconsistently across
