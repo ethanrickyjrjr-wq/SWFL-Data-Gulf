@@ -20,6 +20,32 @@ ceilings found by code probe: overlays unreachable, sectionBg stripped, multi-co
 bug, no list shape. Pushed from a detached worktree off origin/main to avoid carrying the
 parallel session's 14 unpushed stripe-billing commits (held for operator review). Next:
 operator spec review -> writing-plans -> implement (recipes -> layout -> media -> seeds).
+## 2026-07-03 (main) — `stripe-billing` BUILT (Lane A of commercial spine): checkout + webhook + portal + live /billing
+
+Commercial spine specced+approved first (`docs/superpowers/specs/2026-07-02-commercial-spine-design.md`):
+pricing $29/$79/$149 (+annual 2-months-free $290/$790/$1,490) DERIVED cost-first — measured
+api_usage_log unit costs (deliverable build avg $0.0213/call Sonnet, assistant $0.0144 Haiku, live
+query 07/02, 10-call samples) + crawled vendor prices (Resend Free 3k/mo 100/day · Pro $20/50k ·
+overage $0.90/1k; Vercel Hobby/Pro; Supabase Free/Pro — all crawled 07/02) + comps as ceiling only
+(Altos $29/79/149, KCM $59.95–99.95, Reventure $39, beehiiv free-forever). Operator: first-tier
+plans everywhere, Resend Free until launch (Pro upgrade = go-live gate — Free's 100/day can't
+serve a Starter). Checks OPEN: `commercial_spine_live_verify`, `stripe_billing_live_verify`.
+
+Lane A executed inline TDD per `docs/superpowers/plans/2026-07-03-stripe-billing.md` (spec
+`2026-07-03-stripe-billing-design.md`): migration `billing_subscriptions` applied+verified (tier
+source of truth; RLS on, service-role only) · `lib/billing/tiers.ts` ONE price root (mirror-tested
+vs TIER_LIMITS; homepage lane imports the SAME file) · pure cores `stripe-sync` (event→mutation,
+keep-through-dunning: past_due keeps tier, only subscription.deleted reverts free; unknown lookup
+key → null never guess) + `normalize-event` (per-event field extraction, injected fetch, 18 billing
+tests green) · routes: webhook (sig-verified, idempotent, always-200 on handled), checkout (hosted
+session by lookup_key, customer created once + row seeded), portal · `checkUsageLimit` now reads
+tier from billing_subscriptions (fail-open kept; email_usage.tier = KNOWN-DEBT, unread) · /billing
+live: usage meter + tier cards (annual default, "2 months free") + portal button · idempotent
+`scripts/stripe/setup-products.mts --dry-run` verified. Gates: 838 tests green (lib/billing +
+lib/email), `bunx next build` green. ⚠ `.env.local` STRIPE_SECRET_KEY is a LIVE key — dry-run only
+was executed; setup-products/e2e need a TEST key first (operator runbook in plan Task 11). NOT
+pushed — operator to review + approve push. Next: STRIPE_WEBHOOK_SECRET, test-mode e2e, lanes B–E.
+
 ## 2026-07-02 (main) — `funnel-demo-email` BUILT: two-track prospect sequence + cadence engine (13 plan tasks, 13 commits)
 
 Executed `docs/superpowers/plans/2026-07-02-funnel-demo-email.md` inline, TDD per task (spec
