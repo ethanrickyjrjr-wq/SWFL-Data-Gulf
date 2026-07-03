@@ -22,12 +22,17 @@ export const runtime = "nodejs";
 const W = 800;
 const H = 520;
 
-/** Transparent canvas, teal shape centered via nested-svg fit — no background rect. */
+/** Transparent canvas, flat teal shape centered via nested-svg fit — no
+ *  background rect, no stroke. The webpage's stroke is a real CSS 0.6px that
+ *  nearly disappears against its own dark background; the same stroke-width
+ *  in this SVG's raw (unscaled) geometry coordinates rendered as a thick,
+ *  visible dark border once rasterized — operator flagged it 07/03/2026 as
+ *  not matching the site. Flat fill, no stroke, avoids the mismatch entirely. */
 function cardSvg(inner: string, viewBox: string): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
     `<svg x="40" y="30" width="${W - 80}" height="${H - 60}" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet">` +
-    `<g fill="#3DC9C0" fill-opacity="0.92" stroke="#0f1d24" stroke-width="1">${inner}</g>` +
+    `<g fill="#3DC9C0">${inner}</g>` +
     `</svg>` +
     `</svg>`
   );
