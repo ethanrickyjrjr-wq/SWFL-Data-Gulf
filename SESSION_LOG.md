@@ -1,3 +1,14 @@
+## 2026-07-03 (main) — Report-page AI dock now shows the showcase funnel to logged-out visitors
+
+Operator escalation (screenshot, /r/* page, logged out): the "AI + Briefcase" pill opens the
+report AskAiDock, which never got the showcase example cards — 5c9bb577 wired "See it built —
+real campaigns, real data" into the standalone BriefcasePanel ONLY, so the bridged /r/* mode
+(the main public/SEO entry for prospects) showed zero examples of what the product builds.
+Fix: AskAiDock compose stage renders the same 3 SHOWCASES cards + ShowcaseOverlay (portals to
+body z-[90] > dock z-[58]), gated to resolved-anon (`useSession` non-null && !authed) — no
+flash for logged-in loads, and converted users keep fixture-free surfaces per the 07/03
+project-mode ruling. bunx next build green. Next: consider ?showcase= deep-link parity on /r/*.
+
 ## 2026-07-03 (main) — PROD FIX: sharp module load killed This Week + lab AI (libvips .so untraced)
 
 Operator hit "Some of this week didn't generate — retry" (Bonita Springs 34135 project). Vercel
