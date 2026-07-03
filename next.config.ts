@@ -59,6 +59,9 @@ const nextConfig: NextConfig = {
       "./node_modules/@img/sharp-linux-x64/**",
       "./node_modules/@img/sharp-libvips-linux-x64/**",
     ],
+    // ZIP cutout PNG (seeded ZIP email's image block): reads the contractor SVG
+    // from disk at runtime — belt-and-braces trace so the file always ships.
+    "/api/zip-shape/[zip]": ["./public/map/lee-collier.svg"],
   },
   async redirects() {
     return [
