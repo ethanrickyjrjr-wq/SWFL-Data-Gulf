@@ -8,7 +8,11 @@
 //
 // SERVER-ONLY (sharp is a native dep): never import from client components —
 // the lab panel consumes the route's JSON, not this module.
-import sharp from "sharp";
+//
+// sharp is loaded LAZILY inside deriveMediaUpload, never at module top level:
+// routes importing only the pure helpers here (/api/email-lab/ai reads
+// toPanelItem) must not die at module load if the native binding is missing
+// (07/03/2026 prod outage — libvips .so absent from the traced bundle).
 
 /** 2x retina for the 600px canvas. */
 export const MEDIA_MAX_WIDTH = 1200;
@@ -29,6 +33,7 @@ export interface MediaDerivative {
 /** Resize to ≤MEDIA_MAX_WIDTH (EXIF-honoring), JPEG-compress. Throws on
  *  unreadable input — the route answers 400, never stores junk. */
 export async function deriveMediaUpload(input: Buffer): Promise<MediaDerivative> {
+  const { default: sharp } = await import("sharp");
   const img = sharp(input).rotate();
   const meta = await img.metadata();
   if (!meta.width || !meta.height) throw new Error("unreadable image");

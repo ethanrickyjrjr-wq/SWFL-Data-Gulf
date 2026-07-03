@@ -1,3 +1,20 @@
+## 2026-07-03 (main) — PROD FIX: sharp module load killed This Week + lab AI (libvips .so untraced)
+
+Operator hit "Some of this week didn't generate — retry" (Bonita Springs 34135 project). Vercel
+runtime errors (first 04:05Z, dpl_4DHkThHjAC3tbfzphcQhyEeYt8ay): ERR_DLOPEN_FAILED
+libvips-cpp.so.8.18.3 missing → sharp (added 0e538db3, 07/02) failed to load on linux-x64,
+500ing /api/projects/[id]/week + /api/email-lab/ai AT MODULE LOAD via top-level `import sharp`
+in lib/media/listing-photo.ts + lib/email/media-assets.ts (build-doc/build-week import chains).
+Crawl-verified (sharp.pixelplumbing.com/install + nextjs.org serverExternalPackages docs,
+07/03/2026): sharp IS Next's default external; the miss is the file tracer — libvips is an RPATH
+dlopen, not a require, so @img/sharp-libvips-linux-x64 never got traced. Fix (2 layers): (1) lazy
+`await import("sharp")` inside cropWatermarkBand + deriveMediaUpload — a sharp failure now
+degrades to no-photo/400, never a dead route; (2) next.config.ts outputFileTracingIncludes ships
+@img/sharp-linux-x64 + @img/sharp-libvips-linux-x64 on all 5 sharp-capable routes (ai, media,
+social-calendar, social/generate, projects/[id]/week); duplicate /api/email-lab/ai key merged
+(fonts + sharp). 16/16 bun tests, bunx next build green. Pushed ALONE via detached worktree off
+origin/main — 4 unpushed Lane D commits (bfa27d3f..7a624fae) stay local to their session.
+
 ## 2026-07-03 (main) — Chat auto-chart spam fix + follow-up chips (Briefcase AI panel)
 
 Operator escalation: "why does a chart pop up every time I ask a question" + "no follow-up

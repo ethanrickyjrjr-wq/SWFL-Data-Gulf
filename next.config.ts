@@ -26,12 +26,39 @@ const nextConfig: NextConfig = {
     // svgToPng (lib/charts/chart-fonts) loads a bundled Liberation TTF by path at
     // runtime — Vercel's Linux runtime has no system Arial, so without these the
     // chart route renders blank-text PNGs (silently). The Email Lab AI build is the
-    // ONLY route that rasterizes a chart; any NEW svgToPng caller-route must add this.
-    "/api/email-lab/ai": ["./assets/fonts/*.ttf"],
+    // ONLY route that rasterizes a chart; any NEW svgToPng caller-route must add
+    // this. (The /api/email-lab/ai entry lives below, merged with its sharp files.)
     // The social rasterizer now loads the same bundled Liberation TTFs by path at
     // runtime (lib/brand/fonts CANVAS_FONT_FILES) — same blank-text landmine as
     // the chart route above.
     "/api/social/render/[format]": ["./assets/fonts/*.ttf"],
+    // sharp (Next's default external) dlopens libvips-cpp.so from
+    // @img/sharp-libvips-linux-x64 — an RPATH link, invisible to the file
+    // tracer, so prod threw ERR_DLOPEN_FAILED (07/03/2026: killed This Week +
+    // lab AI). Force both linux-x64 packages into every route that can run a
+    // sharp derivative (listing-photo crop / media upload). Any NEW sharp
+    // caller-route must add itself here.
+    "/api/email-lab/ai": [
+      "./assets/fonts/*.ttf",
+      "./node_modules/@img/sharp-linux-x64/**",
+      "./node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/email-lab/media": [
+      "./node_modules/@img/sharp-linux-x64/**",
+      "./node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/email-lab/social-calendar": [
+      "./node_modules/@img/sharp-linux-x64/**",
+      "./node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/email-lab/social/generate": [
+      "./node_modules/@img/sharp-linux-x64/**",
+      "./node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/projects/[id]/week": [
+      "./node_modules/@img/sharp-linux-x64/**",
+      "./node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
   },
   async redirects() {
     return [

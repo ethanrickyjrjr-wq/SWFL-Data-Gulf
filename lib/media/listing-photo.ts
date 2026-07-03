@@ -9,7 +9,12 @@
 // SERVER-ONLY (sharp is a native dep): never import this from client-reachable
 // code. lib/listings/select.ts takes deriveListingPhoto via a param and imports
 // only the type.
-import sharp from "sharp";
+//
+// sharp is loaded LAZILY inside cropWatermarkBand, never at module top level: a
+// top-level import means a native-binding load failure (07/03/2026 prod outage —
+// libvips .so missing from the traced bundle) 500s EVERY route that transitively
+// imports this module, including ones that never touch a photo. Lazy keeps the
+// designed degradation: photo derivation fails → null → original photo kept.
 import { hostEmailMedia } from "@/lib/email/chart-image";
 
 /** Crop tuning. bottomFraction was tuned against the Latitude 26 fixture photos
@@ -28,6 +33,7 @@ export function listingPhotoKey(
 
 /** Pure transform: bytes in → cropped JPEG bytes out. Throws on unreadable input. */
 export async function cropWatermarkBand(input: Buffer): Promise<Buffer> {
+  const { default: sharp } = await import("sharp");
   const img = sharp(input);
   const meta = await img.metadata();
   if (!meta.width || !meta.height) throw new Error("unreadable image");
