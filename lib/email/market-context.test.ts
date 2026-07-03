@@ -50,3 +50,52 @@ describe("singleSourcePerMetric", () => {
     ]);
   });
 });
+
+import { mergeSourcedFigures } from "./market-context";
+import type { SourcedFigure } from "@/lib/figures/sourced";
+
+describe("mergeSourcedFigures", () => {
+  const held: MarketFigure[] = [
+    {
+      key: "home_value",
+      label: "Median home value",
+      value: "$485,000",
+      source: "Zillow ZHVI",
+      as_of: "06/30/2026",
+    },
+  ];
+  const sourced: SourcedFigure[] = [
+    {
+      key: "permits_90d",
+      label: "New building permits issued in ZIP 33914 (Cape Coral), last 90 days",
+      value: "412",
+      source: "capecoral.gov",
+      source_url: "https://www.capecoral.gov/x",
+      as_of: "06/30/2026",
+    },
+    {
+      key: "home_value",
+      label: "dupe",
+      value: "$999",
+      source: "elsewhere",
+      source_url: "https://x",
+      as_of: undefined,
+    },
+  ];
+
+  test("a stored figure appears in builder context with citation + as-of", () => {
+    const merged = mergeSourcedFigures(held, sourced);
+    const found = merged.find((f) => f.key === "permits_90d");
+    expect(found).toBeDefined();
+    expect(found!.value).toBe("412");
+    expect(found!.source).toBe("capecoral.gov");
+    expect(found!.as_of).toBe("06/30/2026");
+  });
+
+  test("held lake figures win on key collision — sourced never overrides", () => {
+    const merged = mergeSourcedFigures(held, sourced);
+    const hv = merged.filter((f) => f.key === "home_value");
+    expect(hv.length).toBe(1);
+    expect(hv[0].value).toBe("$485,000");
+  });
+});

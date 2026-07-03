@@ -13,6 +13,7 @@
 
 // KNOWN-DEBT(data_lake: market views (zhvi/zori/active listings/acs/redfin) live in the data_lake schema)
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { getSourcedFigures, type SourcedFigure } from "@/lib/figures/sourced";
 
 export interface MarketFigure {
   key: string;
@@ -296,6 +297,20 @@ export function singleSourcePerMetric(figs: MarketFigure[]): {
   };
 }
 
+/** Fold cached lane-3 figures (sourced_figures) into the builder feed. Held lake
+ *  figures win on key collision — a found figure only fills a key the lake doesn't
+ *  cover. Pure; exported for tests. */
+export function mergeSourcedFigures(
+  held: MarketFigure[],
+  sourced: SourcedFigure[],
+): MarketFigure[] {
+  const heldKeys = new Set(held.map((f) => f.key));
+  const extra = sourced
+    .filter((s) => !heldKeys.has(s.key))
+    .map((s) => ({ key: s.key, label: s.label, value: s.value, source: s.source, as_of: s.as_of }));
+  return [...held, ...extra];
+}
+
 /**
  * Pull cited market figures for a scope. zip scope → per-ZIP value/rent/listings/
  * demographics + that ZIP's county sale figures; county scope → county sale figures.
@@ -323,7 +338,18 @@ export async function loadMarketFigures(scope?: {
   } catch {
     /* degrade — return whatever we gathered */
   }
-  const { figures, discrepancies } = singleSourcePerMetric(figs);
+  // Shared lane-3 cache: figures found via the Find-it button ride into every
+  // builder (email lab + social) — found numbers are platform-wide, never page-local.
+  let merged = figs;
+  if (scope.kind === "zip" || scope.kind === "county") {
+    try {
+      const sourced = await getSourcedFigures({ kind: scope.kind, key: scope.value });
+      merged = mergeSourcedFigures(figs, sourced);
+    } catch {
+      /* degrade — held figures only */
+    }
+  }
+  const { figures, discrepancies } = singleSourcePerMetric(merged);
   if (discrepancies.length > 0) {
     // Operator-facing record; never reaches the customer artifact.
     console.warn("[market-context] one-source-per-metric tripwire:", JSON.stringify(discrepancies));
