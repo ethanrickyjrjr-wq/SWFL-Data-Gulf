@@ -288,11 +288,13 @@ export async function loadCensusSignals(zip: string): Promise<{
     const { data, error } = await db
       .schema("data_lake")
       .from("census_acs_zcta")
-      .select(`geo_id, ${Object.keys(CENSUS_KEY_BY_COLUMN).join(", ")}`);
+      .select(
+        "geo_id, total_population, median_household_income, median_age, owner_occupied_pct, avg_household_size, poverty_rate, employment_rate, moved_in_past_year_pct",
+      );
     if (error || !data) return empty;
     const numericByKey = new Map<string, number>();
     const distribution = new Map<string, number[]>();
-    for (const raw of data as Record<string, unknown>[]) {
+    for (const raw of data as unknown as Record<string, unknown>[]) {
       const geoId = typeof raw.geo_id === "string" ? raw.geo_id : "";
       if (!/^\d{5}$/.test(geoId) || !resolveZip(geoId).in_scope) continue;
       for (const [col, key] of Object.entries(CENSUS_KEY_BY_COLUMN)) {

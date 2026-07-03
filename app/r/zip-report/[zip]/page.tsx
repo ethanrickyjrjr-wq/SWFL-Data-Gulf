@@ -4,8 +4,16 @@ import { notFound } from "next/navigation";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
 import type { LocationInput } from "../../../../refinery/lib/location-resolver.mts";
 import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
-import { resolveGradeConfig, type DirectionPolarity } from "../../../../refinery/vocab/loader.mts";
 import { loadParsedBrain } from "../../../../lib/fetch-brain";
+import { rankSignals, type RankedSignal } from "../../../../lib/zip-report/signal-rank";
+import {
+  buildZipCandidates,
+  loadCensusSignals,
+  type CensusValue,
+  type FloodZipRow,
+} from "../../../../lib/zip-report/candidates";
+import { getSourcedFigures } from "../../../../lib/figures/sourced";
+import { FindItButton, type FoundFigure } from "../_components/find-it-button";
 import { assembleLocationDossier, selectDossierLines } from "../../../../lib/zip-dossier";
 import type { LocationDossierLine } from "../../../../lib/zip-dossier";
 import { didYouMeanBanner } from "../../../../lib/location-surface";
@@ -48,7 +56,6 @@ export async function generateMetadata({
 }
 
 const VALID_ZIP = /^\d{5}$/;
-const TOTAL_SWFL_ZIPS = 57;
 
 interface PageProps {
   params: Promise<{ zip: string }>;
@@ -61,26 +68,6 @@ function grainBucket(grain: Grain): SectionBucket {
   if (grain === "city" || grain === "corridor") return "city";
   if (grain === "county") return "county";
   return "swfl";
-}
-
-function fmtCurrency(val: number): string {
-  if (val >= 1_000_000) return "$" + (val / 1_000_000).toFixed(1) + "M";
-  if (val >= 1_000) return "$" + Math.round(val / 1_000) + "K";
-  return "$" + val.toLocaleString();
-}
-
-function deltaForSlug(
-  deltaSlug: string,
-  delta: number | null | undefined,
-  unitLabel: string,
-): { text: string; polarity: DirectionPolarity; isUp: boolean } | null {
-  if (delta == null || delta === 0) return null;
-  const { direction_polarity } = resolveGradeConfig(deltaSlug);
-  return {
-    text: `${delta > 0 ? "↑" : "↓"} ${Math.abs(delta)}${unitLabel}`,
-    polarity: direction_polarity,
-    isUp: delta > 0,
-  };
 }
 
 export default async function ZipReportPage({ params, searchParams }: PageProps) {
@@ -101,67 +88,66 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const loc: LocationInput = { kind: "zip", resolution: res };
 
-  const [housing, env, permits, dossier, summary, metroTrend] = await Promise.all([
-    loadParsedBrain("housing-swfl"),
-    loadParsedBrain("env-swfl"),
-    loadParsedBrain("permits-swfl"),
-    assembleLocationDossier(loc),
-    loadZipQuickSummary(zip),
-    loadMetroTrend("zhvi_pivoted"),
-  ]);
+  const [housing, env, permits, dossier, summary, metroTrend, censusSignals, sourcedFigures] =
+    await Promise.all([
+      loadParsedBrain("housing-swfl"),
+      loadParsedBrain("env-swfl"),
+      loadParsedBrain("permits-swfl"),
+      assembleLocationDossier(loc),
+      loadZipQuickSummary(zip),
+      loadMetroTrend("zhvi_pivoted"),
+      loadCensusSignals(zip),
+      getSourcedFigures({ kind: "zip", key: zip }),
+    ]);
 
   // ── ZIP shape ─────────────────────────────────────────────────────────────
   const { svgMarkup, found: shapeFound } = extractZipShape(zip);
 
-  // ── Housing ───────────────────────────────────────────────────────────────
+  // ── Housing (all-ZIP detail table — the candidate builder ranks from it) ──
   const housingTable = housing?.output.detail_tables?.find((t) => t.id === "housing_by_zip");
-  const housingRow = housingTable?.rows.find((r) => r.key === zip);
+  const housingRows = housingTable?.rows ?? [];
+  const housingRow = housingRows.find((r) => r.key === zip);
 
   const price = housingRow?.cells["median_sale_price"] as number | undefined;
-  const priceYoy = housingRow?.cells["median_sale_price_yoy_pct"] as number | null | undefined;
   const dom = housingRow?.cells["median_dom"] as number | undefined;
-  const domYoy = housingRow?.cells["median_dom_yoy_days"] as number | null | undefined;
   const saleToList = housingRow?.cells["avg_sale_to_list_pct"] as number | null | undefined;
   const mos = housingRow?.cells["months_of_supply"] as number | null | undefined;
   const homesSold = housingRow?.cells["homes_sold"] as number | null | undefined;
   const inventory = housingRow?.cells["inventory"] as number | null | undefined;
 
   const hasHousing = housingRow !== undefined && price !== undefined && dom !== undefined;
+  const housingSource = housingTable
+    ? { label: housingTable.source.citation || "SWFL Data Gulf", url: housingTable.source.url }
+    : undefined;
 
-  // ── Flood ──────────────────────────────────────────────────────────────────
+  // ── Flood — flood_by_zip detail table first (all 57 ZIPs), key_metrics fallback ──
+  const floodTable = env?.output.detail_tables?.find((t) => t.id === "flood_by_zip");
+  const floodRows: FloodZipRow[] = (floodTable?.rows ?? [])
+    .map((r) => ({
+      zip: r.key,
+      aal: r.cells["aal_usd_per_insured_property"] as number,
+      pctRank: typeof r.cells["pct_rank"] === "number" ? (r.cells["pct_rank"] as number) : null,
+    }))
+    .filter((r) => typeof r.aal === "number" && Number.isFinite(r.aal));
+  let floodForZip: FloodZipRow | null = floodRows.find((r) => r.zip === zip) ?? null;
   const floodMetric = env?.output.key_metrics.find(
     (m) => m.metric === `swfl_zip_${zip}_flood_aal_usd_per_insured_property`,
   );
   const rankMetric = env?.output.key_metrics.find(
     (m) => m.metric === `swfl_zip_${zip}_flood_aal_pct_swfl_rank`,
   );
-  const hasFlood = floodMetric !== undefined && rankMetric !== undefined;
+  if (!floodForZip && floodMetric && rankMetric) {
+    floodForZip = {
+      zip,
+      aal: floodMetric.value as number,
+      pctRank: rankMetric.value as number,
+    };
+  }
+  const hasFlood = floodForZip !== null;
+  const floodSourceUrl = floodTable?.source.url ?? floodMetric?.source.url ?? "";
+  const floodSourceCitation = floodTable?.source.citation ?? floodMetric?.source.citation ?? "";
 
-  const aal = hasFlood ? ((floodMetric as NonNullable<typeof floodMetric>).value as number) : 0;
-  const floodPct = hasFlood
-    ? Math.round((rankMetric as NonNullable<typeof rankMetric>).value as number)
-    : 0;
-  const floodRankPos = hasFlood
-    ? Math.max(1, Math.round((1 - floodPct / 100) * TOTAL_SWFL_ZIPS) + 1)
-    : null;
-  const floodSourceUrl = hasFlood
-    ? (floodMetric as NonNullable<typeof floodMetric>).source.url
-    : "";
-  const floodSourceCitation = hasFlood
-    ? (floodMetric as NonNullable<typeof floodMetric>).source.citation
-    : "";
-
-  // ── Home value ranking ────────────────────────────────────────────────────
-  const allPrices = (housingTable?.rows ?? [])
-    .map((r) => ({ zip: r.key, price: r.cells["median_sale_price"] as number | null }))
-    .filter((r): r is { zip: string; price: number } => typeof r.price === "number");
-  const priceSortedAsc = [...allPrices].sort((a, b) => a.price - b.price);
-  const priceIdx = price !== undefined ? priceSortedAsc.findIndex((r) => r.zip === zip) : -1;
-  const valuePct = priceIdx >= 0 ? Math.round((priceIdx / priceSortedAsc.length) * 100) : null;
-  const valueRankPos = priceIdx >= 0 ? priceSortedAsc.length - priceIdx : null;
-  const totalValueZips = priceSortedAsc.length;
-
-  // ── Permits ───────────────────────────────────────────────────────────────
+  // ── Permits (unchanged aggregation; the builder decides covered vs gap) ──
   const permitsTable = permits?.output.detail_tables?.find((t) => t.id === "permits_by_zip");
   const permitsCountMap = new Map<string, number>();
   for (const r of permitsTable?.rows ?? []) {
@@ -177,16 +163,45 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     ? (permitsTable?.source.citation ?? "Lee County permits")
     : "";
 
-  const allPermitEntries = [...permitsCountMap.entries()].sort(([, a], [, b]) => a - b);
-  const permitsIdx = allPermitEntries.findIndex(([z]) => z === zip);
-  const permitsPct =
-    permitsIdx >= 0 ? Math.round((permitsIdx / allPermitEntries.length) * 100) : null;
-  const permitsRankPos = permitsIdx >= 0 ? allPermitEntries.length - permitsIdx : null;
-  const totalPermitsZips = allPermitEntries.length;
+  // ── Candidate pool + deterministic ranking (spec §2) ──────────────────────
+  const censusValues: CensusValue[] = summary.figures.flatMap((fig) => {
+    const value = censusSignals.numericByKey.get(fig.key);
+    if (value === undefined) return [];
+    return [
+      {
+        key: fig.key,
+        label: fig.label,
+        value,
+        display: fig.value,
+        sourceLabel: fig.source_label,
+        sourceUrl: fig.source_url,
+      },
+    ];
+  });
+  const { candidates, gaps } = buildZipCandidates({
+    zip,
+    housingRows,
+    housingSource,
+    floodRows,
+    floodForZip,
+    floodSource: floodSourceUrl
+      ? { label: floodSourceCitation || "FEMA NFIP", url: floodSourceUrl }
+      : undefined,
+    permitsCounts: permitsCountMap,
+    permitsSource: permitsSourceUrl
+      ? { label: permitsSourceCitation, url: permitsSourceUrl }
+      : undefined,
+    censusValues,
+    censusDistribution: censusSignals.distribution,
+  });
+  const ranked = rankSignals(candidates);
+  const heroSignals = ranked.slice(0, 3);
+  const gridSignals = ranked.slice(3);
+  const sourcedByKey = new Map(sourcedFigures.map((f) => [f.key, f]));
 
   // ── Fill color — same gradient as homepage MapCanvas, using live AAL from env-swfl ─
   const fillColor = computeZipGradient(
-    hasFlood ? aal : undefined,
+    hasFlood ? (floodForZip as FloodZipRow).aal : undefined,
     FLOOD_GRADIENT.low,
     FLOOD_GRADIENT.high,
     FLOOD_GRADIENT.c0,
@@ -211,12 +226,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const countyLines = rollupLines.filter((l) => grainBucket(l.grain) === "county");
   const swflLines = rollupLines.filter((l) => grainBucket(l.grain) === "swfl");
 
-  // ── Delta badges ──────────────────────────────────────────────────────────
-  const priceBadge = deltaForSlug("median_sale_price_yoy_pct", priceYoy, "% YoY");
-  const domBadge = deltaForSlug("median_dom_yoy_days", domYoy, " days");
-  const priceColor = priceBadge ? badgeColor(priceBadge.polarity, priceBadge.isUp) : undefined;
-  const domColor = domBadge ? badgeColor(domBadge.polarity, domBadge.isUp) : undefined;
-
   // ── Citations ─────────────────────────────────────────────────────────────
   const sources: SourceEntry[] = [];
   if (hasFlood && floodSourceUrl)
@@ -228,6 +237,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   }
   for (const fig of summary.figures) {
     if (fig.source_url) sources.push({ label: fig.source_label, url: fig.source_url });
+  }
+  for (const f of sourcedFigures) {
+    sources.push({ label: f.source, url: f.source_url });
   }
 
   // ── Freshness ─────────────────────────────────────────────────────────────
@@ -255,29 +267,31 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     if (homesSold != null) metricSuggestions.push(hm("Homes sold (90 days)", String(homesSold)));
     if (inventory != null) metricSuggestions.push(hm("Active inventory", String(inventory)));
   }
-  if (hasFlood) {
+  if (hasFlood && floodForZip) {
+    const aalVal = floodForZip.aal;
+    const floodPctVal = floodForZip.pctRank != null ? Math.round(floodForZip.pctRank) : null;
     const fp = {
       sourceUrl: floodSourceUrl,
       sourceLabel: floodSourceCitation || "FEMA NFIP",
       freshnessToken,
     };
-    metricSuggestions.push(
-      {
-        label: "Avg Annual Loss",
-        suggestions: suggestionsForMetric({ metric: "avg annual loss", value: aal }, "env-swfl"),
-        value: `$${aal.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr`,
-        ...fp,
-      },
-      {
+    metricSuggestions.push({
+      label: "Avg Annual Loss",
+      suggestions: suggestionsForMetric({ metric: "avg annual loss", value: aalVal }, "env-swfl"),
+      value: `$${aalVal.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr`,
+      ...fp,
+    });
+    if (floodPctVal !== null) {
+      metricSuggestions.push({
         label: "SWFL percentile rank",
         suggestions: suggestionsForMetric(
-          { metric: "SWFL percentile rank", value: floodPct },
+          { metric: "SWFL percentile rank", value: floodPctVal },
           "env-swfl",
         ),
-        value: `${floodPct}th`,
+        value: `${floodPctVal}th`,
         ...fp,
-      },
-    );
+      });
+    }
   }
 
   return (
@@ -310,135 +324,59 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
             {res.county_names[0] && (
               <div className="zp-county">{res.county_names[0]} County, Florida</div>
             )}
-            {asOf && <p className="mt-3 text-xs text-gray-500">As of {asOf}</p>}
           </div>
         </div>
       </section>
 
-      {/* ── STATS BAR — 3 cells, centered to 1120 under the hero ─────────── */}
-      <div className="zp-stats-bar">
-        <div className="zp-stats-inner">
-          <div className="zp-stat-cell">
-            <div className="zp-stat-label">Annual Flood Loss</div>
-            <div className="zp-stat-value">{hasFlood ? fmtCurrency(aal) : "—"}</div>
-            <div className="zp-stat-sub">Flood insurance avg/home</div>
-            {floodRankPos !== null && (
-              <div className="zp-stat-tag">
-                #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs
+      {/* ── HERO SIGNALS — this ZIP's top-3 ranked signals, each with its why ── */}
+      {heroSignals.length > 0 && (
+        <div className="zp-stats-bar">
+          <div className="zp-stats-inner">
+            {heroSignals.map((s) => (
+              <div key={s.key} className="zp-stat-cell">
+                <div className="zp-stat-label">{s.label}</div>
+                <div className="zp-stat-value">{s.display}</div>
+                {s.sub && <div className="zp-stat-sub">{s.sub}</div>}
+                {s.why && <div className="zp-stat-tag">{s.why}</div>}
               </div>
-            )}
-          </div>
-          <div className="zp-stat-cell">
-            <div className="zp-stat-label">Median Home Value</div>
-            <div className="zp-stat-value">{price !== undefined ? fmtCurrency(price) : "—"}</div>
-            <div className="zp-stat-sub">90-day median sale price</div>
-            {valueRankPos !== null && (
-              <div className="zp-stat-tag">
-                #{valueRankPos} of {totalValueZips} ZIPs
-              </div>
-            )}
-          </div>
-          <div className="zp-stat-cell">
-            <div className="zp-stat-label">New Permits (90 Days)</div>
-            <div className="zp-stat-value">{hasPermits ? permitsCount.toLocaleString() : "—"}</div>
-            <div className="zp-stat-sub">Lee County building permits</div>
-            {permitsRankPos !== null && (
-              <div className="zp-stat-tag">
-                #{permitsRankPos} of {totalPermitsZips} ZIPs
-              </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ── BODY: breakdown (left) + rail (right) ────────────────────────── */}
+      {/* ── BODY: ranked grid (left) + context rail (right) — every number once ── */}
       <div className="zp-body">
         {/* Full-width title — its faint underline is the baseline the rail aligns to */}
         <div className="zp-breakdown-header">
-          <h1 className="zp-breakdown-title">{zip} at a glance</h1>
+          <h1 className="zp-breakdown-title">{zip} in detail</h1>
         </div>
 
-        {/* LEFT — at a glance metric blocks */}
+        {/* LEFT — every remaining held metric exactly once, ranked; gaps become Find-it */}
         <div className="zp-breakdown">
           {didYouMean && <DidYouMeanBanner message={didYouMean} />}
 
-          {hasFlood && (
-            <div className="zp-metric-block">
-              <div className="zp-metric-header">
-                <div className="zp-metric-label">Annual Flood Loss</div>
-                {floodRankPos !== null && (
-                  <div className="zp-metric-rank">
-                    #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs
-                  </div>
-                )}
-              </div>
-              <div className="zp-metric-value">{fmtCurrency(aal)}</div>
-              <div className="zp-metric-sublabel">Avg annual flood loss per home</div>
-              <div className="zp-bar-track">
-                <div className="zp-bar-fill zp-bar-fill--flood" style={{ width: `${floodPct}%` }} />
-              </div>
-              <div className="zp-percentile">{floodPct}th percentile</div>
-            </div>
-          )}
-
-          {price !== undefined && (
-            <div className="zp-metric-block">
-              <div className="zp-metric-header">
-                <div className="zp-metric-label">Median Home Value</div>
-                {valueRankPos !== null && (
-                  <div className="zp-metric-rank">
-                    #{valueRankPos} of {totalValueZips} ZIPs
-                  </div>
-                )}
-              </div>
-              <div className="zp-metric-value">{fmtCurrency(price)}</div>
-              <div className="zp-metric-sublabel">90-day median sale price</div>
-              {valuePct !== null && (
-                <>
-                  <div className="zp-bar-track">
-                    <div
-                      className="zp-bar-fill zp-bar-fill--value"
-                      style={{ width: `${valuePct}%` }}
-                    />
-                  </div>
-                  <div className="zp-percentile">{valuePct}th percentile</div>
-                </>
-              )}
-            </div>
-          )}
-
-          {hasPermits && (
-            <div className="zp-metric-block">
-              <div className="zp-metric-header">
-                <div className="zp-metric-label">New Permits (90 Days)</div>
-                {permitsRankPos !== null && (
-                  <div className="zp-metric-rank">
-                    #{permitsRankPos} of {totalPermitsZips} ZIPs
-                  </div>
-                )}
-              </div>
-              <div className="zp-metric-value">{permitsCount.toLocaleString()}</div>
-              <div className="zp-metric-sublabel">Lee County building permits</div>
-              {permitsPct !== null && (
-                <>
-                  <div className="zp-bar-track">
-                    <div
-                      className="zp-bar-fill zp-bar-fill--permits"
-                      style={{ width: `${permitsPct}%` }}
-                    />
-                  </div>
-                  <div className="zp-percentile">{permitsPct}th percentile</div>
-                </>
-              )}
-            </div>
-          )}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {gridSignals.map((s) => (
+              <SignalCard key={s.key} s={s} />
+            ))}
+            {gaps.map((g) => (
+              <FindItButton
+                key={g.metric_key}
+                zip={zip}
+                metricKey={g.metric_key}
+                label={g.label}
+                coverage={g.coverage}
+                initialFigure={(sourcedByKey.get(g.metric_key) as FoundFigure | undefined) ?? null}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* RIGHT — side rail */}
+        {/* RIGHT — context & coverage card. No metric values here, ever. */}
         <aside className="zp-rail">
           <div className="zp-rail-header">
-            <div className="zp-rail-metric-name">Data Summary</div>
-            <div className="zp-rail-sublabel">Key data points</div>
+            <div className="zp-rail-metric-name">About This Page</div>
+            <div className="zp-rail-sublabel">What leads and why</div>
           </div>
           <div className="zp-rail-zip-header">
             <div className="zp-rail-zip-code">{zip}</div>
@@ -448,173 +386,35 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
             )}
           </div>
 
-          {hasFlood && (
-            <div className="zp-rail-metric-row zp-rail-metric-row--active">
-              <div className="zp-rail-row-label">Annual Flood Loss</div>
-              <div className="zp-rail-row-value">{fmtCurrency(aal)}</div>
-              {floodRankPos !== null && (
-                <div className="zp-rail-row-rank">
-                  #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs
-                </div>
-              )}
-              <div className="zp-mini-bar">
-                <div
-                  className="zp-mini-bar-fill zp-mini-bar-fill--flood"
-                  style={{ width: `${floodPct}%` }}
-                />
-              </div>
-            </div>
-          )}
+          <p className="mt-4 text-xs leading-relaxed text-gray-400">
+            The numbers up top are this area&apos;s strongest signals — ranked by how far they sit
+            from the Southwest Florida middle and how fast they&apos;re moving. Everything else we
+            hold is in the grid, each figure exactly once.
+          </p>
 
-          {price !== undefined && (
-            <div className="zp-rail-metric-row">
-              <div className="zp-rail-row-label">Median Home Value</div>
-              <div className="zp-rail-row-value">{fmtCurrency(price)}</div>
-              {valueRankPos !== null && (
-                <div className="zp-rail-row-rank">
-                  #{valueRankPos} of {totalValueZips} ZIPs
-                </div>
-              )}
-              <div className="zp-mini-bar">
-                <div
-                  className="zp-mini-bar-fill zp-mini-bar-fill--value"
-                  style={{ width: `${valuePct ?? 0}%` }}
-                />
-              </div>
-            </div>
-          )}
+          {asOf && <p className="mt-3 text-xs text-gray-500">As of {asOf}</p>}
 
-          {hasPermits && (
-            <div className="zp-rail-metric-row">
-              <div className="zp-rail-row-label">New Permits (90 Days)</div>
-              <div className="zp-rail-row-value">{permitsCount.toLocaleString()}</div>
-              {permitsRankPos !== null && (
-                <div className="zp-rail-row-rank">
-                  #{permitsRankPos} of {totalPermitsZips} ZIPs
-                </div>
-              )}
-              <div className="zp-mini-bar">
-                <div
-                  className="zp-mini-bar-fill zp-mini-bar-fill--permits"
-                  style={{ width: `${permitsPct ?? 0}%` }}
-                />
-              </div>
-            </div>
-          )}
+          {gaps.map((g) => (
+            <p key={g.metric_key} className="mt-3 text-xs leading-relaxed text-gray-500">
+              Building permits here are issued by the{" "}
+              <a
+                href={g.coverage.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-white/30 underline-offset-2 hover:text-white"
+              >
+                {g.coverage.name.replace(/ permitting$/, "")}
+              </a>{" "}
+              — not the county feed our permit counts come from.
+            </p>
+          ))}
 
-          <div className="zp-rail-footer">
-            Sources: FEMA flood insurance · home sales data · Lee County permits
-          </div>
+          <div className="zp-rail-footer">Every figure is cited — sources listed below.</div>
         </aside>
       </div>
 
-      {/* ── Below body: unified data + dossier ───────────────────────────── */}
+      {/* ── Below body: dossier + chart + citations ──────────────────────── */}
       <div className="mx-auto max-w-[1120px] px-10 pb-24 space-y-10">
-        {/* Unified data grid — census + housing + flood, same card style */}
-        {(summary.figures.length > 0 || hasHousing || hasFlood) && (
-          <section id="section-data">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {summary.figures.map((fig) => (
-                <div
-                  key={fig.key}
-                  className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    {fig.label}
-                  </p>
-                  <p className="mt-1 font-mono text-lg font-semibold text-white">{fig.value}</p>
-                  {fig.as_of && <p className="mt-0.5 text-xs text-gray-500">as of {fig.as_of}</p>}
-                  <p className="mt-1 text-xs text-gray-600">{fig.source_label}</p>
-                </div>
-              ))}
-
-              {hasHousing && (
-                <>
-                  <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      Median Sale Price
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-semibold text-white">
-                      ${(price as number).toLocaleString()}
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">90-day window</p>
-                    {priceBadge && (
-                      <p className={`mt-1 text-xs ${priceColor}`}>{priceBadge.text}</p>
-                    )}
-                  </div>
-                  <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      Days on Market
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-semibold text-white">{dom}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">90-day window</p>
-                    {domBadge && <p className={`mt-1 text-xs ${domColor}`}>{domBadge.text}</p>}
-                  </div>
-                  {saleToList != null && (
-                    <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Sale-to-List Ratio
-                      </p>
-                      <p className="mt-1 font-mono text-lg font-semibold text-white">
-                        {saleToList}%
-                      </p>
-                    </div>
-                  )}
-                  {mos != null && (
-                    <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Months of Supply
-                      </p>
-                      <p className="mt-1 font-mono text-lg font-semibold text-white">{mos}</p>
-                    </div>
-                  )}
-                  {homesSold != null && (
-                    <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Homes Sold (90 Days)
-                      </p>
-                      <p className="mt-1 font-mono text-lg font-semibold text-white">{homesSold}</p>
-                    </div>
-                  )}
-                  {inventory != null && (
-                    <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Active Inventory
-                      </p>
-                      <p className="mt-1 font-mono text-lg font-semibold text-white">{inventory}</p>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {hasFlood && (
-                <>
-                  <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      Avg Annual Flood Loss
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-semibold text-white">
-                      ${aal.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      Flood insurance, per insured home
-                    </p>
-                  </div>
-                  <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      Flood Percentile
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-semibold text-white">{floodPct}th</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      #{floodRankPos} of {TOTAL_SWFL_ZIPS} ZIPs in the area
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-          </section>
-        )}
-
         {/* ── City / Corridor Area ───────────────────────────────────────── */}
         {cityLines.length > 0 && (
           <section id="section-city">
@@ -748,10 +548,18 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function badgeColor(polarity: DirectionPolarity, isUp: boolean): string {
-  if (polarity === "none") return "text-gray-400";
-  if (polarity === "higher_is_bullish") return isUp ? "text-[#5bc97a]" : "text-[#e08158]";
-  return isUp ? "text-[#e08158]" : "text-[#5bc97a]";
+function SignalCard({ s }: { s: RankedSignal }) {
+  return (
+    <div className="rounded-xl glass-card-modern border border-white/10 px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{s.label}</p>
+      <p className="mt-1 font-mono text-lg font-semibold text-white">{s.display}</p>
+      {s.sub && <p className="mt-0.5 text-xs text-gray-500">{s.sub}</p>}
+      {s.why && <p className="mt-1 text-xs text-teal-primary/80">{s.why}</p>}
+      {s.movementText && s.movementText !== s.why && (
+        <p className="mt-1 text-xs text-gray-400">{s.movementText}</p>
+      )}
+    </div>
+  );
 }
 
 function stripStatAnnotation(text: string): string {
