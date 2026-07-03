@@ -5,10 +5,12 @@ import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
 import type { LocationInput } from "../../../../refinery/lib/location-resolver.mts";
 import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
 import { loadParsedBrain } from "../../../../lib/fetch-brain";
+import { buildRegistryTableMap } from "../../../../lib/zip-report/load-registry-tables";
 import { rankSignals, type RankedSignal } from "../../../../lib/zip-report/signal-rank";
 import {
   buildZipCandidates,
   loadCensusSignals,
+  ZIP_METRIC_SOURCES,
   type CensusValue,
   type FloodZipRow,
 } from "../../../../lib/zip-report/candidates";
@@ -70,6 +72,12 @@ function grainBucket(grain: Grain): SectionBucket {
   return "swfl";
 }
 
+/** A ranked candidate's `key` -> the registry `concept` it won, so the rail can
+ * look up `railContext` (keyed by concept) from a rendered signal's key. */
+const RAIL_CONCEPT_BY_KEY: Record<string, string> = Object.fromEntries(
+  ZIP_METRIC_SOURCES.filter((s) => s.role === "primary").map((s) => [s.key, s.concept]),
+);
+
 export default async function ZipReportPage({ params, searchParams }: PageProps) {
   const { zip } = await params;
   if (!VALID_ZIP.test(zip)) notFound();
@@ -88,25 +96,52 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const loc: LocationInput = { kind: "zip", resolution: res };
 
-  const [housing, env, permits, dossier, summary, metroTrend, censusSignals, sourcedFigures] =
-    await Promise.all([
-      loadParsedBrain("housing-swfl"),
-      loadParsedBrain("env-swfl"),
-      loadParsedBrain("permits-swfl"),
-      assembleLocationDossier(loc),
-      loadZipQuickSummary(zip),
-      loadMetroTrend("zhvi_pivoted"),
-      loadCensusSignals(zip),
-      getSourcedFigures({ kind: "zip", key: zip }),
-    ]);
+  const REGISTRY_PACK_IDS = [
+    "housing-swfl",
+    "home-values-swfl",
+    "rentals-swfl",
+    "active-rentals-swfl",
+    "market-heat-swfl",
+    "market-temperature-swfl",
+    "listing-momentum-swfl",
+    "seller-stress-swfl",
+    "tier-divergence-swfl",
+    "permits-commercial-swfl",
+    "properties-collier-value",
+  ] as const;
+
+  const [
+    registryBrains,
+    env,
+    permits,
+    dossier,
+    summary,
+    metroTrend,
+    censusSignals,
+    sourcedFigures,
+  ] = await Promise.all([
+    Promise.all(REGISTRY_PACK_IDS.map((id) => loadParsedBrain(id))).then(
+      (brains) => new Map(REGISTRY_PACK_IDS.map((id, i) => [id, brains[i]])),
+    ),
+    loadParsedBrain("env-swfl"),
+    loadParsedBrain("permits-swfl"),
+    assembleLocationDossier(loc),
+    loadZipQuickSummary(zip),
+    loadMetroTrend("zhvi_pivoted"),
+    loadCensusSignals(zip),
+    getSourcedFigures({ kind: "zip", key: zip }),
+  ]);
+  const housing = registryBrains.get("housing-swfl") ?? null;
+  const registryTables = buildRegistryTableMap(registryBrains);
 
   // ── ZIP shape ─────────────────────────────────────────────────────────────
   const { svgMarkup, found: shapeFound } = extractZipShape(zip);
 
-  // ── Housing (all-ZIP detail table — the candidate builder ranks from it) ──
-  const housingTable = housing?.output.detail_tables?.find((t) => t.id === "housing_by_zip");
-  const housingRows = housingTable?.rows ?? [];
-  const housingRow = housingRows.find((r) => r.key === zip);
+  // ── Housing display fields read directly off the brain; ranking now goes
+  // through registryTables (populated above via buildRegistryTableMap). ──
+  const housingRow = housing?.output.detail_tables
+    ?.find((t) => t.id === "housing_by_zip")
+    ?.rows.find((r) => r.key === zip);
 
   const price = housingRow?.cells["median_sale_price"] as number | undefined;
   const dom = housingRow?.cells["median_dom"] as number | undefined;
@@ -116,9 +151,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const inventory = housingRow?.cells["inventory"] as number | null | undefined;
 
   const hasHousing = housingRow !== undefined && price !== undefined && dom !== undefined;
-  const housingSource = housingTable
-    ? { label: housingTable.source.citation || "SWFL Data Gulf", url: housingTable.source.url }
-    : undefined;
 
   // ── Flood — flood_by_zip detail table first (all 57 ZIPs), key_metrics fallback ──
   const floodTable = env?.output.detail_tables?.find((t) => t.id === "flood_by_zip");
@@ -178,10 +210,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       },
     ];
   });
-  const { candidates, gaps } = buildZipCandidates({
+  const { candidates, gaps, railContext } = buildZipCandidates({
     zip,
-    housingRows,
-    housingSource,
+    registryTables,
     floodRows,
     floodForZip,
     floodSource: floodSourceUrl
@@ -409,6 +440,29 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
             </p>
           ))}
 
+          {[...heroSignals, ...gridSignals]
+            .flatMap((s) => {
+              const demoted = railContext.get(RAIL_CONCEPT_BY_KEY[s.key] ?? "");
+              return demoted ? demoted.map((d) => ({ winner: s, demoted: d })) : [];
+            })
+            .map(({ winner, demoted }) => (
+              <p
+                key={`${winner.key}:${demoted.label}`}
+                className="mt-3 text-xs leading-relaxed text-gray-500"
+              >
+                Also reported — {demoted.label}: {demoted.display} (
+                <a
+                  href={demoted.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-white/30 underline-offset-2 hover:text-white"
+                >
+                  {demoted.sourceLabel}
+                </a>
+                ).
+              </p>
+            ))}
+
           <div className="zp-rail-footer">Every figure is cited — sources listed below.</div>
         </aside>
       </div>
@@ -558,6 +612,7 @@ function SignalCard({ s }: { s: RankedSignal }) {
       {s.movementText && s.movementText !== s.why && (
         <p className="mt-1 text-xs text-gray-400">{s.movementText}</p>
       )}
+      {s.footnote && <p className="mt-1 text-xs text-gray-500 italic">{s.footnote}</p>}
     </div>
   );
 }
