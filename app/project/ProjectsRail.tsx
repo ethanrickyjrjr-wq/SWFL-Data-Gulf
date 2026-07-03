@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { projectHome } from "@/lib/project/tool-tabs";
+import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 
 export interface RailProject {
   id: string;
@@ -175,6 +176,8 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
             })}
           </ul>
         )}
+
+        <SendCeilingMeter variant="rail" />
       </nav>
 
       {/* Confirm delete modal — fixed overlay, outside the nav so z-index stacks cleanly */}

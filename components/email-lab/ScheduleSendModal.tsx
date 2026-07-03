@@ -9,6 +9,7 @@
 // fresh commentary, and a fresh chart each occurrence — never a frozen snapshot.
 
 import { SendWeeklyHandle } from "@/app/p/[id]/SendWeeklyHandle";
+import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 
 interface Props {
   deliverableId: string;
@@ -45,10 +46,11 @@ export function ScheduleSendModal({
             ✕
           </button>
         </div>
-        <p className="mb-1 text-xs text-white/50">
+        <p className="mb-3 text-xs text-white/50">
           It sends on your schedule and re-renders with fresh data, new commentary, and an updated
           chart each time — not this frozen preview.
         </p>
+        <SendCeilingMeter variant="panel" />
         <SendWeeklyHandle
           deliverableId={deliverableId}
           projectId={projectId}

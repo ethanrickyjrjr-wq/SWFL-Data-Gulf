@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Contact } from "@/lib/contacts/types";
+import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 
 interface Props {
   deliverableId: string;
@@ -228,6 +229,7 @@ export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Pr
             </div>
 
             <div className="border-t border-white/10 px-5 py-4">
+              <SendCeilingMeter variant="panel" />
               <button
                 disabled={selected.size === 0 || sending}
                 onClick={handleSend}
