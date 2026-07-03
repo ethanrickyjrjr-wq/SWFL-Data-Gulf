@@ -1,3 +1,15 @@
+## 2026-07-03 (main) — Lane B spec CORRECTED: seed honors projects/lab unification + Lane C seam flagged
+
+Operator: "i thought we made projects and labs one thing." Correct — Cockpit D4 unified them
+(signed-in /email-lab → /project/<id>/email-lab; standalone client = anonymous taste only). Lane B
+spec's seed section had written "the lab" as standalone-for-everyone, silently breaking signed-in
+map clicks: labDestination() and AutoCreateProject DROP query params today. Fixed: ?zip= carried
+through both redirects; signed-in seed lands as a branded draft IN THEIR PROJECT; anonymous path
+unchanged (taste surface + /api/claim). One composer (lib/email/zip-seed.ts) serves all arrivals.
+DISCREPANCY (parallel Lane C session, entry below): Lane C's CTA uses the OpenProjectCta claim
+bridge (template:"email", scopeKind:"zip"); Lane B's door uses zip-seed.ts. Same intent, two
+mechanisms — flagged in Lane B spec out-of-scope for operator to reconcile at plan time.
+
 ## 2026-07-02 (main) — `report-bridge-seo` (commercial-spine Lane C) SPECCED
 
 Brainstormed per RULE 3.5, scoped to `app/r/zip-report/[zip]/*` only, no new vendor surface (RULE

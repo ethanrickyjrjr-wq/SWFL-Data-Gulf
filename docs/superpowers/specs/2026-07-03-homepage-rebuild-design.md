@@ -25,7 +25,7 @@ One page that sells the actual product to the paying audience (professionals) wh
 ## Forks taken (operator was AFK — review these first)
 
 1. **Hero shape — map stays in the hero** (recommended option). The interactive choropleth is our "product in action" shot, it already works, and Altos/Reventure lead with an interactive data visual. Rejected: slim SaaS hero with a screenshot and the map demoted — more conventional, but demotes working code and our most distinctive above-the-fold asset.
-1b. **Map click → lab seed (operator-proposed 07/03, shape finalized while AFK).** Operator: "click on the map and you end up in the lab with basically the zip page built as an email." Adopted with one adjustment: the click **selects** (fills the data rail — no more surprise hard-navigation to `/z/[zip]`) and the rail's **primary CTA** is "Turn this into a branded email" → `/email-lab?zip=<zip>` pre-built; "Full report" → `/z/[zip]` rides secondary. Rationale: map clickers split professional/explorer — the lab door is now the map's headline story, but entered with intent; the pure straight-to-lab variant (operator's literal shape) is one line to flip to if preferred. Two hard requirements attached: the prebuild is **deterministic and cached** (composed from the same live blocks as the ZIP page — never an LLM authoring call per anonymous arrival; AI enters when the visitor edits), and it rides the **existing anonymous-lab taste surface + claim flow** (`app/email-lab/page.tsx` Cockpit D4; `/api/claim` carry-back → OTP → owned project) — no new auth machinery.
+1b. **Map click → lab seed (operator-proposed 07/03, shape finalized while AFK).** Operator: "click on the map and you end up in the lab with basically the zip page built as an email." Adopted with one adjustment: the click **selects** (fills the data rail — no more surprise hard-navigation to `/z/[zip]`) and the rail's **primary CTA** is "Turn this into a branded email" → `/email-lab?zip=<zip>` pre-built; "Full report" → `/z/[zip]` rides secondary. Rationale: map clickers split professional/explorer — the lab door is now the map's headline story, but entered with intent; the pure straight-to-lab variant (operator's literal shape) is one line to flip to if preferred. Two hard requirements attached: the prebuild is **deterministic and cached** (composed from the same live blocks as the ZIP page — never an LLM authoring call per anonymous arrival; AI enters when the visitor edits), and it rides the **one unified email surface** (Cockpit D4: signed-in → project Email tab with the seed carried through and their brand applied; anonymous → the standalone taste-surface + existing claim flow, `/api/claim` carry-back → OTP → owned project) — no new auth machinery, no standalone-lab resurrection.
 2. **Capture seam — Lane B ships storage, Lane D ships the engine.** The homepage capture posts to a new `POST /api/weekly-read/signup` which upserts into a new public table `weekly_read_signups` (email, zip_code, source, created_at; unique on email+zip). Signups accumulate empty-tolerantly until Lane D's enrollment engine consumes them (ODD-style seam). Rejected: waiting on Lane D's endpoint (couples the lanes) and reusing `/api/waitlist` (wrong shape — no ZIP, wrong semantics).
 
 ## Page structure (top to bottom)
@@ -41,11 +41,15 @@ One page that sells the actual product to the paying audience (professionals) wh
 
 ### 1b. Lab seed — the ZIP email prebuild (operator-proposed)
 
-The lab (anonymous taste-surface, Cockpit D4) accepts `?zip=<5-digit>`: on arrival it shows a **pre-built weekly-read-style email for that ZIP** — the ZIP page's story as an email: place name, headline figures (value, permits, flood), short deterministic prose, sources listed, as-of date stated once.
-- **Deterministic + cached:** composed in code from the same live loaders the ZIP page/map use (zip-summary, `zhvi_zip_latest`, permits view, NFIP agg) — cacheable per ZIP per day. **No LLM call on arrival**; drive-by clicks and bots cost ~$0. The AI assistant engages only when the visitor edits — that's the taste moment.
-- **Claim path unchanged:** existing anonymous lab → edit → claim flow (`/api/claim`) turns it into an owned project. No new auth machinery.
-- Invalid/unknown `?zip=` → lab opens in its normal blank state (empty-tolerant, no error page).
-- A "see the full report →" link inside the seeded lab covers anyone who actually wanted the data page.
+**Projects and labs are ONE surface (Cockpit D4)** — the seed must honor the unification, not resurrect a standalone lab. `/email-lab?zip=<5-digit>` behaves per who arrives:
+- **Anonymous** → the standalone taste-surface (its only remaining role) opens with a **pre-built weekly-read-style email for that ZIP** — the ZIP page's story as an email: place name, headline figures (value, permits, flood), short deterministic prose, sources listed, as-of date stated once. Edit → existing claim flow (`/api/claim`) turns it into an owned project. No new auth machinery.
+- **Signed-in with a project** → today's redirect to `/project/<id>/email-lab` **carries the `?zip=` through** (`labDestination()` gains the param) and the project's Email tab seeds the same deterministic doc as a new draft **in their project, with their brand applied** — for an existing user the map becomes a one-click branded-report starter.
+- **Signed-in, zero projects** → `AutoCreateProject` carries `?zip=` through its redirect; same result.
+
+Shared mechanics:
+- **Deterministic + cached:** one composer (`lib/email/zip-seed.ts`) builds the doc in code from the same live loaders the ZIP page/map use (zip-summary, `zhvi_zip_latest`, permits view, NFIP agg) — cacheable per ZIP per day. **No LLM call on arrival**; drive-by clicks and bots cost ~$0. The AI assistant engages only when the visitor edits — that's the taste moment.
+- Invalid/unknown `?zip=` → each surface opens in its normal state (empty-tolerant, no error page).
+- A "see the full report →" link inside the seeded doc covers anyone who actually wanted the data page.
 
 ### 2. Proof strip (social-proof slot, our version)
 
@@ -100,7 +104,9 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 - `lib/landing/load-home-map-data.ts` — NEW server loader (+ unit test with mocked db).
 - `lib/landing/home-map-data.ts` — fixture demoted to fallback; types/color math unchanged.
 - `components/landing/Hero.tsx` — props-driven data, Home Value default, new copy, live badge, click=select + two-door rail CTAs (hard-navigation removed).
-- `app/email-lab/page.tsx` + `EmailLabClient.tsx` — accept `?zip=` seed (anonymous path only; signed-in redirect untouched).
+- `app/email-lab/page.tsx` + `EmailLabClient.tsx` — accept `?zip=` seed on the anonymous path.
+- `lib/project/lab-redirect.ts` (`labDestination`) + `app/email-lab/AutoCreateProject.tsx` — carry `?zip=` through the signed-in redirects (they drop query params today).
+- Project Email tab (`app/project/[id]/…` email surface) — consume the carried `?zip=` and seed the deterministic doc as a new draft with the project's brand.
 - `lib/email/zip-seed.ts` — NEW deterministic ZIP-email composer reusing existing loaders (+ unit test: known ZIP → doc with figures/sources/as-of; unknown ZIP → null).
 - `components/landing/Capabilities.tsx` — clickable persona cards, competitor strip deleted, CTA retargeted.
 - `components/landing/ProofStrip.tsx`, `DeliverableShowcase.tsx`, `PricingStrip.tsx`, `WeeklyReadCapture.tsx`, `ObjectionFaq.tsx` — NEW.
@@ -124,4 +130,4 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 
 ## Out of scope
 
-Weekly-read enrollment/sending (Lane D), per-ZIP subscribe buttons on report pages (Lane C), the `/r/zip-report/[zip]` → pre-seeded-project bridge (Lane C — Lane B's lab seed is the map-side door, Lane C's bridge is the report-side door; both target the same lab surface and Lane C should reuse `lib/email/zip-seed.ts`), Stripe mechanics (Lane A), homepage A/B testing, testimonials (none exist — revisit when real ones do), 6-county map asset (current SVG is Lee+Collier; honest badge instead).
+Weekly-read enrollment/sending (Lane D), per-ZIP subscribe buttons on report pages (Lane C), the `/r/zip-report/[zip]` → pre-seeded-project bridge (Lane C — **CROSS-LANE SEAM, operator to reconcile:** Lane C's spec of 07/02 routes its CTA through the `OpenProjectCta`/`planOpenProject` claim bridge with a `template:"email", scopeKind:"zip"` seed, while Lane B's map door seeds a deterministic prebuilt doc via `lib/email/zip-seed.ts`. Same intent, two mechanisms — either Lane C's template seed learns to use `zip-seed.ts` for its content, or Lane B's signed-in path adopts the claim-bridge planner; pin at plan time, don't ship both), Stripe mechanics (Lane A), homepage A/B testing, testimonials (none exist — revisit when real ones do), 6-county map asset (current SVG is Lee+Collier; honest badge instead).
