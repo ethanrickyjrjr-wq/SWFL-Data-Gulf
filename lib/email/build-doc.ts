@@ -657,6 +657,7 @@ export async function authorDoc({
       anchorNumbers: anchorStrings,
       chart: chartSlot,
       photo: photoSlot,
+      defaultLinkUrl: brandWebsiteUrl(currentDoc),
     });
 
   const firstParse = EmailDocSchema.safeParse(assemble(authored));

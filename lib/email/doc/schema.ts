@@ -373,6 +373,20 @@ const authoredText = (n: number) =>
     .transform((s) => s.slice(0, n))
     .optional();
 
+/** One authored feature card in a `multi-column` block. The model writes copy
+ *  only — the engine supplies the link destination (never an authored URL). */
+const AuthoredColumnSchema = z.object({
+  heading: authoredText(120),
+  body: authoredText(500),
+  link_label: authoredText(40),
+});
+
+/** One authored `list` row. */
+const AuthoredListItemSchema = z.object({
+  lead: authoredText(24),
+  text: authoredText(200),
+});
+
 const AuthoredStatSchema = z.object({
   /** Menu id whose verbatim value fills this cell (id-selection moat). */
   value_figure: authoredText(40),
@@ -407,6 +421,26 @@ export const AuthoredBlockSchema = z.object({
   /** For an image block: which auto-resolved asset the engine drops in. */
   image_role: z.enum(["chart", "photo"]).optional(),
   stats: z.array(AuthoredStatSchema).max(3).optional(),
+  // ── semantic layout (author-layout-recipes build) — the model names a mood,
+  // the engine owns every color/pixel ──
+  /** Image blocks: short text rendered on top of the image (→ overlayTitle). */
+  overlay_title: authoredText(80),
+  /** Image blocks: supporting overlay text (→ overlayBody). */
+  overlay_body: authoredText(200),
+  /** Background band — engine resolves the hex from the user's palette. */
+  band: z.enum(["light", "dark", "accent"]).optional(),
+  /** Breathing room — engine maps onto paddingY (airy=lg, normal=md, tight=sm). */
+  pad: z.enum(["airy", "normal", "tight"]).optional(),
+  /** multi-column blocks: 2–3 authored cards (clamped, never rejected). */
+  columns: z
+    .array(AuthoredColumnSchema)
+    .transform((c) => c.slice(0, 3))
+    .optional(),
+  /** list blocks: up to 8 authored rows (clamped, never rejected). */
+  items: z
+    .array(AuthoredListItemSchema)
+    .transform((i) => i.slice(0, 8))
+    .optional(),
 });
 
 export const ScheduleSuggestionSchema = z.object({

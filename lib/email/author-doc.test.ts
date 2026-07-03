@@ -289,3 +289,197 @@ describe("author recorded-claim gate", () => {
     expect(r.ok).toBe(true);
   });
 });
+
+// ── semantic layout power-up (author-layout-recipes build) ────────────────────
+
+describe("semantic layout power-up (band / pad / overlay / columns / list)", () => {
+  test("authored multi-column columns replace the placeholder defaults", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [
+          {
+            type: "multi-column",
+            columns: [
+              { heading: "Open houses", body: "Around the Cape this weekend." },
+              { heading: "Buyer tips", body: "How to read days-on-market." },
+            ],
+          },
+        ],
+      }),
+    );
+    const mc = doc.blocks.find((b) => b.type === "multi-column");
+    expect(mc).toBeDefined();
+    const cols = propsOf(mc!).columns as Array<{ heading?: string }>;
+    expect(cols.map((c) => c.heading)).toEqual(["Open houses", "Buyer tips"]);
+    expect(JSON.stringify(doc)).not.toContain("Column one"); // placeholder junk is dead
+  });
+
+  test("a multi-column with fewer than two usable columns is dropped", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [
+          { type: "text", body: "ok" },
+          { type: "multi-column", columns: [{ heading: "Solo" }] },
+        ],
+      }),
+    );
+    expect(doc.blocks.some((b) => b.type === "multi-column")).toBe(false);
+  });
+
+  test("column link_label gets the default link URL; without one the link is dropped", () => {
+    const authored: AuthoredDoc = {
+      blocks: [
+        {
+          type: "multi-column",
+          columns: [
+            { heading: "A", body: "a", link_label: "See more" },
+            { heading: "B", body: "b" },
+          ],
+        },
+      ],
+    };
+    const withUrl = assembleAuthoredDoc(args(authored, { defaultLinkUrl: "https://example.com" }));
+    const cols1 = propsOf(withUrl.blocks.find((b) => b.type === "multi-column")!).columns as Array<
+      Record<string, unknown>
+    >;
+    expect(cols1[0].linkUrl).toBe("https://example.com");
+    expect(cols1[0].linkLabel).toBe("See more");
+
+    const noUrl = assembleAuthoredDoc(args(authored));
+    const cols2 = propsOf(noUrl.blocks.find((b) => b.type === "multi-column")!).columns as Array<
+      Record<string, unknown>
+    >;
+    expect(cols2[0].linkUrl).toBeUndefined();
+    expect(cols2[0].linkLabel).toBeUndefined();
+  });
+
+  test("authored list items fill the block; empty rows drop; an itemless list drops", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [
+          {
+            type: "list",
+            title: "This month",
+            items: [
+              { lead: "SAT ·", text: "Farmers market on the Cape" },
+              { text: "" },
+              { text: "Flood-map open house" },
+            ],
+          },
+          { type: "list" },
+        ],
+      }),
+    );
+    const lists = doc.blocks.filter((b) => b.type === "list");
+    expect(lists.length).toBe(1); // itemless one dropped
+    const items = propsOf(lists[0]).items as Array<{ lead?: string; text: string }>;
+    expect(items.length).toBe(2);
+    expect(items[0].lead).toBe("SAT ·");
+    expect(propsOf(lists[0]).title).toBe("This month");
+    expect(JSON.stringify(doc)).not.toContain("Worth knowing"); // placeholder never leaks
+  });
+
+  test("band resolves from the branded global style; pad maps onto paddingY", () => {
+    const gs = { ...DEFAULT_GLOBAL_STYLE, surfaceDarkColor: "#101418" };
+    const doc = assembleAuthoredDoc(
+      args(
+        {
+          blocks: [
+            { type: "text", body: "dark", band: "dark", pad: "airy" },
+            { type: "signal", title: "accent", band: "accent", pad: "tight" },
+            { type: "text", body: "light", band: "light" },
+          ],
+        },
+        { globalStyle: gs },
+      ),
+    );
+    const [t1, sig, t2] = doc.blocks;
+    expect(propsOf(t1).sectionBg).toBe("#101418"); // dark → surfaceDarkColor
+    expect(propsOf(t1).paddingY).toBe("lg"); // airy
+    expect(propsOf(sig).sectionBg).toBe(gs.accentColor); // accent
+    expect(propsOf(sig).paddingY).toBe("sm"); // tight
+    expect(propsOf(t2).sectionBg).toBe("#ffffff"); // light with no surfaceColor set
+  });
+
+  test("dark band falls back to primaryColor when surfaceDarkColor is absent", () => {
+    const doc = assembleAuthoredDoc(args({ blocks: [{ type: "text", body: "x", band: "dark" }] }));
+    expect(propsOf(doc.blocks[0]).sectionBg).toBe(DEFAULT_GLOBAL_STYLE.primaryColor);
+  });
+
+  test("image overlay text writes through to overlayTitle/overlayBody", () => {
+    const doc = assembleAuthoredDoc(
+      args(
+        {
+          blocks: [
+            {
+              type: "image",
+              image_role: "photo",
+              overlay_title: "Live on the water",
+              overlay_body: "A look inside this month's featured listing.",
+              alt: "Canal home",
+            },
+          ],
+        },
+        { photo: { url: "https://x/p.jpg", alt: "photo" } },
+      ),
+    );
+    const img = doc.blocks.find((b) => b.type === "image");
+    expect(propsOf(img!).overlayTitle).toBe("Live on the water");
+    expect(propsOf(img!).overlayBody).toBe("A look inside this month's featured listing.");
+  });
+
+  test("AuthorDocSchema truncates overlay_title to 80 and clamps items to 8 / columns to 3", () => {
+    const parsed = AuthorDocSchema.safeParse({
+      blocks: [
+        { type: "image", image_role: "photo", overlay_title: "x".repeat(100) },
+        { type: "list", items: Array.from({ length: 12 }, (_, i) => ({ text: `row ${i}` })) },
+        {
+          type: "multi-column",
+          columns: Array.from({ length: 5 }, (_, i) => ({ heading: `c${i}` })),
+        },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect((parsed.data.blocks[0].overlay_title ?? "").length).toBe(80);
+      expect(parsed.data.blocks[1].items?.length).toBe(8);
+      expect(parsed.data.blocks[2].columns?.length).toBe(3);
+    }
+  });
+
+  test("the prose lint walks multi-column columns and list items", () => {
+    const doc = {
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [
+        {
+          id: "b1",
+          type: "multi-column",
+          props: {
+            columns: [
+              {
+                heading: "Values",
+                body: "The median is $1,250,000 now. It doubled to $9,999,999 overnight.",
+              },
+              { heading: "Pace", body: "Homes sit 47 days." },
+            ],
+          },
+        },
+        {
+          id: "b2",
+          type: "list",
+          props: {
+            items: [{ text: "Rents hit $8,888 this week." }, { text: "Homes sit 47 days." }],
+          },
+        },
+      ],
+    } as unknown as EmailDoc;
+    const r = lintAuthoredProse(doc, collectAnchorNumbers(FIGURES));
+    expect(r.ok).toBe(false);
+    const cols = propsOf(r.stripped.blocks[0]).columns as Array<{ body?: string }>;
+    expect(cols[0].body).toContain("$1,250,000"); // anchored survives
+    expect(cols[0].body).not.toContain("9,999,999"); // unanchored stripped
+    const items = propsOf(r.stripped.blocks[1]).items as Array<{ text: string }>;
+    expect(items[0].text).not.toContain("8,888");
+    expect(items[1].text).toContain("47");
+  });
+});

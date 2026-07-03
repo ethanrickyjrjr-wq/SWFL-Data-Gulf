@@ -93,6 +93,15 @@ export const AUTHOR_TOOL = {
     '`image` block with `image_role:"chart"` or `image_role:"photo"` where it ' +
     "best fits and write its caption/alt; the system drops in the real asset. Do " +
     "not place an image whose asset was not offered.\n\n" +
+    "SECTIONS — optional semantic styling; the system resolves every color and " +
+    'pixel, you never write one. `band` ("light" | "dark" | "accent") gives a ' +
+    "section a background from the user's palette (text flips automatically on " +
+    'dark). `pad` ("airy" | "normal" | "tight") sets breathing room — airy reads ' +
+    "premium. On an image block you may write `overlay_title`/`overlay_body`: " +
+    "short text rendered on top of the image. A `multi-column` block carries " +
+    "`columns` (two or three cards of heading/body/link_label — the system " +
+    "supplies link destinations). A `list` block carries an optional `title` plus " +
+    "`items` rows of {lead, text} (lead is a short prefix like a date tag).\n\n" +
     "Lead with the answer, keep prose tight, no internal ids or jargon. Always " +
     "include a footer block.",
   input_schema: {
@@ -141,6 +150,55 @@ export const AUTHOR_TOOL = {
               type: "string",
               enum: ["chart", "photo"],
               description: "For an image block: which offered asset to place.",
+            },
+            overlay_title: {
+              type: "string",
+              description: "Image blocks only: a short headline rendered on top of the image.",
+            },
+            overlay_body: {
+              type: "string",
+              description: "Image blocks only: supporting text under the overlay headline.",
+            },
+            band: {
+              type: "string",
+              enum: ["light", "dark", "accent"],
+              description:
+                "Optional background band — the system resolves the color from the user's " +
+                "palette and flips text on dark.",
+            },
+            pad: {
+              type: "string",
+              enum: ["airy", "normal", "tight"],
+              description: "Breathing room for this section. Airy reads premium.",
+            },
+            columns: {
+              type: "array",
+              description: "multi-column blocks only: 2–3 feature cards.",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  heading: { type: "string" },
+                  body: { type: "string" },
+                  link_label: {
+                    type: "string",
+                    description: "Optional link text; the system supplies the destination.",
+                  },
+                },
+              },
+            },
+            items: {
+              type: "array",
+              description: "list blocks only: up to 8 rows.",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  lead: { type: "string", description: "Short bold prefix, e.g. a date tag." },
+                  text: { type: "string" },
+                },
+                required: ["text"],
+              },
             },
             stats: {
               type: "array",
@@ -286,6 +344,36 @@ function applyContent(
   }
 }
 
+// ── Semantic layout resolution (the model names a mood; the engine owns the hex/px) ──
+
+const PAD_MAP: Record<NonNullable<AuthoredBlock["pad"]>, "lg" | "md" | "sm"> = {
+  airy: "lg",
+  normal: "md",
+  tight: "sm",
+};
+
+/** Block types whose props extend BlockBase (accept paddingY/sectionBg). */
+const BANDABLE = new Set<BlockType>([
+  "hero",
+  "stats",
+  "signal",
+  "text",
+  "image",
+  "listing",
+  "multi-column",
+  "list",
+]);
+
+/** Resolve a semantic band onto a concrete palette color. Exported for tests. */
+export function resolveBand(
+  band: NonNullable<AuthoredBlock["band"]>,
+  gs: EmailGlobalStyle,
+): string {
+  if (band === "dark") return gs.surfaceDarkColor ?? gs.primaryColor;
+  if (band === "accent") return gs.accentColor;
+  return gs.surfaceColor ?? "#ffffff";
+}
+
 interface AssetSlot {
   url: string;
   alt?: string;
@@ -304,6 +392,9 @@ export interface AssembleArgs {
   chart?: AssetSlot | null;
   /** Resolved hero photo image. */
   photo?: AssetSlot | null;
+  /** Engine-owned destination for authored column links (brand website). The model
+   *  writes `link_label` only; without a destination the label is dropped. */
+  defaultLinkUrl?: string;
 }
 
 /** A literal (non-figure) stat value is allowed ONLY if it invents no number: a
@@ -323,6 +414,8 @@ function buildEntry(
   anchors: ReadonlySet<string>,
   chart: AssetSlot | null | undefined,
   photo: AssetSlot | null | undefined,
+  gs: EmailGlobalStyle,
+  defaultLinkUrl?: string,
 ): { entry: Entry; placedChart: boolean; placedPhoto: boolean } | null {
   const type = a.type as BlockType;
   if (!KNOWN_TYPES.has(type)) return null; // unknown block type (drives off the ONE root) — skip
@@ -359,6 +452,41 @@ function buildEntry(
     } else {
       return null; // image with no offered asset — skip (never emit an empty image)
     }
+    // Authored overlay text rides on top of the resolved asset (colors stay
+    // user-owned defaults — the model wrote no hex).
+    if (a.overlay_title) props.overlayTitle = a.overlay_title.slice(0, 120);
+    if (a.overlay_body) props.overlayBody = a.overlay_body.slice(0, 300);
+  } else if (type === "multi-column") {
+    const cols = (a.columns ?? [])
+      .map((c) => {
+        const col: Record<string, unknown> = {};
+        const heading = (c.heading ?? "").slice(0, 120);
+        const body = (c.body ?? "").slice(0, 500);
+        const linkLabel = (c.link_label ?? "").slice(0, 40);
+        if (heading) col.heading = heading;
+        if (body) col.body = body;
+        if (linkLabel && defaultLinkUrl) {
+          // The model wrote the label; the ENGINE owns the destination.
+          col.linkLabel = linkLabel;
+          col.linkUrl = defaultLinkUrl;
+        }
+        return col;
+      })
+      .filter((c) => Object.keys(c).length > 0)
+      .slice(0, 3);
+    if (cols.length < 2) return null; // schema requires 2–3 — never ship placeholder columns
+    props = defaultPropsFor("multi-column") as unknown as Record<string, unknown>;
+    props.columns = cols;
+  } else if (type === "list") {
+    const items = (a.items ?? [])
+      .map((it) => ({ lead: (it.lead ?? "").slice(0, 24), text: (it.text ?? "").slice(0, 200) }))
+      .filter((it) => it.text !== "")
+      .map((it) => (it.lead ? it : { text: it.text }))
+      .slice(0, 8);
+    if (items.length === 0) return null; // itemless list — skip (never ship placeholder rows)
+    props = defaultPropsFor("list") as unknown as Record<string, unknown>;
+    props.title = (a.title ?? a.label ?? "").slice(0, 120) || undefined;
+    props.items = items;
   } else if (type === "stats") {
     const cells = (a.stats ?? [])
       .map((s) => ({
@@ -375,6 +503,13 @@ function buildEntry(
   } else {
     props = defaultPropsFor(type) as unknown as Record<string, unknown>;
     applyContent(type, props, a, num);
+  }
+
+  // Semantic band/pad — resolved by the engine, only on blocks whose schema
+  // carries sectionBg/paddingY (BlockBase extenders).
+  if (BANDABLE.has(type)) {
+    if (a.band) props.sectionBg = resolveBand(a.band, gs);
+    if (a.pad) props.paddingY = PAD_MAP[a.pad];
   }
 
   return {
@@ -463,14 +598,14 @@ function capBlocks(entries: Entry[]): Entry[] {
 /** Assemble a positioned EmailDoc from the model's authored output. PURE. Brand is
  *  never authored — globalStyle is the incoming (branded) style, untouched. */
 export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
-  const { authored, figuresById, globalStyle, anchorNumbers, chart, photo } = args;
+  const { authored, figuresById, globalStyle, anchorNumbers, chart, photo, defaultLinkUrl } = args;
   const anchors = buildAnchorSet(anchorNumbers); // for the stat-literal number guard
   const entries: Entry[] = [];
   let chartPlaced = false;
   let photoPlaced = false;
 
   for (const a of authored.blocks) {
-    const r = buildEntry(a, figuresById, anchors, chart, photo);
+    const r = buildEntry(a, figuresById, anchors, chart, photo, globalStyle, defaultLinkUrl);
     if (!r) continue;
     entries.push(r.entry);
     if (r.placedChart) chartPlaced = true;
@@ -644,6 +779,32 @@ export function lintAuthoredProse(
     return kept.join(" ");
   };
 
+  // Nested prose surfaces the author writes (multi-column columns, list items) —
+  // same gate, one level down. Returns the linted array, or null when untouched.
+  const lintNested = (arr: unknown, fields: readonly string[]): unknown[] | null => {
+    if (!Array.isArray(arr)) return null;
+    let anyChanged = false;
+    const out = arr.map((el) => {
+      if (!el || typeof el !== "object") return el;
+      const rec = el as Record<string, unknown>;
+      let elChanged = false;
+      const next: Record<string, unknown> = { ...rec };
+      for (const field of fields) {
+        const v = rec[field];
+        if (typeof v === "string" && v) {
+          const cleaned = lintField(v);
+          if (cleaned !== v) {
+            next[field] = cleaned;
+            elChanged = true;
+          }
+        }
+      }
+      if (elChanged) anyChanged = true;
+      return elChanged ? next : el;
+    });
+    return anyChanged ? out : null;
+  };
+
   const blocks = doc.blocks.map((b) => {
     const props = b.props as Record<string, unknown>;
     let changed = false;
@@ -657,6 +818,16 @@ export function lintAuthoredProse(
           changed = true;
         }
       }
+    }
+    const cols = lintNested(props.columns, ["heading", "body", "linkLabel"]);
+    if (cols) {
+      next.columns = cols;
+      changed = true;
+    }
+    const items = lintNested(props.items, ["lead", "text"]);
+    if (items) {
+      next.items = items;
+      changed = true;
     }
     return changed ? ({ ...b, props: next } as EmailBlock) : b;
   });
