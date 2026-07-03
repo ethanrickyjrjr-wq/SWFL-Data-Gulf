@@ -32,13 +32,15 @@ const ZHVI = [
   { zip_code: "34108", home_value_latest: 1250000, latest_period: "2026-04-30", city: null },
   { zip_code: "99999", home_value_latest: 111111, latest_period: "2026-04-30", city: null }, // off-map: dropped
 ];
-const LISTINGS = [
+// Market Activity ← listing_active_stats (active inventory, full Lee+Collier).
+// The null-zip county-rollup row must be DROPPED by the loader's zip_code gate —
+// its 7,673 must never leak into the "Active Listings" total (stays 30+120=150).
+const ACTIVITY = [
   {
     zip_code: "33901",
     county: "Lee",
     listing_count: 30,
     median_list_price: 552500,
-    avg_days_on_market: 157,
     latest_scraped_at: "2026-07-02T00:00:00Z",
   },
   {
@@ -46,15 +48,27 @@ const LISTINGS = [
     county: "Collier",
     listing_count: 120,
     median_list_price: 900000,
-    avg_days_on_market: 90,
     latest_scraped_at: "2026-07-02T00:00:00Z",
   },
+  {
+    zip_code: null,
+    county: "Collier",
+    listing_count: 7673,
+    median_list_price: 615000,
+    latest_scraped_at: "2026-07-02T00:00:00Z",
+  },
+];
+// Days on Market ← market_details_swfl_latest (realtor.com median DOM).
+const MARKET_DETAILS = [
+  { zip_code: "33901", county: "Lee", median_days_on_market: 157, captured_date: "2026-07-02" },
+  { zip_code: "34102", county: "Collier", median_days_on_market: 90, captured_date: "2026-07-02" },
 ];
 
 beforeEach(() => {
   for (const k of Object.keys(tables)) delete tables[k];
   tables["zhvi_zip_latest"] = { data: ZHVI, error: null };
-  tables["active_listings_residential_zip_stats"] = { data: LISTINGS, error: null };
+  tables["listing_active_stats"] = { data: ACTIVITY, error: null };
+  tables["market_details_swfl_latest"] = { data: MARKET_DETAILS, error: null };
 });
 
 describe("loadHomeMapData", () => {
@@ -100,8 +114,9 @@ describe("loadHomeMapData", () => {
     expect(p.stats.map((s) => s.label)).not.toContain("Highest Home Value");
   });
 
-  test("listing query fails → activity AND dom pills absent, page stays live", async () => {
-    tables["active_listings_residential_zip_stats"] = { data: null, error: { message: "boom" } };
+  test("listing queries fail → activity AND dom pills absent, page stays live", async () => {
+    tables["listing_active_stats"] = { data: null, error: { message: "boom" } };
+    tables["market_details_swfl_latest"] = { data: null, error: { message: "boom" } };
     const p = await loadHomeMapData();
     expect(p.data.metrics.activity).toBeUndefined();
     expect(p.data.metrics.dom).toBeUndefined();

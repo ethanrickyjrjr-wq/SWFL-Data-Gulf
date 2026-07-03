@@ -344,7 +344,7 @@ export default function Hero({ payload }: { payload: Payload }) {
             )}
 
             <div className="rail-footer">
-              Sources: Zillow ZHVI · SWFL Data Gulf listings · Census TIGER 2020
+              Sources: Zillow ZHVI · SWFL Data Gulf listings · realtor.com · Census TIGER 2020
             </div>
           </div>
 

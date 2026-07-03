@@ -1,4 +1,29 @@
-## 2026-07-03 (main) — fix(mcp): co-build write tools no longer require a client-unreachable freshness token
+## 2026-07-03 (main) — fix(homepage): map's Market Activity + Days on Market repointed off the WAF-blocked Collier scraper onto full-coverage lake sources
+
+Operator report (`docs/handoff/2026-07-03-homepage-map-color-scope-bugs.md`): all three hero-map
+pills "look flat/same," Collier "taken out" on some pills, Hendry not on the map. Probed live prod +
+the lake instead of trusting the handoff. Findings: (1) the "flat colors" root cause was already
+fixed — `Hero.tsx` colors via `blendedT` (½ rank + ½ log-magnitude) + `rampColor` (commit b03804cb,
+deployed); the handoff pointed at `computeZipGradient`, which only feeds the zip-report page. (2) The
+real culprit behind "flat/same" was Collier going dead-gray on Market Activity + Days on Market:
+both pills read `data_lake.active_listings_residential_zip_stats`, whose Collier coverage had
+collapsed to **3 of ~21 ZIPs** — the WAF-blocked datacenter-IP scrape keeps only rows gathered before
+the 403 (`ingest/pipelines/active_listings/extract.py` header documents this exact Collier failure).
+Two of three pills were Lee-only with a giant gray void, so they read identically.
+
+Fix (`lib/landing/load-home-map-data.ts`): repointed both listing pills onto fully-covered lake
+sources the loader can already reach via PostgREST — Market Activity ← `data_lake.listing_active_stats`
+(active inventory, the SteadyAPI `_api` feed; the null-zip county-rollup row is dropped by the
+zip_code gate), Days on Market ← `data_lake.market_details_swfl_latest.median_days_on_market`
+(realtor.com). Drawable-ZIP coverage of the 57-ZIP map: Market Activity 34→**49**, Days on Market
+3→**53**, Home Value 53 (unchanged) — full Collier on all three. Added realtor.com to the Hero rail
+footer (attribution). `load-home-map-data.test.ts` remocked to the two new tables (+ a null-zip
+rollup case proving it's dropped): 9/9 green; tsc clean on changed files.
+
+Hendry: operator ruled "hold until it has data" (0 ZHVI, ~1 listing/ZIP) — no map/SVG work.
+Next: (a) a fanned-out ingest-engineer subagent is adding a per-COUNTY coverage guard to the
+active_listings pipeline (the total-row guards missed the Collier collapse) + documenting the
+home-IP Collier re-seed; fold that in on return. (b) Operator decision on push. NOT pushed.
 
 Live-testing the MCP co-build flow (`swfl_project_add`) surfaced a real bug: the raw `SWFL-…`
 freshness token never reaches an MCP client's visible TEXT anywhere in this codebase — both

@@ -7,7 +7,12 @@
 //
 // Pill set (operator ruling 07/03/2026): Home Value (default, orange brand
 // ramp) · Market Activity · Days on Market. Flood/permits lost their pills —
-// hollow first-click cells. Both listing metrics ride ONE query.
+// hollow first-click cells. Market Activity ← data_lake.listing_active_stats
+// (active inventory, full Lee+Collier); Days on Market ← market_details_swfl_latest
+// (realtor.com median DOM, full Lee+Collier). The old
+// active_listings_residential_zip_stats scraper table is ABANDONED here — its
+// Collier coverage collapsed to 3 ZIPs (WAF-blocked datacenter IP), which
+// rendered the southern half of the map dead gray (operator report 07/03/2026).
 //
 // Empty-tolerant by contract (four-lane / ODD): no creds, no rows, any query
 // error → per-metric fallback, NEVER a thrown error and NEVER an invented
@@ -50,13 +55,18 @@ interface ZhviRow {
   latest_period: string | null;
   city: string | null;
 }
-interface ListingRow {
+interface ActivityRow {
   zip_code: string;
   county: string | null;
   listing_count: number | string | null;
   median_list_price: number | string | null;
-  avg_days_on_market: number | string | null;
   latest_scraped_at: string | null;
+}
+interface DomRow {
+  zip_code: string;
+  county: string | null;
+  median_days_on_market: number | string | null;
+  captured_date: string | null;
 }
 
 function metricFromRows(
@@ -89,7 +99,7 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
   let dom: MetricDef | null = null;
 
   let zhviRows: ZhviRow[] = [];
-  let listingRows: ListingRow[] = [];
+  let activityRows: ActivityRow[] = [];
 
   // ── Home Value — data_lake.zhvi_zip_latest (Zillow ZHVI) ──
   if (db) {
@@ -126,24 +136,25 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
     }
   }
 
-  // ── Market Activity + Days on Market — one query, two pills ──
+  // ── Market Activity — data_lake.listing_active_stats (active inventory; full
+  //    Lee+Collier). Row grain is per-ZIP; a null-zip county-rollup row also
+  //    lives here (Collier total ~7,673) — the MAP_ZIPS gate drops it. ──
   if (db) {
     try {
       const { data, error } = await db
         .schema("data_lake")
-        .from("active_listings_residential_zip_stats")
-        .select(
-          "zip_code, county, listing_count, median_list_price, avg_days_on_market, latest_scraped_at",
-        );
+        .from("listing_active_stats")
+        .select("zip_code, county, listing_count, median_list_price, latest_scraped_at");
       if (!error && data) {
-        listingRows = (data as ListingRow[]).filter((r) => MAP_ZIPS.has(r.zip_code));
-        const latest = listingRows
+        activityRows = (data as ActivityRow[]).filter(
+          (r) => r.zip_code != null && MAP_ZIPS.has(r.zip_code),
+        );
+        const latest = activityRows
           .map((r) => r.latest_scraped_at)
           .sort()
           .at(-1);
-        const asOf = mdY(latest);
         activity = metricFromRows(
-          listingRows
+          activityRows
             .map((r) => ({ zip: r.zip_code, val: num(r.listing_count) }))
             .filter((r): r is { zip: string; val: number } => r.val != null),
           {
@@ -153,26 +164,49 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
             c0: "#314a6b",
             c1: "#4a6fa8",
             c2: "#a0c4ff",
-            asOf,
-          },
-        );
-        dom = metricFromRows(
-          listingRows
-            .map((r) => ({ zip: r.zip_code, val: num(r.avg_days_on_market) }))
-            .filter((r): r is { zip: string; val: number } => r.val != null),
-          {
-            label: "Days on Market",
-            sublabel: "Average days on market, residential listings (SWFL Data Gulf)",
-            format: "number",
-            c0: "#1f4f4a",
-            c1: "#3DC9C0",
-            c2: "#b9ede8",
-            asOf,
+            asOf: mdY(latest),
           },
         );
       }
     } catch {
-      /* no fixture for listing metrics — their pills hide */
+      /* no fixture for the activity metric — its pill hides */
+    }
+  }
+
+  // ── Days on Market — data_lake.market_details_swfl_latest (realtor.com median
+  //    DOM; full Lee+Collier). Separate source from activity: listing_active_stats
+  //    carries no DOM for Collier (null), so DOM rides realtor.com's ZIP grain. ──
+  if (db) {
+    try {
+      const { data, error } = await db
+        .schema("data_lake")
+        .from("market_details_swfl_latest")
+        .select("zip_code, county, median_days_on_market, captured_date");
+      if (!error && data) {
+        const domRows = (data as DomRow[]).filter(
+          (r) => r.zip_code != null && MAP_ZIPS.has(r.zip_code),
+        );
+        const latest = domRows
+          .map((r) => r.captured_date)
+          .sort()
+          .at(-1);
+        dom = metricFromRows(
+          domRows
+            .map((r) => ({ zip: r.zip_code, val: num(r.median_days_on_market) }))
+            .filter((r): r is { zip: string; val: number } => r.val != null),
+          {
+            label: "Days on Market",
+            sublabel: "Median days on market, residential listings (realtor.com)",
+            format: "number",
+            c0: "#1f4f4a",
+            c1: "#3DC9C0",
+            c2: "#b9ede8",
+            asOf: mdY(latest),
+          },
+        );
+      }
+    } catch {
+      /* no fixture for the DOM metric — its pill hides */
     }
   }
 
@@ -200,15 +234,15 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
   // ── Stats bar — verbatim row values + counts only (no derived rates) ──
   const stats: HomeStatCell[] = [];
 
-  if (listingRows.length > 0 && activity && !activity.sample) {
-    const total = listingRows.reduce((s, r) => s + (num(r.listing_count) ?? 0), 0);
+  if (activityRows.length > 0 && activity && !activity.sample) {
+    const total = activityRows.reduce((s, r) => s + (num(r.listing_count) ?? 0), 0);
     stats.push({
       label: "Active Listings",
       value: total.toLocaleString("en-US"),
       sub: "Lee & Collier Counties",
       tag: `SWFL Data Gulf${activity.asOf ? ` · ${activity.asOf}` : ""}`,
     });
-    const busiest = [...listingRows].sort(
+    const busiest = [...activityRows].sort(
       (a, b) => (num(b.listing_count) ?? 0) - (num(a.listing_count) ?? 0),
     )[0];
     if (busiest) {
