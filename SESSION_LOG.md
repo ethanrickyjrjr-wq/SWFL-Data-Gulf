@@ -1,3 +1,34 @@
+## 2026-07-03 (main) — plan(mcp-account-level-auth): design spec for account-level MCP token
+
+Operator hit the per-project MCP key friction live: asked to file a ZIP 33931 median-sale-price
+metric into a project, `swfl_project_add`/`swfl_project_list` 401'd with "no project key found."
+Traced it to `app/api/mcp/project-tools.ts` `resolveProjectByKey` — the key is a per-project
+capability minted at `app/api/projects/[id]/mcp-key/route.ts`, sent as `X-Project-Key`, and this
+session's `.mcp.json` swfl entry had no header configured at all. Operator had tried fixing it by
+setting a bearer token as a Vercel env var and redeploying — that changes the deployed server, not
+the local `.mcp.json` header this session sends, so it did nothing. Once the per-project design was
+visible, operator called it "terrible" and asked for a redesign: connect once, every project reachable
+without re-minting a key per project.
+
+Researched via crawl4ai (RULE 0.4) — modelcontextprotocol.io/specification/2025-06-18/basic/authorization:
+confirmed MCP's own OAuth model binds a token to the whole server connection (RFC 8707 resource
+indicator = the MCP server's canonical URI), not to a sub-resource like one project. Per-entity
+scoping is left to the application layer via tool arguments + server-side ownership checks — this is
+exactly how the GitHub/Notion MCP connections already active in this session behave. So today's
+per-project-key design is stricter than the MCP norm; account-level auth is the standard pattern, not
+a shortcut.
+
+Wrote the full redesign to `docs/superpowers/specs/2026-07-03-mcp-account-level-auth-design.md`:
+one account-level token (new `public.user_mcp_tokens` table, `X-Account-Key` header, minted at
+`app/settings/mcp/page.tsx`), project selection via an optional `project` arg on
+`swfl_project_add`/`_list`/`_build` resolved server-side (exact id → exact title → prefix →
+substring, first tier with exactly one hit wins), and a hard code-enforced guardrail: zero or 2+
+matches at every tier returns a numbered candidate list and touches NO database row — never a guess,
+never a partial write. Also caught mid-design that `lib/identity/mcp-connected.ts` derives the
+rung-2 send discount from `projects.mcp_key IS NOT NULL` — that check has to move to the new token
+table in the same change or the discount silently breaks. Spec written, not yet implemented — next
+session should run it through writing-plans.
+
 ## 2026-07-03 (main) — zip_hero_pool_all_brains — built, verified, pushed
 
 Executed the 7-task plan inline (bounded, already fully specced — no subagents needed). Before
