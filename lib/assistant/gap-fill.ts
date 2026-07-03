@@ -194,19 +194,29 @@ async function runSearch(prompt: string, domains: string[]): Promise<unknown[]> 
   return accumulated;
 }
 
-const defaultSearch: SearchFn = async (prompt) => {
-  try {
-    return await runSearch(prompt, SEARCH_ALLOWED_DOMAINS);
-  } catch (err) {
-    // Self-heal: a 400 naming blocked domains → strip them and retry once. A domain
-    // that opted out of Anthropic's crawler must not kill the whole feature.
-    const blocked = parseBlockedDomains(err instanceof Error ? err.message : String(err));
-    if (blocked.length === 0) throw err;
-    const pruned = SEARCH_ALLOWED_DOMAINS.filter((d) => !blocked.includes(d));
-    console.warn(`[gap-fill] dropping blocked domain(s) ${blocked.join(", ")} and retrying`);
-    return await runSearch(prompt, pruned);
-  }
-};
+/**
+ * Build a SearchFn over a custom allowed-domain list, with the same self-heal on
+ * vendor blocked-domain 400s as the default. Lets the Find-it endpoint add the
+ * issuing city's own domain for an allowlisted metric gap without touching the
+ * default chart-peer list.
+ */
+export function makeDomainSearch(domains: string[]): SearchFn {
+  return async (prompt) => {
+    try {
+      return await runSearch(prompt, domains);
+    } catch (err) {
+      // Self-heal: a 400 naming blocked domains → strip them and retry once. A domain
+      // that opted out of Anthropic's crawler must not kill the whole feature.
+      const blocked = parseBlockedDomains(err instanceof Error ? err.message : String(err));
+      if (blocked.length === 0) throw err;
+      const pruned = domains.filter((d) => !blocked.includes(d));
+      console.warn(`[gap-fill] dropping blocked domain(s) ${blocked.join(", ")} and retrying`);
+      return await runSearch(prompt, pruned);
+    }
+  };
+}
+
+const defaultSearch: SearchFn = makeDomainSearch([...SEARCH_ALLOWED_DOMAINS]);
 
 /**
  * Fetch ONE external chart figure live and return it only if verified against a real
