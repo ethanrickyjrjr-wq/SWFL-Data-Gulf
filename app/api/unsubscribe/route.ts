@@ -27,9 +27,23 @@ async function unsubscribeOutreach(rid: string | null): Promise<void> {
       .from("outreach_recipients")
       .update({ status: "unsubscribed", updated_at: new Date().toISOString() })
       .eq("id", rid);
+    await supabase.from("outreach_events").insert({ recipient_id: rid, event: "unsubscribed" });
+  } catch {
+    // best-effort
+  }
+}
+
+// Weekly-read subscribers (Lane D) carry ?wid=<weekly_read_subscribers.id>. Flip
+// status to 'unsubscribed' (the weekly runner's shouldSend then excludes them).
+// Best-effort, same contract as the branches above.
+async function unsubscribeWeeklyRead(wid: string | null): Promise<void> {
+  if (!wid) return;
+  try {
+    const supabase = createServiceRoleClient();
     await supabase
-      .from("outreach_events")
-      .insert({ recipient_id: rid, event: "unsubscribed" });
+      .from("weekly_read_subscribers")
+      .update({ status: "unsubscribed", updated_at: new Date().toISOString() })
+      .eq("id", wid);
   } catch {
     // best-effort
   }
@@ -39,6 +53,7 @@ async function handle(req: NextRequest): Promise<void> {
   const params = new URL(req.url).searchParams;
   await unsubscribe(params.get("id"));
   await unsubscribeOutreach(params.get("rid"));
+  await unsubscribeWeeklyRead(params.get("wid"));
 }
 
 // Gmail's one-click List-Unsubscribe-Post sends a POST.

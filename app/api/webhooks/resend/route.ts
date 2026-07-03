@@ -26,6 +26,7 @@ import {
 } from "@/lib/email/process-inbound";
 import { extractOutreachAction, type ResendWebhookPayload } from "@/lib/email/outreach/lifecycle";
 import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
+import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,6 +63,28 @@ export async function POST(request: Request): Promise<Response> {
     event = JSON.parse(raw) as InboundEvent;
   } catch {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+
+  // ── Weekly-read (Lane D): suppression only ─────────────────────────────────
+  // A bounce/complaint on a `wid`-tagged send flips the subscriber terminal. The
+  // status guard makes it idempotent and never resurrects an unsubscribed row.
+  // Weekly-read messages carry `wid` (never `rid`), so this and the outreach
+  // branch below can't both match one event.
+  const weeklyAction = extractWeeklyReadAction(event as unknown as ResendWebhookPayload);
+  if (weeklyAction) {
+    try {
+      const wdb = createServiceRoleClient();
+      await wdb
+        .from("weekly_read_subscribers")
+        .update({ status: weeklyAction.suppressTo, updated_at: new Date().toISOString() })
+        .eq("id", weeklyAction.wid)
+        .eq("status", "active");
+    } catch (err) {
+      console.error(
+        `[resend-webhook] weekly-read suppression failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    return NextResponse.json({ ok: true, kind: "weekly-read" }, { status: 200 });
   }
 
   // ── Outreach Increment 2: outbound tracking ───────────────────────────────
