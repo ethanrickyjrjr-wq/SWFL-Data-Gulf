@@ -85,6 +85,7 @@
 .home-explorer .tip-zip {font-family:var(--font-geist-mono),monospace;font-size:10px;color:var(--text-tertiary);margin-bottom:1px}
 .home-explorer .tip-place {font-size:13px;font-weight:500;margin-bottom:3px}
 .home-explorer .tip-val {font-family:var(--font-geist-mono),monospace;font-size:14px;font-weight:600;color:var(--neutral-gold)}
+.home-explorer .tip-cta {font-size:10px;color:var(--gulf-teal);margin-top:4px}
 
 /* ── Stats bar ── */
 .home-explorer .stats-bar {display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--gulf-slate);background:var(--gulf-deep)}

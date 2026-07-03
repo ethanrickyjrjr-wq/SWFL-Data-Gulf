@@ -35,7 +35,6 @@ export default async function Home() {
     : [
         { name: "Zillow ZHVI", asOf: data.metrics.value?.asOf },
         { name: "SWFL Data Gulf listings", asOf: data.metrics.activity?.asOf },
-        { name: "FEMA NFIP", asOf: data.metrics.flood?.asOf },
         { name: "U.S. Census TIGER" },
       ];
 
@@ -49,18 +48,13 @@ export default async function Home() {
       const usd = (n: number) =>
         n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${Math.round(n / 1000)}K`;
       const listings = data.metrics.activity?.sample ? undefined : data.metrics.activity?.data[zip];
-      const flood = data.metrics.flood?.sample ? undefined : data.metrics.flood?.data[zip];
+      const domDays = data.metrics.dom?.sample ? undefined : data.metrics.dom?.data[zip];
       showcase = {
         zip,
         place: data.placeNames[zip] ?? zip,
         value: usd(val),
         listings: listings !== undefined ? listings.toLocaleString("en-US") : undefined,
-        flood:
-          flood !== undefined
-            ? flood >= 1_000_000
-              ? `$${(flood / 1_000_000).toFixed(1)}M`
-              : `$${Math.round(flood / 1000)}K`
-            : undefined,
+        dom: domDays !== undefined ? `${Math.round(domDays)} days` : undefined,
         asOf: valueMetric.asOf,
       };
     }

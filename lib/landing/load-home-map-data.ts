@@ -1,15 +1,19 @@
 // lib/landing/load-home-map-data.ts
 //
 // Live-lake loader for the homepage hero map + stats bar (Lane B Phase 1 —
-// kills the mock). Reads three data_lake views via the service-role PostgREST
-// client (same pattern as lib/zip-summary/load.ts / lib/email/market-context.ts)
-// and returns the HomeMapData shape the Hero renders.
+// kills the mock). Reads data_lake views via the service-role PostgREST client
+// (same pattern as lib/zip-summary/load.ts / lib/email/market-context.ts) and
+// returns the HomeMapData shape the Hero renders.
+//
+// Pill set (operator ruling 07/03/2026): Home Value (default, orange brand
+// ramp) · Market Activity · Days on Market. Flood/permits lost their pills —
+// hollow first-click cells. Both listing metrics ride ONE query.
 //
 // Empty-tolerant by contract (four-lane / ODD): no creds, no rows, any query
 // error → per-metric fallback, NEVER a thrown error and NEVER an invented
-// number. Home Value + Flood fall back to the mock fixture WITH `sample: true`
-// (badge renders "Sample data"); Market Activity has no fixture — on failure
-// its pill simply doesn't render.
+// number. Home Value falls back to the mock fixture WITH `sample: true` (badge
+// renders "Sample data"); the listing metrics have no fixture — on failure
+// their pills simply don't render.
 //
 // KNOWN-DEBT(data_lake: market views live in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -17,12 +21,6 @@ import type { HomeMapData, HomeMapPayload, HomeStatCell, MetricDef } from "./hom
 import { HOME_MAP_DATA } from "./home-map-data";
 
 export type { HomeMapPayload, HomeStatCell } from "./home-map-types";
-
-/** Mirrors AAL_WINDOW_YEARS (refinery/sources/fema-nfip-source.mts) — the
- *  fema_nfip_zip_window_agg view is built on that constant. Kept as a literal
- *  because the refinery module drags config/env at import; the loader test
- *  imports both and asserts they agree. */
-export const NFIP_WINDOW_YEARS = 10;
 
 /** The ZIP set the contractor SVG can draw — rows outside it are dropped. */
 const MAP_ZIPS = new Set(Object.keys(HOME_MAP_DATA.placeNames));
@@ -60,12 +58,6 @@ interface ListingRow {
   avg_days_on_market: number | string | null;
   latest_scraped_at: string | null;
 }
-interface NfipRow {
-  zip: string;
-  paid_total_in_window_usd: number | string | null;
-  claim_count_in_window: number | string | null;
-  window_end_year: number | null;
-}
 
 function metricFromRows(
   rows: Array<{ zip: string; val: number }>,
@@ -88,13 +80,13 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
   try {
     db = createServiceRoleClientUntyped();
   } catch {
-    db = null; // no lake creds in this env — full fixture fallback below
+    db = null; // no lake creds in this env — fixture fallback below
   }
 
   const placeNames: Record<string, string> = { ...HOME_MAP_DATA.placeNames };
   let value: MetricDef | null = null;
   let activity: MetricDef | null = null;
-  let flood: MetricDef | null = null;
+  let dom: MetricDef | null = null;
 
   let zhviRows: ZhviRow[] = [];
   let listingRows: ListingRow[] = [];
@@ -119,9 +111,11 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
           label: "Home Value",
           sublabel: "Median home value (Zillow ZHVI)",
           format: "currency",
-          c0: "#256b5f",
-          c1: "#3DC9C0",
-          c2: "#5bc97a",
+          // The orange brand ramp (operator ruling 07/03/2026): dark slate
+          // base, gold→coral coast — Home Value is the first map and wears it.
+          c0: "#33525e",
+          c1: "#d4b370",
+          c2: "#e08158",
           asOf: mdY(latest),
         });
         for (const r of zhviRows)
@@ -132,7 +126,7 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
     }
   }
 
-  // ── Market Activity — data_lake.active_listings_residential_zip_stats ──
+  // ── Market Activity + Days on Market — one query, two pills ──
   if (db) {
     try {
       const { data, error } = await db
@@ -143,75 +137,56 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
         );
       if (!error && data) {
         listingRows = (data as ListingRow[]).filter((r) => MAP_ZIPS.has(r.zip_code));
-        const rows = listingRows
-          .map((r) => ({ zip: r.zip_code, val: num(r.listing_count) }))
-          .filter((r): r is { zip: string; val: number } => r.val != null);
         const latest = listingRows
           .map((r) => r.latest_scraped_at)
           .sort()
           .at(-1);
-        activity = metricFromRows(rows, {
-          label: "Market Activity",
-          sublabel: "Active residential listings (SWFL Data Gulf)",
-          format: "number",
-          c0: "#3d5a80",
-          c1: "#4a6fa8",
-          c2: "#a0c4ff",
-          asOf: mdY(latest),
-        });
+        const asOf = mdY(latest);
+        activity = metricFromRows(
+          listingRows
+            .map((r) => ({ zip: r.zip_code, val: num(r.listing_count) }))
+            .filter((r): r is { zip: string; val: number } => r.val != null),
+          {
+            label: "Market Activity",
+            sublabel: "Active residential listings (SWFL Data Gulf)",
+            format: "number",
+            c0: "#314a6b",
+            c1: "#4a6fa8",
+            c2: "#a0c4ff",
+            asOf,
+          },
+        );
+        dom = metricFromRows(
+          listingRows
+            .map((r) => ({ zip: r.zip_code, val: num(r.avg_days_on_market) }))
+            .filter((r): r is { zip: string; val: number } => r.val != null),
+          {
+            label: "Days on Market",
+            sublabel: "Average days on market, residential listings (SWFL Data Gulf)",
+            format: "number",
+            c0: "#1f4f4a",
+            c1: "#3DC9C0",
+            c2: "#b9ede8",
+            asOf,
+          },
+        );
       }
     } catch {
-      /* no fixture for activity — pill hides */
+      /* no fixture for listing metrics — their pills hide */
     }
   }
 
-  // ── Flood — data_lake.fema_nfip_zip_window_agg (FEMA NFIP paid claims) ──
-  if (db) {
-    try {
-      const { data, error } = await db
-        .schema("data_lake")
-        .from("fema_nfip_zip_window_agg")
-        .select("zip, paid_total_in_window_usd, claim_count_in_window, window_end_year");
-      if (!error && data) {
-        const nfipRows = (data as NfipRow[]).filter((r) => MAP_ZIPS.has(r.zip));
-        const rows = nfipRows
-          .map((r) => ({ zip: r.zip, val: num(r.paid_total_in_window_usd) }))
-          .filter((r): r is { zip: string; val: number } => r.val != null);
-        const endYear = nfipRows
-          .map((r) => r.window_end_year)
-          .filter((y): y is number => y != null)
-          .sort()
-          .at(-1);
-        const window = endYear ? `${endYear - NFIP_WINDOW_YEARS + 1}–${endYear}` : undefined;
-        flood = metricFromRows(rows, {
-          label: "Flood Risk",
-          // The view has no property count — "per property" is NOT derivable.
-          // Label states exactly what the rows hold: total NFIP claims paid.
-          sublabel: `NFIP flood claims paid per ZIP${window ? `, ${window}` : ""} (FEMA)`,
-          format: "currency",
-          c0: "#3d6272",
-          c1: "#d4b370",
-          c2: "#e08158",
-          asOf: window,
-        });
-      }
-    } catch {
-      /* fall through to fixture */
-    }
-  }
-
-  // ── Fixture fallbacks (sample:true rides each) ──
+  // ── Fixture fallback (sample:true rides it) ──
   if (!value) value = HOME_MAP_DATA.metrics.value;
-  if (!flood) flood = HOME_MAP_DATA.metrics.flood;
 
-  const anySample = Boolean(value.sample || flood.sample || (activity && activity.sample));
+  const anySample = Boolean(value.sample);
 
   const data: HomeMapData = {
     placeNames,
     metrics: {
       value,
       ...(activity ? { activity } : {}),
-      flood,
+      ...(dom ? { dom } : {}),
     },
   };
 

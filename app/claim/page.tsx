@@ -82,6 +82,9 @@ export default async function ClaimPage({
 
   const itemWord = peek.itemCount === 1 ? "item" : "items";
   const kinds = peek.kinds.map((k) => KIND_LABEL[k] ?? k).join(", ");
+  // Zero-item claims are SEEDED projects (/welcome brand arrivals) — "0 items
+  // you assembled with your AI" read as a broken promise (operator, 07/03).
+  const seeded = peek.itemCount === 0;
 
   if (!user) {
     const next = `/claim?t=${token}`;
@@ -91,15 +94,15 @@ export default async function ClaimPage({
           {peek.title || "Continue your work on the web"}
         </h1>
         <p className="mt-2 text-sm text-gray-400">
-          Sign in to bring over {peek.itemCount} {itemWord}
-          {kinds ? ` (${kinds})` : ""} you assembled with your AI — then refine and build a polished
-          deliverable.
+          {seeded
+            ? `Sign in to open your ${peek.title || "new"} project — seeded and ready to style and send.`
+            : `Sign in to bring over ${peek.itemCount} ${itemWord}${kinds ? ` (${kinds})` : ""} you assembled with your AI — then refine and build a polished deliverable.`}
         </p>
         <Link
           href={`/login?next=${encodeURIComponent(next)}`}
           className="mt-5 inline-flex items-center justify-center rounded-xl bg-gulf-teal px-4 py-2 text-sm font-medium text-[#0a1419] transition-colors hover:bg-gulf-teal/80"
         >
-          Sign in to claim
+          {seeded ? "Sign in to open it" : "Sign in to claim"}
         </Link>
       </Shell>
     );
@@ -109,8 +112,9 @@ export default async function ClaimPage({
     <Shell>
       <h1 className="text-lg font-semibold text-white">{peek.title || "Claiming your work"}</h1>
       <p className="mt-2 text-sm text-gray-400">
-        Bringing over {peek.itemCount} {itemWord}
-        {kinds ? ` (${kinds})` : ""}…
+        {seeded
+          ? `Opening your ${peek.title || "new"} project…`
+          : `Bringing over ${peek.itemCount} ${itemWord}${kinds ? ` (${kinds})` : ""}…`}
       </p>
       <ClaimOnLogin token={token} />
     </Shell>

@@ -29,6 +29,10 @@ interface Props {
   initialBranding?: Record<string, string>;
   scope?: { kind: string; value: string } | null;
   initialDoc?: EmailDoc | null;
+  /** True when initialDoc is the homepage-map ?zip= prebuild — suppresses the
+   *  one-shot AI auto-build (deterministic seed must not be clobbered by an
+   *  LLM call on arrival; the AI engages when the visitor edits). */
+  zipSeeded?: boolean;
   deliverableId?: string | null;
   /** Lane E gallery: false = no block-canvas deliverable exists yet, so a
    *  doc-less open lands on the template gallery instead of the canvas. */
@@ -51,6 +55,7 @@ export function ProjectEmailLabClient({
   initialBranding,
   scope,
   initialDoc,
+  zipSeeded,
   deliverableId,
   hasDeliverables,
   autoOpenSchedule,
@@ -196,7 +201,7 @@ export function ProjectEmailLabClient({
     initialBranding,
     scope: effectiveScope,
     initialAiPrompt: aiPrompt,
-    autoGenerate: !savedId && !hasToggled && !galleryPicked,
+    autoGenerate: !savedId && !hasToggled && !galleryPicked && !zipSeeded,
     aiPlaceholder: `e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`,
     onSave: handleSave,
     saving,

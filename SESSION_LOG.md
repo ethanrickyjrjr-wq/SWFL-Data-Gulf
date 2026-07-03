@@ -1,3 +1,32 @@
+## 2026-07-03 (main) — MAP CLICK → SEEDED LAB built (lab-first funnel spec) + operator map orders (orange Home Value, dense pills, blended pop) — LOCAL, push held
+
+Operator rulings (verbatim escalations): map click goes to the email lab with the ZIP loaded
+(no select-panel middleman), Home Value is the first map and wears the ORANGE brand ramp
+(#33525e→#d4b370→#e08158 — my earlier "lifted" c0s + teal→green value ramp read as one flat
+teal: reverted), pills only for metrics that reliably have numbers (flood + permits OUT —
+hollow first-click cells; Days on Market IN, same live listing query as Market Activity),
+"pop where numbers are DECISIVELY different" → blendedT = ½ rank + ½ log-magnitude
+(home-map-types). Executed the 2026-07-03-lab-first-funnel-landing spec (handed over by
+operator): lib/email/zip-seed.ts deterministic composer (market-context figures verbatim,
+prose carries zero digits, unknown/empty → null), ?zip= seeds all three lab arrival paths
+(anonymous EmailLabClient / labDestination carry / AutoCreateProject carry / project Email
+tab as new draft, autoGenerate suppressed so the LLM never clobbers the seed),
+Hero map+rail clicks → /email-lab?zip= (full load so the param survives the signed-in server
+redirect), zip-report CTA → plain link (OpenProjectCta keeps its /welcome caller),
+SendToSelfModal (OTP mirror of login-form, typo-suggest included) + POST
+/api/lab/claim-and-send (RLS project insert + service-role deliverable insert mirroring
+materials POST, renderEmailDocHtml + url-lint gate, ONE send hard-pinned to session email,
+quota-gated, send-failure still returns saved project), /claim zero-item seeded copy.
+Verified: bunx next build green; 16 bun tests green (loader/blend/zip-seed/guard); live
+walkthrough on :3005 — orange map pops, click 33914 → lab opens "$421,294 · Cape Coral
+(33914) · Zillow ZHVI · as of 05/31/2026" + cited figure rows, Send-to-self modal opens.
+NOT verified (needs live OTP + a real send — operator-run): the full capture round-trip.
+DISCREPANCY flagged: homepage rail vs seed email cite different live listing tables
+(active_listings_residential_zip_stats 154 vs listing_active_stats 1002 for 33914) — both
+real, scopes differ, one-root decision pending. Parallel-session note: released 3601ec56's
+stale claims on landing files per operator handoff ("the other is just a spec"); node_modules
+was broken mid-session (bun install EBUSY vs my own :3005 server — killed task, reinstalled).
+
 ## 2026-07-03 (main) — Email Lab "Make this": examples lead + recipe buttons build the thing (COMMITTED LOCAL, push on operator word)
 
 Operator escalation: lab must LEAD with what users can do; examples' "See the real thing"

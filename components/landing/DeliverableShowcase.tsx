@@ -10,7 +10,7 @@ export interface ShowcaseFigures {
   place: string;
   value?: string;
   listings?: string;
-  flood?: string;
+  dom?: string;
   asOf?: string;
 }
 
@@ -75,10 +75,10 @@ export default function DeliverableShowcase({ figures }: { figures: ShowcaseFigu
                     <span className="showcase-fig-val">{figures.listings}</span>
                   </div>
                 )}
-                {figures.flood && (
+                {figures.dom && (
                   <div className="showcase-fig">
-                    <span className="showcase-fig-label">NFIP claims paid</span>
-                    <span className="showcase-fig-val">{figures.flood}</span>
+                    <span className="showcase-fig-label">Avg days on market</span>
+                    <span className="showcase-fig-val">{figures.dom}</span>
                   </div>
                 )}
                 <div className="showcase-mail-cite">

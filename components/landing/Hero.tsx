@@ -5,27 +5,34 @@ import { useRouter } from "next/navigation";
 import {
   METRIC_ORDER,
   NO_DATA_FILL,
-  quantileT,
+  blendedT,
   rampColor,
   type HomeMapPayload,
   type MetricKey,
 } from "@/lib/landing/home-map-types";
 
 /**
- * Homepage hero — Lane B Phase 1 (spec: 2026-07-03-homepage-rebuild-design.md).
+ * Homepage hero — Lane B Phase 1 (specs: 2026-07-03-homepage-rebuild-design.md
+ * + 2026-07-03-lab-first-funnel-landing-design.md).
+ *
  * Live-lake choropleth (props-fed by lib/landing/load-home-map-data.ts — the
- * mock fixture only rides as its fail-soft fallback), Home Value default
- * (locked vision), rank-based colors so the skewed metrics read as data
- * instead of a dead low-end mass, and a data rail that leads with the top-5
- * ZIPs before any interaction. Map click SELECTS (fills the rail) — the rail's
- * two doors are "Build a branded email" (/email-lab?zip=) and the full ZIP
- * report. The contractor SVG is served from public/map/lee-collier.svg and
- * injected client-side.
+ * mock fixture only rides as its fail-soft fallback). Home Value is the first
+ * map and wears the orange brand ramp; color position blends rank with
+ * magnitude so decisive gaps pop (operator rulings 07/03/2026).
+ *
+ * MAP CLICK = THE LAB (operator's shape, locked 07/03/2026): clicking any ZIP —
+ * map polygon or rail row — lands in /email-lab?zip= with that ZIP's page
+ * prebuilt as a branded email. No intermediate select-panel. The contractor SVG
+ * is served from public/map/lee-collier.svg and injected client-side.
  */
 
 type Payload = Pick<HomeMapPayload, "data" | "badge" | "stats">;
 
-const county = (zip: string) => (parseInt(zip) >= 34100 ? "Collier County" : "Lee County");
+/** Full page load (not router.push): the signed-in path is a server redirect
+ *  into the project Email tab and the ?zip= must reach the server. */
+const openZipInLab = (zip: string) => {
+  window.location.href = `/email-lab?zip=${zip}`;
+};
 
 const fmt = (val: number, format: "currency" | "number") => {
   if (format === "currency") {
@@ -46,7 +53,6 @@ export default function Hero({ payload }: { payload: Payload }) {
     [data.metrics],
   );
   const [metric, setMetric] = useState<MetricKey>(availableMetrics[0] ?? "value");
-  const [selected, setSelected] = useState<string | null>(null);
   const [svgReady, setSvgReady] = useState(false);
 
   const svgHostRef = useRef<HTMLDivElement>(null);
@@ -62,10 +68,10 @@ export default function Hero({ payload }: { payload: Payload }) {
 
   const active = data.metrics[metric];
 
-  /** Rank position per ZIP for the active metric (drives color + mini-bars). */
-  const activeT = useMemo(() => (active ? quantileT(active.data) : {}), [active]);
+  /** Color position per ZIP: ½ rank + ½ log-magnitude (see home-map-types). */
+  const activeT = useMemo(() => (active ? blendedT(active.data) : {}), [active]);
 
-  /** Descending [zip, value] for ranks + the top-5 rail list. */
+  /** Descending [zip, value] for the top-5 rail list. */
   const activeRanked = useMemo(
     () => (active ? Object.entries(active.data).sort((a, b) => b[1] - a[1]) : []),
     [active],
@@ -102,6 +108,7 @@ export default function Hero({ payload }: { payload: Payload }) {
       set("tip-zip", zip);
       set("tip-place", data.placeNames[zip] || "");
       set("tip-val", m && val !== undefined ? fmt(val, m.format) : "N/A");
+      set("tip-cta", "Click → open as a branded email");
       tip.style.opacity = "1";
       moveTip(e);
     };
@@ -116,8 +123,11 @@ export default function Hero({ payload }: { payload: Payload }) {
         host.innerHTML = svgText;
         host.querySelectorAll<SVGGElement>(".zip-group").forEach((g) => {
           g.setAttribute("tabindex", "0");
-          g.setAttribute("role", "button");
-          g.setAttribute("aria-label", `${data.placeNames[g.id] || g.id} (${g.id})`);
+          g.setAttribute("role", "link");
+          g.setAttribute(
+            "aria-label",
+            `${data.placeNames[g.id] || g.id} (${g.id}) — open as a branded email`,
+          );
           const on = <K extends keyof HTMLElementEventMap>(
             type: K,
             fn: (e: HTMLElementEventMap[K]) => void,
@@ -128,19 +138,18 @@ export default function Hero({ payload }: { payload: Payload }) {
           on("mouseenter", (e) => showTip(e as MouseEvent, g.id));
           on("mousemove", (e) => moveTip(e as MouseEvent));
           on("mouseleave", hideTip);
-          on("click", () => setSelected(g.id));
+          on("click", () => openZipInLab(g.id));
           on("keydown", (e) => {
             const ke = e as KeyboardEvent;
             if (ke.key === "Enter" || ke.key === " ") {
               ke.preventDefault();
-              setSelected(g.id);
+              openZipInLab(g.id);
             }
           });
         });
 
         // Clean edge cuts: Lee top cut (y=153, removes NFM) + Collier staircase
-        // right. Pad tightened 0.06 → 0.025 — the old pad left a dead moat of
-        // canvas around the counties.
+        // right. Pad 0.025 — the old 0.06 left a dead moat around the counties.
         const svg = host.querySelector("svg");
         if (svg) {
           svg.setAttribute("width", "100%");
@@ -214,7 +223,7 @@ export default function Hero({ payload }: { payload: Payload }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Recolor on metric change (rank-based positions) ──
+  // ── Recolor on metric change (blended rank+magnitude positions) ──
   useEffect(() => {
     const host = svgHostRef.current;
     if (!host || !svgReady || !active) return;
@@ -231,27 +240,11 @@ export default function Hero({ payload }: { payload: Payload }) {
     });
   }, [svgReady, active, activeT]);
 
-  // ── Selected outline follows state ──
-  useEffect(() => {
-    const host = svgHostRef.current;
-    if (!host || !svgReady) return;
-    host.querySelectorAll(".zip-group.selected").forEach((s) => s.classList.remove("selected"));
-    if (selected) {
-      host.querySelector<SVGGElement>(`.zip-group[id="${selected}"]`)?.classList.add("selected");
-    }
-  }, [selected, svgReady]);
-
   const submitSearch = () => {
     const val = (searchRef.current?.value ?? "").trim();
     if (!val) return;
-    // One ZIP truth: the report route (same page the rail's "Full report" opens).
+    // One ZIP truth: the report route (the rail rows open the lab instead).
     router.push(/^\d{5}$/.test(val) ? `/r/zip-report/${val}` : `/ask?q=${encodeURIComponent(val)}`);
-  };
-
-  const metricRowColor: Record<MetricKey, string> = {
-    value: "var(--gulf-teal)",
-    activity: "#4a6fa8",
-    flood: "var(--sunset-coral)",
   };
 
   return (
@@ -319,7 +312,7 @@ export default function Hero({ payload }: { payload: Payload }) {
               <div className="rail-sublabel">{active?.sublabel ?? ""}</div>
             </div>
 
-            {!selected && active && (
+            {active && (
               <div className="rail-top">
                 <div className="rail-top-title">
                   Top ZIPs · {active.label}
@@ -331,7 +324,7 @@ export default function Hero({ payload }: { payload: Payload }) {
                       <button
                         type="button"
                         className="rail-top-row"
-                        onClick={() => setSelected(zip)}
+                        onClick={() => openZipInLab(zip)}
                       >
                         <span className="rail-top-rank">{i + 1}</span>
                         <span className="rail-top-place">
@@ -343,68 +336,15 @@ export default function Hero({ payload }: { payload: Payload }) {
                     </li>
                   ))}
                 </ol>
-                <div className="rail-top-hint">Click any ZIP on the map for the full picture.</div>
-              </div>
-            )}
-
-            {selected && (
-              <div className="rail-detail visible">
-                <div className="zip-header">
-                  <div className="zip-code-label">{selected}</div>
-                  <div className="zip-place">{data.placeNames[selected] ?? selected}</div>
-                  <div className="zip-county">{county(selected)}</div>
+                <div className="rail-top-hint">
+                  Click any ZIP — map or list — and it opens in the email lab, prebuilt with that
+                  ZIP&rsquo;s live figures.
                 </div>
-                {availableMetrics.map((k) => {
-                  const m = data.metrics[k];
-                  if (!m) return null;
-                  const val = m.data[selected];
-                  const t = k === metric ? activeT[selected] : quantileT(m.data)[selected];
-                  const r =
-                    val !== undefined
-                      ? Object.values(m.data).filter((v) => v > val).length + 1
-                      : null;
-                  return (
-                    <button
-                      key={k}
-                      type="button"
-                      className={`metric-row${k === metric ? " active-metric" : ""}`}
-                      onClick={() => setMetric(k)}
-                    >
-                      <div className="metric-row-label">{m.label}</div>
-                      <div className="metric-row-value">
-                        {val !== undefined ? fmt(val, m.format) : "N/A"}
-                      </div>
-                      <div className="metric-row-rank">
-                        {r ? `#${r} of ${Object.keys(m.data).length} ZIPs` : ""}
-                      </div>
-                      <div className="mini-bar">
-                        <div
-                          className="mini-bar-fill"
-                          style={{
-                            background: metricRowColor[k],
-                            width: t !== undefined ? `${Math.max(3, t * 100)}%` : "0%",
-                          }}
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
-                <div className="rail-cta">
-                  <a className="rail-cta-primary" href={`/email-lab?zip=${selected}`}>
-                    Build a branded email
-                  </a>
-                  <a className="rail-cta-secondary" href={`/r/zip-report/${selected}`}>
-                    Full report →
-                  </a>
-                </div>
-                <button type="button" className="rail-back" onClick={() => setSelected(null)}>
-                  ← Back to top ZIPs
-                </button>
               </div>
             )}
 
             <div className="rail-footer">
-              Sources: Zillow ZHVI · SWFL Data Gulf listings · FEMA NFIP · Census TIGER 2020
+              Sources: Zillow ZHVI · SWFL Data Gulf listings · Census TIGER 2020
             </div>
           </div>
 
@@ -429,6 +369,7 @@ export default function Hero({ payload }: { payload: Payload }) {
               <div className="tip-zip" />
               <div className="tip-place" />
               <div className="tip-val" />
+              <div className="tip-cta" />
             </div>
           </div>
         </div>

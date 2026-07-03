@@ -51,6 +51,10 @@ export default async function ProjectEmailLabPage({
   const sp = await searchParams;
   const did = sp.did ?? null;
   const seedId = sp.seed ?? null;
+  // Homepage-map click (Lane B fork 1b): ?zip= seeds the deterministic ZIP
+  // email prebuild as a new draft in THIS project, brand applied via the
+  // normal token bridge below. No LLM call on arrival.
+  const zipSeed = /^\d{5}$/.test(sp.zip ?? "") ? (sp.zip as string) : null;
   // Returning from the contacts-upload detour re-opens the schedule modal (?schedule=1).
   const autoOpenSchedule = sp.schedule === "1";
 
@@ -128,6 +132,9 @@ export default async function ProjectEmailLabPage({
   } else if (seedId) {
     const { seedById } = await import("@/lib/email/doc/default-docs");
     initialDoc = seedById(seedId)?.build() ?? null;
+  } else if (zipSeed) {
+    const { buildZipSeedDoc } = await import("@/lib/email/zip-seed");
+    initialDoc = await buildZipSeedDoc(zipSeed);
   }
 
   return (
@@ -144,6 +151,7 @@ export default async function ProjectEmailLabPage({
             : undefined
       }
       initialDoc={initialDoc}
+      zipSeeded={Boolean(zipSeed && initialDoc)}
       deliverableId={did}
       hasDeliverables={hasDeliverables}
       autoOpenSchedule={autoOpenSchedule}

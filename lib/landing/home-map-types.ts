@@ -6,20 +6,20 @@
 // load-home-map-data.ts. Client components import THIS module so they never
 // touch the fixture.
 
-/** "permits" is dead (corridor-scoped scrape, no county-wide coverage — operator
- *  ruling 07/03/2026); "activity" = active residential listings took its slot. */
-export type MetricKey = "value" | "activity" | "flood";
+/** Pill set (operator ruling 07/03/2026): only metrics with dense per-ZIP
+ *  coverage get a pill — flood + permits lost their slots (hollow first-click
+ *  cells). "activity" = active residential listings; "dom" = average days on
+ *  market, same live table. */
+export type MetricKey = "value" | "activity" | "dom";
 
-export const METRIC_ORDER: MetricKey[] = ["value", "activity", "flood"];
+export const METRIC_ORDER: MetricKey[] = ["value", "activity", "dom"];
 
 export interface MetricDef {
   label: string;
   sublabel: string;
   format: "currency" | "number";
   data: Record<string, number>;
-  /** Real min/max of the rendered rows — legend endpoints. Color position is
-   *  rank-based (see quantileT), NOT (val-low)/(high-low): SWFL metrics are
-   *  heavily skewed and a linear t collapses ~90% of ZIPs onto c0. */
+  /** Real min/max of the rendered rows — legend endpoints. */
   low: number;
   high: number;
   c0: string;
@@ -80,8 +80,7 @@ export function rampColor(t: number, c0: string, c1: string, c2: string): string
 /**
  * Rank-percentile position per ZIP (ties share the average rank). Spreads a
  * skewed distribution across the full ramp so the map reads as data, not as a
- * dead low-end mass. Legend endpoints stay the REAL min/max values — only the
- * color position is rank-based.
+ * dead low-end mass.
  */
 export function quantileT(data: Record<string, number>): Record<string, number> {
   const entries = Object.entries(data).sort((a, b) => a[1] - b[1]);
@@ -100,6 +99,32 @@ export function quantileT(data: Record<string, number>): Record<string, number> 
     const t = avgRank / (n - 1);
     for (let k = i; k <= j; k++) out[entries[k][0]] = t;
     i = j + 1;
+  }
+  return out;
+}
+
+/**
+ * Color position = ½ rank + ½ log-magnitude (operator ruling 07/03/2026: "make
+ * the map pop where numbers are DECISIVELY different"). Pure rank forces
+ * near-identical ZIPs onto artificially different shades and flattens real
+ * gaps; pure linear collapses skewed metrics onto the low end. The blend keeps
+ * the full ramp in play while letting a decisive gap (a $2.3M island vs a
+ * $1.3M neighbor) actually read bigger.
+ */
+export function blendedT(data: Record<string, number>): Record<string, number> {
+  const rank = quantileT(data);
+  const values = Object.values(data);
+  if (values.length === 0) return {};
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  // log1p handles zero-valued rows; a degenerate range falls back to pure rank.
+  const logLo = Math.log1p(Math.max(0, lo));
+  const logHi = Math.log1p(Math.max(0, hi));
+  const span = logHi - logLo;
+  const out: Record<string, number> = {};
+  for (const [zip, val] of Object.entries(data)) {
+    const mag = span > 0 ? (Math.log1p(Math.max(0, val)) - logLo) / span : rank[zip];
+    out[zip] = (rank[zip] + mag) / 2;
   }
   return out;
 }

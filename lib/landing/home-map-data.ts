@@ -149,7 +149,7 @@ export const HOME_MAP_DATA: HomeMapFixture = {
       },
       low: 600,
       high: 30074,
-      c0: "#3d6272",
+      c0: "#33525e",
       c1: "#d4b370",
       c2: "#e08158",
     },
@@ -219,9 +219,11 @@ export const HOME_MAP_DATA: HomeMapFixture = {
       },
       low: 185000,
       high: 1250000,
-      c0: "#256b5f",
-      c1: "#3DC9C0",
-      c2: "#5bc97a",
+      // The orange brand ramp (operator ruling 07/03/2026): dark slate base,
+      // gold→coral where values run high — Home Value wears it as the first map.
+      c0: "#33525e",
+      c1: "#d4b370",
+      c2: "#e08158",
     },
   },
 };

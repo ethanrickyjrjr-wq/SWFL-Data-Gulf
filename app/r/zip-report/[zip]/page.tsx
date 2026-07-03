@@ -27,7 +27,6 @@ import type { SourceEntry } from "../../../../components/CitationList";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
-import { OpenProjectCta } from "../../../../components/prospect/OpenProjectCta";
 import { MetroAreaChart } from "../../../../components/charts";
 import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
 import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
@@ -53,7 +52,7 @@ const TOTAL_SWFL_ZIPS = 57;
 
 interface PageProps {
   params: Promise<{ zip: string }>;
-  searchParams: Promise<{ q?: string; matched?: string }>;
+  searchParams: Promise<{ q?: string; matched?: string; ref?: string }>;
 }
 
 type SectionBucket = "city" | "county" | "swfl";
@@ -708,10 +707,18 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         <section className="glass-card-modern rounded-2xl border border-teal-primary/20 p-6 sm:p-8">
           <h3 className="text-xl font-bold text-white">Turn this into a weekly branded email</h3>
           <p className="mt-2 text-sm leading-relaxed text-gray-400">
-            Free to build. We&apos;ll seed a project for {primaryPlace ?? `ZIP ${zip}`}, {zip} —
-            style it, then send whenever you&apos;re ready.
+            Free to build. The lab opens with this page already laid out as an email for{" "}
+            {primaryPlace ?? `ZIP ${zip}`}, {zip} — style it, then send it to yourself.
           </p>
-          <OpenProjectCta zip={zip} />
+          {/* Lab-first funnel (spec 07/03/2026): plain link, no claim token —
+              auth happens inline at send time (SendToSelfModal). */}
+          <a
+            href={`/email-lab?zip=${zip}${typeof sp.ref === "string" && sp.ref ? `&ref=${encodeURIComponent(sp.ref)}` : ""}`}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition"
+            style={{ backgroundColor: "var(--brand-primary)" }}
+          >
+            Open it in the email lab →
+          </a>
         </section>
 
         <div>
