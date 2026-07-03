@@ -21,11 +21,6 @@ export interface GapSlot {
   coverage: MetricGapCoverage;
 }
 
-export interface HousingZipRow {
-  key: string;
-  cells: Record<string, number | string | boolean | null>;
-}
-
 export interface FloodZipRow {
   zip: string;
   aal: number;
@@ -44,8 +39,8 @@ export interface CensusValue {
 
 export interface CandidateInput {
   zip: string;
-  housingRows: HousingZipRow[];
-  housingSource?: { label: string; url: string };
+  /** packId:tableId -> table data, for every pack the registry references. */
+  registryTables: Map<string, RegistryTableData>;
   floodRows: FloodZipRow[];
   floodForZip: FloodZipRow | null;
   floodSource?: { label: string; url: string };
@@ -62,64 +57,6 @@ const fmtUsdShort = (v: number): string => {
 };
 
 const arrow = (n: number) => (n > 0 ? "↑" : "↓");
-
-interface HousingMetricSpec {
-  key: string;
-  cell: string;
-  label: string;
-  sub: string;
-  display: (v: number) => string;
-}
-
-const HOUSING_METRICS: HousingMetricSpec[] = [
-  {
-    key: "median_sale_price",
-    cell: "median_sale_price",
-    label: "Median Home Value",
-    sub: "90-day median sale price",
-    display: fmtUsdShort,
-  },
-  {
-    key: "median_dom",
-    cell: "median_dom",
-    label: "Days on Market",
-    sub: "90-day median",
-    display: (v) => `${v} days`,
-  },
-  {
-    key: "avg_sale_to_list_pct",
-    cell: "avg_sale_to_list_pct",
-    label: "Sale-to-List Ratio",
-    sub: "Average, 90-day window",
-    display: (v) => `${v}%`,
-  },
-  {
-    key: "months_of_supply",
-    cell: "months_of_supply",
-    label: "Months of Supply",
-    sub: "At the current sales pace",
-    display: (v) => `${v} mo`,
-  },
-  {
-    key: "homes_sold",
-    cell: "homes_sold",
-    label: "Homes Sold",
-    sub: "Last 90 days",
-    display: (v) => v.toLocaleString("en-US"),
-  },
-  {
-    key: "inventory",
-    cell: "inventory",
-    label: "Active Inventory",
-    sub: "Homes for sale now",
-    display: (v) => v.toLocaleString("en-US"),
-  },
-];
-
-function numCell(row: HousingZipRow | undefined, cell: string): number | null {
-  const v = row?.cells[cell];
-  return typeof v === "number" && Number.isFinite(v) ? v : null;
-}
 
 // ---------------------------------------------------------------------------
 // Concept-deduped registry (spec 2026-07-03 zip-hero-pool-all-brains). Widens
@@ -745,51 +682,11 @@ export function buildRegistryCandidates(
 export function buildZipCandidates(input: CandidateInput): {
   candidates: SignalCandidate[];
   gaps: GapSlot[];
+  railContext: Map<string, DemotedFigure[]>;
 } {
-  const candidates: SignalCandidate[] = [];
+  const registryResult = buildRegistryCandidates(input.zip, input.registryTables);
+  const candidates: SignalCandidate[] = [...registryResult.candidates];
   const gaps: GapSlot[] = [];
-  const row = input.housingRows.find((r) => r.key === input.zip);
-
-  // ── Housing — percentile from the all-ZIP detail table the page already loads.
-  for (const spec of HOUSING_METRICS) {
-    const v = numCell(row, spec.cell);
-    if (v == null) continue;
-    const dist = input.housingRows
-      .map((r) => numCell(r, spec.cell))
-      .filter((n): n is number => n != null);
-    const pct = percentileOf(dist, v);
-
-    let movementPct: number | null = null;
-    let movementText: string | undefined;
-    if (spec.key === "median_sale_price") {
-      const yoy = numCell(row, "median_sale_price_yoy_pct");
-      if (yoy != null && yoy !== 0) {
-        movementPct = yoy;
-        movementText = `${arrow(yoy)} ${Math.abs(yoy)}% YoY`;
-      }
-    } else if (spec.key === "median_dom") {
-      const days = numCell(row, "median_dom_yoy_days");
-      if (days != null && days !== 0) {
-        const prior = v - days;
-        movementPct = prior > 0 ? Math.round((days / prior) * 100) : null;
-        movementText = `${arrow(days)} ${Math.abs(days)} days YoY`;
-      }
-    }
-
-    candidates.push({
-      key: spec.key,
-      label: spec.label,
-      display: spec.display(v),
-      sub: spec.sub,
-      percentile: pct?.percentile ?? null,
-      rankPos: pct?.rankPos,
-      rankOf: pct?.rankOf,
-      movementPct,
-      movementText,
-      covered: true,
-      source: input.housingSource,
-    });
-  }
 
   // ── Flood — all-ZIP detail table preferred; key_metrics fallback keeps today's page working.
   if (input.floodForZip) {
@@ -871,7 +768,7 @@ export function buildZipCandidates(input: CandidateInput): {
     });
   }
 
-  return { candidates, gaps };
+  return { candidates, gaps, railContext: registryResult.railContext };
 }
 
 // ---------------------------------------------------------------------------

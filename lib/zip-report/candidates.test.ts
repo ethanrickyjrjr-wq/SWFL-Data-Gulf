@@ -14,7 +14,7 @@ function tableMap(entries: Record<string, RegistryTableData>): Map<string, Regis
 function baseInput(over: Partial<CandidateInput> = {}): CandidateInput {
   return {
     zip: "33914",
-    housingRows: [],
+    registryTables: new Map(),
     floodRows: [],
     floodForZip: null,
     permitsCounts: new Map(),
@@ -24,54 +24,58 @@ function baseInput(over: Partial<CandidateInput> = {}): CandidateInput {
   };
 }
 
-const HOUSING_ROWS = [
-  {
-    key: "33914",
-    cells: {
-      median_sale_price: 485_000,
-      median_sale_price_yoy_pct: 18,
-      median_dom: 60,
-      median_dom_yoy_days: 12,
-      homes_sold: 90,
-      inventory: 300,
-      months_of_supply: 5,
-      avg_sale_to_list_pct: 96,
+const HOUSING_TABLE: RegistryTableData = {
+  rows: [
+    {
+      key: "33914",
+      cells: {
+        median_sale_price: 485_000,
+        median_sale_price_yoy_pct: 18,
+        median_dom: 60,
+        median_dom_yoy_days: 12,
+        homes_sold: 90,
+        inventory: 300,
+        months_of_supply: 5,
+        avg_sale_to_list_pct: 96,
+      },
     },
-  },
-  {
-    key: "33901",
-    cells: {
-      median_sale_price: 300_000,
-      median_sale_price_yoy_pct: null,
-      median_dom: 40,
-      median_dom_yoy_days: null,
-      homes_sold: 50,
-      inventory: 100,
-      months_of_supply: 3,
-      avg_sale_to_list_pct: 97,
+    {
+      key: "33901",
+      cells: {
+        median_sale_price: 300_000,
+        median_sale_price_yoy_pct: null,
+        median_dom: 40,
+        median_dom_yoy_days: null,
+        homes_sold: 50,
+        inventory: 100,
+        months_of_supply: 3,
+        avg_sale_to_list_pct: 97,
+      },
     },
-  },
-  {
-    key: "34102",
-    cells: {
-      median_sale_price: 900_000,
-      median_sale_price_yoy_pct: 2,
-      median_dom: 80,
-      median_dom_yoy_days: -5,
-      homes_sold: 20,
-      inventory: 200,
-      months_of_supply: 8,
-      avg_sale_to_list_pct: 94,
+    {
+      key: "34102",
+      cells: {
+        median_sale_price: 900_000,
+        median_sale_price_yoy_pct: 2,
+        median_dom: 80,
+        median_dom_yoy_days: -5,
+        homes_sold: 20,
+        inventory: 200,
+        months_of_supply: 8,
+        avg_sale_to_list_pct: 94,
+      },
     },
-  },
-];
+  ],
+};
 
-describe("buildZipCandidates — housing", () => {
+describe("buildZipCandidates — housing (via the registry)", () => {
   test("price candidate: percentile from the all-ZIP distribution + YoY movement restated", () => {
-    const { candidates } = buildZipCandidates(baseInput({ housingRows: HOUSING_ROWS }));
+    const { candidates } = buildZipCandidates(
+      baseInput({ registryTables: new Map([["housing-swfl:housing_by_zip", HOUSING_TABLE]]) }),
+    );
     const price = candidates.find((c) => c.key === "median_sale_price")!;
     expect(price.covered).toBe(true);
-    expect(price.percentile).toBe(50); // middle of 3
+    expect(price.percentile).toBe(50);
     expect(price.rankPos).toBe(2);
     expect(price.rankOf).toBe(3);
     expect(price.movementPct).toBe(18);
@@ -80,10 +84,28 @@ describe("buildZipCandidates — housing", () => {
   });
 
   test("DOM movement % derives from held days delta: 12 days on a 48-day prior = +25%", () => {
-    const { candidates } = buildZipCandidates(baseInput({ housingRows: HOUSING_ROWS }));
+    const { candidates } = buildZipCandidates(
+      baseInput({ registryTables: new Map([["housing-swfl:housing_by_zip", HOUSING_TABLE]]) }),
+    );
     const dom = candidates.find((c) => c.key === "median_dom")!;
-    expect(dom.movementPct).toBe(25); // 12 / (60 - 12) * 100
+    expect(dom.movementPct).toBe(25);
     expect(dom.movementText).toBe("↑ 12 days YoY");
+  });
+
+  test("a widened-pool concept (e.g. rent_index_latest) rides the same registry path", () => {
+    const { candidates } = buildZipCandidates(
+      baseInput({
+        registryTables: new Map([
+          [
+            "rentals-swfl:rentals_by_zip",
+            { rows: [{ key: "33914", cells: { rent_index_latest: 2100, rent_yoy_pct: 4 } }] },
+          ],
+        ]),
+      }),
+    );
+    const rent = candidates.find((c) => c.key === "rent_index_latest")!;
+    expect(rent.display).toBe("$2K/mo");
+    expect(rent.movementText).toBe("↑ 4% YoY");
   });
 });
 
