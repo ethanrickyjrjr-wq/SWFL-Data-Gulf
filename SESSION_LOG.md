@@ -1,3 +1,17 @@
+## 2026-07-03 (main) — fix(zip-shape): PNG card was a solid black box in the seeded ZIP email
+
+Operator flagged the seeded ZIP email's map cutout as an opaque black rounded box (screenshot),
+"transparent like it was on the website." Root cause: `app/api/zip-shape/[zip]/route.ts`
+(`cardSvg`) filled an `#0f1d24` rect behind the shape — on the website the shape sits directly
+on `.zp-hero`'s own background with no card; the email's image block section is white
+(`CARD_BG`), so that dark rect rendered as a literal black square. Dropped the background rect
+entirely — Resvg now renders a transparent PNG (verified `colortype=6`/RGBA, corner pixels
+`(0,0,0,0)`, shape pixels ~`(61,201,192,235)`). Verified the live `/r/zip-report/[zip]` page
+itself is unchanged/intact (screenshot) — the zip_hero_pool_all_brains work didn't touch it.
+Separately: the email's overall look (flat default blocks) vs the webpage's dark ranked-metric
+design is a real, larger gap — raised with operator as a scoped design decision, not fixed here.
+Next: operator to pick fidelity level for a fuller zip-seed-email reskin.
+
 ## 2026-07-03 (main) — plan(mcp-account-level-auth): design spec for account-level MCP token
 
 Operator hit the per-project MCP key friction live: asked to file a ZIP 33931 median-sale-price

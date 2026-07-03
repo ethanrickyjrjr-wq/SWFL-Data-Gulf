@@ -1,11 +1,16 @@
 // app/api/zip-shape/[zip]/route.ts
 //
 // The ZIP cutout as a PNG — the zip-report page's shape (extractZipShape, same
-// contractor SVG) rendered as a branded card image that EMAIL CLIENTS can show
+// contractor SVG) rendered as a branded image that EMAIL CLIENTS can show
 // (they strip inline <svg>; the seeded ZIP email's image block points here).
 // Shape-only, no text → no font bundling needed. Rasterizer: @resvg/resvg-js —
 // the house-proven path (lib/social/render-social-image.ts fork decision,
 // vendor-verified 06/20/2026); already in serverExternalPackages.
+//
+// Transparent canvas — mirrors the zip-report page's .zp-shape-wrap, where the
+// shape floats directly on the section background with no card behind it.
+// A solid dark rect here used to read as an opaque black box once dropped into
+// a white email section (operator flagged 07/03/2026).
 //
 // Cacheable hard: the geometry never changes day-to-day.
 
@@ -17,13 +22,12 @@ export const runtime = "nodejs";
 const W = 800;
 const H = 520;
 
-/** Card wrapper: dark gulf canvas, teal shape centered via nested-svg fit. */
+/** Transparent canvas, teal shape centered via nested-svg fit — no background rect. */
 function cardSvg(inner: string, viewBox: string): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
-    `<rect width="${W}" height="${H}" rx="24" fill="#0f1d24"/>` +
-    `<svg x="60" y="50" width="${W - 120}" height="${H - 100}" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet">` +
-    `<g fill="#3DC9C0" fill-opacity="0.92" stroke="#0a1419" stroke-width="1">${inner}</g>` +
+    `<svg x="40" y="30" width="${W - 80}" height="${H - 60}" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet">` +
+    `<g fill="#3DC9C0" fill-opacity="0.92" stroke="#0f1d24" stroke-width="1">${inner}</g>` +
     `</svg>` +
     `</svg>`
   );
