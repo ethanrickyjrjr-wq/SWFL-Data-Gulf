@@ -1,3 +1,20 @@
+## 2026-07-03 (main) — zip_hero_pool_all_brains — implementation plan written, ready to execute
+
+Fixed a real drift in the design spec first: it said the two macro/micro pairs (ZHVI/MLS,
+ZORI/median-rent) "render together, not as independent ranked slots" — contradicting the
+operator's actual Q1 decision ("let both compete freely"). Corrected (commit `57f95cc1`): both
+sides of each pair compete as full independent candidates, linked only by an optional footnote.
+Then wrote the 7-task implementation plan (`docs/superpowers/plans/2026-07-03-zip-hero-pool-all-
+brains.md`): Task 1 adds an additive `footnote` field to `SignalCandidate`; Task 2 builds the
+37-entry `ZIP_METRIC_SOURCES` concept registry + `buildRegistryCandidates` standalone with dedup/
+pairing/collier-gating tests; Task 3 wires it into `buildZipCandidates`, retiring
+`HOUSING_METRICS`; Task 4 is the generic `ParsedBrain` -> table-map extractor; Task 5 wires
+page.tsx to load all 11 registry packs; Task 6 renders footnotes + "also reported by" rail
+citations for the ~16 demoted columns. Self-reviewed against the plan: fixed a placeholder
+("keep existing block verbatim" instead of literal code) and a duplicate formatter helper before
+finalizing. Next: execute the plan (subagent-driven or inline, operator's call). Check
+`zip_hero_pool_all_brains` stays open until built + live-verified.
+
 ## 2026-07-03 (main) — zip_hero_pool_all_brains — design spec written, awaiting plan
 
 Brainstormed the follow-up check `zip_hero_pool_all_brains` (widen the ZIP hero's candidate
