@@ -1,3 +1,7 @@
+## 2026-07-03 (main) — addendum: build-queue synced for zip-signal-hero (missed in the spec push)
+
+One-line queue entry added per RULE 2 same-push sync; no other changes.
+
 ## 2026-07-03 (main) — SPEC: signal-driven ZIP hero + shared sourced figures (brainstormed, approved, registered)
 
 Operator escalation (33914 screenshots): ZIP page showed $485K in THREE surfaces while flood +
