@@ -1,3 +1,22 @@
+## 2026-07-03 (main) — SPEC: signal-driven ZIP hero + shared sourced figures (brainstormed, approved, registered)
+
+Operator escalation (33914 screenshots): ZIP page showed $485K in THREE surfaces while flood +
+permits rendered em-dashes. Root causes traced: (1) env-swfl emits per-ZIP flood for only the
+top-6 AAL ZIPs (aggregateZipRollupTop6 — the SQL view already computes ALL 57, truncated at
+emission); (2) permits_by_zip = Lee Accela only — Cape Coral (33904/09/14/90/91) runs its own
+portal, structurally absent; (3) fixed 3-metric template repeats the same numbers per surface.
+Brainstormed per RULE 3.5 (crawl4ai research: NN/g dashboards 06/18/2017 + progressive
+disclosure 12/03/2006). Approved design: deterministic signal ranker (60% extremity + 40%
+movement) leads each ZIP's page with ITS story, render-once surfaces, flood_by_zip detail
+table for all 57 ZIPs, Find-it button (lane-3 gap-fill reuse, verbatim-cited, cached-for-all
+in new sourced_figures store) feeding page + assistant + email/social builders via
+market-context — found numbers are platform-wide, never page-local. Spec committed a554806b:
+docs/superpowers/specs/2026-07-03-zip-signal-hero-design.md. Checks opened:
+zip_signal_hero_live_verify, zip_hero_pool_all_brains (widen pool, operator-ordered
+follow-up), city_permits_ingest_odd. Next: writing-plans → implementation. This push also
+carries the parallel session's two held commits (8609d091 zip-seed, b03804cb funnel) —
+operator approved bundling explicitly.
+
 ## 2026-07-03 (main) — MAP CLICK → SEEDED LAB built (lab-first funnel spec) + operator map orders (orange Home Value, dense pills, blended pop) — LOCAL, push held
 
 Operator rulings (verbatim escalations): map click goes to the email lab with the ZIP loaded
