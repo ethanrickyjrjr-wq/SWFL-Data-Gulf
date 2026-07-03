@@ -27,9 +27,12 @@ number three times") recreated at pack scale instead of surface scale.
 
 Widen the pool to every zip-grain pack's headline metrics, but make **concept**
 — not column — the unit that competes. Each concept occupies at most one
-ranked slot (hero or grid), except for two explicitly-approved macro/micro
-pairs that render together. Everything else measuring an already-represented
-concept is cited as rail-only supporting context, never a second ranked slot.
+ranked slot (hero or grid). Two macro/micro pairs (home value, rent) are each
+modeled as TWO distinct concepts that both compete independently — they're
+genuinely different lenses, not duplicates — and are additionally
+footnote-linked when both are held for a ZIP. Everything else measuring an
+already-represented concept is demoted to rail-only supporting context,
+never a second ranked slot.
 
 ## Research (RULE 0.4, crawl4ai, 07/03/2026)
 
@@ -50,8 +53,10 @@ concept is cited as rail-only supporting context, never a second ranked slot.
 
 - **Overlap policy:** measurements of the same real-world concept from
   different sources don't all compete. One primary competes; others are
-  cited as rail context. Exception: two explicitly-approved macro/micro pairs
-  (below) render together as a linked pair, not as independent ranked slots.
+  cited as rail context. Exception: the two explicitly-approved macro/micro
+  pairs (below) are each treated as two DIFFERENT concepts — not one concept
+  with a suppressed second measurement — so both sides compete independently
+  and are only linked by a footnote, never merged into one slot.
 - **Primary-source rule:** prefer closed/sold, transaction-grounded data over
   list-side/asking-price aggregates. housing-swfl's MLS closed-sale figures
   win their concepts over realtor.com list-side aggregators
@@ -62,9 +67,13 @@ concept is cited as rail-only supporting context, never a second ranked slot.
   - Rent: rentals-swfl `rent_index_latest`/ZORI (macro — monthly index)
     paired with market-temperature-swfl `median_rent_price` (micro — current
     asking median).
-  - Each pair renders with a coherence footnote when both are held for a ZIP
-    (e.g. "MLS median tracks within X% of the Zillow index") — pure math on
-    two already-cited numbers, not a new invented figure.
+  - **Both sides of each pair compete as independent, first-class candidates**
+    — per the "let both compete freely" decision, ZHVI and the micro rent
+    median are NOT suppressed or folded into the primary's slot. `pairId`
+    only drives one extra thing: when both sides of a pair are held for the
+    same ZIP, each renders a coherence footnote (e.g. "MLS median tracks
+    within X% of the Zillow index") — pure math on two already-cited numbers,
+    not a new invented figure, and not a scoring input.
 - **Composite scores:** treated as one concept family across all 4 packs that
   emit one (market-heat-swfl's `market_heat_score` + `hotness_score`,
   market-temperature-swfl's `local_hotness_score`, seller-stress-swfl's
@@ -91,12 +100,13 @@ generalizes that into one declarative registry:
 
 ```ts
 interface ZipMetricSource {
-  concept: string;              // dedup key — "home_value", "days_on_market", ...
+  concept: string;              // dedup key — "home_value", "home_value_zhvi", ...
   packId: string;
   tableId: string;
   cell: string;
-  role: "primary" | "paired" | "demoted";
-  pairedWith?: string;          // concept-family partner, for the two macro/micro pairs
+  role: "primary" | "demoted";
+  /** Shared by BOTH sides of an approved macro/micro pair — footnote linkage only, not scoring. */
+  pairId?: string;
   key: string;                  // SignalCandidate.key
   label: string;
   sub: string;
@@ -104,18 +114,23 @@ interface ZipMetricSource {
   movementCell?: string;
 }
 
-const ZIP_METRIC_SOURCES: ZipMetricSource[] = [ /* ~30 entries */ ];
+const ZIP_METRIC_SOURCES: ZipMetricSource[] = [ /* ~32 entries */ ];
 ```
 
 A single generic loop replaces the current per-source blocks: for each
-`role: "primary"` or `role: "paired"` entry, look up the pack's already-loaded
-`detail_tables` output, find the row for the ZIP, compute percentile from the
-table's full distribution (same `percentileOf` used today), and push a
-`SignalCandidate`. `role: "demoted"` entries never become a `SignalCandidate`
-— they're read into a separate `railContext: Map<concept, DemotedFigure[]>`
-that the rail renders as supporting citations under the winning candidate for
-that concept (e.g. "Also reported: realtor.com list-side median $X, city
-tax-assessed value $Y").
+`role: "primary"` entry (this includes BOTH sides of a pair — a pair is two
+independent primaries sharing a `pairId`, not a demoted/primary split), look
+up the pack's already-loaded `detail_tables` output, find the row for the
+ZIP, compute percentile from the table's full distribution (same
+`percentileOf` used today), and push a `SignalCandidate`. When two entries
+share a `pairId` and BOTH produced a candidate for this ZIP, compute the
+coherence footnote and attach it to both (`RankedSignal.footnote`, an
+additive optional field — the ranking formula itself doesn't change).
+`role: "demoted"` entries never become a `SignalCandidate` — they're read
+into a separate `railContext: Map<concept, DemotedFigure[]>` that the rail
+renders as supporting citations under the winning candidate for that concept
+(e.g. "Also reported: realtor.com list-side median $X, city tax-assessed
+value $Y").
 
 Flood (dual-source fallback) and permits (Find-it gap-fill allowlist) keep
 their existing special-cased sections in `candidates.ts` — their behavior is
@@ -142,8 +157,14 @@ ratio [primary: housing-swfl], months of supply, homes sold, active
 inventory [primary: housing-swfl], flood risk (env-swfl), residential permits
 (permits-swfl, Find-it gap-fill), 8 census demographic concepts.
 
-**New concepts added by this build** (13, each one ranked slot):
-rent level (ZORI, paired with median_rent_price per the pairing rule above),
+**New concepts added by this build** (15, each its own ranked slot — no
+suppression, each is a genuine independent `SignalCandidate`):
+home value macro index (home-values-swfl `home_value_zhvi` — `pairId:
+"home_value"` shared with housing-swfl's existing median_sale_price
+candidate, footnote-linked, both compete freely), rent level (ZORI, the
+macro/index side of the rent pair), asking-rent median
+(market-temperature-swfl `median_rent_price` — the micro side, `pairId:
+"rent_level"` shared with ZORI, footnote-linked, both compete freely),
 rental inventory count (active-rentals-swfl), commercial permits
 (permits-commercial-swfl), tax-assessed value (properties-collier-value,
 Collier-only), Save-Our-Homes gap (properties-collier-value, Collier-only),
@@ -154,17 +175,15 @@ price-reduced share [primary: listing-momentum-swfl], new-listing share
 `avg_price_drop_pct` — a magnitude, distinct from the share above), pending
 ratio (market-heat-swfl), one market-sentiment composite (`market_heat_score`).
 
-**Paired, not a new ranked slot** (2): ZHVI alongside MLS home value; ZORI
-alongside micro rent median (median_rent_price becomes the "micro" half of
-the rent pair rather than a demoted figure).
-
 **Demoted — cited in the rail under their concept's winning candidate, never
-ranked** (~17 columns): active-listings-swfl's list price / avg DOM / listing
+ranked** (~16 columns): active-listings-swfl's list price / avg DOM / listing
 count; market-heat-swfl's DOM / active-listing count / new-listing count /
 price-reduced share / `hotness_score`; market-temperature-swfl's sold price /
 listing price / DOM / sale-to-list ratio / `local_hotness_score`;
 listing-momentum-swfl's active-listing count; seller-stress-swfl's delisted
-share / cancellation rate / relisted share / `seller_stress_score`.
+share / cancellation rate / relisted share / `seller_stress_score`. (Note:
+`median_rent_price` is NOT in this list — it's the micro half of the rent
+pair above, a competing candidate, not demoted.)
 
 **Explicitly out of scope for this build** (available in the brain, not
 promoted to a candidate — same restraint the parent build's HOUSING_METRICS
