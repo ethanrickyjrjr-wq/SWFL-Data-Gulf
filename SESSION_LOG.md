@@ -1,3 +1,14 @@
+## 2026-07-03 (main) — Lane B: permits pill KILLED by operator ("why would we have permits where we have shit data")
+
+RESOLVED: New Construction pill is dead — corridor-only permit data doesn't back a county-wide map
+metric. Replacement: Market Activity from active_listings_residential_zip_stats (listings /
+median-list / DOM, verified live at ZIP grain 07/03/2026). Metric set: Home Value (default) ·
+Market Activity · Flood Risk. Swept the spec of all permit remnants: seed composer sources, proof
+strip source names, stats-bar cell, permits view migration (deleted — no new view needed), loader
+smoke replaces view verification, fixture fallback covers value/flood only (Market Activity pill
+disables on failure — no fixture for it). Permits can return as its own build when a real county-
+wide source lands.
+
 ## 2026-07-03 (main) — CAN-SPAM postal address promoted to account level
 
 Verified via crawl4ai against the FTC compliance guide (ftc.gov/business-guidance/resources/

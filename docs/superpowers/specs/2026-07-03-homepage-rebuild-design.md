@@ -35,25 +35,25 @@ One page that sells the actual product to the paying audience (professionals) wh
 - **H1 (passes litmus):** "Southwest Florida market intelligence, cited to the source — delivered to your clients' inboxes automatically."
 - **Subheader (hook + top objection):** "Ask about any ZIP, address, or corridor and get an answer with every number sourced. Build a branded client report in minutes. Free to build — no credit card."
 - Search bar unchanged in behavior: 5-digit ZIP → `/z/[zip]`, free text → `/ask?q=`. Button copy stays an action ("Search").
-- Metric pills reordered; **default metric = Home Value** (locked vision), then New Construction, Flood Risk.
+- Metric pills reordered; **default metric = Home Value** (locked vision), then Market Activity (listings/DOM — replaces New Construction, whose data was corridor-only; operator ruling 07/03/2026), then Flood Risk.
 - Choropleth + data rail + stats bar stay structurally as-is but run on **live lake data** (wiring below). The "Sample data" badge dies; replaced by "Live data · Lee & Collier Counties · as of MM/DD/YYYY" (date stated once, from the freshest source vintage).
 - **Map click = select, then two doors (fork 1b).** Clicking a ZIP fills the data rail (existing behavior) and no longer hard-navigates. The rail grows two CTAs: primary **"Turn this into a branded email"** → `/email-lab?zip=<zip>` (pre-built, § below); secondary **"Full report"** → `/r/zip-report/[zip]` directly (`/z/[zip]` is RETIRED — it 307-redirects there; hero search's ZIP branch should also point at the report route, one ZIP truth). Keyboard/tap behavior mirrors click; mobile keeps the rail reachable below the map.
 
 ### 1b. Lab seed — the ZIP email prebuild (operator-proposed)
 
 **Projects and labs are ONE surface (Cockpit D4)** — the seed must honor the unification, not resurrect a standalone lab. `/email-lab?zip=<5-digit>` behaves per who arrives:
-- **Anonymous** → the standalone taste-surface (its only remaining role) opens with a **pre-built weekly-read-style email for that ZIP** — the ZIP page's story as an email: place name, headline figures (value, permits, flood), short deterministic prose, sources listed, as-of date stated once. Edit → existing claim flow (`/api/claim`) turns it into an owned project. No new auth machinery.
+- **Anonymous** → the standalone taste-surface (its only remaining role) opens with a **pre-built weekly-read-style email for that ZIP** — the ZIP page's story as an email: place name, headline figures (value, listings/DOM, flood), short deterministic prose, sources listed, as-of date stated once. Reference rendering: the 07/03 mock artifact (built from real 33914 lake pulls). Edit → existing claim flow (`/api/claim`) turns it into an owned project. No new auth machinery.
 - **Signed-in with a project** → today's redirect to `/project/<id>/email-lab` **carries the `?zip=` through** (`labDestination()` gains the param) and the project's Email tab seeds the same deterministic doc as a new draft **in their project, with their brand applied** — for an existing user the map becomes a one-click branded-report starter.
 - **Signed-in, zero projects** → `AutoCreateProject` carries `?zip=` through its redirect; same result.
 
 Shared mechanics:
-- **Deterministic + cached:** one composer (`lib/email/zip-seed.ts`) builds the doc in code from the same live loaders the ZIP page/map use (zip-summary, `zhvi_zip_latest`, permits view, NFIP agg) — cacheable per ZIP per day. **No LLM call on arrival**; drive-by clicks and bots cost ~$0. The AI assistant engages only when the visitor edits — that's the taste moment.
+- **Deterministic + cached:** one composer (`lib/email/zip-seed.ts`) builds the doc in code from the same live loaders the ZIP page/map use (zip-summary, `zhvi_zip_latest`, `active_listings_residential_zip_stats`, NFIP agg) — cacheable per ZIP per day. **No LLM call on arrival**; drive-by clicks and bots cost ~$0. The AI assistant engages only when the visitor edits — that's the taste moment.
 - Invalid/unknown `?zip=` → each surface opens in its normal state (empty-tolerant, no error page).
 - A "see the full report →" link inside the seeded doc covers anyone who actually wanted the data page.
 
 ### 2. Proof strip (social-proof slot, our version)
 
-We have no testimonials; we have provenance. A slim strip: named sources with as-of dates (FEMA NFIP, Zillow ZHVI, Lee & Collier permits, Census) + "57 ZIPs · every number cited." Real values injected server-side from the same loader as the map — no hardcoded counts. Never framed as "ZIP-level intelligence."
+We have no testimonials; we have provenance. A slim strip: named sources with as-of dates (FEMA NFIP, Zillow ZHVI, SWFL Data Gulf listing stats, Census) + "57 ZIPs · every number cited." Real values injected server-side from the same loader as the map — no hardcoded counts. Never framed as "ZIP-level intelligence."
 
 ### 3. Persona cards (features & objections, part 1)
 
@@ -89,12 +89,12 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 **Sources (all verified present in `pg.data_lake` 07/03/2026):**
 - Home Value: `data_lake.zhvi_zip_latest` (`zip_code`, `home_value_latest`, `latest_period`, …) — already read by the app via the typed client in `lib/email/market-context.ts`, proving the PostgREST path works.
 - Flood: `data_lake.fema_nfip_zip_window_agg` (per-ZIP aggregate — exact column mapping verified in the plan against the live schema; metric shown = avg annual insured loss per property, matching the current sublabel).
-- Permits: **GAP, verified 07/03/2026** — `lee_building_permits` is the corridor-scoped scrape (288 rows total, 02/25–06/16/2026, zero rows for e.g. 33914), NOT county-wide coverage; the earlier draft of this spec assumed otherwise. The "New Construction" pill therefore has no live per-ZIP source today. Options (operator picks at plan time): (a) swap the pill to **Active Listings / Days on Market** from `active_listings_residential_zip_stats` (live, ZIP grain, verified) — recommended, zero new ingest; (b) keep the pill and ship a county-wide permit ingest first (new lane, blocks Lane B); (c) drop to two pills. Never the mock fixture on a user-facing metric.
-- Stats bar: active-listing count from `data_lake.listing_active_stats` / `active_listings_residential_zip_stats` (whichever holds the county-level count — pinned in plan), median value + top-permits ZIP + range computed in the loader from the rows above. Listing figures cite "SWFL Data Gulf" per the locked citation rule.
+- Permits: **RESOLVED by operator 07/03/2026 — the "New Construction" pill is DEAD.** `lee_building_permits` is the corridor-scoped scrape (288 rows total, 02/25–06/16/2026, zero rows for e.g. 33914), not county-wide coverage; the operator's ruling: we don't surface a metric where the data is bad. Replacement pill: **Market Activity** from `active_listings_residential_zip_stats` (live, ZIP grain, verified 07/03/2026) — choropleth colors by `listing_count` (or `avg_days_on_market`; pin one in plan), rail shows listings/median-list/DOM. Metric set is now Home Value (default) · Market Activity · Flood Risk. The stats-bar "Most New Construction" cell dies with it — replaced by a listings-derived cell from the same table. No permit ingest is blocked into this lane; a county-wide permits pill can return as its own build when a real source lands.
+- Stats bar: active-listing count from `data_lake.listing_active_stats` / `active_listings_residential_zip_stats` (whichever holds the county-level count — pinned in plan), median value + a most-active-market cell (highest listing count or fastest DOM — pin in plan) + range computed in the loader from the rows above. Listing figures cite "SWFL Data Gulf" per the locked citation rule.
 
 **Mechanics:**
 - `app/page.tsx` becomes an async server component with `export const revalidate = 3600`; a new server-only loader `lib/landing/load-home-map-data.ts` queries the three sources with the typed Supabase client and returns the existing `HomeMapData` shape (plus per-metric as-of vintages). `Hero` takes it as a prop instead of importing the fixture.
-- `lib/landing/home-map-data.ts` keeps the **types, color math, and `getZipMapColor`**; the hardcoded `HOME_MAP_DATA` fixture becomes the **fail-soft fallback**: any lake query failing → serve the fixture for that metric with the sample badge restored for honesty (page never blanks; mirrors the current SVG-fetch fail-soft).
+- `lib/landing/home-map-data.ts` keeps the **types, color math, and `getZipMapColor`**; the hardcoded `HOME_MAP_DATA` fixture becomes the **fail-soft fallback** for Home Value and Flood Risk: a failing lake query → serve the fixture for that metric with the sample badge restored for honesty (page never blanks; mirrors the current SVG-fetch fail-soft). Market Activity has no fixture (the fixture's permits data is dead with the pill) — on failure that pill disables with a "temporarily unavailable" state rather than showing stale invented-adjacent numbers.
 - Metric sublabels/as-of dates come from live vintages (e.g. ZHVI `latest_period`), formatted MM/DD/YYYY, stated once per surface — never a raw freshness token.
 - Low/high color-scale bounds computed from the live rows, not hardcoded.
 
@@ -112,7 +112,7 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 - `components/landing/ProofStrip.tsx`, `DeliverableShowcase.tsx`, `PricingStrip.tsx`, `WeeklyReadCapture.tsx`, `ObjectionFaq.tsx` — NEW.
 - `components/landing/home-explorer.css` — extended for new sections (existing look and feel maintained; `h-full`/`dvh`, never `h-screen`).
 - `app/api/weekly-read/signup/route.ts` — NEW (validate email + 5-digit ZIP, idempotent upsert, rate-limit posture copied from `/api/waitlist`).
-- SQL migrations (Bun.SQL, idempotent, row-count verified): `weekly_read_signups` table + RLS (service-role writes only); `home_map_permits_zip` view + grant.
+- SQL migration (Bun.SQL, idempotent, row-count verified): `weekly_read_signups` table + RLS (service-role writes only). No permits view — that metric is dead (operator ruling above); all three map metrics read existing granted tables.
 - `components/landing/Waitlist.tsx` — parked, not deleted.
 
 ## Error handling
@@ -126,7 +126,7 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 - `bun test` for the loader (mocked db: happy path, partial failure → fallback, bounds computed) and signup route validation; tiers strip has no price literals (imports only — `tiers.test.ts` already guards the root).
 - `bunx next build` locally (never bare `npx tsc`) before commit.
 - `homepage_rebuild_live_verify` is **operator-run** post-deploy: live homepage shows Home Value default with live figures + as-of dates, map click fills the rail and both doors work (primary → seeded lab showing that ZIP's figures with zero LLM spend logged, secondary → `/z/[zip]`), persona cards route to `/ask`, pricing matches `/billing`, capture writes a row, no `#waitlist` anchor remains.
-- Migration verification: row count on `weekly_read_signups` (0 after create), `home_map_permits_zip` returns ≥40 ZIPs with non-zero counts.
+- Migration verification: row count on `weekly_read_signups` (0 after create); loader smoke asserts ≥40 ZIPs with non-null values per live metric.
 
 ## Out of scope
 
