@@ -5,6 +5,7 @@ import pytest
 
 from ingest.lib.guards import (
     VolumeGuardError,
+    assert_county_coverage,
     assert_min_rows,
     assert_vs_baseline,
     assert_vs_canonical,
@@ -105,3 +106,29 @@ class TestAssertVsBaseline:
         with caplog.at_level(logging.WARNING):
             assert_vs_baseline(100, None, label="my_pipeline")
         assert "my_pipeline" in caplog.text
+
+
+class TestAssertCountyCoverage:
+    def test_passes_when_all_expected_full(self):
+        assert_county_coverage({"Collier": 1800, "Lee": 2400}, ["Collier", "Lee"], min_per_county=200)
+
+    def test_raises_partial_block(self):
+        # Lee full, Collier collapsed — total still healthy, but the shape is broken.
+        with pytest.raises(VolumeGuardError, match="Collier"):
+            assert_county_coverage({"Collier": 6, "Lee": 2400}, ["Collier", "Lee"], min_per_county=200)
+
+    def test_defers_on_total_block(self):
+        # Nothing landed anywhere → total-empty/baseline guards own it; no double-raise.
+        assert_county_coverage({"Collier": 0, "Lee": 0}, ["Collier", "Lee"], min_per_county=200)
+
+    def test_missing_county_counts_as_zero(self):
+        with pytest.raises(VolumeGuardError, match="Collier"):
+            assert_county_coverage({"Lee": 2400}, ["Collier", "Lee"], min_per_county=200)
+
+    def test_empty_expected_is_noop(self):
+        assert_county_coverage({"Glades": 0}, [], min_per_county=200)
+
+    def test_label_in_error_message(self):
+        with pytest.raises(VolumeGuardError, match="active_listings"):
+            assert_county_coverage({"Collier": 1, "Lee": 2400}, ["Collier"], min_per_county=200,
+                                   label="active_listings")

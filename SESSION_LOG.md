@@ -1,3 +1,19 @@
+## 2026-07-03 (main) — feat(ingest): per-county coverage guard so a single-county scrape collapse can't pass green (the gap that hid the Collier block)
+
+Follow-up to the homepage fix below (operator: "how do we not know about data issues with all our
+guards?"). Root cause of the blind spot: `active_listings/pipeline.py` guarded only TOTAL rows
+(`assert_min_rows` + `assert_vs_baseline`) — a full Lee padded the total while a WAF-truncated Collier
+sailed through. Added `assert_county_coverage(rows_by_county, expected_counties, min_per_county)` to
+`ingest/lib/guards.py` — differential (only fires when the run otherwise succeeded, so a total block
+still defers to the existing guards; no bootstrap false-alarm), raises naming the collapsed county.
+Wired into the pipeline with `DENSE_COUNTIES = ["Collier","Lee"]` (rural pair excluded — legitimately
+0) and `LISTINGS_MIN_PER_COUNTY` (default 200; healthy counties land thousands). It enforces only the
+dense counties in the run, so a `--county Collier` re-seed enforces just Collier, and it runs under
+`--dry-run` so a thin Collier is flagged before any write. Tests: `test_county_coverage_guard.py`
+(new) + `TestAssertCountyCoverage` mirror in `test_guards.py` — 38 green on the crawl4ai venv.
+Operator re-seed (home IP, needs `LISTINGS_SOURCE_BASE_URL` secret): dry-run then real
+`python -m ingest.pipelines.active_listings.pipeline --county Collier`. NOT pushed.
+
 ## 2026-07-03 (main) — fix(homepage): map's Market Activity + Days on Market repointed off the WAF-blocked Collier scraper onto full-coverage lake sources
 
 Operator report (`docs/handoff/2026-07-03-homepage-map-color-scope-bugs.md`): all three hero-map

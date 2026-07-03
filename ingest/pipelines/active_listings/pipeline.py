@@ -15,13 +15,19 @@ import argparse
 import os
 import sys
 
-from ingest.lib.guards import assert_min_rows, assert_vs_baseline
+from ingest.lib.guards import assert_county_coverage, assert_min_rows, assert_vs_baseline
 
 from .distill import current_row_count, normalize, upsert_rows
-from .extract import SWFL_COUNTIES, fetch_listings_for_county
+from .extract import DENSE_COUNTIES, SWFL_COUNTIES, fetch_listings_for_county
 
 # Bootstrap-safe floor (raise toward 0.9 * observed in cadence_registry after the first seed).
 _MIN_ROWS = int(os.environ.get("LISTINGS_MIN_ROWS", "1"))
+# Per-county floor for the coverage guard: a healthy Lee/Collier scrape lands thousands of listings;
+# a WAF-truncated county dies at a handful of ZIPs (tens of rows). 200 sits with huge margin between
+# the two, so a partial Collier block (the recurring failure) can't pass green while the total —
+# padded by a full Lee — still looks healthy. Provisional/env-tunable, mirroring _MIN_ROWS: raise
+# toward 0.5 * observed-per-county in cadence_registry after the first clean seed.
+_MIN_PER_COUNTY = int(os.environ.get("LISTINGS_MIN_PER_COUNTY", "200"))
 
 
 def run(args: argparse.Namespace) -> None:
@@ -44,11 +50,13 @@ def run(args: argparse.Namespace) -> None:
     # never discard the counties already gathered — the bug that lost the first 4,691-row seed.
     total_raw = 0
     total_written = 0
+    rows_by_county: dict[str, int] = {}
     for county in counties:
         print(f"[county] {county}", flush=True)
         raw = fetch_listings_for_county(county)
         print(f"  {len(raw)} in-scope listings", flush=True)
         total_raw += len(raw)
+        rows_by_county[county] = len(raw)
         normed = normalize(raw)
         if normed:
             written = upsert_rows(normed, dry_run=args.dry_run)
@@ -71,6 +79,15 @@ def run(args: argparse.Namespace) -> None:
     # a sudden collapse vs the prior load is the tell of a partial block degrading the result set.
     assert_min_rows(total_raw, _MIN_ROWS, label="active_listings")
     assert_vs_baseline(total_raw, prior, label="active_listings")
+    # Per-county coverage guard — the fix for the "total looks healthy while Collier silently
+    # emptied" gap the two total-count guards above are blind to. Enforce only the dense counties
+    # actually in this run (a single-county --county run enforces just that one); raises red if a
+    # named market collapses toward zero while others land. Runs under --dry-run too, so a dry seed
+    # already flags a thin Collier before any write.
+    enforced = [c for c in DENSE_COUNTIES if c in counties]
+    assert_county_coverage(
+        rows_by_county, enforced, min_per_county=_MIN_PER_COUNTY, label="active_listings"
+    )
 
     print(
         f"\nDone. {total_written} rows {'would be ' if args.dry_run else ''}upserted "

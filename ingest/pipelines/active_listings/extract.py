@@ -39,6 +39,14 @@ from ingest.lib.crawl_client import Crawl4aiError, _proxy_from_env
 
 # Covers Naples/Fort Myers heavily; the rural pair (Glades/Hendry) returns 0 and is harmless.
 SWFL_COUNTIES: list[str] = ["Collier", "Lee", "Charlotte", "Sarasota", "Glades", "Hendry"]
+# Counties the per-county coverage guard ENFORCES (see ingest.lib.guards.assert_county_coverage).
+# Deliberately just the two named markets whose collapse is the recurring failure — Lee (Fort Myers)
+# and Collier (Naples). Both land thousands of listings on a healthy scrape, so the guard's floor has
+# a huge margin above a WAF-truncated county (a handful of ZIPs ≈ tens of rows) and needs no
+# calibration. Charlotte/Sarasota are dense too but smaller; add them here only AFTER a clean seed
+# fixes their healthy row counts, each with its own calibrated floor. Glades/Hendry are NEVER
+# enforced — they legitimately return 0. The rural pair must stay out of this list.
+DENSE_COUNTIES: list[str] = ["Collier", "Lee"]
 
 _UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
