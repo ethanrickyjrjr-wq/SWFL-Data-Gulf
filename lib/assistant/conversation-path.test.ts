@@ -17,6 +17,7 @@ import * as anthropicModule from "@/refinery/agents/anthropic.mts";
 // hatch and trips no-restricted-imports. We only stub/restore the typed createClient.
 import { createClient as realCreateClient } from "@/utils/supabase/server";
 import * as geocodeModule from "@/lib/geo/geocode-address";
+import * as sourcedModule from "@/lib/figures/sourced";
 import * as nextHeadersModule from "next/headers";
 import { parseSseFrame, type WelcomeFrame } from "@/lib/welcome/frames";
 import type { AssistantRequest } from "@/lib/assistant/contract";
@@ -40,6 +41,7 @@ const ORIG = {
   "@/refinery/agents/anthropic.mts": { ...anthropicModule },
   "@/utils/supabase/server": { createClient: realCreateClient },
   "@/lib/geo/geocode-address": { ...geocodeModule },
+  "@/lib/figures/sourced": { ...sourcedModule },
   "next/headers": { ...nextHeadersModule },
 };
 afterAll(() => {
@@ -87,6 +89,12 @@ mock.module("@/lib/highlighter/meter", () => ({
   actionCount: async () => 0,
   weeklyCount: async () => 0,
   capEnabled: () => false,
+}));
+// Sourced-figures cache: stubbed to empty so located-path tests never touch the db.
+mock.module("@/lib/figures/sourced", () => ({
+  ...sourcedModule,
+  sourcedFiguresBlockForZip: async () => "",
+  getSourcedFigures: async () => [],
 }));
 // Mock the guarded fan-out so these tests never read real brains/*.md.
 const guardState: { result: { dossier?: LocationDossier; capped: boolean; fromCache: boolean } } = {

@@ -14,6 +14,7 @@ import { buildPlaceContext } from "@/lib/place-context";
 import { resolveLocation } from "@/refinery/lib/location-resolver.mts";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 import { renderLocationDossierText } from "@/lib/zip-dossier";
+import { sourcedFiguresBlockForZip } from "@/lib/figures/sourced";
 import { assembleGuardedDossier } from "@/lib/welcome/dossier-cache";
 import {
   detectWelcomeLocation,
@@ -788,6 +789,10 @@ export async function runConversationPath(
     tier: 2,
     voice: analyst ? "analyst" : "welcome",
   });
+  // Shared lane-3 cache — figures found via the ZIP page's Find-it button ground
+  // this answer too, so the assistant never says "I don't know" about a number
+  // the platform already found and cited. "" when nothing is cached (no-op).
+  const sourcedBlock = await sourcedFiguresBlockForZip(dossier.zip);
   // RUNG 3/4 — same web-fallback for a located figure ask the per-place dossier may not
   // hold (e.g. active listings / days on market before market-heat-swfl is live): fetch
   // it cited from a named source, or hand it to the user, never invent.
@@ -809,6 +814,7 @@ export async function runConversationPath(
   return streamAnswer(
     system +
       locatedChartBlock +
+      sourcedBlock +
       gapBlock +
       buildUploadsBlock(uploadsText) +
       clientContext +
