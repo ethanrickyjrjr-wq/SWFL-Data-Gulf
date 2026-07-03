@@ -5,7 +5,7 @@
  */
 import { describe, test } from "bun:test";
 import assert from "node:assert/strict";
-import { billingPeriod, tierLimit } from "../usage.ts";
+import { billingPeriod, tierLimit, resolveTier } from "../usage.ts";
 
 // ---------------------------------------------------------------------------
 // billingPeriod
@@ -104,5 +104,21 @@ describe("allow / deny math", () => {
   test("pro: 9999 → allowed, 10000 → denied", () => {
     assert.equal(isAllowed(9999, "pro"), true);
     assert.equal(isAllowed(10000, "pro"), false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveTier (billing_subscriptions → tier)
+// ---------------------------------------------------------------------------
+
+describe("resolveTier (billing_subscriptions → tier)", () => {
+  test("no subscription row → free", () => {
+    assert.equal(resolveTier(null), "free");
+  });
+  test("row with null tier → free", () => {
+    assert.equal(resolveTier({ tier: null }), "free");
+  });
+  test("paid row → its tier verbatim (incl. past_due rows — keep-through-dunning)", () => {
+    assert.equal(resolveTier({ tier: "growth" }), "growth");
   });
 });

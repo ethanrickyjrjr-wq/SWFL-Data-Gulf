@@ -69,6 +69,15 @@ export function tierLimit(tier: string): number {
   return TIER_LIMITS[tier] ?? TIER_LIMITS.free;
 }
 
+/**
+ * billing_subscriptions row → effective tier. The Stripe webhook already
+ * encodes keep-through-dunning (past_due keeps its tier; deletion writes
+ * 'free'), so this is a straight read with a free fallback.
+ */
+export function resolveTier(row: { tier: string | null } | null): string {
+  return row?.tier ?? "free";
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -143,9 +152,23 @@ export async function checkUsageLimit(userId: string): Promise<{
     const db = createServiceRoleClient();
     const period = billingPeriod(new Date());
 
+    // Tier now lives in billing_subscriptions (the Stripe webhook is the
+    // writer); email_usage.tier is legacy and no longer read
+    // (KNOWN-DEBT: drop the column later).
+    const { data: subRow, error: subError } = await db
+      .from("billing_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (subError) {
+      // FAIL OPEN: DB error → allow
+      return failOpen;
+    }
+    const tier = resolveTier(subRow);
+
     const { data, error } = await db
       .from("email_usage")
-      .select("sent_count, tier")
+      .select("sent_count")
       .eq("user_id", userId)
       .eq("billing_period", period)
       .maybeSingle();
@@ -155,13 +178,7 @@ export async function checkUsageLimit(userId: string): Promise<{
       return failOpen;
     }
 
-    // No row yet this period → zero sends recorded; use free tier default.
-    if (!data) {
-      return { allowed: true, tier: "free", sent: 0, limit: tierLimit("free") };
-    }
-
-    const tier = data.tier ?? "free";
-    const sent = data.sent_count ?? 0;
+    const sent = data?.sent_count ?? 0;
     const limit = tierLimit(tier);
     const allowed = sent < limit;
 
