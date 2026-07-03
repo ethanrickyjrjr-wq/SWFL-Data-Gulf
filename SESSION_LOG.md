@@ -1,3 +1,14 @@
+## 2026-07-03 (main) — fix(zip-report): source links collapse into the closed Sources accordion, no inline rail sprawl
+
+Operator: the ZIP report's right-hand "About this page" rail was sprawling inline
+"Also reported — realtor.com…" lines, each a long underlined deep-link to an
+external/provenance URL (plus a permit-coverage link). Operator ruling: source links
+collapse into the closed Sources accordion, no rail sprawl. Fix (`app/r/zip-report/[zip]/page.tsx`):
+(1) fold each demoted alternate's source into the `sources` array so it rides the
+already-collapsed CitationList accordion (deduped by `clean-url` href); (2) strip the
+inline `<a>` from the "Also reported" lines (plain source label kept for context) and
+from the permit-gap line — the rail is now link-free. `bunx next build` green. NOT pushed.
+
 ## 2026-07-03 (main) — fix(zip-shape): outline stroke removed, brainstorming ZIP email reskin
 
 Follow-up to the earlier transparent-PNG fix (5277fa09): operator flagged the shape's stroke as a

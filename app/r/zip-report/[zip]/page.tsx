@@ -272,6 +272,15 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   for (const f of sourcedFigures) {
     sources.push({ label: f.source, url: f.source_url });
   }
+  // Demoted "also reported" alternates: their source rides the closed Sources
+  // accordion below (deduped by clean-url), NOT an inline rail link — operator
+  // ruling 07/03/2026: source links collapse into the closed box, no rail sprawl.
+  for (const s of [...heroSignals, ...gridSignals]) {
+    const demotedForKey = railContext.get(RAIL_CONCEPT_BY_KEY[s.key] ?? "");
+    if (demotedForKey)
+      for (const d of demotedForKey)
+        if (d.sourceUrl) sources.push({ label: d.sourceLabel, url: d.sourceUrl });
+  }
 
   // ── Freshness ─────────────────────────────────────────────────────────────
   const freshnessToken =
@@ -427,15 +436,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
           {gaps.map((g) => (
             <p key={g.metric_key} className="mt-3 text-xs leading-relaxed text-gray-500">
-              Building permits here are issued by the{" "}
-              <a
-                href={g.coverage.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline decoration-white/30 underline-offset-2 hover:text-white"
-              >
-                {g.coverage.name.replace(/ permitting$/, "")}
-              </a>{" "}
+              {/* Coverage link removed from the rail (operator ruling 07/03/2026):
+                  no inline source/coverage deep-links — the rail stays link-free. */}
+              Building permits here are issued by the {g.coverage.name.replace(/ permitting$/, "")}{" "}
               — not the county feed our permit counts come from.
             </p>
           ))}
@@ -450,16 +453,10 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                 key={`${winner.key}:${demoted.label}`}
                 className="mt-3 text-xs leading-relaxed text-gray-500"
               >
-                Also reported — {demoted.label}: {demoted.display} (
-                <a
-                  href={demoted.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-white/30 underline-offset-2 hover:text-white"
-                >
-                  {demoted.sourceLabel}
-                </a>
-                ).
+                {/* Source link removed from the rail (operator ruling 07/03/2026):
+                    the citation rides the closed Sources accordion below, not an
+                    inline deep-link. Plain source label kept for context. */}
+                Also reported — {demoted.label}: {demoted.display} ({demoted.sourceLabel}).
               </p>
             ))}
 
