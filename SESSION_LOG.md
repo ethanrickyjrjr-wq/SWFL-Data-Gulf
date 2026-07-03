@@ -1,3 +1,22 @@
+## 2026-07-03 (main) — Lane D (weekly-read) confirmed NOT built + design spec written
+
+Operator asked to confirm Lane D wasn't done and spec it. Code probe: only the capture form
+exists (`DigestSubscribe` on the zip-report page, wired by Lane C), and it's mislabeled — copy
+says "weekly read" but it POSTs to `/api/email/subscribe`, the pre-existing Phase 2 daily digest
+(one generic non-personalized broadcast, reads `scope.zip` for nothing). No enrollment→build→send
+loop exists. `lib/email/outreach/*` demo-cadence machinery is real/live but shaped for cold B2B
+prospect funnels — wrong semantics to reuse directly. Wrote
+`docs/superpowers/specs/2026-07-03-weekly-read-design.md`: new isolated `weekly_read_subscribers`
+table + new pure cadence module (imitates demo-cadence.ts's shape, not its states) + new
+`lib/email/weekly-read/send.ts` (Resend batch, personalized, proven pattern from
+`lib/email/outreach/send.ts`) + new approval-locked GHA cron, coexisting with (not replacing) the
+daily digest. crawl4ai-verified Resend batch cap still 100/call (resend.com/docs/api-reference/
+emails/send-batch-emails, 07/03/2026) — matches existing `CHUNK=100`. Registered check
+`weekly_read_live_verify` via `new-build.mjs`. Operator didn't respond to 3 clarifying questions
+(approval-vs-auto-send, content grain, digest coexistence) — proceeded on recommended defaults,
+flagged `[PROVISIONAL]` inline in the spec for confirmation before implementation. No code written
+yet — spec only, per RULE 3.5.
+
 ## 2026-07-03 (main) — Lane B: permits pill KILLED by operator ("why would we have permits where we have shit data")
 
 RESOLVED: New Construction pill is dead — corridor-only permit data doesn't back a county-wide map
