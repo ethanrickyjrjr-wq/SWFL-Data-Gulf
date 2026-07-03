@@ -34,37 +34,50 @@ export default async function BillingPage() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-6 py-16">
-        <h1 className="text-3xl font-semibold mb-2">Pricing</h1>
-        <p className="text-sm text-neutral-500 mb-8">
-          Building is free. You pay to send at scale — no contract, cancel anytime.
-        </p>
+    <main className="min-h-dvh bg-gulf-midnight">
+      <div className="mx-auto w-full max-w-4xl px-6 py-16">
+        <div className="text-center">
+          <h1 className="text-4xl font-semibold tracking-tight text-text-primary">Pricing</h1>
+          <p className="mx-auto mt-3 max-w-md text-text-secondary">
+            Building is free. You pay to send at scale — no contract, cancel anytime.
+          </p>
+        </div>
 
         {usage && (
-          <div className="mb-8 rounded-lg border border-neutral-200 px-5 py-4">
-            <p className="text-sm font-medium">
-              Current plan: <span className="capitalize">{usage.tier}</span>
-            </p>
-            <p className="text-sm text-neutral-500">
-              {usage.sent.toLocaleString()} of {usage.limit.toLocaleString()} sends used this month
-            </p>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded bg-neutral-100">
+          <div className="mx-auto mt-10 max-w-md rounded-xl glass-card-modern border border-white/10 px-6 py-5">
+            <div className="flex items-baseline justify-between">
+              <p className="text-sm font-medium text-text-primary">
+                Current plan: <span className="capitalize text-gulf-teal">{usage.tier}</span>
+              </p>
+              <p className="metric-value text-sm text-text-secondary">
+                {usage.sent.toLocaleString()} / {usage.limit.toLocaleString()} sends
+              </p>
+            </div>
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded bg-white/10">
               <div
-                className="h-full bg-neutral-800"
+                className="h-full bg-gulf-teal"
                 style={{ width: `${Math.min(100, (usage.sent / usage.limit) * 100)}%` }}
               />
             </div>
           </div>
         )}
 
-        <TierCards currentTier={usage?.tier ?? "free"} hasCustomer={hasCustomer} />
+        <div className="mt-10">
+          <TierCards
+            currentTier={usage?.tier ?? "free"}
+            hasCustomer={hasCustomer}
+            loggedIn={Boolean(user)}
+          />
+        </div>
 
-        <div className="mt-12 rounded-lg bg-neutral-50 border border-neutral-200 px-5 py-4 text-sm text-neutral-600 space-y-1">
-          <p className="font-medium text-neutral-800">Enterprise</p>
-          <p>
+        <div className="mt-12 rounded-xl border border-white/10 bg-gulf-deep px-6 py-5 text-center text-sm text-text-secondary">
+          <p className="font-medium text-text-primary">Enterprise</p>
+          <p className="mt-1">
             Higher limits, teams, or something custom — email{" "}
-            <a href="mailto:hello@swfldatagulf.com" className="underline text-neutral-800">
+            <a
+              href="mailto:hello@swfldatagulf.com"
+              className="text-gulf-teal underline underline-offset-4"
+            >
               hello@swfldatagulf.com
             </a>
             .

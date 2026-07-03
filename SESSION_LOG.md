@@ -1,3 +1,19 @@
+## 2026-07-03 (main) — /billing restyled to Gulf design system + logged-out UX fix; Stripe live wiring DONE
+
+Operator flagged /billing as unusable ("can't click anything"): page shipped with light-theme
+classes on the dark site (white boxes, invisible contrast) and logged-out users got a dead-end
+alert() on Upgrade. Rewrote `app/billing/page.tsx` + `TierCards.tsx`: Gulf tokens
+(glass-card-modern, gulf-teal, text-primary/secondary/tertiary), centered 3-card grid with Growth
+featured, Free row, dark Enterprise box; Upgrade is login-aware (logged out → `/login?next=/billing`,
+401 → same), alert() replaced with inline coral error + busy states. Verified: dev-server screenshot
++ login redirect clicked live; `bunx next build` GREEN in clean worktree off origin/main (shared tree
+is dirty with another session's in-flight app/project work — `projectHome` type error is theirs, not
+this diff). Stripe live wiring completed this session: live products/prices created (operator ran
+setup-products, Mode LIVE), gh secrets STRIPE_SECRET_KEY/PUBLISH_KEY/WEBHOOK_SECRET set, Vercel env
++ webhook endpoint registered by operator, live probe of /api/stripe/webhook returns 401
+bad_signature (deployed + secret loaded). Remaining: operator smoke test ($29 Starter → verify tier
+flip → cancel + refund) to close `stripe_billing_live_verify`.
+
 ## 2026-07-03 (main) — Lane D (weekly-read) confirmed NOT built + design spec written
 
 Operator asked to confirm Lane D wasn't done and spec it. Code probe: only the capture form
