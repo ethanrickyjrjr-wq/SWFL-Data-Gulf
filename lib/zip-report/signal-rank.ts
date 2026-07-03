@@ -25,6 +25,13 @@ export interface SignalCandidate {
   movementText?: string;
   covered: boolean;
   source?: { label: string; url: string };
+  /**
+   * Cross-reference note shown alongside the candidate when a linked macro/micro
+   * measurement of a DIFFERENT concept is also held for the same ZIP (e.g. ZHVI vs
+   * MLS median). Set by the candidate builder, never by the ranker — purely additive,
+   * does not participate in scoring.
+   */
+  footnote?: string;
 }
 
 export interface RankedSignal extends SignalCandidate {

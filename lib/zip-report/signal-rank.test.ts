@@ -80,3 +80,14 @@ describe("rankSignals", () => {
     expect(a.score).toBeCloseTo(b.score, 10);
   });
 });
+
+describe("rankSignals — footnote passthrough", () => {
+  test("an optional footnote on a candidate survives ranking unchanged, and doesn't affect score", () => {
+    const withFootnote = rankSignals([
+      cand({ key: "a", percentile: 80, footnote: "tracks within 6% of the index" }),
+    ])[0];
+    const without = rankSignals([cand({ key: "a", percentile: 80 })])[0];
+    expect(withFootnote.footnote).toBe("tracks within 6% of the index");
+    expect(withFootnote.score).toBeCloseTo(without.score, 10);
+  });
+});
