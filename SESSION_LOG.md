@@ -1,3 +1,17 @@
+## 2026-07-03 (main) — fix(zip-shape): fill color is now a caller-supplied param + spec updated
+
+Operator: "the zip color stays the same color as clicked when on homepage... should be a
+skeleton so brand colors can flow through." `/api/zip-shape/[zip]` was still hardcoding teal
+even after the earlier transparency/outline fixes. Made the fill a `?fill=` query param (strict
+hex/`rgb()` validation — it's spliced into an SVG attribute, so anything else falls back rather
+than being sanitized), defaulting to the map's own neutral no-data slate when absent. Verified
+live: default renders neutral, a valid `rgb()` renders that exact color, a script-injection
+payload falls back safely (`ab40c4f7`). Updated the `zip-email-reskin` design spec
+(`2db55426`) so `zip-seed.ts` will compute this fill with the same `computeZipGradient(flood
+AAL)` call the homepage map and zip-report page already use — same color everywhere, no new
+data source, and a ZIP with no held AAL just omits `?fill=` rather than faking a gradient point.
+Next: operator reviews the spec, then `writing-plans` for implementation.
+
 ## 2026-07-03 (main) — feat(mcp): account-level MCP token — connect once, reach every project by name
 
 Operator: "FIX THIS FUCKING MCP SHIT" — the per-project MCP key forced a re-mint + `.mcp.json`
