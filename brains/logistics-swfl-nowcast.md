@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v15 | Token: SWFL-7421-v15-20260603 -->
+<!-- FRESHNESS: v16 | Token: SWFL-7421-v16-20260703 -->
 ---
 brain_id: logistics-swfl-nowcast
-version: 15
-refined_at: 2026-06-03T07:39:34Z
-freshness_token: SWFL-7421-v15-20260603
+version: 16
+refined_at: 2026-07-03T21:54:05Z
+freshness_token: SWFL-7421-v16-20260703
 ttl_seconds: 2592000
 context_type: user_saved_reference
 scope: Current-state freight-activity nowcast for SWFL — derives a daily activity proxy from FDOT AADT × tfctr × payload, compares against the brain's OWN rolling history (Path B), and classifies shock_state + baseline_validity_flag. FAF5 inbound-flow is preserved as audited CONTEXT.
@@ -29,22 +29,24 @@ SCOPE: Current-state freight-activity nowcast for SWFL — derives a daily activ
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                                                                        | verified   | expires
-s01 | FDOT freight-coded segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7; counties Lee+Collier, year 2025, roadways I-* + US-* only) plus the last 120 rows of data_lake.fdot_freight_nowcast_shock_log — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=yearx,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(Lee,Collier)&yearx=eq.2025 | 2026-06-03 | 2026-07-03
-s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                                                                                                                                                                                                                                                                                                                                      | 2026-05-30 | 2026-06-29
+s01 | FDOT freight-coded segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7; counties Lee+Collier, year 2025, roadways I-* + US-* only) plus the last 120 rows of data_lake.fdot_freight_nowcast_shock_log — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=yearx,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(Lee,Collier)&yearx=eq.2025 | 2026-07-03 | 2026-08-02
+s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                                                                                                                                                                                                                                                                                                                                      | 2026-07-03 | 2026-08-02
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"FDOT freight-coded corpus — Lee + Collier interstates + US routes","value":"615 freight-coded FDOT segments (I-* + US-*) for Lee + Collier in year 2025. Connector pre-computed per-segment annualized activity tons; corpus total: 625,226,130,376 tons/year. Prior shock-log entries available: 17 (17 with non-null activity in the last 90 days). Upstream FAF5 context (logistics-swfl) available: yes.","src":"s01","date":"2026-06-03"},
-  {"id":"f002","topic":"faf5_context","fact":"Upstream logistics-swfl FAF5 context (display only)","value":"logistics-swfl (confidence 1.00, refined 2026-05-30) reports inbound_freight_tons_swfl = 1226969.1 thousand tons/year (= 1,226,969,100 tons/year). Path B: this value is CONTEXT only — the deviation z-score below is computed against FDOT's own rolling history, not against the FAF5 number.","src":"s01","date":"2026-06-03"}
+  {"id":"f001","topic":"corpus_overview","fact":"FDOT freight-coded corpus — Lee + Collier interstates + US routes","value":"615 freight-coded FDOT segments (I-* + US-*) for Lee + Collier in year 2025. Connector pre-computed per-segment annualized activity tons; corpus total: 625,226,130,376 tons/year. Prior shock-log entries available: 18 (18 with non-null activity in the last 24 days). Upstream FAF5 context (logistics-swfl) available: yes.","src":"s01","date":"2026-07-03"},
+  {"id":"f002","topic":"faf5_context","fact":"Upstream logistics-swfl FAF5 context (display only)","value":"logistics-swfl (confidence 1.00, refined 2026-07-03) reports inbound_freight_tons_swfl = 1,226,969 thousand tons/year (= 1,226,969,100 tons/year). Path B: this value is CONTEXT only — the deviation z-score below is computed against FDOT's own rolling history, not against the FAF5 number.","src":"s01","date":"2026-07-03"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "logistics-swfl-nowcast",
-  "version": 15,
-  "refined_at": "2026-06-03T07:39:34Z",
+  "version": 16,
+  "refined_at": "2026-07-03T21:54:05Z",
+  "expires": "2026-08-02T21:54:05Z",
+  "ttl_seconds": 2592000,
   "direction": "neutral",
-  "magnitude": 0,
+  "magnitude": 0.16666666666666663,
   "drivers": [
     {
       "brain_id": "logistics-swfl",
@@ -52,7 +54,7 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
     }
   ],
   "overrides": [],
-  "conclusion": "FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year. Shock-state: insufficient_history. Only 17/90 required days of rolling-baseline history are available — deviation z is suppressed until the history matures.",
+  "conclusion": "FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year against a 312,733,065,188 tons/year rolling baseline (18-day window, σ = 312,493,065,188) — deviation z = 1.00 (99.9%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 0.",
   "key_metrics": [
     {
       "metric": "faf5_inbound_flow_tons_year",
@@ -64,10 +66,14 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/logistics-swfl",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 1,
-        "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-05-30) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
-      }
+        "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-07-03) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
+      },
+      "suggestions": [
+        "What's driving faf5 inbound flow tons year?",
+        "How does faf5 inbound flow tons year here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "current_activity_tons_year",
@@ -79,29 +85,38 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "Chart asking rents across the corridors",
+        "What's driving current activity tons year?",
+        "How does current activity tons year here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "rolling_mean_activity_tons_year",
-      "value": 294351120177,
+      "value": 312733065188,
       "direction": "stable",
-      "label": "Rolling-mean baseline (last 17 of up to 90 prior runs) — the actual math anchor for the deviation z below",
+      "label": "Rolling-mean baseline (last 18 of up to 24 prior runs) — the actual math anchor for the deviation z below",
       "variable_type": "extensive",
       "units": "tons/year",
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving rolling mean activity tons year?",
+        "How does rolling mean activity tons year here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "rolling_stddev_activity_tons_year",
-      "value": 311951951249,
+      "value": 312493065188,
       "direction": "stable",
       "label": "Rolling-stddev baseline (population stddev over the same window) — denominator of the deviation z below",
       "variable_type": "extensive",
@@ -109,38 +124,88 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving rolling stddev activity tons year?",
+        "How does rolling stddev activity tons year here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "history_days_observed",
-      "value": 17,
+      "value": 18,
       "direction": "stable",
-      "label": "Count of prior shock-log rows with non-null activity in the rolling window — must be ≥ 90 for z computation to proceed",
+      "label": "Count of prior shock-log rows with non-null activity in the rolling window — must be ≥ 6 for z computation to proceed",
       "variable_type": "extensive",
       "units": "days",
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving history days observed?",
+        "How does history days observed here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "deviation_z",
+      "value": 1,
+      "direction": "rising",
+      "label": "Deviation z-score: (current_activity − rolling_mean) / rolling_stddev",
+      "variable_type": "intensive",
+      "units": "z-score",
+      "display_format": "ratio",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+        "fetched_at": "2026-07-03T21:54:05Z",
+        "tier": 2,
+        "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+      },
+      "suggestions": [
+        "What's driving deviation z?",
+        "How does deviation z here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "deviation_pct",
+      "value": 99.9,
+      "direction": "rising",
+      "label": "Deviation as percent of rolling_mean",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+        "fetched_at": "2026-07-03T21:54:05Z",
+        "tier": 2,
+        "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+      },
+      "suggestions": [
+        "What's driving deviation pct?",
+        "How does deviation pct here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "shock_state",
-      "value": "insufficient_history",
+      "value": "normal",
       "direction": "stable",
       "label": "Shock-state classifier (normal | anomaly | structural_break | insufficient_history)",
       "variable_type": "categorical",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving shock state?",
+        "How does shock state here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "baseline_validity_flag",
@@ -150,10 +215,14 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "variable_type": "categorical",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving baseline validity flag?",
+        "How does baseline validity flag here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "consecutive_breach_days",
@@ -165,10 +234,14 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving consecutive breach days?",
+        "How does consecutive breach days here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "freight_segment_count",
@@ -180,10 +253,14 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 2,
         "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
-      }
+      },
+      "suggestions": [
+        "What's driving freight segment count?",
+        "How does freight segment count here compare to other SWFL areas?"
+      ]
     },
     {
       "metric": "avg_payload_tons_per_truck",
@@ -195,15 +272,18 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
       "display_format": "raw",
       "source": {
         "url": "https://www.fhwa.dot.gov/policyinformation/statistics/2023/vm1.cfm",
-        "fetched_at": "2026-06-03T07:39:34Z",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 1,
         "citation": "FHWA Highway Statistics 2023, Table VM-1 — combination-truck average payload assumption (16.0 tons)."
-      }
+      },
+      "suggestions": [
+        "What's driving avg payload tons per truck?",
+        "How does avg payload tons per truck here compare to other SWFL areas?"
+      ]
     }
   ],
   "caveats": [
-    "Insufficient history: only 17 of 90 required prior shock-log rows are available — deviation z is suppressed and the shock-state machine is held at \"insufficient_history\" until the rolling baseline matures.",
-    "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 90 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
+    "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 24 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
     "Daily-cadence shock detection uses a synthetic per-day denominator (annual tons_per_year ÷ 365) because Tier 2 carries only annual FDOT AADT. 30d / 90d escalation thresholds will rarely fire from current Tier 2 data alone — true daily AADT-equivalent (FDOT continuous-count stations) is reserved for v2 ingest.",
     "Conversion math: activity_tons_per_year_per_segment = AADT × tfctr × 16 × 365. The 16.0 tons/truck payload is FHWA HS 2023 Table VM-1 (combination trucks); commodity-mix shifts (heavy gravel vs light electronics) are not modeled in v1.",
     "Path B over-counts pass-through traffic (one truck traversing five segments contributes to five segment counts) — the over-count is constant across days and cancels in the z-score, but the headline tons/year number should NOT be compared directly to FAF5 flow.",
@@ -219,7 +299,7 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-03T07:39:34Z"
+    "computed_at": "2026-07-03T21:54:05Z"
   },
   "exogenous_signals": []
 }
@@ -228,5 +308,5 @@ s02 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl
 - logistics-swfl-nowcast: daily freight-activity deviation read against the brain's rolling FDOT history (Path B).
 
 --- RECENT NOTES ---
-- 2026-06-03: pack refined by the Refinery — 2 fact(s) from 2 source(s).
+- 2026-07-03: pack refined by the Refinery — 2 fact(s) from 2 source(s).
 ```
