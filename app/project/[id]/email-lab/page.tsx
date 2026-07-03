@@ -70,6 +70,15 @@ export default async function ProjectEmailLabPage({
 
   if (!project) notFound();
 
+  // Lane E gallery: does this project have ANY built block-canvas deliverable?
+  // head:true count — no rows shipped. RLS-scoped like every read on this page.
+  const { count: dCount } = await supabase
+    .from("deliverables")
+    .select("id", { count: "exact", head: true })
+    .eq("project_id", id)
+    .eq("template", "block-canvas");
+  const hasDeliverables = (dCount ?? 0) > 0;
+
   const branding: Branding = (project.branding ?? {}) as Branding;
   const items: ProjectItem[] = Array.isArray(project.items) ? project.items : [];
   const scope = inferScopeFromItems(items);
@@ -136,6 +145,7 @@ export default async function ProjectEmailLabPage({
       }
       initialDoc={initialDoc}
       deliverableId={did}
+      hasDeliverables={hasDeliverables}
       autoOpenSchedule={autoOpenSchedule}
       projectPhotos={projectPhotos}
       uiState={(project.ui_state ?? {}) as import("../workspace/types").ProjectUiState}

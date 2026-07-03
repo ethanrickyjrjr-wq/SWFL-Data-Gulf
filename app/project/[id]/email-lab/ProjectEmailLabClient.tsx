@@ -12,8 +12,9 @@ import {
   type EmailCanvas,
   type SwitchChoice,
 } from "@/lib/email/lab/canvas-pref";
-import { defaultDoc } from "@/lib/email/doc/default-docs";
+import { defaultDoc, type SeedDoc } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
+import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import type { ProjectUiState } from "../workspace/types";
 
 interface Props {
@@ -29,6 +30,9 @@ interface Props {
   scope?: { kind: string; value: string } | null;
   initialDoc?: EmailDoc | null;
   deliverableId?: string | null;
+  /** Lane E gallery: false = no block-canvas deliverable exists yet, so a
+   *  doc-less open lands on the template gallery instead of the canvas. */
+  hasDeliverables?: boolean;
   /** Re-open the Schedule modal on mount (set when returning from contacts-upload). */
   autoOpenSchedule?: boolean;
   projectPhotos?: { storage_path: string; signedUrl: string; caption?: string }[];
@@ -48,6 +52,7 @@ export function ProjectEmailLabClient({
   scope,
   initialDoc,
   deliverableId,
+  hasDeliverables,
   autoOpenSchedule,
   projectPhotos,
   uiState,
@@ -66,6 +71,21 @@ export function ProjectEmailLabClient({
   // autoGenerate fires ONCE per page load — never again after a canvas toggle.
   // State (not a ref): it feeds the autoGenerate prop, i.e. render output.
   const [hasToggled, setHasToggled] = useState(false);
+  // Lane E first-run gallery — pure UI state, never persisted. Shows only when
+  // the tool opened with no doc (?did/?seed absent) AND nothing was ever built.
+  const [showGallery, setShowGallery] = useState(() => !initialDoc && !hasDeliverables);
+  // A pick/Start-blank suppresses the shells' one-shot AI auto-build: on the
+  // grid canvas that build REPLACES the doc, which would clobber the choice.
+  const [galleryPicked, setGalleryPicked] = useState(false);
+
+  function seedCanvas(doc: EmailDoc) {
+    setSeedDoc(doc);
+    currentDocRef.current = doc;
+    savedDocRef.current = doc;
+    dirtyRef.current = false;
+    setGalleryPicked(true);
+    setShowGallery(false);
+  }
 
   const scopeLabel = scope
     ? `${scope.kind === "zip" ? "ZIP " : ""}${scope.value}`
@@ -176,7 +196,7 @@ export function ProjectEmailLabClient({
     initialBranding,
     scope: effectiveScope,
     initialAiPrompt: aiPrompt,
-    autoGenerate: !savedId && !hasToggled,
+    autoGenerate: !savedId && !hasToggled && !galleryPicked,
     aiPlaceholder: `e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`,
     onSave: handleSave,
     saving,
@@ -190,7 +210,14 @@ export function ProjectEmailLabClient({
 
   return (
     <>
-      {canvas === "grid" ? (
+      {showGallery ? (
+        <div className="min-h-[calc(100dvh-3.5rem)]">
+          <TemplateGallery
+            onPick={(seed: SeedDoc) => seedCanvas(seed.build())}
+            onStartBlank={() => seedCanvas(defaultDoc())}
+          />
+        </div>
+      ) : canvas === "grid" ? (
         <EmailLabGridShell
           key="grid"
           initialDoc={ensureGridLayouts(seedDoc, DEFAULT_H)}
