@@ -22,6 +22,7 @@ import {
   INSURED_PENETRATION_FACTOR,
   type NfipSwflAggregate,
   type NfipZipAggregate,
+  type NfipZipWindowFull,
   type NfipStormTotal,
 } from "../sources/fema-nfip-source.mts";
 import { usgsWaterSource, type HydroSwflAggregate } from "../sources/usgs-water-source.mts";
@@ -147,6 +148,13 @@ interface EnvSnapshot {
   zipAggregates: NfipZipAggregate[];
   /** Provenance: earliest fetched_at across the per-ZIP fragments, when present. */
   zip_aggregates_fetched_at: string | null;
+  /**
+   * Full per-ZIP window list (every SWFL ZIP with ≥1 claim in window) from the
+   * nfip-zip-window-full fragment. Feeds ONLY the flood_by_zip detail table —
+   * key_metrics stay top-6 (thin pipe). Empty when the fragment is absent.
+   */
+  zipWindowFull: NfipZipAggregate[];
+  zip_window_full_fetched_at: string | null;
 }
 
 function envFragmentsFrom(fragments: RawFragment[]): EnvSwflNormalized[] {
@@ -215,6 +223,21 @@ function zipAggregatesFrom(fragments: RawFragment[]): {
   return {
     aggs: hits.map((h) => h.normalized as unknown as NfipZipAggregate),
     fetched_at: earliest,
+  };
+}
+
+/** Find the single nfip-zip-window-full fragment (all windowed SWFL ZIPs). */
+function zipWindowFullFrom(fragments: RawFragment[]): {
+  zips: NfipZipAggregate[];
+  fetched_at: string | null;
+} {
+  const hit = fragments.find(
+    (f) => (f.normalized as { kind?: string } | null)?.kind === "nfip-zip-window-full",
+  );
+  if (!hit) return { zips: [], fetched_at: null };
+  return {
+    zips: (hit.normalized as unknown as NfipZipWindowFull).zips,
+    fetched_at: hit.fetched_at,
   };
 }
 
@@ -297,6 +320,8 @@ function buildSnapshot(rows: EnvSwflNormalized[]): EnvSnapshot {
     rainfall_fetched_at: null,
     zipAggregates: [],
     zip_aggregates_fetched_at: null,
+    zipWindowFull: [],
+    zip_window_full_fetched_at: null,
     stormTotals: [],
     stormTotals_fetched_at: null,
   };
@@ -584,6 +609,10 @@ function envSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const zipHit = zipAggregatesFrom(allFragments);
   snapshot.zipAggregates = zipHit.aggs;
   snapshot.zip_aggregates_fetched_at = zipHit.fetched_at;
+
+  const fullHit = zipWindowFullFrom(allFragments);
+  snapshot.zipWindowFull = fullHit.zips;
+  snapshot.zip_window_full_fetched_at = fullHit.fetched_at;
 
   const stormHit = stormTotalsFrom(allFragments);
   snapshot.stormTotals = stormHit.totals;
@@ -1068,6 +1097,60 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
           `Storm-list reviewed ${SWFL_STORM_YEARS_LAST_REVIEWED}.`,
       },
       note: "Per-storm NFIP paid claims. For 2024, Helene (2024-09-26) and Milton (2024-10-09) are attributed by date_of_loss cutoff. Claims with null date_of_loss in 2024 are excluded from per-storm rows but included in the combined swfl_storm_year_claims_usd metric.",
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // detail_tables — flood_by_zip: one row per SWFL ZIP with ≥1 claim in
+  // the rolling window (spec 2026-07-03 zip-signal-hero §4). key_metrics
+  // stay top-6; this is the finer-grain lookup surface (zip-drill pattern).
+  // ------------------------------------------------------------------
+  if (snapshot.zipWindowFull.length > 0) {
+    detail_tables.push({
+      id: "flood_by_zip",
+      title: "SWFL flood loss by ZIP — NFIP per-insured-property AAL",
+      grain: "zip",
+      columns: [
+        {
+          id: "aal_usd_per_insured_property",
+          label: "Avg annual flood loss per insured home",
+          display_format: "currency",
+          units: "USD/year",
+        },
+        {
+          id: "pct_rank",
+          label: "SWFL percentile rank",
+          display_format: "raw",
+          units: "percentile",
+        },
+        {
+          id: "claim_count_in_window",
+          label: `Claims in ${AAL_WINDOW_YEARS}-year window`,
+          display_format: "count",
+          units: "claims",
+        },
+        { id: "county", label: "County" },
+      ],
+      rows: snapshot.zipWindowFull.map((z) => ({
+        key: z.zip,
+        label: z.zip,
+        cells: {
+          aal_usd_per_insured_property: z.aal_usd_per_insured_property,
+          pct_rank: z.aal_pct_swfl_rank,
+          claim_count_in_window: z.claim_count_in_window,
+          county: z.county_name,
+        },
+      })),
+      source: {
+        url: FEMA_NFIP_TABLE_URL,
+        fetched_at: snapshot.zip_window_full_fetched_at ?? snapshot.earliest_fetched_at,
+        tier: 1,
+        citation:
+          `OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims — every SWFL ZIP with ≥1 ` +
+          `claim in the ${AAL_WINDOW_YEARS}-year rolling window; per-insured-property AAL, ` +
+          `2020 ACS population × ${INSURED_PENETRATION_FACTOR} NSI proxy denominator (v1).`,
+      },
+      note: "NFIP policyholder claims only — uninsured flood loss is not in the archive. Percentile rank is across all SWFL ZIPs with ≥1 claim in window.",
     });
   }
 

@@ -11,11 +11,7 @@ const { femaNfipSource } = await import("../sources/fema-nfip-source.mts");
  * Minimal EnvSnapshot stub for voteEnvDirection unit tests. The function only
  * reads area fields, so a partial object cast through unknown is fine.
  */
-function snapshot(opts: {
-  totalArea?: number;
-  sfhaArea?: number;
-  veArea?: number;
-}): never {
+function snapshot(opts: { totalArea?: number; sfhaArea?: number; veArea?: number }): never {
   return {
     counties: [],
     swfl_total_area_sq_deg: opts.totalArea ?? 0,
@@ -35,20 +31,13 @@ function snapshot(opts: {
 test("voteEnvDirection: storm-shadow fires in 2026 (Ian 2022 within 3yr) — bearish 0.6 floor even with zero SFHA", () => {
   const v = voteEnvDirection(snapshot({}), 2026);
   assert.equal(v.direction, "bearish");
-  assert.ok(
-    v.magnitude >= 0.6,
-    `expected magnitude >= 0.6, got ${v.magnitude}`,
-  );
+  assert.ok(v.magnitude >= 0.6, `expected magnitude >= 0.6, got ${v.magnitude}`);
 });
 
 test("voteEnvDirection: storm-shadow active in 2025 (Ian+Helene+Milton all recent)", () => {
   const v = voteEnvDirection(snapshot({}), 2025);
   assert.equal(v.direction, "bearish");
-  assert.equal(
-    v.magnitude,
-    0.6,
-    "with 0% SFHA, the storm-shadow floor is exactly 0.6",
-  );
+  assert.equal(v.magnitude, 0.6, "with 0% SFHA, the storm-shadow floor is exactly 0.6");
 });
 
 test("voteEnvDirection: storm-shadow expires in 2028 (3yr past Milton 2024 = 2027 last covered)", () => {
@@ -70,11 +59,7 @@ test("voteEnvDirection: outside shadow + high SFHA → bearish driven by SFHA ti
 test("voteEnvDirection: in-shadow + high SFHA → magnitude is max(0.6, sfha-tier) = 0.8", () => {
   const v = voteEnvDirection(snapshot({ totalArea: 100, sfhaArea: 50 }), 2026);
   assert.equal(v.direction, "bearish");
-  assert.equal(
-    v.magnitude,
-    0.8,
-    "storm-shadow uses max(0.6, sfha-tier); 0.8 wins",
-  );
+  assert.equal(v.magnitude, 0.8, "storm-shadow uses max(0.6, sfha-tier); 0.8 wins");
 });
 
 test("voteEnvDirection: outside shadow + zero SFHA → neutral 0.2 (the unhappy-path default)", () => {
@@ -125,14 +110,9 @@ test("outputProducer: with NFIP fragments → 4 NFIP metrics surface alongside N
 
 test("outputProducer: NFIP storm-year total carries a positive USD value", async () => {
   const result = await runProducer();
-  const m = result.key_metrics.find(
-    (x) => x.metric === "swfl_storm_year_claims_usd",
-  );
+  const m = result.key_metrics.find((x) => x.metric === "swfl_storm_year_claims_usd");
   assert.ok(m, "swfl_storm_year_claims_usd should be present");
-  assert.ok(
-    (m!.value as number) > 1_000_000,
-    `expected > $1M (got ${m!.value})`,
-  );
+  assert.ok((m!.value as number) > 1_000_000, `expected > $1M (got ${m!.value})`);
 });
 
 test("outputProducer: NFIP storm-frequency = 5 (matches deduped years >= 2000 in hardcoded list)", async () => {
@@ -181,9 +161,7 @@ test("outputProducer: conclusion uses Mode 1 template on fixture (50-claim Ian-2
 test("anti-regression §G.4 #1: 33931 fixture-driven Mode 1 — AAL>$800, barrier 1.0, cap-rate 60 bps, ins-pct>5%", async () => {
   const result = await runProducer();
   const findVal = (slug: string) =>
-    result.key_metrics.find((m) => m.metric === slug)?.value as
-      | number
-      | undefined;
+    result.key_metrics.find((m) => m.metric === slug)?.value as number | undefined;
 
   const aal = findVal("swfl_zip_33931_flood_aal_usd_per_insured_property");
   assert.ok(aal !== undefined, "33931 AAL metric must be present");
@@ -193,24 +171,13 @@ test("anti-regression §G.4 #1: 33931 fixture-driven Mode 1 — AAL>$800, barrie
   );
 
   const barrier = findVal("swfl_zip_33931_barrier_island_score");
-  assert.equal(
-    barrier,
-    1.0,
-    "33931 must classify as barrier (score 1.0) via swfl-geo lookup",
-  );
+  assert.equal(barrier, 1.0, "33931 must classify as barrier (score 1.0) via swfl-geo lookup");
 
   const bps = findVal("swfl_zip_33931_flood_cap_rate_adj_bps");
-  assert.equal(
-    bps,
-    60,
-    "33931's barrier 1.0 score must map to 60 bps cap-rate midpoint",
-  );
+  assert.equal(bps, 60, "33931's barrier 1.0 score must map to 60 bps cap-rate midpoint");
 
   const ins = findVal("swfl_zip_33931_insurance_pct_typical_noi");
-  assert.ok(
-    ins !== undefined,
-    "33931 insurance_pct_typical_noi must be present",
-  );
+  assert.ok(ins !== undefined, "33931 insurance_pct_typical_noi must be present");
   assert.ok(
     ins! > 0.05,
     `33931 imputed flood insurance must run > 5% of NOI at 8% cap (got ${ins})`,
@@ -417,8 +384,7 @@ test("outputProducer per-ZIP: barrier_island_score matches swfl-geo lookup", asy
       county_name: "Collier",
     }, // inland 0.0
   ]);
-  const findVal = (slug: string) =>
-    result.key_metrics.find((m) => m.metric === slug)?.value;
+  const findVal = (slug: string) => result.key_metrics.find((m) => m.metric === slug)?.value;
   assert.equal(findVal("swfl_zip_33931_barrier_island_score"), 1.0);
   assert.equal(findVal("swfl_zip_33914_barrier_island_score"), 0.5);
   assert.equal(findVal("swfl_zip_34112_barrier_island_score"), 0.0);
@@ -437,8 +403,7 @@ test("outputProducer per-ZIP: cap_rate_adj_bps equals capRateBpsFor(barrier_scor
       county_name: "Collier",
     },
   ]);
-  const findVal = (slug: string) =>
-    result.key_metrics.find((m) => m.metric === slug)?.value;
+  const findVal = (slug: string) => result.key_metrics.find((m) => m.metric === slug)?.value;
   assert.equal(findVal("swfl_zip_33931_flood_cap_rate_adj_bps"), 60);
   assert.equal(findVal("swfl_zip_33914_flood_cap_rate_adj_bps"), 27.5);
   assert.equal(findVal("swfl_zip_34112_flood_cap_rate_adj_bps"), 0);
@@ -454,18 +419,13 @@ test("outputProducer per-ZIP: insurance_pct_typical_noi = (AAL × 2) / (median_b
     (m) => m.metric === "swfl_zip_33931_insurance_pct_typical_noi",
   );
   assert.ok(ins, "insurance_pct_typical_noi metric must exist for 33931");
-  assert.ok(
-    Math.abs((ins!.value as number) - 0.05) < 0.001,
-    `expected 0.05, got ${ins!.value}`,
-  );
+  assert.ok(Math.abs((ins!.value as number) - 0.05) < 0.001, `expected 0.05, got ${ins!.value}`);
 });
 
 test("outputProducer per-ZIP: insurance_pct_typical_noi degrades gracefully when median_bv = 0", async () => {
   // Defensive — median_bv could be 0 for a ZIP with no building_property_value rows.
   // The metric must NOT emit NaN/Infinity. Either omit the metric or emit 0.
-  const result = await runProducerWithSyntheticZips([
-    { zip: "33931", aal: 1200, median_bv: 0 },
-  ]);
+  const result = await runProducerWithSyntheticZips([{ zip: "33931", aal: 1200, median_bv: 0 }]);
   const ins = result.key_metrics.find(
     (m) => m.metric === "swfl_zip_33931_insurance_pct_typical_noi",
   );
@@ -492,11 +452,7 @@ test("outputProducer Mode 1 (barrier + AAL ≥ $800): conclusion uses '+50-70 bp
     /Barrier-island|barrier island/i,
     "Mode 1 conclusion must name the barrier-island framing",
   );
-  assert.match(
-    result.conclusion,
-    /33931/,
-    "Mode 1 conclusion must name the top barrier ZIP",
-  );
+  assert.match(result.conclusion, /33931/, "Mode 1 conclusion must name the top barrier ZIP");
 });
 
 test("outputProducer Mode 2 (no Mode-1 barrier, coastal-mainland present): conclusion uses '+20-35 bps'", async () => {
@@ -611,11 +567,7 @@ test("voteEnvDirection Mode 1 (barrier + AAL ≥ $800): bearish 0.8 outside stor
     2030,
   );
   assert.equal(v.direction, "bearish");
-  assert.equal(
-    v.magnitude,
-    0.8,
-    "Mode 1 should produce the top-tier bearish magnitude",
-  );
+  assert.equal(v.magnitude, 0.8, "Mode 1 should produce the top-tier bearish magnitude");
 });
 
 test("voteEnvDirection Mode 2 (coastal-mainland only): bearish ~0.4 outside storm shadow", () => {
@@ -624,11 +576,7 @@ test("voteEnvDirection Mode 2 (coastal-mainland only): bearish ~0.4 outside stor
     2030,
   );
   assert.equal(v.direction, "bearish");
-  assert.equal(
-    v.magnitude,
-    0.4,
-    "Mode 2 should produce the mid bearish magnitude",
-  );
+  assert.equal(v.magnitude, 0.4, "Mode 2 should produce the mid bearish magnitude");
 });
 
 test("voteEnvDirection Mode 3 (inland only): neutral 0.2 outside storm shadow", () => {
@@ -670,14 +618,57 @@ test("voteEnvDirection: storm-shadow still overrides Mode 3 in 2026 — bearish 
 
 test("voteEnvDirection: empty zipAggregates falls back to SFHA/VE area logic (no regression for NFHL-only path)", () => {
   // No zip aggregates AND high SFHA area → falls back to legacy tier and emits 0.8.
-  const v = voteEnvDirection(
-    snapshotWithZips([]) /* zipAggregates = [] */,
-    2030,
-  );
+  const v = voteEnvDirection(snapshotWithZips([]) /* zipAggregates = [] */, 2030);
   assert.equal(
     v.direction,
     "neutral",
     "with empty zips AND zero SFHA, direction is neutral (the unhappy-path default)",
   );
   assert.equal(v.magnitude, 0.2);
+});
+
+// --------------------------------------------------------------------------
+// flood_by_zip detail table — all-ZIP emission (spec 2026-07-03 zip-signal-hero §4).
+// --------------------------------------------------------------------------
+
+test("flood_by_zip: detail table present, grain zip, one row per windowed SWFL ZIP (≥ top-6)", async () => {
+  const result = await runProducer();
+  const table = result.detail_tables?.find((t) => t.id === "flood_by_zip");
+  assert.ok(table, "flood_by_zip detail table should be emitted");
+  assert.equal(table!.grain, "zip");
+  assert.ok(table!.rows.length >= 6, `expected ≥ 6 rows, got ${table!.rows.length}`);
+  const colIds = table!.columns.map((c) => c.id);
+  assert.deepEqual(colIds, [
+    "aal_usd_per_insured_property",
+    "pct_rank",
+    "claim_count_in_window",
+    "county",
+  ]);
+});
+
+test("flood_by_zip: top-6 key_metrics UNCHANGED and mirrored exactly in the table (thin pipe)", async () => {
+  const result = await runProducer();
+  const table = result.detail_tables?.find((t) => t.id === "flood_by_zip");
+  const perZipAal = result.key_metrics.filter((m) =>
+    /^swfl_zip_\d{5}_flood_aal_usd_per_insured_property$/.test(m.metric),
+  );
+  assert.ok(perZipAal.length > 0 && perZipAal.length <= 6, "top-6 emission preserved");
+  for (const m of perZipAal) {
+    const zip = m.metric.match(/^swfl_zip_(\d{5})_/)![1];
+    const row = table!.rows.find((r) => r.key === zip);
+    assert.ok(row, `metric ZIP ${zip} must appear in flood_by_zip`);
+    assert.equal(row!.cells["aal_usd_per_insured_property"], m.value);
+  }
+});
+
+test("flood_by_zip: every row carries numeric AAL + pct_rank and a county name", async () => {
+  const result = await runProducer();
+  const table = result.detail_tables?.find((t) => t.id === "flood_by_zip");
+  for (const row of table!.rows) {
+    assert.match(row.key, /^\d{5}$/);
+    assert.equal(typeof row.cells["aal_usd_per_insured_property"], "number");
+    assert.equal(typeof row.cells["pct_rank"], "number");
+    assert.equal(typeof row.cells["claim_count_in_window"], "number");
+    assert.equal(typeof row.cells["county"], "string");
+  }
 });

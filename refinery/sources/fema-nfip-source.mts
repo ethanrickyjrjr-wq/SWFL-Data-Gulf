@@ -485,6 +485,16 @@ function aggregateStormTotals(rows: ClaimRow[]): NfipStormTotal[] {
 }
 
 /**
+ * Full ranked per-ZIP window list — EVERY SWFL ZIP with ≥1 claim in the rolling
+ * window, carried as ONE fragment so the env-swfl pack can emit the flood_by_zip
+ * detail table without widening the top-6 key_metrics surface (thin pipe).
+ */
+export interface NfipZipWindowFull {
+  kind: "nfip-zip-window-full";
+  zips: NfipZipAggregate[];
+}
+
+/**
  * Group rows into per-ZIP buckets, rank by per-insured-property AAL across all
  * SWFL ZIPs with ≥1 claim in window, and return the top N (default 6) with
  * pre-computed percentile rank.
@@ -764,7 +774,8 @@ export const femaNfipSource: SourceConnector = {
         });
       }
 
-      const zipRollup = aggregateZipRollupTop6(data.claims);
+      const zipFullList = aggregateZipRollupTop6(data.claims, Number.POSITIVE_INFINITY);
+      const zipRollup = zipFullList.slice(0, 6);
       for (const zipAgg of zipRollup) {
         fragments.push({
           fragment_id: fragmentId(SOURCE_ID, `zip-${zipAgg.zip}`),
@@ -778,6 +789,18 @@ export const femaNfipSource: SourceConnector = {
             window_end_year: zipAgg.window_end_year,
           },
           normalized: zipAgg,
+        });
+      }
+
+      if (zipFullList.length > 0) {
+        const full: NfipZipWindowFull = { kind: "nfip-zip-window-full", zips: zipFullList };
+        fragments.push({
+          fragment_id: fragmentId(SOURCE_ID, "zip-window-full"),
+          source_id: SOURCE_ID,
+          source_trust_tier: 1,
+          fetched_at,
+          raw: { zip_count: zipFullList.length },
+          normalized: full,
         });
       }
 
@@ -843,7 +866,8 @@ export const femaNfipSource: SourceConnector = {
         });
       }
 
-      const zipAggs = buildZipFragmentsFromView(zipWindowRows);
+      const zipFullLive = buildZipFragmentsFromView(zipWindowRows, Number.POSITIVE_INFINITY);
+      const zipAggs = zipFullLive.slice(0, 6);
       for (const zipAgg of zipAggs) {
         fragments.push({
           fragment_id: fragmentId(SOURCE_ID, `zip-${zipAgg.zip}`),
@@ -857,6 +881,18 @@ export const femaNfipSource: SourceConnector = {
             window_end_year: zipAgg.window_end_year,
           },
           normalized: zipAgg,
+        });
+      }
+
+      if (zipFullLive.length > 0) {
+        const full: NfipZipWindowFull = { kind: "nfip-zip-window-full", zips: zipFullLive };
+        fragments.push({
+          fragment_id: fragmentId(SOURCE_ID, "zip-window-full"),
+          source_id: SOURCE_ID,
+          source_trust_tier: 1,
+          fetched_at,
+          raw: { zip_count: zipFullLive.length },
+          normalized: full,
         });
       }
 
