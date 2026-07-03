@@ -1,3 +1,22 @@
+## 2026-07-03 (main) — `homepage-rebuild` (Lane B) SPECCED: professional-first homepage, live-lake map, pricing strip, weekly-read capture (research-backed, DRAFT)
+
+Lane B unblocked by spine spec approval. Brainstormed per RULE 3.5 with a crawl4ai pass (RULE 0.4,
+07/02/2026): julian.com landing-pages (homepage template navbar→hero→social-proof→CTA→features+
+objections→repeat-CTA; header litmus test; CTA continues hero promise), altosresearch.com (hero
+action = ZIP-input free-report capture, "no credit card"; Timely/Precise/Actionable trio),
+keepingcurrentmatters.com (problem-first narrative, tier ladder on homepage, "No contract. Cancel
+anytime."), unbounce (action above fold, product-in-action shot, authentic social proof only),
+cxl (strip-navigation rule is for ad pages, NOT homepages — not applied). reventure.app crawl =
+empty JS shell; patterns inherited from spine spec's 07/02 pull. Code probe: hero map runs on MOCK
+fixture defaulting to Flood (locked vision = Home Value); persona cards not clickable; comp strip
+names competitors (locked rule violation); no pricing. Lake probe: zhvi_zip_latest /
+fema_nfip_zip_window_agg / lee+collier_building_permits all live at ZIP grain; app already reads
+data_lake via typed client (lib/email/market-context.ts); price root lib/billing/tiers.ts (Lane A)
+mandates homepage imports it. Spec: `docs/superpowers/specs/2026-07-03-homepage-rebuild-design.md`
+(registered via new-build, check `homepage_rebuild_live_verify` OPEN). Operator AFK during
+questions — 2 forks taken on recommendation and FLAGGED in spec (map stays in hero; Lane B ships
+weekly_read_signups storage seam, Lane D consumes). Spec is DRAFT pending operator review. No code.
+
 ## 2026-07-02 (main) — sold-price backfill: investigation only, NO code — plan validated + one flaw found
 
 Validated a proposed lifecycle change (re-probe terminal `sold` rows to backfill price 0) before
