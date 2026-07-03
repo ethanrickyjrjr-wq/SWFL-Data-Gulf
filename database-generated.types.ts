@@ -1011,6 +1011,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      email_media_assets: {
+        Row: {
+          id: string;
+          user_id: string;
+          url: string;
+          kind: string;
+          label: string;
+          width: number | null;
+          height: number | null;
+          attribution: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          url: string;
+          kind?: string;
+          label?: string;
+          width?: number | null;
+          height?: number | null;
+          attribution?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          url?: string;
+          kind?: string;
+          label?: string;
+          width?: number | null;
+          height?: number | null;
+          attribution?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       email_schedules: {
         Row: {
           id: number;
