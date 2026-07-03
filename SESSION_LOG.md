@@ -1,3 +1,32 @@
+## 2026-07-03 (main) — Lane D weekly-read BUILT, engine-routed (operator ruling mid-build)
+
+Executed `docs/superpowers/plans/2026-07-03-weekly-read.md` (10 tasks, TDD, commit-per-task).
+Mid-execution the operator ruled "route through the full deliverable engine" — superseding the
+spec's provisional light-3-stat content; plan revised in place (appendix in the plan doc) and
+Tasks 3/4/8 rebuilt engine-routed. Shipped: `weekly_read_subscribers` (migration applied, rows 0
+verified, types regenerated — regen also carries the parallel session's live `business_address`
+column) · `lib/email/weekly-read/{cadence,issue,send,webhook}.ts`, 24/0 bun:tests — cadence
+(6–8d jitter), issue (seed "market-letter" doc + prompt + finalize + `buildWeeklyIssue` DI core
+mirroring `emaildoc-occurrence.ts` but SKIPPING on `applied:false` instead of shipping the saved
+doc), send (`wid` tag, chunk 100, one-click headers, token from the shared scheduler root),
+webhook extractor · `/api/weekly-read/subscribe` (hard-400 ZIP moat gate, canonical server-set
+consent, reactivating upsert) · `?wid=` third unsubscribe branch + webhook bounce/complaint
+branch (guarded `.eq("status","active")`) · zip-report `DigestSubscribe` grew `endpoint`/
+`doneMessage` props and now posts to the weekly-read endpoint (the Lane C mislabel is fixed) ·
+runner `weekly-read-run.mts` — ONE `buildContentDoc` mode:"quality" build per distinct due ZIP
+(cost scales with ZIPs ≤57, not subscribers; >25 ZIPs/window = parked batch-authoring trigger
+fires, noted in-run), per-ZIP previews, DRY-default, `WEEKLY_READ_APPROVED=1` + postal + sender
+ladder · `weekly-read.yml` dispatch-only DRY workflow (schedule + ANTHROPIC_API_KEY deliberately
+absent; previews upload as artifacts). Verified: `bunx next build` ✓, weekly-read suite 24/0,
+DRY smokes on empty table + a temp row with agents forced-mocked (`ANTHROPIC_API_KEY=` blank —
+zero paid calls; mock can't produce a content patch so the row skipped `no_issue_built`, which
+IS the designed honest-skip path; row + artifacts cleaned up). Discrepancy caught pre-build:
+spec claimed the hero 3-stat bar is "Home Value / Market Activity / Flood Risk verified live" —
+live code still shows New Permits third; Lane B's swap is spec-only. Moot for content now
+(engine-routed) but corrected in the plan. NEXT (operator): `weekly_read_live_verify` — real
+CTA signup lands a row → real-key DRY run reads well → approved live send with working
+unsubscribe. Build-queue Lane D line pending (file claim-held by session 450fb28b at write time).
+
 ## 2026-07-03 (main) — Report-page AI dock now shows the showcase funnel to logged-out visitors
 
 Operator escalation (screenshot, /r/* page, logged out): the "AI + Briefcase" pill opens the

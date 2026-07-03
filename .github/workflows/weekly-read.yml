@@ -1,0 +1,59 @@
+# .github/workflows/weekly-read.yml
+name: Weekly Read Cadence
+on:
+  # SCHEDULE COMMENTED until the first operator-approved live cycle ships clean
+  # (spec + plan: v1 is approval-locked — the engine-routed content pipeline is new;
+  # a human reviews each week's per-ZIP previews before anything reaches real
+  # subscribers). Before uncommenting: several clean weeks of operator-local
+  # preview → approve → send.
+  # NOTE: WEEKLY_READ_APPROVED and ANTHROPIC_API_KEY are deliberately NOT provided
+  # by this workflow — a dispatch run previews with the engine in deterministic
+  # mock mode (zero spend, zero sends); real builds + live sends are operator-local
+  # commands with the real key. Even a live cron run would refuse to send until
+  # the approval env is threaded on purpose.
+  # schedule:
+  #   - cron: "0 13 * * 2" # 13:00 UTC Tuesdays (~9am ET)
+  workflow_dispatch:
+concurrency:
+  group: weekly-read
+  cancel-in-progress: false
+jobs:
+  weekly-read:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run weekly read (DRY)
+        env:
+          # Hardcoded DRY — v1 live sends are operator-local only (preview → approve → send).
+          DRY_RUN: "true"
+          SITE_ORIGIN: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          # buildContentDoc's lake feed: master dossier over HTTP + lake figures.
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BRAINS_SUPABASE_URL: ${{ secrets.BRAINS_SUPABASE_URL }}
+          BRAINS_SUPABASE_SERVICE_KEY: ${{ secrets.BRAINS_SUPABASE_SERVICE_KEY }}
+          WEEKLY_READ_FROM_NAME: ${{ vars.WEEKLY_READ_FROM_NAME || vars.DIGEST_SENDER_NAME }}
+          WEEKLY_READ_FROM_EMAIL: ${{ vars.WEEKLY_READ_FROM_EMAIL || vars.DIGEST_SENDER_ADDRESS }}
+          WEEKLY_READ_POSTAL_ADDRESS: ${{ vars.WEEKLY_READ_POSTAL_ADDRESS || vars.OUTREACH_POSTAL_ADDRESS }}
+          WEEKLY_READ_BATCH_LIMIT: ${{ vars.WEEKLY_READ_BATCH_LIMIT || '200' }}
+        run: bun scripts/email/weekly-read-run.mts
+      - name: Upload previews + run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-read-previews
+          path: weekly-read-runs/
+          if-no-files-found: ignore
+          retention-days: 14
