@@ -1,3 +1,21 @@
+## 2026-07-03 (main) — Lane E conversion-furniture SPEC (brainstormed + committed, build registered)
+
+Lane E kickoff per commercial-spine appendix. Brainstorm ran with crawl4ai research (mailcheck
+GitHub: suggest-don't-block domain/SLD/TLD distance matching; NN/g empty-states: in-context
+pathway over forced tours; appcues/userpilot/baymard URLs 404'd — meter anchored on beehiiv comp
++ our shipped /billing meter). Probe findings: sign-out + login front door ALREADY SHIPPED
+(components/nav/SiteShell.tsx signOut + LoginModal) — brief item closed by prior work, 06/10
+memory stale; no open piece2_* checks remain; control-center session owns app/project/page.tsx +
+BriefcasePanel + schedule-cadence — lane stays off all three. Spec 56d1535c
+(docs/superpowers/specs/2026-07-03-conversion-furniture-design.md): (1) GET /api/email/usage
+(checkUsageLimit shape verbatim) + fail-quiet SendCeilingMeter — rail chip pinned to ProjectsRail
+bottom + billing-style panel at send moments, Upgrade link at 80%; (2) Email-tool empty-state
+template gallery (operator-picked): no doc + zero built deliverables → full-pane lazy live
+previews of 26 SEED_DOCS, click seeds canvas, never reappears after first build; (3) pure
+lib/email/typo-suggest.ts (Mailcheck algorithm, own ~60-line helper over the dead npm dep) wired
+into login form only — weekly-read/contacts adopt later (Lane D claims). Registered:
+conversion_furniture_live_verify opened. Next: operator spec review → writing-plans → implement.
+
 ## 2026-07-03 (main) — Lane D weekly-read BUILT, engine-routed (operator ruling mid-build)
 
 Executed `docs/superpowers/plans/2026-07-03-weekly-read.md` (10 tasks, TDD, commit-per-task).
