@@ -1,143 +1,86 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { HOME_MAP_DATA as DATA, METRIC_ORDER, type MetricKey } from "@/lib/landing/home-map-data";
+import {
+  METRIC_ORDER,
+  NO_DATA_FILL,
+  quantileT,
+  rampColor,
+  type HomeMapPayload,
+  type MetricKey,
+} from "@/lib/landing/home-map-types";
 
 /**
- * Homepage hero = the approved docs/_archive/superseded/homepage/ demo, integrated.
- * Centered headline + search + metric filter pills, then the live Lee/Collier
- * choropleth (data rail · clickable ZIP map · stats bar). The contractor SVG is
- * served from public/map/lee-collier.svg and injected client-side; the demo's
- * vanilla interaction logic is ported into one scoped effect. Mock data for now
- * (lib/landing/home-map-data.ts) — swap for the live lake later (HANDOFF step 4).
+ * Homepage hero — Lane B Phase 1 (spec: 2026-07-03-homepage-rebuild-design.md).
+ * Live-lake choropleth (props-fed by lib/landing/load-home-map-data.ts — the
+ * mock fixture only rides as its fail-soft fallback), Home Value default
+ * (locked vision), rank-based colors so the skewed metrics read as data
+ * instead of a dead low-end mass, and a data rail that leads with the top-5
+ * ZIPs before any interaction. Map click SELECTS (fills the rail) — the rail's
+ * two doors are "Build a branded email" (/email-lab?zip=) and the full ZIP
+ * report. The contractor SVG is served from public/map/lee-collier.svg and
+ * injected client-side.
  */
-export default function Hero() {
-  const rootRef = useRef<HTMLElement>(null);
-  const svgHostRef = useRef<HTMLDivElement>(null);
+
+type Payload = Pick<HomeMapPayload, "data" | "badge" | "stats">;
+
+const county = (zip: string) => (parseInt(zip) >= 34100 ? "Collier County" : "Lee County");
+
+const fmt = (val: number, format: "currency" | "number") => {
+  if (format === "currency") {
+    if (val >= 1_000_000_000) return "$" + (val / 1_000_000_000).toFixed(1) + "B";
+    if (val >= 1_000_000) return "$" + (val / 1_000_000).toFixed(2) + "M";
+    if (val >= 1000) return "$" + Math.round(val / 1000) + "K";
+    return "$" + val.toLocaleString("en-US");
+  }
+  return val.toLocaleString("en-US");
+};
+
+export default function Hero({ payload }: { payload: Payload }) {
+  const { data, badge, stats } = payload;
   const router = useRouter();
-  // Latest-router ref so the imperative (DOM-wired) search handlers below can
-  // navigate without making the heavy map-setup effect depend on `router`.
-  const routerRef = useRef(router);
-  useEffect(() => {
-    routerRef.current = router;
-  }, [router]);
 
+  const availableMetrics = useMemo(
+    () => METRIC_ORDER.filter((k) => data.metrics[k] !== undefined),
+    [data.metrics],
+  );
+  const [metric, setMetric] = useState<MetricKey>(availableMetrics[0] ?? "value");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [svgReady, setSvgReady] = useState(false);
+
+  const svgHostRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  // Imperative hover handlers are wired once at SVG injection; they read the
+  // active metric through this ref so recoloring never rewires them.
+  const metricRef = useRef<MetricKey>(metric);
   useEffect(() => {
-    const root = rootRef.current;
+    metricRef.current = metric;
+  }, [metric]);
+
+  const active = data.metrics[metric];
+
+  /** Rank position per ZIP for the active metric (drives color + mini-bars). */
+  const activeT = useMemo(() => (active ? quantileT(active.data) : {}), [active]);
+
+  /** Descending [zip, value] for ranks + the top-5 rail list. */
+  const activeRanked = useMemo(
+    () => (active ? Object.entries(active.data).sort((a, b) => b[1] - a[1]) : []),
+    [active],
+  );
+
+  // ── SVG injection + per-ZIP wiring (once) ──
+  useEffect(() => {
     const host = svgHostRef.current;
-    if (!root || !host) return;
-
+    if (!host) return;
     let cancelled = false;
     const cleanups: Array<() => void> = [];
-    const on = <K extends keyof HTMLElementEventMap>(
-      el: Element | null,
-      type: K,
-      fn: (e: HTMLElementEventMap[K]) => void,
-    ) => {
-      if (!el) return;
-      el.addEventListener(type, fn as EventListener);
-      cleanups.push(() => el.removeEventListener(type, fn as EventListener));
-    };
-    const byId = (id: string) => root.querySelector<HTMLElement>(`[id="${id}"]`);
-    const zipEl = (zip: string) => host.querySelector<SVGGElement>(`.zip-group[id="${zip}"]`);
 
-    let activeMetric: MetricKey = "flood";
-    let selectedZip: string | null = null;
-
-    const clamp = (t: number) => Math.max(0, Math.min(1, t));
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * clamp(t);
-    const hexToRgb = (h: string): [number, number, number] => [
-      parseInt(h.slice(1, 3), 16),
-      parseInt(h.slice(3, 5), 16),
-      parseInt(h.slice(5, 7), 16),
-    ];
-    const lerpColor = (c1: string, c2: string, t: number) => {
-      const [r1, g1, b1] = hexToRgb(c1);
-      const [r2, g2, b2] = hexToRgb(c2);
-      return `rgb(${Math.round(lerp(r1, r2, t))},${Math.round(lerp(g1, g2, t))},${Math.round(lerp(b1, b2, t))})`;
-    };
-    const getColor = (zip: string, metric: MetricKey) => {
-      const m = DATA.metrics[metric];
-      const val = m.data[zip];
-      if (val === undefined) return "#2a3942"; // no-data: visible neutral, NOT the bg
-      const t = (val - m.low) / (m.high - m.low);
-      return t < 0.5 ? lerpColor(m.c0, m.c1, t * 2) : lerpColor(m.c1, m.c2, (t - 0.5) * 2);
-    };
-    const fmt = (val: number, format: "currency" | "number") => {
-      if (format === "currency") {
-        if (val >= 1_000_000) return "$" + (val / 1_000_000).toFixed(2) + "M";
-        if (val >= 1000) return "$" + Math.round(val / 1000) + "K";
-        return "$" + val.toLocaleString();
-      }
-      return val.toLocaleString();
-    };
-    const rankOf = (zip: string, metric: MetricKey) => {
-      const m = DATA.metrics[metric];
-      const sorted = Object.entries(m.data).sort((a, b) => b[1] - a[1]);
-      const i = sorted.findIndex(([z]) => z === zip);
-      return i === -1 ? null : { pos: i + 1, total: sorted.length };
-    };
-    const county = (zip: string) => (parseInt(zip) >= 34100 ? "Collier County" : "Lee County");
-
-    const setText = (id: string, text: string) => {
-      const el = byId(id);
-      if (el) el.textContent = text;
-    };
-
-    const fillRail = (zip: string) => {
-      selectedZip = zip;
-      setText("rd-zipcode", zip);
-      setText("rd-place", DATA.placeNames[zip] || zip);
-      setText("rd-county", county(zip));
-      for (const k of METRIC_ORDER) {
-        const m = DATA.metrics[k];
-        const val = m.data[zip];
-        const r = rankOf(zip, k);
-        setText("mval-" + k, val !== undefined ? fmt(val, m.format) : "N/A");
-        setText("mrank-" + k, r ? `#${r.pos} of ${r.total} ZIPs` : "");
-        const bar = byId("mbar-" + k);
-        if (bar)
-          bar.style.width =
-            val !== undefined ? Math.max(3, ((val - m.low) / (m.high - m.low)) * 100) + "%" : "0%";
-      }
-      const empty = byId("rail-empty");
-      if (empty) empty.style.display = "none";
-      byId("rail-detail")?.classList.add("visible");
-    };
-
-    const applyMetric = (metric: MetricKey) => {
-      activeMetric = metric;
-      const m = DATA.metrics[metric];
-      host.querySelectorAll<SVGGElement>(".zip-group").forEach((g) => {
-        const color = getColor(g.id, metric);
-        g.querySelectorAll<SVGElement>("path, polygon").forEach((p) => {
-          if (p.tagName === "path" && (p.getAttribute("d") ?? "").length < 100) return;
-          p.style.fill = color;
-          p.style.stroke = "#0a1419";
-          p.style.strokeWidth = ".3px";
-          p.style.opacity = "1";
-        });
-      });
-      setText("legend-title", m.label);
-      setText("leg-low", fmt(m.low, m.format));
-      setText("leg-high", fmt(m.high, m.format));
-      const lb = byId("legend-bar");
-      if (lb) lb.style.background = `linear-gradient(to right,${m.c0},${m.c1},${m.c2})`;
-      setText("rail-metric-name", m.label);
-      setText("rail-sublabel", m.sublabel);
-      root
-        .querySelectorAll<HTMLElement>(".filter-pill")
-        .forEach((p) => p.classList.toggle("active", p.dataset.metric === metric));
-      for (const k of METRIC_ORDER)
-        byId("mrow-" + k)?.classList.toggle("active-metric", k === metric);
-      if (selectedZip) fillRail(selectedZip);
-    };
-
-    // ── Tooltip ──
-    const tip = byId("tooltip");
-    const canvas = byId("map-canvas");
     const moveTip = (e: MouseEvent) => {
+      const tip = tipRef.current;
+      const canvas = canvasRef.current;
       if (!tip || !canvas) return;
       const r = canvas.getBoundingClientRect();
       let x = e.clientX - r.left + 14;
@@ -148,50 +91,24 @@ export default function Hero() {
       tip.style.top = y + "px";
     };
     const showTip = (e: MouseEvent, zip: string) => {
+      const tip = tipRef.current;
       if (!tip) return;
-      const m = DATA.metrics[activeMetric];
-      const val = m.data[zip];
-      setText("tip-zip", zip);
-      setText("tip-place", DATA.placeNames[zip] || "");
-      setText("tip-val", val !== undefined ? fmt(val, m.format) : "N/A");
+      const m = data.metrics[metricRef.current];
+      const val = m?.data[zip];
+      const set = (cls: string, text: string) => {
+        const el = tip.querySelector<HTMLElement>(`.${cls}`);
+        if (el) el.textContent = text;
+      };
+      set("tip-zip", zip);
+      set("tip-place", data.placeNames[zip] || "");
+      set("tip-val", m && val !== undefined ? fmt(val, m.format) : "N/A");
       tip.style.opacity = "1";
       moveTip(e);
     };
-
-    const selectZip = (zip: string) => {
-      host.querySelectorAll(".zip-group.selected").forEach((s) => s.classList.remove("selected"));
-      zipEl(zip)?.classList.add("selected");
-      fillRail(zip);
-      // Full page load (not router.push) so mobile pinch-zoom on the map resets
-      // to fit-width on the ZIP page instead of opening zoomed-in.
-      window.location.href = `/z/${zip}`;
+    const hideTip = () => {
+      if (tipRef.current) tipRef.current.style.opacity = "0";
     };
 
-    // Filter pills + metric rows (present immediately — no SVG needed)
-    root
-      .querySelectorAll<HTMLElement>(".filter-pill")
-      .forEach((b) => on(b, "click", () => applyMetric(b.dataset.metric as MetricKey)));
-    root
-      .querySelectorAll<HTMLElement>(".metric-row")
-      .forEach((r) => on(r, "click", () => applyMetric(r.dataset.metric as MetricKey)));
-    // Search → the ZIP page (the one front door, same as clicking the map). A 5-digit
-    // ZIP opens /z/[zip]; a town / neighborhood / free-text question goes to /ask, which
-    // runs the assistant and answers from the live lake. Clicking the map navigates to
-    // the same /z/[zip] page — search and map now agree.
-    const search = byId("search-input") as HTMLInputElement | null;
-    const searchBtn = byId("search-btn");
-    const submitSearch = () => {
-      const val = (search?.value ?? "").trim();
-      if (!val) return;
-      const zip = /^\d{5}$/.test(val) ? val : "";
-      routerRef.current.push(zip ? `/z/${zip}` : `/ask?q=${encodeURIComponent(val)}`);
-    };
-    on(search, "keydown", (e) => {
-      if ((e as KeyboardEvent).key === "Enter") submitSearch();
-    });
-    on(searchBtn, "click", submitSearch);
-
-    // Fetch + inject the contractor SVG, then wire ZIP interactivity.
     fetch("/map/lee-collier.svg")
       .then((r) => r.text())
       .then((svgText) => {
@@ -200,24 +117,30 @@ export default function Hero() {
         host.querySelectorAll<SVGGElement>(".zip-group").forEach((g) => {
           g.setAttribute("tabindex", "0");
           g.setAttribute("role", "button");
-          g.setAttribute("aria-label", `${DATA.placeNames[g.id] || g.id} (${g.id})`);
-          on(g, "mouseenter", (e) => showTip(e as MouseEvent, g.id));
-          on(g, "mousemove", (e) => moveTip(e as MouseEvent));
-          on(g, "mouseleave", () => {
-            if (tip) tip.style.opacity = "0";
-          });
-          on(g, "click", () => selectZip(g.id));
-          on(g, "keydown", (e) => {
+          g.setAttribute("aria-label", `${data.placeNames[g.id] || g.id} (${g.id})`);
+          const on = <K extends keyof HTMLElementEventMap>(
+            type: K,
+            fn: (e: HTMLElementEventMap[K]) => void,
+          ) => {
+            g.addEventListener(type, fn as EventListener);
+            cleanups.push(() => g.removeEventListener(type, fn as EventListener));
+          };
+          on("mouseenter", (e) => showTip(e as MouseEvent, g.id));
+          on("mousemove", (e) => moveTip(e as MouseEvent));
+          on("mouseleave", hideTip);
+          on("click", () => setSelected(g.id));
+          on("keydown", (e) => {
             const ke = e as KeyboardEvent;
             if (ke.key === "Enter" || ke.key === " ") {
               ke.preventDefault();
-              selectZip(g.id);
+              setSelected(g.id);
             }
           });
         });
-        applyMetric("flood");
 
-        // Apply clean edge cuts: Lee top cut (y=153, removes NFM) + Collier staircase right
+        // Clean edge cuts: Lee top cut (y=153, removes NFM) + Collier staircase
+        // right. Pad tightened 0.06 → 0.025 — the old pad left a dead moat of
+        // canvas around the counties.
         const svg = host.querySelector("svg");
         if (svg) {
           svg.setAttribute("width", "100%");
@@ -244,7 +167,7 @@ export default function Hero() {
           if (Number.isFinite(bx0)) {
             const bw = bx1 - bx0,
               bh = by1 - by0;
-            const bpad = Math.max(bw, bh) * 0.06;
+            const bpad = Math.max(bw, bh) * 0.025;
             let defs = svg.querySelector("defs");
             if (!defs) {
               defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
@@ -277,35 +200,72 @@ export default function Hero() {
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
           }
         }
+        setSvgReady(true);
       })
       .catch(() => {
         /* map fetch failed — rest of the page still renders */
       });
 
-    // Initial pill/legend state before the SVG lands.
-    applyMetric("flood");
-
     return () => {
       cancelled = true;
       cleanups.forEach((fn) => fn());
     };
+    // data is server-loaded and stable for the life of the page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Recolor on metric change (rank-based positions) ──
+  useEffect(() => {
+    const host = svgHostRef.current;
+    if (!host || !svgReady || !active) return;
+    host.querySelectorAll<SVGGElement>(".zip-group").forEach((g) => {
+      const t = activeT[g.id];
+      const color = t === undefined ? NO_DATA_FILL : rampColor(t, active.c0, active.c1, active.c2);
+      g.querySelectorAll<SVGElement>("path, polygon").forEach((p) => {
+        if (p.tagName === "path" && (p.getAttribute("d") ?? "").length < 100) return;
+        p.style.fill = color;
+        p.style.stroke = "#0a1419";
+        p.style.strokeWidth = ".3px";
+        p.style.opacity = "1";
+      });
+    });
+  }, [svgReady, active, activeT]);
+
+  // ── Selected outline follows state ──
+  useEffect(() => {
+    const host = svgHostRef.current;
+    if (!host || !svgReady) return;
+    host.querySelectorAll(".zip-group.selected").forEach((s) => s.classList.remove("selected"));
+    if (selected) {
+      host.querySelector<SVGGElement>(`.zip-group[id="${selected}"]`)?.classList.add("selected");
+    }
+  }, [selected, svgReady]);
+
+  const submitSearch = () => {
+    const val = (searchRef.current?.value ?? "").trim();
+    if (!val) return;
+    // One ZIP truth: the report route (same page the rail's "Full report" opens).
+    router.push(/^\d{5}$/.test(val) ? `/r/zip-report/${val}` : `/ask?q=${encodeURIComponent(val)}`);
+  };
+
+  const metricRowColor: Record<MetricKey, string> = {
+    value: "var(--gulf-teal)",
+    activity: "#4a6fa8",
+    flood: "var(--sunset-coral)",
+  };
+
   return (
-    <section ref={rootRef}>
+    <section>
       <div className="hero">
-        {/* Sample, not live: this hero map + stat bar are illustrative fixture data
-            (lib/landing/home-map-data.ts). Honesty over the "every number cited" promise
-            until it's wired to the live lake — the real cited reads are one Search away. */}
-        <div className="hero-badge">Sample data · Lee &amp; Collier Counties</div>
+        <div className="hero-badge">{badge}</div>
         <h1>
-          Real Data.
+          Southwest Florida market intelligence,
           <br />
-          <em>Instant Answers.</em>
+          <em>cited to the source.</em>
         </h1>
         <p className="hero-sub">
-          Ask any question about any ZIP code and get a cited answer in seconds. Tell AI what to
-          build and it delivers the report — automatically, to your clients&rsquo; inboxes.
+          Ask about any ZIP, address, or corridor and get an answer with every number sourced. Build
+          a branded client report in minutes. Free to build — no credit card.
         </p>
         <div className="search-wrap">
           <div className="search-bar">
@@ -323,27 +283,31 @@ export default function Hero() {
               <path d="m21 21-4.35-4.35" />
             </svg>
             <input
+              ref={searchRef}
               className="search-input"
               type="text"
               placeholder="Search ZIP code, city, or neighborhood…"
-              id="search-input"
-              aria-label="Search by ZIP code"
+              aria-label="Search by ZIP code, city, or neighborhood"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitSearch();
+              }}
             />
-            <button className="search-btn" type="button" id="search-btn">
+            <button className="search-btn" type="button" onClick={submitSearch}>
               Search
             </button>
           </div>
         </div>
         <div className="filter-row">
-          <button className="filter-pill" type="button" data-metric="value">
-            Home Value
-          </button>
-          <button className="filter-pill" type="button" data-metric="permits">
-            New Construction
-          </button>
-          <button className="filter-pill active" type="button" data-metric="flood">
-            Flood Risk
-          </button>
+          {availableMetrics.map((k) => (
+            <button
+              key={k}
+              className={`filter-pill${metric === k ? " active" : ""}`}
+              type="button"
+              onClick={() => setMetric(k)}
+            >
+              {data.metrics[k]?.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -351,118 +315,136 @@ export default function Hero() {
         <div className="map-layout">
           <div className="data-rail">
             <div className="rail-header">
-              <div className="rail-metric-name" id="rail-metric-name">
-                Flood Risk
-              </div>
-              <div className="rail-sublabel" id="rail-sublabel">
-                Avg annual insurance loss per property (FEMA NFIP)
-              </div>
+              <div className="rail-metric-name">{active?.label ?? ""}</div>
+              <div className="rail-sublabel">{active?.sublabel ?? ""}</div>
             </div>
-            <div className="rail-empty" id="rail-empty">
-              <div className="e-icon">📍</div>
-              <div className="e-title">Select a ZIP code</div>
-              <div className="e-hint">Click any area on the map to see detailed metrics</div>
-            </div>
-            <div className="rail-detail" id="rail-detail">
-              <div className="zip-header">
-                <div className="zip-code-label" id="rd-zipcode"></div>
-                <div className="zip-place" id="rd-place"></div>
-                <div className="zip-county" id="rd-county"></div>
+
+            {!selected && active && (
+              <div className="rail-top">
+                <div className="rail-top-title">
+                  Top ZIPs · {active.label}
+                  {active.asOf ? ` · ${active.asOf}` : ""}
+                </div>
+                <ol className="rail-top-list">
+                  {activeRanked.slice(0, 5).map(([zip, val], i) => (
+                    <li key={zip}>
+                      <button
+                        type="button"
+                        className="rail-top-row"
+                        onClick={() => setSelected(zip)}
+                      >
+                        <span className="rail-top-rank">{i + 1}</span>
+                        <span className="rail-top-place">
+                          {data.placeNames[zip] ?? zip}
+                          <span className="rail-top-zip">{zip}</span>
+                        </span>
+                        <span className="rail-top-val">{fmt(val, active.format)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+                <div className="rail-top-hint">Click any ZIP on the map for the full picture.</div>
               </div>
-              <div className="metric-row" id="mrow-value" data-metric="value">
-                <div className="metric-row-label">Median Home Value</div>
-                <div className="metric-row-value" id="mval-value">
-                  —
+            )}
+
+            {selected && (
+              <div className="rail-detail visible">
+                <div className="zip-header">
+                  <div className="zip-code-label">{selected}</div>
+                  <div className="zip-place">{data.placeNames[selected] ?? selected}</div>
+                  <div className="zip-county">{county(selected)}</div>
                 </div>
-                <div className="metric-row-rank" id="mrank-value"></div>
-                <div className="mini-bar">
-                  <div
-                    className="mini-bar-fill"
-                    id="mbar-value"
-                    style={{ background: "var(--gulf-teal)" }}
-                  ></div>
+                {availableMetrics.map((k) => {
+                  const m = data.metrics[k];
+                  if (!m) return null;
+                  const val = m.data[selected];
+                  const t = k === metric ? activeT[selected] : quantileT(m.data)[selected];
+                  const r =
+                    val !== undefined
+                      ? Object.values(m.data).filter((v) => v > val).length + 1
+                      : null;
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      className={`metric-row${k === metric ? " active-metric" : ""}`}
+                      onClick={() => setMetric(k)}
+                    >
+                      <div className="metric-row-label">{m.label}</div>
+                      <div className="metric-row-value">
+                        {val !== undefined ? fmt(val, m.format) : "N/A"}
+                      </div>
+                      <div className="metric-row-rank">
+                        {r ? `#${r} of ${Object.keys(m.data).length} ZIPs` : ""}
+                      </div>
+                      <div className="mini-bar">
+                        <div
+                          className="mini-bar-fill"
+                          style={{
+                            background: metricRowColor[k],
+                            width: t !== undefined ? `${Math.max(3, t * 100)}%` : "0%",
+                          }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+                <div className="rail-cta">
+                  <a className="rail-cta-primary" href={`/email-lab?zip=${selected}`}>
+                    Build a branded email
+                  </a>
+                  <a className="rail-cta-secondary" href={`/r/zip-report/${selected}`}>
+                    Full report →
+                  </a>
                 </div>
+                <button type="button" className="rail-back" onClick={() => setSelected(null)}>
+                  ← Back to top ZIPs
+                </button>
               </div>
-              <div className="metric-row" id="mrow-permits" data-metric="permits">
-                <div className="metric-row-label">New Construction 2024</div>
-                <div className="metric-row-value" id="mval-permits">
-                  —
-                </div>
-                <div className="metric-row-rank" id="mrank-permits"></div>
-                <div className="mini-bar">
-                  <div
-                    className="mini-bar-fill"
-                    id="mbar-permits"
-                    style={{ background: "#4a6fa8" }}
-                  ></div>
-                </div>
-              </div>
-              <div className="metric-row" id="mrow-flood" data-metric="flood">
-                <div className="metric-row-label">Flood Risk</div>
-                <div className="metric-row-value" id="mval-flood">
-                  —
-                </div>
-                <div className="metric-row-rank" id="mrank-flood"></div>
-                <div className="mini-bar">
-                  <div
-                    className="mini-bar-fill"
-                    id="mbar-flood"
-                    style={{ background: "var(--sunset-coral)" }}
-                  ></div>
-                </div>
-              </div>
-              <div className="rail-footer">
-                Sources: FEMA NFIP · Zillow ZHVI · Lee/Collier County Permits · Census TIGER 2020
-              </div>
+            )}
+
+            <div className="rail-footer">
+              Sources: Zillow ZHVI · SWFL Data Gulf listings · FEMA NFIP · Census TIGER 2020
             </div>
           </div>
 
-          <div className="map-canvas" id="map-canvas">
+          <div className="map-canvas" ref={canvasRef}>
             <div className="svg-host" ref={svgHostRef} aria-hidden="false" />
-            <div className="map-legend">
-              <div className="legend-title" id="legend-title">
-                Flood Risk
+            {active && (
+              <div className="map-legend">
+                <div className="legend-title">{active.label}</div>
+                <div
+                  className="legend-bar"
+                  style={{
+                    background: `linear-gradient(to right, ${active.c0}, ${active.c1}, ${active.c2})`,
+                  }}
+                />
+                <div className="legend-labels">
+                  <span>{fmt(active.low, active.format)}</span>
+                  <span>{fmt(active.high, active.format)}</span>
+                </div>
               </div>
-              <div className="legend-bar" id="legend-bar"></div>
-              <div className="legend-labels">
-                <span id="leg-low"></span>
-                <span id="leg-high"></span>
-              </div>
-            </div>
-            <div id="tooltip">
-              <div className="tip-zip" id="tip-zip"></div>
-              <div className="tip-place" id="tip-place"></div>
-              <div className="tip-val" id="tip-val"></div>
+            )}
+            <div id="tooltip" ref={tipRef}>
+              <div className="tip-zip" />
+              <div className="tip-place" />
+              <div className="tip-val" />
             </div>
           </div>
         </div>
 
-        <div className="stats-bar">
-          <div className="stat-cell">
-            <div className="stat-label">Active Listings</div>
-            <div className="stat-value">10,161</div>
-            <div className="stat-sub">Lee &amp; Collier Counties</div>
-            <div className="stat-tag">Updated daily</div>
+        {stats.length > 0 && (
+          <div className="stats-bar">
+            {stats.map((s) => (
+              <div className="stat-cell" key={s.label}>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-value">{s.value}</div>
+                <div className="stat-sub">{s.sub}</div>
+                <div className="stat-tag">{s.tag}</div>
+              </div>
+            ))}
           </div>
-          <div className="stat-cell">
-            <div className="stat-label">Median Home Value</div>
-            <div className="stat-value">$496K</div>
-            <div className="stat-sub">Lee County</div>
-            <div className="stat-tag">Zillow ZHVI · Apr 2026</div>
-          </div>
-          <div className="stat-cell">
-            <div className="stat-label">Most New Construction</div>
-            <div className="stat-value">34120</div>
-            <div className="stat-sub">Golden Gate Estates E</div>
-            <div className="stat-tag">423 permits in 2024</div>
-          </div>
-          <div className="stat-cell">
-            <div className="stat-label">Market Range</div>
-            <div className="stat-value">57 ZIPs</div>
-            <div className="stat-sub">$180K Copeland → $1.25M Pelican Bay</div>
-            <div className="stat-tag">6 live data sources</div>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

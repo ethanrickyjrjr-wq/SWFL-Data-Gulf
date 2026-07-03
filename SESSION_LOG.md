@@ -1,3 +1,26 @@
+## 2026-07-03 (main) — homepage-rebuild Phase 1 BUILT: live-lake map, Home Value default, full Lane B page (COMMITTED LOCAL, push held for operator review)
+
+Operator escalation on the live homepage ("make it not look like shit") + redesign fatigue ("not
+holding my breath"). Executed the existing Lane B spec's VISIBLE page (Phase 1) instead of
+re-speccing; spec amended in place with the phase split + a visual-craft addendum (rank-based
+quantile choropleth — linear t on skewed NFIP/ZHVI data collapsed ~90% of ZIPs to background
+slate, THE "dead map" root cause; fold-fit map framing; rail defaults to top-5 ranked list, pin
+emoji dead). Shipped: lib/landing/load-home-map-data.ts (live zhvi_zip_latest +
+active_listings_residential_zip_stats + fema_nfip_zip_window_agg via untyped data_lake client,
+per-metric fixture fallback w/ sample badge, 8 bun tests green); Hero.tsx rewritten React-state
+(props-fed, Home Value default per locked vision, Market Activity replaces dead permits pill,
+click=select + two-door rail CTAs → /email-lab?zip= + /r/zip-report/[zip], search ZIP branch →
+report route); new ProofStrip/DeliverableShowcase (live-figure email mock)/PricingStrip (all $
+from lib/billing/tiers.ts)/WeeklyReadCapture (posts to LIVE /api/weekly-read/subscribe — spec
+fork-2 signup table OBSOLETE, Lane D landed first)/ObjectionFaq; competitor strip deleted;
+Waitlist parked (also had a default-visible red error). Flood label honesty: "per property" not
+derivable from the window view → "NFIP claims paid per ZIP, 2017–2026". grounding-coverage
+allowlist: Hero out, loader (fallback lane) in. Verified: bunx next build green, loader+guard
+tests green, live walkthrough on :3005 (map alive, live badge + as-of dates, selection/rail/CTAs
+work, zero console errors). NOT verified: mobile stacking (browser window refused resize — check
+on device), capture POST (endpoint is Lane D live-verified; didn't write a prod row). Phase 2
+(zip-seed composer, ?zip= threading, /z retirement) not started. Push HELD for operator.
+
 ## 2026-07-03 (main) — Pexels picker live-debug: failure lanes now log a warn
 ## 2026-07-03 (main) — Lane E conversion-furniture BUILT (5 commits, plan + spec executed)
 

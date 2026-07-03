@@ -10,6 +10,7 @@
   "lib/claim/claim-store.test.ts",
   "lib/claim/claim-store.ts",
   "lib/email/market-context.ts",
+  "lib/landing/load-home-map-data.ts",
   "lib/email/usage.ts",
   "lib/listings/select.ts",
   "lib/zip-summary/load.ts"

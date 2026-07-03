@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HOME_MAP_DATA as DATA, type MetricKey } from "@/lib/landing/home-map-data";
+import { HOME_MAP_DATA as DATA, type FixtureMetricKey } from "@/lib/landing/home-map-data";
 
 // Lee County ZIPs (source of truth: fixtures/swfl-zip-county.json)
 const LEE_ZIPS = new Set([
@@ -44,7 +44,7 @@ const LEE_ZIPS = new Set([
 
 interface Props {
   county?: "Lee" | "Collier" | "both";
-  metric?: MetricKey;
+  metric?: FixtureMetricKey;
   className?: string;
 }
 
@@ -77,7 +77,7 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
       const [r2, g2, b2] = hexToRgb(c2);
       return `rgb(${Math.round(lerp(r1, r2, t))},${Math.round(lerp(g1, g2, t))},${Math.round(lerp(b1, b2, t))})`;
     };
-    const getColor = (zip: string, m: MetricKey) => {
+    const getColor = (zip: string, m: FixtureMetricKey) => {
       const md = DATA.metrics[m];
       const val = md.data[zip];
       if (val === undefined) return "#2a3942"; // no-data: visible neutral, NOT the bg

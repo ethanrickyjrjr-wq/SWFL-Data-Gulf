@@ -1,22 +1,28 @@
-// AUTO-PORTED from docs/_archive/superseded/homepage/build_demo4.py — mock data; swap for live lake later.
-// 57 ZIPs (33 Lee + 24 Collier). Regenerate from build_demo4.py — do not hand-edit.
-export type MetricKey = "flood" | "value" | "permits";
-export interface MetricDef {
-  label: string;
-  sublabel: string;
-  format: "currency" | "number";
-  data: Record<string, number>;
-  low: number;
-  high: number;
-  c0: string;
-  c1: string;
-  c2: string;
-}
-export interface HomeMapData {
+// lib/landing/home-map-data.ts
+//
+// MOCK FIXTURE — fail-soft fallback ONLY (originally ported from
+// docs/_archive/superseded/homepage/build_demo4.py). The homepage runs on live
+// lake rows via load-home-map-data.ts; these numbers are served only when a
+// lake query fails, and always with `sample: true` so the "Sample data" badge
+// renders (honesty over a blank map). Import-quarantined by
+// lib/highlighter/grounding-coverage.test.ts — do NOT import from new surfaces.
+//
+// "permits" fixture is DELETED with the New Construction pill (operator ruling
+// 07/03/2026: corridor-scoped scrape, not county-wide — we don't surface a
+// metric where the data is bad). Market Activity has no fixture by design: a
+// failed live query hides the pill rather than showing invented-adjacent rows.
+
+import type { MetricDef } from "./home-map-types";
+
+/** The two metrics with an honest mock fallback. */
+export type FixtureMetricKey = "value" | "flood";
+
+export interface HomeMapFixture {
   placeNames: Record<string, string>;
-  metrics: Record<MetricKey, MetricDef>;
+  metrics: Record<FixtureMetricKey, MetricDef>;
 }
-export const HOME_MAP_DATA: HomeMapData = {
+
+export const HOME_MAP_DATA: HomeMapFixture = {
   placeNames: {
     "33901": "Fort Myers (Downtown)",
     "33903": "North Fort Myers",
@@ -81,6 +87,7 @@ export const HOME_MAP_DATA: HomeMapData = {
       label: "Flood Risk",
       sublabel: "Avg annual insurance loss per property (FEMA NFIP)",
       format: "currency",
+      sample: true,
       data: {
         "33901": 2900,
         "33903": 1800,
@@ -142,14 +149,15 @@ export const HOME_MAP_DATA: HomeMapData = {
       },
       low: 600,
       high: 30074,
-      c0: "#33525e",
+      c0: "#3d6272",
       c1: "#d4b370",
       c2: "#e08158",
     },
     value: {
-      label: "Median Home Value",
-      sublabel: "Zillow ZHVI, April 2026",
+      label: "Home Value",
+      sublabel: "Median home value (Zillow ZHVI)",
       format: "currency",
+      sample: true,
       data: {
         "33901": 285000,
         "33903": 310000,
@@ -211,100 +219,9 @@ export const HOME_MAP_DATA: HomeMapData = {
       },
       low: 185000,
       high: 1250000,
-      c0: "#1f4f4a",
+      c0: "#256b5f",
       c1: "#3DC9C0",
       c2: "#5bc97a",
     },
-    permits: {
-      label: "New Construction",
-      sublabel: "Building permits issued 2024 (Lee + Collier)",
-      format: "number",
-      data: {
-        "33901": 28,
-        "33903": 45,
-        "33904": 62,
-        "33905": 38,
-        "33907": 51,
-        "33908": 89,
-        "33909": 245,
-        "33912": 142,
-        "33913": 356,
-        "33914": 178,
-        "33916": 19,
-        "33917": 34,
-        "33919": 67,
-        "33920": 82,
-        "33921": 6,
-        "33922": 41,
-        "33924": 3,
-        "33928": 168,
-        "33931": 44,
-        "33936": 198,
-        "33956": 12,
-        "33957": 8,
-        "33965": 22,
-        "33966": 95,
-        "33967": 113,
-        "33971": 267,
-        "33972": 231,
-        "33973": 312,
-        "33974": 189,
-        "33976": 204,
-        "33990": 198,
-        "33991": 287,
-        "33993": 341,
-        "34101": 31,
-        "34102": 18,
-        "34103": 24,
-        "34104": 76,
-        "34105": 58,
-        "34108": 42,
-        "34109": 134,
-        "34110": 187,
-        "34112": 89,
-        "34113": 112,
-        "34114": 143,
-        "34116": 167,
-        "34117": 198,
-        "34119": 215,
-        "34120": 423,
-        "34134": 122,
-        "34135": 145,
-        "34137": 4,
-        "34138": 9,
-        "34139": 7,
-        "34140": 11,
-        "34141": 3,
-        "34142": 88,
-        "34145": 56,
-      },
-      low: 3,
-      high: 423,
-      c0: "#314a6b",
-      c1: "#4a6fa8",
-      c2: "#a0c4ff",
-    },
   },
 };
-export const METRIC_ORDER: MetricKey[] = ["value", "permits", "flood"];
-
-function _hexToRgb(h: string): [number, number, number] {
-  return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-}
-function _lerp(a: number, b: number, t: number) {
-  return a + (b - a) * Math.max(0, Math.min(1, t));
-}
-function _lerpColor(c1: string, c2: string, t: number) {
-  const [r1, g1, b1] = _hexToRgb(c1);
-  const [r2, g2, b2] = _hexToRgb(c2);
-  return `rgb(${Math.round(_lerp(r1, r2, t))},${Math.round(_lerp(g1, g2, t))},${Math.round(_lerp(b1, b2, t))})`;
-}
-
-/** Same color formula used by MapCanvas — call this server-side to match homepage colors exactly. */
-export function getZipMapColor(zip: string, metric: MetricKey = "flood"): string {
-  const md = HOME_MAP_DATA.metrics[metric];
-  const val = md.data[zip];
-  if (val === undefined) return "#2a3942";
-  const t = Math.max(0, Math.min(1, (val - md.low) / (md.high - md.low)));
-  return t < 0.5 ? _lerpColor(md.c0, md.c1, t * 2) : _lerpColor(md.c1, md.c2, (t - 0.5) * 2);
-}

@@ -69,7 +69,10 @@ describe("grounding coverage guard", () => {
   test("home-map-data (mock) is imported only by the allowlisted debt", () => {
     const MOCK_MODULE = "landing/home-map-data";
     const MOCK_ALLOWLIST = new Set([
-      "components/landing/Hero.tsx",
+      // The live loader imports the fixture as its FAIL-SOFT lane only: served
+      // with sample:true + the "Sample data" badge when a lake query fails
+      // (Lane B Phase 1 — Hero itself no longer touches the mock).
+      "lib/landing/load-home-map-data.ts",
       "components/charts/MapCanvas.tsx",
     ]);
     const importers = allSources

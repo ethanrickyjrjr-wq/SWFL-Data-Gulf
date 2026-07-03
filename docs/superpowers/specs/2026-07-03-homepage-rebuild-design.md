@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-03
 **Status:** DRAFT — awaiting operator review. Operator was AFK during brainstorm questions; the two forks below (hero shape, capture seam) were taken on the recommended option and are flagged. Everything else follows the approved spine spec (`2026-07-02-commercial-spine-design.md`, D1/D2/D3 final).
+**Amended 07/03/2026 (second session, operator escalation "make it not look like shit"):** phased execution + visual-craft addendum + fork-2 obsoleted — see "Phase split & visual addendum" section at the bottom. Phase 1 build started same session on the operator's escalation; local commits only, push held for operator review.
 **Check:** `homepage_rebuild_live_verify` (opened via new-build 07/03/2026).
 **Research basis:** crawl4ai pulls 07/02/2026 — altosresearch.com, keepingcurrentmatters.com, beehiiv.com, julian.com/guide/growth/landing-pages, unbounce.com landing-page best practices, cxl.com landing-page anatomy. reventure.app returned an empty JS shell; its patterns (search-as-hero, SAVE-15% badge) come from the spine spec's 07/02 pull. Raw markdown in session scratchpad (`crawl4ai-laneb/`), never committed.
 
@@ -127,6 +128,27 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 - `bunx next build` locally (never bare `npx tsc`) before commit.
 - `homepage_rebuild_live_verify` is **operator-run** post-deploy: live homepage shows Home Value default with live figures + as-of dates, map click fills the rail and both doors work (primary → seeded lab showing that ZIP's figures with zero LLM spend logged, secondary → `/z/[zip]`), persona cards route to `/ask`, pricing matches `/billing`, capture writes a row, no `#waitlist` anchor remains.
 - Migration verification: row count on `weekly_read_signups` (0 after create); loader smoke asserts ≥40 ZIPs with non-null values per live metric.
+
+## Phase split & visual addendum (07/03/2026 second session — operator escalation)
+
+**Why:** operator escalated on the live page ("this is our fucking homepage?") and separately noted redesign fatigue ("not holding my breath for anything real to happen"). Response: execute the visible page NOW (Phase 1), defer the invisible machinery (Phase 2), and fix the visual failures this spec did not cover — diagnosed on the live page 07/03/2026 at 1440px and in the operator's screenshot.
+
+### Phase 1 (this session): the visible page
+Everything in "Page structure" EXCEPT fork 1b's machinery: live-lake loader + Hero wiring, Home Value default, metric set Home Value · Market Activity · Flood Risk, proof strip, clickable persona cards, deliverable showcase, pricing strip, weekly-read capture, objection FAQ, competitor strip + waitlist die. Rail CTAs ship both doors, but the primary lab door points at plain `/email-lab?zip=` (param accepted and IGNORED until Phase 2 — the lab opens normally; no dead promise copy: primary reads "Build a branded email" which the lab satisfies even unseeded, secondary "Full report" → the ZIP report).
+
+### Phase 2 (next): fork 1b machinery
+`lib/email/zip-seed.ts` deterministic composer, `?zip=` threading through claim/redirect surfaces, project-brand seeding, `/z/[zip]` 307 retirement.
+
+### Fork 2 is OBSOLETE — Lane D landed first
+Since this spec was written, Lane D's enrollment endpoint shipped to main (`POST /api/weekly-read/subscribe`, commit 4f2aa98a; `public.weekly_read_subscribers`; hard-400s out-of-scope ZIPs via `resolveZip`; consent recorded server-side). The homepage capture posts THERE with `source: "homepage"`. No new table, no migration, no seam. `weekly_read_signups` is dead — do not create it.
+
+### Visual-craft addendum (the "looks like shit" fixes — none were in the spec)
+1. **Choropleth scale: rank-based (quantile), not linear.** Linear t on skewed data (flood: $600–$30K; permits had the same shape) collapses ~90% of ZIPs to `c0` ≈ background — the live map reads as one dead slate mass. Color by rank percentile within the metric (ties averaged), keep the legend endpoints as real min/max values. Also lift each metric's `c0` to a clearly-visible low endpoint (≥ ~1.5× the luminance distance of `--gulf-slate-hi` from the canvas) so "low" reads as *data*, not *void*.
+2. **Map framing.** The map must fit the fold at ≥1280px: legend visible without scrolling, no dead half-canvas between rail and coastline. Fix = tighter viewBox pad + `xMidYMid` centering inside a canvas whose height accounts for the actual hero block, and cap `map-layout` height so hero+map+stats-bar top edge land inside 100dvh.
+3. **Rail default state: ranked list, not pin emoji.** Replace the 📍 "Select a ZIP code" void with the top-5 ZIPs by the active metric (rank · place name · value, clickable → selects on the map). The rail leads with data before any interaction; "click any area on the map" survives as one-line microcopy under the list.
+4. **Identity stays gulf-token.** No new palette/font root — the 06-28 nautical swing was operator-reverted; the signature element is the map itself rendering alive. `'JetBrains Mono'` references in home-explorer.css fall back silently (font never loaded) — replace with `var(--font-geist-mono)`.
+5. **Flood label honesty.** `fema_nfip_zip_window_agg` has no property count — "avg annual insurance loss per property" is NOT derivable and dies. Label becomes what the view holds: NFIP claims paid per ZIP over the window (window_end_year shown as as-of). Never a derived denominator (derivable ≠ source-faithful).
+6. **Waitlist red error.** `Waitlist.tsx` shows "Select at least one interest" before any interaction (renders whenever `interests.length === 0`). Moot in Phase 1 (component parked), noted so un-parking never resurrects it.
 
 ## Out of scope
 
