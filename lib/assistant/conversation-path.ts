@@ -39,7 +39,11 @@ import { streamAnswer, sseMessage } from "@/lib/assistant/stream";
 import { FORMAT_RULE } from "@/lib/assistant/system-prompt";
 import { isOffTopicQuestion } from "@/lib/assistant/off-topic";
 import { asOfFromToken } from "@/lib/project/as-of";
-import { buildChartForQuestion, type ChartForQuestion } from "@/lib/assistant/chart-for-question";
+import {
+  buildChartForQuestion,
+  looksChartWorthy,
+  type ChartForQuestion,
+} from "@/lib/assistant/chart-for-question";
 import { composeChartFromRequest } from "@/lib/assistant/compose-chart";
 import {
   looksLikeFigureAsk,
@@ -61,17 +65,24 @@ import { looksLikePastedListingLink, pastedLinkComp } from "@/lib/assistant/past
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
 /**
- * Pick the chart for a conversation answer. An explicit "chart X / plot Y" request
- * first tries the user-DIRECTED composer (Tier C: the LLM selects which HELD numbers
- * to plot and the shape, provenance-gated so it can never invent) — honoring the exact
- * ask. On any miss (not a chart request, lint reject, nothing to plot) it falls back to
- * the canned producer (rich zhvi/scatter visuals + the any-brain deterministic bar).
+ * Pick the chart for a conversation answer. GATED on chart-shaped intent
+ * (`looksChartWorthy`) so a plain factual question ("what's the median home value
+ * in Naples") gets a text answer, not a bar chart on every single turn — routeChart
+ * / resolveReachTargets match on TOPIC, not on whether a chart is the right response
+ * shape, so without this gate any on-topic question auto-charted (bug found live
+ * 2026-07-03: a chart appeared on every question/starter prompt). Once gated in: an
+ * explicit "chart X / plot Y" request first tries the user-DIRECTED composer (Tier C:
+ * the LLM selects which HELD numbers to plot and the shape, provenance-gated so it can
+ * never invent) — honoring the exact ask. On any miss (lint reject, nothing to plot) it
+ * falls back to the canned producer (rich zhvi/scatter visuals + the any-brain
+ * deterministic bar).
  */
 async function chartForConversation(
   question: string,
   origin: string,
   uploadsText: string,
 ): Promise<ChartForQuestion | null> {
+  if (!looksChartWorthy(question)) return null;
   const composed = await composeChartFromRequest(question, origin, { uploadsText });
   return composed ?? (await buildChartForQuestion(question, origin));
 }

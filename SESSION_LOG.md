@@ -1,3 +1,22 @@
+## 2026-07-03 (main) — Chat auto-chart spam fix + follow-up chips (Briefcase AI panel)
+
+Operator escalation: "why does a chart pop up every time I ask a question" + "no follow-up
+prompts about the answers." Root cause: `chartForConversation` (lib/assistant/conversation-path.ts)
+had zero intent gate — `buildChartForQuestion`'s Layer-2 fallback (`CHART_FALLBACKS`, 10 brains)
+guaranteed a chart on ANY grounded turn regardless of topic match or ask, contradicting its own
+doc comment ("returns null when nothing chartable — text-only answer"). Fix: added
+`looksChartWorthy()` (lib/assistant/chart-for-question.ts) — requires explicit chart words OR
+ranking/comparison/breakdown language ("top ZIPs by…", "compare X vs Y", "by zip") before the
+chart pipeline runs at all; a plain factual question now gets text only. Follow-ups were never
+built (BriefcaseChat.tsx only showed `starterPrompts` pre-first-message; no server frame type,
+no client rendering existed for post-answer suggestions) — added
+lib/assistant/follow-up-suggestions.ts (static topic-keyword chips, zero extra latency, no LLM
+call) wired into BriefcaseChat.tsx under each completed answer. Verified: `bunx next build`
+clean, all 169 lib/assistant tests pass, manual sanity check on 6 sample questions confirms the
+gate/chips behave as intended. NOTE: `database-generated.types.ts` shows an unrelated local diff
+(weekly_read_subscribers table + business_address column) from the parallel 4b42a8c5 session —
+left untouched, not staged, not part of this push.
+
 ## 2026-07-03 (main) — Social tool layout RESTORED to grid-shell shape (operator ruling: cockpit layout never changes)
 
 Operator escalation: Socials Lab "everything moved to the left." Root cause: the Jul 2 Cockpit

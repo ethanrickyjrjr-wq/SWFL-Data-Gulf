@@ -18,6 +18,7 @@ import { DockChart } from "@/components/highlighter/DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CitationList } from "@/components/CitationList";
 import type { WelcomeSource } from "@/lib/welcome/frames";
+import { suggestFollowUps } from "@/lib/assistant/follow-up-suggestions";
 
 /**
  * The global Briefcase's standalone chat (off /r/*). Streams via the SHARED
@@ -247,6 +248,15 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       : null;
   const scheduleProjectId = projectIdFromPath(pathname ?? "/");
 
+  // Follow-up chips under a COMPLETE assistant answer — static, zero-latency,
+  // topic-matched off the question that produced it (lib/assistant/follow-up-suggestions).
+  // Never empty once shown: the generic set is the floor when no topic keyword matched.
+  const lastUserQuestion = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const followUps =
+    !busy && lastMsg?.role === "assistant" && lastMsg.content.length > 0
+      ? suggestFollowUps(lastUserQuestion)
+      : [];
+
   return (
     <div className="flex flex-col">
       {messages.length === 0 && starterPrompts.length > 0 && (
@@ -369,6 +379,20 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
               placeName={scheduleCardPlace.name}
               projectId={scheduleProjectId}
             />
+          )}
+          {followUps.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {followUps.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => submit(f)}
+                  className="rounded-full border border-gulf-teal/40 px-2.5 py-1 text-[10px] text-gray-300 transition-colors hover:border-gulf-teal hover:text-gulf-teal"
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       )}

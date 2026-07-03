@@ -39,6 +39,23 @@ export interface ChartForQuestion {
   groundingNote: string;
 }
 
+/** Chart-shaped intent for the AUTO producer (distinct from `wantsCustomChart`'s
+ *  explicit chart/plot/graph words, which composeChartFromRequest already checks).
+ *  A plain factual question ("what's the median home value in Naples") should get
+ *  a text answer, not a bar chart, even though it topically matches a brain via
+ *  routeChart/resolveReachTargets — those routers match on TOPIC, not on whether
+ *  a chart is the right response shape. This catches ranking/comparison/breakdown
+ *  language ("top ZIPs by...", "compare X vs Y", "which corridors...", "by zip"),
+ *  where a chart genuinely is the better answer shape. Bug found live 2026-07-03:
+ *  every grounded turn charted regardless of ask (buildChartForQuestion had no
+ *  gate at all) — this is the fix. */
+export function looksChartWorthy(question: string): boolean {
+  if (!question || typeof question !== "string") return false;
+  return /\b(charts?|charting|plots?|plotting|graphs?|graphing|visuali[sz]e[sd]?|visuali[sz]ation|bar chart|line chart|pie chart|trend\s+line|top\s+\d*\s*(zips?|areas?|towns?|corridors?)|rank(ed|ing)?|compare|comparison|\bvs\.?\b|versus|highest|lowest|breakdown|by\s+zip|by\s+corridor|which\s+(zips?|areas?|towns?|corridors?))\b/i.test(
+    question,
+  );
+}
+
 export async function buildChartForQuestion(
   question: string,
   origin: string,
