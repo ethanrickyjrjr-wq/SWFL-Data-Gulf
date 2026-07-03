@@ -10,7 +10,8 @@
     },
     "swfl": {
       "type": "http",
-      "url": "https://www.swfldatagulf.com/api/mcp"
+      "url": "https://www.swfldatagulf.com/api/mcp",
+      "headersHelper": "node -e \"process.stdout.write(JSON.stringify({'X-Account-Key':process.env.SWFL_MCP_KEY||''}))\""
     },
     "ezhomesearch": {
       "type": "http",

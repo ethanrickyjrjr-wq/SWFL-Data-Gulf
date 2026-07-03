@@ -1,3 +1,12 @@
+## 2026-07-03 (main) — chore(mcp): wire secret-free account-token header into .mcp.json
+
+Follow-up to the account-level MCP auth ship (e7ea5a4a). The repo `.mcp.json` swfl entry sent NO
+header at all — the original 401. `.mcp.json` is git-tracked, so a raw token can't live there.
+Added a `headersHelper` (verified live per code.claude.com/docs/en/mcp: stdout JSON k-v becomes
+request headers, re-run on 401/403) that emits `{"X-Account-Key": $SWFL_MCP_KEY}` from the env — no
+secret in the repo. Operator sets `SWFL_MCP_KEY` once (their token from /settings/mcp after the
+e7ea5a4a deploy lands) and restarts. Helper output verified mechanically (set + unset cases).
+
 ## 2026-07-03 (main) — fix(ingest): repopulate empty fdot_aadt_fl, unblock master HELD
 
 Operator: "figure out why master is RED AGAIN." Root cause traced via `_tier1_inventory` +
