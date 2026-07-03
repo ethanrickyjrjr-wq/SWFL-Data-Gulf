@@ -268,6 +268,16 @@ test("two builds of the same seed have distinct (non-aliased) block ids", () => 
   expect(a.blocks[0].id).not.toBe(b.blocks[0].id);
 });
 
+test("editorial seeds exist and carry the serif-display editorial style", () => {
+  for (const id of ["editorial-letter", "magazine-issue"]) {
+    const seed = SEED_DOCS.find((s) => s.id === id);
+    expect(seed).toBeDefined();
+    const doc = seed!.build();
+    expect(doc.globalStyle.displayFontFamily).toBe("PLAYFAIR_SERIF");
+    expect(doc.blocks.at(-1)!.type).toBe("footer");
+  }
+});
+
 test("createBlock mints a fresh block with default props", () => {
   const blk = createBlock("hero");
   expect(blk.type).toBe("hero");

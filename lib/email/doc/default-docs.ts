@@ -1301,6 +1301,78 @@ export const SEED_DOCS: SeedDoc[] = [
       ],
     }),
   },
+
+  // ── Editorial seeds (author-layout-recipes build) ──────────────────────────
+  // STRUCTURE comes from the recipes (author-recipes.ts); these seeds carry the
+  // editorial GLOBAL STYLE — serif display, airy padding, restrained palette.
+  // Brand stays canonical: applyBrand still overlays globalStyle after.
+  {
+    id: "editorial-letter",
+    name: "Editorial Letter",
+    description:
+      "A text-only personal letter — serif, airy, one link, no buttons. Plain letters out-open designed emails for warm audiences.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        fontFamily: "BOOK_SERIF",
+        displayFontFamily: "PLAYFAIR_SERIF",
+        primaryColor: "#1C1C1C",
+        accentColor: "#8A7B5C",
+        textColor: "#2A2A2A",
+        backdropColor: "#FBFAF8",
+      },
+      blocks: [
+        seedBlock("header", { companyName: "", tagline: "" }),
+        seedBlock("text", {
+          body: "Dear reader,\n\nWrite like you would to one person — what you noticed in the market this month, what it means for them, and the one thing worth doing about it.\n\nWarmly,",
+          paddingY: "lg",
+        }),
+        seedBlock("agent-card", { ctaLabel: "" }),
+        seedBlock("footer"),
+      ],
+    }),
+  },
+  {
+    id: "magazine-issue",
+    name: "Magazine Issue",
+    description:
+      "Masthead hero with overlay title, feature cards, a dark section band — the designed edition for a warm audience.",
+    build: () => ({
+      globalStyle: {
+        ...style(),
+        displayFontFamily: "PLAYFAIR_SERIF",
+        primaryColor: "#14181C",
+        textColor: "#2A2A2A",
+        backdropColor: "#F6F5F2",
+      },
+      blocks: [
+        seedBlock("header", { companyName: "", tagline: "" }),
+        seedBlock("image", {
+          url: "",
+          alt: "Issue cover",
+          overlayTitle: "The Issue",
+          overlayBody: "A designed edition of what mattered in your market.",
+          paddingY: "lg",
+        }),
+        seedBlock("multi-column", {
+          columns: [
+            { heading: "Feature one", body: "A couple of lines that earn the click." },
+            { heading: "Feature two", body: "Aspirational context lifts time spent." },
+          ],
+          paddingY: "lg",
+        }),
+        seedBlock("signal", {
+          kicker: "From the Desk",
+          title: "The section band",
+          body: "A dark band separates sections; text flips to light automatically.",
+          bgColor: "#14181C",
+          paddingY: "lg",
+        }),
+        seedBlock("button", { label: "Read the full issue" }),
+        seedBlock("footer"),
+      ],
+    }),
+  },
 ];
 
 /** Look up a seed by id (used by the "Start from" picker). */
