@@ -1,3 +1,20 @@
+## 2026-07-02 (main) — sold-price backfill: investigation only, NO code — plan validated + one flaw found
+
+Validated a proposed lifecycle change (re-probe terminal `sold` rows to backfill price 0) before
+building. Probed code (RULE 0.5) + advisor. Live lake (07/02/2026, `listing_transitions to_state=sold`):
+19 sold rows, 11 at price 0 / 0 null / 8 priced; all <3 days old. The 8 priced show real deed-lag
+(close 1-2d before detection, 85-100% of list); the 11 zero-price are close==detection-day and all
+ultra-luxury Naples/Port Royal ($2.3-16M, 34102/34108/34145/34103). Walked back the "ghost" read:
+same-day-$0 fits deed-lag AND undisclosed equally, luxury skew is a probe-order artifact (planner
+sorts list_price desc), and no row is old enough to expect a recovery — recovery rate is UNMEASURED,
+not zero. Real flaw in the plan: priority — $0s are highest list_price, would grab the paid budget
+first and crowd out fresh departures; fix = leftover-priority + close-date-anchored ~45-60d window
+(reuse RECENT_SALE_BUFFER_DAYS, not 180d) + monthly interval; keep stamped sold-pending (not reverted
+to holding). Blast radius contained: market-aggregate median_sold_price reads realtor.com, not these
+rows; `lib/listings/sold-price.ts` already discards $0. Decision pending (build-now-instrumented vs
+wait-4wk-measure) + tie-breaker (has the per-build lane ever recovered a real price on same endpoint?).
+Findings: `_ASSISTANT/research/2026-07-02-sold-price-backfill-findings.md`. No code, no schema change.
+
 ## 2026-07-02 (main) — `author-layout-recipes` SPECCED: 3 recipe families + author layout power-up + media library (research-backed)
 
 Brainstormed per RULE 3.5 with 4 crawl4ai passes (RULE 0.4): Mailchimp Email Design Reference
