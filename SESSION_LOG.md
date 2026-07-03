@@ -1,3 +1,28 @@
+## 2026-07-02 (main) — `sold-price-pending-backfill` BUILT: display split + leftover-budget price backfill (Approach B approved + containment)
+
+Operator approved Approach B with the 07/02 investigation folded in. Reconciliation findings first
+(RULE 0.5): both parsers of /property-tax-history treat a $0 event identically (Python
+`classify_off_market` stamps sold_price=0; TS `parseSoldEvent` accepts 0, `pos()` rejects it) and
+the TS per-build lane persists/logs nothing — so open item 2 ("did the per-build lane ever recover
+a price?") is structurally unanswerable today; the instrumented loop IS the measurement. Also
+corrected: `resolveSoldPrice` had ZERO production consumers (root + test only), so the display kind
+is additive. Built: (1) `sold_price_pending` kind in `lib/listings/sold-price.ts` — "Sold —
+confirmed MM/DD/YYYY. Closing price not yet in the county record; last listed at $X." (2)
+`sales_price_pending_30d/90d` APPENDED to `listing_transitions_recent_zip_stats` — migration
+`docs/sql/20260702_listing_transitions_price_pending_stats.sql` applied + verified live (11 sales /
+3 pending in the 90d digest scope, matches raw cross-check). (3) digest split in
+`lib/email/market-context.ts`: "9 sales (7 recorded, 2 awaiting county record)". (4) backfill pass
+in `listing_lifecycle`: pure `plan_price_rechecks`/`apply_price_recheck_results` + distill
+loader/guarded in-place `update_sold_price` + post-county-loop wiring — LEFTOVER budget only
+(departures + holding-rechecks always eat first; global leftover), close-anchor ≤60d, monthly
+re-probe via existing `sold_check_at`, never demotes a sold, never fires on dry-run/catchup.
+`[backfill]` cron line self-instruments the $0→priced recovery rate (replaces the separate
+operator probe of the 11 known $0 rows — the loop reaches them once they age 30d). Gates:
+sold-capture suite 35/0, sold-price + market-context 19/0, `bunx next build` ✓. Spec:
+`docs/superpowers/specs/2026-07-03-sold-price-pending-backfill-design.md`; check
+`sold_price_pending_backfill_live_verify` OPEN (first cron `[backfill]` line + one in-place
+recovery). Fast follows deliberately out: assistant/zip-report wording; per-build write-back.
+
 ## 2026-07-03 (main) — Lane B spec UPDATED: map click → lab seed (operator-proposed), select+two-doors shape
 
 Operator proposed mid-review: "click on the map and you end up in the lab with basically the zip

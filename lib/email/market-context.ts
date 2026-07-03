@@ -343,20 +343,34 @@ interface LifecycleStatsRow {
   sales_90d: number | null;
   new_listings_90d: number | null;
   latest_at: string | null;
+  sales_price_pending_30d: number | null;
+  sales_price_pending_90d: number | null;
 }
 
-function digestValue(
+/** Exported for tests only. */
+export function digestValue(
   cuts: number,
   raises: number,
   holdings: number,
   sales: number,
   listings: number,
+  salesPricePending = 0,
 ): string | null {
   const parts: string[] = [];
   if (cuts) parts.push(`${cuts} price cut${cuts === 1 ? "" : "s"}`);
   if (raises) parts.push(`${raises} price raise${raises === 1 ? "" : "s"}`);
   if (holdings) parts.push(`${holdings} pulled to holding`);
-  if (sales) parts.push(`${sales} sale${sales === 1 ? "" : "s"}`);
+  if (sales) {
+    // A sale with no positive price in the county record yet is still a CONFIRMED sale — count
+    // it, and say the price is pending rather than silently folding it in as if recorded.
+    const pending = Math.min(salesPricePending, sales);
+    const recorded = sales - pending;
+    const noun = `${sales} sale${sales === 1 ? "" : "s"}`;
+    if (pending === 0) parts.push(noun);
+    else if (recorded > 0)
+      parts.push(`${noun} (${recorded} recorded, ${pending} awaiting county record)`);
+    else parts.push(`${noun} (closing price${pending === 1 ? "" : "s"} awaiting county record)`);
+  }
   if (listings) parts.push(`${listings} new listing${listings === 1 ? "" : "s"}`);
   return parts.length ? parts.join(", ") : null;
 }
@@ -381,7 +395,8 @@ export async function loadLifecycleDigest(scope?: {
       .from("listing_transitions_recent_zip_stats")
       .select(
         "price_cuts_30d, price_raises_30d, new_holdings_30d, sales_30d, new_listings_30d, " +
-          "price_cuts_90d, price_raises_90d, new_holdings_90d, sales_90d, new_listings_90d, latest_at",
+          "price_cuts_90d, price_raises_90d, new_holdings_90d, sales_90d, new_listings_90d, latest_at, " +
+          "sales_price_pending_30d, sales_price_pending_90d",
       );
     q =
       scope.kind === "zip"
@@ -397,6 +412,7 @@ export async function loadLifecycleDigest(scope?: {
       row.new_holdings_30d ?? 0,
       row.sales_30d ?? 0,
       row.new_listings_30d ?? 0,
+      row.sales_price_pending_30d ?? 0,
     );
     const v90 = digestValue(
       row.price_cuts_90d ?? 0,
@@ -404,6 +420,7 @@ export async function loadLifecycleDigest(scope?: {
       row.new_holdings_90d ?? 0,
       row.sales_90d ?? 0,
       row.new_listings_90d ?? 0,
+      row.sales_price_pending_90d ?? 0,
     );
     const value = v30 ?? v90;
     if (!value) return null;

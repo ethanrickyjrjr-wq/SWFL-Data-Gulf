@@ -328,3 +328,93 @@ def apply_off_market_resolutions(
             else:
                 stats["holding_unresolved"] += 1  # stays holding — stamped only (no ups/trans row).
     return stats
+
+
+# ------------------------------------------------------------ sold-price backfill (Part A follow-up)
+# A sold row captured with a 0/absent price (deed not yet recorded at probe time — or an undisclosed
+# land-trust sale that never will be) is terminal to the loop above: it's neither a departure nor a
+# holding. This pass re-probes those rows on the LEFTOVER budget only — departures + holding re-checks
+# always claim first, so backfill can never crowd out fresh sold detection (the investigation's
+# containment call, 07/02/2026). Window ~60d from the close; monthly interval via the SAME
+# sold_check_at stamp; past the window the honest "sold, price pending" line stands permanently.
+
+
+def plan_price_rechecks(
+    candidates: list[dict[str, Any]],
+    today: str,
+    *,
+    cap: int,
+    interval_days: int = 30,
+    max_age_days: int = 60,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Pure: pick which price-pending sold rows to spend LEFTOVER probe budget on.
+
+    `candidates` come from distill.load_price_pending_solds — sold transitions with no positive
+    sold_price, joined to state for property_id / list_price / sold_check_at. Eligibility: the close
+    (sold_date, falling back to `at`, the detection day) is within `max_age_days`, and the listing
+    wasn't probed within `interval_days`. Priority = list_price desc (the $0 set skews luxury by
+    construction — the planner's own sampling bias — so this just keeps ordering consistent), age asc
+    tie-break (freshest close first: most likely to have just recorded).
+
+    Each check = {kind:'price_recheck', key, property_id, since, list_price, days}; `since` is the
+    close anchor so classify's [since-45d .. today+7d] window covers the original sale event."""
+    stats = {"cap": cap, "candidates": len(candidates), "eligible": 0, "checked": 0}
+    if cap <= 0 or not candidates:
+        return [], stats
+    today_d = _as_date(today)
+    if today_d is None:
+        return [], stats
+
+    eligible: list[dict[str, Any]] = []
+    seen: set[Key] = set()
+    for c in candidates:
+        key = (c.get("address_key"), c.get("sale_or_rent"))
+        pid = c.get("property_id")
+        anchor = _as_date(c.get("sold_date")) or _as_date(c.get("at"))
+        if key in seen or not pid or anchor is None:
+            continue
+        age = (today_d - anchor).days
+        if not (0 <= age <= max_age_days):
+            continue
+        probed = _as_date(c.get("sold_check_at"))
+        if probed is not None and (today_d - probed).days < interval_days:
+            continue
+        seen.add(key)
+        eligible.append({
+            "kind": "price_recheck", "key": key, "property_id": str(pid),
+            "since": anchor.isoformat(),
+            "list_price": _to_int(c.get("list_price")) or 0, "days": age,
+        })
+
+    eligible.sort(key=lambda c: (-c["list_price"], c["days"]))
+    checks = eligible[:cap]
+    stats["eligible"] = len(eligible)
+    stats["checked"] = len(checks)
+    return checks, stats
+
+
+def apply_price_recheck_results(
+    checks: list[dict[str, Any]],
+    resolutions: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Pure: turn price-recheck probe results into targeted upgrades. NEVER demotes — a sold row stays
+    sold whatever the probe says (a withdrawn/holding answer on a known-sold is vendor lag, not a
+    retraction). Only a sold outcome with a POSITIVE price yields an upgrade; the county record with a
+    still-$0 price just re-stamps (still_pending). A gap stays unstamped so it retries next run.
+
+    Returns {'upgrades': [{key, sold_price, sold_date}], 'checked_keys', 'recovered', 'still_pending'}."""
+    out: dict[str, Any] = {"upgrades": [], "checked_keys": [], "recovered": 0, "still_pending": 0}
+    for chk, res in zip(checks, resolutions):
+        outcome = (res or {}).get("outcome", "gap")
+        if outcome == "gap":
+            continue
+        out["checked_keys"].append(chk["key"])
+        price = _to_int((res or {}).get("sold_price"))
+        if outcome == "sold" and price is not None and price > 0:
+            out["upgrades"].append({
+                "key": chk["key"], "sold_price": price, "sold_date": res.get("sold_date"),
+            })
+            out["recovered"] += 1
+        else:
+            out["still_pending"] += 1
+    return out

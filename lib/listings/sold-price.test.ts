@@ -60,6 +60,48 @@ describe("resolveSoldPrice — lane 2: recorded event lookup", () => {
   });
 });
 
+describe("resolveSoldPrice — lane 3: sold, price pending", () => {
+  test("held sold date + 0 price → sold_price_pending with the confirmed date", async () => {
+    const out = await resolveSoldPrice(
+      { soldPrice: 0, soldDate: "2026-07-01", lastListPrice: 8_999_000 },
+      noFetch,
+    );
+    expect(out).toEqual({
+      kind: "sold_price_pending",
+      value: 8_999_000,
+      asOf: "07/01/2026",
+      source: "SWFL Data Gulf",
+      disclosure:
+        "Sold — confirmed 07/01/2026. Closing price not yet in the county record; last listed at $8,999,000.",
+    });
+  });
+
+  test("live lookup still wins over pending when it recovers a real price", async () => {
+    const out = await resolveSoldPrice(
+      { soldPrice: 0, soldDate: "2026-07-01", propertyId: "M1", lastListPrice: 8_999_000 },
+      { fetchSold: async () => ({ soldPrice: 8_100_000, soldDate: "2026-07-01" }) },
+    );
+    expect(out?.kind).toBe("sold");
+    expect(out?.value).toBe(8_100_000);
+  });
+
+  test("sold date but no positive list price → null, never a bare sold-with-no-number", async () => {
+    const out = await resolveSoldPrice(
+      { soldPrice: 0, soldDate: "2026-07-01", lastListPrice: 0 },
+      noFetch,
+    );
+    expect(out).toBeNull();
+  });
+
+  test("unparseable sold date degrades to plain last_list", async () => {
+    const out = await resolveSoldPrice(
+      { soldPrice: 0, soldDate: "not-a-date", lastListPrice: 500_000 },
+      noFetch,
+    );
+    expect(out?.kind).toBe("last_list");
+  });
+});
+
 describe("resolveSoldPrice — never 0, never invented", () => {
   test("nothing resolvable → null (caller omits the slot)", async () => {
     const out = await resolveSoldPrice({ soldPrice: 0, lastListPrice: 0 }, noFetch);

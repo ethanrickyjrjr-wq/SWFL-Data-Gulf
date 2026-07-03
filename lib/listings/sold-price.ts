@@ -5,7 +5,11 @@
 //   1. Lake: a NONZERO recorded sold price we already hold.
 //   2. Live recorded event: fetchSoldEvent (property tax history — a recorded
 //      deed event). PAID call: injectable, fired only for a real build.
-//   3. Last list price, DISCLOSED — labeled as a list price, never a sale.
+//   3. Sold, price pending: we HOLD a confirmed sold date but no positive price
+//      (county deed record lags the close by days; luxury sales via land trust
+//      may never post one). Says the sale is confirmed; shows the list price,
+//      disclosed as a list price.
+//   4. Last list price, DISCLOSED — labeled as a list price, never a sale.
 // A 0/null/negative price is MISSING by definition — it never binds. If no lane
 // resolves, returns null and the caller omits the slot entirely.
 
@@ -23,14 +27,14 @@ export interface SoldPriceInput {
 }
 
 export interface SoldPriceDisplay {
-  kind: "sold" | "last_list";
-  /** Always > 0. */
+  kind: "sold" | "sold_price_pending" | "last_list";
+  /** Always > 0. For "sold_price_pending" this is the LAST LIST price, never a sale. */
   value: number;
-  /** MM/DD/YYYY when a date is held. */
+  /** MM/DD/YYYY when a date is held. For "sold_price_pending": the confirmed sold date. */
   asOf?: string;
   /** "SWFL Data Gulf" | "Public record" — never a vendor name. */
   source: string;
-  /** Present when kind === "last_list" — code-owned wording, model never writes it. */
+  /** Present unless kind === "sold" — code-owned wording, model never writes it. */
   disclosure?: string;
 }
 
@@ -74,6 +78,21 @@ export async function resolveSoldPrice(
         source: "Public record",
       };
     }
+  }
+
+  // Sold with the price not yet recorded: the confirmed sold date is real held data —
+  // say so, instead of downgrading to a bare list-price line that hides the sale.
+  const soldAsOf = toMdY(input.soldDate);
+  if (soldAsOf && pos(input.lastListPrice)) {
+    return {
+      kind: "sold_price_pending",
+      value: input.lastListPrice,
+      asOf: soldAsOf,
+      source: "SWFL Data Gulf",
+      disclosure:
+        `Sold — confirmed ${soldAsOf}. Closing price not yet in the county record; ` +
+        `last listed at ${usd(input.lastListPrice)}.`,
+    };
   }
 
   if (pos(input.lastListPrice)) {

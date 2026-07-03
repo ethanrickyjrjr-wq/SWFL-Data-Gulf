@@ -23,7 +23,9 @@ from ingest.pipelines.listing_lifecycle.extract_api import (
 )
 from ingest.pipelines.listing_lifecycle.transitions import (
     apply_off_market_resolutions,
+    apply_price_recheck_results,
     plan_off_market_checks,
+    plan_price_rechecks,
 )
 
 TODAY = "2026-07-01"
@@ -280,6 +282,60 @@ def test_cap_bounds_call_count_and_known_sold_yields_priced_transition():
     assert len(sold) == 3 and all(t["sold_price"] == 355000 and t["sold_date"] for t in sold)
 
 
+# ------------------------------------------------------------------ price backfill (pure)
+
+def _pending(addr, *, sold_date=None, at=None, pid="p", price=1000000, checked=None):
+    return {"address_key": addr, "sale_or_rent": "sale", "at": at or TODAY, "sold_date": sold_date,
+            "property_id": pid, "list_price": price, "sold_check_at": checked}
+
+
+def test_price_recheck_window_interval_and_dedupe():
+    cands = [
+        _pending("fresh", sold_date="2026-06-25"),                        # 6d old — eligible
+        _pending("aged", sold_date="2026-04-20"),                          # 72d — outside 60d window
+        _pending("probed", sold_date="2026-06-20", checked="2026-06-15"),  # probed 16d ago — interval blocks
+        _pending("noid", sold_date="2026-06-25", pid=None),                # unprobeable
+        _pending("fresh", sold_date="2026-06-25"),                         # duplicate key — deduped
+        _pending("no_close", sold_date=None, at="2026-06-28"),             # falls back to `at` — eligible
+    ]
+    checks, stats = plan_price_rechecks(cands, TODAY, cap=10)
+    assert stats["eligible"] == 2 and stats["checked"] == 2
+    assert {c["key"][0] for c in checks} == {"fresh", "no_close"}
+    assert all(c["kind"] == "price_recheck" for c in checks)
+
+
+def test_price_recheck_since_is_the_close_anchor():
+    checks, _ = plan_price_rechecks([_pending("A", sold_date="2026-06-20")], TODAY, cap=1)
+    assert checks[0]["since"] == "2026-06-20"      # classify window must cover the original sale event
+
+
+def test_price_recheck_cap_holds_and_orders_by_list_price_desc():
+    cands = [_pending(f"A{i}", sold_date="2026-06-25", price=1000000 + i) for i in range(5)]
+    checks, stats = plan_price_rechecks(cands, TODAY, cap=2)
+    assert len(checks) == 2 and stats["eligible"] == 5
+    assert [c["key"][0] for c in checks] == ["A4", "A3"]
+
+
+def test_price_recheck_zero_cap_is_free():
+    checks, stats = plan_price_rechecks([_pending("A", sold_date="2026-06-25")], TODAY, cap=0)
+    assert checks == [] and stats["checked"] == 0
+
+
+def test_apply_price_recheck_upgrades_only_positive_sold():
+    checks = [{"kind": "price_recheck", "key": (k, "sale"), "property_id": "p", "since": TODAY}
+              for k in ("recovered", "still_zero", "vendor_lag", "gap")]
+    res = [
+        {"outcome": "sold", "sold_price": 8100000, "sold_date": "2026-06-28"},
+        {"outcome": "sold", "sold_price": 0, "sold_date": "2026-06-28"},   # county record still $0
+        {"outcome": "withdrawn"},                                          # NEVER demotes a sold
+        {"outcome": "gap"},                                                # transient — retry, unstamped
+    ]
+    out = apply_price_recheck_results(checks, res)
+    assert out["upgrades"] == [{"key": ("recovered", "sale"), "sold_price": 8100000, "sold_date": "2026-06-28"}]
+    assert out["recovered"] == 1 and out["still_pending"] == 2
+    assert ("gap", "sale") not in out["checked_keys"] and len(out["checked_keys"]) == 3
+
+
 # ------------------------------------------------------------------ pipeline wiring (gated to LIVE api)
 
 import ingest.pipelines.listing_lifecycle.pipeline as P  # noqa: E402
@@ -305,6 +361,9 @@ def _wire(monkeypatch, calls):
     monkeypatch.setattr(P.distill, "upsert_state", lambda ups, **k: len(ups))
     monkeypatch.setattr(P.distill, "append_transitions", lambda tr, **k: len(tr))
     monkeypatch.setattr(P.distill, "stamp_sold_checked", lambda keys, **k: len(keys))
+    # Backfill loader: NEVER let a wiring test read the live lake; tests opt in via re-patching.
+    monkeypatch.setattr(P.distill, "load_price_pending_solds", lambda *a, **k: [])
+    monkeypatch.setattr(P.distill, "update_sold_price", lambda ups, **k: len(ups))
 
     def fake_fetch(pid, **k):
         calls.append(pid)
@@ -332,3 +391,44 @@ def test_hook_fires_live_and_threads_budget(monkeypatch):
     # One eligible recheck in prior -> the live hook should fire exactly one probe.
     P.run(dry_run=False, only_county="Lee", today=TODAY, source="api")
     assert calls == ["9"]                            # the eligible holding was probed, live
+
+
+def test_backfill_fires_on_leftover_budget_and_upgrades_in_place(monkeypatch):
+    calls: list = []
+    _wire(monkeypatch, calls)
+    upgraded: list = []
+    monkeypatch.setattr(P.distill, "load_price_pending_solds",
+                        lambda *a, **k: [_pending("PR", sold_date="2026-06-25", pid="77", price=9000000)])
+    monkeypatch.setattr(P.distill, "update_sold_price",
+                        lambda ups, **k: (upgraded.extend(ups), len(ups))[1])
+
+    def fake_fetch(pid, **k):
+        calls.append(pid)
+        if pid == "77":
+            return {"outcome": "sold", "sold_price": 8100000, "sold_date": "2026-06-25"}
+        return {"outcome": "gap"}
+    monkeypatch.setattr(P, "fetch_sold_event", fake_fetch)
+
+    P.run(dry_run=False, only_county="Lee", today=TODAY, source="api")
+    assert "77" in calls                             # leftover budget reached the price backfill
+    assert upgraded == [{"key": ("PR", "sale"), "sold_price": 8100000, "sold_date": "2026-06-25"}]
+
+
+def test_backfill_starves_when_county_loop_spends_the_whole_cap(monkeypatch):
+    calls: list = []
+    _wire(monkeypatch, calls)
+    monkeypatch.setattr(P, "SOLD_CHECK_CAP", 1)      # the one slot goes to the holding recheck
+    monkeypatch.setattr(P.distill, "load_price_pending_solds",
+                        lambda *a, **k: [_pending("PR", sold_date="2026-06-25", pid="77")])
+    P.run(dry_run=False, only_county="Lee", today=TODAY, source="api")
+    assert calls == ["9"]                            # departures/rechecks first; backfill got nothing
+
+
+def test_backfill_never_fires_on_dry_run_or_catchup(monkeypatch):
+    calls: list = []
+    _wire(monkeypatch, calls)
+    monkeypatch.setattr(P.distill, "load_price_pending_solds",
+                        lambda *a, **k: [_pending("PR", sold_date="2026-06-25", pid="77")])
+    P.run(dry_run=True, only_county="Lee", today=TODAY, source="api")
+    P.run(dry_run=False, only_county="Lee", today=TODAY, source="api", catchup=True)
+    assert calls == []                               # zero paid probes on dry-run AND on the baseline

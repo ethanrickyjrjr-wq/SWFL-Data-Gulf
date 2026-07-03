@@ -236,6 +236,67 @@ def append_transitions(
     return len(transitions)
 
 
+def load_price_pending_solds(
+    source_name: str = SOURCE_NAME, *, max_age_days: int = 60
+) -> list[dict[str, Any]]:
+    """Sold transitions holding NO positive price (deed record not yet posted — or never will be),
+    young enough to still be worth a leftover-budget re-probe. Joined to state for the probe identity
+    (property_id), the priority signal (list_price) and the interval stamp (sold_check_at). The close
+    anchor is sold_date, falling back to `at` (detection day). ODD-tolerant: any failure reads as
+    "no candidates", never a crash — backfill is strictly best-effort."""
+    sql = f"""
+        SELECT t.address_key, t.sale_or_rent, t.at, t.sold_date,
+               s.property_id, s.list_price, s.sold_check_at
+        FROM {_TRANS_TABLE} t
+        JOIN {_STATE_TABLE} s
+          ON s.source_name = t.source_name
+         AND s.address_key = t.address_key
+         AND s.sale_or_rent = t.sale_or_rent
+        WHERE t.source_name = %(src)s
+          AND t.to_state = 'sold'
+          AND (t.sold_price IS NULL OR t.sold_price <= 0)
+          AND COALESCE(t.sold_date, t.at) >= current_date - %(days)s * interval '1 day'
+    """
+    cols = ["address_key", "sale_or_rent", "at", "sold_date", "property_id", "list_price", "sold_check_at"]
+    try:
+        with _get_conn() as conn, conn.cursor() as cur:
+            cur.execute(sql, {"src": source_name, "days": max_age_days})
+            return [dict(zip(cols, row)) for row in cur.fetchall()]
+    except Exception:
+        return []
+
+
+def update_sold_price(
+    upgrades: list[dict[str, Any]], *, source_name: str = SOURCE_NAME, dry_run: bool = False
+) -> int:
+    """Fold a recovered closing price back onto the EXISTING sold transition(s) — a targeted in-place
+    UPDATE, never a new row (one sold event per listing per spell stays one row). Guarded: only rows
+    still price-less are touched, and only with a positive price, so a double-fire or a stale plan can
+    never clobber a real recorded price. sold_date upgrades only when the probe returned one."""
+    if not upgrades:
+        return 0
+    if dry_run:
+        print(f"[dry-run] would backfill sold_price on {len(upgrades)} transitions")
+        return len(upgrades)
+    sql = (f"UPDATE {_TRANS_TABLE} SET sold_price = %(price)s, "
+           f"sold_date = COALESCE(%(sold_date)s, sold_date) "
+           f"WHERE source_name = %(src)s AND address_key = %(addr)s AND sale_or_rent = %(sor)s "
+           f"AND to_state = 'sold' AND (sold_price IS NULL OR sold_price <= 0)")
+    params = [
+        {"price": u["sold_price"], "sold_date": u.get("sold_date"), "src": source_name,
+         "addr": u["key"][0], "sor": u["key"][1]}
+        for u in upgrades
+        if isinstance(u.get("sold_price"), int) and u["sold_price"] > 0
+    ]
+    if not params:
+        return 0
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.executemany(sql, params)
+        conn.commit()
+    return len(params)
+
+
 def stamp_sold_checked(
     keys: list[tuple[str, str]], *, source_name: str = SOURCE_NAME, checked_at: Any = None,
     dry_run: bool = False,

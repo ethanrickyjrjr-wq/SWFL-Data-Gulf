@@ -26,8 +26,10 @@ from ingest.pipelines.listing_lifecycle.extract import SWFL_COUNTIES, scan_count
 from ingest.pipelines.listing_lifecycle.extract_api import scan_county_api, fetch_sold_event
 from ingest.pipelines.listing_lifecycle.transitions import (
     apply_off_market_resolutions,
+    apply_price_recheck_results,
     diff_states,
     plan_off_market_checks,
+    plan_price_rechecks,
 )
 
 # Counties the API feed covers (SteadyAPI scope gate = IN_SCOPE_FIPS). Hendry added 2026-07-02
@@ -141,6 +143,29 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         totals["upserts"] += n_u
         totals["transitions"] += n_t
         print(f"[ok] {county}: scanned={len(rows)} seed={is_seed} upserts={n_u} transitions={n_t} ({why})", flush=True)
+    # Sold-price backfill (approved 07/02/2026): sold rows captured with a 0/absent price (deed not
+    # yet recorded, or an undisclosed land-trust sale) get ONLY the budget the county loop left over —
+    # departures + holding re-checks always eat first, so backfill can never crowd out fresh sold
+    # detection. Runs AFTER the loop precisely so "leftover" is global, not per-county. The stats line
+    # is the instrumentation the build decision rests on: recovered vs still_pending over the next few
+    # weeks IS the measured $0→priced recovery rate.
+    if source == "api" and not dry_run and not catchup and sold_budget_remaining > 0:
+        pending = distill.load_price_pending_solds(source_name=src_name)
+        bf_checks, bf_plan = plan_price_rechecks(pending, today, cap=sold_budget_remaining)
+        if bf_checks:
+            bf_res = [fetch_sold_event(c["property_id"], since=c["since"], at=today) for c in bf_checks]
+            applied = apply_price_recheck_results(bf_checks, bf_res)
+            distill.update_sold_price(applied["upgrades"], source_name=src_name, dry_run=dry_run)
+            if applied["checked_keys"]:
+                distill.stamp_sold_checked(applied["checked_keys"], source_name=src_name, dry_run=dry_run)
+            budget_calls += len(bf_checks)
+            sold_budget_remaining -= len(bf_checks)
+        if bf_plan["candidates"]:
+            print(f"[backfill] price-pending={bf_plan['candidates']} eligible={bf_plan['eligible']} "
+                  f"probed={bf_plan['checked']} recovered={applied['recovered'] if bf_checks else 0} "
+                  f"still_pending={applied['still_pending'] if bf_checks else 0} "
+                  f"(leftover budget only)", flush=True)
+
     if source == "api":
         print(f"[budget] this run = {budget_calls} SteadyAPI calls "
               f"(10,000/mo Starter cap; ~4,700/mo steady-state target)", flush=True)
