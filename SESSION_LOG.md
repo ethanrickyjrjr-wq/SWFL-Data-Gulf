@@ -1,3 +1,23 @@
+## 2026-07-03 (main) — fix(zip-shape): outline stroke removed, brainstorming ZIP email reskin
+
+Follow-up to the earlier transparent-PNG fix (5277fa09): operator flagged the shape's stroke as a
+thick dark outline the website doesn't have (screenshot). Root cause: the CSS stroke on the
+website is a real 0.6px that nearly disappears against the dark hero background; the same
+stroke-width applied to the SVG's raw unscaled geometry coordinates rasterized as a thick,
+visible border. Dropped the stroke entirely — flat fill only (7f16e13f). Verified by re-rendering
+`/api/zip-shape/34135` locally.
+
+Also mid-brainstorm (superpowers:brainstorming) on the deeper ask: rebuild the seeded ZIP email
+(`lib/email/zip-seed.ts`) to look like a real, well-designed email instead of the current flat
+block stack. Operator-confirmed scope: neutral brand-skeleton colors (not hardcoded SWFL navy/
+teal — users will brand these), a new reusable `metric-card` block type with a real email-safe
+percentile bar sourced from today's `zip_hero_pool_all_brains` registry (`buildRegistryCandidates`
++ `rankSignals`, already deterministic/cited/$0-cost), grid layout (shape + ZIP code side by
+side), mirroring the density of the listing-comp and social-week email examples. Confirmed our
+own crawl4ai research already exists and is fresh (`docs/email-marketing/QUALITY-BAR-data-
+deliverables.md`, 06/26/2026) — reused it instead of re-crawling. Next: write the design spec,
+self-review, operator reviews, then writing-plans.
+
 ## 2026-07-03 (main) — feat(ingest): per-county coverage guard so a single-county scrape collapse can't pass green (the gap that hid the Collier block)
 
 Follow-up to the homepage fix below (operator: "how do we not know about data issues with all our
