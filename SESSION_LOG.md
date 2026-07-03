@@ -1,3 +1,16 @@
+## 2026-07-03 (main) — zip_signal_hero_live_verify CLOSED — proved live against swfldatagulf.com
+
+Deploy `bc8e8b6b` confirmed live (Vercel deployment 5302923601, state success). Live evidence:
+(1) `GET /r/zip-report/33990` (Cape Coral, previously an em-dash ZIP for flood) now renders
+"Annual Flood Loss $43.96, #66 of 124 SWFL ZIPs" in the ranked grid — real row from the widened
+`flood_by_zip` table, zero em-dash stat cells on the page. (2) `POST /api/figures/find
+{"zip":"33990","metric_key":"permits_90d"}` → `200 {"found":false,"pointer":{"name":"City of
+Cape Coral permitting","url":"https://www.capecoral.gov/"}}` — a live paid web-search call ran
+(allowlist passed, cache missed, daily cap not tripped) and returned the honest miss with a real
+issuing-source pointer rather than inventing a number; `findFigure` only upserts on the verified
+-point branch, which this call did not take, so the moat held. Check closed via
+`node scripts/check.mjs close zip_signal_hero_live_verify`.
+
 ## 2026-07-03 (main) — env-swfl targeted rebuild lands flood_by_zip in prod (operator-run)
 
 Ran `bun run refinery -- env-swfl --target-only` (live mode, no cascade) per the plan's operator
