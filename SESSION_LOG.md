@@ -1,3 +1,18 @@
+## 2026-07-03 (main) — Social tool layout RESTORED to grid-shell shape (operator ruling: cockpit layout never changes)
+
+Operator escalation: Socials Lab "everything moved to the left." Root cause: the Jul 2 Cockpit
+session (faf0cada) promoted Social to its own tab but silently inverted the layout — all controls
+in a 288px LEFT rail, canvas floating in a dark void (empty canvas = brand primary on #0a141a,
+dark-on-dark), preview in a third far-right column. Not a rendering bug — a scope-creep redesign.
+Restored `app/project/[id]/social/ProjectSocialClient.tsx` (02efa…/02efe326) to the exact
+EmailLabGridShell social shape: canvas 1fr left, ONE 380px right "AI assistant" aside (Build with
+AI → Now editing inspector → Add/Size → collapsible Social calendar → Card preview → Photos). Zero
+behavior change — same hooks/endpoints/modals. RULING pinned in a file comment: the cockpit layout
+never changes; controls never move to a left rail. Verified: compile clean, 0 type errors in the
+file (full `next build` red only from the parallel session's then-in-flight `projectHome` refactor,
+since landed as 649615a5 — which stacked cleanly on the restore, adding ExamplesAccordion below
+Photos). Commit 02efe326 reached origin via the parallel session's push; this entry logs it.
+
 ## 2026-07-03 (main) — Cockpit landing + project-AI cleanup (operator rulings) + /project control center v1
 
 Operator escalation: still landing on the bare projects list, cockpit tabs invisible, the
