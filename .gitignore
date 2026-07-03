@@ -197,6 +197,9 @@ _ASSISTANT/TODAY.md
 # Outreach campaign dry-run artifacts (rendered previews + run reports)
 outreach-runs/
 
+# Weekly-read run artifacts (per-ZIP issue previews + run reports)
+weekly-read-runs/
+
 # cloud-secrets: ONLY the encrypted vault.enc is committed. The passphrase and any
 # decrypted/plaintext key material must NEVER be committed.
 cloud-secrets/.passphrase
