@@ -61,10 +61,11 @@ export async function POST(request: Request): Promise<Response> {
 
   const db = createServiceRoleClient();
   if (mutation.user_id) {
-    // checkout: we know the user — upsert the full row.
+    // checkout: we know the user — upsert the full row. (Spread re-pins
+    // user_id as a definite string; the if-guard doesn't narrow the object.)
     const { error } = await db
       .from("billing_subscriptions")
-      .upsert(mutation, { onConflict: "user_id" });
+      .upsert({ ...mutation, user_id: mutation.user_id }, { onConflict: "user_id" });
     if (error) console.error("[stripe-webhook] upsert failed:", error.message);
   } else {
     // subscription/invoice events: keyed by customer id. A miss means we
