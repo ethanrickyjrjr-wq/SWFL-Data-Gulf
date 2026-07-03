@@ -3,22 +3,30 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Showcase } from "@/lib/showcase/registry";
+import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { totalSteps, clampStep, stepLabel } from "@/lib/showcase/overlay-logic";
 import { LoginModal } from "@/components/landing/LoginModal";
 
 /**
  * Near-fullscreen step-through for one showcase. Click-through ONLY — no
  * auto-advance ever (rotating content reads as an ad and gets skipped).
- * Content steps render the committed capture + captions; the final step is
- * the tier/CTA slide, which opens the OTP LoginModal ABOVE this overlay
- * (LoginModal portals at z-[100]; we sit at z-[90]).
+ * Content steps render the committed capture + captions; buildable steps carry
+ * the "Make this →" recipe button when the host passes `onUseRecipe` (the lab
+ * injects the prompt into its Build box — operator ruling 07/03/2026; the old
+ * "See the real thing" self-link is dead). The final step is the tier/CTA
+ * slide, which opens the OTP LoginModal ABOVE this overlay (LoginModal portals
+ * at z-[100]; we sit at z-[90]).
  */
 export function ShowcaseOverlay({
   showcase,
   onClose,
+  onUseRecipe,
 }: {
   showcase: Showcase;
   onClose: () => void;
+  /** Present only where a builder is on screen (the lab rails) — hosts without
+   *  it (dock, briefcase) show the story with no button. */
+  onUseRecipe?: (recipe: ShowcaseRecipe) => void;
 }) {
   const total = totalSteps(showcase);
   const [step, setStep] = useState(0);
@@ -47,6 +55,7 @@ export function ShowcaseOverlay({
 
   const isTier = step === total - 1;
   const slide = isTier ? null : showcase.slides[step];
+  const recipe = slide?.recipe;
 
   return createPortal(
     <div
@@ -145,16 +154,20 @@ export function ShowcaseOverlay({
                     {slide.receipt}
                   </p>
                 )}
-                {slide.liveHref && (
-                  <a
-                    href={slide.liveHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-block text-xs font-semibold underline-offset-2 hover:underline"
-                    style={{ color: showcase.accent }}
-                  >
-                    See the real thing ↗
-                  </a>
+                {recipe && onUseRecipe && (
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => onUseRecipe(recipe)}
+                      className="w-full rounded-lg px-3 py-2 text-xs font-bold text-navy-dark transition-opacity hover:opacity-90"
+                      style={{ background: showcase.accent }}
+                    >
+                      Make this →
+                    </button>
+                    <p className="mt-1.5 text-center text-[10px] leading-relaxed text-gray-500">
+                      Drops the ready-made prompt in the builder — one blank to fill.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

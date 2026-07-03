@@ -1,3 +1,27 @@
+## 2026-07-03 (main) — Email Lab "Make this": examples lead + recipe buttons build the thing (COMMITTED LOCAL, push on operator word)
+
+Operator escalation: lab must LEAD with what users can do; examples' "See the real thing"
+self-link was a dead end ("show them the good shit and have a button"). Built in the GRID
+shell ONLY — the cockpit's canvas; zero investment in the D4-retiring standalone block page:
+(1) lib/showcase/recipe.ts (new, pure) — BrandNeed/ShowcaseRecipe types, [[blank]] finder,
+brand-gap calc + tests; (2) recipes on all 8 buildable email slides in the showcase registry
+(5 listing-to-close steps, launch-blitz agent-intro, market-pulse ask+pulse; social slides
+exempt-listed for a follow-up); (3) ShowcaseOverlay "Make this →" per buildable step, dead
+liveHref link REMOVED everywhere (data kept for capture/tests); (4) ExamplesAccordion gains
+defaultOpen + onUseRecipe; (5) EmailLabGridShell — rail reordered (Build box → Examples
+top+OPEN → … → Brand CLOSED+demoted; operator rulings 07/03/2026 PM, supersede same-day
+closed-by-default), prompt injection with the [[blank]] pre-selected for typing, placeholder
+build-guard (no garbage builds), brand-gap yes/no (Add my info → opens Brand / Build anyway).
+Research (RULE 0.4, crawl4ai): NN/g prompt-suggestions (04/25/2025) + NN/g empty-states —
+use-case prompt suggestions + direct-pathway evidence in spec. Spec committed 675a582e:
+docs/superpowers/specs/2026-07-03-email-lab-make-this-design.md. Mid-session inversion
+(floated deleting /email-lab/grid — the KEEPER) caught by operator; withdrawn + memory-pinned
+(grid builder untouchable; standalone PAGES retire per cockpit D4). Verify: bun test
+lib/showcase 17/17; next build COMPILES green; repo-wide tsc has exactly ONE error file —
+app/page.tsx (Lane B's claimed in-flight homepage edit, ShowcaseFigures missing `dom`), zero
+errors in this diff's 7 files. Check email_lab_make_this_live_verify OPEN (operator-run).
+Next: operator live-verify Make-this in the cockpit Email tab; social-surface recipe wiring.
+
 ## 2026-07-03 (main) — homepage-rebuild Phase 1 BUILT: live-lake map, Home Value default, full Lane B page (COMMITTED LOCAL, push held for operator review)
 
 Operator escalation on the live homepage ("make it not look like shit") + redesign fatigue ("not

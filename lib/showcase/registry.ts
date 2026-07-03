@@ -7,6 +7,8 @@
  * overlay appends it as the final step.
  */
 
+import type { ShowcaseRecipe } from "./recipe";
+
 export interface ShowcaseSlide {
   /** Root-relative committed capture, e.g. "/showcase/<id>/step-1.webp". */
   image: string;
@@ -15,10 +17,16 @@ export interface ShowcaseSlide {
   whatsHappening: string;
   /** The concrete mechanics of how the AI built it. */
   howAiHandled: string;
-  /** Optional "see the real email" target (root-relative, served from public/). */
+  /** Committed live-HTML artifact (root-relative, under public/). Kept for the
+   *  capture scripts + asset tests; NOT rendered as a link anymore — the
+   *  overlay's action is the Make-this recipe (operator ruling 07/03/2026). */
   liveHref?: string;
   /** Optional named-source practice receipt, rendered as a footnote. */
   receipt?: string;
+  /** "Make this →" — rebuilds this artifact for the user's own listing/farm.
+   *  Buildable email slides carry one; social-surface slides are wired in a
+   *  follow-up (exempt list in registry.test.ts). */
+  recipe?: ShowcaseRecipe;
 }
 
 export interface Showcase {
@@ -61,6 +69,11 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Counted the live for-sale inventory and found the angle itself: only 156 of Collier's 8,067 active homes sit at $10M+.",
         liveHref: "/showcase/listing-to-close/live/01-coming-soon.html",
+        recipe: {
+          prompt:
+            "Build a coming-soon teaser email for my listing at [[your listing address]] — hold the street address back, use real county inventory counts to show how scarce homes like it are, and one CTA to join a private preview list.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/listing-to-close/step-2.webp",
@@ -70,6 +83,11 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Charted the ZIP's value index and wrote the honest read — the reset has stopped resetting — instead of a hype line.",
         liveHref: "/showcase/listing-to-close/live/02-new-listing.html",
+        recipe: {
+          prompt:
+            "Build a new-listing announcement email for my listing at [[your listing address]] — key specs, price per square foot, a chart of the ZIP's home-value trend, and one honest line about where that market sits.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/listing-to-close/step-3.webp",
@@ -80,6 +98,11 @@ export const SHOWCASES: Showcase[] = [
           "Picked six live comps in the same ZIP and computed each $/sq ft in code, then argued the premium straight: the case is the land.",
         liveHref: "/showcase/listing-to-close/live/03-comps.html",
         receipt: "Numbers, not adjectives — every figure traces to the listing feed snapshot.",
+        recipe: {
+          prompt:
+            "Build a market-comps email for my listing at [[your listing address]] — six live comparable listings nearby with each price and price per square foot, a price bar chart, and a straight case for my asking price.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/listing-to-close/step-4.webp",
@@ -89,6 +112,11 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Corroborated the story with the ZIP's own numbers — 85 pendings, 31 of them at $2M+ — to convert losing bidders into backup offers.",
         liveHref: "/showcase/listing-to-close/live/04-pending.html",
+        recipe: {
+          prompt:
+            "Build an under-contract announcement email for my listing at [[your listing address]] — lead with how fast it went pending compared to the ZIP's typical days on market, and invite backup offers.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/listing-to-close/step-5.webp",
@@ -98,6 +126,11 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Placed the close inside the actual sale wave it belonged to, then turned proof into the next lead.",
         liveHref: "/showcase/listing-to-close/live/05-sold.html",
+        recipe: {
+          prompt:
+            "Build a just-sold email for my listing at [[your listing address]] — set the close among the week's real sales nearby, and end with a private home-valuation offer for my readers.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
     ],
   },
@@ -122,6 +155,11 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/launch-blitz/live/agent-intro.html",
         receipt:
           "One CTA per email — “give readers three things to click and they often click nothing” (Luxury Presence, 2026).",
+        recipe: {
+          prompt:
+            "Build an agent-introduction email for my farm area [[your city or ZIP]] — a ZIP-by-ZIP asking-price chart from live listings, my name and headshot up front, and my newest listing as the anchor.",
+          needs: ["agent_name", "photo_url", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/launch-blitz/step-2.webp",
@@ -155,6 +193,11 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Reads the ask, locks the schedule, and takes over sourcing, charting, and writing from here.",
         liveHref: "/showcase/market-pulse/live/ask.html",
+        recipe: {
+          prompt:
+            "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/market-pulse/step-2.webp",
@@ -166,6 +209,11 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/market-pulse/live/pulse-email.html",
         receipt:
           "Market-update newsletters are the top-performing real-estate email type; single column, one CTA, subject under 40 characters (Luxury Presence, 2026).",
+        recipe: {
+          prompt:
+            "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
       },
       {
         image: "/showcase/market-pulse/step-3.webp",

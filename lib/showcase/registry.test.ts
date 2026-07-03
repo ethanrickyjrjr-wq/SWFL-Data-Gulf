@@ -2,6 +2,7 @@ import { describe, it, expect } from "bun:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { SHOWCASES } from "./registry";
+import { NEED_LABELS, findPlaceholder } from "./recipe";
 
 /**
  * Registry is the single source of truth for the panel showcases. A missing
@@ -43,6 +44,46 @@ describe("showcase registry", () => {
     for (const s of SHOWCASES) {
       for (const sl of s.slides) {
         expect(banned.test(sl.whatsHappening + " " + sl.howAiHandled)).toBe(false);
+      }
+    }
+  });
+
+  // ── Make-this recipes (spec: 2026-07-03-email-lab-make-this-design.md) ──────
+  // Social-surface artifacts + the flywheel-proof slide are wired in a follow-up.
+  const RECIPE_EXEMPT = new Set([
+    "launch-blitz/Social Pack — 4 Formats",
+    "market-pulse/The Social Cut",
+    "market-pulse/Proof It Updates",
+  ]);
+
+  it("every email-surface slide has a recipe or an explicit exemption", () => {
+    for (const s of SHOWCASES.filter((s) => s.surfaces.includes("email"))) {
+      for (const sl of s.slides) {
+        const key = `${s.id}/${sl.title}`;
+        if (RECIPE_EXEMPT.has(key)) continue;
+        expect(sl.recipe, `missing recipe: ${key}`).toBeDefined();
+      }
+    }
+  });
+
+  it("exempt list holds no stale keys", () => {
+    const liveKeys = new Set(SHOWCASES.flatMap((s) => s.slides.map((sl) => `${s.id}/${sl.title}`)));
+    for (const key of RECIPE_EXEMPT) {
+      expect(liveKeys.has(key), `stale exempt key: ${key}`).toBe(true);
+    }
+  });
+
+  it("recipes carry exactly one [[blank]] and real brand needs", () => {
+    for (const s of SHOWCASES) {
+      for (const sl of s.slides) {
+        if (!sl.recipe) continue;
+        const blanks = sl.recipe.prompt.match(/\[\[[^\]]+\]\]/g) ?? [];
+        expect(blanks.length, `${s.id}/${sl.title} blanks`).toBe(1);
+        expect(findPlaceholder(sl.recipe.prompt)).not.toBeNull();
+        expect(sl.recipe.needs.length).toBeGreaterThan(0);
+        for (const need of sl.recipe.needs) {
+          expect(NEED_LABELS[need], `${s.id}/${sl.title} unknown need ${need}`).toBeDefined();
+        }
       }
     }
   });

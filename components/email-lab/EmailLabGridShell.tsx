@@ -59,6 +59,13 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
+import {
+  brandGaps,
+  findPlaceholder,
+  NEED_LABELS,
+  type BrandNeed,
+  type ShowcaseRecipe,
+} from "@/lib/showcase/recipe";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import {
   type BrandPalette,
@@ -223,6 +230,13 @@ export function EmailLabGridShell({
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   // The AI's last "what I just did" line, shown in the panel ("Built the whole email…").
   const [aiStatus, setAiStatus] = useState<string | null>(null);
+  // "Make this →" recipe flow (spec: 2026-07-03-email-lab-make-this-design.md):
+  // the injected showcase recipe rides until its build fires, so the Build click
+  // can guard the unfilled [[blank]] and run the brand-gap yes/no.
+  const aiBoxRef = useRef<HTMLTextAreaElement>(null);
+  const [pendingRecipe, setPendingRecipe] = useState<ShowcaseRecipe | null>(null);
+  const [recipeGaps, setRecipeGaps] = useState<BrandNeed[] | null>(null);
+  const [recipeHint, setRecipeHint] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
@@ -251,9 +265,10 @@ export function EmailLabGridShell({
   // so it's idle/free in email mode. (Photos-accordion state now lives in PhotosPanel.)
   const social = useSocialComposer({ scope, projectId, branding });
 
-  // Right-panel accordions. Brand opens by default so the 4 brand colors
-  // (primary / accent / text / background) are visible without a click.
-  const [showBrand, setShowBrand] = useState(true);
+  // Right-panel accordions. Examples LEAD (open, right under the Build box);
+  // Brand starts CLOSED and sits low — operator ruling 07/03/2026 ("lead with
+  // what they can do"; brand was hogging the rail).
+  const [showBrand, setShowBrand] = useState(false);
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
 
@@ -389,6 +404,60 @@ export function EmailLabGridShell({
     } finally {
       setAiLoading(false);
     }
+  }
+
+  // ── "Make this →" (showcase recipe → Build box, blank pre-selected) ─────────
+  function handleUseRecipe(recipe: ShowcaseRecipe) {
+    setPendingRecipe(recipe);
+    setRecipeGaps(null);
+    setAiStatus(null);
+    setAiMessage(null);
+    setAiPrompt(recipe.prompt);
+    const ph = findPlaceholder(recipe.prompt);
+    setRecipeHint(
+      ph ? `Type ${ph.hint} over the highlighted part, then hit Build the email.` : null,
+    );
+    // Selection after React commits the new value — replaces the [[blank]] as they type.
+    setTimeout(() => {
+      const el = aiBoxRef.current;
+      if (!el) return;
+      el.focus();
+      if (ph) el.setSelectionRange(ph.start, ph.end);
+    }, 0);
+  }
+
+  /** True (and nags + re-selects) while a recipe's [[blank]] is still unfilled. */
+  function placeholderBlocked(): boolean {
+    if (!pendingRecipe) return false;
+    const ph = findPlaceholder(aiPrompt);
+    if (!ph) return false;
+    setAiMessage(`Fill in ${ph.hint} first — it's highlighted in the box.`);
+    const el = aiBoxRef.current;
+    if (el) {
+      el.focus();
+      el.setSelectionRange(ph.start, ph.end);
+    }
+    return true;
+  }
+
+  /** Build-button pre-flight: no placeholder garbage, then the brand-gap yes/no. */
+  function buildFromPanel() {
+    if (placeholderBlocked()) return;
+    if (pendingRecipe) {
+      const gaps = brandGaps(pendingRecipe.needs, branding);
+      if (gaps.length > 0 && recipeGaps === null) {
+        setRecipeGaps(gaps);
+        return;
+      }
+    }
+    proceedBuild();
+  }
+
+  function proceedBuild() {
+    setPendingRecipe(null);
+    setRecipeGaps(null);
+    setRecipeHint(null);
+    void runAuthor(aiPrompt);
   }
 
   // ── per-block AI (re-targets to the selected block) ─────────────────────────
@@ -543,6 +612,9 @@ export function EmailLabGridShell({
     if (!seed) return;
     setSelectedId(null);
     setAiStatus(null);
+    setPendingRecipe(null);
+    setRecipeGaps(null);
+    setRecipeHint(null);
     commit(applyBrand(seed.build(), brandTokens));
     setShowSeeds(false);
   }
@@ -998,15 +1070,17 @@ export function EmailLabGridShell({
                 Build with AI
               </p>
               <textarea
+                ref={aiBoxRef}
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) runAuthor(aiPrompt);
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) buildFromPanel();
                 }}
                 placeholder={aiPlaceholder}
                 rows={3}
                 className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
               />
+              {recipeHint && <p className="mt-1.5 text-[11px] text-gulf-teal/90">{recipeHint}</p>}
               <div className="mb-1.5 mt-2.5 flex items-center justify-between">
                 <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">
                   Chart type
@@ -1030,14 +1104,16 @@ export function EmailLabGridShell({
               </div>
               <div className="mt-2.5 flex gap-2">
                 <button
-                  onClick={() => runAuthor(aiPrompt)}
+                  onClick={buildFromPanel}
                   disabled={aiLoading || !aiPrompt.trim()}
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
                 >
                   {aiLoading ? "Working…" : "Build the email"}
                 </button>
                 <button
-                  onClick={() => runFill(aiPrompt)}
+                  onClick={() => {
+                    if (!placeholderBlocked()) runFill(aiPrompt);
+                  }}
                   disabled={aiLoading || !aiPrompt.trim()}
                   title="Fill content into the current layout (keeps your blocks)"
                   className="rounded-lg border border-white/10 px-3 py-2 text-sm text-white/60 transition-colors hover:text-white/90 disabled:opacity-40"
@@ -1045,6 +1121,33 @@ export function EmailLabGridShell({
                   Fill
                 </button>
               </div>
+              {recipeGaps && recipeGaps.length > 0 && (
+                <div className="mt-2.5 rounded-md border border-[#f59e0b]/30 bg-[#f59e0b]/10 px-2.5 py-2">
+                  <p className="text-[11px] leading-relaxed text-[#fbbf24]">
+                    This example uses {recipeGaps.map((g) => NEED_LABELS[g]).join(", ")} — Brand
+                    doesn&rsquo;t have {recipeGaps.length === 1 ? "it" : "them"} yet.
+                  </p>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecipeGaps(null);
+                        setShowBrand(true);
+                      }}
+                      className="flex-1 rounded-md bg-[#f59e0b] px-2 py-1.5 text-[11px] font-semibold text-[#1a1206] transition-opacity hover:opacity-90"
+                    >
+                      Add my info
+                    </button>
+                    <button
+                      type="button"
+                      onClick={proceedBuild}
+                      className="flex-1 rounded-md border border-white/15 px-2 py-1.5 text-[11px] text-white/70 transition-colors hover:text-white"
+                    >
+                      Build anyway
+                    </button>
+                  </div>
+                </div>
+              )}
               {aiStatus && (
                 <p className="mt-2.5 rounded-md border border-gulf-teal/20 bg-gulf-teal/10 px-2.5 py-2 text-[11px] text-gulf-teal/90">
                   ✓ {aiStatus}
@@ -1052,6 +1155,13 @@ export function EmailLabGridShell({
               )}
               {aiMessage && <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>}
             </div>
+          )}
+
+          {/* ── Examples — LEAD, open on first visit (operator ruling 07/03/2026 PM:
+              "lead with what they can do"; supersedes the same-day closed-by-default
+              ruling — examples now ACT via Make-this recipes). ── */}
+          {mode === "email" && (
+            <ExamplesAccordion surface="email" defaultOpen onUseRecipe={handleUseRecipe} />
           )}
 
           {/* ── SOCIAL: Build the post (author) / Fill ── */}
@@ -1254,7 +1364,68 @@ export function EmailLabGridShell({
             </div>
           )}
 
-          {/* ── Brand ── */}
+          {/* ── Start from (grid seeds) ── */}
+          {mode === "email" && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-3">
+              <button
+                onClick={() => setShowSeeds((v) => !v)}
+                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+              >
+                <span>Start from a layout</span>
+                <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
+              </button>
+              {showSeeds && (
+                <div className="mt-2 space-y-1.5">
+                  {GRID_SEEDS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => pickSeed(s.id)}
+                      className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
+                    >
+                      <span className="block text-xs font-medium text-white/75">{s.name}</span>
+                      <span className="block text-[10px] leading-tight text-white/35">
+                        {s.description}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Add Blocks ── */}
+          {mode === "email" && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-3">
+              <button
+                onClick={() => setShowBlocks((v) => !v)}
+                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+              >
+                <span>Add a block</span>
+                <span className={`transition-transform ${showBlocks ? "rotate-180" : ""}`}>▾</span>
+              </button>
+              {showBlocks && (
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  {BLOCK_MENU.map((b) => (
+                    <button
+                      key={b.type}
+                      type="button"
+                      onClick={() => addBlockToGrid(b.type)}
+                      className="flex items-center gap-2 rounded-md border border-white/8 bg-white/4 px-2.5 py-2 text-left transition-colors hover:bg-white/8"
+                    >
+                      <span className="w-4 text-center text-sm leading-none text-white/40">
+                        {b.icon}
+                      </span>
+                      <span className="text-[11px] font-medium text-white/55">{b.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Brand — closed by default, below the action sections (operator
+              ruling 07/03/2026: it was hogging the rail). The gap yes/no's
+              "Add my info" pops it open. ── */}
           <div className="border-b border-white/8 px-4 pb-4 pt-3">
             <button
               onClick={() => setShowBrand((v) => !v)}
@@ -1294,69 +1465,6 @@ export function EmailLabGridShell({
               </div>
             )}
           </div>
-
-          {/* ── Start from (grid seeds) ── */}
-          {mode === "email" && (
-            <div className="border-b border-white/8 px-4 pb-4 pt-3">
-              <button
-                onClick={() => setShowSeeds((v) => !v)}
-                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-              >
-                <span>Start from a layout</span>
-                <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
-              </button>
-              {showSeeds && (
-                <div className="mt-2 space-y-1.5">
-                  {GRID_SEEDS.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => pickSeed(s.id)}
-                      className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
-                    >
-                      <span className="block text-xs font-medium text-white/75">{s.name}</span>
-                      <span className="block text-[10px] leading-tight text-white/35">
-                        {s.description}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Examples (closed by default) — email showcases live HERE, not in the
-              AI panel (operator ruling 07/03/2026). ── */}
-          {mode === "email" && <ExamplesAccordion surface="email" />}
-
-          {/* ── Add Blocks ── */}
-          {mode === "email" && (
-            <div className="border-b border-white/8 px-4 pb-4 pt-3">
-              <button
-                onClick={() => setShowBlocks((v) => !v)}
-                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
-              >
-                <span>Add a block</span>
-                <span className={`transition-transform ${showBlocks ? "rotate-180" : ""}`}>▾</span>
-              </button>
-              {showBlocks && (
-                <div className="mt-2 grid grid-cols-2 gap-1">
-                  {BLOCK_MENU.map((b) => (
-                    <button
-                      key={b.type}
-                      type="button"
-                      onClick={() => addBlockToGrid(b.type)}
-                      className="flex items-center gap-2 rounded-md border border-white/8 bg-white/4 px-2.5 py-2 text-left transition-colors hover:bg-white/8"
-                    >
-                      <span className="w-4 text-center text-sm leading-none text-white/40">
-                        {b.icon}
-                      </span>
-                      <span className="text-[11px] font-medium text-white/55">{b.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* ── Photos (shared component; the target is mode-aware) ── */}
           <PhotosPanel
