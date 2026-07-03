@@ -1,3 +1,31 @@
+## 2026-07-03 (main) — fix(mcp): co-build write tools no longer require a client-unreachable freshness token
+
+Live-testing the MCP co-build flow (`swfl_project_add`) surfaced a real bug: the raw `SWFL-…`
+freshness token never reaches an MCP client's visible TEXT anywhere in this codebase — both
+`server.ts`'s RESPONSE_CONTRACT footer and `lib/fetch-brain.ts`'s `renderDetailRowText` only ever
+render the human `as-of MM/DD/YYYY` date; the real token rides only in `_meta`, which claude.ai's
+web host is confirmed to drop (`mcp_widget_host_bug_blocked`) and which other hosts' handling is
+undocumented. `swfl_project_add`'s `metric` schema required the client to quote that token back
+verbatim — unsatisfiable for a `_meta`-dropping client, and the field was untyped `z.string()` so
+a model substituting the human date (as the connected test-Claude did, verbatim: "that report
+doesn't expose the raw SWFL-... token, only the stated date") would've written silently, quietly
+breaking `swfl_reconcile`/`change-detection.ts`'s staleness comparisons downstream.
+
+Fix (`app/api/mcp/project-tools.ts`): the server now resolves the freshness token itself from
+`report_id` via `loadParsedBrain` (same authority `swfl_fetch` reads from) — for both
+`swfl_project_add` (metric: required, errors clean on an unknown report_id rather than writing an
+unstamped/invented item; qa: optional, same-pattern) and `swfl_project_handoff` (identical bug,
+identical fix). Client-supplied `freshness_token` is now optional on the input schema and ignored
+whenever the report resolves — kept only for backward compat. Verified: 47/47 MCP tests green (6
+new, covering server-stamp-overrides-client-value, omitted-token-still-files, and
+unknown-report-id-clean-error for both tools), `tsc --noEmit` clean, `bunx next build` green.
+
+Separate finding surfaced along the way and NOT yet acted on: the Redfin (housing-swfl) vs.
+realtor.com (market-temperature-swfl) median-sale-price discrepancy the test Claude flagged for
+ZIP 33931 is real (verified both source tags against `refinery/sources/*.mts`) — a genuine
+two-vendor methodology/vintage gap, not a hallucination. No action taken; flagging for whoever
+picks up `mcp_project_tools_live_verify` next.
+
 ## 2026-07-03 (main) — fix(graphify): writes/reads/fetches edges were silently dropping real data-flow
 
 Operator asked to update graphify with new data paths and whether we can see what flows to the

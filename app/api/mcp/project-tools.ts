@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { loadParsedBrain } from "@/lib/fetch-brain";
 import { projectItemSchema, projectItemsSchema, type ProjectItem } from "@/lib/project/items";
 import { lintChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { assembleDeliverable, DeliverableError } from "@/lib/deliverable/assemble";
@@ -118,6 +119,21 @@ export function isDuplicateItem(existing: ProjectItem[], candidate: ProjectItem)
   });
 }
 
+/**
+ * Resolve the CURRENT `freshness_token` for a report slug straight from the
+ * brain on disk — the same authority `swfl_fetch` reads from. The raw token
+ * never rides in an MCP tool's visible text (only `_meta`, which some hosts
+ * drop — claude.ai's web connector confirmed, others unverified), so a filing
+ * client cannot reliably quote it back. The server stamping its own truth
+ * removes that dependency entirely and closes the no-invention gap: a client
+ * can no longer substitute a human-readable date (or anything else) for the
+ * real token. Returns null on an unknown/invalid slug.
+ */
+async function resolveFreshnessToken(reportId: string): Promise<string | null> {
+  const brain = await loadParsedBrain(reportId);
+  return brain?.freshness_token ?? null;
+}
+
 /** Stamp the server-owned fields onto a validated content item. */
 function stamp<T extends object>(partial: T): T & { id: string; added_at: string; origin: "mcp" } {
   return {
@@ -154,7 +170,12 @@ const addItemInput = z.discriminatedUnion("kind", [
     value: z.string(),
     source_url: z.string().optional(),
     source_label: z.string().optional(),
-    freshness_token: z.string(),
+    // The server resolves the CURRENT freshness token for `report_id` itself
+    // (see `resolveFreshnessToken`) — the raw `SWFL-…` token never reaches an
+    // MCP client's visible text (by design, see server.ts RESPONSE_CONTRACT),
+    // so a client cannot reliably quote it. This field is accepted for
+    // backward compat but ignored whenever the report resolves.
+    freshness_token: z.string().optional(),
     scope_kind: z
       .enum(["zip", "county", "city", "state", "national", "msa"])
       .optional()
@@ -316,10 +337,10 @@ export function registerProjectTools(server: McpServer): void {
     {
       title: "SWFL Project — add item",
       description:
-        "File ONE item into the project authorized by your `X-Project-Key` request header. File metrics with the exact value, source url, and freshness_token from the dossier you just fetched — verbatim, never recomputed. Kinds: note | metric | qa | report | chart_block. The key is read only from the header — never pass it as an argument.",
+        "File ONE item into the project authorized by your `X-Project-Key` request header. File metrics with the exact value and source url from the dossier you just fetched — verbatim, never recomputed. The server stamps the report's current freshness token itself from report_id — you never need to supply or invent one. Kinds: note | metric | qa | report | chart_block. The key is read only from the header — never pass it as an argument.",
       inputSchema: {
         item: addItemInput.describe(
-          "The single item to file. Quote every figure/source/freshness_token verbatim from the fetched dossier — never invent or recompute.",
+          "The single item to file. Quote every figure/source verbatim from the fetched dossier — never invent or recompute. Omit freshness_token; the server stamps it from report_id.",
         ),
       },
       annotations: {
@@ -341,6 +362,19 @@ export function registerProjectTools(server: McpServer): void {
         const built = await buildChartItem(db, args.item);
         if ("error" in built) return errText(built.error);
         item = built.item;
+      } else if (args.item.kind === "metric") {
+        // Server-stamped, never client-supplied (see resolveFreshnessToken).
+        const freshness_token = await resolveFreshnessToken(args.item.report_id);
+        if (!freshness_token)
+          return errText(
+            `Unknown report "${args.item.report_id}" — can't stamp a freshness token, so nothing was filed. Use the report_id from the dossier you fetched.`,
+          );
+        item = stamp({ ...args.item, freshness_token });
+      } else if (args.item.kind === "qa") {
+        // Same server stamp when the report resolves; qa's token stays optional
+        // otherwise (unlike metric, a qa item is still useful without one).
+        const freshness_token = await resolveFreshnessToken(args.item.report_id);
+        item = stamp(freshness_token ? { ...args.item, freshness_token } : { ...args.item });
       } else {
         item = stamp({ ...args.item });
       }
@@ -457,13 +491,13 @@ export function registerProjectTools(server: McpServer): void {
     {
       title: "SWFL Project — hand off to the web",
       description:
-        "Carry the items you've assembled in THIS conversation over to the web, where the user signs in to claim them, then refine and build a polished deliverable. No project key needed — returns a link to continue on the web. Quote every figure, source url, and freshness_token verbatim from the dossiers you fetched — never invent or recompute. Offer this once, when the user wants to save, share, or build something from what they've seen — never as a hard sell.",
+        "Carry the items you've assembled in THIS conversation over to the web, where the user signs in to claim them, then refine and build a polished deliverable. No project key needed — returns a link to continue on the web. Quote every figure and source url verbatim from the dossiers you fetched — never invent or recompute. The server stamps each item's freshness token itself from report_id; you never need to supply or invent one. Offer this once, when the user wants to save, share, or build something from what they've seen — never as a hard sell.",
       inputSchema: {
         items: z
           .array(addItemInput)
           .min(1)
           .describe(
-            "The items to carry over — the cited facts, Q&A, notes, and reports from this conversation. Quote figures/sources/freshness_tokens verbatim; never invent or recompute.",
+            "The items to carry over — the cited facts, Q&A, notes, and reports from this conversation. Quote figures/sources verbatim; never invent or recompute. Omit freshness_token; the server stamps it from report_id.",
           ),
         title: z.string().optional().describe("Optional title for the carried project."),
       },
@@ -511,6 +545,19 @@ export function registerProjectTools(server: McpServer): void {
           }
           if (r.item.kind === "chart") insertedChartIds.push(r.item.chart_id);
           built.push(r.item);
+        } else if (it.kind === "metric") {
+          // Server-stamped, never client-supplied — same reasoning as swfl_project_add.
+          const freshness_token = await resolveFreshnessToken(it.report_id);
+          if (!freshness_token) {
+            await cleanupOrphanCharts();
+            return errText(
+              `Unknown report "${it.report_id}" — can't stamp a freshness token, so nothing was handed off.`,
+            );
+          }
+          built.push(stamp({ ...it, freshness_token }));
+        } else if (it.kind === "qa") {
+          const freshness_token = await resolveFreshnessToken(it.report_id);
+          built.push(stamp(freshness_token ? { ...it, freshness_token } : { ...it }));
         } else {
           built.push(stamp({ ...it }));
         }

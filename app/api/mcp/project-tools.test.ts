@@ -267,6 +267,70 @@ test("swfl_project_add: dedupe drops a second identical metric (one item, no wri
   expect(updates.filter((u) => u.table === "projects")).toHaveLength(0);
 });
 
+test("swfl_project_add: metric — server stamps the CURRENT freshness token from report_id, ignoring any client-supplied value", async () => {
+  seeded.set("proj_abc", project());
+  const res = await tools().swfl_project_add(
+    {
+      item: {
+        kind: "metric",
+        report_id: "housing-swfl",
+        label: "Median sale price",
+        value: "$545,000",
+        // A client that can't see `_meta` might send the human as-of date, or
+        // nothing at all — either way the server must not trust this value.
+        freshness_token: "06/29/2026",
+      },
+    },
+    hdr("proj_abc"),
+  );
+  expect(res.isError).toBeFalsy();
+  const item = (
+    updates.find((u) => u.table === "projects")!.payload.items as Record<string, unknown>[]
+  )[0];
+  expect(item.freshness_token).not.toBe("06/29/2026");
+  expect(item.freshness_token).toMatch(/^SWFL-/);
+});
+
+test("swfl_project_add: metric — omitting freshness_token entirely still files, server-stamped", async () => {
+  seeded.set("proj_abc", project());
+  const res = await tools().swfl_project_add(
+    {
+      item: {
+        kind: "metric",
+        report_id: "housing-swfl",
+        label: "Median sale price",
+        value: "$545,000",
+      },
+    },
+    hdr("proj_abc"),
+  );
+  expect(res.isError).toBeFalsy();
+  const item = (
+    updates.find((u) => u.table === "projects")!.payload.items as Record<string, unknown>[]
+  )[0];
+  expect(typeof item.freshness_token).toBe("string");
+  expect((item.freshness_token as string).length).toBeGreaterThan(0);
+});
+
+test("swfl_project_add: metric — unknown report_id → clean error, no write (can't stamp, won't invent)", async () => {
+  seeded.set("proj_abc", project());
+  const res = await tools().swfl_project_add(
+    {
+      item: {
+        kind: "metric",
+        report_id: "not-a-real-report",
+        label: "Made up",
+        value: "$1",
+        freshness_token: "SWFL-fake-token",
+      },
+    },
+    hdr("proj_abc"),
+  );
+  expect(res.isError).toBe(true);
+  expect(res.content[0].text.toLowerCase()).toContain("unknown report");
+  expect(updates.filter((u) => u.table === "projects")).toHaveLength(0);
+});
+
 test("swfl_project_add: chart_block → lint → saves chart → files a {kind:'chart'} ref", async () => {
   seeded.set("proj_abc", project());
   const block = {
@@ -387,6 +451,36 @@ test("swfl_project_handoff: oversize payload (>256 KB) rejected, NO token minted
   expect(res.isError).toBe(true);
   expect(res.content[0].text.toLowerCase()).toContain("too much");
   expect(inserts.filter((i) => i.table === "claim_tokens")).toHaveLength(0);
+});
+
+test("swfl_project_handoff: unknown report_id on a metric → clean error, no token minted", async () => {
+  const res = await tools().swfl_project_handoff({
+    items: [{ kind: "metric", report_id: "not-a-real-report", label: "Made up", value: "$1" }],
+  });
+  expect(res.isError).toBe(true);
+  expect(res.content[0].text.toLowerCase()).toContain("unknown report");
+  expect(inserts.filter((i) => i.table === "claim_tokens")).toHaveLength(0);
+});
+
+test("swfl_project_handoff: metric freshness_token is server-stamped from report_id, not the client's value", async () => {
+  const res = await tools().swfl_project_handoff({
+    items: [
+      {
+        kind: "metric",
+        report_id: "housing-swfl",
+        label: "Median sale price",
+        value: "$545,000",
+        freshness_token: "06/29/2026",
+      },
+    ],
+  });
+  expect(res.isError).toBeFalsy();
+  const carried = inserts.find((i) => i.table === "claim_tokens")!.row.items as Record<
+    string,
+    unknown
+  >[];
+  expect(carried[0].freshness_token).not.toBe("06/29/2026");
+  expect(carried[0].freshness_token).toMatch(/^SWFL-/);
 });
 
 test("swfl_project_handoff: chart_block carries as a saved {kind:'chart'} ref (parity with add)", async () => {
