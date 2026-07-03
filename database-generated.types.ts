@@ -2175,6 +2175,27 @@ export interface Database {
         };
         Relationships: [];
       };
+      user_mcp_tokens: {
+        Row: {
+          user_id: string;
+          token: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          token: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          token?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       prospect_activation: {
         Row: {
           id: number;

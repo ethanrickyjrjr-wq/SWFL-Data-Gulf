@@ -8,8 +8,9 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
  * `mcp_account_links` binding table.
  *
  * Returns true iff BOTH hold for `authUid`:
- *  1. the account owns a `projects` row with a non-null `mcp_key` (they wired the
- *     MCP), AND
+ *  1. the account wired the MCP — EITHER an account-level token
+ *     (`user_mcp_tokens`, the connect-once default) OR a `projects` row with a
+ *     non-null `mcp_key` (the per-project path). Either counts as "connected."
  *  2. a `usage_events` row exists with `client_id = "mcp:<authUid>"` (they actually
  *     built/added via MCP — these rows already come from the swfl_project_* tools).
  *
@@ -24,13 +25,19 @@ export async function isMcpConnected(authUid: string): Promise<boolean> {
   if (!authUid) return false;
   const db = createServiceRoleClient();
 
-  // (1) Owns a project with a wired MCP key?
-  const { count: keyedProjects } = await db
-    .from("projects")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", authUid)
-    .not("mcp_key", "is", null);
-  if (!keyedProjects) return false;
+  // (1) Wired the MCP — account-level token OR a per-project key. Either counts.
+  const { count: accountTokens } = await db
+    .from("user_mcp_tokens")
+    .select("user_id", { count: "exact", head: true })
+    .eq("user_id", authUid);
+  if (!accountTokens) {
+    const { count: keyedProjects } = await db
+      .from("projects")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", authUid)
+      .not("mcp_key", "is", null);
+    if (!keyedProjects) return false;
+  }
 
   // (2) Has actually built/added via MCP (an `mcp:<uid>` usage event)?
   const { count: mcpEvents } = await db

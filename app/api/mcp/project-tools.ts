@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { resolveAccountProject, formatDisambiguation } from "./account-resolve";
 import { loadParsedBrain } from "@/lib/fetch-brain";
 import { projectItemSchema, projectItemsSchema, type ProjectItem } from "@/lib/project/items";
 import { lintChartBlock } from "@/refinery/validate/chart-block-lint.mts";
@@ -223,6 +224,20 @@ const TEMPLATE_ENUM = z.enum(["market-overview", "bov-lite", "client-email", "on
  *  carry a ZIP/place/county scope so /p/[id] reconstructs the grounded model. */
 const SCOPE_KIND_ENUM = z.enum(["zip", "place", "county"]);
 
+/**
+ * The optional account-path project selector. Only meaningful when the caller
+ * connected with an account-level `X-Account-Key` (which reaches every project
+ * they own); a per-project `X-Project-Key` is already scoped to one project and
+ * ignores this. Resolved server-side against the caller's OWN projects — a name,
+ * partial name, or id; never a cross-user target.
+ */
+const PROJECT_ARG = z
+  .string()
+  .optional()
+  .describe(
+    "Which of your projects to act on — a full or partial name (or its id). Omit it if you only have one project, or once you've already chosen one earlier in this conversation: keep passing that same value until the user names a different project. If it's ambiguous the tool lists your projects and asks — it never guesses.",
+  );
+
 // ---------------------------------------------------------------------------
 // Response helpers
 // ---------------------------------------------------------------------------
@@ -230,21 +245,43 @@ const SCOPE_KIND_ENUM = z.enum(["zip", "place", "county"]);
 const text = (s: string) => ({ content: [{ type: "text" as const, text: s }] });
 const errText = (s: string) => ({ content: [{ type: "text" as const, text: s }], isError: true });
 const NO_KEY = errText(
-  "No project key found. These tools read the key ONLY from the `X-Project-Key` request header — your MCP client must send it (copy the connect command from the “Connect your AI” panel on the project page). The key is never accepted as a tool argument.",
+  "Not connected. These tools read your connection ONLY from a request header — your MCP client must send it, never a tool argument. Connect once for every project at Settings → Connect your AI (sends `X-Account-Key`), or use a single-project key from the “Connect your AI” panel on a project page (`X-Project-Key`).",
 );
 const INVALID_KEY = errText(
-  "Invalid or expired project key — no changes were made. Ask the project owner for a fresh key from the “Connect your AI” panel on the project page.",
+  "Invalid or expired connection — no changes were made. Regenerate it at Settings → Connect your AI (account) or the project’s “Connect your AI” panel (per-project key).",
 );
 
 /**
- * Resolve the per-project key from the request header → its project. Returns the
- * project, or the right error response: NO_KEY when the header is absent (so the
- * caller knows to configure it), INVALID_KEY when present but unmatched/revoked.
+ * Resolve the caller → the target project. Two coexisting paths, tried in order:
+ *
+ *  1. ACCOUNT (connect-once default): an `X-Account-Key` header → the owning user
+ *     → the ONE project named by the optional `projectArg` selector, resolved
+ *     server-side against that user's OWN projects (`resolveAccountProject`). If
+ *     the selector is absent/ambiguous/no-match the tool ASKS (a numbered list)
+ *     and writes nothing — a hard stop, not a model-overridable suggestion.
+ *  2. PER-PROJECT (optional, tighter scope): no account header → fall back to the
+ *     `X-Project-Key` capability key → its single project (unchanged behavior).
+ *
+ * Returns `{ project }` on a single resolved project, or `{ error }` — which here
+ * carries EITHER a real error (NO_KEY / INVALID_KEY) OR the non-error
+ * disambiguation prompt (a `text()` the model relays); both are valid tool
+ * results the handler returns as-is.
  */
 async function authorize(
   db: SupabaseClient,
   extra: ToolExtra | undefined,
-): Promise<{ project: ProjectKeyRow } | { error: ReturnType<typeof errText> }> {
+  projectArg?: string,
+): Promise<
+  { project: ProjectKeyRow } | { error: ReturnType<typeof errText> | ReturnType<typeof text> }
+> {
+  // (1) Account-level token first — the connect-once default.
+  const acct = await resolveAccountProject(db, extra, projectArg);
+  if (!("noToken" in acct)) {
+    if ("invalid" in acct) return { error: INVALID_KEY };
+    if ("candidates" in acct) return { error: text(formatDisambiguation(acct.candidates)) };
+    return { project: acct.project };
+  }
+  // (2) Per-project capability key fallback — unchanged.
   const key = keyFromHeader(extra);
   if (!key) return { error: NO_KEY };
   const project = await resolveProjectByKey(db, key);
@@ -309,8 +346,10 @@ export function registerProjectTools(server: McpServer): void {
     {
       title: "SWFL Project — list",
       description:
-        "List the project authorized by your `X-Project-Key` request header: its title and a condensed view of the items already filed. Read-only. The key is read only from the header — never pass it as an argument.",
-      inputSchema: {},
+        "List one of your projects — its title and a condensed view of the items already filed. Name which one with `project` (a full/partial name); omit it if you have only one, or if it's already clear this conversation. If ambiguous, this returns your project list and asks. Read-only. Your connection is read only from the request header — never pass a key/token as an argument.",
+      inputSchema: {
+        project: PROJECT_ARG,
+      },
       annotations: {
         title: "SWFL Project — list",
         readOnlyHint: false,
@@ -318,9 +357,9 @@ export function registerProjectTools(server: McpServer): void {
         idempotentHint: true,
       },
     },
-    async (_args, extra) => {
+    async (args, extra) => {
       const db = createServiceRoleClient();
-      const auth = await authorize(db, extra as ToolExtra);
+      const auth = await authorize(db, extra as ToolExtra, args.project as string | undefined);
       if ("error" in auth) return auth.error;
       const { project } = auth;
       const items = Array.isArray(project.items) ? project.items : [];
@@ -337,8 +376,9 @@ export function registerProjectTools(server: McpServer): void {
     {
       title: "SWFL Project — add item",
       description:
-        "File ONE item into the project authorized by your `X-Project-Key` request header. File metrics with the exact value and source url from the dossier you just fetched — verbatim, never recomputed. The server stamps the report's current freshness token itself from report_id — you never need to supply or invent one. Kinds: note | metric | qa | report | chart_block. The key is read only from the header — never pass it as an argument.",
+        "File ONE item into one of your projects. Name which one with `project` (a full/partial name); omit it if you have only one, or once it's already chosen this conversation. If ambiguous, this asks first and files nothing. File metrics with the exact value and source url from the dossier you just fetched — verbatim, never recomputed. The server stamps the report's current freshness token itself from report_id — you never need to supply or invent one. Kinds: note | metric | qa | report | chart_block. Your connection is read only from the request header — never pass a key/token as an argument.",
       inputSchema: {
+        project: PROJECT_ARG,
         item: addItemInput.describe(
           "The single item to file. Quote every figure/source verbatim from the fetched dossier — never invent or recompute. Omit freshness_token; the server stamps it from report_id.",
         ),
@@ -352,7 +392,7 @@ export function registerProjectTools(server: McpServer): void {
     },
     async (args, extra) => {
       const db = createServiceRoleClient();
-      const auth = await authorize(db, extra as ToolExtra);
+      const auth = await authorize(db, extra as ToolExtra, args.project as string | undefined);
       if ("error" in auth) return auth.error;
       const { project } = auth;
 
@@ -420,8 +460,9 @@ export function registerProjectTools(server: McpServer): void {
     {
       title: "SWFL Project — build deliverable",
       description:
-        "Assemble a client-ready deliverable from everything filed in the project authorized by your `X-Project-Key` request header, and return a shareable link. Pick a template; an optional instruction steers the framing. The `email` template builds a send-ready branded email — pass `scope_kind`/`scope_value` (e.g. zip 33931) so it stays grounded to that place. Numbers are quoted verbatim from the filed items — nothing is invented. The key is read only from the header — never pass it as an argument.",
+        "Assemble a client-ready deliverable from everything filed in one of your projects, and return a shareable link. Name which project with `project` (a full/partial name); omit it if you have only one, or once it's already chosen this conversation. If ambiguous, this asks first and builds nothing. Pick a template; an optional instruction steers the framing. The `email` template builds a send-ready branded email — pass `scope_kind`/`scope_value` (e.g. zip 33931) so it stays grounded to that place. Numbers are quoted verbatim from the filed items — nothing is invented. Your connection is read only from the request header — never pass a key/token as an argument.",
       inputSchema: {
+        project: PROJECT_ARG,
         template: TEMPLATE_ENUM.describe(
           "Deliverable template: market-overview | bov-lite | client-email | one-pager | email.",
         ),
@@ -447,7 +488,7 @@ export function registerProjectTools(server: McpServer): void {
     },
     async (args, extra) => {
       const db = createServiceRoleClient();
-      const auth = await authorize(db, extra as ToolExtra);
+      const auth = await authorize(db, extra as ToolExtra, args.project as string | undefined);
       if ("error" in auth) return auth.error;
       const { project } = auth;
       // G4: thread the deliverable scope so an `email` build stays grounded to its

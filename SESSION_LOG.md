@@ -1,3 +1,33 @@
+## 2026-07-03 (main) — feat(mcp): account-level MCP token — connect once, reach every project by name
+
+Operator: "FIX THIS FUCKING MCP SHIT" — the per-project MCP key forced a re-mint + `.mcp.json`
+re-edit for every project. Operator ruling (amended live, overriding the spec's "replace" framing):
+per-project keys STAY as an optional path for anyone who wants single-project scope; ADD an
+account-level token as the connect-once DEFAULT so nobody is forced to key each project. Additive,
+not a cutover — `projects.mcp_key` untouched.
+
+Vendor-verified in-session (crawl4ai, code.claude.com/docs/en/mcp): Claude Code `http` MCP servers
+DO accept a static custom header (`--header`, or `headers` in `.mcp.json`) and a `headersHelper`;
+the immediate 401 was simply that this session's `.mcp.json` swfl entry sent no header at all. MCP's
+own auth spec binds a token to the whole server, per-entity scoping left to the app layer — so
+account-token + server-side ownership checks is the standard pattern.
+
+Built (all additive; per-project path fully intact): `public.user_mcp_tokens` (migration
+`docs/sql/20260703_user_mcp_tokens.sql` — applied live, RLS owner-only, service-role lookup lane,
+backfilled the 1 existing keyed user); `app/api/mcp/account-resolve.ts` (token→user→project, a
+4-tier name/id resolver — exact id → exact title → prefix → substring — that HARD-STOPS and asks on
+absent/ambiguous/no-match, never guesses, never crosses users; candidate set built from the token's
+owned rows before any match) + 20 passing tests in `account-resolve.test.ts`; wired into
+`project-tools.ts` `authorize()` (account token first, per-project key fallback) + optional `project`
+selector on list/add/build; `app/api/account/mcp-token/route.ts` (GET/POST/DELETE mint-regenerate-
+revoke); `app/settings/mcp` connect-once UI (`X-Account-Key` snippet); `lib/identity/mcp-connected.ts`
+now counts an account token OR a per-project key. `bunx tsc --noEmit` clean across the repo.
+
+Note: a PRE-EXISTING bun `mock.module` cross-file bleed (project-tools.test.ts + mcp-connected.test.ts
+share a process; the latter's mock omits `createServiceRoleClientUntyped`) reddens the combined run —
+reproduces WITHOUT any file of mine; each file green alone; not in the pre-push gate's test list. The
+deterministic fix (mirror the full mock surface) was blocked by a live claim on the test file.
+
 ## 2026-07-03 (main) — fix(zip-report): source links collapse into the closed Sources accordion, no inline rail sprawl
 
 Operator: the ZIP report's right-hand "About this page" rail was sprawling inline
