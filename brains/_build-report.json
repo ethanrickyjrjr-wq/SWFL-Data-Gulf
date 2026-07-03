@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-07-02T08:49:22.403Z",
-    "finished": "2026-07-02T08:49:22.899Z"
+    "started": "2026-07-03T08:56:06.615Z",
+    "finished": "2026-07-03T08:56:07.762Z"
   },
   "source": "live",
   "outcomes": [
@@ -68,7 +68,10 @@
     },
     {
       "packId": "logistics-swfl-nowcast",
-      "status": "skipped-fresh",
+      "status": "missing",
+      "failureClass": "deterministic",
+      "reason": "fdot-freight-source: data_lake.fdot_aadt_fl returned 0 rows for counties=Lee,Collier year=2025 tfctr>=5. Confirm the dlt pipeline ran (python -m ingest.pipelines.fdot.pipeline) and that docs/sql/fdot_aadt_fl_grant.sql was applied.",
+      "lastGoodRefinedAt": "2026-06-03T07:39:34Z",
       "written": false
     },
     {
@@ -113,8 +116,176 @@
     },
     {
       "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 26,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "city-pulse-swfl",
+        "version": 26,
+        "refined_at": "2026-07-03T08:56:07Z",
+        "expires": "2026-07-04T08:56:07Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL city pulse as of 2026-07-03: 68 live current-events signals across 13 cities — Cape Coral (7), Fort Myers (9), Naples (7), Marco Island (6), East Naples (6), Lehigh Acres (3), Bonita Springs (6), Fort Myers Beach (7), North Fort Myers (2), North Naples (7), Golden Gate (2), Sanibel (2), Estero (4). Most current: Cape Coral — The Shops at Surfside, a Cape Coral shopping center at 2354 Surfside Blvd., sold to a Pinellas County real estate developer for $12 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "signal_transactions_1",
+            "value": "Cape Coral: The Shops at Surfside, a Cape Coral shopping center at 2354 Surfside Blvd., sold to a Pinellas County real estate developer for $12 million.",
+            "direction": "stable",
+            "label": "Cape Coral — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Pinellas investor buys Cape Coral shopping center for $12M | Business Observer: \"The Shops at Surfside, a Cape Coral shopping center, has been sold to a Pinellas County real estate developer. The center at 2354 Surfside Blvd. was b...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_2",
+            "value": "Cape Coral: Gulf Gateway Resort & Marina LLC purchased property from the City of Cape Coral at 106/200 Old Burnt Store Road N., Cape Coral (multifamily property type), in the week's top commercial real estate transactions published March 9, 2026.",
+            "direction": "stable",
+            "label": "Cape Coral — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/mar/09/commercial-real-estate-transactions/",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "The week's top commercial real estate transactions in Charlotte, Collier, Hillsborough, Lee, Manatee, Pasco, Pinellas, Polk, Sarasota | Business Observer: \"Buyer: Gulf Gateway Resort &amp; Marina LLC Seller: City of Cape Coral Address: 106/200 Old Burnt Store Road N., Cape Coral Property Type: Multifamily...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 2?",
+              "How does signal transactions 2 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_3",
+            "value": "Fort Myers: The final outparcel in a Fort Myers shopping center has sold to a Wisconsin Culver's hamburger franchisee, who plans to build a Culver's restaurant on the site.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee | Business Observer: \"The final outparcel in a Fort Myers shopping center has sold and the new owner is planning to build a Culver’s restaurant on the site. LQ Commercial R...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 3?",
+              "How does signal transactions 3 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_4",
+            "value": "Fort Myers: The Cobblestone on The Lake Apartments in Fort Myers sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale for $43 million.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/28/tampa-bay-investor-fort-myers-apartment/",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Tampa Bay investor pays $43 million for Fort Myers apartment | Business Observer: \"The Cobblestone on The Lake Apartments in Fort Myers have sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale. The 248-un...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 4?",
+              "How does signal transactions 4 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_5",
+            "value": "Fort Myers: Ben Mallah purchased a 60,305 sq ft building in Fort Myers for $17.25 million using a 1031 exchange.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/youtube-real-estate-investor-buys-nova-southeastern-building/article_dbed9a3b-ca90-4ee9-8e24-318815f60e51.html",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Ben Mallah adds Fort Myers property to portfolio: \"Ben Mallah, a YouTube real estate star with over 1 million followers, purchased a 60,305 sq ft building in Fort Myers for $17.25 million, using a 1031...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 5?",
+              "How does signal transactions 5 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_6",
+            "value": "Naples: The buyer of Collier Place in Naples is a group of local investors who bought it together and plan to retain it, according to senior broker associate Max Molloy of Fort Myers-based LSI Cos. The sale closed around June 20, 2026.",
+            "direction": "stable",
+            "label": "Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/20/naples-office-building-sells/",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Naples office complex sells for $23 million | Business Observer: \"Max Molloy, a senior broker associate with Fort Myers-based LSI Cos., says the buyer is a group of local investors who bought it together and plan to ...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_7",
+            "value": "Marco Island: The new owner of Island Plaza has local ties to Marco Island restaurateur Luigi Carvelli, whose family owns a local business.",
+            "direction": "stable",
+            "label": "Marco Island — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/real_estate/marco-island-shopping-center-sells-for-26-6m/article_c490a0d8-d052-41ed-99d0-62208fdb24bb.html",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Marco Island shopping center sells for $26.6M | Real Estate | gulfshorebusiness.com: \"Instead of a local owner selling to a national one, the new owner has local ties to a Marco Island restaurateur. Luigi Carvelli, whose family owns Sno...\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 7?",
+              "How does signal transactions 7 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_8",
+            "value": "East Naples: A two-building Naples office complex sold to a group of local investors for $23 million; the seller, Collier Place Holding, had paid $12.85 million for the property in 2019.",
+            "direction": "stable",
+            "label": "East Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.businessobserverfl.com/news/2026/jun/20/naples-office-building-sells/",
+              "fetched_at": "2026-07-03T08:56:07Z",
+              "tier": 2,
+              "citation": "Naples office complex sells for $23 million | Business Observer: \"The seller is Collier Place Holding, which Collier County property records show, paid $12.85 million in 2019.\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 8?",
+              "How does signal transactions 8 here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "60 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-03T08:56:07Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "rsw-airport",
@@ -128,8 +299,59 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 15,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 15,
+        "refined_at": "2026-07-03T08:56:07Z",
+        "expires": "2026-07-04T08:56:07Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-06-25) 6.49%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.49,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-06-25)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-07-02T13:41:24.073905+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-06-25"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-03T08:56:07Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -193,741 +415,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 4,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 4,
-        "refined_at": "2026-07-02T08:49:22Z",
-        "expires": "2026-07-04T08:49:22Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "28,670 active SWFL residential listings, median asking $349,000 (active residential listings, as of 2026-07-01). By county: Lee 20,936 (median $299,000), Collier 7,734 (median $619,900), Lee 1 (median $319,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 28670,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-02T08:49:22Z",
-              "tier": 2,
-              "citation": "28,670 active SWFL residential listings as of 2026-07-01"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 349000,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-02T08:49:22Z",
-              "tier": 2,
-              "citation": "median asking price across 28,670 active SWFL listings: $349,000"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 20936,
-                  "median_list_price": 299000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 7734,
-                  "median_list_price": 619900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 319900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-02T08:49:22Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-01"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 2203,
-                  "median_list_price": 239000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 2038,
-                  "median_list_price": 31000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 1320,
-                  "median_list_price": 199000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 1314,
-                  "median_list_price": 35000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 1086,
-                  "median_list_price": 259900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 1084,
-                  "median_list_price": 299900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 1074,
-                  "median_list_price": 549900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 998,
-                  "median_list_price": 475000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 921,
-                  "median_list_price": 179900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 789,
-                  "median_list_price": 529000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 769,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 759,
-                  "median_list_price": 449900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 657,
-                  "median_list_price": 300000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 652,
-                  "median_list_price": 294250,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 647,
-                  "median_list_price": 424900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 633,
-                  "median_list_price": 899000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 620,
-                  "median_list_price": 134998,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 617,
-                  "median_list_price": 350000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 601,
-                  "median_list_price": 415000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 575,
-                  "median_list_price": 538000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 546,
-                  "median_list_price": 2995000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 537,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 530,
-                  "median_list_price": 215000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 500,
-                  "median_list_price": 699450,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 494,
-                  "median_list_price": 1282500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 489,
-                  "median_list_price": 250000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 479,
-                  "median_list_price": 775000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 477,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 473,
-                  "median_list_price": 649000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 463,
-                  "median_list_price": 924000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 410,
-                  "median_list_price": 424000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 387,
-                  "median_list_price": 1495000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 367,
-                  "median_list_price": 394900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 362,
-                  "median_list_price": 515500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 322,
-                  "median_list_price": 699900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 307,
-                  "median_list_price": 399999,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 302,
-                  "median_list_price": 352450,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 276,
-                  "median_list_price": 181000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 253,
-                  "median_list_price": 405000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 241,
-                  "median_list_price": 350000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 240,
-                  "median_list_price": 299900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 227,
-                  "median_list_price": 495000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 199,
-                  "median_list_price": 399900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 162,
-                  "median_list_price": 333700,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 116,
-                  "median_list_price": 27900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 103,
-                  "median_list_price": 614990,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Lee)",
-                "cells": {
-                  "listing_count": 14,
-                  "median_list_price": 1622500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33955",
-                "label": "33955 (Lee)",
-                "cells": {
-                  "listing_count": 8,
-                  "median_list_price": 347200,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Lee)",
-                "cells": {
-                  "listing_count": 8,
-                  "median_list_price": 4147500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Collier)",
-                "cells": {
-                  "listing_count": 7,
-                  "median_list_price": 334900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33155",
-                "label": "33155 (Collier)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 199000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Collier)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 355000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 49999,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34146",
-                "label": "34146 (Collier)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 199999,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33095",
-                "label": "33095 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 28000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33467",
-                "label": "33467 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 30000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33792",
-                "label": "33792 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 39900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33873",
-                "label": "33873 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 399900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 300000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33975",
-                "label": "33975 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 20000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33979",
-                "label": "33979 (Lee)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 585000,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-02T08:49:22Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-01"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-02T08:49:22Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
@@ -937,13 +426,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 91,
+      "version": 92,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 91,
-        "refined_at": "2026-07-02T08:49:22Z",
-        "expires": "2026-07-09T08:49:22Z",
+        "version": 92,
+        "refined_at": "2026-07-03T08:56:07Z",
+        "expires": "2026-07-10T08:56:07Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
         "magnitude": 0.4578052161567625,
@@ -1656,7 +1145,9 @@
           "Each row can be a multi-unit community (one property_id spans a range of unit types/prices), not one apartment — counts are LISTINGS, not units.",
           "This is live FOR-RENT inventory, distinct from rentals-swfl (the Zillow ZORI rent INDEX — a monthly trend/direction read, not a listing count).",
           "Weekly snapshot — direction is neutral on any one week; a second sweep is what would read inventory rising/falling.",
-          "Source is realtor.com rental listings."
+          "Source is realtor.com rental listings.",
+          "Upstream brain 'logistics-swfl-nowcast' was stale at build time (expired 2026-07-03).",
+          "Upstream brain 'logistics-swfl-nowcast' failed to rebuild on 2026-07-03; using last good read from 2026-06-03 (v15)."
         ],
         "contradicts": [
           "macro-us (bearish) vs safety-swfl (bullish)",
@@ -1713,8 +1204,8 @@
         "upstream_count": 37,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000002,
-          "computed_at": "2026-07-02T08:49:22.000Z"
+          "half_life_hours": 720,
+          "computed_at": "2026-07-03T08:56:07.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
@@ -1742,10 +1233,11 @@
             "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?"
           ]
         },
-        "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release"
+        "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release",
+        "degraded_inputs": []
       }
     }
   ],
-  "exitCode": 0,
+  "exitCode": 1,
   "masterDecision": "published"
 }
