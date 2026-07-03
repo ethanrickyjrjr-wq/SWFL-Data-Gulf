@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { isSafeReturnPath } from "@/lib/safe-return";
+import { suggestEmailFix } from "@/lib/email/typo-suggest";
 
 type Step = "email" | "code";
 
@@ -26,9 +27,27 @@ export function LoginForm({ next }: { next: string }) {
   const [code, setCode] = useState("");
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [suggestion, setSuggestion] = useState<{ full: string; domain: string } | null>(null);
+  // The exact value we already suggested on — a second submit of it passes straight through.
+  const [suggestionChecked, setSuggestionChecked] = useState<string | null>(null);
 
   async function sendCode(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // Suggest-don't-block: first submit of a probably-typo'd address shows a
+    // one-time "did you mean" line; submitting the same value again proceeds.
+    if (email !== suggestionChecked) {
+      const fix = suggestEmailFix(email);
+      if (fix) {
+        setSuggestion(fix);
+        setSuggestionChecked(email);
+        return;
+      }
+    }
+    setSuggestion(null);
+    await dispatchCode(email);
+  }
+
+  async function dispatchCode(target: string) {
     setPending(true);
     setErrorMessage(null);
 
@@ -38,7 +57,7 @@ export function LoginForm({ next }: { next: string }) {
     const callback = new URL("/auth/callback", window.location.origin);
     if (next && next !== "/") callback.searchParams.set("next", next);
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: target,
       options: { shouldCreateUser: true, emailRedirectTo: callback.toString() },
     });
 
@@ -135,12 +154,45 @@ export function LoginForm({ next }: { next: string }) {
           autoComplete="email"
           autoFocus
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (suggestion) setSuggestion(null);
+          }}
           disabled={pending}
           className={inputBase}
           placeholder="you@example.com"
         />
       </label>
+      {suggestion && (
+        <p className="text-sm leading-6 text-amber-600 dark:text-amber-400">
+          Did you mean <span className="font-medium">{suggestion.full}</span>?{" "}
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              const fixed = suggestion.full;
+              setEmail(fixed);
+              setSuggestion(null);
+              void dispatchCode(fixed);
+            }}
+            className="font-semibold underline underline-offset-2 disabled:opacity-50"
+          >
+            Use it
+          </button>{" "}
+          ·{" "}
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              setSuggestion(null);
+              void dispatchCode(email);
+            }}
+            className="underline underline-offset-2 disabled:opacity-50"
+          >
+            No, keep mine
+          </button>
+        </p>
+      )}
       <button type="submit" disabled={pending || email.length === 0} className={buttonBase}>
         {pending ? "Sending…" : "Email me a code"}
       </button>
