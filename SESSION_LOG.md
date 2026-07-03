@@ -1,3 +1,32 @@
+## 2026-07-03 (main) — correction: lee_permits schedule-trigger fix (e103fb38) was necessary but NOT sufficient — still 0 live rows
+
+Operator asked for proof, not a status claim, after the e103fb38 push. Ran a manual
+`gh workflow run lee-permits-weekly.yml -f dry_run=false` to test the fix live rather than
+waiting for Monday's cron. Result: the job reported `success`, but a direct query against
+`data_lake.lee_building_permits` immediately after shows `max(_loaded_at)` STILL stuck at
+2026-06-16, 288 rows total, 0 rows loaded in the trailing hour, `load_batches` still 6 — no
+different from before the fix.
+
+Root cause of THIS run's zero write, confirmed from the raw job log: the schedule-trigger fix
+worked correctly (the job executed the real live path — 95-row CapDetail enrichment loop,
+geocoding, incremental cursor print — not `--dry-run`, a first since 06-16). But Accela's WAF
+hit the GHA runner with a sustained HTTP 429 storm during CapDetail enrichment
+(`enriching 95/95 rows... concurrency=5`, ~16:47–16:52 UTC), dozens of
+`Blocked by anti-bot protection: HTTP 429` errors despite the existing retry/backoff in
+`ingest/lib/crawl_client.py` (3 retries, 1-3s base, 60s cap, `rate_limit_codes=[429, 503]`).
+Many rows came back `detail fetch empty` — no `issued_date` extracted. `pipeline.py`'s
+incremental cursor is built to drop (not fabricate) rows missing `issued_date`
+(`on_cursor_value_missing="exclude"`) — correct by design, but it meant most/all of tonight's
+95 rows got excluded, so nothing new was written even though the code path was finally right.
+
+The ONLY live write that has ever actually succeeded for this pipeline is the original 06-16
+manual dispatch (94 rows). Did not retry again tonight — hammering an already-WAF-triggered
+IP risks a longer/harder block. Opened check `lee_permits_capdetail_waf_429` (brain-platform)
+to track it instead of letting it go quiet again. Next real signal is Monday 07/06's scheduled
+cron: if `max(_loaded_at)` still hasn't moved past 06-16 after that, the WAF/concurrency
+interaction needs real tuning (lower concurrency, longer backoff, or accept Accela has
+tightened detection since 06-16) — a job for `ingest-engineer`, not another ad-hoc poke.
+
 ## 2026-07-03 (main) — fix(refinery): franchise-outcomes was shipping SYNTHETIC fixture numbers to prod under a real SBA citation
 
 The live `brains/franchise-outcomes.md` (36 rebuild cycles) carried the 15-brand committed
