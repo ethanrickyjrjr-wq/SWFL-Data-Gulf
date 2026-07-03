@@ -16,8 +16,11 @@ CAN-SPAM postal address token + non-blocking lab nudge + lib/email/CLAUDE.md 3�
 ⚠ NOTE: 5f5df89c swept in the parallel Lane C session's STAGED rename
 (app/welcome/_components → components/prospect/OpenProjectCta.tsx, 100% identical move) — my
 commit ran against a shared index. Content intact; Lane C's own commit simply won't re-include it.
-OPERATOR: (1) PEXELS_API_KEY → Vercel env (code degrades keyless); (2) push not done (10 commits
-local); (3) `author_layout_recipes_live_verify` stays OPEN until live-send evidence.
+CORRECTION (same session, minutes later): all 10 feature commits are ALREADY LIVE on origin/main
+— the Lane C session's concurrent push carried them verbatim (same hashes; the known
+concurrent-push behavior). Only this docs commit remained local. OPERATOR: (1) PEXELS_API_KEY →
+Vercel env (code degrades keyless); (2) `author_layout_recipes_live_verify` stays OPEN until
+live-send evidence.
 
 ## 2026-07-03 (main) — Lane B spec CORRECTED: seed honors projects/lab unification + Lane C seam flagged
 
