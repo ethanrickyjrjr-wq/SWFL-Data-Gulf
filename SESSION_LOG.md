@@ -1,3 +1,25 @@
+## 2026-07-02 (main) — `author-layout-recipes` SPECCED: 3 recipe families + author layout power-up + media library (research-backed)
+
+Brainstormed per RULE 3.5 with 4 crawl4ai passes (RULE 0.4): Mailchimp Email Design Reference
+(single-column for CTA emails, hook at top, Read Me/Buy Me/Join Me), Klaviyo 2025 benchmarks
+(welcome = 51% avg open; bite-size bio, expectation-setting), Vero inverted pyramid, Campaign
+Monitor (>=50% mobile opens), Scalero image mechanics (<=100KB, 2x retina, 60/40 text-image),
+Chase Dimond 45-brand layout analysis (text-only letter 35-50% opens; 50-60% whitespace luxury
+spotlight; hero+cards J.Crew pattern), Techelix (whitespace = luxury, serif display + sans body),
+Litmus typography (max 2 font styles, fallback stacks), Pexels API (free, 200/hr 20k/mo,
+attribution lifts limits; license explicitly allows newsletters; Unsplash compiling ban = not
+used). NNG eyetracking = paywalled, honestly not cited. Shopify CAN-SPAM guide (operator-handed):
+postal address is a 4th REAL requirement -> spec notes + memory corrected. Spec:
+`docs/superpowers/specs/2026-07-03-author-layout-recipes-design.md` (registered via new-build,
+check `author_layout_recipes_live_verify` OPEN). Design: deterministic recipe detection feeding
+authorSystem (prospect welcome / monthly newsletter / editorial letter-showcase-magazine),
+semantic layout fields (overlay_title/body, band light|dark|accent + luminance onDark, pad
+airy|normal|tight, authorable multi-column, new `list` block), `email_media_assets` + Pexels
+picker + id-selected ASSET MENU (figure-menu moat pattern; unknown id drops block). Author engine
+ceilings found by code probe: overlays unreachable, sectionBg stripped, multi-column placeholder
+bug, no list shape. Pushed from a detached worktree off origin/main to avoid carrying the
+parallel session's 14 unpushed stripe-billing commits (held for operator review). Next:
+operator spec review -> writing-plans -> implement (recipes -> layout -> media -> seeds).
 ## 2026-07-02 (main) — `funnel-demo-email` BUILT: two-track prospect sequence + cadence engine (13 plan tasks, 13 commits)
 
 Executed `docs/superpowers/plans/2026-07-02-funnel-demo-email.md` inline, TDD per task (spec
