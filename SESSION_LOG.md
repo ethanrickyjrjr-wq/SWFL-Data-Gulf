@@ -1,3 +1,13 @@
+## 2026-07-03 (main) — env-swfl targeted rebuild lands flood_by_zip in prod (operator-run)
+
+Ran `bun run refinery -- env-swfl --target-only` (live mode, no cascade) per the plan's operator
+follow-up. Result: env-swfl v24, `flood_by_zip` detail table now carries 124 windowed SWFL ZIPs
+(up from the top-6 key_metrics-only surface). Verified before push: all 6 top-6 key_metric AAL
+values match their `flood_by_zip` row byte-for-byte (33957/33931/33921/33908/33924/34102) —
+thin pipe held, no regression. Pushed alongside 3 unrelated same-session-author commits already
+stacked locally ahead of origin (lee_permits status correction, franchise-outcomes fixture fix,
+build-queue sync) — operator confirmed bundling.
+
 ## 2026-07-03 (main) — correction: lee_permits schedule-trigger fix (e103fb38) was necessary but NOT sufficient — still 0 live rows
 
 Operator asked for proof, not a status claim, after the e103fb38 push. Ran a manual
