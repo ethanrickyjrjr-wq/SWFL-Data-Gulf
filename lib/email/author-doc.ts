@@ -67,6 +67,48 @@ export function renderFigureMenu(menu: MenuFigure[]): string {
     .join("\n");
 }
 
+// ── The ASSET MENU (the user's image library, given selectable ids) ───────────
+// Same moat pattern as the figure menu: the model selects [aN], the engine
+// writes the real URL at assembly. The model never types an image URL, so a
+// library image can never be mis-linked or invented; an unknown id drops the
+// block. Attribution captions (Pexels credit) ride along unless authored over.
+
+export interface LibraryAsset {
+  url: string;
+  label: string;
+  kind: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+  /** Ready-made credit line (Pexels picks) — default image caption. */
+  caption?: string;
+}
+
+export interface MenuAsset {
+  id: string; // "a0", "a1", … — what the model selects
+  asset: LibraryAsset;
+}
+
+export function buildAssetMenu(assets: LibraryAsset[]): MenuAsset[] {
+  return assets.map((asset, i) => ({ id: `a${i}`, asset }));
+}
+
+export function assetMenuById(menu: MenuAsset[]): Map<string, LibraryAsset> {
+  return new Map(menu.map((m) => [m.id, m.asset]));
+}
+
+/** Render the asset menu — label + kind always; dimensions only when HELD
+ *  (never an invented number). */
+export function renderAssetMenu(menu: MenuAsset[]): string {
+  return menu
+    .map((m) => {
+      const a = m.asset;
+      const dims = a.width && a.height ? ` · ${a.width}×${a.height}` : "";
+      return `  [${m.id}] "${a.label}" · ${a.kind}${dims}`;
+    })
+    .join("\n");
+}
+
 // ── The forced tool — the author SELECTS structure + content, never numbers ────
 
 export const AUTHOR_TOOL = {
@@ -91,8 +133,11 @@ export const AUTHOR_TOOL = {
     "to about 12. Keep at most 3 blocks per row.\n\n" +
     "ASSETS — when the context says a CHART or a PHOTO is available, place an " +
     '`image` block with `image_role:"chart"` or `image_role:"photo"` where it ' +
-    "best fits and write its caption/alt; the system drops in the real asset. Do " +
-    "not place an image whose asset was not offered.\n\n" +
+    "best fits and write its caption/alt; the system drops in the real asset. " +
+    "When an ASSET MENU is listed, you may instead set `asset` to an [aN] id (on " +
+    "an image block, or on a multi-column column) — the system drops in that " +
+    "library image and its credit. Do not place an image whose asset was not " +
+    "offered; only listed ids exist.\n\n" +
     "SECTIONS — optional semantic styling; the system resolves every color and " +
     'pixel, you never write one. `band` ("light" | "dark" | "accent") gives a ' +
     "section a background from the user's palette (text flips automatically on " +
@@ -151,6 +196,12 @@ export const AUTHOR_TOOL = {
               enum: ["chart", "photo"],
               description: "For an image block: which offered asset to place.",
             },
+            asset: {
+              type: "string",
+              description:
+                "For an image block: an [aN] ASSET MENU id — the system places that " +
+                "library image. Takes precedence over image_role.",
+            },
             overlay_title: {
               type: "string",
               description: "Image blocks only: a short headline rendered on top of the image.",
@@ -183,6 +234,10 @@ export const AUTHOR_TOOL = {
                   link_label: {
                     type: "string",
                     description: "Optional link text; the system supplies the destination.",
+                  },
+                  asset: {
+                    type: "string",
+                    description: "Optional [aN] ASSET MENU id for this card's image.",
                   },
                 },
               },
@@ -251,6 +306,8 @@ export function authorSystem(opts: {
   hasChart: boolean;
   chartGrounding?: string;
   hasPhoto: boolean;
+  /** The user's image library, id-selectable via `asset` (empty/absent → no section). */
+  assetMenu?: MenuAsset[];
   /** Advisory deliverable-type recipe (author-recipes.ts) — appended verbatim.
    *  Absent → the generic prompt, byte-identical to before recipes existed. */
   recipe?: string;
@@ -278,6 +335,11 @@ export function authorSystem(opts: {
   if (opts.hasPhoto) {
     parts.push(
       `A property/agent PHOTO is available — place ONE image block with\nimage_role:"photo" as the lead visual and write its alt text.`,
+    );
+  }
+  if (opts.assetMenu?.length) {
+    parts.push(
+      `ASSET MENU — the user's image library. Place one by setting asset:"aN" on an\nimage block (or a multi-column column) and writing its alt text; the system\ndrops in the real image and its credit. Only these ids exist.\n${renderAssetMenu(opts.assetMenu)}`,
     );
   }
   if (opts.recipe) parts.push(opts.recipe);
@@ -399,6 +461,8 @@ export interface AssembleArgs {
   /** Engine-owned destination for authored column links (brand website). The model
    *  writes `link_label` only; without a destination the label is dropped. */
   defaultLinkUrl?: string;
+  /** The user's library, keyed by [aN] menu id (assetMenuById). */
+  assetsById?: Map<string, LibraryAsset>;
 }
 
 /** A literal (non-figure) stat value is allowed ONLY if it invents no number: a
@@ -420,6 +484,7 @@ function buildEntry(
   photo: AssetSlot | null | undefined,
   gs: EmailGlobalStyle,
   defaultLinkUrl?: string,
+  assetsById?: Map<string, LibraryAsset>,
 ): { entry: Entry; placedChart: boolean; placedPhoto: boolean } | null {
   const type = a.type as BlockType;
   if (!KNOWN_TYPES.has(type)) return null; // unknown block type (drives off the ONE root) — skip
@@ -431,7 +496,16 @@ function buildEntry(
   let props: Record<string, unknown>;
 
   if (type === "image") {
-    if (a.image_role === "chart") {
+    if (a.asset) {
+      // Library image (id-selection moat) — takes precedence over image_role.
+      const lib = assetsById?.get(a.asset);
+      if (!lib) return null; // unknown [aN] — drop, never a placeholder or invented URL
+      props = {
+        url: lib.url,
+        alt: (a.alt ?? lib.alt ?? lib.label).slice(0, 160),
+        caption: (a.caption ?? lib.caption)?.slice(0, 200),
+      };
+    } else if (a.image_role === "chart") {
       if (!chart) return null; // reserved a chart slot but none resolved — drop the empty block
       props = {
         ...chartImageBlock({
@@ -474,6 +548,10 @@ function buildEntry(
           col.linkLabel = linkLabel;
           col.linkUrl = defaultLinkUrl;
         }
+        // Library image for this card — unknown [aN] means no image, never a
+        // placeholder or invented URL.
+        const lib = c.asset ? assetsById?.get(c.asset) : undefined;
+        if (lib) col.imageUrl = lib.url;
         return col;
       })
       .filter((c) => Object.keys(c).length > 0)
@@ -602,14 +680,32 @@ function capBlocks(entries: Entry[]): Entry[] {
 /** Assemble a positioned EmailDoc from the model's authored output. PURE. Brand is
  *  never authored — globalStyle is the incoming (branded) style, untouched. */
 export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
-  const { authored, figuresById, globalStyle, anchorNumbers, chart, photo, defaultLinkUrl } = args;
+  const {
+    authored,
+    figuresById,
+    globalStyle,
+    anchorNumbers,
+    chart,
+    photo,
+    defaultLinkUrl,
+    assetsById,
+  } = args;
   const anchors = buildAnchorSet(anchorNumbers); // for the stat-literal number guard
   const entries: Entry[] = [];
   let chartPlaced = false;
   let photoPlaced = false;
 
   for (const a of authored.blocks) {
-    const r = buildEntry(a, figuresById, anchors, chart, photo, globalStyle, defaultLinkUrl);
+    const r = buildEntry(
+      a,
+      figuresById,
+      anchors,
+      chart,
+      photo,
+      globalStyle,
+      defaultLinkUrl,
+      assetsById,
+    );
     if (!r) continue;
     entries.push(r.entry);
     if (r.placedChart) chartPlaced = true;

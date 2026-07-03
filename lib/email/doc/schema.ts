@@ -379,6 +379,8 @@ const AuthoredColumnSchema = z.object({
   heading: authoredText(120),
   body: authoredText(500),
   link_label: authoredText(40),
+  /** [aN] ASSET MENU id for this card's image — resolved at assembly. */
+  asset: authoredText(8),
 });
 
 /** One authored `list` row. */
@@ -420,6 +422,8 @@ export const AuthoredBlockSchema = z.object({
   align: z.enum(["left", "center", "right"]).optional(),
   /** For an image block: which auto-resolved asset the engine drops in. */
   image_role: z.enum(["chart", "photo"]).optional(),
+  /** [aN] ASSET MENU id — a library image; takes precedence over image_role. */
+  asset: authoredText(8),
   stats: z.array(AuthoredStatSchema).max(3).optional(),
   // ── semantic layout (author-layout-recipes build) — the model names a mood,
   // the engine owns every color/pixel ──

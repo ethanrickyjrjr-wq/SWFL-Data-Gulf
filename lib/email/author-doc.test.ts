@@ -13,6 +13,10 @@ import {
   collectAnchorNumbers,
   lintAuthoredProse,
   AUTHOR_TOOL,
+  authorSystem,
+  buildAssetMenu,
+  assetMenuById,
+  renderAssetMenu,
   type AssembleArgs,
 } from "./author-doc";
 import { DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
@@ -445,6 +449,96 @@ describe("semantic layout power-up (band / pad / overlay / columns / list)", () 
       expect(parsed.data.blocks[1].items?.length).toBe(8);
       expect(parsed.data.blocks[2].columns?.length).toBe(3);
     }
+  });
+
+  test("ASSET MENU: id-selected library images resolve; unknown ids drop the block", () => {
+    const menu2 = buildAssetMenu([
+      {
+        url: "https://x/dani.jpg",
+        label: "Dani headshot",
+        kind: "upload",
+        width: 600,
+        height: 600,
+      },
+      {
+        url: "https://cdn.pexels.com/p.jpg",
+        label: "Waterfront",
+        kind: "pexels",
+        caption: "Photo by Dana Q on Pexels",
+      },
+    ]);
+    expect(menu2.map((m) => m.id)).toEqual(["a0", "a1"]);
+    const rendered = renderAssetMenu(menu2);
+    expect(rendered).toContain('[a0] "Dani headshot" · upload · 600×600');
+    expect(rendered).toContain('[a1] "Waterfront" · pexels'); // no invented dimensions
+    expect(rendered).not.toContain("undefined");
+
+    const doc = assembleAuthoredDoc(
+      args(
+        {
+          blocks: [
+            { type: "image", asset: "a1", alt: "Canal home" },
+            { type: "image", asset: "a99" }, // unknown id — dropped
+          ],
+        },
+        { assetsById: assetMenuById(menu2) },
+      ),
+    );
+    const images = doc.blocks.filter((b) => b.type === "image");
+    expect(images.length).toBe(1);
+    expect(propsOf(images[0]).url).toBe("https://cdn.pexels.com/p.jpg");
+    expect(propsOf(images[0]).caption).toBe("Photo by Dana Q on Pexels"); // attribution rides
+    expect(propsOf(images[0]).alt).toBe("Canal home");
+  });
+
+  test("asset takes precedence over image_role; multi-column columns resolve assets too", () => {
+    const menu2 = buildAssetMenu([
+      { url: "https://x/one.jpg", label: "One", kind: "upload" },
+      { url: "https://x/two.jpg", label: "Two", kind: "upload" },
+    ]);
+    const doc = assembleAuthoredDoc(
+      args(
+        {
+          blocks: [
+            // no photo slot offered — but the asset still resolves (no drop)
+            { type: "image", asset: "a0", image_role: "photo" },
+            {
+              type: "multi-column",
+              columns: [
+                { heading: "A", body: "x", asset: "a1" },
+                { heading: "B", body: "y", asset: "a77" }, // unknown → column has no image
+              ],
+            },
+          ],
+        },
+        { assetsById: assetMenuById(menu2) },
+      ),
+    );
+    const img = doc.blocks.find((b) => b.type === "image");
+    expect(propsOf(img!).url).toBe("https://x/one.jpg");
+    const cols = propsOf(doc.blocks.find((b) => b.type === "multi-column")!).columns as Array<
+      Record<string, unknown>
+    >;
+    expect(cols[0].imageUrl).toBe("https://x/two.jpg");
+    expect(cols[1].imageUrl).toBeUndefined(); // unknown id never invents a URL
+  });
+
+  test("authorSystem carries the ASSET MENU section only when assets exist", () => {
+    const base = {
+      menu: buildFigureMenu(FIGURES),
+      dossier: "",
+      vocabulary: ["image", "footer"],
+      hasChart: false,
+      hasPhoto: false,
+    };
+    const without = authorSystem(base);
+    expect(without).not.toContain("ASSET MENU");
+    const withAssets = authorSystem({
+      ...base,
+      assetMenu: buildAssetMenu([{ url: "https://x/a.jpg", label: "A", kind: "upload" }]),
+    });
+    expect(withAssets).toContain("ASSET MENU");
+    expect(withAssets).toContain('[a0] "A" · upload');
   });
 
   test("the prose lint walks multi-column columns and list items", () => {

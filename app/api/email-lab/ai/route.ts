@@ -1,8 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
+import { createClient } from "@/utils/supabase/server";
 import { buildContentDoc, authorDoc, fetchLakeContext } from "@/lib/email/build-doc";
+import { toPanelItem, type MediaAssetRow } from "@/lib/email/media-assets";
+import type { LibraryAsset } from "@/lib/email/author-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import type { ChartType } from "@/lib/email/reshape-chart-type";
+
+/** The caller's media library for the author's ASSET MENU (newest 24). Anonymous
+ *  or failing → [] — the author simply gets no menu section. */
+async function loadCallerAssets(): Promise<LibraryAsset[]> {
+  try {
+    const db = createClient(await cookies());
+    const {
+      data: { user },
+    } = await db.auth.getUser();
+    if (!user) return [];
+    const { data } = await db
+      .from("email_media_assets")
+      .select()
+      .order("created_at", { ascending: false })
+      .limit(24);
+    return ((data ?? []) as unknown as MediaAssetRow[]).map(toPanelItem);
+  } catch {
+    return [];
+  }
+}
 
 // The content-build pipeline lives in lib/email/build-doc.ts (the ONE root a script
 // or test can run identically). This route is a thin HTTP wrapper: block-canvas
@@ -61,6 +85,7 @@ export async function POST(req: NextRequest) {
             scope: body.scope,
             mode: body.mode,
             chartType: body.chartType as ChartType | undefined,
+            assets: await loadCallerAssets(),
           })
         : await buildContentDoc({
             prompt,

@@ -55,11 +55,14 @@ import {
   AUTHOR_TOOL,
   authorSystem,
   assembleAuthoredDoc,
+  assetMenuById,
+  buildAssetMenu,
   buildFigureMenu,
   figureMenuById,
   collectAnchorNumbers,
   collectRecordedAnchors,
   lintAuthoredProse,
+  type LibraryAsset,
 } from "@/lib/email/author-doc";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
 
@@ -329,6 +332,9 @@ export interface BuildArgs {
   mode?: string;
   /** Optional user-chosen chart shape from the lab control; reshapes the routed chart. */
   chartType?: ChartType;
+  /** The caller's media library (author path only) — id-selected via the ASSET MENU.
+   *  Fetched by the route (it holds the auth user); empty/absent → no menu section. */
+  assets?: LibraryAsset[];
 }
 
 export interface BuildResult {
@@ -595,6 +601,7 @@ export async function authorDoc({
   scope,
   mode,
   chartType,
+  assets,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -630,6 +637,7 @@ export async function authorDoc({
   // Deliverable-type recipe: deterministic keyword routing; no match leaves the
   // generic prompt byte-identical (advisory only — RULE C2, no new gate).
   const recipeId = detectRecipe(prompt);
+  const assetMenu = buildAssetMenu(assets ?? []);
   const system = authorSystem({
     menu,
     dossier: lakeParts.dossier,
@@ -637,6 +645,7 @@ export async function authorDoc({
     hasChart: !!chartRes,
     chartGrounding: chartRes?.groundingNote,
     hasPhoto: !!photoRes,
+    assetMenu,
     recipe: recipeId ? recipeSection(recipeId) : undefined,
   });
   const baseUser = scope?.value
@@ -663,6 +672,7 @@ export async function authorDoc({
       chart: chartSlot,
       photo: photoSlot,
       defaultLinkUrl: brandWebsiteUrl(currentDoc),
+      assetsById: assetMenuById(assetMenu),
     });
 
   const firstParse = EmailDocSchema.safeParse(assemble(authored));
