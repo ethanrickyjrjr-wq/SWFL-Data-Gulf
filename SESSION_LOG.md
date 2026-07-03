@@ -1,3 +1,25 @@
+## 2026-07-03 (main) — fix(ingest): lee_permits cron was silently no-op'ing since 06-16
+
+Operator asked to confirm the lee_permits weekly cron was live per the 06-16 gate closure. It
+wasn't. `lee-permits-weekly.yml`'s branch condition checked `github.event.inputs.dry_run = "false"`
+to trigger the live write — but `github.event.inputs` is only populated on `workflow_dispatch`,
+so on the actual `schedule` trigger it's empty and the condition always fell through to
+`--dry-run`. Both scheduled runs since the 06-16 gate close (27965428963 on 06-22, 28380780880
+on 06-29) went green and logged real row counts (100/94) but never wrote to Postgres. Caught by
+querying `data_lake.lee_building_permits` directly: `max(_loaded_at)` stuck at 2026-06-16 10:25,
+288 rows total, 0 loaded in the trailing 10 days, despite 2 "successful" runs after it — the
+first live write (06-16 manual `-f dry_run=false` dispatch) was the ONLY real write that ever
+landed. Every other pipeline workflow in `.github/workflows/` uses the opposite (correct) idiom
+(`dry_run = "true"` gates the dry path) — this was a lone inverted condition, not a platform-wide
+bug (checked all 64 workflows referencing `dry_run`). Fixed the condition to match the platform
+standard + added an inline dated comment explaining the failure mode. Corrected the stale
+"⬜ ONLY GATE LEFT: operator approval" line in `build-queue.md` (and local-only `TODAY.md`) that
+had been carried since 06-16 without ever being updated after the gate actually closed — that
+line is what led to this being reported as still-pending three weeks after it wasn't.
+Next: Monday 07/06's scheduled run is the real test — confirm `max(_loaded_at)` moves past 06-16;
+if it doesn't, suspect the dlt incremental cursor (`issued_date`, lag=30, wired 2026-06-28 in
+`ad9e1303`) next.
+
 ## 2026-07-03 (main) — BUILT: signal-driven ZIP hero + shared sourced figures (plan executed, 10 commits)
 
 Plan `docs/superpowers/plans/2026-07-03-zip-signal-hero.md` (spec a554806b) executed inline, TDD,

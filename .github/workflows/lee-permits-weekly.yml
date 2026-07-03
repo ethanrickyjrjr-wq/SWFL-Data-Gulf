@@ -5,6 +5,12 @@ on:
     - cron: "0 11 * * 1"   # 11:00 UTC = 7:00 AM ET Mondays; rolling Mon→Mon window
   # Gates cleared 2026-06-16: crawl4ai_accela_gha_ip CLOSED (run 27602909470) +
   # lee_permits_first_lake_ingestion CLOSED (run 27624394217, 94 rows, 100% 33xxx ZIPs).
+  # 2026-07-03: schedule-trigger bug fixed — condition below was inverted
+  # (`dry_run = "false"` gated the live branch), so `github.event.inputs.dry_run`
+  # being unset on a `schedule` trigger always fell to `--dry-run`. Every scheduled
+  # Monday run since 06-16 (06-22, 06-29) went green but wrote 0 rows. Confirmed via
+  # `data_lake.lee_building_permits`: max _loaded_at stuck at 2026-06-16 despite 2
+  # "successful" runs after it.
   workflow_dispatch:
     inputs:
       dry_run:
@@ -49,8 +55,8 @@ jobs:
         # already loaded (minus a lookback), so a skipped/failed week self-heals on the
         # next run instead of leaving a permanent gap. --end defaults to today.
         run: |
-          if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
-            python -m ingest.pipelines.lee_permits.pipeline
-          else
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             python -m ingest.pipelines.lee_permits.pipeline --dry-run
+          else
+            python -m ingest.pipelines.lee_permits.pipeline
           fi
