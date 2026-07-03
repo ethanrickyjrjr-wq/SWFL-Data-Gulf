@@ -20,7 +20,10 @@ jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 2026-06-15's only real (non-dry-run) scheduled run used ~19.5 of the old 20min cap
+    # and got hard-killed mid-Tier-2-replace — since `write_disposition="replace"` truncates
+    # before reinserting, the kill left data_lake.fdot_aadt_fl empty for 18 days undetected.
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v6

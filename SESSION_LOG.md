@@ -1,3 +1,29 @@
+## 2026-07-03 (main) — fix(ingest): repopulate empty fdot_aadt_fl, unblock master HELD
+
+Operator: "figure out why master is RED AGAIN." Root cause traced via `_tier1_inventory` +
+`_dlt_loads` (not guessed): `data_lake.fdot_aadt_fl` was 0 rows. The ONLY completed live Tier-2
+load ever was 2026-05-18 (manual/local, pre-dates GHA automation). 2026-06-15's scheduled
+`fdot-aadt-annual` run (first-ever real, non-dry-run automated attempt) reached the Tier-1 upload
+(vintage stamped 2026-06-15 in `_tier1_inventory`) but was hard-killed by the workflow's
+`timeout-minutes: 20` mid-Tier-2-replace (~19m35s vs ~4.5min dry-run baseline, no `_dlt_loads` row
+ever recorded for that attempt). `write_disposition="replace"` on dlt's postgres destination
+truncates before reinserting — non-atomic — so the kill left the table permanently empty. Masked
+18 days because `logistics-swfl-nowcast`'s brain cache TTL (from its last live rebuild before the
+truncation) didn't expire until 2026-07-03, at which point `fdot-freight-source.mts`'s
+`assertSegmentsNonEmpty` guard correctly refused to synthesize on 0 rows and HELD master (exit 1,
+prior master.md kept serving — no invented freight data, working as designed).
+
+Fix: (1) ran `python -m ingest.pipelines.fdot.pipeline` locally (bypasses the GHA timeout risk) —
+repopulated `fdot_aadt_fl` with 103,662 rows, 100% AADT non-null, 615 freight-qualifying
+Lee+Collier segments for 2025 (matches connector's documented expectation). (2) Bumped
+`fdot-aadt-annual.yml` `timeout-minutes` 20→40 so a slow FDOT ArcGIS day doesn't repeat the kill.
+Verified live: `gh workflow run daily-rebuild.yml -f pack_id=logistics-swfl-nowcast -f force=true`
+→ success (633 fresh fragments, `logistics-swfl-nowcast.md` v16); then
+`-f pack_id=master -f force=false` → upstream-aware trigger fired, `master.md` v94 wrote clean,
+no CRON-DIAG error, freeze-watchdog passed. Master is green.
+Next: none open — cadence's monthly retry (15th of month) now has headroom; no code defect in
+the connector itself (it behaved correctly per RULE re never inventing a number).
+
 ## 2026-07-03 (main) — fix(zip-shape): fill color is now a caller-supplied param + spec updated
 
 Operator: "the zip color stays the same color as clicked when on homepage... should be a
