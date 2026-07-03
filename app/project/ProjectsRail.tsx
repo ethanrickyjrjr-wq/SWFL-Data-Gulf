@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { projectHome } from "@/lib/project/tool-tabs";
 
 export interface RailProject {
   id: string;
@@ -38,7 +39,7 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
         body: JSON.stringify({ title: "Untitled project" }),
       });
       const data = (await res.json().catch(() => ({}))) as { id?: string };
-      if (res.ok && data.id) router.push(`/project/${data.id}`);
+      if (res.ok && data.id) router.push(projectHome(data.id));
     } finally {
       setCreating(false);
     }
@@ -138,8 +139,10 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
         ) : (
           <ul className="flex flex-col gap-0.5 overflow-y-auto">
             {projects.map((p) => {
-              const href = `/project/${p.id}`;
-              const active = pathname === href;
+              // Open into the Email tool (projectHome); highlight on ANY of the
+              // project's tool pages, not just the landing one.
+              const href = projectHome(p.id);
+              const active = pathname.startsWith(`/project/${p.id}`);
               return (
                 <li key={p.id} className="flex items-center gap-1">
                   <Link

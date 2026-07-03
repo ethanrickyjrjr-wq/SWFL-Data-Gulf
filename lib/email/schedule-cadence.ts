@@ -49,6 +49,42 @@ export function formatScheduleSendTime(iso: string): string {
   return `${parts.weekday} ${parts.month} ${parts.day}, ${parts.hour}:${parts.minute}${ampm} ET`;
 }
 
+const WEEKDAY_NAME = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** "8 AM" / "12 PM" / "12 AM" from an Eastern wall-clock hour. */
+function hourLabel(h: number): string {
+  const ampm = h < 12 ? "AM" : "PM";
+  const twelve = h % 12 === 0 ? 12 : h % 12;
+  return `${twelve} ${ampm}`;
+}
+
+/**
+ * Plain-English cadence line for a schedule chip — "every Monday at 8 AM ET",
+ * "daily at 8 AM ET", "monthly on the 15th at 8 AM ET". The control-center
+ * `/project` page reads this; keep phrasing here (the one cadence root) so the
+ * chip can never drift from the math the worker runs.
+ */
+export function describeCadence(spec: CadenceSpec): string {
+  const at = `at ${hourLabel(spec.send_hour_et)} ET`;
+  if (spec.cadence === "weekly") {
+    const day = WEEKDAY_NAME[spec.day_of_week ?? 0] ?? "Sunday";
+    return `every ${day} ${at}`;
+  }
+  if (spec.cadence === "monthly") {
+    const d = spec.day_of_month ?? 1;
+    const suffix =
+      d % 10 === 1 && d !== 11
+        ? "st"
+        : d % 10 === 2 && d !== 12
+          ? "nd"
+          : d % 10 === 3 && d !== 13
+            ? "rd"
+            : "th";
+    return `monthly on the ${d}${suffix} ${at}`;
+  }
+  return `daily ${at}`;
+}
+
 /** NY-local calendar parts for a UTC instant. */
 function nyParts(d: Date): { year: number; month: number; day: number; weekday: number } {
   const dtf = new Intl.DateTimeFormat("en-US", {

@@ -13,6 +13,7 @@ import {
   type PillPage,
 } from "@/lib/briefcase/visits";
 import { projectPrompts } from "@/lib/project/prompt-engine";
+import { projectHome } from "@/lib/project/tool-tabs";
 import { panelState, resolveBuildAction } from "@/lib/briefcase/panel-logic";
 import { SHOWCASES } from "@/lib/showcase/registry";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
@@ -74,6 +75,14 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
   const authed = session?.authed ?? false;
   const draftItems = briefcase?.draftItems ?? [];
   const state = panelState(draftItems.length);
+  // Inside a project the pill IS the project assistant (the root-mounted AI the
+  // cockpit deliberately doesn't remount) — so it renders as a clean project chat.
+  // The funnel furniture (pitch copy, showcase demo cards, "Build & send here",
+  // MCP card, ladder copy) is for prospects on public pages; inside a project the
+  // user has already converted, and the demo cards read as YOUR data when they are
+  // fixtures (operator, 07/03/2026). Examples now live in the labs' own collapsed
+  // Examples section instead.
+  const projectMode = page.kind === "project" && authed;
 
   // On a project page, drive the starter prompts off the live project digest (the
   // context bus). Until the digest seeds — or during a switch when the store still holds
@@ -100,7 +109,51 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
       setLoginOpen(true);
       return;
     }
-    window.location.assign(projectId ? `/project/${projectId}` : "/project");
+    window.location.assign(projectId ? projectHome(projectId) : "/project");
+  }
+
+  // PROJECT MODE — chat + (any carried draft items) only. No funnel.
+  if (projectMode) {
+    return (
+      <div className="flex flex-col gap-3 text-sm text-[#f0ede6]">
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-gulf-teal">Project AI</span>
+          <span className="text-[10px] text-gray-500">knows this project</span>
+        </div>
+
+        <BriefcaseChat starterPrompts={prompts} />
+
+        {draftItems.length > 0 && (
+          <div>
+            <p className="mb-1.5 text-[10px] uppercase tracking-wider text-gray-500">
+              Carried in · {draftItems.length}
+            </p>
+            <ul className="flex max-h-40 flex-col gap-1 overflow-y-auto">
+              {draftItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-start gap-2 rounded bg-[#0f1d24] px-2 py-1.5"
+                >
+                  <span className="min-w-0 flex-1 truncate text-xs text-gray-200">
+                    {itemTitle(item)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => briefcase?.removeItem(item.id)}
+                    aria-label="Remove from briefcase"
+                    className="shrink-0 text-gray-500 transition-colors hover:text-red-400"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M4.3 3.3 8 7l3.7-3.7 1 1L9 8l3.7 3.7-1 1L8 9l-3.7 3.7-1-1L7 8 3.3 4.3z" />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (

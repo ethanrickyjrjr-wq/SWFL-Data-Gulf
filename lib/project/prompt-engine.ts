@@ -135,7 +135,17 @@ function openProjectCandidates(input: PromptEngineInput, digest: ProjectDigest):
   const feedSignal = digest.feedSignals.find(
     (s) => !(s.overlapKey !== undefined && dismissed.has(s.overlapKey)),
   );
-  if (feedSignal) out.push(feedSignal.title);
+  if (feedSignal) {
+    // outside-action rows carry a RAW filed-item title (e.g. `Q: What's the read on
+    // $510,000 ↓ 2.9?`) — surfaced verbatim it reads as the AI asking about a number
+    // that is nowhere on screen (operator bug, 07/03/2026). Frame it as what it is:
+    // something the user filed earlier, offered back.
+    out.push(
+      feedSignal.kind === "outside-action"
+        ? `You filed “${feedSignal.title}” — pick it back up?`
+        : feedSignal.title,
+    );
+  }
 
   // nearbyEvent — highest-scored qualitative signal for this project (Phase 4F).
   // ai_summary is already pre-written: "Walmart (1.1 mi N): permit filed 2026-06-10"

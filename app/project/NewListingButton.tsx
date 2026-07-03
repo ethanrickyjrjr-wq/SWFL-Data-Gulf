@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { projectHome } from "@/lib/project/tool-tabs";
 
 /**
  * New Listing entry (Build 1 of the New Listing lifecycle). Creates a project with
@@ -31,7 +32,7 @@ export function NewListingButton() {
       });
       if (res.ok) {
         const { id } = (await res.json()) as { id?: string };
-        if (id) router.push(`/project/${id}`);
+        if (id) router.push(projectHome(id));
       }
     } catch {
       // leave the form open so the user can retry

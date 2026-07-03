@@ -9,6 +9,7 @@ import { useSocialComposer } from "@/components/email-lab/social/useSocialCompos
 import { SocialCalendarPanel } from "@/components/email-lab/SocialCalendarPanel";
 import { ScheduleSocialModal } from "@/components/email-lab/ScheduleSocialModal";
 import { PhotosPanel } from "@/components/email-lab/PhotosPanel";
+import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import type { SocialElement } from "@/lib/social/design/types";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import { applyBrand } from "@/components/email-lab/EmailLabShell";
@@ -327,6 +328,12 @@ export function ProjectSocialClient({
             onPickFiled={(p) => void social.pickFiledPhoto(p)}
             onUploadFile={(f) => void social.uploadNewPhoto(f)}
           />
+        </div>
+
+        {/* Social showcases, closed by default — same operator ruling as the
+            Email lab: examples in the lab they demonstrate, never in the AI. */}
+        <div className="mt-4">
+          <ExamplesAccordion surface="social" />
         </div>
       </aside>
 

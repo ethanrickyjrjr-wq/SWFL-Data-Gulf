@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { projectHome } from "@/lib/project/tool-tabs";
 
 export function NewProjectButton() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export function NewProjectButton() {
       });
       if (res.ok) {
         const { id } = (await res.json()) as { id?: string };
-        if (id) router.push(`/project/${id}`);
+        if (id) router.push(projectHome(id));
       }
     } catch {
       // surfaced by leaving the button enabled to retry

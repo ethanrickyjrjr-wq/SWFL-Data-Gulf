@@ -30,7 +30,15 @@ export interface Showcase {
   accent: string;
   thumb: string;
   disclosure: string;
+  /** Which lab surfaces this example belongs to — the labs' collapsed Examples
+   *  section filters on it (email examples in Email, social in Social). */
+  surfaces: ("email" | "social")[];
   slides: ShowcaseSlide[];
+}
+
+/** The showcases for one lab surface. */
+export function showcasesFor(surface: "email" | "social"): Showcase[] {
+  return SHOWCASES.filter((s) => s.surfaces.includes(surface));
 }
 
 export const SHOWCASES: Showcase[] = [
@@ -41,6 +49,7 @@ export const SHOWCASES: Showcase[] = [
     hook: "Five emails carry one $14.8M listing from teaser to sold — every number sourced.",
     accent: "#B98F45",
     thumb: "/showcase/listing-to-close/thumb.webp",
+    surfaces: ["email"],
     disclosure:
       "Demonstration campaign — Latitude 26 Estates and its agent are fictional. The property, comp, and market data are real — SWFL Data Gulf (07/01/2026).",
     slides: [
@@ -99,6 +108,7 @@ export const SHOWCASES: Showcase[] = [
     hook: "One mid-market listing launches with an agent-brand email and four social formats — same real numbers everywhere.",
     accent: "#0E7C86",
     thumb: "/showcase/launch-blitz/thumb.webp",
+    surfaces: ["email", "social"],
     disclosure:
       "Demonstration campaign — Cast & Coast Realty and Dani Vero are fictional (her portrait is AI-generated). The property, ZIP, and market data are real — SWFL Data Gulf listing feed (07/01/2026) and the linked listing detail page (07/02/2026).",
     slides: [
@@ -133,6 +143,7 @@ export const SHOWCASES: Showcase[] = [
     hook: "Type the ask once — the monthly brief and its socials rebuild themselves from fresh data.",
     accent: "#C4551A",
     thumb: "/showcase/market-pulse/thumb.webp",
+    surfaces: ["email", "social"],
     disclosure:
       "Demonstration campaign — Meridian South Advisory is fictional. Every number is real — Zillow Home Value Index (through 05/31/2026) and SWFL Data Gulf listing feed (07/01/2026).",
     slides: [

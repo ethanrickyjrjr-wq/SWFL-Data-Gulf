@@ -1,3 +1,28 @@
+## 2026-07-03 (main) — Cockpit landing + project-AI cleanup (operator rulings) + /project control center v1
+
+Operator escalation: still landing on the bare projects list, cockpit tabs invisible, the
+welcome-funnel AI panel leaking into the project email lab (showcase demo cards + a ghost
+"$510,000" chip), duplicate Email/Social toggles on one screen, "no way to save branding".
+Shipped: (1) `projectHome()` one root (lib/project/tool-tabs.ts) — opening a project lands on
+the EMAIL tool; rail rows/list/new-project/new-listing/pill-CTA all point there; tabs reordered
+Email·Social·Overview and restyled unmissable. (2) AI pill on project pages = slim "Ask AI"
+project chat — pitch/showcases/MCP card/ladder suppressed in project mode (the pill IS the
+root-mounted project assistant; deleting it would have orphaned Piece 2). Ghost chip diagnosed:
+a FILED item resurfaced verbatim (project_feed outside-action title straight through
+prompt-engine) — now framed `You filed "…" — pick it back up?`. (3) Grid shell's inner
+email/social toggle hidden in project context (cockpit Social tab is the social surface).
+(4) Examples → closed `ExamplesAccordion` in the Email-lab rail + Social tool rail; registry
+gains `surfaces` tags + `showcasesFor()`; crawl4ai pass: majors keep template galleries behind
+explicit entry points, NN/g endorses accordions for secondary content. (5) Branding save
+VERIFIED EXISTS (BrandingBlock Save / Save-To-This-Project → /api/user/brand) — it was buried
+under the pill popover; unburied by (2). (6) `/project` rebuilt as control center v1 per
+operator ruling ("show what's running, dates next to the email, click to tailor"): per-project
+schedule chips ("Emails every Monday at 8 AM ET → audience · next Tue Jul 7, 8:00am ET", click
+→ tailor via ?did=&schedule=1), Running-now summary (next 3 sends), built-email counts.
+`describeCadence()` added to the cadence root. Spec:
+docs/superpowers/specs/2026-07-03-projects-control-center-design.md · check
+`projects_control_center_live_verify`. Gates: targeted bun suites 364/0, `bunx next build` ✓.
+
 ## 2026-07-03 (main) — /billing restyled to Gulf design system + logged-out UX fix; Stripe live wiring DONE
 
 Operator flagged /billing as unusable ("can't click anything"): page shipped with light-theme

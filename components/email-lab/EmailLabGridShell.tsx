@@ -58,6 +58,7 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
   ssr: false,
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import {
   type BrandPalette,
@@ -792,7 +793,10 @@ export function EmailLabGridShell({
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black bg-[#111418] px-5 py-2.5">
           <div className="flex items-center gap-4">
             {headerSlot}
-            {caps.socialCalendar && (
+            {/* Inside the cockpit (projectId set) the Social TAB is the social surface —
+                this pre-cockpit inner toggle would be a second Email/Social switcher on
+                the same screen (operator: killed 07/03/2026). Standalone lab keeps it. */}
+            {caps.socialCalendar && !projectId && (
               <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5">
                 {(["email", "social"] as const).map((m) => (
                   <button
@@ -1319,6 +1323,10 @@ export function EmailLabGridShell({
               )}
             </div>
           )}
+
+          {/* ── Examples (closed by default) — email showcases live HERE, not in the
+              AI panel (operator ruling 07/03/2026). ── */}
+          {mode === "email" && <ExamplesAccordion surface="email" />}
 
           {/* ── Add Blocks ── */}
           {mode === "email" && (

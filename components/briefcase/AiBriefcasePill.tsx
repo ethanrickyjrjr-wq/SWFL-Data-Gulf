@@ -53,6 +53,9 @@ export function AiBriefcasePill({
   const session = useSession();
   const count = briefcase?.draftItems.length ?? 0;
   const bridged = typeof reportId === "string" && reportId.length > 0;
+  // Inside a project the panel renders as the project assistant (no funnel), so the
+  // pill introduces itself as the AI — "Briefcase" is prospect-facing vocabulary.
+  const label = page.kind === "project" ? "Ask AI" : "AI + Briefcase";
 
   const [open, setOpen] = useState(false);
   // One-shot guard so the funnel pop fires at most once per page load: right after it
@@ -98,7 +101,7 @@ export function AiBriefcasePill({
               />
             </g>
           </svg>
-          <span>{open ? "Close" : "AI + Briefcase"}</span>
+          <span>{open ? "Close" : label}</span>
           {count > 0 && (
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-navy-dark px-1 text-[11px] font-bold text-gulf-teal">
               {count}
