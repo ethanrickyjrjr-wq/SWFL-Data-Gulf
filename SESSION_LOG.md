@@ -1,3 +1,25 @@
+## 2026-07-03 (main) — fix(refinery): franchise-outcomes was shipping SYNTHETIC fixture numbers to prod under a real SBA citation
+
+The live `brains/franchise-outcomes.md` (36 rebuild cycles) carried the 15-brand committed
+fixture (`refinery/__fixtures__/franchise-outcomes.sample.json`, `__meta._synthetic: true`)
+byte-for-byte — Subway 77.5%, UPS Store 89.5%, etc. — cited as "SBA 7(a) FOIA loan-level data"
+at data.sba.gov, and master quoted the synthetic 78.6% corpus rate in its dossier (f001). Root
+cause: `REFINERY_FRANCHISE_SOURCE` is the ONLY per-brain source flag in the repo and it defaults
+to **fixture** — inverted vs the global `REFINERY_SOURCE` (unset → live, `env.mts:66`) every
+other fixture-capable source keys off — and no workflow ever sets it, so every nightly rebuild
+silently used the sample. The one caveat that could disclose it only fired on `rate == null`
+(structurally unreachable — the fixture always has assessable brands). Audited all sources:
+franchise is the lone brain with this blind spot; collier-parcels/collier-permits already mark
+"(fixture)" in citations per platform convention. Fix (invention blocked, build never blocked):
+fixture mode now publishes NO figures — `isLive()` exported from `franchise-source.mts`; pack
+gates corpusSummary + outputProducer on it (no key_metrics, no detail table, neutral/mag 0,
+honest "awaiting first live SBA FOIA load" conclusion + loud caveat); fixture citation string
+now carries "(fixture; awaiting first live SBA FOIA load — no figures published)". Live mode
+unchanged. Rebuilt locally `--target-only`: franchise-outcomes v37 + master v93 — grep-verified
+zero synthetic figures in both. Gate 5 catalog 4/4 + vocab-coverage 40 brains OK. The live flip
+stays gated on the first quarterly cron land (Jul 15, check `franchise_foia_first_run`) — after
+it, set `REFINERY_FRANCHISE_SOURCE=live` in the rebuild env and real figures flow.
+
 ## 2026-07-03 (main) — fix(ingest): lee_permits cron was silently no-op'ing since 06-16
 
 Operator asked to confirm the lee_permits weekly cron was live per the 06-16 gate closure. It

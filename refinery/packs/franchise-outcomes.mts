@@ -8,14 +8,23 @@ import type {
   BrainOutputProducerResult,
   BrainOutputDetailTable,
 } from "../types/brain-output.mts";
-import { franchiseSource, type FranchiseNormalized } from "../sources/franchise-source.mts";
+import { franchiseSource, isLive, type FranchiseNormalized } from "../sources/franchise-source.mts";
 
 /**
  * franchise-outcomes — SBA 7(a) named-brand franchise loan outcomes, Lee & Collier FL.
  *
  * Source: SBA FOIA county-grain Parquet (ingest/duckdb_pipelines/franchise_outcomes).
- *   REFINERY_FRANCHISE_SOURCE=fixture (default): committed 15-brand curated sample.
+ *   REFINERY_FRANCHISE_SOURCE=fixture (default): committed 15-brand SYNTHETIC sample.
  *   REFINERY_FRANCHISE_SOURCE=live: full county-grain Parquet (s3://lake-tier1/...).
+ *
+ * FIXTURE MODE NEVER PUBLISHES FIGURES. The fixture rows are synthetic (see the
+ * fixture's __meta block) — in fixture mode this pack emits an empty-tolerant
+ * "awaiting first live SBA FOIA load" output: no key_metrics, no detail table,
+ * neutral direction, magnitude 0, loud caveat. Shipping the synthetic numbers
+ * under an SBA citation would be an invented figure wearing a real source's
+ * face — the one thing the platform unconditionally forbids. Assert full output
+ * in tests by setting REFINERY_FRANCHISE_SOURCE=live and feeding fragments
+ * directly (the pack never fetches; the harness supplies fragments).
  *
  * Tier-1 Reporter: cited facts only, no opinions.
  *
@@ -117,6 +126,20 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastRows = [];
   lastFetchedAt = null;
 
+  if (!isLive()) {
+    // Synthetic sample — never surface its numbers, not even in corpus facts.
+    return [
+      {
+        topic: "corpus_overview",
+        fact: "SBA FOIA franchise outcomes corpus (Lee + Collier)",
+        value:
+          "Awaiting first live SBA FOIA data load — no figures published. " +
+          "The committed development sample is synthetic and is suppressed.",
+        source_fragment_ids: [],
+      },
+    ];
+  }
+
   const rows = rowsFromFragments(allFragments);
   if (rows.length === 0) return [];
 
@@ -143,6 +166,28 @@ function franchiseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 
 function franchiseOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const fetched_at = lastFetchedAt ?? new Date().toISOString();
+
+  if (!isLive()) {
+    // Fixture rows are synthetic — publishing them (even caveated) is an invented
+    // number. Build succeeds, output carries no figures and no direction signal.
+    return {
+      conclusion:
+        "Franchise loan outcomes: awaiting the first live SBA FOIA data load " +
+        "(quarterly pipeline). No survival figures are published from this brain " +
+        "until real loan-level data lands.",
+      key_metrics: [],
+      caveats: [
+        "No figures published: this source has not yet received its first real SBA FOIA load. " +
+          "A synthetic development sample exists for offline testing only and is never shipped.",
+      ],
+      direction: "neutral",
+      magnitude: 0,
+      drivers: [],
+      overrides: [],
+      contradicts: [],
+      exogenous_signals: [],
+    };
+  }
 
   if (lastRows.length === 0) {
     return {

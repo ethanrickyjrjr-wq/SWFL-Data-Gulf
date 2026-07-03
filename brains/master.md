@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v92 | Token: SWFL-7421-v92-20260703 -->
+<!-- FRESHNESS: v93 | Token: SWFL-7421-v93-20260703 -->
 ---
 brain_id: master
-version: 92
-refined_at: 2026-07-03T08:56:07Z
-freshness_token: SWFL-7421-v92-20260703
+version: 93
+refined_at: 2026-07-03T16:48:51Z
+freshness_token: SWFL-7421-v93-20260703
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -29,7 +29,7 @@ SCOPE: SWFL Intelligence Lake — master synthesizer over the verified Franchise
 
 --- CITATION TABLE ---
 id  | source                                                                                       | verified   | expires
-s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-06-29 | 2026-07-06
+s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-07-03 | 2026-07-10
 s02 | cre-swfl brain — https://www.swfldatagulf.com/api/b/cre-swfl                                 | 2026-06-29 | 2026-07-06
 s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                 | 2026-06-29 | 2026-07-06
 s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                       | 2026-06-29 | 2026-07-06
@@ -69,7 +69,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"upstream :: franchise-outcomes","fact":"Upstream snapshot — franchise-outcomes (neutral, magnitude 0.30, confidence 1.00)","value":"franchise-outcomes as of 2026-06-29: direction neutral, magnitude 0.30, confidence 1.00, trust tier T1, 1 key metric(s). SBA FOIA franchise data: 15 brand(s) tracked in Lee & Collier FL, 13 assessable (168 resolved loans). Corpus survival rate 78.6% → neutral. Detail table 'franchise_survival' carries per-brand rates for named-brand underwriting cross-validation.","src":"s01","date":"2026-07-03"},
+  {"id":"f001","topic":"upstream :: franchise-outcomes","fact":"Upstream snapshot — franchise-outcomes (neutral, magnitude 0.00, confidence 1.00)","value":"franchise-outcomes as of 2026-07-03: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 0 key metric(s). Franchise loan outcomes: awaiting the first live SBA FOIA data load (quarterly pipeline). No survival figures are published from this brain until real loan-level data lands.","src":"s01","date":"2026-07-03"},
   {"id":"f002","topic":"upstream :: cre-swfl","fact":"Upstream snapshot — cre-swfl (mixed, magnitude 0.22, confidence 0.84)","value":"cre-swfl as of 2026-06-29: direction mixed, magnitude 0.22, confidence 0.84, trust tier T2, 183 key metric(s). The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 3.2% (stable); median net absorption 6,397 sqft (rising); median asking rent $30.88/sqft NNN (rising). Corridor signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 45/100 (neutral) — composite of cap rate, vacancy, absorption, and asking rent across 27 of 27 corridors. Permit capital flow: Lee County corridor-weighted z = 0.12 (above baseline).","src":"s01","date":"2026-07-03"},
   {"id":"f003","topic":"upstream :: macro-us","fact":"Upstream snapshot — macro-us (bearish, magnitude 0.50, confidence 1.00)","value":"macro-us as of 2026-06-29: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). As of the latest reported periods, the national macro backdrop reads: SOFR at 3.6% and stable, headline CPI at 4.2% YoY and rising. This brain is the root of the macro chain (macro-us → macro-florida → macro-swfl). State and regional brains read the funding-cost and inflation backdrop through here.","src":"s01","date":"2026-07-03"},
   {"id":"f004","topic":"upstream :: macro-florida","fact":"Upstream snapshot — macro-florida (bearish, magnitude 0.50, confidence 1.00)","value":"macro-florida as of 2026-06-29: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 7 key metric(s). As of the latest reported periods, the Florida state-level labor market reads: Florida unemployment at 4.8% (rising), labor force participation at 57.6%. Read against the national backdrop (macro-us, confidence 1.00): SOFR at 3.6% (stable). Regional brains (macro-swfl, future macro-tampa/macro-jax) use this brain as the state baseline for gap math.","src":"s01","date":"2026-07-03"},
@@ -111,12 +111,12 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 92,
-  "refined_at": "2026-07-03T08:56:07Z",
-  "expires": "2026-07-10T08:56:07Z",
+  "version": 93,
+  "refined_at": "2026-07-03T16:48:51Z",
+  "expires": "2026-07-10T16:48:51Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.4578052161567625,
+  "magnitude": 0.47138267321787664,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -521,25 +521,6 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
       ]
     },
     {
-      "metric": "overall_survival_rate",
-      "label": "SBA Franchise Survival Rate (SWFL)",
-      "value": 78.6,
-      "variable_type": "intensive",
-      "units": "percent",
-      "display_format": "percent",
-      "direction": "stable",
-      "source": {
-        "url": "https://data.sba.gov/dataset/7-a-504-foia",
-        "fetched_at": "2026-06-29T18:35:23.732Z",
-        "tier": 1,
-        "citation": "SBA 7(a) FOIA loan-level data — franchise outcomes, Lee & Collier FL. Resolved-loan denominator (paid-in-full + charged-off); brands with < 3 resolved loans excluded."
-      },
-      "suggestions": [
-        "What's driving overall survival rate?",
-        "How does overall survival rate here compare to other SWFL areas?"
-      ]
-    },
-    {
       "metric": "fl_unemployment",
       "value": 4.8,
       "direction": "rising",
@@ -635,6 +616,25 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
       ]
     },
     {
+      "metric": "sales_velocity_per_1k",
+      "value": 65.3,
+      "direction": "stable",
+      "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
+      "variable_type": "intensive",
+      "units": "sales per 1,000 parcels",
+      "display_format": "ratio",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
+        "fetched_at": "2026-06-29T18:40:20Z",
+        "tier": 2,
+        "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548798 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
+      },
+      "suggestions": [
+        "What's driving sales velocity per 1k?",
+        "How does sales velocity per 1k here compare to other SWFL areas?"
+      ]
+    },
+    {
       "metric": "housing_median_sale_price_swfl",
       "value": 400000,
       "direction": "stable",
@@ -677,7 +677,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $31,624/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "2 brand(s) ineligible for survival rate — fewer than 3 resolved loans in Lee & Collier.",
+    "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "vacancy_rate_median: directional reads are tied (rising 3, falling 12, stable 12) — no modal winner; \"stable\" is the tiebreak label, not a consensus signal.",
     "vacancy_rate_marketbeat_swfl: 16 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
     "asking_rent_nnn_marketbeat_swfl: 16 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -827,8 +827,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
     "This is live FOR-RENT inventory, distinct from rentals-swfl (the Zillow ZORI rent INDEX — a monthly trend/direction read, not a listing count).",
     "Weekly snapshot — direction is neutral on any one week; a second sweep is what would read inventory rising/falling.",
     "Source is realtor.com rental listings.",
-    "Upstream brain 'logistics-swfl-nowcast' was stale at build time (expired 2026-07-03).",
-    "Upstream brain 'logistics-swfl-nowcast' failed to rebuild on 2026-07-03; using last good read from 2026-06-03 (v15)."
+    "Upstream brain 'logistics-swfl-nowcast' was stale at build time (expired 2026-07-03)."
   ],
   "contradicts": [
     "macro-us (bearish) vs safety-swfl (bullish)",
@@ -885,8 +884,8 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720,
-    "computed_at": "2026-07-03T08:56:07.000Z"
+    "half_life_hours": 719.9999999999997,
+    "computed_at": "2026-07-03T16:48:51.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
@@ -914,8 +913,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
       "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?"
     ]
   },
-  "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release",
-  "degraded_inputs": []
+  "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release"
 }
 
 --- ACTIVE PROJECTS ---

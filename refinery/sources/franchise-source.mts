@@ -166,11 +166,24 @@ async function fetchLive(): Promise<RawFragment[]> {
 }
 
 /**
+ * True when REFINERY_FRANCHISE_SOURCE=live. Re-read on every call so tests can
+ * flip modes after module load (matches env.mts behavior for the global flag).
+ *
+ * The pack gates its OUTPUT on this: fixture rows are SYNTHETIC (see
+ * refinery/__fixtures__/franchise-outcomes.sample.json __meta) and must never
+ * publish as figures — fixture mode builds an empty-tolerant "awaiting first
+ * live load" output instead.
+ */
+export function isLive(): boolean {
+  return process.env["REFINERY_FRANCHISE_SOURCE"] === "live";
+}
+
+/**
  * Fetch raw fragments from the franchise outcomes source.
  * Defaults to fixture; set REFINERY_FRANCHISE_SOURCE=live to read the Tier-1 Parquet.
  */
 export async function fetch(): Promise<RawFragment[]> {
-  if (process.env["REFINERY_FRANCHISE_SOURCE"] === "live") return fetchLive();
+  if (isLive()) return fetchLive();
   return rowsToFragments(await loadFixtureRows());
 }
 
@@ -185,11 +198,13 @@ export async function fetch(): Promise<RawFragment[]> {
  * See SOURCED.md#sba-foia-franchise-row-counts → "ZIP citation deferred".
  */
 export function citationMeta(verifiedDate: string, ttlSeconds: number): Omit<CitationRow, "id"> {
-  const isLive = process.env["REFINERY_FRANCHISE_SOURCE"] === "live";
   return {
-    source: isLive
+    // Fixture mode must say so — platform convention (collier-parcels, collier-permits
+    // both mark "(fixture)"). The fixture rows are synthetic; a clean SBA descriptor
+    // here would put a real source's name on numbers that were never fetched from it.
+    source: isLive()
       ? "SBA 7(a) FOIA — franchise loan outcomes, Lee & Collier FL (county-grain Parquet, Tier-1 Storage)"
-      : "SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL",
+      : "SBA 7(a)/504 franchise loan outcomes — Lee & Collier counties, FL (fixture; awaiting first live SBA FOIA load — no figures published)",
     verified: verifiedDate,
     expires: expiresDate(verifiedDate, ttlSeconds),
   };
