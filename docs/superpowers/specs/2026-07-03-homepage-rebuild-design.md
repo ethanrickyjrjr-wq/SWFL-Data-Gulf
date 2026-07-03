@@ -37,7 +37,7 @@ One page that sells the actual product to the paying audience (professionals) wh
 - Search bar unchanged in behavior: 5-digit ZIP → `/z/[zip]`, free text → `/ask?q=`. Button copy stays an action ("Search").
 - Metric pills reordered; **default metric = Home Value** (locked vision), then New Construction, Flood Risk.
 - Choropleth + data rail + stats bar stay structurally as-is but run on **live lake data** (wiring below). The "Sample data" badge dies; replaced by "Live data · Lee & Collier Counties · as of MM/DD/YYYY" (date stated once, from the freshest source vintage).
-- **Map click = select, then two doors (fork 1b).** Clicking a ZIP fills the data rail (existing behavior) and no longer hard-navigates. The rail grows two CTAs: primary **"Turn this into a branded email"** → `/email-lab?zip=<zip>` (pre-built, § below); secondary **"Full report"** → `/z/[zip]`. Keyboard/tap behavior mirrors click; mobile keeps the rail reachable below the map.
+- **Map click = select, then two doors (fork 1b).** Clicking a ZIP fills the data rail (existing behavior) and no longer hard-navigates. The rail grows two CTAs: primary **"Turn this into a branded email"** → `/email-lab?zip=<zip>` (pre-built, § below); secondary **"Full report"** → `/r/zip-report/[zip]` directly (`/z/[zip]` is RETIRED — it 307-redirects there; hero search's ZIP branch should also point at the report route, one ZIP truth). Keyboard/tap behavior mirrors click; mobile keeps the rail reachable below the map.
 
 ### 1b. Lab seed — the ZIP email prebuild (operator-proposed)
 
@@ -89,7 +89,7 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 **Sources (all verified present in `pg.data_lake` 07/03/2026):**
 - Home Value: `data_lake.zhvi_zip_latest` (`zip_code`, `home_value_latest`, `latest_period`, …) — already read by the app via the typed client in `lib/email/market-context.ts`, proving the PostgREST path works.
 - Flood: `data_lake.fema_nfip_zip_window_agg` (per-ZIP aggregate — exact column mapping verified in the plan against the live schema; metric shown = avg annual insured loss per property, matching the current sublabel).
-- Permits: `lee_building_permits` + `collier_building_permits` are raw row tables — **aggregate at source** (locked rule): one idempotent SQL migration creates view `data_lake.home_map_permits_zip` (per-ZIP permit count, trailing 12 months, both counties) + `GRANT SELECT … TO service_role; NOTIFY pgrst, 'reload schema'` (the dlt→PostgREST grant landmine).
+- Permits: **GAP, verified 07/03/2026** — `lee_building_permits` is the corridor-scoped scrape (288 rows total, 02/25–06/16/2026, zero rows for e.g. 33914), NOT county-wide coverage; the earlier draft of this spec assumed otherwise. The "New Construction" pill therefore has no live per-ZIP source today. Options (operator picks at plan time): (a) swap the pill to **Active Listings / Days on Market** from `active_listings_residential_zip_stats` (live, ZIP grain, verified) — recommended, zero new ingest; (b) keep the pill and ship a county-wide permit ingest first (new lane, blocks Lane B); (c) drop to two pills. Never the mock fixture on a user-facing metric.
 - Stats bar: active-listing count from `data_lake.listing_active_stats` / `active_listings_residential_zip_stats` (whichever holds the county-level count — pinned in plan), median value + top-permits ZIP + range computed in the loader from the rows above. Listing figures cite "SWFL Data Gulf" per the locked citation rule.
 
 **Mechanics:**

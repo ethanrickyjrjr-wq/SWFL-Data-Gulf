@@ -1,3 +1,18 @@
+## 2026-07-03 (main) — Lane B mock shipped (artifact) + 2 spec corrections from real-data probe
+
+Operator asked to SEE the seeded lab before building. Built an artifact mock of /email-lab?zip=33914
+using REAL lake pulls (07/02/2026): ZHVI $421,294 / -5.9% YoY (vintage 05/31/2026), 154 active
+listings / $564,950 median / 152 DOM avg, NFIP $241.5M paid / 3,387 claims (window end 2026).
+Artifact: claude.ai/code/artifact/dbcfd71d-cb8e-4bbc-84b2-624bc0675560. Probe surfaced 2 spec bugs,
+both fixed: (1) /z/[zip] is RETIRED (307 → /r/zip-report/[zip]) — rail door + hero search now point
+at the report route directly; (2) PERMITS GAP — lee_building_permits is the corridor scrape (288
+rows, 02/25–06/16/2026, zero for 33914), NOT county-wide: "New Construction" pill has no live
+per-ZIP source; options in spec (recommended: swap pill to Active Listings/DOM from
+active_listings_residential_zip_stats, verified live at ZIP grain). X verified: value/flood/
+listings per-ZIP. Y needs review: permits sourcing. NOTE: Lane C now BUILT (entry below) — its
+OpenProjectCta claim bridge is live code, so the Lane B/C seam decision leans toward Lane B's
+signed-in path adopting the claim planner with zip-seed.ts as content. Spec still DRAFT.
+
 ## 2026-07-03 (main) — `report-bridge-seo` (Lane C) BUILT + main-build hotfix
 
 Executed the Lane C spec (`2026-07-02-report-bridge-seo-design.md`) as designed: (1) build-bridge
