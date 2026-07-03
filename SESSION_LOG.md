@@ -1,3 +1,17 @@
+## 2026-07-03 (main) — zip_hero_pool_all_brains — design spec written, awaiting plan
+
+Brainstormed the follow-up check `zip_hero_pool_all_brains` (widen the ZIP hero's candidate
+pool beyond housing/flood/permits/census). Probed all 18 packs emitting `grain: "zip"` detail
+tables and found 4-5x overlapping measurements per concept (home value, days-on-market, active
+inventory, composite scores) — advisor review caught that letting every column compete would
+recreate the parent build's "same number three times" defect at pack scale. Resolved via a
+concept-registry design: one ranked slot per concept, primary-source rule (closed/sold beats
+list-side), two approved macro/micro pairs (ZHVI/MLS home value, ZORI/median-rent), one
+composite score (`market_heat_score`) winning over 3 redundant ones, ~17 demoted columns cited
+rail-only. Spec: `docs/superpowers/specs/2026-07-03-zip-hero-pool-all-brains-design.md`
+(commit `5d154f8c`). Next: writing-plans → implementation plan; check stays open until built +
+live-verified.
+
 ## 2026-07-03 (main) — zip_signal_hero_live_verify CLOSED — proved live against swfldatagulf.com
 
 Deploy `bc8e8b6b` confirmed live (Vercel deployment 5302923601, state success). Live evidence:
