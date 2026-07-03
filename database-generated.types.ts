@@ -129,6 +129,39 @@ export interface Database {
         };
         Relationships: [];
       };
+      billing_subscriptions: {
+        Row: {
+          user_id: string;
+          stripe_customer_id: string;
+          stripe_subscription_id: string | null;
+          tier: string;
+          status: string;
+          current_period_end: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          stripe_customer_id: string;
+          stripe_subscription_id?: string | null;
+          tier?: string;
+          status?: string;
+          current_period_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          stripe_customer_id?: string;
+          stripe_subscription_id?: string | null;
+          tier?: string;
+          status?: string;
+          current_period_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       brain_registry: {
         Row: {
           id: string;
