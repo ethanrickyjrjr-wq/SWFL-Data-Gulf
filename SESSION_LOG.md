@@ -1,3 +1,36 @@
+## 2026-07-03 (main) — fix(graphify): writes/reads/fetches edges were silently dropping real data-flow
+
+Operator asked to update graphify with new data paths and whether we can see what flows to the
+website. Ran full `graphify:update` + `:publish` first (clean refresh, republished ops `/graph`
+page — it was 38h stale). While tracing a concrete pipeline→table→api_route→page path to answer
+"what flows to the website," found the `writes` edge extractor (`scripts/graphify-app-nodes.mjs`)
+was matching pipeline→table via `dlt_schema_name` — but `cadence_registry.yaml`'s own header
+comment documents that field as "the schema_name column in `_dlt_loads`, NOT the pipeline_name...
+they sometimes differ," with `count_table`/`freshness_table` as the actual Postgres table
+reference. Confirmed empirically: `dlt_schema_name` resolved 2/41 pipelines to a real table node,
+`count_table`/`freshness_table` resolved 27/41. Switched extraction to prefer those fields, and
+synthesize a `table:` node when a cadence-referenced table has no `CREATE TABLE` in `docs/sql/`
+(same pattern already used for brains/pipelines graphify's own parser misses).
+
+Separately, the `fetches` edge only matched `fetch('/api/...')` where the path literally started
+with `/api/` — missed every real absolute-URL call site (`app/embed/footer-token/page.tsx`'s
+`fetch("https://www.swfldatagulf.com/api/b/master...")`, `lib/email/build-doc.ts`'s
+`` fetch(`${BASE_URL}/api/b/master...`) ``) and every dynamic-route call (`/api/b/${slug}` vs the
+route node's `/api/b/[slug]`). Added a structural segment matcher (route `[param]` or call `${...}`
+matches anything) and let the `/api/` search start anywhere in the call's first line, not just at
+the string's start. Result: `writes` 2→49, `reads` 20→36, `fetches` 60→89; confirmed
+`page:/embed/footer-token` and `lib_module:lib/email/build-doc` now correctly trace to
+`api_route:/api/b/[slug]`.
+
+Committed `scripts/graphify-app-nodes.mjs` locally, NOT pushed (per standing instruction to always
+ask before push). `app/api/mcp/project-tools.ts`/`.test.ts` are mid-edit from another active
+session — left untouched, not staged.
+
+Next: `reads` coverage is still partial (e.g. `zori_swfl` table has a confirmed `writes` edge but
+no brain-side `reads` edge) — the brain-read extractor's regex-based table-const matching has its
+own blind spots; not chased further today (proportion — the two fixes above already answer the
+"what flows to the website" question for the concrete cases checked).
+
 ## 2026-07-03 (main) — fix(zip-shape): PNG card was a solid black box in the seeded ZIP email
 
 Operator flagged the seeded ZIP email's map cutout as an opaque black rounded box (screenshot),

@@ -292,6 +292,34 @@ function extractHooks() {
   return [...seen.values()];
 }
 
+// cadence_registry.yaml's own header comment documents dlt_schema_name as
+// "the schema_name column in _dlt_loads, NOT the pipeline_name" — it's a dlt
+// bookkeeping key, not necessarily the real Postgres table name. The registry
+// carries the actual table reference in count_table/freshness_table
+// ("required for tier-2 dlt entries where dlt_schema_name differs from the
+// actual Postgres table name"). Confirmed empirically: matching on
+// dlt_schema_name alone resolves 2/41 pipelines to a real table node vs 27/41
+// via count_table/freshness_table — use those fields, dlt_schema_name only as
+// a last-resort fallback for entries that set neither.
+function extractCadenceTableRefs() {
+  const cadencePath = join(ROOT, "ingest", "cadence_registry.yaml");
+  if (!existsSync(cadencePath)) return new Map();
+  let doc;
+  try {
+    doc = parseYaml(readFileSync(cadencePath, "utf8"));
+  } catch {
+    return new Map();
+  }
+  const refs = new Map(); // pipeline name → table name
+  for (const p of doc?.pipelines ?? []) {
+    if (!p?.name) continue;
+    const ref = p.count_table || p.freshness_table;
+    const tableName = ref && typeof ref === "string" ? ref.split(".").pop() : p.dlt_schema_name;
+    if (tableName) refs.set(p.name, tableName);
+  }
+  return refs;
+}
+
 function extractTables() {
   // Migrations live in docs/sql/ in this repo (not supabase/migrations/)
   const migDir = join(ROOT, "docs", "sql");
@@ -311,6 +339,20 @@ function extractTables() {
           source_file: relative(ROOT, f).replace(/\\/g, "/"),
         });
       }
+    }
+  }
+  // Tables that are real (a pipeline verifiably writes to them, per cadence
+  // freshness checks) but have no CREATE TABLE in docs/sql — synthesize the
+  // node rather than silently dropping the writes/reads edges that reference
+  // it, same rationale as extractBrains()/extractPipelines() above.
+  for (const tableName of extractCadenceTableRefs().values()) {
+    if (!seen.has(tableName)) {
+      seen.set(tableName, {
+        id: `table:${tableName}`,
+        label: tableName,
+        type: "table",
+        source_file: "ingest/cadence_registry.yaml",
+      });
     }
   }
   return [...seen.values()];
@@ -373,6 +415,33 @@ function extractEdges(allNodes) {
   const nodeIds = new Set(allNodes.map((n) => n.id));
   const edgeKeys = new Set();
   const edges = [];
+  const apiRouteNodes = allNodes.filter((n) => n.type === "api_route");
+
+  // Fetch call sites often interpolate a param the extractor can't resolve
+  // statically — fetch(`/api/b/${slug}`) — while the route NODE id uses
+  // Next.js bracket syntax (api_route:/api/b/[slug]), so a literal-string
+  // match on the two never lines up even though the route is genuinely wired.
+  // Match structurally instead: same segment count, and either side's dynamic
+  // segment ([param] on the route, ${...} in the call) matches anything.
+  function matchDynamicRoute(cleanPath) {
+    const segs = cleanPath.split("/").filter(Boolean);
+    for (const node of apiRouteNodes) {
+      const routeSegs = node.id.slice("api_route:".length).split("/").filter(Boolean);
+      if (routeSegs.length !== segs.length) continue;
+      let ok = true;
+      for (let i = 0; i < segs.length; i++) {
+        const isDynamicRoute = routeSegs[i].startsWith("[") && routeSegs[i].endsWith("]");
+        const isDynamicFetch = segs[i].includes("${");
+        if (isDynamicRoute || isDynamicFetch) continue;
+        if (segs[i] !== routeSegs[i]) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) return node.id;
+    }
+    return null;
+  }
 
   function addEdge(source, target, relation) {
     if (!nodeIds.has(source) || !nodeIds.has(target)) return;
@@ -459,10 +528,25 @@ function extractEdges(allNodes) {
         }
       }
 
-      // fetches: fetch('/api/...')  — string or template literal start
-      for (const [, path] of content.matchAll(/fetch\(\s*['"`](\/api\/[^'"`?\s#]+)/g)) {
-        if (sourceId && nodeIds.has(`api_route:${path}`)) {
-          addEdge(sourceId, `api_route:${path}`, "fetches");
+      // fetches: fetch('/api/...') — the /api/ path anywhere in the call's
+      // first argument, not just at the string's start. Real call sites
+      // frequently prefix it with an absolute origin or a base-URL variable —
+      // fetch("https://www.swfldatagulf.com/api/b/master...") in
+      // app/embed/footer-token/page.tsx, fetch(`${SITE_URL}/api/b/${slug}...`)
+      // in scripts/email/fetch-digest-data.mts — which a start-anchored match
+      // never catches even though these are real production data-flow edges.
+      for (const [, path] of content.matchAll(/fetch\(\s*['"`]?[^'"`\n]*?(\/api\/[^'"`?\s#]+)/g)) {
+        if (!sourceId) continue;
+        const clean = path.split("?")[0].split("#")[0];
+        const exactId = `api_route:${clean}`;
+        if (nodeIds.has(exactId)) {
+          addEdge(sourceId, exactId, "fetches");
+        } else {
+          // Also try structural match even for a fully-literal call path —
+          // fetch(`${BASE_URL}/api/b/master`) resolves to the concrete
+          // segment "master" against the dynamic route node api_route:/api/b/[slug].
+          const matched = matchDynamicRoute(clean);
+          if (matched) addEdge(sourceId, matched, "fetches");
         }
       }
 
@@ -480,23 +564,13 @@ function extractEdges(allNodes) {
     }
   }
 
-  // writes: pipeline → table via dlt_schema_name in cadence_registry.yaml
-  const cadencePath = join(ROOT, "ingest", "cadence_registry.yaml");
-  if (existsSync(cadencePath)) {
-    try {
-      const yaml = parseYaml(readFileSync(cadencePath, "utf8"));
-      const pipelines = yaml?.pipelines ?? [];
-      for (const p of pipelines) {
-        if (!p?.name || !p?.dlt_schema_name) continue;
-        // dlt_schema_name is the Postgres schema name for the pipeline's tables
-        // Map to a table node if one exists
-        const pipeId = `pipeline:${p.name}`;
-        if (nodeIds.has(pipeId) && nodeIds.has(`table:${p.dlt_schema_name}`)) {
-          addEdge(pipeId, `table:${p.dlt_schema_name}`, "writes");
-        }
-      }
-    } catch (e) {
-      console.warn("  warn: could not parse cadence_registry.yaml:", e.message);
+  // writes: pipeline → table, via count_table/freshness_table (falls back to
+  // dlt_schema_name) in cadence_registry.yaml — see extractCadenceTableRefs()
+  // for why count_table/freshness_table are the correct fields to read.
+  for (const [pipelineName, tableName] of extractCadenceTableRefs()) {
+    const pipeId = `pipeline:${pipelineName}`;
+    if (nodeIds.has(pipeId) && nodeIds.has(`table:${tableName}`)) {
+      addEdge(pipeId, `table:${tableName}`, "writes");
     }
   }
 
