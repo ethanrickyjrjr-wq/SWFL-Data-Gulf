@@ -1,3 +1,21 @@
+## 2026-07-03 (main) — zip_hero_pool_all_brains — built, verified, pushed
+
+Executed the 7-task plan inline (bounded, already fully specced — no subagents needed). Before
+touching code, verified every pack id and `detail_tables` id/cell name the registry references
+(`home_value_zhvi`, `rent_index_latest`, `spread_ratio`, `pending_ratio`, etc. across all 12 packs)
+against live pack source — all matched. Found and fixed a real bug in the committed plan: the
+`median_sale_price` entry (housing-swfl) was missing `pairId: "home_value"`, so
+`pairedEntries()` never formed the ZHVI/MLS footnote cross-reference (caught by the plan's own
+test, which failed until fixed). Combined Tasks 5+6 into one commit — `eslint --max-warnings=0`
+rejects an unused `railContext` destructure, so the page-wiring commit couldn't land standalone
+without a throwaway `_railContext` hack. 5 commits: footnote field, registry+builder (with the
+pairId fix), buildZipCandidates rewired off `HOUSING_METRICS`, generic `buildRegistryTableMap`
+extractor, page wiring + rendering. `bun test lib/zip-report/ lib/figures/` (44 pass) and
+`bunx next build` both clean; zero `refinery/packs/**` files touched (Gate 2/5 not triggered).
+Candidate pool: 4 sources -> 13 zip-grain packs, concept-deduped, 15 new competing signals + 1
+composite + 2 macro/micro pairs, ~16 demoted figures cited in the rail. Next: operator live-
+verifies on prod, then closes `zip_hero_pool_all_brains`.
+
 ## 2026-07-03 (main) — zip_hero_pool_all_brains — implementation plan written, ready to execute
 
 Fixed a real drift in the design spec first: it said the two macro/micro pairs (ZHVI/MLS,
