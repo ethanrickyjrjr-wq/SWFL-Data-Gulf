@@ -1,3 +1,24 @@
+## 2026-07-03 (main) — `author-layout-recipes` BUILT: 10 commits, local, push pending operator OK
+
+Executed the full spec (plan saved: `docs/superpowers/plans/2026-07-03-author-layout-recipes.md`).
+Phase A layout power-up: `list` block across all 3 render engines + lab UI (0cab31b4); authored
+semantic fields overlay_title/overlay_body/band/pad + multi-column & list fill — "Column one"
+placeholder bug dead, prose lint extended to walk columns[]/items[] (51dc44a4); onDark render
+flip via lib/charts/palette WCAG math — dark bands always get light text (990e5cdf). Phase B
+recipes: author-recipes.ts, 5 research-backed recipe families, zero-digits test-enforced,
+advisory-only wiring into authorSystem (dbc14f52). Phase C media: email_media_assets table live
+on prod w/ RLS + gen:types (5b4ee040); media routes PUT-derivative/GET/PATCH/DELETE/POST-pick
+(7f7fadf4); Pexels client + proxy, empty-tolerant keyless (7c3a46ea); MediaPanel in both shells
+(f9fe6d10); ASSET MENU — author id-selects [aN] library images, unknown id drops block, Pexels
+credit rides captions (72ce9d63). Phase D: editorial-letter + magazine-issue seeds (b4adc186);
+CAN-SPAM postal address token + non-blocking lab nudge + lib/email/CLAUDE.md 3→4 correction
+(5f5df89c). Verified: bun test lib/email+lib/pdf 885 pass · bunx next build green.
+⚠ NOTE: 5f5df89c swept in the parallel Lane C session's STAGED rename
+(app/welcome/_components → components/prospect/OpenProjectCta.tsx, 100% identical move) — my
+commit ran against a shared index. Content intact; Lane C's own commit simply won't re-include it.
+OPERATOR: (1) PEXELS_API_KEY → Vercel env (code degrades keyless); (2) push not done (10 commits
+local); (3) `author_layout_recipes_live_verify` stays OPEN until live-send evidence.
+
 ## 2026-07-03 (main) — Lane B spec CORRECTED: seed honors projects/lab unification + Lane C seam flagged
 
 Operator: "i thought we made projects and labs one thing." Correct — Cockpit D4 unified them
