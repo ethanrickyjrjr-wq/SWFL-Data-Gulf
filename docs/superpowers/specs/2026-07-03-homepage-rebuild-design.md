@@ -25,6 +25,7 @@ One page that sells the actual product to the paying audience (professionals) wh
 ## Forks taken (operator was AFK — review these first)
 
 1. **Hero shape — map stays in the hero** (recommended option). The interactive choropleth is our "product in action" shot, it already works, and Altos/Reventure lead with an interactive data visual. Rejected: slim SaaS hero with a screenshot and the map demoted — more conventional, but demotes working code and our most distinctive above-the-fold asset.
+1b. **Map click → lab seed (operator-proposed 07/03, shape finalized while AFK).** Operator: "click on the map and you end up in the lab with basically the zip page built as an email." Adopted with one adjustment: the click **selects** (fills the data rail — no more surprise hard-navigation to `/z/[zip]`) and the rail's **primary CTA** is "Turn this into a branded email" → `/email-lab?zip=<zip>` pre-built; "Full report" → `/z/[zip]` rides secondary. Rationale: map clickers split professional/explorer — the lab door is now the map's headline story, but entered with intent; the pure straight-to-lab variant (operator's literal shape) is one line to flip to if preferred. Two hard requirements attached: the prebuild is **deterministic and cached** (composed from the same live blocks as the ZIP page — never an LLM authoring call per anonymous arrival; AI enters when the visitor edits), and it rides the **existing anonymous-lab taste surface + claim flow** (`app/email-lab/page.tsx` Cockpit D4; `/api/claim` carry-back → OTP → owned project) — no new auth machinery.
 2. **Capture seam — Lane B ships storage, Lane D ships the engine.** The homepage capture posts to a new `POST /api/weekly-read/signup` which upserts into a new public table `weekly_read_signups` (email, zip_code, source, created_at; unique on email+zip). Signups accumulate empty-tolerantly until Lane D's enrollment engine consumes them (ODD-style seam). Rejected: waiting on Lane D's endpoint (couples the lanes) and reusing `/api/waitlist` (wrong shape — no ZIP, wrong semantics).
 
 ## Page structure (top to bottom)
@@ -36,6 +37,15 @@ One page that sells the actual product to the paying audience (professionals) wh
 - Search bar unchanged in behavior: 5-digit ZIP → `/z/[zip]`, free text → `/ask?q=`. Button copy stays an action ("Search").
 - Metric pills reordered; **default metric = Home Value** (locked vision), then New Construction, Flood Risk.
 - Choropleth + data rail + stats bar stay structurally as-is but run on **live lake data** (wiring below). The "Sample data" badge dies; replaced by "Live data · Lee & Collier Counties · as of MM/DD/YYYY" (date stated once, from the freshest source vintage).
+- **Map click = select, then two doors (fork 1b).** Clicking a ZIP fills the data rail (existing behavior) and no longer hard-navigates. The rail grows two CTAs: primary **"Turn this into a branded email"** → `/email-lab?zip=<zip>` (pre-built, § below); secondary **"Full report"** → `/z/[zip]`. Keyboard/tap behavior mirrors click; mobile keeps the rail reachable below the map.
+
+### 1b. Lab seed — the ZIP email prebuild (operator-proposed)
+
+The lab (anonymous taste-surface, Cockpit D4) accepts `?zip=<5-digit>`: on arrival it shows a **pre-built weekly-read-style email for that ZIP** — the ZIP page's story as an email: place name, headline figures (value, permits, flood), short deterministic prose, sources listed, as-of date stated once.
+- **Deterministic + cached:** composed in code from the same live loaders the ZIP page/map use (zip-summary, `zhvi_zip_latest`, permits view, NFIP agg) — cacheable per ZIP per day. **No LLM call on arrival**; drive-by clicks and bots cost ~$0. The AI assistant engages only when the visitor edits — that's the taste moment.
+- **Claim path unchanged:** existing anonymous lab → edit → claim flow (`/api/claim`) turns it into an owned project. No new auth machinery.
+- Invalid/unknown `?zip=` → lab opens in its normal blank state (empty-tolerant, no error page).
+- A "see the full report →" link inside the seeded lab covers anyone who actually wanted the data page.
 
 ### 2. Proof strip (social-proof slot, our version)
 
@@ -89,7 +99,9 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 - `app/page.tsx` — server component, new section order, metadata rewrite (professional-first title/description, no "ZIP-level" phrasing).
 - `lib/landing/load-home-map-data.ts` — NEW server loader (+ unit test with mocked db).
 - `lib/landing/home-map-data.ts` — fixture demoted to fallback; types/color math unchanged.
-- `components/landing/Hero.tsx` — props-driven data, Home Value default, new copy, live badge.
+- `components/landing/Hero.tsx` — props-driven data, Home Value default, new copy, live badge, click=select + two-door rail CTAs (hard-navigation removed).
+- `app/email-lab/page.tsx` + `EmailLabClient.tsx` — accept `?zip=` seed (anonymous path only; signed-in redirect untouched).
+- `lib/email/zip-seed.ts` — NEW deterministic ZIP-email composer reusing existing loaders (+ unit test: known ZIP → doc with figures/sources/as-of; unknown ZIP → null).
 - `components/landing/Capabilities.tsx` — clickable persona cards, competitor strip deleted, CTA retargeted.
 - `components/landing/ProofStrip.tsx`, `DeliverableShowcase.tsx`, `PricingStrip.tsx`, `WeeklyReadCapture.tsx`, `ObjectionFaq.tsx` — NEW.
 - `components/landing/home-explorer.css` — extended for new sections (existing look and feel maintained; `h-full`/`dvh`, never `h-screen`).
@@ -107,9 +119,9 @@ Final CTA repeats the hero's promise (search bar again or "Build one free"), the
 
 - `bun test` for the loader (mocked db: happy path, partial failure → fallback, bounds computed) and signup route validation; tiers strip has no price literals (imports only — `tiers.test.ts` already guards the root).
 - `bunx next build` locally (never bare `npx tsc`) before commit.
-- `homepage_rebuild_live_verify` is **operator-run** post-deploy: live homepage shows Home Value default with live figures + as-of dates, persona cards route to `/ask`, pricing matches `/billing`, capture writes a row, no `#waitlist` anchor remains.
+- `homepage_rebuild_live_verify` is **operator-run** post-deploy: live homepage shows Home Value default with live figures + as-of dates, map click fills the rail and both doors work (primary → seeded lab showing that ZIP's figures with zero LLM spend logged, secondary → `/z/[zip]`), persona cards route to `/ask`, pricing matches `/billing`, capture writes a row, no `#waitlist` anchor remains.
 - Migration verification: row count on `weekly_read_signups` (0 after create), `home_map_permits_zip` returns ≥40 ZIPs with non-zero counts.
 
 ## Out of scope
 
-Weekly-read enrollment/sending (Lane D), per-ZIP subscribe buttons on report pages (Lane C), Stripe mechanics (Lane A), homepage A/B testing, testimonials (none exist — revisit when real ones do), 6-county map asset (current SVG is Lee+Collier; honest badge instead).
+Weekly-read enrollment/sending (Lane D), per-ZIP subscribe buttons on report pages (Lane C), the `/r/zip-report/[zip]` → pre-seeded-project bridge (Lane C — Lane B's lab seed is the map-side door, Lane C's bridge is the report-side door; both target the same lab surface and Lane C should reuse `lib/email/zip-seed.ts`), Stripe mechanics (Lane A), homepage A/B testing, testimonials (none exist — revisit when real ones do), 6-county map asset (current SVG is Lee+Collier; honest badge instead).

@@ -1,3 +1,15 @@
+## 2026-07-03 (main) — Lane B spec UPDATED: map click → lab seed (operator-proposed), select+two-doors shape
+
+Operator proposed mid-review: "click on the map and you end up in the lab with basically the zip
+page built as an email." Probed (RULE 0.5): lab is ALREADY the anonymous taste-surface (Cockpit D4,
+app/email-lab/page.tsx) + claim flow exists (/api/claim carry-back→OTP→owned project) — idea is
+mostly plumbing-backed. Adopted as fork 1b (operator AFK for the shape question): map click =
+SELECT (rail fills, hard-nav to /z/[zip] removed), rail primary CTA "Turn this into a branded
+email" → /email-lab?zip= pre-built, secondary "Full report" → /z/[zip]. Hard requirements: prebuild
+DETERMINISTIC + cached (new lib/email/zip-seed.ts reusing zip-summary/lake loaders — NO LLM call on
+anonymous arrival; AI engages on edit), empty-tolerant bad zips, Lane C reuses zip-seed for the
+report-side bridge. Spec updated in place; pure straight-to-lab variant noted as one-line flip.
+
 ## 2026-07-03 (main) — `homepage-rebuild` (Lane B) SPECCED: professional-first homepage, live-lake map, pricing strip, weekly-read capture (research-backed, DRAFT)
 
 Lane B unblocked by spine spec approval. Brainstormed per RULE 3.5 with a crawl4ai pass (RULE 0.4,
