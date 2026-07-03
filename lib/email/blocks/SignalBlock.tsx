@@ -2,6 +2,7 @@
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, SignalProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
+import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 
 export function SignalBlock({
   props,
@@ -12,6 +13,8 @@ export function SignalBlock({
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const boxBg = props.bgColor ?? "#F0F9FA";
+  // The text sits on the CALLOUT BOX, not the outer section — key the flip there.
+  const onDark = isDarkBg(boxBg);
   const inner = (
     <Section
       style={{
@@ -34,7 +37,9 @@ export function SignalBlock({
               fontFamily: font,
               fontSize: "11px",
               fontWeight: 700,
-              color: globalStyle.accentColor,
+              color: onDark
+                ? legibleAccent(globalStyle.accentColor, boxBg)
+                : globalStyle.accentColor,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               margin: "0 0 6px",
@@ -49,7 +54,7 @@ export function SignalBlock({
               fontFamily: font,
               fontSize: "18px",
               fontWeight: 700,
-              color: globalStyle.primaryColor,
+              color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
               margin: "0 0 6px",
             }}
           >
@@ -62,7 +67,7 @@ export function SignalBlock({
               fontFamily: font,
               fontSize: "14px",
               lineHeight: "1.65",
-              color: globalStyle.textColor,
+              color: onDark ? ON_DARK_BODY : globalStyle.textColor,
               margin: 0,
             }}
           >

@@ -6,6 +6,7 @@
 import { Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, ListProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
+import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 
 export function ListBlock({
   props,
@@ -17,11 +18,13 @@ export function ListBlock({
   const font = fontStack(globalStyle.fontFamily);
   const items = props.items ?? [];
   if (items.length === 0 && !props.title) return null;
+  const bg = props.sectionBg ?? CARD_BG;
+  const onDark = isDarkBg(bg);
 
   return (
     <Section
       style={{
-        backgroundColor: props.sectionBg ?? CARD_BG,
+        backgroundColor: bg,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
@@ -32,7 +35,7 @@ export function ListBlock({
             fontFamily: font,
             fontSize: "17px",
             fontWeight: 700,
-            color: globalStyle.primaryColor,
+            color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
             margin: "0 0 10px",
           }}
         >
@@ -49,7 +52,9 @@ export function ListBlock({
                     fontFamily: font,
                     fontSize: "13px",
                     fontWeight: 700,
-                    color: globalStyle.accentColor,
+                    color: onDark
+                      ? legibleAccent(globalStyle.accentColor, bg)
+                      : globalStyle.accentColor,
                     whiteSpace: "nowrap",
                     verticalAlign: "top",
                     padding: "5px 10px 5px 0",
@@ -64,7 +69,7 @@ export function ListBlock({
                   fontFamily: font,
                   fontSize: "15px",
                   lineHeight: "1.6",
-                  color: globalStyle.textColor,
+                  color: onDark ? ON_DARK_BODY : globalStyle.textColor,
                   verticalAlign: "top",
                   padding: "5px 0",
                   width: "100%",

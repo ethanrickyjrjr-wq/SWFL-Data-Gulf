@@ -11,6 +11,7 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, MultiColumnProps } from "../doc/types";
 import { fontStack, sectionPad, BORDER, CARD_BG } from "./styles";
+import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 
 export function MultiColumnBlock({
   props,
@@ -25,11 +26,13 @@ export function MultiColumnBlock({
   // Desktop column width inside the 600px canvas (minus the 28px section padding).
   const maxW = threeUp ? 176 : 260;
   const minW = threeUp ? 150 : 200;
+  const bg = props.sectionBg ?? CARD_BG;
+  const onDark = isDarkBg(bg);
 
   return (
     <Section
       style={{
-        backgroundColor: props.sectionBg ?? CARD_BG,
+        backgroundColor: bg,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
@@ -70,7 +73,7 @@ export function MultiColumnBlock({
                   fontFamily: font,
                   fontSize: "15px",
                   fontWeight: 700,
-                  color: globalStyle.primaryColor,
+                  color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
                   margin: "0 0 4px",
                 }}
               >
@@ -84,7 +87,7 @@ export function MultiColumnBlock({
                   fontFamily: font,
                   fontSize: "13px",
                   lineHeight: "1.6",
-                  color: globalStyle.textColor,
+                  color: onDark ? ON_DARK_BODY : globalStyle.textColor,
                   margin: 0,
                 }}
               >
@@ -100,7 +103,9 @@ export function MultiColumnBlock({
                     fontFamily: font,
                     fontSize: "13px",
                     fontWeight: 600,
-                    color: globalStyle.accentColor,
+                    color: onDark
+                      ? legibleAccent(globalStyle.accentColor, bg)
+                      : globalStyle.accentColor,
                   }}
                 >
                   {c.linkLabel || "Learn more"} →

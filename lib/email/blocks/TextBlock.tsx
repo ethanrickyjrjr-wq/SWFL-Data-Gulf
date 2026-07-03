@@ -2,6 +2,7 @@
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, TextProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
+import { isDarkBg, ON_DARK_BODY } from "./on-dark";
 
 export function TextBlock({
   props,
@@ -11,10 +12,11 @@ export function TextBlock({
   globalStyle: EmailGlobalStyle;
 }) {
   const font = fontStack(globalStyle.fontFamily);
+  const bg = props.sectionBg ?? CARD_BG;
   const inner = (
     <Section
       style={{
-        backgroundColor: props.sectionBg ?? CARD_BG,
+        backgroundColor: bg,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
@@ -25,7 +27,7 @@ export function TextBlock({
             fontFamily: font,
             fontSize: "16px",
             lineHeight: "1.75",
-            color: globalStyle.textColor,
+            color: isDarkBg(bg) ? ON_DARK_BODY : globalStyle.textColor,
             textAlign: props.align ?? "left",
             margin: 0,
             whiteSpace: "pre-line",
