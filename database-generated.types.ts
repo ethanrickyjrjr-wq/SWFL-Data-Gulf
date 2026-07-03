@@ -2667,6 +2667,60 @@ export interface Database {
         };
         Relationships: [];
       };
+      sourced_figures: {
+        Row: {
+          id: string;
+          scope_kind: string;
+          scope_key: string;
+          metric_key: string;
+          label: string;
+          value_num: number | null;
+          value_text: string | null;
+          unit: string | null;
+          source_name: string;
+          source_url: string;
+          cited_text: string;
+          as_of: string | null;
+          fetched_at: string;
+          expires_at: string;
+          requested_from: string;
+        };
+        Insert: {
+          id?: string;
+          scope_kind: string;
+          scope_key: string;
+          metric_key: string;
+          label: string;
+          value_num?: number | null;
+          value_text?: string | null;
+          unit?: string | null;
+          source_name: string;
+          source_url: string;
+          cited_text?: string;
+          as_of?: string | null;
+          fetched_at?: string;
+          expires_at: string;
+          requested_from?: string;
+        };
+        Update: {
+          id?: string;
+          scope_kind?: string;
+          scope_key?: string;
+          metric_key?: string;
+          label?: string;
+          value_num?: number | null;
+          value_text?: string | null;
+          unit?: string | null;
+          source_name?: string;
+          source_url?: string;
+          cited_text?: string;
+          as_of?: string | null;
+          fetched_at?: string;
+          expires_at?: string;
+          requested_from?: string;
+        };
+        Relationships: [];
+      };
       swfl_inc_announcements: {
         Row: {
           id: string;
