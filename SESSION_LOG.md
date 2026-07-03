@@ -7,6 +7,38 @@ Prime suspect: the running deploy (05:37 UTC today) may predate the PEXELS_API_K
 env vars only land on the NEXT deploy; this push's deploy resolves that too. Verify after
 deploy: re-search, then read runtime logs for `[pexels]` if still empty. (Pushed via detached
 worktree to avoid bundling another session's unpushed display-fix commit.)
+## 2026-07-03 (main) — Answer-text number formatting consistency + teal number highlighting
+
+Operator escalation (verbatim frustration): narrative numbers render inconsistently across
+brains — `30,551` (commas) next to `35810`/`548798` (none), and the same percentage shows
+`43.2%` in prose but `43.20%` in the trailing key_metric citation. Root cause probed: each
+pack (`refinery/packs/*.mts`) reinvented its own local `fmtK`/`fmt1`/nothing for prose numbers,
+with zero connection to `refinery/render/speaker.mts`'s `formatNumericValue` chokepoint (which
+always renders percent at 2 decimals for `key_metrics`). Fix: new shared
+`refinery/packs/lib/number-format.mts` (`fmtInt`/`fmtUsd`/`fmtPct`/`fmtRatio`, `fmtPct` matching
+the chokepoint's 2-decimal convention on purpose) — swept into properties-lee-value,
+properties-collier-value (raw parcel/sales counts, the exact bug from the escalation),
+home-values-swfl, rentals-swfl, env-swfl, macro-swfl, traffic-swfl (AADT), logistics-swfl-nowcast,
+tourism-tdt, sector-credit-swfl, price-distribution-swfl, listing-momentum-swfl (prose/citation
+percent-precision mismatch — the second half of the escalation). Full audit via Explore agent
+covered all 30+ narrative-building packs; clean files and two low-confidence sub-1000-count
+borderlines left untouched (documented in spec). Brainstormed (RULE 3.5) + spec'd new UI
+behavior separately: `components/answer/AnswerText.tsx` — a shared regex tokenizer
+(`tokenizeAnswerText`, pure + tested) that highlights every numeric figure in `text-gulf-teal`
+across answer surfaces, explicitly excluding MM/DD/YYYY dates and letter-fused tokens (3yr, Q4,
+FY2025) via a three-alternative pattern (date / mixed-alnum / number) that avoids a regex
+backtracking bug where a failed lookahead let the scanner re-match mid-token digits. Wired into
+6 of 8 identified surfaces: AskPage, AnswerBlock, ConversationalChat, `/r/[slug]`,
+`/r/cre-swfl/[corridor]`, project ItemDetail. `components/briefcase/BriefcaseChat.tsx` and
+`/r/zip-report/[zip]` were repolith-locked by two other active sessions for the full session —
+still need the same one-line `<AnswerText text={...} />` swap once free. Spec:
+`docs/superpowers/specs/2026-07-03-answer-number-highlight-design.md`. Verified: `bunx tsc -p
+refinery/tsconfig.json --noEmit` clean on every touched pack; `bunx tsc -p tsconfig.json
+--noEmit` shows zero new errors on any touched app/component file (the only 4 project-wide
+errors are pre-existing, from two OTHER active sessions' uncommitted homepage-rebuild files,
+confirmed via `git status`/`git diff --stat`); `bun test refinery/packs` 434/434 pass; new
+`AnswerText.test.tsx` (9/9) + `number-format.test.mts` (5/5) pass; vocab-coverage clean.
+Check opened: `answer_number_highlight_live_verify`.
 
 ## 2026-07-03 (main) — Lane E conversion-furniture SPEC (brainstormed + committed, build registered)
 

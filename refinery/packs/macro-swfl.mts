@@ -7,18 +7,10 @@ import type {
   BrainOutputMetricSource,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
-import {
-  makeBrainInputSource,
-  type BrainInputNormalized,
-} from "../sources/brain-input-source.mts";
-import {
-  blsLausSource,
-  type LausSwflSummary,
-} from "../sources/bls-laus-source.mts";
-import {
-  blsQcewSource,
-  type LaborSwflSummary,
-} from "../sources/bls-qcew-source.mts";
+import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brain-input-source.mts";
+import { blsLausSource, type LausSwflSummary } from "../sources/bls-laus-source.mts";
+import { fmtUsd } from "./lib/number-format.mts";
+import { blsQcewSource, type LaborSwflSummary } from "../sources/bls-qcew-source.mts";
 
 /**
  * macro-swfl — regional macro context for the Southwest Florida market.
@@ -49,10 +41,7 @@ let lastLausFetchedAt: string | null = null;
 let lastQcewSummary: LaborSwflSummary | null = null;
 let lastQcewFetchedAt: string | null = null;
 
-function brainInputFrom(
-  fragments: RawFragment[],
-  upstreamId: string,
-): BrainOutput | null {
+function brainInputFrom(fragments: RawFragment[], upstreamId: string): BrainOutput | null {
   for (const f of fragments) {
     const n = f.normalized as unknown as BrainInputNormalized;
     if (n?.kind === "brain-input" && n.upstream_id === upstreamId) {
@@ -176,9 +165,7 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const coRate = laus.collier_county.unemployment_rate;
   const flRate = laus.fl_state.unemployment_rate;
   const flBase =
-    flRate != null
-      ? `FL state baseline ${fmt(flRate)}%`
-      : "FL state baseline unavailable";
+    flRate != null ? `FL state baseline ${fmt(flRate)}%` : "FL state baseline unavailable";
 
   const facts: SynthesisFact[] = [];
 
@@ -223,8 +210,8 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
         value:
           `BLS QCEW private-sector wages, ${qcew.latest_quarter}: ` +
           [
-            leWage != null ? `Lee County $${leWage}/wk` : null,
-            coWage != null ? `Collier County $${coWage}/wk` : null,
+            leWage != null ? `Lee County ${fmtUsd(leWage)}/wk` : null,
+            coWage != null ? `Collier County ${fmtUsd(coWage)}/wk` : null,
           ]
             .filter(Boolean)
             .join("; "),
@@ -240,10 +227,8 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const macroFl = lastMacroFloridaOutput;
   const laus = lastLausSummary;
   const qcew = lastQcewSummary;
-  const fetchedAt =
-    lastLausFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-  const qcewFetchedAt =
-    lastQcewFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetchedAt = lastLausFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const qcewFetchedAt = lastQcewFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!macroFl && !laus) {
     return {
@@ -307,13 +292,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "intensive",
       units: "%",
       display_format: "percent",
-      source: makeSource(
-        fetchedAt,
-        "LAUCN120710000000003",
-        refMonth,
-        leRate,
-        "%",
-      ),
+      source: makeSource(fetchedAt, "LAUCN120710000000003", refMonth, leRate, "%"),
     });
   }
 
@@ -326,13 +305,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "intensive",
       units: "%",
       display_format: "percent",
-      source: makeSource(
-        fetchedAt,
-        "LAUCN120210000000003",
-        refMonth,
-        coRate,
-        "%",
-      ),
+      source: makeSource(fetchedAt, "LAUCN120210000000003", refMonth, coRate, "%"),
     });
   }
 
@@ -345,13 +318,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "intensive",
       units: "%",
       display_format: "percent",
-      source: makeSource(
-        fetchedAt,
-        "LAUST120000000000003",
-        refMonth,
-        flRate,
-        "%",
-      ),
+      source: makeSource(fetchedAt, "LAUST120000000000003", refMonth, flRate, "%"),
     });
   }
 
@@ -392,7 +359,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
           qcewFetchedAt,
           "12071",
           qtr,
-          `avg_wkly_wage = $${lePrivate.avg_wkly_wage}/wk`,
+          `avg_wkly_wage = ${fmtUsd(lePrivate.avg_wkly_wage)}/wk`,
         ),
       });
     }
@@ -428,7 +395,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
           qcewFetchedAt,
           "12021",
           qtr,
-          `avg_wkly_wage = $${coPrivate.avg_wkly_wage}/wk`,
+          `avg_wkly_wage = ${fmtUsd(coPrivate.avg_wkly_wage)}/wk`,
         ),
       });
     }
@@ -497,8 +464,7 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   ): "bullish" | "bearish" | "neutral" =>
     d === "rising" ? "bearish" : d === "falling" ? "bullish" : "neutral";
   const primaryDir = metricToBrainDir(leeMetricDir);
-  const direction =
-    primaryDir !== "neutral" ? primaryDir : metricToBrainDir(flMetricDir);
+  const direction = primaryDir !== "neutral" ? primaryDir : metricToBrainDir(flMetricDir);
 
   const prelim = laus.is_preliminary ? " (preliminary)" : "";
   const leeStr =
@@ -509,23 +475,18 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     coRate != null
       ? `Collier County at ${fmt(coRate)}%${coDelta != null ? `, ${coDelta >= 0 ? "+" : ""}${fmt(coDelta)}pp YoY` : ""}`
       : null;
-  const flStr =
-    flRate != null ? `FL state LAUS ${fmt(flRate)}% (benchmark)` : null;
+  const flStr = flRate != null ? `FL state LAUS ${fmt(flRate)}% (benchmark)` : null;
 
   const metricParts = [leeStr, collierStr, flStr].filter(Boolean).join("; ");
 
   let wageClause = "";
-  if (
-    qcew &&
-    qcew.latest_quarter &&
-    qcew.lee_county.private.avg_wkly_wage != null
-  ) {
+  if (qcew && qcew.latest_quarter && qcew.lee_county.private.avg_wkly_wage != null) {
     const w = qcew.lee_county.private;
     const yoy =
       w.avg_wkly_wage_yoy_pct != null
         ? ` (${w.avg_wkly_wage_yoy_pct >= 0 ? "+" : ""}${w.avg_wkly_wage_yoy_pct.toFixed(1)}% YoY)`
         : "";
-    wageClause = ` Private-sector wages in Lee County ran $${w.avg_wkly_wage}/wk in ${qcew.latest_quarter}${yoy}.`;
+    wageClause = ` Private-sector wages in Lee County ran ${fmtUsd(w.avg_wkly_wage!)}/wk in ${qcew.latest_quarter}${yoy}.`;
   }
 
   const conclusion =
@@ -573,11 +534,7 @@ export const macroSwfl: PackDefinition = {
   scope:
     "Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Own sources: BLS LAUS monthly unemployment for Lee + Collier counties; BLS QCEW quarterly private-sector wages + employment for Lee + Collier. Upstream: macro-florida for FL state baseline and confidence propagation.",
   ttl_seconds: 2592000, // 30 days — BLS LAUS is monthly; QCEW is quarterly (cadence_registry bls_laus=30, bls_qcew=90)
-  sources: [
-    makeBrainInputSource("macro-florida"),
-    blsLausSource,
-    blsQcewSource,
-  ],
+  sources: [makeBrainInputSource("macro-florida"), blsLausSource, blsQcewSource],
   input_brains: [{ id: "macro-florida", edge_type: "input" }],
   fitScore: (): number => 8,
   compositeCutoff: 0,

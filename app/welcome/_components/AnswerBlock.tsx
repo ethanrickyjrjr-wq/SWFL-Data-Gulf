@@ -1,6 +1,7 @@
 import type { WelcomeState } from "@/lib/welcome/frames";
 
 import { CitationList } from "@/components/CitationList";
+import { AnswerText } from "@/components/answer/AnswerText";
 import { FreshnessBadge } from "./FreshnessBadge";
 import { MetricCard } from "./MetricCard";
 import { MetricCardSkeleton } from "./MetricCardSkeleton";
@@ -47,7 +48,7 @@ export function AnswerBlock({ state }: { state: WelcomeState }) {
 
             {prose ? (
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
-                {prose}
+                <AnswerText text={prose} />
                 {status === "streaming" ? (
                   <span
                     className="ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse bg-[var(--brand-primary,#3DC9C0)] align-middle"

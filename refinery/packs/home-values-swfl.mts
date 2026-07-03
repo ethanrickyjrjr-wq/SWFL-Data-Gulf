@@ -9,6 +9,7 @@ import type {
 } from "../types/brain-output.mts";
 import { zhviZipLatestSource, type ZhviZipLatestRow } from "../sources/zhvi-zip-latest-source.mts";
 import { env } from "../config/env.mts";
+import { fmtUsd } from "./lib/number-format.mts";
 
 const BRAIN_ID = "home-values-swfl";
 
@@ -172,7 +173,7 @@ function homeValuesCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     {
       topic: "corpus_overview",
       fact: "Zillow ZHVI SWFL home-value-index corpus",
-      value: `${rows.length.toLocaleString()} rows across ${snap.zips_covered} ZIPs through ${snap.regional_latest_period}. Regional median home value = $${snap.regional_median_home_value.toFixed(0)}, regional median YoY = ${yoyStr}.`,
+      value: `${rows.length.toLocaleString()} rows across ${snap.zips_covered} ZIPs through ${snap.regional_latest_period}. Regional median home value = ${fmtUsd(snap.regional_median_home_value)}, regional median YoY = ${yoyStr}.`,
       source_fragment_ids: [],
     },
   ];
@@ -333,7 +334,7 @@ function homeValuesOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   // ── Conclusion prose ──
   const yoyDisplay =
     snap.regional_median_yoy_pct === null ? "n/a" : `${snap.regional_median_yoy_pct.toFixed(2)}%`;
-  const valueDisplay = `$${snap.regional_median_home_value.toFixed(0)}`;
+  const valueDisplay = fmtUsd(snap.regional_median_home_value);
   const heatList =
     topHeating
       .map(

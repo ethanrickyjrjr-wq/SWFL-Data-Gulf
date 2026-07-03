@@ -11,6 +11,7 @@ import {
   type PriceDistributionSummary,
   type PriceDistributionCounty,
 } from "../sources/price-distribution-source.mts";
+import { fmtPct } from "./lib/number-format.mts";
 
 const SOURCE_ID = "price_distribution_swfl";
 
@@ -202,10 +203,10 @@ function priceDistributionOutputProducer(_out: PackOutput): BrainOutputProducerR
 
   const conclusion =
     `Of ${region.total.toLocaleString("en-US")} active SWFL for-sale listings (as of ${asOf}), ` +
-    `${pct(region.entry, region.total)}% are priced under $300k, ` +
-    `${pct(region.mid, region.total)}% $300k–$600k, ` +
-    `${pct(region.upper, region.total)}% $600k–$1M, and ` +
-    `${pct(region.luxury, region.total)}% at $1M or above. ` +
+    `${fmtPct(pct(region.entry, region.total))} are priced under $300k, ` +
+    `${fmtPct(pct(region.mid, region.total))} $300k–$600k, ` +
+    `${fmtPct(pct(region.upper, region.total))} $600k–$1M, and ` +
+    `${fmtPct(pct(region.luxury, region.total))} at $1M or above. ` +
     `By county: ${buckets
       .map((b) => `${b.county} ${b.total.toLocaleString("en-US")}`)
       .join(", ")}.`;
@@ -276,7 +277,7 @@ export const priceDistributionSwfl: PackDefinition = {
         fact: "SWFL for-sale listing price distribution ",
         value:
           `${total.toLocaleString("en-US")} active for-sale listings across ${buckets.length} counties; ` +
-          `${pct(entry, total)}% priced under $300k. As of ${lastSummary.captured_date ?? "latest"}.`,
+          `${fmtPct(pct(entry, total))} priced under $300k. As of ${lastSummary.captured_date ?? "latest"}.`,
         source_fragment_ids: [],
       },
     ];

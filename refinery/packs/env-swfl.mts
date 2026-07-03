@@ -37,6 +37,7 @@ import {
 } from "../lib/swfl-geo.mts";
 import { env } from "../config/env.mts";
 import { medianOf } from "../lib/stats.mts";
+import { fmtUsd } from "./lib/number-format.mts";
 
 /**
  * env-swfl — Southwest Florida flood-hazard exposure derived directly from
@@ -910,7 +911,7 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         url: source.url,
         fetched_at: source.fetched_at,
         tier: 1,
-        citation: `Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = ${z.aal_usd_per_insured_property} USD/yr; median building value = ${z.median_building_property_value_usd} USD; 8% cap-rate assumption. Source: ${source.citation}`,
+        citation: `Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = ${fmtUsd(z.aal_usd_per_insured_property)} USD/yr; median building value = ${fmtUsd(z.median_building_property_value_usd)} USD; 8% cap-rate assumption. Source: ${source.citation}`,
       },
     });
   }

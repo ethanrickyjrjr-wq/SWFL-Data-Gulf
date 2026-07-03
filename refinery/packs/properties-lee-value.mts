@@ -18,6 +18,7 @@ import {
   type LeeSummaryNormalized,
 } from "../sources/lee-market-source.mts";
 import { env } from "../config/env.mts";
+import { fmtInt, fmtPct, fmtRatio } from "./lib/number-format.mts";
 
 /**
  * properties-lee-value — Lee County Property Appraiser parcel-value direction read.
@@ -239,9 +240,6 @@ function aggregate(
   };
 }
 
-const fmt1 = (n: number): string =>
-  Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
-
 export function directionFromZScore(z: number | null): "bullish" | "bearish" | "neutral" {
   if (z == null) return "neutral";
   if (z >= Z_BULL_THRESHOLD) return "bullish";
@@ -258,11 +256,11 @@ function buildLeepaSource(fetched_at: string, totalParcels: number): BrainOutput
     env.source === "live"
       ? `LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from ` +
         `gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). ` +
-        `Snapshot row count: ${totalParcels} parcels. Pre-aggregated through ` +
+        `Snapshot row count: ${fmtInt(totalParcels)} parcels. Pre-aggregated through ` +
         `data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary.`
       : `LeePA parcel snapshot (fixture; refinery/__fixtures__/properties-lee-value.sample.json), ` +
         `layers 9+10+12 joined on FOLIOID; Lee County. ` +
-        `Snapshot row count: ${totalParcels} parcels (fixture).`;
+        `Snapshot row count: ${fmtInt(totalParcels)} parcels (fixture).`;
   return {
     url,
     fetched_at,
@@ -295,8 +293,8 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
     topic: "corpus_overview",
     fact: "Lee County parcel snapshot — value/use/sale fields joined on FOLIOID",
     value:
-      `${agg.totalParcels} Lee County parcels in snapshot. ` +
-      `${agg.homesteadedParcels} actively homesteaded (cap_difference > 0). ` +
+      `${fmtInt(agg.totalParcels)} Lee County parcels in snapshot. ` +
+      `${fmtInt(agg.homesteadedParcels)} actively homesteaded (cap_difference > 0). ` +
       `Sales-velocity baseline derived from each parcel's LATEST qualified sale across the ` +
       `${BASELINE_YEAR_COUNT}-year window ${agg.baselineYears[0]}-${agg.baselineYears[agg.baselineYears.length - 1]}, ` +
       `current year ${agg.currentYear}.`,
@@ -307,7 +305,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
     facts.push({
       topic: "metric:sales_velocity_per_1k",
       fact: `Lee sales velocity (year ${agg.currentYear})`,
-      value: `${agg.currentSalesCount} qualified sales in ${agg.currentYear} across ${agg.totalParcels} parcels → ${fmt1(agg.velocityCurrentPer1k)} sales per 1,000 parcels.`,
+      value: `${fmtInt(agg.currentSalesCount ?? 0)} qualified sales in ${agg.currentYear} across ${fmtInt(agg.totalParcels)} parcels → ${fmtRatio(agg.velocityCurrentPer1k)} sales per 1,000 parcels.`,
       source_fragment_ids: [],
     });
   }
@@ -317,10 +315,10 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
       topic: "metric:sales_velocity_zscore",
       fact: "Lee sales-velocity z-score (current year vs trailing 3yr)",
       value:
-        `Baseline counts ${agg.baselineYears.map((y, i) => `${y}=${agg.baselineSalesCounts[i]}`).join(", ")}; ` +
-        `mean ${agg.baselineMean != null ? fmt1(agg.baselineMean) : "n/a"}, ` +
-        `population std ${agg.baselineStd != null ? fmt1(agg.baselineStd) : "n/a"}. ` +
-        `Current ${agg.currentSalesCount}. z = ${fmt1(agg.zScore)}.`,
+        `Baseline counts ${agg.baselineYears.map((y, i) => `${y}=${fmtInt(agg.baselineSalesCounts[i]!)}`).join(", ")}; ` +
+        `mean ${agg.baselineMean != null ? fmtRatio(agg.baselineMean) : "n/a"}, ` +
+        `population std ${agg.baselineStd != null ? fmtRatio(agg.baselineStd) : "n/a"}. ` +
+        `Current ${fmtInt(agg.currentSalesCount ?? 0)}. z = ${fmtRatio(agg.zScore!)}.`,
       source_fragment_ids: [],
     });
   }
@@ -329,7 +327,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
     facts.push({
       topic: "metric:soh_gap_median",
       fact: "Lee Save-Our-Homes gap median across homesteaded parcels",
-      value: `Median (just−taxable)/just across ${agg.homesteadedParcels} homesteaded parcels: ${fmt1(agg.sohGapMedianPct)}%.`,
+      value: `Median (just−taxable)/just across ${fmtInt(agg.homesteadedParcels)} homesteaded parcels: ${fmtPct(agg.sohGapMedianPct!)}.`,
       source_fragment_ids: [],
     });
   }
@@ -339,8 +337,8 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
     fact: "Lee total parcel count in snapshot",
     value:
       env.source === "live"
-        ? `${agg.totalParcels} parcels in data_lake.leepa_parcels.`
-        : `${agg.totalParcels} parcels in fixture refinery/__fixtures__/properties-lee-value.sample.json.`,
+        ? `${fmtInt(agg.totalParcels)} parcels in data_lake.leepa_parcels.`
+        : `${fmtInt(agg.totalParcels)} parcels in fixture refinery/__fixtures__/properties-lee-value.sample.json.`,
     source_fragment_ids: [],
   });
 
@@ -378,7 +376,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
       facts.push({
         topic: "metric:lee_homes_sold_per_year",
         fact: `Lee homes sold (year ${mkt.currentYear}, Redfin market-grain)`,
-        value: `${mkt.currentSalesCount} residential closings recorded by Redfin for Lee County in ${mkt.currentYear}.`,
+        value: `${fmtInt(mkt.currentSalesCount)} residential closings recorded by Redfin for Lee County in ${mkt.currentYear}.`,
         source_fragment_ids: [],
       });
     }
@@ -387,10 +385,10 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
         topic: "metric:lee_homes_sold_zscore",
         fact: "Lee homes-sold z-score (Redfin market-grain, current year vs trailing 3yr)",
         value:
-          `Baseline counts ${mkt.baselineYears.map((y, i) => `${y}=${mkt.baselineSalesCounts[i]}`).join(", ")}; ` +
-          `mean ${mkt.baselineMean != null ? fmt1(mkt.baselineMean) : "n/a"}, ` +
-          `population std ${mkt.baselineStd != null ? fmt1(mkt.baselineStd) : "n/a"}. ` +
-          `Current ${mkt.currentSalesCount}. z = ${fmt1(mkt.zScore)}. ` +
+          `Baseline counts ${mkt.baselineYears.map((y, i) => `${y}=${fmtInt(mkt.baselineSalesCounts[i]!)}`).join(", ")}; ` +
+          `mean ${mkt.baselineMean != null ? fmtRatio(mkt.baselineMean) : "n/a"}, ` +
+          `population std ${mkt.baselineStd != null ? fmtRatio(mkt.baselineStd) : "n/a"}. ` +
+          `Current ${fmtInt(mkt.currentSalesCount ?? 0)}. z = ${fmtRatio(mkt.zScore!)}. ` +
           `Market-grain Redfin closed sales — NOT directly comparable to LeePA sales_velocity_zscore (parcel-grain); compare direction, not raw counts.`,
         source_fragment_ids: [],
       });
@@ -399,7 +397,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
       facts.push({
         topic: "metric:lee_median_sale_price_yoy",
         fact: `Lee median sale price YoY (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
-        value: `${mkt.medianSalePriceYoyPct > 0 ? "+" : ""}${fmt1(mkt.medianSalePriceYoyPct)}% year-over-year. Source: Redfin market tracker — NOT LeePA (LeePA last_sale_amount is null).`,
+        value: `${mkt.medianSalePriceYoyPct > 0 ? "+" : ""}${fmtPct(mkt.medianSalePriceYoyPct)} year-over-year. Source: Redfin market tracker — NOT LeePA (LeePA last_sale_amount is null).`,
         source_fragment_ids: [],
       });
     }
@@ -407,7 +405,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
       facts.push({
         topic: "metric:lee_months_of_supply",
         fact: `Lee months of supply (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
-        value: `${fmt1(mkt.monthsOfSupply)} months of supply — inventory vs sales pace (lower = tighter, seller-favorable).`,
+        value: `${fmtRatio(mkt.monthsOfSupply)} months of supply — inventory vs sales pace (lower = tighter, seller-favorable).`,
         source_fragment_ids: [],
       });
     }
@@ -477,7 +475,7 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
       metric: "soh_gap_median_pct",
       value: Math.round(agg.sohGapMedianPct * 10) / 10,
       direction: "stable",
-      label: `Lee Save-Our-Homes gap median (% of just value suppressed for taxation) across ${agg.homesteadedParcels} homesteaded parcels`,
+      label: `Lee Save-Our-Homes gap median (% of just value suppressed for taxation) across ${fmtInt(agg.homesteadedParcels)} homesteaded parcels`,
       variable_type: "intensive",
       units: "percent",
       display_format: "percent",
@@ -626,11 +624,11 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
 
   const conclusionParts: string[] = [];
   conclusionParts.push(
-    `Lee County had ${agg.currentSalesCount ?? 0} qualified parcel sales recorded for ${agg.currentYear} across ${agg.totalParcels} parcels (${agg.velocityCurrentPer1k != null ? fmt1(agg.velocityCurrentPer1k) : "n/a"} per 1,000).`,
+    `Lee County had ${fmtInt(agg.currentSalesCount ?? 0)} qualified parcel sales recorded for ${agg.currentYear} across ${fmtInt(agg.totalParcels)} parcels (${agg.velocityCurrentPer1k != null ? fmtRatio(agg.velocityCurrentPer1k) : "n/a"} per 1,000).`,
   );
   if (agg.zScore != null && agg.baselineMean != null) {
     conclusionParts.push(
-      `Trailing ${BASELINE_YEAR_COUNT}yr baseline (${agg.baselineYears[0]}-${agg.baselineYears[agg.baselineYears.length - 1]}) averaged ${fmt1(agg.baselineMean)} sales/yr; current year sits at z = ${fmt1(agg.zScore)} — ${direction} read on Lee parcel transaction velocity.`,
+      `Trailing ${BASELINE_YEAR_COUNT}yr baseline (${agg.baselineYears[0]}-${agg.baselineYears[agg.baselineYears.length - 1]}) averaged ${fmtRatio(agg.baselineMean)} sales/yr; current year sits at z = ${fmtRatio(agg.zScore)} — ${direction} read on Lee parcel transaction velocity.`,
     );
   } else if (agg.currentSalesCount == null) {
     conclusionParts.push(
@@ -650,7 +648,7 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
   }
   if (agg.sohGapMedianPct != null) {
     conclusionParts.push(
-      `Median Save-Our-Homes gap across ${agg.homesteadedParcels} homesteaded parcels: ${fmt1(agg.sohGapMedianPct)}% of just value suppressed for taxation.`,
+      `Median Save-Our-Homes gap across ${fmtInt(agg.homesteadedParcels)} homesteaded parcels: ${fmtPct(agg.sohGapMedianPct)} of just value suppressed for taxation.`,
     );
   }
 

@@ -9,6 +9,7 @@ import type {
 } from "../types/brain-output.mts";
 import { zoriZipLatestSource, type ZoriZipLatestRow } from "../sources/zori-zip-latest-source.mts";
 import { env } from "../config/env.mts";
+import { fmtUsd } from "./lib/number-format.mts";
 
 const BRAIN_ID = "rentals-swfl";
 
@@ -172,7 +173,7 @@ function rentalsCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     {
       topic: "corpus_overview",
       fact: "Zillow ZORI SWFL rent-index corpus",
-      value: `${rows.length.toLocaleString()} rows across ${snap.zips_covered} ZIPs through ${snap.regional_latest_period}. Regional median rent index = $${snap.regional_median_rent_index.toFixed(0)}, regional median YoY = ${yoyStr}.`,
+      value: `${rows.length.toLocaleString()} rows across ${snap.zips_covered} ZIPs through ${snap.regional_latest_period}. Regional median rent index = ${fmtUsd(snap.regional_median_rent_index)}, regional median YoY = ${yoyStr}.`,
       source_fragment_ids: [],
     },
   ];
@@ -334,7 +335,7 @@ function rentalsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   // ── Conclusion prose ──
   const yoyDisplay =
     snap.regional_median_yoy_pct === null ? "n/a" : `${snap.regional_median_yoy_pct.toFixed(2)}%`;
-  const rentDisplay = `$${snap.regional_median_rent_index.toFixed(0)}`;
+  const rentDisplay = fmtUsd(snap.regional_median_rent_index);
   const heatList =
     topHeating
       .map(

@@ -8,6 +8,7 @@ import { DockChart } from "@/components/highlighter/DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CitationList } from "@/components/CitationList";
 import type { WelcomeSource } from "@/lib/welcome/frames";
+import { AnswerText } from "@/components/answer/AnswerText";
 
 /** The four hardcoded arrival prompts. #1 leads with the recurring-email hook (the
  *  product); #2 is the instant "try it" build; #3 and #4 are conversion prompts. */
@@ -104,7 +105,7 @@ export function ConversationalChat({
                   : "whitespace-pre-wrap text-sm text-text-secondary"
               }
             >
-              {m.content || (busy ? "…" : "")}
+              {m.role === "user" ? m.content : <AnswerText text={m.content || (busy ? "…" : "")} />}
             </p>
           ))}
           {chart && (

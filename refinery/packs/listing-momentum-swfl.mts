@@ -11,6 +11,7 @@ import {
   type ListingMomentumSummary,
   type MomentumRow,
 } from "../sources/listing-momentum-source.mts";
+import { fmtPct } from "./lib/number-format.mts";
 
 const SOURCE_ID = "listing_momentum_swfl";
 
@@ -71,7 +72,7 @@ function listingMomentumOutputProducer(_out: PackOutput): BrainOutputProducerRes
       units: "%",
       display_format: "percent",
       source: makeSource(
-        `${region.price_reduced_share}% of ${fmtK(region.active_listing_count)} active SWFL for-sale listings carry a price reduction, as of ${asOf}`,
+        `${fmtPct(region.price_reduced_share)} of ${fmtK(region.active_listing_count)} active SWFL for-sale listings carry a price reduction, as of ${asOf}`,
         fetchedAt,
         url,
       ),
@@ -88,7 +89,7 @@ function listingMomentumOutputProducer(_out: PackOutput): BrainOutputProducerRes
       units: "%",
       display_format: "percent",
       source: makeSource(
-        `${region.new_listing_share}% of ${fmtK(region.active_listing_count)} active SWFL for-sale listings are newly listed, as of ${asOf}`,
+        `${fmtPct(region.new_listing_share)} of ${fmtK(region.active_listing_count)} active SWFL for-sale listings are newly listed, as of ${asOf}`,
         fetchedAt,
         url,
       ),
@@ -156,12 +157,12 @@ function listingMomentumOutputProducer(_out: PackOutput): BrainOutputProducerRes
 
   const conclusion =
     `Across ${fmtK(region.active_listing_count)} active SWFL for-sale listings (as of ${asOf}), ` +
-    `${region.price_reduced_share ?? "—"}% currently carry a price cut and ` +
-    `${region.new_listing_share ?? "—"}% are newly listed. ` +
+    `${region.price_reduced_share != null ? fmtPct(region.price_reduced_share) : "—"} currently carry a price cut and ` +
+    `${region.new_listing_share != null ? fmtPct(region.new_listing_share) : "—"} are newly listed. ` +
     `By county: ${summary.by_county
       .map(
         (c) =>
-          `${c.county} ${c.price_reduced_share ?? "—"}% cut / ${c.new_listing_share ?? "—"}% new`,
+          `${c.county} ${c.price_reduced_share != null ? fmtPct(c.price_reduced_share) : "—"} cut / ${c.new_listing_share != null ? fmtPct(c.new_listing_share) : "—"} new`,
       )
       .join(", ")}.`;
 

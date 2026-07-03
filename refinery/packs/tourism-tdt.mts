@@ -7,10 +7,7 @@ import type {
   BrainOutputMetricSource,
   BrainOutputProducerResult,
 } from "../types/brain-output.mts";
-import {
-  tourismTdtSource,
-  type TourismTdtNormalized,
-} from "../sources/tourism-tdt-source.mts";
+import { tourismTdtSource, type TourismTdtNormalized } from "../sources/tourism-tdt-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -82,9 +79,7 @@ function tdtRowsFrom(fragments: RawFragment[]): TourismTdtNormalized[] {
   return fragments
     .map((f) => f.normalized as unknown as TourismTdtNormalized)
     .filter((n) => n?.kind === "tdt-collection")
-    .filter(
-      (n) => n.period_yyyymm.length === 7 && n.gross_collections_usd !== null,
-    );
+    .filter((n) => n.period_yyyymm.length === 7 && n.gross_collections_usd !== null);
 }
 
 function byPeriodAsc(a: TourismTdtNormalized, b: TourismTdtNormalized): number {
@@ -168,16 +163,12 @@ export function buildSnapshot(rows: TourismTdtNormalized[]): TdtSnapshot {
   const trailing12moUsd = trailingSlice.reduce((s, p) => s + p.combined_usd, 0);
 
   // pre-Ian baseline: best 12-month window from non-zero pre-Ian combined periods
-  const preIanNonZero = swflPeriods.filter(
-    (p) => !p.post_ian && p.combined_usd > 0,
-  );
+  const preIanNonZero = swflPeriods.filter((p) => !p.post_ian && p.combined_usd > 0);
   let preIanBaseline12moUsd: number | null = null;
   if (preIanNonZero.length >= 12) {
     let maxWindow = 0;
     for (let i = 0; i + 12 <= preIanNonZero.length; i++) {
-      const sum = preIanNonZero
-        .slice(i, i + 12)
-        .reduce((s, p) => s + p.combined_usd, 0);
+      const sum = preIanNonZero.slice(i, i + 12).reduce((s, p) => s + p.combined_usd, 0);
       if (sum > maxWindow) maxWindow = sum;
     }
     preIanBaseline12moUsd = maxWindow;
@@ -191,20 +182,14 @@ export function buildSnapshot(rows: TourismTdtNormalized[]): TdtSnapshot {
   const sameMonthHistoricalMeanUsd =
     sameMonthNonZero.length === 0
       ? null
-      : sameMonthNonZero.reduce((s, p) => s + p.combined_usd, 0) /
-        sameMonthNonZero.length;
+      : sameMonthNonZero.reduce((s, p) => s + p.combined_usd, 0) / sameMonthNonZero.length;
 
   // --- Per-county ---
-  const leeRows = rows
-    .filter((r) => r.county.toLowerCase() === "lee")
-    .sort(byPeriodAsc);
-  const collierRows = rows
-    .filter((r) => r.county.toLowerCase() === "collier")
-    .sort(byPeriodAsc);
+  const leeRows = rows.filter((r) => r.county.toLowerCase() === "lee").sort(byPeriodAsc);
+  const collierRows = rows.filter((r) => r.county.toLowerCase() === "collier").sort(byPeriodAsc);
 
   const leeLatest = leeRows.length > 0 ? leeRows[leeRows.length - 1] : null;
-  const collierLatest =
-    collierRows.length > 0 ? collierRows[collierRows.length - 1] : null;
+  const collierLatest = collierRows.length > 0 ? collierRows[collierRows.length - 1] : null;
 
   const leeTrailing = leeRows.slice(-12);
   const collierTrailing = collierRows.slice(-12);
@@ -277,9 +262,7 @@ export function voteTdtDirection(snapshot: TdtSnapshot): {
   const priorUsd = snapshot.priorYear?.combined_usd ?? null;
   // 0-value guard already enforced by priorYear selection (> 0 required).
   const yoyPct =
-    priorUsd !== null && priorUsd > 0
-      ? ((latest.combined_usd - priorUsd) / priorUsd) * 100
-      : null;
+    priorUsd !== null && priorUsd > 0 ? ((latest.combined_usd - priorUsd) / priorUsd) * 100 : null;
 
   const recoveryRatio =
     snapshot.trailing12moUsd !== null &&
@@ -333,9 +316,7 @@ function tourismTdtCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const snapshot = buildSnapshot(rows);
   lastSnapshot = snapshot;
   const sourceFragment = allFragments.find(
-    (f) =>
-      (f.normalized as unknown as TourismTdtNormalized)?.kind ===
-      "tdt-collection",
+    (f) => (f.normalized as unknown as TourismTdtNormalized)?.kind === "tdt-collection",
   );
   lastFetchedAt = sourceFragment?.fetched_at ?? null;
 
@@ -507,9 +488,7 @@ function buildTdtSource(
         : `${trailing[0].period_yyyymm} → ${trailing[trailing.length - 1].period_yyyymm} (${trailing.length} months)`;
   const sameMonthCount = latest
     ? snapshot.swflPeriods.filter(
-        (p) =>
-          monthOf(p.period_yyyymm) === monthOf(latest.period_yyyymm) &&
-          p.combined_usd > 0,
+        (p) => monthOf(p.period_yyyymm) === monthOf(latest.period_yyyymm) && p.combined_usd > 0,
       ).length
     : 0;
   const base =
@@ -521,13 +500,13 @@ function buildTdtSource(
   switch (metricKind) {
     case "latest":
       detail = latest
-        ? ` — SWFL combined ${latest.period_yyyymm} = $${latest.combined_usd.toFixed(2)} (FY ${latest.fiscal_year ?? "?"}, post_ian=${latest.post_ian})`
+        ? ` — SWFL combined ${latest.period_yyyymm} = ${fmtUsdMillions(latest.combined_usd)} (FY ${latest.fiscal_year ?? "?"}, post_ian=${latest.post_ian})`
         : "";
       break;
     case "yoy":
       detail =
         latest && priorYear
-          ? ` — comparing ${latest.period_yyyymm} ($${latest.combined_usd.toFixed(2)}) against ${priorYear.period_yyyymm} ($${priorYear.combined_usd.toFixed(2)})`
+          ? ` — comparing ${latest.period_yyyymm} (${fmtUsdMillions(latest.combined_usd)}) against ${priorYear.period_yyyymm} (${fmtUsdMillions(priorYear.combined_usd)})`
           : "";
       break;
     case "trailing_12mo":
@@ -536,18 +515,18 @@ function buildTdtSource(
     case "post_ian_recovery":
       detail =
         snapshot.preIanBaseline12moUsd !== null
-          ? ` — SWFL trailing 12-month total (${trailingSpan}) ÷ best pre-Ian 12-month window ($${snapshot.preIanBaseline12moUsd.toFixed(2)}; Ian landfall 2022-09-28)`
+          ? ` — SWFL trailing 12-month total (${trailingSpan}) ÷ best pre-Ian 12-month window (${fmtUsdMillions(snapshot.preIanBaseline12moUsd)}; Ian landfall 2022-09-28)`
           : "";
       break;
     case "seasonal_position":
       detail = latest
-        ? ` — SWFL ${latest.period_yyyymm} ($${latest.combined_usd.toFixed(2)}) vs same-calendar-month mean across ${sameMonthCount} non-zero years`
+        ? ` — SWFL ${latest.period_yyyymm} (${fmtUsdMillions(latest.combined_usd)}) vs same-calendar-month mean across ${sameMonthCount} non-zero years`
         : "";
       break;
     case "lee_latest": {
       detail =
         snapshot.leeLatestUsd !== null
-          ? ` — Lee County ${latest?.period_yyyymm ?? "?"} = $${snapshot.leeLatestUsd.toFixed(2)}`
+          ? ` — Lee County ${latest?.period_yyyymm ?? "?"} = ${fmtUsdMillions(snapshot.leeLatestUsd)}`
           : "";
       break;
     }
@@ -566,7 +545,7 @@ function buildTdtSource(
     case "collier_latest": {
       detail =
         snapshot.collierLatestUsd !== null
-          ? ` — Collier County ${latest?.period_yyyymm ?? "?"} = $${snapshot.collierLatestUsd.toFixed(2)}`
+          ? ` — Collier County ${latest?.period_yyyymm ?? "?"} = ${fmtUsdMillions(snapshot.collierLatestUsd)}`
           : "";
       break;
     }
@@ -614,8 +593,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const latestUsd = latest.combined_usd;
   const vote = voteTdtDirection(snapshot);
   const season = seasonLabel(monthOf(latest.period_yyyymm));
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
   const source_url = latest.source_url;
 
   const key_metrics: BrainOutputMetric[] = [];
@@ -644,8 +622,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: METRIC_YOY,
       value: Math.round(vote.yoyPct * 10) / 10,
-      direction:
-        vote.yoyPct > 0 ? "rising" : vote.yoyPct < 0 ? "falling" : "stable",
+      direction: vote.yoyPct > 0 ? "rising" : vote.yoyPct < 0 ? "falling" : "stable",
       label: "Year-over-year delta vs same month prior year (SWFL combined)",
       variable_type: "intensive",
       units: "percent",
@@ -672,22 +649,12 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: METRIC_RECOVERY,
       value: Math.round(vote.recoveryRatio * 100) / 100,
       direction:
-        vote.recoveryRatio >= 0.95
-          ? "rising"
-          : vote.recoveryRatio < 0.85
-            ? "falling"
-            : "stable",
-      label:
-        "Post-Hurricane-Ian recovery ratio (SWFL trailing 12mo ÷ best pre-Ian 12mo)",
+        vote.recoveryRatio >= 0.95 ? "rising" : vote.recoveryRatio < 0.85 ? "falling" : "stable",
+      label: "Post-Hurricane-Ian recovery ratio (SWFL trailing 12mo ÷ best pre-Ian 12mo)",
       variable_type: "intensive",
       units: "ratio",
       display_format: "ratio",
-      source: buildTdtSource(
-        "post_ian_recovery",
-        snapshot,
-        fetched_at,
-        source_url,
-      ),
+      source: buildTdtSource("post_ian_recovery", snapshot, fetched_at, source_url),
     });
   }
 
@@ -697,21 +664,12 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: METRIC_SEASONAL,
       value: Math.round(seasonalPosition * 100) / 100,
       direction:
-        seasonalPosition > 1.05
-          ? "rising"
-          : seasonalPosition < 0.95
-            ? "falling"
-            : "stable",
+        seasonalPosition > 1.05 ? "rising" : seasonalPosition < 0.95 ? "falling" : "stable",
       label: "Seasonal position vs same-month historical mean (SWFL combined)",
       variable_type: "intensive",
       units: "ratio",
       display_format: "ratio",
-      source: buildTdtSource(
-        "seasonal_position",
-        snapshot,
-        fetched_at,
-        source_url,
-      ),
+      source: buildTdtSource("seasonal_position", snapshot, fetched_at, source_url),
     });
   }
 
@@ -739,12 +697,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "extensive",
       units: "USD",
       display_format: "currency",
-      source: buildTdtSource(
-        "lee_trailing_12mo",
-        snapshot,
-        fetched_at,
-        source_url,
-      ),
+      source: buildTdtSource("lee_trailing_12mo", snapshot, fetched_at, source_url),
     });
   }
 
@@ -757,12 +710,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "extensive",
       units: "USD/month",
       display_format: "currency",
-      source: buildTdtSource(
-        "collier_latest",
-        snapshot,
-        fetched_at,
-        source_url,
-      ),
+      source: buildTdtSource("collier_latest", snapshot, fetched_at, source_url),
     });
   }
 
@@ -775,12 +723,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "extensive",
       units: "USD",
       display_format: "currency",
-      source: buildTdtSource(
-        "collier_trailing_12mo",
-        snapshot,
-        fetched_at,
-        source_url,
-      ),
+      source: buildTdtSource("collier_trailing_12mo", snapshot, fetched_at, source_url),
     });
   }
 
@@ -791,9 +734,7 @@ function tourismTdtOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     `SWFL TDT collections (Lee + Collier combined) for ${latest.period_yyyymm} (${season} season): ${fmtUsdMillions(latestUsd)}.`,
   );
   if (vote.yoyPct !== null) {
-    conclusionParts.push(
-      `Year-over-year ${fmtPct(vote.yoyPct)} against same month prior year.`,
-    );
+    conclusionParts.push(`Year-over-year ${fmtPct(vote.yoyPct)} against same month prior year.`);
   }
   if (vote.recoveryRatio !== null) {
     conclusionParts.push(

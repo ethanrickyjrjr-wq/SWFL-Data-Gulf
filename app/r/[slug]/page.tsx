@@ -28,6 +28,7 @@ import { reportTrail } from "@/lib/nav/breadcrumbs";
 import { ReportChart } from "../../../components/charts/ReportChart";
 import { ReportHighlightBridge } from "../../../components/highlighter/ReportHighlightBridge";
 import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
+import { AnswerText } from "../../../components/answer/AnswerText";
 import { PrintButton } from "../../../components/PrintButton";
 import DigestSubscribe from "../../../components/email/DigestSubscribe";
 import { CRESummaryBoxes, CRECorridorBreakdown } from "../cre-swfl/CREMetricsExplorer";
@@ -197,7 +198,9 @@ export default async function ReportPage({ params }: PageProps) {
           <Stat label="Strength" value={`${display.magnitudePct}%`} />
           <PrintButton reportId={slug} />
         </div>
-        <p className="mt-6 text-lg leading-8 text-gray-200">{display.conclusion}</p>
+        <p className="mt-6 text-lg leading-8 text-gray-200">
+          <AnswerText text={display.conclusion} />
+        </p>
       </section>
 
       {/* The at-a-glance chart. For cre-swfl this is the sector-clickable

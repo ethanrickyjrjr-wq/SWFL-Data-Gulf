@@ -9,6 +9,7 @@ import { asOfFromToken } from "@/lib/project/as-of";
 import { cleanCitation } from "@/lib/citations/clean-url";
 import { CollisionChip } from "@/components/project/CollisionChip";
 import { FrozenSnapshotNote } from "@/components/project/FrozenSnapshotNote";
+import { AnswerText } from "@/components/answer/AnswerText";
 import type { SavedChart } from "./types";
 import dynamic from "next/dynamic";
 const PdfViewer = dynamic(() => import("@/lib/pdf/PdfViewer").then((m) => m.PdfViewer), {
@@ -121,7 +122,9 @@ export function ItemDetail({
       return (
         <div>
           <p className="text-sm font-medium text-white">{item.question}</p>
-          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-300">{item.answer}</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-300">
+            <AnswerText text={item.answer} />
+          </p>
           <AsOf token={item.freshness_token} />
         </div>
       );

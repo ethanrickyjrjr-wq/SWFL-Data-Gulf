@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useConverse } from "@/lib/assistant/use-converse";
+import { AnswerText } from "@/components/answer/AnswerText";
 
 const STARTERS = [
   "Is Fort Myers Beach a good buy right now?",
@@ -128,7 +129,7 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
               ) : (
                 <>
                   <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">
-                    {answer}
+                    <AnswerText text={answer} />
                     {streaming && (
                       <span className="inline-block w-1.5 h-4 bg-gulf-teal ml-1 animate-pulse rounded-sm" />
                     )}

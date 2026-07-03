@@ -13,6 +13,7 @@ import {
   type TrafficCohortYoYNormalized,
 } from "../sources/fdot-source.mts";
 import { env } from "../config/env.mts";
+import { fmtInt } from "./lib/number-format.mts";
 
 /**
  * traffic-swfl — FDOT AADT (Annual Average Daily Traffic) for SWFL corridors.
@@ -69,17 +70,13 @@ interface TrafficAggregates {
 let lastAggregate: TrafficAggregates | null = null;
 let lastFetchedAt: string | null = null;
 
-function countyYearsFrom(
-  fragments: RawFragment[],
-): TrafficCountyYearNormalized[] {
+function countyYearsFrom(fragments: RawFragment[]): TrafficCountyYearNormalized[] {
   return fragments
     .map((f) => f.normalized as unknown as TrafficCountyYearNormalized)
     .filter((n) => n?.kind === "fdot-county-year");
 }
 
-function cohortFrom(
-  fragments: RawFragment[],
-): TrafficCohortYoYNormalized | null {
+function cohortFrom(fragments: RawFragment[]): TrafficCohortYoYNormalized | null {
   const match = fragments
     .map((f) => f.normalized as unknown as TrafficCohortYoYNormalized)
     .find((n) => n?.kind === "fdot-cohort-yoy");
@@ -91,9 +88,7 @@ function weightedAvgAcrossCounties(
   counties: readonly string[],
   year: number,
 ): { avg: number; segmentCount: number } | null {
-  const inScope = buckets.filter(
-    (b) => counties.includes(b.county) && b.year === year,
-  );
+  const inScope = buckets.filter((b) => counties.includes(b.county) && b.year === year);
   if (inScope.length === 0) return null;
   let weighted = 0;
   let totalLen = 0;
@@ -112,9 +107,7 @@ function medianTfctrAcrossCounties(
   counties: readonly string[],
   year: number,
 ): number | null {
-  const inScope = buckets.filter(
-    (b) => counties.includes(b.county) && b.year === year,
-  );
+  const inScope = buckets.filter((b) => counties.includes(b.county) && b.year === year);
   if (inScope.length === 0) return null;
   // Length-weighted median is hard without raw segments; the source already
   // computed per-county median TFCTR, so we report a length-weighted MEAN of
@@ -132,16 +125,8 @@ function aggregate(
   buckets: TrafficCountyYearNormalized[],
   cohort: TrafficCohortYoYNormalized | null,
 ): TrafficAggregates {
-  const latest = weightedAvgAcrossCounties(
-    buckets,
-    BRAIN_COUNTIES,
-    LATEST_FDOT_YEAR,
-  );
-  const base5yr = weightedAvgAcrossCounties(
-    buckets,
-    BRAIN_COUNTIES,
-    FIVE_YEAR_BASE,
-  );
+  const latest = weightedAvgAcrossCounties(buckets, BRAIN_COUNTIES, LATEST_FDOT_YEAR);
+  const base5yr = weightedAvgAcrossCounties(buckets, BRAIN_COUNTIES, FIVE_YEAR_BASE);
 
   let cagrPct: number | null = null;
   if (latest && base5yr && base5yr.avg > 0) {
@@ -149,20 +134,10 @@ function aggregate(
     cagrPct = (Math.pow(ratio, 1 / WINDOW_GAP) - 1) * 100;
   }
 
-  const ianBase = weightedAvgAcrossCounties(
-    buckets,
-    IAN_COUNTIES,
-    IAN_BASELINE_YEAR,
-  );
-  const ianLatest = weightedAvgAcrossCounties(
-    buckets,
-    IAN_COUNTIES,
-    LATEST_FDOT_YEAR,
-  );
+  const ianBase = weightedAvgAcrossCounties(buckets, IAN_COUNTIES, IAN_BASELINE_YEAR);
+  const ianLatest = weightedAvgAcrossCounties(buckets, IAN_COUNTIES, LATEST_FDOT_YEAR);
   const ianRecovery =
-    ianBase && ianLatest && ianBase.avg > 0
-      ? (ianLatest.avg / ianBase.avg) * 100
-      : null;
+    ianBase && ianLatest && ianBase.avg > 0 ? (ianLatest.avg / ianBase.avg) * 100 : null;
 
   return {
     latestAvgAadt: latest?.avg ?? null,
@@ -174,11 +149,7 @@ function aggregate(
     yoyPct: cohort?.yoy_pct ?? null,
     cohortSize: cohort?.cohort_size ?? 0,
     cagrPct,
-    medianTfctr: medianTfctrAcrossCounties(
-      buckets,
-      BRAIN_COUNTIES,
-      LATEST_FDOT_YEAR,
-    ),
+    medianTfctr: medianTfctrAcrossCounties(buckets, BRAIN_COUNTIES, LATEST_FDOT_YEAR),
     ianRecoveryIndex: ianRecovery,
     ianBaseAadt: ianBase?.avg ?? null,
     ianLatestAadt: ianLatest?.avg ?? null,
@@ -189,9 +160,7 @@ function aggregate(
 const fmt1 = (n: number): string =>
   Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
 
-export function directionFromYoY(
-  yoyPct: number | null,
-): "bullish" | "bearish" | "neutral" {
+export function directionFromYoY(yoyPct: number | null): "bullish" | "bearish" | "neutral" {
   if (yoyPct == null) return "neutral";
   if (yoyPct >= YOY_BULL_THRESHOLD) return "bullish";
   if (yoyPct <= YOY_BEAR_THRESHOLD) return "bearish";
@@ -207,10 +176,7 @@ function metricDirectionFromValue(
   return posMeans === "rising" ? "falling" : "rising";
 }
 
-function buildFdotSource(
-  fetched_at: string,
-  segmentCount: number,
-): BrainOutputMetricSource {
+function buildFdotSource(fetched_at: string, segmentCount: number): BrainOutputMetricSource {
   const url =
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)`
@@ -254,7 +220,7 @@ function trafficCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     facts.push({
       topic: "metric:aadt_swfl_avg",
       fact: "SWFL length-weighted average AADT (latest year)",
-      value: `Length-weighted average AADT across Lee + Collier in ${LATEST_FDOT_YEAR}: ${fmt1(agg.latestAvgAadt)} vehicles/day.`,
+      value: `Length-weighted average AADT across Lee + Collier in ${LATEST_FDOT_YEAR}: ${fmtInt(agg.latestAvgAadt)} vehicles/day.`,
       source_fragment_ids: [],
     });
   }
@@ -300,8 +266,7 @@ function trafficCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 
 function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const agg = lastAggregate;
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (!agg || agg.latestAvgAadt == null) {
     return {
@@ -401,12 +366,11 @@ function trafficOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   //     master's rollup still sees us as a low-weight contributor rather than a hard zero.
   //     Direction stays "neutral" in that path, so the 0.3 only shows up as a tie-breaker
   //     in voteDirection, not as a directional vote.
-  const magnitude =
-    agg.yoyPct == null ? 0.3 : Math.min(1, Math.abs(agg.yoyPct) / 10);
+  const magnitude = agg.yoyPct == null ? 0.3 : Math.min(1, Math.abs(agg.yoyPct) / 10);
 
   const conclusionParts: string[] = [];
   conclusionParts.push(
-    `SWFL (Lee + Collier) length-weighted AADT in ${LATEST_FDOT_YEAR} averaged ${fmt1(agg.latestAvgAadt)} vehicles/day across ${agg.segmentCountLatest} FDOT segments.`,
+    `SWFL (Lee + Collier) length-weighted AADT in ${LATEST_FDOT_YEAR} averaged ${fmtInt(agg.latestAvgAadt)} vehicles/day across ${agg.segmentCountLatest} FDOT segments.`,
   );
   if (agg.yoyPct != null) {
     conclusionParts.push(

@@ -16,11 +16,9 @@ import {
   flDorSalesTaxSource,
   type SalesTaxNormalized,
 } from "../sources/fl-dor-sales-tax-source.mts";
-import {
-  makeBrainInputSource,
-  type BrainInputNormalized,
-} from "../sources/brain-input-source.mts";
+import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brain-input-source.mts";
 import { env } from "../config/env.mts";
+import { fmtInt } from "./lib/number-format.mts";
 
 /**
  * sector-credit-swfl — "What sectors should I lend into in SWFL right now?"
@@ -100,17 +98,14 @@ let lastSalesTaxSnapshot: SalesTaxSnapshot | null = null;
  * span, and underlying federal source so the receipt is self-contained.
  */
 function buildSectorSource(
-  scope:
-    | { kind: "swfl_all" }
-    | { kind: "sector"; naics_2digit: string; label: string },
+  scope: { kind: "swfl_all" } | { kind: "sector"; naics_2digit: string; label: string },
   sector: SectorAggregate | null,
   fetched_at: string,
   since_fy: number,
 ): BrainOutputMetricSource {
   const fyClause = `&approval_fy=gte.${since_fy}`;
   const countyClause = "&project_county=in.(LEE,COLLIER)";
-  const naicsClause =
-    scope.kind === "sector" ? `&naics_code=like.${scope.naics_2digit}%25` : "";
+  const naicsClause = scope.kind === "sector" ? `&naics_code=like.${scope.naics_2digit}%25` : "";
   const url =
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/sba_loans_by_naics_county?select=*${countyClause}${fyClause}${naicsClause}`
@@ -120,7 +115,7 @@ function buildSectorSource(
   const fySpan = `FY ${since_fy}+`;
   const sectorDetail =
     sector !== null
-      ? ` — ${sector.label} (NAICS ${sector.naics_2digit}): ${sector.n_chargeoffs} charged off of ${sector.resolved} resolved loans (${sector.n_loans_total} total approved across ${sector.sample_brands} sub-industries; $${(sector.total_approved / 1_000_000).toFixed(1)}M gross approved capital)`
+      ? ` — ${sector.label} (NAICS ${sector.naics_2digit}): ${fmtInt(sector.n_chargeoffs)} charged off of ${fmtInt(sector.resolved)} resolved loans (${fmtInt(sector.n_loans_total)} total approved across ${sector.sample_brands} sub-industries; $${(sector.total_approved / 1_000_000).toFixed(1)}M gross approved capital)`
       : "";
   const citation =
     `SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV ` +
@@ -174,10 +169,7 @@ function rowsFrom(fragments: RawFragment[]): SectorCreditNormalized[] {
     .filter((n) => n?.kind === "sector-credit-row");
 }
 
-function brainInputFrom(
-  fragments: RawFragment[],
-  upstreamId: string,
-): BrainOutput | null {
+function brainInputFrom(fragments: RawFragment[], upstreamId: string): BrainOutput | null {
   for (const f of fragments) {
     const n = f.normalized as unknown as BrainInputNormalized;
     if (n?.kind === "brain-input" && n.upstream_id === upstreamId) {
@@ -243,10 +235,7 @@ function salesTaxRowsFrom(fragments: RawFragment[]): SalesTaxNormalized[] {
 
 function buildSalesTaxSnapshot(rows: SalesTaxNormalized[]): SalesTaxSnapshot {
   // Sum all kind_codes per (county, period), then combine Lee + Collier per period.
-  const byPeriod = new Map<
-    string,
-    { lee: number; collier: number; source_url: string }
-  >();
+  const byPeriod = new Map<string, { lee: number; collier: number; source_url: string }>();
   for (const r of rows) {
     if (r.taxable_sales_usd == null) continue;
     const cur = byPeriod.get(r.period_yyyymm) ?? {
@@ -267,8 +256,7 @@ function buildSalesTaxSnapshot(rows: SalesTaxNormalized[]): SalesTaxSnapshot {
       source_url: v.source_url,
     }));
 
-  const latest =
-    swflPeriods.length > 0 ? swflPeriods[swflPeriods.length - 1] : null;
+  const latest = swflPeriods.length > 0 ? swflPeriods[swflPeriods.length - 1] : null;
   const priorYearPeriod = latest
     ? (() => {
         const [yy, mm] = latest.period_yyyymm.split("-");
@@ -281,16 +269,12 @@ function buildSalesTaxSnapshot(rows: SalesTaxNormalized[]): SalesTaxSnapshot {
 
   const last12 = swflPeriods.slice(-12);
   const trailing12moUsd =
-    last12.length === 12
-      ? last12.reduce((s, p) => s + p.swfl_total_usd, 0)
-      : null;
+    last12.length === 12 ? last12.reduce((s, p) => s + p.swfl_total_usd, 0) : null;
 
   return { swflPeriods, latest, priorYear, trailing12moUsd };
 }
 
-function sectorCreditCorpusSummary(
-  allFragments: RawFragment[],
-): SynthesisFact[] {
+function sectorCreditCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const rows = rowsFrom(allFragments);
   const franchise = brainInputFrom(allFragments, "franchise-outcomes");
   const macroUs = brainInputFrom(allFragments, "macro-us");
@@ -306,9 +290,7 @@ function sectorCreditCorpusSummary(
   // outputProducer can rebuild the exact PostgREST query URL the source ran.
   const firstRow = rows[0];
   const sectorFragment = allFragments.find(
-    (f) =>
-      (f.normalized as unknown as SectorCreditNormalized)?.kind ===
-      "sector-credit-row",
+    (f) => (f.normalized as unknown as SectorCreditNormalized)?.kind === "sector-credit-row",
   );
   lastFetchedAt = sectorFragment?.fetched_at ?? null;
   lastSinceFy = firstRow?.since_fy ?? null;
@@ -317,19 +299,14 @@ function sectorCreditCorpusSummary(
 
   const sectors = lastSectors;
   const rankable = sectors.filter((s) => s.resolved >= RANKING_MIN_RESOLVED);
-  const sortedSafe = [...rankable].sort(
-    (a, b) => a.rate_resolved - b.rate_resolved,
-  );
-  const sortedRisk = [...rankable].sort(
-    (a, b) => b.rate_resolved - a.rate_resolved,
-  );
+  const sortedSafe = [...rankable].sort((a, b) => a.rate_resolved - b.rate_resolved);
+  const sortedRisk = [...rankable].sort((a, b) => b.rate_resolved - a.rate_resolved);
 
   const totalLoans = sectors.reduce((s, x) => s + x.n_loans_total, 0);
   const totalResolved = sectors.reduce((s, x) => s + x.resolved, 0);
   const totalChargeoffs = sectors.reduce((s, x) => s + x.n_chargeoffs, 0);
   const totalApproved = sectors.reduce((s, x) => s + x.total_approved, 0);
-  const overallRate =
-    totalResolved === 0 ? 0 : (totalChargeoffs / totalResolved) * 100;
+  const overallRate = totalResolved === 0 ? 0 : (totalChargeoffs / totalResolved) * 100;
 
   const facts: SynthesisFact[] = [];
 
@@ -339,7 +316,7 @@ function sectorCreditCorpusSummary(
     fact: "SBA loan corpus — every 2-digit NAICS sector with Lee & Collier county loan activity",
     value:
       `${sectors.length} 2-digit NAICS sectors represented across Lee & Collier counties. ` +
-      `${totalLoans} total SBA loans, ${totalResolved} resolved (${totalChargeoffs} charged off, ${totalResolved - totalChargeoffs} paid in full), ` +
+      `${fmtInt(totalLoans)} total SBA loans, ${fmtInt(totalResolved)} resolved (${fmtInt(totalChargeoffs)} charged off, ${fmtInt(totalResolved - totalChargeoffs)} paid in full), ` +
       `${usdM(totalApproved)} in gross approved capital. ` +
       `Overall resolved-loan charge-off rate across all sectors: ${pct(overallRate)}%. ` +
       `Charge-off rates throughout this brain use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)) — never total loans — to keep them comparable with the franchise-outcomes brain.`,
@@ -352,7 +329,7 @@ function sectorCreditCorpusSummary(
     const named = top
       .map(
         (s) =>
-          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${s.n_chargeoffs} of ${s.resolved} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)`,
+          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${fmtInt(s.n_chargeoffs)} of ${fmtInt(s.resolved)} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)`,
       )
       .join("; ");
     facts.push({
@@ -369,7 +346,7 @@ function sectorCreditCorpusSummary(
     const named = top
       .map(
         (s) =>
-          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${s.n_chargeoffs} of ${s.resolved} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)`,
+          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${fmtInt(s.n_chargeoffs)} of ${fmtInt(s.resolved)} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)`,
       )
       .join("; ");
     facts.push({
@@ -385,7 +362,7 @@ function sectorCreditCorpusSummary(
     facts.push({
       topic: `metric:sector_${s.naics_2digit}_chargeoff_rate`,
       fact: `${s.label} (NAICS ${s.naics_2digit}) resolved charge-off rate`,
-      value: `${s.label} — ${pct(s.rate_resolved)}% resolved-loan charge-off rate (${s.n_chargeoffs} charged off out of ${s.resolved} resolved loans; ${s.n_loans_total} total loans approved including still-active; ${usdM(s.total_approved)} gross approved capital).`,
+      value: `${s.label} — ${pct(s.rate_resolved)}% resolved-loan charge-off rate (${fmtInt(s.n_chargeoffs)} charged off out of ${fmtInt(s.resolved)} resolved loans; ${fmtInt(s.n_loans_total)} total loans approved including still-active; ${usdM(s.total_approved)} gross approved capital).`,
       source_fragment_ids: [],
     });
   }
@@ -405,22 +382,15 @@ function sectorCreditCorpusSummary(
   if (macroUs || macroFl) {
     const sofr = macroUs?.key_metrics.find((m) => m.metric === "sofr_rate");
     const cpi = macroUs?.key_metrics.find((m) => m.metric === "cpi_yoy");
-    const flUnemp = macroFl?.key_metrics.find(
-      (m) => m.metric === "fl_unemployment",
-    );
+    const flUnemp = macroFl?.key_metrics.find((m) => m.metric === "fl_unemployment");
     const macroLine = [
       sofr ? `SOFR ${pct(Number(sofr.value))}% (${sofr.direction})` : "",
       cpi ? `CPI YoY ${pct(Number(cpi.value))}% (${cpi.direction})` : "",
-      flUnemp
-        ? `FL unemployment ${pct(Number(flUnemp.value))}% (${flUnemp.direction})`
-        : "",
+      flUnemp ? `FL unemployment ${pct(Number(flUnemp.value))}% (${flUnemp.direction})` : "",
     ]
       .filter(Boolean)
       .join(", ");
-    const minConfidence = Math.min(
-      macroUs?.confidence ?? 1,
-      macroFl?.confidence ?? 1,
-    );
+    const minConfidence = Math.min(macroUs?.confidence ?? 1, macroFl?.confidence ?? 1);
     facts.push({
       topic: "macro-chain :: upstream_routing",
       fact: "Current macro funding-cost backdrop from the macro-us + macro-florida brains",
@@ -440,8 +410,7 @@ function sectorCreditCorpusSummary(
     const yoyLine = (() => {
       if (!st.priorYear) return "";
       const delta =
-        ((st.latest!.swfl_total_usd - st.priorYear.swfl_total_usd) /
-          st.priorYear.swfl_total_usd) *
+        ((st.latest!.swfl_total_usd - st.priorYear.swfl_total_usd) / st.priorYear.swfl_total_usd) *
         100;
       return ` YoY ${delta >= 0 ? "+" : ""}${pct(delta)}% vs ${st.priorYear.period_yyyymm}.`;
     })();
@@ -463,23 +432,16 @@ function sectorCreditCorpusSummary(
   return facts;
 }
 
-function sectorCreditOutputProducer(
-  _out: PackOutput,
-): BrainOutputProducerResult {
+function sectorCreditOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const sectors = lastSectors;
   const macroUs = lastMacroUsOutput;
   const franchise = lastFranchiseOutput;
-  const fetched_at =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
   const since_fy = lastSinceFy ?? new Date().getUTCFullYear() - 6;
 
   const rankable = sectors.filter((s) => s.resolved >= RANKING_MIN_RESOLVED);
-  const sortedSafe = [...rankable].sort(
-    (a, b) => a.rate_resolved - b.rate_resolved,
-  );
-  const sortedRisk = [...rankable].sort(
-    (a, b) => b.rate_resolved - a.rate_resolved,
-  );
+  const sortedSafe = [...rankable].sort((a, b) => a.rate_resolved - b.rate_resolved);
+  const sortedRisk = [...rankable].sort((a, b) => b.rate_resolved - a.rate_resolved);
 
   // Headline metrics for master roll-up — best/worst named NAICS (MANDATORY
   // Week 1, redistributed from franchise-outcomes since NAICS data lives here).
@@ -532,23 +494,21 @@ function sectorCreditOutputProducer(
   // "stable" since this is a point-in-time snapshot.
   const sectorMetrics: BrainOutputMetric[] = rankable
     .sort((a, b) => a.rate_resolved - b.rate_resolved)
-    .map(
-      (s): BrainOutputMetric => ({
-        metric: `sector_${s.naics_2digit}_chargeoff_rate`,
-        value: Math.round(s.rate_resolved * 10) / 10,
-        direction: "stable",
-        label: `${s.label} (NAICS ${s.naics_2digit})`,
-        variable_type: "intensive",
-        units: "percent",
-        display_format: "percent",
-        source: buildSectorSource(
-          { kind: "sector", naics_2digit: s.naics_2digit, label: s.label },
-          s,
-          fetched_at,
-          since_fy,
-        ),
-      }),
-    );
+    .map((s): BrainOutputMetric => ({
+      metric: `sector_${s.naics_2digit}_chargeoff_rate`,
+      value: Math.round(s.rate_resolved * 10) / 10,
+      direction: "stable",
+      label: `${s.label} (NAICS ${s.naics_2digit})`,
+      variable_type: "intensive",
+      units: "percent",
+      display_format: "percent",
+      source: buildSectorSource(
+        { kind: "sector", naics_2digit: s.naics_2digit, label: s.label },
+        s,
+        fetched_at,
+        since_fy,
+      ),
+    }));
 
   const conclusionParts: string[] = [];
   if (sortedSafe.length > 0) {
@@ -621,8 +581,7 @@ function sectorCreditOutputProducer(
     });
     if (st.priorYear) {
       const yoyPct =
-        ((st.latest.swfl_total_usd - st.priorYear.swfl_total_usd) /
-          st.priorYear.swfl_total_usd) *
+        ((st.latest.swfl_total_usd - st.priorYear.swfl_total_usd) / st.priorYear.swfl_total_usd) *
         100;
       salesTaxMetrics.push({
         metric: "swfl_taxable_sales_yoy_pct",
@@ -723,18 +682,11 @@ function voteSectorCreditDirection(
       ],
     };
   }
-  if (
-    worst.rate_resolved <= CHARGEOFF_BULLISH_CEILING &&
-    bestSurvival >= SURVIVAL_BULLISH_FLOOR
-  ) {
+  if (worst.rate_resolved <= CHARGEOFF_BULLISH_CEILING && bestSurvival >= SURVIVAL_BULLISH_FLOOR) {
     // Magnitude grows with how clean the picture is: worst near 0 + best at 100% → ~1.0
     const magnitude = Math.max(
       0,
-      Math.min(
-        1,
-        (CHARGEOFF_BULLISH_CEILING - worst.rate_resolved) /
-          CHARGEOFF_BULLISH_CEILING,
-      ),
+      Math.min(1, (CHARGEOFF_BULLISH_CEILING - worst.rate_resolved) / CHARGEOFF_BULLISH_CEILING),
     );
     return { direction: "bullish", magnitude, caveats: [] };
   }

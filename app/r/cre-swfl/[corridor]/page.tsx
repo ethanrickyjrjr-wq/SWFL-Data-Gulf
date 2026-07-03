@@ -23,6 +23,7 @@ import {
 import { MetricsTable, type MetricRow } from "../../_components/metrics-table";
 import { ColorLegend } from "../../_components/color-legend";
 import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
+import { AnswerText } from "../../../../components/answer/AnswerText";
 import { buildReportId } from "../../../../lib/highlighter/report-surface";
 import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
@@ -144,7 +145,9 @@ export default async function CorridorPage({ params }: PageProps) {
               .split(/\n\n+/)
               .filter((p) => p.trim().length > 0)
               .map((para, i) => (
-                <p key={i}>{para.trim()}</p>
+                <p key={i}>
+                  <AnswerText text={para.trim()} />
+                </p>
               ))}
           </div>
         </section>

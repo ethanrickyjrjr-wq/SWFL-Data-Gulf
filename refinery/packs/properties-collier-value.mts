@@ -19,6 +19,7 @@ import {
 } from "../sources/collier-parcels-source.mts";
 import { fhfaHpiSource, type HpiSwflSummary } from "../sources/fhfa-hpi-source.mts";
 import { env } from "../config/env.mts";
+import { fmtInt, fmtPct, fmtRatio } from "./lib/number-format.mts";
 
 /**
  * properties-collier-value — Collier County (FL) real-estate market direction read.
@@ -172,9 +173,6 @@ function aggregate(
   };
 }
 
-const fmt1 = (n: number): string =>
-  Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
-
 export function directionFromZScore(z: number | null): "bullish" | "bearish" | "neutral" {
   if (z == null) return "neutral";
   if (z >= Z_BULL_THRESHOLD) return "bullish";
@@ -225,7 +223,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     facts.push({
       topic: "metric:homes_sold_per_year",
       fact: `Collier homes sold (year ${agg.currentYear})`,
-      value: `${agg.currentSalesCount} residential closings recorded by Redfin for Collier County in ${agg.currentYear}.`,
+      value: `${fmtInt(agg.currentSalesCount)} residential closings recorded by Redfin for Collier County in ${agg.currentYear}.`,
       source_fragment_ids: [],
     });
   }
@@ -235,10 +233,10 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
       topic: "metric:homes_sold_zscore",
       fact: "Collier homes-sold z-score (current year vs trailing 3yr)",
       value:
-        `Baseline counts ${agg.baselineYears.map((y, i) => `${y}=${agg.baselineSalesCounts[i]}`).join(", ")}; ` +
-        `mean ${agg.baselineMean != null ? fmt1(agg.baselineMean) : "n/a"}, ` +
-        `population std ${agg.baselineStd != null ? fmt1(agg.baselineStd) : "n/a"}. ` +
-        `Current ${agg.currentSalesCount}. z = ${fmt1(agg.zScore)}.`,
+        `Baseline counts ${agg.baselineYears.map((y, i) => `${y}=${fmtInt(agg.baselineSalesCounts[i]!)}`).join(", ")}; ` +
+        `mean ${agg.baselineMean != null ? fmtRatio(agg.baselineMean) : "n/a"}, ` +
+        `population std ${agg.baselineStd != null ? fmtRatio(agg.baselineStd) : "n/a"}. ` +
+        `Current ${fmtInt(agg.currentSalesCount ?? 0)}. z = ${fmtRatio(agg.zScore!)}.`,
       source_fragment_ids: [],
     });
   }
@@ -247,7 +245,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     facts.push({
       topic: "metric:median_sale_price_yoy",
       fact: `Collier median sale price YoY (${agg.latestPeriod ?? "latest"})`,
-      value: `${agg.medianSalePriceYoyPct > 0 ? "+" : ""}${fmt1(agg.medianSalePriceYoyPct)}% year-over-year (Redfin median sale price, All Residential).`,
+      value: `${agg.medianSalePriceYoyPct > 0 ? "+" : ""}${fmtPct(agg.medianSalePriceYoyPct)} year-over-year (Redfin median sale price, All Residential).`,
       source_fragment_ids: [],
     });
   }
@@ -256,7 +254,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     facts.push({
       topic: "metric:months_of_supply",
       fact: `Collier months of supply (${agg.latestPeriod ?? "latest"})`,
-      value: `${fmt1(agg.monthsOfSupply)} months of supply — inventory vs sales pace (lower = tighter, seller-favorable).`,
+      value: `${fmtRatio(agg.monthsOfSupply)} months of supply — inventory vs sales pace (lower = tighter, seller-favorable).`,
       source_fragment_ids: [],
     });
   }
@@ -265,7 +263,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     facts.push({
       topic: "metric:soh_gap_median",
       fact: "Collier Save-Our-Homes gap median across homesteaded parcels",
-      value: `Median (jv_hmstd - av_hmstd)/jv_hmstd across ${agg.homesteadedParcels} homesteaded parcels: ${fmt1(agg.sohGapMedianPct)}% of homestead just value suppressed by the SOH cap (FDOR cadastral).`,
+      value: `Median (jv_hmstd - av_hmstd)/jv_hmstd across ${fmtInt(agg.homesteadedParcels)} homesteaded parcels: ${fmtPct(agg.sohGapMedianPct!)} of homestead just value suppressed by the SOH cap (FDOR cadastral).`,
       source_fragment_ids: [],
     });
   }
@@ -274,7 +272,7 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     facts.push({
       topic: "metric:total_parcels",
       fact: "Collier total parcel count (FDOR cadastral snapshot)",
-      value: `${agg.totalParcels} parcels in data_lake.collier_parcels (FDOR Statewide Cadastral, CO_NO=21).`,
+      value: `${fmtInt(agg.totalParcels)} parcels in data_lake.collier_parcels (FDOR Statewide Cadastral, CO_NO=21).`,
       source_fragment_ids: [],
     });
   }
@@ -401,7 +399,7 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         metric: "collier_soh_gap_median_pct",
         value: Math.round(agg.sohGapMedianPct * 10) / 10,
         direction: "stable",
-        label: `Collier Save-Our-Homes gap median (% of homestead just value suppressed by the SOH cap) across ${agg.homesteadedParcels} homesteaded parcels`,
+        label: `Collier Save-Our-Homes gap median (% of homestead just value suppressed by the SOH cap) across ${fmtInt(agg.homesteadedParcels)} homesteaded parcels`,
         variable_type: "intensive",
         units: "percent",
         display_format: "percent",
@@ -494,11 +492,11 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
 
   const conclusionParts: string[] = [];
   conclusionParts.push(
-    `Collier County had ${agg.currentSalesCount ?? 0} residential closings recorded by Redfin for ${agg.currentYear}.`,
+    `Collier County had ${fmtInt(agg.currentSalesCount ?? 0)} residential closings recorded by Redfin for ${agg.currentYear}.`,
   );
   if (agg.zScore != null && agg.baselineMean != null) {
     conclusionParts.push(
-      `Trailing ${BASELINE_YEAR_COUNT}yr baseline (${agg.baselineYears[0]}-${agg.baselineYears[agg.baselineYears.length - 1]}) averaged ${fmt1(agg.baselineMean)} sales/yr; current year sits at z = ${fmt1(agg.zScore)} — ${direction} read on Collier transaction velocity.`,
+      `Trailing ${BASELINE_YEAR_COUNT}yr baseline (${agg.baselineYears[0]}-${agg.baselineYears[agg.baselineYears.length - 1]}) averaged ${fmtRatio(agg.baselineMean)} sales/yr; current year sits at z = ${fmtRatio(agg.zScore)} — ${direction} read on Collier transaction velocity.`,
     );
   } else if (agg.currentSalesCount == null) {
     conclusionParts.push(
@@ -511,12 +509,12 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   }
   if (agg.medianSalePriceYoyPct != null) {
     conclusionParts.push(
-      `Median sale price ${agg.medianSalePriceYoyPct > 0 ? "+" : ""}${fmt1(agg.medianSalePriceYoyPct)}% YoY (${agg.latestPeriod ?? "latest"})${agg.monthsOfSupply != null ? `, ${fmt1(agg.monthsOfSupply)} months of supply` : ""}.`,
+      `Median sale price ${agg.medianSalePriceYoyPct > 0 ? "+" : ""}${fmtPct(agg.medianSalePriceYoyPct)} YoY (${agg.latestPeriod ?? "latest"})${agg.monthsOfSupply != null ? `, ${fmtRatio(agg.monthsOfSupply)} months of supply` : ""}.`,
     );
   }
   if (agg.sohGapMedianPct != null && agg.totalParcels > 0) {
     conclusionParts.push(
-      `Parcel base: ${agg.totalParcels.toLocaleString("en-US")} Collier parcels (FDOR cadastral), median Save-Our-Homes gap ${fmt1(agg.sohGapMedianPct)}% across ${agg.homesteadedParcels.toLocaleString("en-US")} homesteaded.`,
+      `Parcel base: ${fmtInt(agg.totalParcels)} Collier parcels (FDOR cadastral), median Save-Our-Homes gap ${fmtPct(agg.sohGapMedianPct!)} across ${fmtInt(agg.homesteadedParcels)} homesteaded.`,
     );
   }
 

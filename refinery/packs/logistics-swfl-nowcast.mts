@@ -14,11 +14,9 @@ import {
   type FreightSegmentNormalized,
   type ShockLogRow,
 } from "../sources/fdot-freight-source.mts";
-import {
-  makeBrainInputSource,
-  type BrainInputNormalized,
-} from "../sources/brain-input-source.mts";
+import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brain-input-source.mts";
 import { env } from "../config/env.mts";
+import { fmtInt } from "./lib/number-format.mts";
 
 /**
  * logistics-swfl-nowcast — daily FDOT-vs-FDOT-history freight-activity
@@ -108,11 +106,7 @@ export const COLD_START_THRESHOLD_DAYS = 6;
  * connector to match. */
 export const ROLLING_WINDOW_DAYS = 24;
 
-export type ShockState =
-  | "normal"
-  | "anomaly"
-  | "structural_break"
-  | "insufficient_history";
+export type ShockState = "normal" | "anomaly" | "structural_break" | "insufficient_history";
 export type BaselineValidityFlag = "valid" | "stale-structural";
 
 // ---------------------------------------------------------------------
@@ -226,10 +220,7 @@ export function nextConsecutiveBreachDays(
 /** Classify shock_state from a consecutive_breach_days count + cold-start signal.
  * When `coldStart` is true, the state machine returns "insufficient_history"
  * regardless of the counter (the counter is itself 0 in that case). Pure. */
-export function classifyShockState(
-  consecutiveBreachDays: number,
-  coldStart = false,
-): ShockState {
+export function classifyShockState(consecutiveBreachDays: number, coldStart = false): ShockState {
   if (coldStart) return "insufficient_history";
   if (consecutiveBreachDays >= STRUCTURAL_BREAK_CONSECUTIVE_DAYS) {
     return "structural_break";
@@ -266,22 +257,16 @@ export function decideBaselineValidityFlag(
 // corpusSummary — pure deterministic, sets snapshot for the producer.
 // ---------------------------------------------------------------------
 
-function logisticsNowcastCorpusSummary(
-  allFragments: RawFragment[],
-): SynthesisFact[] {
+function logisticsNowcastCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const segments = segmentsFrom(allFragments);
   const priorShockLog = shockLogFrom(allFragments);
   const baselineOutput = baselineOutputFrom(allFragments);
   const fetched_at =
-    allFragments[0]?.fetched_at ??
-    new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    allFragments[0]?.fetched_at ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
   lastSnapshot = { segments, priorShockLog, baselineOutput, fetched_at };
 
   const facts: SynthesisFact[] = [];
-  const currentActivity = segments.reduce(
-    (s, seg) => s + seg.activity_tons_per_year,
-    0,
-  );
+  const currentActivity = segments.reduce((s, seg) => s + seg.activity_tons_per_year, 0);
   const { observed } = rollingActivityStats(priorShockLog);
   facts.push({
     topic: "corpus_overview",
@@ -295,16 +280,14 @@ function logisticsNowcastCorpusSummary(
   });
 
   if (baselineOutput) {
-    const faf5Metric = baselineOutput.key_metrics.find(
-      (m) => m.metric === FAF5_CONTEXT_METRIC,
-    );
+    const faf5Metric = baselineOutput.key_metrics.find((m) => m.metric === FAF5_CONTEXT_METRIC);
     if (faf5Metric) {
       facts.push({
         topic: "faf5_context",
         fact: "Upstream logistics-swfl FAF5 context (display only)",
         value:
           `logistics-swfl (confidence ${baselineOutput.confidence.toFixed(2)}, refined ${baselineOutput.refined_at.slice(0, 10)}) ` +
-          `reports ${FAF5_CONTEXT_METRIC} = ${faf5Metric.value} thousand tons/year (= ${(Number(faf5Metric.value) * THOUSAND_TONS_TO_TONS).toLocaleString("en-US")} tons/year). ` +
+          `reports ${FAF5_CONTEXT_METRIC} = ${fmtInt(Number(faf5Metric.value))} thousand tons/year (= ${(Number(faf5Metric.value) * THOUSAND_TONS_TO_TONS).toLocaleString("en-US")} tons/year). ` +
           `Path B: this value is CONTEXT only — the deviation z-score below is computed against FDOT's own rolling history, not against the FAF5 number.`,
         source_fragment_ids: [],
       });
@@ -317,10 +300,7 @@ function logisticsNowcastCorpusSummary(
 // outputProducer — does all the math + builds key_metrics + caveats.
 // ---------------------------------------------------------------------
 
-function buildFdotSource(
-  fetched_at: string,
-  segmentCount: number,
-): BrainOutputMetricSource {
+function buildFdotSource(fetched_at: string, segmentCount: number): BrainOutputMetricSource {
   const url =
     env.source === "live" && env.supabaseUrl
       ? `${env.supabaseUrl}/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.${LATEST_FDOT_YEAR}`
@@ -339,10 +319,7 @@ function buildFdotSource(
   };
 }
 
-function buildBrainInputSource(
-  upstream: BrainOutput,
-  fetched_at: string,
-): BrainOutputMetricSource {
+function buildBrainInputSource(upstream: BrainOutput, fetched_at: string): BrainOutputMetricSource {
   return {
     url: `https://www.swfldatagulf.com/api/b/${BASELINE_UPSTREAM_ID}`,
     fetched_at,
@@ -382,9 +359,7 @@ export function renderFaf5ContextSentences(
   );
 }
 
-function logisticsNowcastOutputProducer(
-  _out: PackOutput,
-): BrainOutputProducerResult {
+function logisticsNowcastOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const snap = lastSnapshot;
   if (!snap) {
     return emptyProducerResult("no fragments received");
@@ -398,10 +373,7 @@ function logisticsNowcastOutputProducer(
   }
 
   // ----- Deterministic activity math (no upstream dependency) -----
-  const currentActivity = segments.reduce(
-    (s, seg) => s + seg.activity_tons_per_year,
-    0,
-  );
+  const currentActivity = segments.reduce((s, seg) => s + seg.activity_tons_per_year, 0);
   const {
     mean: rollingMean,
     stddev: rollingStddev,
@@ -410,24 +382,14 @@ function logisticsNowcastOutputProducer(
   const coldStart = historyDays < COLD_START_THRESHOLD_DAYS;
 
   const deviationZ =
-    coldStart || rollingStddev === 0
-      ? null
-      : (currentActivity - rollingMean) / rollingStddev;
+    coldStart || rollingStddev === 0 ? null : (currentActivity - rollingMean) / rollingStddev;
   const deviationPct =
-    coldStart || rollingMean === 0
-      ? null
-      : ((currentActivity - rollingMean) / rollingMean) * 100;
+    coldStart || rollingMean === 0 ? null : ((currentActivity - rollingMean) / rollingMean) * 100;
 
   // ----- State-machine reads -----
-  const consecutiveBreachDays = nextConsecutiveBreachDays(
-    deviationZ,
-    priorShockLog,
-  );
+  const consecutiveBreachDays = nextConsecutiveBreachDays(deviationZ, priorShockLog);
   const shockState = classifyShockState(consecutiveBreachDays, coldStart);
-  const baselineValidityFlag = decideBaselineValidityFlag(
-    consecutiveBreachDays,
-    priorShockLog,
-  );
+  const baselineValidityFlag = decideBaselineValidityFlag(consecutiveBreachDays, priorShockLog);
 
   const fdotSourceMeta = buildFdotSource(fetched_at, segments.length);
 
@@ -522,10 +484,8 @@ function logisticsNowcastOutputProducer(
     key_metrics.push({
       metric: "deviation_z",
       value: Math.round(deviationZ * 100) / 100,
-      direction:
-        deviationZ > 0.5 ? "rising" : deviationZ < -0.5 ? "falling" : "stable",
-      label:
-        "Deviation z-score: (current_activity − rolling_mean) / rolling_stddev",
+      direction: deviationZ > 0.5 ? "rising" : deviationZ < -0.5 ? "falling" : "stable",
+      label: "Deviation z-score: (current_activity − rolling_mean) / rolling_stddev",
       variable_type: "intensive",
       units: "z-score",
       display_format: "ratio",
@@ -535,8 +495,7 @@ function logisticsNowcastOutputProducer(
     key_metrics.push({
       metric: "deviation_pct",
       value: Math.round(deviationPct * 10) / 10,
-      direction:
-        deviationPct > 1 ? "rising" : deviationPct < -1 ? "falling" : "stable",
+      direction: deviationPct > 1 ? "rising" : deviationPct < -1 ? "falling" : "stable",
       label: "Deviation as percent of rolling_mean",
       variable_type: "intensive",
       units: "percent",
@@ -549,8 +508,7 @@ function logisticsNowcastOutputProducer(
     metric: "shock_state",
     value: shockState,
     direction: "stable",
-    label:
-      "Shock-state classifier (normal | anomaly | structural_break | insufficient_history)",
+    label: "Shock-state classifier (normal | anomaly | structural_break | insufficient_history)",
     variable_type: "categorical",
     source: fdotSourceMeta,
   });
@@ -559,8 +517,7 @@ function logisticsNowcastOutputProducer(
     metric: "baseline_validity_flag",
     value: baselineValidityFlag,
     direction: "stable",
-    label:
-      "Baseline-validity flag (valid | stale-structural, sticky once stale)",
+    label: "Baseline-validity flag (valid | stale-structural, sticky once stale)",
     variable_type: "categorical",
     source: fdotSourceMeta,
   });
@@ -597,8 +554,7 @@ function logisticsNowcastOutputProducer(
     metric: "avg_payload_tons_per_truck",
     value: AVG_PAYLOAD_TONS_PER_TRUCK,
     direction: "stable",
-    label:
-      "Assumed combination-truck average payload — FHWA Highway Statistics 2023, Table VM-1",
+    label: "Assumed combination-truck average payload — FHWA Highway Statistics 2023, Table VM-1",
     variable_type: "intensive",
     units: "tons/truck",
     display_format: "raw",
@@ -617,11 +573,8 @@ function logisticsNowcastOutputProducer(
   // value as the math baseline.
   const conclusionParts: string[] = [];
   if (faf5InboundTonsYear != null && baselineOutput) {
-    const faf5Year =
-      Number(baselineOutput.refined_at.slice(0, 4)) || LATEST_FDOT_YEAR;
-    conclusionParts.push(
-      renderFaf5ContextSentences(Math.round(faf5InboundTonsYear), faf5Year),
-    );
+    const faf5Year = Number(baselineOutput.refined_at.slice(0, 4)) || LATEST_FDOT_YEAR;
+    conclusionParts.push(renderFaf5ContextSentences(Math.round(faf5InboundTonsYear), faf5Year));
   }
 
   if (coldStart) {
@@ -725,10 +678,7 @@ export const logisticsSwflNowcast: PackDefinition = {
   scope:
     "Current-state freight-activity nowcast for SWFL — derives a daily activity proxy from FDOT AADT × tfctr × payload, compares against the brain's OWN rolling history (Path B), and classifies shock_state + baseline_validity_flag. FAF5 inbound-flow is preserved as audited CONTEXT.",
   ttl_seconds: 2592000, // 30 days — FDOT AADT is annual (sibling traffic-swfl=30d); a daily rebuild restamped an identical proxy AND flooded the row-based rolling baseline with zero-variance duplicates, degrading the shock detector. Comment was wrong: FDOT does not refresh nightly.
-  sources: [
-    fdotFreightSegmentsSource,
-    makeBrainInputSource(BASELINE_UPSTREAM_ID),
-  ],
+  sources: [fdotFreightSegmentsSource, makeBrainInputSource(BASELINE_UPSTREAM_ID)],
   // Path B semantic shift: the upstream logistics-swfl brain is no longer
   // load-bearing for the math (the deviation z is computed against rolling
   // FDOT history, not against FAF5). The edge is retained so Stage 4's Lane 2E
