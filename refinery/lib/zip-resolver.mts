@@ -27,14 +27,7 @@ import { allPockets, corridorsInPocket, type Pocket } from "./pockets.mts";
 
 /** The grain ladder. Location is a lens, not a storage grain. */
 export type Grain =
-  | "zip"
-  | "corridor"
-  | "city"
-  | "county"
-  | "msa"
-  | "region"
-  | "state"
-  | "national";
+  "zip" | "corridor" | "city" | "county" | "msa" | "region" | "state" | "national";
 
 /** The 6-county SWFL footprint (Charlotte, Collier, Glades, Hendry, Lee, Sarasota). */
 export type CountyFips = "12015" | "12021" | "12043" | "12051" | "12071" | "12115";
@@ -214,7 +207,7 @@ const CENTROID_MAP = new Map<string, [number, number]>(
 
 const COORD_MAX_DIST_MI = 10;
 
-function haversineMi(lat1: number, lng1: number, lat2: number, lng2: number): number {
+export function haversineMi(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 3958.8;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;

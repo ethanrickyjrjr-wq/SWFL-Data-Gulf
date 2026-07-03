@@ -3,6 +3,35 @@
 import { useState } from "react";
 
 /**
+ * Pure helpers exported for bun:test (this repo has no DOM test environment).
+ * A valid presetZip wins over activation: the caller already knows the ZIP
+ * (e.g. from the /r/zip-report/[zip] URL), so the ZIP input and consent
+ * checkbox are suppressed and the ZIP rides silently in the POST body.
+ */
+export function activationFieldsVisible(activation: boolean, presetZip?: string): boolean {
+  return activation && !(presetZip && /^\d{5}$/.test(presetZip.trim()));
+}
+
+export function buildSubscribeBody(input: {
+  email: string;
+  source: string;
+  activation: boolean;
+  presetZip?: string;
+  zip: string;
+  consent: boolean;
+}): Record<string, unknown> {
+  const preset = input.presetZip?.trim();
+  if (preset && /^\d{5}$/.test(preset)) {
+    return { email: input.email, source: input.source, zip: preset };
+  }
+  return {
+    email: input.email,
+    source: input.source,
+    ...(input.activation ? { zip: input.zip, consent: input.consent } : {}),
+  };
+}
+
+/**
  * Daily-digest subscribe CTA (Email Marketing Phase 2). SEPARATE from the
  * landing Waitlist (launch-notify) — this opts the reader into the free daily
  * SWFL data email. Posts to /api/email/subscribe with a `source` tag.
@@ -15,6 +44,7 @@ export default function DigestSubscribe({
   heading = "Get the free daily SWFL data digest",
   blurb = "ZIP-level prices, permits, and the day's market read — one short email each weekday. Cited, no spam.",
   activation = false,
+  presetZip,
 }: {
   source?: string;
   heading?: string;
@@ -25,13 +55,20 @@ export default function DigestSubscribe({
    * their one-field behavior unchanged.
    */
   activation?: boolean;
+  /**
+   * ZIP already known from context (e.g. the zip-report URL). Sent in the POST
+   * body as `scope` without asking the reader anything new — keeps the
+   * lightweight single-email-field opt-in, never the activation flow.
+   */
+  presetZip?: string;
 }) {
   const [email, setEmail] = useState("");
   const [zip, setZip] = useState("");
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
 
-  const blocked = activation && (!/^\d{5}$/.test(zip) || !consent);
+  const askActivation = activationFieldsVisible(activation, presetZip);
+  const blocked = askActivation && (!/^\d{5}$/.test(zip) || !consent);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,11 +78,9 @@ export default function DigestSubscribe({
       const res = await fetch("/api/email/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          source,
-          ...(activation ? { zip, consent } : {}),
-        }),
+        body: JSON.stringify(
+          buildSubscribeBody({ email, source, activation: askActivation, presetZip, zip, consent }),
+        ),
       });
       setStatus(res.ok ? "done" : "error");
     } catch {
@@ -65,7 +100,7 @@ export default function DigestSubscribe({
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row gap-3">
-            {activation && (
+            {askActivation && (
               <input
                 type="text"
                 inputMode="numeric"
@@ -91,11 +126,15 @@ export default function DigestSubscribe({
               disabled={status === "submitting" || blocked}
               className="btn-gradient text-navy-dark px-6 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {status === "submitting" ? "Sending…" : activation ? "Send my report" : "Subscribe"}
+              {status === "submitting"
+                ? "Sending…"
+                : askActivation
+                  ? "Send my report"
+                  : "Subscribe"}
             </button>
           </div>
 
-          {activation && (
+          {askActivation && (
             <label className="flex items-start gap-2 text-xs text-gray-400 leading-relaxed">
               <input
                 type="checkbox"

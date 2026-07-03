@@ -27,13 +27,26 @@ import type { SourceEntry } from "../../../../components/CitationList";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
+import { OpenProjectCta } from "../../../../components/prospect/OpenProjectCta";
 import { MetroAreaChart } from "../../../../components/charts";
 import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
 import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
 import { loadZipQuickSummary } from "../../../../lib/zip-summary/load";
+import { nearestZips } from "../../../../lib/geo/nearest-zips";
+import { zipReportMetadata } from "./metadata";
+import type { Metadata } from "next";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ zip: string }>;
+}): Promise<Metadata> {
+  const { zip } = await params;
+  return zipReportMetadata(zip);
+}
 
 const VALID_ZIP = /^\d{5}$/;
 const TOTAL_SWFL_ZIPS = 57;
@@ -186,6 +199,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);
   const primaryPlace =
     (res.places.find((p) => p.match === "primary") ?? res.places[0])?.place ?? null;
+  const nearby = nearestZips(zip, 5);
   const cityAreaTitle = primaryPlace ? `${primaryPlace} Area` : "Local Area";
   const countyTitle = res.county_names[0] ? `${res.county_names[0]} County` : "County";
   const eyebrow = `SWFL Data Gulf · ${res.county_names.join(" & ")}`;
@@ -669,8 +683,44 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         )}
 
         <CitationList sources={sources} />
+
+        {/* ── Nearby ZIPs — same report, one click away ─────────────────── */}
+        {nearby.length > 0 && (
+          <section id="section-nearby">
+            <SectionTitle>Nearby ZIPs</SectionTitle>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {nearby.map((n) => (
+                <Link
+                  key={n.zip}
+                  href={`/r/zip-report/${n.zip}`}
+                  className="rounded-xl glass-card-modern border border-white/10 px-4 py-3 transition-colors hover:border-teal-primary/40"
+                >
+                  <span className="font-mono text-sm font-semibold text-white">{n.zip}</span>
+                  {n.place && <span className="ml-2 text-sm text-gray-400">{n.place}</span>}
+                  <span className="ml-2 text-xs text-gray-600">{n.distanceMi} mi</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Build bridge — reader → branded weekly email project ────────── */}
+        <section className="glass-card-modern rounded-2xl border border-teal-primary/20 p-6 sm:p-8">
+          <h3 className="text-xl font-bold text-white">Turn this into a weekly branded email</h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            Free to build. We&apos;ll seed a project for {primaryPlace ?? `ZIP ${zip}`}, {zip} —
+            style it, then send whenever you&apos;re ready.
+          </p>
+          <OpenProjectCta zip={zip} />
+        </section>
+
         <div>
-          <DigestSubscribe source="zip-report" />
+          <DigestSubscribe
+            source="zip-report"
+            presetZip={zip}
+            heading={`Subscribe to ${zip}'s weekly read`}
+            blurb={`A short weekly market read for ${primaryPlace ?? `ZIP ${zip}`}, built and sent by our engine — see it before you build your own.`}
+          />
         </div>
         <ColorLegend />
         <ReportFooter freshnessToken={freshnessToken} />

@@ -1,3 +1,19 @@
+## 2026-07-03 (main) — `report-bridge-seo` (Lane C) BUILT + main-build hotfix
+
+Executed the Lane C spec (`2026-07-02-report-bridge-seo-design.md`) as designed: (1) build-bridge
+banner on `/r/zip-report/[zip]` via the promoted `components/prospect/OpenProjectCta` (the R100
+move itself rode into 5f5df89c via the shared-index sweep — see entry below; this session's
+93e88aef completes it by fixing the `app/welcome/page.tsx` import. origin/main IS 5f5df89c and is
+unbuildable until 93e88aef pushes — welcome/page.tsx there imports the deleted route-local path);
+(2) `generateMetadata` from new pure `metadata.ts` (title/description/canonical off `resolveZip`;
+bare fallback out-of-scope); (3) Nearby ZIPs row — `lib/geo/nearest-zips.ts` (exported
+`haversineMi` from zip-resolver, cross-county, tie-break ZIP-asc); (4) `DigestSubscribe`
+`presetZip` prop via pure `buildSubscribeBody`/`activationFieldsVisible` (D3 labels at call site;
+presetZip suppresses activation fields, rides in POST body). Tests: 18 pass across 3 new bun:test
+files (pure-helper pattern — repo has no DOM test env). `bunx next build` green.
+`report_bridge_seo_live_verify` stays OPEN pending live check. Lane B/C seam (zip-seed.ts vs
+claim bridge): Lane B still spec-only, nothing to reconcile in code yet.
+
 ## 2026-07-03 (main) — `author-layout-recipes` BUILT: 10 commits, local, push pending operator OK
 
 Executed the full spec (plan saved: `docs/superpowers/plans/2026-07-03-author-layout-recipes.md`).
