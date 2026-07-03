@@ -2819,6 +2819,7 @@ export interface Database {
           pinterest_url: string | null;
           threads_url: string | null;
           unsubscribe_url: string | null;
+          business_address: string | null;
         };
         Insert: {
           id?: string;
@@ -2848,6 +2849,7 @@ export interface Database {
           pinterest_url?: string | null;
           threads_url?: string | null;
           unsubscribe_url?: string | null;
+          business_address?: string | null;
         };
         Update: {
           id?: string;
@@ -2877,6 +2879,7 @@ export interface Database {
           pinterest_url?: string | null;
           threads_url?: string | null;
           unsubscribe_url?: string | null;
+          business_address?: string | null;
         };
         Relationships: [];
       };
@@ -2964,6 +2967,48 @@ export interface Database {
           source?: string | null;
           created_at?: string;
           interests?: string[];
+        };
+        Relationships: [];
+      };
+      weekly_read_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          zip: string;
+          status: string;
+          next_send_at: string | null;
+          issues_sent: number;
+          source: string | null;
+          consent_text: string | null;
+          consent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          zip: string;
+          status?: string;
+          next_send_at?: string | null;
+          issues_sent?: number;
+          source?: string | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          zip?: string;
+          status?: string;
+          next_send_at?: string | null;
+          issues_sent?: number;
+          source?: string | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
