@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v93 | Token: SWFL-7421-v93-20260703 -->
+<!-- FRESHNESS: v94 | Token: SWFL-7421-v94-20260703 -->
 ---
 brain_id: master
-version: 93
-refined_at: 2026-07-03T16:48:51Z
-freshness_token: SWFL-7421-v93-20260703
+version: 94
+refined_at: 2026-07-03T21:55:44Z
+freshness_token: SWFL-7421-v94-20260703
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
@@ -36,9 +36,9 @@ s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida  
 s05 | macro-swfl brain — https://www.swfldatagulf.com/api/b/macro-swfl                             | 2026-06-29 | 2026-07-06
 s06 | sector-credit-swfl brain — https://www.swfldatagulf.com/api/b/sector-credit-swfl             | 2026-06-29 | 2026-07-06
 s07 | tourism-tdt brain — https://www.swfldatagulf.com/api/b/tourism-tdt                           | 2026-06-29 | 2026-07-06
-s08 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                                 | 2026-06-12 | 2026-06-19
-s09 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                     | 2026-06-29 | 2026-07-06
-s10 | logistics-swfl-nowcast brain — https://www.swfldatagulf.com/api/b/logistics-swfl-nowcast     | 2026-06-03 | 2026-06-10
+s08 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                                 | 2026-07-03 | 2026-07-10
+s09 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                     | 2026-07-03 | 2026-07-10
+s10 | logistics-swfl-nowcast brain — https://www.swfldatagulf.com/api/b/logistics-swfl-nowcast     | 2026-07-03 | 2026-07-10
 s11 | traffic-swfl brain — https://www.swfldatagulf.com/api/b/traffic-swfl                         | 2026-06-09 | 2026-06-16
 s12 | properties-lee-value brain — https://www.swfldatagulf.com/api/b/properties-lee-value         | 2026-06-29 | 2026-07-06
 s13 | properties-collier-value brain — https://www.swfldatagulf.com/api/b/properties-collier-value | 2026-06-29 | 2026-07-06
@@ -76,9 +76,9 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
   {"id":"f005","topic":"upstream :: macro-swfl","fact":"Upstream snapshot — macro-swfl (bearish, magnitude 1.00, confidence 1.00)","value":"macro-swfl as of 2026-06-29: direction bearish, magnitude 1.00, confidence 1.00, trust tier T1, 10 key metric(s). SWFL labor market, 2026-M04 (preliminary): Lee County at 5%, +1.4pp YoY; Collier County at 4.6%, +1.3pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1173/wk in 2025-Q3 (+6.6% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.","src":"s01","date":"2026-07-03"},
   {"id":"f006","topic":"upstream :: sector-credit-swfl","fact":"Upstream snapshot — sector-credit-swfl (bearish, magnitude 0.39, confidence 1.00)","value":"sector-credit-swfl as of 2026-06-29: direction bearish, magnitude 0.39, confidence 1.00, trust tier T1, 18 key metric(s). For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0%), Finance & Insurance (0%), Real Estate, Rental & Leasing (0%). The three highest-risk sectors are: Transportation & Warehousing (57.1%), Retail Trade (44.4%), Other Services (Personal & Repair) (21.2%) — meaningful sample size in each case. Read these rates against the current SOFR of 3.6% (stable) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.","src":"s01","date":"2026-07-03"},
   {"id":"f007","topic":"upstream :: tourism-tdt","fact":"Upstream snapshot — tourism-tdt (neutral, magnitude 0.40, confidence 1.00)","value":"tourism-tdt as of 2026-06-29: direction neutral, magnitude 0.40, confidence 1.00, trust tier T1, 8 key metric(s). SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.","src":"s01","date":"2026-07-03"},
-  {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.80, confidence 1.00)","value":"env-swfl as of 2026-06-12: direction bearish, magnitude 0.80, confidence 1.00, trust tier T1, 43 key metric(s). Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $31,624/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $10,510/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 247.2% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.","src":"s01","date":"2026-07-03"},
-  {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-06-29: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 1226969.1K tons of inbound domestic freight worth $614894.8M across 12 origin zones and 40 commodity classes. Top origin zones by tonnage: Remainder of Florida (835272.9K tons), Jacksonville (125669.1K tons), Orlando (96882.9K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Natural sands (206809.8K tons), Gravel and crushed stone (155970.1K tons), Natural gas and other fuels (153589.7K tons).","src":"s01","date":"2026-07-03"},
-  {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (neutral, magnitude 0.00, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-06-03: direction neutral, magnitude 0.00, confidence 0.91, trust tier T2, 10 key metric(s). FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year. Shock-state: insufficient_history. Only 17/90 required days of rolling-baseline history are available — deviation z is suppressed until the history matures.","src":"s01","date":"2026-07-03"},
+  {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.80, confidence 1.00)","value":"env-swfl as of 2026-07-03: direction bearish, magnitude 0.80, confidence 1.00, trust tier T1, 43 key metric(s). Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $32,610/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $10,937/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 280.7% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.","src":"s01","date":"2026-07-03"},
+  {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-07-03: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 1226969.1K tons of inbound domestic freight worth $614894.8M across 12 origin zones and 40 commodity classes. Top origin zones by tonnage: Remainder of Florida (835272.9K tons), Jacksonville (125669.1K tons), Orlando (96882.9K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Natural sands (206809.8K tons), Gravel and crushed stone (155970.1K tons), Natural gas and other fuels (153589.7K tons).","src":"s01","date":"2026-07-03"},
+  {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (neutral, magnitude 0.17, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-07-03: direction neutral, magnitude 0.17, confidence 0.91, trust tier T2, 12 key metric(s). FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year against a 312,733,065,188 tons/year rolling baseline (18-day window, σ = 312,493,065,188) — deviation z = 1.00 (99.9%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 0.","src":"s01","date":"2026-07-03"},
   {"id":"f011","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (neutral, magnitude 0.09, confidence 0.80)","value":"traffic-swfl as of 2026-06-09: direction neutral, magnitude 0.09, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 21138.3 vehicles/day across 749 FDOT segments. Cohort-matched YoY 2024→2025: 0.9% over 684 segments — neutral read on corridor demand. 5-year CAGR 2021→2025: 3.3% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 108.1 — above pre-storm baseline.","src":"s01","date":"2026-07-03"},
   {"id":"f012","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (neutral, magnitude 0.31, confidence 0.88)","value":"properties-lee-value as of 2026-06-29: direction neutral, magnitude 0.31, confidence 0.88, trust tier T2, 10 key metric(s). Lee County had 35810 qualified parcel sales recorded for 2025 across 548798 parcels (65.3 per 1,000). Trailing 3yr baseline (2022-2024) averaged 36875 sales/yr; current year sits at z = -0.9 — neutral read on Lee parcel transaction velocity. FHFA Cape Coral-Fort Myers MSA HPI: -8.86% YoY (2025-Q4), FL state -2.62% — federal price-index benchmark for the Lee market. Median Save-Our-Homes gap across 192973 homesteaded parcels: 36.7% of just value suppressed for taxation.","src":"s01","date":"2026-07-03"},
   {"id":"f013","topic":"upstream :: properties-collier-value","fact":"Upstream snapshot — properties-collier-value (neutral, magnitude 0.26, confidence 0.88)","value":"properties-collier-value as of 2026-06-29: direction neutral, magnitude 0.26, confidence 0.88, trust tier T2, 6 key metric(s). Collier County had 9172 residential closings recorded by Redfin for 2025. Trailing 3yr baseline (2022-2024) averaged 9893.7 sales/yr; current year sits at z = -0.8 — neutral read on Collier transaction velocity. Median sale price +1.6% YoY (2026-05-31), 5.3 months of supply. Parcel base: 290,973 Collier parcels (FDOR cadastral), median Save-Our-Homes gap 36.5% across 107,030 homesteaded.","src":"s01","date":"2026-07-03"},
@@ -111,12 +111,12 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 93,
-  "refined_at": "2026-07-03T16:48:51Z",
-  "expires": "2026-07-10T16:48:51Z",
+  "version": 94,
+  "refined_at": "2026-07-03T21:55:44Z",
+  "expires": "2026-07-10T21:55:44Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.47138267321787664,
+  "magnitude": 0.4787855360588354,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -274,6 +274,44 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
   "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, fgcu-reri, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs safety-swfl (bullish). Combined confidence 0.88, trust tier T4, based on 37 upstream brains.",
   "key_metrics": [
     {
+      "metric": "inbound_freight_tons_swfl",
+      "value": 1226969.1,
+      "direction": "stable",
+      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+      "variable_type": "extensive",
+      "units": "thousand tons/year",
+      "display_format": "count",
+      "source": {
+        "url": "https://faf.ornl.gov/faf5/",
+        "fetched_at": "2026-07-03T21:54:04Z",
+        "tier": 1,
+        "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
+      },
+      "suggestions": [
+        "What's driving inbound freight tons swfl?",
+        "How does inbound freight tons swfl here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "swfl_sfha_pct_area_weighted",
+      "value": 0.4325,
+      "direction": "stable",
+      "label": "SWFL area-weighted Special Flood Hazard Area coverage",
+      "variable_type": "intensive",
+      "units": "ratio",
+      "display_format": "ratio",
+      "source": {
+        "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+        "fetched_at": "2026-07-03T17:29:49Z",
+        "tier": 1,
+        "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
+      },
+      "suggestions": [
+        "What's driving swfl sfha pct area weighted?",
+        "How does swfl sfha pct area weighted here compare to other SWFL areas?"
+      ]
+    },
+    {
       "metric": "licenses_active_lee",
       "label": "Active Licensed Contractors — Lee County",
       "value": 6361,
@@ -404,25 +442,6 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
       "suggestions": [
         "What's driving rsw trailing 12mo total passengers yoy?",
         "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "inbound_freight_tons_swfl",
-      "value": 1226969.1,
-      "direction": "stable",
-      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
-      "variable_type": "extensive",
-      "units": "thousand tons/year",
-      "display_format": "count",
-      "source": {
-        "url": "https://faf.ornl.gov/faf5/",
-        "fetched_at": "2026-06-29T18:40:17Z",
-        "tier": 1,
-        "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
-      },
-      "suggestions": [
-        "What's driving inbound freight tons swfl?",
-        "How does inbound freight tons swfl here compare to other SWFL areas?"
       ]
     },
     {
@@ -578,22 +597,22 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
       ]
     },
     {
-      "metric": "swfl_sfha_pct_area_weighted",
-      "value": 0.4325,
+      "metric": "faf5_inbound_flow_tons_year",
+      "value": 1226969100,
       "direction": "stable",
-      "label": "SWFL area-weighted Special Flood Hazard Area coverage",
-      "variable_type": "intensive",
-      "units": "ratio",
-      "display_format": "ratio",
+      "label": "FAF5 audited annual inbound freight FLOW to SWFL (CONTEXT — not the math anchor; the deviation z below is computed against FDOT's own rolling history)",
+      "variable_type": "extensive",
+      "units": "tons/year",
+      "display_format": "count",
       "source": {
-        "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-06-12T01:07:20Z",
+        "url": "https://www.swfldatagulf.com/api/b/logistics-swfl",
+        "fetched_at": "2026-07-03T21:54:05Z",
         "tier": 1,
-        "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
+        "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-07-03) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
       },
       "suggestions": [
-        "What's driving swfl sfha pct area weighted?",
-        "How does swfl sfha pct area weighted here compare to other SWFL areas?"
+        "What's driving faf5 inbound flow tons year?",
+        "How does faf5 inbound flow tons year here compare to other SWFL areas?"
       ]
     },
     {
@@ -613,25 +632,6 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
       "suggestions": [
         "What's driving collier homes sold zscore?",
         "How does collier homes sold zscore here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "sales_velocity_per_1k",
-      "value": 65.3,
-      "direction": "stable",
-      "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
-      "variable_type": "intensive",
-      "units": "sales per 1,000 parcels",
-      "display_format": "ratio",
-      "source": {
-        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
-        "fetched_at": "2026-06-29T18:40:20Z",
-        "tier": 2,
-        "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548798 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
-      },
-      "suggestions": [
-        "What's driving sales velocity per 1k?",
-        "How does sales velocity per 1k here compare to other SWFL areas?"
       ]
     },
     {
@@ -675,7 +675,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
     }
   ],
   "caveats": [
-    "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $31,624/insured property",
+    "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $32,610/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "vacancy_rate_median: directional reads are tied (rising 3, falling 12, stable 12) — no modal winner; \"stable\" is the tiebreak label, not a consensus signal.",
@@ -735,8 +735,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
     "Scope is inbound domestic only (dms_dest=129 AND trade_type=1). Imports (trade_type=2), exports (trade_type=3), and outbound flows (dms_orig=129) are intentionally excluded — separate brains would own those scopes if built.",
     "Year scope is 2024 (latest historical FAF5 year). FAF5 forecast years are deliberately not consumed here; bump LATEST_HISTORICAL_FAF_YEAR in refinery/sources/faf5-source.mts when ORNL publishes the next vintage.",
     "v1 emits no direction/magnitude vote — the brain reports a point-in-time snapshot, not a time series. Direction reads require a multi-year retro (planned for v2 once a second FAF5 vintage is ingested).",
-    "Insufficient history: only 17 of 90 required prior shock-log rows are available — deviation z is suppressed and the shock-state machine is held at \"insufficient_history\" until the rolling baseline matures.",
-    "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 90 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
+    "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 24 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
     "Daily-cadence shock detection uses a synthetic per-day denominator (annual tons_per_year ÷ 365) because Tier 2 carries only annual FDOT AADT. 30d / 90d escalation thresholds will rarely fire from current Tier 2 data alone — true daily AADT-equivalent (FDOT continuous-count stations) is reserved for v2 ingest.",
     "Conversion math: activity_tons_per_year_per_segment = AADT × tfctr × 16 × 365. The 16.0 tons/truck payload is FHWA HS 2023 Table VM-1 (combination trucks); commodity-mix shifts (heavy gravel vs light electronics) are not modeled in v1.",
     "Path B over-counts pass-through traffic (one truck traversing five segments contributes to five segment counts) — the over-count is constant across days and cancels in the z-score, but the headline tons/year number should NOT be compared directly to FAF5 flow.",
@@ -826,8 +825,7 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
     "Each row can be a multi-unit community (one property_id spans a range of unit types/prices), not one apartment — counts are LISTINGS, not units.",
     "This is live FOR-RENT inventory, distinct from rentals-swfl (the Zillow ZORI rent INDEX — a monthly trend/direction read, not a listing count).",
     "Weekly snapshot — direction is neutral on any one week; a second sweep is what would read inventory rising/falling.",
-    "Source is realtor.com rental listings.",
-    "Upstream brain 'logistics-swfl-nowcast' was stale at build time (expired 2026-07-03)."
+    "Source is realtor.com rental listings."
   ],
   "contradicts": [
     "macro-us (bearish) vs safety-swfl (bullish)",
@@ -884,8 +882,8 @@ s37 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-re
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 719.9999999999997,
-    "computed_at": "2026-07-03T16:48:51.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-07-03T21:55:44.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [

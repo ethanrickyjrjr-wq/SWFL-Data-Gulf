@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-07-03T08:56:06.615Z",
-    "finished": "2026-07-03T08:56:07.762Z"
+    "started": "2026-07-03T21:55:44.070Z",
+    "finished": "2026-07-03T21:55:44.376Z"
   },
   "source": "live",
   "outcomes": [
@@ -68,10 +68,7 @@
     },
     {
       "packId": "logistics-swfl-nowcast",
-      "status": "missing",
-      "failureClass": "deterministic",
-      "reason": "fdot-freight-source: data_lake.fdot_aadt_fl returned 0 rows for counties=Lee,Collier year=2025 tfctr>=5. Confirm the dlt pipeline ran (python -m ingest.pipelines.fdot.pipeline) and that docs/sql/fdot_aadt_fl_grant.sql was applied.",
-      "lastGoodRefinedAt": "2026-06-03T07:39:34Z",
+      "status": "skipped-fresh",
       "written": false
     },
     {
@@ -116,176 +113,8 @@
     },
     {
       "packId": "city-pulse-swfl",
-      "status": "built",
-      "version": 26,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "city-pulse-swfl",
-        "version": 26,
-        "refined_at": "2026-07-03T08:56:07Z",
-        "expires": "2026-07-04T08:56:07Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-07-03: 68 live current-events signals across 13 cities — Cape Coral (7), Fort Myers (9), Naples (7), Marco Island (6), East Naples (6), Lehigh Acres (3), Bonita Springs (6), Fort Myers Beach (7), North Fort Myers (2), North Naples (7), Golden Gate (2), Sanibel (2), Estero (4). Most current: Cape Coral — The Shops at Surfside, a Cape Coral shopping center at 2354 Surfside Blvd., sold to a Pinellas County real estate developer for $12 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "signal_transactions_1",
-            "value": "Cape Coral: The Shops at Surfside, a Cape Coral shopping center at 2354 Surfside Blvd., sold to a Pinellas County real estate developer for $12 million.",
-            "direction": "stable",
-            "label": "Cape Coral — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Pinellas investor buys Cape Coral shopping center for $12M | Business Observer: \"The Shops at Surfside, a Cape Coral shopping center, has been sold to a Pinellas County real estate developer. The center at 2354 Surfside Blvd. was b...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_2",
-            "value": "Cape Coral: Gulf Gateway Resort & Marina LLC purchased property from the City of Cape Coral at 106/200 Old Burnt Store Road N., Cape Coral (multifamily property type), in the week's top commercial real estate transactions published March 9, 2026.",
-            "direction": "stable",
-            "label": "Cape Coral — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/mar/09/commercial-real-estate-transactions/",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "The week's top commercial real estate transactions in Charlotte, Collier, Hillsborough, Lee, Manatee, Pasco, Pinellas, Polk, Sarasota | Business Observer: \"Buyer: Gulf Gateway Resort &amp; Marina LLC Seller: City of Cape Coral Address: 106/200 Old Burnt Store Road N., Cape Coral Property Type: Multifamily...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 2?",
-              "How does signal transactions 2 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_3",
-            "value": "Fort Myers: The final outparcel in a Fort Myers shopping center has sold to a Wisconsin Culver's hamburger franchisee, who plans to build a Culver's restaurant on the site.",
-            "direction": "stable",
-            "label": "Fort Myers — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/jun/07/fort-myers-land-culver-franchisee/",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Fort Myers land sells to Wisconsin Culver's hamburger franchisee | Business Observer: \"The final outparcel in a Fort Myers shopping center has sold and the new owner is planning to build a Culver’s restaurant on the site. LQ Commercial R...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 3?",
-              "How does signal transactions 3 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_4",
-            "value": "Fort Myers: The Cobblestone on The Lake Apartments in Fort Myers sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale for $43 million.",
-            "direction": "stable",
-            "label": "Fort Myers — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/jun/28/tampa-bay-investor-fort-myers-apartment/",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Tampa Bay investor pays $43 million for Fort Myers apartment | Business Observer: \"The Cobblestone on The Lake Apartments in Fort Myers have sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale. The 248-un...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 4?",
-              "How does signal transactions 4 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_5",
-            "value": "Fort Myers: Ben Mallah purchased a 60,305 sq ft building in Fort Myers for $17.25 million using a 1031 exchange.",
-            "direction": "stable",
-            "label": "Fort Myers — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.gulfshorebusiness.com/real_estate/youtube-real-estate-investor-buys-nova-southeastern-building/article_dbed9a3b-ca90-4ee9-8e24-318815f60e51.html",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Ben Mallah adds Fort Myers property to portfolio: \"Ben Mallah, a YouTube real estate star with over 1 million followers, purchased a 60,305 sq ft building in Fort Myers for $17.25 million, using a 1031...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 5?",
-              "How does signal transactions 5 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_6",
-            "value": "Naples: The buyer of Collier Place in Naples is a group of local investors who bought it together and plan to retain it, according to senior broker associate Max Molloy of Fort Myers-based LSI Cos. The sale closed around June 20, 2026.",
-            "direction": "stable",
-            "label": "Naples — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/jun/20/naples-office-building-sells/",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Naples office complex sells for $23 million | Business Observer: \"Max Molloy, a senior broker associate with Fort Myers-based LSI Cos., says the buyer is a group of local investors who bought it together and plan to ...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 6?",
-              "How does signal transactions 6 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_7",
-            "value": "Marco Island: The new owner of Island Plaza has local ties to Marco Island restaurateur Luigi Carvelli, whose family owns a local business.",
-            "direction": "stable",
-            "label": "Marco Island — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.gulfshorebusiness.com/real_estate/marco-island-shopping-center-sells-for-26-6m/article_c490a0d8-d052-41ed-99d0-62208fdb24bb.html",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Marco Island shopping center sells for $26.6M | Real Estate | gulfshorebusiness.com: \"Instead of a local owner selling to a national one, the new owner has local ties to a Marco Island restaurateur. Luigi Carvelli, whose family owns Sno...\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 7?",
-              "How does signal transactions 7 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_8",
-            "value": "East Naples: A two-building Naples office complex sold to a group of local investors for $23 million; the seller, Collier Place Holding, had paid $12.85 million for the property in 2019.",
-            "direction": "stable",
-            "label": "East Naples — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/jun/20/naples-office-building-sells/",
-              "fetched_at": "2026-07-03T08:56:07Z",
-              "tier": 2,
-              "citation": "Naples office complex sells for $23 million | Business Observer: \"The seller is Collier Place Holding, which Collier County property records show, paid $12.85 million in 2019.\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 8?",
-              "How does signal transactions 8 here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "caveats": [
-          "60 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
-          "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-03T08:56:07Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "rsw-airport",
@@ -299,59 +128,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 15,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 15,
-        "refined_at": "2026-07-03T08:56:07Z",
-        "expires": "2026-07-04T08:56:07Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-06-25) 6.49%. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 6.49,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-06-25)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-07-02T13:41:24.073905+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-06-25"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-03T08:56:07Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -426,16 +204,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 92,
+      "version": 94,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 92,
-        "refined_at": "2026-07-03T08:56:07Z",
-        "expires": "2026-07-10T08:56:07Z",
+        "version": 94,
+        "refined_at": "2026-07-03T21:55:44Z",
+        "expires": "2026-07-10T21:55:44Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.4578052161567625,
+        "magnitude": 0.4787855360588354,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -593,6 +371,44 @@
         "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, fgcu-reri, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs safety-swfl (bullish). Combined confidence 0.88, trust tier T4, based on 37 upstream brains.",
         "key_metrics": [
           {
+            "metric": "inbound_freight_tons_swfl",
+            "value": 1226969.1,
+            "direction": "stable",
+            "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+            "variable_type": "extensive",
+            "units": "thousand tons/year",
+            "display_format": "count",
+            "source": {
+              "url": "https://faf.ornl.gov/faf5/",
+              "fetched_at": "2026-07-03T21:54:04Z",
+              "tier": 1,
+              "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
+            },
+            "suggestions": [
+              "What's driving inbound freight tons swfl?",
+              "How does inbound freight tons swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_sfha_pct_area_weighted",
+            "value": 0.4325,
+            "direction": "stable",
+            "label": "SWFL area-weighted Special Flood Hazard Area coverage",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+              "fetched_at": "2026-07-03T17:29:49Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
+            },
+            "suggestions": [
+              "What's driving swfl sfha pct area weighted?",
+              "How does swfl sfha pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
             "metric": "licenses_active_lee",
             "label": "Active Licensed Contractors — Lee County",
             "value": 6361,
@@ -726,25 +542,6 @@
             ]
           },
           {
-            "metric": "inbound_freight_tons_swfl",
-            "value": 1226969.1,
-            "direction": "stable",
-            "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
-            "variable_type": "extensive",
-            "units": "thousand tons/year",
-            "display_format": "count",
-            "source": {
-              "url": "https://faf.ornl.gov/faf5/",
-              "fetched_at": "2026-06-29T18:40:17Z",
-              "tier": 1,
-              "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
-            },
-            "suggestions": [
-              "What's driving inbound freight tons swfl?",
-              "How does inbound freight tons swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
             "metric": "best_naics_survival",
             "value": 100,
             "direction": "stable",
@@ -840,25 +637,6 @@
             ]
           },
           {
-            "metric": "overall_survival_rate",
-            "label": "SBA Franchise Survival Rate (SWFL)",
-            "value": 78.6,
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "direction": "stable",
-            "source": {
-              "url": "https://data.sba.gov/dataset/7-a-504-foia",
-              "fetched_at": "2026-06-29T18:35:23.732Z",
-              "tier": 1,
-              "citation": "SBA 7(a) FOIA loan-level data — franchise outcomes, Lee & Collier FL. Resolved-loan denominator (paid-in-full + charged-off); brands with < 3 resolved loans excluded."
-            },
-            "suggestions": [
-              "What's driving overall survival rate?",
-              "How does overall survival rate here compare to other SWFL areas?"
-            ]
-          },
-          {
             "metric": "fl_unemployment",
             "value": 4.8,
             "direction": "rising",
@@ -916,22 +694,22 @@
             ]
           },
           {
-            "metric": "swfl_sfha_pct_area_weighted",
-            "value": 0.4325,
+            "metric": "faf5_inbound_flow_tons_year",
+            "value": 1226969100,
             "direction": "stable",
-            "label": "SWFL area-weighted Special Flood Hazard Area coverage",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "display_format": "ratio",
+            "label": "FAF5 audited annual inbound freight FLOW to SWFL (CONTEXT — not the math anchor; the deviation z below is computed against FDOT's own rolling history)",
+            "variable_type": "extensive",
+            "units": "tons/year",
+            "display_format": "count",
             "source": {
-              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-              "fetched_at": "2026-06-12T01:07:20Z",
+              "url": "https://www.swfldatagulf.com/api/b/logistics-swfl",
+              "fetched_at": "2026-07-03T21:54:05Z",
               "tier": 1,
-              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
+              "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-07-03) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
             },
             "suggestions": [
-              "What's driving swfl sfha pct area weighted?",
-              "How does swfl sfha pct area weighted here compare to other SWFL areas?"
+              "What's driving faf5 inbound flow tons year?",
+              "How does faf5 inbound flow tons year here compare to other SWFL areas?"
             ]
           },
           {
@@ -994,9 +772,9 @@
           }
         ],
         "caveats": [
-          "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $31,624/insured property",
+          "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $32,610/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "2 brand(s) ineligible for survival rate — fewer than 3 resolved loans in Lee & Collier.",
+          "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "vacancy_rate_median: directional reads are tied (rising 3, falling 12, stable 12) — no modal winner; \"stable\" is the tiebreak label, not a consensus signal.",
           "vacancy_rate_marketbeat_swfl: 16 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
           "asking_rent_nnn_marketbeat_swfl: 16 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1054,8 +832,7 @@
           "Scope is inbound domestic only (dms_dest=129 AND trade_type=1). Imports (trade_type=2), exports (trade_type=3), and outbound flows (dms_orig=129) are intentionally excluded — separate brains would own those scopes if built.",
           "Year scope is 2024 (latest historical FAF5 year). FAF5 forecast years are deliberately not consumed here; bump LATEST_HISTORICAL_FAF_YEAR in refinery/sources/faf5-source.mts when ORNL publishes the next vintage.",
           "v1 emits no direction/magnitude vote — the brain reports a point-in-time snapshot, not a time series. Direction reads require a multi-year retro (planned for v2 once a second FAF5 vintage is ingested).",
-          "Insufficient history: only 17 of 90 required prior shock-log rows are available — deviation z is suppressed and the shock-state machine is held at \"insufficient_history\" until the rolling baseline matures.",
-          "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 90 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
+          "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 24 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
           "Daily-cadence shock detection uses a synthetic per-day denominator (annual tons_per_year ÷ 365) because Tier 2 carries only annual FDOT AADT. 30d / 90d escalation thresholds will rarely fire from current Tier 2 data alone — true daily AADT-equivalent (FDOT continuous-count stations) is reserved for v2 ingest.",
           "Conversion math: activity_tons_per_year_per_segment = AADT × tfctr × 16 × 365. The 16.0 tons/truck payload is FHWA HS 2023 Table VM-1 (combination trucks); commodity-mix shifts (heavy gravel vs light electronics) are not modeled in v1.",
           "Path B over-counts pass-through traffic (one truck traversing five segments contributes to five segment counts) — the over-count is constant across days and cancels in the z-score, but the headline tons/year number should NOT be compared directly to FAF5 flow.",
@@ -1145,9 +922,7 @@
           "Each row can be a multi-unit community (one property_id spans a range of unit types/prices), not one apartment — counts are LISTINGS, not units.",
           "This is live FOR-RENT inventory, distinct from rentals-swfl (the Zillow ZORI rent INDEX — a monthly trend/direction read, not a listing count).",
           "Weekly snapshot — direction is neutral on any one week; a second sweep is what would read inventory rising/falling.",
-          "Source is realtor.com rental listings.",
-          "Upstream brain 'logistics-swfl-nowcast' was stale at build time (expired 2026-07-03).",
-          "Upstream brain 'logistics-swfl-nowcast' failed to rebuild on 2026-07-03; using last good read from 2026-06-03 (v15)."
+          "Source is realtor.com rental listings."
         ],
         "contradicts": [
           "macro-us (bearish) vs safety-swfl (bullish)",
@@ -1204,8 +979,8 @@
         "upstream_count": 37,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-03T08:56:07.000Z"
+          "half_life_hours": 719.9999999999999,
+          "computed_at": "2026-07-03T21:55:44.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
@@ -1233,11 +1008,10 @@
             "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?"
           ]
         },
-        "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release",
-        "degraded_inputs": []
+        "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release"
       }
     }
   ],
-  "exitCode": 1,
+  "exitCode": 0,
   "masterDecision": "published"
 }
