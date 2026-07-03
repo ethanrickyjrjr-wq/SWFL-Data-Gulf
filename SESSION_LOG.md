@@ -1,3 +1,19 @@
+## 2026-07-03 (main) — CAN-SPAM postal address promoted to account level
+
+Verified via crawl4ai against the FTC compliance guide (ftc.gov/business-guidance/resources/
+can-spam-act-compliance-guide-business, 07/03/2026): every commercial email needs a valid physical
+postal address (street address, registered PO box, or CMRA private mailbox). `business_address`
+already flowed project-level → footer (5f5df89c) but wasn't in the account-level carry-forward set,
+so every new project needed it re-entered. Fixed: (1) migration
+`docs/sql/20260703_user_brand_business_address.sql` adds the column to `user_brand_profiles` (run
+against prod, verified); (2) `app/api/user/brand/route.ts` — new `CONTACT_FIELDS` array, same
+pattern as `COLOR_FIELDS`/`SOCIAL_FIELDS`; (3) `ProjectWorkspace.tsx` — `business_address` added to
+`AGENT_KEYS` so it pre-fills new projects from the account default. Multi-tenant: `user_brand_profiles`
+is one row per `user_id` with "own brand" RLS (`auth.uid() = user_id`) — each account supplies and
+stores its own address, never shared. Operator's own address (iPostal1 CMRA, Fort Myers) still needs
+one "Save globally" click in the Branding panel to land in their account row — not written via script
+(bulk `auth.users` read was correctly denied by the auto-mode classifier as an unauthorized PII dump).
+
 ## 2026-07-03 (main) — Lane B mock shipped (artifact) + 2 spec corrections from real-data probe
 
 Operator asked to SEE the seeded lab before building. Built an artifact mock of /email-lab?zip=33914

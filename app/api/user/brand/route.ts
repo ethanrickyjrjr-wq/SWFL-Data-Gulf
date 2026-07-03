@@ -31,9 +31,17 @@ const SOCIAL_FIELDS = [
 ] as const;
 type SocialField = (typeof SOCIAL_FIELDS)[number];
 
+// CAN-SPAM postal address — account-level so it's entered once and carries to
+// every new project's footer, like colors/socials above. Verified against the
+// FTC compliance guide 07/03/2026: business_address, PO box, or CMRA mailbox.
+const CONTACT_FIELDS = ["business_address"] as const;
+type ContactField = (typeof CONTACT_FIELDS)[number];
+
 const BASE_SELECT =
   "agent_name, photo_url, license, brokerage, primary_color, accent_color, logo_url, " +
-  SOCIAL_FIELDS.join(", ");
+  SOCIAL_FIELDS.join(", ") +
+  ", " +
+  CONTACT_FIELDS.join(", ");
 
 async function authed() {
   const supabase = createClient(await cookies());
@@ -112,6 +120,12 @@ export async function PATCH(req: NextRequest) {
   for (const key of SOCIAL_FIELDS) {
     if (key in body) {
       const v = body[key as SocialField];
+      update[key] = typeof v === "string" && v.trim() ? v : null;
+    }
+  }
+  for (const key of CONTACT_FIELDS) {
+    if (key in body) {
+      const v = body[key as ContactField];
       update[key] = typeof v === "string" && v.trim() ? v : null;
     }
   }

@@ -46,7 +46,9 @@ import type {
 } from "./workspace/types";
 
 // Agent fields that BrandingBlock edits — used for pre-fill detection.
-const AGENT_KEYS = ["agent_name", "photo_url", "license", "brokerage"] as const;
+// business_address rides along (CAN-SPAM postal address, account-level like
+// the rest of these so it seeds every new project once saved globally).
+const AGENT_KEYS = ["agent_name", "photo_url", "license", "brokerage", "business_address"] as const;
 
 interface Seed {
   template: string;
