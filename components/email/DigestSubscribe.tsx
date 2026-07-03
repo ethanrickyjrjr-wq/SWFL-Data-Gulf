@@ -42,7 +42,7 @@ export function buildSubscribeBody(input: {
 export default function DigestSubscribe({
   source = "landing",
   heading = "Get the free daily SWFL data digest",
-  blurb = "ZIP-level prices, permits, and the day's market read — one short email each weekday. Cited, no spam.",
+  blurb = "Your ZIP's prices, permits, and the day's market read — one short email each weekday. Cited, no spam.",
   activation = false,
   presetZip,
   endpoint = "/api/email/subscribe",
