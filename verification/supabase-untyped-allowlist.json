@@ -13,5 +13,6 @@
   "lib/landing/load-home-map-data.ts",
   "lib/email/usage.ts",
   "lib/listings/select.ts",
+  "lib/zip-report/candidates.ts",
   "lib/zip-summary/load.ts"
 ]
