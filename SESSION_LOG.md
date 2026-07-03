@@ -1,3 +1,28 @@
+## 2026-07-03 (main) — BUILT: signal-driven ZIP hero + shared sourced figures (plan executed, 10 commits)
+
+Plan `docs/superpowers/plans/2026-07-03-zip-signal-hero.md` (spec a554806b) executed inline, TDD,
+one commit per task: (1) `public.sourced_figures` migration applied + `gen:types` (666e3897);
+(2) `lib/figures/sourced.ts` empty-tolerant reader + assistant prompt block (143c3fd3);
+(3) `lib/zip-report/signal-rank.ts` pure ranker — 0.6×extremity + 0.4×movement, capped, fixed
+tie-break, why-tags restate held rank/delta only (ce552c8d); (4) env-swfl `flood_by_zip` detail
+table for EVERY windowed SWFL ZIP via new `nfip-zip-window-full` fragment — top-6 key_metrics
+byte-identical, mirrored-value test enforces it (7a8aed24); (5) Find-it core: `makeDomainSearch`
+extracted in gap-fill, `metric-gaps.ts` fixed allowlist (permits_90d × Cape Coral
+33904/09/14/90/91), `find.ts` cache-first → daily-capped cold lookup → upsert (6db4ed11);
+(6) `POST /api/figures/find` + FindItButton client states idle/finding/found/not-found
+(5b2c9ef8); (7) `candidates.ts` pool builder + census-distribution loader (untyped-hatch
+allowlisted) (5f6f002c); (8) page rebuilt render-once — top-3 hero with why-tags, ranked grid
+absorbs at-a-glance + below-fold census/housing/flood cards, rail = context/coverage card with
+zero numbers, as-of once (19072cc9); (9) `market-context` merges cached sourced figures, held
+figures win on key collision → email lab + social builders inherit (0c0b400b); (10) assistant
+located path grounds on the same cache via FOUND-FIGURES block, test-mocked (42596b65). Bonus:
+pre-existing "ZIP-level" default blurb in DigestSubscribe fixed (2bd1d5e3). Verified: 116
+targeted bun tests green, Gate-2 vocab/alias clean (no new slugs — detail table only),
+`bunx next build` ✓, prod-server smoke on 33914 + 33957 — zero em-dash stat cells, distinct
+per-ZIP heroes, Find-it slot renders with Cape Coral coverage line. NOT done (operator-run):
+env-swfl `--target-only` rebuild to land flood_by_zip in the prod brain (page falls back to
+key_metrics until then), live Find-it click (paid call) → close `zip_signal_hero_live_verify`.
+
 ## 2026-07-03 (main) — addendum: build-queue synced for zip-signal-hero (missed in the spec push)
 
 One-line queue entry added per RULE 2 same-push sync; no other changes.
