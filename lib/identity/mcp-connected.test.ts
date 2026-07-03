@@ -14,15 +14,22 @@ function builder(getResult: () => { count: number }) {
   return b;
 }
 
+// Provide BOTH exports the real module has. `mock.module` is process-global in
+// bun, so an incomplete mock here bleeds into sibling test files run in the same
+// process (one importing `createServiceRoleClientUntyped` would hit an "export
+// not found"). Mirror the full surface so the combined suite is deterministic.
+const fakeClient = () => ({
+  from: (table: string) =>
+    builder(() => {
+      if (table === "user_mcp_tokens") return { count: scenario.tokenCount };
+      if (table === "projects") return { count: scenario.projectCount };
+      return { count: scenario.mcpEventCount };
+    }),
+});
+
 mock.module("@/utils/supabase/service-role", () => ({
-  createServiceRoleClient: () => ({
-    from: (table: string) =>
-      builder(() => {
-        if (table === "user_mcp_tokens") return { count: scenario.tokenCount };
-        if (table === "projects") return { count: scenario.projectCount };
-        return { count: scenario.mcpEventCount };
-      }),
-  }),
+  createServiceRoleClient: fakeClient,
+  createServiceRoleClientUntyped: fakeClient,
 }));
 
 const { isMcpConnected } = await import("./mcp-connected");

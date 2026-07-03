@@ -1,3 +1,13 @@
+## 2026-07-03 (main) — test(mcp): kill the pre-existing mock.module bleed — combined suite deterministic
+
+The account-auth ship flagged a PRE-EXISTING bun flake: `mcp-connected.test.ts`'s
+`mock.module("@/utils/supabase/service-role")` exported only `createServiceRoleClient`, so a sibling
+file importing `createServiceRoleClientUntyped` in the same process hit "export not found" (mock.module
+is process-global). Mirrored the full module surface (both exports) in the mock. Combined run
+`project-tools.test.ts + account-resolve.test.ts + mcp-connected.test.ts` now 54 pass / 0 fail (was
+1 fail + 1 error). The stale 1h claim on the file was released after confirming the working copy was
+byte-identical to origin (nothing to clobber).
+
 ## 2026-07-03 (main) — chore(mcp): wire secret-free account-token header into .mcp.json
 
 Follow-up to the account-level MCP auth ship (e7ea5a4a). The repo `.mcp.json` swfl entry sent NO
