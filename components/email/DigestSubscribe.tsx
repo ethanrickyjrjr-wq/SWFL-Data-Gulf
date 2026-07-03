@@ -45,10 +45,16 @@ export default function DigestSubscribe({
   blurb = "ZIP-level prices, permits, and the day's market read — one short email each weekday. Cited, no spam.",
   activation = false,
   presetZip,
+  endpoint = "/api/email/subscribe",
+  doneMessage = "You're subscribed. Watch for the next weekday digest.",
 }: {
   source?: string;
   heading?: string;
   blurb?: string;
+  /** POST target — the daily digest by default; pass /api/weekly-read/subscribe for the weekly read. */
+  endpoint?: string;
+  /** Success copy — override when the product isn't the weekday digest. */
+  doneMessage?: string;
   /**
    * Activation mode (the "It's Alive" surface): also collect the prospect's ZIP and
    * an explicit, unchecked opt-in. Off everywhere else — the landing/report forms keep
@@ -75,7 +81,7 @@ export default function DigestSubscribe({
     if (!email || blocked) return;
     setStatus("submitting");
     try {
-      const res = await fetch("/api/email/subscribe", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
@@ -94,9 +100,7 @@ export default function DigestSubscribe({
       <p className="mt-2 text-sm text-gray-400 leading-relaxed">{blurb}</p>
 
       {status === "done" ? (
-        <p className="mt-4 text-sm font-medium text-teal-primary">
-          You&apos;re subscribed. Watch for the next weekday digest.
-        </p>
+        <p className="mt-4 text-sm font-medium text-teal-primary">{doneMessage}</p>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row gap-3">

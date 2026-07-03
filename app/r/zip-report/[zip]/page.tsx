@@ -718,8 +718,10 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           <DigestSubscribe
             source="zip-report"
             presetZip={zip}
+            endpoint="/api/weekly-read/subscribe"
             heading={`Subscribe to ${zip}'s weekly read`}
             blurb={`A short weekly market read for ${primaryPlace ?? `ZIP ${zip}`}, built and sent by our engine — see it before you build your own.`}
+            doneMessage={`You're in — ${zip}'s next weekly read will land in your inbox.`}
           />
         </div>
         <ColorLegend />
