@@ -8,8 +8,11 @@
 - **Charts in deliverables** go through `buildChartForQuestion` (`lib/email/build-doc.ts`). Every plotted
   number is REAL (held brain / live-web-cited / upload-verified / user-stated) — the model selects points,
   never writes a number. If a shape isn't built, offer bar/table — never "can't chart it".
-- **CAN-SPAM = 3 real requirements:** a working opt-out, accurate headers, no misleading subject. That's
-  it — don't re-add a compliance lecture.
+- **CAN-SPAM = 4 real requirements:** a working opt-out, accurate headers, no misleading subject, AND a
+  valid physical postal address (business address, PO box, or mailbox service) in every commercial email
+  (corrected 07/02/2026 per Shopify's FTC-sourced guide). The footer's `address` field is its home —
+  populated from the brand profile's `business_address`; the lab nudges (non-blocking) when it's empty.
+  Don't re-add a compliance lecture.
 - **Layout:** use `h-full` / `dvh`, never `h-screen`.
 - **Send is the paywall, builds are free** — watermark only; no build gate, no Stripe on creation.
 - **Email Lab tier DIAL has ONE root:** `lib/email/lab/capabilities.ts`. Every feature + every font

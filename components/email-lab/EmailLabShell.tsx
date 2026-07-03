@@ -104,6 +104,7 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
       if (t.LOGO_URL) props.logoUrl = t.LOGO_URL;
     } else if (b.type === "footer") {
       if (t.COMPANY_NAME) props.companyName = t.COMPANY_NAME;
+      if (t.ADDRESS) props.address = t.ADDRESS;
       if (t.WEBSITE_URL) props.websiteUrl = t.WEBSITE_URL;
       if (t.CONTACT_PHONE) props.phone = t.CONTACT_PHONE;
       if (t.CONTACT_EMAIL) props.email = t.CONTACT_EMAIL;
@@ -702,6 +703,17 @@ export function EmailLabShell({
             )}
           </div>
           <div className="flex items-center gap-2">
+            {!(
+              (doc.blocks.find((b) => b.type === "footer")?.props as { address?: string })
+                ?.address ?? ""
+            ).trim() && (
+              <span
+                className="max-w-56 text-right text-[10px] leading-tight text-[#f59e0b]/70"
+                title="CAN-SPAM requires a physical postal address (business address, PO box, or mailbox service) in every commercial email. Add your Business Address in Brand — the footer picks it up."
+              >
+                Footer needs a postal address (CAN-SPAM) — add it in Brand
+              </span>
+            )}
             <button
               onClick={downloadPdf}
               disabled={exporting}

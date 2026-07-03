@@ -73,6 +73,9 @@ export function brandingToTokens(
   // contact
   set("contact_email", "CONTACT_EMAIL");
   set("contact_phone", "CONTACT_PHONE");
+  // CAN-SPAM: the postal address is a REAL requirement (business address, PO
+  // box, or mailbox service) — the footer's address field is its home.
+  set("business_address", "ADDRESS");
 
   // socials + unsubscribe
   for (const [key, token] of Object.entries(SOCIAL_TOKENS)) set(key, token);

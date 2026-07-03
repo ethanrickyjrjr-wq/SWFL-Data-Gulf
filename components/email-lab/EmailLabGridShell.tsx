@@ -868,6 +868,18 @@ export function EmailLabGridShell({
                 {social.exporting ? "Exporting…" : "Export PNG"}
               </button>
             )}
+            {mode === "email" &&
+              !(
+                (doc.blocks.find((b) => b.type === "footer")?.props as { address?: string })
+                  ?.address ?? ""
+              ).trim() && (
+                <span
+                  className="max-w-56 text-right text-[10px] leading-tight text-[#f59e0b]/70"
+                  title="CAN-SPAM requires a physical postal address (business address, PO box, or mailbox service) in every commercial email. Add your Business Address in Brand — the footer picks it up."
+                >
+                  Footer needs a postal address (CAN-SPAM) — add it in Brand
+                </span>
+              )}
             {onSave && (
               <button
                 type="button"
