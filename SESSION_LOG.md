@@ -1,3 +1,68 @@
+## 2026-07-03 (main) — fix(pill): "Start building free" ignored an existing session; wire "Make this →" into the AI pill
+
+Operator report: on the AI pill (BriefcasePanel), signed-in visitor opened the "Listing → Close"
+showcase from the pitch state and the small footer "Start building free" CTA prompted a login
+anyway. Root cause: `ShowcaseOverlay`'s tier-slide + footer CTA unconditionally called
+`setLoginOpen(true)` with no session check — shipped that way for every host, so any already-authed
+visitor hit the wall. Fixed by having `ShowcaseOverlay` call `useSession()` itself (can't be forgotten
+per-host again) and gate on `authed`: signed in → `onAuthedCta` (host action) or close the overlay if
+none passed, never login; signed out → the OTP modal as before.
+
+Second ask: "BUILD THIS" should land in the email lab with the AI box ready, just type the address.
+BriefcasePanel never wired a recipe CTA at all (only the lab's own Examples accordion had one). Added
+`onUseRecipe` to the pill, carrying the clicked slide's recipe through `?recipe=/?recipeNeeds=` into
+`/email-lab/grid` (auto-creates/opens a project) or the current project's Email tab — landed on
+`EmailLabGridShell.initialRecipe` (`components/email-lab/EmailLabGridShell.tsx`), the exact prop the
+parallel `/showcase`-page session built for the identical handoff. Also fixed `onBuild`'s no-project
+fallback from `/project` (the projects LIST) to `/email-lab/grid` (actually opens a lab), and made the
+"Make this" caption a labeled mini-panel instead of a bare button + one-liner (operator ask: more
+noticeable, explain what the button does).
+
+**Parallel-session note (real-time collision, not a stale claim echo):** a second live session was
+independently building the /showcase page's own recipe-carry at the same time; we flip-flopped between
+a compact `id:step` token and the raw `?recipe=<prompt>&recipeNeeds=<csv>` format twice before
+converging on the latter (their `EmailLabGridClient` reads it via `useSearchParams`, their
+`recipeDestination` in `lib/showcase/recipe.ts` is now the shared root `BriefcasePanel.onUseRecipe`
+calls instead of re-deriving the URL). Commit deliberately excludes their in-flight, unrelated files
+(`CampaignExamples.tsx`, `app/showcase/page.tsx`, `app/social-lab/`, `ProjectSocialClient.tsx`,
+`useSocialComposer.ts`, the zip-email-reskin block/grid changes) — only `EmailLabGridShell.tsx`'s
+`initialRecipe` addition and `lib/showcase/recipe.ts`'s `recipeDestination`/`target` addition are
+included, both verified as clean, additive-only diffs this fix genuinely depends on.
+
+Verified: `bun test lib/showcase components/briefcase` 17/0, full `bunx next build` green (twice,
+before and after the format reconciliation).
+
+## 2026-07-03 (main) — feat(showcase): /showcase leads with 3 buildable campaign sections + social-ready recipe root
+
+Operator: "put all the showcase examples on the page, one click to email/social lab ready to build."
+Built `components/showcase/CampaignExamples.tsx` — reuses `ShowcaseCard`/`ShowcaseOverlay` UNCHANGED
+(same click-to-expand thumbnail the AI-chat pill already uses) across 3 sections (listing-to-close,
+launch-blitz, market-pulse), each with a one-line explainer. "Make this →" now calls ONE shared root,
+`lib/showcase/recipe.ts` `recipeDestination(recipe, {projectId?})` — picks `/email-lab/grid` vs the NEW
+`/social-lab` (anonymous entry, redirects through `/login?next=` then into the project's Social tab,
+auto-creating one if needed — mirrors the proven `/email-lab/grid` dance) by the recipe's new
+`target: "email" | "social"` field. `useSocialComposer` now accepts `initialRecipe` and guards `author()`
+on an unfilled `[[blank]]`, same pattern as the email lab's `pendingRecipe`/`placeholderBlocked`.
+`ProjectSocialClient` + its page read `?recipe=/?recipeNeeds=` and render the fill-in hint.
+
+Collision handling: found a PARALLEL session mid-build on the exact same "Make this →" handoff for the
+BriefcasePanel pill (`?recipe=<prompt>&recipeNeeds=<needs>` into `labDestination`/`AutoCreateProject`/
+`EmailLabGridShell.initialRecipe`) — dropped my conflicting `id:step` registry-lookup scheme and
+conformed to theirs; `EmailLabGridClient` now reads `?recipe=` straight off `useSearchParams()` instead
+of a prop, so it never depends on their still-claimed `app/email-lab/grid/page.tsx`. `BriefcasePanel.tsx`
+still inlines the URL-building logic it had before this session started — safe now that
+`recipeDestination` exists, but NOT swapped in (avoided touching their actively-claimed file twice).
+
+Verified live in-browser: showcase page renders → thumbnail expands → Make this → lands in Email Lab
+Grid with the prompt pre-filled and the blank-fill hint showing. `/social-lab` anonymous → correctly
+redirects to `/login?next=/social-lab?recipe=...`. Full `bunx next build` + scoped `bun test` green.
+
+**Left as a handoff** (check `social_showcase_recipes_author`, opened this session): the plumbing above
+is ready, but the 3 social-only slides (launch-blitz "Social Pack — 4 Formats", market-pulse "The Social
+Cut" + "Proof It Updates") still have no `recipe` field — they're in `registry.test.ts`'s `RECIPE_EXEMPT`
+list. Authoring those (real data via crawl4ai per RULE 0.4, one `[[blank]]` each, `target: "social"`) is
+FOR THE NEXT SESSION, not done here. Not committed/pushed — awaiting operator confirmation.
+
 ## 2026-07-03 (main) — test(mcp): kill the pre-existing mock.module bleed — combined suite deterministic
 
 The account-auth ship flagged a PRE-EXISTING bun flake: `mcp-connected.test.ts`'s

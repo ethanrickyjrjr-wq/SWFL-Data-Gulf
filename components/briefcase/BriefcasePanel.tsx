@@ -16,6 +16,7 @@ import { projectPrompts } from "@/lib/project/prompt-engine";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { panelState, resolveBuildAction } from "@/lib/briefcase/panel-logic";
 import { SHOWCASES } from "@/lib/showcase/registry";
+import { recipeDestination, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";
@@ -101,15 +102,33 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
   }, [page, projectId, visits, aiContext]);
 
   // Create-gate: a logged-out Build opens the login wall; it NEVER POSTs the build
-  // API. Authed off a project → /project (imports the draft, builds). Authed INSIDE a
-  // project (F2) → that project's own workspace, where the build button lives — NEVER
-  // /project, which would spawn a brand-new project (the A2/A6 bug).
+  // API. Authed off a project → /email-lab/grid, which auto-lands the visitor in a
+  // real project's Email tab (auto-creates one if they have none — same route the
+  // standalone lab pages use). Authed INSIDE a project (F2) → that project's own
+  // workspace, where the build button lives — NEVER /project (the projects LIST),
+  // which would just be a detour and, for a fresh visitor, spawn a brand-new
+  // project on top of the one they're about to land in anyway (the A2/A6 bug).
   function onBuild() {
     if (resolveBuildAction(authed) === "login") {
       setLoginOpen(true);
       return;
     }
-    window.location.assign(projectId ? projectHome(projectId) : "/project");
+    window.location.assign(projectId ? projectHome(projectId) : "/email-lab/grid");
+  }
+
+  // "Make this →" on a showcase slide (operator ruling 07/03/2026: the pill's
+  // examples get the same build path the lab's own Examples accordion has).
+  // The pill has no Build box on screen, so the recipe rides via
+  // recipeDestination (lib/showcase/recipe.ts) — the ONE root every recipe
+  // carrier (this pill, the /showcase page) shares, so the URL scheme only
+  // ever lives in one place.
+  function onUseRecipe(recipe: ShowcaseRecipe) {
+    setOpenShowcase(null);
+    if (resolveBuildAction(authed) === "login") {
+      setLoginOpen(true);
+      return;
+    }
+    window.location.assign(recipeDestination(recipe, { projectId }));
   }
 
   // PROJECT MODE — chat + (any carried draft items) only. No funnel.
@@ -262,6 +281,8 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
         <ShowcaseOverlay
           showcase={SHOWCASES.find((s) => s.id === openShowcase)!}
           onClose={closeShowcase}
+          onUseRecipe={onUseRecipe}
+          onAuthedCta={onBuild}
         />
       )}
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />

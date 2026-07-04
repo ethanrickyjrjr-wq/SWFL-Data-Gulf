@@ -5,6 +5,7 @@ import { inferScopeFromItems } from "@/lib/project/derive-name";
 import type { ProjectItem } from "@/lib/project/items";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
+import type { BrandNeed, ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { ProjectEmailLabClient } from "./ProjectEmailLabClient";
 
 export const runtime = "nodejs";
@@ -57,6 +58,18 @@ export default async function ProjectEmailLabPage({
   const zipSeed = /^\d{5}$/.test(sp.zip ?? "") ? (sp.zip as string) : null;
   // Returning from the contacts-upload detour re-opens the schedule modal (?schedule=1).
   const autoOpenSchedule = sp.schedule === "1";
+  // Showcase "Make this →" carry — the AI pill, the lab's own Examples
+  // accordion, and the /showcase page all route through the same
+  // ?recipe=<prompt>&recipeNeeds=<comma needs> (lib/project/lab-redirect.ts).
+  // Grid canvas only; the block canvas has no Build box to seed.
+  const recipePrompt = sp.recipe ?? null;
+  const recipeNeeds = (sp.recipeNeeds ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean) as BrandNeed[];
+  const initialRecipe: ShowcaseRecipe | null = recipePrompt
+    ? { prompt: recipePrompt, needs: recipeNeeds }
+    : null;
 
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -152,6 +165,7 @@ export default async function ProjectEmailLabPage({
       }
       initialDoc={initialDoc}
       zipSeeded={Boolean(zipSeed && initialDoc)}
+      initialRecipe={initialRecipe}
       deliverableId={did}
       hasDeliverables={hasDeliverables}
       autoOpenSchedule={autoOpenSchedule}

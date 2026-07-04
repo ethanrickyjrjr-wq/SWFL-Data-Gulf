@@ -6,33 +6,57 @@ import type { Showcase } from "@/lib/showcase/registry";
 import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { totalSteps, clampStep, stepLabel } from "@/lib/showcase/overlay-logic";
 import { LoginModal } from "@/components/landing/LoginModal";
+import { useSession } from "@/lib/auth/use-session";
 
 /**
  * Near-fullscreen step-through for one showcase. Click-through ONLY — no
  * auto-advance ever (rotating content reads as an ad and gets skipped).
  * Content steps render the committed capture + captions; buildable steps carry
  * the "Make this →" recipe button when the host passes `onUseRecipe` (the lab
- * injects the prompt into its Build box — operator ruling 07/03/2026; the old
- * "See the real thing" self-link is dead). The final step is the tier/CTA
- * slide, which opens the OTP LoginModal ABOVE this overlay (LoginModal portals
- * at z-[100]; we sit at z-[90]).
+ * injects the prompt into its Build box, or a host without a Build box on
+ * screen carries it to one — operator ruling 07/03/2026; the old "See the real
+ * thing" self-link is dead). The final step is the tier/CTA slide.
+ *
+ * "Start building free" (footer + tier slide) checks the session ITSELF —
+ * `useSession()` is called here, not threaded in as a prop, so no host can
+ * forget to wire it (that's exactly how the 07/03/2026 pill-auth bug
+ * happened: the recipe flow shipped to the lab's own accordion but the
+ * button here kept unconditionally opening LoginModal for every host,
+ * including already-signed-in visitors). Authed → `onAuthedCta` (host action,
+ * e.g. "go build"); no handler given → falls back to just closing the
+ * overlay, never login. Logged out → the OTP LoginModal opens ABOVE this
+ * overlay (LoginModal portals at z-[100]; we sit at z-[90]).
  */
 export function ShowcaseOverlay({
   showcase,
   onClose,
   onUseRecipe,
+  onAuthedCta,
 }: {
   showcase: Showcase;
   onClose: () => void;
-  /** Present only where a builder is on screen (the lab rails) — hosts without
-   *  it (dock, briefcase) show the story with no button. */
+  /** Present only where a builder is on screen, or a host that can carry the
+   *  recipe to one — hosts without it show the story with no CTA button. */
   onUseRecipe?: (recipe: ShowcaseRecipe) => void;
+  /** What "Start building free" does for an ALREADY-signed-in visitor.
+   *  Default (unset): close the overlay — safe no-op, never re-prompts login. */
+  onAuthedCta?: () => void;
 }) {
   const total = totalSteps(showcase);
   const [step, setStep] = useState(0);
   const [loginOpen, setLoginOpen] = useState(false);
+  const session = useSession();
+  const authed = session?.authed ?? false;
   const scrimRef = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
+
+  function handleFreeCta() {
+    if (authed) {
+      (onAuthedCta ?? onClose)();
+      return;
+    }
+    setLoginOpen(true);
+  }
 
   const go = (next: number) => setStep(clampStep(next, total));
 
@@ -155,18 +179,28 @@ export function ShowcaseOverlay({
                   </p>
                 )}
                 {recipe && onUseRecipe && (
-                  <div className="mt-4">
+                  <div
+                    className="mt-4 rounded-lg border p-3"
+                    style={{ borderColor: showcase.accent, background: `${showcase.accent}14` }}
+                  >
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-wider"
+                      style={{ color: showcase.accent }}
+                    >
+                      Build your own version
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-gray-300">
+                      One click fills the email lab&rsquo;s AI box with this exact prompt, real data
+                      included — you only type your own address in the highlighted spot.
+                    </p>
                     <button
                       type="button"
                       onClick={() => onUseRecipe(recipe)}
-                      className="w-full rounded-lg px-3 py-2 text-xs font-bold text-navy-dark transition-opacity hover:opacity-90"
+                      className="mt-2.5 w-full rounded-lg px-3 py-2.5 text-xs font-bold text-navy-dark transition-opacity hover:opacity-90"
                       style={{ background: showcase.accent }}
                     >
                       Make this →
                     </button>
-                    <p className="mt-1.5 text-center text-[10px] leading-relaxed text-gray-500">
-                      Drops the ready-made prompt in the builder — one blank to fill.
-                    </p>
                   </div>
                 )}
               </div>
@@ -205,10 +239,10 @@ export function ShowcaseOverlay({
               </div>
               <button
                 type="button"
-                onClick={() => setLoginOpen(true)}
+                onClick={handleFreeCta}
                 className="btn-gradient rounded-lg px-8 py-2.5 text-sm font-semibold text-navy-dark"
               >
-                Start building free
+                {authed ? "Go build it →" : "Start building free"}
               </button>
             </div>
           )}
@@ -238,11 +272,11 @@ export function ShowcaseOverlay({
           {!isTier && (
             <button
               type="button"
-              onClick={() => setLoginOpen(true)}
+              onClick={handleFreeCta}
               className="shrink-0 text-xs font-semibold underline-offset-2 hover:underline"
               style={{ color: showcase.accent }}
             >
-              Start building free
+              {authed ? "Go build it →" : "Start building free"}
             </button>
           )}
         </div>

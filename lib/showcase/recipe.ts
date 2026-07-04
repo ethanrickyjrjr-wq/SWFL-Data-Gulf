@@ -15,6 +15,10 @@ export interface ShowcaseRecipe {
   prompt: string;
   /** Brand fields the built artifact uses — gaps trigger the add-info yes/no. */
   needs: readonly BrandNeed[];
+  /** Which builder this recipe seeds — "email" (default, omitted on existing
+   *  recipes) opens the email lab's Build box; "social" opens the social
+   *  composer's Build-with-AI box instead. Read by `recipeDestination` below. */
+  target?: "email" | "social";
 }
 
 /** Plain-words labels for the gap prompt ("your name, your headshot"). */
@@ -43,4 +47,37 @@ export function brandGaps(
   branding: Record<string, string>,
 ): BrandNeed[] {
   return needs.filter((k) => !(branding[k] ?? "").trim());
+}
+
+/**
+ * THE ROOT for "Make this →" navigation — every host that carries a recipe to
+ * a builder (the /showcase page, the AI-chat pill's BriefcasePanel, and any
+ * future example surface) should call this instead of re-deriving the path +
+ * query string itself. One place to fix if the URL scheme or a target route
+ * ever changes.
+ *
+ * `?recipe=<prompt>&recipeNeeds=<comma needs>` is the established carry (see
+ * lib/project/lab-redirect.ts, which threads the SAME two params through the
+ * signed-in email-lab redirect). Picks the builder by `recipe.target`
+ * ("email", the default, or "social") and by whether the caller is already
+ * inside a project:
+ *   - email, no project  → /email-lab/grid   (anonymous-usable today)
+ *   - email, in project  → /project/<id>/email-lab
+ *   - social, no project → /social-lab       (login-gated: no anonymous
+ *     social composer exists yet — see app/social-lab/page.tsx)
+ *   - social, in project → /project/<id>/social
+ */
+export function recipeDestination(
+  recipe: ShowcaseRecipe,
+  opts: { projectId?: string | null } = {},
+): string {
+  const params = new URLSearchParams({ recipe: recipe.prompt });
+  if (recipe.needs.length > 0) params.set("recipeNeeds", recipe.needs.join(","));
+  const isSocial = recipe.target === "social";
+  const base = opts.projectId
+    ? `/project/${opts.projectId}/${isSocial ? "social" : "email-lab"}`
+    : isSocial
+      ? "/social-lab"
+      : "/email-lab/grid";
+  return `${base}?${params.toString()}`;
 }

@@ -22,6 +22,11 @@ export default async function EmailLabPage({
 }) {
   const sp = await searchParams;
   const zip = /^\d{5}$/.test(sp.zip ?? "") ? (sp.zip as string) : null;
+  // A pill/showcase "Make this →" (?recipe=/?recipeNeeds=) that lands here
+  // (the block-canvas standalone) rides through to the grid canvas via the
+  // redirect below — the block canvas itself has no Build box to seed, Grid-only.
+  const recipe = sp.recipe ?? null;
+  const recipeNeeds = sp.recipeNeeds ?? null;
 
   const supabase = createClient(await cookies());
   const {
@@ -33,9 +38,13 @@ export default async function EmailLabPage({
       .select("id")
       .order("updated_at", { ascending: false })
       .limit(1);
-    const dest = labDestination((data as { id: string }[] | null) ?? [], zip);
+    const dest = labDestination((data as { id: string }[] | null) ?? [], {
+      zip,
+      recipe,
+      recipeNeeds,
+    });
     if (dest) redirect(dest);
-    return <AutoCreateProject zip={zip} />;
+    return <AutoCreateProject zip={zip} recipe={recipe} recipeNeeds={recipeNeeds} />;
   }
 
   const seedDoc = zip ? await buildZipSeedDoc(zip) : null;

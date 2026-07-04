@@ -6,16 +6,29 @@ import { useRouter } from "next/navigation";
 // Cockpit D4 — a signed-in lab visitor with ZERO projects gets one made for
 // them via POST /api/projects (tokenless; the saved brand profile applies
 // server-side). Redirect race / create failure falls back to /project.
-// A homepage-map ?zip= rides through so the fresh project's Email tab opens
-// with the ZIP email prebuild.
-export function AutoCreateProject({ zip = null }: { zip?: string | null }) {
+// A homepage-map ?zip= or a showcase ?recipe=/?recipeNeeds= rides through so
+// the fresh project's Email tab opens with the ZIP prebuild or the recipe
+// prompt ready.
+export function AutoCreateProject({
+  zip = null,
+  recipe = null,
+  recipeNeeds = null,
+}: {
+  zip?: string | null;
+  recipe?: string | null;
+  recipeNeeds?: string | null;
+}) {
   const router = useRouter();
   const firedRef = useRef(false); // strict-mode double-fire would create two projects
 
   useEffect(() => {
     if (firedRef.current) return;
     firedRef.current = true;
-    const q = zip && /^\d{5}$/.test(zip) ? `?zip=${zip}` : "";
+    const params = new URLSearchParams();
+    if (zip && /^\d{5}$/.test(zip)) params.set("zip", zip);
+    if (recipe) params.set("recipe", recipe);
+    if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
+    const q = params.size > 0 ? `?${params.toString()}` : "";
     fetch("/api/projects", {
       method: "POST",
       headers: { "content-type": "application/json" },

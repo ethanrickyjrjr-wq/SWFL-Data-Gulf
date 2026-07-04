@@ -184,6 +184,13 @@ export interface EmailLabGridShellProps {
   initialAiPrompt?: string;
   /** …and fire ONE author build on mount (project auto-fill path). */
   autoGenerate?: boolean;
+  /** Cross-page "Make this →" handoff — the pill and the /showcase page both
+   *  carry a recipe here via `?recipe=<prompt>&recipeNeeds=<comma needs>`
+   *  (lib/project/lab-redirect.ts). Seeds the SAME pendingRecipe/gap-guard
+   *  path as the in-page Examples accordion's onUseRecipe, so a Build click
+   *  still catches the unfilled [[blank]] instead of authoring garbage from
+   *  the literal placeholder. */
+  initialRecipe?: ShowcaseRecipe | null;
   headerSlot: ReactNode;
   aiPlaceholder?: string;
   onSave?: (doc: EmailDoc, aiPrompt: string) => Promise<string | void>;
@@ -204,6 +211,7 @@ export function EmailLabGridShell({
   scope,
   initialAiPrompt,
   autoGenerate,
+  initialRecipe,
   headerSlot,
   aiPlaceholder = "Describe the whole email — the AI lays it out on the grid with real SWFL numbers…",
   onSave,
@@ -224,7 +232,7 @@ export function EmailLabGridShell({
   );
   const doc = history.present;
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [aiPrompt, setAiPrompt] = useState(initialAiPrompt ?? "");
+  const [aiPrompt, setAiPrompt] = useState(initialAiPrompt ?? initialRecipe?.prompt ?? "");
   const [chartType, setChartType] = useState<ChartType | "auto">("auto");
   const [aiLoading, setAiLoading] = useState(Boolean(autoGenerate));
   const [aiMessage, setAiMessage] = useState<string | null>(null);
@@ -234,9 +242,13 @@ export function EmailLabGridShell({
   // the injected showcase recipe rides until its build fires, so the Build click
   // can guard the unfilled [[blank]] and run the brand-gap yes/no.
   const aiBoxRef = useRef<HTMLTextAreaElement>(null);
-  const [pendingRecipe, setPendingRecipe] = useState<ShowcaseRecipe | null>(null);
+  const [pendingRecipe, setPendingRecipe] = useState<ShowcaseRecipe | null>(initialRecipe ?? null);
   const [recipeGaps, setRecipeGaps] = useState<BrandNeed[] | null>(null);
-  const [recipeHint, setRecipeHint] = useState<string | null>(null);
+  const [recipeHint, setRecipeHint] = useState<string | null>(() => {
+    if (!initialRecipe) return null;
+    const ph = findPlaceholder(initialRecipe.prompt);
+    return ph ? `Type ${ph.hint} over the highlighted part, then hit Build the email.` : null;
+  });
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
@@ -405,6 +417,22 @@ export function EmailLabGridShell({
       setAiLoading(false);
     }
   }
+
+  // A recipe carried in via `initialRecipe` (cross-page "Make this →" handoff)
+  // already seeded aiPrompt/pendingRecipe/recipeHint in the lazy state
+  // initializers above — this mount-only effect ONLY focuses + selects the
+  // [[blank]] (DOM side effect, no setState, so it's clear of the set-state
+  // -in-effect lint even though it depends on a prop).
+  useEffect(() => {
+    if (!initialRecipe) return;
+    const ph = findPlaceholder(initialRecipe.prompt);
+    const el = aiBoxRef.current;
+    if (el) {
+      el.focus();
+      if (ph) el.setSelectionRange(ph.start, ph.end);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── "Make this →" (showcase recipe → Build box, blank pre-selected) ─────────
   function handleUseRecipe(recipe: ShowcaseRecipe) {

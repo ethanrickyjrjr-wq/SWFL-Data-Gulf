@@ -15,6 +15,7 @@ import {
 import { defaultDoc, type SeedDoc } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
+import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 import type { ProjectUiState } from "../workspace/types";
 
 interface Props {
@@ -33,6 +34,11 @@ interface Props {
    *  one-shot AI auto-build (deterministic seed must not be clobbered by an
    *  LLM call on arrival; the AI engages when the visitor edits). */
   zipSeeded?: boolean;
+  /** Showcase "Make this →" carry (?recipe=<prompt>&recipeNeeds=<comma
+   *  needs>, built server-side in page.tsx from the raw params) — seeds the
+   *  grid canvas's AI box with the prompt, blank pre-selected, instead of the
+   *  generic auto-build. Grid-only; ignored by the block canvas. */
+  initialRecipe?: ShowcaseRecipe | null;
   deliverableId?: string | null;
   /** Lane E gallery: false = no block-canvas deliverable exists yet, so a
    *  doc-less open lands on the template gallery instead of the canvas. */
@@ -56,6 +62,7 @@ export function ProjectEmailLabClient({
   scope,
   initialDoc,
   zipSeeded,
+  initialRecipe,
   deliverableId,
   hasDeliverables,
   autoOpenSchedule,
@@ -77,8 +84,11 @@ export function ProjectEmailLabClient({
   // State (not a ref): it feeds the autoGenerate prop, i.e. render output.
   const [hasToggled, setHasToggled] = useState(false);
   // Lane E first-run gallery — pure UI state, never persisted. Shows only when
-  // the tool opened with no doc (?did/?seed absent) AND nothing was ever built.
-  const [showGallery, setShowGallery] = useState(() => !initialDoc && !hasDeliverables);
+  // the tool opened with no doc (?did/?seed absent) AND nothing was ever built,
+  // AND there's no pending recipe to seed the Build box with instead.
+  const [showGallery, setShowGallery] = useState(
+    () => !initialDoc && !hasDeliverables && !initialRecipe,
+  );
   // A pick/Start-blank suppresses the shells' one-shot AI auto-build: on the
   // grid canvas that build REPLACES the doc, which would clobber the choice.
   const [galleryPicked, setGalleryPicked] = useState(false);
@@ -201,7 +211,8 @@ export function ProjectEmailLabClient({
     initialBranding,
     scope: effectiveScope,
     initialAiPrompt: aiPrompt,
-    autoGenerate: !savedId && !hasToggled && !galleryPicked && !zipSeeded,
+    initialRecipe,
+    autoGenerate: !savedId && !hasToggled && !galleryPicked && !zipSeeded && !initialRecipe,
     aiPlaceholder: `e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`,
     onSave: handleSave,
     saving,
