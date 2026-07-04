@@ -1,3 +1,27 @@
+## 2026-07-04 (main) — chore(graphify): refresh stale graph, wire orphaned /settings/mcp, delete dead MCP-install/landing components
+
+Operator asked what graphify shows as unconnected. Graph was 19 commits + 30 dirty files stale
+(built from `04330ced`); ran `bun run graphify:update` to refresh (24,595 nodes / 40,751 edges).
+Confirmed the website plane IS represented (46 pages, 109 components, 89 api_routes, 61
+app_components, 12 hooks via `scripts/graphify-app-nodes.mjs`) — most zero-edge nodes were AST
+extractor blind spots (string-literal hrefs, nav-config-driven routes, barrel re-exports,
+cross-repo consumers), verified real by grep, not actual gaps.
+
+Found one real product gap: `app/settings/mcp/page.tsx` (account-level "one token, every project"
+MCP connect, from `e7ea5a4a`) had zero in-app links — not in `nav-config.ts`, no `href` anywhere.
+Checked the other 3 MCP entry points first (`MCPInstall.tsx` landing, `MCPInstallCard.tsx` in
+BriefcasePanel's anonymous pitch state, `ConnectMcpBlock.tsx` per-project key in
+`ProjectWorkspace`) to place the link correctly — added it inside `ConnectMcpBlock.tsx` ("Or
+connect once for every project →") since that's the one place a signed-in user is already
+choosing project-scoped MCP access.
+
+Deleted two dead components found in the same pass (zero imports anywhere): `app/install-tabs.tsx`
+(an unused, more complete MCP-install tab widget — CLI/Desktop/Cursor/Windsurf — superseding what
+`MCPInstall.tsx`/`MCPInstallCard.tsx` cover today) and `components/landing/PixelTextAnimation.tsx`
+(a canvas hero text-scatter effect, never dropped into a page). Left the two unused hooks
+(`useDeliverableOwnerActive`, `useOptionalHighlighterContext`) — not yet confirmed for deletion.
+Verified: `bunx next build` green, `/settings/mcp` still builds static.
+
 ## 2026-07-04 (main) — fix(showcase): wire the last two `target:"social"` recipes so /social-lab is UI-reachable
 
 Follow-up to the audit below: added recipes to the two showcase slides the make-this rollout had

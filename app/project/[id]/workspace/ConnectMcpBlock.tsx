@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 type McpClient = "desktop" | "cursor" | "cline" | "windsurf" | "other";
@@ -284,6 +285,12 @@ export function ConnectMcpBlock({
             </button>
           </>
         )}
+        <Link
+          href="/settings/mcp"
+          className="mt-3 block text-xs text-gray-500 underline underline-offset-4 hover:text-gray-300"
+        >
+          Or connect once for every project →
+        </Link>
 
         {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
       </div>
