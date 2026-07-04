@@ -1,3 +1,24 @@
+## 2026-07-04 (main) — audit: email/showcase/social overlap check, then commit both in-flight efforts
+
+Operator asked for a full pass over the uncommitted working tree (20 modified + 10 untracked files)
+to confirm no collision between the showcase/social recipe-carry work and the ZIP-email-reskin work,
+given several parallel sessions had been touching these same areas (see the two entries below this
+one, and 649615a5/faf0cada further back). Dispatched `project-state-sync` for a read-only drift check
+across git + SESSION_LOG + MEMORY + the reskin spec, then ran a combined `bunx next build` myself to
+verify the two efforts compile together (each had only been build-checked separately until now).
+
+Result: clean split, no shared files, no broken assumption across the `EmailDoc` seam. Committed as
+two commits: `3953beab` feat(showcase) — `/social-lab` redirector, `CampaignExamples.tsx`, and the
+recipe-carry thread through `ProjectSocialPage`/`ProjectSocialClient`/`useSocialComposer`; `4e9d6703`
+feat(email) — the ranked grid-based ZIP reskin's `metric-card` block + `lib/zip-report` helpers +
+`zip-shape` route hardening. Full file list and reasoning in the audit transcript; not re-derived here.
+
+One real gap the audit surfaced (not a defect, a documented follow-up already tracked as check
+`social_showcase_recipes_author`): `/social-lab` and the `target:"social"` path in `lib/showcase/
+recipe.ts` are live but UI-unreachable — no showcase recipe carries `target:"social"` yet. Fixing
+that next in this same session: adding recipes to the two exempted social slides in
+`lib/showcase/registry.ts` (`launch-blitz/Social Pack — 4 Formats`, `market-pulse/The Social Cut`).
+
 ## 2026-07-03 (main) — fix(pill): "Start building free" ignored an existing session; wire "Make this →" into the AI pill
 
 Operator report: on the AI pill (BriefcasePanel), signed-in visitor opened the "Listing → Close"
