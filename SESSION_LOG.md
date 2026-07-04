@@ -1,3 +1,18 @@
+## 2026-07-04 (main) — send launch: force fresh prod deploy to clear route 503 + correct Resend free-tier fact
+
+Preflight to `/api/email/broadcast` stayed `503 not_configured` after the operator set DIGEST_BROADCAST_SECRET
++ DIGEST_SENDER_ADDRESS in Vercel (Production+Preview). Sending the CORRECT bearer returns 503 (no secret
+seen), NOT 401 (wrong secret) → the value is fine, but the live `www` deployment predates the env and the
+manual redeploy didn't promote it. This commit triggers a clean git-connected production build that reads the
+saved env. GH confirmed: DIGEST_BROADCAST_SECRET = a GH SECRET; DIGEST_SENDER_ADDRESS + DIGEST_POSTAL_ADDRESS
+= GH VARIABLES (GHA reads `secrets.*` vs `vars.*`).
+
+Corrected a stale fact: Resend free tier is **3,000/mo + 100/day** (resend.com/pricing, 07/04/2026), NOT the
+"1/day" the `resend_account_upgraded` check claims (that note is wrong). Our own per-user free gate is 50/mo
+(`lib/email/usage.ts` TIER_LIMITS.free). Flag: a geocoder test fixture still uses the neighboring street
+number `16448 Rainbow Meadows Ct` — operator's call whether to swap it. Staged SESSION_LOG only — a parallel
+session's uncommitted bun.lock/package.json/knip work stays untouched.
+
 ## 2026-07-04 (main) — Operation July: fan-out planners + Opus-built the safe set (10, 14, 19)
 
 Operator: "fan out one Sonnet per project to spec+plan; Opus audits, folds, builds; live-verify; no
