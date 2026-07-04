@@ -1,3 +1,17 @@
+## 2026-07-04 (main) — docs(operation-july): task-decompose the launch autopsy into per-build files
+
+Broke `_AUDIT_AND_ROADMAP/2026-07-04-CLAUDE-AUTOPSY-AND-HANDOFF.md` into 22 owner-tagged task files
+under `_AUDIT_AND_ROADMAP/Operation July/`, each with an existing check key (where one exists) and a
+live-proof done-when (the whole autopsy is about built≠works). Owners: OPERATOR / SESSION / named
+agent. README notes `public.checks` stays source of truth (RULE 2) — files are the brief + the
+leaves-the-folder mechanic, not a parallel tracker. SEND spine kept as ONE atomic file (§4/§7 are
+strictly ordered). A finished file `git mv`s out to the sibling `Operation-July-DONE/`.
+
+Operator confirmed the SEND spine is handled (DB fn applied, gh secrets/vars being set, fake rows
+cleared, cron in progress) → `01-turn-on-send.md` flipped ✅ and moved to `Operation-July-DONE/`;
+README index updated. Docs-only; the §6 code fixes + dead-code deletions stay in the working tree
+for task 03's own operator-confirmed push. Next: `02` (PowerShell push-gate hole), `03` (push §6).
+
 ## 2026-07-04 (main) — chore(root): clear repo-root clutter the spec-archiver never touched
 
 Operator: "there is tons of shit that shouldn't be here." `scripts/assistant-weekly.mjs` only
