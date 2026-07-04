@@ -360,6 +360,65 @@ export function BlockInspector({
           </>
         )}
 
+        {block.type === "metric-card" && (
+          <>
+            {/* User-owned edits for the data-seeded metric card. Every field is a
+                held number/label restated verbatim — the editor never computes one. */}
+            <TextField
+              label="Metric value"
+              value={str("metricValue")}
+              onChange={(v) => set("metricValue", v)}
+              placeholder="$495K"
+            />
+            <TextField
+              label="Metric label"
+              value={str("metricLabel")}
+              onChange={(v) => set("metricLabel", v)}
+              placeholder="Median Home Value"
+            />
+            <TextField
+              label="Sub-label"
+              value={str("sub")}
+              onChange={(v) => set("sub", v)}
+              placeholder="90-day median sale price"
+            />
+            <TextField
+              label="Rank text"
+              value={str("rankText")}
+              onChange={(v) => set("rankText", v)}
+              placeholder="#45 of 124 SWFL ZIPs"
+            />
+            <TextField
+              label="Movement text"
+              value={str("movementText")}
+              onChange={(v) => set("movementText", v)}
+              placeholder="↑ 6.85% YoY"
+            />
+            <FieldShell label="Bar fill (0–100 percentile · blank = no bar)">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                className={inputCls}
+                value={typeof props.barPct === "number" ? String(props.barPct) : ""}
+                placeholder="e.g. 62"
+                onChange={(e) => {
+                  const raw = e.target.value.trim();
+                  if (raw === "") return set("barPct", undefined);
+                  const n = Number(raw);
+                  set("barPct", Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : undefined);
+                }}
+              />
+            </FieldShell>
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
+          </>
+        )}
+
         {block.type === "agent-card" && (
           <>
             <TextField

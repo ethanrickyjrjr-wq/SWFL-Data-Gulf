@@ -19,8 +19,13 @@ const INVENTORY_MOM_THRESHOLD = 0.2;
 const DRY_RUN = process.env.DRY_RUN === "true";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 const SENDER_NAME = process.env.DIGEST_SENDER_NAME ?? "[PLACEHOLDER — set DIGEST_SENDER_NAME]";
-const SENDER_ADDRESS =
-  process.env.DIGEST_SENDER_ADDRESS ?? "[PLACEHOLDER — set DIGEST_SENDER_ADDRESS]";
+// CAN-SPAM: the footer's physical mailing address. This is the business / virtual
+// mailbox address (iPostal1) — NEVER a personal home address and NEVER the sender
+// email. Split out from DIGEST_SENDER_ADDRESS on 2026-07-04: that variable is the
+// sender EMAIL (read as the from-header by the scheduler + broadcast route), and a
+// home address had leaked into this footer slot through the name collision.
+const POSTAL_ADDRESS =
+  process.env.DIGEST_POSTAL_ADDRESS ?? "[PLACEHOLDER — set DIGEST_POSTAL_ADDRESS]";
 const SENDER_CONTACT =
   process.env.DIGEST_SENDER_CONTACT ?? "[PLACEHOLDER — set DIGEST_SENDER_CONTACT]";
 
@@ -210,7 +215,7 @@ async function main() {
       unsubscribeUrl,
       issue,
       senderName: SENDER_NAME,
-      senderAddress: SENDER_ADDRESS,
+      senderAddress: POSTAL_ADDRESS,
       senderContact: SENDER_CONTACT,
     }),
   );

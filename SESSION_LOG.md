@@ -1,3 +1,29 @@
+## 2026-07-04 (main) — feat(email): actually wire the SEND spine + purge home address from sender config
+
+Operator: "GET MY ADDRESS OUT" + "run sqls, set passwords, commit and push." The prior Operation-July
+entry closed 01-turn-on-send on operator attestation ("DB fn applied, fake rows cleared") — but a live
+DB probe this session showed `claim_due_email_schedules` MISSING and both `drytest-segment` rows (id=1,2)
+still present. Built≠works again; did the real work and proved it:
+
+- **Home address purged.** `DIGEST_SENDER_ADDRESS` gh var held a personal HOME address, mailed in the
+  daily-digest CAN-SPAM footer via a name collision — that var is the sender EMAIL in the scheduler+route
+  but the footer POSTAL address in build-digest. Split: gh var `DIGEST_SENDER_ADDRESS`=hello@swfldatagulf.com,
+  new `DIGEST_POSTAL_ADDRESS`=iPostal1 mailbox (7191 Cypress Lake Drive STE 3, Fort Myers FL 33907 — the
+  CAN-SPAM address the operator supplied 07/03). `build-digest.mts` + `daily-email-digest.yml` now read
+  DIGEST_POSTAL_ADDRESS. Scrubbed the home address from the autopsy + all ~/Downloads copies; not in any
+  committed file (a neighboring number 16448 remains a geocoder test fixture — flagged for operator).
+- **Migration applied + verified.** `docs/sql/20260612_email_schedule_claim_fn.sql` → prod (was missing);
+  `pg_proc` now has claim_due_email_schedules (2 args). All other email tables already existed.
+- **Fake rows deleted** (guarded on drytest profile): email_schedules id=1,2 gone; id=6 (real block-canvas
+  "me" target) intact.
+- **gh secret `DIGEST_BROADCAST_SECRET` set** (from .env.local so it matches Vercel). **Cron uncommented**
+  in email-scheduler.yml.
+
+REMAINS (keyboard-only — my Vercel token is personal-scoped, sees 0 team projects): set Vercel env
+DIGEST_BROADCAST_SECRET (match gh) + DIGEST_SENDER_ADDRESS=hello@swfldatagulf.com, then live-dispatch.
+Opened `email_first_live_send` (closes only on a real email_sends row). Resend free tier 1/day
+(`resend_account_upgraded` still open).
+
 ## 2026-07-04 (main) — docs(operation-july): task-decompose the launch autopsy into per-build files
 
 Broke `_AUDIT_AND_ROADMAP/2026-07-04-CLAUDE-AUTOPSY-AND-HANDOFF.md` into 22 owner-tagged task files

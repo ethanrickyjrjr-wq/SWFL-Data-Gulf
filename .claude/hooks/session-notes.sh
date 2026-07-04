@@ -33,17 +33,24 @@ fi
 BRANCH="$(git branch --show-current)"
 DATE="$(date '+%Y-%m-%d %H:%M')"
 
-git add .claude/session-notes.md
-
-if git diff --cached --quiet; then
-  exit 0  # nothing staged
+# LOCKED 2026-07-04 (operator rule: "never push without explicit confirmation").
+# This Stop hook must NEVER autonomously push, NEVER use --no-verify (which bypasses
+# every pre-push gate), and NEVER commit on main. Auto-commit on a FEATURE branch is
+# opt-in only via SESSION_NOTES_AUTOCOMMIT=1, and even then runs the normal verify hooks
+# and is pathspec-limited so it can't sweep unrelated staged changes. Pushing is a human action.
+if [ -z "$BRANCH" ] || [ "$BRANCH" = "main" ]; then
+  exit 0   # never touch main / detached HEAD
 fi
 
-git commit -m "Session notes update — $DATE" \
-  --no-verify 2>/dev/null || true
+if [ "${SESSION_NOTES_AUTOCOMMIT:-}" != "1" ]; then
+  exit 0   # do not auto-commit unless explicitly opted in
+fi
 
-git push -u origin "$BRANCH" 2>/dev/null || \
-  (sleep 2 && git push -u origin "$BRANCH" 2>/dev/null) || \
-  (sleep 4 && git push -u origin "$BRANCH" 2>/dev/null) || true
+git add .claude/session-notes.md
+if git diff --cached --quiet -- .claude/session-notes.md; then
+  exit 0
+fi
 
-echo '{"systemMessage": "Session notes saved and pushed."}'
+git commit -m "Session notes update — $DATE" -- .claude/session-notes.md 2>/dev/null || true
+
+echo '{"systemMessage": "Session notes committed locally (no push, no --no-verify, per no-autonomous-push rule)."}'

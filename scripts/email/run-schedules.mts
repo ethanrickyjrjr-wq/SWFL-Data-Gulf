@@ -150,6 +150,18 @@ function requireEnv(): void {
   if (!process.env.DIGEST_BROADCAST_SECRET) {
     throw new Error("DIGEST_BROADCAST_SECRET is required to POST the broadcast.");
   }
+  // Guard the sender identity: DIGEST_SENDER_ADDRESS must be an EMAIL, never a
+  // postal street address. Without this a misconfigured var (e.g. a CAN-SPAM
+  // mailing address pasted here) ships an invalid RFC5322 from-header and Resend
+  // 400s per-row while the run still exits 0 — a silent no-send. Fail loud early.
+  const senderAddr = process.env.DIGEST_SENDER_ADDRESS;
+  if (senderAddr && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderAddr.trim())) {
+    throw new Error(
+      `DIGEST_SENDER_ADDRESS is not a valid email address (got "${senderAddr}"). ` +
+        "It must be a sending email like hello@swfldatagulf.com. The CAN-SPAM postal " +
+        "mailing address belongs in a SEPARATE variable, not here.",
+    );
+  }
   // On a REAL run, NEXT_PUBLIC_SITE_URL must be set: the localhost fallback would
   // make every broadcast POST hit http://localhost:3000 and fail per-row while the
   // run still exits 0 — a silent no-send. Fail loud here instead. The fallback

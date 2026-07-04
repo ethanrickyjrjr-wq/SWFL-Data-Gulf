@@ -72,6 +72,12 @@ export async function POST(request: Request) {
   if (!sender) {
     return NextResponse.json({ error: "sender_not_configured" }, { status: 503 });
   }
+  // Guard against a postal address (or any non-email) in the sender slot: building
+  // `Name <street address>` yields an invalid RFC5322 from-header and Resend 400s.
+  // Fail loud with a 503 instead of shipping a broken broadcast.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sender.address.trim())) {
+    return NextResponse.json({ error: "sender_address_invalid" }, { status: 503 });
+  }
   const from = `${sender.name} <${sender.address}>`;
 
   // Segment: per-tenant override wins; else the digest default. The default is

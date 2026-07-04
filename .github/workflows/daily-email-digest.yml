@@ -55,6 +55,9 @@ jobs:
           DIGEST_SENDER_NAME: ${{ vars.DIGEST_SENDER_NAME }}
           DIGEST_SENDER_ADDRESS: ${{ vars.DIGEST_SENDER_ADDRESS }}
           DIGEST_SENDER_CONTACT: ${{ vars.DIGEST_SENDER_CONTACT }}
+          # CAN-SPAM physical mailing address (iPostal1 business mailbox) — the footer
+          # postal address, split from DIGEST_SENDER_ADDRESS (the sender email).
+          DIGEST_POSTAL_ADDRESS: ${{ vars.DIGEST_POSTAL_ADDRESS }}
         run: bun scripts/email/build-digest.mts
 
       - name: Commit email log
