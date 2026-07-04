@@ -68,14 +68,32 @@ export function classify(logTail) {
     };
   }
 
-  // 3. MISSING_DEP — a Python import of a package that isn't installed.
+  // 3. BILLING — Anthropic credit/billing exhaustion (HTTP 402 `billing_error`).
+  //    A credit-exhausted org 402s every messages call, so every AI brain HOLDs
+  //    platform-wide during a scheduled-send window. The distinctive signal is the
+  //    error body's literal `billing_error` type token (or the "credit balance is
+  //    too low" human message) — verified against docs.claude.com/en/api/errors
+  //    (2026-07-04): it is HTTP 402, NOT a 400. Placed before DETERMINISTIC_HOLD (a
+  //    402 is tagged `failureClass=deterministic` upstream by resilient-build, so it
+  //    would otherwise mis-bucket as a master HOLD with useless "reconcile sources[]"
+  //    advice) and before TRANSIENT (retry/timeout noise often precedes the 402).
+  if (/\bbilling_error\b|credit balance is too low|\binsufficient[ _]?credit\b/i.test(text)) {
+    return {
+      klass: "BILLING",
+      signal: "anthropic billing_error (402)",
+      suggestedAction:
+        "Anthropic credit/billing exhaustion (HTTP 402 `billing_error`) — every AI brain HOLDs platform-wide until credits are restored. Top up credits at platform.claude.com (Billing/Plans). This is a payment problem, not a code, dependency, or pipeline-wiring problem — do not retry or reconcile packs.",
+    };
+  }
+
+  // 4. MISSING_DEP — a Python import of a package that isn't installed.
   m = text.match(/ModuleNotFoundError: No module named ['"]([\w][\w.]*)['"]/);
   if (m) {
     const mod = m[1];
     return { klass: "MISSING_DEP", signal: mod, suggestedAction: depFix(mod) };
   }
 
-  // 4. MISSING_SECRET — env var / credential absent. Must look like an ENV name (UPPER_SNAKE).
+  // 5. MISSING_SECRET — env var / credential absent. Must look like an ENV name (UPPER_SNAKE).
   m =
     text.match(
       /missing required env var\(s\)[^:]*:\s*([A-Z][A-Z0-9_]+(?:\s*,\s*[A-Z][A-Z0-9_]+)*)/,
@@ -93,7 +111,7 @@ export function classify(logTail) {
     };
   }
 
-  // 5. SCHEMA_DRIFT — vocab orphan / missing relation or column / Postgres column
+  // 6. SCHEMA_DRIFT — vocab orphan / missing relation or column / Postgres column
   //    type drift (DatatypeMismatch) / failed render validation / stale alias.
   m = text.match(
     /(Orphan Concept[^\n]*|relation ["'][\w.]+["'] does not exist|column ["'][\w.]+["'] does not exist|column ["']?[\w.]+["']? is of type [^\n]+? but expression is of type [\w ]+|[^\n]*failed validation[^\n]*|CORRIDOR_ALIASES[^\n]*)/i,
@@ -107,7 +125,7 @@ export function classify(logTail) {
     };
   }
 
-  // 6. DETERMINISTIC_HOLD — master held / a brain's brains/<id>.md missing. Root:
+  // 7. DETERMINISTIC_HOLD — master held / a brain's brains/<id>.md missing. Root:
   //    a pack lists a brain in `sources[]` but not `input_brains[]`, so the DAG
   //    resolver never builds it → deterministic master HOLD (the 06-18 flap).
   //    Surfaced by build 02's `CRON-DIAG failureClass=deterministic …` echo and/or
@@ -127,7 +145,7 @@ export function classify(logTail) {
     };
   }
 
-  // 7. DATA_EMPTY — source returned nothing (dead/changed URL, WAF, async job not polled).
+  // 8. DATA_EMPTY — source returned nothing (dead/changed URL, WAF, async job not polled).
   m = text.match(
     /\b(0 rows|0 permits?|0 decisions|0 URLs?|0 records|no rows|returned 0|empty (?:HTML|response|result)|0 \w+ (?:discovered|returned|loaded))\b/i,
   );
@@ -140,7 +158,7 @@ export function classify(logTail) {
     };
   }
 
-  // 8. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
+  // 9. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
   if (
     /ReadTimeout|TimeoutError|ConnectTimeout|Connection error|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|SSL[: ][^\n]*EOF|HTTP 429|\b429\b|rate.?limit|Temporary failure in name resolution|Connection reset|ECONNRESET|ETIMEDOUT|EAI_AGAIN|Max retries exceeded/i.test(
       text,
@@ -157,7 +175,7 @@ export function classify(logTail) {
     };
   }
 
-  // 9. UNKNOWN — unrecognised shape; route to the LLM narrative.
+  // 10. UNKNOWN — unrecognised shape; route to the LLM narrative.
   return {
     klass: "UNKNOWN",
     signal: "",

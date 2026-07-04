@@ -172,6 +172,34 @@ test("DETERMINISTIC_HOLD — `deterministically` does not match (word boundary)"
   assert.notEqual(classify("failureClass=deterministically computed").klass, "DETERMINISTIC_HOLD");
 });
 
+test("BILLING — Anthropic 402 billing_error is pulled out of the generic HOLD bucket", () => {
+  const c = classify(
+    'CRON-DIAG failureClass=deterministic reason=402 {"type":"error","error":{"type":"billing_error","message":"Your credit balance is too low to access the Claude API."}}',
+  );
+  assert.equal(c.klass, "BILLING");
+  assert.match(c.suggestedAction, /platform\.claude\.com/);
+  assert.doesNotMatch(c.suggestedAction, /input_brains/);
+});
+
+test("BILLING — wins over TRANSIENT when retry/timeout noise precedes the 402", () => {
+  const c = classify(
+    "Max retries exceeded ... ReadTimeout ... terminal: 402 billing_error, credit balance is too low",
+  );
+  assert.equal(c.klass, "BILLING");
+});
+
+test("BILLING — the human 'credit balance is too low' message", () => {
+  const c = classify(
+    "anthropic.BadRequestError: Your credit balance is too low to access the Claude API",
+  );
+  assert.equal(c.klass, "BILLING");
+});
+
+test("routing — BILLING never retries and needs no LLM", () => {
+  assert.equal(shouldRetry("BILLING"), false);
+  assert.equal(needsLlm("BILLING"), false);
+});
+
 test("routing — shouldRetry only for TRANSIENT", () => {
   assert.equal(shouldRetry("TRANSIENT"), true);
   for (const k of [

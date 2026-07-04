@@ -1,3 +1,41 @@
+## 2026-07-04 (main) — Operation July: fan-out planners + Opus-built the safe set (10, 14, 19)
+
+Operator: "fan out one Sonnet per project to spec+plan; Opus audits, folds, builds; live-verify; no
+collisions." Ran 7 Sonnet planners (read-only, zero collision) on the design tasks 14/16/17/18/19/20/21;
+every one independently confirmed the autopsy is stale in places (probe-first paid off). Opus audited +
+built only the genuinely-safe, live-probed set. NOT pushed — awaiting operator go.
+
+- **03 — verified DONE (not built).** Diffed the four §6 fixes vs origin/main: autonomous-push kill in
+  `.claude/hooks/session-notes.sh` (blob c4c2ef2e), metric-card `BlockInspector`, both loud-503 sender
+  guards (run-schedules.mts + broadcast/route.ts) — all already on origin/main. File can leave the folder.
+- **10 — built.** 5/6 dead modules already deleted+pushed; deleted the last one,
+  `lib/signals/permit-event-extractor.ts` (zero live importers, grep-confirmed). `bunx next build` green.
+- **14 — reconciled + PROD WRITE applied.** Live SELECT showed goals 0-8 only; `goal_number=9` MISSING —
+  the 2026-05-30 SESSION_LOG claim (~line 10896) that `20260530_goal9_flywheel.sql` was "run" was FALSE
+  (marked shipped, never landed). Applied it (idempotent, ON CONFLICT DO NOTHING) via
+  `bun scripts/run-migration.ts`; re-SELECT confirms goal 9 'The compounding flywheel' (red) now live.
+  This entry CORRECTS that 2026-05-30 claim.
+- **19 — built.** Premise was wrong: credit exhaustion is HTTP **402 `billing_error`** (verified live at
+  docs.claude.com/en/api/errors + the installed @anthropic-ai/sdk), not the "400" the autopsy assumed.
+  Added a BILLING class to `.github/scripts/classify-cron-failure.mjs`, placed before DETERMINISTIC_HOLD
+  (a 402 tags failureClass=deterministic upstream) and TRANSIENT (retry noise precedes it); advice points
+  at platform.claude.com, never a DAG/pack reconcile. 33 classifier tests green (4 new adversarial).
+- **HELD 11/12/13 (stale autopsy — did NOT run as written).** Live grep: the Glass spec pair is an active
+  project pinned by a shipped migration (`docs/sql/20260607_backtest_grades.sql`); `SOCIAL BUILD/` is
+  "actively building" (section-map + the active grid-lab-socials Task-1 spec source);
+  `GO-LIVE/email-scheduler-unit-f.md` is flagged operator-parallel. Deleting/moving them breaks live links.
+  Needs re-scope, not blind rm/mv.
+- **DEFERRED 02.** The push-gate matcher fix (`.claude/settings.json` Bash→Bash|PowerShell) is ready and
+  correct (both gate hooks read tool_input.command shell-agnostic), but the file is under an active claim
+  by parallel session 1dffeca1 — not overridden (no-collision rule).
+- **Planned, HELD for sign-off:** 16 (11-file CLI+prod-schema change), 17 (BLOCKED — task-01 checks
+  `email_first_live_send`/`email_scheduler_f_live_verify` still OPEN, task-15 A/B/C undecided; autopsy's
+  single-table fold contradicted by the 07/03 weekly-read design), 18 (32 files; found a LIVE bug —
+  redfin_lee/collier exit 0 on empty pull), 21 (data-shape PK swap + backfill). 20 (knip) ready as
+  report-only-first.
+
+Push pending operator confirmation.
+
 ## 2026-07-04 (main) — feat(email): actually wire the SEND spine + purge home address from sender config
 
 Operator: "GET MY ADDRESS OUT" + "run sqls, set passwords, commit and push." The prior Operation-July
