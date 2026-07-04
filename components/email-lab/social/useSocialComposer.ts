@@ -13,11 +13,17 @@ import { newDesign, designToSkeleton, applyDesignPatch } from "@/lib/social/desi
 import type { SocialDesign, SocialElement } from "@/lib/social/design/types";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { mintBlockId } from "@/lib/email/doc/schema";
+import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 
 export interface UseSocialComposerArgs {
   scope?: { kind?: string; value?: string };
   projectId?: string;
   branding: Record<string, string>;
+  /** Showcase "Make this →" carry for a social-target recipe (see
+   *  lib/showcase/recipe.ts recipeDestination). Seeds the prompt box with the
+   *  blank still literal in it; `author()` refuses to build until it's gone,
+   *  same guard the email lab's Build box has for its own recipes. */
+  initialRecipe?: ShowcaseRecipe | null;
 }
 
 function isDesign(d: unknown): d is SocialDesign {
@@ -29,7 +35,12 @@ function isDesign(d: unknown): d is SocialDesign {
   );
 }
 
-export function useSocialComposer({ scope, projectId, branding }: UseSocialComposerArgs) {
+export function useSocialComposer({
+  scope,
+  projectId,
+  branding,
+  initialRecipe,
+}: UseSocialComposerArgs) {
   const tokens = brandingToTokens(branding);
   const primary = tokens.PRIMARY ?? "#0f1d24";
   const accent = tokens.ACCENT ?? "#0ea5b7";
@@ -48,10 +59,23 @@ export function useSocialComposer({ scope, projectId, branding }: UseSocialCompo
   const stageRef = useRef<Konva.Stage | null>(null);
 
   // AI state (author + fill share one prompt box + status line)
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(() => initialRecipe?.prompt ?? "");
   const [aiBusy, setAiBusy] = useState(false);
   const [aiStatus, setAiStatus] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  // "Make this →" recipe flow — mirrors the email lab's pendingRecipe guard
+  // (components/email-lab/EmailLabGridShell.tsx handleUseRecipe/
+  // placeholderBlocked): a carried recipe's [[blank]] must be filled before
+  // `author()` is allowed to fire, or the build authors the literal bracket
+  // text as if it were the user's real listing/farm.
+  const [pendingRecipe, setPendingRecipe] = useState<ShowcaseRecipe | null>(
+    () => initialRecipe ?? null,
+  );
+  const [recipeHint, setRecipeHint] = useState<string | null>(() => {
+    if (!initialRecipe) return null;
+    const ph = findPlaceholder(initialRecipe.prompt);
+    return ph ? `Type ${ph.hint} over the highlighted part, then hit Build the post.` : null;
+  });
 
   // caption editor (set after author/fill)
   const [caption, setCaption] = useState("");
@@ -138,10 +162,22 @@ export function useSocialComposer({ scope, projectId, branding }: UseSocialCompo
     setSelectedId(id);
   }
 
+  /** True (and nags) while a carried recipe's [[blank]] is still unfilled. */
+  function placeholderBlocked(): boolean {
+    if (!pendingRecipe) return false;
+    const ph = findPlaceholder(prompt);
+    if (!ph) return false;
+    setAiError(`Fill in ${ph.hint} first — it's highlighted in the box.`);
+    return true;
+  }
+
   // ── AI: author a whole post from one sentence (template-backed) ──────────────
   async function author() {
+    if (placeholderBlocked()) return;
     const trimmed = prompt.trim();
     if (!trimmed) return;
+    setPendingRecipe(null);
+    setRecipeHint(null);
     setAiBusy(true);
     setAiError(null);
     setAiStatus(null);
@@ -371,6 +407,7 @@ export function useSocialComposer({ scope, projectId, branding }: UseSocialCompo
     aiBusy,
     aiStatus,
     aiError,
+    recipeHint,
     // caption
     caption,
     setCaption,

@@ -17,6 +17,7 @@ import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
 import type { EmailDoc } from "@/lib/email/doc/types";
+import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 
 interface Props {
   projectId: string;
@@ -24,6 +25,10 @@ interface Props {
   branding: Record<string, string>;
   scope?: { kind: string; value: string };
   projectPhotos: { storage_path: string; signedUrl: string; caption?: string }[];
+  /** Showcase "Make this →" carry (?recipe=/?recipeNeeds=, resolved server-side
+   *  in page.tsx into a target:"social" ShowcaseRecipe) — seeds the Build-with-
+   *  AI box with the prompt, blank highlighted, instead of opening empty. */
+  initialRecipe?: ShowcaseRecipe | null;
 }
 
 // Element palette for the "Add" section (mirrors the grid shell's private
@@ -55,9 +60,10 @@ export function ProjectSocialClient({
   branding,
   scope,
   projectPhotos,
+  initialRecipe,
 }: Props) {
   const router = useRouter();
-  const social = useSocialComposer({ scope, projectId, branding });
+  const social = useSocialComposer({ scope, projectId, branding, initialRecipe });
   const tokens = brandingToTokens(branding);
 
   // Generate-Week state (exact generateWeek shape from EmailLabGridShell).
@@ -178,6 +184,11 @@ export function ProjectSocialClient({
               rows={3}
               className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
             />
+            {social.recipeHint && (
+              <p className="mt-1.5 text-[11px] leading-snug text-gulf-teal/80">
+                {social.recipeHint}
+              </p>
+            )}
             <div className="mt-2.5 flex gap-2">
               <button
                 type="button"

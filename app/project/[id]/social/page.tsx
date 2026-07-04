@@ -5,13 +5,34 @@ import { inferScopeFromItems } from "@/lib/project/derive-name";
 import type { ProjectItem } from "@/lib/project/items";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { ProjectSocialClient } from "./ProjectSocialClient";
+import type { BrandNeed, ShowcaseRecipe } from "@/lib/showcase/recipe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Social" };
 
-export default async function ProjectSocialPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectSocialPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const { id } = await params;
+  const sp = await searchParams;
+  // Showcase "Make this →" carry (pill or the /showcase page, both
+  // ?recipe=/?recipeNeeds= — see lib/showcase/recipe.ts recipeDestination).
+  const initialRecipe: ShowcaseRecipe | null = sp.recipe
+    ? {
+        prompt: sp.recipe,
+        needs: (sp.recipeNeeds ?? "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean) as BrandNeed[],
+        target: "social",
+      }
+    : null;
+
   const supabase = createClient(await cookies());
   const {
     data: { session },
@@ -62,6 +83,7 @@ export default async function ProjectSocialPage({ params }: { params: Promise<{ 
             : undefined
       }
       projectPhotos={projectPhotos}
+      initialRecipe={initialRecipe}
     />
   );
 }
