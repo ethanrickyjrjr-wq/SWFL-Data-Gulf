@@ -1,3 +1,14 @@
+## 2026-07-04 (main) — fix(showcase): wire the last two `target:"social"` recipes so /social-lab is UI-reachable
+
+Follow-up to the audit below: added recipes to the two showcase slides the make-this rollout had
+left exempt (`launch-blitz/Social Pack — 4 Formats`, `market-pulse/The Social Cut`), both carrying
+`target: "social"` so `recipeDestination` (`lib/showcase/recipe.ts`) now actually routes a click
+into `/social-lab` → the project's Social tab, exercising the path the prior commit shipped
+plumbing for but nothing yet used. `market-pulse/Proof It Updates` stays exempt — it demonstrates
+vintage refresh, not a single buildable artifact. Updated `registry.test.ts`'s `RECIPE_EXEMPT`
+to match. Verified: `bun test lib/showcase` 17/17 pass, `bunx next build` green. Committed, NOT
+pushed — holding for operator confirmation.
+
 ## 2026-07-04 (main) — audit: email/showcase/social overlap check, then commit both in-flight efforts
 
 Operator asked for a full pass over the uncommitted working tree (20 modified + 10 untracked files)

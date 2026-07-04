@@ -171,6 +171,12 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/launch-blitz/live/social-pack.html",
         receipt:
           "Data-hook first lines and a local + broad hashtag mix are the current lead-generating pattern for agent social (The Close, 2026).",
+        recipe: {
+          prompt:
+            "Build a social post for my farm area [[your city or ZIP]] — a data-hook caption from live listings and a local + broad hashtag mix.",
+          needs: ["agent_name", "brokerage", "business_address"],
+          target: "social",
+        },
       },
     ],
   },
@@ -225,6 +231,12 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/market-pulse/live/socials.html",
         receipt:
           "Serialized, recurring content keeps audiences returning — 57% of consumers want original series (Sprout Social, 2026).",
+        recipe: {
+          prompt:
+            "Build a social post for [[your city or ZIP]]'s monthly market pulse — the biggest ZIP move as the headline stat, values matching your email.",
+          needs: ["agent_name", "brokerage", "business_address"],
+          target: "social",
+        },
       },
       {
         image: "/showcase/market-pulse/step-4.webp",

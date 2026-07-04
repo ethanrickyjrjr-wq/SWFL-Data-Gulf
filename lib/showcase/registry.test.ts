@@ -49,12 +49,9 @@ describe("showcase registry", () => {
   });
 
   // ── Make-this recipes (spec: 2026-07-03-email-lab-make-this-design.md) ──────
-  // Social-surface artifacts + the flywheel-proof slide are wired in a follow-up.
-  const RECIPE_EXEMPT = new Set([
-    "launch-blitz/Social Pack — 4 Formats",
-    "market-pulse/The Social Cut",
-    "market-pulse/Proof It Updates",
-  ]);
+  // The flywheel-proof slide isn't a single buildable artifact — it demonstrates
+  // vintage-over-vintage refresh, not a recipe to rebuild.
+  const RECIPE_EXEMPT = new Set(["market-pulse/Proof It Updates"]);
 
   it("every email-surface slide has a recipe or an explicit exemption", () => {
     for (const s of SHOWCASES.filter((s) => s.surfaces.includes("email"))) {
