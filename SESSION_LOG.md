@@ -1,3 +1,43 @@
+## 2026-07-04 (main) — chore(root): clear repo-root clutter the spec-archiver never touched
+
+Operator: "there is tons of shit that shouldn't be here." `scripts/assistant-weekly.mjs` only
+archives `docs/superpowers/specs`/`docs/handoff` — it had nothing to do with the actual mess,
+which was sitting loose at repo root. Audited every root-level file/dir before touching anything
+(checked git-tracked status, last-touch date, and whether anything still referenced each one).
+
+Deleted (untracked, zero repo history impact): a mangled Windows-path artifact
+(`C:UsersethanAppDataLocalTempmhs_permits_inserts.sql`), empty `dev-stderr.txt`/`dev-stdout.txt`,
+a resolved `cre_source_probe_results.json` probe dump, a 2.1MB `style-gallery-preview.html`,
+`tsconfig.testcheck.tsbuildinfo`, `__scratch__/` (22 files), `awesome-claude-code-toolkit/` (665
+files/4.6MB, an unrelated vendored toolkit), empty `downloads/`.
+
+Removed from git (dead, no live reference found): `SESSION_8_HANDOVER.md` (superseded by this
+file), `MY-INSTRUCTIONS.md` (Phase-1 franchise-pack bootstrap doc, long since shipped),
+`scratch-email.html` + `scratch-send-oneoff.mts`, `_run_pending_sqls.py` (one-off runner for 2
+migrations that Goals 0-8 being live in prod proves are long applied), `runs/` (6 files — support
+scripts for the already-parked `docs/_archive/parked/site-flow-build/` project).
+
+Archived, not deleted: `FUCKCLAUDE.md`, `SNICKLEFRITZ-EMAIL-REQUIREMENTS.md`, `PROBLEMS.md`,
+`PROBLEMS-SCOPED-AGAINST-CODE.md`, `CLAUDE IS STUPID AS FUCK PROBLEMS.md`, `COMMANDS.html` →
+`_archive/2026-06-26-snicklefritz-and-problems-audit/`. This is the 06/25-06/26 SNICKLEFRITZ
+incident/audit cluster — reads as resolved, but `FUCKCLAUDE.md` documents a trigger-word operating
+rule (the SNICKLEFRITZ word gates a specific send flow) that isn't folded into current CLAUDE.md
+anywhere; moved off root instead of deleted so that rule isn't lost if it's ever needed again.
+
+Left alone (confirmed still live/referenced): `cloud-secrets/` (real encrypted vault),
+`GET DONE/` (the credit-freeze reversal runbook — `city-pulse-daily.yml`/
+`dbpr-public-notices-weekly.yml` crons are STILL paused, so this is unfinished, not dead),
+`GO-LIVE/`, `SOCIAL BUILD/` (active per `_ASSISTANT/TODAY.md`), `DELIVERABLES.md`/
+`DELIVERABLE-ENGINE-BLUEPRINT.md`/`ENGINE-HANDOFF.md` (referenced by `docs/section-map.md` and
+each other), `SOURCED.md`/`THE-CONTRACT.md` (referenced by `CLAUDE.md`/memory), `mcp-widget/`
+(self-labeled `PARKED.md`, not dead), `.private/`/`_private/` (not mine to touch), `data/`
+(263MB untracked local cache, flagged but not removed — didn't want to guess at a quarter-gig of
+someone else's local data without asking).
+
+Next: confirm whether the archived SNICKLEFRITZ trigger-word rule needs to be re-encoded into
+`CLAUDE.md` properly, or is truly dead. `data/` (263MB) and `COMMANDS.html`'s final disposition
+still open if a second pass is wanted.
+
 ## 2026-07-04 (main) — chore(graphify): refresh stale graph, wire orphaned /settings/mcp, delete dead MCP-install/landing components
 
 Operator asked what graphify shows as unconnected. Graph was 19 commits + 30 dirty files stale
