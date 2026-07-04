@@ -27,6 +27,7 @@ import type {
   ImageProps,
   ListingProps,
   ListProps,
+  MetricCardProps,
   MultiColumnProps,
   SignalProps,
   SocialIconsProps,
@@ -157,6 +158,22 @@ const ListPropsSchema = z.object({
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<ListProps>;
 
+// metricValue/metricLabel are named OUTSIDE the AI content-patch allowlist
+// (BlockContentPatchSchema) on purpose — a held number is never AI-writable,
+// exactly like ListingProps' price/beds. `sub`/`rankText`/`movementText`/`barPct`
+// are already outside it. barPct is validated as a plain number; the component
+// clamps it to 0–100 at render, so an out-of-range value never overflows the bar.
+const MetricCardPropsSchema = z.object({
+  metricValue: z.string().max(24).optional(),
+  metricLabel: z.string().max(80).optional(),
+  sub: z.string().max(80).optional(),
+  rankText: z.string().max(60).optional(),
+  movementText: z.string().max(40).optional(),
+  barPct: z.number().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
+}) satisfies z.ZodType<MetricCardProps>;
+
 const AgentCardPropsSchema = z.object({
   photoUrl: z.string().optional(),
   name: z.string().max(80).optional(),
@@ -281,6 +298,7 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("listing"), props: ListingPropsSchema }),
     z.object({ id: idIn, type: z.literal("multi-column"), props: MultiColumnPropsSchema }),
     z.object({ id: idIn, type: z.literal("list"), props: ListPropsSchema }),
+    z.object({ id: idIn, type: z.literal("metric-card"), props: MetricCardPropsSchema }),
     z.object({ id: idIn, type: z.literal("agent-card"), props: AgentCardPropsSchema }),
     z.object({ id: idIn, type: z.literal("agent-hero"), props: AgentHeroPropsSchema }),
     z.object({ id: idIn, type: z.literal("social-icons"), props: SocialIconsPropsSchema }),

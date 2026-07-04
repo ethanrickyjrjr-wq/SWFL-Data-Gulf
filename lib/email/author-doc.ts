@@ -488,6 +488,12 @@ function buildEntry(
 ): { entry: Entry; placedChart: boolean; placedPhoto: boolean } | null {
   const type = a.type as BlockType;
   if (!KNOWN_TYPES.has(type)) return null; // unknown block type (drives off the ONE root) — skip
+  // `metric-card` is DATA-SEEDED only (its held value is `metricValue`, sourced from
+  // the ranked-candidate pool — see lib/email/zip-seed.ts). The author writes
+  // `value_figure`, not `metricValue`, so an authored metric-card would ship its
+  // placeholder number. It's already kept out of the author's vocabulary
+  // (lib/email/build-doc.ts); dropping it here too makes a rogue emit inert.
+  if (type === "metric-card") return null;
   const num = (id?: string) => (id ? figuresById.get(id)?.value : undefined);
   const span = a.span ?? GRID_COLS;
   const newRow = a.new_row ?? true;

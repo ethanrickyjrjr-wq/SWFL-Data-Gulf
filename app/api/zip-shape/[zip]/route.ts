@@ -36,7 +36,7 @@ const FALLBACK_FILL = "#2a3942"; // lib/map/zip-color.ts FALLBACK_COLOR — neut
 /** `#rgb`/`#rrggbb` or `rgb(r,g,b)` only — this string is spliced straight
  *  into an SVG `fill` attribute, so anything else (e.g. `url(...)`, quotes,
  *  markup) is rejected rather than sanitized. */
-function safeFill(raw: string | null): string {
+export function safeFill(raw: string | null): string {
   if (!raw) return FALLBACK_FILL;
   if (/^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(raw)) return raw;
   if (/^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/.test(raw)) return raw;

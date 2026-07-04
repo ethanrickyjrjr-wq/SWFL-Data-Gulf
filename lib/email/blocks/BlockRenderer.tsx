@@ -10,6 +10,7 @@ import { ImageBlock } from "./ImageBlock";
 import { ListingBlock } from "./ListingBlock";
 import { MultiColumnBlock } from "./MultiColumnBlock";
 import { ListBlock } from "./ListBlock";
+import { MetricCardBlock } from "./MetricCardBlock";
 import { AgentCardBlock } from "./AgentCardBlock";
 import { AgentHeroBlock } from "./AgentHeroBlock";
 import { SocialIconsBlock } from "./SocialIconsBlock";
@@ -43,6 +44,8 @@ export function BlockRenderer({
       return <MultiColumnBlock props={block.props} globalStyle={globalStyle} />;
     case "list":
       return <ListBlock props={block.props} globalStyle={globalStyle} />;
+    case "metric-card":
+      return <MetricCardBlock props={block.props} globalStyle={globalStyle} />;
     case "agent-card":
       return <AgentCardBlock props={block.props} globalStyle={globalStyle} />;
     case "agent-hero":

@@ -1,6 +1,30 @@
 # Ranked, grid-based ZIP email reskin
 
-**Date:** 2026-07-03
+**Date:** 2026-07-03 · **Revised:** 2026-07-03 (post-review — see "Review corrections")
+
+## Review corrections (applied)
+
+An in-session code audit caught three spec bugs before implementation; the sections
+below are the corrected versions. Summary of what changed from the first draft:
+
+1. **§4 named the wrong builder.** The draft called `buildRegistryCandidates`, a strict
+   SUBSET of what the webpage uses (`buildZipCandidates`) — it omits `flood_aal` (the #1
+   signal, and the one that colors the hero shape), `permits_90d`, and census. Using it
+   would have painted the hero cutout with a signal that could never appear as a card, and
+   broken the "same pool as the webpage" promise. Corrected to `buildZipCandidates` via a
+   shared helper (`lib/zip-report/load-ranked-signals.ts`). This is modest new plumbing,
+   not "zero" — the draft's "zero new plumbing" claim was wrong.
+2. **Census cap was unaddressed.** The seed deliberately ships income-only census (stale
+   2018–2022 ACS vintage). `buildZipCandidates` adds every census value. Corrected: the
+   helper takes a `censusPolicy: "income-only"` that keeps only the income VALUE while
+   passing the FULL distribution (so income's percentile is still computed against the
+   whole SWFL set). "Exact same pool as the webpage" is softened to "same builder + inputs,
+   minus the seed's income-only census cap."
+3. **The strip mechanism doesn't protect `value`/`label`.** `BlockContentPatchSchema` is a
+   single flat text allowlist shared by all block types; `value` and `label` ARE in it. So
+   the draft's `value`/`label` metric-card fields would have survived an AI patch. Corrected:
+   the held fields are named `metricValue`/`metricLabel` (outside the allowlist), exactly as
+   `ListingProps` uses `price`/`beds`.
 
 ## Problem
 
@@ -69,24 +93,31 @@ tokens on top of whatever `globalStyle` the doc carries; no changes needed to th
 
 ### 2. New `metric-card` block type
 
-No existing block type carries a value + label + percentile bar. New addition, following the
-existing block-type pattern exactly:
+No existing block type in the EmailDoc block system carries a value + label + percentile bar.
+(There IS a `renderMetricCard` in `lib/email/templates/components/metric-card.ts` — but that's the
+server-string `templates/` render path, a different subsystem, and it has no percentile bar; it is
+not reused here.) New addition, following the existing block-type pattern exactly:
 
 - `doc/types.ts`: add `"metric-card"` to `BlockType`; add
   ```ts
   export interface MetricCardProps extends BlockBase {
-    value?: string;       // preformatted, e.g. "$495K" — never computed client-side
-    label?: string;       // "Median Home Value"
+    metricValue?: string; // preformatted, e.g. "$495K" — never computed client-side
+    metricLabel?: string; // "Median Home Value"
     sub?: string;         // "90-day median sale price"
-    rankText?: string;    // "#45 of 124 SWFL ZIPs" — built from rankPos/rankOf, restated verbatim
+    rankText?: string;    // "#3 of 57 SWFL ZIPs" — built from rankPos/rankOf, restated verbatim
     movementText?: string;// "↑ 6.85% YoY" — the candidate's own movementText, restated verbatim
     barPct?: number;      // 0-100, the candidate's own percentile — drives the bar width only
   }
   ```
   and add `"metric-card": MetricCardProps` to `BlockPropsMap`.
-- `doc/schema.ts`: validation entry for the new prop shape; in `ContentPatchSchema`, every field
-  above is a **data field** (sourced from the ranked-candidate pool, never AI-authored) — strip
-  mode drops AI writes to it, same treatment as `ListingProps`' price/beds/baths.
+  **Field-naming is load-bearing:** `metricValue`/`metricLabel` — NOT `value`/`label` — because
+  `BlockContentPatchSchema` is a single flat text allowlist shared by every block type, and it
+  DOES include `value` and `label` (hero uses them). Naming the held fields outside that allowlist
+  is the ONLY thing that keeps an AI content-patch from rewriting a held number, exactly as
+  `ListingProps` relies on `price`/`beds`/`baths` being outside it.
+- `doc/schema.ts`: validation entry for the new prop shape. All six fields sit OUTSIDE
+  `BlockContentPatchSchema` (the AI content-patch allowlist), so an AI patch that targets any of
+  them is stripped — same treatment as `ListingProps`' price/beds/baths.
 - `blocks/MetricCardBlock.tsx` (new, pure component like the others): renders value (large bold),
   label (small caps, muted) + sub (smaller, muted); when `barPct` is a number, a single-row
   two-cell table follows — `<td style="background:accentColor;width:{barPct}%">` +
@@ -124,30 +155,52 @@ grouping mechanism, already used elsewhere — no compiler changes needed):
 - `metric-card` blocks, two per row, `{w:6}` each, `y` incrementing per row — top 6 ranked signals
   (see §4), so 3 rows.
 
-Blocks with no `layout` (header, the "what just moved" signal block, sources text, button,
-footer) render stacked exactly as they do today — mixing grid and flow blocks in one doc is
-already how `compile-grid.ts`/`isGridDoc()` is designed to work.
+**Every block is positioned** (header at `y:0` … footer at the bottom), like the existing grid
+templates in `default-docs.ts`. The draft claimed no-`layout` blocks would "render stacked as
+today" alongside positioned ones — that is WRONG: `compile-grid.ts`'s `groupRows` assigns a
+no-`layout` block `fallbackY = 1_000_000 + i`, so it sorts AFTER every positioned block. A bare
+header would land at the BOTTOM. So the seed gives every block an explicit full-width row
+(`w:12`) at a sequential `y`; the flow blocks still render full-width and stacked, they just
+carry a layout to hold their order. (Free-tier canvas still ignores layout and stacks — the
+side-by-side shape+identity and two-up cards appear in the preview/send `compileGrid` render; the
+metric-card CONTENT shows either way.)
 
-### 4. Data: reuse today's ranked-candidate pool, zero new plumbing
+### 4. Data: reuse the webpage's ranked pool via a shared helper (modest new plumbing)
 
-`zip-seed.ts` gains the same loading step `app/r/zip-report/[zip]/page.tsx` already does:
+The registry/flood/permits/census assembly the report page does inline is extracted into a
+shared helper, `lib/zip-report/load-ranked-signals.ts`, which both surfaces can call:
 
 ```
-REGISTRY_PACK_IDS.map(id => loadParsedBrain(id))      // lib/fetch-brain.ts, existing
-  → buildRegistryTableMap(brains)                      // lib/zip-report/load-registry-tables.ts, existing
-  → buildRegistryCandidates(zip, tables).candidates     // lib/zip-report/candidates.ts, existing
-  → rankSignals(candidates)                             // lib/zip-report/signal-rank.ts, existing
-  → top 6 (RankedSignal[])
-  → one metric-card block per signal:
-      value = display, label = label, sub = sub,
+loadRankedZipSignals(zip, { censusPolicy: "income-only" })    // lib/zip-report/load-ranked-signals.ts
+  loads: 11 registry brains + env-swfl (flood) + permits-swfl + census (loadCensusSignals +
+         loadZipQuickSummary), assembles floodRows/floodForZip/permitsCounts/censusValues
+  → buildZipCandidates({ ... })                                // lib/zip-report/candidates.ts — the FULL
+                                                               //   builder (flood_aal + permits_90d +
+                                                               //   census, NOT the registry-only subset)
+  → rankSignals(candidates)                                    // lib/zip-report/signal-rank.ts
+  → returns { ranked, hasFlood, fillColor, place, shapeFound, sources }
+
+zip-seed.ts then: top 6 ranked → one metric-card block per signal:
+      metricValue = display, metricLabel = label, sub = sub,
       rankText = rankPos/rankOf != null ? `#${rankPos} of ${rankOf} SWFL ZIPs` : undefined,
       movementText = movementText (candidate's own field, independent of `why`),
-      barPct = percentile
+      barPct = percentile ?? undefined   // null percentile → NO bar (never a fabricated width)
 ```
 
-Every field is a restated held value — no new number is computed, no LLM call, no new data
-source. This is the exact same pool the webpage renders from; the email and the webpage will
-never show a different percentile/rank for the same ZIP on the same day.
+Why the FULL builder: `buildRegistryCandidates` is a strict subset — it omits `flood_aal`
+(SIGNAL_PRIORITY[0], and the signal whose gradient colors the hero shape), `permits_90d`, and
+census. Using it would paint the hero cutout with a signal that can never appear as a card.
+
+**Census policy:** `censusPolicy: "income-only"` keeps only the income census VALUE in the pool
+(every other ACS figure rides a stale 2018–2022 vintage) while passing the FULL census
+distribution through, so income's percentile is still computed against the whole SWFL set — not
+a truncated one.
+
+Every field is a restated held value — no new number is computed, no LLM call. The email uses the
+SAME builder + the SAME inputs the webpage uses (minus the income-only census cap), so email and
+webpage agree on a ZIP's rank/percentile today. (Parity is by-convention, not yet structural: the
+page still inlines its own assembly. Follow-up check `zip_report_helper_page_migration` tracks
+migrating the page onto this helper so parity becomes structural.)
 
 `rankText` and `movementText` are two independent lines (not `why`, which is a single tag that
 picks whichever of the two "wins" for the webpage's terse inline display) — the email has room
@@ -163,16 +216,21 @@ The "what just moved" signal block and the sources/text block stay exactly as th
 (already deterministic, already cited) — only the metric-list block is replaced by the grid of
 `metric-card`s.
 
-**Commentary:** one new deterministic sentence, templated from the #1-ranked signal only (its
-`why` string, restated — e.g. "34135 currently ranks #45 of 124 SWFL ZIPs on median home value.")
-placed as a `text` block under the metric-card grid. This is composed in code, not an LLM call —
-consistent with the file's existing locked rule that seed-arrival stays $0-cost; a fuller
-AI-authored "what it means" paragraph remains something the visitor gets only by opening/editing
-the doc in the Email Lab (existing AI-patch path, unchanged).
+**Commentary:** one new deterministic sentence placed as a `text` block under the metric-card
+grid. It NAMES the signal that most sets this ZIP apart (the #1-ranked signal's topic), but is
+**digit-free** — it never restates a number (the number already rides the card, and the file's
+existing invariant is that prose carries no digits). E.g. "Right now, the figure that most sets
+Cape Coral apart is its annual flood loss." The lead topic is derived from the #1 signal's label
+with any parenthetical/digit portion stripped (so "New Permits (90 Days)" → "new permits", never
+leaking a digit into prose). Composed in code, not an LLM call — consistent with the file's locked
+$0-cost seed-arrival rule; a fuller AI-authored "what it means" paragraph remains something the
+visitor gets only by opening/editing the doc in the Email Lab (AI-patch path, unchanged).
 
 ### 5. Error handling (unchanged empty-tolerant contract)
 
-- Zero market figures → `null` (today's existing behavior, unchanged).
+- Out-of-scope ZIP (`loadRankedZipSignals` returns `null`) **or** zero ranked signals → `null`
+  (caller opens unseeded). This replaces the draft's "zero market figures → null": the pool is now
+  the ranked-signal set, so that is what gates the seed.
 - A pack that fails to load or holds no row for this ZIP → that concept simply doesn't produce a
   `metric-card` (existing `buildRegistryCandidates` behavior — never throws).
 - Unknown ZIP / `extractZipShape` returns `found: false` → skip the `image` block entirely
@@ -184,22 +242,29 @@ the doc in the Email Lab (existing AI-patch path, unchanged).
 
 ### 6. Testing
 
-- Fix the pre-existing break in `lib/email/zip-seed.test.ts` (currently 0 passing — an import
-  mismatch unrelated to this change) as part of rewriting this file's tests.
-- `MetricCardBlock` render test: value/label/sub/bar-width render from props; a `barPct` outside
-  0–100 clamps rather than overflowing the table cell.
-- `doc/schema.test.ts`: `ContentPatchSchema` strip test for `metric-card` — an AI patch attempting
-  to rewrite `value`/`barPct` is dropped, same as it is for `ListingProps`.
-- Grid-compile smoke test: a doc with the shape+identity row and 3 metric-card rows compiles via
-  `compileGrid` without throwing, and `isGridDoc()` returns true.
-- `zip-seed.test.ts`: seeded doc for a known ZIP includes a shape image block (when the shape is
-  found), an identity block, up to 6 metric-card blocks matching `rankSignals` output order, and
-  no `DEFAULT_GLOBAL_STYLE` navy/teal literal in the resulting `globalStyle`. Also: the shape
-  image URL's `?fill=` matches `computeZipGradient` for a ZIP with held flood AAL, and omits
-  `?fill=` entirely for a ZIP with none.
-- `route.test.ts` (new, for `/api/zip-shape/[zip]` — it has none today): a valid `?fill=` renders
-  that color; an invalid/malicious `?fill=` (e.g. `<script>`, `url(...)`) falls back to the
-  neutral default rather than reaching the SVG string.
+All implemented and passing (74 tests across the files below; full email/pdf/zip-report suite
+971 pass):
+
+- `zip-seed.test.ts` (rewritten — the old file failed to import at the `createServiceRoleClient`
+  seam): mocks the two seams `zip-seed` composes from — `loadRankedZipSignals` + `loadLifecycleDigest`
+  — and asserts header-first/footer-last, one metric-card per ranked signal IN ORDER with held
+  value/rank/movement/bar, a null percentile → no bar, the shape URL's `?fill=` = the URL-encoded
+  gradient (omitted when no flood), NEUTRAL skeleton style (no `#0f1d24`/`#3DC9C0`), digit-free
+  commentary, and `null` on out-of-scope/zero-signals/malformed-ZIP. The helper is asked for
+  `censusPolicy: "income-only"`.
+- `blocks/MetricCardBlock.test.ts`: value/label/sub/rank/movement render; bar draws at the held
+  width; an out-of-range `barPct` clamps to 0–100; an undefined `barPct` renders NO bar.
+- `doc/schema.test.ts`: an AI content-patch targeting `metricValue`/`metricLabel`/`sub`/`rankText`/
+  `movementText`/`barPct` is stripped (data fields, like `ListingProps`); a metric-card block
+  round-trips through `EmailDocSchema` with its held value intact.
+- `compile-grid-metric.test.ts`: a doc shaped like the seed (shape+identity row + metric-card rows)
+  is `isGridDoc() === true` and compiles via `compileGrid` without throwing, with the header at top
+  (not pooled at the bottom).
+- `app/api/zip-shape/[zip]/route.test.ts` (new): `safeFill` accepts `#hex`/`rgb(...)`, falls back to
+  the neutral default for `null`/empty and rejects `<script>`/`url(...)`/quotes/named colors before
+  they reach the SVG string.
+- `author-doc.test.ts`: an authored `metric-card` is dropped (it's data-seeded only; also excluded
+  from the author vocabulary in `build-doc.ts`), so the author can never ship a placeholder card.
 
 ## Non-goals
 

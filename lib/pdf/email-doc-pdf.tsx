@@ -711,6 +711,77 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       );
     }
 
+    case "metric-card": {
+      const p = block.props;
+      // The engine stacks every block linearly (ignores BlockLayout); the bar is
+      // a plain filled rectangle (two Views in a row) — no interactivity needed.
+      const pct = typeof p.barPct === "number" ? Math.max(0, Math.min(100, p.barPct)) : null;
+      const captions = [p.rankText, p.movementText].filter(Boolean).join("   ·   ");
+      return (
+        <View style={s.section}>
+          {p.metricValue ? (
+            <Text
+              style={{
+                fontFamily: font,
+                fontSize: 26,
+                fontWeight: "bold",
+                color: gs.primaryColor,
+                marginBottom: 4,
+              }}
+            >
+              {p.metricValue}
+            </Text>
+          ) : null}
+          {p.metricLabel ? (
+            <Text
+              style={{
+                fontFamily: font,
+                fontSize: 10,
+                fontWeight: "bold",
+                color: "#6B7280",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              {p.metricLabel}
+            </Text>
+          ) : null}
+          {p.sub ? (
+            <Text style={{ fontFamily: font, fontSize: 10, color: "#6B7280", marginTop: 2 }}>
+              {p.sub}
+            </Text>
+          ) : null}
+          {pct !== null ? (
+            <View
+              style={{
+                flexDirection: "row",
+                height: 5,
+                marginTop: 8,
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <View style={{ width: `${pct}%`, backgroundColor: gs.accentColor }} />
+              <View style={{ flex: 1, backgroundColor: "#E5E7EB" }} />
+            </View>
+          ) : null}
+          {captions ? (
+            <Text
+              style={{
+                fontFamily: font,
+                fontSize: 10,
+                fontWeight: "bold",
+                color: gs.accentColor,
+                marginTop: 6,
+              }}
+            >
+              {captions}
+            </Text>
+          ) : null}
+        </View>
+      );
+    }
+
     default: {
       // Exhaustiveness guard: a new BlockType must add a case above, or the build
       // fails here — so the PDF can never silently drop a block kind.

@@ -166,6 +166,21 @@ describe("structural guarantees", () => {
     expect(doc.blocks.some((b) => b.type === "text")).toBe(true);
   });
 
+  test("a metric-card is dropped from an authored doc (DATA-SEEDED, never author-written)", () => {
+    // The author writes value_figure, not metricValue — an authored metric-card would
+    // ship its placeholder number. It's kept out of the vocabulary AND dropped here.
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [
+          { type: "text", body: "ok" },
+          { type: "metric-card", value_figure: "f1" },
+        ],
+      }),
+    );
+    expect(doc.blocks.some((b) => b.type === "metric-card")).toBe(false);
+    expect(doc.blocks.some((b) => b.type === "text")).toBe(true);
+  });
+
   test("an offered-but-unplaced chart & photo are reserved in real rows — never bottom-dumped", () => {
     const doc = assembleAuthoredDoc(
       args(

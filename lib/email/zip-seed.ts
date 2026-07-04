@@ -2,30 +2,49 @@
 //
 // The ZIP email prebuild (Lane B fork 1b — OPERATOR'S SHAPE): clicking a ZIP on
 // the homepage map lands in the email lab with that ZIP's page already built as
-// an email. DETERMINISTIC + composed in code from the same cited live loaders
-// the lab's AI uses (lib/email/market-context.ts) — never an LLM authoring call
-// on arrival; drive-by clicks and bots cost ~$0. The AI engages when the
-// visitor edits.
+// an email. DETERMINISTIC + composed in code from the SAME ranked-candidate pool
+// the ZIP report page renders (lib/zip-report/load-ranked-signals.ts) — never an
+// LLM authoring call on arrival; drive-by clicks and bots cost ~$0. The AI
+// engages only when the visitor edits.
 //
-// NUMBERS PEOPLE CARE ABOUT (operator ruling 07/03/2026): value + direction,
-// list price, days on market, live market motion, rent. Census ACS rides a
-// 2018–2022 vintage (the Bureau's own publication lag) — AT MOST ONE census
-// line ships (median household income, dated honestly); population/age/
-// owner-occupied/household demographics stay on the ZIP page.
+// RANKED, NOT A FLAT LIST: the email presents the same ranked/percentile/movement
+// signals the webpage does — one `metric-card` per signal, each with the held
+// value, its rank, its YoY movement, and a percentile bar (a visual restatement of
+// a held percentile, never a fabricated width). The email and the webpage never
+// show a different rank/percentile for the same ZIP on the same day (same builder
+// + same inputs — see the helper's header).
 //
-// Empty-tolerant by contract: unknown ZIP, no lake creds, or zero figures →
-// null, and each surface opens in its normal state. Every rendered value is a
-// MarketFigure verbatim (real source + as-of); prose sentences carry NO numbers.
+// NEUTRAL SKELETON: seed docs carry NEUTRAL_SKELETON_STYLE (grayscale/slate), NOT
+// SWFL's own navy/teal — an unbranded send reads as a skeleton awaiting a brand,
+// not "our" template. applyBrand()/brandGlobalStyle() overlay the operator's real
+// brand on top, exactly as they would over DEFAULT_GLOBAL_STYLE.
+//
+// CENSUS: at most ONE census line (median household income) — every other ACS
+// figure rides a 2018–2022 vintage that reads stale next to this-week market rows
+// (income-only policy in the helper).
+//
+// Empty-tolerant by contract: out-of-scope ZIP, no lake creds, or zero ranked
+// signals → null, and each surface opens in its normal state. Every rendered
+// value is a held figure restated verbatim; prose sentences carry NO numbers.
 
-import { createBlock, DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
-import type { BlockOf, BlockPropsMap, BlockType, EmailDoc } from "./doc/types";
-import { loadLifecycleDigest, loadMarketFigures, type MarketFigure } from "./market-context";
+import { createBlock } from "./doc/default-docs";
+import { NEUTRAL_SKELETON_STYLE } from "./doc/skeleton-style";
+import type { BlockLayout, BlockOf, BlockPropsMap, BlockType, EmailDoc } from "./doc/types";
+import { loadLifecycleDigest } from "./market-context";
+import { loadRankedZipSignals } from "../zip-report/load-ranked-signals";
+import type { RankedSignal } from "../zip-report/signal-rank";
 
-/** Seed-style block: defaults + overrides (mirror of default-docs' seedBlock,
- *  which is deliberately unexported). */
-function blk<K extends BlockType>(type: K, overrides: Partial<BlockPropsMap[K]> = {}): BlockOf<K> {
+/** Seed-style grid block: default props + overrides + a grid layout (every block
+ *  in this doc is positioned, so the preview/send grid render orders them top-to-
+ *  bottom — a no-`layout` block would pool at the bottom in compile-grid). */
+function gblk<K extends BlockType>(
+  type: K,
+  layout: BlockLayout,
+  overrides: Partial<BlockPropsMap[K]> = {},
+): BlockOf<K> {
   const b = createBlock(type);
   Object.assign(b.props as object, overrides);
+  (b as { layout?: BlockLayout }).layout = layout;
   return b;
 }
 
@@ -36,133 +55,150 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com"
   "",
 );
 
-/** "Median home value — Cape Coral (33914)" → "Cape Coral". */
-function placeFromLabel(figs: MarketFigure[], zip: string): string {
-  const hv = figs.find((f) => f.key === "home_value");
-  const m = hv?.label.match(/—\s*(.+?)\s*\(\d{5}\)\s*$/);
-  return m?.[1] ?? zip;
-}
-
-function fig(figs: MarketFigure[], key: string): MarketFigure | undefined {
-  return figs.find((f) => f.key === key);
-}
-
-/** "Zillow ZHVI · as of 05/31/2026" (as-of stated once per figure line). */
-function cite(f: MarketFigure): string {
-  return f.as_of ? `${f.source} · as of ${f.as_of}` : f.source;
-}
-
 /**
- * Builds the deterministic ZIP email. Returns null when the ZIP yields no
- * figures — the caller opens its surface unseeded (never an error page).
+ * Builds the deterministic, ranked ZIP email. Returns null when the ZIP is out of
+ * scope or yields no ranked signals — the caller opens its surface unseeded
+ * (never an error page).
  */
 export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
   if (!/^\d{5}$/.test(zip)) return null;
 
-  // Parallel pulls — the same loaders the ZIP page renders from. Each is
-  // empty-tolerant; only zero market figures blocks the seed entirely.
-  const [allFigs, lifecycle] = await Promise.all([
-    loadMarketFigures({ kind: "zip", value: zip }),
+  // Parallel pulls: the ranked-signal pool (same as the webpage) + the lifecycle
+  // "what just moved" digest. Each is empty-tolerant.
+  const [signals, lifecycle] = await Promise.all([
+    loadRankedZipSignals(zip, { censusPolicy: "income-only" }),
     loadLifecycleDigest({ kind: "zip", value: zip }),
   ]);
 
-  // ONE census line max: median household income. Every other ACS figure
-  // (population, owner-occupied) is dropped — its 2022 vintage reads stale next
-  // to this week's market rows.
-  const figs = allFigs.filter((f) => f.source !== "U.S. Census ACS" || f.key === "income");
-  if (figs.length === 0) return null;
+  if (!signals || signals.ranked.length === 0) return null;
 
-  const place = placeFromLabel(figs, zip);
-  const value = fig(figs, "home_value");
-  const active = fig(figs, "active");
-  const medianList = fig(figs, "median_list");
-  const dom = fig(figs, "dom");
+  const { ranked, place, hasFlood, fillColor, shapeFound, sources } = signals;
+  // A place with no crosswalk name falls back to the ZIP itself — never let a
+  // digit-only fallback leak into a prose sentence (figures ride blocks, not prose).
+  const placeLabel = /^\d+$/.test(place) ? "this area" : place;
 
-  // Hero number: home value, else median list — a ZIP with neither still seeds
-  // (stats/list carry what exists), the hero states the place only.
-  const heroFig = value ?? medianList;
+  const top = ranked.slice(0, 6);
+  const blocks: EmailDoc["blocks"] = [];
+  let y = 0;
 
-  const statFigs = [active, medianList, dom].filter((f): f is MarketFigure => Boolean(f));
+  // ── Masthead ──────────────────────────────────────────────────────────────
+  blocks.push(gblk("header", { x: 0, y, w: 12, h: 2 }));
+  y += 2;
 
-  // "On the record": the remaining care-worthy figures, verbatim, source-cited.
-  // Order fixed: direction first (value YoY), then rent, rent YoY, income last.
-  const listOrder = ["home_value_yoy", "rent", "rent_yoy", "income"];
-  const usedKeys = new Set(["home_value", ...statFigs.map((f) => f.key)]);
-  const listFigs = listOrder
-    .map((k) => fig(figs, k))
-    .filter((f): f is MarketFigure => Boolean(f) && !usedKeys.has((f as MarketFigure).key));
-
-  const sources = [...new Map(figs.map((f) => [f.source, f])).values()];
-
-  const blocks: EmailDoc["blocks"] = [
-    blk("header"),
-    blk("hero", {
-      kicker: `This Week in ${place}`,
-      value: heroFig?.value ?? place,
-      label: heroFig
-        ? `${heroFig.key === "home_value" ? "Median Home Value" : "Median List Price"} · ${place} (${zip}) · ${cite(heroFig)}`
-        : `${place} (${zip})`,
-      prose: `Where ${place} stands right now — every figure in this email is pulled live and cited to its source.`,
-    }),
-    // The ZIP cutout — the report page's shape as a branded PNG card (email
-    // clients strip inline SVG; /api/zip-shape rasterizes the same geometry).
-    blk("image", {
-      url: `${SITE}/api/zip-shape/${zip}`,
-      alt: `Map cutout of ${place} (${zip})`,
-      caption: `${place} · ZIP ${zip}`,
-    }),
-  ];
-
-  if (statFigs.length > 0) {
+  // ── Shape + identity, side by side ────────────────────────────────────────
+  // The cutout is the SAME color as the homepage map / report page: the route
+  // takes a `?fill=` param and we pass computeZipGradient's value through. rgb()
+  // carries commas/parens → URL-encode it. No flood AAL held → omit ?fill so the
+  // route paints its own neutral no-data slate (never a fabricated gradient point).
+  const shapeUrl =
+    `${SITE}/api/zip-shape/${zip}` + (hasFlood ? `?fill=${encodeURIComponent(fillColor)}` : "");
+  const identity = {
+    kicker: "Southwest Florida",
+    value: place.slice(0, 24),
+    label: `ZIP ${zip}`,
+    prose: "",
+  };
+  if (shapeFound) {
     blocks.push(
-      blk("stats", {
-        stats: statFigs.map((f) => ({
-          value: f.value,
-          label:
-            f.key === "active"
-              ? "Active Listings"
-              : f.key === "median_list"
-                ? "Median List Price"
-                : "Avg Days on Market",
-        })),
-      }),
+      gblk(
+        "image",
+        { x: 0, y, w: 4, h: 4 },
+        { url: shapeUrl, alt: `Map cutout of ${place} (${zip})`, caption: "" },
+      ),
     );
+    blocks.push(gblk("hero", { x: 4, y, w: 8, h: 4 }, identity));
+  } else {
+    blocks.push(gblk("hero", { x: 0, y, w: 12, h: 4 }, identity));
+  }
+  y += 4;
+
+  // ── Ranked metric cards, two per row ──────────────────────────────────────
+  for (let i = 0; i < top.length; i += 2) {
+    blocks.push(gblk("metric-card", { x: 0, y, w: 6, h: 4 }, cardProps(top[i])));
+    if (top[i + 1]) {
+      blocks.push(gblk("metric-card", { x: 6, y, w: 6, h: 4 }, cardProps(top[i + 1])));
+    }
+    y += 4;
   }
 
-  // Market motion — the lifecycle digest sentence (price cuts / new listings /
-  // sales over the last 30 or 90 days), composed in code from live transition
-  // counts. Window rides in the loader's own label.
+  // ── Commentary (digit-free): names the signal that most sets this ZIP apart,
+  // never its number — the number already rides the card. Composed in code (no
+  // LLM call); a fuller "what it means" paragraph is what the visitor gets by
+  // opening/editing the doc in the Email Lab (AI-patch path, unchanged). ──
+  const lead = top[0];
+  const leadTopic = lead
+    ? lead.label
+        .replace(/\([^)]*\)/g, "") // drop "(90 Days)" etc — no digits in prose
+        .replace(/[0-9]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase()
+    : "";
+  const commentary = leadTopic
+    ? `Right now, the figure that most sets ${placeLabel} apart is its ${leadTopic}.`
+    : `Here's where ${placeLabel} stands this week — every figure below is pulled live and cited.`;
+  blocks.push(gblk("text", { x: 0, y, w: 12, h: 2 }, { body: commentary, align: "left" }));
+  y += 2;
+
+  // ── Market motion — the lifecycle digest sentence (a held, cited value). ──
   if (lifecycle) {
     const windowLabel = lifecycle.label.match(/\(([^)]+)\)\s*$/)?.[1] ?? "recent weeks";
     blocks.push(
-      blk("signal", {
-        kicker: `${lifecycle.source}${lifecycle.as_of ? ` · as of ${lifecycle.as_of}` : ""}`,
-        title: `What just moved (${windowLabel})`,
-        body: lifecycle.value,
-      }),
+      gblk(
+        "signal",
+        { x: 0, y, w: 12, h: 4 },
+        {
+          kicker: `${lifecycle.source}${lifecycle.as_of ? ` · as of ${lifecycle.as_of}` : ""}`,
+          title: `What just moved (${windowLabel})`,
+          body: lifecycle.value,
+        },
+      ),
     );
+    y += 4;
   }
 
-  if (listFigs.length > 0) {
+  // ── Sources + CTA + footer ────────────────────────────────────────────────
+  const sourceLabels = [
+    ...sources.map((s) => s.label),
+    ...(lifecycle ? [lifecycle.source] : []),
+  ].filter((l, i, arr) => l && arr.indexOf(l) === i);
+  if (sourceLabels.length > 0) {
     blocks.push(
-      blk("list", {
-        title: "On the record",
-        items: listFigs.map((f) => ({
-          lead: `${f.value} ·`,
-          text: `${f.label} (${cite(f)})`,
-        })),
-      }),
+      gblk(
+        "text",
+        { x: 0, y, w: 12, h: 2 },
+        {
+          body: `Sources: ${sourceLabels.join(" · ")}. Figures refresh from live data when this email rebuilds.`,
+          align: "left",
+        },
+      ),
     );
+    y += 2;
   }
 
   blocks.push(
-    blk("text", {
-      body: `Sources: ${sources.map((f) => cite(f)).join(" · ")}. Figures refresh from live data when this email rebuilds.`,
-      align: "left",
-    }),
-    blk("button", { label: "See the full ZIP report", url: `${SITE}/r/zip-report/${zip}` }),
-    blk("footer"),
+    gblk(
+      "button",
+      { x: 0, y, w: 12, h: 2 },
+      { label: "See the full ZIP report", url: `${SITE}/r/zip-report/${zip}` },
+    ),
   );
+  y += 2;
+  blocks.push(gblk("footer", { x: 0, y, w: 12, h: 3, static: true }));
 
-  return { globalStyle: { ...DEFAULT_GLOBAL_STYLE }, blocks };
+  return { globalStyle: { ...NEUTRAL_SKELETON_STYLE }, blocks };
+}
+
+/** One ranked signal → metric-card props. Every field is a held value restated
+ *  verbatim; `barPct` is the held percentile (null → no bar, never a midpoint). */
+function cardProps(s: RankedSignal): Partial<BlockPropsMap["metric-card"]> {
+  return {
+    metricValue: s.display,
+    metricLabel: s.label,
+    sub: s.sub,
+    rankText:
+      s.rankPos != null && s.rankOf != null ? `#${s.rankPos} of ${s.rankOf} SWFL ZIPs` : undefined,
+    movementText: s.movementText,
+    barPct: s.percentile ?? undefined,
+  };
 }

@@ -334,3 +334,55 @@ test("STRIPS a link/asset/identity key from a patch (user-owned — not AI-writa
     if (r.success) expect(key in r.data).toBe(false);
   }
 });
+
+test("STRIPS a metric-card's held data fields (a number is DATA-SEEDED, never AI-written)", () => {
+  // metricValue/metricLabel/sub/rankText/movementText/barPct are named OUTSIDE the
+  // content allowlist on purpose — an AI patch that tries to rewrite a held value or
+  // its bar is dropped, exactly like ListingProps' price/beds. Same guarantee.
+  for (const key of ["metricValue", "metricLabel", "sub", "rankText", "movementText"]) {
+    const r = BlockContentPatchSchema.safeParse({ body: "x", [key]: "spoofed" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(key in r.data).toBe(false);
+  }
+  const bar = BlockContentPatchSchema.safeParse({ body: "x", barPct: 99 });
+  expect(bar.success).toBe(true);
+  if (bar.success) expect("barPct" in bar.data).toBe(false);
+});
+
+test("a metric-card block round-trips through EmailDocSchema with its held value intact", () => {
+  const doc = {
+    globalStyle: {
+      primaryColor: "#1F2937",
+      accentColor: "#64748B",
+      fontFamily: "MODERN_SANS",
+      textColor: "#1F2937",
+      backdropColor: "#F8FAFC",
+    },
+    blocks: [
+      {
+        id: "mc1",
+        type: "metric-card",
+        props: {
+          metricValue: "$421K",
+          metricLabel: "Median Home Value",
+          sub: "90-day median sale price",
+          rankText: "#12 of 57 SWFL ZIPs",
+          movementText: "↓ 2.1% YoY",
+          barPct: 62,
+        },
+        layout: { x: 0, y: 0, w: 6, h: 4 },
+      },
+      { id: "f1", type: "footer", props: {} },
+    ],
+  };
+  const r = EmailDocSchema.safeParse(doc);
+  expect(r.success).toBe(true);
+  if (r.success) {
+    const mc = r.data.blocks[0];
+    expect(mc.type).toBe("metric-card");
+    if (mc.type === "metric-card") {
+      expect(mc.props.metricValue).toBe("$421K");
+      expect(mc.props.barPct).toBe(62);
+    }
+  }
+});

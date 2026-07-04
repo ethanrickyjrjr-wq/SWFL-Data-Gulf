@@ -63,6 +63,7 @@ export const DEFAULT_H: Record<BlockType, number> = {
   listing: 9,
   "multi-column": 5,
   list: 5,
+  "metric-card": 4,
   "agent-card": 6,
   "agent-hero": 8,
   "social-icons": 2,

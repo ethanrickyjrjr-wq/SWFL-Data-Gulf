@@ -20,6 +20,7 @@ export type BlockType =
   | "listing"
   | "multi-column"
   | "list"
+  | "metric-card"
   | "agent-card"
   | "agent-hero"
   | "social-icons"
@@ -188,6 +189,29 @@ export interface ListProps extends BlockBase {
   items: ListItem[]; // 1–8 rows
 }
 
+/** A single ranked metric: a big value, a label, and an optional percentile bar.
+ *  DATA-SEEDED, never AI-authored — the number-bearing fields are named OUTSIDE
+ *  the AI content-patch allowlist (`metricValue`/`metricLabel`, like ListingProps'
+ *  `price`/`beds`), so a content patch that tries to rewrite a held value is
+ *  silently stripped and the component never reads it. Values are restated
+ *  verbatim from the ranked-candidate pool (lib/zip-report/signal-rank) — the
+ *  seed builder fills them; there is no client-side computation. */
+export interface MetricCardProps extends BlockBase {
+  /** Preformatted, e.g. "$495K" — a held number restated verbatim, never computed. */
+  metricValue?: string;
+  /** e.g. "Median Home Value". */
+  metricLabel?: string;
+  /** Secondary line, e.g. "90-day median sale price". */
+  sub?: string;
+  /** e.g. "#45 of 124 SWFL ZIPs" — built from the candidate's rankPos/rankOf. */
+  rankText?: string;
+  /** e.g. "↑ 6.85% YoY" — the candidate's own movementText, restated verbatim. */
+  movementText?: string;
+  /** 0–100 percentile — drives the bar width only. Undefined → no bar renders
+   *  (never a fabricated midpoint; a bar is a restatement of a held percentile). */
+  barPct?: number;
+}
+
 export interface AgentCardProps {
   photoUrl?: string;
   name?: string;
@@ -272,6 +296,7 @@ export interface BlockPropsMap {
   listing: ListingProps;
   "multi-column": MultiColumnProps;
   list: ListProps;
+  "metric-card": MetricCardProps;
   "agent-card": AgentCardProps;
   "agent-hero": AgentHeroProps;
   "social-icons": SocialIconsProps;

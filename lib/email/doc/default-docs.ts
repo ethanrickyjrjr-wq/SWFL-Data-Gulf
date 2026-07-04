@@ -71,6 +71,14 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
       { lead: "TUE ·", text: "Second item — swap these for events, tips, or links." },
     ],
   },
+  "metric-card": {
+    metricValue: "$485K",
+    metricLabel: "Median Home Value",
+    sub: "90-day median sale price",
+    rankText: "#12 of 57 SWFL ZIPs",
+    movementText: "↑ 4% YoY",
+    barPct: 62,
+  },
   "agent-card": {
     name: "Your Name",
     title: "Realtor®",

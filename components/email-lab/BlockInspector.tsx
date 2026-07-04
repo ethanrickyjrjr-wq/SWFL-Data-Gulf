@@ -29,6 +29,7 @@ const LABELS: Record<EmailBlock["type"], string> = {
   listing: "Listing",
   "multi-column": "Columns",
   list: "List",
+  "metric-card": "Metric Card",
   "agent-card": "Agent Card",
   "agent-hero": "Agent Feature",
   "social-icons": "Social Icons",
