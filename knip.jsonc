@@ -1,0 +1,68 @@
+{
+  // Dead-code detector — catches orphan modules at PR time (Operation July task 20).
+  //
+  // PHASE 1 (now): REPORT-ONLY. Every rule is "warn", so `knip` always exits 0 and
+  // the CI step can never redden `main` on a false positive. This repo invokes dozens
+  // of scripts from GHA workflows, git hooks, and cron (not just package.json), so the
+  // first passes need `entry` tuning before enforcement. Read the CI log's "Unused
+  // files" section, confirm each is genuinely dead (RULE 0.5) or add it to `ignoreFiles`,
+  // and only THEN flip `rules.files` to "error" (phase 2 — fails the build on new orphans).
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+
+  // Entry points knip can't discover on its own. The `next` plugin auto-adds the
+  // app-router entries (app/**/{page,layout,route,...}, middleware); package.json
+  // scripts are auto-added too. These are the ones invoked by workflows/hooks/cron:
+  "entry": [
+    "scripts/**/*.{ts,mts,mjs,js}",
+    ".github/scripts/**/*.mjs",
+    ".claude/hooks/**/*.mjs",
+    "refinery/cli.mts",
+    "refinery/tools/**/*.mts",
+    "middleware.ts",
+    // Test files are run by `bun test` / `node --test`, not imported — they're entries.
+    "**/*.test.{ts,tsx,mts,mjs}",
+    "**/__tests__/**/*.{ts,tsx,mts,mjs}"
+  ],
+
+  // Non-JS/TS or generated trees that must never be flagged as dead code.
+  "ignore": [
+    "ingest/**",
+    "brains/**",
+    "graphify-out/**",
+    "app/_design/**",
+    "mcp-widget/**",
+    "**/*.css",
+    "**/*.d.ts",
+    "next-env.d.ts",
+    "database.types.ts",
+    "database-generated.types.ts"
+  ],
+
+  // Intentional grep-0 / parked files — real, kept on purpose (autopsy §9.5 named these).
+  // Verified paths (RULE 0.5, 2026-07-04). Do NOT let knip flag them.
+  "ignoreFiles": [
+    "lib/email/templates/components/map-placeholder.ts",
+    "lib/social/recipients.ts",
+    "components/landing/Waitlist.tsx",
+    "components/email-lab/PhotopeaModal.tsx",
+    "lib/email/snicklefritz/targets.ts"
+  ],
+
+  // Phase 1: focus the signal on dead FILES + dependency hygiene (the task's target).
+  // Unused-exports/types are noisy on a large app and are silenced until the file
+  // surface is clean. All "warn" = report-only (exit 0). Flip `files` to "error" in phase 2.
+  "rules": {
+    "files": "warn",
+    "dependencies": "off",
+    "devDependencies": "off",
+    "unlisted": "off",
+    "unresolved": "off",
+    "binaries": "off",
+    "exports": "off",
+    "nsExports": "off",
+    "types": "off",
+    "nsTypes": "off",
+    "enumMembers": "off",
+    "duplicates": "off"
+  }
+}

@@ -24,6 +24,29 @@ three surfaces; crawl4ai researched campaign taxonomy (RULE 0.4).
   Re-engagement — all reuse the same shell (spec §"coming tiles").
 
 Next: operator reviews spec → register the build (`node scripts/new-build.mjs campaign-quick-start …`) → implement.
+## 2026-07-04 (main) — Operation July: task 20 (knip dead-code CI, report-only) + task 15 = A
+
+Built task 20 and recorded the operator's task-15 decision. NOT pushed — held for operator ok.
+
+- **20 — knip wired, PHASE 1 report-only.** Added knip@6.24.0 (verified current on npm) + `knip.jsonc` +
+  a "Dead code (knip, report-only)" CI step. First raw run flagged 191 "unused files" (90% noise — the
+  `app/_design` vendored examples tree, `refinery/**/*.test.mts` not seen as entries, `mcp-widget`). After
+  teaching knip about test entries + ignoring _design/mcp-widget/css, the surface is **14 real candidates**.
+  `rules.files="warn"` (all else off) → `bunx --bun knip` exits 0, so CI can NEVER redden main on a false
+  positive. Phase 2 flips files→error once the 14 are triaged. Lockfile staged with package.json (Gate 1).
+  - Triage candidates (NOT auto-deleted): `lib/highlighter/deliverable-owner-store.ts` is a strong REAL
+    orphan (its consumer `DeliverableOwnerBridge.tsx` was deleted in task 10). `refinery/sources/master-source.mts`
+    is a likely FALSE positive (dynamically DAG-loaded — do NOT delete without proof). The rest
+    (landing/UI components, `use-assistant.ts`, a docs `_FINISHED` .mts) need per-file RULE 0.5 checks.
+  - Deferred to phase 2: dep-hygiene (knip flags `vitest`/`yaml` as unlisted — real; plus false unused-deps
+    from the mcp-widget ignore). Dep rules left "off" for now.
+- **15 — DECISION: A (retire).** Operator chose: retire `daily-email-digest.yml` once the multi-tenant
+  scheduler proves one real schedule-triggered send. Sequences after task 01's live-send checks close;
+  feeds task 17. `daily-email-digest.yml` NOT touched yet. Task-15 file itself left unedited — under an
+  active claim by a parallel session; decision recorded here canonically.
+
+Next: 18 (freshness guards + the live redfin bug), 16 (un-closeable checks), 21 (unify contacts) — each
+with a brainstorm + audit, push held for operator ok.
 
 ## 2026-07-04 (main) — send launch: force fresh prod deploy to clear route 503 + correct Resend free-tier fact
 
