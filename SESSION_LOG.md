@@ -1,3 +1,23 @@
+## 2026-07-05 (main) — BUILD: agent-launch campaign tasks 1-7+10 SHIPPED · task 8 BLOCKED on API credits
+
+Executing `docs/superpowers/plans/2026-07-05-agent-launch-campaign.md` inline. Landed (each TDD, all green,
+`bunx next build` green): editorial agent-card portrait — circle avatar KILLED (f83cb940) · side-by-side
+column render proof, compileGrid already correct (f83cb940) · banded-hero stat clipping w/ accent border
+(66b94a2d) · engine-owned mailto reply CTA: AssembleArgs.buttonMailto + ai-route replyEmail + applyBrand
+no longer clobbers mailto button urls — found live, applyBrand overwrote EVERY button url (c554f6c3,
+8f7cbd1e) · agent-intro recipe rewritten Sonnet-proof; portrait rides `agent-hero` (brand-filled), NOT the
+OG-photo slot — recipe corrected after probing resolveHeroPhoto (in 1d78d67c, 8f7cbd1e) ·
+ShowcaseCampaign.followUp + campaignFollowUpForPrompt (2b3fb45d) · follow-up chip in grid shell (in
+ed288fd0) · blastTags did+tpl on every blast send (11909ed8, ca647a53). Checks opened:
+`scheduled_send_minute_jitter`, `gmail_shared_from_unsub_audit`.
+**BLOCKER (task 8, demo builds):** the ANTHROPIC_API_KEY in `.env.local` has NO CREDITS — API 400 "credit
+balance too low" (pipeline verified fine: 15 figures, recipe routed, tool call well-formed). Demos + registry
+entry (task 9) + full verify (task 11) wait on a funded key. Also needed for task 8: the Marisol Vega
+persona portrait (AI-generated, professional half-body — operator input or approved generation).
+**Parallel-session note:** shared-index races swept 3 of my commits into foreign-labeled commits (0cd6d872
+grabbed nothing in the end; 1d78d67c carried author-recipes; ed288fd0 carried the grid-shell chip) — content
+verified intact in HEAD each time; no rewrites attempted. NOT pushed.
+
 ## 2026-07-05 (main) — BUILD: account quick-access — dropdown + route-modal brand/schedule editors (12 tasks)
 
 Executed `docs/superpowers/plans/2026-07-05-account-quick-access.md` inline, all 12 tasks: `resume` in the
