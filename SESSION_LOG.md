@@ -1,3 +1,31 @@
+## 2026-07-05 (main) — SPEC: agent-first homepage re-flip (agent-first-homepage) — 4-lane research, identity decision, 5-build ladder
+
+Operator re-flipped homepage identity (explicit, supersedes 06/28 intelligence-first framing; memory updated):
+agent-first campaign engine — address-bar hero ("Research done. Send. We'll take care of the rest."),
+four campaign chips (New Listing / Just Sold / Coming to Market / Market Update), map demotes below the
+fold as proof-of-data. Ship order: hero first with honest ZIP-grade fallback, address spine (geocode→comps
+into the builder) as build 2, lifecycle sequences build 3, send hardening build 4, voice build 5.
+Spec: `docs/superpowers/specs/2026-07-05-agent-first-homepage-design.md`. Check opened:
+`agent_first_homepage_live_verify`.
+
+**Research findings (RULE 0.4, 07/05/2026, all live):**
+- Competitive (crawl4ai, ~20 products): pieces commodity, loop unowned. Write.homes $25/mo does
+  address→content one-shot; Altos $79/mo does scheduled ZIP market emails; Ylopo Listing Rocket does MLS
+  lifecycle auto-switching but ONLY paid FB ads; Curaytor does the full loop with humans at $299–$999/mo.
+  NOBODY cites a number inside the deliverable; EVERYBODY gates at build time. Solo-agent zone $50–$150/mo.
+- Reddit (SteadyAPI, 39 calls): Homebot's address-anchored email = most-loved mechanic in category; named
+  gaps = zero-context auto-stats, wrong numbers (Homebot AVM blowups drive churn), third-party voice feels
+  "ingenuine". Consumer AI backlash huge (28k-upvote thread) → market with "every number sourced", never
+  "AI-generated". Subject-property AVM = category blowup risk → market-grain cited figures only.
+  SteadyAPI Reddit quirks found (filter=posts 422s; subreddit param only biases; /reddit/post shape) —
+  fold into INSTAGRAM-SOCIAL-STEADY.md on next touch.
+- GitHub: no OSS incumbent for address→scheduled data-refreshed campaign email. Steal: Resend native
+  Idempotency-Key dual-layer (dubinc/dub), recipient-grain send ledger (listmonk), send_history on
+  schedule row + render-at-fire (Anmol-Baranwal/hndigest).
+- Internal audit: ZIP loop already works end-to-end; geocode→comps engine live-verified but chat-siloed;
+  subject_address read by no builder; just-sold/coming-to-market are slide-level only; no autocomplete
+  anywhere; scheduler = one cadence, no sequences; anonymous grid lab passes no scope (empty figures).
+
 ## 2026-07-05 (main) — BUILT: SWFL Social Pulse P1+P2 (9 commits) — scan+store live tables, digest, /pulse page
 
 Executed plan tasks 1–9 inline (TDD, one commit each, `60422484..906883cd`): 4 `social_pulse_*` tables
