@@ -1,6 +1,11 @@
 # 16 — Make a check un-closeable without live prod proof (P1)
 
-- **Status:** ⬜ Not started — **brainstorm/plan first (RULE 3.5)**
+- **Status:** 🟡 Phase 1 BUILT (2026-07-05, held for push + migration) — proof-gated `close` (CLI runs the stored
+  signal live) + `checks_require_proof` DB trigger + `proof jsonb` column + signal-runner. Spec:
+  `docs/superpowers/specs/2026-07-05-uncloseable-check-proof-design.md`, plan:
+  `docs/superpowers/plans/2026-07-05-uncloseable-check-proof.md`. Check `uncloseable_check_proof_live_verify` open
+  (operator-run). **Migration `docs/sql/20260705_checks_proof_gate.sql` NOT applied** — operator runs it (touches a
+  shared prod table; verify the swfldatagulf-ops close path first). Do NOT flip ✅ until live-verify closes.
 - **Owner:** SESSION (plan) → likely answer-engine-guardian / infra
 - **Source:** autopsy §9.1 + §10
 

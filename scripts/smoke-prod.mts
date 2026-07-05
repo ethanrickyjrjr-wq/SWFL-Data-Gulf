@@ -233,7 +233,7 @@ async function main(): Promise<void> {
       console.log(`        ${result.test.label}`);
       console.log(`        Error: ${result.error}`);
       console.log(
-        `        To close manually: node scripts/check.mjs close ${result.test.checkKey} "verified manually"`,
+        `        To close manually: node scripts/check.mjs close ${result.test.checkKey} --evidence "verified manually: <what you saw>"`,
       );
     }
   }

@@ -19,7 +19,9 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { resolveSupabaseCreds } from "./lib/supabase-creds.mjs";
+import { runSignal, SIGNAL_TYPES } from "./lib/check-signals.mjs";
 
 const ROOT = process.cwd();
 const SECRETS_PATH = resolve(ROOT, ".dlt/secrets.toml");
@@ -93,6 +95,52 @@ function parseArgs(args) {
   return { positionals, flags };
 }
 
+// --- proof helpers (pure — unit-tested without a git/DB state) ---
+
+// Tier is fixed by whether the check carries a stored signal. A signal-bearing
+// check MUST close by running that signal; a signal-less one closes with a
+// recorded human attestation. The trigger enforces the same split server-side.
+export function closeTier(row) {
+  return row && row.signal != null ? "signal" : "manual";
+}
+
+// The proof record a signal-bearing close writes. `observed` is what runSignal
+// actually saw — the CLI made the call, so this is not self-reported. `signal`
+// echoes the STORED signal so the trigger can bind proof→signal.
+export function buildSignalProof({ signal, observed, nowIso, by }) {
+  return {
+    kind: "signal",
+    ok: true,
+    signal,
+    observed: observed ?? null,
+    observed_at: nowIso,
+    by: by ?? "session",
+  };
+}
+
+// The proof record a signal-less (manual) close writes — honestly the weaker
+// tier: a recorded, non-empty human attestation.
+export function buildManualProof({ evidence, nowIso, by }) {
+  return { kind: "manual", evidence, observed_at: nowIso, by: by ?? "session" };
+}
+
+// Parse + validate a --signal '<json>' flag. Rejects non-JSON, non-objects, and
+// unknown types at the CLI boundary so a bad signal never reaches the DB.
+export function parseSignalFlag(raw) {
+  if (typeof raw !== "string") fail("--signal needs a JSON value");
+  let sig;
+  try {
+    sig = JSON.parse(raw);
+  } catch (e) {
+    fail(`--signal is not valid JSON: ${e.message}`);
+  }
+  if (!sig || typeof sig !== "object" || Array.isArray(sig) || !sig.type)
+    fail("--signal JSON must be an object with a `type`");
+  if (!SIGNAL_TYPES.includes(sig.type))
+    fail(`--signal type must be one of: ${SIGNAL_TYPES.join(", ")}`);
+  return sig;
+}
+
 async function list() {
   const rows = await rest("checks?state=eq.open&order=due_at.asc.nullslast&select=*");
   if (!rows.length) {
@@ -135,12 +183,15 @@ async function open(args) {
   };
   if (flags.detail) row.detail = flags.detail;
   if (flags.due) row.due_at = flags.due;
+  // A machine-checkable close assertion, set at creation and immutable thereafter
+  // (see the checks_require_proof trigger). Without one the check is manual-tier.
+  if (flags.signal != null) row.signal = parseSignalFlag(flags.signal);
   await rest("checks", {
     method: "POST",
     headers: { Prefer: "return=minimal" },
     body: JSON.stringify(row),
   });
-  console.log(`opened: ${checkKey} — ${label}`);
+  console.log(`opened: ${checkKey} — ${label}${row.signal ? ` [signal: ${row.signal.type}]` : ""}`);
 }
 
 // Upsert-to-open. Unlike `open` (create-only — fails if the key exists in ANY
@@ -156,7 +207,8 @@ async function reopen(args) {
     `checks?check_key=eq.${encodeURIComponent(checkKey)}&select=check_key,state`,
   );
   if (existing.length) {
-    const patch = { state: "open", resolved_at: null, resolved_by: null };
+    // Clear the old proof too — a re-opened check's prior proof is stale.
+    const patch = { state: "open", resolved_at: null, resolved_by: null, proof: null };
     if (flags.detail) patch.detail = flags.detail;
     await rest(`checks?check_key=eq.${encodeURIComponent(checkKey)}`, {
       method: "PATCH",
@@ -187,27 +239,66 @@ async function reopen(args) {
 async function close(args) {
   const { positionals, flags } = parseArgs(args);
   const [handle, ...noteParts] = positionals;
-  if (!handle) fail("close: need a check_key or id — close <check_key|id> [note] [--drop]");
+  if (!handle)
+    fail('close: need a check_key or id — close <check_key|id> [note] [--evidence "..."] [--drop]');
   const note = noteParts.join(" ") || null;
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
   const col = isUuid ? "id" : "check_key";
-  // state IN ('open','done','dropped'). --drop = abandoned (note → drop_reason);
-  // otherwise the obligation was met (note → resolved_by, defaults to 'session').
-  const dropped = Boolean(flags.drop);
-  const patch = {
-    state: dropped ? "dropped" : "done",
-    resolved_at: new Date().toISOString(),
-    resolved_by: dropped ? "session" : (note ?? "session"),
-  };
-  if (dropped && note) patch.drop_reason = note;
-  const updated = await rest(`checks?${col}=eq.${encodeURIComponent(handle)}`, {
+  const where = `checks?${col}=eq.${encodeURIComponent(handle)}`;
+  const nowIso = new Date().toISOString();
+
+  // --drop = abandoned, not attested → state='dropped' (the trigger does NOT gate
+  // 'dropped') with no proof. note → drop_reason.
+  if (flags.drop) {
+    const patch = { state: "dropped", resolved_at: nowIso, resolved_by: "session" };
+    if (note) patch.drop_reason = note;
+    const updated = await rest(where, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(patch),
+    });
+    const arr = Array.isArray(updated) ? updated : [updated];
+    if (!arr.length) fail(`no check matched ${col}=${handle}`);
+    console.log(`dropped: ${handle} — ${arr[0]?.label ?? ""}`.trim());
+    return;
+  }
+
+  // A real close asserts live proof. Fetch the STORED signal to pick the tier —
+  // the CLI never accepts a signal from argv, so a session cannot swap in an
+  // easy one.
+  const rows = await rest(`${where}&select=id,check_key,label,state,signal,resolution`);
+  if (!rows.length) fail(`no check matched ${col}=${handle}`);
+  const row = rows[0];
+  const by = note ?? "session";
+  let proof;
+
+  if (closeTier(row) === "signal") {
+    // The CLI makes the live HTTP/DB call itself; the observed result is not
+    // self-reported. A non-passing signal blocks the close — the gate working.
+    const result = await runSignal(row.signal, { rest });
+    if (!result.ok)
+      fail(
+        `live signal did NOT pass for ${row.check_key} — ${result.detail}. Not closing (that is the gate, not a false alarm).`,
+      );
+    console.log(`signal ok: ${result.detail}`);
+    proof = buildSignalProof({ signal: row.signal, observed: result.observed, nowIso, by });
+  } else {
+    const evidence = typeof flags.evidence === "string" ? flags.evidence.trim() : "";
+    if (!evidence)
+      fail(
+        `manual check ${row.check_key} has no signal — pass --evidence "<what you observed / commit / url>". A bare close is not allowed.`,
+      );
+    proof = buildManualProof({ evidence, nowIso, by });
+  }
+
+  const updated = await rest(where, {
     method: "PATCH",
     headers: { Prefer: "return=representation" },
-    body: JSON.stringify(patch),
+    body: JSON.stringify({ state: "done", resolved_at: nowIso, resolved_by: by, proof }),
   });
   const arr = Array.isArray(updated) ? updated : [updated];
   if (!arr.length) fail(`no check matched ${col}=${handle}`);
-  console.log(`closed: ${handle} — ${arr[0]?.label ?? ""}`.trim());
+  console.log(`closed: ${handle} — ${arr[0]?.label ?? ""} [${proof.kind}]`.trim());
 }
 
 async function update(args) {
@@ -219,15 +310,26 @@ async function update(args) {
     );
   // Metadata-only: PATCH the named fields, leave `state` untouched (that's
   // `close`'s job). At least one field is required so a no-op can't pass.
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
+  const col = isUuid ? "id" : "check_key";
   const patch = {};
   if (flags.detail != null) patch.detail = flags.detail;
   if (flags.due != null) patch.due_at = flags.due;
   if (flags.priority != null) patch.priority = Number(flags.priority);
   if (flags.label != null) patch.label = flags.label;
+  if (flags.signal != null) {
+    // Attach a signal ONLY to a signal-less check. A set signal is immutable via
+    // the CLI (the trigger enforces it); pre-check so we fail friendly, not 500.
+    const sig = parseSignalFlag(flags.signal);
+    const existing = await rest(`checks?${col}=eq.${encodeURIComponent(handle)}&select=signal`);
+    if (existing.length && existing[0].signal != null)
+      fail(
+        `signal already set on ${handle} and immutable via the CLI. Change it only via a Bun.SQL session that has SET app.allow_signal_edit='1'.`,
+      );
+    patch.signal = sig;
+  }
   if (!Object.keys(patch).length)
-    fail("update: nothing to change — pass --detail / --due / --priority / --label");
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
-  const col = isUuid ? "id" : "check_key";
+    fail("update: nothing to change — pass --detail / --due / --priority / --label / --signal");
   const updated = await rest(`checks?${col}=eq.${encodeURIComponent(handle)}`, {
     method: "PATCH",
     headers: { Prefer: "return=representation" },
@@ -238,35 +340,49 @@ async function update(args) {
   console.log(`updated: ${handle} — ${Object.keys(patch).join(", ")} [${arr[0]?.state}]`);
 }
 
-const [cmd, ...args] = process.argv.slice(2);
-try {
-  switch (cmd) {
-    case "list":
-      await list();
-      break;
-    case "open":
-      await open(args);
-      break;
-    case "reopen":
-      await reopen(args);
-      break;
-    case "close":
-      await close(args);
-      break;
-    case "update":
-      await update(args);
-      break;
-    default:
-      console.log(
-        'usage:\n  check.mjs list\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N]\n  check.mjs reopen <project> <check_key> "<label>" [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."]\n  check.mjs close <check_key|id> [note] [--drop]',
-      );
-      process.exitCode = cmd ? 1 : 0;
-  }
-} catch (e) {
-  // CheckFail already printed its message + set exitCode; anything else is a
-  // real crash worth surfacing.
-  if (!(e instanceof CheckFail)) {
-    console.error(e);
-    process.exitCode = 1;
+async function mainCli() {
+  const [cmd, ...args] = process.argv.slice(2);
+  try {
+    switch (cmd) {
+      case "list":
+        await list();
+        break;
+      case "open":
+        await open(args);
+        break;
+      case "reopen":
+        await reopen(args);
+        break;
+      case "close":
+        await close(args);
+        break;
+      case "update":
+        await update(args);
+        break;
+      default:
+        console.log(
+          'usage:\n  check.mjs list\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N] [--signal \'<json>\']\n  check.mjs reopen <project> <check_key> "<label>" [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."] [--signal \'<json>\']\n  check.mjs close <check_key|id> [note] [--evidence "..."] [--drop]\n\n  --signal types: http_ok {url}, http_body {url,contains}, db_row_exists {table,filter}, db_fresh {table,column,max_age_days}\n  A check WITH a signal closes only when the CLI re-runs it live and it passes; a check WITHOUT one needs --evidence.',
+        );
+        process.exitCode = cmd ? 1 : 0;
+    }
+  } catch (e) {
+    // CheckFail already printed its message + set exitCode; anything else is a
+    // real crash worth surfacing.
+    if (!(e instanceof CheckFail)) {
+      console.error(e);
+      process.exitCode = 1;
+    }
   }
 }
+
+// Only drive the CLI when invoked directly — importing this module (e.g. from
+// scripts/check.test.mjs) must NOT run the dispatch or touch process.argv.
+const isMain = (() => {
+  try {
+    return import.meta.url === pathToFileURL(process.argv[1]).href;
+  } catch {
+    return false;
+  }
+})();
+
+if (isMain) await mainCli();

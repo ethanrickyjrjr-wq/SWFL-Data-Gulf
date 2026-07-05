@@ -141,8 +141,14 @@ function openIncidentCheck(detail) {
 function closeIncidentCheck() {
   // close patches 0 rows when the key is absent/already closed; sh throws only on
   // a real error — swallow either way so a resolve never reddens the listener.
+  // The incident check is signal-less (manual tier), so the proof gate needs
+  // --evidence: the succeeding scheduled-run URL is exactly that recorded pointer.
+  // (When workflow_success graduates from recognized-but-next, this can become a
+  // stored signal that check.mjs re-verifies at close instead.)
   try {
-    sh(`node scripts/check.mjs close ${checkKey} "next scheduled run succeeded ${runUrl}"`);
+    sh(
+      `node scripts/check.mjs close ${checkKey} --evidence "next scheduled run succeeded ${runUrl}"`,
+    );
     log(`closed check ${checkKey}`);
   } catch (e) {
     log(`could not close check ${checkKey} (non-fatal): ${e.message}`);

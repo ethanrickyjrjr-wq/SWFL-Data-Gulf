@@ -1,3 +1,24 @@
+## 2026-07-05 (main) — BUILD: un-closeable check without live prod proof (Op-July task 16, HELD — migration + push)
+
+Brainstormed → researched (crawl4ai: gh run list JSON fields, PostgREST count) → specced → advisor-hardened →
+planned → built. A check can no longer close without proof. `scripts/check.mjs close` now looks up the check's
+STORED `signal` (jsonb) and runs it live ITSELF — http_ok / http_body / db_row_exists / db_fresh, all on the
+existing rest()/fetch (no gh-auth in the close path). A non-passing signal REFUSES the close; the observed result
+is written to a new `proof jsonb` column. A signal-less check closes only with a recorded `--evidence` string
+(honestly-weaker manual tier; a signal-bearing check can't be downgraded to it). Structural backstop (operator
+picked DB-trigger + two-tier): `checks_require_proof` trigger rejects any transition INTO 'done' without a fresh,
+passing, signal-matching (or manual-evidence) proof — a direct PATCH / lake-MCP write is blocked too, not just the
+CLI. The stored signal is immutable via the CLI (only a Bun.SQL `SET app.allow_signal_edit='1'` changes it). The
+CLI makes the call, so there's no proof JSON for a session to fabricate (task's "reject fabricated JSON" is
+inexpressible by design — noted, RULE 0.5). In-repo close callers reconciled so the migration reddens nothing:
+log-cron-incident auto-close passes the run URL as `--evidence`; smoke-prod uses `update` (unaffected).
+- **HELD:** migration `docs/sql/20260705_checks_proof_gate.sql` NOT applied — shared prod table, operator runs it
+  (verify the swfldatagulf-ops close path first). Push HELD for operator ok. Check
+  `uncloseable_check_proof_live_verify` open (operator-run live proof: stale signal → close refused; live-passing →
+  succeeds + proof stored; direct PATCH → trigger rejects). Spec/plan `2026-07-05-uncloseable-check-proof*`.
+- Verify: check-signals 20, check.mjs helpers 7, cron-incident dryrun 2 ✓; migration SQL syntax read; read-only
+  http_ok vs live master → ok:true. (Task 18 confirmed already live — rebase-carried as cdf97542 / 7fe8ed11.)
+
 ## 2026-07-05 (main) — BUILD: send-surface hardening (public /p view + house brand + loud scheduler)
 
 Operator live-send of a lab-recipe listing email (16447 Rainbow Meadows Ct → his inbox, first real rows in
