@@ -273,7 +273,7 @@ export const SHOWCASES: Showcase[] = [
     thumb: "/showcase/agent-launch/thumb.webp",
     surfaces: ["email"],
     disclosure:
-      "Demonstration campaign — Gulfline Realty and Marisol Vega are fictional (her portrait is AI-generated). Every number is real — SWFL Data Gulf listing feed and Zillow Home Value Index (07/05/2026).",
+      "Demonstration campaign — Gulfline Realty and Marisol Vega are fictional (her portrait is a licensed stock photo: Luan Albarracin / Pexels). Every number is real — SWFL Data Gulf listing feed and Zillow Home Value Index (07/05/2026).",
     slides: [
       {
         image: "/showcase/agent-launch/step-1.webp",

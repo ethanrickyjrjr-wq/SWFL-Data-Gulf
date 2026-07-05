@@ -1,3 +1,20 @@
+## 2026-07-05 (main) — SHIP: Marisol portrait lands — the letter demo now proves the flagship look (agent-launch T8 gap closed)
+
+Operator: "Run it. Finish it." The T9 ship (eddcf2da) declared its one gap — "portrait slot ships as honest
+placeholder until the persona file lands" (the letter had NO portrait; the flagship portrait-beside-letter
+look was unproven). Closed: persona = licensed Pexels stock (Luan Albarracin, photo 30781748, green suit
+matching the palm palette — chosen over AI-gen because no image-gen provider exists in env and writing to
+the shared Sanity CMS was correctly denied), committed at live/assets/marisol-vega.jpg; disclosure updated
+AI-generated → licensed stock credit. 01-letter.html REBUILT through the real author engine (ONE Sonnet
+call, authorDoc quality mode, portrait via the ASSET MENU + brand tokens — zero hand-edits): output =
+agent-hero[0,5] beside text[5,7], brass-bordered $461,108 clipping (Zillow through May 2026, menu label),
+758 active / $450,000 median list (listing feed), words-led list, ONE mailto reply button, P.S., rectangular
+agent-card signature. step-1.webp + thumb recaptured (surgical, 02/03 untouched). Slide-1 caption verified
+still truthful against the new artifact. Gates: 1013 tests 0 fail, next build GREEN. Waste note: built
+01/02/03 once before discovering eddcf2da (mid-flight collision) — reverted mine, kept theirs, net extra
+spend ≈ four Sonnet calls. `agent_launch_campaign_live_verify` remains OPEN — operator click-through is
+the close.
+
 ## 2026-07-05 (main) — FOLLOW-UP REGISTERED: capture-method comparison — our gathering vs LLM-alone (check capture_method_quality_compare)
 
 Operator: "compare the two different styles and if the information we gather is as good as LLM alone or
