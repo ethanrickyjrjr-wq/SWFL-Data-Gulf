@@ -48,7 +48,12 @@ mock.module("../zip-report/load-ranked-signals", () => ({
   },
 }));
 
+// Spread the REAL module — a partial mock leaks process-wide in bun on Linux CI:
+// every later test file importing figuresToPromptBlock/loadMarketFigures from
+// market-context hits "Export named ... not found" (11 CI failures, 2026-07-05).
+const realMarketContext = await import("./market-context");
 mock.module("./market-context", () => ({
+  ...realMarketContext,
   loadLifecycleDigest: () => Promise.resolve(lifecycleFixture),
 }));
 

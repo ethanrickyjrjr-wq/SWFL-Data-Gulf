@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — fix(test): zip-seed partial mock.module leak = the 11-failure CI red since 07/04
+
+Ops-page red/yellow audit (operator: "why is anything red or yellow — put notes in"). CI has failed on
+EVERY push since 07/04 ~22:00: commit `4e9d6703` added `mock.module("./market-context", …)` in
+`lib/email/zip-seed.test.ts` exporting ONLY `loadLifecycleDigest`; on Linux CI the mock leaks
+process-wide, so 11 later test files hit "Export named 'figuresToPromptBlock' not found" (not
+reproducible on Windows — mock key path mismatch). Fix: mock now spreads the real module. Also wrote 27
+diagnosis notes into `ops_notes` (live on /ops immediately) + ops-repo ledger fixes (committed there).
+QUEUED (cadence_registry.yaml claimed by parallel session): drop `source_name` from 2 live_search
+entries (false-RED — daily_truth's column is `source_tag`; data fresh 07/04), `parked: true` + notes
+for sba_foia/airdna/land_manufactured, notes for city_pulse/swfl_inc/dbpr_press/dbpr_notices.
+
 ## 2026-07-05 (main) — SPEC: unify contact stores (Op-July 21) + contact-intake research (crawl4ai)
 
 Brainstormed + specced task 21: `public.contacts` becomes the ONE contact store (operator-approved; uuid PK,
