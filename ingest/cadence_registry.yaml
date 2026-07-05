@@ -817,7 +817,7 @@ pipelines:
     expected_rows_min: 1 # daily news; a quiet day may legitimately publish 0-1 articles — rebaseline when baseline volume is confirmed
     dlt_schema_name: data_lake
     source_tag: news_crawl
-    note: "4 SWFL sources via crawl4ai. Cron at /api/cron/news-crawl scores + inserts into project_events."
+    note: "4 SWFL sources via crawl4ai. Cron at /api/cron/news-crawl scores + inserts into project_events. Novelty guard (2026-07-05): published_date = first-seen (carried forward pre-merge); assert_content_fresh 7d gate trips when no NEW article_url appears — news has no real content date, so staleness = no novelty."
 
   - name: active_listings
     lane: tier-2

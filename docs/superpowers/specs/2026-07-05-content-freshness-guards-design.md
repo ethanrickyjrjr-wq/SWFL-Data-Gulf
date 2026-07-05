@@ -93,7 +93,9 @@ premise didn't survive contact with the code.
 - **ZHVI narration cadence** (home-values / investor-zip narrate ZHVI ~10-16d after it lands) — a
   brain-side TTL, orthogonal to the ingest guard; split to its own build.
 - **news_swfl novelty guard** — news has no content date (see scope), so its staleness detection needs a
-  new-`article_url` novelty check rather than an age guard; deferred follow-up.
+  new-`article_url` novelty check rather than an age guard. BUILT 2026-07-05 (operator directive) — see
+  `2026-07-05-news-novelty-guard-design.md`: first-seen carried forward pre-merge, then
+  `assert_content_fresh` reused as a 7d novelty gate.
 
 ## Done when (live proof)
 

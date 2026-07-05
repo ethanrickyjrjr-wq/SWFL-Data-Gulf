@@ -20,8 +20,10 @@ from .fetcher import fetch_all_sources
     # columns/tables are still tolerated (per-pipeline opt-in, RULE 3 C2).
     schema_contract={"data_type": "freeze"},
 )
-def news_articles():
-    articles = fetch_all_sources()
+def news_articles(rows=None):
+    # rows is materialized in run() so the novelty guard can inspect the batch
+    # BEFORE the merge; the bare call path stays for ad-hoc/manual use.
+    articles = fetch_all_sources() if rows is None else rows
     print(f"[news_swfl] fetched {len(articles)} SWFL-relevant articles")
     yield from articles
 
@@ -44,11 +46,24 @@ def run(dry_run: bool = False):
 
     from dlt.pipeline.exceptions import PipelineStepFailed
 
+    from ingest.lib.guards import assert_content_fresh
     from ingest.lib.schema_contract import explain_contract_failure, log_schema_update
+
+    from .novelty import NEWS_NOVELTY_MAX_AGE_DAYS, carry_first_seen
+
+    # NOVELTY guard, not an age guard: news has no real content date (published_date is
+    # today-coerced and re-bumped by delete-insert merge). carry_first_seen restores each
+    # re-seen URL's stored first-seen date, so MAX(published_date) = the last time a NEW
+    # article_url appeared. 7d gate: a week with zero new URLs across all 4 sources is a
+    # broken scrape, not a quiet news week. An empty batch (all sources failing, currently
+    # a green no-op) raises immediately via newest=None.
+    batch = carry_first_seen(fetch_all_sources())
+    newest = max((r["published_date"] for r in batch if r.get("published_date")), default=None)
+    assert_content_fresh(newest, NEWS_NOVELTY_MAX_AGE_DAYS, label="news_swfl")
 
     pipeline = build_pipeline()
     try:
-        load_info = pipeline.run(news_articles())
+        load_info = pipeline.run(news_articles(rows=batch))
     except PipelineStepFailed as exc:
         # Turn a freeze-mode contract violation into a classifier-routable,
         # plain-English line; re-raises the original failure either way.

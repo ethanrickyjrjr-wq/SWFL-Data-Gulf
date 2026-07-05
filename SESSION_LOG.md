@@ -1,3 +1,18 @@
+## 2026-07-05 (main) — BUILD: news_swfl novelty (new-URL) content guard (task-18 follow-up)
+
+Operator: news_swfl was dropped from task 18's phase-1 because it has no content date — build the novelty guard.
+RULE 0.5 sharpened the premise: `published_date=None` never reaches the row — `normalizer._coerce_pub_date` coerces
+it to TODAY, and dlt merge is **delete-insert** (verified in-session via crawl4ai, dlt merge-loading docs), so every
+re-seen `article_url` re-bumps `published_date`. An age guard would trivially PASS forever, not fail — either way
+useless. Fix: `novelty.py carry_first_seen` restores each re-seen URL's stored first-seen date pre-merge, making
+`published_date` honest (stable first-seen; its one consumer, news-crawl→event_date, only gets more accurate), then
+the existing `assert_content_fresh` gates MAX(published_date) at **7d** as a novelty guard — zero new guard
+machinery (RULE 3 C2). Empty batch (all 4 sources failing, previously a green no-op) now raises immediately.
+Fail-open with BASELINE_UNAVAILABLE warning if the pre-query can't reach the DB. 6 new deterministic tests
+(mocked Tier-2 lookup) + 48-test news_swfl/guards surface green; `test_adaptive_fetcher` collection error
+pre-exists (crawl4ai only in pinned venv). Spec: `docs/superpowers/specs/2026-07-05-news-novelty-guard-design.md`.
+Check opened: `news_novelty_guard_live_verify` (operator-run cron red proof). Next: operator review + push.
+
 ## 2026-07-05 (main) — fix: cadence legend renders once (first slide), not per-slide
 
 Operator: "don't need two cadence legends." Gated the `ShowcaseOverlay` legend on `step === 0` so it shows once
