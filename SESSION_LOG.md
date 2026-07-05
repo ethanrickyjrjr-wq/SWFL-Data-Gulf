@@ -1,3 +1,13 @@
+## 2026-07-05 (main) — PLAN: social-pulse-swfl P1+P2 (10 TDD tasks) — scan+store, digest, /pulse page
+
+Implementation plan for the Social Pulse spec: `docs/superpowers/plans/2026-07-05-social-pulse-swfl.md`.
+Tasks 1–10: migration (4 `social_pulse_*` tables, service-role RLS) → terms config → empty-tolerant
+IG client (PHOTOS_API key, browser headers, weight accounting) → pure-DI scan core → adapter +
+`social-pulse-scan.yml` cron (daily bootstrap, dated Mon/Thu flip 07/26/2026 + `social_pulse_cadence_flip`
+check to open) → topic rules → deterministic digest math → figures-only narrative → public `/pulse` page →
+ship gate (operator-run live verify; ~80 weighted req/run on the 10k/mo Starter quota). P3 (AI wiring),
+P4 (ladder), P5 (own-results) are follow-on plans. Self-review fixed a swfl-area benchmark shadowing bug.
+
 ## 2026-07-05 (main) — spec: account quick-access (dropdown + route-modal brand/schedule editors)
 
 Brainstormed → scoped code → researched (crawl4ai: Next.js parallel/intercepting routes = official modal
