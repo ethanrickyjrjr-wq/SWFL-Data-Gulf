@@ -16,4 +16,17 @@ describe("blastTags", () => {
       { name: "tpl", value: "email" },
     ]);
   });
+
+  it("adds the campaign tag when the deliverable was campaign-seeded", () => {
+    expect(blastTags("abc-123", "block-canvas", "agent-launch")).toContainEqual({
+      name: "campaign",
+      value: "agent-launch",
+    });
+  });
+
+  it("null/undefined/unsafe campaign key = no campaign tag", () => {
+    expect(blastTags("abc-123", "block-canvas", null)).toHaveLength(2);
+    expect(blastTags("abc-123", "block-canvas")).toHaveLength(2);
+    expect(blastTags("abc-123", "block-canvas", "!!!")).toHaveLength(2);
+  });
 });

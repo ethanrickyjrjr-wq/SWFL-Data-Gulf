@@ -234,7 +234,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
       // Attribution hook: webhook events carry these back (Build 2 reads them).
-      tags: blastTags(id, deliverable.template),
+      // `campaign` = the quick-start campaign that seeded this deliverable
+      // (deliverables.campaign_key, stamped at save) — null for organic builds.
+      tags: blastTags(id, deliverable.template, deliverable.campaign_key),
     };
   };
 

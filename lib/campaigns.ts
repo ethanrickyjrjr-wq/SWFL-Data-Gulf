@@ -45,6 +45,19 @@ export function campaignFollowUpForPrompt(
   return null;
 }
 
+/** Campaign provenance for a Build-box seed — matches ANY live email campaign's
+ *  seed OR follow-up recipe prompt (both live only in the registry), so BOTH
+ *  campaign artifacts (announcement + weekly) save with the same
+ *  `deliverables.campaign_key`. Null for organic prompts. Blast sends turn this
+ *  into the `campaign` Resend tag (operator-ratified full thread, 07/05/2026). */
+export function campaignKeyForPrompt(prompt: string): string | null {
+  for (const { campaign } of liveCampaigns("email")) {
+    if (campaign.seedRecipe?.prompt === prompt) return campaign.key;
+    if (campaign.followUp?.recipe.prompt === prompt) return campaign.key;
+  }
+  return null;
+}
+
 /** A not-yet-built campaign — greyed chip, no wiring. Promote by adding a
  *  Showcase with `campaign.status:"live"` + `seedRecipe` and capturing its
  *  slide assets (scripts/capture-showcase.mjs). */

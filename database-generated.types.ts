@@ -1,3279 +1,3282 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
     Tables: {
       api_usage_log: {
         Row: {
-          id: string
-          created_at: string
-          model: string
-          call_type: string
-          pack_id: string | null
-          input_tokens: number
-          output_tokens: number
-          cache_read_tokens: number
-          cache_creation_tokens: number
-          cost_usd: number
-          env: string
-        }
+          id: string;
+          created_at: string;
+          model: string;
+          call_type: string;
+          pack_id: string | null;
+          input_tokens: number;
+          output_tokens: number;
+          cache_read_tokens: number;
+          cache_creation_tokens: number;
+          cost_usd: number;
+          env: string;
+        };
         Insert: {
-          id?: string
-          created_at?: string
-          model: string
-          call_type?: string
-          pack_id?: string | null
-          input_tokens?: number
-          output_tokens?: number
-          cache_read_tokens?: number
-          cache_creation_tokens?: number
-          cost_usd: number
-          env?: string
-        }
+          id?: string;
+          created_at?: string;
+          model: string;
+          call_type?: string;
+          pack_id?: string | null;
+          input_tokens?: number;
+          output_tokens?: number;
+          cache_read_tokens?: number;
+          cache_creation_tokens?: number;
+          cost_usd: number;
+          env?: string;
+        };
         Update: {
-          id?: string
-          created_at?: string
-          model?: string
-          call_type?: string
-          pack_id?: string | null
-          input_tokens?: number
-          output_tokens?: number
-          cache_read_tokens?: number
-          cache_creation_tokens?: number
-          cost_usd?: number
-          env?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          created_at?: string;
+          model?: string;
+          call_type?: string;
+          pack_id?: string | null;
+          input_tokens?: number;
+          output_tokens?: number;
+          cache_read_tokens?: number;
+          cache_creation_tokens?: number;
+          cost_usd?: number;
+          env?: string;
+        };
+        Relationships: [];
+      };
       backtest_grades: {
         Row: {
-          id: string
-          slug: string
-          as_of_date: string
-          predicted_direction: string
-          baseline_value: number
-          window_end_date: string
-          observed_value: number
-          grade: string
-          magnitude_error: number | null
-          confidence: number | null
-          grade_method: string
-          family: string | null
-          prior_value: number | null
-          window_days: number | null
-          observed_direction: string | null
-          source_tag: string
-          created_at: string
-        }
+          id: string;
+          slug: string;
+          as_of_date: string;
+          predicted_direction: string;
+          baseline_value: number;
+          window_end_date: string;
+          observed_value: number;
+          grade: string;
+          magnitude_error: number | null;
+          confidence: number | null;
+          grade_method: string;
+          family: string | null;
+          prior_value: number | null;
+          window_days: number | null;
+          observed_direction: string | null;
+          source_tag: string;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          slug: string
-          as_of_date: string
-          predicted_direction: string
-          baseline_value: number
-          window_end_date: string
-          observed_value: number
-          grade: string
-          magnitude_error?: number | null
-          confidence?: number | null
-          grade_method?: string
-          family?: string | null
-          prior_value?: number | null
-          window_days?: number | null
-          observed_direction?: string | null
-          source_tag?: string
-          created_at?: string
-        }
+          id?: string;
+          slug: string;
+          as_of_date: string;
+          predicted_direction: string;
+          baseline_value: number;
+          window_end_date: string;
+          observed_value: number;
+          grade: string;
+          magnitude_error?: number | null;
+          confidence?: number | null;
+          grade_method?: string;
+          family?: string | null;
+          prior_value?: number | null;
+          window_days?: number | null;
+          observed_direction?: string | null;
+          source_tag?: string;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          slug?: string
-          as_of_date?: string
-          predicted_direction?: string
-          baseline_value?: number
-          window_end_date?: string
-          observed_value?: number
-          grade?: string
-          magnitude_error?: number | null
-          confidence?: number | null
-          grade_method?: string
-          family?: string | null
-          prior_value?: number | null
-          window_days?: number | null
-          observed_direction?: string | null
-          source_tag?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          slug?: string;
+          as_of_date?: string;
+          predicted_direction?: string;
+          baseline_value?: number;
+          window_end_date?: string;
+          observed_value?: number;
+          grade?: string;
+          magnitude_error?: number | null;
+          confidence?: number | null;
+          grade_method?: string;
+          family?: string | null;
+          prior_value?: number | null;
+          window_days?: number | null;
+          observed_direction?: string | null;
+          source_tag?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       backtest_skill_by_slug: {
         Row: {
-          slug: string | null
-          n: number | null
-          system_accuracy: number | null
-          persistence_accuracy: number | null
-          lift: number | null
-        }
+          slug: string | null;
+          n: number | null;
+          system_accuracy: number | null;
+          persistence_accuracy: number | null;
+          lift: number | null;
+        };
         Insert: {
-          slug?: string | null
-          n?: number | null
-          system_accuracy?: number | null
-          persistence_accuracy?: number | null
-          lift?: number | null
-        }
+          slug?: string | null;
+          n?: number | null;
+          system_accuracy?: number | null;
+          persistence_accuracy?: number | null;
+          lift?: number | null;
+        };
         Update: {
-          slug?: string | null
-          n?: number | null
-          system_accuracy?: number | null
-          persistence_accuracy?: number | null
-          lift?: number | null
-        }
-        Relationships: []
-      }
+          slug?: string | null;
+          n?: number | null;
+          system_accuracy?: number | null;
+          persistence_accuracy?: number | null;
+          lift?: number | null;
+        };
+        Relationships: [];
+      };
       billing_subscriptions: {
         Row: {
-          user_id: string
-          stripe_customer_id: string
-          stripe_subscription_id: string | null
-          tier: string
-          status: string
-          current_period_end: string | null
-          created_at: string
-          updated_at: string
-        }
+          user_id: string;
+          stripe_customer_id: string;
+          stripe_subscription_id: string | null;
+          tier: string;
+          status: string;
+          current_period_end: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          user_id: string
-          stripe_customer_id: string
-          stripe_subscription_id?: string | null
-          tier?: string
-          status?: string
-          current_period_end?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          user_id: string;
+          stripe_customer_id: string;
+          stripe_subscription_id?: string | null;
+          tier?: string;
+          status?: string;
+          current_period_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          user_id?: string
-          stripe_customer_id?: string
-          stripe_subscription_id?: string | null
-          tier?: string
-          status?: string
-          current_period_end?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          user_id?: string;
+          stripe_customer_id?: string;
+          stripe_subscription_id?: string | null;
+          tier?: string;
+          status?: string;
+          current_period_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       brain_registry: {
         Row: {
-          id: string
-          domain: string
-          display_name: string
-          scope: string
-          source_tiers: number[]
-          url: string
-          branch_ids: string[]
-          output_type: string
-          output_summary: string
-          output_metrics: string[]
-          input_brains: string[]
-          consumer_brains: string[]
-          status: string
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          domain: string;
+          display_name: string;
+          scope: string;
+          source_tiers: number[];
+          url: string;
+          branch_ids: string[];
+          output_type: string;
+          output_summary: string;
+          output_metrics: string[];
+          input_brains: string[];
+          consumer_brains: string[];
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id: string
-          domain: string
-          display_name: string
-          scope: string
-          source_tiers?: number[]
-          url: string
-          branch_ids?: string[]
-          output_type?: string
-          output_summary: string
-          output_metrics?: string[]
-          input_brains?: string[]
-          consumer_brains?: string[]
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id: string;
+          domain: string;
+          display_name: string;
+          scope: string;
+          source_tiers?: number[];
+          url: string;
+          branch_ids?: string[];
+          output_type?: string;
+          output_summary: string;
+          output_metrics?: string[];
+          input_brains?: string[];
+          consumer_brains?: string[];
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          domain?: string
-          display_name?: string
-          scope?: string
-          source_tiers?: number[]
-          url?: string
-          branch_ids?: string[]
-          output_type?: string
-          output_summary?: string
-          output_metrics?: string[]
-          input_brains?: string[]
-          consumer_brains?: string[]
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          domain?: string;
+          display_name?: string;
+          scope?: string;
+          source_tiers?: number[];
+          url?: string;
+          branch_ids?: string[];
+          output_type?: string;
+          output_summary?: string;
+          output_metrics?: string[];
+          input_brains?: string[];
+          consumer_brains?: string[];
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       brand_custom_socials: {
         Row: {
-          id: string
-          domain: string
-          url: string
-          user_id: string | null
-          logo_url: string | null
-          created_at: string
-        }
+          id: string;
+          domain: string;
+          url: string;
+          user_id: string | null;
+          logo_url: string | null;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          domain: string
-          url: string
-          user_id?: string | null
-          logo_url?: string | null
-          created_at?: string
-        }
+          id?: string;
+          domain: string;
+          url: string;
+          user_id?: string | null;
+          logo_url?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          domain?: string
-          url?: string
-          user_id?: string | null
-          logo_url?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          domain?: string;
+          url?: string;
+          user_id?: string | null;
+          logo_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       buyer_intent_events: {
         Row: {
-          id: number
-          user_id: string
-          reply_token: string | null
-          schedule_id: number | null
-          contact_email: string
-          contact_name: string | null
-          contact_tags: string[]
-          parsed_zip: string | null
-          parsed_place: string | null
-          parsed_topic: string | null
-          raw_reply: string | null
-          answer_sent: boolean
-          created_at: string
-          read_at: string | null
-        }
+          id: number;
+          user_id: string;
+          reply_token: string | null;
+          schedule_id: number | null;
+          contact_email: string;
+          contact_name: string | null;
+          contact_tags: string[];
+          parsed_zip: string | null;
+          parsed_place: string | null;
+          parsed_topic: string | null;
+          raw_reply: string | null;
+          answer_sent: boolean;
+          created_at: string;
+          read_at: string | null;
+        };
         Insert: {
-          id: number
-          user_id: string
-          reply_token?: string | null
-          schedule_id?: number | null
-          contact_email: string
-          contact_name?: string | null
-          contact_tags?: string[]
-          parsed_zip?: string | null
-          parsed_place?: string | null
-          parsed_topic?: string | null
-          raw_reply?: string | null
-          answer_sent?: boolean
-          created_at?: string
-          read_at?: string | null
-        }
+          id: number;
+          user_id: string;
+          reply_token?: string | null;
+          schedule_id?: number | null;
+          contact_email: string;
+          contact_name?: string | null;
+          contact_tags?: string[];
+          parsed_zip?: string | null;
+          parsed_place?: string | null;
+          parsed_topic?: string | null;
+          raw_reply?: string | null;
+          answer_sent?: boolean;
+          created_at?: string;
+          read_at?: string | null;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          reply_token?: string | null
-          schedule_id?: number | null
-          contact_email?: string
-          contact_name?: string | null
-          contact_tags?: string[]
-          parsed_zip?: string | null
-          parsed_place?: string | null
-          parsed_topic?: string | null
-          raw_reply?: string | null
-          answer_sent?: boolean
-          created_at?: string
-          read_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          reply_token?: string | null;
+          schedule_id?: number | null;
+          contact_email?: string;
+          contact_name?: string | null;
+          contact_tags?: string[];
+          parsed_zip?: string | null;
+          parsed_place?: string | null;
+          parsed_topic?: string | null;
+          raw_reply?: string | null;
+          answer_sent?: boolean;
+          created_at?: string;
+          read_at?: string | null;
+        };
+        Relationships: [];
+      };
       checks: {
         Row: {
-          id: string
-          project: string
-          check_key: string
-          label: string
-          detail: string | null
-          resolution: string
-          signal: Json | null
-          priority: number
-          due_at: string | null
-          state: string
-          drop_reason: string | null
-          resolved_at: string | null
-          resolved_by: string | null
-          created_at: string
-          updated_at: string
-          proof: Json | null
-        }
+          id: string;
+          project: string;
+          check_key: string;
+          label: string;
+          detail: string | null;
+          resolution: string;
+          signal: Json | null;
+          priority: number;
+          due_at: string | null;
+          state: string;
+          drop_reason: string | null;
+          resolved_at: string | null;
+          resolved_by: string | null;
+          created_at: string;
+          updated_at: string;
+          proof: Json | null;
+        };
         Insert: {
-          id?: string
-          project: string
-          check_key: string
-          label: string
-          detail?: string | null
-          resolution?: string
-          signal?: Json | null
-          priority?: number
-          due_at?: string | null
-          state?: string
-          drop_reason?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          created_at?: string
-          updated_at?: string
-          proof?: Json | null
-        }
+          id?: string;
+          project: string;
+          check_key: string;
+          label: string;
+          detail?: string | null;
+          resolution?: string;
+          signal?: Json | null;
+          priority?: number;
+          due_at?: string | null;
+          state?: string;
+          drop_reason?: string | null;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          proof?: Json | null;
+        };
         Update: {
-          id?: string
-          project?: string
-          check_key?: string
-          label?: string
-          detail?: string | null
-          resolution?: string
-          signal?: Json | null
-          priority?: number
-          due_at?: string | null
-          state?: string
-          drop_reason?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          created_at?: string
-          updated_at?: string
-          proof?: Json | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          project?: string;
+          check_key?: string;
+          label?: string;
+          detail?: string | null;
+          resolution?: string;
+          signal?: Json | null;
+          priority?: number;
+          due_at?: string | null;
+          state?: string;
+          drop_reason?: string | null;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          proof?: Json | null;
+        };
+        Relationships: [];
+      };
       claim_tokens: {
         Row: {
-          token: string
-          items: Json
-          title: string | null
-          project_id: string | null
-          created_at: string
-          expires_at: string
-          consumed_at: string | null
-          brand: Json | null
-          seed: Json | null
-          ref: string | null
-        }
+          token: string;
+          items: Json;
+          title: string | null;
+          project_id: string | null;
+          created_at: string;
+          expires_at: string;
+          consumed_at: string | null;
+          brand: Json | null;
+          seed: Json | null;
+          ref: string | null;
+        };
         Insert: {
-          token: string
-          items: Json
-          title?: string | null
-          project_id?: string | null
-          created_at?: string
-          expires_at: string
-          consumed_at?: string | null
-          brand?: Json | null
-          seed?: Json | null
-          ref?: string | null
-        }
+          token: string;
+          items: Json;
+          title?: string | null;
+          project_id?: string | null;
+          created_at?: string;
+          expires_at: string;
+          consumed_at?: string | null;
+          brand?: Json | null;
+          seed?: Json | null;
+          ref?: string | null;
+        };
         Update: {
-          token?: string
-          items?: Json
-          title?: string | null
-          project_id?: string | null
-          created_at?: string
-          expires_at?: string
-          consumed_at?: string | null
-          brand?: Json | null
-          seed?: Json | null
-          ref?: string | null
-        }
-        Relationships: []
-      }
+          token?: string;
+          items?: Json;
+          title?: string | null;
+          project_id?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          consumed_at?: string | null;
+          brand?: Json | null;
+          seed?: Json | null;
+          ref?: string | null;
+        };
+        Relationships: [];
+      };
       confidence_calibration: {
         Row: {
-          id: string
-          brain_id: string
-          recorded_at: string
-          predicted_confidence: number
-          actual_confidence: number | null
-          notes: string | null
-          attribution: Json | null
-        }
+          id: string;
+          brain_id: string;
+          recorded_at: string;
+          predicted_confidence: number;
+          actual_confidence: number | null;
+          notes: string | null;
+          attribution: Json | null;
+        };
         Insert: {
-          id?: string
-          brain_id: string
-          recorded_at?: string
-          predicted_confidence: number
-          actual_confidence?: number | null
-          notes?: string | null
-          attribution?: Json | null
-        }
+          id?: string;
+          brain_id: string;
+          recorded_at?: string;
+          predicted_confidence: number;
+          actual_confidence?: number | null;
+          notes?: string | null;
+          attribution?: Json | null;
+        };
         Update: {
-          id?: string
-          brain_id?: string
-          recorded_at?: string
-          predicted_confidence?: number
-          actual_confidence?: number | null
-          notes?: string | null
-          attribution?: Json | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          brain_id?: string;
+          recorded_at?: string;
+          predicted_confidence?: number;
+          actual_confidence?: number | null;
+          notes?: string | null;
+          attribution?: Json | null;
+        };
+        Relationships: [];
+      };
       contacts: {
         Row: {
-          id: string
-          user_id: string
-          name: string | null
-          email: string
-          phone: string | null
-          tags: string[]
-          unsubscribed: boolean
-          created_at: string
-        }
+          id: string;
+          user_id: string;
+          name: string | null;
+          email: string;
+          phone: string | null;
+          tags: string[];
+          unsubscribed: boolean;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          name?: string | null
-          email: string
-          phone?: string | null
-          tags?: string[]
-          unsubscribed?: boolean
-          created_at?: string
-        }
+          id?: string;
+          user_id: string;
+          name?: string | null;
+          email: string;
+          phone?: string | null;
+          tags?: string[];
+          unsubscribed?: boolean;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          name?: string | null
-          email?: string
-          phone?: string | null
-          tags?: string[]
-          unsubscribed?: boolean
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          name?: string | null;
+          email?: string;
+          phone?: string | null;
+          tags?: string[];
+          unsubscribed?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       corridor_profiles: {
         Row: {
-          id: string
-          corridor_name: string
-          city: string
-          corridor_type: string | null
-          seasonal_index: number | null
-          character: string | null
-          evolution_direction: string | null
-          tenant_mix: string | null
-          active_flags: Json | null
-          source_url: string | null
-          verification_status: string | null
-          deleted_at: string | null
-          cap_rate_pct: number | null
-          cap_rate_direction: string | null
-          vacancy_rate_pct: number | null
-          vacancy_rate_direction: string | null
-          metrics_period: string | null
-          metrics_verified_date: string | null
-          created_at: string
-          updated_at: string
-          absorption_sqft: number | null
-          absorption_sqft_direction: string | null
-          asking_rent_psf: number | null
-          asking_rent_psf_direction: string | null
-          cap_rate_source_url: string | null
-          vacancy_rate_source_url: string | null
-          absorption_sqft_source_url: string | null
-          asking_rent_psf_source_url: string | null
-          character_broker_narrative: Json | null
-          character_broker_narrative_pending: Json | null
-          character_facts: string | null
-          character_chart: Json | null
-          character_speculative: string | null
-          character_citations: Json | null
-          character_generated_at: string | null
-          character_fact_pack_vintage: string | null
-        }
+          id: string;
+          corridor_name: string;
+          city: string;
+          corridor_type: string | null;
+          seasonal_index: number | null;
+          character: string | null;
+          evolution_direction: string | null;
+          tenant_mix: string | null;
+          active_flags: Json | null;
+          source_url: string | null;
+          verification_status: string | null;
+          deleted_at: string | null;
+          cap_rate_pct: number | null;
+          cap_rate_direction: string | null;
+          vacancy_rate_pct: number | null;
+          vacancy_rate_direction: string | null;
+          metrics_period: string | null;
+          metrics_verified_date: string | null;
+          created_at: string;
+          updated_at: string;
+          absorption_sqft: number | null;
+          absorption_sqft_direction: string | null;
+          asking_rent_psf: number | null;
+          asking_rent_psf_direction: string | null;
+          cap_rate_source_url: string | null;
+          vacancy_rate_source_url: string | null;
+          absorption_sqft_source_url: string | null;
+          asking_rent_psf_source_url: string | null;
+          character_broker_narrative: Json | null;
+          character_broker_narrative_pending: Json | null;
+          character_facts: string | null;
+          character_chart: Json | null;
+          character_speculative: string | null;
+          character_citations: Json | null;
+          character_generated_at: string | null;
+          character_fact_pack_vintage: string | null;
+        };
         Insert: {
-          id?: string
-          corridor_name: string
-          city: string
-          corridor_type?: string | null
-          seasonal_index?: number | null
-          character?: string | null
-          evolution_direction?: string | null
-          tenant_mix?: string | null
-          active_flags?: Json | null
-          source_url?: string | null
-          verification_status?: string | null
-          deleted_at?: string | null
-          cap_rate_pct?: number | null
-          cap_rate_direction?: string | null
-          vacancy_rate_pct?: number | null
-          vacancy_rate_direction?: string | null
-          metrics_period?: string | null
-          metrics_verified_date?: string | null
-          created_at?: string
-          updated_at?: string
-          absorption_sqft?: number | null
-          absorption_sqft_direction?: string | null
-          asking_rent_psf?: number | null
-          asking_rent_psf_direction?: string | null
-          cap_rate_source_url?: string | null
-          vacancy_rate_source_url?: string | null
-          absorption_sqft_source_url?: string | null
-          asking_rent_psf_source_url?: string | null
-          character_broker_narrative?: Json | null
-          character_broker_narrative_pending?: Json | null
-          character_facts?: string | null
-          character_chart?: Json | null
-          character_speculative?: string | null
-          character_citations?: Json | null
-          character_generated_at?: string | null
-          character_fact_pack_vintage?: string | null
-        }
+          id?: string;
+          corridor_name: string;
+          city: string;
+          corridor_type?: string | null;
+          seasonal_index?: number | null;
+          character?: string | null;
+          evolution_direction?: string | null;
+          tenant_mix?: string | null;
+          active_flags?: Json | null;
+          source_url?: string | null;
+          verification_status?: string | null;
+          deleted_at?: string | null;
+          cap_rate_pct?: number | null;
+          cap_rate_direction?: string | null;
+          vacancy_rate_pct?: number | null;
+          vacancy_rate_direction?: string | null;
+          metrics_period?: string | null;
+          metrics_verified_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          absorption_sqft?: number | null;
+          absorption_sqft_direction?: string | null;
+          asking_rent_psf?: number | null;
+          asking_rent_psf_direction?: string | null;
+          cap_rate_source_url?: string | null;
+          vacancy_rate_source_url?: string | null;
+          absorption_sqft_source_url?: string | null;
+          asking_rent_psf_source_url?: string | null;
+          character_broker_narrative?: Json | null;
+          character_broker_narrative_pending?: Json | null;
+          character_facts?: string | null;
+          character_chart?: Json | null;
+          character_speculative?: string | null;
+          character_citations?: Json | null;
+          character_generated_at?: string | null;
+          character_fact_pack_vintage?: string | null;
+        };
         Update: {
-          id?: string
-          corridor_name?: string
-          city?: string
-          corridor_type?: string | null
-          seasonal_index?: number | null
-          character?: string | null
-          evolution_direction?: string | null
-          tenant_mix?: string | null
-          active_flags?: Json | null
-          source_url?: string | null
-          verification_status?: string | null
-          deleted_at?: string | null
-          cap_rate_pct?: number | null
-          cap_rate_direction?: string | null
-          vacancy_rate_pct?: number | null
-          vacancy_rate_direction?: string | null
-          metrics_period?: string | null
-          metrics_verified_date?: string | null
-          created_at?: string
-          updated_at?: string
-          absorption_sqft?: number | null
-          absorption_sqft_direction?: string | null
-          asking_rent_psf?: number | null
-          asking_rent_psf_direction?: string | null
-          cap_rate_source_url?: string | null
-          vacancy_rate_source_url?: string | null
-          absorption_sqft_source_url?: string | null
-          asking_rent_psf_source_url?: string | null
-          character_broker_narrative?: Json | null
-          character_broker_narrative_pending?: Json | null
-          character_facts?: string | null
-          character_chart?: Json | null
-          character_speculative?: string | null
-          character_citations?: Json | null
-          character_generated_at?: string | null
-          character_fact_pack_vintage?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          corridor_name?: string;
+          city?: string;
+          corridor_type?: string | null;
+          seasonal_index?: number | null;
+          character?: string | null;
+          evolution_direction?: string | null;
+          tenant_mix?: string | null;
+          active_flags?: Json | null;
+          source_url?: string | null;
+          verification_status?: string | null;
+          deleted_at?: string | null;
+          cap_rate_pct?: number | null;
+          cap_rate_direction?: string | null;
+          vacancy_rate_pct?: number | null;
+          vacancy_rate_direction?: string | null;
+          metrics_period?: string | null;
+          metrics_verified_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          absorption_sqft?: number | null;
+          absorption_sqft_direction?: string | null;
+          asking_rent_psf?: number | null;
+          asking_rent_psf_direction?: string | null;
+          cap_rate_source_url?: string | null;
+          vacancy_rate_source_url?: string | null;
+          absorption_sqft_source_url?: string | null;
+          asking_rent_psf_source_url?: string | null;
+          character_broker_narrative?: Json | null;
+          character_broker_narrative_pending?: Json | null;
+          character_facts?: string | null;
+          character_chart?: Json | null;
+          character_speculative?: string | null;
+          character_citations?: Json | null;
+          character_generated_at?: string | null;
+          character_fact_pack_vintage?: string | null;
+        };
+        Relationships: [];
+      };
       daily_goals: {
         Row: {
-          id: string
-          text: string
-          notes: string
-          goal_date: string
-          completed_at: string | null
-          created_at: string
-        }
+          id: string;
+          text: string;
+          notes: string;
+          goal_date: string;
+          completed_at: string | null;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          text: string
-          notes?: string
-          goal_date?: string
-          completed_at?: string | null
-          created_at?: string
-        }
+          id?: string;
+          text: string;
+          notes?: string;
+          goal_date?: string;
+          completed_at?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          text?: string
-          notes?: string
-          goal_date?: string
-          completed_at?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          text?: string;
+          notes?: string;
+          goal_date?: string;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       data_readiness_alerts: {
         Row: {
-          id: string
-          project_id: string | null
-          schedule_id: string | null
-          metric_slug: string
-          metric_label: string
-          scope_kind: string | null
-          scope_value: string | null
-          tier_used: string
-          value_used: string | null
-          source_urls: string[] | null
-          snapshot_value: string | null
-          within_tolerance: boolean | null
-          alert_at: string
-          resolved_at: string | null
-          send_at: string | null
-        }
+          id: string;
+          project_id: string | null;
+          schedule_id: string | null;
+          metric_slug: string;
+          metric_label: string;
+          scope_kind: string | null;
+          scope_value: string | null;
+          tier_used: string;
+          value_used: string | null;
+          source_urls: string[] | null;
+          snapshot_value: string | null;
+          within_tolerance: boolean | null;
+          alert_at: string;
+          resolved_at: string | null;
+          send_at: string | null;
+        };
         Insert: {
-          id?: string
-          project_id?: string | null
-          schedule_id?: string | null
-          metric_slug: string
-          metric_label: string
-          scope_kind?: string | null
-          scope_value?: string | null
-          tier_used?: string
-          value_used?: string | null
-          source_urls?: string[] | null
-          snapshot_value?: string | null
-          within_tolerance?: boolean | null
-          alert_at?: string
-          resolved_at?: string | null
-          send_at?: string | null
-        }
+          id?: string;
+          project_id?: string | null;
+          schedule_id?: string | null;
+          metric_slug: string;
+          metric_label: string;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          tier_used?: string;
+          value_used?: string | null;
+          source_urls?: string[] | null;
+          snapshot_value?: string | null;
+          within_tolerance?: boolean | null;
+          alert_at?: string;
+          resolved_at?: string | null;
+          send_at?: string | null;
+        };
         Update: {
-          id?: string
-          project_id?: string | null
-          schedule_id?: string | null
-          metric_slug?: string
-          metric_label?: string
-          scope_kind?: string | null
-          scope_value?: string | null
-          tier_used?: string
-          value_used?: string | null
-          source_urls?: string[] | null
-          snapshot_value?: string | null
-          within_tolerance?: boolean | null
-          alert_at?: string
-          resolved_at?: string | null
-          send_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          project_id?: string | null;
+          schedule_id?: string | null;
+          metric_slug?: string;
+          metric_label?: string;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          tier_used?: string;
+          value_used?: string | null;
+          source_urls?: string[] | null;
+          snapshot_value?: string | null;
+          within_tolerance?: boolean | null;
+          alert_at?: string;
+          resolved_at?: string | null;
+          send_at?: string | null;
+        };
+        Relationships: [];
+      };
       data_requests: {
         Row: {
-          id: number
-          report_id: string
-          fact: string | null
-          question: string
-          reach: string[]
-          answered: boolean
-          created_at: string
-          needed_components: string[]
-          selection_type: string | null
-          is_realtime: boolean | null
-          from_chip: boolean | null
-        }
+          id: number;
+          report_id: string;
+          fact: string | null;
+          question: string;
+          reach: string[];
+          answered: boolean;
+          created_at: string;
+          needed_components: string[];
+          selection_type: string | null;
+          is_realtime: boolean | null;
+          from_chip: boolean | null;
+        };
         Insert: {
-          id: number
-          report_id: string
-          fact?: string | null
-          question: string
-          reach?: string[]
-          answered?: boolean
-          created_at?: string
-          needed_components?: string[]
-          selection_type?: string | null
-          is_realtime?: boolean | null
-          from_chip?: boolean | null
-        }
+          id: number;
+          report_id: string;
+          fact?: string | null;
+          question: string;
+          reach?: string[];
+          answered?: boolean;
+          created_at?: string;
+          needed_components?: string[];
+          selection_type?: string | null;
+          is_realtime?: boolean | null;
+          from_chip?: boolean | null;
+        };
         Update: {
-          id?: number
-          report_id?: string
-          fact?: string | null
-          question?: string
-          reach?: string[]
-          answered?: boolean
-          created_at?: string
-          needed_components?: string[]
-          selection_type?: string | null
-          is_realtime?: boolean | null
-          from_chip?: boolean | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          report_id?: string;
+          fact?: string | null;
+          question?: string;
+          reach?: string[];
+          answered?: boolean;
+          created_at?: string;
+          needed_components?: string[];
+          selection_type?: string | null;
+          is_realtime?: boolean | null;
+          from_chip?: boolean | null;
+        };
+        Relationships: [];
+      };
       data_targets: {
         Row: {
-          id: string
-          target_key: string
-          kind: string
-          subject: string
-          label: string
-          reason: string
-          status: string
-          priority: number
-          metric: Json
-          source: string
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          target_key: string;
+          kind: string;
+          subject: string;
+          label: string;
+          reason: string;
+          status: string;
+          priority: number;
+          metric: Json;
+          source: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          target_key: string
-          kind: string
-          subject: string
-          label: string
-          reason: string
-          status?: string
-          priority?: number
-          metric?: Json
-          source?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          target_key: string;
+          kind: string;
+          subject: string;
+          label: string;
+          reason: string;
+          status?: string;
+          priority?: number;
+          metric?: Json;
+          source?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          target_key?: string
-          kind?: string
-          subject?: string
-          label?: string
-          reason?: string
-          status?: string
-          priority?: number
-          metric?: Json
-          source?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          target_key?: string;
+          kind?: string;
+          subject?: string;
+          label?: string;
+          reason?: string;
+          status?: string;
+          priority?: number;
+          metric?: Json;
+          source?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       dbpr_press_releases: {
         Row: {
-          id: number
-          source_url: string
-          title: string | null
-          published_date: string | null
-          body_text: string | null
-          summary: string | null
-          topics: string[] | null
-          affected_industries: string[] | null
-          geographic_mentions: string[] | null
-          is_swfl_relevant: boolean | null
-          scraped_at: string | null
-          created_at: string | null
-          inserted_at: string | null
-        }
+          id: number;
+          source_url: string;
+          title: string | null;
+          published_date: string | null;
+          body_text: string | null;
+          summary: string | null;
+          topics: string[] | null;
+          affected_industries: string[] | null;
+          geographic_mentions: string[] | null;
+          is_swfl_relevant: boolean | null;
+          scraped_at: string | null;
+          created_at: string | null;
+          inserted_at: string | null;
+        };
         Insert: {
-          id: number
-          source_url: string
-          title?: string | null
-          published_date?: string | null
-          body_text?: string | null
-          summary?: string | null
-          topics?: string[] | null
-          affected_industries?: string[] | null
-          geographic_mentions?: string[] | null
-          is_swfl_relevant?: boolean | null
-          scraped_at?: string | null
-          created_at?: string | null
-          inserted_at?: string | null
-        }
+          id: number;
+          source_url: string;
+          title?: string | null;
+          published_date?: string | null;
+          body_text?: string | null;
+          summary?: string | null;
+          topics?: string[] | null;
+          affected_industries?: string[] | null;
+          geographic_mentions?: string[] | null;
+          is_swfl_relevant?: boolean | null;
+          scraped_at?: string | null;
+          created_at?: string | null;
+          inserted_at?: string | null;
+        };
         Update: {
-          id?: number
-          source_url?: string
-          title?: string | null
-          published_date?: string | null
-          body_text?: string | null
-          summary?: string | null
-          topics?: string[] | null
-          affected_industries?: string[] | null
-          geographic_mentions?: string[] | null
-          is_swfl_relevant?: boolean | null
-          scraped_at?: string | null
-          created_at?: string | null
-          inserted_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          source_url?: string;
+          title?: string | null;
+          published_date?: string | null;
+          body_text?: string | null;
+          summary?: string | null;
+          topics?: string[] | null;
+          affected_industries?: string[] | null;
+          geographic_mentions?: string[] | null;
+          is_swfl_relevant?: boolean | null;
+          scraped_at?: string | null;
+          created_at?: string | null;
+          inserted_at?: string | null;
+        };
+        Relationships: [];
+      };
       dbpr_public_notices: {
         Row: {
-          id: number
-          pdf_url: string
-          respondent_name: string | null
-          county: string
-          case_number: string | null
-          all_case_numbers: string[] | null
-          violation_type: string | null
-          industry: string | null
-          pdf_summary: string | null
-          response_deadline: string | null
-          last_seen_at: string | null
-          scraped_at: string | null
-          created_at: string | null
-        }
+          id: number;
+          pdf_url: string;
+          respondent_name: string | null;
+          county: string;
+          case_number: string | null;
+          all_case_numbers: string[] | null;
+          violation_type: string | null;
+          industry: string | null;
+          pdf_summary: string | null;
+          response_deadline: string | null;
+          last_seen_at: string | null;
+          scraped_at: string | null;
+          created_at: string | null;
+        };
         Insert: {
-          id: number
-          pdf_url: string
-          respondent_name?: string | null
-          county: string
-          case_number?: string | null
-          all_case_numbers?: string[] | null
-          violation_type?: string | null
-          industry?: string | null
-          pdf_summary?: string | null
-          response_deadline?: string | null
-          last_seen_at?: string | null
-          scraped_at?: string | null
-          created_at?: string | null
-        }
+          id: number;
+          pdf_url: string;
+          respondent_name?: string | null;
+          county: string;
+          case_number?: string | null;
+          all_case_numbers?: string[] | null;
+          violation_type?: string | null;
+          industry?: string | null;
+          pdf_summary?: string | null;
+          response_deadline?: string | null;
+          last_seen_at?: string | null;
+          scraped_at?: string | null;
+          created_at?: string | null;
+        };
         Update: {
-          id?: number
-          pdf_url?: string
-          respondent_name?: string | null
-          county?: string
-          case_number?: string | null
-          all_case_numbers?: string[] | null
-          violation_type?: string | null
-          industry?: string | null
-          pdf_summary?: string | null
-          response_deadline?: string | null
-          last_seen_at?: string | null
-          scraped_at?: string | null
-          created_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          pdf_url?: string;
+          respondent_name?: string | null;
+          county?: string;
+          case_number?: string | null;
+          all_case_numbers?: string[] | null;
+          violation_type?: string | null;
+          industry?: string | null;
+          pdf_summary?: string | null;
+          response_deadline?: string | null;
+          last_seen_at?: string | null;
+          scraped_at?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [];
+      };
       deliverables: {
         Row: {
-          id: string
-          project_id: string
-          user_id: string
-          template: string
-          instruction: string | null
-          narrative: Json
-          items_snapshot: Json
-          branding: Json | null
-          status: string
-          created_at: string
-          is_example: boolean
-          scope_kind: string | null
-          scope_value: string | null
-          deleted_at: string | null
-          supersedes_id: string | null
-          doc: Json | null
-          data_as_of: string | null
-        }
+          id: string;
+          project_id: string;
+          user_id: string;
+          template: string;
+          instruction: string | null;
+          narrative: Json;
+          items_snapshot: Json;
+          branding: Json | null;
+          status: string;
+          created_at: string;
+          is_example: boolean;
+          scope_kind: string | null;
+          scope_value: string | null;
+          deleted_at: string | null;
+          supersedes_id: string | null;
+          doc: Json | null;
+          data_as_of: string | null;
+          campaign_key: string | null;
+        };
         Insert: {
-          id: string
-          project_id: string
-          user_id: string
-          template: string
-          instruction?: string | null
-          narrative: Json
-          items_snapshot: Json
-          branding?: Json | null
-          status?: string
-          created_at?: string
-          is_example?: boolean
-          scope_kind?: string | null
-          scope_value?: string | null
-          deleted_at?: string | null
-          supersedes_id?: string | null
-          doc?: Json | null
-          data_as_of?: string | null
-        }
+          id: string;
+          project_id: string;
+          user_id: string;
+          template: string;
+          instruction?: string | null;
+          narrative: Json;
+          items_snapshot: Json;
+          branding?: Json | null;
+          status?: string;
+          created_at?: string;
+          is_example?: boolean;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          deleted_at?: string | null;
+          supersedes_id?: string | null;
+          doc?: Json | null;
+          data_as_of?: string | null;
+          campaign_key?: string | null;
+        };
         Update: {
-          id?: string
-          project_id?: string
-          user_id?: string
-          template?: string
-          instruction?: string | null
-          narrative?: Json
-          items_snapshot?: Json
-          branding?: Json | null
-          status?: string
-          created_at?: string
-          is_example?: boolean
-          scope_kind?: string | null
-          scope_value?: string | null
-          deleted_at?: string | null
-          supersedes_id?: string | null
-          doc?: Json | null
-          data_as_of?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          project_id?: string;
+          user_id?: string;
+          template?: string;
+          instruction?: string | null;
+          narrative?: Json;
+          items_snapshot?: Json;
+          branding?: Json | null;
+          status?: string;
+          created_at?: string;
+          is_example?: boolean;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          deleted_at?: string | null;
+          supersedes_id?: string | null;
+          doc?: Json | null;
+          data_as_of?: string | null;
+          campaign_key?: string | null;
+        };
+        Relationships: [];
+      };
       email_audiences: {
         Row: {
-          id: number
-          user_id: string
-          audience_slug: string
-          resend_audience_id: string | null
-          contact_count: number
-          created_at: string
-          updated_at: string
-        }
+          id: number;
+          user_id: string;
+          audience_slug: string;
+          resend_audience_id: string | null;
+          contact_count: number;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          audience_slug: string
-          resend_audience_id?: string | null
-          contact_count?: number
-          created_at?: string
-          updated_at?: string
-        }
+          id?: number;
+          user_id: string;
+          audience_slug: string;
+          resend_audience_id?: string | null;
+          contact_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          audience_slug?: string
-          resend_audience_id?: string | null
-          contact_count?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          audience_slug?: string;
+          resend_audience_id?: string | null;
+          contact_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       email_blasts: {
         Row: {
-          id: string
-          user_id: string
-          deliverable_id: string
-          contact_ids: string[]
-          status: string
-          sent_count: number
-          failed_count: number
-          sent_at: string | null
-          created_at: string
-        }
+          id: string;
+          user_id: string;
+          deliverable_id: string;
+          contact_ids: string[];
+          status: string;
+          sent_count: number;
+          failed_count: number;
+          sent_at: string | null;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          deliverable_id: string
-          contact_ids: string[]
-          status?: string
-          sent_count?: number
-          failed_count?: number
-          sent_at?: string | null
-          created_at?: string
-        }
+          id?: string;
+          user_id: string;
+          deliverable_id: string;
+          contact_ids: string[];
+          status?: string;
+          sent_count?: number;
+          failed_count?: number;
+          sent_at?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          deliverable_id?: string
-          contact_ids?: string[]
-          status?: string
-          sent_count?: number
-          failed_count?: number
-          sent_at?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          deliverable_id?: string;
+          contact_ids?: string[];
+          status?: string;
+          sent_count?: number;
+          failed_count?: number;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       email_contacts: {
         Row: {
-          id: number
-          user_id: string
-          email: string
-          name: string | null
-          tags: string[]
-          created_at: string
-          updated_at: string
-        }
+          id: number;
+          user_id: string;
+          email: string;
+          name: string | null;
+          tags: string[];
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          email: string
-          name?: string | null
-          tags?: string[]
-          created_at?: string
-          updated_at?: string
-        }
+          id?: number;
+          user_id: string;
+          email: string;
+          name?: string | null;
+          tags?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          email?: string
-          name?: string | null
-          tags?: string[]
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          email?: string;
+          name?: string | null;
+          tags?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       email_events: {
         Row: {
-          id: number
-          resend_email_id: string | null
-          rid: string | null
-          event: string
-          created_at: string
-        }
+          id: number;
+          resend_email_id: string | null;
+          rid: string | null;
+          event: string;
+          created_at: string;
+        };
         Insert: {
-          id?: number
-          resend_email_id?: string | null
-          rid?: string | null
-          event: string
-          created_at?: string
-        }
+          id?: number;
+          resend_email_id?: string | null;
+          rid?: string | null;
+          event: string;
+          created_at?: string;
+        };
         Update: {
-          id?: number
-          resend_email_id?: string | null
-          rid?: string | null
-          event?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          resend_email_id?: string | null;
+          rid?: string | null;
+          event?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       email_media_assets: {
         Row: {
-          id: string
-          user_id: string
-          url: string
-          kind: string
-          label: string
-          width: number | null
-          height: number | null
-          attribution: Json | null
-          created_at: string
-        }
+          id: string;
+          user_id: string;
+          url: string;
+          kind: string;
+          label: string;
+          width: number | null;
+          height: number | null;
+          attribution: Json | null;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          url: string
-          kind?: string
-          label?: string
-          width?: number | null
-          height?: number | null
-          attribution?: Json | null
-          created_at?: string
-        }
+          id?: string;
+          user_id: string;
+          url: string;
+          kind?: string;
+          label?: string;
+          width?: number | null;
+          height?: number | null;
+          attribution?: Json | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          url?: string
-          kind?: string
-          label?: string
-          width?: number | null
-          height?: number | null
-          attribution?: Json | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          url?: string;
+          kind?: string;
+          label?: string;
+          width?: number | null;
+          height?: number | null;
+          attribution?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       email_schedules: {
         Row: {
-          id: number
-          user_id: string
-          project_id: string | null
-          status: string
-          cadence: string
-          day_of_week: number | null
-          day_of_month: number | null
-          send_hour_et: number
-          audience_slug: string | null
-          template_id: string | null
-          next_run_at: string | null
-          last_run_at: string | null
-          created_at: string
-          updated_at: string
-          scope_kind: string | null
-          scope_value: string | null
-          topic: string | null
-          deliverable_id: string | null
-        }
+          id: number;
+          user_id: string;
+          project_id: string | null;
+          status: string;
+          cadence: string;
+          day_of_week: number | null;
+          day_of_month: number | null;
+          send_hour_et: number;
+          audience_slug: string | null;
+          template_id: string | null;
+          next_run_at: string | null;
+          last_run_at: string | null;
+          created_at: string;
+          updated_at: string;
+          scope_kind: string | null;
+          scope_value: string | null;
+          topic: string | null;
+          deliverable_id: string | null;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          project_id?: string | null
-          status?: string
-          cadence: string
-          day_of_week?: number | null
-          day_of_month?: number | null
-          send_hour_et: number
-          audience_slug?: string | null
-          template_id?: string | null
-          next_run_at?: string | null
-          last_run_at?: string | null
-          created_at?: string
-          updated_at?: string
-          scope_kind?: string | null
-          scope_value?: string | null
-          topic?: string | null
-          deliverable_id?: string | null
-        }
+          id?: number;
+          user_id: string;
+          project_id?: string | null;
+          status?: string;
+          cadence: string;
+          day_of_week?: number | null;
+          day_of_month?: number | null;
+          send_hour_et: number;
+          audience_slug?: string | null;
+          template_id?: string | null;
+          next_run_at?: string | null;
+          last_run_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          topic?: string | null;
+          deliverable_id?: string | null;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          project_id?: string | null
-          status?: string
-          cadence?: string
-          day_of_week?: number | null
-          day_of_month?: number | null
-          send_hour_et?: number
-          audience_slug?: string | null
-          template_id?: string | null
-          next_run_at?: string | null
-          last_run_at?: string | null
-          created_at?: string
-          updated_at?: string
-          scope_kind?: string | null
-          scope_value?: string | null
-          topic?: string | null
-          deliverable_id?: string | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          project_id?: string | null;
+          status?: string;
+          cadence?: string;
+          day_of_week?: number | null;
+          day_of_month?: number | null;
+          send_hour_et?: number;
+          audience_slug?: string | null;
+          template_id?: string | null;
+          next_run_at?: string | null;
+          last_run_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          topic?: string | null;
+          deliverable_id?: string | null;
+        };
+        Relationships: [];
+      };
       email_send_ledger: {
         Row: {
-          id: number
-          user_id: string
-          idempotency_key: string
-          kind: string
-          schedule_id: number | null
-          recipient: string | null
-          sequence_step: string | null
-          broadcast_id: string | null
-          created_at: string
-        }
+          id: number;
+          user_id: string;
+          idempotency_key: string;
+          kind: string;
+          schedule_id: number | null;
+          recipient: string | null;
+          sequence_step: string | null;
+          broadcast_id: string | null;
+          created_at: string;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          idempotency_key: string
-          kind: string
-          schedule_id?: number | null
-          recipient?: string | null
-          sequence_step?: string | null
-          broadcast_id?: string | null
-          created_at?: string
-        }
+          id?: number;
+          user_id: string;
+          idempotency_key: string;
+          kind: string;
+          schedule_id?: number | null;
+          recipient?: string | null;
+          sequence_step?: string | null;
+          broadcast_id?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          idempotency_key?: string
-          kind?: string
-          schedule_id?: number | null
-          recipient?: string | null
-          sequence_step?: string | null
-          broadcast_id?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          idempotency_key?: string;
+          kind?: string;
+          schedule_id?: number | null;
+          recipient?: string | null;
+          sequence_step?: string | null;
+          broadcast_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       email_sender_config: {
         Row: {
-          id: number
-          user_id: string
-          domain: string | null
-          resend_domain_id: string | null
-          from_name: string | null
-          from_email: string | null
-          reply_to: string | null
-          domain_verified: boolean
-          dns_records: Json | null
-          created_at: string
-          updated_at: string
-        }
+          id: number;
+          user_id: string;
+          domain: string | null;
+          resend_domain_id: string | null;
+          from_name: string | null;
+          from_email: string | null;
+          reply_to: string | null;
+          domain_verified: boolean;
+          dns_records: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          domain?: string | null
-          resend_domain_id?: string | null
-          from_name?: string | null
-          from_email?: string | null
-          reply_to?: string | null
-          domain_verified?: boolean
-          dns_records?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
+          id?: number;
+          user_id: string;
+          domain?: string | null;
+          resend_domain_id?: string | null;
+          from_name?: string | null;
+          from_email?: string | null;
+          reply_to?: string | null;
+          domain_verified?: boolean;
+          dns_records?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          domain?: string | null
-          resend_domain_id?: string | null
-          from_name?: string | null
-          from_email?: string | null
-          reply_to?: string | null
-          domain_verified?: boolean
-          dns_records?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          domain?: string | null;
+          resend_domain_id?: string | null;
+          from_name?: string | null;
+          from_email?: string | null;
+          reply_to?: string | null;
+          domain_verified?: boolean;
+          dns_records?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       email_sends: {
         Row: {
-          id: number
-          user_id: string
-          schedule_id: number | null
-          audience_slug: string | null
-          broadcast_id: string | null
-          reply_token: string
-          reply_address: string
-          sent_at: string
-        }
+          id: number;
+          user_id: string;
+          schedule_id: number | null;
+          audience_slug: string | null;
+          broadcast_id: string | null;
+          reply_token: string;
+          reply_address: string;
+          sent_at: string;
+        };
         Insert: {
-          id: number
-          user_id: string
-          schedule_id?: number | null
-          audience_slug?: string | null
-          broadcast_id?: string | null
-          reply_token: string
-          reply_address: string
-          sent_at?: string
-        }
+          id: number;
+          user_id: string;
+          schedule_id?: number | null;
+          audience_slug?: string | null;
+          broadcast_id?: string | null;
+          reply_token: string;
+          reply_address: string;
+          sent_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          schedule_id?: number | null
-          audience_slug?: string | null
-          broadcast_id?: string | null
-          reply_token?: string
-          reply_address?: string
-          sent_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          schedule_id?: number | null;
+          audience_slug?: string | null;
+          broadcast_id?: string | null;
+          reply_token?: string;
+          reply_address?: string;
+          sent_at?: string;
+        };
+        Relationships: [];
+      };
       email_subscribers: {
         Row: {
-          id: number
-          email: string
-          status: string
-          source: string | null
-          segment_id: string | null
-          contact_id: string | null
-          interests: string[]
-          created_at: string
-          updated_at: string
-          prospect_brand: Json | null
-          consent_text: string | null
-          consent_at: string | null
-          scope: Json | null
-        }
+          id: number;
+          email: string;
+          status: string;
+          source: string | null;
+          segment_id: string | null;
+          contact_id: string | null;
+          interests: string[];
+          created_at: string;
+          updated_at: string;
+          prospect_brand: Json | null;
+          consent_text: string | null;
+          consent_at: string | null;
+          scope: Json | null;
+        };
         Insert: {
-          id?: number
-          email: string
-          status?: string
-          source?: string | null
-          segment_id?: string | null
-          contact_id?: string | null
-          interests?: string[]
-          created_at?: string
-          updated_at?: string
-          prospect_brand?: Json | null
-          consent_text?: string | null
-          consent_at?: string | null
-          scope?: Json | null
-        }
+          id?: number;
+          email: string;
+          status?: string;
+          source?: string | null;
+          segment_id?: string | null;
+          contact_id?: string | null;
+          interests?: string[];
+          created_at?: string;
+          updated_at?: string;
+          prospect_brand?: Json | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          scope?: Json | null;
+        };
         Update: {
-          id?: number
-          email?: string
-          status?: string
-          source?: string | null
-          segment_id?: string | null
-          contact_id?: string | null
-          interests?: string[]
-          created_at?: string
-          updated_at?: string
-          prospect_brand?: Json | null
-          consent_text?: string | null
-          consent_at?: string | null
-          scope?: Json | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          email?: string;
+          status?: string;
+          source?: string | null;
+          segment_id?: string | null;
+          contact_id?: string | null;
+          interests?: string[];
+          created_at?: string;
+          updated_at?: string;
+          prospect_brand?: Json | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          scope?: Json | null;
+        };
+        Relationships: [];
+      };
       email_usage: {
         Row: {
-          id: number
-          user_id: string
-          billing_period: string
-          sent_count: number
-          tier: string
-          created_at: string
-          updated_at: string
-        }
+          id: number;
+          user_id: string;
+          billing_period: string;
+          sent_count: number;
+          tier: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          billing_period: string
-          sent_count?: number
-          tier?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: number;
+          user_id: string;
+          billing_period: string;
+          sent_count?: number;
+          tier?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          billing_period?: string
-          sent_count?: number
-          tier?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          billing_period?: string;
+          sent_count?: number;
+          tier?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       fdle_crime_swfl: {
         Row: {
-          id: string
-          county: string
-          period: string
-          data_year: number
-          burglary: number | null
-          larceny_theft: number | null
-          motor_vehicle_theft: number | null
-          arson: number | null
-          total_property_crimes: number | null
-          population: number | null
-          property_crime_per_1k: number | null
-          source_url: string | null
-          retrieved_at: string | null
-          inserted_at: string
-        }
+          id: string;
+          county: string;
+          period: string;
+          data_year: number;
+          burglary: number | null;
+          larceny_theft: number | null;
+          motor_vehicle_theft: number | null;
+          arson: number | null;
+          total_property_crimes: number | null;
+          population: number | null;
+          property_crime_per_1k: number | null;
+          source_url: string | null;
+          retrieved_at: string | null;
+          inserted_at: string;
+        };
         Insert: {
-          id?: string
-          county: string
-          period: string
-          data_year: number
-          burglary?: number | null
-          larceny_theft?: number | null
-          motor_vehicle_theft?: number | null
-          arson?: number | null
-          total_property_crimes?: number | null
-          population?: number | null
-          property_crime_per_1k?: number | null
-          source_url?: string | null
-          retrieved_at?: string | null
-          inserted_at?: string
-        }
+          id?: string;
+          county: string;
+          period: string;
+          data_year: number;
+          burglary?: number | null;
+          larceny_theft?: number | null;
+          motor_vehicle_theft?: number | null;
+          arson?: number | null;
+          total_property_crimes?: number | null;
+          population?: number | null;
+          property_crime_per_1k?: number | null;
+          source_url?: string | null;
+          retrieved_at?: string | null;
+          inserted_at?: string;
+        };
         Update: {
-          id?: string
-          county?: string
-          period?: string
-          data_year?: number
-          burglary?: number | null
-          larceny_theft?: number | null
-          motor_vehicle_theft?: number | null
-          arson?: number | null
-          total_property_crimes?: number | null
-          population?: number | null
-          property_crime_per_1k?: number | null
-          source_url?: string | null
-          retrieved_at?: string | null
-          inserted_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          county?: string;
+          period?: string;
+          data_year?: number;
+          burglary?: number | null;
+          larceny_theft?: number | null;
+          motor_vehicle_theft?: number | null;
+          arson?: number | null;
+          total_property_crimes?: number | null;
+          population?: number | null;
+          property_crime_per_1k?: number | null;
+          source_url?: string | null;
+          retrieved_at?: string | null;
+          inserted_at?: string;
+        };
+        Relationships: [];
+      };
       fgcu_reri_indicators: {
         Row: {
-          id: string
-          report_month: string
-          indicator: string
-          county: string
-          reference_period_label: string | null
-          reference_period_end: string | null
-          pct_change: number | null
-          pct_change_unit: string | null
-          source_url: string
-          inserted_at: string | null
-        }
+          id: string;
+          report_month: string;
+          indicator: string;
+          county: string;
+          reference_period_label: string | null;
+          reference_period_end: string | null;
+          pct_change: number | null;
+          pct_change_unit: string | null;
+          source_url: string;
+          inserted_at: string | null;
+        };
         Insert: {
-          id: string
-          report_month: string
-          indicator: string
-          county?: string
-          reference_period_label?: string | null
-          reference_period_end?: string | null
-          pct_change?: number | null
-          pct_change_unit?: string | null
-          source_url: string
-          inserted_at?: string | null
-        }
+          id: string;
+          report_month: string;
+          indicator: string;
+          county?: string;
+          reference_period_label?: string | null;
+          reference_period_end?: string | null;
+          pct_change?: number | null;
+          pct_change_unit?: string | null;
+          source_url: string;
+          inserted_at?: string | null;
+        };
         Update: {
-          id?: string
-          report_month?: string
-          indicator?: string
-          county?: string
-          reference_period_label?: string | null
-          reference_period_end?: string | null
-          pct_change?: number | null
-          pct_change_unit?: string | null
-          source_url?: string
-          inserted_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          report_month?: string;
+          indicator?: string;
+          county?: string;
+          reference_period_label?: string | null;
+          reference_period_end?: string | null;
+          pct_change?: number | null;
+          pct_change_unit?: string | null;
+          source_url?: string;
+          inserted_at?: string | null;
+        };
+        Relationships: [];
+      };
       fl_dor_sales_tax: {
         Row: {
-          id: string
-          county: string
-          county_code: string | null
-          kind_code: number
-          business_type: string
-          period: string
-          taxable_sales_usd: number | null
-          source_url: string | null
-          retrieved_at: string | null
-          inserted_at: string
-        }
+          id: string;
+          county: string;
+          county_code: string | null;
+          kind_code: number;
+          business_type: string;
+          period: string;
+          taxable_sales_usd: number | null;
+          source_url: string | null;
+          retrieved_at: string | null;
+          inserted_at: string;
+        };
         Insert: {
-          id?: string
-          county: string
-          county_code?: string | null
-          kind_code: number
-          business_type: string
-          period: string
-          taxable_sales_usd?: number | null
-          source_url?: string | null
-          retrieved_at?: string | null
-          inserted_at?: string
-        }
+          id?: string;
+          county: string;
+          county_code?: string | null;
+          kind_code: number;
+          business_type: string;
+          period: string;
+          taxable_sales_usd?: number | null;
+          source_url?: string | null;
+          retrieved_at?: string | null;
+          inserted_at?: string;
+        };
         Update: {
-          id?: string
-          county?: string
-          county_code?: string | null
-          kind_code?: number
-          business_type?: string
-          period?: string
-          taxable_sales_usd?: number | null
-          source_url?: string | null
-          retrieved_at?: string | null
-          inserted_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          county?: string;
+          county_code?: string | null;
+          kind_code?: number;
+          business_type?: string;
+          period?: string;
+          taxable_sales_usd?: number | null;
+          source_url?: string | null;
+          retrieved_at?: string | null;
+          inserted_at?: string;
+        };
+        Relationships: [];
+      };
       fl_dor_tdt_collections: {
         Row: {
-          id: string
-          county: string
-          county_fips: string | null
-          period: string
-          collections_usd: number | null
-          returns_filed: number | null
-          source_url: string | null
-          inserted_at: string | null
-        }
+          id: string;
+          county: string;
+          county_fips: string | null;
+          period: string;
+          collections_usd: number | null;
+          returns_filed: number | null;
+          source_url: string | null;
+          inserted_at: string | null;
+        };
         Insert: {
-          id?: string
-          county: string
-          county_fips?: string | null
-          period: string
-          collections_usd?: number | null
-          returns_filed?: number | null
-          source_url?: string | null
-          inserted_at?: string | null
-        }
+          id?: string;
+          county: string;
+          county_fips?: string | null;
+          period: string;
+          collections_usd?: number | null;
+          returns_filed?: number | null;
+          source_url?: string | null;
+          inserted_at?: string | null;
+        };
         Update: {
-          id?: string
-          county?: string
-          county_fips?: string | null
-          period?: string
-          collections_usd?: number | null
-          returns_filed?: number | null
-          source_url?: string | null
-          inserted_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          county?: string;
+          county_fips?: string | null;
+          period?: string;
+          collections_usd?: number | null;
+          returns_filed?: number | null;
+          source_url?: string | null;
+          inserted_at?: string | null;
+        };
+        Relationships: [];
+      };
       glass_calibration: {
         Row: {
-          source: string | null
-          confidence_bucket: string | null
-          stated_confidence: number | null
-          n_grades: number | null
-          hit_rate: number | null
-        }
+          source: string | null;
+          confidence_bucket: string | null;
+          stated_confidence: number | null;
+          n_grades: number | null;
+          hit_rate: number | null;
+        };
         Insert: {
-          source?: string | null
-          confidence_bucket?: string | null
-          stated_confidence?: number | null
-          n_grades?: number | null
-          hit_rate?: number | null
-        }
+          source?: string | null;
+          confidence_bucket?: string | null;
+          stated_confidence?: number | null;
+          n_grades?: number | null;
+          hit_rate?: number | null;
+        };
         Update: {
-          source?: string | null
-          confidence_bucket?: string | null
-          stated_confidence?: number | null
-          n_grades?: number | null
-          hit_rate?: number | null
-        }
-        Relationships: []
-      }
+          source?: string | null;
+          confidence_bucket?: string | null;
+          stated_confidence?: number | null;
+          n_grades?: number | null;
+          hit_rate?: number | null;
+        };
+        Relationships: [];
+      };
       glass_skill_over_time: {
         Row: {
-          month: string | null
-          source: string | null
-          n_grades: number | null
-          system_accuracy: number | null
-          persistence_accuracy: number | null
-          lift: number | null
-        }
+          month: string | null;
+          source: string | null;
+          n_grades: number | null;
+          system_accuracy: number | null;
+          persistence_accuracy: number | null;
+          lift: number | null;
+        };
         Insert: {
-          month?: string | null
-          source?: string | null
-          n_grades?: number | null
-          system_accuracy?: number | null
-          persistence_accuracy?: number | null
-          lift?: number | null
-        }
+          month?: string | null;
+          source?: string | null;
+          n_grades?: number | null;
+          system_accuracy?: number | null;
+          persistence_accuracy?: number | null;
+          lift?: number | null;
+        };
         Update: {
-          month?: string | null
-          source?: string | null
-          n_grades?: number | null
-          system_accuracy?: number | null
-          persistence_accuracy?: number | null
-          lift?: number | null
-        }
-        Relationships: []
-      }
+          month?: string | null;
+          source?: string | null;
+          n_grades?: number | null;
+          system_accuracy?: number | null;
+          persistence_accuracy?: number | null;
+          lift?: number | null;
+        };
+        Relationships: [];
+      };
       goals: {
         Row: {
-          goal_number: number
-          title: string
-          description: string
-          status: string
-          updated_at: string
-        }
+          goal_number: number;
+          title: string;
+          description: string;
+          status: string;
+          updated_at: string;
+        };
         Insert: {
-          goal_number: number
-          title: string
-          description?: string
-          status?: string
-          updated_at?: string
-        }
+          goal_number: number;
+          title: string;
+          description?: string;
+          status?: string;
+          updated_at?: string;
+        };
         Update: {
-          goal_number?: number
-          title?: string
-          description?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          goal_number?: number;
+          title?: string;
+          description?: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       grade_accuracy_by_slug: {
         Row: {
-          gradeable_slug: string | null
-          n: number | null
-          pct_correct: number | null
-        }
+          gradeable_slug: string | null;
+          n: number | null;
+          pct_correct: number | null;
+        };
         Insert: {
-          gradeable_slug?: string | null
-          n?: number | null
-          pct_correct?: number | null
-        }
+          gradeable_slug?: string | null;
+          n?: number | null;
+          pct_correct?: number | null;
+        };
         Update: {
-          gradeable_slug?: string | null
-          n?: number | null
-          pct_correct?: number | null
-        }
-        Relationships: []
-      }
+          gradeable_slug?: string | null;
+          n?: number | null;
+          pct_correct?: number | null;
+        };
+        Relationships: [];
+      };
       metric_observations: {
         Row: {
-          id: number
-          slug: string
-          brain_id: string
-          value: number
-          observed_at: string
-          source_url: string | null
-          captured_at: string
-        }
+          id: number;
+          slug: string;
+          brain_id: string;
+          value: number;
+          observed_at: string;
+          source_url: string | null;
+          captured_at: string;
+        };
         Insert: {
-          id: number
-          slug: string
-          brain_id: string
-          value: number
-          observed_at: string
-          source_url?: string | null
-          captured_at?: string
-        }
+          id: number;
+          slug: string;
+          brain_id: string;
+          value: number;
+          observed_at: string;
+          source_url?: string | null;
+          captured_at?: string;
+        };
         Update: {
-          id?: number
-          slug?: string
-          brain_id?: string
-          value?: number
-          observed_at?: string
-          source_url?: string | null
-          captured_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          slug?: string;
+          brain_id?: string;
+          value?: number;
+          observed_at?: string;
+          source_url?: string | null;
+          captured_at?: string;
+        };
+        Relationships: [];
+      };
       ops_ideas: {
         Row: {
-          id: string
-          slug: string
-          title: string
-          description: string | null
-          notes: string | null
-          status: string
-          created_at: string | null
-          updated_at: string | null
-        }
+          id: string;
+          slug: string;
+          title: string;
+          description: string | null;
+          notes: string | null;
+          status: string;
+          created_at: string | null;
+          updated_at: string | null;
+        };
         Insert: {
-          id?: string
-          slug: string
-          title: string
-          description?: string | null
-          notes?: string | null
-          status?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
+          id?: string;
+          slug: string;
+          title: string;
+          description?: string | null;
+          notes?: string | null;
+          status?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
         Update: {
-          id?: string
-          slug?: string
-          title?: string
-          description?: string | null
-          notes?: string | null
-          status?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          slug?: string;
+          title?: string;
+          description?: string | null;
+          notes?: string | null;
+          status?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       ops_notes: {
         Row: {
-          item_id: string
-          note: string
-          updated_at: string
-        }
+          item_id: string;
+          note: string;
+          updated_at: string;
+        };
         Insert: {
-          item_id: string
-          note: string
-          updated_at?: string
-        }
+          item_id: string;
+          note: string;
+          updated_at?: string;
+        };
         Update: {
-          item_id?: string
-          note?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          item_id?: string;
+          note?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       outcomes: {
         Row: {
-          id: string
-          prediction_id: string
-          actual_value: string
-          observed_at: string
-          delta: string | null
-          correction_notes: string | null
-          predicted_direction: string | null
-          observed_direction: string | null
-          baseline_value: number | null
-          observed_value: number | null
-          direction_correct: boolean | null
-          error: number | null
-          source_url: string | null
-          graded_at: string | null
-          grade_method: string | null
-          grade_config: Json | null
-        }
+          id: string;
+          prediction_id: string;
+          actual_value: string;
+          observed_at: string;
+          delta: string | null;
+          correction_notes: string | null;
+          predicted_direction: string | null;
+          observed_direction: string | null;
+          baseline_value: number | null;
+          observed_value: number | null;
+          direction_correct: boolean | null;
+          error: number | null;
+          source_url: string | null;
+          graded_at: string | null;
+          grade_method: string | null;
+          grade_config: Json | null;
+        };
         Insert: {
-          id?: string
-          prediction_id: string
-          actual_value: string
-          observed_at?: string
-          delta?: string | null
-          correction_notes?: string | null
-          predicted_direction?: string | null
-          observed_direction?: string | null
-          baseline_value?: number | null
-          observed_value?: number | null
-          direction_correct?: boolean | null
-          error?: number | null
-          source_url?: string | null
-          graded_at?: string | null
-          grade_method?: string | null
-          grade_config?: Json | null
-        }
+          id?: string;
+          prediction_id: string;
+          actual_value: string;
+          observed_at?: string;
+          delta?: string | null;
+          correction_notes?: string | null;
+          predicted_direction?: string | null;
+          observed_direction?: string | null;
+          baseline_value?: number | null;
+          observed_value?: number | null;
+          direction_correct?: boolean | null;
+          error?: number | null;
+          source_url?: string | null;
+          graded_at?: string | null;
+          grade_method?: string | null;
+          grade_config?: Json | null;
+        };
         Update: {
-          id?: string
-          prediction_id?: string
-          actual_value?: string
-          observed_at?: string
-          delta?: string | null
-          correction_notes?: string | null
-          predicted_direction?: string | null
-          observed_direction?: string | null
-          baseline_value?: number | null
-          observed_value?: number | null
-          direction_correct?: boolean | null
-          error?: number | null
-          source_url?: string | null
-          graded_at?: string | null
-          grade_method?: string | null
-          grade_config?: Json | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          prediction_id?: string;
+          actual_value?: string;
+          observed_at?: string;
+          delta?: string | null;
+          correction_notes?: string | null;
+          predicted_direction?: string | null;
+          observed_direction?: string | null;
+          baseline_value?: number | null;
+          observed_value?: number | null;
+          direction_correct?: boolean | null;
+          error?: number | null;
+          source_url?: string | null;
+          graded_at?: string | null;
+          grade_method?: string | null;
+          grade_config?: Json | null;
+        };
+        Relationships: [];
+      };
       outreach_campaign_metrics: {
         Row: {
-          campaign_id: string | null
-          sent: number | null
-          delivered: number | null
-          opened: number | null
-          clicked: number | null
-          unsubscribed: number | null
-          bounced: number | null
-          open_rate_pct: number | null
-          click_rate_pct: number | null
-          complaints: number | null
-        }
+          campaign_id: string | null;
+          sent: number | null;
+          delivered: number | null;
+          opened: number | null;
+          clicked: number | null;
+          unsubscribed: number | null;
+          bounced: number | null;
+          open_rate_pct: number | null;
+          click_rate_pct: number | null;
+          complaints: number | null;
+        };
         Insert: {
-          campaign_id?: string | null
-          sent?: number | null
-          delivered?: number | null
-          opened?: number | null
-          clicked?: number | null
-          unsubscribed?: number | null
-          bounced?: number | null
-          open_rate_pct?: number | null
-          click_rate_pct?: number | null
-          complaints?: number | null
-        }
+          campaign_id?: string | null;
+          sent?: number | null;
+          delivered?: number | null;
+          opened?: number | null;
+          clicked?: number | null;
+          unsubscribed?: number | null;
+          bounced?: number | null;
+          open_rate_pct?: number | null;
+          click_rate_pct?: number | null;
+          complaints?: number | null;
+        };
         Update: {
-          campaign_id?: string | null
-          sent?: number | null
-          delivered?: number | null
-          opened?: number | null
-          clicked?: number | null
-          unsubscribed?: number | null
-          bounced?: number | null
-          open_rate_pct?: number | null
-          click_rate_pct?: number | null
-          complaints?: number | null
-        }
-        Relationships: []
-      }
+          campaign_id?: string | null;
+          sent?: number | null;
+          delivered?: number | null;
+          opened?: number | null;
+          clicked?: number | null;
+          unsubscribed?: number | null;
+          bounced?: number | null;
+          open_rate_pct?: number | null;
+          click_rate_pct?: number | null;
+          complaints?: number | null;
+        };
+        Relationships: [];
+      };
       outreach_demo_funnel: {
         Row: {
-          campaign_id: string | null
-          track: string | null
-          subject_variant: string | null
-          recipients: number | null
-          delivered: number | null
-          opened: number | null
-          clicked: number | null
-          arrived: number | null
-          claimed: number | null
-          complaints: number | null
-          unsubscribed: number | null
-        }
+          campaign_id: string | null;
+          track: string | null;
+          subject_variant: string | null;
+          recipients: number | null;
+          delivered: number | null;
+          opened: number | null;
+          clicked: number | null;
+          arrived: number | null;
+          claimed: number | null;
+          complaints: number | null;
+          unsubscribed: number | null;
+        };
         Insert: {
-          campaign_id?: string | null
-          track?: string | null
-          subject_variant?: string | null
-          recipients?: number | null
-          delivered?: number | null
-          opened?: number | null
-          clicked?: number | null
-          arrived?: number | null
-          claimed?: number | null
-          complaints?: number | null
-          unsubscribed?: number | null
-        }
+          campaign_id?: string | null;
+          track?: string | null;
+          subject_variant?: string | null;
+          recipients?: number | null;
+          delivered?: number | null;
+          opened?: number | null;
+          clicked?: number | null;
+          arrived?: number | null;
+          claimed?: number | null;
+          complaints?: number | null;
+          unsubscribed?: number | null;
+        };
         Update: {
-          campaign_id?: string | null
-          track?: string | null
-          subject_variant?: string | null
-          recipients?: number | null
-          delivered?: number | null
-          opened?: number | null
-          clicked?: number | null
-          arrived?: number | null
-          claimed?: number | null
-          complaints?: number | null
-          unsubscribed?: number | null
-        }
-        Relationships: []
-      }
+          campaign_id?: string | null;
+          track?: string | null;
+          subject_variant?: string | null;
+          recipients?: number | null;
+          delivered?: number | null;
+          opened?: number | null;
+          clicked?: number | null;
+          arrived?: number | null;
+          claimed?: number | null;
+          complaints?: number | null;
+          unsubscribed?: number | null;
+        };
+        Relationships: [];
+      };
       outreach_events: {
         Row: {
-          id: number
-          recipient_id: string | null
-          campaign_id: string | null
-          event: string
-          resend_email_id: string | null
-          at: string
-          meta: Json | null
-        }
+          id: number;
+          recipient_id: string | null;
+          campaign_id: string | null;
+          event: string;
+          resend_email_id: string | null;
+          at: string;
+          meta: Json | null;
+        };
         Insert: {
-          id?: number
-          recipient_id?: string | null
-          campaign_id?: string | null
-          event: string
-          resend_email_id?: string | null
-          at?: string
-          meta?: Json | null
-        }
+          id?: number;
+          recipient_id?: string | null;
+          campaign_id?: string | null;
+          event: string;
+          resend_email_id?: string | null;
+          at?: string;
+          meta?: Json | null;
+        };
         Update: {
-          id?: number
-          recipient_id?: string | null
-          campaign_id?: string | null
-          event?: string
-          resend_email_id?: string | null
-          at?: string
-          meta?: Json | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          recipient_id?: string | null;
+          campaign_id?: string | null;
+          event?: string;
+          resend_email_id?: string | null;
+          at?: string;
+          meta?: Json | null;
+        };
+        Relationships: [];
+      };
       outreach_recipients: {
         Row: {
-          id: string
-          campaign_id: string
-          email: string
-          name: string | null
-          domain: string | null
-          zip: string | null
-          brand: Json | null
-          brand_source: string | null
-          brand_confidence: number | null
-          arrival_url: string | null
-          status: string
-          step: number
-          next_send_at: string | null
-          created_at: string
-          updated_at: string
-          track: string | null
-          stage: string | null
-          subject_variant: string | null
-          snapshot: Json | null
-          trial_sends: number
-        }
+          id: string;
+          campaign_id: string;
+          email: string;
+          name: string | null;
+          domain: string | null;
+          zip: string | null;
+          brand: Json | null;
+          brand_source: string | null;
+          brand_confidence: number | null;
+          arrival_url: string | null;
+          status: string;
+          step: number;
+          next_send_at: string | null;
+          created_at: string;
+          updated_at: string;
+          track: string | null;
+          stage: string | null;
+          subject_variant: string | null;
+          snapshot: Json | null;
+          trial_sends: number;
+        };
         Insert: {
-          id?: string
-          campaign_id: string
-          email: string
-          name?: string | null
-          domain?: string | null
-          zip?: string | null
-          brand?: Json | null
-          brand_source?: string | null
-          brand_confidence?: number | null
-          arrival_url?: string | null
-          status?: string
-          step?: number
-          next_send_at?: string | null
-          created_at?: string
-          updated_at?: string
-          track?: string | null
-          stage?: string | null
-          subject_variant?: string | null
-          snapshot?: Json | null
-          trial_sends?: number
-        }
+          id?: string;
+          campaign_id: string;
+          email: string;
+          name?: string | null;
+          domain?: string | null;
+          zip?: string | null;
+          brand?: Json | null;
+          brand_source?: string | null;
+          brand_confidence?: number | null;
+          arrival_url?: string | null;
+          status?: string;
+          step?: number;
+          next_send_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          track?: string | null;
+          stage?: string | null;
+          subject_variant?: string | null;
+          snapshot?: Json | null;
+          trial_sends?: number;
+        };
         Update: {
-          id?: string
-          campaign_id?: string
-          email?: string
-          name?: string | null
-          domain?: string | null
-          zip?: string | null
-          brand?: Json | null
-          brand_source?: string | null
-          brand_confidence?: number | null
-          arrival_url?: string | null
-          status?: string
-          step?: number
-          next_send_at?: string | null
-          created_at?: string
-          updated_at?: string
-          track?: string | null
-          stage?: string | null
-          subject_variant?: string | null
-          snapshot?: Json | null
-          trial_sends?: number
-        }
-        Relationships: []
-      }
+          id?: string;
+          campaign_id?: string;
+          email?: string;
+          name?: string | null;
+          domain?: string | null;
+          zip?: string | null;
+          brand?: Json | null;
+          brand_source?: string | null;
+          brand_confidence?: number | null;
+          arrival_url?: string | null;
+          status?: string;
+          step?: number;
+          next_send_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          track?: string | null;
+          stage?: string | null;
+          subject_variant?: string | null;
+          snapshot?: Json | null;
+          trial_sends?: number;
+        };
+        Relationships: [];
+      };
       predictions: {
         Row: {
-          id: string
-          brain_id: string
-          refined_at: string
-          conclusion: string
-          confidence: number
-          prediction_window: string | null
-          metadata: Json
-          conditional_claims: Json
-          gradeable_slug: string | null
-          baseline_value: number | null
-          predicted_direction: string | null
-          window_end_date: string | null
-          grade_status: string
-          grade_method: string
-          prediction_kind: string
-        }
+          id: string;
+          brain_id: string;
+          refined_at: string;
+          conclusion: string;
+          confidence: number;
+          prediction_window: string | null;
+          metadata: Json;
+          conditional_claims: Json;
+          gradeable_slug: string | null;
+          baseline_value: number | null;
+          predicted_direction: string | null;
+          window_end_date: string | null;
+          grade_status: string;
+          grade_method: string;
+          prediction_kind: string;
+        };
         Insert: {
-          id?: string
-          brain_id: string
-          refined_at?: string
-          conclusion: string
-          confidence: number
-          prediction_window?: string | null
-          metadata?: Json
-          conditional_claims?: Json
-          gradeable_slug?: string | null
-          baseline_value?: number | null
-          predicted_direction?: string | null
-          window_end_date?: string | null
-          grade_status?: string
-          grade_method?: string
-          prediction_kind?: string
-        }
+          id?: string;
+          brain_id: string;
+          refined_at?: string;
+          conclusion: string;
+          confidence: number;
+          prediction_window?: string | null;
+          metadata?: Json;
+          conditional_claims?: Json;
+          gradeable_slug?: string | null;
+          baseline_value?: number | null;
+          predicted_direction?: string | null;
+          window_end_date?: string | null;
+          grade_status?: string;
+          grade_method?: string;
+          prediction_kind?: string;
+        };
         Update: {
-          id?: string
-          brain_id?: string
-          refined_at?: string
-          conclusion?: string
-          confidence?: number
-          prediction_window?: string | null
-          metadata?: Json
-          conditional_claims?: Json
-          gradeable_slug?: string | null
-          baseline_value?: number | null
-          predicted_direction?: string | null
-          window_end_date?: string | null
-          grade_status?: string
-          grade_method?: string
-          prediction_kind?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          brain_id?: string;
+          refined_at?: string;
+          conclusion?: string;
+          confidence?: number;
+          prediction_window?: string | null;
+          metadata?: Json;
+          conditional_claims?: Json;
+          gradeable_slug?: string | null;
+          baseline_value?: number | null;
+          predicted_direction?: string | null;
+          window_end_date?: string | null;
+          grade_status?: string;
+          grade_method?: string;
+          prediction_kind?: string;
+        };
+        Relationships: [];
+      };
       project_activity: {
         Row: {
-          id: string
-          project_id: string
-          activity_type: string
-          actor: string
-          summary: string
-          detail: Json | null
-          significance: number
-          created_at: string
-        }
+          id: string;
+          project_id: string;
+          activity_type: string;
+          actor: string;
+          summary: string;
+          detail: Json | null;
+          significance: number;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          project_id: string
-          activity_type: string
-          actor: string
-          summary: string
-          detail?: Json | null
-          significance?: number
-          created_at?: string
-        }
+          id?: string;
+          project_id: string;
+          activity_type: string;
+          actor: string;
+          summary: string;
+          detail?: Json | null;
+          significance?: number;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          project_id?: string
-          activity_type?: string
-          actor?: string
-          summary?: string
-          detail?: Json | null
-          significance?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          project_id?: string;
+          activity_type?: string;
+          actor?: string;
+          summary?: string;
+          detail?: Json | null;
+          significance?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       project_events: {
         Row: {
-          id: string
-          project_id: string
-          entity_name: string
-          entity_brand_key: string | null
-          event_type: string
-          event_date: string
-          lat: number | null
-          lng: number | null
-          distance_miles: number | null
-          brand_tier: number | null
-          brand_weight: number | null
-          final_score: number | null
-          radius_band: string | null
-          notify_user: boolean
-          inject_ai: boolean
-          ai_summary: string | null
-          headline: string | null
-          source: string
-          source_url: string | null
-          suppressed_reason: string | null
-          notified_at: string | null
-          injected_at: string | null
-          dismissed_at: string | null
-          cooldown_until: string | null
-          geocode_source: string | null
-          created_at: string
-        }
+          id: string;
+          project_id: string;
+          entity_name: string;
+          entity_brand_key: string | null;
+          event_type: string;
+          event_date: string;
+          lat: number | null;
+          lng: number | null;
+          distance_miles: number | null;
+          brand_tier: number | null;
+          brand_weight: number | null;
+          final_score: number | null;
+          radius_band: string | null;
+          notify_user: boolean;
+          inject_ai: boolean;
+          ai_summary: string | null;
+          headline: string | null;
+          source: string;
+          source_url: string | null;
+          suppressed_reason: string | null;
+          notified_at: string | null;
+          injected_at: string | null;
+          dismissed_at: string | null;
+          cooldown_until: string | null;
+          geocode_source: string | null;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          project_id: string
-          entity_name: string
-          entity_brand_key?: string | null
-          event_type: string
-          event_date: string
-          lat?: number | null
-          lng?: number | null
-          distance_miles?: number | null
-          brand_tier?: number | null
-          brand_weight?: number | null
-          final_score?: number | null
-          radius_band?: string | null
-          notify_user?: boolean
-          inject_ai?: boolean
-          ai_summary?: string | null
-          headline?: string | null
-          source: string
-          source_url?: string | null
-          suppressed_reason?: string | null
-          notified_at?: string | null
-          injected_at?: string | null
-          dismissed_at?: string | null
-          cooldown_until?: string | null
-          geocode_source?: string | null
-          created_at?: string
-        }
+          id?: string;
+          project_id: string;
+          entity_name: string;
+          entity_brand_key?: string | null;
+          event_type: string;
+          event_date: string;
+          lat?: number | null;
+          lng?: number | null;
+          distance_miles?: number | null;
+          brand_tier?: number | null;
+          brand_weight?: number | null;
+          final_score?: number | null;
+          radius_band?: string | null;
+          notify_user?: boolean;
+          inject_ai?: boolean;
+          ai_summary?: string | null;
+          headline?: string | null;
+          source: string;
+          source_url?: string | null;
+          suppressed_reason?: string | null;
+          notified_at?: string | null;
+          injected_at?: string | null;
+          dismissed_at?: string | null;
+          cooldown_until?: string | null;
+          geocode_source?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          project_id?: string
-          entity_name?: string
-          entity_brand_key?: string | null
-          event_type?: string
-          event_date?: string
-          lat?: number | null
-          lng?: number | null
-          distance_miles?: number | null
-          brand_tier?: number | null
-          brand_weight?: number | null
-          final_score?: number | null
-          radius_band?: string | null
-          notify_user?: boolean
-          inject_ai?: boolean
-          ai_summary?: string | null
-          headline?: string | null
-          source?: string
-          source_url?: string | null
-          suppressed_reason?: string | null
-          notified_at?: string | null
-          injected_at?: string | null
-          dismissed_at?: string | null
-          cooldown_until?: string | null
-          geocode_source?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          project_id?: string;
+          entity_name?: string;
+          entity_brand_key?: string | null;
+          event_type?: string;
+          event_date?: string;
+          lat?: number | null;
+          lng?: number | null;
+          distance_miles?: number | null;
+          brand_tier?: number | null;
+          brand_weight?: number | null;
+          final_score?: number | null;
+          radius_band?: string | null;
+          notify_user?: boolean;
+          inject_ai?: boolean;
+          ai_summary?: string | null;
+          headline?: string | null;
+          source?: string;
+          source_url?: string | null;
+          suppressed_reason?: string | null;
+          notified_at?: string | null;
+          injected_at?: string | null;
+          dismissed_at?: string | null;
+          cooldown_until?: string | null;
+          geocode_source?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       project_feed: {
         Row: {
-          id: number
-          user_id: string
-          project_id: string | null
-          kind: string
-          scope_kind: string | null
-          scope_value: string | null
-          title: string
-          detail: string | null
-          ref_url: string | null
-          payload: Json
-          dedup_key: string
-          created_at: string
-          read_at: string | null
-          void_at: string | null
-        }
+          id: number;
+          user_id: string;
+          project_id: string | null;
+          kind: string;
+          scope_kind: string | null;
+          scope_value: string | null;
+          title: string;
+          detail: string | null;
+          ref_url: string | null;
+          payload: Json;
+          dedup_key: string;
+          created_at: string;
+          read_at: string | null;
+          void_at: string | null;
+        };
         Insert: {
-          id: number
-          user_id: string
-          project_id?: string | null
-          kind: string
-          scope_kind?: string | null
-          scope_value?: string | null
-          title: string
-          detail?: string | null
-          ref_url?: string | null
-          payload?: Json
-          dedup_key: string
-          created_at?: string
-          read_at?: string | null
-          void_at?: string | null
-        }
+          id: number;
+          user_id: string;
+          project_id?: string | null;
+          kind: string;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          title: string;
+          detail?: string | null;
+          ref_url?: string | null;
+          payload?: Json;
+          dedup_key: string;
+          created_at?: string;
+          read_at?: string | null;
+          void_at?: string | null;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          project_id?: string | null
-          kind?: string
-          scope_kind?: string | null
-          scope_value?: string | null
-          title?: string
-          detail?: string | null
-          ref_url?: string | null
-          payload?: Json
-          dedup_key?: string
-          created_at?: string
-          read_at?: string | null
-          void_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          project_id?: string | null;
+          kind?: string;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          title?: string;
+          detail?: string | null;
+          ref_url?: string | null;
+          payload?: Json;
+          dedup_key?: string;
+          created_at?: string;
+          read_at?: string | null;
+          void_at?: string | null;
+        };
+        Relationships: [];
+      };
       project_templates: {
         Row: {
-          id: string
-          user_id: string
-          name: string
-          recipes: Json
-          scope_type: string | null
-          created_at: string
-        }
+          id: string;
+          user_id: string;
+          name: string;
+          recipes: Json;
+          scope_type: string | null;
+          created_at: string;
+        };
         Insert: {
-          id: string
-          user_id: string
-          name: string
-          recipes?: Json
-          scope_type?: string | null
-          created_at?: string
-        }
+          id: string;
+          user_id: string;
+          name: string;
+          recipes?: Json;
+          scope_type?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          recipes?: Json
-          scope_type?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          name?: string;
+          recipes?: Json;
+          scope_type?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       projects: {
         Row: {
-          id: string
-          user_id: string
-          title: string | null
-          items: Json
-          branding: Json | null
-          mcp_key: string | null
-          created_at: string
-          updated_at: string
-          ui_state: Json
-          project_type: string | null
-          derived_project_type: string | null
-          kind: string
-          subject_address: string | null
-          property_url: string | null
-        }
+          id: string;
+          user_id: string;
+          title: string | null;
+          items: Json;
+          branding: Json | null;
+          mcp_key: string | null;
+          created_at: string;
+          updated_at: string;
+          ui_state: Json;
+          project_type: string | null;
+          derived_project_type: string | null;
+          kind: string;
+          subject_address: string | null;
+          property_url: string | null;
+        };
         Insert: {
-          id: string
-          user_id: string
-          title?: string | null
-          items?: Json
-          branding?: Json | null
-          mcp_key?: string | null
-          created_at?: string
-          updated_at?: string
-          ui_state?: Json
-          project_type?: string | null
-          derived_project_type?: string | null
-          kind?: string
-          subject_address?: string | null
-          property_url?: string | null
-        }
+          id: string;
+          user_id: string;
+          title?: string | null;
+          items?: Json;
+          branding?: Json | null;
+          mcp_key?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          ui_state?: Json;
+          project_type?: string | null;
+          derived_project_type?: string | null;
+          kind?: string;
+          subject_address?: string | null;
+          property_url?: string | null;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          title?: string | null
-          items?: Json
-          branding?: Json | null
-          mcp_key?: string | null
-          created_at?: string
-          updated_at?: string
-          ui_state?: Json
-          project_type?: string | null
-          derived_project_type?: string | null
-          kind?: string
-          subject_address?: string | null
-          property_url?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          title?: string | null;
+          items?: Json;
+          branding?: Json | null;
+          mcp_key?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          ui_state?: Json;
+          project_type?: string | null;
+          derived_project_type?: string | null;
+          kind?: string;
+          subject_address?: string | null;
+          property_url?: string | null;
+        };
+        Relationships: [];
+      };
       prospect_activation: {
         Row: {
-          id: number
-          email: string
-          subscriber_id: number | null
-          scope: Json
-          brand: Json | null
-          step: number
-          snapshot: Json | null
-          next_send_at: string | null
-          sent_at: string[]
-          status: string
-          created_at: string
-          updated_at: string
-        }
+          id: number;
+          email: string;
+          subscriber_id: number | null;
+          scope: Json;
+          brand: Json | null;
+          step: number;
+          snapshot: Json | null;
+          next_send_at: string | null;
+          sent_at: string[];
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: number
-          email: string
-          subscriber_id?: number | null
-          scope: Json
-          brand?: Json | null
-          step?: number
-          snapshot?: Json | null
-          next_send_at?: string | null
-          sent_at?: string[]
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: number;
+          email: string;
+          subscriber_id?: number | null;
+          scope: Json;
+          brand?: Json | null;
+          step?: number;
+          snapshot?: Json | null;
+          next_send_at?: string | null;
+          sent_at?: string[];
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: number
-          email?: string
-          subscriber_id?: number | null
-          scope?: Json
-          brand?: Json | null
-          step?: number
-          snapshot?: Json | null
-          next_send_at?: string | null
-          sent_at?: string[]
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          email?: string;
+          subscriber_id?: number | null;
+          scope?: Json;
+          brand?: Json | null;
+          step?: number;
+          snapshot?: Json | null;
+          next_send_at?: string | null;
+          sent_at?: string[];
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       rsw_airport_monthly: {
         Row: {
-          id: string
-          report_month: string
-          airport_code: string
-          metric: string
-          value: number | null
-          yoy_pct_change: number | null
-          period_label: string | null
-          source_url: string
-          inserted_at: string | null
-        }
+          id: string;
+          report_month: string;
+          airport_code: string;
+          metric: string;
+          value: number | null;
+          yoy_pct_change: number | null;
+          period_label: string | null;
+          source_url: string;
+          inserted_at: string | null;
+        };
         Insert: {
-          id: string
-          report_month: string
-          airport_code: string
-          metric: string
-          value?: number | null
-          yoy_pct_change?: number | null
-          period_label?: string | null
-          source_url: string
-          inserted_at?: string | null
-        }
+          id: string;
+          report_month: string;
+          airport_code: string;
+          metric: string;
+          value?: number | null;
+          yoy_pct_change?: number | null;
+          period_label?: string | null;
+          source_url: string;
+          inserted_at?: string | null;
+        };
         Update: {
-          id?: string
-          report_month?: string
-          airport_code?: string
-          metric?: string
-          value?: number | null
-          yoy_pct_change?: number | null
-          period_label?: string | null
-          source_url?: string
-          inserted_at?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          report_month?: string;
+          airport_code?: string;
+          metric?: string;
+          value?: number | null;
+          yoy_pct_change?: number | null;
+          period_label?: string | null;
+          source_url?: string;
+          inserted_at?: string | null;
+        };
+        Relationships: [];
+      };
       saved_charts: {
         Row: {
-          id: string
-          chart_block: Json
-          source_meta: Json | null
-          freshness_token: string | null
-          created_at: string
-        }
+          id: string;
+          chart_block: Json;
+          source_meta: Json | null;
+          freshness_token: string | null;
+          created_at: string;
+        };
         Insert: {
-          id: string
-          chart_block: Json
-          source_meta?: Json | null
-          freshness_token?: string | null
-          created_at?: string
-        }
+          id: string;
+          chart_block: Json;
+          source_meta?: Json | null;
+          freshness_token?: string | null;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          chart_block?: Json
-          source_meta?: Json | null
-          freshness_token?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          chart_block?: Json;
+          source_meta?: Json | null;
+          freshness_token?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       sba_loans_by_naics_county: {
         Row: {
-          project_county: string | null
-          project_state: string | null
-          naics_code: string | null
-          naics_description: string | null
-          approval_fy: number | null
-          n_loans: number | null
-          total_approved: number | null
-          n_chargeoffs: number | null
-          n_paid_in_full: number | null
-          chargeoff_pct: number | null
-          total_chargeoff_amount: number | null
-        }
+          project_county: string | null;
+          project_state: string | null;
+          naics_code: string | null;
+          naics_description: string | null;
+          approval_fy: number | null;
+          n_loans: number | null;
+          total_approved: number | null;
+          n_chargeoffs: number | null;
+          n_paid_in_full: number | null;
+          chargeoff_pct: number | null;
+          total_chargeoff_amount: number | null;
+        };
         Insert: {
-          project_county?: string | null
-          project_state?: string | null
-          naics_code?: string | null
-          naics_description?: string | null
-          approval_fy?: number | null
-          n_loans?: number | null
-          total_approved?: number | null
-          n_chargeoffs?: number | null
-          n_paid_in_full?: number | null
-          chargeoff_pct?: number | null
-          total_chargeoff_amount?: number | null
-        }
+          project_county?: string | null;
+          project_state?: string | null;
+          naics_code?: string | null;
+          naics_description?: string | null;
+          approval_fy?: number | null;
+          n_loans?: number | null;
+          total_approved?: number | null;
+          n_chargeoffs?: number | null;
+          n_paid_in_full?: number | null;
+          chargeoff_pct?: number | null;
+          total_chargeoff_amount?: number | null;
+        };
         Update: {
-          project_county?: string | null
-          project_state?: string | null
-          naics_code?: string | null
-          naics_description?: string | null
-          approval_fy?: number | null
-          n_loans?: number | null
-          total_approved?: number | null
-          n_chargeoffs?: number | null
-          n_paid_in_full?: number | null
-          chargeoff_pct?: number | null
-          total_chargeoff_amount?: number | null
-        }
-        Relationships: []
-      }
+          project_county?: string | null;
+          project_state?: string | null;
+          naics_code?: string | null;
+          naics_description?: string | null;
+          approval_fy?: number | null;
+          n_loans?: number | null;
+          total_approved?: number | null;
+          n_chargeoffs?: number | null;
+          n_paid_in_full?: number | null;
+          chargeoff_pct?: number | null;
+          total_chargeoff_amount?: number | null;
+        };
+        Relationships: [];
+      };
       sba_loans_franchise_outcomes: {
         Row: {
-          franchise_code: string | null
-          franchise_name: string | null
-          n_loans: number | null
-          total_approved: number | null
-          n_chargeoffs: number | null
-          n_paid_in_full: number | null
-          survival_rate: number | null
-          chargeoff_rate: number | null
-        }
+          franchise_code: string | null;
+          franchise_name: string | null;
+          n_loans: number | null;
+          total_approved: number | null;
+          n_chargeoffs: number | null;
+          n_paid_in_full: number | null;
+          survival_rate: number | null;
+          chargeoff_rate: number | null;
+        };
         Insert: {
-          franchise_code?: string | null
-          franchise_name?: string | null
-          n_loans?: number | null
-          total_approved?: number | null
-          n_chargeoffs?: number | null
-          n_paid_in_full?: number | null
-          survival_rate?: number | null
-          chargeoff_rate?: number | null
-        }
+          franchise_code?: string | null;
+          franchise_name?: string | null;
+          n_loans?: number | null;
+          total_approved?: number | null;
+          n_chargeoffs?: number | null;
+          n_paid_in_full?: number | null;
+          survival_rate?: number | null;
+          chargeoff_rate?: number | null;
+        };
         Update: {
-          franchise_code?: string | null
-          franchise_name?: string | null
-          n_loans?: number | null
-          total_approved?: number | null
-          n_chargeoffs?: number | null
-          n_paid_in_full?: number | null
-          survival_rate?: number | null
-          chargeoff_rate?: number | null
-        }
-        Relationships: []
-      }
+          franchise_code?: string | null;
+          franchise_name?: string | null;
+          n_loans?: number | null;
+          total_approved?: number | null;
+          n_chargeoffs?: number | null;
+          n_paid_in_full?: number | null;
+          survival_rate?: number | null;
+          chargeoff_rate?: number | null;
+        };
+        Relationships: [];
+      };
       social_accounts: {
         Row: {
-          id: string
-          user_id: string
-          platform: string
-          platform_account_id: string
-          access_token: string
-          refresh_token: string | null
-          token_type: string | null
-          expires_at: string | null
-          scopes: string[]
-          account_name: string | null
-          status: string
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          user_id: string;
+          platform: string;
+          platform_account_id: string;
+          access_token: string;
+          refresh_token: string | null;
+          token_type: string | null;
+          expires_at: string | null;
+          scopes: string[];
+          account_name: string | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          platform: string
-          platform_account_id: string
-          access_token: string
-          refresh_token?: string | null
-          token_type?: string | null
-          expires_at?: string | null
-          scopes?: string[]
-          account_name?: string | null
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          user_id: string;
+          platform: string;
+          platform_account_id: string;
+          access_token: string;
+          refresh_token?: string | null;
+          token_type?: string | null;
+          expires_at?: string | null;
+          scopes?: string[];
+          account_name?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          platform?: string
-          platform_account_id?: string
-          access_token?: string
-          refresh_token?: string | null
-          token_type?: string | null
-          expires_at?: string | null
-          scopes?: string[]
-          account_name?: string | null
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          platform?: string;
+          platform_account_id?: string;
+          access_token?: string;
+          refresh_token?: string | null;
+          token_type?: string | null;
+          expires_at?: string | null;
+          scopes?: string[];
+          account_name?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       social_events: {
         Row: {
-          id: number
-          social_post_id: string | null
-          platform_post_id: string
-          metric: string
-          value: number
-          captured_at: string
-          source: string
-        }
+          id: number;
+          social_post_id: string | null;
+          platform_post_id: string;
+          metric: string;
+          value: number;
+          captured_at: string;
+          source: string;
+        };
         Insert: {
-          id?: number
-          social_post_id?: string | null
-          platform_post_id: string
-          metric: string
-          value?: number
-          captured_at?: string
-          source?: string
-        }
+          id?: number;
+          social_post_id?: string | null;
+          platform_post_id: string;
+          metric: string;
+          value?: number;
+          captured_at?: string;
+          source?: string;
+        };
         Update: {
-          id?: number
-          social_post_id?: string | null
-          platform_post_id?: string
-          metric?: string
-          value?: number
-          captured_at?: string
-          source?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          social_post_id?: string | null;
+          platform_post_id?: string;
+          metric?: string;
+          value?: number;
+          captured_at?: string;
+          source?: string;
+        };
+        Relationships: [];
+      };
       social_posts: {
         Row: {
-          id: string
-          post_schedule_id: number | null
-          social_account_id: string
-          platform: string
-          platform_post_id: string | null
-          freshness_token: string | null
-          caption: string
-          media_url: string | null
-          status: string
-          error: string | null
-          idempotency_key: string
-          published_at: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          post_schedule_id: number | null;
+          social_account_id: string;
+          platform: string;
+          platform_post_id: string | null;
+          freshness_token: string | null;
+          caption: string;
+          media_url: string | null;
+          status: string;
+          error: string | null;
+          idempotency_key: string;
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          post_schedule_id?: number | null
-          social_account_id: string
-          platform: string
-          platform_post_id?: string | null
-          freshness_token?: string | null
-          caption: string
-          media_url?: string | null
-          status?: string
-          error?: string | null
-          idempotency_key: string
-          published_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          post_schedule_id?: number | null;
+          social_account_id: string;
+          platform: string;
+          platform_post_id?: string | null;
+          freshness_token?: string | null;
+          caption: string;
+          media_url?: string | null;
+          status?: string;
+          error?: string | null;
+          idempotency_key: string;
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          post_schedule_id?: number | null
-          social_account_id?: string
-          platform?: string
-          platform_post_id?: string | null
-          freshness_token?: string | null
-          caption?: string
-          media_url?: string | null
-          status?: string
-          error?: string | null
-          idempotency_key?: string
-          published_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          post_schedule_id?: number | null;
+          social_account_id?: string;
+          platform?: string;
+          platform_post_id?: string | null;
+          freshness_token?: string | null;
+          caption?: string;
+          media_url?: string | null;
+          status?: string;
+          error?: string | null;
+          idempotency_key?: string;
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       social_pulse_digest: {
         Row: {
-          week: string
-          digest: Json
-          narrative: string | null
-          scan_id: number | null
-          built_at: string
-        }
+          week: string;
+          digest: Json;
+          narrative: string | null;
+          scan_id: number | null;
+          built_at: string;
+        };
         Insert: {
-          week: string
-          digest: Json
-          narrative?: string | null
-          scan_id?: number | null
-          built_at?: string
-        }
+          week: string;
+          digest: Json;
+          narrative?: string | null;
+          scan_id?: number | null;
+          built_at?: string;
+        };
         Update: {
-          week?: string
-          digest?: Json
-          narrative?: string | null
-          scan_id?: number | null
-          built_at?: string
-        }
-        Relationships: []
-      }
+          week?: string;
+          digest?: Json;
+          narrative?: string | null;
+          scan_id?: number | null;
+          built_at?: string;
+        };
+        Relationships: [];
+      };
       social_pulse_hashtags: {
         Row: {
-          name: string
-          scan_id: number
-          media_count: number | null
-          formatted_media_count: string | null
-        }
+          name: string;
+          scan_id: number;
+          media_count: number | null;
+          formatted_media_count: string | null;
+        };
         Insert: {
-          name: string
-          scan_id: number
-          media_count?: number | null
-          formatted_media_count?: string | null
-        }
+          name: string;
+          scan_id: number;
+          media_count?: number | null;
+          formatted_media_count?: string | null;
+        };
         Update: {
-          name?: string
-          scan_id?: number
-          media_count?: number | null
-          formatted_media_count?: string | null
-        }
-        Relationships: []
-      }
+          name?: string;
+          scan_id?: number;
+          media_count?: number | null;
+          formatted_media_count?: string | null;
+        };
+        Relationships: [];
+      };
       social_pulse_posts: {
         Row: {
-          post_id: string
-          scan_id: number
-          shortcode: string
-          permalink: string
-          username: string
-          is_verified: boolean
-          taken_at: string | null
-          media_type: number | null
-          product_type: string | null
-          caption: string | null
-          like_count: number | null
-          comment_count: number | null
-          view_count: number | null
-          reshare_count: number | null
-          matched_term: string
-          area: string
-        }
+          post_id: string;
+          scan_id: number;
+          shortcode: string;
+          permalink: string;
+          username: string;
+          is_verified: boolean;
+          taken_at: string | null;
+          media_type: number | null;
+          product_type: string | null;
+          caption: string | null;
+          like_count: number | null;
+          comment_count: number | null;
+          view_count: number | null;
+          reshare_count: number | null;
+          matched_term: string;
+          area: string;
+        };
         Insert: {
-          post_id: string
-          scan_id: number
-          shortcode: string
-          permalink: string
-          username: string
-          is_verified?: boolean
-          taken_at?: string | null
-          media_type?: number | null
-          product_type?: string | null
-          caption?: string | null
-          like_count?: number | null
-          comment_count?: number | null
-          view_count?: number | null
-          reshare_count?: number | null
-          matched_term: string
-          area: string
-        }
+          post_id: string;
+          scan_id: number;
+          shortcode: string;
+          permalink: string;
+          username: string;
+          is_verified?: boolean;
+          taken_at?: string | null;
+          media_type?: number | null;
+          product_type?: string | null;
+          caption?: string | null;
+          like_count?: number | null;
+          comment_count?: number | null;
+          view_count?: number | null;
+          reshare_count?: number | null;
+          matched_term: string;
+          area: string;
+        };
         Update: {
-          post_id?: string
-          scan_id?: number
-          shortcode?: string
-          permalink?: string
-          username?: string
-          is_verified?: boolean
-          taken_at?: string | null
-          media_type?: number | null
-          product_type?: string | null
-          caption?: string | null
-          like_count?: number | null
-          comment_count?: number | null
-          view_count?: number | null
-          reshare_count?: number | null
-          matched_term?: string
-          area?: string
-        }
-        Relationships: []
-      }
+          post_id?: string;
+          scan_id?: number;
+          shortcode?: string;
+          permalink?: string;
+          username?: string;
+          is_verified?: boolean;
+          taken_at?: string | null;
+          media_type?: number | null;
+          product_type?: string | null;
+          caption?: string | null;
+          like_count?: number | null;
+          comment_count?: number | null;
+          view_count?: number | null;
+          reshare_count?: number | null;
+          matched_term?: string;
+          area?: string;
+        };
+        Relationships: [];
+      };
       social_pulse_scans: {
         Row: {
-          id: number
-          ran_at: string
-          terms_scanned: number
-          requests_spent: number
-          status: string
-        }
+          id: number;
+          ran_at: string;
+          terms_scanned: number;
+          requests_spent: number;
+          status: string;
+        };
         Insert: {
-          id: number
-          ran_at?: string
-          terms_scanned?: number
-          requests_spent?: number
-          status?: string
-        }
+          id: number;
+          ran_at?: string;
+          terms_scanned?: number;
+          requests_spent?: number;
+          status?: string;
+        };
         Update: {
-          id?: number
-          ran_at?: string
-          terms_scanned?: number
-          requests_spent?: number
-          status?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          ran_at?: string;
+          terms_scanned?: number;
+          requests_spent?: number;
+          status?: string;
+        };
+        Relationships: [];
+      };
       social_schedule_metrics: {
         Row: {
-          schedule_id: number | null
-          platform: string | null
-          total_posts: number | null
-          published: number | null
-          dry_run: number | null
-          failed: number | null
-          total_likes: number | null
-          total_comments: number | null
-          total_shares: number | null
-          total_impressions: number | null
-          total_clicks: number | null
-          last_published_at: string | null
-          last_freshness_token: string | null
-        }
+          schedule_id: number | null;
+          platform: string | null;
+          total_posts: number | null;
+          published: number | null;
+          dry_run: number | null;
+          failed: number | null;
+          total_likes: number | null;
+          total_comments: number | null;
+          total_shares: number | null;
+          total_impressions: number | null;
+          total_clicks: number | null;
+          last_published_at: string | null;
+          last_freshness_token: string | null;
+        };
         Insert: {
-          schedule_id?: number | null
-          platform?: string | null
-          total_posts?: number | null
-          published?: number | null
-          dry_run?: number | null
-          failed?: number | null
-          total_likes?: number | null
-          total_comments?: number | null
-          total_shares?: number | null
-          total_impressions?: number | null
-          total_clicks?: number | null
-          last_published_at?: string | null
-          last_freshness_token?: string | null
-        }
+          schedule_id?: number | null;
+          platform?: string | null;
+          total_posts?: number | null;
+          published?: number | null;
+          dry_run?: number | null;
+          failed?: number | null;
+          total_likes?: number | null;
+          total_comments?: number | null;
+          total_shares?: number | null;
+          total_impressions?: number | null;
+          total_clicks?: number | null;
+          last_published_at?: string | null;
+          last_freshness_token?: string | null;
+        };
         Update: {
-          schedule_id?: number | null
-          platform?: string | null
-          total_posts?: number | null
-          published?: number | null
-          dry_run?: number | null
-          failed?: number | null
-          total_likes?: number | null
-          total_comments?: number | null
-          total_shares?: number | null
-          total_impressions?: number | null
-          total_clicks?: number | null
-          last_published_at?: string | null
-          last_freshness_token?: string | null
-        }
-        Relationships: []
-      }
+          schedule_id?: number | null;
+          platform?: string | null;
+          total_posts?: number | null;
+          published?: number | null;
+          dry_run?: number | null;
+          failed?: number | null;
+          total_likes?: number | null;
+          total_comments?: number | null;
+          total_shares?: number | null;
+          total_impressions?: number | null;
+          total_clicks?: number | null;
+          last_published_at?: string | null;
+          last_freshness_token?: string | null;
+        };
+        Relationships: [];
+      };
       social_schedules: {
         Row: {
-          id: number
-          user_id: string
-          social_account_id: string
-          platform: string
-          status: string
-          cadence: string
-          day_of_week: number | null
-          day_of_month: number | null
-          send_hour_et: number
-          scope_kind: string | null
-          scope_value: string | null
-          content_template: string | null
-          hashtags: string[]
-          media_kind: string | null
-          freshness_gate: boolean
-          signature: string | null
-          next_run_at: string | null
-          last_run_at: string | null
-          created_at: string
-          updated_at: string
-          project_id: string | null
-          frozen_post: Json | null
-        }
+          id: number;
+          user_id: string;
+          social_account_id: string;
+          platform: string;
+          status: string;
+          cadence: string;
+          day_of_week: number | null;
+          day_of_month: number | null;
+          send_hour_et: number;
+          scope_kind: string | null;
+          scope_value: string | null;
+          content_template: string | null;
+          hashtags: string[];
+          media_kind: string | null;
+          freshness_gate: boolean;
+          signature: string | null;
+          next_run_at: string | null;
+          last_run_at: string | null;
+          created_at: string;
+          updated_at: string;
+          project_id: string | null;
+          frozen_post: Json | null;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          social_account_id: string
-          platform: string
-          status?: string
-          cadence: string
-          day_of_week?: number | null
-          day_of_month?: number | null
-          send_hour_et: number
-          scope_kind?: string | null
-          scope_value?: string | null
-          content_template?: string | null
-          hashtags?: string[]
-          media_kind?: string | null
-          freshness_gate?: boolean
-          signature?: string | null
-          next_run_at?: string | null
-          last_run_at?: string | null
-          created_at?: string
-          updated_at?: string
-          project_id?: string | null
-          frozen_post?: Json | null
-        }
+          id?: number;
+          user_id: string;
+          social_account_id: string;
+          platform: string;
+          status?: string;
+          cadence: string;
+          day_of_week?: number | null;
+          day_of_month?: number | null;
+          send_hour_et: number;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          content_template?: string | null;
+          hashtags?: string[];
+          media_kind?: string | null;
+          freshness_gate?: boolean;
+          signature?: string | null;
+          next_run_at?: string | null;
+          last_run_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          project_id?: string | null;
+          frozen_post?: Json | null;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          social_account_id?: string
-          platform?: string
-          status?: string
-          cadence?: string
-          day_of_week?: number | null
-          day_of_month?: number | null
-          send_hour_et?: number
-          scope_kind?: string | null
-          scope_value?: string | null
-          content_template?: string | null
-          hashtags?: string[]
-          media_kind?: string | null
-          freshness_gate?: boolean
-          signature?: string | null
-          next_run_at?: string | null
-          last_run_at?: string | null
-          created_at?: string
-          updated_at?: string
-          project_id?: string | null
-          frozen_post?: Json | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          social_account_id?: string;
+          platform?: string;
+          status?: string;
+          cadence?: string;
+          day_of_week?: number | null;
+          day_of_month?: number | null;
+          send_hour_et?: number;
+          scope_kind?: string | null;
+          scope_value?: string | null;
+          content_template?: string | null;
+          hashtags?: string[];
+          media_kind?: string | null;
+          freshness_gate?: boolean;
+          signature?: string | null;
+          next_run_at?: string | null;
+          last_run_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          project_id?: string | null;
+          frozen_post?: Json | null;
+        };
+        Relationships: [];
+      };
       social_send_ledger: {
         Row: {
-          id: number
-          user_id: string
-          idempotency_key: string
-          kind: string
-          schedule_id: number | null
-          created_at: string
-        }
+          id: number;
+          user_id: string;
+          idempotency_key: string;
+          kind: string;
+          schedule_id: number | null;
+          created_at: string;
+        };
         Insert: {
-          id?: number
-          user_id: string
-          idempotency_key: string
-          kind: string
-          schedule_id?: number | null
-          created_at?: string
-        }
+          id?: number;
+          user_id: string;
+          idempotency_key: string;
+          kind: string;
+          schedule_id?: number | null;
+          created_at?: string;
+        };
         Update: {
-          id?: number
-          user_id?: string
-          idempotency_key?: string
-          kind?: string
-          schedule_id?: number | null
-          created_at?: string
-        }
-        Relationships: []
-      }
+          id?: number;
+          user_id?: string;
+          idempotency_key?: string;
+          kind?: string;
+          schedule_id?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       source_connectors: {
         Row: {
-          source_id: string
-          display_name: string
-          kind: string
-          trust_tier: number
-          description: string | null
-          created_at: string
-          updated_at: string
-          trust_tier_score: number
-        }
+          source_id: string;
+          display_name: string;
+          kind: string;
+          trust_tier: number;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+          trust_tier_score: number;
+        };
         Insert: {
-          source_id: string
-          display_name: string
-          kind: string
-          trust_tier?: number
-          description?: string | null
-          created_at?: string
-          updated_at?: string
-          trust_tier_score?: number
-        }
+          source_id: string;
+          display_name: string;
+          kind: string;
+          trust_tier?: number;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          trust_tier_score?: number;
+        };
         Update: {
-          source_id?: string
-          display_name?: string
-          kind?: string
-          trust_tier?: number
-          description?: string | null
-          created_at?: string
-          updated_at?: string
-          trust_tier_score?: number
-        }
-        Relationships: []
-      }
+          source_id?: string;
+          display_name?: string;
+          kind?: string;
+          trust_tier?: number;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          trust_tier_score?: number;
+        };
+        Relationships: [];
+      };
       sourced_figures: {
         Row: {
-          id: string
-          scope_kind: string
-          scope_key: string
-          metric_key: string
-          label: string
-          value_num: number | null
-          value_text: string | null
-          unit: string | null
-          source_name: string
-          source_url: string
-          cited_text: string
-          as_of: string | null
-          fetched_at: string
-          expires_at: string
-          requested_from: string
-        }
+          id: string;
+          scope_kind: string;
+          scope_key: string;
+          metric_key: string;
+          label: string;
+          value_num: number | null;
+          value_text: string | null;
+          unit: string | null;
+          source_name: string;
+          source_url: string;
+          cited_text: string;
+          as_of: string | null;
+          fetched_at: string;
+          expires_at: string;
+          requested_from: string;
+        };
         Insert: {
-          id?: string
-          scope_kind: string
-          scope_key: string
-          metric_key: string
-          label: string
-          value_num?: number | null
-          value_text?: string | null
-          unit?: string | null
-          source_name: string
-          source_url: string
-          cited_text?: string
-          as_of?: string | null
-          fetched_at?: string
-          expires_at: string
-          requested_from?: string
-        }
+          id?: string;
+          scope_kind: string;
+          scope_key: string;
+          metric_key: string;
+          label: string;
+          value_num?: number | null;
+          value_text?: string | null;
+          unit?: string | null;
+          source_name: string;
+          source_url: string;
+          cited_text?: string;
+          as_of?: string | null;
+          fetched_at?: string;
+          expires_at: string;
+          requested_from?: string;
+        };
         Update: {
-          id?: string
-          scope_kind?: string
-          scope_key?: string
-          metric_key?: string
-          label?: string
-          value_num?: number | null
-          value_text?: string | null
-          unit?: string | null
-          source_name?: string
-          source_url?: string
-          cited_text?: string
-          as_of?: string | null
-          fetched_at?: string
-          expires_at?: string
-          requested_from?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          scope_kind?: string;
+          scope_key?: string;
+          metric_key?: string;
+          label?: string;
+          value_num?: number | null;
+          value_text?: string | null;
+          unit?: string | null;
+          source_name?: string;
+          source_url?: string;
+          cited_text?: string;
+          as_of?: string | null;
+          fetched_at?: string;
+          expires_at?: string;
+          requested_from?: string;
+        };
+        Relationships: [];
+      };
       swfl_inc_announcements: {
         Row: {
-          id: string
-          title: string
-          announced_date: string | null
-          county: string
-          category: string | null
-          investment_usd: number | null
-          jobs: number | null
-          summary: string | null
-          source_url: string
-          scraped_at: string
-          inserted_at: string
-        }
+          id: string;
+          title: string;
+          announced_date: string | null;
+          county: string;
+          category: string | null;
+          investment_usd: number | null;
+          jobs: number | null;
+          summary: string | null;
+          source_url: string;
+          scraped_at: string;
+          inserted_at: string;
+        };
         Insert: {
-          id: string
-          title: string
-          announced_date?: string | null
-          county?: string
-          category?: string | null
-          investment_usd?: number | null
-          jobs?: number | null
-          summary?: string | null
-          source_url: string
-          scraped_at?: string
-          inserted_at?: string
-        }
+          id: string;
+          title: string;
+          announced_date?: string | null;
+          county?: string;
+          category?: string | null;
+          investment_usd?: number | null;
+          jobs?: number | null;
+          summary?: string | null;
+          source_url: string;
+          scraped_at?: string;
+          inserted_at?: string;
+        };
         Update: {
-          id?: string
-          title?: string
-          announced_date?: string | null
-          county?: string
-          category?: string | null
-          investment_usd?: number | null
-          jobs?: number | null
-          summary?: string | null
-          source_url?: string
-          scraped_at?: string
-          inserted_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          title?: string;
+          announced_date?: string | null;
+          county?: string;
+          category?: string | null;
+          investment_usd?: number | null;
+          jobs?: number | null;
+          summary?: string | null;
+          source_url?: string;
+          scraped_at?: string;
+          inserted_at?: string;
+        };
+        Relationships: [];
+      };
       swfl_search_demand: {
         Row: {
-          id: string
-          keyword: string
-          source: string
-          location: string
-          captured_month: string
-          avg_monthly_searches: number | null
-          competition: string | null
-          cpc: number | null
-          monthly_searches: Json | null
-          is_bucketed: boolean
-          fetched_at: string
-          inserted_at: string
-        }
+          id: string;
+          keyword: string;
+          source: string;
+          location: string;
+          captured_month: string;
+          avg_monthly_searches: number | null;
+          competition: string | null;
+          cpc: number | null;
+          monthly_searches: Json | null;
+          is_bucketed: boolean;
+          fetched_at: string;
+          inserted_at: string;
+        };
         Insert: {
-          id: string
-          keyword: string
-          source: string
-          location: string
-          captured_month: string
-          avg_monthly_searches?: number | null
-          competition?: string | null
-          cpc?: number | null
-          monthly_searches?: Json | null
-          is_bucketed?: boolean
-          fetched_at: string
-          inserted_at?: string
-        }
+          id: string;
+          keyword: string;
+          source: string;
+          location: string;
+          captured_month: string;
+          avg_monthly_searches?: number | null;
+          competition?: string | null;
+          cpc?: number | null;
+          monthly_searches?: Json | null;
+          is_bucketed?: boolean;
+          fetched_at: string;
+          inserted_at?: string;
+        };
         Update: {
-          id?: string
-          keyword?: string
-          source?: string
-          location?: string
-          captured_month?: string
-          avg_monthly_searches?: number | null
-          competition?: string | null
-          cpc?: number | null
-          monthly_searches?: Json | null
-          is_bucketed?: boolean
-          fetched_at?: string
-          inserted_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          keyword?: string;
+          source?: string;
+          location?: string;
+          captured_month?: string;
+          avg_monthly_searches?: number | null;
+          competition?: string | null;
+          cpc?: number | null;
+          monthly_searches?: Json | null;
+          is_bucketed?: boolean;
+          fetched_at?: string;
+          inserted_at?: string;
+        };
+        Relationships: [];
+      };
       usage_events: {
         Row: {
-          id: number
-          client_id: string
-          iso_week: string
-          report_id: string | null
-          reach: string[] | null
-          ip_hash: string | null
-          created_at: string
-          action: string
-          user_id: string | null
-        }
+          id: number;
+          client_id: string;
+          iso_week: string;
+          report_id: string | null;
+          reach: string[] | null;
+          ip_hash: string | null;
+          created_at: string;
+          action: string;
+          user_id: string | null;
+        };
         Insert: {
-          id: number
-          client_id: string
-          iso_week: string
-          report_id?: string | null
-          reach?: string[] | null
-          ip_hash?: string | null
-          created_at?: string
-          action?: string
-          user_id?: string | null
-        }
+          id: number;
+          client_id: string;
+          iso_week: string;
+          report_id?: string | null;
+          reach?: string[] | null;
+          ip_hash?: string | null;
+          created_at?: string;
+          action?: string;
+          user_id?: string | null;
+        };
         Update: {
-          id?: number
-          client_id?: string
-          iso_week?: string
-          report_id?: string | null
-          reach?: string[] | null
-          ip_hash?: string | null
-          created_at?: string
-          action?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+          id?: number;
+          client_id?: string;
+          iso_week?: string;
+          report_id?: string | null;
+          reach?: string[] | null;
+          ip_hash?: string | null;
+          created_at?: string;
+          action?: string;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       user_brand_profiles: {
         Row: {
-          id: string
-          user_id: string
-          primary_color: string | null
-          accent_color: string | null
-          logo_url: string | null
-          company_name: string | null
-          website_url: string | null
-          sender_name: string | null
-          sender_address: string | null
-          sender_domain_verified: boolean
-          source: string
-          created_at: string
-          updated_at: string
-          agent_name: string | null
-          photo_url: string | null
-          license: string | null
-          brokerage: string | null
-          color_palettes: Json
-          instagram_url: string | null
-          facebook_url: string | null
-          linkedin_url: string | null
-          x_url: string | null
-          tiktok_url: string | null
-          youtube_url: string | null
-          pinterest_url: string | null
-          threads_url: string | null
-          unsubscribe_url: string | null
-          business_address: string | null
-          nickname: string | null
-          agent_title: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          font_display: string | null
-          font_body: string | null
-          text_color: string | null
-          background_color: string | null
-          surface_color: string | null
-          surface_dark_color: string | null
-        }
+          id: string;
+          user_id: string;
+          primary_color: string | null;
+          accent_color: string | null;
+          logo_url: string | null;
+          company_name: string | null;
+          website_url: string | null;
+          sender_name: string | null;
+          sender_address: string | null;
+          sender_domain_verified: boolean;
+          source: string;
+          created_at: string;
+          updated_at: string;
+          agent_name: string | null;
+          photo_url: string | null;
+          license: string | null;
+          brokerage: string | null;
+          color_palettes: Json;
+          instagram_url: string | null;
+          facebook_url: string | null;
+          linkedin_url: string | null;
+          x_url: string | null;
+          tiktok_url: string | null;
+          youtube_url: string | null;
+          pinterest_url: string | null;
+          threads_url: string | null;
+          unsubscribe_url: string | null;
+          business_address: string | null;
+          nickname: string | null;
+          agent_title: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
+          font_display: string | null;
+          font_body: string | null;
+          text_color: string | null;
+          background_color: string | null;
+          surface_color: string | null;
+          surface_dark_color: string | null;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          primary_color?: string | null
-          accent_color?: string | null
-          logo_url?: string | null
-          company_name?: string | null
-          website_url?: string | null
-          sender_name?: string | null
-          sender_address?: string | null
-          sender_domain_verified?: boolean
-          source?: string
-          created_at?: string
-          updated_at?: string
-          agent_name?: string | null
-          photo_url?: string | null
-          license?: string | null
-          brokerage?: string | null
-          color_palettes?: Json
-          instagram_url?: string | null
-          facebook_url?: string | null
-          linkedin_url?: string | null
-          x_url?: string | null
-          tiktok_url?: string | null
-          youtube_url?: string | null
-          pinterest_url?: string | null
-          threads_url?: string | null
-          unsubscribe_url?: string | null
-          business_address?: string | null
-          nickname?: string | null
-          agent_title?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          font_display?: string | null
-          font_body?: string | null
-          text_color?: string | null
-          background_color?: string | null
-          surface_color?: string | null
-          surface_dark_color?: string | null
-        }
+          id?: string;
+          user_id: string;
+          primary_color?: string | null;
+          accent_color?: string | null;
+          logo_url?: string | null;
+          company_name?: string | null;
+          website_url?: string | null;
+          sender_name?: string | null;
+          sender_address?: string | null;
+          sender_domain_verified?: boolean;
+          source?: string;
+          created_at?: string;
+          updated_at?: string;
+          agent_name?: string | null;
+          photo_url?: string | null;
+          license?: string | null;
+          brokerage?: string | null;
+          color_palettes?: Json;
+          instagram_url?: string | null;
+          facebook_url?: string | null;
+          linkedin_url?: string | null;
+          x_url?: string | null;
+          tiktok_url?: string | null;
+          youtube_url?: string | null;
+          pinterest_url?: string | null;
+          threads_url?: string | null;
+          unsubscribe_url?: string | null;
+          business_address?: string | null;
+          nickname?: string | null;
+          agent_title?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          font_display?: string | null;
+          font_body?: string | null;
+          text_color?: string | null;
+          background_color?: string | null;
+          surface_color?: string | null;
+          surface_dark_color?: string | null;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          primary_color?: string | null
-          accent_color?: string | null
-          logo_url?: string | null
-          company_name?: string | null
-          website_url?: string | null
-          sender_name?: string | null
-          sender_address?: string | null
-          sender_domain_verified?: boolean
-          source?: string
-          created_at?: string
-          updated_at?: string
-          agent_name?: string | null
-          photo_url?: string | null
-          license?: string | null
-          brokerage?: string | null
-          color_palettes?: Json
-          instagram_url?: string | null
-          facebook_url?: string | null
-          linkedin_url?: string | null
-          x_url?: string | null
-          tiktok_url?: string | null
-          youtube_url?: string | null
-          pinterest_url?: string | null
-          threads_url?: string | null
-          unsubscribe_url?: string | null
-          business_address?: string | null
-          nickname?: string | null
-          agent_title?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          font_display?: string | null
-          font_body?: string | null
-          text_color?: string | null
-          background_color?: string | null
-          surface_color?: string | null
-          surface_dark_color?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          primary_color?: string | null;
+          accent_color?: string | null;
+          logo_url?: string | null;
+          company_name?: string | null;
+          website_url?: string | null;
+          sender_name?: string | null;
+          sender_address?: string | null;
+          sender_domain_verified?: boolean;
+          source?: string;
+          created_at?: string;
+          updated_at?: string;
+          agent_name?: string | null;
+          photo_url?: string | null;
+          license?: string | null;
+          brokerage?: string | null;
+          color_palettes?: Json;
+          instagram_url?: string | null;
+          facebook_url?: string | null;
+          linkedin_url?: string | null;
+          x_url?: string | null;
+          tiktok_url?: string | null;
+          youtube_url?: string | null;
+          pinterest_url?: string | null;
+          threads_url?: string | null;
+          unsubscribe_url?: string | null;
+          business_address?: string | null;
+          nickname?: string | null;
+          agent_title?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          font_display?: string | null;
+          font_body?: string | null;
+          text_color?: string | null;
+          background_color?: string | null;
+          surface_color?: string | null;
+          surface_dark_color?: string | null;
+        };
+        Relationships: [];
+      };
       user_mcp_tokens: {
         Row: {
-          user_id: string
-          token: string
-          created_at: string
-          updated_at: string
-        }
+          user_id: string;
+          token: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          user_id: string
-          token: string
-          created_at?: string
-          updated_at?: string
-        }
+          user_id: string;
+          token: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          user_id?: string
-          token?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          user_id?: string;
+          token?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       user_mls_connections: {
         Row: {
-          id: string
-          user_id: string
-          board_slug: string
-          member_mls_id: string
-          last_entity_event_sequence: number | null
-          status: string
-          connected_at: string
-          last_synced_at: string | null
-          error_message: string | null
-        }
+          id: string;
+          user_id: string;
+          board_slug: string;
+          member_mls_id: string;
+          last_entity_event_sequence: number | null;
+          status: string;
+          connected_at: string;
+          last_synced_at: string | null;
+          error_message: string | null;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          board_slug: string
-          member_mls_id: string
-          last_entity_event_sequence?: number | null
-          status?: string
-          connected_at?: string
-          last_synced_at?: string | null
-          error_message?: string | null
-        }
+          id?: string;
+          user_id: string;
+          board_slug: string;
+          member_mls_id: string;
+          last_entity_event_sequence?: number | null;
+          status?: string;
+          connected_at?: string;
+          last_synced_at?: string | null;
+          error_message?: string | null;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          board_slug?: string
-          member_mls_id?: string
-          last_entity_event_sequence?: number | null
-          status?: string
-          connected_at?: string
-          last_synced_at?: string | null
-          error_message?: string | null
-        }
-        Relationships: []
-      }
+          id?: string;
+          user_id?: string;
+          board_slug?: string;
+          member_mls_id?: string;
+          last_entity_event_sequence?: number | null;
+          status?: string;
+          connected_at?: string;
+          last_synced_at?: string | null;
+          error_message?: string | null;
+        };
+        Relationships: [];
+      };
       vocab_concept_embeddings: {
         Row: {
-          concept_id: string
-          model: string
-          embedding: string
-          source_text: string
-          embedded_at: string
-          vocab_schema_version: string
-        }
+          concept_id: string;
+          model: string;
+          embedding: string;
+          source_text: string;
+          embedded_at: string;
+          vocab_schema_version: string;
+        };
         Insert: {
-          concept_id: string
-          model: string
-          embedding: string
-          source_text: string
-          embedded_at?: string
-          vocab_schema_version: string
-        }
+          concept_id: string;
+          model: string;
+          embedding: string;
+          source_text: string;
+          embedded_at?: string;
+          vocab_schema_version: string;
+        };
         Update: {
-          concept_id?: string
-          model?: string
-          embedding?: string
-          source_text?: string
-          embedded_at?: string
-          vocab_schema_version?: string
-        }
-        Relationships: []
-      }
+          concept_id?: string;
+          model?: string;
+          embedding?: string;
+          source_text?: string;
+          embedded_at?: string;
+          vocab_schema_version?: string;
+        };
+        Relationships: [];
+      };
       waitlist: {
         Row: {
-          id: number
-          email: string
-          source: string | null
-          created_at: string
-          interests: string[]
-        }
+          id: number;
+          email: string;
+          source: string | null;
+          created_at: string;
+          interests: string[];
+        };
         Insert: {
-          id?: number
-          email: string
-          source?: string | null
-          created_at?: string
-          interests?: string[]
-        }
+          id?: number;
+          email: string;
+          source?: string | null;
+          created_at?: string;
+          interests?: string[];
+        };
         Update: {
-          id?: number
-          email?: string
-          source?: string | null
-          created_at?: string
-          interests?: string[]
-        }
-        Relationships: []
-      }
+          id?: number;
+          email?: string;
+          source?: string | null;
+          created_at?: string;
+          interests?: string[];
+        };
+        Relationships: [];
+      };
       weekly_read_subscribers: {
         Row: {
-          id: string
-          email: string
-          zip: string
-          status: string
-          next_send_at: string | null
-          issues_sent: number
-          source: string | null
-          consent_text: string | null
-          consent_at: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          email: string;
+          zip: string;
+          status: string;
+          next_send_at: string | null;
+          issues_sent: number;
+          source: string | null;
+          consent_text: string | null;
+          consent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          email: string
-          zip: string
-          status?: string
-          next_send_at?: string | null
-          issues_sent?: number
-          source?: string | null
-          consent_text?: string | null
-          consent_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          email: string;
+          zip: string;
+          status?: string;
+          next_send_at?: string | null;
+          issues_sent?: number;
+          source?: string | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          email?: string
-          zip?: string
-          status?: string
-          next_send_at?: string | null
-          issues_sent?: number
-          source?: string | null
-          consent_text?: string | null
-          consent_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          email?: string;
+          zip?: string;
+          status?: string;
+          next_send_at?: string | null;
+          issues_sent?: number;
+          source?: string | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       welcome_chat_usage: {
         Row: {
-          id: number
-          cid: string | null
-          ip: string | null
-          turn_count: number | null
-          created_at: string
-        }
+          id: number;
+          cid: string | null;
+          ip: string | null;
+          turn_count: number | null;
+          created_at: string;
+        };
         Insert: {
-          id: number
-          cid?: string | null
-          ip?: string | null
-          turn_count?: number | null
-          created_at?: string
-        }
+          id: number;
+          cid?: string | null;
+          ip?: string | null;
+          turn_count?: number | null;
+          created_at?: string;
+        };
         Update: {
-          id?: number
-          cid?: string | null
-          ip?: string | null
-          turn_count?: number | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-    }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
-    CompositeTypes: Record<string, never>
-  }
+          id?: number;
+          cid?: string | null;
+          ip?: string | null;
+          turn_count?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
 }

@@ -116,10 +116,16 @@ export function ProjectEmailLabClient({
   // `ai_prompt` is persisted as the deliverable's build prompt so a SCHEDULED re-render
   // reproduces this exact email — chart included — with fresh data each occurrence (the
   // chart selector keys off the prompt; without it a scheduled send loses the chart).
-  async function handleSave(doc: EmailDoc, prompt: string): Promise<string | void> {
+  async function handleSave(
+    doc: EmailDoc,
+    prompt: string,
+    campaignKey?: string | null,
+  ): Promise<string | void> {
     setSaving(true);
     try {
       if (savedId) {
+        // PATCH is doc-only on purpose — a later edit never wipes the
+        // campaign provenance set at creation.
         await fetch(`/api/projects/${projectId}/materials`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -132,7 +138,11 @@ export function ProjectEmailLabClient({
       const res = await fetch(`/api/projects/${projectId}/materials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ doc, ai_prompt: prompt }),
+        body: JSON.stringify({
+          doc,
+          ai_prompt: prompt,
+          ...(campaignKey ? { campaign_key: campaignKey } : {}),
+        }),
       });
       if (res.ok) {
         const { id } = await res.json();

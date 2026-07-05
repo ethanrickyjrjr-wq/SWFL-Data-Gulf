@@ -61,7 +61,7 @@ import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
-import { campaignFollowUpForPrompt } from "@/lib/campaigns";
+import { campaignFollowUpForPrompt, campaignKeyForPrompt } from "@/lib/campaigns";
 import {
   brandGaps,
   findPlaceholder,
@@ -196,7 +196,10 @@ export interface EmailLabGridShellProps {
   initialRecipe?: ShowcaseRecipe | null;
   headerSlot: ReactNode;
   aiPlaceholder?: string;
-  onSave?: (doc: EmailDoc, aiPrompt: string) => Promise<string | void>;
+  /** Save the doc as a deliverable. `campaignKey` = quick-start campaign
+   *  provenance (null for organic builds) — stored as
+   *  deliverables.campaign_key, read back as the blast `campaign` tag. */
+  onSave?: (doc: EmailDoc, aiPrompt: string, campaignKey?: string | null) => Promise<string | void>;
   saving?: boolean;
   autoOpenSchedule?: boolean;
   deliverableId?: string | null;
@@ -255,6 +258,12 @@ export function EmailLabGridShell({
     recipe: ShowcaseRecipe;
   } | null>(null);
   const [followUpArmed, setFollowUpArmed] = useState(false);
+  // Campaign provenance for saves — separate from the chip lifecycle on
+  // purpose: a dismissed/consumed chip must still save provenance, and the
+  // weekly (follow-up) build carries the same key. Matched at seed time via
+  // campaignKeyForPrompt (seed AND follow-up prompts); organic seeds clear it.
+  // Saved as deliverables.campaign_key → the `campaign` Resend tag at blast.
+  const [campaignKey, setCampaignKey] = useState<string | null>(null);
   const [recipeGaps, setRecipeGaps] = useState<BrandNeed[] | null>(null);
   const [recipeHint, setRecipeHint] = useState<string | null>(() => {
     if (!initialRecipe) return null;
@@ -466,6 +475,7 @@ export function EmailLabGridShell({
     const follow = campaignFollowUpForPrompt(recipe.prompt);
     setCampaignFollowUp(follow ? { label: follow.label, recipe: follow.recipe } : null);
     setFollowUpArmed(false);
+    setCampaignKey(campaignKeyForPrompt(recipe.prompt));
     setPendingRecipe(recipe);
     setRecipeGaps(null);
     setAiStatus(null);
@@ -846,7 +856,7 @@ export function EmailLabGridShell({
   async function openSend() {
     let id = deliverableId ?? null;
     if (onSave) {
-      const saved = await onSave(doc, aiPrompt);
+      const saved = await onSave(doc, aiPrompt, campaignKey);
       if (typeof saved === "string") id = saved;
     }
     if (id) {
@@ -858,7 +868,7 @@ export function EmailLabGridShell({
   async function openSchedule() {
     let id = deliverableId ?? null;
     if (onSave) {
-      const saved = await onSave(doc, aiPrompt);
+      const saved = await onSave(doc, aiPrompt, campaignKey);
       if (typeof saved === "string") id = saved;
     }
     if (id) {
@@ -1077,7 +1087,7 @@ export function EmailLabGridShell({
             {onSave && (
               <button
                 type="button"
-                onClick={() => onSave(doc, aiPrompt)}
+                onClick={() => onSave(doc, aiPrompt, campaignKey)}
                 disabled={saving}
                 className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/20 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/30 disabled:opacity-40"
               >

@@ -1,3 +1,24 @@
+## 2026-07-05 (main) — BUILD: agent-launch amendment delta executed inline — campaign provenance LIVE, PDF columns, email-safe crop
+
+Operator: INLINE then FINISH+PUSH. Parallel session had already shipped plan tasks 1-7+old-10; this session
+executed the AMENDED delta. (1) A5: agent-card crop width-only (object-fit not email-safe; Outlook distorts)
++ PDF circle avatar dropped (30825466). (2) A4: row grouping extracted to ONE root `lib/email/doc/
+row-grouping.ts` — compile-grid consumes it (output proven unchanged) and EmailDocPdf now renders 5+7/6+6
+bands as true flex rows; free-flow routing asserted, 19 render tests (f98821eb). (3) Operator-ratified FULL
+campaign-key thread: migration `docs/sql/20260705_deliverables_campaign_key.sql` APPLIED+VERIFIED live
+(campaign_key text null; 24 rows, 0 stamped; pgrst reloaded), generated types, materials POST validates
+`/^[a-z0-9-]{1,40}$/`, `campaignKeyForPrompt` (matches seed AND follow-up prompts), grid shell provenance
+state survives chip dismiss/consume + 3-arg onSave at all call sites, ProjectEmailLabClient posts it
+create-only, blastTags gains the `campaign` tag, blast route passes deliverable.campaign_key. Gates:
+1000 tests 0 fail, `bunx next build` GREEN. Checks scheduled_send_minute_jitter + gmail_shared_from_
+unsub_audit already open; `agent_launch_campaign_live_verify` stays OPEN (operator-run).
+- INCIDENT (honest note for 6bea88f5): database-generated.types.ts — I checked out HEAD over its claimed
+  working copy (verified content-identical formatting churn twice pre-checkout, real types already
+  committed; worst case = re-run the regen), then released its 22-min stale claim under the operator's
+  FINISH order to land the campaign_key field.
+- REMAINING: plan tasks 8+9 (Marisol Vega lab demos — paid Sonnet, operator present — then the registry
+  entry that turns the 4th campaign button live with captured assets).
+
 ## 2026-07-05 (main) — GUARD: sessions can no longer dispatch paid workflows — check-no-paid-dispatch hook (drain forensics closed)
 
 Forensics on today's $0 drain: TWO manual `gh workflow run` dispatches of corridor-pulse (13:08 + 13:40 UTC,

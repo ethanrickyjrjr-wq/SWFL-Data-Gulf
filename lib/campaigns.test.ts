@@ -1,5 +1,10 @@
 import { describe, it, expect } from "bun:test";
-import { liveCampaigns, COMING_TILES, campaignFollowUpForPrompt } from "./campaigns";
+import {
+  liveCampaigns,
+  COMING_TILES,
+  campaignFollowUpForPrompt,
+  campaignKeyForPrompt,
+} from "./campaigns";
 import { CADENCE_COLORS, CADENCE_ORDER } from "./campaigns/cadence-colors";
 import { SHOWCASES } from "./showcase/registry";
 import { findPlaceholder, NEED_LABELS } from "./showcase/recipe";
@@ -120,6 +125,30 @@ describe("campaignFollowUpForPrompt", () => {
     const noFollow = SHOWCASES.find((s) => s.campaign?.seedRecipe && !s.campaign.followUp);
     if (noFollow?.campaign?.seedRecipe) {
       expect(campaignFollowUpForPrompt(noFollow.campaign.seedRecipe.prompt)).toBe(null);
+    }
+  });
+});
+
+describe("campaignKeyForPrompt (save provenance — deliverables.campaign_key)", () => {
+  it("returns null for an organic prompt", () => {
+    expect(campaignKeyForPrompt("build me anything")).toBe(null);
+  });
+
+  it("any live email campaign's seed prompt returns its key", () => {
+    for (const { campaign } of liveCampaigns("email")) {
+      if (campaign.seedRecipe) {
+        expect(campaignKeyForPrompt(campaign.seedRecipe.prompt)).toBe(campaign.key);
+      }
+    }
+  });
+
+  it("a follow-up recipe prompt returns the OWNING campaign's key (both artifacts share provenance)", () => {
+    // Guarded until an entry with a followUp lands (task 9) — helper must be total.
+    const withFollowUp = SHOWCASES.find((s) => s.campaign?.followUp);
+    if (withFollowUp?.campaign?.followUp) {
+      expect(campaignKeyForPrompt(withFollowUp.campaign.followUp.recipe.prompt)).toBe(
+        withFollowUp.campaign.key,
+      );
     }
   });
 });

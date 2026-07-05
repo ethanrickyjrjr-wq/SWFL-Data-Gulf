@@ -49,6 +49,11 @@ export async function POST(
   // this email — chart included — with fresh data (run-schedules.mts reads it). Optional.
   const aiPrompt =
     typeof body?.ai_prompt === "string" && body.ai_prompt.trim() ? body.ai_prompt.trim() : null;
+  // Quick-start campaign provenance (ShowcaseCampaign.key) — set once at
+  // creation, never on PATCH. The blast route reads it back as the `campaign`
+  // Resend tag. Registry keys are kebab-case; anything else is dropped.
+  const rawCampaign = typeof body?.campaign_key === "string" ? body.campaign_key.trim() : "";
+  const campaignKey = /^[a-z0-9-]{1,40}$/.test(rawCampaign) ? rawCampaign : null;
   const admin = createServiceRoleClient(); // deliverables has no owner INSERT policy — write via service-role
   const { error } = await admin.from("deliverables").insert({
     id: newId,
@@ -57,6 +62,7 @@ export async function POST(
     template: "block-canvas",
     doc: parsed.data,
     instruction: aiPrompt,
+    campaign_key: campaignKey,
     data_as_of: body?.data_as_of ?? new Date().toISOString(),
     narrative: EMPTY_NARRATIVE,
     items_snapshot: [],
