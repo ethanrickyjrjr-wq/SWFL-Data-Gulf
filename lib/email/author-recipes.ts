@@ -79,8 +79,9 @@ const RECIPES: Record<RecipeId, string> = {
     "- An `agent-card` as the sign-off — the bio reads as a two-line signature, never a " +
     "resume.\n" +
     "- Exactly ONE `button`, and you MUST write its `button_label` field yourself as " +
-    "the reply ask (reply with your address for your home's numbers) — leaving it " +
-    "empty ships a generic label; never a view, read, or learn-more label. A short " +
+    "the reply ask, in a few short words that fit a button (reply with your address " +
+    "— the details live in the email body, not the label); leaving it empty ships a " +
+    "generic label, and never a view, read, or learn-more label. A short " +
     "`text` P.S. inviting a forward to one friend is the only second ask, and it is " +
     "soft.\n" +
     "- The key message and the one ask land in the first readable lines. Copy is always " +
@@ -91,20 +92,22 @@ const RECIPES: Record<RecipeId, string> = {
     "RECIPE — WEEKLY SPHERE MARKET UPDATE (the headlines-versus-here contrast).\n" +
     "Target structure, top to bottom:\n" +
     "- Open with the contrast pair: TWO `hero` blocks side by side in ONE row, each " +
-    "spanning six of the twelve columns, each with band light. The first hero's kicker " +
-    "names the broad market (national, Florida, or the county) and its value comes " +
-    "from the DATA MENU; the second hero's kicker names the reader's own area and its " +
-    "value comes from the DATA MENU. These two are the headline figures — the whole " +
-    "email hangs on this pair.\n" +
-    "- One honest read of the gap in a `signal` block: plain language, what the " +
-    "difference actually means for someone who owns or wants a home there, and one " +
-    "sentence naming what would change this read. Never hedge it into mush.\n" +
+    "spanning six of the twelve columns, each with band light, each value from the " +
+    "DATA MENU. The system prints each figure's own factual label under its value " +
+    "automatically — so the kickers must NOT repeat it: the first hero's kicker reads " +
+    "like a headline pointer for the broad market (the county says, the headlines " +
+    "say), the second points at the reader's side (here in your neighborhood). These " +
+    "two are the headline figures — the whole email hangs on this pair.\n" +
+    "- One honest read of the gap in a `signal` block: plain language, a few sentences " +
+    "that END on a complete thought, what the difference actually means for someone " +
+    "who owns or wants a home there, and one sentence naming what would change this " +
+    "read. Never hedge it into mush.\n" +
     "- Optionally one supporting `stats` row (values only from the DATA MENU) or the " +
     "offered chart — nothing else competes with the pair.\n" +
     "- Exactly ONE `button`, and you MUST write its `button_label` field yourself as " +
-    "the reply ask — invite the reader to reply with their address and the word REVIEW " +
-    "for their home's snapshot; leaving it empty ships a generic label, and never a " +
-    "view, read, or learn-more label.\n" +
+    "the reply ask in a few short words that fit a button (reply with REVIEW — the " +
+    "address instruction lives in the email body, not the label); leaving it empty " +
+    "ships a generic label, and never a view, read, or learn-more label.\n" +
     "- Keep it short: this arrives every week, and consistency of shape builds the " +
     "open habit. The footer with unsubscribe and postal address always renders.",
 

@@ -367,6 +367,17 @@ interface Entry {
  *  are resolved via the menu (`num`) — an unresolved id blanks the field rather
  *  than leaking the placeholder default number. `fig` resolves the WHOLE menu
  *  figure so an id-selected value carries its own label (menu-label fidelity). */
+/** Clamp prose to `n` WITHOUT a mid-word cut: at the cap, drop the trailing
+ *  partial sentence (fallback: the trailing partial word). A clamped thought
+ *  that ends clean reads as written; "a meaningf" reads as broken (seen live
+ *  07/05/2026 on signal.body). */
+export function clampProse(s: string, n: number): string {
+  const cut = s.slice(0, n);
+  if (cut.length < n) return cut;
+  const sentenceSafe = cut.replace(/(?<=[.!?])[^.!?]*$/, "").trim();
+  return sentenceSafe || cut.replace(/\s+\S+$/, "");
+}
+
 function applyContent(
   type: BlockType,
   props: Record<string, unknown>,
@@ -389,15 +400,15 @@ function applyContent(
       // figure's OWN label — a real number must never ship under a label that
       // re-attributes it ("List Price" on a ZIP median). No figure → authored.
       props.label = (fig(a.value_figure)?.label ?? a.label ?? a.title ?? "").slice(0, 80);
-      props.prose = (a.prose ?? a.body ?? "").slice(0, 500);
+      props.prose = clampProse(a.prose ?? a.body ?? "", 500);
       break;
     case "signal":
       props.kicker = (a.kicker ?? "").slice(0, 60);
       props.title = (a.title ?? a.label ?? "").slice(0, 120);
-      props.body = (a.body ?? a.prose ?? "").slice(0, 500);
+      props.body = clampProse(a.body ?? a.prose ?? "", 500);
       break;
     case "text":
-      props.body = (a.body ?? a.prose ?? "").slice(0, 2000);
+      props.body = clampProse(a.body ?? a.prose ?? "", 2000);
       if (a.align) props.align = a.align;
       break;
     case "agent-card":
@@ -409,7 +420,12 @@ function applyContent(
       if (a.alt !== undefined) props.alt = a.alt;
       break;
     case "button":
-      if (a.button_label) props.label = a.button_label;
+      if (a.button_label) {
+        // The schema pre-slices to the 40-char prop cap — a label AT the cap was
+        // almost certainly cut mid-phrase; drop the dangling partial word.
+        props.label =
+          a.button_label.length === 40 ? a.button_label.replace(/\s+\S+$/, "") : a.button_label;
+      }
       break;
     // header / footer / social-icons / divider: brand/structural — author writes none.
   }
