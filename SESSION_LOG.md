@@ -1,3 +1,16 @@
+## 2026-07-05 (main) — PLAN AMENDED: agent-launch — operator ruled "1" (full campaign-key thread) + defect fixes folded in
+
+Operator ratified decision 1: the FULL campaign-key thread (deviation 1 overruled). Folded into the plan
+in place: Task 10 rewritten (idempotent `deliverables.campaign_key` migration via Bun.SQL + generated
+types + materials POST + `onSave(doc, prompt, campaignKey?)` thread + `campaign` Resend tag —
+DONE-WHEN 4 meetable again); Task 6 gains `campaignKeyForPrompt` (matches seed AND follow-up prompts so
+both campaign artifacts save provenance); Task 7 gains the provenance state that survives chip
+dismiss/consume; Task 4 gains the REQUIRED applyBrand no-clobber guard (mailto defect A3); Task 2 gains
+Steps 3/3b/3c (free-flow routing assertion + row-grouping root extraction + PDF flex rows — defect A4);
+Task 1 crop switched to width-only (object-fit not email-safe, A5). Decision 2 (L3 source line) NOT
+overruled → deviation stands, annotated. Plan header/parallel-safety auto-recomputed by the plan hook
+(23 files, 2 conflict groups). Execution NOT started; push held for operator.
+
 ## 2026-07-05 (main) — LOCK: no paid web_search in scheduled ingest (ingest/CLAUDE.md + memory) — receipts confirmed operator's "we already did this"
 
 History check proved the operator right: city_pulse was PAUSED 06/18 for a credit freeze (same fire),

@@ -1,7 +1,7 @@
 # Agent Launch Campaign Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 11 tasks, 19 files, keywords: schema, architecture
+> **Recommended model:** 🧠 Opus — 11 tasks, 23 files, 2 conflict groups, keywords: migration, schema, architecture
 
 **Goal:** Ship the fourth quick-start campaign — a day-one agent's launch: seeded announcement email + post-build chip that seeds the recurring weekly sphere update — with the lab upgrades that make the promised look actually render out of Sonnet.
 
@@ -180,16 +180,85 @@ describe("compiled grid: portrait beside letter", () => {
 Run: `bun test lib/email/compile-grid-columns.test.ts`
 Expected: PASS if compileGrid already handles it (likely — the canvas uses the same rows). If FAIL, the defect is real: read `compile-grid.ts`, fix column-width derivation or image sizing inside a column cell (image must be `width:100%` of its CELL, `height:auto`, never the fixed 300px banner height), and re-run until green.
 
-- [ ] **Step 3: PDF + free-stack spot check**
+- [ ] **Step 3: Free-flow engine — assert the routing, don't fix it**
 
-Run: `bun test lib/email/` (full email suite) — the three render engines' existing tests must stay green.
-Expected: PASS.
+`renderEmailDocHtml` (`lib/email/render-email-doc.ts:23`) routes ANY layout-carrying doc to `compileGrid`, so the free stacker (`EmailDocRenderer`) never sees a positioned doc on any surface (preview, blast, /p, scheduled). Add one assertion to the Step 1 test: the compiled output contains an MSO ghost-table marker (`[if mso]`) — that marker only exists on the compileGrid path, which proves the routing.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 3b: Extract the row-grouping root (PDF fix, part 1)**
+
+The PDF engine is VERIFIED BROKEN for this look: `lib/pdf/email-doc-pdf.tsx` never reads `block.layout` — blocks render as a sequential stack, so the portrait row stacks in the PDF attachment (blast `include_pdf`) and Download-PDF paths. Spec L4: fix where broken.
+
+Write the failing test first — `lib/email/doc/row-grouping.test.ts`:
+
+```ts
+import { describe, expect, it } from "bun:test";
+import { groupRows } from "./row-grouping";
+import type { EmailBlock } from "./types";
+
+const blk = (id: string, layout?: { x: number; y: number; w: number; h: number }): EmailBlock =>
+  ({ id, type: "text", props: { body: id }, ...(layout ? { layout } : {}) }) as EmailBlock;
+
+describe("groupRows", () => {
+  it("5+7 on one y-band is one row of two", () => {
+    const rows = groupRows([blk("a", { x: 0, y: 0, w: 5, h: 6 }), blk("b", { x: 5, y: 0, w: 7, h: 6 })]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].map((d) => d.block.id)).toEqual(["a", "b"]);
+  });
+  it("6+6 with unequal heights (RGL vertical compaction) still shares a row", () => {
+    const rows = groupRows([blk("a", { x: 0, y: 0, w: 6, h: 6 }), blk("b", { x: 6, y: 2, w: 6, h: 3 })]);
+    expect(rows).toHaveLength(1);
+  });
+  it("a block at/below the band bottom opens a new row; no-layout blocks trail full-bleed", () => {
+    const rows = groupRows([blk("a", { x: 0, y: 0, w: 6, h: 2 }), blk("c", { x: 0, y: 2, w: 12, h: 2 }), blk("z")]);
+    expect(rows).toHaveLength(3);
+    expect(rows[2][0].eff.w).toBe(12);
+  });
+});
+```
+
+Then create `lib/email/doc/row-grouping.ts` by moving `effectiveLayout` + `groupRows` out of `compile-grid.ts:68-130` VERBATIM (band-overlap grouping, sort by y→x→index, `FALLBACK_BASE` for no-layout blocks), exporting:
+
+```ts
+export interface EffLayout { x: number; y: number; w: number; h: number }
+export interface RowEntry { block: EmailBlock; eff: EffLayout }
+export function effectiveLayout(block: EmailBlock, fallbackY: number): EffLayout
+export function groupRows(blocks: EmailBlock[]): RowEntry[][]
+```
+
+Make `compile-grid.ts` import from the new module and delete its private copy — its compiled output must stay byte-identical (the Step 1 test + existing `compile-grid-metric.test.ts` prove it). If compile-grid's internal shape keeps extra fields (e.g. the original index `i`), adapt the import site, never the helper.
+
+- [ ] **Step 3c: PDF renders grouped rows as flex rows (PDF fix, part 2)**
+
+In `EmailDocPdf` (`lib/pdf/email-doc-pdf.tsx`), where the body maps `doc.blocks` today, group first:
+
+```tsx
+import { groupRows } from "@/lib/email/doc/row-grouping";
+// ...
+{groupRows(doc.blocks).map((row, ri) =>
+  row.length === 1 ? (
+    <PdfBlock key={row[0].block.id ?? ri} block={row[0].block} gs={gs} />
+  ) : (
+    <View key={ri} style={{ flexDirection: "row" }}>
+      {row.map(({ block, eff }) => (
+        <View key={block.id} style={{ flex: eff.w }}>
+          <PdfBlock block={block} gs={gs} />
+        </View>
+      ))}
+    </View>
+  ),
+)}
+```
+
+(@react-pdf: no `gap`; flex weights carry the 5/12–7/12 split; single-block rows render exactly as today so the audit test stays meaningful.) Add a PDF test mirroring the audit test's element-tree introspection: the 5+7 doc yields a `View` with `flexDirection: "row"` whose two children carry `flex: 5` and `flex: 7`.
+
+- [ ] **Step 4: Full suites + commit**
+
+Run: `bun test lib/email/ lib/pdf/`
+Expected: PASS — compile-grid output unchanged, PDF audit test green, new grouping tests green.
 
 ```bash
-git add lib/email/compile-grid-columns.test.ts lib/email/compile-grid.ts lib/email/blocks/ImageBlock.tsx
-git commit -m "test(email): prove portrait-column side-by-side rows compile to real email columns (agent-launch L4)"
+git add lib/email/compile-grid-columns.test.ts lib/email/doc/row-grouping.ts lib/email/doc/row-grouping.test.ts lib/email/compile-grid.ts lib/pdf/email-doc-pdf.tsx lib/email/blocks/ImageBlock.tsx
+git commit -m "feat(email): one row-grouping root — PDF renders true side-by-side columns (agent-launch L4)"
 ```
 
 (Stage only the files you actually touched.)
@@ -334,6 +403,50 @@ const buttonMailto =
 ```
 
 and pass it through. (If the route serves anonymous users, `user` may be null — the guard above already handles it.)
+
+- [ ] **Step 3b: REQUIRED — applyBrand must not clobber the mailto (verified defect)**
+
+The grid shell runs `applyBrand(parsed.data, brandTokens)` on every authored doc (`EmailLabGridShell.tsx:342`), and `applyBrand`'s button branch (`components/email-lab/EmailLabShell.tsx:140-141`) unconditionally overwrites `props.url` with the brand CTA — so for any brand with a website URL the assembly-set mailto is silently replaced and the reply button becomes a website link. Without this guard, everything above is dead code. Change the branch to:
+
+```ts
+    } else if (b.type === "button") {
+      if (cta && !String(props.url ?? "").startsWith("mailto:")) props.url = cta;
+    } else if (b.type === "hero") {
+```
+
+And add a direct test (`applyBrand` is exported from `EmailLabShell.tsx`) — new file `lib/email/brand/apply-brand-button.test.ts`:
+
+```ts
+import { describe, expect, it } from "bun:test";
+import { applyBrand } from "@/components/email-lab/EmailLabShell";
+import type { EmailDoc } from "@/lib/email/doc/types";
+
+const gs = {
+  primaryColor: "#1F4D3A",
+  accentColor: "#A98A4E",
+  fontFamily: "BOOK_SERIF",
+  textColor: "#1A1E22",
+  backdropColor: "#FBFAF7",
+} as EmailDoc["globalStyle"];
+
+const docWith = (props: Record<string, unknown>): EmailDoc =>
+  ({ globalStyle: gs, blocks: [{ id: "b1", type: "button", props }] }) as EmailDoc;
+
+describe("applyBrand button branch", () => {
+  it("keeps an engine-set mailto — the brand CTA must not clobber it", () => {
+    const out = applyBrand(docWith({ label: "Reply", url: "mailto:agent@example.com" }), {
+      WEBSITE_URL: "https://site.example",
+    });
+    expect((out.blocks[0].props as { url?: string }).url).toBe("mailto:agent@example.com");
+  });
+  it("still fills the CTA on ordinary buttons (today's behavior preserved)", () => {
+    const out = applyBrand(docWith({ label: "Go", url: "" }), { WEBSITE_URL: "https://site.example" });
+    expect((out.blocks[0].props as { url?: string }).url).toBe("https://site.example");
+  });
+});
+```
+
+(Note: `mailto:` hrefs pass the blast route's URL lint — `SAFE_SCHEME_RE`, `lib/deliverable/url-lint.ts:33` — so the guarded mailto ships cleanly. Add `components/email-lab/EmailLabShell.tsx` and the new test file to this task's staged paths.)
 
 - [ ] **Step 4: Run tests + build**
 
@@ -498,9 +611,21 @@ export function campaignFollowUpForPrompt(
   }
   return null;
 }
+
+/** Campaign provenance for a Build-box seed — matches ANY live email campaign's
+ *  seed OR follow-up recipe prompt (both live only in the registry), so BOTH
+ *  campaign artifacts (announcement + weekly) save with the same campaign_key.
+ *  Null for organic prompts. Task 10's save thread reads this. */
+export function campaignKeyForPrompt(prompt: string): string | null {
+  for (const { campaign } of liveCampaigns("email")) {
+    if (campaign.seedRecipe?.prompt === prompt) return campaign.key;
+    if (campaign.followUp?.recipe.prompt === prompt) return campaign.key;
+  }
+  return null;
+}
 ```
 
-(Import `ShowcaseRecipe` type from `@/lib/showcase/recipe`.)
+(Import `ShowcaseRecipe` type from `@/lib/showcase/recipe`.) Add tests for `campaignKeyForPrompt` beside the followUp ones: an existing seed prompt (e.g. the newsletter campaign's) returns its key; a followUp recipe prompt returns the owning campaign's key (guarded until Task 9 lands an entry with one); an organic prompt returns null.
 
 - [ ] **Step 4: Run tests**
 
@@ -519,7 +644,7 @@ git commit -m "feat(campaigns): ShowcaseCampaign.followUp + seed-prompt lookup h
 ### Task 7: follow-up chip in the grid shell
 
 **Files:**
-- Modify: `components/email-lab/EmailLabGridShell.tsx` (state near `handleUseRecipe` :439; chip in the toolbar beside the CAN-SPAM span :976-987; success point in `runAuthor` :339-348)
+- 🟡 Modify: `components/email-lab/EmailLabGridShell.tsx` (state near `handleUseRecipe` :439; chip in the toolbar beside the CAN-SPAM span :976-987; success point in `runAuthor` :339-348)
 
 **Interfaces:**
 - Consumes: `campaignFollowUpForPrompt` (Task 6), `handleUseRecipe(recipe)`, `runAuthor` success branch, existing toolbar styling (`text-[10px] text-[#f59e0b]/70` family — match the shell's look, use the teal accent family for a positive nudge: `text-gulf-teal`).
@@ -540,15 +665,25 @@ const [campaignFollowUp, setCampaignFollowUp] = useState<{
 const [followUpArmed, setFollowUpArmed] = useState(false);
 ```
 
+Also add the PROVENANCE state — separate from the chip lifecycle on purpose (a dismissed chip must still save provenance, and the weekly build carries the same key):
+
+```tsx
+// Campaign provenance for saves (Task 10) — set at seed time, survives chip
+// consume/dismiss. Matches seed AND follow-up prompts, so both campaign
+// artifacts save with the key. Organic seeds clear it.
+const [campaignKey, setCampaignKey] = useState<string | null>(null);
+```
+
 In `handleUseRecipe` (top of the function):
 
 ```tsx
 const follow = campaignFollowUpForPrompt(recipe.prompt);
 setCampaignFollowUp(follow ? { label: follow.label, recipe: follow.recipe } : null);
 setFollowUpArmed(false);
+setCampaignKey(campaignKeyForPrompt(recipe.prompt));
 ```
 
-Import `campaignFollowUpForPrompt` from `@/lib/campaigns`.
+Import `campaignFollowUpForPrompt` and `campaignKeyForPrompt` from `@/lib/campaigns`. (The chip's onClick routes through `handleUseRecipe(r)` with the follow-up recipe, and `campaignKeyForPrompt` matches follow-up prompts too — so the key carries over without special-casing.)
 
 - [ ] **Step 2: Arm on build success**
 
@@ -731,17 +866,63 @@ git commit -m "feat(campaigns): Agent Launch — fourth quick-start campaign liv
 
 ---
 
-### Task 10: blast send tags
+### Task 10: campaign provenance + blast send tags (operator-ratified full thread, 07/05/2026)
 
 **Files:**
+- Create: `docs/sql/20260705_deliverables_campaign_key.sql` (run via Bun.SQL — psql is NOT installed; creds in `.dlt/secrets.toml`, `sslmode=require`)
+- Modify: `database-generated.types.ts` (~line 834 — deliverables Row/Insert/Update gain `campaign_key`)
+- Modify: `app/api/projects/[id]/materials/route.ts` (POST accepts + stores `campaign_key`; PATCH untouched so doc edits never wipe provenance)
+- 🟡 Modify: `components/email-lab/EmailLabGridShell.tsx` (`onSave` signature + call sites pass `campaignKey` from Task 7's state)
+- Modify: `app/project/[id]/email-lab/ProjectEmailLabClient.tsx` (`handleSave` forwards it — new-deliverable branch only)
 - Modify: `app/api/deliverables/[id]/blast/route.ts:218-232` (`messageFor`)
 - Test: `lib/email/blast-tags.test.ts` (create) + pure helper `lib/email/blast-tags.ts` (create)
 
 **Interfaces:**
-- Consumes: `deliverable.id`, `deliverable.template` in the route.
-- Produces: `blastTags(deliverableId: string, template: string): { name: string; value: string }[]` — Resend tag rules: names/values ASCII letters, numbers, underscores, dashes only. UUIDs pass as-is; template is sanitized. Every outgoing message (both the batch and the PDF path — both call `messageFor`) carries `tags`.
+- Consumes: `campaignKey` state (Task 7), `deliverable.id` / `deliverable.template` / `deliverable.campaign_key` in the blast route.
+- Produces: `blastTags(deliverableId: string, template: string, campaignKey?: string | null): { name: string; value: string }[]`. Resend tag rules (verified 07/05/2026, SDK + live docs): names/values ASCII letters, numbers, underscores, dashes only, ≤256 chars; tags ride BOTH `emails.send` and `batch.send`; the tag is included in webhook events — Build 2's data accrues from day one.
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Migration (idempotent) + verify**
+
+`docs/sql/20260705_deliverables_campaign_key.sql`:
+
+```sql
+-- Campaign provenance for blast-send tagging (agent-launch build 1; Build 2's
+-- results strip reads the Resend webhook events these tags unlock). Idempotent.
+ALTER TABLE public.deliverables
+  ADD COLUMN IF NOT EXISTS campaign_key text;
+COMMENT ON COLUMN public.deliverables.campaign_key IS
+  'Quick-start campaign key that seeded this deliverable (ShowcaseCampaign.key, lib/showcase/registry.ts); null = not campaign-seeded.';
+```
+
+Run via the repo's Bun.SQL runner pattern (see prior `docs/sql/*` executions in git history). Verify:
+
+```sql
+SELECT column_name FROM information_schema.columns
+WHERE table_schema='public' AND table_name='deliverables' AND column_name='campaign_key';
+```
+
+Expected: exactly one row.
+
+- [ ] **Step 2: Generated types**
+
+In `database-generated.types.ts` deliverables (~line 834): add `campaign_key: string | null;` to `Row` and `campaign_key?: string | null;` to `Insert` + `Update`, matching the file's existing style. (`database.types.ts`'s deliverables override only concerns `doc` — no change there.)
+
+- [ ] **Step 3: Thread the save**
+
+`EmailLabGridShell.tsx`: prop becomes `onSave?: (doc: EmailDoc, aiPrompt: string, campaignKey?: string | null) => Promise<string | void>`; every `onSave(doc, aiPrompt)` call site (~lines 820, 832, 1023) becomes `onSave(doc, aiPrompt, campaignKey)` (Task 7's provenance state).
+
+`ProjectEmailLabClient.tsx` `handleSave(doc, prompt, campaignKey?)`: the NEW-deliverable POST body gains `campaign_key: campaignKey ?? null`; the PATCH branch stays untouched.
+
+`app/api/projects/[id]/materials/route.ts` POST:
+
+```ts
+  const rawCampaign = typeof body?.campaign_key === "string" ? body.campaign_key.trim() : "";
+  const campaignKey = /^[a-z0-9-]{1,40}$/.test(rawCampaign) ? rawCampaign : null;
+```
+
+and the insert object gains `campaign_key: campaignKey,`.
+
+- [ ] **Step 4: Write the failing tag test**
 
 ```ts
 // lib/email/blast-tags.test.ts
@@ -755,8 +936,14 @@ describe("blastTags", () => {
       { name: "tpl", value: "block-canvas" },
     ]);
   });
-  it("strips characters outside [A-Za-z0-9_-]", () => {
-    expect(blastTags("a b", "e!mail")).toEqual([
+  it("adds the campaign tag when the deliverable was campaign-seeded", () => {
+    expect(blastTags("abc-123", "block-canvas", "agent-launch")).toContainEqual({
+      name: "campaign",
+      value: "agent-launch",
+    });
+  });
+  it("null campaign = no campaign tag; strips characters outside [A-Za-z0-9_-]", () => {
+    expect(blastTags("a b", "e!mail", null)).toEqual([
       { name: "did", value: "ab" },
       { name: "tpl", value: "email" },
     ]);
@@ -764,38 +951,50 @@ describe("blastTags", () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure, then implement**
+- [ ] **Step 5: Run to verify failure, then implement**
 
 ```ts
 // lib/email/blast-tags.ts — Resend outbound tags for agent blast sends.
-// Build 2 (campaign results strip) reads these back off webhook events;
-// the deliverable id is the join key to campaign/schedule attribution.
+// Build 2 (campaign results strip) reads these back off webhook events —
+// verified 07/05/2026: tags ride emails.send AND batch.send, and "after the
+// email is sent, the tag is included in the webhook event" (Resend docs).
+// Charset: ASCII letters/numbers/underscores/dashes only (SDK Tag type).
 const SAFE = /[^A-Za-z0-9_-]/g;
 
 export function blastTags(
   deliverableId: string,
   template: string,
+  campaignKey?: string | null,
 ): { name: string; value: string }[] {
-  return [
+  const tags = [
     { name: "did", value: deliverableId.replace(SAFE, "") },
     { name: "tpl", value: template.replace(SAFE, "") },
   ];
+  const campaign = (campaignKey ?? "").replace(SAFE, "");
+  if (campaign) tags.push({ name: "campaign", value: campaign });
+  return tags;
 }
 ```
 
 Run: `bun test lib/email/blast-tags.test.ts` → PASS.
 
-- [ ] **Step 3: Wire into the route**
+- [ ] **Step 6: Wire into the route**
 
-In `messageFor`, add `tags: blastTags(id, deliverable.template),` to the returned object (import the helper). Both send paths (batch + per-recipient PDF) flow through `messageFor`, so one line covers both.
+In `messageFor`, add to the returned object (import the helper):
 
-- [ ] **Step 4: Build + commit**
+```ts
+      tags: blastTags(id, deliverable.template, (deliverable as { campaign_key?: string | null }).campaign_key),
+```
 
-Run: `bunx next build` → green.
+(After Step 2 the typed row carries `campaign_key` — drop the cast if the select's row type picks it up directly.) Both send paths (batch + per-recipient PDF) flow through `messageFor`, so one line covers both.
+
+- [ ] **Step 7: Build + commit**
+
+Run: `bun test lib/email/ && bunx next build` → green. (Live Resend payload inspection is operator-run under `agent_launch_campaign_live_verify` — no paid live send from this session.)
 
 ```bash
-git add lib/email/blast-tags.ts lib/email/blast-tags.test.ts "app/api/deliverables/[id]/blast/route.ts"
-git commit -m "feat(blast): tag every send with deliverable id + template — Build 2 attribution hook (agent-launch)"
+git add docs/sql/20260705_deliverables_campaign_key.sql database-generated.types.ts "app/api/projects/[id]/materials/route.ts" app/project/[id]/email-lab/ProjectEmailLabClient.tsx components/email-lab/EmailLabGridShell.tsx lib/email/blast-tags.ts lib/email/blast-tags.test.ts "app/api/deliverables/[id]/blast/route.ts"
+git commit -m "feat(blast): campaign provenance column + campaign/deliverable Resend tags — Build 2 data accrues from day one (agent-launch)"
 ```
 
 ---
@@ -833,7 +1032,7 @@ STOP. Do not push — the operator pushes after review.
 
 ## Self-Review (done at write time)
 
-- Spec coverage: §1 registry → T9; §2 recipes → T5 (announcement via agent-intro) + T9 (prompt strings); §3 recipe upgrade → T5; §4 chip → T6+T7; §5 L1 → T1+T2, L2 → T4, L3 → T3, L4 → T2, L5 → cut (deviation 3); §6 tagging → T10 (deviation 1), jitter → T11 check; §7 demos → T8; §8 design language → T8 brand settings. Testing section → per-task tests + T11 sweep. DONE-WHEN → T8 (Sonnet-look proof), T9 (button), T7/T8 (chip+schedule), T10 (tags), live-verify stays operator-run.
+- Spec coverage: §1 registry → T9; §2 recipes → T5 (announcement via agent-intro) + T9 (prompt strings); §3 recipe upgrade → T5; §4 chip → T6+T7; §5 L1 → T1+T2, L2 → T4 (incl. the applyBrand no-clobber guard), L3 → T3 (deviation 2 stands), L4 → T2 (incl. the PDF row-grouping fix — all three engines), L5 → cut (deviation 3); §6 tagging → T10 (FULL campaign-key thread, operator-ratified 07/05/2026), jitter → T11 check; §7 demos → T8; §8 design language → T8 brand settings. Testing section → per-task tests + T11 sweep. DONE-WHEN → T8 (Sonnet-look proof), T9 (button), T7/T8 (chip+schedule), T10 (campaign + deliverable tags — DONE-WHEN 4 now meetable), live-verify stays operator-run.
 - Placeholders: none — every code step shows real code; two steps direct reading a neighboring fixture/export first (author-doc test fixture, compileGrid width mechanism) because inventing those names cold would be worse than reading them.
 - Type consistency: `campaignFollowUpForPrompt` returns `{key,label,recipe}` (T6) and T7 consumes `.label`/`.recipe`; `followUp` = `{label, recipe}` in registry (T6/T9); `blastTags(id, template)` (T10) matches route call.
 
@@ -846,5 +1045,6 @@ STOP. Do not push — the operator pushes after review.
 | Group | Tasks | Shared Files |
 |-------|-------|--------------|
 | 🔴 | Task 6, Task 9 | `lib/showcase/registry.ts` |
+| 🟡 | Task 7, Task 10 | `components/email-lab/EmailLabGridShell.tsx` |
 
 Tasks with no color badge have no file conflicts — safe to parallelize freely.
