@@ -1,9 +1,15 @@
 # communities-swfl — Program Plan (review, scope, decomposition)
 
 > **This is the PROGRAM map, not an executable task list.** The executable Phase-1 plan is
-> `docs/superpowers/plans/2026-07-05-communities-swfl-phase1-backbone.md`. Phases 2–5 are briefs here
-> and get promoted to their own full TDD plan files **after** the Phase-1 GO/NO-GO gate resolves
-> (their content depends on the gate's outcome + thresholds).
+> `docs/superpowers/plans/2026-07-05-communities-swfl-phase1-namejoin.md`. Phases 2–5 are briefs here.
+>
+> **⚠️ PIVOT 07/05/2026 — the spatial-join spike is DEAD.** A live probe proved every parcel already
+> carries its subdivision name (`S_LEGAL` / `Description`); grouping by that name reproduces real
+> community counts (~7% off on a built-out community — Heritage Bay 1,501 vs 1,400). There is no
+> boundary-polygon / centroid / spatial-join problem, and no GO/NO-GO gate. Phase 1 is now a name-join:
+> ingest parcel name+type+zip → group → roll up via the alias reconciler (built). Evidence:
+> `verification/communities-name-join-accuracy.md`. The old spike plan (`…-phase1-backbone.md`) is
+> superseded; the new plan (`…-phase1-namejoin.md`) replaces it. See §5 for the session findings.
 
 **Spec:** `docs/superpowers/specs/2026-07-05-communities-swfl-design.md` (design approved 07/05/2026)
 **Slug:** `communities-swfl` · **Check:** `communities_swfl_live_verify`
@@ -115,6 +121,24 @@ offline-verifiable — `communities_swfl_live_verify` stays operator-run.
 
 ---
 
-## 5. Prerequisites before executing Phase 1
-- Confirm `communities_swfl_live_verify` is open: `node scripts/check.mjs list` (grep `communities`). Spec already exists — do **not** re-run `new-build.mjs`.
-- Read the executable plan: `docs/superpowers/plans/2026-07-05-communities-swfl-phase1-backbone.md`.
+## 5. Session findings (07/05/2026) — what the probe proved
+
+- **The spatial-join crux is unnecessary.** Every parcel carries its subdivision name in `S_LEGAL`
+  (Collier) / `Description` (Lee); grouping by it reproduces real community counts. Benchmark:
+  `verification/communities-name-join-accuracy.md`. Spatial join, boundary polygons, centroid pull, and
+  the GO/NO-GO gate are all obsolete.
+- **Accuracy:** ~7% on a built-out single-name community (Heritage Bay 1,501 vs 55places' 1,400). The
+  only systematic gap is sub-neighborhood name fragmentation (Pelican Bay raw prefix = 59% of 6,500),
+  closed by the alias reconciler — bounded, testable, no infra.
+- **Collier data:** 364,000 parcels pulled from the FDOR centroid layer → 289,212 homes, 4,521
+  subdivisions. Marketed golf communities ~120 in Lee+Collier (naplesgolfguy); a few hundred with gated.
+- **Landmines recorded in the name-join plan:** FDOR Lee partition (`CO_NO=46`) is broken (record queries
+  400); the cadastral layer doesn't expose `S_LEGAL` (use the centroid layer); `returnCountOnly`/`LIKE`/
+  `returnCentroid` 400 on these layers (use keyset pagination); condo count is per-unit (169,047) vs the
+  spec's 100,847 — reconcile.
+
+## 6. Prerequisites before executing Phase 1
+- **Executable plan:** `docs/superpowers/plans/2026-07-05-communities-swfl-phase1-namejoin.md` (the
+  old `…-phase1-backbone.md` is superseded — banner on it).
+- Confirm `communities_swfl_live_verify` is open: `node scripts/check.mjs list` (grep `communities`).
+  Spec exists — do **not** re-run `new-build.mjs`. Open the follow-ups (F1–F8) as sub-checks.

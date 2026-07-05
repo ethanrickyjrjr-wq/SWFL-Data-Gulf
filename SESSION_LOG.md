@@ -1,3 +1,25 @@
+## 2026-07-05 (main) — communities-swfl: spatial-join crux KILLED — home→community link already in every parcel
+
+Reviewed + scoped `docs/superpowers/specs/2026-07-05-communities-swfl-design.md`, probed all six subsystems
+live, then TDD-executed the Phase-1 spike — which overturned the design. The spec's "one hard, unproven
+piece" (a DuckDB spatial join of ~700K parcels to boundary polygons, behind a GO/NO-GO gate) is
+**unnecessary**: every parcel already carries its subdivision name (`S_LEGAL` on the FDOR centroid layer /
+`Description` on Lee GIS). Pulled 364,000 Collier parcels (`CO_NO=21`, FDOR
+`Florida_Statewide_Parcel_Centroid_Version`) and grouped by name → 289,212 homes across 4,521 subdivisions.
+Benchmarked vs named sources (`verification/communities-name-join-accuracy.md`): ~7% on a built-out
+single-name community (Heritage Bay 1,501 vs 55places 1,400); the only systematic gap is sub-neighborhood
+name fragmentation (Pelican Bay raw prefix 3,849 = 59% of 6,500), which the alias reconciler closes.
+Committed: `refinery/lib/subdivision-aliases.mts` (+test, 4/4 — the reconciler, carried to origin via the
+parallel session's `7c1c9027`); `verification/communities-name-join-accuracy.md` + a SUPERSEDED banner on
+the old spike plan (`c39925f1`, local). New executable plan
+`docs/superpowers/plans/2026-07-05-communities-swfl-phase1-namejoin.md` replaces `…-phase1-backbone.md`;
+program map repointed. Landmines recorded so nobody re-fights them: FDOR **Lee partition (`CO_NO=46`) is
+broken** (record queries 400, count works — use Lee GIS `Description`/LeePA, NOT FDOR); the cadastral layer
+does **not** expose `S_LEGAL` (use the centroid layer); `returnCountOnly`/`LIKE`/`returnCentroid` 400 on
+these layers (keyset-paginate); condo count is per-unit 169,047 vs spec 100,847 (reconcile). Follow-ups
+F1–F8 in the name-join plan (Lee source, condo reconcile, alias coverage, marketed-list scrape, situs
+address, other counties, checks). Next: run the Lee pull, grow the alias map, then Phases 2–5 (unchanged).
+
 ## 2026-07-05 (main) — audit: email-hero-mirror verified against spec, rot re-probe tracked, pending work pushed
 
 Post-ship scope of `85dbe9a9` against `docs/superpowers/specs/2026-07-05-email-hero-mirror-design.md`: all
