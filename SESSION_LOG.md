@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — SPEC: deliverable-distiller — reverse-engineer found deliverables into skeletons + recipes (email + social)
+
+Brainstormed + researched (crawl4ai: Unlayer AI Template Importer = commercial precedent for HTML/screenshot
+→ editable template; Unlayer design schema = AI writes compact structured JSON, guidance separate — verdict:
+NO new format, we already own both halves; screenshot-to-code proves vision→blocks; copyright.gov: layout =
+uncopyrightable system, copy/images stripped always). Design: operator-factory distiller SKILL
+(.claude/skills/deliverable-distiller), both inputs day one, per-find decision rule exact-layout→SEED_DOC /
+pattern→prose recipe, socials folded in (SocialTemplate factory, fixed ids, token-driven). Spec committed
+7b598752 (carried to origin by a parallel session's push — same hash; this entry backfills RULE 0). Check
+open: deliverable_distiller_live_verify. Follow-ups in spec: per-section AI UI (patch-by-id seam exists),
+social two-system wiring, registry-menu routing at scale. Next: operator spec review → writing-plans.
+
 ## 2026-07-05 (main) — TRIPWIRE CADENCE: hourly CI scan + issue-on-RED + every-session-start (operator: "24h check = nice try")
 
 Operator gap-call: the drain ran in ~2h; a daily scan sleeps through it. Damage-SPEED is bounded by the caps
