@@ -1,3 +1,17 @@
+## 2026-07-05 (main) — DECREE: $1/run cap on every LLM job + daily-ceiling preflight (locked in ingest/CLAUDE.md)
+
+Operator decrees, in order: (1) **$1.00 per run** on every scheduled LLM job — only the daily brain
+rebuild may exceed, via a visible env line in its workflow; the spend-guard session's structure-derived
+caps (city $8 / corridor $16) must come DOWN to 1.0 — **HANDOFF to session 24334191** (files
+city_pulse/pipeline.py:202 + city_pulse_corridors/pipeline.py:259 are claim-held by you as I write;
+change `default_usd=8.0`/`16.0` → `1.0`, decree comment in ingest/CLAUDE.md). I removed my duplicate
+spend_guard.py — `ingest.lib.api_usage.RunBudget` is the ONE root. (2) Operator gap-call: a run cap
+alone lets retries bleed $1×N → **daily-ceiling preflight** added to the ingest lock (sum today's
+api_usage_log before first call; ≥ INGEST_DAILY_CEILING_USD default $5 → exit 1 loud, no API call).
+(3) "Every cent on the ops site": VERIFIED both lanes write public.api_usage_log (refinery/agents/
+anthropic.mts:111 TS + ingest/lib/api_usage.py:76 Python) → ops /spend, 60s revalidate. NOT visible
+there ever: Claude Code dev-session spend + console-side fees — console usage export is that record.
+
 ## 2026-07-05 (main) — BUILD: lab-email truth guards (all 7 plan tasks, check `lab_email_truth_guards_live_verify`)
 
 Executed `docs/superpowers/plans/2026-07-05-lab-email-truth-guards.md` — Tasks 1-4 subagent-driven with

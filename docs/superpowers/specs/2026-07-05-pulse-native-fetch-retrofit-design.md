@@ -21,6 +21,7 @@ Same rows, same tables, same downstream contract — at the "actual pennies" tie
 3. **One Haiku distill per city/corridor WITH MATCHES.** `claude-haiku-4-5-20251001`, input = the matched article texts only (a few thousand tokens), output = the same rows the current distill emits. A unit with zero matched articles this period = **zero LLM calls** and a no-op merge.
 4. **Checkpoint per unit.** Rows upsert as each city/corridor finishes, so a kill loses one unit, never a run's spend. Timeout drops back to something sane.
 5. **Provenance unchanged:** every kept fact still carries its source URL; no-invention lint path and freshness columns stay as-is so ops tiles keep working.
+6. **$1 hard budget (operator decree 07/05/2026).** Both pipelines already construct `ingest.lib.api_usage.RunBudget` (the one metering root, wired 07/05 into all ingest call sites + the `api_usage_log` ledger); the decree sets `default_usd=1.0` on BOTH — no env override in these workflows. Under the retrofit $1 is laughably generous; under the old web_search capture it kills the run early by design.
 
 ## Cost math (from the operator's own paste + the pipelines' constants)
 

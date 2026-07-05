@@ -14,6 +14,20 @@ This is the Python ingest island (dlt + DuckDB), zero TS coupling. Rules for wor
   cron drained the account twice (06/18 freeze, 07/05 caught live at ~$6/run). Before re-enabling any
   paused workflow: grep its pipeline for `web_search` — retrofit first, re-enable second. Spec:
   `docs/superpowers/specs/2026-07-05-pulse-native-fetch-retrofit-design.md`.
+- **$1 HARD BUDGET PER RUN (LOCKED 07/05/2026, operator decree).** Every scheduled pipeline that calls
+  an LLM wires `ingest.lib.api_usage.RunBudget` (the ONE root — metering + `api_usage_log` ledger the
+  ops /spend page reads) and charges EVERY API call; crossing the cap raises `RunBudgetExceeded` and
+  the run exits 1 loud. Default cap = **$1.00 per run** for every job; the ONLY job allowed higher is
+  the daily brain rebuild, via its explicit per-pipeline env var in the workflow file (a visible,
+  reviewable line — never a code default). Rates verified from docs.claude.com pricing 07/05/2026
+  (sonnet $3/$15 per MTok, haiku $1/$5, web search $10/1k).
+- **DAILY CEILING PREFLIGHT (operator gap-call 07/05/2026: "what does a cap do when they just run it
+  again and again").** A per-run cap alone meters a retry loop into $1 slices — so every scheduled
+  LLM pipeline ALSO preflights the shared ledger before its first API call: sum today's
+  `api_usage_log` spend; at/over the day ceiling (`INGEST_DAILY_CEILING_USD`, default $5) → exit 1
+  LOUD without calling the API. Retries, re-dispatches, and heal-crons all hit the same ledger, so N
+  runs can never multiply past the day ceiling. Vendor-side backstop (operator-only, console): a
+  monthly workspace spend limit — the only layer that also catches spend our code never sees.
 - **Probe < 1 min before any multi-minute ingest.** Fetch only the columns the normalizer reads, at the
   largest page the API honors (`docs/standards/data-and-build-bible.md` §0.1–0.2).
 - **Gate 4 (pre-push):** a destructive write with no non-null guard is BLOCKED. Guard load-bearing
