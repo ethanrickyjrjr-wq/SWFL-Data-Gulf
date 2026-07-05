@@ -52,17 +52,20 @@ follows to new listing projects. The single-cadence scheduler stays the untouche
 2. **No full build at arm.** A home can sell in 5 days. Arming shows every step's LAYOUT with
    the live-data slots visibly marked "fills fresh at build" — $0, instant. Authoring is
    user-initiated per step: next only, all five, or one at a time, any order, whenever.
-3. **Send now OR schedule — schedule freezes.** Confirm card offers both. Send now = sent
-   immediately (cron is the safety net, not the trigger). Schedule = the email locks exactly
-   as-is; the card says plainly: "Scheduling locks this email. It can't be edited or sent
-   until [time]." Cancel un-schedules back to editable draft; nothing goes out.
+3. **Send now OR schedule — schedule freezes, unlock allowed.** Confirm card offers both.
+   Send now = sent immediately (cron is the safety net, not the trigger). Schedule = the
+   email locks exactly as-is; the card says plainly: "Scheduling locks this email. It can't
+   be edited or sent until [time] — unlock to change it." Unlock returns it to editable
+   draft (nothing goes out); same-day-before-overnight-update re-sends are safe as-is, after
+   the boundary a review/rebuild nudge appears (nudge, never a hard block).
 4. **Nothing sends unseen.** A milestone send requires a built piece; the confirm card offers
    "build it now" (and shows it) when the step is still layout-only.
 5. **Saved setups.** "Save as my setup" snapshots the shaped arc (prompts + doc skeletons,
    never project data). Nameable, multiple allowed, one `is_default` that auto-applies to new
    listing projects; every project can deviate freely (a $14.8M arc ≠ a $400K arc).
-6. **Data currency is a platform job, not a send-time rebuild**: all lake/brain updates move
-   into a 2–5 AM ET window so morning builds carry that morning's data — follow-up check
+6. **Data currency is a platform job, not a send-time rebuild**: find when realtor.com
+   updates each night, then land ALL our lake/brain updates right after theirs (target
+   2–5 AM ET) so morning builds carry that morning's data — follow-up check
    `overnight_data_update_window`, NOT this build.
 
 ## What we're building
@@ -112,8 +115,15 @@ milestone API mutate it. Sent-state truth is reconciled from the schedule row
   `next_run_at = <chosen time>`. At fire, the occurrence renders the FROZEN doc verbatim —
   no AI refill, no figure swap: what they saw when they scheduled is what goes out. Cron
   granularity is honest in the picker copy (sends within ~15 min of the chosen time).
-- **Cancel**: clears the one-shot row (status stopped), unfreezes the deliverable, step back
-  to `built`.
+- **Unlock (operator amendment 07/05/2026)**: a scheduled step can be unlocked — it clears
+  the pending one-shot row and returns the piece to editable draft; nothing goes out. The
+  data-day rule rides the card copy: re-sending the SAME day, before the overnight data
+  update, the piece is safe as-is ("want it an hour later? unlock and send"). Once the
+  overnight update boundary has passed, unlocking prompts a review/rebuild nudge — the
+  figures now have a newer vintage than the frozen piece (nudge, not a hard block; the user
+  keeps full control). Boundary timing comes from the `overnight_data_update_window`
+  follow-up (realtor.com nightly timing → our updates land right after, target 2–5 AM ET).
+- **Cancel** = unlock without a re-send intent: same mechanics, step back to `built`.
 - The frozen lane is a small branch in the runner's `buildContent` for one-shot sequence rows:
   load deliverable → render saved doc → `emailDocHtml` verbatim (the existing short-circuit),
   skipping `buildDoc`. `processSchedule` itself is not modified.
@@ -177,5 +187,6 @@ milestone API mutate it. Sent-state truth is reconciled from the schedule row
 
 ## Follow-ups (checks, not this build)
 
-- `overnight_data_update_window` — all lake/brain updates into a 2–5 AM ET window so morning
-  builds carry that morning's data (operator directive 07/05/2026).
+- `overnight_data_update_window` — find realtor.com's nightly update time, then land all
+  lake/brain updates right after it (target 2–5 AM ET) so morning builds carry that
+  morning's data; also defines the unlock rule's same-day boundary (operator 07/05/2026).
