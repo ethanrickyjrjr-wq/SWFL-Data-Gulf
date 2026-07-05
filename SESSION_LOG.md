@@ -19,6 +19,22 @@ unsub_audit already open; `agent_launch_campaign_live_verify` stays OPEN (operat
 - REMAINING: plan tasks 8+9 (Marisol Vega lab demos — paid Sonnet, operator present — then the registry
   entry that turns the 4th campaign button live with captured assets).
 
+## 2026-07-05 (main) — GUARD 2: paid-surface push gate + local key quarantine — sessions structurally cannot spend
+
+Operator decree ("fix it so you can't steal — no taps"): (1) NEW `.claude/hooks/check-no-new-paid-surface.mjs`
+(PreToolUse Bash, registered): any `git push`/safe-push whose outgoing diff ADDS a paid-API marker
+(ANTHROPIC_API_KEY · Anthropic client constructors · api.anthropic.com · web_search_2xxx) outside the two
+metered roots (refinery/agents/anthropic.mts · ingest/lib/api_usage.py), hooks, docs/md, and test files is
+BLOCKED — closes the "write a new burner, let the cron run it" path (the 8a009308 pattern). Override:
+ALLOW_PAID_SURFACE=1 + SESSION_LOG note. Self-test 11/11. (2) Local key QUARANTINE in .env.local +
+.dlt/secrets.toml: ANTHROPIC + FIRECRAWL (banned) + DATAFORSEO ×2 + SPIDER + RENTCAST (dead vendor) + VOYAGE
+renamed *_LOCKED_BY_OPERATOR — values intact, operator restores by rename/export; session env carries no key
+(verified). Vercel + GHA production secrets untouched — the project runs exactly as before. (3) VERIFIED:
+GitHub Actions secret values are unreadable via gh/API (write-only; metadata endpoint returns no value).
+Required-reviewer environments researched (repo is PUBLIC = free-plan eligible) but REJECTED by operator
+("not tapping") — no-tap posture = caps + hooks + gates. Prior guard (check-no-paid-dispatch, ab1cf805)
+confirmed live on origin via parallel-session carry.
+
 ## 2026-07-05 (main) — GUARD: sessions can no longer dispatch paid workflows — check-no-paid-dispatch hook (drain forensics closed)
 
 Forensics on today's $0 drain: TWO manual `gh workflow run` dispatches of corridor-pulse (13:08 + 13:40 UTC,
