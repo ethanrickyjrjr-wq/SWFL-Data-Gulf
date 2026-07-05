@@ -24,9 +24,9 @@ this measures wording/fidelity/classification on shared spans, not recall.
 Sonnet-era = rows with captured_at < 07/05/2026. No lake writes; Haiku output
 stays in this file.
 
-Daily protocol: run the command below once a day for a few days (fresh
-Sonnet-era rows keep aging out via TTL, so earlier runs cover more ground);
-read the pairs; judge.
+Protocol (operator-amended 07/05/2026: "One run that 3 days — heard enough"):
+ONE more run on 07/08/2026, appended below, then this file closes. Check:
+haiku_vs_sonnet_final_run.
 
 ```
 OPERATOR_APPROVED_PAID_RUN=1 node scripts/paid-run.mjs python scripts/compare-distill-writing.py

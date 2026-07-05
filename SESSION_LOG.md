@@ -10,6 +10,14 @@ reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in
 order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
 those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
 deliverable_distiller_live_verify stays open (operator-run live proof).
+## 2026-07-05 (main) — AMEND: Haiku comparison → ONE final run 07/08/2026 (operator: "heard enough about how haiku sucks")
+
+Daily protocol cancelled: check haiku_vs_sonnet_distill_daily CLOSED (evidence = operator ruling + day-1
+data in commit 466e686b), replaced by haiku_vs_sonnet_final_run — a single run of
+scripts/compare-distill-writing.py on 07/08/2026 appended to verification/haiku-vs-sonnet-distill.md, then
+the file closes. Protocol section in the file amended. Haiku stays the distill model per the
+Haiku-until-prepared decision (memory: project_pulse-distill-haiku-until-prepared). Unpushed.
+
 ## 2026-07-05 (main) — SHIPPED: Agent Launch campaign LIVE (build 1 of 3 complete) + spend guard
 
 Campaign live (c28cba56): 4th quick-start button, followUp chip, 3 lab-built demo slides — Sonnet-authored
