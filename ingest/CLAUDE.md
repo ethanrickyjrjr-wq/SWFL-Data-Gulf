@@ -8,6 +8,12 @@ This is the Python ingest island (dlt + DuckDB), zero TS coupling. Rules for wor
   See `docs/superpowers/specs/2026-06-28-focus-restructure/03-incremental-ingest.md`.
 - **Aggregate at source.** Push COUNT/AVG/median/grouping to SQL/DuckDB. Never haul raw rows to count
   them in TS. `selectAllPaged` is legacy, not the target.
+- **NO paid model web_search in scheduled pipelines (LOCKED 07/05/2026, operator decree).** Capture =
+  crawl4ai fetch of sources we discover ourselves (news_swfl lake matching, outlet pages); LLM = one
+  small Haiku distill per unit WITH matched content, zero calls for quiet units. `web_search_*` on a
+  cron drained the account twice (06/18 freeze, 07/05 caught live at ~$6/run). Before re-enabling any
+  paused workflow: grep its pipeline for `web_search` — retrofit first, re-enable second. Spec:
+  `docs/superpowers/specs/2026-07-05-pulse-native-fetch-retrofit-design.md`.
 - **Probe < 1 min before any multi-minute ingest.** Fetch only the columns the normalizer reads, at the
   largest page the API honors (`docs/standards/data-and-build-bible.md` §0.1–0.2).
 - **Gate 4 (pre-push):** a destructive write with no non-null guard is BLOCKED. Guard load-bearing
