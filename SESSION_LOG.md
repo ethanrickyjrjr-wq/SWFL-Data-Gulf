@@ -1,3 +1,20 @@
+## 2026-07-05 (main) — feat(spend-guard): ingest Anthropic metering + hard per-run budgets; web_search crons re-paused per decree
+
+Operator decree ("put guards on all this shit; X per run, over → shut down") after the credit drain.
+NEW `ingest/lib/api_usage.py`: mirrors refinery/agents/anthropic.mts rates into python (same
+api_usage_log table the ops /spend page reads) + $0.01/search surcharge (crawl4ai-verified
+07/05/2026: "$10 per 1,000 searches") + `RunBudget` — cumulative per-run cost, crossing the cap
+raises RunBudgetExceeded and KILLS the run (never `continue`d past). Wired ALL 10 ingest Anthropic
+call sites: city_pulse capture ($8 cap)/distill, corridor capture ($16 cap)/distill, dbpr notices
+summarize, dbpr press enricher, extract_client, corridor_grounded, marketbeat vision, report-design
+research. Caps are structure-derived ceilings (call count × per-call bound, ~2× expected) documented
+in-line. ALSO re-paused city-pulse + corridor-pulse crons — ingest/CLAUDE.md LOCKED decree (no
+web_search on schedule; crawl4ai retrofit owned by the pulse-retrofit session). 68 pipeline tests +
+budget unit check pass; all files py_compile clean. Ops /spend revalidate 3600→60s (ops repo
+f457db9). TS side: daily/monthly ledger caps are the OTHER session's in-flight work on
+refinery/agents/anthropic.mts (claimed) — this session's 9 prove-*.mts conversions to
+getAnthropic("proof") land once that claim frees.
+
 ## 2026-07-05 (main) — PLAN AMENDED: agent-launch — operator ruled "1" (full campaign-key thread) + defect fixes folded in
 
 Operator ratified decision 1: the FULL campaign-key thread (deviation 1 overruled). Folded into the plan

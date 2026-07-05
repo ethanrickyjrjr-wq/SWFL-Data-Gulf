@@ -1,11 +1,15 @@
 name: Corridor pulse weekly
 
 on:
-  schedule:
+  # PAUSED 07/05/2026 — operator decree (ingest/CLAUDE.md, LOCKED): NO paid model
+  # web_search on a schedule. Capture is web_search-based; crawl4ai retrofit in
+  # flight (2026-07-05-pulse-native-fetch-retrofit-design.md). Retrofit first,
+  # re-enable second.
+  # schedule:
     # 10:00 UTC Sunday = 6 AM ET — after the Saturday-night news cycle.
     # Slot confirmed free: daily-rebuild 0 6 * * *, city-pulse-daily 0 9 * * *,
     # freshness-probe 0 14 * * *. 0 10 * * 0 has no collision.
-    - cron: "0 10 * * 0"
+    # - cron: "0 10 * * 0"
   workflow_dispatch:
     inputs:
       dry_run:

@@ -42,6 +42,7 @@ from dotenv import load_dotenv
 # so this is a no-op on CI.
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
+from ingest.lib.api_usage import log_api_usage, search_count  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import (  # noqa: E402
     _get_connection as _inventory_get_connection,
@@ -176,6 +177,12 @@ def run_grounded_search(corridor_name: str, run_at: str) -> dict[str, Any]:
             }
         ],
         messages=[{"role": "user", "content": query}],
+    )
+    log_api_usage(
+        model=response.model,
+        call_type="ingest_corridor_grounded",
+        usage=response.usage,
+        searches=search_count(response.usage),
     )
     return build_record(corridor_name, query, response.model_dump(), run_at)
 

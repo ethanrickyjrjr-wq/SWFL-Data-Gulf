@@ -339,6 +339,9 @@ def _vision_extract(page: fitz.Page, quarter: str, source_name: str) -> list[dic
             }
         ],
     )
+    from ingest.lib.api_usage import log_api_usage
+
+    log_api_usage(model=msg.model, call_type="ingest_marketbeat", usage=msg.usage)
     import json
 
     raw = msg.content[0].text.strip()

@@ -34,6 +34,7 @@ from typing import Any, Iterable, Optional
 
 from bs4 import BeautifulSoup
 
+from ingest.lib.api_usage import log_api_usage
 from ingest.lib.crawl_client import Crawl4aiError, fetch_many, fetch_page_markdown
 from ingest.lib.firecrawl_client import FirecrawlError, scrape as firecrawl_scrape
 from ingest.lib.spider_client import SpiderError, scrape as spider_scrape
@@ -198,6 +199,7 @@ def _llm_extract_rows(
         if output_config is not None:
             kwargs["output_config"] = output_config
         msg = client.messages.create(**kwargs)
+        log_api_usage(model=msg.model, call_type="ingest_extract", usage=msg.usage)
         if msg.stop_reason in ("refusal", "max_tokens"):
             raise RuntimeError(
                 f"Anthropic extraction returned stop_reason={msg.stop_reason!r} — output is not "

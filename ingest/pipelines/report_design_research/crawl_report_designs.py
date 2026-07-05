@@ -92,6 +92,9 @@ def _extract(label: str, page_text: str) -> dict[str, Any] | None:
         max_tokens=1200,
         messages=[{"role": "user", "content": _EXTRACT_PROMPT + page_text}],
     )
+    from ingest.lib.api_usage import log_api_usage
+
+    log_api_usage(model=msg.model, call_type="ingest_report_research", usage=msg.usage)
     raw = "".join(block.text for block in msg.content if getattr(block, "type", "") == "text")
     raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     try:

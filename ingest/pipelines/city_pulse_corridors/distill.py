@@ -31,6 +31,7 @@ from typing import Any
 
 import anthropic
 
+from ingest.lib.api_usage import log_api_usage
 from ingest.lib.tier1_inventory import _get_connection
 # Pure, grain-agnostic helpers — single-sourced from the daily module. dedup_key's
 # first positional arg is the grain key (named `city` there); its value semantics
@@ -204,6 +205,9 @@ def distill_capture(capture: dict[str, Any]) -> list[dict[str, Any]]:
         tools=[EXTRACT_TOOL],
         tool_choice={"type": "tool", "name": "record_corridor_facts"},
         messages=[{"role": "user", "content": prompt}],
+    )
+    log_api_usage(
+        model=msg.model, call_type="ingest_corridor_pulse_distill", usage=msg.usage
     )
     extraction = next(
         (b.input for b in msg.content if getattr(b, "type", None) == "tool_use"),

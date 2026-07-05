@@ -1,12 +1,13 @@
 name: City pulse daily
 
 on:
-  # RE-ENABLED 07/05/2026 in WEEKLY cost mode (operator: build data cheaply pre-launch).
-  # Wednesday 09:00 UTC — clear of the Monday 08:00/09:00/10:00 slots (swfl-inc,
-  # dbpr-press, dbpr-notices). At launch: restore "0 9 * * *" (daily) + registry
-  # cadence_days: 1 + freshness_sla 2/4 in the same commit.
-  schedule:
-    - cron: "0 9 * * 3"
+  # PAUSED AGAIN 07/05/2026 — operator decree (ingest/CLAUDE.md, LOCKED): NO paid
+  # model web_search on a schedule. This pipeline's capture is web_search-based;
+  # the crawl4ai-fetch + Haiku-distill retrofit is in flight
+  # (docs/superpowers/specs/2026-07-05-pulse-native-fetch-retrofit-design.md).
+  # Retrofit first, re-enable second. Weekly cost-mode slot was "0 9 * * 3".
+  # schedule:
+  #   - cron: "0 9 * * 3"
   workflow_dispatch:
     inputs:
       dry_run:

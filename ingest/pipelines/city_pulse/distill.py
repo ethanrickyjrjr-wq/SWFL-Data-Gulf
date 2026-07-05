@@ -29,6 +29,7 @@ from typing import Any
 
 import anthropic
 
+from ingest.lib.api_usage import log_api_usage
 from ingest.lib.tier1_inventory import _get_connection
 
 # Haiku 4.5 (cost mode 07/05/2026): distill is structured extraction over an
@@ -237,6 +238,7 @@ def distill_capture(capture: dict[str, Any]) -> list[dict[str, Any]]:
         tool_choice={"type": "tool", "name": "record_city_facts"},
         messages=[{"role": "user", "content": prompt}],
     )
+    log_api_usage(model=msg.model, call_type="ingest_city_pulse_distill", usage=msg.usage)
     extraction = next(
         (b.input for b in msg.content if getattr(b, "type", None) == "tool_use"),
         {"facts": []},

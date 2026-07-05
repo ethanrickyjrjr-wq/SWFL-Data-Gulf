@@ -16,6 +16,8 @@ from typing import Any
 import anthropic
 import psycopg
 
+from ingest.lib.api_usage import log_api_usage
+
 from .constants import ENRICH_BATCH_SIZE, ENRICH_MODEL, TABLE
 
 # ── Sonnet tool schema ─────────────────────────────────────────────────────────
@@ -91,6 +93,9 @@ def _enrich_row(client: anthropic.Anthropic, row: dict[str, Any]) -> dict[str, A
         tools=[_EXTRACT_TOOL],
         tool_choice={"type": "tool", "name": "extract_press_release"},
         messages=[{"role": "user", "content": prompt}],
+    )
+    log_api_usage(
+        model=response.model, call_type="ingest_dbpr_press", usage=response.usage
     )
 
     for block in response.content:

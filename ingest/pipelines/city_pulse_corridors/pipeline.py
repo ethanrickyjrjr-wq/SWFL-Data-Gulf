@@ -41,6 +41,9 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
+from ingest.lib.api_usage import (  # noqa: E402
+    RunBudget, RunBudgetExceeded, log_api_usage, search_count,
+)
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import (  # noqa: E402
     _get_connection,
@@ -193,7 +196,9 @@ def build_record(corridor: str, query: str, response_dump: dict[str, Any], run_a
     }
 
 
-def run_corridor_search(corridor: str, run_at: str) -> dict[str, Any]:
+def run_corridor_search(
+    corridor: str, run_at: str, budget: RunBudget | None = None
+) -> dict[str, Any]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     query = QUERY_TEMPLATE.format(corridor=corridor)
     response = client.messages.create(
@@ -208,6 +213,14 @@ def run_corridor_search(corridor: str, run_at: str) -> dict[str, Any]:
         }],
         messages=[{"role": "user", "content": query}],
     )
+    cost = log_api_usage(
+        model=response.model,
+        call_type="ingest_corridor_pulse",
+        usage=response.usage,
+        searches=search_count(response.usage),
+    )
+    if budget is not None:
+        budget.charge(cost)
     return build_record(corridor, query, response.model_dump(), run_at)
 
 
@@ -238,12 +251,22 @@ def main(argv: list[str] | None = None) -> int:
     run_key = now.strftime("%Y%m%dT%H%M%SZ")
     yyyy, mm = f"{now.year:04d}", f"{now.month:02d}"
 
+    # Hard run budget (operator guard 07/05/2026): 27 corridors x ~$0.30
+    # structural ceiling per capture (<=8 searches @ $0.01 + ~60K in @ $3/MTok
+    # + 4K out @ $15/MTok) ~= $8 expected; cap at 2x. Crossing it = misbehaving
+    # run — abort loudly. Override: CORRIDOR_PULSE_MAX_USD.
+    budget = RunBudget(
+        "corridor_pulse", default_usd=16.0, env_var="CORRIDOR_PULSE_MAX_USD"
+    )
+
     errors: list[str] = []
     total_new = 0
     for corridor in corridors:
         print(f"corridor_pulse: querying '{corridor}'...")
         try:
-            record = run_corridor_search(corridor, run_at)
+            record = run_corridor_search(corridor, run_at, budget)
+        except RunBudgetExceeded:
+            raise  # kill the whole run — never "continue" past a blown budget
         except Exception as exc:
             print(f"  -> ERROR (search): {exc!r}")
             errors.append(corridor)

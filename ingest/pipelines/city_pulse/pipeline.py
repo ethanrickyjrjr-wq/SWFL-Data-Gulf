@@ -35,6 +35,9 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
+from ingest.lib.api_usage import (  # noqa: E402
+    RunBudget, RunBudgetExceeded, log_api_usage, search_count,
+)
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import upsert_inventory_row  # noqa: E402
 from ingest.pipelines.city_pulse.distill import (  # noqa: E402
@@ -138,7 +141,9 @@ def build_record(city: str, query: str, response_dump: dict[str, Any], run_at: s
     }
 
 
-def run_city_search(city: str, run_at: str) -> dict[str, Any]:
+def run_city_search(
+    city: str, run_at: str, budget: RunBudget | None = None
+) -> dict[str, Any]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     query = QUERY_TEMPLATE.format(city=city)
     response = client.messages.create(
@@ -153,6 +158,14 @@ def run_city_search(city: str, run_at: str) -> dict[str, Any]:
         }],
         messages=[{"role": "user", "content": query}],
     )
+    cost = log_api_usage(
+        model=response.model,
+        call_type="ingest_city_pulse",
+        usage=response.usage,
+        searches=search_count(response.usage),
+    )
+    if budget is not None:
+        budget.charge(cost)
     return build_record(city, query, response.model_dump(), run_at)
 
 
@@ -182,12 +195,20 @@ def main(argv: list[str] | None = None) -> int:
     run_key = now.strftime("%Y%m%dT%H%M%SZ")
     yyyy, mm = f"{now.year:04d}", f"{now.month:02d}"
 
+    # Hard run budget (operator guard 07/05/2026): 13 cities x ~$0.30 structural
+    # ceiling per capture (<=8 searches @ $0.01 + ~60K in @ $3/MTok + 4K out
+    # @ $15/MTok) ~= $4 expected; cap at 2x. Crossing it = misbehaving run —
+    # abort loudly rather than drain the account. Override: CITY_PULSE_MAX_USD.
+    budget = RunBudget("city_pulse", default_usd=8.0, env_var="CITY_PULSE_MAX_USD")
+
     errors: list[str] = []
     total_new = 0
     for city in cities:
         print(f"city_pulse: querying '{city}'...")
         try:
-            record = run_city_search(city, run_at)
+            record = run_city_search(city, run_at, budget)
+        except RunBudgetExceeded:
+            raise  # kill the whole run — never "continue" past a blown budget
         except Exception as exc:
             print(f"  -> ERROR (search): {exc!r}")
             errors.append(city)
