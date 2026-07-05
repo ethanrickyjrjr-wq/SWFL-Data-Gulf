@@ -4,6 +4,51 @@ Operator: "don't need two cadence legends." Gated the `ShowcaseOverlay` legend o
 per showcase instead of repeating on every content slide. One-line JSX conditional; eslint clean. Shipped via a
 detached worktree off origin/main (a live parallel session held 11 unpushed band-guard commits on local main;
 isolating avoided bundling them).
+## 2026-07-05 (main) — BUILD: sourced movement-band + web-confirm outlier guard for deliverable numbers (Op-July task 18, flag OFF)
+
+Brainstormed → specced → planned → built inline. New feature: every number a deliverable prints is judged against
+**what the previous deliverable in its series printed** (operator decree — baseline is the prior send's frozen
+`items_snapshot`, NOT a lake time-series). An implausible move is **web-confirmed** against live authoritative
+sources before any note, then handled additively (the trusted number always ships).
+- **Spec:** `docs/superpowers/specs/2026-07-05-sourced-band-number-guard-design.md` (corrected after code read: reconcile
+  layer is lane1-vs-lane2 not time-series; `lookupLakeFact` carries no prior period). **Plan:**
+  `docs/superpowers/plans/2026-07-05-sourced-band-number-guard.md`.
+- **Bands are sourced (crawl4ai, RULE 0.4):** Census construction ±CI for counts (starts ±9.8%, completions ±12.3%),
+  Zillow YoY for slow prices (0.8% home value / 2.0% rent), absolute point-delta for bounded ratios; cadence-scaled
+  to the gap between sends.
+- **Web-confirm reuses existing infra:** `verifyMetricItem` (data-readiness ladder — two web_search calls over
+  disjoint authoritative domains). Grounded+agree → ship clean; grounded+disagree → discrepancy note; no confirm →
+  please-confirm. Every note carries a `falsifier:` + the current value so it survives the deliverable note gate.
+- **Files:** `lib/deliverable/band-guard.ts` (pure: classify + FAMILY_BANDS + checkBand + bandOutliers +
+  resolveOutlierNote), `band-guard-web.ts` (ladder projection), wired flag-gated into `build.ts`
+  `buildDeliverableNarrative` + `assemble.ts` prior-load. **`BAND_GUARD_ENABLED` default OFF = byte-identical.**
+- **Proof (offline):** 39 new tests incl. note-gate-survival; `bun test lib/deliverable/` 354 pass; `next build` clean.
+  Live-verify (`sourced_band_number_guard_live_verify`) stays OPEN — operator-run (build twice, force an outlier).
+- **Not built (named):** proactive crawl-fill for a brand-new number with no prior AND no lake value (ladder step 2).
+
+## 2026-07-05 (main) — RESEARCH: marketing-campaign ideas sweep (crawl4ai, 3 lanes) — no code, findings only
+
+Operator asked for new campaign ideas (esp. new-agent traction), listing-close design upgrades, and more social
+post types. Probed code first (SHOWCASES, author-recipes, DAY_THEMES/LISTING_LAUNCH_ARC, 40-pack registry), then
+crawl4ai swept 15 sources across 3 lanes (HousingWire, Luxury Presence, Sequenzy, The Listing Showcase, Saleswise,
+Birdeye, bright-shot, Highnote, closedaily, americasbestmarketing, serif.ai, estatepass). Raw dumps stay LOCAL
+(scratchpad, *crawl4ai* gitignored). Key findings:
+- **New-agent whitespace:** 4/5 lane-1 sources converge on the listing-less loop — weekly sphere market email +
+  monthly farm report + home-value/equity hook + open-house follow-up drip. None of our 3 quick-start campaigns
+  covers it; every shape is powerable by held data (values, comps, DOM, actives). Top candidates: Agent Launch
+  sphere sequence, equity-report drip (pairs with saved-address listing-lifecycle work), farm starter.
+- **Listing→Close missing stages (Sequenzy/Luxury Presence/Listing Showcase):** open-house invite + morning-of
+  reminder, price-improvement alert (24h, viewers-only), multiple-offers deadline, back-on-market, showing recap,
+  post-close nurture ladder (testimonial 2-4wk, referral 30-60d, home anniversary annual). Design: subject =
+  specs+place+price; open with the trigger not a greeting; one CTA + P.S. as soft second; investor "numbers"
+  variant; Tue–Thu ~9am/2pm, just-listed within hours of MLS (open 25-35%, click 3-5% benchmarks, Sequenzy).
+- **Social post types we lack (Birdeye/Saleswise/bright-shot/Luxury Presence):** Myth-vs-Fact w/ real number,
+  Stat of the Week, rent-vs-buy math, what-$X-buys by area, ZIP-vs-ZIP this-or-that, permit/development explainer,
+  quarterly outlook (fits [INFERENCE]+falsifier), guess-the-median trivia, price-cut + back-on-market cards.
+  Mechanics: lead-gen ≤50% of mix, 4 posts/wk + stories, one stat per carousel slide, named recurring series.
+- Gaps: no source gave numeric image-ratio specs (Litmus-type crawl if needed); theclose.com crawl caught nav only.
+Next: operator picks build targets → RULE 3.5 brainstorm per pick. Nothing committed beyond this log entry.
+
 ## 2026-07-05 (main) — Operation July task 18: content-freshness guards (phase 1, 7 pipelines) — NOT pushed, held
 
 Built the content-freshness guard + wired 7 small-lag merge pipelines. Brainstorm (RULE 3.5) + advisor +
