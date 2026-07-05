@@ -1,3 +1,12 @@
+## 2026-07-05 (main) — correction: dbpr_press_releases + swfl_inc are BOTH already crawl4ai; dbpr false-RED fixed via scraped_at
+
+Run-log evidence corrects the prior entry's "Firecrawl-era" guesses: dbpr_press_releases is HEALTHY
+(crawl4ai, upserted 12 rows 06/29) — the SOURCE went quiet (newest DBPR release 02/07/2025), so
+`inserted_at` freshness froze → switched `freshness_column: scraped_at` (measures pipeline-alive).
+swfl_inc failed 06/15 with "every feed returned empty markdown" (WAF-block or moved feeds — already
+crawl4ai); fix is probing SWFL_INC_FEEDS with UndetectedAdapter, then re-enable. CI VERIFIED GREEN
+after 3f289925. ops_notes rows corrected to match.
+
 ## 2026-07-05 (main) — fix(registry): kill 2 false-RED live_search tiles + park 3 never-runs + ops notes on 4 paused/stale pipelines
 
 Follow-up to the ops red/yellow audit (operator: "push and fix it all" + "airdna parked"): dropped

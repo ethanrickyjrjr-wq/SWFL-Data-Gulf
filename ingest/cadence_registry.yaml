@@ -540,13 +540,15 @@ pipelines:
     # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
     # Cron: Monday 08:00 UTC via swfl-inc-weekly.yml.
     # First run: 2026-06-01 (GHA success confirmed).
-    note: "Workflow DISABLED MANUALLY in GitHub; last scheduled run FAILED 06/15/2026 (Firecrawl-era scraper, Firecrawl dead). Data frozen 05/31/2026. Fix: crawl4ai port + re-enable."
+    note: "Workflow DISABLED MANUALLY in GitHub after the 06/15/2026 run failed: 'every feed returned empty markdown' — swflinc.com likely WAF-blocking the GHA runner or feed URLs moved. Already crawl4ai; fix = probe SWFL_INC_FEEDS (UndetectedAdapter), then re-enable. Data frozen 05/31/2026."
 
   - name: dbpr_press_releases
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0
     freshness_table: public.dbpr_press_releases
+    freshness_column: scraped_at # NOT inserted_at: source publishes rarely (newest release 02/07/2025);
+    # scraped_at bumps on every green run, so this measures "pipeline alive", not "source published".
     expected_rows_min: 135 # 90% of 151 confirmed 2026-06-01 backfill
     # Non-dlt pipeline — freshness checked via MAX(inserted_at); inserted_at backfilled from scraped_at for 2026-06-01 rows.
     # Source: FL DBPR (www2.myfloridalicense.com/press-releases/) — ~4-5 releases/month.
@@ -556,7 +558,7 @@ pipelines:
     # Enrichment: Sonnet fills summary/topics/affected_industries/geographic_mentions/is_swfl_relevant.
     # Consumer: news-swfl brain (refinery/packs/news-swfl.mts).
     # First run: 2026-06-01 backfill — 151 rows, 2016-2026, 146/151 dated.
-    note: "Cron GREEN weekly but 0 new rows since the 06/01/2026 backfill — DBPR publishes ~4-5/mo, so ~5 empty weeks = probable parser/selector drift (Firecrawl-era code). Investigate run logs + crawl4ai port."
+    note: "Pipeline HEALTHY (crawl4ai, green weekly, upserts fine) — the SOURCE went quiet: newest DBPR release is dated 02/07/2025. Freshness now reads scraped_at (pipeline-alive), fixed 07/05/2026; was false-RED on frozen inserted_at."
 
   - name: rsw_airport_monthly
     lane: tier-2
