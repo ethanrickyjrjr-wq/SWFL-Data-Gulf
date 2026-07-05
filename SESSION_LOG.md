@@ -1,3 +1,17 @@
+## 2026-07-05 (main) — BUILD: spend tripwire Phase 1 SHIPPED — first live scan caught 7 manual paid dispatches (we knew of 2)
+
+Operator: "How do we find out something is fucked? advisor sonnet with morals" → spec filled
+(2026-07-05-spend-tripwire-design.md): detection is CODE, judgment is the MODEL (Phase 2 = capped Sonnet
+verdict on REDs only). NEW `scripts/tripwire-scan.mjs` ($0, no LLM, exit 1 on RED): today's ledger spend vs
+$5 ceiling (per-call_type) · pulse workflows still dark · manual dispatches of ANTHROPIC_API_KEY workflows
+24h · guard hooks present+registered + key quarantine intact · paid-run valve audit · paid-run failures.
+FIRST LIVE RUN: 7 RED manual paid dispatches in 24h — corridor ×2 (13:08/13:40, the drain) PLUS previously
+unknown social-pulse-scan ×3 (09:05 ✓, 09:10 ✗, 13:08 ✓), City pulse daily 08:55 ✓, DBPR notices 08:55 ✓ —
+operator to recognize or condemn each. Spend today $0.95/60 calls (metered lanes). Push carries
+ALLOW_PAID_SURFACE=1: tripwire-scan.mjs REFERENCES the key marker as the watchman (reads workflow files +
+env names; makes zero API calls) — reviewed, not a spender. Phase 2 (cron + issue + $1-capped Sonnet
+verdict) specced, not built. Check spend_tripwire_live_verify stays open pending operator-run.
+
 ## 2026-07-05 (main) — GUARD 4: PUSH LOCK — no session pushes without in-conversation operator approval (hook-enforced)
 
 Operator caught it: GitHub activity API shows **35 session pushes to main in 24h** despite memory rule
