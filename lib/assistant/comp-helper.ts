@@ -189,13 +189,13 @@ function usd(n: number): string {
 // ── the orchestrator ──────────────────────────────────────────────────────────
 
 /**
- * Run the on-demand comp path for one question. DI-injectable
- * (geocode/fetchNearby/fetchSold/now) so it is fully offline-testable. Hard cap of
- * **≤3 Steady calls**: 1 `/nearby-home-values` + ≤2 `/property-tax-history`. Returns
- * `{ comps, asOf, needs }`; a non-comp ask is a no-op (`comps:[]`, `needs:[]`) so the
- * caller falls through to web-fallback. Never throws.
+ * The address-first core of the comp path — shared by chat (compHelper) AND the
+ * email builder's address spine (lib/email/address-context.ts). Geocode →
+ * Lee/Collier gate → nearby SOLD comps → ≤2 exact-sale enrichments; hard cap of
+ * **≤3 Steady calls**: 1 `/nearby-home-values` + ≤2 `/property-tax-history`.
+ * Same DI seams as compHelper; never throws.
  */
-export async function compHelper(question: string, deps: CompDeps = {}): Promise<CompResult> {
+export async function compsForAddress(address: string, deps: CompDeps = {}): Promise<CompResult> {
   const now = deps.now ?? new Date();
   const asOf = fmtMDY(now);
   const done = (comps: RenderComp[], needs: string[], matchedAddress?: string): CompResult => ({
@@ -204,26 +204,6 @@ export async function compHelper(question: string, deps: CompDeps = {}): Promise
     needs,
     ...(matchedAddress ? { matchedAddress } : {}),
   });
-
-  if (!looksLikeCompAsk(question)) return done([], []); // no-op → fall through to web-fallback
-
-  const address = extractAddress(question);
-  if (!address) {
-    // Build 1 — a listing project with a saved subject address: CONFIRM it instead of
-    // guessing or cold-asking. No geocode/fetch here — the user's next turn ("yes" or a
-    // different address) is resolved by the caller (resolveCompConfirmReentry) and
-    // re-enters with a real address. Falls back to the plain cold-ask with no saved address.
-    if (deps.projectAddress) {
-      return done(
-        [],
-        [`Is this comp for ${deps.projectAddress}? Reply "yes" or send a different address.`],
-      );
-    }
-    return done(
-      [],
-      ["Send me the full street address (with the city or ZIP) and I'll pull nearby comps."],
-    );
-  }
 
   const geocode = deps.geocode ?? geocodeAddress;
   const geo = await geocode(address);
@@ -312,6 +292,46 @@ export async function compHelper(question: string, deps: CompDeps = {}): Promise
     );
   }
   return done(comps, needs, geo.matchedAddress);
+}
+
+/**
+ * Run the on-demand comp path for one question. DI-injectable
+ * (geocode/fetchNearby/fetchSold/now) so it is fully offline-testable. Hard cap of
+ * **≤3 Steady calls**: 1 `/nearby-home-values` + ≤2 `/property-tax-history`. Returns
+ * `{ comps, asOf, needs }`; a non-comp ask is a no-op (`comps:[]`, `needs:[]`) so the
+ * caller falls through to web-fallback. Never throws.
+ */
+export async function compHelper(question: string, deps: CompDeps = {}): Promise<CompResult> {
+  const now = deps.now ?? new Date();
+  const asOf = fmtMDY(now);
+  const done = (comps: RenderComp[], needs: string[], matchedAddress?: string): CompResult => ({
+    comps,
+    asOf,
+    needs,
+    ...(matchedAddress ? { matchedAddress } : {}),
+  });
+
+  if (!looksLikeCompAsk(question)) return done([], []); // no-op → fall through to web-fallback
+
+  const address = extractAddress(question);
+  if (!address) {
+    // Build 1 — a listing project with a saved subject address: CONFIRM it instead of
+    // guessing or cold-asking. No geocode/fetch here — the user's next turn ("yes" or a
+    // different address) is resolved by the caller (resolveCompConfirmReentry) and
+    // re-enters with a real address. Falls back to the plain cold-ask with no saved address.
+    if (deps.projectAddress) {
+      return done(
+        [],
+        [`Is this comp for ${deps.projectAddress}? Reply "yes" or send a different address.`],
+      );
+    }
+    return done(
+      [],
+      ["Send me the full street address (with the city or ZIP) and I'll pull nearby comps."],
+    );
+  }
+
+  return compsForAddress(address, deps);
 }
 
 // ── render + sources (the two seams the wiring uses) ──────────────────────────
