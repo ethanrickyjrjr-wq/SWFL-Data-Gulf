@@ -1,3 +1,16 @@
+## 2026-07-05 (main) — BUILD: deliverable-distiller — skill + first SOCIAL distillation pushed (mine-only push; email distillation held on parallel-session dependency)
+
+Pushed (cherry-picked onto origin/main, operator: "safe push your files only"): (1) `.claude/skills/
+deliverable-distiller/SKILL.md` + plan — the operator factory: capture (crawl4ai URL / native-vision
+screenshot) → strip content → map to vocab → emit recipe/seed-doc/SocialTemplate → verify; first project
+skill in this repo. (2) `tip-stack` SocialTemplate distilled from a realtor pack shot on dribbble.com
+(kicker/title/four rows/CTA, token-only styling, fixed ids); offerable-list test updated same commit;
+design suite green. HELD locally: `year-in-review` email recipe (distilled from Resy via
+reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in-session) — its detection
+order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
+those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
+deliverable_distiller_live_verify stays open (operator-run live proof).
+
 ## 2026-07-05 (main) — SPEC: deliverable-distiller — reverse-engineer found deliverables into skeletons + recipes (email + social)
 
 Brainstormed + researched (crawl4ai: Unlayer AI Template Importer = commercial precedent for HTML/screenshot
