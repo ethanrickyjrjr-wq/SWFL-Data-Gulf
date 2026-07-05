@@ -1,3 +1,10 @@
+## 2026-07-05 (main) — fix: cadence legend renders once (first slide), not per-slide
+
+Operator: "don't need two cadence legends." Gated the `ShowcaseOverlay` legend on `step === 0` so it shows once
+per showcase instead of repeating on every content slide. One-line JSX conditional; eslint clean. Shipped via a
+detached worktree off origin/main (a live parallel session held 11 unpushed band-guard commits on local main;
+isolating avoided bundling them).
+
 ## 2026-07-05 (main) — BUILD: quick-start campaign buttons (Projects · Email Lab · Social)
 
 Implemented the 2026-07-04 spec. Registered `campaign-quick-start` (`campaign_quick_start_live_verify` open).

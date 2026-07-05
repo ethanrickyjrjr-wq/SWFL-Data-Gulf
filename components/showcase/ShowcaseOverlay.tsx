@@ -179,7 +179,7 @@ export function ShowcaseOverlay({
                     {slide.receipt}
                   </p>
                 )}
-                {showcase.cadenceRefresh && (
+                {step === 0 && showcase.cadenceRefresh && (
                   <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.03] p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-white/50">
                       What the AI keeps fresh
