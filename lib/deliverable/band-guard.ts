@@ -6,6 +6,8 @@
 // Census construction ± CI for counts, Zillow YoY for slow prices, absolute
 // point-delta for bounded ratios/scores. Pure — no I/O, no model.
 
+import type { SnapshotItem } from "./templates";
+
 export type MetricFamily =
   "slow_price" | "volatile_count" | "duration" | "bounded_ratio" | "structural" | "unknown";
 
@@ -101,4 +103,96 @@ export function checkBand(args: {
   }
   const movePct = Math.abs((now - prior) / prior) * 100;
   return { status: movePct > allowed ? "confirm_outlier" : "ok", movePct, allowed };
+}
+
+// ---------------------------------------------------------------------------
+// Outlier detection across two deliverable snapshots + web-confirm note resolution
+// ---------------------------------------------------------------------------
+
+/** One metric that moved implausibly vs the previous deliverable's printed value. */
+export interface Outlier {
+  label: string;
+  nowValue: string;
+  priorValue: string;
+  family: MetricFamily;
+  movePct: number | null;
+}
+
+/** The subset of the data-readiness `VerificationResult` the note resolver needs.
+ *  A grounded verify (real `source_urls`) is what lets an outlier ship clean or as
+ *  a discrepancy; an ungrounded/omitted result is treated as "could not confirm". */
+export interface WebConfirm {
+  within_tolerance: boolean;
+  value_used: string | null;
+  source_urls: string[];
+}
+
+function normLabel(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+type MetricItem = Extract<SnapshotItem, { kind: "metric" }>;
+
+/** Every `metric` in the new snapshot that label-matches a `metric` in the prior
+ *  snapshot and moved beyond its sourced band. Pure — the caller decides what to
+ *  do with each (web-confirm, then note). */
+export function bandOutliers(
+  nowItems: SnapshotItem[],
+  priorItems: SnapshotItem[],
+  gapDays: number,
+): Outlier[] {
+  const priorByLabel = new Map<string, MetricItem>();
+  for (const it of priorItems) {
+    if (it.kind === "metric") priorByLabel.set(normLabel(it.label), it);
+  }
+  const out: Outlier[] = [];
+  for (const it of nowItems) {
+    if (it.kind !== "metric") continue;
+    const prior = priorByLabel.get(normLabel(it.label));
+    if (!prior) continue;
+    const family = classifyFamily(it.label);
+    const verdict = checkBand({
+      nowValue: it.value,
+      priorValue: prior.value,
+      family,
+      gapDays,
+    });
+    if (verdict.status !== "confirm_outlier") continue;
+    out.push({
+      label: it.label,
+      nowValue: it.value,
+      priorValue: prior.value,
+      family,
+      movePct: verdict.movePct,
+    });
+  }
+  return out;
+}
+
+/** Map an outlier + its web-confirm result to the note that should ride in the
+ *  deliverable's `inference_notes`. Returns "" when the number should ship clean
+ *  (a grounded source agreed the move is real). Every non-empty note carries a
+ *  `falsifier:` clause and cites the CURRENT value (which anchors to a filed item),
+ *  so it survives the deliverable note gate. Additive — the number always ships.
+ *
+ *  - grounded + within tolerance  → "" (real move, verified — no scary note)
+ *  - grounded + out of tolerance  → discrepancy note (our value vs the source's)
+ *  - no grounded confirm          → please-confirm note */
+export function resolveOutlierNote(o: Outlier, web: WebConfirm | null): string {
+  const grounded = web != null && web.source_urls.length > 0 && web.value_used != null;
+  if (grounded && web!.within_tolerance) return "";
+  if (grounded && !web!.within_tolerance) {
+    const src = web!.source_urls[0];
+    return (
+      `${o.label} reads ${o.nowValue} in this update, versus ${o.priorValue} in the last one — ` +
+      `a named source (${src}) shows ${web!.value_used} for this period. Please confirm ${o.nowValue} before this sends. ` +
+      `falsifier: this holds if a named source shows ${o.nowValue} for this period.`
+    );
+  }
+  return (
+    `${o.label} reads ${o.nowValue} in this update, versus ${o.priorValue} in the last one — ` +
+    `a larger shift than this figure usually makes over this period, and we could not confirm it against a live source. ` +
+    `We can make mistakes; please confirm ${o.nowValue} before this sends. ` +
+    `falsifier: this holds if a named source shows ${o.nowValue} for this period.`
+  );
 }

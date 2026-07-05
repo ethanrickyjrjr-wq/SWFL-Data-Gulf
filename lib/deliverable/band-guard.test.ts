@@ -1,5 +1,28 @@
 import { test, expect, describe } from "bun:test";
-import { classifyFamily, FAMILY_BANDS, parseMagnitude, checkBand } from "./band-guard";
+import {
+  classifyFamily,
+  FAMILY_BANDS,
+  parseMagnitude,
+  checkBand,
+  bandOutliers,
+  resolveOutlierNote,
+  type Outlier,
+} from "./band-guard";
+import { lintDeliverableNarrative } from "./narrative-lint";
+import type { SnapshotItem, Narrative } from "./templates";
+
+function metric(label: string, value: string): SnapshotItem {
+  return {
+    id: crypto.randomUUID(),
+    added_at: "2026-07-05T00:00:00Z",
+    origin: "web",
+    kind: "metric",
+    report_id: "d1",
+    label,
+    value,
+    freshness_token: "",
+  } as SnapshotItem;
+}
 
 describe("classifyFamily", () => {
   test("slow prices/values", () => {
@@ -117,5 +140,97 @@ describe("checkBand", () => {
     expect(
       checkBand({ nowValue: "5", priorValue: "0", family: "slow_price", gapDays: 30 }).status,
     ).toBe("uncheckable");
+  });
+});
+
+describe("bandOutliers", () => {
+  test("an outlier metric is detected with its now/prior values", () => {
+    const now = [metric("Median Home Value", "$1.5M")];
+    const prior = [metric("Median Home Value", "$485K")];
+    const outliers = bandOutliers(now, prior, 30);
+    expect(outliers.length).toBe(1);
+    expect(outliers[0].nowValue).toBe("$1.5M");
+    expect(outliers[0].priorValue).toBe("$485K");
+    expect(outliers[0].family).toBe("slow_price");
+  });
+  test("an in-band metric is not an outlier", () => {
+    const now = [metric("Median Home Value", "$490K")];
+    const prior = [metric("Median Home Value", "$485K")];
+    expect(bandOutliers(now, prior, 30)).toEqual([]);
+  });
+  test("a metric with no prior match is not an outlier", () => {
+    const now = [metric("Median Home Value", "$1.5M")];
+    const prior = [metric("Active Inventory", "100")];
+    expect(bandOutliers(now, prior, 30)).toEqual([]);
+  });
+  test("label match is case/space-insensitive", () => {
+    const now = [metric("  median home value ", "$1.5M")];
+    const prior = [metric("Median Home Value", "$485K")];
+    expect(bandOutliers(now, prior, 30).length).toBe(1);
+  });
+});
+
+describe("resolveOutlierNote", () => {
+  const o: Outlier = {
+    label: "Median Home Value",
+    nowValue: "$1.5M",
+    priorValue: "$485K",
+    family: "slow_price",
+    movePct: 209,
+  };
+
+  test("grounded + within tolerance → no note (real move, verified)", () => {
+    expect(
+      resolveOutlierNote(o, {
+        within_tolerance: true,
+        value_used: "$1.49M",
+        source_urls: ["https://zillow.com/x"],
+      }),
+    ).toBe("");
+  });
+
+  test("grounded + out of tolerance → discrepancy note citing the source value", () => {
+    const note = resolveOutlierNote(o, {
+      within_tolerance: false,
+      value_used: "$500K",
+      source_urls: ["https://redfin.com/y"],
+    });
+    expect(note).toContain("$1.5M"); // our (current) value — anchors
+    expect(note).toContain("$500K"); // the source's value
+    expect(note).toContain("redfin.com");
+    expect(note).toMatch(/falsifier\s*:/i);
+  });
+
+  test("no grounded confirm (null) → please-confirm note", () => {
+    const note = resolveOutlierNote(o, null);
+    expect(note.toLowerCase()).toContain("please confirm");
+    expect(note).toContain("$1.5M");
+    expect(note).toMatch(/falsifier\s*:/i);
+  });
+
+  test("ungrounded result (no source urls) is treated as could-not-confirm", () => {
+    const note = resolveOutlierNote(o, {
+      within_tolerance: true,
+      value_used: "$1.5M",
+      source_urls: [],
+    });
+    expect(note.toLowerCase()).toContain("please confirm");
+  });
+
+  test("both note branches survive the deliverable note gate", () => {
+    const discrepancy = resolveOutlierNote(o, {
+      within_tolerance: false,
+      value_used: "$500K",
+      source_urls: ["https://redfin.com/y"],
+    });
+    const please = resolveOutlierNote(o, null);
+    const narrative: Narrative = {
+      exec_summary: "",
+      sections: [],
+      inference_notes: [discrepancy, please],
+    };
+    // Anchor set = the current snapshot value the deliverable holds.
+    const res = lintDeliverableNarrative(narrative, ["$1.5M"], []);
+    expect(res.violations.filter((v) => v.location === "inference_note")).toEqual([]);
   });
 });
