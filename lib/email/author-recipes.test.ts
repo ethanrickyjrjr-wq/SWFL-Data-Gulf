@@ -37,6 +37,16 @@ describe("detectRecipe — deterministic keyword routing", () => {
     // weekly must not trip monthly, and an intro mentioning a weekly update stays a welcome
     ["a weekly market update for my farm", "sphere-weekly"],
     ["introduce me and mention my weekly market update", "agent-intro"],
+    // year-in-review — distilled 07/05/2026 (see PROVENANCE in author-recipes.ts)
+    ["Build my year-in-review email for my sphere", "year-in-review"],
+    ["an annual recap of the Cape Coral market", "year-in-review"],
+    // precedence: year-end/annual beats monthly's "newsletter" keyword…
+    ["year-end newsletter for my farm", "year-in-review"],
+    // …but welcome and sphere-weekly still win before it
+    ["introduce me and mention my annual review", "agent-intro"],
+    ["a weekly market update with a year-end recap teaser", "sphere-weekly"],
+    // bare "review" near-miss stays generic
+    ["review this contract for me", null],
     // no match → null → generic prompt unchanged
     ["price update for Cape Coral", null],
     ["", null],

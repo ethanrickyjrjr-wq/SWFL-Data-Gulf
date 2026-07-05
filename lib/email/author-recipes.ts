@@ -17,6 +17,7 @@
 export const RECIPE_IDS = [
   "agent-intro",
   "sphere-weekly",
+  "year-in-review",
   "monthly-newsletter",
   "editorial-letter",
   "editorial-showcase",
@@ -34,6 +35,12 @@ const WELCOME_RE = /\bwelcome\b|introduc|\bnew agent\b|\bmeet\b/i;
 // Checked AFTER welcome (an intro mentioning a weekly update stays a welcome)
 // and BEFORE monthly (a "weekly" ask must never read as the monthly digest).
 const SPHERE_WEEKLY_RE = /\bweekly\b[^.!?]*\bmarket update\b|\bsphere market update\b/i;
+// The personalized annual recap ("year in review" / "annual recap" / "year-end
+// newsletter"). Checked AFTER welcome and sphere-weekly (an intro or weekly ask
+// that mentions the year stays what it is) and BEFORE monthly — "year-end
+// newsletter" and "annual newsletter" must read as the recap, never the digest.
+const YEAR_REVIEW_RE =
+  /\byear[- ]in[- ]review\b|\bannual\b[^.!?]*\b(recap|review|letter|update|newsletter)\b|\byear[- ]end\b[^.!?]*\b(recap|review|update|newsletter|email)\b|\byour year\b/i;
 const MONTHLY_RE = /\bmonthly\b|\bnewsletter\b|\bdigest\b/i;
 const EDITORIAL_RE = /\bfancy\b|\belegant\b|\beditorial\b|\bmagazine\b|\bluxury\b|\bletter\b/i;
 const LETTER_RE = /\bletter\b/i;
@@ -45,6 +52,7 @@ export function detectRecipe(prompt: string): RecipeId | null {
   const p = prompt ?? "";
   if (WELCOME_RE.test(p)) return "agent-intro";
   if (SPHERE_WEEKLY_RE.test(p)) return "sphere-weekly";
+  if (YEAR_REVIEW_RE.test(p)) return "year-in-review";
   if (MONTHLY_RE.test(p)) return "monthly-newsletter";
   if (EDITORIAL_RE.test(p)) {
     if (LETTER_RE.test(p)) return "editorial-letter";
@@ -110,6 +118,46 @@ const RECIPES: Record<RecipeId, string> = {
     "ships a generic label, and never a view, read, or learn-more label.\n" +
     "- Keep it short: this arrives every week, and consistency of shape builds the " +
     "open habit. The footer with unsubscribe and postal address always renders.",
+
+  // PROVENANCE: distilled 07/05/2026 from Resy's year-in-review email via
+  // reallygoodemails.com (public gallery; screenshot lane — content stripped,
+  // layout system only). Why-tag evidence: en.wikipedia.org/wiki/Spotify_Wrapped
+  // (fetched in-session 07/05/2026 — wrapped recaps are a series of sequential
+  // single-stat screens, organized visually to boost engagement; the personalized
+  // recap format drives sharing and advocacy), plus the in-file base (Vero
+  // inverted pyramid — the hook lands in the first screen).
+  "year-in-review":
+    "RECIPE — YEAR IN REVIEW (the personalized annual recap; one number at a time, " +
+    "zooming home).\n" +
+    "Target structure, top to bottom:\n" +
+    "- Open with a personal masthead: a `hero` with band light whose kicker names " +
+    "the reader's area and whose headline frames the recap — the reader's own year, " +
+    "by the numbers (name the year in words like this past year — you never type " +
+    "digits). The reader is the subject of the story: a personal recap reads as a " +
+    "gift, not a pitch, and that is what earns the open and the forward.\n" +
+    "- A short `text` note written to one reader: what this recap is and why they " +
+    "are getting it — a couple of warm sentences, no selling.\n" +
+    "- The cascade: a small handful of figures, EACH in its own row — one " +
+    "`metric-card` per figure, its value id-selected from the DATA MENU, its label " +
+    "one short line — never one crowded grid. Sequential single-number moments are " +
+    "the wrapped-style mechanic: each figure lands alone, so each one registers.\n" +
+    "- Order the cascade as a zoom: the broad market first (state or county), the " +
+    "reader's own area last — the story tightens toward home, and the most personal " +
+    "figure is the payoff.\n" +
+    "- One `signal` block as the year's honest read: what the year actually meant " +
+    "for someone who owns or wants a home there, plus one sentence naming what " +
+    "would change this read next year. Never hedge it into mush.\n" +
+    "- Close warm and forward-looking in a `text` block: thank the reader and ask " +
+    "the question that points at next year. Sign off with an `agent-card` — the " +
+    "bio reads as a signature.\n" +
+    "- Exactly ONE `button`, and you MUST write its `button_label` field yourself " +
+    "as the reply ask in a few short words that fit a button (reply with your " +
+    "address for your home's own year recap — the details live in the email body, " +
+    "not the label); leaving it empty ships a generic label, and never a view, " +
+    "read, or learn-more label. The recap ask converts because it extends the " +
+    "personal story to the reader's own home.\n" +
+    "- This is an annual moment — let it breathe: pad airy on the cascade rows. The " +
+    "footer with unsubscribe and postal address always renders.",
 
   "monthly-newsletter":
     "RECIPE — MONTHLY NEWSLETTER (recurring market digest).\n" +
