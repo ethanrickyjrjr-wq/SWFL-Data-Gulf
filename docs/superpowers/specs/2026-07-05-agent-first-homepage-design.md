@@ -27,7 +27,7 @@ An anonymous visitor types a Lee/Collier address, clicks a campaign chip, and la
 ### Hero
 
 - Headline (operator's line): **"Research done. Send. We'll take care of the rest."** Subline: "Type your next listing's address. We build the campaign from live Southwest Florida data — every number sourced — and send it on your schedule." The word "AI" does not appear in the hero. Anti-drip note rides subcopy ("fewer, better sends").
-- **One address bar** with autocomplete (Mapbox Search/Geocoding, proximity-biased to Lee/Collier), accepting street address, ZIP, or city. Autocomplete is net-new; the server-side geocoder exists (`refinery/lib/geocode.mts` via `lib/geo/geocode-address.ts`).
+- **One address bar** with an as-you-type suggestion dropdown, accepting street address, ZIP, or city. Vendor settled 07/05/2026 (verified live: docs.mapbox.com Search Box API + mapbox.com/pricing): **Mapbox Search Box API**, `/suggest` per debounced keystroke → `/retrieve` on selection (returns coordinates + postcode, so scope is resolved before the lab opens — no typo geocode failures). One `session_token` (UUIDv4) per typing session; billed per session (≤50 suggests + 1 retrieve, 2-min idle expiry), standard tier 2,500 sessions/mo free then $11.50/1k. Bias: `proximity` Fort Myers, `bbox` Lee+Collier, `country=US`, `types=address,place,postcode,locality,neighborhood`. Note: Mapbox "Address Autofill" is a different product (checkout forms) — not this. Token scoping per mapbox-token-security. The server-side geocoder (`refinery/lib/geocode.mts` via `lib/geo/geocode-address.ts`) stays as the fallback for free-typed input that skips the dropdown.
 - **Four campaign chips** under the bar: New Listing · Just Sold · Coming to Market · Market Update. Address (or ZIP/city) + chip → lab opens prebuilt.
 - **Chip-driven placeholder (settled 07/05/2026):** one bar, no second field, no error states. The three listing chips set the placeholder to "Type your next listing's address…"; Market Update (area-grain by nature) sets it to "Type a city or ZIP…". Whatever is typed resolves: address → its ZIP, ZIP/city → as-is — no input is ever wrong. Market Update + a typed city is deliberately one click from the recurring newsletter schedule, the loop that already works end-to-end.
 
@@ -73,5 +73,4 @@ Choropleth + rail + stats bar move below the fold as the proof-of-data section, 
 
 ## Open questions (build 2+ inputs, not blockers)
 
-- Autocomplete vendor call: Mapbox Search JS vs. plain Geocoding API + our own dropdown (decide in plan; token scoping per mapbox-token-security).
 - Social chip surface (chips open the email lab in build 1; social lands with the spine/sequence builds).
