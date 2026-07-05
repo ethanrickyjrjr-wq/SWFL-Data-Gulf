@@ -21,6 +21,7 @@
    `Image` element to `img` by name, so the a11y rule mis-fires — disable it for
    this PDF-only file. */
 import { Document, Page, View, Text, Image, Link, StyleSheet } from "@react-pdf/renderer";
+import { groupRows } from "@/lib/email/doc/row-grouping";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle, FontFamily } from "@/lib/email/doc/types";
 import { PLATFORMS, platformMeta, domainFromUrl } from "@/lib/email/social/platforms";
 import { BRAND_FONTS } from "@/lib/brand/fonts";
@@ -794,12 +795,27 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
  * at the foot (consumption-contract rule 5 — state the as-of date once).
  */
 export function EmailDocPdf({ doc, asOf }: { doc: EmailDoc; asOf?: string }) {
+  // Positioned blocks share visual rows exactly as the email engines do — the
+  // grouping comes from the ONE root (lib/email/doc/row-grouping.ts), so a
+  // portrait-beside-letter row can never column in the email and stack here.
+  // Flex weights carry the span split (e.g. 5/12 vs 7/12); no `gap` (spotty in
+  // @react-pdf flex) — the blocks' own section padding provides the gutter.
   return (
     <Document>
       <Page size="LETTER" style={s.page} wrap>
-        {doc.blocks.map((block) => (
-          <PdfBlock key={block.id} block={block} gs={doc.globalStyle} />
-        ))}
+        {groupRows(doc.blocks).map((row, ri) =>
+          row.length === 1 ? (
+            <PdfBlock key={row[0].block.id ?? ri} block={row[0].block} gs={doc.globalStyle} />
+          ) : (
+            <View key={row[0].block.id ?? ri} style={{ flexDirection: "row" }}>
+              {row.map(({ block, eff }) => (
+                <View key={block.id} style={{ flex: eff.w }}>
+                  <PdfBlock block={block} gs={doc.globalStyle} />
+                </View>
+              ))}
+            </View>
+          ),
+        )}
         {asOf ? <Text style={s.asOf}>As of {asOf}</Text> : null}
       </Page>
     </Document>

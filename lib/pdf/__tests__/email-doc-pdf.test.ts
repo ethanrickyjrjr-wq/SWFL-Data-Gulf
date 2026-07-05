@@ -3,8 +3,10 @@
 // field crashes the renderer, this goes red — "every piece of data can be added
 // to a PDF" is enforced here, not assumed.
 import { test, expect } from "bun:test";
+import type { ReactElement } from "react";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import {
+  EmailDocPdf,
   renderEmailDocToBuffer,
   pdfFilename,
   parsePdfText,
@@ -136,6 +138,71 @@ test("renders all 12 block types to a valid PDF buffer", async () => {
   expect(Buffer.isBuffer(buf)).toBe(true);
   expect(buf.length).toBeGreaterThan(1000);
   // Magic number — a real PDF starts with "%PDF".
+  expect(buf.subarray(0, 4).toString("latin1")).toBe("%PDF");
+});
+
+// ── Side-by-side rows (agent-launch L4): the PDF consumes the SAME row
+// grouping as the email engines, so a 5+7 portrait-beside-letter row renders
+// as one flex row here, never a stack. ──────────────────────────────────────
+const POSITIONED_DOC: EmailDoc = {
+  globalStyle: FULL_DOC.globalStyle,
+  blocks: [
+    {
+      id: "p1",
+      type: "image",
+      props: { url: "https://example.com/portrait.png", alt: "Agent portrait", kind: "photo" },
+      layout: { x: 0, y: 0, w: 5, h: 6 },
+    },
+    {
+      id: "p2",
+      type: "text",
+      props: { body: "You're getting this because we know each other." },
+      layout: { x: 5, y: 0, w: 7, h: 6 },
+    },
+    {
+      id: "p3",
+      type: "footer",
+      props: { companyName: "Gulfline" },
+      layout: { x: 0, y: 6, w: 12, h: 3 },
+    },
+  ],
+};
+
+/** Depth-first walk of a React element tree collecting elements whose style
+ *  (object or array form) matches the predicate. */
+function findByStyle(
+  node: unknown,
+  pred: (style: Record<string, unknown>) => boolean,
+  out: ReactElement[] = [],
+): ReactElement[] {
+  if (node == null || typeof node !== "object") return out;
+  if (Array.isArray(node)) {
+    for (const child of node) findByStyle(child, pred, out);
+    return out;
+  }
+  const el = node as ReactElement & { props?: { style?: unknown; children?: unknown } };
+  const styles = Array.isArray(el.props?.style) ? el.props.style : [el.props?.style];
+  for (const s of styles) {
+    if (s && typeof s === "object" && pred(s as Record<string, unknown>)) {
+      out.push(el);
+      break;
+    }
+  }
+  findByStyle(el.props?.children, pred, out);
+  return out;
+}
+
+test("a positioned 5+7 row renders as ONE flex row with span-weighted columns", () => {
+  const tree = EmailDocPdf({ doc: POSITIONED_DOC });
+  const rows = findByStyle(tree, (s) => s.flexDirection === "row" && !("paddingHorizontal" in s));
+  const spanRow = rows.find((r) => findByStyle(r, (s) => s.flex === 5).length > 0);
+  expect(spanRow).toBeDefined();
+  expect(findByStyle(spanRow, (s) => s.flex === 5)).toHaveLength(1);
+  expect(findByStyle(spanRow, (s) => s.flex === 7)).toHaveLength(1);
+});
+
+test("a positioned doc still renders to a valid PDF buffer", async () => {
+  const buf = await renderEmailDocToBuffer(POSITIONED_DOC);
   expect(buf.subarray(0, 4).toString("latin1")).toBe("%PDF");
 });
 

@@ -57,6 +57,7 @@ import { Html, Head, Body, Container } from "@react-email/components";
 import { emailHeadChildren, msoFontPin } from "./blocks/email-head";
 import { BlockRenderer } from "./blocks/BlockRenderer";
 import { colSpanToPx, GRID_COLS } from "./grid-schema";
+import { groupRows as groupRowEntries } from "./doc/row-grouping";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
 
 // `render()` always prepends this XHTML doctype (the DTD string has no interior
@@ -65,63 +66,13 @@ import type { EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
 const DOCTYPE_RE = /^\s*<!DOCTYPE[^>]*>/i;
 const SUSPENSE_MARKER_RE = /<!--\/?\$-->/g;
 
-interface Eff {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+// Row grouping + effective layout live in the shared root (doc/row-grouping.ts)
+// — the PDF engine consumes the SAME grouping, so a side-by-side row can never
+// column in one engine and stack in the other.
 
-function effectiveLayout(block: EmailBlock, fallbackY: number): Eff {
-  const l = block.layout;
-  return {
-    x: l?.x ?? 0,
-    y: l?.y ?? fallbackY,
-    w: l?.w ?? GRID_COLS, // no layout → treat as full-bleed
-    h: l?.h ?? 1,
-  };
-}
-
-/**
- * Group blocks into visual rows. Blocks whose vertical band (y .. y+h) overlaps
- * the current row's running band join it; a block starting at/below the row's
- * bottom opens a new row. Within a row, blocks are ordered by `x`.
- *
- * The spec says "group by `layout.y`". This band rule is a strict SUPERSET: it
- * also handles react-grid-layout vertical compaction, where side-by-side columns
- * of UNEQUAL height get different `y` values (each pulled up independently) — an
- * exact-`y` match would split such a row into two single-block rows. We assume
- * the layout is already compacted upstream (canvas / `react-grid-layout/core`);
- * we only read positions, we don't compact.
- *
- * Blocks without a `layout` sort AFTER positioned ones (via `fallbackY`), in
- * original array order, each as its own full-bleed row.
- */
+/** Rows of blocks, via the shared root (band-overlap grouping, x-ordered). */
 function groupRows(blocks: EmailBlock[]): EmailBlock[][] {
-  const FALLBACK_BASE = 1_000_000;
-  const decorated = blocks.map((block, i) => ({
-    block,
-    i,
-    eff: effectiveLayout(block, FALLBACK_BASE + i),
-  }));
-  decorated.sort((a, b) => a.eff.y - b.eff.y || a.eff.x - b.eff.x || a.i - b.i);
-
-  const rows: (typeof decorated)[] = [];
-  let cur: typeof decorated = [];
-  let curBottom = Number.NEGATIVE_INFINITY;
-  for (const d of decorated) {
-    if (cur.length === 0 || d.eff.y < curBottom) {
-      cur.push(d);
-      curBottom = Math.max(curBottom, d.eff.y + d.eff.h);
-    } else {
-      rows.push(cur);
-      cur = [d];
-      curBottom = d.eff.y + d.eff.h;
-    }
-  }
-  if (cur.length) rows.push(cur);
-
-  return rows.map((r) => [...r].sort((a, b) => a.eff.x - b.eff.x || a.i - b.i).map((d) => d.block));
+  return groupRowEntries(blocks).map((row) => row.map((d) => d.block));
 }
 
 /** Render ONE block to a self-contained HTML fragment (no doctype, no Suspense
