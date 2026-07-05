@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260702 -->
+<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260705 -->
 ---
 brain_id: active-listings-swfl
-version: 4
-refined_at: 2026-07-02T08:49:22Z
-freshness_token: SWFL-7421-v4-20260702
+version: 5
+refined_at: 2026-07-05T08:47:11Z
+freshness_token: SWFL-7421-v5-20260705
 ttl_seconds: 172800
 context_type: user_saved_reference
 scope: Southwest Florida active residential listing inventory — count, median asking price, and average days on market at region, county, and ZIP grain. Source: realtor.com for-sale listings; a licensed feed can swap in later. List-side only (no closed sales).
@@ -28,39 +28,39 @@ SCOPE: Southwest Florida active residential listing inventory — count, median 
 
 --- CITATION TABLE ---
 id  | source                                      | verified   | expires
-s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
+s01 | SWFL active for-sale listings — realtor.com | 2026-07-05 | 2026-07-07
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"active_listings_swfl_snapshot","fact":"SWFL active residential listing inventory ","value":"28,670 active listings, median asking $349,000. 3 counties, 62 ZIPs covered.","src":"s01","date":"2026-07-02"}
+  {"id":"f001","topic":"active_listings_swfl_snapshot","fact":"SWFL active residential listing inventory ","value":"29,264 active listings, median asking $339,999. 4 counties, 66 ZIPs covered.","src":"s01","date":"2026-07-05"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "active-listings-swfl",
-  "version": 4,
-  "refined_at": "2026-07-02T08:49:22Z",
-  "expires": "2026-07-04T08:49:22Z",
+  "version": 5,
+  "refined_at": "2026-07-05T08:47:11Z",
+  "expires": "2026-07-07T08:47:11Z",
   "ttl_seconds": 172800,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "28,670 active SWFL residential listings, median asking $349,000 (active residential listings, as of 2026-07-01). By county: Lee 20,936 (median $299,000), Collier 7,734 (median $619,900), Lee 1 (median $319,900).",
+  "conclusion": "29,264 active SWFL residential listings, median asking $339,999 (active residential listings, as of 2026-07-04). By county: Lee 20,565 (median $299,000), Collier 7,651 (median $615,000), Hendry 1,048 (median $199,950), Lee 1 (median $319,900).",
   "key_metrics": [
     {
       "metric": "active_listings_count_swfl",
       "label": "SWFL active residential listings (count)",
-      "value": 28670,
+      "value": 29264,
       "direction": "stable",
       "variable_type": "extensive",
       "units": "listings",
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-02T08:49:22Z",
+        "fetched_at": "2026-07-05T08:47:11Z",
         "tier": 2,
-        "citation": "28,670 active SWFL residential listings as of 2026-07-01"
+        "citation": "29,264 active SWFL residential listings as of 2026-07-04"
       },
       "suggestions": [
         "What's driving active listings count swfl?",
@@ -70,16 +70,16 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
     {
       "metric": "median_list_price_swfl",
       "label": "SWFL median asking price (active residential)",
-      "value": 349000,
+      "value": 339999,
       "direction": "stable",
       "variable_type": "intensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-02T08:49:22Z",
+        "fetched_at": "2026-07-05T08:47:11Z",
         "tier": 2,
-        "citation": "median asking price across 28,670 active SWFL listings: $349,000"
+        "citation": "median asking price across 29,264 active SWFL listings: $339,999"
       },
       "suggestions": [
         "What's driving median list price swfl?",
@@ -117,7 +117,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "Lee",
           "label": "Lee",
           "cells": {
-            "listing_count": 20936,
+            "listing_count": 20565,
             "median_list_price": 299000,
             "avg_days_on_market": null
           }
@@ -126,8 +126,17 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "Collier",
           "label": "Collier",
           "cells": {
-            "listing_count": 7734,
-            "median_list_price": 619900,
+            "listing_count": 7651,
+            "median_list_price": 615000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "Hendry",
+          "label": "Hendry",
+          "cells": {
+            "listing_count": 1048,
+            "median_list_price": 199950,
             "avg_days_on_market": null
           }
         },
@@ -143,9 +152,9 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-02T08:49:22Z",
+        "fetched_at": "2026-07-05T08:47:11Z",
         "tier": 2,
-        "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-01"
+        "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-04"
       }
     },
     {
@@ -177,8 +186,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33993",
           "label": "33993 (Lee)",
           "cells": {
-            "listing_count": 2203,
-            "median_list_price": 239000,
+            "listing_count": 2178,
+            "median_list_price": 226500,
             "avg_days_on_market": null
           }
         },
@@ -186,8 +195,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33974",
           "label": "33974 (Lee)",
           "cells": {
-            "listing_count": 2038,
-            "median_list_price": 31000,
+            "listing_count": 1964,
+            "median_list_price": 32000,
             "avg_days_on_market": null
           }
         },
@@ -195,7 +204,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33909",
           "label": "33909 (Lee)",
           "cells": {
-            "listing_count": 1320,
+            "listing_count": 1304,
             "median_list_price": 199000,
             "avg_days_on_market": null
           }
@@ -204,7 +213,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33972",
           "label": "33972 (Lee)",
           "cells": {
-            "listing_count": 1314,
+            "listing_count": 1302,
             "median_list_price": 35000,
             "avg_days_on_market": null
           }
@@ -213,7 +222,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33971",
           "label": "33971 (Lee)",
           "cells": {
-            "listing_count": 1086,
+            "listing_count": 1060,
             "median_list_price": 259900,
             "avg_days_on_market": null
           }
@@ -222,7 +231,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33908",
           "label": "33908 (Lee)",
           "cells": {
-            "listing_count": 1084,
+            "listing_count": 1052,
             "median_list_price": 299900,
             "avg_days_on_market": null
           }
@@ -231,7 +240,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34120",
           "label": "34120 (Collier)",
           "cells": {
-            "listing_count": 1074,
+            "listing_count": 1050,
             "median_list_price": 549900,
             "avg_days_on_market": null
           }
@@ -240,8 +249,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33914",
           "label": "33914 (Lee)",
           "cells": {
-            "listing_count": 998,
-            "median_list_price": 475000,
+            "listing_count": 984,
+            "median_list_price": 472450,
             "avg_days_on_market": null
           }
         },
@@ -249,7 +258,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33917",
           "label": "33917 (Lee)",
           "cells": {
-            "listing_count": 921,
+            "listing_count": 909,
             "median_list_price": 179900,
             "avg_days_on_market": null
           }
@@ -258,8 +267,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34114",
           "label": "34114 (Collier)",
           "cells": {
-            "listing_count": 789,
-            "median_list_price": 529000,
+            "listing_count": 784,
+            "median_list_price": 525000,
             "avg_days_on_market": null
           }
         },
@@ -267,8 +276,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33931",
           "label": "33931 (Lee)",
           "cells": {
-            "listing_count": 769,
-            "median_list_price": 675000,
+            "listing_count": 762,
+            "median_list_price": 676500,
             "avg_days_on_market": null
           }
         },
@@ -276,17 +285,17 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34135",
           "label": "34135 (Lee)",
           "cells": {
-            "listing_count": 759,
-            "median_list_price": 449900,
+            "listing_count": 760,
+            "median_list_price": 450000,
             "avg_days_on_market": null
           }
         },
         {
-          "key": "33905",
-          "label": "33905 (Lee)",
+          "key": "33935",
+          "label": "33935 (Hendry)",
           "cells": {
-            "listing_count": 657,
-            "median_list_price": 300000,
+            "listing_count": 703,
+            "median_list_price": 240000,
             "avg_days_on_market": null
           }
         },
@@ -294,35 +303,17 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33976",
           "label": "33976 (Lee)",
           "cells": {
-            "listing_count": 652,
-            "median_list_price": 294250,
+            "listing_count": 648,
+            "median_list_price": 289900,
             "avg_days_on_market": null
           }
         },
         {
-          "key": "33904",
-          "label": "33904 (Lee)",
+          "key": "33905",
+          "label": "33905 (Lee)",
           "cells": {
-            "listing_count": 647,
-            "median_list_price": 424900,
-            "avg_days_on_market": null
-          }
-        },
-        {
-          "key": "34145",
-          "label": "34145 (Collier)",
-          "cells": {
-            "listing_count": 633,
-            "median_list_price": 899000,
-            "avg_days_on_market": null
-          }
-        },
-        {
-          "key": "33903",
-          "label": "33903 (Lee)",
-          "cells": {
-            "listing_count": 620,
-            "median_list_price": 134998,
+            "listing_count": 635,
+            "median_list_price": 309000,
             "avg_days_on_market": null
           }
         },
@@ -330,8 +321,35 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34112",
           "label": "34112 (Collier)",
           "cells": {
-            "listing_count": 617,
-            "median_list_price": 350000,
+            "listing_count": 628,
+            "median_list_price": 349900,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "33904",
+          "label": "33904 (Lee)",
+          "cells": {
+            "listing_count": 628,
+            "median_list_price": 419950,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "34145",
+          "label": "34145 (Collier)",
+          "cells": {
+            "listing_count": 621,
+            "median_list_price": 920000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "33903",
+          "label": "33903 (Lee)",
+          "cells": {
+            "listing_count": 603,
+            "median_list_price": 130000,
             "avg_days_on_market": null
           }
         },
@@ -339,8 +357,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33913",
           "label": "33913 (Lee)",
           "cells": {
-            "listing_count": 601,
-            "median_list_price": 415000,
+            "listing_count": 594,
+            "median_list_price": 419900,
             "avg_days_on_market": null
           }
         },
@@ -348,8 +366,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33928",
           "label": "33928 (Lee)",
           "cells": {
-            "listing_count": 575,
-            "median_list_price": 538000,
+            "listing_count": 566,
+            "median_list_price": 529500,
             "avg_days_on_market": null
           }
         },
@@ -357,7 +375,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34102",
           "label": "34102 (Collier)",
           "cells": {
-            "listing_count": 546,
+            "listing_count": 538,
             "median_list_price": 2995000,
             "avg_days_on_market": null
           }
@@ -366,8 +384,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33991",
           "label": "33991 (Lee)",
           "cells": {
-            "listing_count": 537,
-            "median_list_price": 399000,
+            "listing_count": 532,
+            "median_list_price": 394938,
             "avg_days_on_market": null
           }
         },
@@ -375,17 +393,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33936",
           "label": "33936 (Lee)",
           "cells": {
-            "listing_count": 530,
+            "listing_count": 528,
             "median_list_price": 215000,
-            "avg_days_on_market": null
-          }
-        },
-        {
-          "key": "34119",
-          "label": "34119 (Collier)",
-          "cells": {
-            "listing_count": 500,
-            "median_list_price": 699450,
             "avg_days_on_market": null
           }
         },
@@ -393,8 +402,17 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34108",
           "label": "34108 (Collier)",
           "cells": {
-            "listing_count": 494,
-            "median_list_price": 1282500,
+            "listing_count": 491,
+            "median_list_price": 1255000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "34119",
+          "label": "34119 (Collier)",
+          "cells": {
+            "listing_count": 491,
+            "median_list_price": 699000,
             "avg_days_on_market": null
           }
         },
@@ -402,8 +420,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33919",
           "label": "33919 (Lee)",
           "cells": {
-            "listing_count": 489,
-            "median_list_price": 250000,
+            "listing_count": 478,
+            "median_list_price": 249900,
             "avg_days_on_market": null
           }
         },
@@ -411,17 +429,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34134",
           "label": "34134 (Lee)",
           "cells": {
-            "listing_count": 479,
-            "median_list_price": 775000,
-            "avg_days_on_market": null
-          }
-        },
-        {
-          "key": "34113",
-          "label": "34113 (Collier)",
-          "cells": {
-            "listing_count": 477,
-            "median_list_price": 525000,
+            "listing_count": 472,
+            "median_list_price": 782500,
             "avg_days_on_market": null
           }
         },
@@ -429,8 +438,17 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34110",
           "label": "34110 (Collier)",
           "cells": {
-            "listing_count": 473,
+            "listing_count": 465,
             "median_list_price": 649000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "34113",
+          "label": "34113 (Collier)",
+          "cells": {
+            "listing_count": 465,
+            "median_list_price": 525000,
             "avg_days_on_market": null
           }
         },
@@ -438,8 +456,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33957",
           "label": "33957 (Lee)",
           "cells": {
-            "listing_count": 463,
-            "median_list_price": 924000,
+            "listing_count": 443,
+            "median_list_price": 925000,
             "avg_days_on_market": null
           }
         },
@@ -447,8 +465,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34142",
           "label": "34142 (Collier)",
           "cells": {
-            "listing_count": 410,
-            "median_list_price": 424000,
+            "listing_count": 405,
+            "median_list_price": 425499,
             "avg_days_on_market": null
           }
         },
@@ -456,7 +474,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34103",
           "label": "34103 (Collier)",
           "cells": {
-            "listing_count": 387,
+            "listing_count": 381,
             "median_list_price": 1495000,
             "avg_days_on_market": null
           }
@@ -465,8 +483,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33990",
           "label": "33990 (Lee)",
           "cells": {
-            "listing_count": 367,
-            "median_list_price": 394900,
+            "listing_count": 368,
+            "median_list_price": 396950,
             "avg_days_on_market": null
           }
         },
@@ -474,8 +492,17 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34117",
           "label": "34117 (Collier)",
           "cells": {
-            "listing_count": 362,
-            "median_list_price": 515500,
+            "listing_count": 359,
+            "median_list_price": 500000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "33440",
+          "label": "33440 (Hendry)",
+          "cells": {
+            "listing_count": 342,
+            "median_list_price": 145000,
             "avg_days_on_market": null
           }
         },
@@ -483,8 +510,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34109",
           "label": "34109 (Collier)",
           "cells": {
-            "listing_count": 322,
-            "median_list_price": 699900,
+            "listing_count": 320,
+            "median_list_price": 699000,
             "avg_days_on_market": null
           }
         },
@@ -492,8 +519,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34104",
           "label": "34104 (Collier)",
           "cells": {
-            "listing_count": 307,
-            "median_list_price": 399999,
+            "listing_count": 309,
+            "median_list_price": 404900,
             "avg_days_on_market": null
           }
         },
@@ -501,8 +528,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33912",
           "label": "33912 (Lee)",
           "cells": {
-            "listing_count": 302,
-            "median_list_price": 352450,
+            "listing_count": 298,
+            "median_list_price": 349900,
             "avg_days_on_market": null
           }
         },
@@ -510,8 +537,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33907",
           "label": "33907 (Lee)",
           "cells": {
-            "listing_count": 276,
-            "median_list_price": 181000,
+            "listing_count": 271,
+            "median_list_price": 179900,
             "avg_days_on_market": null
           }
         },
@@ -519,8 +546,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33973",
           "label": "33973 (Lee)",
           "cells": {
-            "listing_count": 253,
-            "median_list_price": 405000,
+            "listing_count": 252,
+            "median_list_price": 407000,
             "avg_days_on_market": null
           }
         },
@@ -528,8 +555,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33901",
           "label": "33901 (Lee)",
           "cells": {
-            "listing_count": 241,
-            "median_list_price": 350000,
+            "listing_count": 238,
+            "median_list_price": 330000,
             "avg_days_on_market": null
           }
         },
@@ -537,7 +564,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33916",
           "label": "33916 (Lee)",
           "cells": {
-            "listing_count": 240,
+            "listing_count": 238,
             "median_list_price": 299900,
             "avg_days_on_market": null
           }
@@ -546,8 +573,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34105",
           "label": "34105 (Collier)",
           "cells": {
-            "listing_count": 227,
-            "median_list_price": 495000,
+            "listing_count": 225,
+            "median_list_price": 480000,
             "avg_days_on_market": null
           }
         },
@@ -555,8 +582,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33967",
           "label": "33967 (Lee)",
           "cells": {
-            "listing_count": 199,
-            "median_list_price": 399900,
+            "listing_count": 195,
+            "median_list_price": 399000,
             "avg_days_on_market": null
           }
         },
@@ -564,8 +591,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33966",
           "label": "33966 (Lee)",
           "cells": {
-            "listing_count": 162,
-            "median_list_price": 333700,
+            "listing_count": 157,
+            "median_list_price": 330000,
             "avg_days_on_market": null
           }
         },
@@ -573,8 +600,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "33920",
           "label": "33920 (Lee)",
           "cells": {
-            "listing_count": 116,
-            "median_list_price": 27900,
+            "listing_count": 110,
+            "median_list_price": 29000,
             "avg_days_on_market": null
           }
         },
@@ -582,8 +609,8 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "key": "34116",
           "label": "34116 (Collier)",
           "cells": {
-            "listing_count": 103,
-            "median_list_price": 614990,
+            "listing_count": 105,
+            "median_list_price": 599500,
             "avg_days_on_market": null
           }
         },
@@ -619,7 +646,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "label": "33971 (Collier)",
           "cells": {
             "listing_count": 7,
-            "median_list_price": 334900,
+            "median_list_price": 337900,
             "avg_days_on_market": null
           }
         },
@@ -629,6 +656,15 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           "cells": {
             "listing_count": 2,
             "median_list_price": 525000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "31420",
+          "label": "31420 (Collier)",
+          "cells": {
+            "listing_count": 1,
+            "median_list_price": 220000,
             "avg_days_on_market": null
           }
         },
@@ -669,6 +705,33 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           }
         },
         {
+          "key": "33040",
+          "label": "33040 (Hendry)",
+          "cells": {
+            "listing_count": 1,
+            "median_list_price": 80000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "33936",
+          "label": "33936 (Hendry)",
+          "cells": {
+            "listing_count": 1,
+            "median_list_price": 66000,
+            "avg_days_on_market": null
+          }
+        },
+        {
+          "key": "33975",
+          "label": "33975 (Hendry)",
+          "cells": {
+            "listing_count": 1,
+            "median_list_price": 625000,
+            "avg_days_on_market": null
+          }
+        },
+        {
           "key": "33095",
           "label": "33095 (Lee)",
           "cells": {
@@ -696,24 +759,6 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
           }
         },
         {
-          "key": "33873",
-          "label": "33873 (Lee)",
-          "cells": {
-            "listing_count": 1,
-            "median_list_price": 399900,
-            "avg_days_on_market": null
-          }
-        },
-        {
-          "key": "33922",
-          "label": "33922 (Lee)",
-          "cells": {
-            "listing_count": 1,
-            "median_list_price": 300000,
-            "avg_days_on_market": null
-          }
-        },
-        {
           "key": "33975",
           "label": "33975 (Lee)",
           "cells": {
@@ -734,9 +779,9 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-02T08:49:22Z",
+        "fetched_at": "2026-07-05T08:47:11Z",
         "tier": 2,
-        "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-01"
+        "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-04"
       }
     }
   ],
@@ -756,7 +801,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-02T08:49:22Z"
+    "computed_at": "2026-07-05T08:47:11Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -773,5 +818,5 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-02 | 2026-07-04
 - active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from the realtor.com daily feed, licensed-feed-swap-ready.
 
 --- RECENT NOTES ---
-- 2026-07-02: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-05: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
