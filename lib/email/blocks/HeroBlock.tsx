@@ -16,12 +16,18 @@ export function HeroBlock({
   const displayFont = displayFontStack(globalStyle);
   const bg = props.sectionBg ?? globalStyle.surfaceColor ?? CARD_BG;
   const onDark = isDarkBg(bg);
+  // A banded hero carrying a figure is the "stat clipping" — the letter's one
+  // piece of hard evidence, pinned with an accent left border. Unbanded heros
+  // (no explicit sectionBg) render exactly as before.
+  const clipping = Boolean(props.sectionBg && props.value);
+  const clipAccent = onDark ? legibleAccent(globalStyle.accentColor, bg) : globalStyle.accentColor;
   const inner = (
     <Section
       style={{
         backgroundColor: bg,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
+        ...(clipping ? { borderLeft: `4px solid ${clipAccent}` } : {}),
       }}
     >
       {props.kicker ? (
