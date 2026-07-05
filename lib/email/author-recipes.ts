@@ -16,6 +16,7 @@
 
 export const RECIPE_IDS = [
   "agent-intro",
+  "sphere-weekly",
   "monthly-newsletter",
   "editorial-letter",
   "editorial-showcase",
@@ -29,6 +30,10 @@ export type RecipeId = (typeof RECIPE_IDS)[number];
 // editorial family, letter/showcase pick sub-recipes; magazine-issue is the
 // default. \bletter\b never fires inside "newsletter" (word boundary).
 const WELCOME_RE = /\bwelcome\b|introduc|\bnew agent\b|\bmeet\b/i;
+// The weekly contrast brief ("weekly … market update" / "sphere market update").
+// Checked AFTER welcome (an intro mentioning a weekly update stays a welcome)
+// and BEFORE monthly (a "weekly" ask must never read as the monthly digest).
+const SPHERE_WEEKLY_RE = /\bweekly\b[^.!?]*\bmarket update\b|\bsphere market update\b/i;
 const MONTHLY_RE = /\bmonthly\b|\bnewsletter\b|\bdigest\b/i;
 const EDITORIAL_RE = /\bfancy\b|\belegant\b|\beditorial\b|\bmagazine\b|\bluxury\b|\bletter\b/i;
 const LETTER_RE = /\bletter\b/i;
@@ -39,6 +44,7 @@ const SHOWCASE_RE = /\bshowcase\b|\bspotlight\b/i;
 export function detectRecipe(prompt: string): RecipeId | null {
   const p = prompt ?? "";
   if (WELCOME_RE.test(p)) return "agent-intro";
+  if (SPHERE_WEEKLY_RE.test(p)) return "sphere-weekly";
   if (MONTHLY_RE.test(p)) return "monthly-newsletter";
   if (EDITORIAL_RE.test(p)) {
     if (LETTER_RE.test(p)) return "editorial-letter";
@@ -58,23 +64,49 @@ const RECIPES: Record<RecipeId, string> = {
     "full-width photo banner on top. The agent-hero is the professional portrait " +
     "treated as a tall column (the system fills the photo and name; you write only " +
     "the tagline).\n" +
-    "- The letter opening: the first sentence says plainly why the reader is receiving " +
-    "this (you know each other, or they asked to hear from you); then a line or two of " +
-    "first-person origin story. Written for one reader — warm, direct, short.\n" +
+    "- The letter opening: write it in the text block's `body` field (the long field — " +
+    "`prose` gets cut short) as a few short paragraphs that END on a complete thought. " +
+    "The first sentence says plainly why the reader is receiving this (you know each " +
+    "other, or they asked to hear from you); then a line or two of first-person origin " +
+    "story. Written for one reader — warm, direct, short.\n" +
     "- One `hero` block with band light as the market moment: kicker names the place, " +
-    "the headline value comes from the DATA MENU, label is one honest plain-language " +
-    "line. Exactly one figure in the whole email — the letter carries one piece of hard " +
-    "evidence, no more.\n" +
+    "the headline value comes from the DATA MENU, label is one SHORT honest line — a " +
+    "handful of words that fit whole, never a sentence that risks being cut mid-word. " +
+    "Exactly one figure in the whole email — the letter carries one piece of hard " +
+    "evidence, no more, and no chart.\n" +
     "- A `list` block about what happens next: leads are words (First / Then / Every " +
     "week), every item phrased as what the reader gets, never as sender activity.\n" +
     "- An `agent-card` as the sign-off — the bio reads as a two-line signature, never a " +
     "resume.\n" +
-    "- Exactly ONE `button`: the reply ask (reply with your address and a word like " +
-    "REVIEW for your home's numbers). A short `text` P.S. inviting a forward to one " +
-    "friend is the only second ask, and it is soft.\n" +
+    "- Exactly ONE `button`, and you MUST write its `button_label` field yourself as " +
+    "the reply ask (reply with your address for your home's numbers) — leaving it " +
+    "empty ships a generic label; never a view, read, or learn-more label. A short " +
+    "`text` P.S. inviting a forward to one friend is the only second ask, and it is " +
+    "soft.\n" +
     "- The key message and the one ask land in the first readable lines. Copy is always " +
     "real text, never baked into an image. The footer with unsubscribe and postal " +
     "address always renders — never suggest removing it.",
+
+  "sphere-weekly":
+    "RECIPE — WEEKLY SPHERE MARKET UPDATE (the headlines-versus-here contrast).\n" +
+    "Target structure, top to bottom:\n" +
+    "- Open with the contrast pair: TWO `hero` blocks side by side in ONE row, each " +
+    "spanning six of the twelve columns, each with band light. The first hero's kicker " +
+    "names the broad market (national, Florida, or the county) and its value comes " +
+    "from the DATA MENU; the second hero's kicker names the reader's own area and its " +
+    "value comes from the DATA MENU. These two are the headline figures — the whole " +
+    "email hangs on this pair.\n" +
+    "- One honest read of the gap in a `signal` block: plain language, what the " +
+    "difference actually means for someone who owns or wants a home there, and one " +
+    "sentence naming what would change this read. Never hedge it into mush.\n" +
+    "- Optionally one supporting `stats` row (values only from the DATA MENU) or the " +
+    "offered chart — nothing else competes with the pair.\n" +
+    "- Exactly ONE `button`, and you MUST write its `button_label` field yourself as " +
+    "the reply ask — invite the reader to reply with their address and the word REVIEW " +
+    "for their home's snapshot; leaving it empty ships a generic label, and never a " +
+    "view, read, or learn-more label.\n" +
+    "- Keep it short: this arrives every week, and consistency of shape builds the " +
+    "open habit. The footer with unsubscribe and postal address always renders.",
 
   "monthly-newsletter":
     "RECIPE — MONTHLY NEWSLETTER (recurring market digest).\n" +

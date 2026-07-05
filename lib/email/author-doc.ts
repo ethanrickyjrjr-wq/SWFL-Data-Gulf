@@ -611,7 +611,12 @@ function buildEntry(
     applyContent(type, props, a, num, fig);
     // Reply CTA: the model wrote the label; the ENGINE owns the destination
     // (same contract as multi-column links above).
-    if (type === "button" && buttonMailto) props.url = buttonMailto;
+    if (type === "button" && buttonMailto) {
+      props.url = buttonMailto;
+      // The author omitted the label → the stock default ("View Full Report")
+      // is incoherent on a mailto; default it to the reply ask instead.
+      if (!a.button_label) props.label = "Reply with your address";
+    }
   }
 
   // Semantic band/pad — resolved by the engine, only on blocks whose schema

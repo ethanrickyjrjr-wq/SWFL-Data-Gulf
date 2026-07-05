@@ -32,8 +32,11 @@ describe("detectRecipe — deterministic keyword routing", () => {
     ],
     [
       "Build a weekly sphere market update for Bonita Springs — one national or Florida headline number set beside my own area's number",
-      null,
+      "sphere-weekly",
     ],
+    // weekly must not trip monthly, and an intro mentioning a weekly update stays a welcome
+    ["a weekly market update for my farm", "sphere-weekly"],
+    ["introduce me and mention my weekly market update", "agent-intro"],
     // no match → null → generic prompt unchanged
     ["price update for Cape Coral", null],
     ["", null],

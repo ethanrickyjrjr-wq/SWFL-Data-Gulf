@@ -639,9 +639,13 @@ export async function authorDoc({
   ]);
   const recordedStrings = collectRecordedAnchors(lakeParts.figures);
 
-  const chartSlot = chartRes
-    ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
-    : null;
+  // The agent-intro letter carries ONE clipping figure and no chart (recipe rule)
+  // — without this, assembleAuthoredDoc force-reserves any offered chart above the
+  // footer and a cross-SWFL ranking lands in a personal letter (seen live 07/05/2026).
+  const chartSlot =
+    chartRes && detectRecipe(prompt) !== "agent-intro"
+      ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
+      : null;
   const photoSlot = photoRes
     ? { url: photoRes.image, alt: photoRes.title ?? "Featured property", linkUrl: photoRes.source }
     : null;
