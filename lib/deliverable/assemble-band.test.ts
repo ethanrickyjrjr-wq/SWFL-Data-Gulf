@@ -3,7 +3,9 @@ import { assembleDeliverable } from "./assemble";
 
 // A minimal fake service-role client capturing the deliverables prior-lookup and
 // the INSERT. The prior lookup chain mirrors assemble.ts exactly:
-//   from("deliverables").select().eq().eq().lt().order().limit()
+//   from("deliverables").select().eq().eq().order().limit()
+// (no `.lt("created_at", nowIso)` — a client-clock upper bound compared against
+// the DB server's `created_at` is a clock-skew trap; see assemble.ts comment.)
 function fakeDb(priorSnapshot: unknown[]) {
   const inserted: Record<string, unknown>[] = [];
   const db = {
@@ -16,11 +18,9 @@ function fakeDb(priorSnapshot: unknown[]) {
           select: () => ({
             eq: () => ({
               eq: () => ({
-                lt: () => ({
-                  order: () => ({
-                    limit: async () => ({
-                      data: [{ items_snapshot: priorSnapshot, created_at: "2026-06-05T00:00:00Z" }],
-                    }),
+                order: () => ({
+                  limit: async () => ({
+                    data: [{ items_snapshot: priorSnapshot, created_at: "2026-06-05T00:00:00Z" }],
                   }),
                 }),
               }),

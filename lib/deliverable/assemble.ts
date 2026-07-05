@@ -86,19 +86,23 @@ export async function assembleDeliverable(opts: {
   let priorItems: typeof itemsSnapshot | undefined;
   let gapDays = 30;
   try {
-    const nowIso = new Date().toISOString();
+    // No client-clock upper bound here on purpose: this query runs BEFORE this
+    // build's own insert below, so there is no risk of it matching itself — and
+    // an `nowIso` bound (this machine's clock) compared against `created_at`
+    // (the DB server's clock) is a real clock-skew trap: a caller whose clock
+    // lags the DB's can find zero rows for a prior that was already committed,
+    // silently disabling the band guard. Ordering + limit(1) is sufficient.
     const { data: priorRows } = await opts.db
       .from("deliverables")
       .select("items_snapshot, created_at")
       .eq("project_id", opts.projectId)
       .eq("template", opts.template)
-      .lt("created_at", nowIso)
       .order("created_at", { ascending: false })
       .limit(1);
     const prior = priorRows?.[0];
     if (prior?.items_snapshot) {
       priorItems = prior.items_snapshot as typeof itemsSnapshot;
-      const ms = Date.parse(nowIso) - Date.parse(prior.created_at as string);
+      const ms = Date.now() - Date.parse(prior.created_at as string);
       if (Number.isFinite(ms) && ms > 0) gapDays = Math.max(1, Math.round(ms / 86_400_000));
     }
   } catch {

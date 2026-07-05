@@ -1,3 +1,19 @@
+## 2026-07-05 (main) — fix: band-guard prior-lookup clock-skew bug (found via live-verify)
+
+Ran the `sourced_band_number_guard_live_verify` live-verify (operator-approved): built a real deliverable
+series through `assembleDeliverable` with `BAND_GUARD_ENABLED=1`, forced a metric to 3x (real Anthropic
+LLM call + real web-confirm), fetched the actual `/p/[id]` HTML. First pass produced NO confirm note.
+Root cause: the "load prior deliverable" query in `lib/deliverable/assemble.ts` filtered
+`created_at < nowIso` where `nowIso` came from the calling machine's clock, but `created_at` is stamped
+by Postgres's clock — a caller whose clock lags the DB's (measured ~1-2s locally) can find zero rows for
+a prior deliverable already committed, silently disabling the guard. Not local-only: the same skew can
+occur between a Vercel function and Supabase in prod. Fix: dropped the client-clock upper bound (the
+query runs before this build's own insert, so no self-match risk) — `order(created_at desc).limit(1)` is
+sufficient. Updated `assemble-band.test.ts`'s mock chain to match. Re-ran live-verify after the fix: real
+outlier note cited a live Zillow source ($360,424 vs our forced $1,275,000), outlier value still rendered
+(additive), and a normal small-move rebuild stayed clean. `lib/deliverable` suite: 354 pass. Check closed:
+`sourced_band_number_guard_live_verify`.
+
 ## 2026-07-05 (main) — BUILD: news_swfl novelty (new-URL) content guard (task-18 follow-up)
 
 Operator: news_swfl was dropped from task 18's phase-1 because it has no content date — build the novelty guard.
