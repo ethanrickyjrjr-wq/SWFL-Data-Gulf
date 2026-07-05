@@ -105,7 +105,21 @@ have no front door:
   the command route (user's project via RLS-backed check).
 - "+ New schedule" links into the owning project's flow — creation is out of scope here.
 
-### 6. Out of scope
+### 6. Plan-time corrections (code-verified 07/05/2026, RULE 0.5)
+
+- `writeAction` does NOT live in `lib/email/schedule-command.ts` — it's a local function of
+  `app/api/email/schedule-command/route.ts` (:337), and route files can't export helpers. The build
+  extracts it to `lib/email/schedule-write.ts`; both routes import it.
+- The account brand endpoint is `GET`/`PATCH /api/user/brand` (PATCH, not PUT).
+- `user_brand_profiles` is missing 10 of BrandingBlock's fields (nickname, agent_title, contact_email,
+  contact_phone, font_display, font_body, text_color, background_color, surface_color,
+  surface_dark_color), and `website_url` exists but isn't in the route allowlist — today's "Save
+  globally" silently drops all of them. The build ships `docs/sql/20260705_user_brand_full_fields.sql`
+  + allowlist extension so the account editor round-trips the full set.
+- `resume` confirmed absent from `SCHEDULE_ACTIONS`; it's added to the pure core (validate + summarize)
+  and implemented in the extracted `writeAction` (status → active, `next_run_at` recomputed from the row).
+
+### 7. Out of scope
 
 - A `/settings` hub page folding MLS + MCP into one surface (follow-up if the menu gets heavy).
 - Schedule creation from the account surface.
