@@ -1,5 +1,15 @@
 # communities-swfl Phase 1 — Universal Backbone (Spike → Gate → Build) Implementation Plan
 
+> **⚠️ SUPERSEDED 07/05/2026 — the spatial join below is NOT needed.** A live probe proved the
+> home→community link is already in every parcel (`S_LEGAL` / `Description`); grouping by that name
+> reproduces real community counts within ~7% on a clean built-out community (Heritage Bay), with the
+> only gap being sub-neighborhood name fragmentation — the alias reconciler's job, not new infra.
+> Evidence + benchmark: `verification/communities-name-join-accuracy.md`. The DuckDB spatial join,
+> boundary-polygon ingest, centroid pull, and GO/NO-GO gate in Parts A/B are obsolete. What survives:
+> Task 1 (alias reconciler, built + committed), the `neighborhood_stats` aggregation, the pack/page/
+> master-wiring tasks, and cadence — now fed by an `S_LEGAL`/`Description` group-by instead of a join.
+> This plan will be rewritten to the name-join architecture before further Part-B execution.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > **Recommended model:** 🧠 Opus — 6 tasks, 18 files, keywords: migration, schema, architecture
 >
