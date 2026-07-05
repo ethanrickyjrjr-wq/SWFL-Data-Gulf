@@ -1,3 +1,31 @@
+## 2026-07-05 (main) — docs: email-images policy LOCKED (docs/standards/email-images.md) + 2 follow-up checks
+
+Wrote the research below into `docs/standards/email-images.md` as locked policy: sent email = remote
+hosted URLs only (base64 never — Gmail strips it on every platform; CID never — Resend batch endpoint
+can't attach + webmail issues); data URIs ONLY for a future save-and-open-offline artifact (iOS Quick
+Look blocks all network fetches); the authoring AI never chooses — EmailDoc stores URLs, render layer
+owns the format per target. Future errors opened as checks, not doc markers: `email_hero_mirror_to_storage`
+(hotlinked ap.rdcpix.com heroes rot after closings → red X's in scheduled re-sends; mirror to our storage
+at build time) and `download_artifact_inline_images` (data-URI post-pass gate before any raw .html is
+ever handed out; until then hosted links only). Docs-only, no code touched.
+
+## 2026-07-05 (main) — RESEARCH (crawl4ai, RULE 0.4): email images — remote URL vs data URI vs CID, no code change
+
+Operator saved `05-sold.html` from an email on iPhone; iOS Quick Look blocked the remote images (blue "?")
+— file and rdcpix URLs verified fine (200 image/webp). Researched whether we need embedded images anywhere.
+Evidence: caniemail.com/features/image-base64 (raw data file) — base64 data-URI images are "n" in Gmail on
+EVERY platform (retested 2024-05), "n" in Outlook Windows 2007–2016 (partial 2019), "y" in Apple Mail/
+Outlook macOS+mobile/Yahoo/Proton; mailtrap.io embedding-images article — three methods (CID / base64
+inline / linked-hosted), the majors (Amazon, GitHub, PayPal) all ship linked images on their own hosts;
+mailtrap.io email-size — Gmail clips message bodies over 102 KB (base64 heroes blow that instantly);
+resend.com/docs attachments + embed-inline-images — CID supported via `contentId`, 40 MB total cap, NOT
+supported on the batch endpoint, "inline images may be rejected by some clients (especially webmail)".
+VERDICT (no code change now): sent email keeps remote hosted URLs (current behavior, correct); data URIs
+only for a future "download as file" artifact that must survive sandboxed viewers (Quick Look); CID never
+(batch-send blocker + webmail issues). If built: EmailDoc always stores remote URLs, an inline-images
+post-pass at render time serves the download target — the authoring AI never chooses. Flagged risk: hero
+images hotlink third-party CDNs (ap.rdcpix.com); a mirror-to-our-storage step is the durable fix.
+
 ## 2026-07-05 (main) — FIXED: phone pill + address leak + raw markdown (0c8cad9e) — the operator's two phone screenshots
 
 Operator hit prod mid-deploy (pushed 2:49–2:55 PM, screenshots 2:57/3:01 — old hero still serving) and
