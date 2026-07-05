@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Hero from "@/components/landing/Hero";
+import HeroCampaign from "@/components/landing/HeroCampaign";
 import ProofStrip, { type ProofItem } from "@/components/landing/ProofStrip";
 import Capabilities from "@/components/landing/Capabilities";
 import DeliverableShowcase, {
@@ -12,9 +13,9 @@ import { loadHomeMapData } from "@/lib/landing/load-home-map-data";
 import "@/components/landing/home-explorer.css";
 
 export const metadata: Metadata = {
-  title: "SWFL Data Gulf — Southwest Florida market intelligence, cited to the source",
+  title: "SWFL Data Gulf — Your listing's marketing, built and sent for you",
   description:
-    "Ask about any Southwest Florida ZIP, address, or corridor and get an answer with every number sourced — home values, flood risk, listings, market direction. Build branded client reports that send themselves. Free to build, no credit card.",
+    "Type your next listing's address and pick a campaign — new listing, just sold, coming to market, or a market update. We build the emails and socials from live Southwest Florida data, every number sourced, and send them on your schedule. Free to build, no credit card.",
 };
 
 // Lane B Phase 1 (spec: docs/superpowers/specs/2026-07-03-homepage-rebuild-design.md).
@@ -62,6 +63,7 @@ export default async function Home() {
 
   return (
     <main className="home-explorer relative">
+      <HeroCampaign />
       <Hero payload={payload} />
       <ProofStrip items={proofItems} zipCount={Object.keys(data.placeNames).length} />
       <Capabilities />

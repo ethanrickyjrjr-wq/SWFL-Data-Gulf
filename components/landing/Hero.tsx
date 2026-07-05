@@ -247,64 +247,63 @@ export default function Hero({ payload }: { payload: Payload }) {
     router.push(/^\d{5}$/.test(val) ? `/r/zip-report/${val}` : `/ask?q=${encodeURIComponent(val)}`);
   };
 
+  // Agent-first re-flip (spec 2026-07-05-agent-first-homepage-design.md): the
+  // headline hero moved to components/landing/HeroCampaign.tsx; this component
+  // is now the proof-of-data section — same map, rail, stats, and report/ask
+  // search, retitled and demoted below the fold. Mechanics unchanged.
   return (
     <section>
-      <div className="hero">
-        <div className="hero-badge">{badge}</div>
-        <h1>
-          Southwest Florida market intelligence,
-          <br />
-          <em>cited to the source.</em>
-        </h1>
-        <p className="hero-sub">
-          Ask about any ZIP, address, or corridor and get an answer with every number sourced. Build
-          a branded client report in minutes. Free to build — no credit card.
-        </p>
-        <div className="search-wrap">
-          <div className="search-bar">
-            <svg
-              className="search-icon"
-              width="16"
-              height="16"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              ref={searchRef}
-              className="search-input"
-              type="text"
-              placeholder="Search ZIP code, city, or neighborhood…"
-              aria-label="Search by ZIP code, city, or neighborhood"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submitSearch();
-              }}
-            />
-            <button className="search-btn" type="button" onClick={submitSearch}>
-              Search
-            </button>
+      <div className="map-section" id="data">
+        <div className="map-intro">
+          <div className="hero-badge">{badge}</div>
+          <h2 className="map-heading">The data your campaigns are built on</h2>
+          <p className="map-sub">
+            Live Southwest Florida market signals, cited to the source. Click any ZIP — map or list
+            — and it opens in the email lab, prebuilt with that ZIP&rsquo;s live figures.
+          </p>
+          <div className="search-wrap">
+            <div className="search-bar">
+              <svg
+                className="search-icon"
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                ref={searchRef}
+                className="search-input"
+                type="text"
+                placeholder="Search ZIP code, city, or neighborhood…"
+                aria-label="Search by ZIP code, city, or neighborhood"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submitSearch();
+                }}
+              />
+              <button className="search-btn" type="button" onClick={submitSearch}>
+                Search
+              </button>
+            </div>
+          </div>
+          <div className="filter-row">
+            {availableMetrics.map((k) => (
+              <button
+                key={k}
+                className={`filter-pill${metric === k ? " active" : ""}`}
+                type="button"
+                onClick={() => setMetric(k)}
+              >
+                {data.metrics[k]?.label}
+              </button>
+            ))}
           </div>
         </div>
-        <div className="filter-row">
-          {availableMetrics.map((k) => (
-            <button
-              key={k}
-              className={`filter-pill${metric === k ? " active" : ""}`}
-              type="button"
-              onClick={() => setMetric(k)}
-            >
-              {data.metrics[k]?.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="map-section" id="data">
         <div className="map-layout">
           <div className="data-rail">
             <div className="rail-header">
