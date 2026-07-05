@@ -28,6 +28,10 @@ export interface ShowcaseCampaign {
   /** Email campaigns hand this recipe to the builder; social campaigns create a
    *  listing project + deep-link instead, so they omit it. */
   seedRecipe?: ShowcaseRecipe;
+  /** Present when this campaign has a second step: after the seeded build
+   *  completes, the lab offers this recipe as a one-click follow-up chip
+   *  (matched by seed prompt — lib/campaigns.ts campaignFollowUpForPrompt). */
+  followUp?: { label: string; recipe: ShowcaseRecipe };
 }
 
 export interface ShowcaseSlide {

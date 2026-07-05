@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { liveCampaigns, COMING_TILES } from "./campaigns";
+import { liveCampaigns, COMING_TILES, campaignFollowUpForPrompt } from "./campaigns";
 import { CADENCE_COLORS, CADENCE_ORDER } from "./campaigns/cadence-colors";
 import { SHOWCASES } from "./showcase/registry";
 import { findPlaceholder, NEED_LABELS } from "./showcase/recipe";
@@ -97,5 +97,29 @@ describe("listing-launch arc", () => {
     }
     const stages = LISTING_LAUNCH_ARC.map((a) => a.stage);
     expect(new Set(stages).size).toBe(stages.length);
+  });
+});
+
+describe("campaignFollowUpForPrompt", () => {
+  it("returns null for a non-campaign prompt", () => {
+    expect(campaignFollowUpForPrompt("build me anything")).toBe(null);
+  });
+
+  it("returns the followUp when the prompt IS a campaign seed carrying one", () => {
+    // Guarded until the agent-launch entry lands (task 9) — helper must be total.
+    const withFollowUp = SHOWCASES.find((s) => s.campaign?.followUp && s.campaign.seedRecipe);
+    if (withFollowUp?.campaign?.seedRecipe && withFollowUp.campaign.followUp) {
+      const r = campaignFollowUpForPrompt(withFollowUp.campaign.seedRecipe.prompt);
+      expect(r?.label).toBe(withFollowUp.campaign.followUp.label);
+      expect(r?.key).toBe(withFollowUp.campaign.key);
+      expect(r?.recipe.prompt.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("a campaign seed WITHOUT a followUp returns null", () => {
+    const noFollow = SHOWCASES.find((s) => s.campaign?.seedRecipe && !s.campaign.followUp);
+    if (noFollow?.campaign?.seedRecipe) {
+      expect(campaignFollowUpForPrompt(noFollow.campaign.seedRecipe.prompt)).toBe(null);
+    }
   });
 });

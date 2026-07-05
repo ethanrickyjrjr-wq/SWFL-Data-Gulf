@@ -6,6 +6,7 @@
 // filters them for a button row and holds the "coming soon" tiles that have no
 // showcase yet (the only campaign data not derivable from SHOWCASES).
 import { SHOWCASES, type Showcase, type ShowcaseCampaign } from "@/lib/showcase/registry";
+import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 
 export type CampaignSurface = "email" | "social" | "all";
 
@@ -27,6 +28,21 @@ export function liveCampaigns(surface: CampaignSurface): CampaignEntry[] {
       ? [{ showcase: s, campaign: s.campaign }]
       : [],
   );
+}
+
+/** The follow-up step for a Build-box seed that came from a campaign button —
+ *  matched by the seed PROMPT (stable: seed prompts live only in the registry,
+ *  and the lab captures the match at seed time, before the user edits the
+ *  [[blank]]). Null for organic prompts and campaigns without a second step. */
+export function campaignFollowUpForPrompt(
+  prompt: string,
+): { key: string; label: string; recipe: ShowcaseRecipe } | null {
+  for (const { campaign } of liveCampaigns("email")) {
+    if (campaign.seedRecipe?.prompt === prompt && campaign.followUp) {
+      return { key: campaign.key, ...campaign.followUp };
+    }
+  }
+  return null;
 }
 
 /** A not-yet-built campaign — greyed chip, no wiring. Promote by adding a
