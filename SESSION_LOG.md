@@ -1,3 +1,13 @@
+## 2026-07-05 (main) — LOCK: no paid web_search in scheduled ingest (ingest/CLAUDE.md + memory) — receipts confirmed operator's "we already did this"
+
+History check proved the operator right: city_pulse was PAUSED 06/18 for a credit freeze (same fire),
+per-run cost MEASURED ~$6 and logged 06/28, and the crawl4ai-only decree was once "implemented" by
+deleting the cheap capture leg (8a009308) leaving sonnet+web_search as the only path; today's re-enable
+cost-moded only the distill. Lock now lives in ingest/CLAUDE.md (grep for web_search before ANY
+re-enable; capture=crawl4ai, distill=Haiku-per-matched-unit) + memory feedback_no-paid-search-in-
+scheduled-ingest. Next: implement pulse-native-fetch retrofit per spec, corridors first; workflows stay
+dark until dry-run green.
+
 ## 2026-07-05 (main) — KILLED the API burners: corridor-pulse + city-pulse workflows DISABLED; crawl4ai retrofit registered
 
 Operator caught the drain on the console (pasted ~2.5M input tokens in 2h, one request billed in 4+
