@@ -1,6 +1,6 @@
 // lib/social-pulse/digest.test.ts
 import { test, expect } from "bun:test";
-import { computeDigest, medianOf, quantileOf, isoWeekOf } from "./digest";
+import { computeDigest, medianOf, quantileOf, isoWeekOf, previewOf } from "./digest";
 
 const p = (
   id: string,
@@ -35,6 +35,15 @@ test("median and quantile use nearest-rank and tolerate empty input", () => {
 
 test("isoWeekOf pins the ISO week", () => {
   expect(isoWeekOf(new Date("2026-07-05T12:00:00Z"))).toBe("2026-W27");
+});
+
+test("previewOf never splits a surrogate pair and strips NUL (live scan-1 digest failure)", () => {
+  const caption = "x".repeat(139) + "🌴🌴";
+  const preview = previewOf(caption)!;
+  expect(preview.length).toBe(141); // 139 x's + ONE full palm (2 UTF-16 units), not a lone surrogate
+  expect(() => encodeURIComponent(preview)).not.toThrow(); // throws URIError on lone surrogates
+  expect(previewOf("a\u0000b")).toBe("ab");
+  expect(previewOf(null)).toBeNull();
 });
 
 test("computeDigest: benchmarks per area + swfl-wide, format split, top posts, hashtag deltas", () => {

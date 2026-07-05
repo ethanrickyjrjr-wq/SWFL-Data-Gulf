@@ -67,6 +67,17 @@ export function isoWeekOf(date: Date): string {
   return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
+// Code-point-safe caption preview: naive String.slice cuts UTF-16 units and can
+// split an emoji surrogate pair — the lone surrogate is invalid JSON and Postgres
+// rejects the whole digest ("Empty or invalid json", seen live on scan 1). Also
+// strips \u0000, which jsonb never accepts.
+export function previewOf(caption: string | null): string | null {
+  if (!caption) return null;
+  return Array.from(caption.replace(/\u0000/g, ""))
+    .slice(0, 140)
+    .join("");
+}
+
 function formatOf(mediaType: number | null): "image" | "video" | "carousel" | "unknown" {
   if (mediaType === 1) return "image";
   if (mediaType === 2) return "video";
@@ -131,7 +142,7 @@ export function computeDigest(input: {
         likeCount: p.like_count as number,
         commentCount: p.comment_count ?? 0,
         format: formatOf(p.media_type),
-        captionPreview: p.caption ? p.caption.slice(0, 140) : null,
+        captionPreview: previewOf(p.caption),
       })),
   );
 

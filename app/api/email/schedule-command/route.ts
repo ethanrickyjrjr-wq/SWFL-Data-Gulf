@@ -1,4 +1,3 @@
-import type { Database } from "@/database.types";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import type Anthropic from "@anthropic-ai/sdk";
@@ -17,7 +16,7 @@ import {
 } from "@/lib/email/schedule-command";
 import { issueProposalNonce, verifyProposalNonce } from "@/lib/email/proposal-nonce";
 import { claimOnce } from "@/lib/email/idempotency";
-import { createOrTouchSchedule, type ScheduleUpsertDb } from "@/lib/email/schedule-upsert";
+import { writeAction } from "@/lib/email/schedule-write";
 import { deliverableToScheduleRecipe } from "@/lib/deliverable/schedule-recipe";
 
 export const runtime = "nodejs";
@@ -43,8 +42,6 @@ export const runtime = "nodejs";
  */
 
 const COMMAND_MODEL = "claude-haiku-4-5";
-
-type Db = ReturnType<typeof createClient>;
 
 const SCHEDULE_COLUMNS =
   "id,status,cadence,day_of_week,day_of_month,send_hour_et,audience_slug,template_id";
@@ -332,98 +329,4 @@ function resolveAndMerge(input: ParsedCommand, existing: ExistingSchedule[]): Re
     merged.send_hour_et = target.send_hour_et;
   }
   return { command: merged };
-}
-
-async function writeAction(
-  supabase: Db,
-  userId: string,
-  projectId: string,
-  command: ParsedCommand,
-): Promise<NextResponse> {
-  const now = new Date().toISOString();
-
-  if (command.action === "create") {
-    const next = computeNextRunAt({
-      cadence: command.cadence!,
-      day_of_week: command.day_of_week ?? null,
-      day_of_month: command.day_of_month ?? null,
-      send_hour_et: command.send_hour_et!,
-    });
-    const nextIso = next ? next.toISOString() : null;
-    // Idempotent create (Task 7, D2): re-issuing the SAME recipe reactivates/updates the
-    // existing schedule rather than inserting a duplicate. NULL-equal matching lives in
-    // createOrTouchSchedule (IS NOT DISTINCT FROM, never `=` against null). One create
-    // path for both the NL `create` and the build→schedule bridge.
-    try {
-      const { id, created } = await createOrTouchSchedule(supabase as unknown as ScheduleUpsertDb, {
-        userId,
-        projectId,
-        command,
-        nowIso: now,
-        nextRunAtIso: nextIso,
-      });
-      return NextResponse.json({
-        ok: true,
-        action: "create",
-        schedule_id: id,
-        created,
-        next_run_at: nextIso,
-      });
-    } catch (e) {
-      console.error("[schedule-command] create failed:", e);
-      return NextResponse.json({ error: "create_failed" }, { status: 500 });
-    }
-  }
-
-  // All other actions mutate an existing row, scoped to this user's project (RLS
-  // also enforces ownership). schedule_id is guaranteed present post-resolve.
-  if (command.schedule_id == null) {
-    return NextResponse.json({ error: "schedule_id required" }, { status: 422 });
-  }
-
-  let patch: Database["public"]["Tables"]["email_schedules"]["Update"];
-  switch (command.action) {
-    case "pause":
-      patch = { status: "paused", updated_at: now };
-      break;
-    case "stop":
-      patch = { status: "stopped", next_run_at: null, updated_at: now };
-      break;
-    case "change-template":
-      patch = { template_id: command.template_id, updated_at: now };
-      break;
-    case "change-audience":
-      patch = { audience_slug: command.audience_slug, updated_at: now };
-      break;
-    case "change-cadence": {
-      const next = computeNextRunAt({
-        cadence: command.cadence!,
-        day_of_week: command.day_of_week ?? null,
-        day_of_month: command.day_of_month ?? null,
-        send_hour_et: command.send_hour_et!,
-      });
-      patch = {
-        cadence: command.cadence,
-        day_of_week: command.day_of_week ?? null,
-        day_of_month: command.day_of_month ?? null,
-        send_hour_et: command.send_hour_et,
-        next_run_at: next ? next.toISOString() : null,
-        updated_at: now,
-      };
-      break;
-    }
-    default:
-      return NextResponse.json({ error: "unsupported_action" }, { status: 422 });
-  }
-
-  const { error } = await supabase
-    .from("email_schedules")
-    .update(patch)
-    .eq("id", command.schedule_id)
-    .eq("project_id", projectId);
-  if (error) {
-    console.error(`[schedule-command] ${command.action} failed:`, error);
-    return NextResponse.json({ error: `${command.action}_failed` }, { status: 500 });
-  }
-  return NextResponse.json({ ok: true, action: command.action, schedule_id: command.schedule_id });
 }
