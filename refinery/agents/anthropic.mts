@@ -123,6 +123,140 @@ export async function logApiUsage(opts: LogApiUsageOpts): Promise<void> {
   }
 }
 
+// ── Spend guard (operator directive 07/05/2026) ─────────────────────────────
+// HARD daily/monthly caps on LOGGED spend, enforced at this ONE seam before
+// every real API call. Caps are env-tunable; breach throws SpendCapError (the
+// caller sees a loud, named failure — never a silent drain). The spend window
+// is read from public.api_usage_log (the same table every call above logs to)
+// and cached in-process for 60s so the gate adds at most one aggregate query
+// per minute. Fail-open BY DESIGN when the spend query itself fails (a
+// Supabase outage must not kill production builds) — but loudly.
+// Known softness (documented, accepted): logging happens after each call, so
+// a parallel burst can overshoot the cap by the burst's own cost.
+
+const DEFAULT_DAILY_CAP_USD = 25;
+const DEFAULT_MONTHLY_CAP_USD = 250;
+const SPEND_CHECK_TTL_MS = 60_000;
+
+export class SpendCapError extends Error {
+  constructor(window: "daily" | "monthly", spentUsd: number, capUsd: number) {
+    super(
+      `[spend-guard] ${window} Anthropic spend cap hit: $${spentUsd.toFixed(2)} logged >= $${capUsd.toFixed(2)} cap. ` +
+        `Raise ANTHROPIC_${window === "daily" ? "DAILY" : "MONTHLY"}_SPEND_CAP_USD or set ANTHROPIC_SPEND_CAP_OFF=1 (emergencies only).`,
+    );
+    this.name = "SpendCapError";
+  }
+}
+
+export interface SpendCaps {
+  dailyUsd: number;
+  monthlyUsd: number;
+  off: boolean;
+}
+
+/** Caps from env — defaults are deliberate: far above a normal day, far below a
+ *  runaway. A non-numeric env value falls back to the default (never silently 0,
+ *  which would block everything). */
+export function spendCaps(e: NodeJS.ProcessEnv = process.env): SpendCaps {
+  const num = (v: string | undefined, d: number) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : d;
+  };
+  return {
+    dailyUsd: num(e.ANTHROPIC_DAILY_SPEND_CAP_USD, DEFAULT_DAILY_CAP_USD),
+    monthlyUsd: num(e.ANTHROPIC_MONTHLY_SPEND_CAP_USD, DEFAULT_MONTHLY_CAP_USD),
+    off: e.ANTHROPIC_SPEND_CAP_OFF === "1",
+  };
+}
+
+export interface SpendWindow {
+  dayUsd: number;
+  monthUsd: number;
+}
+
+/** Pure gate — throws SpendCapError on breach; a null window (spend query
+ *  failed) passes fail-open (the caller logs the failure loudly). */
+export function assertUnderCaps(w: SpendWindow | null, caps: SpendCaps): void {
+  if (caps.off || !w) return;
+  if (w.dayUsd >= caps.dailyUsd) throw new SpendCapError("daily", w.dayUsd, caps.dailyUsd);
+  if (w.monthUsd >= caps.monthlyUsd)
+    throw new SpendCapError("monthly", w.monthUsd, caps.monthlyUsd);
+}
+
+/** Sum logged spend since UTC month start (one aggregate query), split into
+ *  day/month windows. Null on ANY failure — fail-open, caller logs. */
+export async function fetchSpendWindow(opts?: {
+  supabaseUrl?: string;
+  supabaseKey?: string;
+}): Promise<SpendWindow | null> {
+  const url = opts?.supabaseUrl ?? env.supabaseUrl;
+  const key = opts?.supabaseKey ?? env.supabaseKey;
+  if (!url || !key) return null;
+  try {
+    const sb = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const now = new Date();
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+    const dayStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    ).toISOString();
+    // Sum server-side via public.sum_api_spend (docs/sql/20260705_sum_api_spend.sql)
+    // — PostgREST aggregates are DISABLED on this project ("Use of aggregate
+    // functions is not allowed", probed live 07/05/2026), and fetching a month of
+    // raw rows would hit the db-max-rows 1000 cap. The narrow RPC avoids both.
+    const [month, day] = await Promise.all([
+      sb.rpc("sum_api_spend", { since: monthStart }),
+      sb.rpc("sum_api_spend", { since: dayStart }),
+    ]);
+    if (month.error || day.error) {
+      console.error(
+        "[spend-guard] sum_api_spend failed — failing OPEN:",
+        month.error?.message ?? day.error?.message,
+      );
+      return null;
+    }
+    return { dayUsd: Number(day.data ?? 0), monthUsd: Number(month.data ?? 0) };
+  } catch (e) {
+    console.error(
+      "[spend-guard] spend query threw — failing OPEN:",
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
+
+let spendGateCache: { at: number; window: SpendWindow | null } | null = null;
+
+/** The gate `wrapMessages` runs before each real call. Cached 60s. Streams use
+ *  the last-known window synchronously (stream() must return immediately) and
+ *  trigger a refresh; creates await the fresh check. */
+async function checkSpendGuardAsync(): Promise<void> {
+  const caps = spendCaps();
+  if (caps.off || agentsAreMocked()) return;
+  const now = Date.now();
+  if (!spendGateCache || now - spendGateCache.at > SPEND_CHECK_TTL_MS) {
+    spendGateCache = { at: now, window: await fetchSpendWindow() };
+  }
+  assertUnderCaps(spendGateCache.window, caps);
+}
+
+function checkSpendGuardSync(): void {
+  const caps = spendCaps();
+  if (caps.off || agentsAreMocked()) return;
+  const now = Date.now();
+  if (!spendGateCache || now - spendGateCache.at > SPEND_CHECK_TTL_MS) {
+    // Kick a refresh; gate this call on the last-known window (below).
+    void checkSpendGuardAsync().catch(() => {});
+  }
+  assertUnderCaps(spendGateCache?.window ?? null, caps);
+}
+
+/** Test hook — reset the in-process gate cache. */
+export function __resetSpendGateCacheForTests(): void {
+  spendGateCache = null;
+}
+
 let cached: Anthropic | null = null;
 
 function getRawClient(): Anthropic {
@@ -150,6 +284,7 @@ function wrapMessages(raw: Anthropic, callType: CallType): Anthropic["messages"]
   const realStream = raw.messages.stream.bind(raw.messages);
 
   const wrappedCreate = (async (...args: Parameters<typeof realCreate>) => {
+    await checkSpendGuardAsync(); // throws SpendCapError on breach — never a silent drain
     const response = await realCreate(...args);
     // Non-streaming Message has `.usage` directly; a `stream:true` Message
     // stream response does not — skip those (call sites use .stream() for
@@ -165,6 +300,7 @@ function wrapMessages(raw: Anthropic, callType: CallType): Anthropic["messages"]
   }) as typeof realCreate;
 
   const wrappedStream = ((...args: Parameters<typeof realStream>) => {
+    checkSpendGuardSync(); // last-known window (stream() must return sync) + async refresh
     const stream = realStream(...args);
     stream
       .finalMessage()
