@@ -1,3 +1,13 @@
+## 2026-07-05 (main) — docs(vendor): INSTAGRAM-SOCIAL-STEADY — full SteadyAPI social-surface reference (crawl4ai)
+
+RULE 0.4 research pass, operator-requested. Crawled docs.steadyapi.com live (whole 1.25M-char page) and
+distilled `docs/vendor-notes/INSTAGRAM-SOCIAL-STEADY.md`: all 13 Instagram Social endpoints verbatim
+(params + real response shapes), plus cross-social inventories (Twitter 15 endpoints, Reddit 9,
+ScrapeFlow) and build notes. Key contract facts: real paths are `/v1/instagram/...`; IG pagination
+tokens expire in 15 min with a 20-req/15-min session cap; IG CDN media URLs are signed + expiring
+(must rehost); `shortcode` is the universal post key; endpoint weights (IG search=2). No TikTok/FB/
+LinkedIn dedicated endpoints exist as of 07/05/2026. Next: social-scan build ideas (operator reviewing).
+
 ## 2026-07-05 (main) — correction: dbpr_press_releases + swfl_inc are BOTH already crawl4ai; dbpr false-RED fixed via scraped_at
 
 Run-log evidence corrects the prior entry's "Firecrawl-era" guesses: dbpr_press_releases is HEALTHY
