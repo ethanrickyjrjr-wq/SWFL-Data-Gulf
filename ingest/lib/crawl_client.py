@@ -37,13 +37,17 @@ from crawl4ai import (
     CrawlerMonitor,
     CrawlerRunConfig,
     DefaultMarkdownGenerator,
+    HTTPCrawlerConfig,
     MemoryAdaptiveDispatcher,
     ProxyConfig,
     PruningContentFilter,
     RateLimiter,
     UndetectedAdapter,
 )
-from crawl4ai.async_crawler_strategy import AsyncPlaywrightCrawlerStrategy
+from crawl4ai.async_crawler_strategy import (
+    AsyncHTTPCrawlerStrategy,
+    AsyncPlaywrightCrawlerStrategy,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -188,22 +192,54 @@ class Crawl4aiSession:
             shutil.rmtree(self._downloads_dir, ignore_errors=True)
 
 
-async def _scrape_page(url: str, *, fit_markdown: bool = False) -> tuple[str, str]:
+# Real-browser UA for the HTTP (no-browser) strategy — some WAFs 403 the headless
+# Playwright fingerprint but serve plain HTTP with a browser UA just fine (proven:
+# swflinc.com 403s Playwright from GHA runners, 200s this; same pattern as
+# active_listings' runner-IP WAF proof).
+_HTTP_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
+
+
+async def _scrape_page(
+    url: str, *, fit_markdown: bool = False, http_strategy: bool = False
+) -> tuple[str, str]:
     """Fetch a static page without stealth. Returns (html, markdown).
 
     fit_markdown (default OFF = byte-identical): attaches a PruningContentFilter denoiser
     (drops nav/footer/ads) and returns the fit/denoised markdown — cleaner parse, fewer LLM
-    tokens. Off => the same raw_markdown capture as before."""
-    bc = BrowserConfig(headless=True)
-    strategy = AsyncPlaywrightCrawlerStrategy(browser_config=bc)
-    cfg_kwargs = dict(cache_mode=CacheMode.BYPASS, delay_before_return_html=1.0)
+    tokens. Off => the same raw_markdown capture as before.
+
+    http_strategy (default OFF = byte-identical): fetches via AsyncHTTPCrawlerStrategy
+    (plain HTTP GET with a browser UA, no Playwright) — for server-rendered pages whose
+    WAF 403s the headless-browser fingerprint. Markdown generation is strategy-agnostic."""
+    cfg_kwargs = dict(cache_mode=CacheMode.BYPASS)
     if fit_markdown:
         cfg_kwargs["markdown_generator"] = DefaultMarkdownGenerator(
             content_filter=PruningContentFilter()
         )
-    cfg = CrawlerRunConfig(**cfg_kwargs)
-    async with AsyncWebCrawler(crawler_strategy=strategy, config=bc) as crawler:
-        r = await crawler.arun(url=url, config=cfg)
+    if http_strategy:
+        _pc = _proxy_from_env()
+        if _pc is not None:
+            cfg_kwargs["proxy_config"] = _pc
+        http_cfg = HTTPCrawlerConfig(
+            method="GET",
+            headers={"User-Agent": _HTTP_UA},
+            follow_redirects=True,
+            verify_ssl=True,
+        )
+        strategy = AsyncHTTPCrawlerStrategy(browser_config=http_cfg)
+        cfg = CrawlerRunConfig(**cfg_kwargs)
+        async with AsyncWebCrawler(crawler_strategy=strategy) as crawler:
+            r = await crawler.arun(url=url, config=cfg)
+    else:
+        bc = BrowserConfig(headless=True)
+        strategy = AsyncPlaywrightCrawlerStrategy(browser_config=bc)
+        cfg_kwargs["delay_before_return_html"] = 1.0
+        cfg = CrawlerRunConfig(**cfg_kwargs)
+        async with AsyncWebCrawler(crawler_strategy=strategy, config=bc) as crawler:
+            r = await crawler.arun(url=url, config=cfg)
     if not getattr(r, "success", False):
         raise Crawl4aiError(f"scrape failed for {url}: {getattr(r, 'error_message', '?')}")
     html = r.html or ""
@@ -219,10 +255,16 @@ async def _scrape_page(url: str, *, fit_markdown: bool = False) -> tuple[str, st
     return html, md
 
 
-def fetch_page_markdown(url: str, *, fit_markdown: bool = False) -> str:
+def fetch_page_markdown(
+    url: str, *, fit_markdown: bool = False, http_strategy: bool = False
+) -> str:
     """Sync: fetch a static page, return markdown. No stealth.
-    fit_markdown=True denoises via PruningContentFilter (default off = raw_markdown)."""
-    _, md = asyncio.run(_scrape_page(url, fit_markdown=fit_markdown))
+    fit_markdown=True denoises via PruningContentFilter (default off = raw_markdown).
+    http_strategy=True fetches via plain HTTP with a browser UA (no Playwright) —
+    for server-rendered pages whose WAF blocks the headless-browser fingerprint."""
+    _, md = asyncio.run(
+        _scrape_page(url, fit_markdown=fit_markdown, http_strategy=http_strategy)
+    )
     return md
 
 

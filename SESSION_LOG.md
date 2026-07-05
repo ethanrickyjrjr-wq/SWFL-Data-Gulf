@@ -1,3 +1,14 @@
+## 2026-07-05 (main) — fix(swfl_inc): HTTP-strategy fetch beats the runner-side WAF 403; workflow re-enabled
+
+Systematic-debug of the last real red: the 06/15 failure was the OLD Spider-vendor code (0 bytes);
+the crawl4ai port (06/16, d19f11a8) never ran because the workflow stayed disabled. Re-enabled +
+dispatched dry-run: runner got **HTTP 403 anti-bot** from swflinc.com — the WAF blocks the headless
+Playwright fingerprint from datacenter IPs (plain curl 200s, blog is fully server-rendered, 16 "Date
+posted" anchors in raw HTML). Fix = the proven active_listings pattern: opt-in `http_strategy=True` on
+`fetch_page_markdown` (AsyncHTTPCrawlerStrategy + browser UA; default path byte-identical), swfl_inc
+opts in. Local dry-run identical through HTTP path (3 feeds, 32 rows, newest 05/27/2026); 5 unit tests
+pass. GHA dry-run + real run verified after push (see run links in checks/notes).
+
 ## 2026-07-05 (main) — docs(vendor): INSTAGRAM-SOCIAL-STEADY — full SteadyAPI social-surface reference (crawl4ai)
 
 RULE 0.4 research pass, operator-requested. Crawled docs.steadyapi.com live (whole 1.25M-char page) and

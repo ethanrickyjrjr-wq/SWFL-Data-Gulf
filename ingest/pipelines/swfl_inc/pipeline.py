@@ -342,7 +342,10 @@ def fetch_feeds() -> list[tuple[str, str]]:
     """
     results: list[tuple[str, str]] = []
     for feed_url in SWFL_INC_FEEDS:
-        markdown = fetch_page_markdown(feed_url)
+        # http_strategy: swflinc.com's WAF 403s the headless Playwright fingerprint from
+        # GHA datacenter IPs (proven 07/05/2026 dispatch) but serves plain HTTP with a
+        # browser UA fine — and the blog is fully server-rendered, so no JS is needed.
+        markdown = fetch_page_markdown(feed_url, http_strategy=True)
         if markdown:
             print(f"  {feed_url}: fetched ({len(markdown):,} chars)")
             results.append((markdown, feed_url))
