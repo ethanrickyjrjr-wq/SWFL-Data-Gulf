@@ -8,23 +8,27 @@ import type { LibraryAsset } from "@/lib/email/author-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import type { ChartType } from "@/lib/email/reshape-chart-type";
 
-/** The caller's media library for the author's ASSET MENU (newest 24). Anonymous
- *  or failing → [] — the author simply gets no menu section. */
-async function loadCallerAssets(): Promise<LibraryAsset[]> {
+/** The caller's media library for the author's ASSET MENU (newest 24) plus their
+ *  account email (the engine-owned reply-CTA destination — the same address every
+ *  blast send already uses as reply-to). Anonymous or failing → empty. */
+async function loadCaller(): Promise<{ assets: LibraryAsset[]; email?: string }> {
   try {
     const db = createClient(await cookies());
     const {
       data: { user },
     } = await db.auth.getUser();
-    if (!user) return [];
+    if (!user) return { assets: [] };
     const { data } = await db
       .from("email_media_assets")
       .select()
       .order("created_at", { ascending: false })
       .limit(24);
-    return ((data ?? []) as unknown as MediaAssetRow[]).map(toPanelItem);
+    return {
+      assets: ((data ?? []) as unknown as MediaAssetRow[]).map(toPanelItem),
+      email: user.email ?? undefined,
+    };
   } catch {
-    return [];
+    return { assets: [] };
   }
 }
 
@@ -78,6 +82,7 @@ export async function POST(req: NextRequest) {
     // (re-fill the existing skeleton) stays buildContentDoc. Both validate the doc.
     const isAuthor = body.build === true || body.mode === "author";
     try {
+      const caller = isAuthor ? await loadCaller() : null;
       const { httpStatus, payload } = isAuthor
         ? await authorDoc({
             prompt,
@@ -85,7 +90,8 @@ export async function POST(req: NextRequest) {
             scope: body.scope,
             mode: body.mode,
             chartType: body.chartType as ChartType | undefined,
-            assets: await loadCallerAssets(),
+            assets: caller?.assets,
+            replyEmail: caller?.email,
           })
         : await buildContentDoc({
             prompt,

@@ -335,6 +335,10 @@ export interface BuildArgs {
   /** The caller's media library (author path only) — id-selected via the ASSET MENU.
    *  Fetched by the route (it holds the auth user); empty/absent → no menu section. */
   assets?: LibraryAsset[];
+  /** The caller's account email (author path only). When the build prompt asks for
+   *  a reply CTA, authored buttons get the engine-owned `mailto:` to this address —
+   *  the same address blast sends already use as reply-to. Never model-written. */
+  replyEmail?: string;
 }
 
 export interface BuildResult {
@@ -602,6 +606,7 @@ export async function authorDoc({
   mode,
   chartType,
   assets,
+  replyEmail,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -678,6 +683,9 @@ export async function authorDoc({
       photo: photoSlot,
       defaultLinkUrl: brandWebsiteUrl(currentDoc),
       assetsById: assetMenuById(assetMenu),
+      // Reply CTA: only when the prompt asks for a reply AND we know the
+      // caller's address. The model writes the label; the engine owns the URL.
+      buttonMailto: /\breply\b/i.test(prompt) && replyEmail ? `mailto:${replyEmail}` : undefined,
     });
 
   const firstParse = EmailDocSchema.safeParse(assemble(authored));

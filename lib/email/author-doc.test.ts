@@ -592,3 +592,24 @@ describe("semantic layout power-up (band / pad / overlay / columns / list)", () 
     expect(items[1].text).toContain("47");
   });
 });
+
+describe("reply CTA (agent-launch L2 — URLs stay engine-owned)", () => {
+  test("buttonMailto puts an engine-owned mailto on authored buttons", () => {
+    const doc = assembleAuthoredDoc(
+      args(
+        { blocks: [{ type: "button", button_label: "Reply with your address" }] },
+        { buttonMailto: "mailto:agent@example.com" },
+      ),
+    );
+    const btn = doc.blocks.find((b) => b.type === "button");
+    expect(btn).toBeDefined();
+    expect((btn!.props as { url?: string }).url).toBe("mailto:agent@example.com");
+    expect((btn!.props as { label?: string }).label).toBe("Reply with your address");
+  });
+
+  test("no buttonMailto → button url stays the default (never model-written)", () => {
+    const doc = assembleAuthoredDoc(args({ blocks: [{ type: "button", button_label: "Reply" }] }));
+    const btn = doc.blocks.find((b) => b.type === "button");
+    expect((btn!.props as { url?: string }).url ?? "").not.toContain("mailto:");
+  });
+});

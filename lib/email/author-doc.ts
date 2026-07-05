@@ -463,6 +463,10 @@ export interface AssembleArgs {
   defaultLinkUrl?: string;
   /** The user's library, keyed by [aN] menu id (assetMenuById). */
   assetsById?: Map<string, LibraryAsset>;
+  /** Engine-owned reply destination ("mailto:…") for authored buttons — set by
+   *  the caller when the build prompt asks for a reply CTA. The model still
+   *  writes button_label only; URLs are never authored (moat rule 2). */
+  buttonMailto?: string;
 }
 
 /** A literal (non-figure) stat value is allowed ONLY if it invents no number: a
@@ -485,6 +489,7 @@ function buildEntry(
   gs: EmailGlobalStyle,
   defaultLinkUrl?: string,
   assetsById?: Map<string, LibraryAsset>,
+  buttonMailto?: string,
 ): { entry: Entry; placedChart: boolean; placedPhoto: boolean } | null {
   const type = a.type as BlockType;
   if (!KNOWN_TYPES.has(type)) return null; // unknown block type (drives off the ONE root) — skip
@@ -591,6 +596,9 @@ function buildEntry(
   } else {
     props = defaultPropsFor(type) as unknown as Record<string, unknown>;
     applyContent(type, props, a, num);
+    // Reply CTA: the model wrote the label; the ENGINE owns the destination
+    // (same contract as multi-column links above).
+    if (type === "button" && buttonMailto) props.url = buttonMailto;
   }
 
   // Semantic band/pad — resolved by the engine, only on blocks whose schema
@@ -695,6 +703,7 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
     photo,
     defaultLinkUrl,
     assetsById,
+    buttonMailto,
   } = args;
   const anchors = buildAnchorSet(anchorNumbers); // for the stat-literal number guard
   const entries: Entry[] = [];
@@ -711,6 +720,7 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
       globalStyle,
       defaultLinkUrl,
       assetsById,
+      buttonMailto,
     );
     if (!r) continue;
     entries.push(r.entry);
