@@ -47,6 +47,25 @@ describe("detectRecipe — deterministic keyword routing", () => {
     ["a weekly market update with a year-end recap teaser", "sphere-weekly"],
     // bare "review" near-miss stays generic
     ["review this contract for me", null],
+    // chart-digest — distilled 07/05/2026 (see PROVENANCE in author-recipes.ts)
+    ["the week in charts for Cape Coral", "chart-digest"],
+    ["build my monthly chartbook for the sphere", "chart-digest"],
+    ["a chart roundup of the Lee County market", "chart-digest"],
+    // chart-story — distilled 07/05/2026 (see PROVENANCE in author-recipes.ts)
+    ["a chart of the day email for my farm", "chart-story"],
+    ["one chart that explains Naples prices", "chart-story"],
+    ["a chart breakdown for past clients", "chart-story"],
+    // precedence: digest beats monthly ("digest" keyword) and beats story
+    ["a weekly chart digest newsletter", "chart-digest"],
+    ["a chart roundup with a chart of the week as the lead", "chart-digest"],
+    // precedence: story beats monthly's "newsletter" keyword
+    ["chart of the month newsletter", "chart-story"],
+    // precedence: welcome and year-review still win before the chart recipes
+    ["introduce me and mention my weekly chartbook", "agent-intro"],
+    ["an annual recap with one chart per quarter", "year-in-review"],
+    // near-miss: a bare "chart" mention never trips the chart recipes
+    ["monthly newsletter with a chart", "monthly-newsletter"],
+    ["can you chart Cape Coral prices", null],
     // no match → null → generic prompt unchanged
     ["price update for Cape Coral", null],
     ["", null],

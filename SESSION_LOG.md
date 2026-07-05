@@ -1,3 +1,18 @@
+## 2026-07-05 (main) — DISTILLED: two chart-led email recipes — chart-digest (Daily Chartbook) + chart-story (The Morning Print)
+
+Operator: "Go get some high quality graphs and charts and let's see this work." Deliverable-distiller runs
+sourced via crawl4ai: (1) dailychartbook.com DC Lite → `chart-digest` recipe — scan-cadence roundup of
+one-figure briefs, offered chart anchors the lead brief, word-led topic labels replace the source's numbered
+ordinals (a bare ordinal digit would trip the prose lint); (2) thechartreport.com The Morning Print →
+`chart-story` recipe — one chart one claim: hero conclusion-first, setup pivot, THE chart alone in its row,
+short-paragraph walkthrough, signal stake + falsifier, reply button. Why-tag evidence fetched in-session:
+nngroup.com how-users-read-on-the-web (scan > read; one idea per paragraph; source-naming credibility;
+no marketese) + storytellingwithdata.com guiding principles (point-of-view charts; clear where to look;
+title + source note). Routing: both checked after year-review, digest before story before monthly (digest's
+"digest" keyword would otherwise be swallowed by monthly). 43/43 recipe tests (14 new routing cases),
+social suite 7/7, next build GREEN. Commit only — push awaits operator. RGE search 404s now (their search
+URL shape changed); milled.com is Cloudflare-walled — hunting grounds that worked: beehiiv/Drupal archives.
+
 ## 2026-07-05 (main) — BUILT: agent-first homepage build 1 (7 commits, be3ec219..fb1e8c48) — hero + chips + autocomplete + grid zip-seed
 
 Executed plan `2026-07-05-agent-first-homepage.md` inline (TDD, one commit per task): T1 HERO_CAMPAIGNS

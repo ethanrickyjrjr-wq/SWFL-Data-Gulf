@@ -18,6 +18,8 @@ export const RECIPE_IDS = [
   "agent-intro",
   "sphere-weekly",
   "year-in-review",
+  "chart-digest",
+  "chart-story",
   "monthly-newsletter",
   "editorial-letter",
   "editorial-showcase",
@@ -41,6 +43,20 @@ const SPHERE_WEEKLY_RE = /\bweekly\b[^.!?]*\bmarket update\b|\bsphere market upd
 // newsletter" and "annual newsletter" must read as the recap, never the digest.
 const YEAR_REVIEW_RE =
   /\byear[- ]in[- ]review\b|\bannual\b[^.!?]*\b(recap|review|letter|update|newsletter)\b|\byear[- ]end\b[^.!?]*\b(recap|review|update|newsletter|email)\b|\byour year\b/i;
+// The chart-led roundup ("week in charts" / "chartbook" / "chart digest").
+// Checked AFTER year-review (an annual-recap ask stays the recap even if it
+// mentions charts) and BEFORE chart-story (a roundup naming a lead chart keeps
+// the digest shape) and BEFORE monthly — "chart digest" contains "digest", so
+// monthly would swallow it if checked first.
+const CHART_DIGEST_RE =
+  /\bchartbook\b|\bcharts? (roundup|digest|pack|briefs?)\b|\b(week|month|year|market) in charts\b/i;
+// The single-chart story ("chart of the day/week/month" / "one chart" / "chart
+// breakdown"). Checked AFTER chart-digest (multi-chart asks keep the digest
+// shape) and BEFORE monthly — "chart of the month newsletter" must read as the
+// story, never the generic digest. A bare "chart" never fires (compound
+// phrases only), so "newsletter with a chart" stays monthly.
+const CHART_STORY_RE =
+  /\bchart of the (day|week|month)\b|\bone[- ]chart\b|\bchart (story|breakdown|deep[- ]dive|walkthrough)\b/i;
 const MONTHLY_RE = /\bmonthly\b|\bnewsletter\b|\bdigest\b/i;
 const EDITORIAL_RE = /\bfancy\b|\belegant\b|\beditorial\b|\bmagazine\b|\bluxury\b|\bletter\b/i;
 const LETTER_RE = /\bletter\b/i;
@@ -53,6 +69,8 @@ export function detectRecipe(prompt: string): RecipeId | null {
   if (WELCOME_RE.test(p)) return "agent-intro";
   if (SPHERE_WEEKLY_RE.test(p)) return "sphere-weekly";
   if (YEAR_REVIEW_RE.test(p)) return "year-in-review";
+  if (CHART_DIGEST_RE.test(p)) return "chart-digest";
+  if (CHART_STORY_RE.test(p)) return "chart-story";
   if (MONTHLY_RE.test(p)) return "monthly-newsletter";
   if (EDITORIAL_RE.test(p)) {
     if (LETTER_RE.test(p)) return "editorial-letter";
@@ -158,6 +176,90 @@ const RECIPES: Record<RecipeId, string> = {
     "personal story to the reader's own home.\n" +
     "- This is an annual moment — let it breathe: pad airy on the cascade rows. The " +
     "footer with unsubscribe and postal address always renders.",
+
+  // PROVENANCE: distilled from https://www.dailychartbook.com/ (DC Lite issue,
+  // public archive), found 07/05/2026. Layout system only — no source copy,
+  // figures, or images. Adapted to this engine's one-chart contract: the source
+  // runs many charts; here the single offered chart anchors the lead brief and
+  // every other brief carries one DATA MENU figure. The source's literal
+  // numbered ordinals are dropped (a bare ordinal digit would trip the prose
+  // lint) — word-led topic labels keep the same scan mechanic.
+  // Why-tag evidence (fetched in-session 07/05/2026):
+  // nngroup.com/articles/how-users-read-on-the-web — readers scan rather than
+  // read (email newsletters even more abruptly); one idea per paragraph caught
+  // by the first few words; naming outside sources builds credibility; readers
+  // detest marketese. storytellingwithdata.com/blog/2017/8/9/my-guiding-principles
+  // — an explanatory graph states a point of view; make it clear where to look;
+  // every graph needs a title and a source note.
+  "chart-digest":
+    "RECIPE — CHART DIGEST (the market in charts; a roundup of short evidence " +
+    "briefs, each one figure, one takeaway).\n" +
+    "Target structure, top to bottom:\n" +
+    "- Masthead header naming the edition's cadence and place (week, month — " +
+    "written as words; you never type digits).\n" +
+    "- The lead brief carries the offered chart: a short `text` block FIRST whose " +
+    "opening few words are the brief's topic label, then one plain-language " +
+    "takeaway sentence that states what the chart shows — the point of view lands " +
+    "before the picture, because readers scan and a brief's first words decide " +
+    "whether it registers. Then the chart image, its caption quoting only the " +
+    "chart's real figures.\n" +
+    "- After the lead, a small handful of further briefs — each ONE idea only: a " +
+    "topic label in the first few words, one takeaway sentence, and one " +
+    "`metric-card` whose value is id-selected from the DATA MENU. One figure per " +
+    "brief, each in its own row — a crowded grid kills the scan rhythm that makes " +
+    "a digest work.\n" +
+    "- Takeaways are flat statements of what the number says, never sales language " +
+    "— readers detest marketese, and a digest's authority comes from reading like " +
+    "reporting. When a figure comes from a named outside source, say the name " +
+    "plainly the way the menu labels it: naming sources builds credibility.\n" +
+    "- Close with the more-where-this-came-from turn: one short `text` line noting " +
+    "the reader's own area has its own numbers, then exactly ONE `button` — you " +
+    "MUST write its `button_label` field yourself as the reply ask in a few short " +
+    "words that fit a button (reply with your address — details live in the email " +
+    "body, not the label); leaving it empty ships a generic label, and never a " +
+    "view, read, or learn-more label.\n" +
+    "- Keep the shape identical edition to edition — the fixed cadence builds the " +
+    "open habit. The footer with unsubscribe and postal address always renders.",
+
+  // PROVENANCE: distilled from https://www.thechartreport.com/ (The Morning
+  // Print issue, public archive), found 07/05/2026. Layout system only — no
+  // source copy, figures, or images.
+  // Why-tag evidence (fetched in-session 07/05/2026):
+  // storytellingwithdata.com/blog/2017/8/9/my-guiding-principles — the right
+  // graph creates one aha moment; make it clear where to look (one emphasized
+  // thing, everything else recedes); an explanatory chart states a point of
+  // view. nngroup.com/articles/how-users-read-on-the-web — one idea per
+  // paragraph; inverted pyramid, conclusion first; half the word count.
+  "chart-story":
+    "RECIPE — CHART STORY (one chart, one claim; the deep read).\n" +
+    "The whole email hangs on ONE chart and the claim it proves. Nothing else " +
+    "competes — a single emphasized exhibit is what makes the reader's eye land, " +
+    "and one aha beats five maybes.\n" +
+    "Target structure, top to bottom:\n" +
+    "- Open with the claim as the headline moment: a `hero` with band light whose " +
+    "kicker names the place and whose headline value is id-selected from the DATA " +
+    "MENU — the conclusion lands first, inverted-pyramid style, so the reader who " +
+    "stops after one screen still gets the story.\n" +
+    "- A short `text` setup written like a note: a sentence or two on why this " +
+    "matters right now, ending on a pivot line that hands the reader to the " +
+    "evidence (a plain here is the picture turn).\n" +
+    "- THE chart — the offered chart image, large, alone in its own row, its " +
+    "caption quoting only the chart's real figures. This is the exhibit; give it " +
+    "room.\n" +
+    "- The walkthrough: a `text` block of a few SHORT paragraphs — one idea each, " +
+    "each anchored to what is visible in the chart or to a DATA MENU value, " +
+    "walking the reader through what the picture shows and what usually follows " +
+    "a picture like this. Half the words you think you need.\n" +
+    "- One `signal` block as the honest stake: what this means for someone who " +
+    "owns or wants a home there, plus one sentence naming what would change the " +
+    "read. Never hedge it into mush.\n" +
+    "- Exactly ONE `button`, and you MUST write its `button_label` field yourself " +
+    "as the reply ask in a few short words that fit a button (reply for your " +
+    "street's version of this chart — details live in the email body, not the " +
+    "label); leaving it empty ships a generic label, and never a view, read, or " +
+    "learn-more label. Sign off with an `agent-card` — the bio reads as a " +
+    "signature.\n" +
+    "- The footer with unsubscribe and postal address always renders.",
 
   "monthly-newsletter":
     "RECIPE — MONTHLY NEWSLETTER (recurring market digest).\n" +
