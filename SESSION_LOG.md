@@ -1,3 +1,30 @@
+## 2026-07-04 (main) — spec: quick-start campaign buttons (Projects · Email Lab · Social) — RESEARCH + PLAN ONLY
+
+Wrote `docs/superpowers/specs/2026-07-04-quick-start-campaign-buttons-design.md`. No product code — spec/design
+only, per operator ("just research and plan, do not build the deliverables"). Three Explore agents mapped the
+three surfaces; crawl4ai researched campaign taxonomy (RULE 0.4).
+
+- **Key probe finding:** the recipe machinery ALREADY exists — `ShowcaseRecipe` + `recipeDestination()`
+  (`lib/showcase/recipe.ts`) + `handleUseRecipe()` (`EmailLabGridShell.tsx:438`) + the `SHOWCASES` registry
+  (`lib/showcase/registry.ts`), which already holds the three campaigns (`listing-to-close` = New Listing,
+  `market-pulse` = Newsletter, `launch-blitz` = New Listing Socials). Quick-start buttons are additive: extend
+  `Showcase` with a `campaign` field + a thin `lib/campaigns.ts` selector; place `<CampaignQuickStart>` in
+  `app/project/page.tsx` (hub), `EmailLabGridShell.tsx` (email), `ProjectSocialClient.tsx` (social).
+- **Net-new piece:** color-coded daily/weekly/monthly explainer on the EXAMPLES (operator: live per-user view
+  deferred). Keyed to the existing `Cadence` type (`lib/email/schedule-cadence.ts`); tint the real regions in
+  each showcase's committed `liveHref` artifact via `data-cadence` + a new `CADENCE_COLORS` root.
+- **Social publishing answer:** the publish path is fully built but OFF. To make it post: set X/Meta/LinkedIn
+  OAuth app pairs + `SDG_CRYPTO_KEY`, `node scripts/social.mjs go-live` (sets `SOCIAL_PUBLISH_ENABLED`),
+  un-pause the `scripts/social/run-schedules.mts` cron (task `05-social-go-live.md`). GBP parked. Button ships
+  now; needs go-live only to actually post.
+- **crawl4ai taxonomy (07/04/2026, sources theclose/luxurypresence/coffeecontracts/yoursocialpros):** drip
+  archetypes (welcome, nurture, buyer 8-touch, seller 7-touch, promotional, seasonal, referral, re-engagement);
+  newsletter cadence norm monthly; just-listed/just-sold social angles; open-house before/day-of/after arc.
+  Ranked recipe backlog after the three: Open House, Buyer Nurture, Seller/Home-Value, Past-Client seasonal,
+  Re-engagement — all reuse the same shell (spec §"coming tiles").
+
+Next: operator reviews spec → register the build (`node scripts/new-build.mjs campaign-quick-start …`) → implement.
+
 ## 2026-07-04 (main) — send launch: force fresh prod deploy to clear route 503 + correct Resend free-tier fact
 
 Preflight to `/api/email/broadcast` stayed `503 not_configured` after the operator set DIGEST_BROADCAST_SECRET
