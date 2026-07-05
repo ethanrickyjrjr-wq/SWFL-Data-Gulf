@@ -22,6 +22,7 @@ import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
+import { blastTags } from "@/lib/email/blast-tags";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -232,6 +233,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         "List-Unsubscribe": `<${unsubUrl}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
+      // Attribution hook: webhook events carry these back (Build 2 reads them).
+      tags: blastTags(id, deliverable.template),
     };
   };
 
