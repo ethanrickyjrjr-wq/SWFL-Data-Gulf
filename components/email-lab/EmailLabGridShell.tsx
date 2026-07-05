@@ -58,6 +58,7 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
   ssr: false,
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import { campaignFollowUpForPrompt } from "@/lib/campaigns";
@@ -294,6 +295,18 @@ export function EmailLabGridShell({
   const [showBrand, setShowBrand] = useState(false);
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
+  // Brand-reveal registration — inert today (/email-lab/grid is chrome-free, no
+  // account menu renders) but any future in-grid caller of revealBrandPanel()
+  // gets open+scroll+pulse for free (spec 2026-07-05-account-quick-access).
+  const brandRevealRef = useRef<HTMLDivElement>(null);
+  useEffect(
+    () =>
+      registerBrandPanel(() => {
+        setShowBrand(true);
+        requestAnimationFrame(() => pulseBrandPanel(brandRevealRef.current));
+      }),
+    [],
+  );
 
   // history helpers (coalesced field edits → meaningful undo frames)
   const editingRef = useRef(false);
@@ -1501,7 +1514,7 @@ export function EmailLabGridShell({
           {/* ── Brand — closed by default, below the action sections (operator
               ruling 07/03/2026: it was hogging the rail). The gap yes/no's
               "Add my info" pops it open. ── */}
-          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+          <div className="border-b border-white/8 px-4 pb-4 pt-3" ref={brandRevealRef}>
             <button
               onClick={() => setShowBrand((v) => !v)}
               className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"

@@ -45,6 +45,7 @@ import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
 import { createBlock } from "@/lib/email/doc/default-docs";
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { brandGlobalStyle } from "@/lib/email/brand/apply-brand-style";
 import { SocialCalendarPanel } from "./SocialCalendarPanel";
@@ -234,6 +235,17 @@ export function EmailLabShell({
   const brandPrefillAttempted = useRef(false);
 
   const [showBrand, setShowBrand] = useState(true);
+  // Account-menu Brand click lands HERE while the lab is on screen: open the
+  // accordion, scroll to it, pulse (spec 2026-07-05-account-quick-access).
+  const brandRevealRef = useRef<HTMLDivElement>(null);
+  useEffect(
+    () =>
+      registerBrandPanel(() => {
+        setShowBrand(true);
+        requestAnimationFrame(() => pulseBrandPanel(brandRevealRef.current));
+      }),
+    [],
+  );
   const [showSeeds, setShowSeeds] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -917,7 +929,7 @@ export function EmailLabShell({
           )}
 
           {/* ── Brand ── */}
-          <div className="border-b border-white/8 px-4 pb-4 pt-3">
+          <div className="border-b border-white/8 px-4 pb-4 pt-3" ref={brandRevealRef}>
             <button
               onClick={() => setShowBrand((v) => !v)}
               className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"

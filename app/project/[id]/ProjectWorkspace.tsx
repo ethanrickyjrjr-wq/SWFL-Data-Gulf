@@ -21,6 +21,7 @@ import { MaterialsHub } from "@/components/project/MaterialsHub";
 import { ProjectTitle } from "./workspace/ProjectTitle";
 import { ItemsBoard } from "./workspace/ItemsBoard";
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { PropertyUrlBlock } from "./workspace/PropertyUrlBlock";
 import {
   type BrandPalette,
@@ -137,6 +138,18 @@ export function ProjectWorkspace({
 
   // True when this project has at least one agent branding field saved.
   const hasBranding = AGENT_KEYS.some((k) => !!branding[k]);
+
+  // Account-menu Brand click lands HERE when this workspace is on screen: open
+  // the pill popover, scroll to it, pulse (spec 2026-07-05-account-quick-access).
+  const brandRevealRef = useRef<HTMLDivElement>(null);
+  useEffect(
+    () =>
+      registerBrandPanel(() => {
+        setActivePill("brand");
+        requestAnimationFrame(() => pulseBrandPanel(brandRevealRef.current));
+      }),
+    [],
+  );
 
   // On first brand-pill open, load the user's saved brand profile: seed agent
   // fields + empty color slots from the account default (funnel arrivals, new
@@ -531,7 +544,7 @@ export function ProjectWorkspace({
       />
 
       {/* Brand + Connect AI pills — each opens a popover panel */}
-      <div className="relative mt-3">
+      <div className="relative mt-3" ref={brandRevealRef}>
         <div className="flex items-center gap-2">
           <button
             type="button"
