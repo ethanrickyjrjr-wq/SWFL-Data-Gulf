@@ -62,10 +62,11 @@ function paidWorkflows() {
 
 async function checkSpend() {
   const env = envLocal();
-  const url = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = env.SUPABASE_SERVICE_KEY;
+  // .env.local locally; repo secrets via process.env in the hourly CI scan.
+  const url = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) {
-    yellows.push("SPEND: no Supabase creds in .env.local — ledger unreadable from here");
+    yellows.push("SPEND: no Supabase creds available — ledger unreadable from here");
     return;
   }
   const since = new Date().toISOString().slice(0, 10); // UTC day start
@@ -175,17 +176,22 @@ function checkGuards() {
     else reds.push(`GUARD MISSING — ${v}`);
   }
   // quarantine intact: no live paid key names in .env.local
-  const env = envLocal();
-  const liveKeys = [
-    "ANTHROPIC_API_KEY",
-    "FIRECRAWL_API_KEY",
-    "DATAFORSEO_LOGIN",
-    "SPIDER_API_KEY",
-    "RENTCAST_API_KEY",
-    "VOYAGE_KEY",
-  ].filter((k) => env[k]);
-  if (liveKeys.length) reds.push(`QUARANTINE BROKEN — live in .env.local: ${liveKeys.join(", ")}`);
-  else greens.push("QUARANTINE intact — no per-use paid key live in .env.local");
+  if (!fs.existsSync(path.join(ROOT, ".env.local"))) {
+    yellows.push("QUARANTINE check n/a — no .env.local (CI context)");
+  } else {
+    const env = envLocal();
+    const liveKeys = [
+      "ANTHROPIC_API_KEY",
+      "FIRECRAWL_API_KEY",
+      "DATAFORSEO_LOGIN",
+      "SPIDER_API_KEY",
+      "RENTCAST_API_KEY",
+      "VOYAGE_KEY",
+    ].filter((k) => env[k]);
+    if (liveKeys.length)
+      reds.push(`QUARANTINE BROKEN — live in .env.local: ${liveKeys.join(", ")}`);
+    else greens.push("QUARANTINE intact — no per-use paid key live in .env.local");
+  }
 
   try {
     const commits = sh(

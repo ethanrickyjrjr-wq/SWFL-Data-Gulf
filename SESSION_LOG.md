@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — TRIPWIRE CADENCE: hourly CI scan + issue-on-RED + every-session-start (operator: "24h check = nice try")
+
+Operator gap-call: the drain ran in ~2h; a daily scan sleeps through it. Damage-SPEED is bounded by the caps
+($1/run kill + $5 daily/monthly seam caps, 43fdd93f + ingest ceiling) — detection cadence now matches:
+(1) NEW `.github/workflows/tripwire-hourly.yml` — cron :17 hourly, $0 (public-repo Actions, NO anthropic
+key), runs the scan with SUPABASE_URL/SERVICE_KEY repo secrets for the ledger read; any RED opens/updates a
+"TRIPWIRE RED" issue (GitHub notifies operator's phone) + red X. (2) scan patched for CI (process.env cred
+fallback; quarantine check n/a-yellow without .env.local; no early-return). (3) settings.json SessionStart
+runs the scan on EVERY session launch — REDs land in every Claude's face before it works. Local rerun:
+7 RED (this morning's pre-guard dispatches aging out) · spend $0.95/60 calls. Worst-case blind window is
+now ≤1h, with metered damage inside it capped at $5. Awaiting operator push word.
+
 ## 2026-07-05 (main) — BUILD: spend tripwire Phase 1 SHIPPED — first live scan caught 7 manual paid dispatches (we knew of 2)
 
 Operator: "How do we find out something is fucked? advisor sonnet with morals" → spec filled

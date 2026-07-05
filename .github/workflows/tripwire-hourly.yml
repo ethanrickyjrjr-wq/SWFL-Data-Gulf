@@ -1,0 +1,62 @@
+name: Tripwire hourly
+
+# The watchman on a clock — spec: docs/superpowers/specs/2026-07-05-spend-tripwire-design.md
+# The 07/05/2026 drain ran in ~2 hours; a daily check would sleep through it.
+# This runs the $0 deterministic scan EVERY HOUR (free on a public repo) and
+# opens/updates a GitHub issue on any RED — GitHub notifies the operator's
+# phone/email; nobody has to remember to look.
+#
+# No ANTHROPIC_API_KEY here — the scan spends nothing, by design.
+
+on:
+  schedule:
+    - cron: "17 * * * *" # hourly, off the top-of-hour congestion
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+  actions: read # gh workflow list / gh run list
+
+concurrency:
+  group: tripwire-hourly
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: Run tripwire scan
+        id: scan
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          set -o pipefail
+          node scripts/tripwire-scan.mjs | tee scan.txt
+
+      - name: Open or update the RED issue
+        if: steps.scan.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          body="$(printf '```\n%s\n```\nRun: %s/%s/actions/runs/%s' "$(cat scan.txt)" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
+          existing=$(gh issue list --state open --search "TRIPWIRE RED in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "TRIPWIRE RED — unauthorized paid activity or guard failure" --body "$body"
+          fi
+
+      - name: Fail the run on RED (visible red X + heal-ledger visibility)
+        if: steps.scan.outcome == 'failure'
+        run: exit 1
