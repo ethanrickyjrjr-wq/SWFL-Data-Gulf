@@ -14,6 +14,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { getMarketingResend } from "@/lib/email/marketing-client";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
+import { bindUnsubscribeHref } from "@/lib/email/bind-unsubscribe";
 import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
 import { renderGroundedReport } from "@/lib/email/grounded-report";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
@@ -217,7 +218,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const messageFor = (c: { id: string; email: string; name: string | null }) => {
     const unsubUrl = `${BASE_URL}/api/unsubscribe?id=${c.id}`;
-    const html = withMergeTags(withFooter(baseHtml, webUrl, unsubUrl), c);
+    const html = withMergeTags(
+      bindUnsubscribeHref(withFooter(baseHtml, webUrl, unsubUrl), unsubUrl),
+      c,
+    );
     return {
       from,
       to: [c.email],
