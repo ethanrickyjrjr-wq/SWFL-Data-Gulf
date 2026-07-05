@@ -1,3 +1,13 @@
+## 2026-07-05 (main) — spec: account quick-access (dropdown + route-modal brand/schedule editors)
+
+Brainstormed → scoped code → researched (crawl4ai: Next.js parallel/intercepting routes = official modal
+pattern, soft-nav keeps underlying page mounted; NN/g utility nav top-right) → spec committed `53a9f141`
+(`docs/superpowers/specs/2026-07-05-account-quick-access-design.md`). Operator decisions: route-modals;
+schedules v1 = full edit via structured PATCH reusing `writeAction` (resume added to core — no resume case
+exists today); dropdown adds Brand / Email Schedule / Alerts / MLS Settings; brand reveal on pages that
+already carry the editor = claim/fallback registry (open + scroll + glow, no reordering). Build registered:
+`account_quick_access_live_verify` open. Next: implementation plan (writing-plans).
+
 ## 2026-07-05 (main) — BUILD: un-closeable check without live prod proof (Op-July task 16, HELD — migration + push)
 
 Brainstormed → researched (crawl4ai: gh run list JSON fields, PostgREST count) → specced → advisor-hardened →
