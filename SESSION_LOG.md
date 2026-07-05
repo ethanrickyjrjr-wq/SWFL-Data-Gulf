@@ -1,3 +1,17 @@
+## 2026-07-05 (main) — audit: email-hero-mirror verified against spec, rot re-probe tracked, pending work pushed
+
+Post-ship scope of `85dbe9a9` against `docs/superpowers/specs/2026-07-05-email-hero-mirror-design.md`: all
+four spec items confirmed in code (mirror root `lib/media/hero-photo.ts`, `resolveHeroPhoto` seam
+`build-doc.ts:252`, flyer branch `:396`, `author.ts:222` derivePhoto wiring, showcase HTML zero-rdcpix).
+Leak sweep found none: `listing-scrape.ts:424` og fallback lands in `facts.photos[0]` (mirrored
+downstream); all 3 prod `loadListingContext` callers pass `derivePhoto`. Opened
+`rdcpix_rot_head_reprobe` (email, due 09/15/2026) — the spec's falsifier for the INFERRED months-scale
+rot claim; re-HEAD the 07/05 sold photo set at 60–90 days. Remaining on the build: operator-run
+`email_hero_mirror_live_verify` → then `email_hero_mirror_to_storage`. This push carries (operator said
+"push it all"): the parallel session's grid-lab-phone commit `5e98ce63` (its entry below) + the two
+communities-swfl plan docs (their spec was already committed). `tmp-*.mts` scripts + `paid-runs.log`
+stay local (marked never-commit / local audit log).
+
 ## 2026-07-05 (main) — BUILT: grid lab phone layout — Build/Preview tabs (grid-lab-phone)
 
 Operator's 3:55 PM phone screenshot: the lab rendered its desktop split-pane on a phone (root
