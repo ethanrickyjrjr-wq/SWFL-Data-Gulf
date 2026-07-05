@@ -17,6 +17,7 @@ import {
   buildAssetMenu,
   assetMenuById,
   renderAssetMenu,
+  promptAnchors,
   type AssembleArgs,
 } from "./author-doc";
 import { DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
@@ -611,5 +612,38 @@ describe("reply CTA (agent-launch L2 — URLs stay engine-owned)", () => {
     const doc = assembleAuthoredDoc(args({ blocks: [{ type: "button", button_label: "Reply" }] }));
     const btn = doc.blocks.find((b) => b.type === "button");
     expect((btn!.props as { url?: string }).url ?? "").not.toContain("mailto:");
+  });
+});
+
+// ── lane-4 prompt anchors (figures the USER typed are quotable prose) ──────────
+
+describe("promptAnchors — lane 4 (figures the user gave)", () => {
+  const docWithTextBody = (body: string) =>
+    ({
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [{ id: "b1", type: "text", props: { body } }],
+    }) as unknown as EmailDoc;
+
+  test("extracts the street number and user-typed figures", () => {
+    expect(
+      promptAnchors("email for my listing at 16447 Rainbow Meadows Ct, offered near $1,200,000"),
+    ).toEqual(["16447", "$1,200,000"]);
+  });
+
+  test("prose naming the prompt's address survives the lint", () => {
+    const doc = docWithTextBody("Welcome to 16447 Rainbow Meadows Ct.");
+    const anchors = collectAnchorNumbers(
+      [],
+      promptAnchors("my listing at 16447 Rainbow Meadows Ct"),
+    );
+    const r = lintAuthoredProse(doc, anchors, []);
+    expect(r.ok).toBe(true);
+  });
+
+  test("a prompt figure still cannot be dressed as a recorded sale", () => {
+    const doc = docWithTextBody("It sold for $1,200,000 last month.");
+    const anchors = collectAnchorNumbers([], promptAnchors("asking $1,200,000"));
+    const r = lintAuthoredProse(doc, anchors, []); // recorded anchors EMPTY
+    expect(r.ok).toBe(false);
   });
 });

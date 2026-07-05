@@ -62,6 +62,7 @@ import {
   collectAnchorNumbers,
   collectRecordedAnchors,
   lintAuthoredProse,
+  promptAnchors,
   type LibraryAsset,
 } from "@/lib/email/author-doc";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
@@ -629,7 +630,13 @@ export async function authorDoc({
   const chartGroundingNumbers = chartRes?.groundingNote
     ? extractNumbers(chartRes.groundingNote)
     : [];
-  const anchorStrings = collectAnchorNumbers(lakeParts.figures, chartGroundingNumbers);
+  // Lane 4: figures the USER typed (street number, an asking figure) join the
+  // GENERAL anchors only — never recordedStrings, so "sold for $X" still
+  // requires a recorded menu figure.
+  const anchorStrings = collectAnchorNumbers(lakeParts.figures, [
+    ...chartGroundingNumbers,
+    ...promptAnchors(prompt),
+  ]);
   const recordedStrings = collectRecordedAnchors(lakeParts.figures);
 
   const chartSlot = chartRes

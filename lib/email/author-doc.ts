@@ -825,6 +825,14 @@ export function collectAnchorNumbers(
   return out;
 }
 
+/** Lane 4 — figures the user GAVE: every numeric token in the user's own prompt
+ *  (the listing's street number, a figure they typed) is quotable prose. They are
+ *  general anchors ONLY — never recorded anchors, so "sold for $X" still requires
+ *  a recorded menu figure (RECORDED_CLAIM_RE gate unchanged). */
+export function promptAnchors(prompt: string): string[] {
+  return extractNumbers(prompt ?? "");
+}
+
 function splitSentences(text: string): string[] {
   return (text.match(/[\s\S]+?(?:[.!?]+(?=\s|$)|$)/g) ?? []).map((s) => s.trim()).filter(Boolean);
 }
