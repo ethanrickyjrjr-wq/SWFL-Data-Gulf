@@ -311,6 +311,7 @@ export interface Database {
           resolved_by: string | null;
           created_at: string;
           updated_at: string;
+          proof: Json | null;
         };
         Insert: {
           id?: string;
@@ -328,6 +329,7 @@ export interface Database {
           resolved_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          proof?: Json | null;
         };
         Update: {
           id?: string;
@@ -345,6 +347,7 @@ export interface Database {
           resolved_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          proof?: Json | null;
         };
         Relationships: [];
       };
@@ -2175,27 +2178,6 @@ export interface Database {
         };
         Relationships: [];
       };
-      user_mcp_tokens: {
-        Row: {
-          user_id: string;
-          token: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          token: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          user_id?: string;
-          token?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       prospect_activation: {
         Row: {
           id: number;
@@ -2502,6 +2484,132 @@ export interface Database {
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      social_pulse_digest: {
+        Row: {
+          week: string;
+          digest: Json;
+          narrative: string | null;
+          scan_id: number | null;
+          built_at: string;
+        };
+        Insert: {
+          week: string;
+          digest: Json;
+          narrative?: string | null;
+          scan_id?: number | null;
+          built_at?: string;
+        };
+        Update: {
+          week?: string;
+          digest?: Json;
+          narrative?: string | null;
+          scan_id?: number | null;
+          built_at?: string;
+        };
+        Relationships: [];
+      };
+      social_pulse_hashtags: {
+        Row: {
+          name: string;
+          scan_id: number;
+          media_count: number | null;
+          formatted_media_count: string | null;
+        };
+        Insert: {
+          name: string;
+          scan_id: number;
+          media_count?: number | null;
+          formatted_media_count?: string | null;
+        };
+        Update: {
+          name?: string;
+          scan_id?: number;
+          media_count?: number | null;
+          formatted_media_count?: string | null;
+        };
+        Relationships: [];
+      };
+      social_pulse_posts: {
+        Row: {
+          post_id: string;
+          scan_id: number;
+          shortcode: string;
+          permalink: string;
+          username: string;
+          is_verified: boolean;
+          taken_at: string | null;
+          media_type: number | null;
+          product_type: string | null;
+          caption: string | null;
+          like_count: number | null;
+          comment_count: number | null;
+          view_count: number | null;
+          reshare_count: number | null;
+          matched_term: string;
+          area: string;
+        };
+        Insert: {
+          post_id: string;
+          scan_id: number;
+          shortcode: string;
+          permalink: string;
+          username: string;
+          is_verified?: boolean;
+          taken_at?: string | null;
+          media_type?: number | null;
+          product_type?: string | null;
+          caption?: string | null;
+          like_count?: number | null;
+          comment_count?: number | null;
+          view_count?: number | null;
+          reshare_count?: number | null;
+          matched_term: string;
+          area: string;
+        };
+        Update: {
+          post_id?: string;
+          scan_id?: number;
+          shortcode?: string;
+          permalink?: string;
+          username?: string;
+          is_verified?: boolean;
+          taken_at?: string | null;
+          media_type?: number | null;
+          product_type?: string | null;
+          caption?: string | null;
+          like_count?: number | null;
+          comment_count?: number | null;
+          view_count?: number | null;
+          reshare_count?: number | null;
+          matched_term?: string;
+          area?: string;
+        };
+        Relationships: [];
+      };
+      social_pulse_scans: {
+        Row: {
+          id: number;
+          ran_at: string;
+          terms_scanned: number;
+          requests_spent: number;
+          status: string;
+        };
+        Insert: {
+          id: number;
+          ran_at?: string;
+          terms_scanned?: number;
+          requests_spent?: number;
+          status?: string;
+        };
+        Update: {
+          id?: number;
+          ran_at?: string;
+          terms_scanned?: number;
+          requests_spent?: number;
+          status?: string;
         };
         Relationships: [];
       };
@@ -2955,6 +3063,27 @@ export interface Database {
           threads_url?: string | null;
           unsubscribe_url?: string | null;
           business_address?: string | null;
+        };
+        Relationships: [];
+      };
+      user_mcp_tokens: {
+        Row: {
+          user_id: string;
+          token: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          token: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          token?: string;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
