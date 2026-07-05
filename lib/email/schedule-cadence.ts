@@ -11,7 +11,7 @@
  * (`America/New_York`) — no dependency, DST-correct.
  */
 
-export type Cadence = "daily" | "weekly" | "monthly";
+export type Cadence = "daily" | "weekly" | "monthly" | "once";
 
 export interface CadenceSpec {
   cadence: Cadence;
@@ -66,6 +66,7 @@ function hourLabel(h: number): string {
  */
 export function describeCadence(spec: CadenceSpec): string {
   const at = `at ${hourLabel(spec.send_hour_et)} ET`;
+  if (spec.cadence === "once") return `one-time send ${at}`;
   if (spec.cadence === "weekly") {
     const day = WEEKDAY_NAME[spec.day_of_week ?? 0] ?? "Sunday";
     return `every ${day} ${at}`;
@@ -151,6 +152,11 @@ function nyWallToUtc(y: number, m1: number, d: number, hour: number): Date {
  */
 export function computeNextRunAt(spec: CadenceSpec, fromUtc: Date = new Date()): Date | null {
   const { cadence, send_hour_et } = spec;
+  // "once" (lifecycle sequences): a one-shot has NO next occurrence. Returning
+  // null makes the worker's re-arm park the row after its single fire — one-shot
+  // semantics fall out of the existing machinery. next_run_at is set explicitly
+  // by the milestone API at create time, never computed here.
+  if (cadence === "once") return null;
   if (cadence === "weekly" && spec.day_of_week == null) return null;
   if (cadence === "monthly" && spec.day_of_month == null) return null;
 

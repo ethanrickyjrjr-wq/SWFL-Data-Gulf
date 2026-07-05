@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { computeNextRunAt, formatScheduleSendTime } from "../schedule-cadence";
+import { computeNextRunAt, describeCadence, formatScheduleSendTime } from "../schedule-cadence";
 
 // US DST 2026: spring forward Sun Mar 8 (EST→EDT), fall back Sun Nov 1 (EDT→EST).
 // EST = UTC-5 (9am ET = 14:00Z), EDT = UTC-4 (9am ET = 13:00Z).
@@ -110,5 +110,16 @@ describe("formatScheduleSendTime", () => {
   test("returns an empty string for an invalid date", () => {
     expect(formatScheduleSendTime("nonsense")).toBe("");
     expect(formatScheduleSendTime("")).toBe("");
+  });
+});
+
+describe('cadence "once" (lifecycle sequences)', () => {
+  test("computeNextRunAt returns null — a fired one-shot parks itself", () => {
+    expect(
+      computeNextRunAt({ cadence: "once", send_hour_et: 9 }, new Date("2026-07-06T12:00:00Z")),
+    ).toBeNull();
+  });
+  test("describeCadence labels it a one-time send", () => {
+    expect(describeCadence({ cadence: "once", send_hour_et: 9 })).toBe("one-time send at 9 AM ET");
   });
 });
