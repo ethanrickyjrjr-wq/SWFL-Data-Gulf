@@ -100,14 +100,18 @@ async function main() {
       hashtags: hashtags ?? [],
       prevHashtags,
     });
+    const { buildNarrative } = await import("@/lib/social-pulse/narrative");
+    const narrative = await buildNarrative(digest);
     const { error } = await supabase
       .from("social_pulse_digest")
       .upsert(
-        { week, digest, scan_id: result.scanId, built_at: now.toISOString() },
+        { week, digest, narrative, scan_id: result.scanId, built_at: now.toISOString() },
         { onConflict: "week" },
       );
     if (error) throw new Error(`digest upsert: ${error.message}`);
-    console.log(`digest upserted for ${week} (scan ${result.scanId})`);
+    console.log(
+      `digest upserted for ${week} (scan ${result.scanId}, narrative: ${narrative ? "yes" : "null"})`,
+    );
   }
 }
 
