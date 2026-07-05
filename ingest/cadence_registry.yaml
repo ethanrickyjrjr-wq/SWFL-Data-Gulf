@@ -534,13 +534,15 @@ pipelines:
     cadence_days: 7
     tolerance_multiplier: 3.0
     freshness_table: public.swfl_inc_announcements
+    freshness_column: scraped_at # NOT inserted_at: SWFL Inc. publishes sporadically; scraped_at
+    # bumps on every green run, so this measures "pipeline alive", not "source published".
     expected_rows_min: 28 # 90% of 32 confirmed 2026-05-31
-    # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
+    # Non-dlt pipeline — freshness checked via MAX(scraped_at) on the table directly.
     # Source: SWFL Inc. (swflinc.com/blog/ category feeds), Lee County Economic Development Organization.
     # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
     # Cron: Monday 08:00 UTC via swfl-inc-weekly.yml.
     # First run: 2026-06-01 (GHA success confirmed).
-    note: "Workflow DISABLED MANUALLY in GitHub after the 06/15/2026 run failed: 'every feed returned empty markdown' — swflinc.com likely WAF-blocking the GHA runner or feed URLs moved. Already crawl4ai; fix = probe SWFL_INC_FEEDS (UndetectedAdapter), then re-enable. Data frozen 05/31/2026."
+    note: "FIXED + re-enabled 07/05/2026: swflinc.com WAF 403s GHA IPs on plain Playwright AND plain HTTP; stealth fetch (UndetectedAdapter) passes. Real run green 07/05/2026 (32 rows, 3 feeds). Weekly cron Monday 08:00 UTC. Source publishes sporadically — freshness reads scraped_at."
 
   - name: dbpr_press_releases
     lane: tier-2

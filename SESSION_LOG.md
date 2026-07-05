@@ -1,3 +1,13 @@
+## 2026-07-05 (main) — swfl_inc VERIFIED LIVE: stealth fetch green on runner (dry + REAL, 32 rows); freshness → scraped_at
+
+Correction to the entry below: HTTP-strategy ALSO 403'd from the runner (IP-reputation block, not
+fingerprint) — the working fix is stealth (UndetectedAdapter + simulate_user/magic, `stealth=True` on
+`fetch_page_markdown`, d9420a86). Runner proof: dry-run green (3 feeds, 32 rows) + REAL run green
+(32 rows upserted, tier-1 cold copy + inventory row, run 28734126710). `max(scraped_at)` in
+swfl_inc_announcements = 07/05/2026 08:03 UTC. Same quiet-source pattern as dbpr_press_releases →
+`freshness_column: scraped_at` so the ops tile measures pipeline-alive. ops_notes updated. Workflow
+re-enabled; weekly cron Monday 08:00 UTC resumes naturally.
+
 ## 2026-07-05 (main) — fix(swfl_inc): HTTP-strategy fetch beats the runner-side WAF 403; workflow re-enabled
 
 Systematic-debug of the last real red: the 06/15 failure was the OLD Spider-vendor code (0 bytes);
