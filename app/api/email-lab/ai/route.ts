@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     prompt?: string;
     doc?: unknown;
     currentTokens?: Record<string, string>;
-    scope?: { kind?: string; value?: string };
+    scope?: { kind?: string; value?: string; address?: string };
     // "interactive" (default → Haiku) | "quality"/"snicklefritz" (Sonnet) | "max" (Opus).
     mode?: string;
     // Optional chart shape chosen in the lab control: bar | ranked | donut | dotplot.

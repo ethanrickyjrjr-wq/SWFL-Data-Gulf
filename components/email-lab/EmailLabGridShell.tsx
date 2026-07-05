@@ -182,7 +182,9 @@ function normalizeAuthorHeights(doc: EmailDoc): EmailDoc {
 export interface EmailLabGridShellProps {
   initialDoc: EmailDoc;
   brandTokens?: Record<string, string>;
-  scope?: { kind?: string; value?: string };
+  /** Area scope + optional subject listing address (address spine) — forwarded
+   *  verbatim to the build API, where BuildScope.address pulls nearby comps. */
+  scope?: { kind?: string; value?: string; address?: string };
   /** Mirrors the block shell's contract: seed the prompt box… */
   initialAiPrompt?: string;
   /** …and fire ONE author build on mount (project auto-fill path). */

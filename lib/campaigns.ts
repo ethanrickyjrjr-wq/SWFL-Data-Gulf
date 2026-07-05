@@ -128,6 +128,9 @@ export function heroDestination(
   const params = new URLSearchParams({ recipe: prompt });
   if (entry.recipe.needs.length > 0) params.set("recipeNeeds", entry.recipe.needs.join(","));
   if (opts.zip) params.set("zip", opts.zip);
+  // Address spine (build 2): listing chips carry the subject address so the lab
+  // scope can pull the listing's own nearby sold comps into the figure feed.
+  if (entry.input === "address") params.set("addr", opts.filled);
   return `/email-lab/grid?${params.toString()}`;
 }
 

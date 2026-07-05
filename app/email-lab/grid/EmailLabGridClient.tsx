@@ -18,7 +18,15 @@ import type { BrandNeed, ShowcaseRecipe } from "@/lib/showcase/recipe";
 // already does, for the labDestination/AutoCreateProject hop); this
 // anonymous leaf reads its own query string, so it never depends on page.tsx
 // remembering to thread anything through. Absent → the lab opens blank.
-export function EmailLabGridClient({ seedDoc }: { seedDoc?: EmailDoc | null }) {
+export function EmailLabGridClient({
+  seedDoc,
+  zip,
+  addr,
+}: {
+  seedDoc?: EmailDoc | null;
+  zip?: string | null;
+  addr?: string | null;
+}) {
   // ?zip= server-built prebuild wins; otherwise the static grid seed.
   const [initialDoc] = useState(
     () => seedDoc ?? (seedById("luxury-market-report") ?? SEED_DOCS[0]).build(),
@@ -40,6 +48,7 @@ export function EmailLabGridClient({ seedDoc }: { seedDoc?: EmailDoc | null }) {
     <EmailLabGridShell
       initialDoc={initialDoc}
       initialRecipe={initialRecipe}
+      scope={zip ? { kind: "zip", value: zip, address: addr ?? undefined } : undefined}
       headerSlot={
         <span className="flex items-center gap-2 text-sm font-semibold">
           <span className="text-gulf-teal">Email</span>

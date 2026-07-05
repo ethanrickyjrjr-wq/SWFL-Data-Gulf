@@ -181,6 +181,15 @@ describe("heroDestination", () => {
     expect(params.get("recipe")).toContain("Cape Coral");
     expect(params.get("zip")).toBeNull();
   });
+
+  it("listing chips carry addr= for the address spine; market-update does not", () => {
+    const listing = HERO_CAMPAIGNS[0];
+    const url = heroDestination(listing, { filled: "123 Main St, Cape Coral", zip: "33904" });
+    expect(new URLSearchParams(url.split("?")[1]).get("addr")).toBe("123 Main St, Cape Coral");
+    const area = HERO_CAMPAIGNS[3];
+    const areaUrl = heroDestination(area, { filled: "Cape Coral", zip: null });
+    expect(new URLSearchParams(areaUrl.split("?")[1]).get("addr")).toBeNull();
+  });
 });
 
 describe("campaignKeyForPrompt (save provenance — deliverables.campaign_key)", () => {

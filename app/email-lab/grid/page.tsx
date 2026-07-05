@@ -24,6 +24,8 @@ export default async function EmailLabGridPage({
 }) {
   const sp = await searchParams;
   const zip = /^\d{5}$/.test(sp.zip ?? "") ? (sp.zip as string) : null;
+  // Subject listing address (address spine) — rides the hero's listing chips.
+  const addr = (sp.addr ?? "").trim() || null;
   const recipe = sp.recipe ?? null;
   const recipeNeeds = sp.recipeNeeds ?? null;
 
@@ -50,5 +52,5 @@ export default async function EmailLabGridPage({
   // until they engage the builder. EmailLabGridClient still reads ?recipe=/
   // ?recipeNeeds= itself via useSearchParams; only the seed doc is server-built.
   const seedDoc = zip ? await buildZipSeedDoc(zip) : null;
-  return <EmailLabGridClient seedDoc={seedDoc} />;
+  return <EmailLabGridClient seedDoc={seedDoc} zip={zip} addr={addr} />;
 }
