@@ -1,3 +1,17 @@
+## 2026-07-05 (main) — GUARD: sessions can no longer dispatch paid workflows — check-no-paid-dispatch hook (drain forensics closed)
+
+Forensics on today's $0 drain: TWO manual `gh workflow run` dispatches of corridor-pulse (13:08 + 13:40 UTC,
+operator token = a Claude session) — the 13:08 run spent live Sonnet+web_search across ~6 corridors until the
+balance hit $0 (21 corridors then failed "credit balance is too low"); heal-cron-failure retry was SKIPPED both
+times (innocent); corridor_grounded has NO workflow (dead); social-pulse/live-search/dbpr are small-call or
+no-Anthropic. NEW `.claude/hooks/check-no-paid-dispatch.mjs` (PreToolUse Bash, registered in settings.json):
+blocks `gh workflow run|enable` on any workflow whose file references ANTHROPIC_API_KEY (filename OR display-name
+resolution; unresolvable target = fail-closed), ALL `gh run rerun`, and raw `gh api`/`curl` dispatch/enable
+paths. Protective/read-only gh always allowed. Operator escape: `OPERATOR_APPROVED_PAID_RUN=1` prefix — human
+approval in-conversation only. 14/14 hook test cases pass. Complements the $1/run RunBudget + $5 daily-ceiling
+decree (session 24334191) and the crawl4ai retrofit (session 6bea88f5): budget = spend cap inside a run,
+ceiling = cap per day, THIS hook = no session starts a paid run at all. NOT pushed — awaiting operator OK.
+
 ## 2026-07-05 (main) — DECREE: $1/run cap on every LLM job + daily-ceiling preflight (locked in ingest/CLAUDE.md)
 
 Operator decrees, in order: (1) **$1.00 per run** on every scheduled LLM job — only the daily brain
