@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — FOLLOW-UP REGISTERED: capture-method comparison — our gathering vs LLM-alone (check capture_method_quality_compare)
+
+Operator: "compare the two different styles and if the information we gather is as good as LLM alone or
+better." NEW `verification/capture-method-comparison.md`: INFORMATION quality protocol (distinct from the
+writing comparison) — baselines FROZEN (city = 07/05 08:55 web_search run; corridor = 06/14 run; TTL warning:
+read old side from Tier-1 cold storage, Tier-2 rows pruning), runs after retrofit's first live run + ~2wks.
+Metrics: fact count · source breadth · missed stories (diagnosed OUTLET GAP vs MATCHER GAP — different
+fixes) · new-only stories · freshness lag. Rubric: PARITY (≥80% story overlap + no missed
+breaking/transactions) / BETTER / WORSE→fix the named gap; paid search never returns regardless (locked).
+ALSO this message: pushed 5acc66be..bf789fca — queue (acceptance, protocol, Sonnet decree) + parallel
+sessions' finished stack carried (13 commits, rebased hashes; all were commit-complete work).
+
 ## 2026-07-05 (main) — BUILD: deliverable-distiller — skill + first SOCIAL distillation pushed (mine-only push; email distillation held on parallel-session dependency)
 
 Pushed (cherry-picked onto origin/main, operator: "safe push your files only"): (1) `.claude/skills/
