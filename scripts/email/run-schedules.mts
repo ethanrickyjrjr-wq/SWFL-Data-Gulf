@@ -313,7 +313,7 @@ async function main(): Promise<void> {
       async loadDeliverable(id): Promise<EmailDocDeliverable | null> {
         const { data, error } = await db
           .from("deliverables")
-          .select("doc, instruction, scope_kind, scope_value, template")
+          .select("doc, instruction, scope_kind, scope_value, template, project_id")
           .eq("id", id)
           .maybeSingle();
         if (error) {
@@ -323,12 +323,26 @@ async function main(): Promise<void> {
           return null;
         }
         if (!data) return null;
+        // Address spine: the owning listing project's saved subject address rides
+        // the occurrence scope, read FRESH each send (never frozen — an updated
+        // project address flows into future sends). Best-effort: any failure → null.
+        let subjectAddress: string | null = null;
+        const projectId = (data as { project_id?: string | null }).project_id ?? null;
+        if (projectId) {
+          const { data: proj } = await db
+            .from("projects")
+            .select("subject_address")
+            .eq("id", projectId)
+            .maybeSingle();
+          subjectAddress = (proj?.subject_address as string | null) ?? null;
+        }
         return {
           doc: data.doc,
           instruction: (data.instruction as string | null) ?? null,
           scope_kind: (data.scope_kind as string | null) ?? null,
           scope_value: (data.scope_value as string | null) ?? null,
           template: data.template as string,
+          subject_address: subjectAddress,
         };
       },
       async buildDoc({ prompt, rawDoc, scope }) {

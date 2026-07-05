@@ -24,6 +24,10 @@ export interface EmailDocDeliverable {
   scope_kind: string | null;
   scope_value: string | null;
   template: string;
+  /** The owning listing project's saved subject address (address spine) — read
+   *  fresh at occurrence time via the runner's project join, so every scheduled
+   *  send re-pulls the listing's nearby sold comps. Null/absent = no-op. */
+  subject_address?: string | null;
 }
 
 export interface EmailDocOccurrenceDeps {
@@ -73,11 +77,15 @@ export async function buildEmailDocOccurrence(
 
   // Scope + prompt ride off the DELIVERABLE row (single source of truth). A whole-region
   // design has null scope; a stored instruction is the build prompt, else a neutral refresh.
+  const address =
+    typeof deliv.subject_address === "string" && deliv.subject_address.trim()
+      ? deliv.subject_address.trim()
+      : undefined;
   const scope: BuildScope | undefined =
     typeof deliv.scope_kind === "string" &&
     typeof deliv.scope_value === "string" &&
     deliv.scope_value
-      ? { kind: deliv.scope_kind, value: deliv.scope_value }
+      ? { kind: deliv.scope_kind, value: deliv.scope_value, ...(address ? { address } : {}) }
       : undefined;
   const stored = typeof deliv.instruction === "string" ? deliv.instruction.trim() : "";
   const prompt = stored || refreshPrompt(scope);

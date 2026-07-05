@@ -63,6 +63,25 @@ describe("buildEmailDocOccurrence", () => {
     expect(calls.buildDoc[0].scope).toEqual({ kind: "county", value: "lee" });
   });
 
+  test("a listing project's subject_address rides the occurrence scope (address spine)", async () => {
+    const { deps, calls } = makeDeps({
+      loadDeliverable: async () => deliverable({ subject_address: "123 Main St, Cape Coral" }),
+    });
+    const out = await buildEmailDocOccurrence("deliv-1", deps);
+    expect(out).not.toBeNull();
+    expect(calls.buildDoc[0].scope).toEqual({
+      kind: "county",
+      value: "lee",
+      address: "123 Main St, Cape Coral",
+    });
+  });
+
+  test("no subject_address → scope unchanged (regression contract)", async () => {
+    const { deps, calls } = makeDeps();
+    await buildEmailDocOccurrence("deliv-1", deps);
+    expect(calls.buildDoc[0].scope).toEqual({ kind: "county", value: "lee" });
+  });
+
   test("no stored instruction → a neutral refresh prompt that still names the scope", async () => {
     const { deps, calls } = makeDeps({
       loadDeliverable: async () => deliverable({ instruction: null }),
