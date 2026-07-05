@@ -114,11 +114,12 @@ test("offerableTemplates hides listing-feature unless a listing exists", () => {
   expect(offerableTemplates({ hasListing: true }).some((t) => t.id === "listing-feature")).toBe(
     true,
   );
-  // the other three are always offered
+  // the others are always offered
   expect(offerableTemplates().map((t) => t.id)).toEqual([
     "stat-hero",
     "headline-cta",
     "three-stat",
+    "tip-stack",
   ]);
 });
 

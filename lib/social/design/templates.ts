@@ -338,11 +338,110 @@ const listingFeature: SocialTemplate = {
   },
 };
 
+// PROVENANCE: distilled 07/05/2026 from a realtor social-template pack shot on
+// dribbble.com (public gallery; screenshot lane — content stripped, layout system
+// only). The numbered value-stack (title over short ordinal rows) is the dominant
+// non-listing realtor post format in the found pack (guides, myths, benefits,
+// this-or-that): one thought per row reads as skimmable educational value rather
+// than an ad, and the ordinals promise a bounded, finishable read. Rows are text
+// elements the author fills — ordinals/prefixes are the author's copy, never
+// template furniture, so the same skeleton serves tips, myths, or reasons.
+const tipStack: SocialTemplate = {
+  id: "tip-stack",
+  label: "Tip stack",
+  description:
+    "A kicker and title over a stack of short numbered tips or reasons. Good for educational value posts (buyer/seller tips, myths, benefits).",
+  formats: ["square", "portrait", "story"],
+  build: (tk, format) => {
+    const { W, H, base, m, cw, gap } = dims(format);
+    const kickFs = Math.round(base * 0.032);
+    const kickH = Math.round(kickFs * 1.5);
+    const titleFs = Math.round(base * 0.075);
+    const titleH = titleFs * 2;
+    const itemFs = Math.round(base * 0.032);
+    const itemH = itemFs * 2;
+    const itemGap = Math.round(gap / 2);
+    const itemIds = ["item1", "item2", "item3", "item4"] as const;
+    const itemsH = itemH * itemIds.length + itemGap * (itemIds.length - 1);
+    const ctaH = Math.round(base * 0.1);
+    const logo = logoItem(tk, W);
+    const heights = [logo?.h, kickH, titleH, itemsH, ctaH].filter((h): h is number => h != null);
+    const totalH = heights.reduce((a, b) => a + b, 0) + gap * (heights.length - 1);
+    let y = stackTop(H, totalH, m);
+    const els: SocialElement[] = [];
+    if (logo) {
+      els.push(logo.make(y));
+      y += logo.h + gap;
+    }
+    els.push({
+      id: "kicker",
+      type: "text",
+      x: m,
+      y,
+      width: cw,
+      height: kickH,
+      text: "Who this list is for",
+      fontSize: kickFs,
+      fontFamily: tk.fontBody,
+      fill: tk.accent,
+      align: "left",
+      fontStyle: "bold",
+    });
+    y += kickH + gap;
+    els.push({
+      id: "title",
+      type: "text",
+      x: m,
+      y,
+      width: cw,
+      height: titleH,
+      text: "The list's promise",
+      fontSize: titleFs,
+      fontFamily: tk.fontDisplay,
+      fill: tk.text,
+      align: "left",
+      fontStyle: "bold",
+    });
+    y += titleH + gap;
+    itemIds.forEach((id, i) => {
+      els.push({
+        id,
+        type: "text",
+        x: m,
+        y: y + i * (itemH + itemGap),
+        width: cw,
+        height: itemH,
+        text: "One short tip, reason, or myth",
+        fontSize: itemFs,
+        fontFamily: tk.fontBody,
+        fill: tk.text,
+        align: "left",
+      });
+    });
+    y += itemsH + gap;
+    els.push({
+      id: "cta",
+      type: "cta",
+      x: m,
+      y,
+      width: Math.round(cw * 0.6),
+      height: ctaH,
+      text: "Save this for later",
+      url: "",
+      fill: tk.accent,
+      textFill: tk.primary,
+      fontSize: Math.round(base * 0.03),
+    });
+    return { version: 1, format, background: tk.surfaceDark, elements: els };
+  },
+};
+
 export const SOCIAL_TEMPLATES: SocialTemplate[] = [
   statHero,
   headlineCta,
   threeStat,
   listingFeature,
+  tipStack,
 ];
 
 export function getTemplate(id: string): SocialTemplate | undefined {
