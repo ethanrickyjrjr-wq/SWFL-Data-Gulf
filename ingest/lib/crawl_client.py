@@ -203,17 +203,26 @@ _HTTP_UA = (
 
 
 async def _scrape_page(
-    url: str, *, fit_markdown: bool = False, http_strategy: bool = False
+    url: str,
+    *,
+    fit_markdown: bool = False,
+    http_strategy: bool = False,
+    stealth: bool = False,
 ) -> tuple[str, str]:
-    """Fetch a static page without stealth. Returns (html, markdown).
+    """Fetch a static page. Returns (html, markdown).
 
     fit_markdown (default OFF = byte-identical): attaches a PruningContentFilter denoiser
     (drops nav/footer/ads) and returns the fit/denoised markdown — cleaner parse, fewer LLM
     tokens. Off => the same raw_markdown capture as before.
 
     http_strategy (default OFF = byte-identical): fetches via AsyncHTTPCrawlerStrategy
-    (plain HTTP GET with a browser UA, no Playwright) — for server-rendered pages whose
-    WAF 403s the headless-browser fingerprint. Markdown generation is strategy-agnostic."""
+    (plain HTTP GET with a browser UA, no Playwright). NOTE: does NOT clear IP-range WAF
+    blocks (swflinc 403s GHA IPs on plain HTTP too — proven 07/05/2026).
+
+    stealth (default OFF = byte-identical): UndetectedAdapter + enable_stealth +
+    simulate_user/magic with a longer settle delay — for WAFs that challenge datacenter
+    IPs; the stealth browser can pass a JS challenge where plain fetches 403.
+    Markdown generation is strategy-agnostic. http_strategy and stealth are exclusive."""
     cfg_kwargs = dict(cache_mode=CacheMode.BYPASS)
     if fit_markdown:
         cfg_kwargs["markdown_generator"] = DefaultMarkdownGenerator(
@@ -232,6 +241,21 @@ async def _scrape_page(
         strategy = AsyncHTTPCrawlerStrategy(browser_config=http_cfg)
         cfg = CrawlerRunConfig(**cfg_kwargs)
         async with AsyncWebCrawler(crawler_strategy=strategy) as crawler:
+            r = await crawler.arun(url=url, config=cfg)
+    elif stealth:
+        _pc = _proxy_from_env()
+        if _pc is not None:
+            cfg_kwargs["proxy_config"] = _pc
+        adapter = UndetectedAdapter()
+        bc = BrowserConfig(headless=True, enable_stealth=True)
+        strategy = AsyncPlaywrightCrawlerStrategy(
+            browser_adapter=adapter, browser_config=bc
+        )
+        cfg_kwargs["delay_before_return_html"] = 3.0  # let a JS challenge settle
+        cfg_kwargs["simulate_user"] = True
+        cfg_kwargs["magic"] = True
+        cfg = CrawlerRunConfig(**cfg_kwargs)
+        async with AsyncWebCrawler(crawler_strategy=strategy, config=bc) as crawler:
             r = await crawler.arun(url=url, config=cfg)
     else:
         bc = BrowserConfig(headless=True)
@@ -256,14 +280,20 @@ async def _scrape_page(
 
 
 def fetch_page_markdown(
-    url: str, *, fit_markdown: bool = False, http_strategy: bool = False
+    url: str,
+    *,
+    fit_markdown: bool = False,
+    http_strategy: bool = False,
+    stealth: bool = False,
 ) -> str:
-    """Sync: fetch a static page, return markdown. No stealth.
+    """Sync: fetch a static page, return markdown.
     fit_markdown=True denoises via PruningContentFilter (default off = raw_markdown).
-    http_strategy=True fetches via plain HTTP with a browser UA (no Playwright) —
-    for server-rendered pages whose WAF blocks the headless-browser fingerprint."""
+    http_strategy=True fetches via plain HTTP with a browser UA (no Playwright).
+    stealth=True uses UndetectedAdapter + stealth for WAFs that challenge datacenter IPs."""
     _, md = asyncio.run(
-        _scrape_page(url, fit_markdown=fit_markdown, http_strategy=http_strategy)
+        _scrape_page(
+            url, fit_markdown=fit_markdown, http_strategy=http_strategy, stealth=stealth
+        )
     )
     return md
 

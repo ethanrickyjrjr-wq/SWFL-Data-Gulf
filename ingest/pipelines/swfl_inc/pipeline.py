@@ -342,10 +342,11 @@ def fetch_feeds() -> list[tuple[str, str]]:
     """
     results: list[tuple[str, str]] = []
     for feed_url in SWFL_INC_FEEDS:
-        # http_strategy: swflinc.com's WAF 403s the headless Playwright fingerprint from
-        # GHA datacenter IPs (proven 07/05/2026 dispatch) but serves plain HTTP with a
-        # browser UA fine — and the blog is fully server-rendered, so no JS is needed.
-        markdown = fetch_page_markdown(feed_url, http_strategy=True)
+        # stealth: swflinc.com's WAF 403s GHA datacenter IPs on BOTH plain Playwright and
+        # plain HTTP (proven 07/05/2026 dispatches) while residential IPs get 200 either
+        # way — an IP-reputation challenge. UndetectedAdapter + stealth is the remaining
+        # free lever; if this also 403s from the runner, the fix is CRAWL4AI_PROXY.
+        markdown = fetch_page_markdown(feed_url, stealth=True)
         if markdown:
             print(f"  {feed_url}: fetched ({len(markdown):,} chars)")
             results.append((markdown, feed_url))
