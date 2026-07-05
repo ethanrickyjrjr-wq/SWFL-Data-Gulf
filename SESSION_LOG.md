@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — BUILT: SWFL Social Pulse P1+P2 (9 commits) — scan+store live tables, digest, /pulse page
+
+Executed plan tasks 1–9 inline (TDD, one commit each, `60422484..906883cd`): 4 `social_pulse_*` tables
+LIVE in prod (migration run twice = idempotent; types regenerated — includes parallel session's `proof`
+column from live schema), 14-term SWFL scan set, empty-tolerant IG client (`PHOTOS_API`, browser headers),
+pure-DI scan core (weight accounting, cross-term dedupe), `social-pulse-scan.yml` daily-bootstrap cron
+(Mon/Thu flip due 07/26/2026 — check `social_pulse_cadence_flip` opened), topic rules, deterministic
+digest math (fixed swfl-area benchmark shadowing during self-review), figures-only narrative
+(claude-sonnet-5, env-overridable), public `/pulse` page. Gates: 16 pulse tests green, `bunx next build` ✓.
+Deviations from plan: Bun.SQL `db.query`→`db.unsafe`, TOML creds via gen-supabase-types regex pattern.
+NEXT (operator): dry-run dispatch → real run → close `social_pulse_swfl_live_verify` with run URL.
+
 ## 2026-07-05 (main) — feat(ingest): city_pulse + dbpr_public_notices RE-ENABLED in cost mode (operator decree)
 
 Operator: "bring them both in as cost effectively as we can — build data pre-launch." Levers:
