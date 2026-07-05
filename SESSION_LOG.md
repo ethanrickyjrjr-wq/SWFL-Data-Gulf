@@ -1,3 +1,14 @@
+## 2026-07-05 (main) — SPEC: SWFL Social Pulse (social-pulse-swfl) — brainstormed, researched, registered
+
+Brainstorm + RULE 0.4 research (crawl4ai live: steadyapi.com/pricing $14.95–$299.95 tiers; Later/Buffer/Flick
+gating patterns — free taste forever, meter depth+AI, never gate the build). Operator approved Approach 1:
+public /pulse weekly digest of what's earning likes in SWFL real-estate Instagram (traction surface) +
+anonymous→signup→paid ladder + AI tag steering. Adjustments: daily scans first 3 weeks then 2×/week; AI
+wiring first-class (fetchPulseContext, cache-only in build path); receipts-in-place UX (no selling copy).
+Spec: `docs/superpowers/specs/2026-07-05-social-pulse-swfl-design.md`. Check opened:
+`social_pulse_swfl_live_verify`. Follow-ups B (peer tracker) + D (Reddit mining) written into the spec.
+NOTE: scripts/check.mjs working-tree changes are the PARALLEL session's signal-proof work — not staged here.
+
 ## 2026-07-05 (main) — swfl_inc VERIFIED LIVE: stealth fetch green on runner (dry + REAL, 32 rows); freshness → scraped_at
 
 Correction to the entry below: HTTP-strategy ALSO 403'd from the runner (IP-reputation block, not
