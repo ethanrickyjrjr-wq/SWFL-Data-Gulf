@@ -1,3 +1,20 @@
+## 2026-07-05 (main) — BUILT: agent-first homepage build 1 (7 commits, be3ec219..fb1e8c48) — hero + chips + autocomplete + grid zip-seed
+
+Executed plan `2026-07-05-agent-first-homepage.md` inline (TDD, one commit per task): T1 HERO_CAMPAIGNS
+selector + heroDestination over existing registry recipes (Just Sold / Coming to Market surface their
+listing-to-close SLIDE recipes — one-campaign-per-showcase constraint, tests pin resolution); T2 pure
+Mapbox Search Box suggest/retrieve builders+parsers; T3 /api/address-suggest + /api/address-retrieve
+proxies (MAPBOX_TOKEN server-side, scope via resolveZip); T4 HeroCampaign component (chip-driven
+placeholder, 300ms debounce, one session_token per typing session; eslint react-hooks fix = handler
+pattern, no set-state-in-effect); T5 anonymous /email-lab/grid?zip= now opens on buildZipSeedDoc; T6
+homepage assembly — hero copy "Research done. Send. We'll take care of the rest.", map demoted to
+"The data your campaigns are built on", metadata re-flip. LIVE-VERIFIED on dev: real Lee street →
+suggestions → retrieve {zip:33904,inScope:true} → grid lands with that ZIP's figures on canvas.
+FIX FOUND LIVE: request-origin Referer 403s on the URL-locked token — Mapbox routes must send the
+geocode.mts MAPBOX_REFERER constant (c3198bcb). Gates: 44 tests green (campaigns/search-box/showcase),
+`bunx next build` clean. `agent_first_homepage_live_verify` stays OPEN — operator prod check.
+NOT in this build (ladder): address spine (build 2), lifecycle sequences (3), send hardening (4).
+
 ## 2026-07-05 (main) — SHIP: Marisol portrait lands — the letter demo now proves the flagship look (agent-launch T8 gap closed)
 
 Operator: "Run it. Finish it." The T9 ship (eddcf2da) declared its one gap — "portrait slot ships as honest
