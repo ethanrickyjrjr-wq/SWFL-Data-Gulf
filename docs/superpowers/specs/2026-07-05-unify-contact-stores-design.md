@@ -93,6 +93,8 @@ dropping it is a follow-up check opened at ship time, closed only after live ver
 - Add `TEL` capture → `phone` (first TEL per card, matching the retired parser's behavior).
 - Delete `lib/contacts/parse-vcard.ts` + `lib/contacts/__tests__/parse-vcard.test.ts`; port distinctive cases
   (TEL, skip-counting with reasons) into `lib/email/__tests__/parse-vcard.test.ts`.
+- Parse the vCard `CATEGORIES` property → tags (research 2026-07-05: Apple/Google exports carry the user's
+  own contact groups there; both current parsers throw it away — free categorization on every .vcf import).
 - `/api/contacts/import` switches to the surviving parser.
 - **Behavior change (accepted):** one row per email address — a card with 2 addresses becomes 2 contacts
   (each a legitimate recipient; the work-email filter depends on per-email rows). The retired parser picked a
@@ -130,6 +132,49 @@ no-audience by design (`enumerateAudiences` decision comment stands).
 - Live proof (operator-run — no paid sends without approval): add a tagged contact on `/contacts` → it appears
   as an audience chip in the recipe flow; close `unify_contact_stores_live_verify` + the standing reconcile
   check on that evidence.
+
+## Phase 2 — sourced intake & auto-grouping roadmap (research 2026-07-05, crawl4ai, all live vendor docs)
+
+Operator directive: find the easiest/best ways to bring contacts in and group them. Findings, ranked by
+effort-to-value. None of these are in the current build; they stack cleanly on the unified store because tags
+remain the ONE grouping primitive (tags → audiences → recipe flow, already wired).
+
+**P2a — Google contact groups → auto-tags. ZERO new scopes.** `contactGroups.list` and the `memberships`
+person field are covered by `contacts.readonly` — the scope our Google import already requests
+(developers.google.com/people/api/rest/v1/contactGroups/list: "Requires … contacts or contacts.readonly";
+people.connections/list readMask includes `memberships`). The user's own Gmail labels ("Buyers", "Sphere",
+"Past Clients") are sitting in the responses we already fetch and get thrown away. Extend the readMask +
+one `contactGroups.list` call to resolve group names → import each group as a tag → instant audiences.
+
+**P2b — "People you've emailed" WITHOUT touching Gmail: People API Other contacts.**
+`GET people.googleapis.com/v1/otherContacts`, scope `contacts.other.readonly` — "contact info automatically
+saved in your 'Other contacts'", i.e. auto-created from interactions (the addresses the user has actually
+emailed). Verbatim from Google's restricted-scopes list (support.google.com/cloud/answer/13464325): restricted
+= Gmail, Drive, Fit, Chat, Data Portability, Photos Ambient APIs — **no contacts scope is restricted**, so this
+is sensitive-tier: same verification lane as the `contacts.readonly` we already ship, no CASA security
+assessment, no annual re-verification. Import them under an `emailed` tag → the "people I actually correspond
+with" audience the operator asked for.
+
+**P2c — Gmail API itself is a TRAP for this use case.** `gmail.readonly` AND even `gmail.metadata`
+(headers-only!) are RESTRICTED scopes (developers.google.com/workspace/gmail/api/auth/scopes) → annual paid
+CASA security assessment by a Google-empanelled assessor + annual recertification
+(support.google.com/cloud/answer/13465431). P2b delivers the same grouping signal at sensitive tier. Do not
+request any gmail.* read scope.
+
+**P2d — CRM lane, easiest first: Follow Up Boss.** The dominant real-estate CRM has a plain REST v1
+(`api.followupboss.com/v1/people`) with HTTP **Basic auth via per-user API key** (user pastes their key from
+Admin → API; no OAuth app registration to start — docs.followupboss.com/reference/authentication). People
+carry tags → map straight onto ours. OAuth exists for a marketplace-grade integration later.
+
+**P2e — Outlook/Microsoft contacts.** Graph `GET /me/contacts`, delegated `Contacts.Read`, works for
+personal AND work Microsoft accounts (learn.microsoft.com/en-us/graph/api/user-list-contacts) — far lighter
+verification than Google restricted. Second import provider when demand shows.
+
+**P2f — HubSpot: UNRESOLVED.** developers.hubspot.com is bot-walled (anti-bot block on two crawl attempts,
+2026-07-05) — needs a follow-up research pass before speccing. Flagged, not guessed.
+
+**Phone status quo confirmed:** Contact Picker API is still experimental / not Baseline (MDN, fetched
+2026-07-05) — our Chrome/Android picker + QR-token vCard fallback remains the right architecture; no change.
 
 ## Out of scope
 

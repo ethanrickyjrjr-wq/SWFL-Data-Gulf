@@ -1,3 +1,29 @@
+## 2026-07-05 (main) — SPEC: unify contact stores (Op-July 21) + contact-intake research (crawl4ai)
+
+Brainstormed + specced task 21: `public.contacts` becomes the ONE contact store (operator-approved; uuid PK,
+phone, unsubscribed, live unsub links keep working), `email_contacts` merges in (union tags / non-null wins /
+email lowercased first), everything funnels through `upsertContacts`, ONE vCard parser (lib/email's, + TEL +
+CATEGORIES→tags), `/contacts` fires audience sync so any tagged contact becomes a recipe-flow audience, and
+sync excludes + Resend-globally-mutes unsubscribed contacts. Spec:
+`docs/superpowers/specs/2026-07-05-unify-contact-stores-design.md` (commit df9fe05f). Build registered:
+`unify_contact_stores_live_verify`; same live proof closes the standing email_contacts-reconcile check.
+
+**Research findings (RULE 0.4, crawl4ai, live vendor docs 2026-07-05) — contact intake & grouping:**
+- **Google restricted-scope list has NO contacts scope** (support.google.com/cloud/answer/13464325 verbatim:
+  Gmail/Drive/Fit/Chat/DataPortability/PhotosAmbient only). So:
+- **`contacts.other.readonly` (People API otherContacts = addresses auto-saved from the user's actual
+  emailing) is SENSITIVE tier** — same verification lane as our existing `contacts.readonly`. "Group by who
+  I've emailed" WITHOUT Gmail API. This was the operator's hunch and it's real.
+- **`gmail.readonly` AND `gmail.metadata` are RESTRICTED** → annual paid CASA assessment — never request them.
+- **Google contact groups need ZERO new scopes**: `contactGroups.list` + `memberships` readMask are covered by
+  `contacts.readonly` we already request — user's Gmail labels can auto-become tags today; we currently
+  discard them.
+- **Follow Up Boss**: plain REST `/v1/people`, per-user API key over HTTP Basic — easiest CRM lane, no OAuth
+  app needed to start. **MS Graph** `/me/contacts` (`Contacts.Read`, delegated) = light-verification Outlook
+  lane. **HubSpot docs bot-walled** — unresolved, flagged in spec, don't guess.
+- vCards carry the user's own groups in `CATEGORIES` — both current parsers discard it; folded into the build.
+All findings written into the spec's "Phase 2 — sourced intake & auto-grouping roadmap" section.
+
 ## 2026-07-05 (main) — fix: band-guard prior-lookup clock-skew bug (found via live-verify)
 
 Ran the `sourced_band_number_guard_live_verify` live-verify (operator-approved): built a real deliverable
