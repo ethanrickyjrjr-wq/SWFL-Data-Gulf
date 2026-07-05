@@ -44,6 +44,8 @@ import { reconcileMetric } from "../reconcile/reconcile";
 import { lookupLakeFact } from "../reconcile/lane1";
 import { toAssertion } from "../reconcile/lane2";
 import type { ReconciliationVerdict } from "../reconcile/types";
+import { bandOutliers, resolveOutlierNote, type Outlier, type WebConfirm } from "./band-guard";
+import { webConfirmMetric } from "./band-guard-web";
 
 /** Env override for the assembly model; defaults to the repo's Sonnet synthesis model. */
 const DELIVERABLE_MODEL = process.env.DELIVERABLE_MODEL || SYNTHESIS_MODEL;
@@ -57,6 +59,13 @@ const DELIVERABLE_MODEL = process.env.DELIVERABLE_MODEL || SYNTHESIS_MODEL;
  */
 function ttlGateEnabled(): boolean {
   return process.env.RECONCILE_TTL_GATE_ENABLED === "1";
+}
+
+/** Band guard (spec 2026-07-05) — default OFF; "1"/"true" turns it on. Mirrors
+ *  ttlGateEnabled so the whole outlier→web-confirm pass ships dark until enabled. */
+export function bandGuardEnabled(): boolean {
+  const v = process.env.BAND_GUARD_ENABLED;
+  return v === "1" || v === "true";
 }
 
 /**
@@ -459,6 +468,17 @@ export async function buildDeliverableNarrative(opts: {
   instruction: string;
   items: SnapshotItem[];
   template: string;
+  /** Prior deliverable's frozen items — the band-guard baseline. Omitted on a
+   *  first send (no prior) → the guard runs on nothing. */
+  priorItems?: SnapshotItem[];
+  /** Days between the prior send and now — scales the movement band. Default 30. */
+  gapDays?: number;
+  /** Injectable web-confirm for an outlier (tests pass a stub; default hits the
+   *  data-readiness verification ladder). */
+  confirmOutlier?: (
+    o: Outlier,
+    item: Extract<SnapshotItem, { kind: "metric" }>,
+  ) => Promise<WebConfirm | null>;
 }): Promise<BuildResult> {
   const { instruction, items } = opts;
   const anchors = collectSnapshotNumbers(items);
@@ -469,32 +489,60 @@ export async function buildDeliverableNarrative(opts: {
 The numbered items are the ONLY facts you may use:
 ${itemBlock}`;
 
-  if (agentsAreMocked()) {
-    return { narrative: mockNarrative(items), regenerations: 0, stripped: false };
-  }
-
-  // Plan C-4 — reconcile filed metrics ONLY when the ttl gate is ON. Flag OFF ⇒
-  // verdicts = [] ⇒ ttlViolations = [] ⇒ every branch below collapses to the
-  // pre-C behavior, so this function's output is byte-identical to before.
-  const ttlGate = ttlGateEnabled();
-  const verdicts = ttlGate ? await computeMetricVerdicts(items) : [];
-
-  let narrative = await callModel(baseUser);
-  let gate = gateNarrative(narrative, anchors, verdicts, ttlGate, recordedNumbers);
+  let narrative: Narrative;
   let regenerations = 0;
   let stripped = false;
 
-  if (!gate.ok) {
-    regenerations = 1;
-    const retryUser = `${baseUser}
+  if (agentsAreMocked()) {
+    narrative = mockNarrative(items);
+  } else {
+    // Plan C-4 — reconcile filed metrics ONLY when the ttl gate is ON. Flag OFF ⇒
+    // verdicts = [] ⇒ ttlViolations = [] ⇒ every branch below collapses to the
+    // pre-C behavior, so this function's output is byte-identical to before.
+    const ttlGate = ttlGateEnabled();
+    const verdicts = ttlGate ? await computeMetricVerdicts(items) : [];
+
+    narrative = await callModel(baseUser);
+    let gate = gateNarrative(narrative, anchors, verdicts, ttlGate, recordedNumbers);
+    if (!gate.ok) {
+      regenerations = 1;
+      const retryUser = `${baseUser}
 
 Your previous draft had these problems — fix every one and re-emit via the tool:
 ${describeViolations(gate.violations)}`;
-    narrative = await callModel(retryUser);
-    gate = gateNarrative(narrative, anchors, verdicts, ttlGate, recordedNumbers);
-    if (!gate.ok) {
-      narrative = gate.stripped; // hard-strip offending sentences and proceed
-      stripped = true;
+      narrative = await callModel(retryUser);
+      gate = gateNarrative(narrative, anchors, verdicts, ttlGate, recordedNumbers);
+      if (!gate.ok) {
+        narrative = gate.stripped; // hard-strip offending sentences and proceed
+        stripped = true;
+      }
+    }
+  }
+
+  // Band guard (spec 2026-07-05) — flag-gated, ADDITIVE. For each metric that moved
+  // implausibly vs what the previous deliverable printed, web-confirm it against
+  // live authoritative sources and append a note (discrepancy or please-confirm)
+  // when it can't be verified clean. The trusted number always ships; nothing is
+  // stripped. Flag OFF or no prior ⇒ this block is a no-op (byte-identical output).
+  if (bandGuardEnabled() && opts.priorItems && opts.priorItems.length > 0) {
+    const outliers = bandOutliers(items, opts.priorItems, opts.gapDays ?? 30);
+    if (outliers.length > 0) {
+      const confirm = opts.confirmOutlier ?? ((_o, item) => webConfirmMetric(item));
+      const nowByLabel = new Map(
+        items
+          .filter((i): i is Extract<SnapshotItem, { kind: "metric" }> => i.kind === "metric")
+          .map((i) => [i.label, i]),
+      );
+      const notes: string[] = [];
+      for (const o of outliers) {
+        const item = nowByLabel.get(o.label);
+        const web = item ? await confirm(o, item) : null;
+        const note = resolveOutlierNote(o, web);
+        if (note) notes.push(note);
+      }
+      if (notes.length > 0) {
+        narrative = { ...narrative, inference_notes: [...narrative.inference_notes, ...notes] };
+      }
     }
   }
 
