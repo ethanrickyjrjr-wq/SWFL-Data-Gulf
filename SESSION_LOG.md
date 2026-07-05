@@ -1,3 +1,13 @@
+## 2026-07-05 (main) — SPEC: Social Pulse follow-ups — three lenses (IG performance · X conversation · Reddit demand) + Pulse v2
+
+Operator-requested follow-up roadmap: `docs/superpowers/specs/2026-07-05-social-pulse-followups-design.md`.
+Frame: three platforms = three user populations = three signals (IG: what agents post that earns; X: what
+locals/investors say now; Reddit: what buyers/movers ask). Phases P3 AI-wiring (trigger ~07/12) → P4 ladder →
+P6 X lane ‖ P7 Reddit lane → P5 own-results → P8 peer tracker; Pulse-v2 list leads with four ZERO-cost wins
+(velocity, best-time-to-post, term auto-discovery, relevance score — all mine already-stored snapshots).
+Cost envelope: all three lenses daily ≈ 2,400 weighted req/mo vs 10k quota. Verify-at-build flags: X response
+shapes, FL WOEID via endpoint, subreddit existence. Each phase registers via new-build.mjs at its turn.
+
 ## 2026-07-05 (main) — BUILD: agent-launch campaign tasks 1-7+10 SHIPPED · task 8 BLOCKED on API credits
 
 Executing `docs/superpowers/plans/2026-07-05-agent-launch-campaign.md` inline. Landed (each TDD, all green,
