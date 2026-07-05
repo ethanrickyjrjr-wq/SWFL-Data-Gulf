@@ -1,3 +1,12 @@
+## 2026-07-05 (main) — fix(corridor-pulse): 45m timeout killed 3 straight weekly runs AFTER full API spend — 90m + unbuffered
+
+Found while confirming the board post-re-enable: corridor-pulse-weekly cancelled 06/21 + 06/28 +
+07/05 at exactly 45m (last success 06/14 ran 37m — headroom evaporated). Worst failure shape:
+Sonnet web_search spend happens, then the kill discards the run; buffered stdout also lost, so the
+logs showed nothing. Fix: timeout-minutes 90 (2× last-known-good), PYTHONUNBUFFERED=1, registry
+note. Corridor distill already inherits the Haiku cost-mode (imports MODEL from city_pulse distill —
+24 parity tests pass). Live dispatch after push recovers this week's corridor sweep.
+
 ## 2026-07-05 (main) — SPEC: agent-first homepage re-flip (agent-first-homepage) — 4-lane research, identity decision, 5-build ladder
 
 Operator re-flipped homepage identity (explicit, supersedes 06/28 intelligence-first framing; memory updated):

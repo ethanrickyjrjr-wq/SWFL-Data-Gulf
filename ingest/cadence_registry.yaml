@@ -287,6 +287,7 @@ pipelines:
     # synchronous distill into data_lake.city_pulse_corridors (Tier-2), read by the
     # corridor-pulse-swfl brain (brain-input edge into cre-swfl). Cron 0 10 * * 0.
     # First run: <fill on first successful GHA run>.
+    note: "Was silently dead 3 weeks (06/21-07/05/2026): runs outgrew the 45-min workflow timeout — killed after full API spend, zero rows kept (last success 06/14 ran 37m). Fixed 07/05/2026: timeout 90m + unbuffered logs; distill inherits Haiku cost mode."
 
   # ── Tier-2 dlt (Postgres data_lake.* via _dlt_loads) ─────────────────────
   # Verified: SELECT schema_name, MAX(inserted_at) FROM data_lake._dlt_loads

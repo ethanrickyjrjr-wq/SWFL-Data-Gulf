@@ -25,9 +25,11 @@ jobs:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     # 25 corridors are captured + distilled sequentially (one synchronous forced-tool
-    # call each), so this is longer than the daily 7-city job. Latency is irrelevant
-    # on a weekly cadence; 45m is headroom, not expected runtime.
-    timeout-minutes: 45
+    # call each), so this is longer than the daily city job. 45m stopped being
+    # headroom: last success 06/14/2026 ran 37m, then 06/21 + 06/28 + 07/05 ALL hit
+    # the 45m wall and were killed — full API spend, zero rows kept. 90m = 2x the
+    # last-known-good runtime.
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -42,6 +44,9 @@ jobs:
 
       - name: Run city_pulse_corridors pipeline
         env:
+          # Unbuffered: on the 3 timeout kills, buffered stdout was LOST — the log
+          # showed zero per-corridor progress, making the hang undiagnosable.
+          PYTHONUNBUFFERED: "1"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
