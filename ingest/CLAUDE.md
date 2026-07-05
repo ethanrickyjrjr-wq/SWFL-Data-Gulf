@@ -10,7 +10,9 @@ This is the Python ingest island (dlt + DuckDB), zero TS coupling. Rules for wor
   them in TS. `selectAllPaged` is legacy, not the target.
 - **NO paid model web_search in scheduled pipelines (LOCKED 07/05/2026, operator decree).** Capture =
   crawl4ai fetch of sources we discover ourselves (news_swfl lake matching, outlet pages); LLM = one
-  small Haiku distill per unit WITH matched content, zero calls for quiet units. `web_search_*` on a
+  small SONNET distill per unit WITH matched content (model amended Haiku→`claude-sonnet-4-6` by operator
+  decree later 07/05/2026 — evidence in `verification/haiku-vs-sonnet-distill.md`; the cost was never the
+  model, it was the search-tool capture shape), zero calls for quiet units. `web_search_*` on a
   cron drained the account twice (06/18 freeze, 07/05 caught live at ~$6/run). Before re-enabling any
   paused workflow: grep its pipeline for `web_search` — retrofit first, re-enable second. Spec:
   `docs/superpowers/specs/2026-07-05-pulse-native-fetch-retrofit-design.md`.

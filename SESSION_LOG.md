@@ -10,6 +10,22 @@ reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in
 order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
 those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
 deliverable_distiller_live_verify stays open (operator-run live proof).
+## 2026-07-05 (main) — DECREE EXECUTED: pulse distill = SONNET (claude-sonnet-4-6); all pull-ins = crawl4ai capture + Sonnet distill
+
+Operator: "Ok. Then just do sonnet. Make sure all our pull-ins like corridors, city vibes crawl4ai with
+sonnet." (1) `MODEL = "claude-sonnet-4-6"` in city_pulse/distill.py — corridor distill imports it, ONE
+constant flips both; py_compile clean. (2) Records updated: retrofit spec item 3 (SONNET distill + corridor
+busy-week budget note: 25-27 × ~$0.03-0.07 may need visible CORRIDOR_PULSE_MAX_USD=2 env line if dry-run
+measures > $1 — NOTE FOR RETROFIT SESSION 6bea88f5, your claimed spec was amended per decree) ·
+ingest/CLAUDE.md lock line · memory superseded (Sonnet now) · comparison file SWITCH EXECUTED section.
+(3) VALIDATED LIVE via valve: 31 span pairs regenerated on Sonnet — real cost $0.0265+$0.0276 (~$0.03/city,
+as predicted); those 2 calls UNLOGGED to ledger (valve env carried no DB creds — /spend undercounts today
+~$0.055; noted in file). (4) compare script labels now follow live MODEL (were hardcoded HAIKU; label
+correction appended to file). (5) dbpr pull-ins aligned: press-release enricher was ALREADY sonnet-4-6;
+public-notices summarize_notice default flipped haiku→sonnet-4-6 (weekly, ~1-2K tokens/notice = pennies;
+NOTE for session 24334191: your 9b0e9eb8 "Haiku summaries" default amended per this decree). 07/08
+final-run check = post-switch sanity. Unpushed.
+
 ## 2026-07-05 (main) — AMEND: Haiku comparison → ONE final run 07/08/2026 (operator: "heard enough about how haiku sucks")
 
 Daily protocol cancelled: check haiku_vs_sonnet_distill_daily CLOSED (evidence = operator ruling + day-1

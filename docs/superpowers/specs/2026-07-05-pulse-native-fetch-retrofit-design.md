@@ -12,20 +12,20 @@ Both `ingest/pipelines/city_pulse/` (DAILY) and `ingest/pipelines/city_pulse_cor
 
 ## Goal
 
-Same rows, same tables, same downstream contract — at the "actual pennies" tier: our own fetch (crawl4ai, free) + one small Haiku summarize per unit that has news, zero LLM calls for units that don't.
+Same rows, same tables, same downstream contract — at the "actual pennies" tier: our own fetch (crawl4ai, free) + one small SONNET summarize per unit that has news, zero LLM calls for units that don't. (Model amended Haiku→Sonnet by operator decree 07/05/2026 — see item 3.)
 
 ## What we're building
 
 1. **Discovery from what we already ingest.** `news_swfl` crawls the local outlets daily into the lake (crawl4ai, already live). Match each article to cities/corridors with the existing deterministic matchers — `refinery/lib/corridor-aliases` for corridors, city-name rules for cities. No LLM, no fees.
 2. **Fetch with crawl4ai, not the search tool.** For matched articles whose stored row lacks full text, fetch the article URL with the pinned crawl4ai venv (stealth/HTTP-strategy patterns already proven on swfl_inc/dbpr). Optionally add 1–2 outlet-search listing pages per run (an outlet's own search URL for a corridor name) — still crawl4ai, still free.
-3. **One Haiku distill per city/corridor WITH MATCHES.** `claude-haiku-4-5-20251001`, input = the matched article texts only (a few thousand tokens), output = the same rows the current distill emits. A unit with zero matched articles this period = **zero LLM calls** and a no-op merge.
+3. **One SONNET distill per city/corridor WITH MATCHES.** `claude-sonnet-4-6` (operator decree 07/05/2026, "just do sonnet" — the day-1 comparison in `verification/haiku-vs-sonnet-distill.md` showed Haiku drops facts, compresses names/addresses, and misattributed an $835M sale to a $26.6M one; in the no-tools distill shape Sonnet is ~$0.03–0.07/unit). `MODEL` lives in `ingest/pipelines/city_pulse/distill.py` and the corridor distill imports it — already flipped. Input = the matched article texts only (a few thousand tokens), output = the same rows the current distill emits. A unit with zero matched articles this period = **zero LLM calls** and a no-op merge. BUDGET: 25–27 corridors × Sonnet can reach ~$0.75–1.90 on a busy week — measure at dry-run; if > $1, the corridor workflow carries a visible `CORRIDOR_PULSE_MAX_USD=2` env line (the decree's reviewable exception mechanism), never a silent code default.
 4. **Checkpoint per unit.** Rows upsert as each city/corridor finishes, so a kill loses one unit, never a run's spend. Timeout drops back to something sane.
 5. **Provenance unchanged:** every kept fact still carries its source URL; no-invention lint path and freshness columns stay as-is so ops tiles keep working.
 6. **$1 hard budget (operator decree 07/05/2026).** Both pipelines already construct `ingest.lib.api_usage.RunBudget` (the one metering root, wired 07/05 into all ingest call sites + the `api_usage_log` ledger); the decree sets `default_usd=1.0` on BOTH — no env override in these workflows. Under the retrofit $1 is laughably generous; under the old web_search capture it kills the run early by design.
 
 ## Cost math (from the operator's own paste + the pipelines' constants)
 
-Today: corridor run ≈ 2.5M+ Sonnet input tokens + up to 200 paid searches per WEEK (25 corridors × max_uses 8); the city job is the same shape per DAY. Retrofit: discovery + fetch = $0 (crawl4ai); distill = a handful of Haiku calls per run at ~3–6k tokens each. Worst week (every corridor has news) ≈ 25 Haiku calls ≈ under 200k Haiku tokens total.
+Today: corridor run ≈ 2.5M+ Sonnet input tokens + up to 200 paid searches per WEEK (25 corridors × max_uses 8); the city job is the same shape per DAY. Retrofit: discovery + fetch = $0 (crawl4ai); distill = a handful of SONNET calls per run at ~3–6k tokens each (~$0.03–0.07/unit; rates: sonnet $3/$15 per MTok, verified 07/05/2026). Worst week (every corridor has news) ≈ 25 Sonnet calls ≈ $0.75–1.90 — still ~70–100× cheaper than the web_search capture it replaces.
 
 ## Out of scope
 

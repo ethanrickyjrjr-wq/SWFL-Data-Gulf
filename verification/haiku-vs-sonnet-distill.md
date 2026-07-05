@@ -145,7 +145,7 @@ OPERATOR_APPROVED_PAID_RUN=1 node scripts/paid-run.mjs python scripts/compare-di
 
 _31 span pairs this run; spend metered to api_usage_log (call_type ingest_city_pulse_distill)._
 
-## OPERATOR DECISION — 07/05/2026
+## OPERATOR DECISION — 07/05/2026 (SUPERSEDED same day — see below)
 
 **"We run haiku until we are more prepared and then switch to sonnet."**
 Distill stays `claude-haiku-4-5-20251001` for now (already the code's MODEL).
@@ -155,3 +155,128 @@ RunBudget still holds (Sonnet ≈ 5× Haiku token price ⇒ distill ≈ $0.05–
 — fits), and log the switch here. Daily comparisons continue meanwhile
 (check `haiku_vs_sonnet_distill_daily`) so the switch decision has evidence.
 
+## SWITCH EXECUTED — 07/05/2026 (operator: "Ok. Then just do sonnet.")
+
+`MODEL = "claude-sonnet-4-6"` in `ingest/pipelines/city_pulse/distill.py`
+(corridor distill imports it — one constant, both pipelines). The day-1
+comparison above is the evidence base. Records updated: retrofit spec item 3,
+ingest/CLAUDE.md lock, memory. The 07/08/2026 final-run check now serves as a
+post-switch sanity run (Sonnet-new vs Sonnet-old on shared spans).
+
+
+## Comparison run — 07/05/2026 17:19 UTC
+
+### Marco Island — 11 shared spans · Sonnet kept 11 facts · Haiku kept 11 facts
+
+- SPAN: Marco Island shopping center sells for $26.6M | Real Estate | gulfshorebusiness.com
+  - SONNET (transactions): The new owner of Island Plaza has local ties to Marco Island restaurateur Luigi Carvelli, whose family owns a local business.
+  - HAIKU  (transactions): Island Plaza, one of Marco Island's most prominent shopping centers, sold for $26.6 million; the new owner has local ties to Marco Island restaurateur Luigi Carvelli, whose family owns Sno...
+- SPAN: Marco Island expects tax bump from resort sale | GB Daily | gulfshorebusiness.com
+  - SONNET (structural): Casey Lucius, interim city manager for Marco Island, expects property tax revenue to increase after the $835 million JW Marriott resort sale.
+  - HAIKU  (structural): Marco Island interim city manager Casey Lucius expects property tax revenue to increase after the resort (JW Marriott Marco Island) sale.
+- SPAN: Marco Island shopping center sells for $26.6M | Real Estate | gulfshorebusiness.com
+  - SONNET (transactions): Island Plaza, a Marco Island shopping center at 3058-3078 Bald Eagle Drive at the intersection with Collier Boulevard, sold for $26.6 million.
+  - HAIKU  (transactions): Island Plaza shopping center on Marco Island changed hands in a $26.6 million transaction; buyer is connected to local restaurateur Luigi Carvelli, replacing a national ownership structure with a locally-tied one.
+- SPAN: Dashcam video reveals tension between Marco Island Councilwoman and police officer over beach night fishing enforcement | Collier County | winknews.com
+  - SONNET (structural): At a June 1 City Council meeting, Councilwoman Schwan spearheaded a request to investigate the potential disbanding of the Marco Island Police Department, citing it as a cost-saving measure to prepare for potential property tax revenue losses.
+  - HAIKU  (breaking): On June 1, a City Council meeting addressed a request spearheaded by Councilwoman Schwan to investigate the potential disbanding of the Marco Island Police Department, just two days after a dashcam-recorded beach incident between the councilwoman and a police officer over night fishing enforcement.
+- SPAN: Marco airport seeks federal funds to update runway plan | Government | gulfshorebusiness.com
+  - SONNET (development): Marco Island Executive Airport is seeking a nearly $500,000 FAA grant to update its runway plan; the airport has not had an Airport Master Plan Update since 2006.
+  - HAIKU  (development): Marco Island Executive Airport is seeking a nearly $500,000 Federal Aviation Administration grant to update its runway plan/master plan.
+- SPAN: Beloved Marco Island theater shuts down amid rising costs | Collier County | winknews.com
+  - SONNET (business): A beloved Marco Island theater shut down amid rising costs and declining attendance; owner Drake Heroy had bought the theater 4 years prior after managing it for years.
+  - HAIKU  (business): The beloved Marco Island theater shut down amid rising costs; owner Drake Heroy had purchased the theater 4 years prior after managing it for years, calling it his dream to own.
+- SPAN: Marco Island weighs revenue options amid property tax amendment | GB Daily | gulfshorebusiness.com
+  - SONNET (structural): City Manager Casey Lucius told City Council on June 1 that the city could lose about $2 million annually if the state property tax amendment measure passes.
+  - HAIKU  (structural): On June 1, City Manager Casey Lucius told City Council that Marco Island could lose about $2 million annually if the state property tax amendment measure passes.
+- SPAN: Marco Island exploring costs to phase out local police department amid state property tax debate | Collier County | winknews.com
+  - SONNET (structural): The Marco Island Police Department has provided law enforcement services within city limits since its establishment in 1999.
+  - HAIKU  (structural): The Marco Island Police Department has provided law enforcement services within city limits since its establishment in 1999; the city is now exploring costs to phase it out amid the state property tax debate.
+- SPAN: Marco Island studies sheriff takeover of police services | GB Daily | gulfshorebusiness.com
+  - SONNET (structural): Marco Island City Council voted 4-3 on June 1 to direct staff to research the costs, logistics, and operational impacts of potentially shifting police services to the Collier County Sheriff's Office.
+  - HAIKU  (structural): Marco Island City Council voted 4-3 on June 1 to direct staff to research the costs, logistics, and operational impacts of potentially shifting police services to the Collier County Sheriff's Office.
+- SPAN: Collier County property values drop, but tax bills might not
+  - SONNET (structural): Collier County property values fell nearly 6%, but tax bills may not decrease correspondingly, per a June 12, 2026 report.
+  - HAIKU  (structural): Collier County property values dropped as of the June 12, 2026 report, though tax bills may not decrease as a result.
+- SPAN: Marco Island weighs replacing city police with Collier County ...
+  - SONNET (structural): Marco Island is weighing replacing its city police department with the Collier County Sheriff's Office, according to a report by WINK News.
+  - HAIKU  (structural): Marco Island is weighing replacing its city police department with the Collier County Sheriff's Office for law enforcement services.
+
+### Bonita Springs — 10 shared spans · Sonnet kept 10 facts · Haiku kept 8 facts
+
+- SPAN: SWFL member-owned golf club to build $110M clubhouse | Business Observer
+  - SONNET (development): Bonita Bay Club, billed as the largest member-owned private golf club in Florida, announced a $110 million clubhouse project.
+  - HAIKU  (development): Bonita Bay Club announced a $110 million clubhouse build; it bills itself as the largest member-owned private golf club in Florida.
+- SPAN: Midtown Development: Hub for Bonita Springs' Growth
+  - SONNET (development): Midtown at Bonita's design includes 30 acres of open space/drainage addressing flooding concerns, as the development drains into the Kehl Canal and Imperial River Watershed.
+  - HAIKU  (development): Midtown at Bonita's design includes 30 acres of open space to address flooding concerns, as the project drains into the Kehl Canal and Imperial River Watershed.
+- SPAN: 68-acre Lee County project adds tenants, including popular donut shop | Business Observer
+  - SONNET (business): Midtown at Bonita's new tenants will join TJ Maxx and Ulta Beauty, which were announced in February, and existing tenants Jeff's Bagel Run, Gelato & Co., and LowB (partial name).
+  - HAIKU  (business): New tenants at the 68-acre Bonita Springs center (Midtown at Bonita) include a popular donut shop, joining previously announced TJ Maxx and Ulta Beauty (announced February), and existing tenants Jeff's Bagel Run, Gelato & Co., and LowB.
+- SPAN: Five retailers sign leases at Midtown at Bonita | GB Daily | gulfshorebusiness.com
+  - SONNET (transactions): Five new retail tenants signed leases at Midtown at Bonita, the 68-acre mixed-use development on Bonita Beach Road, developed by The Zuckerman Group.
+  - HAIKU  (business): Five new retail tenants signed leases at Midtown at Bonita, the 68-acre mixed-use development on Bonita Beach Road by The Zuckerman Group.
+- SPAN: Saltleaf Marina opens on Weeks Fish Camp site in Bonita Springs
+  - SONNET (business): Saltleaf Marina in Bonita Springs opened to the public on June 22, 2026, on the historic Weeks Fish Camp site, as part of the 500-acre Saltleaf community being built by Naples-based London Bay.
+  - HAIKU  (business): Saltleaf Marina in Bonita Springs opened to the public on June 22, built on the historic Weeks Fish Camp site, as part of the 500-acre Saltleaf community being developed by Naples-based London Bay.
+- SPAN: Top Real Estate Agent in Estero, FL | McGreevy & Comisar
+  - SONNET (structural): Jesse McGreevy and Marc Comisar are also recognized as the top real estate agents in Estero, FL (neighboring Bonita Springs market), with more than $860 million in career sales and nearly two decades of market leadership, as of June 11, 2026.
+  - HAIKU  : (dropped this span)
+- SPAN: Best Real Estate Agent in Bonita Springs, FL: Jesse McGreevy and ...
+  - SONNET (structural): McGreevy | Comisar Team, based in Bonita Springs, FL, has recorded over $860 million in career sales and nearly two decades of market leadership with over 1,700 career transactions, as of a press release dated June 10, 2026.
+  - HAIKU  (structural): Jesse McGreevy and Marc Comisar are recognized as top/best real estate agents in Bonita Springs, FL, backed by more than $860 million in career sales, nearly two decades of market leadership, and over 1,700 career transactions; announcement dated June 10, 2026.
+- SPAN: Waterfront estates, penthouses, lead big 2026 SW Florida home sales
+  - SONNET (structural): The SW Florida uber-luxury real estate market remained steady in 2026, with waterfront estates and penthouses leading big home sales across the region including Bonita Springs, as reported May 13, 2026.
+  - HAIKU  : (dropped this span)
+- SPAN: SW Florida uber-luxury real estate market remains steady in 2026
+  - SONNET (structural): SW Florida's uber-luxury real estate market remained steady in 2026, with head-turning home and condo sales since the start of 2026 setting records or coming close in communities including areas of Lee County encompassing Bonita Springs, as reported May 5, 2026.
+  - HAIKU  (transactions): SW Florida uber-luxury real estate market remained steady in 2026, with some home and condo sales setting records in their communities and neighborhoods, including in the Bonita Springs area; reported May 5–13, 2026.
+- SPAN: Now You Know: No rate increases at BSU; new business brings the ...
+  - SONNET (structural): Bonita Springs Utilities Inc. (BSU) will maintain current water and wastewater rates for 2026, as approved by its board of directors.
+  - HAIKU  (structural): Bonita Springs Utilities Inc. announced it will maintain current water and wastewater rates for 2026, with executive director Andy Koebel stating the board is 'in a position to hold rates steady'; announced May 6, 2026.
+
+### Fort Myers — 10 shared spans · Sonnet kept 10 facts · Haiku kept 10 facts
+
+- SPAN: Ben Mallah adds Fort Myers property to portfolio
+  - SONNET (transactions): Ben Mallah purchased a 60,305 sq ft building in Fort Myers for $17.25 million using a 1031 exchange.
+  - HAIKU  (transactions): Ben Mallah purchased a 60,305 sq ft building in Fort Myers for $17.25 million, using a 1031 exchange.
+- SPAN: Tampa medical building tied to philanthropist, investor Patel sold | Business Observer
+  - SONNET (structural): NAI Burns Scalo's Commercial Property Southwest Florida team transition from the Cushman & Wakefield Alliance has begun, led by Brian Walker, president of NAI Pittsburgh.
+  - HAIKU  : (dropped this span)
+- SPAN: Fort Myers land sells to Wisconsin Culver's hamburger franchisee | Business Observer
+  - SONNET (transactions): The final outparcel in a Fort Myers shopping center has sold to a Wisconsin Culver's hamburger franchisee, who plans to build a Culver's restaurant on the site.
+  - HAIKU  (transactions): The final outparcel in a Fort Myers shopping center sold to a Wisconsin Culver's hamburger franchisee, who is planning to build a Culver's restaurant on the site, as reported June 7, 2026.
+- SPAN: Tampa Bay investor pays $43 million for Fort Myers apartment | Business Observer
+  - SONNET (transactions): The Cobblestone on The Lake Apartments in Fort Myers sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale for $43 million.
+  - HAIKU  (transactions): The Cobblestone on The Lake Apartments in Fort Myers sold to Tampa Bay investor Ben Mallah of Equity Management in an off-market sale; the complex has 248 units and the sale price was $43 million, reported June 28, 2026.
+- SPAN: Fort Myers scooter expansion plan divides downtown business owners | Lee County | winknews.com
+  - SONNET (business): A Fort Myers scooter expansion plan is dividing downtown business owners; as of June 8, 2026, City Council had not taken a final vote during a workshop but weighed benefits against safety concerns.
+  - HAIKU  (development): Fort Myers City Council held a workshop on the downtown scooter expansion plan but did not take a final vote; the discussion weighed benefits of expansion against concerns from divided downtown business owners.
+- SPAN: Construction giant moving local HQ, jobs from Naples to Fort Myers | Business Observer
+  - SONNET (structural): Manhattan Construction Group, one of the largest contractors in the region, has begun building a new office in Lee County where it will eventually relocate its local headquarters from Naples.
+  - HAIKU  (structural): Manhattan Construction Group has begun building a new office in Lee County (Fort Myers) where it will eventually relocate its local HQ and jobs from Naples, reported April 10, 2026.
+- SPAN: NAI Burns Scalo Grows Florida Market Share, Announces Major ...
+  - SONNET (structural): NAI Burns Scalo acquired Cushman & Wakefield | Commercial Property Southwest Florida (CPSWFL) in Fort Myers on June 10, 2026, transitioning the firm from the Cushman & Wakefield Alliance to the NAI Burns Scalo brand; the acquisition was led by Brian Walker, President of NAI Burns Scalo.
+  - HAIKU  (structural): NAI Burns Scalo acquired Cushman & Wakefield | Commercial Property Southwest Florida (CPSWFL) in Fort Myers; the acquisition was led by Brian Walker, President of NAI Burns Scalo, announced June 10, 2026.
+  - HAIKU  (structural): Following the acquisition of CPSWFL, NAI Burns Scalo began the transition from the Cushman & Wakefield Alliance to the NAI Burns Scalo brand in Fort Myers.
+- SPAN: Fort Myers Beach hotel recovery lags 4 years after Ian | GB Daily
+  - SONNET (structural): Fort Myers Beach hotel recovery continues to lag 4 years after Hurricane Ian, per a Gulfshore Business report.
+  - HAIKU  (breaking): Fort Myers Beach hotel recovery lags 4 years after Hurricane Ian, per a Gulf Shore Business report.
+- SPAN: Florida lawmaker says some Southwest Florida fire districts may need to merge if property tax proposal passes
+  - SONNET (structural): A Florida lawmaker stated that some Southwest Florida fire districts may need to merge if a property tax proposal passes, affecting Lee County districts.
+  - HAIKU  (structural): A Florida lawmaker stated that some Southwest Florida fire districts may need to merge if the property tax proposal passes.
+- SPAN: Fort Myers Costco officially moving to Colonial Boulevard location
+  - SONNET (structural): Fort Myers Costco is officially moving to a Colonial Boulevard location, replacing its current overcrowded location.
+  - HAIKU  (business): Fort Myers Costco is officially moving to a Colonial Boulevard location.
+
+_31 span pairs this run; spend metered to api_usage_log (call_type ingest_city_pulse_distill)._
+
+
+**LABEL CORRECTION for the run above (the third section, stamped ~17:0x UTC):**
+that run executed AFTER the model switch — its "HAIKU"-labeled lines are
+actually `claude-sonnet-4-6` output (the script's label was hardcoded; fixed to
+follow the live MODEL from this commit on). Read it as the post-switch sanity
+run: new-Sonnet vs old-Sonnet on shared spans. Its two distill calls cost
+$0.0265 + $0.0276 (printed by the metering lib) but went UNLOGGED to the
+ledger — the valve env carried no DB creds — so /spend undercounts today by
+~$0.055. Real Sonnet distill cost per city confirmed: ~$0.03.

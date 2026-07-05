@@ -32,10 +32,14 @@ import anthropic
 from ingest.lib.api_usage import log_api_usage
 from ingest.lib.tier1_inventory import _get_connection
 
-# Haiku 4.5 (cost mode 07/05/2026): distill is structured extraction over an
-# already-captured record, no tools — small-model work. Capture (pipeline.py)
-# stays Sonnet: web_search quality IS the signal there.
-MODEL = "claude-haiku-4-5-20251001"
+# Sonnet (operator decree 07/05/2026: "just do sonnet"): the day-1 comparison
+# (verification/haiku-vs-sonnet-distill.md) showed Haiku keeps fewer facts,
+# compresses away names/addresses, and misattributed a $835M sale to a $26.6M
+# one. In the distill SHAPE (no tools, numbered spans in, structured facts out)
+# Sonnet costs ~$0.03-0.07 per unit — the $6 runs were the web_search CAPTURE
+# shape, which is dead (crawl4ai retrofit). Corridor distill imports this
+# constant: one source of truth for both pipelines.
+MODEL = "claude-sonnet-4-6"
 
 TTL_DAYS: dict[str, int] = {
     "breaking": 1,

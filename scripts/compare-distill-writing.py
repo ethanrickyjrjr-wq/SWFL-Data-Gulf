@@ -41,6 +41,8 @@ load_dotenv(ROOT / ".env.local")  # same source pipeline.py uses
 from ingest.lib.tier1_inventory import _get_connection  # noqa: E402
 from ingest.pipelines.city_pulse import distill  # noqa: E402
 
+NEW_LABEL = distill.MODEL.split("-2")[0].upper()  # e.g. CLAUDE-SONNET-4-6 / CLAUDE-HAIKU-4-5
+
 OUT = ROOT / "verification" / "haiku-vs-sonnet-distill.md"
 SONNET_ERA_CUTOFF = "2026-07-05"  # distill switched to Haiku this day (cost mode)
 MAX_CITIES = 3
@@ -111,7 +113,7 @@ def main() -> int:
         try:
             haiku_rows = distill.distill_capture(capture)  # Haiku, in-memory, no writes
         except Exception as exc:  # 400 no-credits lands here — record and stop
-            lines.append(f"### {city} — HAIKU CALL FAILED: {exc!r}\n")
+            lines.append(f"### {city} — {NEW_LABEL} CALL FAILED: {exc!r}\n")
             lines.append("(harness ready; re-run once credits exist)\n")
             append(lines)
             print(f"Haiku call failed for {city}: {exc!r}")
@@ -122,8 +124,8 @@ def main() -> int:
             haiku_by_url[h["source_url"]].append(h)
 
         lines.append(
-            f"### {city} — {len(citations)} shared spans · Sonnet kept {len(crows)} facts · "
-            f"Haiku kept {sum(len(v) for v in haiku_by_url.values())} facts\n"
+            f"### {city} — {len(citations)} shared spans · OLD-SONNET kept {len(crows)} facts · "
+            f"{NEW_LABEL} kept {sum(len(v) for v in haiku_by_url.values())} facts\n"
         )
         for r in crows:
             u = (r["source_url"] or "").strip()
@@ -132,14 +134,14 @@ def main() -> int:
             lines.append(f"  - SONNET ({r['topic']}): {r['fact']}")
             if hk:
                 for h in hk:
-                    lines.append(f"  - HAIKU  ({h['topic']}): {h['fact']}")
+                    lines.append(f"  - {NEW_LABEL}  ({h['topic']}): {h['fact']}")
             else:
-                lines.append("  - HAIKU  : (dropped this span)")
+                lines.append(f"  - {NEW_LABEL}  : (dropped this span)")
             total_pairs += 1
         extra = [u for u in haiku_by_url if u not in {(r["source_url"] or "").strip() for r in crows}]
         for u in extra:
             for h in haiku_by_url[u]:
-                lines.append(f"- HAIKU-ONLY ({h['topic']}): {h['fact']} [{u}]")
+                lines.append(f"- {NEW_LABEL}-ONLY ({h['topic']}): {h['fact']} [{u}]")
         lines.append("")
 
     lines.append(f"_{total_pairs} span pairs this run; spend metered to api_usage_log (call_type ingest_city_pulse_distill)._\n")
