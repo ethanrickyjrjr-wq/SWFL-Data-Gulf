@@ -1,10 +1,13 @@
 """Tests for ingest.lib.guards."""
 import logging
+from datetime import date, datetime
 
 import pytest
 
 from ingest.lib.guards import (
+    ContentStaleError,
     VolumeGuardError,
+    assert_content_fresh,
     assert_county_coverage,
     assert_min_rows,
     assert_vs_baseline,
@@ -132,3 +135,51 @@ class TestAssertCountyCoverage:
         with pytest.raises(VolumeGuardError, match="active_listings"):
             assert_county_coverage({"Collier": 1, "Lee": 2400}, ["Collier"], min_per_county=200,
                                    label="active_listings")
+
+
+class TestAssertContentFresh:
+    """Content-age guard — trips when the newest content date stalls, even if the row
+    count is healthy and dlt wrote a fresh _dlt_loads row (the lee_permits 18d-stale class)."""
+
+    TODAY = date(2026, 7, 5)
+
+    def test_passes_fresh_date(self):
+        assert_content_fresh(date(2026, 7, 1), 14, today=self.TODAY)  # 4d old — fine
+
+    def test_passes_at_boundary(self):
+        assert_content_fresh(date(2026, 6, 21), 14, today=self.TODAY)  # exactly 14d — no raise
+
+    def test_raises_one_past_boundary(self):
+        with pytest.raises(ContentStaleError, match="stalled"):
+            assert_content_fresh(date(2026, 6, 20), 14, today=self.TODAY)  # 15d — trips
+
+    def test_raises_the_lee_permits_18d_stall(self):
+        # The flagship bug: probe tolerance would be 21d, but a 14d gate trips the 18d stall.
+        with pytest.raises(ContentStaleError):
+            assert_content_fresh(date(2026, 6, 17), 14, today=self.TODAY)  # 18d
+
+    def test_raises_on_none(self):
+        with pytest.raises(ContentStaleError, match="no dated rows"):
+            assert_content_fresh(None, 14, today=self.TODAY)
+
+    def test_accepts_iso_string(self):
+        # redfin period_end is stored as text — the guard must accept ISO strings.
+        assert_content_fresh("2026-07-01", 50, today=self.TODAY)
+        with pytest.raises(ContentStaleError):
+            assert_content_fresh("2026-01-01", 50, today=self.TODAY)  # ~185d old
+
+    def test_accepts_iso_string_with_time_component(self):
+        assert_content_fresh("2026-07-01T00:00:00", 14, today=self.TODAY)
+
+    def test_accepts_datetime(self):
+        assert_content_fresh(datetime(2026, 7, 1, 12, 0), 14, today=self.TODAY)
+
+    def test_label_in_error_message(self):
+        with pytest.raises(ContentStaleError, match="lee_permits"):
+            assert_content_fresh(None, 14, label="lee_permits", today=self.TODAY)
+
+    def test_distinct_from_volume_guard_error(self):
+        # Own class so the cron-failure classifier routes it to CONTENT_STALE (do not retry),
+        # never conflated with a VolumeGuardError.
+        assert not issubclass(ContentStaleError, VolumeGuardError)
+        assert not issubclass(VolumeGuardError, ContentStaleError)

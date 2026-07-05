@@ -195,6 +195,40 @@ test("BILLING — the human 'credit balance is too low' message", () => {
   assert.equal(c.klass, "BILLING");
 });
 
+test("CONTENT_STALE — a stalled content guard trips (ContentStaleError)", () => {
+  const c = classify(
+    "ingest.lib.guards.ContentStaleError: [content-guard] lee_permits: newest content date 2026-06-17 is 18d old (> 14d max) — content stalled; the load may be LOAD-fresh but the source has not advanced — aborting",
+  );
+  assert.equal(c.klass, "CONTENT_STALE");
+  assert.match(c.suggestedAction, /do NOT auto-retry/i);
+});
+
+test("CONTENT_STALE — an empty-batch content guard (no dated rows) classifies too", () => {
+  const c = classify(
+    "ContentStaleError: [content-guard] zhvi_swfl: no dated rows in the fetched batch — source produced nothing datable (dead scrape / empty pull) — aborting",
+  );
+  assert.equal(c.klass, "CONTENT_STALE");
+});
+
+test("CONTENT_STALE — wins over DATA_EMPTY when both a 0-row line and the guard marker appear", () => {
+  const c = classify(
+    "WARN: 0 rows in delta\nContentStaleError: [content-guard] lee_permits: content stalled — aborting",
+  );
+  assert.equal(c.klass, "CONTENT_STALE");
+});
+
+test("DATA_EMPTY — the redfin empty-pull VolumeGuardError classifies as a 0-row pull", () => {
+  const c = classify(
+    "ingest.lib.guards.VolumeGuardError: redfin_lee: returned 0 rows — no Lee County rows found (check LEE_REGION filter / URL)",
+  );
+  assert.equal(c.klass, "DATA_EMPTY");
+});
+
+test("routing — CONTENT_STALE never retries and needs no LLM", () => {
+  assert.equal(shouldRetry("CONTENT_STALE"), false);
+  assert.equal(needsLlm("CONTENT_STALE"), false);
+});
+
 test("routing — BILLING never retries and needs no LLM", () => {
   assert.equal(shouldRetry("BILLING"), false);
   assert.equal(needsLlm("BILLING"), false);
@@ -208,6 +242,7 @@ test("routing — shouldRetry only for TRANSIENT", () => {
     "SCHEMA_DRIFT",
     "DETERMINISTIC_HOLD",
     "DATA_EMPTY",
+    "CONTENT_STALE",
     "LOCKFILE",
     "UNKNOWN",
   ]) {
@@ -224,6 +259,7 @@ test("routing — needsLlm only for the fuzzy classes", () => {
     "ACTION_VERSION",
     "TRANSIENT",
     "DETERMINISTIC_HOLD",
+    "CONTENT_STALE",
   ]) {
     assert.equal(needsLlm(k), false, k);
   }

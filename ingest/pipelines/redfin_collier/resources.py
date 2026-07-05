@@ -153,10 +153,20 @@ def ingest_redfin_collier(url: str = REDFIN_COUNTY_TRACKER_URL) -> int:
     """
     import dlt
 
+    from ingest.lib.guards import VolumeGuardError, assert_content_fresh
+
     rows = list(iter_collier_rows(url))
     if not rows:
-        print("redfin_collier: 0 Collier rows found — aborting (check REGION filter / URL).")
-        return 0
+        # An empty pull (Redfin renamed the region or moved the URL) is a REAL failure, not a
+        # green no-op. Raise so the cron goes red instead of exiting 0 with stale data narrated live.
+        raise VolumeGuardError(
+            "redfin_collier: returned 0 rows — no Collier County rows found (check REGION filter / URL)"
+        )
+    # Content-freshness: the newest period_end the source produced THIS run (ISO text). Monthly
+    # tracker → 55d gate (content lag + one cadence + buffer), tighter than the daily probe's 62d
+    # so a multi-month Redfin stall trips the cron red pre-promote instead of re-merging stale rows.
+    newest_period_end = max(r["period_end"] for r in rows if r.get("period_end"))
+    assert_content_fresh(newest_period_end, 55, label="redfin_collier")
     pipeline = dlt.pipeline(
         pipeline_name="redfin_collier",
         destination="postgres",

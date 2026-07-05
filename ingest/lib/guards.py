@@ -7,6 +7,7 @@ after fetching/parsing but before any Tier-2 write.
 from __future__ import annotations
 
 import logging
+from datetime import date, datetime
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +16,59 @@ class VolumeGuardError(RuntimeError):
     """Raised pre-promote when a volume assertion fails. Named for unambiguous GHA log parsing."""
 
     pass
+
+
+class ContentStaleError(RuntimeError):
+    """Raised pre-promote when the freshest CONTENT date is missing or too old.
+
+    Distinct from VolumeGuardError on purpose: this is a stalled-source / dead-scrape
+    signal, NOT a row-count problem. A merge pipeline can write a fresh _dlt_loads row
+    (LOAD-fresh) every run while re-merging the same stale content — the row count looks
+    healthy while the newest content date never advances. That is exactly how lee_permits
+    sat 18 days stale behind 3 green cron runs. Named for unambiguous GHA log parsing and
+    cron-failure classification (CONTENT_STALE -> investigate source/scraper, do NOT retry)."""
+
+    pass
+
+
+def assert_content_fresh(
+    newest,
+    max_age_days: int,
+    label: str = "",
+    today: date | None = None,
+) -> None:
+    """Assert the freshest content date is no older than ``max_age_days``.
+
+    ``newest`` is MAX(content_date) across the freshly-fetched batch — the newest
+    period_end / issued_date / month the source actually produced THIS run, not the load
+    timestamp. Accepts a ``date``/``datetime`` (permits: ``issued_date``) or an ISO string
+    (redfin: ``period_end`` is stored as text); anything else is a caller error.
+
+    Raises ContentStaleError when:
+      - ``newest`` is None            — source produced no dated rows (dead scrape / empty pull)
+      - ``today - newest > max_age``  — content stalled past the allowed age
+
+    ``max_age_days`` is the pipeline's own GATING threshold (content lag + one cadence +
+    buffer), deliberately TIGHTER than the daily probe's ``cadence * tolerance``: the probe
+    is loose for observability, this trips the cron red. ``today`` is injectable for tests.
+    """
+    ref = today or date.today()
+    if newest is None:
+        raise ContentStaleError(
+            f"[content-guard] {label}: no dated rows in the fetched batch — source produced "
+            f"nothing datable (dead scrape / empty pull) — aborting"
+        )
+    if isinstance(newest, str):
+        newest = date.fromisoformat(newest[:10])
+    elif isinstance(newest, datetime):
+        newest = newest.date()
+    age = (ref - newest).days
+    if age > max_age_days:
+        raise ContentStaleError(
+            f"[content-guard] {label}: newest content date {newest.isoformat()} is {age}d old "
+            f"(> {max_age_days}d max) — content stalled; the load may be LOAD-fresh but the "
+            f"source has not advanced — aborting"
+        )
 
 
 def assert_vs_canonical(landed: int, canonical: int, floor: float = 0.9, label: str = "") -> None:

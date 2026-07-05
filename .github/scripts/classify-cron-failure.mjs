@@ -145,7 +145,22 @@ export function classify(logTail) {
     };
   }
 
-  // 8. DATA_EMPTY — source returned nothing (dead/changed URL, WAF, async job not polled).
+  // 8. CONTENT_STALE — an ingest content-freshness guard tripped (ingest.lib.guards
+  //    assert_content_fresh -> ContentStaleError). The run was LOAD-fresh (dlt wrote a
+  //    _dlt_loads row) but the newest CONTENT date stalled past the pipeline's gating
+  //    threshold, or the fetched batch carried no dated rows. A stalled-source / broken-scrape
+  //    signal — NOT transient, and distinct from DATA_EMPTY (a true 0-row pull). Placed before
+  //    DATA_EMPTY so the guard's own error wins. Never auto-retry: a retry re-merges the stale window.
+  if (/\bContentStaleError\b|\[content-guard\]/.test(text)) {
+    return {
+      klass: "CONTENT_STALE",
+      signal: "content-freshness guard tripped",
+      suggestedAction:
+        "An ingest content-freshness guard tripped — the run was LOAD-fresh (dlt wrote a load row) but the newest content date has stalled past the pipeline's gating threshold (or the batch carried no dated rows). The source or scraper stopped advancing: check the source URL/feed, the scrape window/cursor, and any WAF or region-filter change. Do NOT auto-retry — a retry re-merges the same stale content.",
+    };
+  }
+
+  // 9. DATA_EMPTY — source returned nothing (dead/changed URL, WAF, async job not polled).
   m = text.match(
     /\b(0 rows|0 permits?|0 decisions|0 URLs?|0 records|no rows|returned 0|empty (?:HTML|response|result)|0 \w+ (?:discovered|returned|loaded))\b/i,
   );
@@ -158,7 +173,7 @@ export function classify(logTail) {
     };
   }
 
-  // 9. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
+  // 10. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
   if (
     /ReadTimeout|TimeoutError|ConnectTimeout|Connection error|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|SSL[: ][^\n]*EOF|HTTP 429|\b429\b|rate.?limit|Temporary failure in name resolution|Connection reset|ECONNRESET|ETIMEDOUT|EAI_AGAIN|Max retries exceeded/i.test(
       text,
@@ -175,7 +190,7 @@ export function classify(logTail) {
     };
   }
 
-  // 10. UNKNOWN — unrecognised shape; route to the LLM narrative.
+  // 11. UNKNOWN — unrecognised shape; route to the LLM narrative.
   return {
     klass: "UNKNOWN",
     signal: "",

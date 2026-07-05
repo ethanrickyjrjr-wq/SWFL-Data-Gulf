@@ -4,6 +4,30 @@ Operator: "don't need two cadence legends." Gated the `ShowcaseOverlay` legend o
 per showcase instead of repeating on every content slide. One-line JSX conditional; eslint clean. Shipped via a
 detached worktree off origin/main (a live parallel session held 11 unpushed band-guard commits on local main;
 isolating avoided bundling them).
+## 2026-07-05 (main) — Operation July task 18: content-freshness guards (phase 1, 7 pipelines) — NOT pushed, held
+
+Built the content-freshness guard + wired 7 small-lag merge pipelines. Brainstorm (RULE 3.5) + advisor +
+crawl4ai (dlt v1.28.1 — no native content-freshness hook, so a Python-side MAX assertion is idiomatic). NOT pushed.
+
+- **New guard** `ingest/lib/guards.py`: `assert_content_fresh(newest, max_age_days, label, today=None)` +
+  `ContentStaleError` (own class, sibling of VolumeGuardError). Raises when the freshest content date is None
+  or older than the gating threshold. 11 unit tests (39 total pass), incl. the 18d-stall DONE-WHEN proof.
+- **2 live bugs fixed (verified vs code, not the autopsy):** `redfin_lee`/`redfin_collier` `if not rows: return 0`
+  → **exit 0 / cron GREEN on an empty pull** → now `raise VolumeGuardError` ("returned 0 rows"). `lee_permits`
+  18d-stale-behind-3-green-runs → now a 14d post-merge `assert_content_fresh(MAX(issued_date))`.
+- **Wired 7:** lee_permits (issued_date, 14d) · redfin_lee/collier (period_end, 55d) · zhvi/zori/tier_divergence
+  (period_end, 55d — materialize-max also closes their missing `raise_on_failed_jobs`) · collier_permits
+  (date_issued, 75d). Gating thresholds are TIGHTER than the probe's cadence*tolerance (lee's probe is 21d —
+  would MISS the 18d bug; the advisor's catch).
+- **news_swfl EXCLUDED (RULE 0.5):** `news_swfl/fetcher.py:66` normalizes every article `published_date=None`
+  — no content date. An age guard would fail every run. Deferred to a novelty (new-`article_url`) follow-up.
+- **Classifier (task 19):** `CONTENT_STALE` rule in `classify-cron-failure.mjs` → "investigate source/scraper,
+  do NOT retry"; redfin empty reworded to classify DATA_EMPTY. +5 tests (38 mjs pass).
+- **Deferred (phase 2):** 8 big-lag batch sources (bls/census/fhfa/leepa/parcels/noaa — need vendor-lag research)
+  + probe content-date complement (stays non-gating) + ZHVI narration-cadence TTL (own build).
+- Verify: guards 39 ✓, redfin 6 ✓, zori 3 ✓, classifier 38 ✓, py_compile all 10 ✓. Ingest pytest is NOT in CI
+  (local-only); collier/lee co-located tests need the crawl4ai venv (verified via py_compile + the guard's own
+  tests). Check `content_freshness_guards_live_verify` open (operator-run live cron-red).
 
 ## 2026-07-05 (main) — BUILD: quick-start campaign buttons (Projects · Email Lab · Social)
 

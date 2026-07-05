@@ -15,7 +15,7 @@ from typing import Iterable
 import dlt
 import pandas as pd
 
-from ingest.lib.guards import assert_min_rows
+from ingest.lib.guards import assert_content_fresh, assert_min_rows
 
 from .fetcher import discover_issued_reports, download_latest_issued, download_month
 from .geocoder import assign_corridor, geocode_batch, load_collier_centroids
@@ -97,6 +97,12 @@ def run_pipeline(year: int, month: int) -> None:
     df = pd.read_excel(io.BytesIO(xlsx_bytes), engine="openpyxl", header=1)
     rows = normalize_df(df, source_file=filename)
     assert_min_rows(len(rows), _EXPECTED_ROWS_MIN, "collier_building_permits")
+    # Content-freshness: the newest date_issued in this pull must be recent. Collier publishes
+    # the prior month's XLSX mid-month, so content lags ~1 month; 75d gate (content lag + one
+    # cadence + buffer) trips a genuinely stalled feed (source stopped publishing, or _fallback_latest
+    # kept serving an old month) while tolerating the normal prior-month lag. Fail fast before geocode.
+    newest_issued = max((r.get("date_issued") for r in rows if r.get("date_issued")), default=None)
+    assert_content_fresh(newest_issued, 75, label="collier_permits")
 
     addresses = [r["site_address"] for r in rows if r["site_address"]]
     geo = geocode_batch(addresses)

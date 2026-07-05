@@ -61,12 +61,24 @@ def run_pipeline(parquet_path: Optional[str] = None) -> None:
         parquet_path: Optional override for the Parquet location (tests use
             a local file; production reads from S3).
     """
+    from ingest.lib.guards import assert_content_fresh
+
+    from .resources import read_tier1_parquet
+
     pipeline = dlt.pipeline(
         pipeline_name="tier_divergence_swfl",
         destination="postgres",
         dataset_name="data_lake",
     )
-    load_info = pipeline.run(tier_divergence_swfl_resource(parquet_path=parquet_path))
+    # Materialize the Tier-1 rows once so we can assert content-freshness BEFORE the merge:
+    # the newest period_end the Parquet carries must be recent. A LOAD-fresh run against a
+    # stale/empty Parquet (Zillow stalled, or the Tier-1 writer produced nothing) would
+    # otherwise re-merge old months green. 55d gate (monthly index, ~mid-month publish +
+    # buffer), tighter than the daily probe's 60d; also raises on an empty Parquet (newest=None).
+    rows = list(read_tier1_parquet(parquet_path=parquet_path))
+    newest = max((r["period_end"] for r in rows if r.get("period_end")), default=None)
+    assert_content_fresh(newest, 55, label="tier_divergence_swfl")
+    load_info = pipeline.run(tier_divergence_swfl_resource(rows=rows))
     print(load_info)
 
 

@@ -5,10 +5,11 @@ Uses an ephemeral DuckDB destination so no live Postgres credentials are needed.
 import json
 from pathlib import Path
 import tempfile
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import patch
 
 import dlt
+import pytest
 
 from . import pipeline as pipeline_mod
 from .pipeline import permits_resource
@@ -105,6 +106,9 @@ def test_incremental_dedup_across_runs() -> None:
 
 def test_run_pipeline_seeds_initial_value_from_max() -> None:
     """First-run floor comes from MAX(issued_date) — no 1970 backfill on a populated table."""
+    # Use a RECENT max so the post-merge content-freshness guard (14d) passes — this test
+    # exercises cursor seeding, not staleness (that's test_run_pipeline_content_guard_trips).
+    recent = date.today() - timedelta(days=2)
     captured: dict = {}
     real_inc = dlt.sources.incremental
 
@@ -122,14 +126,39 @@ def test_run_pipeline_seeds_initial_value_from_max() -> None:
             return _FakeLoadInfo()
 
     with (
-        patch.object(pipeline_mod, "_latest_issued_date", return_value=date(2026, 5, 20)),
+        patch.object(pipeline_mod, "_latest_issued_date", return_value=recent),
         patch.object(dlt.sources, "incremental", side_effect=_spy_inc),
         patch("dlt.pipeline", return_value=_FakePipeline()),
     ):
         pipeline_mod.run_pipeline()
 
-    assert captured["initial_value"] == date(2026, 5, 20)
+    assert captured["initial_value"] == recent
     assert captured.get("ran") and captured.get("raised")
+
+
+def test_run_pipeline_content_guard_trips_on_stale_max() -> None:
+    """DONE-WHEN proof (task 18): a LOAD-fresh run whose MAX(issued_date) has stalled must
+    raise ContentStaleError (cron red), not exit green. Mirrors the 18-days-stale-behind-3-
+    green-runs bug — 18d > the 14d gate. raise_on_failed_jobs passes (the dlt job succeeded);
+    the content guard is what catches the stall."""
+    from ingest.lib.guards import ContentStaleError
+
+    stale = date.today() - timedelta(days=18)
+
+    class _FakeLoadInfo:
+        def raise_on_failed_jobs(self):
+            pass
+
+    class _FakePipeline:
+        def run(self, *a, **k):
+            return _FakeLoadInfo()
+
+    with (
+        patch.object(pipeline_mod, "_latest_issued_date", return_value=stale),
+        patch("dlt.pipeline", return_value=_FakePipeline()),
+    ):
+        with pytest.raises(ContentStaleError):
+            pipeline_mod.run_pipeline()
 
 
 def test_dry_run_with_no_start_uses_default_window() -> None:

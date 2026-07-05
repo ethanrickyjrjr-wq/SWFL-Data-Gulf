@@ -212,6 +212,14 @@ def run_pipeline() -> None:
     # House convention (bls_*, fema, fdot, collier_parcels): without this dlt swallows a
     # per-job failure into LoadInfo and the process exits 0 with a half-written table.
     load_info.raise_on_failed_jobs()
+    # Content-freshness: after the merge, the newest issued_date must be recent. raise_on_failed_jobs
+    # only catches dlt JOB failure; a LOAD-fresh run that re-merged a stalled scrape window (the
+    # 18-days-stale-behind-3-green-runs bug) leaves MAX(issued_date) behind. 14d gate trips the cron
+    # red (weekly source at ~1.2 permits/day — 14 dry days is a broken scraper, not a quiet week);
+    # deliberately tighter than the daily probe's 21d (cadence*tolerance), which would MISS an 18d stall.
+    from ingest.lib.guards import assert_content_fresh
+
+    assert_content_fresh(_latest_issued_date(), 14, label="lee_permits")
 
 
 def main(argv: list[str] | None = None) -> int:

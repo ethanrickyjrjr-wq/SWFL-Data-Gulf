@@ -1,6 +1,9 @@
 # 18 — Content-freshness guards on the merge pipelines (P3)
 
-- **Status:** ⬜ Not started — **brainstorm/plan first (RULE 3.5)**
+- **Status:** 🟡 Phase 1 BUILT (2026-07-05, held for push) — guard + 7 small-lag pipelines wired; live-verify
+  check `content_freshness_guards_live_verify` open (operator-run). Spec:
+  `docs/superpowers/specs/2026-07-05-content-freshness-guards-design.md`. Phase 2 (8 big-lag batch sources +
+  probe content-date complement) and the news_swfl novelty guard deferred. Do NOT flip ✅ until live-verify closes.
 - **Owner:** ingest-engineer
 - **Source:** autopsy §9.3 + §5-C (lee_permits landmine)
 
