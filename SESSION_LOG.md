@@ -1,3 +1,20 @@
+## 2026-07-05 (main) — BUILD: account quick-access — dropdown + route-modal brand/schedule editors (12 tasks)
+
+Executed `docs/superpowers/plans/2026-07-05-account-quick-access.md` inline, all 12 tasks: `resume` in the
+schedule-command core (e3649278) · `writeAction` extracted to `lib/email/schedule-write.ts` + `patchBodyToCommands`
+· structured `PATCH /api/email/schedules/[id]` (b38414c6; `as Cadence` type fix rode in 1d78d67c) · tested
+`ACCOUNT_MENU` (c0be337f) · brand-reveal claim/fallback registry + pulse (0f227b63) · SiteShell menus render it,
+Brand claims locally first (1d78d67c) · `user_brand_profiles` full-field migration APPLIED to prod + types regen +
+`/api/user/brand` allowlists (ed288fd0) — global saves stop silently dropping 10 BrandingBlock fields ·
+`@accountModal` slot + shell (8f54c5ff) · `/account/brand` page+modal on BrandingBlock (ab70cdd8) ·
+`/account/schedules` full-edit surface (062f9025) · reveal registrations on workspace pill + both lab accordions
+(a9a4adab). Gates: 1009 tests green (nav/brand/email sweep), `bunx next build` ✓ at a9a4adab. Cross-session commit
+sweeps (shared index, 3+ live sessions): their 8931ad03 carried my Task-2 files; my 1d78d67c carried their
+author-recipes.*; my ed288fd0 carried their weekly-read/issue.* + EmailLabGridShell — content correct + tested,
+boundaries cosmetic, no history surgery under live sessions. Push: riding the parallel session's un-red-Vercel
+stack push (their entry below). Next: operator smoke (mid-edit lab → Brand opens LOCAL accordion, canvas intact;
+/charts → Brand modal; schedule hour edit moves next_run_at) → close `account_quick_access_live_verify`.
+
 ## 2026-07-05 (main) — log: push 10 parallel-session commits to un-red Vercel (schedules route type fix) + /pulse rebuild
 
 Prod deploys RED since 7dc0781e: email session's b38414c6 had a type error in
