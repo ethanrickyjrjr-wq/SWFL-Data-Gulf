@@ -98,4 +98,13 @@ describe("buildEmailDocOccurrence", () => {
     });
     expect(await buildEmailDocOccurrence("deliv-1", deps)).toBeNull();
   });
+
+  test("occurrence html binds the doc footer's #unsubscribe to the broadcast token", async () => {
+    const { deps } = makeDeps({
+      renderDoc: async () => `<html><body><a href="#unsubscribe">Unsubscribe</a></body></html>`,
+    });
+    const built = await buildEmailDocOccurrence("d1", deps);
+    expect(built?.emailDocHtml?.includes("#unsubscribe")).toBe(false);
+    expect(built?.emailDocHtml?.includes("{{{RESEND_UNSUBSCRIBE_URL}}}")).toBe(true);
+  });
 });

@@ -14,6 +14,8 @@ import { EmailDocSchema } from "./doc/schema";
 import type { EmailDoc } from "./doc/types";
 import { deriveEmailDocSubject } from "./emaildoc-subject";
 import type { BuildScope } from "./build-doc";
+import { bindUnsubscribeHref } from "./bind-unsubscribe";
+import { UNSUBSCRIBE_TOKEN } from "./scheduler";
 
 /** The deliverable fields the lane reads (a `deliverables` row is a superset). */
 export interface EmailDocDeliverable {
@@ -81,6 +83,7 @@ export async function buildEmailDocOccurrence(
   const prompt = stored || refreshPrompt(scope);
 
   const freshDoc = await deps.buildDoc({ prompt, rawDoc: parsed.data, scope });
-  const emailDocHtml = await deps.renderDoc(freshDoc);
+  const rendered = await deps.renderDoc(freshDoc);
+  const emailDocHtml = bindUnsubscribeHref(rendered, UNSUBSCRIBE_TOKEN);
   return { subject: deriveEmailDocSubject(freshDoc), body: "", emailDocHtml };
 }
