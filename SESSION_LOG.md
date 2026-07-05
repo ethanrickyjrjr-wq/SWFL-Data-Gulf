@@ -10,6 +10,20 @@ reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in
 order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
 those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
 deliverable_distiller_live_verify stays open (operator-run live proof).
+## 2026-07-05 (main) — BUILD: Haiku-vs-Sonnet distill comparison — day 1 RUN (operator-approved), check haiku_vs_sonnet_distill_daily
+
+Operator: "Run haiku, show me the difference vs old sonnet writings over the next few days, keep it in a file
+with the specs to change." NEW `scripts/compare-distill-writing.py` (READ-ONLY on the lake, no writes):
+rebuilds each city's capture from Sonnet-era rows' own citation spans (captured_at < 07/05), runs the CURRENT
+Haiku distill on the SAME spans/prompt/schema in memory, appends verbatim span-pairs to
+`verification/haiku-vs-sonnet-distill.md` (header = the retrofit specs-to-change). $5-ceiling preflight;
+spend metered (call_type ingest_city_pulse_distill); ran via paid-run valve. DAY 1 (3 cities): Haiku keeps
+FEWER facts (Marco 8 vs 11, Bonita 5 vs 10), compresses away names/addresses/dates Sonnet kept verbatim, one
+topic drift (business→breaking), and ONE REAL MISATTRIBUTION: Haiku credited the tax-revenue bump to Island
+Plaza ($26.6M) instead of the JW Marriott resort sale ($835M) — the exact fidelity risk to weigh for the
+retrofit. NOTE: operator refilled credits + restored live ANTHROPIC_API_KEY in .env.local by hand (their
+call — tripwire will show the quarantine RED until relocked or accepted). Daily protocol in the file;
+check haiku_vs_sonnet_distill_daily open.
 
 ## 2026-07-05 (main) — SPEC: deliverable-distiller — reverse-engineer found deliverables into skeletons + recipes (email + social)
 
