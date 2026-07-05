@@ -81,7 +81,7 @@ export default async function ProjectEmailLabPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, title, items, branding, ui_state")
+    .select("id, title, items, branding, ui_state, subject_address")
     .eq("id", id)
     .maybeSingle();
 
@@ -157,10 +157,12 @@ export default async function ProjectEmailLabPage({
       initialTokens={initialTokens}
       initialBranding={branding as Record<string, string>}
       scope={
+        // Address spine (build 2): a listing project's saved subject address
+        // rides the scope so the build feed pulls its nearby sold comps.
         scope.zip
-          ? { kind: "zip", value: scope.zip }
+          ? { kind: "zip", value: scope.zip, address: project.subject_address ?? undefined }
           : scope.place
-            ? { kind: "place", value: scope.place }
+            ? { kind: "place", value: scope.place, address: project.subject_address ?? undefined }
             : undefined
       }
       initialDoc={initialDoc}

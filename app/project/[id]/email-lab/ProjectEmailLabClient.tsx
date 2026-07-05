@@ -28,7 +28,9 @@ interface Props {
   /** The raw project branding blob (snake_case) — seeds the lab's live Brand
    *  panel so editing brand here writes back to the SAME projects.branding. */
   initialBranding?: Record<string, string>;
-  scope?: { kind: string; value: string } | null;
+  /** Area scope + optional subject listing address (address spine) — rides
+   *  every build call so the feed pulls the listing's nearby sold comps. */
+  scope?: { kind: string; value: string; address?: string } | null;
   initialDoc?: EmailDoc | null;
   /** True when initialDoc is the homepage-map ?zip= prebuild — suppresses the
    *  one-shot AI auto-build (deterministic seed must not be clobbered by an
