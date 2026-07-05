@@ -6,6 +6,10 @@ export const runtime = "nodejs";
 
 const SESSION_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** MAPBOX_TOKEN is URL-restricted — every Mapbox call must send this exact
+ *  Referer or Mapbox 403s (same constant as refinery/lib/geocode.mts:32-33). */
+const MAPBOX_REFERER = "https://www.swfldatagulf.com/";
+
 // Second half of the hero autocomplete pair: called ONCE when the visitor picks
 // a suggestion. Resolves the pick to { name, zip, inScope } — the ZIP is what
 // the email lab's prebuild needs, and inScope rides the same zip-resolver the
@@ -20,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const res = await fetch(buildRetrieveUrl(id, session, token), {
-      headers: { Referer: req.nextUrl.origin },
+      headers: { Referer: MAPBOX_REFERER },
       signal: AbortSignal.timeout(4000),
     });
     if (!res.ok) return NextResponse.json({ error: "upstream" }, { status: 502 });

@@ -5,6 +5,10 @@ export const runtime = "nodejs";
 
 const SESSION_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** MAPBOX_TOKEN is URL-restricted — every Mapbox call must send this exact
+ *  Referer or Mapbox 403s (same constant as refinery/lib/geocode.mts:32-33). */
+const MAPBOX_REFERER = "https://www.swfldatagulf.com/";
+
 // Server proxy for the homepage hero autocomplete (spec:
 // 2026-07-05-agent-first-homepage-design.md) — the URL-restricted MAPBOX_TOKEN
 // never ships to the browser. Empty-tolerant: any upstream failure returns
@@ -20,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const res = await fetch(buildSuggestUrl(q, session, token), {
-      headers: { Referer: req.nextUrl.origin },
+      headers: { Referer: MAPBOX_REFERER },
       signal: AbortSignal.timeout(4000),
     });
     if (!res.ok) return NextResponse.json({ suggestions: [] });
