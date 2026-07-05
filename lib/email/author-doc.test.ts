@@ -85,7 +85,8 @@ describe("stat-value moat (the prose lint never sees stats — assembly must gua
             type: "stats",
             stats: [
               { value: "$999,999", label: "Invented" }, // unanchored literal → blanked
-              { value_figure: "f1", label: "DOM" }, // id-selected → verbatim "47"
+              // id-selected → verbatim "47"; its label becomes the MENU label
+              { value_figure: "f1", label: "DOM" },
               { value: "Buyer's market", label: "Climate" }, // qualitative → kept
             ],
           },
@@ -95,7 +96,7 @@ describe("stat-value moat (the prose lint never sees stats — assembly must gua
     const stats = doc.blocks.find((b) => b.type === "stats");
     const cells = propsOf(stats!).stats as Array<{ value: string; label: string }>;
     expect(cells.find((c) => c.label === "Invented")?.value).toBe("");
-    expect(cells.find((c) => c.label === "DOM")?.value).toBe("47");
+    expect(cells.find((c) => c.label === "Average days on market")?.value).toBe("47");
     expect(cells.find((c) => c.label === "Climate")?.value).toBe("Buyer's market");
     // The invented number never appears ANYWHERE in the doc.
     expect(JSON.stringify(doc)).not.toContain("999,999");
@@ -645,5 +646,57 @@ describe("promptAnchors — lane 4 (figures the user gave)", () => {
     const anchors = collectAnchorNumbers([], promptAnchors("asking $1,200,000"));
     const r = lintAuthoredProse(doc, anchors, []); // recorded anchors EMPTY
     expect(r.ok).toBe(false);
+  });
+});
+
+// ── menu-label fidelity (an id-selected figure carries its OWN label) ──────────
+// A real value under a re-attributed label ("List Price" on a ZIP median) was the
+// Rainbow Meadows failure: the VALUE was anchored, the LABEL was free text. For
+// any value_figure cell the engine now writes the menu figure's own label.
+
+describe("menu-label fidelity — an id-selected figure carries its own label", () => {
+  test("a lying authored stats label is replaced by the menu figure's label", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [{ type: "stats", stats: [{ value_figure: "f0", label: "List Price" }] }],
+      }),
+    );
+    const cells = propsOf(doc.blocks.find((b) => b.type === "stats")!).stats as Array<{
+      value: string;
+      label: string;
+    }>;
+    expect(cells[0].label).toBe("Median home value — Naples (34102)");
+    expect(cells[0].value).toBe("$1,250,000");
+  });
+
+  test("a literal qualitative cell keeps its authored label", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [{ type: "stats", stats: [{ value: "Buyer's market", label: "Custom" }] }],
+      }),
+    );
+    const cells = propsOf(doc.blocks.find((b) => b.type === "stats")!).stats as Array<{
+      value: string;
+      label: string;
+    }>;
+    expect(cells[0].label).toBe("Custom");
+  });
+
+  test("hero label follows the selected figure too", () => {
+    const doc = assembleAuthoredDoc(
+      args({ blocks: [{ type: "hero", value_figure: "f1", label: "This Home's DOM" }] }),
+    );
+    expect(propsOf(doc.blocks.find((b) => b.type === "hero")!).label).toBe(
+      "Average days on market",
+    );
+  });
+
+  test("hero without a figure keeps the authored label", () => {
+    const doc = assembleAuthoredDoc(
+      args({ blocks: [{ type: "hero", label: "A qualitative headline" }] }),
+    );
+    expect(propsOf(doc.blocks.find((b) => b.type === "hero")!).label).toBe(
+      "A qualitative headline",
+    );
   });
 });

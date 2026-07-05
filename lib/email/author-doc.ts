@@ -317,7 +317,7 @@ export function authorSystem(opts: {
       "estate intelligence platform. You compose a complete, on-brand marketing " +
       "email from real data by calling the author_email tool.",
     `BLOCK VOCABULARY (use only these \`type\` values): ${opts.vocabulary.join(", ")}.`,
-    `DATA MENU — the ONLY source of numbers. Select figures by their [fN] id; the\nsystem writes the exact value. Never type a number that is not here.\n${renderFigureMenu(opts.menu)}`,
+    `DATA MENU — the ONLY source of numbers. Select figures by their [fN] id; the\nsystem writes the exact value AND that figure's own label. Write your own label\nonly on qualitative cells. Never type a number that is not here.\n${renderFigureMenu(opts.menu)}`,
     "SCHEDULING — if this content reads like a recurring digest (a weekly/monthly market update, not " +
       "a one-off), you MAY optionally set schedule_suggestion (cadence + a one-sentence reason). Omit " +
       "it for a one-off email.",
@@ -365,12 +365,14 @@ interface Entry {
 /** Fill a content block's text fields from the author's output, leaving identity/
  *  brand/structural defaults intact (applyBrand owns those). Number-bearing fields
  *  are resolved via the menu (`num`) — an unresolved id blanks the field rather
- *  than leaking the placeholder default number. */
+ *  than leaking the placeholder default number. `fig` resolves the WHOLE menu
+ *  figure so an id-selected value carries its own label (menu-label fidelity). */
 function applyContent(
   type: BlockType,
   props: Record<string, unknown>,
   a: AuthoredBlock,
   num: (id?: string) => string | undefined,
+  fig: (id?: string) => MarketFigure | undefined,
 ): void {
   // Clamp to the TARGET prop-schema maxima (doc/schema.ts) so an over-long authored
   // field never fails EmailDocSchema and discards the whole doc. Authored maxima
@@ -383,7 +385,10 @@ function applyContent(
     case "hero":
       props.value = (num(a.value_figure) ?? "").slice(0, 24);
       props.kicker = (a.kicker ?? "").slice(0, 60);
-      props.label = (a.label ?? a.title ?? "").slice(0, 80);
+      // Menu-label fidelity: an id-selected headline value carries the menu
+      // figure's OWN label — a real number must never ship under a label that
+      // re-attributes it ("List Price" on a ZIP median). No figure → authored.
+      props.label = (fig(a.value_figure)?.label ?? a.label ?? a.title ?? "").slice(0, 80);
       props.prose = (a.prose ?? a.body ?? "").slice(0, 500);
       break;
     case "signal":
@@ -499,7 +504,8 @@ function buildEntry(
   // placeholder number. It's already kept out of the author's vocabulary
   // (lib/email/build-doc.ts); dropping it here too makes a rogue emit inert.
   if (type === "metric-card") return null;
-  const num = (id?: string) => (id ? figuresById.get(id)?.value : undefined);
+  const fig = (id?: string) => (id ? figuresById.get(id) : undefined);
+  const num = (id?: string) => fig(id)?.value;
   const span = a.span ?? GRID_COLS;
   const newRow = a.new_row ?? true;
   let placedChart = false;
@@ -582,12 +588,19 @@ function buildEntry(
     props.items = items;
   } else if (type === "stats") {
     const cells = (a.stats ?? [])
-      .map((s) => ({
-        // id-selected figure value (always anchored) OR a literal that invents no
-        // number (anchoredStatValue blanks an unanchored figure) — never raw model digits.
-        value: num(s.value_figure) ?? anchoredStatValue(s.value ?? "", anchors),
-        label: s.label ?? "",
-      }))
+      .map((s) => {
+        const f = fig(s.value_figure);
+        return {
+          // id-selected figure value (always anchored) OR a literal that invents no
+          // number (anchoredStatValue blanks an unanchored figure) — never raw model digits.
+          value: f?.value ?? anchoredStatValue(s.value ?? "", anchors),
+          // Menu-label fidelity: an id-selected cell carries the figure's OWN label
+          // (clamped to StatItemSchema's 60) — a real value must never ship under a
+          // re-attributing label ("List Price" on a ZIP median, the Rainbow Meadows
+          // failure). Literal/qualitative cells keep their authored label.
+          label: f?.label ? f.label.slice(0, 60) : (s.label ?? ""),
+        };
+      })
       .filter((c) => c.value !== "" || c.label !== "")
       .slice(0, 3);
     if (cells.length === 0) return null; // no resolvable cells — skip (never ship placeholder stats)
@@ -595,7 +608,7 @@ function buildEntry(
     props.stats = cells;
   } else {
     props = defaultPropsFor(type) as unknown as Record<string, unknown>;
-    applyContent(type, props, a, num);
+    applyContent(type, props, a, num, fig);
     // Reply CTA: the model wrote the label; the ENGINE owns the destination
     // (same contract as multi-column links above).
     if (type === "button" && buttonMailto) props.url = buttonMailto;
