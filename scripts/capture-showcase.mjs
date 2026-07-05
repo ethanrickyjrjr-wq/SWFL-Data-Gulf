@@ -28,6 +28,11 @@ const SHOWCASES = [
       "05-sold.html",
     ],
   },
+  {
+    id: "agent-launch",
+    width: 700,
+    files: ["01-letter.html", "02-headlines-vs-here.html", "03-review-snapshot.html"],
+  },
   { id: "launch-blitz", width: 700, files: ["agent-intro.html"] },
   { id: "launch-blitz", width: 1440, files: ["social-pack.html"], startAt: 2 },
   { id: "market-pulse", width: 1100, files: ["ask.html"] },

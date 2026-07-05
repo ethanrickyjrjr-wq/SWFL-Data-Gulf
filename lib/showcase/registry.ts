@@ -17,7 +17,7 @@ import type { Cadence } from "@/lib/email/schedule-cadence";
  *  email+social showcases but each is ONE campaign button. See lib/campaigns.ts. */
 export interface ShowcaseCampaign {
   /** Stable campaign key — also the ?campaign= deep-link value for social. */
-  key: "new-listing" | "newsletter" | "new-listing-socials";
+  key: "new-listing" | "newsletter" | "new-listing-socials" | "agent-launch";
   /** Button label, e.g. "New Listing Campaign". */
   label: string;
   /** One-line description under the label. */
@@ -234,6 +234,93 @@ export const SHOWCASES: Showcase[] = [
             "Build a social post for my farm area [[your city or ZIP]] — a data-hook caption from live listings and a local + broad hashtag mix.",
           needs: ["agent_name", "brokerage", "business_address"],
           target: "social",
+        },
+      },
+    ],
+  },
+  {
+    id: "agent-launch",
+    company: "Gulfline Realty · Bonita Springs",
+    title: "Agent Launch: Day One, With Receipts",
+    hook: "A brand-new agent introduces herself with one real market number — then the weekly update sends itself.",
+    campaign: {
+      key: "agent-launch",
+      label: "Agent Launch Campaign",
+      blurb:
+        "Introduce yourself to your sphere with a real market insight — then a weekly update that sends itself.",
+      status: "live",
+      surface: "email",
+      seedRecipe: {
+        prompt:
+          "Build my agent-launch announcement email introducing me to my sphere — open like a personal letter about why I got into real estate here, lead with one real market insight about [[your city or ZIP]], a short numbered what-happens-next of what I'll send each week, and one reply CTA. My photo sits beside the letter, not above it.",
+        needs: ["agent_name", "photo_url", "brokerage", "business_address"],
+      },
+      followUp: {
+        label: "schedule your weekly sphere update",
+        recipe: {
+          prompt:
+            "Build a weekly sphere market update for [[your city or ZIP]] — one national or Florida headline number set beside my own area's number, one honest read of the gap, and end by inviting readers to reply with their address and the word REVIEW for their home's snapshot. Schedule it every Tuesday morning.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
+      },
+    },
+    cadenceRefresh: {
+      daily: ["the live listing counts and asking prices near the reader"],
+      weekly: ["the broad-market versus your-area contrast figures"],
+      monthly: ["the area's home-value trend line"],
+    },
+    accent: "#1F4D3A",
+    thumb: "/showcase/agent-launch/thumb.webp",
+    surfaces: ["email"],
+    disclosure:
+      "Demonstration campaign — Gulfline Realty and Marisol Vega are fictional (her portrait is AI-generated). Every number is real — SWFL Data Gulf listing feed and Zillow Home Value Index (07/05/2026).",
+    slides: [
+      {
+        image: "/showcase/agent-launch/step-1.webp",
+        title: "The Letter",
+        whatsHappening:
+          "Day-one announcement to her own sphere: a personal letter beside her portrait, opening with why the reader is getting it — and carrying exactly one hard number.",
+        howAiHandled:
+          "Wrote the letter for one reader, pinned the area's real home-value figure as an accent-bordered clipping with its source, and ended on a single reply ask — no chart, no pitch.",
+        liveHref: "/showcase/agent-launch/live/01-letter.html",
+        receipt:
+          "Personal welcome emails outperform generic ones 2–3x; the founder-note pattern (real photo, origin line, reply prompt) is the person-brand play (Sequenzy / Omnisend, 2026).",
+        recipe: {
+          prompt:
+            "Build my agent-launch announcement email introducing me to my sphere — open like a personal letter about why I got into real estate here, lead with one real market insight about [[your city or ZIP]], a short numbered what-happens-next of what I'll send each week, and one reply CTA. My photo sits beside the letter, not above it.",
+          needs: ["agent_name", "photo_url", "brokerage", "business_address"],
+        },
+      },
+      {
+        image: "/showcase/agent-launch/step-2.webp",
+        title: "Headlines vs Here",
+        whatsHappening:
+          "The weekly that sends itself: the county's number and the reader's own area side by side, one honest read of the gap, and the REVIEW reply ask.",
+        howAiHandled:
+          "Set the county median beside the area's own figure — each carrying its true source label — read the gap honestly (a paper premium sellers can't assume holds), and named what would change that read.",
+        liveHref: "/showcase/agent-launch/live/02-headlines-vs-here.html",
+        receipt:
+          "Replies are among the strongest sender-trust signals mailbox providers count — a reply-first CTA builds deliverability, not just conversation (Validity, 2026).",
+        recipe: {
+          prompt:
+            "Build a weekly sphere market update for [[your city or ZIP]] — one national or Florida headline number set beside my own area's number, one honest read of the gap, and end by inviting readers to reply with their address and the word REVIEW for their home's snapshot.",
+          needs: ["agent_name", "brokerage", "business_address"],
+        },
+      },
+      {
+        image: "/showcase/agent-launch/step-3.webp",
+        title: "The REVIEW Reply",
+        whatsHappening:
+          "A reader replied REVIEW with their address — this is what Marisol sends back: their area's value level and trend, days on market, and live inventory, each cited.",
+        howAiHandled:
+          "Built the snapshot from held data only — the year-over-year move, months of supply, and the honest read that buyers currently hold the negotiating room — with every source and date listed.",
+        liveHref: "/showcase/agent-launch/live/03-review-snapshot.html",
+        receipt:
+          "A home-value ask is the highest-click hook in agent marketing; answering it with cited data is the trust play (practitioner consensus, r/realtors, 2026).",
+        recipe: {
+          prompt:
+            "Build a one-area home-value snapshot email for [[your city or ZIP]] — the current home-value level and trend, days on market, and active inventory, each cited, with one honest read.",
+          needs: ["agent_name", "brokerage", "business_address"],
         },
       },
     ],

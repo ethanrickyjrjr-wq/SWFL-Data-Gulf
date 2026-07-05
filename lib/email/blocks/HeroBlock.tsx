@@ -40,6 +40,10 @@ export function HeroBlock({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: "0 0 8px",
+            // Clipping heros sit in side-by-side PAIRS — reserve two kicker
+            // lines so a wrapped kicker on one card can never stagger the
+            // values/bottoms against its partner (operator flag 07/05/2026).
+            ...(clipping ? { minHeight: "34px" } : {}),
           }}
         >
           {props.kicker}

@@ -9,9 +9,9 @@ import { NEED_LABELS, findPlaceholder } from "./recipe";
  * asset must be a red test here, never a broken slide in prod.
  */
 describe("showcase registry", () => {
-  it("ships exactly 3 showcases with unique ids", () => {
-    expect(SHOWCASES).toHaveLength(3);
-    expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(3);
+  it("ships exactly 4 showcases with unique ids", () => {
+    expect(SHOWCASES).toHaveLength(4);
+    expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(4);
   });
 
   it("every asset path exists under public/", () => {

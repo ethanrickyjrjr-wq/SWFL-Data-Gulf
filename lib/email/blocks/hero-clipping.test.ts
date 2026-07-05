@@ -42,3 +42,13 @@ describe("hero clipping", () => {
     expect(html).not.toContain("border-left:4px");
   });
 });
+
+it("clipping kicker reserves two lines so a side-by-side pair can never stagger", async () => {
+  const html = await render(
+    HeroBlock({
+      props: { kicker: "Here in your area", value: "$1", label: "l", sectionBg: "#ffffff" },
+      globalStyle: gs,
+    }),
+  );
+  expect(html).toContain("min-height:34px");
+});
