@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — GUARD 4: PUSH LOCK — no session pushes without in-conversation operator approval (hook-enforced)
+
+Operator caught it: GitHub activity API shows **35 session pushes to main in 24h** despite memory rule
+feedback_no-autonomous-push. Memory rules are forgettable; hooks are not. NEW `.claude/hooks/
+check-no-unapproved-push.mjs` (PreToolUse Bash, registered in settings.json, binds EVERY session on this
+machine): blocks all `git push` forms + safe-push.mjs invocations unless prefixed OPERATOR_APPROVED_PUSH=1 —
+set ONLY when the operator says push in the conversation, per push, never standing. Commits/fetch/rebase/pull
+untouched. 12/12 test cases pass. ALSO this hour: paid-run valve committed (fd4b5c50, unpushed) · build
+registered `spend-tripwire` + check `spend_tripwire_live_verify` (deterministic red-flag scan → capped Sonnet
+advisor verdict — spec stub pending, parked for the push-lock emergency). NOT PUSHED — three commits queue
+for the operator's word, as the lock itself now requires.
+
 ## 2026-07-05 (main) — BUILD: agent-launch amendment delta executed inline — campaign provenance LIVE, PDF columns, email-safe crop
 
 Operator: INLINE then FINISH+PUSH. Parallel session had already shipped plan tasks 1-7+old-10; this session
