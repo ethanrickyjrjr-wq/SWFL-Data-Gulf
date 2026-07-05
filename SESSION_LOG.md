@@ -10,6 +10,17 @@ reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in
 order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
 those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
 deliverable_distiller_live_verify stays open (operator-run live proof).
+## 2026-07-05 (main) — DECISION MARKED: Haiku-until-prepared (then Sonnet) + live Anthropic key operator-accepted in tripwire
+
+Operator: "Mark it. We run haiku until we are more prepared and then switch to sonnet." (1) NEW
+`verification/tripwire-accepted.json` — committed, reviewable acceptance; tripwire quarantine check now
+splits accepted-live (YELLOW "LIVE BY OPERATOR ACCEPTANCE… valve covenant still applies") from unexpected-live
+(still RED). Verified: scan shows YELLOW for ANTHROPIC_API_KEY, green "no UNACCEPTED key". (2) Decision
+recorded three places: comparison file OPERATOR DECISION section (incl. switch-to-Sonnet spec: MODEL in
+city_pulse/distill.py + corridor twin, $1 budget re-check — Sonnet distill ≈ $0.05–0.15/run fits), memory
+project_pulse-distill-haiku-until-prepared (+ MEMORY.md index), and here. Daily comparison continues
+(haiku_vs_sonnet_distill_daily) so the eventual switch has evidence. Unpushed; awaiting operator word.
+
 ## 2026-07-05 (main) — BUILD: deliverable-distiller — skill shipped + BOTH first distillations end-to-end (check deliverable_distiller_live_verify stays open)
 
 Executed the 07/05 spec (plan: docs/superpowers/plans/2026-07-05-deliverable-distiller.md). (1) SKILL

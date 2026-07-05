@@ -145,3 +145,13 @@ OPERATOR_APPROVED_PAID_RUN=1 node scripts/paid-run.mjs python scripts/compare-di
 
 _31 span pairs this run; spend metered to api_usage_log (call_type ingest_city_pulse_distill)._
 
+## OPERATOR DECISION — 07/05/2026
+
+**"We run haiku until we are more prepared and then switch to sonnet."**
+Distill stays `claude-haiku-4-5-20251001` for now (already the code's MODEL).
+The switch-to-Sonnet spec, when the operator calls it: change `MODEL` in
+`ingest/pipelines/city_pulse/distill.py` + the corridor twin, re-check the $1
+RunBudget still holds (Sonnet ≈ 5× Haiku token price ⇒ distill ≈ $0.05–0.15/run
+— fits), and log the switch here. Daily comparisons continue meanwhile
+(check `haiku_vs_sonnet_distill_daily`) so the switch decision has evidence.
+

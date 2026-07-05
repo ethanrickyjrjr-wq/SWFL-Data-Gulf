@@ -180,6 +180,16 @@ function checkGuards() {
     yellows.push("QUARANTINE check n/a — no .env.local (CI context)");
   } else {
     const env = envLocal();
+    // Operator can accept a key as deliberately live (committed, reviewable):
+    let accepted = [];
+    try {
+      accepted =
+        JSON.parse(
+          fs.readFileSync(path.join(ROOT, "verification", "tripwire-accepted.json"), "utf8"),
+        ).accepted_live_keys ?? [];
+    } catch {
+      /* no acceptance file → nothing accepted */
+    }
     const liveKeys = [
       "ANTHROPIC_API_KEY",
       "FIRECRAWL_API_KEY",
@@ -188,9 +198,18 @@ function checkGuards() {
       "RENTCAST_API_KEY",
       "VOYAGE_KEY",
     ].filter((k) => env[k]);
-    if (liveKeys.length)
-      reds.push(`QUARANTINE BROKEN — live in .env.local: ${liveKeys.join(", ")}`);
-    else greens.push("QUARANTINE intact — no per-use paid key live in .env.local");
+    const unexpected = liveKeys.filter((k) => !accepted.includes(k));
+    const ok = liveKeys.filter((k) => accepted.includes(k));
+    if (unexpected.length)
+      reds.push(`QUARANTINE BROKEN — live in .env.local: ${unexpected.join(", ")}`);
+    if (ok.length)
+      yellows.push(
+        `LIVE BY OPERATOR ACCEPTANCE (tripwire-accepted.json) — ${ok.join(", ")}; valve covenant still applies`,
+      );
+    if (!unexpected.length && !ok.length)
+      greens.push("QUARANTINE intact — no per-use paid key live in .env.local");
+    else if (!unexpected.length)
+      greens.push("QUARANTINE — no UNACCEPTED paid key live in .env.local");
   }
 
   try {

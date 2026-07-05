@@ -1,0 +1,6 @@
+{
+  "accepted_live_keys": ["ANTHROPIC_API_KEY"],
+  "accepted_on": "07/05/2026",
+  "accepted_by": "operator (in conversation: 'Mark it')",
+  "note": "Operator refilled credits and restored the live Anthropic key in .env.local by hand. Pulse distill runs Haiku until more prepared, then switches to Sonnet. Sessions still may not spend without in-conversation approval (paid-run valve covenant) — this acceptance only silences the quarantine RED, it grants nothing."
+}
