@@ -1,3 +1,18 @@
+## 2026-07-05 (main) — BUILD: lab-email truth guards (all 7 plan tasks, check `lab_email_truth_guards_live_verify`)
+
+Executed `docs/superpowers/plans/2026-07-05-lab-email-truth-guards.md` — Tasks 1-4 subagent-driven with
+per-task reviews (all Spec-OK/Approved), Tasks 5-6 finished INLINE per operator cost ruling mid-run.
+Commits: f1405c61 bindUnsubscribeHref helper · bbaa1404 blast-route per-recipient bind · def57117
+scheduled-lane bind in buildEmailDocOccurrence (+ new emaildoc-occurrence.test.ts) · weekly-read bind
+(swept into parallel session's ed288fd0 — mixed commit, slice reviewed scoped) · 9a85a490 lane-4
+promptAnchors (address/user figures quotable; recorded-claim gate intact) · dc4a3d44 menu-label fidelity
+(id-selected stats/hero carry the menu figure's own label; "List Price on a ZIP median" now structurally
+impossible; 1 existing moat test updated to the new spec). Gates: lib/email+lib/deliverable 1322/0,
+`bunx next build` green. Final whole-branch subagent review SKIPPED (RULE 0.6 + operator cost ruling;
+every diff individually reviewed). Minor findings logged in .superpowers/sdd/progress.md for later triage
+(unescaped quote in bind href — safe for current callers; pre-existing double-footer when a user sets a
+real unsubscribe URL). All but dc4a3d44 already on origin via parallel-session carries.
+
 ## 2026-07-05 (main) — feat(spend-guard): ingest Anthropic metering + hard per-run budgets; web_search crons re-paused per decree
 
 Operator decree ("put guards on all this shit; X per run, over → shut down") after the credit drain.
