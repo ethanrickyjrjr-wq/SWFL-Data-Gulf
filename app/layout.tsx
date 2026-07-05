@@ -41,8 +41,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
+  accountModal,
 }: Readonly<{
   children: React.ReactNode;
+  /** @accountModal parallel slot — /account/* intercepted as modals over the
+   *  current page (spec 2026-07-05-account-quick-access); default.tsx = null. */
+  accountModal: React.ReactNode;
 }>) {
   // Plain env read (not a dynamic API) — keeps the layout static. Gates the whole
   // highlighter root (provider + GlobalHighlighter) and tells AppShell whether a /r/*
@@ -63,6 +67,9 @@ export default function RootLayout({
               everywhere else, nothing on the white-label/auth prefixes. Replaces the
               old split (Header on `/` only + GlobalNav elsewhere) that sealed home. */}
           <SiteShell />
+          {/* Account route-modals (Brand / Email Schedule) — render over whatever
+              page is active; soft-nav keeps that page mounted underneath. */}
+          {accountModal}
           {/* Phase 3C — the highlighter is now the app-root, selection-triggered twin of
               the click-triggered pill. HighlighterProvider (chipFact + conversation thread)
               is LIFTED here from the 5 per-/r/* pages, so GlobalHighlighter + the bridged
