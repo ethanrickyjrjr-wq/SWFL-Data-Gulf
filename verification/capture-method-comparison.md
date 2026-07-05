@@ -19,11 +19,19 @@ Two different questions, two files:
   the corridor baseline is already partially pruned; Tier-1 cold storage holds
   the full raw record. Comparisons should read Tier-1 for the old side.
 
-## When to run
+## When to run — and the hard scope line (operator, 07/05/2026)
 
-After the retrofit's FIRST LIVE run of each pipeline (gate:
-`pulse_crawl4ai_retrofit_live_verify` green), and again ~2 weeks later once
-several runs accumulated. Check: `capture_method_quality_compare`.
+**"We have old reports from sonnet, so don't run a bunch of only-LLMs — just a
+little comparison."** The old side is ALWAYS the stored reports above — the
+Tier-1 raw captures and surviving lake rows that already exist. ZERO new
+LLM-with-web-search runs are ever fired for this comparison (that path is
+locked anyway). The only fresh thing in the comparison is the retrofit's own
+normal scheduled output, which happens regardless.
+
+Scale: a LITTLE comparison — spot-check ~3 cities + ~5 corridors against
+their stored baselines, once after the retrofit's first live run (gate:
+`pulse_crawl4ai_retrofit_live_verify` green) and once ~2 weeks later. Two
+sittings total, then verdict and close. Check: `capture_method_quality_compare`.
 
 ## Metrics per unit (city / corridor)
 

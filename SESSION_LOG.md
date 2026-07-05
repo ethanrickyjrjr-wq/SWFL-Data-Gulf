@@ -1,3 +1,11 @@
+## 2026-07-05 (main) — SCOPE LOCK: capture comparison uses STORED Sonnet reports only — zero new search runs, ~8 units, two sittings
+
+Operator: "We have old reports from sonnet, so don't run a bunch of only LLMs just a little comparison."
+verification/capture-method-comparison.md amended with the hard scope line: old side = existing Tier-1
+captures + surviving lake rows ALWAYS; no LLM-with-web-search run is ever fired for comparison (path locked
+anyway); only fresh input = the retrofit's own normal scheduled output. Scale pinned: spot-check ~3 cities +
+~5 corridors, once at retrofit-first-live + once ~2wks, verdict, close. Unpushed.
+
 ## 2026-07-05 (main) — DISTILLED: two chart-led email recipes — chart-digest (Daily Chartbook) + chart-story (The Morning Print)
 
 Operator: "Go get some high quality graphs and charts and let's see this work." Deliverable-distiller runs
