@@ -1,3 +1,12 @@
+## 2026-07-05 (main) — log: push 10 parallel-session commits to un-red Vercel (schedules route type fix) + /pulse rebuild
+
+Prod deploys RED since 7dc0781e: email session's b38414c6 had a type error in
+`app/api/email/schedules/[id]/route.ts:48` (`as typeof candidate.cadence`); their fix (`as Cadence`)
+sat in a 10-commit UNPUSHED local stack (brand/account/campaigns/nav work, c554f6c3..a9a4adab).
+Verified `bunx next build` green at HEAD, pushing the stack to restore deploys — this also rebuilds
+/pulse WITH the live 2026-W27 digest (DB-verified: 7 benchmarks, 21 top posts, scan 3 = 301 posts).
+`social_pulse_swfl_live_verify` CLOSED with run 28741826681 evidence; `social_pulse_cadence_flip` open.
+
 ## 2026-07-05 (main) — LIVE: Social Pulse scan verified on runner (301 posts, digest 2026-W27) + surrogate fix + narrative key
 
 Operator "run it and confirm": dry-run green (222 posts, 40 weighted req — half the est.), first real run
