@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { Showcase } from "@/lib/showcase/registry";
 import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { totalSteps, clampStep, stepLabel } from "@/lib/showcase/overlay-logic";
+import { CADENCE_COLORS, CADENCE_ORDER } from "@/lib/campaigns/cadence-colors";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { useSession } from "@/lib/auth/use-session";
 
@@ -177,6 +178,37 @@ export function ShowcaseOverlay({
                   <p className="mt-3 border-l-2 border-white/10 pl-2 text-[10px] leading-relaxed text-gray-500">
                     {slide.receipt}
                   </p>
+                )}
+                {showcase.cadenceRefresh && (
+                  <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-white/50">
+                      What the AI keeps fresh
+                    </p>
+                    <ul className="mt-2 space-y-1.5">
+                      {CADENCE_ORDER.filter((c) => showcase.cadenceRefresh?.[c]?.length).map(
+                        (c) => (
+                          <li key={c} className="flex gap-2 text-[11px] leading-snug">
+                            <span
+                              className="mt-px shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                              style={{
+                                background: CADENCE_COLORS[c].bg,
+                                color: CADENCE_COLORS[c].fg,
+                              }}
+                            >
+                              {CADENCE_COLORS[c].label}
+                            </span>
+                            <span className="text-gray-300">
+                              {showcase.cadenceRefresh![c]!.join("; ")}
+                            </span>
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                    <p className="mt-2 text-[9px] leading-snug text-gray-500">
+                      Colors mark how often each figure updates in the data — not how often it
+                      sends.
+                    </p>
+                  </div>
                 )}
                 {recipe && onUseRecipe && (
                   <div

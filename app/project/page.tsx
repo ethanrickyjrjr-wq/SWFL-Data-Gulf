@@ -15,6 +15,7 @@ import {
 import { ImportDraftOnLogin } from "./_import/ImportDraftOnLogin";
 import { NewProjectButton } from "./NewProjectButton";
 import { NewListingButton } from "./NewListingButton";
+import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -151,6 +152,10 @@ export default async function ProjectListPage() {
           <NewProjectButton />
         </div>
       </div>
+
+      {/* Quick-start campaigns — one click drops the user into a pre-shaped
+          recipe (New Listing / Newsletter email, New Listing Socials). */}
+      <CampaignQuickStart surface="all" variant="bare" />
 
       {/* B4 — signed-in home base. The logo lands signed-in users here; this
           header doubles as a hub into the rest of the toolset. */}

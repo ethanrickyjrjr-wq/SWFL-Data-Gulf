@@ -1,6 +1,44 @@
 // lib/email/social-calendar/themes.ts
 import type { DayTheme } from "./types";
 
+/**
+ * The New Listing Socials launch arc — one narrative beat per weekday, mapped
+ * onto DAY_THEMES[0..4] (Mon–Fri). When the campaign is requested, buildWeek
+ * pins ONE listing across every card (no rotation) and steers each day's copy
+ * toward its stage. `stage` becomes the card's visible theme label; `addendum`
+ * is appended to that day's system addendum (no-invention rules untouched — the
+ * model still only fills fields it can cite). Kept beside DAY_THEMES so the
+ * arc-length parity guard (campaigns.test.ts) can import both without the
+ * network-heavy build-week module.
+ */
+export const LISTING_LAUNCH_ARC: { stage: string; addendum: string }[] = [
+  {
+    stage: "Just Listed",
+    addendum:
+      "CAMPAIGN STAGE — Just Listed: announce THIS featured home hitting the market. Lead with its area, price, and one standout spec.",
+  },
+  {
+    stage: "Feature Spotlight",
+    addendum:
+      "CAMPAIGN STAGE — Feature Spotlight: highlight one concrete standout of THIS home buyers care about (space, view, lot, build).",
+  },
+  {
+    stage: "Open House",
+    addendum:
+      "CAMPAIGN STAGE — Open House: invite people to see THIS home in person. If no date is provided, use a [Need: open house date and time] placeholder.",
+  },
+  {
+    stage: "Neighborhood",
+    addendum:
+      "CAMPAIGN STAGE — Neighborhood: sell the location around THIS home with one cited local signal for its ZIP or area.",
+  },
+  {
+    stage: "Price & CTA",
+    addendum:
+      "CAMPAIGN STAGE — Price & CTA: make the price case for THIS home with a cited comparable, and end with one clear showing CTA.",
+  },
+];
+
 export const DAY_THEMES: DayTheme[] = [
   {
     day: "mon",

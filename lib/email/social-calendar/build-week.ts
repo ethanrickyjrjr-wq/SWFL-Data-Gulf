@@ -16,7 +16,7 @@ import {
   type BuildScope,
 } from "@/lib/email/build-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
-import { DAY_THEMES } from "./themes";
+import { DAY_THEMES, LISTING_LAUNCH_ARC } from "./themes";
 import type {
   DayTheme,
   GoalTone,
@@ -268,7 +268,14 @@ export async function buildSocialPost(
 export async function buildWeek(
   scope: BuildScope | undefined,
   weekOf: string,
-  opts?: { platforms?: Platform[]; goalTone?: GoalTone },
+  opts?: {
+    platforms?: Platform[];
+    goalTone?: GoalTone;
+    /** New Listing Socials campaign — pins one listing across the week and runs
+     *  LISTING_LAUNCH_ARC. `listingId` picks the subject home from the ranked
+     *  set; absent, the top-ranked featurable listing is used. */
+    campaign?: { listingId?: string };
+  },
 ): Promise<WeeklyCalendar> {
   const { figures, dossier } = await fetchLakeParts(scope);
   const today = new Date();
@@ -294,11 +301,24 @@ export async function buildWeek(
   // Rotate a featured (aerial-able) listing across the weekday posts — each card gets a
   // real local lot's satellite view; days repeat only if fewer listings than days.
   const featurable = listingCtx.ranked.filter((l) => l.latitude != null && l.longitude != null);
+  // New Listing Socials campaign: run the launch arc and PIN one listing (the
+  // named one, else the top-ranked) onto every card instead of rotating.
+  const arc = opts?.campaign ? LISTING_LAUNCH_ARC : null;
+  const pinned = opts?.campaign
+    ? ((opts.campaign.listingId
+        ? featurable.find((l) => l.id === opts.campaign!.listingId)
+        : undefined) ?? featurable[0])
+    : undefined;
+  // buildSocialPost doesn't take `campaign` — pass only the post-level opts.
+  const postBaseOpts = { platforms: opts?.platforms, goalTone: opts?.goalTone };
   const results = await Promise.all(
     DAY_THEMES.map((t, i) => {
-      const featured = featurable.length ? featurable[i % featurable.length] : undefined;
-      const postOpts = opts || featured ? { ...opts, featured } : undefined;
-      return buildSocialPost(t, lakeContext, postOpts);
+      const featured =
+        pinned ?? (featurable.length ? featurable[i % featurable.length] : undefined);
+      const theme = arc?.[i]
+        ? { ...t, label: arc[i].stage, systemAddendum: `${t.systemAddendum}\n\n${arc[i].addendum}` }
+        : t;
+      return buildSocialPost(theme, lakeContext, { ...postBaseOpts, featured });
     }),
   );
   const posts = results.filter((p): p is SocialDraft => p !== null);

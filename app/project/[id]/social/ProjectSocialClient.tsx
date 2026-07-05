@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SocialComposer } from "@/components/email-lab/social/SocialComposer";
 import { SocialElementInspector } from "@/components/email-lab/social/SocialElementInspector";
 import { useSocialComposer } from "@/components/email-lab/social/useSocialComposer";
@@ -10,6 +10,7 @@ import { SocialCalendarPanel } from "@/components/email-lab/SocialCalendarPanel"
 import { ScheduleSocialModal } from "@/components/email-lab/ScheduleSocialModal";
 import { PhotosPanel } from "@/components/email-lab/PhotosPanel";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
+import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import type { SocialElement } from "@/lib/social/design/types";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import { applyBrand } from "@/components/email-lab/EmailLabShell";
@@ -29,6 +30,9 @@ interface Props {
    *  in page.tsx into a target:"social" ShowcaseRecipe) — seeds the Build-with-
    *  AI box with the prompt, blank highlighted, instead of opening empty. */
   initialRecipe?: ShowcaseRecipe | null;
+  /** Quick-start campaign deep-link (?campaign=, resolved in page.tsx). When
+   *  "new-listing-socials", auto-generates the listing-launch week on arrival. */
+  initialCampaign?: string | null;
 }
 
 // Element palette for the "Add" section (mirrors the grid shell's private
@@ -61,6 +65,7 @@ export function ProjectSocialClient({
   scope,
   projectPhotos,
   initialRecipe,
+  initialCampaign,
 }: Props) {
   const router = useRouter();
   const social = useSocialComposer({ scope, projectId, branding, initialRecipe });
@@ -77,13 +82,13 @@ export function ProjectSocialClient({
   const [previewCard, setPreviewCard] = useState<EmailDoc | null>(null);
   const [savingCard, setSavingCard] = useState(false);
 
-  async function generateWeek() {
+  async function generateWeek(campaign?: "new-listing") {
     setCalState("loading");
     try {
       const res = await fetch("/api/email-lab/social-calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scope }),
+        body: JSON.stringify(campaign ? { scope, campaign } : { scope }),
       });
       const data = (await res.json()) as { calendar?: WeeklyCalendar };
       if (data.calendar?.posts?.length) {
@@ -96,6 +101,27 @@ export function ProjectSocialClient({
       setCalState("error");
     }
   }
+
+  // Deep-link arrival from a "New Listing Socials" quick-start button: generate
+  // the listing-launch week once on mount (a fetch side-effect, not derived
+  // state — the setState calls live inside generateWeek, off the effect body).
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || initialCampaign !== "new-listing-socials") return;
+    autoRan.current = true;
+    // Only auto-generate when the project has a listing area — otherwise a launch
+    // "week" would be a region-wide post about an arbitrary home (see the notice
+    // below). Defer a tick so the effect doesn't setState synchronously.
+    if (!scope) return;
+    const id = setTimeout(() => void generateWeek("new-listing"), 0);
+    return () => clearTimeout(id);
+    // generateWeek closes over `scope`; intentionally fire-once on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCampaign]);
+
+  // Arrived from a New Listing Socials button but the project has no listing
+  // area yet — prompt for it instead of silently generating a region-wide week.
+  const campaignNeedsScope = initialCampaign === "new-listing-socials" && !scope;
 
   // "Load Card" — render the day's EmailDoc with the project brand into the
   // preview section (brand applied client-side, the established card path).
@@ -282,6 +308,17 @@ export function ProjectSocialClient({
             </div>
           </div>
 
+          {/* ── Start a campaign — New Listing Socials launch week ── */}
+          <CampaignQuickStart surface="social" projectId={projectId} />
+          {campaignNeedsScope && (
+            <div className="border-b border-white/8 px-4 py-3">
+              <p className="text-[11px] leading-snug text-amber-300/80">
+                Add your listing&rsquo;s city or ZIP to this project, then Generate Week to build
+                the launch sequence about your listing.
+              </p>
+            </div>
+          )}
+
           {/* ── Social calendar (Generate Week) ── */}
           <div className="border-b border-white/8 px-4 pb-4 pt-3">
             <button
@@ -296,7 +333,7 @@ export function ProjectSocialClient({
                 state={calState}
                 calendar={calendar}
                 expandedDay={expandedDay}
-                onGenerate={generateWeek}
+                onGenerate={() => void generateWeek()}
                 onToggleDay={(d) => setExpandedDay((cur) => (cur === d ? null : d))}
                 onCopyCaption={(d) => void navigator.clipboard.writeText(formatForClipboard(d))}
                 onLoadCard={loadCard}

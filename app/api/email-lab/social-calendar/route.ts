@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     platforms?: unknown;
     goal?: unknown;
     tone?: unknown;
+    campaign?: unknown;
   };
   const weekOf = body.weekOf ?? mondayOf(new Date());
 
@@ -42,7 +43,12 @@ export async function POST(req: NextRequest) {
       ? { goal: body.goal as SocialGoal, tone: body.tone as SocialTone }
       : undefined;
 
-  const opts = platforms.length || goalTone ? { platforms, goalTone } : undefined;
+  // New Listing Socials launch week — whitelist the one known campaign key; the
+  // subject listing is chosen server-side (top-ranked) so a body can't inject one.
+  const campaign = body.campaign === "new-listing" ? {} : undefined;
+
+  const opts =
+    platforms.length || goalTone || campaign ? { platforms, goalTone, campaign } : undefined;
   const calendar = await buildWeek(body.scope, weekOf, opts);
   return NextResponse.json({ calendar });
 }

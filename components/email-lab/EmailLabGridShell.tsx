@@ -59,6 +59,7 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
+import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import {
   brandGaps,
   findPlaceholder,
@@ -1091,6 +1092,8 @@ export function EmailLabGridShell({
         </div>
 
         <div className="flex-1 overflow-y-auto">
+          {/* ── Start a campaign — seeds the Build box below via handleUseRecipe ── */}
+          {mode === "email" && <CampaignQuickStart surface="email" onUseRecipe={handleUseRecipe} />}
           {/* ── Build the whole email ── */}
           {mode === "email" && (
             <div className="border-b border-white/8 px-4 pb-4 pt-4">

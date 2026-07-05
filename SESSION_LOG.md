@@ -1,3 +1,29 @@
+## 2026-07-05 (main) — BUILD: quick-start campaign buttons (Projects · Email Lab · Social)
+
+Implemented the 2026-07-04 spec. Registered `campaign-quick-start` (`campaign_quick_start_live_verify` open).
+Verified all spec integration points against live code first (3 Explore agents) — corrected 4 drifts before writing.
+
+- **New:** `lib/campaigns.ts` (thin selector over `SHOWCASES`, no parallel registry) + `lib/campaigns/cadence-colors.ts`
+  (`CADENCE_COLORS` keyed to the `Cadence` type) + `components/campaigns/CampaignQuickStart.tsx` + `lib/campaigns.test.ts`.
+- **Extended `Showcase`** with `campaign?` (label/blurb/status/surface/seedRecipe) + `cadenceRefresh?`; filled the
+  three existing showcases (`listing-to-close`=New Listing, `market-pulse`=Newsletter, `launch-blitz`=New Listing Socials).
+  Button identity keys off `campaign.surface`, NOT `showcase.surfaces` (both social showcases are email+social).
+- **Cadence legend = DATA-FRESHNESS, not send-schedule** (operator decision) — rendered in `ShowcaseOverlay` caption
+  column with an explicit "how often the figure updates, not how often it sends" disclaimer. Caption-only this build;
+  literal `data-cadence` artifact tinting deferred (model built).
+- **Placements:** hub (`app/project/page.tsx`, variant="bare"), Email Lab (`EmailLabGridShell.tsx`, seeds Build box via
+  `handleUseRecipe`), Social cockpit (`ProjectSocialClient.tsx`). Email inherits the paid shell — no new gate.
+- **Social launch arc:** `buildWeek` gains `opts.campaign` — pins ONE listing across the week + runs `LISTING_LAUNCH_ARC`
+  (Just Listed→Feature→Open House→Neighborhood→Price/CTA), moved to `themes.ts` for testability. API route whitelists
+  `campaign:"new-listing"`; posts SCHEDULE (dry-run) until `SOCIAL_PUBLISH_ENABLED` flips — never "posted".
+- **Scope-flow fix (advisor caught):** the hub social button was creating an empty project → SWFL-wide week about an
+  arbitrary listing. Now it collects the listing area (mirrors `NewListingButton`), the social `page.tsx` scopes from
+  `subject_address` through the ONE scope root when items are empty, and auto-generate is gated on scope (blank → prompt,
+  never region-wide). In-project path unchanged.
+- **Verified offline:** `bunx next build` green, eslint clean (deferred the mount-effect fetch a tick to satisfy
+  `react-hooks/set-state-in-effect`), `bun test` 8+ pass. Live E2E is operator-run (`campaign_quick_start_live_verify`).
+- **Next:** operator live-verify the 3 buttons; social go-live (task 05) to actually post; literal artifact tinting later.
+
 ## 2026-07-04 (main) — spec: quick-start campaign buttons (Projects · Email Lab · Social) — RESEARCH + PLAN ONLY
 
 Wrote `docs/superpowers/specs/2026-07-04-quick-start-campaign-buttons-design.md`. No product code — spec/design

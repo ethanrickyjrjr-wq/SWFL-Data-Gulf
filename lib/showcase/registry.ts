@@ -8,6 +8,27 @@
  */
 
 import type { ShowcaseRecipe } from "./recipe";
+import type { Cadence } from "@/lib/email/schedule-cadence";
+
+/** Quick-start campaign metadata — a Showcase that is ALSO a one-click campaign
+ *  gets this. `surface` is the BUTTON placement lane (which quick-start row it
+ *  appears in), deliberately separate from `Showcase.surfaces` (which lab's
+ *  Examples accordion lists the showcase) — market-pulse/launch-blitz are both
+ *  email+social showcases but each is ONE campaign button. See lib/campaigns.ts. */
+export interface ShowcaseCampaign {
+  /** Stable campaign key — also the ?campaign= deep-link value for social. */
+  key: "new-listing" | "newsletter" | "new-listing-socials";
+  /** Button label, e.g. "New Listing Campaign". */
+  label: string;
+  /** One-line description under the label. */
+  blurb: string;
+  status: "live";
+  /** Which quick-start row this button belongs in. */
+  surface: "email" | "social";
+  /** Email campaigns hand this recipe to the builder; social campaigns create a
+   *  listing project + deep-link instead, so they omit it. */
+  seedRecipe?: ShowcaseRecipe;
+}
 
 export interface ShowcaseSlide {
   /** Root-relative committed capture, e.g. "/showcase/<id>/step-1.webp". */
@@ -42,6 +63,12 @@ export interface Showcase {
    *  section filters on it (email examples in Email, social in Social). */
   surfaces: ("email" | "social")[];
   slides: ShowcaseSlide[];
+  /** Present when this showcase is ALSO a one-click quick-start campaign. */
+  campaign?: ShowcaseCampaign;
+  /** Data-freshness explainer for the cadence legend — plain-language list of
+   *  which figures the AI refreshes at each cadence. NOT a send schedule; see
+   *  lib/campaigns/cadence-colors.ts. Rendered in the overlay caption column. */
+  cadenceRefresh?: Partial<Record<Cadence, string[]>>;
 }
 
 /** The showcases for one lab surface. */
@@ -55,6 +82,23 @@ export const SHOWCASES: Showcase[] = [
     company: "Latitude 26 Estates · Naples",
     title: "Listing → Close: The Auto Email Plan",
     hook: "Five emails carry one $14.8M listing from teaser to sold — every number sourced.",
+    campaign: {
+      key: "new-listing",
+      label: "New Listing Campaign",
+      blurb: "Announce a new listing with cited specs, a price chart, and an honest market read.",
+      status: "live",
+      surface: "email",
+      seedRecipe: {
+        prompt:
+          "Build a new-listing announcement email for my listing at [[your listing address]] — key specs, price per square foot, a chart of the ZIP's home-value trend, and one honest line about where that market sits.",
+        needs: ["agent_name", "brokerage", "business_address"],
+      },
+    },
+    cadenceRefresh: {
+      daily: ["the live active-listing count and asking prices nearby"],
+      weekly: ["the comparable-sale set behind the price case"],
+      monthly: ["the neighborhood's home-value trend line"],
+    },
     accent: "#B98F45",
     thumb: "/showcase/listing-to-close/thumb.webp",
     surfaces: ["email"],
@@ -139,6 +183,16 @@ export const SHOWCASES: Showcase[] = [
     company: "Cast & Coast Realty · Cape Coral",
     title: "Launch Weekend: Listing + Social Blitz",
     hook: "One mid-market listing launches with an agent-brand email and four social formats — same real numbers everywhere.",
+    campaign: {
+      key: "new-listing-socials",
+      label: "New Listing Socials Campaign",
+      blurb:
+        "A week of launch posts for one listing — Just Listed through Price & CTA, across platforms.",
+      status: "live",
+      surface: "social",
+      // No seedRecipe — social campaigns create a listing project and generate a
+      // launch week via buildWeek, not a builder recipe (see lib/campaigns.ts).
+    },
     accent: "#0E7C86",
     thumb: "/showcase/launch-blitz/thumb.webp",
     surfaces: ["email", "social"],
@@ -185,6 +239,23 @@ export const SHOWCASES: Showcase[] = [
     company: "Meridian South Advisory · Fort Myers",
     title: "The Market Pulse: Set It Once",
     hook: "Type the ask once — the monthly brief and its socials rebuild themselves from fresh data.",
+    campaign: {
+      key: "newsletter",
+      label: "Newsletter Campaign",
+      blurb: "A recurring monthly market brief that rebuilds itself from fresh data — set it once.",
+      status: "live",
+      surface: "email",
+      seedRecipe: {
+        prompt:
+          "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
+        needs: ["agent_name", "brokerage", "business_address"],
+      },
+    },
+    cadenceRefresh: {
+      daily: ["the live active-listing counts and prices"],
+      weekly: ["newly recorded comparable sales"],
+      monthly: ["every ZIP's month-over-month home-value move and the trend read"],
+    },
     accent: "#C4551A",
     thumb: "/showcase/market-pulse/thumb.webp",
     surfaces: ["email", "social"],
