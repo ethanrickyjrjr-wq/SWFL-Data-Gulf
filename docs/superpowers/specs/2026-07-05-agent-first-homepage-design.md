@@ -29,6 +29,7 @@ An anonymous visitor types a Lee/Collier address, clicks a campaign chip, and la
 - Headline (operator's line): **"Research done. Send. We'll take care of the rest."** Subline: "Type your next listing's address. We build the campaign from live Southwest Florida data — every number sourced — and send it on your schedule." The word "AI" does not appear in the hero. Anti-drip note rides subcopy ("fewer, better sends").
 - **One address bar** with autocomplete (Mapbox Search/Geocoding, proximity-biased to Lee/Collier), accepting street address, ZIP, or city. Autocomplete is net-new; the server-side geocoder exists (`refinery/lib/geocode.mts` via `lib/geo/geocode-address.ts`).
 - **Four campaign chips** under the bar: New Listing · Just Sold · Coming to Market · Market Update. Address (or ZIP/city) + chip → lab opens prebuilt.
+- **Chip-driven placeholder (settled 07/05/2026):** one bar, no second field, no error states. The three listing chips set the placeholder to "Type your next listing's address…"; Market Update (area-grain by nature) sets it to "Type a city or ZIP…". Whatever is typed resolves: address → its ZIP, ZIP/city → as-is — no input is ever wrong. Market Update + a typed city is deliberately one click from the recurring newsletter schedule, the loop that already works end-to-end.
 
 ### Flow (hero → lab), ZIP-grade fallback by design
 
@@ -73,5 +74,4 @@ Choropleth + rail + stats bar move below the fold as the proof-of-data section, 
 ## Open questions (build 2+ inputs, not blockers)
 
 - Autocomplete vendor call: Mapbox Search JS vs. plain Geocoding API + our own dropdown (decide in plan; token scoping per mapbox-token-security).
-- Whether Market Update chip should ask for ZIP/city instead of address (it's area-grain by nature) — default: bar accepts both, chip works with either.
 - Social chip surface (chips open the email lab in build 1; social lands with the spine/sequence builds).
