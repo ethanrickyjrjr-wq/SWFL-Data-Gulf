@@ -48,6 +48,32 @@ export const NAV_GROUPS: NavItem[] = [
 ];
 
 /**
+ * Account dropdown (top-right disclosure) — the signed-in user's quick-access set:
+ * everything they may need to reach fast to update-and-save (operator ruling
+ * 07/05/2026). Brand + Email Schedule open as route-modals over the current page
+ * (@accountModal slot) so in-progress work is never unmounted; `reveal: "brand"`
+ * tells the shell to first offer the click to a brand editor already on the page
+ * (lib/brand/reveal-brand-panel.ts) before navigating. Sign out is not an item —
+ * it stays a button in the shell. Pinned by nav-config.test.ts like NAV_GROUPS.
+ */
+export interface AccountMenuItem {
+  label: string;
+  href: string;
+  /** Set on items a page can claim locally instead of navigating. */
+  reveal?: "brand";
+}
+
+export const ACCOUNT_MENU: AccountMenuItem[] = [
+  { label: "My Projects", href: "/project" },
+  { label: "Brand", href: "/account/brand", reveal: "brand" },
+  { label: "Contacts", href: "/contacts" },
+  { label: "Email Schedule", href: "/account/schedules" },
+  { label: "Alerts", href: "/alerts" },
+  { label: "MLS Settings", href: "/settings/mls" },
+  { label: "Billing", href: "/billing" },
+];
+
+/**
  * Prefixes where NO chrome renders — the shell AND the global footer both suppress
  * here. `/p/` (trailing slash so it can't match `/privacy` or `/project`) + `/embed/`
  * stay white-label clean (a finished deliverable may carry a broker's brand, not SWFL

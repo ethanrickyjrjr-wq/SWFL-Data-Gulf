@@ -2,6 +2,7 @@ import { describe, it, expect } from "bun:test";
 import type { User } from "@supabase/supabase-js";
 import {
   NAV_GROUPS,
+  ACCOUNT_MENU,
   SHELL_HIDDEN_PREFIXES,
   isHiddenPath,
   homeHref,
@@ -158,5 +159,23 @@ describe("activeChildHref (longest match wins in the dropdown)", () => {
     ];
     expect(activeChildHref("/r/search", multi)).toBe("/r/search");
     expect(activeChildHref("/r/env-swfl", multi)).toBe("/r");
+  });
+});
+
+describe("ACCOUNT_MENU (account dropdown contract)", () => {
+  it("carries the exact quick-access set, in order", () => {
+    expect(ACCOUNT_MENU.map((i) => [i.label, i.href])).toEqual([
+      ["My Projects", "/project"],
+      ["Brand", "/account/brand"],
+      ["Contacts", "/contacts"],
+      ["Email Schedule", "/account/schedules"],
+      ["Alerts", "/alerts"],
+      ["MLS Settings", "/settings/mls"],
+      ["Billing", "/billing"],
+    ]);
+  });
+  it("marks ONLY Brand as reveal-capable", () => {
+    expect(ACCOUNT_MENU.filter((i) => i.reveal).map((i) => i.label)).toEqual(["Brand"]);
+    expect(ACCOUNT_MENU.find((i) => i.label === "Brand")?.reveal).toBe("brand");
   });
 });
