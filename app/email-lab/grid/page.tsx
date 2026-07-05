@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { labDestination } from "@/lib/project/lab-redirect";
+import { buildZipSeedDoc } from "@/lib/email/zip-seed";
 import { AutoCreateProject } from "../AutoCreateProject";
 import { EmailLabGridClient } from "./EmailLabGridClient";
 
@@ -44,7 +45,10 @@ export default async function EmailLabGridPage({
     if (dest) redirect(dest);
     return <AutoCreateProject zip={zip} recipe={recipe} recipeNeeds={recipeNeeds} />;
   }
-  // EmailLabGridClient reads ?recipe=/?recipeNeeds= itself via useSearchParams
-  // (anonymous leaf — no prop threading needed here).
-  return <EmailLabGridClient />;
+  // Anonymous + ?zip= (homepage hero / map click): same deterministic prebuild
+  // as /email-lab — the visitor lands on a branded email already on canvas, $0
+  // until they engage the builder. EmailLabGridClient still reads ?recipe=/
+  // ?recipeNeeds= itself via useSearchParams; only the seed doc is server-built.
+  const seedDoc = zip ? await buildZipSeedDoc(zip) : null;
+  return <EmailLabGridClient seedDoc={seedDoc} />;
 }

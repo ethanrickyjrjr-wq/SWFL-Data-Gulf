@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
 import { seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
+import type { EmailDoc } from "@/lib/email/doc/types";
 import type { BrandNeed, ShowcaseRecipe } from "@/lib/showcase/recipe";
 
 // Standalone PAID-tier grid lab (the north star) — no project scope yet, so you
@@ -17,8 +18,11 @@ import type { BrandNeed, ShowcaseRecipe } from "@/lib/showcase/recipe";
 // already does, for the labDestination/AutoCreateProject hop); this
 // anonymous leaf reads its own query string, so it never depends on page.tsx
 // remembering to thread anything through. Absent → the lab opens blank.
-export function EmailLabGridClient() {
-  const [initialDoc] = useState(() => (seedById("luxury-market-report") ?? SEED_DOCS[0]).build());
+export function EmailLabGridClient({ seedDoc }: { seedDoc?: EmailDoc | null }) {
+  // ?zip= server-built prebuild wins; otherwise the static grid seed.
+  const [initialDoc] = useState(
+    () => seedDoc ?? (seedById("luxury-market-report") ?? SEED_DOCS[0]).build(),
+  );
   const searchParams = useSearchParams();
   const recipePrompt = searchParams.get("recipe");
   const recipeNeedsCsv = searchParams.get("recipeNeeds");
