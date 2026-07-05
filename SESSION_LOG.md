@@ -24,6 +24,7 @@ three surfaces; crawl4ai researched campaign taxonomy (RULE 0.4).
   Re-engagement — all reuse the same shell (spec §"coming tiles").
 
 Next: operator reviews spec → register the build (`node scripts/new-build.mjs campaign-quick-start …`) → implement.
+
 ## 2026-07-04 (main) — Operation July: task 20 (knip dead-code CI, report-only) + task 15 = A
 
 Built task 20 and recorded the operator's task-15 decision. NOT pushed — held for operator ok.
