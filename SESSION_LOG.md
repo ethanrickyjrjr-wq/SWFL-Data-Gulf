@@ -1,3 +1,14 @@
+## 2026-07-05 (main) — fix(registry): kill 2 false-RED live_search tiles + park 3 never-runs + ops notes on 4 paused/stale pipelines
+
+Follow-up to the ops red/yellow audit (operator: "push and fix it all" + "airdna parked"): dropped
+`source_name: live_search` from both live_search entries (daily_truth's column is `source_tag` — the
+filter errored every freshness lookup → false RED with data fresh through 07/04); `parked: true` +
+notes on sba_foia (first cron 07/15), airdna (operator: stays parked, no sub), land_manufactured
+(06/30 backfill deferral); `note:` on city_pulse + dbpr_public_notices (credit-freeze pauses 06/18),
+swfl_inc (workflow disabled manually, Firecrawl-era, failed 06/15), dbpr_press_releases (green cron,
+0 rows since 06/01 — parser drift suspected). Registry parses clean (69 pipelines / 3 parked). Ops
+ledger passthrough for these notes shipped in swfldatagulf-ops `da2cc6e`.
+
 ## 2026-07-05 (main) — fix(test): zip-seed partial mock.module leak = the 11-failure CI red since 07/04
 
 Ops-page red/yellow audit (operator: "why is anything red or yellow — put notes in"). CI has failed on

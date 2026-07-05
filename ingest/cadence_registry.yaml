@@ -49,12 +49,14 @@ pipelines:
     tolerance_multiplier: 1.5
     freshness_table: data_lake.daily_truth
     freshness_column: retrieved_at
-    source_name: live_search
+    # NO source_name filter: daily_truth's source column is source_tag (not source_name) and
+    # the table is single-writer (live_search only). The filter made both the ops ledger and
+    # check_freshness.py error out -> FALSE RED while data was fresh (fixed 07/05/2026).
     expected_rows_min: 1
     freshness_sla:
       warn_after_days: 2    # past 1.5× tolerance threshold; log WARN but keep exit 0
       error_after_days: 4   # 4× cadence — genuinely dead (transient outages resolve in <2d)
-    note: "Daily sourced median sale price; cascade Gemini->Firecrawl->Spider->Claude; anomaly vs own prior."
+    note: "Daily sourced median sale price; cascade Gemini->Firecrawl->Spider->Claude; anomaly vs own prior. Was false-RED on ops until 07/05/2026 (source_name filter vs source_tag column — removed)."
     live_search_config:
       fetch_mode: search
       metric_key: median_sale_price
@@ -75,9 +77,9 @@ pipelines:
     tolerance_multiplier: 1.5
     freshness_table: data_lake.daily_truth
     freshness_column: retrieved_at
-    source_name: live_search
+    # NO source_name filter — same source_tag/source_name mismatch as median_price above (fixed 07/05/2026).
     expected_rows_min: 1
-    note: "Daily 30-yr fixed mortgage from FRED MORTGAGE30US (weekly Thu; api mode = authoritative, no search)."
+    note: "Daily 30-yr fixed mortgage from FRED MORTGAGE30US (weekly Thu; api mode = authoritative, no search). Was false-RED on ops until 07/05/2026 (source_name filter vs source_tag column — removed)."
     live_search_config:
       fetch_mode: api
       metric_key: mortgage_30yr_fixed
@@ -273,6 +275,7 @@ pipelines:
     # Daily web_search current-events capture for 7 SWFL cities; distilled into
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
+    note: "RED expected: daily cron PAUSED 06/18/2026 (credit freeze — spends Anthropic web_search credits). Schedule commented out in city-pulse-daily.yml; last manual run 06/28/2026. Re-enable at launch."
 
   - name: city_pulse_corridors
     lane: tier-1
@@ -537,6 +540,7 @@ pipelines:
     # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
     # Cron: Monday 08:00 UTC via swfl-inc-weekly.yml.
     # First run: 2026-06-01 (GHA success confirmed).
+    note: "Workflow DISABLED MANUALLY in GitHub; last scheduled run FAILED 06/15/2026 (Firecrawl-era scraper, Firecrawl dead). Data frozen 05/31/2026. Fix: crawl4ai port + re-enable."
 
   - name: dbpr_press_releases
     lane: tier-2
@@ -552,6 +556,7 @@ pipelines:
     # Enrichment: Sonnet fills summary/topics/affected_industries/geographic_mentions/is_swfl_relevant.
     # Consumer: news-swfl brain (refinery/packs/news-swfl.mts).
     # First run: 2026-06-01 backfill — 151 rows, 2016-2026, 146/151 dated.
+    note: "Cron GREEN weekly but 0 new rows since the 06/01/2026 backfill — DBPR publishes ~4-5/mo, so ~5 empty weeks = probable parser/selector drift (Firecrawl-era code). Investigate run logs + crawl4ai port."
 
   - name: rsw_airport_monthly
     lane: tier-2
@@ -627,6 +632,7 @@ pipelines:
     # Amendment pattern: DBPR publishes corrections as new URLs alongside old ones.
     # Two rows for the same respondent is normal; ORDER BY response_deadline DESC for active version.
     # First run: 2026-06-01 (news-swfl.md: 6 notices, 1 construction unlicensed, 0 ABT/hospitality).
+    note: "RED expected: weekly cron PAUSED 06/18/2026 (credit freeze — Claude summaries spend credits). Schedule commented out in dbpr-public-notices-weekly.yml; data frozen 06/08/2026. Re-enable at launch."
 
   - name: noaa_ghcn_rainfall
     lane: tier-2
@@ -920,6 +926,8 @@ not_yet_running:
     tolerance_multiplier: 1.5
     inventory_id: lake-tier1/franchise/sba_foia_franchise_county.parquet
     inventory_key_type: exact
+    parked: true # shows yellow on ops, not red — never-run is BY DESIGN until the first cron
+    note: "Never run BY DESIGN — first quarterly cron fires 07/15/2026 (franchise-outcomes-quarterly.yml, 15th Jan/Apr/Jul/Oct). Consumer brain is empty-tolerant; graduates to pipelines: after first green run."
     # Merge key (county-grain): (franchise_code, franchise_name) — stable across quarterly refreshes.
     # Pipeline does a full-replace (overwrite in place); the Parquet is regenerated from all 3 FOIA files.
 
@@ -938,6 +946,8 @@ not_yet_running:
     tolerance_multiplier: 2.0
     inventory_id: lake-tier1/market/airdna_str_swfl.parquet # reserved Tier-1 cold target
     inventory_key_type: exact
+    parked: true # operator decision 07/05/2026: stays parked — no AirDNA sub purchase for now
+    note: "Parked ODD source (operator 07/05/2026): STR data needs a paid AirDNA sub (~$20-100/mo). Consumer (investor-zip-swfl) ships empty-tolerant with available_on_request. Zero-code graduation if a sub is ever bought."
     # Consumer: refinery/packs/investor-zip-swfl.mts (str_revenue_est_monthly column).
     # Idempotent merge key when it graduates: (zip_code, period_end), source_tag provenance.
     # Pricing verified 2026-06-11: airdna.co/pricing — single market $19.95-99.95/mo by
@@ -975,6 +985,7 @@ not_yet_running:
     cadence_days: 30
     tolerance_multiplier: 2.0
     source_name: api_feed
+    parked: true # shows yellow on ops, not red — deliberate backfill deferral (operator 06/30)
     note: "Parked ODD backfill — no pipeline code yet, spare-call sweep once budget allows. See docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/phase-5-land-manufactured-parked.md."
 
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
