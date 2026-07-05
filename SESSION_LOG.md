@@ -10,6 +10,24 @@ reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in
 order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
 those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
 deliverable_distiller_live_verify stays open (operator-run live proof).
+## 2026-07-05 (main) — SHIPPED: Agent Launch campaign LIVE (build 1 of 3 complete) + spend guard
+
+Campaign live (c28cba56): 4th quick-start button, followUp chip, 3 lab-built demo slides — Sonnet-authored
+through the REAL pipeline, zero hand-edits (the DONE-WHEN proof). Iteration loop that got the look: letter
+in `body` not `prose` (500-cap cut mid-sentence) · short clipping labels · NO chart in agent-intro (engine
+force-reserved a z-score ranking into a personal letter — build-doc skips chart for that recipe) · authored
+`button_label` required + engine defaults "Reply with your address" on mailto · clampProse sentence-safe
+caps (hero/signal/text) · NEW sphere-weekly recipe (6+6 headlines-vs-here pair, pointer kickers that never
+repeat the engine's figure label) · clipping kicker reserves two lines (operator flagged the uneven pair —
+root cause was the pre-fix build; structural guard added). Also: SPEND GUARD (43fdd93f, operator directive)
+— $25/day + $250/mo hard caps at the one client seam, sum_api_spend RPC (aggregates disabled on project),
+fail-open loud, kill-switch; month's logged spend $2.16 → the credit drain did NOT come through our logged
+paths. Checks opened: scheduled_send_minute_jitter, gmail_shared_from_unsub_audit.
+REMAINING: (1) Marisol portrait file → rebuild demo-01 with AGENT_PHOTO_URL + `node scripts/capture-showcase.mjs`
++ recommit step-1/thumb (slide ships honest placeholder box meanwhile); (2) `agent_launch_campaign_live_verify`
+operator-run on prod; (3) push decision is the operator's. Parallel sessions extended this work live
+(campaignKeyForPrompt + campaign tag + PDF row-stacking L4 fix + year-in-review recipe) — composed cleanly.
+
 ## 2026-07-05 (main) — DECISION MARKED: Haiku-until-prepared (then Sonnet) + live Anthropic key operator-accepted in tripwire
 
 Operator: "Mark it. We run haiku until we are more prepared and then switch to sonnet." (1) NEW
