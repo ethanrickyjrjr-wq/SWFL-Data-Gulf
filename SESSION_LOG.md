@@ -1,3 +1,14 @@
+## 2026-07-05 (main) — LIVE: Social Pulse scan verified on runner (301 posts, digest 2026-W27) + surrogate fix + narrative key
+
+Operator "run it and confirm": dry-run green (222 posts, 40 weighted req — half the est.), first real run
+FATAL'd on digest upsert ("Empty or invalid json") → root cause `caption.slice(0,140)` splitting emoji
+surrogate pairs = invalid jsonb; fixed with code-point-safe `previewOf` (+NUL strip, regression test,
+17 pulse tests green). Re-run: scan_id=3, 301 posts + 6 hashtag rows in prod, digest upserted 2026-W27
+(run 28741826681). narrative=null → ANTHROPIC_API_KEY now added to workflow env (this commit). /pulse live
+but serving pre-digest static render; this push's deploy rebuilds it with real data. INTERLEAVE NOTE:
+commits 0cd6d872 (reset, replaced by 8931ad03) + 8931ad03 carried parallel email-session staged files
+(AgentCardBlock/schedule-write) — shared-index race, content intact on main, attribution only.
+
 ## 2026-07-05 (main) — fix(corridor-pulse): 45m timeout killed 3 straight weekly runs AFTER full API spend — 90m + unbuffered
 
 Found while confirming the board post-re-enable: corridor-pulse-weekly cancelled 06/21 + 06/28 +
