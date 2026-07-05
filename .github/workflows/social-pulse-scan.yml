@@ -1,0 +1,32 @@
+# .github/workflows/social-pulse-scan.yml
+#
+# SWFL Social Pulse scan (spec: docs/superpowers/specs/2026-07-05-social-pulse-swfl-design.md).
+# BOOTSTRAP CADENCE: daily until 07/26/2026 (3 weeks from first live scan) to build
+# week-over-week history fast. THEN flip the cron to '0 11 * * 1,4' (Mon/Thu) —
+# that flip is a one-line edit here, tracked by check social_pulse_cadence_flip.
+name: social-pulse-scan
+on:
+  schedule:
+    - cron: "0 11 * * *" # 11:00 UTC daily (bootstrap — see header note)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Log without writing"
+        type: boolean
+        default: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Run pulse scan
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          PHOTOS_API: ${{ secrets.PHOTOS_API }}
+          DRY_RUN: ${{ inputs.dry_run == true && 'true' || 'false' }}
+        run: bun scripts/social-pulse/scan.mts
