@@ -1,3 +1,18 @@
+## 2026-07-05 (main) — SPEC+PLAN: lab-email truth guards (registered `lab_email_truth_guards_live_verify`)
+
+Scoped from the Rainbow Meadows live-send findings the send-surface wave didn't cover, all three verified
+in code this session: (A) author lint strips the user's own address/figures (anchors = menu+chart only —
+`16447` dropped from every prose field, survived only in unlinted photo-overlay fields) → lane-4
+`promptAnchors(prompt)` joins the anchor set, recorded-claim gate unchanged; (B) stats/hero LABELS are
+authored free-text detached from the id-selected figure (`s.label ?? ""`, author-doc.ts:584 — the "List
+Price $299,900 on a ZIP median" misattribution) → menu figure's own label wins for value_figure cells,
+clamped to schema maxima; (C) the doc footer's literal `#unsubscribe` dead link ships in real sends →
+pure `bindUnsubscribeHref` bound in blast route (per-recipient URL), `buildEmailDocOccurrence` +
+weekly-read `finalizeIssueHtml` (broadcast token). Spec `2026-07-05-lab-email-truth-guards-design.md`,
+plan `2026-07-05-lab-email-truth-guards.md` (7 TDD tasks). Visual polish L1–L5 excluded (lives in the
+agent-launch-campaign spec). NOTE: send-surface hardening commit 193b3c0a reached origin via a parallel
+session's carry — already deploying; nothing was double-pushed.
+
 ## 2026-07-05 (main) — PLAN: social-pulse-swfl P1+P2 (10 TDD tasks) — scan+store, digest, /pulse page
 
 Implementation plan for the Social Pulse spec: `docs/superpowers/plans/2026-07-05-social-pulse-swfl.md`.
