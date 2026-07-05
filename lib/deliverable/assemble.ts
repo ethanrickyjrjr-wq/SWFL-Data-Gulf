@@ -64,6 +64,10 @@ export async function assembleDeliverable(opts: {
    *  at today's data) so a shared `/p/[id]` stays frozen for an external holder. Omitted
    *  for an original build → NULL (a "head"). */
   supersedesId?: string;
+  /** Band-guard web-confirm (spec 2026-07-05). Injectable for tests; default hits
+   *  the data-readiness verification ladder. Passed straight through to
+   *  `buildDeliverableNarrative`. */
+  confirmOutlier?: Parameters<typeof buildDeliverableNarrative>[0]["confirmOutlier"];
 }): Promise<{ id: string }> {
   const parsed = projectItemsSchema.safeParse(opts.items ?? []);
   if (!parsed.success) throw new DeliverableError("project items invalid", 422);
@@ -74,10 +78,40 @@ export async function assembleDeliverable(opts: {
   // lake" ≠ "no data" — a number can come from our data, the user's upload, a sourced web
   // lookup, or a figure the user gave us (the four-lane rule). Only invention is forbidden.
   const itemsSnapshot = await freezeSnapshot(opts.db, parsed.data);
+
+  // Band-guard baseline (spec 2026-07-05): the previous deliverable in this series
+  // (same project + template), most recent first. Its frozen items are the prior
+  // values the new numbers are judged against. Best-effort — a missing prior (first
+  // send) simply means no band gate. Never throws into the build.
+  let priorItems: typeof itemsSnapshot | undefined;
+  let gapDays = 30;
+  try {
+    const nowIso = new Date().toISOString();
+    const { data: priorRows } = await opts.db
+      .from("deliverables")
+      .select("items_snapshot, created_at")
+      .eq("project_id", opts.projectId)
+      .eq("template", opts.template)
+      .lt("created_at", nowIso)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const prior = priorRows?.[0];
+    if (prior?.items_snapshot) {
+      priorItems = prior.items_snapshot as typeof itemsSnapshot;
+      const ms = Date.parse(nowIso) - Date.parse(prior.created_at as string);
+      if (Number.isFinite(ms) && ms > 0) gapDays = Math.max(1, Math.round(ms / 86_400_000));
+    }
+  } catch {
+    // prior lookup failed — proceed with no baseline (no band gate), never block a build
+  }
+
   const { narrative } = await buildDeliverableNarrative({
     instruction: opts.instruction,
     items: itemsSnapshot,
     template: opts.template,
+    priorItems,
+    gapDays,
+    confirmOutlier: opts.confirmOutlier,
   });
 
   // Full-entropy slug (≥122 bits, [LB-R5]) — base64url of 16 random bytes = 128 bits.
