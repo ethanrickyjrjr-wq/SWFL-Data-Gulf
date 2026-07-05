@@ -286,10 +286,7 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       return (
         <View style={[s.section, { flexDirection: "row" }]}>
           {p.photoUrl ? (
-            <Image
-              src={p.photoUrl}
-              style={{ width: 64, height: 64, borderRadius: 32, marginRight: 14 }}
-            />
+            <Image src={p.photoUrl} style={{ width: 64, borderRadius: 4, marginRight: 14 }} />
           ) : null}
           <View style={{ flex: 1 }}>
             {p.name ? (

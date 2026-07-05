@@ -23,17 +23,16 @@ export function AgentCardBlock({
         {props.photoUrl ? (
           <Column style={{ width: "108px", verticalAlign: "top" }}>
             {/* Editorial rectangular crop — agent photos are professional
-                half-body portraits; a circle avatar wastes them. */}
+                half-body portraits; a circle avatar wastes them. Width-only:
+                Outlook ignores object-fit, so a fixed height would distort —
+                natural aspect is the only email-safe crop. */}
             <Img
               src={props.photoUrl}
               alt={props.name ?? ""}
               width={96}
-              height={120}
               style={{
                 borderRadius: "10px",
                 display: "block",
-                objectFit: "cover",
-                objectPosition: "center top",
               }}
             />
           </Column>
