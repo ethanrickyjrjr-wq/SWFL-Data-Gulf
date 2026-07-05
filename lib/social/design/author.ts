@@ -18,6 +18,7 @@ import { resolveEmailModel } from "@/lib/email/model-router";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { fetchLakeParts, refreshStaleLakeContext, type BuildScope } from "@/lib/email/build-doc";
 import { loadListingContext, renderListingsBlock, pickFeatured } from "@/lib/listings/select";
+import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import { aerialUrl } from "@/lib/listings/aerial";
 import type { Listing } from "@/lib/listings/rentcast";
 import {
@@ -215,7 +216,10 @@ export async function authorSocialPost(
       today,
       includeGapProbe: false,
     }),
-    loadListingContext(scope, today),
+    // derivePhoto mirrors the featured listing's photo into email-media (watermark-cropped,
+    // same wiring as build-doc/build-week) — publish-engine socials never hotlink the
+    // listing CDN (check email_hero_mirror_to_storage).
+    loadListingContext(scope, today, { derivePhoto: deriveListingPhoto }),
   ]);
   const featured = pickFeatured(listingCtx.ranked);
   const listingsBlock = renderListingsBlock(listingCtx.figures);

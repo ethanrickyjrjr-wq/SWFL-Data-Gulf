@@ -1,3 +1,46 @@
+## 2026-07-05 (main) — feat(media): hero photos mirror to our storage at build time (email-hero-mirror)
+
+Operator ruling: keep the watermark crop for now ("uncrop when we actually get a person"), build the
+mirror. NEW `lib/media/hero-photo.ts` — `mirrorHeroPhoto(url)`: fetch verbatim → `image/*` + ≤10 MB gate
+→ upsert `email-media/hero-photos/{sha256(url) prefix}.{ext}` → public URL; null on any failure (caller
+keeps the original remote URL — degraded, never blocked). NO crop: og:image provenance is unknown (an
+agent's own site hero must never be cropped); the crop stays scoped to listing-feed photos
+(`deriveListingPhoto`). Wired at the seams the research found: `resolveHeroPhoto` in
+`lib/email/build-doc.ts` (covers newsletter + author paths — the doc saves OUR durable URL, so an
+occurrence re-send after the source dies still renders) + the listing-flyer branch (`facts.photos[0]`
+mirrored pre-flyer) + `lib/social/design/author.ts` threads `{ derivePhoto: deriveListingPhoto }` (publish
+socials stop hotlinking rdcpix; crop applies — listing photos). One-off: mirrored all 11 unique rdcpix
+photos in `public/showcase/listing-to-close/live/*.html` and rewrote the files (0 misses; mirrored URLs
+verified live `200 image/webp`; zero rdcpix left — script `tmp-mirror-showcase-heroes.mts`, local-only).
+Spec `docs/superpowers/specs/2026-07-05-email-hero-mirror-design.md`; check `email_hero_mirror_live_verify`
+opened (operator-run: one real build with a pasted listing URL saves a `hero-photos/` URL). Gates: new
+hero-photo suite 7/0, affected suites 30/0, `bunx next build` ✓. PHOTO_ENRICH_LIMIT untouched (social
+features ONE listing — the 5-cap covers every photo-rendering surface).
+
+## 2026-07-05 (main) — RESEARCH (crawl4ai + lake probe, RULE 0.4): figured out the two email-image checks, no code change
+
+Probed code + researched the two open checks from `docs/standards/email-images.md`. FINDING 1 — the mirror
+for `email_hero_mirror_to_storage` MOSTLY EXISTS: `lib/media/listing-photo.ts` (`deriveListingPhoto`) is the
+one photo root — fetch verbatim → watermark crop → JPEG q80 → upsert `email-media/listing-photos/{id}-v1.jpg`
+→ durable public URL — and is already wired into `lib/email/build-doc.ts:433` + social-calendar
+`build-week.ts:294`. The real gaps: (a) `lib/social/design/author.ts:218` calls `loadListingContext`
+WITHOUT `derivePhoto` → publish-engine socials ship raw rdcpix; (b) `PHOTO_ENRICH_LIMIT=5` — listings 6+
+keep hotlinks; (c) derive-failure keeps the hotlink, which then FREEZES into a scheduled EmailDoc with no
+retry at occurrence-send time; (d) static `public/showcase/listing-to-close/live/*.html` hardcode rdcpix.
+FINDING 2 — rot is INFERRED, not yet observed: HEAD-checked all 12 sold/withdrawn `ap.rdcpix.com` photo
+URLs in `data_lake.listing_state` → 12/12 still `200 image/webp` days after close. Lake history is only
+~8 days deep; no published rdcpix retention policy exists. Falsifier: re-run the HEAD probe at 60–90 days
+of sold history. FINDING 3 — vendor surfaces (crawl4ai, supabase.com docs + MDN, 07/05/2026): Supabase
+public buckets are CDN-cached (`cf-cache-status`, better hit rate than private) with a 50 MB/file floor
+even on Free — hero images are ~50–200 KB, no limit risk; upsert = idempotent rebuilds. MDN data-URL
+length limits: 512 MB Chromium/Firefox, 2 GB WebKit — iOS Quick Look is WebKit, so the
+`download_artifact_inline_images` post-pass (fetch each img src → base64 → swap) is viable with huge
+headroom; stays parked until a download-as-file artifact ships. FLAGGED (not relitigating): NAR
+(nar.realtor/copyright) — listing photos are copyrighted works; our pipeline already re-hosts CROPPED
+derivatives (operator-approved 07/02), so broader mirroring is same-in-kind exposure, not new. Research
+only — both checks stay open; the fix is a small follow-up build (thread `derivePhoto` into
+`lib/social/design/author.ts`, decide scheduled-doc re-derive policy, one-off showcase re-derive).
+
 ## 2026-07-05 (main) — docs: email-images policy LOCKED (docs/standards/email-images.md) + 2 follow-up checks
 
 Wrote the research below into `docs/standards/email-images.md` as locked policy: sent email = remote

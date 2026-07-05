@@ -36,6 +36,7 @@ import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-im
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
 import { loadListingContext, renderListingsBlock } from "@/lib/listings/select";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
+import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { isListingIntent } from "@/lib/email/listing-intent";
 import { fetchListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
@@ -244,7 +245,13 @@ async function resolveHeroPhoto(
   try {
     for (const u of candidates.slice(0, 4)) {
       const r = await fetchOgImage(u);
-      if (r) return { ...r, source: u };
+      if (r) {
+        // Mirror into email-media so the doc saves OUR durable URL — a scheduled
+        // re-send months after the listing closes never depends on the source CDN
+        // (check email_hero_mirror_to_storage). Mirror miss keeps the remote URL.
+        const mirrored = await mirrorHeroPhoto(r.image);
+        return { ...r, image: mirrored ?? r.image, source: u };
+      }
     }
   } catch {
     /* a photo is a bonus — never block the fill on it */
@@ -383,6 +390,12 @@ export async function buildContentDoc({
     const url = extractUrls(prompt)[0];
     const facts = url ? await fetchListingFacts(url).catch(() => null) : null;
     if (facts) {
+      // Same durable-URL rule as resolveHeroPhoto: the flyer hero saves OUR copy,
+      // not the listing CDN's (mirror miss keeps the scraped URL — degraded, never blocked).
+      if (facts.photos[0]) {
+        const mirrored = await mirrorHeroPhoto(facts.photos[0]);
+        if (mirrored) facts.photos[0] = mirrored;
+      }
       let flyer = buildListingFlyer(facts, doc);
 
       // Comps chart — fetch active listings from the same area page and build a
