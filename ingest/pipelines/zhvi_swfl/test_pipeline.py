@@ -6,10 +6,12 @@ test_pipeline.py pattern.
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 import tempfile
+from unittest.mock import patch
 
 import dlt
+import pytest
 
 
 FAKE_ROWS = [
@@ -125,3 +127,62 @@ def test_merge_overwrites_changed_home_value_for_same_pk() -> None:
 
     assert len(result) == 1
     assert result[0][0] == 999999.0
+
+
+def _one_row(period_end: date) -> list[dict]:
+    return [
+        {
+            "zip_code": "34135",
+            "period_end": period_end,
+            "home_value": 610000.0,
+            "metro": "Cape Coral-Fort Myers, FL",
+            "county_name": "Lee County",
+            "city": "Bonita Springs",
+            "ingested_at": "2026-05-23T15:00:00+00:00",
+        }
+    ]
+
+
+def test_run_pipeline_content_guard_trips_on_stale_parquet() -> None:
+    """DONE-WHEN proof (task 18), locally runnable: run_pipeline against a stale Tier-1 Parquet
+    (newest period_end past the 55d gate) raises ContentStaleError BEFORE the merge, instead of
+    re-merging old months green. Exercises the real materialize-max path (read_tier1_parquet ->
+    max(period_end) -> assert_content_fresh). Generalizes to the zori/tier_divergence twins."""
+    from ingest.pipelines.zhvi_swfl import pipeline as zhvi_pipeline
+    from ingest.pipelines.zhvi_swfl import resources as zhvi_resources
+    from ingest.lib.guards import ContentStaleError
+
+    stale_rows = _one_row(date.today() - timedelta(days=90))  # 90d > 55d gate
+
+    class _FakePipeline:
+        def run(self, *a, **k):
+            raise AssertionError("merge must not run when content is stale")
+
+    with (
+        patch.object(zhvi_resources, "read_tier1_parquet", return_value=stale_rows),
+        patch("dlt.pipeline", return_value=_FakePipeline()),
+    ):
+        with pytest.raises(ContentStaleError):
+            zhvi_pipeline.run_pipeline(parquet_path="unused")
+
+
+def test_run_pipeline_passes_on_fresh_parquet() -> None:
+    """Complement: a fresh Parquet (recent period_end) clears the guard and reaches the merge."""
+    from ingest.pipelines.zhvi_swfl import pipeline as zhvi_pipeline
+    from ingest.pipelines.zhvi_swfl import resources as zhvi_resources
+
+    fresh_rows = _one_row(date.today() - timedelta(days=10))  # within 55d gate
+    captured: dict = {}
+
+    class _FakePipeline:
+        def run(self, *a, **k):
+            captured["ran"] = True
+            return "load_info"
+
+    with (
+        patch.object(zhvi_resources, "read_tier1_parquet", return_value=fresh_rows),
+        patch("dlt.pipeline", return_value=_FakePipeline()),
+    ):
+        zhvi_pipeline.run_pipeline(parquet_path="unused")
+
+    assert captured.get("ran") is True
