@@ -224,3 +224,16 @@ describe("prompt + tool surface", () => {
     expect(s).toContain("newsletter");
   });
 });
+
+describe("resume action", () => {
+  test("validates a bare resume like pause/stop", () => {
+    const v = validateToolInput({ action: "resume", schedule_id: 3 });
+    expect(v.ok).toBe(true);
+  });
+
+  test("summarizes resume", () => {
+    expect(summarizeCommand({ action: "resume", schedule_id: 3 })).toBe(
+      "Resume schedule #3 (it will send again).",
+    );
+  });
+});

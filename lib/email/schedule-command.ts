@@ -18,6 +18,7 @@ import type { Cadence } from "./schedule-cadence";
 export const SCHEDULE_ACTIONS = [
   "create",
   "pause",
+  "resume",
   "stop",
   "change-template",
   "change-cadence",
@@ -147,7 +148,7 @@ export interface ParsedCommand {
 export function buildSystemPrompt(existing: ExistingSchedule[]): string {
   return [
     "You convert a tenant's natural-language request into ONE email-schedule action via the propose_email_schedule_action tool.",
-    "Actions: create (a new schedule), pause, stop, change-template, change-cadence, change-audience, clarify (ask the user a disambiguating question).",
+    "Actions: create (a new schedule), pause, resume, stop, change-template, change-cadence, change-audience, clarify (ask the user a disambiguating question).",
     "Rules:",
     "- send_hour_et is the hour in US Eastern time, 0–23. Convert '7am' -> 7, '5pm' -> 17, 'noon' -> 12, 'midnight' -> 0.",
     "- If the user gives an hour with NO am/pm that is genuinely ambiguous ('at 6', 'around 8'), do NOT guess: set action 'clarify' and ambiguous_hour to the bare number (1–12). Unambiguous words ('noon', 'midnight', '7am', '5pm') need no clarify.",
@@ -246,6 +247,7 @@ export function validateToolInput(input: unknown): ValidationResult {
       if (!c.audience_slug) errors.push("change-audience requires audience_slug");
       break;
     case "pause":
+    case "resume":
     case "stop":
       // schedule_id is resolved by the route (explicit, or inferred when the tenant
       // has exactly one schedule); not a hard param requirement here.
@@ -336,6 +338,8 @@ export function summarizeCommand(c: ParsedCommand, opts?: { scopeConsumerLive?: 
       return `Create a ${c.cadence} schedule that sends ${when()}${about}${forPlace}${to}${tmpl}.${pendingScope}`;
     case "pause":
       return `Pause schedule #${c.schedule_id ?? "?"}.`;
+    case "resume":
+      return `Resume schedule #${c.schedule_id ?? "?"} (it will send again).`;
     case "stop":
       return `Stop schedule #${c.schedule_id ?? "?"} (it will no longer send).`;
     case "change-template":
