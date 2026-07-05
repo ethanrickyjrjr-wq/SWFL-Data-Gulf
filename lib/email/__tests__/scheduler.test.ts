@@ -10,6 +10,9 @@ import {
   buildBroadcastPayload,
   rowCadenceSpec,
   UNSUBSCRIBE_TOKEN,
+  SEND_RETRY_DELAY_MS,
+  isDefinitiveSendFailure,
+  hasSendFailures,
   type ScheduleRow,
   type ProcessDeps,
   type BroadcastRequest,
@@ -413,12 +416,103 @@ describe("processSchedule — real send path", () => {
     assert.deepEqual(rec.recordSent, [{ userId: "user-1", n: 1 }]);
   });
 
-  test("non-ok broadcast → error outcome, NO recordSent, row still re-armed (no retry)", async () => {
+  test("non-ok broadcast → error outcome, NO recordSent, row still re-armed", async () => {
     const { deps, rec } = makeDeps({ broadcastResult: { ok: false, status: "502" } });
     const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
     assert.equal(outcome.kind, "error");
     assert.equal(rec.recordSent.length, 0, "no usage recorded on a failed send");
-    assert.equal(rec.rearms.length, 1, "failed send still re-arms for next occurrence");
+    assert.equal(rec.rearms.length, 1, "failed send still re-arms");
+  });
+});
+
+describe("processSchedule — send-failure retry semantics (07/04 dropped-send fix)", () => {
+  test("DEFINITIVE failure (non-2xx): re-arms at fromUtc+30min, releases the claim", async () => {
+    const released: number[] = [];
+    const { deps, rec } = makeDeps({ broadcastResult: { ok: false, status: "503" } });
+    deps.releaseSend = async (row) => {
+      released.push(row.id);
+    };
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "error");
+    assert.deepEqual(released, [1], "idempotency claim released so the retry can re-claim");
+    assert.equal(rec.rearms.length, 1);
+    assert.equal(
+      rec.rearms[0].next,
+      new Date(FIXED_NOW.getTime() + SEND_RETRY_DELAY_MS).toISOString(),
+      "re-armed at the retry instant, NOT the next cadence occurrence",
+    );
+  });
+
+  test("AMBIGUOUS failure (timeout): claim kept, cadence advances as before", async () => {
+    const released: number[] = [];
+    const { deps, rec } = makeDeps({ broadcastResult: { ok: false, status: "timeout" } });
+    deps.releaseSend = async (row) => {
+      released.push(row.id);
+    };
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "error");
+    assert.deepEqual(released, [], "claim NOT released — the POST may have sent");
+    assert.equal(
+      rec.rearms[0].next,
+      new Date(FIXED_NOW.getTime() + 86_400_000).toISOString(),
+      "cadence advance unchanged (at-most-once holds)",
+    );
+  });
+
+  test("definitive failure without releaseSend dep still retries (release is best-effort)", async () => {
+    const { deps, rec } = makeDeps({ broadcastResult: { ok: false, status: "404" } });
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "error");
+    assert.equal(
+      rec.rearms[0].next,
+      new Date(FIXED_NOW.getTime() + SEND_RETRY_DELAY_MS).toISOString(),
+    );
+  });
+
+  test("releaseSend throwing never sinks the row (logged, retry still armed)", async () => {
+    const { deps, rec } = makeDeps({ broadcastResult: { ok: false, status: "500" } });
+    deps.releaseSend = async () => {
+      throw new Error("release-boom");
+    };
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "error");
+    assert.equal(rec.rearms.length, 1, "row still re-armed");
+    assert.ok(rec.logs.some((l) => l.includes("RELEASE FAILED")));
+  });
+
+  test("successful send never touches retry semantics", async () => {
+    const released: number[] = [];
+    const { deps, rec } = makeDeps({});
+    deps.releaseSend = async (row) => {
+      released.push(row.id);
+    };
+    const outcome = await processSchedule(makeRow(), deps, FIXED_NOW);
+    assert.equal(outcome.kind, "sent");
+    assert.deepEqual(released, []);
+    assert.equal(rec.rearms[0].next, new Date(FIXED_NOW.getTime() + 86_400_000).toISOString());
+  });
+});
+
+describe("isDefinitiveSendFailure / hasSendFailures", () => {
+  test("numeric statuses are definitive; transport statuses are not", () => {
+    assert.equal(isDefinitiveSendFailure({ ok: false, status: "503" }), true);
+    assert.equal(isDefinitiveSendFailure({ ok: false, status: "400" }), true);
+    assert.equal(isDefinitiveSendFailure({ ok: false, status: "timeout" }), false);
+    assert.equal(isDefinitiveSendFailure({ ok: false, status: "network_error" }), false);
+    assert.equal(isDefinitiveSendFailure({ ok: false }), false);
+    assert.equal(isDefinitiveSendFailure(null), false);
+  });
+
+  test("hasSendFailures flags error outcomes only", () => {
+    assert.equal(hasSendFailures([{ kind: "sent", scheduleId: 1, recipients: 1 }]), false);
+    assert.equal(hasSendFailures([{ kind: "skipped", scheduleId: 1, reason: "x" }]), false);
+    assert.equal(
+      hasSendFailures([
+        { kind: "sent", scheduleId: 1, recipients: 1 },
+        { kind: "error", scheduleId: 2, error: "broadcast_not_ok" },
+      ]),
+      true,
+    );
   });
 });
 

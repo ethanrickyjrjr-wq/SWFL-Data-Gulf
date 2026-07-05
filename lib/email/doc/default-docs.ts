@@ -27,8 +27,26 @@ export const DEFAULT_GLOBAL_STYLE: EmailGlobalStyle = {
 
 /** Default props for each block type — used by the add-block palette and by the
  *  seed builder below. Sensible placeholders; the user/AI fills real content. */
+// Brand-bearing blocks (header / footer / agent-*) default to the SWFL Data Gulf
+// HOUSE BRAND, never lorem-style placeholders: the AI content fill deliberately
+// skips brand blocks, so an empty brand profile used to ship "Your Company" /
+// "123 Main St" in REAL sends (operator ruling 07/05/2026 — house brand until the
+// user's own brand overrides via applyBrand/brandingToTokens).
+export const HOUSE_BRAND = {
+  companyName: "SWFL Data Gulf",
+  tagline: "Southwest Florida Market Intelligence",
+  logoUrl: "https://www.swfldatagulf.com/logo-name.png",
+  address: "Fort Myers, FL",
+  email: "hello@swfldatagulf.com",
+  websiteUrl: "https://www.swfldatagulf.com",
+} as const;
+
 export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
-  header: { companyName: "Your Company", tagline: "Southwest Florida Real Estate" },
+  header: {
+    companyName: HOUSE_BRAND.companyName,
+    tagline: HOUSE_BRAND.tagline,
+    logoUrl: HOUSE_BRAND.logoUrl,
+  },
   hero: {
     kicker: "Market Spotlight",
     value: "$485K",
@@ -80,8 +98,8 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
     barPct: 62,
   },
   "agent-card": {
-    name: "Your Name",
-    title: "Realtor®",
+    name: HOUSE_BRAND.companyName,
+    title: "Market Intelligence",
     bio: "A short bio that builds trust with your readers.",
     phone: "",
     ctaLabel: "Get in touch",
@@ -89,8 +107,8 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
   "agent-hero": {
     photoUrl: "",
     alt: "Agent photo",
-    name: "Your Name",
-    designation: "Realtor® · Your Market Area",
+    name: HOUSE_BRAND.companyName,
+    designation: HOUSE_BRAND.tagline,
     tagline: "Tell readers what makes you the right agent for them.",
     ctaLabel: "Schedule a call",
     ctaUrl: "",
@@ -105,11 +123,11 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
   button: { label: "View Full Report", url: "" },
   divider: { color: "#E5E7EB" },
   footer: {
-    companyName: "Your Company",
-    address: "123 Main St, Fort Myers, FL 33901",
+    companyName: HOUSE_BRAND.companyName,
+    address: HOUSE_BRAND.address,
     phone: "",
-    email: "",
-    websiteUrl: "",
+    email: HOUSE_BRAND.email,
+    websiteUrl: HOUSE_BRAND.websiteUrl,
     instagramUrl: "",
     facebookUrl: "",
     linkedinUrl: "",

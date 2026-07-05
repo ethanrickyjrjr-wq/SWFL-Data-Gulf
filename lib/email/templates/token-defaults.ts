@@ -116,8 +116,8 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   PROPERTY_SQFT: "2,850",
   PROPERTY_TYPE: "Single Family",
   AGENT_PHOTO_URL: "",
-  AGENT_NAME: "Your Name",
-  AGENT_TITLE: "Licensed Real Estate Agent",
+  AGENT_NAME: "SWFL Data Gulf",
+  AGENT_TITLE: "Market Intelligence",
   AGENT_BIO:
     "Helping buyers and sellers navigate Southwest Florida real estate with local expertise and market intelligence.",
   NEIGHBORHOOD_PHOTO_URL: "",

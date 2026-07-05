@@ -26,12 +26,13 @@ import { computeNextRunAt } from "@/lib/email/schedule-cadence";
 import { renderEmailTemplate } from "@/lib/email/templates/render-template";
 import { EMAIL_TEMPLATES, type TemplateSlug } from "@/lib/email/templates/template-registry";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
-import { claimOnce } from "@/lib/email/idempotency";
+import { claimOnce, releaseClaim } from "@/lib/email/idempotency";
 import type { SenderConfigRow } from "@/lib/email/sender-config";
 import { generateReplyToken, buildReplyAddress, replyDomain } from "@/lib/email/reply-token";
 import {
   processBatch,
   reapOrphans,
+  hasSendFailures,
   type ScheduleRow,
   type AudienceLookup,
   type BroadcastRequest,
@@ -528,12 +529,30 @@ async function main(): Promise<void> {
       return { proceed: won };
     },
 
+    // Release the SAME key after a DEFINITIVE non-2xx send failure (nothing was
+    // sent) so the core's 30-min same-occurrence retry can re-claim. Key derivation
+    // mirrors claimSend exactly — same scheduleId + same fromUtc date.
+    async releaseSend(row: ScheduleRow, fromUtc: Date): Promise<void> {
+      const dateKey = fromUtc.toISOString().slice(0, 10);
+      await releaseClaim(db, `digest:${row.id}:${dateKey}`);
+    },
+
     computeNext: computeNextRunAt,
     log: (line: string) => console.log(line),
   };
 
   const outcomes = await processBatch(rows, deps, now);
   summarize(outcomes);
+
+  // LOUD-FAILURE GATE: any failed send exits non-zero so the GHA run goes RED and
+  // the cron-incident capture fires. 07/04/2026 a 503 route dropped every send
+  // while the run exited 0 — a silent no-send must never look green again.
+  if (hasSendFailures(outcomes)) {
+    console.error(
+      "[run-schedules] one or more sends FAILED this cycle (see SEND FAILED lines above) — exiting 1 so the failure is visible.",
+    );
+    process.exitCode = 1;
+  }
 }
 
 function summarize(outcomes: readonly ScheduleOutcome[]): void {

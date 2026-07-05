@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { cookies } from "next/headers";
@@ -24,6 +24,8 @@ import { FrameRenderer } from "@/components/charts/registry/FrameRenderer";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
 import { renderGroundedReport } from "@/lib/email/grounded-report";
+import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
+import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { GlobalDigestFallback } from "@/components/GlobalDigestFallback";
 import { TemplateSwitcher } from "./TemplateSwitcher";
 import { StatCard } from "./StatCard";
@@ -50,6 +52,9 @@ interface DeliverableRow {
   instruction: string | null;
   narrative: Narrative;
   items_snapshot: SnapshotItem[];
+  // Block-canvas EmailDoc (jsonb) — validated by EmailDocSchema before render;
+  // null/absent for slot-rendered templates and legacy rows.
+  doc: unknown;
   branding: Record<string, unknown> | null;
   status: "ready" | "building" | "revoked";
   created_at: string;
@@ -484,9 +489,46 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
     );
   }
 
-  // block-canvas emails live in the email-lab, not this report viewer.
+  // block-canvas (Email Lab) emails get a PUBLIC read-only render — every sent
+  // email's "View this report online" / CTA points here, and a recipient must
+  // NEVER be bounced into the owner-only editor (that redirect shipped a login
+  // wall to every non-owner click). The doc renders through the ONE EmailDoc→HTML
+  // root — the same HTML the blast sent — inside an isolated iframe (it is a full
+  // <html> document). Owners get an "Edit in Email Lab" affordance on top.
   if (data.template === "block-canvas") {
-    redirect(`/project/${data.project_id}/email-lab?did=${id}`);
+    const parsedDoc = EmailDocSchema.safeParse(data.doc);
+    if (!parsedDoc.success) {
+      return (
+        <main className="deliverable-page w-full px-4 py-10">
+          <GlobalDigestFallback narrative={data.narrative} />
+        </main>
+      );
+    }
+    const docHtml = await renderEmailDocHtml(parsedDoc.data);
+    return (
+      <main className="deliverable-page w-full px-4 py-10">
+        {isOwner && (
+          <div className="print-hide mb-6 flex flex-wrap items-center justify-between gap-3">
+            <a
+              href={`/project/${data.project_id}/email-lab?did=${id}`}
+              className="rounded-full border border-gulf-teal/40 px-4 py-2 text-sm font-medium text-gulf-teal transition-colors hover:bg-gulf-teal/10"
+            >
+              Edit in Email Lab
+            </a>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href={`/project/${data.project_id}`}
+                className="rounded-full border border-gulf-teal/40 px-4 py-2 text-sm font-medium text-gulf-teal transition-colors hover:bg-gulf-teal/10"
+              >
+                ← Back to project
+              </a>
+              <SendToContactsHandle deliverableId={id} />
+            </div>
+          </div>
+        )}
+        <EmailPreviewFrame srcDoc={docHtml} />
+      </main>
+    );
   }
 
   // Build deterministic render model from the frozen snapshot

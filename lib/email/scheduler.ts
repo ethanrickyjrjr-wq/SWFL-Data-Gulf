@@ -40,6 +40,29 @@ import type { GroundedReportModel } from "./grounded-report";
 /** The literal Resend managed-unsubscribe token the broadcast route requires. */
 export const UNSUBSCRIBE_TOKEN = "{{{RESEND_UNSUBSCRIBE_URL}}}";
 
+/** How far out a DEFINITIVELY-failed send occurrence re-arms for retry (the next
+ *  few cron cycles, not the next cadence occurrence — a bad deploy must never
+ *  silently eat a send; 07/04/2026 both live schedules advanced a week past a
+ *  503 route with zero emails out and a green run). */
+export const SEND_RETRY_DELAY_MS = 30 * 60 * 1000;
+
+/**
+ * A DEFINITIVE send failure: the broadcast route RESPONDED with a non-2xx HTTP
+ * status (the runner encodes that as the numeric status string — "503", "404",
+ * "400"…), so the broadcast was never created and a retry cannot double-send.
+ * Ambiguous transport failures ("timeout", "network_error") may have reached the
+ * route — those must NOT retry; the standing idempotency claim blocks a duplicate.
+ */
+export function isDefinitiveSendFailure(result: BroadcastResult | null | undefined): boolean {
+  return /^\d+$/.test(result?.status ?? "");
+}
+
+/** True when any row in the batch failed its send — the runner exits non-zero on
+ *  this so the cron goes RED instead of green-while-dropping-sends. */
+export function hasSendFailures(outcomes: readonly ScheduleOutcome[]): boolean {
+  return outcomes.some((o) => o.kind === "error");
+}
+
 /**
  * A claimed `public.email_schedules` row (the fields the worker reads). Matches
  * the schema in 20260612_email_product.sql; the claim RPC returns the full row.
@@ -205,6 +228,12 @@ export interface ProcessDeps {
    *  reaching it). See lib/email/idempotency.ts. */
   claimSend?: (row: ScheduleRow, fromUtc: Date) => Promise<{ proceed: boolean }>;
 
+  /** OPTIONAL claim release, invoked ONLY after a DEFINITIVE non-2xx send failure
+   *  (nothing was sent) so the 30-min retry of the SAME occurrence can re-claim.
+   *  Must release the exact key `claimSend` claimed. Best-effort: a release
+   *  failure degrades to no-same-day-retry, never a double-send. */
+  releaseSend?: (row: ScheduleRow, fromUtc: Date) => Promise<void>;
+
   /** Structured logger (defaults to console in the runner). */
   log: (line: string) => void;
 }
@@ -294,6 +323,10 @@ export async function processSchedule(
   fromUtc: Date,
 ): Promise<ScheduleOutcome> {
   const tag = `schedule=${row.id} user=${row.user_id}`;
+  // Set ONLY on a definitive (non-2xx) send failure: the finally re-arms at this
+  // instant instead of the next cadence occurrence, so the SAME occurrence retries
+  // until the route heals — a bad deploy delays a send, never eats it.
+  let retryAtMs: number | null = null;
 
   try {
     // 1. SEGMENT — a tenant schedule MUST resolve to a tenant segment. Resolve it
@@ -389,10 +422,34 @@ export async function processSchedule(
     }
     const result = await deps.postBroadcast(payload);
     if (!result || result.ok !== true) {
-      // Treat non-ok as a per-row send failure: log, re-arm (finally), continue.
-      deps.log(
-        `[scheduler] SEND FAILED ${tag} — broadcast not ok (status=${result?.status ?? "?"}); will retry next cadence occurrence.`,
-      );
+      // Per-row send failure — two classes:
+      //  DEFINITIVE (route responded non-2xx → nothing sent): release this
+      //  occurrence's idempotency claim and re-arm ~30 min out (finally) so the
+      //  SAME occurrence retries until the route heals. The 07/04/2026 dropped
+      //  sends were exactly this class (503) silently advanced a whole week.
+      //  AMBIGUOUS (timeout / network error → the POST may have sent): keep the
+      //  claim, advance to the next cadence occurrence — at-most-once holds.
+      if (isDefinitiveSendFailure(result)) {
+        retryAtMs = fromUtc.getTime() + SEND_RETRY_DELAY_MS;
+        if (deps.releaseSend) {
+          try {
+            await deps.releaseSend(row, fromUtc);
+          } catch (relErr) {
+            deps.log(
+              `[scheduler] RELEASE FAILED ${tag} — ${relErr instanceof Error ? relErr.message : String(relErr)}; retry will dedupe-skip (no double-send).`,
+            );
+          }
+        }
+        deps.log(
+          `[scheduler] SEND FAILED ${tag} — broadcast responded ${result?.status}; NOTHING sent. ` +
+            `Retrying this occurrence at ${new Date(retryAtMs).toISOString()} (not advancing the cadence).`,
+        );
+      } else {
+        deps.log(
+          `[scheduler] SEND FAILED ${tag} — broadcast not ok (status=${result?.status ?? "?"}; ambiguous — may have sent). ` +
+            `Keeping the idempotency claim; will retry next cadence occurrence.`,
+        );
+      }
       return {
         kind: "error",
         scheduleId: row.id,
@@ -440,7 +497,14 @@ export async function processSchedule(
     // the next successful run touches it).
     try {
       const spec = rowCadenceSpec(row);
-      const next = spec ? deps.computeNext(spec, fromUtc) : null;
+      const cadenceNext = spec ? deps.computeNext(spec, fromUtc) : null;
+      // A definitive send failure re-arms at the RETRY instant (or the cadence's
+      // next occurrence if that is somehow sooner) — the occurrence is delayed,
+      // never dropped. Every other outcome advances the cadence as before.
+      const next =
+        retryAtMs !== null
+          ? new Date(Math.min(retryAtMs, cadenceNext?.getTime() ?? Infinity))
+          : cadenceNext;
       await deps.rearm(row.id, next ? next.toISOString() : null);
       if (!next) {
         deps.log(`[scheduler] PARKED ${tag} — invalid/empty cadence spec; next_run_at stays NULL.`);

@@ -1,3 +1,20 @@
+## 2026-07-05 (main) — BUILD: send-surface hardening (public /p view + house brand + loud scheduler)
+
+Operator live-send of a lab-recipe listing email (16447 Rainbow Meadows Ct → his inbox, first real rows in
+email_blasts ever) exposed three defects; operator ordered "fix it all" (design approved inline, spec
+`2026-07-05-send-surface-hardening-design.md`, check `send_surface_hardening_live_verify`). (1) block-canvas
+`/p/[id]` no longer redirects every viewer into the owner-only lab editor — public read-only render via
+renderEmailDocHtml in EmailPreviewFrame, owner gets Edit-in-Email-Lab strip; anonymous 200 verified on dev.
+(2) Brand-bearing block defaults (header/footer/agent-card/agent-hero + legacy AGENT_* tokens) now carry the
+SWFL Data Gulf HOUSE_BRAND (logo-name.png, hello@, Fort Myers FL) instead of "Your Company"/"123 Main St"
+placeholders that shipped in real sends; user brand still overrides via the untouched token bridge.
+(3) Scheduler: definitive non-2xx broadcast failure (the 07/04 dropped-sends class, verified in prod:
+both schedules advanced a week past a 503 with email_sends=0 and a green run) now releases the idempotency
+claim (`releaseClaim`) and re-arms the SAME occurrence +30min (`SEND_RETRY_DELAY_MS`); ambiguous
+timeout/network keeps the claim and advances (at-most-once holds); runner exits 1 on any send failure so the
+cron goes red. Gates: lib/email+lib/deliverable 1292/0 (incl. 7 new scheduler tests), `bunx next build` ✓,
+eslint clean. Local-only tmp scripts (tmp-rainbow-*.mts) NOT committed. Push pending operator diff review.
+
 ## 2026-07-05 (main) — SPEC: Agent Launch campaign (build 1 of 3) + email-marketing evidence notes
 
 Brainstormed (RULE 3.5) + registered `agent-launch-campaign` (`agent_launch_campaign_live_verify` open).

@@ -82,3 +82,23 @@ export async function claimOnce(
   // existed (lost the claim).
   return (data?.length ?? 0) > 0;
 }
+
+/**
+ * Release a previously-won claim so the SAME occurrence can be retried.
+ *
+ * ONLY correct after a DEFINITIVE non-send: the caller won `key` this run, then
+ * the broadcast route RESPONDED non-2xx — nothing was sent, so re-claiming later
+ * cannot double-send. Never call this on an ambiguous failure (timeout / network
+ * error): the POST may have gone through, and the standing claim is exactly what
+ * prevents a duplicate.
+ *
+ * Fail-soft by design: a release error is logged and swallowed — the worst case
+ * is the pre-release behavior (no same-day retry; the occurrence waits for its
+ * next cadence), never a double-send. 42P01 (pre-migration) is a silent no-op.
+ */
+export async function releaseClaim(db: SupabaseClient, key: string): Promise<void> {
+  const { error } = await db.from("email_send_ledger").delete().eq("idempotency_key", key);
+  if (error && (error as { code?: string }).code !== "42P01") {
+    console.warn(`[idempotency] releaseClaim("${key}") failed: ${error.message}`);
+  }
+}
