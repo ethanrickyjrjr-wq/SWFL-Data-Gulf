@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import { useSession } from "@/lib/auth/use-session";
 import { BriefcasePanel } from "@/components/briefcase/BriefcasePanel";
@@ -70,13 +70,27 @@ export function AiBriefcasePill({
   // logged-in first-load never flashes open. Set-state-during-render is the sanctioned
   // no-effect pattern; `autoOpenResolved` prevents a render loop. Because `session` is
   // null in SSR + the first client paint, this is skipped during hydration — the
-  // committed DOM matches the server HTML before the pop fires.
+  // committed DOM matches the server HTML before the pop fires. The matchMedia read is
+  // safe here for the same reason: session !== null only happens client-side.
   if (!autoOpenResolved && session !== null) {
     setAutoOpenResolved(true);
-    if (shouldAutoOpenPill({ firstVisit, authed: session.authed, bridged })) {
+    const phone = typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
+    if (shouldAutoOpenPill({ firstVisit, authed: session.authed, bridged, phone })) {
       setOpen(true);
     }
   }
+
+  // Escape closes the open standalone sheet — the keyboard twin of the header X
+  // (NN/g overlay guideline). Listener-only effect; setState happens in the event
+  // handler, not the effect body, so the set-state-in-effect ban doesn't apply.
+  useEffect(() => {
+    if (!open || bridged) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, bridged]);
 
   return (
     <>
@@ -127,12 +141,29 @@ export function AiBriefcasePill({
         <div
           role="dialog"
           aria-label="AI and Briefcase"
-          // PHONE ONLY: the auto-open sheet was max-h-[80vh] and buried the homepage map
-          // on first visit. Cap it at 60vh so the map stays visible above it. Desktop
-          // (sm:) keeps its 70vh / 360px popover unchanged.
-          className="fixed inset-x-0 bottom-0 z-[57] flex max-h-[60vh] flex-col overflow-y-auto rounded-t-2xl border border-gulf-teal bg-[#2c3539] p-4 shadow-2xl shadow-black/50 sm:inset-x-auto sm:bottom-20 sm:right-4 sm:max-h-[70vh] sm:w-[360px] sm:rounded-xl"
+          // PHONE: the sheet sits above the pill (z-57 > z-56) and spans the full
+          // width, so it COVERS the Close pill — the always-visible header X below
+          // is the sheet's own close (07/05/2026 fix; the panel had none). Cap at
+          // 55vh so the page stays readable above it. Desktop (sm:) keeps its
+          // 70vh / 360px popover unchanged.
+          className="fixed inset-x-0 bottom-0 z-[57] flex max-h-[55vh] flex-col rounded-t-2xl border border-gulf-teal bg-[#2c3539] shadow-2xl shadow-black/50 sm:inset-x-auto sm:bottom-20 sm:right-4 sm:max-h-[70vh] sm:w-[360px] sm:rounded-xl"
         >
-          <BriefcasePanel page={page} />
+          <div className="relative flex shrink-0 items-center justify-center px-4 pt-2 pb-1">
+            <div className="h-1 w-9 rounded-full bg-white/20" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close AI and Briefcase"
+              className="absolute right-2 top-1.5 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M4.3 3.3 8 7l3.7-3.7 1 1L9 8l3.7 3.7-1 1L8 9l-3.7 3.7-1-1L7 8 3.3 4.3z" />
+              </svg>
+            </button>
+          </div>
+          <div className="min-h-0 overflow-y-auto p-4 pt-2">
+            <BriefcasePanel page={page} />
+          </div>
         </div>
       )}
     </>

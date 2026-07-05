@@ -5,6 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useConverse } from "@/lib/assistant/use-converse";
 import { AnswerText } from "@/components/answer/AnswerText";
+import { isBareAddressQuery, resolveAddressDestination } from "@/lib/geo/address-route";
+
+/** A bare street address is a listing signal, not a research question — send it
+ *  to the campaign-build flow (the hero's URL) instead of answering it with
+ *  region-grain medians (07/05/2026 screenshot). This also covers the map-section
+ *  search, whose non-ZIP submits land here as ?q=. Returns true when redirecting;
+ *  false → the caller asks normally (empty-tolerant, no error states). */
+async function redirectBareAddress(q: string): Promise<boolean> {
+  if (!isBareAddressQuery(q)) return false;
+  const dest = await resolveAddressDestination(q);
+  if (!dest) return false;
+  window.location.replace(dest);
+  return true;
+}
 
 const STARTERS = [
   "Is Fort Myers Beach a good buy right now?",
@@ -20,11 +34,14 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasSubmittedInitial = useRef(false);
 
-  // Auto-submit when a ?q= param is provided
+  // Auto-submit when a ?q= param is provided (address-shaped q redirects instead)
   useEffect(() => {
     if (initialQ && !hasSubmittedInitial.current) {
       hasSubmittedInitial.current = true;
-      void ask({ reportId, question: initialQ });
+      void (async () => {
+        if (await redirectBareAddress(initialQ)) return;
+        void ask({ reportId, question: initialQ });
+      })();
     }
   }, [initialQ, reportId, ask]);
 
@@ -38,8 +55,11 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
   function submit() {
     const q = question.trim();
     if (!q || streaming) return;
-    reset();
-    void ask({ reportId, question: q });
+    void (async () => {
+      if (await redirectBareAddress(q)) return;
+      reset();
+      void ask({ reportId, question: q });
+    })();
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {

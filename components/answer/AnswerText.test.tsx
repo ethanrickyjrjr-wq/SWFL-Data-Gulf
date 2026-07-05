@@ -1,7 +1,7 @@
 // This repo has no DOM test environment by design — tests are bun:test + pure.
 // We test tokenizeAnswerText (the pure tokenizer AnswerText renders from) directly.
 import { describe, test, expect } from "bun:test";
-import { tokenizeAnswerText } from "./AnswerText";
+import { tokenizeAnswerText, stripAnswerMarkdown } from "./AnswerText";
 
 function highlighted(text: string): string[] {
   return tokenizeAnswerText(text)
@@ -53,5 +53,34 @@ describe("tokenizeAnswerText", () => {
 
   test("plain prose with no numbers highlights nothing", () => {
     expect(highlighted("Lee County parcels in snapshot, actively homesteaded.")).toEqual([]);
+  });
+});
+
+describe("stripAnswerMarkdown (answers are plain text — asterisks never ship raw)", () => {
+  test("strips **bold** and __bold__ markers, keeping the text", () => {
+    expect(stripAnswerMarkdown("**Housing Market** — the median")).toBe(
+      "Housing Market — the median",
+    );
+    expect(stripAnswerMarkdown("__emphasis__ stays plain")).toBe("emphasis stays plain");
+  });
+
+  test("strips heading markers at line start", () => {
+    expect(stripAnswerMarkdown("## Housing Market\nprose")).toBe("Housing Market\nprose");
+    expect(stripAnswerMarkdown("### Deep header")).toBe("Deep header");
+  });
+
+  test("strips inline code backticks and leading blockquote markers", () => {
+    expect(stripAnswerMarkdown("run `the thing` now")).toBe("run the thing now");
+    expect(stripAnswerMarkdown("> quoted line\nnormal")).toBe("quoted line\nnormal");
+  });
+
+  test("leaves plain prose, newlines, and math untouched", () => {
+    const text = "Median $400,000 as of 03/31/2026.\nActive listings: 29,264.";
+    expect(stripAnswerMarkdown(text)).toBe(text);
+    expect(stripAnswerMarkdown("z = -0.9 and 4 * 5")).toBe("z = -0.9 and 4 * 5");
+  });
+
+  test("empty string round-trips", () => {
+    expect(stripAnswerMarkdown("")).toBe("");
   });
 });

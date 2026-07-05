@@ -89,6 +89,11 @@ export function shouldMountHighlighter(pathname: string | null): boolean {
  *  - NOT `authed`  logged-in users are already past signup — never pop for them.
  *  - NOT `bridged` the bridged /r/* report dock keeps its manual-open behavior; this is
  *                  only the standalone prompts+examples panel.
+ *  - NOT `phone`   on a phone the sheet covers most of the viewport before the visitor
+ *                  has seen the page at all (07/05/2026 operator screenshots; NN/g:
+ *                  never overlay before the user gets value, never block content on
+ *                  mobile). Desktop keeps the funnel pop — its popover doesn't bury
+ *                  the page. Caller reads matchMedia at the sm breakpoint (639px).
  * Pure (no React, no DOM) so it's unit-tested directly. The caller passes RESOLVED auth
  * (it holds off while `useSession()` is still loading) and a freshly read visit flag.
  */
@@ -96,6 +101,7 @@ export function shouldAutoOpenPill(opts: {
   firstVisit: boolean;
   authed: boolean;
   bridged: boolean;
+  phone: boolean;
 }): boolean {
-  return opts.firstVisit && !opts.authed && !opts.bridged;
+  return opts.firstVisit && !opts.authed && !opts.bridged && !opts.phone;
 }

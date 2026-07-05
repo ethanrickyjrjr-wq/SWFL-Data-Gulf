@@ -12,6 +12,7 @@ import { describePage, projectPageContextForPath } from "@/lib/chat/page-context
 import { briefcaseDigest } from "@/lib/briefcase/briefcase-digest";
 import { ChatScheduleCard } from "@/components/briefcase/ChatScheduleCard";
 import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
+import { isBareAddressQuery, resolveAddressDestination } from "@/lib/geo/address-route";
 import { getAiContext } from "@/lib/project/ai-context-store";
 import type { ProjectItem } from "@/lib/project/items";
 import { DockChart } from "@/components/highlighter/DockChart";
@@ -125,6 +126,21 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
   // last town's card. The next answer's prelude `place` frame re-populates these.
   const submit = (text: string) => {
     if (busy || !text.trim()) return; // mirror useChatStream.send's own guard
+    // A bare street address on a PUBLIC page is a listing signal — route it into
+    // the campaign-build flow (the hero's URL), never to the answer engine, which
+    // would reply with region-grain medians (07/05/2026 screenshot). Inside a
+    // project the assistant keeps every address flow (comps, saved address) as-is.
+    if (!projectIdFromPath(pathname ?? "") && isBareAddressQuery(text)) {
+      void resolveAddressDestination(text).then((dest) => {
+        if (dest) window.location.href = dest;
+        else stream(text); // resolution failed — fall through to a normal answer
+      });
+      return;
+    }
+    stream(text);
+  };
+
+  const stream = (text: string) => {
     placeRef.current = null;
     tokenRef.current = undefined;
     setPlace(null);

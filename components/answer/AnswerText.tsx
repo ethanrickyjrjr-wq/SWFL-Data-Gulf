@@ -48,6 +48,24 @@ export function tokenizeAnswerText(text: string): AnswerTextToken[] {
 }
 
 /**
+ * Answers are plain text (locked rule) — but when the model disobeys and emits
+ * markdown anyway, the markers must not ship raw to users (07/05/2026 prod
+ * screenshot: literal `**Housing Market**` on /ask). Structural guarantee at
+ * this one root: strip bold/heading/inline-code/blockquote markers, keep the
+ * text. Lists are left alone — a leading "- " reads naturally as prose.
+ * Streaming note: an unclosed `**pair` stays visible until its closer arrives,
+ * then cleans up on the next render — acceptable transient.
+ */
+export function stripAnswerMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^\s*>\s?/gm, "");
+}
+
+/**
  * Renders answer/narrative text with every numeric figure in the brand teal.
  * One shared component so every answer surface (chat, /ask, /r pages, alerts,
  * project workspace) highlights numbers the same way — fix it here, not per
@@ -56,7 +74,7 @@ export function tokenizeAnswerText(text: string): AnswerTextToken[] {
  */
 export function AnswerText({ text }: { text: string }) {
   if (!text) return null;
-  const tokens = tokenizeAnswerText(text);
+  const tokens = tokenizeAnswerText(stripAnswerMarkdown(text));
   return (
     <>
       {tokens.map((t, i) =>
