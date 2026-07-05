@@ -8,8 +8,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 import { LoginModal } from "@/components/landing/LoginModal";
+import { revealBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import {
   NAV_GROUPS,
+  ACCOUNT_MENU,
+  type AccountMenuItem,
   homeHref,
   isActive,
   isItemActive,
@@ -303,6 +306,15 @@ function AppBar({
   const closeAccount = useCallback(() => setAccountOpen(false), []);
   const closeExplore = useCallback(() => setExploreOpen(false), []);
 
+  // Brand's local claim: a page already showing a brand editor takes the click
+  // (opens + scrolls + pulses its own panel); otherwise fall through to the
+  // Link navigation → the /account/brand route-modal.
+  const onAccountItem = useCallback((item: AccountMenuItem, e: React.MouseEvent) => {
+    if (item.reveal === "brand" && revealBrandPanel()) e.preventDefault();
+    setAccountOpen(false);
+    setMobileOpen(false);
+  }, []);
+
   // One outside-click / Escape listener for BOTH bar disclosures (account + Explore).
   // Clicking inside the bar never closes via this path (barRef contains the target);
   // opening one trigger explicitly closes the other (see the toggle handlers) so the
@@ -451,15 +463,16 @@ function AppBar({
                   <div className="truncate border-b border-white/10 px-3 py-2 text-xs text-gray-400">
                     {email}
                   </div>
-                  <AccountLink href="/project" onClick={closeAccount}>
-                    My Projects
-                  </AccountLink>
-                  <AccountLink href="/contacts" onClick={closeAccount}>
-                    Contacts
-                  </AccountLink>
-                  <AccountLink href="/billing" onClick={closeAccount}>
-                    Billing
-                  </AccountLink>
+                  {ACCOUNT_MENU.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={(e) => onAccountItem(item, e)}
+                      className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                   <button
                     type="button"
                     onClick={() => {
@@ -563,12 +576,16 @@ function AppBar({
             {user ? (
               <>
                 <p className="truncate px-3 pb-1 text-xs text-gray-400">{email}</p>
-                <MobileLink href="/contacts" onClick={() => setMobileOpen(false)}>
-                  Contacts
-                </MobileLink>
-                <MobileLink href="/billing" onClick={() => setMobileOpen(false)}>
-                  Billing
-                </MobileLink>
+                {ACCOUNT_MENU.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={(e) => onAccountItem(item, e)}
+                    className="block rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-white/10 hover:text-white"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
                 <button
                   type="button"
                   onClick={() => {
@@ -629,46 +646,6 @@ function HomeAnchor({ href, children }: { href: string; children: React.ReactNod
     <Link href={href} className="group relative text-gray-400 transition-colors hover:text-white">
       {children}
       <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-teal-primary transition-all group-hover:w-full" />
-    </Link>
-  );
-}
-
-function AccountLink({
-  href,
-  onClick,
-  children,
-}: {
-  href: string;
-  onClick?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function MobileLink({
-  href,
-  onClick,
-  children,
-}: {
-  href: string;
-  onClick?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className="block rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-white/10 hover:text-white"
-    >
-      {children}
     </Link>
   );
 }

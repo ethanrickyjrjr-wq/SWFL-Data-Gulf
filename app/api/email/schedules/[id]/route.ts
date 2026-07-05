@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import type { Cadence } from "@/lib/email/schedule-cadence";
 import { validateToolInput } from "@/lib/email/schedule-command";
 import { patchBodyToCommands, writeAction } from "@/lib/email/schedule-write";
 
@@ -45,7 +46,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       candidate.action === "change-cadence"
         ? {
             ...candidate,
-            cadence: candidate.cadence ?? (row.cadence as typeof candidate.cadence),
+            cadence: candidate.cadence ?? (row.cadence as Cadence),
             day_of_week: candidate.day_of_week ?? row.day_of_week ?? undefined,
             day_of_month: candidate.day_of_month ?? row.day_of_month ?? undefined,
             send_hour_et: candidate.send_hour_et ?? row.send_hour_et ?? undefined,

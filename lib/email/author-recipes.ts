@@ -50,21 +50,30 @@ export function detectRecipe(prompt: string): RecipeId | null {
 
 const RECIPES: Record<RecipeId, string> = {
   "agent-intro":
-    "RECIPE — PROSPECT WELCOME / AGENT INTRO (tuned for cold-open conversion).\n" +
+    "RECIPE — AGENT LAUNCH / PROSPECT WELCOME (tuned for cold-open conversion; the " +
+    "letter-plus-clipping look — a personal letter carrying one piece of hard evidence).\n" +
     "Target structure, top to bottom:\n" +
-    "- Hero image with an overlay_title carrying the value proposition — what the reader " +
-    "gets — right at the top, because mobile clients may cut the message short and the " +
-    "hook must land first.\n" +
-    "- A bite-size agent-card: a sentence or two of brand story, never a lengthy " +
-    "biography — welcome readers skim.\n" +
-    "- A short what-to-expect `list` (how often you'll write, what value each send " +
-    "carries) — expectation-setting builds the trust that keeps opens high.\n" +
-    "- A stats row ONLY when the DATA MENU holds real track-record figures; when it " +
-    "doesn't, skip stats entirely.\n" +
-    "- Exactly ONE button. Single column throughout; every element leads the eye down " +
-    "the inverted pyramid to that one ask, and placing it high is fine.\n" +
-    "Tone: warm, direct, short. The footer with unsubscribe and postal address always " +
-    "renders — never suggest removing it.",
+    "- Open with a side-by-side row: an `image` block (image_role photo) spanning about " +
+    "five of the twelve columns BESIDE a `text` block carrying the letter opening — " +
+    "never a full-width photo banner on top. The photo is the agent's professional " +
+    "portrait treated as a tall column.\n" +
+    "- The letter opening: the first sentence says plainly why the reader is receiving " +
+    "this (you know each other, or they asked to hear from you); then a line or two of " +
+    "first-person origin story. Written for one reader — warm, direct, short.\n" +
+    "- One `hero` block with band light as the market moment: kicker names the place, " +
+    "the headline value comes from the DATA MENU, label is one honest plain-language " +
+    "line. Exactly one figure in the whole email — the letter carries one piece of hard " +
+    "evidence, no more.\n" +
+    "- A `list` block about what happens next: leads are words (First / Then / Every " +
+    "week), every item phrased as what the reader gets, never as sender activity.\n" +
+    "- An `agent-card` as the sign-off — the bio reads as a two-line signature, never a " +
+    "resume.\n" +
+    "- Exactly ONE `button`: the reply ask (reply with your address and a word like " +
+    "REVIEW for your home's numbers). A short `text` P.S. inviting a forward to one " +
+    "friend is the only second ask, and it is soft.\n" +
+    "- The key message and the one ask land in the first readable lines. Copy is always " +
+    "real text, never baked into an image. The footer with unsubscribe and postal " +
+    "address always renders — never suggest removing it.",
 
   "monthly-newsletter":
     "RECIPE — MONTHLY NEWSLETTER (recurring market digest).\n" +

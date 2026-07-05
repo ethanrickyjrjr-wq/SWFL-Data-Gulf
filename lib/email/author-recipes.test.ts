@@ -25,6 +25,15 @@ describe("detectRecipe — deterministic keyword routing", () => {
     ["monthly letter to clients", "monthly-newsletter"],
     // "newsletter" must NOT trip the editorial \bletter\b sub-keyword
     ["quarterly newsletter", "monthly-newsletter"],
+    // agent-launch campaign prompts (registry seed + weekly follow-up)
+    [
+      "Build my agent-launch announcement email introducing me to my sphere — open like a personal letter",
+      "agent-intro",
+    ],
+    [
+      "Build a weekly sphere market update for Bonita Springs — one national or Florida headline number set beside my own area's number",
+      null,
+    ],
     // no match → null → generic prompt unchanged
     ["price update for Cape Coral", null],
     ["", null],
@@ -75,7 +84,7 @@ describe("authorSystem wiring", () => {
     };
     const plain = authorSystem(base);
     const withRecipe = authorSystem({ ...base, recipe: recipeSection("agent-intro") });
-    expect(withRecipe).toContain("RECIPE — PROSPECT WELCOME");
+    expect(withRecipe).toContain("RECIPE — AGENT LAUNCH / PROSPECT WELCOME");
     expect(withRecipe.startsWith(plain)).toBe(true); // appended, nothing else moved
     expect(authorSystem(base)).toBe(plain); // no-recipe path unchanged
   });
