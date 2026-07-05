@@ -61,6 +61,54 @@ async function main() {
   console.log(
     `scan ${DRY_RUN ? "(dry) " : ""}done: scan_id=${result.scanId} posts=${result.posts} hashtags=${result.hashtags} weighted_requests=${result.requests}`,
   );
+
+  if (!DRY_RUN && result.scanId > 0) {
+    const { computeDigest, isoWeekOf } = await import("@/lib/social-pulse/digest");
+    const now = new Date();
+    const week = isoWeekOf(now);
+    const asOf = `${String(now.getUTCMonth() + 1).padStart(2, "0")}/${String(now.getUTCDate()).padStart(2, "0")}/${now.getUTCFullYear()}`;
+
+    const { data: posts } = await supabase
+      .from("social_pulse_posts")
+      .select("post_id, permalink, username, media_type, caption, like_count, comment_count, area")
+      .eq("scan_id", result.scanId);
+    const { data: hashtags } = await supabase
+      .from("social_pulse_hashtags")
+      .select("name, media_count")
+      .eq("scan_id", result.scanId);
+
+    // previous week's hashtag counts for deltas (latest digest before this week)
+    const { data: prevDigest } = await supabase
+      .from("social_pulse_digest")
+      .select("digest")
+      .lt("week", week)
+      .order("week", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const prevHashtags =
+      (
+        prevDigest?.digest as {
+          hashtags?: { name: string; mediaCount: number | null }[];
+        } | null
+      )?.hashtags?.map((h) => ({ name: h.name, media_count: h.mediaCount })) ?? [];
+
+    const digest = computeDigest({
+      scanId: result.scanId,
+      asOf,
+      week,
+      posts: posts ?? [],
+      hashtags: hashtags ?? [],
+      prevHashtags,
+    });
+    const { error } = await supabase
+      .from("social_pulse_digest")
+      .upsert(
+        { week, digest, scan_id: result.scanId, built_at: now.toISOString() },
+        { onConflict: "week" },
+      );
+    if (error) throw new Error(`digest upsert: ${error.message}`);
+    console.log(`digest upserted for ${week} (scan ${result.scanId})`);
+  }
 }
 
 main().catch((e) => {
