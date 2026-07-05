@@ -1,4 +1,4 @@
-// lib/email/blocks/AgentCardBlock.tsx — PURE. Circular headshot + name + bio.
+// lib/email/blocks/AgentCardBlock.tsx — PURE. Editorial portrait + name + bio.
 import { Section, Row, Column, Img, Text, Link } from "@react-email/components";
 import type { AgentCardProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, MUTED, BORDER, CARD_BG } from "./styles";
@@ -21,13 +21,20 @@ export function AgentCardBlock({
     >
       <Row>
         {props.photoUrl ? (
-          <Column style={{ width: "76px", verticalAlign: "top" }}>
+          <Column style={{ width: "108px", verticalAlign: "top" }}>
+            {/* Editorial rectangular crop — agent photos are professional
+                half-body portraits; a circle avatar wastes them. */}
             <Img
               src={props.photoUrl}
               alt={props.name ?? ""}
-              width={64}
-              height={64}
-              style={{ borderRadius: "50%", display: "block" }}
+              width={96}
+              height={120}
+              style={{
+                borderRadius: "10px",
+                display: "block",
+                objectFit: "cover",
+                objectPosition: "center top",
+              }}
             />
           </Column>
         ) : null}
