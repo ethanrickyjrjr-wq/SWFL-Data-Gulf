@@ -12,16 +12,18 @@ describe("BILLING_TIERS", () => {
     assert.equal(FREE_SENDS_PER_MONTH, tierLimit("free"));
   });
 
-  test("spec prices: 29/79/149 monthly, 290/790/1490 annual (2 months free)", () => {
+  test("prices: 9.99/79/149 monthly, 99.90/790/1490 annual (2 months free; starter repriced 07/05/2026)", () => {
     const bySlug = Object.fromEntries(BILLING_TIERS.map((t) => [t.slug, t]));
-    assert.equal(bySlug.starter.priceMonthlyUsd, 29);
-    assert.equal(bySlug.starter.priceAnnualUsd, 290);
+    assert.equal(bySlug.starter.priceMonthlyUsd, 9.99);
+    assert.equal(bySlug.starter.priceAnnualUsd, 99.9);
     assert.equal(bySlug.growth.priceMonthlyUsd, 79);
     assert.equal(bySlug.growth.priceAnnualUsd, 790);
     assert.equal(bySlug.pro.priceMonthlyUsd, 149);
     assert.equal(bySlug.pro.priceAnnualUsd, 1490);
-    // annual = 10 months of monthly, for every tier — the "2 months free" invariant
-    for (const t of BILLING_TIERS) assert.equal(t.priceAnnualUsd, t.priceMonthlyUsd * 10);
+    // annual = 10 months of monthly, for every tier — the "2 months free" invariant.
+    // Compared in integer cents: 9.99 * 10 is 99.89999… in IEEE floats.
+    for (const t of BILLING_TIERS)
+      assert.equal(Math.round(t.priceAnnualUsd * 100), Math.round(t.priceMonthlyUsd * 10 * 100));
   });
 
   test("lookup keys are unique and follow swfl_<tier>_<interval>", () => {
