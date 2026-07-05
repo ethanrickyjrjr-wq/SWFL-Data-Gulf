@@ -1,3 +1,15 @@
+## 2026-07-05 (main) — KILLED the API burners: corridor-pulse + city-pulse workflows DISABLED; crawl4ai retrofit registered
+
+Operator caught the drain on the console (pasted ~2.5M input tokens in 2h, one request billed in 4+
+web-search segments) and decreed the fix: crawl4ai fetch + Claude summarize, not paid web_search. Both
+capture pipelines (city_pulse DAILY, city_pulse_corridors weekly) run sonnet-4-6 + web_search_20250305
+max_uses=8 per unit — today's earlier "cost mode" only Haiku'd the distill, not the capture. ACTIONS:
+`gh workflow disable` on corridor-pulse-weekly.yml + city-pulse-daily.yml (both `disabled_manually`,
+zero further spend) · build registered `pulse-crawl4ai-retrofit` + spec (news_swfl lake matching via
+corridor-aliases → crawl4ai article fetch → one Haiku distill per unit WITH matches, zero LLM for quiet
+units, per-unit checkpointing) · re-enable only after dry-run green. Check: pulse_crawl4ai_retrofit_live_verify.
+NOTE for the ingest session: your pipelines went dark deliberately — retrofit spec is the path back.
+
 ## 2026-07-05 (main) — SPEC: Social Pulse follow-ups — three lenses (IG performance · X conversation · Reddit demand) + Pulse v2
 
 Operator-requested follow-up roadmap: `docs/superpowers/specs/2026-07-05-social-pulse-followups-design.md`.
