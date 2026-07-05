@@ -1,3 +1,19 @@
+## 2026-07-05 (main) — BUILT: address spine build 2 (6 commits, 3a10aa97..e413af6e) — comps ride the ONE lake feed
+
+Executed plan `2026-07-05-address-spine.md` inline (TDD, commit per task): T1 compsForAddress extracted
+from compHelper (169 assistant tests untouched-green — chat byte-identical); T2 lib/email/address-context.ts
+loadAddressFigures → MarketFigure[] (honest price kinds: sold/estimate/last-list never conflated; vendor +
+property ids never surfaced; empty-tolerant; 5 tests); T3 BuildScope.address + fetchLakeParts 4th parallel
+pull — authorDoc/buildContentDoc/social-calendar/occurrences ALL inherit (1000 lib/email tests green);
+T4 hero addr= param (listing chips only) → grid page threads ?zip=/?addr= → shell scope (closes the
+anonymous-grid empty-scope gap); T5 project email tab selects projects.subject_address into scope;
+T6 occurrence lane re-reads subject_address each send via project join — NO new column, address stays
+current (occurrence + scheduler tests green). LIVE-VERIFIED (≤3 vendor calls, zero LLM): real Cape Coral
+address → 21 figures incl. 6 "Nearby comp —" (sold-for dated 2016/2019 where that's the true nearby sold
+set — dates ride each figure), vendor-leak scan clean. Gates: 1191 tests 0 fail, `bunx next build` clean.
+`address_spine_live_verify` stays OPEN — operator prod check. Next on the ladder: lifecycle sequences (3),
+send hardening (4).
+
 ## 2026-07-05 (main) — SCOPE LOCK: capture comparison uses STORED Sonnet reports only — zero new search runs, ~8 units, two sittings
 
 Operator: "We have old reports from sonnet, so don't run a bunch of only LLMs just a little comparison."
