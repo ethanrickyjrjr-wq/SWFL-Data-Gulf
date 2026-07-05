@@ -66,6 +66,7 @@ import {
   type LibraryAsset,
 } from "@/lib/email/author-doc";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
+import { loadAddressFigures } from "@/lib/email/address-context";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
 const MAX_TOKENS = 4096;
@@ -73,6 +74,10 @@ const MAX_TOKENS = 4096;
 export interface BuildScope {
   kind?: string;
   value?: string;
+  /** Subject listing address (address spine, build 2): when present, the feed
+   *  additionally carries nearby sold comps as cited figures. Enrichment only —
+   *  kind/value stay the area scope; nothing branches on it besides the feed. */
+  address?: string;
 }
 
 // ── Lake context (the builder's data feed — EVERYTHING, every time) ──────────
@@ -95,12 +100,17 @@ async function fetchMasterDossier(scope?: BuildScope): Promise<string> {
 export async function fetchLakeParts(
   scope?: BuildScope,
 ): Promise<{ figures: MarketFigure[]; dossier: string }> {
-  const [marketFigures, lifecycleFigure, dossier] = await Promise.all([
+  const [marketFigures, lifecycleFigure, dossier, addressFigures] = await Promise.all([
     loadMarketFigures(scope).catch(() => []),
     loadLifecycleDigest(scope).catch(() => null),
     fetchMasterDossier(scope).catch(() => ""),
+    loadAddressFigures(scope?.address).catch(() => []),
   ]);
-  const figures = lifecycleFigure ? [...marketFigures, lifecycleFigure] : marketFigures;
+  const figures = [
+    ...marketFigures,
+    ...(lifecycleFigure ? [lifecycleFigure] : []),
+    ...addressFigures,
+  ];
   return { figures, dossier };
 }
 
