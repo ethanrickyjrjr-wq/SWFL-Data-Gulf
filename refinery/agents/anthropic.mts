@@ -23,6 +23,11 @@ export type CallType =
   | "assistant_chart"
   | "email_build"
   | "deliverable_build"
+  // Live answer-proof scripts (scripts/prove-*.mts) — converted 07/05/2026 off
+  // raw unmetered clients; routing through here gives them logging + the spend
+  // caps. The pre-push proof gate makes these runs mandatory — they must never
+  // again be the invisible spender.
+  | "proof"
   | "other";
 
 export interface UsageLike {

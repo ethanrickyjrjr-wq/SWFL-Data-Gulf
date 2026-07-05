@@ -1,4 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { appendFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { parseBrainMarkdown } from "../refinery/render/speaker.mts";
@@ -8,7 +9,7 @@ import { FORMAT_RULE } from "../lib/assistant/system-prompt";
 import { OUTSIDE_SYSTEM } from "../lib/assistant/conversation-path";
 import { findDeflection, findLeak } from "../.claude/hooks/check-answer-fix-proof.mjs";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = getAnthropic("proof");
 const masterMd = await readFile("brains/master.md", "utf-8");
 const brain = parseBrainMarkdown(masterMd);
 const token = brain.freshness_token;

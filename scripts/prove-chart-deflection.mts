@@ -25,7 +25,8 @@
  *
  * Run:  bun run scripts/prove-chart-deflection.mts
  */
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { TRIAGE_MODEL } from "../refinery/agents/anthropic.mts";
 import { parseBrainMarkdown } from "../refinery/render/speaker.mts";
 import { buildDossier } from "../lib/fetch-brain";
@@ -155,7 +156,7 @@ async function main() {
     );
     return;
   }
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const client = getAnthropic("proof");
   const creMd = await fs.readFile("brains/cre-swfl.md", "utf-8");
   const observedAt = execSync('bash -lc "date -u +%Y-%m-%dT%H:%M:%SZ"', {
     encoding: "utf-8",

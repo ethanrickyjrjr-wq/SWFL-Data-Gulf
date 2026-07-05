@@ -10,7 +10,8 @@
  *
  * Run:  bun run scripts/prove-user-chart.mts
  */
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { TRIAGE_MODEL } from "../refinery/agents/anthropic.mts";
 import { buildGroundedRegionSystem } from "../lib/assistant/conversation-path";
 import { composeChartFromRequest } from "../lib/assistant/compose-chart";
@@ -41,7 +42,7 @@ async function main() {
     console.log(JSON.stringify({ key_loaded: false, reason: "run with `bun run` so .env.local loads" })); // prettier-ignore
     return;
   }
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const client = getAnthropic("proof");
   const observedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   const composed = await composeChartFromRequest(QUESTION, ORIGIN);

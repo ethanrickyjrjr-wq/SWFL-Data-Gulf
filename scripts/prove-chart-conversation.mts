@@ -16,7 +16,8 @@
  *
  * Run:  bun run scripts/prove-chart-conversation.mts
  */
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { TRIAGE_MODEL } from "../refinery/agents/anthropic.mts";
 import { buildGroundedRegionSystem } from "../lib/assistant/conversation-path";
 import { buildChartForQuestion } from "../lib/assistant/chart-for-question";
@@ -70,7 +71,7 @@ async function main() {
     );
     return;
   }
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const client = getAnthropic("proof");
   const observedAt = execSync('bash -lc "date -u +%Y-%m-%dT%H:%M:%SZ"', {
     encoding: "utf-8",
   }).trim();

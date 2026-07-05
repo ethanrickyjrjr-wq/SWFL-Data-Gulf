@@ -17,7 +17,8 @@
  *
  * Run:  bun run scripts/prove-web-fallback.mts   (so .env.local loads ANTHROPIC_API_KEY)
  */
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { TRIAGE_MODEL } from "../refinery/agents/anthropic.mts";
 import { buildGroundedRegionSystem } from "../lib/assistant/conversation-path";
 import { webFallback, renderWebFallbackBlock } from "../lib/assistant/web-fallback";
@@ -48,7 +49,7 @@ async function main() {
     console.log(JSON.stringify({ key_loaded: false, reason: "run with `bun run` so .env.local loads" })); // prettier-ignore
     return;
   }
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const client = getAnthropic("proof");
   const observedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   // The grounded REGION system — exactly what the no-location conversation branch builds.

@@ -26,7 +26,8 @@
  * (Bun auto-loads ANTHROPIC_API_KEY from .env.local.)
  */
 import { execSync } from "node:child_process";
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
+import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { TRIAGE_MODEL } from "../refinery/agents/anthropic.mts";
 import { parseBrainMarkdown } from "../refinery/render/speaker.mts";
 import { buildDossier } from "../lib/fetch-brain";
@@ -277,7 +278,7 @@ async function main() {
     );
     return;
   }
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const client = getAnthropic("proof");
 
   // FIXED master.md = working tree on disk.
   const fixedMaster = await fs.readFile("brains/master.md", "utf-8");
