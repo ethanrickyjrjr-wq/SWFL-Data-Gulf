@@ -1,7 +1,9 @@
 import anthropic
 
 
-def summarize_notice(pdf_text: str, model: str = 'claude-sonnet-4-6') -> str:
+# Haiku 4.5 (cost mode 07/05/2026): a 2-3 sentence factual summary of a short
+# notice PDF is squarely small-model work — Sonnet was ~4x the cost for parity here.
+def summarize_notice(pdf_text: str, model: str = 'claude-haiku-4-5-20251001') -> str:
     """Generate a 2-3 sentence plain-English summary of a DBPR notice.
 
     Returns the summary string. On API error, returns empty string (caller logs, row still upserts).

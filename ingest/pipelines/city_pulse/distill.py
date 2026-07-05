@@ -31,7 +31,10 @@ import anthropic
 
 from ingest.lib.tier1_inventory import _get_connection
 
-MODEL = "claude-sonnet-4-6"
+# Haiku 4.5 (cost mode 07/05/2026): distill is structured extraction over an
+# already-captured record, no tools — small-model work. Capture (pipeline.py)
+# stays Sonnet: web_search quality IS the signal there.
+MODEL = "claude-haiku-4-5-20251001"
 
 TTL_DAYS: dict[str, int] = {
     "breaking": 1,

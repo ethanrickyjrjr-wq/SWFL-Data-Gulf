@@ -265,17 +265,17 @@ pipelines:
 
   - name: city_pulse
     lane: tier-1
-    cadence_days: 1
+    cadence_days: 7 # WEEKLY cost mode 07/05/2026 (pre-launch data building) — restore 1 at launch
     tolerance_multiplier: 3.0
     inventory_id: lake-tier1/city_pulse/
     inventory_key_type: prefix
     freshness_sla:
-      warn_after_days: 4    # past the 3d tolerance window; log WARN but keep exit 0
-      error_after_days: 7   # 7× cadence — a full week dark is a production defect
-    # Daily web_search current-events capture for 7 SWFL cities; distilled into
+      warn_after_days: 10   # scaled for weekly cost mode; restore 2/4 with daily cadence at launch
+      error_after_days: 21  # 3× weekly cadence — three dark weeks is a production defect
+    # web_search current-events capture for the SWFL cities; distilled into
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
-    note: "RED expected: daily cron PAUSED 06/18/2026 (credit freeze — spends Anthropic web_search credits). Schedule commented out in city-pulse-daily.yml; last manual run 06/28/2026. Re-enable at launch."
+    note: "RE-ENABLED 07/05/2026 in weekly cost mode (operator: build data cheaply pre-launch): cron Wednesday 09:00 UTC, distill on Haiku, capture stays Sonnet web_search. At launch: daily cadence + freshness_sla 2/4."
 
   - name: city_pulse_corridors
     lane: tier-1
@@ -636,7 +636,7 @@ pipelines:
     # Amendment pattern: DBPR publishes corrections as new URLs alongside old ones.
     # Two rows for the same respondent is normal; ORDER BY response_deadline DESC for active version.
     # First run: 2026-06-01 (news-swfl.md: 6 notices, 1 construction unlicensed, 0 ABT/hospitality).
-    note: "RED expected: weekly cron PAUSED 06/18/2026 (credit freeze — Claude summaries spend credits). Schedule commented out in dbpr-public-notices-weekly.yml; data frozen 06/08/2026. Re-enable at launch."
+    note: "RE-ENABLED 07/05/2026 — cron Monday 10:00 UTC restored; pdf_summary moved to Haiku (cost mode, handful of notices/week = cents). Structured fields are deterministic regex; only the summary prose is LLM."
 
   - name: noaa_ghcn_rainfall
     lane: tier-2

@@ -1,9 +1,10 @@
 name: DBPR Public Notices — Weekly SWFL
 
 on:
-  # PAUSED 2026-06-18 — credit freeze (ANTHROPIC_API_KEY); re-enable at launch
-  # schedule:
-  #   - cron: "0 10 * * 1"
+  # RE-ENABLED 07/05/2026 — summaries moved to Haiku (cost mode); handful of
+  # notices/week, cents per run.
+  schedule:
+    - cron: "0 10 * * 1"
   workflow_dispatch:
     inputs:
       dry_run:

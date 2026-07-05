@@ -1,3 +1,30 @@
+## 2026-07-05 (main) — feat(ingest): city_pulse + dbpr_public_notices RE-ENABLED in cost mode (operator decree)
+
+Operator: "bring them both in as cost effectively as we can — build data pre-launch." Levers:
+city_pulse cron daily→WEEKLY (Wed 09:00 UTC, 7× cost cut; registry cadence_days 7, sla 10/21 —
+restore daily + 2/4 at launch) + distill.py MODEL → Haiku 4.5 (structured extraction, no tools;
+capture stays Sonnet — web_search quality is the signal). dbpr_public_notices cron restored (Mon
+10:00 UTC) + pdf_summary → Haiku 4.5 (2-3 sentence factual summary; structured fields are regex,
+LLM only writes prose). 44 pipeline tests pass. Live dispatch of both after push = verification +
+first data points; ops_notes updated after rows confirmed.
+
+## 2026-07-05 (main) — VERIFY: agent-launch plan second pass — 2 spec deviations flagged, 2 defects found (handoff doc)
+
+Operator-ordered verification of the inherited plan `2026-07-05-agent-launch-campaign.md` (2b719e6b): full
+code probe of every seam + crawl4ai vendor pass. Resend tags verified live + against installed SDK 6.16.0:
+tags ride emails.send AND batch.send (batch = Omit<CreateEmailOptions,'attachments'|'scheduledAt'>), ASCII
+letters/numbers/_/- only ≤256 chars ≤75/email, docs verbatim "the tag is included in the webhook event";
+mailto: passes the blast URL lint (SAFE_SCHEME_RE). Findings → `docs/superpowers/handoffs/
+2026-07-05-agent-launch-plan-verification.md`: **A1** plan deviation 1 (drop campaign tag) loses campaign
+provenance PERMANENTLY (no campaign_key column exists; DONE-WHEN 4 unmeetable) — operator decision, default
+= full thread (1 column + materials POST + onSave param); **A2** deviation 2 (no source line) conflicts
+with ratified spec L3 — operator decision; **A3 defect** applyBrand button branch (EmailLabShell.tsx:140)
+clobbers the Task-4 mailto for any brand with a website — one-line guard required; **A4 gap** PDF engine
+never reads layout → portrait row STACKS in PDF (spec L4 says all three engines) — extract compile-grid's
+groupRows as one root + flex rows in EmailDocPdf; **A5** object-fit not email-safe; **A6** scheduler files
+claimed by parallel session → jitter check correct. Plan file itself was actively claimed (cc281291) so
+amendments live in the handoff, not inline. Nothing pushed.
+
 ## 2026-07-05 (main) — SPEC+PLAN: lab-email truth guards (registered `lab_email_truth_guards_live_verify`)
 
 Scoped from the Rainbow Meadows live-send findings the send-surface wave didn't cover, all three verified

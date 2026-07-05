@@ -1,9 +1,12 @@
 name: City pulse daily
 
 on:
-  # PAUSED 2026-06-18 — credit freeze (ANTHROPIC_API_KEY only; pipeline uses Anthropic web_search, NOT Firecrawl); re-enable at launch
-  # schedule:
-  #   - cron: "0 9 * * *"
+  # RE-ENABLED 07/05/2026 in WEEKLY cost mode (operator: build data cheaply pre-launch).
+  # Wednesday 09:00 UTC — clear of the Monday 08:00/09:00/10:00 slots (swfl-inc,
+  # dbpr-press, dbpr-notices). At launch: restore "0 9 * * *" (daily) + registry
+  # cadence_days: 1 + freshness_sla 2/4 in the same commit.
+  schedule:
+    - cron: "0 9 * * 3"
   workflow_dispatch:
     inputs:
       dry_run:
