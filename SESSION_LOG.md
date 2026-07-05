@@ -1,3 +1,24 @@
+## 2026-07-05 (main) — FIXED: phone pill + address leak + raw markdown (0c8cad9e) — the operator's two phone screenshots
+
+Operator hit prod mid-deploy (pushed 2:49–2:55 PM, screenshots 2:57/3:01 — old hero still serving) and
+caught three REAL live defects. (1) First-visit auto-open sheet buried the phone viewport with its only
+close control rendered UNDERNEATH it (z-56 pill vs z-57 full-width sheet; BriefcasePanel has no close of
+its own) — `shouldAutoOpenPill` gains a `phone` flag (never auto-open <640px; desktop funnel unchanged),
+sheet gets an always-visible grabber+X header + Escape, cap 60→55vh. Research (crawl4ai, RULE 0.4): NN/g
+"Popups: 10 Problematic Trends" + "Overuse of Overlays" — never overlay before first value, never block
+content on mobile, always show a visible close. (2) A bare street address typed into /ask (incl. the map
+search's ?q= handoff) or the public pill chat got a region-grain-medians essay — new
+`lib/geo/address-route.ts`: `isBareAddressQuery` (strict: house-number start + street suffix/comma/ZIP, no
+question words — deliberately NOT comp-helper's permissive hint, which would hijack "3 bedroom homes in
+33904") + `resolveAddressDestination` (suggest→retrieve→`heroDestination`, so the redirect inherits the
+address-spine `addr=` comps enrichment automatically). Project-context chat untouched (comp/saved-address
+flows intact — 169 assistant tests green). Hero.tsx not edited (claimed by the parallel spine session;
+/ask's ?q= covers the map search transitively). (3) `AnswerText` (the ONE answer-render root) now strips
+bold/heading/inline-code/blockquote markers — model-emitted `**` can never ship raw again. 99 tests green
+across touched areas, `bunx next build` clean. `mobile_pill_address_leak_live_verify` open — operator
+prod check. Note: address spine (build 2) shipped in parallel below — next on the ladder is lifecycle
+sequences (build 3), not yet started by anyone as of this entry.
+
 ## 2026-07-05 (main) — BUILT: address spine build 2 (6 commits, 3a10aa97..e413af6e) — comps ride the ONE lake feed
 
 Executed plan `2026-07-05-address-spine.md` inline (TDD, commit per task): T1 compsForAddress extracted
