@@ -10,6 +10,23 @@ reallygoodemails.com; why-tags: en.wikipedia.org/wiki/Spotify_Wrapped fetched in
 order + tests depend on the parallel session's unpushed sphere-weekly/clampProse commits; it ships when
 those land. Seed-doc decision: skipped (value = repeatable pattern, not exact arrangement). Check
 deliverable_distiller_live_verify stays open (operator-run live proof).
+## 2026-07-05 (main) — BUILD: deliverable-distiller — skill shipped + BOTH first distillations end-to-end (check deliverable_distiller_live_verify stays open)
+
+Executed the 07/05 spec (plan: docs/superpowers/plans/2026-07-05-deliverable-distiller.md). (1) SKILL
+54965449: `.claude/skills/deliverable-distiller/SKILL.md` — first project skill; capture (crawl4ai URL /
+native-vision screenshot, zero paid API) → strip content → map to vocab → emit contracts (recipe/seed-doc/
+SocialTemplate) → verify. (2) EMAIL 91a30992: `year-in-review` recipe + YEAR_REVIEW_RE (after sphere-weekly,
+before monthly — "year-end newsletter" reads as recap) + six routing tests; distilled from Resy's recap via
+reallygoodemails.com (screenshot lane); why-tag evidence fetched in-session: en.wikipedia.org/wiki/
+Spotify_Wrapped (sequential single-stat screens boost engagement; personalized recaps drive sharing).
+Seed-doc decision: SKIPPED — value is the repeatable pattern, exact look is the stripped expression (rule
+recorded in skill). Built in bp-distill worktree (author-recipes claimed live by parallel session), landed
+clean, worktree cleaned. (3) SOCIAL 29f59e54: `tip-stack` template (kicker/title/four rows/CTA, token-only,
+fixed ids) distilled from a realtor pack shot on dribbble.com; offerable-list test updated same commit.
+Verify: 37/37 both suites + `bunx next build` green. NOT pushed (operator confirms). Live-verify check open:
+closes when a distilled recipe/template produces a real deliverable end-to-end. Evidence-fetch note: Litmus/
+Omnisend year-in-review article URLs 404'd; Wikipedia + the find itself are the named sources.
+
 ## 2026-07-05 (main) — BUILD: Haiku-vs-Sonnet distill comparison — day 1 RUN (operator-approved), check haiku_vs_sonnet_distill_daily
 
 Operator: "Run haiku, show me the difference vs old sonnet writings over the next few days, keep it in a file
