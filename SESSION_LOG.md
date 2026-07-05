@@ -1,3 +1,18 @@
+## 2026-07-05 (main) — SPEC: Agent Launch campaign (build 1 of 3) + email-marketing evidence notes
+
+Brainstormed (RULE 3.5) + registered `agent-launch-campaign` (`agent_launch_campaign_live_verify` open).
+Research rounds 2+3 (crawl4ai): design-proof case studies, 35 Reddit practitioner threads (old.reddit —
+JSON API 403s datacenter IPs now), Validity deep dive (operator-directed). All distilled into
+`docs/superpowers/specs/2026-07-05-email-marketing-evidence-notes.md` (11 sections, evidence-graded, the
+research base for ALL agent-facing recipes). Spec: `2026-07-05-agent-launch-campaign-design.md` —
+seed+schedule combo (4th quick-start button), `ShowcaseCampaign.followUp` + post-build chip, Sonnet-proof
+block-explicit recipes, lab upgrades L1–L5 (kill circle avatar / portrait column, mailto button, stat-card
+clipping, 3-engine side-by-side render proof, optional script font), blast send tagging (Build 2 reads it),
+Marisol Vega persona + 4 lab-built demo slides. Operator refs (2 realtor intro templates) drove the
+portrait-column look. Validity product flags logged in notes §11 (on-the-hour send jitter, Gmail
+Manage-Subscriptions shared-From risk). Builds 2 (results strip) + 3 (sphere list-builder) registered when
+picked up. NOT pushed; spec awaiting operator review, then superpowers:writing-plans.
+
 ## 2026-07-05 (main) — SPEC: SWFL Social Pulse (social-pulse-swfl) — brainstormed, researched, registered
 
 Brainstorm + RULE 0.4 research (crawl4ai live: steadyapi.com/pricing $14.95–$299.95 tiers; Later/Buffer/Flick
