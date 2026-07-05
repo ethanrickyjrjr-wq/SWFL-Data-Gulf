@@ -60,6 +60,7 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
+import { campaignFollowUpForPrompt } from "@/lib/campaigns";
 import {
   brandGaps,
   findPlaceholder,
@@ -244,6 +245,15 @@ export function EmailLabGridShell({
   // can guard the unfilled [[blank]] and run the brand-gap yes/no.
   const aiBoxRef = useRef<HTMLTextAreaElement>(null);
   const [pendingRecipe, setPendingRecipe] = useState<ShowcaseRecipe | null>(initialRecipe ?? null);
+  // Campaign second step — set when the Build box was seeded by a campaign
+  // button whose registry entry carries a followUp (matched by seed prompt at
+  // seed time, before the user edits the [[blank]]); armed (visible) only after
+  // that build succeeds. Session-scoped by design — no persistence.
+  const [campaignFollowUp, setCampaignFollowUp] = useState<{
+    label: string;
+    recipe: ShowcaseRecipe;
+  } | null>(null);
+  const [followUpArmed, setFollowUpArmed] = useState(false);
   const [recipeGaps, setRecipeGaps] = useState<BrandNeed[] | null>(null);
   const [recipeHint, setRecipeHint] = useState<string | null>(() => {
     if (!initialRecipe) return null;
@@ -345,6 +355,7 @@ export function EmailLabGridShell({
           setAiStatus(
             `Built the whole email from one line — ${normalized.blocks.length} blocks laid out on the grid.`,
           );
+          if (campaignFollowUp) setFollowUpArmed(true);
         }
       }
     } catch {
@@ -437,6 +448,11 @@ export function EmailLabGridShell({
 
   // ── "Make this →" (showcase recipe → Build box, blank pre-selected) ─────────
   function handleUseRecipe(recipe: ShowcaseRecipe) {
+    // Capture the campaign second step NOW — the prompt is still the registry's
+    // verbatim seed; after this the user types over the [[blank]].
+    const follow = campaignFollowUpForPrompt(recipe.prompt);
+    setCampaignFollowUp(follow ? { label: follow.label, recipe: follow.recipe } : null);
+    setFollowUpArmed(false);
     setPendingRecipe(recipe);
     setRecipeGaps(null);
     setAiStatus(null);
@@ -972,6 +988,34 @@ export function EmailLabGridShell({
               >
                 {social.exporting ? "Exporting…" : "Export PNG"}
               </button>
+            )}
+            {/* Campaign second step — armed by a successful campaign-seeded build. */}
+            {mode === "email" && followUpArmed && campaignFollowUp && (
+              <span className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const r = campaignFollowUp.recipe;
+                    setFollowUpArmed(false);
+                    setCampaignFollowUp(null);
+                    handleUseRecipe(r);
+                  }}
+                  className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-3 py-1.5 text-xs text-gulf-teal transition-colors hover:bg-gulf-teal/20"
+                >
+                  Next: {campaignFollowUp.label} →
+                </button>
+                <button
+                  type="button"
+                  aria-label="Dismiss follow-up"
+                  onClick={() => {
+                    setFollowUpArmed(false);
+                    setCampaignFollowUp(null);
+                  }}
+                  className="text-xs text-gray-500 transition-colors hover:text-gray-300"
+                >
+                  ✕
+                </button>
+              </span>
             )}
             {mode === "email" &&
               !(

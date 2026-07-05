@@ -7,14 +7,35 @@ import { sanitizePalettes } from "@/lib/brand/palette";
 
 export const runtime = "nodejs";
 
-const AGENT_FIELDS = ["agent_name", "photo_url", "license", "brokerage"] as const;
+const AGENT_FIELDS = [
+  "agent_name",
+  "nickname",
+  "agent_title",
+  "photo_url",
+  "license",
+  "brokerage",
+] as const;
 type AgentField = (typeof AGENT_FIELDS)[number];
 
 // Theme fields persisted at the account level so saved colors carry to NEW
 // projects (pre-fill). primary_color/accent_color also feed legacy consumers
-// (resolve-brand.ts). logo_url rides along when present.
-const COLOR_FIELDS = ["primary_color", "accent_color", "logo_url"] as const;
+// (resolve-brand.ts). logo_url rides along when present. text/background +
+// surface colors joined 07/05/2026 (account-quick-access) so the account-level
+// editor round-trips the FULL BrandingBlock palette instead of dropping slots.
+const COLOR_FIELDS = [
+  "primary_color",
+  "accent_color",
+  "text_color",
+  "background_color",
+  "surface_color",
+  "surface_dark_color",
+  "logo_url",
+] as const;
 type ColorField = (typeof COLOR_FIELDS)[number];
+
+// Brand fonts (FontFamily enum values — brandingToTokens validates downstream).
+const FONT_FIELDS = ["font_display", "font_body"] as const;
+type FontField = (typeof FONT_FIELDS)[number];
 
 // Social + unsubscribe URLs persisted at the account level (like colors) so they
 // carry to NEW projects. Columns added by docs/sql/20260625_user_brand_socials.sql.
@@ -34,14 +55,21 @@ type SocialField = (typeof SOCIAL_FIELDS)[number];
 // CAN-SPAM postal address — account-level so it's entered once and carries to
 // every new project's footer, like colors/socials above. Verified against the
 // FTC compliance guide 07/03/2026: business_address, PO box, or CMRA mailbox.
-const CONTACT_FIELDS = ["business_address"] as const;
+const CONTACT_FIELDS = [
+  "business_address",
+  "contact_email",
+  "contact_phone",
+  "website_url",
+] as const;
 type ContactField = (typeof CONTACT_FIELDS)[number];
 
-const BASE_SELECT =
-  "agent_name, photo_url, license, brokerage, primary_color, accent_color, logo_url, " +
-  SOCIAL_FIELDS.join(", ") +
-  ", " +
-  CONTACT_FIELDS.join(", ");
+const BASE_SELECT = [
+  AGENT_FIELDS.join(", "),
+  COLOR_FIELDS.join(", "),
+  FONT_FIELDS.join(", "),
+  SOCIAL_FIELDS.join(", "),
+  CONTACT_FIELDS.join(", "),
+].join(", ");
 
 async function authed() {
   const supabase = createClient(await cookies());
@@ -126,6 +154,12 @@ export async function PATCH(req: NextRequest) {
   for (const key of CONTACT_FIELDS) {
     if (key in body) {
       const v = body[key as ContactField];
+      update[key] = typeof v === "string" && v.trim() ? v : null;
+    }
+  }
+  for (const key of FONT_FIELDS) {
+    if (key in body) {
+      const v = body[key as FontField];
       update[key] = typeof v === "string" && v.trim() ? v : null;
     }
   }

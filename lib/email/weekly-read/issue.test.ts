@@ -44,6 +44,15 @@ describe("weeklyReadSeedDoc", () => {
 describe("finalizeIssueHtml", () => {
   const base = "<html><body><p>the issue</p></body></html>";
 
+  it("binds the doc footer's #unsubscribe to the token", () => {
+    const html = finalizeIssueHtml(
+      `<html><body><a href="#unsubscribe">u</a></body></html>`,
+      { ctaUrl: CTA },
+    );
+    expect(html.includes("#unsubscribe")).toBe(false);
+    expect(html.includes(UNSUBSCRIBE_TOKEN)).toBe(true);
+  });
+
   it("injects the CTA, the unsubscribe token, and the postal address", () => {
     const html = finalizeIssueHtml(base, {
       ctaUrl: CTA,

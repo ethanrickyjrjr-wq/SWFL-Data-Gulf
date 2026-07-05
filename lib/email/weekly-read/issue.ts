@@ -14,7 +14,8 @@
 import { seedById, defaultDoc } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { deriveEmailDocSubject } from "@/lib/email/emaildoc-subject";
-import { ensureUnsubscribeToken } from "@/lib/email/scheduler";
+import { bindUnsubscribeHref } from "@/lib/email/bind-unsubscribe";
+import { ensureUnsubscribeToken, UNSUBSCRIBE_TOKEN } from "@/lib/email/scheduler";
 import type { BuildScope } from "@/lib/email/build-doc";
 
 const FONT = "Arial, Helvetica, sans-serif";
@@ -75,6 +76,7 @@ export interface FinalizeOpts {
  * one), and the postal address. send.ts substitutes the per-subscriber URL.
  */
 export function finalizeIssueHtml(html: string, opts: FinalizeOpts): string {
+  html = bindUnsubscribeHref(html, UNSUBSCRIBE_TOKEN);
   const cta =
     `<div style="text-align:center;margin:24px 0 8px;">` +
     `<a href="${escapeAttr(opts.ctaUrl)}" style="font-family:${FONT};font-size:15px;font-weight:bold;color:#ffffff;background:#0d9488;text-decoration:none;padding:12px 28px;border-radius:8px;display:inline-block;">Build your own version &rarr;</a>` +
