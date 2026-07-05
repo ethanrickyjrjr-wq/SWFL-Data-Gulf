@@ -19,6 +19,17 @@ unsub_audit already open; `agent_launch_campaign_live_verify` stays OPEN (operat
 - REMAINING: plan tasks 8+9 (Marisol Vega lab demos — paid Sonnet, operator present — then the registry
   entry that turns the 4th campaign button live with captured assets).
 
+## 2026-07-05 (main) — GUARD 3: paid-run valve — operator says "run it", session runs it, zero operator friction
+
+Operator rejected rename-to-unlock ("i'm not renaming any lines"). NEW `scripts/paid-run.mjs`: reads the
+*_LOCKED_BY_OPERATOR keys from .env.local and injects them into ONE child process only (never disk, never
+session shell), prints an audit banner, appends verification/paid-runs.log, refuses without
+OPERATOR_APPROVED_PAID_RUN=1 (set by a session ONLY on in-conversation operator approval — same covenant as
+the hook escape hatches). Usage: `OPERATOR_APPROVED_PAID_RUN=1 node scripts/paid-run.mjs <cmd...>`.
+Tested: refuses bare (exit 2) · unlocks all 7 keys child-only · session env stays clean · audit line written ·
+Windows arg-quoting fixed. Operator flow is now purely conversational: "run the rebuild" → session prefixes
+the valve → RunBudget caps still bound the spend.
+
 ## 2026-07-05 (main) — GUARD 2: paid-surface push gate + local key quarantine — sessions structurally cannot spend
 
 Operator decree ("fix it so you can't steal — no taps"): (1) NEW `.claude/hooks/check-no-new-paid-surface.mjs`
