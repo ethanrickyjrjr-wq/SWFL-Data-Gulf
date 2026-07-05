@@ -238,3 +238,15 @@
   .home-explorer .weekly-input-email { flex-basis:100%; }
   .home-explorer .weekly-input-zip { flex:1; }
 }
+
+/* ── Agent-first hero (spec 2026-07-05): chip row + autocomplete dropdown ── */
+.home-explorer .hero-chip-row {display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0 16px}
+.home-explorer .hero-addr-wrap {position:relative}
+.home-explorer .hero-suggest {position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:30;margin:0;padding:6px;list-style:none;border-radius:12px;border:1px solid var(--gulf-slate-hi);background:var(--gulf-slate);box-shadow:0 12px 32px rgba(0,0,0,.45)}
+.home-explorer .hero-suggest li + li {margin-top:2px}
+.home-explorer .hero-suggest button {display:flex;flex-direction:column;width:100%;padding:8px 10px;text-align:left;border:0;border-radius:8px;background:transparent;color:var(--text-primary);cursor:pointer;font-family:inherit}
+.home-explorer .hero-suggest button:hover,
+.home-explorer .hero-suggest button:focus-visible {background:rgba(255,255,255,.08)}
+.home-explorer .hero-suggest-name {font-weight:600;font-size:14px}
+.home-explorer .hero-suggest-place {font-size:12px;color:var(--text-tertiary)}
+.home-explorer .hero-note {margin-top:12px;font-size:13px;color:var(--text-tertiary)}
