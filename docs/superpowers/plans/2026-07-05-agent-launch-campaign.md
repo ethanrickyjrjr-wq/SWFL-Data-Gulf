@@ -1,7 +1,7 @@
 # Agent Launch Campaign Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 11 tasks, 17 files, keywords: schema, architecture
+> **Recommended model:** 🧠 Opus — 11 tasks, 19 files, keywords: schema, architecture
 
 **Goal:** Ship the fourth quick-start campaign — a day-one agent's launch: seeded announcement email + post-build chip that seeds the recurring weekly sphere update — with the lab upgrades that make the promised look actually render out of Sonnet.
 
@@ -12,10 +12,28 @@
 **Spec:** `docs/superpowers/specs/2026-07-05-agent-launch-campaign-design.md` · Check: `agent_launch_campaign_live_verify`
 **Evidence:** `docs/superpowers/specs/2026-07-05-email-marketing-evidence-notes.md`
 
-**Deviations from spec (decided at plan time, both proportionate):**
-1. §6 send tagging: tags carry `deliverable_id` + `template` only. Campaign-key attribution needs a `deliverables.campaign_key` column threaded through three save routes — that storage lands in Build 2 (results strip) with its events table; deliverable id is the join key, so nothing is lost.
-2. §5 L3: no inline source line on the stat clipping — sources ride the collapsed list, never inline (consumption contract rule 1). The clipping is banded hero + accent border + honest label.
-3. §5 L5 (script font): CUT from this build. Italic serif via existing PLAYFAIR_SERIF covers the greeting; revisit only if the demo builds look flat.
+**Deviations from spec — status after the verification pass (evidence:
+`docs/superpowers/handoffs/2026-07-05-agent-launch-plan-verification.md`):**
+1. **OVERRULED by operator 07/05/2026 — do the FULL campaign-key thread.** The original
+   deviation ("deliverable id is the join key, so nothing is lost") was wrong: nothing anywhere
+   persists which deliverable was campaign-seeded, so dropping the campaign tag loses the
+   linkage permanently and DONE-WHEN item 4 becomes unmeetable. Task 10 (amended) now ships:
+   idempotent `deliverables.campaign_key` column + generated-types entry + materials-route POST
+   field + `onSave` threading from the grid shell + the `campaign` tag on sends. Task 7 retains
+   the campaign KEY across the chip lifecycle for exactly this.
+2. §5 L3 STANDS (operator did not overrule): no inline source line on the stat clipping —
+   sources ride the collapsed list, never inline (consumption contract rule 1). The clipping is
+   banded hero + accent border + honest label. (If ever revisited: `MarketFigure.source` is
+   available at assembly, and the field must be engine-owned — never AI-patchable.)
+3. §5 L5 (script font): CUT from this build. Italic serif via existing PLAYFAIR_SERIF covers
+   the greeting; revisit only if the demo builds look flat.
+
+**Verified vendor contract (crawl4ai + installed `resend@6.16.0` SDK, 07/05/2026):** `tags`
+ride `emails.send` AND `batch.send` (batch payload = `Omit<CreateEmailOptions, 'attachments' |
+'scheduledAt'>`, index.d.cts:635); name/value ASCII letters/numbers/underscores/dashes only,
+≤256 chars, ≤75 tags/email; docs verbatim "After the email is sent, the tag is included in the
+webhook event"; `mailto:` hrefs pass the blast URL lint (`SAFE_SCHEME_RE`,
+`lib/deliverable/url-lint.ts:33`).
 
 ## Global Constraints
 
@@ -72,20 +90,17 @@ Expected: FAIL — html contains `border-radius:50%`.
 
 - [ ] **Step 3: Change the render**
 
-In `AgentCardBlock.tsx`, replace the photo `<Img>` style `borderRadius: "50%"` with a rectangular editorial treatment. Also bump the crop from square to portrait (agent photos are half-body):
+In `AgentCardBlock.tsx`, replace the photo `<Img>` style `borderRadius: "50%"` with a rectangular editorial treatment. **Width-only sizing — no fixed height, no `object-fit`:** Outlook ignores `object-fit` and would distort a fixed 96×120 crop; letting the portrait keep its natural aspect is the only email-safe "crop" (half-body cutouts read as a tall column on their own):
 
 ```tsx
 style={{
   borderRadius: "10px",
   display: "block",
   width: "96px",
-  height: "120px",
-  objectFit: "cover",
-  objectPosition: "center top",
 }}
 ```
 
-(Keep surrounding table cell widths consistent — adjust the fixed cell width to 96px if it was sized to the old square.)
+Also drop the `width={64} height={64}` attributes on the `<Img>` in favor of `width={96}` only (attribute + style agree; no height attribute). Adjust the fixed table-cell width from 76px to ~108px. Mirror in the PDF: `lib/pdf/email-doc-pdf.tsx` agent-card case (line ~291) becomes `style={{ width: 64, borderRadius: 4, marginRight: 14 }}` — fixed square + circular radius dropped there too (add `lib/pdf/email-doc-pdf.tsx` to this task's staged files).
 
 - [ ] **Step 4: Run the test + the block suite**
 
@@ -105,7 +120,9 @@ git commit -m "feat(email-blocks): agent-card portrait is an editorial rectangle
 
 **Files:**
 - Test: `lib/email/compile-grid-columns.test.ts` (create)
-- Modify (only if the test exposes a defect): `lib/email/compile-grid.ts`, `lib/email/blocks/ImageBlock.tsx`
+- Create: `lib/email/doc/row-grouping.ts` + `lib/email/doc/row-grouping.test.ts` (the shared row-grouping root — see Step 3b)
+- Modify: `lib/email/compile-grid.ts` (consume the extracted root; output byte-identical), `lib/pdf/email-doc-pdf.tsx` (render grouped rows as flex rows — **this engine is verified broken**: it never reads `block.layout`, so side-by-side rows stack in the PDF attachment and Download-PDF paths)
+- Modify (only if the HTML test exposes a defect): `lib/email/blocks/ImageBlock.tsx`
 
 **Interfaces:**
 - Consumes: `renderEmailDocHtml` (`lib/email/render-email-doc.ts`) — grid docs (blocks carrying `layout`) compile through `compileGrid` (Cerberus hybrid columns + Outlook ghost tables).
