@@ -1,3 +1,25 @@
+## 2026-07-05 (main) — BUILT: grid lab phone layout — Build/Preview tabs (grid-lab-phone)
+
+Operator's 3:55 PM phone screenshot: the lab rendered its desktop split-pane on a phone (root
+`grid-cols-[1fr_380px]` unconditional — canvas got ~10px, panel clipped). The agent-first hero now sends
+every phone visitor here, so this was the next domino, not a regression. RESEARCH (crawl4ai, RULE 0.4):
+web.dev Learn Design (ui-patterns/macro-layouts/interaction/screen-configurations) + Tailwind responsive
+docs + NN/g "Mobile First Is NOT Mobile Only" + NN/g "Tabs, Used Right" — a phone layout is its own design
+never a shrunken desktop; single column is the default and the split is APPLIED at a breakpoint; two
+non-coexisting panes = one visible panel behind text-labeled tabs (no mystery-meat icons); coarse pointers
+get ≥48px targets; safe-area env() padding. Full findings list in the spec
+(`2026-07-05-grid-lab-phone-design.md`) — builders read it before touching this surface. BUILD: root goes
+phone-first (`flex flex-col` → `lg:grid lg:grid-cols-[1fr_380px]`; lg not md — 768px would leave the canvas
+~390px, the anti-pattern); ONE pane below lg via new pure `lib/email/lab/phone-tabs.ts` (recipe arrival →
+Build, else Preview — tested); bottom 48px Build/Preview tab bar (safe-area padded); build-success
+auto-flips phone to Preview; top bar overflow-scrolls; width-picker row is lg-only. VERIFIED on the REAL
+compiled build (`next start`, 390px same-origin iframe probe + screenshots): phone = one pane + working
+flip + seeded prompt; desktop 2560px = split-pane unchanged. TRAP FOUND: the long-running `next dev`
+(port 3000) serves STALE Tailwind v4 CSS — new variant classes (even `lg:flex`) silently styleless; memory
++ spec note written (`reference_stale-dev-server-tailwind-css`). V1 trade-off: phone Preview pans the
+~600px email canvas horizontally (pinch-zoom on) — fit-to-width scale is a follow-up candidate.
+`grid_lab_phone_live_verify` open — operator prod check on a real phone. Committed, push awaits operator.
+
 ## 2026-07-05 (main) — feat(media): hero photos mirror to our storage at build time (email-hero-mirror)
 
 Operator ruling: keep the watermark crop for now ("uncrop when we actually get a person"), build the

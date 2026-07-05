@@ -53,6 +53,7 @@ import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
 import { capabilitiesFor } from "@/lib/email/lab/capabilities";
+import { initialPhoneTab, type PhoneTab } from "@/lib/email/lab/phone-tabs";
 import dynamic from "next/dynamic";
 const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.FilerobotModal), {
   ssr: false,
@@ -233,6 +234,15 @@ export function EmailLabGridShell({
 }: EmailLabGridShellProps) {
   // Tier dial (lib/email/lab/capabilities.ts) — socials etc. are gated on this, never hardcoded.
   const caps = capabilitiesFor("paid");
+
+  // Phone layout (spec 2026-07-05-grid-lab-phone-design): below lg exactly ONE
+  // pane shows — assistant ("build") or canvas ("preview") — via the bottom tab
+  // bar. Desktop lg+ renders the split-pane and ignores this state. Both panes
+  // stay MOUNTED at all sizes (visibility is CSS-only) so pane state survives
+  // tab flips and the desktop DOM is unchanged.
+  const [phoneTab, setPhoneTab] = useState<PhoneTab>(() =>
+    initialPhoneTab({ hasRecipe: initialRecipe != null }),
+  );
   // Top-level mode: Email grid ↔ Social composer. The tab itself is gated on the dial.
   const [mode, setMode] = useState<"email" | "social">("email");
   const [history, setHistory] = useState<DocHistory>(() =>
@@ -379,6 +389,10 @@ export function EmailLabGridShell({
           setAiStatus(
             `Built the whole email from one line — ${normalized.blocks.length} blocks laid out on the grid.`,
           );
+          // Phone: show them what got built (the tab bar is right there to come
+          // back). No-op on lg+ where both panes are visible. Failure paths stay
+          // on Build so the message is seen.
+          setPhoneTab("preview");
           if (campaignFollowUp) setFollowUpArmed(true);
         }
       }
@@ -928,11 +942,18 @@ export function EmailLabGridShell({
     : null;
 
   return (
-    <div className="grid h-dvh grid-cols-[1fr_380px] overflow-hidden bg-[#e9edf0] text-[#242424]">
-      {/* ══════════ CENTER: top bar + grid canvas ══════════ */}
-      <main className="flex min-w-0 flex-col overflow-hidden">
-        {/* top bar */}
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black bg-[#111418] px-5 py-2.5">
+    // Phone-first root (spec 2026-07-05-grid-lab-phone-design + web.dev macro-layouts:
+    // single column is the default, the split-pane is APPLIED at lg). lg = 1024px on
+    // purpose, not md: at 768px the canvas next to the 380px panel would get ~390px —
+    // the shrunk-down-desktop anti-pattern the research forbids.
+    <div className="flex h-dvh flex-col overflow-hidden bg-[#e9edf0] text-[#242424] lg:grid lg:grid-cols-[1fr_380px]">
+      {/* ══════════ CENTER: top bar + grid canvas (phone: the Preview tab) ══════════ */}
+      <main
+        className={`${phoneTab === "preview" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex lg:flex-auto`}
+      >
+        {/* top bar — phone: horizontal overflow-scroll (web.dev overflow pattern)
+            instead of clipping or wrapping; lg+: exactly as before */}
+        <div className="flex shrink-0 items-center justify-between gap-3 overflow-x-auto border-b border-black bg-[#111418] px-5 py-2.5 lg:overflow-x-visible">
           <div className="flex items-center gap-4">
             {headerSlot}
             {/* Inside the cockpit (projectId set) the Social TAB is the social surface —
@@ -1099,9 +1120,12 @@ export function EmailLabGridShell({
           </div>
         </div>
 
-        {/* width-preset bar (selected block) — email-only (operates on selectedBlock) */}
+        {/* width-preset bar (selected block) — email-only (operates on selectedBlock).
+            Desktop-only furniture: precision width-picking is a fine-pointer job
+            (web.dev interaction: pointer:coarse ≠ smaller mouse UI) and the row ate a
+            third of the phone screen. Phone keeps tap-select + per-block AI. */}
         {mode === "email" && (
-          <div className="flex shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs">
+          <div className="hidden shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs lg:flex">
             <span className="text-xs font-semibold text-[#0a1419]">Selected block width</span>
             <div className="flex items-center gap-1">
               {WIDTH_PRESETS.map((p) => (
@@ -1150,8 +1174,10 @@ export function EmailLabGridShell({
         </div>
       </main>
 
-      {/* ══════════ RIGHT: AI assistant (full height) ══════════ */}
-      <aside className="flex flex-col overflow-hidden border-l border-[#0a141a] bg-[#0f1d24]">
+      {/* ══════════ RIGHT: AI assistant (full height; phone: the Build tab) ══════════ */}
+      <aside
+        className={`${phoneTab === "build" ? "flex" : "hidden"} min-h-0 flex-1 flex-col overflow-hidden border-[#0a141a] bg-[#0f1d24] lg:flex lg:flex-auto lg:border-l`}
+      >
         <div className="flex shrink-0 items-center gap-2 border-b border-white/8 px-4 py-3">
           <span className="text-gulf-teal">✦</span>
           <span className="text-sm font-semibold text-white/85">AI assistant</span>
@@ -1579,6 +1605,36 @@ export function EmailLabGridShell({
           {mode === "email" && <MediaPanel onApply={applyPhotoUrl} />}
         </div>
       </aside>
+
+      {/* ══════════ PHONE ONLY: Build / Preview tab bar (spec 2026-07-05-grid-lab-phone-design).
+          Text-labeled (NN/g tabs-used-right; no mystery-meat icons), 48px targets
+          (web.dev interaction: coarse pointers), thumb zone, safe-area padded
+          (env() is 0 without viewport-fit=cover — defensive, not load-bearing). ══════════ */}
+      <div
+        role="tablist"
+        aria-label="Lab view"
+        className="flex shrink-0 border-t border-black bg-[#111418] pb-[env(safe-area-inset-bottom)] lg:hidden"
+      >
+        {(
+          [
+            { tab: "build" as const, label: "✦ Build" },
+            { tab: "preview" as const, label: "Preview" },
+          ] as const
+        ).map(({ tab, label }) => (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={phoneTab === tab}
+            onClick={() => setPhoneTab(tab)}
+            className={`h-12 flex-1 text-sm font-semibold transition-colors ${
+              phoneTab === tab ? "bg-gulf-teal text-[#06231f]" : "text-white/60 hover:text-white/85"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       {sendOpen && sendId && (
         <ContactPickerModal
