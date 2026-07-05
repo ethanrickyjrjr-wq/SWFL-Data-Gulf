@@ -4,6 +4,8 @@ import {
   COMING_TILES,
   campaignFollowUpForPrompt,
   campaignKeyForPrompt,
+  HERO_CAMPAIGNS,
+  heroDestination,
 } from "./campaigns";
 import { CADENCE_COLORS, CADENCE_ORDER } from "./campaigns/cadence-colors";
 import { SHOWCASES } from "./showcase/registry";
@@ -126,6 +128,58 @@ describe("campaignFollowUpForPrompt", () => {
     if (noFollow?.campaign?.seedRecipe) {
       expect(campaignFollowUpForPrompt(noFollow.campaign.seedRecipe.prompt)).toBe(null);
     }
+  });
+});
+
+/**
+ * Homepage hero chips (spec 2026-07-05-agent-first-homepage-design.md) — four
+ * chips resolved from the registry (seed recipes + listing-to-close slide
+ * recipes). A chip that can't resolve must be a red test, never a dead button.
+ */
+describe("HERO_CAMPAIGNS", () => {
+  it("exactly four chips in spec order", () => {
+    expect(HERO_CAMPAIGNS.map((c) => c.key)).toEqual([
+      "new-listing",
+      "just-sold",
+      "coming-to-market",
+      "market-update",
+    ]);
+  });
+
+  it("every chip resolves a recipe with one [[blank]] and brand needs", () => {
+    for (const c of HERO_CAMPAIGNS) {
+      expect(findPlaceholder(c.recipe.prompt), `${c.key} placeholder`).not.toBeNull();
+      expect(c.recipe.needs.length, `${c.key} needs`).toBeGreaterThan(0);
+    }
+  });
+
+  it("listing chips take an address; market-update takes an area", () => {
+    const byKey = Object.fromEntries(HERO_CAMPAIGNS.map((c) => [c.key, c.input]));
+    expect(byKey["new-listing"]).toBe("address");
+    expect(byKey["just-sold"]).toBe("address");
+    expect(byKey["coming-to-market"]).toBe("address");
+    expect(byKey["market-update"]).toBe("area");
+  });
+});
+
+describe("heroDestination", () => {
+  it("fills the blank and carries zip + recipeNeeds to the grid lab", () => {
+    const entry = HERO_CAMPAIGNS[0];
+    const url = heroDestination(entry, { filled: "123 Main St, Cape Coral", zip: "33904" });
+    expect(url.startsWith("/email-lab/grid?")).toBe(true);
+    const params = new URLSearchParams(url.split("?")[1]);
+    expect(params.get("recipe")).toContain("123 Main St, Cape Coral");
+    expect(params.get("recipe")).not.toContain("[[");
+    expect(params.get("zip")).toBe("33904");
+    expect(params.get("recipeNeeds")).toBe(entry.recipe.needs.join(","));
+  });
+
+  it("omits zip when the pick has none (city input)", () => {
+    const entry = HERO_CAMPAIGNS[3];
+    const url = heroDestination(entry, { filled: "Cape Coral", zip: null });
+    const params = new URLSearchParams(url.split("?")[1]);
+    expect(params.get("recipe")).toContain("Cape Coral");
+    expect(params.get("zip")).toBeNull();
   });
 });
 

@@ -6,7 +6,7 @@
 // filters them for a button row and holds the "coming soon" tiles that have no
 // showcase yet (the only campaign data not derivable from SHOWCASES).
 import { SHOWCASES, type Showcase, type ShowcaseCampaign } from "@/lib/showcase/registry";
-import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 
 export type CampaignSurface = "email" | "social" | "all";
 
@@ -56,6 +56,79 @@ export function campaignKeyForPrompt(prompt: string): string | null {
     if (campaign.followUp?.recipe.prompt === prompt) return campaign.key;
   }
   return null;
+}
+
+/** The four homepage hero chips (spec 2026-07-05-agent-first-homepage-design).
+ *  Still a thin read over SHOWCASES — a showcase carries at most ONE `campaign`,
+ *  so Just Sold / Coming to Market surface their listing-to-close SLIDE recipes
+ *  (looked up by slide title; campaigns.test.ts pins existence). */
+export type HeroCampaignKey = "new-listing" | "just-sold" | "coming-to-market" | "market-update";
+
+export interface HeroCampaignEntry {
+  key: HeroCampaignKey;
+  label: string;
+  /** Which placeholder the hero bar shows: a listing address or an area. */
+  input: "address" | "area";
+  recipe: ShowcaseRecipe;
+}
+
+function showcaseSeed(showcaseId: string): ShowcaseRecipe {
+  const recipe = SHOWCASES.find((s) => s.id === showcaseId)?.campaign?.seedRecipe;
+  if (!recipe) throw new Error(`hero campaign: no seedRecipe on showcase "${showcaseId}"`);
+  return recipe;
+}
+
+function slideRecipe(showcaseId: string, slideTitle: string): ShowcaseRecipe {
+  const recipe = SHOWCASES.find((s) => s.id === showcaseId)?.slides.find(
+    (sl) => sl.title === slideTitle,
+  )?.recipe;
+  if (!recipe)
+    throw new Error(`hero campaign: no recipe on slide "${slideTitle}" of "${showcaseId}"`);
+  return recipe;
+}
+
+export const HERO_CAMPAIGNS: HeroCampaignEntry[] = [
+  {
+    key: "new-listing",
+    label: "New Listing",
+    input: "address",
+    recipe: showcaseSeed("listing-to-close"),
+  },
+  {
+    key: "just-sold",
+    label: "Just Sold",
+    input: "address",
+    recipe: slideRecipe("listing-to-close", "Sold"),
+  },
+  {
+    key: "coming-to-market",
+    label: "Coming to Market",
+    input: "address",
+    recipe: slideRecipe("listing-to-close", "Coming Soon"),
+  },
+  {
+    key: "market-update",
+    label: "Market Update",
+    input: "area",
+    recipe: showcaseSeed("market-pulse"),
+  },
+];
+
+/** Hero → grid-lab URL: fill the recipe's [[blank]] with the picked text and
+ *  carry zip (when known) + recipeNeeds — the same params the lab already reads
+ *  (lib/project/lab-redirect.ts threads them through the signed-in redirect). */
+export function heroDestination(
+  entry: HeroCampaignEntry,
+  opts: { filled: string; zip?: string | null },
+): string {
+  const ph = findPlaceholder(entry.recipe.prompt);
+  const prompt = ph
+    ? entry.recipe.prompt.slice(0, ph.start) + opts.filled + entry.recipe.prompt.slice(ph.end)
+    : entry.recipe.prompt;
+  const params = new URLSearchParams({ recipe: prompt });
+  if (entry.recipe.needs.length > 0) params.set("recipeNeeds", entry.recipe.needs.join(","));
+  if (opts.zip) params.set("zip", opts.zip);
+  return `/email-lab/grid?${params.toString()}`;
 }
 
 /** A not-yet-built campaign — greyed chip, no wiring. Promote by adding a
