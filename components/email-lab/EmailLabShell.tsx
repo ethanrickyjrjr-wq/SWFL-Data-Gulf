@@ -139,7 +139,9 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
       }
       props.platforms = next;
     } else if (b.type === "button") {
-      if (cta) props.url = cta;
+      // Brand owns ordinary link destinations — but an engine-set reply CTA
+      // (mailto:, agent-launch L2) survives the overlay.
+      if (cta && !String(props.url ?? "").startsWith("mailto:")) props.url = cta;
     } else if (b.type === "hero") {
       if (t.HERO_LABEL) props.label = t.HERO_LABEL;
     }

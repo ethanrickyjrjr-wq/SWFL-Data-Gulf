@@ -53,10 +53,11 @@ const RECIPES: Record<RecipeId, string> = {
     "RECIPE — AGENT LAUNCH / PROSPECT WELCOME (tuned for cold-open conversion; the " +
     "letter-plus-clipping look — a personal letter carrying one piece of hard evidence).\n" +
     "Target structure, top to bottom:\n" +
-    "- Open with a side-by-side row: an `image` block (image_role photo) spanning about " +
-    "five of the twelve columns BESIDE a `text` block carrying the letter opening — " +
-    "never a full-width photo banner on top. The photo is the agent's professional " +
-    "portrait treated as a tall column.\n" +
+    "- Open with a side-by-side row: an `agent-hero` block spanning about five of the " +
+    "twelve columns BESIDE a `text` block carrying the letter opening — never a " +
+    "full-width photo banner on top. The agent-hero is the professional portrait " +
+    "treated as a tall column (the system fills the photo and name; you write only " +
+    "the tagline).\n" +
     "- The letter opening: the first sentence says plainly why the reader is receiving " +
     "this (you know each other, or they asked to hear from you); then a line or two of " +
     "first-person origin story. Written for one reader — warm, direct, short.\n" +
