@@ -1,3 +1,42 @@
+## 2026-07-06 (main) — BUILT: lab-entry-root — one arrival path for every email-lab door (11 tasks, plan-executed, UNPUSHED pending operator go)
+
+Executed `docs/superpowers/plans/2026-07-06-lab-entry-root.md` (spec `…-lab-entry-root-design.md`) task-by-task,
+TDD, commit per task. crawl4ai-verified `nextjs-nav-guard@1.0.5` (fork of unmaintained LayerX; Next 16.2+;
+`active`/`accept`/`reject` custom-dialog API) before adding the dep. `bunx next build` green; 683 area tests +
+37 lab-entry/capabilities/items tests pass, 0 fail.
+
+**Shipped — the root (all under `lib/lab-entry/`):**
+- `destination.ts` — ONE URL builder every nav door calls; `signedInLabArrival` replaces `labDestination`
+  (projects[0] pick DELETED, `lib/project/lab-redirect.ts` removed). `destination.static.test.ts` pins it:
+  no raw `/email-lab` nav string (href=/href:/router.push/replace/redirect/window.location) outside the root.
+  ~20 doors migrated (campaign/hero/map/did/seed/arc/tool-tab/landing CTAs + p/[id] edit link, social post-save,
+  briefcase grid nav).
+- `arrival.ts` — pure `planArrival()`: did→load, seed→pick, zip→prebuild, recipe→BLANK skeleton
+  (`skeleton-clean-white`, NEVER the $485K fake-fill demo), plain→gallery/blank. Kills the generic on-mount
+  auto-build for new-build arrivals (the wrong-listing-email bug). `autoBuildAfterConfirm = !recipeHasBlank`
+  (hero slices its address into the prompt, so a real hero arrival has no blank).
+- `address-reconcile.ts` — match / no-belief / differ; `{kind:"address"}` project item (atomic type-lift:
+  backfilled all 9 exhaustive `ProjectItem.kind` consumers in the same work).
+- Standalone grid lab (`EmailLabGridClient` + `grid/page.tsx`): signed-in no longer redirects into projects[0] —
+  ProjectConfirmPopup over a blank skeleton, routes into the project carrying recipe+addr+zip; zero-projects →
+  AutoCreateProject; anonymous recipe builds on the grid (remount + autoGenerate off `initialAiPrompt`).
+  `/email-lab` (dying block page) redirects signed-in → grid.
+- In-project lab (`ProjectEmailLabClient`): blank skeleton for recipes, AddressPopup (pre-filled from
+  `subject_address`) with reconcile-on-build (differ → keep-here-and-record OR new-project-titled-address),
+  generic auto-build removed. `page.tsx` reads `?addr=` into the build scope.
+- Save model (`use-autosave.ts` + `use-leave-guard.ts`): saved docs autosave (5s debounce + `pagehide`
+  keepalive PATCH, skips >64KB, empty prompt never wipes the stored build prompt); `NavigationGuardProvider`
+  in the root layout; Save/Leave/Cancel dialog on internal nav + dirty-only `beforeunload` (bfcache-safe);
+  5-min never-saved nudge in-project; Leave/Stay guard on the anonymous grid. `labEntry` routes `"both"`.
+
+**Git note:** a concurrent rebase-push already carried Tasks 1–7 to origin/main; ahead of origin now = my
+5 remaining lab-entry commits + 2 FOREIGN communities-swfl commits (`27dde50f`, `ba855278`) interleaved —
+a push carries both sessions' legit work. Check `lab_entry_root_live_verify` stays open (operator-run).
+Twice caught lint-staged/`git add` bundling foreign staged files (parcel_subdivision Python, spec docs) into
+my commits — ejected via soft-reset + `restore --staged` each time; foreign work preserved untracked.
+
+---
+
 ## 2026-07-06 (main) — communities-swfl Phase 1: T2 (Collier) built + F1 CORRECTION (Lee needs a spatial join, not a name-join)
 
 Continuing `docs/superpowers/specs/2026-07-05-communities-swfl-design.md` (spec approved 07/05). Opus
