@@ -55,15 +55,27 @@ describe("planArrival", () => {
     expect(p.doc.kind).toBe("blank");
   });
 
-  test("?recipe= with addr pre-filled (hero) → skip address popup, auto-build after confirm", () => {
+  test("hero arrival (blank already sliced into prompt, addr set) → no popup, auto-build after confirm", () => {
+    // heroDestination fills the [[blank]] BEFORE navigating, so a real hero
+    // arrival reaches the client with recipeHasBlank=false and an addr param.
     const p = planArrival({
       ...base,
-      params: { recipe: "Just listed [[addr]]", addr: "123 Palm Ave" },
-      recipeHasBlank: true,
+      params: { recipe: "Just listed 123 Palm Ave", addr: "123 Palm Ave" },
+      recipeHasBlank: false,
       recipeInputKind: "address",
     });
     expect(p.addressPopup).toBe(false);
     expect(p.autoBuildAfterConfirm).toBe(true);
+  });
+
+  test("recipe still holding a blank → address popup, NOT auto-build", () => {
+    const p = planArrival({
+      ...base,
+      params: { recipe: "Just listed [[your listing address]]" },
+      recipeHasBlank: true,
+    });
+    expect(p.addressPopup).toBe(true);
+    expect(p.autoBuildAfterConfirm).toBe(false);
   });
 
   test("in-project recipe → NO project confirm (already inside the project you clicked)", () => {

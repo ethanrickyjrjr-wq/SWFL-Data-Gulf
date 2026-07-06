@@ -79,12 +79,18 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
   // Recipe (Make-this / campaign / hero) — BLANK skeleton, never a demo doc.
   if (trimmed(params.recipe)) {
     const addrPreFilled = Boolean(trimmed(params.addr));
+    // A recipe still holding a [[blank]] needs the address popup (unless an addr
+    // param already answers it). The hero slices its typed address INTO the
+    // prompt before navigating, so a real hero arrival has no remaining blank.
     const addressPopup = input.recipeHasBlank && !addrPreFilled;
     return {
       doc: { kind: "blank" },
       projectConfirm,
       addressPopup,
-      autoBuildAfterConfirm: input.recipeHasBlank && addrPreFilled,
+      // Ready to build the moment the project is confirmed: a recipe with no
+      // remaining blank (hero pre-filled, or the recipe never had one). A recipe
+      // still holding a blank waits for the popup's Build instead.
+      autoBuildAfterConfirm: !input.recipeHasBlank,
       legacyAutoGenerate: false,
     };
   }
