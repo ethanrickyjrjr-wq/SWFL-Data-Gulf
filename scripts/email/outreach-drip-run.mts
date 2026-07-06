@@ -23,6 +23,7 @@ import { getMarketingResend } from "@/lib/email/marketing-client";
 import { composeCampaign, type ComposedMessage } from "@/lib/email/outreach/campaign";
 import { buildContent } from "@/lib/email/outreach/build-content";
 import { buildBatchMessages, sendBatches, type BatchSender } from "@/lib/email/outreach/send";
+import { wrapCampaignLinks } from "@/lib/email/tracked-links/wrap";
 import { nextStep, shouldSend, type RecipientStatus } from "@/lib/email/outreach/lifecycle";
 import { enrichBrand } from "@/lib/prospects/enrich-brand";
 import type { OutreachTarget } from "@/lib/email/outreach/targets";
@@ -129,8 +130,17 @@ async function main(): Promise<void> {
   // ── live send ──
   const from = outreachFrom();
   const resend = getMarketingResend();
+  // Wrap the CTA in every ready message so a click routes through /api/r/<token>
+  // (per-link attribution). `minted` is the `sent` inventory for the CTR denominator.
+  // Unsubscribe is left alone — it already routes through /api/unsubscribe.
+  const { messages: trackedMsgs, minted } = wrapCampaignLinks(readyMsgs, {
+    origin: SITE_ORIGIN,
+    recipientId: (m) => idByEmail.get(m.email) ?? "",
+    campaignId: (m) => campaignByEmail.get(m.email) ?? null,
+    step: (m) => stepByEmail.get(m.email) ?? null,
+  });
   const batches = buildBatchMessages({
-    messages: readyMsgs,
+    messages: trackedMsgs,
     from,
     unsubBase: SITE_ORIGIN,
     recipientId: (m) => idByEmail.get(m.email) ?? "",
@@ -138,6 +148,27 @@ async function main(): Promise<void> {
   const result = await sendBatches(resend as unknown as BatchSender, batches);
   console.log(`[outreach-drip] sent=${result.sent} failed=${result.failed}`);
   for (const e of result.errors) console.error(`  send error: ${e}`);
+
+  // Link `sent` inventory (fire-and-forget): a failed analytics write never fails the run.
+  if (minted.length > 0) {
+    try {
+      await db.from("link_events").insert(
+        minted.map((mt) => ({
+          event_type: "sent",
+          recipient_id: mt.rid,
+          campaign_id: mt.cid,
+          step: mt.step,
+          button_key: mt.bk,
+          destination_url: mt.dest,
+          channel: mt.ch,
+        })),
+      );
+    } catch (err) {
+      console.error(
+        `[outreach-drip] link_events sent-log failed (send unaffected): ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
 
   // Record a `sent` event + advance the cursor for each recipient we composed-ready.
   let advanced = 0;

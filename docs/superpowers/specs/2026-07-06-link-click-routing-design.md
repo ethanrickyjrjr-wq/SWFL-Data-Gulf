@@ -1,5 +1,35 @@
 # Link click routing — design
 
+> **BUILT 07/06/2026 — corrections folded in (this note supersedes the design below where they
+> differ).** A code probe before building found the original design bound to the wrong system.
+> Resolved by targeting the ONE system that exists and sends today: the live cold-outreach drip.
+> As-built deltas from the first draft:
+> - **Route is `/api/r/<token>`, NOT `/r/<token>`.** `/r/*` is already the report-page namespace
+>   (`app/r/[slug]` + zip-report/source/communities/cre/…); a token under `/r/` 404s via the
+>   `[slug]` catch-all (`VALID_SLUG` → `notFound()`). The wrapper and the route both use `/api/r/`.
+> - **Identity is `rid`/`campaign_id`/`step`, NOT `project_id`/`step_key`/`contact_id`.** The live
+>   drip tags `rid` (`outreach_recipients.id`) + `campaign_id` (text) + an integer `step`. The
+>   `project_id`/`contact_id` model belongs to the not-yet-built 9-campaign flow-graph system.
+> - **Integration is send-side, not compose-time block-walking.** `composeCampaign` renders the drip
+>   to HTML from a token template — there is no `EmailDoc` block tree to walk, and `rid`/`campaign_id`
+>   aren't joined to a message until the send layer. So a single reusable utility `wrapCampaignLinks`
+>   rewrites the CTA URL by exact string match and is called by the drip runner right before
+>   `buildBatchMessages` (the same seam that already rewrites the unsubscribe placeholder per recipient).
+> - **Unsubscribe is EXCLUDED from the wrap** (reverses decision 2 — see the corrected decision below):
+>   it already routes through our own `/api/unsubscribe?rid=` with a one-click `List-Unsubscribe`
+>   header; re-wrapping adds a failure hop to the compliance-critical opt-out path.
+> - **No new env var:** tokens are HMAC-signed with the existing prod `SDG_COOKIE_SECRET` (the seam
+>   `contact-import-token.ts` / `proposal-nonce.ts` already use).
+> - **No token TTL:** an email link may be clicked weeks later; a valid-signature link always routes.
+> - **`link_events` is justified, not a blind `social_events` mirror:** `outreach_events` already
+>   records recipient-grain `sent`/`clicked`; the genuinely new grain is per-link (`button_key`).
+>
+> As-built files: `lib/email/tracked-links/{token,wrap,redirect}.ts`, `app/api/r/[token]/route.ts`,
+> `docs/sql/20260706_link_events.sql` (table LIVE), wired into `scripts/email/outreach-drip-run.mts`.
+> Follow-on (one-line each): call `wrapCampaignLinks` in `outreach-demo-run.mts` +
+> `outreach-campaign.mts` to extend `sent` inventory to those paths (they already get click capture
+> for free once their links are wrapped).
+
 Brainstormed 07/06/2026, following directly from the 9-campaign email/social/MLS flow map
 (`docs/superpowers/specs/2026-07-06-email-campaign-playbooks.md` +
 `2026-07-06-email-campaign-flow-graph.yaml`). This is sub-project 1 of 3 surfaced that session
@@ -28,10 +58,14 @@ already receive.
    transactional/system emails (the ones sketched in the flow map: "Did you make it?," "What did
    you think?") may carry 2-3 distinct links, told apart by which URL was clicked — not by
    breaking the existing recipe convention, which stays untouched.
-2. **Redirect-through-us, universally — including unsubscribe.** Every link-bearing block (button,
-   footer/unsubscribe, social-icon link) gets wrapped, for consistent stats and because it's easier
-   to keep users if they can see the campaigns working. Unsubscribe is not excluded, but its
-   redirect route must not share a failure mode with the rest of the system (see Error handling).
+2. **Redirect-through-us for content links — unsubscribe EXCLUDED (corrected on build).** Content
+   links (the CTA today; buttons/social-icons as they appear) get wrapped for consistent stats.
+   Unsubscribe is NOT wrapped: on the drip it already routes through our own
+   `/api/unsubscribe?rid=` with a one-click `List-Unsubscribe`/`List-Unsubscribe-Post` header
+   (`lib/email/outreach/send.ts`), and the real URL only exists at send (compose carries the literal
+   `{{{RESEND_UNSUBSCRIBE_URL}}}` placeholder). Re-wrapping an already-owned opt-out endpoint would
+   add a failure hop to the exact compliance-critical path — the opposite of protecting it, and it
+   risks desync with the RFC 8058 one-click header. So the wrap SKIPS unsubscribe by construction.
    Grounding for why this needed care at all: the FTC's CAN-SPAM compliance guide (fetched live
    07/06/2026, ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business) requires
    "any opt-out mechanism... be able to process opt-out requests for at least 30 days after you
@@ -62,37 +96,51 @@ already receive.
 
 ## Architecture
 
-One append-only ledger table, `link_events`, mirroring the existing `social_events` pattern
-(`docs/sql/20260620_social_schema.sql`) rather than inventing a new shape. Columns: `event_type`
-(`'sent'` | `'clicked'`), `project_id`, `step_key`, `button_key`, `contact_id`, `channel`
-(`'email'` for now), `destination_url`, `created_at`. Both event types carry the full context
-independently — click-through rate is a `GROUP BY` on those columns, no join required.
+One append-only ledger table, `link_events` (`docs/sql/20260706_link_events.sql`, LIVE) — the
+link-grain sibling of the recipient-grain `outreach_events`. As-built columns: `event_type`
+(`'sent'` | `'clicked'`), `recipient_id` (→ `outreach_recipients.id`, the `rid`), `campaign_id`
+(text), `step` (smallint), `button_key` (`'cta'` today), `destination_url`, `channel`
+(`'email'`), `at`. (NOT `project_id`/`step_key`/`contact_id` — the original draft's columns were
+the flow-graph model, which doesn't exist.) Both event types carry the full context independently —
+click-through rate is a `GROUP BY` on those columns, no join required. Why a new table rather than
+extending `outreach_events`: that ledger already records `sent`/`clicked` at RECIPIENT grain (for
+suppression); the click there stays the drip's suppress trigger. `link_events` adds the per-LINK
+grain (`button_key`) it structurally lacks, so the two never double-count.
 
 ## Components
 
 Each has one job and a narrow dependency surface:
 
-**`lib/email/tracked-links/token.ts`** — pure. `sign(destination, context) → token`;
-`verify(token) → { destination, context } | throws`. HMAC-signed using a server-side secret (env
-var). No I/O, no database, no knowledge of email docs or routes.
+**`lib/email/tracked-links/token.ts`** — pure. `signLinkToken(dest, ctx) → token | null`;
+`verifyLinkToken(token) → { ok, dest, ctx } | { ok:false, reason }`. HMAC-SHA256 keyed on the
+existing prod `SDG_COOKIE_SECRET` (no new env var), domain-separated `tracked-link:v1`, integrity
+via `crypto.timingSafeEqual` BEFORE any payload parse — mirrors `contact-import-token.ts`. No I/O,
+no database. No TTL (a stale-but-valid link must still route). No secret → `sign` returns null and
+wrapping degrades to shipping the raw untracked link.
 
-**`lib/email/tracked-links/wrap.ts`** — pure. `wrapLinks(doc, context) → doc'`. Walks every
-link-bearing block (`button`, `footer` social/unsubscribe URLs, `social-icons`) and replaces each
-`url` with `${origin}/r/${token}`, using `token.ts` for the signing. Returns a new doc; never
-mutates the input (matches the existing pure-transform convention in this codebase, e.g.
-`lib/email/sequence/state.ts`'s `transition()`).
+**`lib/email/tracked-links/wrap.ts`** — pure. `wrapTrackedLink(html, dest, ctx, origin)` rewrites a
+known URL to `${origin}/api/r/${token}` by exact string match (raw + `&amp;`-escaped forms), and
+`wrapCampaignLinks(messages, opts) → { messages, minted }` — the single reusable adoption seam
+(decision 6): wraps each ready message's CTA and returns the `sent` inventory. NOT a block-walk (the
+drip has no `EmailDoc` block tree); NOT unsubscribe (left untouched — see decision 2). Returns new
+strings; never mutates input.
 
-**`app/api/r/[token]/route.ts`** — the one adapter. `GET`: verify the token (fail → safe-fallback
-redirect to the site homepage, never a raw error page); on success, fire-and-forget insert a
-`'clicked'` row (caught, logged, never blocks); 302 to the decoded destination. This route must
-have zero database dependency on its success path — the redirect happens whether or not the
-logging write succeeds.
+**`lib/email/tracked-links/redirect.ts`** — pure decision core. `resolveTrackedRedirect(token,
+{siteOrigin}) → { location, log }`: valid → `{ location: dest, log }`; invalid → `{ location:
+siteOrigin, log: null }` (fail-closed to homepage).
 
-**Compose-time integration** — `composeCampaign()` in `lib/email/outreach/campaign.ts` (confirmed
-07/06/2026: this is where `ComposedMessage[]` gets built, `.html` populated, before
-`scripts/email/outreach-drip-run.mts` and equivalent runners hand messages to Resend). Call
-`wrapLinks()` on the doc there, before rendering to HTML, and fire-and-forget insert the matching
-`'sent'` rows. Same rule: a failed ledger write never blocks an actual send going out.
+**`app/api/r/[token]/route.ts`** — the one adapter. `GET`: `resolveTrackedRedirect` → best-effort
+`clicked` insert (caught, logged, never blocks) → 302. Zero database READ on the success path (the
+token carries everything); the redirect happens whether or not the logging write succeeds.
+
+**Send-side integration** — the drip runner `scripts/email/outreach-drip-run.mts` calls
+`wrapCampaignLinks()` on its ready messages right before `buildBatchMessages` (the seam where `rid`,
+`campaign_id`, and `step` are already joined to each message — `composeCampaign` doesn't have them),
+then fire-and-forget inserts the returned `minted` rows as `link_events` `'sent'`. A failed ledger
+write never blocks the send. (`composeCampaign` was the original draft's integration point but is
+the wrong seam: it renders HTML with no block tree and no per-recipient id.) The Resend webhook is
+UNCHANGED — `email.clicked` still flips status → `engaged` (`lifecycle.ts`); per-link click truth
+comes from the redirect route, so the two never double-count.
 
 ## Error handling
 

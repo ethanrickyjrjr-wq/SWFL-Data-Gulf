@@ -1629,6 +1629,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      link_events: {
+        Row: {
+          id: number;
+          event_type: string;
+          recipient_id: string | null;
+          campaign_id: string | null;
+          step: number | null;
+          button_key: string;
+          destination_url: string | null;
+          channel: string;
+          at: string;
+        };
+        Insert: {
+          id?: number;
+          event_type: string;
+          recipient_id?: string | null;
+          campaign_id?: string | null;
+          step?: number | null;
+          button_key: string;
+          destination_url?: string | null;
+          channel?: string;
+          at?: string;
+        };
+        Update: {
+          id?: number;
+          event_type?: string;
+          recipient_id?: string | null;
+          campaign_id?: string | null;
+          step?: number | null;
+          button_key?: string;
+          destination_url?: string | null;
+          channel?: string;
+          at?: string;
+        };
+        Relationships: [];
+      };
       metric_observations: {
         Row: {
           id: number;

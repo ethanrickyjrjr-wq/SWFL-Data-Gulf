@@ -1,3 +1,24 @@
+## 2026-07-06 (main) — link-click routing BUILT (drip-targeted), spec corrected — COMMITTED, awaiting push OK
+
+RULE 0.5 probe of the link-click-routing spec found it bound to the wrong system: it named the live
+outreach drip (`composeCampaign`) as its seam but used the not-yet-built flow-graph model
+(`project_id`/`contact_id`, block-walking `wrapLinks(doc)`, `/r/<token>`). Advisor-sharpened the
+findings, then folded in + built against the ONE system that ships today — the drip. As-built:
+`lib/email/tracked-links/{token,wrap,redirect}.ts` (HMAC on existing prod `SDG_COOKIE_SECRET`, no new
+env var; no TTL; `timingSafeEqual`; mirrors `contact-import-token.ts`), `app/api/r/[token]/route.ts`
+(NOT `/r/` — that's the report-page namespace `app/r/[slug]`, which 404s a token; decode → best-effort
+`clicked` log → 302, fail-closed to homepage), `docs/sql/20260706_link_events.sql` (link-grain sibling
+of `outreach_events`; `rid`/`campaign_id`/`step`/`button_key` — applied LIVE, 0 rows, types regenerated).
+Single reusable `wrapCampaignLinks` wired into `scripts/email/outreach-drip-run.mts` at the send seam
+(where `rid`/`campaign_id`/`step` exist — compose doesn't have them), wrapping the CTA + logging `sent`;
+unsubscribe EXCLUDED (already routes via `/api/unsubscribe` one-click; re-wrapping adds a failure hop).
+Webhook unchanged (`email.clicked`→engaged stays the suppress trigger; per-link truth from the route →
+no double-count). Demo/campaign runners are a one-line follow-on (call the same utility). TDD: 26 tests
+green across 5 files (token round-trip/tamper/no-TTL, wrap raw+&amp;, redirect 3 paths, campaign-wrap +
+unsub-untouched, send.ts regression). `bunx next build` ✓ compiled, `/api/r/[token]` registered. Spec
+corrected in place; check `link_click_routing_live_verify` opened (operator-run live send). Did NOT stage
+foreign `lib/email/{build-doc,place-from-prompt}.ts` (another session's claim). Next: operator push OK.
+
 ## 2026-07-06 (main) — email/social/MLS campaign trigger map + link-click-routing design, PUSHED
 
 Built the full end-to-end trigger map connecting email campaigns, social (`lib/social/`), and MLS
