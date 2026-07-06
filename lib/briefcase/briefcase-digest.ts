@@ -25,6 +25,7 @@ const KIND_LABEL: Record<ProjectItem["kind"], string> = {
   report: "report",
   note: "note",
   file: "file",
+  address: "address",
 };
 
 function itemLine(it: ProjectItem): string {

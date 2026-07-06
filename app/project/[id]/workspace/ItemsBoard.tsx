@@ -15,6 +15,7 @@ const KIND_LABEL: Record<ProjectItem["kind"], string> = {
   table_slice: "Tables",
   file: "Files",
   frame: "Live frames",
+  address: "Addresses",
 };
 
 /**

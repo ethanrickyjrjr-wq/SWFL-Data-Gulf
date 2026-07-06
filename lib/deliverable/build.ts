@@ -296,6 +296,8 @@ export function renderItem(item: SnapshotItem, n: number): string {
         return `[${n}] DOCUMENT — ${item.caption ?? item.storage_path}\n${item.extracted_text.trim()}`;
       }
       return `[${n}] FILE — ${item.caption ?? item.storage_path} (pdf, content not available)`;
+    case "address":
+      return `[${n}] ADDRESS — ${item.address}`;
   }
 }
 

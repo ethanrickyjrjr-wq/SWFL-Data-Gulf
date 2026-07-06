@@ -1,9 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { labDestination } from "@/lib/project/lab-redirect";
+import { signedInLabArrival } from "@/lib/lab-entry/destination";
 import { buildZipSeedDoc } from "@/lib/email/zip-seed";
-import { AutoCreateProject } from "./AutoCreateProject";
 import { EmailLabClient } from "./EmailLabClient";
 
 export const runtime = "nodejs";
@@ -33,18 +32,11 @@ export default async function EmailLabPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
-    const { data } = await supabase
-      .from("projects")
-      .select("id")
-      .order("updated_at", { ascending: false })
-      .limit(1);
-    const dest = labDestination((data as { id: string }[] | null) ?? [], {
-      zip,
-      recipe,
-      recipeNeeds,
-    });
-    if (dest) redirect(dest);
-    return <AutoCreateProject zip={zip} recipe={recipe} recipeNeeds={recipeNeeds} />;
+    // The dying block-canvas standalone never grows the new-build flow — send
+    // signed-in visitors to the grid lab, which owns the project/address popups
+    // (spec 2026-07-06 §A). The grid page then asks which project (or auto-creates
+    // one when they have none). Params ride the redirect so nothing is dropped.
+    redirect(signedInLabArrival({ zip, recipe, recipeNeeds }));
   }
 
   const seedDoc = zip ? await buildZipSeedDoc(zip) : null;

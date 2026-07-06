@@ -23,5 +23,7 @@ export function itemTitle(item: ProjectItem): string {
       return item.text;
     case "file":
       return item.caption ?? "Attachment";
+    case "address":
+      return item.address;
   }
 }

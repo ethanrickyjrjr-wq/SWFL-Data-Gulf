@@ -310,6 +310,8 @@ function describeItem(it: ProjectItem): string {
       return it.title;
     case "file":
       return it.caption ?? "attachment";
+    case "address":
+      return it.address;
   }
 }
 

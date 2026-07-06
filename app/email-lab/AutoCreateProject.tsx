@@ -14,10 +14,12 @@ export function AutoCreateProject({
   zip = null,
   recipe = null,
   recipeNeeds = null,
+  addr = null,
 }: {
   zip?: string | null;
   recipe?: string | null;
   recipeNeeds?: string | null;
+  addr?: string | null;
 }) {
   const router = useRouter();
   const firedRef = useRef(false); // strict-mode double-fire would create two projects
@@ -29,6 +31,7 @@ export function AutoCreateProject({
     if (zip && /^\d{5}$/.test(zip)) params.set("zip", zip);
     if (recipe) params.set("recipe", recipe);
     if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
+    if (addr) params.set("addr", addr);
     const q = params.size > 0 ? `?${params.toString()}` : "";
     fetch("/api/projects", {
       method: "POST",

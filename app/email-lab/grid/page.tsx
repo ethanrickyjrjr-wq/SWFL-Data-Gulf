@@ -1,7 +1,5 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { labDestination } from "@/lib/project/lab-redirect";
 import { buildZipSeedDoc } from "@/lib/email/zip-seed";
 import { AutoCreateProject } from "../AutoCreateProject";
 import { EmailLabGridClient } from "./EmailLabGridClient";
@@ -10,13 +8,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Email Lab — Grid (North Star)" };
 
-// Cockpit D4 — same chooser as /email-lab; the project Email tab defaults to
-// the grid canvas, so grid visitors lose nothing.
-// This is also where the AI pill's "Make this →" (BriefcasePanel.onUseRecipe)
-// and "Start building free" (ShowcaseOverlay.onAuthedCta → onBuild) land a
-// signed-in visitor with no current project — ?recipe=/?recipeNeeds= rides
-// the redirect into their project's Email tab exactly like the homepage-map
-// ?zip= (same carry the /showcase page's own handoff uses).
+// Signed-in visitors NO LONGER redirect into projects[0] (spec 2026-07-06 §A):
+// the grid client renders a project-confirm popup over a blank skeleton and asks
+// which project. Three arrivals:
+//   - anonymous              → grid client, no project (taste surface)
+//   - signed-in + a project  → grid client + offeredProject (confirm popup)
+//   - signed-in + no project → AutoCreateProject (make one, carry into it), so
+//     the confirm popup only ever sees a real project to offer.
 export default async function EmailLabGridPage({
   searchParams,
 }: {
@@ -24,7 +22,6 @@ export default async function EmailLabGridPage({
 }) {
   const sp = await searchParams;
   const zip = /^\d{5}$/.test(sp.zip ?? "") ? (sp.zip as string) : null;
-  // Subject listing address (address spine) — rides the hero's listing chips.
   const addr = (sp.addr ?? "").trim() || null;
   const recipe = sp.recipe ?? null;
   const recipeNeeds = sp.recipeNeeds ?? null;
@@ -33,24 +30,44 @@ export default async function EmailLabGridPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (user) {
     const { data } = await supabase
       .from("projects")
-      .select("id")
+      .select("id, title")
       .order("updated_at", { ascending: false })
       .limit(1);
-    const dest = labDestination((data as { id: string }[] | null) ?? [], {
-      zip,
-      recipe,
-      recipeNeeds,
-    });
-    if (dest) redirect(dest);
-    return <AutoCreateProject zip={zip} recipe={recipe} recipeNeeds={recipeNeeds} />;
+    const row = (data as { id: string; title: string | null }[] | null)?.[0];
+    if (!row) {
+      // Zero projects: make one and carry the recipe/zip/addr into it, where the
+      // in-project client runs the same arrival (blank skeleton + address popup).
+      return <AutoCreateProject zip={zip} recipe={recipe} recipeNeeds={recipeNeeds} addr={addr} />;
+    }
+    const seedDoc = zip ? await buildZipSeedDoc(zip) : null;
+    return (
+      <EmailLabGridClient
+        seedDoc={seedDoc}
+        zip={zip}
+        addr={addr}
+        recipe={recipe}
+        recipeNeeds={recipeNeeds}
+        signedIn
+        offeredProject={{ id: row.id, title: row.title ?? "your project" }}
+      />
+    );
   }
-  // Anonymous + ?zip= (homepage hero / map click): same deterministic prebuild
-  // as /email-lab — the visitor lands on a branded email already on canvas, $0
-  // until they engage the builder. EmailLabGridClient still reads ?recipe=/
-  // ?recipeNeeds= itself via useSearchParams; only the seed doc is server-built.
+
+  // Anonymous: deterministic ZIP prebuild when present, else the grid seed.
   const seedDoc = zip ? await buildZipSeedDoc(zip) : null;
-  return <EmailLabGridClient seedDoc={seedDoc} zip={zip} addr={addr} />;
+  return (
+    <EmailLabGridClient
+      seedDoc={seedDoc}
+      zip={zip}
+      addr={addr}
+      recipe={recipe}
+      recipeNeeds={recipeNeeds}
+      signedIn={false}
+      offeredProject={null}
+    />
+  );
 }

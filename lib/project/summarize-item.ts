@@ -39,5 +39,7 @@ export function summarizeItem(item: ProjectItem): string {
       const mimeShort = item.mime.split("/").pop() ?? item.mime;
       return `${basename} (${mimeShort})`;
     }
+    case "address":
+      return clip(item.address);
   }
 }

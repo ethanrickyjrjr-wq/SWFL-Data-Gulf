@@ -38,6 +38,8 @@ export function identityKeyForItem(item: ProjectItem): string {
       return `file:${item.storage_path}`;
     case "note":
       return `note:${item.text}`;
+    case "address":
+      return `address:${item.address.toLowerCase().replace(/\s+/g, " ").trim()}`;
   }
 }
 
@@ -66,5 +68,7 @@ export function titleForItem(item: ProjectItem): string {
       return `File: ${item.caption ?? item.storage_path.split("/").pop() ?? item.storage_path}`;
     case "note":
       return `Note: ${item.text.slice(0, 120)}`;
+    case "address":
+      return `Address: ${item.address}`;
   }
 }

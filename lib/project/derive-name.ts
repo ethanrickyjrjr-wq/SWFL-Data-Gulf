@@ -84,6 +84,9 @@ function itemText(item: ProjectItem): string {
         [item.caption, item.extracted_text?.slice(0, FILE_TEXT_MAX)].filter(Boolean).join(" ") ||
         item.storage_path
       );
+    case "address":
+      // A known listing address is scope-bearing — the place/ZIP inference reads it.
+      return item.address;
   }
 }
 
